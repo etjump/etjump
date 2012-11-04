@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName>
+    </SccProjectName>
+    <SccAuxPath />
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and $(VisualStudioVersion) == ''">$(VCTargetsPath11)</VCTargetsPath>
+    <ProjectGuid>{FC333AAC-4E2D-D107-0199-A82ED1B615CA}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v90</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;UI_EXPORTS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\Release/ui.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>../Release/ui_mp_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>.\ui.def</ModuleDefinitionFile>
+      <ProgramDatabaseFile>.\Release/ui_mp_x86.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\Release/ui_mp_x86.map</MapFileName>
+      <BaseAddress>0x40000000</BaseAddress>
+      <ImportLibrary>.\Release/ui_mp_x86.lib</ImportLibrary>
+    </Link>
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/ui.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;UI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\Debug/ui.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>../Debug/ui_mp_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>.\ui.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>../Debug/ui.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\Debug/ui_mp_x86.map</MapFileName>
+      <BaseAddress>0x40000000</BaseAddress>
+      <ImportLibrary>.\Debug/ui_mp_x86.lib</ImportLibrary>
+    </Link>
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/ui.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\game\bg_campaign.c" />
+    <ClCompile Include="..\game\bg_classes.c" />
+    <ClCompile Include="..\game\bg_lib.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_misc.c" />
+    <ClCompile Include="..\game\q_math.c" />
+    <ClCompile Include="..\game\q_shared.c" />
+    <ClCompile Include="ui_atoms.c" />
+    <ClCompile Include="ui_gameinfo.c" />
+    <ClCompile Include="ui_loadpanel.c" />
+    <ClCompile Include="ui_main.c" />
+    <ClCompile Include="ui_players.c" />
+    <ClCompile Include="ui_shared.c" />
+    <ClCompile Include="ui_syscalls.c" />
+    <ClCompile Include="ui_util.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\trickjump\ui\credits_activision.menu" />
+    <None Include="..\..\trickjump\ui\credits_additional.menu" />
+    <None Include="..\..\trickjump\ui\credits_et260.menu" />
+    <None Include="..\..\trickjump\ui\credits_idsoftware.menu" />
+    <None Include="..\..\trickjump\ui\credits_quit.menu" />
+    <None Include="..\..\trickjump\ui\credits_splashdamage.menu" />
+    <None Include="..\..\trickjump\ui\global.menu" />
+    <None Include="..\..\trickjump\ui\hostgame.menu" />
+    <None Include="..\..\trickjump\ui\hostgame_advanced.menu" />
+    <None Include="..\..\trickjump\ui\hostgame_advanced_default.menu" />
+    <None Include="..\..\trickjump\ui\hostgame_dedicated_warning.menu" />
+    <None Include="..\..\trickjump\ui\ingame_disconnect.menu" />
+    <None Include="..\..\trickjump\ui\ingame_main.menu" />
+    <None Include="..\..\trickjump\ui\ingame_messagemode.menu" />
+    <None Include="..\..\trickjump\ui\ingame_serverinfo.menu" />
+    <None Include="..\..\trickjump\ui\ingame_tapout.menu" />
+    <None Include="..\..\trickjump\ui\ingame_tapoutlms.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote_disabled.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote_map.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote_misc.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote_misc_refrcon.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote_players.menu" />
+    <None Include="..\..\trickjump\ui\ingame_vote_players_warn.menu" />
+    <None Include="..\..\trickjump\ui\main.menu" />
+    <None Include="..\..\trickjump\ui\menus.txt" />
+    <None Include="..\..\trickjump\ui\mods.menu" />
+    <None Include="..\..\trickjump\ui\options.menu" />
+    <None Include="..\..\trickjump\ui\options_controls.menu" />
+    <None Include="..\..\trickjump\ui\options_controls_default.menu" />
+    <None Include="..\..\trickjump\ui\options_customise_game.menu" />
+    <None Include="..\..\trickjump\ui\options_customise_hud.menu" />
+    <None Include="..\..\trickjump\ui\options_system.menu" />
+    <None Include="..\..\trickjump\ui\options_system_gamma.menu" />
+    <None Include="..\..\trickjump\ui\playonline.menu" />
+    <None Include="..\..\trickjump\ui\playonline_connecttoip.menu" />
+    <None Include="..\..\trickjump\ui\playonline_disablepb.menu" />
+    <None Include="..\..\trickjump\ui\playonline_enablepb.menu" />
+    <None Include="..\..\trickjump\ui\playonline_serverinfo.menu" />
+    <None Include="..\..\trickjump\ui\popup_autoupdate.menu" />
+    <None Include="..\..\trickjump\ui\popup_errormessage.menu" />
+    <None Include="..\..\trickjump\ui\popup_errormessage_pb.menu" />
+    <None Include="..\..\trickjump\ui\popup_hostgameerrormessage.menu" />
+    <None Include="..\..\trickjump\ui\popup_password.menu" />
+    <None Include="..\..\trickjump\ui\popup_serverredirect.menu" />
+    <None Include="..\..\trickjump\ui\profile.menu" />
+    <None Include="..\..\trickjump\ui\profile_create.menu" />
+    <None Include="..\..\trickjump\ui\profile_create_error.menu" />
+    <None Include="..\..\trickjump\ui\profile_create_initial.menu" />
+    <None Include="..\..\trickjump\ui\profile_delete.menu" />
+    <None Include="..\..\trickjump\ui\profile_delete_error.menu" />
+    <None Include="..\..\trickjump\ui\profile_rename.menu" />
+    <None Include="..\..\trickjump\ui\quit.menu" />
+    <None Include="..\..\trickjump\ui\rec_restart.menu" />
+    <None Include="..\..\trickjump\ui\trickjump_options.menu" />
+    <None Include="..\..\trickjump\ui\vid_confirm.menu" />
+    <None Include="..\..\trickjump\ui\vid_restart.menu" />
+    <None Include="..\..\trickjump\ui\viewreplay.menu" />
+    <None Include="..\..\trickjump\ui\viewreplay_delete.menu" />
+    <None Include="..\..\trickjump\ui\wm_ftquickmessage.menu" />
+    <None Include="..\..\trickjump\ui\wm_ftquickmessageAlt.menu" />
+    <None Include="..\..\trickjump\ui\wm_quickmessage.menu" />
+    <None Include="..\..\trickjump\ui\wm_quickmessageAlt.menu" />
+    <None Include="ui.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\trickjump\ui\menudef.h" />
+    <ClInclude Include="..\..\trickjump\ui\menumacros.h" />
+    <ClInclude Include="..\game\bg_classes.h" />
+    <ClInclude Include="..\game\bg_public.h" />
+    <ClInclude Include="keycodes.h" />
+    <ClInclude Include="..\..\main\ui\menudef.h" />
+    <ClInclude Include="..\game\q_shared.h" />
+    <ClInclude Include="..\game\surfaceflags.h" />
+    <ClInclude Include="..\cgame\tr_types.h" />
+    <ClInclude Include="ui_local.h" />
+    <ClInclude Include="ui_public.h" />
+    <ClInclude Include="ui_shared.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,54 @@
+#include "ui/menudef.h"
+
+// Defines //
+
+#define WINDOW_X		16
+#define WINDOW_Y		16
+//#define WINDOW_WIDTH	128
+#define WINDOW_WIDTH	148
+#define WINDOW_HEIGHT	75
+#define GROUP_NAME		"grpIngameVoteMisc"
+
+// Macros //
+
+#include "ui/menumacros.h"
+
+// Misc Vote Menu //
+
+menuDef {
+	name		"ingame_vote_misc"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+
+	onOpen {
+		//copyCvar g_gametype ui_netgametype ;
+		
+		conditionalScript g_gametype 3	// 3: cvartest
+			( "hide bttn_nextmap ; show bttn_nextcampaign" )
+			( "show bttn_nextmap ; hide bttn_nextcampaign" ) "4" ;
+
+		copyCvar g_gametype ui_voteGameType ;
+
+		conditionalScript ui_voteGameType 3	// 3: cvartest
+			( "setcvar ui_voteGameType 2" )
+			( "clearFocus" ) "4" ;
+
+	}
+
+	onEsc {
+		close ingame_vote_misc ;
+		open ingame_vote
+	}
+
+// Window //
+
+	WINDOW( "MISC", 50)
+
+// Buttons //
+
+	BUTTON( 6, 32, (WINDOW_WIDTH-12), 14, "RESTART MAP", .24, 11, exec "cmd callvote maprestart"; uiScript closeingame )
+	BUTTON( 6, WINDOW_HEIGHT-24, WINDOW_WIDTH-12, 18, "BACK", .3, 14, close ingame_vote_misc ; open ingame_vote )
+}
+

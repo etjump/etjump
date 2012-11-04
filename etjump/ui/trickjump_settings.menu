@@ -1,0 +1,63 @@
+#include "ui/menudef.h"
+
+// Defines //
+
+#define WINDOW_X		16
+#define WINDOW_Y		16
+#define WINDOW_WIDTH	400
+#define WINDOW_HEIGHT	217
+#define GROUP_NAME		"grpTjsettings"
+
+// Macros //
+
+#include "ui/menumacros.h"
+		
+// Options Menu //
+	
+menuDef {
+	name		"trickjump_settings"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+	
+	onESC {
+		close trickjump_settings ;
+		open trickjump ;
+	}
+
+// Window //
+
+#define SUBWINDOW_WIDTH WINDOW_WIDTH-12
+
+WINDOW( "SETTINGS", 94 )
+
+SUBWINDOW( 6, 32, (SUBWINDOW_WIDTH), 78, "CVARS" )
+
+YESNO( 8, 48, (SUBWINDOW_WIDTH)-4, 10, "Pmove_fixed:", .2, 8, "pmove_fixed", "Makes you jump a little bit higher, use this!" )
+
+MULTI( 8, 60, (SUBWINDOW_WIDTH)-4, 10, "Max FPS:", 	.2, 8, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 }, "" )
+
+YESNO( 8, 72, (SUBWINDOW_WIDTH)-4, 10, "Load view angles:", .2, 8, "cg_loadviewangles", "Load command also loads view angles." )
+
+YESNO( 8, 84, (SUBWINDOW_WIDTH)-4, 10, "Hide players:", .2, 8, "cg_hide", "Hide other players." )
+
+MULTI( 8, 96, (SUBWINDOW_WIDTH)-4, 10, "Hide distance:", 	.2, 8, "cg_hidedist", cvarFloatList { "Short" 64 "Normal" 128 "Long" 256 }, "" )
+
+
+SUBWINDOW( 6, 116, (SUBWINDOW_WIDTH), 90, "BINDS" )
+
+BIND( 8, 132, (SUBWINDOW_WIDTH)-4, 10, "Save:", .2, 8, save, "To save your position." )
+
+BIND( 8, 144, (SUBWINDOW_WIDTH)-4, 10, "Load:", .2, 8, load, "To load your position." )
+
+BIND( 8, 156, (SUBWINDOW_WIDTH)-4, 10, "No goto:", .2, 8, nogoto, "To enable/disable goto." )
+
+BIND( 8, 168, (SUBWINDOW_WIDTH)-4, 10, "No call:", .2, 8, nocall, "To enable/disable call." )
+
+BIND( 8, 180, (SUBWINDOW_WIDTH)-4, 10, "No nading:", .2, 8, nonading, "To enable/disable nading." )
+
+BIND( 8, 192, (SUBWINDOW_WIDTH)-4, 10, "Second portal:", .2, 8, "+attack2", "" )
+
+
+}
