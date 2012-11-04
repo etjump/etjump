@@ -2653,3 +2653,5 @@ qboolean G_admin_report_bug( gentity_t *ent, int skiparg );
 
 void GuidReceived(gentity_t *ent);
 void ResetClientData(int clientNum);
+
+qboolean G_admin_readconfig(gentity_t *ent, int skipargs);

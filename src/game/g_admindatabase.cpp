@@ -4,6 +4,14 @@
 #include <sstream>
 #include <fstream>
 
+void DPrint(std::string s) {
+    AP(string("print \"" + s + "\"").c_str());
+}
+
+void DPrintln(std::string s) {
+    AP(string("print \"" + s + "\n\"").c_str());
+}
+
 CommandDatabase commandDatabase;
 
 ClientDatabase::ClientDatabase() {
@@ -115,6 +123,8 @@ bool AdminDatabase::readConfig_string(std::stringstream& current_line,
         return false;
     }
 
+    current_line.ignore(1);
+
     if(current_line.peek() == EOF) {
         error_msg_ = "missing additional parameters on line ";
         return false;
@@ -140,6 +150,8 @@ bool AdminDatabase::readConfig_int(std::stringstream& current_line,
         error_msg_ = "missing \"=\" on line ";
         return false;
     }
+
+    current_line.ignore(1);
 
     if(current_line.peek() == EOF) {
         error_msg_ = "missing additional parameters on line ";
@@ -172,11 +184,9 @@ bool AdminDatabase::readConfig_parseCommands(std::stringstream& current_line,
     if(arg != "=") {
         error_msg_ = "missing \"=\" on line ";
         return false;
-    }
-
+    }   
     while(current_line.peek() != EOF) {
         current_line >> arg;
-
         commandlist.push_back(arg);
     }
 
@@ -206,7 +216,7 @@ bool AdminDatabase::readConfig() {
     std::ifstream admin_config(file_name.c_str());
 
     if(!admin_config) {
-        error_msg_ = "failed to open admin config file " + file_name + ".";
+        error_msg_ = "failed to open admin config file \"" + file_name + "\".";
         writeDefaultConfig();
         return false;
     }
@@ -217,6 +227,8 @@ bool AdminDatabase::readConfig() {
         std::stringstream ss;
         string line;
         std::getline(admin_config, line);
+
+        ss.clear();
 
         ss << line;
 
@@ -271,14 +283,110 @@ bool AdminDatabase::readConfig() {
                 }
             }
 
+            else {
+                error_msg_ = "parse error on line " + line;
+                read_failed = true;
+            }
         }
 
         else if(user_open) {
 
+            if(arg == "level") {
+                if(!readConfig_int(ss, temp_user.level)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "username") {
+                if(!readConfig_string(ss, temp_user.username)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "password") {
+                if(!readConfig_string(ss, temp_user.password)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "guid") {
+                if(!readConfig_string(ss, temp_user.guid)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "commands") {
+                if(!readConfig_parseCommands(ss, temp_user.commands)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "name") {
+                if(!readConfig_string(ss, temp_user.ingame_name)) {
+                    read_failed = true;
+                }
+            }
+
+            else {
+                error_msg_ = "parse error on line " + line;
+                read_failed = true;
+            }
         }
 
         else if(ban_open) {
 
+            if(arg == "name") {
+                if(!readConfig_string(ss, temp_ban.name)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "ip") {
+                if(!readConfig_string(ss, temp_ban.ip)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "hardware") {
+                if(!readConfig_string(ss, temp_ban.hardware_id)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "reason") {
+                if(!readConfig_string(ss, temp_ban.reason)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "made") {
+                if(!readConfig_string(ss, temp_ban.date)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "date") {
+                if(!readConfig_string(ss, temp_ban.date)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "expires") {
+                if(!readConfig_int(ss, temp_ban.expires)) {
+                    read_failed = true;
+                }
+            }
+
+            else if(arg == "banner") {
+                if(!readConfig_string(ss, temp_ban.banned_by)) {
+                    read_failed = true;
+                }
+            }
+            
+            else {
+                error_msg_ = "parse error on line " + line;
+                read_failed = true;
+            }
         }
 
         if( arg == "[level]" ) {
@@ -308,10 +416,86 @@ bool AdminDatabase::readConfig() {
 			temp_ban.reason.clear();
         }
     }
+
+    if(level_open) {
+        if(!addLevel(temp_level)) {
+            return false;
+        }
+    }
+
+    else if(user_open) {
+        if(!addUser(temp_user)) {
+            return false;
+        }
+    }
+
+    else if(ban_open) {
+        if(!addBan(temp_ban)) {
+            return false;
+        }
+    }
+
     return true;
 }
 
 bool AdminDatabase::writeConfig() {
+    vector<admin_level_t*>::size_type li = 0;
+    vector<admin_user_t*>::size_type ui = 0;
+    vector<admin_ban_t*>::size_type bi = 0;
+
+    char mod_folder[MAX_TOKEN_CHARS];
+    string file_name;
+
+    trap_Cvar_VariableStringBuffer("fs_game", mod_folder, sizeof(mod_folder));
+
+    if(strlen(mod_folder)) {
+        file_name = string(mod_folder) + "/" + string(g_admin.string);
+    } else {
+        file_name = "etjump/" + string(g_admin.string);
+    }
+
+    std::ofstream admin_config(file_name.c_str());
+
+    if(!admin_config) {
+        error_msg_ = "failed to open admin config \"" + file_name + "\".";
+        return false;
+    }
+
+    for(;li < admin_levels_.size(); li++) {
+
+        admin_config << "[level]\n";
+		admin_config << "name = " << admin_levels_.at(li)->name << "\n";
+		admin_config << "commands = " << admin_levels_.at(li)->commands << "\n";
+		admin_config << "greeting = " << admin_levels_.at(li)->greeting << "\n\n";
+
+    }
+
+    for(;ui < admin_users_.size(); ui++) {
+
+        admin_config << "[user]\n";
+		admin_config << "level = " << admin_users_.at(ui)->level << "\n";
+		admin_config << "name = " << admin_users_.at(ui)->ingame_name << "\n";
+        admin_config << "guid = " << admin_users_.at(ui)->guid << "\n";
+		admin_config << "username = " << admin_users_.at(ui)->username << "\n";
+		admin_config << "password = " << admin_users_.at(ui)->password << "\n";
+		admin_config << "commands = " << admin_users_.at(ui)->commands << "\n\n";
+
+    }
+
+    for(;bi < admin_bans_.size(); bi++) {
+
+        admin_config << "[ban]\n";
+		admin_config << "name = " << admin_bans_.at(bi)->name << "\n";
+		admin_config << "ip = " << admin_bans_.at(bi)->ip << "\n";
+		admin_config << "hardware = " << admin_bans_.at(bi)->hardware_id << "\n";
+		admin_config << "reason = " << admin_bans_.at(bi)->reason << "\n";
+		admin_config << "made = " << admin_bans_.at(bi)->date << "\n";
+		admin_config << "expires = " << admin_bans_.at(bi)->expires << "\n";
+		admin_config << "banner = " << admin_bans_.at(bi)->banned_by << "\n\n";
+
+    }
+
+    admin_config.close();
 
     return true;
 }
@@ -360,13 +544,45 @@ bool AdminDatabase::writeDefaultConfig() {
 // Users
 /////////////////////
 // Adds user to database
-bool AdminDatabase::addUser(int level, const string& guid,
-        const string& commands, const string& username,
-        const string& password, const string& ingame_name) 
-{
-    return true;
-}
 bool AdminDatabase::addUser(admin_user_t user) {
+
+    admin_user_t *new_user = 0;
+
+    if(user.level == 0) {
+        return true;
+    }
+
+    if(!levelExists(user.level)) {
+        error_msg_ = "level \"" + int2string(user.level) + "\" does not exist.";
+        return false;
+    }
+
+    new_user = findUser(user.username, USERNAME);
+
+    if(new_user) {
+        *new_user = user;
+        admin_users_.push_back(new_user);
+        return true;
+    }
+
+    new_user = findUser(user.guid, GUID);
+
+    if(new_user) {
+        *new_user = user;
+        admin_users_.push_back(new_user);
+        return true;
+    }
+
+    try {
+        new_user = new admin_user_t;
+    } catch( ... ) {
+        error_msg_ = "failed to allocate memory.";
+        return false;
+    }
+
+    *new_user = user;
+
+    admin_users_.push_back(new_user);
 
     return true;
 }
@@ -387,26 +603,73 @@ bool AdminDatabase::updateUser(const string& username, const string& guid,
 
 // Finds user in database
 admin_user_t *AdminDatabase::findUser(const string& key, int keytype) {
+
+    vector<admin_user_t*>::size_type i = 0;
+
+    while(i < admin_users_.size()) {
+
+        if(keytype == GUID) {
+            if(admin_users_.at(i)->guid == key) {
+                return admin_users_.at(i);
+            }
+        } else if(keytype == USERNAME) {
+            if(admin_users_.at(i)->username == key) {
+                return admin_users_.at(i);
+            }
+        } else {
+            return 0;
+        }
+
+        i++;
+    }
+
+
     return 0;
 }
 
 // Checks if user exists in database
 bool AdminDatabase::userExists(const string& key, int keytype) {
-    return true;
+
+    vector<admin_user_t*>::size_type i = 0;
+
+    while(i < admin_users_.size()) {
+
+        if(keytype == GUID) {
+            if(admin_users_.at(i)->guid == key) {
+                return true;
+            }
+        } else if(keytype == USERNAME) {
+            if(admin_users_.at(i)->username == key) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+
+        i++;
+    }
+
+    return false;
 }
 
 /////////////////////
 // Levels
 /////////////////////
 
-bool AdminDatabase::addLevel(int level, const string& name, const string& commands,
-                const string& greeting, bool protected_level) 
-{
-    return true;
-}
-
 bool AdminDatabase::addLevel(admin_level_t level) {
-    return true;
+
+    if(levelExists(level.level)) {
+	    error_msg_ = "Readconfig: level \"" + int2string(level.level) + " exists.";
+		return false;
+	}
+
+	admin_level_t *new_level = new admin_level_t;
+	new_level->name = level.name;
+	new_level->commands = level.commands;
+	new_level->greeting = level.greeting;
+	new_level->level = level.level;
+	admin_levels_.push_back(new_level);
+	return true;
 }
 
 bool AdminDatabase::deleteLevel(int level) {
@@ -424,7 +687,12 @@ admin_level_t *AdminDatabase::findLevel(int level) {
 }
 
 bool AdminDatabase::levelExists(int level) {
-    return true;
+    for(vector<admin_level_t*>::size_type i = 0; i < admin_levels_.size(); i++) {
+        if(admin_levels_.at(i)->level == level) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /////////////////////
@@ -435,10 +703,79 @@ bool AdminDatabase::addBan(const string& name, const string& ip, const string& h
             const string& etguid, const string& reason, const string& date,
             int expires, const string& banned_by)
 {
-    return true;
+    if(name.length() == 0) { 
+		return false;
+	}
+
+	if(ip.length() == 0) {
+		return false;
+	}
+
+	if(hardware_id.length() == 0) {
+		return false;
+	}
+
+	if(date.length() == 0) {
+		return false;
+	}
+
+	if(banned_by.length() == 0) {
+		return false;
+	}
+
+	admin_ban_t* new_ban = 0;
+
+    try {
+        new_ban = new admin_ban_t;
+    } catch(...) {
+        error_msg_ = "failed to allocate memory.";
+        return false;
+    }
+
+	new_ban->name = name;
+	new_ban->ip = ip;
+	new_ban->hardware_id = hardware_id;
+	new_ban->reason = reason;
+	new_ban->date = date;
+	new_ban->expires = expires;
+	new_ban->banned_by = banned_by;
+	admin_bans_.push_back(new_ban);
+	return true;
 }
 
 bool AdminDatabase::addBan(admin_ban_t ban) {
+
+    if(ban.name.length() == 0) { 
+		return false;
+	}
+
+	if(ban.ip.length() == 0) {
+		return false;
+	}
+
+	if(ban.hardware_id.length() == 0) {
+		return false;
+	}
+
+	if(ban.date.length() == 0) {
+		return false;
+	}
+
+	if(ban.banned_by.length() == 0) {
+		return false;
+	}
+
+    admin_ban_t* new_ban = 0;
+
+    try {
+        new_ban = new admin_ban_t;
+    } catch(...) {
+        error_msg_ = "failed to allocate memory.";
+        return false;
+    }
+
+    *new_ban = ban;
+
     return true;
 }
 
@@ -459,4 +796,16 @@ string AdminDatabase::error() const {
 
 void AdminDatabase::sort() {
 
+}
+
+int AdminDatabase::levelCount() const {
+    return admin_levels_.size();
+}
+
+int AdminDatabase::userCount() const {
+    return admin_users_.size();
+}
+
+int AdminDatabase::banCount() const {
+    return admin_bans_.size();
 }

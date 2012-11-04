@@ -76,9 +76,6 @@ public:
     // Users
     /////////////////////
     // Adds user to database
-    bool addUser(int level, const string& guid,
-            const string& commands, const string& username,
-            const string& password, const string& ingame_name);
     bool addUser(admin_user_t user);
 
     // Deletes user from database
@@ -93,6 +90,8 @@ public:
 
     // Checks if user exists in database
     bool userExists(const string& username, int keytype);
+
+    int userCount() const;
 
     /////////////////////
     // Levels
@@ -111,6 +110,8 @@ public:
 
     bool levelExists(int level);
 
+    int levelCount() const;
+
     /////////////////////
     // Bans
     /////////////////////
@@ -127,7 +128,14 @@ public:
     // error message.
     string error() const;
 
+    int banCount() const;
+
 private:
+
+    enum Keytypes {
+        USERNAME,
+        GUID
+    };
 
     bool readConfig_string(std::stringstream& current_line,
                        string& data);

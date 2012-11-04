@@ -218,3 +218,20 @@ void GuidReceived(gentity_t *ent) {
 void ResetClientData(int clientNum) {
     clientDatabase.resetClientData(clientNum);
 }
+
+
+
+
+
+qboolean G_admin_readconfig(gentity_t *ent, int skipargs) {
+
+    if(!adminDatabase.readConfig()) {
+        ChatPrintTo(ent, "Readconfig error: " + adminDatabase.error());
+        return qfalse;
+    }
+
+    ChatPrintTo(ent, va("^3readconfig:^7 loaded %d levels, %d users and %d bans", 
+        adminDatabase.levelCount(), adminDatabase.userCount(), adminDatabase.banCount()));
+
+    return qtrue;
+}
