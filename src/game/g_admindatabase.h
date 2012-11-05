@@ -21,13 +21,22 @@ public:
     ~ClientDatabase();
     string guid(int clientNum);
     void setGuid(int clientNum, string guid);
+    void setCommands(int clientNum, string commands);
+    void setUsername(int clientNum, string username);
+    void setPassword(int clientNum, string password);
     void setActive(int clientNum);
     void setInactive(int clientNum);
     void resetClientData(int clientNum);
 private:
+
     struct Client {
         Client();
+        int level;
         string guid;
+        string username;
+        string password;
+        // Store personal commands here
+        string commands;
         bool active;
     };
     Client clients_[MAX_CLIENTS];
@@ -47,7 +56,6 @@ struct admin_level_t {
     string name;
     string commands;
     string greeting;
-    bool protected_level;
 };
 
 struct admin_ban_t {
@@ -98,13 +106,13 @@ public:
     /////////////////////
 
     bool addLevel(int level, const string& name, const string& commands,
-                  const string& greeting, bool protected_level);
+                  const string& greeting);
     bool addLevel(admin_level_t level);
 
     bool deleteLevel(int level);
 
     bool updateLevel(int level, const string& name, const string& commands,
-                     const string& greeting, bool protected_level);
+                     const string& greeting);
 
     admin_level_t *findLevel(int level);
 

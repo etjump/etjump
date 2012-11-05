@@ -209,8 +209,6 @@ void GuidReceived(gentity_t *ent) {
         return;
     }
 
-    clientDatabase.resetClientData(ent->client->ps.clientNum);
-
     clientDatabase.setActive(ent->client->ps.clientNum);
     clientDatabase.setGuid(ent->client->ps.clientNum, G_SHA1(argv.at(1)));
 }
@@ -218,10 +216,6 @@ void GuidReceived(gentity_t *ent) {
 void ResetClientData(int clientNum) {
     clientDatabase.resetClientData(clientNum);
 }
-
-
-
-
 
 qboolean G_admin_readconfig(gentity_t *ent, int skipargs) {
 

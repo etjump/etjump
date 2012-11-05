@@ -48,9 +48,37 @@ void ClientDatabase::setGuid(int clientNum, string guid) {
     clients_[clientNum].guid = guid;
 }
 
+void ClientDatabase::setCommands(int clientNum, string commands) {
+    if(!clients_[clientNum].active) {
+        return;
+    }
+
+    clients_[clientNum].commands = commands;
+}
+
+void ClientDatabase::setUsername(int clientNum, string username) {
+    if(!clients_[clientNum].active) {
+        return;
+    }
+
+    clients_[clientNum].username = username;
+}
+
+void ClientDatabase::setPassword(int clientNum, string password) {
+    if(!clients_[clientNum].active) {
+        return;
+    }
+
+    clients_[clientNum].password = password;
+}
+
 void ClientDatabase::resetClientData(int clientNum) {
     clients_[clientNum].active = false;
-    clients_[clientNum].guid = "";
+    clients_[clientNum].guid.clear();
+    clients_[clientNum].level = 0;
+    clients_[clientNum].username.clear();
+    clients_[clientNum].password.clear();
+    clients_[clientNum].commands.clear();
 }
 
 AdminDatabase::AdminDatabase() {
@@ -677,7 +705,7 @@ bool AdminDatabase::deleteLevel(int level) {
 }
 
 bool AdminDatabase::updateLevel(int level, const string& name, const string& commands,
-                    const string& greeting, bool protected_level) 
+                    const string& greeting) 
 {
     return true;
 }
