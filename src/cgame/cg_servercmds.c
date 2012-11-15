@@ -2065,7 +2065,7 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-    if ( !Q_stricmp( cmd, "guid_request" ) ) {
+    if ( !Q_stricmp( cmd, "request_guid" ) ) {
         SendGuid();
     }
 
@@ -2443,6 +2443,11 @@ static void CG_ServerCommand( void ) {
 
 		return;
 	}
+
+    if(!Q_stricmp(cmd, "identify")) {
+        AdminLogin();
+        return;
+    }
 
 	if (!Q_stricmp(cmd, "rename")) {
 		int argc, totlen, i, len;

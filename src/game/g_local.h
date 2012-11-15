@@ -3,7 +3,6 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
-#include "g_admin.h"
 
 #include "../game/be_aas.h"
 
@@ -2652,6 +2651,9 @@ qboolean G_admin_report_bug( gentity_t *ent, int skiparg );
 #endif
 
 void GuidReceived(gentity_t *ent);
-void ResetClientData(int clientNum);
+void AdminLogin(gentity_t *ent);
+void PrintClientInfo(gentity_t *ent, int clientNum);
+void ResetData(int clientNum);
+void RequestLogin(int clientNum);
 
-qboolean G_admin_readconfig(gentity_t *ent, int skipargs);
+void G_ReadConfig(gentity_t *ent, int skipargs);

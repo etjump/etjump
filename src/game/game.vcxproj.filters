@@ -195,13 +195,16 @@
     <ClCompile Include="..\sha-1\bg_sha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_clientdatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="g_admin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_admindatabase.cpp">
+    <ClCompile Include="g_leveldatabase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_commanddatabase.cpp">
+    <ClCompile Include="g_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -322,10 +325,13 @@
     <ClInclude Include="g_admin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_admindatabase.h">
+    <ClInclude Include="g_clientdatabase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_commanddatabase.h">
+    <ClInclude Include="g_leveldatabase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

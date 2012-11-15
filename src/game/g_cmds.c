@@ -4062,14 +4062,35 @@ void ClientCommand(int clientNum)
 
 	trap_Argv(0, cmd, sizeof(cmd));
 
-    if( !Q_stricmp(cmd, "etguid") ) {
+    if(!Q_stricmp(cmd, "etguid")) {
         GuidReceived(ent);
+        return;
+    }
+
+    if(!Q_stricmp(cmd, "adminlogin")) {
+        AdminLogin(ent);
         return;
     }
 
 	if(ent->client->pers.connected != CON_CONNECTED) {
 		return;
 	}
+
+    if(!Q_stricmp(cmd, "cinfo")) {
+        int clientNum =0;
+        char arg[MAX_TOKEN_CHARS];
+
+        if(trap_Argc() <= 1) {
+            return;
+        }
+
+        trap_Argv(1, arg, sizeof(arg));
+
+        clientNum = atoi(arg);
+
+        PrintClientInfo(ent, clientNum);
+        return;
+    }
 
 	// Let's handle rest of the commands after checking if we're really connected.
 

@@ -1185,7 +1185,6 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand ("vsay_team");
 	trap_AddCommand ("vsay_buddy");
 	trap_AddCommand ("info");
-	trap_AddCommand ("adminlogin");
 	trap_AddCommand ("portal");
 	trap_AddCommand ("setspawnpt");
 	trap_AddCommand ("minimize");

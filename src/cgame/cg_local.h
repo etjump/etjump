@@ -3632,3 +3632,4 @@ void CG_Minimize_f(void);
 //
 
 void SendGuid();
+void AdminLogin();

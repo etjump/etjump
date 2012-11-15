@@ -26,11 +26,6 @@ std::string G_SHA1(const std::string& str) {
 
 void GenerateGuid() {
 
-    if(user_guid.length() > 0) {
-        CG_Printf("^1Error: ^7trying to generate a new guid with an existing user guid\n");
-        return;
-    }
-
     char folder_name[MAX_TOKEN_CHARS];
     std::string file_name;
 
@@ -97,7 +92,25 @@ bool ReadGuid() {
 void SendGuid() {
    ReadGuid();
 
-   trap_SendClientCommand(std::string("etguid " + user_guid).c_str());
+   // Hash it again so it's not sent as "plain text"
+   trap_SendClientCommand((std::string("etguid " + G_SHA1(user_guid)).c_str()));
+}
+
+void AdminLogin() {
+    std::string username = cg_username.string;
+    std::string password = cg_adminpassword.string;
+    
+    if(username.length() == 0) {
+        return;
+    }
+
+    if(password.length() == 0) {
+        return;
+    }
+
+    // adminlogin username password
+    trap_SendClientCommand(std::string("adminlogin " + username + " " + 
+        G_SHA1("ETJump" + password)).c_str());
 }
 
 #if defined __linux__

@@ -1620,6 +1620,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		client->sess.sessionTeam = TEAM_SPECTATOR;
 		client->sess.spectatorState = SPECTATOR_FREE;
 		client->sess.spectatorClient = 0;
+        ResetData(clientNum);
 
 		// unlink the entity - just in case they were already connected
 		trap_UnlinkEntity( ent );
@@ -1652,9 +1653,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
     value = Info_ValueForKey (userinfo, "ip");
     if( G_isIPMuted( value ) ) {
         ent->client->sess.muted = qtrue;
-    }
-
-    ResetClientData(clientNum);
+    }  
 
 	return NULL;
 }
@@ -2257,11 +2256,11 @@ void ClientDisconnect( int clientNum ) {
 		BotAIShutdownClient( clientNum );
 	}
 
-    ResetClientData(clientNum);
-
 	// OSP
 	G_verifyMatchState(i);
 	// OSP
+
+    ResetData(clientNum);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

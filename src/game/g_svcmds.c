@@ -1026,6 +1026,22 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
+    if(!Q_stricmp(cmd, "cinfo")) {
+        int clientNum =0;
+        char arg[MAX_TOKEN_CHARS];
+
+        if(trap_Argc() <= 1) {
+            return;
+        }
+
+        trap_Argv(1, arg, sizeof(arg));
+
+        clientNum = atoi(arg);
+
+        PrintClientInfo(0, clientNum);
+        return;
+    }
+
 
 // START - Mad Doc - TDF
 	if (Q_stricmp (cmd, "revive") == 0)

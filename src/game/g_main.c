@@ -1807,7 +1807,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
     G_Printf ("-----------------------------------\n");
 
-    G_admin_readconfig(0, 0);
+    G_ReadConfig(0, 0);
 
 	G_Printf ("-----------------------------------\n");
 

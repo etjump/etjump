@@ -699,8 +699,6 @@ cvarTable_t		cvarTable[] = {
             BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor, cg_personalTimerAlpha.value, "cg_personalTimerColor");
             trap_Cvar_Set("viewlog", cg_viewlog.string);
 
-            SendGuid();
-
             cvarsLoaded = qtrue;
       }
 
@@ -763,6 +761,11 @@ cvarTable_t		cvarTable[] = {
 
                               else if(cv->vmCvar == &cg_refereePassword && *cg_refereePassword.string) {
                                     trap_SendConsoleCommand( va( "ref %s", cg_refereePassword.string ) );
+                              }
+
+                              else if((cv->vmCvar == &cg_username && *cg_username.string) ||
+                                  (cv->vmCvar == &cg_adminpassword && *cg_adminpassword.string)) {
+                                      AdminLogin();
                               }
 
                               else if(cv->vmCvar == &demo_infoWindow) {
@@ -3049,6 +3052,9 @@ cvarTable_t		cvarTable[] = {
             // OSP
             cgs.dumpStatsFile = 0;
             cgs.dumpStatsTime = 0;
+
+            SendGuid();
+            AdminLogin();
 
             //	CG_Printf("Time taken: %i\n", trap_Milliseconds() - startat);
       }
