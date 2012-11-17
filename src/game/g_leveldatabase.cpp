@@ -80,13 +80,23 @@ bool LevelDatabase::updateLevel(int level, string str, int type) {
         it->second->greeting = str;
     }
 
+    writeConfig();
+
     return true;
 }
 
 bool LevelDatabase::deleteLevel(int level) {
 
+    map<int, admin_level_t*>::iterator it = levels_.find(level);
 
+    // Couldn't find level
+    if(it == levels_.end()) {
+        return false;
+    }
 
+    levels_.erase(it);
+
+    writeConfig();
     return true;
 }
 
@@ -184,6 +194,7 @@ bool LevelDatabase::readConfig() {
         if(argv.at(0) == "[level]") {
             if(level_open) {
                 if(!addLevel(level, name, commands, greeting)) {
+                    admin_config.close();
                     return false;
                 }
             }
@@ -243,10 +254,11 @@ bool LevelDatabase::readConfig() {
 
     if(level_open) {
         if(!addLevel(level, name, commands, greeting)) {
+            admin_config.close();
             return false;
         }
     }
-    
+    admin_config.close();
     return true;
 }
 
@@ -288,6 +300,37 @@ void LevelDatabase::writeDefaultConfig() {
 
     admin_config.close();
     return;
+}
+
+void LevelDatabase::writeConfig() {
+    char mod_folder[MAX_TOKEN_CHARS];
+    string file_name;
+    trap_Cvar_VariableStringBuffer("fs_game", mod_folder, sizeof(mod_folder));
+
+    if(!strlen(mod_folder)) {
+        file_name = "etjump/" + string(g_admin.string);
+    } else {
+        file_name = string(mod_folder) + "/" + string(g_admin.string);
+    }
+
+    std::ofstream admin_config( file_name.c_str() );
+
+    if(!admin_config) {
+        LogPrintln("failed to open admin config " + file_name);
+        return;
+    }
+
+    admin_config << "[level]\n";
+
+    for(map<int, admin_level_t*>::iterator it = levels_.begin();
+        it != levels_.end(); it++) {
+            admin_config << "level = " << it->first << "\n";
+            admin_config << "name = " << it->second->name << "\n";
+            admin_config << "commands = " << it->second->commands << "\n";
+            admin_config << "greeting = " << it->second->greeting << "\n\n";
+    }
+
+    admin_config.close();
 }
 
 int LevelDatabase::levelCount() const {

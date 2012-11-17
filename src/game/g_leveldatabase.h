@@ -40,6 +40,7 @@ public:
 private:
 
     void clearDatabase();
+    void writeConfig();
     void writeDefaultConfig();
     void createLevelZero();
 
