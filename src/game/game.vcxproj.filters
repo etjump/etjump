@@ -207,6 +207,12 @@
     <ClCompile Include="g_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_userdatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_sql.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -332,6 +338,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_userdatabase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_sql.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -49,10 +49,8 @@ bool LevelDatabase::addLevel(int level, string name,
     } catch (...) {
         return false;
     }
-    std::pair< map<int, admin_level_t*>::iterator, bool > retval = 
-        levels_.insert(std::make_pair(level, new_level));
-    // Already is on the datastructure
-    if(retval.second == false) {
+
+    if(levels_.insert(std::make_pair(level, new_level)).second == false) {
         return false;
     }
 

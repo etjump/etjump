@@ -189,6 +189,7 @@
     <ClCompile Include="g_script_actions.c" />
     <ClCompile Include="g_session.c" />
     <ClCompile Include="g_spawn.c" />
+    <ClCompile Include="g_sql.cpp" />
     <ClCompile Include="g_stats.c" />
     <ClCompile Include="g_sv_entities.c" />
     <ClCompile Include="g_svcmds.c" />
@@ -198,6 +199,7 @@
     <ClCompile Include="g_team.c" />
     <ClCompile Include="g_teammapdata.c" />
     <ClCompile Include="g_trigger.c" />
+    <ClCompile Include="g_userdatabase.cpp" />
     <ClCompile Include="g_utilities.cpp" />
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vote.c" />
@@ -242,9 +244,11 @@
     <ClInclude Include="g_leveldatabase.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_public.h" />
+    <ClInclude Include="g_sql.h" />
     <ClInclude Include="g_team.h" />
     <ClInclude Include="..\botai\inv.h" />
     <ClInclude Include="..\botai\match.h" />
+    <ClInclude Include="g_userdatabase.h" />
     <ClInclude Include="g_utilities.h" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
