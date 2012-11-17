@@ -1976,7 +1976,7 @@ int		trap_BotAllocateClient( int clientNum );
 void	trap_BotFreeClient( int clientNum );
 void	trap_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean	trap_GetEntityToken( char *buffer, int bufferSize );
-qboolean trap_GetTag( int clientNum, int tagFileNumber, char *tagName, orientation_t *or );
+qboolean trap_GetTag( int clientNum, int tagFileNumber, char *tagName, orientation_t *orientation );
 qboolean trap_LoadTag( const char* filename );
 
 int		trap_RealTime( qtime_t *qtime );

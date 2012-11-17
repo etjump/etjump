@@ -1,12 +1,12 @@
 #include "g_leveldatabase.h"
 #include "g_utilities.h"
 
-extern "C" {
-#include "g_local.h"
-}
-
 #include <fstream>
 #include <sstream>
+
+extern "C" {
+#include "g_local.h"
+};
 
 LevelDatabase::admin_level_t::admin_level_t(string n, 
                                             string c, 
@@ -49,7 +49,7 @@ bool LevelDatabase::addLevel(int level, string name,
     } catch (...) {
         return false;
     }
-    std::pair<map<int, admin_level_t*>::iterator, bool> retval = 
+    std::pair< map<int, admin_level_t*>::iterator, bool > retval = 
         levels_.insert(std::make_pair(level, new_level));
     // Already is on the datastructure
     if(retval.second == false) {
