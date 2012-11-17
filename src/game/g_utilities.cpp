@@ -9,6 +9,22 @@ extern "C" {
 using std::vector;
 using std::string;
 
+void LogPrintln(string msg) {
+    if(msg.length() > 1000) {
+        msg.resize(1000);
+    }
+    G_LogPrintf("%s\n", msg.c_str());
+}
+
+void LogPrint(string msg) {
+    // Just an arbitrary number that won't exceed the 1024 char limit
+    if(msg.length() > 1000) {
+        msg.resize(1000);
+    }
+
+    G_LogPrintf("%s", msg.c_str());
+}
+
 vector<string> GetArgs() {
     vector<string> argv;
     for(int i = 0; i < trap_Argc(); i++) {
@@ -27,7 +43,11 @@ std::string G_SHA1(const std::string& str) {
 }
 
 string int2string(int value) {
-    return std::stringstream(value).str();
+    std::stringstream ss;
+    ss << value;
+    string s;
+    ss >> s;
+    return s;
 }
 
 bool string2int(const string& s, int& i) {
@@ -37,20 +57,4 @@ bool string2int(const string& s, int& i) {
 	}	
 
 	return true;
-}
-
-void LogPrintln(string msg) {
-    if(msg.length() > 1000) {
-        msg.resize(1000);
-    }
-    G_LogPrintf("%s\n", msg.c_str());
-}
-
-void LogPrint(string msg) {
-    // Just an arbitrary number that won't exceed the 1024 char limit
-    if(msg.length() > 1000) {
-        msg.resize(1000);
-    }
-
-    G_LogPrintf("%s", msg.c_str());
 }

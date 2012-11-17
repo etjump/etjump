@@ -2653,6 +2653,7 @@ qboolean G_admin_report_bug( gentity_t *ent, int skiparg );
 void GuidReceived(gentity_t *ent);
 void AdminLogin(gentity_t *ent);
 void PrintClientInfo(gentity_t *ent, int clientNum);
+void PrintLevelInfo(int level);
 void ResetData(int clientNum);
 void RequestLogin(int clientNum);
 

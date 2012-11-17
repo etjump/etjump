@@ -30,9 +30,9 @@ menuDef {
 
 WINDOW( "INFO", 94 )
 	
-LABELWHITE( 130, 35, WINDOW_WIDTH-24, 18, "^7Trickjump mod \nby \n^f_^7zero ^k>:3 \n^7and \n^1F^7eengur", .2, ITEM_ALIGN_CENTER, 0, 8 )
+LABELWHITE( 130, 35, WINDOW_WIDTH-24, 18, "^7Trickjump mod \nby \n^f_^7zero ^k>:3\n^1F^7eengur\n^zeT^>|^7setup^>.\n", .2, ITEM_ALIGN_CENTER, 0, 8 )
 
-LABELWHITE( 130, 100, WINDOW_WIDTH-24, 18, "^7Special thanks to the following people:\nsetup\n^wH^0e^wX^9|^wFate\nApple\n^z|^7999^z|^7noodle", .2, ITEM_ALIGN_CENTER, 0, 8 )
+LABELWHITE( 130, 100, WINDOW_WIDTH-24, 18, "^7Special thanks to the following people\n^wH^0e^wX^9|^wFate\nApple\n^z|^7999^z|^7noodle\n^7Luvah", .2, ITEM_ALIGN_CENTER, 0, 8 )
 
 LABELWHITE( 12, 200, WINDOW_WIDTH-24, 18, "You can ^3save ^7& ^3load ^7by using the commands /save and /load.", .2, ITEM_ALIGN_LEFT, 0, 8)
 

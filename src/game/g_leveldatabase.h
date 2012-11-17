@@ -13,7 +13,7 @@ public:
     ~LevelDatabase();
 
     struct admin_level_t {
-        admin_level_t(string name, string commands, string greeting);
+        admin_level_t(string n, string c, string g);
         string name;
         string commands;
         string greeting;
@@ -33,12 +33,15 @@ public:
     bool readString(std::stringstream& current_line, string& str);
     bool readConfig();
 
+    string getAll(int level);
+
     int levelCount() const;
 
 private:
 
     void clearDatabase();
     void writeDefaultConfig();
+    void createLevelZero();
 
     map<int, admin_level_t*> levels_;    
 

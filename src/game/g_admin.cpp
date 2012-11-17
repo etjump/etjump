@@ -64,6 +64,10 @@ void PrintClientInfo(gentity_t *ent, int clientNum) {
     DPrintln(clientDatabase.getAll(clientNum));
 }
 
+void PrintLevelInfo(int level) {
+    LogPrintln(levelDatabase.getAll(level));
+}
+
 void ResetData(int clientNum) {
     clientDatabase.ResetData(clientNum);
 }

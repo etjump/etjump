@@ -8,22 +8,17 @@ extern "C" {
 #include <fstream>
 #include <sstream>
 
-LevelDatabase::admin_level_t::admin_level_t(string name, 
-                                            string commands, 
-                                            string greeting)
+LevelDatabase::admin_level_t::admin_level_t(string n, 
+                                            string c, 
+                                            string g)
 {
-
+    name = n;
+    commands = c;
+    greeting = g;
 }
 
 LevelDatabase::LevelDatabase() {
-    admin_level_t *level_zero = 0;
-    try {
-        level_zero = new admin_level_t("", "", "");
-    } catch (...) {
-        // ???
-    }
 
-    levels_.insert(std::make_pair(0, level_zero));
 }
 
 LevelDatabase::~LevelDatabase() {
@@ -39,11 +34,11 @@ LevelDatabase::~LevelDatabase() {
 
 bool LevelDatabase::addLevel(int level, string name,
                              string commands, string greeting) 
-{
+{    
     if(level == 0) {
-        levels_[0]->name = name;
-        levels_[0]->commands = commands;
-        levels_[0]->greeting = greeting;
+        levels_.find(level)->second->name = name;
+        levels_.find(level)->second->commands = commands;
+        levels_.find(level)->second->greeting = greeting;
         return true;
     }
 
@@ -54,10 +49,8 @@ bool LevelDatabase::addLevel(int level, string name,
     } catch (...) {
         return false;
     }
-
     std::pair<map<int, admin_level_t*>::iterator, bool> retval = 
         levels_.insert(std::make_pair(level, new_level));
-
     // Already is on the datastructure
     if(retval.second == false) {
         return false;
@@ -108,67 +101,24 @@ void LevelDatabase::clearDatabase() {
     levels_.clear();
 }
 
+// We must always have level 0 
+void LevelDatabase::createLevelZero() {
+    admin_level_t *level_zero = 0;
+    try {
+        level_zero = new admin_level_t("", "", "");
+    } catch (...) {
+        // ???
+    }
+
+    levels_.insert(std::make_pair(0, level_zero));
+}
+
 const string RCFG_ERROR = "Readconfig error: ";
-
-bool LevelDatabase::readInteger(std::stringstream& current_line, int& data) {
-    int count = 0;
-    vector<string> args;
-    while(current_line.peek() != EOF) {
-        string arg;
-        if(count < 2) {
-            current_line >> arg;
-            args.push_back(arg);
-        } else {
-            std::getline(current_line, arg);
-        }
-        count++;
-    }
-
-    if(args.size() != 3) {
-        return false;
-    }
-
-    if(args.at(1) != "=") {
-        return false;
-    }
-
-    if(!string2int(args.at(2), data)) {
-        return false;
-    }
-    return true;
-}
-
-bool LevelDatabase::readString(std::stringstream& current_line, string& data) {
-    int count = 0;
-    vector<string> args;
-    while(current_line.peek() != EOF) {
-        string arg;
-        if(count < 2) {
-            current_line >> arg;
-            args.push_back(arg);
-        } else {
-            std::getline(current_line, arg);
-        }
-        count++;
-    }
-
-    if(args.size() != 3) {
-        return false;
-    }
-
-    if(args.at(1) != "=") {
-        return false;
-    }
-
-    data = args.at(2).substr(1);
-
-    return true;
-}
 
 bool LevelDatabase::readConfig() {
 
+    int linecount = -1;
     bool level_open = false;
-    bool read_failed = false;
 
     int level;
     string name;
@@ -196,85 +146,104 @@ bool LevelDatabase::readConfig() {
     }
 
     clearDatabase();
+    // Have to do this here because for some reason constructor won't
+    // do anything if I add it there.
+    createLevelZero();
 
     while(admin_config.peek() != EOF) 
     {
+        linecount++;
         string arg;
         string current_line;
+        vector<string> argv;
         std::stringstream ss;
-        int count = 0;
-
-        if(read_failed) {
-            admin_config.close();
-            clearDatabase();
-            writeDefaultConfig();
-            LogPrintln(RCFG_ERROR + "parsing level data failed on line: " + current_line);
-            return false;
-        }
-
-        LogPrintln(int2string(count) + ":" + current_line);
-        count++;
-
         std::getline(admin_config, current_line);
 
         if(current_line.length() == 0) {
             continue;
         }
 
-        // Store the line to stringstream
         ss << current_line;
-        // Read first arg from stringstream
-        ss >> arg;
 
-        // New level open
-        if(arg == "[level]") {
+        for(int i = 0; ss.peek() != EOF; i++) {
+            if(i < 2) {
+                ss >> arg;
+            } else {
+                // Skip the space
+                ss.ignore(1);
+                std::getline(ss, arg);
+            }
+            argv.push_back(arg);
+        }
+        
+        if(argv.size() == 0) {
+            // shouldn't happen
+            continue;
+        }
 
-            if(level_open == true) {
-
+        if(argv.at(0) == "[level]") {
+            if(level_open) {
                 if(!addLevel(level, name, commands, greeting)) {
                     return false;
                 }
+            }
+
+            level_open = false;
+        }
+
+        if(level_open) {
+
+            if(argv.size() != 3) {
+                LogPrintln("WARNING: Invalid line(" + int2string(linecount) + ") \"" + current_line + "\" on admin config.");
+                continue;
+            }
+
+            if(argv.at(1) != "=") {
+                LogPrintln("WARNING: Missing \"=\" on line(" + int2string(linecount) + ") \"" + current_line + "\" on admin config.");
+            }
+
+            else if(argv.at(0) == "level") {
+
+                if(!string2int(argv.at(2), level)) {
+                    LogPrintln(RCFG_ERROR + "invalid level(" + int2string(linecount) + ") \"" + argv.at(2) + "\" on admin config.");
+                    return false;
+                }   
+
+            } 
+
+            else if(argv.at(0) == "name") {
+
+                name = argv.at(2);
 
             }
 
+            else if(argv.at(0) == "greeting") {
+
+                greeting = argv.at(2);
+
+            }
+
+            else if(argv.at(0) == "commands") {
+
+                commands = argv.at(2);
+
+            }
+
+        }
+
+        if(argv.at(0) == "[level]") {
             level = 0;
             name.clear();
             commands.clear();
             greeting.clear();
             level_open = true;
-            continue;
         }
 
-        if(level_open) {
+    }
 
-            if(arg == "level") {
-                if(!readInteger(ss, level)) {
-                    read_failed = true;
-                }
-            }
-
-            else if(arg == "name") {
-                if(!readString(ss, name)) {
-                    read_failed = true;
-                }
-            }
-
-            else if(arg == "commands") {
-                if(!readString(ss, commands)) {
-                    read_failed = true;
-                }
-            }
-
-            else if(arg == "greeting") {
-                if(!readString(ss, greeting)) {
-                    read_failed = true;
-                }
-            }
-
-            else {
-                read_failed = true;
-            }
-
+    if(level_open) {
+        if(!addLevel(level, name, commands, greeting)) {
+            return false;
         }
     }
     
@@ -323,4 +292,21 @@ void LevelDatabase::writeDefaultConfig() {
 
 int LevelDatabase::levelCount() const {
     return levels_.size();
+}
+
+string LevelDatabase::getAll(int level) {
+    map<int, admin_level_t*>::iterator it = levels_.find(level);
+
+    // Couldn't find level
+    if(it == levels_.end()) {
+        return "";
+    }
+
+    return string("---------------------------------------------------\n") + 
+           string("- Level " + int2string(level)) + string("\n") +
+           string("---------------------------------------------------\n") +
+           string("- NAME: ") + it->second->name + 
+           string("\n- CMDS: ") + it->second->commands + 
+           string("\n- GRTN: ") + it->second->greeting +
+           string("\n---------------------------------------------------\n");
 }

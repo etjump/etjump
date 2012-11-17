@@ -1042,6 +1042,25 @@ qboolean	ConsoleCommand( void ) {
         return;
     }
 
+    if(!Q_stricmp(cmd, "linfo")) {
+        int level = 0;
+        char arg[MAX_TOKEN_CHARS];
+
+        if(trap_Argc() <= 1) {
+            return;
+        }
+
+        trap_Argv(1, arg, sizeof(arg));
+
+        level = atoi(arg);
+
+        PrintLevelInfo(level);
+    }
+
+    if(!Q_stricmp(cmd, "readconfig")) {
+        G_ReadConfig(0, 0);
+    }
+
 
 // START - Mad Doc - TDF
 	if (Q_stricmp (cmd, "revive") == 0)
