@@ -29,8 +29,6 @@ public:
     bool updateLevel(int level, string str, int type);
     bool deleteLevel(int level);
 
-    bool readInteger(std::stringstream& current_line, int& integer);
-    bool readString(std::stringstream& current_line, string& str);
     bool readConfig();
 
     string getAll(int level);
