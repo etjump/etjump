@@ -1607,10 +1607,12 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	// read or initialize the session data
 	if( firstTime ) {
 		G_InitSessionData( client, userinfo );
+        G_InitClientSessionAdminData( client );
 		client->pers.enterTime = level.time;
 		client->ps.persistant[PERS_SCORE] = 0;
 	} else {
 		G_ReadSessionData( client );
+        G_ReadClientSessionAdminData( client );
 	}
 
 	client->pers.enterTime = level.time;

@@ -186,7 +186,28 @@ SanitizeString
 Remove case and control characters
 ==================
 */
+
 void SanitizeString( char *in, char *out, qboolean fToLower )
+{
+	while(*in) {
+		if(*in == 27 || *in == '^') {
+			in++;		// skip color code
+			if(*in) in++;
+			continue;
+		}
+
+		if(*in < 32) {
+			in++;
+			continue;
+		}
+
+		*out++ = (fToLower) ? tolower(*in++) : *in++;
+	}
+
+	*out = 0;
+}
+
+void SanitizeConstString( const char *in, char *out, qboolean fToLower )
 {
 	while(*in) {
 		if(*in == 27 || *in == '^') {
@@ -291,7 +312,7 @@ names that are a partial match for s. List is terminated by a -1.
 Returns number of matching clientids.
 ==================
 */
-int ClientNumbersFromString( char *s, int *plist) {
+int ClientNumbersFromString( const char *s, int *plist) {
 	gclient_t *p;
 	int i, found = 0;
 	char s2[MAX_STRING_CHARS];
@@ -323,7 +344,7 @@ int ClientNumbersFromString( char *s, int *plist) {
 	}
 
 	// now look for name matches
-	SanitizeString(s, s2, qtrue);
+	SanitizeConstString(s, s2, qtrue);
 	if(strlen(s2) < 1) return 0;
 	for(i=0; i < level.maxclients; i++) {
 		p = &level.clients[i];
@@ -4171,6 +4192,11 @@ void ClientCommand(int clientNum)
 		G_weaponStatsLeaders_cmd(ent, qtrue, qtrue);
 		return;
 	}
+
+    if(!Q_stricmp(cmd, "add")) {
+        G_SetLevel(ent, 0);
+        return;
+    }
 
 	// regular anytime commands
 	for (i = 0 ; i < sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0]) ; i++)

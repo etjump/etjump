@@ -1031,7 +1031,7 @@ qboolean	ConsoleCommand( void ) {
         char arg[MAX_TOKEN_CHARS];
 
         if(trap_Argc() <= 1) {
-            return;
+            return qtrue;
         }
 
         trap_Argv(1, arg, sizeof(arg));
@@ -1047,7 +1047,7 @@ qboolean	ConsoleCommand( void ) {
         char arg[MAX_TOKEN_CHARS];
 
         if(trap_Argc() <= 1) {
-            return;
+            return qfalse;
         }
 
         trap_Argv(1, arg, sizeof(arg));

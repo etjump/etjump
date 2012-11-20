@@ -1392,28 +1392,28 @@ team_t G_GetTeamFromEntity( gentity_t *ent ) {
 static char bigTextBuffer[100000];
 
 // Print message to ent on chat
-void ChatPrintTo(gentity_t *ent, char *message) {
+void ChatPrintTo(gentity_t *ent, const char *message) {
     if(ent) CP(va("chat \"%s\"", message));
     else G_Printf("%s\n", message);
 }
 
 // Print message to all players on chat
-void ChatPrintAll(char *message) {
+void ChatPrintAll(const char *message) {
     AP(va("chat \"%s\"", message));
     G_Printf("%s\n", message);
 }
 // Print message to ent on CPM
-void CPMPrintTo(gentity_t *ent, char *message) {
+void CPMPrintTo(gentity_t *ent, const char *message) {
     if(ent) CP(va("cpm \"%s\n\"", message));
     else G_Printf("%s\n", message);
 }
 // Print message to all players on CPM
-void CPMPrintAll(char *message) {
+void CPMPrintAll(const char *message) {
     AP(va("cpm \"%s\n\"", message));
     G_Printf("%s\n", message);
 }
 // Print message to ent on CP
-void CPPrintTo(gentity_t *ent, char *message) {
+void CPPrintTo(gentity_t *ent, const char *message) {
     if(ent)CP(va("cp \"%s\n\"", message));
     else G_Printf("%s\n", message);
 }
@@ -1433,7 +1433,7 @@ void PrintTo(gentity_t *ent, char *message) {
 	} 
 }
 // Print message to all players on console
-void PrintAll(char *message) {
+void PrintAll(const char *message) {
 	AP(va("print \"%s\n\"", message));
 	G_Printf("%s\n", message);
 }

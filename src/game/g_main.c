@@ -199,6 +199,7 @@ vmCvar_t		g_nameChangeLimit;
 // ETJump admin system
 
 vmCvar_t		g_admin;
+vmCvar_t        g_adminLoginType;
 vmCvar_t		g_adminLog;
 vmCvar_t		g_logCommands;
 
@@ -441,6 +442,7 @@ cvarTable_t		gameCvarTable[] = {
 	
 
 	{ &g_admin, "g_admin", "admins.dat", CVAR_ARCHIVE },
+    { &g_adminLoginType, "g_adminLoginType", "1", CVAR_ARCHIVE },
 	{ &g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE },
 	{ &g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE },
 
@@ -2424,6 +2426,7 @@ void ExitLevel (void) {
 
 	// we need to do this here before chaning to CON_CONNECTING
 	G_WriteSessionData( qfalse );
+
 
 	// change all client states to connecting, so the early players into the
 	// next level will know the others aren't done reconnecting

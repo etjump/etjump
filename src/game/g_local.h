@@ -1,3 +1,5 @@
+#ifndef G_LOCAL_H
+#define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
 #include "q_shared.h"
@@ -81,7 +83,7 @@ typedef enum {
 	MOVER_2TO1ROTATE
 } moverState_t;
 
-#define MAX_PASSWORD_LEN 32
+#define MAX_PASSWORD_LEN 40
 #define MAX_ADMINS 16
 
 // door AI sound ranges
@@ -1246,9 +1248,10 @@ void Cmd_SwapPlacesWithBot_f( gentity_t *ent, int botNum );
 void G_EntitySound( gentity_t *ent, const char *soundId, int volume );
 void G_EntitySoundNoCut( gentity_t *ent, const char *soundId, int volume );
 int ClientNumberFromString( gentity_t *to, char *s );
-int ClientNumbersFromString( char *s, int *plist);
+int ClientNumbersFromString( const char *s, int *plist);
 qboolean G_MatchOnePlayer(int *plist, char *err, int len) ;
 void SanitizeString( char *in, char *out, qboolean fToLower );
+void SanitizeConstString( const char *in, char *out, qboolean fToLower );
 void Cmd_PrivateMessage_f(gentity_t *ent);
 void Cmd_noGoto_f(gentity_t *ent);
 void Cmd_noCall_f(gentity_t *ent);
@@ -1904,6 +1907,7 @@ extern vmCvar_t	g_mapScriptDir;
 extern vmCvar_t	g_blockedMaps;
 
 extern vmCvar_t	g_admin;
+extern vmCvar_t g_adminLoginType;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
 
@@ -2606,7 +2610,6 @@ void G_AddIpMute( char *ip );
 void G_RemoveIPMute( char *ip );
 qboolean G_isIPMuted( char *ip );
 void G_ClearIPMutes();
-gentity_t *getPlayerPtrForName(char *name, char *err, int size);
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime);
 // g_admin.c
 char *G_SHA1(char *string);
@@ -2637,14 +2640,14 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 #define BANNER_CPM 3
 #define DEFAULT_BANNER_TIME 60000
 
-void ChatPrintTo(gentity_t *ent, char *message);
-void ChatPrintAll(char *message);
-void CPMPrintTo(gentity_t *ent, char *message);
-void CPMPrintAll(char *message);
-void CPPrintTo(gentity_t *ent, char *message);
-void CPPrintAll(char *message);
+void ChatPrintTo(gentity_t *ent, const char *message);
+void ChatPrintAll(const char *message);
+void CPMPrintTo(gentity_t *ent, const char *message);
+void CPMPrintAll(const char *message);
+void CPPrintTo(gentity_t *ent, const char *message);
+void CPPrintAll(const char *message);
 void PrintTo(gentity_t *ent, char *message);
-void PrintAll(char *message);
+void PrintAll(const char *message);
 
 #ifdef BETATEST
 qboolean G_admin_report_bug( gentity_t *ent, int skiparg );
@@ -2656,5 +2659,10 @@ void PrintClientInfo(gentity_t *ent, int clientNum);
 void PrintLevelInfo(int level);
 void ResetData(int clientNum);
 void RequestLogin(int clientNum);
+void G_WriteClientSessionAdminData( gclient_t *client );
+void G_ReadClientSessionAdminData( gclient_t *client );
+void G_InitClientSessionAdminData( gclient_t *client );
 
 void G_ReadConfig(gentity_t *ent, int skipargs);
+void G_SetLevel(gentity_t *ent, int skipargs);
+#endif // G_LOCAL_H

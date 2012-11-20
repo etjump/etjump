@@ -62,6 +62,7 @@ game/q_shared.c
 game/g_admin.cpp
 game/g_clientdatabase.cpp
 game/g_leveldatabase.cpp
+game/g_userdatabase.cpp
 sha-1/bg_sha.c
 sha-1/sha1.c
 ''')

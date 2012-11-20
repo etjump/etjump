@@ -9,6 +9,58 @@ extern "C" {
 using std::vector;
 using std::string;
 
+void ChatPrintTo(gentity_t *ent, string message) {
+	if(ent) {
+		CP(va("chat \"%s\"", message.c_str()));
+	} else {
+		G_Printf("%s\n", message.c_str());
+	}
+}
+
+void ChatPrintAll(string message) {
+	AP(va("chat \"%s\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
+}
+
+void CPMPrintTo(gentity_t *ent, string message) {
+	if(ent) {
+		CP(va("cpm \"%s\n\"", message.c_str()));
+	} else {
+		G_Printf("%s\n", message.c_str());
+	}
+}
+
+void CPMPrintAll(string message) {
+	AP(va("cpm \"%s\n\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
+}
+
+void CPPrintTo(gentity_t *ent, string message) {
+	if(ent) {
+		CP(va("cp \"%s\n\"", message.c_str()));
+	} else {
+		G_Printf("%s\n", message.c_str());
+	}
+}
+
+void CPPrintAll(string message) {
+	AP(va("cp \"%s\n\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
+}
+
+void PrintTo(gentity_t *ent, string message) {
+	if(ent) {
+		CP(va("print \"%s\n\"", message.c_str()));
+	} else {
+		G_Printf("%s\n", message.c_str());
+	} 
+}
+
+void PrintAll(string message) {
+	AP(va("print \"%s\n\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
+}
+
 void LogPrintln(string msg) {
     if(msg.length() > 1000) {
         msg.resize(1000);
@@ -57,4 +109,37 @@ bool string2int(const string& s, int& i) {
 	}	
 
 	return true;
+}
+
+void SanitizeString(const string& in, string& out, bool toLower) {
+    string::size_type i = 0;
+    while( i < in.size() ) {
+        
+        if(in[i] == 27 || in[i] == '^') {
+            i++;
+            if(i < in.size()) {
+                continue;
+            }
+        }
+
+        if(in[i] < 32) {
+            i++;
+            continue;
+        }
+
+        out.push_back(toLower ? tolower(in[i]) : in[i]);
+        i++;
+    }
+}
+
+gentity_t *playerFromName(const string& name, string& error) {
+    char err[MAX_STRING_CHARS];
+    int pids[MAX_CLIENTS];
+    if(ClientNumbersFromString(name.c_str(), pids) != 1) {
+        G_MatchOnePlayer(pids, err, sizeof(err));
+        error = err;
+        return 0;
+    }
+
+    return (g_entities + pids[0]);
 }

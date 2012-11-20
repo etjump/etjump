@@ -51,6 +51,9 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>D:\GitHub\etjump\src\sqlite;D:\Ohjelmointi\boost_1_51_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -147,6 +150,8 @@
     <ClCompile Include="..\botai\ai_team.c" />
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="..\sqlite\sqlite3pp.cpp" />
     <ClCompile Include="bg_animation.c" />
     <ClCompile Include="bg_animgroup.c" />
     <ClCompile Include="bg_campaign.c" />
@@ -189,7 +194,6 @@
     <ClCompile Include="g_script_actions.c" />
     <ClCompile Include="g_session.c" />
     <ClCompile Include="g_spawn.c" />
-    <ClCompile Include="g_sql.cpp" />
     <ClCompile Include="g_stats.c" />
     <ClCompile Include="g_sv_entities.c" />
     <ClCompile Include="g_svcmds.c" />
@@ -225,6 +229,8 @@
     <ClInclude Include="..\botai\ai_team.h" />
     <ClInclude Include="..\botai\ai_teamX.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
+    <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="..\sqlite\sqlite3pp.h" />
     <ClInclude Include="be_aas.h" />
     <ClInclude Include="be_ai_char.h" />
     <ClInclude Include="be_ai_chat.h" />
@@ -244,7 +250,6 @@
     <ClInclude Include="g_leveldatabase.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_public.h" />
-    <ClInclude Include="g_sql.h" />
     <ClInclude Include="g_team.h" />
     <ClInclude Include="..\botai\inv.h" />
     <ClInclude Include="..\botai\match.h" />

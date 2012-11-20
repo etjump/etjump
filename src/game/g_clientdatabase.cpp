@@ -45,7 +45,7 @@ void ClientDatabase::setUsername(int clientNum, string username) {
     if(clientNum < 0 || clientNum > MAX_CLIENTS) {
         return;
     }
-
+    
     setActive(clientNum);
     clients_[clientNum].username = username;
 }
