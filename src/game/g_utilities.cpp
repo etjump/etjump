@@ -9,7 +9,7 @@ extern "C" {
 using std::vector;
 using std::string;
 
-void ChatPrintTo(gentity_t *ent, string message) {
+void ChatPrintTo(gentity_t *ent, const string& message) {
 	if(ent) {
 		CP(va("chat \"%s\"", message.c_str()));
 	} else {
@@ -17,12 +17,12 @@ void ChatPrintTo(gentity_t *ent, string message) {
 	}
 }
 
-void ChatPrintAll(string message) {
+void ChatPrintAll(const string& message) {
 	AP(va("chat \"%s\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void CPMPrintTo(gentity_t *ent, string message) {
+void CPMPrintTo(gentity_t *ent, const string& message) {
 	if(ent) {
 		CP(va("cpm \"%s\n\"", message.c_str()));
 	} else {
@@ -30,12 +30,12 @@ void CPMPrintTo(gentity_t *ent, string message) {
 	}
 }
 
-void CPMPrintAll(string message) {
+void CPMPrintAll(const string& message) {
 	AP(va("cpm \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void CPPrintTo(gentity_t *ent, string message) {
+void CPPrintTo(gentity_t *ent, const string& message) {
 	if(ent) {
 		CP(va("cp \"%s\n\"", message.c_str()));
 	} else {
@@ -43,12 +43,12 @@ void CPPrintTo(gentity_t *ent, string message) {
 	}
 }
 
-void CPPrintAll(string message) {
+void CPPrintAll(const string& message) {
 	AP(va("cp \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void PrintTo(gentity_t *ent, string message) {
+void PrintTo(gentity_t *ent, const string& message) {
 	if(ent) {
 		CP(va("print \"%s\n\"", message.c_str()));
 	} else {
@@ -56,7 +56,7 @@ void PrintTo(gentity_t *ent, string message) {
 	} 
 }
 
-void PrintAll(string message) {
+void PrintAll(const string& message) {
 	AP(va("print \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
@@ -75,6 +75,17 @@ void LogPrint(string msg) {
     }
 
     G_LogPrintf("%s", msg.c_str());
+}
+
+vector<string> GetSayArgs() {
+    vector<string> argv;
+    for(int i = 0; i < Q_SayArgc(); i++) {
+        char arg[MAX_TOKEN_CHARS];
+
+        Q_SayArgv(i, arg, sizeof(arg));
+        argv.push_back(arg);
+    }
+    return argv;
 }
 
 vector<string> GetArgs() {
@@ -143,3 +154,4 @@ gentity_t *playerFromName(const string& name, string& error) {
 
     return (g_entities + pids[0]);
 }
+

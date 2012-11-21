@@ -351,3 +351,18 @@ string LevelDatabase::getAll(int level) {
            string("\n- GRTN: ") + it->second->greeting +
            string("\n---------------------------------------------------\n");
 }
+
+bool LevelDatabase::levelExists(int level) const {
+    if(levels_.find(level) != levels_.end()) {
+        return true;
+    }
+    return false;
+}
+
+string LevelDatabase::commands(int level) const {
+    map<int, admin_level_t*>::const_iterator it = levels_.find(level);
+    if(it != levels_.end()) {
+        return it->second->commands;
+    }
+    return "";
+}

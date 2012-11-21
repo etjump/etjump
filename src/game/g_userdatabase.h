@@ -13,25 +13,24 @@ public:
 
     UserDatabase();
     ~UserDatabase();
-    // For adding a new user to db+memory
-    bool newUser(string guid, int level,
-        string name, string commands,
-        string greeting, string username,
-        string password);
+    // For adding a new user to database + to users_ -map
+    bool newUser(string& const guid, int level,
+        string& const name, string& const commands,
+        string& const greeting, string& const username,
+        string& const password);
     bool readConfig();
     int userCount() const;
     bool userExists(const string& guid) const;
-    void getUser(const string& guid, int& level, string& name, string& commands,
+    bool getUser(const string& guid, int& level, string& name, string& commands,
                            string& greeting, string& username, string& password);
+    bool updateUser(const string& guid, int level, const string& name);
 private:
     void clearDatabase();
-    // For readconfig
-    bool addUser(string guid, int level,
-        string name, string commands,
-        string greeting, string username,
-        string password);
-    bool updateUser(string guid, int level, string name, string commands,
-        string greeting, string username, string password);
+    // Used to add a user to the users_ datastructure
+    bool addUser(string& const guid, int level,
+        string& const name, string& const commands,
+        string& const greeting, string& const username,
+        string& const password);
     struct admin_user_t { 
         // Great names here.. 
         admin_user_t(int lev, 

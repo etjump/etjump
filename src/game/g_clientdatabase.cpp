@@ -77,6 +77,15 @@ void ClientDatabase::setHardwareID(int clientNum, string hardware_id) {
     clients_[clientNum].hardware_id = hardware_id;
 }
 
+void ClientDatabase::setGreeting(int clientNum, string greeting) {
+    if(clientNum < 0 || clientNum > MAX_CLIENTS) {
+        return;
+    }
+
+    setActive(clientNum);
+    clients_[clientNum].greeting = greeting;
+}
+
 void ClientDatabase::setActive(int clientNum) {
     if(clientNum < 0 || clientNum > MAX_CLIENTS) {
         return;
@@ -141,6 +150,14 @@ string ClientDatabase::hardwareID(int clientNum) const {
     }
 
     return clients_[clientNum].hardware_id;
+}
+
+string ClientDatabase::greeting(int clientNum) const {
+    if(clientNum < 0 || clientNum > MAX_CLIENTS) {
+        return "";
+    }
+
+    return clients_[clientNum].greeting;
 }
 
 string ClientDatabase::getAll(int clientNum) const {

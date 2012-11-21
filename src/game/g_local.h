@@ -2659,10 +2659,7 @@ void PrintClientInfo(gentity_t *ent, int clientNum);
 void PrintLevelInfo(int level);
 void ResetData(int clientNum);
 void RequestLogin(int clientNum);
-void G_WriteClientSessionAdminData( gclient_t *client );
-void G_ReadClientSessionAdminData( gclient_t *client );
-void G_InitClientSessionAdminData( gclient_t *client );
 
-void G_ReadConfig(gentity_t *ent, int skipargs);
-void G_SetLevel(gentity_t *ent, int skipargs);
+qboolean G_ReadConfig(gentity_t *ent, int skipargs);
+qboolean G_SetLevel(gentity_t *ent, int skipargs);
 #endif // G_LOCAL_H

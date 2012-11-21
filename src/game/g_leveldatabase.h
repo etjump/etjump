@@ -34,6 +34,8 @@ public:
     string getAll(int level);
 
     int levelCount() const;
+    bool levelExists(int level) const;
+    string commands(int level) const;
 
 private:
 

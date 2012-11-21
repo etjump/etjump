@@ -31,10 +31,10 @@ UserDatabase::admin_user_t::admin_user_t(int lev,
     password = pw;
 }
 
-bool UserDatabase::newUser(string guid, int level,
-                           string name, string commands,
-                           string greeting, string username,
-                           string password) 
+bool UserDatabase::newUser(string& const guid, int level,
+                           string& const name, string& const commands,
+                           string& const greeting, string& const username,
+                           string& const password) 
 {
     if(!addUser(guid, level, name, commands, greeting, username, password)) {
         return false;
@@ -63,14 +63,19 @@ bool UserDatabase::newUser(string guid, int level,
     return true;
 }
 
-bool UserDatabase::addUser(string guid, int level,
-        string name, string commands,
-        string greeting, string username,
-        string password) 
+bool UserDatabase::addUser(string& const guid, int level,
+        string& const name, string& const commands,
+        string& const greeting, string& const username,
+        string& const password) 
 {
     // No checks related to the validity of guid etc. are done here
     // except that it must be 40 chars
     if(guid.length() != 40) {
+        return false;
+    }
+
+    // Make sure user doesn't exist on datastructure
+    if(users_.find(guid) != users_.end()) {
         return false;
     }
     
@@ -80,44 +85,14 @@ bool UserDatabase::addUser(string guid, int level,
         new_user = new admin_user_t(level, name, commands, 
             greeting, username, password);
     } catch(...) {
+        LogPrintln("USER DATABASE ERROR: Failed to allocate memory for a user");
         return false;
     }
 
-    if(users_.insert(std::make_pair(guid, new_user)).second == false) {
-        LogPrintln("User " + new_user->name + " exists.");
-        delete new_user;
-        return false;
-    }
+    users_.insert(std::make_pair(guid, new_user));        
 
     return true;
 
-}
-
-bool UserDatabase::updateUser(string guid, int level, string name,
-                              string commands, string greeting,
-                              string username, string password)
-{
-    try {
-        sqlite3pp::command cmd(db_, "UPDATE users SET guid='?1',\
-                                    level='?2',\
-                                    name='?3',\
-                                    commands='?4',\
-                                    greeting='?5',\
-                                    username='?6',\
-                                    password='?7';");
-        cmd.bind(1, guid.c_str());
-        cmd.bind(2, level);
-        cmd.bind(3, name.c_str());
-        cmd.bind(4, commands.c_str());
-        cmd.bind(5, greeting.c_str());
-        cmd.bind(6, username.c_str());
-        cmd.bind(7, password.c_str());
-        cmd.execute();
-    } catch( sqlite3pp::database_error& e ) {
-        LogPrintln("ERROR: " + string(e.what()));
-        return false;
-    }
-    return true;
 }
 
 bool UserDatabase::userExists(const string& guid) const {
@@ -127,7 +102,7 @@ bool UserDatabase::userExists(const string& guid) const {
     return false;
 }
 
-void UserDatabase::getUser(const string& guid, int& level, string& name, string& commands,
+bool UserDatabase::getUser(const string& guid, int& level, string& name, string& commands,
                            string& greeting, string& username, string& password) 
 {
     map<string, admin_user_t*>::iterator it;
@@ -135,7 +110,7 @@ void UserDatabase::getUser(const string& guid, int& level, string& name, string&
 
     // Should never happen
     if(it == users_.end()) {
-        return;
+        return false;
     }
 
     level = it->second->level;
@@ -202,7 +177,7 @@ bool UserDatabase::readConfig() {
         }
     } catch( sqlite3pp::database_error& e ) {
         clearDatabase();
-        LogPrintln("ERROR: " + string(e.what()));
+        LogPrintln("DATABASE ERROR: " + string(e.what()));
         return false;
     }
 
@@ -211,4 +186,31 @@ bool UserDatabase::readConfig() {
 
 int UserDatabase::userCount() const {
     return users_.size();
+}
+
+// Used for setlevel
+bool UserDatabase::updateUser(const string& guid, int level, const string& name) {
+
+    // Let's not add a user to DB if guid != 40 chars long
+    if(guid.length() != 40) {
+        return false;
+    }
+
+    map<string, admin_user_t*>::iterator it = users_.find(guid);
+
+    if(it != users_.end()) {
+        it->second->name = name;
+        it->second->level = level;
+
+        sqlite3pp::command cmd(db_, "UPDATE users WHERE guid='?1' SET name='?2', level='?3';");
+        cmd.bind(1, guid.c_str());
+        cmd.bind(2, name.c_str());
+        cmd.bind(3, level);
+        cmd.execute();
+
+        return true;
+    }
+
+    return false;
+
 }

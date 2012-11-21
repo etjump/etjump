@@ -24,6 +24,7 @@ public:
     void setPassword(int clientNum, string password);
     void setCommands(int clientNum, string commands);
     void setHardwareID(int clientNum, string hardware_id);
+    void setGreeting(int clientNum, string greeting);
     void setActive(int clientNum);
     void setInactive(int clientNum);
 
@@ -33,6 +34,7 @@ public:
     string password(int clientNum) const;
     string commands(int clientNum) const;
     string hardwareID(int clientNum) const;
+    string greeting(int clientNum) const;
 
     string getAll(int clientNum) const;
 
@@ -46,6 +48,7 @@ private:
         string password;
         string commands;
         string hardware_id;
+        string greeting;
         bool active_client;
     };
 

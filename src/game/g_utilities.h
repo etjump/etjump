@@ -16,5 +16,14 @@ bool string2int(const string& s, int& i);
 void LogPrint(string msg);
 void LogPrintln(string msg);
 gentity_t *playerFromName(const string& name, string& error);
+void ChatPrintTo(gentity_t *ent, const string& message);
+void ChatPrintAll(const string& message);
+void CPMPrintTo(gentity_t *ent, const string& message);
+void CPMPrintAll(const string& message);
+void CPPrintTo(gentity_t *ent, const string& message);
+void CPPrintAll(const string& message);
+void PrintTo(gentity_t *ent, const string& message);
+void PrintAll(const string& message);
+vector<string> GetSayArgs();
 
 #endif

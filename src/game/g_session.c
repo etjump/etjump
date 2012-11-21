@@ -445,7 +445,6 @@ void G_WriteSessionData( qboolean restart ) {
 	for(i=0; i<level.numConnectedClients; i++ ) {
 		if(level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED) {
 			G_WriteClientSessionData(&level.clients[level.sortedClients[i]], restart);
-            G_WriteClientSessionAdminData(&level.clients[level.sortedClients[i]]);
 		// For slow connecters and a short warmup
 		} else if(level.fResetStats) {
 			G_deleteStats(level.sortedClients[i]);
