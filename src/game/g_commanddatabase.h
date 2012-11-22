@@ -21,7 +21,7 @@ class CommandDatabase {
 public:
     CommandDatabase();
     ~CommandDatabase();
-    AdminCommand *Command(const string& keyword);
+    AdminCommand *Command(string keyword);
     
 private:
 };

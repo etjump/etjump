@@ -5,6 +5,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
+#include "g_admin.h"
 
 #include "../game/be_aas.h"
 
@@ -2660,6 +2661,14 @@ void PrintLevelInfo(int level);
 void ResetData(int clientNum);
 void RequestLogin(int clientNum);
 
+void G_ClientBegin(gentity_t *ent);
+void G_ClientConnect(gentity_t *ent, qboolean firstTime);
+void G_ClientDisconnect(gentity_t *ent);
+
+qboolean G_HasPermissionC(gentity_t *ent, char flag);
+qboolean G_CommandCheck(gentity_t *ent);
+qboolean G_AdminTest(gentity_t *ent, int skipargs);
+qboolean G_Finger(gentity_t *ent, int skipargs);
 qboolean G_ReadConfig(gentity_t *ent, int skipargs);
 qboolean G_SetLevel(gentity_t *ent, int skipargs);
 #endif // G_LOCAL_H

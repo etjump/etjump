@@ -31,10 +31,10 @@ UserDatabase::admin_user_t::admin_user_t(int lev,
     password = pw;
 }
 
-bool UserDatabase::newUser(string& const guid, int level,
-                           string& const name, string& const commands,
-                           string& const greeting, string& const username,
-                           string& const password) 
+bool UserDatabase::newUser(const string& guid, int level,
+                           const string& name, const string& commands,
+                           const string& greeting, const string& username,
+                           const string& password) 
 {
     if(!addUser(guid, level, name, commands, greeting, username, password)) {
         return false;
@@ -63,10 +63,10 @@ bool UserDatabase::newUser(string& const guid, int level,
     return true;
 }
 
-bool UserDatabase::addUser(string& const guid, int level,
-        string& const name, string& const commands,
-        string& const greeting, string& const username,
-        string& const password) 
+bool UserDatabase::addUser(const string& guid, int level,
+        const string& name, const string& commands,
+        const string& greeting, const string& username,
+        const string& password) 
 {
     // No checks related to the validity of guid etc. are done here
     // except that it must be 40 chars
@@ -119,6 +119,7 @@ bool UserDatabase::getUser(const string& guid, int& level, string& name, string&
     greeting = it->second->greeting;
     username = it->second->username;
     password = it->second->password;
+    return true;
 }
 
 void UserDatabase::clearDatabase() {
@@ -166,9 +167,8 @@ bool UserDatabase::readConfig() {
         for(sqlite3pp::query::iterator it = query.begin();
             it != query.end(); it++) 
         {
-
             (*it).getter() >> guid >> level >> name >> commands >> greeting >> username >> password;
-
+            
             if(!addUser(guid, level, name, commands, greeting, username, password)) {
                 LogPrintln("WARNING: failed to add a user.");
                 continue;
@@ -198,17 +198,22 @@ bool UserDatabase::updateUser(const string& guid, int level, const string& name)
 
     map<string, admin_user_t*>::iterator it = users_.find(guid);
 
-    if(it != users_.end()) {
-        it->second->name = name;
-        it->second->level = level;
+    try {
 
-        sqlite3pp::command cmd(db_, "UPDATE users WHERE guid='?1' SET name='?2', level='?3';");
-        cmd.bind(1, guid.c_str());
-        cmd.bind(2, name.c_str());
-        cmd.bind(3, level);
-        cmd.execute();
+        if(it != users_.end()) {
+            it->second->name = name;
+            it->second->level = level;
 
-        return true;
+            sqlite3pp::command cmd(db_, string("UPDATE users SET name='"+name+"', level='"+int2string(level)+"' WHERE guid='"+guid+"';").c_str());
+            
+            cmd.execute();
+
+            return true;
+        }
+
+    } catch( sqlite3pp::database_error& e ) {
+        LogPrintln("DATABASE ERROR: " + string(e.what()));
+        return false;
     }
 
     return false;

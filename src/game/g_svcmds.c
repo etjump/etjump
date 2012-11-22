@@ -1088,6 +1088,10 @@ qboolean	ConsoleCommand( void ) {
 		return qfalse;
 	}
 
+    if (G_CommandCheck(NULL)) {
+        return qtrue;
+    }
+
     if(!Q_stricmp(cmd, "ipmutes")) {
         G_ListIPMutes();
         return qfalse;

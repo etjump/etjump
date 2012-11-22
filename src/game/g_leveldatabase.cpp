@@ -366,3 +366,11 @@ string LevelDatabase::commands(int level) const {
     }
     return "";
 }
+
+string LevelDatabase::name(int level) const {
+    map<int, admin_level_t*>::const_iterator it = levels_.find(level);
+    if(it != levels_.end()) {
+        return it->second->name;
+    }
+    return "";
+}

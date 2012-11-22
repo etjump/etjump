@@ -1620,7 +1620,6 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		client->sess.sessionTeam = TEAM_SPECTATOR;
 		client->sess.spectatorState = SPECTATOR_FREE;
 		client->sess.spectatorClient = 0;
-        ResetData(clientNum);
 
 		// unlink the entity - just in case they were already connected
 		trap_UnlinkEntity( ent );
@@ -1654,6 +1653,8 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
     if( G_isIPMuted( value ) ) {
         ent->client->sess.muted = qtrue;
     }  
+
+    G_ClientConnect(ent, firstTime);
 
 	return NULL;
 }
@@ -1736,6 +1737,8 @@ void ClientBegin( int clientNum )
 
 	// No surface determined yet.	
 	ent->surfaceFlags = 0;
+
+    G_ClientBegin(ent);
 }
 
 gentity_t *SelectSpawnPointFromList( char *list, vec3_t spawn_origin, vec3_t spawn_angles )
@@ -2260,7 +2263,7 @@ void ClientDisconnect( int clientNum ) {
 	G_verifyMatchState(i);
 	// OSP
 
-    ResetData(clientNum);
+    G_ClientDisconnect(ent);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

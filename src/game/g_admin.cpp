@@ -1,13 +1,56 @@
 #include "g_commanddatabase.h"
-#include "g_clientdatabase.h"
 #include "g_leveldatabase.h"
 #include "g_userdatabase.h"
 #include "g_utilities.h"
 
 static CommandDatabase commandDatabase;
-static ClientDatabase clientDatabase;
 static LevelDatabase levelDatabase;
 static UserDatabase userDatabase;
+
+struct Client {
+    Client();
+    int level;
+    string guid;
+    string username;
+    string password;
+    string commands;
+    string hardware_id;
+    string greeting;
+    string name;
+};
+
+Client::Client() {
+    level = 0;
+}
+
+static Client clients[MAX_CLIENTS];
+
+void ResetData(int clientNum) {
+    if(clientNum < 0 || clientNum >= MAX_CLIENTS) {
+        return;
+    }
+
+    clients[clientNum].guid.clear();
+    clients[clientNum].commands.clear();
+    clients[clientNum].hardware_id.clear();
+    clients[clientNum].level = 0;
+    clients[clientNum].password.clear();
+    clients[clientNum].username.clear();
+}
+
+void G_ClientBegin(gentity_t *ent) {
+
+}
+
+void G_ClientConnect(gentity_t *ent, qboolean firstTime) {
+    if(firstTime) {
+        ResetData(ent->client->ps.clientNum);
+    }
+}
+
+void G_ClientDisconnect(gentity_t *ent) {
+    ResetData(ent->client->ps.clientNum);
+}
 
 void RequestLogin(int clientNum) {
     trap_SendServerCommand(clientNum, "login_request");
@@ -31,29 +74,29 @@ void GuidReceived(gentity_t *ent) {
         return;
     }
 
-    string guid = G_SHA1(argv.at(1));
-    
-    if(guid.length() != 40) {
+    if(argv.at(1).length() != 40) {
         RequestGuid(ent->client->ps.clientNum);
         return;
     }
-    
-    clientDatabase.setGuid(ent->client->ps.clientNum, guid);
 
-    int level;
+    string guid = G_SHA1(argv.at(1));
+    
+    clients[ent->client->ps.clientNum].guid = guid;
+
+    int level = 0;
     string name, commands, greeting, username, password;
     // Get user info from database
     if(!userDatabase.getUser(guid, level, name, commands, greeting, username, password)) {
         // If fails, add the user
-        userDatabase.newUser(guid, 0, string(ent->client->pers.netname), string(""), string(""), string(""), string(""));
+        string s;
+        userDatabase.newUser(guid, 0, string(ent->client->pers.netname), s, s, s, s);
         return;
     } 
     
-    clientDatabase.setLevel(ent->client->ps.clientNum, level);
-    clientDatabase.setCommands(ent->client->ps.clientNum, commands);
-    clientDatabase.setGreeting(ent->client->ps.clientNum, greeting);
-    
-
+    clients[ent->client->ps.clientNum].level = level;
+    clients[ent->client->ps.clientNum].commands = commands;
+    clients[ent->client->ps.clientNum].greeting = greeting;
+    clients[ent->client->ps.clientNum].name = name;
 }
 
 void AdminLogin(gentity_t *ent) {
@@ -72,27 +115,59 @@ void AdminLogin(gentity_t *ent) {
     string username = argv.at(1);
     string password = G_SHA1(argv.at(2));
 
-    clientDatabase.setUsername(ent->client->ps.clientNum, username);
-    clientDatabase.setPassword(ent->client->ps.clientNum, password);
+    clients[ent->client->ps.clientNum].username = username;
+    clients[ent->client->ps.clientNum].password = password;
 }
 
 void PrintClientInfo(gentity_t *ent, int clientNum) {
-    LogPrintln(clientDatabase.getAll(clientNum));
+    LogPrintln(string("---------------------------------------------------\n") + 
+           string("- Client \n") +
+           string("---------------------------------------------------\n") +
+           string("\n- NAME: ") + clients[clientNum].name +
+           string("\n- GUID: ") + clients[clientNum].guid + 
+           string("\n- USER: ") + clients[clientNum].username + 
+           string("\n- PASS: ") + clients[clientNum].password +
+           string("\n- CMDS: ") + clients[clientNum].commands +
+           string("\n- HWID: ") + clients[clientNum].hardware_id +
+           string("\n---------------------------------------------------\n"));
 }
 
 void PrintLevelInfo(int level) {
     LogPrintln(levelDatabase.getAll(level));
 }
 
-void ResetData(int clientNum) {
-    clientDatabase.ResetData(clientNum);
+bool isTargetHigher(gentity_t *ent, gentity_t *target, bool equalIsHigher) {
+    if(!ent) {
+        return false;
+    }
+
+    if(equalIsHigher) {
+        if(clients[target->client->ps.clientNum].level >= clients[ent->client->ps.clientNum].level) {
+            return true;
+        }
+    }
+
+    else {
+        if(clients[target->client->ps.clientNum].level > clients[ent->client->ps.clientNum].level) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool G_HasPermission(gentity_t *ent, char flag) {
-    int clientNum = ent->client->ps.clientNum;
-    int level = clientDatabase.level(clientNum);
 
-    string personal_commands = clientDatabase.commands(clientNum);
+    if(*g_admin.string) {
+        return false;
+    }
+
+    if(!ent) {
+        return true;
+    }
+
+    int level = clients[ent->client->ps.clientNum].level;
+
+    string personal_commands = clients[ent->client->ps.clientNum].commands;
     string commands = levelDatabase.commands(level);
 
     string::size_type flag_pos = personal_commands.find(flag);
@@ -156,6 +231,13 @@ bool G_HasPermission(gentity_t *ent, char flag) {
     return false;
 }
 
+qboolean G_HasPermissionC(gentity_t *ent, char flag) {
+    if(G_HasPermission(ent, flag)) {
+        return qtrue;
+    }
+    return qfalse;
+}
+
 qboolean G_CommandCheck(gentity_t *ent) {
 
     // Let's not do anything if admin system is off
@@ -164,7 +246,7 @@ qboolean G_CommandCheck(gentity_t *ent) {
     }
 
     vector<string> argv = GetSayArgs();
-    int skipargs;
+    int skipargs = 0;
 
     if(argv.size() <= 0) {
         return qfalse;
@@ -175,7 +257,7 @@ qboolean G_CommandCheck(gentity_t *ent) {
         skipargs = 1;
     }
 
-    if(argv.size() < 2) {
+    if(argv.size() < 1 + skipargs) {
         return qfalse;
     }
 
@@ -193,27 +275,33 @@ qboolean G_CommandCheck(gentity_t *ent) {
 
     string keyword;
     // Remove the ! from the command
-    if(argv[1][0] == '!') {
-        keyword = argv[1].substr(1);
+    if(argv[0+skipargs][0] == '!') {
+        keyword = argv[0+skipargs].substr(1);
     } 
 
     else if(!ent) {
-        keyword = argv[1];
+        keyword = argv[0+skipargs];
     }
 
     else {
         return qfalse;
     }
+
     // Find the command
     AdminCommand *command = commandDatabase.Command(keyword);
 
     if(!command) {
         return qfalse;
     }
-
-    if(!G_HasPermission(ent, command->flag)) {
-        return qfalse;
+    
+    if(ent) {
+        if(!G_HasPermission(ent, command->flag)) {
+            ChatPrintTo(ent, "^3!" + command->keyword + ":^7 permission denied.");
+            return qfalse;
+        }
     }
+
+    command->handler(ent, skipargs);
 
     return qtrue;
 }
@@ -242,14 +330,14 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
     string error_msg;
     gentity_t *target = 0;
 
-    if(argv.size() != 3) {
+    if(argv.size() != 3 + skipargs) {
         ChatPrintTo(ent, "^3usage: ^7!setlevel <target> <level>");
         return qfalse;
     }
 
     int level = -1;
 
-    if(!string2int(argv.at(2), level)) {
+    if(!string2int(argv.at(2 + skipargs), level)) {
         ChatPrintTo(ent, string("^3!setlevel:^7 invalid number " + argv.at(2)).c_str());
         return qfalse;
     }
@@ -259,10 +347,21 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
         return qfalse;
     }
 
-    target = playerFromName(argv.at(1), error_msg);
+    if(ent) {
+        if(level > clients[ent->client->ps.clientNum].level) {
+            ChatPrintTo(ent, "^3!setlevel:^7 you may not setlevel higher than your current level");
+            return qfalse;
+        }
+    }
+
+    target = playerFromName(argv.at(1 + skipargs), error_msg);
 
     if(!target) {
         ChatPrintTo(ent, "^3!setlevel:^7 " + error_msg);
+        return qfalse;
+    }
+
+    if(isTargetHigher(ent, target, false)) {
         return qfalse;
     }
 
@@ -280,7 +379,7 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
     // if g_adminLoginType is set to 3
     // guids, username and passwords are used for authentication.
 
-    string guid = clientDatabase.guid(target->client->ps.clientNum);
+    string guid = clients[target->client->ps.clientNum].guid;
 
     // if user does not have a guid let's request it.
     // by the time of re-setlevel server should already
@@ -292,5 +391,46 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
         return qfalse;
     }
 
-    
+    clients[target->client->ps.clientNum].level = level;
+    clients[target->client->ps.clientNum].name = target->client->pers.netname;
+    ChatPrintTo(ent, "^3!setlevel:^7 " + string(target->client->pers.netname)
+        + "^7 is now a level " + int2string(level) + " user.");
+
+    userDatabase.updateUser(guid, level, string(target->client->pers.netname));
+
+    return qtrue;
+}
+
+qboolean G_AdminTest(gentity_t *ent, int skipargs) {
+    if(!ent) {
+        return qtrue;
+    }
+    ChatPrintAll("^3admintest: ^7" + 
+        string(ent->client->pers.netname) + 
+        " ^7is a level " + 
+        int2string(clients[ent->client->ps.clientNum].level) + 
+        " user ("
+        + levelDatabase.name(clients[ent->client->ps.clientNum].level) + ")");
+    return qtrue;
+}
+
+qboolean G_Finger(gentity_t *ent, int skipargs) {
+    vector<string> argv = GetSayArgs();
+
+    // !Finger name
+    if(argv.size() != 2 + skipargs) {
+        ChatPrintTo(ent, "^3usage: ^7!finger <name>");
+        return qfalse;
+    }
+
+    string error;
+    gentity_t *target = playerFromName(argv.at(1 + skipargs), error);
+
+    if(!target) {
+        ChatPrintTo(ent, "^3!finger: ^7" + error);
+        return qfalse;
+    }
+
+    string level_name = levelDatabase.name(clients[target->client->ps.clientNum].level);
+    ChatPrintAll("^3finger:^7 "+string(target->client->pers.netname)+" ^7("+clients[target->client->ps.clientNum].name+"^7) is a level "+int2string(clients[target->client->ps.clientNum].level)+" user ("+level_name+"^7)");
 }

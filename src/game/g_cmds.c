@@ -1619,6 +1619,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
 		}
 	}
+    G_CommandCheck(ent);
 }
 
 
@@ -4193,11 +4194,6 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
-    if(!Q_stricmp(cmd, "add")) {
-        G_SetLevel(ent, 0);
-        return;
-    }
-
 	// regular anytime commands
 	for (i = 0 ; i < sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0]) ; i++)
 		if (!Q_stricmp(cmd, anyTimeCommands[i].cmd))
@@ -4229,7 +4225,7 @@ void ClientCommand(int clientNum)
 	}
 
 	// regular no intermission commands
-	for (i = 0 ; i < sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0]) ; i++)
+	for (i = 0 ; i < sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0]) ; i++) {
 		if (!Q_stricmp(cmd, noIntermissionCommands[i].cmd))
 		{
 			if (noIntermissionCommands[i].floodProtected && ClientIsFlooding(ent))
@@ -4238,8 +4234,13 @@ void ClientCommand(int clientNum)
 				noIntermissionCommands[i].function(ent);
 			return;
 		}
-
+    }
+    
 	if(G_commandCheck(ent, cmd, qtrue)) return;
+
+    if(G_HasPermissionC(ent, AF_SILENTCOMMANDS)) {
+        if(G_CommandCheck(ent)) return;
+    }
 
 	PrintTo(ent, va("Unknown command %s^7.", cmd));
 }

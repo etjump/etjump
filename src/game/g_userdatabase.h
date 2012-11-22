@@ -14,10 +14,10 @@ public:
     UserDatabase();
     ~UserDatabase();
     // For adding a new user to database + to users_ -map
-    bool newUser(string& const guid, int level,
-        string& const name, string& const commands,
-        string& const greeting, string& const username,
-        string& const password);
+    bool newUser(const string& guid, int level,
+        const string& name, const string& commands,
+        const string& greeting, const string& username,
+        const string& password);
     bool readConfig();
     int userCount() const;
     bool userExists(const string& guid) const;
@@ -27,10 +27,10 @@ public:
 private:
     void clearDatabase();
     // Used to add a user to the users_ datastructure
-    bool addUser(string& const guid, int level,
-        string& const name, string& const commands,
-        string& const greeting, string& const username,
-        string& const password);
+    bool addUser(const string& guid, int level,
+        const string& name, const string& commands,
+        const string& greeting, const string& username,
+        const string& password);
     struct admin_user_t { 
         // Great names here.. 
         admin_user_t(int lev, 

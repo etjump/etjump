@@ -36,6 +36,7 @@ public:
     int levelCount() const;
     bool levelExists(int level) const;
     string commands(int level) const;
+    string name(int level) const;
 
 private:
 
