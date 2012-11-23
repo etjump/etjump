@@ -1,10 +1,10 @@
-extern "C" {
-#include "g_local.h"
-}
-
 #include <sstream>
 #include <vector>
 #include <string>
+
+extern "C" {
+#include "g_local.h"
+}
 
 using std::vector;
 using std::string;

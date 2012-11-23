@@ -1424,7 +1424,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			    client->sess.lastNameChangeTime = level.time;
 			    G_refPrintf(ent, "^3WARNING: ^7You have %d name changes left.", (g_nameChangeLimit.integer - client->sess.nameChangeCount));
 			    if(5 - client->sess.nameChangeCount == 0)
-				    PrintTo(ent, "^3WARNING: ^7You must wait atleast 1 minute to rename again.");
+				    G_refPrintf(ent, "^3WARNING: ^7You must wait atleast 1 minute to rename again.");
 			    if(client->sess.nameChangeCount > g_nameChangeLimit.integer) {
 				    trap_DropClient(client->ps.clientNum, "you were kicked for spamming rename.", 0);
 			    }

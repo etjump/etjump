@@ -37,6 +37,7 @@ public:
     bool levelExists(int level) const;
     string commands(int level) const;
     string name(int level) const;
+    string greeting(int level) const;
 
 private:
 

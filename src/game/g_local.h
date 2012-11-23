@@ -2641,15 +2641,6 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 #define BANNER_CPM 3
 #define DEFAULT_BANNER_TIME 60000
 
-void ChatPrintTo(gentity_t *ent, const char *message);
-void ChatPrintAll(const char *message);
-void CPMPrintTo(gentity_t *ent, const char *message);
-void CPMPrintAll(const char *message);
-void CPPrintTo(gentity_t *ent, const char *message);
-void CPPrintAll(const char *message);
-void PrintTo(gentity_t *ent, char *message);
-void PrintAll(const char *message);
-
 void GuidReceived(gentity_t *ent);
 void AdminLogin(gentity_t *ent);
 void PrintClientInfo(gentity_t *ent, int clientNum);

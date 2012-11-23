@@ -1,8 +1,8 @@
-#include "g_leveldatabase.h"
-#include "g_utilities.h"
-
 #include <fstream>
 #include <sstream>
+
+#include "g_leveldatabase.h"
+#include "g_utilities.h"
 
 extern "C" {
 #include "g_local.h"
@@ -371,6 +371,14 @@ string LevelDatabase::name(int level) const {
     map<int, admin_level_t*>::const_iterator it = levels_.find(level);
     if(it != levels_.end()) {
         return it->second->name;
+    }
+    return "";
+}
+
+string LevelDatabase::greeting(int level) const {
+    map<int, admin_level_t*>::const_iterator it = levels_.find(level);
+    if(it != levels_.end()) {
+        return it->second->greeting;
     }
     return "";
 }

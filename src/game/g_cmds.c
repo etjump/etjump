@@ -1976,8 +1976,8 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 	}
 
 	if( ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
-		PrintTo(ent, "^3callvote: ^7you are not allowed to call a vote as a spectator");
-		return qfalse;
+        CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator\n\"");
+        return qfalse;
 	}
 
 	if( ent && ent->client->sess.muted && g_mute.integer & 2) {
@@ -2055,7 +2055,7 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 	}
 
 	if(level.time - ent->client->lastVoteTime < 1000 * g_voteCooldown.integer) {
-		ChatPrintTo(ent, va("^3callvote:^7 you must wait %d more seconds to vote again", 
+		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again\n\"", 
 			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000) ));
 		return qfalse;
 	}
@@ -4242,7 +4242,7 @@ void ClientCommand(int clientNum)
         if(G_CommandCheck(ent)) return;
     }
 
-	PrintTo(ent, va("Unknown command %s^7.", cmd));
+	CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }
 
 // A replacement for trap_Argc() that can correctly handle

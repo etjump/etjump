@@ -1,8 +1,9 @@
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+
 #include "g_leveldatabase.h"
 #include "g_userdatabase.h"
 #include "g_utilities.h"
-
-#include <algorithm>
 
 using std::vector;
 using std::string;
@@ -60,6 +61,7 @@ struct Client {
     string hardware_id;
     string greeting;
     string name;
+    bool need_greeting;
 };
 
 Client::Client() {
@@ -79,10 +81,11 @@ void ResetData(int clientNum) {
     clients[clientNum].level = 0;
     clients[clientNum].password.clear();
     clients[clientNum].username.clear();
+    clients[clientNum].need_greeting = true;
 }
 
 void G_ClientBegin(gentity_t *ent) {
-
+    
 }
 
 void G_ClientConnect(gentity_t *ent, qboolean firstTime) {
@@ -101,6 +104,25 @@ void RequestLogin(int clientNum) {
 
 void RequestGuid(int clientNum) {
     trap_SendServerCommand(clientNum, "guid_request");
+}
+
+void G_PrintGreeting(gentity_t *ent) {
+    if(clients[ent->client->ps.clientNum].need_greeting) {
+
+        string to_print;
+
+        if(clients[ent->client->ps.clientNum].greeting.length() > 0) {
+            to_print = clients[ent->client->ps.clientNum].greeting;
+        } else if(levelDatabase.greeting(clients[ent->client->ps.clientNum].level).length() > 0) {
+            to_print = levelDatabase.greeting(clients[ent->client->ps.clientNum].level);
+        } 
+
+        if(to_print.length() > 0) {
+            boost::replace_all(to_print, "[n]", string("^7") + ent->client->pers.netname + string("^7"));
+            ChatPrintAll(to_print);
+        }
+    }
+    clients[ent->client->ps.clientNum].need_greeting = false;
 }
 
 void GuidReceived(gentity_t *ent) {
@@ -140,6 +162,8 @@ void GuidReceived(gentity_t *ent) {
     clients[ent->client->ps.clientNum].commands = commands;
     clients[ent->client->ps.clientNum].greeting = greeting;
     clients[ent->client->ps.clientNum].name = name;
+
+    G_PrintGreeting(ent);
 }
 
 void AdminLogin(gentity_t *ent) {

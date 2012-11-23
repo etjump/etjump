@@ -1480,7 +1480,7 @@ void target_save_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 		activator->client->sess.allies_save_pos->isValid = qtrue;
 	}
 
-	CPPrintTo(activator, g_savemsg.string);
+    trap_SendServerCommand(activator-g_entities, g_savemsg.string);
 }
 
 void SP_target_save( gentity_t *self )
@@ -1503,7 +1503,7 @@ void target_remove_portals_use( gentity_t *self, gentity_t *other, gentity_t *ac
 		activator->portal_red = NULL;
 	}
 
-	CPPrintTo(activator, "^7Your portal gun portals have been reseted.");
+    trap_SendServerCommand(activator-g_entities, "cp \"^7Your portal gun portals have been reseted.\n\"");	
 }
 
 void SP_target_remove_portals( gentity_t *self ) {
