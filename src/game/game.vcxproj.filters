@@ -213,9 +213,6 @@
     <ClCompile Include="..\sqlite\sqlite3pp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_commanddatabase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -344,9 +341,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\sqlite\sqlite3pp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_commanddatabase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_admin.h">

@@ -1057,11 +1057,6 @@ qboolean	ConsoleCommand( void ) {
         PrintLevelInfo(level);
     }
 
-    if(!Q_stricmp(cmd, "readconfig")) {
-        G_ReadConfig(0, 0);
-    }
-
-
 // START - Mad Doc - TDF
 	if (Q_stricmp (cmd, "revive") == 0)
 	{

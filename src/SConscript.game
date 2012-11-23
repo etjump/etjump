@@ -60,9 +60,9 @@ game/g_weapon.c
 game/q_math.c
 game/q_shared.c
 game/g_admin.cpp
-game/g_clientdatabase.cpp
 game/g_leveldatabase.cpp
 game/g_userdatabase.cpp
+game/g_utilities.cpp
 sha-1/bg_sha.c
 sha-1/sha1.c
 ''')

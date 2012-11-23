@@ -2650,10 +2650,6 @@ void CPPrintAll(const char *message);
 void PrintTo(gentity_t *ent, char *message);
 void PrintAll(const char *message);
 
-#ifdef BETATEST
-qboolean G_admin_report_bug( gentity_t *ent, int skiparg );
-#endif
-
 void GuidReceived(gentity_t *ent);
 void AdminLogin(gentity_t *ent);
 void PrintClientInfo(gentity_t *ent, int clientNum);
@@ -2667,8 +2663,10 @@ void G_ClientDisconnect(gentity_t *ent);
 
 qboolean G_HasPermissionC(gentity_t *ent, char flag);
 qboolean G_CommandCheck(gentity_t *ent);
-qboolean G_AdminTest(gentity_t *ent, int skipargs);
-qboolean G_Finger(gentity_t *ent, int skipargs);
-qboolean G_ReadConfig(gentity_t *ent, int skipargs);
-qboolean G_SetLevel(gentity_t *ent, int skipargs);
+qboolean G_AdminTest(gentity_t *ent, unsigned skipargs);
+qboolean G_Finger(gentity_t *ent, unsigned skipargs);
+qboolean G_Help(gentity_t *ent, unsigned skipargs);
+qboolean G_Kick(gentity_t *ent, unsigned skipargs);
+qboolean G_ReadConfig(gentity_t *ent, unsigned skipargs);
+qboolean G_SetLevel(gentity_t *ent, unsigned skipargs);
 #endif // G_LOCAL_H

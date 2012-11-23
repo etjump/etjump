@@ -1437,32 +1437,3 @@ void PrintAll(const char *message) {
 	AP(va("print \"%s\n\"", message));
 	G_Printf("%s\n", message);
 }
-
-void beginBufferPrint() {
-	bigTextBuffer[0] = '\0';
-}
-
-void finishBufferPrint(gentity_t *ent) {
-	PrintTo(ent, bigTextBuffer);
-}
-
-void bufferPrint(gentity_t *ent, char *string) {
-	if(!ent) {
-		char string2[MAX_STRING_CHARS];
-		DecolorString(string, string2);
-
-		if(strlen(string2) + strlen(bigTextBuffer) > 239) {
-			CP(va("print \"%s\"", bigTextBuffer));
-		//	PrintTo(ent, bigTextBuffer);
-			bigTextBuffer[0] = '\0';
-		}
-		Q_strcat(bigTextBuffer, sizeof(bigTextBuffer), string2);
-	} else {
-		if(strlen(string) + strlen(bigTextBuffer) >= 1009) {
-			CP(va("print \"%s\"", bigTextBuffer));
-			// PrintTo(ent, bigTextBuffer);
-			bigTextBuffer[0] = '\0';
-		}
-		Q_strcat(bigTextBuffer, sizeof(bigTextBuffer), string);
-	}
-}

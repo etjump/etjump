@@ -178,7 +178,6 @@
     <ClCompile Include="g_cmds.c" />
     <ClCompile Include="g_cmds_ext.c" />
     <ClCompile Include="g_combat.c" />
-    <ClCompile Include="g_commanddatabase.cpp" />
     <ClCompile Include="g_fireteams.c" />
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_leveldatabase.cpp" />
@@ -246,7 +245,6 @@
     <ClInclude Include="botlib.h" />
     <ClInclude Include="..\botai\chars.h" />
     <ClInclude Include="g_admin.h" />
-    <ClInclude Include="g_commanddatabase.h" />
     <ClInclude Include="g_leveldatabase.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_public.h" />

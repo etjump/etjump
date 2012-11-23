@@ -155,3 +155,37 @@ gentity_t *playerFromName(const string& name, string& error) {
     return (g_entities + pids[0]);
 }
 
+namespace utilities {
+
+    static string bigTextBuffer;
+
+}
+
+void beginBufferPrint() {
+    utilities::bigTextBuffer.clear();
+}
+
+void finishBufferPrint(gentity_t *ent) {
+    PrintTo(ent, utilities::bigTextBuffer);
+}
+
+void bufferPrint(gentity_t *ent, const string& msg) {
+
+    if(!ent) {
+
+        if(msg.length() + utilities::bigTextBuffer.length() > 239) {
+            G_Printf("%s", utilities::bigTextBuffer.c_str());
+            utilities::bigTextBuffer.clear();
+        }
+        utilities::bigTextBuffer += msg;
+    }
+
+    else {
+        if(msg.length() + utilities::bigTextBuffer.length() >= 1009) {
+            CP( string("print \""+utilities::bigTextBuffer+"\"").c_str() );
+            utilities::bigTextBuffer.clear();
+        }
+        utilities::bigTextBuffer+=msg;
+    }
+
+}

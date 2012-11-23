@@ -1,11 +1,54 @@
-#include "g_commanddatabase.h"
 #include "g_leveldatabase.h"
 #include "g_userdatabase.h"
 #include "g_utilities.h"
 
-static CommandDatabase commandDatabase;
+#include <algorithm>
+
+using std::vector;
+using std::string;
+
 static LevelDatabase levelDatabase;
 static UserDatabase userDatabase;
+
+struct AdminCommand {
+        string keyword;
+        qboolean (*handler)(gentity_t *ent, unsigned skipargs);
+        char flag;
+        string function;
+        string syntax;
+};
+
+static AdminCommand Commands[] = {
+    {"admintest",		G_AdminTest,		'a',	"Displays your current admin level.", "!admintest"},
+    {"finger",			G_Finger,			'f',	"Displays target's admin level.", "!finger <target>"},
+    {"help",		    G_Help,			'h',	"Prints useful information about commands.", "!help <command>"},
+    {"kick",			G_Kick,			'k',	"Kicks target.", "!kick <player> <time> <reason>"},
+    {"listcmds",		G_Help,			'h',	"Prints useful information about commands.", "!help <command>"},
+    {"readconfig",		G_ReadConfig,		'G',	"Reads admin config.", "!readconfig"},
+    {"setlevel",		G_SetLevel,		's',	"Sets target level.", "!setlevel <target> <level>"},
+    {"", 0, 0, "", ""}
+};
+
+AdminCommand *MatchCommand(string keyword) {
+    int matchcount = 0;
+    AdminCommand *command = 0;
+
+    std::transform(keyword.begin(), keyword.end(), keyword.begin(), ::tolower);
+
+    for(int i = 0; Commands[i].handler != 0; i++) {
+        
+        if(Commands[i].keyword.compare(0, keyword.length(), keyword) == 0) {
+            matchcount++;
+            command = &Commands[i];
+        }
+
+    }
+
+    if(matchcount == 1) {
+        return command;
+    } 
+    return 0;
+}
 
 struct Client {
     Client();
@@ -154,10 +197,22 @@ bool isTargetHigher(gentity_t *ent, gentity_t *target, bool equalIsHigher) {
     }
     return false;
 }
+qboolean G_ReadConfig(gentity_t *ent, unsigned skipargs) {
+
+    if(!*g_admin.string) {
+        return qfalse;
+    }
+
+    levelDatabase.readConfig();
+    userDatabase.readConfig();
+    ChatPrintTo(ent, "^3!readconfig:^7 loaded " + int2string(levelDatabase.levelCount()) + " levels, " + int2string(userDatabase.userCount()) + " users.");
+    return qtrue;
+}
+
 
 bool G_HasPermission(gentity_t *ent, char flag) {
 
-    if(*g_admin.string) {
+    if(!*g_admin.string) {
         return false;
     }
 
@@ -246,9 +301,9 @@ qboolean G_CommandCheck(gentity_t *ent) {
     }
 
     vector<string> argv = GetSayArgs();
-    int skipargs = 0;
+    unsigned skipargs = 0;
 
-    if(argv.size() <= 0) {
+    if(argv.size() < 1) {
         return qfalse;
     }
 
@@ -262,13 +317,17 @@ qboolean G_CommandCheck(gentity_t *ent) {
     }
 
     if(g_logCommands.integer) {
-        
+        string to_log = ConcatArgs(0+skipargs);
         if(ent) {
-
+            // name (guid): command
+            G_ALog("^7%s^7 (%s^7): %s", 
+                clients[ent->client->ps.clientNum].name.c_str(), 
+                clients[ent->client->ps.clientNum].guid.c_str(), 
+                to_log.c_str());
         }
 
         else {
-
+            G_ALog("Console: %s", to_log.c_str());
         }
 
     }
@@ -288,7 +347,7 @@ qboolean G_CommandCheck(gentity_t *ent) {
     }
 
     // Find the command
-    AdminCommand *command = commandDatabase.Command(keyword);
+    AdminCommand *command = MatchCommand(keyword);
 
     if(!command) {
         return qfalse;
@@ -296,7 +355,7 @@ qboolean G_CommandCheck(gentity_t *ent) {
     
     if(ent) {
         if(!G_HasPermission(ent, command->flag)) {
-            ChatPrintTo(ent, "^3!" + command->keyword + ":^7 permission denied.");
+            ChatPrintTo(ent, "^3" + command->keyword + ":^7 permission denied.");
             return qfalse;
         }
     }
@@ -315,12 +374,12 @@ qboolean G_ReadConfig(gentity_t *ent, int skipargs) {
 
     levelDatabase.readConfig();
     userDatabase.readConfig();
-    ChatPrintTo(ent, "Readconfig: loaded " + int2string(levelDatabase.levelCount()) + " levels, " + int2string(userDatabase.userCount()) + " users.");
+    ChatPrintTo(ent, "readconfig: loaded " + int2string(levelDatabase.levelCount()) + " levels, " + int2string(userDatabase.userCount()) + " users.");
     return qtrue;
 }
  
 // !setlevel <target> <level>
-qboolean G_SetLevel(gentity_t *ent, int skipargs) {
+qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
 
     if(!*g_admin.string) {
         return qfalse;
@@ -338,18 +397,18 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
     int level = -1;
 
     if(!string2int(argv.at(2 + skipargs), level)) {
-        ChatPrintTo(ent, string("^3!setlevel:^7 invalid number " + argv.at(2)).c_str());
+        ChatPrintTo(ent, string("^3setlevel:^7 invalid number " + argv.at(2)).c_str());
         return qfalse;
     }
 
     if(!levelDatabase.levelExists(level)) {
-        ChatPrintTo(ent, string("^3!setlevel:^7 level " + int2string(level) + " does not exist.").c_str());
+        ChatPrintTo(ent, string("^3setlevel:^7 level " + int2string(level) + " does not exist.").c_str());
         return qfalse;
     }
 
     if(ent) {
         if(level > clients[ent->client->ps.clientNum].level) {
-            ChatPrintTo(ent, "^3!setlevel:^7 you may not setlevel higher than your current level");
+            ChatPrintTo(ent, "^3setlevel:^7 you may not setlevel higher than your current level");
             return qfalse;
         }
     }
@@ -357,27 +416,13 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
     target = playerFromName(argv.at(1 + skipargs), error_msg);
 
     if(!target) {
-        ChatPrintTo(ent, "^3!setlevel:^7 " + error_msg);
+        ChatPrintTo(ent, "^3setlevel:^7 " + error_msg);
         return qfalse;
     }
 
     if(isTargetHigher(ent, target, false)) {
         return qfalse;
     }
-
-    // User should already be stored on sqlite database, so we just 
-    // need to update it.
-
-    // if g_adminLoginType is set to 1
-    // only guids are used for authentication. usernames and password
-    // are stored if possible, but not necessary
-
-    // if g_adminLoginType is set to 2
-    // only usernames + passwords are used for authentication. guids are
-    // stored but not used
-
-    // if g_adminLoginType is set to 3
-    // guids, username and passwords are used for authentication.
 
     string guid = clients[target->client->ps.clientNum].guid;
 
@@ -386,23 +431,27 @@ qboolean G_SetLevel(gentity_t *ent, int skipargs) {
     // have it
 
     if(guid.length() != 40) {
-        ChatPrintTo(ent, "^3!setlevel: ^7" + string(target->client->pers.netname) + " ^7does not have a guid. Try again.");
+        ChatPrintTo(ent, "^3setlevel: ^7" + string(target->client->pers.netname) + " ^7does not have a guid. Try again.");
         RequestGuid(target->client->ps.clientNum);
         return qfalse;
     }
 
     clients[target->client->ps.clientNum].level = level;
     clients[target->client->ps.clientNum].name = target->client->pers.netname;
-    ChatPrintTo(ent, "^3!setlevel:^7 " + string(target->client->pers.netname)
+    ChatPrintTo(ent, "^3setlevel:^7 " + string(target->client->pers.netname)
         + "^7 is now a level " + int2string(level) + " user.");
+
+    // User should already be stored on sqlite database, so we just 
+    // need to update it.
 
     userDatabase.updateUser(guid, level, string(target->client->pers.netname));
 
     return qtrue;
 }
 
-qboolean G_AdminTest(gentity_t *ent, int skipargs) {
+qboolean G_AdminTest(gentity_t *ent, unsigned skipargs) {
     if(!ent) {
+        ChatPrintAll("^3admintest: ^7Hello, I'm an admin.");
         return qtrue;
     }
     ChatPrintAll("^3admintest: ^7" + 
@@ -414,7 +463,7 @@ qboolean G_AdminTest(gentity_t *ent, int skipargs) {
     return qtrue;
 }
 
-qboolean G_Finger(gentity_t *ent, int skipargs) {
+qboolean G_Finger(gentity_t *ent, unsigned skipargs) {
     vector<string> argv = GetSayArgs();
 
     // !Finger name
@@ -427,10 +476,95 @@ qboolean G_Finger(gentity_t *ent, int skipargs) {
     gentity_t *target = playerFromName(argv.at(1 + skipargs), error);
 
     if(!target) {
-        ChatPrintTo(ent, "^3!finger: ^7" + error);
+        ChatPrintTo(ent, "^3finger: ^7" + error);
         return qfalse;
     }
 
     string level_name = levelDatabase.name(clients[target->client->ps.clientNum].level);
     ChatPrintAll("^3finger:^7 "+string(target->client->pers.netname)+" ^7("+clients[target->client->ps.clientNum].name+"^7) is a level "+int2string(clients[target->client->ps.clientNum].level)+" user ("+level_name+"^7)");
+    return qtrue;
+}
+
+qboolean G_Help(gentity_t *ent, unsigned skipargs) {
+    vector<string> argv = GetSayArgs();
+
+    beginBufferPrint();
+
+    if(argv.size() == 1 + skipargs) {
+        int count = 0;
+
+        ChatPrintTo(ent, "^3help:^7 check console for more information.");
+    
+        for(unsigned i = 0; Commands[i].handler; i++) {
+            if(G_HasPermission(ent, Commands[i].flag)) {
+                if(count != 0 && count % 3 == 0) {
+                    bufferPrint(ent, "\n");
+                }
+                bufferPrint(ent, va("%-21s ", Commands[i].keyword.c_str()));
+                count++;
+            }
+        }
+        bufferPrint(ent, "\n^3help: ^7" + int2string(count) + " available commands.");
+        finishBufferPrint(ent);
+    }
+
+    else {
+
+        for(unsigned i = 0; Commands[i].handler; i++) {
+            if(argv.at(1 + skipargs) == Commands[i].keyword) {
+                if(!G_HasPermission(ent, Commands[i].flag)) {
+                    return qfalse;
+                }
+                ChatPrintTo(ent, va("^3%s:^7 %s", Commands[i].keyword.c_str(), Commands[i].function.c_str()));
+				ChatPrintTo(ent, va("^3Syntax: ^7%s", Commands[i].syntax.c_str()));
+                return qtrue;
+            }
+        }
+        ChatPrintTo(ent, "^3help: ^7unknown command.");
+        return qfalse;
+    }
+    return qtrue;
+}
+
+qboolean G_Kick(gentity_t *ent, unsigned skipargs) {
+    vector<string> argv = GetSayArgs();
+
+    if(argv.size() < 2 + skipargs) {
+        ChatPrintTo(ent, "^3usage: ^7!kick <player> <timeout> <reason>");
+        return qfalse;
+    }
+
+    string error_msg;
+    gentity_t *target = playerFromName(argv.at(1 + skipargs), error_msg);
+
+    if(!target) {
+        ChatPrintTo(ent, "^3kick: ^7" + error_msg);
+        return qfalse;
+    }
+
+    if(target == ent) {
+        ChatPrintTo(ent, "^3kick:^7 you cannot kick yourself.");
+        return qfalse;
+    }
+
+    if(isTargetHigher(ent, target, true)) {
+        ChatPrintTo(ent, "^3kick:^7 you cannot kick a fellow admin.");
+        return qfalse;
+    }
+
+    int timeout = 60;
+    string reason = "You've been kicked.";
+
+    if(argv.size() >= 3 + skipargs) {
+        if(!string2int(argv.at(2+skipargs), timeout)) {
+            ChatPrintTo(ent, "^3kick: ^7invalid timeout \""+argv.at(2+skipargs)+"\" specified. Using default (60).");
+        }
+    }
+
+    if(argv.size() >= 4 + skipargs) {
+        reason = Q_SayConcatArgs(3 + skipargs);
+    }
+
+    trap_DropClient(target->client->ps.clientNum, reason.c_str(), timeout);
+    return qtrue;
 }
