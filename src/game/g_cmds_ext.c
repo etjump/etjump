@@ -70,7 +70,7 @@ qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime)
 			return(qtrue);
 		}
 	}
-
+    
 	return(qfalse);
 }
 

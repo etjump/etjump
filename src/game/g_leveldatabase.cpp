@@ -342,7 +342,7 @@ string LevelDatabase::getAll(int level) {
     if(it == levels_.end()) {
         return "";
     }
-
+    
     return string("---------------------------------------------------\n") + 
            string("- Level " + int2string(level)) + string("\n") +
            string("---------------------------------------------------\n") +

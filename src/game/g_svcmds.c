@@ -1026,22 +1026,6 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-    if(!Q_stricmp(cmd, "cinfo")) {
-        int clientNum =0;
-        char arg[MAX_TOKEN_CHARS];
-
-        if(trap_Argc() <= 1) {
-            return qtrue;
-        }
-
-        trap_Argv(1, arg, sizeof(arg));
-
-        clientNum = atoi(arg);
-
-        PrintClientInfo(0, clientNum);
-        return;
-    }
-
     if(!Q_stricmp(cmd, "linfo")) {
         int level = 0;
         char arg[MAX_TOKEN_CHARS];

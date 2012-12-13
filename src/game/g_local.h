@@ -5,7 +5,6 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
-#include "g_admin.h"
 
 #include "../game/be_aas.h"
 
@@ -2641,23 +2640,31 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 #define BANNER_CPM 3
 #define DEFAULT_BANNER_TIME 60000
 
-void GuidReceived(gentity_t *ent);
-void AdminLogin(gentity_t *ent);
-void PrintClientInfo(gentity_t *ent, int clientNum);
-void PrintLevelInfo(int level);
-void ResetData(int clientNum);
-void RequestLogin(int clientNum);
 
+void PrintLevelInfo(int level);
+
+// G_admin.cpp connection related
 void G_ClientBegin(gentity_t *ent);
 void G_ClientConnect(gentity_t *ent, qboolean firstTime);
 void G_ClientDisconnect(gentity_t *ent);
+void G_PrintGreeting(gentity_t *ent);
+void ResetData(int clientNum);
+void RequestLogin(int clientNum);
+void GuidReceived(gentity_t *ent);
+void AdminLogin(gentity_t *ent);
 
-qboolean G_HasPermissionC(gentity_t *ent, char flag);
+#define AF_SILENTCOMMANDS '/'
+// G_admin.cpp command related
+
+qboolean G_HasPermissionC(gentity_t *ent, const char flag);
 qboolean G_CommandCheck(gentity_t *ent);
 qboolean G_AdminTest(gentity_t *ent, unsigned skipargs);
+qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs);
 qboolean G_Finger(gentity_t *ent, unsigned skipargs);
 qboolean G_Help(gentity_t *ent, unsigned skipargs);
 qboolean G_Kick(gentity_t *ent, unsigned skipargs);
 qboolean G_ReadConfig(gentity_t *ent, unsigned skipargs);
 qboolean G_SetLevel(gentity_t *ent, unsigned skipargs);
+qboolean G_EditUser(gentity_t *ent, unsigned skipargs);
+qboolean G_Userinfo(gentity_t *ent, unsigned skipargs);
 #endif // G_LOCAL_H
