@@ -262,7 +262,7 @@ bool UserDatabase::updateUser(const string& guid, int level, const string& name)
             it->second->name = name;
             it->second->level = level;
 
-            sqlite3pp::command cmd(db_, string("UPDATE users SET name='"+name+"', level='"+int2string(level)+"' WHERE guid='"+guid+"';").c_str());
+            sqlite3pp::command cmd(db_, string("UPDATE users SET name='"+name+"', level='"+IntToString(level)+"' WHERE guid='"+guid+"';").c_str());
             
             cmd.execute();
 
@@ -506,8 +506,8 @@ void UserDatabase::listUsers
 
     ChatPrintTo(ent, "^3!findplayer: ^7check console for more information.");
 
-    beginBufferPrint();
-    bufferPrint(ent, HORIZONTAL_LINE + INFO_LINE + HORIZONTAL_LINE);
+    BeginBufferPrint();
+    BufferPrint(ent, HORIZONTAL_LINE + INFO_LINE + HORIZONTAL_LINE);
 
     char to_print[MAX_TOKEN_CHARS];
     for(vector<std::pair<string, admin_user_t*> >::const_iterator it = found_users.begin();
@@ -519,10 +519,10 @@ void UserDatabase::listUsers
         }
         Com_sprintf(to_print, sizeof(to_print), "|%-4d|%-s| %-8d|%-15s|%-36s^7\n", id, it->first.substr(0, 8).c_str(),
             it->second->level, it->second->ip.c_str(), it->second->name.c_str());
-        bufferPrint(ent, to_print);
+        BufferPrint(ent, to_print);
     }
 
-    finishBufferPrint(ent);
+    FinishBufferPrint(ent);
 
 }
 
@@ -541,7 +541,7 @@ bool UserDatabase::setLevel(int id, int level)
             it->second->level = level;
             
             try {
-                sqlite3pp::command cmd(db_, string("UPDATE users SET level='"+int2string(level)+"' WHERE userid='"+int2string(id)+"';").c_str());
+                sqlite3pp::command cmd(db_, string("UPDATE users SET level='"+IntToString(level)+"' WHERE userid='"+IntToString(id)+"';").c_str());
                 cmd.execute();
             } catch( sqlite3pp::database_error& e ) {
                 LogPrintln("ERROR: " + string(e.what()));
@@ -564,8 +564,8 @@ bool UserDatabase::printUserinfo(int id, gentity_t *ent) {
         if(it->second->userid == id) {
             ChatPrintTo(ent, "^3userinfo: ^7check console for more information.");
             string to_print = "^5User\n";
-            to_print += "^5id: ^7" + int2string(it->second->userid) + "\n";
-            to_print += "^5level: ^7" + int2string(it->second->level) + "\n";
+            to_print += "^5id: ^7" + IntToString(it->second->userid) + "\n";
+            to_print += "^5level: ^7" + IntToString(it->second->level) + "\n";
             to_print += "^5name: ^7" + it->second->name + "\n";
             to_print += "^5guid: ^7" + it->first.substr(0, 8) + "\n";
             to_print += "^5commands: ^7" + it->second->commands + "\n";
@@ -600,13 +600,13 @@ bool UserDatabase::updateUser(int id, Level level, string cmds, string greeting)
             try {
                 // UPDATE users SET level='level', commands='cmds', greeting='greeting' WHERE userid='id'
                 string update = "UPDATE users SET level='"
-                    +int2string(it->second->level)
+                    +IntToString(it->second->level)
                     +"', commands='"
                     +it->second->commands
                     +"', greeting='"
                     +it->second->greeting
                     +"' WHERE userid='"
-                    +int2string(id)
+                    +IntToString(id)
                     +"'"; 
                 sqlite3pp::command cmd(db_, update.c_str());
                 cmd.execute();

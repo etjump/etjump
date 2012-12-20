@@ -2005,9 +2005,8 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 			CP("print \"^3Usage:^7 Callvote random map");
 			return qfalse;
 		}
-		number = rand() % level.mapCount;
 		Q_strncpyz(arg1, "map", sizeof("map"));
-		Q_strncpyz(arg2, g_maplist[number], sizeof(arg1));
+		Q_strncpyz(arg2, G_GetRandomMap(), sizeof(arg1));
 	}
 
 	if (!Q_stricmp(arg1, "map"))
@@ -4334,24 +4333,4 @@ void DecolorString( char *in, char *out)
 		*out++ = *in++;
 	}
 	*out = 0;
-}
-
-void G_cache_map_names() {
-	int numdirs;
-	char dirlist[8192];
-	char* dirptr;
-	int i;
-	int dirlen;
-	numdirs = trap_FS_GetFileList("maps", ".bsp", dirlist, sizeof(dirlist));
-
-	dirptr = dirlist;
-	for(i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
-		if(strlen(dirptr) > 4)
-			dirptr[strlen(dirptr)-4] = '\0';
-		if(i < MAX_MAPS) {
-			Q_strncpyz(g_maplist[i], dirptr, sizeof(g_maplist[i]));
-		}		
-	}
-	level.mapCount = i;
 }

@@ -11,23 +11,39 @@ extern "C" {
 using std::vector;
 using std::string;
 
-vector<string> GetArgs();
-std::string G_SHA1(const std::string& str);
-string int2string(int value);
-bool string2int(const string& s, int& i);
-void LogPrint(string msg);
-void LogPrintln(string msg);
-gentity_t *playerFromName(const string& name, string& error);
+
+string RemoveColors(const string& source);
+void SanitizeString(const string& in, string& out, bool to_lower);
+
 void ChatPrintTo(gentity_t *ent, const string& message);
-void ChatPrintAll(const string& message);
 void CPMPrintTo(gentity_t *ent, const string& message);
-void CPMPrintAll(const string& message);
 void CPPrintTo(gentity_t *ent, const string& message);
-void CPPrintAll(const string& message);
 void PrintTo(gentity_t *ent, const string& message);
+
+void BannerPrintAll(const string& message);
+void ChatPrintAll(const string& message);
+void CPMPrintAll(const string& message);
+void CPPrintAll(const string& message);
 void PrintAll(const string& message);
+
+void LogPrintln(const string& message);
+void LogPrint(const string& message);
+
+void BeginBufferPrint();
+void FinishBufferPrint(gentity_t *ent);
+void BufferPrint(gentity_t *ent, const string& message);
+
 vector<string> GetSayArgs();
-void beginBufferPrint();
-void finishBufferPrint(gentity_t *ent);
-void bufferPrint(gentity_t *ent, const string& msg);
+vector<string> GetArgs();
+
+string IntToString(int to_convert);
+bool StringToInt(const string& source, int& target);
+
+string SHA1(const string& to_hash);
+gentity_t *PlayerForName(const string& name, string& error);
+
+// Doesn't really belong here.
+// Located at g_maplist.cpp
+const vector<string> *G_GetMapList();
+
 #endif

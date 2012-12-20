@@ -204,7 +204,6 @@ vmCvar_t		g_adminLog;
 vmCvar_t		g_logCommands;
 
 // Banner
-vmCvar_t		g_banners;
 vmCvar_t		g_bannerLocation;
 vmCvar_t		g_bannerTime;
 // Zero: FIXME. I couldn't think of a way to have dynamic bannersize
@@ -228,8 +227,6 @@ vmCvar_t		g_maxConnsPerIP;
 vmCvar_t		g_mute;
 vmCvar_t        g_goto;
 vmCvar_t		g_voteCooldown;
-
-char g_maplist[MAX_MAPS][MAX_FLEN];
 
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -446,7 +443,7 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE },
 	{ &g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE },
 
-	{ &g_banners, "g_banners", "0", CVAR_ARCHIVE },
+    // BannerPrint location
 	{ &g_bannerLocation, "g_bannerLocation", "1", CVAR_ARCHIVE },
 	{ &g_bannerTime, "g_bannerTime", "60000", CVAR_ARCHIVE },
 	// FIXME: dynamic banner count.
@@ -1403,6 +1400,14 @@ void G_UpdateCvars( void )
 					}
 				}
 
+                else if(cv->vmCvar == &g_banner1 ||
+                    cv->vmCvar == &g_banner2 ||
+                    cv->vmCvar == &g_banner3 ||
+                    cv->vmCvar == &g_banner4 ||
+                    cv->vmCvar == &g_banner5) {
+                        SetBanners();
+                }
+
 
 				// OSP - Update vote info for clients, if necessary
 				else if(!G_IsSinglePlayerGame()) {
@@ -1620,8 +1625,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	level.engineerChargeTimeModifier[0] = level.engineerChargeTimeModifier[1] = 1.f;
 	level.lieutenantChargeTimeModifier[0] = level.lieutenantChargeTimeModifier[1] = 1.f;
 	level.covertopsChargeTimeModifier[0] = level.covertopsChargeTimeModifier[1] = 1.f;
-	
-	level.mapCount = 0;
 
 	cs[0] = '\0';
 	Info_SetValueForKey( cs, "axs_sld", va("%i", level.soldierChargeTime[0]) );
@@ -1750,7 +1753,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// load level script
 	G_Script_ScriptLoad();
 
-	G_cache_map_names();
+	G_CacheMapNames();
 
 	// reserve some spots for dead player bodies
 	InitBodyQue();
@@ -1835,6 +1838,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	// Match init work
 	G_loadMatchGame();
+
+    SetBanners();
 
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
@@ -2978,8 +2983,6 @@ void CheckVote( void ) {
 	trap_SetConfigstring(CS_VOTE_TIME, "");
 }
 
-void CheckBanner();
-
 #ifdef SAVEGAME_SUPPORT
 /*
 =============
@@ -3591,7 +3594,7 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time )
 	// cancel vote if timed out
 	CheckVote();
 
-	CheckBanner();
+	CheckBanners();
 
 	// for tracking changes
 	CheckCvars();
@@ -3616,102 +3619,4 @@ qboolean G_IsSinglePlayerGame()
 		return qtrue;
 
 	return qfalse;
-}
-
-void CheckBanner() {
-	char msg[MAX_STRING_CHARS];
-	int bannerCount;
-	int bannerLocation = BANNER_BP;
-	int bannerTime = DEFAULT_BANNER_TIME;
-
-	if(g_banners.integer <= 0) {
-		return;
-	}
-
-	if(level.nextBannerTime > level.time) {
-		return;
-	}
-
-	// I don't think anyone needs to see a banner every 5 seconds
-	// or once every 30 minutes. 30seconds - 10minutes.
-	if(g_bannerTime.integer >= 30000 && g_bannerTime.integer <= 600000) {
-		bannerTime = g_bannerTime.integer;
-	}
-	
-	// Maximum of five banners.
-	if(g_banners.integer > 5) {
-		bannerCount = 5;
-	} else if(g_banners.integer < 0) {
-		bannerCount = 0;
-	} else {
-		bannerCount = g_banners.integer;
-	}
-
-	if (!*g_banner5.string) {
-		if(g_banners.integer > 4) {
-			Com_sprintf(g_banner5.string, sizeof(g_banner5.string), "%s", "Set g_banners to 0/1/2/3/4 or set g_banner5");
-		}
-	}
-	if (!*g_banner4.string) {
-		if(g_banners.integer > 3) {
-			Com_sprintf(g_banner4.string, sizeof(g_banner4.string), "%s", "Set g_banners to 0/1/2/3 or set g_banner4");
-		}
-	}
-	if (!*g_banner3.string) {
-		if(g_banners.integer > 2) {
-			Com_sprintf(g_banner3.string, sizeof(g_banner3.string), "%s", "Set g_banners to 0/1/2 or set g_banner3");
-		}
-	}
-	if (!*g_banner2.string) {
-		if(g_banners.integer > 1) {
-			Com_sprintf(g_banner2.string, sizeof(g_banner2.string), "%s", "Set g_banners to 0/1 or set g_banner2");
-		}
-	}
-	if(!*g_banner1.string) {
-		if(g_banners.integer > 0) {
-			Com_sprintf(g_banner1.string, sizeof(g_banner1.string), "%s", "Set g_banners to 0 or set g_banner1");
-		}
-	}
-
-	if(level.nextBanner == 0) {
-		Q_strncpyz(msg, g_banner1.string, sizeof(msg));
-	} else if(level.nextBanner == 1) {
-		Q_strncpyz(msg, g_banner2.string, sizeof(msg));
-	} else if(level.nextBanner == 2) {
-		Q_strncpyz(msg, g_banner3.string, sizeof(msg));
-	} else if(level.nextBanner == 3) {
-		Q_strncpyz(msg, g_banner4.string, sizeof(msg));
-	} else if(level.nextBanner == 4) {
-		Q_strncpyz(msg, g_banner5.string, sizeof(msg));
-	}
-
-	if( g_bannerLocation.integer != BANNER_CP &&
-		g_bannerLocation.integer != BANNER_CPM &&
-		g_bannerLocation.integer != BANNER_SAY &&
-		g_bannerLocation.integer != BANNER_BP ) {
-			bannerLocation = BANNER_BP;
-	} else {
-		bannerLocation = g_bannerLocation.integer;
-	}
-
-	if(bannerLocation == BANNER_CP) {
-		AP(va("cp \"%s\n\"", msg));
-	} else if(bannerLocation == BANNER_CPM) {
-		AP(va("cpm \"%s\n\"", msg));
-	} else if(bannerLocation == BANNER_SAY) {
-		AP(va("chat \"%s\n\"", msg));
-	} else if(bannerLocation == BANNER_BP) {
-		AP(va("bp \"%s\n\"", msg));
-	} else {
-		AP(va("cpm \"%s\n\"", msg));
-	}
-
-
-	if(level.nextBanner < g_banners.integer - 1) {
-		level.nextBanner++;
-	} else {
-		level.nextBanner = 0;
-	}
-
-	level.nextBannerTime = level.time + bannerTime;
 }

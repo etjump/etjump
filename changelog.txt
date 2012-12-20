@@ -1,0 +1,18 @@
+Demo bug: cheatcvar demossa p‰‰lle sit servulle -> on servullaki
+Demo bug2: eli jos on ollu hideme p‰‰ll‰ ja demotat jonku hypyn, niin sitte sit‰ demoa kattoessa ei saa pelaajaa n‰kyviin mit
+FIXME: (21:26:39) lock: when I turn of cg_drawCompass to 0, command map dissapear as well.
+Suggestion: game manager to a non scripted map/new tj game manager?
+
+TODO: Fix crash on readconfig when sqlite3.exe is used to insert stuff in db
+POSSIBLE BUG: Changed plenty of functions (PrintTo etc.) to use trap_sendservercommand/CP 
+FIXME: /follow
+FIXME: case insensitive !find -name name
+FIXME: in case of a new guid add data to memory aswell, not just sql
+FIXME: update id after connecting for the first time and incase of id < 0
+FIXME: follow0 crashes
+FIXME: too long level names wont show up
+TODO: add -clear cmds to !edituser & !editlevel
+
+TIMERUN:
+ThWuT: Something like /currenttimes command which would me allow to check everyones times sorted from 1st to ... without pressing TAB and writi
+Some sort of limit runtime to for example 10 mins, once its done you cant start a run anymore.

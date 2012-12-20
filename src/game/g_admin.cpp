@@ -32,6 +32,10 @@ static AdminCommand Commands[] = {
     {"readconfig",		G_ReadConfig,		'G',	"Reads admin config.", "!readconfig"},
     {"setlevel",		G_SetLevel,		    's',	"Sets target level.", "!setlevel <target> <level>"},
     {"userinfo",        G_Userinfo,         'A',    "Prints user admin information.", "!userinfo <id>"},
+    {"addlevel",		G_AddLevel,			'A',	"Adds admin level to admin level database.", "!levadd <level>"},
+	{"editlevel",		G_EditLevel,		'A',	"Edits admin level.", "!levedit <level> <name|gtext|cmds> <third parameter>"},
+	{"levinfo",			G_LevInfo,	    	'A',	"Prints information about admin levels.", "!levinfo or !levinfo <level>"},
+    {"listmaps",		G_ListMaps,		'a',	"Prints a list of all maps on the server.", "!listmaps"},
     {"", 0, 0, "", ""}
 };
 
@@ -111,7 +115,7 @@ void GuidReceived(gentity_t *ent) {
         return;
     }
 
-    string guid = G_SHA1(argv.at(1));
+    string guid = SHA1(argv.at(1));
     
     clients[ent->client->ps.clientNum].guid = guid;
 
@@ -161,7 +165,7 @@ void AdminLogin(gentity_t *ent) {
     }
 
     string username = argv.at(1);
-    string password = G_SHA1(argv.at(2));
+    string password = SHA1(argv.at(2));
 
     clients[ent->client->ps.clientNum].username = username;
     clients[ent->client->ps.clientNum].password = password;
@@ -331,7 +335,7 @@ qboolean G_ReadConfig(gentity_t *ent, unsigned skipargs) {
 
     levelDatabase.readConfig();
     userDatabase.readConfig();
-    ChatPrintTo(ent, "^3!readconfig:^7 loaded " + int2string(levelDatabase.levelCount()) + " levels, " + int2string(userDatabase.userCount()) + " users.");
+    ChatPrintTo(ent, "^3!readconfig:^7 loaded " + IntToString(levelDatabase.levelCount()) + " levels, " + IntToString(userDatabase.userCount()) + " users.");
     return qtrue;
 }
 
@@ -465,18 +469,18 @@ qboolean G_SetIdLevel(gentity_t *ent, unsigned skipargs) {
         return qfalse;
     }
 
-    if(!string2int(argv.at(2 + skipargs), id)) {
+    if(!StringToInt(argv.at(2 + skipargs), id)) {
         ChatPrintTo(ent, "^3usage:^7 !setlevel -id <id> <level>");
         return qfalse;
     }
 
-    if(!string2int(argv.at(3 + skipargs), alevel)) {
+    if(!StringToInt(argv.at(3 + skipargs), alevel)) {
         ChatPrintTo(ent, "^3usage:^7 !setlevel -id <id> <level>");
         return qfalse;
     }
 
     if(!levelDatabase.levelExists(alevel)) {
-        ChatPrintTo(ent, string("^3setlevel:^7 level " + int2string(alevel) + " does not exist.").c_str());
+        ChatPrintTo(ent, string("^3setlevel:^7 level " + IntToString(alevel) + " does not exist.").c_str());
         return qfalse;
     }
 
@@ -532,13 +536,13 @@ qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
 
     int level = -1;
 
-    if(!string2int(argv.at(2 + skipargs), level)) {
+    if(!StringToInt(argv.at(2 + skipargs), level)) {
         ChatPrintTo(ent, string("^3setlevel:^7 invalid number " + argv.at(2)).c_str());
         return qfalse;
     }
 
     if(!levelDatabase.levelExists(level)) {
-        ChatPrintTo(ent, string("^3setlevel:^7 level " + int2string(level) + " does not exist.").c_str());
+        ChatPrintTo(ent, string("^3setlevel:^7 level " + IntToString(level) + " does not exist.").c_str());
         return qfalse;
     }
 
@@ -549,7 +553,7 @@ qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
         }
     }
 
-    target = playerFromName(argv.at(1 + skipargs), error_msg);
+    target = PlayerForName(argv.at(1 + skipargs), error_msg);
 
     if(!target) {
         ChatPrintTo(ent, "^3setlevel:^7 " + error_msg);
@@ -575,7 +579,7 @@ qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
     clients[target->client->ps.clientNum].level = level;
     clients[target->client->ps.clientNum].name = target->client->pers.netname;
     ChatPrintTo(ent, "^3setlevel:^7 " + string(target->client->pers.netname)
-        + "^7 is now a level " + int2string(level) + " user.");
+        + "^7 is now a level " + IntToString(level) + " user.");
 
     // User should already be stored on sqlite database, so we just 
     // need to update it.
@@ -596,9 +600,9 @@ qboolean G_AdminTest(gentity_t *ent, unsigned skipargs) {
     ChatPrintAll("^3admintest: ^7" + 
         string(ent->client->pers.netname) + 
         " ^7is a level " + 
-        int2string(clients[ent->client->ps.clientNum].level) + 
+        IntToString(clients[ent->client->ps.clientNum].level) + 
         " user ("
-        + levelDatabase.name(clients[ent->client->ps.clientNum].level) + ")");
+        + levelDatabase.name(clients[ent->client->ps.clientNum].level) + "^7)");
     return qtrue;
 }
 
@@ -613,7 +617,7 @@ qboolean G_Finger(gentity_t *ent, unsigned skipargs) {
     }
 
     string error;
-    gentity_t *target = playerFromName(argv.at(1 + skipargs), error);
+    gentity_t *target = PlayerForName(argv.at(1 + skipargs), error);
 
     if(!target) {
         ChatPrintTo(ent, "^3finger: ^7" + error);
@@ -621,7 +625,7 @@ qboolean G_Finger(gentity_t *ent, unsigned skipargs) {
     }
 
     string level_name = levelDatabase.name(clients[target->client->ps.clientNum].level);
-    ChatPrintAll("^3finger:^7 "+string(target->client->pers.netname)+" ^7("+clients[target->client->ps.clientNum].name+"^7) is a level "+int2string(clients[target->client->ps.clientNum].level)+" user ("+level_name+"^7)");
+    ChatPrintAll("^3finger:^7 "+string(target->client->pers.netname)+" ^7("+clients[target->client->ps.clientNum].name+"^7) is a level "+IntToString(clients[target->client->ps.clientNum].level)+" user ("+level_name+"^7)");
     return qtrue;
 }
 
@@ -629,7 +633,7 @@ qboolean G_Finger(gentity_t *ent, unsigned skipargs) {
 qboolean G_Help(gentity_t *ent, unsigned skipargs) {
     vector<string> argv = GetSayArgs();
 
-    beginBufferPrint();
+    BeginBufferPrint();
 
     if(argv.size() == 1 + skipargs) {
         int count = 0;
@@ -639,14 +643,14 @@ qboolean G_Help(gentity_t *ent, unsigned skipargs) {
         for(unsigned i = 0; Commands[i].handler; i++) {
             if(G_HasPermission(ent, Commands[i].flag)) {
                 if(count != 0 && count % 3 == 0) {
-                    bufferPrint(ent, "\n");
+                    BufferPrint(ent, "\n");
                 }
-                bufferPrint(ent, va("%-21s ", Commands[i].keyword.c_str()));
+                BufferPrint(ent, va("%-21s ", Commands[i].keyword.c_str()));
                 count++;
             }
         }
-        bufferPrint(ent, "\n^3help: ^7" + int2string(count) + " available commands.");
-        finishBufferPrint(ent);
+        BufferPrint(ent, "\n^3help: ^7" + IntToString(count) + " available commands.");
+        FinishBufferPrint(ent);
     }
 
     else {
@@ -678,7 +682,7 @@ qboolean G_Kick(gentity_t *ent, unsigned skipargs) {
     }
 
     string error_msg;
-    gentity_t *target = playerFromName(argv.at(1 + skipargs), error_msg);
+    gentity_t *target = PlayerForName(argv.at(1 + skipargs), error_msg);
 
     if(!target) {
         ChatPrintTo(ent, "^3kick: ^7" + error_msg);
@@ -699,7 +703,7 @@ qboolean G_Kick(gentity_t *ent, unsigned skipargs) {
     string reason = "You've been kicked.";
 
     if(argv.size() >= 3 + skipargs) {
-        if(!string2int(argv.at(2+skipargs), timeout)) {
+        if(!StringToInt(argv.at(2+skipargs), timeout)) {
             ChatPrintTo(ent, "^3kick: ^7invalid timeout \""+argv.at(2+skipargs)+"\" specified. Using default (60).");
         }
     }
@@ -780,7 +784,7 @@ qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs) {
     }
 
     if(level_it != argv.end()) {
-        if(!string2int(*(level_it + 1), level)) {
+        if(!StringToInt(*(level_it + 1), level)) {
             level = 0;
         }
     }
@@ -795,7 +799,7 @@ qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs) {
     }
 
     if(id_it != argv.end()) {
-        if(!string2int(*(id_it + 1), id)) {
+        if(!StringToInt(*(id_it + 1), id)) {
             id = -1;
             ChatPrintTo(ent, "^3!listplayer: ^7invalid id");
             return qfalse;
@@ -818,7 +822,7 @@ qboolean G_Userinfo(gentity_t *ent, unsigned skipargs) {
         return qfalse;
     }
 
-    if(!string2int(argv.at(1 + skipargs), id)) {
+    if(!StringToInt(argv.at(1 + skipargs), id)) {
         ChatPrintTo(ent, "^3usage:^7 invalid id specified");
         return qfalse;
     }
@@ -849,7 +853,7 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
         return qfalse;
     }
 
-    if(!string2int(argv.at(1 + skipargs), id)) {
+    if(!StringToInt(argv.at(1 + skipargs), id)) {
         ChatPrintTo(ent, INVALID_ID);
         return qfalse;
     }
@@ -897,7 +901,7 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
     }
 
     if(level_it != argv.end()) {
-        if(!string2int(*level_it, new_level.value)) {
+        if(!StringToInt(*level_it, new_level.value)) {
             ChatPrintTo(ent, INVALID_LEVEL);
             return qfalse;
         }
@@ -940,5 +944,150 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
         }
     }
 
+    return qtrue;
+}
+
+// !addlevel level -name <name> -cmds <cmds> -greeting <greeting>
+
+qboolean G_AddLevel(gentity_t *ent, unsigned skipargs) {
+
+    vector<string> argv = GetSayArgs();
+
+    int level = 0;
+
+    // !addlevel <level>
+    if(argv.size() < 2 + skipargs) {
+        ChatPrintTo(ent, "^3usage: ^7!addlevel <level> <-cmds|-greeting> <cmds|greeting>");
+        return qfalse;
+    }
+
+    if(!StringToInt(argv.at(1+skipargs), level)) {
+        ChatPrintTo(ent, "^3addlevel: ^7invalid level specified.");
+        return qfalse;
+    }
+
+    if(levelDatabase.levelExists(level)) {
+        ChatPrintTo(ent, "^3addlevel: ^7level exists.");
+        return qfalse;
+    }
+
+    // Skip !addlevel <level>
+    vector<string>::const_iterator it = argv.begin() + (2 + skipargs);
+
+    bool name_open = false;
+    bool commands_open = false;
+    bool greeting_open = false;
+
+    string name;
+    string commands;
+    string greeting;
+
+    while(it != argv.end()) {
+
+        if(*it == "-greeting" && (it + 1) != argv.end()) {
+            commands_open = false;
+            greeting_open = true;
+            name_open = false;
+        }
+
+        else if(*it == "-cmds" && (it + 1) != argv.end()) {
+            commands_open = true;
+            greeting_open = false;
+            name_open = false;
+        }
+
+        else if(*it == "-name" && (it + 1) != argv.end()) {
+            commands_open = false;
+            greeting_open = false;
+            name_open = true;
+        }
+
+        else if(commands_open) {
+            commands += *it;
+        }
+
+        else if(greeting_open) {
+            greeting += *it;
+            greeting += " ";
+        }
+
+        else if(name_open) {
+            name += *it;
+            name += " ";
+        }
+        it++;
+    }
+
+    boost::trim(name);
+    boost::trim(commands);
+    boost::trim(greeting);
+    if(!levelDatabase.addNewLevel(level, name, commands, greeting)) {
+        return qfalse;
+    }
+    return qtrue;
+}
+
+qboolean G_EditLevel(gentity_t *ent, unsigned skipargs) {
+
+    return qtrue;
+}
+qboolean G_LevInfo(gentity_t *ent, unsigned skipargs) {
+
+    return qtrue;
+}
+
+qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {    
+    if(ent) {
+		if(ent->client->sess.last_listmaps_time != 0 && level.time - ent->client->sess.last_listmaps_time < 60000) {
+			ChatPrintTo(ent, va("^3!listmaps:^7 you must wait atleast %d seconds before using !listmaps again.", 
+				((ent->client->sess.last_listmaps_time + 60000 - level.time)/1000)));
+			return qfalse;
+		}
+	}
+
+    vector<string> argv = GetSayArgs();
+
+    ChatPrintTo(ent, "^3!listmaps:^7 check console for more information.");
+
+    vector<string>::const_iterator it = argv.begin();
+    int columns = 3;
+
+
+    if(argv.size() > 1 + skipargs) {
+        
+        while(it != argv.end()) {
+            if(*it == "-col" && (it + 1) != argv.end()) {
+                // Doesn't matter if this succeeds or not.
+                // if it doesn't, just use the default value
+                StringToInt(*(it+1), columns);
+                break;
+            }
+            it++;
+        }
+
+    }
+
+    BeginBufferPrint();
+
+    const vector<string> *map_list = G_GetMapList();
+
+    vector<string>::const_reverse_iterator map_it = map_list->rbegin();
+
+    int count = 0;
+    while(map_it != map_list->rend()) {
+
+        if(count % columns == 0) {
+            BufferPrint(ent, "\n");
+        }
+
+        BufferPrint(ent, va("%-27s ", map_it->c_str()));
+
+        map_it++;
+        count++;
+    }
+
+    FinishBufferPrint(ent);
+    if(ent)
+		ent->client->sess.last_listmaps_time = level.time;
     return qtrue;
 }

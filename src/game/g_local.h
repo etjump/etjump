@@ -657,6 +657,8 @@ typedef struct {
 	// Map ident
 	int			client_map_id;
 
+    int         last_listmaps_time;
+
 	qboolean	versionOK;
 } clientSession_t;
 
@@ -1187,11 +1189,6 @@ typedef struct {
 	qboolean	noNoclip;
 	qboolean	noGod;
 	qboolean	noGoto;
-
-	int			mapCount;
-	
-	int			nextBannerTime;
-	int			nextBanner;
 
 	int			portalEnabled; //Feen: PGM - Enabled/Disabled by map key
 	qboolean	portalSurfaces;
@@ -1911,7 +1908,6 @@ extern vmCvar_t g_adminLoginType;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
 
-extern vmCvar_t	g_banners;
 extern vmCvar_t	g_bannerLocation;
 extern vmCvar_t	g_bannerTime;
 extern vmCvar_t g_banner1;
@@ -1928,10 +1924,6 @@ extern vmCvar_t g_maxConnsPerIP;
 extern vmCvar_t	g_mute;
 extern vmCvar_t g_goto;
 extern vmCvar_t g_voteCooldown;
-
-#define MAX_MAPS 300
-#define MAX_FLEN 30
-extern char g_maplist[MAX_MAPS][MAX_FLEN];
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
@@ -2604,7 +2596,9 @@ qboolean G_CanPickupWeapon( weapon_t weapon, gentity_t* ent );
 
 qboolean G_LandmineSnapshotCallback( int entityNum, int clientNum );
 
-void G_cache_map_names();
+// g_maplist.cpp
+const char *G_GetRandomMap();
+void G_CacheMapNames();
 
 void G_AddIpMute( char *ip );
 void G_RemoveIPMute( char *ip );
@@ -2633,15 +2627,11 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 
 //Feen: END PGM
 
-// Banner locations
-#define BANNER_CP 0
-#define BANNER_BP 1
-#define BANNER_SAY 2
-#define BANNER_CPM 3
-#define DEFAULT_BANNER_TIME 60000
-
-
 void PrintLevelInfo(int level);
+
+// G_banner.cpp
+void SetBanners();
+void CheckBanners();
 
 // G_admin.cpp connection related
 void G_ClientBegin(gentity_t *ent);
@@ -2667,4 +2657,8 @@ qboolean G_ReadConfig(gentity_t *ent, unsigned skipargs);
 qboolean G_SetLevel(gentity_t *ent, unsigned skipargs);
 qboolean G_EditUser(gentity_t *ent, unsigned skipargs);
 qboolean G_Userinfo(gentity_t *ent, unsigned skipargs);
+qboolean G_AddLevel(gentity_t *ent, unsigned skipargs);
+qboolean G_EditLevel(gentity_t *ent, unsigned skipargs);
+qboolean G_LevInfo(gentity_t *ent, unsigned skipargs);
+qboolean G_ListMaps(gentity_t *ent, unsigned skipargs);
 #endif // G_LOCAL_H

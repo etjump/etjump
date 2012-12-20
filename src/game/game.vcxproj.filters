@@ -201,9 +201,6 @@
     <ClCompile Include="g_leveldatabase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_utilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_userdatabase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -211,6 +208,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\sqlite\sqlite3pp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_banner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_maplist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

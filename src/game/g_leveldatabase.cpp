@@ -128,7 +128,7 @@ bool LevelDatabase::readConfig() {
     int linecount = -1;
     bool level_open = false;
 
-    int level;
+    int level = 0;
     string name;
     string commands;
     string greeting;
@@ -203,18 +203,18 @@ bool LevelDatabase::readConfig() {
         if(level_open) {
 
             if(argv.size() != 3) {
-                LogPrintln("WARNING: Invalid line(" + int2string(linecount) + ") \"" + current_line + "\" on admin config.");
+                LogPrintln("WARNING: Invalid line(" + IntToString(linecount) + ") \"" + current_line + "\" on admin config.");
                 continue;
             }
 
             if(argv.at(1) != "=") {
-                LogPrintln("WARNING: Missing \"=\" on line(" + int2string(linecount) + ") \"" + current_line + "\" on admin config.");
+                LogPrintln("WARNING: Missing \"=\" on line(" + IntToString(linecount) + ") \"" + current_line + "\" on admin config.");
             }
 
             else if(argv.at(0) == "level") {
 
-                if(!string2int(argv.at(2), level)) {
-                    LogPrintln(RCFG_ERROR + "invalid level(" + int2string(linecount) + ") \"" + argv.at(2) + "\" on admin config.");
+                if(!StringToInt(argv.at(2), level)) {
+                    LogPrintln(RCFG_ERROR + "invalid level(" + IntToString(linecount) + ") \"" + argv.at(2) + "\" on admin config.");
                     return false;
                 }   
 
@@ -344,7 +344,7 @@ string LevelDatabase::getAll(int level) {
     }
     
     return string("---------------------------------------------------\n") + 
-           string("- Level " + int2string(level)) + string("\n") +
+           string("- Level " + IntToString(level)) + string("\n") +
            string("---------------------------------------------------\n") +
            string("- NAME: ") + it->second->name + 
            string("\n- CMDS: ") + it->second->commands + 
@@ -381,4 +381,13 @@ string LevelDatabase::greeting(int level) const {
         return it->second->greeting;
     }
     return "";
+}
+
+bool LevelDatabase::addNewLevel(int level, const string& name, const string& commands, const string& greeting) {
+    if(!addLevel(level, name, commands, greeting)) {
+        return false;
+    }
+
+    writeConfig();
+    return true;
 }

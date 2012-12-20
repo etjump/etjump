@@ -1,0 +1,4 @@
+!listmaps
+Optional parameters:
+-col <columns>
+How many maps per row to print.

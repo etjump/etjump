@@ -26,6 +26,7 @@ public:
     };
 
     bool addLevel(int level, string name, string commands, string greeting);
+    bool addNewLevel(int level, const string& name, const string& commands, const string& greeting);
     bool updateLevel(int level, string str, int type);
     bool deleteLevel(int level);
 
