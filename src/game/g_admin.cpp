@@ -1076,7 +1076,7 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {
     int count = 0;
     while(map_it != map_list->rend()) {
 
-        if(count % columns == 0) {
+        if(count % columns == 0 && count != 0) {
             BufferPrint(ent, "\n");
         }
 
