@@ -11,6 +11,7 @@ extern "C" {
 using std::vector;
 using std::string;
 
+const string SEPARATOR = " ";
 
 string RemoveColors(const string& source);
 void SanitizeString(const string& in, string& out, bool to_lower);
