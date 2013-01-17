@@ -16,3 +16,7 @@ TODO: add -clear cmds to !edituser & !editlevel
 TIMERUN:
 ThWuT: Something like /currenttimes command which would me allow to check everyones times sorted from 1st to ... without pressing TAB and writi
 Some sort of limit runtime to for example 10 mins, once its done you cant start a run anymore.
+
+Added: MapDatabase
+Added: rcon updatemapdatabase
+Added: !mapinfo <map>

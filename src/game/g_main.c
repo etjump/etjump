@@ -1,8 +1,5 @@
 #include "g_local.h"
 
-// Include the "External"/"Public" components of AI_Team
-#include "../botai/ai_teamX.h"
-
 level_locals_t	level;
 
 typedef struct {
@@ -465,7 +462,6 @@ cvarTable_t		gameCvarTable[] = {
 
 // bk001129 - made static to avoid aliasing
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
-
 
 void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
@@ -1844,6 +1840,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
+
+    G_InitGame_ext(levelTime, randomSeed, restart);
+    
 }
 
 
@@ -1895,11 +1894,8 @@ void G_ShutdownGame( int restart ) {
 	// write all the client session data so we can get it back
 	G_WriteSessionData( restart );
 
-#ifndef NO_BOT_SUPPORT
-	if ( bot_enable.integer ) {
-		BotAIShutdown( restart );
-	}
-#endif // NO_BOT_SUPPORT
+
+    G_ShutdownGame_ext( restart );
 }
 
 
@@ -2256,9 +2252,6 @@ void MoveClientToIntermission( gentity_t *ent ) {
 	ent->s.event = 0;
 	ent->s.events[0] = ent->s.events[1] = ent->s.events[2] = ent->s.events[3] = 0;		// DHM - Nerve
 	ent->r.contents = 0;
-
-	// todo: call bot routine so they can process the transition to intermission (send voice chats, etc)
-	BotMoveToIntermission( ent->s.number );
 }
 
 /*

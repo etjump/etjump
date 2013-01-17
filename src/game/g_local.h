@@ -6,8 +6,6 @@
 #include "bg_public.h"
 #include "g_public.h"
 
-#include "../game/be_aas.h"
-
 //==================================================================
 
 // the "MOD_VERSION" client command will print this plus compile date
@@ -1613,62 +1611,16 @@ void G_WriteSessionData( qboolean restart );
 
 void G_CalcRank( gclient_t* client );
 
-//
-// g_bot.c
-//
-void G_InitBots( qboolean restart );
-char *G_GetBotInfoByNumber( int num );
-char *G_GetBotInfoByName( const char *name );
-void G_CheckBotSpawn( void );
-void G_QueueBotBegin( int clientNum );
-qboolean G_BotConnect( int clientNum, qboolean restart );
-void Svcmd_AddBot_f( void );
-void Svcmd_SpawnBot( );
-void G_SpawnBot( const char *text );
-int Bot_GetWeaponForClassAndTeam( int classNum, int teamNum, const char *weaponName );
-void G_BotParseCharacterParms( char *characterFile, int *characterInt );
-
 // ai_main.c
 #define MAX_FILEPATH			144
-int BotAIThinkFrame(int time);
-void G_SetAASBlockingEntity( gentity_t *ent, int blocking );
-qboolean BotSinglePlayer();
-qboolean BotCoop();
-//gentity_t *BotCheckBotGameEntity( gentity_t *ent );
-gentity_t *BotFindEntity( gentity_t *from, int fieldofs, char *match );
-void GetBotAmmoPct(int clientNum, int *ammoPct, int *ammoclipPct);
-void BotCalculateMg42Spots(void);
 
 // ai_dmq3.c
 //returns the number of the client with the given name
 int ClientFromName(char *name);
-void BotMoveToIntermission( int client );
-qboolean BotVisibleFromPos( vec3_t srcorigin, int srcnum, vec3_t destorigin, int destent, qboolean dummy );
-qboolean BotCheckAttackAtPos(	int entnum, int enemy, vec3_t pos, qboolean ducking, qboolean allowHitWorld);
 
 // ai_main.c
 // TTimo - wraps to BotGetTargetExplosives, without dependency to bot_target_s (which breaks gcc build)
 int GetTargetExplosives( team_t team, qboolean ignoreDynamite );
-
-//bot settings
-typedef struct bot_settings_s
-{
-	char characterfile[MAX_FILEPATH];
-	float skill;
-	char team[MAX_FILEPATH];
-	int squadNum;		// xkan, 10/10/2002
-} bot_settings_t;
-
-int BotAISetup( int restart );
-//void BotInitBotGameEntities(void);
-int BotAIShutdown( int restart );
-int BotAILoadMap( int restart );
-int BotAISetupClient(int client, struct bot_settings_s *settings);
-int BotAIShutdownClient( int client);
-int BotAIStartFrame( int time );
-void BotTestAAS(vec3_t origin);
-void BotSetIdealViewAngles(int clientNum, vec3_t angle);
-
 
 // g_cmd.c
 void Cmd_Activate_f (gentity_t *ent);
@@ -1702,14 +1654,6 @@ float AngleDifference(float ang1, float ang2);
 
 // g_props.c
 void Props_Chair_Skyboxtouch (gentity_t *ent);
-
-// ai_script.c
-void Bot_ScriptLoad( void );
-qboolean Bot_ScriptInitBot( int entnum );
-void Bot_ScriptEvent( int entityNum, char *eventStr, char *params );
-
-void Bot_TeamScriptEvent( int team, char *eventStr, char *params );
-
 
 #include "g_team.h" // teamplay specific stuff
 
@@ -2047,9 +1991,7 @@ int			trap_AAS_Retreat
 	float dangerRange,
 	int travelflags
 );
-int			trap_AAS_AlternativeRouteGoals(vec3_t start, vec3_t goal, int travelflags,
-										 aas_altroutegoal_t *altroutegoals, int maxaltroutegoals,
-										 int color);
+
 void		trap_AAS_SetAASBlockingEntity( vec3_t absmin, vec3_t absmax, int blocking );
 void		trap_AAS_RecordTeamDeathArea( vec3_t srcpos, int srcarea, int team, int teamCount, int travelflags );
 // done.
@@ -2629,6 +2571,10 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 
 void PrintLevelInfo(int level);
 
+void G_InitGame_ext( int levelTime, int randomSeed, int restart );
+void G_ShutdownGame_ext( int restart );
+void Svcmd_UpdateMapDatabase_f();
+
 // G_banner.cpp
 void SetBanners();
 void CheckBanners();
@@ -2661,4 +2607,7 @@ qboolean G_AddLevel(gentity_t *ent, unsigned skipargs);
 qboolean G_EditLevel(gentity_t *ent, unsigned skipargs);
 qboolean G_LevInfo(gentity_t *ent, unsigned skipargs);
 qboolean G_ListMaps(gentity_t *ent, unsigned skipargs);
+qboolean G_MapInfo(gentity_t *ent, unsigned skipargs);
+qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs);
 #endif // G_LOCAL_H
+

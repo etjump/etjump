@@ -15,30 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\botai\ai_cmd.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_dmgoal_mp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_dmnet_mp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_dmq3.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_script.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_script_actions.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\botai\ai_team.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bg_animation.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,9 +60,6 @@
     <ClCompile Include="g_antilag.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_bot.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_buddy_list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -109,9 +82,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_items.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_match.c">
@@ -219,6 +189,15 @@
     <ClCompile Include="g_maplist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_mapdata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_main_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -226,69 +205,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\botai\ai_botScriptTrigger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_botScriptTriggerX.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_cmd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_distances.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_dmgoal_mp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_dmgoal_sp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_dmnet_mp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_dmnet_sp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_dmq3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_matrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_team.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\ai_teamX.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_aas.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_char.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_chat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_gen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_goal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_move.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_weap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ea.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bg_classes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -296,12 +212,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bg_public.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\botai\botai.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="botlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\chars.h">
@@ -350,6 +260,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_admin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_mapdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

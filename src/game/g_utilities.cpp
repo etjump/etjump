@@ -112,6 +112,16 @@ void PrintTo(gentity_t *ent, const string& message) {
     }
 }
 
+void PrintToNoNewline(gentity_t *ent, const string& message) {
+    if(ent) {
+        CP(va("print \"%s\"", message.c_str()));
+    }
+
+    else {
+        G_Printf("%s", RemoveColors(message).c_str());
+    }
+}
+
 // Prints text in chat to all entities
 
 void ChatPrintAll(const string& message) {
@@ -154,6 +164,10 @@ static string big_text_buffer;
 
 void BeginBufferPrint() {
     big_text_buffer.clear();
+}
+
+void FinishBufferPrintNoNewline(gentity_t *ent) {
+    PrintToNoNewline(ent, big_text_buffer);
 }
 
 void FinishBufferPrint(gentity_t *ent) {

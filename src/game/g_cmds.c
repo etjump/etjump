@@ -837,8 +837,6 @@ void Cmd_Kill_f( gentity_t *ent )
 	ent->client->sess.lastKillTime = level.time;
 }
 
-void BotRecordTeamChange( int client );
-
 void G_TeamDataForString( const char* teamstr, int clientNum, team_t* team, spectatorState_t* sState, int* specClient ) {
 	*sState = SPECTATOR_NOT;
 	if( !Q_stricmp( teamstr, "follow1" ) ) {
@@ -985,7 +983,6 @@ qboolean SetTeam( gentity_t *ent, char *s, qboolean force, weapon_t w1, weapon_t
 	ClientBegin( clientNum );
 
 	G_verifyMatchState(oldTeam);
-	BotRecordTeamChange( clientNum );
 
 	// Reset stats when changing teams
 	if(team != oldTeam) {
@@ -1634,8 +1631,6 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded)
 	G_Say(ent, NULL, mode, encoded, ConcatArgs(((arg0) ? 0 : 1)));
 }
 
-extern void BotRecordVoiceChat( int client, int destclient, const char *id, int mode, qboolean noResponse );
-
 // NERVE - SMF
 void G_VoiceTo( gentity_t *ent, gentity_t *other, int mode, const char *id, qboolean voiceonly ) {
 	int color;
@@ -1686,10 +1681,6 @@ void G_VoiceTo( gentity_t *ent, gentity_t *other, int mode, const char *id, qboo
 		color = COLOR_GREEN;
 		cmd = "vchat";
 	}
-
-	// RF, record this chat so bots can parse them
-	// bots respond with voiceonly, so we check for this so they dont keep responding to responses
-	BotRecordVoiceChat( ent->s.number, other->s.number, id, mode, voiceonly == 2 );
 
 	if (voiceonly == 2) {
 		voiceonly = qfalse;

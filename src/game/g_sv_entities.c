@@ -141,35 +141,6 @@ g_serverEntity_t *FindServerEntity( g_serverEntity_t *from, int fieldofs, char *
 	return NULL;
 }
 
-// TAT 11/18/2002
-//		For the (possibly temporary) system of loading a separate file of these server entities
-extern void SP_SeekCover_Setup(g_serverEntity_t *ent);
-extern void SP_AIMarker_Setup(g_serverEntity_t *ent);
-
-// We have to hardcode the setup functions for these
-void InitServerEntitySetupFunc(g_serverEntity_t *ent)
-{
-	if (strcmp(ent->classname, "ai_marker") == 0)
-	{
-		ent->setup = SP_AIMarker_Setup;
-	}
-	else if (strcmp(ent->classname, "bot_seek_cover_spot") == 0)
-	{
-		// set the team to allies
-		ent->team = TEAM_ALLIES;
-		// set the setup func
-		ent->setup = SP_SeekCover_Setup;
-	}
-	else if (strcmp(ent->classname, "bot_axis_seek_cover_spot") == 0)
-	{
-		// set the team to axis
-		ent->team = TEAM_AXIS;
-		// set the setup func
-		ent->setup = SP_SeekCover_Setup;
-	}
-}
-
-
 // Create a server entity from some basic data
 void CreateServerEntityFromData(char* classname, char* targetname, char* target, vec3_t origin, int spawnflags, vec3_t angle)
 {
@@ -199,9 +170,6 @@ void CreateServerEntityFromData(char* classname, char* targetname, char* target,
 		//		these don't move, so we should only have to calc it once, the first
 		//		time someone asks for it
 		newEnt->areaNum = -1;
-
-		// and do class specific stuff
-		InitServerEntitySetupFunc(newEnt);
 	}
 }
 

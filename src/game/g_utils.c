@@ -1029,9 +1029,6 @@ void G_SetEntState( gentity_t *ent, entState_t state ) {
 										}
 									}
 
-									// if this is an mg42, then we should try and calculate mg42 spots again
-									BotCalculateMg42Spots();
-
 									break;
 	case STATE_UNDERCONSTRUCTION:	ent->entstate = STATE_UNDERCONSTRUCTION;
 									ent->s.powerups = STATE_UNDERCONSTRUCTION;
@@ -1387,4 +1384,242 @@ team_t G_GetTeamFromEntity( gentity_t *ent ) {
 	}
 
 	return TEAM_FREE;
+}
+
+/*
+===============
+BotFindEntityForName
+===============
+*/
+gentity_t *BotFindEntityForName( char *name )
+{
+	gentity_t *trav;
+	int i;
+
+	for (trav = g_entities, i = 0; i < level.maxclients; i++, trav++ ) {
+		if (!trav->inuse) {
+			continue;
+		}
+		if (!trav->client) {
+			continue;
+		}
+		if (!trav->aiName) {
+			continue;
+		}
+		if (Q_stricmp( trav->aiName, name )) {
+			continue;
+		}
+		return trav;
+	}
+	return NULL;
+}
+
+gentity_t* G_FindMissile( gentity_t* start, weapon_t weap ) {
+	int i = start ? (start-g_entities) + 1 : 0;
+	gentity_t* ent = &g_entities[i];
+
+	for( ; i < level.num_entities; i++, ent++) {
+		if( ent->s.eType != ET_MISSILE ) {
+			continue;
+		}
+
+		if( ent->s.weapon != weap ) {
+			continue;
+		}
+
+		return ent;
+	}
+
+	return NULL;
+}
+
+gentity_t* G_FindDynamite( gentity_t* start ) {
+	return G_FindMissile( start, WP_DYNAMITE );
+}
+
+gentity_t* G_FindSmokeBomb( gentity_t* start ) {
+	return G_FindMissile( start, WP_SMOKE_BOMB );
+}
+
+gentity_t* G_FindLandmine( gentity_t* start ) {
+	return G_FindMissile( start, WP_LANDMINE );
+}
+
+gentity_t* G_FindSatchels( gentity_t* start ) {
+	return G_FindMissile( start, WP_SATCHEL );
+}
+
+// Gordon: adding some support functions
+// returns qtrue if a construction is under way on this ent, even before it hits any stages
+qboolean G_ConstructionBegun( gentity_t* ent ) {
+	if( G_ConstructionIsPartlyBuilt( ent ) ) {
+		return qtrue;
+	}
+	
+	if( ent->s.angles2[0] ) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+// returns qtrue if all stage are built
+qboolean G_ConstructionIsFullyBuilt( gentity_t* ent ) {
+	if( ent->s.angles2[1] != 1 ) {
+		return qfalse;
+	}
+	return qtrue;
+}
+
+// returns qtrue if 1 stage or more is built
+qboolean G_ConstructionIsPartlyBuilt( gentity_t* ent ) {
+	if( G_ConstructionIsFullyBuilt( ent ) ) {
+		return qtrue;
+	}
+
+	if( ent->count2 ) {
+		if( !ent->grenadeFired ) {
+			return qfalse;
+		} else {
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
+qboolean G_ConstructionIsDestroyable( gentity_t* ent ) {
+	if(!G_ConstructionIsPartlyBuilt( ent )) {
+		return qfalse;
+	}
+
+	if( ent->s.angles2[0] ) {
+		return qfalse;
+	}
+
+	return qtrue;
+}
+
+// returns the constructible for this team that is attached to this toi
+gentity_t* G_ConstructionForTeam( gentity_t* toi, team_t team ) {
+	gentity_t* targ = toi->target_ent;
+	if(!targ || targ->s.eType != ET_CONSTRUCTIBLE) {
+		return NULL;
+	}
+
+	if( targ->spawnflags & 4 ) {
+		if( team == TEAM_ALLIES ) {
+			return targ->chain;
+		}
+	} else if( targ->spawnflags & 8 ) {
+		if( team == TEAM_AXIS ) {
+			return targ->chain;
+		}
+	}
+
+	return targ;
+}
+
+gentity_t* G_IsConstructible( team_t team, gentity_t* toi ) {
+	gentity_t* ent;
+
+	if( !toi || toi->s.eType != ET_OID_TRIGGER ) { 
+		return NULL;
+	}
+
+	if( !(ent = G_ConstructionForTeam( toi, team )) ) {
+		return NULL;
+	}
+
+	if( G_ConstructionIsFullyBuilt( ent ) ) {
+		return NULL;
+	}
+
+	if( ent->chain && G_ConstructionBegun( ent->chain ) ) {
+		return NULL;
+	}
+
+	return ent;
+}
+
+/*
+==============
+AngleDifference
+==============
+*/
+float AngleDifference(float ang1, float ang2) {
+	float diff;
+
+	diff = ang1 - ang2;
+	if (ang1 > ang2) {
+		if (diff > 180.0) diff -= 360.0;
+	}
+	else {
+		if (diff < -180.0) diff += 360.0;
+	}
+	return diff;
+}
+
+/*
+==================
+ClientName
+==================
+*/
+char *ClientName(int client, char *name, int size) {
+	char buf[MAX_INFO_STRING];
+
+	if (client < 0 || client >= MAX_CLIENTS) {
+		return "[client out of range]";
+	}
+	trap_GetConfigstring(CS_PLAYERS+client, buf, sizeof(buf));
+	strncpy(name, Info_ValueForKey(buf, "n"), size-1);
+	name[size-1] = '\0';
+	Q_CleanStr( name );
+	return name;
+}
+
+/*
+==================
+stristr
+==================
+*/
+char *stristr(char *str, char *charset) {
+	int i;
+
+	while(*str) {
+		for (i = 0; charset[i] && str[i]; i++) {
+			if (toupper(charset[i]) != toupper(str[i])) break;
+		}
+		if (!charset[i]) return str;
+		str++;
+	}
+	return NULL;
+}
+
+/*
+==================
+FindClientByName
+==================
+*/
+int FindClientByName(char *name) {
+	int i, j;
+	char buf[MAX_INFO_STRING];
+
+	for(j = 0; j < level.numConnectedClients; j++) {
+		i = level.sortedClients[j];
+		ClientName(i, buf, sizeof(buf));
+		if (!Q_stricmp(buf, name)) {
+			return i;
+		}
+	}
+
+	for(j = 0; j < level.numConnectedClients; j++) {
+		i = level.sortedClients[j];
+		ClientName(i, buf, sizeof(buf));
+		if( stristr(buf, name) ) {
+			return i;
+		}
+	}
+
+	return -1;
 }

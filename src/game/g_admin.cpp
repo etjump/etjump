@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <bitset>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include "g_leveldatabase.h"
 #include "g_userdatabase.h"
 #include "g_utilities.h"
 #include "g_admin.h"
+#include "g_mapdata.h"
 
 using std::vector;
 using std::string;
@@ -35,7 +37,9 @@ static AdminCommand Commands[] = {
     {"addlevel",		G_AddLevel,			'A',	"Adds admin level to admin level database.", "!levadd <level>"},
 	{"editlevel",		G_EditLevel,		'A',	"Edits admin level.", "!levedit <level> <name|gtext|cmds> <third parameter>"},
 	{"levinfo",			G_LevInfo,	    	'A',	"Prints information about admin levels.", "!levinfo or !levinfo <level>"},
-    {"listmaps",		G_ListMaps,		'a',	"Prints a list of all maps on the server.", "!listmaps"},
+    {"listmaps",		G_ListMaps,		    'a',	"Prints a list of all maps on the server.", "!listmaps"},
+    {"mapinfo",         G_MapInfo,          'H',    "Prints statistics about map.", "!mapinfo <map>"},
+    {"mostplayed",      G_MostPlayed,       'H',    "Prints most played maps.", "!mostplayed"},
     {"", 0, 0, "", ""}
 };
 
@@ -75,23 +79,6 @@ void RequestLogin(int clientNum) {
 // Ask client to send guid
 void RequestGuid(int clientNum) {
     trap_SendServerCommand(clientNum, "guid_request");
-}
-
-// Called on ClientBegin() on g_main.c
-void G_ClientBegin(gentity_t *ent) {
-    
-}
-
-// Called on ClientConnect() on g_main.c
-void G_ClientConnect(gentity_t *ent, qboolean firstTime) {
-    if(firstTime) {
-        ResetData(ent->client->ps.clientNum);
-    }
-}
-
-// Called on ClientDisconnect() on g_main.c
-void G_ClientDisconnect(gentity_t *ent) {
-    ResetData(ent->client->ps.clientNum);
 }
 
 // Parses clients guid and loads user from database
@@ -183,10 +170,12 @@ AdminCommand *MatchCommand(string keyword) {
     std::transform(keyword.begin(), keyword.end(), keyword.begin(), ::tolower);
     // Find command(s)
     for(int i = 0; Commands[i].handler != 0; i++) {
-        if(Commands[i].keyword.compare(0, keyword.length(), keyword) == 0) {
+        if(Commands[i].keyword == keyword) {
+            return &Commands[i];
+        } else if(Commands[i].keyword.compare(0, keyword.length(), keyword) == 0) {
             matchcount++;
             command = &Commands[i];
-        }
+        }  
     }
     // only return a command if there's just one
     if(matchcount == 1) {
@@ -449,6 +438,8 @@ qboolean G_CommandCheck(gentity_t *ent) {
 
     return qtrue;
 }
+
+const string MORE_INFO = "^7check console for more information.";
 
 qboolean G_SetIdLevel(gentity_t *ent, unsigned skipargs) {
 
@@ -1089,5 +1080,105 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {
     FinishBufferPrint(ent);
     if(ent)
 		ent->client->sess.last_listmaps_time = level.time;
+    return qtrue;
+}
+
+qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
+    vector<string> argv = GetSayArgs();
+    MapInfo minfo;
+    time_t t;
+    tm *lt;
+    char date[MAX_TOKEN_CHARS];
+    
+    if(argv.size() == 1 + skipargs) {
+        minfo = mapData.mapInfo(level.rawmapname);
+    }
+
+    else if(argv.size() >= 1 + skipargs) {
+        minfo = mapData.mapInfo(argv[1+skipargs]);
+    } else {
+        return qfalse;
+    }
+
+    t = minfo.lastPlayed;
+    lt = localtime(&t);
+    strftime(date, sizeof(date), "%d/%m/%y %H:%M:%S", lt);
+
+    int hours = minfo.minutesPlayed / 60;
+    int minutes = minfo.minutesPlayed - (hours - minfo.minutesPlayed);
+
+    boost::format output = 
+        boost::format("^g%1% ^7was last played on %2%. It has been played %3% times. (%4% hours %5% minutes)");
+    output % minfo.mapName % date % minfo.timesPlayed % hours % minutes;
+
+    ChatPrintTo(ent, "^3!mapinfo: ^7" + output.str());
+
+    return qtrue;
+}
+
+string timeToString(int time) {
+    time_t t;
+    tm *lt;
+    char date[32];
+
+    t = time;
+    lt = localtime(&t);
+    strftime(date, sizeof(date), "%d/%m/%y %H:%M:%S", lt);
+
+    return date;
+}
+
+// Most played maps are:
+// Rank Map                    Played       Time         Last played       
+// 4    30           16/01/13 18:32:19
+// 4|30|
+
+string mostPlayedFormattedOutput(int rank, vector<MapInfo>::const_iterator minfo) {
+
+    int hours = 0;
+    int minutes = 0;
+
+    string hoursPlayed;
+    string timesPlayed; 
+
+    boost::format formatted_output =
+                boost::format("%|1$-4| %|2$-22| %|3$-12| %|4$-12| %|5$-17| \n");
+
+    try {
+        hours = minfo->minutesPlayed / 60;
+        minutes = minfo->minutesPlayed - hours*60;
+        hoursPlayed = IntToString(hours)+"h "+IntToString(minutes)+"min";
+        if(minfo->timesPlayed == 1) {
+            timesPlayed = IntToString(minfo->timesPlayed) + " time";
+        } else {
+            timesPlayed = IntToString(minfo->timesPlayed) + " times";
+        }
+        formatted_output % rank % minfo->mapName % timesPlayed % hoursPlayed % timeToString(minfo->lastPlayed);
+    }
+    catch(boost::io::format_error exc) {
+        LogPrintln(exc.what());
+        return "Error while formatting string.";
+    }
+    return formatted_output.str();
+}
+
+const string LAYOUT = "^gRank Map                    Played       Time         Last played       ";
+qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs) {
+    const vector<MapInfo> *mostPlayed = mapData.mostPlayed();
+    if(ent) {
+        ChatPrintTo(ent, "^3!mostplayed:^7 " + MORE_INFO);
+    }
+    PrintTo(ent, LAYOUT);
+
+    int rank = 1;
+    BeginBufferPrint();
+
+    vector<MapInfo>::const_iterator it = mostPlayed->begin();
+    while(it != mostPlayed->end()) {
+        BufferPrint(ent, mostPlayedFormattedOutput(rank, it));
+        it++;
+        rank++;
+    }
+    FinishBufferPrintNoNewline(ent);
     return qtrue;
 }

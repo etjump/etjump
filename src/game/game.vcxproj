@@ -140,14 +140,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\botai\ai_cmd.c" />
-    <ClCompile Include="..\botai\ai_dmgoal_mp.c" />
-    <ClCompile Include="..\botai\ai_dmnet_mp.c" />
-    <ClCompile Include="..\botai\ai_dmq3.c" />
-    <ClCompile Include="..\botai\ai_main.c" />
-    <ClCompile Include="..\botai\ai_script.c" />
-    <ClCompile Include="..\botai\ai_script_actions.c" />
-    <ClCompile Include="..\botai\ai_team.c" />
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
@@ -171,7 +163,6 @@
     <ClCompile Include="g_admin.cpp" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
-    <ClCompile Include="g_bot.c" />
     <ClCompile Include="g_buddy_list.c" />
     <ClCompile Include="g_character.c" />
     <ClCompile Include="g_client.c" />
@@ -183,6 +174,8 @@
     <ClCompile Include="g_leveldatabase.cpp" />
     <ClCompile Include="g_main.c" />
     <ClCompile Include="g_banner.cpp" />
+    <ClCompile Include="g_main_ext.cpp" />
+    <ClCompile Include="g_mapdata.cpp" />
     <ClCompile Include="g_maplist.cpp" />
     <ClCompile Include="g_match.c" />
     <ClCompile Include="g_mem.c" />
@@ -216,39 +209,17 @@
     <None Include="game.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\botai\ai_botScriptTrigger.h" />
-    <ClInclude Include="..\botai\ai_botScriptTriggerX.h" />
-    <ClInclude Include="..\botai\ai_cmd.h" />
-    <ClInclude Include="..\botai\ai_distances.h" />
-    <ClInclude Include="..\botai\ai_dmgoal_mp.h" />
-    <ClInclude Include="..\botai\ai_dmgoal_sp.h" />
-    <ClInclude Include="..\botai\ai_dmnet_mp.h" />
-    <ClInclude Include="..\botai\ai_dmnet_sp.h" />
-    <ClInclude Include="..\botai\ai_dmq3.h" />
-    <ClInclude Include="..\botai\ai_main.h" />
-    <ClInclude Include="..\botai\ai_matrix.h" />
-    <ClInclude Include="..\botai\ai_team.h" />
-    <ClInclude Include="..\botai\ai_teamX.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="..\sqlite\sqlite3pp.h" />
-    <ClInclude Include="be_aas.h" />
-    <ClInclude Include="be_ai_char.h" />
-    <ClInclude Include="be_ai_chat.h" />
-    <ClInclude Include="be_ai_gen.h" />
-    <ClInclude Include="be_ai_goal.h" />
-    <ClInclude Include="be_ai_move.h" />
-    <ClInclude Include="be_ai_weap.h" />
-    <ClInclude Include="be_ea.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
-    <ClInclude Include="..\botai\botai.h" />
-    <ClInclude Include="botlib.h" />
     <ClInclude Include="..\botai\chars.h" />
     <ClInclude Include="g_admin.h" />
     <ClInclude Include="g_leveldatabase.h" />
     <ClInclude Include="g_local.h" />
+    <ClInclude Include="g_mapdata.h" />
     <ClInclude Include="g_public.h" />
     <ClInclude Include="g_team.h" />
     <ClInclude Include="..\botai\inv.h" />

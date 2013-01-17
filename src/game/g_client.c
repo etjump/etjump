@@ -744,8 +744,6 @@ qboolean AddWeaponToPlayer( gclient_t *client, weapon_t weapon, int ammo, int am
 	return qtrue;
 }
 
-void BotSetPOW(int entityNum, qboolean isPOW);
-
 /*
 ===========
 SetWolfSpawnWeapons
@@ -775,16 +773,6 @@ void SetWolfSpawnWeapons( gclient_t *client )
 	// All players start with a knife (not OR-ing so that it clears previous weapons)
 	client->ps.weapons[0] = 0;
 	client->ps.weapons[1] = 0;
-
-	// Gordon: set up pow status
-	if( isBot ) {
-		if( isPOW ) {
-			BotSetPOW( client->ps.clientNum, qtrue );
-			return;
-		} else {
-			BotSetPOW( client->ps.clientNum, qfalse );
-		}
-	}
 
 	AddWeaponToPlayer( client, WP_KNIFE, 1, 0, qtrue );
 	AddWeaponToPlayer( client, WP_MEDIC_ADRENALINE, 1, 1, qtrue );
@@ -2095,18 +2083,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=569
 	G_ResetMarkers( ent );
 
-	// Set up bot speed bonusses
-	BotSpeedBonus( ent->s.number );
-
 	// RF, start the scripting system
 	if (!revived && client->sess.sessionTeam != TEAM_SPECTATOR) {
-		Bot_ScriptInitBot( ent->s.number );
-		//
-		if (spawnPoint && spawnPoint->targetname) {
-			Bot_ScriptEvent( ent->s.number, "spawn", spawnPoint->targetname );
-		} else {
-			Bot_ScriptEvent( ent->s.number, "spawn", "" );
-		}
 		// RF, call entity scripting event
 		G_Script_ScriptEvent( ent, "playerstart", "" );
 	} 
@@ -2254,10 +2232,6 @@ void ClientDisconnect( int clientNum ) {
 
 
 	CalculateRanks();
-
-	if ( ent->r.svFlags & SVF_BOT ) {
-		BotAIShutdownClient( clientNum );
-	}
 
 	// OSP
 	G_verifyMatchState(i);

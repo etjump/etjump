@@ -179,42 +179,6 @@ void G_SetClientSound( gentity_t *ent ) {
 
 /*
 ==============
-PushBot
-==============
-*/
-void BotVoiceChatAfterIdleTime( int client, const char *id, int mode, int delay, qboolean voiceonly, int idleTime, qboolean forceIfDead );
-
-void PushBot( gentity_t *ent, gentity_t *other ) {
-	vec3_t dir, ang, f, r;
-	float oldspeed;
-	//
-	oldspeed = VectorLength( other->client->ps.velocity );
-	if (oldspeed < 200)
-		oldspeed = 200;
-	//
-	VectorSubtract( other->r.currentOrigin, ent->r.currentOrigin, dir );
-	VectorNormalize( dir );
-	vectoangles( dir, ang );
-	AngleVectors( ang, f, r, NULL );
-	f[2] = 0;
-	r[2] = 0;
-	//
-	VectorMA( other->client->ps.velocity, 200, f, other->client->ps.velocity );
-	VectorMA( other->client->ps.velocity, 100 * ((level.time+(ent->s.number*1000))%4000 < 2000 ? 1.0 : -1.0), r, other->client->ps.velocity );
-	//
-	if (VectorLengthSquared( other->client->ps.velocity ) > SQR(oldspeed)) {
-		VectorNormalize( other->client->ps.velocity );
-		VectorScale( other->client->ps.velocity, oldspeed, other->client->ps.velocity );
-	}
-	//
-	// also, if "ent" is a bot, tell "other" to move!
-	if (rand()%50 == 0 && (ent->r.svFlags & SVF_BOT) && oldspeed < 10) {
-		BotVoiceChatAfterIdleTime( ent->s.number, "Move", SAY_TEAM, 1000, qfalse, 20000, qfalse );
-	}
-}
-
-/*
-==============
 ClientNeedsAmmo
 ==============
 */
@@ -274,23 +238,6 @@ qboolean ReadyToConstruct(gentity_t *ent, gentity_t *constructible, qboolean upd
 	return qtrue;
 }
 
-void BotSetBlockEnt( int client, int blocker );
-/*
-==============
-CheckBotImpacts
-==============
-*/
-void CheckBotImpacts( gentity_t *ent, gentity_t *other ) {
-	char *blockEnts[] = {"func_explosive", NULL};
-	int j;
-
-	for (j=0; blockEnts[j]; j++) {
-		if (other->classname && !Q_stricmp( other->classname, blockEnts[j] )) {
-			BotSetBlockEnt( ent->s.number, other->s.number );
-		}
-	}
-}
-
 //==============================================================
 
 /*
@@ -314,32 +261,6 @@ void ClientImpacts( gentity_t *ent, pmove_t *pm ) {
 			continue;	// duplicated
 		}
 		other = &g_entities[ pm->touchents[i] ];
-
-		if ( ( ent->r.svFlags & SVF_BOT ) && ( ent->touch ) ) {
-			ent->touch( ent, other, &trace );
-		}
-
-		// RF, bot should get pushed out the way
-		if ( (ent->client) /*&& !(ent->r.svFlags & SVF_BOT)*/ && (other->r.svFlags & SVF_BOT) ) {
-/*			vec3_t dir;
-			// if we are not heading for them, ignore
-			VectorSubtract( other->r.currentOrigin, ent->r.currentOrigin, dir );
-			VectorNormalize( dir );
-			if (DotProduct( ent->client->ps.velocity, dir ) > 0) {
-				PushBot( ent, other );
-			}
-*/
-			PushBot( ent, other );
-		}
-
-		// if we are standing on their head, then we should be pushed also
-		if ( (ent->r.svFlags & SVF_BOT) && ent->s.groundEntityNum == other->s.number && other->client) {
-			PushBot( other, ent );
-		}
-
-		if ( ent->r.svFlags & SVF_BOT ) {
-			CheckBotImpacts( ent, other );
-		}
 
 		if ( !other->touch ) {
 			continue;

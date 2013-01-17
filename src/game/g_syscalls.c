@@ -509,12 +509,6 @@ int trap_AAS_Retreat
 	return syscall( BOTLIB_AAS_RETREAT, dangerSpots, dangerSpotCount, srcpos, srcarea, dangerpos, dangerarea, PASSFLOAT(range), PASSFLOAT(dangerRange),travelflags );
 }
 
-int trap_AAS_AlternativeRouteGoals(vec3_t start, vec3_t goal, int travelflags,
-										 aas_altroutegoal_t *altroutegoals, int maxaltroutegoals,
-										 int color) {
-	return syscall( BOTLIB_AAS_ALTROUTEGOALS, start, goal, travelflags, altroutegoals, maxaltroutegoals, color );
-}
-
 void trap_AAS_SetAASBlockingEntity( vec3_t absmin, vec3_t absmax, int blocking ) {
 	syscall( BOTLIB_AAS_SETAASBLOCKINGENTITY, absmin, absmax, blocking );
 }

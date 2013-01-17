@@ -994,6 +994,12 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
+    if (!Q_stricmp(cmd, "updatemapdatabase")) {
+        Svcmd_UpdateMapDatabase_f();
+        G_LogPrintf("***Map database updated.***\n");
+        return qtrue;
+    }
+
 	// -NERVE - SMF
 
 	if (Q_stricmp (cmd, "makeReferee") == 0) {
@@ -1018,11 +1024,6 @@ qboolean	ConsoleCommand( void ) {
 
 	if (Q_stricmp (cmd, "ban") == 0) {
 		G_PlayerBan();
-		return qtrue;
-	}
-
-	if (Q_stricmp (cmd, "spawnbot") == 0) {
-		Svcmd_SpawnBot();
 		return qtrue;
 	}
 
