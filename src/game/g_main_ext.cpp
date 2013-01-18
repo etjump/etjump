@@ -31,7 +31,7 @@ void G_InitGame_ext(int levelTime, int randomSeed, int restart ) {
 
 // Very expensive, don't call if not necessary
 void Svcmd_UpdateMapDatabase_f() {
-    mapData.updateMapDatabase();
+    //mapData.updateMapDatabase();
 }
 
 /*
@@ -54,5 +54,6 @@ void G_ShutdownGame_ext( int restart ) {
     int msecPlayed = level.time - level.startTime;
     int minutesPlayed = msecPlayed/1000/60;
 
-    mapData.update(level.rawmapname, timeInt, 1, minutesPlayed);
+    mapData.updateMap(level.rawmapname, timeInt, minutesPlayed);
 }
+

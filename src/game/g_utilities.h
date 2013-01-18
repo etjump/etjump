@@ -44,8 +44,6 @@ bool StringToInt(const string& source, int& target);
 string SHA1(const string& to_hash);
 gentity_t *PlayerForName(const string& name, string& error);
 
-// Doesn't really belong here.
-// Located at g_maplist.cpp
 const vector<string> *G_GetMapList();
 
 #endif

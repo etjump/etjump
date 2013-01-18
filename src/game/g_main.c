@@ -1842,7 +1842,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
 
     G_InitGame_ext(levelTime, randomSeed, restart);
-    
 }
 
 

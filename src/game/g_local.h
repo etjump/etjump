@@ -656,6 +656,7 @@ typedef struct {
 	int			client_map_id;
 
     int         last_listmaps_time;
+    int         lastMostPlayedListTime;
 
 	qboolean	versionOK;
 } clientSession_t;
@@ -2609,5 +2610,6 @@ qboolean G_LevInfo(gentity_t *ent, unsigned skipargs);
 qboolean G_ListMaps(gentity_t *ent, unsigned skipargs);
 qboolean G_MapInfo(gentity_t *ent, unsigned skipargs);
 qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs);
+qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs);
 #endif // G_LOCAL_H
 

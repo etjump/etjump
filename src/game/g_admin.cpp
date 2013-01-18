@@ -40,6 +40,7 @@ static AdminCommand Commands[] = {
     {"listmaps",		G_ListMaps,		    'a',	"Prints a list of all maps on the server.", "!listmaps"},
     {"mapinfo",         G_MapInfo,          'H',    "Prints statistics about map.", "!mapinfo <map>"},
     {"mostplayed",      G_MostPlayed,       'H',    "Prints most played maps.", "!mostplayed"},
+    {"leastplayed",     G_LeastPlayedMaps,  'H',    "Prints least played maps.", "!leastplayed"},
     {"", 0, 0, "", ""}
 };
 
@@ -1058,26 +1059,7 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {
 
     }
 
-    BeginBufferPrint();
-
-    const vector<string> *map_list = G_GetMapList();
-
-    vector<string>::const_reverse_iterator map_it = map_list->rbegin();
-
-    int count = 0;
-    while(map_it != map_list->rend()) {
-
-        if(count % columns == 0 && count != 0) {
-            BufferPrint(ent, "\n");
-        }
-
-        BufferPrint(ent, va("%-27s ", map_it->c_str()));
-
-        map_it++;
-        count++;
-    }
-
-    FinishBufferPrint(ent);
+    mapData.printMapList(ent, columns);
     if(ent)
 		ent->client->sess.last_listmaps_time = level.time;
     return qtrue;
@@ -1105,7 +1087,7 @@ qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
     strftime(date, sizeof(date), "%d/%m/%y %H:%M:%S", lt);
 
     int hours = minfo.minutesPlayed / 60;
-    int minutes = minfo.minutesPlayed - (hours - minfo.minutesPlayed);
+    int minutes = minfo.minutesPlayed - hours*60;
 
     boost::format output = 
         boost::format("^g%1% ^7was last played on %2%. It has been played %3% times. (%4% hours %5% minutes)");
@@ -1116,69 +1098,28 @@ qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
     return qtrue;
 }
 
-string timeToString(int time) {
-    time_t t;
-    tm *lt;
-    char date[32];
-
-    t = time;
-    lt = localtime(&t);
-    strftime(date, sizeof(date), "%d/%m/%y %H:%M:%S", lt);
-
-    return date;
-}
-
-// Most played maps are:
-// Rank Map                    Played       Time         Last played       
-// 4    30           16/01/13 18:32:19
-// 4|30|
-
-string mostPlayedFormattedOutput(int rank, vector<MapInfo>::const_iterator minfo) {
-
-    int hours = 0;
-    int minutes = 0;
-
-    string hoursPlayed;
-    string timesPlayed; 
-
-    boost::format formatted_output =
-                boost::format("%|1$-4| %|2$-22| %|3$-12| %|4$-12| %|5$-17| \n");
-
-    try {
-        hours = minfo->minutesPlayed / 60;
-        minutes = minfo->minutesPlayed - hours*60;
-        hoursPlayed = IntToString(hours)+"h "+IntToString(minutes)+"min";
-        if(minfo->timesPlayed == 1) {
-            timesPlayed = IntToString(minfo->timesPlayed) + " time";
-        } else {
-            timesPlayed = IntToString(minfo->timesPlayed) + " times";
-        }
-        formatted_output % rank % minfo->mapName % timesPlayed % hoursPlayed % timeToString(minfo->lastPlayed);
-    }
-    catch(boost::io::format_error exc) {
-        LogPrintln(exc.what());
-        return "Error while formatting string.";
-    }
-    return formatted_output.str();
-}
-
-const string LAYOUT = "^gRank Map                    Played       Time         Last played       ";
 qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs) {
-    const vector<MapInfo> *mostPlayed = mapData.mostPlayed();
-    if(ent) {
-        ChatPrintTo(ent, "^3!mostplayed:^7 " + MORE_INFO);
+    //FIXME: CRASHING
+    if(ent->client->sess.lastMostPlayedListTime > level.time + 15000) {
+        ChatPrintTo(ent, va("^3!mostplayed:^7 you must wait atleast %d seconds before using !mostplayed again.", 
+				((ent->client->sess.lastMostPlayedListTime + 15000 - level.time)/1000)));
+        return qfalse;
     }
-    PrintTo(ent, LAYOUT);
 
-    int rank = 1;
-    BeginBufferPrint();
+    int mapCount = 10;
+    mapData.printMostPlayedMaps(ent, mapCount);
+    return qtrue;
+}
 
-    vector<MapInfo>::const_iterator it = mostPlayed->begin();
-    while(it != mostPlayed->end()) {
-        BufferPrint(ent, mostPlayedFormattedOutput(rank, it));
-        it++;
-        rank++;
+qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs) {
+
+    if(ent->client->sess.lastMostPlayedListTime > level.time + 15000) {
+        ChatPrintTo(ent, va("^3!mostplayed:^7 you must wait atleast %d seconds before using !leastplayed again.", 
+				((ent->client->sess.lastMostPlayedListTime + 15000 - level.time)/1000)));
+        return qfalse;
     }
-    FinishBufferPrintNoNewline(ent);
+
+    int mapCount = 10;
+    mapData.printLeastPlayedMaps(ent, mapCount);
     return qtrue;
 }
