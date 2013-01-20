@@ -90,20 +90,20 @@ void GuidReceived(gentity_t *ent) {
         return;
     }
 
-    vector<string> argv = GetArgs();
+    Arguments argv = GetArgs();
 
     // etguid <hash>
-    if(argv.size() != 2) {
+    if(argv->size() != 2) {
         RequestGuid(ent->client->ps.clientNum);
         return;
     }
 
-    if(argv.at(1).length() != 40) {
+    if(argv->at(1).length() != 40) {
         RequestGuid(ent->client->ps.clientNum);
         return;
     }
 
-    string guid = SHA1(argv.at(1));
+    string guid = SHA1(argv->at(1));
     
     clients[ent->client->ps.clientNum].guid = guid;
 
@@ -145,15 +145,15 @@ void AdminLogin(gentity_t *ent) {
         return;
     }
 
-    vector<string> argv = GetArgs();
+    Arguments argv = GetArgs();
 
     // adminlogin <user> <pass>
-    if(argv.size() != 3) {
+    if(argv->size() != 3) {
         return;
     }
 
-    string username = argv.at(1);
-    string password = SHA1(argv.at(2));
+    string username = argv->at(1);
+    string password = SHA1(argv->at(2));
 
     clients[ent->client->ps.clientNum].username = username;
     clients[ent->client->ps.clientNum].password = password;
@@ -369,20 +369,20 @@ qboolean G_CommandCheck(gentity_t *ent) {
         return qfalse;
     }
 
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
     unsigned skipargs = 0;
 
-    if(argv.size() < 1) {
+    if(argv->size() < 1) {
         return qfalse;
     }
 
     // If calling entity was a player that used chat
     // to call a command, skip the "say" argument
-    if(argv[0] == "say" || argv[0] == "enc_say") {
+    if((*argv)[0] == "say" || (*argv)[0] == "enc_say") {
         skipargs = 1;
     }
 
-    if(argv.size() < 1 + skipargs) {
+    if(argv->size() < 1 + skipargs) {
         return qfalse;
     }
 
@@ -405,13 +405,13 @@ qboolean G_CommandCheck(gentity_t *ent) {
 
     string keyword;
     // Remove the ! from the command
-    if(argv[0+skipargs][0] == '!') {
-        keyword = argv[0+skipargs].substr(1);
+    if((*argv)[0+skipargs][0] == '!') {
+        keyword = (*argv)[0+skipargs].substr(1);
     } 
     // If there was no !, check if caller was console
     // if yes, just use the arg itself, no need to remove !
     else if(!ent) {
-        keyword = argv[0+skipargs];
+        keyword = (*argv)[0+skipargs];
     }
     // Should never get here
     else {
@@ -448,25 +448,25 @@ qboolean G_SetIdLevel(gentity_t *ent, unsigned skipargs) {
 
     int id = UNKNOWN_ID;
     int alevel = -1;
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
 
     // This shouldn't ever happen
-    if(argv.size() != 4 + skipargs) {
+    if((*argv).size() != 4 + skipargs) {
         ChatPrintTo(ent, "^3usage:^7 !setlevel -id <id> <level>");
         return qfalse;
     }
     
-    if(argv.at(1 + skipargs) != "-id") {
+    if((*argv).at(1 + skipargs) != "-id") {
         ChatPrintTo(ent, "^3usage:^7 !setlevel -id <id> <level>");
         return qfalse;
     }
 
-    if(!StringToInt(argv.at(2 + skipargs), id)) {
+    if(!StringToInt((*argv).at(2 + skipargs), id)) {
         ChatPrintTo(ent, "^3usage:^7 !setlevel -id <id> <level>");
         return qfalse;
     }
 
-    if(!StringToInt(argv.at(3 + skipargs), alevel)) {
+    if(!StringToInt((*argv).at(3 + skipargs), alevel)) {
         ChatPrintTo(ent, "^3usage:^7 !setlevel -id <id> <level>");
         return qfalse;
     }
@@ -502,8 +502,8 @@ qboolean G_SetIdLevel(gentity_t *ent, unsigned skipargs) {
         }
     }
     
-    ChatPrintTo(ent, "^3setlevel:^7 id: " + argv.at(2+skipargs)
-        + "^7 is now a level " + argv.at(3+skipargs) + " user.");
+    ChatPrintTo(ent, "^3setlevel:^7 id: " + (*argv).at(2+skipargs)
+        + "^7 is now a level " + (*argv).at(3+skipargs) + " user.");
     return qtrue;
 }
  
@@ -514,12 +514,12 @@ qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
         return qfalse;
     }
 
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
     string error_msg;
     gentity_t *target = 0;
 
-    if(argv.size() != 3 + skipargs) {
-        if(argv.size() == 4 + skipargs) {
+    if((*argv).size() != 3 + skipargs) {
+        if((*argv).size() == 4 + skipargs) {
             return G_SetIdLevel(ent, skipargs);            
         }
         ChatPrintTo(ent, "^3usage: ^7!setlevel <target> <level>");
@@ -528,8 +528,8 @@ qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
 
     int level = -1;
 
-    if(!StringToInt(argv.at(2 + skipargs), level)) {
-        ChatPrintTo(ent, string("^3setlevel:^7 invalid number " + argv.at(2)).c_str());
+    if(!StringToInt((*argv).at(2 + skipargs), level)) {
+        ChatPrintTo(ent, string("^3setlevel:^7 invalid number " + (*argv).at(2)).c_str());
         return qfalse;
     }
 
@@ -545,7 +545,7 @@ qboolean G_SetLevel(gentity_t *ent, unsigned skipargs) {
         }
     }
 
-    target = PlayerForName(argv.at(1 + skipargs), error_msg);
+    target = PlayerForName((*argv).at(1 + skipargs), error_msg);
 
     if(!target) {
         ChatPrintTo(ent, "^3setlevel:^7 " + error_msg);
@@ -600,16 +600,16 @@ qboolean G_AdminTest(gentity_t *ent, unsigned skipargs) {
 
 // Prints the level of target player
 qboolean G_Finger(gentity_t *ent, unsigned skipargs) {
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
 
     // !Finger name
-    if(argv.size() != 2 + skipargs) {
+    if((*argv).size() != 2 + skipargs) {
         ChatPrintTo(ent, "^3usage: ^7!finger <name>");
         return qfalse;
     }
 
     string error;
-    gentity_t *target = PlayerForName(argv.at(1 + skipargs), error);
+    gentity_t *target = PlayerForName((*argv).at(1 + skipargs), error);
 
     if(!target) {
         ChatPrintTo(ent, "^3finger: ^7" + error);
@@ -623,11 +623,11 @@ qboolean G_Finger(gentity_t *ent, unsigned skipargs) {
 
 // Prints a list of all commands OR detailed information about one command
 qboolean G_Help(gentity_t *ent, unsigned skipargs) {
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
 
     BeginBufferPrint();
 
-    if(argv.size() == 1 + skipargs) {
+    if((*argv).size() == 1 + skipargs) {
         int count = 0;
 
         ChatPrintTo(ent, "^3help:^7 check console for more information.");
@@ -648,7 +648,7 @@ qboolean G_Help(gentity_t *ent, unsigned skipargs) {
     else {
 
         for(unsigned i = 0; Commands[i].handler; i++) {
-            if(argv.at(1 + skipargs) == Commands[i].keyword) {
+            if((*argv).at(1 + skipargs) == Commands[i].keyword) {
                 if(!G_HasPermission(ent, Commands[i].flag)) {
                     return qfalse;
                 }
@@ -666,15 +666,15 @@ qboolean G_Help(gentity_t *ent, unsigned skipargs) {
 // Kicks a client from the server
 
 qboolean G_Kick(gentity_t *ent, unsigned skipargs) {
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
 
-    if(argv.size() < 2 + skipargs) {
+    if((*argv).size() < 2 + skipargs) {
         ChatPrintTo(ent, "^3usage: ^7!kick <player> <timeout> <reason>");
         return qfalse;
     }
 
     string error_msg;
-    gentity_t *target = PlayerForName(argv.at(1 + skipargs), error_msg);
+    gentity_t *target = PlayerForName((*argv).at(1 + skipargs), error_msg);
 
     if(!target) {
         ChatPrintTo(ent, "^3kick: ^7" + error_msg);
@@ -694,13 +694,13 @@ qboolean G_Kick(gentity_t *ent, unsigned skipargs) {
     int timeout = 60;
     string reason = "You've been kicked.";
 
-    if(argv.size() >= 3 + skipargs) {
-        if(!StringToInt(argv.at(2+skipargs), timeout)) {
-            ChatPrintTo(ent, "^3kick: ^7invalid timeout \""+argv.at(2+skipargs)+"\" specified. Using default (60).");
+    if((*argv).size() >= 3 + skipargs) {
+        if(!StringToInt((*argv).at(2+skipargs), timeout)) {
+            ChatPrintTo(ent, "^3kick: ^7invalid timeout \""+(*argv).at(2+skipargs)+"\" specified. Using default (60).");
         }
     }
 
-    if(argv.size() >= 4 + skipargs) {
+    if((*argv).size() >= 4 + skipargs) {
         reason = Q_SayConcatArgs(3 + skipargs);
     }
 
@@ -720,42 +720,42 @@ qboolean G_Kick(gentity_t *ent, unsigned skipargs) {
 
 qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs) {
 
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
     const string USAGE = "^3usage:^7 !findplayer <-name|-level|-level> <name|level|guid>";
 
-    if(argv.size() < 3 + skipargs) {
+    if(argv->size() < 3 + skipargs) {
         ChatPrintTo(ent, USAGE);
         return qfalse;
     }
 
-    vector<string>::iterator it = argv.begin();
-    vector<string>::iterator name_it = argv.end();
-    vector<string>::iterator ip_it = argv.end();
-    vector<string>::iterator guid_it = argv.end();
-    vector<string>::iterator level_it = argv.end();
-    vector<string>::iterator id_it = argv.end();
+    vector<string>::const_iterator it = argv->begin();
+    vector<string>::const_iterator name_it = argv->end();
+    vector<string>::const_iterator ip_it = argv->end();
+    vector<string>::const_iterator guid_it = argv->end();
+    vector<string>::const_iterator level_it = argv->end();
+    vector<string>::const_iterator id_it = argv->end();
 
     // Find all switches with a following argument
     // and save them to iterators
-    while(it != argv.end()) {
+    while(it != argv->end()) {
 
-        if(*it == "-name" && (it + 1) != argv.end()) {
+        if(*it == "-name" && (it + 1) != argv->end()) {
             name_it = it;
         }
 
-        else if(*it == "-level" && (it + 1) != argv.end()) {
+        else if(*it == "-level" && (it + 1) != argv->end()) {
             level_it = it;
         }
 
-        else if(*it == "-guid" && (it + 1) != argv.end()) {
+        else if(*it == "-guid" && (it + 1) != argv->end()) {
             guid_it = it;
         }
 
-        else if(*it == "-ip" && (it + 1) != argv.end()) {
+        else if(*it == "-ip" && (it + 1) != argv->end()) {
             ip_it = it;
         }
 
-        else if(*it == "-id" && (it + 1) != argv.end()) {
+        else if(*it == "-id" && (it + 1) != argv->end()) {
             id_it = it;
         }
 
@@ -771,26 +771,26 @@ qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs) {
     // the next argument in vector exists if iterator is not end()
     // because it's checked on the previous loop
 
-    if(name_it != argv.end()) {
+    if(name_it != argv->end()) {
         name = *(name_it + 1);
     }
 
-    if(level_it != argv.end()) {
+    if(level_it != argv->end()) {
         if(!StringToInt(*(level_it + 1), level)) {
             level = 0;
         }
     }
 
-    if(guid_it != argv.end()) {
+    if(guid_it != argv->end()) {
         guid = *(guid_it + 1);
         std::transform(guid.begin(), guid.end(), guid.begin(), ::toupper);
     }
 
-    if(ip_it != argv.end()) {
+    if(ip_it != argv->end()) {
         ip = *(ip_it + 1);
     }
 
-    if(id_it != argv.end()) {
+    if(id_it != argv->end()) {
         if(!StringToInt(*(id_it + 1), id)) {
             id = -1;
             ChatPrintTo(ent, "^3!listplayer: ^7invalid id");
@@ -806,15 +806,15 @@ qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs) {
 qboolean G_Userinfo(gentity_t *ent, unsigned skipargs) {
 
     // !userinfo id 
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
     int id = UNKNOWN_ID;
 
-    if(argv.size() != 2 + skipargs) {
+    if(argv->size() != 2 + skipargs) {
         ChatPrintTo(ent, "^3usage:^7 !userinfo id");
         return qfalse;
     }
 
-    if(!StringToInt(argv.at(1 + skipargs), id)) {
+    if(!StringToInt(argv->at(1 + skipargs), id)) {
         ChatPrintTo(ent, "^3usage:^7 invalid id specified");
         return qfalse;
     }
@@ -832,7 +832,7 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
 
     // Editable:
     // level, commands, greeting
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
     int id = UNKNOWN_ID;
     const string USAGE = "^3usage:^7 !edituser <id> <-level|-cmds|-greeting> <level|cmds|greeting>";
     const string INVALID_ID = "^3edituser:^7 invalid id specified";
@@ -840,12 +840,12 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
     const string LEVEL_NOT_FOUND = "^3edituser:^7 level could not be found.";
     const string ID_NOT_FOUND = "^3edituser:^7 user with that id could not be found.";
 
-    if(argv.size() < 4 + skipargs) {
+    if(argv->size() < 4 + skipargs) {
         ChatPrintTo(ent, USAGE);
         return qfalse;
     }
 
-    if(!StringToInt(argv.at(1 + skipargs), id)) {
+    if(!StringToInt(argv->at(1 + skipargs), id)) {
         ChatPrintTo(ent, INVALID_ID);
         return qfalse;
     }
@@ -856,10 +856,10 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
     }
 
     // skip (say) !edituser <id>
-    vector<string>::const_iterator it = argv.begin() + (2 + skipargs);
-    vector<string>::const_iterator level_it = argv.end();
-    vector<string>::const_iterator cmds_it = argv.end();
-    vector<string>::const_iterator greeting_it = argv.end();
+    vector<string>::const_iterator it = argv->begin() + (2 + skipargs);
+    vector<string>::const_iterator level_it = argv->end();
+    vector<string>::const_iterator cmds_it = argv->end();
+    vector<string>::const_iterator greeting_it = argv->end();
 
     UserDatabase::Level new_level;
     string cmds;
@@ -867,19 +867,19 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
 
     bool greeting_open = false;
 
-    while(it != argv.end()) {
+    while(it != argv->end()) {
         
-        if(*it == "-level" && (it + 1) != argv.end()) {
+        if(*it == "-level" && (it + 1) != argv->end()) {
             greeting_open = false;
             level_it = (it + 1);
         }
 
-        else if(*it == "-cmds" && (it + 1) != argv.end()) {
+        else if(*it == "-cmds" && (it + 1) != argv->end()) {
             greeting_open = false;
             cmds_it = (it + 1);
         }
 
-        else if(*it == "-greeting" && (it + 1) != argv.end()) {
+        else if(*it == "-greeting" && (it + 1) != argv->end()) {
             greeting_open = true;
             greeting.clear();
         }
@@ -892,7 +892,7 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
         it++;
     }
 
-    if(level_it != argv.end()) {
+    if(level_it != argv->end()) {
         if(!StringToInt(*level_it, new_level.value)) {
             ChatPrintTo(ent, INVALID_LEVEL);
             return qfalse;
@@ -905,7 +905,7 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
         new_level.inuse = true;
     }
 
-    if(cmds_it != argv.end()) {
+    if(cmds_it != argv->end()) {
         cmds = *cmds_it;
     }
 
@@ -943,17 +943,17 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
 
 qboolean G_AddLevel(gentity_t *ent, unsigned skipargs) {
 
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
 
     int level = 0;
 
     // !addlevel <level>
-    if(argv.size() < 2 + skipargs) {
+    if(argv->size() < 2 + skipargs) {
         ChatPrintTo(ent, "^3usage: ^7!addlevel <level> <-cmds|-greeting> <cmds|greeting>");
         return qfalse;
     }
 
-    if(!StringToInt(argv.at(1+skipargs), level)) {
+    if(!StringToInt(argv->at(1+skipargs), level)) {
         ChatPrintTo(ent, "^3addlevel: ^7invalid level specified.");
         return qfalse;
     }
@@ -964,7 +964,7 @@ qboolean G_AddLevel(gentity_t *ent, unsigned skipargs) {
     }
 
     // Skip !addlevel <level>
-    vector<string>::const_iterator it = argv.begin() + (2 + skipargs);
+    vector<string>::const_iterator it = argv->begin() + (2 + skipargs);
 
     bool name_open = false;
     bool commands_open = false;
@@ -974,21 +974,21 @@ qboolean G_AddLevel(gentity_t *ent, unsigned skipargs) {
     string commands;
     string greeting;
 
-    while(it != argv.end()) {
+    while(it != argv->end()) {
 
-        if(*it == "-greeting" && (it + 1) != argv.end()) {
+        if(*it == "-greeting" && (it + 1) != argv->end()) {
             commands_open = false;
             greeting_open = true;
             name_open = false;
         }
 
-        else if(*it == "-cmds" && (it + 1) != argv.end()) {
+        else if(*it == "-cmds" && (it + 1) != argv->end()) {
             commands_open = true;
             greeting_open = false;
             name_open = false;
         }
 
-        else if(*it == "-name" && (it + 1) != argv.end()) {
+        else if(*it == "-name" && (it + 1) != argv->end()) {
             commands_open = false;
             greeting_open = false;
             name_open = true;
@@ -1037,18 +1037,18 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {
 		}
 	}
 
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
 
     ChatPrintTo(ent, "^3!listmaps:^7 check console for more information.");
 
-    vector<string>::const_iterator it = argv.begin();
+    vector<string>::const_iterator it = argv->begin();
     int columns = 3;
 
 
-    if(argv.size() > 1 + skipargs) {
+    if(argv->size() > 1 + skipargs) {
         
-        while(it != argv.end()) {
-            if(*it == "-col" && (it + 1) != argv.end()) {
+        while(it != argv->end()) {
+            if(*it == "-col" && (it + 1) != argv->end()) {
                 // Doesn't matter if this succeeds or not.
                 // if it doesn't, just use the default value
                 StringToInt(*(it+1), columns);
@@ -1066,19 +1066,24 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {
 }
 
 qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
-    vector<string> argv = GetSayArgs();
+    Arguments argv = GetSayArgs();
     MapInfo minfo;
     time_t t;
     tm *lt;
     char date[MAX_TOKEN_CHARS];
     
-    if(argv.size() == 1 + skipargs) {
+    if(argv->size() == 1 + skipargs) {
         minfo = mapData.mapInfo(level.rawmapname);
     }
 
-    else if(argv.size() >= 1 + skipargs) {
-        minfo = mapData.mapInfo(argv[1+skipargs]);
+    else if(argv->size() >= 1 + skipargs) {
+        minfo = mapData.mapInfo((*argv)[1+skipargs]);
     } else {
+        return qfalse;
+    }
+
+    if(minfo.lastPlayed == MAP_NOT_FOUND) {
+        ChatPrintTo(ent, "^3!mapinfo: ^7could not find map.");
         return qfalse;
     }
 
@@ -1098,27 +1103,15 @@ qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
     return qtrue;
 }
 
-qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs) {
-    //FIXME: CRASHING
-    if(ent->client->sess.lastMostPlayedListTime > level.time + 15000) {
-        ChatPrintTo(ent, va("^3!mostplayed:^7 you must wait atleast %d seconds before using !mostplayed again.", 
-				((ent->client->sess.lastMostPlayedListTime + 15000 - level.time)/1000)));
-        return qfalse;
-    }
+const int DELAY_BETWEEN_MOST_PLAYED_CMDS = 15000;
 
+qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs) {
     int mapCount = 10;
     mapData.printMostPlayedMaps(ent, mapCount);
     return qtrue;
 }
 
 qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs) {
-
-    if(ent->client->sess.lastMostPlayedListTime > level.time + 15000) {
-        ChatPrintTo(ent, va("^3!mostplayed:^7 you must wait atleast %d seconds before using !leastplayed again.", 
-				((ent->client->sess.lastMostPlayedListTime + 15000 - level.time)/1000)));
-        return qfalse;
-    }
-
     int mapCount = 10;
     mapData.printLeastPlayedMaps(ent, mapCount);
     return qtrue;

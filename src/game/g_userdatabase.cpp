@@ -4,6 +4,8 @@ extern "C" {
 #include "g_local.h"
 }
 
+#include "../sqlite/sqlite3pp.h"
+
 UserDatabase::UserDatabase() {
 }
 

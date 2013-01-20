@@ -2,11 +2,11 @@
 
 using std::string;
 
+#include "g_utilities.h"
+
 extern "C" {
 #include "g_local.h"
 }
-
-#include "g_utilities.h"
 
 // Banner locations
 enum {

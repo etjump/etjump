@@ -1,6 +1,7 @@
 #include <boost/format.hpp>
 #include "g_mapdata.h"
 #include "g_utilities.h"
+#include "../sqlite/sqlite3pp.h"
 
 MapData::MapData() {
     
@@ -27,11 +28,11 @@ MapInfo::MapInfo(const string& mapName_,
     minutesPlayed = minutesPlayed_;
 }
 
-bool MapInfo::operator<(const MapInfo& rhs) {
+bool MapInfo::operator<(const MapInfo& rhs) const {
     return (this->mapName < rhs.mapName);
 }
 
-bool MapInfo::operator<(const string& rhs) {
+bool MapInfo::operator<(const string& rhs) const {
     return (this->mapName < rhs);
 }
 
@@ -43,10 +44,19 @@ void MapData::init() {
 }
 
 // returns info about the map that matches mapName. if multiple matches,
-    // returns the first match
+// returns the first match
 MapInfo MapData::mapInfo(const string& mapName) const {
-    MapInfo minfo;
+    vector<MapInfo>::const_iterator mapIterator = mapList.begin();
 
+    while(mapIterator != mapList.end()) {
+        if(mapIterator->mapName.find(mapName) != string::npos) {
+            return *mapIterator;
+        }
+        mapIterator++;
+    }
+
+    MapInfo minfo;
+    minfo.lastPlayed = MAP_NOT_FOUND;
     return minfo;
 }
 

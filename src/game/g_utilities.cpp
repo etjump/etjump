@@ -7,6 +7,8 @@ extern "C" {
 #include "g_local.h"
 }
 
+#include "g_utilities.h"
+
 using std::string;
 using std::vector;
 
@@ -205,28 +207,29 @@ Argument handling
 
 // Parses arguments for admin system
 // Example: say "!kick a" -> "say" "!kick" "a" instead of say & kick a
-vector<string> GetSayArgs() {
-    vector<string> argv;
-
+Arguments GetSayArgs() {
+    static vector<string> argv;
+    argv.clear();
     for(int i = 0; i < Q_SayArgc(); i++) {
         char arg[MAX_TOKEN_CHARS];
 
         Q_SayArgv(i, arg, sizeof(arg));
         argv.push_back(arg);
     }
-    return argv;
+    return &argv;
 }
 
 // Gets all arguments
-vector<string> GetArgs() {
-    vector<string> argv;
+Arguments GetArgs() {
+    static vector<string> argv;
+    argv.clear();
     for(int i = 0; i < trap_Argc(); i++) {
         char arg[MAX_TOKEN_CHARS];
 
         trap_Argv(i, arg, sizeof(arg));
         argv.push_back(arg);
     }
-    return argv;
+    return &argv;
 }
 
 /*

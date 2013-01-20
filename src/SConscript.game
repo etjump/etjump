@@ -1,73 +1,89 @@
-Import('env')
+# -*- mode: python -*-
+# Enemy Territory build script
+# TTimo <ttimo@idsoftware.com>
+# http://scons.sourceforge.net
 
-qagame_src = Split('''
-botai/ai_cmd.c
-botai/ai_dmgoal_mp.c
-botai/ai_dmnet_mp.c
-botai/ai_dmq3.c
-botai/ai_main.c
-botai/ai_script.c
-botai/ai_script_actions.c
-botai/ai_team.c
+import sys, os
+import scons_utils
 
-game/bg_animation.c
-game/bg_animgroup.c
-game/bg_campaign.c
-game/bg_character.c
-game/bg_classes.c
-game/bg_misc.c
-game/bg_pmove.c
-game/bg_slidemove.c
-game/bg_sscript.c
-game/bg_stats.c
-game/bg_tracemap.c
-game/g_active.c
-game/g_alarm.c
-game/g_antilag.c
-game/g_bot.c
-game/g_buddy_list.c
-game/g_character.c
-game/g_client.c
-game/g_cmds.c
-game/g_cmds_ext.c
-game/g_combat.c
-game/g_fireteams.c
-game/g_items.c
-game/g_main.c
-game/g_match.c
-game/g_mem.c
-game/g_misc.c
-game/g_missile.c
-game/g_mover.c
-game/g_props.c
-game/g_referee.c
-game/g_script.c
-game/g_script_actions.c
-game/g_session.c
-game/g_spawn.c
-game/g_stats.c
-game/g_sv_entities.c
-game/g_svcmds.c
-game/g_syscalls.c
-game/g_systemmsg.c
-game/g_target.c
-game/g_team.c
-game/g_teammapdata.c
-game/g_trigger.c
-game/g_utils.c
-game/g_vote.c
-game/g_weapon.c
-game/q_math.c
-game/q_shared.c
-game/g_admin.cpp
-game/g_leveldatabase.cpp
-game/g_userdatabase.cpp
-game/g_utilities.cpp
-sha-1/bg_sha.c
-sha-1/sha1.c
-''')
+Import( 'GLOBALS' )
+Import( GLOBALS )
 
-qagame_env = env.Clone()
-qagame_env.Append(CPPDEFINES = ['GAMEDLL'])
-ret = qagame_env.SharedLibrary('qagame', qagame_src)
-Return('ret')
+qagame_string = """
+bg_animation.c
+bg_animgroup.c
+bg_campaign.c
+bg_character.c
+bg_classes.c
+bg_misc.c
+bg_pmove.c
+bg_slidemove.c
+bg_sscript.c
+bg_stats.c
+bg_tracemap.c
+g_active.c
+g_alarm.c
+g_antilag.c
+g_buddy_list.c
+g_character.c
+g_client.c
+g_cmds.c
+g_cmds_ext.c
+g_combat.c
+g_fireteams.c
+g_items.c
+g_main.c
+g_match.c
+g_mem.c
+g_misc.c
+g_missile.c
+g_mover.c
+g_props.c
+g_referee.c
+g_script.c
+g_script_actions.c
+g_session.c
+g_spawn.c
+g_stats.c
+g_sv_entities.c
+g_svcmds.c
+g_syscalls.c
+g_systemmsg.c
+g_target.c
+g_team.c
+g_teammapdata.c
+g_trigger.c
+g_utils.c
+g_vote.c
+g_weapon.c
+q_math.c
+q_shared.c
+g_admin.cpp
+g_leveldatabase.cpp
+g_userdatabase.cpp
+g_utilities.cpp
+g_banner.cpp
+g_main_ext.cpp
+g_mapdata.cpp
+g_maplist.cpp
+g_save.cpp
+../sha-1/bg_sha.c
+../sha-1/sha1.c
+../sqlite/sqlite3.c
+../sqlite/sqlite3pp.cpp
+
+"""
+
+qagame_list = scons_utils.BuildList( 'game', qagame_string )
+
+local_env = g_env.Copy()
+
+local_env.Append( CPPDEFINES = [ 'GAMEDLL' ] )
+
+local_env['LINK'] = local_env['CC']
+
+source_list = qagame_list
+
+#ret = local_env.Program( target = 'et', source = source_list )
+ret = local_env.SharedLibrary( target = 'qagame', source = source_list )
+Return( 'ret' )

@@ -2611,5 +2611,12 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs);
 qboolean G_MapInfo(gentity_t *ent, unsigned skipargs);
 qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs);
 qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs);
+
+// g_save.cpp
+void Cmd_Load_f(gentity_t *ent);
+void Cmd_Save_f(gentity_t *ent);
+void Cmd_BackupLoad_f(gentity_t *ent);
+void ResetSavedPositions(gentity_t *ent);
+void forceSave(gentity_t *location, gentity_t *ent);
 #endif // G_LOCAL_H
 

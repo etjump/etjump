@@ -56,4 +56,3 @@ void G_ShutdownGame_ext( int restart ) {
 
     mapData.updateMap(level.rawmapname, timeInt, minutesPlayed);
 }
-

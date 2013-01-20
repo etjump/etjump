@@ -11,6 +11,9 @@ extern "C" {
 using std::vector;
 using std::string;
 
+// Pointer to const vector<string>
+typedef const vector<string>* Arguments;
+
 const string SEPARATOR = " ";
 
 string RemoveColors(const string& source);
@@ -35,8 +38,8 @@ void FinishBufferPrint(gentity_t *ent);
 void FinishBufferPrintNoNewline(gentity_t *ent);
 void BufferPrint(gentity_t *ent, const string& message);
 
-vector<string> GetSayArgs();
-vector<string> GetArgs();
+Arguments GetSayArgs();
+Arguments GetArgs();
 
 string IntToString(int to_convert);
 bool StringToInt(const string& source, int& target);

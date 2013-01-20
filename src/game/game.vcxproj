@@ -184,6 +184,7 @@
     <ClCompile Include="g_mover.c" />
     <ClCompile Include="g_props.c" />
     <ClCompile Include="g_referee.c" />
+    <ClCompile Include="g_save.cpp" />
     <ClCompile Include="g_script.c" />
     <ClCompile Include="g_script_actions.c" />
     <ClCompile Include="g_session.c" />
@@ -221,6 +222,7 @@
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_mapdata.h" />
     <ClInclude Include="g_public.h" />
+    <ClInclude Include="g_save.h" />
     <ClInclude Include="g_team.h" />
     <ClInclude Include="..\botai\inv.h" />
     <ClInclude Include="..\botai\match.h" />

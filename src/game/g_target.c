@@ -1415,10 +1415,7 @@ Resets saved positions
 void target_savereset_use ( gentity_t *self, gentity_t *other, gentity_t *activator) {
 	int i;
 	if(activator && activator->client) {
-		for(i = 0; i < MAX_SAVE_POSITIONS; i++) {
-			activator->client->sess.allies_save_pos[i].isValid = qfalse;
-			activator->client->sess.axis_save_pos[i].isValid = qfalse;
-		}
+        ResetSavedPositions(activator);
 	}
 	CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 }
@@ -1458,23 +1455,7 @@ void SP_target_increase_ident( gentity_t *self ) {
 
 void target_save_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-	if( activator->client->sess.sessionTeam == TEAM_SPECTATOR )
-	{
-		return;
-	} 
-	else if ( activator->client->sess.sessionTeam == TEAM_ALLIES )
-	{
-		VectorCopy( self->s.origin, activator->client->sess.allies_save_pos->origin );
-		VectorCopy( self->s.angles, activator->client->sess.allies_save_pos->vangles );
-		activator->client->sess.allies_save_pos->isValid = qtrue;
-	} 
-	else if ( activator->client->sess.sessionTeam == TEAM_AXIS )
-	{
-		VectorCopy( self->s.origin, activator->client->sess.axis_save_pos->origin );
-		VectorCopy( self->s.angles, activator->client->sess.axis_save_pos->vangles );
-		activator->client->sess.allies_save_pos->isValid = qtrue;
-	}
-
+	forceSave(self, activator);
     trap_SendServerCommand(activator-g_entities, g_savemsg.string);
 }
 

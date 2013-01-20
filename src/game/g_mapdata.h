@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 #include <boost/algorithm/string/case_conv.hpp>
-#include <sqlite3pp.h>
+#include "../sqlite/sqlite3pp.h"
 using std::string;
 using std::vector;
 
@@ -23,13 +23,15 @@ struct MapInfo {
     MapInfo();
     MapInfo(const string& mapName_, int lastPlayed_,
         int timesPlayed_, int minutesPlayed_);
-    bool operator<(const MapInfo& rhs);
-    bool operator<(const string& rhs);
+    bool operator<(const MapInfo& rhs) const;
+    bool operator<(const string& rhs) const;
     string mapName;
     int lastPlayed;
     int timesPlayed;
     int minutesPlayed;
 };
+
+const int MAP_NOT_FOUND = -1;
 
 class MapData {
 public:

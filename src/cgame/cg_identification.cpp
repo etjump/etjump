@@ -8,6 +8,7 @@ extern "C" {
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/lexical_cast.hpp>
 
 static std::string user_guid;
 
@@ -15,7 +16,8 @@ std::string GenerateUUID() {
     boost::uuids::random_generator gen;
     boost::uuids::uuid u = gen();
 
-    return boost::uuids::to_string(u);
+    return boost::lexical_cast<std::string>(u);
+    // return boost::uuids::to_string(u);
 }
 
 std::string G_SHA1(const std::string& str) {

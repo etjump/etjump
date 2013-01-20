@@ -20,3 +20,7 @@ Some sort of limit runtime to for example 10 mins, once its done you cant start 
 Added: MapDatabase
 Added: rcon updatemapdatabase
 Added: !mapinfo <map>
+Added: backup save positions
+TODO: Make sure target_save & target_save_reset work
+
+TODO: user must get updated after edituser

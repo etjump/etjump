@@ -1,65 +1,89 @@
-Import('env')
+# -*- mode: python -*-
+# Enemy Territory build script
+# TTimo <ttimo@idsoftware.com>
+# http://scons.sourceforge.net
 
-cgame_src = Split('''
-cgame/cg_atmospheric.c
-cgame/cg_character.c
-cgame/cg_commandmap.c
-cgame/cg_consolecmds.c
-cgame/cg_debriefing.c
-cgame/cg_draw.c
-cgame/cg_drawtools.c
-cgame/cg_drawCHS.c
-cgame/cg_effects.c
-cgame/cg_ents.c
-cgame/cg_event.c
-cgame/cg_fireteamoverlay.c
-cgame/cg_fireteams.c
-cgame/cg_flamethrower.c
-cgame/cg_info.c
-cgame/cg_limbopanel.c
-cgame/cg_loadpanel.c
-cgame/cg_localents.c
-cgame/cg_main.c
-cgame/cg_marks.c
-cgame/cg_missionbriefing.c
-cgame/cg_multiview.c
-cgame/cg_newDraw.c
-cgame/cg_particles.c
-cgame/cg_players.c
-cgame/cg_playerstate.c
-cgame/cg_polybus.c
-cgame/cg_popupmessages.c
-cgame/cg_predict.c
-cgame/cg_scoreboard.c
-cgame/cg_servercmds.c
-cgame/cg_snapshot.c
-cgame/cg_sound.c
-cgame/cg_spawn.c
-cgame/cg_statsranksmedals.c
-cgame/cg_syscalls.c
-cgame/cg_trails.c
-cgame/cg_view.c
-cgame/cg_weapons.c
-cgame/cg_window.c
-game/bg_animation.c
-game/bg_animgroup.c
-game/bg_character.c
-game/bg_classes.c
-game/bg_misc.c
-game/bg_pmove.c
-game/bg_slidemove.c
-game/bg_sscript.c
-game/bg_stats.c
-game/bg_tracemap.c
-game/q_math.c
-game/q_shared.c
-ui/ui_shared.c
-sha-1/bg_sha.c
-sha-1/sha1.c
-cgame/cg_identification.cpp
-''')
+import sys, os
+import scons_utils
 
-cgame_env = env.Clone()
-cgame_env.Append(CPPDEFINES = ['CGAMEDLL'])
-ret = cgame_env.SharedLibrary('cgame', cgame_src)
-Return('ret')
+Import( 'GLOBALS' )
+Import( GLOBALS )
+
+cgame_string = """
+cg_atmospheric.c
+cg_character.c
+cg_commandmap.c
+cg_consolecmds.c
+cg_debriefing.c
+cg_draw.c
+cg_drawCHS.c
+cg_drawtools.c
+cg_effects.c
+cg_ents.c
+cg_event.c
+cg_fireteamoverlay.c
+cg_fireteams.c
+cg_flamethrower.c
+cg_info.c
+cg_limbopanel.c
+cg_loadpanel.c
+cg_localents.c
+cg_main.c
+cg_marks.c
+cg_missionbriefing.c
+cg_multiview.c
+cg_newDraw.c
+cg_particles.c
+cg_players.c
+cg_playerstate.c
+cg_polybus.c
+cg_popupmessages.c
+cg_predict.c
+cg_scoreboard.c
+cg_servercmds.c
+cg_snapshot.c
+cg_sound.c
+cg_spawn.c
+cg_statsranksmedals.c
+cg_syscalls.c
+cg_trails.c
+cg_view.c
+cg_weapons.c
+cg_window.c
+../sha-1/bg_sha.c
+../sha-1/sha1.c
+cg_identification.cpp
+../game/bg_animation.c
+../game/bg_animgroup.c
+../game/bg_character.c
+../game/bg_classes.c
+../game/bg_misc.c
+../game/bg_pmove.c
+../game/bg_slidemove.c
+../game/bg_sscript.c
+../game/bg_stats.c
+../game/bg_tracemap.c
+../game/q_math.c
+../game/q_shared.c
+../ui/ui_shared.c
+"""
+
+cgame_list = scons_utils.BuildList( 'cgame', cgame_string )
+
+local_env = g_env.Copy()
+
+local_env.Append( CPPDEFINES = [ 'CGAMEDLL' ] )
+
+source_list = cgame_list
+
+local_env['LINK'] = local_env['CC']
+
+# GAMERANGER isn't exported in all usage paths
+try:
+	if ( GAMERANGER == '1' ):
+		local_env.Append( CPPDEFINES = [ 'GAMERANGER' ] )
+except:
+	pass
+
+ret = local_env.SharedLibrary( target = 'cgame', source = source_list )
+Return( 'ret' )
