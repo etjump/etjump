@@ -1556,7 +1556,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("------- Game Initialization -------\n");
 	G_Printf ("gamename: %s %s\n", GAME_VERSION, MOD_VERSION);
 	G_Printf ("gamedate: %s\n", __DATE__);
-	trap_Cvar_Set("g_gametype", "2");
+    if( g_gametype.integer != GT_WOLF && 
+        g_gametype.integer != GT_CTF ) {
+	    trap_Cvar_Set("g_gametype", "2");
+    }
 	trap_Cvar_Update(&g_gametype);
 	G_Printf ("Gametype forced to 2.\n");
 	trap_Cvar_Set("sv_floodprotect", "0");

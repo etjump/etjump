@@ -1,11 +1,16 @@
 #ifndef G_SAVE_H
 #define G_SAVE_H
 
+#include <map>
+#include <string>
 #include <boost/circular_buffer.hpp>
 
 extern "C" {
 #include "g_local.h"
 }
+
+using std::map;
+using std::string;
 
 class Save {
 public:
@@ -29,6 +34,18 @@ public:
         boost::circular_buffer<SavePosition> axisBackupPositions;
     };
 
+    struct DisconnectedClient {
+        DisconnectedClient();
+
+        // Allies saved positions at the time of disconnect
+        SavePosition alliesSavedPositions[MAX_SAVED_POSITIONS];
+        // Axis saved positions at the time of disconnect
+        SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
+
+        // So called "map ident"
+        int progression;
+    };
+
     // Saves current position
     void save(gentity_t *ent);
 
@@ -46,12 +63,21 @@ public:
 
     // Resets targets positions
     void resetSavedPositions(gentity_t *ent);
+
+    // Saves positions to db on disconnect
+    void savePositionsToDatabase(gentity_t *ent);
+
+    // Loads positions from db on dc
+    void loadPositionsFromDatabase(gentity_t *ent);
 private:
     // Saves backup position
     void saveBackupPosition(gentity_t *ent, SavePosition *pos);
 
     // All clients' save related data
     Client clients_[MAX_CLIENTS];
+
+    // Disconnected clients saved position data
+    map<string, DisconnectedClient> savedPositions;
 };
 
 #endif

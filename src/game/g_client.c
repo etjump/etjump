@@ -775,7 +775,9 @@ void SetWolfSpawnWeapons( gclient_t *client )
 	client->ps.weapons[1] = 0;
 
 	AddWeaponToPlayer( client, WP_KNIFE, 1, 0, qtrue );
-	AddWeaponToPlayer( client, WP_MEDIC_ADRENALINE, 1, 1, qtrue );
+    if(!CTFEnabled()) {
+	    AddWeaponToPlayer( client, WP_MEDIC_ADRENALINE, 1, 1, qtrue );
+    }
 
 	// Feen: PSM -TEST
 	if ((g_portalMode.integer == 0) && (level.portalEnabled)) //Freestyle mode...
@@ -783,8 +785,8 @@ void SetWolfSpawnWeapons( gclient_t *client )
 
 	client->ps.weaponstate = WEAPON_READY;
 
-	// Engineer gets dynamite
-	if (g_weapons.integer)
+    // Zero: CTF: if CTF give no other weapons than knife
+	if (g_weapons.integer && !CTFEnabled())
 	{
 		if(pc != PC_FIELDOPS) {
 			if( AddWeaponToPlayer( client, WP_BINOCULARS, 1, 0, qfalse ) ) {
@@ -1798,6 +1800,18 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
 	int			savedSlotNumber;
 	index = ent - g_entities;
 	client = ent->client;
+
+    if(CTFEnabled()) {
+        if( client->sess.latchPlayerType != PC_SOLDIER &&
+            client->sess.latchPlayerType != PC_ENGINEER ) {
+            client->sess.latchPlayerType = PC_ENGINEER;
+        }
+
+        if( client->sess.playerType != PC_SOLDIER &&
+            client->sess.playerType != PC_ENGINEER ) {
+                client->sess.playerType = PC_ENGINEER;
+        }
+    }
 
 	G_UpdateSpawnCounts();
 

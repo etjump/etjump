@@ -13,6 +13,7 @@ using std::string;
 
 // Pointer to const vector<string>
 typedef const vector<string>* Arguments;
+typedef vector<string>::const_iterator ArgIterator;
 
 const string SEPARATOR = " ";
 

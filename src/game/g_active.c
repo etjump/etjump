@@ -1049,6 +1049,16 @@ void ClientThink_real( gentity_t *ent ) {
 	// set speed
 	client->ps.speed = G_SPEED;
 
+    if(CTFEnabled()) {
+#define CTF_BLOCKER_VEL 0.5
+#define CTF_RUNNER_VEL 1.0
+        if(ent->client->sess.playerType == PC_SOLDIER) {
+            client->ps.speed *= CTF_BLOCKER_VEL;
+        } else {
+            client->ps.speed *= CTF_RUNNER_VEL;
+        } 
+    }
+
 	if( client->speedScale )				// Goalitem speed scale
 		client->ps.speed *= (client->speedScale * 0.01);
 

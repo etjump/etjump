@@ -48,6 +48,8 @@ namespace admin {
         string function;
         string syntax;
     };
+
+    string Guid(gentity_t *ent);
 }
 
 void UpdatePermissions(int clientNum);

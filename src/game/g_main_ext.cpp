@@ -10,7 +10,7 @@ MapData mapData;
 
 // Called on ClientBegin() on g_main.c
 void G_ClientBegin(gentity_t *ent) {
-    
+    loadPositionsFromDatabase(ent);
 }
 
 // Called on ClientConnect() on g_main.c
@@ -23,10 +23,13 @@ void G_ClientConnect(gentity_t *ent, qboolean firstTime) {
 // Called on ClientDisconnect() on g_main.c
 void G_ClientDisconnect(gentity_t *ent) {
     ResetData(ent->client->ps.clientNum);
+
+    savePositionsToDatabase(ent);
 }
 
 void G_InitGame_ext(int levelTime, int randomSeed, int restart ) {
     mapData.init();
+    initSaveDatabase();
 }
 
 // Very expensive, don't call if not necessary

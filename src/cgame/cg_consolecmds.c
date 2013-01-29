@@ -1172,6 +1172,7 @@ void CG_InitConsoleCommands( void ) {
 
 	trap_AddCommand ("save");
 	trap_AddCommand ("load");
+    trap_AddCommand ("backup");
 	trap_AddCommand ("goto");
 	trap_AddCommand ("call");
 	trap_AddCommand ("nogoto");

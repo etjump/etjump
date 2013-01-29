@@ -39,8 +39,9 @@ static AdminCommand Commands[] = {
 	{"levinfo",			G_LevInfo,	    	'A',	"Prints information about admin levels.", "!levinfo or !levinfo <level>"},
     {"listmaps",		G_ListMaps,		    'a',	"Prints a list of all maps on the server.", "!listmaps"},
     {"mapinfo",         G_MapInfo,          'H',    "Prints statistics about map.", "!mapinfo <map>"},
-    {"mostplayed",      G_MostPlayed,       'H',    "Prints most played maps.", "!mostplayed"},
-    {"leastplayed",     G_LeastPlayedMaps,  'H',    "Prints least played maps.", "!leastplayed"},
+    {"mostplayed",      G_MostPlayed,       'H',    "Prints most played maps.", "!mostplayed <maps> (default 10)"},
+    {"leastplayed",     G_LeastPlayedMaps,  'H',    "Prints least played maps.", "!leastplayed <maps> (default 10)"},
+    {"map",             G_Map,              'M',	"Changes map.", "!map <mapname>"},
     {"", 0, 0, "", ""}
 };
 
@@ -157,6 +158,13 @@ void AdminLogin(gentity_t *ent) {
 
     clients[ent->client->ps.clientNum].username = username;
     clients[ent->client->ps.clientNum].password = password;
+}
+
+string admin::Guid(gentity_t *ent) {
+    if(!ent) {
+        return "";
+    }
+    return clients[ent->client->ps.clientNum].guid;
 }
 
 /////////////////////////////////////////////////////
@@ -728,12 +736,12 @@ qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs) {
         return qfalse;
     }
 
-    vector<string>::const_iterator it = argv->begin();
-    vector<string>::const_iterator name_it = argv->end();
-    vector<string>::const_iterator ip_it = argv->end();
-    vector<string>::const_iterator guid_it = argv->end();
-    vector<string>::const_iterator level_it = argv->end();
-    vector<string>::const_iterator id_it = argv->end();
+    ArgIterator it = argv->begin();
+    ArgIterator name_it = argv->end();
+    ArgIterator ip_it = argv->end();
+    ArgIterator guid_it = argv->end();
+    ArgIterator level_it = argv->end();
+    ArgIterator id_it = argv->end();
 
     // Find all switches with a following argument
     // and save them to iterators
@@ -856,10 +864,10 @@ qboolean G_EditUser(gentity_t *ent, unsigned skipargs) {
     }
 
     // skip (say) !edituser <id>
-    vector<string>::const_iterator it = argv->begin() + (2 + skipargs);
-    vector<string>::const_iterator level_it = argv->end();
-    vector<string>::const_iterator cmds_it = argv->end();
-    vector<string>::const_iterator greeting_it = argv->end();
+    ArgIterator it = argv->begin() + (2 + skipargs);
+    ArgIterator level_it = argv->end();
+    ArgIterator cmds_it = argv->end();
+    ArgIterator greeting_it = argv->end();
 
     UserDatabase::Level new_level;
     string cmds;
@@ -964,7 +972,7 @@ qboolean G_AddLevel(gentity_t *ent, unsigned skipargs) {
     }
 
     // Skip !addlevel <level>
-    vector<string>::const_iterator it = argv->begin() + (2 + skipargs);
+    ArgIterator it = argv->begin() + (2 + skipargs);
 
     bool name_open = false;
     bool commands_open = false;
@@ -1021,6 +1029,98 @@ qboolean G_AddLevel(gentity_t *ent, unsigned skipargs) {
 
 qboolean G_EditLevel(gentity_t *ent, unsigned skipargs) {
 
+    Arguments argv = GetSayArgs();
+
+    // !editlevel <level> <-cmds|-name|-greeting> <cmds|name|greeting>
+    if(argv->size() < 4 + skipargs) {
+        ChatPrintTo(ent, "^3usage: ^7!editlevel <level> <-cmds|-name|-greeting|-reset> <cmds|name|greeting>");
+        return qfalse;
+    }
+    int level = 0;
+    if(!StringToInt(argv->at(1 + skipargs), level)) {
+        ChatPrintTo(ent, "^3!editlevel: ^7invalid level specified.");
+        return qfalse;
+    }
+
+    if(!levelDatabase.levelExists(level)) {
+        ChatPrintTo(ent, "^3!editlevel: ^7level does not exist.");
+        return qfalse;
+    }
+
+    ArgIterator it = argv->begin();
+    
+    bool readingCommands = false;
+    bool readingName = false;
+    bool readingGreeting = false;
+    string commands;
+    string greeting;
+    string name;
+
+    while(it != argv->end()) {
+        if(*it == "-cmds" && (it + 1) != argv->end()) {
+            readingCommands = true;
+            readingName = false;
+            readingGreeting = false;
+        }
+
+        else if(*it == "-name" && (it + 1) != argv->end()) {
+            readingCommands = false;
+            readingName = true;
+            readingGreeting = false;
+        }
+
+        else if(*it == "-greeting" && (it + 1) != argv->end()) {
+            readingCommands = false;
+            readingName = false;
+            readingGreeting = true;
+        } 
+
+        else if(*it == "-reset" && (it + 1) != argv->end()) {
+            it++;
+            if(*it == "cmds") {
+                levelDatabase.updateLevel(level, "", LevelDatabase::COMMANDS);
+            } else if(*it == "name") {
+                levelDatabase.updateLevel(level, "", LevelDatabase::NAME);
+            } else if(*it == "greeting") {
+                levelDatabase.updateLevel(level, "", LevelDatabase::GREETING);
+            }
+            it++;
+            continue;
+        }
+
+        else if(readingCommands) {
+            commands += *it;
+        }
+
+        else if(readingName) {
+            name += *it;
+            name += " ";
+        }
+
+        else if(readingGreeting) {
+            greeting += *it;
+            greeting += " ";
+        }
+        boost::trim(name);
+        boost::trim(commands);
+        boost::trim(greeting);
+        it++;
+    }
+
+    if(name.length()) {
+        levelDatabase.updateLevel(level, name, LevelDatabase::NAME);
+    }
+
+    if(commands.length()) {
+        levelDatabase.updateLevel(level, commands, LevelDatabase::COMMANDS);
+    }
+
+    if(greeting.length()) {
+        levelDatabase.updateLevel(level, greeting, LevelDatabase::GREETING);
+    }
+
+    ChatPrintTo(ent, "^3!editlevel: ^7level has been edited.");
+
     return qtrue;
 }
 qboolean G_LevInfo(gentity_t *ent, unsigned skipargs) {
@@ -1041,7 +1141,7 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs) {
 
     ChatPrintTo(ent, "^3!listmaps:^7 check console for more information.");
 
-    vector<string>::const_iterator it = argv->begin();
+    ArgIterator it = argv->begin();
     int columns = 3;
 
 
@@ -1093,10 +1193,20 @@ qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
 
     int hours = minfo.minutesPlayed / 60;
     int minutes = minfo.minutesPlayed - hours*60;
+    boost::format output;
+    if(minfo.lastPlayed > 0) {
+        output = 
+            boost::format("^g%1% ^7was last played on %2%. It has been played %3% times. (%4% hours %5% minutes)");
+    
+        output % minfo.mapName % date % minfo.timesPlayed % hours % minutes; 
+    } 
 
-    boost::format output = 
-        boost::format("^g%1% ^7was last played on %2%. It has been played %3% times. (%4% hours %5% minutes)");
-    output % minfo.mapName % date % minfo.timesPlayed % hours % minutes;
+    else {
+        output = 
+            boost::format("^g%1% ^7has never been played.");
+    
+        output % minfo.mapName; 
+    }
 
     ChatPrintTo(ent, "^3!mapinfo: ^7" + output.str());
 
@@ -1106,13 +1216,37 @@ qboolean G_MapInfo(gentity_t *ent, unsigned skipargs) {
 const int DELAY_BETWEEN_MOST_PLAYED_CMDS = 15000;
 
 qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs) {
+
+    Arguments argv = GetSayArgs();
+
     int mapCount = 10;
+    if(argv->size() > 1 + skipargs) {
+        StringToInt(argv->at(1 + skipargs), mapCount);
+    }
+
     mapData.printMostPlayedMaps(ent, mapCount);
     return qtrue;
 }
 
 qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs) {
+    Arguments argv = GetSayArgs();
+
     int mapCount = 10;
+    if(argv->size() > 1 + skipargs) {
+        StringToInt(argv->at(1 + skipargs), mapCount);
+    }
     mapData.printLeastPlayedMaps(ent, mapCount);
     return qtrue;
+}
+
+qboolean G_Map(gentity_t *ent, unsigned skipargs) {
+    Arguments argv = GetSayArgs();
+
+    if(argv->size() != 2 + skipargs) {
+        ChatPrintTo(ent, "^3usage:^7 !map <map name>");
+        return qfalse;
+    }
+
+    trap_SendConsoleCommand(EXEC_APPEND, va("map %s", argv->at(1 + skipargs).c_str()));
+    return qtrue;    
 }

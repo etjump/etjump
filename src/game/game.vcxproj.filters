@@ -201,6 +201,9 @@
     <ClCompile Include="g_save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_ctf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -270,6 +273,9 @@
     </ClInclude>
     <ClInclude Include="g_save.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_ctf.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

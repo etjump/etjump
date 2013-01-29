@@ -655,6 +655,8 @@ typedef struct {
 	// Map ident
 	int			client_map_id;
 
+    qboolean    loadedSavedPositions;
+
     int         last_listmaps_time;
     int         lastMostPlayedListTime;
 
@@ -1194,6 +1196,8 @@ typedef struct {
 
     ipMute_t    ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
+    qboolean    ctfEnabled;
+
 } level_locals_t;
 
 typedef struct {
@@ -1592,6 +1596,7 @@ qboolean ReadyToConstruct(gentity_t *ent, gentity_t *constructible, qboolean upd
 qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 );
 qboolean OnAnyTeam ( gentity_t *ent1, gentity_t *ent2 );
 int Team_ClassForString( char *string );
+void Team_ResetFlags(void);
 
 
 //
@@ -2611,6 +2616,7 @@ qboolean G_ListMaps(gentity_t *ent, unsigned skipargs);
 qboolean G_MapInfo(gentity_t *ent, unsigned skipargs);
 qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs);
 qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs);
+qboolean G_Map(gentity_t *ent, unsigned skipargs);
 
 // g_save.cpp
 void Cmd_Load_f(gentity_t *ent);
@@ -2618,5 +2624,11 @@ void Cmd_Save_f(gentity_t *ent);
 void Cmd_BackupLoad_f(gentity_t *ent);
 void ResetSavedPositions(gentity_t *ent);
 void forceSave(gentity_t *location, gentity_t *ent);
+void savePositionsToDatabase(gentity_t *ent);
+void loadPositionsFromDatabase(gentity_t *ent);
+void initSaveDatabase();
+
+// g_ctf.cpp
+qboolean CTFEnabled();
 #endif // G_LOCAL_H
 

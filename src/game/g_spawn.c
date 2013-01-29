@@ -1002,27 +1002,45 @@ void SP_worldspawn( void ) {
 	}
 
 	G_SpawnString("nosave", "0", &s);
-	if (atoi(s))
+	if (atoi(s)) {
 		level.noSave = qtrue;
-
+    } else {
+        level.noSave = qfalse;
+    }
 	G_SpawnString("nonoclip", "0", &s);
-	if (atoi(s))
+	if (atoi(s)) {
 		level.noNoclip = qtrue;
+    } else {
+        level.noNoclip = qfalse;
+    }
+
+    G_SpawnString("ctfenabled", "0", &s);
+    if(atoi(s)) {
+        level.ctfEnabled = qtrue;
+    } else {
+        level.ctfEnabled = qfalse;
+    }
 
 	G_SpawnString("nogod", "0", &s);
-	if (atoi(s))
+	if (atoi(s)) {
 		level.noGod = qtrue;
-
+    } else {
+        level.noGod = qfalse;
+    }
 	G_SpawnString("nogoto", "0", &s);
-	if (atoi(s))
+	if (atoi(s)) {
 		level.noGoto = qtrue;
-
+    } else {
+        level.noGoto = qfalse;
+    }
 	//Feen: PGM - Enable/Disable frivolous use
 	//			  of portal gun....
 	G_SpawnString("portalgun_spawn", "1", &s);
-	if (atoi(s))
+	if (atoi(s)) {
 		level.portalEnabled = qtrue;
-
+    } else {
+        level.portalEnabled = qfalse;
+    }
 	G_SpawnString("portalsurfaces", "1", &s);
 	if (atoi(s)) {
 		level.portalSurfaces = qtrue;

@@ -5,6 +5,7 @@ using std::vector;
 
 #include "g_save.h"
 #include "g_utilities.h"
+#include "g_admin.h"
 
 Save positionData;
 
@@ -26,8 +27,20 @@ Save::Client::Client() {
     }
 }
 
+Save::DisconnectedClient::DisconnectedClient() {
+    for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+        alliesSavedPositions[i].isValid = false;
+        axisSavedPositions[i].isValid = false;
+        progression = 0;
+    }
+}
+
 // Saves current position
 void Save::save(gentity_t *ent) {
+
+    if(!ent->client) {
+        return;
+    }
 
     if(!g_save.integer) {
         CPPrintTo(ent, "^3Save ^7is not enabled.");
@@ -95,6 +108,10 @@ void Save::save(gentity_t *ent) {
 // Loads position
 void Save::load(gentity_t *ent) {
 
+    if(!ent->client) {
+        return;
+    }
+
     if(!g_save.integer) {
         CPPrintTo(ent, "^3Load ^7is not enabled.");
         return;
@@ -146,6 +163,11 @@ void Save::load(gentity_t *ent) {
 
 // Saves position, does not check for anything
 void Save::forceSave(gentity_t *location, gentity_t *ent)  {
+
+    if(!ent->client || !location) {
+        return;
+    }
+
     if( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
 	{
 		return;
@@ -174,6 +196,10 @@ void Save::forceSave(gentity_t *location, gentity_t *ent)  {
     
 // Loads backup position
 void Save::loadBackupPosition(gentity_t *ent) {
+
+    if(!ent->client) {
+        return;
+    }
 
     if(!g_save.integer) {
         CPPrintTo(ent, "^3Load ^7is not enabled.");
@@ -229,9 +255,12 @@ void Save::loadBackupPosition(gentity_t *ent) {
 }
 
 void Save::reset() {
-    for(unsigned clientIndex = 0; clientIndex < MAX_CLIENTS; clientIndex++) {
-        resetSavedPositions(g_entities + clientIndex);
+    for(unsigned clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++) {
+        unsigned clientNum = level.sortedClients[clientIndex];
+        resetSavedPositions(g_entities + clientNum);
     }
+
+    savedPositions.clear();
 }
 
 // Used to reset positions on map change/restart
@@ -247,12 +276,103 @@ void Save::resetSavedPositions(gentity_t *ent) {
     }
 }
 
+// Called on client disconnect. Saves saves for future sessions
+void Save::savePositionsToDatabase(gentity_t *ent) {
+
+    if(!ent->client) {
+        return;
+    }
+
+    string guid = admin::Guid(ent);
+
+    if(guid.length() != 40) {
+        return;
+    }
+
+    DisconnectedClient client;
+
+    for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+        // Allied
+        VectorCopy(clients_[ent->client->ps.clientNum].alliesSavedPositions[i].origin,
+            client.alliesSavedPositions[i].origin);
+        VectorCopy(clients_[ent->client->ps.clientNum].alliesSavedPositions[i].vangles,
+            client.alliesSavedPositions[i].vangles);
+        clients_[ent->client->ps.clientNum].alliesSavedPositions[i].isValid =
+            client.alliesSavedPositions[i].isValid;
+        // Axis
+        VectorCopy(clients_[ent->client->ps.clientNum].axisSavedPositions[i].origin,
+            client.axisSavedPositions[i].origin);
+        VectorCopy(clients_[ent->client->ps.clientNum].axisSavedPositions[i].vangles,
+            client.axisSavedPositions[i].vangles);
+        clients_[ent->client->ps.clientNum].axisSavedPositions[i].isValid =
+            client.axisSavedPositions[i].isValid;
+    }
+
+    client.progression = ent->client->sess.client_map_id;
+    ent->client->sess.loadedSavedPositions = qfalse;
+
+    map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+
+    if(it != savedPositions.end()) {
+        it->second = client;
+    } else {
+        savedPositions.insert(std::make_pair(guid, client));
+    }
+}
+
+// Called on client connect. Loads saves from previous session
+void Save::loadPositionsFromDatabase(gentity_t *ent) {
+
+    if(!ent->client) {
+        return;
+    }
+
+    if(ent->client->sess.loadedSavedPositions) {
+        return;
+    }
+
+    string guid = admin::Guid(ent);
+
+    if(guid.length() != 40) {
+        return;
+    }
+
+    map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+
+    if(it != savedPositions.end()) {
+        for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+            // Allied
+            VectorCopy(it->second.alliesSavedPositions[i].origin,
+                clients_[ent->client->ps.clientNum].alliesSavedPositions[i].origin);
+            VectorCopy(it->second.alliesSavedPositions[i].vangles,
+                clients_[ent->client->ps.clientNum].alliesBackupPositions[i].vangles);
+            it->second.alliesSavedPositions[i].isValid =
+                clients_[ent->client->ps.clientNum].alliesBackupPositions[i].isValid;
+            // Axis
+            VectorCopy(it->second.axisSavedPositions[i].origin,
+                clients_[ent->client->ps.clientNum].axisSavedPositions[i].origin);
+            VectorCopy(it->second.axisSavedPositions[i].vangles,
+                clients_[ent->client->ps.clientNum].axisBackupPositions[i].vangles);
+            it->second.axisSavedPositions[i].isValid =
+                clients_[ent->client->ps.clientNum].axisBackupPositions[i].isValid;
+        }
+        ent->client->sess.client_map_id = it->second.progression;
+        ent->client->sess.loadedSavedPositions = qtrue;
+        ChatPrintTo(ent, "^5ETJump: ^7loaded positions from previous session.");
+    }
+}
+
 // Saves backup position
 void Save::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
+
+    if(!ent->client) {
+        return;
+    }
+
     SavePosition backup;
     VectorCopy(pos->origin, backup.origin);
 	VectorCopy(pos->vangles, backup.vangles);
-    backup.isValid = true;
+    backup.isValid = pos->isValid;
     // Can never be spectator as this would not be called
     if(ent->client->sess.sessionTeam == TEAM_ALLIES) {
         clients_[ent->client->ps.clientNum].alliesBackupPositions.push_front(backup);
@@ -280,4 +400,16 @@ void ResetSavedPositions(gentity_t *ent) {
 
 void forceSave(gentity_t *location, gentity_t *ent) {
     positionData.forceSave(location, ent);
+}
+
+void savePositionsToDatabase(gentity_t *ent) {
+    positionData.savePositionsToDatabase(ent);
+}
+
+void loadPositionsFromDatabase(gentity_t *ent) {
+    positionData.loadPositionsFromDatabase(ent);
+}
+
+void initSaveDatabase() {
+    positionData.reset();
 }
