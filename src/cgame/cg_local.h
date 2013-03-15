@@ -1183,6 +1183,8 @@ typedef struct {
 	int				stopTime;
 	qboolean		activeTimer;
 	qboolean		resetmaxspeed;
+    int             ctfAxisScore;
+    int             ctfAlliedScore;
 
 } cg_t;
 
@@ -3633,3 +3635,5 @@ void CG_Minimize_f(void);
 
 void SendGuid();
 void AdminLogin();
+void SendHWID(void);
+void UserinfoSendHWID(void);

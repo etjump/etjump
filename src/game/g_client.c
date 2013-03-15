@@ -1645,7 +1645,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
     }  
 
     G_ClientConnect(ent, firstTime);
-
+    Client_OnClientConnect(ent, firstTime);
 	return NULL;
 }
 
@@ -1729,6 +1729,7 @@ void ClientBegin( int clientNum )
 	ent->surfaceFlags = 0;
 
     G_ClientBegin(ent);
+    Client_OnClientBegin(ent);
 }
 
 gentity_t *SelectSpawnPointFromList( char *list, vec3_t spawn_origin, vec3_t spawn_angles )

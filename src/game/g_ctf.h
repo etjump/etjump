@@ -16,8 +16,8 @@ public:
 
     void StartGame();
     void StopGame();
-
 private:
+    void UpdateScoreToPlayers() const;
     int     axisScore;
     int     alliedScore;
     int     axisFlagStatus;

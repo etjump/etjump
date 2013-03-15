@@ -1337,6 +1337,34 @@ void CG_BannerPrint( const char *str ) {
 
 }
 
+static void CG_DrawCTFScore( void ) {
+    char *score = 0;
+    float color = 1.0f;
+    int x = 0, y = 0, w = 0;
+    int charHeight = 0;
+
+    y = 24;
+    charHeight = CG_Text_Height_Ext("A", 0.4, 0, &cgs.media.limboFont1);
+
+    trap_R_SetColor( &color );
+    
+    score = va("^1%d^7 | ^4%d", cg.ctfAxisScore, cg.ctfAlliedScore);
+
+    w = CG_Text_Width_Ext(score, 0.25,
+			0, &cgs.media.limboFont1);
+
+	x = ( SCREEN_WIDTH - w ) / 2;
+
+    CG_Text_Paint_Ext( x, y,
+			0.25,
+			0.25,
+			&color, score,
+			0, 0, ITEM_TEXTSTYLE_SHADOWED,
+			&cgs.media.limboFont1);
+
+    trap_R_SetColor( NULL );
+}
+
 static void CG_DrawBannerPrint( void ) {
 	char	*start;
 	int		l;
@@ -5151,6 +5179,7 @@ static void CG_Draw2D( void ) {
 			CG_DrawUpperRight();
 		}
 		CG_DrawBannerPrint();
+        CG_DrawCTFScore();
 		CG_DrawCenterString();
 		CG_DrawPMItems();
 		CG_DrawPMItemsBig();

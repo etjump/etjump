@@ -2065,8 +2065,15 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-    if ( !Q_stricmp( cmd, "request_guid" ) ) {
+    if ( !Q_stricmp( cmd, GUID_REQUEST ) ) {
         SendGuid();
+        return;
+    }
+
+    if ( !Q_stricmp(cmd, HWID_REQUEST)) {
+        SendHWID();
+        UserinfoSendHWID();
+        return;
     }
 
 	if ( !Q_stricmp( cmd, "cheatCvarsOff" ) ) {
@@ -2076,6 +2083,17 @@ static void CG_ServerCommand( void ) {
 		trap_SendConsoleCommand("set m_pitch 0.022\n");
 		return;
 	}
+
+    if( !Q_stricmp( cmd, "ctfscore" ) ) {
+        if(trap_Argc() != 3) {
+            CG_Printf("Argc != 3\n");
+            return;
+        }
+
+        cg.ctfAxisScore = atoi(CG_Argv(1));
+        cg.ctfAlliedScore = atoi(CG_Argv(2));
+        return;
+    }
 
 	if ( !Q_stricmp( cmd, "cpm" ) ) {
 		CG_AddPMItem( PM_MESSAGE, CG_LocalizeServerCommand( CG_Argv(1) ), cgs.media.voiceChatShader );

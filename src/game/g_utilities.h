@@ -51,3 +51,4 @@ gentity_t *PlayerForName(const string& name, string& error);
 const vector<string> *G_GetMapList();
 
 #endif
+

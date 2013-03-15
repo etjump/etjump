@@ -37,10 +37,19 @@ void CTFSystem::Init() {
 
 void CTFSystem::AlliesScored() {
     alliedScore++;
+    LogPrintln("Allied score: " + IntToString(alliedScore));
+    //Debugging purposes
+    AP("CP \"^7Team ^4Allies ^7scored!\n\"");
+    UpdateScoreToPlayers();
 }
 
 void CTFSystem::AxisScored() {
     axisScore++;
+
+    LogPrintln("Axis score: " + IntToString(axisScore));
+
+    AP("CP \"^7Team ^1Axis ^7scored!\n\"");
+    UpdateScoreToPlayers();
 }
 
 void CTFSystem::StartGame() {
@@ -50,6 +59,8 @@ void CTFSystem::StartGame() {
 
     // Initialize the CTF variables
     Init();
+
+    UpdateScoreToPlayers();
 
     // Kill all players when the game starts
     for(int i = 0; i < level.numConnectedClients; i++) {
@@ -80,3 +91,11 @@ void CTFSystem::StopGame() {
         "^4Allies: ^7" + IntToString(alliedScore) + "\n");
 }
 
+void CTFSystem::UpdateScoreToPlayers() const {
+    for(int i = 0; i < level.numConnectedClients; i++) {
+        unsigned clientNum = level.sortedClients[i];
+
+        // Axis score - Allied score
+        trap_SendServerCommand(clientNum, va("ctfscore %d %d", axisScore, alliedScore));
+    }
+}

@@ -660,6 +660,8 @@ typedef struct {
     int         last_listmaps_time;
     int         lastMostPlayedListTime;
 
+    qboolean    ctfUserReady;
+
 	qboolean	versionOK;
 } clientSession_t;
 
@@ -2630,5 +2632,19 @@ void initSaveDatabase();
 
 // g_ctf.cpp
 qboolean CTFEnabled();
+void AlliesScored();
+void AxisScored();
+void Cmd_CTF_f( gentity_t *ent );
+
+// g_users.cpp
+void Client_OnClientBegin(gentity_t *ent);
+void Client_OnClientConnect(gentity_t *ent, qboolean firstTime);
+void Client_OnClientDisconnect(gentity_t *ent);
+void Client_HWIDReceived(gentity_t *ent);
+void Client_GuidReceived(gentity_t *ent);
+void Client_DebugPrint(gentity_t *ent);
+
+qboolean HardwareBanCheck(const char* hardwareId);
+
 #endif // G_LOCAL_H
 

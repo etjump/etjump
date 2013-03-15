@@ -1,12 +1,15 @@
 #include <vector>
 using std::vector;
 #include "g_mapdata.h"
+#include "g_utilities.h"
+#include "g_ctf.h"
 
 extern "C" {
 #include "g_local.h"
 }
 
 MapData mapData;
+static CTFSystem ctfSystem;
 
 // Called on ClientBegin() on g_main.c
 void G_ClientBegin(gentity_t *ent) {
@@ -58,4 +61,46 @@ void G_ShutdownGame_ext( int restart ) {
     int minutesPlayed = msecPlayed/1000/60;
 
     mapData.updateMap(level.rawmapname, timeInt, minutesPlayed);
+}
+
+void AlliesScored() {
+    ctfSystem.AlliesScored();
+}
+
+void AxisScored() {
+    ctfSystem.AxisScored();
+}
+
+void CTF_CheckReadyStatus() {
+    for(int i = 0; i < level.numConnectedClients; i++) {
+        unsigned clientNum = level.sortedClients[i];
+        gentity_t *ent = g_entities + clientNum;
+        
+        if(ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+            continue;
+        }
+
+        if(ent->client->pers.connected != CON_CONNECTING 
+            && ent->client->sess.ctfUserReady == qfalse) {
+            return;
+        }
+    }
+    ctfSystem.StartGame();
+}
+
+void Cmd_CTF_f( gentity_t *ent ) {
+    Arguments argv = GetArgs();
+
+    if(argv->size() < 2) {
+        // Print usage
+        return;
+    }
+
+    if(argv->at(1) == "ready") {
+        ent->client->sess.ctfUserReady = qtrue;
+    } else if(argv->at(1) == "notready") {
+        ent->client->sess.ctfUserReady = qfalse;
+    }
+
+    CTF_CheckReadyStatus();
 }

@@ -413,3 +413,4 @@ void loadPositionsFromDatabase(gentity_t *ent) {
 void initSaveDatabase() {
     positionData.reset();
 }
+

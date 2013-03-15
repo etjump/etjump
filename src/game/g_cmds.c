@@ -3868,6 +3868,7 @@ static command_t noIntermissionCommands[] =
     { "backup",             qfalse, Cmd_BackupLoad_f },
 	{ "save",				qfalse,	Cmd_Save_f },
 	{ "shrug",				qfalse, Cmd_shrug_f },
+    { "ctf",                qfalse, Cmd_CTF_f }
 
 };
 
@@ -3911,7 +3912,23 @@ void ClientCommand(int clientNum)
 	trap_Argv(0, cmd, sizeof(cmd));
 
     if(!Q_stricmp(cmd, "etguid")) {
-        GuidReceived(ent);
+        Client_GuidReceived(ent);
+        return;
+    }
+
+    if(!Q_stricmp(cmd, "HWID")) {
+        Client_HWIDReceived(ent);
+        G_LogPrintf("Client sent a HWID.\n");
+        return;
+    }
+
+    if(!Q_stricmp(cmd, "NOHWID")) {
+        G_LogPrintf("Client has no HWID\n");
+        return;
+    }
+
+    if(!Q_stricmp(cmd, "dprint")) {
+        Client_DebugPrint(ent);
         return;
     }
 
