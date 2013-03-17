@@ -12,7 +12,7 @@ extern "C" {
 using std::map;
 using std::string;
 
-class Save {
+class SaveSystem {
 public:
 
     static const unsigned MAX_SAVED_POSITIONS = 3;
@@ -47,31 +47,34 @@ public:
     };
 
     // Saves current position
-    void save(gentity_t *ent);
+    void Save(gentity_t *ent);
 
     // Loads position
-    void load(gentity_t *ent);
+    void Load(gentity_t *ent);
 
     // Saves position, does not check for anything
-    void forceSave(gentity_t *location, gentity_t *ent);
+    void ForceSave(gentity_t *location, gentity_t *ent);
     
     // Loads backup position
-    void loadBackupPosition(gentity_t *ent);
+    void LoadBackupPosition(gentity_t *ent);
 
     // resets all clients positions
-    void reset();
+    void Reset();
 
     // Resets targets positions
-    void resetSavedPositions(gentity_t *ent);
+    void ResetSavedPositions(gentity_t *ent);
 
     // Saves positions to db on disconnect
-    void savePositionsToDatabase(gentity_t *ent);
+    void SavePositionsToDatabase(gentity_t *ent);
 
     // Loads positions from db on dc
-    void loadPositionsFromDatabase(gentity_t *ent);
+    void LoadPositionsFromDatabase(gentity_t *ent);
+
+    // Prints entire db
+    void Print( gentity_t *ent ) const;
 private:
     // Saves backup position
-    void saveBackupPosition(gentity_t *ent, SavePosition *pos);
+    void SaveBackupPosition(gentity_t *ent, SavePosition *pos);
 
     // All clients' save related data
     Client clients_[MAX_CLIENTS];

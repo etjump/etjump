@@ -1,11 +1,6 @@
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
-
-extern "C" {
-#include "g_local.h"
-}
 
 #include "g_utilities.h"
 
@@ -13,219 +8,264 @@ using std::string;
 using std::vector;
 
 /*
-==============================
-String modification
-==============================
-*/
+ * Printing related
+ */
 
-// Removes color tags from string
+void ConsolePrintTo( gentity_t *target, const string& msg ) 
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
+    if( target ) {
+        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+    }
+    else {
+        G_Printf("%s\n", msg.c_str());
+    }
+}
 
-string RemoveColors(const string& source) {
+void ConsolePrintTo( gentity_t *target, const char* msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
+    if( target ) {
+        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+    }
+    else {
+        G_Printf("%s\n", msg);
+    }
+}
+
+void ConsolePrintAll( const string& msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
+    trap_SendServerCommand( -1, toPrint );
+    G_Printf("%s\n", msg.c_str());
+}
+
+void ConsolePrintAll( const char* msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
+    trap_SendServerCommand( -1, toPrint );
+    G_Printf("%s\n", msg);
+}
+
+void ChatPrintTo( gentity_t *target, const string& msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg.c_str());
+    if( target ) {
+        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+    }
+    else {
+        G_Printf("%s\n", msg.c_str());
+    }
+}
+
+void ChatPrintTo( gentity_t *target, const char* msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
+    if( target ) {
+        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+    }
+    else {
+        G_Printf("%s\n", msg);
+    }
+}
+
+void ChatPrintAll( const string& msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg.c_str());
+    trap_SendServerCommand( -1, toPrint );
+    G_Printf("%s\n", msg.c_str());
+}
+
+void ChatPrintAll( const char* msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
+    trap_SendServerCommand( -1, toPrint );
+    G_Printf("%s\n", msg);
+}
+
+void CPTo( gentity_t *target, const string& msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg.c_str());
+    if( target ) {
+        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+    }
+    else {
+        G_Printf("%s\n", msg.c_str());
+    }
+}
+
+void CPTo( gentity_t *target, const char* msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
+    if( target ) {
+        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+    }
+    else {
+        G_Printf("%s\n", msg);
+    }
+}
+
+void CPAll( const string& msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg.c_str());
+    trap_SendServerCommand( -1, toPrint );
+    G_Printf("%s\n", msg.c_str());
+}
+
+void CPAll( const char* msg ) {
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
+    trap_SendServerCommand( -1, toPrint );
+    G_Printf("%s\n", msg);
+}
+
+void CPMTo( gentity_t *target, const string& msg ) 
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg.c_str());
+    if( target ) {
+        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+    }
+    else {
+        G_Printf("%s\n", msg.c_str());
+    }
+}
+
+void CPMTo( gentity_t *target, const char* msg ) 
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
+    if( target ) {
+        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+    }
+    else {
+        G_Printf("%s\n", msg);
+    }
+}
+
+void CPMAll( const string& msg ) 
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg.c_str());
+    trap_SendServerCommand(-1, toPrint);
+    G_Printf("%s\n", msg.c_str());
+}
+
+void CPMAll( const char* msg ) 
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
+    trap_SendServerCommand(-1, toPrint);
+    G_Printf("%s\n", msg);
+}
+
+void BPTo( gentity_t *target, const string& msg )
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg.c_str());
+    if( target ) {
+        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+    }
+    else { 
+        G_Printf("%s\n", msg.c_str());
+    }
+}
+
+void BPAll( const string& msg )
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg.c_str());
+    trap_SendServerCommand(-1, toPrint);
+
+    G_Printf("%s\n", msg.c_str());
+}
+
+void BPTo( gentity_t *target, const char* msg )
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);
+    if( target ) {
+        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+    } else {
+        G_Printf("%s\n", msg);
+    }
+}
+
+void BPAll( const char* msg )
+{
+    char toPrint[MAX_TOKEN_CHARS] = "\0";
+    Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);
+    trap_SendServerCommand(-1, toPrint);
     
-    size_t output_length = 0;
-    char no_colors[MAX_TOKEN_CHARS] = "\0";
-    char *output_ptr = &no_colors[0];
-    const char *source_ptr = source.c_str();
-
-    while(*source_ptr) {
-        // Return the string if we exceed 
-        if(output_length >= MAX_TOKEN_CHARS) {
-            return no_colors;
-        }
-
-        // If we found ^ in source
-        if(*source_ptr == 27 || *source_ptr == '^') {
-            // Skip it
-            source_ptr++;
-            // Skip the next char aswell if it exists
-            if(*source_ptr) {
-                source_ptr++;
-            }
-            continue;
-        }
-        *output_ptr++ = *source_ptr++;
-        output_length++;
-    }
-    *output_ptr = 0;
-
-    return no_colors;
+    G_Printf("%s\n", msg);
 }
 
-// Removes color codes & converts to lower if required
-void SanitizeString(const string& in, string& out, bool to_lower) {
-    out = RemoveColors(in);
-
-    if(to_lower) {
-        boost::to_lower(out);
-    }
-
-}
-
-/*
-======================
-Printing
-======================
-*/
-
-// Prints text in chat to target entity only
-// if entity is null prints to console
-
-void ChatPrintTo(gentity_t *ent, const string& message) {
-
-    if(ent) {
-        CP(va("chat \"%s\"", message.c_str()));
-    }
-
-    else {
-        G_Printf("%s\n", RemoveColors(message).c_str());
-    }
-
-}
-
-// cpm to ent
-void CPMPrintTo(gentity_t *ent, const string& message) {
-    if(ent) {
-        CP(va("cpm \"%s\n\"", message.c_str()));
-    }
-
-    else {
-        G_Printf("%s\n", RemoveColors(message).c_str());
-    }
-}
-
-// cp to ent
-void CPPrintTo(gentity_t *ent, const string& message) {
-    if(ent) {
-        CP(va("cp \"%s\n\"", message.c_str()));
-    }
-
-    else {
-        G_Printf("%s\n", RemoveColors(message).c_str());
-    }
-}
-
-void PrintTo(gentity_t *ent, const string& message) {
-    if(ent) {
-        CP(va("print \"%s\n\"", message.c_str()));
-    }
-
-    else {
-        G_Printf("%s\n", RemoveColors(message).c_str());
-    }
-}
-
-void PrintToNoNewline(gentity_t *ent, const string& message) {
-    if(ent) {
-        CP(va("print \"%s\"", message.c_str()));
-    }
-
-    else {
-        G_Printf("%s", RemoveColors(message).c_str());
-    }
-}
-
-// Prints text in chat to all entities
-
-void ChatPrintAll(const string& message) {
-    AP(va("chat \"%s\"", message.c_str()));
-    G_Printf("%s\n", RemoveColors(message).c_str());
-}
-
-void CPMPrintAll(const string& message) {
-    AP(va("cpm \"%s\n\"", message.c_str()));
-    G_Printf("%s\n", RemoveColors(message).c_str());
-}
-
-void CPPrintAll(const string& message) {
-    AP(va("cp \"%s\n\"", message.c_str()));
-    G_Printf("%s\n", RemoveColors(message).c_str());
-}
-
-void PrintAll(const string& message) {
-    AP(va("print \"%s\n\"", message.c_str()));
-    G_Printf("%s\n", RemoveColors(message).c_str());
-}
-
-void BannerPrintAll(const string& message) {
-    AP(va("bp \"%s\n\"", message.c_str()));
-    G_Printf("%s\n", RemoveColors(message).c_str());
-}
-
-// LogPrint that includes newline
-void LogPrintln(const string& message) {
-    G_LogPrintf("%s\n", message.c_str());
-}
-
-void LogPrint(const string& message) {
-    G_LogPrintf("%s", message.c_str());
-}
-
-// Buffer printing for bigger than 1024 char string
-
-static string big_text_buffer;
+static string bigTextBuffer;
 
 void BeginBufferPrint() {
-    big_text_buffer.clear();
+    bigTextBuffer.clear();
 }
 
-void FinishBufferPrintNoNewline(gentity_t *ent) {
-    PrintToNoNewline(ent, big_text_buffer);
+void FinishBufferPrint(gentity_t *ent, bool insertNewLine) {
+    if(ent) {
+        if( insertNewLine ) {
+            trap_SendServerCommand(ent->client->ps.clientNum, 
+                (bigTextBuffer + NEWLINE).c_str());
+        } else {
+            trap_SendServerCommand(ent->client->ps.clientNum,
+                bigTextBuffer.c_str());
+        }
+    } else {
+        if( insertNewLine ) {
+            G_Printf("%s\n",
+                (bigTextBuffer + NEWLINE).c_str());
+        } else {
+            G_Printf("%s",
+                bigTextBuffer.c_str());
+        }
+    }
 }
 
-void FinishBufferPrint(gentity_t *ent) {
-    PrintTo(ent, big_text_buffer);
-}
-
-void BufferPrint(gentity_t *ent, const string& message) {
+void BufferPrint( gentity_t *ent, const string& msg ) {
 
     if(!ent) {
-        // No need to print color codes to console
-        string clean_message = RemoveColors(message);
-        
-        if(clean_message.length() + big_text_buffer.length() > 239) {
-            G_Printf("%s", big_text_buffer.c_str());
-            big_text_buffer.clear();
+        char cleanMsg[MAX_TOKEN_CHARS];
+        SanitizeConstString(msg.c_str(), cleanMsg, qfalse);
+        if(cleanMsg) {
+            if(strlen(cleanMsg) + bigTextBuffer.length() > 239) {
+                G_Printf("%s", bigTextBuffer.c_str());
+                bigTextBuffer.clear();
+            }
+            bigTextBuffer += msg;
         }
-        big_text_buffer += message;
     }
 
     else {
-
-        if(message.length() + big_text_buffer.length() > 1009) {
-            CP( string("print \"" + big_text_buffer + "\"").c_str() );
-            big_text_buffer.clear();
+        if( msg.length() + bigTextBuffer.length() > 1009 ) {
+            trap_SendServerCommand(ent->client->ps.clientNum, 
+                std::string("print \"" + bigTextBuffer + "\"").c_str() );
         }
-        big_text_buffer += message;
+        bigTextBuffer += msg;
     }
-
 }
+
 /*
-==================
-Argument handling
-==================
-*/
+ * End of printing related
+ */
 
-// Parses arguments for admin system
-// Example: say "!kick a" -> "say" "!kick" "a" instead of say & kick a
-Arguments GetSayArgs() {
+/*
+ * Argument handling
+ */
+
+Arguments GetArgs()
+{
+    int argc = trap_Argc();
     static vector<string> argv;
     argv.clear();
-    for(int i = 0; i < Q_SayArgc(); i++) {
+
+    for(int i = 0; i < argc; i++) {
         char arg[MAX_TOKEN_CHARS];
-
-        Q_SayArgv(i, arg, sizeof(arg));
-        argv.push_back(arg);
-    }
-    return &argv;
-}
-
-// Gets all arguments
-Arguments GetArgs() {
-    static vector<string> argv;
-    argv.clear();
-    for(int i = 0; i < trap_Argc(); i++) {
-        char arg[MAX_TOKEN_CHARS];
-
         trap_Argv(i, arg, sizeof(arg));
         argv.push_back(arg);
     }
@@ -233,52 +273,76 @@ Arguments GetArgs() {
 }
 
 /*
-==================
-Conversions
-==================
-*/
+ * Conversions
+ */
 
-// Returns an empty string if it fails
-string IntToString(int to_convert) {
-    string target;
+qboolean StringToInt( const char* toConvert, int *value )
+{
     try {
-        target = boost::lexical_cast<std::string, int>(to_convert);
-    } catch( ... ) {
-        // Should never happen
-        return "";
+        static int result = boost::lexical_cast<int>(toConvert);
+
+        *value = result;
+    } 
+    catch( /* boost::bad_lexical_cast& e */ ... ) {
+        return qfalse;
     }
-    return target;
+    return qtrue;
 }
 
-// Returns true if conversion succeeded
-bool StringToInt(const string& source, int& target) {
+bool StringToInt( const string& toConvert, int& value )
+{
     try {
-        target = boost::lexical_cast<int, std::string>(source);
-    } catch ( boost::bad_lexical_cast ) {
+        int result = boost::lexical_cast<int>(toConvert);
+
+        value = result;
+    } 
+    catch( /* boost::bad_lexical_cast& e */ ... ) {
         return false;
     }
-	return true;
+    return true;
 }
 
-// Other utilities
-
-// Sha1 hashing for a string, max len 1024
-string SHA1(const string& to_hash) {
-    char temp[MAX_TOKEN_CHARS];
-
-    Q_strncpyz(temp, to_hash.c_str(), sizeof(temp));
-    return G_SHA1(temp);
+std::string IntToString( int value ) {
+    return boost::lexical_cast<std::string>(value);
 }
 
-// returns pointer to player 
-gentity_t *PlayerForName(const string& name, string& error) {
-    char err[MAX_STRING_CHARS];
+std::string Vec3ToString( vec3_t toConvert ) {
+    string vec3 = "(" + IntToString( toConvert[0] )
+        + ", " + IntToString( toConvert[1] ) + ", " +
+        IntToString( toConvert[2] ) + ")";
+    return vec3;
+}
+
+std::string Vec3ToString( vec_t x, vec_t y, vec_t z ) {
+    string vec3 = "(" + IntToString( x )
+        + ", " + IntToString( y ) + ", " +
+        IntToString( z ) + ")";
+    return vec3;
+}
+
+gentity_t *PlayerGentityFromString(char *name, char *err, int size) {
     int pids[MAX_CLIENTS];
-    if(ClientNumbersFromString(name.c_str(), pids) != 1) {
-        G_MatchOnePlayer(pids, err, sizeof(err));
-        error = err;
-        return 0;
+    gentity_t *player;
+
+    if(ClientNumbersFromString(name, pids) != 1) {
+        G_MatchOnePlayer(pids, err, size);
+        return NULL;
     }
 
-    return (g_entities + pids[0]);
+    player = g_entities + pids[0];
+    return player;
+}
+
+gentity_t *PlayerGentityFromString
+    (const std::string& name, char *err, int size) {
+    int pids[MAX_CLIENTS];
+    gentity_t *player;
+
+    if(ClientNumbersFromString(name.c_str(), pids) != 1) {
+        G_MatchOnePlayer(pids, err, size);
+        return NULL;
+    }
+
+    player = g_entities + pids[0];
+    return player;
 }

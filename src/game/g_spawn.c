@@ -1014,13 +1014,6 @@ void SP_worldspawn( void ) {
         level.noNoclip = qfalse;
     }
 
-    G_SpawnString("ctfenabled", "0", &s);
-    if(atoi(s)) {
-        level.ctfEnabled = qtrue;
-    } else {
-        level.ctfEnabled = qfalse;
-    }
-
 	G_SpawnString("nogod", "0", &s);
 	if (atoi(s)) {
 		level.noGod = qtrue;

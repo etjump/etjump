@@ -165,46 +165,31 @@
     <ClCompile Include="..\sha-1\bg_sha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_admin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_leveldatabase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_userdatabase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\sqlite\sqlite3pp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_utilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_banner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_maplist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_mapdata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_main_ext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_ctf.cpp">
+    <ClCompile Include="g_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_users.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_admin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -253,34 +238,16 @@
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_leveldatabase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_userdatabase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\sqlite\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\sqlite\sqlite3pp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_admin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_mapdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_ctf.h">
+    <ClInclude Include="g_save.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_users.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_save.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

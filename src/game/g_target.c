@@ -532,6 +532,10 @@ void target_teleporter_use( gentity_t *self, gentity_t *other, gentity_t *activa
 		return;
 	}
 
+    if (self->spawnflags & 4) {
+
+    }
+
 	TeleportPlayer( activator, dest->s.origin, dest->s.angles );
 }
 
@@ -1455,7 +1459,7 @@ void SP_target_increase_ident( gentity_t *self ) {
 
 void target_save_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-	forceSave(self, activator);
+	ForceSave(self, activator);
     trap_SendServerCommand(activator-g_entities, g_savemsg.string);
 }
 

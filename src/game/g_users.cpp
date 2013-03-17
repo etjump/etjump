@@ -1,368 +1,390 @@
-#include "g_users.h"
+#include <vector>
+#include <string>
+
 #include "g_utilities.h"
+#include "g_users.h"
 
-ClientData::~ClientData()
+UserDatabase users;
+
+const char CREATE_USERS_TABLE[] =
+    "CREATE TABLE IF NOT EXISTS Users(UserID INTEGER PRIMARY KEY,\
+    Guid VARCHAR(40) UNIQUE);";
+const char CREATE_ALIAS_TABLE[] =
+    "CREATE TABLE IF NOT EXISTS Aliases(AliasID INTEGER PRIMARY KEY,\
+    Alias VARCHAR(36), UserID INTEGER, FOREIGN KEY(UserID) REFERENCES\
+    Users(UserID));";
+
+
+const char INSERT_INTO_USERS[] =
+    "INSERT OR IGNORE INTO Users(Guid) VALUES ('%s');";
+const char INSERT_INTO_ALIASES[] =
+    "INSERT OR IGNORE INTO Aliases(UserID, Alias) VALUES ('%s', '%s');";
+const char SELECT_ALIASES_BY_ID[] = 
+    "SELECT * FROM Aliases WHERE UserID='%d';";
+const char SELECT_ALIASES_BY_ID_LIMIT[] = 
+    "SELECT * FROM Aliases WHERE UserID='%' ORDER BY AliasID DESC LIMIT('%d');";
+
+const char INVALID_GUID_FRAME[] = 
+    "Error: invalid guid info frame from %s: %s\n";
+const char INVALID_LOGIN_FRAME[] = 
+"Error: invalid login info frame from %s: %s\n";
+const char INVALID_IP[] =
+    "Error: invalid IP %s";
+const char INVALID_HWID_FRAME[] = 
+    "Error: invalid HWID frame from %s: %s\n";
+
+void OnGameInit() {
+    InitSaveDatabase();
+}
+
+void OnClientConnect(int clientNum, 
+                     qboolean firstTime, 
+                     qboolean isBot)
 {
+    if(firstTime) {
+        users.ResetData((g_entities + clientNum));
+    }
+}
+
+void OnClientBegin(gentity_t *ent) {
+    LoadPositionsFromDatabase(ent);
+}
+
+void OnClientDisconnect(gentity_t *ent) {
+    SavePositionsToDatabase(ent);
+    ResetSavedPositions(ent);
+    users.ResetData(ent);
+}
+
+void ClientGuidReceived(gentity_t *ent) {
+    Arguments argv = GetArgs();
+
+
+    // etguid <GUID>
+    if( argv->size() != 2 ) {
+        G_LogPrintf(INVALID_GUID_FRAME, 
+            ent->client->pers.netname, ConcatArgs(0));
+        return;
+    }
+
+    if(!users.SetGuid(ent, argv->at(1))) {
+        G_LogPrintf(INVALID_GUID_FRAME,
+            ent->client->pers.netname, ConcatArgs(0));
+        return;
+    }
+
 
 }
 
-ClientData::ClientData()
-{
+void ClientCredentialsReceived(gentity_t *ent) {
+    Arguments argv = GetArgs();
 
+    // login username password
+    if( argv->size() != 3 ) {
+        G_LogPrintf(INVALID_LOGIN_FRAME, 
+            ent->client->pers.netname, ConcatArgs(0));
+        return;
+    }
+
+    if(!users.SetUsername(ent, argv->at(1))) {
+        G_LogPrintf(INVALID_LOGIN_FRAME,
+            ent->client->pers.netname, ConcatArgs(0));
+        return;
+    }
+
+    if(!users.SetPassword(ent, argv->at(2))) {
+        G_LogPrintf(INVALID_LOGIN_FRAME,
+            ent->client->pers.netname, ConcatArgs(0));
+        // Reset username because password was invalid
+        users.ResetUsername(ent);
+        return;
+    }
 }
 
-string ClientData::Guid( gentity_t *ent ) const
-{
-    return clients_[ent->client->ps.clientNum].guid;
+void ClientHWIDReceived(gentity_t *ent) {
+    Arguments argv = GetArgs();
+
+    // HWID <ID>
+    if( argv->size() != 2 ) {
+        G_LogPrintf(INVALID_LOGIN_FRAME, ent->client->pers.netname,
+            ConcatArgs(0));
+        return;
+    }
+
+    if( !users.SetHardwareID(ent, argv->at(1))) {
+        G_LogPrintf(INVALID_LOGIN_FRAME, ent->client->pers.netname,
+            ConcatArgs(0));
+        return;
+    }
 }
 
-string ClientData::HWID( gentity_t *ent ) const
+void UserDatabase_SetIP(gentity_t *ent, const char* ip) 
 {
-    return clients_[ent->client->ps.clientNum].hardwareId;
+    users.SetIP(ent, ip);
 }
 
-string ClientData::IP( gentity_t *ent ) const
-{
-    return clients_[ent->client->ps.clientNum].ip;
+void UserDatabase_Print( gentity_t *caller ) {
+    Arguments argv = GetArgs();
+    int clientNum = -1;
+
+    if( argv->size() != 2 ) {
+        ConsolePrintTo(caller, "usage: udbprint <clientNum>");
+        return;
+    }
+
+    if(!StringToInt(argv->at(1), clientNum)) {
+        ConsolePrintTo(caller, "udbprint: invalid number specified.");
+        return;
+    }
+
+    users.Print(caller, clientNum);
 }
 
-bool ClientData::SetGuid( gentity_t *ent, string guid )
+std::string UserDatabase_Guid(gentity_t *ent) {
+    return users.Guid(ent);
+}
+
+/*
+ * UserDB class
+ */
+
+UserDatabase::UserDatabase()
 {
-    if( guid.length() < GUID_LEN ) {
-        G_LogPrintf("Error while setting %s guid.\n", 
-            ent->client->pers.netname);
-        G_LogPrintf("Client::SetGuid: Guid is less than 40 chars.");
+    try {
+        // TODO: paths
+        db_.connect("etjump/etjump.db");
+        db_.execute(CREATE_USERS_TABLE);
+        db_.execute(CREATE_ALIAS_TABLE);
+    } catch ( sqlite3pp::database_error& e ) {
+        
+    }
+}
+
+UserDatabase::~UserDatabase()
+{
+    db_.disconnect();
+}
+
+UserDatabase::Client::Client()
+{
+    guid.clear();
+    hardwareID.clear();
+    ip.clear();
+    password.clear();
+    username.clear();
+    dbUserID = -1;
+}
+
+bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
+{
+    if( guid.length() != GUID_LEN ) {
         return false;
-    } else if( guid.length() > GUID_LEN ) {
-        G_LogPrintf("Error while setting %s guid.\n", 
-            ent->client->pers.netname);
-        G_LogPrintf("Client::SetGuid: Guid is more than 40 chars.");
-        return false;
-    } 
+    }
 
     clients_[ent->client->ps.clientNum].guid = guid;
+
+    try {
+
+        sqlite3pp::command cmd(db_, "INSERT OR IGNORE INTO Users (Guid) VALUES (?);");
+        cmd.bind(1, guid.c_str());
+        cmd.execute();
+        
+        // Cache UserID for later queries
+        char qry[MAX_TOKEN_CHARS];
+        Com_sprintf(qry, sizeof(qry), 
+            "SELECT UserID FROM Users WHERE Guid='%s';", guid.c_str());
+        sqlite3pp::query query(db_, qry);
+
+        sqlite3pp::query::iterator it = query.begin();
+        if(it == query.end()) {
+            G_LogPrintf("Database error: failed to cache UserID\n");
+            // Returns true to save the guid to memory anyway
+            return true;
+        }
+        clients_[ent->client->ps.clientNum].dbUserID =
+            (*it).get<int>(0);
+        
+        // Add the first nick to aliasDB aswell
+        AddNameToDatabase(ent);
+    } catch ( sqlite3pp::database_error&e) {
+        G_LogPrintf("Database error: %s\n", e.what());
+    }
+
     return true;
 }
 
-bool ClientData::SetHWID( gentity_t *ent, string hwid )
+bool UserDatabase::SetHardwareID( gentity_t *ent, const std::string& hardwareID )
 {
-    if( hwid.length() < HWID_LEN ) {
-        G_LogPrintf("Error while setting %s hardware ID.\n", 
-            ent->client->pers.netname);
-        G_LogPrintf("Client::SetHWID: HWID is less than 40 chars.\n");
-        return false;
-    } else if( hwid.length() < HWID_LEN ) {
-        G_LogPrintf("Error while setting %s hardware ID.\n", 
-            ent->client->pers.netname);
-        G_LogPrintf("Client::SetHWID: HWID is more than 40 chars.\n");
+    if( hardwareID.length() != HARDWARE_ID_LEN ) {
         return false;
     }
 
-    clients_[ent->client->ps.clientNum].hardwareId = hwid;
+    clients_[ent->client->ps.clientNum].hardwareID = hardwareID;
     return true;
 }
 
-bool ClientData::SetIP( gentity_t *ent, string ip )
+bool UserDatabase::SetIP( gentity_t *ent, const std::string& ip )
 {
-    if( ip.length() > MAX_IP_LEN ) {
-        G_LogPrintf("Error while setting %s's IP.\nClient::SetIP: \
-                    IP is more than 15 chars.");
+    if( ip.length() < 0 || ip.length() > MAX_IP_LEN ) {
+        G_LogPrintf(INVALID_IP, ip.c_str());
         return false;
-    }
+    } 
 
     clients_[ent->client->ps.clientNum].ip = ip;
     return true;
 }
 
-void ClientData::DebugPrint( gentity_t *ent ) const
+bool UserDatabase::SetPassword( gentity_t *ent, const std::string& password )
 {
-    G_LogPrintf("Client: %s\nGuid: %s\nHWID: %s\nIP: %s\n", 
-        ent->client->pers.netname,
-        clients_[ent->client->ps.clientNum].guid.c_str(),
-        clients_[ent->client->ps.clientNum].hardwareId.c_str(),
-        clients_[ent->client->ps.clientNum].ip.c_str());
+    if( password.length() != 40 ) {
+        return false;
+    }
+    clients_[ent->client->ps.clientNum].password = password;
+    return true;
 }
 
-/*
- * FIXME: this belongs to g_utilities.cpp
- */
-string GetIP( gentity_t *ent ) {
-    char userinfo[MAX_INFO_STRING];
-    trap_GetUserinfo( ent->client->ps.clientNum, 
-        userinfo, sizeof(userinfo));
-
-    char *ipPtr = Info_ValueForKey(userinfo, "ip");
-    if(!ipPtr) {
-        G_LogPrintf("GetIP: Error while getting %s's ip",
-            ent->client->pers.netname);
-        return "";
+bool UserDatabase::SetUsername( gentity_t *ent, const std::string& username )
+{
+    if( username.length() < 0 ) {
+        return false;
     }
-
-    unsigned charactersCopied = 0;
-    char ip[MAX_IP_LEN + 1];
-
-    // Copy the IP without port separator
-    while(ipPtr[charactersCopied] != ':') {
-        if(charactersCopied >= MAX_IP_LEN) {
-            break;
-        }
-        ip[charactersCopied] = ipPtr[charactersCopied];
-        charactersCopied++;
-    }
-
-    ip[charactersCopied] = NULL;
-
-    G_LogPrintf("GetIp called: %s\n", ip);
-
-    return string(ip);
+    clients_[ent->client->ps.clientNum].username = username;
+    return true;
 }
 
-/*
- * This function is called every time we receive
- * "etguid"-command from client
- */
-void ClientData::GuidReceived( gentity_t *ent )
+std::string UserDatabase::Guid( gentity_t *ent ) const
 {
-    Arguments argv = GetArgs();
+    return clients_[ent->client->ps.clientNum].guid;
+}
 
-    // Client sends "etguid <hash>"
-    if(argv->size() != 2) {
-        // Request client to send guid again
-        RequestGuid(ent);
+std::string UserDatabase::HardwareID( gentity_t *ent ) const
+{
+    return clients_[ent->client->ps.clientNum].hardwareID;
+}
+
+std::string UserDatabase::IP( gentity_t *ent ) const
+{
+    return clients_[ent->client->ps.clientNum].ip;
+}
+
+std::string UserDatabase::Password( gentity_t *ent ) const
+{
+    return clients_[ent->client->ps.clientNum].password;
+}
+
+std::string UserDatabase::Username( gentity_t *ent ) const
+{
+    return clients_[ent->client->ps.clientNum].username;
+}
+
+void UserDatabase::Print( gentity_t *caller, int targetClientNum ) const
+{
+    // Client: client's name
+    // { username, password, guid, hardwareID, ip }
+    if( targetClientNum < 0 || targetClientNum >= MAX_CLIENTS ) {
+        ConsolePrintTo(caller, "udbprint: invalid clientNum");
         return;
     }
+    std::string toPrint = "Client: ";
+    toPrint += IntToString(targetClientNum);
+    toPrint += "\n{ USER: ";
+    toPrint += clients_[targetClientNum].username + ", PASSWORD: ";
+    toPrint += clients_[targetClientNum].password + ", GUID: ";
+    toPrint += clients_[targetClientNum].guid + ", HARDWAREID: ";
+    toPrint += clients_[targetClientNum].hardwareID + ", IP: ";
+    toPrint += clients_[targetClientNum].ip + ", USERID: " +
+    toPrint += IntToString(clients_[targetClientNum].dbUserID) + " }";
 
-    if(argv->at(1).length() != 40) {
-        // We received an invalid guid hash, request guid again
-        RequestGuid(ent);
-        return;
-    }
+    ConsolePrintTo(caller, "USERID HERE: " + IntToString(clients_[targetClientNum].dbUserID));
 
-    // Hash the guid again and update the client data
-    string guid = SHA1(argv->at(1));
-    string ip   = GetIP(ent);
-
-    if(ip.length() > 0) {
-        // If for some reason it fails to get the IP, don't add it to db
-        // Should never happen
-        SetIP(ent, ip);
-    }
-
-    SetGuid(ent, guid);
+    ConsolePrintTo(caller, toPrint);
 }
 
-/*
- * Called when hardware id is received from ClientCommand()
- */
-void ClientData::HWIDReceived( gentity_t *ent )
-{
-    // HWID <hwid hash>
-    Arguments argv = GetArgs();
-
-    if(argv->size() != 2) {
-        // Possible fake HWID command. Log it and request HWID again
-        G_LogPrintf("Invalid HWID info from client on slot %d\n\
-                    name: %s\n", ent->client->ps.clientNum,
-                    ent->client->pers.netname);
-        RequestHWID(ent);
-        return;
-    }
-
-    if(argv->at(1).length() != HWID_LEN) {
-        // Possible fake HWID. Log it and request HWID again
-        G_LogPrintf("Invalid HWID info from client on slot %d\n\
-                    name: %s\n", ent->client->ps.clientNum,
-                    ent->client->pers.netname);
-        RequestHWID(ent);
-        return;
-    }
-
-    /*
-     * Check if either guid is banned & add to client db
-     */
-
-    if(HardwareBanCheck(argv->at(1).c_str())) {
-        // TODO: Handle kicking.
-    }
-
-    char userinfo[MAX_INFO_STRING];
-    trap_GetUserinfo( ent->client->ps.clientNum, 
-        userinfo, sizeof(userinfo));
-
-    char *userinfoHWID = Info_ValueForKey(userinfo, "hwinfo");
-    if(!userinfoHWID) {
-        // Shouldn't happen
-        RequestHWID(ent);
-        return;
-    }
-
-    if(!Q_stricmp(userinfoHWID, "NOHWID")) {
-        RequestHWID(ent);
-    } else {
-        if(HardwareBanCheck(userinfoHWID)) {
-            // TODO: Handle kicking.
-        }
-    }
-
-    SetHWID(ent, argv->at(1));
-}
-
-void ClientData::OnClientConnect( gentity_t *ent, bool firstTime )
-{
-    if(firstTime) {
-        ResetClientData(ent);
-    }
-}
-
-
-void ClientData::OnClientBegin( gentity_t *ent )
-{
-    if( clients_[ent->client->ps.clientNum].guid.length() == 0 ) {
-        RequestGuid(ent);
-    }
-    if( clients_[ent->client->ps.clientNum].hardwareId.length() == 0 ) {
-        RequestHWID(ent);
-    }
-}
-
-void ClientData::OnClientDisconnect( gentity_t *ent )
-{
-    ResetClientData(ent);
-}
-
-void ClientData::ResetClientData( gentity_t * ent )
+void UserDatabase::ResetGuid( gentity_t *ent )
 {
     clients_[ent->client->ps.clientNum].guid.clear();
-    clients_[ent->client->ps.clientNum].hardwareId.clear();
+}
+
+void UserDatabase::ResetHardwareID( gentity_t *ent )
+{
+    clients_[ent->client->ps.clientNum].hardwareID.clear();
+}
+
+void UserDatabase::ResetIP( gentity_t *ent )
+{
     clients_[ent->client->ps.clientNum].ip.clear();
 }
 
-void ClientData::RequestGuid( gentity_t *ent )
+void UserDatabase::ResetPassword( gentity_t *ent )
 {
-    trap_SendServerCommand(ent->client->ps.clientNum,
-        GUID_REQUEST);
+    clients_[ent->client->ps.clientNum].password.clear();
 }
 
-void ClientData::RequestHWID( gentity_t *ent )
+void UserDatabase::ResetUsername( gentity_t *ent )
 {
-    trap_SendServerCommand(ent->client->ps.clientNum,
-        HWID_REQUEST);
+    clients_[ent->client->ps.clientNum].username.clear();
 }
 
-
-bool BanDatabase::BanCheck( const string& hardwareID, 
-                           const string& ip ) const
+void UserDatabase::ResetDBUserID( gentity_t *ent )
 {
-    vector<Ban*>::const_iterator it = bans_.begin();
+    clients_[ent->client->ps.clientNum].dbUserID = -1;
+}
 
-    while(it != bans_.end()) {
-        if((*it)->ip == ip || (*it)->hardwareID == hardwareID) {
-            return true;
+void UserDatabase::ResetData( gentity_t *ent )
+{
+    ResetGuid(ent);
+    ResetHardwareID(ent);
+    ResetIP(ent);
+    ResetPassword(ent);
+    ResetUsername(ent);
+    ResetDBUserID(ent);
+}
+
+void UserDatabase_AddNameToDatabase( gentity_t *ent ) {
+    users.AddNameToDatabase(ent);
+}
+
+void UserDatabase::AddNameToDatabase( gentity_t *ent )
+{
+    try {
+        sqlite3pp::command cmd(db_,
+            "INSERT INTO Aliases (Alias, UserID) SELECT * FROM (SELECT ?1, ?2) AS temp WHERE NOT EXISTS (SELECT Alias FROM Aliases WHERE Alias=?1 AND UserID=?2) LIMIT(1);");
+        cmd.bind(1, ent->client->pers.netname);
+        cmd.bind(2, clients_[ent->client->ps.clientNum].dbUserID);
+        cmd.execute();
+    } catch ( sqlite3pp::database_error& e ) {
+        G_LogPrintf("SQLite3 Error: %s\n", e.what());
+    }
+}
+
+const std::vector<std::string> * UserDatabase::GetAliases( gentity_t *ent )
+{
+    static std::vector<std::string> aliases;
+    aliases.clear();
+    try {
+        char queryText[MAX_TOKEN_CHARS];
+
+        Com_sprintf(queryText, sizeof(queryText), "SELECT Alias FROM Aliases WHERE UserID='%d';", clients_[ent->client->ps.clientNum].dbUserID);
+
+        sqlite3pp::query query(db_, queryText);
+
+        for(sqlite3pp::query::iterator it = query.begin(); 
+            it != query.end(); it++) 
+        {
+            const char *alias = (*it).get<const char*>(0);
+
+            if(alias) {
+                aliases.push_back(alias);
+            } 
         }
+    } catch ( sqlite3pp::database_error & e) {
+        G_LogPrintf("SQLite3 Error: %s\n", e.what());
+        return NULL;
     }
-
-    return false;
+    return &aliases;
 }
 
-bool BanDatabase::AddBan( int expires, const string& banner, 
-                         const string& date, const string& hardwareID, 
-                         const string& ip, const string& name, 
-                         const string& reason )
+const std::vector<std::string> *UserDatabase_GetAliases( gentity_t *ent )
 {
-    if(expires < 0) {
-        G_LogPrintf("Invalid expiration timestamp. Ignoring ban.\n");
-        return false;
-    }
-
-    Ban *newBan = new Ban(expires, banner, date, 
-        hardwareID, ip, name, reason);
-
-    bans_.push_back(newBan);
-
-    // TODO: sqlite database updates
-
-    return false;
-}
-
-bool BanDatabase::RemoveBan( const string& hardwareID, const string& ip )
-{
-    vector<Ban*>::iterator it = bans_.begin();
-
-    while(it != bans_.end()) {
-        if((*it)->ip == ip || (*it)->hardwareID == hardwareID) {
-            // Considering there won't be too many bans (~hundreds max)
-            // I'd say it's ok to have a rather crappy algorithm to
-            // delete the bans
-            delete *it;
-            bans_.erase(it);
-
-            // TODO: update sqlite 
-        }
-        it++;
-    }
-    return false;
-}
-
-const string fs_game_path = "etjump/";
-
-BanDatabase::BanDatabase()
-{
-    
-}
-
-BanDatabase::~BanDatabase()
-{
-    
-}
-
-BanDatabase::Ban::Ban( int expires_, const string& banner_, 
-                      const string& date_, 
-                      const string& hardwareID_, const string& ip_, 
-                      const string& name_, const string& reason_ )
-{
-    expires = expires_;
-    banner = banner_;
-    date = date_;
-    hardwareID = hardwareID_;
-    ip = ip_;
-    name = name_;
-    reason = reason_;
-}
-
-/*
- * C Interface for Client class method calls.
- */
-
-static ClientData clients;
-
-void Client_OnClientConnect( gentity_t *ent, qboolean firstTime )
-{
-    clients.OnClientConnect(ent, firstTime);
-}
-
-void Client_OnClientBegin( gentity_t *ent ) {
-    clients.OnClientBegin(ent);
-}
-
-void Client_OnClientDisconnect( gentity_t *ent ) {
-    clients.OnClientDisconnect(ent);
-}
-
-void Client_GuidReceived( gentity_t *ent ) {
-    clients.GuidReceived(ent);
-}
-
-void Client_HWIDReceived( gentity_t *ent ) {
-    clients.HWIDReceived(ent);
-}
-
-void Client_DebugPrint(gentity_t *ent) {
-    if(!ent) {
-        return;
-    }
-    clients.DebugPrint(ent);
-}
-
-qboolean HardwareBanCheck(const char* hardwareId) {
-    return qfalse;
+    return users.GetAliases(ent);
 }

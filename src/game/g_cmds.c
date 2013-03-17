@@ -227,6 +227,26 @@ void SanitizeConstString( const char *in, char *out, qboolean fToLower )
 	*out = 0;
 }
 
+int CleanStrlen( const char* in ) {
+    int len = 0;
+    while(*in) {
+        if(*in == 27 || *in == '^') {
+            in++;
+            if(*in) in++;
+            continue;
+        }
+
+        if(*in < 32) {
+            in++;
+            continue;
+        }
+
+        len++;
+        in++;
+    }
+    return len;
+}
+
 /*
 ==================
 ClientNumberFromString
@@ -1616,7 +1636,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
 		}
 	}
-    G_CommandCheck(ent);
 }
 
 
@@ -1946,6 +1965,7 @@ Cmd_CallVote_f
 ==================
 */
 qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCommand ) {
+    qboolean randommap = qfalse;
 	int		i;
 	char	arg1[MAX_STRING_TOKENS];
 	char	arg2[MAX_STRING_TOKENS];
@@ -1966,12 +1986,14 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 		} 
 	}
 
-	if( ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+	if( ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR 
+        && !fRefCommand) {
         CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator\n\"");
         return qfalse;
 	}
 
-	if( ent && ent->client->sess.muted && g_mute.integer & 2) {
+	if( ent && ent->client->sess.muted && g_mute.integer & 2 &&
+        !fRefCommand ) {
 		CP("print \"^3callvote: ^7not allowed to call a vote while muted.\n\"");
 		return qfalse;
 	}
@@ -1990,14 +2012,9 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 		return(qfalse);
 	}
 
-	if(!Q_stricmp(arg1, "random")) {
-		int number;
-		if(Q_stricmp(arg2, "map")) {
-			CP("print \"^3Usage:^7 Callvote random map");
-			return qfalse;
-		}
-		Q_strncpyz(arg1, "map", sizeof("map"));
-		Q_strncpyz(arg2, G_GetRandomMap(), sizeof(arg1));
+	if(!Q_stricmp(arg1, "randommap")) {
+		Q_strncpyz(arg2, "fueldump", sizeof(arg2));
+        randommap = qtrue;
 	}
 
 	if (!Q_stricmp(arg1, "map"))
@@ -2031,7 +2048,8 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 
 	}
 
-	if(trap_Argc() > 1 && (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND) {	//  --OSP
+	if(trap_Argc() > 1 && 
+        (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND) {	//  --OSP
 		if(i != G_OK)	 {
 			if(i == G_NOTFOUND) return(qfalse);	// Command error
 			else return(qtrue);
@@ -2049,8 +2067,11 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000) ));
 		return qfalse;
 	}
-
-	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
+    if(randommap) {
+        Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s", arg1);
+    } else {
+	    Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
+    }
 
 	// start the voting, the caller automatically votes yes
 	// If a referee, vote automatically passes.	// OSP
@@ -3587,28 +3608,37 @@ void Cmd_PrivateMessage_f(gentity_t *ent)
 
 	other = g_entities + clientNum;
 
-	if(ent) {
-		G_LogPrintf("%s -> %s: %s", ent->client->pers.netname, other->client->pers.netname, msg);
-	} else {
-		G_LogPrintf("Console -> %s: %s", other->client->pers.netname, msg);
-	}
-
 	if(!ent) {
 		msg = ConcatArgs(2);
-		CPx(other - g_entities, va("chat \"^7Private message from server console^7: ^3%s\"", msg));
-		G_Printf( va("Private message to %s^7: ^3%s\"", other->client->pers.netname, msg));
+		CPx(other - g_entities, 
+            va("chat \"^7Private message from server console^7: ^3%s\"", 
+            msg));
+		
+        G_Printf( 
+            va("Private message to %s^7: ^3%s\"", 
+            other->client->pers.netname, msg));
 		return;
 	}
 
 	if (!COM_BitCheck(other->client->sess.ignoreClients, ent->client->ps.clientNum))
 	{
 		msg = ConcatArgs(2);
-		CPx(other - g_entities, va("chat \"^7Private message from %s^7: ^3%s\"", ent->client->pers.netname, msg));
+		CPx(other - g_entities, va("chat \"^7Private message from %s^7: ^3%s\"", 
+            ent->client->pers.netname, msg));
 		if(ent)
-			CP(va("chat \"^7Private message to %s^7: ^3%s\"", other->client->pers.netname, msg));
+			CP(va("chat \"^7Private message to %s^7: ^3%s\"", 
+            other->client->pers.netname, msg));
 	}
 	else
-		CP(va("print \"Private message to %s was ignored by the player.\n\"", other->client->pers.netname));
+		CP(va("print \"Private message to %s was ignored by the player.\n\"", 
+        other->client->pers.netname));
+    if(ent) {
+        G_LogPrintf("%s -> %s: %s", 
+            ent->client->pers.netname, other->client->pers.netname, msg);
+    } else {
+        G_LogPrintf("Console -> %s: %s", 
+            other->client->pers.netname, msg);
+    }
 }
 
 void Cmd_noGoto_f(gentity_t *ent) {
@@ -3868,7 +3898,6 @@ static command_t noIntermissionCommands[] =
     { "backup",             qfalse, Cmd_BackupLoad_f },
 	{ "save",				qfalse,	Cmd_Save_f },
 	{ "shrug",				qfalse, Cmd_shrug_f },
-    { "ctf",                qfalse, Cmd_CTF_f }
 
 };
 
@@ -3911,29 +3940,19 @@ void ClientCommand(int clientNum)
 
 	trap_Argv(0, cmd, sizeof(cmd));
 
+    // Received client guid
     if(!Q_stricmp(cmd, "etguid")) {
-        Client_GuidReceived(ent);
+        ClientGuidReceived(ent);
+        return;
+    }
+
+    if(!Q_stricmp(cmd, "login")) {
+        ClientCredentialsReceived(ent);
         return;
     }
 
     if(!Q_stricmp(cmd, "HWID")) {
-        Client_HWIDReceived(ent);
-        G_LogPrintf("Client sent a HWID.\n");
-        return;
-    }
-
-    if(!Q_stricmp(cmd, "NOHWID")) {
-        G_LogPrintf("Client has no HWID\n");
-        return;
-    }
-
-    if(!Q_stricmp(cmd, "dprint")) {
-        Client_DebugPrint(ent);
-        return;
-    }
-
-    if(!Q_stricmp(cmd, "adminlogin")) {
-        AdminLogin(ent);
+        ClientHWIDReceived(ent);
         return;
     }
 
@@ -4064,10 +4083,6 @@ void ClientCommand(int clientNum)
     }
     
 	if(G_commandCheck(ent, cmd, qtrue)) return;
-
-    if(G_HasPermissionC(ent, AF_SILENTCOMMANDS)) {
-        if(G_CommandCheck(ent)) return;
-    }
 
 	CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }

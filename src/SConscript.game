@@ -58,16 +58,9 @@ g_vote.c
 g_weapon.c
 q_math.c
 q_shared.c
-g_admin.cpp
-g_leveldatabase.cpp
-g_userdatabase.cpp
 g_utilities.cpp
 g_banner.cpp
-g_main_ext.cpp
-g_mapdata.cpp
-g_maplist.cpp
 g_save.cpp
-g_users.cpp
 ../sha-1/bg_sha.c
 ../sha-1/sha1.c
 ../sqlite/sqlite3.c

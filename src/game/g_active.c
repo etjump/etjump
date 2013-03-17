@@ -504,7 +504,7 @@ qboolean ClientInactivityTimer( gclient_t *client ) {
 			client->inactivityWarning = qfalse;
 			client->inactivityTime = level.time + 60 * 1000;
 
-			AP(va("cpm \" %s ^7was removed from teams due to inactivity! (%i seconds) \n\"", client->pers.netname, g_inactivity.integer));
+			AP(va("cpm \"%s ^7was removed from teams due to inactivity! (%i seconds) \n\"", client->pers.netname, g_inactivity.integer));
 			SetTeam(g_entities + (client - level.clients), "s", qtrue, -1, -1, qfalse);
 
 			return(qfalse);
@@ -1048,16 +1048,6 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// set speed
 	client->ps.speed = G_SPEED;
-
-    if(CTFEnabled()) {
-#define CTF_BLOCKER_VEL 0.5
-#define CTF_RUNNER_VEL 1.0
-        if(ent->client->sess.playerType == PC_SOLDIER) {
-            client->ps.speed *= CTF_BLOCKER_VEL;
-        } else {
-            client->ps.speed *= CTF_RUNNER_VEL;
-        } 
-    }
 
 	if( client->speedScale )				// Goalitem speed scale
 		client->ps.speed *= (client->speedScale * 0.01);

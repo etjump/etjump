@@ -2084,17 +2084,6 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-    if( !Q_stricmp( cmd, "ctfscore" ) ) {
-        if(trap_Argc() != 3) {
-            CG_Printf("Argc != 3\n");
-            return;
-        }
-
-        cg.ctfAxisScore = atoi(CG_Argv(1));
-        cg.ctfAlliedScore = atoi(CG_Argv(2));
-        return;
-    }
-
 	if ( !Q_stricmp( cmd, "cpm" ) ) {
 		CG_AddPMItem( PM_MESSAGE, CG_LocalizeServerCommand( CG_Argv(1) ), cgs.media.voiceChatShader );
 		return;
@@ -2461,11 +2450,6 @@ static void CG_ServerCommand( void ) {
 
 		return;
 	}
-
-    if(!Q_stricmp(cmd, "identify")) {
-        AdminLogin();
-        return;
-    }
 
     if(!Q_stricmp(cmd, "guid_request")) {
         SendGuid();

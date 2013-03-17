@@ -47,13 +47,22 @@ typedef struct {
 
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] = {
-	{ 0x1ff, "kick",		 G_Kick_v,			"KICK",				" <player_id>^7\n  Attempts to kick player from server" },
-	{ 0x1ff, "mute",		 G_Mute_v,			"MUTE",				" <player_id>^7\n  Removes the chat capabilities of a player" },
-	{ 0x1ff, "unmute",		 G_UnMute_v,		"UN-MUTE",			" <player_id>^7\n  Restores the chat capabilities of a player" },
-	{ 0x1ff, "map",			 G_Map_v,			"Change map to",	" <mapname>^7\n  Votes for a new map to be loaded" },
-	{ 0x1ff, "maprestart",	 G_MapRestart_v,	"Map Restart",		"^7\n  Restarts the current map in progress" },
-	{ 0x1ff, "referee",		 G_Referee_v,		"Referee",			" <player_id>^7\n  Elects a player to have admin abilities" },
-	{ 0x1ff, "unreferee",	 G_Unreferee_v,		"UNReferee",		" <player_id>^7\n  Elects a player to have admin abilities removed" },
+	{ 0x1ff, "kick",		 G_Kick_v,			"KICK",				
+    " <player_id>^7\n  Attempts to kick player from server" },
+	{ 0x1ff, "mute",		 G_Mute_v,			"MUTE",				
+    " <player_id>^7\n  Removes the chat capabilities of a player" },
+	{ 0x1ff, "unmute",		 G_UnMute_v,		"UN-MUTE",			
+    " <player_id>^7\n  Restores the chat capabilities of a player" },
+	{ 0x1ff, "map",			 G_Map_v,			"Change map to",	
+    " <mapname>^7\n  Votes for a new map to be loaded" },
+	{ 0x1ff, "maprestart",	 G_MapRestart_v,	"Map Restart",		
+    "^7\n  Restarts the current map in progress" },
+	{ 0x1ff, "referee",		 G_Referee_v,		"Referee",			
+    " <player_id>^7\n  Elects a player to have admin abilities" },
+	{ 0x1ff, "unreferee",	 G_Unreferee_v,		"UNReferee",		
+    " <player_id>^7\n  Elects a player to have admin abilities removed" },
+    { 0x1ff, "randommap",    G_RandomMap_v,     "Random Map",
+    " ^7\n Votes a new random map to be loaded" },
 	{ 0, 0, NULL, 0 }
 };
 
@@ -375,6 +384,20 @@ int G_UnMute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, 
 	}
 
 	return(G_OK);
+}
+
+int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, 
+                  char *arg2, qboolean fRefereeCmd) 
+{
+    if(arg) {
+        Q_strncpyz(level.voteInfo.vote_value, 
+            "fueldump", sizeof(level.voteInfo.vote_value));
+    } else {
+        trap_SendConsoleCommand(EXEC_APPEND, 
+            va("map %s\n", level.voteInfo.vote_value));
+    }
+
+    return G_OK;
 }
 
 // *** Map - simpleton: we dont verify map is allowed/exists ***

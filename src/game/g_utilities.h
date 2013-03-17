@@ -1,54 +1,46 @@
-#ifndef UTILITIES_H
-#define UTILITIES_H
-
-#include <vector>
-#include <string>
+#ifndef g_utilities_h__
+#define g_utilities_h__
 
 extern "C" {
 #include "g_local.h"
-}
+};
 
-using std::vector;
-using std::string;
-
-// Pointer to const vector<string>
-typedef const vector<string>* Arguments;
-typedef vector<string>::const_iterator ArgIterator;
-
-const string SEPARATOR = " ";
-
-string RemoveColors(const string& source);
-void SanitizeString(const string& in, string& out, bool to_lower);
-
-void ChatPrintTo(gentity_t *ent, const string& message);
-void CPMPrintTo(gentity_t *ent, const string& message);
-void CPPrintTo(gentity_t *ent, const string& message);
-void PrintTo(gentity_t *ent, const string& message);
-
-void BannerPrintAll(const string& message);
-void ChatPrintAll(const string& message);
-void CPMPrintAll(const string& message);
-void CPPrintAll(const string& message);
-void PrintAll(const string& message);
-
-void LogPrintln(const string& message);
-void LogPrint(const string& message);
-
-void BeginBufferPrint();
-void FinishBufferPrint(gentity_t *ent);
-void FinishBufferPrintNoNewline(gentity_t *ent);
-void BufferPrint(gentity_t *ent, const string& message);
-
-Arguments GetSayArgs();
-Arguments GetArgs();
-
-string IntToString(int to_convert);
-bool StringToInt(const string& source, int& target);
-
-string SHA1(const string& to_hash);
-gentity_t *PlayerForName(const string& name, string& error);
-
-const vector<string> *G_GetMapList();
-
+#ifdef max
+#undef max
 #endif
 
+#include <string>
+#include <vector>
+
+const std::string NEWLINE = "\n";
+
+// C++ versions of the printing functions
+void BPAll( const std::string& msg );
+void BPTo( gentity_t *target, const std::string& msg );
+void BeginBufferPrint();
+void BufferPrint( gentity_t *ent, const std::string& msg );
+void FinishBufferPrint(gentity_t *ent, bool insertNewLine=false);
+void CPAll( const std::string& msg );
+void CPMAll( const std::string& msg );
+void CPMTo( gentity_t *target, const std::string& msg );
+void CPTo( gentity_t *target, const std::string& msg );
+void ChatPrintAll( const std::string& msg );
+void ChatPrintTo( gentity_t *target, const std::string& msg );
+void ConsolePrintAll( const std::string& msg );
+void ConsolePrintTo( gentity_t *target, const std::string& msg );
+
+// Argument handling
+typedef const std::vector<std::string> *Arguments;
+Arguments GetArgs();
+
+// Conversions
+bool StringToInt(const std::string& toConvert, int& value);
+std::string IntToString( int value );
+
+std::string Vec3ToString( vec3_t toConvert );
+std::string Vec3ToString( vec_t x, vec_t y, vec_t z );
+
+gentity_t *PlayerGentityFromString(char *name, char *err, int size);
+gentity_t *PlayerGentityFromString(const std::string& name, 
+                                   char *err, int size);
+#endif // g_utilities_h__

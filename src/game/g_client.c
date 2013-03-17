@@ -775,9 +775,6 @@ void SetWolfSpawnWeapons( gclient_t *client )
 	client->ps.weapons[1] = 0;
 
 	AddWeaponToPlayer( client, WP_KNIFE, 1, 0, qtrue );
-    if(!CTFEnabled()) {
-	    AddWeaponToPlayer( client, WP_MEDIC_ADRENALINE, 1, 1, qtrue );
-    }
 
 	// Feen: PSM -TEST
 	if ((g_portalMode.integer == 0) && (level.portalEnabled)) //Freestyle mode...
@@ -786,7 +783,7 @@ void SetWolfSpawnWeapons( gclient_t *client )
 	client->ps.weaponstate = WEAPON_READY;
 
     // Zero: CTF: if CTF give no other weapons than knife
-	if (g_weapons.integer && !CTFEnabled())
+	if (g_weapons.integer)
 	{
 		if(pc != PC_FIELDOPS) {
 			if( AddWeaponToPlayer( client, WP_BINOCULARS, 1, 0, qfalse ) ) {
@@ -1408,11 +1405,15 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( client->pers.connected == CON_CONNECTED ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
-			trap_SendServerCommand( -1, va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", oldname, 
-			    client->pers.netname) );
+
+			trap_SendServerCommand( -1, 
+                va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", 
+                oldname, client->pers.netname) );
 			    client->sess.nameChangeCount++;
 			    client->sess.lastNameChangeTime = level.time;
-			    G_refPrintf(ent, "^3WARNING: ^7You have %d name changes left.", (g_nameChangeLimit.integer - client->sess.nameChangeCount));
+			    G_refPrintf(ent, "^3WARNING: ^7You have %d name changes left.",
+                    (g_nameChangeLimit.integer - client->sess.nameChangeCount));
+                UserDatabase_AddNameToDatabase( ent );
 			    if(5 - client->sess.nameChangeCount == 0)
 				    G_refPrintf(ent, "^3WARNING: ^7You must wait atleast 1 minute to rename again.");
 			    if(client->sess.nameChangeCount > g_nameChangeLimit.integer) {
@@ -1515,6 +1516,10 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
 
+    // Zero: has to be here because else it'll reset the ip we'll
+    // set a bit later 
+    OnClientConnect(clientNum, firstTime, isBot);
+
 	// IP filtering
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
 	// recommanding PB based IP / GUID banning, the builtin system is pretty limited
@@ -1549,6 +1554,8 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	/* End of ETPub fakeplayers DoS fix */
 	
+    UserDatabase_SetIP(ent, ip);
+
 	// we don't check password for bots and local client
 	// NOTE: local client <-> "ip" "localhost"
 	//   this means this client is not running in our current process
@@ -1584,6 +1591,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		client->sess.goto_allowed = qtrue;
 		client->sess.save_allowed = qtrue;  //qfalse	//Feen: Why was this set to false?
         client->last8BallTime = 0;
+        client->sess.loadedSavedPositions = qfalse;
 		client->lastVoteTime = 0;
 	} else {
 		client->sess.goto_allowed = qtrue;				//Feen: TEMP FIX! - Also added these two here as well.
@@ -1644,8 +1652,6 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
         ent->client->sess.muted = qtrue;
     }  
 
-    G_ClientConnect(ent, firstTime);
-    Client_OnClientConnect(ent, firstTime);
 	return NULL;
 }
 
@@ -1728,8 +1734,7 @@ void ClientBegin( int clientNum )
 	// No surface determined yet.	
 	ent->surfaceFlags = 0;
 
-    G_ClientBegin(ent);
-    Client_OnClientBegin(ent);
+    OnClientBegin(ent);
 }
 
 gentity_t *SelectSpawnPointFromList( char *list, vec3_t spawn_origin, vec3_t spawn_angles )
@@ -1801,18 +1806,6 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
 	int			savedSlotNumber;
 	index = ent - g_entities;
 	client = ent->client;
-
-    if(CTFEnabled()) {
-        if( client->sess.latchPlayerType != PC_SOLDIER &&
-            client->sess.latchPlayerType != PC_ENGINEER ) {
-            client->sess.latchPlayerType = PC_ENGINEER;
-        }
-
-        if( client->sess.playerType != PC_SOLDIER &&
-            client->sess.playerType != PC_ENGINEER ) {
-                client->sess.playerType = PC_ENGINEER;
-        }
-    }
 
 	G_UpdateSpawnCounts();
 
@@ -2129,6 +2122,7 @@ void ClientDisconnect( int clientNum ) {
 		return;
 	}
 
+    OnClientDisconnect(ent);
 	G_RemoveClientFromFireteams( clientNum, qtrue, qfalse );
 	G_RemoveFromAllIgnoreLists( clientNum );
 	G_LeaveTank( ent, qfalse );
@@ -2251,8 +2245,6 @@ void ClientDisconnect( int clientNum ) {
 	// OSP
 	G_verifyMatchState(i);
 	// OSP
-
-    G_ClientDisconnect(ent);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

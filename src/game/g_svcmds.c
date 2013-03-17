@@ -956,6 +956,21 @@ qboolean	ConsoleCommand( void ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
+    if( !Q_stricmp(cmd, "udbprint")) {
+        UserDatabase_Print( NULL );
+        return qtrue;
+    }
+
+    if( !Q_stricmp(cmd, "sdbprint")) {
+        SaveSystem_Print( NULL );
+        return qtrue;
+    }
+
+    if ( !Q_stricmp(cmd, "listaliases")) {
+        Svcmd_ListAliases_f();
+        return qtrue;
+    }
+
 	if ( Q_stricmp (cmd, "entitylist") == 0 ) {
 		Svcmd_EntityList_f();
 		return qtrue;
@@ -994,12 +1009,6 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-    if (!Q_stricmp(cmd, "updatemapdatabase")) {
-        Svcmd_UpdateMapDatabase_f();
-        G_LogPrintf("***Map database updated.***\n");
-        return qtrue;
-    }
-
 	// -NERVE - SMF
 
 	if (Q_stricmp (cmd, "makeReferee") == 0) {
@@ -1027,21 +1036,6 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-    if(!Q_stricmp(cmd, "linfo")) {
-        int level = 0;
-        char arg[MAX_TOKEN_CHARS];
-
-        if(trap_Argc() <= 1) {
-            return qfalse;
-        }
-
-        trap_Argv(1, arg, sizeof(arg));
-
-        level = atoi(arg);
-
-        PrintLevelInfo(level);
-    }
-
 // START - Mad Doc - TDF
 	if (Q_stricmp (cmd, "revive") == 0)
 	{
@@ -1067,10 +1061,6 @@ qboolean	ConsoleCommand( void ) {
 		G_ref_con();
 		return qfalse;
 	}
-
-    if (G_CommandCheck(NULL)) {
-        return qtrue;
-    }
 
     if(!Q_stricmp(cmd, "ipmutes")) {
         G_ListIPMutes();

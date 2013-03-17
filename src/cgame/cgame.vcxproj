@@ -54,6 +54,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
@@ -202,6 +205,8 @@
     <ClCompile Include="..\ui\ui_shared.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\etjump\ui\menudef.h" />
+    <ClInclude Include="..\..\etjump\ui\menumacros.h" />
     <ClInclude Include="..\game\bg_classes.h" />
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
@@ -217,6 +222,73 @@
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\etjump\ui\credits_activision.menu" />
+    <None Include="..\..\etjump\ui\credits_additional.menu" />
+    <None Include="..\..\etjump\ui\credits_et260.menu" />
+    <None Include="..\..\etjump\ui\credits_idsoftware.menu" />
+    <None Include="..\..\etjump\ui\credits_quit.menu" />
+    <None Include="..\..\etjump\ui\credits_splashdamage.menu" />
+    <None Include="..\..\etjump\ui\global.menu" />
+    <None Include="..\..\etjump\ui\hostgame.menu" />
+    <None Include="..\..\etjump\ui\hostgame_advanced.menu" />
+    <None Include="..\..\etjump\ui\hostgame_advanced_default.menu" />
+    <None Include="..\..\etjump\ui\hostgame_dedicated_warning.menu" />
+    <None Include="..\..\etjump\ui\ingame_disconnect.menu" />
+    <None Include="..\..\etjump\ui\ingame_main.menu" />
+    <None Include="..\..\etjump\ui\ingame_map_details.menu" />
+    <None Include="..\..\etjump\ui\ingame_messagemode.menu" />
+    <None Include="..\..\etjump\ui\ingame_serverinfo.menu" />
+    <None Include="..\..\etjump\ui\ingame_tapout.menu" />
+    <None Include="..\..\etjump\ui\ingame_tapoutlms.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_disabled.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_map.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_misc.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_players.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu" />
+    <None Include="..\..\etjump\ui\main.menu" />
+    <None Include="..\..\etjump\ui\menus.txt" />
+    <None Include="..\..\etjump\ui\mods.menu" />
+    <None Include="..\..\etjump\ui\options.menu" />
+    <None Include="..\..\etjump\ui\options_controls.menu" />
+    <None Include="..\..\etjump\ui\options_controls_default.menu" />
+    <None Include="..\..\etjump\ui\options_customise_game.menu" />
+    <None Include="..\..\etjump\ui\options_customise_hud.menu" />
+    <None Include="..\..\etjump\ui\options_system.menu" />
+    <None Include="..\..\etjump\ui\options_system_gamma.menu" />
+    <None Include="..\..\etjump\ui\playonline.menu" />
+    <None Include="..\..\etjump\ui\playonline_connecttoip.menu" />
+    <None Include="..\..\etjump\ui\playonline_disablepb.menu" />
+    <None Include="..\..\etjump\ui\playonline_enablepb.menu" />
+    <None Include="..\..\etjump\ui\playonline_serverinfo.menu" />
+    <None Include="..\..\etjump\ui\popup_autoupdate.menu" />
+    <None Include="..\..\etjump\ui\popup_errormessage.menu" />
+    <None Include="..\..\etjump\ui\popup_errormessage_pb.menu" />
+    <None Include="..\..\etjump\ui\popup_hostgameerrormessage.menu" />
+    <None Include="..\..\etjump\ui\popup_password.menu" />
+    <None Include="..\..\etjump\ui\popup_serverredirect.menu" />
+    <None Include="..\..\etjump\ui\profile.menu" />
+    <None Include="..\..\etjump\ui\profile_create.menu" />
+    <None Include="..\..\etjump\ui\profile_create_error.menu" />
+    <None Include="..\..\etjump\ui\profile_create_initial.menu" />
+    <None Include="..\..\etjump\ui\profile_delete.menu" />
+    <None Include="..\..\etjump\ui\profile_delete_error.menu" />
+    <None Include="..\..\etjump\ui\profile_rename.menu" />
+    <None Include="..\..\etjump\ui\quit.menu" />
+    <None Include="..\..\etjump\ui\rec_restart.menu" />
+    <None Include="..\..\etjump\ui\trickjump.menu" />
+    <None Include="..\..\etjump\ui\trickjump_info.menu" />
+    <None Include="..\..\etjump\ui\trickjump_settings.menu" />
+    <None Include="..\..\etjump\ui\trickjump_view.menu" />
+    <None Include="..\..\etjump\ui\vid_confirm.menu" />
+    <None Include="..\..\etjump\ui\vid_restart.menu" />
+    <None Include="..\..\etjump\ui\viewreplay.menu" />
+    <None Include="..\..\etjump\ui\viewreplay_delete.menu" />
+    <None Include="..\..\etjump\ui\wm_ftquickmessage.menu" />
+    <None Include="..\..\etjump\ui\wm_ftquickmessageAlt.menu" />
+    <None Include="..\..\etjump\ui\wm_quickmessage.menu" />
+    <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu" />
     <None Include="cgame.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

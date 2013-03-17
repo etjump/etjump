@@ -1183,8 +1183,6 @@ typedef struct {
 	int				stopTime;
 	qboolean		activeTimer;
 	qboolean		resetmaxspeed;
-    int             ctfAxisScore;
-    int             ctfAlliedScore;
 
 } cg_t;
 

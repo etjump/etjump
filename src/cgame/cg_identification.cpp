@@ -95,7 +95,6 @@ bool ReadGuid() {
 
 void SendGuid() {
    ReadGuid();
-
    // Hash it again so it's not sent as "plain text"
    trap_SendClientCommand((std::string("etguid " + G_SHA1(user_guid)).c_str()));
 }
@@ -113,7 +112,7 @@ void AdminLogin() {
     }
 
     // adminlogin username password
-    trap_SendClientCommand(std::string("adminlogin " + username + " " + 
+    trap_SendClientCommand(std::string("login " + username + " " + 
         G_SHA1("ETJump" + password)).c_str());
 }
 

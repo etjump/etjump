@@ -3057,9 +3057,6 @@ cvarTable_t		cvarTable[] = {
             SendHWID();
             UserinfoSendHWID();
             AdminLogin();
-            cg.ctfAxisScore = 0;
-            cg.ctfAlliedScore = 0;
-            // TODO: request server to send score on init
             //	CG_Printf("Time taken: %i\n", trap_Milliseconds() - startat);
       }
 

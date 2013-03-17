@@ -203,9 +203,6 @@ vmCvar_t		g_logCommands;
 // Banner
 vmCvar_t		g_bannerLocation;
 vmCvar_t		g_bannerTime;
-// Zero: FIXME. I couldn't think of a way to have dynamic bannersize
-// other than reading them from a file. I don't think we need it right
-// now. 
 vmCvar_t		g_banner1;
 vmCvar_t		g_banner2;
 vmCvar_t		g_banner3;
@@ -1492,50 +1489,6 @@ char *strcut( char *dest, char *src, int num ) {
 	*dest = (char)0;
 	return src;
 }
-
-// To be sure no1 can change the YCN logo.
-void CheckForValidIngameMain() {
-	int len = -1;
-	int len2 = -1;
-	fileHandle_t f;
-	fileHandle_t f2;
-	char *data = NULL;
-	const char sha[] = "CAAF1E2194767F6104BD9AF7657DA0BC2A1EFAB0";
-	const int LOGOLEN = 524332;
-
-	len = trap_FS_FOpenFile("ui/ingame_main.menu", &f, FS_READ);
-	len2 = trap_FS_FOpenFile("ui/assets/ycn/ycn_logo.tga", &f2, FS_READ);
-	trap_FS_FCloseFile(f2);
-
-	if(len < 0) {
-		G_Printf("Shouldn't happen...\n");
-		return;
-	}
-
-	data = (char*)malloc(len+1);
-	trap_FS_Read(data, len, f);
-	data[len] = 0;
-
-	trap_FS_FCloseFile(f);
-
-	if(Q_stricmp(G_SHA1(data), sha) || len2 != LOGOLEN) {
-
-		free(data);
-		G_LogPrintf("--------------------------------------------------\n");
-		G_LogPrintf("ETJump error:\n");
-		G_LogPrintf("ingame_main.menu and/or ycn_logo.tga have been modified\n");
-		G_LogPrintf("This is not allowed and mod will not work\n");
-		G_LogPrintf("until modified ingame_main.menu/ycn_logo.tga have been removed.\n");
-		G_LogPrintf("You can most likely find them in custom files with .pk3 extension.\n");
-		G_LogPrintf("All other .menu files can be modified.\n");
-		G_LogPrintf("--------------------------------------------------\n");
-		G_Error(" READ LOGS FOR MORE INFO. DELETE MODIFIED ingame_main.menu & ui/assets/ycn/ycn_logo.tga FILES");
-		return;
-	}
-
-	free(data);
-}
-
 /*
 ============
 G_InitGame
@@ -1752,8 +1705,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// load level script
 	G_Script_ScriptLoad();
 
-	G_CacheMapNames();
-
 	// reserve some spots for dead player bodies
 	InitBodyQue();
 
@@ -1809,12 +1760,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// general initialization
 	G_FindTeams();
 
-    G_Printf ("-----------------------------------\n");
-
-    G_ReadConfig(0, 0);
-
-	G_Printf ("-----------------------------------\n");
-
 	trap_PbStat ( -1 , "INIT" , "GAME" ) ;
 
 #ifndef NO_BOT_SUPPORT
@@ -1839,12 +1784,11 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_loadMatchGame();
 
     SetBanners();
+    OnGameInit();
 
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
-
-    G_InitGame_ext(levelTime, randomSeed, restart);
 }
 
 
@@ -1895,9 +1839,6 @@ void G_ShutdownGame( int restart ) {
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData( restart );
-
-
-    G_ShutdownGame_ext( restart );
 }
 
 

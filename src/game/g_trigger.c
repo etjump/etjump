@@ -1138,10 +1138,6 @@ void Touch_flagonly_multiple (gentity_t *ent, gentity_t *other, trace_t *trace) 
 
 		ent->parent = tmp;
 
-        if(CTFEnabled()) {
-            AlliesScored();
-        }
-
 	} else if ( ent->spawnflags & BLUE_FLAG && other->client->ps.powerups[ PW_BLUEFLAG ] ) {
 
 		other->client->ps.powerups[ PW_BLUEFLAG ] = 0;
@@ -1159,10 +1155,6 @@ void Touch_flagonly_multiple (gentity_t *ent, gentity_t *other, trace_t *trace) 
 		G_Script_ScriptEvent( &g_entities[other->client->flagParent], "trigger", "captured" );
 
 		ent->parent = tmp;
-
-        if(CTFEnabled()) {
-            AxisScored();
-        }
 	}
 }
 

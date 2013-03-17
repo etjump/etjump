@@ -9,6 +9,9 @@
       <UniqueIdentifier>{0ed61284-e1e5-4135-a8a0-64ccb5f3aea3}</UniqueIdentifier>
       <Extensions>h</Extensions>
     </Filter>
+    <Filter Include="Menu files">
+      <UniqueIdentifier>{e6a9f9cd-dd1d-435d-a875-8b96474931b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\game\bg_animation.c">
@@ -226,8 +229,215 @@
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\etjump\ui\menudef.h">
+      <Filter>Menu files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\etjump\ui\menumacros.h">
+      <Filter>Menu files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />
+    <None Include="..\..\etjump\ui\credits_activision.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\credits_additional.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\credits_et260.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\credits_idsoftware.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\credits_quit.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\credits_splashdamage.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\global.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\hostgame.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\hostgame_advanced.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\hostgame_advanced_default.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\hostgame_dedicated_warning.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_disconnect.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_main.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_map_details.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_messagemode.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_serverinfo.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_tapout.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_tapoutlms.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote_disabled.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote_map.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote_misc.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote_players.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\main.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\menus.txt">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\mods.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options_controls.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options_controls_default.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options_customise_game.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options_customise_hud.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options_system.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\options_system_gamma.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\playonline.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\playonline_connecttoip.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\playonline_disablepb.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\playonline_enablepb.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\playonline_serverinfo.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\popup_autoupdate.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\popup_errormessage.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\popup_errormessage_pb.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\popup_hostgameerrormessage.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\popup_password.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\popup_serverredirect.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile_create.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile_create_error.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile_create_initial.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile_delete.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile_delete_error.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\profile_rename.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\quit.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\rec_restart.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\trickjump.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\trickjump_info.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\trickjump_settings.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\trickjump_view.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\vid_confirm.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\vid_restart.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\viewreplay.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\viewreplay_delete.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\wm_ftquickmessage.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\wm_ftquickmessageAlt.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\wm_quickmessage.menu">
+      <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu">
+      <Filter>Menu files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -660,8 +660,6 @@ typedef struct {
     int         last_listmaps_time;
     int         lastMostPlayedListTime;
 
-    qboolean    ctfUserReady;
-
 	qboolean	versionOK;
 } clientSession_t;
 
@@ -1198,8 +1196,6 @@ typedef struct {
 
     ipMute_t    ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
-    qboolean    ctfEnabled;
-
 } level_locals_t;
 
 typedef struct {
@@ -1254,6 +1250,7 @@ int ClientNumbersFromString( const char *s, int *plist);
 qboolean G_MatchOnePlayer(int *plist, char *err, int len) ;
 void SanitizeString( char *in, char *out, qboolean fToLower );
 void SanitizeConstString( const char *in, char *out, qboolean fToLower );
+int CleanStrlen( const char* in );
 void Cmd_PrivateMessage_f(gentity_t *ent);
 void Cmd_noGoto_f(gentity_t *ent);
 void Cmd_noCall_f(gentity_t *ent);
@@ -1503,6 +1500,7 @@ void G_ReadXPBackup( void );
 void AddIPBan( const char *str );
 
 void Svcmd_ShuffleTeams_f(void);
+void Svcmd_ListAliases_f(void);
 
 
 //
@@ -2461,26 +2459,48 @@ void G_voteFlags(void);
 void G_voteHelp(gentity_t *ent, qboolean fShowVote);
 void G_playersMessage(gentity_t *ent);
 // Actual voting commands
-int G_Comp_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Gametype_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Kick_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Mute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_UnMute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Campaign_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_MatchReset_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Mutespecs_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Nextmap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Pub_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Referee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_ShuffleTeams_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_StartMatch_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_SwapTeams_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Timelimit_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Warmupfire_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_Unreferee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
-int G_AntiLag_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
+int G_Comp_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+             char *arg2, qboolean fRefereeCmd);
+int G_Gametype_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                 char *arg2, qboolean fRefereeCmd);
+int G_Kick_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+             char *arg2, qboolean fRefereeCmd);
+int G_Mute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+             char *arg2, qboolean fRefereeCmd);
+int G_UnMute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+               char *arg2, qboolean fRefereeCmd);
+int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+            char *arg2, qboolean fRefereeCmd);
+int G_Campaign_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                 char *arg2, qboolean fRefereeCmd);
+int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                   char *arg2, qboolean fRefereeCmd);
+int G_MatchReset_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                   char *arg2, qboolean fRefereeCmd);
+int G_Mutespecs_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                  char *arg2, qboolean fRefereeCmd);
+int G_Nextmap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                char *arg2, qboolean fRefereeCmd);
+int G_Pub_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+            char *arg2, qboolean fRefereeCmd);
+int G_Referee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                char *arg2, qboolean fRefereeCmd);
+int G_ShuffleTeams_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                     char *arg2, qboolean fRefereeCmd);
+int G_StartMatch_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                   char *arg2, qboolean fRefereeCmd);
+int G_SwapTeams_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                  char *arg2, qboolean fRefereeCmd);
+int G_Timelimit_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                  char *arg2, qboolean fRefereeCmd);
+int G_Warmupfire_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                   char *arg2, qboolean fRefereeCmd);
+int G_Unreferee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                  char *arg2, qboolean fRefereeCmd);
+int G_AntiLag_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                char *arg2, qboolean fRefereeCmd);
+int G_RandomMap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
+                char *arg2, qboolean fRefereeCmd);
 
 void G_LinkDebris( void );
 void G_LinkDamageParents( void );
@@ -2546,10 +2566,6 @@ qboolean G_CanPickupWeapon( weapon_t weapon, gentity_t* ent );
 
 qboolean G_LandmineSnapshotCallback( int entityNum, int clientNum );
 
-// g_maplist.cpp
-const char *G_GetRandomMap();
-void G_CacheMapNames();
-
 void G_AddIpMute( char *ip );
 void G_RemoveIPMute( char *ip );
 qboolean G_isIPMuted( char *ip );
@@ -2577,74 +2593,49 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 
 //Feen: END PGM
 
-void PrintLevelInfo(int level);
-
-void G_InitGame_ext( int levelTime, int randomSeed, int restart );
-void G_ShutdownGame_ext( int restart );
-void Svcmd_UpdateMapDatabase_f();
-
 // G_banner.cpp
 void SetBanners();
 void CheckBanners();
 
-// G_admin.cpp connection related
-void G_ClientBegin(gentity_t *ent);
-void G_ClientConnect(gentity_t *ent, qboolean firstTime);
-void G_ClientDisconnect(gentity_t *ent);
-void G_PrintGreeting(gentity_t *ent);
-void ResetData(int clientNum);
-void RequestLogin(int clientNum);
-void GuidReceived(gentity_t *ent);
-void AdminLogin(gentity_t *ent);
-
-#define AF_SILENTCOMMANDS '/'
-// G_admin.cpp command related
-
-qboolean G_HasPermissionC(gentity_t *ent, const char flag);
-qboolean G_CommandCheck(gentity_t *ent);
-qboolean G_AdminTest(gentity_t *ent, unsigned skipargs);
-qboolean G_FindPlayer(gentity_t *ent, unsigned skipargs);
-qboolean G_Finger(gentity_t *ent, unsigned skipargs);
-qboolean G_Help(gentity_t *ent, unsigned skipargs);
-qboolean G_Kick(gentity_t *ent, unsigned skipargs);
-qboolean G_ReadConfig(gentity_t *ent, unsigned skipargs);
-qboolean G_SetLevel(gentity_t *ent, unsigned skipargs);
-qboolean G_EditUser(gentity_t *ent, unsigned skipargs);
-qboolean G_Userinfo(gentity_t *ent, unsigned skipargs);
-qboolean G_AddLevel(gentity_t *ent, unsigned skipargs);
-qboolean G_EditLevel(gentity_t *ent, unsigned skipargs);
-qboolean G_LevInfo(gentity_t *ent, unsigned skipargs);
-qboolean G_ListMaps(gentity_t *ent, unsigned skipargs);
-qboolean G_MapInfo(gentity_t *ent, unsigned skipargs);
-qboolean G_MostPlayed(gentity_t *ent, unsigned skipargs);
-qboolean G_LeastPlayedMaps(gentity_t *ent, unsigned skipargs);
-qboolean G_Map(gentity_t *ent, unsigned skipargs);
-
 // g_save.cpp
+void Cmd_BackupLoad_f(gentity_t *ent);
 void Cmd_Load_f(gentity_t *ent);
 void Cmd_Save_f(gentity_t *ent);
-void Cmd_BackupLoad_f(gentity_t *ent);
+void ForceSave(gentity_t *location, gentity_t *ent);
+void InitSaveDatabase();
+void LoadPositionsFromDatabase(gentity_t *ent);
 void ResetSavedPositions(gentity_t *ent);
-void forceSave(gentity_t *location, gentity_t *ent);
-void savePositionsToDatabase(gentity_t *ent);
-void loadPositionsFromDatabase(gentity_t *ent);
-void initSaveDatabase();
+void SavePositionsToDatabase(gentity_t *ent);
+void SaveSystem_Print( gentity_t *ent );
 
-// g_ctf.cpp
-qboolean CTFEnabled();
-void AlliesScored();
-void AxisScored();
-void Cmd_CTF_f( gentity_t *ent );
+// g_utilities.h
+// C versions of printing functions
+void BPAll( const char* msg );
+void BPTo( gentity_t *target, const char* msg );
+void CPAll( const char* msg );
+void CPMAll( const char* msg );
+void CPMTo( gentity_t *target, const char* msg );
+void CPTo( gentity_t *target, const char* msg );
+void ChatPrintAll( const char* msg );
+void ChatPrintTo( gentity_t *target, const char* msg );
+void ConsolePrintAll( const char* msg );
+void ConsolePrintTo( gentity_t *target, const char* msg );
 
-// g_users.cpp
-void Client_OnClientBegin(gentity_t *ent);
-void Client_OnClientConnect(gentity_t *ent, qboolean firstTime);
-void Client_OnClientDisconnect(gentity_t *ent);
-void Client_HWIDReceived(gentity_t *ent);
-void Client_GuidReceived(gentity_t *ent);
-void Client_DebugPrint(gentity_t *ent);
+// C versions of conversion functions
+qboolean StringToInt(const char* toConvert, int *value);
 
-qboolean HardwareBanCheck(const char* hardwareId);
+// g_users.h
+                          
+void ClientCredentialsReceived(gentity_t *ent);
+void ClientGuidReceived(gentity_t *ent);
+void ClientHWIDReceived(gentity_t *ent);
+void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+void UserDatabase_AddNameToDatabase( gentity_t *ent );
+void UserDatabase_Print( gentity_t *caller );
+void UserDatabase_SetIP(gentity_t *ent, const char* ip);
+void OnClientDisconnect(gentity_t *ent);
+void OnClientBegin(gentity_t *ent);
+void OnGameInit();
 
 #endif // G_LOCAL_H
 
