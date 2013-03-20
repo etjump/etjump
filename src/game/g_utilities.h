@@ -1,9 +1,7 @@
 #ifndef g_utilities_h__
 #define g_utilities_h__
 
-extern "C" {
-#include "g_local.h"
-};
+#include "g_local.hpp"
 
 #ifdef max
 #undef max

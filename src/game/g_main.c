@@ -1815,6 +1815,8 @@ void G_ShutdownGame( int restart ) {
 		trap_Cvar_Update( &g_gametype );
 	}
 
+    OnGameShutdown();
+
 	G_Printf ("==== ShutdownGame ====\n");
 
 	G_DebugCloseSkillLog();

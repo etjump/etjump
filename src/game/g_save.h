@@ -5,9 +5,7 @@
 #include <string>
 #include <boost/circular_buffer.hpp>
 
-extern "C" {
-#include "g_local.h"
-}
+#include "g_local.hpp"
 
 using std::map;
 using std::string;

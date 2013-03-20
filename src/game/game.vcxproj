@@ -173,6 +173,7 @@
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_main.c" />
     <ClCompile Include="g_banner.cpp" />
+    <ClCompile Include="g_main_ext.cpp" />
     <ClCompile Include="g_match.c" />
     <ClCompile Include="g_mem.c" />
     <ClCompile Include="g_misc.c" />
@@ -215,6 +216,7 @@
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="..\botai\chars.h" />
     <ClInclude Include="g_local.h" />
+    <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />
     <ClInclude Include="g_save.h" />
     <ClInclude Include="g_team.h" />

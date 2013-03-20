@@ -2636,6 +2636,7 @@ void UserDatabase_SetIP(gentity_t *ent, const char* ip);
 void OnClientDisconnect(gentity_t *ent);
 void OnClientBegin(gentity_t *ent);
 void OnGameInit();
+void OnGameShutdown();
 
 #endif // G_LOCAL_H
 

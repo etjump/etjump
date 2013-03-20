@@ -10,7 +10,6 @@ int StringColorLen(const std::string& str) {
     return (str.length() - CleanStrlen(str.c_str()));
 }
 
-const std::vector<std::string> *UserDatabase_GetAliases( gentity_t *ent );
 void Svcmd_ListAliases_f(void) {
     Arguments argv = GetArgs();
 
@@ -29,7 +28,7 @@ void Svcmd_ListAliases_f(void) {
     }
 
     const std::vector<std::string> *aliases = 
-        UserDatabase_GetAliases(target);
+        users.GetAliases(target);
 
     unsigned printed = 0;
     BeginBufferPrint();
@@ -43,5 +42,6 @@ void Svcmd_ListAliases_f(void) {
         BufferPrint(NULL, va("^7%-*s", 36 + StringColorLen(*it), (*it).c_str()));
         printed++;
     }
-    FinishBufferPrint(NULL, true);
+    BufferPrint(NULL, "\nFound " + IntToString(aliases->size()) + " aliases.\n");
+    FinishBufferPrint(NULL, false);
 }

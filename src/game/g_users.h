@@ -2,12 +2,13 @@
 #define g_users_h__
 
 #include <string>
+#include <vector>
 #include <boost/noncopyable.hpp>
-#include "sqlite3pp.h"
-
-extern "C" {
-#include "g_local.h"
-};
+#ifdef min
+#undef min
+#endif
+#include "../sqlite/sqlite3pp.h"
+#include "g_local.hpp"
 
 class UserDatabase : public boost::noncopyable {
 public:
@@ -17,6 +18,11 @@ public:
 
     UserDatabase();
     ~UserDatabase();
+
+    // Called on game init
+    void Init();
+    // Called on game shutdown
+    void Shutdown();
 
     bool SetGuid(gentity_t *ent, const std::string& guid);
     bool SetHardwareID(gentity_t *ent, const std::string& hardwareID);

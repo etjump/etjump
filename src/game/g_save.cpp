@@ -1,5 +1,6 @@
 #include "g_save.h"
 #include "g_utilities.h"
+#include "g_local.hpp"
 
 #ifdef max
 #undef max
@@ -9,8 +10,6 @@
 #include <vector>
 using std::string;
 using std::vector;
-
-SaveSystem positionData;
 
 SaveSystem::Client::Client() {
     alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
@@ -292,7 +291,7 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = UserDatabase_Guid(ent);
+    string guid = users.Guid(ent);
 
     DisconnectedClient client;
 
@@ -336,7 +335,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = UserDatabase_Guid(ent);
+    string guid = users.Guid(ent);
 
     map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
@@ -424,37 +423,37 @@ void SaveSystem::Print( gentity_t *ent ) const
 
 // C API for save&load db
 void Cmd_Load_f(gentity_t *ent) {
-    positionData.Load(ent);
+    positions.Load(ent);
 }
 
 void Cmd_Save_f(gentity_t *ent) {
-    positionData.Save(ent);
+    positions.Save(ent);
 }
 
 void Cmd_BackupLoad_f(gentity_t *ent) {
-    positionData.LoadBackupPosition(ent);
+    positions.LoadBackupPosition(ent);
 }
 
 void ResetSavedPositions(gentity_t *ent) {
-    positionData.ResetSavedPositions(ent);
+    positions.ResetSavedPositions(ent);
 }
 
 void ForceSave(gentity_t *location, gentity_t *ent) {
-    positionData.ForceSave(location, ent);
+    positions.ForceSave(location, ent);
 }
 
 void SavePositionsToDatabase(gentity_t *ent) {
-    positionData.SavePositionsToDatabase(ent);
+    positions.SavePositionsToDatabase(ent);
 }
 
 void LoadPositionsFromDatabase(gentity_t *ent) {
-    positionData.LoadPositionsFromDatabase(ent);
+    positions.LoadPositionsFromDatabase(ent);
 }
 
 void InitSaveDatabase() {
-    positionData.Reset();
+    positions.Reset();
 }
 
 void SaveSystem_Print( gentity_t *ent ) {
-    positionData.Print( ent );
+    positions.Print( ent );
 }

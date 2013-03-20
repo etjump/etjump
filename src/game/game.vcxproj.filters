@@ -192,6 +192,9 @@
     <ClCompile Include="g_admin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_main_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -248,6 +251,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_users.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g_local.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

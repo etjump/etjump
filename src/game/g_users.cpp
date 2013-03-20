@@ -1,14 +1,19 @@
 #include <vector>
 #include <string>
 
+#include "g_local.hpp"
 #include "g_utilities.h"
 #include "g_users.h"
 
-UserDatabase users;
-
 const char CREATE_USERS_TABLE[] =
-    "CREATE TABLE IF NOT EXISTS Users(UserID INTEGER PRIMARY KEY,\
-    Guid VARCHAR(40) UNIQUE);";
+    "CREATE TABLE IF NOT EXISTS Users("
+    "UserID INTEGER PRIMARY KEY,"
+    "Commands VARCHAR(256),"
+    "Greeting VARCHAR(256),"
+    "Guid VARCHAR(40) UNIQUE,"
+    "HardwareID VARCHAR(40),"
+    "IP VARCHAR(16),"
+    "Level INTEGER);";
 const char CREATE_ALIAS_TABLE[] =
     "CREATE TABLE IF NOT EXISTS Aliases(AliasID INTEGER PRIMARY KEY,\
     Alias VARCHAR(36), UserID INTEGER, FOREIGN KEY(UserID) REFERENCES\
@@ -33,10 +38,6 @@ const char INVALID_IP[] =
 const char INVALID_HWID_FRAME[] = 
     "Error: invalid HWID frame from %s: %s\n";
 
-void OnGameInit() {
-    InitSaveDatabase();
-}
-
 void OnClientConnect(int clientNum, 
                      qboolean firstTime, 
                      qboolean isBot)
@@ -47,12 +48,12 @@ void OnClientConnect(int clientNum,
 }
 
 void OnClientBegin(gentity_t *ent) {
-    LoadPositionsFromDatabase(ent);
+    positions.LoadPositionsFromDatabase(ent);
 }
 
 void OnClientDisconnect(gentity_t *ent) {
-    SavePositionsToDatabase(ent);
-    ResetSavedPositions(ent);
+    positions.SavePositionsToDatabase(ent);
+    positions.ResetSavedPositions(ent);
     users.ResetData(ent);
 }
 
@@ -150,19 +151,12 @@ std::string UserDatabase_Guid(gentity_t *ent) {
 
 UserDatabase::UserDatabase()
 {
-    try {
-        // TODO: paths
-        db_.connect("etjump/etjump.db");
-        db_.execute(CREATE_USERS_TABLE);
-        db_.execute(CREATE_ALIAS_TABLE);
-    } catch ( sqlite3pp::database_error& e ) {
-        
-    }
+    
 }
 
 UserDatabase::~UserDatabase()
 {
-    db_.disconnect();
+    
 }
 
 UserDatabase::Client::Client()
@@ -185,7 +179,7 @@ bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
 
     try {
 
-        sqlite3pp::command cmd(db_, "INSERT OR IGNORE INTO Users (Guid) VALUES (?);");
+        sqlite3pp::command cmd(db_, "INSERT OR IGNORE INTO Users (Guid, Level) VALUES (?, '0');");
         cmd.bind(1, guid.c_str());
         cmd.execute();
         
@@ -220,6 +214,14 @@ bool UserDatabase::SetHardwareID( gentity_t *ent, const std::string& hardwareID 
     }
 
     clients_[ent->client->ps.clientNum].hardwareID = hardwareID;
+    try {
+        sqlite3pp::command cmd(db_, "UPDATE Users SET HardwareID=?1 WHERE UserID=?2;");
+        cmd.bind(1, hardwareID.c_str());
+        cmd.bind(2, clients_[ent->client->ps.clientNum].dbUserID);
+        cmd.execute();
+    } catch ( sqlite3pp::database_error&e) {
+        G_LogPrintf("SQLite3 error: %s\n", e.what());
+    }
     return true;
 }
 
@@ -231,6 +233,14 @@ bool UserDatabase::SetIP( gentity_t *ent, const std::string& ip )
     } 
 
     clients_[ent->client->ps.clientNum].ip = ip;
+    try {
+        sqlite3pp::command cmd(db_, "UPDATE Users SET IP=?1 WHERE UserID=?2;");
+        cmd.bind(1, ip.c_str());
+        cmd.bind(2, clients_[ent->client->ps.clientNum].dbUserID);
+        cmd.execute();
+    } catch ( sqlite3pp::database_error&e) {
+        G_LogPrintf("SQLite3 error: %s\n", e.what());
+    }
     return true;
 }
 
@@ -294,8 +304,6 @@ void UserDatabase::Print( gentity_t *caller, int targetClientNum ) const
     toPrint += clients_[targetClientNum].hardwareID + ", IP: ";
     toPrint += clients_[targetClientNum].ip + ", USERID: " +
     toPrint += IntToString(clients_[targetClientNum].dbUserID) + " }";
-
-    ConsolePrintTo(caller, "USERID HERE: " + IntToString(clients_[targetClientNum].dbUserID));
 
     ConsolePrintTo(caller, toPrint);
 }
@@ -384,7 +392,20 @@ const std::vector<std::string> * UserDatabase::GetAliases( gentity_t *ent )
     return &aliases;
 }
 
-const std::vector<std::string> *UserDatabase_GetAliases( gentity_t *ent )
+void UserDatabase::Init()
 {
-    return users.GetAliases(ent);
+    try {
+        // TODO: paths
+        db_.connect("etjump/etjump.db");
+        db_.execute(CREATE_USERS_TABLE);
+        db_.execute(CREATE_ALIAS_TABLE);
+    } catch ( sqlite3pp::database_error& e ) {
+        G_LogPrintf("User database error: %s\nRestart map to try again", 
+            e.what());
+    }
+}
+
+void UserDatabase::Shutdown()
+{
+    db_.disconnect();
 }
