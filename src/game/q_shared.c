@@ -1523,8 +1523,6 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 
 qboolean charErase(int pos, char *src) {
 
-	int i = 0;
-
 	if(strlen(src) < pos) {
 		return qfalse;
 	}

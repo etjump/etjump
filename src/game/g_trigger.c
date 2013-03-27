@@ -351,9 +351,6 @@ void SP_trigger_teleport( gentity_t *self ) {
 
 void trigger_savereset_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
-	save_position_t	*saves[] = {other->client->sess.allies_save_pos, other->client->sess.axis_save_pos};
-	int i, j;
-
 	if (!other->client)
 		return;
 
@@ -362,9 +359,7 @@ void trigger_savereset_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	self->timestamp = level.time + FRAMETIME;
 
-	for (i = 0; i < 2; i++)
-		for (j = 0; j < MAX_SAVE_POSITIONS; j++)
-			saves[i][j].isValid = qfalse;
+    ResetSavedPositions(other);    
 
 	CPx(other - g_entities, "cp \"^7 Your saves were removed.\n\"");
 }

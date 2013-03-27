@@ -504,6 +504,10 @@ qboolean ClientInactivityTimer( gclient_t *client ) {
 			client->inactivityWarning = qfalse;
 			client->inactivityTime = level.time + 60 * 1000;
 
+            VectorCopy(client->ps.origin, client->sess.posBeforeInactivity);
+            client->sess.loadedPosBeforeInactivity = qfalse;
+            client->sess.teamBeforeInactivitySpec = client->sess.sessionTeam;
+            G_LogPrintf("%f %f %f\n", client->sess.posBeforeInactivity[0], client->sess.posBeforeInactivity[1], client->sess.posBeforeInactivity[2]);
 			AP(va("cpm \"%s ^7was removed from teams due to inactivity! (%i seconds) \n\"", client->pers.netname, g_inactivity.integer));
 			SetTeam(g_entities + (client - level.clients), "s", qtrue, -1, -1, qfalse);
 

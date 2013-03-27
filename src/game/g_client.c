@@ -1588,14 +1588,17 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	if( firstTime ) {
 		client->pers.initialSpawn = qtrue;				// DHM - Nerve
-		client->sess.goto_allowed = qtrue;
-		client->sess.save_allowed = qtrue;  //qfalse	//Feen: Why was this set to false?
+		client->sess.gotoAllowed = qtrue;
+		client->sess.saveAllowed = qtrue;  //qfalse	//Feen: Why was this set to false?
         client->last8BallTime = 0;
         client->sess.loadedSavedPositions = qfalse;
 		client->lastVoteTime = 0;
+        // Client has loaded position after inactivity putspec
+        // -> don't do anything anymore
+        client->sess.loadedPosBeforeInactivity = qtrue;
 	} else {
-		client->sess.goto_allowed = qtrue;				//Feen: TEMP FIX! - Also added these two here as well.
-		client->sess.save_allowed = qtrue;				//		They are not being red in G_ReadSessionData, so they
+		client->sess.gotoAllowed = qtrue;				//Feen: TEMP FIX! - Also added these two here as well.
+		client->sess.saveAllowed = qtrue;				//		They are not being red in G_ReadSessionData, so they
 														//		default to qfalse/NULL.
 														//Feen: TODO - Make sure sess vars are in InfoString and read
 														//             properly in G_ReadSessionData()
@@ -1640,7 +1643,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	client->sess.noNading = qtrue;
 	client->sess.nameChangeCount = 0;
 	// Zero: target_set_ident id.
-	client->sess.client_map_id = 0;
+	client->sess.clientMapProgression = 0;
     ent->client->sess.muted = qfalse;
 
 	// count current clients and rank for scoreboard
@@ -2096,6 +2099,17 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
 		// RF, call entity scripting event
 		G_Script_ScriptEvent( ent, "playerstart", "" );
 	} 
+
+
+    // FIXME: doesn't load pos????
+    if( !client->sess.loadedPosBeforeInactivity && 
+        client->sess.sessionTeam == client->sess.teamBeforeInactivitySpec )
+    {
+        G_LogPrintf("Setting inactivityPos\n");
+        VectorCopy(client->sess.posBeforeInactivity, client->ps.origin);
+        VectorCopy(client->sess.posBeforeInactivity, ent->r.currentOrigin);
+        client->sess.loadedPosBeforeInactivity = qtrue;
+    }
 }
 
 /*

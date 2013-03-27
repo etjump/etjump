@@ -1059,12 +1059,12 @@ qboolean	ConsoleCommand( void ) {
 
 	if (!Q_stricmp(cmd, "ref")) {
 		G_ref_con();
-		return qfalse;
+		return qtrue;
 	}
 
     if(!Q_stricmp(cmd, "ipmutes")) {
         G_ListIPMutes();
-        return qfalse;
+        return qtrue;
     }
 
 	// -fretn
@@ -1089,9 +1089,8 @@ qboolean	ConsoleCommand( void ) {
 //		trap_SendServerCommand( -1, va("cpm \"server: %s\n\"", ConcatArgs(0) ) );
 
 		// prints to the console instead now
-		return qfalse;
 	}
 
-	return qfalse;
+    return CommandCheck(NULL);
 }
 

@@ -78,7 +78,9 @@ qboolean G_ScriptAction_SetPosition( gentity_t *ent, char *params ) {
 		G_Error( "G_Scripting: setposition must have an targetname\n" );
 	}
 
-	if ((pPathCorner = BG_Find_PathCorner( token ))) {
+    pPathCorner = BG_Find_PathCorner( token );
+
+	if (pPathCorner) {
 		G_SetOrigin( ent, pPathCorner->origin );
 	} else  {
 		// find the entity with the given "targetname"
@@ -245,8 +247,8 @@ qboolean G_ScriptAction_FollowPath( gentity_t* ent, char *params ) {
 		if (!token[0]) {
 			G_Error( "G_Scripting: followpath must have an targetname\n" );
 		}
-
-		if(!(pSpline = BG_Find_Spline( token ))) {
+        pSpline = BG_Find_Spline( token );
+		if(!pSpline) {
 			G_Error( "G_Scripting: can't find spline with \"targetname\" = \"%s\"\n", token );
 		}
 
@@ -445,8 +447,8 @@ qboolean G_ScriptAction_SetSpeed( gentity_t* ent, char *params ) {
 		}
 		speed[i] = atoi(token);
 	}
-
-	while((token = COM_Parse(&pString)) && *token) {
+    token = COM_Parse(&pString);
+	while(token && *token) {
 		if(!Q_stricmp( token, "gravity" )) {
 			gravity = qtrue;
 		} else if(!Q_stricmp( token, "lowgravity" )) {
@@ -606,8 +608,8 @@ qboolean G_ScriptAction_FollowSpline( gentity_t* ent, char *params ) {
 		if (!token[0]) {
 			G_Error( "G_Scripting: followspline must have an targetname\n" );
 		}
-
-		if(!(pSpline = BG_Find_Spline( token ))) {
+        pSpline = BG_Find_Spline( token );
+		if(!pSpline) {
 			G_Error( "G_Scripting: can't find spline with \"targetname\" = \"%s\"\n", token );
 		}
 		VectorSubtract( pSpline->point.origin, ent->r.currentOrigin, vec );
@@ -970,7 +972,8 @@ qboolean G_ScriptAction_DisableMessage( gentity_t *ent, char *params ) {
 	}
 
 	// find the entity with the given "targetname"
-	while ((target = G_FindByTargetname( target, token ))) {
+    target = G_FindByTargetname( target, token );
+	while (target) {
 		target->s.aiState = 1;
 	}
 
@@ -1108,8 +1111,8 @@ qboolean G_ScriptAction_GotoMarker( gentity_t *ent, char *params )
 		if (!token[0]) {
 			G_Error( "G_Scripting: gotomarker must have an targetname\n" );
 		}
-
-		if ((pPathCorner = BG_Find_PathCorner( token ))) {
+        pPathCorner = BG_Find_PathCorner( token );
+		if (pPathCorner) {
 			VectorSubtract( pPathCorner->origin, ent->r.currentOrigin, vec );
 		} else {
 			// find the entity with the given "targetname"
@@ -1144,11 +1147,11 @@ qboolean G_ScriptAction_GotoMarker( gentity_t *ent, char *params )
 				} else if (!Q_stricmp( token, "relative" )) {
 					gentity_t*		target2;
 					pathCorner_t*	pPathCorner2;
-					vec3_t vec2;
+                    vec3_t vec2 = {0, 0, 0};
 
 					token = COM_ParseExt( &pString, qfalse );
-
-					if ((pPathCorner2 = BG_Find_PathCorner( token ))) {
+                    pPathCorner2 = BG_Find_PathCorner( token );
+					if (pPathCorner2) {
 						VectorCopy( pPathCorner2->origin, vec2 );
 					} else if ((target2 = G_FindByTargetname( NULL, token ))) {
 						VectorCopy( target2->r.currentOrigin, vec2 );

@@ -219,7 +219,7 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine) {
     } else {
         if( insertNewLine ) {
             G_Printf("%s\n",
-                (bigTextBuffer + NEWLINE).c_str());
+                (bigTextBuffer).c_str());
         } else {
             G_Printf("%s",
                 bigTextBuffer.c_str());
@@ -270,6 +270,20 @@ Arguments GetArgs()
         argv.push_back(arg);
     }
     return &argv;
+}
+
+Arguments GetSayArgs() {
+    int argc = trap_Argc();
+
+    static vector<string> argv;
+    argv.clear();
+
+    for(int i = 0; i < argc; i++) {
+        char arg[MAX_TOKEN_CHARS];
+        trap_Argv(i, arg, sizeof(arg));
+        argv.push_back(arg);
+    }
+    return & argv;
 }
 
 /*

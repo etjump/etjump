@@ -64,7 +64,7 @@ void SaveSystem::Save(gentity_t *ent) {
         }
     }
 
-    if(!ent->client->sess.save_allowed) {
+    if(!ent->client->sess.saveAllowed) {
         CPTo(ent, "You are not allowed to save a position.");
         return;
     }
@@ -122,7 +122,7 @@ void SaveSystem::Load(gentity_t *ent) {
         return;
     }
 
-    if(!ent->client->sess.save_allowed) {
+    if(!ent->client->sess.saveAllowed) {
         CPTo(ent, "You are not allowed to load a position.");
         return;
     }
@@ -213,7 +213,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent) {
         return;
     }
 
-    if(!ent->client->sess.save_allowed) {
+    if(!ent->client->sess.saveAllowed) {
         CPTo(ent, "You are not allowed to load a position.");
         return;
     }
@@ -263,8 +263,8 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent) {
 }
 
 void SaveSystem::Reset() {
-    for(unsigned clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++) {
-        unsigned clientNum = level.sortedClients[clientIndex];
+    for(int clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++) {
+        int clientNum = level.sortedClients[clientIndex];
         ResetSavedPositions(g_entities + clientNum);
     }
 
@@ -312,7 +312,7 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
             = clients_[ent->client->ps.clientNum].axisSavedPositions[i].isValid;
     }
 
-    client.progression = ent->client->sess.client_map_id;
+    client.progression = ent->client->sess.clientMapProgression;
     ent->client->sess.loadedSavedPositions = qfalse;
 
     map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
@@ -358,7 +358,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
                 it->second.axisSavedPositions[i].isValid;
         }
 
-        ent->client->sess.client_map_id = it->second.progression;
+        ent->client->sess.clientMapProgression = it->second.progression;
         ent->client->sess.loadedSavedPositions = qtrue;
         ChatPrintTo(ent, "^5ETJump: ^7loaded positions from previous session.");
     }

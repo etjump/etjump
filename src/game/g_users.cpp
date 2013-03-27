@@ -19,16 +19,6 @@ const char CREATE_ALIAS_TABLE[] =
     Alias VARCHAR(36), UserID INTEGER, FOREIGN KEY(UserID) REFERENCES\
     Users(UserID));";
 
-
-const char INSERT_INTO_USERS[] =
-    "INSERT OR IGNORE INTO Users(Guid) VALUES ('%s');";
-const char INSERT_INTO_ALIASES[] =
-    "INSERT OR IGNORE INTO Aliases(UserID, Alias) VALUES ('%s', '%s');";
-const char SELECT_ALIASES_BY_ID[] = 
-    "SELECT * FROM Aliases WHERE UserID='%d';";
-const char SELECT_ALIASES_BY_ID_LIMIT[] = 
-    "SELECT * FROM Aliases WHERE UserID='%' ORDER BY AliasID DESC LIMIT('%d');";
-
 const char INVALID_GUID_FRAME[] = 
     "Error: invalid guid info frame from %s: %s\n";
 const char INVALID_LOGIN_FRAME[] = 
@@ -37,25 +27,6 @@ const char INVALID_IP[] =
     "Error: invalid IP %s";
 const char INVALID_HWID_FRAME[] = 
     "Error: invalid HWID frame from %s: %s\n";
-
-void OnClientConnect(int clientNum, 
-                     qboolean firstTime, 
-                     qboolean isBot)
-{
-    if(firstTime) {
-        users.ResetData((g_entities + clientNum));
-    }
-}
-
-void OnClientBegin(gentity_t *ent) {
-    positions.LoadPositionsFromDatabase(ent);
-}
-
-void OnClientDisconnect(gentity_t *ent) {
-    positions.SavePositionsToDatabase(ent);
-    positions.ResetSavedPositions(ent);
-    users.ResetData(ent);
-}
 
 void ClientGuidReceived(gentity_t *ent) {
     Arguments argv = GetArgs();
@@ -177,6 +148,10 @@ bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
 
     clients_[ent->client->ps.clientNum].guid = guid;
 
+    if( !g_admin.integer ) {
+        return true;
+    }
+
     try {
 
         sqlite3pp::command cmd(db_, "INSERT OR IGNORE INTO Users (Guid, Level) VALUES (?, '0');");
@@ -214,6 +189,11 @@ bool UserDatabase::SetHardwareID( gentity_t *ent, const std::string& hardwareID 
     }
 
     clients_[ent->client->ps.clientNum].hardwareID = hardwareID;
+
+    if( !g_admin.integer ) {
+        return true;
+    }
+
     try {
         sqlite3pp::command cmd(db_, "UPDATE Users SET HardwareID=?1 WHERE UserID=?2;");
         cmd.bind(1, hardwareID.c_str());
@@ -233,6 +213,11 @@ bool UserDatabase::SetIP( gentity_t *ent, const std::string& ip )
     } 
 
     clients_[ent->client->ps.clientNum].ip = ip;
+
+    if( !g_admin.integer ) {
+        return true;
+    }
+
     try {
         sqlite3pp::command cmd(db_, "UPDATE Users SET IP=?1 WHERE UserID=?2;");
         cmd.bind(1, ip.c_str());
@@ -354,6 +339,9 @@ void UserDatabase_AddNameToDatabase( gentity_t *ent ) {
 
 void UserDatabase::AddNameToDatabase( gentity_t *ent )
 {
+    if( !g_admin.integer || !g_aliasDB.integer ) {
+        return;
+    }
     try {
         sqlite3pp::command cmd(db_,
             "INSERT INTO Aliases (Alias, UserID) SELECT * FROM (SELECT ?1, ?2) AS temp WHERE NOT EXISTS (SELECT Alias FROM Aliases WHERE Alias=?1 AND UserID=?2) LIMIT(1);");
@@ -367,6 +355,10 @@ void UserDatabase::AddNameToDatabase( gentity_t *ent )
 
 const std::vector<std::string> * UserDatabase::GetAliases( gentity_t *ent )
 {
+    if( !g_admin.integer || !g_aliasDB.integer ) {
+        return NULL;
+    }
+
     static std::vector<std::string> aliases;
     aliases.clear();
     try {
@@ -394,6 +386,9 @@ const std::vector<std::string> * UserDatabase::GetAliases( gentity_t *ent )
 
 void UserDatabase::Init()
 {
+    if( !g_admin.integer ) {
+        return;
+    }
     try {
         // TODO: paths
         db_.connect("etjump/etjump.db");
@@ -407,5 +402,25 @@ void UserDatabase::Init()
 
 void UserDatabase::Shutdown()
 {
+    if( !g_aliasDB.integer ) {
+        return;
+    }
     db_.disconnect();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

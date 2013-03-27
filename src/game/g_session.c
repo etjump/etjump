@@ -160,7 +160,6 @@ Called on a reconnect
 */
 void G_ReadSessionData( gclient_t *client )
 {
-	int mvc_l, mvc_h;
 	char s[MAX_STRING_CHARS];
 	qboolean test;
 
@@ -270,7 +269,6 @@ Called on a first-time connect
 ================
 */
 void G_InitSessionData( gclient_t *client, char *userinfo ) {
-	int i;
 	clientSession_t	*sess;
 //	const char		*value;
 
@@ -304,10 +302,6 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->spec_invite = 0;
 	sess->spec_team = 0;
 
-	for(i = 0; i < MAX_SAVE_POSITIONS; i++) {
-		sess->allies_save_pos[i].isValid = qfalse;
-		sess->axis_save_pos[i].isValid = qfalse;
-	}
 	G_deleteStats(client - level.clients);
 	// OSP
 
@@ -338,7 +332,6 @@ void G_InitWorldSession( void ) {
 
 	} else {
 		char *tmp = s;
-		qboolean test = (g_altStopwatchMode.integer != 0 || g_currentRound.integer == 1);
 
 
 #define GETVAL(x) if((tmp = strchr(tmp, ' ')) == NULL) return; x = atoi(++tmp);

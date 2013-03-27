@@ -364,19 +364,19 @@ void G_UseTargets( gentity_t *ent, gentity_t *activator ) {
 
 					if(t->reqident && activator->client) {
 						if(t->spawnflags & 1) {
-							if(t->reqident < activator->client->sess.client_map_id) {
+							if(t->reqident < activator->client->sess.clientMapProgression) {
 								G_UseEntity( t, ent, activator );
 							}
 						} else if(t->spawnflags & 2) {
-								if(t->reqident != activator->client->sess.client_map_id) {
+								if(t->reqident != activator->client->sess.clientMapProgression) {
 									G_UseEntity( t, ent, activator );
 								}
 						} else if(t->spawnflags & 4) {
-								if(t->reqident > activator->client->sess.client_map_id) {
+								if(t->reqident > activator->client->sess.clientMapProgression) {
 									G_UseEntity( t, ent, activator );
 								}
 						} else {
-							if(t->reqident == activator->client->sess.client_map_id) {
+							if(t->reqident == activator->client->sess.clientMapProgression) {
 								G_UseEntity( t, ent, activator );
 							}
 						}

@@ -171,6 +171,7 @@
     <ClCompile Include="g_combat.c" />
     <ClCompile Include="g_fireteams.c" />
     <ClCompile Include="g_items.c" />
+    <ClCompile Include="g_levels.cpp" />
     <ClCompile Include="g_main.c" />
     <ClCompile Include="g_banner.cpp" />
     <ClCompile Include="g_main_ext.cpp" />
@@ -215,6 +216,8 @@
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="..\botai\chars.h" />
+    <ClInclude Include="g_admin.h" />
+    <ClInclude Include="g_levels.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />

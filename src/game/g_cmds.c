@@ -3471,7 +3471,7 @@ void Cmd_Goto_f(gentity_t *ent) {
 		return;
 	}
 
-	if(!ent->client->sess.goto_allowed) {
+	if(!ent->client->sess.gotoAllowed) {
 		CP("print \"You are not allowed to use goto.\n\"");
 		return;
 	}
@@ -3538,7 +3538,7 @@ void Cmd_Call_f(gentity_t *ent)
 		return;
 	}
 
-	if(!ent->client->sess.goto_allowed) {
+	if(!ent->client->sess.gotoAllowed) {
 		CP("print \"You are not allowed to use call.\n\"");
 		return;
 	}

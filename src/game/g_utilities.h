@@ -30,6 +30,7 @@ void ConsolePrintTo( gentity_t *target, const std::string& msg );
 // Argument handling
 typedef const std::vector<std::string> *Arguments;
 Arguments GetArgs();
+Arguments GetSayArgs();
 
 // Conversions
 bool StringToInt(const std::string& toConvert, int& value);

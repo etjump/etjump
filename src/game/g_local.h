@@ -624,16 +624,13 @@ typedef struct {
 	weapon_stat_t aWeaponStats[WS_MAX+1];	// Weapon stats.  +1 to avoid invalid weapon check
 	// OSP
 
-	save_position_t allies_save_pos[MAX_SAVE_POSITIONS];
-	save_position_t axis_save_pos[MAX_SAVE_POSITIONS];
-
 	qboolean	noGoto;
 	qboolean	noCall;
 	qboolean	noNading;
 
 	// goto_allowed for both call & goto
-	qboolean	goto_allowed;
-	qboolean	save_allowed;
+	qboolean	gotoAllowed;
+	qboolean	saveAllowed;
 	// SpamProtection
 
 	int			nextReliableTime;
@@ -653,12 +650,18 @@ typedef struct {
 	// Fireteam save limit
 	int			savelimit;
 	// Map ident
-	int			client_map_id;
+	int			clientMapProgression;
 
     qboolean    loadedSavedPositions;
 
-    int         last_listmaps_time;
+    int         lastListmapsTime;
     int         lastMostPlayedListTime;
+
+    // Position of user before inactivity 
+    vec3_t      posBeforeInactivity;
+    // Did the client join back to team already (after inactivity)?
+    qboolean    loadedPosBeforeInactivity;
+    team_t      teamBeforeInactivitySpec;
 
 	qboolean	versionOK;
 } clientSession_t;
@@ -1854,9 +1857,11 @@ extern vmCvar_t	g_mapScriptDir;
 extern vmCvar_t	g_blockedMaps;
 
 extern vmCvar_t	g_admin;
-extern vmCvar_t g_adminLoginType;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
+extern vmCvar_t g_aliasDB;
+extern vmCvar_t g_levelDB;
+extern vmCvar_t g_userDB;
 
 extern vmCvar_t	g_bannerLocation;
 extern vmCvar_t	g_bannerTime;
@@ -2608,7 +2613,7 @@ void ResetSavedPositions(gentity_t *ent);
 void SavePositionsToDatabase(gentity_t *ent);
 void SaveSystem_Print( gentity_t *ent );
 
-// g_utilities.h
+// g_utilities.cpp
 // C versions of printing functions
 void BPAll( const char* msg );
 void BPTo( gentity_t *target, const char* msg );
@@ -2624,7 +2629,7 @@ void ConsolePrintTo( gentity_t *target, const char* msg );
 // C versions of conversion functions
 qboolean StringToInt(const char* toConvert, int *value);
 
-// g_users.h
+// g_users.cpp
                           
 void ClientCredentialsReceived(gentity_t *ent);
 void ClientGuidReceived(gentity_t *ent);
@@ -2637,6 +2642,9 @@ void OnClientDisconnect(gentity_t *ent);
 void OnClientBegin(gentity_t *ent);
 void OnGameInit();
 void OnGameShutdown();
+
+// g_admin.cpp
+qboolean CommandCheck(gentity_t *ent);
 
 #endif // G_LOCAL_H
 

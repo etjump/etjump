@@ -196,9 +196,11 @@ vmCvar_t		g_nameChangeLimit;
 // ETJump admin system
 
 vmCvar_t		g_admin;
-vmCvar_t        g_adminLoginType;
+vmCvar_t        g_userDB;
+vmCvar_t        g_levelDB;
 vmCvar_t		g_adminLog;
 vmCvar_t		g_logCommands;
+vmCvar_t        g_aliasDB;
 
 // Banner
 vmCvar_t		g_bannerLocation;
@@ -432,10 +434,13 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_blockedMaps, "g_blockedMaps", "", CVAR_ARCHIVE },
 	
 
-	{ &g_admin, "g_admin", "admins.dat", CVAR_ARCHIVE },
-    { &g_adminLoginType, "g_adminLoginType", "1", CVAR_ARCHIVE },
+	{ &g_admin, "g_admin", "1", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE },
 	{ &g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE },
+    { &g_aliasDB, "g_aliasDB", "1", CVAR_ARCHIVE },
+    { &g_levelDB, "g_levelDB", "levels.cfg", CVAR_ARCHIVE },
+    { &g_userDB, "g_userDB", "users.db", CVAR_ARCHIVE | CVAR_LATCH },
+      
 
     // BannerPrint location
 	{ &g_bannerLocation, "g_bannerLocation", "1", CVAR_ARCHIVE },
