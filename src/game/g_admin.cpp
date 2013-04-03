@@ -11,6 +11,26 @@ using std::vector;
 
 namespace Commands {
     bool AddLevel(gentity_t *ent, Arguments argv) {
+
+        const size_t MIN_ADDLEVEL_ARGS = 2;
+        if(argv->size() < MIN_ADDLEVEL_ARGS) {
+            ChatPrintTo(ent, "^3usage:^7 !addlevel <level>");
+            return false;
+        }
+
+        int level = 0;
+        if(!StringToInt(argv->at(1), level)) {
+            ChatPrintTo(ent, "^3addlevel: ^7invalid level " + argv->at(1));
+            return false;
+        }
+
+        if(!levels.AddLevel(level)) {
+            ChatPrintTo(ent, "^3addlevel: " + levels.Error());
+            return false;
+        }
+
+        ChatPrintTo(ent, "^3addlevel: ^7successfully added level " + argv->at(1));
+
         return true;
     }
 
@@ -36,91 +56,98 @@ namespace Commands {
     // !editlevel <level> -a -cmds
     bool EditLevel(gentity_t *ent, Arguments argv) {
 
-        enum EDIT_MODE {
-            REPLACE,
-            APPEND,
-            CLEAR
-        };
+        // !editlevel 5 -append -cmds abc
+        // !editlevel 5 -cmds abcde
+        // !editlevel 5 -clear -cmds
+        // !editlevel 5 -clear -cmds -greeting -name
+        const size_t MIN_EDITLEVEL_ARGS = 4;
+        if(argv->size() < MIN_EDITLEVEL_ARGS) {
+            ChatPrintTo(ent, "^3usage: ^7check console for more information.");
+            BeginBufferPrint();
 
-        enum UPDATED_VALUE {
-            CMDS,
-            NAME,
-            GREETING
-        };
+            BufferPrint(ent, "!editlevel <level> "
+                "[-a/-append|-c/-clear|-r/-replace]"
+                "[-cmds|-greeting|-name] <new value>");
+            FinishBufferPrint(ent, true);
+            return false;
+        }
+
+        int level = 0;
+        if(!StringToInt(argv->at(1), level)) {
+            ChatPrintTo(ent, "^3editlevel: ^7invalid level " + argv->at(1));
+            return false;
+        }
 
         EDIT_MODE editMode = REPLACE;
-        bool readingCmds = false;
-        bool readingName = false;
-        bool readingGreeting = false;
-        int updatedAttributes = 0;
-        int level = -1;
-
-        string cmds;
-        string name;
-        string greeting;
         
-        if(argv->size() < 4) {
-            // TODO: print usage
-            return false;
-        }
+        if(argv->at(2) == "-c" || argv->at(2) == "-clear") {
+            editMode = CLEAR;
+        } else if(argv->at(2) == "-a" || argv->at(2) == "-append") {
+            editMode = APPEND;
+        } else if(argv->at(2) == "-r" || argv->at(2) == "-replace") {
+            editMode = REPLACE;
+        } 
 
-        if(!StringToInt(argv->at(2), level)) {
-            // TODO: Print invalid lvl
-            return false;
-        }
+        string newCommands;
+        string newGreeting;
+        string newName;
 
-        vector<string>::const_iterator it = argv->begin();
+        int editing     = -1;
+        int edited      = NONE;
+        ConstArgIter it = argv->begin();
 
-        for(it = argv->begin(); it != argv->end(); it++) {
-            if( *it == "-a" || *it == "-append" ) {
-                editMode = APPEND;
-            } else if( *it == "-r" || *it == "-replace" ) {
-                editMode = REPLACE;
-            } else if( *it == "-c" || *it == "-clear" ) {
-                editMode = CLEAR;
-            } else if( *it == "-cmds" && (it + 1) != argv->end() ) {
-                if( editMode == CLEAR ) {
-                    updatedAttributes |= (1 << CMDS);
-                    cmds.clear();
+        while(it != argv->end())
+        {
+            if( editMode == CLEAR ) {
+                if( *it == "-cmds" ) {
+                    edited |= (1 << COMMANDS);
+                } else if( *it == "-greeting" ) {
+                    edited |= (1 << GREETING);
+                } else if( *it == "-name" ) {
+                    edited |= (1 << NAME);
                 }
-                readingCmds = true;
-                readingName = false;
-                readingGreeting = false;
-            } else if( *it == "-name" && (it + 1) != argv->end() ) {
-                if( editMode == CLEAR ) {
-                    updatedAttributes |= (1 << NAME);
-                    name.clear();
+            } else {
+                if( (*it == "-cmds" || *it == "-commands") 
+                    && (it + 1) != argv->end() ) {
+                    editing = COMMANDS;
+                } else if( *it == "-greeting" && (it + 1) != argv->end() ) {
+                    editing = GREETING;
+                } else if( *it == "-name" && (it + 1) != argv->end() ) {
+                    editing = NAME;
+                } else if( editing == COMMANDS ) {
+                    newCommands += *it;
+                    edited |= (1 << COMMANDS);
+                } else if( editing == GREETING ) {
+                    newGreeting += *it;
+                    newGreeting += ' ';
+                    edited |= (1 << GREETING);
+                } else if( editing == NAME ) {
+                    newName += *it;
+                    newName += " ";
+                    edited |= (1 << NAME);
                 }
-                readingCmds = false;
-                readingName = true;
-                readingGreeting = false;
-            } else if( *it == "-greeting" && (it + 1) != argv->end() ) {
-                if( editMode == CLEAR ) {
-                    updatedAttributes |= (1 << GREETING);
-                    greeting.clear();
-                }
-                readingCmds = false;
-                readingName = false;
-                readingGreeting = true;
-            } else if( readingName ) {
-                updatedAttributes |= (1 << NAME);
-                name += *it;
-                name += NEWLINE;
-            } else if( readingCmds ) {
-                updatedAttributes |= (1 << CMDS);
-                cmds += *it;
-            } else if( readingGreeting ) {
-                updatedAttributes |= (1 << GREETING);
-                greeting += *it;
-                greeting += NEWLINE;
             }
+            it++;
         }
 
-        boost::trim(name);
-        boost::trim(cmds);
-        boost::trim(greeting);
+        if( edited == NONE ) {
+            ChatPrintTo(ent, "^3editlevel: ^7nothing was edited.");
+            return true;
+        }
 
-        levels.Update(level, cmds, name, greeting, updatedAttributes);
+        boost::trim(newCommands);
+        boost::trim(newGreeting);
+        boost::trim(newName);
+
+        if(!levels.UpdateLevel(level,
+            newCommands, newName, newGreeting, edited, editMode))
+        {
+            ChatPrintTo(ent, "^3editlevel: ^7" + levels.Error());
+            return false;
+        }
+
+        ChatPrintTo(ent, "^3editlevel: ^7successfully edited level " + argv->at(1));
+        levels.PrintLevelToConsole(level, ent);
 
         return true;
     }
@@ -223,7 +250,6 @@ static const Command commands[] = {
     {"spectate",    Commands::Spectate,     '!', "", ""},
     {"unban",       Commands::Unban,        '!', "", ""},
     {"unmute",      Commands::Unmute,       '!', "", ""},
-
 };
 static const unsigned COMMANDS_SIZE = sizeof(commands)/sizeof(Command); 
 
@@ -248,6 +274,10 @@ int FindMatchingCommands(const string& toMatch, int indices[])
 
 qboolean CommandCheck(gentity_t *ent) 
 {
+    if( g_admin.integer == 0 ) {
+        return qfalse;
+    }
+
     char    *cmd                    = NULL;
     char    arg1[MAX_TOKEN_CHARS]   = "\0";
     char    arg2[MAX_TOKEN_CHARS]   = "\0";
@@ -257,6 +287,7 @@ qboolean CommandCheck(gentity_t *ent)
     int     matchingIndices[COMMANDS_SIZE];
 
     static vector<string> argv;
+    argv.clear();
     string error;
 
     // If there's just "say" in it do nothing
@@ -322,9 +353,6 @@ qboolean CommandCheck(gentity_t *ent)
     // Push all except possible "say" and first arg to vector
     for(int i = 1 + skipargs; i < argc; i++) {
         Q_SayArgv(i, arg1, sizeof(arg1));
-
-        boost::algorithm::to_lower(arg1);
-
         argv.push_back(arg1);
     }
 

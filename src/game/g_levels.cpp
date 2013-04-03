@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <bitset>
 #include <boost/algorithm/string.hpp>
 using std::string;
 using std::vector;
@@ -16,6 +17,11 @@ LevelDatabase::LevelDatabase()
 LevelDatabase::~LevelDatabase()
 {
 
+}
+
+bool LevelComparator(const shared_ptr<Level>& lhs, const shared_ptr<Level>& rhs) 
+{
+    return lhs->level < rhs->level;
 }
 
 const string LEVELS_PATH = "etjump/levels.cfg";
@@ -148,6 +154,10 @@ bool LevelDatabase::ReadConfig()
     }
     FinishBufferPrint(NULL, false);
     G_LogPrintf(LINE);
+
+    // Let's sort the DB aswell
+    std::sort(levels_.begin(), levels_.end(), LevelComparator);
+
     return true;
 }
 
@@ -157,39 +167,45 @@ void LevelDatabase::Reset()
     levels_.clear();
 }
 
-bool LevelDatabase::Update( int level, const std::string& cmds,const std::string& name, const std::string& greeting, int updatedValues )
+bool LevelDatabase::UpdateLevel( int level, const std::string& cmds, 
+                                const std::string& name, 
+                                const std::string& greeting, 
+                                int updatedAttributes, int editMode )
 {
-    enum UPDATED_VALUE {
-        CMDS,
-        NAME,
-        GREETING
-    };
+    LevelIterator it = FindLevelIter(level);
 
-
-    LevelIterator it = levels_.begin();
-
-    while(it != levels_.end()) {
-        if(it->get()->level == level) {
-            break;
-        }
-        it++;
-    }
-
+    // TODO: maybe create a new level?
     if( it == levels_.end() ) {
+        error_ = "couldn't find level.";
         return false;
     }
 
+    if(updatedAttributes & (1 << COMMANDS)) {
+        if( editMode == CLEAR ) {
+            (*it).get()->commands.clear();
+        } else if( editMode == APPEND ) {
+            (*it).get()->commands += cmds;
+        } else if( editMode == REPLACE ) {
+            (*it).get()->commands = cmds;
+        }
+        std::sort(it->get()->commands.begin(), it->get()->commands.end());
+        RemoveDuplicates(it->get()->commands);
+    }
 
-    if(updatedValues & (1 << CMDS)) {
-        (*it).get()->commands = cmds;
-    } 
-    
-    if(updatedValues & (1 << NAME)) {
-        (*it).get()->name = name;
-    } 
-    
-    if(updatedValues & (1 << GREETING)) {
-        (*it).get()->greeting = greeting;
+    if(updatedAttributes & (1 << GREETING)) {
+        if( editMode == CLEAR ) {
+            (*it).get()->greeting.clear();
+        } else {
+            (*it).get()->greeting = greeting;
+        }
+    }
+
+    if (updatedAttributes & (1 << NAME)) {
+        if( editMode == CLEAR ) {
+            (*it).get()->name.clear();
+        } else {
+            (*it).get()->name = name;
+        }
     }
     WriteConfig();
     return true;
@@ -197,13 +213,15 @@ bool LevelDatabase::Update( int level, const std::string& cmds,const std::string
 
 bool LevelDatabase::WriteConfig()
 {
-    vector<shared_ptr<Level> >::const_iterator it = levels_.begin();
     std::ofstream config(LEVELS_PATH.c_str());
 
     if(!config) {
         return false;
     }
 
+    std::sort(levels_.begin(), levels_.end(), LevelComparator);
+
+    vector<shared_ptr<Level> >::const_iterator it = levels_.begin();
     while( it != levels_.end() ) {
         config << "[level]\n";
         config << "level = " << (*it)->level << NEWLINE;
@@ -214,6 +232,119 @@ bool LevelDatabase::WriteConfig()
     }
 
     config.close();
+    return true;
+}
+
+std::string LevelDatabase::Error() const
+{
+    return error_;
+}
+
+void LevelDatabase::PrintLevelToConsole( int level, gentity_t *ent ) const
+{
+    ConstLevelIterator it = ConstFindLevelIter(level);
+
+    if(it == levels_.end()) {
+        ConsolePrintTo(ent, "LevelDB: level not found.");
+        return;
+    }
+
+    BeginBufferPrint();
+    BufferPrint(ent, "^7[level]\n");
+    BufferPrint(ent, "^7level    = " + IntToString(it->get()->level));
+    BufferPrint(ent, "\n^7name     = " + it->get()->name);
+    BufferPrint(ent, "\n^7commands = " + it->get()->commands);
+    BufferPrint(ent, "\n^7greeting = " + it->get()->greeting);
+    FinishBufferPrint(ent, true);
+}
+
+bool LevelDatabase::AddLevel( int level )
+{
+    if( ConstFindLevelIter(level) != levels_.end() ) {
+        error_ = "level exists.";
+        return false;
+    }
+
+    shared_ptr<Level> newLevel(new Level);
+    newLevel->level = level;
+    levels_.push_back(newLevel);
+    WriteConfig();
+    return true;
+}
+
+ConstLevelIterator LevelDatabase::ConstFindLevelIter( int level ) const
+{
+    ConstLevelIterator it = levels_.begin();
+    while(it != levels_.end()) {
+
+        if(it->get()->level == level) {
+            break;
+        }
+
+        it++;
+    }
+    return it;
+}
+
+LevelIterator LevelDatabase::FindLevelIter( int level )
+{
+    LevelIterator it = levels_.begin();
+    while(it != levels_.end()) {
+
+        if(it->get()->level == level) {
+            break;
+        }
+
+        it++;
+    }
+    return it;
+}
+
+std::bitset<MAX_CMDS> LevelDatabase::Permissions( int level ) const
+{
+    std::bitset<MAX_CMDS> permissions;
+    permissions.reset();
+
+    ConstLevelIterator it = levels_.begin();
+
+    // Levels are always sorted
+    while(it != levels_.end() && it->get()->level <= level) {
+        const char* flags = it->get()->commands.c_str();
+
+        while(*flags) {
+
+            // Shouldn't happen but just to be sure
+            if(*flags < 0) {
+                *flags++;
+                continue;
+            }
+
+            if(*flags == '-') {
+                while(*flags++) {
+                    if(*flags == '+') {
+                        break;
+                    }
+                    permissions.set(*flags, true);
+                }
+            } else if(*flags == '*') {
+                // Clear allowed
+                permissions.reset();
+                // Make everything allowed
+                permissions.flip();
+                while(*flags++) {
+                    // Disable ones listed after *
+                    permissions.set(*flags, false);
+                }
+            }
+
+            permissions.set(*flags, true);
+
+            flags++;
+        }
+        it++;
+    }
+
+    return permissions;
 }
 
 void ResetLevel( Level& lvl )
@@ -227,4 +358,9 @@ void ResetLevel( Level& lvl )
 bool Level::operator<( const int& rhs )
 {
     return this->level < rhs;
+}
+
+bool Level::operator<( const Level& rhs ) 
+{
+    return this->level < rhs.level;
 }

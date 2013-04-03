@@ -19,5 +19,17 @@ extern class UserDatabase     users;
 extern class SaveSystem       positions;
 extern class LevelDatabase    levels;
 
+const enum EDIT_MODE {
+    REPLACE,
+    APPEND,
+    CLEAR
+};
+
+const enum EDIT_TYPE {
+    NONE,
+    COMMANDS,
+    GREETING,
+    NAME
+};
 
 #endif // g_local_hpp__

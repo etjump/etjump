@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <bitset>
 #include <boost/noncopyable.hpp>
 #ifdef min
 #undef min
@@ -35,6 +36,7 @@ public:
     std::string IP(gentity_t *ent) const;
     std::string Password(gentity_t *ent) const;
     std::string Username(gentity_t *ent) const;
+    std::bitset<MAX_CMDS> Permissions(gentity_t *ent) const;
 
     void ResetGuid(gentity_t *ent);
     void ResetHardwareID(gentity_t *ent);
@@ -65,6 +67,9 @@ private:
         // User ID from DB, used for some queries. Cached on 
         // ClientGuidReceived
         int dbUserID;
+        int level;
+        static const size_t MAX_CMDS = 256;
+        std::bitset<MAX_CMDS> permissions;
     };
 
     Client clients_[MAX_CLIENTS];

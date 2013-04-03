@@ -138,6 +138,7 @@ UserDatabase::Client::Client()
     password.clear();
     username.clear();
     dbUserID = -1;
+    level = 0;
 }
 
 bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
@@ -172,7 +173,12 @@ bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
         }
         clients_[ent->client->ps.clientNum].dbUserID =
             (*it).get<int>(0);
+        clients_[ent->client->ps.clientNum].level =
+            it->get<int>(1);
         
+        clients_[ent->client->ps.clientNum].permissions =
+            levels.Permissions(clients_[ent->client->ps.clientNum].level);
+
         // Add the first nick to aliasDB aswell
         AddNameToDatabase(ent);
     } catch ( sqlite3pp::database_error&e) {
@@ -406,6 +412,11 @@ void UserDatabase::Shutdown()
         return;
     }
     db_.disconnect();
+}
+
+std::bitset<MAX_CMDS> UserDatabase::Permissions( gentity_t *ent ) const
+{
+    return clients_[ent->client->ps.clientNum].permissions;
 }
 
 

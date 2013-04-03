@@ -29,6 +29,8 @@ void ConsolePrintTo( gentity_t *target, const std::string& msg );
 
 // Argument handling
 typedef const std::vector<std::string> *Arguments;
+typedef std::vector<std::string>::const_iterator ConstArgIter;
+typedef std::vector<std::string>::iterator ArgIter;
 Arguments GetArgs();
 Arguments GetSayArgs();
 
@@ -42,4 +44,6 @@ std::string Vec3ToString( vec_t x, vec_t y, vec_t z );
 gentity_t *PlayerGentityFromString(char *name, char *err, int size);
 gentity_t *PlayerGentityFromString(const std::string& name, 
                                    char *err, int size);
+// Removes duplicate chars
+void RemoveDuplicates(std::string& out);
 #endif // g_utilities_h__

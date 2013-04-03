@@ -360,3 +360,28 @@ gentity_t *PlayerGentityFromString
     player = g_entities + pids[0];
     return player;
 }
+
+void RemoveDuplicates(std::string& in) {
+    bool exists[256];
+    char buf[MAX_TOKEN_CHARS];
+    const char *inPtr = &in[0];
+    int count = 0;
+
+    for(int i = 0; i < 256; i++) {
+        exists[i] = false;
+    }
+
+    while(*inPtr != NULL) {
+
+        if(!exists[*inPtr]) {
+            buf[count] = *inPtr;
+            count++;
+        }
+
+        exists[*inPtr] = true;
+
+        inPtr++;
+    }
+    buf[count] = 0;
+    in = buf;
+}
