@@ -148,11 +148,6 @@ bool LevelDatabase::ReadConfig()
 
     G_LogPrintf("ETJump: loaded %d levels.\n", levels_.size());
     
-    BeginBufferPrint();
-    for( vector<Level*>::size_type i = 0; i < levels_.size(); i++ ) {
-        BufferPrint(NULL, levels_.at(i)->name + NEWLINE);
-    }
-    FinishBufferPrint(NULL, false);
     G_LogPrintf(LINE);
 
     // Let's sort the DB aswell
@@ -345,6 +340,20 @@ std::bitset<MAX_CMDS> LevelDatabase::Permissions( int level ) const
     }
 
     return permissions;
+}
+
+std::string LevelDatabase::Name( int level ) const
+{
+    ConstLevelIterator it = ConstFindLevelIter(level);
+    
+    if(it != levels_.end()) {
+        if(it->get()->name.length() != 0) {
+            ChatPrintTo(NULL, it->get()->name);
+            return it->get()->name;
+        }
+    }
+
+    return "^7undefined";
 }
 
 void ResetLevel( Level& lvl )

@@ -16,6 +16,7 @@ public:
 
     static const unsigned GUID_LEN = 40;
     static const unsigned HARDWARE_ID_LEN = 40;
+    static const size_t MAX_CMDS = 256;
 
     UserDatabase();
     ~UserDatabase();
@@ -30,6 +31,7 @@ public:
     bool SetIP(gentity_t *ent, const std::string& ip);
     bool SetPassword(gentity_t *ent, const std::string& password);
     bool SetUsername(gentity_t *ent, const std::string& username);
+    bool SetLevel(gentity_t *ent, int level);
 
     std::string Guid(gentity_t *ent) const;
     std::string HardwareID(gentity_t *ent) const;
@@ -37,6 +39,7 @@ public:
     std::string Password(gentity_t *ent) const;
     std::string Username(gentity_t *ent) const;
     std::bitset<MAX_CMDS> Permissions(gentity_t *ent) const;
+    int Level(gentity_t *ent) const;
 
     void ResetGuid(gentity_t *ent);
     void ResetHardwareID(gentity_t *ent);
@@ -44,6 +47,11 @@ public:
     void ResetPassword(gentity_t *ent);
     void ResetUsername(gentity_t *ent);
     void ResetDBUserID(gentity_t *ent);
+    void ResetTitle(gentity_t *ent);
+    void ResetCommands(gentity_t *ent);
+    void ResetGreeting(gentity_t *ent);
+    void ResetLevel(gentity_t *ent);
+    void ResetPermissions(gentity_t *ent);
 
     void ResetData(gentity_t *ent);
 
@@ -63,12 +71,14 @@ private:
         std::string ip;
         std::string password;
         std::string username;
+        std::string title;
+        std::string commands;
+        std::string greeting;
 
         // User ID from DB, used for some queries. Cached on 
         // ClientGuidReceived
         int dbUserID;
         int level;
-        static const size_t MAX_CMDS = 256;
         std::bitset<MAX_CMDS> permissions;
     };
 

@@ -10,6 +10,10 @@ using std::string;
 using std::vector;
 
 namespace Commands {
+    // used to add level to leveldatabase
+    // syntax: !addlevel <new level>
+    // TODO: should be possible to actually set name, greeting and commands
+    // on create aswell
     bool AddLevel(gentity_t *ent, Arguments argv) {
 
         const size_t MIN_ADDLEVEL_ARGS = 2;
@@ -24,6 +28,7 @@ namespace Commands {
             return false;
         }
 
+        // let's try to add the level to database
         if(!levels.AddLevel(level)) {
             ChatPrintTo(ent, "^3addlevel: " + levels.Error());
             return false;
@@ -35,10 +40,70 @@ namespace Commands {
     }
 
     bool Admintest(gentity_t *ent, Arguments argv) {
+
+        if(!ent) {
+            ChatPrintAll("^3admintest: ^7console is a level 2147483648 user (Your daddy)");
+            return false;
+        }
+
     	return true;
     }
 
     bool Ball8(gentity_t *ent, Arguments argv) {
+        static const char *m8BallResponses[] = {
+            "It is certain",
+            "It is decidedly so",
+            "Without a doubt",
+            "Yes - definitely",
+            "You may rely on it",
+
+            "As I see it, yes",
+            "Most likely",
+            "Outlook good",
+            "Signs point to yes",
+            "Yes",
+
+            "Reply hazy, try again",
+            "Ask again later",
+            "Better not tell you now",
+            "Cannot predict now",
+            "Concentrate and ask again",
+
+            "Don't count on it",
+            "My reply is no",
+            "My sources say no",
+            "Outlook not so good",
+            "Very doubtful"
+        };
+
+        const int RESPONSE_COUNT = 20;
+        const unsigned DELAY_8BALL = 3000; // ms
+
+        if( ent && ent->client->last8BallTime + DELAY_8BALL > level.time ) {
+            ChatPrintTo(ent, va("^38ball: ^7you must wait %d seconds before"
+                "using !8ball", 
+                (ent->client->last8BallTime + DELAY_8BALL - level.time)/1000));
+            return false;
+        }
+
+        if(argv->size() < 2) {
+            ChatPrintTo(ent, "^3usage:^7 !8ball <question>");
+            return false;
+        }
+
+        int random = rand() % RESPONSE_COUNT;
+        if(random < 10) {
+            ChatPrintAll(va("^3Magic 8 Ball: ^2%s.", m8BallResponses[random]));
+        } else if (random < 15) {
+            ChatPrintAll(va("^3Magic 8 Ball: ^3%s.", m8BallResponses[random]));
+        } else {
+            ChatPrintAll(va("^3Magic 8 Ball: ^1%s.", m8BallResponses[random]));
+        }	
+
+        if(ent) {
+            ent->client->last8BallTime = level.time;
+        }
+
     	return true;
     }
 
@@ -50,10 +115,17 @@ namespace Commands {
     	return true;
     }
 
-    // Client should be able to edit name, commands & greetings
-    // Append, replace, clear
-    // support for full cmd names instead of just flags?
-    // !editlevel <level> -a -cmds
+    // used to edit admin levels. currently possible
+    // to edit/append to commands, edit greeting and edit name
+    // also possible to reset(clear) name, greeting & commands
+    // examples:
+    // !editlevel 5 -append -cmds abc
+    // !editlevel -cmds newcommands
+    // !editlevel -clear -cmds
+    // !editlevel -clear -name
+    // !editlevel -clear -greeting
+    // !editlevel -greeting newgreeting is here -name this is a new name
+    // it is not possible to clear a name then edit other two 
     bool EditLevel(gentity_t *ent, Arguments argv) {
 
         // !editlevel 5 -append -cmds abc
@@ -152,7 +224,49 @@ namespace Commands {
         return true;
     }
 
+    // prints admin information about user
+    // syntax: !finger (-all) player
+    // if switch -all is given, prints the information to everyone
+    // else to just caller
+    // -all is not necessary
     bool Finger(gentity_t *ent, Arguments argv) {
+        const char FINGER_MSG[] = 
+            "^3finger: ^7%s^7 is a level %d user (%s^7)";
+
+        if(argv->size() < 2) {
+            ChatPrintTo(ent, "^3usage: ^7!finger <player>");
+            return false;
+        }
+
+        int skiparg = 0;
+        bool printToAll = false;
+        if(argv->size() == 3 && argv->at(1) == "-all") {
+            skiparg = 1;
+            printToAll = true;
+        }
+
+        char errMsg[MAX_TOKEN_CHARS];
+        gentity_t *target = 
+            PlayerGentityFromString(argv->at(1 + skiparg), errMsg, sizeof(errMsg));
+
+        if(!target) {
+            ChatPrintTo(ent, "^3finger: ^7couldn't find target player. "
+                "Check console for more information");
+            ConsolePrintTo(ent, errMsg);
+            return false;
+        }
+
+        char toPrint[MAX_TOKEN_CHARS];
+        Com_sprintf(toPrint, sizeof(toPrint), FINGER_MSG, 
+            target->client->pers.netname, users.Level(target), 
+            levels.Name(users.Level(target)).c_str());
+
+        if(printToAll) {
+            ChatPrintAll(toPrint);   
+        } else {
+            ChatPrintTo(ent, toPrint);
+        }
+
     	return true;
     }
 
@@ -176,7 +290,30 @@ namespace Commands {
     	return true;
     }
 
+    // changes to given map if it exists.
     bool Map(gentity_t *ent, Arguments argv) {
+
+        if(argv->size() < 2) {
+            ChatPrintTo(ent, "^3usage: ^7!map <map name>");
+            return false;
+        }
+
+        char mapFilename[MAX_QPATH];
+
+        Com_sprintf(mapFilename, sizeof(mapFilename), "maps/%s.bsp",
+            argv->at(1).c_str());
+
+        fileHandle_t f;
+        int len = trap_FS_FOpenFile(mapFilename, &f, FS_READ);
+        trap_FS_FCloseFile(f);
+
+        if(!f) {
+            ChatPrintTo(ent, "^3map: ^7couldn't find map " + argv->at(1));
+            return false;
+        }
+
+        trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", argv->at(1).c_str()));
+
     	return true;
     }
 
@@ -209,6 +346,49 @@ namespace Commands {
     }
 
     bool Setlevel(gentity_t *ent, Arguments argv) {
+        // !setlevel <player> <level>
+        // TODO: !setlevel -id <id> <level>
+        
+        if( argv->size() < 3 ) {
+            ChatPrintTo(ent, "^3usage:^7 !setlevel <player> <level>");
+            return false;
+        }
+
+        int level = 0;
+        if(!StringToInt(argv->at(2), level)) {
+            ChatPrintTo(ent, "^3setlevel: ^7invalid level " + argv->at(1));
+            return false;
+        }
+        
+        char errmsg[MAX_TOKEN_CHARS];
+        gentity_t *target = 
+            PlayerGentityFromString(argv->at(1), errmsg, sizeof(errmsg));
+
+        if(!target) {
+            ChatPrintTo(ent, "^3setlevel: ^7couldn't find target player. "
+                "Check console for more information");
+            ConsolePrintTo(ent, errmsg);
+            return false;
+        }
+
+        if( !IsAllowed(ent, target, true) ) {
+            ChatPrintTo(ent, "^3setlevel: ^7you are not allowed "
+                "to setlevel fellow admins.");
+            return false;
+        }
+
+        if( !users.SetLevel(target, level) ) {
+            ChatPrintTo(ent, "^3setlevel: ^7failed to update database. "
+                "Users level is temporarily set to " + argv->at(1));
+            return false;
+        }
+
+        char toPrint[MAX_TOKEN_CHARS];
+        Com_sprintf(toPrint, sizeof(toPrint),
+            "^3setlevel: ^7%s^7 is now level %s user",
+            target->client->pers.netname, argv->at(2).c_str());
+        ChatPrintTo(ent, toPrint);
+
     	return true;
     }
 
@@ -412,4 +592,18 @@ void Svcmd_ListAliases_f(void) {
     }
     BufferPrint(NULL, "\nFound " + IntToString(aliases->size()) + " aliases.\n");
     FinishBufferPrint(NULL, false);
+}
+
+// Is user's level higher (or equal) than targets
+bool IsAllowed( gentity_t *caller, gentity_t *target, bool equalIsHigher /*= true*/ )
+{
+    if( !caller ) {
+        return true;
+    }
+    if(equalIsHigher) {
+        // If targets level is higher or equal to callers, deny
+        return users.Level(caller) > users.Level(target);
+    } else {
+        return users.Level(caller) >= users.Level(target);
+    }
 }

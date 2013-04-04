@@ -9,3 +9,5 @@ struct Command {
     std::string function;
     std::string syntax;
 };
+
+bool IsAllowed(gentity_t *caller, gentity_t *target, bool equalIsHigher = true);

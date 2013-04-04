@@ -41,6 +41,7 @@ public:
     void PrintLevelToConsole(int level, gentity_t *ent) const;
     std::string Error() const;
     std::bitset<MAX_CMDS> Permissions(int level) const;
+    std::string Name(int level) const;
 private:
     ConstLevelIterator ConstFindLevelIter(int level) const;
     LevelIterator FindLevelIter(int level);

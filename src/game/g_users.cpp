@@ -8,6 +8,7 @@
 const char CREATE_USERS_TABLE[] =
     "CREATE TABLE IF NOT EXISTS Users("
     "UserID INTEGER PRIMARY KEY,"
+    "Title VARCHAR(256),"
     "Commands VARCHAR(256),"
     "Greeting VARCHAR(256),"
     "Guid VARCHAR(40) UNIQUE,"
@@ -159,11 +160,8 @@ bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
         cmd.bind(1, guid.c_str());
         cmd.execute();
         
-        // Cache UserID for later queries
-        char qry[MAX_TOKEN_CHARS];
-        Com_sprintf(qry, sizeof(qry), 
-            "SELECT UserID FROM Users WHERE Guid='%s';", guid.c_str());
-        sqlite3pp::query query(db_, qry);
+        sqlite3pp::query query(db_, "SELECT UserID, Level FROM Users Where Guid=?1;");
+        query.bind(1, guid.c_str());
 
         sqlite3pp::query::iterator it = query.begin();
         if(it == query.end()) {
@@ -286,17 +284,19 @@ void UserDatabase::Print( gentity_t *caller, int targetClientNum ) const
         ConsolePrintTo(caller, "udbprint: invalid clientNum");
         return;
     }
-    std::string toPrint = "Client: ";
-    toPrint += IntToString(targetClientNum);
-    toPrint += "\n{ USER: ";
-    toPrint += clients_[targetClientNum].username + ", PASSWORD: ";
-    toPrint += clients_[targetClientNum].password + ", GUID: ";
-    toPrint += clients_[targetClientNum].guid + ", HARDWAREID: ";
-    toPrint += clients_[targetClientNum].hardwareID + ", IP: ";
-    toPrint += clients_[targetClientNum].ip + ", USERID: " +
-    toPrint += IntToString(clients_[targetClientNum].dbUserID) + " }";
 
-    ConsolePrintTo(caller, toPrint);
+    BeginBufferPrint();
+    BufferPrint(caller, "Client: ");
+    BufferPrint(caller, IntToString(targetClientNum));
+    BufferPrint(caller, "\n{ USER: ");
+    BufferPrint(caller, clients_[targetClientNum].username + ", PASSWORD: ");
+    BufferPrint(caller, clients_[targetClientNum].password + ", GUID: ");
+    BufferPrint(caller, clients_[targetClientNum].guid + ", HARDWAREID: ");
+    BufferPrint(caller, clients_[targetClientNum].hardwareID + ", IP: ");
+    BufferPrint(caller, clients_[targetClientNum].ip + ", USERID: ");
+    BufferPrint(caller, IntToString(clients_[targetClientNum].dbUserID));
+    BufferPrint(caller, clients_[targetClientNum].permissions.to_string() + " }");    
+    FinishBufferPrint(caller, true);
 }
 
 void UserDatabase::ResetGuid( gentity_t *ent )
@@ -337,6 +337,11 @@ void UserDatabase::ResetData( gentity_t *ent )
     ResetPassword(ent);
     ResetUsername(ent);
     ResetDBUserID(ent);
+    ResetCommands(ent);
+    ResetTitle(ent);
+    ResetPermissions(ent);
+    ResetLevel(ent);
+    ResetGreeting(ent);
 }
 
 void UserDatabase_AddNameToDatabase( gentity_t *ent ) {
@@ -345,12 +350,25 @@ void UserDatabase_AddNameToDatabase( gentity_t *ent ) {
 
 void UserDatabase::AddNameToDatabase( gentity_t *ent )
 {
+    // if neither is not set, database won't be open
+    // so don't do anything
     if( !g_admin.integer || !g_aliasDB.integer ) {
         return;
     }
+
+    // insert into aliases if certain userid does not have the name already
+    // FIXME: create a proper SQL sentence for this. I think this is way 
+    // too complex
     try {
         sqlite3pp::command cmd(db_,
-            "INSERT INTO Aliases (Alias, UserID) SELECT * FROM (SELECT ?1, ?2) AS temp WHERE NOT EXISTS (SELECT Alias FROM Aliases WHERE Alias=?1 AND UserID=?2) LIMIT(1);");
+            "INSERT INTO Aliases (Alias, UserID) "
+                "SELECT * "
+                "FROM (SELECT ?1, ?2) AS temp "
+                "WHERE NOT EXISTS "
+                    "(SELECT Alias "
+                    "FROM Aliases "
+                    "WHERE Alias=?1 AND UserID=?2) "
+                    "LIMIT(1);");
         cmd.bind(1, ent->client->pers.netname);
         cmd.bind(2, clients_[ent->client->ps.clientNum].dbUserID);
         cmd.execute();
@@ -361,18 +379,21 @@ void UserDatabase::AddNameToDatabase( gentity_t *ent )
 
 const std::vector<std::string> * UserDatabase::GetAliases( gentity_t *ent )
 {
+    // if either is not set return nothing as access to db is not
+    // initialized (most likely)
     if( !g_admin.integer || !g_aliasDB.integer ) {
         return NULL;
     }
 
     static std::vector<std::string> aliases;
+    // clear aliases on every function execution, else we would have
+    // all aliases ever requested
     aliases.clear();
     try {
-        char queryText[MAX_TOKEN_CHARS];
-
-        Com_sprintf(queryText, sizeof(queryText), "SELECT Alias FROM Aliases WHERE UserID='%d';", clients_[ent->client->ps.clientNum].dbUserID);
-
-        sqlite3pp::query query(db_, queryText);
+        sqlite3pp::query query(db_, "SELECT Alias "
+                                    "FROM Aliases "
+                                    "WHERE UserID=?1;");
+        query.bind(1, clients_[ent->client->ps.clientNum].dbUserID);
 
         for(sqlite3pp::query::iterator it = query.begin(); 
             it != query.end(); it++) 
@@ -419,6 +440,55 @@ std::bitset<MAX_CMDS> UserDatabase::Permissions( gentity_t *ent ) const
     return clients_[ent->client->ps.clientNum].permissions;
 }
 
+int UserDatabase::Level( gentity_t *ent ) const
+{
+    return clients_[ent->client->ps.clientNum].level;
+}
+
+bool UserDatabase::SetLevel( gentity_t *ent, int level )
+{
+    // Update level
+    clients_[ent->client->ps.clientNum].level = level;
+    // Update permissions
+    clients_[ent->client->ps.clientNum].permissions =
+        levels.Permissions(level);
+    // Update database
+    try {
+        sqlite3pp::command cmd(db_, "UPDATE Users SET Level=?1 WHERE UserID=?2;" );
+        cmd.bind(1, level);
+        cmd.bind(2, clients_[ent->client->ps.clientNum].dbUserID);
+        cmd.execute();
+    } catch ( sqlite3pp::database_error & e) {
+        G_LogPrintf("SQLite3 Error: %s\n", e.what());
+        return false;
+    }
+    return true;
+}
+
+void UserDatabase::ResetTitle( gentity_t *ent )
+{
+    clients_[ent->client->ps.clientNum].title.clear();
+}
+
+void UserDatabase::ResetCommands( gentity_t *ent )
+{
+    clients_[ent->client->ps.clientNum].commands.clear();
+}
+
+void UserDatabase::ResetGreeting( gentity_t *ent )
+{
+    clients_[ent->client->ps.clientNum].greeting.clear();
+}
+
+void UserDatabase::ResetLevel( gentity_t *ent )
+{
+    clients_[ent->client->ps.clientNum].level = 0;
+}
+
+void UserDatabase::ResetPermissions( gentity_t *ent )
+{
+    clients_[ent->client->ps.clientNum].permissions.reset();
+}
 
 
 
