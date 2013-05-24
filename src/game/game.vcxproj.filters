@@ -198,6 +198,9 @@
     <ClCompile Include="g_levels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="users.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -263,6 +266,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_levels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="users.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

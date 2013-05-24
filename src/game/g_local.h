@@ -2644,7 +2644,11 @@ void OnGameInit();
 void OnGameShutdown();
 
 // g_admin.cpp
+
+#define AF_SILENT_COMMANDS '/'
+
 qboolean CommandCheck(gentity_t *ent);
+qboolean G_CheckPermissions(gentity_t *ent, char flag);
 
 #endif // G_LOCAL_H
 

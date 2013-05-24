@@ -4041,7 +4041,7 @@ void ClientCommand(int clientNum)
 	}
 
 	// regular anytime commands
-	for (i = 0 ; i < sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0]) ; i++)
+	for (i = 0 ; i < sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0]) ; i++) {
 		if (!Q_stricmp(cmd, anyTimeCommands[i].cmd))
 		{
 			if (anyTimeCommands[i].floodProtected && ClientIsFlooding(ent))
@@ -4050,6 +4050,7 @@ void ClientCommand(int clientNum)
 				anyTimeCommands[i].function(ent);
 			return;
 		}
+	}
 
 	// ignore all other commands when at intermission
 	if (level.intermissiontime)
@@ -4081,8 +4082,11 @@ void ClientCommand(int clientNum)
 			return;
 		}
     }
-    
-	if(G_commandCheck(ent, cmd, qtrue)) return;
+
+	if((G_CheckPermissions(ent, AF_SILENT_COMMANDS) && CommandCheck(ent)) || G_commandCheck(ent, cmd, qtrue)) {
+		return;
+	}
+
 
 	CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }

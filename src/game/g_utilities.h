@@ -46,4 +46,5 @@ gentity_t *PlayerGentityFromString(const std::string& name,
                                    char *err, int size);
 // Removes duplicate chars
 void RemoveDuplicates(std::string& out);
+void CharPtrToString( const char* p, std::string& s );
 #endif // g_utilities_h__

@@ -10,7 +10,7 @@
 
 struct Level {
     bool operator<(const int& rhs);
-    bool Level::operator<( const Level& rhs );
+    bool operator<( const Level& rhs );
     int level;
     std::string name;
     std::string commands;

@@ -15,10 +15,20 @@ const char CREATE_USERS_TABLE[] =
     "HardwareID VARCHAR(40),"
     "IP VARCHAR(16),"
     "Level INTEGER);";
-const char CREATE_ALIAS_TABLE[] =
+/*const char CREATE_ALIAS_TABLE[] =
     "CREATE TABLE IF NOT EXISTS Aliases(AliasID INTEGER PRIMARY KEY,\
     Alias VARCHAR(36), UserID INTEGER, FOREIGN KEY(UserID) REFERENCES\
-    Users(UserID));";
+    Users(UserID));";*/
+
+const char CREATE_ALIAS_TABLE[] =
+	"CREATE TABLE IF NOT EXISTS Aliases"
+	"("
+	"AliasID INTEGER PRIMARY KEY,"
+	"Alias VARCHAR(36),"
+	"UserID INTEGER,"
+	"FOREIGN KEY(UserID) REFERENCES Users(UserID)"
+	"UNIQUE(UserID, Alias)"
+	");";
 
 const char INVALID_GUID_FRAME[] = 
     "Error: invalid guid info frame from %s: %s\n";
@@ -174,8 +184,7 @@ bool UserDatabase::SetGuid( gentity_t *ent, const std::string& guid )
         clients_[ent->client->ps.clientNum].level =
             it->get<int>(1);
         
-        clients_[ent->client->ps.clientNum].permissions =
-            levels.Permissions(clients_[ent->client->ps.clientNum].level);
+		UpdatePermissions(ent);
 
         // Add the first nick to aliasDB aswell
         AddNameToDatabase(ent);
@@ -360,6 +369,7 @@ void UserDatabase::AddNameToDatabase( gentity_t *ent )
     // FIXME: create a proper SQL sentence for this. I think this is way 
     // too complex
     try {
+		/*
         sqlite3pp::command cmd(db_,
             "INSERT INTO Aliases (Alias, UserID) "
                 "SELECT * "
@@ -369,6 +379,9 @@ void UserDatabase::AddNameToDatabase( gentity_t *ent )
                     "FROM Aliases "
                     "WHERE Alias=?1 AND UserID=?2) "
                     "LIMIT(1);");
+                    "*/
+		sqlite3pp::command cmd(db_,
+			"INSERT OR IGNORE INTO Aliases (Alias, UserID) VALUES (?1, ?2);");
         cmd.bind(1, ent->client->pers.netname);
         cmd.bind(2, clients_[ent->client->ps.clientNum].dbUserID);
         cmd.execute();
@@ -488,6 +501,22 @@ void UserDatabase::ResetLevel( gentity_t *ent )
 void UserDatabase::ResetPermissions( gentity_t *ent )
 {
     clients_[ent->client->ps.clientNum].permissions.reset();
+}
+
+void UserDatabase::UpdatePermissions()
+{
+	for( int i = 0; i < level.numConnectedClients; i++ ) 
+	{
+		int clientNum = level.sortedClients[i];
+
+		UpdatePermissions(g_entities + clientNum);
+	}
+}
+
+void UserDatabase::UpdatePermissions( gentity_t *ent )
+{
+	clients_[ent->client->ps.clientNum].permissions = 
+		levels.Permissions(clients_[ent->client->ps.clientNum].level);
 }
 
 

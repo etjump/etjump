@@ -385,3 +385,15 @@ void RemoveDuplicates(std::string& in) {
     buf[count] = 0;
     in = buf;
 }
+
+void CharPtrToString( const char* p, std::string& s ) 
+{
+	if(p) 
+	{
+		s = p;
+	} 
+	else
+	{
+		s = "";
+	}
+}

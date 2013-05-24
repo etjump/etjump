@@ -30,7 +30,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <PlatformToolset>v90</PlatformToolset>
+    <PlatformToolset>v110_xp</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -52,10 +52,10 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;F:\Ohjelmointi\boost_1_51_0;D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Jussi\boost_1_51_0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -290,6 +290,9 @@
     <None Include="..\..\etjump\ui\wm_quickmessage.menu" />
     <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu" />
     <None Include="cgame.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="authentication.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

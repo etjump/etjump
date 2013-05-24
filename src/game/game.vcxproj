@@ -25,7 +25,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <PlatformToolset>v90</PlatformToolset>
+    <PlatformToolset>v110_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -52,7 +52,10 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>D:\GitHub\etjump\src\sqlite;D:\Ohjelmointi\boost_1_51_0;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Ohjelmointi\boost_1_51_0;C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;C:\Users\Jussi\boost_1_51_0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -204,6 +207,7 @@
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="users.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
@@ -229,6 +233,7 @@
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
     <ClInclude Include="..\botai\syn.h" />
+    <ClInclude Include="users.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

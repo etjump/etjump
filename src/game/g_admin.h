@@ -10,4 +10,8 @@ struct Command {
     std::string syntax;
 };
 
+const enum AdminFlags {
+	SILENT_COMMANDS = '/',
+};
+
 bool IsAllowed(gentity_t *caller, gentity_t *target, bool equalIsHigher = true);

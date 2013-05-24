@@ -33,6 +33,9 @@ public:
     bool SetUsername(gentity_t *ent, const std::string& username);
     bool SetLevel(gentity_t *ent, int level);
 
+	void UpdatePermissions(gentity_t *ent);
+	void UpdatePermissions();
+
     std::string Guid(gentity_t *ent) const;
     std::string HardwareID(gentity_t *ent) const;
     std::string IP(gentity_t *ent) const;

@@ -30,7 +30,7 @@ namespace Commands {
 
         // let's try to add the level to database
         if(!levels.AddLevel(level)) {
-            ChatPrintTo(ent, "^3addlevel: " + levels.Error());
+            ChatPrintTo(ent, "^3addlevel: ^7" + levels.Error());
             return false;
         }
 
@@ -44,7 +44,12 @@ namespace Commands {
         if(!ent) {
             ChatPrintAll("^3admintest: ^7console is a level 2147483648 user (Your daddy)");
             return false;
-        }
+        } else {
+			char buf[MAX_TOKEN_CHARS];
+			Com_sprintf(buf, sizeof(buf), "^3admintest: ^7%s ^7is a level %d user (%s^7)",
+				ent->client->pers.netname, users.Level(ent), levels.Name(users.Level(ent)).c_str());
+			ChatPrintAll(buf);
+		}
 
     	return true;
     }
@@ -220,6 +225,8 @@ namespace Commands {
 
         ChatPrintTo(ent, "^3editlevel: ^7successfully edited level " + argv->at(1));
         levels.PrintLevelToConsole(level, ent);
+
+		users.UpdatePermissions();
 
         return true;
     }
@@ -452,6 +459,23 @@ int FindMatchingCommands(const string& toMatch, int indices[])
     return foundMatches;
 }
 
+bool CheckPermissions(gentity_t *ent, char flag) 
+{
+	if(!ent) {
+		return true;
+	}
+	return users.Permissions(ent).test(flag);
+
+	//return users.Permissions(ent).at(flag);
+}
+
+qboolean G_CheckPermissions(gentity_t *ent, char flag) {
+	if(CheckPermissions(ent, flag)) {
+		return qtrue;
+	}
+	return qfalse;
+}
+
 qboolean CommandCheck(gentity_t *ent) 
 {
     if( g_admin.integer == 0 ) {
@@ -527,6 +551,14 @@ qboolean CommandCheck(gentity_t *ent)
         return qfalse;
     }
 
+	if(!CheckPermissions(ent, commands[matchingIndices[0]].flag)) {
+		char buf[MAX_TOKEN_CHARS];
+		Com_sprintf(buf, sizeof(buf), "^3%s: ^7permission denied.", 
+			commands[matchingIndices[0]].keyword.c_str());
+		ChatPrintTo(ent, buf);
+		return qfalse;
+	}
+
     // Push the first useful arg without ! to vector
     argv.push_back(cmd);
 
@@ -535,8 +567,6 @@ qboolean CommandCheck(gentity_t *ent)
         Q_SayArgv(i, arg1, sizeof(arg1));
         argv.push_back(arg1);
     }
-
-    // TODO: Check if client is allowed to do this
 
     commands[matchingIndices[0]].handler(ent, &argv);
     return qtrue;

@@ -440,4 +440,9 @@
       <Filter>Menu files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="authentication.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
