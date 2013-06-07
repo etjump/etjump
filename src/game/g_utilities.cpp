@@ -397,3 +397,8 @@ void CharPtrToString( const char* p, std::string& s )
 		s = "";
 	}
 }
+
+int CNum(gentity_t *ent)
+{
+	return ent->client->ps.clientNum;
+}

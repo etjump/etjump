@@ -763,11 +763,6 @@ cvarTable_t		cvarTable[] = {
                                     trap_SendConsoleCommand( va( "ref %s", cg_refereePassword.string ) );
                               }
 
-                              else if((cv->vmCvar == &cg_username && *cg_username.string) ||
-                                  (cv->vmCvar == &cg_adminpassword && *cg_adminpassword.string)) {
-                                      AdminLogin();
-                              }
-
                               else if(cv->vmCvar == &demo_infoWindow) {
                                     if(demo_infoWindow.integer == 0 && cg.demohelpWindow == SHOW_ON) {
                                           CG_ShowHelp_On(&cg.demohelpWindow);
@@ -3056,7 +3051,6 @@ cvarTable_t		cvarTable[] = {
             SendGuid();
             SendHWID();
             UserinfoSendHWID();
-            AdminLogin();
             //	CG_Printf("Time taken: %i\n", trap_Milliseconds() - startat);
       }
 

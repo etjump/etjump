@@ -663,6 +663,8 @@ typedef struct {
     qboolean    loadedPosBeforeInactivity;
     team_t      teamBeforeInactivitySpec;
 
+	qboolean	needGreeting;
+
 	qboolean	versionOK;
 } clientSession_t;
 
@@ -1503,7 +1505,6 @@ void G_ReadXPBackup( void );
 void AddIPBan( const char *str );
 
 void Svcmd_ShuffleTeams_f(void);
-void Svcmd_ListAliases_f(void);
 
 
 //
@@ -2577,7 +2578,7 @@ qboolean G_isIPMuted( char *ip );
 void G_ClearIPMutes();
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime);
 // g_admin.c
-char *G_SHA1(char *string);
+char *G_SHA1(const char *string);
 char *Q_SayConcatArgs(int start);
 void DecolorString( char *in, char *out);
 char *Q_StrReplace(char *haystack, char *needle, char *newp);
@@ -2630,25 +2631,19 @@ void ConsolePrintTo( gentity_t *target, const char* msg );
 qboolean StringToInt(const char* toConvert, int *value);
 
 // g_users.cpp
-                          
-void ClientCredentialsReceived(gentity_t *ent);
-void ClientGuidReceived(gentity_t *ent);
-void ClientHWIDReceived(gentity_t *ent);
+                         
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
-void UserDatabase_AddNameToDatabase( gentity_t *ent );
-void UserDatabase_Print( gentity_t *caller );
-void UserDatabase_SetIP(gentity_t *ent, const char* ip);
 void OnClientDisconnect(gentity_t *ent);
 void OnClientBegin(gentity_t *ent);
 void OnGameInit();
 void OnGameShutdown();
 
-// g_admin.cpp
+void GuidReceived(gentity_t *ent);
 
-#define AF_SILENT_COMMANDS '/'
 
-qboolean CommandCheck(gentity_t *ent);
-qboolean G_CheckPermissions(gentity_t *ent, char flag);
+// Returns clientnum from ent
+int CNum(gentity_t *ent);
+
 
 #endif // G_LOCAL_H
 

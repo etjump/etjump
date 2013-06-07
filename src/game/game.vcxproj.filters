@@ -165,12 +165,6 @@
     <ClCompile Include="..\sha-1\bg_sha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\sqlite\sqlite3.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sqlite\sqlite3pp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_banner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -186,19 +180,16 @@
     <ClCompile Include="g_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_users.cpp">
+    <ClCompile Include="g_main_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_clientdb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_admin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_main_ext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_levels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="users.cpp">
+    <ClCompile Include="g_database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -247,28 +238,16 @@
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\sqlite\sqlite3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\sqlite\sqlite3pp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="g_save.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_users.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_local.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_admin.h">
+    <ClInclude Include="g_clientdb.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_levels.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="users.h">
+    <ClInclude Include="g_database.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

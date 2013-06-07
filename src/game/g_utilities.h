@@ -3,10 +3,6 @@
 
 #include "g_local.hpp"
 
-#ifdef max
-#undef max
-#endif
-
 #include <string>
 #include <vector>
 

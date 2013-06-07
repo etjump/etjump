@@ -3632,6 +3632,5 @@ void CG_Minimize_f(void);
 //
 
 void SendGuid();
-void AdminLogin();
 void SendHWID(void);
 void UserinfoSendHWID(void);

@@ -1,0 +1,113 @@
+Admin system
+- Session DB
+	- If no GUID has been sent set state to noguid
+	- ID, which is used to identify client when modifying
+		it in the permanent db.
+	- GUID
+	- Level
+	- Level information?
+	- Personal commands etc.
+	- Or just permissions?
+
+- Permanent DB
+	[user]
+	id = 572
+	name = "Client's name"
+	level = 5
+	commands = "Client's personal commands"
+	greeting = "Client's personal greeting"
+
+	[level]
+	level = 0
+	name = "Guest"
+	commands = "abc"
+	greeting = "Welcome"
+
+- Sending GUID information to client using client command. 
+- Receiving GUID information
+	
+	- Check that the command vector is valid, 2 args.
+	- Check that the guid supplied in the vector is valid using 
+	  ValidGuid(). Log possible spoofs to server.
+	- Hash the received GUID.
+
+	- Storing received information to temporary DB until disconnect.
+		- On client connect, reset all client data.
+		- On client disconnect, reset all client data.
+		- Once the data is received, save it to users DB
+			- Get the level data from permanent DB.
+			- Check permissions and set them
+	- Storing received information to permanent DB if not there already.
+		- Check if exists
+			- Exists, do nothing
+			- Doesn't, add user.
+	- After GUID has been received print greeting. Store needGreeting
+	  variable in persistant session data so it doesn't get printed between
+	  connections (ent->client->sess.needGreeting)
+- Altering client's level & personal data using setlevel, edituser etc.
+	- Saving modified data -> new level, new personal commands, new greeting etc.
+- Altering level data using commands such as editlevel, addlevel, removelevel
+	- Saving modified data -> new level, new level commands, new greeting etc.
+
+Admin system greeting
+
+- Printed once per connection after level data has been set
+- Track the need to print greeting in session struct 
+
+Admin system commands
+
+- Before executing a command
+	- Check for permissions
+
+- admintest
+	- Used to print your admin level
+	  !admintest
+	  "admintest: <name> is level <level> user (<level name>)."
+	- Get level data.
+	- Print text based on data.
+
+- setlevel
+	- Used to set target player's level
+	  !setlevel <target> <new level>
+	  or
+	  !setlevel -id <id> <new level>
+	
+	- If -id is supplied as a parameter use it to find player from db
+	  else just use target name.
+
+	- Check if target exists.
+		"!setlevel: couldn't find target id <id>"
+		"!setlevel: couldn't find target player <player name>"
+	- Check if target has noguid set to true. Abort if yes.
+		"!setlevel: target does not have a GUID." 
+	- Check if target level is higher or equal to own. Abort if yes.
+		"!setlevel: you're not allowed to set the level of fellow admins."
+	- Check that new level is less or equal to own level. Abort if higher.
+		"!setlevel: you're not allowed to setlevel higher than your own level."
+	- Check that new level exists. Abort if not.
+		"!setlevel: level does not exist."
+
+	"!setlevel: <name> is now level <level> user (<level name>)."
+		
+
+
+
+Multiple client entity activation proxy
+
+"target_team_activate"
+
+- Teams are fireteams
+- Once any player in the fireteam triggers the activation proxy, proxy 
+  activates the target entity for the entire team.
+
+
+
+
+More worldspawn flags
+- noadrenaline
+- nofatigue
+Should probably be just one.
+
+
+A command variable to modify noclipspeed
+example: cg_noclipSpeed "1500"

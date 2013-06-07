@@ -52,10 +52,10 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;F:\Ohjelmointi\boost_1_51_0;D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\boost_1_53_0;C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;F:\Ohjelmointi\boost_1_51_0;D:\Ohjelmointi\boost_1_51_0\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Jussi\boost_1_51_0;$(IncludePath)</IncludePath>
+    <IncludePath>C:\boost_1_53_0;C:\Users\Jussi\boost_1_51_0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

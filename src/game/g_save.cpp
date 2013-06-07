@@ -1,15 +1,11 @@
-#include "g_save.h"
-#include "g_utilities.h"
-#include "g_local.hpp"
-
-#ifdef max
-#undef max
-#endif
-
 #include <string>
 #include <vector>
 using std::string;
 using std::vector;
+
+#include "g_save.h"
+#include "g_utilities.h"
+#include "g_local.hpp"
 
 SaveSystem::Client::Client() {
     alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
@@ -286,7 +282,7 @@ void SaveSystem::ResetSavedPositions(gentity_t *ent) {
 
 // Called on client disconnect. Saves saves for future sessions
 void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
-
+	/*
     if(!ent->client) {
         return;
     }
@@ -322,11 +318,12 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
     } else {
         savedPositions.insert(std::make_pair(guid, client));
     }
+    */
 }
 
 // Called on client connect. Loads saves from previous session
 void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
-
+	/*
     if(!ent->client) {
         return;
     }
@@ -362,11 +359,12 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         ent->client->sess.loadedSavedPositions = qtrue;
         ChatPrintTo(ent, "^5ETJump: ^7loaded positions from previous session.");
     }
+    */
 }
 
 // Saves backup position
 void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos) {
-
+	
     if(!ent->client) {
         return;
     }
@@ -381,6 +379,7 @@ void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos) {
     } else {
         clients_[ent->client->ps.clientNum].axisBackupPositions.push_front(backup);
     }
+    
 }
 
 void SaveSystem::Print( gentity_t *ent ) const

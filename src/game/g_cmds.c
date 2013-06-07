@@ -3942,17 +3942,11 @@ void ClientCommand(int clientNum)
 
     // Received client guid
     if(!Q_stricmp(cmd, "etguid")) {
-        ClientGuidReceived(ent);
-        return;
-    }
-
-    if(!Q_stricmp(cmd, "login")) {
-        ClientCredentialsReceived(ent);
+		GuidReceived(ent);
         return;
     }
 
     if(!Q_stricmp(cmd, "HWID")) {
-        ClientHWIDReceived(ent);
         return;
     }
 
@@ -4083,7 +4077,7 @@ void ClientCommand(int clientNum)
 		}
     }
 
-	if((G_CheckPermissions(ent, AF_SILENT_COMMANDS) && CommandCheck(ent)) || G_commandCheck(ent, cmd, qtrue)) {
+	if(G_commandCheck(ent, cmd, qtrue)) {
 		return;
 	}
 

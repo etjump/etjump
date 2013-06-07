@@ -11,25 +11,11 @@ extern "C" {
 #undef max
 #endif
 
-#include "g_users.h"
 #include "g_save.h"
-#include "g_levels.h"
 
-extern class UserDatabase     users;
 extern class SaveSystem       positions;
-extern class LevelDatabase    levels;
-
-const enum EDIT_MODE {
-    REPLACE,
-    APPEND,
-    CLEAR
-}
-
-const enum EDIT_TYPE {
-    NONE,
-    COMMANDS,
-    GREETING,
-    NAME
-}
+extern class Database		  adminDB;
+extern class SessionDB		  sessionDB;
 
 #endif // g_local_hpp__
+

@@ -956,18 +956,8 @@ qboolean	ConsoleCommand( void ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-    if( !Q_stricmp(cmd, "udbprint")) {
-        UserDatabase_Print( NULL );
-        return qtrue;
-    }
-
     if( !Q_stricmp(cmd, "sdbprint")) {
         SaveSystem_Print( NULL );
-        return qtrue;
-    }
-
-    if ( !Q_stricmp(cmd, "listaliases")) {
-        Svcmd_ListAliases_f();
         return qtrue;
     }
 
@@ -1091,6 +1081,6 @@ qboolean	ConsoleCommand( void ) {
 		// prints to the console instead now
 	}
 
-    return CommandCheck(NULL);
+    return qfalse;
 }
 
