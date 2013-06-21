@@ -1881,6 +1881,10 @@ extern vmCvar_t	g_mute;
 extern vmCvar_t g_goto;
 extern vmCvar_t g_voteCooldown;
 
+extern vmCvar_t g_levelConfig;
+extern vmCvar_t g_userConfig;
+extern vmCvar_t g_banConfig;
+
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
 int		trap_Milliseconds( void );

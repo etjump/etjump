@@ -9,6 +9,7 @@
 
 #include "g_local.hpp"
 #include "boost/shared_ptr.hpp"
+#include <map>
 #include <vector>
 #include <string>
 
@@ -28,7 +29,20 @@ struct User {
 	std::string personalGreeting;
 	std::string personalTitle;
 };
-typedef const User* const UserData;
+
+struct UserData {
+	int level;
+	std::string name;
+	std::string personalCommands;
+	std::string personalGreeting;
+	std::string personalTitle;
+};
+
+typedef std::map<std::string, UserData>::iterator UserIterator;
+typedef std::map<std::string, UserData>::const_iterator ConstUserIterator;
+typedef const std::pair<std::string, UserData>* ConstUserPtr;
+
+// typedef const User* const UserData;
 
 struct Ban {
 	// TODO: bans
@@ -68,15 +82,18 @@ public:
 	bool SaveBan(const Ban& ban);
 
 	// Get functions are used to get level, user & ban data
-	LevelData	GetLevel(int level) const;
-	UserData	GetUser(const std::string& guid) const;
-	BanData		GetBan() const;
+	LevelData			GetLevel(int level) const;
+	// returns false if user could not be found
+	bool GetUser(const std::string& guid, ConstUserIterator& it) const;
+	BanData				GetBan() const;
 private:
+	void WriteUserConfig();
+
 	std::vector<boost::shared_ptr<Level> > levels_;
-	std::vector<boost::shared_ptr<User> > users_;
+	std::map<std::string, UserData> users_;
 	std::vector<boost::shared_ptr<Ban> > bans_;
 
-	bool usersSorted;
+	bool usersSorted_;
 };
 
 #endif // g_database_h__

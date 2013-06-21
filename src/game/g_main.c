@@ -224,6 +224,10 @@ vmCvar_t		g_mute;
 vmCvar_t        g_goto;
 vmCvar_t		g_voteCooldown;
 
+vmCvar_t		g_userConfig;
+vmCvar_t		g_levelConfig;
+vmCvar_t		g_banConfig;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -459,7 +463,11 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_maxConnsPerIP, "g_maxConnsPerIP", "2", CVAR_ARCHIVE },
 	{ &g_mute, "g_mute", "0", CVAR_ARCHIVE },
     { &g_goto, "g_goto", "1", CVAR_ARCHIVE },
-	{ &g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE }
+	{ &g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE },
+
+	{ &g_userConfig, "g_userConfig", "users.cfg", CVAR_ARCHIVE },
+	{ &g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE },
+	{ &g_banConfig, "g_banConfig", "bans.cfg", CVAR_ARCHIVE }
 };
 
 // bk001129 - made static to avoid aliasing

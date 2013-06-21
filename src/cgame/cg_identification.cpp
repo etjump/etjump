@@ -63,10 +63,6 @@ bool CreateNewGuid()
     // Convert to uppercase
     boost::to_upper(userGuid);
 
-    // Close the filehandle so we can open another for writing
-    trap_FS_FCloseFile(f); 
-    f = -1;
-
     if(trap_FS_FOpenFile("etguid", &f, FS_WRITE) < 0)
     {
         // Couldn't open "etguid", print error and send the generated
@@ -118,7 +114,6 @@ bool ValidGuid(const std::string& guid)
 const int GUID_LEN = 40;
 // Reads the guid and if it does not exist, create it
 void ReadGuid() {
-
     fileHandle_t f = -1;
 
     int fileLen = trap_FS_FOpenFile("etguid", &f, FS_READ);
@@ -128,7 +123,7 @@ void ReadGuid() {
     {
         // The GUID does not exist, create a new one.
         CreateNewGuid();
-
+		
     } else
     {
         // The GUID exists, read it

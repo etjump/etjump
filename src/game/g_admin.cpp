@@ -23,7 +23,7 @@ void PrintGreeting( gentity_t * ent )
 
 	boost::replace_all(greeting, "[n]", ent->client->pers.netname);    
 
-	ChatPrintAll(greeting + NEWLINE);
+	ChatPrintAll(greeting);
 }
 
 bool ValidGuid(const std::string& guid);
@@ -77,16 +77,15 @@ void GuidReceived( gentity_t * ent )
 	// and the level data from the db
 	// 
 	// Get admin data
-	UserData userAdminData = adminDB.GetUser(hashedGuid);
-
-	if(userAdminData != NULL) 
+	ConstUserIterator userAdminData;
+	if(adminDB.GetUser(hashedGuid, userAdminData)) 
 	{
 		// We now have the admin data and the GUID so we can save them all
 		// to the temporary clientDB
 		// 
-		sessionDB.Set(ent, hashedGuid, userAdminData->level,
-			userAdminData->name, userAdminData->personalCommands,
-			userAdminData->personalGreeting, userAdminData->personalTitle);
+		sessionDB.Set(ent, hashedGuid, userAdminData->second.level,
+			userAdminData->second.name, userAdminData->second.personalCommands,
+			userAdminData->second.personalGreeting, userAdminData->second.personalTitle);
 	}
 	else
 	{
@@ -109,6 +108,8 @@ void GuidReceived( gentity_t * ent )
 		PrintGreeting(ent);
 	}
 
+	// We've now added client to permanent & session database 
+	// and printed greeting. 
 
 }
 
