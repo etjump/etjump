@@ -1,4 +1,3 @@
-
 #include "g_save.h"
 #include "g_local.hpp"
 
@@ -6,6 +5,7 @@ SaveSystem       positions;
 
 void OnGameInit() {
     // Init save db
+	adminDB.ReadConfig(NULL);
     positions.Reset();
 }
 

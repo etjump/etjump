@@ -2619,6 +2619,7 @@ void SavePositionsToDatabase(gentity_t *ent);
 void SaveSystem_Print( gentity_t *ent );
 
 // g_utilities.cpp
+
 // C versions of printing functions
 void BPAll( const char* msg );
 void BPTo( gentity_t *target, const char* msg );

@@ -1,25 +1,6 @@
 #include "g_database.hpp"
 #include <algorithm>
 
-// Used to sort user database by guid. "LESS"
-bool SortByGuid(const boost::shared_ptr<User>& lhs,
-				const boost::shared_ptr<User>& rhs)
-{
-	return lhs->guid < rhs->guid;
-}
-
-bool SortByGuidStr(const boost::shared_ptr<User>& lhs,
-				const std::string& rhs)
-{
-	return lhs->guid < rhs;
-}
-
-bool SortByGuidStr(const std::string& lhs, 
-				const boost::shared_ptr<User>& rhs)
-{
-	return lhs < rhs->guid;
-}
-
 bool Database::NewLevel( Level level )
 {
 	G_LogPrintf("Database::NewLevel is not yet implemented.\n");
@@ -41,6 +22,8 @@ bool Database::NewUser( User user )
 		// User already exists
 		return false;
 	}
+
+	WriteUserConfig();
 
 	// user is now on db
 	return true;
@@ -106,19 +89,27 @@ bool Database::GetUser( const std::string& guid, ConstUserIterator& it ) const
 	return false;
 }
 
-namespace configConstants {
-	std::string 
-		USER_BEGIN =	"[user] = ",
-		LEVEL =			"level = ",
-		NAME =			"name = ",
-		GUID =			"guid = ",
-		PCMDS =			"pcmds = ",
-		PGRT =			"pgrt = ",
-		PTITLE =		"ptitle = ";
+void WriteString(const char* toWrite, fileHandle_t& f)
+{
+	trap_FS_Write(toWrite, strlen(toWrite), f);
+	trap_FS_Write("\n", 1, f);
 }
+
+void WriteInt(int toWrite, fileHandle_t& f)
+{
+#define BUFSIZE 32
+	char buf[BUFSIZE];
+	Com_sprintf(buf, sizeof(buf), "%d", toWrite);
+	trap_FS_Write(buf, strlen(buf), f);
+	trap_FS_Write("\n", 1, f);
+}
+
 void Database::WriteUserConfig()
 {
-	ConstUserIterator it = users_.begin();
+	if(g_userConfig.string[0] == 0)
+	{
+		return;
+	}
 
 	fileHandle_t f = -1;
 	
@@ -128,10 +119,175 @@ void Database::WriteUserConfig()
 		return;
 	}
 
+	ConstUserIterator it = users_.begin();
+
 	while(it != users_.end())
 	{
-		using namespace configConstants;
-		trap_FS_Write(USER_BEGIN.c_str(), USER_BEGIN.length(), f);
-		
+		trap_FS_Write("[user]\n", 7, f);
+		trap_FS_Write("level = ", 8, f);
+		WriteInt(it->second.level, f);
+
+		trap_FS_Write("name = ", 7, f);
+		WriteString(it->second.name.c_str(), f);
+
+		trap_FS_Write("guid = ", 7, f);
+		WriteString(it->first.c_str(), f);
+
+		trap_FS_Write("cmds = ", 7, f);
+		WriteString(it->second.personalCommands.c_str(), f);
+
+		trap_FS_Write("greeting = ", 11, f);
+		WriteString(it->second.personalGreeting.c_str(), f);
+
+		trap_FS_Write("title = ", 8, f);
+		WriteString(it->second.personalTitle.c_str(), f);
+	
+		trap_FS_Write("\n", 1, f);
+		it++;
 	}
+
+	trap_FS_FCloseFile(f);
+}
+
+void ResetUserDataPair( std::pair<std::string, UserData>& tempUser ) 
+{
+	tempUser.first.clear();
+	tempUser.second.level = 0;
+	tempUser.second.name.clear();
+	tempUser.second.personalCommands.clear();
+	tempUser.second.personalGreeting.clear();
+	tempUser.second.personalTitle.clear();
+}
+
+void ReadInt( char ** configFile, int& level ) 
+{
+	char *token = COM_ParseExt(configFile, qfalse);
+
+	if(!Q_stricmp(token, "="))
+	{
+		token = COM_ParseExt(configFile, qfalse);
+	} else
+	{
+		G_LogPrintf("readconfig: missing = before \"%s\" on line %d.\n",
+			token, COM_GetCurrentParseLine());
+	}
+	level = atoi(token);
+}
+
+void ReadString( char** configFile, std::string& str )
+{
+	char *token = COM_ParseExt(configFile, qfalse);
+
+	if(!Q_stricmp(token, "="))
+	{
+		token = COM_ParseExt(configFile, qfalse);
+	} else
+	{
+		G_LogPrintf("readconfig: missing = before \"%s\" on line %d.\n",
+			token, COM_GetCurrentParseLine());
+	}
+	str.clear();
+	while(token[0])
+	{
+		str += token;
+		str.push_back(' ');
+		token = COM_ParseExt(configFile, qfalse);
+	}
+
+	// trim the trailing space
+	if(str.length()) 
+	{
+		str.pop_back();
+	}
+}
+
+bool Database::ReadConfig(gentity_t *ent)
+{
+	if(!g_userConfig.string[0])
+	{
+		return false;
+	}
+	fileHandle_t f = -1;
+	int len = trap_FS_FOpenFile(g_userConfig.string, &f, FS_READ);
+	if(len < 0)
+	{
+		ChatPrintTo(ent, va("readconfig: failed to open %s.\n", g_userConfig.string));
+		return false;
+	}
+
+	char *configFile = (char*)malloc(len+1);
+	char *configFile2 = configFile;
+
+	trap_FS_Read(configFile, len, f);
+	configFile[len] = 0;	
+	trap_FS_FCloseFile(f);
+
+	char *token = NULL;
+	bool userOpen = false;
+	std::pair<std::string, UserData> tempUser;
+
+	users_.clear();
+
+	token = COM_Parse(&configFile);
+	while(*token)
+	{
+		if(!Q_stricmp(token, "[user]"))
+		{
+			if(userOpen)
+			{
+				users_.insert(tempUser);
+			}
+			userOpen = false;
+		}
+
+		if(userOpen)
+		{
+			if(!Q_stricmp(token, "level"))
+			{
+				ReadInt(&configFile, tempUser.second.level);
+			}
+			else if(!Q_stricmp(token, "name"))
+			{
+				ReadString(&configFile, tempUser.second.name);
+			}
+			else if (!Q_stricmp(token, "guid"))
+			{
+				ReadString(&configFile, tempUser.first);
+			}
+			else if (!Q_stricmp(token, "cmds"))
+			{
+				ReadString(&configFile, tempUser.second.personalCommands);
+			}
+			else if (!Q_stricmp(token, "greeting"))
+			{
+				ReadString(&configFile, tempUser.second.personalGreeting);
+			}
+			else if (!Q_stricmp(token, "title"))
+			{
+				ReadString(&configFile, tempUser.second.personalTitle);
+			}
+			else
+			{
+				ChatPrintTo(ent, va("^3readconfig: ^7parse error near %s on line %d",
+					token, COM_GetCurrentParseLine()));
+			}
+		}
+
+		if(!Q_stricmp(token, "[user]"))
+		{
+			ResetUserDataPair(tempUser);
+			userOpen = true;
+		}
+
+		token = COM_Parse(&configFile);
+	}
+
+	if(userOpen)
+	{
+		users_.insert(tempUser);
+	}
+	free(configFile2);
+	ChatPrintTo(ent, va("^3readconfig: ^7loaded %d users.", users_.size()));
+
+	return true;
 }

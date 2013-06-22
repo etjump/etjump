@@ -86,6 +86,7 @@ public:
 	// returns false if user could not be found
 	bool GetUser(const std::string& guid, ConstUserIterator& it) const;
 	BanData				GetBan() const;
+	bool ReadConfig(gentity_t *ent);
 private:
 	void WriteUserConfig();
 
