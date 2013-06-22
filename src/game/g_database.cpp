@@ -201,7 +201,7 @@ void ReadString( char** configFile, std::string& str )
 	}
 }
 
-bool Database::ReadConfig(gentity_t *ent)
+bool Database::ReadUserConfig(gentity_t *ent)
 {
 	if(!g_userConfig.string[0])
 	{
@@ -290,4 +290,80 @@ bool Database::ReadConfig(gentity_t *ent)
 	ChatPrintTo(ent, va("^3readconfig: ^7loaded %d users.", users_.size()));
 
 	return true;
+}
+
+void Database::DefaultLevels()
+{
+	levels_.clear();
+
+	boost::shared_ptr<Level> levelToAdd(new Level(0, "Visitor", "", "Welcome [n]^7!"));
+	levels_.push_back(levelToAdd);
+
+	levelToAdd = boost::shared_ptr<Level>(new Level(1, "Regular", "", "Welcome Regular [n]^7!"));
+	levels_.push_back(levelToAdd);
+
+	levelToAdd = boost::shared_ptr<Level>(new Level(2, "Moderator", "", "Welcome Moderator [n]^7!"));
+	levels_.push_back(levelToAdd);
+
+	levelToAdd = boost::shared_ptr<Level>(new Level(3, "Admin", "", "Welcome Admin [n]^7!"));
+	levels_.push_back(levelToAdd);
+
+	WriteLevelConfig();
+}
+
+void Database::WriteLevelConfig()
+{
+	if(g_levelConfig.string[0] == 0)
+	{
+		return;
+	}
+
+	fileHandle_t f = -1;
+
+	if(trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE) < 0)
+	{
+		G_LogPrintf("WriteConfig: failed to open level config file.\n");
+		return;
+	}
+
+	ConstLevelIterator it = levels_.begin();
+	
+	while(it != levels_.end())
+	{
+		trap_FS_Write("[level]", 7, f);
+		trap_FS_Write("level = ", 8, f);
+		WriteInt(it->get()->level, f);
+
+		trap_FS_Write("name = ", 7, f);
+		WriteString(it->get()->name.c_str(), f);
+
+		trap_FS_Write("cmds = ", 7, f);
+		WriteString(it->get()->commands.c_str(), f);
+
+		trap_FS_Write("greeting = ", 11, f);
+		WriteString(it->get()->greeting.c_str(), f);
+		it++;
+	}
+	trap_FS_FCloseFile(f);
+}
+
+bool Database::ReadLevelConfig( gentity_t *ent )
+{
+
+}
+
+Level::Level( int level, const std::string& name, const std::string& greeting, const std::string& commands )
+{
+	this->level = level;
+	this->name = name;
+	this->greeting = greeting;
+	this->commands = commands;
+}
+
+Level::Level()
+{
+	this->level = 0;
+	this->name.clear();
+	this->greeting.clear();
+	this->commands.clear();
 }

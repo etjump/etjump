@@ -14,6 +14,9 @@
 #include <string>
 
 struct Level {
+	Level(int level, const std::string& name,
+		const std::string& greeting, const std::string& commands);
+	Level();
 	int level;
 	std::string name;
 	std::string greeting;
@@ -40,6 +43,7 @@ struct UserData {
 
 typedef std::map<std::string, UserData>::iterator UserIterator;
 typedef std::map<std::string, UserData>::const_iterator ConstUserIterator;
+typedef std::vector<boost::shared_ptr<Level> >::const_iterator ConstLevelIterator;
 typedef const std::pair<std::string, UserData>* ConstUserPtr;
 
 // typedef const User* const UserData;
@@ -86,10 +90,12 @@ public:
 	// returns false if user could not be found
 	bool GetUser(const std::string& guid, ConstUserIterator& it) const;
 	BanData				GetBan() const;
-	bool ReadConfig(gentity_t *ent);
+	bool ReadUserConfig(gentity_t *ent);
+	bool ReadLevelConfig(gentity_t *ent);
 private:
+	void DefaultLevels();
 	void WriteUserConfig();
-
+	void WriteLevelConfig();
 	std::vector<boost::shared_ptr<Level> > levels_;
 	std::map<std::string, UserData> users_;
 	std::vector<boost::shared_ptr<Ban> > bans_;
