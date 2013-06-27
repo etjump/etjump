@@ -9,13 +9,14 @@ bool Database::NewLevel( Level level )
 
 bool Database::NewUser( User user )
 {
-	std::pair<std::string, UserData> newUser;
+	std::pair<std::string, UserDataPtr> newUser;
+    newUser.second = UserDataPtr(new UserData);
 	newUser.first = user.guid;
-	newUser.second.level = user.level;
-	newUser.second.name = user.name;
-	newUser.second.personalCommands = user.personalCommands;
-	newUser.second.personalGreeting = user.personalGreeting;
-	newUser.second.personalTitle = user.personalTitle;
+	newUser.second->level = user.level;
+	newUser.second->name = user.name;
+	newUser.second->personalCommands = user.personalCommands;
+	newUser.second->personalGreeting = user.personalGreeting;
+	newUser.second->personalTitle = user.personalTitle;
 	
 	if(users_.insert(newUser).second == false) 
 	{
@@ -125,22 +126,22 @@ void Database::WriteUserConfig()
 	{
 		trap_FS_Write("[user]\n", 7, f);
 		trap_FS_Write("level = ", 8, f);
-		WriteInt(it->second.level, f);
+		WriteInt(it->second->level, f);
 
 		trap_FS_Write("name = ", 7, f);
-		WriteString(it->second.name.c_str(), f);
+		WriteString(it->second->name.c_str(), f);
 
 		trap_FS_Write("guid = ", 7, f);
 		WriteString(it->first.c_str(), f);
 
 		trap_FS_Write("cmds = ", 7, f);
-		WriteString(it->second.personalCommands.c_str(), f);
+		WriteString(it->second->personalCommands.c_str(), f);
 
 		trap_FS_Write("greeting = ", 11, f);
-		WriteString(it->second.personalGreeting.c_str(), f);
+		WriteString(it->second->personalGreeting.c_str(), f);
 
 		trap_FS_Write("title = ", 8, f);
-		WriteString(it->second.personalTitle.c_str(), f);
+		WriteString(it->second->personalTitle.c_str(), f);
 	
 		trap_FS_Write("\n", 1, f);
 		it++;
@@ -224,7 +225,9 @@ bool Database::ReadUserConfig(gentity_t *ent)
 
 	char *token = NULL;
 	bool userOpen = false;
-	std::pair<std::string, UserData> tempUser;
+    // UserDataPtr is initialized when a new user block is opened
+    // while parsing .cfg so no need to do it now.
+	std::pair<std::string, UserDataPtr> tempUser;
 
 	users_.clear();
 
@@ -244,11 +247,11 @@ bool Database::ReadUserConfig(gentity_t *ent)
 		{
 			if(!Q_stricmp(token, "level"))
 			{
-				ReadInt(&configFile, tempUser.second.level);
+				ReadInt(&configFile, tempUser.second->level);
 			}
 			else if(!Q_stricmp(token, "name"))
 			{
-				ReadString(&configFile, tempUser.second.name);
+				ReadString(&configFile, tempUser.second->name);
 			}
 			else if (!Q_stricmp(token, "guid"))
 			{
@@ -256,15 +259,15 @@ bool Database::ReadUserConfig(gentity_t *ent)
 			}
 			else if (!Q_stricmp(token, "cmds"))
 			{
-				ReadString(&configFile, tempUser.second.personalCommands);
+				ReadString(&configFile, tempUser.second->personalCommands);
 			}
 			else if (!Q_stricmp(token, "greeting"))
 			{
-				ReadString(&configFile, tempUser.second.personalGreeting);
+				ReadString(&configFile, tempUser.second->personalGreeting);
 			}
 			else if (!Q_stricmp(token, "title"))
 			{
-				ReadString(&configFile, tempUser.second.personalTitle);
+				ReadString(&configFile, tempUser.second->personalTitle);
 			}
 			else
 			{
@@ -272,10 +275,9 @@ bool Database::ReadUserConfig(gentity_t *ent)
 					token, COM_GetCurrentParseLine()));
 			}
 		}
-
 		if(!Q_stricmp(token, "[user]"))
 		{
-			ResetUserDataPair(tempUser);
+            tempUser.second = UserDataPtr(new UserData);
 			userOpen = true;
 		}
 
@@ -349,7 +351,104 @@ void Database::WriteLevelConfig()
 
 bool Database::ReadLevelConfig( gentity_t *ent )
 {
+    if(g_levelConfig.string[0] == 0)
+    {
+        return false;
+    }
 
+    fileHandle_t f = -1;
+    int len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_READ);
+    if(len < 0)
+    {
+        ChatPrintTo(ent, va("readconfig: failed to open %s.\n", 
+            g_levelConfig.string));
+        return false;
+    }
+    else if(len == 0)
+    {
+        DefaultLevels();
+    }
+    else {
+        char* file = (char*)malloc(len+1);
+        char* file2 = file;
+
+        trap_FS_Read(file, len, f);
+        file[len] = 0;
+        trap_FS_FCloseFile(f);
+
+        char *token = NULL;
+        bool levelOpen = false;
+        LevelPtr tempLevel;
+
+        levels_.clear();
+
+        token = COM_Parse(&file);
+
+        while(*token)
+        {
+            if(!Q_stricmp(token, "[level]"))
+            {
+                if(levelOpen)
+                {
+                    levels_.push_back(tempLevel);
+                }
+            }
+            else if(!Q_stricmp(token, "cmds"))
+            {
+
+            }
+            else if(!Q_stricmp(token, "level"))
+            {
+
+            }
+            else if(!Q_stricmp(token, "greeting"))
+            {
+
+            }
+            else if(!Q_stricmp(token, "name"))
+            {
+
+            }
+            else {
+                ChatPrintTo(ent, va("^3readconfig: ^7parse error near %s "
+                    "on line %d", token, COM_GetCurrentParseLine()));
+
+            }
+            token = COM_Parse(&file);
+        }
+        free(file2);
+
+
+    }
+    return true;
+}
+
+void Database::PrintUsers()
+{
+    ConstUserIterator it = users_.begin();
+    G_LogPrintf("User database: \n");
+    while(it != users_.end())
+    {
+        char buf[MAX_TOKEN_CHARS] = "\0";
+
+        Com_sprintf(buf, sizeof(buf), 
+            "[user]\nname = %s\n"
+            "level = %d\n"
+            "guid = %s\n"
+            "commands = %s\n"
+            "greeting = %s\n"
+            "title = %s\n",
+            it->second->name.c_str(), 
+            it->second->level, 
+            it->first.c_str(),
+            it->second->personalCommands.c_str(), 
+            it->second->personalGreeting.c_str(), 
+            it->second->personalTitle.c_str());
+
+        G_LogPrintf("%s\n", buf);
+
+        it++;
+    }
 }
 
 Level::Level( int level, const std::string& name, const std::string& greeting, const std::string& commands )

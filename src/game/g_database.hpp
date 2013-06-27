@@ -41,10 +41,12 @@ struct UserData {
 	std::string personalTitle;
 };
 
-typedef std::map<std::string, UserData>::iterator UserIterator;
-typedef std::map<std::string, UserData>::const_iterator ConstUserIterator;
-typedef std::vector<boost::shared_ptr<Level> >::const_iterator ConstLevelIterator;
-typedef const std::pair<std::string, UserData>* ConstUserPtr;
+typedef boost::shared_ptr<UserData> UserDataPtr;
+typedef boost::shared_ptr<Level> LevelPtr;
+
+typedef std::map<std::string, UserDataPtr>::iterator UserIterator;
+typedef std::map<std::string, UserDataPtr>::const_iterator ConstUserIterator;
+typedef std::vector<LevelPtr>::const_iterator ConstLevelIterator;
 
 // typedef const User* const UserData;
 
@@ -92,12 +94,15 @@ public:
 	BanData				GetBan() const;
 	bool ReadUserConfig(gentity_t *ent);
 	bool ReadLevelConfig(gentity_t *ent);
+
+    // For debugging
+    void PrintUsers();
 private:
 	void DefaultLevels();
 	void WriteUserConfig();
 	void WriteLevelConfig();
-	std::vector<boost::shared_ptr<Level> > levels_;
-	std::map<std::string, UserData> users_;
+	std::vector<LevelPtr> levels_;
+	std::map<std::string, UserDataPtr> users_;
 	std::vector<boost::shared_ptr<Ban> > bans_;
 
 	bool usersSorted_;

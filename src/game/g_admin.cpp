@@ -83,9 +83,9 @@ void GuidReceived( gentity_t * ent )
 		// We now have the admin data and the GUID so we can save them all
 		// to the temporary clientDB
 		// 
-		sessionDB.Set(ent, hashedGuid, userAdminData->second.level,
-			userAdminData->second.name, userAdminData->second.personalCommands,
-			userAdminData->second.personalGreeting, userAdminData->second.personalTitle);
+		sessionDB.Set(ent, hashedGuid, userAdminData->second->level,
+			userAdminData->second->name, userAdminData->second->personalCommands,
+			userAdminData->second->personalGreeting, userAdminData->second->personalTitle);
 	}
 	else
 	{
@@ -139,4 +139,9 @@ bool ValidGuid(const std::string& guid)
 
 	return true;
 
+}
+
+void PrintUserDB()
+{
+    adminDB.PrintUsers();
 }
