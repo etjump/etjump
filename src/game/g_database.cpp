@@ -17,6 +17,8 @@ bool Database::NewUser( User user )
 	newUser.second->personalCommands = user.personalCommands;
 	newUser.second->personalGreeting = user.personalGreeting;
 	newUser.second->personalTitle = user.personalTitle;
+    // Auto increment user id
+    newUser.second->id = users_.size();
 	
 	if(users_.insert(newUser).second == false) 
 	{
@@ -36,28 +38,8 @@ bool Database::NewBan( Ban ban )
 	return true;
 }
 
-bool Database::SaveLevel( const Level& level )
-{
-	G_LogPrintf("Database::SaveLevel is not yet implemented.\n");
-	return true;
-}
-
-bool Database::SaveUser( const User& user )
-{
-	G_LogPrintf("Database::SaveUser is not yet implemented.\n");
-	return true;
-}
-
-bool Database::SaveBan( const Ban& ban )
-{
-	G_LogPrintf("Database::SaveBan is not yet implemented.\n");
-	return true;
-}
-
 bool Database::GetLevel( int level, ConstLevelIterator& it ) const
 {
-    LevelData levelToReturn = NULL;
-
     it = levels_.begin();
 
     while(it != levels_.end())
@@ -98,6 +80,20 @@ bool Database::GetUser( const std::string& guid, ConstUserIterator& it ) const
 	return false;
 }
 
+bool Database::GetUser( int id, UserIterator& it )
+{
+    it = users_.begin();
+    while(it != users_.end())
+    {
+        if(it->second->id == id)
+        {
+            return true;
+        }
+        it++;
+    }
+    return false;
+}
+
 void WriteString(const char* toWrite, fileHandle_t& f)
 {
 	trap_FS_Write(toWrite, strlen(toWrite), f);
@@ -133,6 +129,9 @@ void Database::WriteUserConfig()
 	while(it != users_.end())
 	{
 		trap_FS_Write("[user]\n", 7, f);
+        trap_FS_Write("id = ", 5, f);
+        WriteInt(it->second->id, f);
+
 		trap_FS_Write("level = ", 8, f);
 		WriteInt(it->second->level, f);
 
@@ -253,6 +252,10 @@ bool Database::ReadUserConfig(gentity_t *ent)
 
 		if(userOpen)
 		{
+            if(!Q_stricmp(token, "id"))
+            {
+                ReadInt(&configFile, tempUser.second->id);
+            }
 			if(!Q_stricmp(token, "level"))
 			{
 				ReadInt(&configFile, tempUser.second->level);
@@ -469,6 +472,49 @@ void Database::PrintUsers()
 
         it++;
     }
+}
+
+bool Database::LevelExists( int level ) const
+{
+    ConstLevelIterator it = levels_.begin();
+
+    while(it != levels_.end())
+    {
+        if(it->get()->level == level)
+        {
+            return true;
+        }
+        it++;
+    }
+    return false;
+}
+
+bool Database::UpdateUserLevel( const std::string& guid, int newLevel )
+{
+    ConstUserIterator it = users_.find(guid);
+
+    if(it == users_.end())
+    {
+        // Should NEVER happen
+        return false;
+    }
+
+    it->second->level = newLevel;
+    WriteUserConfig();
+}
+
+std::string Database::LevelName( int level ) const
+{
+    ConstLevelIterator it = levels_.begin();
+    while(it != levels_.end())
+    {
+        if(it->get()->level == level)
+        {
+            return it->get()->name;
+        }
+        it++;
+    }
+    return "";
 }
 
 Level::Level( int level, const std::string& name, const std::string& commands, const std::string& greeting )

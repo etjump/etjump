@@ -408,3 +408,17 @@ int CNum(gentity_t *ent)
 {
 	return ent->client->ps.clientNum;
 }
+
+std::string SayArgv( int n )
+{
+    if(n >= Q_SayArgc())
+    {
+        return "";
+    } else
+    {
+        char arg[MAX_TOKEN_CHARS] = "\0";
+        Q_SayArgv(n, arg, sizeof(arg));
+
+        return arg;
+    }
+}

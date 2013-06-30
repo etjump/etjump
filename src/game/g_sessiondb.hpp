@@ -42,6 +42,8 @@ public:
 	// Returns client's greeting
 	std::string Greeting(gentity_t *ent);
 
+    bool HasPermission(gentity_t *ent, char flag) const;
+
     int Level(gentity_t *ent);
 private:
 	void SetPermissions( Client& client, const std::string& personalCommands, const std::string& levelCommands );

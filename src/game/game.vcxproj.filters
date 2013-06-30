@@ -250,6 +250,9 @@
     <ClInclude Include="g_sessiondb.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="g_admin.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\todo.txt" />

@@ -2648,5 +2648,10 @@ void GuidReceived(gentity_t *ent);
 int CNum(gentity_t *ent);
 void PrintUserDB();
 
+/* 
+ * admin 
+ */
+qboolean CheckCommand( gentity_t *ent );
+
 #endif // G_LOCAL_H
 

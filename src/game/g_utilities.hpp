@@ -28,7 +28,9 @@ typedef const std::vector<std::string> *Arguments;
 typedef std::vector<std::string>::const_iterator ConstArgIter;
 typedef std::vector<std::string>::iterator ArgIter;
 Arguments GetArgs();
-Arguments GetSayArgs();
+Arguments GetSayArgs( int start = 0 );
+// returns an empty string if not so many args
+std::string SayArgv(int arg);
 
 // Conversions
 bool StringToInt(const std::string& toConvert, int& value);

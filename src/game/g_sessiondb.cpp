@@ -2,6 +2,7 @@
 #include "g_utilities.hpp"
 #include "g_local.hpp"
 #include "g_database.hpp"
+#include <numeric>
 
 void Reset(Client& toReset)
 {
@@ -153,7 +154,21 @@ std::string SessionDB::Greeting( gentity_t *ent )
 
 int SessionDB::Level( gentity_t *ent )
 {
+    if(!ent)
+    {
+        return std::numeric_limits<int>::max();
+    }
     return clients_[ent->client->ps.clientNum].level;
+}
+
+bool SessionDB::HasPermission( gentity_t *ent, char flag ) const
+{
+    if(!ent)
+    {
+        return true;
+    }
+
+    return clients_[ent->client->ps.clientNum].permissions.at(flag);        
 }
 
 Client::Client()

@@ -215,6 +215,7 @@
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="..\botai\chars.h" />
+    <ClInclude Include="g_admin.hpp" />
     <ClInclude Include="g_sessiondb.hpp" />
     <ClInclude Include="g_database.hpp" />
     <ClInclude Include="g_local.h" />

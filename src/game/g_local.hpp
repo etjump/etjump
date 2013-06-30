@@ -19,4 +19,3 @@ extern class Database		  adminDB;
 extern class SessionDB		  sessionDB;
 
 #endif // g_local_hpp__
-

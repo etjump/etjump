@@ -34,6 +34,7 @@ struct User {
 };
 
 struct UserData {
+    int id;
 	int level;
 	std::string name;
 	std::string personalCommands;
@@ -81,16 +82,19 @@ public:
 	// TODO: entirely
 	bool NewBan(Ban ban);
 
-	// Save functions are used to save a level/user/ban to the
-	// memory. Readconfig() uses these. 
-	bool SaveLevel(const Level& level);
-	bool SaveUser(const User& user);
-	bool SaveBan(const Ban& ban);
+    bool UpdateUserLevel(const std::string& guid, int newLevel);
 
 	// Get functions are used to get level, user & ban data
     bool GetLevel(int level, ConstLevelIterator& it) const;
+
+    bool LevelExists(int level) const;
+
+    std::string LevelName(int level) const;
+
 	// returns false if user could not be found
 	bool GetUser(const std::string& guid, ConstUserIterator& it) const;
+    bool GetUser(int id, UserIterator& it);
+
 	BanData				GetBan() const;
 	bool ReadUserConfig(gentity_t *ent);
 	bool ReadLevelConfig(gentity_t *ent);
