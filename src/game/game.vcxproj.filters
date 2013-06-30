@@ -174,16 +174,10 @@
     <ClCompile Include="g_save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_utilities.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_main_ext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_clientdb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_admin.cpp">
@@ -191,6 +185,12 @@
     </ClCompile>
     <ClCompile Include="g_database.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_sessiondb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_utilities.hpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -244,11 +244,14 @@
     <ClInclude Include="g_local.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_clientdb.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="g_database.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="g_sessiondb.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\todo.txt" />
   </ItemGroup>
 </Project>

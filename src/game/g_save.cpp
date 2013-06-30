@@ -4,7 +4,7 @@ using std::string;
 using std::vector;
 
 #include "g_save.h"
-#include "g_utilities.h"
+#include "g_utilities.hpp"
 #include "g_local.hpp"
 
 SaveSystem::Client::Client() {

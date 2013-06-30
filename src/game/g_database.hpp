@@ -88,7 +88,7 @@ public:
 	bool SaveBan(const Ban& ban);
 
 	// Get functions are used to get level, user & ban data
-	LevelData			GetLevel(int level) const;
+    bool GetLevel(int level, ConstLevelIterator& it) const;
 	// returns false if user could not be found
 	bool GetUser(const std::string& guid, ConstUserIterator& it) const;
 	BanData				GetBan() const;

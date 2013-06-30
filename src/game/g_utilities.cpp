@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "g_utilities.h"
+#include "g_utilities.hpp"
 
 using std::string;
 using std::vector;

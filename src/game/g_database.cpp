@@ -54,14 +54,22 @@ bool Database::SaveBan( const Ban& ban )
 	return true;
 }
 
-LevelData Database::GetLevel( int level ) const
+bool Database::GetLevel( int level, ConstLevelIterator& it ) const
 {
-	static Level dummyLevel;
-	dummyLevel.name = "Dummy level";
-	dummyLevel.greeting = "Hello [n]^7!";
-	dummyLevel.level = 0;
-	dummyLevel.commands = "abc";
-	return &dummyLevel;
+    LevelData levelToReturn = NULL;
+
+    it = levels_.begin();
+
+    while(it != levels_.end())
+    {
+        if(it->get()->level == level)
+        {
+            return true;
+        }
+        it++;
+    }
+
+    return false;
 }
 
 
@@ -332,7 +340,7 @@ void Database::WriteLevelConfig()
 	
 	while(it != levels_.end())
 	{
-		trap_FS_Write("[level]", 7, f);
+		trap_FS_Write("[level]\n", 8, f);
 		trap_FS_Write("level = ", 8, f);
 		WriteInt(it->get()->level, f);
 
@@ -344,6 +352,7 @@ void Database::WriteLevelConfig()
 
 		trap_FS_Write("greeting = ", 11, f);
 		WriteString(it->get()->greeting.c_str(), f);
+        trap_FS_Write("\n", 1, f);
 		it++;
 	}
 	trap_FS_FCloseFile(f);
@@ -360,13 +369,8 @@ bool Database::ReadLevelConfig( gentity_t *ent )
     int len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_READ);
     if(len < 0)
     {
-        ChatPrintTo(ent, va("readconfig: failed to open %s.\n", 
-            g_levelConfig.string));
-        return false;
-    }
-    else if(len == 0)
-    {
         DefaultLevels();
+        return false;
     }
     else {
         char* file = (char*)malloc(len+1);
@@ -392,34 +396,50 @@ bool Database::ReadLevelConfig( gentity_t *ent )
                 {
                     levels_.push_back(tempLevel);
                 }
+                levelOpen = false;
             }
             else if(!Q_stricmp(token, "cmds"))
             {
-
+                ReadString(&file, tempLevel->commands);
             }
             else if(!Q_stricmp(token, "level"))
             {
-
+                ReadInt(&file, tempLevel->level);
             }
             else if(!Q_stricmp(token, "greeting"))
             {
-
+                ReadString(&file, tempLevel->greeting);
             }
             else if(!Q_stricmp(token, "name"))
             {
-
+                ReadString(&file, tempLevel->name);
             }
             else {
                 ChatPrintTo(ent, va("^3readconfig: ^7parse error near %s "
                     "on line %d", token, COM_GetCurrentParseLine()));
 
             }
+
+            if(!Q_stricmp(token, "[level]"))
+            {
+                tempLevel = LevelPtr(new Level);
+                levelOpen = true;
+            }
+
             token = COM_Parse(&file);
         }
+
+        if(levelOpen)
+        {
+            levels_.push_back(tempLevel);
+        }
+
         free(file2);
-
-
     }
+
+
+    ChatPrintTo(ent, va("^3readconfig: ^7loaded %d levels.", levels_.size()));
+
     return true;
 }
 
@@ -451,7 +471,7 @@ void Database::PrintUsers()
     }
 }
 
-Level::Level( int level, const std::string& name, const std::string& greeting, const std::string& commands )
+Level::Level( int level, const std::string& name, const std::string& commands, const std::string& greeting )
 {
 	this->level = level;
 	this->name = name;

@@ -1,5 +1,5 @@
 #include "g_sessiondb.hpp"
-#include "g_utilities.h"
+#include "g_utilities.hpp"
 #include "g_local.hpp"
 #include "g_database.hpp"
 
@@ -38,22 +38,22 @@ void SessionDB::Set( gentity_t *ent, const std::string& guid, int level,
 	clients_[ent->client->ps.clientNum].noguid = false;
 	clients_[ent->client->ps.clientNum].guid=guid;
 	// Find user level data
-	LevelData levelData = adminDB.GetLevel(level);
-	if(!levelData)
-	{
-		// Make sure it always exists. This shouldn't happen as it just 
-		// returns a level 0 one if it does not exist
-		G_LogPrintf("Error while trying to get level data from persistant"
-			" database. Level: %d.\n", level);
-		return;
-	}
+    ConstLevelIterator it;
+    if(!adminDB.GetLevel(level, it))
+    {
+        // Make sure it always exists. This shouldn't happen as it just 
+        // returns a level 0 one if it does not exist
+        G_LogPrintf("Error while trying to get level data from persistant"
+            " database. Level: %d.\n", level);
+        return;
+    }
 
 	// If target has a personal title or greeting, just set them 
 	// to the personal ones instead of the level ones. We only need to do
 	// this when level/personal data is modified
 	if(personalTitle.length() == 0)
 	{
-		clients_[ent->client->ps.clientNum].title = levelData->name;
+		clients_[ent->client->ps.clientNum].title = it->get()->name;
 	}
 	else
 	{
@@ -62,7 +62,7 @@ void SessionDB::Set( gentity_t *ent, const std::string& guid, int level,
 
 	if(personalGreeting.length() == 0)
 	{
-		clients_[ent->client->ps.clientNum].greeting = levelData->greeting;
+		clients_[ent->client->ps.clientNum].greeting = it->get()->greeting;
 	}
 	else
 	{
@@ -71,7 +71,7 @@ void SessionDB::Set( gentity_t *ent, const std::string& guid, int level,
 
 	// Set client permissions based on the personal&level data
 	SetPermissions(clients_[ent->client->ps.clientNum], personalCommands,
-		levelData->commands);
+		it->get()->commands);
 
 	clients_[ent->client->ps.clientNum].level=level;
 }
@@ -149,6 +149,11 @@ void SessionDB::SetPermissions( Client& client,
 std::string SessionDB::Greeting( gentity_t *ent )
 {
 	return clients_[ent->client->ps.clientNum].greeting;
+}
+
+int SessionDB::Level( gentity_t *ent )
+{
+    return clients_[ent->client->ps.clientNum].level;
 }
 
 Client::Client()

@@ -2,7 +2,7 @@ extern "C" {
 #include "g_local.h"
 }
 
-#include "g_utilities.h"
+#include "g_utilities.hpp"
 
 #include <string>
 using std::string;

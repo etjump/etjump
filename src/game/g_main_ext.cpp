@@ -6,6 +6,7 @@ SaveSystem       positions;
 void OnGameInit() {
     // Init save db
 	adminDB.ReadUserConfig(NULL);
+    adminDB.ReadLevelConfig(NULL);
     positions.Reset();
 }
 

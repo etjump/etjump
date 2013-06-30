@@ -1,6 +1,6 @@
 #include "g_local.hpp"
 #include "g_sessiondb.hpp"
-#include "g_utilities.h"
+#include "g_utilities.hpp"
 #include "g_database.hpp"
 #include <boost/algorithm/string/replace.hpp>
 
@@ -16,14 +16,35 @@ void PrintGreeting( gentity_t * ent )
 {
 	std::string greeting = sessionDB.Greeting(ent);
 
+    // Print level greeting instead
 	if(greeting.length() == 0)
 	{
-		return;
+        ConstLevelIterator it;
+        // Couldn't find the level
+        if(!adminDB.GetLevel(sessionDB.Level(ent), it))
+        {
+            return;
+        }
+
+        greeting = it->get()->greeting;
+
+        if(greeting.length() == 0)
+        {
+            return;
+        }
+
+        boost::replace_all(greeting, "[n]", ent->client->pers.netname);    
+
+        ChatPrintAll(greeting);
 	}
+    else
+    {
+        boost::replace_all(greeting, "[n]", ent->client->pers.netname);    
 
-	boost::replace_all(greeting, "[n]", ent->client->pers.netname);    
+        ChatPrintAll(greeting);
+    }
 
-	ChatPrintAll(greeting);
+	
 }
 
 bool ValidGuid(const std::string& guid);
@@ -113,7 +134,6 @@ void GuidReceived( gentity_t * ent )
 
 }
 
-// TODO: make one function for both cgame & game instead of one for each.
 bool ValidGuid(const std::string& guid)
 {
 	// Make sure length is correct

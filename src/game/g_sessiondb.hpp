@@ -41,6 +41,8 @@ public:
 
 	// Returns client's greeting
 	std::string Greeting(gentity_t *ent);
+
+    int Level(gentity_t *ent);
 private:
 	void SetPermissions( Client& client, const std::string& personalCommands, const std::string& levelCommands );
 	Client clients_[MAX_CLIENTS];
