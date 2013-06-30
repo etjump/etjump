@@ -272,13 +272,19 @@ Arguments GetArgs()
     return &argv;
 }
 
-Arguments GetSayArgs() {
+Arguments GetSayArgs( int start /*= 0*/ )
+{
     int argc = trap_Argc();
 
     static vector<string> argv;
     argv.clear();
 
-    for(int i = 0; i < argc; i++) {
+    if(start >= argc)
+    {
+        return &argv;
+    }
+
+    for(int i = start; i < argc; i++) {
         char arg[MAX_TOKEN_CHARS];
         trap_Argv(i, arg, sizeof(arg));
         argv.push_back(arg);

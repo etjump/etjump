@@ -165,3 +165,16 @@ void PrintUserDB()
 {
     adminDB.PrintUsers();
 }
+
+qboolean CheckCommand( gentity_t *ent )
+{
+    // say "!command additional args"
+
+    if(g_admin.integer == 0)
+    {
+        return qfalse;
+    }
+
+
+    return qtrue;
+}

@@ -196,11 +196,11 @@ vmCvar_t		g_nameChangeLimit;
 // ETJump admin system
 
 vmCvar_t		g_admin;
-vmCvar_t        g_userDB;
-vmCvar_t        g_levelDB;
 vmCvar_t		g_adminLog;
+vmCvar_t		g_userConfig;
+vmCvar_t		g_levelConfig;
+vmCvar_t		g_banConfig;
 vmCvar_t		g_logCommands;
-vmCvar_t        g_aliasDB;
 
 // Banner
 vmCvar_t		g_bannerLocation;
@@ -223,10 +223,6 @@ vmCvar_t		g_maxConnsPerIP;
 vmCvar_t		g_mute;
 vmCvar_t        g_goto;
 vmCvar_t		g_voteCooldown;
-
-vmCvar_t		g_userConfig;
-vmCvar_t		g_levelConfig;
-vmCvar_t		g_banConfig;
 
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -441,9 +437,6 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_admin, "g_admin", "1", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE },
 	{ &g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE },
-    { &g_aliasDB, "g_aliasDB", "1", CVAR_ARCHIVE },
-    { &g_levelDB, "g_levelDB", "levels.cfg", CVAR_ARCHIVE },
-    { &g_userDB, "g_userDB", "users.db", CVAR_ARCHIVE | CVAR_LATCH },
       
 
     // BannerPrint location

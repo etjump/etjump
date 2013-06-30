@@ -1860,9 +1860,10 @@ extern vmCvar_t	g_blockedMaps;
 extern vmCvar_t	g_admin;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
-extern vmCvar_t g_aliasDB;
-extern vmCvar_t g_levelDB;
-extern vmCvar_t g_userDB;
+extern vmCvar_t g_levelConfig;
+extern vmCvar_t g_userConfig;
+extern vmCvar_t g_banConfig;
+
 
 extern vmCvar_t	g_bannerLocation;
 extern vmCvar_t	g_bannerTime;
@@ -1881,9 +1882,6 @@ extern vmCvar_t	g_mute;
 extern vmCvar_t g_goto;
 extern vmCvar_t g_voteCooldown;
 
-extern vmCvar_t g_levelConfig;
-extern vmCvar_t g_userConfig;
-extern vmCvar_t g_banConfig;
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
