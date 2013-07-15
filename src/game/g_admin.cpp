@@ -20,23 +20,10 @@ void PrintGreeting( gentity_t * ent )
     // Print level greeting instead
 	if(greeting.length() == 0)
 	{
-        ConstLevelIterator it;
-        // Couldn't find the level
-        if(!adminDB.GetLevel(sessionDB.Level(ent), it))
-        {
-            return;
-        }
-
-        greeting = it->get()->greeting;
-
-        if(greeting.length() == 0)
-        {
-            return;
-        }
-
-        boost::replace_all(greeting, "[n]", ent->client->pers.netname);    
-
-        ChatPrintAll(greeting);
+        // Greeting is checked on sessionDB.Set() and will always have 
+        // a) personal greeting b) level greeting c) no greeting so if
+        // there's none don't do anything.
+        return;
 	}
     else
     {
