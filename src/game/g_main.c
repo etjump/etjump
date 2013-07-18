@@ -458,7 +458,7 @@ cvarTable_t		gameCvarTable[] = {
     { &g_goto, "g_goto", "1", CVAR_ARCHIVE },
 	{ &g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE },
 
-	{ &g_userConfig, "g_userConfig", "users.cfg", CVAR_ARCHIVE },
+	{ &g_userConfig, "g_userConfig", "users.SQLite", CVAR_ARCHIVE },
 	{ &g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE },
 	{ &g_banConfig, "g_banConfig", "bans.cfg", CVAR_ARCHIVE }
 };

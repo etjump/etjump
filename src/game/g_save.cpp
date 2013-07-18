@@ -6,6 +6,7 @@ using std::vector;
 #include "g_save.h"
 #include "g_utilities.hpp"
 #include "g_local.hpp"
+#include "g_sessiondb.hpp"
 
 SaveSystem::Client::Client() {
     alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
@@ -282,12 +283,12 @@ void SaveSystem::ResetSavedPositions(gentity_t *ent) {
 
 // Called on client disconnect. Saves saves for future sessions
 void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
-	/*
+	
     if(!ent->client) {
         return;
     }
 
-    string guid = users.Guid(ent);
+    string guid = sessionDB.Guid(ent);
 
     DisconnectedClient client;
 
@@ -318,12 +319,12 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
     } else {
         savedPositions.insert(std::make_pair(guid, client));
     }
-    */
+    
 }
 
 // Called on client connect. Loads saves from previous session
 void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
-	/*
+	
     if(!ent->client) {
         return;
     }
@@ -332,7 +333,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = users.Guid(ent);
+    string guid = sessionDB.Guid(ent);
 
     map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
@@ -359,7 +360,6 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         ent->client->sess.loadedSavedPositions = qtrue;
         ChatPrintTo(ent, "^5ETJump: ^7loaded positions from previous session.");
     }
-    */
 }
 
 // Saves backup position

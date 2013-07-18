@@ -140,6 +140,8 @@ void ReadGuid() {
         userGuid = guidBuf;
 
     }
+
+    trap_FS_FCloseFile(f);
 }
 
 // Function is called when the guid is sent

@@ -1057,11 +1057,6 @@ qboolean	ConsoleCommand( void ) {
         return qtrue;
     }
 
-    if(!Q_stricmp(cmd, "udbprint"))
-    {
-        PrintUserDB();
-        return qtrue;
-    }
 	// -fretn
 
 	if( g_dedicated.integer ) {

@@ -13,9 +13,10 @@ extern "C" {
 
 #include "g_save.h"
 #include "g_database.hpp"
+#include "g_sessiondb.hpp"
 
 extern class SaveSystem       positions;
-extern class Database		  adminDB;
-extern class SessionDB		  sessionDB;
+extern class Database         adminDB;
+extern class SessionDB        sessionDB;
 
 #endif // g_local_hpp__

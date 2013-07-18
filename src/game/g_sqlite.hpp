@@ -4,10 +4,26 @@
 #include <string>
 #include "sqlite3.h"
 
-// Development purposes.
-#ifndef NULL
-#define NULL 0
-#endif
+// This has to be defined here because else we'd run into a circular
+// include hell. Needed for the callback
+// Users are stored in a map where GUID is the key
+// which is a regular string
+// The actual user data (dbid, hwid, level, name, pcmds, ptitle, pgreet)
+// is stored in a struct
+
+struct UserData_s
+{
+    UserData_s();
+    int id;
+    int level;
+    std::string hwid;
+    std::string name;
+    std::string personalCmds;
+    std::string personalTitle;
+    std::string personalGreeting;
+};
+
+typedef boost::shared_ptr<UserData_s> UserData;
 
 class SQLite 
 {
@@ -16,12 +32,15 @@ public:
     ~SQLite();
 
     // Opens a database connection, prepares statements and handles the 
-    // creation of tables.
-    bool Init();
+    // creation of tables. Takes a callback function pointer, which 
+    // is used to save users to memory as an argument
+    bool Init(void (*callback)(const std::string&, UserData));
     // Finalizes the statements and closes the database connection.
     bool Shutdown();
     // Adds a new user to database
     bool AddNewUser(int id, const std::string& guid, const std::string& name);
+    // Sets the level of an existing user
+    bool SetLevel(gentity_t *ent, int level);
 private:
     // This is called on Init() and will prepare all the statements for
     // later use. It will also create the tables.

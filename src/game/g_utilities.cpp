@@ -23,7 +23,7 @@ void ConsolePrintTo( gentity_t *target, const string& msg )
     }
 }
 
-void ConsolePrintTo( gentity_t *target, const char* msg ) {
+void C_ConsolePrintTo( gentity_t *target, const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
     if( target ) {
@@ -41,7 +41,7 @@ void ConsolePrintAll( const string& msg ) {
     G_Printf("%s\n", msg.c_str());
 }
 
-void ConsolePrintAll( const char* msg ) {
+void C_ConsolePrintAll( const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
     trap_SendServerCommand( -1, toPrint );
@@ -59,7 +59,7 @@ void ChatPrintTo( gentity_t *target, const string& msg ) {
     }
 }
 
-void ChatPrintTo( gentity_t *target, const char* msg ) {
+void C_ChatPrintTo( gentity_t *target, const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
     if( target ) {
@@ -77,7 +77,7 @@ void ChatPrintAll( const string& msg ) {
     G_Printf("%s\n", msg.c_str());
 }
 
-void ChatPrintAll( const char* msg ) {
+void C_ChatPrintAll( const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
     trap_SendServerCommand( -1, toPrint );
@@ -95,7 +95,7 @@ void CPTo( gentity_t *target, const string& msg ) {
     }
 }
 
-void CPTo( gentity_t *target, const char* msg ) {
+void C_CPTo( gentity_t *target, const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
     if( target ) {
@@ -113,7 +113,7 @@ void CPAll( const string& msg ) {
     G_Printf("%s\n", msg.c_str());
 }
 
-void CPAll( const char* msg ) {
+void C_CPAll( const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
     trap_SendServerCommand( -1, toPrint );
@@ -132,7 +132,7 @@ void CPMTo( gentity_t *target, const string& msg )
     }
 }
 
-void CPMTo( gentity_t *target, const char* msg ) 
+void C_CPMTo( gentity_t *target, const char* msg ) 
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
@@ -152,7 +152,7 @@ void CPMAll( const string& msg )
     G_Printf("%s\n", msg.c_str());
 }
 
-void CPMAll( const char* msg ) 
+void C_CPMAll( const char* msg ) 
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
@@ -181,7 +181,7 @@ void BPAll( const string& msg )
     G_Printf("%s\n", msg.c_str());
 }
 
-void BPTo( gentity_t *target, const char* msg )
+void C_BPTo( gentity_t *target, const char* msg )
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);
@@ -192,7 +192,7 @@ void BPTo( gentity_t *target, const char* msg )
     }
 }
 
-void BPAll( const char* msg )
+void C_BPAll( const char* msg )
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);

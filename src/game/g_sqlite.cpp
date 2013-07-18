@@ -1,6 +1,7 @@
-#include <cstdio>
 #include <string>
+#include "g_local.hpp"
 #include "g_sqlite.hpp"
+#include "g_utilities.hpp"
 
 
 SQLite::SQLite()
@@ -11,7 +12,7 @@ SQLite::SQLite()
     selectAllFromUsers_ = NULL;
     insertIntoUsers_ = NULL;
     setlevelUpdate_ = NULL;
-    
+
 }
 
 SQLite::~SQLite()
@@ -19,7 +20,7 @@ SQLite::~SQLite()
 
 }
 
-bool SQLite::Init()
+bool SQLite::Init( void (*callback)(const std::string&, UserData) )
 {
     char dbName[] = "users.SQLite";
 
@@ -27,7 +28,7 @@ bool SQLite::Init()
     int rc = sqlite3_open(dbName, &db_);
     if(rc != SQLITE_OK)
     {
-        printf("Couldn't open database %s: (%d) %s\n",
+        G_LogPrintf("Couldn't open database %s: (%d) %s\n",
             dbName, rc, sqlite3_errmsg(db_));
     }
 
@@ -35,6 +36,63 @@ bool SQLite::Init()
     if(!PrepareStatements())
     {
         return false;
+    }
+
+
+    UserData temp;
+    while(true)
+    {
+        temp = UserData(new UserData_s);
+
+        rc = sqlite3_step(selectAllFromUsers_);
+        if(rc == SQLITE_ROW)
+        {
+            /*
+             * id
+             * guid
+             * hwid
+             * level
+             * name
+             * pcommands
+             * pgreeting
+             * ptitle
+             */
+
+            const char *text = 0;
+            std::string guid;
+
+            temp->id = sqlite3_column_int(selectAllFromUsers_, 0);
+            temp->level = sqlite3_column_int(selectAllFromUsers_, 3);
+
+            text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 1));
+            CharPtrToString(text, guid);
+
+            text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 2));
+            CharPtrToString(text, temp->hwid);
+
+            text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 4));
+            CharPtrToString(text, temp->name);
+
+            text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 5));
+            CharPtrToString(text, temp->personalCmds);
+
+            text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 6));
+            CharPtrToString(text, temp->personalGreeting);
+
+            text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 7));
+            CharPtrToString(text, temp->personalTitle);
+
+            callback(guid, temp);
+
+        } else if(rc == SQLITE_DONE)
+        {
+            break;
+        } else
+        {
+            G_LogPrintf("Couldn't read all users from database.\n");
+            return false;
+        }
+
     }
 
     return true;
@@ -69,7 +127,7 @@ bool SQLite::PrepareStatements()
 
     if(rc != SQLITE_OK)
     {
-        printf("Preparing createTableUsers statement failed: (%d) %s\n",
+        G_LogPrintf("Preparing createTableUsers statement failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
     }
 
@@ -82,11 +140,11 @@ bool SQLite::PrepareStatements()
     // Prepare select all statement
 
     rc = sqlite3_prepare_v2(db_,
-        "SELECT * FROM users;", -1, &selectAllFromUsers_, 0);
+        "SELECT id, guid, hwid, level, name, pcommands, pgreeting, ptitle FROM users;", -1, &selectAllFromUsers_, 0);
 
     if(rc != SQLITE_OK)
     {
-        printf("Preparing selectAllFromUsers statement failed: (%d) %s\n",
+        G_LogPrintf("Preparing selectAllFromUsers statement failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
     }
 
@@ -94,12 +152,12 @@ bool SQLite::PrepareStatements()
 
     rc = sqlite3_prepare_v2(db_, 
         "INSERT INTO users "
-        "(id, guid, level, name, pcommands, pgreeting, ptitle) "
-        "VALUES (?, ?, 0, ?, '', '', '');", -1, &insertIntoUsers_, 0);
+        "(id, guid, level, name, pcommands, pgreeting, ptitle, hwid) "
+        "VALUES (?, ?, 0, ?, '', '', '', 'a');", -1, &insertIntoUsers_, 0);
 
     if(rc != SQLITE_OK)
     {
-        printf("Preparing insertIntoUsers statement failed: (%d) %s\n",
+        G_LogPrintf("Preparing insertIntoUsers statement failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
     }
 
@@ -111,7 +169,7 @@ bool SQLite::PrepareStatements()
 
     if(rc != SQLITE_OK)
     {
-        printf("Preparing setLevelUpdate statement failed: (%d) %s\n",
+        G_LogPrintf("Preparing setLevelUpdate statement failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
     }
     return true;
@@ -133,7 +191,7 @@ bool SQLite::AddNewUser( int id, const std::string& guid, const std::string& nam
     int rc = sqlite3_bind_int(insertIntoUsers_, 1, id);
     if(rc != SQLITE_OK)
     {
-        printf("Couldn't bind id to statement: (%d) %s\n",
+        G_LogPrintf("Couldn't bind id to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
@@ -144,7 +202,7 @@ bool SQLite::AddNewUser( int id, const std::string& guid, const std::string& nam
 
     if(rc != SQLITE_OK)
     {
-        printf("Couldn't bind guid to statement: (%d) %s\n",
+        G_LogPrintf("Couldn't bind guid to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
@@ -155,7 +213,7 @@ bool SQLite::AddNewUser( int id, const std::string& guid, const std::string& nam
 
     if(rc != SQLITE_OK)
     {
-        printf("Couldn't bind name to statement: (%d) %s\n",
+        G_LogPrintf("Couldn't bind name to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
@@ -163,7 +221,7 @@ bool SQLite::AddNewUser( int id, const std::string& guid, const std::string& nam
     rc = sqlite3_step(insertIntoUsers_);
     if(rc != SQLITE_DONE)
     {
-        printf("Failed to insert a new user to database: (%d) %s\n",
+        G_LogPrintf("Failed to insert a new user to database: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
@@ -178,10 +236,47 @@ bool SQLite::CreateUsersTable()
     int rc = sqlite3_step(createUsersTable_);
     if(rc != SQLITE_DONE)
     {
-        printf("Creating table \"users\" failed: (%d) %s\n",
+        G_LogPrintf("Creating table \"users\" failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
     return true;
 }
 
+bool SQLite::SetLevel( gentity_t *ent, int level )
+{
+    sqlite3_reset(setlevelUpdate_);
+
+    int rc = sqlite3_bind_int(setlevelUpdate_, 3, sessionDB.Id(ent));
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind id to setlevel query: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_bind_text(setlevelUpdate_, 2, ent->client->pers.netname,
+        strlen(ent->client->pers.netname), 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind name to setlevel query: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_bind_int(setlevelUpdate_, 1, level);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind level to setlevel query: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_step(setlevelUpdate_);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't execute setlevel query: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+}

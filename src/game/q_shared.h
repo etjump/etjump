@@ -738,8 +738,8 @@ int		COM_GetCurrentParseLine( void );
 char	*COM_Parse( char **data_p );
 char	*COM_ParseExt( char **data_p, qboolean allowLineBreak );
 int		COM_Compress( char *data_p );
-void	COM_ParseError( char *format, ... )_attribute((format(printf,1,2)));
-void	COM_ParseWarning( char *format, ... )_attribute((format(printf,1,2)));
+void	COM_ParseError( char *format, ... )_attribute((format(G_LogPrintf,1,2)));
+void	COM_ParseWarning( char *format, ... )_attribute((format(G_LogPrintf,1,2)));
 int		Com_ParseInfos( char *buf, int max, char infos[][MAX_INFO_STRING] );
 
 qboolean COM_BitCheck( const int array[], int bitNum );
@@ -780,7 +780,7 @@ void Parse1DMatrix (char **buf_p, int x, float *m);
 void Parse2DMatrix (char **buf_p, int y, int x, float *m);
 void Parse3DMatrix (char **buf_p, int z, int y, int x, float *m);
 
-void	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...)_attribute((format(printf,3,4)));
+void	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...)_attribute((format(G_LogPrintf,3,4)));
 
 
 // mode parm for FS_FOpenFile
@@ -859,7 +859,7 @@ qint64  BigLong64 (qint64 l);
 float	BigFloat (float l);
 
 void	Swap_Init (void);
-char	* QDECL va(char *format, ...)_attribute((format(printf,1,2)));
+char	* QDECL va(char *format, ...)_attribute((format(G_LogPrintf,1,2)));
 float	*tv( float x, float y, float z );
 
 //=============================================
@@ -881,8 +881,8 @@ void RemoveDuplicates(char *str);
 void SortString(char *src);
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void	QDECL Com_Error( int level, const char *error, ... )_attribute((format(printf,2,3)));
-void	QDECL Com_Printf( const char *msg, ... )_attribute((format(printf,1,2)));
+void	QDECL Com_Error( int level, const char *error, ... )_attribute((format(G_LogPrintf,2,3)));
+void	QDECL Com_Printf( const char *msg, ... )_attribute((format(G_LogPrintf,1,2)));
 
 /*
 ==========================================================

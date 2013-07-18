@@ -2619,16 +2619,16 @@ void SaveSystem_Print( gentity_t *ent );
 // g_utilities.cpp
 
 // C versions of printing functions
-void BPAll( const char* msg );
-void BPTo( gentity_t *target, const char* msg );
-void CPAll( const char* msg );
-void CPMAll( const char* msg );
-void CPMTo( gentity_t *target, const char* msg );
-void CPTo( gentity_t *target, const char* msg );
-void ChatPrintAll( const char* msg );
-void ChatPrintTo( gentity_t *target, const char* msg );
-void ConsolePrintAll( const char* msg );
-void ConsolePrintTo( gentity_t *target, const char* msg );
+void C_BPAll( const char* msg );
+void C_BPTo( gentity_t *target, const char* msg );
+void C_CPAll( const char* msg );
+void C_CPMAll( const char* msg );
+void C_CPMTo( gentity_t *target, const char* msg );
+void C_CPTo( gentity_t *target, const char* msg );
+void C_ChatPrintAll( const char* msg );
+void C_ChatPrintTo( gentity_t *target, const char* msg );
+void C_ConsolePrintAll( const char* msg );
+void C_ConsolePrintTo( gentity_t *target, const char* msg );
 
 // C versions of conversion functions
 qboolean StringToInt(const char* toConvert, int *value);
@@ -2646,7 +2646,6 @@ void GuidReceived(gentity_t *ent);
 
 // Returns clientnum from ent
 int CNum(gentity_t *ent);
-void PrintUserDB();
 
 /* 
  * admin 

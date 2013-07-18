@@ -1637,7 +1637,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 		}
 	}
 
-    CheckCommand( ent );
+    CheckCommand(ent);
 }
 
 
