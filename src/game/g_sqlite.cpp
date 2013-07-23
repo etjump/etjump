@@ -3,7 +3,6 @@
 #include "g_sqlite.hpp"
 #include "g_utilities.hpp"
 
-
 SQLite::SQLite()
 {
     db_ = NULL;
@@ -20,7 +19,7 @@ SQLite::~SQLite()
 
 }
 
-bool SQLite::Init( void (*callback)(const std::string&, UserData) )
+bool SQLite::Init( Database& db )
 {
     char dbName[] = "users.SQLite";
 
@@ -82,7 +81,7 @@ bool SQLite::Init( void (*callback)(const std::string&, UserData) )
             text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 7));
             CharPtrToString(text, temp->personalTitle);
 
-            callback(guid, temp);
+            db.SaveUser(guid, temp);
 
         } else if(rc == SQLITE_DONE)
         {
@@ -273,7 +272,7 @@ bool SQLite::SetLevel( gentity_t *ent, int level )
     }
 
     rc = sqlite3_step(setlevelUpdate_);
-    if(rc != SQLITE_OK)
+    if(rc != SQLITE_DONE)
     {
         G_LogPrintf("Couldn't execute setlevel query: (%d) %s\n",
             rc, sqlite3_errmsg(db_));

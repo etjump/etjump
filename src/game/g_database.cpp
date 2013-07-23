@@ -17,16 +17,11 @@ Database::~Database()
 
 }
 
-void SaveUsersCallback(const std::string& guid, UserData u)
-{
-    adminDB.SaveUser(guid, u);
-}
-
 void Database::Init()
 {
     users_.clear();
     // Hack, couldn't really figure this out @ 3am
-    udb_.Init( SaveUsersCallback );
+    udb_.Init( *this );
     ldb_.ReadLevels();
 }
 
@@ -98,7 +93,7 @@ void Database::PrintAdminTest( gentity_t *ent )
 {
     int level = sessionDB.Level(ent);
     ChatPrintAll(va("^3admintest: ^7%s^7 is a level %d user (%s^7)",
-        ent->client->pers.netname, level, ldb_.Name(level)));
+        ent->client->pers.netname, level, ldb_.Name(level).c_str()));
 }
 
 bool Database::SetLevel( gentity_t *ent, gentity_t *target, int level )
@@ -114,10 +109,11 @@ bool Database::SetLevel( gentity_t *ent, gentity_t *target, int level )
     if(it == users_.end())
     {
         // Should never happen
-        ChatPrintTo(ent, "^3setlevel: ^7unknown error..");
+        ChatPrintTo(ent, "^3setlevel: ^7couldn't find target's guid. Are you sure target is not connecting?");
         return false;
     }
     it->second->level = level;
+    sessionDB.SetLevel(target, level, ldb_.Permissions(level), it->second->personalCmds);
     ChatPrintAll(va("^3setlevel: ^7%s is now a level %d user (%s)", 
         target->client->pers.netname,
         level, 

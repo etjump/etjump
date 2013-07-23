@@ -1,6 +1,7 @@
 #include "g_levels.hpp"
 #include "g_local.hpp"
 #include "g_utilities.hpp"
+#include <boost/shared_array.hpp>
 
 LevelData_s::LevelData_s( int level, 
                          const std::string& name, 
@@ -101,10 +102,9 @@ void LevelDatabase::ReadLevels()
         return;
     } else
     {
-        char *file = new char[len + 1];
-        char *file2 = file;
+        boost::shared_array<char> file(new char[len+1]);
 
-        trap_FS_Read(file, len, f);
+        trap_FS_Read(file.get(), len, f);
         file[len] = 0;
         trap_FS_FCloseFile(f);
 
@@ -114,7 +114,10 @@ void LevelDatabase::ReadLevels()
 
         levels_.clear();
 
-        token = COM_Parse(&file);
+        // Little hack to be able to use shared_array with COM_Parse*
+        char *file2 = file.get();
+
+        token = COM_Parse(&file2);
 
         while(*token)
         {
@@ -128,19 +131,19 @@ void LevelDatabase::ReadLevels()
             }
             else if(!Q_stricmp(token, "cmds"))
             {
-                ReadString(&file, tempLevel->commands);
+                ReadString(&file2, tempLevel->commands);
             }
             else if(!Q_stricmp(token, "level"))
             {
-                ReadInt(&file, tempLevel->level);
+                ReadInt(&file2, tempLevel->level);
             }
             else if(!Q_stricmp(token, "greeting"))
             {
-                ReadString(&file, tempLevel->greeting);
+                ReadString(&file2, tempLevel->greeting);
             }
             else if(!Q_stricmp(token, "name"))
             {
-                ReadString(&file, tempLevel->name);
+                ReadString(&file2, tempLevel->name);
             }
             else {
                 G_LogPrintf("readconfig: parse error near %s on line %d",
@@ -153,16 +156,13 @@ void LevelDatabase::ReadLevels()
                 levelOpen = true;
             }
 
-            token = COM_Parse(&file);
+            token = COM_Parse(&file2);
         }
 
         if(levelOpen)
         {
             levels_.push_back(tempLevel);
         }
-
-
-        delete[] file2;
     }
 
 

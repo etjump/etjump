@@ -208,6 +208,7 @@
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="session.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
@@ -225,6 +226,7 @@
     <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />
     <ClInclude Include="g_save.h" />
+    <ClInclude Include="session.hpp" />
     <ClInclude Include="g_sessiondb.hpp" />
     <ClInclude Include="g_sqlite.hpp" />
     <ClInclude Include="g_team.h" />

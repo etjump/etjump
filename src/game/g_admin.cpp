@@ -70,18 +70,6 @@ namespace AdminCommands
 
             // AdminDB does the level exists check
             return adminDB.SetLevel(ent, target, level);
-            
-//             if(!adminDB.LevelExists(level))
-//             {
-//                 ChatPrintTo(ent, "^3setlevel: ^7level does not exist.");
-//                 return false;
-//             }
-// 
-//             adminDB.UpdateUserLevel(sessionDB.Guid(target), level);
-//             ChatPrintAll(va("^3setlevel: ^7%s is now a level %d user (%s)", 
-//                 target->client->pers.netname,
-//                 level, 
-//                 adminDB.LevelName(level).c_str()));
         } else if(argv->size() == 4)
         {
             // Set by ID

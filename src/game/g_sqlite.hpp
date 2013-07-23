@@ -4,6 +4,8 @@
 #include <string>
 #include "sqlite3.h"
 
+class Database;
+
 // This has to be defined here because else we'd run into a circular
 // include hell. Needed for the callback
 // Users are stored in a map where GUID is the key
@@ -35,6 +37,7 @@ public:
     // creation of tables. Takes a callback function pointer, which 
     // is used to save users to memory as an argument
     bool Init(void (*callback)(const std::string&, UserData));
+    bool Init(Database& db);
     // Finalizes the statements and closes the database connection.
     bool Shutdown();
     // Adds a new user to database

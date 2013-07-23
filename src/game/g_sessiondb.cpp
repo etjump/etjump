@@ -152,6 +152,15 @@ int SessionDB::Id( gentity_t *ent )
     return clients_[ent->client->ps.clientNum].id;
 }
 
+void SessionDB::SetLevel( gentity_t *ent, int level, 
+              const std::string& levelPermissions, 
+              const std::string& personalPermissions )
+{
+    clients_[ent->client->ps.clientNum].level = level;
+
+    SetPermissions(clients_[ent->client->ps.clientNum], personalPermissions, levelPermissions);
+}
+
 Client::Client()
 {
     this->id = -1;

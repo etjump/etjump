@@ -1081,6 +1081,8 @@ qboolean	ConsoleCommand( void ) {
 		// prints to the console instead now
 	}
 
+    return CheckCommand(NULL);
+
     return qfalse;
 }
 	
