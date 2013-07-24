@@ -2645,9 +2645,9 @@ void GuidReceived(gentity_t *ent);
 
 
 // Returns clientnum from ent
-int CNum(gentity_t *ent);
+int ClientNum(gentity_t *ent);
 
-/* 
+/*  
  * admin 
  */
 qboolean CheckCommand( gentity_t *ent );

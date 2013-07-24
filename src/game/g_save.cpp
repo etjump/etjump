@@ -288,7 +288,7 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = sessionDB.Guid(ent);
+    string guid = Session::Guid(ent);
 
     DisconnectedClient client;
 
@@ -333,7 +333,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = sessionDB.Guid(ent);
+    string guid = Session::Guid(ent);
 
     map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 

@@ -3616,8 +3616,6 @@ void CG_Fireteams_Setup( void );
 void CG_Fireteams_MenuText_Draw( panel_button_t* button );
 void CG_Fireteams_MenuTitleText_Draw( panel_button_t* button );
 
-char *G_SHA1(char *string);
-
 //
 // cg_drawCHS.c
 //
@@ -3634,3 +3632,5 @@ void CG_Minimize_f(void);
 void SendGuid();
 void SendHWID(void);
 void UserinfoSendHWID(void);
+
+char *G_SHA1(const char* str);

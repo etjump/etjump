@@ -48,13 +48,6 @@ std::string GenerateUUID() {
     return boost::lexical_cast<std::string>(u);
 }
 
-
-std::string G_SHA1(const std::string& str) {
-    char s[MAX_TOKEN_CHARS];
-    Q_strncpyz(s, str.c_str(), sizeof(s));
-    return std::string(G_SHA1(s));
-}
-
 bool CreateNewGuid()
 {
     fileHandle_t f = -1;
@@ -93,7 +86,7 @@ bool ValidGuid(const std::string& guid)
     }
 
     // Check each character for illegal chars
-    for(int i = 0; i < guid.length(); i++)
+    for(size_t i = 0; i < guid.length(); i++)
     {
         // It's a sha hashed guid converted to hexadecimal. If values
         // greater than F are found in it, it's a fake guid.

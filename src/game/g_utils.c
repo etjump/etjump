@@ -1623,3 +1623,8 @@ int FindClientByName(char *name) {
 
 	return -1;
 }
+
+int ClientNum(gentity_t *ent)
+{
+    return ent->client->ps.clientNum;
+}

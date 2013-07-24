@@ -10,6 +10,9 @@ extern "C" {
 #ifdef max
 #undef max
 #endif
+#ifdef min
+#undef min
+#endif
 
 #include "g_save.h"
 #include "g_database.hpp"
@@ -17,6 +20,5 @@ extern "C" {
 
 extern class SaveSystem       positions;
 extern class Database         adminDB;
-extern class SessionDB        sessionDB;
 
 #endif // g_local_hpp__

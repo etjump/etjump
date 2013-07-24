@@ -5,10 +5,10 @@ bool TargetIsHigherLevel(gentity_t *ent, gentity_t *target, bool equalIsHigher =
 {
     if(equalIsHigher)
     {
-        return sessionDB.Level(target) >= sessionDB.Level(ent);
+        return Session::Level(target) >= Session::Level(ent);
     } else
     {
-        return sessionDB.Level(target) > sessionDB.Level(ent);
+        return Session::Level(target) > Session::Level(ent);
     }
 }
 
@@ -62,7 +62,7 @@ namespace AdminCommands
                 return false;
             }
 
-            if(level > sessionDB.Level(ent))
+            if(level > Session::Level(ent))
             {
                 ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher than your own level.");
                 return false;
@@ -94,7 +94,7 @@ namespace AdminCommands
                 return false;
             }
 
-            if(level > sessionDB.Level(ent))
+            if(level > Session::Level(ent))
             {
                 ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher than your own level.");
                 return false;
@@ -184,7 +184,7 @@ qboolean CheckCommand( gentity_t *ent )
             continue;
         } else
         {
-            if(sessionDB.HasPermission(ent, AdminCommandList[i].flag))
+            if(Session::HasPermission(ent, AdminCommandList[i].flag))
             {
                 AdminCommandList[i].handler(ent, argv);
                 return qtrue;  

@@ -246,7 +246,7 @@ bool SQLite::SetLevel( gentity_t *ent, int level )
 {
     sqlite3_reset(setlevelUpdate_);
 
-    int rc = sqlite3_bind_int(setlevelUpdate_, 3, sessionDB.Id(ent));
+    int rc = sqlite3_bind_int(setlevelUpdate_, 3, Session::ID(ent));
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind id to setlevel query: (%d) %s\n",
@@ -278,4 +278,6 @@ bool SQLite::SetLevel( gentity_t *ent, int level )
             rc, sqlite3_errmsg(db_));
         return false;
     }
+
+    return true;
 }

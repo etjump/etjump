@@ -180,9 +180,6 @@
     <ClCompile Include="g_main_ext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_utilities.hpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -199,9 +196,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_admin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="session.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -271,7 +265,7 @@
     <ClInclude Include="g_sessiondb.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="session.hpp">
+    <ClInclude Include="g_utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

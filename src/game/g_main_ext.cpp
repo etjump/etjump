@@ -8,7 +8,6 @@
 
 SaveSystem       positions;
 Database         adminDB;
-SessionDB        sessionDB;
 
 void OnGameInit() {
     // Init save db
@@ -23,7 +22,7 @@ void OnGameShutdown() {
 void OnClientConnect( int clientNum, qboolean firstTime, qboolean isBot )
 {
     if(firstTime) {
-        sessionDB.ResetClient(g_entities + clientNum);
+        Session::ResetClient(g_entities + clientNum);
     }
 }
 
@@ -36,7 +35,7 @@ void OnClientDisconnect(gentity_t *ent)
 {
     positions.SavePositionsToDatabase(ent);
     positions.ResetSavedPositions(ent);
-    sessionDB.ResetClient(ent);
+    Session::ResetClient(ent);
 }
 
 bool ValidGuid(const std::string& guid)
@@ -63,12 +62,12 @@ bool ValidGuid(const std::string& guid)
 
 void PrintGreeting( gentity_t * ent ) 
 {
-    std::string greeting = sessionDB.Greeting(ent);
+    std::string greeting = Session::Greeting(ent);
 
     // Print level greeting instead
     if(greeting.length() == 0)
     {
-        // Greeting is checked on sessionDB.Set() and will always have 
+        // Greeting is checked on Session::Set() and will always have 
         // a) personal greeting b) level greeting c) no greeting so if
         // there's none don't do anything.
         return;

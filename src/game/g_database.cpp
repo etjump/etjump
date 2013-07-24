@@ -47,8 +47,7 @@ void Database::ClientGuidReceived( gentity_t *ent, const std::string& guid )
             greeting = it->second->personalGreeting;   
         }
 
-        // User is already in the DB
-        sessionDB.Set(ent, it->second->id, guid, 
+        Session::ClientConnect(ent, it->second->id, guid, 
             it->second->level, 
             it->second->name,
             ldb_.Permissions(it->second->level), 
@@ -72,7 +71,7 @@ void Database::ClientGuidReceived( gentity_t *ent, const std::string& guid )
         // MUST use newUser->id because users_.size() is already +1
         udb_.AddNewUser(newUser->id, guid, newUser->name);
         // Also add it to the sessionDB
-        sessionDB.Set(ent, newUser->id, guid, newUser->level, newUser->name,
+        Session::ClientConnect(ent, newUser->id, guid, newUser->level, newUser->name,
             ldb_.Permissions(newUser->level), newUser->personalCmds, 
             ldb_.Greeting(newUser->level), 
             newUser->personalTitle);
@@ -91,7 +90,8 @@ void Database::SaveUser( const std::string& guid, UserData u )
 
 void Database::PrintAdminTest( gentity_t *ent )
 {
-    int level = sessionDB.Level(ent);
+    
+    int level = Session::Level(ent);
     ChatPrintAll(va("^3admintest: ^7%s^7 is a level %d user (%s^7)",
         ent->client->pers.netname, level, ldb_.Name(level).c_str()));
 }
@@ -105,7 +105,7 @@ bool Database::SetLevel( gentity_t *ent, gentity_t *target, int level )
     }
 
     udb_.SetLevel(target, level);
-    UserIter it = users_.find(sessionDB.Guid(target));
+    UserIter it = users_.find(Session::Guid(target));
     if(it == users_.end())
     {
         // Should never happen
@@ -113,7 +113,7 @@ bool Database::SetLevel( gentity_t *ent, gentity_t *target, int level )
         return false;
     }
     it->second->level = level;
-    sessionDB.SetLevel(target, level, ldb_.Permissions(level), it->second->personalCmds);
+    Session::SetLevel(target, level, ldb_.Permissions(level), it->second->personalCmds);
     ChatPrintAll(va("^3setlevel: ^7%s is now a level %d user (%s)", 
         target->client->pers.netname,
         level, 
@@ -129,7 +129,7 @@ bool Database::IDSetLevel( gentity_t *ent, int id, int level )
     {
         if(it->second->id == id)
         {
-            if(it->second->level > sessionDB.Level(ent))
+            if(it->second->level > Session::Level(ent))
             {
                 ChatPrintTo(ent, "^3setlevel: ^7you can't set the level of a fellow admin.");
                 return false;
@@ -155,6 +155,7 @@ bool Database::IDSetLevel( gentity_t *ent, int id, int level )
         it->second->name.c_str(),
         level, 
         ldb_.Name(level).c_str()));
+    return true;
 }
 
 

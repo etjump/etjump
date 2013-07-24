@@ -1,6 +1,47 @@
 #include "g_sessiondb.hpp"
+#include <boost/array.hpp>
 
-void Reset(Client& toReset)
+Session::Session()
+{
+
+}
+
+Session::~Session()
+{
+
+}
+
+boost::array<Session::Client, 64> Session::clients_;
+
+Session::Client::Client()
+{
+    this->id = -1;
+    this->guid.clear();
+    this->level = 0;
+    this->permissions.reset();
+    this->greeting.clear();
+    this->title.clear();
+}
+
+void Session::InitGame()
+{
+    ResetAll();
+}
+
+void Session::ShutdownGame()
+{
+    ResetAll();
+}
+
+void Session::ResetAll()
+{
+    for(size_t i = 0; i < MAX_CLIENTS; i++)
+    {
+        ResetClient(clients_[i]);
+    }
+}
+
+void Session::ResetClient( Client& toReset )
 {
     toReset.guid.clear();
     toReset.greeting.clear();
@@ -10,48 +51,57 @@ void Reset(Client& toReset)
     toReset.title.clear();
 }
 
-
-void SessionDB::Reset()
+void Session::ResetClient( gentity_t *ent )
 {
-    for(size_t i = 0; i < MAX_CLIENTS; i++)
+    if(ent)
     {
-        ::Reset(clients_[i]);
+        ResetClient(clients_[ClientNum(ent)]);
     }
 }
 
-void SessionDB::ResetClient( gentity_t *ent )
+void Session::ClientConnect(gentity_t *ent, int id, 
+                            const std::string& guid,
+                            int level, const std::string& name, 
+                            const std::string& levelCmds,
+                            const std::string& personalCmds, 
+                            const std::string& personalGreeting,
+                            const std::string& personalTitle)
 {
-    if(ent->client) {
-        ::Reset(clients_[ent->client->ps.clientNum]);
-    }
+    clients_[ClientNum(ent)].id = id;
+    clients_[ClientNum(ent)].guid = guid;
+    clients_[ClientNum(ent)].title = personalTitle;
+    clients_[ClientNum(ent)].greeting = personalGreeting;
+
+    SetLevel(ent, level, levelCmds, personalCmds);
 }
 
-std::string SessionDB::Guid( gentity_t *ent )
+void Session::SetLevel( gentity_t *ent, int level, 
+                       const std::string& levelCmds, 
+                       const std::string& personalCmds )
 {
-    return clients_[ent->client->ps.clientNum].guid;
+    clients_[ClientNum(ent)].level = level;
+
+    SetPermissions(clients_[ClientNum(ent)], personalCmds, levelCmds);
 }
 
-void SessionDB::Set( gentity_t *ent, int id, const std::string& guid, int level, 
-                    const std::string& name, 
-                    const std::string& levelPermissions, 
-                    const std::string& personalPermissions, 
-                    const std::string& greeting, 
-                    const std::string& personalTitle )
+void Session::SetPermissions(Client& client, 
+                             const std::string& personalCmds, 
+                             const std::string& levelCmds)
 {
-    clients_[ent->client->ps.clientNum].id = id;
-    clients_[ent->client->ps.clientNum].guid = guid;
-    clients_[ent->client->ps.clientNum].level = level;
-    clients_[ent->client->ps.clientNum].title = personalTitle;
-    clients_[ent->client->ps.clientNum].greeting = greeting;
-    
-    SetPermissions(clients_[ent->client->ps.clientNum], 
-        personalPermissions, levelPermissions);
+    // Make sure it's empty
+    client.permissions.reset();
+
+    // Set permissions based on level commands
+    ParsePermissions(client.permissions, levelCmds);
+
+    // Override level perms with personal permissions
+    ParsePermissions(client.permissions, personalCmds);
 }
 
-void ParsePermissions(std::bitset<MAX_COMMANDS>& temp, 
+void Session::ParsePermissions(std::bitset<MAX_COMMANDS>& temp, 
                       const std::string& permissions)
 {
-    const enum {
+    enum {
         ALLOW,
         DENY
     };
@@ -104,69 +154,37 @@ void ParsePermissions(std::bitset<MAX_COMMANDS>& temp,
     }
 }
 
-void SessionDB::SetPermissions( Client& client, 
-                               const std::string& personalCommands, 
-                               const std::string& levelCommands )
+int Session::ID(gentity_t *ent)
 {
-    // Make sure it's empty
-    client.permissions.reset();
-
-    // Set permissions based on level commands
-    ParsePermissions(client.permissions, levelCommands);
-
-    // Override level perms with personal permissions
-    ParsePermissions(client.permissions, personalCommands);
+    return clients_[ClientNum(ent)].id;
 }
 
-std::string SessionDB::Greeting( gentity_t *ent )
+int Session::Level(gentity_t *ent)
 {
-    return clients_[ent->client->ps.clientNum].greeting;
+    return clients_[ClientNum(ent)].level;
 }
 
-int SessionDB::Level( gentity_t *ent )
+std::string Session::Guid(gentity_t *ent)
 {
-    if(!ent)
-    {
-        return std::numeric_limits<int>::max();
-    }
-    return clients_[ent->client->ps.clientNum].level;
+    return clients_[ClientNum(ent)].guid;
 }
 
-bool SessionDB::HasPermission( gentity_t *ent, char flag ) const
+std::string Session::Greeting(gentity_t *ent)
+{
+    return clients_[ClientNum(ent)].greeting;
+}
+
+std::string Session::Title(gentity_t *ent)
+{
+    return clients_[ClientNum(ent)].title;
+}
+
+bool Session::HasPermission(gentity_t *ent, char flag)
 {
     if(!ent)
     {
         return true;
     }
 
-    return clients_[ent->client->ps.clientNum].permissions.at(flag);        
-}
-
-int SessionDB::Id( gentity_t *ent )
-{
-    if(!ent)
-    {
-        return -1;
-    }
-
-    return clients_[ent->client->ps.clientNum].id;
-}
-
-void SessionDB::SetLevel( gentity_t *ent, int level, 
-              const std::string& levelPermissions, 
-              const std::string& personalPermissions )
-{
-    clients_[ent->client->ps.clientNum].level = level;
-
-    SetPermissions(clients_[ent->client->ps.clientNum], personalPermissions, levelPermissions);
-}
-
-Client::Client()
-{
-    this->id = -1;
-    this->guid.clear();
-    this->level = 0;
-    this->permissions.reset();
-    this->greeting.clear();
-    this->title.clear();
+    return clients_[ent->client->ps.clientNum].permissions.test(flag); 
 }

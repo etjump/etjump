@@ -404,11 +404,6 @@ void CharPtrToString( const char* p, std::string& s )
 	}
 }
 
-int CNum(gentity_t *ent)
-{
-	return ent->client->ps.clientNum;
-}
-
 std::string SayArgv( int n )
 {
     if(n >= Q_SayArgc())

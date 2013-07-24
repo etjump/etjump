@@ -2,6 +2,7 @@
 #include "g_local.hpp"
 #include "g_utilities.hpp"
 #include <boost/shared_array.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 LevelData_s::LevelData_s( int level, 
                          const std::string& name, 
@@ -81,10 +82,7 @@ void ReadString( char** configFile, std::string& str )
     }
 
     // trim the trailing space
-    if(str.length()) 
-    {
-        str.pop_back();
-    }
+    boost::trim_right(str);
 }
 
 void LevelDatabase::ReadLevels()
