@@ -1,5 +1,6 @@
 #include "g_local.hpp"
 #include "g_utilities.hpp"
+#include "g_admin.hpp"
 
 bool TargetIsHigherLevel(gentity_t *ent, gentity_t *target, bool equalIsHigher = false)
 {
@@ -197,4 +198,10 @@ qboolean CheckCommand( gentity_t *ent )
     }
 
     return qfalse;
+}
+
+Admin::UserData_s::UserData_s()
+{
+    this->id = -1;
+    this->level = 0;
 }

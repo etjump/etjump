@@ -207,6 +207,7 @@
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="sqlite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
@@ -218,6 +219,7 @@
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="..\botai\chars.h" />
+    <ClInclude Include="g_admin.hpp" />
     <ClInclude Include="g_database.hpp" />
     <ClInclude Include="g_levels.hpp" />
     <ClInclude Include="g_local.h" />
@@ -231,6 +233,7 @@
     <ClInclude Include="..\botai\inv.h" />
     <ClInclude Include="..\botai\match.h" />
     <ClInclude Include="q_shared.h" />
+    <ClInclude Include="sqlite.hpp" />
     <ClInclude Include="surfaceflags.h" />
     <ClInclude Include="..\botai\syn.h" />
   </ItemGroup>
