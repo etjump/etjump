@@ -1399,7 +1399,7 @@ Sets activator's identity value to ident <val>.
 */
 
 void target_set_ident_use( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
-	if(!activator->client)
+	if(!activator || !activator->client)
 		return;
 	
 	activator->client->sess.clientMapProgression = ent->ident;
@@ -1421,6 +1421,12 @@ Target target_activate to another entity.
 
 void target_activate_use ( gentity_t *self, gentity_t *other, gentity_t *activator ) {
 	qboolean activate = qfalse;
+
+    if(!activator || !activator->client)
+    {
+        G_DPrintf("Error: trying to activate \"target_activate\" without an activator.\n");
+        return;
+    }
 
 	if(self->spawnflags & 1) {
 		if(self->reqident < activator->client->sess.clientMapProgression) {
@@ -1467,7 +1473,7 @@ void target_printname_use ( gentity_t *ent, gentity_t *other, gentity_t *activat
 	char msg[MAX_TOKEN_CHARS];
 	char text[MAX_TOKEN_CHARS];
 	int i = 0;
-	
+
 	Com_sprintf(msg, sizeof(msg), "cpm \"%s", ent->message);
 
 	while(msg[i]) {
@@ -1544,10 +1550,17 @@ Resets saved positions
 */
 
 void target_savereset_use ( gentity_t *self, gentity_t *other, gentity_t *activator) {
-	if(activator && activator->client) {
+
+    if(!activator || !activator->client)
+    {
+        G_DPrintf("Error: trying to activate \"target_savereset\" without an activator.\n");
+        return;
+    }
+
+	if(activator->client) {
         ResetSavedPositions(activator);
+        CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 	}
-	CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 }
 
 void SP_target_savereset ( gentity_t *self ) {
@@ -1561,6 +1574,13 @@ Resets saved positions
 
 void target_increase_ident_use ( gentity_t *self, gentity_t *other, gentity_t *activator ) {
 	int inc = 1;
+
+    if(!activator || !activator->client)
+    {
+        G_DPrintf("Error: trying to activate \"target_remove_portals\" without an activator.\n");
+        return;
+    }
+
 	if(self->inc != 0) {
 		inc = self->inc;
 	} 
@@ -1585,6 +1605,12 @@ void SP_target_increase_ident( gentity_t *self ) {
 
 void target_save_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
+    if(!activator || !activator->client)
+    {
+        G_DPrintf("Error: trying to activate \"target_save\" without an activator.\n");
+        return;
+    }
+
 	ForceSave(self, activator);
     trap_SendServerCommand(activator-g_entities, g_savemsg.string);
 }
@@ -1595,6 +1621,12 @@ void SP_target_save( gentity_t *self )
 }
 
 void target_remove_portals_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
+    if(!activator || !activator->client)
+    {
+        G_DPrintf("Error: trying to activate \"target_remove_portals\" without an activator.\n");
+        return;
+    }
+
 	if(activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
 		return;
 	}
@@ -1614,4 +1646,63 @@ void target_remove_portals_use( gentity_t *self, gentity_t *other, gentity_t *ac
 
 void SP_target_remove_portals( gentity_t *self ) {
 	self->use = target_remove_portals_use;
+}
+
+void G_ActivateTarget( gentity_t * self, gentity_t *activator ) 
+{
+    gentity_t *ent = NULL;
+    ent = G_PickTarget( self->target );
+    if( ent && ent->use ) {
+        G_UseEntity(ent, self, activator);
+    }  
+}
+
+qboolean G_IsOnFireteam(int entityNum, fireteamData_t** teamNum);
+void target_ftrelay_use( gentity_t *self, gentity_t *other, gentity_t *activator )
+{
+    fireteamData_t *activatorsFt = NULL;
+    fireteamData_t *otherFt = NULL;
+
+    if(!activator || !activator->client)
+    {
+        G_DPrintf("Error: trying to activate \"target_ftrelay\" without an activator.\n");
+        return;
+    }
+
+    if(!G_IsOnFireteam(activator->client->ps.clientNum, &activatorsFt))
+    {
+        // Let's use it just for the activator
+        G_ActivateTarget( self, activator );
+        return;
+    } else
+    {
+        int i = 0;
+        if(activatorsFt->teamJumpMode == qfalse)
+        {
+            // Let's use it just for the activator
+            G_ActivateTarget( self, activator ); 
+            return;
+        }
+
+        for(; i < level.numConnectedClients; i++)
+        {
+            int cnum = level.sortedClients[i];
+
+            if(!G_IsOnFireteam(cnum, &otherFt))
+            {
+                continue;
+            } else
+            {
+                if(activatorsFt == otherFt)
+                {
+                    G_ActivateTarget( self, g_entities + cnum );   
+                }
+            }
+        }
+    }
+}
+
+void SP_target_ftrelay( gentity_t *self )
+{
+    self->use = target_ftrelay_use;
 }

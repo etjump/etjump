@@ -648,7 +648,7 @@ typedef struct {
 	qboolean	specLocked;
 	int			specInvitedClients[MAX_CLIENTS / (sizeof(int) * 8)];
 	// Fireteam save limit
-	int			savelimit;
+	int			saveLimit;
 	// Map ident
 	int			clientMapProgression;
 
@@ -1190,7 +1190,9 @@ typedef struct {
 
 	qboolean	tempTraceIgnoreEnts[ MAX_GENTITIES ];
 
+    // Deprecated
 	int			noExplosives;
+
 	qboolean	noSave;
 	qboolean	noNoclip;
 	qboolean	noGod;

@@ -417,3 +417,46 @@ std::string SayArgv( int n )
         return arg;
     }
 }
+
+static void FS_ReplaceSeparators( char *path ) {
+    char    *s;
+
+    for ( s = path ; *s ; s++ ) {
+        if ( *s == '/' || *s == '\\' ) {
+            *s = PATH_SEP;
+        }
+    }
+}
+
+static char* BuildOSPath( const char* file )
+{
+    char base[MAX_CVAR_VALUE_STRING] = "\0";
+    char temp[MAX_OSPATH] = "\0";
+    char game[MAX_CVAR_VALUE_STRING] = "\0";
+    static char ospath[2][MAX_OSPATH] = {"\0", "\0"};
+    static int toggle;
+
+    toggle ^= 1;        // flip-flop to allow two returns without clash
+
+    trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
+    trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
+
+    Com_sprintf( temp, sizeof( temp ), "/%s/%s", game, file );
+    FS_ReplaceSeparators( temp );
+    Com_sprintf( ospath[toggle], sizeof( ospath[0] ), "%s%s", base, temp );
+
+    return ospath[toggle];
+}
+
+std::string GetPath( const std::string& file )
+{
+    char *ospath = BuildOSPath( file.c_str() );
+
+    if(!ospath)
+    {
+        return std::string();
+    } else
+    {
+        return ospath;
+    }
+}

@@ -19,12 +19,12 @@ SQLite::~SQLite()
 
 }
 
-bool SQLite::Init( Database& db )
+bool SQLite::Init()
 {
     char dbName[] = "users.SQLite";
 
     // TODO: make it open the correct file based on g_dbFile
-    int rc = sqlite3_open(dbName, &db_);
+    int rc = sqlite3_open(GetPath(dbName).c_str(), &db_);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't open database %s: (%d) %s\n",
@@ -81,7 +81,7 @@ bool SQLite::Init( Database& db )
             text = (const char*)(sqlite3_column_text(selectAllFromUsers_, 7));
             CharPtrToString(text, temp->personalTitle);
 
-            db.SaveUser(guid, temp);
+            Database::SaveUser(guid, temp);
 
         } else if(rc == SQLITE_DONE)
         {

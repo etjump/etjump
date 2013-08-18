@@ -34,10 +34,8 @@ public:
     ~SQLite();
 
     // Opens a database connection, prepares statements and handles the 
-    // creation of tables. Takes a callback function pointer, which 
-    // is used to save users to memory as an argument
-    bool Init(void (*callback)(const std::string&, UserData));
-    bool Init(Database& db);
+    // creation of tables.
+    bool Init();
     // Finalizes the statements and closes the database connection.
     bool Shutdown();
     // Adds a new user to database

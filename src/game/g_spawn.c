@@ -433,6 +433,7 @@ void SP_target_save(gentity_t *self);
 //Feen: PGM
 void SP_weapon_portalgun (gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
+void SP_target_ftrelay(gentity_t *self);
 
 spawn_t	spawns[] = {
 	// info entities don't do anything at all, but provide positional
@@ -659,6 +660,7 @@ spawn_t	spawns[] = {
 	{"target_increase_ident", SP_target_increase_ident },
 	{"target_save",			SP_target_save },
 	{"target_remove_portals", SP_target_remove_portals },
+    {"target_ftrelay", SP_target_ftrelay},
 
 	{0, 0}
 };

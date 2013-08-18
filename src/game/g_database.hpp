@@ -8,33 +8,34 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 
-typedef std::map<std::string, UserData>::const_iterator ConstUserIter;
-typedef std::map<std::string, UserData>::iterator UserIter;
-
 class Database
 {
 public:
+    typedef std::map<std::string, UserData>::const_iterator ConstUserIter;
+    typedef std::map<std::string, UserData>::iterator UserIter;
+
     Database();
     ~Database();
 
-    void Init();
-    void Shutdown();
+    static void Init();
+    static void Shutdown();
 
-    void ClientGuidReceived(gentity_t *ent, const std::string& guid);
-    void SaveUser(const std::string& guid, UserData u);
-    void PrintAdminTest(gentity_t *ent);
-    bool SetLevel(gentity_t *ent, gentity_t *target, int level);
-    bool IDSetLevel(gentity_t *ent, int id, int level);
+    static void ClientGuidReceived(gentity_t *ent, const std::string& guid);
+    static void SaveUser(const std::string& guid, UserData u);
+    static void PrintAdminTest(gentity_t *ent);
+    static bool SetLevel(gentity_t *ent, gentity_t *target, int level);
+    static bool IDSetLevel(gentity_t *ent, int id, int level);
 private:
     // Database connection to store users
-    SQLite udb_;
+    static SQLite udb_;
     // Database connection to store levels
-    LevelDatabase ldb_;
+    static LevelDatabase ldb_;
 
-    int highestId_;
+    static int highestId_;
 
     // Users stored on memory
-    std::map<std::string, UserData> users_;
+    static std::map<std::string, UserData> users_;
+
 };
 
 #endif // g_database_h__

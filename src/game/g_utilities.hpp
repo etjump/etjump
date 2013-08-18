@@ -45,4 +45,6 @@ gentity_t *PlayerGentityFromString(const std::string& name,
 // Removes duplicate chars
 void RemoveDuplicates(std::string& out);
 void CharPtrToString( const char* p, std::string& s );
+
+std::string GetPath( const std::string& file );
 #endif // g_utilities_h__

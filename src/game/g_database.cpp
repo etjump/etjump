@@ -1,6 +1,11 @@
 #include "g_database.hpp"
 #include "g_utilities.hpp"
 
+SQLite Database::udb_;
+LevelDatabase Database::ldb_;
+int Database::highestId_;
+std::map<std::string, UserData> Database::users_;
+
 UserData_s::UserData_s()
 {
     this->id = -1;
@@ -21,7 +26,7 @@ void Database::Init()
 {
     users_.clear();
     // Hack, couldn't really figure this out @ 3am
-    udb_.Init( *this );
+    udb_.Init();
     ldb_.ReadLevels();
 }
 

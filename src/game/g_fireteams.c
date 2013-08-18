@@ -231,7 +231,8 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
 	memset(ft->joinOrder, -1, sizeof(level.fireTeams[0].joinOrder));
 	ft->joinOrder[0] = leader - g_entities;
 	ft->ident = ident;
-	ft->savelimit = 0;
+	ft->saveLimit = 0;
+    ft->teamJumpMode = 0;
 
 	if( g_autoFireteams.integer ) {
 		ft->priv = qfalse;
@@ -281,7 +282,7 @@ void G_AddClientToFireteam( int entityNum, int leaderNum ) {
 
 			G_UpdateFireteamConfigString(ft);
 
-			otherEnt->client->sess.savelimit = ft->savelimit;
+			otherEnt->client->sess.saveLimit = ft->saveLimit;
 
 			return;
 		}
@@ -342,14 +343,14 @@ void G_RemoveClientFromFireteams( int entityNum, qboolean update, qboolean print
 
 	// if the leader leaves it seems the savelimit will be set to
 	// 2^32-1 / -2^32-1 so this should fix it.
-	if(!ft->savelimit) {
+	if(!ft->saveLimit) {
 		gentity_t *ent;
 		for(i = 0; i < level.numConnectedClients; i++) {
 			if(ft->joinOrder[i] == -1) {
 				continue;
 			} else {
 				ent = g_entities + ft->joinOrder[i];
-				ent->client->sess.savelimit = ft->savelimit;
+				ent->client->sess.saveLimit = ft->saveLimit;
 			}
 		}
 	}
@@ -593,6 +594,75 @@ fireteamData_t* G_FindFreePublicFireteam( team_t team ) {
 	return NULL;
 }
 
+void G_TeamJumpMode( int clientNum )
+{
+    int i = 0;
+    char buf[MAX_TOKEN_CHARS] = "\0";
+    char arg[MAX_TOKEN_CHARS] = "\0";
+    fireteamData_t *ft = NULL;
+    qboolean printChanges = qtrue;
+
+    if(!G_IsOnFireteam(clientNum, &ft))
+    {
+        G_ClientPrintAndReturn(clientNum, "You are not on a fireteam");
+    }
+
+    if(!G_IsFireteamLeader( clientNum, &ft )) {
+        G_ClientPrintAndReturn( clientNum, "You are not the leader." );
+    }
+
+    if(trap_Argc() != 3)
+    {
+        G_ClientPrintAndReturn(clientNum, "usage: fireteam tj on");
+    }
+
+    trap_Argv(2, arg, sizeof(arg));
+
+    if(!Q_stricmp(arg, "on"))
+    {
+        if(ft->teamJumpMode == qtrue)
+        {
+            printChanges = qfalse;
+        } else
+        {
+            ft->teamJumpMode = qtrue;
+            Com_sprintf(buf, sizeof(buf), "chat \"Fireteam: team jump mode ^2ON\"");
+        }
+    } else if(!Q_stricmp(arg, "off"))
+    {
+        if(ft->teamJumpMode == qfalse)
+        {
+            printChanges = qfalse;
+        } else
+        {
+            ft->teamJumpMode = qfalse;
+            Com_sprintf(buf, sizeof(buf), "chat \"Fireteam: team jump mode ^1OFF\"");
+        }
+    }
+
+    for(i = 0; i < level.numConnectedClients; i++)
+    {
+        int cnum = level.sortedClients[i];
+        fireteamData_t *ft2 = NULL;
+
+        if(!G_IsOnFireteam(cnum, &ft2))
+        {
+            continue;
+        }
+
+        if(ft != ft2)
+        {
+            continue;
+        } else
+        {
+            if(printChanges)
+            {
+                trap_SendServerCommand(cnum, buf);
+            }
+        }
+    }
+}
+
 void G_SetFireTeamRules( int clientNum ) {
 	int i;
 	char arg1[MAX_TOKEN_CHARS];
@@ -627,27 +697,27 @@ void G_SetFireTeamRules( int clientNum ) {
 					continue;
 				} else {
 					ent = g_entities + ft->joinOrder[i];
-					ent->client->sess.savelimit = ft->savelimit;
+					ent->client->sess.saveLimit = ft->saveLimit;
 				}
 			}
 			return;
 		}
 
 		if( atoi(val) > 100) 
-			ft->savelimit = 100;
+			ft->saveLimit = 100;
 		else if ( atoi(val) < 0 )
-			ft->savelimit = -1;
+			ft->saveLimit = -1;
 		else
-			ft->savelimit = atoi(val);
+			ft->saveLimit = atoi(val);
 
-		ft->savelimit = atoi(val);
+		ft->saveLimit = atoi(val);
 		trap_SendServerCommand(clientNum, va("print \"Fireteam: savelimit was set to %i\n\"", atoi(val)));
 		for(i = 0; i < level.numConnectedClients; i++) {
 			if(ft->joinOrder[i] == -1) {
 				continue;
 			} else {
 				ent = g_entities + ft->joinOrder[i];
-				ent->client->sess.savelimit = ft->savelimit;
+				ent->client->sess.saveLimit = ft->saveLimit;
 			}
 		}
 		return;
@@ -818,10 +888,13 @@ void Cmd_FireTeam_MP_f( gentity_t* ent ) {
 		}
 
 		G_ProposeFireTeamPlayer( ent-g_entities, clientnum-1 );		
-	} 
+	}  
 	// Challenge group. 
 	// Only leader 
 	else if (!Q_stricmp(command, "rules")) {
 		G_SetFireTeamRules( ent - g_entities );
-	}
+	} else if(!Q_stricmp(command, "tj"))
+    {
+        G_TeamJumpMode( ent - g_entities );
+    }
 }

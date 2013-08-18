@@ -207,7 +207,6 @@
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
-    <ClCompile Include="sqlite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
