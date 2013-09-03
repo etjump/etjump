@@ -7,9 +7,6 @@
 
 #include "g_local.hpp"
 
-using std::map;
-using std::string;
-
 class SaveSystem {
 public:
 
@@ -45,40 +42,40 @@ public:
     };
 
     // Saves current position
-    void Save(gentity_t *ent);
+    static void Save(gentity_t *ent);
 
     // Loads position
-    void Load(gentity_t *ent);
+    static void Load(gentity_t *ent);
 
     // Saves position, does not check for anything
-    void ForceSave(gentity_t *location, gentity_t *ent);
+    static void ForceSave(gentity_t *location, gentity_t *ent);
     
     // Loads backup position
-    void LoadBackupPosition(gentity_t *ent);
+    static void LoadBackupPosition(gentity_t *ent);
 
     // resets all clients positions
-    void Reset();
+    static void Reset();
 
     // Resets targets positions
-    void ResetSavedPositions(gentity_t *ent);
+    static void ResetSavedPositions(gentity_t *ent);
 
     // Saves positions to db on disconnect
-    void SavePositionsToDatabase(gentity_t *ent);
+    static void SavePositionsToDatabase(gentity_t *ent);
 
     // Loads positions from db on dc
-    void LoadPositionsFromDatabase(gentity_t *ent);
+    static void LoadPositionsFromDatabase(gentity_t *ent);
 
     // Prints entire db
-    void Print( gentity_t *ent ) const;
+    static void Print( gentity_t *ent );
 private:
     // Saves backup position
-    void SaveBackupPosition(gentity_t *ent, SavePosition *pos);
+    static void SaveBackupPosition(gentity_t *ent, SavePosition *pos);
 
     // All clients' save related data
-    Client clients_[MAX_CLIENTS];
+    static Client clients_[MAX_CLIENTS];
 
     // Disconnected clients saved position data
-    map<string, DisconnectedClient> savedPositions;
+    static std::map<std::string, DisconnectedClient> savedPositions;
 };
 
 #endif

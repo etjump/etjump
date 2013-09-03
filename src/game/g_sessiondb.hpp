@@ -16,6 +16,8 @@ public:
         Client();
         int id;
         int level;
+        // Name when first seen/last setlevel
+        std::string name;
         std::string guid;
         std::string greeting;
         std::bitset<MAX_COMMANDS> permissions;
@@ -35,6 +37,7 @@ public:
     // Reset client
     static void ResetClient(Client& toReset);
     static void ResetClient(gentity_t *ent);
+    static void ResetClient(int clientNum);
 
     // Sets all necessary values when client connects
     static void ClientConnect(gentity_t *ent, int id, 
@@ -56,13 +59,14 @@ public:
     static std::string Greeting(gentity_t *ent);
     static std::string Title(gentity_t *ent);
     static bool HasPermission(gentity_t *ent, char flag);
+    static std::string Name(gentity_t *ent);
 private:
     static void SetPermissions(Client& client, 
         const std::string& personalCmds, const std::string& levelCmds);
 
     static void ParsePermissions(std::bitset<MAX_COMMANDS>& temp, 
         const std::string& permissions);
-
+    static void PrintDB();
     static boost::array<Client, 64> clients_;
 };
 

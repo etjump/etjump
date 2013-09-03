@@ -3,10 +3,16 @@
 using std::string;
 using std::vector;
 
-#include "g_save.h"
+#include "g_save.hpp"
 #include "g_utilities.hpp"
 #include "g_local.hpp"
 #include "g_sessiondb.hpp"
+
+// All clients' save related data
+SaveSystem::Client SaveSystem::clients_[MAX_CLIENTS];
+
+// Disconnected clients saved position data
+std::map<std::string, SaveSystem::DisconnectedClient> SaveSystem::savedPositions;
 
 SaveSystem::Client::Client() {
     alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
@@ -312,7 +318,7 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
     client.progression = ent->client->sess.clientMapProgression;
     ent->client->sess.loadedSavedPositions = qfalse;
 
-    map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+    std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
     if(it != savedPositions.end()) {
         it->second = client;
@@ -335,7 +341,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
 
     string guid = Session::Guid(ent);
 
-    map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+    std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
     if(it != savedPositions.end()) {
 
@@ -382,9 +388,9 @@ void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos) {
     
 }
 
-void SaveSystem::Print( gentity_t *ent ) const
+void SaveSystem::Print( gentity_t *ent )
 {
-    map<string, DisconnectedClient>::const_iterator it = savedPositions.begin();
+    std::map<string, DisconnectedClient>::const_iterator it = savedPositions.begin();
 
     string toPrint = "Save database:\n";
     while(it != savedPositions.end()) {
@@ -422,37 +428,37 @@ void SaveSystem::Print( gentity_t *ent ) const
 
 // C API for save&load db
 void Cmd_Load_f(gentity_t *ent) {
-    positions.Load(ent);
+    SaveSystem::Load(ent);
 }
 
 void Cmd_Save_f(gentity_t *ent) {
-    positions.Save(ent);
+    SaveSystem::Save(ent);
 }
 
 void Cmd_BackupLoad_f(gentity_t *ent) {
-    positions.LoadBackupPosition(ent);
+    SaveSystem::LoadBackupPosition(ent);
 }
 
 void ResetSavedPositions(gentity_t *ent) {
-    positions.ResetSavedPositions(ent);
+    SaveSystem::ResetSavedPositions(ent);
 }
 
 void ForceSave(gentity_t *location, gentity_t *ent) {
-    positions.ForceSave(location, ent);
+    SaveSystem::ForceSave(location, ent);
 }
 
 void SavePositionsToDatabase(gentity_t *ent) {
-    positions.SavePositionsToDatabase(ent);
+    SaveSystem::SavePositionsToDatabase(ent);
 }
 
 void LoadPositionsFromDatabase(gentity_t *ent) {
-    positions.LoadPositionsFromDatabase(ent);
+    SaveSystem::LoadPositionsFromDatabase(ent);
 }
 
 void InitSaveDatabase() {
-    positions.Reset();
+    SaveSystem::Reset();
 }
 
 void SaveSystem_Print( gentity_t *ent ) {
-    positions.Print( ent );
+    SaveSystem::Print( ent );
 }

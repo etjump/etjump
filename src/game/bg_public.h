@@ -2448,4 +2448,24 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB);
 #define HWID_REQUEST "HWIDREQUEST"
 #define GUID_REQUEST "GUIDREQUEST"
 
+struct Manual {
+    const char *cmd;
+    const char *usage;
+    const char *description;
+};
+
+static const struct Manual commandManuals[] = {
+    {"8ball", "!8ball [question]", 
+    "Magical 8 Ball of pure awesomeness gives an answer to any question you might have!"},
+    {"admintest", "!admintest", "Displays your admin level"},
+    {"cancelvote", "!cancelvote", "Cancels current vote in progress"},
+    {"finger", "!finger <target>", "Displays target's admin level."},
+    {"help", "!help\n!help [command]", "Prints useful information about commands."},
+    {"map", "!map [map name]", "Changes map."},
+    {"mute", "!mute [target]", "Mutes target player."},
+    {"passvote", "!passvote", "Passes current vote in progress"},
+    {"rmsaves", "!rmsaves [target]", "Clears target's saved positions."},
+    {"setlevel", "!setlevel [target] [level]\n!setlevel -id [id] [level]", "Sets the target's admin level."}
+};
+
 #endif

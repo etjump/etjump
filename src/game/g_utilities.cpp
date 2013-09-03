@@ -1,4 +1,5 @@
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 #include <string>
 #include <vector>
 
@@ -203,18 +204,22 @@ void C_BPAll( const char* msg )
 
 static string bigTextBuffer;
 
+
 void BeginBufferPrint() {
     bigTextBuffer.clear();
 }
 
 void FinishBufferPrint(gentity_t *ent, bool insertNewLine) {
     if(ent) {
+        boost::format toPrint("print \"%s\"");
         if( insertNewLine ) {
+            toPrint % (bigTextBuffer + NEWLINE);
             trap_SendServerCommand(ent->client->ps.clientNum, 
-                (bigTextBuffer + NEWLINE).c_str());
+                toPrint.str().c_str());
         } else {
+            toPrint % bigTextBuffer;
             trap_SendServerCommand(ent->client->ps.clientNum,
-                bigTextBuffer.c_str());
+                toPrint.str().c_str());
         }
     } else {
         if( insertNewLine ) {
@@ -354,12 +359,14 @@ gentity_t *PlayerGentityFromString(char *name, char *err, int size) {
 }
 
 gentity_t *PlayerGentityFromString
-    (const std::string& name, char *err, int size) {
+    (const std::string& name, std::string& err) {
+    char errorMsg[MAX_TOKEN_CHARS] = "\0";
     int pids[MAX_CLIENTS];
     gentity_t *player;
 
     if(ClientNumbersFromString(name.c_str(), pids) != 1) {
-        G_MatchOnePlayer(pids, err, size);
+        G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg));
+        err = errorMsg;
         return NULL;
     }
 
@@ -459,4 +466,19 @@ std::string GetPath( const std::string& file )
     {
         return ospath;
     }
+}
+
+bool MapExists( const std::string& map )
+{
+    std::string mapName = "maps/" + map + ".bsp";
+
+    fileHandle_t f = 0;
+    trap_FS_FOpenFile(mapName.c_str(), &f, FS_READ);
+    trap_FS_FCloseFile(f);
+
+    if(!f)
+    {
+        return false;
+    }
+    return true;
 }

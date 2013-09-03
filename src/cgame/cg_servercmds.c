@@ -2456,6 +2456,11 @@ static void CG_ServerCommand( void ) {
         return;
     }
 
+    if(!Q_stricmp(cmd, "manual"))
+    {
+        CG_Manual_f();
+    }
+
 	if (!Q_stricmp(cmd, "rename")) {
 		int argc, totlen, i, len;
 		static char	line[MAX_STRING_CHARS];

@@ -2,11 +2,25 @@
 #define g_database_h__
 
 #include "g_local.hpp"
-#include "g_sqlite.hpp"
-#include "g_levels.hpp"
 #include <string>
 #include <map>
 #include <boost/shared_ptr.hpp>
+
+class LevelDatabase;
+class SQLite;
+
+struct UserData_s
+{
+    UserData_s();
+    int id;
+    int level;
+    std::string hwid;
+    std::string name;
+    std::string personalCmds;
+    std::string personalTitle;
+    std::string personalGreeting;
+};
+typedef boost::shared_ptr<UserData_s> UserData;
 
 class Database
 {
@@ -23,6 +37,7 @@ public:
     static void ClientGuidReceived(gentity_t *ent, const std::string& guid);
     static void SaveUser(const std::string& guid, UserData u);
     static void PrintAdminTest(gentity_t *ent);
+    static void PrintFinger(gentity_t *ent, gentity_t *target);
     static bool SetLevel(gentity_t *ent, gentity_t *target, int level);
     static bool IDSetLevel(gentity_t *ent, int id, int level);
 private:

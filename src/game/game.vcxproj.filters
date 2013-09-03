@@ -244,9 +244,6 @@
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_save.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="g_local.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -268,10 +265,10 @@
     <ClInclude Include="g_utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sqlite.hpp">
+    <ClInclude Include="g_admin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_admin.hpp">
+    <ClInclude Include="g_save.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

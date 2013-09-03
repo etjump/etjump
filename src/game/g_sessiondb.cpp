@@ -21,6 +21,7 @@ Session::Client::Client()
     this->permissions.reset();
     this->greeting.clear();
     this->title.clear();
+    this->name.clear();
 }
 
 void Session::InitGame()
@@ -35,6 +36,7 @@ void Session::ShutdownGame()
 
 void Session::ResetAll()
 {
+    G_LogPrintf("**********************************\nResetAll()\n********************************\n");
     for(size_t i = 0; i < MAX_CLIENTS; i++)
     {
         ResetClient(clients_[i]);
@@ -49,6 +51,17 @@ void Session::ResetClient( Client& toReset )
     toReset.level = 0;
     toReset.permissions.reset();
     toReset.title.clear();
+    toReset.name.clear();
+}
+
+void Session::ResetClient( int clientNum )
+{
+    if(clientNum > MAX_CLIENTS || clientNum < 0)
+    {
+        return;
+    }
+
+    ResetClient(clients_[clientNum]);
 }
 
 void Session::ResetClient( gentity_t *ent )
@@ -71,10 +84,14 @@ void Session::ClientConnect(gentity_t *ent, int id,
     clients_[ClientNum(ent)].guid = guid;
     clients_[ClientNum(ent)].title = personalTitle;
     clients_[ClientNum(ent)].greeting = personalGreeting;
+    clients_[ClientNum(ent)].name = name;
 
     SetLevel(ent, level, levelCmds, personalCmds);
+
+    PrintDB();
 }
 
+// FIXME: update name
 void Session::SetLevel( gentity_t *ent, int level, 
                        const std::string& levelCmds, 
                        const std::string& personalCmds )
@@ -187,4 +204,53 @@ bool Session::HasPermission(gentity_t *ent, char flag)
     }
 
     return clients_[ent->client->ps.clientNum].permissions.test(flag); 
+}
+
+std::string Session::Name( gentity_t *ent )
+{
+    if(!ent)
+    {
+        return "";
+    }
+
+    return clients_[ent->client->ps.clientNum].name;
+}
+
+/*
+*    struct Client
+{
+Client();
+int id;
+int level;
+// Name when first seen/last setlevel
+std::string name;
+std::string guid;
+std::string greeting;
+std::bitset<MAX_COMMANDS> permissions;
+std::string title;
+};
+
+ */
+
+#include <fstream>
+#include <boost/format.hpp>
+void Session::PrintDB()
+{
+    std::ofstream out("log.txt");
+    out << "****************************\n";
+    for(int i = 0; i < MAX_CLIENTS; i++)
+    {
+        
+        out << (boost::format("(%d)(%d)(%s)(%s)(%s)(%s)(%s)\n")
+            
+            % clients_[i].id % clients_[i].level % clients_[i].name.c_str() %
+            clients_[i].guid.c_str() % clients_[i].greeting.c_str() %
+            clients_[i].permissions.to_string().c_str() % 
+            clients_[i].title.c_str()
+            
+            ).str();
+           
+    }
+    out << "****************************\n";
+    out.close();
 }

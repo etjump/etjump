@@ -224,7 +224,7 @@
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />
-    <ClInclude Include="g_save.h" />
+    <ClInclude Include="g_save.hpp" />
     <ClInclude Include="g_utilities.hpp" />
     <ClInclude Include="g_sessiondb.hpp" />
     <ClInclude Include="g_sqlite.hpp" />
@@ -232,7 +232,6 @@
     <ClInclude Include="..\botai\inv.h" />
     <ClInclude Include="..\botai\match.h" />
     <ClInclude Include="q_shared.h" />
-    <ClInclude Include="sqlite.hpp" />
     <ClInclude Include="surfaceflags.h" />
     <ClInclude Include="..\botai\syn.h" />
   </ItemGroup>

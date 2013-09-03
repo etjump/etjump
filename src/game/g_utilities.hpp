@@ -41,10 +41,11 @@ std::string Vec3ToString( vec_t x, vec_t y, vec_t z );
 
 gentity_t *PlayerGentityFromString(char *name, char *err, int size);
 gentity_t *PlayerGentityFromString(const std::string& name, 
-                                   char *err, int size);
+                                   std::string& err);
 // Removes duplicate chars
 void RemoveDuplicates(std::string& out);
 void CharPtrToString( const char* p, std::string& s );
 
 std::string GetPath( const std::string& file );
+bool MapExists( const std::string& map );
 #endif // g_utilities_h__

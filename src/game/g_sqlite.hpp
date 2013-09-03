@@ -2,30 +2,11 @@
 #define g_sqlite_h__
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include "sqlite3.h"
 
 class Database;
-
-// This has to be defined here because else we'd run into a circular
-// include hell. Needed for the callback
-// Users are stored in a map where GUID is the key
-// which is a regular string
-// The actual user data (dbid, hwid, level, name, pcmds, ptitle, pgreet)
-// is stored in a struct
-
-struct UserData_s
-{
-    UserData_s();
-    int id;
-    int level;
-    std::string hwid;
-    std::string name;
-    std::string personalCmds;
-    std::string personalTitle;
-    std::string personalGreeting;
-};
-
-typedef boost::shared_ptr<UserData_s> UserData;
+struct UserData_s;
 
 class SQLite 
 {

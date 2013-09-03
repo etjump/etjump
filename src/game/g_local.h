@@ -1203,6 +1203,7 @@ typedef struct {
 
     ipMute_t    ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
+    qboolean    ghostPlayers;
 } level_locals_t;
 
 typedef struct {

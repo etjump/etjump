@@ -14,11 +14,8 @@ extern "C" {
 #undef min
 #endif
 
-#include "g_save.h"
 #include "g_database.hpp"
-#include "g_sessiondb.hpp"
 
-extern class SaveSystem       positions;
 extern class Database         adminDB;
 
 #endif // g_local_hpp__

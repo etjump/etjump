@@ -1,5 +1,9 @@
 #include "g_database.hpp"
 #include "g_utilities.hpp"
+#include <boost/format.hpp>
+#include "g_sqlite.hpp"
+#include "g_levels.hpp"
+#include "g_sessiondb.hpp"
 
 SQLite Database::udb_;
 LevelDatabase Database::ldb_;
@@ -25,7 +29,6 @@ Database::~Database()
 void Database::Init()
 {
     users_.clear();
-    // Hack, couldn't really figure this out @ 3am
     udb_.Init();
     ldb_.ReadLevels();
 }
@@ -51,7 +54,6 @@ void Database::ClientGuidReceived( gentity_t *ent, const std::string& guid )
         {
             greeting = it->second->personalGreeting;   
         }
-
         Session::ClientConnect(ent, it->second->id, guid, 
             it->second->level, 
             it->second->name,
@@ -61,8 +63,17 @@ void Database::ClientGuidReceived( gentity_t *ent, const std::string& guid )
             it->second->personalTitle);
     } else
     {
+        UserData newUser;
+        try
+        {
+        	newUser = UserData(new UserData_s);
+        }
+        catch( std::bad_alloc& e )
+        {
+            G_LogPrintf("Failed to allocate memory for a new user.\n");
+            return;
+        }
         // User is not in the DB
-        UserData newUser = UserData(new UserData_s);
         newUser->hwid = "";
         newUser->id = highestId_ + 1;
         highestId_ = newUser->id;
@@ -99,6 +110,14 @@ void Database::PrintAdminTest( gentity_t *ent )
     int level = Session::Level(ent);
     ChatPrintAll(va("^3admintest: ^7%s^7 is a level %d user (%s^7)",
         ent->client->pers.netname, level, ldb_.Name(level).c_str()));
+}
+
+    void Database::PrintFinger( gentity_t *ent, gentity_t *target )
+{
+    int level = Session::Level( target );
+
+    ChatPrintAll((boost::format("^3finger:^7 %s ^7(%s^7) is a level %d user (%s^7)") % target->client->pers.netname %
+        Session::Name(target) % level % ldb_.Name(level)).str());
 }
 
 bool Database::SetLevel( gentity_t *ent, gentity_t *target, int level )

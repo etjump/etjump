@@ -2888,6 +2888,12 @@ void CG_toggleSwing_f(void);
 void CG_Info_f(void);
 
 //
+// cg_manual.c
+// 
+
+void CG_Manual_f( void );
+
+//
 // cg_servercmds.c
 //
 void CG_ExecuteNewServerCommands( int latestSequence );

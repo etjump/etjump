@@ -1,4 +1,4 @@
-#include "g_save.h"
+#include "g_save.hpp"
 #include "g_local.hpp"
 #include "g_utilities.hpp"
 #include "g_sessiondb.hpp"
@@ -6,12 +6,11 @@
 #include "g_database.hpp"
 #include <boost/algorithm/string/replace.hpp>
 
-SaveSystem       positions;
 Database         adminDB;
 
 void OnGameInit() {
     // Init save db
-    positions.Reset();
+    SaveSystem::Reset();
     adminDB.Init();
 }
 
@@ -22,19 +21,22 @@ void OnGameShutdown() {
 void OnClientConnect( int clientNum, qboolean firstTime, qboolean isBot )
 {
     if(firstTime) {
-        Session::ResetClient(g_entities + clientNum);
+        // Zero: gentity isn't _always_ updated yet, so if ResetClient is called with
+        // gentity (g_entities + clientNum) instead of just clientNum, it will
+        // always reset client with cnum 0
+        Session::ResetClient(clientNum);
     }
 }
 
 void OnClientBegin(gentity_t *ent) 
 {
-    positions.LoadPositionsFromDatabase(ent);
+    SaveSystem::LoadPositionsFromDatabase(ent);
 }
 
 void OnClientDisconnect(gentity_t *ent) 
 {
-    positions.SavePositionsToDatabase(ent);
-    positions.ResetSavedPositions(ent);
+    SaveSystem::SavePositionsToDatabase(ent);
+    SaveSystem::ResetSavedPositions(ent);
     Session::ResetClient(ent);
 }
 
@@ -79,7 +81,7 @@ void PrintGreeting( gentity_t * ent )
         ChatPrintAll(greeting);
     }
 
-
+    ent->client->sess.needGreeting = qfalse;
 }
 
 void GuidReceived(gentity_t *ent)

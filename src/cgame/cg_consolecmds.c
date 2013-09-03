@@ -1040,7 +1040,10 @@ static consoleCommand_t	commands[] =
 	{ "portal", CG_portalinfo_f },
 	{ "chs", CG_InfoCHS_f },
 	{ "minimize", CG_Minimize_f },
-	{ "min", CG_Minimize_f }
+	{ "min", CG_Minimize_f },
+    { "help", CG_Manual_f },
+    { "man", CG_Manual_f },
+    { "manual", CG_Manual_f }
 };
 
 
@@ -1190,4 +1193,7 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand ("setspawnpt");
 	trap_AddCommand ("minimize");
 	trap_AddCommand ("min");
+    trap_AddCommand ("man");
+    trap_AddCommand ("manual");
+    trap_AddCommand ("help");
 }

@@ -100,7 +100,17 @@ void LevelDatabase::ReadLevels()
         return;
     } else
     {
-        boost::shared_array<char> file(new char[len+1]);
+        boost::shared_array<char> file;
+        try
+        {
+        	file = boost::shared_array<char>(new char[len+1]);
+        }
+        catch( std::bad_alloc& e )
+        {
+            G_LogPrintf("Failed to allocate memory to parse level config.\n");
+            trap_FS_FCloseFile(f);
+            return;
+        }
 
         trap_FS_Read(file.get(), len, f);
         file[len] = 0;
@@ -150,7 +160,16 @@ void LevelDatabase::ReadLevels()
 
             if(!Q_stricmp(token, "[level]"))
             {
-                tempLevel = LevelData(new LevelData_s);
+                try
+                {
+                	tempLevel = LevelData(new LevelData_s);
+                }
+                catch( std::bad_alloc& e )
+                {
+                    G_LogPrintf("Failed to allocate memory for a level.\n");
+                    return;
+                }
+                
                 levelOpen = true;
             }
 
@@ -209,21 +228,29 @@ void LevelDatabase::CreateDefaultLevels()
         return;
     }
 
-    LevelData tempLevel = LevelData(new LevelData_s(0, "Visitor", 
-        "Welcome Visitor [n]^7!", ""));
-    levels_.push_back(tempLevel);
+    try
+    {
+        LevelData tempLevel = LevelData(new LevelData_s(0, "Visitor", 
+            "Welcome Visitor [n]^7!", ""));
+        levels_.push_back(tempLevel);
 
-    tempLevel = LevelData(new LevelData_s(1, "Friend", 
-        "Welcome Friend [n]^7!", ""));
-    levels_.push_back(tempLevel);
+        tempLevel = LevelData(new LevelData_s(1, "Friend", 
+            "Welcome Friend [n]^7!", ""));
+        levels_.push_back(tempLevel);
 
-    tempLevel = LevelData(new LevelData_s(2, "Moderator",
-        "Welcome Moderator [n]^7!", ""));
-    levels_.push_back(tempLevel);
+        tempLevel = LevelData(new LevelData_s(2, "Moderator",
+            "Welcome Moderator [n]^7!", ""));
+        levels_.push_back(tempLevel);
 
-    tempLevel = LevelData(new LevelData_s(3, "Administrator",
-        "Welcome Administrator [n]^7!", ""));
-    levels_.push_back(tempLevel);
+        tempLevel = LevelData(new LevelData_s(3, "Administrator",
+            "Welcome Administrator [n]^7!", ""));
+        levels_.push_back(tempLevel);
+    }
+    catch( std::bad_alloc& e )
+    {
+        G_LogPrintf("Failed to allocate memory for a default level.\n");
+        return;
+    }
 
     WriteLevels();
 }

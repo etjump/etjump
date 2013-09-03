@@ -1706,3 +1706,8 @@ void SP_target_ftrelay( gentity_t *self )
 {
     self->use = target_ftrelay_use;
 }
+
+void SP_target_start_timer( gentity_t *self )
+{
+    
+}

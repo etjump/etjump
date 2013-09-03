@@ -41,7 +41,16 @@ bool SQLite::Init()
     UserData temp;
     while(true)
     {
-        temp = UserData(new UserData_s);
+        try
+        {
+        	temp = UserData(new UserData_s);
+        }
+        catch( std::bad_alloc& e )
+        {
+            G_LogPrintf("Failed to allocate memory for a user.\n");
+            return false;
+        }
+        
 
         rc = sqlite3_step(selectAllFromUsers_);
         if(rc == SQLITE_ROW)
