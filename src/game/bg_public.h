@@ -2459,8 +2459,15 @@ static const struct Manual commandManuals[] = {
     "Magical 8 Ball of pure awesomeness gives an answer to any question you might have!"},
     {"admintest", "!admintest", "Displays your admin level"},
     {"cancelvote", "!cancelvote", "Cancels current vote in progress"},
+    {"edituser", "!edituser -id [id] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n"
+    "!edituser -guid [guid] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n",
+    "Used to edit user admin attributes such as personal commands, personal title and personal greeting."
+    "Users can be identified using either user ID or the GUID. All of the \"-cmds|-title|-greeting\" switches are optional "
+    "but atleast one must be given."},
     {"finger", "!finger <target>", "Displays target's admin level."},
     {"help", "!help\n!help [command]", "Prints useful information about commands."},
+    {"kick", "!kick [target]\n!kick [target] [timeout]\n!kick [target] [timeout] [reason]",
+    "Kicks target player."},
     {"map", "!map [map name]", "Changes map."},
     {"mute", "!mute [target]", "Mutes target player."},
     {"passvote", "!passvote", "Passes current vote in progress"},

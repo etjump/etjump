@@ -22,7 +22,7 @@ void CG_Manual_f(void)
     {
         if(!Q_stricmp(cmd, commandManuals[i].cmd))
         {
-            CG_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n\n",
+            CG_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n",
                 cmd, commandManuals[i].usage, commandManuals[i].description);
             return;
         }

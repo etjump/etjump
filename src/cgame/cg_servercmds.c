@@ -2459,6 +2459,7 @@ static void CG_ServerCommand( void ) {
     if(!Q_stricmp(cmd, "manual"))
     {
         CG_Manual_f();
+        return;
     }
 
 	if (!Q_stricmp(cmd, "rename")) {

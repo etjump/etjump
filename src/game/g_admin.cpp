@@ -16,8 +16,10 @@ static std::map<std::string, AdminCommand_s> adminCommands
     ("8ball", AdminCommand_s(AdminCommand::Magical8Ball, '8', "Magical 8 ball of pure awesomeness gives an answer to any question that you might have!", "!8ball <question>"))
     ("admintest", AdminCommand_s(AdminCommand::Admintest, 'a', "Displays your current admin level.", "!admintest"))
     ("cancelvote", AdminCommand_s(AdminCommand::Cancelvote, 'C',"Cancels current vote in progress.", "!cancelvote"))
+    ("edituser", AdminCommand_s(AdminCommand::EditUser, 'A', "Edits user's attributes.", "!edituser meh"))
     ("finger", AdminCommand_s(AdminCommand::Finger, 'f', "Displays target's admin level.", "!finger <target>"))
     ("help", AdminCommand_s(AdminCommand::Help, 'f', "Prints useful information about commands.", "!help <command>"))
+    ("kick", AdminCommand_s(AdminCommand::Kick, 'k', "Kicks target player.", "!kick <target>"))
     ("map", AdminCommand_s(AdminCommand::Map, 'M', "Changes map.", "!map <mapname>"))
     ("mute", AdminCommand_s(AdminCommand::Mute, 'm', "Mutes target player.", "!mute <target>"))
     ("passvote", AdminCommand_s(AdminCommand::Passvote, 'P', "Passes the current vote in progress.", "!passvote}"))
@@ -52,6 +54,27 @@ void MutePlayer(gentity_t *target)
     ip = Info_ValueForKey(userinfo, "ip");
 
     G_AddIpMute(ip);
+}
+
+void PrintManual(gentity_t *ent, const std::string& command)
+{
+    if(ent)
+    {
+        ChatPrintTo(ent, va("^3%s: ^7check console for more information.", command.c_str()));
+        trap_SendServerCommand(ent->client->ps.clientNum, va("manual %s", command.c_str()));
+    } else
+    {
+        for(int i = 0; i < sizeof(commandManuals)/sizeof(commandManuals[0]); i++)
+        {
+            if(!Q_stricmp(commandManuals[i].cmd, command.c_str()))
+            {
+                G_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n",
+                    commandManuals[i].cmd, commandManuals[i].usage, 
+                    commandManuals[i].description);
+                return;
+            }
+        }
+    }
 }
 
 namespace AdminCommand
@@ -94,7 +117,7 @@ namespace AdminCommand
 
         if(argv->size() != 2)
         {
-            ChatPrintTo(ent, "^3usage: ^7!8ball <question>");
+            PrintManual(ent, "8ball");
             return false;
         }
 
@@ -136,7 +159,7 @@ namespace AdminCommand
     {
         if(argv->size() != 2)
         {
-            ChatPrintTo(ent, "^3usage:^7 !finger <name>");
+            PrintManual(ent, "finger");
             return false;
         }
 
@@ -219,7 +242,7 @@ namespace AdminCommand
         const unsigned MIN_ARGS = 2;
         if(argv->size() < MIN_ARGS)
         {
-            ChatPrintTo(ent, "^3usage: ^7!kick <player> <timeout> <reason>");
+            PrintManual(ent, "kick");
             return false;
         }
 
@@ -297,7 +320,7 @@ namespace AdminCommand
     {
         if(argv->size() != 2)
         {
-            ChatPrintTo(ent, "^3usage: ^7!rmsaves <target>");
+            PrintManual(ent, "rmsaves");
             return false;
         }
 
@@ -327,8 +350,7 @@ namespace AdminCommand
         // !setlevel -id id level
         if(argv->size() < 3)
         {
-            ChatPrintTo(ent, "^3usage: ^7!setlevel <player> <level>");
-            ChatPrintTo(ent, "^3usage: ^7!setlevel -id <id> <level>");
+            PrintManual(ent, "setlevel");
             return false;
         } else if(argv->size() == 3)
         {
@@ -407,19 +429,6 @@ namespace AdminCommand
         return true;
     }
 
-    void PrintEditUserUsage(gentity_t *ent)
-    {
-        ChatPrintTo(ent, "^3usage: ^7check console for more information.");
-        BeginBufferPrint();
-        BufferPrint(ent, "!EditUser\n\n");
-        BufferPrint(ent, "Identifying user using user ID: \n");
-        BufferPrint(ent, "!edituser -id <id> -cmds <personal commands> -title <personal title> -greeting <personal greeting>\n\n");
-        BufferPrint(ent, "Identifying user using GUID: \n");
-        BufferPrint(ent, "!edituser -guid <guid> -cmds <personal commands> -title <personal title> -greeting <personal greeting>\n\n");
-        BufferPrint(ent, "All the \"-cmds|-title|-greeting\" switches are optional but atleast one is required.\n");
-        FinishBufferPrint(ent, false);
-    }
-
     bool EditUser(gentity_t *ent, Arguments argv)
     {
         // !edituser -id <id> -cmds <personal commands> -title <personal title> -greeting <personal greeting>
@@ -427,10 +436,115 @@ namespace AdminCommand
         
         if(argv->size() < 5)
         {
-            PrintEditUserUsage(ent);
+            PrintManual(ent, "edituser");
             return false;
         }
 
+        enum Mode {
+            NONE,
+            ID,
+            GUID
+        };
+
+        int mode = NONE;
+        int id = 0;
+        std::string guid;
+        if((*argv)[1] == "-id")
+        {
+            if(!StringToInt((*argv)[2], id))
+            {
+                ChatPrintTo(ent, "^3edituser: ^7invalid id \"" + (*argv)[2] + "\" specified.");
+                return false;
+            }
+            mode = ID;
+        } else if((*argv)[1] == "-guid")
+        {
+            mode = GUID;
+            guid = (*argv)[2];
+        } else
+        {
+            PrintManual(ent, "edituser");
+            return false;
+        }
+
+        ConstArgIter it = argv->begin() + 3;
+
+        const int STATE_NONE = 0;
+        const int STATE_COMMANDS = 1;
+        const int STATE_TITLE = 2;
+        const int STATE_GREETING = 4;
+        const int STATE_LEVEL = 8;
+
+        int parsing = STATE_NONE;
+        int updated = STATE_NONE;
+        int level = 0;
+        std::string commands;
+        std::string title;
+        std::string greeting;
+
+        while(it != argv->end())
+        {
+            if(*it == "-cmds" && it+1 != argv->end())
+            {
+                parsing = STATE_COMMANDS;
+                it++;
+                continue;
+            } else if(*it == "-title" && it+1 != argv->end())
+            {
+                parsing = STATE_TITLE;
+                it++;
+                continue;
+            } else if(*it == "-greeting" && it+1 != argv->end())
+            {
+                parsing = STATE_GREETING;
+                it++;
+                continue;
+            } else if(*it == "-level" && it+1 != argv->end())
+            {
+                parsing = STATE_LEVEL;
+                it++;
+                continue;
+            }
+            
+            // For commands spaces are useless
+            if(parsing == STATE_COMMANDS)
+            {
+                updated |= STATE_COMMANDS;
+                commands += *it;
+            } 
+            // For title & greeting spaces are there for a reason
+            else if(parsing == STATE_TITLE)
+            {
+                updated |= STATE_TITLE;
+                title += *it + " ";
+            } else if(parsing == STATE_GREETING)
+            {
+                updated |= STATE_GREETING;
+                greeting += *it + " ";
+            } else if(parsing == STATE_LEVEL)
+            {
+                updated |= STATE_LEVEL;
+                if(!StringToInt(*it, level))
+                {
+                    ChatPrintTo(ent, "^3edituser: ^7invalid level \"" + *it + "\" specified.");
+                    return false;
+                }
+            }
+         
+            it++;
+        }
+
+        boost::trim_right(greeting);
+        boost::trim_right(title);
+
+        if(mode == ID)
+        {
+            adminDB.UpdateUserByID(ent, id, updated, level, commands, greeting, title);
+        } else 
+        {
+            adminDB.UpdateUserByGUID(ent, guid, updated, level, commands, greeting, title);
+        }
+        
         return true;
     }
 
@@ -438,7 +552,7 @@ namespace AdminCommand
     {
         if(argv->size() != 2)
         {
-            ChatPrintTo(ent, "^3usage: ^7!map <mapname>");
+            PrintManual(ent, "map");
             return false;
         }
 
@@ -456,7 +570,7 @@ namespace AdminCommand
     {
         if(argv->size() != 2)
         {
-            ChatPrintTo(ent, "^3usage: ^7!mute <target>");
+            PrintManual(ent, "mute");
             return false;
         }
 
@@ -496,32 +610,6 @@ namespace AdminCommand
         return true;
     }
 }
-
-/*
-// FIXME: move to .hpp
-struct AdminCommand_s
-{
-    std::string keyword;
-    bool (*handler)(gentity_t *ent, Arguments argv);
-    char flag;
-    std::string function;
-    std::string syntax;
-};
-
-static AdminCommand_s AdminCommandList[] =
-{
-    {"8ball", AdminCommands::Magical8Ball, '8', "Magical 8 ball of pure awesomeness gives an answer to any question that you might have!", "!8ball <question>"},
-    {"admintest", AdminCommands::Admintest, 'a', "Displays your current admin level.", "!admintest"},
-    {"cancelvote", AdminCommands::Cancelvote, 'C',"Cancels current vote in progress.", "!cancelvote"},
-    {"finger", AdminCommands::Finger, 'f', "Displays target's admin level.", "!finger <target>"},
-    {"map", AdminCommands::Map, 'M', "Changes map.", "!map <mapname>"},
-    {"mute", AdminCommands::Mute, 'm', "Mutes target player.", "!mute <target>"},
-    {"passvote", AdminCommands::Passvote, 'P', "Passes the current vote in progress.", "!passvote}"},
-    {"setlevel", AdminCommands::Setlevel, 's', "Sets the target's admin level.", "!setlevel <target> <level>\n!setlevel -id <id> <level>"},
-    {"", 0, 0, "", ""}
-};
-};
-};*/
 
 qboolean CheckCommand( gentity_t *ent )
 {

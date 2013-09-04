@@ -23,6 +23,9 @@ public:
     bool AddNewUser(int id, const std::string& guid, const std::string& name);
     // Sets the level of an existing user
     bool SetLevel(gentity_t *ent, int level);
+    // Updates user attributes
+    bool UpdateUser(int id, int level, const std::string& cmds, const std::string& greeting,
+        const std::string& title);
 private:
     // This is called on Init() and will prepare all the statements for
     // later use. It will also create the tables.
@@ -44,6 +47,7 @@ private:
     sqlite3_stmt *selectAllFromUsers_;
     sqlite3_stmt *insertIntoUsers_;
     sqlite3_stmt *setlevelUpdate_;
+    sqlite3_stmt *edituserUpdate_;
 };
 
 #endif // g_database_h__

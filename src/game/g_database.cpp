@@ -1,6 +1,7 @@
 #include "g_database.hpp"
 #include "g_utilities.hpp"
 #include <boost/format.hpp>
+#include <vector>
 #include "g_sqlite.hpp"
 #include "g_levels.hpp"
 #include "g_sessiondb.hpp"
@@ -180,6 +181,105 @@ bool Database::IDSetLevel( gentity_t *ent, int id, int level )
         level, 
         ldb_.Name(level).c_str()));
     return true;
+}
+
+void Database::UpdateUserByID( gentity_t *ent, int id, int updated, 
+                              int level, const std::string& commands, 
+                              const std::string& greeting, 
+                              const std::string& title )
+{
+    UserIter user = users_.begin();
+    for(; user != users_.end(); user++)
+    {
+        if(user->second->id == id)
+        {
+
+            break;
+        }
+    }
+    ChatPrintTo(ent, "^3system: ^7couldn't find user with ID=" + IntToString(id) + "." );
+}
+
+void Database::UpdateUserByGUID( gentity_t *ent, const std::string& guid, 
+                                int updated, int level, 
+                                const std::string& commands, 
+                                const std::string& greeting, 
+                                const std::string& title )
+{
+    UserIter user = users_.lower_bound(guid);
+    if(user == users_.end())
+    {
+        ChatPrintTo(ent, "^3system: ^7couldn't find user with GUID=" + guid + ".");
+        return;
+    }
+
+    std::vector<UserIter> matchingUsers;
+
+    while(user != users_.end())
+    {
+        // Just in case
+        if(user->first.length() < guid.length())
+        {
+            break;
+        }
+
+        if(user->first.compare(0, guid.length(), guid) == 0)
+        {
+            matchingUsers.push_back(user);
+        }
+        user++;
+    }
+
+    // should never happen
+    if(matchingUsers.size() == 0)
+    {
+        ChatPrintTo(ent, "^3system: ^7couldn't find user with GUID=" + guid + ".");
+        return;
+    } else if(matchingUsers.size() == 1)
+    {
+        const int STATE_NONE = 0;
+        const int STATE_COMMANDS = 1;
+        const int STATE_TITLE = 2;
+        const int STATE_GREETING = 4;
+        const int STATE_LEVEL = 8;
+
+        if(updated & STATE_LEVEL)
+        {
+            matchingUsers[0]->second->level = level;
+        }
+
+        if(updated & STATE_COMMANDS)
+        {
+            matchingUsers[0]->second->personalCmds = commands;
+        }
+
+        if(updated & STATE_GREETING)
+        {
+            matchingUsers[0]->second->personalGreeting = greeting;
+        }
+
+        if(updated & STATE_TITLE)
+        {
+            matchingUsers[0]->second->personalTitle = title;
+        }
+        udb_.UpdateUser(matchingUsers[0]->second->id, 
+            matchingUsers[0]->second->level, 
+            matchingUsers[0]->second->personalCmds,
+            matchingUsers[0]->second->personalGreeting, 
+            matchingUsers[0]->second->personalTitle);
+    } else {
+        ChatPrintTo(ent, "^3system: ^7multiple matching users. Check console for more information.");
+        BeginBufferPrint();
+        BufferPrint(ent, "Please use \"-id\" switch to specify target user.\n");
+        BufferPrint(ent, "Matching users:\n");
+        BufferPrint(ent, "ID   |GUID    |Name                                \n");
+        for(std::vector<UserIter>::const_iterator it = matchingUsers.begin();
+            it != matchingUsers.end(); it++)
+        {
+            BufferPrint(ent, (boost::format("%-5.d|%-8.8s|%-.36s\n") % (*it)->second->id % (*it)->first % (*it)->second->name).str());
+        }
+        FinishBufferPrint(ent, false);
+    }
 }
 
 

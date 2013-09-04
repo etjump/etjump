@@ -40,6 +40,12 @@ public:
     static void PrintFinger(gentity_t *ent, gentity_t *target);
     static bool SetLevel(gentity_t *ent, gentity_t *target, int level);
     static bool IDSetLevel(gentity_t *ent, int id, int level);
+    static void UpdateUserByID(gentity_t *ent, int id, int updated,
+        int level, const std::string& commands, const std::string& greeting,
+        const std::string& title);
+    static void UpdateUserByGUID(gentity_t *ent, const std::string& guid,
+        int updated, int level, const std::string& commands, const std::string& greeting,
+        const std::string& title);
 private:
     // Database connection to store users
     static SQLite udb_;

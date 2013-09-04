@@ -2,6 +2,7 @@
 #include "g_local.hpp"
 #include "g_sqlite.hpp"
 #include "g_utilities.hpp"
+#include "g_sessiondb.hpp"
 
 SQLite::SQLite()
 {
@@ -180,6 +181,15 @@ bool SQLite::PrepareStatements()
         G_LogPrintf("Preparing setLevelUpdate statement failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
     }
+
+    rc = sqlite3_prepare_v2(db_,
+        "UPDATE users SET level=?, pcommands=?, pgreeting=?, ptitle=? WHERE id=?;",
+        -1, &edituserUpdate_, 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Preparing edituserUpdate statement failed: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+    }
     return true;
 }
 
@@ -188,6 +198,7 @@ void SQLite::FinalizeStatements()
     sqlite3_finalize(insertIntoUsers_);
     sqlite3_finalize(selectAllFromUsers_);
     sqlite3_finalize(setlevelUpdate_);
+    sqlite3_finalize(edituserUpdate_);
 }
 
 bool SQLite::AddNewUser( int id, const std::string& guid, const std::string& name )
@@ -288,5 +299,60 @@ bool SQLite::SetLevel( gentity_t *ent, int level )
         return false;
     }
 
+    return true;
+}
+
+bool SQLite::UpdateUser( int id, int level, const std::string& cmds, const std::string& greeting, const std::string& title )
+{
+    sqlite3_reset(edituserUpdate_);
+
+    int rc = sqlite3_bind_int(edituserUpdate_, 1, level);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind level to edituser query: (%d) %s",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_bind_text(edituserUpdate_, 2, cmds.c_str(),
+        cmds.length(), 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind commands to edituser query: (%d) %s",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_bind_text(edituserUpdate_, 3, greeting.c_str(), greeting.length(), 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind greeting to edituser query: (%d) %s",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_bind_text(edituserUpdate_, 4, title.c_str(), title.length(), 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind title to edituser query: (%d) %s",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_bind_int(edituserUpdate_, 5, id);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind id to edituser query: (%d) %s",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_step(edituserUpdate_);
+    if(rc != SQLITE_DONE)
+    {
+        G_LogPrintf("Couldn't execute edituser query: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
     return true;
 }

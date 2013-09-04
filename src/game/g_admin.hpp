@@ -37,8 +37,10 @@ namespace AdminCommand
 {
     bool Magical8Ball(gentity_t *ent, Arguments argv);
     bool Admintest(gentity_t *ent, Arguments argv);
+    bool EditUser(gentity_t *ent, Arguments argv);
     bool Finger(gentity_t *ent, Arguments argv);
     bool Help(gentity_t *ent, Arguments argv);
+    bool Kick(gentity_t *ent, Arguments argv);
     bool Cancelvote(gentity_t *ent, Arguments argv);
     bool Passvote(gentity_t *ent, Arguments argv);
     bool RemoveSaves(gentity_t *ent, Arguments argv);
