@@ -3928,6 +3928,8 @@ qboolean ClientIsFlooding(gentity_t *ent)
 	return qfalse;
 }
 
+void HWIDReceived( gentity_t * ent );
+
 void ClientCommand(int clientNum)
 {
 	gentity_t	*ent;
@@ -3949,7 +3951,12 @@ void ClientCommand(int clientNum)
     }
 
     if(!Q_stricmp(cmd, "HWID")) {
+        // HWIDReceived(ent);
         return;
+    }
+
+    if(!Q_stricmp(cmd, "NOHWID")) {
+      //  HWIDReceived(ent);
     }
 
 	if(ent->client->pers.connected != CON_CONNECTED) {

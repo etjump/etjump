@@ -1577,7 +1577,7 @@ void target_increase_ident_use ( gentity_t *self, gentity_t *other, gentity_t *a
 
     if(!activator || !activator->client)
     {
-        G_DPrintf("Error: trying to activate \"target_remove_portals\" without an activator.\n");
+        G_DPrintf("Error: trying to activate \"target_increase_ident\" without an activator.\n");
         return;
     }
 
@@ -1705,9 +1705,4 @@ void target_ftrelay_use( gentity_t *self, gentity_t *other, gentity_t *activator
 void SP_target_ftrelay( gentity_t *self )
 {
     self->use = target_ftrelay_use;
-}
-
-void SP_target_start_timer( gentity_t *self )
-{
-    
 }

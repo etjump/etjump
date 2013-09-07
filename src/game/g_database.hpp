@@ -46,6 +46,10 @@ public:
     static void UpdateUserByGUID(gentity_t *ent, const std::string& guid,
         int updated, int level, const std::string& commands, const std::string& greeting,
         const std::string& title);
+    static bool LevelExists(int level);
+    static void AddLevel(gentity_t *ent, int level);
+    static void AddLevel(gentity_t *ent, int level, const std::string& commands,
+        const std::string& greeting, const std::string& title);
 private:
     // Database connection to store users
     static SQLite udb_;
@@ -58,5 +62,11 @@ private:
     static std::map<std::string, UserData> users_;
 
 };
+
+const int UPDATED_NONE = 0;
+const int UPDATED_COMMANDS = 1;
+const int UPDATED_TITLE = 2;
+const int UPDATED_GREETING = 4;
+const int UPDATED_LEVEL = 8;
 
 #endif // g_database_h__

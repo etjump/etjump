@@ -60,6 +60,9 @@ public:
     static std::string Title(gentity_t *ent);
     static bool HasPermission(gentity_t *ent, char flag);
     static std::string Name(gentity_t *ent);
+    static void UpdateUser(int id, int updated, int level, const std::string& levelCommands,
+        const std::string& commands,
+        const std::string& greeting, const std::string& title);
 private:
     static void SetPermissions(Client& client, 
         const std::string& personalCmds, const std::string& levelCmds);

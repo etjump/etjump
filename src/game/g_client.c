@@ -2109,6 +2109,22 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
     }
 }
 
+void ClearPortals( gentity_t * ent ) 
+{
+    //Clear portalgun portals
+    if(ent->portal_blue)
+    {
+        G_FreeEntity(ent->portal_blue);
+        ent->portal_blue = NULL;
+    }
+
+    if(ent->portal_red)
+    {
+        G_FreeEntity(ent->portal_blue);
+        ent->portal_blue = NULL;
+    }
+}
+
 /*
 ===========
 ClientDisconnect
@@ -2256,6 +2272,9 @@ void ClientDisconnect( int clientNum ) {
 	// OSP
 	G_verifyMatchState(i);
 	// OSP
+
+    ClearPortals(ent);
+
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

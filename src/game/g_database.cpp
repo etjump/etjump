@@ -193,8 +193,47 @@ void Database::UpdateUserByID( gentity_t *ent, int id, int updated,
     {
         if(user->second->id == id)
         {
+            ChatPrintTo(ent, "^3system: ^7updated user with id=" + IntToString(user->second->id));
+            if(ent)
+            {
+                ChatPrintTo(ent, "^3system: ^7check console for more information.");
+            }
+            BeginBufferPrint();
 
-            break;
+            if(updated & UPDATED_LEVEL)
+            {
+                user->second->level = level;
+                BufferPrint(ent, "Updated level: " + IntToString(level) + "\n");
+            }
+
+            if(updated & UPDATED_COMMANDS)
+            {
+                user->second->personalCmds = commands;
+                BufferPrint(ent, "Updated personal commands: " + commands + "\n");
+            }
+
+            if(updated & UPDATED_GREETING)
+            {
+                user->second->personalGreeting = greeting;
+                BufferPrint(ent, "Updated personal greeting: " + greeting + "\n");
+            }
+
+            if(updated & UPDATED_TITLE)
+            {
+                user->second->personalTitle = title;
+                BufferPrint(ent, "Updated personal title: " + title + "\n");
+            }
+            udb_.UpdateUser(user->second->id, 
+                user->second->level, 
+                user->second->personalCmds,
+                user->second->personalGreeting, 
+                user->second->personalTitle);
+            FinishBufferPrint(ent, false);
+
+            // personal and level commands must be given always
+            Session::UpdateUser(user->second->id, updated, level, 
+                ldb_.Permissions(level), user->second->personalCmds, greeting, title);
+            return;
         }
     }
     ChatPrintTo(ent, "^3system: ^7couldn't find user with ID=" + IntToString(id) + "." );
@@ -237,36 +276,45 @@ void Database::UpdateUserByGUID( gentity_t *ent, const std::string& guid,
         return;
     } else if(matchingUsers.size() == 1)
     {
-        const int STATE_NONE = 0;
-        const int STATE_COMMANDS = 1;
-        const int STATE_TITLE = 2;
-        const int STATE_GREETING = 4;
-        const int STATE_LEVEL = 8;
-
-        if(updated & STATE_LEVEL)
+        ChatPrintTo(ent, "^3system: ^7updated user with GUID=" + guid);
+        if(ent)
+        {
+            ChatPrintTo(ent, "^3system: ^7check console for more information.");
+        }
+        BeginBufferPrint();
+        
+        if(updated & UPDATED_LEVEL)
         {
             matchingUsers[0]->second->level = level;
+            BufferPrint(ent, "Updated level: " + IntToString(level) + "\n");
         }
 
-        if(updated & STATE_COMMANDS)
+        if(updated & UPDATED_COMMANDS)
         {
             matchingUsers[0]->second->personalCmds = commands;
+            BufferPrint(ent, "Updated personal commands: " + commands + "\n");
         }
 
-        if(updated & STATE_GREETING)
+        if(updated & UPDATED_GREETING)
         {
             matchingUsers[0]->second->personalGreeting = greeting;
+            BufferPrint(ent, "Updated personal greeting: " + greeting + "\n");
         }
 
-        if(updated & STATE_TITLE)
+        if(updated & UPDATED_TITLE)
         {
             matchingUsers[0]->second->personalTitle = title;
+            BufferPrint(ent, "Updated personal title: " + title + "\n");
         }
         udb_.UpdateUser(matchingUsers[0]->second->id, 
             matchingUsers[0]->second->level, 
             matchingUsers[0]->second->personalCmds,
             matchingUsers[0]->second->personalGreeting, 
             matchingUsers[0]->second->personalTitle);
+        FinishBufferPrint(ent, false);
+        // personal and level commands must be given always
+        Session::UpdateUser(matchingUsers[0]->second->id, updated, level, 
+            ldb_.Permissions(level), matchingUsers[0]->second->personalCmds, greeting, title);
     } else {
         ChatPrintTo(ent, "^3system: ^7multiple matching users. Check console for more information.");
         BeginBufferPrint();
@@ -280,6 +328,35 @@ void Database::UpdateUserByGUID( gentity_t *ent, const std::string& guid,
         }
         FinishBufferPrint(ent, false);
     }
+}
+
+bool Database::LevelExists( int level )
+{
+    return ldb_.LevelExists(level);
+}
+
+void Database::AddLevel( gentity_t *ent, int level )
+{
+    if(ldb_.LevelExists(level))
+    {
+        ChatPrintTo(ent, "^3system: ^7level already exists.");
+        return;
+    }
+
+    ldb_.AddLevel(level);
+    ChatPrintTo(ent, "^3addlevel: ^7added level " + IntToString(level) + ".");
+}
+
+void Database::AddLevel( gentity_t *ent, int level, const std::string& commands, const std::string& greeting, const std::string& title )
+{
+    if(ldb_.LevelExists(level))
+    {
+        ChatPrintTo(ent, "^3system: ^7level already exists.");
+        return;
+    }
+
+    ldb_.AddLevel(level, commands, greeting, title);
+    ChatPrintTo(ent, "^3addlevel: ^7added level " + IntToString(level) + ".");
 }
 
 

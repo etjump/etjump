@@ -254,3 +254,37 @@ void Session::PrintDB()
     out << "****************************\n";
     out.close();
 }
+
+void Session::UpdateUser( int id, int updated, int level, const std::string& levelCommands, 
+                         const std::string& personalCommands, const std::string& greeting, const std::string& title )
+{
+    for(int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if(clients_[i].id == id)
+        {
+            if(updated & UPDATED_LEVEL)
+            {
+                clients_[i].level = level;
+                SetPermissions(clients_[i], personalCommands, levelCommands);
+            }
+
+            if(updated & UPDATED_COMMANDS)
+            {
+                SetPermissions(clients_[i], personalCommands, levelCommands);
+            }
+
+            if(updated & UPDATED_GREETING)
+            {
+                clients_[i].greeting = greeting;
+            }
+
+            if(updated & UPDATED_TITLE)
+            {
+                clients_[i].title = title;
+            }
+            
+
+            return;
+        }
+    }
+}

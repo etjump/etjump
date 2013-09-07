@@ -124,3 +124,21 @@ void GuidReceived(gentity_t *ent)
         PrintGreeting(ent);
     }
 }
+
+void HWIDReceived( gentity_t * ent )
+{
+    // HWID hwid
+    // OR
+    // NOHWID
+    // 
+
+    Arguments argv = GetArgs();
+
+    if(argv->at(0) == "HWID")
+    {
+       
+    } else if(argv->at(0) == "NOHWID")
+    {
+        
+    }
+}

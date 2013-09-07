@@ -185,6 +185,11 @@ void LevelDatabase::ReadLevels()
 
 }
 
+bool SortByLevel(const LevelData& lhs, const LevelData& rhs)
+{
+    return lhs->level < rhs->level;
+}
+
 void LevelDatabase::WriteLevels()
 {
     if(!g_admin.integer || g_levelConfig.string[0] == 0)
@@ -199,6 +204,8 @@ void LevelDatabase::WriteLevels()
             g_levelConfig.string);
         return;
     }
+
+    std::sort(levels_.begin(), levels_.end(), SortByLevel);
 
     for(ConstLevelIter it = levels_.begin();
         it != levels_.end(); it++)
@@ -313,4 +320,20 @@ bool LevelDatabase::LevelExists( int level )
         it++;
     }
     return false;
+}
+
+void LevelDatabase::AddLevel( int level )
+{
+    levels_.push_back(LevelData(new LevelData_s(level, "", "", "")));
+
+    WriteLevels();
+}
+
+void LevelDatabase::AddLevel( int level, const std::string& commands, 
+                             const std::string& greeting, 
+                             const std::string& title )
+{
+    levels_.push_back(LevelData(new LevelData_s(level, title, greeting, commands)));
+    
+    WriteLevels();
 }

@@ -29,6 +29,10 @@ public:
     void ReadLevels();
     void WriteLevels();
 
+    void AddLevel(int level);
+    void AddLevel(int level, const std::string& commands,
+        const std::string& greeting, const std::string& title);
+
     std::string Permissions(int level);
     std::string Greeting(int level);
     std::string Name(int level);

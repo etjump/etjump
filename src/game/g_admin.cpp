@@ -9,22 +9,45 @@
 #include <boost/function.hpp>
 #include <boost/format.hpp>
 #include <boost/assign.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp> 
 
 static std::map<std::string, AdminCommand_s> adminCommands 
     = boost::assign::map_list_of
-    ("8ball", AdminCommand_s(AdminCommand::Magical8Ball, '8', "Magical 8 ball of pure awesomeness gives an answer to any question that you might have!", "!8ball <question>"))
-    ("admintest", AdminCommand_s(AdminCommand::Admintest, 'a', "Displays your current admin level.", "!admintest"))
-    ("cancelvote", AdminCommand_s(AdminCommand::Cancelvote, 'C',"Cancels current vote in progress.", "!cancelvote"))
-    ("edituser", AdminCommand_s(AdminCommand::EditUser, 'A', "Edits user's attributes.", "!edituser meh"))
-    ("finger", AdminCommand_s(AdminCommand::Finger, 'f', "Displays target's admin level.", "!finger <target>"))
-    ("help", AdminCommand_s(AdminCommand::Help, 'f', "Prints useful information about commands.", "!help <command>"))
-    ("kick", AdminCommand_s(AdminCommand::Kick, 'k', "Kicks target player.", "!kick <target>"))
-    ("map", AdminCommand_s(AdminCommand::Map, 'M', "Changes map.", "!map <mapname>"))
-    ("mute", AdminCommand_s(AdminCommand::Mute, 'm', "Mutes target player.", "!mute <target>"))
-    ("passvote", AdminCommand_s(AdminCommand::Passvote, 'P', "Passes the current vote in progress.", "!passvote}"))
-    ("rmsaves", AdminCommand_s(AdminCommand::RemoveSaves, 'T',    "Clears target's saved positions.", "!rmsaves <target>"))
-    ("setlevel", AdminCommand_s(AdminCommand::Setlevel, 's', "Sets the target's admin level.", "!setlevel <target> <level>\n!setlevel -id <id> <level>"))
+    ("8ball", AdminCommand_s(AdminCommand::Magical8Ball, Flag::EBALL))
+    ("addlevel", AdminCommand_s(AdminCommand::AddLevel, Flag::EDIT))
+    ("admintest", AdminCommand_s(AdminCommand::Admintest, Flag::BASIC))
+    ("ban", AdminCommand_s(AdminCommand::Ban, Flag::BAN))
+    ("cancelvote", AdminCommand_s(AdminCommand::Cancelvote, Flag::CANCELVOTE))
+    ("deletelevel", AdminCommand_s(AdminCommand::DeleteLevel, Flag::EDIT))
+    ("deleteuser", AdminCommand_s(AdminCommand::DeleteUser, Flag::EDIT))
+    ("editcommands", AdminCommand_s(AdminCommand::EditCommands, Flag::EDIT))
+    ("editlevel", AdminCommand_s(AdminCommand::EditLevel, Flag::EDIT))
+    ("edituser", AdminCommand_s(AdminCommand::EditUser, Flag::EDIT))
+    ("finger", AdminCommand_s(AdminCommand::Finger, Flag::FINGER))
+    ("help", AdminCommand_s(AdminCommand::Help, Flag::BASIC))
+    ("kick", AdminCommand_s(AdminCommand::Kick, Flag::KICK))
+    ("levelinfo", AdminCommand_s(AdminCommand::LevelInfo, Flag::EDIT))
+    ("listbans", AdminCommand_s(AdminCommand::ListBans, Flag::LISTBANS))
+    ("listcmds", AdminCommand_s(AdminCommand::Help, Flag::BASIC))
+    ("listflags", AdminCommand_s(AdminCommand::ListFlags, Flag::EDIT))
+    ("listmaps", AdminCommand_s(AdminCommand::ListMaps, Flag::BASIC))
+    ("listplayers", AdminCommand_s(AdminCommand::ListPlayers, Flag::LISTPLAYERS))
+    ("listusers", AdminCommand_s(AdminCommand::ListUsers, Flag::EDIT))
+    ("map", AdminCommand_s(AdminCommand::Map, Flag::MAP))
+    ("mute", AdminCommand_s(AdminCommand::Mute, Flag::MUTE))
+    ("noclip", AdminCommand_s(AdminCommand::Noclip, Flag::NOCLIP))
+    ("nogoto", AdminCommand_s(AdminCommand::Nogoto, Flag::SAVESYSTEM))
+    ("nosave", AdminCommand_s(AdminCommand::Nosave, Flag::SAVESYSTEM))
+    ("passvote", AdminCommand_s(AdminCommand::Passvote, Flag::PASSVOTE))
+    ("putteam", AdminCommand_s(AdminCommand::Putteam, Flag::PUTTEAM))
+    ("readconfig", AdminCommand_s(AdminCommand::ReadConfig, Flag::READCONFIG))
+    ("rename", AdminCommand_s(AdminCommand::Rename, Flag::RENAME))
+    ("restart", AdminCommand_s(AdminCommand::Restart, Flag::RESTART))
+    ("rmsaves", AdminCommand_s(AdminCommand::RemoveSaves, Flag::SAVESYSTEM))
+    ("setlevel", AdminCommand_s(AdminCommand::Setlevel, Flag::SETLEVEL))
+    ("unban", AdminCommand_s(AdminCommand::Unban, Flag::BAN))
+    ("unmute", AdminCommand_s(AdminCommand::Unmute, Flag::MUTE))
+    ("userinfo", AdminCommand_s(AdminCommand::UserInfo, Flag::EDIT))
     ;
 
 bool TargetIsHigherLevel(gentity_t *ent, gentity_t *target, bool equalIsHigher = false)
@@ -509,24 +532,30 @@ namespace AdminCommand
             // For commands spaces are useless
             if(parsing == STATE_COMMANDS)
             {
-                updated |= STATE_COMMANDS;
+                updated |= UPDATED_COMMANDS;
                 commands += *it;
             } 
             // For title & greeting spaces are there for a reason
             else if(parsing == STATE_TITLE)
             {
-                updated |= STATE_TITLE;
+                updated |= UPDATED_TITLE;
                 title += *it + " ";
             } else if(parsing == STATE_GREETING)
             {
-                updated |= STATE_GREETING;
+                updated |= UPDATED_GREETING;
                 greeting += *it + " ";
             } else if(parsing == STATE_LEVEL)
             {
-                updated |= STATE_LEVEL;
+                updated |= UPDATED_LEVEL;
                 if(!StringToInt(*it, level))
                 {
                     ChatPrintTo(ent, "^3edituser: ^7invalid level \"" + *it + "\" specified.");
+                    return false;
+                }
+
+                if(!adminDB.LevelExists(level))
+                {
+                    ChatPrintTo(ent, "^3edituser: ^7level " + *it + " does not exist.");
                     return false;
                 }
             }
@@ -536,6 +565,12 @@ namespace AdminCommand
 
         boost::trim_right(greeting);
         boost::trim_right(title);
+
+        if(updated & UPDATED_NONE)
+        {
+            ChatPrintTo(ent, "^3edituser: ^7nothing to update.");
+            return true;
+        }
 
         if(mode == ID)
         {
@@ -609,6 +644,183 @@ namespace AdminCommand
         ChatPrintTo(ent, std::string(target->client->pers.netname) + " ^7has been muted.");
         return true;
     }
+
+    bool AddLevel( gentity_t *ent, Arguments argv )
+    {
+        if(argv->size() < 2)
+        {
+            PrintManual(ent, "addlevel");
+            return false;
+        }
+
+        int level = 0;
+        if(!StringToInt(argv->at(1), level))
+        {
+            ChatPrintTo(ent, "^3addlevel: ^7invalid level \"" + argv->at(1) + "\" specified.");
+            return false;
+        }
+
+        if(argv->size() == 2)
+        {
+            // Prints info
+            adminDB.AddLevel(ent, level);
+            return true;
+        }
+        
+        int reading = UPDATED_NONE;
+        int updated = UPDATED_NONE;
+        std::string commands;
+        std::string title;
+        std::string greeting;
+        ConstArgIter it = argv->begin() + 2;
+        while(it != argv->end())
+        {
+            if(*it == "-cmds" && it+1 != argv->end())
+            {
+                reading = UPDATED_COMMANDS;
+            }
+
+            else if(*it == "-greeting" && it+1 != argv->end())
+            {
+                reading = UPDATED_GREETING;
+            }
+
+            else if(*it == "-title" && it+1 != argv->end())
+            {
+                reading = UPDATED_TITLE;
+            }
+            else
+            {
+                if(reading & UPDATED_COMMANDS)
+                {
+                    commands = *it;
+                    updated |= UPDATED_COMMANDS;
+                }
+
+                else if(reading & UPDATED_GREETING)
+                {
+                    greeting = *it + " ";
+                    updated |= UPDATED_GREETING;
+                }
+
+                else if(reading & UPDATED_TITLE)
+                {
+                    title = *it + " ";
+                    updated |= UPDATED_TITLE;
+                }
+            }
+            
+
+            it++;
+        }
+        return true;
+    }
+
+    bool Ban( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool DeleteLevel( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool DeleteUser( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool EditCommands( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool EditLevel( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool LevelInfo( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool ListBans( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool ListFlags( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool ListMaps( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool ListPlayers( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool ListUsers( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Noclip( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Nogoto( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Nosave( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Putteam( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool ReadConfig( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Rename( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Restart( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Unban( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool Unmute( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
+    bool UserInfo( gentity_t *ent, Arguments argv )
+    {
+        return true;
+    }
+
 }
 
 qboolean CheckCommand( gentity_t *ent )
@@ -716,10 +928,8 @@ Admin::UserData_s::UserData_s()
     this->level = 0;
 }
 
-AdminCommand_s::AdminCommand_s( boost::function<bool(gentity_t *ent, Arguments argv)> handler, char flag, const std::string& function, const std::string& syntax )
+AdminCommand_s::AdminCommand_s( boost::function<bool(gentity_t *ent, Arguments argv)> handler, char flag)
 {
     this->handler = handler;
     this->flag = flag;
-    this->function = function;
-    this->syntax = syntax;
 }

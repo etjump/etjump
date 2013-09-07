@@ -217,7 +217,6 @@
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
-    <ClInclude Include="..\botai\chars.h" />
     <ClInclude Include="g_admin.hpp" />
     <ClInclude Include="g_database.hpp" />
     <ClInclude Include="g_levels.hpp" />
@@ -229,11 +228,8 @@
     <ClInclude Include="g_sessiondb.hpp" />
     <ClInclude Include="g_sqlite.hpp" />
     <ClInclude Include="g_team.h" />
-    <ClInclude Include="..\botai\inv.h" />
-    <ClInclude Include="..\botai\match.h" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
-    <ClInclude Include="..\botai\syn.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\todo.txt" />
