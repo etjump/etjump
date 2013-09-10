@@ -1477,6 +1477,20 @@ void G_wipeCvars(void)
 //bani - #113
 #define SNIPSIZE 250
 
+void G_ExecMapSpecificConfig() 
+{
+    int len = 0;
+    fileHandle_t f = 0;
+    len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
+    if(len <= 0)
+    {
+        trap_SendConsoleCommand( EXEC_APPEND, "exec autoexec_default.cfg");
+    } else
+    {
+        trap_SendConsoleCommand( EXEC_APPEND, va("exec autoexec_%s.cfg", level.rawmapname));
+    }
+}
+
 //copies max num chars from beginning of dest into src and returns pointer to new src
 char *strcut( char *dest, char *src, int num ) {
 	int i;
@@ -1515,8 +1529,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("------- Game Initialization -------\n");
 	G_Printf ("gamename: %s %s\n", GAME_VERSION, MOD_VERSION);
 	G_Printf ("gamedate: %s\n", __DATE__);
-    if( g_gametype.integer != GT_WOLF && 
-        g_gametype.integer != GT_CTF ) {
+    if( g_gametype.integer != GT_WOLF ) {
 	    trap_Cvar_Set("g_gametype", "2");
     }
 	trap_Cvar_Update(&g_gametype);
@@ -1603,27 +1616,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_SoundIndex( "sound/player/gurp1.wav"	);
 	G_SoundIndex( "sound/player/gurp2.wav"	);
 
-	if( g_gametype.integer == GT_WOLF_LMS ) {
-		trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof(cs) );
-		Info_SetValueForKey( cs, "winner", "-1" );
-		trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
-
-		level.firstbloodTeam = -1;
-
-		if( g_currentRound.integer == 0 ) {
-			trap_Cvar_Set( "g_axiswins", "0" );
-			trap_Cvar_Set( "g_alliedwins", "0" );
-
-			trap_Cvar_Update( &g_axiswins );
-			trap_Cvar_Update( &g_alliedwins );
-		}
-
-		trap_SetConfigstring( CS_ROUNDSCORES1, va("%i", g_axiswins.integer ) );
-		trap_SetConfigstring( CS_ROUNDSCORES2, va("%i", g_alliedwins.integer ) );
-	}
-
 	trap_GetServerinfo( cs, sizeof( cs ) );
 	Q_strncpyz( level.rawmapname, Info_ValueForKey( cs, "mapname" ), sizeof(level.rawmapname) );
+
+    G_ExecMapSpecificConfig();
 
 	G_ParseCampaigns();
 	if( g_gametype.integer == GT_WOLF_CAMPAIGN ) {

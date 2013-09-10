@@ -1267,6 +1267,7 @@ qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other);
 void Cmd_FollowCycle_f(gentity_t *ent, int dir);
 qboolean ClientIsFlooding(gentity_t *ent);
 char *ConcatArgs(int start);
+void Cmd_SaveReset_f(gentity_t *ent);
 
 //
 // g_items.c

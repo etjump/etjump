@@ -462,3 +462,9 @@ void InitSaveDatabase() {
 void SaveSystem_Print( gentity_t *ent ) {
     SaveSystem::Print( ent );
 }
+
+void Cmd_SaveReset_f(gentity_t *ent)
+{
+    SaveSystem::ResetSavedPositions(ent);
+    CPTo(ent, "Your saved positions have been reseted.");
+}

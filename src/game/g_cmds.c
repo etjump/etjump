@@ -3900,6 +3900,7 @@ static command_t noIntermissionCommands[] =
     { "backup",             qfalse, Cmd_BackupLoad_f },
 	{ "save",				qfalse,	Cmd_Save_f },
 	{ "shrug",				qfalse, Cmd_shrug_f },
+    { "savereset",          qfalse, Cmd_SaveReset_f },
 
 };
 
