@@ -1080,7 +1080,7 @@ void ClientThink_real( gentity_t *ent ) {
 	} else if( pm.ps->pm_type == PM_SPECTATOR ) {
 		pm.trace = trap_TraceCapsuleNoEnts;
 	} else {
-		if(g_ghostPlayers.integer) {
+		if(g_ghostPlayers.integer == 1) {
 			// Trickjump: Players can move through bodies.
 			pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
 		}
@@ -1530,7 +1530,7 @@ extern vec3_t	playerMins, playerMaxs;
 
 void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
 	
-	if(!g_ghostPlayers.integer) {
+	if(!g_ghostPlayers.integer || g_ghostPlayers.integer == 2) {
 
 		vec3_t	dir, push;
 

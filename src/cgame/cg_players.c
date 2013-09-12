@@ -1383,7 +1383,7 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane )
 	VectorCopy( cent->lerpOrigin, end );
 	end[2] -= SHADOW_DISTANCE;
 	// Trickjump: Ghost
-	if(cg_ghostPlayers.integer)
+	if(cg_ghostPlayers.integer == 1)
 		trap_CM_BoxTrace( &trace, cent->lerpOrigin, end, NULL, NULL, 0, MASK_PLAYERSOLID & ~CONTENTS_BODY );
 	else
 		trap_CM_BoxTrace( &trace, cent->lerpOrigin, end, NULL, NULL, 0, MASK_PLAYERSOLID );
@@ -1769,12 +1769,16 @@ void CG_Player( centity_t *cent )
 		return;
 	}
 
-	// Hide players at close range
-	if (cg_hide.integer && ci->clientNum != cg.clientNum && Distance(cgsnap->lerpOrigin, cent->lerpOrigin) < cg_hideDistance.integer)
-		return;
+    // Only hide if ghostPlayers is on
+    if(cg_ghostPlayers.integer == 1)
+    {
+        // Hide players at close range
+        if (cg_hide.integer && ci->clientNum != cg.clientNum && Distance(cgsnap->lerpOrigin, cent->lerpOrigin) < cg_hideDistance.integer)
+            return;
 
-	if (ci->hideMe)
-		return;
+        if (ci->hideMe)
+            return;
+    }
 
 	character = CG_CharacterForClientinfo( ci, cent );
 

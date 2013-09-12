@@ -1509,6 +1509,26 @@ char *strcut( char *dest, char *src, int num ) {
 	*dest = (char)0;
 	return src;
 }
+
+void InitGhosting() 
+{
+    // Handle g_ghostPlayers values so it'll always be either 1 or 0 except
+    // when noghost worldspawn key is used to modify it. This is to make sure
+    // no server admin sets g_ghostPlayers to anything but 0-1
+    if(g_ghostPlayers.integer)
+    {
+        if(g_ghostPlayers.integer == 2)
+        {
+            trap_Cvar_Set("g_ghostPlayers", "0");
+        } else
+        {
+            trap_Cvar_Set("g_ghostPlayers", "1");
+        }
+        
+        trap_Cvar_Update(&g_ghostPlayers);
+    }
+}
+
 /*
 ============
 G_InitGame
@@ -1723,6 +1743,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// TAT 11/13/2002
 	//		similarly set up the Server entities
 	InitServerEntities();
+
+    // This must be called before G_SpawnEntitiesFromString, else
+    // it'll mess up the g_ghostPlayers value.
+    InitGhosting();
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();

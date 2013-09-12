@@ -1043,6 +1043,29 @@ void SP_worldspawn( void ) {
 		level.portalSurfaces = qfalse;
 	}
 
+    G_SpawnString("noghost", "0", &s);
+    if(atoi(s))
+    {
+        char buf[32] = "\0";
+        int currentValue = g_ghostPlayers.integer;
+        currentValue |= 2;
+        
+        itoa(currentValue, buf, 10);
+
+        trap_Cvar_Set("g_ghostPlayers", buf);
+        trap_Cvar_Update(&g_ghostPlayers);
+    } else
+    {
+        char buf[128] = "\0";
+        int currentValue = g_ghostPlayers.integer;
+        currentValue &= ~(2);
+
+        itoa(currentValue, buf, 10);
+
+        trap_Cvar_Set("g_ghostPlayers", buf);
+        trap_Cvar_Update(&g_ghostPlayers);
+    }
+
 	level.mapcoordsValid = qfalse;
 	if( G_SpawnVector2D( "mapcoordsmins", "-128 128", level.mapcoordsMins ) &&	// top left
 		G_SpawnVector2D( "mapcoordsmaxs", "128 -128", level.mapcoordsMaxs ) ) {	// bottom right

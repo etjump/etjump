@@ -409,7 +409,7 @@ static void CG_InterpolatePlayerState( qboolean grabAngles ) {
 		trap_GetUserCmd( cmdNum, &cmd );
 
 		// rain - added tracemask
-		if(cg_ghostPlayers.integer) {
+		if(cg_ghostPlayers.integer == 1) {
 			PM_UpdateViewAngles( out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID & ~CONTENTS_BODY );
 		} else {
 			PM_UpdateViewAngles( out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID );
@@ -894,7 +894,7 @@ void CG_PredictPlayerState( void ) {
 
 	cg_pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
 
-	if(cg_ghostPlayers.integer) {
+	if(cg_ghostPlayers.integer == 1) {
 		cg_pmove.trace = CG_TraceCapsule_NoPlayers;
 	} else {
 		cg_pmove.trace = CG_TraceCapsule;

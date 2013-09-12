@@ -1911,7 +1911,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
 		ent->classname = "player";
 	ent->r.contents = CONTENTS_BODY;
 
-	if(g_ghostPlayers.integer) {
+	if(g_ghostPlayers.integer == 1) {
 		ent->clipmask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
 	}
 	else {
