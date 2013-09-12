@@ -16,6 +16,8 @@ static std::map<std::string, AdminCommand_s> adminCommands
     ("8ball", AdminCommand_s(AdminCommand::Magical8Ball, Flag::EBALL))
     ("addlevel", AdminCommand_s(AdminCommand::AddLevel, Flag::EDIT))
     ("admintest", AdminCommand_s(AdminCommand::Admintest, Flag::BASIC))
+    ("allied", AdminCommand_s(AdminCommand::Allies, Flag::BASIC))
+    ("axis", AdminCommand_s(AdminCommand::Axis, Flag::BASIC))
     ("ban", AdminCommand_s(AdminCommand::Ban, Flag::BAN))
     ("cancelvote", AdminCommand_s(AdminCommand::Cancelvote, Flag::CANCELVOTE))
     ("deletelevel", AdminCommand_s(AdminCommand::DeleteLevel, Flag::EDIT))
@@ -45,6 +47,7 @@ static std::map<std::string, AdminCommand_s> adminCommands
     ("restart", AdminCommand_s(AdminCommand::Restart, Flag::RESTART))
     ("rmsaves", AdminCommand_s(AdminCommand::RemoveSaves, Flag::SAVESYSTEM))
     ("setlevel", AdminCommand_s(AdminCommand::Setlevel, Flag::SETLEVEL))
+    ("spectate", AdminCommand_s(AdminCommand::Spectate, Flag::BASIC))
     ("unban", AdminCommand_s(AdminCommand::Unban, Flag::BAN))
     ("unmute", AdminCommand_s(AdminCommand::Unmute, Flag::MUTE))
     ("userinfo", AdminCommand_s(AdminCommand::UserInfo, Flag::EDIT))
@@ -773,6 +776,37 @@ namespace AdminCommand
 
     bool Noclip( gentity_t *ent, Arguments argv )
     {
+        if(level.noNoclip)
+        {
+            ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
+            return false;
+        }
+
+        if(argv->size() > 2)
+        {
+            PrintManual(ent, "noclip");
+            return false;
+        }
+
+        gentity_t *target = NULL;
+
+        if(argv->size() == 1)
+        {
+            if(!ent)
+            {
+                return false;
+            }
+            target = ent;
+        } else
+        {
+            std::string err;
+            target = PlayerGentityFromString(argv->at(1), err);
+            if(!target)
+            {
+
+            }
+        }
+
         return true;
     }
 
@@ -803,6 +837,7 @@ namespace AdminCommand
 
     bool Restart( gentity_t *ent, Arguments argv )
     {
+        Svcmd_ResetMatch_f(qfalse, qtrue);
         return true;
     }
 
@@ -818,6 +853,50 @@ namespace AdminCommand
 
     bool UserInfo( gentity_t *ent, Arguments argv )
     {
+
+        return true;
+    }
+
+    bool Spectate( gentity_t *ent, Arguments argv )
+    {
+        const weapon_t w = static_cast<weapon_t>(-1);
+        if(!ent)
+        {
+            return false;
+        }
+
+        ent->client->sess.lastTeamSwitch = level.time;
+        SetTeam(ent, "s", qfalse, w, w, qtrue);
+
+        return true;
+    }
+
+    bool Axis( gentity_t *ent, Arguments argv )
+    {
+        const weapon_t w = static_cast<weapon_t>(-1);
+
+        if(!ent)
+        {
+            return false;
+        }
+
+        ent->client->sess.lastTeamSwitch = level.time;
+        SetTeam(ent, "r", qfalse, w, w, qtrue);
+
+        return true;
+    }
+
+    bool Allies( gentity_t *ent, Arguments argv )
+    {
+        const weapon_t w = static_cast<weapon_t>(-1);
+        if(!ent)
+        {
+            return false;
+        }
+
+        ent->client->sess.lastTeamSwitch = level.time;
+        SetTeam(ent, "b", qfalse, w, w, qtrue);
+
         return true;
     }
 

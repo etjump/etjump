@@ -60,6 +60,8 @@ namespace AdminCommand
 {
     bool AddLevel(gentity_t *ent, Arguments argv);
     bool Admintest(gentity_t *ent, Arguments argv);
+    bool Allies(gentity_t *ent, Arguments argv);
+    bool Axis(gentity_t *ent, Arguments argv);
     bool Ban(gentity_t *ent, Arguments argv);
     bool Cancelvote(gentity_t *ent, Arguments argv);
     bool DeleteLevel(gentity_t *ent, Arguments argv);
@@ -89,6 +91,7 @@ namespace AdminCommand
     bool Rename(gentity_t *ent, Arguments argv);
     bool Restart(gentity_t *ent, Arguments argv);
     bool Setlevel(gentity_t *ent, Arguments argv);
+    bool Spectate(gentity_t *ent, Arguments argv);
     bool Unban(gentity_t *ent, Arguments argv);
     bool Unmute(gentity_t *ent, Arguments argv);
     bool UserInfo(gentity_t *ent, Arguments argv);

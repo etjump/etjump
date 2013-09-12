@@ -388,6 +388,7 @@ vmCvar_t			cg_HUD_weaponIcon;
 vmCvar_t			cg_HUD_xpInfo;
 
 vmCvar_t            cg_logConsole;
+vmCvar_t                cg_weaponSound;
 
 
 typedef struct {
@@ -653,7 +654,8 @@ cvarTable_t		cvarTable[] = {
       { &cg_HUD_playerHealth,             "cg_HUD_playerHealth", "0", CVAR_ARCHIVE }, 
       { &cg_HUD_weaponIcon,               "cg_HUD_weaponIcon", "1", CVAR_ARCHIVE },
       { &cg_HUD_xpInfo,                   "cg_HUD_xpInfo", "0", CVAR_ARCHIVE },
-      { &cg_logConsole,                   "cg_logConsole", "1", CVAR_ARCHIVE }
+      { &cg_logConsole,                   "cg_logConsole", "1", CVAR_ARCHIVE },
+      { &cg_weaponSound,                  "cg_weaponSound", "1", CVAR_ARCHIVE }
       };
 
 

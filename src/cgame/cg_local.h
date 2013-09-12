@@ -2362,6 +2362,7 @@ extern vmCvar_t         cg_HUD_xpInfo;
 
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t         cg_logConsole;
+extern vmCvar_t			cg_weaponSound;
 //
 // cg_main.c
 //
