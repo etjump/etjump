@@ -1209,10 +1209,17 @@ Cmd_Team_f
 */
 void Cmd_Team_f(gentity_t *ent)
 {
-	char		s[MAX_TOKEN_CHARS];
+	char		s[MAX_TOKEN_CHARS] = "\0";
 	char		ptype[4];
 	char		weap[4], weap2[4];
-	weapon_t	w, w2;
+	int         argc = 0;
+    weapon_t	w, w2;
+
+    argc = trap_Argc();
+    if(argc > 1)
+    {
+        trap_Argv(1, s, sizeof(s));
+    }
 
 	if(ClientIsFlooding(ent)) {
 		CP("print \"^1Spam protection: ^7command team ignored.\n\"");
@@ -1236,6 +1243,12 @@ void Cmd_Team_f(gentity_t *ent)
 	ent->client->sess.latchPlayerType =	atoi(ptype);
 	if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS)
 		ent->client->sess.latchPlayerType = PC_SOLDIER;
+
+    // Let's not do this as SetTeam crashes the game otherwise.
+    if(!Q_stricmp(s, "follow2"))
+    {
+        return;
+    }
 
 	if (!SetTeam(ent, s, qfalse, w, w2, qtrue))
 	{
