@@ -1590,6 +1590,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
         client->last8BallTime = 0;
         client->sess.loadedSavedPositions = qfalse;
 		client->lastVoteTime = 0;
+        client->cheatDetected = qfalse;
         // Client has loaded position after inactivity putspec
         // -> don't do anything anymore
         client->sess.loadedPosBeforeInactivity = qtrue;

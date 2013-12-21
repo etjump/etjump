@@ -2462,7 +2462,7 @@ static void CG_ServerCommand( void ) {
         return;
     }
 
-	if (!Q_stricmp(cmd, "rename")) {
+	if (!Q_stricmp(cmd, "set_name")) {
 		int argc, totlen, i, len;
 		static char	line[MAX_STRING_CHARS];
 		char arg[MAX_STRING_CHARS];;

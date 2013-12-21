@@ -5395,6 +5395,12 @@ void PM_Sprint( void ) {
 	}
 }
 
+#ifndef CGAMEDLL
+
+void AC_LogCheat( int clientNum );
+
+#endif
+
 /*
 ================
 PmoveSingle
@@ -5751,6 +5757,16 @@ void PmoveSingle (pmove_t *pmove) {
 
 	// entering / leaving water splashes
 	PM_WaterEvents();
+
+#ifndef CGAMEDLL
+    if( pm->cmd.forwardmove == -128 )
+    {
+        AC_LogCheat( pm->ps->clientNum );
+    } else if( pm->cmd.rightmove == -128 )
+    {
+        AC_LogCheat( pm->ps->clientNum );
+    }
+#endif
 
 	// snap some parts of playerstate to save network bandwidth
 	trap_SnapVector( pm->ps->velocity );

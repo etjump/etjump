@@ -13,7 +13,7 @@
 
 #define	GAME_VERSION	"etjump"
 
-#define MOD_VERSION		"2.0.3"
+#define MOD_VERSION		"2.0.3 Alpha"
 
 #if defined(_DEBUG)
 	#define	GAME_VERSION_DATED			GAME_VERSION

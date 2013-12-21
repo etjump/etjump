@@ -807,11 +807,6 @@ typedef struct debrisChunk_s {
 
 #define MAX_DEBRISCHUNKS		256
 
-typedef struct runData_s {
-    int startTime;
-    int stopTime;
-} runData_t;
-
 // ===================
 
 // this structure is cleared on each ClientSpawn(),
@@ -942,7 +937,7 @@ struct gclient_s {
 
     int             last8BallTime; // Last level.time client used !8ball.
 	int				lastVoteTime;
-    runData_t       runData;
+    qboolean        cheatDetected;
 };
 
 typedef struct {
@@ -1204,6 +1199,7 @@ typedef struct {
     ipMute_t    ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
     qboolean    ghostPlayers;
+    qboolean	saveLimit;
 } level_locals_t;
 
 typedef struct {
@@ -1246,7 +1242,7 @@ void Cmd_Score_f (gentity_t *ent);
 void StopFollowing( gentity_t *ent );
 //void BroadcastTeamChange( gclient_t *client, int oldTeam );
 void G_TeamDataForString( const char* teamstr, int clientNum, team_t* team, spectatorState_t* sState, int* specClient );
-qboolean SetTeam( gentity_t *ent, char *s, qboolean force, weapon_t w1, weapon_t w2, qboolean setweapons );
+qboolean SetTeam( gentity_t *ent, const char *s, qboolean force, weapon_t w1, weapon_t w2, qboolean setweapons );
 void G_SetClientWeapons( gentity_t* ent, weapon_t w1, weapon_t w2, qboolean updateclient );
 void Cmd_FollowCycle_f( gentity_t *ent, int dir );
 void Cmd_Kill_f( gentity_t *ent );
@@ -1885,6 +1881,8 @@ extern vmCvar_t g_maxConnsPerIP;
 extern vmCvar_t	g_mute;
 extern vmCvar_t g_goto;
 extern vmCvar_t g_voteCooldown;
+
+extern vmCvar_t mod_version;
 
 
 void	trap_Printf( const char *fmt );

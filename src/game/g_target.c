@@ -1706,3 +1706,23 @@ void SP_target_ftrelay( gentity_t *self )
 {
     self->use = target_ftrelay_use;
 }
+
+void target_savelimit_set_use( gentity_t *self, gentity_t *other, gentity_t *activator )
+{
+
+}
+
+void SP_target_savelimit_set( gentity_t *self )
+{
+    self->use = target_savelimit_set_use;
+}
+
+void target_savelimit_inc_use( gentity_t *self, gentity_t *other, gentity_t *activator )
+{
+
+}
+
+void SP_target_savelimit_inc( gentity_t *self )
+{
+    self->use = target_savelimit_inc_use;
+}

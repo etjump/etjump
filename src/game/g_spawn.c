@@ -435,6 +435,10 @@ void SP_weapon_portalgun (gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
 void SP_target_ftrelay(gentity_t *self);
 
+// Savelimit
+void SP_target_savelimit_set(gentity_t *self);
+void SP_target_savelimit_inc(gentity_t *self);
+
 spawn_t	spawns[] = {
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
@@ -661,7 +665,8 @@ spawn_t	spawns[] = {
 	{"target_save",			SP_target_save },
 	{"target_remove_portals", SP_target_remove_portals },
     {"target_ftrelay", SP_target_ftrelay},
-
+    {"target_savelimit_set", SP_target_savelimit_set},
+    {"target_savelimit_inc", SP_target_savelimit_inc},
 	{0, 0}
 };
 
@@ -1050,7 +1055,7 @@ void SP_worldspawn( void ) {
         int currentValue = g_ghostPlayers.integer;
         currentValue |= 2;
         
-        itoa(currentValue, buf, 10);
+        Com_sprintf(buf, sizeof(buf), "%d", currentValue);
 
         trap_Cvar_Set("g_ghostPlayers", buf);
         trap_Cvar_Update(&g_ghostPlayers);
@@ -1060,10 +1065,19 @@ void SP_worldspawn( void ) {
         int currentValue = g_ghostPlayers.integer;
         currentValue &= ~(2);
 
-        itoa(currentValue, buf, 10);
+        Com_sprintf(buf, sizeof(buf), "%d", currentValue);
 
         trap_Cvar_Set("g_ghostPlayers", buf);
         trap_Cvar_Update(&g_ghostPlayers);
+    }
+
+    G_SpawnString("savelimit", "0", &s);
+    if(atoi(s))
+    {
+    	level.saveLimit = qtrue;
+    } else
+    {
+    	level.saveLimit = qfalse;
     }
 
 	level.mapcoordsValid = qfalse;

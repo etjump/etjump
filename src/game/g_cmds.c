@@ -891,7 +891,7 @@ void G_TeamDataForString( const char* teamstr, int clientNum, team_t* team, spec
 SetTeam
 =================
 */
-qboolean SetTeam( gentity_t *ent, char *s, qboolean force, weapon_t w1, weapon_t w2, qboolean setweapons ) {
+qboolean SetTeam( gentity_t *ent, const char *s, qboolean force, weapon_t w1, weapon_t w2, qboolean setweapons ) {
 	team_t				team, oldTeam;
 	gclient_t			*client;
 	int					clientNum;

@@ -224,6 +224,8 @@ vmCvar_t		g_mute;
 vmCvar_t        g_goto;
 vmCvar_t		g_voteCooldown;
 
+vmCvar_t        mod_version;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -460,7 +462,9 @@ cvarTable_t		gameCvarTable[] = {
 
 	{ &g_userConfig, "g_userConfig", "users.SQLite", CVAR_ARCHIVE },
 	{ &g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE },
-	{ &g_banConfig, "g_banConfig", "bans.cfg", CVAR_ARCHIVE }
+	{ &g_banConfig, "g_banConfig", "bans.cfg", CVAR_ARCHIVE },
+
+    { &mod_version, "mod_version", MOD_VERSION, CVAR_SERVERINFO }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1555,6 +1559,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	trap_Cvar_Update(&g_gametype);
 	G_Printf ("Gametype forced to 2.\n");
 	trap_Cvar_Set("sv_floodprotect", "0");
+
+    trap_Cvar_Set("mod_version", MOD_VERSION);
 
 	srand( randomSeed );
 
@@ -3583,4 +3589,32 @@ qboolean G_IsSinglePlayerGame()
 		return qtrue;
 
 	return qfalse;
+}
+
+void AC_LogCheat( int clientNum )
+{
+    gentity_t *ent = g_entities + clientNum;
+    char userinfo[MAX_INFO_STRING] = "\0";
+    char *ip = NULL;
+
+    if(!ent)
+    {
+        return;
+    }
+
+    if(ent->client->cheatDetected)
+    {
+        return;
+    } else
+    {
+        trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+        ip = Info_ValueForKey(userinfo, "ip");
+
+        G_LogPrintf("********************************************\n"
+                    "************* CHEATER DETECTED *************\n"
+                    "********************************************\n");
+        G_LogPrintf("Player: %s\nIP: %s\n", ent->client->pers.netname,
+            ip);
+        ent->client->cheatDetected = qtrue;
+    }
 }

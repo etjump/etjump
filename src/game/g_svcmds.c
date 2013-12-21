@@ -931,6 +931,22 @@ void G_ClearIPMutes() {
         level.ipMutes[i].inuse = qfalse;
 }
 
+void AC_ListCheaters() 
+{
+    int i = 0;
+    for(; i < level.numConnectedClients; i++)
+    {
+        int clientNum = level.sortedClients[i];
+        gentity_t *target = g_entities + clientNum;
+
+        if(target->client->cheatDetected)
+        {
+            G_Printf("Cheater: %s\n", target->client->pers.netname);
+        }
+        
+    }
+}
+
 void G_ListIPMutes() {
     int i;
     G_Printf("IP Mutes:\n");
@@ -1055,6 +1071,13 @@ qboolean	ConsoleCommand( void ) {
     if(!Q_stricmp(cmd, "ipmutes")) {
         G_ListIPMutes();
         return qtrue;
+    }
+
+    if(!Q_stricmp(cmd, "listcheaters")) 
+    {
+        AC_ListCheaters();
+        return qtrue;
+
     }
 
 	// -fretn

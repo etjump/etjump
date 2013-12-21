@@ -803,8 +803,17 @@ namespace AdminCommand
             target = PlayerGentityFromString(argv->at(1), err);
             if(!target)
             {
-
+                ChatPrintTo(ent, "^3noclip: ^7" + err);
+                return false;
             }
+        }
+
+        if(target->client->noclip)
+        {
+            target->client->noclip = qfalse;
+        } else
+        {
+            target->client->noclip = qtrue;
         }
 
         return true;
@@ -817,11 +826,66 @@ namespace AdminCommand
 
     bool Nosave( gentity_t *ent, Arguments argv )
     {
+        if(argv->size() != 2)
+        {
+            PrintManual(ent, "nosave");
+            return false;
+        }
+
+        std::string err;
+        gentity_t *target = PlayerGentityFromString(argv->at(1), err);
+        if(!target)
+        {
+            ChatPrintTo(ent, "^3nosave: ^7" + err);
+            return false;
+        }
+
+        if(TargetIsHigherLevel(ent, target, true))
+        {
+            ChatPrintTo(ent, "^3nosave:^7 can't disable fellow admin's save and load.");
+            return false;
+        }
+
+        if(target->client->sess.saveAllowed) {
+            target->client->sess.saveAllowed = qfalse;
+            ChatPrintTo(target, va("^3adminsystem:^7 %s^7 you are not allowed to save your position.", target->client->pers.netname));
+            ChatPrintTo(ent, va("^3adminsystem:^7 %s^7 is not allowed to save their position.", target->client->pers.netname));
+        } else {
+            target->client->sess.saveAllowed = qtrue;
+            ChatPrintTo(target, va("^3adminsystem:^7 %s^7 you are now allowed to save your position.", target->client->pers.netname));
+            ChatPrintTo(ent, va("^3adminsystem:^7 %s^7 is now allowed to save their position.", target->client->pers.netname));
+        }
+
         return true;
     }
 
     bool Putteam( gentity_t *ent, Arguments argv )
     {
+        if(argv->size() != 3)
+        {
+            PrintManual(ent, "putteam");
+            return false;
+        }
+
+        std::string err;
+        gentity_t *target = PlayerGentityFromString(argv->at(1), err);
+        if(!target)
+        {
+            ChatPrintTo(ent, "^3putteam: ^7" + err);
+            return false;
+        }
+
+        if(TargetIsHigherLevel(ent, target, false))
+        {
+            ChatPrintTo(ent, "^3putteam: ^7you can't use putteam on a fellow admin.");
+            return false;
+        }
+
+        target->client->sess.lastTeamSwitch = level.time;
+
+        const weapon_t w = static_cast<weapon_t>(-1);
+        SetTeam(target, argv->at(2).c_str(), qfalse, w, w, qtrue);
+
         return true;
     }
 
@@ -832,6 +896,30 @@ namespace AdminCommand
 
     bool Rename( gentity_t *ent, Arguments argv )
     {
+        if(argv->size() != 3)
+        {
+            PrintManual(ent, "rename");
+            return false;
+        }
+
+        std::string err;
+        gentity_t *target = PlayerGentityFromString(argv->at(1), err);
+        if(!target)
+        {
+            ChatPrintTo(ent, "^3rename: ^7" + err);
+            return false;
+        }
+
+        char userinfo[MAX_INFO_STRING] = "\0";
+        int cn = ClientNum(target);
+        trap_GetUserinfo(cn, userinfo, sizeof(userinfo));
+
+        const char* oldName = Info_ValueForKey(userinfo, "name");
+        ChatPrintAll( (boost::format("^3rename: ^7%s^7 has been renamed to %s") % oldName % argv->at(2) ).str() );
+        Info_SetValueForKey(userinfo, "name", argv->at(2).c_str());
+        trap_SetUserinfo(cn, userinfo);
+        ClientUserinfoChanged(cn);
+        trap_SendServerCommand(cn, va("set_name %s", argv->at(2).c_str()));
         return true;
     }
 
@@ -848,6 +936,39 @@ namespace AdminCommand
 
     bool Unmute( gentity_t *ent, Arguments argv )
     {
+        if(argv->size() != 2)
+        {
+            PrintManual(ent, "unmute");
+            return false;
+        }
+
+        std::string error;
+        gentity_t *target = PlayerGentityFromString(argv->at(1), error);
+        if(!target)
+        {
+            ChatPrintTo(ent, "^3unmute: ^7" + error);
+            return false;
+        }
+
+        
+        if(!target->client->sess.muted)
+        {
+            ChatPrintTo(ent, "^3unmute: ^7target is not muted.");
+            return false;
+        }
+
+        target->client->sess.muted = qfalse;
+
+        char *ip = NULL;
+        char userinfo[MAX_INFO_STRING] = "\0";
+        trap_GetUserinfo(target->client->ps.clientNum, userinfo, sizeof(userinfo));
+        ip = Info_ValueForKey(userinfo, "ip");
+
+        G_RemoveIPMute(ip);
+
+        CPTo(target, "^5You've been unmuted.");
+        ChatPrintAll(target->client->pers.netname + std::string(" ^7has been unmuted."));
+
         return true;
     }
 
@@ -865,8 +986,26 @@ namespace AdminCommand
             return false;
         }
 
-        ent->client->sess.lastTeamSwitch = level.time;
-        SetTeam(ent, "s", qfalse, w, w, qtrue);
+        if(argv->size() == 1)
+        {
+            ent->client->sess.lastTeamSwitch = level.time;
+            SetTeam(ent, "s", qfalse, w, w, qtrue);
+        } else if(argv->size() == 3)
+        {
+            std::string err;
+            gentity_t *target = PlayerGentityFromString(argv->at(1), err);
+            if(!target)
+            {
+                ChatPrintTo(ent, "^3spec: ^7" + err);
+                return false;
+            }
+
+            target->client->sess.lastTeamSwitch = level.time;
+
+        } else
+        {
+            
+        }
 
         return true;
     }
