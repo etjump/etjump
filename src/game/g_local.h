@@ -2634,8 +2634,6 @@ void C_ConsolePrintTo( gentity_t *target, const char* msg );
 
 // C versions of conversion functions
 qboolean StringToInt(const char* toConvert, int *value);
-
-// g_users.cpp
                          
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
 void OnClientDisconnect(gentity_t *ent);
@@ -2648,11 +2646,6 @@ void GuidReceived(gentity_t *ent);
 
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
-
-/*  
- * admin 
- */
-qboolean CheckCommand( gentity_t *ent );
 
 #endif // G_LOCAL_H
 

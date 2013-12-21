@@ -61,12 +61,7 @@ q_shared.c
 g_utilities.cpp
 g_banner.cpp
 g_save.cpp
-g_sessiondb.cpp
-g_admin.cpp
-g_levels.cpp
-g_database.cpp
 g_main_ext.cpp
-g_sqlite.cpp
 ../sha-1/bg_sha.c
 ../sha-1/sha1.c
 ../sqlite/sqlite3.c

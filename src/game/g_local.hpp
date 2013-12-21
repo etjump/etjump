@@ -14,8 +14,4 @@ extern "C" {
 #undef min
 #endif
 
-#include "g_database.hpp"
-
-extern class Database         adminDB;
-
 #endif // g_local_hpp__

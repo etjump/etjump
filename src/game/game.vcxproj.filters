@@ -183,19 +183,7 @@
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_database.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_sqlite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_levels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_sessiondb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_admin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -238,22 +226,10 @@
     <ClInclude Include="..\sqlite\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_database.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_sqlite.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="g_levels.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_sessiondb.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="g_utilities.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_admin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_save.hpp">

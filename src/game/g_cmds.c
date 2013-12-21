@@ -1636,8 +1636,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
 		}
 	}
-
-    CheckCommand(ent);
 }
 
 
@@ -3947,7 +3945,7 @@ void ClientCommand(int clientNum)
 
     // Received client guid
     if(!Q_stricmp(cmd, "etguid")) {
-		GuidReceived(ent);
+		// GuidReceived(ent);
         return;
     }
 
