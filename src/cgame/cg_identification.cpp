@@ -137,13 +137,15 @@ void ReadGuid() {
     trap_FS_FCloseFile(f);
 }
 
+char *GetHWID(void);
+
 // Function is called when the guid is sent
 void SendGuid() {
     // Let's first make sure we have the guid
     ReadGuid();
     
     // Hash the guid again and send it to server
-    trap_SendClientCommand(va("etguid %s", userGuid.c_str()));
+    trap_SendClientCommand(va("etguid %s %s", userGuid.c_str(), GetHWID()));
 }
 
 #if defined __linux__

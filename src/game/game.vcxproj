@@ -98,6 +98,9 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>xcopy /Y "C:\Users\Jussi\Documents\GitHub\etjump\src\Release\*.dll" "C:\ET\Mapping\etjump"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -146,6 +149,8 @@
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="admin\sessiondata.cpp" />
+    <ClCompile Include="admin\userdata.cpp" />
     <ClCompile Include="bg_animation.c" />
     <ClCompile Include="bg_animgroup.c" />
     <ClCompile Include="bg_campaign.c" />
@@ -209,6 +214,11 @@
   <ItemGroup>
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="admin\iguid.h" />
+    <ClInclude Include="admin\iuserdata.h" />
+    <ClInclude Include="admin\sessiondata.h" />
+    <ClInclude Include="admin\user.h" />
+    <ClInclude Include="admin\userdata.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
@@ -219,10 +229,14 @@
     <ClInclude Include="g_utilities.hpp" />
     <ClInclude Include="g_team.h" />
     <ClInclude Include="q_shared.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="surfaceflags.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

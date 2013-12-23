@@ -482,3 +482,18 @@ bool MapExists( const std::string& map )
     }
     return true;
 }
+
+std::string ValueForKey( gentity_t *ent, const std::string& key )
+{
+    char userinfo[MAX_INFO_STRING] = "\0";
+    char *value = NULL;
+
+    trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+    value = Info_ValueForKey(userinfo, key.c_str());
+    if(!value)
+    {
+        return "";
+    } 
+
+    return value;
+}

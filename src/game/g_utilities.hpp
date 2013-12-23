@@ -48,4 +48,6 @@ void CharPtrToString( const char* p, std::string& s );
 
 std::string GetPath( const std::string& file );
 bool MapExists( const std::string& map );
+
+std::string ValueForKey( gentity_t *ent, const std::string& key );
 #endif // g_utilities_h__

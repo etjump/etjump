@@ -13,6 +13,12 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Source Files\Admin system">
+      <UniqueIdentifier>{e0c53039-7953-46f8-b6e9-c36340e9b1b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Admin system">
+      <UniqueIdentifier>{f7a43994-f591-458e-876d-cb9c539e7d1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bg_animation.c">
@@ -183,6 +189,12 @@
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="admin\sessiondata.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
+    <ClCompile Include="admin\userdata.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -229,8 +241,31 @@
     <ClInclude Include="g_save.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\sessiondata.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\userdata.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\user.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\iuserdata.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\iguid.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

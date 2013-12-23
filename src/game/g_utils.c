@@ -1628,3 +1628,14 @@ int ClientNum(gentity_t *ent)
 {
     return ent->client->ps.clientNum;
 }
+
+char *ClientIPAddr( gentity_t *ent )
+{
+    char userinfo[MAX_INFO_STRING] = "\0";
+    char *ip = NULL;
+
+    trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+    ip = Info_ValueForKey(userinfo, "ip");
+
+    return ip;
+}

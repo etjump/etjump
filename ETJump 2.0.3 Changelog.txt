@@ -1,0 +1,3 @@
+ETJump 2.0.3 Changelog
+
+Fixed /team follow2 crash

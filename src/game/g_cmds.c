@@ -3958,7 +3958,7 @@ void ClientCommand(int clientNum)
 
     // Received client guid
     if(!Q_stricmp(cmd, "etguid")) {
-		// GuidReceived(ent);
+		GuidReceived(ent);
         return;
     }
 

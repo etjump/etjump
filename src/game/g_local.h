@@ -1348,6 +1348,7 @@ void G_ParseCampaigns( void );
 qboolean G_MapIsValidCampaignStartMap( void );
 
 team_t G_GetTeamFromEntity( gentity_t *ent );
+char *ClientIPAddr( gentity_t *ent );
 
 //
 // g_combat.c
@@ -1860,9 +1861,7 @@ extern vmCvar_t	g_blockedMaps;
 extern vmCvar_t	g_admin;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
-extern vmCvar_t g_levelConfig;
 extern vmCvar_t g_userConfig;
-extern vmCvar_t g_banConfig;
 
 
 extern vmCvar_t	g_bannerLocation;
@@ -2641,11 +2640,12 @@ void OnClientBegin(gentity_t *ent);
 void OnGameInit();
 void OnGameShutdown();
 
-void GuidReceived(gentity_t *ent);
-
 
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
+
+// g_main_ext.cpp
+void GuidReceived( gentity_t *ent );
 
 #endif // G_LOCAL_H
 
