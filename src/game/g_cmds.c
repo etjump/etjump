@@ -1649,6 +1649,8 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
 		}
 	}
+
+    AdminCommandCheck( ent );
 }
 
 
@@ -4102,6 +4104,10 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
+    if(AdminCommandCheck( ent ))
+    {
+        return;
+    }
 
 	CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }

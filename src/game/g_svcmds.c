@@ -1104,6 +1104,6 @@ qboolean	ConsoleCommand( void ) {
 		// prints to the console instead now
 	}
 
-    return qfalse;
+    return AdminCommandCheck( NULL );
 }
 	

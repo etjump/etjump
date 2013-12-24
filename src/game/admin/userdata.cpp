@@ -221,18 +221,6 @@ bool UserData::PrepareStatements()
     // Result code
     int rc = 0;
 
-//     rc = sqlite3_prepare_v2(db_, 
-//         "CREATE TABLE IF NOT EXISTS users"
-//         "("
-//         "id INTEGER PRIMARY KEY,"
-//         "guid VARCHAR(40) UNIQUE NOT NULL,"
-//         "hwid VARCHAR(40) NOT NULL,"
-//         "level INTEGER NOT NULL,"
-//         "name VARCHAR(36) NOT NULL,"
-//         "pcommands VARCHAR(255),"
-//         "pgreeting VARCHAR(255),"
-//         "ptitle VARCHAR(255)"
-//         ");", -1, &createUserTable_, 0
     // Prepare create table statement
     rc = sqlite3_prepare_v2(db_, 
         "CREATE TABLE IF NOT EXISTS users"

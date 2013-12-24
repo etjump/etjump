@@ -149,6 +149,9 @@
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="admin\commandinterpreter.cpp" />
+    <ClCompile Include="admin\commands.cpp" />
+    <ClCompile Include="admin\game.cpp" />
     <ClCompile Include="admin\sessiondata.cpp" />
     <ClCompile Include="admin\userdata.cpp" />
     <ClCompile Include="bg_animation.c" />
@@ -214,6 +217,9 @@
   <ItemGroup>
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="admin\commandinterpreter.h" />
+    <ClInclude Include="admin\commands.h" />
+    <ClInclude Include="admin\game.h" />
     <ClInclude Include="admin\iguid.h" />
     <ClInclude Include="admin\iuserdata.h" />
     <ClInclude Include="admin\sessiondata.h" />

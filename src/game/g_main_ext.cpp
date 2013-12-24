@@ -1,31 +1,15 @@
 #include <string>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/shared_ptr.hpp>
 
-#include "g_save.hpp"
 #include "g_local.hpp"
 #include "g_utilities.hpp"
-#include "admin/sessiondata.h"
+#include "g_save.hpp"
+#include "admin/game.h"
 #include "admin/userdata.h"
+#include "admin/sessiondata.h"
+#include "admin/commandinterpreter.h"
 
-// Hack...
-struct Game
-{
-    Game()
-    {
-        userData = boost::shared_ptr< UserData >( new UserData() );
-        session = boost::shared_ptr< SessionData >( new SessionData( userData.get() ) );
-        saveData = boost::shared_ptr< SaveSystem >( new SaveSystem( session.get() ) );
-    }
-    boost::shared_ptr< SessionData > session;
-    boost::shared_ptr< UserData > userData;
-    boost::shared_ptr< SaveSystem > saveData;
-};
-
-namespace
-{
-    static Game game = Game();
-}
+Game game;
 
 void OnGameInit() {
     // Init save db
@@ -63,6 +47,15 @@ void GuidReceived( gentity_t *ent )
     {
         ;
     }
+}
+
+qboolean AdminCommandCheck( gentity_t *ent )
+{
+    if(game.command->ClientCommand( ent ))
+    {
+        return qtrue;
+    }
+    return qfalse;
 }
 
 // C API for save&load db

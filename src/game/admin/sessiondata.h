@@ -30,13 +30,16 @@ public:
     SessionData( IUserData *userData );
     ~SessionData();
 
-    // Checks whether guid is valid or not
-    bool ValidGuid( const std::string& guid );
     // Handles everything needed when guid is received
     bool GuidReceived( gentity_t *ent );
+
+    void PrintAdmintest( gentity_t *ent );
     
     virtual std::string GetGuid( gentity_t *ent );
 private:
+    // Checks whether guid is valid or not
+    bool ValidGuid( const std::string& guid );
+
     void GetUserData( gentity_t *ent, const std::string& guid );
 
     boost::array<Client, 64> clients_;

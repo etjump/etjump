@@ -195,6 +195,15 @@
     <ClCompile Include="admin\userdata.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="admin\commandinterpreter.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
+    <ClCompile Include="admin\commands.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
+    <ClCompile Include="admin\game.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -257,6 +266,15 @@
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
     <ClInclude Include="admin\iguid.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\commandinterpreter.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\commands.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\game.h">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>

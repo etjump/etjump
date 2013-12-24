@@ -97,3 +97,9 @@ std::string SessionData::GetGuid( gentity_t *ent )
 {
     return clients_[ent->client->ps.clientNum].guid;
 }
+
+void SessionData::PrintAdmintest( gentity_t *ent )
+{
+    ChatPrintAll(va("^3admintest: ^7%s^7 is a level %d user (TODO: Level name)",
+        ent->client->pers.netname, clients_[ent->client->ps.clientNum].level));
+}

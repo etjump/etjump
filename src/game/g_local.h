@@ -2647,5 +2647,7 @@ int ClientNum(gentity_t *ent);
 // g_main_ext.cpp
 void GuidReceived( gentity_t *ent );
 
+qboolean AdminCommandCheck(gentity_t *ent);
+
 #endif // G_LOCAL_H
 
