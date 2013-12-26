@@ -197,6 +197,7 @@ vmCvar_t		g_nameChangeLimit;
 
 vmCvar_t		g_admin;
 vmCvar_t		g_userConfig;
+vmCvar_t		g_levelConfig;
 vmCvar_t		g_adminLog;
 vmCvar_t		g_logCommands;
 
@@ -437,7 +438,8 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_admin, "g_admin", "1", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE },
 	{ &g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE },
-	{ &g_userConfig, "g_userConfig", "users.SQLite", CVAR_ARCHIVE },
+	{ &g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE },
+	{ &g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE },
 
       
 

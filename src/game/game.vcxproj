@@ -152,6 +152,7 @@
     <ClCompile Include="admin\commandinterpreter.cpp" />
     <ClCompile Include="admin\commands.cpp" />
     <ClCompile Include="admin\game.cpp" />
+    <ClCompile Include="admin\leveldata.cpp" />
     <ClCompile Include="admin\sessiondata.cpp" />
     <ClCompile Include="admin\userdata.cpp" />
     <ClCompile Include="bg_animation.c" />
@@ -222,6 +223,7 @@
     <ClInclude Include="admin\game.h" />
     <ClInclude Include="admin\iguid.h" />
     <ClInclude Include="admin\iuserdata.h" />
+    <ClInclude Include="admin\leveldata.h" />
     <ClInclude Include="admin\sessiondata.h" />
     <ClInclude Include="admin\user.h" />
     <ClInclude Include="admin\userdata.h" />

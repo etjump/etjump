@@ -108,11 +108,6 @@ bool UserData::AddUserToDatabase( const std::string& guid, const User& user )
     return true;
 }
 
-void UserData::ReadUsersFromDatabase()
-{
-
-}
-
 bool UserData::Initialize()
 {
     char dbFilename[MAX_QPATH] = "users.db";

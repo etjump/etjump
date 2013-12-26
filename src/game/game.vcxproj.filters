@@ -204,6 +204,9 @@
     <ClCompile Include="admin\game.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="admin\leveldata.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -275,6 +278,9 @@
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
     <ClInclude Include="admin\game.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\leveldata.h">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>

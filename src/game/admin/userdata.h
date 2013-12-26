@@ -24,7 +24,6 @@ public:
 private:
     // SQLite3 related functions
     bool AddUserToDatabase( const std::string& guid, const User& name );
-    void ReadUsersFromDatabase();
     bool PrepareStatements();
     bool CreateUserTable();
 

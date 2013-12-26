@@ -69,9 +69,12 @@ g_weapon.c
 q_math.c
 q_shared.c
 
+admin/commandinterpreter.cpp
+admin/commands.cpp
+admin/game.cpp
+admin/leveldata.cpp
 admin/sessiondata.cpp
 admin/userdata.cpp
-
 
 """
 

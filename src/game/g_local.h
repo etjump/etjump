@@ -1862,6 +1862,7 @@ extern vmCvar_t	g_admin;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
 extern vmCvar_t g_userConfig;
+extern vmCvar_t g_levelConfig;
 
 
 extern vmCvar_t	g_bannerLocation;
