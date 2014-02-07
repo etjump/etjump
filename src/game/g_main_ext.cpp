@@ -8,6 +8,7 @@
 #include "admin/userdata.h"
 #include "admin/sessiondata.h"
 #include "admin/commandinterpreter.h"
+#include "admin/leveldata.h"
 
 Game game;
 
@@ -15,6 +16,7 @@ void OnGameInit() {
     // Init save db
     game.saveData->Reset();
     game.userData->Initialize();
+    game.levelData->ReadLevels();
 }
 
 void OnGameShutdown() {

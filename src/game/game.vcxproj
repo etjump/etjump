@@ -222,6 +222,7 @@
     <ClInclude Include="admin\commands.h" />
     <ClInclude Include="admin\game.h" />
     <ClInclude Include="admin\iguid.h" />
+    <ClInclude Include="admin\ileveldata.h" />
     <ClInclude Include="admin\iuserdata.h" />
     <ClInclude Include="admin\leveldata.h" />
     <ClInclude Include="admin\sessiondata.h" />

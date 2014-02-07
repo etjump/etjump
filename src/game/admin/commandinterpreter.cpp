@@ -9,8 +9,43 @@
 
 CommandInterpreter::CommandInterpreter()
 {
+    commands_["addlevel"] = AdminCommand(AddLevel, CommandFlags::EDIT);
     commands_["admintest"] = AdminCommand(Admintest, CommandFlags::BASIC);
+    commands_["8ball"] = AdminCommand(Ball8, CommandFlags::BASIC);
+    commands_["ban"] = AdminCommand(Ban, CommandFlags::BAN);
+    commands_["cancelvote"] = AdminCommand(Cancelvote, CommandFlags::CANCELVOTE);
+    commands_["deletelevel"] = AdminCommand(DeleteLevel, CommandFlags::EDIT);
+    commands_["deleteuser"] = AdminCommand(DeleteUser, CommandFlags::EDIT);
+    commands_["editcommands"] = AdminCommand(EditCommands, CommandFlags::EDIT);
+    commands_["editlevel"] = AdminCommand(EditLevel, CommandFlags::EDIT);
+    commands_["edituser"] = AdminCommand(EditUser, CommandFlags::EDIT);
+    commands_["finger"] = AdminCommand(Finger, CommandFlags::FINGER);
+    commands_["help"] = AdminCommand(Help, CommandFlags::BASIC);
+    commands_["kick"] = AdminCommand(Kick, CommandFlags::KICK);
+    commands_["levelinfo"] = AdminCommand(LevelInfo, CommandFlags::EDIT);
+    commands_["listbans"] = AdminCommand(ListBans, CommandFlags::LISTBANS);
+    commands_["listcmds"] = AdminCommand(Help, CommandFlags::BASIC);
+    commands_["listflags"] = AdminCommand(ListFlags, CommandFlags::EDIT);
+    commands_["listmaps"] = AdminCommand(ListMaps, CommandFlags::BASIC);
+    commands_["listplayers"] = AdminCommand(ListPlayers, CommandFlags::LISTPLAYERS);
+    commands_["listusers"] = AdminCommand(ListUsers, CommandFlags::EDIT);
     commands_["map"] = AdminCommand(Map, CommandFlags::MAP);
+    commands_["mute"] = AdminCommand(Mute, CommandFlags::MUTE);
+    commands_["noclip"] = AdminCommand(Noclip, CommandFlags::NOCLIP);
+    commands_["nogoto"] = AdminCommand(NoGoto, CommandFlags::NOGOTO);
+    commands_["nosave"] = AdminCommand(NoSave, CommandFlags::SAVESYSTEM);
+    commands_["passvote"] = AdminCommand(Passvote, CommandFlags::PASSVOTE);
+    commands_["putteam"] = AdminCommand(Putteam, CommandFlags::PUTTEAM);
+    commands_["readconfig"] = AdminCommand(ReadConfig, CommandFlags::READCONFIG);
+    commands_["rmsaves"] = AdminCommand(RemoveSaves, CommandFlags::SAVESYSTEM);
+    commands_["rename"] = AdminCommand(Rename, CommandFlags::RENAME);
+    commands_["restart"] = AdminCommand(Restart, CommandFlags::RESTART);
+    commands_["setlevel"] = AdminCommand(SetLevel, CommandFlags::SETLEVEL);
+    commands_["spectate"] = AdminCommand(Spectate, CommandFlags::BASIC);
+    commands_["unban"] = AdminCommand(Unban, CommandFlags::BAN);
+    commands_["unmute"] = AdminCommand(Unmute, CommandFlags::MUTE);
+    commands_["userinfo"] = AdminCommand(UserInfo, CommandFlags::EDIT);
+
 }
 
 CommandInterpreter::~CommandInterpreter()

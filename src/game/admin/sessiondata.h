@@ -8,6 +8,7 @@
 #include "../g_local.hpp"
 #include "iuserdata.h"
 #include "iguid.h"
+#include "ileveldata.h"
 
 class SessionData : public IGuid
 {
@@ -27,15 +28,18 @@ public:
         std::bitset< MAX_COMMANDS > permissions;
     };
 
-    SessionData( IUserData *userData );
+    SessionData( IUserData *userData, ILevelData *levelData );
     ~SessionData();
 
     // Handles everything needed when guid is received
     bool GuidReceived( gentity_t *ent );
 
     void PrintAdmintest( gentity_t *ent );
+    void PrintFinger( gentity_t *ent, gentity_t *target );
     
     virtual std::string GetGuid( gentity_t *ent );
+
+    int GetLevel( gentity_t *ent );
 private:
     // Checks whether guid is valid or not
     bool ValidGuid( const std::string& guid );
@@ -45,6 +49,7 @@ private:
     boost::array<Client, 64> clients_;
 
     IUserData *userData_;
+    ILevelData *levelData_;
 };
 
 #endif // sessiondata_h__

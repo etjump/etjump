@@ -8,8 +8,8 @@ SessionData::Client::Client()
     permissions.reset();
 }
 
-SessionData::SessionData( IUserData *userData )
-    : userData_( userData )
+SessionData::SessionData( IUserData *userData, ILevelData *levelData )
+    : userData_( userData ), levelData_( levelData )
 {
 
 }
@@ -100,6 +100,35 @@ std::string SessionData::GetGuid( gentity_t *ent )
 
 void SessionData::PrintAdmintest( gentity_t *ent )
 {
-    ChatPrintAll(va("^3admintest: ^7%s^7 is a level %d user (TODO: Level name)",
-        ent->client->pers.netname, clients_[ent->client->ps.clientNum].level));
+    const ILevelData::LevelInformation *level = 
+        levelData_->GetLevelInformation(clients_[ent->client->ps.clientNum].level);
+    ChatPrintAll(va("^3admintest: ^7%s^7 is a level %d user (%s^7)",
+        ent->client->pers.netname, clients_[ent->client->ps.clientNum].level, 
+        level->name.c_str()));
+}
+
+int SessionData::GetLevel( gentity_t *ent )
+{
+    return clients_[ent->client->ps.clientNum].level;
+}
+
+void SessionData::PrintFinger( gentity_t *ent, gentity_t *target )
+{
+    const ILevelData::LevelInformation *level = 
+        levelData_->GetLevelInformation(clients_[ent->client->ps.clientNum].level);
+    if(clients_[ent->client->ps.clientNum].name.length() > 0)
+    {
+        ChatPrintTo(ent, va("^3finger: ^7%s^7 (%s^7) is a level %d user (%s^7)",
+            ent->client->pers.netname, 
+            clients_[ent->client->ps.clientNum].name.c_str(),
+            clients_[ent->client->ps.clientNum].level,
+            level->name.c_str()));
+    } else
+    {
+        ChatPrintTo(ent, va("^3finger: ^7%s^7 is a level %d user (%s^7)",
+            ent->client->pers.netname, 
+            clients_[ent->client->ps.clientNum].level,
+            level->name.c_str()));
+    }
+    
 }

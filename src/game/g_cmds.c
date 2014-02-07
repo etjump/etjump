@@ -1245,7 +1245,7 @@ void Cmd_Team_f(gentity_t *ent)
 		ent->client->sess.latchPlayerType = PC_SOLDIER;
 
     // Let's not do this as SetTeam crashes the game otherwise.
-    if(!Q_stricmp(s, "follow2"))
+    if(!Q_stricmp(s, "follow2") || !Q_stricmp(s, "follow1"))
     {
         return;
     }
