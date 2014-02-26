@@ -750,6 +750,52 @@ bool RemoveSaves( gentity_t *ent, Arguments argv )
 
 bool SetLevel( gentity_t *ent, Arguments argv )
 {
+    if(argv->size() == 3)
+    {
+        std::string err;
+        gentity_t *target = PlayerGentityFromString(argv->at(1), err);
+
+        if(!target)
+        {
+            ChatPrintTo(ent, err);
+            return false;
+        }
+
+        int level = 0;
+        if(!StringToInt(argv->at(2), level))
+        {
+            ChatPrintTo(ent, "^3setlevel: ^7invalid level " + argv->at(2));
+            return false;
+        }
+
+        if(ent)
+        {
+            if(TargetIsHigherLevel(ent, target, false)) 
+            {
+                ChatPrintTo(ent, "^3setlevel: ^7you can't set the level of a fellow admin.");
+                return false;
+            }
+
+            if(level > game.session->GetLevel(ent))
+            {
+                ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher than your own level.");
+                return false;
+            }
+        }
+        if(!game.session->SetLevel(target, level))
+        {
+            ChatPrintTo(ent, "^3setlevel: ^7level does not exist.");
+            return false;
+        }
+        ChatPrintTo(ent, va("^3setlevel: ^7%s^7 "));
+    } else if(argv->size() == 4)
+    {
+
+    } else 
+    {
+        PrintManual(ent, "setlevel");
+        return false;
+    }
     return true;
 }
 
@@ -841,6 +887,22 @@ bool Unmute( gentity_t *ent, Arguments argv )
 
 bool UserInfo( gentity_t *ent, Arguments argv )
 {
+    if(argv->size() != 2)
+    {
+        PrintManual(ent, "userinfo");
+        return false;
+    }
+
+    std::string error;
+    gentity_t *target = PlayerGentityFromString(argv->at(1), error);
+    if(!target)
+    {
+        ChatPrintTo(ent, "^userinfo: ^7" + error);
+        return false;
+    }
+
+    game.session->PrintUserinfo( ent, target );
+
     return true;
 }
 

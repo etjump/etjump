@@ -31,7 +31,7 @@ const User * UserData::GetUserData( const std::string& guid )
     return NULL;
 }
 
-void UserData::CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid )
+int UserData::CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid )
 {
     boost::shared_ptr<User> newUser( new User() );
 
@@ -47,8 +47,10 @@ void UserData::CreateNewUser( const std::string& guid, const std::string& name, 
     } else
     {
         G_LogPrintf("Error while trying to add user to database.\n");
-        return;
+        return -1;
     }
+
+    return newUser->id;
 }
 
 bool UserData::AddUserToDatabase( const std::string& guid, const User& user )

@@ -15,7 +15,7 @@ public:
     ~UserData();
 
     virtual const User *GetUserData( const std::string& guid );
-    virtual void CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid );
+    virtual int CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid );
 
     // SQLite3 related functions
     bool Initialize();

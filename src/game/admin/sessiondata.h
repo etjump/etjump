@@ -40,11 +40,15 @@ public:
     virtual std::string GetGuid( gentity_t *ent );
 
     int GetLevel( gentity_t *ent );
+    bool SetLevel( gentity_t *target, int level );
+    void PrintUserinfo( gentity_t *ent, gentity_t *target );
 private:
     // Checks whether guid is valid or not
     bool ValidGuid( const std::string& guid );
 
     void GetUserData( gentity_t *ent, const std::string& guid );
+
+    void UpdateUserSessionData( gentity_t *ent );
 
     boost::array<Client, 64> clients_;
 

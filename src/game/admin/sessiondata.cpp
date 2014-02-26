@@ -77,20 +77,38 @@ void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
         
 
         // user does not exist. Create a new one
-        userData_->CreateNewUser( guid, ent->client->pers.netname, clients_[ent->client->ps.clientNum].hwid );
-        G_LogPrintf("Couldn't find user. Adding a new one.\n");
+        clients_[ent->client->ps.clientNum].id = 
+            userData_->CreateNewUser( guid, ent->client->pers.netname, clients_[ent->client->ps.clientNum].hwid );
+         
     } else
     {
+        const ILevelData::LevelInformation *levelInfo = 
+            levelData_->GetLevelInformation(currentUser->level);
+
         clients_[ent->client->ps.clientNum].id = currentUser->id;
         clients_[ent->client->ps.clientNum].level = currentUser->level;
         clients_[ent->client->ps.clientNum].name = currentUser->name;
-        clients_[ent->client->ps.clientNum].title = currentUser->title;
+        if(currentUser->title.length() > 0)
+        {
+            clients_[ent->client->ps.clientNum].title = currentUser->title;
+        } else
+        {
+            clients_[ent->client->ps.clientNum].title = levelInfo->name;
+        }
+        
         clients_[ent->client->ps.clientNum].commands = currentUser->commands;
-        clients_[ent->client->ps.clientNum].greeting = currentUser->greeting;
-        G_LogPrintf("Found a user.\n");
+        
+        if(currentUser->greeting.length() > 0)
+        {
+            clients_[ent->client->ps.clientNum].greeting = currentUser->greeting;
+        } else
+        {
+            clients_[ent->client->ps.clientNum].greeting = levelInfo->greeting;
+        }
+        
     }
 
-    // TODO: levelData.GetData( userData.level )
+    
 }
 
 std::string SessionData::GetGuid( gentity_t *ent )
@@ -131,4 +149,61 @@ void SessionData::PrintFinger( gentity_t *ent, gentity_t *target )
             level->name.c_str()));
     }
     
+}
+
+bool SessionData::SetLevel( gentity_t *target, int level )
+{
+    const ILevelData::LevelInformation *levelInfo = 
+        levelData_->GetLevelInformation(level);
+
+    if(!levelInfo->isValid)
+    {
+        return false;
+    }
+
+    clients_[target->client->ps.clientNum].level = level;
+
+    UpdateUserSessionData(target);
+    return true;
+}
+
+void SessionData::UpdateUserSessionData( gentity_t *ent )
+{
+    const ILevelData::LevelInformation *levelInfo = 
+        levelData_->GetLevelInformation(clients_[ent->client->ps.clientNum].level);
+
+    const User* user = userData_->GetUserData(clients_[ent->client->ps.clientNum].guid);
+
+    if(user->title.length() > 0)
+    {
+        clients_[ent->client->ps.clientNum].title = user->title;
+    } else
+    {
+        clients_[ent->client->ps.clientNum].title = levelInfo->name;
+    }
+
+    if(user->greeting.length() > 0)
+    {
+        clients_[ent->client->ps.clientNum].greeting = user->greeting;
+    } else
+    {
+        clients_[ent->client->ps.clientNum].greeting = levelInfo->greeting;
+    }
+
+    // TODO: update permissions
+}
+
+void SessionData::PrintUserinfo( gentity_t *ent, gentity_t *target )
+{
+    ChatPrintTo(ent, "^3userinfo: ^7check console for more information.");
+    BeginBufferPrint();
+    BufferPrint(ent, va("name: %s\n", clients_[target->client->ps.clientNum].name.c_str()));
+    BufferPrint(ent, va("id: %d\n", clients_[target->client->ps.clientNum].id));
+    BufferPrint(ent, va("guid: %s\n", clients_[target->client->ps.clientNum].guid.c_str()));
+    BufferPrint(ent, va("hwid: %s\n", clients_[target->client->ps.clientNum].hwid.c_str()));
+    BufferPrint(ent, va("level: %d\n", clients_[target->client->ps.clientNum].level));
+    BufferPrint(ent, va("title: %s\n", clients_[target->client->ps.clientNum].title.c_str()));
+    BufferPrint(ent, va("commands: %s\n", clients_[target->client->ps.clientNum].commands.c_str()));
+    BufferPrint(ent, va("greeting: %s\n", clients_[target->client->ps.clientNum].greeting.c_str()));    
+    FinishBufferPrint(ent, false);
 }
