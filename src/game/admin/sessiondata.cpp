@@ -1,8 +1,9 @@
 #include "sessiondata.h"
 #include "../g_utilities.hpp"
+#include <boost/algorithm/string.hpp>
 
 SessionData::Client::Client()
-    : id(0), level(0), guid(""), name(""), hwid(""), title(""), commands(""),
+    : id(0), level(0), lastSeen(0), guid(""), name(""), hwid(""), title(""), commands(""), 
     greeting("")
 {
     permissions.reset();
@@ -72,14 +73,12 @@ bool SessionData::GuidReceived( gentity_t *ent )
 void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
 {
     const User *currentUser = userData_->GetUserData( guid );
+
     if(!currentUser)
     {
-        
-
         // user does not exist. Create a new one
         clients_[ent->client->ps.clientNum].id = 
             userData_->CreateNewUser( guid, ent->client->pers.netname, clients_[ent->client->ps.clientNum].hwid );
-         
     } else
     {
         const ILevelData::LevelInformation *levelInfo = 
@@ -105,7 +104,14 @@ void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
         {
             clients_[ent->client->ps.clientNum].greeting = levelInfo->greeting;
         }
+
+
+        // TODO: customizable
         
+        std::string welcomeMsg;
+        CharPtrToString( g_lastVisitedMessage.string, welcomeMsg );
+        boost::replace_all( welcomeMsg, "[t]", TimeStampToString(currentUser->lastSeen));
+        CPMTo(ent, welcomeMsg);
     }
 
     
@@ -130,25 +136,29 @@ int SessionData::GetLevel( gentity_t *ent )
     return clients_[ent->client->ps.clientNum].level;
 }
 
-void SessionData::PrintFinger( gentity_t *ent, gentity_t *target )
+void SessionData::PrintFinger( gentity_t *toPrint, gentity_t *target )
 {
     const ILevelData::LevelInformation *level = 
-        levelData_->GetLevelInformation(clients_[ent->client->ps.clientNum].level);
-    if(clients_[ent->client->ps.clientNum].name.length() > 0)
+        levelData_->GetLevelInformation(clients_[target->client->ps.clientNum].level);
+    if(clients_[target->client->ps.clientNum].name.length() > 0)
     {
-        ChatPrintTo(ent, va("^3finger: ^7%s^7 (%s^7) is a level %d user (%s^7)",
-            ent->client->pers.netname, 
-            clients_[ent->client->ps.clientNum].name.c_str(),
-            clients_[ent->client->ps.clientNum].level,
+        ChatPrintTo(toPrint, va("^3finger: ^7%s^7 (%s^7) is a level %d user (%s^7)",
+            target->client->pers.netname, 
+            clients_[target->client->ps.clientNum].name.c_str(),
+            clients_[target->client->ps.clientNum].level,
             level->name.c_str()));
     } else
     {
-        ChatPrintTo(ent, va("^3finger: ^7%s^7 is a level %d user (%s^7)",
-            ent->client->pers.netname, 
-            clients_[ent->client->ps.clientNum].level,
+        ChatPrintTo(toPrint, va("^3finger: ^7%s^7 is a level %d user (%s^7)",
+            target->client->pers.netname, 
+            clients_[target->client->ps.clientNum].level,
             level->name.c_str()));
     }
-    
+    ConsolePrintTo(toPrint, "^3GUID: ^7" + clients_[target->client->ps.clientNum].guid.substr(0, 8));
+    ConsolePrintTo(toPrint, "^3HWID: ^7" + clients_[target->client->ps.clientNum].hwid);
+    ConsolePrintTo(toPrint, "^3Title: ^7" + clients_[target->client->ps.clientNum].title);
+    ConsolePrintTo(toPrint, "^3Commands: ^7" + clients_[target->client->ps.clientNum].commands);
+    ConsolePrintTo(toPrint, "^3Greeting: ^7" + clients_[target->client->ps.clientNum].greeting);
 }
 
 bool SessionData::SetLevel( gentity_t *target, int level )
@@ -162,8 +172,8 @@ bool SessionData::SetLevel( gentity_t *target, int level )
     }
 
     clients_[target->client->ps.clientNum].level = level;
-
     UpdateUserSessionData(target);
+    userData_->UpdateLevel(clients_[target->client->ps.clientNum].guid, level);
     return true;
 }
 
@@ -173,6 +183,12 @@ void SessionData::UpdateUserSessionData( gentity_t *ent )
         levelData_->GetLevelInformation(clients_[ent->client->ps.clientNum].level);
 
     const User* user = userData_->GetUserData(clients_[ent->client->ps.clientNum].guid);
+
+    if(!user)
+    {
+        G_LogPrintf("ERROR: couldn't find user with guid: %s\n", clients_[ent->client->ps.clientNum].guid.c_str());
+        return;
+    }
 
     if(user->title.length() > 0)
     {
@@ -191,6 +207,17 @@ void SessionData::UpdateUserSessionData( gentity_t *ent )
     }
 
     // TODO: update permissions
+}
+
+void SessionData::UpdateLastSeen(gentity_t* ent)
+{
+    time_t t = 0;
+    if(!time(&t))
+    {
+        G_LogPrintf("ERROR: Couldn't get time for GuidReceived.\n");
+    }
+    clients_[ent->client->ps.clientNum].lastSeen = static_cast<int>(t);
+    userData_->UpdateLastSeen( clients_[ent->client->ps.clientNum].id, static_cast<int>(t) );
 }
 
 void SessionData::PrintUserinfo( gentity_t *ent, gentity_t *target )

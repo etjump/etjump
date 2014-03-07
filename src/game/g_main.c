@@ -225,6 +225,8 @@ vmCvar_t		g_voteCooldown;
 
 vmCvar_t        mod_version;
 
+vmCvar_t        g_lastVisitedMessage;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -461,7 +463,9 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_mute, "g_mute", "0", CVAR_ARCHIVE },
     { &g_goto, "g_goto", "1", CVAR_ARCHIVE },
 	{ &g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE },
-    { &mod_version, "mod_version", MOD_VERSION, CVAR_SERVERINFO }
+    { &mod_version, "mod_version", MOD_VERSION, CVAR_SERVERINFO },
+
+    { &g_lastVisitedMessage, "g_lastVisitedMessage", "^2Welcome back! Your last visit was on [t].", CVAR_ARCHIVE }
 };
 
 // bk001129 - made static to avoid aliasing

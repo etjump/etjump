@@ -19,6 +19,7 @@ public:
         static const int MAX_COMMANDS = 256;
         int id;
         int level;
+        int lastSeen;
         std::string guid;
         std::string name;
         std::string hwid;
@@ -42,6 +43,8 @@ public:
     int GetLevel( gentity_t *ent );
     bool SetLevel( gentity_t *target, int level );
     void PrintUserinfo( gentity_t *ent, gentity_t *target );
+    // Need this for the OnDisconnect()
+    void UpdateLastSeen(gentity_t *ent);
 private:
     // Checks whether guid is valid or not
     bool ValidGuid( const std::string& guid );
@@ -54,6 +57,7 @@ private:
 
     IUserData *userData_;
     ILevelData *levelData_;
+    
 };
 
 #endif // sessiondata_h__

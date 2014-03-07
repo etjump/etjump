@@ -12,5 +12,5 @@ Game::Game()
     userData = boost::shared_ptr< UserData >( new UserData() );
     session = boost::shared_ptr< SessionData >( new SessionData( userData.get(), levelData.get() ) );
     command = boost::shared_ptr< CommandInterpreter >( new CommandInterpreter );
-    saveData = boost::shared_ptr< SaveSystem >( new SaveSystem( session.get() ) );
+    saveData = boost::shared_ptr< SaveSystem >( new SaveSystem( session.get() ) ); 
 }

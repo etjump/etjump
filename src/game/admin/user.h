@@ -6,12 +6,13 @@
 struct User
 {
     User()
-        :level(0), name(""), hwid(""), title(""), commands(""), greeting("")
+        :level(0), lastSeen(0), name(""), hwid(""), title(""), commands(""), greeting("")
     {
         
     }
     int id;
     int level;
+    int lastSeen;
     std::string name;
     std::string hwid;
     std::string title;

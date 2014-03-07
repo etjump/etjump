@@ -1,10 +1,15 @@
 #ifndef g_utilities_h__
 #define g_utilities_h__
 
-#include "g_local.hpp"
-
 #include <string>
 #include <vector>
+
+typedef struct gentity_s gentity_t;
+typedef float vec_t;
+typedef vec_t vec2_t[2];
+typedef vec_t vec3_t[3];
+typedef vec_t vec4_t[4];
+typedef vec_t vec5_t[5];
 
 const std::string NEWLINE = "\n";
 
@@ -50,4 +55,5 @@ std::string GetPath( const std::string& file );
 bool MapExists( const std::string& map );
 
 std::string ValueForKey( gentity_t *ent, const std::string& key );
+std::string TimeStampToString( int timeStamp );
 #endif // g_utilities_h__

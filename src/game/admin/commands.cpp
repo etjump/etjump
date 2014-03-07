@@ -345,6 +345,8 @@ bool EditLevel( gentity_t *ent, Arguments argv )
 
 bool EditUser( gentity_t *ent, Arguments argv )
 {
+
+
     return true;
 }
 
@@ -787,7 +789,7 @@ bool SetLevel( gentity_t *ent, Arguments argv )
             ChatPrintTo(ent, "^3setlevel: ^7level does not exist.");
             return false;
         }
-        ChatPrintTo(ent, va("^3setlevel: ^7%s^7 "));
+        ChatPrintTo(ent, va("^3setlevel: ^7%s^7 is now a level %d user.", target->client->pers.netname, level));
     } else if(argv->size() == 4)
     {
 
@@ -796,6 +798,7 @@ bool SetLevel( gentity_t *ent, Arguments argv )
         PrintManual(ent, "setlevel");
         return false;
     }
+    
     return true;
 }
 

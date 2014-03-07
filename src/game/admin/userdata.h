@@ -16,6 +16,8 @@ public:
 
     virtual const User *GetUserData( const std::string& guid );
     virtual int CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid );
+    virtual void UpdateLastSeen( int id, int seen );
+    virtual void UpdateLevel( const std::string& guid, int level );
 
     // SQLite3 related functions
     bool Initialize();
@@ -33,6 +35,9 @@ private:
     sqlite3_stmt *createUserTable_;
     sqlite3_stmt *insertIntoUsers_;
     sqlite3_stmt *selectAllUsers_;
+    sqlite3_stmt *updateUser_;
+    sqlite3_stmt *updateLastSeen_;
+    sqlite3_stmt *updateLevel_;
     // End of SQLite3
 
     int highestId_;

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "g_utilities.hpp"
+#include "g_local.hpp"
 
 using std::string;
 using std::vector;
@@ -496,4 +497,15 @@ std::string ValueForKey( gentity_t *ent, const std::string& key )
     } 
 
     return value;
+}
+
+std::string TimeStampToString( int t )
+{
+    char buf[MAX_TOKEN_CHARS];
+    struct tm *lt = NULL;
+    time_t toConvert = t;
+    lt = localtime(&toConvert);
+    // day / month / year 
+    strftime(buf, sizeof(buf), "%d/%m/%y %H:%M:%S", lt);
+    return std::string(buf);
 }
