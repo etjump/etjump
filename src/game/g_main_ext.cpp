@@ -42,6 +42,7 @@ void OnClientDisconnect(gentity_t *ent)
     game.saveData->SavePositionsToDatabase(ent);
     game.saveData->ResetSavedPositions(ent);
     game.session->UpdateLastSeen(ent);
+    game.session->Reset(ent);
 }
 
 void GuidReceived( gentity_t *ent )

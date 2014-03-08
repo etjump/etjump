@@ -9,9 +9,11 @@ UserData::UserData()
 {
     highestId_ = -1;
     db_ = NULL;
-    createUserTable_ = NULL;
     insertIntoUsers_ = NULL;
     selectAllUsers_ = NULL;
+    updateUser_ = NULL;
+    updateLastSeen_ = NULL;
+    updateLevel_ = NULL;
 }
 
 UserData::~UserData()
@@ -221,11 +223,13 @@ bool UserData::Initialize()
     {
         G_LogPrintf("Couldn't open database %s: (%d) %s\n",
             databaseDefaultName, rc, sqlite3_errmsg(db_));
+        return false;
     }
 
     // Try to prepare the statements
     if(!PrepareStatements())
     {
+        sqlite3_close(db_);
         return false;
     }
 
@@ -238,6 +242,7 @@ bool UserData::Initialize()
         }
         catch( std::bad_alloc& e )
         {
+            Shutdown();
             G_Error("Failed to allocate memory for a user.\n");
         }
 
@@ -305,10 +310,15 @@ bool UserData::Initialize()
 bool UserData::Shutdown()
 {
     sqlite3_finalize(insertIntoUsers_);
+    insertIntoUsers_ = NULL;
     sqlite3_finalize(selectAllUsers_);
+    selectAllUsers_ = NULL;
     sqlite3_finalize(updateUser_);
+    updateUser_ = NULL;
     sqlite3_finalize(updateLastSeen_);
+    updateLastSeen_ = NULL;
     sqlite3_finalize(updateLevel_);
+    updateLevel_ = NULL;
 
     sqlite3_close(db_);
     db_ = NULL;
@@ -317,62 +327,46 @@ bool UserData::Shutdown()
 
 bool UserData::PrepareStatements()
 {
-    // Result code
-    int rc = 0;
-
-    // Prepare create table statement
-    rc = sqlite3_prepare_v2(db_, 
-        "CREATE TABLE IF NOT EXISTS users"
-        "("
-        "id INTEGER PRIMARY KEY,"
-        "guid VARCHAR(40) UNIQUE NOT NULL,"
-        "hwid VARCHAR(40) NOT NULL,"
-        "level INTEGER NOT NULL,"
-        "name VARCHAR(36) NOT NULL,"
-        "pcommands VARCHAR(255),"
-        "pgreeting VARCHAR(255),"
-        "ptitle VARCHAR(255),"
-        "seen INTEGER"
-        ");", -1, &createUserTable_, 0);
-
-    if(rc != SQLITE_OK)
+    // Table needs to be created before anything else can be prepared
+    if(!CreateUsersTable())
     {
-        G_LogPrintf("Preparing createUserTable statement failed: (%d) %s\n",
-            rc, sqlite3_errmsg(db_));
         return false;
     }
 
-    // Table needs to be created before anything else can be prepared
-    CreateUsersTable();
+    if(!PrepareQueries())
+    {
+        return false;
+    }
 
-    // We can now finalize the statement as it is no longer needed
-    sqlite3_finalize(createUserTable_);
+    if(!PrepareUpdates())
+    {
+        return false;
+    }
 
-    rc = sqlite3_prepare_v2(db_,
+    if(!PrepareInserts())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool UserData::PrepareQueries()
+{
+    int rc = sqlite3_prepare_v2(db_,
         "SELECT id, guid, hwid, level, name, pcommands, pgreeting, ptitle, seen FROM users;", -1, &selectAllUsers_, 0);
-
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Preparing selectAllFromUsers statement failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
+    return true;
+}
 
-    // Prepare insert into statement
-
-    rc = sqlite3_prepare_v2(db_, 
-        "INSERT INTO users "
-        "(id, guid, level, name, pcommands, pgreeting, ptitle, hwid, seen) "
-        "VALUES (?, ?, 0, ?, '', '', '', ?, ?);", -1, &insertIntoUsers_, 0);
-
-    if(rc != SQLITE_OK)
-    {
-        G_LogPrintf("Preparing insertIntoUsers statement failed: (%d) %s\n",
-            rc, sqlite3_errmsg(db_));
-        return false;
-    }
-
-    rc = sqlite3_prepare_v2(db_, 
+bool UserData::PrepareUpdates()
+{
+    int rc = sqlite3_prepare_v2(db_, 
         "UPDATE users SET pcommands=?, pgreeting=?, ptitle=?, seen=? WHERE id=?;",
         -1, &updateUser_, 0);
 
@@ -408,9 +402,25 @@ bool UserData::PrepareStatements()
     return true;
 }
 
+bool UserData::PrepareInserts()
+{
+    int rc = sqlite3_prepare_v2(db_, 
+        "INSERT INTO users "
+        "(id, guid, level, name, pcommands, pgreeting, ptitle, hwid, seen) "
+        "VALUES (?, ?, 0, ?, '', '', '', ?, ?);", -1, &insertIntoUsers_, 0);
+
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Preparing insertIntoUsers statement failed: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+    return true;
+}
+
 bool UserData::CreateUsersTable()
 {
-
+    sqlite3_stmt *createUserTable = NULL;
     // result code
     int rc = sqlite3_prepare_v2(db_, 
         "CREATE TABLE IF NOT EXISTS users"
@@ -424,7 +434,7 @@ bool UserData::CreateUsersTable()
         "pgreeting VARCHAR(255),"
         "ptitle VARCHAR(255),"
         "seen INTEGER"
-        ");", -1, &createUserTable_, 0);
+        ");", -1, &createUserTable, 0);
     
     if(rc != SQLITE_OK)
     {
@@ -433,13 +443,16 @@ bool UserData::CreateUsersTable()
         return false;
     }
 
-    rc = sqlite3_step(createUserTable_);
+    rc = sqlite3_step(createUserTable);
     if(rc != SQLITE_DONE)
     {
         G_LogPrintf("Creating table \"users\" failed: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
+
+    sqlite3_finalize(createUserTable);
+
     return true;
 }
 

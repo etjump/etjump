@@ -56,7 +56,7 @@ bool CreateNewGuid()
     // Convert to uppercase
     boost::to_upper(userGuid);
 
-    if(trap_FS_FOpenFile("etguid", &f, FS_WRITE) < 0)
+    if(trap_FS_FOpenFile("etguid.dat", &f, FS_WRITE) < 0)
     {
         // Couldn't open "etguid", print error and send the generated
         // guid for temporary identification.
@@ -109,14 +109,15 @@ const int GUID_LEN = 40;
 void ReadGuid() {
     fileHandle_t f = -1;
 
-    int fileLen = trap_FS_FOpenFile("etguid", &f, FS_READ);
+    int fileLen = trap_FS_FOpenFile("etguid.dat", &f, FS_READ);
 
     // Let's see if the file exists already
-    if(fileLen <= 0)
+    if(fileLen < 0)
     {
+        trap_FS_FCloseFile(f);
         // The GUID does not exist, create a new one.
         CreateNewGuid();
-		
+		CG_Printf("^3No GUID was found. Creating a new one.\n");
     } else
     {
         // The GUID exists, read it
@@ -131,10 +132,9 @@ void ReadGuid() {
 
         // if it was a valid guid, just save it to data structure
         userGuid = guidBuf;
-
-    }
-
-    trap_FS_FCloseFile(f);
+        CG_Printf("^3GUID was found.\n");
+        trap_FS_FCloseFile(f);
+    }    
 }
 
 char *GetHWID(void);

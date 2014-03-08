@@ -20,6 +20,18 @@ SessionData::~SessionData()
 
 }
 
+void SessionData::Reset(gentity_t* ent)
+{
+    clients_[ent->client->ps.clientNum].commands.clear();
+    clients_[ent->client->ps.clientNum].greeting.clear();
+    clients_[ent->client->ps.clientNum].guid.clear();
+    clients_[ent->client->ps.clientNum].hwid.clear();
+    clients_[ent->client->ps.clientNum].id = 0;
+    clients_[ent->client->ps.clientNum].lastSeen = 0;
+    clients_[ent->client->ps.clientNum].level = 0;
+    clients_[ent->client->ps.clientNum].name.clear();
+}
+
 bool SessionData::ValidGuid( const std::string& guid )
 {
     const unsigned GUID_SIZE = 40;

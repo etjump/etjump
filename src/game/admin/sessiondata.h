@@ -45,6 +45,7 @@ public:
     void PrintUserinfo( gentity_t *ent, gentity_t *target );
     // Need this for the OnDisconnect()
     void UpdateLastSeen(gentity_t *ent);
+    void Reset(gentity_t *ent);
 private:
     // Checks whether guid is valid or not
     bool ValidGuid( const std::string& guid );

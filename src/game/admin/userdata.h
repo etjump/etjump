@@ -27,12 +27,14 @@ private:
     // SQLite3 related functions
     bool AddUserToDatabase( const std::string& guid, const User& name );
     bool PrepareStatements();
-    bool CreateUserTable();
+    bool PrepareQueries();
+    bool PrepareUpdates();
+    bool PrepareInserts();
+    bool CreateUsersTable();
 
     // SQLite3 related variables
     sqlite3 *db_;
     // SQLite3 statements
-    sqlite3_stmt *createUserTable_;
     sqlite3_stmt *insertIntoUsers_;
     sqlite3_stmt *selectAllUsers_;
     sqlite3_stmt *updateUser_;
