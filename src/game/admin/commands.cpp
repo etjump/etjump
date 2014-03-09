@@ -1,8 +1,10 @@
 #include "commands.h"
+#include "common.h"
 #include "game.h"
 #include "sessiondata.h"
 #include "leveldata.h"
 #include "../g_save.hpp"
+#include "mapdata.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -15,15 +17,16 @@ void PrintManual(gentity_t *ent, const std::string& command)
     {
         ChatPrintTo(ent, va("^3%s: ^7check console for more information.", command.c_str()));
         trap_SendServerCommand(ent->client->ps.clientNum, va("manual %s", command.c_str()));
-    } else
+    }
+    else
     {
         for(int i = 0; i < sizeof(commandManuals)/sizeof(commandManuals[0]); i++)
         {
             if(!Q_stricmp(commandManuals[i].cmd, command.c_str()))
             {
                 G_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n",
-                    commandManuals[i].cmd, commandManuals[i].usage, 
-                    commandManuals[i].description);
+                         commandManuals[i].cmd, commandManuals[i].usage,
+                         commandManuals[i].description);
                 return;
             }
         }
@@ -40,7 +43,8 @@ bool TargetIsHigherLevel( gentity_t *ent, gentity_t *target, bool equalIsHigher 
     if(equalIsHigher)
     {
         return game.session->GetLevel(target) >= game.session->GetLevel(ent);
-    } else
+    }
+    else
     {
         return game.session->GetLevel(target) > game.session->GetLevel(ent);
     }
@@ -107,10 +111,12 @@ bool Ball8( gentity_t *ent, Arguments argv )
     if(random < POSITIVE)
     {
         ChatPrintAll("^3Magical 8 Ball: ^2" + Magical8BallResponses[random]);
-    } else if(random < NO_IDEA)
+    }
+    else if(random < NO_IDEA)
     {
         ChatPrintAll("^3Magical 8 Ball: ^3" + Magical8BallResponses[random]);
-    } else
+    }
+    else
     {
         ChatPrintAll("^3Magical 8 Ball: ^1" + Magical8BallResponses[random]);
     }
@@ -132,9 +138,6 @@ bool AddLevel( gentity_t *ent, Arguments argv )
     }
 
     int open = 0;
-    const int CMDS_OPEN = 1;
-    const int GREETING_OPEN = 2;
-    const int TITLE_OPEN = 4;
 
     int level = 0;
     std::string commands;
@@ -156,15 +159,19 @@ bool AddLevel( gentity_t *ent, Arguments argv )
             if(*it == "-cmds" && it + 1 != argv->end())
             {
                 open = CMDS_OPEN;
-            } else if(*it == "-greeting" && it + 1 != argv->end())
+            }
+            else if(*it == "-greeting" && it + 1 != argv->end())
             {
                 open = GREETING_OPEN;
-            } else if(*it == "-title" && it + 1 != argv->end())
+            }
+            else if(*it == "-title" && it + 1 != argv->end())
             {
                 open = TITLE_OPEN;
-            } else
+            }
+            else
             {
-                switch(open) {
+                switch(open)
+                {
                 case 0:
                     ChatPrintTo(ent, va("^3addlevel: ^7ignored argument \"%s^7\".", it->c_str()));
                     break;
@@ -187,7 +194,6 @@ bool AddLevel( gentity_t *ent, Arguments argv )
 
         boost::trim_right(greeting);
         boost::trim_right(title);
-
     }
 
     if(!game.levelData->AddLevel(level, title, commands, greeting))
@@ -211,10 +217,94 @@ bool Admintest( gentity_t *ent, Arguments argv )
 
     game.session->PrintAdmintest( ent );
     return true;
-} 
+}
+
+void BanHandleGuidSwitch( gentity_t* ent, Arguments argv )
+{
+    
+}
 
 bool Ban( gentity_t *ent, Arguments argv )
 {
+    // !ban <name> <time> <reason>
+    gentity_t *target = NULL;
+    if(argv->size() < 2)
+    {
+        PrintManual(ent, "ban");
+        return false;
+    }
+
+    if(argv->at(1) != "-guid")
+    {
+        // Find the target
+        std::string error = "";
+        target = PlayerGentityFromString(argv->at(1), error);
+        if(!target)
+        {
+            ChatPrintTo(ent, "^3ban: " + error);
+            return false;
+        }
+    } else
+    {
+        BanHandleGuidSwitch( ent, argv );
+        return false;
+    }
+    
+    int multiplier = 1;
+    int seconds = PERMANENT_BAN_DURATION;
+    std::string reason = "";
+
+    if(argv->size() == 2)
+    {
+        // Permanent time, no reason
+        // -> no need to do anything
+    } else
+    {
+        if(argv->size() >= 3)
+        {
+            int multiplier = 1;
+            int seconds = 0;
+
+            char lastChar = argv->at(2).at(argv->at(2).size() - 1);
+            if(lastChar == 'm')
+            {
+                multiplier = 60;
+            } else if(lastChar == 'h')
+            {
+                multiplier = 60 * 60;
+            } else if(lastChar == 'd')
+            {
+                multiplier = 60 * 60 * 24;
+            } else if(lastChar == 'w')
+            {
+                multiplier = 60 * 60 * 24 * 7;
+            }
+
+            if(!StringToInt(argv->at(2).substr(0, argv->at(2).length() - 1), seconds))
+            {
+                ChatPrintTo(ent, "^3ban: ^7invalid time specified");
+                return false;
+            }
+        }
+    
+        if(argv->size() >= 4)
+        {
+            for(ConstArgIter it = argv->begin() + 3;
+                it != argv->end(); it++)
+            {
+                reason += *it + " ";
+            }
+        }
+    }
+    
+    game.session->BanPlayer( ent, argv->at(1), seconds, reason );
+
+    if(target)
+    {
+        trap_DropClient(target->client->ps.clientNum, reason.c_str(),
+            0);
+    }
+
     return true;
 }
 
@@ -225,7 +315,8 @@ bool Cancelvote( gentity_t *ent, Arguments argv )
         level.voteInfo.voteYes = 0;
         level.voteInfo.voteNo = level.numConnectedClients;
         ChatPrintAll("^3cancelvote: ^7vote has been canceled");
-    } else
+    }
+    else
     {
         ChatPrintTo(ent, "^3cancelvote: ^7no vote in progress.");
     }
@@ -243,7 +334,7 @@ bool DeleteLevel( gentity_t *ent, Arguments argv )
     int level = 0;
     if(!StringToInt(argv->at(1), level))
     {
-        ChatPrintTo(ent, va("^3deletelevel: ^7%s is not an integer.", argv->at(1)));
+        ChatPrintTo(ent, va("^3deletelevel: ^7%s is not an integer.", argv->at(1).c_str()));
         return false;
     }
 
@@ -260,11 +351,14 @@ bool DeleteLevel( gentity_t *ent, Arguments argv )
 
 bool DeleteUser( gentity_t *ent, Arguments argv )
 {
+    // TODO: is this really needed?
+    ChatPrintTo(ent, "^3deleteuser: ^7command is not implemented.");
     return true;
 }
 
 bool EditCommands( gentity_t *ent, Arguments argv )
 {
+    ChatPrintTo(ent, "^editcommands: ^7command is not implemented.");
     return true;
 }
 
@@ -278,9 +372,6 @@ bool EditLevel( gentity_t *ent, Arguments argv )
 
     int updated = 0;
     int open = 0;
-    const int CMDS_OPEN = 1;
-    const int GREETING_OPEN = 2;
-    const int TITLE_OPEN = 4;
 
     int level = 0;
     std::string commands;
@@ -303,17 +394,21 @@ bool EditLevel( gentity_t *ent, Arguments argv )
             {
                 open = CMDS_OPEN;
                 updated |= CMDS_OPEN;
-            } else if(*it == "-greeting" && it + 1 != argv->end())
+            }
+            else if(*it == "-greeting" && it + 1 != argv->end())
             {
                 open = GREETING_OPEN;
                 updated |=GREETING_OPEN;
-            } else if(*it == "-title" && it + 1 != argv->end())
+            }
+            else if(*it == "-title" && it + 1 != argv->end())
             {
                 open = TITLE_OPEN;
                 updated |= TITLE_OPEN;
-            } else
+            }
+            else
             {
-                switch(open) {
+                switch(open)
+                {
                 case 0:
                     ChatPrintTo(ent, va("^editlevel: ^7ignored argument \"%s^7\".", it->c_str()));
                     break;
@@ -336,7 +431,6 @@ bool EditLevel( gentity_t *ent, Arguments argv )
 
         boost::trim_right(greeting);
         boost::trim_right(title);
-
     }
 
     game.levelData->EditLevel(level, title, commands, greeting, updated);
@@ -345,7 +439,70 @@ bool EditLevel( gentity_t *ent, Arguments argv )
 
 bool EditUser( gentity_t *ent, Arguments argv )
 {
+    // !edituser guid -cmds personal_commands -title personal_title -greeting pgreeting
+    if(argv->size() < 4)
+    {
+        PrintManual(ent, "edituser");
+        return false;
+    }
 
+    ConstArgIter it = argv->begin() + 2;
+
+    int updated = 0;
+    int open = 0;
+    const int CMDS_OPEN = 1;
+    const int GREETING_OPEN = 2;
+    const int TITLE_OPEN = 4;
+
+    std::string commands;
+    std::string greeting;
+    std::string title;
+
+    while(it != argv->end())
+    {
+        if(*it == "-cmds" && it + 1 != argv->end())
+        {
+            open = CMDS_OPEN;
+            updated |= CMDS_OPEN;
+        }
+        else if(*it == "-greeting" && it + 1 != argv->end())
+        {
+            open = GREETING_OPEN;
+            updated |=GREETING_OPEN;
+        }
+        else if(*it == "-title" && it + 1 != argv->end())
+        {
+            open = TITLE_OPEN;
+            updated |= TITLE_OPEN;
+        }
+        else
+        {
+            switch(open)
+            {
+            case 0:
+                ChatPrintTo(ent, va("^3edituser: ^7ignored argument \"%s^7\".", it->c_str()));
+                break;
+            case CMDS_OPEN:
+                commands += *it;
+                break;
+            case GREETING_OPEN:
+                greeting += *it + " ";
+                break;
+            case TITLE_OPEN:
+                title += *it + " ";
+                break;
+            default:
+                break;
+            }
+        }
+
+        it++;
+    }
+
+    boost::trim_right(greeting);
+    boost::trim_right(title);
+
+    game.session->EditUser( ent, argv->at(1), title, commands, greeting, updated );
 
     return true;
 }
@@ -433,7 +590,8 @@ bool LevelInfo( gentity_t *ent, Arguments argv )
     if(argv->size() == 1)
     {
         game.levelData->PrintLevels( ent );
-    } else if(argv->size() > 1)
+    }
+    else if(argv->size() > 1)
     {
         int level = 0;
         if(!StringToInt(argv->at(1), level))
@@ -479,6 +637,7 @@ bool ListFlags( gentity_t *ent, Arguments argv )
 
 bool ListMaps( gentity_t *ent, Arguments argv )
 {
+    game.mapData->ListMaps(ent);
     return true;
 }
 
@@ -489,6 +648,21 @@ bool ListPlayers( gentity_t *ent, Arguments argv )
 
 bool ListUsers( gentity_t *ent, Arguments argv )
 {
+    int page = 1;
+    if(argv->size() != 2)
+    {
+        PrintManual(ent, "listusers");
+        return false;
+    }
+
+    if(!StringToInt(argv->at(1), page))
+    {
+        PrintManual(ent, "listusers");
+        return false;
+    }
+
+    game.session->PrintUserList( ent, page );
+
     return true;
 }
 
@@ -507,6 +681,23 @@ bool Map( gentity_t *ent, Arguments argv )
     }
 
     trap_SendConsoleCommand(EXEC_APPEND, va("map %s", argv->at(1).c_str()));
+    return true;
+}
+
+bool MapInfo(gentity_t* ent, Arguments argv)
+{
+    std::string name;
+    if(argv->size() != 2)
+    {
+        name = level.rawmapname;
+    } else
+    {
+        name = argv->at(1);
+    }
+
+    boost::to_lower(name);
+
+    game.mapData->PrintMapInfo(ent, name);
     return true;
 }
 
@@ -577,7 +768,8 @@ bool Noclip( gentity_t *ent, Arguments argv )
             return false;
         }
         target = ent;
-    } else
+    }
+    else
     {
         std::string err;
         target = PlayerGentityFromString(argv->at(1), err);
@@ -591,7 +783,8 @@ bool Noclip( gentity_t *ent, Arguments argv )
     if(target->client->noclip)
     {
         target->client->noclip = qfalse;
-    } else
+    }
+    else
     {
         target->client->noclip = qtrue;
     }
@@ -599,8 +792,71 @@ bool Noclip( gentity_t *ent, Arguments argv )
     return true;
 }
 
+bool NoCall( gentity_t *ent, Arguments argv )
+{
+    if(argv->size() != 2)
+    {
+        PrintManual(ent, "nocall");
+        return false;
+    }
+
+    std::string err;
+    gentity_t *target = NULL;
+    target = PlayerGentityFromString(argv->at(1), err);
+    if(!target)
+    {
+        ChatPrintTo(ent, "^nocall: ^7" + err);
+        return false;
+    }
+
+    if(target->client->sess.noCall)
+    {
+        target->client->sess.noCall = qfalse;
+        ChatPrintTo(ent, va("^3nocall: ^7%s can use /call now.", target->client->pers.netname));
+        ChatPrintTo(target, "^3nocall: ^7you can use /call now.");
+    } else
+    {
+        target->client->sess.noCall = qtrue;
+        ChatPrintTo(ent, va("^3nocall: ^7%s can no longer use /call.", target->client->pers.netname));
+        ChatPrintTo(target, "^3nocall: ^7you can no longer use /call.");
+    }
+
+    
+
+    return true;
+}
+
 bool NoGoto( gentity_t *ent, Arguments argv )
 {
+    if(argv->size() != 2)
+    {
+        PrintManual(ent, "nogoto");
+        return false;
+    }
+
+    std::string err;
+    gentity_t *target = NULL;
+    target = PlayerGentityFromString(argv->at(1), err);
+    if(!target)
+    {
+        ChatPrintTo(ent, "^nocall: ^7" + err);
+        return false;
+    }
+
+    if(target->client->sess.noGoto)
+    {
+        target->client->sess.noGoto = qfalse;
+        ChatPrintTo(ent, va("^3nocall: ^7%s can use /goto now.", target->client->pers.netname));
+        ChatPrintTo(target, "^3nocall: ^7you can use /goto now.");
+    } else
+    {
+        target->client->sess.noGoto = qtrue;
+        ChatPrintTo(ent, va("^3nocall: ^7%s can no longer use /goto.", target->client->pers.netname));
+        ChatPrintTo(target, "^3nocall: ^7you can no longer use /goto.");
+    }
+
+    
+
     return true;
 }
 
@@ -626,11 +882,14 @@ bool NoSave( gentity_t *ent, Arguments argv )
         return false;
     }
 
-    if(target->client->sess.saveAllowed) {
+    if(target->client->sess.saveAllowed)
+    {
         target->client->sess.saveAllowed = qfalse;
         ChatPrintTo(target, va("^3system:^7 %s^7 you are not allowed to save your position.", target->client->pers.netname));
         ChatPrintTo(ent, va("^3system:^7 %s^7 is not allowed to save their position.", target->client->pers.netname));
-    } else {
+    }
+    else
+    {
         target->client->sess.saveAllowed = qtrue;
         ChatPrintTo(target, va("^3system:^7 %s^7 you are now allowed to save your position.", target->client->pers.netname));
         ChatPrintTo(ent, va("^3system:^7 %s^7 is now allowed to save their position.", target->client->pers.netname));
@@ -641,12 +900,14 @@ bool NoSave( gentity_t *ent, Arguments argv )
 
 bool Passvote( gentity_t *ent, Arguments argv )
 {
-    if(level.voteInfo.voteTime) {
+    if(level.voteInfo.voteTime)
+    {
         level.voteInfo.voteNo = 0;
         level.voteInfo.voteYes = level.numConnectedClients;
         ChatPrintAll("^3passvote:^7 vote has been passed.");
     }
-    else {
+    else
+    {
         ChatPrintAll("^3passvote:^7 no vote in progress.");
     }
     return qtrue;
@@ -772,7 +1033,7 @@ bool SetLevel( gentity_t *ent, Arguments argv )
 
         if(ent)
         {
-            if(TargetIsHigherLevel(ent, target, false)) 
+            if(TargetIsHigherLevel(ent, target, false))
             {
                 ChatPrintTo(ent, "^3setlevel: ^7you can't set the level of a fellow admin.");
                 return false;
@@ -790,26 +1051,31 @@ bool SetLevel( gentity_t *ent, Arguments argv )
             return false;
         }
         ChatPrintTo(ent, va("^3setlevel: ^7%s^7 is now a level %d user.", target->client->pers.netname, level));
-    } else if(argv->size() == 4)
+        ChatPrintTo(target, va("^3setlevel: ^7you are now a level %d user.", level));
+    }
+    else if(argv->size() == 4)
     {
-
-    } else 
+    }
+    else
     {
         PrintManual(ent, "setlevel");
         return false;
     }
-    
+
     return true;
 }
 
 bool Spectate( gentity_t *ent, Arguments argv )
 {
-    if(!ent) {
+    if(!ent)
+    {
         return qfalse;
     }
 
-    if(argv->size() != 2) {
-        if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if(argv->size() != 2)
+    {
+        if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR )
+        {
             SetTeam( ent, "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse );
         }
 
@@ -825,19 +1091,22 @@ bool Spectate( gentity_t *ent, Arguments argv )
         return false;
     }
 
-    if(target->client->sess.sessionTeam == TEAM_SPECTATOR) {
-        ChatPrintTo(ent, "^3!spec:^7 you can't spectate a spectator.");
+    if(target->client->sess.sessionTeam == TEAM_SPECTATOR)
+    {
+        ChatPrintTo(ent, "^3!spectate:^7 you can't spectate a spectator.");
         return qfalse;
     }
 
-    if(!G_AllowFollow(ent, target)) {
-        ChatPrintTo(ent, va("^3!spec: %s ^7is locked from spectators.", target->client->pers.netname));
+    if(!G_AllowFollow(ent, target))
+    {
+        ChatPrintTo(ent, va("^3!spectate: %s ^7is locked from spectators.", target->client->pers.netname));
         return qfalse;
     }
 
-    if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR )
+    {
         SetTeam( ent, "spectator", qfalse,
-            static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse );
+                 static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse );
     }
 
     ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
@@ -908,5 +1177,3 @@ bool UserInfo( gentity_t *ent, Arguments argv )
 
     return true;
 }
-
-

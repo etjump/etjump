@@ -249,8 +249,10 @@ void BufferPrint( gentity_t *ent, const string& msg ) {
 
     else {
         if( msg.length() + bigTextBuffer.length() > 1009 ) {
+            std::string toSend = std::string("print \"" + bigTextBuffer + "\"");
             trap_SendServerCommand(ent->client->ps.clientNum, 
-                std::string("print \"" + bigTextBuffer + "\"").c_str() );
+                toSend.c_str() );
+            bigTextBuffer.clear();
         }
         bigTextBuffer += msg;
     }
@@ -508,4 +510,35 @@ std::string TimeStampToString( int t )
     // day / month / year 
     strftime(buf, sizeof(buf), "%d/%m/%y %H:%M:%S", lt);
     return std::string(buf);
+}
+
+std::string TimeStampDifferenceToString(int diff)
+{
+    const int MINUTE = 60;
+    const int HOUR = 60 * MINUTE;
+    const int DAY = 24 * HOUR;
+    const int WEEK = 7 * DAY;
+    const int MONTH = 30 * DAY;
+    const int YEAR = 365 * DAY;
+
+    if(diff < HOUR)
+    {
+        return IntToString(diff/MINUTE) + " minute(s)";
+    } else if(diff < DAY)
+    {
+        return IntToString(diff/HOUR) + " hour(s)";
+    } else if(diff < WEEK)
+    {
+        return IntToString(diff/DAY) + " day(s)";
+    } else if(diff >= WEEK && diff < MONTH)
+    {
+        return IntToString(diff/WEEK) + " week(s)";
+    } else if(diff >= MONTH && diff < YEAR)
+    {
+        return IntToString(diff/MONTH) + " month(s)";
+    } else if(diff >= YEAR)
+    {
+        return IntToString(diff/YEAR) + " year(s)";
+    }
+    return "";
 }

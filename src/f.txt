@@ -1,0 +1,23 @@
+scons: Reading SConscript files ...
+cpu: x86
+dumpversion: 
+gcc major: 
+os: Linux
+Loading build configuration from site.conf:
+  JOBS='1'
+  TARGET_UI='1'
+  GAMERANGER='0'
+  CC='gcc-3.3'
+  CXX='g++-3.3'
+  BUILD='release'
+  TARGET_CGAME='1'
+  TARGET_GAME='1'
+  BUILD_ROOT='build'
+Command line: CC='gcc-3.3'
+Command line: CXX='g++-3.3'
+gcc major: 3
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/release/game build/release/cgame build/release/ui
+gcc-3.3 -o build/release/ui/game/bg_campaign.os -c -fPIC -pipe -Wall -fmessage-length=0 -DNDEBUG -O3 -march=i686 -Winline -ffast-math -fomit-frame-pointer -finline-functions -fschedule-insns2 -fno-strict-aliasing -DUIDLL game/bg_campaign.c
+scons: building terminated because of errors.

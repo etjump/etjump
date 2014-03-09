@@ -1,4 +1,5 @@
 #include "sessiondata.h"
+#include "common.h"
 #include "../g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -30,6 +31,49 @@ void SessionData::Reset(gentity_t* ent)
     clients_[ent->client->ps.clientNum].lastSeen = 0;
     clients_[ent->client->ps.clientNum].level = 0;
     clients_[ent->client->ps.clientNum].name.clear();
+}
+
+bool SessionData::EditUser(gentity_t *toPrint, std::string const& guid, std::string const& title, std::string const& commands, std::string const& greeting, int updated)
+{
+    if(!userData_->UpdateUser(guid, commands, greeting, title, updated))
+    {
+        ChatPrintTo(toPrint, "^3edituser: ^7couldn't find user with guid \"" + guid + "\".");
+        return false;
+    }
+
+    // Now we know there was only 1 match
+    for(int i = 0; i < level.numConnectedClients; i++)
+    {
+        int clientNum = level.sortedClients[i];
+        if(clients_[clientNum].guid.compare(0, guid.length(), guid) == 0)
+        {
+            if(updated & CMDS_OPEN)
+            {
+                // TODO: update permissions
+            }
+
+            if(updated & GREETING_OPEN)
+            {
+                clients_[clientNum].greeting = greeting;
+            }
+
+            if(updated & TITLE_OPEN)
+            {
+                clients_[clientNum].title = title;
+            }
+            break;
+        }
+    }
+
+    return true;
+}
+
+void SessionData::BanPlayer(gentity_t* ent, 
+                            std::string const& guid, 
+                            int seconds, std::string 
+                            const& reason)
+{
+    
 }
 
 bool SessionData::ValidGuid( const std::string& guid )
@@ -116,9 +160,6 @@ void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
         {
             clients_[ent->client->ps.clientNum].greeting = levelInfo->greeting;
         }
-
-
-        // TODO: customizable
         
         std::string welcomeMsg;
         CharPtrToString( g_lastVisitedMessage.string, welcomeMsg );
@@ -126,7 +167,7 @@ void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
         CPMTo(ent, welcomeMsg);
     }
 
-    
+    userData_->UserIsOnline(guid);
 }
 
 std::string SessionData::GetGuid( gentity_t *ent )
@@ -219,6 +260,34 @@ void SessionData::UpdateUserSessionData( gentity_t *ent )
     }
 
     // TODO: update permissions
+}
+
+void SessionData::PrintUserList(gentity_t* playerToPrintTo, int page)
+{
+    // ^5User list Page 1/n
+    // len 8    15    10        15       36
+    // ^5GUID | IP | Level | Last Seen | Name 
+    const std::string HEADER =
+        "^5__GUID__|__Level___|___Last Seen__|_____Name____\n";
+
+    std::vector<std::string> linesToPrint;
+    if(!userData_->UserListData(page, linesToPrint))
+    {
+        // Out of range
+        ConsolePrintTo(playerToPrintTo, "^3userlist: ^7page doesn't exist.");
+        return;
+    }
+
+    G_LogPrintf("Lines to print: %d\n", linesToPrint.size());
+
+    BeginBufferPrint();
+    BufferPrint(playerToPrintTo, HEADER);
+    for(unsigned i = 0; i < linesToPrint.size(); i++)
+    {
+        BufferPrint(playerToPrintTo, linesToPrint.at(i));
+    }
+    
+    FinishBufferPrint(playerToPrintTo, false);
 }
 
 void SessionData::UpdateLastSeen(gentity_t* ent)

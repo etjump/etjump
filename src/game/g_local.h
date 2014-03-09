@@ -1886,6 +1886,8 @@ extern vmCvar_t mod_version;
 
 extern vmCvar_t g_lastVisitedMessage;
 
+extern vmCvar_t g_mapDatabase;
+
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
@@ -2649,7 +2651,7 @@ int ClientNum(gentity_t *ent);
 
 // g_main_ext.cpp
 void GuidReceived( gentity_t *ent );
-
+const char *RandomMap();
 qboolean AdminCommandCheck(gentity_t *ent);
 
 #endif // G_LOCAL_H

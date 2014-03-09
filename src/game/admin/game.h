@@ -6,6 +6,7 @@ class SessionData;
 class SaveSystem;
 class CommandInterpreter;
 class LevelData;
+class MapData;
 
 #include <boost/shared_ptr.hpp>
 
@@ -17,6 +18,7 @@ struct Game
     boost::shared_ptr< SessionData > session;
     boost::shared_ptr< SaveSystem > saveData;
     boost::shared_ptr< CommandInterpreter > command;
+    boost::shared_ptr< MapData > mapData;
 };
 
 #endif // game_h__

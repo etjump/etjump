@@ -5,6 +5,7 @@
 #include "commandinterpreter.h"
 #include "../g_save.hpp"
 #include "leveldata.h"
+#include "mapdata.h"
 
 Game::Game()
 {
@@ -13,4 +14,5 @@ Game::Game()
     session = boost::shared_ptr< SessionData >( new SessionData( userData.get(), levelData.get() ) );
     command = boost::shared_ptr< CommandInterpreter >( new CommandInterpreter );
     saveData = boost::shared_ptr< SaveSystem >( new SaveSystem( session.get() ) ); 
+    mapData = boost::shared_ptr< MapData >( new MapData() );
 }

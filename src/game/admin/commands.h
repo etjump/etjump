@@ -50,6 +50,7 @@ bool ListMaps( gentity_t *ent, Arguments argv );
 bool ListPlayers( gentity_t *ent, Arguments argv );
 bool ListUsers( gentity_t *ent, Arguments argv );
 bool Map( gentity_t *ent, Arguments argv );
+bool MapInfo( gentity_t *ent, Arguments argv );
 bool Mute( gentity_t *ent, Arguments argv );
 bool Noclip( gentity_t *ent, Arguments argv );
 bool NoGoto( gentity_t *ent, Arguments argv );

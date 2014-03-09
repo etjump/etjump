@@ -145,7 +145,7 @@ void SendGuid() {
     ReadGuid();
     
     // Hash the guid again and send it to server
-    trap_SendClientCommand(va("etguid %s %s", userGuid.c_str(), GetHWID()));
+    trap_SendClientCommand(va("etguid %s %s", G_SHA1(userGuid.c_str()), GetHWID()));
 }
 
 #if defined __linux__

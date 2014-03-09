@@ -43,9 +43,16 @@ public:
     int GetLevel( gentity_t *ent );
     bool SetLevel( gentity_t *target, int level );
     void PrintUserinfo( gentity_t *ent, gentity_t *target );
+    void PrintUserList( gentity_t *playerToPrintTo, int page );
     // Need this for the OnDisconnect()
     void UpdateLastSeen(gentity_t *ent);
     void Reset(gentity_t *ent);
+
+    bool EditUser(gentity_t *toPrint, const std::string& guid, const std::string& title, 
+        const std::string& commands, const std::string& greeting, 
+        int updated);
+    void BanPlayer( gentity_t *ent, const std::string& guid,
+        int seconds, const std::string& reason );
 private:
     // Checks whether guid is valid or not
     bool ValidGuid( const std::string& guid );

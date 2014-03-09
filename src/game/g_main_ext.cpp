@@ -9,6 +9,7 @@
 #include "admin/sessiondata.h"
 #include "admin/commandinterpreter.h"
 #include "admin/leveldata.h"
+#include "admin/mapdata.h"
 
 Game game;
 
@@ -17,10 +18,12 @@ void OnGameInit() {
     game.saveData->Reset();
     game.userData->Initialize();
     game.levelData->ReadLevels();
+    game.mapData->Initialize();
 }
 
 void OnGameShutdown() {
     game.userData->Shutdown();
+    game.mapData->Shutdown();
 }
 
 void OnClientConnect( int clientNum, qboolean firstTime, qboolean isBot )
@@ -103,4 +106,13 @@ void Cmd_SaveReset_f(gentity_t *ent)
 {
     game.saveData->ResetSavedPositions(ent);
     CPTo(ent, "Your saved positions have been reseted.");
+}
+
+const char *RandomMap()
+{
+    // For some reason returning game.mapData->RandomMap().c_str()
+    // messes up the map name
+    static char buf[MAX_TOKEN_CHARS] = "\0";
+    Q_strncpyz(buf, game.mapData->RandomMap().c_str(), sizeof(buf));
+    return buf;
 }

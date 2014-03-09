@@ -30,6 +30,7 @@ CommandInterpreter::CommandInterpreter()
     commands_["listplayers"] = AdminCommand(ListPlayers, CommandFlags::LISTPLAYERS);
     commands_["listusers"] = AdminCommand(ListUsers, CommandFlags::EDIT);
     commands_["map"] = AdminCommand(Map, CommandFlags::MAP);
+    commands_["mapinfo"] = AdminCommand(MapInfo, CommandFlags::BASIC);
     commands_["mute"] = AdminCommand(Mute, CommandFlags::MUTE);
     commands_["noclip"] = AdminCommand(Noclip, CommandFlags::NOCLIP);
     commands_["nogoto"] = AdminCommand(NoGoto, CommandFlags::NOGOTO);

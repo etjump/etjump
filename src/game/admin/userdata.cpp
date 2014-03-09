@@ -1,4 +1,5 @@
 #include "userdata.h"
+#include "common.h"
 #include "user.h"
 #include "../g_local.hpp"
 #include "../g_utilities.hpp"
@@ -209,6 +210,160 @@ void UserData::UpdateLevel(std::string const& guid, int level)
     }
 }
 
+bool UserData::UserListData(int page, std::vector<std::string>& linesToPrint)
+{
+    int pages = (users_.size() / 20) + 1;
+    time_t now;
+    time(&now);
+
+    if(page > pages)
+    {
+        return false;
+    }
+
+    std::map<std::string, boost::shared_ptr<User> >::const_iterator it
+        = users_.begin();
+
+    // This is pretty bad but nothing else we can do with std::map...
+    int count = 0;
+    while(it != users_.end() && count < (page   - 1) * 20)
+    {
+        it++;
+        count++;
+    }
+    count = 0;
+    while(it != users_.end() && count < 20)
+    {
+        char buf[MAX_TOKEN_CHARS];
+        memset(buf, 0, sizeof(buf));
+        if(it->second->lastSeen == -1)
+        {
+            Com_sprintf(buf, sizeof(buf), "^7%8s %-10d ^2Online          ^7%-36s^7\n",
+            it->first.substr(0, 8).c_str(),
+            it->second->level,
+            it->second->name.c_str());
+        } else
+        {
+            Com_sprintf(buf, sizeof(buf), "^7%8s %-10d %-15s %-36s^7\n",
+            it->first.substr(0, 8).c_str(),
+            it->second->level,
+            TimeStampDifferenceToString(static_cast<int>(now)-it->second->lastSeen).c_str(),
+            it->second->name.c_str());
+        }
+        
+
+        linesToPrint.push_back(buf);
+        
+        it++;
+        count++;
+    }
+    return true;
+}
+
+void UserData::UserIsOnline(std::string const& guid)
+{
+    std::map<std::string, boost::shared_ptr<User> >::iterator it =
+        users_.find(guid);
+
+    if(it == users_.end())
+    {
+        // Should never happen
+        G_LogPrintf("ERROR: couldn't find user to update online status.\n");
+        return;
+    }
+
+    it->second->lastSeen = -1;
+}
+
+bool UserData::UpdateUser(std::string const& guid, std::string const& commands, std::string const& greeting, const std::string& title, int updated)
+{
+    std::map<std::string, boost::shared_ptr<User> >::iterator it =
+        users_.lower_bound(guid);
+
+    if(it == users_.end())
+    {
+        return false;
+    }
+
+    if(it->first.compare(0, guid.length(), guid) != 0)
+    {
+        return false;
+    } 
+
+    // TODO: handle multiple users with same beginning of a guid.
+
+    if(updated & CMDS_OPEN)
+    {
+        it->second->commands = commands;
+    } 
+
+    if(updated & GREETING_OPEN)
+    {
+        it->second->greeting = greeting;
+    }
+
+    if(updated & TITLE_OPEN)
+    {
+        it->second->title = title;
+    }
+
+    int index = 1;
+    sqlite3_reset(updateUser_);
+    // "UPDATE users SET pcommands=?, pgreeting=?, ptitle=? WHERE id=?;"
+
+    // Bind commands to statement
+    int rc = sqlite3_bind_text(updateUser_, index++, 
+        it->second->commands.c_str(), it->second->commands.size(), SQLITE_STATIC);
+
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind personal commands to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    // Bind greeting to statement
+    rc = sqlite3_bind_text(updateUser_, index++, 
+        it->second->greeting.c_str(), it->second->greeting.size(), SQLITE_STATIC);
+
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind personal greeting to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    // Bind title to statement
+    rc = sqlite3_bind_text(updateUser_, index++, 
+        it->second->title.c_str(), it->second->title.size(), SQLITE_STATIC);
+
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind personal title to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    // Bind ID to statement
+    rc = sqlite3_bind_int(updateUser_, index++, it->second->id);
+
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind id to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_step(updateUser_);
+    if(rc != SQLITE_DONE)
+    {
+        G_LogPrintf("Couldn't update user with id: %d: (%d) %s\n",
+            it->second->id, rc, sqlite3_errmsg(db_));
+        return false;
+    }
+    return true;
+}
+
 bool UserData::Initialize()
 {
     char databaseDefaultName[MAX_QPATH] = "users.db";
@@ -240,7 +395,7 @@ bool UserData::Initialize()
         {
         	user = boost::shared_ptr< User >( new User() );
         }
-        catch( std::bad_alloc& e )
+        catch( ... )
         {
             Shutdown();
             G_Error("Failed to allocate memory for a user.\n");
@@ -367,7 +522,7 @@ bool UserData::PrepareQueries()
 bool UserData::PrepareUpdates()
 {
     int rc = sqlite3_prepare_v2(db_, 
-        "UPDATE users SET pcommands=?, pgreeting=?, ptitle=?, seen=? WHERE id=?;",
+        "UPDATE users SET pcommands=?, pgreeting=?, ptitle=? WHERE id=?;",
         -1, &updateUser_, 0);
 
     if(rc != SQLITE_OK)

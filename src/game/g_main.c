@@ -227,6 +227,8 @@ vmCvar_t        mod_version;
 
 vmCvar_t        g_lastVisitedMessage;
 
+vmCvar_t        g_mapDatabase;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -465,7 +467,8 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE },
     { &mod_version, "mod_version", MOD_VERSION, CVAR_SERVERINFO },
 
-    { &g_lastVisitedMessage, "g_lastVisitedMessage", "^2Welcome back! Your last visit was on [t].", CVAR_ARCHIVE }
+    { &g_lastVisitedMessage, "g_lastVisitedMessage", "^2Welcome back! Your last visit was on [t].", CVAR_ARCHIVE },
+    { &g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE }
 };
 
 // bk001129 - made static to avoid aliasing

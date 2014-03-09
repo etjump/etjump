@@ -18,6 +18,9 @@ public:
     virtual int CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid );
     virtual void UpdateLastSeen( int id, int seen );
     virtual void UpdateLevel( const std::string& guid, int level );
+    virtual bool UserListData( int page, std::vector<std::string>& linesToPrint );
+    virtual void UserIsOnline( const std::string& guid );
+    virtual bool UpdateUser( const std::string& guid, const std::string& commands, const std::string& greeting, const std::string& title, int updated );
 
     // SQLite3 related functions
     bool Initialize();
@@ -25,7 +28,7 @@ public:
     // End of SQLite3 functions
 private:
     // SQLite3 related functions
-    bool AddUserToDatabase( const std::string& guid, const User& name );
+    bool AddUserToDatabase( const std::string& guid, const User& user );
     bool PrepareStatements();
     bool PrepareQueries();
     bool PrepareUpdates();
