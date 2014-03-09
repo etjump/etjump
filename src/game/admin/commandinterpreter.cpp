@@ -24,7 +24,7 @@ CommandInterpreter::CommandInterpreter()
     commands_["kick"] = AdminCommand(Kick, CommandFlags::KICK);
     commands_["levelinfo"] = AdminCommand(LevelInfo, CommandFlags::EDIT);
     commands_["listbans"] = AdminCommand(ListBans, CommandFlags::LISTBANS);
-    commands_["listcmds"] = AdminCommand(Help, CommandFlags::BASIC);
+    commands_["listcmds"] = AdminCommand(ListCommands, CommandFlags::BASIC);
     commands_["listflags"] = AdminCommand(ListFlags, CommandFlags::EDIT);
     commands_["listmaps"] = AdminCommand(ListMaps, CommandFlags::BASIC);
     commands_["listplayers"] = AdminCommand(ListPlayers, CommandFlags::LISTPLAYERS);
@@ -63,6 +63,93 @@ CommandInterpreter::AdminCommand::AdminCommand( boost::function<bool(gentity_t *
 CommandInterpreter::AdminCommand::AdminCommand()
 {
 
+}
+
+void CommandInterpreter::PrintFlags(gentity_t* ent)
+{
+    std::map<std::string, AdminCommand>::const_iterator it = 
+        commands_.begin();
+
+    ChatPrintTo(ent, "^3system: ^7check console for more information.");
+
+    BeginBufferPrint();
+    while(it != commands_.end())
+    {
+        BufferPrint(ent, va("%-20s %c\n",
+            it->first.c_str(), it->second.flag));
+
+        it++;
+    }
+    FinishBufferPrint(ent, false);
+}
+
+void CommandInterpreter::PrintCommandList(gentity_t* ent, std::bitset<256> permissions)
+{
+    std::map<std::string, AdminCommand>::const_iterator it = 
+        commands_.begin();
+
+    ChatPrintTo(ent, "^3system: ^7check console for more information.");
+
+    int count = 0;
+    const int COMMANDS_PER_LINE = 3;
+
+    BeginBufferPrint();
+    while(it != commands_.end())
+    {
+        if(permissions.at(it->second.flag))
+        {
+            if(count == COMMANDS_PER_LINE)
+            {
+                BufferPrint(ent, va("%-30 \n", it->first.c_str()));
+                count = 0;
+            } else
+            {
+                BufferPrint(ent, va("%-30s", it->first.c_str()));
+                count++;
+            }
+        }
+        it++;
+    }
+    FinishBufferPrint(ent, true);
+}
+
+void PrintManual(gentity_t *ent, const std::string& command);
+void CommandInterpreter::PrintHelp(gentity_t* ent, std::string const& command, std::bitset<256> permissions)
+{
+    std::map<std::string, AdminCommand>::const_iterator lower_bound =
+        commands_.lower_bound(command);
+
+    if(lower_bound == commands_.end())
+    {
+        ChatPrintTo(ent, "^3help: ^7couldn't find command " + command + ".");
+        return;
+    }
+
+    std::map<std::string, AdminCommand>::const_iterator upper_bound =
+        commands_.upper_bound(command);
+
+    lower_bound++;
+    if(lower_bound == upper_bound)
+    {
+        lower_bound--;
+
+        ChatPrintTo(ent, "^3help: ^7check console for more information.");
+        PrintManual(ent, lower_bound->first);
+    } else
+    {
+        ChatPrintTo(ent, "^3help: ^7found multiple matching commands. Check console for more information.");
+        BeginBufferPrint();
+        while(lower_bound != commands_.end())
+        {
+            if(lower_bound->first.compare(0, command.length(), command) != 0)
+            {
+                break;
+            }
+            BufferPrint(ent, va("^7* %s\n", lower_bound->first.c_str()));
+            lower_bound++;
+        }
+        FinishBufferPrint(ent, true);
+    }
 }
 
 bool CommandInterpreter::ClientCommand( gentity_t *ent )

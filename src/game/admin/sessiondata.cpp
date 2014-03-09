@@ -31,6 +31,7 @@ void SessionData::Reset(gentity_t* ent)
     clients_[ent->client->ps.clientNum].lastSeen = 0;
     clients_[ent->client->ps.clientNum].level = 0;
     clients_[ent->client->ps.clientNum].name.clear();
+    clients_[ent->client->ps.clientNum].permissions.reset();
 }
 
 bool SessionData::EditUser(gentity_t *toPrint, std::string const& guid, std::string const& title, std::string const& commands, std::string const& greeting, int updated)
@@ -49,7 +50,14 @@ bool SessionData::EditUser(gentity_t *toPrint, std::string const& guid, std::str
         {
             if(updated & CMDS_OPEN)
             {
-                // TODO: update permissions
+                const ILevelData::LevelInformation *levelInfo = 
+                levelData_->GetLevelInformation(clients_[clientNum].level);
+
+                clients_[clientNum].commands = commands;
+                clients_[clientNum].permissions.reset();
+
+                ParsePermissions(clients_[clientNum].permissions,
+                    levelInfo->commands + clients_[clientNum].commands);                
             }
 
             if(updated & GREETING_OPEN)
@@ -161,6 +169,8 @@ void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
             clients_[ent->client->ps.clientNum].greeting = levelInfo->greeting;
         }
         
+        ParsePermissions(clients_[ent->client->ps.clientNum].permissions, levelInfo->commands + currentUser->commands);
+
         std::string welcomeMsg;
         CharPtrToString( g_lastVisitedMessage.string, welcomeMsg );
         boost::replace_all( welcomeMsg, "[t]", TimeStampToString(currentUser->lastSeen));
@@ -214,6 +224,21 @@ void SessionData::PrintFinger( gentity_t *toPrint, gentity_t *target )
     ConsolePrintTo(toPrint, "^3Greeting: ^7" + clients_[target->client->ps.clientNum].greeting);
 }
 
+std::bitset<SessionData::Client::MAX_COMMANDS> 
+    SessionData::GetPermissions(gentity_t* ent)
+{
+    if(!ent)
+    {
+         std::bitset<SessionData::Client::MAX_COMMANDS> temp;
+         for(int i = 0; i < SessionData::Client::MAX_COMMANDS; i++)
+         {
+             temp.at(i) = true;
+         }
+         return temp;
+    }
+    return clients_[ent->client->ps.clientNum].permissions;
+}
+
 bool SessionData::SetLevel( gentity_t *target, int level )
 {
     const ILevelData::LevelInformation *levelInfo = 
@@ -259,7 +284,63 @@ void SessionData::UpdateUserSessionData( gentity_t *ent )
         clients_[ent->client->ps.clientNum].greeting = levelInfo->greeting;
     }
 
-    // TODO: update permissions
+    ParsePermissions(clients_[ent->client->ps.clientNum].permissions, 
+        levelInfo->commands + user->commands);
+}
+
+void SessionData::ParsePermissions(std::bitset<SessionData::Client::MAX_COMMANDS>& temp, std::string const& permissions)
+{
+    const enum {
+		ALLOW,
+		DENY
+	};
+
+	int state = ALLOW;
+
+	for(size_t i = 0; i < permissions.size(); i++)
+	{
+		char c = permissions.at(i);
+		if(state == ALLOW)
+		{
+			if(c == '*')
+			{
+				// Allow all commands
+				for(size_t i = 0; i < Client::MAX_COMMANDS; i++)
+				{
+					temp.set(i, true);
+				}
+			}
+			else if (c == '+')
+			{
+				// ignore +
+				continue;
+			}
+			else if (c == '-')
+			{
+				state = DENY;
+			}
+			else
+			{
+				temp.set(c, true);
+			}
+		}
+		else
+		{
+			if(c == '*')
+			{
+				// Ignore * while in deny-mode
+				continue;
+			}
+			else if(c == '+')
+			{
+				state = ALLOW;
+			}
+			else
+			{
+				temp.set(c, false);
+			}
+		}
+	}
 }
 
 void SessionData::PrintUserList(gentity_t* playerToPrintTo, int page)

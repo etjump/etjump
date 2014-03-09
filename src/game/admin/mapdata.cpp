@@ -111,20 +111,20 @@ void MapData::ListMaps(gentity_t* ent)
         maps_.begin();
     
     BeginBufferPrint();
-    const int MAPS_PER_LINE = 3;
+    const int MAPS_PER_LINE = 2;
     int mapsOnThisLine = 0;
     int numListedMaps = 0;
     while(it != maps_.end())
     {
         if(it->second->isOnServer)
         {
-            if(mapsOnThisLine == MAPS_PER_LINE - 1)
+            if(mapsOnThisLine == MAPS_PER_LINE)
             {
-                BufferPrint(ent, va("%-27s\n", it->first.c_str()));
+                BufferPrint(ent, va("%-27s \n", it->first.c_str()));
                 mapsOnThisLine = 0;
             } else
             {
-                BufferPrint(ent, va("%-27s ", it->first.c_str()));
+                BufferPrint(ent, va("%-27s", it->first.c_str()));
                 mapsOnThisLine++;
             }    
             numListedMaps++;

@@ -5,6 +5,7 @@
 #include "leveldata.h"
 #include "../g_save.hpp"
 #include "mapdata.h"
+#include "commandinterpreter.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -530,6 +531,16 @@ bool Finger( gentity_t *ent, Arguments argv )
 
 bool Help( gentity_t *ent, Arguments argv )
 {
+    if(argv->size() == 1)
+    {
+        game.command->PrintCommandList(ent, game.session->GetPermissions(ent));
+    } else if(argv->size() == 2)
+    {
+        game.command->PrintHelp(ent, argv->at(1), game.session->GetPermissions(ent));
+    } else
+    {
+        PrintManual(ent, "help");
+    }
     return true;
 }
 
@@ -627,11 +638,15 @@ bool ListBans( gentity_t *ent, Arguments argv )
 
 bool ListCommands( gentity_t *ent, Arguments argv )
 {
+    std::bitset<SessionData::Client::MAX_COMMANDS> cmds = 
+        game.session->GetPermissions(ent);
+    game.command->PrintCommandList(ent, cmds);
     return true;
 }
 
 bool ListFlags( gentity_t *ent, Arguments argv )
 {
+    game.command->PrintFlags(ent);
     return true;
 }
 

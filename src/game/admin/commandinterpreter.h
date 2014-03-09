@@ -6,12 +6,18 @@
 #include <boost/function.hpp>
 #include "../g_local.hpp"
 #include "../g_utilities.hpp"
+#include <bitset>
 
 class CommandInterpreter
 {
 public:
     CommandInterpreter();
     ~CommandInterpreter();
+
+    void PrintFlags(gentity_t *ent);
+    void PrintCommandList(gentity_t* ent, std::bitset<256> permissions);
+    void PrintHelp(gentity_t *ent, const std::string& command,
+        std::bitset<256> permissions);
 
     struct AdminCommand
     {

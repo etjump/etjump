@@ -13,6 +13,7 @@
 class SessionData : public IGuid
 {
 public:
+
     struct Client
     {
         Client();
@@ -41,6 +42,8 @@ public:
     virtual std::string GetGuid( gentity_t *ent );
 
     int GetLevel( gentity_t *ent );
+    std::bitset<SessionData::Client::MAX_COMMANDS> 
+        GetPermissions( gentity_t *ent );
     bool SetLevel( gentity_t *target, int level );
     void PrintUserinfo( gentity_t *ent, gentity_t *target );
     void PrintUserList( gentity_t *playerToPrintTo, int page );
@@ -60,6 +63,9 @@ private:
     void GetUserData( gentity_t *ent, const std::string& guid );
 
     void UpdateUserSessionData( gentity_t *ent );
+
+    void ParsePermissions(std::bitset<SessionData::Client::MAX_COMMANDS>& temp, 
+					  const std::string& permissions);
 
     boost::array<Client, 64> clients_;
 
