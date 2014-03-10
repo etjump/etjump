@@ -6,6 +6,10 @@
 #include <string>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include "game.h"
+#include "sessiondata.h"
+
+extern Game game;
 
 CommandInterpreter::CommandInterpreter()
 {
@@ -129,7 +133,7 @@ void CommandInterpreter::PrintHelp(gentity_t* ent, std::string const& command, s
         commands_.upper_bound(command);
 
     lower_bound++;
-    if(lower_bound == upper_bound)
+    if(lower_bound == upper_bound || lower_bound->first == command)
     {
         lower_bound--;
 
@@ -194,20 +198,25 @@ bool CommandInterpreter::ClientCommand( gentity_t *ent )
         return false;
     }
 
+    std::bitset<256> permissions = 
+        game.session->GetPermissions(ent);
+
     std::vector<std::map<std::string, AdminCommand>::iterator> foundCommands;
 
     while(it != commands_.end() && 
         it->first.compare(0, command.length(), command) == 0)
     {
-        if(it->first == command)
+        if(permissions.at(it->second.flag))
         {
-            foundCommands.push_back(it);
-            break;
-        } else
-        {
-            foundCommands.push_back(it);
+            if(it->first == command)
+            {
+                foundCommands.push_back(it);
+                break;
+            } else
+            {
+                foundCommands.push_back(it);
+            }
         }
-
         it++;
     }
 
