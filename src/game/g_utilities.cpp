@@ -507,8 +507,15 @@ std::string TimeStampToString( int t )
     struct tm *lt = NULL;
     time_t toConvert = t;
     lt = localtime(&toConvert);
-    // day / month / year 
-    strftime(buf, sizeof(buf), "%d/%m/%y %H:%M:%S", lt);
+    if(t > 0)
+    {
+        // day / month / year 
+        strftime(buf, sizeof(buf), "%d/%m/%y %H:%M:%S", lt);
+    } else
+    {
+        return "never";
+    }
+    
     return std::string(buf);
 }
 

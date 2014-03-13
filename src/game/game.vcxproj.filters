@@ -210,6 +210,9 @@
     <ClCompile Include="admin\mapdata.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="admin\bandata.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -293,6 +296,12 @@
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
     <ClInclude Include="admin\mapdata.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\bandata.h">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\ibandata.h">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>

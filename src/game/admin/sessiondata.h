@@ -9,6 +9,7 @@
 #include "iuserdata.h"
 #include "iguid.h"
 #include "ileveldata.h"
+#include "ibandata.h"
 
 class SessionData : public IGuid
 {
@@ -30,7 +31,8 @@ public:
         std::bitset< MAX_COMMANDS > permissions;
     };
 
-    SessionData( IUserData *userData, ILevelData *levelData );
+    SessionData( IUserData *userData, ILevelData *levelData,
+        IBanData *banData );
     ~SessionData();
 
     // Handles everything needed when guid is received
@@ -54,7 +56,9 @@ public:
     bool EditUser(gentity_t *toPrint, const std::string& guid, const std::string& title, 
         const std::string& commands, const std::string& greeting, 
         int updated);
-    void BanPlayer( gentity_t *ent, const std::string& guid,
+    bool BanPlayer( gentity_t *ent, const std::string& guid,
+        int seconds, const std::string& reason );
+    bool BanPlayer( gentity_t *ent, gentity_t *target,
         int seconds, const std::string& reason );
 private:
     // Checks whether guid is valid or not
@@ -71,7 +75,7 @@ private:
 
     IUserData *userData_;
     ILevelData *levelData_;
-    
+    IBanData *banData_;
 };
 
 #endif // sessiondata_h__

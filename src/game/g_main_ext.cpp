@@ -10,6 +10,7 @@
 #include "admin/commandinterpreter.h"
 #include "admin/leveldata.h"
 #include "admin/mapdata.h"
+#include "admin/bandata.h"
 
 Game game;
 
@@ -19,11 +20,13 @@ void OnGameInit() {
     game.userData->Initialize();
     game.levelData->ReadLevels();
     game.mapData->Initialize();
+    game.banData->Initialize(GetPath(g_banDatabase.string));
 }
 
 void OnGameShutdown() {
     game.userData->Shutdown();
     game.mapData->Shutdown();
+    game.banData->Shutdown();
 }
 
 void OnClientConnect( int clientNum, qboolean firstTime, qboolean isBot )
@@ -33,6 +36,16 @@ void OnClientConnect( int clientNum, qboolean firstTime, qboolean isBot )
         // gentity (g_entities + clientNum) instead of just clientNum, it will
         // always reset client with cnum 0
     }
+}
+
+qboolean IsBanned( const char* ip )
+{
+    std::string err;
+    if(game.banData->Banned("", ip, "", err))
+    {
+        return qtrue;
+    } 
+    return qfalse;
 }
 
 void OnClientBegin(gentity_t *ent) 

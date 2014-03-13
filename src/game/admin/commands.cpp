@@ -245,6 +245,22 @@ bool Ban( gentity_t *ent, Arguments argv )
             ChatPrintTo(ent, "^3ban: " + error);
             return false;
         }
+
+        if(ent)
+        {
+            if(target == ent)
+            {
+                ChatPrintTo(ent, "^3ban: ^7you can't ban yourself.");
+                return false;
+            }
+
+            if(TargetIsHigherLevel(ent, target, true))
+            {
+                ChatPrintTo(ent, "^3ban: ^7can't ban a fellow admin.");
+                return false;
+            }
+        }
+        
     } else
     {
         BanHandleGuidSwitch( ent, argv );
@@ -298,13 +314,18 @@ bool Ban( gentity_t *ent, Arguments argv )
         }
     }
     
-    game.session->BanPlayer( ent, argv->at(1), seconds, reason );
+    if(reason.length() == 0)
+    {
+        reason = "Banned by Administrator.";
+    }
+
+    game.session->BanPlayer( ent, target, seconds, reason );
 
     if(target)
     {
         trap_DropClient(target->client->ps.clientNum, reason.c_str(),
             0);
-    }
+    } 
 
     return true;
 }

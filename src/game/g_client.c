@@ -1528,6 +1528,12 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		return "You are banned from this server.";
 	}
 
+    if(IsBanned(ip))
+    {
+        C_CPMAll(va("^5Banned player ^7%s ^5tried to connect.", ent->client->ps.clientNum));
+        return "You are banned from this server.";
+    }
+
 	/* ETPub fakeplayers DoS fix */
 
 	Q_strncpyz(ip, GetParsedIP(value), sizeof(ip));

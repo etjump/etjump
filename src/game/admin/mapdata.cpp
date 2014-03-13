@@ -268,12 +268,14 @@ void MapData::LoadMapData()
     }
     if( rc == SQLITE_DONE )
     {
+        sqlite3_finalize(stmt);
         return;
     } else
     {
         G_LogPrintf("Couldn't read all maps from the database: (%d) (%s)\n",
             rc, sqlite3_errmsg(db_));
     }
+    sqlite3_finalize(stmt);
 }
 
 void MapData::UpdateLastPlayed()

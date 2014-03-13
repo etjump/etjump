@@ -1887,6 +1887,7 @@ extern vmCvar_t mod_version;
 extern vmCvar_t g_lastVisitedMessage;
 
 extern vmCvar_t g_mapDatabase;
+extern vmCvar_t g_banDatabase;
 
 
 void	trap_Printf( const char *fmt );
@@ -2644,6 +2645,7 @@ void OnClientDisconnect(gentity_t *ent);
 void OnClientBegin(gentity_t *ent);
 void OnGameInit();
 void OnGameShutdown();
+qboolean IsBanned( const char* ip );
 
 
 // Returns clientnum from ent

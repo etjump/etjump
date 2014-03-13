@@ -10,8 +10,8 @@ SessionData::Client::Client()
     permissions.reset();
 }
 
-SessionData::SessionData( IUserData *userData, ILevelData *levelData )
-    : userData_( userData ), levelData_( levelData )
+SessionData::SessionData( IUserData *userData, ILevelData *levelData, IBanData *banData )
+    : userData_( userData ), levelData_( levelData ), banData_( banData )
 {
 
 }
@@ -76,12 +76,90 @@ bool SessionData::EditUser(gentity_t *toPrint, std::string const& guid, std::str
     return true;
 }
 
-void SessionData::BanPlayer(gentity_t* ent, 
+bool SessionData::BanPlayer(gentity_t* ent, 
+                            gentity_t *target, 
+                            int seconds, const std::string& 
+                            reason)
+{
+    std::string guid = clients_[target->client->ps.clientNum].guid;
+    User const * user = userData_->GetUserData(guid);
+    if(!user)
+    {
+        ChatPrintTo(ent, "^3ban: ^7couldn't find user with guid " + guid + ".");
+        return false;
+    }
+
+    time_t t;
+    if(!time(&t))
+    {
+        ChatPrintTo(ent, "^3ban: ^7couldn't get current time.");
+        return false;
+    }
+
+    std::string ip = ValueForKey(target, "ip");
+    std::string::size_type index = ip.find(":");
+    if(index != std::string::npos)
+    {
+        ip = ip.substr(0, index);
+    }
+
+    std::string err;
+    if(!banData_->AddBan(guid, ip, user->hwid, static_cast<int>(t) + seconds,
+        static_cast<int>(t), target->client->pers.netname, reason, err))
+    {
+        ChatPrintTo(ent, "^3ban: ^7" + err);
+        return false;
+    }
+
+    if(seconds == 0)
+    {
+        ChatPrintTo(ent, va("^3ban: ^7banned player %s permanently for %s", target->client->pers.netname, 
+            reason.c_str()));
+    } else
+    {
+        ChatPrintTo(ent, va("^3ban: ^7banned player %s until %s for %s", target->client->pers.netname, 
+            TimeStampToString(seconds).c_str(), reason.c_str()));
+    }
+
+    return true;
+}
+
+bool SessionData::BanPlayer(gentity_t* ent, 
                             std::string const& guid, 
                             int seconds, std::string 
                             const& reason)
 {
-    
+    User const * user = userData_->GetUserData(guid);
+    if(!user)
+    {
+        ChatPrintTo(ent, "^3ban: ^7couldn't find user with guid " + guid + ".");
+        return false;
+    }
+
+    time_t t;
+    if(!time(&t))
+    {
+        ChatPrintTo(ent, "^3ban: ^7couldn't get current time.");
+        return false;
+    }
+
+    std::string ip = ValueForKey(ent, "ip");
+    std::string::size_type index = ip.find(":");
+    if(index != std::string::npos)
+    {
+        ip = ip.substr(0, index);
+    }
+
+    G_LogPrintf("DEBUG: banning person with ip: %s\n", ip.c_str());
+
+    std::string err;
+    if(!banData_->AddBan(guid, ip, user->hwid, static_cast<int>(t) + seconds,
+        static_cast<int>(t), ent->client->pers.netname, reason, err))
+    {
+        ChatPrintTo(ent, "^3ban: ^7" + err);
+        return false;
+    }
+    return true;
 }
 
 bool SessionData::ValidGuid( const std::string& guid )
@@ -128,6 +206,14 @@ bool SessionData::GuidReceived( gentity_t *ent )
     clients_[ent->client->ps.clientNum].hwid = G_SHA1(hwidBuffer);
 
     GetUserData( ent, clients_[ent->client->ps.clientNum].guid );
+
+    std::string err;
+    if(banData_->Banned(clients_[ent->client->ps.clientNum].guid,
+        ValueForKey(ent, "ip"),
+        clients_[ent->client->ps.clientNum].hwid, err))
+    {
+        trap_DropClient(ent->client->ps.clientNum, "You are banned.", 0);
+    }
 
     return true;
 }
