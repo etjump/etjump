@@ -1338,7 +1338,6 @@ void ClientUserinfoChanged( int clientNum ) {
 	char	medalStr[16] = "";
 	int		characterIndex;
 
-
 	ent = g_entities + clientNum;
 	client = ent->client;
 
@@ -1365,14 +1364,15 @@ void ClientUserinfoChanged( int clientNum ) {
 
     // TODO: Check for hardware info spoofing
 
+   
+
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
-	sscanf(s, "%i %i %i %i %i %i",
-							&client->pers.clientFlags,
-							&client->pers.clientTimeNudge,
-							&client->pers.clientMaxPackets,
-							&client->pers.maxFPS,
-							&client->pers.cgaz,
-							&client->pers.hideMe);
+	sscanf(s, "%i %i %i %i %i",
+        &client->pers.clientFlags,
+        &client->pers.clientTimeNudge,
+        &client->pers.clientMaxPackets,
+        &client->pers.maxFPS,
+        &client->pers.noclipScale);
 
 	client->pers.autoActivate = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
 	client->pers.predictItemPickup = ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0);

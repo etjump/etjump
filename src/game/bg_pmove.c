@@ -1630,6 +1630,7 @@ static void PM_NoclipMove( void ) {
 	VectorCopy (wishvel, wishdir);
 	wishspeed = VectorNormalize(wishdir);
 	wishspeed *= scale;
+    wishspeed *= pm->pmext->noclipScale;
 
 	PM_Accelerate( wishdir, wishspeed, pm_accelerate );
 

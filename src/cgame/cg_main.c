@@ -389,7 +389,7 @@ vmCvar_t			cg_HUD_xpInfo;
 
 vmCvar_t            cg_logConsole;
 vmCvar_t                cg_weaponSound;
-
+vmCvar_t            cg_noclipScale;
 
 typedef struct {
       vmCvar_t	*vmCvar;
@@ -655,7 +655,9 @@ cvarTable_t		cvarTable[] = {
       { &cg_HUD_weaponIcon,               "cg_HUD_weaponIcon", "1", CVAR_ARCHIVE },
       { &cg_HUD_xpInfo,                   "cg_HUD_xpInfo", "0", CVAR_ARCHIVE },
       { &cg_logConsole,                   "cg_logConsole", "1", CVAR_ARCHIVE },
-      { &cg_weaponSound,                  "cg_weaponSound", "1", CVAR_ARCHIVE }
+      { &cg_weaponSound,                  "cg_weaponSound", "1", CVAR_ARCHIVE },
+      { &cg_noclipScale,                  "cg_noclipScale", "1", CVAR_ARCHIVE }
+
       };
 
 
@@ -730,7 +732,7 @@ cvarTable_t		cvarTable[] = {
                                     cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
                                     cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
                                     cv->vmCvar == &int_m_pitch  || cv->vmCvar == &cg_loadviewangles ||
-                                    cv->vmCvar == &cg_hideMe 
+                                    cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale
                                     )
                               {
                                     fSetFlags = qtrue;
@@ -798,7 +800,7 @@ cvarTable_t		cvarTable[] = {
             if(cg.demoPlayback) return;
 
             cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-            trap_Cvar_Set("cg_uinfo", va("%d %d %d %d",
+            trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d",
                   // Client Flags
                   (
                   ((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -811,7 +813,7 @@ cvarTable_t		cvarTable[] = {
                   ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0 ) |
                   ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
-                  ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0)
+                  ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) 
                   // Add more in here, as needed
                   ),
 
@@ -819,7 +821,8 @@ cvarTable_t		cvarTable[] = {
                   int_cl_timenudge.integer,
                   // MaxPackets
                   int_cl_maxpackets.integer,
-                  com_maxfps.integer
+                  com_maxfps.integer,
+                  cg_noclipScale.integer
                   ));
       }
 

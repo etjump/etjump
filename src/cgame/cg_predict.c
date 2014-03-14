@@ -408,12 +408,14 @@ static void CG_InterpolatePlayerState( qboolean grabAngles ) {
 		cmdNum = trap_GetCurrentCmdNumber();
 		trap_GetUserCmd( cmdNum, &cmd );
 
-		// rain - added tracemask
+        // rain - added tracemask
 		if(cg_ghostPlayers.integer == 1) {
 			PM_UpdateViewAngles( out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID & ~CONTENTS_BODY );
 		} else {
 			PM_UpdateViewAngles( out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID );
 		}
+
+		
 	}
 
 	// if the next frame is a teleport, we can't lerp to it

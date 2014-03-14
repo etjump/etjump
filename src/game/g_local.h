@@ -774,6 +774,7 @@ typedef struct {
     int				characterIndex;
 
 	int				hideMe;
+    int             noclipScale;
 
 	ipFilter_t		complaintips[MAX_COMPLAINTIPS];
 } clientPersistant_t;

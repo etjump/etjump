@@ -1053,6 +1053,8 @@ void ClientThink_real( gentity_t *ent ) {
 	// set speed
 	client->ps.speed = G_SPEED;
 
+    client->pmext.noclipScale = client->pers.noclipScale;
+
 	if( client->speedScale )				// Goalitem speed scale
 		client->ps.speed *= (client->speedScale * 0.01);
 
@@ -1088,6 +1090,7 @@ void ClientThink_real( gentity_t *ent ) {
 			pm.tracemask = MASK_PLAYERSOLID;
 		}
 	}
+
 	//DHM - Nerve :: We've gone back to using normal bbox traces
 	//pm.trace = trap_Trace;
 	pm.pointcontents = trap_PointContents;
@@ -1529,7 +1532,7 @@ extern vec3_t	playerMins, playerMaxs;
 #define WR_PUSHAMOUNT 25
 
 void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
-	
+
 	if(!g_ghostPlayers.integer || g_ghostPlayers.integer == 2) {
 
 		vec3_t	dir, push;
