@@ -24,14 +24,30 @@ UserData::~UserData()
 
 const User * UserData::GetUserData( const std::string& guid )
 {
-    std::map< std::string, boost::shared_ptr<User> >::const_iterator it =
-        users_.find( guid );
+    std::map< std::string, boost::shared_ptr<User> >::const_iterator lowerBound
+        = users_.lower_bound(guid);
 
-    if(it != users_.end())
+    std::map< std::string, boost::shared_ptr<User> >::const_iterator upperBound 
+        = users_.upper_bound(guid);
+
+    if(lowerBound == users_.end())
     {
-        return it->second.get();
+        return NULL;
     }
-    return NULL;
+    lowerBound++;
+    if(lowerBound == upperBound)
+    {
+        lowerBound--;
+        return lowerBound->second.get();
+    } else
+    {
+        lowerBound--;
+        if(lowerBound->first == guid)
+        {
+            return lowerBound->second.get();
+        }
+        return NULL;
+    }
 }
 
 int UserData::CreateNewUser( const std::string& guid, const std::string& name, const std::string& hwid )

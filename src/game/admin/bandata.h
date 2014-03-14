@@ -5,6 +5,7 @@
 #include <vector>
 #include "ibandata.h"
 #include <sqlite3.h>
+#include "leveldata.h"
 
 class BanData : public IBanData
 {
@@ -26,6 +27,7 @@ public:
         const std::string& hwid, 
         int expires,
         int date_banned,
+        const std::string& name,
         const std::string& banner,
         const std::string& reason,
         std::string& errorMsg);
@@ -38,13 +40,15 @@ public:
     virtual bool RemoveBan(int id,
         std::string& errorMsg);
 
-    void DeleteFromDatabase();
+    void DeleteFromDatabase(int id);
+    void ListBans(int clientNum);
 
     struct Ban
     {
         Ban();
         int expires;
         int ban_date;
+        std::string name;
         std::string guid;
         std::string ip;
         std::string hwid;

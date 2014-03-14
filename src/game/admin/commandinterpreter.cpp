@@ -19,8 +19,8 @@ CommandInterpreter::CommandInterpreter()
     commands_["ban"] = AdminCommand(Ban, CommandFlags::BAN);
     commands_["cancelvote"] = AdminCommand(Cancelvote, CommandFlags::CANCELVOTE);
     commands_["deletelevel"] = AdminCommand(DeleteLevel, CommandFlags::EDIT);
-    commands_["deleteuser"] = AdminCommand(DeleteUser, CommandFlags::EDIT);
-    commands_["editcommands"] = AdminCommand(EditCommands, CommandFlags::EDIT);
+    // commands_["deleteuser"] = AdminCommand(DeleteUser, CommandFlags::EDIT);
+    // commands_["editcommands"] = AdminCommand(EditCommands, CommandFlags::EDIT);
     commands_["editlevel"] = AdminCommand(EditLevel, CommandFlags::EDIT);
     commands_["edituser"] = AdminCommand(EditUser, CommandFlags::EDIT);
     commands_["finger"] = AdminCommand(Finger, CommandFlags::FINGER);

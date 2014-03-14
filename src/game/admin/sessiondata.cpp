@@ -103,13 +103,30 @@ bool SessionData::BanPlayer(gentity_t* ent,
         ip = ip.substr(0, index);
     }
 
-    std::string err;
-    if(!banData_->AddBan(guid, ip, user->hwid, static_cast<int>(t) + seconds,
-        static_cast<int>(t), target->client->pers.netname, reason, err))
+    std::string banner = "console";
+    if(ent)
     {
-        ChatPrintTo(ent, "^3ban: ^7" + err);
-        return false;
+        banner = ent->client->pers.netname;
     }
+    std::string err;
+    if(seconds)
+    {
+        if(!banData_->AddBan(guid, ip, user->hwid, static_cast<int>(t) + seconds,
+        static_cast<int>(t), target->client->pers.netname, banner.c_str(), reason, err))
+        {
+            ChatPrintTo(ent, "^3ban: ^7" + err);
+            return false;
+        }
+    } else
+    {
+        if(!banData_->AddBan(guid, ip, user->hwid, 0,
+        static_cast<int>(t), target->client->pers.netname, banner.c_str(), reason, err))
+        {
+            ChatPrintTo(ent, "^3ban: ^7" + err);
+            return false;
+        }
+    }
+    
 
     if(seconds == 0)
     {
@@ -150,11 +167,9 @@ bool SessionData::BanPlayer(gentity_t* ent,
         ip = ip.substr(0, index);
     }
 
-    G_LogPrintf("DEBUG: banning person with ip: %s\n", ip.c_str());
-
     std::string err;
     if(!banData_->AddBan(guid, ip, user->hwid, static_cast<int>(t) + seconds,
-        static_cast<int>(t), ent->client->pers.netname, reason, err))
+        static_cast<int>(t), user->name.c_str(), ent->client->pers.netname, reason, err))
     {
         ChatPrintTo(ent, "^3ban: ^7" + err);
         return false;
@@ -207,9 +222,16 @@ bool SessionData::GuidReceived( gentity_t *ent )
 
     GetUserData( ent, clients_[ent->client->ps.clientNum].guid );
 
+    std::string ip = ValueForKey(ent, "ip");
+    std::string::size_type i = ip.find(":");
+    if(i != std::string::npos)
+    {
+        ip = ip.substr(0, i);
+    }
+
     std::string err;
     if(banData_->Banned(clients_[ent->client->ps.clientNum].guid,
-        ValueForKey(ent, "ip"),
+        ip,
         clients_[ent->client->ps.clientNum].hwid, err))
     {
         trap_DropClient(ent->client->ps.clientNum, "You are banned.", 0);
@@ -444,8 +466,6 @@ void SessionData::PrintUserList(gentity_t* playerToPrintTo, int page)
         ConsolePrintTo(playerToPrintTo, "^3userlist: ^7page doesn't exist.");
         return;
     }
-
-    G_LogPrintf("Lines to print: %d\n", linesToPrint.size());
 
     BeginBufferPrint();
     BufferPrint(playerToPrintTo, HEADER);

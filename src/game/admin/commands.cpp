@@ -6,6 +6,7 @@
 #include "../g_save.hpp"
 #include "mapdata.h"
 #include "commandinterpreter.h"
+#include "bandata.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -222,7 +223,54 @@ bool Admintest( gentity_t *ent, Arguments argv )
 
 void BanHandleGuidSwitch( gentity_t* ent, Arguments argv )
 {
+    // !Ban -guid guid seconds reason
+    if(argv->size() < 3)
+    {
+        PrintManual(ent, "ban");
+        return;
+    }
+
+    int seconds = 0;
+    std::string reason = "Banned by Administrator.";
+
+    if(argv->size() >= 4)
+    {
+        int multiplier = 1;
+        int seconds = 0;
+
+        char lastChar = argv->at(2).at(argv->at(2).size() - 1);
+        if(lastChar == 'm')
+        {
+            multiplier = 60;
+        } else if(lastChar == 'h')
+        {
+            multiplier = 60 * 60;
+        } else if(lastChar == 'd')
+        {
+            multiplier = 60 * 60 * 24;
+        } else if(lastChar == 'w')
+        {
+            multiplier = 60 * 60 * 24 * 7;
+        }
+
+        if(!StringToInt(argv->at(2).substr(0, argv->at(2).length() - 1), seconds))
+        {
+            ChatPrintTo(ent, "^3ban: ^7invalid time specified");
+            return;
+        }
+        seconds *= multiplier;
+    } 
     
+    if(argv->size() > 4)
+    {
+        for(ConstArgIter it = argv->begin() + 3;
+                it != argv->end(); it++)
+        {
+            reason += *it + " ";
+        }
+    }
+
+    game.session->BanPlayer(ent, argv->at(2), seconds, reason);
 }
 
 bool Ban( gentity_t *ent, Arguments argv )
@@ -302,6 +350,7 @@ bool Ban( gentity_t *ent, Arguments argv )
                 ChatPrintTo(ent, "^3ban: ^7invalid time specified");
                 return false;
             }
+            seconds *= multiplier;
         }
     
         if(argv->size() >= 4)
@@ -654,6 +703,14 @@ bool LevelInfo( gentity_t *ent, Arguments argv )
 
 bool ListBans( gentity_t *ent, Arguments argv )
 {
+    if(ent)
+    {
+        game.banData->ListBans(ent->client->ps.clientNum);
+    } else
+    {
+        game.banData->ListBans(-1);
+    }
+    
     return true;
 }
 
@@ -981,6 +1038,8 @@ bool Putteam( gentity_t *ent, Arguments argv )
 
 bool ReadConfig( gentity_t *ent, Arguments argv )
 {
+    game.levelData->ReadLevels();
+    ChatPrintTo(ent, "^3readconfig: ^7read level config.");
     return true;
 }
 
@@ -1152,6 +1211,28 @@ bool Spectate( gentity_t *ent, Arguments argv )
 
 bool Unban( gentity_t *ent, Arguments argv )
 {
+    if(argv->size() != 2)
+    {
+        PrintManual(ent, "unban");
+        return false;
+    }
+
+    int id = 0;
+    if(!StringToInt(argv->at(1), id))
+    {
+        ChatPrintTo(ent, "^3unban: ^7invalid id " + argv->at(1));
+        return false;
+    }
+
+    std::string err;
+    if(!game.banData->RemoveBan(id, err))
+    {
+        ChatPrintTo(ent, "^3unban: ^7" + err);
+        return false;
+    }
+
+    ChatPrintTo(ent, "^3unban: ^7unbanned id " + argv->at(1));
+
     return true;
 }
 

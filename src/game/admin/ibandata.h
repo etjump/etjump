@@ -9,6 +9,7 @@ public:
         const std::string& hwid, 
         int expires,
         int date_banned,
+        const std::string& name,
         const std::string& banner,
         const std::string& reason,
         std::string& errorMsg) = 0;

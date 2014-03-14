@@ -55,6 +55,7 @@ bool BanData::CreateBansTable()
         "id INTEGER PRIMARY KEY,"
         "expires INTEGER,"
         "ban_date INTEGER,"
+        "name VARCHAR(36),"
         "guid VARCHAR(40),"
         "ip VARCHAR(15),"
         "hwid VARCHAR(40),"
@@ -126,13 +127,14 @@ bool BanData::CloseDatabase()
 bool BanData::AddBan(std::string const& guid, 
                      std::string const& ip, 
                      std::string const& hwid, 
-                     int expires,
-                     int date_banned,
-                     const std::string& banner,
-                     const std::string& reason,
+                     int expires, int date_banned, 
+                     std::string const& name, 
+                     std::string const& banner, 
+                     std::string const& reason, 
                      std::string& errorMsg)
 {
     BanPtr temp(new Ban);
+    temp->name = name;
     temp->guid = guid;
     temp->ip = ip;
     temp->hwid = hwid;
@@ -143,8 +145,9 @@ bool BanData::AddBan(std::string const& guid,
     bans_.push_back(temp);
 
     sqlite3_stmt *insertBan = NULL;
+
     int rc = sqlite3_prepare_v2(db_,
-        "INSERT INTO bans (expires, ban_date, guid, ip, hwid, reason, banner) VALUES (?, ?, ?, ?, ?, ?, ?);",
+        "INSERT INTO bans (expires, ban_date, name, guid, ip, hwid, reason, banner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
         -1, &insertBan, 0);
     if(rc != SQLITE_OK)
     {
@@ -168,6 +171,15 @@ bool BanData::AddBan(std::string const& guid,
             rc, sqlite3_errmsg(db_));
         return false;
     }
+
+    rc = sqlite3_bind_text(insertBan, index++, name.c_str(), name.length(), SQLITE_STATIC);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't bind name to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
     rc = sqlite3_bind_text(insertBan, index++, guid.c_str(), guid.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
@@ -260,16 +272,93 @@ bool BanData::RemoveBan(int id, std::string& errorMsg)
         return false;
     }
 
-    DeleteFromDatabase();
+    DeleteFromDatabase(id);
 
     bans_.erase(bans_.begin() + id);
 
     return true;
 }
 
-void BanData::DeleteFromDatabase()
+void BanData::DeleteFromDatabase(int id)
 {
+    std::vector<BanPtr>::iterator it = bans_.begin() + id;
 
+    if(it == bans_.end())
+    {
+        return;
+    }
+
+    sqlite3_stmt *deleteBan = NULL;
+    int rc = sqlite3_prepare_v2(db_, "DELETE FROM bans WHERE guid=? OR hwid=? OR ip=?;", -1, &deleteBan, 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't prepare delete ban statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return;
+    }
+
+    int index = 1;
+    rc = sqlite3_bind_text(deleteBan, index++, (it->get()->guid.length() > 0 ? it->get()->guid.c_str() : "NOGUID"), it->get()->guid.length(), SQLITE_STATIC);
+    if(rc != SQLITE_OK) 
+    {
+        G_LogPrintf("Couldn't bind guid to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return;
+    }
+
+    rc = sqlite3_bind_text(deleteBan, index++, (it->get()->hwid.length() > 0 ? it->get()->hwid.c_str() : "NOHWID"), it->get()->hwid.length(), SQLITE_STATIC);
+    if(rc != SQLITE_OK) 
+    {
+        G_LogPrintf("Couldn't bind hwid to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return;
+    }
+
+    rc = sqlite3_bind_text(deleteBan, index++, (it->get()->ip.length() > 0 ? it->get()->ip.c_str() : "NOIP"), it->get()->ip.length(), SQLITE_STATIC);
+    if(rc != SQLITE_OK) 
+    {
+        G_LogPrintf("Couldn't bind ip to statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return;
+    }
+
+    rc = sqlite3_step(deleteBan);
+    if(rc != SQLITE_DONE)
+    {
+        G_LogPrintf("Couldn't execute deleteBan statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return;
+    }
+
+    sqlite3_finalize(deleteBan);
+    
+}
+
+void BanData::ListBans(int clientNum)
+{
+    std::vector<BanPtr>::const_iterator it =
+        bans_.begin();
+
+    gentity_t *ent = NULL;
+
+    if(clientNum >= 0)
+    {
+        ent = g_entities + clientNum;
+    } 
+    
+    ChatPrintTo(ent, "^3listbans: ^7check console for more information.");
+    BeginBufferPrint();
+    int id = 1;
+    BufferPrint(ent, va("^5Listing %d bans.\n", bans_.size()));
+    BufferPrint(ent, "^5id | name | ban date | banner | expires | reason \n");
+    while(it != bans_.end())
+    {
+        BufferPrint(ent, va("^5%d ^7%s^7 %s %s %s %s\n",
+            id, it->get()->name.c_str(), TimeStampToString(it->get()->ban_date).c_str(),
+            it->get()->banner.c_str(), TimeStampToString(it->get()->expires).c_str(), it->get()->reason.c_str()));
+        it++;
+    }
+    FinishBufferPrint(ent, false);
 }
 
 BanData::Ban::Ban(): expires(0), ban_date(0),
