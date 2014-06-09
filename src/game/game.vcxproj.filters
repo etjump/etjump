@@ -310,4 +310,7 @@
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
+  </ItemGroup>
 </Project>

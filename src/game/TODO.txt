@@ -1,1 +1,0 @@
-ERROR: SP_team_WOLF_objective: exceeded MAX_MULTI_SPAWNTARGETS (16)

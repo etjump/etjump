@@ -1093,6 +1093,11 @@ void team_wolf_objective_use( gentity_t *self, gentity_t *other, gentity_t *acti
 	trap_SetConfigstring( self->count, cs );
 }
 
+void ResetNumSpawnTargets()
+{
+    numobjectives = 0;
+}
+
 void objective_Register(gentity_t *self) {
 
 	char numspawntargets[128];
@@ -1100,8 +1105,8 @@ void objective_Register(gentity_t *self) {
 	char cs[MAX_STRING_CHARS];
 
 	if (numobjectives == MAX_MULTI_SPAWNTARGETS)
-		G_Error("SP_team_WOLF_objective: exceeded MAX_MULTI_SPAWNTARGETS (%d)\n",MAX_MULTI_SPAWNTARGETS);
-	else {	// Set config strings
+		G_Error("SP_team_WOLF_objective: exceeded MAX_MULTI_SPAWNTARGETS (%d). numobjectives: (%d)\n",MAX_MULTI_SPAWNTARGETS, numobjectives);
+	else {	// Set config strings 
 		cs_obj += numobjectives;
 		trap_GetConfigstring( cs_obj, cs, sizeof(cs) );
 		Info_SetValueForKey( cs, "spawn_targ", self->message );
@@ -1123,11 +1128,13 @@ void objective_Register(gentity_t *self) {
 	trap_GetConfigstring( CS_MULTI_INFO, cs, sizeof(cs) );
 	sprintf(numspawntargets,"%d",numobjectives);
 	Info_SetValueForKey( cs, "numspawntargets", numspawntargets );
+    ResetNumSpawnTargets();
 	trap_SetConfigstring( CS_MULTI_INFO, cs );
 }
 
 void SP_team_WOLF_objective(gentity_t *ent) {
-	char *desc;
+    
+    char *desc;
 
 	G_SpawnString( "description", "WARNING: No objective description set", &desc );
 
@@ -1146,6 +1153,7 @@ void SP_team_WOLF_objective(gentity_t *ent) {
 	} else if( ent->spawnflags & 2 ) {
 		ent->count2 = TEAM_ALLIES;
 	}
+    G_LogPrintf("Count: %d\n", numobjectives);
 }
 
 // DHM - Nerve :: Capture and Hold Checkpoint flag

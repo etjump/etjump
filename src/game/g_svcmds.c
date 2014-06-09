@@ -1058,6 +1058,12 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
+    if (!Q_stricmp(cmd, "-v"))
+    {
+        G_Printf("Version: 2.0.3\n");
+        return qtrue;
+    }
+
 	if (!Q_stricmp(cmd, "m")) {
 		Cmd_PrivateMessage_f(NULL);
 		return qtrue;
