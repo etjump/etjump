@@ -100,15 +100,15 @@ void CommandInterpreter::PrintCommandList(gentity_t* ent, std::bitset<256> permi
     BeginBufferPrint();
     while(it != commands_.end())
     {
-        if(permissions.at(it->second.flag))
+        if(permissions[it->second.flag])
         {
-            if(count == COMMANDS_PER_LINE)
+            if(count == COMMANDS_PER_LINE - 1)
             {
-                BufferPrint(ent, va("%-30 \n", it->first.c_str()));
+                BufferPrint(ent, va("%-24s\n", it->first.c_str()));
                 count = 0;
             } else
             {
-                BufferPrint(ent, va("%-30s", it->first.c_str()));
+                BufferPrint(ent, va("%-24s", it->first.c_str()));
                 count++;
             }
         }
@@ -206,7 +206,7 @@ bool CommandInterpreter::ClientCommand( gentity_t *ent )
     while(it != commands_.end() && 
         it->first.compare(0, command.length(), command) == 0)
     {
-        if(permissions.at(it->second.flag))
+        if(permissions[it->second.flag])
         {
             if(it->first == command)
             {

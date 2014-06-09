@@ -652,8 +652,6 @@ typedef struct {
 	// Map ident
 	int			clientMapProgression;
 
-    qboolean    loadedSavedPositions;
-
     int         lastListmapsTime;
     int         lastMostPlayedListTime;
 
@@ -664,6 +662,7 @@ typedef struct {
     team_t      teamBeforeInactivitySpec;
 
 	qboolean	needGreeting;
+    qboolean    loadPreviousSavedPositions;
 
 	qboolean	versionOK;
 } clientSession_t;

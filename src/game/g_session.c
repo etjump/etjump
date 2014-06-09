@@ -26,7 +26,7 @@ void G_WriteClientSessionData( gclient_t *client, qboolean restart )
 	// OSP -- stats reset check
 	if(level.fResetStats) G_deleteStats(client - level.clients);
 
-	s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 		client->sess.sessionTeam,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
@@ -58,7 +58,8 @@ void G_WriteClientSessionData( gclient_t *client, qboolean restart )
 		client->sess.ignoreClients[1],
 		client->pers.enterTime,
 		restart ? client->sess.spawnObjectiveIndex : 0,
-		client->sess.needGreeting
+		client->sess.needGreeting,
+        client->sess.loadPreviousSavedPositions
 		);
 
 	trap_Cvar_Set( va( "session%i", client - level.clients ), s );
@@ -166,7 +167,7 @@ void G_ReadSessionData( gclient_t *client )
 
 	trap_Cvar_VariableStringBuffer( va( "session%i", client - level.clients ), s, sizeof(s) );
 
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 		(int *)&client->sess.sessionTeam,
 		&client->sess.spectatorTime,
 		(int *)&client->sess.spectatorState,
@@ -196,7 +197,8 @@ void G_ReadSessionData( gclient_t *client )
 		&client->sess.ignoreClients[1],
 		&client->pers.enterTime,
 		&client->sess.spawnObjectiveIndex,
-		&client->sess.needGreeting
+		&client->sess.needGreeting,
+        &client->sess.loadPreviousSavedPositions
 		);
 
 	// OSP -- pull and parse weapon stats
@@ -304,6 +306,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->spec_invite = 0;
 	sess->spec_team = 0;
 	sess->needGreeting = qtrue;
+    sess->loadPreviousSavedPositions = qtrue;
 
 	G_deleteStats(client - level.clients);
 	// OSP

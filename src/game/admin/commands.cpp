@@ -327,29 +327,37 @@ bool Ban( gentity_t *ent, Arguments argv )
     {
         if(argv->size() >= 3)
         {
-            int multiplier = 1;
-            int seconds = 0;
-
             char lastChar = argv->at(2).at(argv->at(2).size() - 1);
-            if(lastChar == 'm')
+            if(lastChar < '0' || lastChar > '9')
             {
-                multiplier = 60;
-            } else if(lastChar == 'h')
-            {
-                multiplier = 60 * 60;
-            } else if(lastChar == 'd')
-            {
-                multiplier = 60 * 60 * 24;
-            } else if(lastChar == 'w')
-            {
-                multiplier = 60 * 60 * 24 * 7;
-            }
+                if(lastChar == 'm')
+                {
+                    multiplier = 60;
+                } else if(lastChar == 'h')
+                {
+                    multiplier = 60 * 60;
+                } else if(lastChar == 'd')
+                {
+                    multiplier = 60 * 60 * 24;
+                } else if(lastChar == 'w')
+                {
+                    multiplier = 60 * 60 * 24 * 7;
+                }
 
-            if(!StringToInt(argv->at(2).substr(0, argv->at(2).length() - 1), seconds))
+                if(!StringToInt(argv->at(2).substr(0, argv->at(2).length() - 1), seconds))
+                {
+                    ChatPrintTo(ent, "^3ban: ^7invalid time specified");
+                    return false;
+                }
+            } else
             {
-                ChatPrintTo(ent, "^3ban: ^7invalid time specified");
-                return false;
+                if(!StringToInt(argv->at(2), seconds))
+                {
+                    ChatPrintTo(ent, "^3ban: ^7invalid time specified");
+                    return false;
+                }
             }
+            
             seconds *= multiplier;
         }
     
@@ -469,12 +477,29 @@ bool EditLevel( gentity_t *ent, Arguments argv )
             else if(*it == "-greeting" && it + 1 != argv->end())
             {
                 open = GREETING_OPEN;
-                updated |=GREETING_OPEN;
+                updated |= GREETING_OPEN;
             }
             else if(*it == "-title" && it + 1 != argv->end())
             {
                 open = TITLE_OPEN;
                 updated |= TITLE_OPEN;
+            }
+            else if(*it == "-clear" && it + 1 != argv->end())
+            {
+                ConstArgIter nextIt = it + 1;
+                if(*nextIt == "cmds")
+                {
+                    
+                } else if(*nextIt == "greeting")
+                {
+                    
+                } else if(*nextIt == "title")
+                {
+                    
+                } else
+                {
+                    it++;
+                }
             }
             else
             {
@@ -505,6 +530,10 @@ bool EditLevel( gentity_t *ent, Arguments argv )
     }
 
     game.levelData->EditLevel(level, title, commands, greeting, updated);
+    game.session->UpdatePermissions();
+
+    ChatPrintTo(ent, va("^3editlevel: ^7updated level %d.", level));
+
     return true;
 }
 
@@ -539,12 +568,32 @@ bool EditUser( gentity_t *ent, Arguments argv )
         else if(*it == "-greeting" && it + 1 != argv->end())
         {
             open = GREETING_OPEN;
-            updated |=GREETING_OPEN;
+            updated |= GREETING_OPEN;
         }
         else if(*it == "-title" && it + 1 != argv->end())
         {
             open = TITLE_OPEN;
             updated |= TITLE_OPEN;
+        }
+        else if(*it == "-clear" && it + 1 != argv->end())
+        {
+            ConstArgIter nextIt = it+1;
+            if(*nextIt == "cmds")
+            {
+                commands.clear();
+                updated |= CMDS_OPEN;
+            } else if(*nextIt == "greeting")
+            {
+                greeting.clear();
+                updated |= GREETING_OPEN;
+            } else if(*nextIt == "title")
+            {
+                title.clear();
+                updated |= TITLE_OPEN;
+            } else
+            {
+                it++;
+            }
         }
         else
         {

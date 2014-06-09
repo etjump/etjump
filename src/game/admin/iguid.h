@@ -2,9 +2,7 @@
 #define iguid_h__
 
 #include <string>
-
-struct gentity_s;
-typedef gentity_s gentity_t;
+#include "../g_local.hpp"
 
 class IGuid
 {

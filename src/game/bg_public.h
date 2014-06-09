@@ -2464,17 +2464,16 @@ static const struct Manual commandManuals[] = {
     {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on ID."},
     {"editcommands", "", ""},
     {"editlevel", "!editlevel [level] -cmds [new commands] -greeting [new greeting] -title [new title]", "Edits an existing level. If level does not exist, creates it."},
-    {"edituser", "!edituser -id [id] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n"    
-    "!edituser -guid [guid] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n",    
+    {"edituser", "!edituser [guid] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n"    
     "Used to edit user admin attributes such as personal commands, personal title and personal greeting."    
-    "Users can be identified using either user ID or the GUID. All of the \"-cmds|-title|-greeting\" switches are optional "    
+    "All of the \"-cmds|-title|-greeting\" switches are optional "    
     "but atleast one must be given."},
     {"finger", "!finger <target>", "Displays target's admin level."},
     {"help", "!help\n!help [command]", "Prints useful information about commands."},
     {"kick", "!kick [target]\n!kick [target] [timeout]\n!kick [target] [timeout] [reason]",    "Kicks target player."},
     {"levelinfo", "!levelinfo [level]", "Prints useful information about a level."},
     {"listbans", "!listbans", "Lists all bans."},
-    {"listcmds", "!listcmds [(optional) command]", "Lists all commands or prints a command manual."},
+    {"listcmds", "!listcmds", "Lists all commands or prints a command manual."},
     {"listflags", "!listflags", "Lists all command flags."},
     {"listmaps", "!listmaps", "Lists all maps."},
     {"listplayers", "!listplayers", "Lists all players on server."},

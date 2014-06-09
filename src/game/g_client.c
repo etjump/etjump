@@ -1594,7 +1594,6 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		client->sess.gotoAllowed = qtrue;
 		client->sess.saveAllowed = qtrue;  //qfalse	//Feen: Why was this set to false?
         client->last8BallTime = 0;
-        client->sess.loadedSavedPositions = qfalse;
 		client->lastVoteTime = 0;
         client->cheatDetected = qfalse;
         // Client has loaded position after inactivity putspec

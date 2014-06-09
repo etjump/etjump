@@ -4,12 +4,11 @@
 #include <string>
 #include <bitset>
 #include <boost/array.hpp>
-
-#include "../g_local.hpp"
 #include "iuserdata.h"
 #include "iguid.h"
 #include "ileveldata.h"
 #include "ibandata.h"
+#include "../g_local.hpp"
 
 class SessionData : public IGuid
 {
@@ -60,6 +59,7 @@ public:
         int seconds, const std::string& reason );
     bool BanPlayer( gentity_t *ent, gentity_t *target,
         int seconds, const std::string& reason );
+    void UpdatePermissions();
 private:
     // Checks whether guid is valid or not
     bool ValidGuid( const std::string& guid );

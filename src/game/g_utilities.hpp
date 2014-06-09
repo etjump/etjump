@@ -3,8 +3,8 @@
 
 #include <string>
 #include <vector>
+#include "g_local.hpp"
 
-typedef struct gentity_s gentity_t;
 typedef float vec_t;
 typedef vec_t vec2_t[2];
 typedef vec_t vec3_t[3];

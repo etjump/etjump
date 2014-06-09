@@ -1,7 +1,7 @@
 #ifndef BANDATA_H
 #define BANDATA_H
 #include <string>
-#include <boost\shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include "ibandata.h"
 #include <sqlite3.h>
@@ -19,8 +19,10 @@ public:
 
     bool OpenDatabase(std::string banDatabaseFileName);
     bool CreateBansTable();
+    bool PrepareStatements();
     bool LoadBans();
     bool CloseDatabase();
+    bool FinalizeStatements();
 
     virtual bool AddBan(const std::string& guid, 
         const std::string& ip,
@@ -62,6 +64,9 @@ private:
     std::vector<BanPtr> bans_;
 
     sqlite3 *db_;
+    sqlite3_stmt *selectAllBans_;
+    sqlite3_stmt *insertBan_;
+    sqlite3_stmt *deleteBan_;
 };
 
 #endif // BANDATA_H

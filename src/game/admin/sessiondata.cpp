@@ -153,6 +153,20 @@ bool SessionData::BanPlayer(gentity_t* ent,
         return false;
     }
 
+    if(ent)
+    {
+        User const *banner = userData_->GetUserData(clients_[ent->client->ps.clientNum].guid);
+        if(banner)
+        {
+            if(banner->level <= user->level)
+            {
+                ChatPrintTo(ent, "^3ban: ^7cannot ban a fellow admin.");
+                return false;
+            }
+        }
+    }
+    
+
     time_t t;
     if(!time(&t))
     {
@@ -160,12 +174,7 @@ bool SessionData::BanPlayer(gentity_t* ent,
         return false;
     }
 
-    std::string ip = ValueForKey(ent, "ip");
-    std::string::size_type index = ip.find(":");
-    if(index != std::string::npos)
-    {
-        ip = ip.substr(0, index);
-    }
+    std::string ip = "NOTCONNECTED";
 
     std::string err;
     if(!banData_->AddBan(guid, ip, user->hwid, static_cast<int>(t) + seconds,
@@ -175,6 +184,17 @@ bool SessionData::BanPlayer(gentity_t* ent,
         return false;
     }
     return true;
+}
+
+void SessionData::UpdatePermissions()
+{
+    for(int i = 0; i < MAX_CLIENTS; i++)
+    {
+        const ILevelData::LevelInformation *levelInfo = 
+            levelData_->GetLevelInformation(clients_[i].level);
+
+        ParsePermissions(clients_[i].permissions, levelInfo->commands + clients_[i].commands);
+    }
 }
 
 bool SessionData::ValidGuid( const std::string& guid )
@@ -279,10 +299,22 @@ void SessionData::GetUserData( gentity_t *ent, const std::string& guid )
         
         ParsePermissions(clients_[ent->client->ps.clientNum].permissions, levelInfo->commands + currentUser->commands);
 
-        std::string welcomeMsg;
-        CharPtrToString( g_lastVisitedMessage.string, welcomeMsg );
-        boost::replace_all( welcomeMsg, "[t]", TimeStampToString(currentUser->lastSeen));
-        CPMTo(ent, welcomeMsg);
+        if(ent->client->sess.needGreeting)
+        {
+            std::string welcomeMsg;
+            CharPtrToString( g_lastVisitedMessage.string, welcomeMsg );
+            boost::replace_all( welcomeMsg, "[t]", TimeStampToString(currentUser->lastSeen));
+            CPMTo(ent, welcomeMsg);
+            ent->client->sess.needGreeting = qfalse;
+            
+            if(clients_[ent->client->ps.clientNum].greeting.length() > 0)
+            {
+                std::string greeting = clients_[ent->client->ps.clientNum].greeting;
+                boost::replace_all( greeting, "[n]", ent->client->pers.netname );
+                ChatPrintAll( greeting );
+            }
+        }
+        
     }
 
     userData_->UserIsOnline(guid);
@@ -340,7 +372,7 @@ std::bitset<SessionData::Client::MAX_COMMANDS>
          std::bitset<SessionData::Client::MAX_COMMANDS> temp;
          for(int i = 0; i < SessionData::Client::MAX_COMMANDS; i++)
          {
-             temp.at(i) = true;
+             temp[i] = true;
          }
          return temp;
     }
@@ -395,13 +427,13 @@ void SessionData::UpdateUserSessionData( gentity_t *ent )
     ParsePermissions(clients_[ent->client->ps.clientNum].permissions, 
         levelInfo->commands + user->commands);
 }
-
+enum {
+    ALLOW,
+    DENY
+};
 void SessionData::ParsePermissions(std::bitset<SessionData::Client::MAX_COMMANDS>& temp, std::string const& permissions)
 {
-    const enum {
-		ALLOW,
-		DENY
-	};
+    
 
 	int state = ALLOW;
 

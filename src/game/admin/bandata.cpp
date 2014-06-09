@@ -4,7 +4,7 @@
 // TODO: replaced g_local.hpp for printf
 // with something that includes less shit
 
-BanData::BanData(): db_(NULL)
+BanData::BanData(): db_(NULL), selectAllBans_(NULL), insertBan_(NULL), deleteBan_(NULL)
 {
 }
 
@@ -17,6 +17,10 @@ void BanData::Initialize(const std::string& banDatabaseFileName)
     // TODO: Load bans from DB
     if(OpenDatabase(banDatabaseFileName) && CreateBansTable())
     {
+        if(!PrepareStatements())
+        {
+            return;
+        }
         if(!LoadBans())
         {
             G_LogPrintf("ERROR: failed to initialize ban database.\n");
@@ -28,6 +32,7 @@ void BanData::Shutdown()
 {
     // shared_ptr handles memory management
     bans_.clear();
+    FinalizeStatements();
     CloseDatabase();
 }
 
@@ -70,33 +75,56 @@ bool BanData::CreateBansTable()
     return true;
 }
 
-bool BanData::LoadBans()
+bool BanData::PrepareStatements()
 {
-    sqlite3_stmt *stmt = NULL;
     int rc = sqlite3_prepare_v2(db_, 
         "SELECT expires, ban_date, guid, ip, hwid, reason, banner FROM bans;",
-        -1, &stmt, 0);
+        -1, &selectAllBans_, 0);
+
     if(rc != SQLITE_OK)
     {
-        G_LogPrintf("Couldn't prepare loadBans statement: (%d) %s\n",
+        G_LogPrintf("Couldn't prepare selectAllBans statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
 
+    rc = sqlite3_prepare_v2(db_,
+        "INSERT INTO bans (expires, ban_date, name, guid, ip, hwid, reason, banner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+        -1, &insertBan_, 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't prepare insertBan statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    rc = sqlite3_prepare_v2(db_, "DELETE FROM bans WHERE guid=? OR hwid=? OR ip=?;", -1, &deleteBan_, 0);
+    if(rc != SQLITE_OK)
+    {
+        G_LogPrintf("Couldn't prepare delete ban statement: (%d) %s\n",
+            rc, sqlite3_errmsg(db_));
+        return false;
+    }
+
+    return true;
+}
+
+bool BanData::LoadBans()
+{
     // Should be empty but do it anyway
     bans_.clear();
 
-    rc = sqlite3_step(stmt);
+    int rc = sqlite3_step(selectAllBans_);
     while(rc == SQLITE_ROW)
     {
         int index = 0;
-        int expires = sqlite3_column_int(stmt, index++);
-        int ban_date = sqlite3_column_int(stmt, index++);
-        const char *guidPtr = (const char*)sqlite3_column_text(stmt, index++);
-        const char *ipPtr = (const char*)sqlite3_column_text(stmt, index++);
-        const char *hwidPtr = (const char*)sqlite3_column_text(stmt, index++);
-        const char *reasonPtr = (const char*)sqlite3_column_text(stmt, index++);
-        const char *bannerPtr = (const char*)sqlite3_column_text(stmt, index++);
+        int expires = sqlite3_column_int(selectAllBans_, index++);
+        int ban_date = sqlite3_column_int(selectAllBans_, index++);
+        const char *guidPtr = (const char*)sqlite3_column_text(selectAllBans_, index++);
+        const char *ipPtr = (const char*)sqlite3_column_text(selectAllBans_, index++);
+        const char *hwidPtr = (const char*)sqlite3_column_text(selectAllBans_, index++);
+        const char *reasonPtr = (const char*)sqlite3_column_text(selectAllBans_, index++);
+        const char *bannerPtr = (const char*)sqlite3_column_text(selectAllBans_, index++);
 
         BanPtr temp(new Ban);
         temp->expires = expires;
@@ -109,10 +137,8 @@ bool BanData::LoadBans()
 
         bans_.push_back(temp);
 
-        rc = sqlite3_step(stmt);
+        rc = sqlite3_step(selectAllBans_);
     }
-
-    sqlite3_finalize(stmt);
 
     return true;
 }
@@ -121,6 +147,17 @@ bool BanData::CloseDatabase()
 {
     sqlite3_close(db_);
     db_ = NULL;
+    return true;
+}
+
+bool BanData::FinalizeStatements()
+{
+    sqlite3_finalize(selectAllBans_);
+    selectAllBans_ = NULL;
+    sqlite3_finalize(insertBan_);
+    insertBan_ = NULL;
+    sqlite3_finalize(deleteBan_);
+    deleteBan_ = NULL;
     return true;
 }
 
@@ -144,27 +181,16 @@ bool BanData::AddBan(std::string const& guid,
     temp->reason = reason;
     bans_.push_back(temp);
 
-    sqlite3_stmt *insertBan = NULL;
-
-    int rc = sqlite3_prepare_v2(db_,
-        "INSERT INTO bans (expires, ban_date, name, guid, ip, hwid, reason, banner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
-        -1, &insertBan, 0);
-    if(rc != SQLITE_OK)
-    {
-        G_LogPrintf("Couldn't prepare insert ban statement: (%d) %s\n",
-            rc, sqlite3_errmsg(db_));
-        return false;
-    }
-
     int index = 1;
-    rc = sqlite3_bind_int(insertBan, index++, expires);
+    sqlite3_reset(insertBan_);
+    int rc = sqlite3_bind_int(insertBan_, index++, expires);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind expires to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
-    rc = sqlite3_bind_int(insertBan, index++, date_banned);
+    rc = sqlite3_bind_int(insertBan_, index++, date_banned);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind ban date to statement: (%d) %s\n",
@@ -172,7 +198,7 @@ bool BanData::AddBan(std::string const& guid,
         return false;
     }
 
-    rc = sqlite3_bind_text(insertBan, index++, name.c_str(), name.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(insertBan_, index++, name.c_str(), name.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind name to statement: (%d) %s\n",
@@ -180,35 +206,35 @@ bool BanData::AddBan(std::string const& guid,
         return false;
     }
 
-    rc = sqlite3_bind_text(insertBan, index++, guid.c_str(), guid.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(insertBan_, index++, guid.c_str(), guid.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind guid to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
-    rc = sqlite3_bind_text(insertBan, index++, ip.c_str(), ip.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(insertBan_, index++, ip.c_str(), ip.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind ip to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
-    rc = sqlite3_bind_text(insertBan, index++, hwid.c_str(), hwid.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(insertBan_, index++, hwid.c_str(), hwid.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind hwid to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
-    rc = sqlite3_bind_text(insertBan, index++, reason.c_str(), reason.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(insertBan_, index++, reason.c_str(), reason.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind reason to statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
-    rc = sqlite3_bind_text(insertBan, index++, banner.c_str(), banner.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(insertBan_, index++, banner.c_str(), banner.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK)
     {
         G_LogPrintf("Couldn't bind banner to statement: (%d) %s\n",
@@ -216,15 +242,13 @@ bool BanData::AddBan(std::string const& guid,
         return false;
     }
 
-    rc = sqlite3_step(insertBan);
+    rc = sqlite3_step(insertBan_);
     if(rc != SQLITE_DONE)
     {
         G_LogPrintf("Couldn't execute insert ban statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return false;
     }
-
-    sqlite3_finalize(insertBan);
 
     return true;
 }
@@ -288,17 +312,9 @@ void BanData::DeleteFromDatabase(int id)
         return;
     }
 
-    sqlite3_stmt *deleteBan = NULL;
-    int rc = sqlite3_prepare_v2(db_, "DELETE FROM bans WHERE guid=? OR hwid=? OR ip=?;", -1, &deleteBan, 0);
-    if(rc != SQLITE_OK)
-    {
-        G_LogPrintf("Couldn't prepare delete ban statement: (%d) %s\n",
-            rc, sqlite3_errmsg(db_));
-        return;
-    }
-
     int index = 1;
-    rc = sqlite3_bind_text(deleteBan, index++, (it->get()->guid.length() > 0 ? it->get()->guid.c_str() : "NOGUID"), it->get()->guid.length(), SQLITE_STATIC);
+    sqlite3_reset(deleteBan_);
+    int rc = sqlite3_bind_text(deleteBan_, index++, (it->get()->guid.length() > 0 ? it->get()->guid.c_str() : "NOGUID"), it->get()->guid.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK) 
     {
         G_LogPrintf("Couldn't bind guid to statement: (%d) %s\n",
@@ -306,7 +322,7 @@ void BanData::DeleteFromDatabase(int id)
         return;
     }
 
-    rc = sqlite3_bind_text(deleteBan, index++, (it->get()->hwid.length() > 0 ? it->get()->hwid.c_str() : "NOHWID"), it->get()->hwid.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(deleteBan_, index++, (it->get()->hwid.length() > 0 ? it->get()->hwid.c_str() : "NOHWID"), it->get()->hwid.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK) 
     {
         G_LogPrintf("Couldn't bind hwid to statement: (%d) %s\n",
@@ -314,7 +330,7 @@ void BanData::DeleteFromDatabase(int id)
         return;
     }
 
-    rc = sqlite3_bind_text(deleteBan, index++, (it->get()->ip.length() > 0 ? it->get()->ip.c_str() : "NOIP"), it->get()->ip.length(), SQLITE_STATIC);
+    rc = sqlite3_bind_text(deleteBan_, index++, (it->get()->ip.length() > 0 ? it->get()->ip.c_str() : "NOIP"), it->get()->ip.length(), SQLITE_STATIC);
     if(rc != SQLITE_OK) 
     {
         G_LogPrintf("Couldn't bind ip to statement: (%d) %s\n",
@@ -322,16 +338,13 @@ void BanData::DeleteFromDatabase(int id)
         return;
     }
 
-    rc = sqlite3_step(deleteBan);
+    rc = sqlite3_step(deleteBan_);
     if(rc != SQLITE_DONE)
     {
         G_LogPrintf("Couldn't execute deleteBan statement: (%d) %s\n",
             rc, sqlite3_errmsg(db_));
         return;
-    }
-
-    sqlite3_finalize(deleteBan);
-    
+    }    
 }
 
 void BanData::ListBans(int clientNum)

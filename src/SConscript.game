@@ -17,6 +17,8 @@ admin/game.cpp
 admin/leveldata.cpp
 admin/sessiondata.cpp
 admin/userdata.cpp
+admin/bandata.cpp
+admin/mapdata.cpp
 
 g_main_ext.cpp
 g_utilities.cpp

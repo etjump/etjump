@@ -309,7 +309,7 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
     }
 
     client.progression = ent->client->sess.clientMapProgression;
-    ent->client->sess.loadedSavedPositions = qfalse;
+    ent->client->sess.loadPreviousSavedPositions = qfalse;
 
     std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
@@ -328,7 +328,8 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         return;
     }
 
-    if(ent->client->sess.loadedSavedPositions) {
+    if(!ent->client->sess.loadPreviousSavedPositions)
+    {
         return;
     }
 
@@ -355,8 +356,8 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
                 it->second.axisSavedPositions[i].isValid;
         }
 
+        ent->client->sess.loadPreviousSavedPositions = qfalse;
         ent->client->sess.clientMapProgression = it->second.progression;
-        ent->client->sess.loadedSavedPositions = qtrue;
         ChatPrintTo(ent, "^5ETJump: ^7loaded saved positions from previous session.");
     }
 }
