@@ -44,6 +44,7 @@ void MapData::Initialize()
         std::map<std::string, MapPtr>::iterator it = 
             maps_.find(buf);
 
+        // TODO: mitä logiikkaa tässä on, että it == maps.end() ???
         if(it == maps_.end())
         {
             MapPtr temp = MapPtr(new Map);

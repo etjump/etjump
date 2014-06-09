@@ -306,9 +306,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\todo.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="game.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>

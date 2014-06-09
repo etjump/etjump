@@ -33,16 +33,6 @@ menuDef {
 		close ingame_main ;
 	}
 
-	itemDef {
-		name		"ycn_logo"
-		rect		200 0 360 180	// X Y W H
-		style		WINDOW_STYLE_SHADER
-		background	"ui/assets/ycn/ycn_logo"
-		forecolor	1 1 1 1
-		visible		1
-		decoration
-	}
-
 // Window //
 
 	WINDOW( "MAIN", 50 )

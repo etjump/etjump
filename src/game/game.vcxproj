@@ -248,9 +248,6 @@
     <ClInclude Include="surfaceflags.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\todo.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="game.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

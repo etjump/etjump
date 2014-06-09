@@ -245,26 +245,28 @@ void LevelData::CreateDefaultLevels()
         return;
     }
 
+    levels_.clear();
+
     try
     {
         boost::shared_ptr< Level > tempLevel = boost::shared_ptr< Level >
             ( new Level(0, "Visitor", 
-            "Welcome Visitor [n]^7!", "") );
+            "Welcome Visitor [n]^7!", "8aS") );
         levels_.push_back(tempLevel);
 
         tempLevel = boost::shared_ptr< Level >
             ( new Level(1, "Friend", 
-            "Welcome Friend [n]^7!", "") ); 
+            "Welcome Friend [n]^7!", "128Sa") ); 
         levels_.push_back(tempLevel);
 
         tempLevel = boost::shared_ptr< Level >
             ( new Level(2, "Moderator",
-            "Welcome Moderator [n]^7!", "") );
+            "Welcome Moderator [n]^7!", "*-AGs") );
         levels_.push_back(tempLevel);
 
         tempLevel = boost::shared_ptr< Level >
                 (new Level(3, "Administrator",
-            "Welcome Administrator [n]^7!", ""));
+            "Welcome Administrator [n]^7!", "*"));
         levels_.push_back(tempLevel);
     }
     catch( std::bad_alloc& e )

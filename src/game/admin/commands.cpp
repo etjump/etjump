@@ -785,6 +785,17 @@ bool ListMaps( gentity_t *ent, Arguments argv )
 
 bool ListPlayers( gentity_t *ent, Arguments argv )
 {
+
+    BeginBufferPrint();
+    BufferPrint(ent, "ID : Level : Player\n----------------------------------------\n");
+    for (int i = 0; i < level.numConnectedClients; i++)
+    {
+        int clientNum = level.sortedClients[i];
+        // ID : Level : Player
+        BufferPrint(ent, va("%-3d %-10d %-36s\n", clientNum, game.session->GetLevel(g_entities + clientNum), (g_entities + clientNum)->client->pers.netname));
+    }
+    FinishBufferPrint(ent);
+
     return true;
 }
 
