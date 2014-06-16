@@ -149,6 +149,7 @@
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="admin\session.cpp" />
     <ClCompile Include="bg_animation.c" />
     <ClCompile Include="bg_animgroup.c" />
     <ClCompile Include="bg_campaign.c" />
@@ -202,6 +203,7 @@
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
+    <ClCompile Include="mainext.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
   </ItemGroup>
@@ -211,6 +213,7 @@
   <ItemGroup>
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="admin\session.hpp" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />

@@ -1874,6 +1874,8 @@ void G_ShutdownGame( int restart ) {
     }
 #endif
 
+    OnGameShutdown();
+
 	// write all the client session data so we can get it back
 	G_WriteSessionData( restart );
 }
@@ -2402,8 +2404,10 @@ void ExitLevel (void) {
 		}
 	}
 
-	// we need to do this here before chaning to CON_CONNECTING
+    OnGameShutdown();
+    // we need to do this here before chaning to CON_CONNECTING
 	G_WriteSessionData( qfalse );
+    
 
 
 	// change all client states to connecting, so the early players into the

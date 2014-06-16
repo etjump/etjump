@@ -1096,6 +1096,11 @@ qboolean	ConsoleCommand( void ) {
         G_Printf("Current time: %s\n", buf);
     }
 
+    if (OnConsoleCommand())
+    {
+        return qtrue;
+    }
+
 	// -fretn
 
 	if( g_dedicated.integer ) {

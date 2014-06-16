@@ -38,11 +38,11 @@ Arguments GetSayArgs( int start = 0 );
 std::string SayArgv(int arg);
 
 // Conversions
-bool StringToInt(const std::string& toConvert, int& value);
-std::string IntToString( int value );
+bool ToInt(const std::string& toConvert, int& value);
+std::string ToString( int value );
 
-std::string Vec3ToString( vec3_t toConvert );
-std::string Vec3ToString( vec_t x, vec_t y, vec_t z );
+std::string ToString( vec3_t toConvert );
+std::string ToString( vec_t x, vec_t y, vec_t z );
 
 gentity_t *PlayerGentityFromString(char *name, char *err, int size);
 gentity_t *PlayerGentityFromString(const std::string& name, 
@@ -57,4 +57,6 @@ bool MapExists( const std::string& map );
 std::string ValueForKey( gentity_t *ent, const std::string& key );
 std::string TimeStampToString( int timeStamp );
 std::string TimeStampDifferenceToString( int diff );
+
+bool ValidGuid(std::string guid);
 #endif // g_utilities_h__

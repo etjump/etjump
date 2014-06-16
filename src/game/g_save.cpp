@@ -52,7 +52,7 @@ void SaveSystem::Save(gentity_t *ent) {
 
     int position = 0;
     if(argv->size() > 1) {
-        StringToInt((*argv)[1], position);
+        ToInt( (*argv)[1] , position );
 
         if(position < 0 || position > MAX_SAVED_POSITIONS) {
             CPTo(ent, "Invalid position.");
@@ -127,7 +127,7 @@ void SaveSystem::Load(gentity_t *ent) {
 
     int position = 0;
     if(argv->size() > 1) {
-        StringToInt(argv->at(1), position);
+        ToInt((*argv)[1], position);
 
         if(position < 0 || position >= MAX_SAVED_POSITIONS) {
             CPTo(ent, "^7Invalid position.");
@@ -218,7 +218,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent) {
 
     int position = 0;
     if(argv->size() > 1) {
-        StringToInt(argv->at(1), position);
+        ToInt(argv->at(1), position);
 
         if(position < 1 || position > MAX_SAVED_POSITIONS) {
             CPTo(ent, "^7Invalid position.");
@@ -411,10 +411,10 @@ void SaveSystem::Print( gentity_t *ent )
             r2 = it->second.axisSavedPositions[i].origin[2];
 
             toPrint += 
-                IntToString(it->second.alliesSavedPositions[i].isValid) +
-                IntToString(it->second.axisSavedPositions[i].isValid) +
-                "B: " + Vec3ToString(b0, b1, b2) + 
-                "R: " + Vec3ToString(r0, r1, r2) + NEWLINE;
+                ToString(it->second.alliesSavedPositions[i].isValid) +
+                ToString(it->second.axisSavedPositions[i].isValid) +
+                "B: " + ToString(b0, b1, b2) + 
+                "R: " + ToString(r0, r1, r2) + NEWLINE;
         }
         it++;
     }

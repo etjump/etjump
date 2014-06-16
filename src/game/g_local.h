@@ -2632,5 +2632,13 @@ qboolean StringToInt(const char* toConvert, int *value);
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
 
+// mainext.cpp
+void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+void OnClientBegin(gentity_t *ent);
+void OnClientDisconnect(gentity_t *ent);
+qboolean OnClientCommand(gentity_t *ent);
+qboolean OnConsoleCommand();
+void OnGameShutdown();
+
 #endif // G_LOCAL_H
 

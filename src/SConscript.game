@@ -11,6 +11,8 @@ Import( GLOBALS )
 
 qagame_string = """
 
+admin/session.cpp
+
 g_utilities.cpp
 g_banner.cpp
 g_save.cpp

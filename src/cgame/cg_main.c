@@ -3053,9 +3053,9 @@ cvarTable_t		cvarTable[] = {
             cgs.dumpStatsFile = 0;
             cgs.dumpStatsTime = 0;
 
-            SendGuid();
-            SendHWID();
-            UserinfoSendHWID();
+            //SendGuid();
+            //SendHWID();
+            //UserinfoSendHWID();
             //	CG_Printf("Time taken: %i\n", trap_Milliseconds() - startat);
       }
 
