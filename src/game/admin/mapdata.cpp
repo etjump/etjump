@@ -44,11 +44,22 @@ void MapData::Initialize()
         std::map<std::string, MapPtr>::iterator it = 
             maps_.find(buf);
 
-        // TODO: mitä logiikkaa tässä on, että it == maps.end() ???
         if(it == maps_.end())
         {
             MapPtr temp = MapPtr(new Map);
             it = maps_.insert(std::make_pair(buf, temp)).first;
+
+            // Hack that will not allow 64 char names with ' in them
+            if (strlen(buf) != MAX_QPATH)
+            {
+                if (buf)
+                {
+                    std::string temp = buf;
+                    boost::replace_all(temp, "'", "''");
+                    Q_strncpyz(buf, temp.c_str(), sizeof(buf));
+                }
+            }
+
             int rc = sqlite3_exec(db_, va("INSERT INTO maps (map, last_played, seconds_played) VALUES ('%s', 0, 0);",
                 buf), NULL, NULL, NULL);
             if(rc != SQLITE_OK)

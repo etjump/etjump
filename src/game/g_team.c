@@ -1093,6 +1093,7 @@ void team_wolf_objective_use( gentity_t *self, gentity_t *other, gentity_t *acti
 	trap_SetConfigstring( self->count, cs );
 }
 
+// Fixes ERROR: SP_team_WOLF_objective: exceeded MAX_MULTI_SPAWNTARGETS (16) caused by certain maps on linux.
 void ResetNumSpawnTargets()
 {
     numobjectives = 0;
@@ -1153,7 +1154,6 @@ void SP_team_WOLF_objective(gentity_t *ent) {
 	} else if( ent->spawnflags & 2 ) {
 		ent->count2 = TEAM_ALLIES;
 	}
-    G_LogPrintf("Count: %d\n", numobjectives);
 }
 
 // DHM - Nerve :: Capture and Hold Checkpoint flag
