@@ -1649,8 +1649,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
 		}
 	}
-
-    AdminCommandCheck( ent );
 }
 
 
@@ -3909,11 +3907,11 @@ static command_t noIntermissionCommands[] =
 	{ "goto",				qtrue,	Cmd_Goto_f },
 	{ "call",				qtrue,  Cmd_Call_f },
 	{ "iwant",				qtrue,  Cmd_Call_f },
-	{ "load",				qfalse,	Cmd_Load_f },
-    { "backup",             qfalse, Cmd_BackupLoad_f },
-	{ "save",				qfalse,	Cmd_Save_f },
+	//{ "load",				qfalse,	Cmd_Load_f },
+    //{ "backup",             qfalse, Cmd_BackupLoad_f },
+	//{ "save",				qfalse,	Cmd_Save_f },
 	{ "shrug",				qfalse, Cmd_shrug_f },
-    { "savereset",          qfalse, Cmd_SaveReset_f },
+    //{ "savereset",          qfalse, Cmd_SaveReset_f },
 
 };
 
@@ -3959,19 +3957,19 @@ void ClientCommand(int clientNum)
 	trap_Argv(0, cmd, sizeof(cmd));
 
     // Received client guid
-    if(!Q_stricmp(cmd, "etguid")) {
-		GuidReceived(ent);
-        return;
-    }
+  //  if(!Q_stricmp(cmd, "etguid")) {
+		//GuidReceived(ent);
+  //      return;
+  //  }
 
-    if(!Q_stricmp(cmd, "HWID")) {
-        // HWIDReceived(ent);
-        return;
-    }
+    //if(!Q_stricmp(cmd, "HWID")) {
+    //    // HWIDReceived(ent);
+    //    return;
+    //}
 
-    if(!Q_stricmp(cmd, "NOHWID")) {
-      //  HWIDReceived(ent);
-    }
+    //if(!Q_stricmp(cmd, "NOHWID")) {
+    //  //  HWIDReceived(ent);
+    //}
 
 	if(ent->client->pers.connected != CON_CONNECTED) {
 		return;
@@ -4103,11 +4101,6 @@ void ClientCommand(int clientNum)
 	if(G_commandCheck(ent, cmd, qtrue)) {
 		return;
 	}
-
-    if(AdminCommandCheck( ent ))
-    {
-        return;
-    }
 
 	CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }

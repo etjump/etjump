@@ -149,14 +149,6 @@
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
-    <ClCompile Include="admin\bandata.cpp" />
-    <ClCompile Include="admin\commandinterpreter.cpp" />
-    <ClCompile Include="admin\commands.cpp" />
-    <ClCompile Include="admin\game.cpp" />
-    <ClCompile Include="admin\leveldata.cpp" />
-    <ClCompile Include="admin\mapdata.cpp" />
-    <ClCompile Include="admin\sessiondata.cpp" />
-    <ClCompile Include="admin\userdata.cpp" />
     <ClCompile Include="bg_animation.c" />
     <ClCompile Include="bg_animgroup.c" />
     <ClCompile Include="bg_campaign.c" />
@@ -185,7 +177,6 @@
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_main.c" />
     <ClCompile Include="g_banner.cpp" />
-    <ClCompile Include="g_main_ext.cpp" />
     <ClCompile Include="g_match.c" />
     <ClCompile Include="g_mem.c" />
     <ClCompile Include="g_misc.c" />
@@ -220,20 +211,6 @@
   <ItemGroup>
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
-    <ClInclude Include="admin\bandata.h" />
-    <ClInclude Include="admin\commandinterpreter.h" />
-    <ClInclude Include="admin\commands.h" />
-    <ClInclude Include="admin\common.h" />
-    <ClInclude Include="admin\game.h" />
-    <ClInclude Include="admin\ibandata.h" />
-    <ClInclude Include="admin\iguid.h" />
-    <ClInclude Include="admin\ileveldata.h" />
-    <ClInclude Include="admin\iuserdata.h" />
-    <ClInclude Include="admin\leveldata.h" />
-    <ClInclude Include="admin\mapdata.h" />
-    <ClInclude Include="admin\sessiondata.h" />
-    <ClInclude Include="admin\user.h" />
-    <ClInclude Include="admin\userdata.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />

@@ -1517,7 +1517,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
     // Zero: has to be here because else it'll reset the ip we'll
     // set a bit later 
-    OnClientConnect(clientNum, firstTime, isBot);
+    //OnClientConnect(clientNum, firstTime, isBot);
 
 	// IP filtering
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
@@ -1528,11 +1528,11 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		return "You are banned from this server.";
 	}
 
-    if(IsBanned(ip))
-    {
-        C_CPMAll(va("^5Banned player ^7%s ^5tried to connect.", ent->client->ps.clientNum));
-        return "You are banned from this server.";
-    }
+    //if(IsBanned(ip))
+    //{
+    //    C_CPMAll(va("^5Banned player ^7%s ^5tried to connect.", ent->client->ps.clientNum));
+    //    return "You are banned from this server.";
+    //}
 
 	/* ETPub fakeplayers DoS fix */
 
@@ -1740,7 +1740,7 @@ void ClientBegin( int clientNum )
 	// No surface determined yet.	
 	ent->surfaceFlags = 0;
 
-    OnClientBegin(ent);
+    //OnClientBegin(ent);
 }
 
 gentity_t *SelectSpawnPointFromList( char *list, vec3_t spawn_origin, vec3_t spawn_angles )
@@ -2155,7 +2155,7 @@ void ClientDisconnect( int clientNum ) {
 		return;
 	}
 
-    OnClientDisconnect(ent);
+    //OnClientDisconnect(ent);
 	G_RemoveClientFromFireteams( clientNum, qtrue, qfalse );
 	G_RemoveFromAllIgnoreLists( clientNum );
 	G_LeaveTank( ent, qfalse );

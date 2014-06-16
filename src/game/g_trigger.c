@@ -359,7 +359,8 @@ void trigger_savereset_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	self->timestamp = level.time + FRAMETIME;
 
-    ResetSavedPositions(other);    
+    // TODO: add savereset here
+    /*ResetSavedPositions(other);    */
 
 	CPx(other - g_entities, "cp \"^7 Your saves were removed.\n\"");
 }

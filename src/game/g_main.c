@@ -1822,7 +1822,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_loadMatchGame();
 
     SetBanners();
-    OnGameInit();
 
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
@@ -1852,8 +1851,6 @@ void G_ShutdownGame( int restart ) {
 
 		trap_Cvar_Update( &g_gametype );
 	}
-
-    OnGameShutdown();
 
 	G_Printf ("==== ShutdownGame ====\n");
 
