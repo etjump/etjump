@@ -192,6 +192,12 @@
     <ClCompile Include="admin\session.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="admin\commands.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
+    <ClCompile Include="admin\game.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -242,6 +248,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="admin\session.hpp">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\commands.hpp">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\game.hpp">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>

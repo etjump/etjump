@@ -21,6 +21,7 @@ public:
     bool GuidReceived(gentity_t *ent);
     void PrintGuid(gentity_t* ent);
     void PrintSessionData();
+    std::string Guid(gentity_t *ent) const;
 private:
     Client clients_[MAX_CLIENTS];
 

@@ -3614,7 +3614,7 @@ void AC_LogCheat( int clientNum )
         return;
     } else
     {
-        trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+        trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
         ip = Info_ValueForKey(userinfo, "ip");
 
         G_LogPrintf("********************************************\n"

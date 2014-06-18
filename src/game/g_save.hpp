@@ -7,10 +7,12 @@
 
 #include "g_local.hpp"
 
+class Session;
+
 class SaveSystem {
 public:
 
-    SaveSystem();
+    SaveSystem( const Session const *session );
     /*SaveSystem( IGuid *guidInterface );*/
     ~SaveSystem();
 
@@ -82,6 +84,7 @@ private:
     std::map<std::string, DisconnectedClient> savedPositions;
 
     // Interface to get player guid 
+    const Session const * session_;
     /*IGuid *guidInterface_;*/
 };
 

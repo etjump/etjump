@@ -24,6 +24,11 @@ void Session::WriteSessionData(int clientNum)
     trap_Cvar_Set(va("etjumpsession%i", clientNum), sessionData);
 }
 
+std::string Session::Guid(gentity_t* ent) const
+{
+    return clients_[ClientNum(ent)].guid;
+}
+
 void Session::ReadSessionData(int clientNum)
 {
     G_DPrintf("Session::ReadSessionData called for %d\n", clientNum);
@@ -66,12 +71,12 @@ bool Session::GuidReceived(gentity_t *ent)
         return false;
     }    
 
-    clients_[ent->client->ps.clientNum].guid = G_SHA1(guidBuf);
-    clients_[ent->client->ps.clientNum].hwid = G_SHA1(hwidBuf);
+    clients_[ClientNum(ent)].guid = G_SHA1(guidBuf);
+    clients_[ClientNum(ent)].hwid = G_SHA1(hwidBuf);
 
     G_DPrintf("GuidReceived: %d GUID: %s HWID: %s\n",
-        ent->client->ps.clientNum, clients_[ent->client->ps.clientNum].guid.c_str(),
-        clients_[ent->client->ps.clientNum].hwid.c_str());
+        ClientNum(ent), clients_[ClientNum(ent)].guid.c_str(),
+        clients_[ClientNum(ent)].hwid.c_str());
 
     return true;
 }
@@ -91,7 +96,8 @@ void Session::PrintSessionData()
 
 void Session::PrintGuid(gentity_t* ent)
 {
-    ChatPrintTo(ent, va("Your guid is: %s", clients_[ent->client->ps.clientNum].guid.c_str()));
+    G_DPrintf("Printing GUID to %s\n", ent->client->pers.netname);
+    ChatPrintTo(ent, va("Your guid is: %s", clients_[ClientNum(ent)].guid.c_str()));
 }
 
 Session::Client::Client():

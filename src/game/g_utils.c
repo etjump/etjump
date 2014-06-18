@@ -1626,7 +1626,7 @@ int FindClientByName(char *name) {
 
 int ClientNum(gentity_t *ent)
 {
-    return ent->client->ps.clientNum;
+    return ent - g_entities;
 }
 
 char *ClientIPAddr( gentity_t *ent )
@@ -1634,7 +1634,7 @@ char *ClientIPAddr( gentity_t *ent )
     char userinfo[MAX_INFO_STRING] = "\0";
     char *ip = NULL;
 
-    trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+    trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
     ip = Info_ValueForKey(userinfo, "ip");
 
     return ip;

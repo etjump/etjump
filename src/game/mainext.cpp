@@ -1,8 +1,11 @@
 #include "g_local.hpp"
-#include "admin\session.hpp"
+#include "admin/game.hpp"
+#include "admin/session.hpp"
+#include "admin/commands.hpp"
 #include "g_utilities.hpp"
+#include <boost/algorithm/string.hpp>
 
-static Session session;
+Game game;
 
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 {
@@ -11,7 +14,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
     if (firstTime)
     {
-        session.Init(clientNum);
+        game.session->Init(clientNum);
 
         G_DPrintf("Requesting guid from %d\n", clientNum);
 
@@ -20,20 +23,20 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
     }
     else
     {
-        session.ReadSessionData(clientNum);
+        game.session->ReadSessionData(clientNum);
     }
 }
 
 void OnClientBegin(gentity_t *ent)
 {
-    G_DPrintf("OnClientBegin called by %d\n", ent->client->ps.clientNum);
+    G_DPrintf("OnClientBegin called by %d\n", ClientNum(ent));
 }
 
 void OnClientDisconnect(gentity_t *ent)
 {
-    G_DPrintf("OnClientDisconnect called by %d\n", ent->client->ps.clientNum);
+    G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
 
-    session.WriteSessionData(ent->client->ps.clientNum);
+    game.session->WriteSessionData(ClientNum(ent));
 }
 
 void WriteSessionData()
@@ -41,7 +44,7 @@ void WriteSessionData()
     for (int i = 0; i < level.numConnectedClients; i++)
     {
         int clientNum = level.sortedClients[i];
-        session.WriteSessionData(clientNum);
+        game.session->WriteSessionData(clientNum);
     }
 }
 
@@ -54,20 +57,29 @@ void OnGameShutdown()
 qboolean OnClientCommand(gentity_t *ent)
 {
     
-    G_DPrintf("OnClientCommand called for %d: %s\n", ent->client->ps.clientNum, ConcatArgs(0));
+    G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
     Arguments argv = GetArgs();
+    std::string command = (*argv)[0];
+    boost::to_lower(command);
 
     if ((*argv)[0] == "etguid")
     {
-        session.GuidReceived(ent);
+        game.session->GuidReceived(ent);
         return qtrue;
     }
-    else if ((*argv)[0] == "guid")
+    
+    if (ent->client->pers.connected != CON_CONNECTED) {
+        return qfalse;
+    }
+
+    if ((*argv)[0] == "guid")
     {
-        session.PrintGuid(ent);
+        game.session->PrintGuid(ent);
         return qtrue;
     }
+
+    game.commands->ClientCommand(ent);
 
     return qfalse;
 }
@@ -80,8 +92,9 @@ qboolean OnConsoleCommand()
 
     if ((*argv)[0] == "printsession")
     {
-        session.PrintSessionData();
+        game.session->PrintSessionData();
         return qtrue;
     }
+
     return qfalse;
 }

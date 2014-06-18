@@ -1480,7 +1480,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir)
 		return;
 	}
 	while (clientNum != original);
-
+    
 	// leave it where it was
 }
 
@@ -2111,7 +2111,7 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 
 	level.voteInfo.voteTime = level.time;
 	level.voteInfo.voteNo = 0;
-	level.voteInfo.voter_cn = ent->client->ps.clientNum;
+    level.voteInfo.voter_cn = ClientNum(ent);
 	level.voteInfo.voter_team = ent->client->sess.sessionTeam;
 
 	ent->client->lastVoteTime = level.time;
@@ -2395,7 +2395,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 		}
 		// If the caller decides to hit f2 after calling the vote
 		// cancel it.
-		if( ent->client->ps.clientNum == level.voteInfo.voter_cn) {
+        if (ClientNum(ent) == level.voteInfo.voter_cn) {
 			if((msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1')) {
 				// Do nothing...
 			} else {
@@ -3531,8 +3531,8 @@ void Cmd_Goto_f(gentity_t *ent) {
 	}
 
 	VectorCopy(other->client->ps.origin, ent->client->ps.origin);
-	trap_SendServerCommand(ent->client->ps.clientNum, va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));
-	trap_SendServerCommand(other->client->ps.clientNum, va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));
+    trap_SendServerCommand(ClientNum(ent), va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));
+    trap_SendServerCommand(ClientNum(other), va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));
 }
 
 void Cmd_Call_f(gentity_t *ent)
@@ -3593,8 +3593,8 @@ void Cmd_Call_f(gentity_t *ent)
 	}
 
 	VectorCopy(ent->client->ps.origin, other->client->ps.origin);
-	trap_SendServerCommand(ent->client->ps.clientNum, va("cpm \"%s^7 -> %s\n\"", other->client->pers.netname, ent->client->pers.netname));
-	trap_SendServerCommand(other->client->ps.clientNum, va("cpm \"%s^7 -> %s\n\"", other->client->pers.netname, ent->client->pers.netname));
+    trap_SendServerCommand(ClientNum(ent), va("cpm \"%s^7 -> %s\n\"", other->client->pers.netname, ent->client->pers.netname));
+    trap_SendServerCommand(ClientNum(other), va("cpm \"%s^7 -> %s\n\"", other->client->pers.netname, ent->client->pers.netname));
 }
 
 void Cmd_PrivateMessage_f(gentity_t *ent)
@@ -3633,7 +3633,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent)
 		return;
 	}
 
-	if (!COM_BitCheck(other->client->sess.ignoreClients, ent->client->ps.clientNum))
+    if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent)))
 	{
 		msg = ConcatArgs(2);
 		CPx(other - g_entities, va("chat \"^7Private message from %s^7: ^3%s\"", 
@@ -3699,7 +3699,7 @@ qboolean G_AllowFollow(gentity_t *ent, gentity_t *other)
 {
 	// Check if target is speclocked, if it is check if we're invited
 	return (!other->client->sess.specLocked
-		|| COM_BitCheck(other->client->sess.specInvitedClients, ent->client->ps.clientNum));
+        || COM_BitCheck(other->client->sess.specInvitedClients, ClientNum(ent)));
 }
 
 /*
