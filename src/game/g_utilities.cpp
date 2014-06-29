@@ -18,7 +18,7 @@ void ConsolePrintTo( gentity_t *target, const string& msg )
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
     if( target ) {
-        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg.c_str());
@@ -29,7 +29,7 @@ void C_ConsolePrintTo( gentity_t *target, const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
     if( target ) {
-        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg);
@@ -54,7 +54,7 @@ void ChatPrintTo( gentity_t *target, const string& msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg.c_str());
     if( target ) {
-        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+        trap_SendServerCommand( ClientNum(target), toPrint );
     }
     else {
         G_Printf("%s\n", msg.c_str());
@@ -65,7 +65,7 @@ void C_ChatPrintTo( gentity_t *target, const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
     if( target ) {
-        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg);
@@ -90,7 +90,7 @@ void CPTo( gentity_t *target, const string& msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg.c_str());
     if( target ) {
-        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg.c_str());
@@ -101,7 +101,7 @@ void C_CPTo( gentity_t *target, const char* msg ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
     if( target ) {
-        trap_SendServerCommand( target->client->ps.clientNum, toPrint );
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg);
@@ -127,7 +127,7 @@ void CPMTo( gentity_t *target, const string& msg )
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg.c_str());
     if( target ) {
-        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg.c_str());
@@ -139,7 +139,7 @@ void C_CPMTo( gentity_t *target, const char* msg )
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
     if( target ) {
-        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else {
         G_Printf("%s\n", msg);
@@ -167,7 +167,7 @@ void BPTo( gentity_t *target, const string& msg )
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg.c_str());
     if( target ) {
-        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+        trap_SendServerCommand(ClientNum(target), toPrint);
     }
     else { 
         G_Printf("%s\n", msg.c_str());
@@ -188,7 +188,7 @@ void C_BPTo( gentity_t *target, const char* msg )
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);
     if( target ) {
-        trap_SendServerCommand(target->client->ps.clientNum, toPrint);
+        trap_SendServerCommand(ClientNum(target), toPrint);
     } else {
         G_Printf("%s\n", msg);
     }
@@ -215,11 +215,11 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine) {
         boost::format toPrint("print \"%s\"");
         if( insertNewLine ) {
             toPrint % (bigTextBuffer + NEWLINE);
-            trap_SendServerCommand(ent->client->ps.clientNum, 
+            trap_SendServerCommand(ClientNum(ent),
                 toPrint.str().c_str());
         } else {
             toPrint % bigTextBuffer;
-            trap_SendServerCommand(ent->client->ps.clientNum,
+            trap_SendServerCommand(ClientNum(ent),
                 toPrint.str().c_str());
         }
     } else {
@@ -250,7 +250,7 @@ void BufferPrint( gentity_t *ent, const string& msg ) {
     else {
         if( msg.length() + bigTextBuffer.length() > 1009 ) {
             std::string toSend = std::string("print \"" + bigTextBuffer + "\"");
-            trap_SendServerCommand(ent->client->ps.clientNum, 
+            trap_SendServerCommand(ClientNum(ent),
                 toSend.c_str() );
             bigTextBuffer.clear();
         }
@@ -317,7 +317,7 @@ qboolean StringToInt( const char* toConvert, int *value )
     return qtrue;
 }
 
-bool StringToInt( const string& toConvert, int& value )
+bool ToInt( const string& toConvert, int& value )
 {
     try {
         int result = boost::lexical_cast<int>(toConvert);
@@ -330,21 +330,21 @@ bool StringToInt( const string& toConvert, int& value )
     return true;
 }
 
-std::string IntToString( int value ) {
+std::string ToString( int value ) {
     return boost::lexical_cast<std::string>(value);
 }
 
-std::string Vec3ToString( vec3_t toConvert ) {
-    string vec3 = "(" + IntToString( toConvert[0] )
-        + ", " + IntToString( toConvert[1] ) + ", " +
-        IntToString( toConvert[2] ) + ")";
+std::string ToString( vec3_t toConvert ) {
+    string vec3 = "(" + ToString( toConvert[0] )
+        + ", " + ToString( toConvert[1] ) + ", " +
+        ToString( toConvert[2] ) + ")";
     return vec3;
 }
 
-std::string Vec3ToString( vec_t x, vec_t y, vec_t z ) {
-    string vec3 = "(" + IntToString( x )
-        + ", " + IntToString( y ) + ", " +
-        IntToString( z ) + ")";
+std::string ToString( vec_t x, vec_t y, vec_t z ) {
+    string vec3 = "(" + ToString( x )
+        + ", " + ToString( y ) + ", " +
+        ToString( z ) + ")";
     return vec3;
 }
 
@@ -491,7 +491,7 @@ std::string ValueForKey( gentity_t *ent, const std::string& key )
     char userinfo[MAX_INFO_STRING] = "\0";
     char *value = NULL;
 
-    trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+    trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
     value = Info_ValueForKey(userinfo, key.c_str());
     if(!value)
     {
@@ -530,22 +530,40 @@ std::string TimeStampDifferenceToString(int diff)
 
     if(diff < HOUR)
     {
-        return IntToString(diff/MINUTE) + " minute(s)";
+        return ToString(diff/MINUTE) + " minute(s)";
     } else if(diff < DAY)
     {
-        return IntToString(diff/HOUR) + " hour(s)";
+        return ToString(diff/HOUR) + " hour(s)";
     } else if(diff < WEEK)
     {
-        return IntToString(diff/DAY) + " day(s)";
+        return ToString(diff/DAY) + " day(s)";
     } else if(diff >= WEEK && diff < MONTH)
     {
-        return IntToString(diff/WEEK) + " week(s)";
+        return ToString(diff/WEEK) + " week(s)";
     } else if(diff >= MONTH && diff < YEAR)
     {
-        return IntToString(diff/MONTH) + " month(s)";
+        return ToString(diff/MONTH) + " month(s)";
     } else if(diff >= YEAR)
     {
-        return IntToString(diff/YEAR) + " year(s)";
+        return ToString(diff/YEAR) + " year(s)";
     }
     return "";
+}
+
+bool ValidGuid(std::string guid)
+{
+    const unsigned GUID_SIZE = 40;
+    if (guid.size() != GUID_SIZE)
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < guid.size(); i++)
+    {
+        if (guid[i] < '0' || guid[i] > 'F')
+        {
+            return false;
+        }
+    }
+    return true;
 }

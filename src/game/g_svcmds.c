@@ -972,11 +972,6 @@ qboolean	ConsoleCommand( void ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-    if( !Q_stricmp(cmd, "sdbprint")) {
-        SaveSystem_Print( NULL );
-        return qtrue;
-    }
-
 	if ( Q_stricmp (cmd, "entitylist") == 0 ) {
 		Svcmd_EntityList_f();
 		return qtrue;
@@ -1060,7 +1055,7 @@ qboolean	ConsoleCommand( void ) {
 
     if (!Q_stricmp(cmd, "-v"))
     {
-        G_Printf("Version: 2.0.3\n");
+        G_Printf("Version: 2.0.32\n");
         return qtrue;
     }
 
@@ -1101,6 +1096,11 @@ qboolean	ConsoleCommand( void ) {
         G_Printf("Current time: %s\n", buf);
     }
 
+    if (OnConsoleCommand())
+    {
+        return qtrue;
+    }
+
 	// -fretn
 
 	if( g_dedicated.integer ) {
@@ -1125,6 +1125,6 @@ qboolean	ConsoleCommand( void ) {
 		// prints to the console instead now
 	}
 
-    return AdminCommandCheck( NULL );
+    return qfalse;
 }
 	

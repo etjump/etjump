@@ -1423,12 +1423,12 @@ void SpectatorClientEndFrame( gentity_t *ent )
 		
 		if(ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 			do_respawn = qtrue;
-
+        
 		if ( do_respawn ) {
 			reinforce(ent);
 			return;
 		}
-
+        
 		clientNum = ent->client->sess.spectatorClient;
 
 		// team follow1 and team follow2 go to whatever clients are playing
@@ -1470,15 +1470,17 @@ void SpectatorClientEndFrame( gentity_t *ent )
 
 				return;
 			} else {
+                
 				// drop them to free spectators unless they are dedicated camera followers
 				if ( ent->client->sess.spectatorClient >= 0 ) {
 					ent->client->sess.spectatorState = SPECTATOR_FREE;
 					ClientBegin( ent->client - level.clients );
 				}
+                
 			}
 		}
 	}
-
+    
 	/*if ( ent->client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
 		ent->client->ps.pm_flags |= PMF_SCOREBOARD;
 	} else {
@@ -1627,6 +1629,7 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// used for informing of speclocked teams.
 	// Zero out here and set only for certain specs
+
 	ent->client->ps.powerups[PW_BLACKOUT] = 0;
 
 	if (level.time >= (ent->client->sess.nextReliableTime + 1000) && ent->client->sess.numReliableCmds)

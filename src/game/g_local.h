@@ -2612,17 +2612,6 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNum ); //TODO add switch for 
 void SetBanners();
 void CheckBanners();
 
-// g_save.cpp
-void Cmd_BackupLoad_f(gentity_t *ent);
-void Cmd_Load_f(gentity_t *ent);
-void Cmd_Save_f(gentity_t *ent);
-void ForceSave(gentity_t *location, gentity_t *ent);
-void InitSaveDatabase();
-void LoadPositionsFromDatabase(gentity_t *ent);
-void ResetSavedPositions(gentity_t *ent);
-void SavePositionsToDatabase(gentity_t *ent);
-void SaveSystem_Print( gentity_t *ent );
-
 // g_utilities.cpp
 
 // C versions of printing functions
@@ -2639,22 +2628,25 @@ void C_ConsolePrintTo( gentity_t *target, const char* msg );
 
 // C versions of conversion functions
 qboolean StringToInt(const char* toConvert, int *value);
-                         
-void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
-void OnClientDisconnect(gentity_t *ent);
-void OnClientBegin(gentity_t *ent);
-void OnGameInit();
-void OnGameShutdown();
-qboolean IsBanned( const char* ip );
-
-
+                        
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
 
-// g_main_ext.cpp
-void GuidReceived( gentity_t *ent );
-const char *RandomMap();
-qboolean AdminCommandCheck(gentity_t *ent);
+// mainext.cpp
+void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+void OnClientBegin(gentity_t *ent);
+void OnClientDisconnect(gentity_t *ent);
+qboolean OnClientCommand(gentity_t *ent);
+qboolean OnConsoleCommand();
+void OnGameInit();
+void OnGameShutdown();
+
+// g_save.cpp
+void ForceSave(gentity_t *location, gentity_t *ent);
+void SavePositionsToDatabase(gentity_t *ent);
+void LoadPositionsFromDatabase(gentity_t *ent);
+void InitSaveSystem();
+void ResetSavedPositions(gentity_t *ent);
 
 #endif // G_LOCAL_H
 

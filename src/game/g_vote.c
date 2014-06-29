@@ -391,7 +391,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 {
     if(arg) {
         Q_strncpyz(level.voteInfo.vote_value, 
-            RandomMap(), sizeof(level.voteInfo.vote_value));
+            "fueldump", sizeof(level.voteInfo.vote_value));
     } else {
         trap_SendConsoleCommand(EXEC_APPEND, 
             va("map %s\n", level.voteInfo.vote_value));

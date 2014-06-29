@@ -1822,11 +1822,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_loadMatchGame();
 
     SetBanners();
-    OnGameInit();
 
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
+
+    OnGameInit();
 }
 
 
@@ -1853,8 +1854,6 @@ void G_ShutdownGame( int restart ) {
 		trap_Cvar_Update( &g_gametype );
 	}
 
-    OnGameShutdown();
-
 	G_Printf ("==== ShutdownGame ====\n");
 
 	G_DebugCloseSkillLog();
@@ -1876,6 +1875,8 @@ void G_ShutdownGame( int restart ) {
         level.bugReportFile = 0;
     }
 #endif
+
+    OnGameShutdown();
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData( restart );
@@ -2405,8 +2406,10 @@ void ExitLevel (void) {
 		}
 	}
 
-	// we need to do this here before chaning to CON_CONNECTING
+    OnGameShutdown();
+    // we need to do this here before chaning to CON_CONNECTING
 	G_WriteSessionData( qfalse );
+    
 
 
 	// change all client states to connecting, so the early players into the
@@ -3613,7 +3616,7 @@ void AC_LogCheat( int clientNum )
         return;
     } else
     {
-        trap_GetUserinfo(ent->client->ps.clientNum, userinfo, sizeof(userinfo));
+        trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
         ip = Info_ValueForKey(userinfo, "ip");
 
         G_LogPrintf("********************************************\n"

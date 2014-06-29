@@ -6,6 +6,7 @@ using std::vector;
 #include "g_save.hpp"
 #include "g_utilities.hpp"
 #include "g_local.hpp"
+#include "admin/session.hpp"
 
 SaveSystem::Client::Client() {
     alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
@@ -52,7 +53,7 @@ void SaveSystem::Save(gentity_t *ent) {
 
     int position = 0;
     if(argv->size() > 1) {
-        StringToInt((*argv)[1], position);
+        ToInt( (*argv)[1] , position );
 
         if(position < 0 || position > MAX_SAVED_POSITIONS) {
             CPTo(ent, "Invalid position.");
@@ -89,9 +90,9 @@ void SaveSystem::Save(gentity_t *ent) {
 
     SavePosition *pos = 0;
     if(ent->client->sess.sessionTeam == TEAM_ALLIES) {
-        pos = clients_[ent->client->ps.clientNum].alliesSavedPositions + position;
+        pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
     } else {
-        pos = clients_[ent->client->ps.clientNum].axisSavedPositions + position;
+        pos = clients_[ClientNum(ent)].axisSavedPositions + position;
     }
 
     SaveBackupPosition(ent, pos);
@@ -127,7 +128,7 @@ void SaveSystem::Load(gentity_t *ent) {
 
     int position = 0;
     if(argv->size() > 1) {
-        StringToInt(argv->at(1), position);
+        ToInt((*argv)[1], position);
 
         if(position < 0 || position >= MAX_SAVED_POSITIONS) {
             CPTo(ent, "^7Invalid position.");
@@ -142,9 +143,9 @@ void SaveSystem::Load(gentity_t *ent) {
 
     SavePosition *pos = 0;
     if(ent->client->sess.sessionTeam == TEAM_ALLIES) {
-        pos = clients_[ent->client->ps.clientNum].alliesSavedPositions + position;
+        pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
     } else {
-        pos = clients_[ent->client->ps.clientNum].axisSavedPositions + position;
+        pos = clients_[ClientNum(ent)].axisSavedPositions + position;
     }
 
     if(pos->isValid) {
@@ -177,21 +178,21 @@ void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)  {
 	else if ( ent->client->sess.sessionTeam == TEAM_ALLIES )
 	{
         SaveBackupPosition(ent, 
-            &clients_[ent->client->ps.clientNum].alliesSavedPositions[0]);
+            &clients_[ClientNum(ent)].alliesSavedPositions[0]);
 		VectorCopy( location->s.origin, 
-            clients_[ent->client->ps.clientNum].alliesSavedPositions[0].origin );
+            clients_[ClientNum(ent)].alliesSavedPositions[0].origin);
 		VectorCopy( location->s.angles, 
-            clients_[ent->client->ps.clientNum].alliesSavedPositions[0].vangles );
-		clients_[ent->client->ps.clientNum].alliesSavedPositions[0].isValid = true;
+            clients_[ClientNum(ent)].alliesSavedPositions[0].vangles);
+        clients_[ClientNum(ent)].alliesSavedPositions[0].isValid = true;
 	} 
 	else if ( ent->client->sess.sessionTeam == TEAM_AXIS )
 	{
-        SaveBackupPosition(ent, &clients_[ent->client->ps.clientNum].axisSavedPositions[0]);
+        SaveBackupPosition(ent, &clients_[ClientNum(ent)].axisSavedPositions[0]);
 		VectorCopy( location->s.origin, 
-            clients_[ent->client->ps.clientNum].axisSavedPositions[0].origin );
+            clients_[ClientNum(ent)].axisSavedPositions[0].origin);
 		VectorCopy( location->s.angles, 
-            clients_[ent->client->ps.clientNum].axisSavedPositions[0].vangles );
-		clients_[ent->client->ps.clientNum].axisSavedPositions[0].isValid = true;
+            clients_[ClientNum(ent)].axisSavedPositions[0].vangles);
+        clients_[ClientNum(ent)].axisSavedPositions[0].isValid = true;
 	}
 
     trap_SendServerCommand(ent-g_entities, g_savemsg.string);
@@ -218,7 +219,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent) {
 
     int position = 0;
     if(argv->size() > 1) {
-        StringToInt(argv->at(1), position);
+        ToInt(argv->at(1), position);
 
         if(position < 1 || position > MAX_SAVED_POSITIONS) {
             CPTo(ent, "^7Invalid position.");
@@ -237,9 +238,9 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent) {
 
     SavePosition *pos = 0;
     if(ent->client->sess.sessionTeam == TEAM_ALLIES) {
-        pos = &clients_[ent->client->ps.clientNum].alliesBackupPositions[position];
+        pos = &clients_[ClientNum(ent)].alliesBackupPositions[position];
     } else {
-        pos = &clients_[ent->client->ps.clientNum].axisBackupPositions[position];
+        pos = &clients_[ClientNum(ent)].axisBackupPositions[position];
     }
 
     if(pos->isValid) {
@@ -261,6 +262,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent) {
 void SaveSystem::Reset() {
     for(int clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++) {
         int clientNum = level.sortedClients[clientIndex];
+        // TODO: reset saved positions here
         ResetSavedPositions(g_entities + clientNum);
     }
 
@@ -270,13 +272,13 @@ void SaveSystem::Reset() {
 // Used to reset positions on map change/restart
 void SaveSystem::ResetSavedPositions(gentity_t *ent) {
     for(unsigned saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++) {
-        clients_[ent->client->ps.clientNum].alliesSavedPositions[saveIndex].isValid = false;
-        clients_[ent->client->ps.clientNum].axisSavedPositions[saveIndex].isValid = false;
+        clients_[ClientNum(ent)].alliesSavedPositions[saveIndex].isValid = false;
+        clients_[ClientNum(ent)].axisSavedPositions[saveIndex].isValid = false;
     }
 
     for(unsigned backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++) {
-        clients_[ent->client->ps.clientNum].alliesBackupPositions[backupIndex].isValid = false;
-        clients_[ent->client->ps.clientNum].axisBackupPositions[backupIndex].isValid = false;
+        clients_[ClientNum(ent)].alliesBackupPositions[backupIndex].isValid = false;
+        clients_[ClientNum(ent)].axisBackupPositions[backupIndex].isValid = false;
     }
 }
 
@@ -287,25 +289,25 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = guidInterface_->GetGuid(ent);
+    string guid = session_->Guid(ent);
 
     DisconnectedClient client;
 
     for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
         // Allied
-        VectorCopy(clients_[ent->client->ps.clientNum].alliesSavedPositions[i].origin,
+        VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].origin,
             client.alliesSavedPositions[i].origin);
-        VectorCopy(clients_[ent->client->ps.clientNum].alliesSavedPositions[i].vangles,
+        VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].vangles,
             client.alliesSavedPositions[i].vangles);
             client.alliesSavedPositions[i].isValid = 
-                clients_[ent->client->ps.clientNum].alliesSavedPositions[i].isValid;
+                clients_[ClientNum(ent)].alliesSavedPositions[i].isValid;
         // Axis
-        VectorCopy(clients_[ent->client->ps.clientNum].axisSavedPositions[i].origin,
+        VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].origin,
             client.axisSavedPositions[i].origin);
-        VectorCopy(clients_[ent->client->ps.clientNum].axisSavedPositions[i].vangles,
+        VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].vangles,
             client.axisSavedPositions[i].vangles);
         client.axisSavedPositions[i].isValid 
-            = clients_[ent->client->ps.clientNum].axisSavedPositions[i].isValid;
+            = clients_[ClientNum(ent)].axisSavedPositions[i].isValid;
     }
 
     client.progression = ent->client->sess.clientMapProgression;
@@ -333,7 +335,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         return;
     }
 
-    string guid = guidInterface_->GetGuid(ent);
+    string guid = session_->Guid(ent);
 
     std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
@@ -342,17 +344,17 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
         for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
             // Allied
             VectorCopy(it->second.alliesSavedPositions[i].origin,
-                clients_[ent->client->ps.clientNum].alliesSavedPositions[i].origin);
+                clients_[ClientNum(ent)].alliesSavedPositions[i].origin);
             VectorCopy(it->second.alliesSavedPositions[i].vangles,
-                clients_[ent->client->ps.clientNum].alliesSavedPositions[i].vangles);
-            clients_[ent->client->ps.clientNum].alliesSavedPositions[i].isValid = 
+                clients_[ClientNum(ent)].alliesSavedPositions[i].vangles);
+            clients_[ClientNum(ent)].alliesSavedPositions[i].isValid = 
                 it->second.alliesSavedPositions[i].isValid;
             // Axis
             VectorCopy(it->second.axisSavedPositions[i].origin,
-                clients_[ent->client->ps.clientNum].axisSavedPositions[i].origin);
+                clients_[ClientNum(ent)].axisSavedPositions[i].origin);
             VectorCopy(it->second.axisSavedPositions[i].vangles,
-                clients_[ent->client->ps.clientNum].axisSavedPositions[i].vangles);
-            clients_[ent->client->ps.clientNum].axisSavedPositions[i].isValid = 
+                clients_[ClientNum(ent)].axisSavedPositions[i].vangles);
+            clients_[ClientNum(ent)].axisSavedPositions[i].isValid = 
                 it->second.axisSavedPositions[i].isValid;
         }
 
@@ -375,9 +377,9 @@ void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos) {
     backup.isValid = pos->isValid;
     // Can never be spectator as this would not be called
     if(ent->client->sess.sessionTeam == TEAM_ALLIES) {
-        clients_[ent->client->ps.clientNum].alliesBackupPositions.push_front(backup);
+        clients_[ClientNum(ent)].alliesBackupPositions.push_front(backup);
     } else {
-        clients_[ent->client->ps.clientNum].axisBackupPositions.push_front(backup);
+        clients_[ClientNum(ent)].axisBackupPositions.push_front(backup);
     }
     
 }
@@ -410,18 +412,19 @@ void SaveSystem::Print( gentity_t *ent )
             r2 = it->second.axisSavedPositions[i].origin[2];
 
             toPrint += 
-                IntToString(it->second.alliesSavedPositions[i].isValid) +
-                IntToString(it->second.axisSavedPositions[i].isValid) +
-                "B: " + Vec3ToString(b0, b1, b2) + 
-                "R: " + Vec3ToString(r0, r1, r2) + NEWLINE;
+                ToString(it->second.alliesSavedPositions[i].isValid) +
+                ToString(it->second.axisSavedPositions[i].isValid) +
+                "B: " + ToString(b0, b1, b2) + 
+                "R: " + ToString(r0, r1, r2) + NEWLINE;
         }
         it++;
     }
     ConsolePrintTo(NULL, toPrint);
 }
 
-SaveSystem::SaveSystem( IGuid *guidInterface )
-    :guidInterface_(guidInterface)
+SaveSystem::SaveSystem(const Session const *session):
+session_(session)
+    //:guidInterface_(guidInterface)
 {
 
 }
@@ -429,4 +432,27 @@ SaveSystem::SaveSystem( IGuid *guidInterface )
 SaveSystem::~SaveSystem()
 {
 
+}
+
+void ForceSave(gentity_t *location, gentity_t *ent)
+{
+    game.saves->ForceSave(location, ent);
+}
+
+void ResetSavedPositions(gentity_t *ent)
+{
+    game.saves->ResetSavedPositions(ent);
+}
+
+void InitSaveSystem()
+{
+    game.saves->Reset();
+}
+
+void SavePositionsToDatabase(gentity_t *ent) {
+    game.saves->SavePositionsToDatabase(ent);
+}
+
+void LoadPositionsFromDatabase(gentity_t *ent) {
+    game.saves->LoadPositionsFromDatabase(ent);
 }

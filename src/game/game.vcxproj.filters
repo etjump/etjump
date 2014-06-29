@@ -183,19 +183,13 @@
     <ClCompile Include="g_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_main_ext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="admin\sessiondata.cpp">
-      <Filter>Source Files\Admin system</Filter>
+    <ClCompile Include="mainext.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="admin\userdata.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\commandinterpreter.cpp">
+    <ClCompile Include="admin\session.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
     <ClCompile Include="admin\commands.cpp">
@@ -204,13 +198,7 @@
     <ClCompile Include="admin\game.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
-    <ClCompile Include="admin\leveldata.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\mapdata.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\bandata.cpp">
+    <ClCompile Include="admin\levels.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
   </ItemGroup>
@@ -262,46 +250,16 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="admin\sessiondata.h">
+    <ClInclude Include="admin\session.hpp">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
-    <ClInclude Include="admin\userdata.h">
+    <ClInclude Include="admin\commands.hpp">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
-    <ClInclude Include="admin\user.h">
+    <ClInclude Include="admin\game.hpp">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
-    <ClInclude Include="admin\iuserdata.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\iguid.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\commandinterpreter.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\commands.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\game.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\leveldata.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\ileveldata.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\common.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\mapdata.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\bandata.h">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\ibandata.h">
+    <ClInclude Include="admin\levels.hpp">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1611,6 +1611,7 @@ void target_save_use( gentity_t *self, gentity_t *other, gentity_t *activator )
         return;
     }
 
+    // TODO: need force save here
 	ForceSave(self, activator);
     trap_SendServerCommand(activator-g_entities, g_savemsg.string);
 }

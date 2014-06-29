@@ -6,12 +6,14 @@
 #include <boost/circular_buffer.hpp>
 
 #include "g_local.hpp"
-#include "admin/iguid.h"
+
+class Session;
 
 class SaveSystem {
 public:
 
-    SaveSystem( IGuid *guidInterface );
+    SaveSystem( const Session *session );
+    /*SaveSystem( IGuid *guidInterface );*/
     ~SaveSystem();
 
     static const unsigned MAX_SAVED_POSITIONS = 3;
@@ -82,7 +84,8 @@ private:
     std::map<std::string, DisconnectedClient> savedPositions;
 
     // Interface to get player guid 
-    IGuid *guidInterface_;
+    const Session *session_;
+    /*IGuid *guidInterface_;*/
 };
 
 #endif
