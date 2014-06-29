@@ -151,6 +151,7 @@
     <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="admin\commands.cpp" />
     <ClCompile Include="admin\game.cpp" />
+    <ClCompile Include="admin\levels.cpp" />
     <ClCompile Include="admin\session.cpp" />
     <ClCompile Include="bg_animation.c" />
     <ClCompile Include="bg_animgroup.c" />
@@ -217,6 +218,7 @@
     <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="admin\commands.hpp" />
     <ClInclude Include="admin\game.hpp" />
+    <ClInclude Include="admin\levels.hpp" />
     <ClInclude Include="admin\session.hpp" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />

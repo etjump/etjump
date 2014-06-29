@@ -1558,8 +1558,7 @@ void target_savereset_use ( gentity_t *self, gentity_t *other, gentity_t *activa
     }
 
 	if(activator->client) {
-        // TODO: reset saved positions here
-        //ResetSavedPositions(activator);
+        ResetSavedPositions(activator);
         CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 	}
 }
@@ -1613,7 +1612,7 @@ void target_save_use( gentity_t *self, gentity_t *other, gentity_t *activator )
     }
 
     // TODO: need force save here
-	//ForceSave(self, activator);
+	ForceSave(self, activator);
     trap_SendServerCommand(activator-g_entities, g_savemsg.string);
 }
 

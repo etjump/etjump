@@ -2638,7 +2638,15 @@ void OnClientBegin(gentity_t *ent);
 void OnClientDisconnect(gentity_t *ent);
 qboolean OnClientCommand(gentity_t *ent);
 qboolean OnConsoleCommand();
+void OnGameInit();
 void OnGameShutdown();
+
+// g_save.cpp
+void ForceSave(gentity_t *location, gentity_t *ent);
+void SavePositionsToDatabase(gentity_t *ent);
+void LoadPositionsFromDatabase(gentity_t *ent);
+void InitSaveSystem();
+void ResetSavedPositions(gentity_t *ent);
 
 #endif // G_LOCAL_H
 

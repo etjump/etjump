@@ -5,14 +5,11 @@
 #include "..\g_utilities.hpp"
 #include <map>
 
-struct gentity_s;
-typedef gentity_s gentity_t;
-
 class Commands
 {
 public:
     Commands();
-    bool ClientCommand(gentity_t *ent);
+    bool ClientCommand(gentity_t *ent, std::string command);
     bool AdminCommand(gentity_t *ent);
 private:
     std::map< std::string, boost::function<bool(gentity_t *ent, Arguments argv)> > commands_;

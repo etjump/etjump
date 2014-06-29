@@ -12,7 +12,7 @@ class Session;
 class SaveSystem {
 public:
 
-    SaveSystem( const Session const *session );
+    SaveSystem( const Session *session );
     /*SaveSystem( IGuid *guidInterface );*/
     ~SaveSystem();
 
@@ -84,7 +84,7 @@ private:
     std::map<std::string, DisconnectedClient> savedPositions;
 
     // Interface to get player guid 
-    const Session const * session_;
+    const Session *session_;
     /*IGuid *guidInterface_;*/
 };
 

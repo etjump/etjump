@@ -1826,6 +1826,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
+
+    OnGameInit();
 }
 
 

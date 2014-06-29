@@ -263,7 +263,7 @@ void SaveSystem::Reset() {
     for(int clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++) {
         int clientNum = level.sortedClients[clientIndex];
         // TODO: reset saved positions here
-        //ResetSavedPositions(g_entities + clientNum);
+        ResetSavedPositions(g_entities + clientNum);
     }
 
     savedPositions.clear();
@@ -432,4 +432,27 @@ session_(session)
 SaveSystem::~SaveSystem()
 {
 
+}
+
+void ForceSave(gentity_t *location, gentity_t *ent)
+{
+    game.saves->ForceSave(location, ent);
+}
+
+void ResetSavedPositions(gentity_t *ent)
+{
+    game.saves->ResetSavedPositions(ent);
+}
+
+void InitSaveSystem()
+{
+    game.saves->Reset();
+}
+
+void SavePositionsToDatabase(gentity_t *ent) {
+    game.saves->SavePositionsToDatabase(ent);
+}
+
+void LoadPositionsFromDatabase(gentity_t *ent) {
+    game.saves->LoadPositionsFromDatabase(ent);
 }

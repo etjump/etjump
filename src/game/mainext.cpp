@@ -2,6 +2,7 @@
 #include "admin/game.hpp"
 #include "admin/session.hpp"
 #include "admin/commands.hpp"
+#include "admin/levels.hpp"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -48,6 +49,24 @@ void WriteSessionData()
     }
 }
 
+void OnGameInit()
+{
+    if (g_admin.integer)
+    {
+        if (strlen(g_levelConfig.string))
+        {
+            if (!game.levels->ReadFromConfig())
+            {
+                G_LogPrintf("Error while reading admin config: %s\n", game.levels->ErrorMessage().c_str());
+            }
+            else
+            {
+                G_Printf("Successfully loaded levels from config: %s\n", g_levelConfig.string);
+            }
+        }
+    }
+}
+
 void OnGameShutdown()
 {
     WriteSessionData();
@@ -79,7 +98,10 @@ qboolean OnClientCommand(gentity_t *ent)
         return qtrue;
     }
 
-    game.commands->ClientCommand(ent);
+    if (game.commands->ClientCommand(ent, command))
+    {
+        return qtrue;
+    }
 
     return qfalse;
 }
@@ -89,10 +111,18 @@ qboolean OnConsoleCommand()
     G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
     Arguments argv = GetArgs();
+    std::string command = (*argv)[0];
+    boost::to_lower(command);
 
-    if ((*argv)[0] == "printsession")
+    if (command == "printsession")
     {
         game.session->PrintSessionData();
+        return qtrue;
+    }
+
+    if (command == "printlevels")
+    {
+        game.levels->PrintLevels();
         return qtrue;
     }
 
