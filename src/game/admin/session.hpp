@@ -2,6 +2,7 @@
 #define SESSION_HPP
 
 #include <string>
+#include <bitset>
 #include "../g_local.hpp"
 
 class Session
@@ -22,6 +23,7 @@ public:
     void PrintGuid(gentity_t* ent);
     void PrintSessionData();
     std::string Guid(gentity_t *ent) const;
+    std::bitset<256> Permissions(gentity_t *ent) const;
 private:
     Client clients_[MAX_CLIENTS];
 

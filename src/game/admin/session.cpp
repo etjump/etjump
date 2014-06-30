@@ -94,6 +94,13 @@ void Session::PrintSessionData()
     FinishBufferPrint(NULL, false);
 }
 
+std::bitset<256> Session::Permissions(gentity_t* ent) const
+{
+    std::bitset<256> set;
+    set.set();
+    return set;
+}
+
 void Session::PrintGuid(gentity_t* ent)
 {
     G_DPrintf("Printing GUID to %s\n", ent->client->pers.netname);

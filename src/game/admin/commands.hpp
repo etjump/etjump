@@ -2,7 +2,7 @@
 #define COMMANDS_HPP
 
 #include <boost/function.hpp>
-#include "..\g_utilities.hpp"
+#include "../g_utilities.hpp"
 #include <map>
 
 class Commands
@@ -13,6 +13,7 @@ public:
     bool AdminCommand(gentity_t *ent);
 private:
     std::map< std::string, boost::function<bool(gentity_t *ent, Arguments argv)> > commands_;
+    std::map< std::string, boost::function<bool(gentity_t *ent, Arguments argv)> > adminCommands_;
 };
 
 #endif 
