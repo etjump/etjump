@@ -1783,3 +1783,42 @@ void SP_target_decay(gentity_t *self)
 
     self->use = target_decay_use;
 }
+
+
+void target_startTime_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+    gclient_t *client = activator->client;
+
+    if (client->sess.run.isActive)
+    {
+        return;
+    }
+
+    G_LogPrintf("Started the run %s\n", self->name);
+
+    client->sess.run.runName = self->name;
+    client->sess.run.startTime = client->ps.commandTime;
+}
+
+// Starts a time run
+// each run has a "name" that is used as an
+// identifier
+void SP_target_startTime(gentity_t *self)
+{
+    G_SpawnString("name", "default", &self->name);
+
+    self->use = target_startTime_use;
+}
+
+void target_endTime_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+
+}
+
+// Stops a time run if the names match
+// each run has a name that is used as 
+// an identifier
+void SP_target_endTime(gentity_t *self)
+{
+    self->use = target_endTime_use;
+}

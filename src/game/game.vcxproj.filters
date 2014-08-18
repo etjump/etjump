@@ -201,6 +201,9 @@
     <ClCompile Include="admin\levels.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="timeruns.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -261,6 +264,9 @@
     </ClInclude>
     <ClInclude Include="admin\levels.hpp">
       <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="timeruns.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -209,6 +209,7 @@
     <ClCompile Include="mainext.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="timeruns.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
@@ -232,6 +233,7 @@
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="surfaceflags.h" />
+    <ClInclude Include="timeruns.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc" />

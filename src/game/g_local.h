@@ -520,6 +520,7 @@ struct gentity_s {
 	gentity_t *portal_red;
 
 	int lastPortalTime; //Last time we teleported using portal
+    char* name;
 };
 
 // Ridah
@@ -583,6 +584,14 @@ typedef struct {
 	unsigned int hits;
 	unsigned int kills;
 } weapon_stat_t;
+
+typedef struct
+{
+    int startTime;
+    int endTime;
+    qboolean isActive;
+    char *runName;
+} run_t;
 
 #define MAX_IP_LEN 15
 
@@ -675,7 +684,11 @@ typedef struct {
 	qboolean	needGreeting;
     qboolean    loadPreviousSavedPositions;
 
+    run_t       run;
+
 	qboolean	versionOK;
+
+    
 } clientSession_t;
 
 //

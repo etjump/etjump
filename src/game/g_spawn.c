@@ -439,6 +439,9 @@ void SP_target_ftrelay(gentity_t *self);
 void SP_target_savelimit_set(gentity_t *self);
 void SP_target_savelimit_inc(gentity_t *self);
 void SP_target_decay(gentity_t *self);
+void SP_target_startTime(gentity_t *self);
+void SP_target_endTime(gentity_t *self);
+
 
 
 spawn_t	spawns[] = {
@@ -670,6 +673,8 @@ spawn_t	spawns[] = {
     {"target_savelimit_set", SP_target_savelimit_set},
     {"target_savelimit_inc", SP_target_savelimit_inc},
     { "target_decay", SP_target_decay },
+    { "target_starttime", SP_target_startTime },
+    { "target_endtime", SP_target_endTime },
 	{0, 0}
 };
 
