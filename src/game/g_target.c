@@ -1727,3 +1727,59 @@ void SP_target_savelimit_inc( gentity_t *self )
 {
     self->use = target_savelimit_inc_use;
 }
+
+#define NO_DECAY_IDENT -1
+#define NO_DECAY_VALUE -1
+#define NO_DECAY_TIME -1
+
+void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+    if (self->decayTime == NO_DECAY_TIME)
+    {
+        C_ConsolePrintAll("target_decay: no \"decay_time\" specified.");
+
+    }
+    else if (self->decayValue == NO_DECAY_VALUE)
+    {
+        C_ConsolePrintAll("target_decay: no \"decay_value\" specified.");
+    }
+    else if (self->decayTime < 0) 
+    {
+        C_ConsolePrintAll("target_decay: \"decay_time\" is below 0.");
+    }
+    else
+    {
+        if (!activator || !activator->client)
+        {
+            return;
+        }
+        if (self->ident != NO_DECAY_IDENT)
+        {
+            activator->client->sess.upcomingClientMapProgression
+                = activator->client->sess.clientMapProgression;
+        }
+        else
+        {
+            activator->client->sess.upcomingClientMapProgression
+                = self->ident;
+        }
+
+        activator->client->sess.previousClientMapProgression
+            = activator->client->sess.clientMapProgression;
+        activator->client->sess.clientMapProgression = self->ident;
+
+        activator->client->sess.nextProgressionDecayEvent =
+            level.time + self->decayTime;
+        activator->client->sess.decayProgression = qtrue;
+    }
+ 
+}
+
+void SP_target_decay(gentity_t *self)
+{
+    G_SpawnInt("ident", NO_DECAY_IDENT, &self->ident);
+    G_SpawnInt("decay_time", NO_DECAY_TIME, &self->decayTime);
+    G_SpawnInt("decay_value", NO_DECAY_VALUE, &self->decayValue);
+
+    self->use = target_decay_use;
+}

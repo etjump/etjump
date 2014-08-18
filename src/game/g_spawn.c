@@ -438,6 +438,8 @@ void SP_target_ftrelay(gentity_t *self);
 // Savelimit
 void SP_target_savelimit_set(gentity_t *self);
 void SP_target_savelimit_inc(gentity_t *self);
+void SP_target_decay(gentity_t *self);
+
 
 spawn_t	spawns[] = {
 	// info entities don't do anything at all, but provide positional
@@ -667,6 +669,7 @@ spawn_t	spawns[] = {
     {"target_ftrelay", SP_target_ftrelay},
     {"target_savelimit_set", SP_target_savelimit_set},
     {"target_savelimit_inc", SP_target_savelimit_inc},
+    { "target_decay", SP_target_decay },
 	{0, 0}
 };
 

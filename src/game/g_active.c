@@ -910,6 +910,17 @@ void WolfFindMedic( gentity_t *self ) {
 	}
 }
 
+void CheckForEvents(gentity_t *ent)
+{
+    if (ent->client->sess.decayProgression == qtrue 
+        && ent->client->sess.nextProgressionDecayEvent < level.time)
+    {
+        ent->client->sess.previousClientMapProgression = ent->client->sess.clientMapProgression;
+        ent->client->sess.clientMapProgression = ent->client->sess.upcomingClientMapProgression;
+        ent->client->sess.decayProgression = qfalse;
+        
+    }
+}
 
 //void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id );		// NERVE - SMF
 
@@ -1331,6 +1342,8 @@ void ClientThink_real( gentity_t *ent ) {
 	if(level.match_pause == PAUSE_NONE) {
 		ClientTimerActions( ent, msec );
 	}
+
+    CheckForEvents(ent);
 
 	if (g_blockCheatCvars.integer)
 	{

@@ -509,6 +509,11 @@ struct gentity_s {
 	int ident;
 	int reqident;
 	int inc; // increment val for target_increase_ident
+    // How long in milliseconds it takes for the progress
+    // identifier to decay back to decayValue
+    int decayTime;
+    // Value that ident decays to
+    int decayValue;
 
 	//Feen - PGM
 	gentity_t *portal_blue;
@@ -651,6 +656,12 @@ typedef struct {
 	int			saveLimit;
 	// Map ident
 	int			clientMapProgression;
+    // What client progression will be when time hits
+    // nextProgressionDecayEvent
+    int         upcomingClientMapProgression;
+    int         previousClientMapProgression;
+    int         nextProgressionDecayEvent;
+    qboolean    decayProgression;
 
     int         lastListmapsTime;
     int         lastMostPlayedListTime;
