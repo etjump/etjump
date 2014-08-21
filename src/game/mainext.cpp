@@ -64,6 +64,7 @@ void OnGameInit()
                 G_Printf("Successfully loaded levels from config: %s\n", g_levelConfig.string);
             }
         }
+          
     }
 }
 

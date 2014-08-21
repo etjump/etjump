@@ -34,7 +34,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 #ifndef __GNUC__
 #pragma export off
 #endif
-#endif
+#endif    
       switch ( command ) {
       case CG_INIT:
             CG_Init( arg0, arg1, arg2, arg3 );
@@ -3052,6 +3052,9 @@ cvarTable_t		cvarTable[] = {
             // OSP
             cgs.dumpStatsFile = 0;
             cgs.dumpStatsTime = 0;
+
+            InitAntiCheat(clientAC);
+            clientAC.vmMain = vmMain;
 
             //SendGuid();
             //SendHWID();

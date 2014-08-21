@@ -150,6 +150,7 @@
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="admin\commands.cpp" />
+    <ClCompile Include="admin\database.cpp" />
     <ClCompile Include="admin\game.cpp" />
     <ClCompile Include="admin\levels.cpp" />
     <ClCompile Include="admin\session.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="admin\commands.hpp" />
+    <ClInclude Include="admin\database.hpp" />
     <ClInclude Include="admin\game.hpp" />
     <ClInclude Include="admin\levels.hpp" />
     <ClInclude Include="admin\session.hpp" />

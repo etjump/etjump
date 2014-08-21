@@ -6,6 +6,7 @@ class Levels;
 class Session;
 class Commands;
 class SaveSystem;
+class Database;
 
 struct Game
 {
@@ -15,6 +16,7 @@ struct Game
     boost::shared_ptr<Session> session;
     boost::shared_ptr<Commands> commands;
     boost::shared_ptr<SaveSystem> saves;
+    boost::shared_ptr<Database> database;
 };
 
 #endif 

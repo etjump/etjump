@@ -11,8 +11,10 @@ void Timeruns::initTimeruns()
 
 bool Timeruns::createNewTimerun()
 {
+    return true;
 }
 
 Timeruns::Run const* Timeruns::findRun(std::string name)
 {
+    return NULL;
 }

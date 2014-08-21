@@ -204,6 +204,9 @@
     <ClCompile Include="timeruns.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="admin\database.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -267,6 +270,9 @@
     </ClInclude>
     <ClInclude Include="timeruns.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\database.hpp">
+      <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

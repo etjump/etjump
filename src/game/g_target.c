@@ -1785,7 +1785,7 @@ void SP_target_decay(gentity_t *self)
 }
 
 
-void target_startTime_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
     gclient_t *client = activator->client;
 
@@ -1798,19 +1798,20 @@ void target_startTime_use(gentity_t *self, gentity_t *other, gentity_t *activato
 
     client->sess.run.runName = self->name;
     client->sess.run.startTime = client->ps.commandTime;
+    client->sess.run.isActive = qtrue;
 }
 
 // Starts a time run
 // each run has a "name" that is used as an
 // identifier
-void SP_target_startTime(gentity_t *self)
+void SP_target_startTimer(gentity_t *self)
 {
     G_SpawnString("name", "default", &self->name);
 
-    self->use = target_startTime_use;
+    self->use = target_startTimer_use;
 }
 
-void target_endTime_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 
 }
@@ -1818,7 +1819,7 @@ void target_endTime_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 // Stops a time run if the names match
 // each run has a name that is used as 
 // an identifier
-void SP_target_endTime(gentity_t *self)
+void SP_target_endTimer(gentity_t *self)
 {
-    self->use = target_endTime_use;
+    self->use = target_endTimer_use;
 }

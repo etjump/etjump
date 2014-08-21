@@ -158,6 +158,7 @@
     <ClCompile Include="..\game\bg_tracemap.c" />
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="cg_anticheat.c" />
     <ClCompile Include="cg_manual.c" />
     <ClCompile Include="cg_atmospheric.c" />
     <ClCompile Include="cg_character.c" />
@@ -211,6 +212,7 @@
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
+    <ClInclude Include="cg_anticheat.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="cg_public.h" />
     <ClInclude Include="..\ui\keycodes.h" />
