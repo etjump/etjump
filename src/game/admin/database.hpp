@@ -4,6 +4,7 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/shared_ptr.hpp>
+#include "../g_local.hpp"
 #include <sqlite3.h>
 
 using namespace boost::multi_index;
@@ -35,11 +36,27 @@ public:
             return guid;
         }
 
+        User_s()
+        {
+            
+        }
+
+        User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid)
+            : id(id), guid(guid), hwid(hwid), name(name)
+        {
+            
+        }
+
         User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen, 
             std::string const& name, std::string const& hwid, std::string const& title, 
             std::string const& commands, std::string const& greeting)
             : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), hwid(hwid), title(title), commands(commands), greeting(greeting)
         {
+        }
+
+        const char *ToChar()
+        {
+            return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), hwid.c_str(), title.c_str(), commands.c_str(), greeting.c_str());
         }
 
         unsigned id;
@@ -70,25 +87,31 @@ public:
     typedef Users::nth_index<1>::type::iterator GuidIterator; 
     typedef Users::nth_index<1>::type::const_iterator ConstGuidIterator;
 
-    IdIterator GetUser(unsigned id) const;
-    ConstIdIterator GetUserConst(unsigned id) const;
-    GuidIterator GetUser(const std::string& guid) const;
-    ConstGuidIterator GetUserConst(const std::string& guid) const;
+    const User_s *GetUserData(unsigned id) const;
+    const User_s *GetUserData(const std::string& guid) const;
 
-    bool InitDatabase();
+    bool InitDatabase(const char *config);
     bool CloseDatabase();
     // When user is added, all we have is the guid, hwid, name, lastSeen and level
     // Adds user to database
     bool AddUser(const std::string& guid, const std::string& hwid, const std::string& name);
     std::string GetMessage() const;
+    bool UserExists(const std::string& guid);
 private:
     unsigned GetHighestFreeId() const;
     bool AddUserToSQLite(User user);
     bool BindInt(sqlite3_stmt* stmt, int index, int val);
-    bool BindString(sqlite3_stmt* stmt, int index, std::string val);
+    bool BindString(sqlite3_stmt* stmt, int index, const std::string& val);
+    IdIterator GetUser(unsigned id) const;
+    ConstIdIterator GetUserConst(unsigned id) const;
+    GuidIterator GetUser(const std::string& guid) const;
+    ConstGuidIterator GetUserConst(const std::string& guid) const;
     Users users_;
     sqlite3 *db_;
     std::string message_;
+
+    ConstIdIterator ID_IT_END;
+    ConstGuidIterator GUID_IT_END;
 };
 
 #endif // DATABASE_HH

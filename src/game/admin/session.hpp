@@ -4,6 +4,7 @@
 #include <string>
 #include <bitset>
 #include "../g_local.hpp"
+#include "database.hpp"
 
 class Session
 {
@@ -14,6 +15,7 @@ public:
         Client();
         std::string guid;
         std::string hwid;
+        const Database::User_s *user;
     };
 
     void Init(int clientNum);

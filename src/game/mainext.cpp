@@ -3,6 +3,7 @@
 #include "admin/session.hpp"
 #include "admin/commands.hpp"
 #include "admin/levels.hpp"
+#include "admin/database.hpp"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -64,7 +65,18 @@ void OnGameInit()
                 G_Printf("Successfully loaded levels from config: %s\n", g_levelConfig.string);
             }
         }
-          
+    }
+
+    if (strlen(g_userConfig.string) > 0)
+    {
+        if (!game.database->InitDatabase(g_userConfig.string))
+        {
+            G_LogPrintf("DATABASE ERROR: %s\n", game.database->GetMessage().c_str());
+        }
+        else
+        {
+            G_LogPrintf("Successfully loaded users from database: %s\n", g_userConfig.string);
+        }
     }
 }
 
@@ -124,6 +136,16 @@ qboolean OnConsoleCommand()
     if (command == "printlevels")
     {
         game.levels->PrintLevels();
+        return qtrue;
+    }
+
+    if (command == "adduser")
+    {
+        G_LogPrintf("%s %s %s\n", argv->at(1).c_str(), argv->at(2).c_str(), argv->at(3).c_str());
+        if (!game.database->AddUser(argv->at(1), argv->at(2), argv->at(3)))
+        {
+            G_LogPrintf("ERROR: %s\n", game.database->GetMessage());
+        }
         return qtrue;
     }
 

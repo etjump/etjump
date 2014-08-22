@@ -1,5 +1,6 @@
 #include "session.hpp"
 #include "../g_utilities.hpp"
+#include "database.hpp"
 
 Session::Session()
 {
@@ -11,6 +12,7 @@ void Session::Init(int clientNum)
     G_DPrintf("Session::Init called for %d\n", clientNum);
     clients_[clientNum].guid = "";
     clients_[clientNum].hwid = "";
+    clients_[clientNum].user = NULL;
 
     WriteSessionData(clientNum);
 }
@@ -44,6 +46,7 @@ void Session::ReadSessionData(int clientNum)
 
     CharPtrToString(guidBuf, clients_[clientNum].guid);
     CharPtrToString(hwidBuf, clients_[clientNum].hwid);
+    clients_[clientNum].user = NULL;
 }
 
 bool Session::GuidReceived(gentity_t *ent)
@@ -78,6 +81,23 @@ bool Session::GuidReceived(gentity_t *ent)
         ClientNum(ent), clients_[ClientNum(ent)].guid.c_str(),
         clients_[ClientNum(ent)].hwid.c_str());
 
+    if (!game.database->UserExists(clients_[ClientNum(ent)].guid))
+    {
+        if (!game.database->AddUser(clients_[ClientNum(ent)].guid, clients_[ClientNum(ent)].hwid, std::string(ent->client->pers.netname)))
+        {
+            G_LogPrintf("ERROR: failed to add user to database: %s\n", game.database->GetMessage().c_str());
+        }
+        else
+        {
+            G_LogPrintf("New user connected. Adding user to the user database\n");
+        }
+    }
+    else
+    {
+        G_LogPrintf("Old user connected. Getting user data from the database.");
+
+    }
+    
     return true;
 }
 
