@@ -52,6 +52,7 @@ void Session::ReadSessionData(int clientNum)
 bool Session::GuidReceived(gentity_t *ent)
 {
     int argc = trap_Argc();
+    int clientNum = ClientNum(ent);
     char guidBuf[MAX_TOKEN_CHARS];
     char hwidBuf[MAX_TOKEN_CHARS];
 
@@ -74,16 +75,16 @@ bool Session::GuidReceived(gentity_t *ent)
         return false;
     }    
 
-    clients_[ClientNum(ent)].guid = G_SHA1(guidBuf);
-    clients_[ClientNum(ent)].hwid = G_SHA1(hwidBuf);
+    clients_[clientNum].guid = G_SHA1(guidBuf);
+    clients_[clientNum].hwid = G_SHA1(hwidBuf);
 
     G_DPrintf("GuidReceived: %d GUID: %s HWID: %s\n",
-        ClientNum(ent), clients_[ClientNum(ent)].guid.c_str(),
-        clients_[ClientNum(ent)].hwid.c_str());
+        clientNum, clients_[clientNum].guid.c_str(),
+        clients_[clientNum].hwid.c_str());
 
-    if (!game.database->UserExists(clients_[ClientNum(ent)].guid))
+    if (!game.database->UserExists(clients_[clientNum].guid))
     {
-        if (!game.database->AddUser(clients_[ClientNum(ent)].guid, clients_[ClientNum(ent)].hwid, std::string(ent->client->pers.netname)))
+        if (!game.database->AddUser(clients_[clientNum].guid, clients_[clientNum].hwid, std::string(ent->client->pers.netname)))
         {
             G_LogPrintf("ERROR: failed to add user to database: %s\n", game.database->GetMessage().c_str());
         }
@@ -94,8 +95,28 @@ bool Session::GuidReceived(gentity_t *ent)
     }
     else
     {
-        G_LogPrintf("Old user connected. Getting user data from the database.");
+        G_LogPrintf("Old user connected. Getting user data from the database.\n");
 
+        clients_[clientNum].user = game.database->GetUserData(clients_[clientNum].guid);
+        if (clients_[clientNum].user)
+        {
+            G_LogPrintf("User data found: %s\n", clients_[clientNum].user->ToChar());
+
+            if (std::find(clients_[clientNum].user->hwids.begin(), clients_[clientNum].user->hwids.end(), clients_[clientNum].hwid) 
+                == clients_[clientNum].user->hwids.end())
+            {
+                G_LogPrintf("New HWID detected. Adding HWID %s to list.\n", clients_[clientNum].hwid.c_str());
+                
+                if (!game.database->AddNewHWID(clients_[clientNum].user->id, clients_[clientNum].hwid))
+                {
+                    G_LogPrintf("Failed to add a new hardware ID to user %s\n", ent->client->pers.netname);
+                }
+            }
+        }
+        else
+        {
+            G_LogPrintf("ERROR: couldn't get user's data (%s)\n", ent->client->pers.netname);
+        }
     }
     
     return true;

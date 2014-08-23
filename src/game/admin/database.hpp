@@ -4,8 +4,10 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 #include "../g_local.hpp"
 #include <sqlite3.h>
+#include <vector>
 
 using namespace boost::multi_index;
 
@@ -36,27 +38,28 @@ public:
             return guid;
         }
 
-        User_s()
+        User_s() : level(0), lastSeen(0)
         {
             
         }
 
         User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid)
-            : id(id), guid(guid), hwid(hwid), name(name)
+            : id(id), guid(guid), name(name), level(0), lastSeen(0)
         {
-            
+            split(hwids, hwid, boost::algorithm::is_any_of(", "));
         }
 
         User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen, 
             std::string const& name, std::string const& hwid, std::string const& title, 
             std::string const& commands, std::string const& greeting)
-            : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), hwid(hwid), title(title), commands(commands), greeting(greeting)
+            : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting)
         {
+            split(hwids, hwid, boost::algorithm::is_any_of(", "));
         }
 
-        const char *ToChar()
+        const char *ToChar() const
         {
-            return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), hwid.c_str(), title.c_str(), commands.c_str(), greeting.c_str());
+            return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
         }
 
         unsigned id;
@@ -66,10 +69,10 @@ public:
         int level;
         unsigned lastSeen;
         std::string name;
-        std::string hwid;
         std::string title;
         std::string commands;
         std::string greeting;
+        std::vector<std::string> hwids;
     };
 
     typedef boost::shared_ptr<User_s> User;
@@ -95,6 +98,7 @@ public:
     // When user is added, all we have is the guid, hwid, name, lastSeen and level
     // Adds user to database
     bool AddUser(const std::string& guid, const std::string& hwid, const std::string& name);
+    bool AddNewHWID(unsigned id, const std::string& hwid);
     std::string GetMessage() const;
     bool UserExists(const std::string& guid);
 private:
@@ -105,6 +109,7 @@ private:
     IdIterator GetUser(unsigned id) const;
     ConstIdIterator GetUserConst(unsigned id) const;
     GuidIterator GetUser(const std::string& guid) const;
+    bool PrepareStatement(char const* query, sqlite3_stmt** stmt);
     ConstGuidIterator GetUserConst(const std::string& guid) const;
     Users users_;
     sqlite3 *db_;

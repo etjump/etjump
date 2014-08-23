@@ -26,6 +26,19 @@ Database::GuidIterator Database::GetUser(std::string const& guid) const
     return users_.get<1>().find(guid);
 }
 
+bool Database::PrepareStatement(const char* query, sqlite3_stmt **stmt)
+{
+    unsigned rc = sqlite3_prepare_v2(db_, query, -1, stmt, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+        return false;
+    }
+
+    return true;
+}
+
 bool Database::BindInt(sqlite3_stmt* stmt, int index, int val)
 {
     int rc = sqlite3_bind_int(stmt, index, val);
@@ -51,21 +64,24 @@ bool Database::BindString(sqlite3_stmt* stmt, int index, const std::string& val)
 
 bool Database::AddUserToSQLite(User user)
 {
+    int rc = 0;
     sqlite3_stmt *stmt = NULL;
-    unsigned rc = sqlite3_prepare_v2(db_, "INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", -1, &stmt, 0);
-
-    if (rc != SQLITE_OK)
+    // TODO: do this once and finalize in game shutdown
+    if (PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
     {
-        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
         return false;
     }
+
+
+    G_LogPrintf("HWIDS: %s\n", boost::algorithm::join(user->hwids, ",").c_str());
+    std::string hwids = boost::algorithm::join(user->hwids, ",");
 
     if (!BindInt(stmt, 1, user->id) ||
         !BindString(stmt, 2, user->guid) ||
         !BindInt(stmt, 3, user->level) ||
         !BindInt(stmt, 4, user->lastSeen) ||
         !BindString(stmt, 5, user->name) ||
-        !BindString(stmt, 6, user->hwid) ||
+        !BindString(stmt, 6, hwids) ||
         !BindString(stmt, 7, user->title) ||
         !BindString(stmt, 8, user->commands) ||
         !BindString(stmt, 9, user->greeting)
@@ -109,6 +125,42 @@ bool Database::UserExists(std::string const& guid)
 std::string Database::GetMessage() const
 {
     return message_;
+}
+
+bool Database::AddNewHWID(unsigned id, std::string const& hwid)
+{
+    IdIterator user = GetUser(id);
+
+    if (user != ID_IT_END)
+    {
+        (*user)->hwids.push_back(hwid);
+
+        sqlite3_stmt *stmt = NULL;
+        int rc = 0;
+        
+        if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;", &stmt))
+        {
+            return false;
+        }
+
+        std::string hwids = boost::algorithm::join((*user)->hwids, ",");
+
+        if (!BindString(stmt, 1, hwids) ||
+            !BindInt(stmt, 2, id)) {
+            return false;
+        }
+
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE)
+        {
+            message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+            return false;
+        }
+
+        return true;
+    }
+    message_ = "Couldn't find user with id " + ToString(id);
+    return false;
 }
 
 bool Database::AddUser(std::string const& guid, std::string const& hwid, std::string const& name)
@@ -184,14 +236,9 @@ bool Database::InitDatabase(char const* config)
     }
 
     sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db_, "SELECT id, guid, level, lastSeen, name, hwid, title, commands, greeting FROM users;",
-        -1, &stmt, 0);
 
-    if (rc != SQLITE_OK)
+    if (!PrepareStatement("SELECT id, guid, level, lastSeen, name, hwid, title, commands, greeting FROM users;", &stmt))
     {
-        message_ = std::string("SQL error: ") + errMsg;
-        sqlite3_free(errMsg);
-        sqlite3_close(db_);
         return false;
     }
 
@@ -212,7 +259,10 @@ bool Database::InitDatabase(char const* config)
             val = (const char*)(sqlite3_column_text(stmt, 4));
             newUser->name = val ? val : "";
             val = (const char*)(sqlite3_column_text(stmt, 5));
-            newUser->hwid = val ? val : "";
+            if (val)
+            {
+                newUser->hwids = split(newUser->hwids, val, boost::algorithm::is_any_of(","));
+            }
             val = (const char*)(sqlite3_column_text(stmt, 6));
             newUser->title = val ? val : "";
             val = (const char*)(sqlite3_column_text(stmt, 7));
