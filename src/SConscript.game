@@ -12,6 +12,10 @@ Import( GLOBALS )
 qagame_string = """
 
 admin/session.cpp
+admin/game.cpp
+admin/commands.cpp
+admin/database.cpp
+admin/levels.cpp
 mainext.cpp
 
 g_utilities.cpp

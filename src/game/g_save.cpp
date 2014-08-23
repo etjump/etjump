@@ -422,7 +422,7 @@ void SaveSystem::Print( gentity_t *ent )
     ConsolePrintTo(NULL, toPrint);
 }
 
-SaveSystem::SaveSystem(const Session const *session):
+SaveSystem::SaveSystem(const Session *session):
 session_(session)
     //:guidInterface_(guidInterface)
 {

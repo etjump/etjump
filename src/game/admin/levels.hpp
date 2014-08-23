@@ -28,7 +28,7 @@ public:
 
     bool Add(int level, const std::string name, const std::string commands, const std::string greeting);
     bool Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated);
-    bool Delete(int level);
+    //bool Delete(int level);
     bool ReadFromConfig();
     static bool SortByLevel(boost::shared_ptr<Level> const lhs, boost::shared_ptr<Level> const rhs);
     bool WriteToConfig();

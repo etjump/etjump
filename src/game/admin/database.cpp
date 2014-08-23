@@ -67,8 +67,9 @@ bool Database::AddUserToSQLite(User user)
     int rc = 0;
     sqlite3_stmt *stmt = NULL;
     // TODO: do this once and finalize in game shutdown
-    if (PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
+    if (!PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
     {
+        message_ = "Preparing statement failed.";
         return false;
     }
 
@@ -87,6 +88,7 @@ bool Database::AddUserToSQLite(User user)
         !BindString(stmt, 9, user->greeting)
         )
     {
+        message_ = "Binding values to statement failed.";
         return false;
     }
 

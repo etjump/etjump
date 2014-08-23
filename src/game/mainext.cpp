@@ -139,15 +139,5 @@ qboolean OnConsoleCommand()
         return qtrue;
     }
 
-    if (command == "adduser")
-    {
-        G_LogPrintf("%s %s %s\n", argv->at(1).c_str(), argv->at(2).c_str(), argv->at(3).c_str());
-        if (!game.database->AddUser(argv->at(1), argv->at(2), argv->at(3)))
-        {
-            G_LogPrintf("ERROR: %s\n", game.database->GetMessage());
-        }
-        return qtrue;
-    }
-
     return qfalse;
 }

@@ -2,7 +2,7 @@
 #include <boost/shared_array.hpp>
 #include "levels.hpp"
 #include "../g_local.hpp"
-#include "..\g_utilities.hpp"
+#include "../g_utilities.hpp"
 
 Levels::Level::Level(int level, std::string const& name, std::string const& commands, std::string const& greeting)
 {
@@ -330,19 +330,19 @@ bool Levels::ReadFromConfig()
     return true;
 }
 
-bool Levels::Delete(int level)
-{
-    ConstIter it = Find(level);
-    bool deleted = false;
-    if (it != levels_.end())
-    {
-        levels_.erase(it);
-        deleted = true;
-    }
-    if (!deleted)
-    {
-        errorMessage = "couldn't find level" + ToString(level);
-        return false;
-    }
-    return true;
-}
+//bool Levels::Delete(int level)
+//{
+//    ConstIter it = Find(level);
+//    bool deleted = false;
+//    if (it != levels_.end())
+//    {
+//        levels_.erase(it);
+//        deleted = true;
+//    }
+//    if (!deleted)
+//    {
+//        errorMessage = "couldn't find level" + ToString(level);
+//        return false;
+//    }
+//    return true;
+//}
