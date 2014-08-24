@@ -50,10 +50,6 @@ void Session::UpdateLastSeen(int clientNum)
 
         game.database->UpdateLastSeen(clients_[clientNum].user->id, lastSeen);
     }
-    else
-    {
-        G_LogPrintf("ERROR: client.user is not defined");
-    }
 }
 
 void Session::WriteSessionData(int clientNum)
@@ -254,6 +250,7 @@ void Session::PrintGreeting(gentity_t* ent)
 {
     int clientNum = ClientNum(ent);
     Client *cl = &clients_[clientNum];
+
     // If user has own greeting, print it
     if (cl->user->greeting.length() > 0)
     {
@@ -298,6 +295,12 @@ void Session::PrintSessionData()
 
 bool Session::SetLevel(gentity_t* target, int level)
 {
+    if (!clients_[ClientNum(target)].user)
+    {
+        message_ = "you must wait until user has connected.";
+        return false;
+    }
+
     if (!game.database->SetLevel(clients_[ClientNum(target)].user->id, level))
     {
         message_ = game.database->GetMessage();
@@ -349,9 +352,31 @@ int Session::GetLevel(gentity_t* ent) const
     return 0;
 }
 
+void Session::PrintFinger(gentity_t* ent, gentity_t* target)
+{
+    int num = ClientNum(target);
+
+    if (!clients_[num].user)
+    {
+        message_ = "you must wait until user has connected.";
+        return;
+    }
+
+    ChatPrintTo(ent, va("^3finger: ^7%s^7 is a level %d user (%s)", target->client->pers.netname,
+        clients_[num].user->level, 
+        clients_[num].user->title.length() > 0 ? clients_[num].user->title.c_str() : clients_[num].level->name.c_str()));
+}
+
 void Session::PrintAdmintest(gentity_t* ent)
 {
     int clientNum = ClientNum(ent);
+
+    if (!clients_[ClientNum(ent)].user)
+    {
+        message_ = "you must wait until user has connected.";
+        return;
+    }
+
     if (ent && clients_[clientNum].user && clients_[clientNum].level)
     {
         std::string message = va("^3admintest: ^7%s^7 is a level %d user (%s^7).",

@@ -43,6 +43,7 @@ public:
     bool UserExists(unsigned id);
     std::string GetMessage() const;
     void PrintAdmintest(gentity_t* ent);
+    void PrintFinger(gentity_t* ent, gentity_t* target);
 private:
     void ParsePermissions(int clientNum);
 
