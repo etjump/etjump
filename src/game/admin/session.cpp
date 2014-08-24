@@ -1,10 +1,23 @@
 #include "session.hpp"
 #include "../g_utilities.hpp"
 #include "database.hpp"
+#include "levels.hpp"
 
 Session::Session()
 {
-    
+    for (unsigned i = 0; i < MAX_CLIENTS; i++)
+    {
+        ResetClient(i);
+    }
+}
+
+void Session::ResetClient(int clientNum)
+{
+    clients_[clientNum].guid = "";
+    clients_[clientNum].hwid = "";
+    clients_[clientNum].user = NULL;
+    clients_[clientNum].level = NULL;
+    clients_[clientNum].permissions.reset();
 }
 
 void Session::Init(int clientNum)
@@ -13,8 +26,34 @@ void Session::Init(int clientNum)
     clients_[clientNum].guid = "";
     clients_[clientNum].hwid = "";
     clients_[clientNum].user = NULL;
+    clients_[clientNum].level = NULL;
+    clients_[clientNum].permissions.reset();
 
     WriteSessionData(clientNum);
+}
+
+void Session::UpdateLastSeen(int clientNum)
+{
+    unsigned lastSeen = 0;
+    if (clients_[clientNum].user)
+    {    
+        time_t t;
+        if (!time(&t))
+        {
+            G_LogPrintf("ERROR: couldn't get current time.");
+            return;
+        }
+
+        lastSeen = static_cast<unsigned>(t);
+
+        G_LogPrintf("Updating client's last seen to: %s\n", TimeStampToString(lastSeen));
+
+        game.database->UpdateLastSeen(clients_[clientNum].user->id, lastSeen);
+    }
+    else
+    {
+        G_LogPrintf("ERROR: client.user is not defined");
+    }
 }
 
 void Session::WriteSessionData(int clientNum)
@@ -46,7 +85,8 @@ void Session::ReadSessionData(int clientNum)
 
     CharPtrToString(guidBuf, clients_[clientNum].guid);
     CharPtrToString(hwidBuf, clients_[clientNum].hwid);
-    clients_[clientNum].user = NULL;
+
+    GetUserAndLevelData(clientNum);
 }
 
 bool Session::GuidReceived(gentity_t *ent)
@@ -82,6 +122,14 @@ bool Session::GuidReceived(gentity_t *ent)
         clientNum, clients_[clientNum].guid.c_str(),
         clients_[clientNum].hwid.c_str());
 
+    GetUserAndLevelData(clientNum);
+
+    return true;
+}
+
+void Session::GetUserAndLevelData(int clientNum)
+{
+    gentity_t *ent = g_entities + clientNum;
     if (!game.database->UserExists(clients_[clientNum].guid))
     {
         if (!game.database->AddUser(clients_[clientNum].guid, clients_[clientNum].hwid, std::string(ent->client->pers.netname)))
@@ -90,7 +138,8 @@ bool Session::GuidReceived(gentity_t *ent)
         }
         else
         {
-            G_LogPrintf("New user connected. Adding user to the user database\n");
+            G_LogPrintf("New user connected. Added user to the user database\n");
+            clients_[clientNum].user = game.database->GetUserData(clients_[clientNum].guid);
         }
     }
     else
@@ -102,24 +151,136 @@ bool Session::GuidReceived(gentity_t *ent)
         {
             G_LogPrintf("User data found: %s\n", clients_[clientNum].user->ToChar());
 
-            if (std::find(clients_[clientNum].user->hwids.begin(), clients_[clientNum].user->hwids.end(), clients_[clientNum].hwid) 
+            if (find(clients_[clientNum].user->hwids.begin(), clients_[clientNum].user->hwids.end(), clients_[clientNum].hwid)
                 == clients_[clientNum].user->hwids.end())
             {
                 G_LogPrintf("New HWID detected. Adding HWID %s to list.\n", clients_[clientNum].hwid.c_str());
-                
+
                 if (!game.database->AddNewHWID(clients_[clientNum].user->id, clients_[clientNum].hwid))
                 {
                     G_LogPrintf("Failed to add a new hardware ID to user %s\n", ent->client->pers.netname);
                 }
             }
+
+            clients_[clientNum].level = game.levels->GetLevel(clients_[clientNum].user->level);
         }
         else
         {
             G_LogPrintf("ERROR: couldn't get user's data (%s)\n", ent->client->pers.netname);
         }
     }
+
+    if (ent->client->sess.firstTime)
+    {
+        PrintGreeting(ent);
+        CPMTo(ent, std::string("^5Your last visit was on ") + clients_[clientNum].user->GetLastSeenString() + ".");
+    }
+
+    if (!clients_[clientNum].user)
+    {
+        // Debugging purposes, should be never executed
+        G_Error("Client doesn't have db::user.\n");
+    }
+
+    ParsePermissions(clientNum);
+}
+
+void Session::ParsePermissions(int clientNum)
+{
+    // First parse level commands then user commands (as user commands override level ones)
+    std::string commands = clients_[clientNum].level->commands + clients_[clientNum].user->commands;
     
-    return true;
+    const int STATE_ALLOW = 1;
+    const int STATE_DENY = 2;
+    int state = STATE_ALLOW;
+    for (unsigned i = 0; i < commands.length(); i++)
+    {
+        char c = commands.at(i);
+        if (state == STATE_ALLOW)
+        {
+            if (c == '*')
+            {
+                // Allow all commands
+                for (size_t i = 0; i < MAX_COMMANDS; i++)
+                {
+                    clients_[clientNum].permissions.set(i, true);
+                }
+            }
+            else if (c == '+')
+            {
+                // ignore +
+                continue;
+            }
+            else if (c == '-')
+            {
+                state = STATE_DENY;
+            }
+            else
+            {
+                clients_[clientNum].permissions.set(c, true);
+            }
+        }
+        else
+        {
+            if (c == '*')
+            {
+                // Ignore * while in deny-mode
+                continue;
+            }
+            
+            if (c == '+')
+            {
+                state = STATE_ALLOW;
+            }
+            else
+            {
+                clients_[clientNum].permissions.set(c, false);
+            }
+        }
+    }
+}
+
+void Session::OnClientDisconnect(int clientNum)
+{
+    WriteSessionData(clientNum);
+
+    clients_[clientNum].user = NULL;
+    clients_[clientNum].level = NULL;
+    clients_[clientNum].permissions.reset();
+    UpdateLastSeen(clientNum);
+}
+
+void Session::PrintGreeting(gentity_t* ent)
+{
+    int clientNum = ClientNum(ent);
+    Client *cl = &clients_[clientNum];
+    // If user has own greeting, print it
+    if (cl->user->greeting.length() > 0)
+    {
+        std::string greeting = cl->user->greeting;
+        boost::replace_all(greeting, "[n]", ent->client->pers.netname);
+        boost::replace_all(greeting, "[t]", cl->user->GetLastSeenString());
+        boost::replace_all(greeting, "[d]", cl->user->GetLastVisitString());
+        G_LogPrintf("Printing greeting %s\n", greeting.c_str());
+        ChatPrintAll(greeting);
+    }
+    else
+    {
+        if (!cl->level)
+        {
+            return;
+        }
+        // if user has a level greeting, print it
+        if (cl->level->greeting.length() > 0)
+        {
+            std::string greeting = cl->level->greeting;
+            boost::replace_all(greeting, "[n]", ent->client->pers.netname);
+            boost::replace_all(greeting, "[t]", cl->user->GetLastSeenString());
+            boost::replace_all(greeting, "[d]", cl->user->GetLastVisitString());
+            G_LogPrintf("Printing greeting %s\n", greeting.c_str());
+            ChatPrintAll(greeting);
+        }
+    }
 }
 
 void Session::PrintSessionData()
@@ -135,11 +296,87 @@ void Session::PrintSessionData()
     FinishBufferPrint(NULL, false);
 }
 
+bool Session::SetLevel(gentity_t* target, int level)
+{
+    if (!game.database->SetLevel(clients_[ClientNum(target)].user->id, level))
+    {
+        message_ = game.database->GetMessage();
+        return false;
+    }
+
+    ParsePermissions(ClientNum(target));
+    return true;
+}
+
+bool Session::SetLevel(unsigned id, int level)
+{
+    if (!game.database->SetLevel(id, level))
+    {
+        message_ = game.database->GetMessage();
+        return false;
+    }
+
+    for (unsigned i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (clients_[i].user && clients_[i].user->id == id)
+        {
+            ParsePermissions(i);
+            ChatPrintTo(g_entities + i, va("^3setlevel: ^7you are now a level %d user.", level));
+        }        
+    }
+    return true;
+}
+
+
+bool Session::UserExists(unsigned id)
+{
+    return game.database->UserExists(id);
+}
+
+int Session::GetLevelById(unsigned id) const
+{
+    return game.database->GetUserData(id)->level;
+}
+
+int Session::GetLevel(gentity_t* ent) const
+{
+    int num = ClientNum(ent);
+    if (ent && clients_[num].user)
+    {
+        return clients_[num].user->level;
+    }
+
+    return 0;
+}
+
+void Session::PrintAdmintest(gentity_t* ent)
+{
+    int clientNum = ClientNum(ent);
+    if (ent && clients_[clientNum].user && clients_[clientNum].level)
+    {
+        std::string message = va("^3admintest: ^7%s^7 is a level %d user (%s^7).",
+            ent->client->pers.netname,
+            clients_[clientNum].user->level,
+            clients_[clientNum].user->title.length() > 0 ? clients_[clientNum].user->title.c_str() : clients_[clientNum].level->name.c_str());
+
+        ChatPrintAll(message);
+    }
+}
+
+std::string Session::GetMessage() const
+{
+    return message_;
+}
+
 std::bitset<256> Session::Permissions(gentity_t* ent) const
 {
-    std::bitset<256> set;
-    set.set();
-    return set;
+    if (!ent)
+    {
+        std::bitset<MAX_COMMANDS> all;
+        all.set();
+        return all;
+    } 
+    return clients_[ClientNum(ent)].permissions;
 }
 
 void Session::PrintGuid(gentity_t* ent)

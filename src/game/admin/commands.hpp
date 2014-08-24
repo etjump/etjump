@@ -13,7 +13,7 @@ public:
     bool AdminCommand(gentity_t *ent);
 private:
     std::map< std::string, boost::function<bool(gentity_t *ent, Arguments argv)> > commands_;
-    std::map< std::string, boost::function<bool(gentity_t *ent, Arguments argv)> > adminCommands_;
+    std::map< std::string, std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> > adminCommands_;
 };
 
 #endif 

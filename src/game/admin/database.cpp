@@ -117,7 +117,17 @@ unsigned Database::GetHighestFreeId() const
 bool Database::UserExists(std::string const& guid)
 {
     ConstGuidIterator user = GetUserConst(guid);
-    if (user != GUID_IT_END) 
+    if (user != GUID_IT_END)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Database::UserExists(unsigned id)
+{
+    ConstIdIterator user = GetUserConst(id);
+    if (user != ID_IT_END)
     {
         return true;
     }
@@ -127,6 +137,162 @@ bool Database::UserExists(std::string const& guid)
 std::string Database::GetMessage() const
 {
     return message_;
+}
+
+bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
+{
+    IdIterator user = GetUser(id);
+    if (user != ID_IT_END)
+    {
+        (*user)->lastSeen = lastSeen;
+        
+        sqlite3_stmt *stmt = NULL;
+        if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
+            !BindInt(stmt, 1, lastSeen) ||
+            !BindInt(stmt, 2, id))
+        {
+            return false;
+        }
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE)
+        {
+            message_ = "Failed to update user's last seen property.";
+            return false;
+        }
+
+        sqlite3_finalize(stmt);
+
+        return true;
+    }
+    message_ = "Couldn't find user with id " + ToString(id);
+    return false;
+}
+
+bool Database::SetLevel(unsigned id, int level)
+{
+    IdIterator user = GetUser(id);
+    if (user != ID_IT_END)
+    {
+        user->get()->level = level;
+        return Save(user, Updated::LEVEL);
+    }
+
+    message_ = "Couldn't find user with id " + ToString(id);
+    return false;
+}
+
+bool Database::Save(IdIterator user, unsigned updated)
+{
+    std::vector<std::string> queryOptions;
+    if (updated & Updated::COMMANDS)
+    {
+        queryOptions.push_back("commands=:commands");
+    } 
+
+    if (updated & Updated::GREETING)
+    {
+        queryOptions.push_back("greeting=:greeting");
+    }
+
+    if (updated & Updated::LAST_SEEN)
+    {
+        queryOptions.push_back("lastSeen=:lastSeen");
+    }
+
+    if (updated & Updated::LEVEL)
+    {
+        queryOptions.push_back("level=:level");
+    }
+
+    if (updated & Updated::NAME)
+    {
+        queryOptions.push_back("name=:name");
+    }
+
+    if (updated & Updated::TITLE)
+    {
+        queryOptions.push_back("title=:title");
+    }
+
+    std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
+
+    sqlite3_stmt *stmt = NULL;
+    if (!PrepareStatement(query.c_str(), &stmt))
+    {
+        message_ = sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if (updated & Updated::COMMANDS)
+    {
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":commands"), user->get()->commands.c_str()))
+        {
+            sqlite3_finalize(stmt);
+            return false;
+        }
+    }
+
+    if (updated & Updated::GREETING)
+    {
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":greeting"), user->get()->greeting.c_str()))
+        {
+            sqlite3_finalize(stmt);
+            return false;
+        }
+    }
+
+    if (updated & Updated::LAST_SEEN)
+    {
+        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":lastSeen"), user->get()->lastSeen))
+        {
+            sqlite3_finalize(stmt);
+            return false;
+        }
+    }
+
+    if (updated & Updated::LEVEL)
+    {
+        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":level"), user->get()->level))
+        {
+            sqlite3_finalize(stmt);
+            return false;
+        }
+    }
+
+    if (updated & Updated::NAME)
+    {
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":name"), user->get()->name.c_str()))
+        {
+            sqlite3_finalize(stmt);
+            return false;
+        }
+    }
+
+    if (updated & Updated::TITLE)
+    {
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":title"), user->get()->title.c_str()))
+        {
+            sqlite3_finalize(stmt);
+            return false;
+        }
+    }
+
+    if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":id"), user->get()->id))
+    {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    int rc = 0;
+    if (rc = sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        G_LogPrintf("SQL ERROR: stepping failed when saving user (%d) %s\n", rc, sqlite3_errmsg(db_));
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
 }
 
 bool Database::AddNewHWID(unsigned id, std::string const& hwid)
@@ -149,6 +315,7 @@ bool Database::AddNewHWID(unsigned id, std::string const& hwid)
 
         if (!BindString(stmt, 1, hwids) ||
             !BindInt(stmt, 2, id)) {
+            sqlite3_finalize(stmt);
             return false;
         }
 
@@ -156,9 +323,10 @@ bool Database::AddNewHWID(unsigned id, std::string const& hwid)
         if (rc != SQLITE_DONE)
         {
             message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+            sqlite3_finalize(stmt);
             return false;
         }
-
+        sqlite3_finalize(stmt);
         return true;
     }
     message_ = "Couldn't find user with id " + ToString(id);
@@ -293,4 +461,18 @@ bool Database::InitDatabase(char const* config)
 Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) const
 {
     return users_.get<1>().find(guid);
+}
+
+std::string Database::User_s::GetLastSeenString() const
+{
+    return TimeStampToString(lastSeen);
+}
+
+std::string Database::User_s::GetLastVisitString() const
+{
+    time_t t;
+    time(&t);
+    unsigned now = static_cast<unsigned>(t);
+
+    return TimeStampDifferenceToString(now - lastSeen);
 }

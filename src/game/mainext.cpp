@@ -38,7 +38,7 @@ void OnClientDisconnect(gentity_t *ent)
 {
     G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
 
-    game.session->WriteSessionData(ClientNum(ent));
+    game.session->OnClientDisconnect(ClientNum(ent));
 }
 
 void WriteSessionData()
@@ -116,6 +116,11 @@ qboolean OnClientCommand(gentity_t *ent)
         return qtrue;
     }
 
+    if (game.commands->AdminCommand(ent))
+    {
+        return qtrue;
+    }
+
     return qfalse;
 }
 
@@ -136,6 +141,11 @@ qboolean OnConsoleCommand()
     if (command == "printlevels")
     {
         game.levels->PrintLevels();
+        return qtrue;
+    }
+
+    if (game.commands->AdminCommand(NULL))
+    {
         return qtrue;
     }
 

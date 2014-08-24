@@ -39,6 +39,7 @@ std::string SayArgv(int arg);
 
 // Conversions
 bool ToInt(const std::string& toConvert, int& value);
+bool ToUnsigned(const std::string& toConvert, unsigned& value);
 std::string ToString( int value );
 
 std::string ToString( vec3_t toConvert );

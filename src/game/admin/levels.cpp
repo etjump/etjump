@@ -14,6 +14,7 @@ Levels::Level::Level(int level, std::string const& name, std::string const& comm
 
 Levels::Levels()
 {
+    dummyLevel_ = boost::shared_ptr<Level>(new Level(0, "", "", ""));
 }
 
 Levels::~Levels()
@@ -82,17 +83,17 @@ bool Levels::CreateDefaultLevels()
 
     boost::shared_ptr< Level > tempLevel = boost::shared_ptr< Level >
         (new Level(0, "Visitor",
-        "Welcome Visitor [n]^7!", "8aS"));
+        "Welcome Visitor [n]^7! Your last visit was on [t]!", "8aS"));
     levels_.push_back(tempLevel);
 
     tempLevel = boost::shared_ptr< Level >
         (new Level(1, "Friend",
-        "Welcome Friend [n]^7!", "128Sa"));
+        "Welcome Friend [n]^7! Your last visit was [d] ago!", "128Sa"));
     levels_.push_back(tempLevel);
 
     tempLevel = boost::shared_ptr< Level >
         (new Level(2, "Moderator",
-        "Welcome Moderator [n]^7!", "*-AGs"));
+        "Welcome Moderator [n]^7!§", "*-AGs"));
     levels_.push_back(tempLevel);
 
     tempLevel = boost::shared_ptr< Level >
@@ -157,6 +158,36 @@ bool Levels::WriteToConfig()
 
     trap_FS_FCloseFile(f);
     return true;
+}
+
+Levels::Level const* Levels::GetLevel(int level)
+{
+    std::vector<boost::shared_ptr<Level>>::iterator it = levels_.begin();
+    std::vector<boost::shared_ptr<Level>>::iterator end = levels_.end();
+    for (; it != end; it++)
+    {
+        if (it->get()->level == level)
+        {
+            return it->get();
+        }
+    }
+    
+
+    return dummyLevel_.get();
+}
+
+bool Levels::LevelExists(int level) const
+{
+    ConstIter it = levels_.begin();
+
+    for (; it != levels_.end(); it++)
+    {
+        if (it->get()->level == level)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Levels::PrintLevels()
@@ -254,7 +285,7 @@ bool Levels::ReadFromConfig()
         }
         catch (std::bad_alloc& e)
         {
-            G_LogPrintf("Failed to allocate memory to parse level config.");
+            G_Error("Failed to allocate memory to parse level config.");
             trap_FS_FCloseFile(f);
             return false;
         }

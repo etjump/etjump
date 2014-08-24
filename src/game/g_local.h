@@ -681,7 +681,7 @@ typedef struct {
     qboolean    loadedPosBeforeInactivity;
     team_t      teamBeforeInactivitySpec;
 
-	qboolean	needGreeting;
+	qboolean	firstTime;
     qboolean    loadPreviousSavedPositions;
 
     run_t       run;

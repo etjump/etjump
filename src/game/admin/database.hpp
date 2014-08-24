@@ -8,6 +8,7 @@
 #include "../g_local.hpp"
 #include <sqlite3.h>
 #include <vector>
+#include <boost/multi_index/ordered_index.hpp>
 
 using namespace boost::multi_index;
 
@@ -15,15 +16,23 @@ using namespace boost::multi_index;
 // some servers don't support threads making it impossible
 // to just query everything from database.
 
+namespace Updated
+{
+    const unsigned NONE = 0;
+    const unsigned LEVEL = 0x00001;
+    const unsigned LAST_SEEN = 0x00002;
+    const unsigned NAME = 0x00004;
+    const unsigned TITLE = 0x00008;
+    const unsigned COMMANDS = 0x00010;
+    const unsigned GREETING = 0x00020;
+}
+
+
 class Database
 {
 public:
     Database();
     ~Database();
-
-    /* tags for accessing the corresponding indices of employee_set */
-    struct id{};
-    struct guid{};
 
     struct User_s
     {
@@ -38,13 +47,13 @@ public:
             return guid;
         }
 
-        User_s() : level(0), lastSeen(0)
+        User_s() : level(0), lastSeen(0), updated(0)
         {
             
         }
 
         User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid)
-            : id(id), guid(guid), name(name), level(0), lastSeen(0)
+            : id(id), guid(guid), name(name), level(0), lastSeen(0), updated(0)
         {
             split(hwids, hwid, boost::algorithm::is_any_of(", "));
         }
@@ -52,9 +61,9 @@ public:
         User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen, 
             std::string const& name, std::string const& hwid, std::string const& title, 
             std::string const& commands, std::string const& greeting)
-            : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting)
+            : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting), updated(0)
         {
-            split(hwids, hwid, boost::algorithm::is_any_of(", "));
+            split(hwids, hwid, boost::algorithm::is_any_of(","));
         }
 
         const char *ToChar() const
@@ -62,6 +71,8 @@ public:
             return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
         }
 
+        std::string GetLastSeenString() const;
+        std::string GetLastVisitString() const;
         unsigned id;
         std::string guid;
 
@@ -73,6 +84,7 @@ public:
         std::string commands;
         std::string greeting;
         std::vector<std::string> hwids;
+        unsigned updated;
     };
 
     typedef boost::shared_ptr<User_s> User;
@@ -99,8 +111,12 @@ public:
     // Adds user to database
     bool AddUser(const std::string& guid, const std::string& hwid, const std::string& name);
     bool AddNewHWID(unsigned id, const std::string& hwid);
+    bool UpdateLastSeen(unsigned id, unsigned lastSeen);
+    bool SetLevel(unsigned id, int level);
+    bool Save(IdIterator user, unsigned updated);
     std::string GetMessage() const;
     bool UserExists(const std::string& guid);
+    bool UserExists(unsigned id);
 private:
     unsigned GetHighestFreeId() const;
     bool AddUserToSQLite(User user);

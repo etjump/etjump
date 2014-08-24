@@ -330,6 +330,19 @@ bool ToInt( const string& toConvert, int& value )
     return true;
 }
 
+bool ToUnsigned(const std::string& toConvert, unsigned& value)
+{
+    try {
+        int result = boost::lexical_cast<unsigned>(toConvert);
+
+        value = result;
+    }
+    catch ( /* boost::bad_lexical_cast& e */ ...) {
+        return false;
+    }
+    return true;
+}
+
 std::string ToString( int value ) {
     return boost::lexical_cast<std::string>(value);
 }
@@ -458,7 +471,7 @@ static char* BuildOSPath( const char* file )
     return ospath[toggle];
 }
 
-std::string GetPath( const std::string& file )
+string GetPath( const std::string& file )
 {
     char *ospath = BuildOSPath( file.c_str() );
 
@@ -473,7 +486,7 @@ std::string GetPath( const std::string& file )
 
 bool MapExists( const std::string& map )
 {
-    std::string mapName = "maps/" + map + ".bsp";
+    string mapName = "maps/" + map + ".bsp";
 
     fileHandle_t f = 0;
     trap_FS_FOpenFile(mapName.c_str(), &f, FS_READ);
@@ -486,7 +499,7 @@ bool MapExists( const std::string& map )
     return true;
 }
 
-std::string ValueForKey( gentity_t *ent, const std::string& key )
+string ValueForKey( gentity_t *ent, const std::string& key )
 {
     char userinfo[MAX_INFO_STRING] = "\0";
     char *value = NULL;
@@ -501,7 +514,7 @@ std::string ValueForKey( gentity_t *ent, const std::string& key )
     return value;
 }
 
-std::string TimeStampToString( int t )
+string TimeStampToString( int t )
 {
     char buf[MAX_TOKEN_CHARS];
     struct tm *lt = NULL;

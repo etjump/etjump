@@ -58,7 +58,7 @@ void G_WriteClientSessionData( gclient_t *client, qboolean restart )
 		client->sess.ignoreClients[1],
 		client->pers.enterTime,
 		restart ? client->sess.spawnObjectiveIndex : 0,
-		client->sess.needGreeting,
+		client->sess.firstTime,
         client->sess.loadPreviousSavedPositions
 		);
 
@@ -197,7 +197,7 @@ void G_ReadSessionData( gclient_t *client )
 		&client->sess.ignoreClients[1],
 		&client->pers.enterTime,
 		&client->sess.spawnObjectiveIndex,
-		&client->sess.needGreeting,
+		&client->sess.firstTime,
         &client->sess.loadPreviousSavedPositions
 		);
 
@@ -305,7 +305,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->referee = (client->pers.localClient) ? RL_REFEREE : RL_NONE;
 	sess->spec_invite = 0;
 	sess->spec_team = 0;
-	sess->needGreeting = qtrue;
+	sess->firstTime = qtrue;
     sess->loadPreviousSavedPositions = qtrue;
 
 	G_deleteStats(client - level.clients);
