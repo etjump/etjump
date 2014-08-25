@@ -40,6 +40,19 @@ bool Levels::Add(int level, std::string const name, std::string const commands, 
     return true;
 }
 
+bool Levels::Delete(int level)
+{
+    ConstIter it = Find(level);
+    if (it != levels_.end())
+    {
+        levels_.erase(it);
+        WriteToConfig();
+        return true;
+    }
+
+    return false;
+}
+
 bool Levels::Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated)
 {
     ConstIter it = Find(level);

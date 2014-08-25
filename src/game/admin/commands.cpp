@@ -103,6 +103,10 @@ bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher)
 
 namespace AdminCommands
 {
+    const int CMDS_OPEN = 1;
+    const int GREETING_OPEN = 2;
+    const int TITLE_OPEN = 4;
+
     bool Admintest(gentity_t *ent, Arguments argv)
     {
         if (!ent)
@@ -117,7 +121,79 @@ namespace AdminCommands
 
     bool AddLevel(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("AddLevel");
+        // !addlevel [level] -cmds [commands] -greeting [greeting] -title [title]
+        if (argv->size() < 2)
+        {
+            PrintManual(ent, "addlevel");
+            return false;
+        }
+        int open = 0;
+
+        int level = 0;
+        std::string commands;
+        std::string greeting;
+        std::string title;
+
+        if (!ToInt(argv->at(1), level))
+        {
+            ChatPrintTo(ent, va("^3system: ^7%d is not an integer.", level));
+            return false;
+        }
+
+        if (argv->size() > 2)
+        {
+            ConstArgIter it = argv->begin() + 2;
+
+            while (it != argv->end())
+            {
+                if (*it == "-cmds" && it + 1 != argv->end())
+                {
+                    open = CMDS_OPEN;
+                }
+                else if (*it == "-greeting" && it + 1 != argv->end())
+                {
+                    open = GREETING_OPEN;
+                }
+                else if (*it == "-title" && it + 1 != argv->end())
+                {
+                    open = TITLE_OPEN;
+                }
+                else
+                {
+                    switch (open)
+                    {
+                    case 0:
+                        ChatPrintTo(ent, va("^3addlevel: ^7ignored argument \"%s^7\".", it->c_str()));
+                        break;
+                    case CMDS_OPEN:
+                        commands += *it;
+                        break;
+                    case GREETING_OPEN:
+                        greeting += *it + " ";
+                        break;
+                    case TITLE_OPEN:
+                        title += *it + " ";
+                        break;
+                    default:
+                        break;
+                    }
+                }
+
+                it++;
+            }
+
+            boost::trim_right(greeting);
+            boost::trim_right(title);
+        }
+
+        if (!game.levels->Add(level, title, commands, greeting))
+        {
+            ChatPrintTo(ent, "^3addlevel: ^7level exists.");
+            return false;
+        }
+
+        ChatPrintTo(ent, va("^3addlevel: ^7added level %d.", level));
+
         return true;
     }
 
@@ -208,7 +284,27 @@ namespace AdminCommands
 
     bool DeleteLevel(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("DeleteLevel");
+        if (argv->size() != 2)
+        {
+            PrintManual(ent, "deletelevel");
+            return false;
+        }
+
+        int level = 0;
+        if (!ToInt(argv->at(1), level))
+        {
+            ChatPrintTo(ent, va("^3deletelevel: ^7%s is not an integer.", argv->at(1).c_str()));
+            return false;
+        }
+
+        if (!game.levels->Delete(level))
+        {
+            ChatPrintTo(ent, "^3deletelevel: ^7couldn't find level.");
+            return false;
+        }
+
+        ChatPrintTo(ent, "^3deletelevel: ^7deleted level.");
+
         return true;
     }
 
@@ -226,7 +322,100 @@ namespace AdminCommands
 
     bool EditLevel(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("EditLevel");
+        if (argv->size() < 4)
+        {
+            PrintManual(ent, "editlevel");
+            return false;
+        }
+
+        int updated = 0;
+        int open = 0;
+
+        int level = 0;
+        std::string commands;
+        std::string greeting;
+        std::string title;
+
+        if (!ToInt(argv->at(1), level))
+        {
+            ChatPrintTo(ent, va("^3editlevel: ^7%d is not an integer.", level));
+            return false;
+        }
+
+        if (argv->size() > 2)
+        {
+            ConstArgIter it = argv->begin() + 2;
+
+            while (it != argv->end())
+            {
+                if (*it == "-cmds" && it + 1 != argv->end())
+                {
+                    open = CMDS_OPEN;
+                    updated |= CMDS_OPEN;
+                }
+                else if (*it == "-greeting" && it + 1 != argv->end())
+                {
+                    open = GREETING_OPEN;
+                    updated |= GREETING_OPEN;
+                }
+                else if (*it == "-title" && it + 1 != argv->end())
+                {
+                    open = TITLE_OPEN;
+                    updated |= TITLE_OPEN;
+                }
+                else if (*it == "-clear" && it + 1 != argv->end())
+                {
+                    ConstArgIter nextIt = it + 1;
+                    if (*nextIt == "cmds")
+                    {
+
+                    }
+                    else if (*nextIt == "greeting")
+                    {
+
+                    }
+                    else if (*nextIt == "title")
+                    {
+
+                    }
+                    else
+                    {
+                        it++;
+                    }
+                }
+                else
+                {
+                    switch (open)
+                    {
+                    case 0:
+                        ChatPrintTo(ent, va("^editlevel: ^7ignored argument \"%s^7\".", it->c_str()));
+                        break;
+                    case CMDS_OPEN:
+                        commands += *it;
+                        break;
+                    case GREETING_OPEN:
+                        greeting += *it + " ";
+                        break;
+                    case TITLE_OPEN:
+                        title += *it + " ";
+                        break;
+                    default:
+                        break;
+                    }
+                }
+
+                it++;
+            }
+
+            boost::trim_right(greeting);
+            boost::trim_right(title);
+        }
+
+        game.levels->Edit(level, title, commands, greeting, updated);
+        G_LogPrintf("TODO: ParsePermissions...\n");
+
+        ChatPrintTo(ent, va("^3editlevel: ^7updated level %d.", level));
+
         return true;
     }
 
@@ -271,7 +460,53 @@ namespace AdminCommands
 
     bool Kick(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("Kick");
+        const unsigned MIN_ARGS = 2;
+        if (argv->size() < MIN_ARGS)
+        {
+            PrintManual(ent, "kick");
+            return false;
+        }
+
+        std::string error = "";
+        gentity_t *target = PlayerGentityFromString(argv->at(1), error);
+        if (!target)
+        {
+            ChatPrintTo(ent, "^3kick: " + error);
+            return false;
+        }
+
+        if (ent)
+        {
+            if (ent == target)
+            {
+                ChatPrintTo(ent, "^3kick: ^7you can't kick yourself.");
+                return false;
+            }
+
+            if (IsTargetHigherLevel(ent, target, true))
+            {
+                ChatPrintTo(ent, "^3kick: ^7you can't kick a fellow admin.");
+                return false;
+            }
+        }
+
+        int timeout = 0;
+        if (argv->size() >= 3)
+        {
+            if (!ToInt(argv->at(2), timeout))
+            {
+                ChatPrintTo(ent, "^3kick: ^7invalid timeout \"" + argv->at(2) + "\" specified.");
+                return false;
+            }
+        }
+
+        std::string reason;
+        if (argv->size() >= 4)
+        {
+            reason = argv->at(3);
+        }
+
+        trap_DropClient(target->client->ps.clientNum, reason.c_str(), timeout);
         return true;
     }
 
@@ -319,7 +554,19 @@ namespace AdminCommands
 
     bool Map(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("Map");
+        if (argv->size() != 2)
+        {
+            // PrintManual(ent, "map");
+            return false;
+        }
+
+        if (!MapExists(argv->at(1)))
+        {
+            ChatPrintTo(ent, "^3map: ^7map " + argv->at(1) + " does not exist.");
+            return false;
+        }
+
+        trap_SendConsoleCommand(EXEC_APPEND, va("map %s", argv->at(1).c_str()));
         return true;
     }
 
