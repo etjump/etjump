@@ -499,17 +499,32 @@ bool MapExists( const std::string& map )
     return true;
 }
 
-string ValueForKey( gentity_t *ent, const std::string& key )
+string ValueForKey(gentity_t *ent, const std::string& key)
 {
     char userinfo[MAX_INFO_STRING] = "\0";
     char *value = NULL;
 
     trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
     value = Info_ValueForKey(userinfo, key.c_str());
-    if(!value)
+    if (!value)
     {
         return "";
-    } 
+    }
+
+    return value;
+}
+
+string ValueForKey(int clientNum, const std::string& key)
+{
+    char userinfo[MAX_INFO_STRING] = "\0";
+    char *value = NULL;
+
+    trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
+    value = Info_ValueForKey(userinfo, key.c_str());
+    if (!value)
+    {
+        return "";
+    }
 
     return value;
 }

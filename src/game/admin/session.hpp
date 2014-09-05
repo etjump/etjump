@@ -21,6 +21,7 @@ public:
         std::string guid;
         std::string hwid;
         std::bitset<MAX_COMMANDS> permissions;
+        std::string ip;
         const Database::User_s *user;
         const Levels::Level *level;
     };
@@ -44,6 +45,8 @@ public:
     std::string GetMessage() const;
     void PrintAdmintest(gentity_t* ent);
     void PrintFinger(gentity_t* ent, gentity_t* target);
+    bool Ban(gentity_t *ent, gentity_t *player, unsigned expires, std::string reason);
+    bool IsIpBanned(int clientNum);
 private:
     void ParsePermissions(int clientNum);
 

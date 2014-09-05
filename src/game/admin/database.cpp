@@ -62,6 +62,40 @@ bool Database::BindString(sqlite3_stmt* stmt, int index, const std::string& val)
     return true;
 }
 
+bool Database::AddBanToSQLite(Ban ban)
+{
+    int rc = 0;
+    sqlite3_stmt *stmt = NULL;
+    // TODO: do this once and finalize in game shutdown
+    if (!PrepareStatement("INSERT INTO bans (name, guid, hwid, ip, banned_by, ban_date, expires, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
+    {
+        return false;
+    }
+
+
+    if (!BindString(stmt, 1, ban->name) ||
+        !BindString(stmt, 2, ban->guid) ||
+        !BindString(stmt, 3, ban->hwid) ||
+        !BindString(stmt, 4, ban->ip) ||
+        !BindString(stmt, 5, ban->bannedBy) ||
+        !BindString(stmt, 6, ban->banDate) ||
+        !BindInt(stmt, 7, ban->expires) ||
+        !BindString(stmt, 8, ban->reason))
+    {
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE)
+    {
+        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
 bool Database::AddUserToSQLite(User user)
 {
     int rc = 0;
@@ -69,7 +103,6 @@ bool Database::AddUserToSQLite(User user)
     // TODO: do this once and finalize in game shutdown
     if (!PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
     {
-        message_ = "Preparing statement failed.";
         return false;
     }
 
@@ -88,7 +121,6 @@ bool Database::AddUserToSQLite(User user)
         !BindString(stmt, 9, user->greeting)
         )
     {
-        message_ = "Binding values to statement failed.";
         return false;
     }
 
@@ -122,6 +154,55 @@ bool Database::UserExists(std::string const& guid)
         return true;
     }
     return false;
+}
+
+bool Database::IsBanned(std::string const& guid, std::string const& hwid)
+{
+    for (unsigned i = 0; i < bans_.size(); i++)
+    {
+        if (bans_[i]->guid == guid ||
+            bans_[i]->hwid == hwid)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Database::IsIpBanned(std::string const& ip)
+{
+    for (unsigned i = 0; i < bans_.size(); i++)
+    {
+        if (bans_[i]->ip == ip)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Database::BanUser(std::string const& name, std::string const& guid, std::string const& hwid, std::string const& ip, 
+    std::string const& bannedBy, std::string const& banDate, unsigned expires, std::string const& reason)
+{
+    Ban newBan(new Ban_s);
+
+    newBan->name = name;
+    newBan->guid = guid;
+    newBan->hwid = hwid;
+    newBan->ip = ip;
+    newBan->bannedBy = bannedBy;
+    newBan->banDate = banDate;
+    newBan->expires = expires;
+    newBan->reason = reason;
+
+    if (!AddBanToSQLite(newBan))
+    {
+        return false;
+    }
+
+    bans_.push_back(newBan);
+
+    return true;
 }
 
 bool Database::UserExists(unsigned id)
@@ -372,39 +453,63 @@ Database::User_s const* Database::GetUserData(unsigned id) const
     return NULL;
 }
 
-Database::User_s const* Database::GetUserData(std::string const& guid) const
+bool Database::LoadBans()
 {
-    ConstGuidIterator user = GetUser(guid);
-    if (user != GUID_IT_END)
+    int rc = 0;
+    char *errMsg = NULL;
+    sqlite3_stmt *stmt = NULL;
+
+    if (!PrepareStatement("SELECT id, name, guid, hwid, ip, banned_by, ban_date, expires, reason FROM bans;", &stmt))
     {
-        return user->get();
+        return false;
     }
-    return NULL;
+
+    const char *val = NULL;
+    rc = sqlite3_step(stmt);
+    while (rc != SQLITE_DONE)
+    {
+        Ban newBan(new Ban_s());
+        switch (rc)
+        {
+        case SQLITE_ROW:
+            newBan->id = sqlite3_column_int(stmt, 0);
+            val = (const char*)(sqlite3_column_text(stmt, 1));
+            newBan->name = val ? val : "";
+            val = (const char*)(sqlite3_column_text(stmt, 2));
+            newBan->guid = val ? val : "";
+            val = (const char*)(sqlite3_column_text(stmt, 3));
+            newBan->hwid = val ? val : "";
+            val = (const char*)(sqlite3_column_text(stmt, 4));
+            newBan->ip = val ? val : "";
+            val = (const char*)(sqlite3_column_text(stmt, 5));
+            newBan->bannedBy = val ? val : "";
+            val = (const char*)(sqlite3_column_text(stmt, 6));
+            newBan->banDate = val ? val : "";
+            newBan->expires = sqlite3_column_int(stmt, 7);
+            val = (const char*)(sqlite3_column_text(stmt, 8));
+            newBan->reason = val ? val : "";
+            bans_.push_back(newBan);
+            G_LogPrintf("User: %s\n", newBan->ToChar());
+            break;
+        case SQLITE_BUSY:
+        case SQLITE_ERROR:
+        case SQLITE_MISUSE:
+        default:
+            message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+            sqlite3_finalize(stmt);
+            return false;
+        }
+        rc = sqlite3_step(stmt);
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
 }
 
-bool Database::InitDatabase(char const* config)
+bool Database::LoadUsers()
 {
-    int rc = sqlite3_open(GetPath(config).c_str(), &db_);
+    int rc = 0;
     char *errMsg = NULL;
-
-    if (rc)
-    {
-        message_ = std::string("Can't open database: ") + sqlite3_errmsg(db_);
-        sqlite3_close(db_);
-        return false;
-    }
-
-    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, guid TEXT UNIQUE NOT NULL, level INT, lastSeen INT, name TEXT, hwid TEXT, title TEXT, commands TEXT, greeting TEXT);",
-        NULL, NULL, &errMsg);
-
-    if (rc != SQLITE_OK)
-    {
-        message_ = std::string("SQL error: ") + errMsg;
-        sqlite3_free(errMsg);
-        sqlite3_close(db_);
-        return false;
-    }
-
     sqlite3_stmt *stmt = NULL;
 
     if (!PrepareStatement("SELECT id, guid, level, lastSeen, name, hwid, title, commands, greeting FROM users;", &stmt))
@@ -417,7 +522,7 @@ bool Database::InitDatabase(char const* config)
     while (rc != SQLITE_DONE)
     {
         User newUser(new User_s());
-        
+
         switch (rc)
         {
         case SQLITE_ROW:
@@ -454,6 +559,78 @@ bool Database::InitDatabase(char const* config)
     }
 
     sqlite3_finalize(stmt);
+    return true;
+}
+
+bool Database::CreateBansTable()
+{
+    int rc = 0;
+    char *errMsg = NULL;
+
+    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS bans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, guid TEXT NOT NULL, hwid TEXT, ip TEXT, banned_by TEXT, ban_date TEXT, expires INT, reason TEXT);",
+        NULL, NULL, &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        message_ = std::string("SQL error: ") + errMsg;
+        sqlite3_free(errMsg);
+        sqlite3_close(db_);
+        return false;
+    }
+    return true;
+}
+
+bool Database::CreateUsersTable()
+{
+    int rc = 0;
+    char *errMsg = NULL;
+
+    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, guid TEXT UNIQUE NOT NULL, level INT, lastSeen INT, name TEXT, hwid TEXT, title TEXT, commands TEXT, greeting TEXT);",
+        NULL, NULL, &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        message_ = std::string("SQL error: ") + errMsg;
+        sqlite3_free(errMsg);
+        sqlite3_close(db_);
+        return false;
+    }
+    return true;
+}
+
+Database::User_s const* Database::GetUserData(std::string const& guid) const
+{
+    ConstGuidIterator user = GetUser(guid);
+    if (user != GUID_IT_END)
+    {
+        return user->get();
+    }
+    return NULL;
+}
+
+bool Database::InitDatabase(char const* config)
+{
+    int rc = sqlite3_open(GetPath(config).c_str(), &db_);
+    char *errMsg = NULL;
+
+    if (rc)
+    {
+        message_ = std::string("Can't open database: ") + sqlite3_errmsg(db_);
+        sqlite3_close(db_);
+        return false;
+    }
+
+    if (!CreateUsersTable() ||
+        !CreateBansTable()) {
+        return false;
+    }
+
+    if (!LoadUsers() || !LoadBans())
+    {
+        return false;
+    }
+
+    
 
     return true;
 }

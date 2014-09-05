@@ -56,6 +56,7 @@ std::string GetPath( const std::string& file );
 bool MapExists( const std::string& map );
 
 std::string ValueForKey( gentity_t *ent, const std::string& key );
+std::string ValueForKey(int clientNum, const std::string& key);
 std::string TimeStampToString( int timeStamp );
 std::string TimeStampDifferenceToString( int diff );
 

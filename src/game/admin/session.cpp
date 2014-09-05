@@ -29,6 +29,10 @@ void Session::Init(int clientNum)
     clients_[clientNum].level = NULL;
     clients_[clientNum].permissions.reset();
 
+    std::string ip = ValueForKey(clientNum, "ip");
+    std::string::size_type pos = ip.find(":");
+    clients_[clientNum].ip = ip.substr(0, pos);
+
     WriteSessionData(clientNum);
 }
 
@@ -36,7 +40,7 @@ void Session::UpdateLastSeen(int clientNum)
 {
     unsigned lastSeen = 0;
     if (clients_[clientNum].user)
-    {    
+    {   
         time_t t;
         if (!time(&t))
         {
@@ -48,7 +52,10 @@ void Session::UpdateLastSeen(int clientNum)
 
         G_LogPrintf("Updating client's last seen to: %s\n", TimeStampToString(lastSeen));
 
-        game.database->UpdateLastSeen(clients_[clientNum].user->id, lastSeen);
+        if (!game.database->UpdateLastSeen(clients_[clientNum].user->id, lastSeen))
+        {
+            G_LogPrintf("ERROR: %s\n", game.database->GetMessage().c_str());
+        }
     }
 }
 
@@ -120,6 +127,14 @@ bool Session::GuidReceived(gentity_t *ent)
 
     GetUserAndLevelData(clientNum);
 
+    if (game.database->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid))
+    {
+        G_LogPrintf("Banned player %s tried to connect with guid %s and hardware id %s\n",
+            clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
+        CPMAll(va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
+        trap_DropClient(clientNum, "You are banned.", 0);
+    }
+
     return true;
 }
 
@@ -157,14 +172,14 @@ void Session::GetUserAndLevelData(int clientNum)
                     G_LogPrintf("Failed to add a new hardware ID to user %s\n", ent->client->pers.netname);
                 }
             }
-
-            clients_[clientNum].level = game.levels->GetLevel(clients_[clientNum].user->level);
         }
         else
         {
             G_LogPrintf("ERROR: couldn't get user's data (%s)\n", ent->client->pers.netname);
         }
     }
+
+    clients_[clientNum].level = game.levels->GetLevel(clients_[clientNum].user->level);
 
     if (ent->client->sess.firstTime)
     {
@@ -185,7 +200,7 @@ void Session::ParsePermissions(int clientNum)
 {
     // First parse level commands then user commands (as user commands override level ones)
     std::string commands = clients_[clientNum].level->commands + clients_[clientNum].user->commands;
-    
+
     const int STATE_ALLOW = 1;
     const int STATE_DENY = 2;
     int state = STATE_ALLOW;
@@ -239,11 +254,12 @@ void Session::ParsePermissions(int clientNum)
 void Session::OnClientDisconnect(int clientNum)
 {
     WriteSessionData(clientNum);
+    UpdateLastSeen(clientNum);
 
     clients_[clientNum].user = NULL;
     clients_[clientNum].level = NULL;
     clients_[clientNum].permissions.reset();
-    UpdateLastSeen(clientNum);
+    
 }
 
 void Session::PrintGreeting(gentity_t* ent)
@@ -350,6 +366,32 @@ int Session::GetLevel(gentity_t* ent) const
     }
 
     return 0;
+}
+
+bool Session::IsIpBanned(int clientNum)
+{
+    return game.database->IsIpBanned(clients_[clientNum].ip);
+}
+
+bool Session::Ban(gentity_t* ent, gentity_t *player, unsigned expires, std::string reason)
+{
+    int clientNum = ClientNum(player);
+    time_t t;
+    time(&t);
+
+    if (clients_[clientNum].guid.length() == 0)
+    {
+        message_ = "User doesn't have a guid. Are you sure he's connected?";
+        return false;
+    }
+
+    std::string ipport = ValueForKey(player, "ip");
+    std::string::size_type pos = ipport.find(":");
+    std::string ip = ipport.substr(0, pos);
+
+    return game.database->BanUser(std::string(player->client->pers.netname), clients_[clientNum].guid,
+        clients_[clientNum].hwid, ip, std::string(ent ? ent->client->pers.netname : "Console"),
+        TimeStampToString(static_cast<unsigned>(t)), expires, reason);
 }
 
 void Session::PrintFinger(gentity_t* ent, gentity_t* target)

@@ -87,6 +87,7 @@ public:
         unsigned updated;
     };
 
+
     typedef boost::shared_ptr<User_s> User;
 
     typedef multi_index_container<
@@ -99,11 +100,41 @@ public:
 
     typedef Users::nth_index<0>::type::iterator IdIterator;
     typedef Users::nth_index<0>::type::const_iterator ConstIdIterator;
-    typedef Users::nth_index<1>::type::iterator GuidIterator; 
+    typedef Users::nth_index<1>::type::iterator GuidIterator;
     typedef Users::nth_index<1>::type::const_iterator ConstGuidIterator;
+
+    struct Ban_s
+    {
+        unsigned id;
+        std::string name;
+        std::string guid;
+        std::string hwid;
+        std::string ip;
+        std::string bannedBy;
+        std::string banDate;
+        std::string reason;
+        unsigned expires;
+
+        Ban_s() : id(0), expires(0)
+        {
+            
+        }
+
+        const char *ToChar()
+        {
+            return va("%d %s %s %s %s %s %s %d %s", id, name.c_str(), guid.c_str(), hwid.c_str(), ip.c_str(), bannedBy.c_str(), banDate.c_str(), expires, reason.c_str());
+        }
+    };
+
+    typedef boost::shared_ptr<Ban_s> Ban;    
 
     const User_s *GetUserData(unsigned id) const;
     const User_s *GetUserData(const std::string& guid) const;
+
+    bool CreateUsersTable();
+    bool CreateBansTable();
+    bool LoadUsers();
+    bool LoadBans();
 
     bool InitDatabase(const char *config);
     bool CloseDatabase();
@@ -117,9 +148,15 @@ public:
     std::string GetMessage() const;
     bool UserExists(const std::string& guid);
     bool UserExists(unsigned id);
+    bool BanUser(const std::string& name, const std::string& guid, 
+        const std::string& hwid, const std::string& ip, const std::string& bannedBy, 
+        const std::string& banDate, unsigned expires, const std::string& reason);
+    bool IsIpBanned(const std::string& ip);
+    bool IsBanned(const std::string& guid, const std::string& hwid);
 private:
     unsigned GetHighestFreeId() const;
     bool AddUserToSQLite(User user);
+    bool AddBanToSQLite(Ban ban);
     bool BindInt(sqlite3_stmt* stmt, int index, int val);
     bool BindString(sqlite3_stmt* stmt, int index, const std::string& val);
     IdIterator GetUser(unsigned id) const;
@@ -128,6 +165,7 @@ private:
     bool PrepareStatement(char const* query, sqlite3_stmt** stmt);
     ConstGuidIterator GetUserConst(const std::string& guid) const;
     Users users_;
+    std::vector<Ban> bans_;
     sqlite3 *db_;
     std::string message_;
 

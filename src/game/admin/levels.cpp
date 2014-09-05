@@ -4,7 +4,7 @@
 #include "../g_local.hpp"
 #include "../g_utilities.hpp"
 
-Levels::Level::Level(int level, std::string const& name, std::string const& commands, std::string const& greeting)
+Levels::Level::Level(int level, std::string const& name, std::string const& greeting, std::string const& commands)
 {
     this->level = level;
     this->name = name;
@@ -33,7 +33,7 @@ bool Levels::Add(int level, std::string const name, std::string const commands, 
     boost::shared_ptr<Level> levelPtr(new Level(level, name, greeting, commands));
     levels_.push_back(levelPtr);
 
-    if (WriteToConfig())
+    if (!WriteToConfig())
     {
         return false;
     }

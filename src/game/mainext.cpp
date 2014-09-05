@@ -27,6 +27,11 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
     {
         game.session->ReadSessionData(clientNum);
     }
+
+    if (game.session->IsIpBanned(clientNum))
+    {
+        trap_DropClient(clientNum, "You are banned.", 0);
+    }
 }
 
 void OnClientBegin(gentity_t *ent)

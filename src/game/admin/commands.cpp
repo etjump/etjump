@@ -83,6 +83,11 @@ void PrintManual(gentity_t *ent, const std::string& command)
 
 bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target, bool equalIsHigher)
 {
+    if (!ent)
+    {
+        return false;
+    }
+
     if (equalIsHigher)
     {
         return game.session->GetLevel(ent) <= game.session->GetLevel(target);
@@ -263,7 +268,67 @@ namespace AdminCommands
 
     bool Ban(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("Ban");
+        if (argv->size() == 1)
+        {
+            PrintManual(ent, "ban");
+            return false;
+        }
+        // ban permanently
+        time_t t;
+        time(&t);
+        std::string err;
+        gentity_t *player = PlayerGentityFromString(argv->at(1).c_str(), err);
+
+        if (!player)
+        {
+            ChatPrintTo(ent, "^3ban: ^7no player with name " + argv->at(1));
+            return false;
+        }
+
+        if (IsTargetHigherLevel(ent, player, true))
+        {
+            ChatPrintTo(ent, "^3ban: ^7you cannot ban a fellow admin.");
+            return false;
+        }
+
+        unsigned expires = 0;
+        std::string reason = "Banned by admin.";
+
+        // !ban <name> <time> <reason>
+        if (argv->size() > 3)
+        {
+            if (!ToUnsigned(argv->at(2), expires))
+            {
+                // TODO: 10m, 2h etc.
+                ChatPrintTo(ent, "^3ban: ^7time was not a number.");
+                return false;
+            }
+
+            expires = static_cast<unsigned>(t)+expires;
+        }
+        
+        if (argv->size() >= 4)
+        {
+            reason = "";
+            for (int i = 3; i < argv->size(); i++)
+            {
+                if (i + 1 == argv->size())
+                {
+                    reason += argv->at(i);
+                }
+                else
+                {
+                    reason += argv->at(i) + " ";
+
+                }
+
+            }
+        }
+        if (!game.session->Ban(ent, player, expires, reason))
+        {
+            ChatPrintTo(ent, "^3ban: ^7" + game.session->GetMessage());
+            return false;
+        }
         return true;
     }
 
