@@ -578,7 +578,21 @@ namespace AdminCommands
 
     bool LevelInfo(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "LevelInfo is not implemented.");
+        if (argv->size() == 1)
+        {
+            game.levels->PrintLevelInfo(ent);
+        }
+        else
+        {
+            int level = 0;
+            if (!ToInt(argv->at(1), level))
+            {
+                ChatPrintTo(ent, "^3levelinfo: ^7 invalid level.");
+                return false;
+            }
+
+            game.levels->PrintLevelInfo(ent, level);
+        }
         return true;
     }
 

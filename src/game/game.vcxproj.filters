@@ -201,9 +201,6 @@
     <ClCompile Include="admin\levels.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
-    <ClCompile Include="timeruns.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="admin\database.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
@@ -270,9 +267,6 @@
     </ClInclude>
     <ClInclude Include="admin\levels.hpp">
       <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="timeruns.hpp">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="admin\database.hpp">
       <Filter>Header Files\Admin system</Filter>

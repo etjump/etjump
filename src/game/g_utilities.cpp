@@ -234,7 +234,6 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine) {
 }
 
 void BufferPrint( gentity_t *ent, const string& msg ) {
-
     if(!ent) {
         char cleanMsg[MAX_TOKEN_CHARS];
         SanitizeConstString(msg.c_str(), cleanMsg, qfalse);

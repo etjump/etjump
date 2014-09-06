@@ -189,6 +189,44 @@ Levels::Level const* Levels::GetLevel(int level)
     return dummyLevel_.get();
 }
 
+void Levels::PrintLevelInfo(gentity_t* ent)
+{
+    std::vector<boost::shared_ptr<Level> >::iterator it = levels_.begin();
+    std::vector<boost::shared_ptr<Level> >::iterator end = levels_.end();
+
+    ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
+    BeginBufferPrint();
+    BufferPrint(ent, "Levels: ");
+    for (; it != end; it++)
+    {
+        if (it + 1 == end)
+        {
+            BufferPrint(ent, va("%d", (*it)->level));
+            FinishBufferPrint(ent, true);
+            return;
+        }
+        BufferPrint(ent, va("%d, ", it->get()->level));
+    }   
+}
+
+void Levels::PrintLevelInfo(gentity_t* ent, int level)
+{
+    std::vector<boost::shared_ptr<Level> >::iterator it = levels_.begin();
+    std::vector<boost::shared_ptr<Level> >::iterator end = levels_.end();
+ 
+    for (; it != end; it++)
+    {
+        if (it->get()->level == level)
+        {
+            ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
+            ConsolePrintTo(ent, va("^5Level: %d\nName: %s\nCommands: %s\nGreeting: %s\n",
+                level, it->get()->name.c_str(), it->get()->commands.c_str(), it->get()->greeting.c_str()));
+            return;
+        }
+    }
+    ChatPrintTo(ent, "^3levelinfo: ^7undefined level: " + ToString(level));
+}
+
 bool Levels::LevelExists(int level) const
 {
     ConstIter it = levels_.begin();
@@ -386,20 +424,3 @@ bool Levels::ReadFromConfig()
     }
     return true;
 }
-
-//bool Levels::Delete(int level)
-//{
-//    ConstIter it = FindConst(level);
-//    bool deleted = false;
-//    if (it != levels_.end())
-//    {
-//        levels_.erase(it);
-//        deleted = true;
-//    }
-//    if (!deleted)
-//    {
-//        errorMessage = "couldn't find level" + ToString(level);
-//        return false;
-//    }
-//    return true;
-//}

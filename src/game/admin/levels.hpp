@@ -36,6 +36,8 @@ public:
     void PrintLevels();
     const Level *GetLevel(int level);
     bool LevelExists(int level) const;
+    void PrintLevelInfo(gentity_t *ent);
+    void PrintLevelInfo(gentity_t *ent, int level);
 private:
     typedef std::vector< boost::shared_ptr< Level > >::const_iterator ConstIter;
     typedef std::vector< boost::shared_ptr< Level > >::iterator Iter;
