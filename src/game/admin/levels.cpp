@@ -23,7 +23,7 @@ Levels::~Levels()
 
 bool Levels::Add(int level, std::string const name, std::string const commands, std::string const greeting)
 {
-    ConstIter it = Find(level);
+    ConstIter it = FindConst(level);
     if (it != levels_.end())
     {
         errorMessage = "level exists";
@@ -42,7 +42,7 @@ bool Levels::Add(int level, std::string const name, std::string const commands, 
 
 bool Levels::Delete(int level)
 {
-    ConstIter it = Find(level);
+    Iter it = Find(level);
     if (it != levels_.end())
     {
         levels_.erase(it);
@@ -55,7 +55,7 @@ bool Levels::Delete(int level)
 
 bool Levels::Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated)
 {
-    ConstIter it = Find(level);
+    ConstIter it = FindConst(level);
     if (it == levels_.end())
     {
         errorMessage = "level does not exist";
@@ -175,8 +175,8 @@ bool Levels::WriteToConfig()
 
 Levels::Level const* Levels::GetLevel(int level)
 {
-    std::vector<boost::shared_ptr<Level>>::iterator it = levels_.begin();
-    std::vector<boost::shared_ptr<Level>>::iterator end = levels_.end();
+    std::vector<boost::shared_ptr<Level> >::iterator it = levels_.begin();
+    std::vector<boost::shared_ptr<Level> >::iterator end = levels_.end();
     for (; it != end; it++)
     {
         if (it->get()->level == level)
@@ -227,9 +227,22 @@ std::string Levels::ErrorMessage()
     return errorMessage;
 }
 
-Levels::ConstIter Levels::Find(int level)
+Levels::ConstIter Levels::FindConst(int level)
 {
     ConstIter it = levels_.begin();
+    for (; it != levels_.end(); it++)
+    {
+        if (it->get()->level == level)
+        {
+            return it;
+        }
+    }
+    return it;
+}
+
+Levels::Iter Levels::Find(int level)
+{
+    Iter it = levels_.begin();
     for (; it != levels_.end(); it++)
     {
         if (it->get()->level == level)
@@ -376,7 +389,7 @@ bool Levels::ReadFromConfig()
 
 //bool Levels::Delete(int level)
 //{
-//    ConstIter it = Find(level);
+//    ConstIter it = FindConst(level);
 //    bool deleted = false;
 //    if (it != levels_.end())
 //    {

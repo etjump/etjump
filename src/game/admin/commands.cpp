@@ -373,15 +373,9 @@ namespace AdminCommands
         return true;
     }
 
-    bool DeleteUser(gentity_t* ent, Arguments argv)
-    {
-        G_LogPrintf("DeleteUser");
-        return true;
-    }
-
     bool EditCommands(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("EditCommands");
+        ChatPrintTo(ent, "EditCommands is not implemented.");
         return true;
     }
 
@@ -486,13 +480,13 @@ namespace AdminCommands
 
     bool EditUser(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("EditUser");
+        ChatPrintTo(ent, "EditUser is not implemented.");
         return true;
     }    
 
     bool AdminCommands(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("AdminCommands");
+        ChatPrintTo(ent, "AdminCommands is not implemented.");
         return true;
     }
 
@@ -519,7 +513,7 @@ namespace AdminCommands
 
     bool Help(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("Help");
+        ChatPrintTo(ent, "Help is not implemented.");
         return true;
     }
 
@@ -577,43 +571,43 @@ namespace AdminCommands
 
     bool LevelInfo(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("LevelInfo");
+        ChatPrintTo(ent, "LevelInfo is not implemented.");
         return true;
     }
 
     bool ListBans(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ListBans");
+        ChatPrintTo(ent, "ListBans is not implemented.");
         return true;
     }
 
     bool ListCommands(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ListCommands");
+        ChatPrintTo(ent, "ListCommands is not implemented.");
         return true;
     }
 
     bool ListFlags(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ListFlags");
+        ChatPrintTo(ent, "ListFlags is not implemented.");
         return true;
     }
 
     bool ListMaps(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ListMaps");
+        ChatPrintTo(ent, "ListMaps is not implemented.");
         return true;
     }
 
     bool ListPlayers(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ListPlayers");
+        ChatPrintTo(ent, "ListPlayers is not implemented.");
         return true;
     }
 
     bool ListUsers(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ListUsers");
+        ChatPrintTo(ent, "ListUsers is not implemented.");
         return true;
     }
 
@@ -637,7 +631,7 @@ namespace AdminCommands
 
     bool MapInfo(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("MapInfo");
+        ChatPrintTo(ent, "MapInfo is not implemented.");
         return true;
     }
 
@@ -700,7 +694,7 @@ namespace AdminCommands
 
     bool Noclip(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("Noclip");
+        ChatPrintTo(ent, "Noclip is not implemented.");
         return true;
     }
 
@@ -822,7 +816,7 @@ namespace AdminCommands
 
     bool ReadConfig(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("ReadConfig");
+        ChatPrintTo(ent, "ReadConfig is not implemented.");
         return true;
     }
 
@@ -1117,7 +1111,7 @@ Commands::Commands()
     adminCommands_["ban"] = AdminCommandPair(AdminCommands::Ban, CommandFlags::BAN);
     adminCommands_["cancelvote"] = AdminCommandPair(AdminCommands::Cancelvote, CommandFlags::CANCELVOTE);
     adminCommands_["deletelevel"] = AdminCommandPair(AdminCommands::DeleteLevel, CommandFlags::EDIT);
-    adminCommands_["deleteuser"] = AdminCommandPair(AdminCommands::DeleteUser, CommandFlags::EDIT);
+    //adminCommands_["deleteuser"] = AdminCommandPair(AdminCommands::DeleteUser, CommandFlags::EDIT);
     adminCommands_["editcommands"] = AdminCommandPair(AdminCommands::EditCommands, CommandFlags::EDIT);
     adminCommands_["editlevel"] = AdminCommandPair(AdminCommands::EditLevel, CommandFlags::EDIT);
     adminCommands_["edituser"] = AdminCommandPair(AdminCommands::EditUser, CommandFlags::EDIT);

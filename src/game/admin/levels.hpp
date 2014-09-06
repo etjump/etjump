@@ -40,7 +40,8 @@ private:
     typedef std::vector< boost::shared_ptr< Level > >::const_iterator ConstIter;
     typedef std::vector< boost::shared_ptr< Level > >::iterator Iter;
     bool CreateDefaultLevels();
-    ConstIter Find(int level);
+    ConstIter FindConst(int level);
+    Iter Find(int level);
     std::vector< boost::shared_ptr< Level > > levels_;
     std::string errorMessage;
     boost::shared_ptr<Level> dummyLevel_;
