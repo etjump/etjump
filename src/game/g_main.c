@@ -1538,7 +1538,8 @@ void InitGhosting()
         trap_Cvar_Update(&g_ghostPlayers);
     }
 }
-
+// Fixes MAX_NUM_SPAWNTARGETS EXCEEDED
+void ResetNumSpawnTargets();
 /*
 ============
 G_InitGame
@@ -1703,7 +1704,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	trap_GetConfigstring( CS_MULTI_INFO, cs, sizeof(cs) );
 	Info_SetValueForKey( cs, "numspawntargets", "0" );
 	trap_SetConfigstring( CS_MULTI_INFO, cs );
-
+    ResetNumSpawnTargets();
 	for ( i=CS_MULTI_SPAWNTARGETS; i<CS_MULTI_SPAWNTARGETS + MAX_MULTI_SPAWNTARGETS; i++ ) {
 		trap_SetConfigstring( i, "" );
 	}

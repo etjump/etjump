@@ -194,7 +194,7 @@ namespace AdminCommands
 
         if (!game.levels->Add(level, title, commands, greeting))
         {
-            ChatPrintTo(ent, "^3addlevel: ^7level exists.");
+            ChatPrintTo(ent, "^3addlevel: ^7" + game.levels->ErrorMessage());
             return false;
         }
 

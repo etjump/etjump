@@ -144,11 +144,7 @@ bool Levels::SortByLevel(const boost::shared_ptr<Level> lhs, const boost::shared
 bool Levels::WriteToConfig()
 {
     fileHandle_t f = 0;
-    if (trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE) < 0)
-    {
-        errorMessage = std::string("Couldn't open file \"") + g_levelConfig.string + "\" to save admin levels.";
-        return false;
-    }
+    trap_FS_FOpenFile(GetPath(g_levelConfig.string).c_str(), &f, FS_WRITE);
 
     std::sort(levels_.begin(), levels_.end(), SortByLevel);
 
