@@ -169,8 +169,8 @@ private:
     sqlite3 *db_;
     std::string message_;
 
-    ConstIdIterator ID_IT_END;
-    ConstGuidIterator GUID_IT_END;
+    ConstIdIterator IdIterEnd() const;
+    ConstGuidIterator GuidIterEnd() const;
 };
 
 #endif // DATABASE_HH

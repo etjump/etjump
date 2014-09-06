@@ -2026,7 +2026,7 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 	}
 
 	if(!Q_stricmp(arg1, "randommap")) {
-		Q_strncpyz(arg2, "fueldump", sizeof(arg2));
+		Q_strncpyz(arg2, "none", sizeof(arg2));
         randommap = qtrue;
 	}
 

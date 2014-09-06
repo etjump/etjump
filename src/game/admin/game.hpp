@@ -7,6 +7,7 @@ class Session;
 class Commands;
 class SaveSystem;
 class Database;
+class MapData;
 
 struct Game
 {
@@ -17,6 +18,7 @@ struct Game
     boost::shared_ptr<Commands> commands;
     boost::shared_ptr<SaveSystem> saves;
     boost::shared_ptr<Database> database;
+    boost::shared_ptr<MapData> mapData;
 };
 
 #endif 

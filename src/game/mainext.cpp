@@ -4,6 +4,7 @@
 #include "admin/commands.hpp"
 #include "admin/levels.hpp"
 #include "admin/database.hpp"
+#include "mapdata.h"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -83,11 +84,22 @@ void OnGameInit()
             G_LogPrintf("Successfully loaded users from database: %s\n", g_userConfig.string);
         }
     }
+
+    if (!game.mapData->Initialize())
+    {
+        G_Error("Failed to initialize map database: %s.\n", game.mapData->GetMessage());
+    }
+    else
+    {
+        G_LogPrintf("Successfully initialized map database.\n");
+    }
 }
 
 void OnGameShutdown()
 {
     WriteSessionData();
+    game.database->CloseDatabase();
+    game.mapData->Shutdown();
 }
 
 // Returning qtrue means no other commands will be checked
@@ -155,4 +167,13 @@ qboolean OnConsoleCommand()
     }
 
     return qfalse;
+}
+
+const char *GetRandomMap()
+{
+    // For some reason returning game.mapData->RandomMap().c_str()
+    // messes up the map name
+    static char buf[MAX_TOKEN_CHARS] = "\0";
+    Q_strncpyz(buf, game.mapData->RandomMap().c_str(), sizeof(buf));
+    return buf;
 }

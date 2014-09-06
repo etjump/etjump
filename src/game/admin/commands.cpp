@@ -4,6 +4,7 @@
 #include "../g_local.hpp"
 #include "../g_save.hpp"
 #include "session.hpp"
+#include "../mapdata.h"
 
 typedef boost::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -427,15 +428,15 @@ namespace AdminCommands
                     ConstArgIter nextIt = it + 1;
                     if (*nextIt == "cmds")
                     {
-
+                        commands = "";
                     }
                     else if (*nextIt == "greeting")
                     {
-
+                        greeting = "";
                     }
                     else if (*nextIt == "title")
                     {
-
+                        title = "";
                     }
                     else
                     {
@@ -513,7 +514,7 @@ namespace AdminCommands
 
     bool Help(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "Help is not implemented.");
+        game.commands->List(ent);
         return true;
     }
 
@@ -569,6 +570,12 @@ namespace AdminCommands
         return true;
     }
 
+    bool LeastPlayed(gentity_t *ent, Arguments argv)
+    {
+        game.mapData->ListLeastPlayed(ent);
+        return true;
+    }
+
     bool LevelInfo(gentity_t* ent, Arguments argv)
     {
         ChatPrintTo(ent, "LevelInfo is not implemented.");
@@ -581,12 +588,6 @@ namespace AdminCommands
         return true;
     }
 
-    bool ListCommands(gentity_t* ent, Arguments argv)
-    {
-        ChatPrintTo(ent, "ListCommands is not implemented.");
-        return true;
-    }
-
     bool ListFlags(gentity_t* ent, Arguments argv)
     {
         ChatPrintTo(ent, "ListFlags is not implemented.");
@@ -595,7 +596,7 @@ namespace AdminCommands
 
     bool ListMaps(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "ListMaps is not implemented.");
+        game.mapData->ListMaps(ent);
         return true;
     }
 
@@ -631,7 +632,13 @@ namespace AdminCommands
 
     bool MapInfo(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "MapInfo is not implemented.");
+        game.mapData->PrintMapInfo(ent, argv->size() > 1 ? argv->at(1) : level.rawmapname);
+        return true;
+    }
+
+    bool MostPlayed(gentity_t *ent, Arguments argv)
+    {
+        game.mapData->ListMostPlayed(ent);
         return true;
     }
 
@@ -694,7 +701,32 @@ namespace AdminCommands
 
     bool Noclip(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "Noclip is not implemented.");
+        if (level.noNoclip)
+        {
+            ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
+            return false;
+        }
+
+        if (argv->size() == 1)
+        {
+            if (!ent)
+            {
+                return false;
+            }
+            ent->client->noclip = ent->client->noclip ? qfalse : qtrue;
+        }
+        else {
+            std::string err;
+            gentity_t *other = PlayerGentityFromString(argv->at(1), err);
+            if (!other)
+            {
+                ChatPrintTo(ent, "^3noclip: ^7" + err);
+                return false;
+            }
+
+            other->client->noclip = other->client->noclip ? qfalse : qtrue;
+        }
+
         return true;
     }
 
@@ -1091,7 +1123,6 @@ namespace AdminCommands
 
     bool UserInfo(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("UserInfo");
         return true;
     }
 
@@ -1118,15 +1149,17 @@ Commands::Commands()
     adminCommands_["finger"] = AdminCommandPair(AdminCommands::Finger, CommandFlags::FINGER);
     adminCommands_["help"] = AdminCommandPair(AdminCommands::Help, CommandFlags::BASIC);
     adminCommands_["kick"] = AdminCommandPair(AdminCommands::Kick, CommandFlags::KICK);
+    adminCommands_["leastplayed"] = AdminCommandPair(AdminCommands::LeastPlayed, CommandFlags::BASIC);
     adminCommands_["levelinfo"] = AdminCommandPair(AdminCommands::LevelInfo, CommandFlags::EDIT);
     adminCommands_["listbans"] = AdminCommandPair(AdminCommands::ListBans, CommandFlags::LISTBANS);
-    adminCommands_["listcmds"] = AdminCommandPair(AdminCommands::ListCommands, CommandFlags::BASIC);
+    //adminCommands_["listcmds"] = AdminCommandPair(AdminCommands::ListCommands, CommandFlags::BASIC);
     adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
     adminCommands_["listmaps"] = AdminCommandPair(AdminCommands::ListMaps, CommandFlags::BASIC);
     adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
     adminCommands_["listusers"] = AdminCommandPair(AdminCommands::ListUsers, CommandFlags::EDIT);
     adminCommands_["map"] = AdminCommandPair(AdminCommands::Map, CommandFlags::MAP);
     adminCommands_["mapinfo"] = AdminCommandPair(AdminCommands::MapInfo, CommandFlags::BASIC);
+    adminCommands_["mostplayed"] = AdminCommandPair(AdminCommands::MostPlayed, CommandFlags::BASIC);
     adminCommands_["mute"] = AdminCommandPair(AdminCommands::Mute, CommandFlags::MUTE);
     adminCommands_["noclip"] = AdminCommandPair(AdminCommands::Noclip, CommandFlags::NOCLIP);
     adminCommands_["nogoto"] = AdminCommandPair(AdminCommands::NoGoto, CommandFlags::NOGOTO);
@@ -1141,7 +1174,7 @@ Commands::Commands()
     adminCommands_["spectate"] = AdminCommandPair(AdminCommands::Spectate, CommandFlags::BASIC);
     adminCommands_["unban"] = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
     adminCommands_["unmute"] = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
-    adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
+    //adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
 
     commands_["backup"] = ClientCommands::BackupLoad;
     commands_["save"] = ClientCommands::Save;
@@ -1160,6 +1193,35 @@ bool Commands::ClientCommand(gentity_t* ent, std::string commandStr)
      
     command->second(ent, GetArgs());
 
+    return true;
+}
+
+bool Commands::List(gentity_t *ent)
+{
+    ConstAdminCommandIterator it = adminCommands_.begin(),
+        end = adminCommands_.end();
+
+    BeginBufferPrint();
+    ChatPrintTo(ent, "^3help: ^7check console for more information.");
+    int i = 1;
+    std::bitset<256> perm = game.session->Permissions(ent);
+    for (; it != end; it++)
+    {
+        if (perm[it->second.second] == false)
+        {
+            continue;
+        }
+
+        BufferPrint(ent, va("%-20s ", it->first.c_str()));
+        if (i != 0 && i % 3 == 0)
+        {
+            BufferPrint(ent, "\n");
+        }
+
+        i++;
+    }
+
+    FinishBufferPrint(ent, true);
     return true;
 }
 

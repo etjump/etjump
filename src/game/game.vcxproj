@@ -208,6 +208,7 @@
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="mainext.cpp" />
+    <ClCompile Include="mapdata.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="timeruns.cpp" />
@@ -232,6 +233,7 @@
     <ClInclude Include="g_save.hpp" />
     <ClInclude Include="g_utilities.hpp" />
     <ClInclude Include="g_team.h" />
+    <ClInclude Include="mapdata.h" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="surfaceflags.h" />

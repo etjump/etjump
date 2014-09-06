@@ -3,8 +3,7 @@
 
 Database::Database()
 {
-    ID_IT_END = users_.get<0>().end();
-    GUID_IT_END = users_.get<1>().end();
+    
 }
 
 Database::~Database()
@@ -149,7 +148,7 @@ unsigned Database::GetHighestFreeId() const
 bool Database::UserExists(std::string const& guid)
 {
     ConstGuidIterator user = GetUserConst(guid);
-    if (user != GUID_IT_END)
+    if (user != GuidIterEnd())
     {
         return true;
     }
@@ -160,8 +159,8 @@ bool Database::IsBanned(std::string const& guid, std::string const& hwid)
 {
     for (unsigned i = 0; i < bans_.size(); i++)
     {
-        if (bans_[i]->guid == guid ||
-            bans_[i]->hwid == hwid)
+        if ((bans_[i]->guid.length() > 0 && bans_[i]->guid == guid) ||
+            (bans_[i]->hwid.length() > 0 && bans_[i]->hwid == hwid))
         {
             return true;
         }
@@ -173,7 +172,7 @@ bool Database::IsIpBanned(std::string const& ip)
 {
     for (unsigned i = 0; i < bans_.size(); i++)
     {
-        if (bans_[i]->ip == ip)
+        if (bans_[i]->ip.length() > 0 && bans_[i]->ip == ip)
         {
             return true;
         }
@@ -208,7 +207,7 @@ bool Database::BanUser(std::string const& name, std::string const& guid, std::st
 bool Database::UserExists(unsigned id)
 {
     ConstIdIterator user = GetUserConst(id);
-    if (user != ID_IT_END)
+    if (user != IdIterEnd())
     {
         return true;
     }
@@ -223,7 +222,7 @@ std::string Database::GetMessage() const
 bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
 {
     IdIterator user = GetUser(id);
-    if (user != ID_IT_END)
+    if (user != IdIterEnd())
     {
         (*user)->lastSeen = lastSeen;
         
@@ -253,7 +252,7 @@ bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
 bool Database::SetLevel(unsigned id, int level)
 {
     IdIterator user = GetUser(id);
-    if (user != ID_IT_END)
+    if (user != IdIterEnd())
     {
         user->get()->level = level;
         return Save(user, Updated::LEVEL);
@@ -380,7 +379,7 @@ bool Database::AddNewHWID(unsigned id, std::string const& hwid)
 {
     IdIterator user = GetUser(id);
 
-    if (user != ID_IT_END)
+    if (user != IdIterEnd())
     {
         (*user)->hwids.push_back(hwid);
 
@@ -446,7 +445,7 @@ bool Database::CloseDatabase()
 Database::User_s const* Database::GetUserData(unsigned id) const
 {
     ConstIdIterator user = GetUser(id);
-    if (user != ID_IT_END)
+    if (user != IdIterEnd())
     {
         return user->get();
     }
@@ -601,7 +600,7 @@ bool Database::CreateUsersTable()
 Database::User_s const* Database::GetUserData(std::string const& guid) const
 {
     ConstGuidIterator user = GetUser(guid);
-    if (user != GUID_IT_END)
+    if (user != GuidIterEnd())
     {
         return user->get();
     }
@@ -633,6 +632,16 @@ bool Database::InitDatabase(char const* config)
     
 
     return true;
+}
+
+Database::ConstIdIterator Database::IdIterEnd() const
+{
+    return users_.get<0>().end();
+}
+
+Database::ConstGuidIterator Database::GuidIterEnd() const
+{
+    return users_.get<1>().end();
 }
 
 Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) const

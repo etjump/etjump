@@ -2664,6 +2664,7 @@ qboolean OnClientCommand(gentity_t *ent);
 qboolean OnConsoleCommand();
 void OnGameInit();
 void OnGameShutdown();
+const char *GetRandomMap();
 
 // g_save.cpp
 void ForceSave(gentity_t *location, gentity_t *ent);

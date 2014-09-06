@@ -207,6 +207,9 @@
     <ClCompile Include="admin\database.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="mapdata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -273,6 +276,9 @@
     </ClInclude>
     <ClInclude Include="admin\database.hpp">
       <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="mapdata.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
