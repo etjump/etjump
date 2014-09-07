@@ -634,12 +634,6 @@ namespace AdminCommands
         return true;
     }
 
-    bool ListPlayers(gentity_t* ent, Arguments argv)
-    {
-        ChatPrintTo(ent, "ListPlayers is not implemented.");
-        return true;
-    }
-
     bool ListUsers(gentity_t* ent, Arguments argv)
     {
         int page = 1;
@@ -1233,9 +1227,9 @@ Commands::Commands()
     adminCommands_["levelinfo"] = AdminCommandPair(AdminCommands::LevelInfo, CommandFlags::EDIT);
     adminCommands_["listbans"] = AdminCommandPair(AdminCommands::ListBans, CommandFlags::LISTBANS);
     //adminCommands_["listcmds"] = AdminCommandPair(AdminCommands::ListCommands, CommandFlags::BASIC);
-    adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
+    //adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
     adminCommands_["listmaps"] = AdminCommandPair(AdminCommands::ListMaps, CommandFlags::BASIC);
-    adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
+    //adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
     adminCommands_["listusers"] = AdminCommandPair(AdminCommands::ListUsers, CommandFlags::EDIT);
     adminCommands_["map"] = AdminCommandPair(AdminCommands::Map, CommandFlags::MAP);
     adminCommands_["mapinfo"] = AdminCommandPair(AdminCommands::MapInfo, CommandFlags::BASIC);

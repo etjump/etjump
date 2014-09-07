@@ -50,7 +50,7 @@ void Session::UpdateLastSeen(int clientNum)
 
         lastSeen = static_cast<unsigned>(t);
 
-        G_LogPrintf("Updating client's last seen to: %s\n", TimeStampToString(lastSeen));
+        G_DPrintf("Updating client's last seen to: %s\n", TimeStampToString(lastSeen).c_str());
 
         if (!game.database->UpdateLastSeen(clients_[clientNum].user->id, lastSeen))
         {
@@ -149,23 +149,23 @@ void Session::GetUserAndLevelData(int clientNum)
         }
         else
         {
-            G_LogPrintf("New user connected. Added user to the user database\n");
+            G_DPrintf("New user connected. Added user to the user database\n");
             clients_[clientNum].user = game.database->GetUserData(clients_[clientNum].guid);
         }
     }
     else
     {
-        G_LogPrintf("Old user connected. Getting user data from the database.\n");
+        G_DPrintf("Old user connected. Getting user data from the database.\n");
 
         clients_[clientNum].user = game.database->GetUserData(clients_[clientNum].guid);
         if (clients_[clientNum].user)
         {
-            G_LogPrintf("User data found: %s\n", clients_[clientNum].user->ToChar());
+            G_DPrintf("User data found: %s\n", clients_[clientNum].user->ToChar());
 
             if (find(clients_[clientNum].user->hwids.begin(), clients_[clientNum].user->hwids.end(), clients_[clientNum].hwid)
                 == clients_[clientNum].user->hwids.end())
             {
-                G_LogPrintf("New HWID detected. Adding HWID %s to list.\n", clients_[clientNum].hwid.c_str());
+                G_DPrintf("New HWID detected. Adding HWID %s to list.\n", clients_[clientNum].hwid.c_str());
 
                 if (!game.database->AddNewHWID(clients_[clientNum].user->id, clients_[clientNum].hwid))
                 {
@@ -259,7 +259,6 @@ void Session::OnClientDisconnect(int clientNum)
     clients_[clientNum].user = NULL;
     clients_[clientNum].level = NULL;
     clients_[clientNum].permissions.reset();
-    
 }
 
 void Session::PrintGreeting(gentity_t* ent)

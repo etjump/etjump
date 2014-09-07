@@ -626,7 +626,7 @@ bool Database::LoadBans()
             val = (const char*)(sqlite3_column_text(stmt, 8));
             newBan->reason = val ? val : "";
             bans_.push_back(newBan);
-            G_LogPrintf("User: %s\n", newBan->ToChar());
+            G_DPrintf("Ban: %s\n", newBan->ToChar());
             break;
         case SQLITE_BUSY:
         case SQLITE_ERROR:
@@ -682,7 +682,7 @@ bool Database::LoadUsers()
             val = (const char*)(sqlite3_column_text(stmt, 8));
             newUser->greeting = val ? val : "";
             users_.insert(newUser);
-            G_LogPrintf("User: %s\n", newUser->ToChar());
+            G_DPrintf("User: %s\n", newUser->ToChar());
             break;
         case SQLITE_BUSY:
         case SQLITE_ERROR:

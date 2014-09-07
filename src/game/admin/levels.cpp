@@ -216,7 +216,7 @@ void Levels::PrintLevelInfo(gentity_t* ent, int level)
         if (it->get()->level == level)
         {
             ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
-            ConsolePrintTo(ent, va("^5Level: ^7%d\nName: ^7%s\nCommands: ^7%s\nGreeting: ^7%s\n",
+            ConsolePrintTo(ent, va("^5Level: ^7%d\n^5Name: ^7%s\n^5Commands: ^7%s\n^5Greeting: ^7%s",
                 level, it->get()->name.c_str(), it->get()->commands.c_str(), it->get()->greeting.c_str()));
             return;
         }

@@ -85,7 +85,7 @@ bool MapData::Initialize()
         newMap->lastPlayed = sqlite3_column_int(stmt, 2);
         newMap->secondsPlayed = sqlite3_column_int(stmt, 3);
 
-        G_LogPrintf("Loaded map: %s\n", newMap->ToChar());
+        G_DPrintf("Loaded map: %s\n", newMap->ToChar());
 
         maps_.insert(newMap);
 
