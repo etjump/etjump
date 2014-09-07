@@ -155,6 +155,144 @@ bool Database::UserExists(std::string const& guid)
     return false;
 }
 
+bool Database::UserInfo(gentity_t* ent, int id)
+{
+    ConstIdIterator user = GetUserConst(id);
+
+    if (user == users_.get<0>().end())
+    {
+        ChatPrintTo(ent, "^3userinfo: ^7no user found with id " + ToString(id));
+        return false;
+    }
+
+    ChatPrintTo(ent, "^3userinfo: ^7check console for more information.");
+    BeginBufferPrint();
+    //unsigned id;
+    //std::string guid;
+
+    //// non indexed properties
+    //int level;
+    //unsigned lastSeen;
+    //std::string name;
+    //std::string title;
+    //std::string commands;
+    //std::string greeting;
+    //std::vector<std::string> hwids;
+    //unsigned updated;
+    BufferPrint(ent, va("^5ID: ^7%d\n^5GUID: ^7%s\n^5Level: ^7%d\n^5Last seen:^7 %s\n^5Name: ^7%s\n^5Title: ^7%s\n^5Commands: ^7%s\n^5Greeting: ^7%s\n",
+        user->get()->id, user->get()->guid.c_str(), user->get()->level, TimeStampToString(user->get()->lastSeen).c_str(), user->get()->name.c_str(), user->get()->title.c_str(), user->get()->commands.c_str(), user->get()->greeting.c_str()));
+
+    FinishBufferPrint(ent, false);
+    return true;
+}
+
+bool Database::ListUsers(gentity_t* ent, int page)
+{
+    const int USERS_PER_PAGE = 20;
+    int size = users_.size();
+    int pages = (size / USERS_PER_PAGE) + 1;
+    int printed = 0;
+    int i = (page - 1) * USERS_PER_PAGE;
+    
+    if (page > pages)
+    {
+        ChatPrintTo(ent, "^3listusers: ^7no page #" + ToString(page));
+        return false;
+    }
+
+    ConstIdIterator it = users_.get<0>().begin();
+    ConstIdIterator end = users_.get<0>().end();
+
+    ChatPrintTo(ent, "^3listusers: ^7check console for more information.");
+    BeginBufferPrint();
+
+    BufferPrint(ent, va("Listing page %d/%d\n", page, pages));
+    int curr = 0;
+    time_t t;
+    time(&t);
+    BufferPrint(ent, va("%-5s %-10s %-15s %-36s\n", "ID", "Level", "Last seen", "Name"));
+    while (it != end)
+    {
+        if (curr >= i && curr < i + USERS_PER_PAGE)
+        {
+            BufferPrint(ent, va("%-5d %-10d %-15s %-36s\n", it->get()->id, it->get()->level, (TimeStampDifferenceToString(static_cast<unsigned>(t) - it->get()->lastSeen) + " ago").c_str(), it->get()->name.c_str()));
+        }
+
+        curr++;
+        it++;
+    }
+    FinishBufferPrint(ent, false);
+
+    return true;
+}
+
+bool Database::Unban(gentity_t* ent, int id)
+{
+    for (int i = 0, len = bans_.size(); i < len; i++)
+    {
+        if (bans_[i]->id == id)
+        {
+            sqlite3_stmt *stmt = NULL;
+            if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
+            {
+                return false;
+            }
+
+            if (!BindInt(stmt, 1, id))
+            {
+                return false;
+            }
+
+            int rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE)
+            {
+                message_ = sqlite3_errmsg(db_);
+                return false;
+            }
+
+            bans_.erase(bans_.begin() + i);
+
+            return true;
+        }
+    }
+    message_ = "no ban with id " + ToString(id);
+    return false;
+}
+
+bool Database::ListBans(gentity_t* ent, int page)
+{
+    const int BANS_PER_PAGE = 10;
+    // 0-19, 20-39
+    int i = (page - 1) * BANS_PER_PAGE;
+    int printed = 0;
+    int size = bans_.size();
+    int pages = (size / BANS_PER_PAGE) + 1;
+
+    if (page > pages)
+    {
+        ChatPrintTo(ent, "^3listbans: ^7no page #" + ToString(page));
+    }
+
+    ChatPrintTo(ent, "^3listbans: ^7check console for more information.");
+    BeginBufferPrint();
+    BufferPrint(ent, va("^7Showing page %d/%d\n", page, pages));
+    for (; i < size; i++, printed++)
+    {
+        if (printed == BANS_PER_PAGE)
+        {
+            break;
+        }
+        BufferPrint(ent, va("%d %s ^7%s %s %s %s %s\n",
+            bans_[i]->id, bans_[i]->name.c_str(),
+            bans_[i]->banDate.c_str(),
+            bans_[i]->bannedBy.c_str(),
+            bans_[i]->expires != 0 ? TimeStampToString(bans_[i]->expires).c_str() : "PERMANENTLY",
+            bans_[i]->reason.c_str()));
+    }
+    FinishBufferPrint(ent, false);
+    return true;
+}
+
 bool Database::IsBanned(std::string const& guid, std::string const& hwid)
 {
     for (unsigned i = 0; i < bans_.size(); i++)

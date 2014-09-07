@@ -1055,7 +1055,7 @@ qboolean	ConsoleCommand( void ) {
 
     if (!Q_stricmp(cmd, "-v"))
     {
-        G_Printf("Version: 2.0.32\n");
+        G_Printf("Version: 2.0.39\n");
         return qtrue;
     }
 

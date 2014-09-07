@@ -371,6 +371,8 @@ namespace AdminCommands
 
         ChatPrintTo(ent, "^3deletelevel: ^7deleted level.");
 
+        G_LogPrintf("TODO: Remove users levels with level\n");
+
         return true;
     }
 
@@ -391,14 +393,14 @@ namespace AdminCommands
         int updated = 0;
         int open = 0;
 
-        int level = 0;
+        int adminLevel = 0;
         std::string commands;
         std::string greeting;
         std::string title;
 
-        if (!ToInt(argv->at(1), level))
+        if (!ToInt(argv->at(1), adminLevel))
         {
-            ChatPrintTo(ent, va("^3editlevel: ^7%d is not an integer.", level));
+            ChatPrintTo(ent, va("^3editlevel: ^7%d is not an integer.", adminLevel));
             return false;
         }
 
@@ -471,10 +473,16 @@ namespace AdminCommands
             boost::trim_right(title);
         }
 
-        game.levels->Edit(level, title, commands, greeting, updated);
-        G_LogPrintf("TODO: ParsePermissions...\n");
+        game.levels->Edit(adminLevel, title, commands, greeting, updated);
+        
+        for (int i = 0; i < level.numConnectedClients; i++)
+        {
+            int num = level.sortedClients[i];
 
-        ChatPrintTo(ent, va("^3editlevel: ^7updated level %d.", level));
+            game.session->ParsePermissions(num);
+        }
+
+        ChatPrintTo(ent, va("^3editlevel: ^7updated level %d.", adminLevel));
 
         return true;
     }
@@ -598,7 +606,19 @@ namespace AdminCommands
 
     bool ListBans(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "ListBans is not implemented.");
+        int page = 1;
+
+        if (argv->size() > 1)
+        {
+            if (!ToInt(argv->at(1), page))
+            {
+                ChatPrintTo(ent, "^3listbans: ^7page is not a number.");
+                return false;
+            }
+        }
+
+        game.database->ListBans(ent, page);
+
         return true;
     }
 
@@ -622,7 +642,18 @@ namespace AdminCommands
 
     bool ListUsers(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "ListUsers is not implemented.");
+        int page = 1;
+
+        if (argv->size() > 1)
+        {
+            if (!ToInt(argv->at(1), page))
+            {
+                ChatPrintTo(ent, "^3listusers: ^7page was not a number.");
+                return false;
+            }
+        }
+
+        game.database->ListUsers(ent, page);
         return true;
     }
 
@@ -1093,7 +1124,27 @@ namespace AdminCommands
 
     bool Unban(gentity_t* ent, Arguments argv)
     {
-        G_LogPrintf("Unban");
+
+        if (argv->size() == 1)
+        {
+            PrintManual(ent, "unban");
+            return false;
+        }
+
+        int id;
+        if (!ToInt(argv->at(1), id))
+        {
+            ChatPrintTo(ent, "^3unban: ^7id is not a number.");
+            return false;
+        }
+
+        if (!game.database->Unban(ent, id))
+        {
+            ChatPrintTo(ent, "^3unban: ^7" + game.database->GetMessage());
+            return false;
+        }
+
+        ChatPrintTo(ent, "^3unban: ^7removed ban with id " + argv->at(1));
         return true;
     }
 
@@ -1137,6 +1188,21 @@ namespace AdminCommands
 
     bool UserInfo(gentity_t* ent, Arguments argv)
     {
+        if (argv->size() == 1)
+        {
+            PrintManual(ent, "userinfo");
+            return false;
+        }
+
+        int id;
+        if (!ToInt(argv->at(1), id))
+        {
+            ChatPrintTo(ent, "^3userinfo: ^7id was not a number.");
+            return false;
+        }
+
+        game.database->UserInfo(ent, id);
+
         return true;
     }
 
@@ -1188,7 +1254,7 @@ Commands::Commands()
     adminCommands_["spectate"] = AdminCommandPair(AdminCommands::Spectate, CommandFlags::BASIC);
     adminCommands_["unban"] = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
     adminCommands_["unmute"] = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
-    //adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
+    adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
 
     commands_["backup"] = ClientCommands::BackupLoad;
     commands_["save"] = ClientCommands::Save;

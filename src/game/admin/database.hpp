@@ -153,6 +153,10 @@ public:
         const std::string& banDate, unsigned expires, const std::string& reason);
     bool IsIpBanned(const std::string& ip);
     bool IsBanned(const std::string& guid, const std::string& hwid);
+    bool ListBans(gentity_t *ent, int page);
+    bool Unban(gentity_t *ent, int id);
+    bool ListUsers(gentity_t *ent, int page);
+    bool UserInfo(gentity_t *ent, int id);
 private:
     unsigned GetHighestFreeId() const;
     bool AddUserToSQLite(User user);

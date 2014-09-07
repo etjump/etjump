@@ -144,10 +144,11 @@ bool Levels::SortByLevel(const boost::shared_ptr<Level> lhs, const boost::shared
 bool Levels::WriteToConfig()
 {
     fileHandle_t f = 0;
-    trap_FS_FOpenFile(GetPath(g_levelConfig.string).c_str(), &f, FS_WRITE);
+    int len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE);
 
-    std::sort(levels_.begin(), levels_.end(), SortByLevel);
 
+
+    sort(levels_.begin(), levels_.end(), SortByLevel);
     for (ConstIter it = levels_.begin(); it != levels_.end(); it++)
     {
         trap_FS_Write("[level]\n", 8, f);
@@ -215,7 +216,7 @@ void Levels::PrintLevelInfo(gentity_t* ent, int level)
         if (it->get()->level == level)
         {
             ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
-            ConsolePrintTo(ent, va("^5Level: %d\nName: %s\nCommands: %s\nGreeting: %s\n",
+            ConsolePrintTo(ent, va("^5Level: ^7%d\nName: ^7%s\nCommands: ^7%s\nGreeting: ^7%s\n",
                 level, it->get()->name.c_str(), it->get()->commands.c_str(), it->get()->greeting.c_str()));
             return;
         }

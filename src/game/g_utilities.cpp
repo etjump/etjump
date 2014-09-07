@@ -557,22 +557,22 @@ std::string TimeStampDifferenceToString(int diff)
 
     if(diff < HOUR)
     {
-        return ToString(diff/MINUTE) + " minute(s)";
+        return ToString(diff/MINUTE) + " minutes";
     } else if(diff < DAY)
     {
-        return ToString(diff/HOUR) + " hour(s)";
+        return ToString(diff/HOUR) + " hours";
     } else if(diff < WEEK)
     {
-        return ToString(diff/DAY) + " day(s)";
+        return ToString(diff/DAY) + " days";
     } else if(diff >= WEEK && diff < MONTH)
     {
-        return ToString(diff/WEEK) + " week(s)";
+        return ToString(diff/WEEK) + " weeks";
     } else if(diff >= MONTH && diff < YEAR)
     {
-        return ToString(diff/MONTH) + " month(s)";
+        return ToString(diff/MONTH) + " months";
     } else if(diff >= YEAR)
     {
-        return ToString(diff/YEAR) + " year(s)";
+        return ToString(diff/YEAR) + " years";
     }
     return "";
 }

@@ -47,8 +47,9 @@ public:
     void PrintFinger(gentity_t* ent, gentity_t* target);
     bool Ban(gentity_t *ent, gentity_t *player, unsigned expires, std::string reason);
     bool IsIpBanned(int clientNum);
-private:
     void ParsePermissions(int clientNum);
+private:
+    
 
     void UpdateLastSeen(int clientNum);
     Client clients_[MAX_CLIENTS];
