@@ -25,11 +25,14 @@ void MapData::Shutdown()
 
         if (!BindInt(stmt, 1, static_cast<unsigned>(curr)) ||
             !BindInt(stmt, 2, secondsPlayed) ||
-            !BindString(stmt, 3, level.rawmapname))
+            !BindString(stmt, 3, name.c_str()))
         {
             sqlite3_close(db_);
+            G_LogPrintf("Failed to update map statistics: %s.\n", sqlite3_errmsg(db_));
             return;
         }
+
+        G_LogPrintf("Updating seconds played on %s to %d\n", name.c_str(), secondsPlayed);
 
         int rc = sqlite3_step(stmt);
         if (rc != SQLITE_DONE)
@@ -155,6 +158,7 @@ void MapData::ListMaps(gentity_t *ent)
 
         if (printed != 0 && printed % 3 == 0)
         {
+            printed = 0;
             BufferPrint(ent, "\n");
         }
 

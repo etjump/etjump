@@ -391,7 +391,7 @@ bool Database::SetLevel(unsigned id, int level)
 {
     IdIterator user = GetUser(id);
     if (user != IdIterEnd())
-    {
+    {   
         user->get()->level = level;
         return Save(user, Updated::LEVEL);
     }

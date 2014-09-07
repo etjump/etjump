@@ -238,7 +238,7 @@ namespace AdminCommands
             return false;
         }
 
-        if (argv->size() != 2)
+        if (argv->size() == 1)
         {
             PrintManual(ent, "8ball");
             return false;
@@ -330,6 +330,8 @@ namespace AdminCommands
             ChatPrintTo(ent, "^3ban: ^7" + game.session->GetMessage());
             return false;
         }
+
+        trap_DropClient(ClientNum(player), "You are banned", 0);
         return true;
     }
 

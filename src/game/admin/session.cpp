@@ -322,6 +322,8 @@ bool Session::SetLevel(gentity_t* target, int level)
         return false;
     }
 
+    clients_[ClientNum(target)].level = game.levels->GetLevel(level);
+
     ParsePermissions(ClientNum(target));
     return true;
 }

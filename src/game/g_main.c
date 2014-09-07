@@ -1840,6 +1840,8 @@ G_ShutdownGame
 */
 void G_ShutdownGame( int restart ) {
 
+    OnGameShutdown();
+
 	// Arnout: gametype latching
 	if	( 
 		( ( g_gametype.integer == GT_WOLF || g_gametype.integer == GT_WOLF_CAMPAIGN ) && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_GT_WOLF)) ||
@@ -1876,8 +1878,6 @@ void G_ShutdownGame( int restart ) {
         level.bugReportFile = 0;
     }
 #endif
-
-    OnGameShutdown();
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData( restart );
@@ -2407,7 +2407,6 @@ void ExitLevel (void) {
 		}
 	}
 
-    OnGameShutdown();
     // we need to do this here before chaning to CON_CONNECTING
 	G_WriteSessionData( qfalse );
     
