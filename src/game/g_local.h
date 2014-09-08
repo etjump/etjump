@@ -1913,6 +1913,8 @@ extern vmCvar_t g_lastVisitedMessage;
 extern vmCvar_t g_mapDatabase;
 extern vmCvar_t g_banDatabase;
 
+extern vmCvar_t troll_speed;
+
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

@@ -55,7 +55,7 @@ void SaveSystem::Save(gentity_t *ent) {
     if(argv->size() > 1) {
         ToInt( (*argv)[1] , position );
 
-        if(position < 0 || position > MAX_SAVED_POSITIONS) {
+        if(position < 0 || position >= MAX_SAVED_POSITIONS) {
             CPTo(ent, "Invalid position.");
             return;
         }

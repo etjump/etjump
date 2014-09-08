@@ -5399,6 +5399,7 @@ void PM_Sprint( void ) {
 #ifndef CGAMEDLL
 
 void AC_LogCheat( int clientNum );
+int AC_SetSpeed();
 
 #endif
 
@@ -5411,6 +5412,7 @@ PmoveSingle
 void trap_SnapVector( float *v );
 
 void PmoveSingle (pmove_t *pmove) {
+
 	// RF, update conditional values for anim system
 	BG_AnimUpdatePlayerStateConditions( pmove );
 

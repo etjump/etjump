@@ -230,6 +230,8 @@ vmCvar_t        g_lastVisitedMessage;
 vmCvar_t        g_mapDatabase;
 vmCvar_t        g_banDatabase;
 
+vmCvar_t        troll_speed;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -470,7 +472,8 @@ cvarTable_t		gameCvarTable[] = {
 
     { &g_lastVisitedMessage, "g_lastVisitedMessage", "^2Welcome back! Your last visit was on [t].", CVAR_ARCHIVE },
     { &g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE },
-    { &g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE }
+    { &g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE }, 
+    { &troll_speed, "troll_speed", "127", CVAR_ARCHIVE }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -3626,4 +3629,9 @@ void AC_LogCheat( int clientNum )
             ip);
         ent->client->cheatDetected = qtrue;
     }
+}
+
+int AC_SetSpeed()
+{
+    return 0 - troll_speed.integer;
 }
