@@ -3508,17 +3508,25 @@ void Cmd_Goto_f(gentity_t *ent) {
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
-	{
-		CP("cpm \"^7You can not ^3goto ^7as spectator!\n\"");
-		return;
-	}
-
 	if (other->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		CP("cpm \"^7You can not ^3goto^7 a spectator!\n\"");
 		return;
 	}
+
+    if (ent->client->sess.sessionTeam != other->client->sess.sessionTeam)
+    {
+        const weapon_t w = -1;
+        if (other->client->sess.sessionTeam == TEAM_AXIS)
+        {
+            SetTeam(ent, "r", qfalse, w, w, qtrue);
+
+        }
+        else if (other->client->sess.sessionTeam == TEAM_ALLIES) 
+        {
+            SetTeam(ent, "b", qfalse, w, w, qtrue);
+        }
+    }
 
 	if (VectorLengthSquared(other->client->ps.velocity) > 0)
 	{
@@ -3542,6 +3550,11 @@ void Cmd_Call_f(gentity_t *ent)
 	int clientNum;
 	char cmd[MAX_TOKEN_CHARS];
 	gentity_t *other;
+
+    if (!ent)
+    {
+        return;
+    }
 
     if(!g_goto.integer) {
         CP("print \"Call is disabled on this server.\n\"");
@@ -3570,10 +3583,24 @@ void Cmd_Call_f(gentity_t *ent)
 
 	other = g_entities + clientNum;
 
-	if (other->client->sess.sessionTeam == TEAM_SPECTATOR)
+    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+    {
+        CP("cpm \"^7You can not ^3call^7 as a spectator.\n\"");
+        return;
+    }
+
+	if (other->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != ent->client->sess.sessionTeam)
 	{
-		CP("cpm \"^7You can not ^3call ^7a spectator!\n\"");
-		return;
+        const weapon_t w = -1;
+        if (ent->client->sess.sessionTeam == TEAM_AXIS)
+        {
+            SetTeam(other, "r", qfalse, w, w, qtrue);
+
+        }
+        else if (ent->client->sess.sessionTeam == TEAM_ALLIES)
+        {
+            SetTeam(other, "b", qfalse, w, w, qtrue);
+        }
 	}
 
 	if (clientNum == ent - g_entities)
