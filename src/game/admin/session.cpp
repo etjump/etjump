@@ -90,6 +90,15 @@ void Session::ReadSessionData(int clientNum)
     CharPtrToString(hwidBuf, clients_[clientNum].hwid);
 
     GetUserAndLevelData(clientNum);
+
+    if (!clients_[clientNum].user)
+    {
+        G_Error("client %d has no user\n", clientNum);
+    }
+    else if (!clients_[clientNum].level)
+    {
+        G_Error("client %d has no level.\n", clientNum);
+    }
 }
 
 bool Session::GuidReceived(gentity_t *ent)
@@ -198,6 +207,7 @@ void Session::GetUserAndLevelData(int clientNum)
 
 void Session::ParsePermissions(int clientNum)
 {
+    clients_[clientNum].permissions.reset();
     // First parse level commands then user commands (as user commands override level ones)
     std::string commands = clients_[clientNum].level->commands + clients_[clientNum].user->commands;
 
@@ -273,7 +283,7 @@ void Session::PrintGreeting(gentity_t* ent)
         boost::replace_all(greeting, "[n]", ent->client->pers.netname);
         boost::replace_all(greeting, "[t]", cl->user->GetLastSeenString());
         boost::replace_all(greeting, "[d]", cl->user->GetLastVisitString());
-        G_LogPrintf("Printing greeting %s\n", greeting.c_str());
+        G_DPrintf("Printing greeting %s\n", greeting.c_str());
         ChatPrintAll(greeting);
     }
     else
@@ -289,7 +299,7 @@ void Session::PrintGreeting(gentity_t* ent)
             boost::replace_all(greeting, "[n]", ent->client->pers.netname);
             boost::replace_all(greeting, "[t]", cl->user->GetLastSeenString());
             boost::replace_all(greeting, "[d]", cl->user->GetLastVisitString());
-            G_LogPrintf("Printing greeting %s\n", greeting.c_str());
+            G_DPrintf("Printing greeting %s\n", greeting.c_str());
             ChatPrintAll(greeting);
         }
     }
@@ -457,4 +467,9 @@ Session::Client::Client():
 guid(""), hwid("")
 {
 
+}
+
+bool Session::HasPermission(gentity_t *ent, char flag) 
+{
+    return clients_[ClientNum(ent)].permissions[flag];
 }

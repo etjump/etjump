@@ -51,7 +51,6 @@ bool Database::BindInt(sqlite3_stmt* stmt, int index, int val)
 
 bool Database::BindString(sqlite3_stmt* stmt, int index, const std::string& val)
 {
-    G_LogPrintf("Binding %s to index %d\n", val.c_str(), index);
     int rc = sqlite3_bind_text(stmt, index, val.c_str(), val.length(), SQLITE_STATIC);
     if (rc != SQLITE_OK)
     {
@@ -106,7 +105,7 @@ bool Database::AddUserToSQLite(User user)
     }
 
 
-    G_LogPrintf("HWIDS: %s\n", boost::algorithm::join(user->hwids, ",").c_str());
+    G_DPrintf("HWIDS: %s\n", boost::algorithm::join(user->hwids, ",").c_str());
     std::string hwids = boost::algorithm::join(user->hwids, ",");
 
     if (!BindInt(stmt, 1, user->id) ||
@@ -576,6 +575,7 @@ bool Database::AddUser(std::string const& guid, std::string const& hwid, std::st
 bool Database::CloseDatabase()
 {
     users_.clear();
+    bans_.clear();
     sqlite3_close(db_);
     return true;
 }
@@ -749,6 +749,9 @@ bool Database::InitDatabase(char const* config)
 {
     int rc = sqlite3_open(GetPath(config).c_str(), &db_);
     char *errMsg = NULL;
+
+    users_.clear();
+    bans_.clear();
 
     if (rc)
     {

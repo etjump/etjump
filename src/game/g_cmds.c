@@ -1649,6 +1649,8 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
 		}
 	}
+
+    AdminCommandCheck(ent);
 }
 
 
@@ -4088,6 +4090,11 @@ void ClientCommand(int clientNum)
 		Cmd_FollowCycle_f(ent, -1);
 		return;
 	}
+
+    if (OnConnectedClientCommand(ent))
+    {
+        return;
+    }
 
 	// regular no intermission commands
 	for (i = 0 ; i < sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0]) ; i++) {

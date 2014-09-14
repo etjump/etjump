@@ -1312,7 +1312,19 @@ bool Commands::AdminCommand(gentity_t* ent)
         arg = SayArgv(1);
         skip = 1;
     }
+    else
+    {
+        if (ent && !game.session->HasPermission(ent, '/'))
+        {
+            return false;
+        }
+    }
     Arguments argv = GetSayArgs(skip);
+
+    for (int i = 0; i < argv->size(); i++)
+    {
+        G_LogPrintf("arg%d: %s\n", i, argv->at(i).c_str());
+    }
 
     if (arg.length() == 0)
     {
@@ -1361,8 +1373,10 @@ bool Commands::AdminCommand(gentity_t* ent)
     if (foundCommands.size() == 1)
     {
         foundCommands[0]->second.first(ent, argv);
+        return true;
     }
-    else if (foundCommands.size() > 1)
+    
+    if (foundCommands.size() > 1)
     {
         ChatPrintTo(ent, "^3server: ^7multiple matching commands found. Check console for more information");
         BeginBufferPrint();
@@ -1374,4 +1388,11 @@ bool Commands::AdminCommand(gentity_t* ent)
     }
 
     return false;
+}
+
+qboolean AdminCommandCheck(gentity_t *ent)
+{
+    G_LogPrintf("AdminCommandCheck from G_Say called.\n");
+
+    return game.commands->AdminCommand(ent) ? qtrue : qfalse;
 }

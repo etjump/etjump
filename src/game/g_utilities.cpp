@@ -281,7 +281,7 @@ Arguments GetArgs()
 
 Arguments GetSayArgs( int start /*= 0*/ )
 {
-    int argc = trap_Argc();
+    int argc = Q_SayArgc();
 
     static vector<string> argv;
     argv.clear();
@@ -293,7 +293,7 @@ Arguments GetSayArgs( int start /*= 0*/ )
 
     for(int i = start; i < argc; i++) {
         char arg[MAX_TOKEN_CHARS];
-        trap_Argv(i, arg, sizeof(arg));
+        Q_SayArgv(i, arg, sizeof(arg));
         argv.push_back(arg);
     }
     return & argv;

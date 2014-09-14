@@ -102,30 +102,16 @@ void OnGameShutdown()
     game.mapData->Shutdown();
 }
 
-// Returning qtrue means no other commands will be checked
-qboolean OnClientCommand(gentity_t *ent)
+qboolean OnConnectedClientCommand(gentity_t *ent) 
 {
-    
     G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
     Arguments argv = GetArgs();
     std::string command = (*argv)[0];
     boost::to_lower(command);
 
-    if ((*argv)[0] == "etguid")
-    {
-        game.session->GuidReceived(ent);
-        return qtrue;
-    }
-    
     if (ent->client->pers.connected != CON_CONNECTED) {
         return qfalse;
-    }
-
-    if ((*argv)[0] == "guid")
-    {
-        game.session->PrintGuid(ent);
-        return qtrue;
     }
 
     if (game.commands->ClientCommand(ent, command))
@@ -141,6 +127,30 @@ qboolean OnClientCommand(gentity_t *ent)
     return qfalse;
 }
 
+// Returning qtrue means no other commands will be checked
+qboolean OnClientCommand(gentity_t *ent)
+{
+    
+    G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
+
+    Arguments argv = GetArgs();
+    std::string command = (*argv)[0];
+    boost::to_lower(command);
+
+    if ((*argv)[0] == "etguid")
+    {
+        game.session->GuidReceived(ent);
+        return qtrue;
+    }
+
+    return qfalse;
+}
+
+/*
+=======================
+Server console commands
+=======================
+*/
 qboolean OnConsoleCommand()
 {
     G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));

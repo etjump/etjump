@@ -44,11 +44,15 @@ void MapData::Shutdown()
         G_LogPrintf("Couldn't find map with name %s\n", level.rawmapname);
     }
 
+    maps_.clear();
+
     sqlite3_close(db_);
 }
 
 bool MapData::Initialize()
 {
+    // Just to make sure
+    maps_.clear();
     int rc = sqlite3_open(GetPath("maps.db").c_str(), &db_);
     if (rc != SQLITE_OK)
     {

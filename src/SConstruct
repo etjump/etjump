@@ -241,6 +241,7 @@ if ( OS == 'Darwin' ):
 BASECPPFLAGS.append( '-pipe' )
 # warn all
 BASECPPFLAGS.append( '-Wall' )
+BASECPPFLAGS.append( '-Wno-format' )
 # don't wrap gcc messages
 BASECPPFLAGS.append( '-fmessage-length=0' )
 BASELINKFLAGS.append( '-lstdc++' )

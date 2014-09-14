@@ -2662,11 +2662,14 @@ int ClientNum(gentity_t *ent);
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
 void OnClientBegin(gentity_t *ent);
 void OnClientDisconnect(gentity_t *ent);
+qboolean OnConnectedClientCommand(gentity_t *ent);
 qboolean OnClientCommand(gentity_t *ent);
 qboolean OnConsoleCommand();
 void OnGameInit();
 void OnGameShutdown();
 const char *GetRandomMap();
+qboolean AdminCommandCheck(gentity_t *ent);
+
 
 // g_save.cpp
 void ForceSave(gentity_t *location, gentity_t *ent);

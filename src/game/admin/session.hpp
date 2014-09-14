@@ -48,6 +48,7 @@ public:
     bool Ban(gentity_t *ent, gentity_t *player, unsigned expires, std::string reason);
     bool IsIpBanned(int clientNum);
     void ParsePermissions(int clientNum);
+    bool HasPermission(gentity_t *ent, char flag);
 private:
     
 
