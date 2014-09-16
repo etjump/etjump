@@ -1,5 +1,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 #include <string>
 #include <vector>
 
@@ -593,4 +594,13 @@ bool ValidGuid(std::string guid)
         }
     }
     return true;
+}
+
+const char *EscapeString(const char *in)
+{
+    string str = in;
+    boost::replace_all(str, "=", "\x19=");
+    static char out[MAX_TOKEN_CHARS] = "\0";
+    Q_strncpyz(out, str.c_str(), sizeof(out));
+    return out;
 }

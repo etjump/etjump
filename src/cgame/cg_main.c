@@ -3130,6 +3130,8 @@ cvarTable_t		cvarTable[] = {
             *out = '\0';
       }
 
+      // Decodes =-encoded stuff. If 0x19 is found, ignored the next
+      // character so ='s can be escaped.
       void CG_DecodeQP(char *line)
       {
             char *o = line;
@@ -3137,33 +3139,42 @@ cvarTable_t		cvarTable[] = {
 
             while (*line)
             {
-                  if (*line == '=')
-                  {
-                        line++;
+                if (*line == 0x19)
+                {
+                    line++;
+                    *o++ = *line++;
+                    continue;
+                }
+                if (*line == '=')
+                {
+                    line++;
 
-                        if (!*line || !*(line + 1))
-                              break;
+                    if (!*line || !*(line + 1))
+                            break;
 
-                        t = 0;
-                        if (!isxdigit(*line))
-                        {
-                              line += 2;
-                              continue;
-                        }
-                        t = gethex(*line) * 16;
+                    t = 0;
+                    if (!isxdigit(*line))
+                    {
+                            line += 2;
+                            continue;
+                    }
+                    t = gethex(*line) * 16;
 
-                        line++;
-                        if (!isxdigit(*line))
-                        {
-                              line++;
-                              continue;
-                        }
-                        t += gethex(*line);
-                        line++;
-                        *o++ = t;
-                  }
-                  else
-                        *o++ = *line++;
+                    line++;
+                    if (!isxdigit(*line))
+                    {
+                            line++;
+                            continue;
+                    }
+                    t += gethex(*line);
+                    line++;
+                    *o++ = t;
+                }
+                else
+                {
+                    *o++ = *line++;
+                    
+                }
             }
             *o = '\0';
       }

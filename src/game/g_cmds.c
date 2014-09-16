@@ -1591,6 +1591,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	char		name[64];
 	// don't let text be too long for malicious reasons
 	char		text[MAX_SAY_TEXT];
+    const char  *escapedName = NULL;
 	qboolean	localize = qfalse;
 	char		*loc;
 
@@ -1624,21 +1625,23 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	}
 
 	Q_strncpyz(text, chatText, sizeof(text));
+    escapedName = EscapeString(name);
 
 	if (target)
 	{
 		if (!COM_BitCheck(target->client->sess.ignoreClients, ent - g_entities))
 		{
-			G_SayTo(ent, target, mode, color, name, text, localize, encoded);
+			G_SayTo(ent, target, mode, color, escapedName, text, localize, encoded);
 		}
 		return;
 	}
 
-	// echo the text to the console
-	if (g_dedicated.integer)
-	{
-		G_Printf("%s%s\n", name, text);
-	}
+    // Zero: do we really need double text on console?
+	//// echo the text to the console
+	//if (g_dedicated.integer)
+	//{
+	//	G_Printf("%s%s\n", name, text);
+	//}
 
 	// send it to all the apropriate clients
 	for (j = 0; j < level.numConnectedClients; j++)
@@ -1646,7 +1649,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 		other = &g_entities[level.sortedClients[j]];
 		if (!COM_BitCheck(other->client->sess.ignoreClients, ent - g_entities))
 		{
-			G_SayTo(ent, other, mode, color, name, text, localize, encoded);
+			G_SayTo(ent, other, mode, color, escapedName, text, localize, encoded);
 		}
 	}
 

@@ -2166,9 +2166,10 @@ static void CG_ServerCommand( void ) {
 		}
 
 		Q_strncpyz(text, s, MAX_SAY_TEXT);
-		CG_RemoveChatEscapeChar(text);
 		if (enc)
 			CG_DecodeQP(text);
+        CG_RemoveChatEscapeChar(text);
+
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
 		CG_Printf("%s\n", text);
 
@@ -2189,9 +2190,10 @@ static void CG_ServerCommand( void ) {
 		}
 
 		Q_strncpyz(text, s, MAX_SAY_TEXT);
-		CG_RemoveChatEscapeChar(text);
 		if (enc)
 			CG_DecodeQP(text);
+        CG_RemoveChatEscapeChar(text);
+
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
 		CG_Printf("%s\n", text);   // JPW NERVE
 

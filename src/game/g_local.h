@@ -2651,6 +2651,7 @@ void C_ChatPrintAll( const char* msg );
 void C_ChatPrintTo( gentity_t *target, const char* msg );
 void C_ConsolePrintAll( const char* msg );
 void C_ConsolePrintTo( gentity_t *target, const char* msg );
+const char *EscapeString(const char *in);
 
 // C versions of conversion functions
 qboolean StringToInt(const char* toConvert, int *value);
