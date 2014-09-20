@@ -688,6 +688,7 @@ typedef struct {
 
 	qboolean	versionOK;
 
+    char        ip[MAX_IP_LEN + 1];
     
 } clientSession_t;
 
@@ -1372,7 +1373,7 @@ void G_ParseCampaigns( void );
 qboolean G_MapIsValidCampaignStartMap( void );
 
 team_t G_GetTeamFromEntity( gentity_t *ent );
-char *ClientIPAddr( gentity_t *ent );
+const char *ClientIPAddr( gentity_t *ent );
 
 //
 // g_combat.c
@@ -1878,11 +1879,11 @@ extern vmCvar_t	g_weapons;
 extern vmCvar_t	g_noclip;
 extern vmCvar_t	g_savemsg;
 extern vmCvar_t g_nameChangeLimit;
+extern vmCvar_t g_nameChangeInterval;
 
 extern vmCvar_t	g_mapScriptDir;
 extern vmCvar_t	g_blockedMaps;
 
-extern vmCvar_t	g_admin;
 extern vmCvar_t	g_adminLog;
 extern vmCvar_t	g_logCommands;
 extern vmCvar_t g_userConfig;

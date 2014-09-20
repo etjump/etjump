@@ -192,10 +192,10 @@ vmCvar_t		g_savemsg;
 vmCvar_t		g_mapScriptDir;
 vmCvar_t		g_blockedMaps;
 vmCvar_t		g_nameChangeLimit;
+vmCvar_t        g_nameChangeInterval;
 
 // ETJump admin system
 
-vmCvar_t		g_admin;
 vmCvar_t		g_userConfig;
 vmCvar_t		g_levelConfig;
 vmCvar_t		g_adminLog;
@@ -438,11 +438,11 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_noclip, "g_noclip", "0", CVAR_ARCHIVE },
 	{ &g_savemsg, "g_savemsg", "^7Saved", CVAR_ARCHIVE },
 	{ &g_nameChangeLimit, "g_nameChangeLimit", "5", CVAR_ARCHIVE },
+    { &g_nameChangeInterval, "g_nameChangeInterval", "60", CVAR_ARCHIVE },
 	{ &g_mapScriptDir, "g_mapScriptDir", "scripts", CVAR_ARCHIVE },
 	{ &g_blockedMaps, "g_blockedMaps", "", CVAR_ARCHIVE },
 	
 
-	{ &g_admin, "g_admin", "1", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE },
 	{ &g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE },
 	{ &g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE },
@@ -454,11 +454,11 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_bannerLocation, "g_bannerLocation", "1", CVAR_ARCHIVE },
 	{ &g_bannerTime, "g_bannerTime", "60000", CVAR_ARCHIVE },
 	// FIXME: dynamic banner count.
-	{ &g_banner1, "g_banner1", "www.etjump.com", CVAR_ARCHIVE },
-	{ &g_banner2, "g_banner2", "www.etjump.com", CVAR_ARCHIVE },
+	{ &g_banner1, "g_banner1", "ETJump", CVAR_ARCHIVE },
+	{ &g_banner2, "g_banner2", "A Wolfenstein: Enemy Territory Trickjump Modification", CVAR_ARCHIVE },
 	{ &g_banner3, "g_banner3", "www.etjump.com", CVAR_ARCHIVE },
-	{ &g_banner4, "g_banner4", "www.etjump.com", CVAR_ARCHIVE },
-	{ &g_banner5, "g_banner5", "www.etjump.com", CVAR_ARCHIVE },
+	{ &g_banner4, "g_banner4", "Developed by Zero, Feengur and Setup", CVAR_ARCHIVE },
+	{ &g_banner5, "g_banner5", "Thanks for choosing ETJump!", CVAR_ARCHIVE },
 
 	//Feen: PGM
 	{ &g_portalDebug, "g_portalDebug", "0", CVAR_CHEAT | CVAR_ARCHIVE },

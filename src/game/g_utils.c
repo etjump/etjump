@@ -1629,13 +1629,17 @@ int ClientNum(gentity_t *ent)
     return ent - g_entities;
 }
 
-char *ClientIPAddr( gentity_t *ent )
+const char *ClientIPAddr( gentity_t *ent )
 {
     char userinfo[MAX_INFO_STRING] = "\0";
     char *ip = NULL;
 
-    trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
-    ip = Info_ValueForKey(userinfo, "ip");
+    if (strlen(ent->client->sess.ip) == 0)
+    {
+        trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
+        ip = Info_ValueForKey(userinfo, "ip");
+        Q_strncpyz(ent->client->sess.ip, ip, sizeof(ent->client->sess.ip));
+    }
 
-    return ip;
+    return ent->client->sess.ip;
 }

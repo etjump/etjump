@@ -58,18 +58,15 @@ void WriteSessionData()
 
 void OnGameInit()
 {
-    if (g_admin.integer)
+    if (strlen(g_levelConfig.string))
     {
-        if (strlen(g_levelConfig.string))
+        if (!game.levels->ReadFromConfig())
         {
-            if (!game.levels->ReadFromConfig())
-            {
-                G_LogPrintf("Error while reading admin config: %s\n", game.levels->ErrorMessage().c_str());
-            }
-            else
-            {
-                G_Printf("Successfully loaded levels from config: %s\n", g_levelConfig.string);
-            }
+            G_LogPrintf("Error while reading admin config: %s\n", game.levels->ErrorMessage().c_str());
+        }
+        else
+        {
+            G_Printf("Successfully loaded levels from config: %s\n", g_levelConfig.string);
         }
     }
 

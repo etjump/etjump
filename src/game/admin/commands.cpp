@@ -380,7 +380,36 @@ namespace AdminCommands
 
     bool EditCommands(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "EditCommands is not implemented.");
+        // !editcommands level +command|-command +command|-command etc.
+        if (argv->size() < 3)
+        {
+            PrintManual(ent, "editcommands");
+            return false;
+        }
+
+        int level = 0;
+        if (!ToInt(argv->at(1), level))
+        {
+            ChatPrintTo(ent, va("^3editcommands: ^7%s is not a number.", level));
+            return false;
+        }
+
+        ConstArgIter it = argv->begin() + 2;
+        ConstArgIter end = argv->end();
+
+        for (; it != end; it++)
+        {
+            if ((*it)[0] == '-')
+            {
+                
+            }
+            else
+            {
+                
+            }
+        }
+        
+
         return true;
     }
 
@@ -1321,11 +1350,6 @@ bool Commands::AdminCommand(gentity_t* ent)
     }
     Arguments argv = GetSayArgs(skip);
 
-    for (int i = 0; i < argv->size(); i++)
-    {
-        G_LogPrintf("arg%d: %s\n", i, argv->at(i).c_str());
-    }
-
     if (arg.length() == 0)
     {
         return false;
@@ -1372,6 +1396,17 @@ bool Commands::AdminCommand(gentity_t* ent)
 
     if (foundCommands.size() == 1)
     {
+        if (ent)
+        {
+            G_ALog("Command: (%d) %s: %s",
+                ClientNum(ent), ent->client->pers.netname,
+                ConcatArgs(skip));
+        }
+        else
+        {
+            G_ALog("Command: console: %s", ConcatArgs(skip));
+        }
+        
         foundCommands[0]->second.first(ent, argv);
         return true;
     }

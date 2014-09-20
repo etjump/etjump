@@ -1291,6 +1291,31 @@ static void ClientCleanName( const char *in, char *out, int outSize )
 	}
 }
 
+void G_NameChanged(gentity_t *ent)
+{
+    gclient_t *client = ent->client;
+
+    if (level.time > client->sess.lastNameChangeTime + (g_nameChangeInterval.integer) * 1000) {
+        client->sess.nameChangeCount = 0;
+    }
+
+    if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0)
+    {
+        C_CPMTo(ent, va("^3WARNING: ^7You must wait atleast %d seconds before renaming.", g_nameChangeInterval.integer));
+    } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer)
+    {
+        trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
+    }
+    else
+    {
+        C_CPMTo(ent, va("^3WARNING: ^7You have %d name changes left",
+            (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+    }
+    
+    client->sess.nameChangeCount++;
+    client->sess.lastNameChangeTime = level.time;
+}
+
 void G_StartPlayerAppropriateSound(gentity_t *ent, char *soundType) {
 }
 
@@ -1399,25 +1424,15 @@ void ClientUserinfoChanged( int clientNum ) {
 	s = Info_ValueForKey (userinfo, "name");
 	ClientCleanName( s, client->pers.netname, sizeof(client->pers.netname) );
 
-	if(level.time > client->sess.lastNameChangeTime + 60000) {
-		client->sess.nameChangeCount = 0;
-	}
-
 	if ( client->pers.connected == CON_CONNECTED ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
 
 			trap_SendServerCommand( -1, 
                 va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", 
-                oldname, client->pers.netname) );
-			    client->sess.nameChangeCount++;
-			    client->sess.lastNameChangeTime = level.time;
-			    G_refPrintf(ent, "^3WARNING: ^7You have %d name changes left.",
-                    (g_nameChangeLimit.integer - client->sess.nameChangeCount));
-			    if(5 - client->sess.nameChangeCount == 0)
-				    G_refPrintf(ent, "^3WARNING: ^7You must wait atleast 1 minute to rename again.");
-			    if(client->sess.nameChangeCount > g_nameChangeLimit.integer) {
-				    trap_DropClient(client->ps.clientNum, "you were kicked for spamming rename.", 0);
-			    }
+                    oldname, client->pers.netname) );
+
+            G_NameChanged(ent);
+			
         }
 	}
 

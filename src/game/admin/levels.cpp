@@ -144,9 +144,7 @@ bool Levels::SortByLevel(const boost::shared_ptr<Level> lhs, const boost::shared
 bool Levels::WriteToConfig()
 {
     fileHandle_t f = 0;
-    int len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE);
-
-
+    trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE);
 
     sort(levels_.begin(), levels_.end(), SortByLevel);
     for (ConstIter it = levels_.begin(); it != levels_.end(); it++)
@@ -337,87 +335,84 @@ bool Levels::ReadFromConfig()
         CreateDefaultLevels();
         return true;
     }
-    else
+    boost::shared_array<char> file;
+    try
     {
-        boost::shared_array<char> file;
-        try
-        {
-            file = boost::shared_array<char>(new char[len + 1]);
-        }
-        catch (std::bad_alloc& e)
-        {
-            G_Error("Failed to allocate memory to parse level config.");
-            trap_FS_FCloseFile(f);
-            return false;
-        }
-
-        trap_FS_Read(file.get(), len, f);
-        file[len] = 0;
+        file = boost::shared_array<char>(new char[len + 1]);
+    }
+    catch (...)
+    {
+        G_Error("Failed to allocate memory to parse level config.");
         trap_FS_FCloseFile(f);
+        return false;
+    }
 
-        char *token = NULL;
-        bool levelOpen = false;
-        boost::shared_ptr<Level> tempLevel;
+    trap_FS_Read(file.get(), len, f);
+    file[len] = 0;
+    trap_FS_FCloseFile(f);
 
-        levels_.clear();
+    char *token = NULL;
+    bool levelOpen = false;
+    boost::shared_ptr<Level> tempLevel;
 
-        char *file2 = file.get();
+    levels_.clear();
+
+    char *file2 = file.get();
+
+    token = COM_Parse(&file2);
+
+    while (*token)
+    {
+        if (!Q_stricmp(token, "[level]"))
+        {
+            if (levelOpen)
+            {
+                levels_.push_back(tempLevel);
+            }
+            levelOpen = false;
+        }
+        else if (!Q_stricmp(token, "cmds"))
+        {
+            ReadString(&file2, tempLevel->commands);
+        }
+        else if (!Q_stricmp(token, "level"))
+        {
+            ReadInt(&file2, tempLevel->level);
+        }
+        else if (!Q_stricmp(token, "greeting"))
+        {
+            ReadString(&file2, tempLevel->greeting);
+        }
+        else if (!Q_stricmp(token, "name"))
+        {
+            ReadString(&file2, tempLevel->name);
+        }
+        else {
+            G_LogPrintf("readconfig: parse error near %s on line %d",
+                        token, COM_GetCurrentParseLine());
+        }
+
+        if (!Q_stricmp(token, "[level]"))
+        {
+            try
+            {
+                tempLevel = boost::shared_ptr<Level>(new Level(0, "", "", ""));
+            }
+            catch (...)
+            {
+                G_Error("Failed to allocate memory for a level.");
+                return false;
+            }
+
+            levelOpen = true;
+        }
 
         token = COM_Parse(&file2);
+    }
 
-        while (*token)
-        {
-            if (!Q_stricmp(token, "[level]"))
-            {
-                if (levelOpen)
-                {
-                    levels_.push_back(tempLevel);
-                }
-                levelOpen = false;
-            }
-            else if (!Q_stricmp(token, "cmds"))
-            {
-                ReadString(&file2, tempLevel->commands);
-            }
-            else if (!Q_stricmp(token, "level"))
-            {
-                ReadInt(&file2, tempLevel->level);
-            }
-            else if (!Q_stricmp(token, "greeting"))
-            {
-                ReadString(&file2, tempLevel->greeting);
-            }
-            else if (!Q_stricmp(token, "name"))
-            {
-                ReadString(&file2, tempLevel->name);
-            }
-            else {
-                G_LogPrintf("readconfig: parse error near %s on line %d",
-                    token, COM_GetCurrentParseLine());
-            }
-
-            if (!Q_stricmp(token, "[level]"))
-            {
-                try
-                {
-                    tempLevel = boost::shared_ptr<Level>(new Level(0, "", "", ""));
-                }
-                catch (std::bad_alloc& e)
-                {
-                    G_Error("Failed to allocate memory for a level.");
-                    return false;
-                }
-
-                levelOpen = true;
-            }
-
-            token = COM_Parse(&file2);
-        }
-
-        if (levelOpen)
-        {
-            levels_.push_back(tempLevel);
-        }
+    if (levelOpen)
+    {
+        levels_.push_back(tempLevel);
     }
     return true;
 }

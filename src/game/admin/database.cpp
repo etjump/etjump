@@ -190,7 +190,6 @@ bool Database::ListUsers(gentity_t* ent, int page)
     const int USERS_PER_PAGE = 20;
     int size = users_.size();
     int pages = (size / USERS_PER_PAGE) + 1;
-    int printed = 0;
     int i = (page - 1) * USERS_PER_PAGE;
     
     if (page > pages)
@@ -227,9 +226,9 @@ bool Database::ListUsers(gentity_t* ent, int page)
 
 bool Database::Unban(gentity_t* ent, int id)
 {
-    for (int i = 0, len = bans_.size(); i < len; i++)
+    for (unsigned i = 0, len = bans_.size(); i < len; i++)
     {
-        if (bans_[i]->id == id)
+        if (bans_[i]->id == (unsigned)id)
         {
             sqlite3_stmt *stmt = NULL;
             if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
@@ -593,7 +592,6 @@ Database::User_s const* Database::GetUserData(unsigned id) const
 bool Database::LoadBans()
 {
     int rc = 0;
-    char *errMsg = NULL;
     sqlite3_stmt *stmt = NULL;
 
     if (!PrepareStatement("SELECT id, name, guid, hwid, ip, banned_by, ban_date, expires, reason FROM bans;", &stmt))
@@ -646,7 +644,6 @@ bool Database::LoadBans()
 bool Database::LoadUsers()
 {
     int rc = 0;
-    char *errMsg = NULL;
     sqlite3_stmt *stmt = NULL;
 
     if (!PrepareStatement("SELECT id, guid, level, lastSeen, name, hwid, title, commands, greeting FROM users;", &stmt))
@@ -748,7 +745,6 @@ Database::User_s const* Database::GetUserData(std::string const& guid) const
 bool Database::InitDatabase(char const* config)
 {
     int rc = sqlite3_open(GetPath(config).c_str(), &db_);
-    char *errMsg = NULL;
 
     users_.clear();
     bans_.clear();
