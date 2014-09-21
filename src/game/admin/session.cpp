@@ -39,6 +39,10 @@ void Session::Init(int clientNum)
 void Session::UpdateLastSeen(int clientNum)
 {
     unsigned lastSeen = 0;
+
+    // DEBUG: crash on client dc?
+    G_LogPrintf("DEBUG: updating client %d last seen.\n", clientNum);
+
     if (clients_[clientNum].user)
     {   
         time_t t;
@@ -61,6 +65,8 @@ void Session::UpdateLastSeen(int clientNum)
 
 void Session::WriteSessionData(int clientNum)
 {
+    G_LogPrintf("DEBUG: Writing client %d etjump session data\n", clientNum);
+
     const char *sessionData = va("%s %s",
         clients_[clientNum].guid.c_str(),
         clients_[clientNum].hwid.c_str());
@@ -266,8 +272,11 @@ void Session::OnClientDisconnect(int clientNum)
     WriteSessionData(clientNum);
     UpdateLastSeen(clientNum);
 
+    G_LogPrintf("DEBUG: nullifying user %d\n", clientNum);
     clients_[clientNum].user = NULL;
+    G_LogPrintf("DEBUG: nullifying level %d\n", clientNum);
     clients_[clientNum].level = NULL;
+    G_LogPrintf("DEBUG: nullifying permissions %d\n", clientNum);
     clients_[clientNum].permissions.reset();
 }
 

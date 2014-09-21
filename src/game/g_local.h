@@ -518,8 +518,12 @@ struct gentity_s {
 	//Feen - PGM
 	gentity_t *portal_blue;
 	gentity_t *portal_red;
+    // Zero - other portal so we know where to go 
+    // when someone goes in a team portal
+    gentity_t *linkedPortal;
 
 	int lastPortalTime; //Last time we teleported using portal
+    int portalTeam;
     char* name;
 };
 
@@ -963,6 +967,7 @@ struct gclient_s {
     int             last8BallTime; // Last level.time client used !8ball.
 	int				lastVoteTime;
     qboolean        cheatDetected;
+    int             portalTeam;
 };
 
 typedef struct {

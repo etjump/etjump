@@ -2141,8 +2141,8 @@ void ClearPortals( gentity_t * ent )
 
     if(ent->portal_red)
     {
-        G_FreeEntity(ent->portal_blue);
-        ent->portal_blue = NULL;
+        G_FreeEntity(ent->portal_red);
+        ent->portal_red = NULL;
     }
 }
 
@@ -2295,7 +2295,6 @@ void ClientDisconnect( int clientNum ) {
 	// OSP
 
     ClearPortals(ent);
-
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

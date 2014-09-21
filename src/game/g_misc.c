@@ -261,6 +261,14 @@ void weapon_portalgun_touch(gentity_t* self, gentity_t* other, trace_t* trace) {
 	if (!other->client)
 		return;
 
+    // If portal team value is higher than 0 let's set users pteam value
+    // to that of the entity.
+    if (self->portalTeam > 0)
+    {
+        other->client->portalTeam = self->portalTeam;
+        G_LogPrintf("Setting %s's portal team to %d\n", other->client->pers.netname, other->client->portalTeam);
+    }
+
 	// check if player already had the weapon
 	alreadyHave = COM_BitCheck( other->client->ps.weapons, self->item->giTag );
 
@@ -283,6 +291,13 @@ void weapon_portal_think(void) {
 	return;
 }
 
+/*
+Portal team
+
+if portalTeam is set to higher value than 0, let's set the users portal team to whatever
+value it is. People with the same portal team value can use eachothers portals.
+Clear portal team on death, team switch etc.
+*/
 void SP_weapon_portalgun (gentity_t* ent){
 
 	//TODO: spawn portalgun ent
@@ -290,6 +305,9 @@ void SP_weapon_portalgun (gentity_t* ent){
 	gitem_t*	item;
 
 	vec3_t		mins,maxs;
+
+    G_SpawnInt("portal_team", "0", &ent->portalTeam);
+    G_LogPrintf("DEBUG: portal team set to %d\n", ent->portalTeam);
 
 	item = BG_FindItemForWeapon(WP_PORTAL_GUN);
 

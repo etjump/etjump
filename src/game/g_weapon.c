@@ -3432,6 +3432,12 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 
 		portal->s.eType = ET_PORTAL_BLUE; //Portal 1
 
+        portal->linkedPortal = ent->portal_red;
+        if (ent->portal_red)
+        {
+            ent->portal_red->linkedPortal = portal;
+        }
+
 		//Assign to client
 		ent->portal_blue = portal;
 
@@ -3439,6 +3445,12 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 
 		portal->s.eType = ET_PORTAL_RED; //Portal 2
 		
+        portal->linkedPortal = ent->portal_blue;
+        if (ent->portal_blue)
+        {
+            ent->portal_blue->linkedPortal = portal;
+        }
+
 		//Assign to client
 		ent->portal_red = portal;
 
@@ -3518,6 +3530,9 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 	portal->s.pos.trType = TR_STATIONARY;
 	portal->s.otherEntityNum = ent->s.clientNum; //HACK: Using this for render checks.....
 
+    // Set portal team to shooters team. Anyone with same team can
+    // use the portal
+    portal->portalTeam = ent->client->portalTeam;
 
 	//NOTE: Moved up
 	/*
@@ -3576,13 +3591,24 @@ void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
 
 	gentity_t	*dest = NULL;
 
-	//If not the owner of this portal, ignore...
-	if (self->r.ownerNum != other->s.number) 
-		return;
+    if (!other->client) { //If this is not a player, then don't teleport it. //NOTE: We'll probably want items to be transferred through portal eventually...
+        return;
+    }
 
-	if ( !other->client ) { //If this is not a player, then don't teleport it. //NOTE: We'll probably want items to be transferred through portal eventually...
-		return;
-	}
+    if (self->portalTeam == 0)
+    {
+        //If not the owner of this portal, ignore...
+        if (self->r.ownerNum != other->s.number)
+            return;
+    }
+    else
+    {
+        // if portal's team isn't clients portal team, ignore
+        if (self->portalTeam != other->client->portalTeam)
+        {
+            return;
+        }
+    }
 
 	if ( other->client->ps.pm_type == PM_DEAD ) {
 		return;
@@ -3592,21 +3618,32 @@ void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
 	if (!(level.time > other->lastPortalTime))
 		return;
 
-	if (self->s.eType == ET_PORTAL_BLUE) {
-		//Check that the 'other' portal exists and set it as dest
-		if (other->portal_red != NULL)
-			dest = other->portal_red;
+    if (self->portalTeam > 0)
+    {
+        if (self->linkedPortal != NULL)
+        {
+            dest = self->linkedPortal;
+        }
+    }
+    else
+    {
+        if (self->s.eType == ET_PORTAL_BLUE) {
+            //Check that the 'other' portal exists and set it as dest
+            if (other->portal_red != NULL)
+                dest = other->portal_red;
 
-	}else if (self->s.eType == ET_PORTAL_RED) {
-		//Check that the 'other' portal exists and set it as dest
-		if (other->portal_blue != NULL)
-			dest = other->portal_blue;
+        }
+        else if (self->s.eType == ET_PORTAL_RED) {
+            //Check that the 'other' portal exists and set it as dest
+            if (other->portal_blue != NULL)
+                dest = other->portal_blue;
 
-	}else{
-		//Not quite sure what the hell we hit here...
-		return;
-	}
-
+        }
+        else{
+            //Not quite sure what the hell we hit here...
+            return;
+        }
+    }
 
 	if (!dest) {
 		//G_Printf ("Couldn't find portal gate destination...\n");
