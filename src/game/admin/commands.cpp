@@ -771,11 +771,11 @@ namespace AdminCommands
 
     bool Noclip(gentity_t* ent, Arguments argv)
     {
-        if (level.noNoclip)
-        {
-            ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
-            return false;
-        }
+//        if (level.noNoclip)
+//        {
+//            ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
+//            return false;
+//        }
 
         if (argv->size() == 1)
         {
@@ -1427,7 +1427,5 @@ bool Commands::AdminCommand(gentity_t* ent)
 
 qboolean AdminCommandCheck(gentity_t *ent)
 {
-    G_LogPrintf("AdminCommandCheck from G_Say called.\n");
-
     return game.commands->AdminCommand(ent) ? qtrue : qfalse;
 }

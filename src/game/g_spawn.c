@@ -983,6 +983,7 @@ Every map should have exactly one worldspawn.
 */
 void SP_worldspawn( void ) {
 	char	*s;
+    int val = 0;
 
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) ) {
@@ -1086,6 +1087,20 @@ void SP_worldspawn( void ) {
     } else
     {
     	level.saveLimit = qfalse;
+    }
+
+    G_SpawnString("portalteam", "0", &s);
+    val = atoi(s);
+    if (val)
+    {
+        if (val == 1)
+        {
+            level.portalTeam = 1;
+        }
+        else
+        {
+            level.portalTeam = 2;
+        }
     }
 
 	level.mapcoordsValid = qfalse;

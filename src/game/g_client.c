@@ -2134,16 +2134,16 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
 void ClearPortals( gentity_t * ent ) 
 {
     //Clear portalgun portals
-    if(ent->portal_blue)
+    if(ent->portalBlue)
     {
-        G_FreeEntity(ent->portal_blue);
-        ent->portal_blue = NULL;
+        G_FreeEntity(ent->portalBlue);
+        ent->portalBlue = NULL;
     }
 
-    if(ent->portal_red)
+    if(ent->portalRed)
     {
-        G_FreeEntity(ent->portal_red);
-        ent->portal_red = NULL;
+        G_FreeEntity(ent->portalRed);
+        ent->portalRed = NULL;
     }
 }
 

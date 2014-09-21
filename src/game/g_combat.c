@@ -621,14 +621,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 
 	//Feen: PGM - Remove old portal ents (if any)
-	if (self->portal_blue) {
-		G_FreeEntity(self->portal_blue);
-		self->portal_blue = NULL;
+	if (self->portalBlue) {
+		G_FreeEntity(self->portalBlue);
+		self->portalBlue = NULL;
 	}
 
-	if (self->portal_red) {
-		G_FreeEntity(self->portal_red);
-		self->portal_red = NULL;
+	if (self->portalRed) {
+		G_FreeEntity(self->portalRed);
+		self->portalRed = NULL;
 	}
 
 

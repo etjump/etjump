@@ -3377,16 +3377,16 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 
 
 	//check that portals aren't overlapping..
-	if ((ent->portal_blue) || (ent->portal_red)) {
+	if ((ent->portalBlue) || (ent->portalRed)) {
 
-		if (PortalNumber == 1 && ent->portal_red){
+		if (PortalNumber == 1 && ent->portalRed){
 
-			if (Distance(t_endpos, ent->portal_red->s.origin) < PORTAL_MIN_DIST)
+			if (Distance(t_endpos, ent->portalRed->s.origin) < PORTAL_MIN_DIST)
 				return;
 
-		}else if (PortalNumber == 2 && ent->portal_blue){
+		}else if (PortalNumber == 2 && ent->portalBlue){
 
-			if (Distance(t_endpos, ent->portal_blue->s.origin) < PORTAL_MIN_DIST)
+			if (Distance(t_endpos, ent->portalBlue->s.origin) < PORTAL_MIN_DIST)
 				return;
 
 		}
@@ -3395,15 +3395,15 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 
 
 	//Free any previous instances of each portal if any
-	if(PortalNumber == 1 && ent->portal_blue){
+	if(PortalNumber == 1 && ent->portalBlue){
 
-		G_FreeEntity(ent->portal_blue);
-		ent->portal_blue = NULL;
+		G_FreeEntity(ent->portalBlue);
+		ent->portalBlue = NULL;
 
-	}else if (PortalNumber == 2 && ent->portal_red){
+	}else if (PortalNumber == 2 && ent->portalRed){
 
-		G_FreeEntity(ent->portal_red);
-		ent->portal_red = NULL;
+		G_FreeEntity(ent->portalRed);
+		ent->portalRed = NULL;
 
 	}
 
@@ -3432,27 +3432,27 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 
 		portal->s.eType = ET_PORTAL_BLUE; //Portal 1
 
-        portal->linkedPortal = ent->portal_red;
-        if (ent->portal_red)
+        portal->linkedPortal = ent->portalRed;
+        if (ent->portalRed)
         {
-            ent->portal_red->linkedPortal = portal;
+            ent->portalRed->linkedPortal = portal;
         }
 
 		//Assign to client
-		ent->portal_blue = portal;
+		ent->portalBlue = portal;
 
 	}else{
 
 		portal->s.eType = ET_PORTAL_RED; //Portal 2
 		
-        portal->linkedPortal = ent->portal_blue;
-        if (ent->portal_blue)
+        portal->linkedPortal = ent->portalBlue;
+        if (ent->portalBlue)
         {
-            ent->portal_blue->linkedPortal = portal;
+            ent->portalBlue->linkedPortal = portal;
         }
 
 		//Assign to client
-		ent->portal_red = portal;
+		ent->portalRed = portal;
 
 	}
 
@@ -3626,14 +3626,14 @@ void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
     {
         if (self->s.eType == ET_PORTAL_BLUE) {
             //Check that the 'other' portal exists and set it as dest
-            if (other->portal_red != NULL)
-                dest = other->portal_red;
+            if (other->portalRed != NULL)
+                dest = other->portalRed;
 
         }
         else if (self->s.eType == ET_PORTAL_RED) {
             //Check that the 'other' portal exists and set it as dest
-            if (other->portal_blue != NULL)
-                dest = other->portal_blue;
+            if (other->portalBlue != NULL)
+                dest = other->portalBlue;
 
         }
         else{

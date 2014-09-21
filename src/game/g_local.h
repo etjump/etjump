@@ -516,8 +516,8 @@ struct gentity_s {
     int decayValue;
 
 	//Feen - PGM
-	gentity_t *portal_blue;
-	gentity_t *portal_red;
+	gentity_t *portalBlue;
+	gentity_t *portalRed;
     // Zero - other portal so we know where to go 
     // when someone goes in a team portal
     gentity_t *linkedPortal;

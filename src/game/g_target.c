@@ -1632,14 +1632,14 @@ void target_remove_portals_use( gentity_t *self, gentity_t *other, gentity_t *ac
 		return;
 	}
 
-	if(activator->portal_blue) {
-		G_FreeEntity(activator->portal_blue);
-		activator->portal_blue = NULL;
+	if(activator->portalBlue) {
+		G_FreeEntity(activator->portalBlue);
+		activator->portalBlue = NULL;
 	}
 
-	if(activator->portal_red) {
-		G_FreeEntity(activator->portal_red);
-		activator->portal_red = NULL;
+	if(activator->portalRed) {
+		G_FreeEntity(activator->portalRed);
+		activator->portalRed = NULL;
 	}
 
     trap_SendServerCommand(activator-g_entities, "cp \"^7Your portal gun portals have been reseted.\n\"");	

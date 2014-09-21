@@ -424,7 +424,8 @@ void Session::PrintFinger(gentity_t* ent, gentity_t* target)
         return;
     }
 
-    ChatPrintTo(ent, va("^3finger: ^7%s^7 is a level %d user (%s)", target->client->pers.netname,
+    ChatPrintTo(ent, va("^3finger: ^7%s^7(%s^7) is a level %d user (%s)", target->client->pers.netname,
+        clients_[num].user->name.c_str(),
         clients_[num].user->level, 
         clients_[num].user->title.length() > 0 ? clients_[num].user->title.c_str() : clients_[num].level->name.c_str()));
 }
