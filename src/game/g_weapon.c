@@ -3532,7 +3532,7 @@ void Weapon_Portal_Fire( gentity_t *ent, int PortalNumber ) {
 
     // Set portal team to shooters team. Anyone with same team can
     // use the portal
-    portal->portalTeam = ent->client->portalTeam;
+    portal->portalTeam = ent->client->sess.portalTeam;
 
 	//NOTE: Moved up
 	/*
@@ -3583,7 +3583,7 @@ void Portal_Think(gentity_t *self){
 
 }
 
-
+qboolean G_IsOnFireteam(int entityNum, fireteamData_t** teamNum);
 void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
 
 	//TODO: Add ability to teleport missles...
@@ -3595,20 +3595,24 @@ void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
         return;
     }
 
-    if (self->portalTeam == 0)
+    if (level.portalTeam == 0)
     {
+        // Default behaviour
         //If not the owner of this portal, ignore...
         if (self->r.ownerNum != other->s.number)
             return;
     }
-    else
-    {
-        // if portal's team isn't clients portal team, ignore
-        if (self->portalTeam != other->client->portalTeam)
+    else if (level.portalTeam == 1) {
+        // People in the same ft can share
+        if (self->portalTeam != other->client->sess.portalTeam)
         {
             return;
         }
     }
+//    else if (level.portalTeam == 2)
+//    {
+//        // Everyone can use eachothers portals
+//    }
 
 	if ( other->client->ps.pm_type == PM_DEAD ) {
 		return;
@@ -3618,14 +3622,7 @@ void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
 	if (!(level.time > other->lastPortalTime))
 		return;
 
-    if (self->portalTeam > 0)
-    {
-        if (self->linkedPortal != NULL)
-        {
-            dest = self->linkedPortal;
-        }
-    }
-    else
+    if (level.portalTeam == 0)
     {
         if (self->s.eType == ET_PORTAL_BLUE) {
             //Check that the 'other' portal exists and set it as dest
@@ -3644,6 +3641,14 @@ void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace){
             return;
         }
     }
+    else if (level.portalTeam == 1 || level.portalTeam == 2)
+    {
+        if (self->linkedPortal != NULL)
+        {
+            dest = self->linkedPortal;
+        }
+    }
+
 
 	if (!dest) {
 		//G_Printf ("Couldn't find portal gate destination...\n");

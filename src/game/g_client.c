@@ -1663,6 +1663,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	// Zero: target_set_ident id.
 	client->sess.clientMapProgression = 0;
     ent->client->sess.muted = qfalse;
+    client->sess.portalTeam = 0;
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();

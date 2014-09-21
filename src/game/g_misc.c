@@ -265,8 +265,8 @@ void weapon_portalgun_touch(gentity_t* self, gentity_t* other, trace_t* trace) {
     // to that of the entity.
     if (self->portalTeam > 0)
     {
-        other->client->portalTeam = self->portalTeam;
-        G_LogPrintf("Setting %s's portal team to %d\n", other->client->pers.netname, other->client->portalTeam);
+        other->client->sess.portalTeam = self->portalTeam;
+        G_LogPrintf("Setting %s's portal team to %d\n", other->client->pers.netname, other->client->sess.portalTeam);
     }
 
 	// check if player already had the weapon

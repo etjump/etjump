@@ -692,6 +692,7 @@ typedef struct {
 
 	qboolean	versionOK;
 
+    int         portalTeam;
     char        ip[MAX_IP_LEN + 1];
     
 } clientSession_t;
@@ -967,7 +968,6 @@ struct gclient_s {
     int             last8BallTime; // Last level.time client used !8ball.
 	int				lastVoteTime;
     qboolean        cheatDetected;
-    int             portalTeam;
 };
 
 typedef struct {
@@ -1230,6 +1230,7 @@ typedef struct {
 
     qboolean    ghostPlayers;
     qboolean	saveLimit;
+    int         portalTeam;
 } level_locals_t;
 
 typedef struct {
