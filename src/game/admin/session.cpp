@@ -272,11 +272,8 @@ void Session::OnClientDisconnect(int clientNum)
     WriteSessionData(clientNum);
     UpdateLastSeen(clientNum);
 
-    G_LogPrintf("DEBUG: nullifying user %d\n", clientNum);
     clients_[clientNum].user = NULL;
-    G_LogPrintf("DEBUG: nullifying level %d\n", clientNum);
     clients_[clientNum].level = NULL;
-    G_LogPrintf("DEBUG: nullifying permissions %d\n", clientNum);
     clients_[clientNum].permissions.reset();
 }
 

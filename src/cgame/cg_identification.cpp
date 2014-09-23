@@ -244,28 +244,6 @@ char *GetHWID(void) {
     return G_SHA1(hwId);
 }
 
-const std::string NO_HARDWARE_ID = "NOHWID\n";
-
-void SendHWID(void) {
-    char *clientHWID = GetHWID();
-
-    if(!clientHWID || !Q_stricmp(clientHWID, "NOHWID")) {
-        trap_SendConsoleCommand(NO_HARDWARE_ID.c_str());
-    } else {
-        trap_SendConsoleCommand(va("HWID %s\n", clientHWID));
-    }
-}
-
-void UserinfoSendHWID(void) {
-    char *clientHWID = GetHWID();
-
-    if(!clientHWID || !Q_stricmp(clientHWID, "NOHWID")) {
-        trap_Cvar_Set("hwinfo", "NOHWID");
-    } else {
-        trap_Cvar_Set("hwinfo", clientHWID);
-    }
-}
-
 /*
  * Doesn't really belong here, but didn't feel like including Windows.h
  * again.
@@ -281,3 +259,27 @@ void CG_Minimize_f ( void )
 }
 
 #endif
+
+const std::string NO_HARDWARE_ID = "NOHWID\n";
+
+void SendHWID(void) {
+    char *clientHWID = GetHWID();
+
+    if (!clientHWID || !Q_stricmp(clientHWID, "NOHWID")) {
+        trap_SendConsoleCommand(NO_HARDWARE_ID.c_str());
+    }
+    else {
+        trap_SendConsoleCommand(va("HWID %s\n", clientHWID));
+    }
+}
+
+void UserinfoSendHWID(void) {
+    char *clientHWID = GetHWID();
+
+    if (!clientHWID || !Q_stricmp(clientHWID, "NOHWID")) {
+        trap_Cvar_Set("hwinfo", "NOHWID");
+    }
+    else {
+        trap_Cvar_Set("hwinfo", clientHWID);
+    }
+}

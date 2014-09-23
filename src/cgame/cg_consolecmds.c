@@ -932,6 +932,8 @@ void CG_portalinfo_f ( void ) {
 	CG_Printf("^7The ^1second ^7portal is placed using +attack2 which you will need to bind by typing '/bind key +attack2' in the console.\n");
 }
 
+#ifdef AC_SUPPORT
+
 void CG_Ptr_f(void)
 {
     InitAntiCheat(clientAC);
@@ -939,6 +941,8 @@ void CG_Ptr_f(void)
     CG_Printf("vmMain addr: %X\n", (int)clientAC.vmMain);
     CG_Printf("Diff: %X\n", (int)clientAC.vmMain - (int)clientAC.baseAddress);
 }
+
+#endif // AC_SUPPORT
 
 typedef struct {
 	char	*cmd;
@@ -1051,8 +1055,7 @@ static consoleCommand_t	commands[] =
 	{ "min", CG_Minimize_f },
     { "help", CG_Manual_f },
     { "man", CG_Manual_f },
-    { "manual", CG_Manual_f },
-    { "ptr", CG_Ptr_f }
+    { "manual", CG_Manual_f }
 };
 
 

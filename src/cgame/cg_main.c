@@ -3053,9 +3053,12 @@ cvarTable_t		cvarTable[] = {
             cgs.dumpStatsFile = 0;
             cgs.dumpStatsTime = 0;
 
+#ifdef AC_SUPPORT
+
             InitAntiCheat(clientAC);
             clientAC.vmMain = vmMain;
 
+#endif // AC_SUPPORT
             //SendGuid();
             //SendHWID();
             //UserinfoSendHWID();

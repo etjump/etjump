@@ -938,7 +938,7 @@ namespace AdminCommands
             return false;
         }
 
-        if (!IsTargetHigherLevel(ent, target, true))
+        if (IsTargetHigherLevel(ent, target, true))
         {
             ChatPrintTo(ent, "^3rmsaves: ^7can't remove fellow admin's saves.");
             return false;
