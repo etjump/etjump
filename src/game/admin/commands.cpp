@@ -998,6 +998,7 @@ namespace AdminCommands
             if (!target)
             {
                 ChatPrintTo(ent, err);
+                return false;
             }
 
             int level = 0;
