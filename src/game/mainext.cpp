@@ -84,7 +84,7 @@ void OnGameInit()
 
     if (!game.mapData->Initialize())
     {
-        G_Error("Failed to initialize map database: %s.\n", game.mapData->GetMessage());
+        G_Error("Failed to initialize map database: %s.\n", game.mapData->GetMessage().c_str());
     }
     else
     {
@@ -165,6 +165,12 @@ qboolean OnConsoleCommand()
     if (command == "printlevels")
     {
         game.levels->PrintLevels();
+        return qtrue;
+    }
+
+    if (command == "executeoperations")
+    {
+        game.database->ExecuteQueuedOperations();
         return qtrue;
     }
 

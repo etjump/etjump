@@ -1913,6 +1913,8 @@ extern vmCvar_t	g_mute;
 extern vmCvar_t g_goto;
 extern vmCvar_t g_voteCooldown;
 
+extern vmCvar_t g_instantDatabaseSync;
+
 extern vmCvar_t mod_version;
 
 extern vmCvar_t g_lastVisitedMessage;

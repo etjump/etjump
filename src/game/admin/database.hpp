@@ -27,67 +27,88 @@ namespace Updated
     const unsigned GREETING = 0x00020;
 }
 
+struct User_s
+{
+    // Needed for multi index container
+    unsigned GetId()
+    {
+        return id;
+    }
+    // Needed for multi index container
+    std::string GetGuid()
+    {
+        return guid;
+    }
 
+    User_s() : level(0), lastSeen(0), updated(0)
+    {
+
+    }
+
+    User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid)
+        : id(id), guid(guid), name(name), level(0), lastSeen(0), updated(0)
+    {
+        split(hwids, hwid, boost::algorithm::is_any_of(", "));
+    }
+
+    User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen,
+        std::string const& name, std::string const& hwid, std::string const& title,
+        std::string const& commands, std::string const& greeting)
+        : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting), updated(0)
+    {
+        split(hwids, hwid, boost::algorithm::is_any_of(","));
+    }
+
+    const char *ToChar() const
+    {
+        return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
+    }
+
+    std::string GetLastSeenString() const;
+    std::string GetLastVisitString() const;
+    unsigned id;
+    std::string guid;
+
+    // non indexed properties
+    int level;
+    unsigned lastSeen;
+    std::string name;
+    std::string title;
+    std::string commands;
+    std::string greeting;
+    std::vector<std::string> hwids;
+    unsigned updated;
+};
+
+struct Ban_s
+{
+    unsigned id;
+    std::string name;
+    std::string guid;
+    std::string hwid;
+    std::string ip;
+    std::string bannedBy;
+    std::string banDate;
+    std::string reason;
+    unsigned expires;
+
+    Ban_s() : id(0), expires(0)
+    {
+
+    }
+
+    const char *ToChar()
+    {
+        return va("%d %s %s %s %s %s %s %d %s", id, name.c_str(), guid.c_str(), hwid.c_str(), ip.c_str(), bannedBy.c_str(), banDate.c_str(), expires, reason.c_str());
+    }
+};
+
+class DatabaseOperation;
 class Database
 {
 public:
     Database();
     ~Database();
-
-    struct User_s
-    {
-        // Needed for multi index container
-        unsigned GetId()
-        {
-            return id;
-        }
-        // Needed for multi index container
-        std::string GetGuid()
-        {
-            return guid;
-        }
-
-        User_s() : level(0), lastSeen(0), updated(0)
-        {
-            
-        }
-
-        User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid)
-            : id(id), guid(guid), name(name), level(0), lastSeen(0), updated(0)
-        {
-            split(hwids, hwid, boost::algorithm::is_any_of(", "));
-        }
-
-        User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen, 
-            std::string const& name, std::string const& hwid, std::string const& title, 
-            std::string const& commands, std::string const& greeting)
-            : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting), updated(0)
-        {
-            split(hwids, hwid, boost::algorithm::is_any_of(","));
-        }
-
-        const char *ToChar() const
-        {
-            return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
-        }
-
-        std::string GetLastSeenString() const;
-        std::string GetLastVisitString() const;
-        unsigned id;
-        std::string guid;
-
-        // non indexed properties
-        int level;
-        unsigned lastSeen;
-        std::string name;
-        std::string title;
-        std::string commands;
-        std::string greeting;
-        std::vector<std::string> hwids;
-        unsigned updated;
-    };
-
-
     typedef boost::shared_ptr<User_s> User;
 
     typedef multi_index_container<
@@ -102,29 +123,6 @@ public:
     typedef Users::nth_index<0>::type::const_iterator ConstIdIterator;
     typedef Users::nth_index<1>::type::iterator GuidIterator;
     typedef Users::nth_index<1>::type::const_iterator ConstGuidIterator;
-
-    struct Ban_s
-    {
-        unsigned id;
-        std::string name;
-        std::string guid;
-        std::string hwid;
-        std::string ip;
-        std::string bannedBy;
-        std::string banDate;
-        std::string reason;
-        unsigned expires;
-
-        Ban_s() : id(0), expires(0)
-        {
-            
-        }
-
-        const char *ToChar()
-        {
-            return va("%d %s %s %s %s %s %s %d %s", id, name.c_str(), guid.c_str(), hwid.c_str(), ip.c_str(), bannedBy.c_str(), banDate.c_str(), expires, reason.c_str());
-        }
-    };
 
     typedef boost::shared_ptr<Ban_s> Ban;    
 
@@ -157,6 +155,7 @@ public:
     bool Unban(gentity_t *ent, int id);
     bool ListUsers(gentity_t *ent, int page);
     bool UserInfo(gentity_t *ent, int id);
+    bool ExecuteQueuedOperations();
 private:
     unsigned GetHighestFreeId() const;
     bool AddUserToSQLite(User user);
@@ -168,6 +167,7 @@ private:
     GuidIterator GetUser(const std::string& guid) const;
     bool PrepareStatement(char const* query, sqlite3_stmt** stmt);
     ConstGuidIterator GetUserConst(const std::string& guid) const;
+    bool InstantSync() const;
     Users users_;
     std::vector<Ban> bans_;
     sqlite3 *db_;
@@ -175,6 +175,11 @@ private:
 
     ConstIdIterator IdIterEnd() const;
     ConstGuidIterator GuidIterEnd() const;
+
+    // If instant database sync is disabled, all the 
+    // database operations needed are added to this queue
+    std::vector<boost::shared_ptr<DatabaseOperation> > databaseOperations_;
+
 };
 
 #endif // DATABASE_HH

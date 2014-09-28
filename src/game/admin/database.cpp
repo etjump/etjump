@@ -1,5 +1,6 @@
 #include "database.hpp"
 #include "../g_utilities.hpp"
+#include "databaseoperation.hpp"
 
 Database::Database()
 {
@@ -154,6 +155,22 @@ bool Database::UserExists(std::string const& guid)
     return false;
 }
 
+bool Database::ExecuteQueuedOperations()
+{
+    std::vector<boost::shared_ptr<DatabaseOperation> >::iterator it =
+        databaseOperations_.begin();
+    std::vector<boost::shared_ptr<DatabaseOperation> >::iterator end =
+        databaseOperations_.end();
+
+    while (it != end)
+    {
+        it->get()->Execute();
+        it++;
+    }
+
+    return true;
+}
+
 bool Database::UserInfo(gentity_t* ent, int id)
 {
     ConstIdIterator user = GetUserConst(id);
@@ -230,25 +247,33 @@ bool Database::Unban(gentity_t* ent, int id)
     {
         if (bans_[i]->id == (unsigned)id)
         {
-            sqlite3_stmt *stmt = NULL;
-            if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
-            {
-                return false;
-            }
-
-            if (!BindInt(stmt, 1, id))
-            {
-                return false;
-            }
-
-            int rc = sqlite3_step(stmt);
-            if (rc != SQLITE_DONE)
-            {
-                message_ = sqlite3_errmsg(db_);
-                return false;
-            }
-
             bans_.erase(bans_.begin() + i);
+
+            if (!InstantSync())
+            {
+                databaseOperations_.push_back(UnbanOperationPtr(new UnbanOperation(db_, id)));
+            }
+            else
+            {
+                sqlite3_stmt *stmt = NULL;
+                if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
+                {
+                    return false;
+                }
+
+                if (!BindInt(stmt, 1, id))
+                {
+                    return false;
+                }
+
+                int rc = sqlite3_step(stmt);
+                if (rc != SQLITE_DONE)
+                {
+                    message_ = sqlite3_errmsg(db_);
+                    return false;
+                }
+            }
+            
 
             return true;
         }
@@ -330,9 +355,19 @@ bool Database::BanUser(std::string const& name, std::string const& guid, std::st
     newBan->expires = expires;
     newBan->reason = reason;
 
-    if (!AddBanToSQLite(newBan))
+    // If this is set to 0, we put the bans into a queue and
+    // add those bans to database once the server is empty or
+    // the map changes
+    if (!InstantSync())
     {
-        return false;
+        databaseOperations_.push_back(BanUserOperationPtr(new BanUserOperation(db_, newBan)));
+    }
+    else
+    {
+        if (!AddBanToSQLite(newBan))
+        {
+            return false;
+        }
     }
 
     bans_.push_back(newBan);
@@ -362,22 +397,29 @@ bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
     {
         (*user)->lastSeen = lastSeen;
         
-        sqlite3_stmt *stmt = NULL;
-        if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
-            !BindInt(stmt, 1, lastSeen) ||
-            !BindInt(stmt, 2, id))
+        if (!InstantSync())
         {
-            return false;
+            databaseOperations_.push_back(UpdateLastSeenOperationPtr(new UpdateLastSeenOperation(db_, id, lastSeen)));
         }
-
-        int rc = sqlite3_step(stmt);
-        if (rc != SQLITE_DONE)
+        else
         {
-            message_ = "Failed to update user's last seen property.";
-            return false;
-        }
+            sqlite3_stmt *stmt = NULL;
+            if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
+                !BindInt(stmt, 1, lastSeen) ||
+                !BindInt(stmt, 2, id))
+            {
+                return false;
+            }
 
-        sqlite3_finalize(stmt);
+            int rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE)
+            {
+                message_ = "Failed to update user's last seen property.";
+                return false;
+            }
+
+            sqlite3_finalize(stmt);
+        }
 
         return true;
     }
@@ -391,6 +433,13 @@ bool Database::SetLevel(unsigned id, int level)
     if (user != IdIterEnd())
     {   
         user->get()->level = level;
+
+        if (!InstantSync())
+        {
+            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(db_, *user)));
+            return true;
+        }
+            
         return Save(user, Updated::LEVEL);
     }
 
@@ -519,30 +568,38 @@ bool Database::AddNewHWID(unsigned id, std::string const& hwid)
     {
         (*user)->hwids.push_back(hwid);
 
-        sqlite3_stmt *stmt = NULL;
-        int rc = 0;
+        if (!InstantSync())
+        {
+            databaseOperations_.push_back(AddNewHWIDOperationPtr(new AddNewHWIDOperation(db_, *user)));
+        }
+        else
+        {
+            sqlite3_stmt *stmt = NULL;
+            int rc = 0;
+
+            if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;", &stmt))
+            {
+                return false;
+            }
+
+            std::string hwids = boost::algorithm::join((*user)->hwids, ",");
+
+            if (!BindString(stmt, 1, hwids) ||
+                !BindInt(stmt, 2, id)) {
+                sqlite3_finalize(stmt);
+                return false;
+            }
+
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE)
+            {
+                message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+                sqlite3_finalize(stmt);
+                return false;
+            }
+            sqlite3_finalize(stmt);
+        }
         
-        if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;", &stmt))
-        {
-            return false;
-        }
-
-        std::string hwids = boost::algorithm::join((*user)->hwids, ",");
-
-        if (!BindString(stmt, 1, hwids) ||
-            !BindInt(stmt, 2, id)) {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-
-        rc = sqlite3_step(stmt);
-        if (rc != SQLITE_DONE)
-        {
-            message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
-            sqlite3_finalize(stmt);
-            return false;
-        }
-        sqlite3_finalize(stmt);
         return true;
     }
     message_ = "Couldn't find user with id " + ToString(id);
@@ -563,9 +620,16 @@ bool Database::AddUser(std::string const& guid, std::string const& hwid, std::st
         return false;
     }
 
-    if (!AddUserToSQLite(newUser))
+    if (!InstantSync())
     {
-        return false;
+        databaseOperations_.push_back(AddUserOperationPtr(new AddUserOperation(db_, newUser)));
+    }
+    else
+    {
+        if (!AddUserToSQLite(newUser))
+        {
+            return false;
+        }
     }
 
     return true;
@@ -579,7 +643,7 @@ bool Database::CloseDatabase()
     return true;
 }
 
-Database::User_s const* Database::GetUserData(unsigned id) const
+User_s const* Database::GetUserData(unsigned id) const
 {
     ConstIdIterator user = GetUser(id);
     if (user != IdIterEnd())
@@ -732,7 +796,7 @@ bool Database::CreateUsersTable()
     return true;
 }
 
-Database::User_s const* Database::GetUserData(std::string const& guid) const
+User_s const* Database::GetUserData(std::string const& guid) const
 {
     ConstGuidIterator user = GetUser(guid);
     if (user != GuidIterEnd())
@@ -766,8 +830,6 @@ bool Database::InitDatabase(char const* config)
         return false;
     }
 
-    
-
     return true;
 }
 
@@ -781,17 +843,22 @@ Database::ConstGuidIterator Database::GuidIterEnd() const
     return users_.get<1>().end();
 }
 
+bool Database::InstantSync() const
+{
+    return g_instantDatabaseSync.integer > 0;
+}
+
 Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) const
 {
     return users_.get<1>().find(guid);
 }
 
-std::string Database::User_s::GetLastSeenString() const
+std::string User_s::GetLastSeenString() const
 {
     return TimeStampToString(lastSeen);
 }
 
-std::string Database::User_s::GetLastVisitString() const
+std::string User_s::GetLastVisitString() const
 {
     time_t t;
     time(&t);

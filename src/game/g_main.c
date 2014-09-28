@@ -227,6 +227,8 @@ vmCvar_t        mod_version;
 
 vmCvar_t        g_lastVisitedMessage;
 
+vmCvar_t        g_instantDatabaseSync;
+
 vmCvar_t        g_mapDatabase;
 vmCvar_t        g_banDatabase;
 
@@ -472,6 +474,7 @@ cvarTable_t		gameCvarTable[] = {
 
     { &g_lastVisitedMessage, "g_lastVisitedMessage", "^2Welcome back! Your last visit was on [t].", CVAR_ARCHIVE },
     { &g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE },
+    { &g_instantDatabaseSync, "g_instantDatabaseSync", "0", CVAR_ARCHIVE | CVAR_LATCH },
     { &g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE }, 
     { &troll_speed, "troll_speed", "127", CVAR_ARCHIVE }
 };

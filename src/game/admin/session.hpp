@@ -22,7 +22,7 @@ public:
         std::string hwid;
         std::bitset<MAX_COMMANDS> permissions;
         std::string ip;
-        const Database::User_s *user;
+        const User_s *user;
         const Levels::Level *level;
     };
 
