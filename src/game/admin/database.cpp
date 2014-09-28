@@ -157,6 +157,7 @@ bool Database::UserExists(std::string const& guid)
 
 bool Database::ExecuteQueuedOperations()
 {
+    G_LogPrintf("Executing %d queued database operations.\n", databaseOperations_.size());
     std::vector<boost::shared_ptr<DatabaseOperation> >::iterator it =
         databaseOperations_.begin();
     std::vector<boost::shared_ptr<DatabaseOperation> >::iterator end =
@@ -167,6 +168,8 @@ bool Database::ExecuteQueuedOperations()
         it->get()->Execute();
         it++;
     }
+
+    databaseOperations_.clear();
 
     return true;
 }
@@ -241,6 +244,28 @@ bool Database::ListUsers(gentity_t* ent, int page)
     return true;
 }
 
+bool Database::RemoveBanFromSQLite(unsigned id)
+{
+    sqlite3_stmt *stmt = NULL;
+    if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
+    {
+        return false;
+    }
+
+    if (!BindInt(stmt, 1, id))
+    {
+        return false;
+    }
+
+    int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE)
+    {
+        message_ = sqlite3_errmsg(db_);
+        return false;
+    }
+    return true;
+}
+
 bool Database::Unban(gentity_t* ent, int id)
 {
     for (unsigned i = 0, len = bans_.size(); i < len; i++)
@@ -251,27 +276,11 @@ bool Database::Unban(gentity_t* ent, int id)
 
             if (!InstantSync())
             {
-                databaseOperations_.push_back(UnbanOperationPtr(new UnbanOperation(db_, id)));
+                databaseOperations_.push_back(UnbanOperationPtr(new UnbanOperation(this, id)));
             }
             else
             {
-                sqlite3_stmt *stmt = NULL;
-                if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
-                {
-                    return false;
-                }
-
-                if (!BindInt(stmt, 1, id))
-                {
-                    return false;
-                }
-
-                int rc = sqlite3_step(stmt);
-                if (rc != SQLITE_DONE)
-                {
-                    message_ = sqlite3_errmsg(db_);
-                    return false;
-                }
+                RemoveBanFromSQLite(id);
             }
             
 
@@ -360,7 +369,7 @@ bool Database::BanUser(std::string const& name, std::string const& guid, std::st
     // the map changes
     if (!InstantSync())
     {
-        databaseOperations_.push_back(BanUserOperationPtr(new BanUserOperation(db_, newBan)));
+        databaseOperations_.push_back(BanUserOperationPtr(new BanUserOperation(this, newBan)));
     }
     else
     {
@@ -390,6 +399,27 @@ std::string Database::GetMessage() const
     return message_;
 }
 
+bool Database::UpdateLastSeenToSQLite(User user)
+{
+    sqlite3_stmt *stmt = NULL;
+    if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
+        !BindInt(stmt, 1, user->lastSeen) ||
+        !BindInt(stmt, 2, user->id))
+    {
+        return false;
+    }
+
+    int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE)
+    {
+        message_ = "Failed to update user's last seen property.";
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
 bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
 {
     IdIterator user = GetUser(id);
@@ -399,26 +429,11 @@ bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
         
         if (!InstantSync())
         {
-            databaseOperations_.push_back(UpdateLastSeenOperationPtr(new UpdateLastSeenOperation(db_, id, lastSeen)));
+            databaseOperations_.push_back(UpdateLastSeenOperationPtr(new UpdateLastSeenOperation(this, *user)));
         }
         else
         {
-            sqlite3_stmt *stmt = NULL;
-            if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
-                !BindInt(stmt, 1, lastSeen) ||
-                !BindInt(stmt, 2, id))
-            {
-                return false;
-            }
-
-            int rc = sqlite3_step(stmt);
-            if (rc != SQLITE_DONE)
-            {
-                message_ = "Failed to update user's last seen property.";
-                return false;
-            }
-
-            sqlite3_finalize(stmt);
+            UpdateLastSeenToSQLite(*user);
         }
 
         return true;
@@ -436,7 +451,7 @@ bool Database::SetLevel(unsigned id, int level)
 
         if (!InstantSync())
         {
-            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(db_, *user)));
+            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(this, *user, Updated::LEVEL)));
             return true;
         }
             
@@ -447,13 +462,13 @@ bool Database::SetLevel(unsigned id, int level)
     return false;
 }
 
-bool Database::Save(IdIterator user, unsigned updated)
+bool Database::Save(User user, unsigned updated)
 {
     std::vector<std::string> queryOptions;
     if (updated & Updated::COMMANDS)
     {
         queryOptions.push_back("commands=:commands");
-    } 
+    }
 
     if (updated & Updated::GREETING)
     {
@@ -492,7 +507,7 @@ bool Database::Save(IdIterator user, unsigned updated)
 
     if (updated & Updated::COMMANDS)
     {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":commands"), user->get()->commands.c_str()))
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":commands"), user->commands.c_str()))
         {
             sqlite3_finalize(stmt);
             return false;
@@ -501,7 +516,7 @@ bool Database::Save(IdIterator user, unsigned updated)
 
     if (updated & Updated::GREETING)
     {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":greeting"), user->get()->greeting.c_str()))
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":greeting"), user->greeting.c_str()))
         {
             sqlite3_finalize(stmt);
             return false;
@@ -510,7 +525,7 @@ bool Database::Save(IdIterator user, unsigned updated)
 
     if (updated & Updated::LAST_SEEN)
     {
-        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":lastSeen"), user->get()->lastSeen))
+        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":lastSeen"), user->lastSeen))
         {
             sqlite3_finalize(stmt);
             return false;
@@ -519,7 +534,7 @@ bool Database::Save(IdIterator user, unsigned updated)
 
     if (updated & Updated::LEVEL)
     {
-        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":level"), user->get()->level))
+        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":level"), user->level))
         {
             sqlite3_finalize(stmt);
             return false;
@@ -528,7 +543,7 @@ bool Database::Save(IdIterator user, unsigned updated)
 
     if (updated & Updated::NAME)
     {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":name"), user->get()->name.c_str()))
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":name"), user->name.c_str()))
         {
             sqlite3_finalize(stmt);
             return false;
@@ -537,14 +552,14 @@ bool Database::Save(IdIterator user, unsigned updated)
 
     if (updated & Updated::TITLE)
     {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":title"), user->get()->title.c_str()))
+        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":title"), user->title.c_str()))
         {
             sqlite3_finalize(stmt);
             return false;
         }
     }
 
-    if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":id"), user->get()->id))
+    if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":id"), user->id))
     {
         sqlite3_finalize(stmt);
         return false;
@@ -560,6 +575,40 @@ bool Database::Save(IdIterator user, unsigned updated)
     return true;
 }
 
+bool Database::Save(IdIterator user, unsigned updated)
+{
+    return Save(*user, updated);
+}
+
+bool Database::AddNewHWIDToDatabase(User user)
+{
+    sqlite3_stmt *stmt = NULL;
+    int rc = 0;
+
+    if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;", &stmt))
+    {
+        return false;
+    }
+
+    std::string hwids = boost::algorithm::join(user->hwids, ",");
+
+    if (!BindString(stmt, 1, hwids) ||
+        !BindInt(stmt, 2, user->id)) {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE)
+    {
+        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
 bool Database::AddNewHWID(unsigned id, std::string const& hwid)
 {
     IdIterator user = GetUser(id);
@@ -570,34 +619,11 @@ bool Database::AddNewHWID(unsigned id, std::string const& hwid)
 
         if (!InstantSync())
         {
-            databaseOperations_.push_back(AddNewHWIDOperationPtr(new AddNewHWIDOperation(db_, *user)));
+            databaseOperations_.push_back(AddNewHWIDOperationPtr(new AddNewHWIDOperation(this, *user)));
         }
         else
         {
-            sqlite3_stmt *stmt = NULL;
-            int rc = 0;
-
-            if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;", &stmt))
-            {
-                return false;
-            }
-
-            std::string hwids = boost::algorithm::join((*user)->hwids, ",");
-
-            if (!BindString(stmt, 1, hwids) ||
-                !BindInt(stmt, 2, id)) {
-                sqlite3_finalize(stmt);
-                return false;
-            }
-
-            rc = sqlite3_step(stmt);
-            if (rc != SQLITE_DONE)
-            {
-                message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
-                sqlite3_finalize(stmt);
-                return false;
-            }
-            sqlite3_finalize(stmt);
+            AddNewHWIDToDatabase(*user);
         }
         
         return true;
@@ -622,7 +648,7 @@ bool Database::AddUser(std::string const& guid, std::string const& hwid, std::st
 
     if (!InstantSync())
     {
-        databaseOperations_.push_back(AddUserOperationPtr(new AddUserOperation(db_, newUser)));
+        databaseOperations_.push_back(AddUserOperationPtr(new AddUserOperation(this, newUser)));
     }
     else
     {

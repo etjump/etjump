@@ -2070,12 +2070,6 @@ static void CG_ServerCommand( void ) {
         return;
     }
 
-    if ( !Q_stricmp(cmd, HWID_REQUEST)) {
-        SendHWID();
-        UserinfoSendHWID();
-        return;
-    }
-
 	if ( !Q_stricmp( cmd, "cheatCvarsOff" ) ) {
 		trap_SendConsoleCommand("set cl_freelook 1\n");
 		trap_SendConsoleCommand("set cl_yawspeed 0\n");

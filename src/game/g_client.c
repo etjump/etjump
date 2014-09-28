@@ -2290,6 +2290,12 @@ void ClientDisconnect( int clientNum ) {
 
 
 	CalculateRanks();
+    // Zero: must be after calc ranks as level.numConnectedClients
+    // is set there
+    if (level.numConnectedClients == 0)
+    {
+        ExecuteQueuedDatabaseOperations();
+    }
 
 	// OSP
 	G_verifyMatchState(i);

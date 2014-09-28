@@ -62,3 +62,4 @@ std::string TimeStampDifferenceToString( int diff );
 
 bool ValidGuid(std::string guid);
 #endif // g_utilities_h__
+

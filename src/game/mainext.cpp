@@ -95,6 +95,7 @@ void OnGameInit()
 void OnGameShutdown()
 {
     WriteSessionData();
+    game.database->ExecuteQueuedOperations();
     game.database->CloseDatabase();
     game.mapData->Shutdown();
 }
@@ -189,4 +190,9 @@ const char *GetRandomMap()
     static char buf[MAX_TOKEN_CHARS] = "\0";
     Q_strncpyz(buf, game.mapData->RandomMap().c_str(), sizeof(buf));
     return buf;
+}
+
+void ExecuteQueuedDatabaseOperations()
+{
+    game.database->ExecuteQueuedOperations();
 }

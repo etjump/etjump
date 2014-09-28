@@ -40,8 +40,7 @@ void Session::UpdateLastSeen(int clientNum)
 {
     unsigned lastSeen = 0;
 
-    // DEBUG: crash on client dc?
-    G_LogPrintf("DEBUG: updating client %d last seen.\n", clientNum);
+    G_DPrintf("DEBUG: updating client %d last seen.\n", clientNum);
 
     if (clients_[clientNum].user)
     {   
@@ -65,7 +64,7 @@ void Session::UpdateLastSeen(int clientNum)
 
 void Session::WriteSessionData(int clientNum)
 {
-    G_LogPrintf("DEBUG: Writing client %d etjump session data\n", clientNum);
+    G_DPrintf("DEBUG: Writing client %d etjump session data\n", clientNum);
 
     const char *sessionData = va("%s %s",
         clients_[clientNum].guid.c_str(),

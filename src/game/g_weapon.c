@@ -4487,7 +4487,7 @@ void FireWeapon( gentity_t *ent ) {
 
         if (ent->s.weapon == WP_SATCHEL)
         {
-            if (G_ExplodeSatchels(ent)) {
+            if (G_ExplodeSatchelsExt(ent)) {
                 ent->client->ps.ammo[WP_SATCHEL_DET] = 0;
                 ent->client->ps.ammoclip[WP_SATCHEL_DET] = 0;
                 ent->client->ps.ammoclip[WP_SATCHEL] = 1;

@@ -1429,6 +1429,42 @@ qboolean G_ExplodeSatchels(gentity_t* ent) {
 	return blown;
 }
 
+/*
+==========
+G_ExplodeSatchelsExt
+==========
+*/
+qboolean G_ExplodeSatchelsExt(gentity_t* ent) {
+    gentity_t* e;
+    vec3_t dist;
+    int i;
+    qboolean blown = qfalse;
+
+    e = &g_entities[MAX_CLIENTS];
+    for (i = MAX_CLIENTS; i < level.num_entities; i++, e++) {
+        if (!e->inuse) {
+            continue;
+        }
+
+        if (e->s.eType != ET_MISSILE) {
+            continue;
+        }
+
+        if (e->methodOfDeath != MOD_SATCHEL) {
+            continue;
+        }
+
+        if (e->parent != ent) {
+            continue;
+        }
+
+        G_ExplodeMissile(e);
+        blown = qtrue;
+    }
+
+    return blown;
+}
+
 void G_FreeSatchel( gentity_t* ent ) {
 	gentity_t* other;
 

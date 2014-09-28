@@ -646,7 +646,6 @@ cvarTable_t		cvarTable[] = {
       { &cg_CHS2Info8,                    "cg_CHS2Info8", "0", CVAR_ARCHIVE },
 
       { &cg_itemPickupText,               "cg_itemPickupText", "1", CVAR_ARCHIVE },
-      { NULL,                             "hwinfo", "NOHWID", CVAR_ROM | CVAR_USERINFO }, 
       { &cg_HUD_chargeBar,                "cg_HUD_chargeBar", "1", CVAR_ARCHIVE },
       { &cg_HUD_fatigueBar,               "cg_HUD_fatigueBar", "1", CVAR_ARCHIVE },
       { &cg_HUD_healthBar,                "cg_HUD_healthBar", "1", CVAR_ARCHIVE },

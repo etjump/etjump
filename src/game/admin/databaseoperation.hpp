@@ -2,18 +2,21 @@
 #define DATABASEOPERATION_HH
 
 #include <boost/shared_ptr.hpp>
-#include <sqlite3.h>
+#include <string>
+#include "database.hpp"
 
 // This is a class that defines a queued database operation
 // for g_instantDatabaseSync 0
 class DatabaseOperation
 {
 public:
-    DatabaseOperation(sqlite3 *db);
+    DatabaseOperation(Database *db);
     virtual ~DatabaseOperation();
     virtual void Execute() = 0;
+    Database *GetDatabase();
 protected:
-    sqlite3 *db_;    
+    Database *db_;   
+    std::string message_;
 };
 
 struct Ban_s;
@@ -21,31 +24,31 @@ typedef boost::shared_ptr<Ban_s> Ban;
 class BanUserOperation : public DatabaseOperation
 {
 public:
-    BanUserOperation(sqlite3 *db, Ban ban);
+    BanUserOperation(Database *db, Ban ban);
     void Execute();
 private:
     Ban ban_;
 };
 typedef boost::shared_ptr<BanUserOperation> BanUserOperationPtr;
 
+struct User_s;
+typedef boost::shared_ptr<User_s> User;
 class UpdateLastSeenOperation : public DatabaseOperation
 {
 public:
-    UpdateLastSeenOperation(sqlite3 *db, unsigned id, unsigned lastSeen);
+    UpdateLastSeenOperation(Database *db, User user);
     void Execute();
 private:
 
-    unsigned id_;
-    unsigned lastSeen_;
+    User user_;
 };
 typedef boost::shared_ptr<UpdateLastSeenOperation> UpdateLastSeenOperationPtr;
 
-struct User_s;
-typedef boost::shared_ptr<User_s> User;
+
 class AddUserOperation : public DatabaseOperation
 {
 public:
-    AddUserOperation(sqlite3 *db, User user);
+    AddUserOperation(Database *db, User user);
     void Execute();
 private:
     User user_;
@@ -55,17 +58,18 @@ typedef boost::shared_ptr<AddUserOperation> AddUserOperationPtr;
 class SaveUserOperation : public DatabaseOperation
 {
 public:
-    SaveUserOperation(sqlite3 *db, User user);
+    SaveUserOperation(Database *db, User user, unsigned updated);
     void Execute();
 private:
     User user_;
+    unsigned updated_;
 };
 typedef boost::shared_ptr<SaveUserOperation> SaveUserOperationPtr;
 
 class UnbanOperation : public DatabaseOperation
 {
 public:
-    UnbanOperation(sqlite3 *db, unsigned id);
+    UnbanOperation(Database *db, unsigned id);
     void Execute();
 private:
     unsigned id_;
@@ -75,7 +79,7 @@ typedef boost::shared_ptr<UnbanOperation> UnbanOperationPtr;
 class AddNewHWIDOperation : public DatabaseOperation
 {
 public: 
-    AddNewHWIDOperation(sqlite3 *db, User user);
+    AddNewHWIDOperation(Database *db, User user);
     void Execute();
 private:
     User user_;

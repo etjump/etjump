@@ -142,6 +142,7 @@ public:
     bool AddNewHWID(unsigned id, const std::string& hwid);
     bool UpdateLastSeen(unsigned id, unsigned lastSeen);
     bool SetLevel(unsigned id, int level);
+    bool Save(User user, unsigned updated);
     bool Save(IdIterator user, unsigned updated);
     std::string GetMessage() const;
     bool UserExists(const std::string& guid);
@@ -156,10 +157,14 @@ public:
     bool ListUsers(gentity_t *ent, int page);
     bool UserInfo(gentity_t *ent, int id);
     bool ExecuteQueuedOperations();
-private:
-    unsigned GetHighestFreeId() const;
     bool AddUserToSQLite(User user);
     bool AddBanToSQLite(Ban ban);
+    bool AddNewHWIDToDatabase(User user);
+    bool RemoveBanFromSQLite(unsigned id);
+    bool UpdateLastSeenToSQLite(User user);
+private:
+    unsigned GetHighestFreeId() const;
+    
     bool BindInt(sqlite3_stmt* stmt, int index, int val);
     bool BindString(sqlite3_stmt* stmt, int index, const std::string& val);
     IdIterator GetUser(unsigned id) const;

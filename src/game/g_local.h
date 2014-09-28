@@ -1484,6 +1484,7 @@ void G_FadeItems(gentity_t* ent, int modType);
 gentity_t *G_FindSatchel(gentity_t* ent);
 void G_ExplodeMines(gentity_t* ent);
 qboolean G_ExplodeSatchels(gentity_t* ent);
+qboolean G_ExplodeSatchelsExt(gentity_t* ent);
 void G_FreeSatchel( gentity_t* ent );
 int G_GetWeaponDamage( int weapon );
 
@@ -2679,6 +2680,7 @@ void OnGameInit();
 void OnGameShutdown();
 const char *GetRandomMap();
 qboolean AdminCommandCheck(gentity_t *ent);
+void ExecuteQueuedDatabaseOperations();
 
 
 // g_save.cpp
