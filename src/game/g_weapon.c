@@ -4484,6 +4484,17 @@ void FireWeapon( gentity_t *ent ) {
 				ent->client->ps.classWeaponTime = level.time;
 			}
 		}
+
+        if (ent->s.weapon == WP_SATCHEL)
+        {
+            if (G_ExplodeSatchels(ent)) {
+                ent->client->ps.ammo[WP_SATCHEL_DET] = 0;
+                ent->client->ps.ammoclip[WP_SATCHEL_DET] = 0;
+                ent->client->ps.ammoclip[WP_SATCHEL] = 1;
+                G_AddEvent(ent, EV_NOAMMO, 0);
+            }
+        }
+
 		weapon_grenadelauncher_fire( ent, ent->s.weapon );
 		break;
 	case WP_FLAMETHROWER:
