@@ -525,6 +525,11 @@ struct gentity_s {
 	int lastPortalTime; //Last time we teleported using portal
     int portalTeam;
     char* name;
+
+    // xyz-width for race cp/end
+    vec3_t  dimensions;
+    int seqNum;
+
 };
 
 // Ridah
@@ -723,6 +728,15 @@ typedef struct ipXPStorage_s {
 	int			timeadded;
 } ipXPStorage_t;
 
+#define MAX_RACE_CHECKPOINTS 20
+typedef struct raceStruct_s {
+    int startTime;
+    int endTime;
+    int visitedCheckpoints[MAX_RACE_CHECKPOINTS];
+    qboolean isRacing;
+    qboolean isRouteMaker;
+} raceStruct_t;
+
 #define MAX_COMPLAINTIPS 5
 
 // client data that stays across multiple respawns, but is cleared
@@ -804,6 +818,8 @@ typedef struct {
 
 	int				hideMe;
     int             noclipScale;
+
+    raceStruct_t    race;
 
 	ipFilter_t		complaintips[MAX_COMPLAINTIPS];
 } clientPersistant_t;
@@ -2681,6 +2697,7 @@ void OnGameShutdown();
 const char *GetRandomMap();
 qboolean AdminCommandCheck(gentity_t *ent);
 void ExecuteQueuedDatabaseOperations();
+void StartRace(gentity_t *ent);
 
 
 // g_save.cpp
@@ -2689,6 +2706,10 @@ void SavePositionsToDatabase(gentity_t *ent);
 void LoadPositionsFromDatabase(gentity_t *ent);
 void InitSaveSystem();
 void ResetSavedPositions(gentity_t *ent);
+
+qboolean G_IsOnFireteam(int entityNum, fireteamData_t** teamNum);
+
+
 
 #endif // G_LOCAL_H
 

@@ -5,6 +5,7 @@
 #include "levels.hpp"
 #include "database.hpp"
 #include "../mapdata.h"
+#include "../races.hpp"
 
 Game::Game()
 {
@@ -14,4 +15,5 @@ Game::Game()
     saves = boost::shared_ptr<SaveSystem>(new SaveSystem(session.get()));
     database = boost::shared_ptr<Database>(new Database());
     mapData = boost::shared_ptr<MapData>(new MapData());
+    races = boost::shared_ptr<Races>(new Races());
 }

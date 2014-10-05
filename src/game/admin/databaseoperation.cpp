@@ -44,7 +44,7 @@ void UpdateLastSeenOperation::Execute()
     G_LogPrintf("Executing update last seen operation: %d %d\n", user_->id, user_->lastSeen);
     if (!this->GetDatabase()->UpdateLastSeenToSQLite(user_))
     {
-        G_LogPrintf("ERROR: %s\n", this->GetDatabase()->GetMessage());
+        G_LogPrintf("ERROR: %s\n", this->GetDatabase()->GetMessage().c_str());
     }
 }
 
@@ -57,7 +57,7 @@ void UnbanOperation::Execute()
     G_LogPrintf("Executing unban operation: %d\n", id_);
     if (!this->GetDatabase()->RemoveBanFromSQLite(id_))
     {
-        G_LogPrintf("ERROR: %s\n", this->GetDatabase()->GetMessage());
+        G_LogPrintf("ERROR: %s\n", this->GetDatabase()->GetMessage().c_str());
     }
 }
 

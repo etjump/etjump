@@ -784,6 +784,13 @@ cvarTable_t		cvarTable[] = {
                               } else if (cv->vmCvar == &cg_viewlog) {
                                     trap_Cvar_Set("viewlog", cg_viewlog.string);
                               }
+
+
+                              // This has to be if, not elseif...
+                              if (cv->vmCvar == &cg_noclipScale)
+                              {
+                                  cg.pmext.noclipScale = cg_noclipScale.integer;
+                              }
                         }
                   }
             }

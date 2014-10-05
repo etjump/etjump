@@ -212,6 +212,7 @@
     <ClCompile Include="mapdata.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="races.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
@@ -236,6 +237,7 @@
     <ClInclude Include="g_team.h" />
     <ClInclude Include="mapdata.h" />
     <ClInclude Include="q_shared.h" />
+    <ClInclude Include="races.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="surfaceflags.h" />
   </ItemGroup>

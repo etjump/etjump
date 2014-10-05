@@ -157,16 +157,25 @@ bool Database::UserExists(std::string const& guid)
 
 bool Database::ExecuteQueuedOperations()
 {
-    G_LogPrintf("Executing %d queued database operations.\n", databaseOperations_.size());
+    G_DPrintf("Executing %d queued database operations.\n", databaseOperations_.size());
     std::vector<boost::shared_ptr<DatabaseOperation> >::iterator it =
         databaseOperations_.begin();
     std::vector<boost::shared_ptr<DatabaseOperation> >::iterator end =
         databaseOperations_.end();
 
+    sqlite3_exec(db_, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+
     while (it != end)
     {
         it->get()->Execute();
         it++;
+    }
+
+    int rc = sqlite3_exec(db_, "END TRANSACTION;", NULL, NULL, NULL);
+    if (rc != SQLITE_OK)
+    {
+        G_LogPrintf("ERROR: failed to execute %d queued database operations: %s\n",
+            databaseOperations_.size(), sqlite3_errmsg(db_));
     }
 
     databaseOperations_.clear();
@@ -228,7 +237,7 @@ bool Database::ListUsers(gentity_t* ent, int page)
     int curr = 0;
     time_t t;
     time(&t);
-    BufferPrint(ent, va("%-5s %-10s %-15s %-36s\n", "ID", "Level", "Last seen", "Name"));
+    BufferPrint(ent, va("^7%-5s %-10s %-15s %-36s\n", "ID", "Level", "Last seen", "Name"));
     while (it != end)
     {
         if (curr >= i && curr < i + USERS_PER_PAGE)

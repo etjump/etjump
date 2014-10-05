@@ -9,6 +9,7 @@ void MapData::Shutdown()
 
     std::string name = level.rawmapname;
     boost::to_lower(name);
+    boost::replace_all(name, "'", "''");
 
     ConstNameIterator it = GetMapByName(name);
     if (it != GetNameIterEnd())
@@ -32,13 +33,12 @@ void MapData::Shutdown()
             return;
         }
 
-        G_LogPrintf("Updating seconds played on %s to %d\n", name.c_str(), secondsPlayed);
-
         int rc = sqlite3_step(stmt);
         if (rc != SQLITE_DONE)
         {
             G_LogPrintf("ERROR while updating map last played: %s\n", sqlite3_errmsg(db_));
         }
+        sqlite3_finalize(stmt);
     }
     else {
         G_LogPrintf("Couldn't find map with name %s\n", level.rawmapname);
@@ -128,6 +128,18 @@ bool MapData::Initialize()
         if (it == GetNameIterEnd())
         {
             Map newMap(new Map_s);
+            
+            // Hack that will not allow 64 char names with ' in them
+            if (strlen(buf) != MAX_QPATH)
+            {
+                if (buf)
+                {
+                    std::string temp = buf;
+                    boost::replace_all(temp, "'", "''");
+                    Q_strncpyz(buf, temp.c_str(), sizeof(buf));
+                }
+            }
+
             newMap->name = buf;
             maps_.insert(newMap);
             it = GetMapByName(buf);
@@ -196,11 +208,32 @@ void MapData::PrintMapInfo(gentity_t* ent, const std::string& mapName)
 {
     std::string map = mapName;
     boost::to_lower(map);
+    bool currentMap = false;
+
+    if (!Q_stricmp(map.c_str(), level.rawmapname))
+    {
+        currentMap = true;
+    }
 
     ConstNameIterator it = maps_.get<0>().find(map);
     if (it != maps_.get<0>().end())
     {
-        unsigned seconds = it->get()->secondsPlayed;
+        unsigned seconds = 0;
+        unsigned lastPlayed = 0;
+        if (currentMap)
+        {
+            time_t current;
+            time(&current);
+            seconds = it->get()->secondsPlayed +
+                static_cast<unsigned>((current-mapStartTime_));
+        }
+        else
+        {
+            lastPlayed = it->get()->lastPlayed;
+            seconds = it->get()->secondsPlayed;
+        }
+
+        
         const unsigned SECONDS_IN_DAY = 60 * 60 * 24;
         const unsigned SECONDS_IN_HOUR = 60 * 60;
         const unsigned SECONDS_IN_MINUTE = 60;
@@ -211,8 +244,17 @@ void MapData::PrintMapInfo(gentity_t* ent, const std::string& mapName)
         unsigned minutes = seconds / SECONDS_IN_MINUTE;
         seconds = seconds - minutes * SECONDS_IN_MINUTE;
 
-        ChatPrintTo(ent, va("^3mapinfo: ^7%s was last played in %s. It has been played for a total of %d days %d hours %d minutes and %d seconds.",
-            map.c_str(), TimeStampToString(it->get()->lastPlayed).c_str(), days, hours, minutes, seconds));
+        if (currentMap)
+        {
+            ChatPrintTo(ent, va("^3mapinfo: ^7%s is the current map on the server. It has been played for a total of %d days %d hours %d minutes and %d seconds.",
+                map.c_str(), days, hours, minutes, seconds));
+        }
+        else
+        {
+            ChatPrintTo(ent, va("^3mapinfo: ^7%s was last played in %s. It has been played for a total of %d days %d hours %d minutes and %d seconds.",
+                map.c_str(), TimeStampToString(lastPlayed).c_str(), days, hours, minutes, seconds));
+        }
+        
         return;
     }
 
@@ -321,7 +363,12 @@ std::string MapData::RandomMap()
         
         if (curr == target)
         {
-            return it->get()->name;
+            if (it->get()->mapOnServer)
+            {
+                return it->get()->name;
+            }
+            // let's just return oasis
+            return "oasis";
         }
 
         it++;

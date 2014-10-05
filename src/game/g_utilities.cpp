@@ -333,7 +333,21 @@ bool ToInt( const string& toConvert, int& value )
 bool ToUnsigned(const std::string& toConvert, unsigned& value)
 {
     try {
-        int result = boost::lexical_cast<unsigned>(toConvert);
+        unsigned result = boost::lexical_cast<unsigned>(toConvert);
+
+        value = result;
+    }
+    catch ( /* boost::bad_lexical_cast& e */ ...) {
+        return false;
+    }
+    return true;
+}
+
+
+bool ToFloat(const std::string& toConvert, float& value)
+{
+    try {
+        float result = boost::lexical_cast<float>(toConvert);
 
         value = result;
     }

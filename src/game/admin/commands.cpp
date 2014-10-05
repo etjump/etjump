@@ -5,6 +5,7 @@
 #include "../g_save.hpp"
 #include "session.hpp"
 #include "../mapdata.h"
+#include "../races.hpp"
 
 typedef boost::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -35,6 +36,7 @@ namespace CommandFlags
     const char READCONFIG = 'G';
     const char RENAME = 'R';
     const char RESTART = 'r';
+    const char ROUTE_MAKER = 'V';
     const char SAVESYSTEM = 'T';
     const char SETLEVEL = 's';
 }
@@ -56,6 +58,260 @@ namespace ClientCommands
     bool Save(gentity_t *ent, Arguments argv)
     {
         game.saves->Save(ent);
+        return true;
+    }
+
+    bool Race(gentity_t *ent, Arguments argv)
+    {
+        if (!ent->client->pers.race.isRouteMaker)
+        {
+            ChatPrintTo(ent, "^3race: ^7you must be a route maker to make routes.");
+            return false;
+        }
+
+        if (argv->size() == 1)
+        {
+            ChatPrintTo(ent, "^3usage: ^7/race");
+            return false;
+        }
+
+        // Adds a start point
+        if (argv->at(1) == "start")
+        {
+            if (argv->size() == 3 && argv->at(2) == "-keep")
+            {
+                if (!game.races->CreateStart(ent->r.currentOrigin, ent->client->ps.viewangles, true))
+                {
+                    // Shouldn't happen.
+                    ChatPrintTo(ent, "^3race: ^7failed to create a start point.");
+                    return false;
+                }
+            }
+            else
+            {
+                if (!game.races->CreateStart(ent->r.currentOrigin, ent->client->ps.viewangles, false))
+                {
+                    // Shouldn't happen.
+                    ChatPrintTo(ent, "^3race: ^7failed to create a start point.");
+                    return false;
+                }
+                CPTo(ent, "^7Race ^2start^7 created.");
+                ConsolePrintTo(ent, "^7Cleared all checkpoints and end point. If you wish to keep them, use the -keep switch.");
+            }
+
+            ConsolePrintTo(ent, va("Setting race start point to (%f %f %f) angle: (%f %f %f)",
+                ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+                ent->client->ps.viewangles[0], ent->client->ps.viewangles[1], ent->client->ps.viewangles[2]));
+        }
+        // Adds a new end point
+        // /race end x y z
+        // /race end xyzwidth
+        // /race end xywidth zwidth
+        // /race end xwidth ywidth zwidth
+        else if (argv->at(1) == "end")
+        {
+            if (argv->size() < 3)
+            {
+                ChatPrintTo(ent, "^3usage: ^7check console for more information.");
+                BeginBufferPrint();
+                BufferPrint(ent, "/race end [xyz width]\n");
+                BufferPrint(ent, "/race end [xy width] [z width]\n");
+                BufferPrint(ent, "/race end [x width] [y width] [z width]\n");
+                FinishBufferPrint(ent, false);
+                return false;
+            }
+
+            vec3_t dimensions = { 0, 0, 0 };
+            if (argv->size() == 3)
+            {
+                float width = 0;
+                if (!ToFloat(argv->at(2), width) || width < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined width is not a positive number.");
+                    return false;
+                }
+                
+                for (int i = 0; i < 3; i++)
+                {
+                    dimensions[i] = width;
+                }
+            }
+            else if (argv->size() == 4)
+            {
+                float xyWidth = 0;
+                float zWidth = 0;
+                if (!ToFloat(argv->at(2), xyWidth) || xyWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined xy width is not a positive number.");
+                    return false;
+                }
+
+                if (!ToFloat(argv->at(3), zWidth) || zWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined z width is not a positive number.");
+                    return false;
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    dimensions[i] = xyWidth;
+                }
+                dimensions[2] = zWidth;
+            }
+            else if (argv->size() == 5)
+            {
+                float xWidth = 0;
+                float yWidth = 0;
+                float zWidth = 0;
+                if (!ToFloat(argv->at(2), xWidth) || xWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined x width is not a positive number.");
+                    return false;
+                }
+
+                if (!ToFloat(argv->at(3), yWidth) || yWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined y width is not a positive number.");
+                    return false;
+                }
+
+                if (!ToFloat(argv->at(4), zWidth) || zWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined z width is not a positive number.");
+                    return false;
+                }
+                dimensions[0] = xWidth;
+                dimensions[1] = yWidth;
+                dimensions[2] = zWidth;
+            }
+
+            // Divide each by two as theyll be doubled later due to
+            // mins/maxs
+            for (int i = 0; i < 3; i++)
+            {
+                dimensions[i] /= 2;
+            }
+
+            game.races->CreateEnd(ent->r.currentOrigin, ent->client->ps.viewangles, dimensions);
+            CPTo(ent, "^7Race ^1end^7 created.");
+            ConsolePrintTo(ent, va("^7Setting race end point to (%f %f %f) angle: (%f %f %f) dimensions: 2x(%f %f %f)",
+                ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+                ent->client->ps.viewangles[0], ent->client->ps.viewangles[1], ent->client->ps.viewangles[2],
+                dimensions[0], dimensions[1], dimensions[2]));
+        }
+        // Adds a new checkpoint
+        // /race checkpoint x y z
+        // /race checkpoint xyzwidth
+        // /race checkpoint xywidth zwidth
+        // /race checkpoint xwidth ywidth zwidth
+        else if (argv->at(1) == "checkpoint")
+        {
+            if (argv->size() < 3)
+            {
+                ChatPrintTo(ent, "^3usage: ^7check console for more information.");
+                BeginBufferPrint();
+                BufferPrint(ent, "/race checkpoint [xyz width]\n");
+                BufferPrint(ent, "/race checkpoint [xy width] [z width]\n");
+                BufferPrint(ent, "/race checkpoint [x width] [y width] [z width]\n");
+                FinishBufferPrint(ent, false);
+                return false;
+            }
+
+            vec3_t dimensions = { 0, 0, 0 };
+            if (argv->size() == 3)
+            {
+                float width = 0;
+                if (!ToFloat(argv->at(2), width) || width < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined width is not a positive number.");
+                    return false;
+                }
+
+                for (int i = 0; i < 3; i++)
+                {
+                    dimensions[i] = width;
+                }
+            }
+            else if (argv->size() == 4)
+            {
+                float xyWidth = 0;
+                float zWidth = 0;
+                if (!ToFloat(argv->at(2), xyWidth) || xyWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined xy width is not a positive number.");
+                    return false;
+                }
+
+                if (!ToFloat(argv->at(3), zWidth) || zWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined z width is not a positive number.");
+                    return false;
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    dimensions[i] = xyWidth;
+                }
+                dimensions[2] = zWidth;
+            }
+            else if (argv->size() == 5)
+            {
+                float xWidth = 0;
+                float yWidth = 0;
+                float zWidth = 0;
+                if (!ToFloat(argv->at(2), xWidth) || xWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined x width is not a positive number.");
+                    return false;
+                }
+
+                if (!ToFloat(argv->at(3), yWidth) || yWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined y width is not a positive number.");
+                    return false;
+                }
+
+                if (!ToFloat(argv->at(4), zWidth) || zWidth < 0)
+                {
+                    ChatPrintTo(ent, "^3race: ^7defined z width is not a positive number.");
+                    return false;
+                }
+                dimensions[0] = xWidth;
+                dimensions[1] = yWidth;
+                dimensions[2] = zWidth;
+            }
+
+            // Divide each by two as theyll be doubled later due to
+            // mins/maxs
+            for (int i = 0; i < 3; i++)
+            {
+                dimensions[i] /= 2;
+            }
+
+            game.races->CreateCheckpoint(ent->r.currentOrigin, ent->client->ps.viewangles, dimensions);
+            CPTo(ent, "^7Race ^3checkpoint^7 created.");
+            ConsolePrintTo(ent, va("^7Adding a race checkpoint to (%f %f %f) angle: (%f %f %f) dimensions: 2x(%f %f %f)",
+                ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+                ent->client->ps.viewangles[0], ent->client->ps.viewangles[1], ent->client->ps.viewangles[2],
+                dimensions[0], dimensions[1], dimensions[2]));
+        }
+        // Clears all checkpoints and start + end
+        else if (argv->at(1) == "clear")
+        {
+            game.races->ClearRoute();
+            ChatPrintTo(ent, "^3race: ^7cleared current route.");
+        }
+        // Undoes the last checkpoint add
+        else if (argv->at(1) == "undo")
+        {
+            if (!game.races->UndoLastCheckpoint())
+            {
+                ChatPrintTo(ent, "^3race: ^7" + game.races->GetMessage());
+                return false;
+            }
+            ChatPrintTo(ent, "^3race: ^7removed last checkpoint.");
+        }
+
         return true;
     }
 }
@@ -520,7 +776,93 @@ namespace AdminCommands
 
     bool EditUser(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "EditUser is not implemented.");
+        if (argv->size() < 4)
+        {
+            PrintManual(ent, "edituser");
+            return false;
+        }
+
+        unsigned id = 0;
+        if (!ToUnsigned(argv->at(1), id))
+        {
+            ChatPrintTo(ent, "^3edituser: ^7invalid id " + argv->at(1));
+            return false;
+        }
+
+        int updated = 0;
+        int open = 0;
+
+        std::string commands;
+        std::string greeting;
+        std::string title;
+
+        ConstArgIter it = argv->begin() + 2;
+        while (it != argv->end())
+        {
+            if (*it == "-cmds" && it + 1 != argv->end())
+            {
+                open = CMDS_OPEN;
+                updated |= CMDS_OPEN;
+            }
+            else if (*it == "-greeting" && it + 1 != argv->end())
+            {
+                open = GREETING_OPEN;
+                updated |= GREETING_OPEN;
+            }
+            else if (*it == "-title" && it + 1 != argv->end())
+            {
+                open = TITLE_OPEN;
+                updated |= TITLE_OPEN;
+            }
+            else if (*it == "-clear" && it + 1 != argv->end())
+            {
+                ConstArgIter nextIt = it + 1;
+                if (*nextIt == "cmds")
+                {
+                    commands = "";
+                }
+                else if (*nextIt == "greeting")
+                {
+                    greeting = "";
+                }
+                else if (*nextIt == "title")
+                {
+                    title = "";
+                }
+                else
+                {
+                    it++;
+                }
+            }
+            else
+            {
+                switch (open)
+                {
+                case 0:
+                    ChatPrintTo(ent, va("^edituser: ^7ignored argument \"%s^7\".", it->c_str()));
+                    break;
+                case CMDS_OPEN:
+                    commands += *it;
+                    break;
+                case GREETING_OPEN:
+                    greeting += *it + " ";
+                    break;
+                case TITLE_OPEN:
+                    title += *it + " ";
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            it++;
+        }
+
+        boost::trim_right(greeting);
+        boost::trim_right(title);
+  
+
+
         return true;
     }    
 
@@ -985,6 +1327,52 @@ namespace AdminCommands
         return true;
     }
 
+    bool RouteMaker(gentity_t *ent, Arguments argv)
+    {
+        if (argv->size() == 1)
+        {
+            PrintManual(ent, "routemaker");
+            return false;
+        }
+        std::string err;
+        gentity_t *target = PlayerGentityFromString(argv->at(1), err);
+        if (!target)
+        {
+            ChatPrintTo(ent, "^3routemaker: ^7" + err);
+            return false;
+        }
+
+        if (!target->client->pers.race.isRouteMaker)
+        {
+            ChatPrintTo(ent, va("^3routemaker: ^7%s ^7is the route maker.", target->client->pers.netname));
+            ChatPrintTo(ent, "^3routemaker: ^7you are the route maker.");
+            target->client->pers.race.isRouteMaker = qtrue;
+            game.races->StopRace();
+            game.races->DesignMode(true);
+        }
+        else
+        {
+            ChatPrintTo(ent, va("^3routemaker: ^7%s ^7is no longer the route maker.", target->client->pers.netname));
+            ChatPrintTo(ent, "^3routemaker: ^7you are no longer the route maker.");
+            game.races->DesignMode(false);
+            target->client->pers.race.isRouteMaker = qfalse;
+        }
+
+        for (int i = 0; i < level.numConnectedClients; i++)
+        {
+            int cnum = level.sortedClients[i];
+            gentity_t *p = g_entities + cnum;
+
+            if (p != target && p->client->pers.race.isRouteMaker)
+            {
+                p->client->pers.race.isRouteMaker = qfalse;
+                CPMTo(p, "^<ETJump: ^7new routemaker was selected.");
+            }
+        }
+
+        return true;
+    }
+
     bool SetLevel(gentity_t* ent, Arguments argv)
     {
         // !setlevel <player> <level>
@@ -1276,6 +1664,7 @@ Commands::Commands()
     adminCommands_["rmsaves"] = AdminCommandPair(AdminCommands::RemoveSaves, CommandFlags::SAVESYSTEM);
     adminCommands_["rename"] = AdminCommandPair(AdminCommands::Rename, CommandFlags::RENAME);
     adminCommands_["restart"] = AdminCommandPair(AdminCommands::Restart, CommandFlags::RESTART);
+    adminCommands_["routemaker"] = AdminCommandPair(AdminCommands::RouteMaker, CommandFlags::ROUTE_MAKER);
     adminCommands_["setlevel"] = AdminCommandPair(AdminCommands::SetLevel, CommandFlags::SETLEVEL);
     adminCommands_["spectate"] = AdminCommandPair(AdminCommands::Spectate, CommandFlags::BASIC);
     adminCommands_["unban"] = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
@@ -1285,6 +1674,7 @@ Commands::Commands()
     commands_["backup"] = ClientCommands::BackupLoad;
     commands_["save"] = ClientCommands::Save;
     commands_["load"] = ClientCommands::Load;
+    commands_["race"] = ClientCommands::Race;
 }
 
 bool Commands::ClientCommand(gentity_t* ent, std::string commandStr)

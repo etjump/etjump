@@ -663,6 +663,30 @@ void G_TeamJumpMode( int clientNum )
     }
 }
 
+void G_FireteamRace(int clientNum)
+{
+    char arg[MAX_TOKEN_CHARS];
+    fireteamData_t *ft;
+    if (!G_IsOnFireteam(clientNum, &ft)) {
+        G_ClientPrintAndReturn(clientNum, "You are not on a fireteam");
+    }
+
+    if (!G_IsFireteamLeader(clientNum, &ft)) {
+        G_ClientPrintAndReturn(clientNum, "You are not the leader.");
+    }                
+
+    if (trap_Argc() < 3)
+    {
+        G_ClientPrintAndReturn(clientNum, "usage: fireteam race start");
+    }
+
+    trap_Argv(2, arg, sizeof(arg));
+    if (!Q_stricmp(arg, "start"))
+    {
+        StartRace(g_entities + clientNum);
+    }
+}
+
 void G_SetFireTeamRules( int clientNum ) {
 	int i;
 	char arg1[MAX_TOKEN_CHARS];
@@ -678,7 +702,7 @@ void G_SetFireTeamRules( int clientNum ) {
 	}
 
 	if(trap_Argc() < 3) {
-		G_ClientPrintAndReturn( clientNum, "usage: fireteam rules <rule> <value>");
+		G_ClientPrintAndReturn( clientNum, "usage: fireteam rules <savelimit|reset> <[optional] value>");
 	}
 
 	if(trap_Argc() == 3 ) {
@@ -896,5 +920,9 @@ void Cmd_FireTeam_MP_f( gentity_t* ent ) {
 	} else if(!Q_stricmp(command, "tj"))
     {
         G_TeamJumpMode( ent - g_entities );
+    }
+    else if (!Q_stricmp(command, "race"))
+    {
+        G_FireteamRace(ent - g_entities);
     }
 }

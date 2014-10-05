@@ -4,6 +4,7 @@
 #include "admin/commands.hpp"
 #include "admin/levels.hpp"
 #include "admin/database.hpp"
+#include "races.hpp"
 #include "mapdata.h"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
@@ -195,4 +196,9 @@ const char *GetRandomMap()
 void ExecuteQueuedDatabaseOperations()
 {
     game.database->ExecuteQueuedOperations();
+}
+
+void StartRace(gentity_t *ent)
+{
+    game.races->StartRace(ent);
 }

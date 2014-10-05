@@ -360,7 +360,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
 
         ent->client->sess.loadPreviousSavedPositions = qfalse;
         ent->client->sess.clientMapProgression = it->second.progression;
-        ChatPrintTo(ent, "^5ETJump: ^7loaded saved positions from previous session.");
+        ChatPrintTo(ent, "^<ETJump: ^7loaded saved positions from previous session.");
     }
 }
 

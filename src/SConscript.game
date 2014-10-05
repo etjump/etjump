@@ -19,6 +19,7 @@ admin/levels.cpp
 admin/databaseoperation.cpp
 mainext.cpp
 mapdata.cpp
+races.cpp
 
 g_utilities.cpp
 g_banner.cpp

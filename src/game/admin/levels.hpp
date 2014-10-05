@@ -1,8 +1,11 @@
 #ifndef LEVELS_HPP
 #define LEVELS_HPP
 
+// This messes up mainext.cpp if its defined twice.
+#ifndef g_local_hpp__
 struct gentity_s;
 typedef gentity_s gentity_t;
+#endif
 
 #include <string>
 #include <vector>
