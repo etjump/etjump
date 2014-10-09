@@ -735,6 +735,7 @@ typedef struct raceStruct_s {
     int visitedCheckpoints[MAX_RACE_CHECKPOINTS];
     qboolean isRacing;
     qboolean isRouteMaker;
+    int saveLimit;
 } raceStruct_t;
 
 #define MAX_COMPLAINTIPS 5

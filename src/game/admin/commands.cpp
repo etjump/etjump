@@ -311,6 +311,10 @@ namespace ClientCommands
             }
             ChatPrintTo(ent, "^3race: ^7removed last checkpoint.");
         }
+        else if (argv->at(1) == "settings")
+        {
+            
+        }
 
         return true;
     }

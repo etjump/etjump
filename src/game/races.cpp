@@ -156,6 +156,7 @@ bool Races::StartRace(gentity_t *caller)
         ent->client->pers.race.isRacing = qtrue;
         ent->client->pers.race.startTime = level.time;
         TeleportPlayerToStart(ent);
+        ent->client->pers.race.saveLimit = raceSettings_.saveLimit;
         CPTo(ent, "^2Race started!");
     }
 
@@ -172,6 +173,20 @@ void Races::StopRace()
         ent->client->pers.race.isRacing = qfalse;
     }
     CPMAll("^<ETJump: ^7Route design mode activated. Racing stopped");
+}
+
+bool Races::SetSettings(std::string const& name, std::string const& map, std::string const& creator, int date, int saveLimit)
+{
+    if (name.length() > 0 && map.length() > 0 && creator.length() > 0)
+    {
+        raceSettings_.name = name;
+        raceSettings_.map = map;
+        raceSettings_.creator = creator;
+        raceSettings_.date = date;
+        raceSettings_.saveLimit = saveLimit;
+    }
+
+    return false;
 }
 
 void Races::DesignMode(bool state)

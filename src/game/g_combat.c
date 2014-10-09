@@ -1255,6 +1255,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,  vec3
 		VectorNormalize(dir);
 	}
 
+    // If player shoots a rocket and goes spec it kills other ppl
+    if (attacker->client && attacker->client->sess.sessionTeam == TEAM_SPECTATOR)
+    {
+        damage = 0;
+        knockback = 0;
+    }
+
 	knockback = damage;
 	if ( knockback > 200 ) {
 		knockback = 200;

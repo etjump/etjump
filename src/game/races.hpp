@@ -10,6 +10,31 @@ typedef vec_t vec3_t[3];
 class Races
 {
 public:
+    struct Settings
+    {
+        Settings() : name("no name"), map(""), creator(""), date(0), saveLimit(-1)
+        {
+            
+        }
+        // Name of the route
+        std::string name;
+
+        // Name of the map
+        std::string map;
+        
+        // Name of the user who created the route
+        std::string creator;
+
+        // Date the route was created
+        int date;
+
+        // -1 no limit 0 no save >0 x saves
+        int saveLimit;
+
+        
+        
+    };
+
     Races();
     ~Races();
     static const unsigned MAX_CHECKPOINTS = 20;
@@ -26,6 +51,8 @@ public:
     bool StartRace(gentity_t *ent);
     void StopRace();
     void DesignMode(bool state);
+    bool SetSettings(const std::string& name, const std::string& map, const std::string& creator,
+        int date, int saveLimit);
 private:
     
     // Think functions for end/cp
@@ -41,6 +68,7 @@ private:
     unsigned numCheckpoints_;
     std::string message_;
     bool designMode_;
+    Settings raceSettings_;
 };
 
 #endif // RACES_HH
