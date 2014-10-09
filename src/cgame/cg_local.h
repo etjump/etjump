@@ -1182,7 +1182,7 @@ typedef struct {
 	int				stopTime;
 	qboolean		activeTimer;
 	qboolean		resetmaxspeed;
-
+    qboolean        routeDesigner;
 } cg_t;
 
 #define	NUM_FUNNEL_SPRITES	21

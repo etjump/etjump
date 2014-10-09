@@ -3058,6 +3058,7 @@ cvarTable_t		cvarTable[] = {
             // OSP
             cgs.dumpStatsFile = 0;
             cgs.dumpStatsTime = 0;
+            cg.routeDesigner = qfalse;
 
 #ifdef AC_SUPPORT
 

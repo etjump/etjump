@@ -5044,6 +5044,19 @@ void CG_DrawDemoRecording( void ) {
 	CG_Text_Paint_Ext( 5, cg_recording_statusline.integer, 0.2f, 0.2f, colorWhite, status, 0, 0, 0, &cgs.media.limboFont2 );
 }
 
+void CG_DrawRouteDesign(void)
+{
+    const char *s = va("Designing a route");
+    int x = 320, y = 30, w = 0;
+    float sizeX = 0.1f * 3, sizeY = 0.1f * 3;
+
+    if (cg.routeDesigner)
+    {
+        w = CG_Text_Width_Ext(s, 0.1f, 0, &cgs.media.limboFont1);
+        CG_Text_Paint_Ext(x - w, y, sizeX, sizeY, colorWhite, s, 0, 0, 0, &cgs.media.limboFont1);
+    }
+}
+
 /*
 =================
 CG_Draw2D
@@ -5180,7 +5193,7 @@ static void CG_Draw2D( void ) {
 		CG_DrawPersonalTimer();
 
 		CG_DrawSpeed2();
-
+        CG_DrawRouteDesign();
 		CG_DrawKeys();
 	} else {
 		if(cgs.eventHandling != CGAME_EVENT_NONE) {
@@ -5208,6 +5221,8 @@ static void CG_Draw2D( void ) {
 	CG_DrawFlashBlend();
 
 	CG_DrawDemoRecording();
+
+    
 }
 
 // NERVE - SMF

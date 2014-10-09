@@ -1208,4 +1208,5 @@ void CG_InitConsoleCommands( void ) {
     trap_AddCommand ("man");
     trap_AddCommand ("manual");
     trap_AddCommand ("help");
+    trap_AddCommand("race");
 }

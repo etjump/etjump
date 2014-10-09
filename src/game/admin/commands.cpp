@@ -313,6 +313,14 @@ namespace ClientCommands
         }
         else if (argv->at(1) == "settings")
         {
+            // race settings setting value
+            if (argv->size() < 4)
+            {
+                return false;
+            }
+        }
+        else if (argv->at(1) == "save")
+        {
             
         }
 
@@ -1349,17 +1357,19 @@ namespace AdminCommands
         if (!target->client->pers.race.isRouteMaker)
         {
             ChatPrintTo(ent, va("^3routemaker: ^7%s ^7is the route maker.", target->client->pers.netname));
-            ChatPrintTo(ent, "^3routemaker: ^7you are the route maker.");
+            ChatPrintTo(target, "^3routemaker: ^7you are the route maker.");
             target->client->pers.race.isRouteMaker = qtrue;
             game.races->StopRace();
             game.races->DesignMode(true);
+            trap_SendServerCommand(target - g_entities, "route_designer 1");
         }
         else
         {
             ChatPrintTo(ent, va("^3routemaker: ^7%s ^7is no longer the route maker.", target->client->pers.netname));
-            ChatPrintTo(ent, "^3routemaker: ^7you are no longer the route maker.");
+            ChatPrintTo(target, "^3routemaker: ^7you are no longer the route maker.");
             game.races->DesignMode(false);
             target->client->pers.race.isRouteMaker = qfalse;
+            trap_SendServerCommand(target - g_entities, "route_designer 0");
         }
 
         for (int i = 0; i < level.numConnectedClients; i++)
@@ -1371,6 +1381,7 @@ namespace AdminCommands
             {
                 p->client->pers.race.isRouteMaker = qfalse;
                 CPMTo(p, "^<ETJump: ^7new routemaker was selected.");
+                trap_SendServerCommand(ent - g_entities, "route_designer 0");
             }
         }
 

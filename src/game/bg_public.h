@@ -2486,6 +2486,8 @@ static const struct Manual commandManuals[] = {
     {"nosave", "!nosave [target]", "Disables save for target player."},
     {"passvote", "!passvote", "Passes current vote in progress"},
     {"putteam", "!putteam [target] [b|r|s]", "Puts target player to target team."},
+    { "race", "/race [start|end|checkpoint|clear|settings|undo] [additional parameters]\n\n/race start [xyz size]\n/race start [xy size] [z size]\n/race start [x size] [y size] [z size]\n\n",
+    "" },
     {"readconfig", "!readconfig", "Reads user, level and ban databases."},
     {"rename", "!rename [target] [new name]", "Renames target player."},
     {"restart", "!restart", "Restarts map."},
