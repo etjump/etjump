@@ -6,6 +6,7 @@
 #include "admin/database.hpp"
 #include "races.hpp"
 #include "mapdata.h"
+#include "custommapvotes.hpp"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -91,6 +92,8 @@ void OnGameInit()
     {
         G_LogPrintf("Successfully initialized map database.\n");
     }
+
+    game.customMapVotes->Load();
 }
 
 void OnGameShutdown()
@@ -193,6 +196,38 @@ const char *GetRandomMap()
     return buf;
 }
 
+const char *GetRandomMapByType(const char *customType)
+{
+    static char buf[MAX_TOKEN_CHARS] = "\0";
+
+    if (!customType)
+    {
+        G_Error("customType is NULL.");
+    }
+
+    Q_strncpyz(buf, game.customMapVotes->RandomMap(customType).c_str(), sizeof(buf));
+    return buf;
+}
+
+// returns null if map type doesnt exists.
+const char *CustomMapTypeExists(const char *mapType)
+{
+    static char buf[MAX_TOKEN_CHARS] = "\0";
+    if (!mapType)
+    {
+        G_Error("mapType is NULL.");
+    }
+
+    CustomMapVotes::TypeInfo info = game.customMapVotes->GetTypeInfo(mapType);
+
+    if (info.typeExists)
+    {
+        Q_strncpyz(buf, info.callvoteText.c_str(), sizeof(buf));
+        return buf;
+    }
+
+    return NULL;
+}
 void ExecuteQueuedDatabaseOperations()
 {
     game.database->ExecuteQueuedOperations();

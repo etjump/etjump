@@ -28,6 +28,7 @@ g_save.cpp
 ../sha-1/bg_sha.c
 ../sha-1/sha1.c
 ../sqlite/sqlite3.c
+../json/jsoncpp.cpp
 
 bg_animation.c
 bg_animgroup.c

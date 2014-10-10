@@ -213,6 +213,12 @@
     <ClCompile Include="races.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="custommapvotes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\json\jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -284,6 +290,15 @@
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
     <ClInclude Include="races.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="custommapvotes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\json\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\json\json-forwards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

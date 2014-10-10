@@ -146,6 +146,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
@@ -170,6 +171,7 @@
     <ClCompile Include="bg_sscript.c" />
     <ClCompile Include="bg_stats.c" />
     <ClCompile Include="bg_tracemap.c" />
+    <ClCompile Include="custommapvotes.cpp" />
     <ClCompile Include="g_active.c" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
@@ -218,6 +220,8 @@
     <None Include="game.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\json\json-forwards.h" />
+    <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="admin\commands.hpp" />
@@ -229,6 +233,7 @@
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
+    <ClInclude Include="custommapvotes.hpp" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />

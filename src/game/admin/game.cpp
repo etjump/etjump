@@ -6,6 +6,7 @@
 #include "database.hpp"
 #include "../mapdata.h"
 #include "../races.hpp"
+#include "../custommapvotes.hpp"
 
 Game::Game()
 {
@@ -16,4 +17,5 @@ Game::Game()
     database = boost::shared_ptr<Database>(new Database());
     mapData = boost::shared_ptr<MapData>(new MapData());
     races = boost::shared_ptr<Races>(new Races());
+    customMapVotes = boost::shared_ptr<CustomMapVotes>(new CustomMapVotes());
 }
