@@ -2695,11 +2695,13 @@ qboolean OnClientCommand(gentity_t *ent);
 qboolean OnConsoleCommand();
 void OnGameInit();
 void OnGameShutdown();
+qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
+const char *GetRandomMapByType(const char *customType);
 qboolean AdminCommandCheck(gentity_t *ent);
 void ExecuteQueuedDatabaseOperations();
 void StartRace(gentity_t *ent);
-
+const char *CustomMapTypeExists(const char *mapType);
 
 // g_save.cpp
 void ForceSave(gentity_t *location, gentity_t *ent);

@@ -2,6 +2,7 @@
 #include <fstream>
 #include "g_utilities.hpp"
 #include "../json/json.h"
+#include <boost/algorithm/string.hpp>
 
 CustomMapVotes::CustomMapVotes()
 {
@@ -30,7 +31,7 @@ bool CustomMapVotes::Load()
 
     if (!f)
     {
-        G_Error("Couldn't open customvotes.json");
+        G_LogPrintf("Couldn't open customvotes.json");
         return false;
     }
     std::string content((std::istreambuf_iterator<char>(f)),
@@ -41,7 +42,7 @@ bool CustomMapVotes::Load()
 
     if (!reader.parse(content, root))
     {
-        G_Error("parser error");
+        G_Error("Customvotes parser error");
         return false;
     }
 
@@ -67,6 +68,51 @@ bool CustomMapVotes::Load()
     }
     
     return true;
+}
+
+std::string CustomMapVotes::ListTypes() const
+{
+    std::string buf;
+    for (unsigned i = 0; i < customMapVotes_.size(); i++)
+    {
+        if (i != (customMapVotes_.size() - 1))
+        {
+            buf += customMapVotes_[i].type + ", ";
+        }
+        else
+        {
+            buf += customMapVotes_[i].type;
+        }
+    }
+    return buf;
+}
+
+const std::vector<std::string> *CustomMapVotes::ListInfo(const std::string& type)
+{
+    static std::vector<std::string> lines;
+    lines.clear();
+    
+    for (unsigned i = 0; i < customMapVotes_.size(); i++)
+    {
+        if (customMapVotes_[i].type == type)
+        {
+            lines.push_back("^<Maps on the list: ^7\n");
+            for (unsigned j = 0; j < customMapVotes_[i].maps.size(); j++)
+            {
+                lines.push_back(va("%-30s ", customMapVotes_[i].maps[j].c_str()));
+                if (j % 3 == 0 && j != 0)
+                {
+                    lines[lines.size() - 1].push_back('\n');
+                }
+                else if (j + 1 == customMapVotes_[i].maps.size())
+                {
+                    lines[lines.size() - 1].push_back('\n');
+                }
+            }
+        }
+    }
+    
+    return &lines;
 }
 
 std::string const CustomMapVotes::RandomMap(std::string const& type)

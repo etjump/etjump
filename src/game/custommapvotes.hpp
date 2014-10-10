@@ -31,6 +31,8 @@ public:
     bool Load();
     TypeInfo GetTypeInfo(const std::string& type) const;
     const std::string RandomMap(const std::string& type);
+    std::string ListTypes() const;
+    const std::vector<std::string> *ListInfo(const std::string& name);
 private:
     std::vector<MapType> customMapVotes_;
 };

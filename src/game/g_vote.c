@@ -388,10 +388,32 @@ int G_UnMute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, 
 
 int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, 
                   char *arg2, qboolean fRefereeCmd) 
-{
-    if(arg) {
-        Q_strncpyz(level.voteInfo.vote_value, 
-            GetRandomMap(), sizeof(level.voteInfo.vote_value));
+{    
+    const char *map = NULL;
+    // We know that arg2 is a type that exists.
+    if (arg)
+    {
+        if (strlen(arg2) > 0)
+        {
+            map = GetRandomMapByType(arg2);
+
+            if (strlen(map) == 0)
+            {
+                C_ChatPrintTo(ent, "^3randommap: ^7no maps on the requested map list. Voting for a random map.");
+                map = GetRandomMap();
+            }
+            else if (!G_MapExists(map))
+            {
+                C_ChatPrintTo(ent, va("^1ERROR: ^7map %s is not on the server. Please update customvotes.json.", map));
+            }
+        }
+        else
+        {
+            map = GetRandomMap();
+        }
+
+        Q_strncpyz(level.voteInfo.vote_value,
+            map, sizeof(level.voteInfo.vote_value));
     } else {
         trap_SendConsoleCommand(EXEC_APPEND, 
             va("map %s\n", level.voteInfo.vote_value));

@@ -20,6 +20,7 @@ admin/databaseoperation.cpp
 mainext.cpp
 mapdata.cpp
 races.cpp
+custommapvotes.cpp
 
 g_utilities.cpp
 g_banner.cpp

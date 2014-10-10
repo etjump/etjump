@@ -6,6 +6,7 @@
 #include "session.hpp"
 #include "../mapdata.h"
 #include "../races.hpp"
+#include "../custommapvotes.hpp"
 
 typedef boost::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -325,6 +326,29 @@ namespace ClientCommands
         }
 
         return true;
+    }
+
+    bool ListInfo(gentity_t *ent, Arguments argv)
+    {
+        if (argv->size() != 2)
+        {
+            std::string types = game.customMapVotes->ListTypes();
+            ConsolePrintTo(ent, "^<List of custom map types: ^7" + types);
+            return true;
+        }
+
+        const std::vector<std::string> *lines = game.customMapVotes->ListInfo(argv->at(1));
+        if (lines->size() == 0)
+        {
+            ChatPrintTo(ent, "^<<listinfo: ^7list could not be found.");
+            return false;
+        }
+        BeginBufferPrint();
+        for (unsigned i = 0; i < lines->size(); i++)
+        {
+            BufferPrint(ent, lines->at(i));
+        }
+        FinishBufferPrint(ent, false);
     }
 }
 
@@ -1690,6 +1714,7 @@ Commands::Commands()
     commands_["save"] = ClientCommands::Save;
     commands_["load"] = ClientCommands::Load;
     commands_["race"] = ClientCommands::Race;
+    commands_["listinfo"] = ClientCommands::ListInfo;
 }
 
 bool Commands::ClientCommand(gentity_t* ent, std::string commandStr)

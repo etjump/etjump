@@ -513,6 +513,16 @@ bool MapExists( const std::string& map )
     return true;
 }
 
+qboolean G_MapExists(const char *map)
+{
+    if (!map)
+    {
+        G_Error("map is NULL.");
+    }
+
+    return MapExists(map) ? qtrue : qfalse;
+}
+
 string ValueForKey(gentity_t *ent, const std::string& key)
 {
     char userinfo[MAX_INFO_STRING] = "\0";

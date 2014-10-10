@@ -1983,10 +1983,10 @@ Cmd_CallVote_f
 ==================
 */
 qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCommand ) {
-    qboolean randommap = qfalse;
 	int		i;
 	char	arg1[MAX_STRING_TOKENS];
 	char	arg2[MAX_STRING_TOKENS];
+    const char *customMapType = NULL;
 
 	// Normal checks, if its not being issued as a referee command
 	if( !fRefCommand ) {
@@ -2031,8 +2031,15 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 	}
 
 	if(!Q_stricmp(arg1, "randommap")) {
-		Q_strncpyz(arg2, "none", sizeof(arg2));
-        randommap = qtrue;
+
+        if (trap_Argc() == 3)
+        {
+            if (!(customMapType = CustomMapTypeExists(arg2)))
+            {
+                G_refPrintf(ent, "^7Map type %s does not exists.", arg2);
+                return qfalse;
+            }
+        }
 	}
 
 	if (!Q_stricmp(arg1, "map"))
@@ -2085,11 +2092,8 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000) ));
 		return qfalse;
 	}
-    if(randommap) {
-        Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s", arg1);
-    } else {
-	    Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
-    }
+	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
+    
 
 	// start the voting, the caller automatically votes yes
 	// If a referee, vote automatically passes.	// OSP
@@ -2107,10 +2111,24 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 
 		G_globalSound("sound/misc/referee.wav");
 	} else {
+
+        // Zero: NOTE! if we call a randommap vote with a custom map type
+        // it only changes the clientside info text, not everything.
+
 		level.voteInfo.voteYes = 1;
-		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, level.voteInfo.voteString));
-		AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
-        G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
+        if (customMapType)
+        {
+            AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, customMapType));
+            AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
+            G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, customMapType);
+        }
+        else
+        {
+            AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, level.voteInfo.voteString));
+            AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
+            G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
+        }
+		
 		G_globalSound("sound/misc/vote.wav");
 	}
 
@@ -2132,7 +2150,16 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 
 		trap_SetConfigstring(CS_VOTE_YES,	 va("%i", level.voteInfo.voteYes));
 		trap_SetConfigstring(CS_VOTE_NO,	 va("%i", level.voteInfo.voteNo));
-		trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);	
+
+        if (!customMapType)
+        {
+            trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
+        }
+        else
+        {
+            trap_SetConfigstring(CS_VOTE_STRING, customMapType);
+        }
+		
 		trap_SetConfigstring(CS_VOTE_TIME,	 va("%i", level.voteInfo.voteTime));
 	}
 	
