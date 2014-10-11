@@ -26,6 +26,7 @@ CustomMapVotes::TypeInfo CustomMapVotes::GetTypeInfo(std::string const& type) co
 
 bool CustomMapVotes::Load()
 {
+    customMapVotes_.clear();
     std::string path = GetPath("customvotes.json");
     std::ifstream f(path.c_str());
 

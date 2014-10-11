@@ -88,14 +88,18 @@ void SaveSystem::Save(gentity_t *ent) {
 		}
 	}
 
-    if (ent->client->pers.race.saveLimit == 0)
+    if (ent->client->pers.race.isRacing)
     {
-        CPTo(ent, "^5You've used all your saves.");
-        return;
-    }
-    else if (ent->client->pers.race.saveLimit > 0)
-    {
-        ent->client->pers.race.saveLimit--;
+        if (ent->client->pers.race.saveLimit == 0)
+        {
+            CPTo(ent, "^5You've used all your saves.");
+            return;
+        }
+        
+        if (ent->client->pers.race.saveLimit > 0)
+        {
+            ent->client->pers.race.saveLimit--;
+        }
     }
 
     SavePosition *pos = 0;
