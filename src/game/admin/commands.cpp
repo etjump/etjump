@@ -42,6 +42,7 @@ namespace CommandFlags
     const char SETLEVEL = 's';
 }
 
+void Test();
 namespace ClientCommands
 {
     bool BackupLoad(gentity_t *ent, Arguments argv)
@@ -322,7 +323,12 @@ namespace ClientCommands
         }
         else if (argv->at(1) == "save")
         {
-            
+            if (argv->size() < 3)
+            {
+                ChatPrintTo(ent, "^3race: ^7/race save name");
+                return false;
+            }
+            game.races->Save(ConcatArgs(2), ent->client->pers.netname);
         }
 
         return true;
@@ -349,7 +355,30 @@ namespace ClientCommands
             BufferPrint(ent, lines->at(i));
         }
         FinishBufferPrint(ent, false);
+        return true;
     }
+
+//    void *PrintHello(void *)
+//    {
+//        sleep(3);
+//
+//        ChatPrintAll("Hello, world!");
+//
+//        pthread_exit(NULL);
+//        return NULL;
+//    }
+//    
+//    bool TestCommand(gentity_t *ent, Arguments argv)
+//    {
+//        pthread_t t;
+//
+//        pthread_create(&t, NULL, PrintHello, NULL);
+//
+//        pthread_detach(t);
+//
+//        return true;
+//    }
+
 }
 
 void PrintManual(gentity_t *ent, const std::string& command)

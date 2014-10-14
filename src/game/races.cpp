@@ -1,6 +1,16 @@
 #include "races.hpp"
 #include "g_local.hpp"
 #include "g_utilities.hpp"
+#include "../json/json.h"
+#include <sqlite3.h>
+
+#ifdef _WIN32
+#define PTW32_STATIC_LIB
+#endif
+
+#include <pthread.h>
+#include "asyncoperation.hpp"
+
 
 Races::Races() : start_(NULL), end_(NULL), numCheckpoints_(0), designMode_(false)
 {
@@ -174,6 +184,88 @@ void Races::StopRace()
     }
     CPMAll("^<ETJump: ^7Route design mode activated. Racing stopped");
 }
+
+std::string GetEntityOriginAndAngles(gentity_t *ent)
+{
+    return std::string(va("%f %f %f %f %f %f",
+        ent->r.currentOrigin[0],
+        ent->r.currentOrigin[1],
+        ent->r.currentOrigin[2],
+        ent->r.currentAngles[0],
+        ent->r.currentAngles[1],
+        ent->r.currentAngles[2]));
+}
+
+class SaveRace : AsyncOperation
+{
+public:
+    SaveRace(Json::Value data) : data_(data)
+    {
+        
+    }
+    void Execute()
+    {
+        Json::StyledWriter writer;
+        std::string race = writer.write(data_);
+        G_LogPrintf("%s\n", writer.write(data_).c_str());
+        delete this;
+    };
+private:
+    Json::Value data_;
+};
+
+bool Races::Save(std::string const& routeName, const std::string& creator)
+{
+    if (!start_ || !end_)
+    {
+        message_ = "No route start or end defined.";
+        return false;
+    }
+
+    Json::Value root;
+    root["name"] = routeName;
+    root["map"] = level.rawmapname;
+    root["creator"] = creator;
+    time_t t;
+    time(&t);
+    root["date"] = static_cast<unsigned>(t);
+    root["start"] = GetEntityOriginAndAngles(start_);
+    root["end"] = GetEntityOriginAndAngles(end_);
+    root["checkpoints"] = Json::Value();
+
+    for (unsigned i = 0; i < numCheckpoints_; i++)
+    {
+        root["checkpoints"][i] = GetEntityOriginAndAngles(checkpoints_[i]);
+    }
+
+    pthread_t thread;
+    int rc = pthread_create(&thread, NULL, AsyncOperation::Thread, (void *)new SaveRace(root));
+    pthread_detach(thread);
+    
+//
+//
+//    Json::StyledWriter writer;
+//    G_LogPrintf("%s\n", writer.write(root).c_str());
+//
+//    sqlite3 *db;
+//    int rc = sqlite3_open(GetPath("races.db").c_str(), &db);
+//    if (rc != SQLITE_OK)
+//    {
+//        message_ = std::string("Couldn't open races.db: ") + sqlite3_errmsg(db);
+//        return false;
+//    }
+
+
+
+    return true;
+}
+
+bool Races::Load(std::string const& name)
+{
+    return true;
+}
+
+
 
 bool Races::SetSettings(std::string const& name, std::string const& map, std::string const& creator, int date, int saveLimit)
 {

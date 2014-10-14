@@ -42,6 +42,7 @@ bool ToInt(const std::string& toConvert, int& value);
 bool ToUnsigned(const std::string& toConvert, unsigned& value);
 bool ToFloat(const std::string& toConvert, float& value);
 std::string ToString( int value );
+std::string LongToString(long value);
 
 std::string ToString( vec3_t toConvert );
 std::string ToString( vec_t x, vec_t y, vec_t z );

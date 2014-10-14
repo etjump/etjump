@@ -43,7 +43,7 @@ bool CustomMapVotes::Load()
 
     if (!reader.parse(content, root))
     {
-        G_Error("Customvotes parser error");
+        G_LogPrintf("There was a parsing error in the customvotes.json: %s\n", reader.getFormattedErrorMessages().c_str());
         return false;
     }
 
@@ -64,7 +64,7 @@ bool CustomMapVotes::Load()
     }
     catch (...)
     {
-        G_Error("Failed to read a value from json");
+        G_LogPrintf("There was a read error in customvotes.json parser\n");
         return false;
     }
     

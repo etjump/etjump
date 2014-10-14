@@ -2,6 +2,7 @@
 #define RACES_HH
 
 #include <string>
+#include "../json/json-forwards.h"
 
 struct gentity_s;
 typedef gentity_s gentity_t;
@@ -53,6 +54,8 @@ public:
     void DesignMode(bool state);
     bool SetSettings(const std::string& name, const std::string& map, const std::string& creator,
         int date, int saveLimit);
+    bool Save(const std::string& name, const std::string& creator);
+    bool Load(const std::string& name);
 private:
     
     // Think functions for end/cp

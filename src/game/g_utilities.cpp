@@ -361,6 +361,10 @@ std::string ToString( int value ) {
     return boost::lexical_cast<std::string>(value);
 }
 
+std::string LongToString(long value) {
+    return boost::lexical_cast<std::string>(value);
+}
+
 std::string ToString( vec3_t toConvert ) {
     string vec3 = "(" + ToString( toConvert[0] )
         + ", " + ToString( toConvert[1] ) + ", " +
