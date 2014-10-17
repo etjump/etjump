@@ -219,10 +219,19 @@
     <ClCompile Include="..\json\jsoncpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="asyncoperation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asyncoperations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="asyncoperations.hh">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

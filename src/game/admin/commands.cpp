@@ -328,7 +328,7 @@ namespace ClientCommands
                 ChatPrintTo(ent, "^3race: ^7/race save name");
                 return false;
             }
-            game.races->Save(ConcatArgs(2), ent->client->pers.netname);
+            game.races->Save(ConcatArgs(2), ent);
         }
 
         return true;

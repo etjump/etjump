@@ -21,6 +21,8 @@ mainext.cpp
 mapdata.cpp
 races.cpp
 custommapvotes.cpp
+asyncoperation.cpp
+asyncoperations.cpp
 
 g_utilities.cpp
 g_banner.cpp

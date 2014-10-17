@@ -94,6 +94,7 @@ void OnGameInit()
     }
 
     game.customMapVotes->Load();
+    game.races->Init();
 }
 
 void OnGameShutdown()
@@ -236,4 +237,9 @@ void ExecuteQueuedDatabaseOperations()
 void StartRace(gentity_t *ent)
 {
     game.races->StartRace(ent);
+}
+
+void CheckIfOperationsNeedToBeExecuted()
+{
+    
 }

@@ -81,6 +81,7 @@ bool Database::AddBanToSQLite(Ban ban)
         !BindInt(stmt, 7, ban->expires) ||
         !BindString(stmt, 8, ban->reason))
     {
+        sqlite3_finalize(stmt);
         return false;
     }
 
@@ -88,6 +89,7 @@ bool Database::AddBanToSQLite(Ban ban)
     if (rc != SQLITE_DONE)
     {
         message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+        sqlite3_finalize(stmt);
         return false;
     }
 

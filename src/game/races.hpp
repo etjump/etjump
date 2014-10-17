@@ -2,6 +2,7 @@
 #define RACES_HH
 
 #include <string>
+#include <vector>
 #include "../json/json-forwards.h"
 
 struct gentity_s;
@@ -35,10 +36,24 @@ public:
         
         
     };
+    static const unsigned MAX_CHECKPOINTS = 20;
+    struct Race
+    {
+        std::string name;
+        std::string map;
+        std::string creator;
+        unsigned long date;
+        std::string start;
+        std::string end;
+        std::vector<std::string> checkpoints;
+    };
+
+    void Init();
+    void Shutdown();
 
     Races();
     ~Races();
-    static const unsigned MAX_CHECKPOINTS = 20;
+    
 
     std::string GetMessage() const;
 
@@ -54,8 +69,8 @@ public:
     void DesignMode(bool state);
     bool SetSettings(const std::string& name, const std::string& map, const std::string& creator,
         int date, int saveLimit);
-    bool Save(const std::string& name, const std::string& creator);
-    bool Load(const std::string& name);
+    bool Save(const std::string& name, gentity_t *ent);
+    bool Load(const std::string& name, gentity_t *ent);
 private:
     
     // Think functions for end/cp

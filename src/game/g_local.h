@@ -1941,6 +1941,7 @@ extern vmCvar_t g_mapDatabase;
 extern vmCvar_t g_banDatabase;
 
 extern vmCvar_t troll_speed;
+extern vmCvar_t g_raceDatabase;
 
 
 void	trap_Printf( const char *fmt );
@@ -2701,8 +2702,8 @@ const char *GetRandomMapByType(const char *customType);
 qboolean AdminCommandCheck(gentity_t *ent);
 void ExecuteQueuedDatabaseOperations();
 void StartRace(gentity_t *ent);
-const char *CustomMapTypeExists(const char *mapType);
-
+const char *CustomMapTypeExists(const char *mapType); 
+void CheckIfOperationsNeedToBeExecuted();
 // g_save.cpp
 void ForceSave(gentity_t *location, gentity_t *ent);
 void SavePositionsToDatabase(gentity_t *ent);

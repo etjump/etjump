@@ -233,6 +233,7 @@ vmCvar_t        g_mapDatabase;
 vmCvar_t        g_banDatabase;
 
 vmCvar_t        troll_speed;
+vmCvar_t        g_raceDatabase;
 
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -476,7 +477,8 @@ cvarTable_t		gameCvarTable[] = {
     { &g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE },
     { &g_instantDatabaseSync, "g_instantDatabaseSync", "0", CVAR_ARCHIVE | CVAR_LATCH },
     { &g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE }, 
-    { &troll_speed, "troll_speed", "127", CVAR_ARCHIVE }
+    { &troll_speed, "troll_speed", "127", CVAR_ARCHIVE },
+    { &g_raceDatabase, "g_raceDatabase", "races.db", CVAR_ARCHIVE | CVAR_LATCH }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -3585,6 +3587,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time )
 	CheckCvars();
 
 	G_UpdateTeamMapData();
+
+    CheckIfOperationsNeedToBeExecuted();
 
 	if(level.gameManager) {
 		level.gameManager->s.otherEntityNum = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_AXIS);

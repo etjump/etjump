@@ -2,15 +2,34 @@
 #include "g_local.hpp"
 #include "g_utilities.hpp"
 #include "../json/json.h"
+#include "asyncoperations.hh"
+#include "g_utilities.hpp"
 #include <sqlite3.h>
 
-#ifdef _WIN32
-#define PTW32_STATIC_LIB
-#endif
+void Races::Init()
+{
+    sqlite3 *db = NULL;
+    int rc = sqlite3_open(GetPath(g_raceDatabase.string).c_str(), &db);
+    if (rc != SQLITE_OK)
+    {
+        G_LogPrintf("ERROR: Failed to initialize race database. %s\n", sqlite3_errmsg(db));
+        return;
+    }
 
-#include <pthread.h>
-#include "asyncoperation.hpp"
+    rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS races (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, creator TEXT, map TEXT, date INTEGER, route TEXT, UNIQUE(name, map));", NULL, NULL, NULL);
+    if (rc != SQLITE_OK)
+    {
+        G_LogPrintf("ERROR: Failed to initialize race database. %s\n", sqlite3_errmsg(db));
+        return;
+    }
 
+    sqlite3_close(db);
+    db = NULL;
+}
+
+void Races::Shutdown()
+{
+}
 
 Races::Races() : start_(NULL), end_(NULL), numCheckpoints_(0), designMode_(false)
 {
@@ -196,25 +215,7 @@ std::string GetEntityOriginAndAngles(gentity_t *ent)
         ent->r.currentAngles[2]));
 }
 
-class SaveRace : AsyncOperation
-{
-public:
-    SaveRace(Json::Value data) : data_(data)
-    {
-        
-    }
-    void Execute()
-    {
-        Json::StyledWriter writer;
-        std::string race = writer.write(data_);
-        G_LogPrintf("%s\n", writer.write(data_).c_str());
-        delete this;
-    };
-private:
-    Json::Value data_;
-};
-
-bool Races::Save(std::string const& routeName, const std::string& creator)
+bool Races::Save(std::string const& routeName, gentity_t *ent)
 {
     if (!start_ || !end_)
     {
@@ -222,46 +223,31 @@ bool Races::Save(std::string const& routeName, const std::string& creator)
         return false;
     }
 
-    Json::Value root;
-    root["name"] = routeName;
-    root["map"] = level.rawmapname;
-    root["creator"] = creator;
+    Race race;
+    race.name = routeName;
+    race.map = level.rawmapname;
+    race.creator = ent->client->pers.netname;
     time_t t;
     time(&t);
-    root["date"] = static_cast<unsigned>(t);
-    root["start"] = GetEntityOriginAndAngles(start_);
-    root["end"] = GetEntityOriginAndAngles(end_);
-    root["checkpoints"] = Json::Value();
-
+    race.date = static_cast<unsigned long>(t);
+    race.start = GetEntityOriginAndAngles(start_);
+    race.end = GetEntityOriginAndAngles(end_);
     for (unsigned i = 0; i < numCheckpoints_; i++)
     {
-        root["checkpoints"][i] = GetEntityOriginAndAngles(checkpoints_[i]);
+        race.checkpoints.push_back(GetEntityOriginAndAngles(checkpoints_[i]));
     }
-
-    pthread_t thread;
-    int rc = pthread_create(&thread, NULL, AsyncOperation::Thread, (void *)new SaveRace(root));
-    pthread_detach(thread);
     
-//
-//
-//    Json::StyledWriter writer;
-//    G_LogPrintf("%s\n", writer.write(root).c_str());
-//
-//    sqlite3 *db;
-//    int rc = sqlite3_open(GetPath("races.db").c_str(), &db);
-//    if (rc != SQLITE_OK)
-//    {
-//        message_ = std::string("Couldn't open races.db: ") + sqlite3_errmsg(db);
-//        return false;
-//    }
-
-
+    AsyncSaveRace *save = new AsyncSaveRace(race, ent);
+    // After thread finishes execution, the object is deleted
+    save->RunAndDeleteObject();
 
     return true;
 }
 
-bool Races::Load(std::string const& name)
+bool Races::Load(std::string const& name, gentity_t *ent)
 {
+    AsyncLoadRace *load = new AsyncLoadRace(name, ent);
+    load->RunAndDeleteObject();
     return true;
 }
 

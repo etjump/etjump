@@ -157,6 +157,8 @@
     <ClCompile Include="admin\game.cpp" />
     <ClCompile Include="admin\levels.cpp" />
     <ClCompile Include="admin\session.cpp" />
+    <ClCompile Include="asyncoperation.cpp" />
+    <ClCompile Include="asyncoperations.cpp" />
     <ClCompile Include="bg_animation.c" />
     <ClCompile Include="bg_animgroup.c" />
     <ClCompile Include="bg_campaign.c" />
@@ -218,6 +220,7 @@
     <ClCompile Include="races.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="asyncoperations.hh" />
     <None Include="game.def" />
   </ItemGroup>
   <ItemGroup>

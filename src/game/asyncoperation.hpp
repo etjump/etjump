@@ -1,26 +1,54 @@
 #ifndef ASYNC_OPERATION_HH
 #define ASYNC_OPERATION_HH
 
+#ifdef _WIN32
+#define PTW32_STATIC_LIB
+#endif
+
+#include <pthread.h>
+#include <sqlite3.h>
+#include "g_local.hpp"
+
+// All async operation objects need to be dynamically allocated
 class AsyncOperation {
 public:
-    AsyncOperation()
+    AsyncOperation() : db_(NULL), stmt_(NULL)
     {
         
     }
     virtual ~AsyncOperation()
     {
-        
+        sqlite3_close(db_);
+        db_ = NULL;
+        sqlite3_finalize(stmt_);
+        stmt_ = NULL;
     }
+
+    // This is called to execute an async operation
+    // Object is deleted on execute
+    void RunAndDeleteObject();
+
+    bool OpenDatabase(const std::string& database);
+    bool PrepareStatement(const std::string& statement);
+    bool BindInt(int index, int value);
+    bool BindString(int index, const std::string& value);
+    bool ExecuteStatement();
+    std::string GetMessage() const;
+protected:
+    sqlite3_stmt *GetStatement();
+
+private:
+    pthread_t thread_;
+
+    // This is the actual operation
     virtual void Execute() = 0;
-    static void *Thread(void *args);
-    
+
+    // This is for pthread
+    static void *StartThread(void *data);
+
+    sqlite3 *db_;
+    sqlite3_stmt *stmt_;
+    std::string errorMessage_;
 };
 
-inline void* AsyncOperation::Thread(void* args)
-{
-    AsyncOperation *object = static_cast<AsyncOperation*>(args);
-    object->Execute();
-    pthread_exit(NULL);
-    return NULL;
-}
 #endif 
