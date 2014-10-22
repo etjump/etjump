@@ -21,14 +21,16 @@ private:
 class AsyncLoadRace : public AsyncOperation
 {
 public:
-    AsyncLoadRace(std::string name, gentity_t *ent) : name_(name), ent_(ent)
+    AsyncLoadRace(Races *races, std::string name, gentity_t *ent, OperationQueue *queue) : races_(races), name_(name), ent_(ent), queue_(queue)
     {
 
     }
 
 private:
+    Races *races_;
     std::string name_;
     gentity_t *ent_;
+    OperationQueue *queue_;
     void Execute();
 };
 

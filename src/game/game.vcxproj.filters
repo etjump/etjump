@@ -19,6 +19,12 @@
     <Filter Include="Header Files\Admin system">
       <UniqueIdentifier>{f7a43994-f591-458e-876d-cb9c539e7d1d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\operationqueue">
+      <UniqueIdentifier>{b73de8bc-e1f1-4252-9073-5524b70cacba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\operationqueue">
+      <UniqueIdentifier>{16901e97-a2b7-4678-add3-c8ede62f274b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bg_animation.c">
@@ -225,6 +231,12 @@
     <ClCompile Include="asyncoperations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="operationqueue.cpp">
+      <Filter>Source Files\operationqueue</Filter>
+    </ClCompile>
+    <ClCompile Include="loadrace.cpp">
+      <Filter>Source Files\operationqueue</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -312,6 +324,12 @@
     </ClInclude>
     <ClInclude Include="asyncoperation.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="operationqueue.hpp">
+      <Filter>Header Files\operationqueue</Filter>
+    </ClInclude>
+    <ClInclude Include="loadrace.hpp">
+      <Filter>Header Files\operationqueue</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

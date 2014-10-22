@@ -4,7 +4,13 @@
 #include "../json/json.h"
 #include "asyncoperations.hh"
 #include "g_utilities.hpp"
+#include "operationqueue.hpp"
 #include <sqlite3.h>
+
+Races::Races(OperationQueue* operationQueue) : operationQueue_(operationQueue)
+{
+
+}
 
 void Races::Init()
 {
@@ -215,6 +221,8 @@ std::string GetEntityOriginAndAngles(gentity_t *ent)
         ent->r.currentAngles[2]));
 }
 
+
+
 bool Races::Save(std::string const& routeName, gentity_t *ent)
 {
     if (!start_ || !end_)
@@ -244,9 +252,16 @@ bool Races::Save(std::string const& routeName, gentity_t *ent)
     return true;
 }
 
+bool Races::CreateLoadedRaceEntities(Race race)
+{
+    G_LogPrintf("Creating race entities\n");
+    return true;
+
+}
+
 bool Races::Load(std::string const& name, gentity_t *ent)
 {
-    AsyncLoadRace *load = new AsyncLoadRace(name, ent);
+    AsyncLoadRace *load = new AsyncLoadRace(this, name, ent, operationQueue_);
     load->RunAndDeleteObject();
     return true;
 }

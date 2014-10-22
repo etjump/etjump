@@ -7,6 +7,7 @@
 #include "../mapdata.h"
 #include "../races.hpp"
 #include "../custommapvotes.hpp"
+#include "../operationqueue.hpp"
 
 Game::Game()
 {
@@ -16,6 +17,7 @@ Game::Game()
     saves = boost::shared_ptr<SaveSystem>(new SaveSystem(session.get()));
     database = boost::shared_ptr<Database>(new Database());
     mapData = boost::shared_ptr<MapData>(new MapData());
-    races = boost::shared_ptr<Races>(new Races());
+    operationQueue = boost::shared_ptr<OperationQueue>(new OperationQueue());
+    races = boost::shared_ptr<Races>(new Races(operationQueue.get()));
     customMapVotes = boost::shared_ptr<CustomMapVotes>(new CustomMapVotes());
 }

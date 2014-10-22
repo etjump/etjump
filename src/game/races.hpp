@@ -5,6 +5,7 @@
 #include <vector>
 #include "../json/json-forwards.h"
 
+class OperationQueue;
 struct gentity_s;
 typedef gentity_s gentity_t;
 typedef float vec_t;
@@ -12,6 +13,7 @@ typedef vec_t vec3_t[3];
 class Races
 {
 public:
+    Races(OperationQueue *operationQueue);
     struct Settings
     {
         Settings() : name("no name"), map(""), creator(""), date(0), saveLimit(-1)
@@ -71,6 +73,10 @@ public:
         int date, int saveLimit);
     bool Save(const std::string& name, gentity_t *ent);
     bool Load(const std::string& name, gentity_t *ent);
+    // Load executes on async operation to get the data from sqlite
+    // then we move the data to main thread and from main thread this
+    // is called to actually create the entities
+    bool CreateLoadedRaceEntities(Race race);
 private:
     
     // Think functions for end/cp
@@ -87,6 +93,7 @@ private:
     std::string message_;
     bool designMode_;
     Settings raceSettings_;
+    OperationQueue *operationQueue_;
 };
 
 #endif // RACES_HH

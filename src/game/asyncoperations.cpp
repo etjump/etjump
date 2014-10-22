@@ -3,7 +3,7 @@
 #include "g_utilities.hpp"
 #include <sqlite3.h>
 #include "../json/json.h"
-#include "operationqueue.hpp"
+#include "loadrace.hpp"
 
 void AsyncSaveRace::Execute()
 {
@@ -51,7 +51,7 @@ void AsyncSaveRace::Execute()
 
 void AsyncLoadRace::Execute()
 {
-    if (!OpenDatabase(GetPath(g_raceDatabase.string)))
+    if (!OpenDatabase(g_raceDatabase.string))
     {
         G_LogPrintf("ERROR: couldn't open %s: %s\n", g_raceDatabase, GetMessage().c_str());
         return;
@@ -76,6 +76,12 @@ void AsyncLoadRace::Execute()
         return;
     }
 
+    int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW)
+    {
+        ChatPrintTo(ent_, va("^1ERROR: ^7failed to load the race %s", name_.c_str()));
+        return;
+    }
     const char *val = NULL;
     Races::Race race;
     race.name = name_;
@@ -101,5 +107,6 @@ void AsyncLoadRace::Execute()
         race.checkpoints.push_back(cps[i].asString());
     }
     
-
+    boost::shared_ptr<OperationQueue::Operation> op(new LoadRace(races_, race, ent_));
+    queue_->AddNewQueuedOperation(op);
 }

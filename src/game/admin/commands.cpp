@@ -330,6 +330,15 @@ namespace ClientCommands
             }
             game.races->Save(ConcatArgs(2), ent);
         }
+        else if (argv->at(1) == "load")
+        {
+            if (argv->size() < 3)
+            {
+                ChatPrintTo(ent, "^3race: ^7/race load name");
+                return false;
+            }
+            game.races->Load(ConcatArgs(2), ent);
+        }
 
         return true;
     }

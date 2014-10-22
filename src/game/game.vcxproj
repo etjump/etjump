@@ -46,8 +46,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -213,8 +213,10 @@
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
+    <ClCompile Include="loadrace.cpp" />
     <ClCompile Include="mainext.cpp" />
     <ClCompile Include="mapdata.cpp" />
+    <ClCompile Include="operationqueue.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="races.cpp" />
@@ -245,7 +247,9 @@
     <ClInclude Include="g_save.hpp" />
     <ClInclude Include="g_utilities.hpp" />
     <ClInclude Include="g_team.h" />
+    <ClInclude Include="loadrace.hpp" />
     <ClInclude Include="mapdata.h" />
+    <ClInclude Include="operationqueue.hpp" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="races.hpp" />
     <ClInclude Include="resource.h" />

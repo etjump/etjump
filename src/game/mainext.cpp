@@ -9,6 +9,7 @@
 #include "custommapvotes.hpp"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
+#include "operationqueue.hpp"
 
 Game game;
 
@@ -241,5 +242,5 @@ void StartRace(gentity_t *ent)
 
 void CheckIfOperationsNeedToBeExecuted()
 {
-    
+    game.operationQueue->ExecuteQueuedOperations();
 }

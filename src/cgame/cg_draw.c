@@ -3504,7 +3504,7 @@ static qboolean CG_DrawFollow(void)
 	{
 		// Show in colors
 		CG_DrawStringExt(INFOTEXT_STARTX, 118,
-			CG_TranslateString(va("^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name)),
+			va("^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name),
 				colorWhite, qtrue, qtrue, BIGCHAR_WIDTH / 2, BIGCHAR_HEIGHT, 0);
 	}
 
