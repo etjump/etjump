@@ -34,4 +34,17 @@ private:
     void Execute();
 };
 
+class AsyncSaveName : public AsyncOperation
+{
+public:
+    AsyncSaveName(const std::string& name, int id) : name_(name), id_(id)
+    {
+        
+    }
+private:
+    std::string name_;
+    int id_;
+    void Execute();
+};
+
 #endif

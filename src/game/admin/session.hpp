@@ -6,13 +6,14 @@
 #include "../g_local.hpp"
 #include "levels.hpp"
 #include "database.hpp"
+#include "iauthentication.hpp"
 
 
 class Session
 {
 public:
     static const unsigned MAX_COMMANDS = 256;
-    Session();
+    Session(IAuthentication *database);
     void ResetClient(int clientNum);
 
     struct Client
@@ -49,8 +50,9 @@ public:
     bool IsIpBanned(int clientNum);
     void ParsePermissions(int clientNum);
     bool HasPermission(gentity_t *ent, char flag);
+    void NewName(gentity_t *ent);
 private:
-    
+    IAuthentication *database_;
 
     void UpdateLastSeen(int clientNum);
     Client clients_[MAX_CLIENTS];

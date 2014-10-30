@@ -5,7 +5,6 @@ using std::vector;
 
 #include "g_save.hpp"
 #include "g_utilities.hpp"
-#include "g_local.hpp"
 #include "admin/session.hpp"
 
 SaveSystem::Client::Client() {

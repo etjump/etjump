@@ -237,6 +237,9 @@
     <ClCompile Include="loadrace.cpp">
       <Filter>Source Files\operationqueue</Filter>
     </ClCompile>
+    <ClCompile Include="admin\user.cpp">
+      <Filter>Source Files\Admin system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -330,6 +333,12 @@
     </ClInclude>
     <ClInclude Include="loadrace.hpp">
       <Filter>Header Files\operationqueue</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\iauthentication.hpp">
+      <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="admin\user.hpp">
+      <Filter>Header Files\Admin system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

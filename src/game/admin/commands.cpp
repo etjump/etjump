@@ -1021,7 +1021,7 @@ namespace AdminCommands
             reason = argv->at(3);
         }
 
-        trap_DropClient(target->client->ps.clientNum, reason.c_str(), timeout);
+        trap_DropClient(target - g_entities, reason.c_str(), timeout);
         return true;
     }
 
@@ -1135,7 +1135,7 @@ namespace AdminCommands
         char userinfo[MAX_INFO_STRING] = "\0";
         char *ip = NULL;
 
-        trap_GetUserinfo(target->client->ps.clientNum, userinfo, sizeof(userinfo));
+        trap_GetUserinfo(target - g_entities, userinfo, sizeof(userinfo));
         ip = Info_ValueForKey(userinfo, "ip");
 
         G_AddIpMute(ip);
@@ -1666,7 +1666,7 @@ namespace AdminCommands
 
         char *ip = NULL;
         char userinfo[MAX_INFO_STRING] = "\0";
-        trap_GetUserinfo(target->client->ps.clientNum, userinfo, sizeof(userinfo));
+        trap_GetUserinfo(ClientNum(target), userinfo, sizeof(userinfo));
         ip = Info_ValueForKey(userinfo, "ip");
 
         G_RemoveIPMute(ip);

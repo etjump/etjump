@@ -1,9 +1,9 @@
 #include "session.hpp"
 #include "../g_utilities.hpp"
-#include "database.hpp"
 #include "levels.hpp"
 
-Session::Session()
+Session::Session(IAuthentication *database)
+: database_(database)
 {
     for (unsigned i = 0; i < MAX_CLIENTS; i++)
     {
@@ -55,9 +55,9 @@ void Session::UpdateLastSeen(int clientNum)
 
         G_DPrintf("Updating client's last seen to: %s\n", TimeStampToString(lastSeen).c_str());
 
-        if (!game.database->UpdateLastSeen(clients_[clientNum].user->id, lastSeen))
+        if (!database_->UpdateLastSeen(clients_[clientNum].user->id, lastSeen))
         {
-            G_LogPrintf("ERROR: %s\n", game.database->GetMessage().c_str());
+            G_LogPrintf("ERROR: %s\n", database_->GetMessage().c_str());
         }
     }
 }
@@ -141,7 +141,7 @@ bool Session::GuidReceived(gentity_t *ent)
 
     GetUserAndLevelData(clientNum);
 
-    if (game.database->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid))
+    if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid))
     {
         G_LogPrintf("Banned player %s tried to connect with guid %s and hardware id %s\n",
             clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
@@ -155,23 +155,23 @@ bool Session::GuidReceived(gentity_t *ent)
 void Session::GetUserAndLevelData(int clientNum)
 {
     gentity_t *ent = g_entities + clientNum;
-    if (!game.database->UserExists(clients_[clientNum].guid))
+    if (!database_->UserExists(clients_[clientNum].guid))
     {
-        if (!game.database->AddUser(clients_[clientNum].guid, clients_[clientNum].hwid, std::string(ent->client->pers.netname)))
+        if (!database_->AddUser(clients_[clientNum].guid, clients_[clientNum].hwid, std::string(ent->client->pers.netname)))
         {
-            G_LogPrintf("ERROR: failed to add user to database: %s\n", game.database->GetMessage().c_str());
+            G_LogPrintf("ERROR: failed to add user to database: %s\n", database_->GetMessage().c_str());
         }
         else
         {
             G_DPrintf("New user connected. Added user to the user database\n");
-            clients_[clientNum].user = game.database->GetUserData(clients_[clientNum].guid);
+            clients_[clientNum].user = database_->GetUserData(clients_[clientNum].guid);
         }
     }
     else
     {
         G_DPrintf("Old user connected. Getting user data from the database.\n");
 
-        clients_[clientNum].user = game.database->GetUserData(clients_[clientNum].guid);
+        clients_[clientNum].user = database_->GetUserData(clients_[clientNum].guid);
         if (clients_[clientNum].user)
         {
             G_DPrintf("User data found: %s\n", clients_[clientNum].user->ToChar());
@@ -181,7 +181,7 @@ void Session::GetUserAndLevelData(int clientNum)
             {
                 G_DPrintf("New HWID detected. Adding HWID %s to list.\n", clients_[clientNum].hwid.c_str());
 
-                if (!game.database->AddNewHWID(clients_[clientNum].user->id, clients_[clientNum].hwid))
+                if (!database_->AddNewHardwareId(clients_[clientNum].user->id, clients_[clientNum].hwid))
                 {
                     G_LogPrintf("Failed to add a new hardware ID to user %s\n", ent->client->pers.netname);
                 }
@@ -331,9 +331,9 @@ bool Session::SetLevel(gentity_t* target, int level)
         return false;
     }
 
-    if (!game.database->SetLevel(clients_[ClientNum(target)].user->id, level))
+    if (!database_->SetLevel(clients_[ClientNum(target)].user->id, level))
     {
-        message_ = game.database->GetMessage();
+        message_ = database_->GetMessage();
         return false;
     }
 
@@ -345,9 +345,9 @@ bool Session::SetLevel(gentity_t* target, int level)
 
 bool Session::SetLevel(unsigned id, int level)
 {
-    if (!game.database->SetLevel(id, level))
+    if (!database_->SetLevel(id, level))
     {
-        message_ = game.database->GetMessage();
+        message_ = database_->GetMessage();
         return false;
     }
 
@@ -365,12 +365,12 @@ bool Session::SetLevel(unsigned id, int level)
 
 bool Session::UserExists(unsigned id)
 {
-    return game.database->UserExists(id);
+    return database_->UserExists(id);
 }
 
 int Session::GetLevelById(unsigned id) const
 {
-    return game.database->GetUserData(id)->level;
+    return database_->GetUserData(id)->level;
 }
 
 int Session::GetLevel(gentity_t* ent) const
@@ -386,7 +386,7 @@ int Session::GetLevel(gentity_t* ent) const
 
 bool Session::IsIpBanned(int clientNum)
 {
-    return game.database->IsIpBanned(clients_[clientNum].ip);
+    return database_->IsIpBanned(clients_[clientNum].ip);
 }
 
 bool Session::Ban(gentity_t* ent, gentity_t *player, unsigned expires, std::string reason)
@@ -405,7 +405,7 @@ bool Session::Ban(gentity_t* ent, gentity_t *player, unsigned expires, std::stri
     std::string::size_type pos = ipport.find(":");
     std::string ip = ipport.substr(0, pos);
 
-    return game.database->BanUser(std::string(player->client->pers.netname), clients_[clientNum].guid,
+    return database_->BanUser(std::string(player->client->pers.netname), clients_[clientNum].guid,
         clients_[clientNum].hwid, ip, std::string(ent ? ent->client->pers.netname : "Console"),
         TimeStampToString(static_cast<unsigned>(t)), expires, reason);
 }
@@ -473,6 +473,11 @@ Session::Client::Client():
 guid(""), hwid("")
 {
 
+}
+
+void Session::NewName(gentity_t* ent)
+{
+    database_->NewName(clients_[ClientNum(ent)].user->id, ent->client->pers.netname);
 }
 
 bool Session::HasPermission(gentity_t *ent, char flag) 

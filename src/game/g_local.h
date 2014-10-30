@@ -2704,6 +2704,7 @@ void ExecuteQueuedDatabaseOperations();
 void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType); 
 void CheckIfOperationsNeedToBeExecuted();
+void ClientNameChanged(gentity_t *ent);
 // g_save.cpp
 void ForceSave(gentity_t *location, gentity_t *ent);
 void SavePositionsToDatabase(gentity_t *ent);

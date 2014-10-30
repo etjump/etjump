@@ -12,10 +12,10 @@
 Game::Game()
 {
     levels = boost::shared_ptr<Levels>(new Levels());
-    session = boost::shared_ptr<Session>(new Session());
+    database = boost::shared_ptr<Database>(new Database());
+    session = boost::shared_ptr<Session>(new Session(database.get()));
     commands = boost::shared_ptr<Commands>(new Commands());
     saves = boost::shared_ptr<SaveSystem>(new SaveSystem(session.get()));
-    database = boost::shared_ptr<Database>(new Database());
     mapData = boost::shared_ptr<MapData>(new MapData());
     operationQueue = boost::shared_ptr<OperationQueue>(new OperationQueue());
     races = boost::shared_ptr<Races>(new Races(operationQueue.get()));

@@ -1427,6 +1427,8 @@ void ClientUserinfoChanged( int clientNum ) {
 	if ( client->pers.connected == CON_CONNECTED ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
 
+            ClientNameChanged(ent);
+
 			trap_SendServerCommand( -1, 
                 va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", 
                     oldname, client->pers.netname) );

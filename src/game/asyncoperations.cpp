@@ -110,3 +110,33 @@ void AsyncLoadRace::Execute()
     boost::shared_ptr<OperationQueue::Operation> op(new LoadRace(races_, race, ent_));
     queue_->AddNewQueuedOperation(op);
 }
+
+void AsyncSaveName::Execute()
+{
+//    G_LogPrintf("Insering new name to database.\n");
+//    sqlite3_stmt *stmt = NULL;
+//    if (!PrepareStatement("INSERT INTO name (clean_name, name, user_id) VALUES (?, ?, ?);", &stmt))
+//    {
+//        G_LogPrintf("ERROR: failed to prepare insert names sql statement.\n");
+//        return;
+//    }
+//
+//    char sanitizedName[MAX_TOKEN_CHARS]; // MAX_TOKEN_CHARS is more than enough
+//    SanitizeConstString(name.c_str(), sanitizedName, qtrue);
+//
+//    if (!BindString(stmt, 1, sanitizedName) ||
+//        !BindString(stmt, 2, name) ||
+//        !BindInt(stmt, 3, id))
+//    {
+//        G_LogPrintf("ERROR: failed to bind a value to insert names sql statement.\n");
+//        return;
+//    }
+//
+//    int rc = sqlite3_step(stmt);
+//    if (rc != SQLITE_DONE)
+//    {
+//        return;
+//    }
+//
+//    sqlite3_finalize(stmt);
+}

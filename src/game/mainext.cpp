@@ -34,6 +34,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
     if (game.session->IsIpBanned(clientNum))
     {
+        G_LogPrintf("Kicked banned client: %d\n", clientNum);
         trap_DropClient(clientNum, "You are banned.", 0);
     }
 }
@@ -61,6 +62,8 @@ void WriteSessionData()
 
 void OnGameInit()
 {
+    game.operationQueue->Init();
+
     if (strlen(g_levelConfig.string))
     {
         if (!game.levels->ReadFromConfig())
@@ -81,17 +84,17 @@ void OnGameInit()
         }
         else
         {
-            G_LogPrintf("Successfully loaded users from database: %s\n", g_userConfig.string);
+            G_LogPrintf("Users loaded successfully from database: %s\n", g_userConfig.string);
         }
     }
 
     if (!game.mapData->Initialize())
     {
-        G_Error("Failed to initialize map database: %s.\n", game.mapData->GetMessage().c_str());
+        G_Error("Map database load failed: %s.\n", game.mapData->GetMessage().c_str());
     }
     else
     {
-        G_LogPrintf("Successfully initialized map database.\n");
+        G_LogPrintf("Map database loaded successfully\n");
     }
 
     game.customMapVotes->Load();
@@ -104,6 +107,7 @@ void OnGameShutdown()
     game.database->ExecuteQueuedOperations();
     game.database->CloseDatabase();
     game.mapData->Shutdown();
+    game.operationQueue->Shutdown();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) 
@@ -243,4 +247,9 @@ void StartRace(gentity_t *ent)
 void CheckIfOperationsNeedToBeExecuted()
 {
     game.operationQueue->ExecuteQueuedOperations();
+}
+
+void ClientNameChanged(gentity_t *ent)
+{
+    game.session->NewName(ent);
 }

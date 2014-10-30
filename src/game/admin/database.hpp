@@ -9,6 +9,8 @@
 #include <sqlite3.h>
 #include <vector>
 #include <boost/multi_index/ordered_index.hpp>
+#include "user.hpp"
+#include "iauthentication.hpp"
 
 using namespace boost::multi_index;
 
@@ -27,58 +29,7 @@ namespace Updated
     const unsigned GREETING = 0x00020;
 }
 
-struct User_s
-{
-    // Needed for multi index container
-    unsigned GetId()
-    {
-        return id;
-    }
-    // Needed for multi index container
-    std::string GetGuid()
-    {
-        return guid;
-    }
 
-    User_s() : level(0), lastSeen(0), updated(0)
-    {
-
-    }
-
-    User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid)
-        : id(id), guid(guid), name(name), level(0), lastSeen(0), updated(0)
-    {
-        split(hwids, hwid, boost::algorithm::is_any_of(", "));
-    }
-
-    User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen,
-        std::string const& name, std::string const& hwid, std::string const& title,
-        std::string const& commands, std::string const& greeting)
-        : id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting), updated(0)
-    {
-        split(hwids, hwid, boost::algorithm::is_any_of(","));
-    }
-
-    const char *ToChar() const
-    {
-        return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
-    }
-
-    std::string GetLastSeenString() const;
-    std::string GetLastVisitString() const;
-    unsigned id;
-    std::string guid;
-
-    // non indexed properties
-    int level;
-    unsigned lastSeen;
-    std::string name;
-    std::string title;
-    std::string commands;
-    std::string greeting;
-    std::vector<std::string> hwids;
-    unsigned updated;
-};
 
 struct Ban_s
 {
@@ -104,13 +55,13 @@ struct Ban_s
 };
 
 class DatabaseOperation;
-class Database
+class Database : public IAuthentication
 {
 public:
     Database();
     ~Database();
     typedef boost::shared_ptr<User_s> User;
-
+     
     typedef multi_index_container<
         User,
         indexed_by<
@@ -127,31 +78,46 @@ public:
     typedef boost::shared_ptr<Ban_s> Ban;    
 
     const User_s *GetUserData(unsigned id) const;
+
+    /**
+     * IAuthentication
+     */
+
+    const std::string GetMessage() const;
+    bool AddUser(const std::string& guid, const std::string& hwid, const std::string& name);
+    bool AddNewHardwareId(int id, const std::string& hwid);
+    bool BanUser(const std::string& name, const std::string& guid,
+        const std::string& hwid, const std::string& ip, const std::string& bannedBy,
+        const std::string& banDate, unsigned expires, const std::string& reason);
+    bool IsBanned(const std::string& guid, const std::string& hwid);
+    bool IsIpBanned(const std::string& ip);
+    bool UserExists(unsigned id);
+    bool UserExists(const std::string& guid);
     const User_s *GetUserData(const std::string& guid) const;
+    const User_s *GetUserData(int id) const;
+    bool SetLevel(int id, int level);
+    void NewName(int id, const std::string& name);
+    bool UpdateLastSeen(int id, int lastSeen);
+
+    /**
+     * End of IAuthentication
+     */
 
     bool CreateUsersTable();
     bool CreateBansTable();
     bool LoadUsers();
     bool LoadBans();
 
+    bool CreateNamesTable();
     bool InitDatabase(const char *config);
     bool CloseDatabase();
     // When user is added, all we have is the guid, hwid, name, lastSeen and level
     // Adds user to database
-    bool AddUser(const std::string& guid, const std::string& hwid, const std::string& name);
-    bool AddNewHWID(unsigned id, const std::string& hwid);
-    bool UpdateLastSeen(unsigned id, unsigned lastSeen);
-    bool SetLevel(unsigned id, int level);
     bool Save(User user, unsigned updated);
     bool Save(IdIterator user, unsigned updated);
-    std::string GetMessage() const;
-    bool UserExists(const std::string& guid);
-    bool UserExists(unsigned id);
-    bool BanUser(const std::string& name, const std::string& guid, 
-        const std::string& hwid, const std::string& ip, const std::string& bannedBy, 
-        const std::string& banDate, unsigned expires, const std::string& reason);
-    bool IsIpBanned(const std::string& ip);
-    bool IsBanned(const std::string& guid, const std::string& hwid);
+    
+    
+    
     bool ListBans(gentity_t *ent, int page);
     bool Unban(gentity_t *ent, int id);
     bool ListUsers(gentity_t *ent, int page);

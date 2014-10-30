@@ -405,9 +405,9 @@ bool Database::UserExists(unsigned id)
     return false;
 }
 
-std::string Database::GetMessage() const
+void Database::NewName(int id, std::string const& name)
 {
-    return message_;
+    
 }
 
 bool Database::UpdateLastSeenToSQLite(User user)
@@ -431,7 +431,7 @@ bool Database::UpdateLastSeenToSQLite(User user)
     return true;
 }
 
-bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
+bool Database::UpdateLastSeen(int id, int lastSeen)
 {
     IdIterator user = GetUser(id);
     if (user != IdIterEnd())
@@ -453,7 +453,7 @@ bool Database::UpdateLastSeen(unsigned id, unsigned lastSeen)
     return false;
 }
 
-bool Database::SetLevel(unsigned id, int level)
+bool Database::SetLevel(int id, int level)
 {
     IdIterator user = GetUser(id);
     if (user != IdIterEnd())
@@ -620,7 +620,7 @@ bool Database::AddNewHWIDToDatabase(User user)
     return true;
 }
 
-bool Database::AddNewHWID(unsigned id, std::string const& hwid)
+bool Database::AddNewHardwareId(int id, std::string const& hwid)
 {
     IdIterator user = GetUser(id);
 
@@ -688,6 +688,24 @@ User_s const* Database::GetUserData(unsigned id) const
         return user->get();
     }
     return NULL;
+}
+
+bool Database::CreateNamesTable()
+{
+    int rc = 0;
+    char *errMsg = NULL;
+
+    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS name (id INTEGER PRIMARY KEY AUTOINCREMENT, clean_name TEXT, name TEXT, user_id INT, FOREIGN KEY (user_id) REFERENCES users(id));",
+        NULL, NULL, &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        message_ = std::string("SQL error: ") + errMsg;
+        sqlite3_free(errMsg);
+        sqlite3_close(db_);
+        return false;
+    }
+    return true;
 }
 
 bool Database::LoadBans()
@@ -830,7 +848,22 @@ bool Database::CreateUsersTable()
         sqlite3_close(db_);
         return false;
     }
-    return true;
+    return true; 
+}
+
+std::string const Database::GetMessage() const
+{
+    return message_;
+}
+
+User_s const* Database::GetUserData(int id) const
+{
+    ConstIdIterator user = GetUser(id);
+    if (user != IdIterEnd())
+    {
+        return user->get();
+    }
+    return NULL;
 }
 
 User_s const* Database::GetUserData(std::string const& guid) const
@@ -858,7 +891,8 @@ bool Database::InitDatabase(char const* config)
     }
 
     if (!CreateUsersTable() ||
-        !CreateBansTable()) {
+        !CreateBansTable() || 
+        !CreateNamesTable()) {
         return false;
     }
 
@@ -890,16 +924,3 @@ Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) cons
     return users_.get<1>().find(guid);
 }
 
-std::string User_s::GetLastSeenString() const
-{
-    return TimeStampToString(lastSeen);
-}
-
-std::string User_s::GetLastVisitString() const
-{
-    time_t t;
-    time(&t);
-    unsigned now = static_cast<unsigned>(t);
-
-    return TimeStampDifferenceToString(now - lastSeen);
-}

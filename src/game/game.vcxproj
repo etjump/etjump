@@ -46,8 +46,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -157,6 +157,7 @@
     <ClCompile Include="admin\game.cpp" />
     <ClCompile Include="admin\levels.cpp" />
     <ClCompile Include="admin\session.cpp" />
+    <ClCompile Include="admin\user.cpp" />
     <ClCompile Include="asyncoperation.cpp" />
     <ClCompile Include="asyncoperations.cpp" />
     <ClCompile Include="bg_animation.c" />
@@ -234,8 +235,10 @@
     <ClInclude Include="admin\database.hpp" />
     <ClInclude Include="admin\databaseoperation.hpp" />
     <ClInclude Include="admin\game.hpp" />
+    <ClInclude Include="admin\iauthentication.hpp" />
     <ClInclude Include="admin\levels.hpp" />
     <ClInclude Include="admin\session.hpp" />
+    <ClInclude Include="admin\user.hpp" />
     <ClInclude Include="asyncoperation.hpp" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />

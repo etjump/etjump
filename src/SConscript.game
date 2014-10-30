@@ -17,12 +17,15 @@ admin/commands.cpp
 admin/database.cpp
 admin/levels.cpp
 admin/databaseoperation.cpp
+admin/user.cpp
 mainext.cpp
 mapdata.cpp
 races.cpp
 custommapvotes.cpp
 asyncoperation.cpp
 asyncoperations.cpp
+loadrace.cpp
+operationqueue.cpp
 
 g_utilities.cpp
 g_banner.cpp

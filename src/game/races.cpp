@@ -35,6 +35,7 @@ void Races::Init()
 
 void Races::Shutdown()
 {
+
 }
 
 Races::Races() : start_(NULL), end_(NULL), numCheckpoints_(0), designMode_(false)
@@ -254,9 +255,9 @@ bool Races::Save(std::string const& routeName, gentity_t *ent)
 
 bool Races::CreateLoadedRaceEntities(Race race)
 {
-    G_LogPrintf("Creating race entities\n");
-    return true;
+    
 
+    return true;
 }
 
 bool Races::Load(std::string const& name, gentity_t *ent)
