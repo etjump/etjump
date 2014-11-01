@@ -123,12 +123,14 @@ public:
     bool Unban(gentity_t *ent, int id);
     bool ListUsers(gentity_t *ent, int page);
     bool UserInfo(gentity_t *ent, int id);
-    bool ExecuteQueuedOperations();
+//    bool ExecuteQueuedOperations();
     bool AddUserToSQLite(User user);
     bool AddBanToSQLite(Ban ban);
     bool AddNewHWIDToDatabase(User user);
     bool RemoveBanFromSQLite(unsigned id);
     bool UpdateLastSeenToSQLite(User user);
+    void FindUser(gentity_t *ent, const std::string& user);
+    void ListUserNames(gentity_t *ent, int id);
 private:
     unsigned GetHighestFreeId() const;
     
@@ -211,6 +213,33 @@ private:
     private:
         User user_;
         void Execute();
+    };
+
+    class FindUserOperation : public AsyncOperation
+    {
+    public: 
+        FindUserOperation(gentity_t *ent, const std::string& user);
+        ~FindUserOperation();
+    private:
+        gentity_t *ent_;
+        std::string user_;
+        void Execute();
+    };
+
+    class SaveNameOperation : public AsyncOperation
+    {
+    public:
+        SaveNameOperation(const std::string& name, int id);
+        ~SaveNameOperation();
+    private:
+        std::string name_;
+        int id_;
+        void Execute();
+    };
+
+    class ListUserNamesOperation : public AsyncOperation
+    {
+    public:
     };
 };
 

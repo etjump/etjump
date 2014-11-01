@@ -940,6 +940,37 @@ namespace AdminCommands
         return true;
     }    
 
+    bool FindUser(gentity_t* ent, Arguments argv)
+    {
+        if (argv->size() != 2)
+        {
+            ChatPrintTo(ent, "^3usage: ^7!finduser <name>");
+            return false;
+        }
+
+        game.database->FindUser(ent, argv->at(1));
+
+        return true;
+    }
+
+    bool ListUserNames(gentity_t *ent, Arguments argv)
+    {
+        if (!argv->size() != 2)
+        {
+            ChatPrintTo(ent, "^3usage: ^7!listusernames <id>");
+            return false;
+        }
+
+        int id;
+        if (!ToInt(argv->at(1), id))
+        {
+            ChatPrintTo(ent, va("^3listusernames: ^7%s is not an id", argv->at(1).c_str()));
+            return false;
+        }
+
+        game.database->ListUserNames(ent, id);
+    }
+
     bool AdminCommands(gentity_t* ent, Arguments argv)
     {
         ChatPrintTo(ent, "AdminCommands is not implemented.");
@@ -1717,6 +1748,8 @@ Commands::Commands()
     adminCommands_["editcommands"] = AdminCommandPair(AdminCommands::EditCommands, CommandFlags::EDIT);
     adminCommands_["editlevel"] = AdminCommandPair(AdminCommands::EditLevel, CommandFlags::EDIT);
     adminCommands_["edituser"] = AdminCommandPair(AdminCommands::EditUser, CommandFlags::EDIT);
+    adminCommands_["finduser"] = AdminCommandPair(AdminCommands::FindUser, CommandFlags::EDIT);
+    adminCommands_["listusernames"] = AdminCommandPair(AdminCommands::ListUserNames, CommandFlags::EDIT);
     adminCommands_["finger"] = AdminCommandPair(AdminCommands::Finger, CommandFlags::FINGER);
     adminCommands_["help"] = AdminCommandPair(AdminCommands::Help, CommandFlags::BASIC);
     adminCommands_["kick"] = AdminCommandPair(AdminCommands::Kick, CommandFlags::KICK);

@@ -1,6 +1,5 @@
 #include "database.hpp"
 #include "../g_utilities.hpp"
-#include "databaseoperation.hpp"
 
 Database::Database()
 {
@@ -163,33 +162,33 @@ bool Database::UserExists(std::string const& guid)
     return false;
 }
 
-bool Database::ExecuteQueuedOperations()
-{
-    G_DPrintf("Executing %d queued database operations.\n", databaseOperations_.size());
-    std::vector<boost::shared_ptr<DatabaseOperation> >::iterator it =
-        databaseOperations_.begin();
-    std::vector<boost::shared_ptr<DatabaseOperation> >::iterator end =
-        databaseOperations_.end();
-
-    sqlite3_exec(db_, "BEGIN TRANSACTION;", NULL, NULL, NULL);
-
-    while (it != end)
-    {
-        it->get()->Execute();
-        it++;
-    }
-
-    int rc = sqlite3_exec(db_, "END TRANSACTION;", NULL, NULL, NULL);
-    if (rc != SQLITE_OK)
-    {
-        G_LogPrintf("ERROR: failed to execute %d queued database operations: %s\n",
-            databaseOperations_.size(), sqlite3_errmsg(db_));
-    }
-
-    databaseOperations_.clear();
-
-    return true;
-}
+//bool Database::ExecuteQueuedOperations()
+//{
+//    G_DPrintf("Executing %d queued database operations.\n", databaseOperations_.size());
+//    std::vector<boost::shared_ptr<DatabaseOperation> >::iterator it =
+//        databaseOperations_.begin();
+//    std::vector<boost::shared_ptr<DatabaseOperation> >::iterator end =
+//        databaseOperations_.end();
+//
+//    sqlite3_exec(db_, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+//
+//    while (it != end)
+//    {
+//        it->get()->Execute();
+//        it++;
+//    }
+//
+//    int rc = sqlite3_exec(db_, "END TRANSACTION;", NULL, NULL, NULL);
+//    if (rc != SQLITE_OK)
+//    {
+//        G_LogPrintf("ERROR: failed to execute %d queued database operations: %s\n",
+//            databaseOperations_.size(), sqlite3_errmsg(db_));
+//    }
+//
+//    databaseOperations_.clear();
+//
+//    return true;
+//}
 
 bool Database::UserInfo(gentity_t* ent, int id)
 {
@@ -420,28 +419,45 @@ bool Database::UserExists(unsigned id)
 
 void Database::NewName(int id, std::string const& name)
 {
-    
+    SaveNameOperation *op = new SaveNameOperation(name, id);
+    op->RunAndDeleteObject();
+    return;
+}
+
+void Database::ListUserNames(gentity_t* ent, int id)
+{
+    ListUserNamesOperation *listUserNamesOperation = new ListUserNamesOperation(ent, id);
+    listUserNamesOperation->RunAndDeleteObject();
+}
+
+void Database::FindUser(gentity_t* ent, std::string const& user)
+{
+    FindUserOperation *findUserOperation = new FindUserOperation(ent, user);
+    findUserOperation->RunAndDeleteObject();
 }
 
 bool Database::UpdateLastSeenToSQLite(User user)
 {
-    sqlite3_stmt *stmt = NULL;
-    if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
-        !BindInt(stmt, 1, user->lastSeen) ||
-        !BindInt(stmt, 2, user->id))
-    {
-        return false;
-    }
-
-    int rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE)
-    {
-        message_ = "Failed to update user's last seen property.";
-        return false;
-    }
-
-    sqlite3_finalize(stmt);
+    UpdateLastSeenOperation *updateLastSeenOperation = new UpdateLastSeenOperation(user);
+    updateLastSeenOperation->RunAndDeleteObject();
     return true;
+//    sqlite3_stmt *stmt = NULL;
+//    if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;", &stmt) ||
+//        !BindInt(stmt, 1, user->lastSeen) ||
+//        !BindInt(stmt, 2, user->id))
+//    {
+//        return false;
+//    }
+//
+//    int rc = sqlite3_step(stmt);
+//    if (rc != SQLITE_DONE)
+//    {
+//        message_ = "Failed to update user's last seen property.";
+//        return false;
+//    }
+//
+//    sqlite3_finalize(stmt);
+//    return true;
 }
 
 bool Database::UpdateLastSeen(int id, int lastSeen)
@@ -480,7 +496,6 @@ bool Database::SetLevel(int id, int level)
 //            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(this, *user, Updated::LEVEL)));
 //            return true;
 //        }
-
         return Save(user, Updated::LEVEL);
     }
 
@@ -491,7 +506,7 @@ bool Database::SetLevel(int id, int level)
 bool Database::Save(User user, unsigned updated)
 {
     AsyncSaveUserOperation *op = new AsyncSaveUserOperation(user, updated);
-    op->ExecuteStatement();
+    op->RunAndDeleteObject();
     return true;
 //    std::vector<std::string> queryOptions;
 //    if (updated & Updated::COMMANDS)
@@ -693,7 +708,6 @@ bool Database::CloseDatabase()
 {
     users_.clear();
     bans_.clear();
-    sqlite3_close(db_);
     return true;
 }
 
@@ -917,6 +931,9 @@ bool Database::InitDatabase(char const* config)
     {
         return false;
     }
+
+    sqlite3_close(db_);
+    db_ = NULL;
 
     return true;
 }
@@ -1168,6 +1185,8 @@ void Database::AsyncSaveUserOperation::Execute()
         return;
     }
 
+    G_LogPrintf("Successfully saved user to database.\n");
+
     return;
 }
 
@@ -1296,4 +1315,142 @@ void Database::UpdateLastSeenOperation::Execute()
 
     G_LogPrintf("Successfully executed last seen operation.\n");
 
+}
+
+Database::FindUserOperation::FindUserOperation(gentity_t* ent, std::string const& user)
+: ent_(ent), user_(user)
+{
+}
+
+Database::FindUserOperation::~FindUserOperation()
+{
+}
+
+void Database::FindUserOperation::Execute()
+{
+    std::string op = "find user operation";
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        PrintOpenError(op);
+        return;
+    }
+
+    if (!PrepareStatement("SELECT user_id, name FROM name WHERE clean_name LIKE '%' || ? || '%' LIMIT(20);"))
+    {
+        PrintPrepareError(op);
+        return;
+    }
+
+    if (!BindString(1, user_))
+    {
+        PrintBindError(op);
+        return;
+    }
+
+    sqlite3_stmt *stmt = GetStatement();
+    int rc = SQLITE_OK;
+    std::vector<std::pair<int, std::string> > users;
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        std::pair<int, std::string> user;
+        user.first = sqlite3_column_int(stmt, 0);
+        const char *val = (const char*)sqlite3_column_text(stmt, 1);
+        user.second = val ? val : "";
+        users.push_back(user);
+    }
+
+    if (users.size() == 0)
+    {
+        ChatPrintTo(ent_, "^3finduser: ^7no users found.");
+        return;
+    }
+
+    ChatPrintTo(ent_, "^3finduser: ^7check console for more information.");
+    BeginBufferPrint();
+    BufferPrint(ent_, "ID       Name\n");
+    for (unsigned i = 0; i < users.size(); i++)
+    {
+        BufferPrint(ent_, va("%-8d %-*s\n", users[i].first, users[i].second.length(), users[i].second.c_str()));
+    }
+    FinishBufferPrint(ent_, false);
+
+}
+
+Database::SaveNameOperation::SaveNameOperation(std::string const& name, int id) : name_(name), id_(id)
+{
+}
+
+Database::SaveNameOperation::~SaveNameOperation()
+{
+}
+
+void Database::SaveNameOperation::Execute()
+{
+    std::string op = "save name operation";
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        PrintOpenError(op);
+        return;
+    }
+
+    if (!PrepareStatement("INSERT INTO name(clean_name, name, user_id) VALUES(? , ? , ? );"))
+    {
+        PrintPrepareError(op);
+        return;
+    }
+    char sanitizedName[MAX_TOKEN_CHARS]; // MAX_TOKEN_CHARS is more than enough
+    SanitizeConstString(name_.c_str(), sanitizedName, qtrue);
+
+    if (!BindString(1, sanitizedName) ||
+        !BindString(2, name_) ||
+        !BindInt(3, id_))
+    {
+        PrintBindError(op);
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        PrintExecuteError(op);
+        return;
+    }
+
+    G_LogPrintf("Successfully added name to database.\n");
+}
+
+Database::ListUserNamesOperation::ListUserNamesOperation(int id) : id_(id)
+{
+}
+
+Database::ListUserNamesOperation::~ListUserNamesOperation()
+{
+}
+
+void Database::ListUserNamesOperation::Execute()
+{
+    const std::string op = "list user names operation";
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        PrintOpenError(op);
+        return;
+    }
+
+    if (!PrepareStatement("SELECT name FROM name WHERE user_id=?;"))
+    {
+        PrintPrepareError(op);
+        return;
+    }
+
+    if (!BindInt(1, id_))
+    {
+        PrintBindError(op);
+        return;
+    }
+
+    sqlite3_stmt *stmt = GetStatement();
+    int rc = 0;
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+        
+    }
 }

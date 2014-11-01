@@ -104,7 +104,7 @@ void OnGameInit()
 void OnGameShutdown()
 {
     WriteSessionData();
-    game.database->ExecuteQueuedOperations();
+//    game.database->ExecuteQueuedOperations();
     game.database->CloseDatabase();
     game.mapData->Shutdown();
     game.operationQueue->Shutdown();
@@ -181,7 +181,7 @@ qboolean OnConsoleCommand()
 
     if (command == "executeoperations")
     {
-        game.database->ExecuteQueuedOperations();
+//        game.database->ExecuteQueuedOperations();
         return qtrue;
     }
 
@@ -236,7 +236,7 @@ const char *CustomMapTypeExists(const char *mapType)
 }
 void ExecuteQueuedDatabaseOperations()
 {
-    game.database->ExecuteQueuedOperations();
+//    game.database->ExecuteQueuedOperations();
 }
 
 void StartRace(gentity_t *ent)

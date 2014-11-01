@@ -16,7 +16,6 @@ admin/game.cpp
 admin/commands.cpp
 admin/database.cpp
 admin/levels.cpp
-admin/databaseoperation.cpp
 admin/user.cpp
 mainext.cpp
 mapdata.cpp

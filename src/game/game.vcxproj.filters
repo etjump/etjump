@@ -213,9 +213,6 @@
     <ClCompile Include="mapdata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="admin\databaseoperation.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
     <ClCompile Include="races.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -309,9 +306,6 @@
     </ClInclude>
     <ClInclude Include="mapdata.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\databaseoperation.hpp">
-      <Filter>Header Files\Admin system</Filter>
     </ClInclude>
     <ClInclude Include="races.hpp">
       <Filter>Header Files</Filter>

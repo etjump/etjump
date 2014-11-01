@@ -113,6 +113,7 @@ void AsyncLoadRace::Execute()
 
 void AsyncSaveName::Execute()
 {
+    
 //    G_LogPrintf("Insering new name to database.\n");
 //    sqlite3_stmt *stmt = NULL;
 //    if (!PrepareStatement("INSERT INTO name (clean_name, name, user_id) VALUES (?, ?, ?);", &stmt))
@@ -124,9 +125,9 @@ void AsyncSaveName::Execute()
 //    char sanitizedName[MAX_TOKEN_CHARS]; // MAX_TOKEN_CHARS is more than enough
 //    SanitizeConstString(name.c_str(), sanitizedName, qtrue);
 //
-//    if (!BindString(stmt, 1, sanitizedName) ||
-//        !BindString(stmt, 2, name) ||
-//        !BindInt(stmt, 3, id))
+//    if (!BindString(1, sanitizedName) ||
+//        !BindString(2, name) ||
+//        !BindInt(3, id))
 //    {
 //        G_LogPrintf("ERROR: failed to bind a value to insert names sql statement.\n");
 //        return;
