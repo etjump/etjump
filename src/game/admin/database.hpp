@@ -11,6 +11,7 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include "user.hpp"
 #include "iauthentication.hpp"
+#include "../asyncoperation.hpp"
 
 using namespace boost::multi_index;
 
@@ -151,6 +152,66 @@ private:
     // database operations needed are added to this queue
     std::vector<boost::shared_ptr<DatabaseOperation> > databaseOperations_;
 
+    class InsertUserOperation : public AsyncOperation
+    {
+    public:
+        InsertUserOperation(User user);
+        ~InsertUserOperation();
+    private:
+        User user_;
+        void Execute();
+    };
+
+    class InsertNewHardwareIdOperation : public AsyncOperation
+    {
+    public:
+        InsertNewHardwareIdOperation(User user);
+        ~InsertNewHardwareIdOperation();
+    private:
+        User user_;
+        void Execute();
+    };
+
+    class AsyncSaveUserOperation : public AsyncOperation
+    {
+    public:
+        AsyncSaveUserOperation(User user, int updated);
+        ~AsyncSaveUserOperation();
+    private:
+        User user_;
+        int updated_;
+        void Execute();
+    };
+
+    class AddBanOperation : public AsyncOperation
+    {
+    public:
+        AddBanOperation(Ban ban);
+        ~AddBanOperation();
+    private:
+        Ban ban_;
+        void Execute();
+    };
+
+    class RemoveBanOperation : public AsyncOperation
+    {
+    public: 
+        RemoveBanOperation(int id);
+        ~RemoveBanOperation();
+    private:
+        int id_;
+        void Execute();
+    };
+
+    class UpdateLastSeenOperation : public AsyncOperation
+    {
+    public:
+        UpdateLastSeenOperation(User user);
+        ~UpdateLastSeenOperation();
+    private:
+        User user_;
+        void Execute();
+    };
 };
 
 #endif // DATABASE_HH

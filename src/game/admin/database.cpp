@@ -63,78 +63,84 @@ bool Database::BindString(sqlite3_stmt* stmt, int index, const std::string& val)
 
 bool Database::AddBanToSQLite(Ban ban)
 {
-    int rc = 0;
-    sqlite3_stmt *stmt = NULL;
-    // TODO: do this once and finalize in game shutdown
-    if (!PrepareStatement("INSERT INTO bans (name, guid, hwid, ip, banned_by, ban_date, expires, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
-    {
-        return false;
-    }
-
-
-    if (!BindString(stmt, 1, ban->name) ||
-        !BindString(stmt, 2, ban->guid) ||
-        !BindString(stmt, 3, ban->hwid) ||
-        !BindString(stmt, 4, ban->ip) ||
-        !BindString(stmt, 5, ban->bannedBy) ||
-        !BindString(stmt, 6, ban->banDate) ||
-        !BindInt(stmt, 7, ban->expires) ||
-        !BindString(stmt, 8, ban->reason))
-    {
-        sqlite3_finalize(stmt);
-        return false;
-    }
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE)
-    {
-        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
-        sqlite3_finalize(stmt);
-        return false;
-    }
-
-    sqlite3_finalize(stmt);
+    AddBanOperation *addBan = new AddBanOperation(ban);
+    addBan->RunAndDeleteObject();
     return true;
+//    int rc = 0;
+//    sqlite3_stmt *stmt = NULL;
+//    // TODO: do this once and finalize in game shutdown
+//    if (!PrepareStatement("INSERT INTO bans (name, guid, hwid, ip, banned_by, ban_date, expires, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
+//    {
+//        return false;
+//    }
+//
+//
+//    if (!BindString(stmt, 1, ban->name) ||
+//        !BindString(stmt, 2, ban->guid) ||
+//        !BindString(stmt, 3, ban->hwid) ||
+//        !BindString(stmt, 4, ban->ip) ||
+//        !BindString(stmt, 5, ban->bannedBy) ||
+//        !BindString(stmt, 6, ban->banDate) ||
+//        !BindInt(stmt, 7, ban->expires) ||
+//        !BindString(stmt, 8, ban->reason))
+//    {
+//        sqlite3_finalize(stmt);
+//        return false;
+//    }
+//
+//    rc = sqlite3_step(stmt);
+//    if (rc != SQLITE_DONE)
+//    {
+//        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+//        sqlite3_finalize(stmt);
+//        return false;
+//    }
+//
+//    sqlite3_finalize(stmt);
+//    return true;
 }
 
 bool Database::AddUserToSQLite(User user)
 {
-    int rc = 0;
-    sqlite3_stmt *stmt = NULL;
-    // TODO: do this once and finalize in game shutdown
-    if (!PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
-    {
-        return false;
-    }
-
-
-    G_DPrintf("HWIDS: %s\n", boost::algorithm::join(user->hwids, ",").c_str());
-    std::string hwids = boost::algorithm::join(user->hwids, ",");
-
-    if (!BindInt(stmt, 1, user->id) ||
-        !BindString(stmt, 2, user->guid) ||
-        !BindInt(stmt, 3, user->level) ||
-        !BindInt(stmt, 4, user->lastSeen) ||
-        !BindString(stmt, 5, user->name) ||
-        !BindString(stmt, 6, hwids) ||
-        !BindString(stmt, 7, user->title) ||
-        !BindString(stmt, 8, user->commands) ||
-        !BindString(stmt, 9, user->greeting)
-        )
-    {
-        return false;
-    }
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE)
-    {
-        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
-        return false;
-    }
-
-    sqlite3_finalize(stmt);
-
+    InsertUserOperation *insert = new InsertUserOperation(user);
+    insert->RunAndDeleteObject();
     return true;
+//    int rc = 0;
+//    sqlite3_stmt *stmt = NULL;
+//    // TODO: do this once and finalize in game shutdown
+//    if (!PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", &stmt))
+//    {
+//        return false;
+//    }
+//
+//
+//    G_DPrintf("HWIDS: %s\n", boost::algorithm::join(user->hwids, ",").c_str());
+//    std::string hwids = boost::algorithm::join(user->hwids, ",");
+//
+//    if (!BindInt(stmt, 1, user->id) ||
+//        !BindString(stmt, 2, user->guid) ||
+//        !BindInt(stmt, 3, user->level) ||
+//        !BindInt(stmt, 4, user->lastSeen) ||
+//        !BindString(stmt, 5, user->name) ||
+//        !BindString(stmt, 6, hwids) ||
+//        !BindString(stmt, 7, user->title) ||
+//        !BindString(stmt, 8, user->commands) ||
+//        !BindString(stmt, 9, user->greeting)
+//        )
+//    {
+//        return false;
+//    }
+//
+//    rc = sqlite3_step(stmt);
+//    if (rc != SQLITE_DONE)
+//    {
+//        message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
+//        return false;
+//    }
+//
+//    sqlite3_finalize(stmt);
+//
+//    return true;
 }
 
 unsigned Database::GetHighestFreeId() const
@@ -257,24 +263,27 @@ bool Database::ListUsers(gentity_t* ent, int page)
 
 bool Database::RemoveBanFromSQLite(unsigned id)
 {
-    sqlite3_stmt *stmt = NULL;
-    if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
-    {
-        return false;
-    }
-
-    if (!BindInt(stmt, 1, id))
-    {
-        return false;
-    }
-
-    int rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE)
-    {
-        message_ = sqlite3_errmsg(db_);
-        return false;
-    }
+    RemoveBanOperation *remove = new RemoveBanOperation(id);
+    remove->RunAndDeleteObject();
     return true;
+//    sqlite3_stmt *stmt = NULL;
+//    if (!PrepareStatement("DELETE FROM bans WHERE id=?;", &stmt))
+//    {
+//        return false;
+//    }
+//
+//    if (!BindInt(stmt, 1, id))
+//    {
+//        return false;
+//    }
+//
+//    int rc = sqlite3_step(stmt);
+//    if (rc != SQLITE_DONE)
+//    {
+//        message_ = sqlite3_errmsg(db_);
+//        return false;
+//    }
+//    return true;
 }
 
 bool Database::Unban(gentity_t* ent, int id)
@@ -285,14 +294,16 @@ bool Database::Unban(gentity_t* ent, int id)
         {
             bans_.erase(bans_.begin() + i);
 
-            if (!InstantSync())
-            {
-                databaseOperations_.push_back(UnbanOperationPtr(new UnbanOperation(this, id)));
-            }
-            else
-            {
-                RemoveBanFromSQLite(id);
-            }
+            RemoveBanFromSQLite(id);
+
+//            if (!InstantSync())
+//            {
+//                databaseOperations_.push_back(UnbanOperationPtr(new UnbanOperation(this, id)));
+//            }
+//            else
+//            {
+//                RemoveBanFromSQLite(id);
+//            }
             
 
             return true;
@@ -375,20 +386,22 @@ bool Database::BanUser(std::string const& name, std::string const& guid, std::st
     newBan->expires = expires;
     newBan->reason = reason;
 
-    // If this is set to 0, we put the bans into a queue and
-    // add those bans to database once the server is empty or
-    // the map changes
-    if (!InstantSync())
-    {
-        databaseOperations_.push_back(BanUserOperationPtr(new BanUserOperation(this, newBan)));
-    }
-    else
-    {
-        if (!AddBanToSQLite(newBan))
-        {
-            return false;
-        }
-    }
+    AddBanToSQLite(newBan);
+
+//    // If this is set to 0, we put the bans into a queue and
+//    // add those bans to database once the server is empty or
+//    // the map changes
+//    if (!InstantSync())
+//    {
+//        databaseOperations_.push_back(BanUserOperationPtr(new BanUserOperation(this, newBan)));
+//    }
+//    else
+//    {
+//        if (!AddBanToSQLite(newBan))
+//        {
+//            return false;
+//        }
+//    }
 
     bans_.push_back(newBan);
 
@@ -438,14 +451,16 @@ bool Database::UpdateLastSeen(int id, int lastSeen)
     {
         (*user)->lastSeen = lastSeen;
         
-        if (!InstantSync())
-        {
-            databaseOperations_.push_back(UpdateLastSeenOperationPtr(new UpdateLastSeenOperation(this, *user)));
-        }
-        else
-        {
-            UpdateLastSeenToSQLite(*user);
-        }
+        UpdateLastSeenToSQLite(*user);
+
+//        if (!InstantSync())
+//        {
+//            databaseOperations_.push_back(UpdateLastSeenOperationPtr(new UpdateLastSeenOperation(this, *user)));
+//        }
+//        else
+//        {
+//            UpdateLastSeenToSQLite(*user);
+//        }
 
         return true;
     }
@@ -460,12 +475,12 @@ bool Database::SetLevel(int id, int level)
     {   
         user->get()->level = level;
 
-        if (!InstantSync())
-        {
-            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(this, *user, Updated::LEVEL)));
-            return true;
-        }
-            
+//        if (!InstantSync())
+//        {
+//            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(this, *user, Updated::LEVEL)));
+//            return true;
+//        }
+
         return Save(user, Updated::LEVEL);
     }
 
@@ -475,115 +490,118 @@ bool Database::SetLevel(int id, int level)
 
 bool Database::Save(User user, unsigned updated)
 {
-    std::vector<std::string> queryOptions;
-    if (updated & Updated::COMMANDS)
-    {
-        queryOptions.push_back("commands=:commands");
-    }
-
-    if (updated & Updated::GREETING)
-    {
-        queryOptions.push_back("greeting=:greeting");
-    }
-
-    if (updated & Updated::LAST_SEEN)
-    {
-        queryOptions.push_back("lastSeen=:lastSeen");
-    }
-
-    if (updated & Updated::LEVEL)
-    {
-        queryOptions.push_back("level=:level");
-    }
-
-    if (updated & Updated::NAME)
-    {
-        queryOptions.push_back("name=:name");
-    }
-
-    if (updated & Updated::TITLE)
-    {
-        queryOptions.push_back("title=:title");
-    }
-
-    std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
-
-    sqlite3_stmt *stmt = NULL;
-    if (!PrepareStatement(query.c_str(), &stmt))
-    {
-        message_ = sqlite3_errmsg(db_);
-        sqlite3_finalize(stmt);
-        return false;
-    }
-
-    if (updated & Updated::COMMANDS)
-    {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":commands"), user->commands.c_str()))
-        {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-    }
-
-    if (updated & Updated::GREETING)
-    {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":greeting"), user->greeting.c_str()))
-        {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-    }
-
-    if (updated & Updated::LAST_SEEN)
-    {
-        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":lastSeen"), user->lastSeen))
-        {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-    }
-
-    if (updated & Updated::LEVEL)
-    {
-        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":level"), user->level))
-        {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-    }
-
-    if (updated & Updated::NAME)
-    {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":name"), user->name.c_str()))
-        {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-    }
-
-    if (updated & Updated::TITLE)
-    {
-        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":title"), user->title.c_str()))
-        {
-            sqlite3_finalize(stmt);
-            return false;
-        }
-    }
-
-    if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":id"), user->id))
-    {
-        sqlite3_finalize(stmt);
-        return false;
-    }
-
-    int rc = 0;
-    if (rc = sqlite3_step(stmt) != SQLITE_DONE)
-    {
-        G_LogPrintf("SQL ERROR: stepping failed when saving user (%d) %s\n", rc, sqlite3_errmsg(db_));
-    }
-
-    sqlite3_finalize(stmt);
+    AsyncSaveUserOperation *op = new AsyncSaveUserOperation(user, updated);
+    op->ExecuteStatement();
     return true;
+//    std::vector<std::string> queryOptions;
+//    if (updated & Updated::COMMANDS)
+//    {
+//        queryOptions.push_back("commands=:commands");
+//    }
+//
+//    if (updated & Updated::GREETING)
+//    {
+//        queryOptions.push_back("greeting=:greeting");
+//    }
+//
+//    if (updated & Updated::LAST_SEEN)
+//    {
+//        queryOptions.push_back("lastSeen=:lastSeen");
+//    }
+//
+//    if (updated & Updated::LEVEL)
+//    {
+//        queryOptions.push_back("level=:level");
+//    }
+//
+//    if (updated & Updated::NAME)
+//    {
+//        queryOptions.push_back("name=:name");
+//    }
+//
+//    if (updated & Updated::TITLE)
+//    {
+//        queryOptions.push_back("title=:title");
+//    }
+//
+//    std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
+//
+//    sqlite3_stmt *stmt = NULL;
+//    if (!PrepareStatement(query.c_str(), &stmt))
+//    {
+//        message_ = sqlite3_errmsg(db_);
+//        sqlite3_finalize(stmt);
+//        return false;
+//    }
+//
+//    if (updated & Updated::COMMANDS)
+//    {
+//        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":commands"), user->commands.c_str()))
+//        {
+//            sqlite3_finalize(stmt);
+//            return false;
+//        }
+//    }
+//
+//    if (updated & Updated::GREETING)
+//    {
+//        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":greeting"), user->greeting.c_str()))
+//        {
+//            sqlite3_finalize(stmt);
+//            return false;
+//        }
+//    }
+//
+//    if (updated & Updated::LAST_SEEN)
+//    {
+//        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":lastSeen"), user->lastSeen))
+//        {
+//            sqlite3_finalize(stmt);
+//            return false;
+//        }
+//    }
+//
+//    if (updated & Updated::LEVEL)
+//    {
+//        if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":level"), user->level))
+//        {
+//            sqlite3_finalize(stmt);
+//            return false;
+//        }
+//    }
+//
+//    if (updated & Updated::NAME)
+//    {
+//        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":name"), user->name.c_str()))
+//        {
+//            sqlite3_finalize(stmt);
+//            return false;
+//        }
+//    }
+//
+//    if (updated & Updated::TITLE)
+//    {
+//        if (!BindString(stmt, sqlite3_bind_parameter_index(stmt, ":title"), user->title.c_str()))
+//        {
+//            sqlite3_finalize(stmt);
+//            return false;
+//        }
+//    }
+//
+//    if (!BindInt(stmt, sqlite3_bind_parameter_index(stmt, ":id"), user->id))
+//    {
+//        sqlite3_finalize(stmt);
+//        return false;
+//    }
+//
+//    int rc = 0;
+//    if (rc = sqlite3_step(stmt) != SQLITE_DONE)
+//    {
+//        G_LogPrintf("SQL ERROR: stepping failed when saving user (%d) %s\n", rc, sqlite3_errmsg(db_));
+//    }
+//
+//    sqlite3_finalize(stmt);
+//    return true;
 }
 
 bool Database::Save(IdIterator user, unsigned updated)
@@ -628,14 +646,8 @@ bool Database::AddNewHardwareId(int id, std::string const& hwid)
     {
         (*user)->hwids.push_back(hwid);
 
-        if (!InstantSync())
-        {
-            databaseOperations_.push_back(AddNewHWIDOperationPtr(new AddNewHWIDOperation(this, *user)));
-        }
-        else
-        {
-            AddNewHWIDToDatabase(*user);
-        }
+        InsertNewHardwareIdOperation *op = new InsertNewHardwareIdOperation(*user);
+        op->RunAndDeleteObject();
         
         return true;
     }
@@ -657,17 +669,22 @@ bool Database::AddUser(std::string const& guid, std::string const& hwid, std::st
         return false;
     }
 
-    if (!InstantSync())
+    if (!AddUserToSQLite(newUser))
     {
-        databaseOperations_.push_back(AddUserOperationPtr(new AddUserOperation(this, newUser)));
+        return false;
     }
-    else
-    {
-        if (!AddUserToSQLite(newUser))
-        {
-            return false;
-        }
-    }
+//
+//    if (!InstantSync())
+//    {
+//        databaseOperations_.push_back(AddUserOperationPtr(new AddUserOperation(this, newUser)));
+//    }
+//    else
+//    {
+//        if (!AddUserToSQLite(newUser))
+//        {
+//            return false;
+//        }
+//    }
 
     return true;
 }
@@ -924,3 +941,359 @@ Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) cons
     return users_.get<1>().find(guid);
 }
 
+Database::InsertUserOperation::InsertUserOperation(User user)
+: user_(user)
+{
+}
+
+Database::InsertUserOperation::~InsertUserOperation()
+{
+}
+
+void Database::InsertUserOperation::Execute()
+{
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        G_LogPrintf("ERROR: failed to open user database for insert user operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, title, commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"))
+    {
+        G_LogPrintf("ERROR: failed to prepare insert user operation statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    std::string hardwareIds = boost::algorithm::join(user_->hwids, ",");
+
+    if (!BindInt(1, user_->id) ||
+        !BindString(2, user_->guid) ||
+        !BindInt(3, user_->level) ||
+        !BindInt(4, user_->lastSeen) ||
+        !BindString(5, user_->name) ||
+        !BindString(6, hardwareIds) ||
+        !BindString(7, user_->title) ||
+        !BindString(8, user_->commands) ||
+        !BindString(9, user_->greeting)
+        )
+    {
+        G_LogPrintf("ERROR: failed to bind value to insert user operation statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        G_LogPrintf("ERROR: failed to execute insert user operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+    G_LogPrintf("Successfully inserted user %s to database.\n",
+        user_->name.c_str());
+}
+
+Database::InsertNewHardwareIdOperation::InsertNewHardwareIdOperation(User user)
+: user_(user)
+{
+}
+
+Database::InsertNewHardwareIdOperation::~InsertNewHardwareIdOperation()
+{
+}
+
+void Database::InsertNewHardwareIdOperation::Execute()
+{
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        G_LogPrintf("ERROR: couldn't open database for hardware id update operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;"))
+    {
+        G_LogPrintf("ERROR: failed to update user's hardware id. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    std::string hwids = boost::algorithm::join(user_->hwids, ",");
+
+    if (!BindString(1, hwids) ||
+        !BindInt(2, user_->id)) {
+        G_LogPrintf("ERROR: failed to bind value to update user operation statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        G_LogPrintf("ERROR: failed to execute update user hardware id operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+    G_LogPrintf("Successfully updated user's hardware id.\n");
+}
+
+Database::AsyncSaveUserOperation::AsyncSaveUserOperation(User user, int updated) : user_(user), updated_(updated)
+{
+}
+
+Database::AsyncSaveUserOperation::~AsyncSaveUserOperation()
+{
+}
+
+void Database::AsyncSaveUserOperation::Execute()
+{
+    std::vector<std::string> queryOptions;
+    if (updated_ & Updated::COMMANDS)
+    {
+        queryOptions.push_back("commands=:commands");
+    }
+
+    if (updated_ & Updated::GREETING)
+    {
+        queryOptions.push_back("greeting=:greeting");
+    }
+
+    if (updated_ & Updated::LAST_SEEN)
+    {
+        queryOptions.push_back("lastSeen=:lastSeen");
+    }
+
+    if (updated_ & Updated::LEVEL)
+    {
+        queryOptions.push_back("level=:level");
+    }
+
+    if (updated_ & Updated::NAME)
+    {
+        queryOptions.push_back("name=:name");
+    }
+
+    if (updated_ & Updated::TITLE)
+    {
+        queryOptions.push_back("title=:title");
+    }
+
+    std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
+
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        G_LogPrintf("ERROR: failed to open database on save user operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!PrepareStatement(query))
+    {
+        G_LogPrintf("ERROR: failed to prepare statement on save user operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (updated_ & Updated::COMMANDS)
+    {
+        if (!BindString(GetParameterIndex(":commands"), user_->commands.c_str()))
+        {
+            G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+                GetMessage().c_str());
+            return;
+        }
+    }
+
+    if (updated_ & Updated::GREETING)
+    {
+        if (!BindString(GetParameterIndex(":greeting"), user_->greeting.c_str()))
+        {
+            G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+                GetMessage().c_str());
+            return;
+        }
+    }
+
+    if (updated_ & Updated::LAST_SEEN)
+    {
+        if (!BindInt(GetParameterIndex(":lastSeen"), user_->lastSeen))
+        {
+            G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+                GetMessage().c_str());
+            return;
+        }
+    }
+
+    if (updated_ & Updated::LEVEL)
+    {
+        if (!BindInt(GetParameterIndex(":level"), user_->level))
+        {
+            G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+                GetMessage().c_str());
+            return;
+        }
+    }
+
+    if (updated_ & Updated::NAME)
+    {
+        if (!BindString(GetParameterIndex(":name"), user_->name.c_str()))
+        {
+            G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+                GetMessage().c_str());
+            return;
+        }
+    }
+
+    if (updated_ & Updated::TITLE)
+    {
+        if (!BindString(GetParameterIndex(":title"), user_->title.c_str()))
+        {
+            G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+                GetMessage().c_str());
+            return;
+        }
+    }
+
+    if (!BindInt(GetParameterIndex(":id"), user_->id))
+    {
+        G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        G_LogPrintf("ERROR: failed to execute save user statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    return;
+}
+
+Database::AddBanOperation::AddBanOperation(Ban ban)
+: ban_(ban)
+{
+    
+}
+
+Database::AddBanOperation::~AddBanOperation()
+{
+}
+
+void Database::AddBanOperation::Execute()
+{
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        G_LogPrintf("ERROR: failed to open database on add ban operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+    
+    if (!PrepareStatement("INSERT INTO bans (name, guid, hwid, ip, banned_by, ban_date, expires, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"))
+    {
+        G_LogPrintf("ERROR: failed to prepare add ban operation statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!BindString(1, ban_->name) ||
+        !BindString(2, ban_->guid) ||
+        !BindString(3, ban_->hwid) ||
+        !BindString(4, ban_->ip) ||
+        !BindString(5, ban_->bannedBy) ||
+        !BindString(6, ban_->banDate) ||
+        !BindInt(7, ban_->expires) ||
+        !BindString(8, ban_->reason))
+    {
+        G_LogPrintf("ERROR: failed to bind value to add ban operation statement. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        G_LogPrintf("ERROR: failed to execute add ban operation. %s\n",
+            GetMessage().c_str());
+        return;
+    }
+
+    G_LogPrintf("Successfully added ban to database.\n");
+}
+
+Database::RemoveBanOperation::RemoveBanOperation(int id) : id_(id)
+{
+}
+
+Database::RemoveBanOperation::~RemoveBanOperation()
+{
+}
+
+void Database::RemoveBanOperation::Execute()
+{
+    std::string op = "remove ban operation";
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        PrintOpenError(op);
+        return;
+    }
+
+    if (!PrepareStatement("DELETE FROM bans WHERE id=?;"))
+    {
+        PrintPrepareError(op);
+        return;
+    }
+
+    if (!BindInt(1, id_))
+    {
+        PrintBindError(op);
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        PrintExecuteError(op);
+        return;
+    }
+    G_LogPrintf("Successfully executed remove ban operation.\n");
+}
+
+Database::UpdateLastSeenOperation::UpdateLastSeenOperation(User user) : user_(user)
+{
+}
+
+Database::UpdateLastSeenOperation::~UpdateLastSeenOperation()
+{
+}
+
+void Database::UpdateLastSeenOperation::Execute()
+{
+    std::string op = "update last seen operation";
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        PrintOpenError(op);
+        return;
+    }
+
+    if (!PrepareStatement("UPDATE users SET lastSeen=? WHERE id=?;"))
+    {
+        PrintPrepareError(op);
+        return;
+    }
+
+    if (!BindInt(1, user_->lastSeen) ||
+        !BindInt(2, user_->id))
+    {
+        PrintBindError(op);
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        PrintExecuteError(op);
+        return;
+    }
+
+    G_LogPrintf("Successfully executed last seen operation.\n");
+
+}

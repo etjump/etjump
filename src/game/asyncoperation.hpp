@@ -33,8 +33,15 @@ public:
     bool PrepareStatement(const std::string& statement);
     bool BindInt(int index, int value);
     bool BindString(int index, const std::string& value);
+    int GetParameterIndex(const std::string& param);
     bool ExecuteStatement();
     std::string GetMessage() const;
+
+    void PrintOpenError(const std::string& operation);
+    void PrintPrepareError(const std::string& operation);
+    void PrintBindError(const std::string& operation);
+    void PrintExecuteError(const std::string& operation);
+
 protected:
     sqlite3_stmt *GetStatement();
 
