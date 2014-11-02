@@ -161,6 +161,7 @@ Server console commands
 */
 qboolean OnConsoleCommand()
 {
+    static sqlite3 *db;
     G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
     Arguments argv = GetArgs();

@@ -985,6 +985,7 @@ namespace AdminCommands
         }
 
         game.database->ListUserNames(ent, id);
+        return true;
     }
 
     bool AdminCommands(gentity_t* ent, Arguments argv)
@@ -1800,7 +1801,7 @@ Commands::Commands()
     commands_["backup"] = ClientCommands::BackupLoad;
     commands_["save"] = ClientCommands::Save;
     commands_["load"] = ClientCommands::Load;
-    commands_["race"] = ClientCommands::Race;
+//    commands_["race"] = ClientCommands::Race;
     commands_["listinfo"] = ClientCommands::ListInfo;
 }
 

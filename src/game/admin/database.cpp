@@ -752,7 +752,7 @@ bool Database::CreateNamesTable()
     int rc = 0;
     char *errMsg = NULL;
 
-    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS name (id INTEGER PRIMARY KEY AUTOINCREMENT, clean_name TEXT, name TEXT, user_id INT, FOREIGN KEY (user_id) REFERENCES users(id));",
+    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS name (id INTEGER PRIMARY KEY AUTOINCREMENT, clean_name TEXT, name TEXT UNIQUE, user_id INT, FOREIGN KEY (user_id) REFERENCES users(id));",
         NULL, NULL, &errMsg);
 
     if (rc != SQLITE_OK)
@@ -937,6 +937,9 @@ bool Database::InitDatabase(char const* config)
 {
     int rc = sqlite3_open(GetPath(config).c_str(), &db_);
 
+    sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
+        NULL, NULL, NULL);
+
     users_.clear();
     bans_.clear();
 
@@ -1090,8 +1093,6 @@ void Database::AsyncSaveUserOperation::Execute()
         return;
     }
 
-    G_LogPrintf("Updating user %s\n", user_->ToChar());
-
     std::vector<std::string> queryOptions;
     if (updated_ & Updated::COMMANDS)
     {
@@ -1124,7 +1125,6 @@ void Database::AsyncSaveUserOperation::Execute()
     }
 
     std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
-    G_LogPrintf("Query: %s\n", query.c_str());
 
     if (!OpenDatabase(g_userConfig.string))
     {
@@ -1142,7 +1142,6 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::COMMANDS)
     {
-        G_LogPrintf("Binding commands: %s\n", user_->commands.c_str());
         if (!BindString(GetParameterIndex(":commands"), user_->commands))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
@@ -1153,7 +1152,6 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::GREETING)
     {
-        G_LogPrintf("Binding greeting: %s\n", user_->greeting.c_str());
         if (!BindString(GetParameterIndex(":greeting"), user_->greeting))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
@@ -1194,7 +1192,6 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::TITLE)
     {
-        G_LogPrintf("Binding title: %s\n", user_->title.c_str());
         if (!BindString(GetParameterIndex(":title"), user_->title))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
@@ -1447,10 +1444,8 @@ void Database::SaveNameOperation::Execute()
 
     if (!ExecuteStatement())
     {
-        PrintExecuteError(op);
         return;
     }
-
     G_LogPrintf("Successfully added name to database.\n");
 }
 
