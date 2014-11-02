@@ -63,5 +63,18 @@ std::string TimeStampToString( int timeStamp );
 std::string TimeStampDifferenceToString( int diff );
 
 bool ValidGuid(std::string guid);
+
+class BufferPrinter
+{
+public:
+    BufferPrinter(gentity_t *ent);
+
+    void Begin();
+    void Print(const std::string& data);
+    void Finish(bool insertNewLine);
+private:
+    gentity_t *ent_;
+    std::string buffer_;
+};
 #endif // g_utilities_h__
 

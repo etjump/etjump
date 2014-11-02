@@ -131,6 +131,9 @@ public:
     bool UpdateLastSeenToSQLite(User user);
     void FindUser(gentity_t *ent, const std::string& user);
     void ListUserNames(gentity_t *ent, int id);
+    bool UpdateUser(gentity_t *ent, int id,
+        const std::string& commands, const std::string& greeting,
+        const std::string& title, int updated);
 private:
     unsigned GetHighestFreeId() const;
     
@@ -240,6 +243,12 @@ private:
     class ListUserNamesOperation : public AsyncOperation
     {
     public:
+        ListUserNamesOperation(gentity_t *ent, int id);
+        ~ListUserNamesOperation();
+    private:
+        gentity_t *ent_;
+        int id_;
+        void Execute();
     };
 };
 

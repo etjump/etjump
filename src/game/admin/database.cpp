@@ -1,5 +1,6 @@
 #include "database.hpp"
 #include "../g_utilities.hpp"
+#include <boost/format.hpp>
 
 Database::Database()
 {
@@ -422,6 +423,31 @@ void Database::NewName(int id, std::string const& name)
     SaveNameOperation *op = new SaveNameOperation(name, id);
     op->RunAndDeleteObject();
     return;
+}
+
+bool Database::UpdateUser(gentity_t* ent, int id, std::string const& commands, std::string const& greeting, std::string const& title, int updated)
+{
+    IdIterator user = GetUser(id);
+    if (user != IdIterEnd())
+    {
+        if (updated & Updated::COMMANDS)
+        {
+            user->get()->commands = commands;
+        } 
+        if (updated & Updated::GREETING)
+        {
+            user->get()->greeting = greeting;
+        }
+        if (updated & Updated::TITLE)
+        {    
+            user->get()->title = title;
+        }
+        
+        return Save(user, updated);
+    }
+
+    message_ = "Couldn't find user with id " + ToString(id);
+    return false;
 }
 
 void Database::ListUserNames(gentity_t* ent, int id)
@@ -948,11 +974,6 @@ Database::ConstGuidIterator Database::GuidIterEnd() const
     return users_.get<1>().end();
 }
 
-bool Database::InstantSync() const
-{
-    return g_instantDatabaseSync.integer > 0;
-}
-
 Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) const
 {
     return users_.get<1>().find(guid);
@@ -1064,6 +1085,13 @@ Database::AsyncSaveUserOperation::~AsyncSaveUserOperation()
 
 void Database::AsyncSaveUserOperation::Execute()
 {
+    if (updated_ == Updated::NONE)
+    {
+        return;
+    }
+
+    G_LogPrintf("Updating user %s\n", user_->ToChar());
+
     std::vector<std::string> queryOptions;
     if (updated_ & Updated::COMMANDS)
     {
@@ -1096,6 +1124,7 @@ void Database::AsyncSaveUserOperation::Execute()
     }
 
     std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
+    G_LogPrintf("Query: %s\n", query.c_str());
 
     if (!OpenDatabase(g_userConfig.string))
     {
@@ -1113,7 +1142,8 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::COMMANDS)
     {
-        if (!BindString(GetParameterIndex(":commands"), user_->commands.c_str()))
+        G_LogPrintf("Binding commands: %s\n", user_->commands.c_str());
+        if (!BindString(GetParameterIndex(":commands"), user_->commands))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
                 GetMessage().c_str());
@@ -1123,7 +1153,8 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::GREETING)
     {
-        if (!BindString(GetParameterIndex(":greeting"), user_->greeting.c_str()))
+        G_LogPrintf("Binding greeting: %s\n", user_->greeting.c_str());
+        if (!BindString(GetParameterIndex(":greeting"), user_->greeting))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
                 GetMessage().c_str());
@@ -1153,7 +1184,7 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::NAME)
     {
-        if (!BindString(GetParameterIndex(":name"), user_->name.c_str()))
+        if (!BindString(GetParameterIndex(":name"), user_->name))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
                 GetMessage().c_str());
@@ -1163,7 +1194,8 @@ void Database::AsyncSaveUserOperation::Execute()
 
     if (updated_ & Updated::TITLE)
     {
-        if (!BindString(GetParameterIndex(":title"), user_->title.c_str()))
+        G_LogPrintf("Binding title: %s\n", user_->title.c_str());
+        if (!BindString(GetParameterIndex(":title"), user_->title))
         {
             G_LogPrintf("ERROR: failed to bind value to save user statement. %s\n",
                 GetMessage().c_str());
@@ -1365,14 +1397,18 @@ void Database::FindUserOperation::Execute()
         return;
     }
 
+    
     ChatPrintTo(ent_, "^3finduser: ^7check console for more information.");
-    BeginBufferPrint();
-    BufferPrint(ent_, "ID       Name\n");
+    BufferPrinter printer(ent_);
+    printer.Begin();
+    printer.Print("ID       Name\n");
     for (unsigned i = 0; i < users.size(); i++)
     {
-        BufferPrint(ent_, va("%-8d %-*s\n", users[i].first, users[i].second.length(), users[i].second.c_str()));
+        boost::format toPrint("%-8d %-36s\n");
+        toPrint % users[i].first % users[i].second;
+        printer.Print(toPrint.str());
     }
-    FinishBufferPrint(ent_, false);
+    printer.Finish(false);
 
 }
 
@@ -1418,7 +1454,7 @@ void Database::SaveNameOperation::Execute()
     G_LogPrintf("Successfully added name to database.\n");
 }
 
-Database::ListUserNamesOperation::ListUserNamesOperation(int id) : id_(id)
+Database::ListUserNamesOperation::ListUserNamesOperation(gentity_t *ent, int id) : ent_(ent), id_(id)
 {
 }
 
@@ -1449,8 +1485,30 @@ void Database::ListUserNamesOperation::Execute()
 
     sqlite3_stmt *stmt = GetStatement();
     int rc = 0;
+    std::vector<std::string> names;
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
     {
-        
+        const char *name = NULL;
+        name = (const char*)sqlite3_column_text(stmt, 0);
+        names.push_back(name ? name : "");
+    }
+
+    if (names.size() == 0)
+    {
+        ChatPrintTo(ent_, "^3listusernames: ^7couldn't find any names with id " + ToString(id_));
+    }
+    else
+    {
+        ConsolePrintTo(ent_, "^3listusernames: ^7check console for more information.");
+        BufferPrinter printer(ent_);
+        printer.Begin();
+        boost::format toPrint("Found %d names with id %d\n");
+        toPrint % names.size() % id_;
+        printer.Print(toPrint.str());
+        for (unsigned i = 0; i < names.size(); i++)
+        {
+            printer.Print(names[i] + "\n");
+        }
+        printer.Finish(false);
     }
 }

@@ -149,6 +149,8 @@ bool Session::GuidReceived(gentity_t *ent)
         trap_DropClient(clientNum, "You are banned.", 0);
     }
 
+    ClientNameChanged(ent);
+
     return true;
 }
 

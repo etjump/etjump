@@ -234,10 +234,6 @@ const char *CustomMapTypeExists(const char *mapType)
 
     return NULL;
 }
-void ExecuteQueuedDatabaseOperations()
-{
-//    game.database->ExecuteQueuedOperations();
-}
 
 void StartRace(gentity_t *ent)
 {

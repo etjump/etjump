@@ -1625,6 +1625,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
        
 	}
 
+
 	// read or initialize the session data
 	if( firstTime ) {
 		G_InitSessionData( client, userinfo );
@@ -2293,12 +2294,6 @@ void ClientDisconnect( int clientNum ) {
 
 
 	CalculateRanks();
-    // Zero: must be after calc ranks as level.numConnectedClients
-    // is set there
-    if (level.numConnectedClients == 0)
-    {
-        ExecuteQueuedDatabaseOperations();
-    }
 
 	// OSP
 	G_verifyMatchState(i);

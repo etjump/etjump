@@ -443,6 +443,17 @@ namespace AdminCommands
     const int GREETING_OPEN = 2;
     const int TITLE_OPEN = 4;
 
+    namespace Updated
+    {
+        const unsigned NONE = 0;
+        const unsigned LEVEL = 0x00001;
+        const unsigned LAST_SEEN = 0x00002;
+        const unsigned NAME = 0x00004;
+        const unsigned TITLE = 0x00008;
+        const unsigned COMMANDS = 0x00010;
+        const unsigned GREETING = 0x00020;
+    }
+
     bool Admintest(gentity_t *ent, Arguments argv)
     {
         if (!ent)
@@ -863,6 +874,12 @@ namespace AdminCommands
             return false;
         }
 
+        if (!game.database->UserExists(id))
+        {
+            ChatPrintTo(ent, "^3edituser: ^7used does not exist.");
+            return false;
+        }
+
         int updated = 0;
         int open = 0;
 
@@ -876,17 +893,17 @@ namespace AdminCommands
             if (*it == "-cmds" && it + 1 != argv->end())
             {
                 open = CMDS_OPEN;
-                updated |= CMDS_OPEN;
+                updated |= Updated::COMMANDS;
             }
             else if (*it == "-greeting" && it + 1 != argv->end())
             {
                 open = GREETING_OPEN;
-                updated |= GREETING_OPEN;
+                updated |= Updated::GREETING;
             }
             else if (*it == "-title" && it + 1 != argv->end())
             {
                 open = TITLE_OPEN;
-                updated |= TITLE_OPEN;
+                updated |= Updated::TITLE;
             }
             else if (*it == "-clear" && it + 1 != argv->end())
             {
@@ -934,10 +951,9 @@ namespace AdminCommands
 
         boost::trim_right(greeting);
         boost::trim_right(title);
-  
-
-
-        return true;
+        
+        ChatPrintTo(ent, va("^3edituser: ^7updating user %d", id));
+        return game.database->UpdateUser(ent, id, commands, greeting, title, updated);
     }    
 
     bool FindUser(gentity_t* ent, Arguments argv)
@@ -955,7 +971,7 @@ namespace AdminCommands
 
     bool ListUserNames(gentity_t *ent, Arguments argv)
     {
-        if (!argv->size() != 2)
+        if (argv->size() != 2)
         {
             ChatPrintTo(ent, "^3usage: ^7!listusernames <id>");
             return false;

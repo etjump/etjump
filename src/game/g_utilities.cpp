@@ -632,3 +632,74 @@ const char *EscapeString(const char *in)
     Q_strncpyz(out, str.c_str(), sizeof(out));
     return out;
 }
+
+std::string SanitizeConstString(const std::string& s, bool toLower)
+{
+    char sanitized[MAX_TOKEN_CHARS];
+    SanitizeConstString(s.c_str(), sanitized, toLower ? qtrue : qfalse);
+    return sanitized;
+}
+
+BufferPrinter::BufferPrinter(gentity_t* ent) : ent_(ent), buffer_("")
+{
+}
+
+void BufferPrinter::Begin()
+{
+    buffer_.clear();
+}
+
+void BufferPrinter::Print(std::string const& data)
+{
+    if (!ent_)
+    {
+        std::string sanitized = SanitizeConstString(data, qfalse);
+        
+        if (sanitized.length() + buffer_.length() > 239)
+        {
+            G_Printf("%s", buffer_.c_str());
+            buffer_.clear();
+        }
+        buffer_ += data;
+    }
+    else
+    {
+        if (data.length() + buffer_.length() > 1009)
+        {
+            std::string toSend = std::string("print \"" + buffer_ + "\"");
+            trap_SendServerCommand(ClientNum(ent_), toSend.c_str());
+            buffer_.clear();
+        } 
+        buffer_ += data;
+    }
+}
+
+void BufferPrinter::Finish(bool insertNewLine)
+{
+    if (ent_)
+    {
+        boost::format toPrint("print \"%s\"");
+        if (insertNewLine)
+        {
+            toPrint % (buffer_ + NEWLINE);
+            trap_SendServerCommand(ClientNum(ent_), toPrint.str().c_str());
+        }
+        else
+        {
+            toPrint % buffer_;
+            trap_SendServerCommand(ClientNum(ent_), toPrint.str().c_str());
+        }
+    }
+    else
+    {
+        if (insertNewLine)
+        {
+            G_Printf("%s\n",
+                buffer_.c_str());
+        }
+        else
+        {
+            G_Printf("%s", buffer_.c_str());
+        }
+    }
+}

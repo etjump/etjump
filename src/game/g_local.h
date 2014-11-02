@@ -1931,8 +1931,6 @@ extern vmCvar_t	g_mute;
 extern vmCvar_t g_goto;
 extern vmCvar_t g_voteCooldown;
 
-extern vmCvar_t g_instantDatabaseSync;
-
 extern vmCvar_t mod_version;
 
 extern vmCvar_t g_lastVisitedMessage;
@@ -2700,7 +2698,6 @@ qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
 const char *GetRandomMapByType(const char *customType);
 qboolean AdminCommandCheck(gentity_t *ent);
-void ExecuteQueuedDatabaseOperations();
 void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType); 
 void CheckIfOperationsNeedToBeExecuted();
