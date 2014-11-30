@@ -1876,6 +1876,10 @@ bool Commands::AdminCommand(gentity_t* ent)
 
     if (arg[0] == '!')
     {
+        if (arg.length() == 1)
+        {
+            return false;
+        }
         command = &arg[1];
     }
     else if (ent == NULL)

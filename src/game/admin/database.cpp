@@ -1497,7 +1497,7 @@ void Database::ListUserNamesOperation::Execute()
         ConsolePrintTo(ent_, "^3listusernames: ^7check console for more information.");
         BufferPrinter printer(ent_);
         printer.Begin();
-        boost::format toPrint("Found %d names with id %d\n");
+        boost::format toPrint("Found %d names with id: %d\n");
         toPrint % names.size() % id_;
         printer.Print(toPrint.str());
         for (unsigned i = 0; i < names.size(); i++)
