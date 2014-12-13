@@ -2004,6 +2004,12 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 		} 
 	}
 
+    if (level.time - level.startTime < g_disableVoteAfterMapChange.integer)
+    {
+        CP(va("cpm \"Vote is disabled for %d seconds after a map change.\n\"", g_disableVoteAfterMapChange.integer / 1000));
+        return qfalse;
+    }
+
 	if( ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR 
         && !fRefCommand) {
         CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator\n\"");

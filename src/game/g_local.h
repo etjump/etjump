@@ -1941,6 +1941,7 @@ extern vmCvar_t g_banDatabase;
 extern vmCvar_t troll_speed;
 extern vmCvar_t g_raceDatabase;
 
+extern vmCvar_t g_disableVoteAfterMapChange;
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

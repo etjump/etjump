@@ -233,6 +233,8 @@ vmCvar_t        g_banDatabase;
 vmCvar_t        troll_speed;
 vmCvar_t        g_raceDatabase;
 
+vmCvar_t        g_disableVoteAfterMapChange;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -475,7 +477,8 @@ cvarTable_t		gameCvarTable[] = {
     { &g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE },
     { &g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE }, 
     { &troll_speed, "troll_speed", "127", CVAR_ARCHIVE },
-    { &g_raceDatabase, "g_raceDatabase", "races.db", CVAR_ARCHIVE | CVAR_LATCH }
+    { &g_raceDatabase, "g_raceDatabase", "races.db", CVAR_ARCHIVE | CVAR_LATCH },
+    { &g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000", CVAR_ARCHIVE }
 };
 
 // bk001129 - made static to avoid aliasing
