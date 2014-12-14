@@ -64,6 +64,26 @@ void Motd::PrintMotd(gentity_t* ent)
 
 void Motd::GenerateMotdFile()
 {
+    Arguments argv = GetArgs();
+    std::ifstream in(GetPath(g_motdFile.string).c_str());
+    if (in.good())
+    {
+        if (argv->size() == 1)
+        {
+            G_Printf("A motd file exists. Are you sure you want to overwrite the file? If so, do /rcon generatemotd -f.\n");
+            return;
+        }
+        if (argv->size() == 2 && argv->at(1) == "-f")
+        {
+            G_LogPrintf("Overwriting motd file with a default one.\n");
+        }
+        else
+        {
+            G_Printf("Unknown argument \"%s\".\n", argv->at(1).c_str());
+            return;
+        }
+    }
+
     Json::Value root;
     root["chat_message"] = "This is the chat message.";
     root["console_message"] = "This is the console message.";
@@ -78,4 +98,5 @@ void Motd::GenerateMotdFile()
     fOut << output;
     fOut.close();
     G_Printf("Generated new motd file \"%s\"\n", g_motdFile.string);
+    Initialize();
 }

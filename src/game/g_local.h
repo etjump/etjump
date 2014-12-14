@@ -1947,6 +1947,7 @@ extern vmCvar_t g_raceDatabase;
 extern vmCvar_t g_disableVoteAfterMapChange;
 
 extern vmCvar_t g_motdFile;
+extern vmCvar_t g_customMapVotesFile;
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

@@ -181,6 +181,12 @@ qboolean OnConsoleCommand()
         return qtrue;
     }
 
+    if (command == "generatecustomvotes")
+    {
+        game.customMapVotes->GenerateVotesFile();
+        return qtrue;
+    }
+
     if (game.commands->AdminCommand(NULL))
     {
         return qtrue;

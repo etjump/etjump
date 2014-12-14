@@ -33,6 +33,7 @@ public:
     const std::string RandomMap(const std::string& type);
     std::string ListTypes() const;
     const std::vector<std::string> *ListInfo(const std::string& name);
+    void GenerateVotesFile();
 private:
     std::vector<MapType> customMapVotes_;
 };
