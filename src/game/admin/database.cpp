@@ -250,7 +250,7 @@ bool Database::ListUsers(gentity_t* ent, int page)
     {
         if (curr >= i && curr < i + USERS_PER_PAGE)
         {
-            BufferPrint(ent, va("%-5d %-10d %-15s %-36s\n", it->get()->id, it->get()->level, (TimeStampDifferenceToString(static_cast<unsigned>(t) - it->get()->lastSeen) + " ago").c_str(), it->get()->name.c_str()));
+            BufferPrint(ent, va("^7%-5d %-10d %-15s %-36s\n", it->get()->id, it->get()->level, (TimeStampDifferenceToString(static_cast<unsigned>(t) - it->get()->lastSeen) + " ago").c_str(), it->get()->name.c_str()));
         }
 
         curr++;
