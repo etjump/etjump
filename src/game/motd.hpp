@@ -14,6 +14,9 @@
 #include <string>
 #include <ostream>
 
+struct gentity_s;
+typedef struct gentity_s gentity_t;
+
 class Motd
 {
 public:
@@ -21,7 +24,7 @@ public:
     ~Motd();
     void Initialize();
     void GenerateMotdFile();
-
+    void PrintMotd(gentity_t *ent);
 private:
     bool initialized_;
     std::string chatMessage_;

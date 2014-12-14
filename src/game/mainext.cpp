@@ -43,6 +43,11 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 void OnClientBegin(gentity_t *ent)
 {
     G_DPrintf("OnClientBegin called by %d\n", ClientNum(ent));
+    if (!ent->client->sess.motdPrinted)
+    {
+        game.motd->PrintMotd(ent);
+        ent->client->sess.motdPrinted = qtrue;
+    }
 }
 
 void OnClientDisconnect(gentity_t *ent)

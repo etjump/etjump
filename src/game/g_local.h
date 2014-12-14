@@ -699,6 +699,7 @@ typedef struct {
 
     int         portalTeam;
     char        ip[MAX_IP_LEN + 1];
+    qboolean    motdPrinted;
     
 } clientSession_t;
 

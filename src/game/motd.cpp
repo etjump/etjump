@@ -55,6 +55,13 @@ void Motd::Initialize()
     initialized_ = true;
 }
 
+void Motd::PrintMotd(gentity_t* ent)
+{
+    
+    ChatPrintTo(ent, chatMessage_);
+    ConsolePrintTo(ent, motd_);
+}
+
 void Motd::GenerateMotdFile()
 {
     Json::Value root;
