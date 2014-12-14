@@ -399,7 +399,9 @@ void PrintManual(gentity_t *ent, const std::string& command)
     }
     else
     {
-        for (int i = 0; i < sizeof(commandManuals) / sizeof(commandManuals[0]); i++)
+        int i = 0;
+        int len = sizeof(commandManuals) / sizeof(commandManuals[0]);
+        for (i = 0; i < len; i++)
         {
             if (!Q_stricmp(commandManuals[i].cmd, command.c_str()))
             {
@@ -408,6 +410,10 @@ void PrintManual(gentity_t *ent, const std::string& command)
                     commandManuals[i].description);
                 return;
             }
+        }
+        if (i == len)
+        {
+            G_Printf("Couldn't find manual for command \"%s\"\n", command.c_str());
         }
     }
 }
@@ -1017,7 +1023,15 @@ namespace AdminCommands
 
     bool Help(gentity_t* ent, Arguments argv)
     {
-        game.commands->List(ent);
+        if (argv->size() == 1)
+        {
+            game.commands->List(ent);
+        }
+        else
+        {
+            PrintManual(ent, argv->at(1));
+        }
+        
         return true;
     }
 

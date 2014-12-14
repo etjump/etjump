@@ -4,6 +4,7 @@ void CG_Manual_f(void)
 {
     int i = 0;
     int argc = trap_Argc();
+    int len = sizeof(commandManuals) / sizeof(commandManuals[0]);
     const char *cmd = NULL;
 
     if(argc != 2)
@@ -18,7 +19,7 @@ void CG_Manual_f(void)
 
     cmd = CG_Argv(1);
 
-    for(; i < sizeof(commandManuals)/sizeof(commandManuals[0]); i++)
+    for(; i < len; i++)
     {
         if(!Q_stricmp(cmd, commandManuals[i].cmd))
         {
@@ -27,5 +28,5 @@ void CG_Manual_f(void)
             return;
         }
     }
-    CG_Printf("Couldn't find command: %s\n", cmd);
+    CG_Printf("Couldn't find manual for command \"%s\".\n", cmd);
 }
