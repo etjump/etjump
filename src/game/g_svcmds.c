@@ -1080,22 +1080,6 @@ qboolean	ConsoleCommand( void ) {
         return qtrue;
     }
 
-    if(!Q_stricmp(cmd, "ctime"))
-    {
-        time_t t = 0;
-        struct tm *lt = NULL;
-        char buf[MAX_TOKEN_CHARS];
-        if(!time(&t))
-        {
-            G_LogPrintf("ERROR: Couldn't get time for GetUserData.\n");
-        }
-        
-        lt = localtime(&t);
-        // day / month / year 
-        strftime(buf, sizeof(buf), "%d/%m/%y %H:%M:%S", lt);
-        G_Printf("Current time: %s\n", buf);
-    }
-
     if (OnConsoleCommand())
     {
         return qtrue;

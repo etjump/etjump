@@ -216,6 +216,7 @@
     <ClCompile Include="loadrace.cpp" />
     <ClCompile Include="mainext.cpp" />
     <ClCompile Include="mapdata.cpp" />
+    <ClCompile Include="motd.cpp" />
     <ClCompile Include="operationqueue.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
@@ -250,6 +251,7 @@
     <ClInclude Include="g_team.h" />
     <ClInclude Include="loadrace.hpp" />
     <ClInclude Include="mapdata.h" />
+    <ClInclude Include="motd.hpp" />
     <ClInclude Include="operationqueue.hpp" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="races.hpp" />

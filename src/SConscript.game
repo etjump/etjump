@@ -25,6 +25,7 @@ asyncoperation.cpp
 asyncoperations.cpp
 loadrace.cpp
 operationqueue.cpp
+motd.cpp
 
 g_utilities.cpp
 g_banner.cpp

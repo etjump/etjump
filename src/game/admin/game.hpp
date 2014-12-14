@@ -11,6 +11,7 @@ class MapData;
 class Races;
 class CustomMapVotes;
 class OperationQueue;
+class Motd;
 
 struct Game
 {
@@ -25,6 +26,7 @@ struct Game
     boost::shared_ptr<OperationQueue> operationQueue;
     boost::shared_ptr<Races> races;
     boost::shared_ptr<CustomMapVotes> customMapVotes;
+    boost::shared_ptr<Motd> motd;
 };
 
 #endif 

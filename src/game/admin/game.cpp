@@ -8,6 +8,7 @@
 #include "../races.hpp"
 #include "../custommapvotes.hpp"
 #include "../operationqueue.hpp"
+#include "../motd.hpp"
 
 Game::Game()
 {
@@ -20,4 +21,5 @@ Game::Game()
     operationQueue = boost::shared_ptr<OperationQueue>(new OperationQueue());
     races = boost::shared_ptr<Races>(new Races(operationQueue.get()));
     customMapVotes = boost::shared_ptr<CustomMapVotes>(new CustomMapVotes());
+    motd = boost::shared_ptr<Motd>(new Motd());
 }

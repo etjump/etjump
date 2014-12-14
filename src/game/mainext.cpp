@@ -10,6 +10,7 @@
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 #include "operationqueue.hpp"
+#include "motd.hpp"
 
 Game game;
 
@@ -99,6 +100,7 @@ void OnGameInit()
 
     game.customMapVotes->Load();
     game.races->Init();
+    game.motd->Initialize();
 }
 
 void OnGameShutdown()
@@ -168,21 +170,9 @@ qboolean OnConsoleCommand()
     std::string command = (*argv)[0];
     boost::to_lower(command);
 
-    if (command == "printsession")
+    if (command == "generatemotd")
     {
-        game.session->PrintSessionData();
-        return qtrue;
-    }
-
-    if (command == "printlevels")
-    {
-        game.levels->PrintLevels();
-        return qtrue;
-    }
-
-    if (command == "executeoperations")
-    {
-//        game.database->ExecuteQueuedOperations();
+        game.motd->GenerateMotdFile();
         return qtrue;
     }
 

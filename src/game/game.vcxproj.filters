@@ -237,6 +237,9 @@
     <ClCompile Include="admin\user.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
+    <ClCompile Include="motd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -333,6 +336,9 @@
     </ClInclude>
     <ClInclude Include="admin\user.hpp">
       <Filter>Header Files\Admin system</Filter>
+    </ClInclude>
+    <ClInclude Include="motd.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
