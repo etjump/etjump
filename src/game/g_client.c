@@ -2128,7 +2128,6 @@ void ClientSpawn( gentity_t *ent, qboolean revived )
     if( !client->sess.loadedPosBeforeInactivity && 
         client->sess.sessionTeam == client->sess.teamBeforeInactivitySpec )
     {
-        G_LogPrintf("Setting inactivityPos\n");
         VectorCopy(client->sess.posBeforeInactivity, client->ps.origin);
         VectorCopy(client->sess.posBeforeInactivity, ent->r.currentOrigin);
         client->sess.loadedPosBeforeInactivity = qtrue;

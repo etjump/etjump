@@ -787,27 +787,20 @@ void Cmd_Noclip_f( gentity_t *ent ) {
 
 	char	*name = ConcatArgs( 1 );
 	if(!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR)) {
-	#ifdef EDITION999
-		if(!G_admin_hasPermission(ent, AF_ADMINBYPASS)) {
-			if ( !g_noclip.integer && !CheatsOk( ent ) ) {
-				return;
-			}
-	
-			if (level.noNoclip) {
-				CP("cp \"Noclip has been disabled on this map.\n\"");
-				return;
-			}
-		}
-	#else
-		if (!g_noclip.integer && !CheatsOk( ent )) {
-			return;
-		}
-	
-		if (level.noNoclip) {
-			CP("cp \"Noclip has been disabled on this map.\n\"");
-			return;
-		}
-	#endif
+        if (level.noNoclip) {
+            CP("cp \"Noclip has been disabled on this map.\n\"");
+            return;
+        }
+    
+        G_LogPrintf("%d %d\n", ent->client->pers.noclipCount, !ent->client->noclip);
+
+        if (ent->client->pers.noclipCount == 0 && 
+            !ent->client->noclip)
+        {
+            if (!g_noclip.integer && !CheatsOk(ent)) {
+                return;
+            }
+        }
 	}
 
 	
@@ -822,6 +815,12 @@ void Cmd_Noclip_f( gentity_t *ent ) {
 
 	if ( ent->client->noclip ) {
 		msg = "noclip ON\n";
+        
+        if (ent->client->pers.noclipCount > 0)
+        {
+            ent->client->pers.noclipCount--;
+            C_CPTo(ent, va("^7You may use noclip ^2%d^7 more times.", ent->client->pers.noclipCount));
+        }
 	} else {
 		msg = "noclip OFF\n";
 	}

@@ -820,6 +820,8 @@ typedef struct {
 	int				hideMe;
     int             noclipScale;
 
+    int             noclipCount;
+
     raceStruct_t    race;
 
 	ipFilter_t		complaintips[MAX_COMPLAINTIPS];

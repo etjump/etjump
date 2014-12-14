@@ -1249,11 +1249,11 @@ namespace AdminCommands
 
     bool Noclip(gentity_t* ent, Arguments argv)
     {
-//        if (level.noNoclip)
-//        {
-//            ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
-//            return false;
-//        }
+        if (level.noNoclip)
+        {
+            ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
+            return false;
+        }
 
         if (argv->size() == 1)
         {
@@ -1261,9 +1261,19 @@ namespace AdminCommands
             {
                 return false;
             }
+
             ent->client->noclip = ent->client->noclip ? qfalse : qtrue;
         }
-        else {
+        else
+        {
+            int count = 1;
+            if (argv->size() == 3)
+            {
+                if (!ToInt(argv->at(2), count))
+                {
+                    count = 1;
+                }
+            }
             std::string err;
             gentity_t *other = PlayerGentityFromString(argv->at(1), err);
             if (!other)
@@ -1272,7 +1282,18 @@ namespace AdminCommands
                 return false;
             }
 
-            other->client->noclip = other->client->noclip ? qfalse : qtrue;
+            if (count > 1)
+            {
+                ChatPrintTo(other, va("^3noclip: ^7you can use /noclip %d times.", count));
+                ChatPrintTo(ent, va("^3noclip: ^7%s can use /noclip %d times.", other->client->pers.netname, count));
+            }
+            else
+            {
+                ChatPrintTo(other, "^3noclip: ^7you can use /noclip once.");
+                ChatPrintTo(ent, va("^3noclip: ^7%s can use /noclip once.", other->client->pers.netname));
+            }
+            
+            other->client->pers.noclipCount = count;
         }
 
         return true;
