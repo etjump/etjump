@@ -422,10 +422,14 @@ void Session::PrintFinger(gentity_t* ent, gentity_t* target)
         return;
     }
 
-    ChatPrintTo(ent, va("^3finger: ^7%s^7(%s^7) is a level %d user (%s)", target->client->pers.netname,
-        clients_[num].user->name.c_str(),
-        clients_[num].user->level, 
-        clients_[num].user->title.length() > 0 ? clients_[num].user->title.c_str() : clients_[num].level->name.c_str()));
+    ChatPrintTo(ent, "^3finger: ^7check console for more information.");
+    BeginBufferPrint();
+    BufferPrint(ent, va("^7Name: %s\n", target->client->pers.netname));
+    BufferPrint(ent, va("^7Original name: %s\n", clients_[num].user->name.c_str()));
+    BufferPrint(ent, va("^7ID: %d\n", clients_[num].user->id));
+    BufferPrint(ent, va("^7Level: %d\n", clients_[num].user->level));
+    BufferPrint(ent, va("^7Title: %s\n", clients_[num].user->title.length() > 0 ? clients_[num].user->title.c_str() : clients_[num].level->name.c_str()));
+    FinishBufferPrint(ent, false);
 }
 
 void Session::PrintAdmintest(gentity_t* ent)
