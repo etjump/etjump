@@ -4122,6 +4122,7 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
+
 	// regular anytime commands
 	for (i = 0 ; i < sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0]) ; i++) {
 		if (!Q_stricmp(cmd, anyTimeCommands[i].cmd))

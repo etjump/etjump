@@ -2545,7 +2545,7 @@ static void CG_ServerCommand( void ) {
 		
 		return;
 	}
-	
+
 	if( CG_Debriefing_ServerCommand( cmd ) ) {
 		return;
 	}

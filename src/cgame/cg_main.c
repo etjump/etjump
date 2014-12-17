@@ -655,7 +655,7 @@ cvarTable_t		cvarTable[] = {
       { &cg_HUD_xpInfo,                   "cg_HUD_xpInfo", "0", CVAR_ARCHIVE },
       { &cg_logConsole,                   "cg_logConsole", "1", CVAR_ARCHIVE },
       { &cg_weaponSound,                  "cg_weaponSound", "1", CVAR_ARCHIVE },
-      { &cg_noclipScale,                  "cg_noclipScale", "1", CVAR_ARCHIVE }
+      { &cg_noclipScale,                  "cg_noclipScale", "1", CVAR_ARCHIVE },
 
       };
 
@@ -831,6 +831,7 @@ cvarTable_t		cvarTable[] = {
                   com_maxfps.integer,
                   cg_noclipScale.integer
                   ));
+            
       }
 
       int CG_CrosshairPlayer( void ) {
