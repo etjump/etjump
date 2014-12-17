@@ -752,7 +752,7 @@ bool Database::CreateNamesTable()
     int rc = 0;
     char *errMsg = NULL;
 
-    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS name (id INTEGER PRIMARY KEY AUTOINCREMENT, clean_name TEXT, name TEXT UNIQUE, user_id INT, FOREIGN KEY (user_id) REFERENCES users(id));",
+    rc = sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS name (id INTEGER PRIMARY KEY AUTOINCREMENT, clean_name TEXT UNIQUE, name TEXT UNIQUE, user_id INT, FOREIGN KEY (user_id) REFERENCES users(id));",
         NULL, NULL, &errMsg);
 
     if (rc != SQLITE_OK)
@@ -1446,7 +1446,6 @@ void Database::SaveNameOperation::Execute()
     {
         return;
     }
-    G_LogPrintf("Successfully added name to database.\n");
 }
 
 Database::ListUserNamesOperation::ListUserNamesOperation(gentity_t *ent, int id) : ent_(ent), id_(id)

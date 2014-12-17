@@ -1,5 +1,6 @@
 #include <bitset>
 #include <boost/algorithm/string.hpp>
+#include <sstream>
 #include "commands.hpp"
 #include "../g_local.hpp"
 #include "../g_save.hpp"

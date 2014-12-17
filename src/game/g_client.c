@@ -1652,6 +1652,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	G_LogPrintf( "ClientConnect: %i.\n", clientNum);
 	G_UpdateCharacter( client );
 	ClientUserinfoChanged( clientNum );
+    G_LogPrintf("%s connected with ip: %s\n", client->pers.netname, ip);
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	//		TAT 12/10/2002 - Don't display connected messages in single player

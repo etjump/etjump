@@ -37,11 +37,12 @@ void C_ConsolePrintTo( gentity_t *target, const char* msg ) {
     }
 }
 
-void ConsolePrintAll( const string& msg ) {
+void ConsolePrintAll(const string& msg, bool toConsole) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
     trap_SendServerCommand( -1, toPrint );
-    G_Printf("%s\n", msg.c_str());
+    if (toConsole)
+        G_Printf("%s\n", msg.c_str());
 }
 
 void C_ConsolePrintAll( const char* msg ) {
@@ -73,11 +74,12 @@ void C_ChatPrintTo( gentity_t *target, const char* msg ) {
     }
 }
 
-void ChatPrintAll( const string& msg ) {
+void ChatPrintAll(const string& msg, bool toConsole) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg.c_str());
     trap_SendServerCommand( -1, toPrint );
-    G_Printf("%s\n", msg.c_str());
+    if (toConsole)
+        G_Printf("%s\n", msg.c_str());
 }
 
 void C_ChatPrintAll( const char* msg ) {
@@ -109,11 +111,12 @@ void C_CPTo( gentity_t *target, const char* msg ) {
     }
 }
 
-void CPAll( const string& msg ) {
+void CPAll( const string& msg, bool toConsole ) {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg.c_str());
     trap_SendServerCommand( -1, toPrint );
-    G_Printf("%s\n", msg.c_str());
+    if (toConsole)
+        G_Printf("%s\n", msg.c_str());
 }
 
 void C_CPAll( const char* msg ) {
@@ -147,12 +150,13 @@ void C_CPMTo( gentity_t *target, const char* msg )
     }
 }
 
-void CPMAll( const string& msg ) 
+void CPMAll( const string& msg, bool toConsole ) 
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg.c_str());
     trap_SendServerCommand(-1, toPrint);
-    G_Printf("%s\n", msg.c_str());
+    if (toConsole)
+        G_Printf("%s\n", msg.c_str());
 }
 
 void C_CPMAll( const char* msg ) 
@@ -175,13 +179,14 @@ void BPTo( gentity_t *target, const string& msg )
     }
 }
 
-void BPAll( const string& msg )
+void BPAll(const string& msg, bool toConsole)
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
     Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg.c_str());
     trap_SendServerCommand(-1, toPrint);
 
-    G_Printf("%s\n", msg.c_str());
+    if (toConsole)
+        G_Printf("%s\n", msg.c_str());
 }
 
 void C_BPTo( gentity_t *target, const char* msg )
@@ -406,31 +411,6 @@ gentity_t *PlayerGentityFromString
 
     player = g_entities + pids[0];
     return player;
-}
-
-void RemoveDuplicates(std::string& in) {
-    bool exists[256];
-    char buf[MAX_TOKEN_CHARS];
-    const char *inPtr = &in[0];
-    int count = 0;
-
-    for(int i = 0; i < 256; i++) {
-        exists[i] = false;
-    }
-
-    while(*inPtr != NULL) {
-
-        if(!exists[*inPtr]) {
-            buf[count] = *inPtr;
-            count++;
-        }
-
-        exists[*inPtr] = true;
-
-        inPtr++;
-    }
-    buf[count] = 0;
-    in = buf;
 }
 
 void CharPtrToString( const char* p, std::string& s ) 

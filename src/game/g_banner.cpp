@@ -88,20 +88,22 @@ void CheckBanners() {
 
     switch(bannerLocation) {
     case BANNER_CP:
-        CPAll(message);
+        CPAll(message, false);
         break;
     case BANNER_CPM:
-        CPMAll(message);
+        CPMAll(message, false);
         break;
     case BANNER_SAY:
-        ChatPrintAll(message);
+        ChatPrintAll(message, false);
         break;
     case BANNER_BP:
-        BPAll(message);
+        BPAll(message, false);
         break;
     default: 
-        BPAll(message);
+        BPAll(message, false);
     }
+
+    G_LogPrintf("banner: %s\n", message.c_str());
 
     if(nextBanner < static_cast<int>(bannerCount) - 1) {
         nextBanner++;
