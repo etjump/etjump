@@ -937,7 +937,8 @@ namespace AdminCommands
                 switch (open)
                 {
                 case 0:
-                    ChatPrintTo(ent, va("^edituser: ^7ignored argument \"%s^7\".", it->c_str()));
+                    ChatPrintTo(ent, va("^3edituser: ^7ignored argument \"%s^7\".", it->c_str()));
+                    ChatPrintTo(ent, va("^3edituser: ^7ignored argument \"%s^7\".", it->c_str()));
                     break;
                 case CMDS_OPEN:
                     commands += *it;
@@ -1272,6 +1273,10 @@ namespace AdminCommands
             {
                 if (!ToInt(argv->at(2), count))
                 {
+                    if (count < 0)
+                    {
+                        count = 1;
+                    }
                     count = 1;
                 }
             }
@@ -1286,12 +1291,12 @@ namespace AdminCommands
             if (count > 1)
             {
                 ChatPrintTo(other, va("^3noclip: ^7you can use /noclip %d times.", count));
-                ChatPrintTo(ent, va("^3noclip: ^7%s can use /noclip %d times.", other->client->pers.netname, count));
+                ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip %d times.", other->client->pers.netname, count));
             }
             else
             {
                 ChatPrintTo(other, "^3noclip: ^7you can use /noclip once.");
-                ChatPrintTo(ent, va("^3noclip: ^7%s can use /noclip once.", other->client->pers.netname));
+                ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip once.", other->client->pers.netname));
             }
             
             other->client->pers.noclipCount = count;
