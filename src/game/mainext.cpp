@@ -145,7 +145,6 @@ qboolean OnConnectedClientCommand(gentity_t *ent)
 // Returning qtrue means no other commands will be checked
 qboolean OnClientCommand(gentity_t *ent)
 {
-    
     G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
     Arguments argv = GetArgs();

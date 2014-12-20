@@ -25,6 +25,7 @@ public:
     virtual bool SetLevel(int id, int level) = 0;
     virtual void NewName(int id, const std::string& name) = 0;
     virtual bool UpdateLastSeen(int id, int lastSeen) = 0;
+    virtual int ResetUsersWithLevel(int level) = 0;
 };
 
 #endif

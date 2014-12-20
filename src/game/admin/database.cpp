@@ -1506,3 +1506,58 @@ void Database::ListUserNamesOperation::Execute()
         printer.Finish(false);
     }
 }
+
+int Database::ResetUsersWithLevel(int level)
+{
+    IdIterator it = users_.begin();
+    IdIterator end = IdIterEnd();
+
+    int resetedUsersCount = 0;
+
+    while (it != end)
+    {
+        if (it->get()->level == level)
+        {
+            it->get()->level = 0;
+            resetedUsersCount++;
+        }
+        it++;
+    }
+
+    return resetedUsersCount;
+}
+
+Database::ResetUsersWithLevelOperation::ResetUsersWithLevelOperation(int level) : level_(level)
+{
+}
+
+Database::ResetUsersWithLevelOperation::~ResetUsersWithLevelOperation()
+{
+}
+
+void Database::ResetUsersWithLevelOperation::Execute()
+{
+    std::string op = "Reset users with level -operation";
+    if (!OpenDatabase(g_userConfig.string))
+    {
+        PrintOpenError(op);
+        return;
+    }
+
+    if (!PrepareStatement("UPDATE users SET level=0 WHERE level=?;"))
+    {
+        PrintPrepareError(op);
+        return;
+    }
+
+    if (!BindInt(1, level_))
+    {
+        PrintBindError(op);
+        return;
+    }
+
+    if (!ExecuteStatement())
+    {
+        return;
+    }
+}

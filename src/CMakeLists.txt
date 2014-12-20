@@ -66,8 +66,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 # global scope of all source files
 FILE(GLOB CGAME_SRC
-    "game/cg_identification.cpp"
-    "game/cg_manual.c"
+    "cgame/cg_identification.cpp"
 
 
 	"game/bg_public.h"
@@ -96,10 +95,12 @@ FILE(GLOB CGAME_SRC
 	"cgame/cg_loadpanel.c"
 	"cgame/cg_localents.c"
 	"cgame/cg_main.c"
+	"cgame/cg_manual.c"
 	"cgame/cg_marks.c"
 	"cgame/cg_missionbriefing.c"
 	"cgame/cg_multiview.c"
 	"cgame/cg_newDraw.c"
+	"cgame/cg_panelhandling.c"
 	"cgame/cg_particles.c"
 	"cgame/cg_players.c"
 	"cgame/cg_playerstate.c"

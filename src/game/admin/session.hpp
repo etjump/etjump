@@ -2,6 +2,7 @@
 #define SESSION_HPP
 
 #include <string>
+#include <vector>
 #include <bitset>
 #include "../g_local.hpp"
 #include "levels.hpp"
@@ -51,6 +52,9 @@ public:
     void ParsePermissions(int clientNum);
     bool HasPermission(gentity_t *ent, char flag);
     void NewName(gentity_t *ent);
+    // Returns the amount of users with that level
+    int LevelDeleted(int level);
+    std::vector<Session::Client*> FindUsersByLevel(int level);
 private:
     IAuthentication *database_;
 

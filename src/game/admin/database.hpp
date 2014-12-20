@@ -134,6 +134,7 @@ public:
     bool UpdateUser(gentity_t *ent, int id,
         const std::string& commands, const std::string& greeting,
         const std::string& title, int updated);
+    int ResetUsersWithLevel(int level);
 private:
     unsigned GetHighestFreeId() const;
     
@@ -248,6 +249,16 @@ private:
     private:
         gentity_t *ent_;
         int id_;
+        void Execute();
+    };
+
+    class ResetUsersWithLevelOperation : public AsyncOperation
+    {
+    public:
+        ResetUsersWithLevelOperation(int level);
+        ~ResetUsersWithLevelOperation();
+    private:
+        int level_;
         void Execute();
     };
 };

@@ -13,6 +13,8 @@ typedef vec_t vec5_t[5];
 
 const std::string NEWLINE = "\n";
 
+void LogPrint(std::string message);
+
 // C++ versions of the printing functions
 void BPAll(const std::string& msg, bool toConsole = true);
 void BPTo( gentity_t *target, const std::string& msg );

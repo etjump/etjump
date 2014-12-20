@@ -43,9 +43,9 @@ namespace CommandFlags
     const char SETLEVEL = 's';
 }
 
-void Test();
 namespace ClientCommands
 {
+
     bool BackupLoad(gentity_t *ent, Arguments argv)
     {
         game.saves->LoadBackupPosition(ent);
@@ -719,9 +719,9 @@ namespace AdminCommands
             return false;
         }
 
-        ChatPrintTo(ent, "^3deletelevel: ^7deleted level.");
-
-        G_LogPrintf("TODO: Remove users levels with level\n");
+        int usersWithLevel = game.session->LevelDeleted(level);
+        
+        ChatPrintTo(ent, "^3deletelevel: ^7deleted level. Set " + ToString(usersWithLevel) + " users to level 0.");
 
         return true;
     }
@@ -738,25 +738,107 @@ namespace AdminCommands
         int level = 0;
         if (!ToInt(argv->at(1), level))
         {
-            ChatPrintTo(ent, va("^3editcommands: ^7%s is not a number.", level));
+            ChatPrintTo(ent, "^3editcommands: ^7defined level \"" + (*argv)[1] + "\" is not an integer.");
+            return false;
+        }
+
+        if (!game.levels->LevelExists(level))
+        {
+            ChatPrintTo(ent, "^3editcommands: ^7level " + (*argv)[1] + " does not exist.");
             return false;
         }
 
         ConstArgIter it = argv->begin() + 2;
         ConstArgIter end = argv->end();
 
+        std::string currentPermissions = game.levels->GetLevel(level)->commands;
+
+        bool add = true;
+        std::string currentCommand;
+        std::string addCommands = "+";
+        std::string deleteCommands = "-";
         for (; it != end; it++)
         {
             if ((*it)[0] == '-')
             {
-                
+                add = false;
+                currentCommand = (*it).substr(1);
+            }
+            else if ((*it)[0] == '+')
+            {
+                add = true;
+                currentCommand = (*it).substr(1);
             }
             else
             {
-                
+                add = true;
+                currentCommand = (*it);
+            }
+            char flag = game.commands->FindCommandFlag(currentCommand);
+            if (flag == 0)
+            {
+                ChatPrintTo(ent, "^3editcommands: ^7command \"" + currentCommand + "\" doesn't match any known command.");
+                continue;
+            }
+            if (add)
+            {
+                addCommands += flag;
+            }
+            else
+            {
+                deleteCommands += flag;
             }
         }
+
+        std::string duplicateFlags = "";
+        for (size_t i = 0; i < addCommands.size(); i++)
+        {
+            if (deleteCommands.find(addCommands[i]) != std::string::npos)
+            {
+                ChatPrintTo(ent, va("^3editcommands: ^7ignoring command flag \"%c\". Are you trying to add or delete it?", addCommands[i]));
+                duplicateFlags.push_back(addCommands[i]);
+            }
+        }
+
+        if (duplicateFlags.length() > 0)
+        {
+            std::string temp;
+            for (size_t i = 0; i < addCommands.length(); i++)
+            {
+                if (duplicateFlags.find(addCommands[i]) == std::string::npos)
+                {
+                    temp += addCommands[i];
+                }
+            }
+            addCommands = temp;
+
+            temp.clear();
+            for (size_t i = 0; i < deleteCommands.length(); i++)
+            {
+                if (duplicateFlags.find(deleteCommands[i]) == std::string::npos)
+                {
+                    temp += deleteCommands[i];
+                }
+            }
+            deleteCommands = temp;
+        }
         
+        bool editedPermissions = false;
+        // always has + in it
+        if (addCommands.length() > 1)
+        {
+            editedPermissions = true;
+            currentPermissions += addCommands;
+        }
+        // always has - in it
+        if (deleteCommands.length() > 1)
+        {
+            editedPermissions = true;
+            currentPermissions += deleteCommands;
+        }
+        game.levels->Edit(level, "", currentPermissions, "", 1);
+
+        ChatPrintTo(ent, "^3editcommands: ^7edited level " + (*argv)[1] + " permissions. New permissions are: " + game.levels->GetLevel(level)->commands);
 
         return true;
     }
@@ -810,14 +892,18 @@ namespace AdminCommands
                     if (*nextIt == "cmds")
                     {
                         commands = "";
+                        updated |= CMDS_OPEN;
+
                     }
                     else if (*nextIt == "greeting")
                     {
                         greeting = "";
+                        updated |= GREETING_OPEN;
                     }
                     else if (*nextIt == "title")
                     {
                         title = "";
+                        updated |= TITLE_OPEN;
                     }
                     else
                     {
@@ -829,7 +915,11 @@ namespace AdminCommands
                     switch (open)
                     {
                     case 0:
-                        ChatPrintTo(ent, va("^editlevel: ^7ignored argument \"%s^7\".", it->c_str()));
+                        if (updated == 0)
+                        {
+                            ChatPrintTo(ent, va("^editlevel: ^7ignored argument \"%s^7\".", it->c_str()));
+                        }
+                        
                         break;
                     case CMDS_OPEN:
                         commands += *it;
@@ -918,14 +1008,17 @@ namespace AdminCommands
                 if (*nextIt == "cmds")
                 {
                     commands = "";
+                    updated |= Updated::COMMANDS;
                 }
                 else if (*nextIt == "greeting")
                 {
                     greeting = "";
+                    updated |= Updated::GREETING;
                 }
                 else if (*nextIt == "title")
                 {
                     title = "";
+                    updated |= Updated::TITLE;
                 }
                 else
                 {
@@ -937,7 +1030,6 @@ namespace AdminCommands
                 switch (open)
                 {
                 case 0:
-                    ChatPrintTo(ent, va("^3edituser: ^7ignored argument \"%s^7\".", it->c_str()));
                     ChatPrintTo(ent, va("^3edituser: ^7ignored argument \"%s^7\".", it->c_str()));
                     break;
                 case CMDS_OPEN:
@@ -1992,4 +2084,16 @@ bool Commands::AdminCommand(gentity_t* ent)
 qboolean AdminCommandCheck(gentity_t *ent)
 {
     return game.commands->AdminCommand(ent) ? qtrue : qfalse;
+}
+
+char Commands::FindCommandFlag(const std::string &command) {
+    AdminCommandsIterator it = adminCommands_.begin();
+    AdminCommandsIterator end = adminCommands_.end();
+    while (it != end) {
+        if ((*it).first == command) {
+            return (*it).second.second;
+        }
+        it++;
+    }
+    return 0;
 }

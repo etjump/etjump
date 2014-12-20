@@ -481,6 +481,35 @@ guid(""), hwid("")
 
 }
 
+std::vector<Session::Client*> Session::FindUsersByLevel(int userLevel)
+{
+    std::vector<Session::Client*> matchingClients;
+    for (int i = 0; i < level.numConnectedClients; i++)
+    {
+        int clientNum = level.sortedClients[i];
+        if (clients_[clientNum].level->level == userLevel)
+        {
+            matchingClients.push_back(&clients_[clientNum]);
+        }
+    }
+    return matchingClients;
+}
+
+int Session::LevelDeleted(int adminLevel)
+{
+    int usersReseted = database_->ResetUsersWithLevel(adminLevel);
+
+    for (int i = 0; i < level.numConnectedClients; i++)
+    {
+        int clientNum = level.sortedClients[i];
+        if (clients_[clientNum].level->level == adminLevel)
+        {
+            ParsePermissions(clientNum);
+        }
+    }
+    return usersReseted;
+}
+
 void Session::NewName(gentity_t* ent)
 {
     database_->NewName(clients_[ClientNum(ent)].user->id, ent->client->pers.netname);

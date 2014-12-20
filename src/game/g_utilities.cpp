@@ -13,7 +13,6 @@ using std::vector;
 /*
  * Printing related
  */
-
 void ConsolePrintTo( gentity_t *target, const string& msg ) 
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
@@ -177,6 +176,11 @@ void BPTo( gentity_t *target, const string& msg )
     else { 
         G_Printf("%s\n", msg.c_str());
     }
+}
+
+void LogPrint(std::string message)
+{
+    G_LogPrintf("%s\n", message.c_str());
 }
 
 void BPAll(const string& msg, bool toConsole)
