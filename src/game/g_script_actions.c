@@ -1932,6 +1932,7 @@ G_ScriptAction_Accum
 =================
 */
 
+
 qboolean G_ScriptAction_Accum( gentity_t *ent, char *params )
 {
 	char *pString, *token, lastToken[MAX_QPATH], name[MAX_QPATH];
@@ -2080,7 +2081,9 @@ qboolean G_ScriptAction_Accum( gentity_t *ent, char *params )
 		if (ent->scriptAccumBuffer[bufferIndex] == atoi(token)) {
 			return qfalse;
 		}
-	} else {
+    } else if (!Q_stricmp(lastToken, "set_to_dynamitecount")) {
+    }
+    else {
 		G_Error( "Scripting: accum %s: unknown command\n", params );
 	}
 

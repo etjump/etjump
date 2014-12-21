@@ -130,7 +130,7 @@ qboolean OnConnectedClientCommand(gentity_t *ent)
     }
 
     if (game.commands->ClientCommand(ent, command))
-    {
+    { 
         return qtrue;
     }
 
