@@ -1227,7 +1227,6 @@ namespace AdminCommands
 
     bool ListFlags(gentity_t* ent, Arguments argv)
     {
-        ChatPrintTo(ent, "ListFlags is not implemented.");
         return true;
     }
 
@@ -2084,6 +2083,14 @@ bool Commands::AdminCommand(gentity_t* ent)
 qboolean AdminCommandCheck(gentity_t *ent)
 {
     return game.commands->AdminCommand(ent) ? qtrue : qfalse;
+}
+
+void Commands::ListCommandFlags(gentity_t* ent)
+{
+    ChatPrintTo(ent, "^3listflags: ^7check console for more information.");
+
+    BeginBufferPrint();
+    
 }
 
 char Commands::FindCommandFlag(const std::string &command) {

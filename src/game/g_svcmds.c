@@ -1090,6 +1090,11 @@ qboolean	ConsoleCommand( void ) {
 			trap_SendServerCommand( -1, va("chat \"%s\"", ConcatArgs(1) ) );
 			return qtrue;
 		}
+        else if (!Q_stricmp(cmd, "enc_qsay"))
+        {
+            trap_SendServerCommand(-1, va("enc_chat \"%s\"", ConcatArgs(1)));
+            return qtrue;
+        }
 		else if( !Q_stricmp (cmd, "cp")) {
 			trap_SendServerCommand( -1, va("cp \"%s\n\"", ConcatArgs(1) ) );
 			return qtrue;

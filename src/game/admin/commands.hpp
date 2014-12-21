@@ -13,6 +13,7 @@ public:
     bool AdminCommand(gentity_t *ent);
     bool List(gentity_t *ent);
     char FindCommandFlag(const std::string& command);
+    void ListCommandFlags(gentity_t *ent);
 private:
     std::map< std::string, boost::function<bool(gentity_t *ent, Arguments argv)> > commands_;
     std::map< std::string, std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> > adminCommands_;
