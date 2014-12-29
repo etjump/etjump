@@ -370,7 +370,7 @@ std::string MapData::RandomMap()
     {
         if (curr == target)
         {
-            if (it->get()->mapOnServer)
+            if (it->get()->mapOnServer && level.rawmapname != it->get()->name)
             {
                 return it->get()->name;
             }
@@ -381,7 +381,7 @@ std::string MapData::RandomMap()
             it++;
             while (it != end)
             {
-                if (it->get()->mapOnServer)
+                if (it->get()->mapOnServer && level.rawmapname != it->get()->name)
                 {
                     return it->get()->name;
                 }
@@ -390,7 +390,7 @@ std::string MapData::RandomMap()
 
             while (it != begin)
             {
-                if (it->get()->mapOnServer)
+                if (it->get()->mapOnServer && level.rawmapname != it->get()->name)
                 {
                     return it->get()->name;
                 }
