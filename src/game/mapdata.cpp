@@ -170,6 +170,12 @@ void MapData::ListMaps(gentity_t *ent)
     ConstNameIterator end = maps_.get<0>().end();
     while (it != end)
     {
+        if (!it->get()->mapOnServer)
+        {
+            it++;
+            continue;
+        }
+
         BufferPrint(ent, va("%-25s ", it->get()->name.c_str()));
 
         if (printed != 0 && printed % 3 == 0)
@@ -357,17 +363,40 @@ std::string MapData::RandomMap()
     int curr = 0;
 
     ConstNameIterator it = maps_.get<0>().begin();
+    ConstNameIterator begin = maps_.get<0>().begin();
     ConstNameIterator end = maps_.get<0>().end();
+
     while (it != end)
     {
-        
         if (curr == target)
         {
             if (it->get()->mapOnServer)
             {
                 return it->get()->name;
             }
-            // let's just return oasis
+
+            // If map is not on server go forwards until we find a map
+            // that matches criteria (not the current one, on the server)
+            // If current one is the last one, go backwards
+            it++;
+            while (it != end)
+            {
+                if (it->get()->mapOnServer)
+                {
+                    return it->get()->name;
+                }
+                it++;
+            }
+
+            while (it != begin)
+            {
+                if (it->get()->mapOnServer)
+                {
+                    return it->get()->name;
+                }
+                it--;
+            }
+
             return "oasis";
         }
 
