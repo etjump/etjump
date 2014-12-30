@@ -57,9 +57,11 @@ void Motd::Initialize()
 
 void Motd::PrintMotd(gentity_t* ent)
 {
-    
-    ChatPrintTo(ent, chatMessage_);
-    ConsolePrintTo(ent, motd_);
+    if (initialized_)
+    {
+        ChatPrintTo(ent, chatMessage_);
+        ConsolePrintTo(ent, motd_);
+    }
 }
 
 void Motd::GenerateMotdFile()

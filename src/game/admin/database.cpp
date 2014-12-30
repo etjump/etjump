@@ -1031,8 +1031,6 @@ void Database::InsertUserOperation::Execute()
             GetMessage().c_str());
         return;
     }
-    G_LogPrintf("Successfully inserted user %s to database.\n",
-        user_->name.c_str());
 }
 
 Database::InsertNewHardwareIdOperation::InsertNewHardwareIdOperation(User user)
@@ -1075,7 +1073,6 @@ void Database::InsertNewHardwareIdOperation::Execute()
             GetMessage().c_str());
         return;
     }
-    G_LogPrintf("Successfully updated user's hardware id.\n");
 }
 
 Database::AsyncSaveUserOperation::AsyncSaveUserOperation(User user, int updated) : user_(user), updated_(updated)
@@ -1214,8 +1211,6 @@ void Database::AsyncSaveUserOperation::Execute()
         return;
     }
 
-    G_LogPrintf("Successfully saved user to database.\n");
-
     return;
 }
 
@@ -1265,8 +1260,6 @@ void Database::AddBanOperation::Execute()
             GetMessage().c_str());
         return;
     }
-
-    G_LogPrintf("Successfully added ban to database.\n");
 }
 
 Database::RemoveBanOperation::RemoveBanOperation(int id) : id_(id)
@@ -1303,7 +1296,6 @@ void Database::RemoveBanOperation::Execute()
         PrintExecuteError(op);
         return;
     }
-    G_LogPrintf("Successfully executed remove ban operation.\n");
 }
 
 Database::UpdateLastSeenOperation::UpdateLastSeenOperation(User user) : user_(user)
@@ -1341,9 +1333,6 @@ void Database::UpdateLastSeenOperation::Execute()
         PrintExecuteError(op);
         return;
     }
-
-    G_LogPrintf("Successfully executed last seen operation.\n");
-
 }
 
 Database::FindUserOperation::FindUserOperation(gentity_t* ent, std::string const& user)

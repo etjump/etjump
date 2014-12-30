@@ -186,6 +186,12 @@ qboolean OnConsoleCommand()
         return qtrue;
     }
 
+    if (command == "logstate")
+    {
+        LogServerState();
+        return qtrue;
+    }
+
     if (game.commands->AdminCommand(NULL))
     {
         return qtrue;
@@ -249,4 +255,41 @@ void CheckIfOperationsNeedToBeExecuted()
 void ClientNameChanged(gentity_t *ent)
 {
     game.session->NewName(ent);
+}
+
+std::string GetTeamString(int clientNum)
+{
+    gentity_t *ent = g_entities + clientNum;
+
+    if (ent->client->sess.sessionTeam == TEAM_ALLIES)
+    {
+        return "ALLIES";
+    }
+    if (ent->client->sess.sessionTeam == TEAM_AXIS)
+    {
+        return "AXIS";
+    }
+    return "SPECTATOR";
+}
+
+void LogServerState()
+{
+    time_t t;
+    time(&t);
+    std::string state = "Server state at " + TimeStampToString(static_cast<int>(t)) + ":\n";
+    boost::format fmter("%1% %2% %3%");
+    for (int i = 0; i < level.numConnectedClients; i++)
+    {
+        int clientNum = level.sortedClients[i];
+        
+        fmter % clientNum % GetTeamString(clientNum) % (g_entities + clientNum)->client->pers.netname;
+        state += fmter.str() + "\n";
+    }
+
+    if (level.numConnectedClients == 0)
+    {
+        state += "No players on the server.\n";
+    }
+
+    LogPrint(state);
 }

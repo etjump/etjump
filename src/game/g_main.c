@@ -3635,12 +3635,16 @@ void AC_LogCheat( int clientNum )
         ip = Info_ValueForKey(userinfo, "ip");
 
         G_LogPrintf("********************************************\n"
-                    "************* CHEATER DETECTED *************\n"
-                    "********************************************\n");
+                    "******* POSSIBLE CHEATER DETECTED **********\n"
+                    "********************************************");
         G_LogPrintf("Player: %s\nIP: %s\n", ent->client->pers.netname,
             ip);
         ent->client->cheatDetected = qtrue;
+        LogServerState();
+
     }
+
+    
 }
 
 int AC_SetSpeed()

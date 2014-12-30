@@ -10,6 +10,74 @@
 using std::string;
 using std::vector;
 
+//
+// Notes
+// Max "chat" length is 150
+// Max client "print" length is 998
+// Max server "print" length is 1013
+
+const int MAX_CHAT_LEN = 150;
+const int MAX_CLIENT_PRINT_LEN = 998;
+const int MAX_SERVER_PRINT_LEN = 1013;
+
+void ConsolePrintTo(gentity_t *target, boost::format fmt)
+{
+    int maxLen = MAX_CLIENT_PRINT_LEN;
+    std::string message = fmt.str();
+
+    if (!target)
+    {
+        maxLen = MAX_SERVER_PRINT_LEN;
+    }
+
+    while (message.length() > 0)
+    {
+        if (message.length() > maxLen)
+        {
+            string toPrint = message.substr(0, maxLen);
+            message = message.substr(maxLen + 1);
+            if (!target)
+            {
+                G_Printf("%s", toPrint.c_str());
+            }
+            else
+            {
+                trap_SendServerCommand(ClientNum(target), va("print \"%s\"", toPrint.c_str()));
+            }
+        }
+        else
+        {
+            if (!target)
+            {
+                G_Printf("%s", message.c_str());
+            }
+            else
+            {
+                trap_SendServerCommand(ClientNum(target), va("print \"%s\"", message.c_str()));
+            }
+            return;
+        }
+    }
+}
+
+void LogPrint(boost::format fmt)
+{
+    string message = fmt.str();
+    while (message.length() > 0)
+    {
+        if (message.length() > MAX_SERVER_PRINT_LEN)
+        {
+            string toPrint = message.substr(0, MAX_SERVER_PRINT_LEN);
+            message = message.substr(MAX_SERVER_PRINT_LEN + 1);
+            G_LogPrintf("%s", toPrint.c_str());
+        }
+        else
+        {
+            G_LogPrintf("%s", message.c_str());
+        }
+    }
+}
+
 /*
  * Printing related
  */
@@ -177,6 +245,7 @@ void BPTo( gentity_t *target, const string& msg )
         G_Printf("%s\n", msg.c_str());
     }
 }
+
 
 void LogPrint(std::string message)
 {

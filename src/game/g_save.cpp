@@ -188,7 +188,7 @@ void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)  {
 	{
 		return;
 	} 
-	else if ( ent->client->sess.sessionTeam == TEAM_ALLIES )
+	if ( ent->client->sess.sessionTeam == TEAM_ALLIES )
 	{
         SaveBackupPosition(ent, 
             &clients_[ClientNum(ent)].alliesSavedPositions[0]);

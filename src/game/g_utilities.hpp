@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/format.hpp>
 #include "g_local.hpp"
 
 typedef float vec_t;
@@ -14,8 +15,10 @@ typedef vec_t vec5_t[5];
 const std::string NEWLINE = "\n";
 
 void LogPrint(std::string message);
+void LogPrint(boost::format fmt);
 
 // C++ versions of the printing functions
+void ConsolePrintTo(gentity_t *target, boost::format fmt);
 void BPAll(const std::string& msg, bool toConsole = true);
 void BPTo( gentity_t *target, const std::string& msg );
 void BeginBufferPrint();

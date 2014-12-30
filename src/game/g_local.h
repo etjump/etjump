@@ -2715,6 +2715,7 @@ void SavePositionsToDatabase(gentity_t *ent);
 void LoadPositionsFromDatabase(gentity_t *ent);
 void InitSaveSystem();
 void ResetSavedPositions(gentity_t *ent);
+void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t** teamNum);
 

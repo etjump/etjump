@@ -164,7 +164,7 @@ void MapData::ListMaps(gentity_t *ent)
 {
     ChatPrintTo(ent, "^3listmaps: ^7check console for more information.");
     BeginBufferPrint();
-    
+
     int printed = 1;
     ConstNameIterator it = maps_.get<0>().begin();
     ConstNameIterator end = maps_.get<0>().end();
