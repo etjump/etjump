@@ -1761,7 +1761,7 @@ void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
         else
         {
             activator->client->sess.upcomingClientMapProgression
-                = self->ident;
+                = self->decayValue;
         }
 
         activator->client->sess.previousClientMapProgression

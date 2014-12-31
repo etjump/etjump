@@ -663,6 +663,7 @@ spawn_t	spawns[] = {
 	{"target_printname",	SP_target_printname },
 	/*{"etjump_target_relay",	SP_target_fireonce },*/  //Changed for RC1 - Feen
 	{"etjump2_target_relay",	SP_target_fireonce },
+	{"etjump203_target_relay",	SP_target_fireonce },
 	{"func_fakebrush",		SP_func_fakebrush },
 	{"target_savereset",	SP_target_savereset },
 	{"weapon_portalgun",	SP_weapon_portalgun }, //Feen: PGM

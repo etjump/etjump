@@ -1180,3 +1180,4 @@ const char* UI_DescriptionForCampaign( void );
 const char* UI_NameForCampaign( void );
 
 #endif
+
