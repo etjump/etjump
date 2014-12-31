@@ -266,7 +266,6 @@ void weapon_portalgun_touch(gentity_t* self, gentity_t* other, trace_t* trace) {
     if (self->portalTeam > 0)
     {
         other->client->sess.portalTeam = self->portalTeam;
-        G_LogPrintf("Setting %s's portal team to %d\n", other->client->pers.netname, other->client->sess.portalTeam);
     }
 
 	// check if player already had the weapon
@@ -307,7 +306,6 @@ void SP_weapon_portalgun (gentity_t* ent){
 	vec3_t		mins,maxs;
 
     G_SpawnInt("portal_team", "0", &ent->portalTeam);
-    G_LogPrintf("DEBUG: portal team set to %d\n", ent->portalTeam);
 
 	item = BG_FindItemForWeapon(WP_PORTAL_GUN);
 

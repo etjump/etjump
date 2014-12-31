@@ -1227,6 +1227,7 @@ namespace AdminCommands
 
     bool ListFlags(gentity_t* ent, Arguments argv)
     {
+        game.commands->ListCommandFlags(ent);
         return true;
     }
 
@@ -1906,7 +1907,7 @@ Commands::Commands()
     adminCommands_["levelinfo"] = AdminCommandPair(AdminCommands::LevelInfo, CommandFlags::EDIT);
     adminCommands_["listbans"] = AdminCommandPair(AdminCommands::ListBans, CommandFlags::LISTBANS);
     //adminCommands_["listcmds"] = AdminCommandPair(AdminCommands::ListCommands, CommandFlags::BASIC);
-    //adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
+    adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
     adminCommands_["listmaps"] = AdminCommandPair(AdminCommands::ListMaps, CommandFlags::BASIC);
     //adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
     adminCommands_["listusers"] = AdminCommandPair(AdminCommands::ListUsers, CommandFlags::EDIT);
@@ -2091,6 +2092,13 @@ void Commands::ListCommandFlags(gentity_t* ent)
 
     BeginBufferPrint();
     
+    boost::format fmt("%c %s\n");
+    for (ConstAdminCommandIterator it = adminCommands_.begin(), end = adminCommands_.end(); it != end; it++)
+    {
+        BufferPrint(ent, (fmt % it->second.second % it->first).str());
+    }
+
+    FinishBufferPrint(ent);
 }
 
 char Commands::FindCommandFlag(const std::string &command) {

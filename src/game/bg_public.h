@@ -2461,14 +2461,14 @@ static const struct Manual commandManuals[] = {
     {"ban", "!ban [player] [(optional) days] [(optional) reason]", "Bans target player from server."},
     {"cancelvote", "!cancelvote", "Cancels current vote in progress"},
     {"deletelevel", "!deletelevel [level]", "Deletes a level."},
-    {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on ID."},
-    {"editcommands", "", ""},
+//    {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on ID."},
+    {"editcommands", "!editcommands [level] [+command|-command] [+command|-command...]", "Edits commands of a level"},
     {"editlevel", "!editlevel [level] -cmds [new commands] -greeting [new greeting] -title [new title]", "Edits an existing level. If level does not exist, creates it."},
-    {"edituser", "!edituser [guid] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n"    
+    {"edituser", "!edituser [id] -cmds [personal commands] -title [personal title] -greeting [personal greeting]\n"    
     "Used to edit user admin attributes such as personal commands, personal title and personal greeting."    
     "All of the \"-cmds|-title|-greeting\" switches are optional "    
     "but atleast one must be given."},
-    {"finger", "!finger <target>", "Displays target's admin level."},
+    {"finger", "!finger [target]", "Displays target's admin level."},
     {"help", "!help\n!help [command]", "Prints useful information about commands."},
     {"kick", "!kick [target]\n!kick [target] [timeout]\n!kick [target] [timeout] [reason]",    "Kicks target player."},
     {"levelinfo", "!levelinfo [level]", "Prints useful information about a level."},
@@ -2496,7 +2496,7 @@ static const struct Manual commandManuals[] = {
     {"setlevel", "!setlevel [target] [level]\n!setlevel -id [id] [level]", "Sets the target's admin level."},
     {"unban", "!unban [ban ID]", "Unbans a player based on ban ID"},
     {"unmute", "!unmute [target]", "Unmutes target player."},
-    {"userinfo", "!userinfo -id [id]\n!userinfo -guid [guid]", "Prints user info."}
+    {"userinfo", "!userinfo -id [id]", "Prints user info."}
 };
 
 #endif
