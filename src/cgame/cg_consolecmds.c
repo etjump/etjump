@@ -912,18 +912,10 @@ void CG_StartTimer( void ) {
 	cg.activeTimer = qtrue;
 }
 
-void CG_StopTimer ( void ) {
-	CG_Printf("Timer stopped.\n");
-	cg.activeTimer = qfalse;
-	cg.stopTime = cg.time;
-}
-// Prints instructions to set up adminpassword
-void CG_Info_f ( void ) {
-	CG_Printf("How to use the admin system\n");
-	CG_Printf("You need to have a unique username and a unique password\n");
-	CG_Printf("To set a username do cg_username <name>\n");
-	CG_Printf("To set a password do cg_adminpassword <password>\n");
-	CG_Printf("Password has to be atleast 8 characters\n");
+void CG_StopTimer(void) {
+    CG_Printf("Timer stopped.\n");
+    cg.activeTimer = qfalse;
+    cg.stopTime = cg.time;
 }
 
 void CG_portalinfo_f ( void ) {
@@ -1138,7 +1130,6 @@ static consoleCommand_t	commands[] =
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
 	{ "startTimer",	CG_StartTimer },
 	{ "stopTimer", CG_StopTimer },
-	{ "info",	CG_Info_f },
 	{ "portal", CG_portalinfo_f },
 	{ "chs", CG_InfoCHS_f },
 	{ "minimize", CG_Minimize_f },

@@ -1388,9 +1388,9 @@ void Database::FindUserOperation::Execute()
     BufferPrinter printer(ent_);
     printer.Begin();
     printer.Print("ID       Name\n");
+    boost::format toPrint("%-8d %-36s^7\n");
     for (unsigned i = 0; i < users.size(); i++)
     {
-        boost::format toPrint("%-8d %-36s\n");
         toPrint % users[i].first % users[i].second;
         printer.Print(toPrint.str());
     }
