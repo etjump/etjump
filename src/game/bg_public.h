@@ -2491,7 +2491,7 @@ static const struct Manual commandManuals[] = {
     {"readconfig", "!readconfig", "Reads user, level and ban databases."},
     {"rename", "!rename [target] [new name]", "Renames target player."},
     {"restart", "!restart", "Restarts map."},
-    { "routemaker", "!routemaker [player]", "Makes target player the route maker." },
+//    { "routemaker", "!routemaker [player]", "Makes target player the route maker." },
     {"rmsaves", "!rmsaves [target]", "Clears target's saved positions."},
     {"setlevel", "!setlevel [target] [level]\n!setlevel -id [id] [level]", "Sets the target's admin level."},
     {"unban", "!unban [ban ID]", "Unbans a player based on ban ID"},

@@ -1183,6 +1183,10 @@ typedef struct {
 	qboolean		activeTimer;
 	qboolean		resetmaxspeed;
     qboolean        routeDesigner;
+
+    qboolean        freeCam;
+    vec3_t          freeCamPos;
+    vec3_t          freeCamAngles;
 } cg_t;
 
 #define	NUM_FUNNEL_SPRITES	21

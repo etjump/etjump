@@ -792,8 +792,6 @@ void Cmd_Noclip_f( gentity_t *ent ) {
             return;
         }
     
-        G_LogPrintf("%d %d\n", ent->client->pers.noclipCount, !ent->client->noclip);
-
         if (ent->client->pers.noclipCount == 0 && 
             !ent->client->noclip)
         {

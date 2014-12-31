@@ -291,6 +291,36 @@ void CG_DemoClick(int key, qboolean down)
 			if(down) cgs.aviDemoRate = demo_avifpsF5.integer;
 			else trap_Cvar_Set("cl_avidemo", demo_avifpsF5.string);
 			return;
+        case K_KP_ENTER:
+            if (!down)
+            {
+                CG_ToggleFreeCam();
+            }
+            return;
+        case 'w':
+            if (down)
+            {
+                CG_FreeCamMoveForward();
+            }
+            return;
+        case 's':
+            if (down)
+            {
+                CG_FreeCamMoveBackward();
+            }
+            return;
+        case 'a':
+            if (down)
+            {
+                CG_FreeCamMoveLeft();
+            }
+            return;
+        case 'd':
+            if (down)
+            {
+                CG_FreeCamMoveRight();
+            }
+            return;
 		default: 
 			if (down)
 			{

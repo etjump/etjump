@@ -35,7 +35,7 @@ static const cmd_reference_t aCommandInfo[] = {
 	{ "callvote",		qtrue,	qfalse,	(void(*)(gentity_t *, unsigned int, qboolean))Cmd_CallVote_f, " <params>:^7 Calls a vote" },
 	{ "commands",		qtrue,	qtrue,	G_commands_cmd, ":^7 Gives a list of OSP-specific commands" },
 	{ "currenttime",	qtrue,	qtrue,	NULL, ":^7 Displays current local time" },
-	{ "follow",			qfalse,	qtrue,	Cmd_Follow_f, " <player_ID|allies|axis>:^7 Spectates a particular player or team" },
+	{ "follow",			qtrue,	qtrue,	Cmd_Follow_f, " <player_ID|allies|axis>:^7 Spectates a particular player or team" },
 	{ "notready",		qtrue,	qfalse,	G_ready_cmd, ":^7 Sets your status to ^5not ready^7 to start a match" },
 	{ "players",		qtrue,	qtrue,	G_players_cmd, ":^7 Lists all active players and their IDs/information" },
 	{ "ready",			qtrue,	qtrue,	G_ready_cmd, ":^7 Sets your status to ^5ready^7 to start a match" },

@@ -1074,49 +1074,6 @@ qboolean	ConsoleCommand( void ) {
         return qtrue;
     }
 
-    if (!Q_stricmp(cmd, "lenghs"))
-    {
-        char buf[MAX_TOKEN_CHARS];
-        int i = 0;
-        int j = 0;
-
-        for (i = 0; i < MAX_TOKEN_CHARS; i++)
-        {
-            buf[i] = 'a';
-        }
-        buf[MAX_TOKEN_CHARS - 1] = 0;
-
-        for (i = 900; i < sizeof(buf); i++)
-        {
-            
-
-            G_LogPrintf("Length is %d\n", i);
-            if (i - 1 >= 0)
-            {
-                buf[i - 1] = 'a';
-                buf[i] = 0;
-            }
-
-            for (j = 0; j < sizeof(buf); j++)
-            {
-                if (buf[j] != 0)
-                {
-                    if (j % 10 == 0)
-                    {
-                        buf[j] = 'T';
-                    }
-                    if (j % 100 == 0)
-                    {
-                        buf[j] = 'X';
-                    }
-                    
-                }
-            }
-            G_LogPrintf("%s\n", buf);
-        }
-        return qtrue;
-    }
-
     if (OnConsoleCommand())
     {
         return qtrue;
