@@ -1920,7 +1920,7 @@ Commands::Commands()
     adminCommands_["nosave"] = AdminCommandPair(AdminCommands::NoSave, CommandFlags::SAVESYSTEM);
     adminCommands_["passvote"] = AdminCommandPair(AdminCommands::Passvote, CommandFlags::PASSVOTE);
     adminCommands_["putteam"] = AdminCommandPair(AdminCommands::Putteam, CommandFlags::PUTTEAM);
-    adminCommands_["readconfig"] = AdminCommandPair(AdminCommands::ReadConfig, CommandFlags::READCONFIG);
+//    adminCommands_["readconfig"] = AdminCommandPair(AdminCommands::ReadConfig, CommandFlags::READCONFIG);
     adminCommands_["rmsaves"] = AdminCommandPair(AdminCommands::RemoveSaves, CommandFlags::SAVESYSTEM);
     adminCommands_["rename"] = AdminCommandPair(AdminCommands::Rename, CommandFlags::RENAME);
     adminCommands_["restart"] = AdminCommandPair(AdminCommands::Restart, CommandFlags::RESTART);

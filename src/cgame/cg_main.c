@@ -701,6 +701,7 @@ cvarTable_t		cvarTable[] = {
             BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
             BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor, cg_personalTimerAlpha.value, "cg_personalTimerColor");
             trap_Cvar_Set("viewlog", cg_viewlog.string);
+            
             cg.pmext.noclipScale = cg_noclipScale.integer;
 
             cvarsLoaded = qtrue;
