@@ -258,6 +258,7 @@
     <ClInclude Include="races.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="surfaceflags.h" />
+    <ClInclude Include="timerun.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc" />

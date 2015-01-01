@@ -594,14 +594,6 @@ typedef struct {
 	unsigned int kills;
 } weapon_stat_t;
 
-typedef struct
-{
-    int startTime;
-    int endTime;
-    qboolean isActive;
-    char *runName;
-} run_t;
-
 #define MAX_IP_LEN 15
 
 // client data that stays across multiple levels or tournament restarts
@@ -692,8 +684,6 @@ typedef struct {
 
 	qboolean	firstTime;
     qboolean    loadPreviousSavedPositions;
-
-    run_t       run;
 
 	qboolean	versionOK;
 

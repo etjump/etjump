@@ -1784,21 +1784,16 @@ void SP_target_decay(gentity_t *self)
     self->use = target_decay_use;
 }
 
+// Begin of timeruns support
 
+// target_starttimer
+// name:    run name. This must be unique and is checked on game init. If it isn't unique
+//          an error will be printed and server will exit. If a matching end timer can't be
+//          found an error is printed and server will exit.
+// 
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
-    gclient_t *client = activator->client;
-
-    if (client->sess.run.isActive)
-    {
-        return;
-    }
-
-    G_LogPrintf("Started the run %s\n", self->name);
-
-    client->sess.run.runName = self->name;
-    client->sess.run.startTime = client->ps.commandTime;
-    client->sess.run.isActive = qtrue;
+    
 }
 
 // Starts a time run
@@ -1807,13 +1802,17 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 void SP_target_startTimer(gentity_t *self)
 {
     G_SpawnString("name", "default", &self->name);
-
+    
     self->use = target_startTimer_use;
 }
 
+// target_endtimer
+// name:    run name. This must be unique and is checked on game init. If it isn't unique an
+//          an error will be printed and server will exit. If a matching start timer can't be
+//          found an error is printed and server will exit.
 void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
-
+    
 }
 
 // Stops a time run if the names match
@@ -1821,5 +1820,9 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 // an identifier
 void SP_target_endTimer(gentity_t *self)
 {
+    G_SpawnString("name", "default", &self->name);
+
     self->use = target_endTimer_use;
 }
+
+// End of timeruns support
