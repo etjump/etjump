@@ -1997,7 +1997,11 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 			if( voteFlags.integer == VOTING_DISABLED ) {
 				CP("cpm \"Voting not enabled on this server.\n\"");
 				return qfalse;
-            } 
+            }
+            else if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer) {
+                CP(va("cpm \"You have already called the maximum number of votes (%d).\n\"", vote_limit.integer));
+                return qfalse;
+            }
 		} 
 	}
 
