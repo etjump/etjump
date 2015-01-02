@@ -2709,6 +2709,9 @@ void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t** teamNum);
 
+void StartTimer(const char *runName, gentity_t *ent);
+void StopTimer(const char *runName, gentity_t *ent);
+
 
 #endif // G_LOCAL_H
 

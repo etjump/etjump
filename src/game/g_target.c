@@ -1787,13 +1787,22 @@ void SP_target_decay(gentity_t *self)
 // Begin of timeruns support
 
 // target_starttimer
-// name:    run name. This must be unique and is checked on game init. If it isn't unique
-//          an error will be printed and server will exit. If a matching end timer can't be
-//          found an error is printed and server will exit.
-// 
+// name:    run name. 
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
-    
+    if (!activator) {
+        return;
+    }
+
+    if (!activator->client) {
+        return;
+    }
+
+    if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
+        return;
+    }
+
+    StartTimer(self->name, activator);
 }
 
 // Starts a time run
@@ -1807,12 +1816,22 @@ void SP_target_startTimer(gentity_t *self)
 }
 
 // target_endtimer
-// name:    run name. This must be unique and is checked on game init. If it isn't unique an
-//          an error will be printed and server will exit. If a matching start timer can't be
-//          found an error is printed and server will exit.
+// name:    run name. 
 void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
-    
+    if (!activator) {
+        return;
+    }
+
+    if (!activator->client) {
+        return;
+    }
+
+    if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
+        return;
+    }
+
+    StopTimer(self->name, activator);
 }
 
 // Stops a time run if the names match

@@ -1,19 +1,16 @@
 #ifndef TIMERUN_HPP
 #define TIMERUN_HPP
 
+struct gentity_s;
+typedef gentity_s gentity_t;
+
 class Timerun {
 public:
-    // This is called when start timer is spawned.
-    // The name is added to a list of start timer names.
-    void StartTimerSpawned(const char *name);
+    // This is called when entity activates the target_starttimer
+    void StartTimer(const char *runName, gentity_t *ent);
 
-    // This is called when an end timer is spawned.
-    // The name is added to a list of end timer names.
-    void EndTimerSpawned(const char *name);
-
-    // This is called once all entities have been spawned. Checks that
-    // a matching start timer is found for every end timer.
-    void EntitiesSpawned();
+    // This is called when the entity activates the target_stoptimer
+    void StopTimer(const char *runName, gentity_t *ent);
 private:
 };
 
