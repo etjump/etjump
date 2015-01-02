@@ -27,6 +27,7 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine=false);
 void CPAll(const std::string& msg, bool toConsole = true);
 void CPMAll(const std::string& msg, bool toConsole = true);
 void CPMTo( gentity_t *target, const std::string& msg );
+void CPMTo(gentity_t *target, boost::format fmt);
 void CPTo( gentity_t *target, const std::string& msg );
 void ChatPrintAll(const std::string& msg, bool toConsole = true);
 void ChatPrintTo( gentity_t *target, const std::string& msg );

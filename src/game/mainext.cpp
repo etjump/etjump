@@ -11,6 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include "operationqueue.hpp"
 #include "motd.hpp"
+#include "timerun.hpp"
 
 Game game;
 
@@ -292,4 +293,13 @@ void LogServerState()
     }
 
     LogPrint(state);
+}
+
+void StartTimer(const char *runName, gentity_t *ent)
+{
+    game.timerun->StartTimer(runName, ent);
+}
+void StopTimer(const char *runName, gentity_t *ent)
+{
+    game.timerun->StopTimer(runName, ent);
 }

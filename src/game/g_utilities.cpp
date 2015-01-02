@@ -205,6 +205,19 @@ void CPMTo( gentity_t *target, const string& msg )
     }
 }
 
+void CPMTo(gentity_t *target, boost::format fmt)
+{
+    std::string toPrint = "cpm \"" + fmt.str() + "\n\"";
+    if (target)
+    {
+        trap_SendServerCommand(ClientNum(target), toPrint.c_str());
+    }
+    else
+    {
+        G_Printf("%s\n", fmt.str().c_str());
+    }
+}
+
 void C_CPMTo( gentity_t *target, const char* msg ) 
 {
     char toPrint[MAX_TOKEN_CHARS] = "\0";
@@ -245,7 +258,6 @@ void BPTo( gentity_t *target, const string& msg )
         G_Printf("%s\n", msg.c_str());
     }
 }
-
 
 void LogPrint(std::string message)
 {

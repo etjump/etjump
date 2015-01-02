@@ -1939,6 +1939,10 @@ extern vmCvar_t g_disableVoteAfterMapChange;
 extern vmCvar_t g_motdFile;
 extern vmCvar_t g_customMapVotesFile;
 
+// Start of timeruns support
+extern vmCvar_t g_timerunsDatabase;
+// End of timeruns support
+
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
 int		trap_Milliseconds( void );
@@ -2662,7 +2666,6 @@ void SetBanners();
 void CheckBanners();
 
 // g_utilities.cpp
-
 // C versions of printing functions
 void C_BPAll( const char* msg );
 void C_BPTo( gentity_t *target, const char* msg );

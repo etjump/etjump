@@ -1840,7 +1840,6 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 void SP_target_endTimer(gentity_t *self)
 {
     G_SpawnString("name", "default", &self->name);
-
     self->use = target_endTimer_use;
 }
 

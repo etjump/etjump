@@ -240,6 +240,9 @@
     <ClCompile Include="motd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="timerun.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">

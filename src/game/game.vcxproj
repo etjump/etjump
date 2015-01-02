@@ -222,6 +222,7 @@
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="races.cpp" />
+    <ClCompile Include="timerun.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="asyncoperations.hh" />

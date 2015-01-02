@@ -238,6 +238,10 @@ vmCvar_t        g_disableVoteAfterMapChange;
 vmCvar_t        g_motdFile;
 vmCvar_t        g_customMapVotesFile;
 
+// Start of timeruns support
+vmCvar_t        g_timerunsDatabase;
+// End of timeruns support
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -483,7 +487,11 @@ cvarTable_t		gameCvarTable[] = {
     { &g_raceDatabase, "g_raceDatabase", "races.db", CVAR_ARCHIVE | CVAR_LATCH },
     { &g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000", CVAR_ARCHIVE },
     { &g_motdFile, "g_motdFile", "motd.json", CVAR_ARCHIVE},
-    { &g_customMapVotesFile, "g_customMapVotesFile", "customvotes.json", CVAR_ARCHIVE}
+    { &g_customMapVotesFile, "g_customMapVotesFile", "customvotes.json", CVAR_ARCHIVE},
+
+    // Start of timeruns support
+    { &g_timerunsDatabase, "g_timerunsDatabase", "timeruns.db", CVAR_ARCHIVE},
+    // End of timeruns support
 };
 
 // bk001129 - made static to avoid aliasing
