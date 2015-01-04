@@ -23,5 +23,5 @@ Game::Game()
     races = boost::shared_ptr<Races>(new Races(operationQueue.get()));
     customMapVotes = boost::shared_ptr<CustomMapVotes>(new CustomMapVotes());
     motd = boost::shared_ptr<Motd>(new Motd());
-    timerun = boost::shared_ptr<Timerun>(new Timerun());
+    timerun = boost::shared_ptr<Timerun>(new Timerun(session.get(), saves.get()));
 }

@@ -107,6 +107,7 @@ void OnGameInit()
     game.customMapVotes->Load();
     game.races->Init();
     game.motd->Initialize();
+    game.timerun->Initialize();
 }
 
 void OnGameShutdown()
@@ -116,6 +117,7 @@ void OnGameShutdown()
     game.database->CloseDatabase();
     game.mapData->Shutdown();
     game.operationQueue->Shutdown();
+    game.timerun->Shutdown();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) 

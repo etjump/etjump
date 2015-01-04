@@ -40,6 +40,7 @@ public:
     std::string Guid(gentity_t *ent) const;
     std::bitset<256> Permissions(gentity_t *ent) const;
     int GetLevel(gentity_t *ent) const;
+    int GetId(gentity_t *ent) const;
     bool SetLevel(gentity_t* target, int level);
     bool SetLevel(unsigned id, int level);
     int GetLevelById(unsigned id) const;

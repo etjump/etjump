@@ -8,6 +8,7 @@
 #include "../mapdata.h"
 #include "../races.hpp"
 #include "../custommapvotes.hpp"
+#include "../timerun.hpp"
 
 typedef boost::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -365,6 +366,12 @@ namespace ClientCommands
             BufferPrint(ent, lines->at(i));
         }
         FinishBufferPrint(ent, false);
+        return true;
+    }
+
+    bool Records(gentity_t *ent, Arguments argv)
+    {
+        game.timerun->PrintRecords(ent);
         return true;
     }
 
@@ -1936,6 +1943,7 @@ Commands::Commands()
     commands_["load"] = ClientCommands::Load;
 //    commands_["race"] = ClientCommands::Race;
     commands_["listinfo"] = ClientCommands::ListInfo;
+    commands_["records"] = ClientCommands::Records;
 }
 
 bool Commands::ClientCommand(gentity_t* ent, std::string commandStr)
