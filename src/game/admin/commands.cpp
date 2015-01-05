@@ -371,7 +371,7 @@ namespace ClientCommands
 
     bool Records(gentity_t *ent, Arguments argv)
     {
-        game.timerun->PrintRecords(ent);
+        game.timerun->PrintRecords(ent, argv);
         return true;
     }
 

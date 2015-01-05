@@ -13,6 +13,17 @@ Timerun::~Timerun()
 {
 }
 
+bool Timerun::CompareRecords(const boost::shared_ptr<Record>& lhs, const boost::shared_ptr<Record>& rhs)
+{
+    return lhs->time < rhs->time;
+}
+
+void Timerun::SortRecords(Run& run)
+{
+    run.sorted = run.records;
+    std::sort(run.sorted.begin(), run.sorted.end(), CompareRecords);
+}
+
 void Timerun::Initialize()
 {
     if (strlen(g_timerunsDatabase.string) == 0)
@@ -68,12 +79,12 @@ void Timerun::Initialize()
             it = records_.find(record->run);
             if (it != records_.end())
             {
-                it->second.push_back(record);
+                it->second.records.push_back(record);
             }
             else
             {
-                records_[record->run] = std::vector<boost::shared_ptr<Record> >();
-                records_[record->run].push_back(record);
+                records_[record->run] = Run();
+                records_[record->run].records.push_back(record);
             }
             G_LogPrintf((boost::format("%s\n") % *(record.get())).str().c_str());
             break;
@@ -132,31 +143,73 @@ void Timerun::StopTimer(const char* runName, gentity_t* ent)
     }
 }
 
-void Timerun::PrintRecords(gentity_t* ent)
+void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
 {
-    RunIterator it = records_.begin();
-    RunIterator end = records_.end();
-
-    boost::format fmt("%s %s %s %d\n");
-    BufferPrinter printer(ent);
-    printer.Begin();
-    for (; it != end; it++)
+    boost::format fmt("%-4d %-20s %-36s ^7%d\n");
+    if (argv->size() == 1)
     {
-        RecordIterator rit = it->second.begin();
-        RecordIterator ritEnd = it->second.end();
+        RunIterator it = records_.begin();
+        RunIterator end = records_.end();
 
-        for (; rit != ritEnd; rit++)
+        if (!it->second.isSorted)
         {
-            printer.Print((fmt
-                % rit->get()->map
-                % rit->get()->run
-                % rit->get()->playerName
-                % rit->get()->time).str());
+            it->second.sorted = it->second.records;
+            std::sort(it->second.sorted.begin(), it->second.sorted.end(),
+                Record::CompareRecords);
+            it->second.isSorted = true;
         }
-    }
-    printer.Finish(false);
-}
 
+        BufferPrinter printer(ent);
+        int rank = 1;
+        printer.Begin();
+        printer.Print("Rank Run                  Player                               Time\n");
+        for (; it != end; it++)
+        {
+            RecordIterator rit = it->second.sorted.begin();
+            RecordIterator ritEnd = it->second.sorted.end();
+
+            for (; rit != ritEnd; rit++)
+            {
+                printer.Print((fmt
+                    % rank
+                    % rit->get()->run
+                    % rit->get()->playerName
+                    % rit->get()->time).str());
+                rank++;
+            }
+        }
+        printer.Finish(false);
+    }
+    else
+    {
+        int rank = 1;
+        std::string run = argv->at(1);
+
+        BufferPrinter printer(ent);
+        printer.Begin();
+        printer.Print("Rank Run                  Player                               Time\n");
+
+        RunIterator it = records_.find(run);
+        if (it != records_.end())
+        {
+            RecordIterator rit = it->second.sorted.begin();
+            RecordIterator ritEnd = it->second.sorted.end();
+
+            for (; rit != ritEnd; rit++)
+            {
+                printer.Print((fmt
+                    % rank
+                    % rit->get()->run
+                    % rit->get()->playerName
+                    % rit->get()->time).str());
+                rank++;
+            }
+            printer.Finish(false);
+            return;
+        }
+        ChatPrintTo(ent, "^3system: ^7couldn't find a run with name " + argv->at(1));
+    }    
+}
 
 // Inserts a record to database. Checks if user already has a record
 // and if it does, just updates current record
@@ -169,25 +222,19 @@ void Timerun::InsertRecord(std::string mapName, Player* player)
     // Check if the run has any records
     if (rit != ritEnd)
     {
-        RecordIterator it = rit->second.begin();
-        RecordIterator end = rit->second.end();
-
-        // Let's try to find players record
-        for (; it != end; it++)
+        RecordIterator currentRecord = std::find_if(rit->second.records.begin(),
+            rit->second.records.end(),
+            Record::Is(player->userDatabaseId));
+        if (currentRecord != rit->second.records.end())
         {
-            if ((*it)->player == player->userDatabaseId)
+            if (player->time < (*currentRecord)->time)
             {
-                // Ok we found the record.
-                // check that it's faster than current record in db
-                if (player->time < (*it)->time)
-                {
-                    // New record is faster
-                    (*it)->time = player->time;
-                    (*it)->playerName = player->currentName;
-                    update = true;
-                    break;
-                }
-                // Old record was faster, do nothing
+                (*currentRecord)->time = player->time;
+                (*currentRecord)->playerName = player->currentName;
+                update = true;
+            }
+            else
+            {
                 return;
             }
         }
@@ -195,7 +242,7 @@ void Timerun::InsertRecord(std::string mapName, Player* player)
     else
     {
         // Couldn't find a record with that run name so let's add it 
-        records_[runName] = std::vector<boost::shared_ptr<Record> >();
+        records_[runName] = Run();
 
         boost::shared_ptr<Record> newRecord(new Record);
         newRecord->map = mapName;
@@ -204,10 +251,10 @@ void Timerun::InsertRecord(std::string mapName, Player* player)
         newRecord->run = player->runName;
         newRecord->time = player->time;
 
-        records_[runName].push_back(newRecord);
+        records_[runName].records.push_back(newRecord);
     }
 
-   
+    records_[runName].isSorted = false;
     InsertRecordOperation *op = new InsertRecordOperation(mapName, *player, update);
     op->RunAndDeleteObject();
     return;
