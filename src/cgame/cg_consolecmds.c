@@ -1292,4 +1292,8 @@ void CG_InitConsoleCommands( void ) {
     trap_AddCommand ("manual");
     trap_AddCommand ("help");
     trap_AddCommand("race");
+    trap_AddCommand("listinfo");
+    trap_AddCommand("records");
+    trap_AddCommand("times");
+    trap_AddCommand("ranks");
 }

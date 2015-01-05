@@ -132,6 +132,14 @@ std::string Timerun::TimeToString(int time)
     return (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
 }
 
+void Timerun::Interrupt(gentity_t* ent)
+{
+    Player *player = &players_[ClientNum(ent)];
+
+    player->racing = false;
+    player->runName = "";
+}
+
 void Timerun::StopTimer(const char* runName, gentity_t* ent)
 {
     Player *player = &players_[ClientNum(ent)];
@@ -152,7 +160,7 @@ void Timerun::StopTimer(const char* runName, gentity_t* ent)
 
 void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
 {
-    boost::format fmt("%-4d %-20s %-36s ^7%d\n");
+    boost::format fmt("^7%-4d %-20s ^7%s %-36s\n");
     if (argv->size() == 1)
     {
         RunIterator it = records_.begin();
@@ -169,7 +177,7 @@ void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
         BufferPrinter printer(ent);
         int rank = 1;
         printer.Begin();
-        printer.Print("Rank Run                  Player                               Time\n");
+        printer.Print("Rank Run                  Time      Player\n");
         for (; it != end; it++)
         {
             RecordIterator rit = it->second.sorted.begin();
@@ -180,8 +188,8 @@ void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
                 printer.Print((fmt
                     % rank
                     % rit->get()->run
-                    % rit->get()->playerName
-                    % TimeToString(rit->get()->time)).str());
+                    % TimeToString(rit->get()->time)
+                    % rit->get()->playerName).str());
                 rank++;
             }
         }
@@ -194,7 +202,7 @@ void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
 
         BufferPrinter printer(ent);
         printer.Begin();
-        printer.Print("Rank Run                  Player                               Time\n");
+        printer.Print("Rank Run                  Time      Player\n");
 
         RunIterator it = records_.find(run);
         if (it != records_.end())
@@ -207,8 +215,8 @@ void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
                 printer.Print((fmt
                     % rank
                     % rit->get()->run
-                    % rit->get()->playerName
-                    % rit->get()->time).str());
+                    % rit->get()->time
+                    % rit->get()->playerName).str());
                 rank++;
             }
             printer.Finish(false);
@@ -250,7 +258,10 @@ void Timerun::InsertRecord(std::string mapName, Player* player)
     {
         // Couldn't find a record with that run name so let's add it 
         records_[runName] = Run();
+    }
 
+    if (!update)
+    {
         boost::shared_ptr<Record> newRecord(new Record);
         newRecord->map = mapName;
         newRecord->player = player->userDatabaseId;

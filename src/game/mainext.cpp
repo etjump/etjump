@@ -305,3 +305,7 @@ void StopTimer(const char *runName, gentity_t *ent)
 {
     game.timerun->StopTimer(runName, ent);
 }
+void InterruptRun(gentity_t *ent)
+{
+    game.timerun->Interrupt(ent);
+}

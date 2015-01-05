@@ -703,6 +703,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			limbo( self, qtrue );
 		}
 	}
+
+    if (self->client->sess.runSpawnflags == 0 
+        || self->client->sess.runSpawnflags & TIMERUN_RESET_ON_DEATH)
+    {
+        InterruptRun(self);
+    }
 }
 
 qboolean IsHeadShotWeapon (int mod) {

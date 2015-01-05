@@ -76,10 +76,7 @@ public:
 
     struct Run
     {
-        Run() : isSorted(false)
-        {
-            
-        }
+        Run() : isSorted(false) {}
         bool isSorted;
         std::vector<boost::shared_ptr<Record> > sorted;
         std::vector<boost::shared_ptr<Record> > records;
@@ -98,6 +95,8 @@ public:
 
     // This is called when the entity activates the target_stoptimer
     void StopTimer(const char *runName, gentity_t *ent);
+
+    void Interrupt(gentity_t *ent);
 
     std::string TimeToString(int time);
     // Prints the records of the current map

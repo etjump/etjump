@@ -690,6 +690,8 @@ typedef struct {
     int         portalTeam;
     char        ip[MAX_IP_LEN + 1];
     qboolean    motdPrinted;
+
+    int         runSpawnflags;
     
 } clientSession_t;
 
@@ -2712,8 +2714,14 @@ void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t** teamNum);
 
+#define TIMERUN_RESET_ON_TEAM_CHANGE    0x1
+#define TIMERUN_RESET_ON_DEATH          0x2
+#define TIMERUN_RESET_ON_END            0x4
+
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);
+
+void InterruptRun(gentity_t *ent);
 
 
 #endif // G_LOCAL_H

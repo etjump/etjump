@@ -374,28 +374,6 @@ namespace ClientCommands
         game.timerun->PrintRecords(ent, argv);
         return true;
     }
-
-//    void *PrintHello(void *)
-//    {
-//        sleep(3);
-//
-//        ChatPrintAll("Hello, world!");
-//
-//        pthread_exit(NULL);
-//        return NULL;
-//    }
-//    
-//    bool TestCommand(gentity_t *ent, Arguments argv)
-//    {
-//        pthread_t t;
-//
-//        pthread_create(&t, NULL, PrintHello, NULL);
-//
-//        pthread_detach(t);
-//
-//        return true;
-//    }
-
 }
 
 void PrintManual(gentity_t *ent, const std::string& command)
@@ -1944,6 +1922,8 @@ Commands::Commands()
 //    commands_["race"] = ClientCommands::Race;
     commands_["listinfo"] = ClientCommands::ListInfo;
     commands_["records"] = ClientCommands::Records;
+    commands_["times"] = ClientCommands::Records;
+    commands_["ranks"] = ClientCommands::Records;
 }
 
 bool Commands::ClientCommand(gentity_t* ent, std::string commandStr)

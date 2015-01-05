@@ -1788,6 +1788,11 @@ void SP_target_decay(gentity_t *self)
 
 // target_starttimer
 // name:    run name. 
+// spawnflags:
+// 0 always reset the run
+// 1 reset the run on team change
+// 2 reset the run on death
+// 4 only reset when you reach the end
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
     if (!activator) {
@@ -1802,6 +1807,8 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
         return;
     }
 
+    activator->client->sess.runSpawnflags = self->spawnflags;
+
     StartTimer(self->name, activator);
 }
 
@@ -1811,7 +1818,7 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 void SP_target_startTimer(gentity_t *self)
 {
     G_SpawnString("name", "default", &self->name);
-    
+
     self->use = target_startTimer_use;
 }
 

@@ -1253,6 +1253,12 @@ void Cmd_Team_f(gentity_t *ent)
 	} else {
 		ent->client->sess.lastTeamSwitch = level.time;
 	}
+
+    if (ent->client->sess.runSpawnflags == 0 || 
+        ent->client->sess.runSpawnflags & TIMERUN_RESET_ON_TEAM_CHANGE)
+    {
+        InterruptRun(ent);
+    }    
 }
 
 void Cmd_ResetSetup_f( gentity_t* ent ) {
