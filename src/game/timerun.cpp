@@ -122,6 +122,16 @@ void Timerun::StartTimer(const char* runName, gentity_t* ent)
     }
 }
 
+std::string Timerun::TimeToString(int time)
+{
+    int millis = time;
+    int seconds = millis / 1000;
+    millis = millis - seconds * 1000;
+    int minutes = seconds / 60;
+    seconds = seconds - minutes * 60;
+    return (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
+}
+
 void Timerun::StopTimer(const char* runName, gentity_t* ent)
 {
     Player *player = &players_[ClientNum(ent)];
@@ -129,13 +139,10 @@ void Timerun::StopTimer(const char* runName, gentity_t* ent)
     if (player->racing)
     {
         int millis = ent->client->ps.commandTime - player->raceStartTime;
-        int seconds = millis / 1000;
-        millis = millis - seconds * 1000;
-        int minutes = seconds / 60;
-        seconds = seconds - minutes * 60;
+        
 
         player->time = ent->client->ps.commandTime - player->raceStartTime;
-        CPMAll((boost::format("Player %s ^7Finished %s ^7in %02d:%02d:%03d") % player->currentName % player->runName % minutes % seconds % millis).str());
+        CPMAll((boost::format("Player %s ^7Finished %s ^7in %s") % player->currentName % player->runName % TimeToString(millis)).str());
         InsertRecord(level.rawmapname, player);
 
         player->racing = false;
@@ -174,7 +181,7 @@ void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
                     % rank
                     % rit->get()->run
                     % rit->get()->playerName
-                    % rit->get()->time).str());
+                    % TimeToString(rit->get()->time)).str());
                 rank++;
             }
         }

@@ -99,6 +99,7 @@ public:
     // This is called when the entity activates the target_stoptimer
     void StopTimer(const char *runName, gentity_t *ent);
 
+    std::string TimeToString(int time);
     // Prints the records of the current map
     void PrintRecords(gentity_t *ent, Arguments argv);
 private:
