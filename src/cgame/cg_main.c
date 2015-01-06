@@ -391,6 +391,11 @@ vmCvar_t            cg_logConsole;
 vmCvar_t                cg_weaponSound;
 vmCvar_t            cg_noclipScale;
 
+vmCvar_t            cg_drawSlick;
+vmCvar_t            cg_slickX;
+vmCvar_t            cg_slickY;
+
+
 typedef struct {
       vmCvar_t	*vmCvar;
       char		*cvarName;
@@ -656,6 +661,9 @@ cvarTable_t		cvarTable[] = {
       { &cg_logConsole,                   "cg_logConsole", "1", CVAR_ARCHIVE },
       { &cg_weaponSound,                  "cg_weaponSound", "1", CVAR_ARCHIVE },
       { &cg_noclipScale,                  "cg_noclipScale", "1", CVAR_ARCHIVE },
+      { &cg_drawSlick ,                   "cg_drawSlick", "1", CVAR_ARCHIVE },
+      { &cg_slickX,                       "cg_slickX", "330", CVAR_ARCHIVE},
+      { &cg_slickY,                       "cg_slickY", "220", CVAR_ARCHIVE}
 
       };
 

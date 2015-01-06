@@ -3401,6 +3401,33 @@ static void CG_DrawOB(void)
 	}
 }
 
+static void CG_DrawSlick(void)
+{
+    playerState_t   *ps = NULL;
+    trace_t         trace;
+    vec3_t          start, end;
+    if (!cg_drawSlick.integer)
+    {
+        return;
+    }
+
+    if (cg.snap->ps.clientNum != cg.clientNum) {
+        ps = &cg.snap->ps;
+    }
+    else {
+        // use predictedPlayerState if not spectating
+        ps = &cg.predictedPlayerState;
+    }
+
+    VectorCopy(cg.refdef.vieworg, start);
+    VectorMA(start, 8192, cg.refdef.viewaxis[0], end);	
+
+    CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, CONTENTS_SOLID);
+
+    if (trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK) {
+        CG_DrawStringExt(cg_slickX.integer, cg_slickY.integer, "S", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+    }
+}
 
 static void CG_DrawKeys(void)
 {
@@ -5187,6 +5214,7 @@ static void CG_Draw2D( void ) {
 		CG_DrawCGazHUD();
 		CG_DrawMapDetails();
 		CG_DrawOB();
+        CG_DrawSlick();
 
 		CG_DrawCHS();
 

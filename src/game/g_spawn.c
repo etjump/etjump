@@ -675,7 +675,9 @@ spawn_t	spawns[] = {
     {"target_savelimit_inc", SP_target_savelimit_inc},
     { "target_decay", SP_target_decay },
     { "target_starttimer", SP_target_startTimer },
+    { "target_startTimer", SP_target_startTimer },
     { "target_stoptimer", SP_target_endTimer },
+    { "target_stopTimer", SP_target_endTimer },
 	{0, 0}
 };
 

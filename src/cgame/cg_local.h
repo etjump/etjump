@@ -2368,6 +2368,10 @@ extern vmCvar_t         cg_logConsole;
 extern vmCvar_t			cg_weaponSound;
 
 extern vmCvar_t         cg_noclipScale;
+extern vmCvar_t         cg_drawSlick;
+extern vmCvar_t         cg_slickX;
+extern vmCvar_t         cg_slickY;
+
 //
 // cg_main.c
 //
