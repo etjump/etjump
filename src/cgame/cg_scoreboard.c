@@ -4,7 +4,10 @@
 #define	SCOREBOARD_WIDTH	(31*BIGCHAR_WIDTH)
 
 vec4_t clrUiBack = { 0.f, 0.f, 0.f, .6f };
+vec4_t clrUiBackDark = { 0.f, 0.f, 0.f, .8f };
 vec4_t clrUiBar = { .16f, .2f, .17f, .8f };
+
+// Begin of alt scoreboard 1
 
 #define ALT_SCOREBOARD_WIDTH 600
 #define ALT_SCOREBOARD_HEIGHT 460
@@ -149,11 +152,288 @@ void CG_DrawAltScoreboard(float fade)
     Vector4Copy(clrUiBack, currentClrUiBack);
     currentClrUiBack[3] = currentClrUiBack[3] * fade;
     CG_FillRect(x, y, 640 - 2 * x, 480 - 2 * y, currentClrUiBack);
-
+    CG_DrawRect_FixedBorder(x, y, 640 - 2 * x, 480 - 2 * y, 1, colorBlack);
     y += 10;
     CG_DrawHeader(x, y, fade);
     CG_DrawPlayers(x, y, fade);
 }
+
+
+// End of alt scoreboard 1
+
+/*
+=================
+Alt scoreboard 2
+=================
+*/
+
+#define THIRD_SCOREBOARD_HEADER_HEIGHT 50
+#define THIRD_SCOREBOARD_SUBHEADER_HEIGHT 30
+#define THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT 20 // TODO: rename pls :D
+#define THIRD_SCOREBOARD_DIVIDER_WIDTH 4
+#define THIRD_SCOREBOARD_PLAYER_WIDTH 180
+#define THIRD_SCOREBOARD_FPS_WIDTH 36
+#define THIRD_SCOREBOARD_PING_WIDTH 40
+#define THIRD_SCOREBOARD_INFO_WIDTH 40
+
+
+void CG_DrawHeader2(float x, float y, float fade)
+{
+    fontInfo_t *font = &cgs.media.limboFont2;
+    const char *header = NULL;
+    const char *configString = CG_ConfigString(CS_SERVERINFO);
+    vec4_t textColor = { 0.6f, 0.6f, 0.6f, fade };
+    float tempX = x + 20;
+    float tempY = y + (THIRD_SCOREBOARD_HEADER_HEIGHT / 2) + 4;
+    float mapNameWidth = 0;
+    float scoreboardWidth = ALT_SCOREBOARD_WIDTH;
+    float teamScoreboardWidth = scoreboardWidth / 2;
+
+    // Draw the server hostname
+    header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
+
+    CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+
+    // Draw the current map name
+    header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
+    mapNameWidth = CG_Text_Width_Ext(header, 0.25f, 0, font);
+    tempX = x + ALT_SCOREBOARD_WIDTH - 20 - mapNameWidth;
+    CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+
+    // Draw the "jumping" text
+    header = va(CG_TranslateString("^7Jumping"));
+    tempX = x + (teamScoreboardWidth / 2) - (CG_Text_Width_Ext(header, 0.25, 0, font) / 2);
+    tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT
+        + THIRD_SCOREBOARD_DIVIDER_WIDTH
+        + (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
+    CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+
+    // Draw the "spectating" text
+    header = CG_TranslateString("^7Spectating");
+    tempX += teamScoreboardWidth;
+    tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT
+        + THIRD_SCOREBOARD_DIVIDER_WIDTH
+        + (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
+    CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+
+    // Draw the header for the player list
+    header = CG_TranslateString("^7Player");
+    tempX = x + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+    tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT // Servername
+        + THIRD_SCOREBOARD_DIVIDER_WIDTH // divider
+        + THIRD_SCOREBOARD_SUBHEADER_HEIGHT // Jumping, spectating
+        + THIRD_SCOREBOARD_DIVIDER_WIDTH // divider
+        + 4; // Random value to make this be in the middle of the bar
+    CG_DrawMiniString(tempX, tempY, header, fade);
+
+    tempX += THIRD_SCOREBOARD_PLAYER_WIDTH;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
+    tempX += THIRD_SCOREBOARD_FPS_WIDTH;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
+    tempX += THIRD_SCOREBOARD_PING_WIDTH;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
+    tempX += THIRD_SCOREBOARD_INFO_WIDTH;
+
+    tempX = x + ALT_SCOREBOARD_WIDTH / 2 + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
+    tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT // Servername
+        + THIRD_SCOREBOARD_DIVIDER_WIDTH // divider
+        + THIRD_SCOREBOARD_SUBHEADER_HEIGHT // Jumping, spectating
+        + THIRD_SCOREBOARD_DIVIDER_WIDTH // divider
+        + 4; // Random value to make this be in the middle of the bar
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("Player"), fade);
+
+}
+
+void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t textColor, float fade)
+{
+    clientInfo_t *ci = &cgs.clientinfo[score->client];
+
+    float tempX = x;
+    textColor[4] *= fade;
+
+    if (ci->team == TEAM_SPECTATOR)
+    {
+        tempX += 2;
+    }
+
+    CG_DrawStringExt(tempX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 22);
+    tempX += THIRD_SCOREBOARD_PLAYER_WIDTH - 2;             
+
+    if (ci->team == TEAM_SPECTATOR)
+    {
+        if (score->ping == -1)
+        {
+            CG_DrawMiniString(tempX, y, CG_TranslateString("^3CONNECTING"), fade);
+        }
+        else if (ci->clientNum == score->followedClient)
+        {
+            CG_DrawMiniString(tempX, y, CG_TranslateString("^3SPECTATOR"), fade);
+        }
+        else
+        {
+            CG_DrawMiniString(tempX, y, CG_TranslateString("^3>"), fade);
+            tempX += 14;
+            CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 12);
+        }
+    }
+    else
+    {
+        CG_DrawMiniString(tempX, y, va("%3i", ci->maxFPS), fade);
+        tempX += ALT_SCOREBOARD_FPS_WIDTH;
+
+        CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
+        tempX += ALT_SCOREBOARD_PING_WIDTH;
+
+        CG_DrawMiniString(tempX, y, va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "", ci->CGaz ? "^8C" : "", ci->team == TEAM_ALLIES ? "^4B" : "^1R"), fade);
+    }
+}
+
+void CG_DrawPlayers2(float x, float y, float fade)
+{
+    float tempX = x + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
+    float tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + THIRD_SCOREBOARD_SUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+    float specStartX = x + ALT_SCOREBOARD_WIDTH / 2 + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
+    int i = 0;
+
+    for (i = 0; i < cg.numScores; i++)
+    {
+        if (cgs.clientinfo[cg.scores[i].client].team != TEAM_ALLIES)
+        {
+            continue;
+        }
+
+        CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
+        tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
+    }
+
+    for (i = 0; i < cg.numScores; i++)
+    {
+        if (cgs.clientinfo[cg.scores[i].client].team != TEAM_AXIS)
+        {
+            continue;
+        }
+
+        CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
+        tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
+    }
+
+    tempX = specStartX;
+    tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + THIRD_SCOREBOARD_SUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+    for (i = 0; i < cg.numScores; i++)
+    {
+        if (cgs.clientinfo[cg.scores[i].client].team != TEAM_SPECTATOR)
+        {
+            continue;
+        }
+
+        CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
+        tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
+    }
+}
+
+void CG_DrawAltScoreboard2(float fade)
+{
+    float x = 20;
+    float tempX = x;
+    float y = 10;
+    float tempY = y;
+    float width = ALT_SCOREBOARD_WIDTH;
+    float height = THIRD_SCOREBOARD_HEADER_HEIGHT;
+    float distanceFromTop = y;
+    vec4_t currentClrUiBack;
+    vec4_t currentClrUiBackLight;
+    Vector4Copy(clrUiBack, currentClrUiBack);
+    Vector4Copy(clrUiBack, currentClrUiBackLight);
+    currentClrUiBackLight[3] = 0.3f;
+    currentClrUiBack[3] = currentClrUiBack[3] * fade;
+    currentClrUiBackLight[3] = currentClrUiBackLight[3] * fade;
+
+
+    // Draw server info bar
+    CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
+    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+    
+    distanceFromTop += height;
+
+    tempY += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
+    height = THIRD_SCOREBOARD_SUBHEADER_HEIGHT;
+    width = ALT_SCOREBOARD_WIDTH / 2 - 2;
+
+    // Draw the jumping header bar
+    CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
+    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+
+    tempX += width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+
+    // Draw the spectating header bar
+    CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
+    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+
+    // Go back to start
+    tempX = x;
+    distanceFromTop += height;
+
+    tempY += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
+    height = ALT_SCOREBOARD_HEIGHT - distanceFromTop;
+
+    // Draw the jumping bar
+    // Draws the left side of the outer box
+    CG_FillRect(tempX, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+    // Draws the top side of the outer box
+    CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, currentClrUiBack);
+    // Draws the right side of the outer box
+    CG_FillRect(tempX + width - THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+    // Draws the bottom side of the outer box
+    CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
+    // Draws the outline of the outer box
+    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+    // Draws the inner box
+    tempX += THIRD_SCOREBOARD_DIVIDER_WIDTH;
+    tempY += THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
+    CG_FillRect(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT - THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBackLight);
+    CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1, colorBlack);
+
+    tempX = x + width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+    tempY -= THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
+
+    // Draw the spectating bar
+    // Draws the left side of the outer box
+    CG_FillRect(tempX, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+    // Draws the top side of the outer box
+    CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, currentClrUiBack);
+    // Draws the right side of the outer box
+    CG_FillRect(tempX + width - THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+    // Draws the bottom side of the outer box
+    CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
+    // Draws the outline of the outer box
+    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+    // Draws the inner box
+    tempX += THIRD_SCOREBOARD_DIVIDER_WIDTH;
+    tempY += THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
+    CG_FillRect(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT - THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBackLight);
+    CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1, colorBlack);
+
+
+
+//    CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
+//    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+//
+//    tempX += width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+//
+//    // Draw the spectating bar
+//    CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
+//    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+//
+//
+//    // Draw the inner jumping bar
+//    CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + 20, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+//
+//    // Draw the inner spectating bar
+
+    CG_DrawHeader2(x, y, fade);
+    CG_DrawPlayers2(x, y, fade);
+}
+
 
 /*
 =================
@@ -779,9 +1059,14 @@ qboolean CG_DrawScoreboard(void)
 		fade = fadeColor[3];
 	}
 
-    if (cg_altScoreboard.integer)
+    if (cg_altScoreboard.integer == 1)
     {
         CG_DrawAltScoreboard(fade);
+        return qtrue;
+    }
+    else if (cg_altScoreboard.integer == 2)
+    {
+        CG_DrawAltScoreboard2(fade);
         return qtrue;
     }
 
