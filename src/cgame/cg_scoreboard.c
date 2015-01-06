@@ -1,11 +1,159 @@
 // cg_scoreboard -- draw the scoreboard on top of the game screen
 #include "cg_local.h"
 
-
 #define	SCOREBOARD_WIDTH	(31*BIGCHAR_WIDTH)
 
 vec4_t clrUiBack = { 0.f, 0.f, 0.f, .6f };
 vec4_t clrUiBar = { .16f, .2f, .17f, .8f };
+
+#define ALT_SCOREBOARD_WIDTH 600
+#define ALT_SCOREBOARD_HEIGHT 460
+
+#define ALT_SCOREBOARD_HORIZONTAL_DELTA 20
+#define ALT_SCOREBOARD_VERTICAL_DELTA 13
+
+#define ALT_SCOREBOARD_PLAYER_WIDTH 105
+#define ALT_SCOREBOARD_INFO_WIDTH 40
+#define ALT_SCOREBOARD_FPS_WIDTH 36
+#define ALT_SCOREBOARD_PING_WIDTH 40
+
+void CG_DrawHeader(float x, float y, float fade)
+{
+    fontInfo_t *font = &cgs.media.limboFont1;
+    const char *header = NULL;
+    const char *configString = CG_ConfigString(CS_SERVERINFO);
+    vec4_t textColor = { 0.6f, 0.6f, 0.6f, fade };
+
+    header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
+
+    y += ALT_SCOREBOARD_VERTICAL_DELTA;
+    CG_Text_Paint_Ext(ALT_SCOREBOARD_WIDTH / 2 - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
+        y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+
+    y += ALT_SCOREBOARD_VERTICAL_DELTA;
+    header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
+    CG_Text_Paint_Ext(ALT_SCOREBOARD_WIDTH / 2 - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2, y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+}
+
+void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t textColor, float fade)
+{
+    clientInfo_t *ci = &cgs.clientinfo[score->client];
+
+    float tempX = x;
+    textColor[4] *= fade;
+
+    CG_DrawStringExt(tempX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 12);
+    tempX += ALT_SCOREBOARD_PLAYER_WIDTH;
+
+    if (ci->team == TEAM_SPECTATOR)
+    {
+        if (score->ping == -1)
+        {
+            CG_DrawMiniString(tempX, y, CG_TranslateString("^3CONNECTING"), fade);
+        }
+        else if (ci->clientNum == score->followedClient)
+        {
+            CG_DrawMiniString(tempX, y, CG_TranslateString("^3SPECTATOR"), fade);
+        }
+        else
+        {
+            CG_DrawMiniString(tempX, y, CG_TranslateString("^3>"), fade);
+            tempX += 19;
+            CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 12);
+        }
+    }
+    else
+    {
+        CG_DrawMiniString(tempX, y, va("%3i", ci->maxFPS), fade);
+        tempX += ALT_SCOREBOARD_FPS_WIDTH;
+
+        CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
+        tempX += ALT_SCOREBOARD_PING_WIDTH;
+
+        CG_DrawMiniString(tempX, y, va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "", ci->CGaz ? "^8C" : "", ci->team == TEAM_ALLIES ? "^4B" : "^1R"), fade);
+    }
+}
+
+void CG_DrawPlayers(float x, float y, float fade)
+{
+    float tempX = x;
+    float tempY = y;
+    float specStartX = 0;
+    int i = 0;
+
+    tempX += ALT_SCOREBOARD_HORIZONTAL_DELTA;
+    tempY += 3 * ALT_SCOREBOARD_VERTICAL_DELTA;
+    specStartX = tempX + 320;
+
+    CG_DrawSmallString(tempX, tempY, CG_TranslateString("PLAYING"), fade);
+    tempX = specStartX;
+    CG_DrawSmallString(tempX, tempY, CG_TranslateString("SPECTATING"), fade);
+    tempX = x + ALT_SCOREBOARD_HORIZONTAL_DELTA;
+    tempY += ALT_SCOREBOARD_VERTICAL_DELTA + 5;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("Player"), fade);
+    CG_DrawMiniString(specStartX, tempY, CG_TranslateString("Player"), fade);
+    tempX += ALT_SCOREBOARD_PLAYER_WIDTH;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
+    tempX += ALT_SCOREBOARD_FPS_WIDTH;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
+    tempX += ALT_SCOREBOARD_PING_WIDTH;
+    CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
+    tempX += ALT_SCOREBOARD_INFO_WIDTH;
+
+    // Spec info
+    tempY = y + 5 * ALT_SCOREBOARD_VERTICAL_DELTA + 5;
+
+    tempX = x + ALT_SCOREBOARD_HORIZONTAL_DELTA;
+
+    for (i = 0; i < cg.numScores; i++)
+    {
+        if (cgs.clientinfo[cg.scores[i].client].team != TEAM_ALLIES)
+        {
+            continue;
+        }
+
+        CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
+        tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
+    }
+
+    for (i = 0; i < cg.numScores; i++)
+    {
+        if (cgs.clientinfo[cg.scores[i].client].team != TEAM_AXIS)
+        {
+            continue;
+        }
+
+        CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
+        tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
+    }
+
+    tempX = specStartX;
+    tempY = y + 5 * ALT_SCOREBOARD_VERTICAL_DELTA + 5;
+    for (i = 0; i < cg.numScores; i++)
+    {
+        if (cgs.clientinfo[cg.scores[i].client].team != TEAM_SPECTATOR)
+        {
+            continue;
+        }
+
+        CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
+        tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
+    }
+}
+
+void CG_DrawAltScoreboard(float fade)
+{
+    float x = 20;
+    float y = 10;
+    vec4_t currentClrUiBack;
+    Vector4Copy(clrUiBack, currentClrUiBack);
+    currentClrUiBack[3] = currentClrUiBack[3] * fade;
+    CG_FillRect(x, y, 640 - 2 * x, 480 - 2 * y, currentClrUiBack);
+
+    y += 10;
+    CG_DrawHeader(x, y, fade);
+    CG_DrawPlayers(x, y, fade);
+}
 
 /*
 =================
@@ -630,6 +778,12 @@ qboolean CG_DrawScoreboard(void)
 		}
 		fade = fadeColor[3];
 	}
+
+    if (cg_altScoreboard.integer)
+    {
+        CG_DrawAltScoreboard(fade);
+        return qtrue;
+    }
 
 	y = WM_DrawObjectives(x, y, 640 - 2 * x + 5, fade);
 

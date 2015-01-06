@@ -395,6 +395,8 @@ vmCvar_t            cg_drawSlick;
 vmCvar_t            cg_slickX;
 vmCvar_t            cg_slickY;
 
+vmCvar_t            cg_altScoreboard;
+
 
 typedef struct {
       vmCvar_t	*vmCvar;
@@ -662,8 +664,9 @@ cvarTable_t		cvarTable[] = {
       { &cg_weaponSound,                  "cg_weaponSound", "1", CVAR_ARCHIVE },
       { &cg_noclipScale,                  "cg_noclipScale", "1", CVAR_ARCHIVE },
       { &cg_drawSlick ,                   "cg_drawSlick", "1", CVAR_ARCHIVE },
-      { &cg_slickX,                       "cg_slickX", "330", CVAR_ARCHIVE},
-      { &cg_slickY,                       "cg_slickY", "220", CVAR_ARCHIVE}
+      { &cg_slickX,                       "cg_slickX", "315", CVAR_ARCHIVE},
+      { &cg_slickY,                       "cg_slickY", "220", CVAR_ARCHIVE},
+      { &cg_altScoreboard,                "cg_altScoreboard", "0", CVAR_ARCHIVE }
 
       };
 

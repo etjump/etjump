@@ -2372,6 +2372,9 @@ extern vmCvar_t         cg_drawSlick;
 extern vmCvar_t         cg_slickX;
 extern vmCvar_t         cg_slickY;
 
+// Alternative scoreboard
+extern vmCvar_t         cg_altScoreboard;
+
 //
 // cg_main.c
 //
@@ -2462,6 +2465,8 @@ void CG_DrawBigString( int x, int y, const char *s, float alpha );
 void CG_DrawBigStringColor( int x, int y, const char *s, vec4_t color );
 void CG_DrawSmallString( int x, int y, const char *s, float alpha );
 void CG_DrawSmallStringColor( int x, int y, const char *s, vec4_t color );
+void CG_DrawMiniString(int x, int y, const char *s, float alpha);
+void CG_DrawMiniStringColor(int x, int y, const char *s, vec4_t color);
 // JOSEPH 4-25-00
 void CG_DrawBigString2( int x, int y, const char *s, float alpha );
 void CG_DrawBigStringColor2( int x, int y, const char *s, vec4_t color );
