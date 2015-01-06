@@ -19,7 +19,8 @@ bool AsyncOperation::OpenDatabase(std::string const& database)
         errorMessage_ = sqlite3_errmsg(db_);
         return false;
     }
-
+    sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
+        NULL, NULL, NULL);
     return true;
 }
 

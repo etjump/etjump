@@ -33,10 +33,17 @@ void Timerun::Initialize()
 
     std::string dbPath = GetPath(g_timerunsDatabase.string);
     sqlite3 *db = NULL;
-    sqlite3_open(dbPath.c_str(), &db);
+    int rc = sqlite3_open(dbPath.c_str(), &db);
+    if (rc != SQLITE_OK)
+    {
+        G_LogPrintf("ERROR: couldn't open timeruns database. (%d): %s\n", rc, sqlite3_errmsg(db));
+        return;
+    }
+
+    sqlite3_exec(db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
 
     char *err;
-    int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS record (id INTEGER PRIMARY KEY AUTOINCREMENT, time INT NOT NULL, map VARCHAR(256), run VARCHAR(256), player INT NOT NULL, player_name VARCHAR(256));", 0, 0, &err);
+    rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS record (id INTEGER PRIMARY KEY AUTOINCREMENT, time INT NOT NULL, map VARCHAR(256), run VARCHAR(256), player INT NOT NULL, player_name VARCHAR(256));", 0, 0, &err);
     if (rc != SQLITE_OK)
     {
         G_LogPrintf("ERROR: couldn't create timerun database table. (%d): %s\n", rc, err);

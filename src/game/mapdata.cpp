@@ -59,6 +59,8 @@ bool MapData::Initialize()
         message_ = sqlite3_errmsg(db_);
         return false;
     }
+    sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
+        NULL, NULL, NULL);
 
     sqlite3_stmt *stmt;
     if (!PrepareStatement("CREATE TABLE IF NOT EXISTS maps (id INTEGER PRIMARY KEY AUTOINCREMENT, map TEXT UNIQUE, last_played INTEGER, seconds_played INTEGER);", &stmt))

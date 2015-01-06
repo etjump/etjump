@@ -937,9 +937,6 @@ bool Database::InitDatabase(char const* config)
 {
     int rc = sqlite3_open(GetPath(config).c_str(), &db_);
 
-    sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
-        NULL, NULL, NULL);
-
     users_.clear();
     bans_.clear();
 
@@ -949,6 +946,9 @@ bool Database::InitDatabase(char const* config)
         sqlite3_close(db_);
         return false;
     }
+
+    sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
+        NULL, NULL, NULL);
 
     if (!CreateUsersTable() ||
         !CreateBansTable() || 
