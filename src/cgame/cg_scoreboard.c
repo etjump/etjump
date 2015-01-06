@@ -191,8 +191,9 @@ void CG_DrawHeader2(float x, float y, float fade)
 
     // Draw the server hostname
     header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
-
     CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+    CG_Text_Paint_Ext(tempX + 1, tempY + 10, 0.15f, 0.15f, textColor, va("^7%s", cg.ipAddr), 0, 0, 0, font);
+    
 
     // Draw the current map name
     header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));

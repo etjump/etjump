@@ -1187,6 +1187,8 @@ typedef struct {
     qboolean        freeCam;
     vec3_t          freeCamPos;
     vec3_t          freeCamAngles;
+
+    char            ipAddr[128];
 } cg_t;
 
 #define	NUM_FUNNEL_SPRITES	21

@@ -666,7 +666,7 @@ cvarTable_t		cvarTable[] = {
       { &cg_drawSlick ,                   "cg_drawSlick", "1", CVAR_ARCHIVE },
       { &cg_slickX,                       "cg_slickX", "315", CVAR_ARCHIVE},
       { &cg_slickY,                       "cg_slickY", "220", CVAR_ARCHIVE},
-      { &cg_altScoreboard,                "cg_altScoreboard", "0", CVAR_ARCHIVE }
+      { &cg_altScoreboard,                "cg_altScoreboard", "2", CVAR_ARCHIVE }
 
       };
 
@@ -3073,6 +3073,8 @@ cvarTable_t		cvarTable[] = {
             cgs.dumpStatsFile = 0;
             cgs.dumpStatsTime = 0;
             cg.routeDesigner = qfalse;
+            trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
+            
 
 #ifdef AC_SUPPORT
 
