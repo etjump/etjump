@@ -2964,6 +2964,15 @@ static void CG_DrawPersonalTimer( void ) {
 	}
 }
 
+static void CG_DrawRunTimer(void) 
+{
+    int millis, seconds, minutes;
+
+    if (player_drawRunTimer.integer == 0) {
+        return;
+    }
+}
+
 /*
 =================
 cg_drawCGaz
@@ -5084,6 +5093,46 @@ void CG_DrawRouteDesign(void)
     }
 }
 
+void CG_DrawSpectatorInfo(void)
+{
+    int i = 0;
+    int y = player_spectatorInfoY.integer;
+
+    if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
+    {
+        // don't do anything if we're spectating
+        return;
+    }
+
+    if (cg.time > cg.lastScoreTime + 3000)
+    {
+        trap_SendClientCommand("score");
+        cg.lastScoreTime = cg.time;
+    }
+
+    for (; i < cg.numScores; i++)
+    {
+        if (cg.snap->ps.clientNum == cg.scores[i].client) 
+        {
+            // ignore self
+            continue;
+        }
+        if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR)
+        {
+            if (cg.scores[i].followedClient == cg.snap->ps.clientNum)
+            {
+                // spectating me
+                CG_DrawSmallString(player_spectatorInfoX.integer, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
+                y += 10;
+            }
+        }
+    }
+}
+
+void CG_DrawTimerunTimer(void)
+{
+}
+
 /*
 =================
 CG_Draw2D
@@ -5219,10 +5268,13 @@ static void CG_Draw2D( void ) {
 		CG_DrawCHS();
 
 		CG_DrawPersonalTimer();
+        CG_DrawRunTimer();
 
 		CG_DrawSpeed2();
         CG_DrawRouteDesign();
 		CG_DrawKeys();
+        CG_DrawSpectatorInfo();
+        CG_DrawTimerunTimer();
 	} else {
 		if(cgs.eventHandling != CGAME_EVENT_NONE) {
 //			qboolean old = cg.showGameView;
@@ -5460,6 +5512,8 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	if ( separation != 0 ) {
 		VectorCopy( baseOrg, cg.refdef_current->vieworg );
 	}
+
+
 
 	if( !cg.showGameView ) {
 		// draw status bar and other floating elements

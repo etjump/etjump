@@ -833,7 +833,7 @@ void CG_PredictPlayerState( void ) {
 	}
 
 	// demo playback just copies the moves
-	if(cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+	if((cg.demoPlayback) || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
 		CG_InterpolatePlayerState( qfalse );
 		return;
 	}

@@ -5570,7 +5570,6 @@ void PmoveSingle (pmove_t *pmove) {
 	//if (pm->ps->eFlags & EF_TELEPORT_BIT)
 	//	pml.previous_teleport = qtrue;
 
-
 	// update the viewangles
 	if( pm->ps->pm_type != PM_FREEZE )	// Arnout: added PM_FREEZE
 		if (!(pm->ps->pm_flags & PMF_LIMBO)) // JPW NERVE

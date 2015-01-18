@@ -1181,6 +1181,7 @@ typedef struct {
 	int				startTime;
 	int				stopTime;
 	qboolean		activeTimer;
+
 	qboolean		resetmaxspeed;
     qboolean        routeDesigner;
 
@@ -1189,6 +1190,11 @@ typedef struct {
     vec3_t          freeCamAngles;
 
     char            ipAddr[128];
+    int             lastScoreTime;
+
+    int             raceStartTime;
+    int             raceTime;
+    qboolean        raceIsActive;
 } cg_t;
 
 #define	NUM_FUNNEL_SPRITES	21
@@ -2376,6 +2382,15 @@ extern vmCvar_t         cg_slickY;
 
 // Alternative scoreboard
 extern vmCvar_t         cg_altScoreboard;
+
+extern vmCvar_t         player_drawSpectatorInfo;
+extern vmCvar_t         player_spectatorInfoX;
+extern vmCvar_t         player_spectatorInfoY;
+
+extern vmCvar_t         player_drawRunTimer;
+extern vmCvar_t         player_runTimerX;
+extern vmCvar_t         player_runTimerY;
+extern vmCvar_t         player_runTimerColor;
 
 //
 // cg_main.c

@@ -126,6 +126,7 @@ void Timerun::StartTimer(const char* runName, gentity_t* ent)
         player->runName = runName ? runName : "";
 
         saveSystem_->ResetSavedPositions(ent);
+        trap_SendServerCommand(ClientNum(ent), "timerun_start");
     }
 }
 
@@ -145,6 +146,8 @@ void Timerun::Interrupt(gentity_t* ent)
 
     player->racing = false;
     player->runName = "";
+
+    trap_SendServerCommand(ClientNum(ent), va("timerun_stop %d", player->time));
 }
 
 void Timerun::StopTimer(const char* runName, gentity_t* ent)
@@ -160,8 +163,7 @@ void Timerun::StopTimer(const char* runName, gentity_t* ent)
         CPMAll((boost::format("Player %s ^7Finished %s ^7in %s") % player->currentName % player->runName % TimeToString(millis)).str());
         InsertRecord(level.rawmapname, player);
 
-        player->racing = false;
-        player->runName = "";
+        Interrupt(ent);
     }
 }
 

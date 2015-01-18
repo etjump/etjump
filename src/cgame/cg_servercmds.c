@@ -2546,6 +2546,20 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+    if (!Q_stricmp(cmd, "timerun_start"))
+    {
+        cg.raceStartTime = cg.time;
+        cg.raceIsActive = qtrue;
+        return;
+    }
+
+    if (!Q_stricmp(cmd, "timerun_end"))
+    {
+        cg.raceIsActive = qfalse;
+        cg.raceTime = atoi(CG_Argv(1));
+        return;
+    }
+
 	if( CG_Debriefing_ServerCommand( cmd ) ) {
 		return;
 	}

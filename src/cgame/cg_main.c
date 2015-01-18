@@ -397,6 +397,15 @@ vmCvar_t            cg_slickY;
 
 vmCvar_t            cg_altScoreboard;
 
+vmCvar_t            player_drawSpectatorInfo;
+vmCvar_t            player_spectatorInfoX;
+vmCvar_t            player_spectatorInfoY;
+
+vmCvar_t            player_drawRunTimer;
+vmCvar_t            player_runTimerX;
+vmCvar_t            player_runTimerY;
+vmCvar_t            player_runTimerColor;
+
 
 typedef struct {
       vmCvar_t	*vmCvar;
@@ -666,8 +675,14 @@ cvarTable_t		cvarTable[] = {
       { &cg_drawSlick ,                   "cg_drawSlick", "1", CVAR_ARCHIVE },
       { &cg_slickX,                       "cg_slickX", "315", CVAR_ARCHIVE},
       { &cg_slickY,                       "cg_slickY", "220", CVAR_ARCHIVE},
-      { &cg_altScoreboard,                "cg_altScoreboard", "2", CVAR_ARCHIVE }
-
+      { &cg_altScoreboard,                "cg_altScoreboard", "2", CVAR_ARCHIVE },
+      { &player_drawSpectatorInfo,        "player_drawSpectatorInfo", "0", CVAR_ARCHIVE },
+      {&player_spectatorInfoX,            "player_spectatorInfoX", "320", CVAR_ARCHIVE},
+      {&player_spectatorInfoY,            "player_spectatorInfoY", "40", CVAR_ARCHIVE},
+      {&player_drawRunTimer,              "player_drawRunTimer", "1", CVAR_ARCHIVE},
+      {&player_runTimerX,                 "player_runTimerX", "1", CVAR_ARCHIVE},
+      {&player_runTimerY,                 "player_runTimerY", "1", CVAR_ARCHIVE},
+      {&player_runTimerColor,             "player_runTimerColor", "1", CVAR_ARCHIVE}
       };
 
 
@@ -2960,6 +2975,7 @@ cvarTable_t		cvarTable[] = {
             s = CG_ConfigString( CS_INTERMISSION_START_TIME );
             cgs.intermissionStartTime = atoi( s );		
 
+            cg.lastScoreTime = 0;
 
             // OSP
             CG_ParseServerVersionInfo(CG_ConfigString(CS_VERSIONINFO));
