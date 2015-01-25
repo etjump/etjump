@@ -530,6 +530,9 @@ struct gentity_s {
     vec3_t  dimensions;
     int seqNum;
 
+    float velocityLowerLimit;
+    float velocityUpperLimit;
+
 };
 
 // Ridah

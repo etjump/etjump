@@ -1851,3 +1851,77 @@ void SP_target_endTimer(gentity_t *self)
 }
 
 // End of timeruns support
+
+
+// target_activate_if_velocity
+// # Keys
+// lower_limit: if velocity is under lower_limit, nothing
+//              will be activated
+// upper_limit: if velocity is over upper_limit, nothing
+//              will be activated
+// if either limit is 0, it will be ignored
+// # Spawnflags
+// 1: only horizontal velocity
+// 2: only vertical velocity
+
+void target_activate_if_velocity_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+    float lowerLimit = self->velocityLowerLimit;
+    float upperLimit = self->velocityUpperLimit;
+    float velocity = VectorLength(activator->client->ps.velocity);
+
+    if (self->spawnflags & 1)
+    {
+        velocity = sqrt(activator->client->ps.velocity[0] * activator->client->ps.velocity[0] + activator->client->ps.velocity[1] * activator->client->ps.velocity[1]);
+    }
+    else if (self->spawnflags & 2)
+    {
+        velocity = activator->client->ps.velocity[2];
+    }
+
+    if (lowerLimit)
+    {
+        if (velocity < lowerLimit)
+        {
+            return;
+        }
+    }
+
+    if (upperLimit)
+    {
+        if (velocity > upperLimit)
+        {
+            return;
+        }
+    }
+
+    G_ActivateTarget(self, activator);
+}
+
+void SP_target_activate_if_velocity(gentity_t *self)
+{
+    G_SpawnFloat("lower_limit", "0", &self->velocityLowerLimit);
+    G_SpawnFloat("upper_limit", "0", &self->velocityUpperLimit);
+
+    self->use = target_activate_if_velocity_use;
+}
+
+// target_scale_velocity
+// # Keys
+// scale: multiplier that velocity will be scaled with
+
+void target_scale_velocity_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+    int i = 0;
+    for (; i < 3; i++)
+    {
+        activator->client->ps.velocity[i] *= self->speed;
+    }
+}
+
+void SP_target_scale_velocity(gentity_t *self)
+{
+    G_SpawnFloat("scale", "1", &self->speed);
+
+    self->use = target_scale_velocity_use;
+}
