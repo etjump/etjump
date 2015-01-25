@@ -2264,7 +2264,6 @@ static void CG_PortalGate( centity_t *cent ){
 	byte clrOrange[4] = { 0xff, 0x7e, 0x00, 0xff };
 	byte clrRed[4] = { 0xf3, 0x32, 0x27, 0xff };
 	byte clrLBlue[4] = { 0x27, 0x82, 0xf4, 0xff }; //This is the red complement
-	
 
 
 	//Check if player wants to see other player portals
@@ -2275,6 +2274,16 @@ static void CG_PortalGate( centity_t *cent ){
 		if (cent->currentState.otherEntityNum != cg.clientNum)
 			return; //Not our portal - Don't draw it...
 	}
+
+    // if cg_viewPlayerPortals is 2, only show others portals when we're speccing
+    if (cg_viewPlayerPortals.integer == 2)
+    {
+        if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
+        {
+            if (cent->currentState.otherEntityNum != cg.clientNum)
+                return; //Not our portal - Don't draw it...
+        }            
+    }
 
 
 
