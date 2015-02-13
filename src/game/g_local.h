@@ -1951,6 +1951,7 @@ extern vmCvar_t g_timerunsDatabase;
 // Start of randommap mode
 extern vmCvar_t g_randomMapMode;
 extern vmCvar_t g_randomMapModeInterval;
+extern vmCvar_t vote_randomMapMode;
 // end of randommap mode
 
 void	trap_Printf( const char *fmt );

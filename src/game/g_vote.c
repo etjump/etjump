@@ -425,21 +425,28 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
 int G_RandomMapMode_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
 {
-    if (!arg)
-    {
-        if (trap_Cvar_VariableIntegerValue("g_randomMapMode") == 0)
-        {
-            trap_Cvar_Set("g_randomMapMode", "1");
-            trap_Cvar_Update(&g_randomMapMode);
-            C_CPAll(va("^zActivating random map mode. A new random ^zmap is chosen every ^2%d^z minutes.", g_randomMapModeInterval.integer));
+    if (arg) {
+        if (vote_randomMapMode.integer == 0) {
+            C_CPTo(ent, "^zVoting for random map mode is disabled.");
+            return G_INVALID;
         }
-        else
+    }
+    else {
+        if (vote_randomMapMode.integer)
         {
-            trap_Cvar_Set("g_randomMapMode", "0");
-            trap_Cvar_Update(&g_randomMapMode);
-            C_CPAll(va("^zRandom map mode is no longer active.", g_randomMapModeInterval.integer));
+            if (trap_Cvar_VariableIntegerValue("g_randomMapMode") == 0)
+            {
+                trap_Cvar_Set("g_randomMapMode", "1");
+                trap_Cvar_Update(&g_randomMapMode);
+                C_CPAll(va("^zActivating random map mode. A new random ^zmap is chosen every ^2%d^z minutes.", g_randomMapModeInterval.integer));
+            }
+            else
+            {
+                trap_Cvar_Set("g_randomMapMode", "0");
+                trap_Cvar_Update(&g_randomMapMode);
+                C_CPAll(va("^zRandom map mode is no longer active.", g_randomMapModeInterval.integer));
+            }
         }
-        
     }
     return G_OK;
 }

@@ -247,6 +247,8 @@ vmCvar_t        g_timerunsDatabase;
 vmCvar_t        g_randomMapMode;
 // how often in minutes
 vmCvar_t        g_randomMapModeInterval;
+// allow vote
+vmCvar_t        vote_randomMapMode;
 // End of random map mode
 
 
@@ -504,6 +506,7 @@ cvarTable_t		gameCvarTable[] = {
     // start of randommap mode
     { &g_randomMapMode, "g_randomMapMode", "0", CVAR_ARCHIVE },
     { &g_randomMapModeInterval, "g_randomMapModeInterval", "30", CVAR_ARCHIVE },
+    { &vote_randomMapMode, "vote_randomMapMode", "1", CVAR_ARCHIVE },
     //end of randommap mode
 };
 
