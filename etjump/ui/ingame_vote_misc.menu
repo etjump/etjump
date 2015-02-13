@@ -6,7 +6,7 @@
 #define WINDOW_Y		16
 //#define WINDOW_WIDTH	128
 #define WINDOW_WIDTH	148
-#define WINDOW_HEIGHT	88
+#define WINDOW_HEIGHT	104
 #define GROUP_NAME		"grpIngameVoteMisc"
 
 // Macros //
@@ -50,6 +50,7 @@ menuDef {
 
 	BUTTON( 6, 32, (WINDOW_WIDTH-12), 14, "RESTART MAP", .24, 11, exec "cmd callvote maprestart"; uiScript closeingame )
 	BUTTON( 6, 48, (WINDOW_WIDTH-12), 14, "RANDOM MAP", .24, 11, exec "cmd callvote randommap"; uiScript closeingame )
+	BUTTON( 6, 64, (WINDOW_WIDTH-12), 14, "RANDOM MAP MODE", .24, 11, exec "cmd callvote randommapmode"; uiScript closeingame )
 	BUTTON( 6, WINDOW_HEIGHT-24, WINDOW_WIDTH-12, 18, "BACK", .3, 14, close ingame_vote_misc ; open ingame_vote )
 }
 
