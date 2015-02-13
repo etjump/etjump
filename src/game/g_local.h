@@ -2577,8 +2577,10 @@ int G_Unreferee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
                   char *arg2, qboolean fRefereeCmd);
 int G_AntiLag_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
                 char *arg2, qboolean fRefereeCmd);
-int G_RandomMap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, 
-                char *arg2, qboolean fRefereeCmd);
+int G_RandomMap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
+    char *arg2, qboolean fRefereeCmd);
+int G_RandomMapMode_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
+    char *arg2, qboolean fRefereeCmd);
 
 void G_LinkDebris( void );
 void G_LinkDamageParents( void );

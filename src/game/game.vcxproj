@@ -222,6 +222,7 @@
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="races.cpp" />
+    <ClCompile Include="randommapmode.cpp" />
     <ClCompile Include="timerun.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -257,6 +258,7 @@
     <ClInclude Include="operationqueue.hpp" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="races.hpp" />
+    <ClInclude Include="randommapmode.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="surfaceflags.h" />
     <ClInclude Include="timerun.hpp" />

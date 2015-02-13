@@ -27,6 +27,7 @@ loadrace.cpp
 operationqueue.cpp
 motd.cpp
 timerun.cpp
+randommapmode.cpp
 
 g_utilities.cpp
 g_banner.cpp
