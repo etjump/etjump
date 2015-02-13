@@ -242,6 +242,14 @@ vmCvar_t        g_customMapVotesFile;
 vmCvar_t        g_timerunsDatabase;
 // End of timeruns support
 
+// Start of random map mode
+// on off
+vmCvar_t        g_randomMapMode;
+// how often in minutes
+vmCvar_t        g_randomMapModeInterval;
+// End of random map mode
+
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -416,7 +424,7 @@ cvarTable_t		gameCvarTable[] = {
 #endif // SAVEGAME_SUPPORT
 
 	// points to the URL for mod information, should not be modified by server admin
-	{ &mod_url, "mod_url", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
+	{ &mod_url, "mod_url", "http://etjump.com", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
 	// configured by the server admin, points to the web pages for the server
 	{ &url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse },
 
@@ -492,6 +500,11 @@ cvarTable_t		gameCvarTable[] = {
     // Start of timeruns support
     { &g_timerunsDatabase, "g_timerunsDatabase", "timeruns.db", CVAR_ARCHIVE},
     // End of timeruns support
+
+    // start of randommap mode
+    { &g_randomMapMode, "g_randomMapMode", "0", CVAR_ARCHIVE },
+    { &g_randomMapModeInterval, "g_randomMapModeInterval", "30", CVAR_ARCHIVE },
+    //end of randommap mode
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1437,7 +1450,10 @@ void G_UpdateCvars( void )
                     cv->vmCvar == &g_banner5) {
                         SetBanners();
                 }
-
+                else if (cv->vmCvar == &g_randomMapModeInterval)
+                {
+                    UpdateRandomMapInterval(g_randomMapModeInterval.integer);
+                }
 
 				// OSP - Update vote info for clients, if necessary
 				else if(!G_IsSinglePlayerGame()) {
@@ -1455,6 +1471,8 @@ void G_UpdateCvars( void )
 						fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles);
 					}
 				}
+
+                
 
 			}
 		}
@@ -3607,6 +3625,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time )
 		level.gameManager->s.otherEntityNum = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_AXIS);
 		level.gameManager->s.otherEntityNum2 = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_ALLIES);
 	}
+
+    RunFrame(levelTime);
 
 #ifdef SAVEGAME_SUPPORT
 	// Check if we are reloading, and times have expired

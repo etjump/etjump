@@ -12,6 +12,7 @@
 #include "operationqueue.hpp"
 #include "motd.hpp"
 #include "timerun.hpp"
+#include "randommapmode.hpp"
 
 Game game;
 
@@ -67,6 +68,50 @@ void WriteSessionData()
     }
 }
 
+/* 
+Informs user about a map change happening in 
+"minutes" minutes.
+*/
+void InformUsersAboutMapChange(int minutes)
+{
+    CPAll((boost::format("^zChanging map to a random map in ^2%d ^zminutes.") % minutes).str());
+}
+
+/*
+Changes map to a random map
+*/
+void ChangeMap()
+{
+    std::string map = game.mapData->RandomMap();
+    CPAll((boost::format("Changing map to %s.") % map).str());
+    trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
+}
+
+/*
+Whenever g_randomMapInterval is updated, update the value in the
+handling object too
+*/
+void UpdateRandomMapInterval(int interval)
+{
+    if (game.randomMapMode->updateInterval(interval) == true)
+    {
+        // interval exceeded already. Print information about a map change in 1 minute
+        InformUsersAboutMapChange(1);
+    }
+    else
+    {
+        CPAll((boost::format("^zChanged random map vote interval to ^2%d^z minutes.") % interval).str());
+    }    
+}
+
+void RunFrame(int levelTime)
+{
+    if (g_randomMapMode.integer)
+    {
+        game.randomMapMode->checkTime(levelTime);
+    }
+}
+
 void OnGameInit()
 {
     game.operationQueue->Init();
@@ -108,6 +153,12 @@ void OnGameInit()
     game.races->Init();
     game.motd->Initialize();
     game.timerun->Initialize();
+    
+    // this has to be initialized here
+    game.randomMapMode = boost::shared_ptr<RandomMapMode>(new RandomMapMode(level.time, 
+        g_randomMapModeInterval.integer, 
+        InformUsersAboutMapChange, 
+        ChangeMap));
 }
 
 void OnGameShutdown()

@@ -13,6 +13,7 @@ class CustomMapVotes;
 class OperationQueue;
 class Motd;
 class Timerun;
+class RandomMapMode;
 
 struct Game
 {
@@ -29,6 +30,7 @@ struct Game
     boost::shared_ptr<CustomMapVotes> customMapVotes;
     boost::shared_ptr<Motd> motd;
     boost::shared_ptr<Timerun> timerun;
+    boost::shared_ptr<RandomMapMode> randomMapMode;
 };
 
 #endif 

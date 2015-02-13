@@ -1948,6 +1948,11 @@ extern vmCvar_t g_customMapVotesFile;
 extern vmCvar_t g_timerunsDatabase;
 // End of timeruns support
 
+// Start of randommap mode
+extern vmCvar_t g_randomMapMode;
+extern vmCvar_t g_randomMapModeInterval;
+// end of randommap mode
+
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
 int		trap_Milliseconds( void );
@@ -2726,6 +2731,8 @@ void StopTimer(const char *runName, gentity_t *ent);
 
 void InterruptRun(gentity_t *ent);
 
+void RunFrame(int levelTime);
+void UpdateRandomMapInterval(int interval);
 
 #endif // G_LOCAL_H
 
