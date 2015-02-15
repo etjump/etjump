@@ -100,6 +100,7 @@ private:
     std::string message_;
     sqlite3 *db_;
     time_t mapStartTime_;
+    std::vector<std::string> mapNames_;
 };
 
 #endif

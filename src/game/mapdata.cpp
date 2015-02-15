@@ -82,6 +82,7 @@ bool MapData::Initialize()
         return false;
     }
 
+    mapNames_.clear();
     const char *val = NULL;
     rc = sqlite3_step(stmt);
     while (rc == SQLITE_ROW)
@@ -125,6 +126,8 @@ bool MapData::Initialize()
         char buf[MAX_QPATH] = "\0";
         Q_strncpyz(buf, dirPtr, sizeof(buf));
         boost::to_lower(buf);
+
+        mapNames_.push_back(buf);
 
         NameIterator it = GetMapByName(buf);
         if (it == GetNameIterEnd())
@@ -360,50 +363,7 @@ std::string MapData::GetMessage()
 
 std::string MapData::RandomMap()
 {
-    int mapCount = maps_.size();
-    int target = rand() % mapCount;
-    int curr = 0;
+    int mapIndex = rand() % mapNames_.size();
 
-    ConstNameIterator it = maps_.get<0>().begin();
-    ConstNameIterator begin = maps_.get<0>().begin();
-    ConstNameIterator end = maps_.get<0>().end();
-
-    while (it != end)
-    {
-        if (curr == target)
-        {
-            if (it->get()->mapOnServer && level.rawmapname != it->get()->name)
-            {
-                return it->get()->name;
-            }
-
-            // If map is not on server go forwards until we find a map
-            // that matches criteria (not the current one, on the server)
-            // If current one is the last one, go backwards
-            it++;
-            while (it != end)
-            {
-                if (it->get()->mapOnServer && level.rawmapname != it->get()->name)
-                {
-                    return it->get()->name;
-                }
-                it++;
-            }
-
-            while (it != begin)
-            {
-                if (it->get()->mapOnServer && level.rawmapname != it->get()->name)
-                {
-                    return it->get()->name;
-                }
-                it--;
-            }
-
-            return "oasis";
-        }
-
-        it++;
-        curr++;
-    }
-    return "oasis";
+    return mapNames_[mapIndex];
 }
