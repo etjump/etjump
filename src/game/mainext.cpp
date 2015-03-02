@@ -12,6 +12,7 @@
 #include "operationqueue.hpp"
 #include "motd.hpp"
 #include "timerun.hpp"
+#include "g_save.hpp"
 #include "randommapmode.hpp"
 
 Game game;
