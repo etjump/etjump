@@ -126,7 +126,7 @@ void Timerun::StartTimer(const char* runName, gentity_t* ent)
         player->runName = runName ? runName : "";
 
         saveSystem_->ResetSavedPositions(ent);
-        trap_SendServerCommand(ClientNum(ent), "timerun_start");
+        // trap_SendServerCommand(ClientNum(ent), "timerun_start");
     }
 }
 
@@ -147,7 +147,7 @@ void Timerun::Interrupt(gentity_t* ent)
     player->racing = false;
     player->runName = "";
 
-    trap_SendServerCommand(ClientNum(ent), va("timerun_stop %d", player->time));
+    // trap_SendServerCommand(ClientNum(ent), va("timerun_stop %d", player->time));
 }
 
 void Timerun::StopTimer(const char* runName, gentity_t* ent)
