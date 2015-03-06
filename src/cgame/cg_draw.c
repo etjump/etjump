@@ -5098,6 +5098,11 @@ void CG_DrawSpectatorInfo(void)
     int i = 0;
     int y = player_spectatorInfoY.integer;
 
+    if (player_drawSpectatorInfo.integer == 0)
+    {
+      return;
+    }
+
     if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
     {
         // don't do anything if we're spectating
