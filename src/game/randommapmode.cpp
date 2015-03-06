@@ -16,7 +16,7 @@ void RandomMapMode::checkTime(int levelTime)
 
     if (minutes <= 5)
     {
-        if (minutes == 0)
+        if (minutes <= 0)
         {
             changeMap_();
         }
