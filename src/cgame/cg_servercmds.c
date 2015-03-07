@@ -687,6 +687,23 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 	char *p, *ls;
 	int lastcolor;
 	int chatHeight;
+  char buf[MAX_TOKEN_CHARS] = "\0";
+  qtime_t t;
+  trap_RealTime(&t);
+
+  if (player_drawMessageTime.integer)
+  {
+    if (player_drawMessageTime.integer == 2)
+    {
+      Q_strcat(buf, sizeof(buf), va("^z[%02d:%02d:%02d]^7 %s", t.tm_hour, t.tm_min, t.tm_sec, str));
+    }
+    else
+    {
+      Q_strcat(buf, sizeof(buf), va("^z[%02d:%02d]^7 %s", t.tm_hour, t.tm_min, str));
+    }
+    
+    str = buf;
+  }
 
 	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
 	{
@@ -2165,7 +2182,26 @@ static void CG_ServerCommand( void ) {
         CG_RemoveChatEscapeChar(text);
 
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
-		CG_Printf("%s\n", text);
+
+    if (player_drawMessageTime.integer)
+    {
+      qtime_t t;
+      trap_RealTime(&t);
+      if (player_drawMessageTime.integer == 2)
+      {
+        CG_Printf("^z[%02d:%02d:%02d] ^7%s\n", t.tm_hour, t.tm_min, t.tm_sec, text);
+      }
+      else
+      {
+        CG_Printf("^z[%02d:%02d] ^7%s\n", t.tm_hour, t.tm_min, text);
+      }
+      
+    }
+    else
+    {
+      CG_Printf("%s\n", text);
+    }
+
 
 		return;
 	}

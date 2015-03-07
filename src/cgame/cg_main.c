@@ -406,6 +406,7 @@ vmCvar_t            player_runTimerX;
 vmCvar_t            player_runTimerY;
 vmCvar_t            player_runTimerColor;
 
+vmCvar_t            player_drawMessageTime;
 
 typedef struct {
       vmCvar_t	*vmCvar;
@@ -682,7 +683,8 @@ cvarTable_t		cvarTable[] = {
       {&player_drawRunTimer,              "player_drawRunTimer", "1", CVAR_ARCHIVE},
       {&player_runTimerX,                 "player_runTimerX", "1", CVAR_ARCHIVE},
       {&player_runTimerY,                 "player_runTimerY", "1", CVAR_ARCHIVE},
-      {&player_runTimerColor,             "player_runTimerColor", "1", CVAR_ARCHIVE}
+      {&player_runTimerColor,             "player_runTimerColor", "1", CVAR_ARCHIVE},
+      { &player_drawMessageTime, "player_drawMessageTime", "2", CVAR_ARCHIVE }
       };
 
 

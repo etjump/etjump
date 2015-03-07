@@ -2392,6 +2392,8 @@ extern vmCvar_t         player_runTimerX;
 extern vmCvar_t         player_runTimerY;
 extern vmCvar_t         player_runTimerColor;
 
+extern vmCvar_t         player_drawMessageTime;
+
 //
 // cg_main.c
 //
