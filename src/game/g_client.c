@@ -1629,7 +1629,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
        
 	}
 
-
+  client->sess.loadPreviousSavedPositions = qtrue;
 	// read or initialize the session data
 	if( firstTime ) {
 		G_InitSessionData( client, userinfo );
@@ -1670,9 +1670,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	client->sess.nameChangeCount = 0;
 	// Zero: target_set_ident id.
 	client->sess.clientMapProgression = 0;
-    ent->client->sess.muted = qfalse;
-    ent->client->pers.race.isRouteMaker = qfalse;
-    client->sess.portalTeam = 0;
+  ent->client->sess.muted = qfalse;
+  ent->client->pers.race.isRouteMaker = qfalse;
+  client->sess.portalTeam = 0;
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
@@ -1682,6 +1682,8 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
     if( G_isIPMuted( value ) ) {
         ent->client->sess.muted = qtrue;
     }  
+
+    ResetSavedPositions(ent);
 
 	return NULL;
 }
@@ -1765,6 +1767,7 @@ void ClientBegin( int clientNum )
 	// No surface determined yet.	
 	ent->surfaceFlags = 0;
 
+  LoadPositionsFromDatabase(ent);
     OnClientBegin(ent);
 }
 
@@ -2302,6 +2305,8 @@ void ClientDisconnect( int clientNum ) {
 	// OSP
 	G_verifyMatchState(i);
 	// OSP
+
+  SavePositionsToDatabase(ent);
 
     ClearPortals(ent);
 }

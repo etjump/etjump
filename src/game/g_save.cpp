@@ -467,5 +467,5 @@ void SavePositionsToDatabase(gentity_t *ent) {
 }
 
 void LoadPositionsFromDatabase(gentity_t *ent) {
-    game.saves->LoadPositionsFromDatabase(ent);
+  game.saves->LoadPositionsFromDatabase(ent);
 }
