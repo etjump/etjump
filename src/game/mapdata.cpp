@@ -365,5 +365,10 @@ std::string MapData::RandomMap()
 {
     int mapIndex = rand() % mapNames_.size();
 
+    while (mapNames_[mapIndex] == level.rawmapname)
+    {
+      mapIndex = rand() % mapNames_.size();
+    }
+
     return mapNames_[mapIndex];
 }
