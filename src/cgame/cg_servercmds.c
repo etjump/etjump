@@ -687,19 +687,26 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 	char *p, *ls;
 	int lastcolor;
 	int chatHeight;
+  int chatWidth = TEAMCHAT_WIDTH - 8;
   char buf[MAX_TOKEN_CHARS] = "\0";
   qtime_t t;
+  const char *msgColor = "^z";
   trap_RealTime(&t);
+
+  if (cg.clientNum == clientnum)
+  {
+    msgColor = "^g";
+  }
 
   if (player_drawMessageTime.integer)
   {
     if (player_drawMessageTime.integer == 2)
     {
-      Q_strcat(buf, sizeof(buf), va("^z[%02d:%02d:%02d]^7 %s", t.tm_hour, t.tm_min, t.tm_sec, str));
+      Q_strcat(buf, sizeof(buf), va("%s[%02d:%02d:%02d]^7 %s", msgColor, t.tm_hour, t.tm_min, t.tm_sec, str));
     }
     else
     {
-      Q_strcat(buf, sizeof(buf), va("^z[%02d:%02d]^7 %s", t.tm_hour, t.tm_min, str));
+      Q_strcat(buf, sizeof(buf), va("%s[%02d:%02d]^7 %s", msgColor, t.tm_hour, t.tm_min, str));
     }
     
     str = buf;
@@ -731,7 +738,7 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 	ls = NULL;
 	while (*str)
 	{
-		if (len > TEAMCHAT_WIDTH - 1)
+		if (len > chatWidth - 1)
 		{
 			if (ls)
 			{
@@ -2186,14 +2193,21 @@ static void CG_ServerCommand( void ) {
     if (player_drawMessageTime.integer)
     {
       qtime_t t;
+      const char *msgColor = "^z";
       trap_RealTime(&t);
+
+      if (cg.clientNum == atoi(CG_Argv(2)))
+      {
+        msgColor = "^g";
+      }
+
       if (player_drawMessageTime.integer == 2)
       {
-        CG_Printf("^z[%02d:%02d:%02d] ^7%s\n", t.tm_hour, t.tm_min, t.tm_sec, text);
+        CG_Printf("%s[%02d:%02d:%02d] ^7%s\n", msgColor, t.tm_hour, t.tm_min, t.tm_sec, text);
       }
       else
       {
-        CG_Printf("^z[%02d:%02d] ^7%s\n", t.tm_hour, t.tm_min, text);
+        CG_Printf("%s[%02d:%02d] ^7%s\n", msgColor, t.tm_hour, t.tm_min, text);
       }
       
     }
