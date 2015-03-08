@@ -3415,6 +3415,7 @@ static void CG_DrawSlick(void)
     playerState_t   *ps = NULL;
     trace_t         trace;
     vec3_t          start, end;
+    const float minWalkNormal = 0.7;
     if (!cg_drawSlick.integer)
     {
         return;
@@ -3433,7 +3434,8 @@ static void CG_DrawSlick(void)
 
     CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, CONTENTS_SOLID);
 
-    if (trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK) {
+    if (trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK || 
+      (trace.plane.normal[2] > 0 && trace.plane.normal[2] < minWalkNormal)) {
         CG_DrawStringExt(cg_slickX.integer, cg_slickY.integer, "S", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
     }
 }
