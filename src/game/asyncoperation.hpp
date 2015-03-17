@@ -19,10 +19,14 @@ public:
     }
     virtual ~AsyncOperation()
     {
-        sqlite3_close(db_);
+		sqlite3_finalize(stmt_);
+		stmt_ = NULL;
+        int rc = sqlite3_close(db_);
+		if (rc != SQLITE_OK) {
+			G_LogPrintf("ERROR: COULDN'T CLOSE SQLITE FILE HANDLE. CONTACT MOD DEVELOPER! (%d): %s\n", rc, sqlite3_errmsg(db_));
+		}
         db_ = NULL;
-        sqlite3_finalize(stmt_);
-        stmt_ = NULL;
+        
     }
 
     // This is called to execute an async operation
