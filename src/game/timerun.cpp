@@ -175,6 +175,11 @@ void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
         RunIterator it = records_.begin();
         RunIterator end = records_.end();
 
+		if (it == end) {
+			ConsolePrintTo(ent, "No records on this map.");
+			return;
+		}
+
         if (!it->second.isSorted)
         {
             it->second.sorted = it->second.records;
