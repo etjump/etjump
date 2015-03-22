@@ -5,7 +5,7 @@
 
 void InitAntiCheat(AntiCheat_t ac)
 {
-    
+	ac;
 }
 #else
 void InitAntiCheat()
@@ -13,3 +13,4 @@ void InitAntiCheat()
     // Do nothing
 }
 #endif
+

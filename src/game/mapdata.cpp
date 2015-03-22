@@ -137,12 +137,9 @@ bool MapData::Initialize()
             // Hack that will not allow 64 char names with ' in them
             if (strlen(buf) != MAX_QPATH)
             {
-                if (buf)
-                {
-                    std::string temp = buf;
-                    boost::replace_all(temp, "'", "''");
-                    Q_strncpyz(buf, temp.c_str(), sizeof(buf));
-                }
+				std::string temp = buf;
+				boost::replace_all(temp, "'", "''");
+				Q_strncpyz(buf, temp.c_str(), sizeof(buf));
             }
 
             newMap->name = buf;

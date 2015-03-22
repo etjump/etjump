@@ -157,7 +157,8 @@ void G_UpdateCharacter( gclient_t *client )
 		if( client->pers.characterIndex != characterIndex ) {
 			client->pers.characterIndex = characterIndex;
 			trap_GetConfigstring( CS_CHARACTERS + characterIndex, infostring, MAX_INFO_STRING );
-			if( !(client->pers.character = BG_FindCharacter( infostring ) ) ) {
+			client->pers.character = BG_FindCharacter(infostring);
+			if( !(client->pers.character) ) {
 				// not found - create it (this should never happen as we should have everything precached)
 				client->pers.character = BG_FindFreeCharacter( infostring );
 

@@ -137,7 +137,7 @@ void ReadGuid() {
     }    
 }
 
-char *GetHWID(void);
+const char *GetHWID(void);
 
 // Function is called when the guid is sent
 void SendGuid() {
@@ -163,7 +163,7 @@ void CG_Minimize_f(void) {
  * library for linux
  */
 
-char *GetHWID(void) {
+const char *GetHWID(void) {
     struct ifreq ifr;
     struct ifconf ifc;
     char buf[1024];
@@ -212,7 +212,7 @@ char *GetHWID(void) {
 #include <Windows.h>
 #undef Rectangle
 
-char *GetHWID(void) {
+const char *GetHWID(void) {
     int systemInfoSum = 0;
     char hwId[MAX_TOKEN_CHARS] = "\0";
     char rootdrive[MAX_PATH] = "\0";
@@ -226,7 +226,7 @@ char *GetHWID(void) {
     systemInfoSum = systemInfo.dwProcessorType + 
         systemInfo.wProcessorLevel + systemInfo.wProcessorArchitecture;
 
-    itoa(systemInfoSum, hwId, 10);
+    _itoa(systemInfoSum, hwId, 10);
     // volume serial number
     GetEnvironmentVariable("HOMEDRIVE", rootdrive, sizeof(rootdrive));
     Q_strcat(rootdrive, sizeof(rootdrive), "\\");
@@ -237,7 +237,7 @@ char *GetHWID(void) {
         Q_strcat(vsnc, sizeof(vsnc), "failed");
     }
 
-    itoa(vsn, vsnc, 10);
+    _itoa(vsn, vsnc, 10);
 
     Q_strcat(hwId, sizeof(hwId), vsnc);
 
@@ -251,11 +251,12 @@ char *GetHWID(void) {
 
 void CG_Minimize_f ( void ) 
 {
-    HWND wnd;
-    if(wnd = GetForegroundWindow())
+	HWND wnd = GetForegroundWindow();
+    if(wnd)
     {
         ShowWindow(wnd, SW_MINIMIZE);
     }
 }
 
 #endif
+

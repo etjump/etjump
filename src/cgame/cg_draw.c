@@ -680,60 +680,6 @@ static float CG_DrawFPS( float y ) {
 	return y + 12 + 4;
 }
 
-/*
-=================
-CG_DrawTimer
-=================
-*/
-
-static float CG_DrawTimer( float y ) {
-	char		*s;
-	int			w;
-	int			mins, seconds, tens;
-	int			msec;
-	char		*rt;
-	vec4_t		color =				{ 0.625f,	0.625f,	0.6f,	1.0f	};
-	vec4_t		timerBackground =	{ 0.16f,	0.2f,	0.17f,	0.8f	};
-	vec4_t		timerBorder     =	{ 0.5f,		0.5f,	0.5f,	0.5f	};
-
-	rt = (cgs.gametype != GT_WOLF_LMS && cg_drawReinforcementTime.integer > 0) ?
-							va("^F%d%s", CG_CalculateReinfTime( qfalse ), ((cgs.timelimit <= 0.0f) ? "" : " ")) : "";
-
-	msec = ( cgs.timelimit * 60.f * 1000.f ) - ( cg.time - cgs.levelStartTime );
-
-	seconds = msec / 1000;
-	mins = seconds / 60;
-	seconds -= mins * 60;
-	tens = seconds / 10;
-	seconds -= tens * 10;
-
-	if(cgs.gamestate != GS_PLAYING) {
-		//%	s = va( "%s^*WARMUP", rt );
-		s = "^*WARMUP";	// ydnar: don't draw reinforcement time in warmup mode
-		color[3] = fabs(sin(cg.time * 0.002));
-	} else if ( msec < 0 && cgs.timelimit > 0.0f) {
-		s = va( "^N0:00" );
-		color[3] = fabs(sin(cg.time * 0.002));
-	} else {
-		if(cgs.timelimit <= 0.0f) {
-			s = va( "%s", rt);
-		} else {
-			s = va( "%s^*%i:%i%i", rt, mins, tens, seconds);
-		}
-
-		color[3] = 1.f;
-	}
-
-	w = CG_Text_Width_Ext( s, 0.19f, 0, &cgs.media.limboFont1 );
-
-	CG_FillRect( UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, timerBackground );
-	CG_DrawRect_FixedBorder( UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1, timerBorder );
-
-	CG_Text_Paint_Ext( UPPERRIGHT_X - w, y + 11, 0.19f, 0.19f, color, s, 0, 0, 0, &cgs.media.limboFont1 );
-
-	return y + 12 + 4;
-}
-
 // START	xkan, 8/29/2002
 int CG_BotIsSelected(int clientNum)
 {
@@ -2966,7 +2912,7 @@ static void CG_DrawPersonalTimer( void ) {
 
 static void CG_DrawRunTimer(void) 
 {
-    int millis, seconds, minutes;
+//    int millis, seconds, minutes;
 
     if (player_drawRunTimer.integer == 0) {
         return;
@@ -3434,7 +3380,7 @@ static void CG_DrawSlick(void)
 
     CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, CONTENTS_SOLID);
 
-    if (trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK || 
+    if ((trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK) || 
       (trace.plane.normal[2] > 0 && trace.plane.normal[2] < minWalkNormal)) {
         CG_DrawStringExt(cg_slickX.integer, cg_slickY.integer, "S", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
     }

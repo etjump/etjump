@@ -22,16 +22,6 @@ static const char *DEACTIVATED = "DEACTIVATED";
 static const char *ENABLED = "ENABLED";
 static const char *DISABLED = "DISABLED";
 
-static const char *gameNames[] = {
-	"Single Player",
-	"Cooperative",
-	"Objective",
-	"Stopwatch",
-	"Campaign",
-	"Last Man Standing"
-};
-
-
 //
 // Update info:
 //	1. Add line to aVoteInfo w/appropriate info

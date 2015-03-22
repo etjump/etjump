@@ -102,3 +102,5 @@ void Motd::GenerateMotdFile()
     G_Printf("Generated new motd file \"%s\"\n", g_motdFile.string);
     Initialize();
 }
+
+

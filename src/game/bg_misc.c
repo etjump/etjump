@@ -3535,7 +3535,8 @@ void BG_EvaluateTrajectory( const trajectory_t *tr, int atTime, vec3_t result, q
 		VectorMA( v, -phase * 0.5 * deltaTime * deltaTime, result, result );
 		break;
 	case TR_SPLINE:
-		if(!(pSpline = BG_GetSplineData( splinePath, &backwards ))) {
+		pSpline = BG_GetSplineData(splinePath, &backwards);
+		if(!pSpline) {
 			return;
 		}
 
@@ -3632,7 +3633,8 @@ void BG_EvaluateTrajectory( const trajectory_t *tr, int atTime, vec3_t result, q
 
 		break;
 	case TR_LINEAR_PATH:
-		if(!(pSpline = BG_GetSplineData( splinePath, &backwards ))) {
+		pSpline = BG_GetSplineData(splinePath, &backwards);
+		if(!pSpline) {
 			return;
 		}
 
@@ -4437,7 +4439,7 @@ float BG_SplineLength(splinePath_t* pSpline) {
 	float dist = 0;
 //	float tension;
 	vec3_t	vec[2];
-	vec3_t lastPoint;
+	vec3_t lastPoint = { 0, 0, 0 };
 	vec3_t result;
 
 	for(i = 0; i <= 1.f; i += granularity ) {
@@ -5403,9 +5405,9 @@ void RGBtoHSL(const vec4_t rgb, vec4_t *hsl) {
 
 		if (R == rgb_max) {
 			*hsl[0] = d_B - d_G;
-		}else if (G = rgb_max) {
+		}else if (G == rgb_max) {
 			*hsl[0] = ( 1 / 3 ) + d_R - d_B;
-		}else if (G = rgb_max) {
+		}else if (G == rgb_max) {
 			*hsl[0] = ( 1 / 3 ) + d_R - d_B;
 		}
 
@@ -5420,7 +5422,7 @@ void RGBtoHSL(const vec4_t rgb, vec4_t *hsl) {
 //NOTE: Helper method to HSLtoRGB
 float Hue_2_RGB(float v1, float v2, float vH){
 
-	float t_H;
+	float t_H = 0;
 
 	if ( vH < 0 ) t_H += 1;
 	if ( vH > 1 ) t_H -= 1;
@@ -5466,7 +5468,7 @@ void HSLtoRGB(const vec4_t HSL, vec4_t *RGB) {
 void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB){
 
 
-	vec4_t *temp_RGB;
+	vec4_t *temp_RGB = NULL;
 
 	RGBtoHSL(in_RGB, temp_RGB);
 

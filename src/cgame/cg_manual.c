@@ -30,3 +30,4 @@ void CG_Manual_f(void)
     }
     CG_Printf("Couldn't find manual for command \"%s\".\n", cmd);
 }
+

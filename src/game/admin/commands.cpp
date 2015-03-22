@@ -644,7 +644,7 @@ namespace AdminCommands
         if (argv->size() >= 4)
         {
             reason = "";
-            for (int i = 3; i < argv->size(); i++)
+            for (size_t i = 3; i < argv->size(); i++)
             {
                 if (i + 1 == argv->size())
                 {

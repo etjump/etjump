@@ -155,7 +155,8 @@ static qboolean BG_RAG_ParseAnimFile( int handle, animModelInfo_t *animModelInfo
 	}
 
 #ifdef CGAMEDLL
-	if( !( mdxFile = trap_R_RegisterModel( token.string ) ) ) {
+	mdxFile = trap_R_RegisterModel( token.string );
+	if( !mdxFile ) {
 		return BG_RAG_ParseError( handle, "failed to load %s", token.string );
 	}
 #else
@@ -176,9 +177,11 @@ static qboolean BG_RAG_ParseAnimFile( int handle, animModelInfo_t *animModelInfo
 		}
 
 #ifdef CGAMEDLL
-		if( !( animation = BG_RAG_FindFreeAnimation( mdxFile, token.string ) ) ) {
+		animation = BG_RAG_FindFreeAnimation( mdxFile, token.string );
+		if( !animation ) {
 #else
-		if( !( animation = BG_RAG_FindFreeAnimation( mdxFileName, token.string ) ) ) {
+		animation = BG_RAG_FindFreeAnimation(mdxFileName, token.string);
+		if( !animation ) {
 #endif // CGAMEDLL
 			return BG_RAG_ParseError( handle, "out of animation storage space" );
 		}

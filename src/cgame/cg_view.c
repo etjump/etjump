@@ -1161,7 +1161,6 @@ int CG_CalcViewValues( void ) {
     {
         float fov = 90;
         float x;
-        centity_t *cent = &cg_entities[cg.snap->ps.clientNum];
 
         VectorCopy(cg.freeCamPos, cg.refdef.vieworg);
         VectorCopy(cg.freeCamAngles, cg.refdefViewAngles);

@@ -1603,13 +1603,12 @@ void Cmd_SetClass_f( gentity_t *ent, unsigned int dwCommand, qboolean fValue );
 //
 void FindIntermissionPoint( void );
 void G_RunThink (gentity_t *ent);
-void QDECL G_LogPrintf( const char *fmt, ... )_attribute((format(printf,1,2)));
-void QDECL G_ALog( const char *fmt, ... )_attribute((format(printf,1,2)));
-void QDECL G_BugPrintf( const char *fmt, ... )_attribute((format(printf,1,2)));
+void QDECL G_LogPrintf( const char *fmt, ... );
+void QDECL G_ALog( const char *fmt, ... );
 void SendScoreboardMessageToAllClients( void );
-void QDECL G_Printf( const char *fmt, ... )_attribute((format(printf,1,2)));
-void QDECL G_DPrintf( const char *fmt, ... )_attribute((format(printf,1,2)));
-void QDECL G_Error( const char *fmt, ... )_attribute((format(printf,1,2)));
+void QDECL G_Printf( const char *fmt, ... );
+void QDECL G_DPrintf( const char *fmt, ... );
+void QDECL G_Error( const char *fmt, ... );
 // Is this a single player type game - sp or coop?
 qboolean G_IsSinglePlayerGame();
 
@@ -2486,7 +2485,7 @@ void G_parseStats(char *pszStatsInfo);
 void G_printFull(char *str, gentity_t *ent);
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
 void G_statsPrint(gentity_t *ent, int nType);
-unsigned int G_weapStatIndex_MOD(unsigned int iWeaponMOD);
+unsigned int G_weapStatIndex_MOD(int iWeaponMOD);
 
 ///////////////////////
 // g_referee.c
@@ -2500,7 +2499,7 @@ void G_refRemove_cmd(gentity_t *ent);
 void G_refWarning_cmd(gentity_t* ent);
 void G_refMute_cmd(gentity_t *ent, qboolean mute);
 int  G_refClientnumForName(gentity_t *ent, const char *name);
-void G_refPrintf(gentity_t* ent, const char *fmt, ...)_attribute((format(printf,2,3)));
+void G_refPrintf(gentity_t* ent, const char *fmt, ...);
 void G_PlayerBan(void);
 void G_MakeReferee(void);
 void G_RemoveReferee(void);

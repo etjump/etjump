@@ -583,7 +583,7 @@ void CG_LoadPanel_RenderMissionDescriptionText( panel_button_t* button ) {
 	}
 
 	Q_strncpyz( buffer, cs, sizeof(buffer) );
-	while ((s = strchr(buffer, '*'))) {
+	for (s = strchr(buffer, '*'); s; s = strchr(buffer, '*')) {
 		*s = '\n';
 	}
 

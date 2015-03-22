@@ -350,13 +350,15 @@ qboolean CG_RegisterCharacter( const char *characterFile, bg_character_t *charac
 	}
 
 	// Register Mesh
-	if( !(character->mesh = trap_R_RegisterModel( characterDef.mesh )) )
+	character->mesh = trap_R_RegisterModel(characterDef.mesh);
+	if( !character->mesh )
 		CG_Printf( S_COLOR_YELLOW "WARNING: failed to register mesh '%s' referenced from '%s'\n", characterDef.mesh, characterFile );
 
 	// Register Skin
 	COM_StripExtension( characterDef.mesh, buf );
 	filename = va( "%s_%s.skin", buf, characterDef.skin );
-	if( !(character->skin = trap_R_RegisterSkin( filename )) ) {
+	character->skin = trap_R_RegisterSkin(filename);
+	if (!character->skin) {
 		CG_Printf( S_COLOR_YELLOW "WARNING: failed to register skin '%s' referenced from '%s'\n", filename, characterFile );
 	} else {
 		for( i = 0; i < cg_numAccessories; i++ ) {
@@ -379,24 +381,28 @@ qboolean CG_RegisterCharacter( const char *characterFile, bg_character_t *charac
 	// Register Undressed Corpse Media
 	if( *characterDef.undressedCorpseModel ) {
 		// Register Undressed Corpse Model
-		if( !(character->undressedCorpseModel = trap_R_RegisterModel( characterDef.undressedCorpseModel )) )
+		character->undressedCorpseModel = trap_R_RegisterModel(characterDef.undressedCorpseModel);
+		if (!character->undressedCorpseModel)
 			CG_Printf( S_COLOR_YELLOW "WARNING: failed to register undressed corpse model '%s' referenced from '%s'\n", characterDef.undressedCorpseModel, characterFile );
 
 		// Register Undressed Corpse Skin
 		COM_StripExtension( characterDef.undressedCorpseModel, buf );
 		filename = va( "%s_%s.skin", buf, characterDef.undressedCorpseSkin );
-		if( !(character->undressedCorpseSkin = trap_R_RegisterSkin( filename )) )
+		character->undressedCorpseSkin = trap_R_RegisterSkin(filename);
+		if (!character->undressedCorpseSkin)
 			CG_Printf( S_COLOR_YELLOW "WARNING: failed to register undressed corpse skin '%s' referenced from '%s'\n", filename, characterFile );
 	}
 
 	// Register the head for the hud
 	if( *characterDef.hudhead ) {
 		// Register Hud Head Model
-		if( !(character->hudhead = trap_R_RegisterModel( characterDef.hudhead )) ) {
+		character->hudhead = trap_R_RegisterModel(characterDef.hudhead);
+		if (!character->hudhead) {
 			CG_Printf( S_COLOR_YELLOW "WARNING: failed to register hud head model '%s' referenced from '%s'\n", characterDef.hudhead, characterFile );
 		}
 
-		if( *characterDef.hudheadskin && !(character->hudheadskin = trap_R_RegisterSkin( characterDef.hudheadskin )) ) {
+		character->hudheadskin = trap_R_RegisterSkin(characterDef.hudheadskin);
+		if (*characterDef.hudheadskin && !character->hudheadskin) {
 			CG_Printf( S_COLOR_YELLOW "WARNING: failed to register hud head skin '%s' referenced from '%s'\n", characterDef.hudheadskin, characterFile );
 		}
 
@@ -497,11 +503,13 @@ void CG_RegisterPlayerClasses( void )
 				CG_Error( "ERROR: CG_RegisterPlayerClasses: failed to load character file '%s' for the %s %s\n", character->characterFile, (team == TEAM_AXIS ? "Axis" : "Allied"), BG_ClassnameForNumber( classInfo->classNum ) );
 			}
 
-			if( !(classInfo->icon = trap_R_RegisterShaderNoMip( classInfo->iconName )) ) {
+			classInfo->icon = trap_R_RegisterShaderNoMip(classInfo->iconName);
+			if (!classInfo->icon) {
 				CG_Printf( S_COLOR_YELLOW "WARNING: failed to load class icon '%s' for the %s %s\n", classInfo->iconName, (team == TEAM_AXIS ? "Axis" : "Allied"), BG_ClassnameForNumber( classInfo->classNum ) );
 			}
 
-			if( !(classInfo->arrow = trap_R_RegisterShaderNoMip( classInfo->iconArrow ))) {
+			classInfo->arrow = trap_R_RegisterShaderNoMip(classInfo->iconArrow);
+			if (!classInfo->arrow) {
 				CG_Printf( S_COLOR_YELLOW "WARNING: failed to load icon arrow '%s' for the %s %s\n", classInfo->iconArrow, (team == TEAM_AXIS ? "Axis" : "Allied"), BG_ClassnameForNumber( classInfo->classNum ) );
 			}
 		}

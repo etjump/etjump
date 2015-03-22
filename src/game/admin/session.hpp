@@ -42,7 +42,7 @@ public:
     int GetLevel(gentity_t *ent) const;
     int GetId(gentity_t *ent) const;
     bool SetLevel(gentity_t* target, int level);
-    bool SetLevel(unsigned id, int level);
+    bool SetLevel(int id, int level);
     int GetLevelById(unsigned id) const;
     bool UserExists(unsigned id);
     std::string GetMessage() const;

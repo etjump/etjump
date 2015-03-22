@@ -21,13 +21,13 @@ using namespace boost::multi_index;
 
 namespace Updated
 {
-    const unsigned NONE = 0;
-    const unsigned LEVEL = 0x00001;
-    const unsigned LAST_SEEN = 0x00002;
-    const unsigned NAME = 0x00004;
-    const unsigned TITLE = 0x00008;
-    const unsigned COMMANDS = 0x00010;
-    const unsigned GREETING = 0x00020;
+    const int NONE = 0;
+	const int LEVEL = 0x00001;
+	const int LAST_SEEN = 0x00002;
+	const int NAME = 0x00004;
+	const int TITLE = 0x00008;
+	const int COMMANDS = 0x00010;
+	const int GREETING = 0x00020;
 }
 
 
@@ -264,3 +264,4 @@ private:
 };
 
 #endif // DATABASE_HH
+

@@ -616,7 +616,7 @@ void QDECL G_Printf( const char *fmt, ... ) {
 	trap_Printf( text );
 }
 //bani
-void QDECL G_Printf( const char *fmt, ... )_attribute((format(printf,1,2)));
+void QDECL G_Printf( const char *fmt, ... );
 
 void QDECL G_DPrintf( const char *fmt, ... ) {
 	va_list		argptr;
@@ -632,7 +632,7 @@ void QDECL G_DPrintf( const char *fmt, ... ) {
 	trap_Printf( text );
 }
 //bani
-void QDECL G_DPrintf( const char *fmt, ... )_attribute((format(printf,1,2)));
+void QDECL G_DPrintf( const char *fmt, ... );
 
 void QDECL G_Error( const char *fmt, ... ) {
 	va_list		argptr;
@@ -645,7 +645,7 @@ void QDECL G_Error( const char *fmt, ... ) {
 	trap_Error( text );
 }
 //bani
-void QDECL G_Error( const char *fmt, ... )_attribute((format(printf,1,2)));
+void QDECL G_Error( const char *fmt, ... );
 
 
 #define CH_KNIFE_DIST		48	// from g_weapon.c
@@ -814,8 +814,8 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 
 	// Arnout: building something - add this here because we don't have anything solid to trace to - quite ugly-ish
 	if( ent->client->touchingTOI && ps->stats[ STAT_PLAYER_CLASS ] == PC_ENGINEER ) {
-		gentity_t* constructible;
-		if ((constructible = G_IsConstructible( ent->client->sess.sessionTeam, ent->client->touchingTOI ))) {
+		gentity_t* constructible = G_IsConstructible(ent->client->sess.sessionTeam, ent->client->touchingTOI);
+		if (constructible) {
 			ps->serverCursorHint = HINT_CONSTRUCTIBLE;
 			ps->serverCursorHintVal = (int)constructible->s.angles2[0];
 			return;
@@ -1943,7 +1943,7 @@ void QDECL Com_Error ( int level, const char *error, ... ) {
 	G_Error( "%s", text);
 }
 //bani
-void QDECL Com_Error( int level, const char *error, ... )_attribute((format(printf,2,3)));
+void QDECL Com_Error( int level, const char *error, ... );
 
 void QDECL Com_Printf( const char *msg, ... ) {
 	va_list		argptr;
@@ -1956,7 +1956,7 @@ void QDECL Com_Printf( const char *msg, ... ) {
 	G_Printf ("%s", text);
 }
 //bani  
-void QDECL Com_Printf( const char *msg, ... )_attribute((format(printf,1,2)));
+void QDECL Com_Printf( const char *msg, ... );
 
 #endif
 
@@ -2504,7 +2504,6 @@ void QDECL G_LogPrintf( const char *fmt, ... ) {
 	trap_FS_Write( string, strlen( string ), level.logFile );
 }
 //bani
-void QDECL G_LogPrintf( const char *fmt, ... )_attribute((format(printf,1,2)));
 
 /*
 =================
@@ -2546,46 +2545,6 @@ void QDECL G_ALog( const char *fmt, ...) {
 
 	trap_FS_Write( string, strlen( string ), level.adminLogFile );
 }
-void QDECL G_ALog( const char *fmt, ... )_attribute((format(printf,1,2)));
-
-#ifdef BETATEST
-
-void QDECL G_BugPrintf( const char *fmt, ...) {
-	va_list		argptr;
-	char		string[1024];
-	qtime_t     rt;
-	int			min, hour, sec, l;
-    trap_RealTime(&rt);
-
-    hour = rt.tm_hour;
-    min = rt.tm_min;
-    sec = rt.tm_sec;
-
-	Com_sprintf( string, sizeof(string), "%02i:%02i:%02i ", hour, min, sec );
-
-	l = strlen( string );
-	
-	va_start( argptr, fmt );
-	Q_vsnprintf( string + l, sizeof( string ) - l, fmt, argptr );
-	va_end( argptr );
-
-	/*
-	if ( g_dedicated.integer ) {
-		G_Printf( "%s\n", string + l );
-	} 
-	*/
-
-    if ( !level.bugReportFile ) {
-		return;
-	}
-
-	Q_strcat(string, sizeof(string), "\n");
-
-	trap_FS_Write( string, strlen( string ), level.bugReportFile );
-}
-void QDECL G_BugPrintf( const char *fmt, ... )_attribute((format(printf,1,2)));
-
-#endif // BETATEST
 
 /*
 ================
@@ -3667,7 +3626,7 @@ void AC_LogCheat( int clientNum )
 
         G_LogPrintf("********************************************\n"
                     "******* POSSIBLE CHEATER DETECTED **********\n"
-                    "********************************************");
+                    "********************************************\n");
         G_LogPrintf("Player: %s\nIP: %s\n", ent->client->pers.netname,
             ip);
         ent->client->cheatDetected = qtrue;

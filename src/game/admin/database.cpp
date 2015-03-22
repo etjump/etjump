@@ -1550,3 +1550,4 @@ void Database::ResetUsersWithLevelOperation::Execute()
         return;
     }
 }
+

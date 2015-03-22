@@ -2680,7 +2680,8 @@ qboolean CG_AddLinkedEntity( centity_t *cent, qboolean ignoreframe, int atTime )
 			int pos;
 			float frac;
 
-			if(!(cent->backspline = BG_GetSplineData( sParent->effect2Time, &cent->back ))) {
+			cent->backspline = BG_GetSplineData(sParent->effect2Time, &cent->back);
+			if (!cent->backspline) {
 				return qfalse;
 			}
 

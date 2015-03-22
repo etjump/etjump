@@ -286,7 +286,7 @@ void weapon_portalgun_touch(gentity_t* self, gentity_t* other, trace_t* trace) {
 }
 
 //Just to fix a bug...
-void weapon_portal_think(void) {
+void weapon_portal_think(gentity_t *self) {
 	return;
 }
 
@@ -302,8 +302,6 @@ void SP_weapon_portalgun (gentity_t* ent){
 	//TODO: spawn portalgun ent
 	//gentity_t*  ent;
 	gitem_t*	item;
-
-	vec3_t		mins,maxs;
 
     G_SpawnInt("portal_team", "0", &ent->portalTeam);
 

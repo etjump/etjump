@@ -156,7 +156,8 @@ fireteamData_t* CG_IsOnSameFireteam( int clientNum, int clientNum2 ) {
 fireteamData_t* CG_IsFireTeamLeader( int clientNum ) {
 	fireteamData_t* f;
 
-	if(!(f = CG_IsOnFireteam(clientNum))) {
+	f = CG_IsOnFireteam(clientNum);
+	if(!f) {
 		return NULL;
 	}
 
@@ -268,7 +269,8 @@ void CG_DrawFireTeamOverlay( rectDef_t* rect ) {
 	vec4_t bgColor		= { 0.0f, 0.0f, 0.0f, 0.6f };		// window
 	vec4_t borderColor	= { 0.5f, 0.5f, 0.5f, 0.5f };	// window
 
-	if(!(f = CG_IsOnFireteam( cg.clientNum ))) {
+	f = CG_IsOnFireteam(cg.clientNum);
+	if(!f) {
 		return;
 	}
 	
@@ -472,7 +474,8 @@ qboolean CG_FireteamHasClass( int classnum, qboolean selectedonly ) {
 	fireteamData_t* ft;
 	int i;
 
-	if( !(ft = CG_IsOnFireteam( cg.clientNum )) ) {
+	ft = CG_IsOnFireteam(cg.clientNum);
+	if( !ft ) {
 		return qfalse;
 	}
 
