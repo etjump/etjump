@@ -8,7 +8,13 @@ User_s::User_s()
 }
 
 User_s::User_s(unsigned id, std::string const& guid, std::string const& name, std::string const& hwid)
-: id(id), guid(guid), name(name), level(0), lastSeen(0), updated(0)
+: 
+id(id), 
+guid(guid), 
+level(0),
+lastSeen(0),
+name(name),
+updated(0)
 {
 }
 
@@ -45,4 +51,5 @@ std::string User_s::GetLastVisitString() const
 
     return TimeStampDifferenceToString(now - lastSeen);
 }
+
 

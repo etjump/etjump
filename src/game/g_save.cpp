@@ -11,12 +11,12 @@ SaveSystem::Client::Client() {
     alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
     axisBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
 
-    for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+	for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
         alliesSavedPositions[i].isValid = false;
         axisSavedPositions[i].isValid = false;
     }
 
-    for(unsigned i = 0; i < MAX_BACKUP_POSITIONS; i++) {
+	for (int i = 0; i < MAX_BACKUP_POSITIONS; i++) {
         alliesBackupPositions.push_back(SavePosition());
         alliesBackupPositions[i].isValid = false;
 
@@ -26,7 +26,7 @@ SaveSystem::Client::Client() {
 }
 
 SaveSystem::DisconnectedClient::DisconnectedClient() {
-    for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+	for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
         alliesSavedPositions[i].isValid = false;
         axisSavedPositions[i].isValid = false;
         progression = 0;
@@ -284,12 +284,12 @@ void SaveSystem::Reset() {
 
 // Used to reset positions on map change/restart
 void SaveSystem::ResetSavedPositions(gentity_t *ent) {
-    for(unsigned saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++) {
+    for(int saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++) {
         clients_[ClientNum(ent)].alliesSavedPositions[saveIndex].isValid = false;
         clients_[ClientNum(ent)].axisSavedPositions[saveIndex].isValid = false;
     }
 
-    for(unsigned backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++) {
+	for (int backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++) {
         clients_[ClientNum(ent)].alliesBackupPositions[backupIndex].isValid = false;
         clients_[ClientNum(ent)].axisBackupPositions[backupIndex].isValid = false;
     }
@@ -306,7 +306,7 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent) {
 
     DisconnectedClient client;
 
-    for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+	for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
         // Allied
         VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].origin,
             client.alliesSavedPositions[i].origin);
@@ -354,7 +354,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent) {
 
     if(it != savedPositions.end()) {
 
-        for(unsigned i = 0; i < MAX_SAVED_POSITIONS; i++) {
+        for(int i = 0; i < MAX_SAVED_POSITIONS; i++) {
             // Allied
             VectorCopy(it->second.alliesSavedPositions[i].origin,
                 clients_[ClientNum(ent)].alliesSavedPositions[i].origin);

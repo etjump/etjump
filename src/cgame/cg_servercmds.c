@@ -2167,7 +2167,8 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-	if (!Q_stricmp(cmd, "chat") || (enc = !Q_stricmp(cmd, "enc_chat")))
+	enc = !Q_stricmp(cmd, "enc_chat");
+	if (!Q_stricmp(cmd, "chat") || enc)
 	{
 		const char *s;
 
@@ -2220,7 +2221,8 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-	if (!Q_stricmp(cmd, "tchat") || (enc = !Q_stricmp(cmd, "enc_tchat")))
+	enc = !Q_stricmp(cmd, "enc_tchat");
+	if (!Q_stricmp(cmd, "tchat") || enc)
 	{
 		const char *s;
 
@@ -2446,7 +2448,7 @@ static void CG_ServerCommand( void ) {
 		int fadeTime = 0;	// default to instant start
 
 		Q_strncpyz( text, CG_Argv(2), MAX_SAY_TEXT );
-		if(text && strlen(text)){
+		if(strlen(text)){
 			fadeTime = atoi(text);
 		}
 
@@ -2458,7 +2460,7 @@ static void CG_ServerCommand( void ) {
 		int fadeTime = 0;	// default to instant start
 
 		Q_strncpyz( text, CG_Argv(2), MAX_SAY_TEXT );
-		if(text && strlen(text)){
+		if(strlen(text)){
 			fadeTime = atoi(text);
 		}
 
@@ -2470,7 +2472,7 @@ static void CG_ServerCommand( void ) {
 		int fadeTime = 0;	// default to instant stop
 
 		Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
-		if(text && strlen(text)){
+		if(strlen(text)){
 			fadeTime = atoi(text);
 		}
 

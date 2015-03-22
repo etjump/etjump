@@ -1319,10 +1319,6 @@ void G_ParseCampaigns( void ) {
 
 			trap_Argv(0, buf, sizeof(buf));
 
-			if (!buf) { // command not found, throw error
-				G_Error("Usage 'map <mapname>\n'");
-			}
-
 			// no campaign found, fallback to GT_WOLF
 			// and reload the map
 			trap_Cvar_Set( "g_gametype", "2");
@@ -1526,8 +1522,8 @@ gentity_t* G_IsConstructible( team_t team, gentity_t* toi ) {
 	if( !toi || toi->s.eType != ET_OID_TRIGGER ) { 
 		return NULL;
 	}
-
-	if( !(ent = G_ConstructionForTeam( toi, team )) ) {
+	ent = G_ConstructionForTeam(toi, team);
+	if( !ent ) {
 		return NULL;
 	}
 

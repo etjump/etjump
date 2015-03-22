@@ -336,11 +336,15 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 
 
 // Get right stats index based on weapon mod
-unsigned int G_weapStatIndex_MOD(unsigned int iWeaponMOD)
+unsigned int G_weapStatIndex_MOD(int iWeaponMOD)
 {
-	unsigned int i;
+	int i;
 
-	for(i=0; i<MOD_NUM_MODS; i++) if(iWeaponMOD == aWeapMOD[i].iWeapon) return(aWeapMOD[i].iWS);
+	for (i = 0; i < MOD_NUM_MODS; i++) {
+		if (iWeaponMOD == aWeapMOD[i].iWeapon) {
+			return(aWeapMOD[i].iWS);
+		}
+	}
 	return(WS_MAX);
 }
 

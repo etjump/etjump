@@ -2047,7 +2047,8 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 
         if (trap_Argc() == 3)
         {
-            if (!(customMapType = CustomMapTypeExists(arg2)))
+			customMapType = CustomMapTypeExists(arg2);
+            if (!customMapType)
             {
                 G_refPrintf(ent, "^7Map type %s does not exists.", arg2);
                 return qfalse;
@@ -3671,10 +3672,10 @@ void Cmd_Call_f(gentity_t *ent)
 
 void Cmd_PrivateMessage_f(gentity_t *ent)
 {
-	int clientNum;
-	char cmd[MAX_TOKEN_CHARS];
-	gentity_t *other;
-	char *msg;
+	int clientNum = -1;
+	char cmd[MAX_TOKEN_CHARS] = "\0";
+	gentity_t *other = NULL;
+	char *msg = NULL;
 
 	if (trap_Argc() < 3)
 	{
@@ -4053,7 +4054,8 @@ void ClientCommand(int clientNum)
 	// Let's handle rest of the commands after checking if we're really connected.
 
 	// handle say/vsay commands
-	if (!Q_stricmp(cmd, "say") || (enc = !Q_stricmp(cmd, "enc_say")))
+	enc = !Q_stricmp(cmd, "enc_say");
+	if (!Q_stricmp(cmd, "say") || enc)
 	{
 		if (ClientIsFlooding(ent))
 			CP(va("print \"^1Spam Protection:^7 command %s^7 ignored\n\"", cmd));
@@ -4061,8 +4063,8 @@ void ClientCommand(int clientNum)
 			Cmd_Say_f(ent, SAY_ALL, qfalse, enc);
 		return;
 	}
-
-	if (!Q_stricmp(cmd, "say_team") || (enc = !Q_stricmp(cmd, "enc_say_team")))
+	enc = !Q_stricmp(cmd, "enc_say_team");
+	if (!Q_stricmp(cmd, "say_team") || enc)
 	{
 		if (ClientIsFlooding(ent))
 			CP(va("print \"^1Spam Protection:^7 command %s^7 ignored\n\"", cmd));
@@ -4086,7 +4088,9 @@ void ClientCommand(int clientNum)
 			Cmd_Voice_f(ent, SAY_TEAM, qfalse, qfalse);
 		return;
 	}
-	if (!Q_stricmp(cmd, "say_buddy") || (enc = !Q_stricmp(cmd, "enc_say_buddy")))
+
+	enc = !Q_stricmp(cmd, "enc_say_buddy");
+	if (!Q_stricmp(cmd, "say_buddy") || enc)
 	{
 		if (ClientIsFlooding(ent))
 			CP(va("print \"^1Spam Protection:^7 command %s^7 ignored\n\"", cmd));

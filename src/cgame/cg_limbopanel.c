@@ -1417,7 +1417,7 @@ void CG_LimboPanel_RenderObjectiveText( panel_button_t* button ) {
 		}
 	}
 
-	while ((s = strchr(buffer, '*'))) {
+	for (s = strchr(buffer, '*'); s; s = strchr(buffer, '*')) {
 		*s = '\n';
 	}
 

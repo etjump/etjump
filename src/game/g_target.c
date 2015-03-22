@@ -533,7 +533,7 @@ void target_teleporter_use( gentity_t *self, gentity_t *other, gentity_t *activa
 	}
 
     if (self->spawnflags & 4) {
-        vec3_t newOrigin, newViewAngles, newVelocity, offset;
+		vec3_t newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
         vec3_t triggerOrigin, tempActivator, tempOrigin;
         vec3_t normalizedVelocity, veloAngles;
         vec3_t sPlane[6];
@@ -793,9 +793,9 @@ If targets, they will be killed when this is fired
 */
 
 void G_KillEnts( const char* target, gentity_t* ignore, gentity_t* killer, meansOfDeath_t mod ) {
-	gentity_t *targ = NULL;
+	gentity_t *targ = G_FindByTargetname(NULL, target);
 
-	while ((targ = G_FindByTargetname( targ, target ))) {
+	for (; targ; targ = G_FindByTargetname(targ, target)) {
 		
 		// make sure it isn't going to respawn or show any events
 		targ->nextthink = 0;
@@ -1777,9 +1777,10 @@ void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 
 void SP_target_decay(gentity_t *self)
 {
-    G_SpawnInt("ident", NO_DECAY_IDENT, &self->ident);
-    G_SpawnInt("decay_time", NO_DECAY_TIME, &self->decayTime);
-    G_SpawnInt("decay_value", NO_DECAY_VALUE, &self->decayValue);
+	// FIXME: -1 instead of "-1"
+    G_SpawnInt("ident", "-1", &self->ident);
+    G_SpawnInt("decay_time", "-1", &self->decayTime);
+    G_SpawnInt("decay_value", "-1", &self->decayValue);
 
     self->use = target_decay_use;
 }

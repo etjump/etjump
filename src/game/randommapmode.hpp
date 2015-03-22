@@ -17,11 +17,11 @@ public:
         int interval, 
         void (*minutesLeft)(int minutes),
         void (*changeMap)()): 
-        startTime_(startTime),
-        interval_(interval), 
-        minutesLeft_(minutesLeft),
-        changeMap_(changeMap),
-        lastPrintedMinute_(0) {}
+		interval_(interval),
+		startTime_(startTime),
+		lastPrintedMinute_(0),
+		minutesLeft_(minutesLeft),
+        changeMap_(changeMap) {}
     ~RandomMapMode() {}
 private:
     // How often to change map

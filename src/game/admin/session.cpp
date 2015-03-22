@@ -114,7 +114,7 @@ bool Session::GuidReceived(gentity_t *ent)
     char hwidBuf[MAX_TOKEN_CHARS];
 
     // Client sends "etguid guid hwid
-    const unsigned ARGC = 3;
+    const int ARGC = 3;
     if (argc != ARGC)
     {
         G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
@@ -345,7 +345,7 @@ bool Session::SetLevel(gentity_t* target, int level)
     return true;
 }
 
-bool Session::SetLevel(unsigned id, int level)
+bool Session::SetLevel(int id, int level)
 {
     if (!database_->SetLevel(id, level))
     {
@@ -353,7 +353,7 @@ bool Session::SetLevel(unsigned id, int level)
         return false;
     }
 
-    for (unsigned i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (clients_[i].user && clients_[i].user->id == id)
         {

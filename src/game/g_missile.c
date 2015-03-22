@@ -1436,7 +1436,6 @@ G_ExplodeSatchelsExt
 */
 qboolean G_ExplodeSatchelsExt(gentity_t* ent) {
     gentity_t* e;
-    vec3_t dist;
     int i;
     qboolean blown = qfalse;
 

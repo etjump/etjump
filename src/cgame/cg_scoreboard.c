@@ -25,7 +25,8 @@ void CG_DrawHeader(float x, float y, float fade)
     fontInfo_t *font = &cgs.media.limboFont1;
     const char *header = NULL;
     const char *configString = CG_ConfigString(CS_SERVERINFO);
-    vec4_t textColor = { 0.6f, 0.6f, 0.6f, fade };
+    vec4_t textColor = { 0.6f, 0.6f, 0.6f, 0 };
+	textColor[3] = fade;
 
     header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
 
@@ -182,12 +183,14 @@ void CG_DrawHeader2(float x, float y, float fade)
     fontInfo_t *font = &cgs.media.limboFont2;
     const char *header = NULL;
     const char *configString = CG_ConfigString(CS_SERVERINFO);
-    vec4_t textColor = { 0.6f, 0.6f, 0.6f, fade };
+    vec4_t textColor = { 0.6f, 0.6f, 0.6f, 0 };
     float tempX = x + 20;
     float tempY = y + (THIRD_SCOREBOARD_HEADER_HEIGHT / 2) + 4;
     float mapNameWidth = 0;
     float scoreboardWidth = ALT_SCOREBOARD_WIDTH;
     float teamScoreboardWidth = scoreboardWidth / 2;
+
+	textColor[3] = fade;
 
     // Draw the server hostname
     header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));

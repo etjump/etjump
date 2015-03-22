@@ -1324,7 +1324,8 @@ static void CG_PlayerSprites( centity_t *cent ) {
 
 	{
 		fireteamData_t* ft;
-		if ((ft = CG_IsOnFireteam( cent->currentState.number ))) {
+		ft = CG_IsOnFireteam(cent->currentState.number);
+		if (ft) {
 			if( ft == CG_IsOnFireteam( cg.clientNum ) && cgs.clientinfo[ cent->currentState.number ].selected ) {
 				CG_PlayerFloatSprite( cent, cgs.media.fireteamicons[ft->ident], 56 );				
 			}
@@ -1731,7 +1732,7 @@ void CG_Player( centity_t *cent )
 	refEntity_t		body;
 	refEntity_t		head;
 	refEntity_t		acc;
-	vec3_t			playerOrigin;
+	vec3_t			playerOrigin = { 0, 0, 0 };
 	vec3_t			lightorigin;
 	int				clientNum,i;
 	int				renderfx;
@@ -2039,7 +2040,8 @@ void CG_Player( centity_t *cent )
 	// add the head
 	//
 
-	if( !(head.hModel = character->hudhead) ) {
+	head.hModel = character->hudhead;
+	if (!head.hModel) {
 		return;
 	}
 	head.customSkin = character->hudheadskin;

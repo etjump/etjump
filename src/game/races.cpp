@@ -459,5 +459,6 @@ bool Races::ClientIsRacing(gentity_t* player)
 
 bool Races::CheckpointVisited(gentity_t* player, unsigned num)
 {
-    return player->client->pers.race.visitedCheckpoints[num];
+    return player->client->pers.race.visitedCheckpoints[num] != 0 ? true : false;
 }
+

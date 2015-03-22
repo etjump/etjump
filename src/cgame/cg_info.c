@@ -107,6 +107,13 @@ void CG_ShowHelp_Off(int *status)
 	}
 }
 
+void CG_ToggleFreeCam(void);
+void CG_FreeCamMoveForward(void);
+void CG_FreeCamMoveBackward(void);
+void CG_FreeCamMoveLeft(void);
+void CG_FreeCamMoveRight(void);
+void CG_FreeCamSetPos(void);
+
 
 // Demo playback key catcher support
 void CG_DemoClick(int key, qboolean down)

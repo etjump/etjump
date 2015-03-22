@@ -1151,9 +1151,10 @@ qboolean G_ScriptAction_GotoMarker( gentity_t *ent, char *params )
 
 					token = COM_ParseExt( &pString, qfalse );
                     pPathCorner2 = BG_Find_PathCorner( token );
+					target2 = G_FindByTargetname(NULL, token);
 					if (pPathCorner2) {
 						VectorCopy( pPathCorner2->origin, vec2 );
-					} else if ((target2 = G_FindByTargetname( NULL, token ))) {
+					} else if (target2) {
 						VectorCopy( target2->r.currentOrigin, vec2 );
 					} else {
 						G_Error( "Target for relative gotomarker not found: %s\n", token );
@@ -1393,8 +1394,8 @@ qboolean G_ScriptAction_Trigger( gentity_t *ent, char *params )
 		terminate = qfalse;
 		found = qfalse;
 		// for all entities/bots with this scriptName
-		trent = NULL;
-		while ((trent = G_Find( trent, FOFS(scriptName), name ))) {
+		trent = G_Find(NULL, FOFS(scriptName), name);
+		while (trent) {
 			found = qtrue;
 			if (!(trent->r.svFlags & SVF_BOT)) {
 				oldId = trent->scriptStatus.scriptId;
@@ -1404,6 +1405,7 @@ qboolean G_ScriptAction_Trigger( gentity_t *ent, char *params )
 					terminate = qtrue;
 				}
 			} 
+			trent = G_Find(trent, FOFS(scriptName), name);
 		}
 		//
 		if (terminate) return qfalse;
@@ -2056,8 +2058,8 @@ qboolean G_ScriptAction_Accum( gentity_t *ent, char *params )
 			terminate = qfalse;
 			found = qfalse;
 			// for all entities/bots with this scriptName
-			trent = NULL;
-			while ((trent = G_Find( trent, FOFS(scriptName), lastToken ))) {
+			trent = G_Find(NULL, FOFS(scriptName), lastToken);
+			while (trent) {
 				found = qtrue;
 				oldId = trent->scriptStatus.scriptId;
 				G_Script_ScriptEvent( trent, "trigger", name );
@@ -2065,6 +2067,7 @@ qboolean G_ScriptAction_Accum( gentity_t *ent, char *params )
 				if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
 					terminate = qtrue;
 				}
+				trent = G_Find(trent, FOFS(scriptName), lastToken);
 			}
 			//
 			if (terminate) return qfalse;
@@ -2240,8 +2243,8 @@ qboolean G_ScriptAction_GlobalAccum( gentity_t *ent, char *params )
 			terminate = qfalse;
 			found = qfalse;
 			// for all entities/bots with this scriptName
-			trent = NULL;
-			while ((trent = G_Find( trent, FOFS(scriptName), lastToken ))) {
+			trent = G_Find(NULL, FOFS(scriptName), lastToken);
+			while (trent) {
 				found = qtrue;
 				oldId = trent->scriptStatus.scriptId;
 				G_Script_ScriptEvent( trent, "trigger", name );
@@ -2249,6 +2252,7 @@ qboolean G_ScriptAction_GlobalAccum( gentity_t *ent, char *params )
 				if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
 					terminate = qtrue;
 				}
+				trent = G_Find(trent, FOFS(scriptName), lastToken);
 			}
 			//
 			if (terminate) return qfalse;
@@ -2298,7 +2302,8 @@ qboolean G_ScriptAction_Print( gentity_t *ent, char *params )
 	pString = params;
 
 	// See if the first parameter is a /N, where N is a number
-	if ((token = COM_ParseExt( &pString, qfalse )) && token[0] == '/') 
+	token = COM_ParseExt(&pString, qfalse);
+	if (token && token[0] == '/') 
 	{
 		// Get the integer version of the print debug level
 		printLevel = atoi(&(token[1]));
@@ -2741,7 +2746,8 @@ qboolean G_ScriptAction_SetDebugLevel( gentity_t *ent, char *params)
 
 
 	// See if the first parameter is a /N, where N is a number
-	if ((token = COM_ParseExt( &pString, qfalse )) && token[0]) 
+	token = COM_ParseExt(&pString, qfalse);
+	if (token && token[0]) 
 	{
 		// Get the integer version of the debug level
 		debugLevel = atoi(token);
@@ -3134,8 +3140,10 @@ qboolean G_ScriptAction_SetDamagable( gentity_t *ent, char *params )
 
 	// look for entities
 	target = &g_entities[MAX_CLIENTS-1];
-	while ((target = G_FindByTargetname( target, name ))) {
+	target = G_FindByTargetname(target, name);
+	while (target) {
 		target->takedamage = canDamage;
+		target = G_FindByTargetname(target, name);
 	}
 
 	return qtrue;
@@ -3307,8 +3315,9 @@ qboolean G_ScriptAction_RepairMG42( gentity_t *ent, char *params ) {
 	}
 
 	// look for entities
-	target = &g_entities[MAX_CLIENTS-1];
-	while ((target = G_FindByTargetname( target, name ))) {
+	for (target = &g_entities[MAX_CLIENTS - 1];
+		target;
+		target = G_FindByTargetname(target, name)) {
 		if( target->takedamage ) {
 			continue;
 		}
@@ -3460,7 +3469,8 @@ qboolean G_ScriptAction_Construct(gentity_t *ent, char *params ) {
 	gentity_t* constructible;
 	
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"construct\" must have a targetname\n" );
 	}
 
@@ -3487,7 +3497,8 @@ qboolean G_ScriptAction_ConstructibleClass( gentity_t *ent, char *params )
 	int value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_class\" must have a class value\n" );
 	}
 
@@ -3519,7 +3530,8 @@ qboolean G_ScriptAction_ConstructibleChargeBarReq( gentity_t *ent, char *params 
 	float value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_chargebarreq\" must have a fraction value\n" );
 	}
 
@@ -3547,7 +3559,8 @@ qboolean G_ScriptAction_ConstructibleConstructXPBonus( gentity_t *ent, char *par
 	int value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_constructxpbonus\" must have a xppoints value\n" );
 	}
 
@@ -3575,7 +3588,8 @@ qboolean G_ScriptAction_ConstructibleDestructXPBonus( gentity_t *ent, char *para
 	int value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_destructxpbonus\" must have a xppoints value\n" );
 	}
 
@@ -3603,7 +3617,8 @@ qboolean G_ScriptAction_ConstructibleHealth( gentity_t *ent, char *params )
 	int value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_health\" must have a health value\n" );
 	}
 
@@ -3632,7 +3647,8 @@ qboolean G_ScriptAction_ConstructibleWeaponclass( gentity_t *ent, char *params )
 	int value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_weaponclass\" must have a weapon class value\n" );
 	}
 
@@ -3661,7 +3677,8 @@ qboolean G_ScriptAction_ConstructibleDuration( gentity_t *ent, char *params )
 	int value;
 
 	pString = params;
-	if(!(token = COM_ParseExt( &pString, qfalse ))) {
+	token = COM_ParseExt(&pString, qfalse);
+	if(!token) {
 		G_Error( "G_Scripting: \"constructible_duration\" must have a duration value\n" );
 	}
 
@@ -3806,7 +3823,10 @@ qboolean G_ScriptAction_Cvar( gentity_t *ent, char *params )
 			found = qfalse;
 			// for all entities/bots with this scriptName
 			trent = NULL;
-			while ((trent = G_Find( trent, FOFS(scriptName), lastToken ))) {
+
+			for (trent = G_Find(trent, FOFS(scriptName), lastToken);
+				trent;
+				trent = G_Find(trent, FOFS(scriptName), lastToken)) {
 				found = qtrue;
 				oldId = trent->scriptStatus.scriptId;
 				G_Script_ScriptEvent( trent, "trigger", name );
@@ -3959,6 +3979,8 @@ G_ScriptAction_Create (inspired by etpro_ScriptAction_SetValues)
 setup - made in a rush...
 ===================
 */
+
+void G_SpawnGEntityFromSpawnVars(void);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params)
 {
 	char	*token;

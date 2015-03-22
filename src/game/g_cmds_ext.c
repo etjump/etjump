@@ -714,17 +714,6 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock
 			StopFollowing(other);
 	}
 }
-// is ent spectating target
-static qboolean isSpectating(gentity_t *ent, gentity_t *target) {
-	if(ent->client->sess.spectatorState != SPECTATOR_FOLLOW) {
-		return qfalse;
-	}
-
-	if(ent->client->sess.spectatorClient == target->client->ps.clientNum) {
-		return qtrue;
-	}
-	return qfalse;
-}
 
 /*
  * Lists specinvited players.

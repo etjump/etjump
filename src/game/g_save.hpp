@@ -16,8 +16,8 @@ public:
     /*SaveSystem( IGuid *guidInterface );*/
     ~SaveSystem();
 
-    static const unsigned MAX_SAVED_POSITIONS = 3;
-    static const unsigned MAX_BACKUP_POSITIONS = 3;
+    static const int MAX_SAVED_POSITIONS = 3;
+    static const int MAX_BACKUP_POSITIONS = 3;
 
     struct SavePosition {
 	    bool	    isValid;

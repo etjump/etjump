@@ -102,7 +102,7 @@ void AsyncLoadRace::Execute()
     race.start = root["start"].asString();
     race.end = root["end"].asString();
     Json::Value cps = root["checkpoints"];
-    for (int i = 0; i < cps.size(); i++)
+    for (size_t i = 0; i < cps.size(); i++)
     {
         race.checkpoints.push_back(cps[i].asString());
     }

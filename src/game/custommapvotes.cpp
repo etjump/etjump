@@ -53,7 +53,7 @@ bool CustomMapVotes::Load()
 
     try
     {
-        for (int i = 0; i < root.size(); i++)
+		for (int i = 0; i < root.size(); i++)
         {
             customMapVotes_.push_back(MapType());
             unsigned curr = customMapVotes_.size() - 1;
