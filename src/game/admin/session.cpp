@@ -89,7 +89,7 @@ void Session::ReadSessionData(int clientNum)
     char guidBuf[MAX_TOKEN_CHARS] = "\0";
     char hwidBuf[MAX_TOKEN_CHARS] = "\0";
 
-    sscanf(sessionData, "%s %s", &guidBuf, &hwidBuf);
+    sscanf(sessionData, "%s %s", guidBuf, hwidBuf);
 
     CharPtrToString(guidBuf, clients_[clientNum].guid);
     CharPtrToString(hwidBuf, clients_[clientNum].hwid);

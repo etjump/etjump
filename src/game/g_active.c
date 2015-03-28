@@ -598,7 +598,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 	int			event;
 	gclient_t	*client;
 	int			damage;
-	vec3_t		dir;
 
 	//Feen: PGM - CrashLand Fix
 	int			crashEvent = 0;
@@ -787,7 +786,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 			}
 			else
 				damage = 5; // never used
-			VectorSet (dir, 0, 0, 1);
 			ent->pain_debounce_time = level.time + 200;	// no normal pain sound
 			G_Damage (ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING);
 
@@ -936,7 +934,7 @@ once for each server frame, which makes for smooth demo recording.
 ==============
 */
 void ClientThink_real( gentity_t *ent ) {
-	int			msec, oldEventSequence, monsterslick = 0;
+	int			msec, oldEventSequence;
 	pmove_t		pm;
 	usercmd_t	*ucmd;
 	gclient_t	*client = ent->client;
@@ -1190,7 +1188,7 @@ void ClientThink_real( gentity_t *ent ) {
 		pm.cmd.weapon = client->ps.weapon;
 	}
 
-	monsterslick = Pmove( &pm );
+	Pmove( &pm );
 
 	// Gordon: thx to bani for this
 	// ikkyo - fix leaning players bug                                       

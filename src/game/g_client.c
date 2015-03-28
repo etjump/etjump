@@ -562,8 +562,7 @@ reinforce
 // -- called when time expires for a team deployment cycle and there is at least one guy ready to go
 */
 void reinforce(gentity_t *ent) {
-	int p, team;// numDeployable=0, finished=0; // TTimo unused
-	char *classname;
+	int p;// numDeployable=0, finished=0; // TTimo unused
 	gclient_t *rclient;
 	char	userinfo[MAX_INFO_STRING], *respawnStr;
 
@@ -579,17 +578,6 @@ void reinforce(gentity_t *ent) {
 		G_Printf("player already deployed, skipping\n");
 		return;
 	}
-
-	// get team to deploy from passed entity
-	team = ent->client->sess.sessionTeam;
-
-	// find number active team spawnpoints
-	if (team == TEAM_AXIS)
-		classname = "team_CTF_redspawn";
-	else if (team == TEAM_ALLIES)
-		classname = "team_CTF_bluespawn";
-	else
-		assert(0);
 
 	// DHM - Nerve :: restore persistant data now that we're out of Limbo
 	rclient = ent->client;
@@ -1246,7 +1234,7 @@ static void ClientCleanName( const char *in, char *out, int outSize )
 			// No ^= color code.
 			if(*in == '=') {
 				*out++ = '7';
-				*in++;	
+				in++;	
 			} 
 
 			/*
@@ -1256,7 +1244,7 @@ static void ClientCleanName( const char *in, char *out, int outSize )
 
 			if(*in == (char)46 || (int)*in < 0) {
 				*out++ = '.';
-				*in++;
+				in++;
 			} else {
 				*out++ = *in++;
 			}
@@ -1362,7 +1350,6 @@ void ClientUserinfoChanged( int clientNum ) {
 	int		i;
 	char	skillStr[16] = "";
 	char	medalStr[16] = "";
-	int		characterIndex;
 
 	ent = g_entities + clientNum;
 	client = ent->client;
@@ -1446,14 +1433,6 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
-
-	// check for custom character
-	s = Info_ValueForKey( userinfo, "ch" );
-	if( *s ) {
-		characterIndex = atoi(s);
-	} else {
-		characterIndex = -1;
-	}
 
 	// To communicate it to cgame
 	client->ps.stats[ STAT_PLAYER_CLASS ] = client->sess.playerType;

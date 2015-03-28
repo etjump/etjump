@@ -22,7 +22,6 @@ void G_LogKill( gentity_t* ent, weapon_t weap ) {
 
 	if(ent->client->sess.playerType == PC_SOLDIER) {
 		int i, j;
-		qboolean pass = qtrue;
 
 		ent->client->soliderKillTimes[ent->client->soldierKillMarker++] = level.timeCurrent;
 
@@ -33,7 +32,6 @@ void G_LogKill( gentity_t* ent, weapon_t weap ) {
 		for( i = 0, j = ent->client->soldierKillMarker; i < NUM_SOLDIERKILL_TIMES; i++ ) {
 
 			if( !ent->client->soliderKillTimes[j] || (ent->client->soliderKillTimes[j] < level.timeCurrent - SOLDIERKILL_MAXTIME) ) {
-				pass = qfalse;
 				break;
 			}
 

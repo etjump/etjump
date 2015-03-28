@@ -765,7 +765,7 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 	gentity_t	*checkEnt, *traceEnt = 0;
   	playerState_t *ps;
 	int			hintType, hintDist, hintVal;
-	qboolean	zooming, indirectHit;	// indirectHit means the checkent was not the ent hit by the trace (checkEnt!=traceEnt)
+	qboolean	zooming;	// indirectHit means the checkent was not the ent hit by the trace (checkEnt!=traceEnt)
 	int			trace_contents;			// DHM - Nerve
 	int			numOfIgnoredEnts = 0;
 
@@ -774,8 +774,6 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 	}
 
 	ps = &ent->client->ps;
-
-	indirectHit = qfalse;
 
 	zooming = (qboolean)(ps->eFlags & EF_ZOOMING);
 
@@ -896,8 +894,6 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 			}
 
 			if(!Q_stricmp(traceEnt->classname, "func_invisible_user")) {
-				indirectHit = qtrue;
-
 				// DHM - Nerve :: Put this back in only in multiplayer
 				if(traceEnt->s.dmgFlags) {	// hint icon specified in entity
 					hintType = traceEnt->s.dmgFlags;
@@ -1416,11 +1412,10 @@ void G_UpdateCvars( void )
 				// Moved this check out of the main world think loop
 				else if(cv->vmCvar == &g_gametype) {
 					int worldspawnflags = g_entities[ENTITYNUM_WORLD].spawnflags;
-					int gt, gametype;
+					int gt;
 					char buffer[32];
 
 					trap_Cvar_LatchedVariableStringBuffer( "g_gametype", buffer, sizeof( buffer ) );
-					gametype = atoi( buffer );
 
 					if(!level.latchGametype && g_gamestate.integer == GS_PLAYING && 
 					  ( ( ( g_gametype.integer == GT_WOLF || g_gametype.integer == GT_WOLF_CAMPAIGN ) && (worldspawnflags & NO_GT_WOLF)) ||	

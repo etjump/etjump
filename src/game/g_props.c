@@ -874,7 +874,6 @@ void Just_Got_Thrown (gentity_t *self)
 {
 	float	len;
 	vec3_t	vec;
-	qboolean prop_hits = qfalse;
 
 	len = 0;
 
@@ -884,7 +883,6 @@ void Just_Got_Thrown (gentity_t *self)
 		
 		if (self->enemy)
 		{
-			prop_hits = qtrue;
 
 			G_Damage ( self->enemy, self, self, NULL, NULL, 5, 0, MOD_CRUSH );
 				
@@ -902,14 +900,11 @@ void Just_Got_Thrown (gentity_t *self)
 		{
 			trace_t		trace;
 			vec3_t		end;
-			gentity_t	*traceEnt;
 
 			VectorCopy (self->r.currentOrigin, end);
 			end[2] += 1;
 
 			trap_Trace( &trace, self->r.currentOrigin, self->r.mins, self->r.maxs, end, self->s.number, MASK_SHOT );
-
-			traceEnt = &g_entities[ trace.entityNum ];
 
 			if (trace.startsolid)
 			{
@@ -1924,19 +1919,6 @@ void smoker_think (gentity_t *ent)
 void SP_OilSlick (gentity_t *ent)
 {
 	gentity_t *tent;
-	gentity_t	*target = NULL;
-	vec3_t		point;
-
-	if (ent->target)
-		target = G_FindByTargetname( NULL, ent->target );
-	
-	if (target)
-	{
-		VectorCopy (target->s.origin, point);
-		point[2] = ent->r.currentOrigin[2]; // just in case
-	}
-	else
-		VectorCopy (ent->r.currentOrigin, point);
 
 	tent = G_TempEntity (ent->r.currentOrigin, EV_OILSLICK);
 	VectorCopy (ent->r.currentOrigin, tent->s.origin);

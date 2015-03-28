@@ -725,7 +725,6 @@ void SP_misc_gamemodel( gentity_t *ent )
 	char	tagname[MAX_QPATH];
 	char*	dummy;
 	int		num_frames,	start_frame, fps;
-	qboolean reverse = qfalse;
 
 	// Gordon: static gamemodels client side only now :D so server can just wave bye-bye
 	if(!ent->scriptName && !ent->targetname && !ent->spawnflags) {
@@ -742,9 +741,7 @@ void SP_misc_gamemodel( gentity_t *ent )
 		G_SpawnInt( "frames",	"0",	&num_frames);
 		G_SpawnInt( "start",	"0",	&start_frame);
 		G_SpawnInt( "fps",		"20",	&fps);
-		if( G_SpawnString( "reverse", "", &dummy ) ) {
-			reverse = qtrue;
-		}
+    G_SpawnString("reverse", "", &dummy);
 
 		if( num_frames == 0 )
 			G_Error( "'misc_model' with ANIMATE spawnflag set has 'frames' set to 0\n" );
@@ -1474,30 +1471,23 @@ void clamp_playerbehindgun (gentity_t *self, gentity_t *other, vec3_t dang) {
 
 void clamp_hweapontofirearc (gentity_t *self, vec3_t dang) 
 {
-	float diff, yawspeed;
-	qboolean clamped;
-
-	clamped = qfalse;
+	float diff;
 
 	// go back to start position
 	VectorCopy (self->s.angles, dang );
-	yawspeed = MG42_IDLEYAWSPEED;
 	
 	if (dang[0] < 0 && dang[0] < -(self->varc)) {
-		clamped = qtrue;
 		dang[0] = -(self->varc);
 	}
 
 	if (dang[0] > 0 && dang[0] > ( self->varc / 2 ) ) 
 	{
-		clamped = qtrue;
 		dang[0] = self->varc / 2;
 	}
 
 	// sanity check the angles again to make sure we don't go passed the harc
 	diff = AngleDifference( self->s.angles[YAW], dang[YAW] );
 	if (fabs(diff) > self->harc) {
-		clamped = qtrue;
 		
 		if (diff > 0) {
 			dang[YAW] = AngleMod( self->s.angles[YAW] - self->harc );
