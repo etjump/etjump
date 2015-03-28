@@ -175,7 +175,7 @@ pip-log.txt
 scons.signatures.dblite
 
 # Cmake build stuff
-src\cmake
+src/cmake
 
 # Built binaries
-src\build
+src/build
