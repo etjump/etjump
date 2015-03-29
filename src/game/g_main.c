@@ -1600,8 +1600,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	trap_RealTime(&ct);
 
 	G_Printf ("------- Game Initialization -------\n");
-	G_Printf ("gamename: %s %s\n", GAME_VERSION, MOD_VERSION);
-	G_Printf ("gamedate: %s\n", __DATE__);
+	G_Printf("gamename: %s %s\n", GAME_VERSION, MOD_VERSION);
+  G_Printf("gamedate: %s\n", __DATE__ " " __TIME__);
     if( g_gametype.integer != GT_WOLF ) {
 	    trap_Cvar_Set("g_gametype", "2");
     }
@@ -1731,6 +1731,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		} else {
 			G_LogPrintf("------------------------------------------------------------\n" );
 			G_LogPrintf("InitGame: %s\n", cs );
+      G_LogPrintf("%s %s %s %s\n", GAME_VERSION, MOD_VERSION, __DATE__, __TIME__);
 		}
 	} else {
 			G_Printf( "Not logging to disk.\n" );
@@ -1753,7 +1754,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	G_ResetTeamMapData();
 
-	// initialize all entities for this game
+	// initialize all entities for this game 
 	memset( g_entities, 0, MAX_GENTITIES * sizeof(g_entities[0]) );
 	level.gentities = g_entities;
 
