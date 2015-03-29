@@ -948,6 +948,11 @@ qboolean	ConsoleCommand( void ) {
         return qtrue;
     }
 
+	if (!Q_stricmp(cmd, "mod_information")) {
+		G_LogPrintf("%s %s\n", GAME_VERSION " " MOD_VERSION, BUILD_TIME);
+		return qtrue;
+	}
+
     if (OnConsoleCommand())
     {
         return qtrue;

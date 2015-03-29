@@ -29,7 +29,7 @@ IF(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-ENDIF($(CMAKE_BUILD_TYPE) MATCHES "Release")
+ENDIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
 
 SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
 SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/game)
@@ -168,9 +168,15 @@ FILE(GLOB QAGAME_SRC
 	"game/g_weapon.c"
 	"game/q_math.c"
 	"game/q_shared.c"
-)
 
-FILE(GLOB UI_SRC
+	"game/admin/iauthentication.hpp"
+	"game/bg_local.h"
+	"game/bg_public.h"
+	"game/g_local.h"
+	"game/g_local.hpp"
+	"game/g_public.h"
+
+
 	"ui/ui_atoms.c"
 	"ui/ui_gameinfo.c"
 	"ui/ui_loadpanel.c"
@@ -190,7 +196,6 @@ FILE(GLOB UI_SRC
 add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
-add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC})
 set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
 target_link_libraries(qagame.mp.${ARCH} pthread)
 

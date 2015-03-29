@@ -15,6 +15,8 @@
 
 #define MOD_VERSION		"2.0.4"
 
+#define BUILD_TIME __DATE__ " " __TIME__
+
 #if defined(_DEBUG)
 	#define	GAME_VERSION_DATED			GAME_VERSION
 #else

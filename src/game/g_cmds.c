@@ -4165,6 +4165,11 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "mod_information")) {
+		C_ConsolePrintTo(ent, va("%s %s", GAME_VERSION " " MOD_VERSION, BUILD_TIME));
+		return;
+	}
+
     if (OnConnectedClientCommand(ent))
     {
         return;
