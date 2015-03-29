@@ -173,3 +173,5 @@ pip-log.txt
 .DS_Store
 
 scons.signatures.dblite
+
+src/cmake
