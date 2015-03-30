@@ -593,6 +593,10 @@ static float PM_CmdScale( usercmd_t *cmd ) {
 		return 0;
 	}
 
+	if (cmd->upmove > 0) {
+		cmd->upmove = 127;
+	}
+
 	total = sqrt( cmd->forwardmove * cmd->forwardmove
 		+ cmd->rightmove * cmd->rightmove + cmd->upmove * cmd->upmove );
 	scale = (float)pm->ps->speed * max / ( 127.0 * total );
@@ -607,8 +611,6 @@ static float PM_CmdScale( usercmd_t *cmd ) {
 	if (pm->ps->pm_type == PM_NOCLIP)
 		scale *= 3;
 
-	// Zero: Decided to remove the heavy weapon slow shit.
-	
 	if (pm->ps->weapon == WP_FLAMETHROWER) { // trying some different balance for the FT
 		if( pm->cmd.buttons & BUTTON_ATTACK )
 			scale *= 0.7;
