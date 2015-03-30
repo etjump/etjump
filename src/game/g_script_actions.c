@@ -524,7 +524,6 @@ G_ScriptAction_FollowSpline
 
 qboolean G_ScriptAction_FollowSpline( gentity_t* ent, char *params ) {
 	char	*pString, *token;
-	vec3_t vec;
 	float	speed;
 	qboolean wait = qfalse;
 	int backward;
@@ -612,7 +611,6 @@ qboolean G_ScriptAction_FollowSpline( gentity_t* ent, char *params ) {
 		if(!pSpline) {
 			G_Error( "G_Scripting: can't find spline with \"targetname\" = \"%s\"\n", token );
 		}
-		VectorSubtract( pSpline->point.origin, ent->r.currentOrigin, vec );
 
 		token = COM_ParseExt( &pString, qfalse );
 		if (!token[0]) {

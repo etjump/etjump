@@ -174,5 +174,12 @@ pip-log.txt
 
 scons.signatures.dblite
 
-src/cmake
+
 src/site.conf
+# Cmake build stuff
+src/cmake
+
+# Built binaries
+src/build
+src/.idea/*
+src/.idea

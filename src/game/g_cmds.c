@@ -2060,7 +2060,6 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 	{
 		char			mapfile[MAX_QPATH];
 		fileHandle_t    f;
-		int				len;
 
 		if (arg2[0] == '\0' || trap_Argc() == 1)
 		{
@@ -2070,7 +2069,7 @@ qboolean Cmd_CallVote_f( gentity_t *ent, unsigned int dwCommand, qboolean fRefCo
 
 		Com_sprintf(mapfile, sizeof(mapfile), "maps/%s.bsp", arg2);
 
-		len = trap_FS_FOpenFile(mapfile, &f, FS_READ);
+		trap_FS_FOpenFile(mapfile, &f, FS_READ);
 
 		trap_FS_FCloseFile(f);
 
@@ -4163,6 +4162,11 @@ void ClientCommand(int clientNum)
 	if (!Q_stricmp(cmd, "followprev"))
 	{
 		Cmd_FollowCycle_f(ent, -1);
+		return;
+	}
+
+	if (!Q_stricmp(cmd, "mod_information")) {
+		C_ConsolePrintTo(ent, va("%s %s", GAME_VERSION " " MOD_VERSION, BUILD_TIME));
 		return;
 	}
 

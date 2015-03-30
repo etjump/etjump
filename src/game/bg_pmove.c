@@ -3396,7 +3396,7 @@ static void PM_Weapon( void ) {
 
 	// check for dead player
 	if ( pm->ps->stats[STAT_HEALTH] <= 0 ) {
-		if(!pm->ps->pm_flags & PMF_LIMBO) {
+		if(!(pm->ps->pm_flags & PMF_LIMBO)) {
 			PM_CoolWeapons();
 		}
 
@@ -4222,17 +4222,14 @@ static void PM_Weapon( void ) {
 
 	if( !(pm->ps->eFlags & EF_PRONE) && (pml.groundTrace.surfaceFlags & SURF_SLICK) ) { 
 		float fwdmove_knockback = 0.f;
-		float bckmove_knockback = 0.f;
 
 		switch( pm->ps->weapon ) {
 			case WP_MOBILE_MG42:	fwdmove_knockback = 4000.f;
 									fwdmove_knockback = 400.f;
 									break;
 			case WP_PANZERFAUST:	fwdmove_knockback = 32000.f;
-									bckmove_knockback = 1200.f;
 									break;
 			case WP_FLAMETHROWER:	fwdmove_knockback = 2000.f;
-									bckmove_knockback = 40.f;
 									break;
 		}
 

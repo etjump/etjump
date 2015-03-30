@@ -3,7 +3,6 @@
 #include "g_utilities.hpp"
 #include "../json/json.h"
 #include "asyncoperations.hh"
-#include "g_utilities.hpp"
 #include "operationqueue.hpp"
 #include <sqlite3.h>
 
