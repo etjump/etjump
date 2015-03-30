@@ -175,3 +175,4 @@ pip-log.txt
 scons.signatures.dblite
 
 src/cmake
+src/site.conf
