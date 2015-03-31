@@ -5618,7 +5618,7 @@ void PmoveSingle (pmove_t *pmove) {
 	if ( pm->ps->pm_type == PM_NOCLIP ) {
 		PM_NoclipMove ();
 		PM_DropTimers ();
-		return; 
+		return;
 	}
 
 	if (pm->ps->pm_type == PM_FREEZE) {
