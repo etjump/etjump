@@ -593,10 +593,6 @@ static float PM_CmdScale( usercmd_t *cmd ) {
 		return 0;
 	}
 
-	if (cmd->upmove > 0) {
-		cmd->upmove = 127;
-	}
-
 	total = sqrt( cmd->forwardmove * cmd->forwardmove
 		+ cmd->rightmove * cmd->rightmove + cmd->upmove * cmd->upmove );
 	scale = (float)pm->ps->speed * max / ( 127.0 * total );
@@ -5582,6 +5578,10 @@ void PmoveSingle (pmove_t *pmove) {
 		pm->ps->pm_flags &= ~PMF_JUMP_HELD;
 	}
 
+	if (pm->cmd.upmove > 0) {
+		pm->cmd.upmove = 127;
+	}
+
 	// decide if backpedaling animations should be used
 	if ( pm->cmd.forwardmove < 0 ) {
 		pm->ps->pm_flags |= PMF_BACKWARDS_RUN;
@@ -5618,7 +5618,7 @@ void PmoveSingle (pmove_t *pmove) {
 	if ( pm->ps->pm_type == PM_NOCLIP ) {
 		PM_NoclipMove ();
 		PM_DropTimers ();
-		return;
+		return; 
 	}
 
 	if (pm->ps->pm_type == PM_FREEZE) {

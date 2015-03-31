@@ -168,15 +168,9 @@ FILE(GLOB QAGAME_SRC
 	"game/g_weapon.c"
 	"game/q_math.c"
 	"game/q_shared.c"
+)
 
-	"game/admin/iauthentication.hpp"
-	"game/bg_local.h"
-	"game/bg_public.h"
-	"game/g_local.h"
-	"game/g_local.hpp"
-	"game/g_public.h"
-
-
+FILE(GLOB UI_SRC
 	"ui/ui_atoms.c"
 	"ui/ui_gameinfo.c"
 	"ui/ui_loadpanel.c"
@@ -196,6 +190,7 @@ FILE(GLOB QAGAME_SRC
 add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
+add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC})
 set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
 target_link_libraries(qagame.mp.${ARCH} pthread)
 
