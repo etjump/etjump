@@ -240,10 +240,16 @@
     <ClCompile Include="motd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="timerun.cpp">
+    <ClCompile Include="randommapmode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="randommapmode.cpp">
+    <ClCompile Include="Timerun.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLiteWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Printer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -346,11 +352,17 @@
     <ClInclude Include="motd.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="timerun.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="randommapmode.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Timerun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLiteWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Printer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

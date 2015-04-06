@@ -8,7 +8,8 @@
 #include "../mapdata.h"
 #include "../races.hpp"
 #include "../custommapvotes.hpp"
-#include "../timerun.hpp"
+#include "../timerun.h"
+#include "../g_local.h"
 
 typedef boost::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -371,7 +372,17 @@ namespace ClientCommands
 
     bool Records(gentity_t *ent, Arguments argv)
     {
-        game.timerun->PrintRecords(ent, argv);
+        std::string map = level.rawmapname, runName = "default";
+
+        if (argv->size() > 1) {
+            runName = argv->at(1);
+        }
+
+        if (argv->size() > 2) {
+            map = argv->at(2);
+        }
+
+        game.timerun->printRecords(ClientNum(ent), map, runName);
         return true;
     }
 }

@@ -113,11 +113,12 @@ FILE(GLOB QAGAME_SRC
 	"game/loadrace.cpp"
 	"game/operationqueue.cpp"
 	"game/motd.cpp"
-	"game/timerun.cpp"
 	"game/randommapmode.cpp"
 	"game/g_utilities.cpp"
 	"game/g_banner.cpp"
 	"game/g_save.cpp"
+	"game/SQLiteWrapper.cpp"
+	"game/Timerun.cpp"
 	"sha-1/bg_sha.c"
 	"sha-1/sha1.c"
 	"sqlite/sqlite3.c"
@@ -192,7 +193,7 @@ FILE(GLOB UI_SRC
 add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
-add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC})
+add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC} game/Printer.cpp game/Printer.h)
 set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
 target_link_libraries(qagame.mp.${ARCH} pthread)
 

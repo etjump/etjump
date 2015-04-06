@@ -1,367 +1,379 @@
-#include "timerun.hpp"
-#include "g_local.hpp"
-#include "g_utilities.hpp"
+//
+// Created by Jussi on 5.4.2015.
+//
+
 #include <sqlite3.h>
-#include "admin/session.hpp"
-#include "g_save.hpp"
+#include <boost/format.hpp>
+#include <ctime>
+#include <thread>
+#include <string>
+#include <vector>
+#include <memory>
+#include <array>
+#include <map>
+#include "Timerun.h"
+#include "SQLiteWrapper.h"
+#include "Printer.h"
 
-Timerun::Timerun(Session* session, SaveSystem *saveSystem) : session_(session), saveSystem_(saveSystem)
+std::string GetColumnText(sqlite3_stmt *stmt, int index)
 {
+    const char *text = reinterpret_cast<const char*>(sqlite3_column_text(stmt, index));
+    return text ? text : "";
 }
 
-Timerun::~Timerun()
+bool Timerun::init(const std::string &database, const std::string &currentMap)
 {
+    SQLiteWrapper wrapper;
+
+    _records.clear();
+    for (auto &p : _players) {
+        p = nullptr;
+    }
+    _currentMap = currentMap;
+    _database = database;
+    for (auto &s : _sorted) {
+        s.second = false;
+    }
+
+    if (!wrapper.open(database.c_str())) {
+        _message = (boost::format("Timerun::init: couldn't open database. error code: %d. error message: %s.")
+                    % wrapper.errorCode() % wrapper.errorMessage()).str();
+        return false;
+    }
+
+    if (!wrapper.prepare("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                 "time INT NOT NULL, "
+                                 "record_date INT NOT NULL, "
+                                 "map TEXT NOT NULL, "
+                                 "run TEXT NOT NULL, "
+                                 "user_id INT NOT NULL, "
+                                 "player_name TEXT NOT NULL);")) {
+        _message = (boost::format("Timerun::init: couldn't prepare create table statement. error code: %d. error message: %s.")
+                    % wrapper.errorCode() % wrapper.errorMessage()).str();
+        return false;
+    }
+
+    if (!wrapper.execute()) {
+        _message = (boost::format("Timerun::init: couldn't execute statement. error code: %d. error message: %s.")
+                    % wrapper.errorCode() % wrapper.errorMessage()).str();
+        return false;
+    }
+
+    if (!wrapper.prepare("SELECT id, time, run, user_id, player_name FROM records WHERE map=?;")) {
+        _message = (boost::format("Timerun::init: couldn't prepare select runs statement. error code: %d. error message: %s.")
+                    % wrapper.errorCode() % wrapper.errorMessage()).str();
+        return false;
+    }
+
+    if (!wrapper.bindText(1, currentMap)) {
+        _message = (boost::format("Timerun::init: couldn't bind current map to statement. error code: %d. error message: %s.")
+                    % wrapper.errorCode() % wrapper.errorMessage()).str();
+        return false;
+    }
+
+    auto stmt = wrapper.getStatement();
+    auto rc = 0;
+    for (rc = sqlite3_step(stmt); rc == SQLITE_ROW; rc = sqlite3_step(stmt)) {
+        Record *record = new Record();
+
+        record->id = sqlite3_column_int(stmt, 0);
+        record->time = sqlite3_column_int(stmt, 1);
+        record->run = GetColumnText(stmt, 2);
+        record->userId = sqlite3_column_int(stmt, 3);
+        record->playerName = GetColumnText(stmt, 4);
+        record->map = currentMap;
+
+        _records[record->run].push_back(std::unique_ptr<Record>(record));
+    }
+    if (rc != SQLITE_DONE) {
+        _message = (boost::format("Timerun::init: couldn't bind current map to statement. error code: %d.")
+                    % rc % wrapper.getSQLiteErrorMessage()).str();
+        return false;
+    }
+
+    Printer::LogPrint((boost::format("Successfully loaded %d records from database\n") % _records.size()).str());
+
+    return true;
 }
 
-bool Timerun::CompareRecords(const boost::shared_ptr<Record>& lhs, const boost::shared_ptr<Record>& rhs)
+void Timerun::startTimer(const std::string &runName, int clientNum, const std::string& currentName, int raceStartTime)
 {
-    return lhs->time < rhs->time;
+    Player *player = _players[clientNum].get();
+
+    if (player == nullptr)
+    {
+        return;
+    }
+
+    if (!player->racing) {
+        player->racing = true;
+        player->name = currentName;
+        player->raceStartTime = raceStartTime;
+        player->completionTime = 0;
+        player->currentRunName = runName;
+        Printer::SendBannerMessage(clientNum, (boost::format("^7Run %s ^7started!") % player->currentRunName).str());
+    }
 }
 
-void Timerun::SortRecords(Run& run)
+void Timerun::stopTimer(const std::string &runName, int clientNum, int commandTime)
 {
-    run.sorted = run.records;
-    std::sort(run.sorted.begin(), run.sorted.end(), CompareRecords);
+    Player *player = _players[clientNum].get();
+
+    if (player == nullptr)
+    {
+        return;
+    }
+
+    if (player->racing) {
+        int millis = commandTime - player->raceStartTime;
+
+        player->completionTime = millis;
+        checkRecord(player, clientNum);
+
+        interrupt(clientNum);
+    }
 }
 
-void Timerun::Initialize()
+void Timerun::interrupt(int clientNum)
 {
-    if (strlen(g_timerunsDatabase.string) == 0)
-    {
+    Player *player = _players[clientNum].get();
+
+    if (player == nullptr) {
         return;
     }
 
-    std::string dbPath = GetPath(g_timerunsDatabase.string);
-    sqlite3 *db = NULL;
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc != SQLITE_OK)
-    {
-        G_LogPrintf("ERROR: couldn't open timeruns database. (%d): %s\n", rc, sqlite3_errmsg(db));
+    player->racing = false;
+    player->currentRunName = "";
+}
+
+/**
+ * Saves the record to database
+ * @param update Inserts if this is set to false, else update
+ * @param database The database file name
+ * @param record The actual record
+ */
+static void SaveRecord(bool update, std::string database, Timerun::Record record)
+{
+    SQLiteWrapper wrapper;
+    if (!wrapper.open(database)) {
+        // TODO: print error
         return;
     }
 
-    sqlite3_exec(db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+//    "CREATE TABLE IF NOT EXISTS records "
+//            "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+//            "time INT NOT NULL, "
+//            "record_date INT NOT NULL, "
+//            "map TEXT NOT NULL, "
+//            "run TEXT NOT NULL, "
+//            "user_id INT NOT NULL, "
+//            "player_name TEXT NOT NULL);"
 
-    char *err;
-    rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS record (id INTEGER PRIMARY KEY AUTOINCREMENT, time INT NOT NULL, map VARCHAR(256), run VARCHAR(256), player INT NOT NULL, player_name VARCHAR(256));", 0, 0, &err);
-    if (rc != SQLITE_OK)
-    {
-        G_LogPrintf("ERROR: couldn't create timerun database table. (%d): %s\n", rc, err);
-        return;
-    }
-
-    sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "SELECT id, time, map, run, player, player_name FROM record WHERE map=?;",-1, &stmt, 0);
-    if (rc != SQLITE_OK)
-    {
-        G_LogPrintf("ERROR: couldn't prepare timerun query. (%d): %s\n", rc, sqlite3_errmsg(db));
-        return;
-    }
-
-    rc = sqlite3_bind_text(stmt, 1, level.rawmapname, strlen(level.rawmapname), SQLITE_STATIC);
-    if (rc != SQLITE_OK)
-    {
-        G_LogPrintf("ERROR: couldn't bind map name to records query. (%d): %s\n",
-            rc, sqlite3_errmsg(db));
-        return;
-    }
-
-    rc = sqlite3_step(stmt);
-    while (rc != SQLITE_DONE)
-    {
-        boost::shared_ptr<Record> record(new Record);
-        RunIterator it;
-        const char *val = NULL;
-        switch (rc)
-        {
-        case SQLITE_ROW:
-            record->time = sqlite3_column_int(stmt, 1);
-            val = (const char*)sqlite3_column_text(stmt, 2);
-            record->map = val ? val : "";
-            val = (const char *)sqlite3_column_text(stmt, 3);
-            record->run = val ? val : "";
-            record->player = sqlite3_column_int(stmt, 4);
-            val = (const char*)sqlite3_column_text(stmt, 5);
-            record->playerName = val ? val : "";
-            it = records_.find(record->run);
-            if (it != records_.end())
-            {
-                it->second.records.push_back(record);
-            }
-            else
-            {
-                records_[record->run] = Run();
-                records_[record->run].records.push_back(record);
-            }
-            G_LogPrintf((boost::format("%s\n") % *(record.get())).str().c_str());
-            break;
-        default:
-            G_LogPrintf("ERROR: couldn't fetch a row from database. (%d): %s\n", rc, sqlite3_errmsg(db));
-            sqlite3_finalize(stmt);
-            sqlite3_close(db);
+    if (update) {
+        if (!wrapper.prepare("UPDATE records SET time=?, record_date=?, player_name=? WHERE id=?;")) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't prepare update statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
             return;
         }
-        rc = sqlite3_step(stmt);
+
+        if (!wrapper.bindInteger(1, record.time)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind time to update statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindInteger(2, record.date)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind date to update statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindText(3, record.playerName)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind name to update statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindInteger(4, record.id)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind id to update statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+    } else {
+        if (!wrapper.prepare("INSERT INTO records (time, record_date, map, run, user_id, player_name) VALUES (?, ?, ?, ?, ?, ?);"))  {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't prepare insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindInteger(1, record.time)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind time to insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindInteger(2, record.date)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind date to insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindText(3, record.map)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind map to insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindText(4, record.run)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind run to insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindInteger(5, record.userId)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't user id to insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
+
+        if (!wrapper.bindText(6, record.playerName)) {
+            Printer::LogPrintln(
+                    (boost::format("SaveRecord::couldn't bind player name to insert statement. error code: %d. error message: %s.")
+                     % wrapper.errorCode() % wrapper.errorMessage()).str());
+            return;
+        }
     }
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
-    G_LogPrintf("Successfully initialized timerun records database.\n");
-}
 
-void Timerun::Shutdown()
-{
-}
-
-void Timerun::StartTimer(const char* runName, gentity_t* ent)
-{
-    Player *player = &players_[ClientNum(ent)];
-
-    if (!player->racing)
-    {
-        player->racing = true;
-        player->userDatabaseId = game.session->GetId(ent);
-        player->currentName = ent->client->pers.netname;
-        player->raceStartTime = ent->client->ps.commandTime;
-        player->time = 0;
-        player->runName = runName ? runName : "";
-
-        saveSystem_->ResetSavedPositions(ent);
-        // trap_SendServerCommand(ClientNum(ent), "timerun_start");
+    if (!wrapper.execute()) {
+        Printer::LogPrintln(
+                (boost::format("SaveRecord::couldn't execute insert or update statement. error code: %d. error message: %s.")
+                 % wrapper.errorCode() % wrapper.errorMessage()).str());
+        return;
     }
 }
 
-std::string Timerun::TimeToString(int time)
+bool Timerun::checkRecord(Player *player, int clientNum)
 {
-    int millis = time;
+    Record *recordToUpdate = nullptr;
+    bool update = false;
+    time_t t;
+    time(&t);
+
+    int millis = player->completionTime;
     int seconds = millis / 1000;
     millis = millis - seconds * 1000;
     int minutes = seconds / 60;
     seconds = seconds - minutes * 60;
-    return (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
-}
 
-void Timerun::Interrupt(gentity_t* ent)
-{
-    Player *player = &players_[ClientNum(ent)];
+    for (auto& run : _records) {
+        for (auto& record : run.second) {
+            if (record->userId == player->userId) {
+                // New time is faster
+                if (player->completionTime < record->time) {
+                    record->time = player->completionTime;
+                    record->date = static_cast<int>(t);
+                    record->playerName = player->name;
+                    recordToUpdate = record.get();
+                    update = true;
 
-    player->racing = false;
-    player->runName = "";
 
-    // trap_SendServerCommand(ClientNum(ent), va("timerun_stop %d", player->time));
-}
 
-void Timerun::StopTimer(const char* runName, gentity_t* ent)
-{
-    Player *player = &players_[ClientNum(ent)];
-
-    if (player->racing)
-    {
-        int millis = ent->client->ps.commandTime - player->raceStartTime;
-        
-
-        player->time = ent->client->ps.commandTime - player->raceStartTime;
-        CPMAll((boost::format("Player %s ^7Finished %s ^7in %s") % player->currentName % player->runName % TimeToString(millis)).str());
-        InsertRecord(level.rawmapname, player);
-
-        Interrupt(ent);
-    }
-}
-
-void Timerun::PrintRecords(gentity_t* ent, Arguments argv)
-{
-    boost::format fmt("^7%-4d %-20s ^7%s %-36s\n");
-    if (argv->size() == 1)
-    {
-        RunIterator it = records_.begin();
-        RunIterator end = records_.end();
-
-		if (it == end) {
-			ConsolePrintTo(ent, "No records on this map.");
-			return;
-		}
-
-        if (!it->second.isSorted)
-        {
-            it->second.sorted = it->second.records;
-            std::sort(it->second.sorted.begin(), it->second.sorted.end(),
-                Record::CompareRecords);
-            it->second.isSorted = true;
-        }
-
-        BufferPrinter printer(ent);
-        int rank = 1;
-        printer.Begin();
-        printer.Print("Rank Run                  Time      Player\n");
-        for (; it != end; it++)
-        {
-            RecordIterator rit = it->second.sorted.begin();
-            RecordIterator ritEnd = it->second.sorted.end();
-
-            for (; rit != ritEnd; rit++)
-            {
-                printer.Print((fmt
-                    % rank
-                    % rit->get()->run
-                    % TimeToString(rit->get()->time)
-                    % rit->get()->playerName).str());
-                rank++;
-            }
-        }
-        printer.Finish(false);
-    }
-    else
-    {
-        int rank = 1;
-        std::string run = argv->at(1);
-
-        BufferPrinter printer(ent);
-        printer.Begin();
-        printer.Print("Rank Run                  Time      Player\n");
-
-        RunIterator it = records_.find(run);
-        if (it != records_.end())
-        {
-            RecordIterator rit = it->second.sorted.begin();
-            RecordIterator ritEnd = it->second.sorted.end();
-
-            for (; rit != ritEnd; rit++)
-            {
-                printer.Print((fmt
-                    % rank
-                    % rit->get()->run
-                    % rit->get()->time
-                    % rit->get()->playerName).str());
-                rank++;
-            }
-            printer.Finish(false);
-            return;
-        }
-        ChatPrintTo(ent, "^3system: ^7couldn't find a run with name " + argv->at(1));
-    }    
-}
-
-// Inserts a record to database. Checks if user already has a record
-// and if it does, just updates current record
-void Timerun::InsertRecord(std::string mapName, Player* player)
-{
-    std::string runName = player->runName;
-    RunIterator rit = records_.find(runName);
-    RunIterator ritEnd = records_.end();
-    bool update = false;
-    // Check if the run has any records
-    if (rit != ritEnd)
-    {
-        RecordIterator currentRecord = std::find_if(rit->second.records.begin(),
-            rit->second.records.end(),
-            Record::Is(player->userDatabaseId));
-        if (currentRecord != rit->second.records.end())
-        {
-            if (player->time < (*currentRecord)->time)
-            {
-                (*currentRecord)->time = player->time;
-                (*currentRecord)->playerName = player->currentName;
-                update = true;
-            }
-            else
-            {
-                return;
+                    Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
+                                                     % player->name
+                                                     % player->currentRunName
+                                                     % minutes
+                                                     % seconds
+                                                     % millis).str());
+                    // Old time was faster, inform client about the new time anyway
+                } else {
+                    Printer::SendBannerMessage(clientNum, (boost::format("You completed %s ^7in %02d:%02d:%03d")
+                                                           % player->currentRunName
+                                                           % minutes
+                                                           % seconds
+                                                           % millis).str());
+                    return true;
+                }
             }
         }
     }
-    else
-    {
-        // Couldn't find a record with that run name so let's add it 
-        records_[runName] = Run();
+
+    if (!recordToUpdate) {
+        recordToUpdate = new Record();
+        recordToUpdate->playerName = player->name;
+        recordToUpdate->time = player->completionTime;
+        recordToUpdate->date = static_cast<int>(t);
+        recordToUpdate->userId = player->userId;
+        recordToUpdate->map = _currentMap;
+        recordToUpdate->run = player->currentRunName;
+        _records[player->currentRunName].push_back(std::unique_ptr<Record>(recordToUpdate));
     }
 
-    if (!update)
-    {
-        boost::shared_ptr<Record> newRecord(new Record);
-        newRecord->map = mapName;
-        newRecord->player = player->userDatabaseId;
-        newRecord->playerName = player->currentName;
-        newRecord->run = player->runName;
-        newRecord->time = player->time;
+    _sorted[player->currentRunName] = false;
+    std::thread thr(::SaveRecord, update, _database, *recordToUpdate);
+    thr.detach();
 
-        records_[runName].records.push_back(newRecord);
-    }
-
-    records_[runName].isSorted = false;
-    InsertRecordOperation *op = new InsertRecordOperation(mapName, *player, update);
-    op->RunAndDeleteObject();
-    return;
+    return true;
 }
 
-Timerun::InsertRecordOperation::InsertRecordOperation(std::string mapName, Player player, bool update) : mapName_(mapName), player_(player), update_(update)
+bool Timerun::clientConnect(int clientNum, int userId)
 {
+    _players[clientNum] = std::unique_ptr<Player>(new Player(userId));
+
+    return true;
 }
 
-Timerun::InsertRecordOperation::~InsertRecordOperation()
+void Timerun::printRecords(int clientNum, const std::string &map, const std::string &runName)
 {
-}
-
-void Timerun::InsertRecordOperation::Execute()
-{
-    const std::string op = "Insert Record Operation";
-    if (!OpenDatabase(g_timerunsDatabase.string))
-    {
-        PrintOpenError(op);
+    if (runName.length() == 0) {
+        Printer::SendConsoleMessage(clientNum, "^3error: ^7run name must be specified.");
         return;
     }
 
-    if (update_)
-    {
-        if (!PrepareStatement("UPDATE record SET time=?, player_name=? WHERE map=? AND run=? AND player=?;"))
-        {
-            PrintPrepareError(op);
+    // User wants to see the records of the current map
+    if (map.length() == 0 || map == _currentMap) {
+        auto run = _records.find(runName);
+        if (run == _records.end()) {
+            Printer::SendConsoleMessage(clientNum,
+                                        (boost::format("^3error: ^7no records found by name %s.") % runName).str());
             return;
         }
 
-        if (!BindInt(1, player_.time) ||
-            !BindString(2, player_.currentName) ||
-            !BindString(3, mapName_) ||
-            !BindString(4, player_.runName) ||
-            !BindInt(5, player_.userDatabaseId)) {
-            PrintBindError(op);
-            return;
+        if (!_sorted[runName]) {
+            std::sort(run->second.begin(), run->second.end());
+            _sorted[runName] = true;
         }
 
-        if (!ExecuteStatement())
-        {
-            PrintExecuteError(op);
-            return;
-        }
-    }
-    else
-    {
-        if (!PrepareStatement("INSERT INTO record (time, map, run, player, player_name) VALUES (?, ?, ?, ?, ?);"))
-        {
-            PrintPrepareError(op);
-            return;
-        }
-
-        if (!BindInt(1, player_.time) ||
-            !BindString(2, mapName_) ||
-            !BindString(3, player_.runName) ||
-            !BindInt(4, player_.userDatabaseId) ||
-            !BindString(5, player_.currentName)) {
-            PrintBindError(op);
-            return;
+        std::string runRecords;
+        runRecords += (boost::format("^zTop 50 records for %s\n")
+                       % runName).str();
+        auto rank = 1;
+        for (auto &record : run->second) {
+            runRecords += (boost::format("^7%d ^7%s ^7%d %d\n")
+                           % rank
+                           % record->playerName
+                           % record->time
+                           % record->date).str();
+            ++rank;
+            if (rank == 50) {
+                break;
+            }
         }
 
-        if (!ExecuteStatement())
-        {
-            PrintExecuteError(op);
-            return;
-        }
-    }
+        Printer::SendConsoleMessage(clientNum, runRecords);
 
-    if (update_)
-    {
-        G_LogPrintf("Updated %s's record time to %d\n", player_.currentName.c_str(), player_.time);
-    }
-    else
-    {
-        G_LogPrintf("Inserted %s's record time %d\n", player_.currentName.c_str(), player_.time);
+        // User wants to see the records of some other map
+    } else {
+        Printer::SendConsoleMessage(clientNum, "This feature is not yet implemented.");
     }
 }

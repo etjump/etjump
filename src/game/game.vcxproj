@@ -219,11 +219,13 @@
     <ClCompile Include="mapdata.cpp" />
     <ClCompile Include="motd.cpp" />
     <ClCompile Include="operationqueue.cpp" />
+    <ClCompile Include="Printer.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="races.cpp" />
     <ClCompile Include="randommapmode.cpp" />
-    <ClCompile Include="timerun.cpp" />
+    <ClCompile Include="SQLiteWrapper.cpp" />
+    <ClCompile Include="Timerun.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="asyncoperations.hh" />
@@ -256,12 +258,14 @@
     <ClInclude Include="mapdata.h" />
     <ClInclude Include="motd.hpp" />
     <ClInclude Include="operationqueue.hpp" />
+    <ClInclude Include="Printer.h" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="races.hpp" />
     <ClInclude Include="randommapmode.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SQLiteWrapper.h" />
     <ClInclude Include="surfaceflags.h" />
-    <ClInclude Include="timerun.hpp" />
+    <ClInclude Include="Timerun.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc" />

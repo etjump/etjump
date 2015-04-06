@@ -11,9 +11,10 @@
 #include <boost/algorithm/string.hpp>
 #include "operationqueue.hpp"
 #include "motd.hpp"
-#include "timerun.hpp"
 #include "g_save.hpp"
 #include "randommapmode.hpp"
+#include "Timerun.h"
+#include "g_local.h"
 
 Game game;
 
@@ -153,7 +154,7 @@ void OnGameInit()
     game.customMapVotes->Load();
     game.races->Init();
     game.motd->Initialize();
-    game.timerun->Initialize();
+    game.timerun->init("etjump/timeruns_test_database.db", level.rawmapname);
     
     // this has to be initialized here
     game.randomMapMode = boost::shared_ptr<RandomMapMode>(new RandomMapMode(level.time, 
@@ -169,7 +170,6 @@ void OnGameShutdown()
     game.database->CloseDatabase();
     game.mapData->Shutdown();
     game.operationQueue->Shutdown();
-    game.timerun->Shutdown();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) 
@@ -209,6 +209,7 @@ qboolean OnClientCommand(gentity_t *ent)
     if ((*argv)[0] == "etguid")
     {
         game.session->GuidReceived(ent);
+        game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
         return qtrue;
     }
 
@@ -350,13 +351,13 @@ void LogServerState()
 
 void StartTimer(const char *runName, gentity_t *ent)
 {
-    game.timerun->StartTimer(runName, ent);
+    game.timerun->startTimer(runName, ClientNum(ent), ent->client->pers.netname, ent->client->ps.commandTime);
 }
 void StopTimer(const char *runName, gentity_t *ent)
 {
-    game.timerun->StopTimer(runName, ent);
+    game.timerun->stopTimer(runName, ClientNum(ent), ent->client->ps.commandTime);
 }
 void InterruptRun(gentity_t *ent)
 {
-    game.timerun->Interrupt(ent);
+    game.timerun->interrupt(ClientNum(ent));
 }
