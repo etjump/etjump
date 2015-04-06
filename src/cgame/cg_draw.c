@@ -2,6 +2,7 @@
 // active (after loading) gameplay
 
 #include "cg_local.h"
+#include "../game/q_shared.h"
 
 #define STATUSBARHEIGHT 452
 char* BindingFromName(const char *cvar);
@@ -5084,6 +5085,9 @@ void CG_DrawSpectatorInfo(void)
 
 void CG_DrawTimerunTimer(void)
 {
+	if (!player_drawRunTimer.integer) {
+		return;
+	}
 }
 
 /*

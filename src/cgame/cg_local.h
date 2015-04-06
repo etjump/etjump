@@ -14,7 +14,6 @@
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/ui_shared.h"
-#include "cg_anticheat.h"
 
 #define MAX_LOCATIONS		256
 #define	POWERUP_BLINKS		5
@@ -3674,6 +3673,3 @@ void SendGuid();
 
 
 char *G_SHA1(const char* str);
-
-// Hehe, let's bust some cheaters
-AntiCheat_t clientAC;

@@ -65,6 +65,13 @@ public:
      */
     static void BroadcastBannerMessage(const std::string& message);
 
+    /**
+     * Sends a command to client specified by clientNum. This should probably
+     * be elsewhere but is here for now.
+     * @param clientNum The client to send the message to
+     * @param command The command to be sent
+     */
+    static void SendCommand(int clientNum, const std::string& command);
 private:
 };
 

@@ -191,9 +191,6 @@
     <ClCompile Include="cg_manual.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cg_anticheat.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -240,9 +237,6 @@
     </ClInclude>
     <ClInclude Include="..\..\etjump\ui\menumacros.h">
       <Filter>Menu files</Filter>
-    </ClInclude>
-    <ClInclude Include="cg_anticheat.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

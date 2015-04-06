@@ -92,3 +92,8 @@ void Printer::SendBannerMessage(int clientNum, const std::string &message)
         trap_SendServerCommand(clientNum, va("cpm \"%s\n\"", message.c_str()));
     }
 }
+
+void Printer::SendCommand(int clientNum, const std::string &command)
+{
+    trap_SendServerCommand(clientNum, command.c_str());
+}

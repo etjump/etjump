@@ -112,6 +112,7 @@ void Timerun::startTimer(const std::string &runName, int clientNum, const std::s
         player->completionTime = 0;
         player->currentRunName = runName;
         Printer::SendBannerMessage(clientNum, (boost::format("^7Run %s ^7started!") % player->currentRunName).str());
+        Printer::SendCommand(clientNum, "timerun_start");
     }
 }
 
@@ -144,6 +145,8 @@ void Timerun::interrupt(int clientNum)
 
     player->racing = false;
     player->currentRunName = "";
+
+    Printer::SendCommand(clientNum, "timerun_stop");
 }
 
 /**

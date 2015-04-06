@@ -1810,7 +1810,33 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
     activator->client->sess.runSpawnflags = self->spawnflags;
 
-    StartTimer(self->name, activator);
+    StartTimer(level.timerunNames[self->runIndex], activator);
+}
+
+void SetTimerunIndex(gentity_t *self)
+{
+	char *name = NULL;
+	int i = 0;
+	G_SpawnString("name", "default", &name);
+
+	for (; i < level.timerunNamesCount; i++) {
+		// Timerun with that name already exists. Set the index
+		if (!Q_stricmp(level.timerunNames[i], name)) {
+			self->runIndex = i;
+			break;
+		}
+	}
+
+	if (i == level.timerunNamesCount) {
+		if (level.timerunNamesCount >= 20) {
+			G_Error("Too many startTimers on the map\n");
+			return;
+		}
+		Q_strncpyz(level.timerunNames[level.timerunNamesCount], name,
+				   sizeof(level.timerunNames[level.timerunNamesCount]));
+		self->runIndex = level.timerunNamesCount;
+		++level.timerunNamesCount;
+	}
 }
 
 // Starts a time run
@@ -1818,7 +1844,7 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 // identifier
 void SP_target_startTimer(gentity_t *self)
 {
-    G_SpawnString("name", "default", &self->name);
+	SetTimerunIndex(self);
 
     self->use = target_startTimer_use;
 }
@@ -1839,7 +1865,7 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
         return;
     }
 
-    StopTimer(self->name, activator);
+    StopTimer(level.timerunNames[self->runIndex], activator);
 }
 
 // Stops a time run if the names match
@@ -1847,7 +1873,8 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 // an identifier
 void SP_target_endTimer(gentity_t *self)
 {
-    G_SpawnString("name", "default", &self->name);
+	SetTimerunIndex(self);
+
     self->use = target_endTimer_use;
 }
 

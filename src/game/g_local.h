@@ -524,7 +524,8 @@ struct gentity_s {
 
 	int lastPortalTime; //Last time we teleported using portal
     int portalTeam;
-    char* name;
+
+	int runIndex;
 
     // xyz-width for race cp/end
     vec3_t  dimensions;
@@ -1246,6 +1247,11 @@ typedef struct {
     qboolean    ghostPlayers;
     qboolean	saveLimit;
     int         portalTeam;
+
+#define MAX_TIMERUNS 20
+#define MAX_TIMERUN_NAME_LENGTH 64
+	int timerunNamesCount;
+	char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
 } level_locals_t;
 
 typedef struct {

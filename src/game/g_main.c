@@ -1772,7 +1772,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	trap_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ), 
 		&level.clients[0].ps, sizeof( level.clients[0] ) );
 
-	
+	// Reset the amount of timerun timers
+	level.timerunNamesCount = 0;
+
 	saveGamePending = 0;
 
 	// load level script
