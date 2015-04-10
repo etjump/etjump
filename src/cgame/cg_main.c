@@ -681,9 +681,9 @@ cvarTable_t		cvarTable[] = {
       {&player_spectatorInfoX,            "player_spectatorInfoX", "320", CVAR_ARCHIVE},
       {&player_spectatorInfoY,            "player_spectatorInfoY", "40", CVAR_ARCHIVE},
       {&player_drawRunTimer,              "player_drawRunTimer", "1", CVAR_ARCHIVE},
-      {&player_runTimerX,                 "player_runTimerX", "1", CVAR_ARCHIVE},
-      {&player_runTimerY,                 "player_runTimerY", "1", CVAR_ARCHIVE},
-      {&player_runTimerColor,             "player_runTimerColor", "1", CVAR_ARCHIVE},
+      {&player_runTimerX,                 "player_runTimerX", "280", CVAR_ARCHIVE},
+      {&player_runTimerY,                 "player_runTimerY", "380", CVAR_ARCHIVE},
+      {&player_runTimerColor,             "player_runTimerColor", "white", CVAR_ARCHIVE},
       { &player_drawMessageTime, "player_drawMessageTime", "2", CVAR_ARCHIVE }
       };
 
@@ -728,6 +728,7 @@ cvarTable_t		cvarTable[] = {
             BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
             BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
             BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor, cg_personalTimerAlpha.value, "cg_personalTimerColor");
+            BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1, "player_runTimerColor");
             trap_Cvar_Set("viewlog", cg_viewlog.string);
             
             cg.pmext.noclipScale = cg_noclipScale.integer;
@@ -785,7 +786,13 @@ cvarTable_t		cvarTable[] = {
                               }
 
                               else if (cv->vmCvar == &cg_personalTimerColor) {
-                                    BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor, cg_personalTimerAlpha.value, "cg_personalTimerColor");
+                                    BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor,
+                                                cg_personalTimerAlpha.value, "cg_personalTimerColor");
+                              }
+
+                              else if (cv->vmCvar == &player_runTimerColor) {
+                                    BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1,
+                                                "player_runTimerColor");
                               }
 
                               else if(cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string) {

@@ -378,7 +378,11 @@ int Session::GetLevelById(unsigned id) const
 int Session::GetId(gentity_t* ent) const
 {
     return clients_[ClientNum(ent)].user->id;
-;}
+}
+
+int Session::GetId(int clientNum) const {
+    return clients_[clientNum].user->id;
+}
 
 int Session::GetLevel(gentity_t* ent) const
 {

@@ -14,6 +14,7 @@
 #include "Timerun.h"
 #include "SQLiteWrapper.h"
 #include "Printer.h"
+#include "Utilities.h"
 
 std::string GetColumnText(sqlite3_stmt *stmt, int index)
 {
@@ -112,7 +113,13 @@ void Timerun::startTimer(const std::string &runName, int clientNum, const std::s
         player->completionTime = 0;
         player->currentRunName = runName;
         Printer::SendBannerMessage(clientNum, (boost::format("^7Run %s ^7started!") % player->currentRunName).str());
-        Printer::SendCommand(clientNum, "timerun_start");
+        auto spectators = Utilities::getSpectators(clientNum);
+        Printer::SendCommand(clientNum, (boost::format("timerun_start %d")
+                                         % (player->raceStartTime + 500)).str());
+        Printer::SendCommand(spectators, (boost::format("timerun_start_spec %d %d")
+                                          % clientNum
+                                          % (player->raceStartTime + 500)).str());
+        Utilities::startRun(clientNum);
     }
 }
 
@@ -131,7 +138,15 @@ void Timerun::stopTimer(const std::string &runName, int clientNum, int commandTi
         player->completionTime = millis;
         checkRecord(player, clientNum);
 
-        interrupt(clientNum);
+        player->racing = false;
+        player->currentRunName = "";
+
+        Printer::SendCommand(clientNum, (boost::format("timerun_stop %d")
+                                         % millis).str());
+        Printer::SendCommand(Utilities::getSpectators(clientNum), (boost::format("timerun_stop_spec %d %d")
+                                                                   % clientNum
+                                                                   % millis).str());
+        Utilities::stopRun(clientNum);
     }
 }
 
@@ -146,6 +161,7 @@ void Timerun::interrupt(int clientNum)
     player->racing = false;
     player->currentRunName = "";
 
+    Utilities::stopRun(clientNum);
     Printer::SendCommand(clientNum, "timerun_stop");
 }
 

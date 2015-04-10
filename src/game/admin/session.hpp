@@ -41,6 +41,7 @@ public:
     std::bitset<256> Permissions(gentity_t *ent) const;
     int GetLevel(gentity_t *ent) const;
     int GetId(gentity_t *ent) const;
+    int GetId(int clientNum) const;
     bool SetLevel(gentity_t* target, int level);
     bool SetLevel(int id, int level);
     int GetLevelById(unsigned id) const;
@@ -64,7 +65,7 @@ private:
     std::string message_;
 
 
-    
+
 };
 
 #endif

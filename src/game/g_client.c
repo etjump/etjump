@@ -1597,6 +1597,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
         // -> don't do anything anymore
         client->sess.loadedPosBeforeInactivity = qtrue;
         client->sess.motdPrinted = qfalse;
+		client->sess.timerunActive = qfalse;
 	} else {
 		client->sess.gotoAllowed = qtrue;				//Feen: TEMP FIX! - Also added these two here as well.
 		client->sess.saveAllowed = qtrue;				//		They are not being red in G_ReadSessionData, so they

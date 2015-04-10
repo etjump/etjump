@@ -639,6 +639,11 @@ void Cmd_God_f (gentity_t *ent)
 	char	*name;
 	qboolean godAll = qfalse;
 
+	if (ent->client->sess.timerunActive) {
+		CP("cp \"Cheats are disabled.\n\"");
+		return;
+	}
+
 #ifdef EDITION999
 	if (!CheatsOk( ent ) ) {
 			return;
@@ -786,6 +791,12 @@ void Cmd_Noclip_f( gentity_t *ent ) {
 	char	*msg;
 
 	char	*name = ConcatArgs( 1 );
+
+	if (ent->client->sess.timerunActive == qtrue) {
+		CP("cp \"Cheats are disabled.\n\"");
+		return;
+	}
+
 	if(!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR)) {
         if (level.noNoclip) {
             CP("cp \"Noclip has been disabled on this map.\n\"");
@@ -3524,6 +3535,11 @@ void Cmd_Goto_f(gentity_t *ent) {
         return;
     }
 
+	if (ent->client->sess.timerunActive) {
+		CP("print \"Goto is disabled while timerun is active.\n\"");
+		return;
+	}
+
 	if(level.noGoto) {
 		CP("print \"Goto is disabled on this map.\n\"");
 		return;
@@ -3631,6 +3647,11 @@ void Cmd_Call_f(gentity_t *ent)
         CP("cpm \"^7You can not ^3call^7 as a spectator.\n\"");
         return;
     }
+
+	if (other->client->sess.timerunActive) {
+		CP("print \"^3call: ^7cannot call while target player is racing.\n\"");
+		return;
+	}
 
 	if (other->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != ent->client->sess.sessionTeam)
 	{

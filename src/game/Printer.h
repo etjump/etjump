@@ -6,6 +6,7 @@
 #define ETJUMP_PRINTER_H
 
 #include <string>
+#include <vector>
 
 class Printer {
 public:
@@ -72,6 +73,13 @@ public:
      * @param command The command to be sent
      */
     static void SendCommand(int clientNum, const std::string& command);
+
+    /**
+     * Sends a command to all clients specified in the clientNums vector.
+     * @param clientNums The list of client numbers to send the command to
+     * @param command The command to send to users
+     */
+    static void SendCommand(std::vector<int> clientNums, const std::string& command);
 private:
 };
 

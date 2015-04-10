@@ -97,3 +97,10 @@ void Printer::SendCommand(int clientNum, const std::string &command)
 {
     trap_SendServerCommand(clientNum, command.c_str());
 }
+
+void Printer::SendCommand(std::vector<int> clientNums, const std::string &command)
+{
+    for (auto &clientNum : clientNums) {
+        trap_SendServerCommand(clientNum, command.c_str());
+    }
+}

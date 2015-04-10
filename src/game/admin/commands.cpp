@@ -1339,30 +1339,28 @@ namespace AdminCommands
 
     bool Noclip(gentity_t* ent, Arguments argv)
     {
-        if (level.noNoclip)
-        {
+        if (level.noNoclip) {
             ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
             return false;
         }
 
-        if (argv->size() == 1)
-        {
-            if (!ent)
-            {
+        if (argv->size() == 1) {
+            if (!ent) {
+                return false;
+            }
+
+            if (ent->client->sess.timerunActive) {
+                ChatPrintTo(ent, "^3noclip: ^7cheats are disabled while timerun is active.");
                 return false;
             }
 
             ent->client->noclip = ent->client->noclip ? qfalse : qtrue;
         }
-        else
-        {
+        else {
             int count = 1;
-            if (argv->size() == 3)
-            {
-                if (!ToInt(argv->at(2), count))
-                {
-                    if (count < 0)
-                    {
+            if (argv->size() == 3) {
+                if (!ToInt(argv->at(2), count)) {
+                    if (count < 0) {
                         count = 1;
                     }
                     count = 1;
@@ -1370,23 +1368,25 @@ namespace AdminCommands
             }
             std::string err;
             gentity_t *other = PlayerGentityFromString(argv->at(1), err);
-            if (!other)
-            {
+            if (!other) {
                 ChatPrintTo(ent, "^3noclip: ^7" + err);
                 return false;
             }
 
-            if (count > 1)
-            {
+            if (other->client->sess.timerunActive) {
+                ChatPrintTo(other, "^3noclip: ^7cheats are disabled while timerun is active.");
+                return false;
+            }
+
+            if (count > 1) {
                 ChatPrintTo(other, va("^3noclip: ^7you can use /noclip %d times.", count));
                 ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip %d times.", other->client->pers.netname, count));
             }
-            else
-            {
+            else {
                 ChatPrintTo(other, "^3noclip: ^7you can use /noclip once.");
                 ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip once.", other->client->pers.netname));
             }
-            
+
             other->client->pers.noclipCount = count;
         }
 

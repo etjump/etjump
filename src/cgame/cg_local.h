@@ -1097,6 +1097,7 @@ typedef struct {
 	vec4_t				speedColor;
 	vec4_t				keysColor;
 	vec4_t				personalTimerColor;
+	vec4_t				runTimerColor;
 
 	// Arnout: allow overriding of countdown sounds
 	char		fiveMinuteSound_g[MAX_QPATH];
@@ -1194,6 +1195,22 @@ typedef struct {
     int             raceStartTime;
     int             raceTime;
     qboolean        raceIsActive;
+
+	/**
+	 * Timerun features
+	 *
+	 * timerunActive: 		is timerun currently active and should be
+	 * 				  		be updating the timer
+	 *
+	 * timerunStartTime:	when did the run start
+	 *
+	 * timerunCompletionTime: 	what was the completion time
+	 */
+	int 			timerunActive;
+	int				timerunStartTime;
+	int 			timerunCompletionTime;
+
+
 } cg_t;
 
 #define	NUM_FUNNEL_SPRITES	21

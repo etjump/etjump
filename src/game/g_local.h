@@ -696,6 +696,8 @@ typedef struct {
     qboolean    motdPrinted;
 
     int         runSpawnflags;
+
+	qboolean timerunActive;
     
 } clientSession_t;
 

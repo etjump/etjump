@@ -226,6 +226,7 @@
     <ClCompile Include="randommapmode.cpp" />
     <ClCompile Include="SQLiteWrapper.cpp" />
     <ClCompile Include="Timerun.cpp" />
+    <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="asyncoperations.hh" />
@@ -266,6 +267,7 @@
     <ClInclude Include="SQLiteWrapper.h" />
     <ClInclude Include="surfaceflags.h" />
     <ClInclude Include="Timerun.h" />
+    <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc" />

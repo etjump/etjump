@@ -35,6 +35,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
     else
     {
         game.session->ReadSessionData(clientNum);
+        game.timerun->clientConnect(clientNum, game.session->GetId(clientNum));
     }
 
     if (game.session->IsIpBanned(clientNum))
