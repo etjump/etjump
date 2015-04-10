@@ -48,6 +48,7 @@ void Utilities::startRun(int clientNum)
     }
     // same thing for god mode
     player->flags &= ~FL_GODMODE;
+    ResetSavedPositions(player);
 }
 
 void Utilities::stopRun(int clientNum)

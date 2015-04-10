@@ -17,6 +17,7 @@ public:
      * A single record on a single run
      */
     struct Record {
+    public:
         Record(): id(-1), time(0), date(0), userId(0) { }
         int id;
         int time;
@@ -78,11 +79,10 @@ public:
      * When a player touches the stop timer this function is called.
      * If player is racing and the end point matches the start point,
      * prints the time and saves the record. Else ignored
-     * @param runName The run name
      * @param clientNum Player's client number
      * @param commandTime client's ps.commandTime (used to get the completion time)
      */
-    void stopTimer(const std::string& runName, int clientNum, int commandTime);
+    void stopTimer(int clientNum, int commandTime);
 
     /**
      * Interrupts the player's current run.

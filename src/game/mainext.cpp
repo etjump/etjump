@@ -356,7 +356,7 @@ void StartTimer(const char *runName, gentity_t *ent)
 }
 void StopTimer(const char *runName, gentity_t *ent)
 {
-    game.timerun->stopTimer(runName, ClientNum(ent), ent->client->ps.commandTime);
+    game.timerun->stopTimer(ClientNum(ent), ent->client->ps.commandTime);
 }
 void InterruptRun(gentity_t *ent)
 {

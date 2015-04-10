@@ -372,7 +372,7 @@ namespace ClientCommands
 
     bool Records(gentity_t *ent, Arguments argv)
     {
-        std::string map = level.rawmapname, runName = "default";
+        std::string map = level.rawmapname, runName;
 
         if (argv->size() > 1) {
             runName = argv->at(1);

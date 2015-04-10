@@ -60,7 +60,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
         return false;
     }
 
-    if (!wrapper.prepare("SELECT id, time, run, user_id, player_name FROM records WHERE map=?;")) {
+    if (!wrapper.prepare("SELECT id, time, run, user_id, player_name, record_date FROM records WHERE map=?;")) {
         _message = (boost::format("Timerun::init: couldn't prepare select runs statement. error code: %d. error message: %s.")
                     % wrapper.errorCode() % wrapper.errorMessage()).str();
         return false;
@@ -82,12 +82,13 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
         record->run = GetColumnText(stmt, 2);
         record->userId = sqlite3_column_int(stmt, 3);
         record->playerName = GetColumnText(stmt, 4);
+        record->date = sqlite3_column_int(stmt, 5);
         record->map = currentMap;
 
         _records[record->run].push_back(std::unique_ptr<Record>(record));
     }
     if (rc != SQLITE_DONE) {
-        _message = (boost::format("Timerun::init: couldn't bind current map to statement. error code: %d.")
+        _message = (boost::format("Timerun::init: couldn't bind current map to statement. error code: %d. error message: %s")
                     % rc % wrapper.getSQLiteErrorMessage()).str();
         return false;
     }
@@ -123,7 +124,7 @@ void Timerun::startTimer(const std::string &runName, int clientNum, const std::s
     }
 }
 
-void Timerun::stopTimer(const std::string &runName, int clientNum, int commandTime)
+void Timerun::stopTimer(int clientNum, int commandTime)
 {
     Player *player = _players[clientNum].get();
 
@@ -306,8 +307,6 @@ bool Timerun::checkRecord(Player *player, int clientNum)
                     recordToUpdate = record.get();
                     update = true;
 
-
-
                     Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
                                                      % player->name
                                                      % player->currentRunName
@@ -320,7 +319,7 @@ bool Timerun::checkRecord(Player *player, int clientNum)
                                                            % player->currentRunName
                                                            % minutes
                                                            % seconds
-                                                           % millis).str());
+                                                           % millis).str());  
                     return true;
                 }
             }
@@ -352,15 +351,57 @@ bool Timerun::clientConnect(int clientNum, int userId)
     return true;
 }
 
+std::string millisToString(int millis)
+{
+    std::string s;
+
+    int minutes, seconds;
+
+    minutes = millis / 60000;
+    millis -= minutes * 60000;
+    seconds = millis / 1000;
+    millis -= seconds * 1000;
+
+    s = (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
+
+    return std::move(s);
+}
+
+std::string dateToFormat(int date)
+{
+    char buffer[128] = "\0";
+    time_t t = static_cast<time_t>(date);
+    strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
+    return buffer;
+}
+
 void Timerun::printRecords(int clientNum, const std::string &map, const std::string &runName)
 {
-    if (runName.length() == 0) {
-        Printer::SendConsoleMessage(clientNum, "^3error: ^7run name must be specified.");
-        return;
-    }
-
     // User wants to see the records of the current map
     if (map.length() == 0 || map == _currentMap) {
+        if (runName.length() == 0) {
+            std::string toPrint = "#1 record for each run:\n";
+            for (auto& record : _records)
+            {
+                toPrint += "^g" + record.first + "\n";
+                if (record.second.size() > 0)
+                {
+                    toPrint += (boost::format("^7#1 %s ^7%s %s\n")
+                        % record.second.at(0)->playerName
+                        % millisToString(record.second.at(0)->time)
+                        % dateToFormat(record.second.at(0)->date)).str();
+                }
+                else
+                {
+                    toPrint += "^7No records\n";
+                }
+            }
+
+            Printer::SendConsoleMessage(clientNum, toPrint);
+
+            return;
+        }
+
         auto run = _records.find(runName);
         if (run == _records.end()) {
             Printer::SendConsoleMessage(clientNum,
@@ -369,7 +410,11 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
         }
 
         if (!_sorted[runName]) {
-            std::sort(run->second.begin(), run->second.end());
+            std::sort(run->second.begin(), run->second.end(), 
+                      [](const std::unique_ptr<Record>& lhs,
+                      const std::unique_ptr<Record>& rhs)->bool {
+              return lhs->time < rhs->time;
+            });
             _sorted[runName] = true;
         }
 
@@ -378,11 +423,11 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
                        % runName).str();
         auto rank = 1;
         for (auto &record : run->second) {
-            runRecords += (boost::format("^7%d ^7%s ^7%d %d\n")
+            runRecords += (boost::format("^7%d ^7%s ^7%s %s\n")
                            % rank
                            % record->playerName
-                           % record->time
-                           % record->date).str();
+                           % millisToString(record->time)
+                           % dateToFormat(record->date)).str();
             ++rank;
             if (rank == 50) {
                 break;
