@@ -283,6 +283,23 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
     }
 }
 
+void Timerun::sortRecords() 
+{
+    for (auto& record : _records)
+    {
+        std::string runName = record.first;
+        if (!_sorted[runName])
+        {
+            std::sort(record.second.begin(), record.second.end(),
+                [](const std::unique_ptr<Record>& lhs,
+                const std::unique_ptr<Record>& rhs)->bool {
+                return lhs->time < rhs->time;
+            });
+            _sorted[runName] = true;
+        }
+    }
+}
+
 bool Timerun::checkRecord(Player *player, int clientNum)
 {
     Record *recordToUpdate = nullptr;
@@ -313,6 +330,14 @@ bool Timerun::checkRecord(Player *player, int clientNum)
                                                      % minutes
                                                      % seconds
                                                      % millis).str());
+
+                    // Log the record just in case there's an issue with sqlite
+                    Printer::LogPrintln((boost::format("%d completed the run in %02d:%02d:%03d (%d)")
+                                         % player->userId
+                                         % minutes
+                                         % seconds
+                                         % millis
+                                         % player->completionTime).str());
                     // Old time was faster, inform client about the new time anyway
                 } else {
                     Printer::SendBannerMessage(clientNum, (boost::format("You completed %s ^7in %02d:%02d:%03d")
@@ -377,9 +402,13 @@ std::string dateToFormat(int date)
 
 void Timerun::printRecords(int clientNum, const std::string &map, const std::string &runName)
 {
+    sortRecords();
     // User wants to see the records of the current map
     if (map.length() == 0 || map == _currentMap) {
         if (runName.length() == 0) {
+
+            
+
             std::string toPrint = "#1 record for each run:\n";
             for (auto& record : _records)
             {
@@ -407,15 +436,6 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
             Printer::SendConsoleMessage(clientNum,
                                         (boost::format("^3error: ^7no records found by name %s.") % runName).str());
             return;
-        }
-
-        if (!_sorted[runName]) {
-            std::sort(run->second.begin(), run->second.end(), 
-                      [](const std::unique_ptr<Record>& lhs,
-                      const std::unique_ptr<Record>& rhs)->bool {
-              return lhs->time < rhs->time;
-            });
-            _sorted[runName] = true;
         }
 
         std::string runRecords;

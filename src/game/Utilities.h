@@ -11,20 +11,20 @@ class Utilities {
 public:
     /**
      * Returns the list of spectators spectating client
-     * @clientNum The client
+     * @param clientNum The client
      */
     static std::vector<int> getSpectators(int clientNum);
 
     /**
      * Disables all cheats for player. Resets saves
-     * @clientNum the client
+     * @param clientNum the client
      * TODO: Should create a Game-object that handles these
      */
     static void startRun(int clientNum);
 
     /**
      * Enables all cheats for player.
-     * @clientNum the player
+     * @param clientNum the player
      */
     static void stopRun(int clientNum);
 

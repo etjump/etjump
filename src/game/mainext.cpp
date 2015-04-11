@@ -155,7 +155,7 @@ void OnGameInit()
     game.customMapVotes->Load();
     game.races->Init();
     game.motd->Initialize();
-    game.timerun->init("etjump/timeruns_test_database.db", level.rawmapname);
+    game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
     
     // this has to be initialized here
     game.randomMapMode = boost::shared_ptr<RandomMapMode>(new RandomMapMode(level.time, 

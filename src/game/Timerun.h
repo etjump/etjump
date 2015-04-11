@@ -90,6 +90,12 @@ public:
      */
     void interrupt(int clientNum);
 
+    /**
+     * Prints either top 50 records from 1 run or all #1s from all runs
+     * @param clientNum the player who's calling the function
+     * @param map The map 
+     * @param runName The run
+     */
     void printRecords(int clientNum, const std::string& map, const std::string&runName);
 
     std::string getMessage() const
@@ -104,6 +110,11 @@ private:
      * @param clientNum The client slot number of the player
      */
     bool checkRecord(Player *player, int clientNum);
+
+    /**
+     * Sorts all records 
+     */
+    void sortRecords();
 
     /**
      * Error or other message
