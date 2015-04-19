@@ -26,6 +26,8 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 {
     SQLiteWrapper wrapper;
 
+    Printer::LogPrintln("Opening timeruns database: " + database);
+
     _records.clear();
     for (auto &p : _players) {
         p = nullptr;
@@ -360,6 +362,13 @@ bool Timerun::checkRecord(Player *player, int clientNum)
         recordToUpdate->map = _currentMap;
         recordToUpdate->run = player->currentRunName;
         _records[player->currentRunName].push_back(std::unique_ptr<Record>(recordToUpdate));
+
+        Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
+                                         % player->name
+                                         % player->currentRunName
+                                         % minutes
+                                         % seconds
+                                         % millis).str());
     }
 
     _sorted[player->currentRunName] = false;

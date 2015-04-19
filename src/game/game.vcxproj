@@ -227,6 +227,7 @@
     <ClCompile Include="SQLiteWrapper.cpp" />
     <ClCompile Include="Timerun.cpp" />
     <ClCompile Include="Utilities.cpp" />
+    <ClCompile Include="Worker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="asyncoperations.hh" />
@@ -268,6 +269,7 @@
     <ClInclude Include="surfaceflags.h" />
     <ClInclude Include="Timerun.h" />
     <ClInclude Include="Utilities.h" />
+    <ClInclude Include="Worker.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc" />

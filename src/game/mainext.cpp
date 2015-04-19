@@ -15,8 +15,12 @@
 #include "randommapmode.hpp"
 #include "Timerun.h"
 #include "g_local.h"
+#include "Worker.h"
+#include <chrono>
 
 Game game;
+
+Worker worker;
 
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 {
@@ -229,6 +233,39 @@ qboolean OnConsoleCommand()
     Arguments argv = GetArgs();
     std::string command = (*argv)[0];
     boost::to_lower(command);
+
+    if (command == "push") {
+        static int count = 1;
+        if (argv->size() == 2)
+        {
+            int times = atoi(argv->at(1).c_str());
+            for (auto i = 0; i < times; i++)
+            {
+                G_LogPrintf("Adding a new one\n");
+                worker.produce([]() {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    G_LogPrintf("This is a function that will be executed %d.\n", count++);
+                });
+            }
+        }
+        else
+        {
+            worker.produce([]() {
+                G_LogPrintf("This is a function that will be executed %d.\n", count++);
+            });
+        }
+        return qtrue;
+    }
+
+    if (command == "work") {
+        worker.work();
+        return qtrue;
+    }
+
+    if (command == "stop") {
+        worker.stop();
+        return qtrue;
+    }
 
     if (command == "generatemotd")
     {

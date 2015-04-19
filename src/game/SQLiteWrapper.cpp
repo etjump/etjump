@@ -16,7 +16,12 @@ bool SQLiteWrapper::open(const std::string &database)
         return false;
     }
 
-    sqlite3_exec(_db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+    rc = sqlite3_exec(_db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+    if (rc != SQLITE_OK) {
+        _message = sqlite3_errmsg(_db);
+        _errorCode = rc;
+        return false;
+    }
 
     return true;
 }
