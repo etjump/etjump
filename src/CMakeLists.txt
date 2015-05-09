@@ -171,6 +171,12 @@ FILE(GLOB QAGAME_SRC
 	"game/g_weapon.c"
 	"game/q_math.c"
 	"game/q_shared.c"
+	"game/Printer.cpp"
+	"game/Printer.h"
+	"game/Utilities.cpp"
+	"game/Utilities.h"
+	"game/Worker.cpp"
+	"game/Worker.h"
 )
 
 FILE(GLOB UI_SRC
@@ -193,7 +199,7 @@ FILE(GLOB UI_SRC
 add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
-add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC} game/Printer.cpp game/Printer.h game/Utilities.cpp game/Utilities.h game/Worker.cpp game/Worker.h)
+add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC} game/Users.cpp game/Users.h game/User.cpp game/User.h)
 set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
 target_link_libraries(qagame.mp.${ARCH} pthread)
 

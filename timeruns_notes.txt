@@ -1,0 +1,12 @@
+Run start
+- disable cheats
+	- noclip
+	- god
+	- remove weapons like flamer?
+	- reset speed on goto
+- inform client to start the timer
+- inform everyone else that clientNum started race
+
+Run checkpoint
+
+Run end

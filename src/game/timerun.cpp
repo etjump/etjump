@@ -18,7 +18,7 @@
 
 std::string GetColumnText(sqlite3_stmt *stmt, int index)
 {
-    const char *text = reinterpret_cast<const char*>(sqlite3_column_text(stmt, index));
+    auto text = reinterpret_cast<const char*>(sqlite3_column_text(stmt, index));
     return text ? text : "";
 }
 
@@ -136,7 +136,7 @@ void Timerun::stopTimer(int clientNum, int commandTime)
     }
 
     if (player->racing) {
-        int millis = commandTime - player->raceStartTime;
+        auto millis = commandTime - player->raceStartTime;
 
         player->completionTime = millis;
         checkRecord(player, clientNum);
@@ -314,6 +314,42 @@ bool Timerun::checkRecord(Player *player, int clientNum)
     millis = millis - seconds * 1000;
     int minutes = seconds / 60;
     seconds = seconds - minutes * 60;
+
+    auto run = _records.find(player->currentRunName);
+    // Atleast a single record already
+    if (run != _records.end())
+    {
+        // Check if the user has a previous record
+        auto end = std::end(run->second);
+        auto record = std::find_if(std::begin(run->second), end, [&player](const std::unique_ptr<Record>& prevRec)
+        {
+            return prevRec->run == player->currentRunName && prevRec->userId == player->userId;
+        });
+
+        // User has a previous record
+        if (record != end)
+        {
+            if (player->completionTime < (*record)->time)
+            {
+                (*record)->time = player->completionTime;
+                (*record)->date = static_cast<int>(t);
+                (*record)->playerName = player->name;
+                recordToUpdate = record->get();
+                update = true;
+
+                Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
+                    % player->name
+                    % player->currentRunName
+                    % minutes
+                    % seconds
+                    % millis).str());
+            }
+        }
+        else // User doesn't have a previous record
+        {
+            
+        }
+    }
 
     for (auto& run : _records) {
         for (auto& record : run.second) {

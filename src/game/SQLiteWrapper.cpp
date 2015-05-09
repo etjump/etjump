@@ -23,6 +23,9 @@ bool SQLiteWrapper::open(const std::string &database)
         return false;
     }
 
+    // Wait atleast 5000 ms for other threads to finish writing
+    sqlite3_busy_timeout(_db, 5000);
+
     return true;
 }
 
