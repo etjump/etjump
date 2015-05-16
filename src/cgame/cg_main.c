@@ -7,6 +7,7 @@
 
 
 #include "cg_local.h"
+#include "cg_mainext.h"
 
 displayContextDef_t cgDC;
 
@@ -3107,6 +3108,7 @@ cvarTable_t		cvarTable[] = {
             clientAC.vmMain = vmMain;
 
 #endif // AC_SUPPORT
+            InitGame();
             //SendGuid();
             //SendHWID();
             //UserinfoSendHWID();

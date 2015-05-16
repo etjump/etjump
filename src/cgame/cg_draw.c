@@ -4,6 +4,7 @@
 #include "cg_local.h"
 #include "../game/q_shared.h"
 
+
 #define STATUSBARHEIGHT 452
 char* BindingFromName(const char *cvar);
 void Controls_GetConfig( void );
@@ -5083,41 +5084,6 @@ void CG_DrawSpectatorInfo(void)
     }
 }
 
-void CG_DrawTimerunTimer(void)
-{
-	int startTime = 0;
-	int millis = 0;
-	int seconds = 0;
-	int minutes = 0;
-	int textWidth = 0;
-	int x = player_runTimerX.integer;
-	int y = player_runTimerY.integer;
-	char text[MAX_TOKEN_CHARS] = "\0";
-
-	if (!player_drawRunTimer.integer) {
-		return;
-	}
-
-	startTime = cg.timerunStartTime - 500;
-
-	if (cg.timerunActive) {
-		millis = cg.time - startTime;
-	} else {
-		millis = cg.timerunCompletionTime;
-	}
-
-	minutes = millis / 60000;
-	millis -= minutes * 60000;
-	seconds = millis / 1000;
-	millis -= seconds * 1000;
-
-	Com_sprintf(text, sizeof(text), "%02d:%02d:%03d", minutes, seconds, millis);
-
-	textWidth = CG_Text_Width_Ext(textWidth, 3, 0, &cgs.media.limboFont1) / 2;
-
-	CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, cg.runTimerColor, text, 0, 0, 0, &cgs.media.limboFont1);
-}
-
 /*
 =================
 CG_Draw2D
@@ -5254,13 +5220,11 @@ static void CG_Draw2D( void ) {
 
 		CG_DrawPersonalTimer();
         CG_DrawRunTimer();
-		CG_DrawTimerunTimer();
 
 		CG_DrawSpeed2();
         CG_DrawRouteDesign();
 		CG_DrawKeys();
         CG_DrawSpectatorInfo();
-        CG_DrawTimerunTimer();
 	} else {
 		if(cgs.eventHandling != CGAME_EVENT_NONE) {
 //			qboolean old = cg.showGameView;
@@ -5277,6 +5241,8 @@ static void CG_Draw2D( void ) {
 		CG_Fireteams_Draw();
 	}
 
+    drawExt();
+
 	// Info overlays
 	CG_DrawOverlays();
     
@@ -5287,8 +5253,6 @@ static void CG_Draw2D( void ) {
 	CG_DrawFlashBlend();
 
 	CG_DrawDemoRecording();
-
-    
 }
 
 // NERVE - SMF

@@ -159,6 +159,7 @@
     <ClCompile Include="..\game\bg_tracemap.c" />
     <ClCompile Include="..\sha-1\bg_sha.c" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="cg_drawext.cpp" />
     <ClCompile Include="cg_manual.c" />
     <ClCompile Include="cg_atmospheric.c" />
     <ClCompile Include="cg_character.c" />
@@ -204,6 +205,9 @@
     <ClCompile Include="..\game\q_math.c" />
     <ClCompile Include="..\game\q_shared.c" />
     <ClCompile Include="..\ui\ui_shared.c" />
+    <ClCompile Include="cg_mainext.cpp" />
+    <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="Drawable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\etjump\ui\menudef.h" />
@@ -213,12 +217,15 @@
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
+    <ClInclude Include="cg_mainext.h" />
     <ClInclude Include="cg_public.h" />
     <ClInclude Include="..\ui\keycodes.h" />
     <ClInclude Include="..\..\main\ui\menudef.h" />
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_sha1.h" />
+    <ClInclude Include="cg_timerun.h" />
+    <ClInclude Include="Drawable.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>

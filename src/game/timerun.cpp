@@ -102,31 +102,52 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 
 void Timerun::startTimer(const std::string &runName, int clientNum, const std::string& currentName, int raceStartTime)
 {
-    Player *player = _players[clientNum].get();
+    auto player = _players[clientNum].get();
 
     if (player == nullptr)
     {
         return;
     }
 
-    if (!player->racing) {
-        player->racing = true;
-        player->name = currentName;
-        player->raceStartTime = raceStartTime;
-        player->completionTime = 0;
-        player->currentRunName = runName;
-        Printer::SendBannerMessage(clientNum, (boost::format("^7Run %s ^7started!") % player->currentRunName).str());
-        auto spectators = Utilities::getSpectators(clientNum);
-        Printer::SendCommand(clientNum, (boost::format("timerun_start %d")
-                                         % (player->raceStartTime + 500)).str());
-        Printer::SendCommand(spectators, (boost::format("timerun_start_spec %d %d")
-                                          % clientNum
-                                          % (player->raceStartTime + 500)).str());
-        Utilities::startRun(clientNum);
+    if (player->racing)
+    {
+        return;
     }
+
+    player->racing = true;
+    player->name = currentName;
+    player->runStartTime = raceStartTime;
+    player->completionTime = 0;
+    player->currentRunName = runName; 
+    startNotify(clientNum);
+    
+    Utilities::startRun(clientNum);
 }
 
-void Timerun::stopTimer(int clientNum, int commandTime)
+void Timerun::startNotify(int clientNum) {
+    auto player = _players[clientNum].get();
+    auto spectators = Utilities::getSpectators(clientNum);
+    auto previousRecord = findPreviousRecord(player);
+    
+    int fastestCompletionTime = -1;
+    if (previousRecord)
+    {
+        fastestCompletionTime = previousRecord->time;
+    }
+    Printer::SendCommand(clientNum, (boost::format("timerun_start %d %s %d")
+                             % (player->runStartTime)
+                             % player->currentRunName
+                             % fastestCompletionTime
+                         ).str());
+    Printer::SendCommand(spectators, (boost::format("timerun_start_spec %d %d %s %d")
+                             % clientNum
+                             % (player->runStartTime)
+                             % (player->currentRunName)
+                             % fastestCompletionTime
+                         ).str());
+}
+
+void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 {
     Player *player = _players[clientNum].get();
 
@@ -135,20 +156,23 @@ void Timerun::stopTimer(int clientNum, int commandTime)
         return;
     }
 
-    if (player->racing) {
-        auto millis = commandTime - player->raceStartTime;
+    if (player->racing && player->currentRunName == runName) {
+        auto millis = commandTime - player->runStartTime;
 
         player->completionTime = millis;
         checkRecord(player, clientNum);
 
         player->racing = false;
-        player->currentRunName = "";
 
-        Printer::SendCommand(clientNum, (boost::format("timerun_stop %d")
-                                         % millis).str());
-        Printer::SendCommand(Utilities::getSpectators(clientNum), (boost::format("timerun_stop_spec %d %d")
-                                                                   % clientNum
-                                                                   % millis).str());
+        Printer::SendCommand(clientNum, (boost::format("timerun_stop %d %s")
+                                 % millis
+                                 % player->currentRunName).str());
+        auto spectators = Utilities::getSpectators(clientNum);
+        Printer::SendCommand(spectators, (boost::format("timerun_stop_spec %d %d %s")
+                                 % clientNum
+                                 % millis
+                                 % player->currentRunName).str());
+        player->currentRunName = "";
         Utilities::stopRun(clientNum);
     }
 }
@@ -165,7 +189,7 @@ void Timerun::interrupt(int clientNum)
     player->currentRunName = "";
 
     Utilities::stopRun(clientNum);
-    Printer::SendCommand(clientNum, "timerun_stop");
+    Printer::SendCommand(clientNum, "timerun_interrupt");
 }
 
 /**
@@ -285,6 +309,76 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
     }
 }
 
+void Timerun::SaveRecord(Record* record, bool update) {
+    std::thread thr(::SaveRecord, update, _database, *record);
+    thr.detach();
+}
+
+void Timerun::addNewRecord(Player* player, int clientNum) {
+    auto record = new Record();
+    time_t currentTime;
+    time(&currentTime);
+    record->playerName = player->name;
+    record->time = player->completionTime;
+    record->date = static_cast<int>(currentTime);
+    record->userId = player->userId;
+    record->map = _currentMap;
+    record->run = player->currentRunName;
+    _records[player->currentRunName].push_back(std::unique_ptr<Record>(record));
+    _sorted[player->currentRunName] = false;
+    SaveRecord(record, false);
+    Printer::SendCommandToAll((boost::format("record %d %s %d") 
+        % clientNum 
+        % player->currentRunName 
+        % player->completionTime).str());
+}
+
+void Timerun::updatePreviousRecord(Record* previousRecord, Player* player, int clientNum) {
+    time_t currentTime;
+    time(&currentTime);
+
+    if (previousRecord->time > player->completionTime)
+    {
+        Printer::SendCommandToAll((boost::format("record %d %s %d")
+            % clientNum
+            % player->currentRunName
+            % player->completionTime).str());
+
+        previousRecord->time = player->completionTime;
+        previousRecord->date = static_cast<int>(currentTime);
+        previousRecord->playerName = player->name;
+        _sorted[player->currentRunName] = false;
+        SaveRecord(previousRecord, true);
+    }
+    else // Previous record was faster 
+    {
+        Printer::SendCommandToAll((boost::format("completion %d %s %d")
+            % clientNum
+            % player->currentRunName
+            % player->completionTime).str());
+    }
+}
+
+Timerun::Record* Timerun::findPreviousRecord(Player* player) {
+    auto run = _records.find(player->currentRunName);
+    if (run == _records.end())
+    {
+        return nullptr;
+    }
+
+    auto begin = std::begin(run->second);
+    auto end = std::end(run->second);
+    auto record = std::find_if(begin, end, [&player](const std::unique_ptr<Record>& r)
+    {
+        return r->run == player->currentRunName && r->userId == player->userId;
+    });
+    if (record != end)
+    {
+        return record->get();
+    }
+    return nullptr;
+}
+
 void Timerun::sortRecords() 
 {
     for (auto& record : _records)
@@ -302,7 +396,7 @@ void Timerun::sortRecords()
     }
 }
 
-bool Timerun::checkRecord(Player *player, int clientNum)
+void Timerun::checkRecord(Player *player, int clientNum)
 {
     Record *recordToUpdate = nullptr;
     bool update = false;
@@ -315,103 +409,16 @@ bool Timerun::checkRecord(Player *player, int clientNum)
     int minutes = seconds / 60;
     seconds = seconds - minutes * 60;
 
-    auto run = _records.find(player->currentRunName);
-    // Atleast a single record already
-    if (run != _records.end())
+    auto previousRecord = findPreviousRecord(player);
+    if (previousRecord)
     {
-        // Check if the user has a previous record
-        auto end = std::end(run->second);
-        auto record = std::find_if(std::begin(run->second), end, [&player](const std::unique_ptr<Record>& prevRec)
-        {
-            return prevRec->run == player->currentRunName && prevRec->userId == player->userId;
-        });
-
-        // User has a previous record
-        if (record != end)
-        {
-            if (player->completionTime < (*record)->time)
-            {
-                (*record)->time = player->completionTime;
-                (*record)->date = static_cast<int>(t);
-                (*record)->playerName = player->name;
-                recordToUpdate = record->get();
-                update = true;
-
-                Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
-                    % player->name
-                    % player->currentRunName
-                    % minutes
-                    % seconds
-                    % millis).str());
-            }
-        }
-        else // User doesn't have a previous record
-        {
-            
-        }
+        updatePreviousRecord(previousRecord, player, clientNum);
+    }
+    else
+    {
+        addNewRecord(player, clientNum);
     }
 
-    for (auto& run : _records) {
-        for (auto& record : run.second) {
-            if (record->userId == player->userId) {
-                // New time is faster
-                if (player->completionTime < record->time) {
-                    record->time = player->completionTime;
-                    record->date = static_cast<int>(t);
-                    record->playerName = player->name;
-                    recordToUpdate = record.get();
-                    update = true;
-
-                    Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
-                                                     % player->name
-                                                     % player->currentRunName
-                                                     % minutes
-                                                     % seconds
-                                                     % millis).str());
-
-                    // Log the record just in case there's an issue with sqlite
-                    Printer::LogPrintln((boost::format("%d completed the run in %02d:%02d:%03d (%d)")
-                                         % player->userId
-                                         % minutes
-                                         % seconds
-                                         % millis
-                                         % player->completionTime).str());
-                    // Old time was faster, inform client about the new time anyway
-                } else {
-                    Printer::SendBannerMessage(clientNum, (boost::format("You completed %s ^7in %02d:%02d:%03d")
-                                                           % player->currentRunName
-                                                           % minutes
-                                                           % seconds
-                                                           % millis).str());  
-                    return true;
-                }
-            }
-        }
-    }
-
-    if (!recordToUpdate) {
-        recordToUpdate = new Record();
-        recordToUpdate->playerName = player->name;
-        recordToUpdate->time = player->completionTime;
-        recordToUpdate->date = static_cast<int>(t);
-        recordToUpdate->userId = player->userId;
-        recordToUpdate->map = _currentMap;
-        recordToUpdate->run = player->currentRunName;
-        _records[player->currentRunName].push_back(std::unique_ptr<Record>(recordToUpdate));
-
-        Printer::BroadcastBannerMessage((boost::format("%s ^7completed %s in %02d:%02d:%03d")
-                                         % player->name
-                                         % player->currentRunName
-                                         % minutes
-                                         % seconds
-                                         % millis).str());
-    }
-
-    _sorted[player->currentRunName] = false;
-    std::thread thr(::SaveRecord, update, _database, *recordToUpdate);
-    thr.detach();
-
-    return true;
 }
 
 bool Timerun::clientConnect(int clientNum, int userId)
@@ -440,7 +447,7 @@ std::string millisToString(int millis)
 std::string dateToFormat(int date)
 {
     char buffer[128] = "\0";
-    time_t t = static_cast<time_t>(date);
+    auto t = static_cast<time_t>(date);
     strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
     return buffer;
 }
@@ -494,7 +501,7 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
                            % millisToString(record->time)
                            % dateToFormat(record->date)).str();
             ++rank;
-            if (rank == 50) {
+            if (rank > 50) {
                 break;
             }
         }

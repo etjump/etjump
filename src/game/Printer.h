@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/format.hpp>
 
 class Printer {
 public:
@@ -65,7 +66,11 @@ public:
      * @param message The message to be sent
      */
     static void BroadcastBannerMessage(const std::string& message);
-
+    /**
+    * Sends a banner print message to all clients.
+    * @param message The message to be sent
+    */
+    static void BroadCastBannerMessage(const boost::format& fmt);
     /**
      * Sends a command to client specified by clientNum. This should probably
      * be elsewhere but is here for now.
@@ -80,6 +85,12 @@ public:
      * @param command The command to send to users
      */
     static void SendCommand(std::vector<int> clientNums, const std::string& command);
+
+    /**
+    * Sends a command to all clients 
+    * @param command The command to send to users
+    */
+    static void SendCommandToAll(const std::string& command);
 private:
 };
 

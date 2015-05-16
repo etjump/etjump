@@ -191,6 +191,18 @@
     <ClCompile Include="cg_manual.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cg_mainext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_timerun.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_drawext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -237,6 +249,15 @@
     </ClInclude>
     <ClInclude Include="..\..\etjump\ui\menumacros.h">
       <Filter>Menu files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_mainext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_timerun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

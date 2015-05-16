@@ -9,6 +9,9 @@
  *
 */
 
+#ifndef CG_LOCAL_H
+#define CG_LOCAL_H
+
 #include "../game/q_shared.h"
 #include "tr_types.h"
 #include "../game/bg_public.h"
@@ -3690,3 +3693,10 @@ void SendGuid();
 
 
 char *G_SHA1(const char* str);
+
+//
+// cg_drawext.cpp
+// 
+void drawExt();
+
+#endif // CG_LOCAL_H

@@ -196,7 +196,7 @@ FILE(GLOB UI_SRC
 )
 
 # cgame library building
-add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
+add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC} cgame/Timerun.cpp cgame/Timerun.h)
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
 add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC} game/Users.cpp game/Users.h game/User.cpp game/User.h)

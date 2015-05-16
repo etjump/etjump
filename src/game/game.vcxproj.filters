@@ -192,9 +192,6 @@
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mainext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="admin\session.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
@@ -256,6 +253,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Worker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

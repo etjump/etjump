@@ -19,7 +19,7 @@ std::vector<int> Utilities::getSpectators(int clientNum)
             continue;
         }
 
-        if (player->client) {
+        if (!player->client) {
             continue;
         }
 
@@ -27,7 +27,7 @@ std::vector<int> Utilities::getSpectators(int clientNum)
             continue;
         }
 
-        if (player->client->sess.spectatorClient == clientNum) {
+        if (player->client->ps.clientNum == clientNum) {
             spectators.push_back(g_entities - player);
         }
     }

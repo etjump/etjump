@@ -3,6 +3,7 @@
 // be a valid snapshot this frame
 
 #include "cg_local.h"
+#include "cg_mainext.h"
 
 #define SCOREPARSE_COUNT	9
 
@@ -2598,55 +2599,12 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-    if (!Q_stricmp(cmd, "timerun_start"))
+    if (CG_ServerCommandExt(cmd))
     {
-		cg.timerunActive = qtrue;
-		cg.timerunStartTime = atoi(CG_Argv(1));
         return;
     }
 
-	if (!Q_stricmp(cmd, "timerun_start_spec"))
-	{
-//		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) {
-//			return;
-//		}
-//
-//		cg.timerunActive = qtrue;
-//		cg.timerunStartTime = atoi(CG_Argv(2));
 
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "timerun_stop"))
-	{
-		cg.timerunActive = qfalse;
-		if (trap_Argc() > 1) {
-			cg.timerunCompletionTime = atoi(CG_Argv(1));
-		} else {
-			cg.timerunStartTime = 0;
-			cg.timerunCompletionTime = 0;
-		}
-
-
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "timerun_stop_spec"))
-	{
-		return;
-	}
-
-    if (!Q_stricmp(cmd, "timerun_end"))
-    {
-        cg.raceIsActive = qfalse;
-        cg.raceTime = atoi(CG_Argv(1));
-        return;
-    }
-
-	if( CG_Debriefing_ServerCommand( cmd ) ) {
-		return;
-	}
-	
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
 

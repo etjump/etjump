@@ -36,7 +36,7 @@ public:
                   userId(userId),
                   name(""),
                   currentRunName(""),
-                  raceStartTime(0),
+                  runStartTime(0),
                   completionTime(0)
         {
 
@@ -45,7 +45,7 @@ public:
         bool racing;
         std::string name;
         std::string currentRunName;
-        int raceStartTime;
+        int runStartTime;
         int completionTime;
     };
 
@@ -71,9 +71,15 @@ public:
      * @param runName The run name player is trying to start
      * @param clientNum The player client number that started the run
      * @param playerName The players current name that will be stored to db if he makes a new record
-     * @param raceStartTime The time when racing was started
+     * @param runStartTime The time when racing was started
      */
     void startTimer(const std::string& runName, int clientNum, const std::string& currentName, int raceStartTime);
+
+    /**
+     * Notifies the client and client's spectators about a run that just started
+     * @param clientNum The player who started the run
+     */
+    void startNotify(int clientNum);
 
     /**
      * When a player touches the stop timer this function is called.
@@ -82,7 +88,7 @@ public:
      * @param clientNum Player's client number
      * @param commandTime client's ps.commandTime (used to get the completion time)
      */
-    void stopTimer(int clientNum, int commandTime);
+    void stopTimer(int clientNum, int commandTime, std::string runName);
 
     /**
      * Interrupts the player's current run.
@@ -109,12 +115,41 @@ private:
      * @param The player who's record we're checking
      * @param clientNum The client slot number of the player
      */
-    bool checkRecord(Player *player, int clientNum);
+    void checkRecord(Player *player, int clientNum);
 
     /**
      * Sorts all records 
      */
     void sortRecords();
+
+    /**
+     * Finds the previous record of a player's current run
+     * @param Player the player who's record we're looking for
+     * @return Record * A pointer to the record
+     */
+    Record *findPreviousRecord(Player *player);
+
+    /**
+     * Updates the previous record if new one is faster
+     * @param previousRecord The pointer to the previous record
+     * @param player Pointer to the player who's record we're updating
+     * @param clientNum Player's client num
+     */
+    void updatePreviousRecord(Record *previousRecord, Player *player, int clientNum);
+
+    /**
+     * Adds a new record
+     * @param player The player who's record we're adding
+     * @param clientNum player's clientNum
+     */
+    void addNewRecord(Player *player, int clientNum);
+
+    /**
+     * Spawns a thread that will save the record
+     * @param record The record that will be added/updated
+     * @param update Is the record a new one or is it getting updated
+     */
+    void SaveRecord(Record *record, bool update);
 
     /**
      * Error or other message

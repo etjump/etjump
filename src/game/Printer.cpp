@@ -3,6 +3,8 @@
 //
 
 #include "Printer.h"
+#include <boost/format.hpp>
+
 extern "C" {
 #include "g_local.h"
 }
@@ -84,6 +86,12 @@ void Printer::BroadcastBannerMessage(const std::string &message)
     G_Printf("%s\n", message.c_str());
 }
 
+void Printer::BroadCastBannerMessage(const boost::format &fmt) 
+{
+    trap_SendServerCommand(-1, va("cpm \"%s\n\"", fmt.str().c_str()));
+    G_Printf("%s\n", fmt.str().c_str());
+}
+
 void Printer::SendBannerMessage(int clientNum, const std::string &message)
 {
     if (clientNum == CONSOLE_CLIENT_NUMBER) {
@@ -96,6 +104,10 @@ void Printer::SendBannerMessage(int clientNum, const std::string &message)
 void Printer::SendCommand(int clientNum, const std::string &command)
 {
     trap_SendServerCommand(clientNum, command.c_str());
+}
+
+void Printer::SendCommandToAll(const std::string& command) {
+    trap_SendServerCommand(-1, command.c_str());
 }
 
 void Printer::SendCommand(std::vector<int> clientNums, const std::string &command)
