@@ -5,6 +5,12 @@
 #include "cg_timerun.h"
 extern "C" {
 #include "cg_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 }
 
 #include <string>
@@ -34,13 +40,13 @@ void Timerun::draw()
         millis = _completionTime;
     }
 
-    auto color = colorWhite;
+    vec4_t *color = &colorWhite;
 
     if (_fastestTime > 0)
     {
         if (millis > _fastestTime)
         {
-            color = colorRed;
+            color = &colorRed;
         }
     }
 
@@ -58,7 +64,7 @@ void Timerun::draw()
     auto x = player_runTimerX.integer;
     auto y = player_runTimerY.integer;
 
-    CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, color, text.c_str(), 0, 0, 0, &cgs.media.limboFont1);
+    CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0, 0, &cgs.media.limboFont1);
 }
 
 void Timerun::startTimerun(const std::string &runName, int startTime, int previousRecord)
@@ -76,7 +82,7 @@ void Timerun::startTimerun(const std::string &runName, int startTime, int previo
     }
 
     playerTimes->second[runName] = previousRecord;
-    _fastestTime = previousRecord;
+    _fastestTime = previousRecord; 
 }
 
 void Timerun::startSpectatorTimerun(int clientNum, const std::string &runName, int startTime, int previousRecord)
@@ -117,7 +123,7 @@ void Timerun::stopTimerun(int completionTime)
 
 void Timerun::record(int clientNum, std::string runName, int completionTime) {
 
-    auto previousTime = NO_PREVIOUS_RECORD;
+    int previousTime = NO_PREVIOUS_RECORD;
 
     auto playerTimes = _fastestTimes.find(clientNum);
     if (playerTimes != _fastestTimes.end())
@@ -166,7 +172,7 @@ void Timerun::record(int clientNum, std::string runName, int completionTime) {
 
 
 void Timerun::completion(int clientNum, std::string runName, int completionTime) {
-    auto previousRecord = NO_PREVIOUS_RECORD;
+    int previousRecord = NO_PREVIOUS_RECORD;
     auto playerTimes = _fastestTimes.find(clientNum);
     if (playerTimes != _fastestTimes.end())
     {

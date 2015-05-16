@@ -202,7 +202,8 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 {
     SQLiteWrapper wrapper;
     if (!wrapper.open(database)) {
-        // TODO: print error
+        Printer::LogPrintln((boost::format("SaveRecord: Couldn't open database to save the record. error code: %d. error message: %s.") 
+            % wrapper.errorCode() % wrapper.errorMessage()).str());
         return;
     }
 
@@ -328,7 +329,7 @@ void Timerun::addNewRecord(Player* player, int clientNum) {
     _sorted[player->currentRunName] = false;
     SaveRecord(record, false);
     Printer::SendCommandToAll((boost::format("record %d %s %d") 
-        % clientNum 
+        % clientNum     
         % player->currentRunName 
         % player->completionTime).str());
 }

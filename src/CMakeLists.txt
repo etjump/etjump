@@ -44,6 +44,7 @@ FILE(GLOB CGAME_SRC
 	"cgame/cg_consolecmds.c"
 	"cgame/cg_debriefing.c"
 	"cgame/cg_draw.c"
+	"cgame/cg_drawext.cpp"
 	"cgame/cg_drawCHS.c"
 	"cgame/cg_drawtools.c"
 	"cgame/cg_effects.c"
@@ -57,6 +58,7 @@ FILE(GLOB CGAME_SRC
 	"cgame/cg_loadpanel.c"
 	"cgame/cg_localents.c"
 	"cgame/cg_main.c"
+	"cgame/cg_mainext.cpp"
 	"cgame/cg_marks.c"
 	"cgame/cg_missionbriefing.c"
 	"cgame/cg_multiview.c"
@@ -74,6 +76,7 @@ FILE(GLOB CGAME_SRC
 	"cgame/cg_spawn.c"
 	"cgame/cg_statsranksmedals.c"
 	"cgame/cg_syscalls.c"
+	"cgame/cg_timerun.cpp"
 	"cgame/cg_trails.c"
 	"cgame/cg_view.c"
 	"cgame/cg_weapons.c"
@@ -95,6 +98,8 @@ FILE(GLOB CGAME_SRC
 	"game/q_math.c"
 	"game/q_shared.c"
 	"ui/ui_shared.c"
+	"cgame/Drawable.cpp"
+
 )
 
 FILE(GLOB QAGAME_SRC
@@ -177,6 +182,7 @@ FILE(GLOB QAGAME_SRC
 	"game/Utilities.h"
 	"game/Worker.cpp"
 	"game/Worker.h"
+	"game/Timerun.cpp"
 )
 
 FILE(GLOB UI_SRC
@@ -196,10 +202,10 @@ FILE(GLOB UI_SRC
 )
 
 # cgame library building
-add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC} cgame/Timerun.cpp cgame/Timerun.h)
+add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
-add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC} game/Users.cpp game/Users.h game/User.cpp game/User.h)
+add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC})
 set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
 target_link_libraries(qagame.mp.${ARCH} pthread)
 
