@@ -969,7 +969,7 @@ namespace AdminCommands
 
         if (!game.database->UserExists(id))
         {
-            ChatPrintTo(ent, "^3edituser: ^7used does not exist.");
+            ChatPrintTo(ent, "^3edituser: ^7user does not exist.");
             return false;
         }
 

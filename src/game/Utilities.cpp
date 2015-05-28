@@ -49,6 +49,12 @@ void Utilities::startRun(int clientNum)
     // same thing for god mode
     player->flags &= ~FL_GODMODE;
     ResetSavedPositions(player);
+
+    // Disable any weapons except kife
+    player->client->ps.weapons[0] = 0;
+    player->client->ps.weapons[1] = 0;
+
+    AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
 }
 
 void Utilities::stopRun(int clientNum)

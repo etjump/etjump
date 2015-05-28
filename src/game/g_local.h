@@ -1537,6 +1537,7 @@ void G_StartPlayerAppropriateSound(gentity_t *ent, char* soundType);
 void SetWolfSpawnWeapons( gclient_t *client );
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce(gentity_t *ent); // JPW NERVE
+qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int ammoclip, qboolean setcurrent);
 
 //
 // g_character.c

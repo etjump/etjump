@@ -150,7 +150,7 @@ void Timerun::record(int clientNum, std::string runName, int completionTime) {
     if (previousTime != NO_PREVIOUS_RECORD)
     {
         CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d! ^7(-^2%02d:%02d:%03d^7)")
-            % cgs.clientinfo[cg.snap->ps.clientNum].name
+            % cgs.clientinfo[clientNum].name
             % runName
             % minutes
             % seconds
@@ -162,7 +162,7 @@ void Timerun::record(int clientNum, std::string runName, int completionTime) {
     else
     {
         CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed %s in %02d:%02d:%03d!")
-            % cgs.clientinfo[cg.snap->ps.clientNum].name
+            % cgs.clientinfo[clientNum].name
             % runName
             % minutes
             % seconds
@@ -214,7 +214,7 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
             else
             {
                 CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d (+^1%02d:%02d:%03d^7).")
-                    % cgs.clientinfo[cg.snap->ps.clientNum].name
+                    % cgs.clientinfo[clientNum].name
                     % runName
                     % minutes
                     % seconds
@@ -237,7 +237,7 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
             else
             {
                 CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d.")
-                    % cgs.clientinfo[cg.snap->ps.clientNum].name
+                    % cgs.clientinfo[clientNum].name
                     % runName
                     % minutes
                     % seconds

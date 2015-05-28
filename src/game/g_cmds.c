@@ -640,9 +640,10 @@ void Cmd_God_f (gentity_t *ent)
 	qboolean godAll = qfalse;
 
 	if (ent->client->sess.timerunActive) {
-		CP("cp \"Cheats are disabled.\n\"");
-		return;
+        CP("cp \"You cannot use cheats while timerun is active.\n\"");
+        return;
 	}
+
 
 #ifdef EDITION999
 	if (!CheatsOk( ent ) ) {
@@ -812,7 +813,11 @@ void Cmd_Noclip_f( gentity_t *ent ) {
         }
 	}
 
-	
+    if (ent->client->sess.timerunActive)
+    {
+        CP("cp \"You cannot use cheats while timerun is active.\n\"");
+        return;
+    }
 
 	if(!Q_stricmp( name, "on" ) || atoi( name ) ) {
 		ent->client->noclip = qtrue;
