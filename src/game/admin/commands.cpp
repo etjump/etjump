@@ -1,5 +1,6 @@
 #include <bitset>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <sstream>
 #include "commands.hpp"
 #include "../g_local.hpp"
@@ -1250,6 +1251,32 @@ namespace AdminCommands
         return true;
     }
 
+    bool ListPlayers(gentity_t *ent, Arguments argv) {
+        
+        if (argv->size() == 1)
+        {
+            BeginBufferPrint();
+
+            BufferPrint(ent, "# ETJumpID Level Player\n");
+
+            for (auto i = 0; i < level.numConnectedClients; i++)
+            {
+                auto clientNum = level.sortedClients[i];
+                auto id = game.session->GetId(g_entities + clientNum);
+
+                BufferPrint(ent, (boost::format("^7%-2d%-9d%-6d%-s\n")
+                    % clientNum 
+                    % (id == -1 ? "-" : boost::lexical_cast<std::string>(id))
+                    % game.session->GetLevel(g_entities + clientNum)
+                    % (g_entities + clientNum)->client->pers.netname).str());
+            }
+
+            FinishBufferPrint(ent);            
+        }
+
+        return true;
+    }
+
     bool Map(gentity_t* ent, Arguments argv)
     {
         if (argv->size() != 2)
@@ -1905,7 +1932,7 @@ Commands::Commands()
     //adminCommands_["listcmds"] = AdminCommandPair(AdminCommands::ListCommands, CommandFlags::BASIC);
     adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
     adminCommands_["listmaps"] = AdminCommandPair(AdminCommands::ListMaps, CommandFlags::BASIC);
-    //adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
+    adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
     adminCommands_["listusers"] = AdminCommandPair(AdminCommands::ListUsers, CommandFlags::EDIT);
     adminCommands_["map"] = AdminCommandPair(AdminCommands::Map, CommandFlags::MAP);
     adminCommands_["mapinfo"] = AdminCommandPair(AdminCommands::MapInfo, CommandFlags::BASIC);
