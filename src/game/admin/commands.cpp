@@ -1257,6 +1257,22 @@ namespace AdminCommands
         {
             BeginBufferPrint();
 
+            if (!level.numConnectedClients)
+            {
+                BufferPrint(ent, "^7There are currently no connected players.\n");
+            }
+            else
+            {
+                if (level.numConnectedClients > 1)
+                {
+                    BufferPrint(ent, (boost::format("^7There are currently %d connected players.\n") % level.numConnectedClients).str());
+                }
+                else
+                {
+                    BufferPrint(ent, "^7There are currently 1 connected player.\n");
+                }
+            }
+
             BufferPrint(ent, "# ETJumpID Level Player\n");
 
             for (auto i = 0; i < level.numConnectedClients; i++)
