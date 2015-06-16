@@ -1213,6 +1213,7 @@ typedef struct {
 	int				timerunStartTime;
 	int 			timerunCompletionTime;
 
+    float             currentFovValue;
 
 } cg_t;
 
@@ -2412,6 +2413,13 @@ extern vmCvar_t         player_runTimerY;
 extern vmCvar_t         player_runTimerColor;
 
 extern vmCvar_t         player_drawMessageTime;
+
+extern vmCvar_t         movie_changeFovBasedOnSpeed;
+extern vmCvar_t         movie_fovMinSpeed;
+extern vmCvar_t         movie_fovMaxSpeed;
+extern vmCvar_t         movie_fovMin;
+extern vmCvar_t         movie_fovMax;
+extern vmCvar_t         movie_fovIncreasePerFrame;
 
 //
 // cg_main.c

@@ -5368,6 +5368,84 @@ void CG_DrawMiscGamemodels( void ) {
 	}
 }
 
+void SetFov(float fov) {
+    char buf[16];
+
+    cg.currentFovValue = fov;
+    Com_sprintf(buf, sizeof(buf), "%f", fov);
+    trap_Cvar_Set("cg_fov", buf);
+    trap_Cvar_Update(&cg_fov);
+}
+
+static void CG_ChangeFovBasedOnSpeed() {
+    float speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+    float speedDiff = speed - movie_fovMinSpeed.value;
+    float additionalFov = movie_fovMax.value - movie_fovMin.value;
+    float minMaxSpeedDiff = movie_fovMaxSpeed.value - movie_fovMinSpeed.value;
+    float currentSpeedFov = movie_fovMin.value;
+    static int fpsValue = 0;
+
+    if (!movie_changeFovBasedOnSpeed.integer)
+    {
+        return;
+    }
+
+    if (speed < movie_fovMinSpeed.value)
+    {
+        if (cg.currentFovValue - movie_fovIncreasePerFrame.value < movie_fovMin.value)
+        {
+            SetFov(movie_fovMin.value);
+        }
+        else
+        {
+            SetFov(cg.currentFovValue - movie_fovIncreasePerFrame.value);
+        }
+
+        return;
+    }
+
+    if (speed > movie_fovMaxSpeed.value)
+    {
+        if (cg.currentFovValue + movie_fovIncreasePerFrame.value > movie_fovMin.value)
+        {
+            SetFov(movie_fovMax.value);
+        }
+        else
+        {
+            SetFov(cg.currentFovValue + movie_fovIncreasePerFrame.value);
+        }
+
+        return;
+    }
+
+    if (minMaxSpeedDiff < 0)
+    {
+        minMaxSpeedDiff = 0;
+    }
+
+    currentSpeedFov = movie_fovMin.value + additionalFov * (speedDiff / minMaxSpeedDiff);
+
+    if (developer.integer)
+    {
+        CG_Printf("Speed: %f\nFov: %f\nCurrent fov: %f\n", speed, currentSpeedFov, cg.currentFovValue);
+    }
+
+    if (abs(cg.currentFovValue - currentSpeedFov) < movie_fovIncreasePerFrame.value)
+    {
+        return;
+    }
+
+    // We need to increase the current fov value
+    if (cg.currentFovValue < currentSpeedFov)
+    {
+        SetFov(cg.currentFovValue + movie_fovIncreasePerFrame.value);
+    }
+    else if (cg.currentFovValue > currentSpeedFov) // We need to decrease the current fov value
+    {
+        SetFov(cg.currentFovValue - movie_fovIncreasePerFrame.value);
+    }
+}
+
 /*
 =====================
 CG_DrawActive
@@ -5463,7 +5541,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		VectorCopy( baseOrg, cg.refdef_current->vieworg );
 	}
 
-
+    CG_ChangeFovBasedOnSpeed();
 
 	if( !cg.showGameView ) {
 		// draw status bar and other floating elements

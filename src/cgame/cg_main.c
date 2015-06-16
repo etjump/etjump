@@ -409,6 +409,13 @@ vmCvar_t            player_runTimerColor;
 
 vmCvar_t            player_drawMessageTime;
 
+vmCvar_t            movie_changeFovBasedOnSpeed;
+vmCvar_t            movie_fovMinSpeed;
+vmCvar_t            movie_fovMaxSpeed;
+vmCvar_t            movie_fovMin;
+vmCvar_t            movie_fovMax;
+vmCvar_t            movie_fovIncreasePerFrame;
+
 typedef struct {
       vmCvar_t	*vmCvar;
       char		*cvarName;
@@ -685,7 +692,14 @@ cvarTable_t		cvarTable[] = {
       {&player_runTimerX,                 "player_runTimerX", "280", CVAR_ARCHIVE},
       {&player_runTimerY,                 "player_runTimerY", "380", CVAR_ARCHIVE},
       {&player_runTimerColor,             "player_runTimerColor", "white", CVAR_ARCHIVE},
-      { &player_drawMessageTime, "player_drawMessageTime", "2", CVAR_ARCHIVE }
+      { &player_drawMessageTime, "player_drawMessageTime", "2", CVAR_ARCHIVE },
+
+      {&movie_changeFovBasedOnSpeed,    "movie_changeFovBasedOnSpeed", "0", CVAR_ARCHIVE},
+      {&movie_fovMinSpeed,              "movie_fovMinSpeed", "400", CVAR_ARCHIVE},
+      {&movie_fovMaxSpeed,              "movie_fovMaxSpeed", "1200", CVAR_ARCHIVE},
+      {&movie_fovMin,                   "movie_fovMin", "90", CVAR_ARCHIVE},
+      {&movie_fovMax,                   "movie_fovMax", "140", CVAR_ARCHIVE},
+      { &movie_fovIncreasePerFrame,     "movie_fovIncreasePerFrame", "1", CVAR_ARCHIVE}
       };
 
 
