@@ -5385,7 +5385,7 @@ static void CG_ChangeFovBasedOnSpeed() {
     float currentSpeedFov = movie_fovMin.value;
     static int fpsValue = 0;
 
-    if (!movie_changeFovBasedOnSpeed.integer)
+    if (!movie_changeFovBasedOnSpeed.integer && !cg.demoPlayback)
     {
         return;
     }
