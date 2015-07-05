@@ -55,6 +55,7 @@ void Utilities::startRun(int clientNum)
     player->client->ps.weapons[1] = 0;
 
     AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
+    ClearPortals(player);
 }
 
 void Utilities::stopRun(int clientNum)
