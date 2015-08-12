@@ -19,12 +19,13 @@
     <SccProvider>
     </SccProvider>
     <ProjectGuid>{48B830C1-1FB5-2909-44CD-4B255F0988DF}</ProjectGuid>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <PlatformToolset>v110_xp</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -51,9 +52,9 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Jussi\Documents\GitHub\etjump\src\pthread;F:\boost_1_49_0;C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>C:\Users\Jussi\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\Jussi\Documents\GitHub\etjump\src\pthread;C:\boost_1_53_0;C:\Users\Jussi\Documents\GitHub\etjump\src\sqlite;C:\Users\Jussi\boost_1_51_0;$(IncludePath)</IncludePath>
@@ -108,7 +109,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GAMEDLL;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GAMEDLL;_CRT_SECURE_NO_DEPRECATE;HAVE_STRUCT_TIMESPEC;_TIMESPEC_DEFINED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -271,9 +272,6 @@
     <ClInclude Include="Timerun.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="Worker.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="game.rc" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
