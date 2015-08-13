@@ -3659,20 +3659,6 @@ void Cmd_Call_f(gentity_t *ent)
 		return;
 	}
 
-	if (other->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != ent->client->sess.sessionTeam)
-	{
-        const weapon_t w = -1;
-        if (ent->client->sess.sessionTeam == TEAM_AXIS)
-        {
-            SetTeam(other, "r", qfalse, w, w, qtrue);
-
-        }
-        else if (ent->client->sess.sessionTeam == TEAM_ALLIES)
-        {
-            SetTeam(other, "b", qfalse, w, w, qtrue);
-        }
-	}
-
 	if (clientNum == ent - g_entities)
 	{
 		CP("cpm \"^7You can not ^3call ^7yourself!\n\"");
@@ -3689,6 +3675,20 @@ void Cmd_Call_f(gentity_t *ent)
 		CP("cpm \"^7Target player has disabled ^3call^7!\n\"");
 		CP("cpm \"^7You need to ask the other player to enable call by using ^3/nocall^7!\n\"");
 		return;
+	}
+
+	if (other->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != ent->client->sess.sessionTeam)
+	{
+		const weapon_t w = -1;
+		if (ent->client->sess.sessionTeam == TEAM_AXIS)
+		{
+			SetTeam(other, "r", qfalse, w, w, qtrue);
+
+		}
+		else if (ent->client->sess.sessionTeam == TEAM_ALLIES)
+		{
+			SetTeam(other, "b", qfalse, w, w, qtrue);
+		}
 	}
 
     VectorClear(other->client->ps.velocity);
@@ -3711,7 +3711,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent)
 	}
 
 	if(ent && ent->client->sess.muted && g_mute.integer & 1) {
-		CP("print \"^3WARNING: ^7You are muted.\n\"");
+		CP("print \"^NOTE: ^7You are muted.\n\"");
 		return;
 	}
 

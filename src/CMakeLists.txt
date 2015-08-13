@@ -126,7 +126,6 @@ FILE(GLOB QAGAME_SRC
 	"game/Timerun.cpp"
 	"sha-1/bg_sha.c"
 	"sha-1/sha1.c"
-	"sqlite/sqlite3.c"
 	"json/jsoncpp.cpp"
 	"game/bg_animation.c"
 	"game/bg_animgroup.c"
