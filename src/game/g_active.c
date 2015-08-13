@@ -1349,10 +1349,11 @@ void ClientThink_real( gentity_t *ent ) {
 			|| ( client->pers.maxFPS < 25 )) {
 			CP("chat \"^3Notification: ^7cheat cvars are disabled on this server. Check console for more information");
 			const char *message = "print \"^gThe following cvar values are not allowed on this server:\n"
-				"^7m_pitch:     (-0.01 <= x <= 0.01)\n"
-				"^7cl_freelook: (0)\n"
-				"^7pmove_Fixed: (0) with"
-				"^7com_maxFPS:  (25 < x or x > 125)\n\"";
+				"^7m_pitch:      (-0.01 <= x <= 0.01)\n"
+				"^7cl_yawspeed:  (not 0)\n"
+				"^7cl_freelook:  (0)\n"
+				"^7pmove_Fixed:  (0) with "
+				"^7com_maxFPS:   (25 < x or x > 125)\n\"";
 			CP(message);
 			trap_SendServerCommand(ent - g_entities, "cheatCvarsOff");
 			SetTeam(ent, "s", qtrue, -1, -1, qfalse);
