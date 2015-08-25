@@ -1846,6 +1846,8 @@ void SP_target_startTimer(gentity_t *self)
 {
 	SetTimerunIndex(self);
 
+	level.hasTimerun = qtrue;
+
     self->use = target_startTimer_use;
 }
 

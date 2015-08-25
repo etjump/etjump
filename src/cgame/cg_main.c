@@ -3115,7 +3115,7 @@ cvarTable_t		cvarTable[] = {
             cg.routeDesigner = qfalse;
             trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
             
-
+			cg.hasTimerun = qfalse;
 #ifdef AC_SUPPORT
 
             InitAntiCheat(clientAC);

@@ -23,6 +23,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 IF(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
+	# This has to be set to compile with -ffast-math
+	# Doesn't matter in ETJumps case as we don't store fps
+	add_definitions(-DSQLITE_OMIT_FLOATING_POINT)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
@@ -124,8 +127,15 @@ FILE(GLOB QAGAME_SRC
 	"game/g_save.cpp"
 	"game/SQLiteWrapper.cpp"
 	"game/Timerun.cpp"
+	"game/Printer.cpp"
+	"game/Printer.h"
+	"game/Utilities.cpp"
+	"game/Utilities.h"
+	"game/Worker.cpp"
+	"game/Worker.h"
 	"sha-1/bg_sha.c"
 	"sha-1/sha1.c"
+	"sqlite/sqlite3.c"
 	"json/jsoncpp.cpp"
 	"game/bg_animation.c"
 	"game/bg_animgroup.c"
@@ -175,13 +185,7 @@ FILE(GLOB QAGAME_SRC
 	"game/g_weapon.c"
 	"game/q_math.c"
 	"game/q_shared.c"
-	"game/Printer.cpp"
-	"game/Printer.h"
-	"game/Utilities.cpp"
-	"game/Utilities.h"
-	"game/Worker.cpp"
-	"game/Worker.h"
-	"game/Timerun.cpp"
+	
 )
 
 FILE(GLOB UI_SRC

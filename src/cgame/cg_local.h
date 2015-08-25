@@ -1214,7 +1214,7 @@ typedef struct {
 	int 			timerunCompletionTime;
 
     float             currentFovValue;
-
+	qboolean hasTimerun;
 } cg_t;
 
 #define	NUM_FUNNEL_SPRITES	21

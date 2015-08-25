@@ -38,6 +38,7 @@ public:
 	const MapInformation *getCurrentMap() const;
 	bool initialize(std::string database, const std::string& currentMap);
 	void runFrame(int levelTime);
+	void resetFields();
 	void saveChanges();
 	void increaseCallvoteCount(const char* map_name);
 	void increasePassedCount(const char* map_name);

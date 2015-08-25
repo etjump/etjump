@@ -38,11 +38,11 @@ YESNO( 8, 48, (SUBWINDOW_WIDTH)-4, 10, "Pmove_fixed:", .2, 8, "pmove_fixed", "Ma
 
 MULTI( 8, 60, (SUBWINDOW_WIDTH)-4, 10, "Max FPS:", 	.2, 8, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 }, "" )
 
-YESNO( 8, 72, (SUBWINDOW_WIDTH)-4, 10, "Load view angles:", .2, 8, "cg_loadviewangles", "Load command also loads view angles." )
+YESNO( 8, 72, (SUBWINDOW_WIDTH)-4, 10, "Load view angles:", .2, 8, "etj_loadviewangles", "Load command also loads view angles." )
 
-YESNO( 8, 84, (SUBWINDOW_WIDTH)-4, 10, "Hide players:", .2, 8, "cg_hide", "Hide other players." )
+YESNO( 8, 84, (SUBWINDOW_WIDTH)-4, 10, "Hide players:", .2, 8, "etj_hide", "Hide other players." )
 
-MULTI( 8, 96, (SUBWINDOW_WIDTH)-4, 10, "Hide distance:", 	.2, 8, "cg_hidedist", cvarFloatList { "Short" 64 "Normal" 128 "Long" 256 }, "" )
+MULTI( 8, 96, (SUBWINDOW_WIDTH)-4, 10, "Hide distance:", 	.2, 8, "etj_hidedist", cvarFloatList { "Short" 64 "Normal" 128 "Long" 256 }, "" )
 
 
 SUBWINDOW( 6, 116, (SUBWINDOW_WIDTH), 90, "BINDS" )

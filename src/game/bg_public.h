@@ -2471,6 +2471,7 @@ static const struct Manual commandManuals[] = {
     "All of the \"-cmds|-title|-greeting\" switches are optional "    
     "but atleast one must be given."},
     {"finger", "!finger [target]", "Displays target's admin level."},
+	{"finduser", "!finduser [name]", "Finds all matching users."},
     {"help", "!help\n!help [command]", "Prints useful information about commands."},
     {"kick", "!kick [target]\n!kick [target] [timeout]\n!kick [target] [timeout] [reason]",    "Kicks target player."},
     {"levelinfo", "!levelinfo [level]", "Prints useful information about a level."},

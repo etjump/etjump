@@ -164,6 +164,12 @@ void MapStatistics::saveChanges()
 		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to end transaction. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
 		return;
 	}
+
+	rc = sqlite3_close(db);
+	if (rc != SQLITE_OK)
+	{
+		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to close sqlite db. (%d) %s") % rc % sqlite3_errmsg(db)).str());
+	}
 }
 
 void MapStatistics::runFrame(int levelTime)
@@ -179,8 +185,21 @@ void MapStatistics::runFrame(int levelTime)
 	}
 }
 
+void MapStatistics::resetFields()
+{
+	_maps.clear();
+	_currentMap = nullptr;
+	_currentMillisecondsOnServer = 0;
+	_currentMillisecondsPlayed = 0;
+	_databaseName = "";
+	_originalSecondsPlayed = 0;
+	_previousLevelTime = 0;
+}
+
 bool MapStatistics::initialize(std::string database, const std::string& currentMap)
 {
+	resetFields();
+
 	if (database.length() == 0)
 	{
 		database = "maps_database.db";
@@ -413,7 +432,7 @@ const char* MapStatistics::randomMap() const
 		std::uniform_int_distribution<int> ui(0, _maps.size() - 1);
 
 		auto mapIdx = ui(re);
-		while (&_maps[mapIdx] == _currentMap)
+		while (&_maps[mapIdx] == _currentMap && _maps[mapIdx].isOnServer)
 		{
 			mapIdx = ui(re);
 		}

@@ -1249,7 +1249,7 @@ namespace AdminCommands
 		auto leastPlayed = game.mapStatistics->getLeastPlayed();
 
 		auto listedMaps = 0;
-		std::string buffer = "^Least played maps are:\n"
+		std::string buffer = "^zLeast played maps are:\n"
 			"^gMap                    Played                         Last played       Times played\n";
 		auto green = false;
 		for (auto& map : leastPlayed)
@@ -1603,9 +1603,6 @@ namespace AdminCommands
             int count = 1;
             if (argv->size() == 3) {
                 if (!ToInt(argv->at(2), count)) {
-                    if (count < 0) {
-                        count = 1;
-                    }
                     count = 1;
                 }
             }
@@ -1625,6 +1622,11 @@ namespace AdminCommands
                 ChatPrintTo(other, va("^3noclip: ^7you can use /noclip %d times.", count));
                 ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip %d times.", other->client->pers.netname, count));
             }
+			else if (count < 0)
+			{
+				ChatPrintTo(other, "^3noclip: ^7you can use /noclip infinitely.");
+				ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip infinitely.", other->client->pers.netname));
+			}
             else {
                 ChatPrintTo(other, "^3noclip: ^7you can use /noclip once.");
                 ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip once.", other->client->pers.netname));

@@ -1254,6 +1254,7 @@ typedef struct {
 #define MAX_TIMERUN_NAME_LENGTH 64
 	int timerunNamesCount;
 	char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
+	qboolean hasTimerun;
 } level_locals_t;
 
 typedef struct {

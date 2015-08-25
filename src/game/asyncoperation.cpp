@@ -21,6 +21,9 @@ bool AsyncOperation::OpenDatabase(std::string const& database)
     }
     sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
         NULL, NULL, NULL);
+
+	sqlite3_busy_timeout(db_, 5000);
+
     return true;
 }
 

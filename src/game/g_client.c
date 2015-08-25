@@ -1747,6 +1747,14 @@ void ClientBegin( int clientNum )
 
   LoadPositionsFromDatabase(ent);
     OnClientBegin(ent);
+	if (level.hasTimerun)
+	{
+		trap_SendServerCommand(clientNum, "hasTimerun 1");
+	} else
+	{
+		trap_SendServerCommand(clientNum, "hasTimerun 0");
+	}
+	
 }
 
 gentity_t *SelectSpawnPointFromList( char *list, vec3_t spawn_origin, vec3_t spawn_angles )

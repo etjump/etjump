@@ -422,7 +422,7 @@ void Timerun::checkRecord(Player *player, int clientNum)
 
 }
 
-bool Timerun::clientConnect(int clientNum, int userId)
+bool Timerun::clientConnect(int clientNum, int userId) 
 {
     _players[clientNum] = std::unique_ptr<Player>(new Player(userId));
 
