@@ -6,11 +6,10 @@
     <LocalDebuggerCommandArguments>+set fs_game etjump +set sv_pure 0 +devmap oasis</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>C:\ET\Modding\etded.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>D:\Modding\ET\etded.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
-    <LocalDebuggerWorkingDirectory>C:\ET\Mapping</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerAttach>true</LocalDebuggerAttach>
+    <LocalDebuggerCommandArguments>+set fs_game "etjump" +map oasis +set net_port 35000</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>D:\Modding\ET\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
 </Project>

@@ -5,9 +5,11 @@
     <RemoteDebuggerDebuggerType>NativeOnly</RemoteDebuggerDebuggerType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>C:\ET\Modding\et.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>D:\Modding\ET\et.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>
-    <LocalDebuggerAttach>true</LocalDebuggerAttach>
+    <LocalDebuggerAttach>false</LocalDebuggerAttach>
+    <LocalDebuggerCommandArguments>+connect localhost:35000</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>D:\Modding\ET\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

@@ -4,24 +4,24 @@
 #include "../g_save.hpp"
 #include "levels.hpp"
 #include "database.hpp"
-#include "../mapdata.h"
 #include "../races.hpp"
 #include "../custommapvotes.hpp"
 #include "../operationqueue.hpp"
 #include "../motd.hpp"
 #include "../timerun.h"
+#include "../map_statistics.h"
 
 Game::Game()
 {
-    levels = boost::shared_ptr<Levels>(new Levels());
-    database = boost::shared_ptr<Database>(new Database());
-    session = boost::shared_ptr<Session>(new Session(database.get()));
-    commands = boost::shared_ptr<Commands>(new Commands());
-    saves = boost::shared_ptr<SaveSystem>(new SaveSystem(session.get()));
-    mapData = boost::shared_ptr<MapData>(new MapData());
-    operationQueue = boost::shared_ptr<OperationQueue>(new OperationQueue());
-    races = boost::shared_ptr<Races>(new Races(operationQueue.get()));
-    customMapVotes = boost::shared_ptr<CustomMapVotes>(new CustomMapVotes());
-    motd = boost::shared_ptr<Motd>(new Motd());
-    timerun = boost::shared_ptr<Timerun>(new Timerun());
+    levels = std::make_shared<Levels>();
+    database = std::make_shared<Database>();
+    session = std::make_shared<Session>(database.get());
+    commands = std::make_shared<Commands>();
+    saves = std::make_shared<SaveSystem>(session.get());
+    operationQueue = std::make_shared<OperationQueue>();
+    races = std::make_shared<Races>(operationQueue.get());
+    customMapVotes = std::make_shared<CustomMapVotes>();
+    motd = std::make_shared<Motd>();
+    timerun = std::make_shared<Timerun>();
+	mapStatistics = std::make_shared<MapStatistics>();
 }

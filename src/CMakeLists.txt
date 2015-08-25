@@ -110,7 +110,7 @@ FILE(GLOB QAGAME_SRC
 	"game/admin/levels.cpp"
 	"game/admin/user.cpp"
 	"game/mainext.cpp"
-	"game/mapdata.cpp"
+	"game/map_statistics.cpp"
 	"game/races.cpp"
 	"game/custommapvotes.cpp"
 	"game/asyncoperation.cpp"

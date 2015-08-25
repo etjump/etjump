@@ -207,9 +207,6 @@
     <ClCompile Include="admin\database.cpp">
       <Filter>Source Files\Admin system</Filter>
     </ClCompile>
-    <ClCompile Include="mapdata.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="races.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -256,6 +253,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mainext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="map_statistics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -325,9 +325,6 @@
     <ClInclude Include="admin\database.hpp">
       <Filter>Header Files\Admin system</Filter>
     </ClInclude>
-    <ClInclude Include="mapdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="races.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -374,6 +371,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Worker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="map_statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

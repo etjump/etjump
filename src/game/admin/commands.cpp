@@ -1,16 +1,16 @@
 #include <bitset>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <sstream>
 #include "commands.hpp"
 #include "../g_local.hpp"
 #include "../g_save.hpp"
 #include "session.hpp"
-#include "../mapdata.h"
 #include "../races.hpp"
 #include "../custommapvotes.hpp"
 #include "../timerun.h"
 #include "../g_local.h"
+#include "../map_statistics.h"
+#include "../Utilities.h"
 
 typedef boost::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool(gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -1178,9 +1178,96 @@ namespace AdminCommands
         return true;
     }
 
+	std::string playedTimeFmtString(int seconds)
+	{
+		auto minutes = seconds / 60;
+		seconds -= minutes * 60;
+		auto hours = minutes / 60;
+		minutes -= hours * 60;
+		auto days = hours / 24;
+		hours -= days * 24;
+		auto weeks = days / 7;
+		days -= weeks * 7;
+
+		std::string str;
+		if (weeks)
+		{
+			if (weeks == 1)
+			{
+				str = (boost::format("%d week") % weeks).str();
+			} else
+			{
+				str = (boost::format("%d weeks") % weeks).str();
+			}
+		}
+		else if (days)
+		{
+			if (days == 1)
+			{
+				str = (boost::format("%d day") % days).str();
+			} else
+			{
+				str = (boost::format("%d days") % days).str();
+			}
+		}
+		else if (hours)
+		{
+			str = (boost::format("%d hours %d minutes %d seconds") % hours % minutes % seconds).str();
+		}
+		else if (minutes)
+		{
+			str = (boost::format("%d hours %d minutes %d seconds") % hours % minutes % seconds).str();
+		}
+		else if (seconds)
+		{
+			str = (boost::format("%d hours %d minutes %d seconds") % hours % minutes % seconds).str();
+		}
+
+		if (str.length() == 0)
+		{
+			str = "never";
+		}
+		return str;
+	}
+
     bool LeastPlayed(gentity_t *ent, Arguments argv)
     {
-        game.mapData->ListLeastPlayed(ent);
+		auto mapsToList = 10;
+		if (argv->size() == 2)
+		{
+			try
+			{
+				mapsToList = std::stoi((*argv)[1]);
+			}
+			catch (std::invalid_argument)
+			{
+				ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
+				return false;
+			}
+		}
+
+		auto leastPlayed = game.mapStatistics->getLeastPlayed();
+
+		auto listedMaps = 0;
+		std::string buffer = "^Least played maps are:\n"
+			"^gMap                    Played                         Last played       Times played\n";
+		auto green = false;
+		for (auto& map : leastPlayed)
+		{
+			if (listedMaps >= mapsToList)
+			{
+				break;
+			}
+
+			buffer += green ? "^g" : "^7";
+			buffer += (boost::format("%-22s %-30s %-17s     %s\n") % map->name % playedTimeFmtString(map->secondsPlayed) % Utilities::timestampToString(map->lastPlayed) % map->timesPlayed).str();
+			green = !green;
+
+			++listedMaps;
+		}
+
+		Utilities::toConsole(ent, buffer);
+
         return true;
     }
 
@@ -1230,7 +1317,47 @@ namespace AdminCommands
 
     bool ListMaps(gentity_t* ent, Arguments argv)
     {
-        game.mapData->ListMaps(ent);
+		auto perRow = 3;
+
+		if (argv->size() == 2)
+		{
+			try
+			{
+				perRow = std::stoi(argv->at(1), 0, 10);
+			} catch (std::invalid_argument)
+			{
+				ChatPrintTo(ent, (boost::format("^3listmaps: ^7%s^7 is not a number") % argv->at(1)).str());
+				return false;
+			}
+
+			if (perRow < 0)
+			{
+				ChatPrintTo(ent, (boost::format("^3listmaps: ^7second argument must be over 0") % argv->at(1)).str());
+				return false;
+			}
+		}
+
+		std::string buffer = "^zListing all maps on server:\n";
+		auto maps = game.mapStatistics->getMaps();
+		auto mapsOnCurrentRow = 0;
+		for (auto& map : maps)
+		{
+			++mapsOnCurrentRow;
+			if (mapsOnCurrentRow > perRow)
+			{
+				mapsOnCurrentRow = 1;
+				buffer += (boost::format("\n%-22s") % map).str();
+			} else
+			{
+				buffer += (boost::format("%-22s") % map).str();
+			}
+			
+		}
+
+		buffer += "\n";
+
+		Utilities::toConsole(ent, buffer);
+
         return true;
     }
 
@@ -1313,13 +1440,86 @@ namespace AdminCommands
 
     bool MapInfo(gentity_t* ent, Arguments argv)
     {
-        game.mapData->PrintMapInfo(ent, argv->size() > 1 ? argv->at(1) : level.rawmapname);
+		auto mi = game.mapStatistics->getMapInformation(argv->size() > 1 ? argv->at(1) : level.rawmapname);
+		auto currentMap = game.mapStatistics->getCurrentMap();
+
+		if (mi == nullptr)
+		{
+			ChatPrintTo(ent, "^3mapinfo: ^7Could not find the map");
+			return false;
+		}
+
+		int seconds = mi->secondsPlayed;
+		int minutes = seconds / 60;
+		seconds = seconds - minutes * 60;
+		int hours = minutes / 60;
+		minutes = minutes - hours * 60;
+		int days = hours / 24;
+		hours = hours - days * 24;
+
+		std::string message;
+		if (mi == currentMap)
+		{
+			message = (boost::format("^3mapinfo: ^7%s is the current map on the server. It has been played for a total of %d days %d hours %d minutes %d seconds.")
+				% mi->name
+				% days
+				% hours
+				% minutes
+				% seconds).str();
+		} else
+		{
+			if (mi->lastPlayed == 0)
+			{
+				message = (boost::format("^3mapinfo: ^7%s has never been played.")
+					% mi->name).str();
+			} else
+			{
+				message = (boost::format("^3mapinfo: ^7%s was last played on %s. It has been played for a total of %d days %d hours %d minutes %d seconds.")
+					% mi->name % Utilities::timestampToString(mi->lastPlayed) % days % hours % minutes % seconds).str();
+			}
+		}
+		ChatPrintTo(ent, message);
+
         return true;
     }
 
     bool MostPlayed(gentity_t *ent, Arguments argv)
     {
-        game.mapData->ListMostPlayed(ent);
+		auto mapsToList = 10;
+		if (argv->size() == 2)
+		{
+			try
+			{
+				mapsToList = std::stoi((*argv)[1]);
+			} catch (std::invalid_argument)
+			{
+				ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
+				return false;
+			}
+		} 
+
+		auto mostPlayed = game.mapStatistics->getMostPlayed();
+
+		auto listedMaps = 0;
+		std::string buffer = "^zMost played maps are:\n"
+							 "^gMap                    Played                         Last played       Times played\n";
+	    auto green = false;
+		for (auto& map : mostPlayed)
+		{
+			if (listedMaps >= mapsToList)
+			{
+				break;
+			}
+
+			buffer += green ? "^g" : "^7";
+			buffer += (boost::format("%-22s %-30s %-17s     %s\n") % map->name % playedTimeFmtString(map->secondsPlayed) % Utilities::timestampToString(map->lastPlayed) % map->timesPlayed).str();
+			green = !green;
+			
+			++listedMaps;
+		}
+
+		Utilities::toConsole(ent, buffer);
+
         return true;
     }
 

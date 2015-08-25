@@ -4107,7 +4107,20 @@ static void UI_LoadMovies() {
 
 }
 
+/* qsort C-string comparison function */
+int cstring_cmp(const void *a, const void *b)
+{
+	const char **ia = (const char **)a;
+	const char **ib = (const char **)b;
+	return strcmp(*ia, *ib);
+	/* strcmp functions works exactly as expected from
+	comparison function */
+}
 
+static void UI_SortDemos()
+{
+	qsort(uiInfo.demoList, uiInfo.demoCount, sizeof(char *), cstring_cmp);
+}
 
 /*
 ===============
@@ -4140,6 +4153,8 @@ static void UI_LoadDemos() {
 			uiInfo.demoList[i] = String_Alloc(demoname);
 			demoname += len + 1;
 		}
+
+		UI_SortDemos();
 	}
 
 }

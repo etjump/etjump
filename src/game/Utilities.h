@@ -6,6 +6,7 @@
 #define ETJUMP_UTILITIES_H
 
 #include <vector>
+#include "admin/levels.hpp"
 
 class Utilities {
 public:
@@ -28,6 +29,46 @@ public:
      */
     static void stopRun(int clientNum);
 
+	/**
+	 * Gets a list of all maps on the server currently
+	 */
+	static std::vector<std::string> getMaps();
+
+	/**
+	 * Sends an error message to server console
+	 */
+	static void Error(const std::string& error);
+
+	/**
+	 * Sends a message to server console
+	 */
+	static void Console(const std::string& message);
+
+	/**
+	* Log a message 
+	*/
+	static void Log(const std::string& message);
+
+	/**
+	 * Returns true if there is atleast one player on team
+	 */
+	static bool anyonePlaying();
+
+	/**
+	 * Returns the q3 engine path for a file
+	 */
+	static std::string getPath(const std::string& name);
+
+	/**
+	 * Converts timestamp to date 
+	 */
+	static std::string timestampToString(int timestamp, const char *format = "%d/%m/%y %H:%M:%S", const char *start = "never");
+
+	/**
+	 * Prints a message to entity's console
+	 * if ent == nullptr, prints to server console
+	 */
+	static void toConsole(gentity_t* ent, std::string message);
 private:
 };
 

@@ -460,9 +460,13 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qbo
 
 		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
 
+		G_increaseCallvoteCount(arg2);
+
 	// Vote action (vote has passed)
 	} else {
 		char s[MAX_STRING_CHARS];
+
+		G_increasePassedCount(level.voteInfo.vote_value);
 
 		if( g_gametype.integer == GT_WOLF_CAMPAIGN ) {
 			trap_Cvar_VariableStringBuffer("nextcampaign", s, sizeof(s));

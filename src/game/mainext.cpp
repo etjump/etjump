@@ -5,7 +5,6 @@
 #include "admin/levels.hpp"
 #include "admin/database.hpp"
 #include "races.hpp"
-#include "mapdata.h"
 #include "custommapvotes.hpp"
 #include "g_utilities.hpp"
 #include <boost/algorithm/string.hpp>
@@ -15,7 +14,7 @@
 #include "randommapmode.hpp"
 #include "Timerun.h"
 #include "g_local.h"
-#include "Worker.h"
+#include "map_statistics.h"
 #include <chrono>
 
 Game game;
@@ -87,7 +86,7 @@ Changes map to a random map
 */
 void ChangeMap()
 {
-    std::string map = game.mapData->RandomMap();
+    std::string map = game.mapStatistics->randomMap();
     CPAll((boost::format("Changing map to %s.") % map).str());
     trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
 }
@@ -115,6 +114,8 @@ void RunFrame(int levelTime)
     {
         game.randomMapMode->checkTime(levelTime);
     }
+
+	game.mapStatistics->runFrame(levelTime);
 }
 
 void OnGameInit()
@@ -145,22 +146,14 @@ void OnGameInit()
         }
     }
 
-    if (!game.mapData->Initialize())
-    {
-        G_Error("Map database load failed: %s.\n", game.mapData->GetMessage().c_str());
-    }
-    else
-    {
-        G_LogPrintf("Map database loaded successfully\n");
-    }
-
     game.customMapVotes->Load();
     game.races->Init();
     game.motd->Initialize();
     game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
+	game.mapStatistics->initialize(std::string(g_mapDatabase.string) + "2", level.rawmapname);
     
     // this has to be initialized here
-    game.randomMapMode = boost::shared_ptr<RandomMapMode>(new RandomMapMode(level.time, 
+    game.randomMapMode = std::shared_ptr<RandomMapMode>(new RandomMapMode(level.time, 
         g_randomMapModeInterval.integer, 
         InformUsersAboutMapChange, 
         ChangeMap));
@@ -171,8 +164,8 @@ void OnGameShutdown()
     WriteSessionData();
 //    game.database->ExecuteQueuedOperations();
     game.database->CloseDatabase();
-    game.mapData->Shutdown();
     game.operationQueue->Shutdown();
+	game.mapStatistics->saveChanges();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) 
@@ -260,11 +253,7 @@ qboolean OnConsoleCommand()
 
 const char *GetRandomMap()
 {
-    // For some reason returning game.mapData->RandomMap().c_str()
-    // messes up the map name
-    static char buf[MAX_TOKEN_CHARS] = "\0";
-    Q_strncpyz(buf, game.mapData->RandomMap().c_str(), sizeof(buf));
-    return buf;
+	return game.mapStatistics->randomMap();
 }
 
 const char *GetRandomMapByType(const char *customType)
@@ -363,4 +352,14 @@ void StopTimer(const char *runName, gentity_t *ent)
 void InterruptRun(gentity_t *ent)
 {
     game.timerun->interrupt(ClientNum(ent));
+}
+
+void G_increaseCallvoteCount(const char *mapName)
+{
+	game.mapStatistics->increaseCallvoteCount(mapName);
+}
+
+void G_increasePassedCount(const char *mapName)
+{
+	game.mapStatistics->increasePassedCount(mapName);
 }
