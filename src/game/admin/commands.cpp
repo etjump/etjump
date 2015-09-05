@@ -1066,6 +1066,59 @@ namespace AdminCommands
         return true;
     }
 
+	bool FindMap(gentity_t *ent, Arguments argv)
+    {
+	    if (argv->size() < 2)
+	    {
+			ChatPrintTo(ent, "^3usage: ^7!findmap <map> [maps per row]");
+			return false;
+	    }
+
+		auto perRow = 3;
+		if (argv->size() == 3)
+		{
+			try
+			{
+				perRow = std::stoi(argv->at(2));
+			} catch (...)
+			{
+				perRow = 3;
+			}
+		}
+
+		auto maps = game.mapStatistics->getMaps();
+		std::vector<std::string> matching;
+		for (auto &map : maps)
+		{
+			if (map.find(argv->at(1)) != std::string::npos)
+			{
+				matching.push_back(map);
+			}
+		}
+
+		auto mapsOnCurrentRow = 0;
+		std::string buffer = "^zFound " + std::to_string(matching.size()) + " maps:\n";
+		for (auto& map : matching)
+		{
+			++mapsOnCurrentRow;
+			if (mapsOnCurrentRow > perRow)
+			{
+				mapsOnCurrentRow = 1;
+				buffer += (boost::format("\n%-22s") % map).str();
+			}
+			else
+			{
+				buffer += (boost::format("%-22s") % map).str();
+			}
+
+		}
+
+		buffer += "\n";
+
+		Utilities::toConsole(ent, buffer);
+		return true;
+    }
+
     bool ListUserNames(gentity_t *ent, Arguments argv)
     {
         if (argv->size() != 2)
@@ -2153,6 +2206,7 @@ Commands::Commands()
     adminCommands_["finduser"] = AdminCommandPair(AdminCommands::FindUser, CommandFlags::EDIT);
     adminCommands_["listusernames"] = AdminCommandPair(AdminCommands::ListUserNames, CommandFlags::EDIT);
     adminCommands_["finger"] = AdminCommandPair(AdminCommands::Finger, CommandFlags::FINGER);
+	adminCommands_["findmap"] = AdminCommandPair(AdminCommands::FindMap, CommandFlags::BASIC);
     adminCommands_["help"] = AdminCommandPair(AdminCommands::Help, CommandFlags::BASIC);
     adminCommands_["kick"] = AdminCommandPair(AdminCommands::Kick, CommandFlags::KICK);
     adminCommands_["leastplayed"] = AdminCommandPair(AdminCommands::LeastPlayed, CommandFlags::BASIC);
