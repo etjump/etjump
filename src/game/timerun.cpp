@@ -6,7 +6,6 @@
 #include <boost/format.hpp>
 #include <ctime>
 #include <thread>
-#include <string>
 #include <vector>
 #include <memory>
 #include <array>

@@ -10,7 +10,6 @@
 #include <boost/algorithm/string.hpp>
 #include "operationqueue.hpp"
 #include "motd.hpp"
-#include "g_save.hpp"
 #include "randommapmode.hpp"
 #include "Timerun.h"
 #include "g_local.h"

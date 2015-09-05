@@ -5,7 +5,6 @@
 #ifndef ETJUMP_TIMERUN_H
 #define ETJUMP_TIMERUN_H
 
-#include <string>
 #include <vector>
 #include <memory>
 #include <array>
@@ -17,7 +16,6 @@ public:
      * A single record on a single run
      */
     struct Record {
-    public:
         Record(): id(-1), time(0), date(0), userId(0) { }
         int id;
         int time;
