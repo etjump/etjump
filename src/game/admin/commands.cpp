@@ -1328,12 +1328,20 @@ namespace AdminCommands
 			{
 				ChatPrintTo(ent, (boost::format("^3listmaps: ^7%s^7 is not a number") % argv->at(1)).str());
 				return false;
+			} catch (std::out_of_range)
+			{
+				perRow = 10;
 			}
 
 			if (perRow < 0)
 			{
 				ChatPrintTo(ent, (boost::format("^3listmaps: ^7second argument must be over 0") % argv->at(1)).str());
 				return false;
+			}
+
+			if (perRow > 10)
+			{
+				perRow = 10;
 			}
 		}
 
@@ -1495,6 +1503,9 @@ namespace AdminCommands
 			{
 				ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
 				return false;
+			} catch (std::out_of_range)
+			{
+				mapsToList = 1000;
 			}
 		} 
 
