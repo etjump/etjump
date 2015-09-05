@@ -23,7 +23,6 @@ Timerun::Timerun(int clientNum)
 
 void Timerun::draw()
 {
-	CG_Printf("Boo");
     if (player_drawRunTimer.integer == 0 || !cg.hasTimerun)
     {
         return;
