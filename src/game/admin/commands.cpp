@@ -1097,7 +1097,7 @@ namespace AdminCommands
 		}
 
 		auto mapsOnCurrentRow = 0;
-		std::string buffer = "^zFound " + std::to_string(matching.size()) + " maps:\n";
+		std::string buffer = "^zFound " + std::to_string(matching.size()) + " maps:\n^7";
 		for (auto& map : matching)
 		{
 			++mapsOnCurrentRow;
@@ -1297,6 +1297,10 @@ namespace AdminCommands
 				ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
 				return false;
 			}
+			catch (std::out_of_range)
+			{
+				mapsToList = 10;
+			}
 		}
 
 		auto leastPlayed = game.mapStatistics->getLeastPlayed();
@@ -1398,7 +1402,7 @@ namespace AdminCommands
 			}
 		}
 
-		std::string buffer = "^zListing all maps on server:\n";
+		std::string buffer = "^zListing all maps on server:\n^7";
 		auto maps = game.mapStatistics->getMaps();
 		auto mapsOnCurrentRow = 0;
 		for (auto& map : maps)

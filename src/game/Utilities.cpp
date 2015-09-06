@@ -101,11 +101,12 @@ namespace UtilityHelperFunctions
 
 void Utilities::toConsole(gentity_t* ent, std::string message)
 {
+	const auto BYTES_PER_PACKET = 998;
 	std::vector<std::string> packets;
-	while (message.length() > 1000)
+	while (message.length() > BYTES_PER_PACKET)
 	{
-		packets.push_back(message.substr(0, 1000));
-		message = message.substr(1000);
+		packets.push_back(message.substr(0, BYTES_PER_PACKET));
+		message = message.substr(BYTES_PER_PACKET);
 	}
 	packets.push_back(message);
 
