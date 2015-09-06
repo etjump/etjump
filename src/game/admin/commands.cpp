@@ -1461,18 +1461,18 @@ namespace AdminCommands
                 }
                 else
                 {
-                    BufferPrint(ent, "^7There are currently 1 connected player.\n");
+                    BufferPrint(ent, "^7There is currently 1 connected player.\n");
                 }
             }
 
-            BufferPrint(ent, "# ETJumpID Level Player\n");
+            BufferPrint(ent, "#  ETJumpID  Level  Player\n");
 
             for (auto i = 0; i < level.numConnectedClients; i++)
             {
                 auto clientNum = level.sortedClients[i];
                 auto id = game.session->GetId(g_entities + clientNum);
 
-                BufferPrint(ent, (boost::format("^7%-2d%-9d%-6d%-s\n")
+                BufferPrint(ent, (boost::format("^7%-2d %-9d %-6d %-s\n")
                     % clientNum 
                     % (id == -1 ? "-" : boost::lexical_cast<std::string>(id))
                     % game.session->GetLevel(g_entities + clientNum)

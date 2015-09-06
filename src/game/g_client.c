@@ -1607,7 +1607,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
        
 	}
 
-  client->sess.loadPreviousSavedPositions = qtrue;
+	client->sess.loadPreviousSavedPositions = qtrue;
 	// read or initialize the session data
 	if( firstTime ) {
 		G_InitSessionData( client, userinfo );
@@ -1745,7 +1745,7 @@ void ClientBegin( int clientNum )
 	// No surface determined yet.	
 	ent->surfaceFlags = 0;
 
-  LoadPositionsFromDatabase(ent);
+	LoadPositionsFromDatabase(ent);
     OnClientBegin(ent);
 	if (level.hasTimerun)
 	{
