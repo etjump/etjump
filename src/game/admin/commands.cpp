@@ -2367,8 +2367,11 @@ bool Commands::AdminCommand(gentity_t* ent)
     {
         if (ent)
         {
+			char nameBuf[MAX_NETNAME];
+			Q_strncpyz(nameBuf, ent->client->pers.netname, sizeof(nameBuf));
+			Q_CleanStr(nameBuf);
             G_ALog("%d (%s): %s",
-				game.session->GetId(ent), Q_CleanStr(ent->client->pers.netname),
+				game.session->GetId(ent), nameBuf,
                 ConcatArgs(skip));
         }
         else
