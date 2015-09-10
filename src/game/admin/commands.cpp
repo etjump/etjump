@@ -2360,20 +2360,20 @@ bool Commands::AdminCommand(gentity_t* ent)
             }
             foundCommands.push_back(it);
         }
-        it++;
+	    ++it;
     }
 
     if (foundCommands.size() == 1)
     {
         if (ent)
         {
-            G_ALog("Command: (%d) %s: %s",
-                ClientNum(ent), ent->client->pers.netname,
+            G_ALog("%d (%s): %s",
+				game.session->GetId(ent), Q_CleanStr(ent->client->pers.netname),
                 ConcatArgs(skip));
         }
         else
         {
-            G_ALog("Command: console: %s", ConcatArgs(skip));
+            G_ALog("Console: %s", ConcatArgs(skip));
         }
         
         foundCommands[0]->second.first(ent, argv);

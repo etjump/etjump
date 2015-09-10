@@ -309,9 +309,7 @@ vmCvar_t	cg_drawKeys;
 vmCvar_t	cg_keysColor;
 vmCvar_t	cg_keysX;
 vmCvar_t	cg_keysY;
-vmCvar_t	cg_keysAlpha;
 vmCvar_t	cg_keysSize;
-vmCvar_t	cg_drawspeedColor;
 vmCvar_t	cg_loadviewangles;
 
 // forty - speedometer

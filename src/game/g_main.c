@@ -1594,9 +1594,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	qtime_t ct;
 	trap_RealTime(&ct);
 
-	G_Printf ("------- Game Initialization -------\n");
+	G_Printf ("\n\n------- Game Initialization -------\n");
 	G_Printf("gamename: %s %s\n", GAME_VERSION, MOD_VERSION);
-  G_Printf("gamedate: %s\n", __DATE__ " " __TIME__);
+	G_Printf("gamedate: %s\n", __DATE__ " " __TIME__);
     if( g_gametype.integer != GT_WOLF ) {
 	    trap_Cvar_Set("g_gametype", "2");
     }
@@ -1723,12 +1723,15 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			trap_FS_FOpenFile( g_log.string, &level.logFile, FS_APPEND );
 			trap_FS_FOpenFile( g_adminLog.string, &level.adminLogFile, FS_APPEND );
 		}
-		if ( !level.logFile ) {
+		if ( !level.logFile || !level.adminLogFile) {
 			G_Printf( "WARNING: Couldn't open logfile: %s\n", g_log.string );
 		} else {
 			G_LogPrintf("------------------------------------------------------------\n" );
 			G_LogPrintf("InitGame: %s\n", cs );
-      G_LogPrintf("%s %s %s %s\n", GAME_VERSION, MOD_VERSION, __DATE__, __TIME__);
+			G_LogPrintf("%s %s %s %s\n", GAME_VERSION, MOD_VERSION, __DATE__, __TIME__);
+			G_ALog("------------------------------------------------------------");
+			G_ALog("Initializing the game");
+			G_ALog("------------------------------------------------------------");
 		}
 	} else {
 			G_Printf( "Not logging to disk.\n" );
