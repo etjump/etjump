@@ -51,7 +51,10 @@ std::vector<std::string> MapStatistics::getMaps()
 
 	for (auto& map: _maps)
 	{
-		maps.push_back(map.name);
+		if (map.isOnServer)
+		{
+			maps.push_back(map.name);
+		}
 	}
 
 	return std::move(maps);
