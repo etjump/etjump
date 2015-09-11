@@ -1613,6 +1613,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
     const char  *escapedName = NULL;
 	qboolean	localize = qfalse;
 	char		*loc;
+	const char *printText = NULL;
 
 	switch (mode)
 	{
@@ -1644,13 +1645,20 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	}
 
 	Q_strncpyz(text, chatText, sizeof(text));
+	printText = text;
     escapedName = EscapeString(name);
+
+	const char *interpolatedMessage = NULL;
+	if (g_chatOptions.integer & CHAT_OPTIONS_INTERPOLATE_NAME_TAGS)
+	{
+		 printText = interpolateNametags(text);
+	}	
 
 	if (target)
 	{
 		if (!COM_BitCheck(target->client->sess.ignoreClients, ent - g_entities))
 		{
-			G_SayTo(ent, target, mode, color, escapedName, text, localize, encoded);
+			G_SayTo(ent, target, mode, color, escapedName, printText, localize, encoded);
 		}
 		return;
 	}
@@ -1668,7 +1676,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 		other = &g_entities[level.sortedClients[j]];
 		if (!COM_BitCheck(other->client->sess.ignoreClients, ent - g_entities))
 		{
-			G_SayTo(ent, other, mode, color, escapedName, text, localize, encoded);
+			G_SayTo(ent, other, mode, color, escapedName, printText, localize, encoded);
 		}
 	}
 

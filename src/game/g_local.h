@@ -116,6 +116,8 @@ typedef enum {
 #define G_GRAVITY   800
 #define G_SPEED     320
 
+#define CHAT_OPTIONS_INTERPOLATE_NAME_TAGS 0x000001
+
 //============================================================================
 
 typedef struct gentity_s gentity_t;
@@ -1963,6 +1965,8 @@ extern vmCvar_t g_randomMapModeInterval;
 extern vmCvar_t vote_randomMapMode;
 // end of randommap mode
 
+extern vmCvar_t g_chatOptions;
+
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );
 int		trap_Milliseconds( void );
@@ -2700,6 +2704,8 @@ void C_ChatPrintTo( gentity_t *target, const char* msg );
 void C_ConsolePrintAll( const char* msg );
 void C_ConsolePrintTo( gentity_t *target, const char* msg );
 const char *EscapeString(const char *in);
+const char *interpolateNametags(const char *text);
+
 
 // C versions of conversion functions
 qboolean StringToInt(const char* toConvert, int *value);

@@ -2,6 +2,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <string>
+#include <regex>
 #include <vector>
 
 #include "g_utilities.hpp"
@@ -767,4 +768,77 @@ void BufferPrinter::Finish(bool insertNewLine)
             G_Printf("%s", buffer_.c_str());
         }
     }
+}
+
+std::vector<std::string> getNames(const std::vector<int>& ids)
+{
+	std::vector<std::string> names;
+
+	for (auto &id : ids) {
+		names.push_back((g_entities + id)->client->pers.netname);
+	}
+
+	return std::move(names);
+}
+
+std::vector<int> getMatchingIds(const std::string& name)
+{
+	int pids[MAX_CLIENTS];
+	auto found = ClientNumbersFromString(name.c_str(), pids);
+	std::vector<int> pidsVector;
+	if (found)
+	{
+		for (auto i = 0; pids[i] != -1; i++)
+		{
+			pidsVector.push_back(pids[i]);
+		}
+	}	
+	return std::move(pidsVector);
+}
+
+std::string interpolateNametags(std::string input)
+{
+	std::string interpolated;
+	std::regex tagRegex("@(.*?)@");
+
+	auto inputBegin = std::begin(input);
+	auto inputEnd = std::end(input);
+
+	std::smatch match;
+	size_t begin = 0;
+	for (auto iter = std::sregex_iterator(inputBegin, inputEnd, tagRegex); iter != std::sregex_iterator(); ++iter)
+	{
+		match = *iter;
+
+		interpolated += input.substr(begin, match.position() - begin);	
+		auto tag = match.str().substr(1, match.str().length() - 2);
+		
+		auto names = getNames(getMatchingIds(tag));
+		if (names.size() > 0)
+		{
+			auto joined = boost::algorithm::join(names, "^2, ^7");
+			interpolated += + "^7" + joined + "^2";
+		} else
+		{
+			interpolated += match.str();
+		}
+		
+		begin = match.position() + match.length();
+	}
+
+	if (begin < input.length())
+	{
+		interpolated += input.substr(begin);
+	}
+	return interpolated;
+}
+
+const char *interpolateNametags(const char *text)
+{
+	static char buf[MAX_SAY_TEXT] = "\0";
+
+	auto interpolated = interpolateNametags(std::string(text));
+
+	Q_strncpyz(buf, interpolated.c_str(), sizeof(buf));
+	return buf;
 }
