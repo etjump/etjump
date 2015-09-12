@@ -796,6 +796,12 @@ std::vector<int> getMatchingIds(const std::string& name)
 	return std::move(pidsVector);
 }
 
+// TODO:
+// This could be done by simply
+// splitting input by @
+// and looping
+// for i = 1, len = split.len - 1; i < len; i += 2
+//   split[i] <- tag
 std::string interpolateNametags(std::string input)
 {
 	std::string interpolated;
