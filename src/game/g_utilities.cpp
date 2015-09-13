@@ -848,3 +848,14 @@ const char *interpolateNametags(const char *text)
 	Q_strncpyz(buf, interpolated.c_str(), sizeof(buf));
 	return buf;
 }
+
+const char *findAndReplaceNametags(const char *text, const char *name)
+{
+	static char buf[MAX_SAY_TEXT] = "\0";
+
+	auto str = std::string(text);
+	boost::replace_all(str, "[n]", name);
+
+	Q_strncpyz(buf, str.c_str(), sizeof(buf));
+	return buf;
+}

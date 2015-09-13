@@ -2705,6 +2705,7 @@ void C_ConsolePrintAll( const char* msg );
 void C_ConsolePrintTo( gentity_t *target, const char* msg );
 const char *EscapeString(const char *in);
 const char *interpolateNametags(const char *text);
+const char *findAndReplaceNametags(const char *text, const char *name);
 
 
 // C versions of conversion functions
