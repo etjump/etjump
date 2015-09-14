@@ -1614,6 +1614,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	qboolean	localize = qfalse;
 	char		*loc;
 	const char *printText = NULL;
+	const char *interpolatedMessage = NULL;
 
 	switch (mode)
 	{
@@ -1648,7 +1649,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	printText = text;
     escapedName = EscapeString(name);
 
-	const char *interpolatedMessage = NULL;
 	if (g_chatOptions.integer & CHAT_OPTIONS_INTERPOLATE_NAME_TAGS)
 	{
 		 printText = interpolateNametags(text);

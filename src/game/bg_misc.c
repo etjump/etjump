@@ -2033,34 +2033,6 @@ model="models/weapons2/colt/colt.md3"
 //		{0,0,0,0,0}
 	},
 
-// DHM - Nerve
-/*
-weapon_medic_heal
-*/
-	{
-		"weapon_medic_heal", 
-		"sound/misc/w_pkup.wav",
-		{	
-			"models/multiplayer/medpack/medpack.md3", 
-			"models/multiplayer/medpack/v_medpack.md3", 
-			0
-		},
-
-		"icons/iconw_medheal_1",	// icon
-		"icons/ammo2",			// ammo icon
-		"medicheal",			// pickup
-		50,
-		IT_WEAPON,
-		WP_MEDKIT,
-		WP_MEDKIT,
-		WP_MEDKIT,
-		"",						// precache
-		"",						// sounds
-//		{0,0,0,0,0}
-	},
-// dhm
-
-
 
 //Feen: PGM Test 2 //NOTE: Overridden by portalgun.weap
 /*QUAKED weapon_portalgun (.3 .3 1) (-16 -16 -16) (16 16 16) suspended

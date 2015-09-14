@@ -1134,7 +1134,7 @@ void Touch_flagonly_multiple (gentity_t *ent, gentity_t *other, trace_t *trace) 
 
 		ent->parent = tmp;
 
-		if (strlen(ent->message))
+		if (ent->message && strlen(ent->message))
 		{
 			const char *msg = findAndReplaceNametags(ent->message, other->client->pers.netname);
 
@@ -1158,7 +1158,7 @@ void Touch_flagonly_multiple (gentity_t *ent, gentity_t *other, trace_t *trace) 
 
 		ent->parent = tmp;
 
-		if (strlen(ent->message))
+		if (ent->message && strlen(ent->message))
 		{
 			const char *msg = findAndReplaceNametags(ent->message, other->client->pers.netname);
 
