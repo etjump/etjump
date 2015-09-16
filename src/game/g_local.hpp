@@ -1,6 +1,6 @@
 #ifndef g_local_hpp__
 #define g_local_hpp__
-#include "admin/game.hpp"
+#include "game.hpp"
 
 // Local C++ definitions for game module
 

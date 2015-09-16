@@ -1,35 +1,55 @@
-//
-// Created by Jussi on 22.4.2015.
-//
+#include "user.hpp"
+#include <boost/algorithm/string/join.hpp>
+#include "utilities.hpp"
 
-#include <thread>
-#include <boost/format.hpp>
-#include "User.h"
-#include "SQLiteWrapper.h"
-#include "Printer.h"
-
-void User::Load(std::string database, std::string guid)
-{
-    if (guid.length() == 0) {
-        return;
-    }
-
-    std::thread t([]() {
-        SQLiteWrapper sqlite;
-        if (!sqlite.open(database)) {
-            Printer::LogPrintln((boost::format("ERROR: couldn't open database to load a user. error code: %d. error message: %s")
-                                 % sqlite.errorCode() % sqlite.errorMessage()).str());
-            return;
-        }
-
-        if (!sqlite.prepare("SELECT id, level, last_seen, "))
-    });
-    t.detach();
-
-
-}
-
-void User::Save(std::string database)
+User_s::User_s()
 {
 
 }
+
+User_s::User_s(unsigned id, std::string const& guid, std::string const& name, std::string const& hwid)
+: 
+id(id), 
+guid(guid), 
+level(0),
+lastSeen(0),
+name(name),
+updated(0)
+{
+}
+
+User_s::User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen, std::string const& name, std::string const& hwid, std::string const& title, std::string const& commands, std::string const& greeting)
+: id(id), guid(guid), level(level), lastSeen(lastSeen), name(name), title(title), commands(commands), greeting(greeting), updated(0)
+{
+}
+
+unsigned User_s::GetId()
+{
+    return id;
+}
+
+std::string User_s::GetGuid()
+{
+    return guid;
+}
+
+char const* User_s::ToChar() const
+{
+    return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
+}
+
+std::string User_s::GetLastSeenString() const
+{
+    return TimeStampToString(lastSeen);
+}
+
+std::string User_s::GetLastVisitString() const
+{
+    time_t t;
+    time(&t);
+    unsigned now = static_cast<unsigned>(t);
+
+    return TimeStampDifferenceToString(now - lastSeen);
+}
+
+

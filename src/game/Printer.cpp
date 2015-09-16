@@ -2,7 +2,7 @@
 // Created by Jussi on 5.4.2015.
 //
 
-#include "Printer.h"
+#include "printer.hpp"
 #include <boost/format.hpp>
 
 extern "C" {

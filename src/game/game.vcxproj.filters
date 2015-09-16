@@ -13,18 +13,6 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="Source Files\Admin system">
-      <UniqueIdentifier>{e0c53039-7953-46f8-b6e9-c36340e9b1b9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Admin system">
-      <UniqueIdentifier>{f7a43994-f591-458e-876d-cb9c539e7d1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\operationqueue">
-      <UniqueIdentifier>{b73de8bc-e1f1-4252-9073-5524b70cacba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\operationqueue">
-      <UniqueIdentifier>{16901e97-a2b7-4678-add3-c8ede62f274b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bg_animation.c">
@@ -177,13 +165,7 @@
     <ClCompile Include="..\sha-1\bg_sha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_banner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_utilities.cpp">
@@ -192,79 +174,70 @@
     <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="admin\session.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\commands.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\game.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\levels.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\database.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
-    <ClCompile Include="races.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="custommapvotes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\json\jsoncpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="asyncoperation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="asyncoperations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="operationqueue.cpp">
-      <Filter>Source Files\operationqueue</Filter>
-    </ClCompile>
-    <ClCompile Include="loadrace.cpp">
-      <Filter>Source Files\operationqueue</Filter>
-    </ClCompile>
-    <ClCompile Include="admin\user.cpp">
-      <Filter>Source Files\Admin system</Filter>
-    </ClCompile>
     <ClCompile Include="motd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="randommapmode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Timerun.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SQLiteWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Printer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Worker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mainext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="map_statistics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="commands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="database.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="levels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="user.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="operation_queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="async_operation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="custom_map_votes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="banner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="save.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="random_map_mode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timerun.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
       <Filter>Source Files</Filter>
-    </None>
-    <None Include="asyncoperations.hh">
-      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -301,34 +274,7 @@
     <ClInclude Include="..\sqlite\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_utilities.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_save.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\session.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\commands.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\game.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\levels.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\database.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="races.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="custommapvotes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\json\json.h">
@@ -337,47 +283,65 @@
     <ClInclude Include="..\json\json-forwards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="asyncoperation.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="operationqueue.hpp">
-      <Filter>Header Files\operationqueue</Filter>
-    </ClInclude>
-    <ClInclude Include="loadrace.hpp">
-      <Filter>Header Files\operationqueue</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\iauthentication.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
-    <ClInclude Include="admin\user.hpp">
-      <Filter>Header Files\Admin system</Filter>
-    </ClInclude>
     <ClInclude Include="motd.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="randommapmode.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Timerun.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SQLiteWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Printer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Worker.h">
+    <ClInclude Include="commands.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="map_statistics.h">
+    <ClInclude Include="session.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="TODO.txt" />
+    <ClInclude Include="database.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iauthentication.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="levels.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="async_operation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="custom_map_votes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="save.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="load_race.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="operation_queue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="random_map_mode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timerun.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="printer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="map_statistics.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite_wrapper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="user.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

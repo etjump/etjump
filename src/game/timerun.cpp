@@ -10,9 +10,9 @@
 #include <memory>
 #include <array>
 #include <map>
-#include "Timerun.h"
-#include "SQLiteWrapper.h"
-#include "Printer.h"
+#include "timerun.hpp"
+#include "sqlite_wrapper.hpp"
+#include "printer.hpp"
 #include "Utilities.h"
 
 std::string GetColumnText(sqlite3_stmt *stmt, int index)

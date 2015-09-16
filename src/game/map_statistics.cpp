@@ -1,4 +1,4 @@
-#include "map_statistics.h"
+#include "map_statistics.hpp"
 #include <sqlite3.h>
 #include <algorithm>
 #include "Utilities.h"

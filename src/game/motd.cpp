@@ -1,7 +1,7 @@
 #include "motd.hpp"
 #include "../json/json.h"
 #include "g_local.hpp"
-#include "g_utilities.hpp"
+#include "utilities.hpp"
 #include <fstream>
 
 Motd::Motd() : initialized_(false)
