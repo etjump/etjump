@@ -107,6 +107,7 @@ FILE(GLOB CGAME_SRC
 
 FILE(GLOB QAGAME_SRC
 	"game/async_operation.cpp"
+	"game/banner.cpp"
 	"game/bg_animation.c"
 	"game/bg_animgroup.c"
 	"game/bg_campaign.c"
@@ -124,7 +125,6 @@ FILE(GLOB QAGAME_SRC
 	"game/g_active.c"
 	"game/g_alarm.c"
 	"game/g_antilag.c"
-	"game/g_banner.cpp"
 	"game/g_buddy_list.c"
 	"game/g_character.c"
 	"game/g_client.c"

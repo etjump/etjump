@@ -1,8 +1,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <string>
-#include <regex>
 #include <vector>
 
 #include "utilities.hpp"
@@ -805,38 +803,35 @@ std::vector<int> getMatchingIds(const std::string& name)
 std::string interpolateNametags(std::string input)
 {
 	std::string interpolated;
-	std::regex tagRegex("@(.*?)@");
+	std::vector<std::string> split;
 
-	auto inputBegin = std::begin(input);
-	auto inputEnd = std::end(input);
+	boost::algorithm::split(split, input, boost::is_any_of("@"));
 
-	std::smatch match;
-	size_t begin = 0;
-	for (auto iter = std::sregex_iterator(inputBegin, inputEnd, tagRegex); iter != std::sregex_iterator(); ++iter)
+	if (split.size() == 1)
 	{
-		match = *iter;
+		return input;
+	}
 
-		interpolated += input.substr(begin, match.position() - begin);	
-		auto tag = match.str().substr(1, match.str().length() - 2);
-		
-		auto names = getNames(getMatchingIds(tag));
+	auto i = 1;
+	auto len = 0;
+	for (len = split.size(); i < len - 1; i += 2)
+	{
+		interpolated += split[i - 1];
+
+		auto names = getNames(getMatchingIds(split[i]));
 		if (names.size() > 0)
 		{
-			auto joined = boost::algorithm::join(names, "^2, ^7");
-			interpolated += + "^7" + joined + "^2";
+			interpolated += "^7" + boost::algorithm::join(names, "^2, ^7") + "^2";
 		} else
 		{
-			interpolated += match.str();
+			interpolated += "@" + split[i] + "@";
 		}
-		
-		begin = match.position() + match.length();
 	}
-
-	if (begin < input.length())
+	if (i < len)
 	{
-		interpolated += input.substr(begin);
+		interpolated += split[i];
 	}
-	return interpolated;
+	return std::move(interpolated);
 }
 
 const char *interpolateNametags(const char *text)
