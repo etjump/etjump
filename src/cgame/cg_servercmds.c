@@ -833,34 +833,11 @@ CG_AddToTeamChat
 */
 static void CG_AddToTeamChat(const char *str, int clientnum)
 {
-	int        len;
-	char       *p, *ls;
-	int        lastcolor;
-	int        chatHeight;
-	int        chatWidth            = TEAMCHAT_WIDTH - 8;
-	char       buf[MAX_TOKEN_CHARS] = "\0";
-	qtime_t    t;
-	const char *msgColor = "^z";
-	trap_RealTime(&t);
-
-	if (cg.clientNum == clientnum)
-	{
-		msgColor = "^g";
-	}
-
-	if (player_drawMessageTime.integer)
-	{
-		if (player_drawMessageTime.integer == 2)
-		{
-			Q_strcat(buf, sizeof(buf), va("%s[%02d:%02d:%02d]^7 %s", msgColor, t.tm_hour, t.tm_min, t.tm_sec, str));
-		}
-		else
-		{
-			Q_strcat(buf, sizeof(buf), va("%s[%02d:%02d]^7 %s", msgColor, t.tm_hour, t.tm_min, str));
-		}
-
-		str = buf;
-	}
+	int  len;
+	char *p, *ls;
+	int  lastcolor;
+	int  chatHeight;
+	int  chatWidth            = TEAMCHAT_WIDTH - 8;
 
 	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
 	{
@@ -2379,6 +2356,50 @@ Cmd_Argc() / Cmd_Argv()
 
 void CG_ForceTapOut_f(void);
 
+/**
+ * @param text The unmodified text (excl. encoding/decoding)
+ * @param clientNum The user who sent the message
+ */
+const char *CG_AddChatModifications(char *text, int clientNum)
+{
+	static char message[MAX_SAY_TEXT] = "\0";
+	const char  *msgColor             = "^z";
+	qtime_t     t;
+
+	memset(message, 0, sizeof(message));
+	trap_RealTime(&t);
+	if (etj_highlight.integer && cg.clientNum != clientNum)
+	{
+		if (strstr(text + strlen(cgs.clientinfo[cg.clientNum].name), cgs.clientinfo[cg.clientNum].name) != NULL)
+		{
+			Q_strcat(message, sizeof(message), etj_highlightText.string);
+			Q_strcat(message, sizeof(message), "^7");
+
+			trap_S_StartLocalSound(trap_S_RegisterSound(etj_highlightSound.string, qfalse), CHAN_LOCAL);
+		}
+	}
+
+	if (player_drawMessageTime.integer)
+	{
+		if (cg.clientNum == clientNum)
+		{
+			msgColor = "^g";
+		}
+		if (player_drawMessageTime.integer == 2)
+		{
+			Q_strcat(message, sizeof(message), va("%s[%02d:%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min, t.tm_sec));
+		}
+		else
+		{
+			Q_strcat(message, sizeof(message), va("%s[%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min));
+		}
+	}
+
+	Q_strcat(message, sizeof(message), text);
+
+	return message;
+}
+
 static void CG_ServerCommand(void)
 {
 	const char *cmd;
@@ -2567,34 +2588,12 @@ static void CG_ServerCommand(void)
 		}
 		CG_RemoveChatEscapeChar(text);
 
+		s = CG_AddChatModifications(text, atoi(CG_Argv(2)));
+		Q_strncpyz(text, s, MAX_SAY_TEXT);
+
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
 
-		if (player_drawMessageTime.integer)
-		{
-			qtime_t    t;
-			const char *msgColor = "^z";
-			trap_RealTime(&t);
-
-			if (cg.clientNum == atoi(CG_Argv(2)))
-			{
-				msgColor = "^g";
-			}
-
-			if (player_drawMessageTime.integer == 2)
-			{
-				CG_Printf("%s[%02d:%02d:%02d] ^7%s\n", msgColor, t.tm_hour, t.tm_min, t.tm_sec, text);
-			}
-			else
-			{
-				CG_Printf("%s[%02d:%02d] ^7%s\n", msgColor, t.tm_hour, t.tm_min, text);
-			}
-
-		}
-		else
-		{
-			CG_Printf("%s\n", text);
-		}
-
+		CG_Printf("%s\n", text);
 
 		return;
 	}
@@ -2602,6 +2601,7 @@ static void CG_ServerCommand(void)
 	enc = !Q_stricmp(cmd, "enc_tchat");
 	if (!Q_stricmp(cmd, "tchat") || enc)
 	{
+
 		const char *s;
 
 		if (atoi(CG_Argv(3)))
@@ -2619,6 +2619,9 @@ static void CG_ServerCommand(void)
 			CG_DecodeQP(text);
 		}
 		CG_RemoveChatEscapeChar(text);
+
+		s = CG_AddChatModifications(text, atoi(CG_Argv(2)));
+		Q_strncpyz(text, s, MAX_SAY_TEXT);
 
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
 		CG_Printf("%s\n", text);   // JPW NERVE

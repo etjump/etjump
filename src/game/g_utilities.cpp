@@ -882,12 +882,6 @@ std::vector<int> getMatchingIds(const std::string& name)
 	return std::move(pidsVector);
 }
 
-// TODO:
-// This could be done by simply
-// splitting input by @
-// and looping
-// for i = 1, len = split.len - 1; i < len; i += 2
-//   split[i] <- tag
 std::string interpolateNametags(std::string input)
 {
 	std::string              interpolated;
@@ -895,31 +889,38 @@ std::string interpolateNametags(std::string input)
 
 	boost::algorithm::split(split, input, boost::is_any_of("@"));
 
-	if (split.size() == 1)
+	if (split.size() == 1 || split.size() == 2)
 	{
 		return input;
 	}
 
 	auto i   = 1;
 	auto len = 0;
-	for (len = split.size(); i < len - 1; i += 2)
+	for (len = split.size(); i < len; i += 2)
 	{
 		interpolated += split[i - 1];
 
-		auto names = getNames(getMatchingIds(split[i]));
-		if (names.size() > 0)
+		if (split[i].length() == 0)
 		{
-			interpolated += "^7" + boost::algorithm::join(names, "^2, ^7") + "^2";
-		}
-		else
+			interpolated += "@";
+		} else
 		{
-			interpolated += "@" + split[i] + "@";
+			auto names = getNames(getMatchingIds(split[i]));
+			if (names.size() > 0)
+			{
+				interpolated += "^7" + boost::algorithm::join(names, "^2, ^7") + "^2";
+			}
+			else
+			{
+				interpolated += "@" + split[i] + "@";
+			}
 		}
 	}
-	if (i < len)
+	if (len % 2 != 0 || i == len)
 	{
-		interpolated += split[i];
+		interpolated += split[len - 1];
 	}
+
 	return std::move(interpolated);
 }
 

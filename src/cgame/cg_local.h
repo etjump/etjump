@@ -2463,6 +2463,10 @@ extern vmCvar_t movie_fovIncreasePerFrame;
 
 extern vmCvar_t etj_drawConnectionIssues;
 
+extern vmCvar_t etj_highlight;
+extern vmCvar_t etj_highlightText;
+extern vmCvar_t etj_highlightSound;
+
 //
 // cg_main.c
 //
