@@ -2421,6 +2421,8 @@ extern vmCvar_t         movie_fovMin;
 extern vmCvar_t         movie_fovMax;
 extern vmCvar_t         movie_fovIncreasePerFrame;
 
+extern vmCvar_t			etj_drawConnectionIssues;
+
 //
 // cg_main.c
 //

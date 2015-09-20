@@ -414,6 +414,8 @@ vmCvar_t            movie_fovMin;
 vmCvar_t            movie_fovMax;
 vmCvar_t            movie_fovIncreasePerFrame;
 
+vmCvar_t			etj_drawConnectionIssues;
+
 typedef struct {
       vmCvar_t	*vmCvar;
       char		*cvarName;
@@ -697,7 +699,8 @@ cvarTable_t		cvarTable[] = {
       {&movie_fovMaxSpeed,                "movie_fovMaxSpeed", "1200", CVAR_ARCHIVE},
       {&movie_fovMin,                     "movie_fovMin", "90", CVAR_ARCHIVE},
       {&movie_fovMax,                     "movie_fovMax", "140", CVAR_ARCHIVE},
-      { &movie_fovIncreasePerFrame,       "movie_fovIncreasePerFrame", "1", CVAR_ARCHIVE}
+      { &movie_fovIncreasePerFrame,       "movie_fovIncreasePerFrame", "1", CVAR_ARCHIVE},
+	  {&etj_drawConnectionIssues,		  "etj_drawConnectionIssues", "1", CVAR_ARCHIVE}
       };
 	  
 

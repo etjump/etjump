@@ -1050,6 +1050,9 @@ static void CG_DrawDisconnect( void ) {
 	const char		*s;
 	int			w;  // bk010215 - FIXME char message[1024];
 
+	if (etj_drawConnectionIssues.integer == 0) {
+		return;
+	}
 	// OSP - dont draw if a demo and we're running at a different timescale
 	if(cg.demoPlayback && cg_timescale.value != 1.0f) return;
 	
