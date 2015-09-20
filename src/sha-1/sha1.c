@@ -43,9 +43,9 @@
 /*
  *  Define the circular shift macro
  */
-#define SHA1CircularShift(bits,word) \
-                ((((word) << (bits)) & 0xFFFFFFFF) | \
-                ((word) >> (32-(bits))))
+#define SHA1CircularShift(bits, word) \
+	((((word) << (bits)) & 0xFFFFFFFF) | \
+	 ((word) >> (32 - (bits))))
 
 /* Function prototypes */
 void SHA1ProcessMessageBlock(SHA1Context *);
@@ -70,18 +70,18 @@ void SHA1PadMessage(SHA1Context *);
  */
 void SHA1Reset(SHA1Context *context)
 {
-	context->Length_Low             = 0;
-	context->Length_High            = 0;
-	context->Message_Block_Index    = 0;
+	context->Length_Low          = 0;
+	context->Length_High         = 0;
+	context->Message_Block_Index = 0;
 
-	context->Message_Digest[0]      = 0x67452301;
-	context->Message_Digest[1]      = 0xEFCDAB89;
-	context->Message_Digest[2]      = 0x98BADCFE;
-	context->Message_Digest[3]      = 0x10325476;
-	context->Message_Digest[4]      = 0xC3D2E1F0;
+	context->Message_Digest[0] = 0x67452301;
+	context->Message_Digest[1] = 0xEFCDAB89;
+	context->Message_Digest[2] = 0x98BADCFE;
+	context->Message_Digest[3] = 0x10325476;
+	context->Message_Digest[4] = 0xC3D2E1F0;
 
-	context->Computed   = 0;
-	context->Corrupted  = 0;
+	context->Computed  = 0;
+	context->Corrupted = 0;
 }
 
 /*
@@ -140,9 +140,9 @@ int SHA1Result(SHA1Context *context)
  *  Comments:
  *
  */
-void SHA1Input(SHA1Context         *context,
-			   const unsigned char *message_array,
-			   unsigned            length)
+void SHA1Input(SHA1Context *context,
+               const unsigned char *message_array,
+               unsigned length)
 {
 	if (!length)
 	{
@@ -158,7 +158,7 @@ void SHA1Input(SHA1Context         *context,
 	while (length-- && !context->Corrupted)
 	{
 		context->Message_Block[context->Message_Block_Index++] =
-			(*message_array & 0xFF);
+		    (*message_array & 0xFF);
 
 		context->Length_Low += 8;
 		/* Force it to 32 bits */
@@ -213,17 +213,17 @@ void SHA1ProcessMessageBlock(SHA1Context *context)
 		0x8F1BBCDC,
 		0xCA62C1D6
 	};
-	int         t;                  /* Loop counter                 */
-	unsigned    temp;               /* Temporary word value         */
-	unsigned    W[80];              /* Word sequence                */
-	unsigned    A, B, C, D, E;      /* Word buffers                 */
+	int      t;                     /* Loop counter                 */
+	unsigned temp;                  /* Temporary word value         */
+	unsigned W[80];                 /* Word sequence                */
+	unsigned A, B, C, D, E;         /* Word buffers                 */
 
 	/*
 	 *  Initialize the first 16 words in the array W
 	 */
 	for (t = 0; t < 16; t++)
 	{
-		W[t] = ((unsigned) context->Message_Block[t * 4]) << 24;
+		W[t]  = ((unsigned) context->Message_Block[t * 4]) << 24;
 		W[t] |= ((unsigned) context->Message_Block[t * 4 + 1]) << 16;
 		W[t] |= ((unsigned) context->Message_Block[t * 4 + 2]) << 8;
 		W[t] |= ((unsigned) context->Message_Block[t * 4 + 3]);
@@ -242,60 +242,60 @@ void SHA1ProcessMessageBlock(SHA1Context *context)
 
 	for (t = 0; t < 20; t++)
 	{
-		temp =  SHA1CircularShift(5, A) +
-				((B & C) | ((~B) & D)) + E + W[t] + K[0];
+		temp = SHA1CircularShift(5, A) +
+		       ((B & C) | ((~B) & D)) + E + W[t] + K[0];
 		temp &= 0xFFFFFFFF;
-		E = D;
-		D = C;
-		C = SHA1CircularShift(30, B);
-		B = A;
-		A = temp;
+		E     = D;
+		D     = C;
+		C     = SHA1CircularShift(30, B);
+		B     = A;
+		A     = temp;
 	}
 
 	for (t = 20; t < 40; t++)
 	{
-		temp = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[1];
+		temp  = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[1];
 		temp &= 0xFFFFFFFF;
-		E = D;
-		D = C;
-		C = SHA1CircularShift(30, B);
-		B = A;
-		A = temp;
+		E     = D;
+		D     = C;
+		C     = SHA1CircularShift(30, B);
+		B     = A;
+		A     = temp;
 	}
 
 	for (t = 40; t < 60; t++)
 	{
 		temp = SHA1CircularShift(5, A) +
-			   ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
+		       ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
 		temp &= 0xFFFFFFFF;
-		E = D;
-		D = C;
-		C = SHA1CircularShift(30, B);
-		B = A;
-		A = temp;
+		E     = D;
+		D     = C;
+		C     = SHA1CircularShift(30, B);
+		B     = A;
+		A     = temp;
 	}
 
 	for (t = 60; t < 80; t++)
 	{
-		temp = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[3];
+		temp  = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[3];
 		temp &= 0xFFFFFFFF;
-		E = D;
-		D = C;
-		C = SHA1CircularShift(30, B);
-		B = A;
-		A = temp;
+		E     = D;
+		D     = C;
+		C     = SHA1CircularShift(30, B);
+		B     = A;
+		A     = temp;
 	}
 
 	context->Message_Digest[0] =
-		(context->Message_Digest[0] + A) & 0xFFFFFFFF;
+	    (context->Message_Digest[0] + A) & 0xFFFFFFFF;
 	context->Message_Digest[1] =
-		(context->Message_Digest[1] + B) & 0xFFFFFFFF;
+	    (context->Message_Digest[1] + B) & 0xFFFFFFFF;
 	context->Message_Digest[2] =
-		(context->Message_Digest[2] + C) & 0xFFFFFFFF;
+	    (context->Message_Digest[2] + C) & 0xFFFFFFFF;
 	context->Message_Digest[3] =
-		(context->Message_Digest[3] + D) & 0xFFFFFFFF;
+	    (context->Message_Digest[3] + D) & 0xFFFFFFFF;
 	context->Message_Digest[4] =
-		(context->Message_Digest[4] + E) & 0xFFFFFFFF;
+	    (context->Message_Digest[4] + E) & 0xFFFFFFFF;
 
 	context->Message_Block_Index = 0;
 }

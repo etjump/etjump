@@ -3,6 +3,7 @@ extern "C" {
 }
 #include "Drawable.h"
 
-void drawExt() {
-    drawDrawables();
+void drawExt()
+{
+	drawDrawables();
 }

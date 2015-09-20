@@ -4,15 +4,18 @@
 class Drawable
 {
 public:
-    Drawable() {
-        addDrawable(this);
-    }
+	Drawable()
+	{
+		addDrawable(this);
+	}
 
-    virtual ~Drawable() {};
+	virtual ~Drawable()
+	{
+	};
 
-    virtual void draw() = 0;
+	virtual void draw() = 0;
 
-    static void addDrawable(Drawable *drawable);
+	static void addDrawable(Drawable *drawable);
 };
 
 void drawDrawables();

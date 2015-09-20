@@ -11,97 +11,106 @@ extern "C" {
 
 std::vector<int> Utilities::getSpectators(int clientNum)
 {
-    std::vector<int> spectators;
+	std::vector<int> spectators;
 
-    for (auto i = 0; i < level.numConnectedClients; i++) {
-        gentity_t *player = g_entities + level.sortedClients[i];
+	for (auto i = 0; i < level.numConnectedClients; i++)
+	{
+		gentity_t *player = g_entities + level.sortedClients[i];
 
-        if (level.sortedClients[i] == clientNum) {
-            continue;
-        }
+		if (level.sortedClients[i] == clientNum)
+		{
+			continue;
+		}
 
-        if (!player->client) {
-            continue;
-        }
+		if (!player->client)
+		{
+			continue;
+		}
 
-        if (player->client->sess.sessionTeam != TEAM_SPECTATOR) {
-            continue;
-        }
+		if (player->client->sess.sessionTeam != TEAM_SPECTATOR)
+		{
+			continue;
+		}
 
-        if (player->client->ps.clientNum == clientNum) {
-            spectators.push_back(g_entities - player);
-        }
-    }
+		if (player->client->ps.clientNum == clientNum)
+		{
+			spectators.push_back(g_entities - player);
+		}
+	}
 
-    return std::move(spectators);
+	return std::move(spectators);
 }
 
 void Utilities::startRun(int clientNum)
 {
-    gentity_t *player = g_entities + clientNum;
+	gentity_t *player = g_entities + clientNum;
 
-    player->client->sess.timerunActive = qtrue;
+	player->client->sess.timerunActive = qtrue;
 
-    // also disable the noclip if it's active
-    if (player->client->noclip) {
-        player->client->noclip = qfalse;
-        VectorClear(player->client->ps.velocity);
-    }
-    // same thing for god mode
-    player->flags &= ~FL_GODMODE;
-    ResetSavedPositions(player);
+	// also disable the noclip if it's active
+	if (player->client->noclip)
+	{
+		player->client->noclip = qfalse;
+		VectorClear(player->client->ps.velocity);
+	}
+	// same thing for god mode
+	player->flags &= ~FL_GODMODE;
+	ResetSavedPositions(player);
 
-    // Disable any weapons except kife
-    player->client->ps.weapons[0] = 0;
-    player->client->ps.weapons[1] = 0;
+	// Disable any weapons except kife
+	player->client->ps.weapons[0] = 0;
+	player->client->ps.weapons[1] = 0;
 
-    AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
-    ClearPortals(player);
+	AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
+	ClearPortals(player);
 }
 
 void Utilities::stopRun(int clientNum)
 {
-    gentity_t *player = g_entities + clientNum;
+	gentity_t *player = g_entities + clientNum;
 
-    player->client->sess.timerunActive = qfalse;
+	player->client->sess.timerunActive = qfalse;
 }
 
 namespace UtilityHelperFunctions
 {
-	static void FS_ReplaceSeparators(char *path) {
-		char    *s;
+static void FS_ReplaceSeparators(char *path)
+{
+	char *s;
 
-		for (s = path; *s; s++) {
-			if (*s == '/' || *s == '\\') {
-				*s = PATH_SEP;
-			}
-		}
-	}
-
-	static char* BuildOSPath(const char* file)
+	for (s = path; *s; s++)
 	{
-		char base[MAX_CVAR_VALUE_STRING] = "\0";
-		char temp[MAX_OSPATH] = "\0";
-		char game[MAX_CVAR_VALUE_STRING] = "\0";
-		static char ospath[2][MAX_OSPATH] = { "\0", "\0" };
-		static int toggle;
-
-		toggle ^= 1;        // flip-flop to allow two returns without clash
-
-		trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
-		trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
-
-		Com_sprintf(temp, sizeof(temp), "/%s/%s", game, file);
-		FS_ReplaceSeparators(temp);
-		Com_sprintf(ospath[toggle], sizeof(ospath[0]), "%s%s", base, temp);
-
-		return ospath[toggle];
+		if (*s == '/' || *s == '\\')
+		{
+			*s = PATH_SEP;
+		}
 	}
 }
 
-void Utilities::toConsole(gentity_t* ent, std::string message)
+static char *BuildOSPath(const char *file)
 {
-	const auto BYTES_PER_PACKET = 998;
+	char        base[MAX_CVAR_VALUE_STRING] = "\0";
+	char        temp[MAX_OSPATH]            = "\0";
+	char        game[MAX_CVAR_VALUE_STRING] = "\0";
+	static char ospath[2][MAX_OSPATH]       = { "\0", "\0" };
+	static int  toggle;
+
+	toggle ^= 1;            // flip-flop to allow two returns without clash
+
+	trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
+	trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
+
+	Com_sprintf(temp, sizeof(temp), "/%s/%s", game, file);
+	FS_ReplaceSeparators(temp);
+	Com_sprintf(ospath[toggle], sizeof(ospath[0]), "%s%s", base, temp);
+
+	return ospath[toggle];
+}
+}
+
+void Utilities::toConsole(gentity_t *ent, std::string message)
+{
+	const auto               BYTES_PER_PACKET = 998;
 	std::vector<std::string> packets;
 	while (message.length() > BYTES_PER_PACKET)
 	{
@@ -123,11 +132,11 @@ void Utilities::toConsole(gentity_t* ent, std::string message)
 	}
 }
 
-std::string Utilities::timestampToString(int timestamp, const char* format, const char *start)
+std::string Utilities::timestampToString(int timestamp, const char *format, const char *start)
 {
-	char buf[1024];
-	struct tm *lt = NULL;
-	time_t toConvert = timestamp;
+	char      buf[1024];
+	struct tm *lt       = NULL;
+	time_t    toConvert = timestamp;
 	lt = localtime(&toConvert);
 	if (timestamp > 0)
 	{
@@ -152,7 +161,7 @@ bool Utilities::anyonePlaying()
 	for (auto i = 0; i < level.numConnectedClients; i++)
 	{
 		auto clientNum = level.sortedClients[i];
-		auto target = g_entities + clientNum;
+		auto target    = g_entities + clientNum;
 
 		if (target->client->sess.sessionTeam != TEAM_SPECTATOR)
 		{
@@ -181,13 +190,13 @@ std::vector<std::string> Utilities::getMaps()
 {
 	std::vector<std::string> maps;
 
-	int i = 0;
-	int numDirs = 0;
-	int dirLen = 0;
+	int  i       = 0;
+	int  numDirs = 0;
+	int  dirLen  = 0;
 	char dirList[8196];
 	char *dirPtr = nullptr;
 	numDirs = trap_FS_GetFileList("maps", ".bsp", dirList, sizeof(dirList));
-	dirPtr = dirList;
+	dirPtr  = dirList;
 
 	for (i = 0; i < numDirs; i++, dirPtr += dirLen + 1)
 	{

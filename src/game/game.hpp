@@ -16,7 +16,7 @@ class MapStatistics;
 
 struct Game
 {
-    Game();
+	Game();
 
 	std::shared_ptr<Levels> levels;
 	std::shared_ptr<Database> database;
@@ -31,4 +31,4 @@ struct Game
 	std::shared_ptr<MapStatistics> mapStatistics;
 };
 
-#endif 
+#endif

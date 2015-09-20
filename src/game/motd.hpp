@@ -1,8 +1,8 @@
 /*
  * Prints a message of the day when client connects to server.
- * g_motdFile is the file where the motd is defined. The format is 
+ * g_motdFile is the file where the motd is defined. The format is
  * in json.
- * Two messages are sent: the actual motd and also a message in chat 
+ * Two messages are sent: the actual motd and also a message in chat
  * to inform that there's a motd in the console.
  * Example format:
  * {
@@ -20,13 +20,13 @@ typedef struct gentity_s gentity_t;
 class Motd
 {
 public:
-    Motd();
-    ~Motd();
-    void Initialize();
-    void GenerateMotdFile();
-    void PrintMotd(gentity_t *ent);
+	Motd();
+	~Motd();
+	void Initialize();
+	void GenerateMotdFile();
+	void PrintMotd(gentity_t *ent);
 private:
-    bool initialized_;
-    std::string chatMessage_;
-    std::string motd_;
+	bool        initialized_;
+	std::string chatMessage_;
+	std::string motd_;
 };

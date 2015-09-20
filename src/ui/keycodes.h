@@ -7,11 +7,12 @@
 
 // normal keys should be passed as lowercased ascii
 
-typedef enum {
-	K_TAB = 9,
-	K_ENTER = 13,
+typedef enum
+{
+	K_TAB    = 9,
+	K_ENTER  = 13,
 	K_ESCAPE = 27,
-	K_SPACE = 32,
+	K_SPACE  = 32,
 
 	K_BACKSPACE = 127,
 
@@ -129,13 +130,13 @@ typedef enum {
 	K_AUX15,
 	K_AUX16,
 
-	K_LAST_KEY		// this had better be <256!
+	K_LAST_KEY      // this had better be <256!
 } keyNum_t;
 
 
 // The menu code needs to get both key and char events, but
 // to avoid duplicating the paths, the char events are just
 // distinguished by or'ing in K_CHAR_FLAG (ugly)
-#define	K_CHAR_FLAG		1024
+#define K_CHAR_FLAG     1024
 
 #endif

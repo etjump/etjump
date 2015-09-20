@@ -9,20 +9,20 @@
 // TAT 11/13/2002
 //		The SP uses entities that have no physical manifestation in the game, are are used simply
 //		as locational indicators - seek cover spots, and ai markers, for example
-//		This is an alternate system so those don't clutter up the real game entities 
+//		This is an alternate system so those don't clutter up the real game entities
 
 // how many of these entities?
 #define MAX_SERVER_ENTITIES 4096
 
 // for now, statically allocate them
 g_serverEntity_t g_serverEntities[MAX_SERVER_ENTITIES];
-int numServerEntities;
+int              numServerEntities;
 
 
 // clear out all the sp entities
 void InitServerEntities(void)
 {
-	memset( g_serverEntities, 0, sizeof(g_serverEntities) );
+	memset(g_serverEntities, 0, sizeof(g_serverEntities));
 	numServerEntities = 0;
 }
 
@@ -30,8 +30,10 @@ void InitServerEntities(void)
 g_serverEntity_t *GetServerEntity(int num)
 {
 	// if it's an invalid number, return null
-	if ( (num < MAX_GENTITIES) || (num >= MAX_GENTITIES + numServerEntities) )
+	if ((num < MAX_GENTITIES) || (num >= MAX_GENTITIES + numServerEntities))
+	{
 		return NULL;
+	}
 
 	return &g_serverEntities[num - MAX_GENTITIES];
 
@@ -43,12 +45,12 @@ g_serverEntity_t *GetFreeServerEntity()
 	//		if we change this, then we need to be more careful when allocating the entities
 	if (numServerEntities >= MAX_SERVER_ENTITIES)
 	{
-		G_Error( "GetFreeServerEntity: Cannot allocate server entity" );
+		G_Error("GetFreeServerEntity: Cannot allocate server entity");
 		return NULL;
 	}
 
 	g_serverEntities[numServerEntities].number = MAX_GENTITIES + numServerEntities;
-	g_serverEntities[numServerEntities].inuse = qtrue;
+	g_serverEntities[numServerEntities].inuse  = qtrue;
 	return &g_serverEntities[numServerEntities++];
 }
 
@@ -63,16 +65,22 @@ g_serverEntity_t *CreateServerEntity(gentity_t *ent)
 	{
 		// G_NewString crashes if you pass in NULL, so let's check...
 		if (ent->classname)
+		{
 			newEnt->classname = G_NewString(ent->classname);
+		}
 
 		if (ent->targetname)
+		{
 			newEnt->name = G_NewString(ent->targetname);
+		}
 
 		if (ent->target)
+		{
 			newEnt->target = G_NewString(ent->target);
+		}
 
 		newEnt->spawnflags = ent->spawnflags;
-		newEnt->team = ent->aiTeam;
+		newEnt->team       = ent->aiTeam;
 		VectorCopy(ent->s.origin, newEnt->origin);
 		VectorCopy(ent->s.angles, newEnt->angles);
 		// DON'T set the number - that should have been set when it was spawned
@@ -96,7 +104,7 @@ void CreateMapServerEntities();
 //		So we want to give each entity the chance to set itself up after it has been created
 void InitialServerEntitySetup()
 {
-	int i;
+	int              i;
 	g_serverEntity_t *ent;
 
 	// TAT - create the server entities for the current map
@@ -117,32 +125,42 @@ void InitialServerEntitySetup()
 }
 
 // Like G_Find, but for server entities
-g_serverEntity_t *FindServerEntity( g_serverEntity_t *from, int fieldofs, char *match )
+g_serverEntity_t *FindServerEntity(g_serverEntity_t *from, int fieldofs, char *match)
 {
-	char	*s;
+	char             *s;
 	g_serverEntity_t *max = &g_serverEntities[numServerEntities];
 
 	if (!from)
+	{
 		from = g_serverEntities;
+	}
 	else
+	{
 		from++;
+	}
 
 	for ( ; from < max ; from++)
 	{
 		if (!from->inuse)
+		{
 			continue;
+		}
 		s = *(char **) ((byte *)from + fieldofs);
 		if (!s)
+		{
 			continue;
-		if (!Q_stricmp (s, match))
+		}
+		if (!Q_stricmp(s, match))
+		{
 			return from;
+		}
 	}
 
 	return NULL;
 }
 
 // Create a server entity from some basic data
-void CreateServerEntityFromData(char* classname, char* targetname, char* target, vec3_t origin, int spawnflags, vec3_t angle)
+void CreateServerEntityFromData(char *classname, char *targetname, char *target, vec3_t origin, int spawnflags, vec3_t angle)
 {
 	// get the entity out of our pool
 	g_serverEntity_t *newEnt = GetFreeServerEntity();
@@ -152,13 +170,19 @@ void CreateServerEntityFromData(char* classname, char* targetname, char* target,
 	{
 		// G_NewString crashes if you pass in NULL, so let's check...
 		if (classname)
+		{
 			newEnt->classname = G_NewString(classname);
+		}
 
 		if (targetname)
+		{
 			newEnt->name = G_NewString(targetname);
+		}
 
 		if (target)
+		{
 			newEnt->target = G_NewString(target);
+		}
 
 		newEnt->spawnflags = spawnflags;
 		//newEnt->team = ent->aiTeam;
@@ -181,5 +205,5 @@ void CreateMapServerEntities()
 
 	trap_GetServerinfo(info, sizeof(info));
 
-	Q_strncpyz( mapname, Info_ValueForKey( info, "mapname" ), sizeof(mapname));
+	Q_strncpyz(mapname, Info_ValueForKey(info, "mapname"), sizeof(mapname));
 }

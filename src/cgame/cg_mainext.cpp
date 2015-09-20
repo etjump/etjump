@@ -10,9 +10,9 @@ static std::unique_ptr<Timerun> timerun;
 /**
  * Initializes the CPP side of client
  */
-void InitGame() 
+void InitGame()
 {
-    timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
+	timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
 }
 
 /**
@@ -21,83 +21,83 @@ void InitGame()
  * returns false
  * @return qboolean Whether a match was found or not
  */
-qboolean CG_ServerCommandExt(const char *cmd) 
+qboolean CG_ServerCommandExt(const char *cmd)
 {
-    std::string command = cmd != nullptr ? cmd : "";
+	std::string command = cmd != nullptr ? cmd : "";
 
-    // timerun_start runStartTime{integer} runName{string}
-    if (command == "timerun_start")
-    {
-        auto startTime = atoi(CG_Argv(1));
-        std::string runName = CG_Argv(2);
-        auto previousRecord = atoi(CG_Argv(3));
-        timerun->startTimerun(runName, startTime, previousRecord);
-        return qtrue;
-    }
-    // timerun_start_spec clientNum{integer} runStartTime{integer} runName{string}
-    if (command == "timerun_start_spec")
-    {
-        if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
-        {
-            return qtrue;
-        }
+	// timerun_start runStartTime{integer} runName{string}
+	if (command == "timerun_start")
+	{
+		auto        startTime      = atoi(CG_Argv(1));
+		std::string runName        = CG_Argv(2);
+		auto        previousRecord = atoi(CG_Argv(3));
+		timerun->startTimerun(runName, startTime, previousRecord);
+		return qtrue;
+	}
+	// timerun_start_spec clientNum{integer} runStartTime{integer} runName{string}
+	if (command == "timerun_start_spec")
+	{
+		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
+		{
+			return qtrue;
+		}
 
-        auto clientNum = atoi(CG_Argv(1));
-        auto runStartTime = atoi(CG_Argv(2));
-        std::string runName = CG_Argv(3);
-        auto previousRecord = atoi(CG_Argv(4));
+		auto        clientNum      = atoi(CG_Argv(1));
+		auto        runStartTime   = atoi(CG_Argv(2));
+		std::string runName        = CG_Argv(3);
+		auto        previousRecord = atoi(CG_Argv(4));
 
-        timerun->startSpectatorTimerun(clientNum, runName, runStartTime, previousRecord);
+		timerun->startSpectatorTimerun(clientNum, runName, runStartTime, previousRecord);
 
-        return qtrue;
-    }
-    if (command == "timerun_interrupt")
-    {
-        timerun->interrupt();
-        return qtrue;
-    }
-    // timerun_stop completionTime{integer}
-    if (command == "timerun_stop")
-    {
-        auto completionTime = atoi(CG_Argv(1));
-        timerun->stopTimerun(completionTime);
-        return qtrue;
-    }
-    // timerun_stop_spec clientNum{integer} completionTime{integer} runName{string}
-    if (command == "timerun_stop_spec")
-    {
-        if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
-        {
-            return qtrue;
-        }
+		return qtrue;
+	}
+	if (command == "timerun_interrupt")
+	{
+		timerun->interrupt();
+		return qtrue;
+	}
+	// timerun_stop completionTime{integer}
+	if (command == "timerun_stop")
+	{
+		auto completionTime = atoi(CG_Argv(1));
+		timerun->stopTimerun(completionTime);
+		return qtrue;
+	}
+	// timerun_stop_spec clientNum{integer} completionTime{integer} runName{string}
+	if (command == "timerun_stop_spec")
+	{
+		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
+		{
+			return qtrue;
+		}
 
-        auto clientNum = atoi(CG_Argv(1));
-        auto completionTime = atoi(CG_Argv(2));
-        std::string runName = CG_Argv(3);
+		auto        clientNum      = atoi(CG_Argv(1));
+		auto        completionTime = atoi(CG_Argv(2));
+		std::string runName        = CG_Argv(3);
 
-        timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
+		timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
 
-        return qtrue;
-    }
-    if (command == "record")
-    {
-        auto clientNum = atoi(CG_Argv(1));
-        std::string runName = CG_Argv(2);
-        auto completionTime = atoi(CG_Argv(3));
+		return qtrue;
+	}
+	if (command == "record")
+	{
+		auto        clientNum      = atoi(CG_Argv(1));
+		std::string runName        = CG_Argv(2);
+		auto        completionTime = atoi(CG_Argv(3));
 
-        timerun->record(clientNum, runName, completionTime);
-        return qtrue;
-    }
-    if (command == "completion")
-    {
-        auto clientNum = atoi(CG_Argv(1));
-        std::string runName = CG_Argv(2);
-        auto completionTime = atoi(CG_Argv(3));
-        
-        timerun->completion(clientNum, runName, completionTime);
+		timerun->record(clientNum, runName, completionTime);
+		return qtrue;
+	}
+	if (command == "completion")
+	{
+		auto        clientNum      = atoi(CG_Argv(1));
+		std::string runName        = CG_Argv(2);
+		auto        completionTime = atoi(CG_Argv(3));
 
-        return qtrue;
-    }
+		timerun->completion(clientNum, runName, completionTime);
 
-    return qfalse;
+		return qtrue;
+	}
+
+	return qfalse;
 }

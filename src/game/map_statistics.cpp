@@ -7,15 +7,15 @@
 
 
 
-MapStatistics::MapStatistics(): _previousLevelTime(0), _currentMillisecondsPlayed(0), _currentMillisecondsOnServer(0), _currentMap(nullptr)
+MapStatistics::MapStatistics() : _previousLevelTime(0), _currentMillisecondsPlayed(0), _currentMillisecondsOnServer(0), _currentMap(nullptr)
 {
 
 }
 
 
-std::vector<const MapStatistics::MapInformation*> MapStatistics::getMostPlayed()
+std::vector<const MapStatistics::MapInformation *> MapStatistics::getMostPlayed()
 {
-	std::vector<const MapInformation*> mostPlayed;
+	std::vector<const MapInformation *> mostPlayed;
 	for (auto& map : _maps)
 	{
 		mostPlayed.push_back(&map);
@@ -29,9 +29,9 @@ std::vector<const MapStatistics::MapInformation*> MapStatistics::getMostPlayed()
 	return std::move(mostPlayed);
 }
 
-std::vector<const MapStatistics::MapInformation*> MapStatistics::getLeastPlayed()
+std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed()
 {
-	std::vector<const MapInformation*> mostPlayed;
+	std::vector<const MapInformation *> mostPlayed;
 	for (auto& map : _maps)
 	{
 		mostPlayed.push_back(&map);
@@ -62,11 +62,12 @@ std::vector<std::string> MapStatistics::getMaps()
 
 const MapStatistics::MapInformation *MapStatistics::getMapInformation(const std::string& mapName)
 {
-	const MapInformation* mi = nullptr;
+	const MapInformation *mi = nullptr;
 	if (mapName.length() == 0)
 	{
 		mi = _currentMap;
-	} else
+	}
+	else
 	{
 		auto it = std::find_if(_maps.begin(), _maps.end(), [&mapName](const MapInformation& mapInformation)
 		{
@@ -83,7 +84,7 @@ const MapStatistics::MapInformation *MapStatistics::getMapInformation(const std:
 	return mi;
 }
 
-void MapStatistics::increasePassedCount(const char* mapName)
+void MapStatistics::increasePassedCount(const char *mapName)
 {
 	auto it = std::find_if(_maps.begin(), _maps.end(), [&mapName](const MapInformation& mi)
 	{
@@ -100,7 +101,7 @@ void MapStatistics::increasePassedCount(const char* mapName)
 	++it->votesPassed;
 }
 
-void MapStatistics::increaseCallvoteCount(const char* mapName)
+void MapStatistics::increaseCallvoteCount(const char *mapName)
 {
 	auto it = std::find_if(_maps.begin(), _maps.end(), [&mapName](const MapInformation& mi)
 	{
@@ -124,15 +125,15 @@ void MapStatistics::saveChanges()
 		Utilities::Log("Notification: Map was changed before a new map was loaded. No map statistics were saved.");
 		return;
 	}
-	_currentMap->changed = true;
+	_currentMap->changed       = true;
 	_currentMap->secondsPlayed = _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
-	_currentMap->timesPlayed += 1;
+	_currentMap->timesPlayed  += 1;
 	time_t t;
 	time(&t);
 	_currentMap->lastPlayed = static_cast<int>(t);
 
 	sqlite3 *db = nullptr;
-	auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to open database. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
@@ -150,9 +151,9 @@ void MapStatistics::saveChanges()
 	{
 		if (map.changed)
 		{
-			rc = sqlite3_exec(db, (boost::format("UPDATE map_statistics SET seconds_played=%d, callvoted=%d, votes_passed=%d, times_played=%d, last_played=%d WHERE id=%d;") 
-				% map.secondsPlayed % map.callvoted % map.votesPassed % map.timesPlayed % map.lastPlayed % map.id
-				).str().c_str(), nullptr, nullptr, nullptr);
+			rc = sqlite3_exec(db, (boost::format("UPDATE map_statistics SET seconds_played=%d, callvoted=%d, votes_passed=%d, times_played=%d, last_played=%d WHERE id=%d;")
+			                       % map.secondsPlayed % map.callvoted % map.votesPassed % map.timesPlayed % map.lastPlayed % map.id
+			                       ).str().c_str(), nullptr, nullptr, nullptr);
 			if (rc != SQLITE_OK)
 			{
 				Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to update map. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
@@ -184,19 +185,19 @@ void MapStatistics::runFrame(int levelTime)
 	if (Utilities::anyonePlaying())
 	{
 		_currentMillisecondsPlayed += diff;
-		_currentMap->secondsPlayed = _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
+		_currentMap->secondsPlayed  = _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
 	}
 }
 
 void MapStatistics::resetFields()
 {
 	_maps.clear();
-	_currentMap = nullptr;
+	_currentMap                  = nullptr;
 	_currentMillisecondsOnServer = 0;
-	_currentMillisecondsPlayed = 0;
-	_databaseName = "";
-	_originalSecondsPlayed = 0;
-	_previousLevelTime = 0;
+	_currentMillisecondsPlayed   = 0;
+	_databaseName                = "";
+	_originalSecondsPlayed       = 0;
+	_previousLevelTime           = 0;
 }
 
 bool MapStatistics::initialize(std::string database, const std::string& currentMap)
@@ -224,7 +225,7 @@ bool MapStatistics::initialize(std::string database, const std::string& currentM
 	return true;
 }
 
-const MapStatistics::MapInformation* MapStatistics::getCurrentMap() const
+const MapStatistics::MapInformation *MapStatistics::getCurrentMap() const
 {
 	return _currentMap;
 }
@@ -239,7 +240,7 @@ void MapStatistics::setCurrentMap(const std::string currentMap)
 	if (it == _maps.end())
 	{
 		Utilities::Error((boost::format("Error: Failed to set the current map to %s. Map could not be found in the maps vector. Map count: %d\n")
-			% currentMap % _maps.size()).str());
+		                  % currentMap % _maps.size()).str());
 		return;
 	}
 
@@ -248,8 +249,8 @@ void MapStatistics::setCurrentMap(const std::string currentMap)
 
 void MapStatistics::addNewMaps()
 {
-	auto maps = Utilities::getMaps();
-	auto mapCount = 0;
+	auto                     maps     = Utilities::getMaps();
+	auto                     mapCount = 0;
 	std::vector<std::string> newMaps;
 
 	for (auto &map : maps)
@@ -270,7 +271,7 @@ void MapStatistics::addNewMaps()
 		Utilities::Console((boost::format("Notification: New map %s found.\n") % map).str());
 
 		MapInformation mapInformation;
-		mapInformation.name = map;
+		mapInformation.name       = map;
 		mapInformation.isOnServer = true;
 
 		_maps.push_back(std::move(mapInformation));
@@ -280,14 +281,14 @@ void MapStatistics::addNewMaps()
 	auto count = newMaps.size();
 	saveNewMaps(std::move(newMaps));
 
-	Utilities::Console((boost::format("%d maps on the server. Added %d new maps.\n") 
-		% mapCount % count).str());
+	Utilities::Console((boost::format("%d maps on the server. Added %d new maps.\n")
+	                    % mapCount % count).str());
 }
 
 void MapStatistics::saveNewMaps(std::vector<std::string> newMaps)
 {
 	sqlite3 *db = nullptr;
-	auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::saveNewMaps: Error: Could not open map database %s\n") % _databaseName).str());
@@ -297,16 +298,16 @@ void MapStatistics::saveNewMaps(std::vector<std::string> newMaps)
 	for (auto newMap : newMaps)
 	{
 		std::string sqlEscapedMapName = newMap;
- 		boost::replace_all(sqlEscapedMapName, "'", "''");
+		boost::replace_all(sqlEscapedMapName, "'", "''");
 		// Map names won't be doing any SQL injection
-		rc = sqlite3_exec(db, 
-			(boost::format("INSERT INTO map_statistics (name, seconds_played, callvoted, votes_passed, times_played, last_played) VALUES ('%s', 0, 0, 0, 0, 0);") % sqlEscapedMapName).str().c_str(), nullptr, nullptr, nullptr);
+		rc = sqlite3_exec(db,
+		                  (boost::format("INSERT INTO map_statistics (name, seconds_played, callvoted, votes_passed, times_played, last_played) VALUES ('%s', 0, 0, 0, 0, 0);") % sqlEscapedMapName).str().c_str(), nullptr, nullptr, nullptr);
 		if (rc != SQLITE_OK)
 		{
 			Utilities::Error((boost::format("MapStatistics::saveNewMaps: Error: Failed to execute statement: (%d) %s") % rc % sqlite3_errmsg(db)).str());
 			sqlite3_close(db);
 			return;
-		} 
+		}
 
 		auto newMapIter = std::find_if(_maps.begin(), _maps.end(), [&newMap](const MapInformation& mi)
 		{
@@ -331,7 +332,7 @@ bool MapStatistics::loadFromDatabase()
 		return false;
 	}
 
-	if(!loadMaps())
+	if (!loadMaps())
 	{
 		return false;
 	}
@@ -347,7 +348,7 @@ bool MapStatistics::loadMaps()
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Failed to open database %s\n")
-			% _databaseName).str());
+		                  % _databaseName).str());
 		return false;
 	}
 
@@ -357,7 +358,7 @@ bool MapStatistics::loadMaps()
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Failed to prepare statement: (%d) %s\n")
-			% rc % sqlite3_errmsg(db)).str());
+		                  % rc % sqlite3_errmsg(db)).str());
 		sqlite3_close(db);
 		return false;
 	}
@@ -368,13 +369,13 @@ bool MapStatistics::loadMaps()
 		MapInformation mi;
 
 		mi.id = sqlite3_column_int(stmt, 0);
-		auto name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-		mi.name = name ? name : "";
+		auto name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
+		mi.name          = name ? name : "";
 		mi.secondsPlayed = sqlite3_column_int(stmt, 2);
-		mi.callvoted = sqlite3_column_int(stmt, 3);
-		mi.votesPassed = sqlite3_column_int(stmt, 4);
-		mi.timesPlayed = sqlite3_column_int(stmt, 5);
-		mi.lastPlayed = sqlite3_column_int(stmt, 6);
+		mi.callvoted     = sqlite3_column_int(stmt, 3);
+		mi.votesPassed   = sqlite3_column_int(stmt, 4);
+		mi.timesPlayed   = sqlite3_column_int(stmt, 5);
+		mi.lastPlayed    = sqlite3_column_int(stmt, 6);
 
 		_maps.push_back(mi);
 		rc = sqlite3_step(stmt);
@@ -383,7 +384,7 @@ bool MapStatistics::loadMaps()
 	if (rc != SQLITE_DONE)
 	{
 		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Reading map statistics failed. (%d) %s\n")
-			% rc % sqlite3_errmsg(db)).str());
+		                  % rc % sqlite3_errmsg(db)).str());
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return false;
@@ -398,11 +399,11 @@ bool MapStatistics::loadMaps()
 bool MapStatistics::createDatabase()
 {
 	sqlite3 *db = nullptr;
-	auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::createDatabase: Error: Failed to open database %s\n")
-			% _databaseName).str());
+		                  % _databaseName).str());
 		return false;
 	}
 
@@ -413,7 +414,7 @@ bool MapStatistics::createDatabase()
 		sqlite3_free(errorMessage);
 		sqlite3_close(db);
 		Utilities::Error((boost::format("MapStatistics::createDatabase: Error: Failed to create database %s. (%d) %s")
-			% _databaseName % rc % errorMessage).str());
+		                  % _databaseName % rc % errorMessage).str());
 		return false;
 	}
 	sqlite3_free(errorMessage);
@@ -421,17 +422,18 @@ bool MapStatistics::createDatabase()
 	return true;
 }
 
-const char* MapStatistics::randomMap() const
+const char *MapStatistics::randomMap() const
 {
-	auto *mapInformation = &_maps[0];
-	static char map[256] = "\0";
+	auto        *mapInformation = &_maps[0];
+	static char map[256]        = "\0";
 	if (_maps.size() == 1)
 	{
 		strcpy(map, _maps[0].name.c_str());
-	} else
+	}
+	else
 	{
-		std::random_device rd;
-		std::mt19937 re(rd());
+		std::random_device                 rd;
+		std::mt19937                       re(rd());
 		std::uniform_int_distribution<int> ui(0, _maps.size() - 1);
 
 		auto mapIdx = ui(re);

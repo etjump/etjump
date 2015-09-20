@@ -16,25 +16,25 @@
 class OperationQueue
 {
 public:
-    class Operation
-    {
-    public:
-        Operation();
-        virtual ~Operation();
-        virtual void Execute() = 0;
-    };
-    
-    // Initializes the mutexes
-    void Init();
-    // Destroys the mutexes
-    void Shutdown();
-    // Executes each queued operation if the mutexes aren't locked
-    bool ExecuteQueuedOperations();
-    // Adds a new operation to the queue
-    bool AddNewQueuedOperation(boost::shared_ptr<Operation> op);
+	class Operation
+	{
+public:
+		Operation();
+		virtual ~Operation();
+		virtual void Execute() = 0;
+	};
+
+	// Initializes the mutexes
+	void Init();
+	// Destroys the mutexes
+	void Shutdown();
+	// Executes each queued operation if the mutexes aren't locked
+	bool ExecuteQueuedOperations();
+	// Adds a new operation to the queue
+	bool AddNewQueuedOperation(boost::shared_ptr<Operation> op);
 private:
-    pthread_mutex_t queueMutex;
-    std::vector<boost::shared_ptr<Operation> > operations_;
+	pthread_mutex_t                            queueMutex;
+	std::vector<boost::shared_ptr<Operation> > operations_;
 };
 
 #endif

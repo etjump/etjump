@@ -1,18 +1,20 @@
 #ifndef __UI_PUBLIC_H__
 #define __UI_PUBLIC_H__
 
-#define UI_API_VERSION	4
+#define UI_API_VERSION  4
 
-typedef struct {
-	connstate_t		connState;
-	int				connectPacketCount;
-	int				clientNum;
-	char			servername[MAX_STRING_CHARS];
-	char			updateInfoString[MAX_STRING_CHARS];
-	char			messageString[MAX_STRING_CHARS];
+typedef struct
+{
+	connstate_t connState;
+	int connectPacketCount;
+	int clientNum;
+	char servername[MAX_STRING_CHARS];
+	char updateInfoString[MAX_STRING_CHARS];
+	char messageString[MAX_STRING_CHARS];
 } uiClientState_t;
 
-typedef enum {
+typedef enum
+{
 	UI_ERROR,
 	UI_PRINT,
 	UI_MILLISECONDS,
@@ -45,7 +47,7 @@ typedef enum {
 	// JOSEPH 12-6-99
 	UI_R_ADDLIGHTTOSCENE,
 	// END JOSEPH
-	//----(SA)	
+	//----(SA)
 	UI_R_ADDCORONATOSCENE,
 	//----(SA)
 	UI_R_RENDERSCENE,
@@ -53,13 +55,13 @@ typedef enum {
 	UI_R_DRAW2DPOLYS,
 	UI_R_DRAWSTRETCHPIC,
 	UI_R_DRAWROTATEDPIC,
-	UI_UPDATESCREEN,		// 30
+	UI_UPDATESCREEN,        // 30
 	UI_CM_LERPTAG,
 	UI_CM_LOADMODEL,
 	UI_S_REGISTERSOUND,
 	UI_S_STARTLOCALSOUND,
-	UI_S_FADESTREAMINGSOUND,	//----(SA)	added
-	UI_S_FADEALLSOUNDS,			//----(SA)	added
+	UI_S_FADESTREAMINGSOUND,    //----(SA)	added
+	UI_S_FADEALLSOUNDS,         //----(SA)	added
 	UI_KEY_KEYNUMTOSTRINGBUF,
 	UI_KEY_GETBINDINGBUF,
 	UI_KEY_SETBINDING,
@@ -76,7 +78,7 @@ typedef enum {
 	UI_GETCONFIGSTRING,
 	UI_LAN_GETLOCALSERVERCOUNT,
 	UI_LAN_GETLOCALSERVERADDRESSSTRING,
-	UI_LAN_GETGLOBALSERVERCOUNT,		// 50
+	UI_LAN_GETGLOBALSERVERCOUNT,        // 50
 	UI_LAN_GETGLOBALSERVERADDRESSSTRING,
 	UI_LAN_GETPINGQUEUECOUNT,
 	UI_LAN_CLEARPING,
@@ -122,13 +124,13 @@ typedef enum {
 	UI_LAN_SERVERISVISIBLE,
 	UI_LAN_COMPARESERVERS,
 	UI_LAN_SERVERISINFAVORITELIST,
-	UI_CL_GETLIMBOSTRING,			// NERVE - SMF
-	UI_SET_PBCLSTATUS,				// DHM - Nerve
-	UI_CHECKAUTOUPDATE,				// DHM - Nerve
-	UI_GET_AUTOUPDATE,				// DHM - Nerve
+	UI_CL_GETLIMBOSTRING,           // NERVE - SMF
+	UI_SET_PBCLSTATUS,              // DHM - Nerve
+	UI_CHECKAUTOUPDATE,             // DHM - Nerve
+	UI_GET_AUTOUPDATE,              // DHM - Nerve
 	UI_CL_TRANSLATE_STRING,
 	UI_OPENURL,
-	UI_SET_PBSVSTATUS,				// TTimo
+	UI_SET_PBSVSTATUS,              // TTimo
 
 	UI_MEMSET = 200,
 	UI_MEMCPY,
@@ -143,16 +145,17 @@ typedef enum {
 
 } uiImport_t;
 
-#define SORT_HOST			0
-#define SORT_MAP			1
-#define SORT_CLIENTS		2
-#define SORT_GAME			3
-#define SORT_PING			4
-#define SORT_FILTERS		5
-#define SORT_FAVOURITES		6
+#define SORT_HOST           0
+#define SORT_MAP            1
+#define SORT_CLIENTS        2
+#define SORT_GAME           3
+#define SORT_PING           4
+#define SORT_FILTERS        5
+#define SORT_FAVOURITES     6
 
-typedef enum {
-	UI_GETAPIVERSION = 0,	// system reserved
+typedef enum
+{
+	UI_GETAPIVERSION = 0,   // system reserved
 
 	UI_INIT,
 //	void	UI_Init( void );
@@ -187,7 +190,7 @@ typedef enum {
 // if !overlay, the background will be drawn, otherwise it will be
 // overlayed over whatever the cgame has drawn.
 // a GetClientState syscall will be made to get the current strings
-	UI_CHECKEXECKEY,		// NERVE - SMF
+	UI_CHECKEXECKEY,        // NERVE - SMF
 
 	UI_WANTSBINDKEYS,
 
