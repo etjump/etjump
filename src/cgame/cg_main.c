@@ -767,7 +767,16 @@ void CG_RegisterCvars(void)
 	BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1, "player_runTimerColor");
 	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
-	cg.pmext.noclipScale = cg_noclipScale.integer;
+	if (cg_noclipScale.integer < 1)
+	{
+		cg.pmext.noclipScale = 1;
+	} else if (cg_noclipScale.integer > 20)
+	{
+		cg.pmext.noclipScale = 20;
+	} else
+	{
+		cg.pmext.noclipScale = cg_noclipScale.integer;
+	}
 
 	cvarsLoaded = qtrue;
 }
@@ -878,7 +887,16 @@ void CG_UpdateCvars(void)
 				// This has to be if, not elseif...
 				if (cv->vmCvar == &cg_noclipScale)
 				{
-					cg.pmext.noclipScale = cg_noclipScale.integer;
+					if (cg_noclipScale.integer < 1)
+					{
+						cg.pmext.noclipScale = 1;
+					} else if (cg_noclipScale.integer > 20)
+					{
+						cg.pmext.noclipScale = 20;
+					} else
+					{
+						cg.pmext.noclipScale = cg_noclipScale.integer;
+					}
 				}
 			}
 		}

@@ -1216,7 +1216,16 @@ void ClientThink_real(gentity_t *ent)
 	// set speed
 	client->ps.speed = G_SPEED;
 
-	client->pmext.noclipScale = client->pers.noclipScale;
+	if (client->pers.noclipScale < 1)
+	{
+		client->pmext.noclipScale = 1;
+	} else if (client->pers.noclipScale > 20)
+	{
+		client->pmext.noclipScale = 20;
+	} else
+	{
+		client->pmext.noclipScale = client->pers.noclipScale;
+	}
 
 	if (client->speedScale)                 // Goalitem speed scale
 	{
