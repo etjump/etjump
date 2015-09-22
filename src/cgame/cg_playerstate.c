@@ -273,7 +273,7 @@ void CG_Respawn(qboolean revived)
 	// clear pmext
 	memset(&cg.pmext, 0, sizeof(cg.pmext));
 
-	cg.pmext.noclipScale = (cg_noclipScale.integer);
+	cg.pmext.noclipScale = (cg_noclipScale.value);
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
 
 	cg.pmext.sprintTime = SPRINTTIME;

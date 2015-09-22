@@ -1539,7 +1539,7 @@ void ClientUserinfoChanged(int clientNum)
 
 
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
-	sscanf(s, "%i %i %i %i %i",
+	sscanf(s, "%i %i %i %i %f",
 	       &client->pers.clientFlags,
 	       &client->pers.clientTimeNudge,
 	       &client->pers.clientMaxPackets,

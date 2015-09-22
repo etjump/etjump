@@ -836,7 +836,7 @@ typedef struct
 	int characterIndex;
 
 	int hideMe;
-	int noclipScale;
+	float noclipScale;
 
 	int noclipCount;
 

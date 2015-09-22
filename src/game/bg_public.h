@@ -534,7 +534,7 @@ typedef struct
 	int lastRecoilDeltaTime;
 
 	qboolean releasedFire;
-	int noclipScale;
+	float noclipScale;
 
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP

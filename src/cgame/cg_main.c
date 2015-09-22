@@ -767,15 +767,15 @@ void CG_RegisterCvars(void)
 	BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1, "player_runTimerColor");
 	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
-	if (cg_noclipScale.integer < 1)
+	if (cg_noclipScale.value < 1)
 	{
 		cg.pmext.noclipScale = 1;
-	} else if (cg_noclipScale.integer > 20)
+	} else if (cg_noclipScale.value > 20)
 	{
 		cg.pmext.noclipScale = 20;
 	} else
 	{
-		cg.pmext.noclipScale = cg_noclipScale.integer;
+		cg.pmext.noclipScale = cg_noclipScale.value;
 	}
 
 	cvarsLoaded = qtrue;
@@ -887,15 +887,15 @@ void CG_UpdateCvars(void)
 				// This has to be if, not elseif...
 				if (cv->vmCvar == &cg_noclipScale)
 				{
-					if (cg_noclipScale.integer < 1)
+					if (cg_noclipScale.value < 1)
 					{
 						cg.pmext.noclipScale = 1;
-					} else if (cg_noclipScale.integer > 20)
+					} else if (cg_noclipScale.value > 20)
 					{
 						cg.pmext.noclipScale = 20;
 					} else
 					{
-						cg.pmext.noclipScale = cg_noclipScale.integer;
+						cg.pmext.noclipScale = cg_noclipScale.value;
 					}
 				}
 			}
@@ -917,7 +917,7 @@ void CG_setClientFlags(void)
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f",
 	                             // Client Flags
 	                             (
 	                                 ((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -939,7 +939,7 @@ void CG_setClientFlags(void)
 	                             // MaxPackets
 	                             int_cl_maxpackets.integer,
 	                             com_maxfps.integer,
-	                             cg_noclipScale.integer
+	                             cg_noclipScale.value
 	                             ));
 
 }
