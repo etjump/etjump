@@ -540,7 +540,6 @@ struct gentity_s
 
 	float velocityLowerLimit;
 	float velocityUpperLimit;
-
 };
 
 // Ridah
@@ -1008,6 +1007,9 @@ struct gclient_s
 	int last8BallTime;             // Last level.time client used !8ball.
 	int lastVoteTime;
 	qboolean cheatDetected;
+
+	// Whether the client already activated a trigger or not
+	qboolean alreadyActivatedTrigger;
 };
 
 typedef struct
@@ -2759,7 +2761,7 @@ qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
 const char *GetRandomMapByType(const char *customType);
 qboolean AdminCommandCheck(gentity_t *ent);
-void StartRace(gentity_t *ent);
+//void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType);
 void CheckIfOperationsNeedToBeExecuted();
 void ClientNameChanged(gentity_t *ent);

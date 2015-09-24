@@ -23,6 +23,22 @@ void multi_wait(gentity_t *ent)
 	ent->nextthink = 0;
 }
 
+// activator is always a client
+void parallel_multi_trigger(gentity_t *ent, gentity_t *activator)
+{
+	// do not activate if we already activated in this frame
+	if (activator->client->alreadyActivatedTrigger)
+	{
+		return;
+	}
+
+	ent->activator = activator;
+
+	G_Script_ScriptEvent(ent, "activate", NULL);
+
+	G_UseTargets(ent, ent->activator);
+	activator->client->alreadyActivatedTrigger = qtrue;
+}
 
 // the trigger was just activated
 // ent->activator should be set to the activator so it can be held through a delay
@@ -137,6 +153,12 @@ void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace)
 		{
 			return;
 		}
+	}
+
+	if (self->spawnflags & 512)
+	{
+		parallel_multi_trigger(self, other);
+		return;
 	}
 	// END Mad Doc - TDF
 

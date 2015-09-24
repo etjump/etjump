@@ -350,6 +350,9 @@ void    G_TouchTriggers(gentity_t *ent)
 	// Arnout: reset the pointer that keeps track of trigger_objective_info tracking
 	ent->client->touchingTOI = NULL;
 
+	// Zero: reset the bool that keeps track of trigger_multiple, spawnflags 512 activations
+	ent->client->alreadyActivatedTrigger = qfalse;
+
 	// dead clients don't activate triggers!
 	if (ent->client->ps.stats[STAT_HEALTH] <= 0)
 	{
@@ -368,7 +371,7 @@ void    G_TouchTriggers(gentity_t *ent)
 	for (i = 0 ; i < num ; i++)
 	{
 		hit = &g_entities[touch[i]];
-
+		
 		if (!hit->touch && !ent->touch)
 		{
 			continue;
