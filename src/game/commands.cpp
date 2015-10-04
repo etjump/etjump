@@ -1119,7 +1119,7 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 
 		if (perRow < 0)
 		{
-			ChatPrintTo(ent, (boost::format("^3listmaps: ^7second argument must be over 0") % argv->at(1)).str());
+			ChatPrintTo(ent, "^3listmaps: ^7second argument must be over 0");
 			return false;
 		}
 
