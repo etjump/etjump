@@ -2485,12 +2485,6 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 			return qfalse;
 		}
 
-		if (!Q_stricmp(arg2, level.rawmapname))
-		{
-			CP(va("print \"^3callvote: ^7%s is the current map.\n\"", level.rawmapname));
-			return qfalse;
-		}
-
 		map = G_MatchOneMap(arg2);
 		if (!map)
 		{
@@ -2499,6 +2493,12 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 			return qfalse;
 		}
 		Q_strncpyz(arg2, map, sizeof(arg2));
+
+		if (!Q_stricmp(arg2, level.rawmapname))
+		{
+			CP(va("print \"^3callvote: ^7%s is the current map.\n\"", level.rawmapname));
+			return qfalse;
+		}
 
 		if (strstr(Q_strlwr(g_blockedMaps.string), Q_strlwr(arg2)) != NULL)
 		{
