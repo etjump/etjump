@@ -45,6 +45,11 @@ std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed
 	return std::move(mostPlayed);
 }
 
+const std::vector<std::string>* MapStatistics::getCurrentMaps()
+{
+	return &_currentMaps;
+}
+
 std::vector<std::string> MapStatistics::getMaps()
 {
 	std::vector<std::string> maps;
@@ -252,6 +257,8 @@ void MapStatistics::addNewMaps()
 	auto                     maps     = Utilities::getMaps();
 	auto                     mapCount = 0;
 	std::vector<std::string> newMaps;
+	_currentMaps = maps;
+	std::sort(_currentMaps.begin(), _currentMaps.end());
 
 	for (auto &map : maps)
 	{
@@ -376,6 +383,7 @@ bool MapStatistics::loadMaps()
 		mi.votesPassed   = sqlite3_column_int(stmt, 4);
 		mi.timesPlayed   = sqlite3_column_int(stmt, 5);
 		mi.lastPlayed    = sqlite3_column_int(stmt, 6);
+		mi.isOnServer = false;
 
 		_maps.push_back(mi);
 		rc = sqlite3_step(stmt);
@@ -437,8 +445,9 @@ const char *MapStatistics::randomMap() const
 		std::uniform_int_distribution<int> ui(0, _maps.size() - 1);
 
 		auto mapIdx = ui(re);
-		while (&_maps[mapIdx] == _currentMap && _maps[mapIdx].isOnServer)
+		while (&_maps[mapIdx] == _currentMap || !_maps[mapIdx].isOnServer)
 		{
+			Utilities::Log(_maps[mapIdx].name);
 			mapIdx = ui(re);
 		}
 

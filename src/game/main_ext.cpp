@@ -143,10 +143,11 @@ void OnGameInit()
 		}
 	}
 
+	game.mapStatistics->initialize(std::string(g_mapDatabase.string), level.rawmapname);
 	game.customMapVotes->Load();
 	game.motd->Initialize();
 	game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
-	game.mapStatistics->initialize(std::string(g_mapDatabase.string), level.rawmapname);
+	
 
 	// this has to be initialized here
 	game.randomMapMode = std::shared_ptr<RandomMapMode>(new RandomMapMode(level.time,

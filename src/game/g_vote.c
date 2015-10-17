@@ -477,12 +477,13 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
 			if (strlen(map) == 0)
 			{
-				C_ChatPrintTo(ent, "^3randommap: ^7no maps on the requested map list. Voting for a random map.");
-				map = GetRandomMap();
+				C_ChatPrintTo(ent, "^3randommap: ^7no maps on the requested map list.");
+				return G_INVALID;
 			}
 			else if (!G_MapExists(map))
 			{
 				C_ChatPrintTo(ent, va("^1ERROR: ^7map %s is not on the server. Please update customvotes.json.", map));
+				return G_INVALID;
 			}
 		}
 		else

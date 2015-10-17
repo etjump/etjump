@@ -1,10 +1,11 @@
 #include "custom_map_votes.hpp"
+#include "map_statistics.hpp"
 #include <fstream>
 #include "utilities.hpp"
 #include "../json/json.h"
 #include <boost/algorithm/string.hpp>
 
-CustomMapVotes::CustomMapVotes()
+CustomMapVotes::CustomMapVotes(MapStatistics *mapStats): _mapStats(mapStats)
 {
 }
 
@@ -30,6 +31,8 @@ bool CustomMapVotes::Load()
 	{
 		return false;
 	}
+	_currentMapsOnServer = _mapStats->getCurrentMaps();
+
 	customMapVotes_.clear();
 	std::string   path = GetPath(g_customMapVotesFile.string);
 	std::ifstream f(path.c_str());
@@ -62,7 +65,14 @@ bool CustomMapVotes::Load()
 			customMapVotes_[curr].callvoteText = root[i]["callvote_text"].asString();
 			for (int j = 0; j < maps.size(); j++)
 			{
-				customMapVotes_[curr].maps.push_back(maps[j].asString());
+				auto mapName = maps[j].asString();
+				if (std::binary_search(_currentMapsOnServer->begin(), _currentMapsOnServer->end(), mapName))
+				{
+					customMapVotes_[curr].mapsOnServer.push_back(mapName);
+				} else
+				{
+					customMapVotes_[curr].otherMaps.push_back(mapName);
+				}
 			}
 		}
 	}
@@ -159,17 +169,37 @@ const std::vector<std::string> *CustomMapVotes::ListInfo(const std::string& type
 		if (customMapVotes_[i].type == type)
 		{
 			lines.push_back("^<Maps on the list: ^7\n");
-			for (unsigned j = 0; j < customMapVotes_[i].maps.size(); j++)
+
+			int count = 0;
+			for (auto & mapOnServer : customMapVotes_[i].mapsOnServer)
 			{
-				lines.push_back(va("%-30s ", customMapVotes_[i].maps[j].c_str()));
-				if (j % 3 == 0 && j != 0)
+				lines.push_back(va("^7%-30s ", mapOnServer.c_str()));
+
+				++count;
+				if (count % 3)
 				{
-					lines[lines.size() - 1].push_back('\n');
-				}
-				else if (j + 1 == customMapVotes_[i].maps.size())
+					lines.push_back("\n");
+				} 
+			}
+			if (lines[lines.size() - 1] != "\n")
+			{
+				lines.push_back("\n");
+			}
+			lines.push_back("^<Maps that are not on the server: ^7\n");
+			count = 0;
+			for (auto & mapNotOnServer : customMapVotes_[i].otherMaps)
+			{
+				lines.push_back(va("^9%-30s ", mapNotOnServer.c_str()));
+
+				++count;
+				if (count % 3)
 				{
-					lines[lines.size() - 1].push_back('\n');
+					lines.push_back("\n");
 				}
+			}
+			if (lines[lines.size() - 1] != "\n")
+			{
+				lines.push_back("\n");
 			}
 		}
 	}
@@ -183,12 +213,11 @@ std::string const CustomMapVotes::RandomMap(std::string const& type)
 	{
 		if (customMapVotes_[i].type == type)
 		{
-			if (customMapVotes_[i].maps.size() == 0)
+			if (customMapVotes_[i].mapsOnServer.size() == 0)
 			{
 				return "";
 			}
-			// TODO: check if map exists
-			return customMapVotes_[i].maps[rand() % customMapVotes_[i].maps.size()];
+			return customMapVotes_[i].mapsOnServer[rand() % customMapVotes_[i].mapsOnServer.size()];
 		}
 	}
 	return "";

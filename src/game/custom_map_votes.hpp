@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+class MapStatistics;
+
 class CustomMapVotes
 {
 public:
@@ -11,7 +13,8 @@ public:
 	{
 		std::string type;
 		std::string callvoteText;
-		std::vector<std::string> maps;
+		std::vector<std::string> mapsOnServer;
+		std::vector<std::string> otherMaps;
 	};
 
 	struct TypeInfo
@@ -28,7 +31,7 @@ public:
 		std::string callvoteText;
 	};
 
-	CustomMapVotes();
+	CustomMapVotes(MapStatistics *mapStats);
 	~CustomMapVotes();
 	bool Load();
 	TypeInfo GetTypeInfo(const std::string& type) const;
@@ -38,6 +41,8 @@ public:
 	void GenerateVotesFile();
 private:
 	std::vector<MapType> customMapVotes_;
+	const std::vector<std::string> *_currentMapsOnServer;
+	MapStatistics* _mapStats;
 };
 
 #endif
