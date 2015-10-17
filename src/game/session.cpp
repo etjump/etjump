@@ -145,9 +145,10 @@ bool Session::GuidReceived(gentity_t *ent)
 	if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid))
 	{
 		G_LogPrintf("Banned player %s tried to connect with guid %s and hardware id %s\n",
-		            clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
+		            (g_entities + clientNum)->client->pers.netname, clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
 		CPMAll(va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
 		trap_DropClient(clientNum, "You are banned.", 0);
+		return false;
 	}
 
 	ClientNameChanged(ent);

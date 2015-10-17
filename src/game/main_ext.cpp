@@ -199,7 +199,7 @@ qboolean OnClientCommand(gentity_t *ent)
 	std::string command = (*argv)[0];
 	boost::to_lower(command);
 
-	if ((*argv)[0] == "etguid")
+	if (command == "etguid")
 	{
 		game.session->GuidReceived(ent);
 		game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
