@@ -55,9 +55,7 @@ BIND( 8, 156, (SUBWINDOW_WIDTH)-4, 10, "No goto:", .2, 8, nogoto, "To enable/dis
 
 BIND( 8, 168, (SUBWINDOW_WIDTH)-4, 10, "No call:", .2, 8, nocall, "To enable/disable call." )
 
-BIND( 8, 180, (SUBWINDOW_WIDTH)-4, 10, "No nading:", .2, 8, nonading, "To enable/disable nading." )
-
-BIND( 8, 192, (SUBWINDOW_WIDTH)-4, 10, "Second portal:", .2, 8, "+attack2", "" )
+BIND( 8, 180, (SUBWINDOW_WIDTH)-4, 10, "Second portal:", .2, 8, "+attack2", "" )
 
 
 }

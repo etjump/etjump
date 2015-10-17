@@ -1481,7 +1481,6 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("nogoto");
 	trap_AddCommand("nocall");
 	trap_AddCommand("resetmaxspeed");
-	trap_AddCommand("nonading");
 	trap_AddCommand("class");
 	trap_AddCommand("startTimer");
 	trap_AddCommand("stopTimer");

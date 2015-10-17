@@ -1831,7 +1831,6 @@ char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	client->sess.noGoto          = qtrue;
 	client->sess.noCall          = qtrue;
-	client->sess.noNading        = qtrue;
 	client->sess.nameChangeCount = 0;
 	// Zero: target_set_ident id.
 	client->sess.clientMapProgression   = 0;

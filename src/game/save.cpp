@@ -115,7 +115,25 @@ void SaveSystem::Save(gentity_t *ent)
 		{
 			ent->client->pers.race.saveLimit--;
 		}
+	} else
+	{
+		fireteamData_t *ft;
+		if (G_IsOnFireteam(ent - g_entities, &ft)) {
+			if (ft->saveLimit < 0) {
+				ent->client->sess.saveLimit = 0;
+			}
+			if (ft->saveLimit) {
+				if (ent->client->sess.saveLimit) {
+					ent->client->sess.saveLimit--;
+				}
+				else {
+					CPTo(ent, "^5You've used all your fireteam saves.");
+					return;
+				}
+			}
+		}
 	}
+
 
 	SavePosition *pos = 0;
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)

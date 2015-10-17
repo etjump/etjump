@@ -4476,24 +4476,6 @@ void Cmd_noCall_f(gentity_t *ent)
 	CP(va("print \"^7You have %s ^3call^7.\n\"", msg));
 }
 
-void Cmd_NoNading_f(gentity_t *ent)
-{
-	char *msg;
-	if (ent->client->sess.noNading)
-	{
-		ent->client->sess.noNading = qfalse;
-		msg                        = "Other players can nade you.";
-	}
-	else
-	{
-		ent->client->sess.noNading = qtrue;
-		msg                        = "Other players can't nade you.";
-	}
-	CP(va("print \"%s\n\"", msg));
-}
-
-
-
 /*
  * Figures out if we are allowed to follow a given client.
  */
@@ -4713,7 +4695,6 @@ static command_t anyTimeCommands[] =
 	{ "m",         qtrue,  Cmd_PrivateMessage_f                },
 	{ "nogoto",    qfalse, Cmd_noGoto_f                        },
 	{ "nocall",    qfalse, Cmd_noCall_f                        },
-	{ "nonading",  qfalse, Cmd_NoNading_f                      },
 };
 
 static command_t noIntermissionCommands[] =

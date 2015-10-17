@@ -1486,12 +1486,9 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 
 	if (targ->client)
 	{
-		if (targ->client->sess.noNading || level.noExplosives)
+		if (attacker->client && attacker->client != targ->client)
 		{
-			if (attacker->client && attacker->client != targ->client)
-			{
-				knockback = 0;
-			}
+			knockback = 0;
 		}
 	}
 
