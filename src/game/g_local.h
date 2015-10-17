@@ -2787,5 +2787,6 @@ void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
 void UpdateRandomMapInterval(int interval);
+const char *G_MatchOneMap(const char *arg);
 
 #endif // G_LOCAL_H

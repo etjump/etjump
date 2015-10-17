@@ -2477,6 +2477,7 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 	{
 		char         mapfile[MAX_QPATH];
 		fileHandle_t f;
+		const char *map = NULL;
 
 		if (arg2[0] == '\0' || trap_Argc() == 1)
 		{
@@ -2490,17 +2491,14 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 			return qfalse;
 		}
 
-		Com_sprintf(mapfile, sizeof(mapfile), "maps/%s.bsp", arg2);
-
-		trap_FS_FOpenFile(mapfile, &f, FS_READ);
-
-		trap_FS_FCloseFile(f);
-
-		if (!f)
+		map = G_MatchOneMap(arg2);
+		if (!map)
 		{
-			CP(va("print \"^3callvote: ^7The map is not on the server.\n\"", arg2));
+			G_LogPrintf("%d: %s\n", strlen(arg2), arg2);
+			CP(va("print \"^3callvote: ^7could not find a single map matching %s.\n\"", arg2));
 			return qfalse;
 		}
+		Q_strncpyz(arg2, map, sizeof(arg2));
 
 		if (strstr(Q_strlwr(g_blockedMaps.string), Q_strlwr(arg2)) != NULL)
 		{

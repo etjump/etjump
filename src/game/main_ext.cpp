@@ -254,6 +254,29 @@ const char *GetRandomMap()
 	return game.mapStatistics->randomMap();
 }
 
+const char *G_MatchOneMap(const char *arg)
+{
+	auto currentMaps = game.mapStatistics->getCurrentMaps();
+	std::vector<std::string> matchingMaps;
+
+	for (auto & map : *(currentMaps))
+	{
+		if (map.find(arg) != std::string::npos)
+		{
+			matchingMaps.push_back(map);
+		}
+	}
+
+	static char matchingMap[MAX_STRING_TOKENS] = "\0";
+	if (matchingMaps.size() == 1)
+	{
+		Q_strncpyz(matchingMap, matchingMaps[0].c_str(), sizeof(matchingMap));
+		return matchingMap;
+	}
+
+	return NULL;
+}
+
 const char *GetRandomMapByType(const char *customType)
 {
 	static char buf[MAX_TOKEN_CHARS] = "\0";
