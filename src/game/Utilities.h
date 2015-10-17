@@ -69,6 +69,8 @@ public:
 	 * if ent == nullptr, prints to server console
 	 */
 	static void toConsole(gentity_t *ent, std::string message);
+
+	static void RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons);
 private:
 };
 

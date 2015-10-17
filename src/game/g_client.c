@@ -856,7 +856,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 	AddWeaponToPlayer(client, WP_KNIFE, 1, 0, qtrue);
 
 	// Feen: PSM -TEST
-	if ((g_portalMode.integer == 0) && (level.portalEnabled)) //Freestyle mode...
+	if ((g_portalMode.integer == 0) && (level.portalEnabled) && !client->sess.timerunActive) //Freestyle mode...
 	{
 		AddWeaponToPlayer(client, WP_PORTAL_GUN, 1, 0, qtrue);
 	}
@@ -876,7 +876,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 		// Engineer gets dynamite
 		if (pc == PC_ENGINEER)
 		{
-			if (level.noExplosives != 2)
+			if (level.noExplosives != 2 && !client->sess.timerunActive)
 			{
 				AddWeaponToPlayer(client, WP_DYNAMITE, 0, 1, qfalse);
 				AddWeaponToPlayer(client, WP_PLIERS, 0, 1, qfalse);
@@ -891,7 +891,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					case WP_KAR98:
 						if (AddWeaponToPlayer(client, WP_KAR98, GetAmmoTableData(WP_KAR98)->defaultStartingAmmo, GetAmmoTableData(WP_KAR98)->defaultStartingClip, qtrue))
 						{
-							if (!level.noExplosives)
+							if (!level.noExplosives && !client->sess.timerunActive)
 							{
 								AddWeaponToPlayer(client, WP_GPG40, GetAmmoTableData(WP_GPG40)->defaultStartingAmmo, GetAmmoTableData(WP_GPG40)->defaultStartingClip, qfalse);
 							}
@@ -901,7 +901,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_MP40, GetAmmoTableData(WP_MP40)->defaultStartingAmmo, GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
 						break;
 					}
-					if (!level.noExplosives)
+					if (!level.noExplosives && !client->sess.timerunActive)
 					{
 						AddWeaponToPlayer(client, WP_LANDMINE, GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo, GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
 						AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 4, qfalse);
@@ -915,7 +915,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					case WP_CARBINE:
 						if (AddWeaponToPlayer(client, WP_CARBINE, GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo, GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue))
 						{
-							if (!level.noExplosives)
+							if (!level.noExplosives && !client->sess.timerunActive)
 							{
 								AddWeaponToPlayer(client, WP_M7, GetAmmoTableData(WP_M7)->defaultStartingAmmo, GetAmmoTableData(WP_M7)->defaultStartingClip, qfalse);
 							}
@@ -925,7 +925,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_THOMPSON, GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo, GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
 						break;
 					}
-					if (!level.noExplosives)
+					if (!level.noExplosives && !client->sess.timerunActive)
 					{
 						AddWeaponToPlayer(client, WP_LANDMINE, GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo, GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
 						AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 4, qfalse);
@@ -947,7 +947,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
 					AddWeaponToPlayer(client, WP_MP40, GetAmmoTableData(WP_MP40)->defaultStartingAmmo, GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
-					if (!level.noExplosives)
+					if (!level.noExplosives && !client->sess.timerunActive)
 					{
 						AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
 					}
@@ -955,7 +955,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				else
 				{
 					AddWeaponToPlayer(client, WP_THOMPSON, GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo, GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
-					if (!level.noExplosives)
+					if (!level.noExplosives && !client->sess.timerunActive)
 					{
 						AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
 					}
@@ -974,7 +974,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
 					AddWeaponToPlayer(client, WP_MP40, 0, GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
-					if (!level.noExplosives)
+					if (!level.noExplosives && !client->sess.timerunActive)
 					{
 						AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
 					}
@@ -982,7 +982,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				else
 				{
 					AddWeaponToPlayer(client, WP_THOMPSON, 0, GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
-					if (!level.noExplosives)
+					if (!level.noExplosives && !client->sess.timerunActive)
 					{
 						AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
 					}
@@ -1000,13 +1000,16 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_MP40, 2 * (GetAmmoTableData(WP_MP40)->defaultStartingAmmo), GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
 						break;
 					case WP_PANZERFAUST:
-						if (!level.noExplosives && team_maxPanzers.integer)
+						if (!level.noExplosives && team_maxPanzers.integer && !client->sess.timerunActive)
 						{
 							AddWeaponToPlayer(client, WP_PANZERFAUST, GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo, GetAmmoTableData(WP_PANZERFAUST)->defaultStartingClip, qtrue);
 						}
 						break;
 					case WP_FLAMETHROWER:
-						AddWeaponToPlayer(client, WP_FLAMETHROWER, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip, qtrue);
+						if (!client->sess.timerunActive)
+						{
+							AddWeaponToPlayer(client, WP_FLAMETHROWER, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip, qtrue);
+						}
 						break;
 					case WP_MOBILE_MG42:
 						if (AddWeaponToPlayer(client, WP_MOBILE_MG42, GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingAmmo, GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingClip, qtrue))
@@ -1017,7 +1020,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					case WP_MORTAR:
 						if (AddWeaponToPlayer(client, WP_MORTAR, GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo, GetAmmoTableData(WP_MORTAR)->defaultStartingClip, qtrue))
 						{
-							if (!level.noExplosives)
+							if (!level.noExplosives && !client->sess.timerunActive)
 							{
 								AddWeaponToPlayer(client, WP_MORTAR_SET, GetAmmoTableData(WP_MORTAR_SET)->defaultStartingAmmo, GetAmmoTableData(WP_MORTAR_SET)->defaultStartingClip, qfalse);
 							}
@@ -1033,13 +1036,16 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_THOMPSON, 2 * (GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo), GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
 						break;
 					case WP_PANZERFAUST:
-						if (!level.noExplosives && team_maxPanzers.integer)
+						if (!level.noExplosives && team_maxPanzers.integer && !client->sess.timerunActive)
 						{
 							AddWeaponToPlayer(client, WP_PANZERFAUST, GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo, GetAmmoTableData(WP_PANZERFAUST)->defaultStartingClip, qtrue);
 						}
 						break;
 					case WP_FLAMETHROWER:
-						AddWeaponToPlayer(client, WP_FLAMETHROWER, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip, qtrue);
+						if (!client->sess.timerunActive)
+						{
+							AddWeaponToPlayer(client, WP_FLAMETHROWER, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip, qtrue);
+						}
 						break;
 					case WP_MOBILE_MG42:
 						if (AddWeaponToPlayer(client, WP_MOBILE_MG42, GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingAmmo, GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingClip, qtrue))
@@ -1050,7 +1056,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					case WP_MORTAR:
 						if (AddWeaponToPlayer(client, WP_MORTAR, GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo, GetAmmoTableData(WP_MORTAR)->defaultStartingClip, qtrue))
 						{
-							if (!level.noExplosives)
+							if (!level.noExplosives && !client->sess.timerunActive)
 							{
 								AddWeaponToPlayer(client, WP_MORTAR_SET, GetAmmoTableData(WP_MORTAR_SET)->defaultStartingAmmo, GetAmmoTableData(WP_MORTAR_SET)->defaultStartingClip, qfalse);
 							}
@@ -1098,7 +1104,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				//AddWeaponToPlayer(client, WP_SMOKE_BOMB, GetAmmoTableData(WP_SMOKE_BOMB)->defaultStartingAmmo,  GetAmmoTableData(WP_SMOKE_BOMB)->defaultStartingClip, qfalse);
 
 				// See if we already have a satchel charge placed - NOTE: maybe we want to change this so the thing voids on death
-				if (!level.noExplosives)
+				if (!level.noExplosives && !client->sess.timerunActive)
 				{
 					if (G_FindSatchel(&g_entities[client->ps.clientNum]))
 					{
@@ -1208,7 +1214,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				}
 			}
 
-			if (pc == PC_SOLDIER && (!level.noExplosives))
+			if (pc == PC_SOLDIER && (!level.noExplosives) && !client->sess.timerunActive)
 			{
 				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
@@ -1219,7 +1225,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 4, qfalse);
 				}
 			}
-			if (pc == PC_COVERTOPS && (!level.noExplosives))
+			if (pc == PC_COVERTOPS && (!level.noExplosives) && !client->sess.timerunActive)
 			{
 				if (client->sess.sessionTeam == TEAM_AXIS)
 				{

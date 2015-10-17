@@ -41,6 +41,34 @@ std::vector<int> Utilities::getSpectators(int clientNum)
 	return std::move(spectators);
 }
 
+static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowed)
+{
+	auto current = cl->ps.weapon;
+	auto it = std::find_if(disallowed.begin(), disallowed.end(), [&current](int w) {return w == current; });
+	if (it != disallowed.end())
+	{
+		if (cl->sess.sessionTeam == TEAM_AXIS)
+		{
+			if (COM_BitCheck(cl->ps.weapons, WP_MP40))
+			{
+				cl->ps.weapon = WP_MP40;
+			} else
+			{
+				cl->ps.weapon = WP_LUGER;
+			}
+		} else
+		{
+			if (COM_BitCheck(cl->ps.weapons, WP_THOMPSON))
+			{
+				cl->ps.weapon = WP_THOMPSON;
+			} else
+			{
+				cl->ps.weapon = WP_COLT;
+			}
+		}
+	}
+}
+
 void Utilities::startRun(int clientNum)
 {
 	gentity_t *player = g_entities + clientNum;
@@ -57,11 +85,27 @@ void Utilities::startRun(int clientNum)
 	player->flags &= ~FL_GODMODE;
 	ResetSavedPositions(player);
 
-	// Disable any weapons except kife
-	player->client->ps.weapons[0] = 0;
-	player->client->ps.weapons[1] = 0;
-
-	AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
+	auto disallowed = std::vector<int>{
+		WP_DYNAMITE,
+		WP_GRENADE_LAUNCHER,
+		WP_GRENADE_PINEAPPLE,
+		WP_SATCHEL_DET,
+		WP_SATCHEL,
+		WP_MORTAR,
+		WP_GPG40,
+		WP_LANDMINE,
+		WP_FLAMETHROWER,
+		WP_PANZERFAUST,
+		WP_PORTAL_GUN
+	};
+	RemovePlayerWeapons(clientNum, disallowed);
+	SelectCorrectWeapon(player->client, disallowed);
+	
+//	// Disable any weapons except kife
+//	player->client->ps.weapons[0] = 0;
+//	player->client->ps.weapons[1] = 0;
+//
+//	AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
 	ClearPortals(player);
 }
 
@@ -129,6 +173,15 @@ void Utilities::toConsole(gentity_t *ent, std::string message)
 		{
 			trap_SendServerCommand(ClientNum(ent), ("print \"" + packet + "\"").c_str());
 		}
+	}
+}
+
+void Utilities::RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons)
+{
+	auto *cl = (g_entities + clientNum)->client;
+	for (auto& weapon : weapons)
+	{
+		COM_BitClear(cl->ps.weapons, weapon);
 	}
 }
 
