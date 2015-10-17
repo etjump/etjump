@@ -2484,6 +2484,12 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 			return qfalse;
 		}
 
+		if (!Q_stricmp(arg2, level.rawmapname))
+		{
+			CP(va("print \"^3callvote: ^7%s is the current map.\n\"", level.rawmapname));
+			return qfalse;
+		}
+
 		Com_sprintf(mapfile, sizeof(mapfile), "maps/%s.bsp", arg2);
 
 		trap_FS_FOpenFile(mapfile, &f, FS_READ);
