@@ -447,7 +447,6 @@ const char *MapStatistics::randomMap() const
 		auto mapIdx = ui(re);
 		while (&_maps[mapIdx] == _currentMap || !_maps[mapIdx].isOnServer)
 		{
-			Utilities::Log(_maps[mapIdx].name);
 			mapIdx = ui(re);
 		}
 
