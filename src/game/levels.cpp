@@ -96,17 +96,17 @@ bool Levels::CreateDefaultLevels()
 
 	boost::shared_ptr< Level > tempLevel = boost::shared_ptr< Level >
 	                                           (new Level(0, "Visitor",
-	                                                      "Welcome Visitor [n]^7! Your last visit was on [t]!", "8aS"));
+	                                                      "Welcome Visitor [n]^7! Your last visit was on [t]!", "a"));
 	levels_.push_back(tempLevel);
 
 	tempLevel = boost::shared_ptr< Level >
 	                (new Level(1, "Friend",
-	                           "Welcome Friend [n]^7! Your last visit was [d] ago!", "128Sa"));
+	                           "Welcome Friend [n]^7! Your last visit was [d] ago!", "a"));
 	levels_.push_back(tempLevel);
 
 	tempLevel = boost::shared_ptr< Level >
 	                (new Level(2, "Moderator",
-	                           "Welcome Moderator [n]^7!§", "*-AGs"));
+	                           "Welcome Moderator [n]^7!§", "*-As"));
 	levels_.push_back(tempLevel);
 
 	tempLevel = boost::shared_ptr< Level >
