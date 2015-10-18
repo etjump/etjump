@@ -274,6 +274,18 @@ const char *G_MatchOneMap(const char *arg)
 		return matchingMap;
 	}
 
+	if (matchingMaps.size() > 1)
+	{
+		for (auto&map:matchingMaps)
+		{
+			if (map == arg)
+			{
+				Q_strncpyz(matchingMap, matchingMaps[0].c_str(), sizeof(matchingMap));
+				return matchingMap;
+			}
+		}
+	}
+
 	return NULL;
 }
 
