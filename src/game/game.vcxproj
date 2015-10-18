@@ -231,6 +231,7 @@
     <ClCompile Include="session.cpp" />
     <ClCompile Include="sqlite_wrapper.cpp" />
     <ClCompile Include="timerun.cpp" />
+    <ClCompile Include="tokens.cpp" />
     <ClCompile Include="user.cpp" />
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
@@ -256,6 +257,7 @@
     <ClInclude Include="printer.hpp" />
     <ClInclude Include="save.hpp" />
     <ClInclude Include="timerun.hpp" />
+    <ClInclude Include="tokens.hpp" />
     <ClInclude Include="user.hpp" />
     <ClInclude Include="utilities.hpp" />
     <ClInclude Include="g_team.h" />

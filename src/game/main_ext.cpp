@@ -12,6 +12,7 @@
 #include "random_map_mode.hpp"
 #include "timerun.hpp"
 #include "map_statistics.hpp"
+#include "tokens.hpp"
 #include <chrono>
 
 Game game;
@@ -147,6 +148,13 @@ void OnGameInit()
 	game.customMapVotes->Load();
 	game.motd->Initialize();
 	game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
+	
+	if (g_tokensMode.integer)
+	{
+		// Utilities::WriteFile handles the correct path (etjump/...)
+		auto path = std::string(g_tokensPath.string) + "/" + std::string(level.rawmapname) + ".json";
+		game.tokens->loadTokens(path);
+	}
 	
 
 	// this has to be initialized here

@@ -1992,6 +1992,11 @@ extern vmCvar_t g_randomMapModeInterval;
 extern vmCvar_t vote_randomMapMode;
 // end of randommap mode
 
+// tokens
+extern vmCvar_t g_tokensMode;
+extern vmCvar_t g_tokensPath;
+// end of tokens
+
 extern vmCvar_t g_chatOptions;
 
 void    trap_Printf(const char *fmt);

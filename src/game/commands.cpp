@@ -10,6 +10,7 @@
 #include "g_local.h"
 #include "map_statistics.hpp"
 #include "Utilities.h"
+#include "tokens.hpp"
 
 typedef boost::function<bool (gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool (gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -40,7 +41,7 @@ const char PUTTEAM     = 'p';
 const char READCONFIG  = 'G';
 const char RENAME      = 'R';
 const char RESTART     = 'r';
-const char ROUTE_MAKER = 'V';
+const char TOKENS = 'V';
 const char SAVESYSTEM  = 'T';
 const char SETLEVEL    = 's';
 }
@@ -1798,6 +1799,94 @@ bool Spectate(gentity_t *ent, Arguments argv)
 	return qtrue;
 }
 
+bool Tokens(gentity_t *ent, Arguments argv)
+{
+	if (!g_tokensMode.integer)
+	{
+		ChatPrintTo(ent, "^3tokens: ^7tokens mode is disabled. Set g_tokensMode \"1\" and restart map to enable tokens mode.");
+		return false;
+	}
+
+	if (ent)
+	{
+		if (argv->size() < 3)
+		{
+			ChatPrintTo(ent, "^3usage: ^7!tokens <create> <difficulty>");
+			return false;
+		}
+	} else
+	{
+		if (argv->size() < 6)
+		{
+			ChatPrintTo(ent, "^3usage: ^7!tokens <create> <difficulty> <x> <y> <z>");
+			return false;
+		}
+	}
+
+	std::array<float, 3> coordinates;
+	if (argv->size() < 6)
+	{
+		VectorCopy(ent->r.currentOrigin, coordinates);
+	} else
+	{
+		try
+		{
+			coordinates[0] = std::stof((*argv)[3]);
+			coordinates[1] = std::stof((*argv)[4]);
+			coordinates[2] = std::stof((*argv)[5]);
+		} catch (std::invalid_argument)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7coordinates are not numbers.");
+			return false;
+		} catch (std::out_of_range)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7coordinates are out of range.");
+			return false;
+		}
+		// Artificial limit, I don't think anyone needs it to be higher
+		if (abs(coordinates[0]) > 100000)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7x coordinate is out of range.");
+			return false;
+		}
+		if (abs(coordinates[1]) > 100000)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7y coordinate is out of range.");
+			return false;
+		}
+		if (abs(coordinates[2]) > 100000)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7z coordinate is out of range.");
+			return false;
+		}
+	}
+
+	Tokens::Difficulty difficulty;
+	if ((*argv)[2] == "easy" || ((*argv)[2]) == "e")
+	{
+		difficulty = Tokens::Easy;
+	} else if ((*argv)[2] == "medium" || ((*argv)[2]) == "m")
+	{
+		difficulty = Tokens::Medium;
+	} else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h")
+	{
+		difficulty = Tokens::Hard;
+	} else
+	{
+		ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium (m) or hard (h)");
+		return false;
+	}
+
+	ChatPrintTo(ent, (boost::format("Creating a token at (%f, %f, %f) for difficulty (%d)") % coordinates[0] % coordinates[1] % coordinates[2] % difficulty).str());
+	auto result = game.tokens->createToken(difficulty, coordinates);
+	if (!result.first)
+	{
+		ChatPrintTo(ent, "^3error: ^7" + result.second);
+		return false;
+	}
+	return true;
+}
+
 bool Unban(gentity_t *ent, Arguments argv)
 {
 
@@ -1931,6 +2020,7 @@ Commands::Commands()
 	adminCommands_["restart"]  = AdminCommandPair(AdminCommands::Restart, CommandFlags::RESTART);
 	adminCommands_["setlevel"] = AdminCommandPair(AdminCommands::SetLevel, CommandFlags::SETLEVEL);
 	adminCommands_["spectate"] = AdminCommandPair(AdminCommands::Spectate, CommandFlags::BASIC);
+	adminCommands_["tokens"]   = AdminCommandPair(AdminCommands::Tokens, CommandFlags::TOKENS);
 	adminCommands_["unban"]    = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
 	adminCommands_["unmute"]   = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
 	adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);

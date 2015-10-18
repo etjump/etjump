@@ -50,6 +50,21 @@ public:
 	static void Log(const std::string& message);
 
 	/**
+	* Log a message & appends a newline
+	*/
+	static void Logln(const std::string& message);
+
+	/**
+	* Writes string to specified file
+	*/
+	static void WriteFile(const std::string& filepath, const std::string& content);
+
+	/**
+	* Reads contents of specified file and returns std moved string
+	*/
+	static std::string ReadFile(const std::string& filepath);
+
+	/**
 	 * Returns true if there is atleast one player on team
 	 */
 	static bool anyonePlaying();
