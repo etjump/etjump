@@ -534,10 +534,6 @@ struct gentity_s
 
 	int runIndex;
 
-	// xyz-width for race cp/end
-	vec3_t dimensions;
-	int seqNum;
-
 	float velocityLowerLimit;
 	float velocityUpperLimit;
 };

@@ -4,6 +4,8 @@
 #include <array>
 #include "../json/json-forwards.h"
 
+typedef struct gentity_s gentity_t;
+
 class Tokens
 {
 public:
@@ -21,6 +23,7 @@ public:
 		std::array<float, 3> coordinates;
 		std::string name;
 		bool isActive;
+		gentity_t *entity;
 		Json::Value toJson() const;
 		void fromJson(const Json::Value& json);
 	};
@@ -32,6 +35,8 @@ public:
 
 	bool loadTokens(const std::string& filepath);
 	bool saveTokens(const std::string& filepath);
+	bool createEntity(Token& token, Difficulty difficulty);
+	bool createEntities();
 private:
 	std::string _filepath;
 	std::array<Token, TOKENS_PER_DIFFICULTY> _easyTokens;

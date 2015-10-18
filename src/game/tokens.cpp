@@ -2,6 +2,16 @@
 #include <fstream>
 #include "Utilities.h"
 #include "../json/json.h"
+extern "C" {
+#include "g_local.h"
+}
+
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
 
 
 Tokens::Tokens()
@@ -111,10 +121,93 @@ bool Tokens::loadTokens(const std::string& filepath)
 		return false;
 	}
 
+	if (!createEntities())
+	{
+		Utilities::Logln("Tokens: Could not create entities from parsed configuration");
+		return false;
+	}
+
 	Utilities::Logln("Tokens: Successfully loaded all tokens from \"" + filepath + "\" for current map.");
 
 	return false;
 }
+
+bool Tokens::createEntity(Token& token, Difficulty difficulty)
+{
+	token.entity = G_Spawn();
+	
+	switch (difficulty)
+	{
+	case Easy:
+		token.entity->classname = "token_easy";
+		break;
+	case Medium:
+		token.entity->classname = "token_medium";
+		break;
+	case Hard:
+		token.entity->classname = "token_hard";
+		break;
+	}
+
+	token.entity->think = [](gentity_t *self)
+	{
+		vec3_t mins = { 0, 0, 0 };
+		vec3_t maxs = { 0, 0, 0 };
+		vec3_t range = { 16, 16, 16 };
+		VectorSubtract(self->r.currentOrigin, range, mins);
+		VectorAdd(self->r.currentOrigin, range, maxs);
+
+		int entityList[MAX_GENTITIES];
+		auto count = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
+		for (auto i = 0; i < count; ++i)
+		{
+			auto ent = &g_entities[entityList[i]];
+
+			if (!ent->client)
+			{
+				continue;
+			}
+
+			G_LogPrintf("%s at %s\n", ent->client->pers.netname, self->classname);
+		}
+
+		self->nextthink = level.time + FRAMETIME;
+	};
+
+	token.entity->nextthink = level.time + FRAMETIME;
+	G_SetOrigin(token.entity, token.coordinates.data());
+	trap_LinkEntity(token.entity);
+
+	return true;
+}
+
+
+bool Tokens::createEntities()
+{
+	for (auto&t : _easyTokens)
+	{
+		if (t.isActive)
+		{
+			createEntity(t, Easy);
+		}
+	}
+	for (auto&t : _mediumTokens)
+	{
+		if (t.isActive)
+		{
+			createEntity(t, Medium);
+		}
+	}
+	for (auto&t : _hardTokens)
+	{
+		if (t.isActive)
+		{
+			createEntity(t, Hard);
+		}
+	}
+	return true;
+}
+
 
 bool Tokens::saveTokens(const std::string& filepath)
 {
