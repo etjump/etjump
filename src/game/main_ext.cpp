@@ -171,6 +171,7 @@ void OnGameShutdown()
 	game.database->CloseDatabase();
 	game.operationQueue->Shutdown();
 	game.mapStatistics->saveChanges();
+	game.tokens->reset();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent)
@@ -386,4 +387,32 @@ void G_increaseCallvoteCount(const char *mapName)
 void G_increasePassedCount(const char *mapName)
 {
 	game.mapStatistics->increasePassedCount(mapName);
+}
+
+bool allTokensCollected(gentity_t *ent)
+{
+	auto tokenCounts = game.tokens->getTokenCounts();
+
+	auto easyCount = 0;
+	auto mediumCount = 0;
+	auto hardCount = 0;
+	for (auto i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
+	{
+		if (ent->client->pers.collectedEasyTokens[i])
+		{
+			++easyCount;
+		}
+
+		if (ent->client->pers.collectedMediumTokens[i])
+		{
+			++mediumCount;
+		}
+		
+		if (ent->client->pers.collectedHardTokens[i])
+		{
+			++hardCount;
+		}
+	}
+
+	return tokenCounts[0] == easyCount && tokenCounts[1] == mediumCount && tokenCounts[2] == hardCount;
 }

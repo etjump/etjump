@@ -222,6 +222,15 @@ typedef struct
 	vec3_t velocity;
 } save_position_t;
 
+struct TokenInformation_s
+{
+	// The index in the Tokens-class tokens array
+	int idx;
+	int difficulty;
+	char name[256];
+};
+typedef struct TokenInformation_s TokenInformation;
+
 //====================================================================
 
 #define MAX_NETNAME         36
@@ -536,6 +545,8 @@ struct gentity_s
 
 	float velocityLowerLimit;
 	float velocityUpperLimit;
+
+	TokenInformation *tokenInformation;
 };
 
 // Ridah
@@ -835,6 +846,12 @@ typedef struct
 	int noclipCount;
 
 	raceStruct_t race;
+
+#define MAX_TOKENS_PER_DIFFICULTY 6
+	qboolean collectedEasyTokens[MAX_TOKENS_PER_DIFFICULTY];
+	qboolean collectedMediumTokens[MAX_TOKENS_PER_DIFFICULTY];
+	qboolean collectedHardTokens[MAX_TOKENS_PER_DIFFICULTY];	
+	int tokenCollectionStartTime;
 
 	ipFilter_t complaintips[MAX_COMPLAINTIPS];
 } clientPersistant_t;

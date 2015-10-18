@@ -1870,6 +1870,7 @@ and on transition between teams, but doesn't happen on respawns
 */
 void ClientBegin(int clientNum)
 {
+	int i = 0;
 	gentity_t *ent;
 	gclient_t *client;
 	int       flags;
@@ -1951,7 +1952,13 @@ void ClientBegin(int clientNum)
 	{
 		trap_SendServerCommand(clientNum, "hasTimerun 0");
 	}
-
+	for (i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
+	{
+		ent->client->pers.collectedEasyTokens[i] = qfalse;
+		ent->client->pers.collectedMediumTokens[i] = qfalse;
+		ent->client->pers.collectedHardTokens[i] = qfalse;
+	}
+	ent->client->pers.tokenCollectionStartTime = level.time;
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)

@@ -3,8 +3,10 @@
 #include <string>
 #include <array>
 #include "../json/json-forwards.h"
+#include <memory>
 
 typedef struct gentity_s gentity_t;
+typedef struct TokenInformation_s TokenInformation;
 
 class Tokens
 {
@@ -19,11 +21,17 @@ public:
 	static const int TOKENS_PER_DIFFICULTY = 6;
 	struct Token
 	{
-		Token() : coordinates{0,0,0}, name(""), isActive(false) {}
+		Token();
 		std::array<float, 3> coordinates;
 		std::string name;
 		bool isActive;
 		gentity_t *entity;
+		// Because we cannot capture values for the entity think lambda
+		// we must pass the data as a gentity pointer in gentity
+		// Because there is so much data stored storing same data for
+		// every entity would be pretty pointles
+		// Only tokens have the data
+		std::unique_ptr<TokenInformation> data;
 		Json::Value toJson() const;
 		void fromJson(const Json::Value& json);
 	};
@@ -35,8 +43,10 @@ public:
 
 	bool loadTokens(const std::string& filepath);
 	bool saveTokens(const std::string& filepath);
-	bool createEntity(Token& token, Difficulty difficulty);
-	bool createEntities();
+	void createEntity(Token& token, Difficulty difficulty);
+	void createEntities();
+	void reset();
+	std::array<int, 3> getTokenCounts() const;
 private:
 	std::string _filepath;
 	std::array<Token, TOKENS_PER_DIFFICULTY> _easyTokens;

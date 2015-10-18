@@ -41,12 +41,15 @@ std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::arr
 	}
 
 	Token *nextFreeToken = nullptr;
+	auto idx = 0;
 	for (auto & token : *tokens)
 	{
 		if (!token.isActive)
 		{
 			nextFreeToken = &token;
+			break;
 		}
+		++idx;
 	}
 
 	if (nextFreeToken == nullptr)
@@ -57,6 +60,9 @@ std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::arr
 	nextFreeToken->isActive = true;
 	nextFreeToken->name = "";
 	nextFreeToken->coordinates = coordinates;
+	nextFreeToken->data->idx = idx;
+
+	createEntity(*nextFreeToken, difficulty);
 
 	if (!saveTokens(_filepath))
 	{
@@ -99,6 +105,7 @@ bool Tokens::loadTokens(const std::string& filepath)
 		for (auto&easyToken:easyTokens)
 		{
 			_easyTokens[idx].fromJson(easyToken);
+			_easyTokens[idx].data->idx = idx;
 			++idx;
 		}
 
@@ -106,6 +113,7 @@ bool Tokens::loadTokens(const std::string& filepath)
 		for (auto&mediumToken:mediumTokens)
 		{
 			_mediumTokens[idx].fromJson(mediumToken);
+			_mediumTokens[idx].data->idx = idx;
 			++idx;
 		}
 
@@ -113,6 +121,7 @@ bool Tokens::loadTokens(const std::string& filepath)
 		for (auto&hardToken:hardTokens)
 		{
 			_hardTokens[idx].fromJson(hardToken);
+			_hardTokens[idx].data->idx = idx;
 			++idx;
 		}
 	} catch (std::runtime_error& e)
@@ -121,20 +130,21 @@ bool Tokens::loadTokens(const std::string& filepath)
 		return false;
 	}
 
-	if (!createEntities())
-	{
-		Utilities::Logln("Tokens: Could not create entities from parsed configuration");
-		return false;
-	}
+	createEntities();
 
 	Utilities::Logln("Tokens: Successfully loaded all tokens from \"" + filepath + "\" for current map.");
 
 	return false;
 }
 
-bool Tokens::createEntity(Token& token, Difficulty difficulty)
+
+bool allTokensCollected(gentity_t *ent);
+void Tokens::createEntity(Token& token, Difficulty difficulty)
 {
 	token.entity = G_Spawn();
+	token.entity->tokenInformation = token.data.get();
+	Q_strncpyz(token.data->name, token.name.c_str(), sizeof(token.data->name));
+	token.data->difficulty = difficulty;
 	
 	switch (difficulty)
 	{
@@ -168,7 +178,45 @@ bool Tokens::createEntity(Token& token, Difficulty difficulty)
 				continue;
 			}
 
-			G_LogPrintf("%s at %s\n", ent->client->pers.netname, self->classname);
+			const char *difficulty = NULL;
+			qboolean *collected = NULL;
+			switch (self->tokenInformation->difficulty)
+			{
+			case Easy:
+				difficulty = "^2easy";
+				collected = &ent->client->pers.collectedEasyTokens[self->tokenInformation->idx];
+				break;
+			case Medium:
+				difficulty = "^3medium";
+				collected = &ent->client->pers.collectedMediumTokens[self->tokenInformation->idx];
+				break;
+			case Hard:
+				difficulty = "^1hard";
+				collected = &ent->client->pers.collectedHardTokens[self->tokenInformation->idx];
+				break;
+			default:
+				G_Error("Visited unknown difficulty.");
+			}
+
+			if (*collected)
+			{
+				continue;
+			}
+
+			*collected = qtrue;
+			C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, self->tokenInformation->idx + 1));
+
+			if (allTokensCollected(ent))
+			{
+				auto millis = level.time - ent->client->pers.tokenCollectionStartTime;
+				int minutes, seconds;
+				minutes = millis / 60000;
+				millis -= minutes * 60000;
+				seconds = millis / 1000;
+				millis -= seconds * 1000;
+
+				C_CPMAll(va("%s ^7collected all tokens in %02d:%02d:%03d", ent->client->pers.netname, minutes, seconds, millis));
+			}
 		}
 
 		self->nextthink = level.time + FRAMETIME;
@@ -177,12 +225,57 @@ bool Tokens::createEntity(Token& token, Difficulty difficulty)
 	token.entity->nextthink = level.time + FRAMETIME;
 	G_SetOrigin(token.entity, token.coordinates.data());
 	trap_LinkEntity(token.entity);
-
-	return true;
 }
 
 
-bool Tokens::createEntities()
+std::array<int, 3> Tokens::getTokenCounts() const
+{
+	std::array<int, 3> ret;
+	for (auto&val:ret)
+	{
+		val = 0;
+	}
+	for (auto&t : _easyTokens)
+	{
+		if (t.isActive)
+		{
+			++ret[0];
+		}
+	}
+	for (auto&t : _mediumTokens)
+	{
+		if (t.isActive)
+		{
+			++ret[1];
+		}
+	}
+	for (auto&t : _hardTokens)
+	{
+		if (t.isActive)
+		{
+			++ret[2];
+		}
+	}
+	return ret;
+}
+
+void Tokens::reset()
+{
+	for (auto&t : _easyTokens)
+	{
+		t.isActive = false;
+	}
+	for (auto&t : _mediumTokens)
+	{
+		t.isActive = false;
+	}
+	for (auto&t : _hardTokens)
+	{
+		t.isActive = false;
+	}
+}
+
+void Tokens::createEntities()
 {
 	for (auto&t : _easyTokens)
 	{
@@ -205,7 +298,6 @@ bool Tokens::createEntities()
 			createEntity(t, Hard);
 		}
 	}
-	return true;
 }
 
 
@@ -266,6 +358,10 @@ void Tokens::Token::fromJson(const Json::Value& json)
 	coordinates[2] = json["coordinates"][2].asFloat();
 	name = json["name"].asString();
 	isActive = true;
+}
+
+Tokens::Token::Token() : coordinates{ 0,0,0 }, name(""), isActive(false), entity(nullptr), data(std::make_unique<TokenInformation>())
+{
 }
 
 Json::Value Tokens::Token::toJson() const
