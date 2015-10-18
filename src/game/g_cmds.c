@@ -2488,7 +2488,6 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 		map = G_MatchOneMap(arg2);
 		if (!map)
 		{
-			G_LogPrintf("%d: %s\n", strlen(arg2), arg2);
 			CP(va("print \"^3callvote: ^7could not find a single map matching %s.\n\"", arg2));
 			return qfalse;
 		}
