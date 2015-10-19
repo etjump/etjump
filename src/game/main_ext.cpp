@@ -258,10 +258,12 @@ const char *G_MatchOneMap(const char *arg)
 {
 	auto currentMaps = game.mapStatistics->getCurrentMaps();
 	std::vector<std::string> matchingMaps;
+	std::string mapName = arg ? arg : "";
+	boost::algorithm::to_lower(mapName);
 
 	for (auto & map : *(currentMaps))
 	{
-		if (map.find(arg) != std::string::npos)
+		if (map.find(mapName) != std::string::npos)
 		{
 			matchingMaps.push_back(map);
 		}
@@ -278,7 +280,7 @@ const char *G_MatchOneMap(const char *arg)
 	{
 		for (auto&map:matchingMaps)
 		{
-			if (map == arg)
+			if (map == mapName)
 			{
 				Q_strncpyz(matchingMap, matchingMaps[0].c_str(), sizeof(matchingMap));
 				return matchingMap;
