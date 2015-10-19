@@ -1544,6 +1544,11 @@ typedef enum
 	ET_PORTAL_BLUE,         //Portal 1
 	ET_PORTAL_RED,          //Portal 2
 	//Feen: PGM - END Entity Types
+	
+	// Tokens
+	ET_TOKEN_EASY,
+	ET_TOKEN_MEDIUM,
+	ET_TOKEN_HARD,
 
 	ET_LANDMINE_HINT,       // Gordon: landmine hint for botsetgoalstate filter
 	ET_ATTRACTOR_HINT,      // Gordon: attractor hint for botsetgoalstate filter

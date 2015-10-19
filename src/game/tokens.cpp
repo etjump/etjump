@@ -150,12 +150,15 @@ void Tokens::createEntity(Token& token, Difficulty difficulty)
 	{
 	case Easy:
 		token.entity->classname = "token_easy";
+		token.entity->s.eType = ET_TOKEN_EASY;
 		break;
 	case Medium:
 		token.entity->classname = "token_medium";
+		token.entity->s.eType = ET_TOKEN_MEDIUM;
 		break;
 	case Hard:
 		token.entity->classname = "token_hard";
+		token.entity->s.eType = ET_TOKEN_HARD;
 		break;
 	}
 
