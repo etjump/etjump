@@ -253,6 +253,11 @@ vmCvar_t vote_randomMapMode;
 // End of random map mode
 vmCvar_t g_chatOptions;
 
+// tokens
+vmCvar_t g_tokensMode;
+vmCvar_t g_tokensPath;
+// end of tokens
+
 
 cvarTable_t gameCvarTable[] =
 {
@@ -510,8 +515,13 @@ cvarTable_t gameCvarTable[] =
 	{ &g_randomMapMode,             "g_randomMapMode",             "0",                                                      CVAR_ARCHIVE },
 	{ &g_randomMapModeInterval,     "g_randomMapModeInterval",     "30",                                                     CVAR_ARCHIVE },
 	{ &vote_randomMapMode,          "vote_randomMapMode",          "1",                                                      CVAR_ARCHIVE },
-	{ &g_chatOptions,               "g_chatOptions",               "1",                                                      CVAR_ARCHIVE }
+	{ &g_chatOptions,               "g_chatOptions",               "1",                                                      CVAR_ARCHIVE },
 	//end of randommap mode
+
+		// tokens
+	{&g_tokensMode, "g_tokensMode", "1", CVAR_ARCHIVE | CVAR_LATCH},
+	{&g_tokensPath, "g_tokensPath", "tokens", CVAR_ARCHIVE | CVAR_LATCH },
+		// end of tokens
 };
 
 // bk001129 - made static to avoid aliasing

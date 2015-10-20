@@ -13,6 +13,7 @@ class Motd;
 class Timerun;
 class RandomMapMode;
 class MapStatistics;
+class Tokens;
 
 struct Game
 {
@@ -29,6 +30,7 @@ struct Game
 	std::shared_ptr<Timerun> timerun;
 	std::shared_ptr<RandomMapMode> randomMapMode;
 	std::shared_ptr<MapStatistics> mapStatistics;
+	std::shared_ptr<Tokens> tokens;
 };
 
 #endif

@@ -2846,6 +2846,92 @@ static void CG_PortalGate(centity_t *cent)
 
 }
 
+// TODO: This is just a straight copy from tjl addIndicator
+// Should prolly use a common function/maybe even a 3d ball/model?.
+#define TOKEN_DIFFICULTY_EASY 0
+#define TOKEN_DIFFICULTY_MEDIUM 1
+#define TOKEN_DIFFICULTY_HARD 2
+static vec4_t clrRed = { 255, 0, 0, 255 };
+static vec4_t clrGreen = { 0, 255, 0, 255 };
+static vec4_t clrOrange = { 128, 128, 0, 255 };
+static void CG_TokenMarker(centity_t *cent, int difficulty)
+{
+	static int nextPrintTime = 0;
+	int i, k;
+	float quadSize = 16;
+	vec3_t point;
+	vec3_t mins = { -quadSize, -quadSize, 0 };
+	vec3_t maxs = { quadSize, quadSize, 0 };
+	float extx, exty, extz;
+	polyVert_t verts[4];
+	vec3_t corners[8];
+	VectorCopy(cent->lerpOrigin, point);
+	vec4_t color;
+
+	switch (difficulty)
+	{
+	case TOKEN_DIFFICULTY_EASY:
+		Vector4Copy(clrGreen, color);
+		break;
+	case TOKEN_DIFFICULTY_MEDIUM:
+		Vector4Copy(clrOrange, color);
+		break;
+	case TOKEN_DIFFICULTY_HARD:
+		Vector4Copy(clrRed, color);
+		break;
+	}
+
+	// get the extents (size)
+	extx = maxs[0] - mins[0];
+	exty = maxs[1] - mins[1];
+	extz = maxs[2] - mins[2];
+
+	// set the polygon's texture coordinates
+	verts[0].st[0] = 0;
+	verts[0].st[1] = 0;
+	verts[1].st[0] = 0;
+	verts[1].st[1] = 1;
+	verts[2].st[0] = 1;
+	verts[2].st[1] = 1;
+	verts[3].st[0] = 1;
+	verts[3].st[1] = 0;
+
+	for (i = 0; i < 4; i++)
+	{
+		for (k = 0; k < 4; k++)
+		{
+			verts[i].modulate[k] = (unsigned char)color[k];
+		}
+	}
+
+	VectorAdd(point, maxs, corners[3]);
+
+	VectorCopy(corners[3], corners[2]);
+	vec3_t tmpx = { -extx, 0.0, 0.0 };
+	VectorAdd(corners[2], tmpx, corners[2]);
+
+	VectorCopy(corners[2], corners[1]);
+	vec3_t tmpy = { 0.0, -exty, 0.0 };
+	VectorAdd(corners[1], tmpy, corners[1]);
+
+	VectorCopy(corners[1], corners[0]);
+	vec3_t tmpx2 = { extx, 0.0, 0.0 };
+	VectorAdd(corners[0], tmpx2, corners[0]);
+
+	vec3_t tmpz = { 0.0, 0.0, -extz };
+	for (i = 0; i < 4; i++) {
+		VectorCopy(corners[i], corners[i + 4]);
+		VectorAdd(corners[i], tmpz, corners[i]);
+	}
+
+	// top
+	VectorCopy(corners[0], verts[0].xyz);
+	VectorCopy(corners[1], verts[1].xyz);
+	VectorCopy(corners[2], verts[2].xyz);
+	VectorCopy(corners[3], verts[3].xyz);
+	trap_R_AddPolyToScene(cgs.media.sparkParticleShader, 4, verts);
+}
+
 /*
 ===============
 CG_ProcessEntity
@@ -2971,6 +3057,15 @@ static void CG_ProcessEntity(centity_t *cent)
 	case ET_PORTAL_RED:
 		//CG_Printf("Portal entity found.....\n");
 		CG_PortalGate(cent);
+		break;
+	case ET_TOKEN_EASY:
+		CG_TokenMarker(cent, TOKEN_DIFFICULTY_EASY);
+		break;
+	case ET_TOKEN_MEDIUM:
+		CG_TokenMarker(cent, TOKEN_DIFFICULTY_MEDIUM);
+		break;
+	case ET_TOKEN_HARD:
+		CG_TokenMarker(cent, TOKEN_DIFFICULTY_HARD);
 		break;
 
 	}

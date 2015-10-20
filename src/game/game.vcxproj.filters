@@ -234,6 +234,9 @@
     <ClCompile Include="timerun.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tokens.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -341,6 +344,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="user.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tokens.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

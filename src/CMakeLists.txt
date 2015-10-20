@@ -171,6 +171,7 @@ FILE(GLOB QAGAME_SRC
 	"game/save.cpp"
 	"game/session.cpp"
 	"game/sqlite_wrapper.cpp"
+	"game/tokens.cpp"
 	"game/timerun.cpp"
 	"game/user.cpp"
 	"game/Utilities.cpp"

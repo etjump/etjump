@@ -12,6 +12,7 @@
 #include "random_map_mode.hpp"
 #include "timerun.hpp"
 #include "map_statistics.hpp"
+#include "tokens.hpp"
 #include <chrono>
 
 Game game;
@@ -148,6 +149,13 @@ void OnGameInit()
 	game.motd->Initialize();
 	game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
 	
+	if (g_tokensMode.integer)
+	{
+		// Utilities::WriteFile handles the correct path (etjump/...)
+		auto path = std::string(g_tokensPath.string) + "/" + std::string(level.rawmapname) + ".json";
+		game.tokens->loadTokens(path);
+	}
+	
 
 	// this has to be initialized here
 	game.randomMapMode = std::shared_ptr<RandomMapMode>(new RandomMapMode(level.time,
@@ -163,6 +171,7 @@ void OnGameShutdown()
 	game.database->CloseDatabase();
 	game.operationQueue->Shutdown();
 	game.mapStatistics->saveChanges();
+	game.tokens->reset();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent)
@@ -392,4 +401,32 @@ void G_increaseCallvoteCount(const char *mapName)
 void G_increasePassedCount(const char *mapName)
 {
 	game.mapStatistics->increasePassedCount(mapName);
+}
+
+bool allTokensCollected(gentity_t *ent)
+{
+	auto tokenCounts = game.tokens->getTokenCounts();
+
+	auto easyCount = 0;
+	auto mediumCount = 0;
+	auto hardCount = 0;
+	for (auto i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
+	{
+		if (ent->client->pers.collectedEasyTokens[i])
+		{
+			++easyCount;
+		}
+
+		if (ent->client->pers.collectedMediumTokens[i])
+		{
+			++mediumCount;
+		}
+		
+		if (ent->client->pers.collectedHardTokens[i])
+		{
+			++hardCount;
+		}
+	}
+
+	return tokenCounts[0] == easyCount && tokenCounts[1] == mediumCount && tokenCounts[2] == hardCount;
 }
