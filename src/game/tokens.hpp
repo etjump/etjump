@@ -40,6 +40,17 @@ public:
 
 
 	std::pair<bool, std::string> createToken(Difficulty difficulty, std::array<float, 3> coordinates);
+	struct NearestToken
+	{
+		int number;
+		Tokens::Token *token;
+		float distance;
+		Difficulty difficulty;
+	};
+	NearestToken findNearestToken(std::array<float, 3> coordinates);
+	std::pair<bool, std::string> moveNearestToken(std::array<float, 3> coordinates);
+	std::pair<bool, std::string> deleteNearestToken(std::array<float, 3> coordinates);
+	std::pair<bool, std::string> deleteToken(Difficulty difficulty, int index);
 
 	bool loadTokens(const std::string& filepath);
 	bool saveTokens(const std::string& filepath);

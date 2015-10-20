@@ -1,5 +1,4 @@
 #include "tokens.hpp"
-#include <fstream>
 #include "Utilities.h"
 #include "../json/json.h"
 extern "C" {
@@ -23,6 +22,147 @@ Tokens::~Tokens()
 {
 }
 
+
+std::string toString(Tokens::Difficulty difficulty)
+{
+	switch (difficulty)
+	{
+	case Tokens::Easy:
+		return "easy";
+	case Tokens::Medium:
+		return "medium";
+	case Tokens::Hard:
+		return "hard";		
+	}
+	return "unknown";
+}
+
+
+Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
+{
+	auto idx = 0;
+	auto tokenNum = 0;
+	Token *token = nullptr;
+	auto difficulty = Easy;
+	float nearestDistance = 1 << 20;
+	for (auto&t : _easyTokens)
+	{
+		if (t.isActive)
+		{
+			auto newDistance = VectorDistance(t.coordinates.data(), coordinates.data());
+			if (newDistance < nearestDistance)
+			{
+				nearestDistance = newDistance;
+				token = &t;
+				tokenNum = idx + 1;
+				difficulty = Easy;
+			}
+		}
+		++idx;
+	}
+
+	idx = 0;
+	for (auto&t : _mediumTokens)
+	{
+		if (t.isActive)
+		{
+			auto newDistance = VectorDistance(t.coordinates.data(), coordinates.data());
+			if (newDistance < nearestDistance)
+			{
+				nearestDistance = newDistance;
+				token = &t;
+				tokenNum = idx + 1;
+				difficulty = Medium;
+			}
+		}
+		++idx;
+	}
+
+	idx = 0;
+	for (auto&t : _hardTokens)
+	{
+		if (t.isActive)
+		{
+			auto newDistance = VectorDistance(t.coordinates.data(), coordinates.data());
+			if (newDistance < nearestDistance)
+			{
+				nearestDistance = newDistance;
+				token = &t;
+				tokenNum = idx + 1;
+				difficulty = Hard;
+			}
+		}
+		++idx;
+	}
+
+	return NearestToken{ tokenNum, token, nearestDistance, difficulty };
+}
+
+
+std::pair<bool, std::string> Tokens::deleteToken(Difficulty difficulty, int index)
+{
+	Token *token = nullptr;
+	switch (difficulty)
+	{
+	case Easy:
+		token = &_easyTokens[index];
+		break;
+	case Medium:
+		token = &_mediumTokens[index];
+		break;
+	case Hard:
+		token = &_hardTokens[index];
+		break;
+	}
+
+	if (!token)
+	{
+		throw "ERROR: undefined difficulty.";
+	}
+
+	if (token->isActive)
+	{
+		token->isActive = false;
+		G_FreeEntity(token->entity);
+		token->entity = nullptr;
+		saveTokens(_filepath);
+		return std::make_pair(true, va("Successfully deleted %s token #%d", toString(difficulty).c_str(), index + 1));
+	}
+	return std::make_pair(false, va("%s token with number #%d does not exist.", toString(difficulty).c_str(), index + 1));
+}
+
+std::pair<bool, std::string> Tokens::deleteNearestToken(std::array<float, 3> coordinates)
+{
+	auto nearestToken = findNearestToken(coordinates);
+
+	if (!nearestToken.token)
+	{
+		return std::make_pair(false, "no tokens in the map.");
+	}
+
+	nearestToken.token->isActive = false;
+	saveTokens(_filepath);
+	G_FreeEntity(nearestToken.token->entity);
+	nearestToken.token->entity = nullptr;
+	return std::make_pair(true, va("Deleted %s token #%d.", toString(nearestToken.difficulty).c_str(), nearestToken.number));
+}
+
+std::pair<bool, std::string> Tokens::moveNearestToken(std::array<float, 3> coordinates)
+{
+	auto nearestToken = findNearestToken(coordinates);
+	
+	if (!nearestToken.token)
+	{
+		return std::make_pair(false, "no tokens in the map.");
+	}
+
+	nearestToken.token->coordinates = coordinates;
+	G_SetOrigin(nearestToken.token->entity, coordinates.data());
+
+	saveTokens(_filepath);
+
+	return std::make_pair(true, va("Moved %s #%d to new location.", toString(nearestToken.difficulty).c_str(), nearestToken.number));
+}
 
 std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::array<float, 3> coordinates)
 {
@@ -363,7 +503,7 @@ void Tokens::Token::fromJson(const Json::Value& json)
 	isActive = true;
 }
 
-Tokens::Token::Token() : coordinates{ 0,0,0 }, name(""), isActive(false), entity(nullptr), data(std::make_unique<TokenInformation>())
+Tokens::Token::Token() : coordinates{ {0.0,0.0,0.0} }, name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))
 {
 }
 

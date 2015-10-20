@@ -1799,26 +1799,20 @@ bool Spectate(gentity_t *ent, Arguments argv)
 	return qtrue;
 }
 
-bool Tokens(gentity_t *ent, Arguments argv)
+bool createToken(gentity_t* ent, Arguments argv)
 {
-	if (!g_tokensMode.integer)
-	{
-		ChatPrintTo(ent, "^3tokens: ^7tokens mode is disabled. Set g_tokensMode \"1\" and restart map to enable tokens mode.");
-		return false;
-	}
-
 	if (ent)
 	{
-		if (argv->size() < 3)
+		if (argv->size() != 3)
 		{
-			ChatPrintTo(ent, "^3usage: ^7!tokens <create> <difficulty>");
+			ChatPrintTo(ent, "^3usage: ^7!tokens create <easy (e)|medium (m)|hard (h)>");
 			return false;
 		}
 	} else
 	{
-		if (argv->size() < 6)
+		if (argv->size() != 6)
 		{
-			ChatPrintTo(ent, "^3usage: ^7!tokens <create> <difficulty> <x> <y> <z>");
+			ChatPrintTo(ent, "^3usage: ^7!tokens create <easy (e)|medium (m)|hard (h)> <x> <y> <z>");
 			return false;
 		}
 	}
@@ -1827,18 +1821,21 @@ bool Tokens(gentity_t *ent, Arguments argv)
 	if (argv->size() < 6)
 	{
 		VectorCopy(ent->r.currentOrigin, coordinates);
-	} else
+	}
+	else
 	{
 		try
 		{
 			coordinates[0] = std::stof((*argv)[3]);
 			coordinates[1] = std::stof((*argv)[4]);
 			coordinates[2] = std::stof((*argv)[5]);
-		} catch (std::invalid_argument)
+		}
+		catch (std::invalid_argument)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7coordinates are not numbers.");
 			return false;
-		} catch (std::out_of_range)
+		}
+		catch (std::out_of_range)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7coordinates are out of range.");
 			return false;
@@ -1865,13 +1862,16 @@ bool Tokens(gentity_t *ent, Arguments argv)
 	if ((*argv)[2] == "easy" || ((*argv)[2]) == "e")
 	{
 		difficulty = Tokens::Easy;
-	} else if ((*argv)[2] == "medium" || ((*argv)[2]) == "m")
+	}
+	else if ((*argv)[2] == "medium" || ((*argv)[2]) == "m")
 	{
 		difficulty = Tokens::Medium;
-	} else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h")
+	}
+	else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h")
 	{
 		difficulty = Tokens::Hard;
-	} else
+	}
+	else
 	{
 		ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium (m) or hard (h)");
 		return false;
@@ -1884,6 +1884,162 @@ bool Tokens(gentity_t *ent, Arguments argv)
 		ChatPrintTo(ent, "^3error: ^7" + result.second);
 		return false;
 	}
+	return true;
+}
+
+bool moveToken(gentity_t* ent)
+{
+	if (!ent)
+	{
+		ChatPrintTo(ent, "^3usage: ^7!tokens move can only be used by players.");
+		return false;
+	}
+	std::array<float, 3> coordinates;
+	VectorCopy(ent->r.currentOrigin, coordinates);
+
+	auto result = game.tokens->moveNearestToken(coordinates);
+	if (!result.first)
+	{
+		ChatPrintTo(ent, "^3error: ^7" + result.second); 
+		return false;
+	} 
+
+	ChatPrintTo(ent, "^3tokens: ^7" + result.second);
+
+	return true;
+}
+
+bool deleteToken(gentity_t* ent, Arguments argv)
+{ 
+	if (!ent)
+	{
+		if (argv->size() != 4)
+		{
+			ChatPrintTo(ent, "^3usage: ^7!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>");
+			return false;
+		}
+	}
+
+	if (argv->size() == 2)
+	{
+		std::array<float, 3> coordinates;
+		VectorCopy(ent->r.currentOrigin, coordinates);
+		auto result = game.tokens->deleteNearestToken(coordinates);
+		if (!result.first)
+		{
+			ChatPrintTo(ent, "^3error: ^7" + result.second);
+			return false;
+		}
+
+		ChatPrintTo(ent, "^3tokens: ^7" + result.second);
+
+		return true;
+	}
+
+	if (argv->size() == 4)
+	{
+		Tokens::Difficulty difficulty;
+		if ((*argv)[2] == "easy" || ((*argv)[2]) == "e")
+		{
+			difficulty = Tokens::Easy;
+		}
+		else if ((*argv)[2] == "medium" || ((*argv)[2]) == "m")
+		{
+			difficulty = Tokens::Medium;
+		}
+		else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h")
+		{
+			difficulty = Tokens::Hard;
+		}
+		else
+		{
+			ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium (m) or hard (h)");
+			return false;
+		}
+
+		auto num = 1;
+		try
+		{
+			num = std::stoi((*argv)[3]);
+		} catch (std::invalid_argument)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7" + (*argv)[3] + " is not a number.");
+			return false;
+		} catch (std::out_of_range)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7" + (*argv)[3] + " is out of range (too large).");
+			return false;
+		}
+
+		if (num < 1 || num > 6)
+		{
+			ChatPrintTo(ent, "^3tokens: ^7number should be between 1 and 6.");
+			return false;
+		}
+
+		ChatPrintTo(ent, va("^3tokens: ^7deleting token %s #%d", (*argv)[2].c_str(), num));
+		 auto result = game.tokens->deleteToken(difficulty, num - 1);
+
+		 if (!result.first) {
+			 ChatPrintTo(ent, "^3error: ^7" + result.second);
+			 return false;
+		 }
+
+		 ChatPrintTo(ent, "^3tokens: ^7" + result.second);
+
+		return true;
+	}
+	return true;
+}
+
+bool Tokens(gentity_t *ent, Arguments argv)
+{
+	if (!g_tokensMode.integer)
+	{
+		ChatPrintTo(ent, "^3tokens: ^7tokens mode is disabled. Set g_tokensMode \"1\" and restart map to enable tokens mode.");
+		return false;
+	}
+
+	if (ent)
+	{
+		if (argv->size() < 2)
+		{
+			ChatPrintTo(ent, "^3usage: ^7check console for more information");
+			Utilities::toConsole(ent,
+				"^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new token\n"
+				"^7!tokens move ^9| Moves nearest token to your location\n"
+				"^7!tokens delete ^9| Deletes nearest token to your location\n"
+				"^7!tokens delete <easy (e)|medium (m)|hard (h)> <1-6> ^9| Deletes specified token\n"
+				);
+			return false;
+		}
+	} else
+	{
+		if (argv->size() < 4)
+		{
+			Utilities::toConsole(ent, 
+				"^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
+				"!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n"
+				);
+			return false;
+		}
+	}
+	
+	if ((*argv)[1] == "create")
+	{
+		return createToken(ent, argv);
+	} 
+	
+	if ((*argv)[1] == "move")
+	{
+		return moveToken(ent);
+	} 
+	
+	if ((*argv)[1] == "delete")
+	{
+		return deleteToken(ent, argv);
+	}
+	
 	return true;
 }
 
