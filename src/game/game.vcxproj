@@ -44,16 +44,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;$(IncludePath)</IncludePath>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>qagame_mp_x86</TargetName>
     <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -61,6 +61,7 @@
     <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <TargetName>qagame_mp_x86</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -69,10 +70,10 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>.\Debug/game.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\game.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -81,13 +82,13 @@
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>winmm.lib;pthreadsVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>..\Debug/qagame_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)build\qagame_mp_x86.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\game.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)game.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/qagame_mp_x86.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\Debug/qagame_mp_x86.map</MapFileName>
+      <MapFileName>$(ProjectDir)Debug\qagame_mp_x86.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <BaseAddress>0x20000000</BaseAddress>
       <ImportLibrary>.\Debug/qagame_mp_x86.lib</ImportLibrary>
@@ -104,7 +105,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>cmd /c PowerShell -ExecutionPolicy Unrestricted -NoProfile -File C:\Users\haapa\Documents\GitHub\etjump\src\debug-copy.ps1</Command>
+      <Command>$(SolutionDir)build\install.bat</Command>
       <Message>Copying debug .dlls to modding ET directory</Message>
     </PostBuildEvent>
     <CustomBuildStep>
@@ -122,10 +123,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>.\Release/game.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Release\game.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Release\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Release\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Release\</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -133,12 +134,12 @@
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>winmm.lib;pthreadsVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>..\Release\qagame_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)build\qagame_mp_x86.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\game.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)game.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Release/qagame_mp_x86.pdb</ProgramDatabaseFile>
       <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>.\Release/qagame_mp_x86.map</MapFileName>
+      <MapFileName>$(ProjectDir)Release\qagame_mp_x86.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <BaseAddress>0x20000000</BaseAddress>
       <ImportLibrary>.\Release/qagame_mp_x86.lib</ImportLibrary>
@@ -155,6 +156,9 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)build\install.bat</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\json\jsoncpp.cpp" />

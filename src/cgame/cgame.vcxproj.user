@@ -3,13 +3,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
     <RemoteDebuggerDebuggerType>NativeOnly</RemoteDebuggerDebuggerType>
+    <RemoteDebuggerCommand>$(ETROOT)et.exe</RemoteDebuggerCommand>
+    <RemoteDebuggerCommandArguments>+set fs_game "etjump" +map oasis</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerWorkingDirectory>$(ETROOT)</RemoteDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>D:\Modding\ET\et.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>$(ETROOT)et.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>
     <LocalDebuggerAttach>false</LocalDebuggerAttach>
-    <LocalDebuggerCommandArguments>+connect localhost:35000</LocalDebuggerCommandArguments>
-    <LocalDebuggerWorkingDirectory>D:\Modding\ET\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArguments>+set fs_game "etjump" +devmap oasis</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

@@ -44,19 +44,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>cgame_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>
+    <TargetName>cgame_mp_x86</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -68,10 +69,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>.\Release/cgame.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Release\cgame.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Release\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Release\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Release\</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -79,9 +80,9 @@
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>../Release/cgame_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)build\cgame_mp_x86.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\cgame.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)cgame.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Release/cgame_mp_x86.pdb</ProgramDatabaseFile>
       <GenerateMapFile>false</GenerateMapFile>
       <MapFileName>.\Release/cgame_mp_x86.map</MapFileName>
@@ -101,6 +102,9 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)build\install.bat</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -109,10 +113,10 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>.\Debug/cgame.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\cgame.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -121,13 +125,13 @@
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>..\Debug/cgame_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)build\cgame_mp_x86.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\cgame.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)cgame.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/cgame_mp_x86.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\Debug/cgame_mp_x86.map</MapFileName>
+      <MapFileName>$(ProjectDir)Debug\cgame_mp_x86.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <BaseAddress>0x30000000</BaseAddress>
       <ImportLibrary>.\Debug/cgame_mp_x86.lib</ImportLibrary>
@@ -143,6 +147,9 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)build\install.bat</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\game\bg_animation.c" />

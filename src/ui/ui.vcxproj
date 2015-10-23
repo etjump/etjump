@@ -46,12 +46,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>ui_mp_x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>ui_mp_x86</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -63,10 +69,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>.\Release/ui.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Release\ui.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Release\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Release\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Release\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -74,7 +80,7 @@
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>../Release/ui_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)build\ui_mp_x86.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>.\ui.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Release/ui_mp_x86.pdb</ProgramDatabaseFile>
@@ -104,10 +110,10 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>.\Debug/ui.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\ui.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -116,13 +122,13 @@
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>../Debug/ui_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)build\ui_mp_x86.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>.\ui.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>../Debug/ui.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\Debug/ui_mp_x86.map</MapFileName>
+      <MapFileName>$(ProjectDir)Debug\ui_mp_x86.map</MapFileName>
       <BaseAddress>0x40000000</BaseAddress>
       <ImportLibrary>.\Debug/ui_mp_x86.lib</ImportLibrary>
     </Link>
