@@ -24,27 +24,28 @@ cd %BATCH_PATH%
 REM Next we need to copy the latest additional files from
 REM the etjump directory
 
-xcopy %ADDITIONAL_MOD_FILES%animations %BATCH_PATH%animations\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%gfx %BATCH_PATH%gfx\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%icons %BATCH_PATH%icons\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%models %BATCH_PATH%models\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%scripts %BATCH_PATH%scripts\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%sound %BATCH_PATH%sound\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%ui %BATCH_PATH%ui\ /s /e /y
-xcopy %ADDITIONAL_MOD_FILES%weapons %BATCH_PATH%weapons\ /s /e /y
+xcopy %ADDITIONAL_MOD_FILES%animations %BATCH_PATH%animations\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%gfx %BATCH_PATH%gfx\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%icons %BATCH_PATH%icons\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%models %BATCH_PATH%models\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%scripts %BATCH_PATH%scripts\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%sound %BATCH_PATH%sound\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%ui %BATCH_PATH%ui\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%weapons %BATCH_PATH%weapons\ /s /e /y >nul
 
 REM Now that the files are there, all we need to do is 
 REM create the pk3
 
-%PATH_TO_7ZIP% u -tzip etjump.zip animations gfx icons models scripts sound ui weapons cgame.mp.i386.so ui.mp.i386.so cgame_mp_x86.dll ui_mp_x86.dll -r
+%PATH_TO_7ZIP% u -tzip etjump.zip animations gfx icons models scripts sound ui weapons cgame.mp.i386.so ui.mp.i386.so cgame_mp_x86.dll ui_mp_x86.dll -r >nul
 
 rename etjump.zip unversioned_etjump.pk3
 
-xcopy unversioned_etjump.pk3 %PATH_TO_ET_ROOT%\%MODNAME%\ /y
-xcopy cgame_mp_x86.dll %PATH_TO_ET_ROOT%\%MODNAME%\ /y
-xcopy ui_mp_x86.dll %PATH_TO_ET_ROOT%\%MODNAME%\ /y
-xcopy qagame_mp_x86.dll %PATH_TO_ET_ROOT%\%MODNAME%\ /y
+xcopy unversioned_etjump.pk3 %PATH_TO_ET_ROOT%\%MODNAME%\ /y >nul
+xcopy cgame_mp_x86.dll %PATH_TO_ET_ROOT%\%MODNAME%\ /y >nul
+xcopy ui_mp_x86.dll %PATH_TO_ET_ROOT%\%MODNAME%\ /y >nul
+xcopy qagame_mp_x86.dll %PATH_TO_ET_ROOT%\%MODNAME%\ /y >nul
 
-del unversioned_etjump.pk3
+del unversioned_etjump.pk3 >nul
 
+echo "Finished copying files to %PATH_TO_ET_ROOT%\%MODNAME%\"
 @echo on
