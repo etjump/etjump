@@ -287,13 +287,11 @@ const char *G_MatchOneMap(const char *arg)
 
 	if (matchingMaps.size() > 1)
 	{
-		for (auto&map:matchingMaps)
+		auto match = std::find(matchingMaps.begin(), matchingMaps.end(), mapName);
+		if (match != matchingMaps.end())
 		{
-			if (map == mapName)
-			{
-				Q_strncpyz(matchingMap, matchingMaps[0].c_str(), sizeof(matchingMap));
-				return matchingMap;
-			}
+			Q_strncpyz(matchingMap, match->c_str(), sizeof(matchingMap));
+			return matchingMap;
 		}
 	}
 
