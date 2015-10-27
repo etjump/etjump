@@ -99,6 +99,16 @@ public:
 	void interrupt(int clientNum);
 
 	/**
+	 * Prints the current map's top records
+	 * Num of records printed per run depends on the run count on the map
+	 */
+	void printCurrentMapRecords(int clientNum);
+
+	/**
+	 * Prints 50 best records for run + own record
+	 */
+	void printRecordsForRun(int clientNum, const std::string& runName);
+	/**
 	 * Prints either top 50 records from 1 run or all #1s from all runs
 	 * @param clientNum the player who's calling the function
 	 * @param map The map
@@ -171,7 +181,7 @@ private:
 	/**
 	 * List of records in current map
 	 */
-	std::map<std::string, std::vector<std::unique_ptr<Record> > > _records;
+	std::map<std::string, std::vector<std::unique_ptr<Record> > > _recordsByName;
 
 	/**
 	 * Sorted status

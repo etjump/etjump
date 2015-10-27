@@ -15,6 +15,30 @@
 #include "printer.hpp"
 #include "Utilities.h"
 
+std::string millisToString(int millis)
+{
+	std::string s;
+
+	int minutes, seconds;
+
+	minutes = millis / 60000;
+	millis -= minutes * 60000;
+	seconds = millis / 1000;
+	millis -= seconds * 1000;
+
+	s = (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
+
+	return s;
+}
+
+std::string dateToFormat(int date)
+{
+	char buffer[128] = "\0";
+	auto t = static_cast<time_t>(date);
+	strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
+	return buffer;
+}
+
 std::string GetColumnText(sqlite3_stmt *stmt, int index)
 {
 	auto text = reinterpret_cast<const char *>(sqlite3_column_text(stmt, index));
@@ -27,7 +51,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 
 	Printer::LogPrintln("Opening timeruns database: " + database);
 
-	_records.clear();
+	_recordsByName.clear();
 	for (auto &p : _players)
 	{
 		p = nullptr;
@@ -94,7 +118,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 		record->date       = sqlite3_column_int(stmt, 5);
 		record->map        = currentMap;
 
-		_records[record->run].push_back(std::unique_ptr<Record>(record));
+		_recordsByName[record->run].push_back(std::unique_ptr<Record>(record));
 	}
 	if (rc != SQLITE_DONE)
 	{
@@ -103,7 +127,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 		return false;
 	}
 
-	Printer::LogPrint((boost::format("Successfully loaded %d records from database\n") % _records.size()).str());
+	Printer::LogPrint((boost::format("Successfully loaded %d records from database\n") % _recordsByName.size()).str());
 
 	return true;
 }
@@ -185,6 +209,107 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		player->currentRunName = "";
 		Utilities::stopRun(clientNum);
 	}
+}
+
+std::string rankToString(int rank)
+{
+	switch (rank)
+	{
+	case 1:
+		return "^3#1";
+	case 2:
+		return "^z#2";
+	case 3:
+		return "^l#3";
+	default:
+		return "^7#" + std::to_string(rank);
+	}
+}
+
+void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
+{
+	const auto run = _recordsByName.find(runName);
+	if (run == end(_recordsByName))
+	{
+		Printer::SendConsoleMessage(clientNum,
+			"^3error: ^7no records found by name: " + runName);
+		return;
+	}
+
+	const auto self = _players[clientNum].get();
+	auto foundSelf = false;
+
+	std::string buffer =
+		"^g=============================================================\n"
+		" ^2Top 50 records for map: ^7" + _currentMap + "\n"
+		"^g=============================================================\n";
+
+	auto rank = 1;
+	buffer += " ^2Run: ^7" + run->first + "\n\n";
+	buffer += "^g Rank   Time        Player\n";
+
+	for (auto&record:run->second)
+	{
+		if (rank <= 50)
+		{
+			if (record->userId == self->userId)
+			{
+				buffer += (boost::format("^7 %5s   ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+				foundSelf = true;
+			} else
+			{
+				buffer += (boost::format("^7 %5s   ^7 %s   %s\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+			}
+		} else
+		{
+			if (foundSelf)
+			{
+				break;
+			}
+
+			if (record->userId == self->userId)
+			{
+				buffer += (boost::format("^7 %4s    ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+				foundSelf = true;
+			}
+		}
+		rank++;
+	}
+
+	if (!foundSelf)
+	{
+		buffer += "^7You haven't set a record on this run yet!\n";
+	}
+
+	buffer += "^g=============================================================\n";
+	Printer::SendConsoleMessage(clientNum, buffer);
+}
+
+void Timerun::printCurrentMapRecords(int clientNum)
+{
+	std::string buffer = 
+		"^g=============================================================\n"
+		" ^2Top records for map: ^7" + _currentMap + "\n"
+		"^g=============================================================\n";
+
+	for (const auto&run : _recordsByName)
+	{
+		auto rank = 1;
+		buffer += " ^2Run: ^7" + run.first + "\n\n";
+		buffer += "^g Rank   Time        Player\n";
+		for (const auto&record : run.second)
+		{
+			if (rank > 3)
+			{
+				break;
+			}
+			buffer += (boost::format("^7 %4s    ^7 %s   %s\n") % rankToString(rank++) % millisToString(record->time) % record->playerName).str();
+		}
+
+		buffer += "^g=============================================================\n";
+	}
+
+	Printer::SendConsoleMessage(clientNum, buffer);
 }
 
 void Timerun::interrupt(int clientNum)
@@ -355,7 +480,7 @@ void Timerun::addNewRecord(Player *player, int clientNum)
 	record->userId     = player->userId;
 	record->map        = _currentMap;
 	record->run        = player->currentRunName;
-	_records[player->currentRunName].push_back(std::unique_ptr<Record>(record));
+	_recordsByName[player->currentRunName].push_back(std::unique_ptr<Record>(record));
 	_sorted[player->currentRunName] = false;
 	SaveRecord(record, false);
 	Printer::SendCommandToAll((boost::format("record %d %s %d")
@@ -393,8 +518,8 @@ void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int c
 
 Timerun::Record *Timerun::findPreviousRecord(Player *player)
 {
-	auto run = _records.find(player->currentRunName);
-	if (run == _records.end())
+	auto run = _recordsByName.find(player->currentRunName);
+	if (run == _recordsByName.end())
 	{
 		return nullptr;
 	}
@@ -414,7 +539,7 @@ Timerun::Record *Timerun::findPreviousRecord(Player *player)
 
 void Timerun::sortRecords()
 {
-	for (auto& record : _records)
+	for (auto& record : _recordsByName)
 	{
 		std::string runName = record.first;
 		if (!_sorted[runName])
@@ -461,43 +586,30 @@ bool Timerun::clientConnect(int clientNum, int userId)
 	return true;
 }
 
-std::string millisToString(int millis)
-{
-	std::string s;
 
-	int minutes, seconds;
-
-	minutes = millis / 60000;
-	millis -= minutes * 60000;
-	seconds = millis / 1000;
-	millis -= seconds * 1000;
-
-	s = (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
-
-	return std::move(s);
-}
-
-std::string dateToFormat(int date)
-{
-	char buffer[128] = "\0";
-	auto t           = static_cast<time_t>(date);
-	strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
-	return buffer;
-}
 
 void Timerun::printRecords(int clientNum, const std::string &map, const std::string &runName)
 {
 	sortRecords();
+	if (!map.length() || map == _currentMap)
+	{
+		if (!runName.length())
+		{
+			printCurrentMapRecords(clientNum);
+			return;
+		}
+
+		printRecordsForRun(clientNum, runName);
+		return;		
+	}
+
 	// User wants to see the records of the current map
 	if (map.length() == 0 || map == _currentMap)
 	{
 		if (runName.length() == 0)
 		{
-
-
-
 			std::string toPrint = "#1 record for each run:\n";
-			for (auto& record : _records)
+			for (auto& record : _recordsByName)
 			{
 				toPrint += "^g" + record.first + "\n";
 				if (record.second.size() > 0)
@@ -518,8 +630,8 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
 			return;
 		}
 
-		auto run = _records.find(runName);
-		if (run == _records.end())
+		auto run = _recordsByName.find(runName);
+		if (run == _recordsByName.end())
 		{
 			Printer::SendConsoleMessage(clientNum,
 			                            (boost::format("^3error: ^7no records found by name %s.") % runName).str());

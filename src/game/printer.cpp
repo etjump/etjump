@@ -32,10 +32,11 @@ void Printer::LogPrintln(const std::string &message)
 void Printer::SendConsoleMessage(int clientNum, std::string message)
 {
 	std::string partialMessage;
-	while (message.length() > 1000)
+	const auto BYTES_PER_PACKET = 998;
+	while (message.length() > BYTES_PER_PACKET)
 	{
-		partialMessage = message.substr(0, 1000);
-		message        = message.substr(1000);
+		partialMessage = message.substr(0, BYTES_PER_PACKET);
+		message        = message.substr(BYTES_PER_PACKET);
 		if (clientNum == CONSOLE_CLIENT_NUMBER)
 		{
 			G_Printf("%s", partialMessage.c_str());
