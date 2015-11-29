@@ -52,7 +52,7 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)pthread;D:\boost_1_57_0;$(SolutionDir)sqlite;$(IncludePath)</IncludePath>
     <TargetName>qagame_mp_x86</TargetName>
     <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
