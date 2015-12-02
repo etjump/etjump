@@ -9,7 +9,7 @@ typedef gentity_s gentity_t;
 
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class Levels
 {
@@ -33,9 +33,9 @@ public:
 	bool Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated);
 	bool Delete(int level);
 	bool ReadFromConfig();
-	static bool SortByLevel(boost::shared_ptr<Level> const lhs, boost::shared_ptr<Level> const rhs);
+	static bool SortByLevel(const std::shared_ptr<Level>& lhs, const std::shared_ptr<Level>& rhs);
 	bool WriteToConfig();
-	std::string ErrorMessage();
+	std::string ErrorMessage() const;
 	void PrintLevels();
 	const Level *GetLevel(int level);
 	bool LevelExists(int level) const;
@@ -43,14 +43,14 @@ public:
 	void PrintLevelInfo(gentity_t *ent, int level);
 
 private:
-	typedef std::vector< boost::shared_ptr< Level > >::const_iterator ConstIter;
-	typedef std::vector< boost::shared_ptr< Level > >::iterator Iter;
+	typedef std::vector< std::shared_ptr< Level > >::const_iterator ConstIter;
+	typedef std::vector< std::shared_ptr< Level > >::iterator Iter;
 	bool CreateDefaultLevels();
 	ConstIter FindConst(int level);
 	Iter Find(int level);
-	std::vector< boost::shared_ptr< Level > > levels_;
+	std::vector< std::shared_ptr< Level > > levels_;
 	std::string                               errorMessage;
-	boost::shared_ptr<Level>                  dummyLevel_;
+	std::shared_ptr<Level>                  dummyLevel_;
 };
 
 #endif

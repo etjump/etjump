@@ -1,5 +1,4 @@
 #include <boost/algorithm/string.hpp>
-#include <boost/shared_array.hpp>
 #include "levels.hpp"
 #include "g_local.hpp"
 #include "utilities.hpp"
@@ -14,7 +13,7 @@ Levels::Level::Level(int level, std::string const& name, std::string const& gree
 
 Levels::Levels()
 {
-	dummyLevel_ = boost::shared_ptr<Level>(new Level(0, "", "", ""));
+	dummyLevel_ = std::shared_ptr<Level>(new Level(0, "", "", ""));
 }
 
 Levels::~Levels()
@@ -23,14 +22,14 @@ Levels::~Levels()
 
 bool Levels::Add(int level, std::string const name, std::string const commands, std::string const greeting)
 {
-	ConstIter it = FindConst(level);
+	auto it = FindConst(level);
 	if (it != levels_.end())
 	{
 		errorMessage = "level exists";
 		return false;
 	}
 
-	boost::shared_ptr<Level> levelPtr(new Level(level, name, greeting, commands));
+	std::shared_ptr<Level> levelPtr(new Level(level, name, greeting, commands));
 	levels_.push_back(levelPtr);
 
 	if (!WriteToConfig())
@@ -42,7 +41,7 @@ bool Levels::Add(int level, std::string const name, std::string const commands, 
 
 bool Levels::Delete(int level)
 {
-	Iter it = Find(level);
+	auto it = Find(level);
 	if (it != levels_.end())
 	{
 		levels_.erase(it);
@@ -55,16 +54,16 @@ bool Levels::Delete(int level)
 
 bool Levels::Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated)
 {
-	ConstIter it = FindConst(level);
+	auto it = FindConst(level);
 	if (it == levels_.end())
 	{
 		errorMessage = "level does not exist";
 		return false;
 	}
 
-	const int CMDS_UPDATED     = 1;
-	const int GREETING_UPDATED = 2;
-	const int NAME_UPDATED     = 4;
+	const auto CMDS_UPDATED     = 1;
+	const auto GREETING_UPDATED = 2;
+	const auto NAME_UPDATED     = 4;
 
 	if (updated & CMDS_UPDATED)
 	{
@@ -94,24 +93,20 @@ bool Levels::CreateDefaultLevels()
 {
 	levels_.clear();
 
-	boost::shared_ptr< Level > tempLevel = boost::shared_ptr< Level >
-	                                           (new Level(0, "Visitor",
-	                                                      "Welcome Visitor [n]^7! Your last visit was on [t]!", "a"));
+	auto tempLevel = std::make_shared<Level>(0, "Visitor",
+	                                         "Welcome Visitor [n]^7! Your last visit was on [t]!", "a");
 	levels_.push_back(tempLevel);
 
-	tempLevel = boost::shared_ptr< Level >
-	                (new Level(1, "Friend",
-	                           "Welcome Friend [n]^7! Your last visit was [d] ago!", "a"));
+	tempLevel = std::make_shared<Level>(1, "Friend",
+	                                    "Welcome Friend [n]^7! Your last visit was [d] ago!", "a");
 	levels_.push_back(tempLevel);
 
-	tempLevel = boost::shared_ptr< Level >
-	                (new Level(2, "Moderator",
-	                           "Welcome Moderator [n]^7!§", "*-As"));
+	tempLevel = std::make_shared<Level>(2, "Moderator",
+	                                    "Welcome Moderator [n]^7!§", "*-As");
 	levels_.push_back(tempLevel);
 
-	tempLevel = boost::shared_ptr< Level >
-	                (new Level(3, "Administrator",
-	                           "Welcome Administrator [n]^7!", "*"));
+	tempLevel = std::make_shared<Level>(3, "Administrator",
+	                                    "Welcome Administrator [n]^7!", "*");
 	levels_.push_back(tempLevel);
 
 	if (!WriteToConfig())
@@ -136,18 +131,18 @@ void WriteInt(int toWrite, fileHandle_t& f)
 	trap_FS_Write("\n", 1, f);
 }
 
-bool Levels::SortByLevel(const boost::shared_ptr<Level> lhs, const boost::shared_ptr<Level> rhs)
+bool Levels::SortByLevel(const std::shared_ptr<Level>& lhs, const std::shared_ptr<Level>& rhs)
 {
 	return lhs->level < rhs->level;
 }
 
 bool Levels::WriteToConfig()
 {
-	fileHandle_t f = 0;
+	auto f = 0;
 	trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE);
 
 	sort(levels_.begin(), levels_.end(), SortByLevel);
-	for (ConstIter it = levels_.begin(); it != levels_.end(); it++)
+	for (ConstIter it = levels_.begin(); it != levels_.end(); ++it)
 	{
 		trap_FS_Write("[level]\n", 8, f);
 		trap_FS_Write("level = ", 8, f);
@@ -170,9 +165,9 @@ bool Levels::WriteToConfig()
 
 Levels::Level const *Levels::GetLevel(int level)
 {
-	std::vector<boost::shared_ptr<Level> >::iterator it  = levels_.begin();
-	std::vector<boost::shared_ptr<Level> >::iterator end = levels_.end();
-	for (; it != end; it++)
+	auto it  = levels_.begin();
+	auto end = levels_.end();
+	for (; it != end; ++it)
 	{
 		if (it->get()->level == level)
 		{
@@ -186,13 +181,13 @@ Levels::Level const *Levels::GetLevel(int level)
 
 void Levels::PrintLevelInfo(gentity_t *ent)
 {
-	std::vector<boost::shared_ptr<Level> >::iterator it  = levels_.begin();
-	std::vector<boost::shared_ptr<Level> >::iterator end = levels_.end();
+	auto it  = levels_.begin();
+	auto end = levels_.end();
 
 	ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
 	BeginBufferPrint();
 	BufferPrint(ent, "Levels: ");
-	for (; it != end; it++)
+	for (; it != end; ++it)
 	{
 		if (it + 1 == end)
 		{
@@ -206,10 +201,10 @@ void Levels::PrintLevelInfo(gentity_t *ent)
 
 void Levels::PrintLevelInfo(gentity_t *ent, int level)
 {
-	std::vector<boost::shared_ptr<Level> >::iterator it  = levels_.begin();
-	std::vector<boost::shared_ptr<Level> >::iterator end = levels_.end();
+	auto it  = levels_.begin();
+	auto end = levels_.end();
 
-	for (; it != end; it++)
+	for (; it != end; ++it)
 	{
 		if (it->get()->level == level)
 		{
@@ -224,9 +219,9 @@ void Levels::PrintLevelInfo(gentity_t *ent, int level)
 
 bool Levels::LevelExists(int level) const
 {
-	ConstIter it = levels_.begin();
+	auto it = levels_.begin();
 
-	for (; it != levels_.end(); it++)
+	for (; it != levels_.end(); ++it)
 	{
 		if (it->get()->level == level)
 		{
@@ -238,11 +233,11 @@ bool Levels::LevelExists(int level) const
 
 void Levels::PrintLevels()
 {
-	ConstIter it = levels_.begin();
+	auto it = levels_.begin();
 
 	std::string level;
 
-	for (; it != levels_.end(); it++)
+	for (; it != levels_.end(); ++it)
 	{
 		level += it->get()->level + "\n" +
 		         it->get()->name + "\n" +
@@ -255,7 +250,7 @@ void Levels::PrintLevels()
 	}
 }
 
-std::string Levels::ErrorMessage()
+std::string Levels::ErrorMessage() const
 {
 	return errorMessage;
 }
@@ -263,7 +258,7 @@ std::string Levels::ErrorMessage()
 Levels::ConstIter Levels::FindConst(int level)
 {
 	ConstIter it = levels_.begin();
-	for (; it != levels_.end(); it++)
+	for (; it != levels_.end(); ++it)
 	{
 		if (it->get()->level == level)
 		{
@@ -275,8 +270,8 @@ Levels::ConstIter Levels::FindConst(int level)
 
 Levels::Iter Levels::Find(int level)
 {
-	Iter it = levels_.begin();
-	for (; it != levels_.end(); it++)
+	auto it = levels_.begin();
+	for (; it != levels_.end(); ++it)
 	{
 		if (it->get()->level == level)
 		{
@@ -288,7 +283,7 @@ Levels::Iter Levels::Find(int level)
 
 void ReadInt(char **configFile, int& level)
 {
-	char *token = COM_ParseExt(configFile, qfalse);
+	auto token = COM_ParseExt(configFile, qfalse);
 
 	if (!Q_stricmp(token, "="))
 	{
@@ -304,7 +299,7 @@ void ReadInt(char **configFile, int& level)
 
 void ReadString(char **configFile, std::string& str)
 {
-	char *token = COM_ParseExt(configFile, qfalse);
+	auto token = COM_ParseExt(configFile, qfalse);
 
 	if (!Q_stricmp(token, "="))
 	{
@@ -328,17 +323,17 @@ void ReadString(char **configFile, std::string& str)
 
 bool Levels::ReadFromConfig()
 {
-	fileHandle_t f   = 0;
-	int          len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_READ);
+	auto f   = 0;
+	auto len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_READ);
 	if (len < 0)
 	{
 		CreateDefaultLevels();
 		return true;
 	}
-	boost::shared_array<char> file;
+	std::unique_ptr<char[]> file;
 	try
 	{
-		file = boost::shared_array<char>(new char[len + 1]);
+		file = std::unique_ptr<char[]>(new char[len + 1]);
 	}
 	catch (...)
 	{
@@ -351,13 +346,13 @@ bool Levels::ReadFromConfig()
 	file[len] = 0;
 	trap_FS_FCloseFile(f);
 
-	char                     *token    = NULL;
-	bool                     levelOpen = false;
-	boost::shared_ptr<Level> tempLevel;
+	char                     *token    = nullptr;
+	auto levelOpen = false;
+	std::shared_ptr<Level> tempLevel;
 
 	levels_.clear();
 
-	char *file2 = file.get();
+	auto file2 = file.get();
 
 	token = COM_Parse(&file2);
 
@@ -397,7 +392,7 @@ bool Levels::ReadFromConfig()
 		{
 			try
 			{
-				tempLevel = boost::shared_ptr<Level>(new Level(0, "", "", ""));
+				tempLevel = std::make_shared<Level>(0, "", "", "");
 			}
 			catch (...)
 			{

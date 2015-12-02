@@ -184,7 +184,6 @@
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="custom_map_votes.cpp" />
     <ClCompile Include="database.cpp" />
-    <ClCompile Include="game.cpp" />
     <ClCompile Include="g_active.c" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />

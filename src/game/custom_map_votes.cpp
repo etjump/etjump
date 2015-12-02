@@ -3,7 +3,6 @@
 #include <fstream>
 #include "utilities.hpp"
 #include "../json/json.h"
-#include <boost/algorithm/string.hpp>
 
 CustomMapVotes::CustomMapVotes(MapStatistics *mapStats): _mapStats(mapStats)
 {

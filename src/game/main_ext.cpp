@@ -2,6 +2,7 @@
 #include "game.hpp"
 #include "session.hpp"
 #include "commands.hpp"
+#include "save.hpp"
 #include "levels.hpp"
 #include "database.hpp"
 #include "custom_map_votes.hpp"
@@ -12,7 +13,6 @@
 #include "timerun.hpp"
 #include "map_statistics.hpp"
 #include "tokens.hpp"
-#include <chrono>
 
 Game game;
 
@@ -117,6 +117,17 @@ void RunFrame(int levelTime)
 
 void OnGameInit()
 {
+	game.levels = std::make_shared<Levels>();
+	game.database = std::make_shared<Database>();
+	game.session = std::make_shared<Session>(game.database.get());
+	game.commands = std::make_shared<Commands>();
+	game.saves = std::make_shared<SaveSystem>(game.session.get());
+	game.mapStatistics = std::make_shared<MapStatistics>();
+	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
+	game.motd = std::make_shared<Motd>();
+	game.timerun = std::make_shared<Timerun>();
+	game.tokens = std::make_shared<Tokens>();
+
 	if (strlen(g_levelConfig.string))
 	{
 		if (!game.levels->ReadFromConfig())
@@ -168,14 +179,37 @@ void OnGameShutdown()
 	game.database->CloseDatabase();
 	game.mapStatistics->saveChanges();
 	game.tokens->reset();
+
+	G_LogPrintf("DEBUG: Destructing levels object.\n");
+	game.levels = nullptr;
+	G_LogPrintf("DEBUG: Destructing database object.\n");
+	game.database = nullptr;
+	G_LogPrintf("DEBUG: Destructing session object.\n");
+	game.session = nullptr;
+	G_LogPrintf("DEBUG: Destructing commands object.\n");
+	game.commands = nullptr;
+	G_LogPrintf("DEBUG: Destructing saves object.\n");
+	game.saves = nullptr;
+	G_LogPrintf("DEBUG: Destructing customMapVotes object.\n");
+	game.customMapVotes = nullptr;
+	G_LogPrintf("DEBUG: Destructing motd object.\n");
+	game.motd = nullptr;
+	G_LogPrintf("DEBUG: Destructing timerun object.\n");
+	game.timerun = nullptr;
+	G_LogPrintf("DEBUG: Destructing randomMapMode object.\n");
+	game.randomMapMode = nullptr;
+	G_LogPrintf("DEBUG: Destructing mapStatistics object.\n");
+	game.mapStatistics = nullptr;
+	G_LogPrintf("DEBUG: Destructing tokens object.\n");
+	game.tokens = nullptr;
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent)
 {
 	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
-	Arguments   argv    = GetArgs();
-	std::string command = (*argv)[0];
+	auto argv    = GetArgs();
+	auto command = (*argv)[0];
 	boost::to_lower(command);
 
 	if (ent->client->pers.connected != CON_CONNECTED)
@@ -201,8 +235,8 @@ qboolean OnClientCommand(gentity_t *ent)
 {
 	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
-	Arguments   argv    = GetArgs();
-	std::string command = (*argv)[0];
+	auto argv    = GetArgs();
+	auto command = (*argv)[0];
 	boost::to_lower(command);
 
 	if (command == "etguid")
@@ -224,8 +258,8 @@ qboolean OnConsoleCommand()
 {
 	G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
-	Arguments   argv    = GetArgs();
-	std::string command = (*argv)[0];
+	auto argv    = GetArgs();
+	auto command = (*argv)[0];
 	boost::to_lower(command);
 
 	if (command == "generatemotd")
