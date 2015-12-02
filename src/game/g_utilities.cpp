@@ -903,7 +903,8 @@ std::string interpolateNametags(std::string input)
 		if (split[i].length() == 0)
 		{
 			interpolated += "@";
-		} else
+		}
+		else
 		{
 			auto names = getNames(getMatchingIds(split[i]));
 			if (names.size() > 0)

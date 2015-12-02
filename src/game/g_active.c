@@ -371,7 +371,7 @@ void    G_TouchTriggers(gentity_t *ent)
 	for (i = 0 ; i < num ; i++)
 	{
 		hit = &g_entities[touch[i]];
-		
+
 		if (!hit->touch && !ent->touch)
 		{
 			continue;
@@ -1222,10 +1222,12 @@ void ClientThink_real(gentity_t *ent)
 	if (client->pers.noclipScale < 1)
 	{
 		client->pmext.noclipScale = 1;
-	} else if (client->pers.noclipScale > 20)
+	}
+	else if (client->pers.noclipScale > 20)
 	{
 		client->pmext.noclipScale = 20;
-	} else
+	}
+	else
 	{
 		client->pmext.noclipScale = client->pers.noclipScale;
 	}

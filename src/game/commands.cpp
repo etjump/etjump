@@ -41,7 +41,7 @@ const char PUTTEAM     = 'p';
 const char READCONFIG  = 'G';
 const char RENAME      = 'R';
 const char RESTART     = 'r';
-const char TOKENS = 'V';
+const char TOKENS      = 'V';
 const char SAVESYSTEM  = 'T';
 const char SETLEVEL    = 's';
 }
@@ -1799,7 +1799,7 @@ bool Spectate(gentity_t *ent, Arguments argv)
 	return qtrue;
 }
 
-bool createToken(gentity_t* ent, Arguments argv)
+bool createToken(gentity_t *ent, Arguments argv)
 {
 	if (ent)
 	{
@@ -1808,7 +1808,8 @@ bool createToken(gentity_t* ent, Arguments argv)
 			ChatPrintTo(ent, "^3usage: ^7!tokens create <easy (e)|medium (m)|hard (h)>");
 			return false;
 		}
-	} else
+	}
+	else
 	{
 		if (argv->size() != 6)
 		{
@@ -1887,7 +1888,7 @@ bool createToken(gentity_t* ent, Arguments argv)
 	return true;
 }
 
-bool moveToken(gentity_t* ent)
+bool moveToken(gentity_t *ent)
 {
 	if (!ent)
 	{
@@ -1900,17 +1901,17 @@ bool moveToken(gentity_t* ent)
 	auto result = game.tokens->moveNearestToken(coordinates);
 	if (!result.first)
 	{
-		ChatPrintTo(ent, "^3error: ^7" + result.second); 
+		ChatPrintTo(ent, "^3error: ^7" + result.second);
 		return false;
-	} 
+	}
 
 	ChatPrintTo(ent, "^3tokens: ^7" + result.second);
 
 	return true;
 }
 
-bool deleteToken(gentity_t* ent, Arguments argv)
-{ 
+bool deleteToken(gentity_t *ent, Arguments argv)
+{
 	if (!ent)
 	{
 		if (argv->size() != 4)
@@ -1961,11 +1962,13 @@ bool deleteToken(gentity_t* ent, Arguments argv)
 		try
 		{
 			num = std::stoi((*argv)[3]);
-		} catch (std::invalid_argument)
+		}
+		catch (std::invalid_argument)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7" + (*argv)[3] + " is not a number.");
 			return false;
-		} catch (std::out_of_range)
+		}
+		catch (std::out_of_range)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7" + (*argv)[3] + " is out of range (too large).");
 			return false;
@@ -1978,14 +1981,15 @@ bool deleteToken(gentity_t* ent, Arguments argv)
 		}
 
 		ChatPrintTo(ent, va("^3tokens: ^7deleting token %s #%d", (*argv)[2].c_str(), num));
-		 auto result = game.tokens->deleteToken(difficulty, num - 1);
+		auto result = game.tokens->deleteToken(difficulty, num - 1);
 
-		 if (!result.first) {
-			 ChatPrintTo(ent, "^3error: ^7" + result.second);
-			 return false;
-		 }
+		if (!result.first)
+		{
+			ChatPrintTo(ent, "^3error: ^7" + result.second);
+			return false;
+		}
 
-		 ChatPrintTo(ent, "^3tokens: ^7" + result.second);
+		ChatPrintTo(ent, "^3tokens: ^7" + result.second);
 
 		return true;
 	}
@@ -2006,40 +2010,41 @@ bool Tokens(gentity_t *ent, Arguments argv)
 		{
 			ChatPrintTo(ent, "^3usage: ^7check console for more information");
 			Utilities::toConsole(ent,
-				"^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new token\n"
-				"^7!tokens move ^9| Moves nearest token to your location\n"
-				"^7!tokens delete ^9| Deletes nearest token to your location\n"
-				"^7!tokens delete <easy (e)|medium (m)|hard (h)> <1-6> ^9| Deletes specified token\n"
-				);
-			return false;
-		}
-	} else
-	{
-		if (argv->size() < 4)
-		{
-			Utilities::toConsole(ent, 
-				"^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
-				"!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n"
-				);
+			                     "^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new token\n"
+			                     "^7!tokens move ^9| Moves nearest token to your location\n"
+			                     "^7!tokens delete ^9| Deletes nearest token to your location\n"
+			                     "^7!tokens delete <easy (e)|medium (m)|hard (h)> <1-6> ^9| Deletes specified token\n"
+			                     );
 			return false;
 		}
 	}
-	
+	else
+	{
+		if (argv->size() < 4)
+		{
+			Utilities::toConsole(ent,
+			                     "^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
+			                     "!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n"
+			                     );
+			return false;
+		}
+	}
+
 	if ((*argv)[1] == "create")
 	{
 		return createToken(ent, argv);
-	} 
-	
+	}
+
 	if ((*argv)[1] == "move")
 	{
 		return moveToken(ent);
-	} 
-	
+	}
+
 	if ((*argv)[1] == "delete")
 	{
 		return deleteToken(ent, argv);
 	}
-	
+
 	return true;
 }
 

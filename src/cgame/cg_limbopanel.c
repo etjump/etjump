@@ -191,10 +191,10 @@ MEDAL_PIC(6);
 		  188 + TEAM_COUNTER_SPACING, \
 		  TEAM_COUNTER_WIDTH - TEAM_COUNTER_BUTTON_DIFF + 20 - 2 * TEAM_COUNTER_SPACING, \
 		  44 - 2 * TEAM_COUNTER_SPACING },  \
-		{ number,                                                                    0,0, 0, 0, 0, 0, 0 },        \
-		NULL,                                                                        /* font		*/                  \
-		CG_LimboPanel_TeamButton_KeyDown,                                            /* keyDown	*/ \
-		NULL,                                                                        /* keyUp	*/                  \
+		{ number,                                                                        0,0, 0, 0, 0, 0, 0 },        \
+		NULL,                                                                            /* font		*/                  \
+		CG_LimboPanel_TeamButton_KeyDown,                                                /* keyDown	*/ \
+		NULL,                                                                            /* keyUp	*/                  \
 		CG_LimboPanel_RenderTeamButton,         \
 		NULL,                                   \
 	}

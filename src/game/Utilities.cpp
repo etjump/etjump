@@ -44,7 +44,9 @@ std::vector<int> Utilities::getSpectators(int clientNum)
 static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowed)
 {
 	auto current = cl->ps.weapon;
-	auto it = std::find_if(disallowed.begin(), disallowed.end(), [&current](int w) {return w == current; });
+	auto it      = std::find_if(disallowed.begin(), disallowed.end(), [&current](int w) {
+		return w == current;
+	});
 	if (it != disallowed.end())
 	{
 		if (cl->sess.sessionTeam == TEAM_AXIS)
@@ -52,16 +54,19 @@ static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowe
 			if (COM_BitCheck(cl->ps.weapons, WP_MP40))
 			{
 				cl->ps.weapon = WP_MP40;
-			} else
+			}
+			else
 			{
 				cl->ps.weapon = WP_LUGER;
 			}
-		} else
+		}
+		else
 		{
 			if (COM_BitCheck(cl->ps.weapons, WP_THOMPSON))
 			{
 				cl->ps.weapon = WP_THOMPSON;
-			} else
+			}
+			else
 			{
 				cl->ps.weapon = WP_COLT;
 			}
@@ -100,7 +105,7 @@ void Utilities::startRun(int clientNum)
 	};
 	RemovePlayerWeapons(clientNum, disallowed);
 	SelectCorrectWeapon(player->client, disallowed);
-	
+
 //	// Disable any weapons except kife
 //	player->client->ps.weapons[0] = 0;
 //	player->client->ps.weapons[1] = 0;
@@ -232,7 +237,7 @@ void Utilities::Log(const std::string& message)
 std::string Utilities::ReadFile(const std::string& filepath)
 {
 	fileHandle_t f;
-	auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_READ);
+	auto         len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_READ);
 	if (len == -1)
 	{
 		throw std::runtime_error("Could not open file for reading: " + filepath);
@@ -248,7 +253,7 @@ std::string Utilities::ReadFile(const std::string& filepath)
 void Utilities::WriteFile(const std::string& filepath, const std::string& content)
 {
 	fileHandle_t f;
-	auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_WRITE);
+	auto         len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_WRITE);
 	if (len == -1)
 	{
 		throw std::runtime_error("Could not open file for writing: " + filepath);

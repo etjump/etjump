@@ -32,7 +32,7 @@ void Printer::LogPrintln(const std::string &message)
 void Printer::SendConsoleMessage(int clientNum, std::string message)
 {
 	std::string partialMessage;
-	const auto BYTES_PER_PACKET = 998;
+	const auto  BYTES_PER_PACKET = 998;
 	while (message.length() > BYTES_PER_PACKET)
 	{
 		partialMessage = message.substr(0, BYTES_PER_PACKET);

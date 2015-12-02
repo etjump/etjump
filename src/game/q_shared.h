@@ -1544,7 +1544,7 @@ typedef enum
 	ET_PORTAL_BLUE,         //Portal 1
 	ET_PORTAL_RED,          //Portal 2
 	//Feen: PGM - END Entity Types
-	
+
 	// Tokens
 	ET_TOKEN_EASY,
 	ET_TOKEN_MEDIUM,

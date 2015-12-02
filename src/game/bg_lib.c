@@ -97,7 +97,8 @@ int n, swaptype;
 		static char *
 		med3(a, b, c, cmp)
 		char *a, *b, *c;
-	} }
+	}
+}
 cmp_t *cmp;
 {
 	return cmp(a, b) < 0 ?

@@ -117,16 +117,16 @@ void RunFrame(int levelTime)
 
 void OnGameInit()
 {
-	game.levels = std::make_shared<Levels>();
-	game.database = std::make_shared<Database>();
-	game.session = std::make_shared<Session>(game.database.get());
-	game.commands = std::make_shared<Commands>();
-	game.saves = std::make_shared<SaveSystem>(game.session.get());
-	game.mapStatistics = std::make_shared<MapStatistics>();
+	game.levels         = std::make_shared<Levels>();
+	game.database       = std::make_shared<Database>();
+	game.session        = std::make_shared<Session>(game.database.get());
+	game.commands       = std::make_shared<Commands>();
+	game.saves          = std::make_shared<SaveSystem>(game.session.get());
+	game.mapStatistics  = std::make_shared<MapStatistics>();
 	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
-	game.motd = std::make_shared<Motd>();
-	game.timerun = std::make_shared<Timerun>();
-	game.tokens = std::make_shared<Tokens>();
+	game.motd           = std::make_shared<Motd>();
+	game.timerun        = std::make_shared<Timerun>();
+	game.tokens         = std::make_shared<Tokens>();
 
 	if (strlen(g_levelConfig.string))
 	{
@@ -156,14 +156,14 @@ void OnGameInit()
 	game.customMapVotes->Load();
 	game.motd->Initialize();
 	game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
-	
+
 	if (g_tokensMode.integer)
 	{
 		// Utilities::WriteFile handles the correct path (etjump/...)
 		auto path = std::string(g_tokensPath.string) + "/" + std::string(level.rawmapname) + ".json";
 		game.tokens->loadTokens(path);
 	}
-	
+
 
 	// this has to be initialized here
 	game.randomMapMode = std::shared_ptr<RandomMapMode>(new RandomMapMode(level.time,
@@ -295,9 +295,9 @@ const char *GetRandomMap()
 
 const char *G_MatchOneMap(const char *arg)
 {
-	auto currentMaps = game.mapStatistics->getCurrentMaps();
+	auto                     currentMaps = game.mapStatistics->getCurrentMaps();
 	std::vector<std::string> matchingMaps;
-	std::string mapName = arg ? arg : "";
+	std::string              mapName = arg ? arg : "";
 	boost::algorithm::to_lower(mapName);
 
 	for (auto & map : *(currentMaps))
@@ -430,9 +430,9 @@ bool allTokensCollected(gentity_t *ent)
 {
 	auto tokenCounts = game.tokens->getTokenCounts();
 
-	auto easyCount = 0;
+	auto easyCount   = 0;
 	auto mediumCount = 0;
-	auto hardCount = 0;
+	auto hardCount   = 0;
 	for (auto i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
 	{
 		if (ent->client->pers.collectedEasyTokens[i])
@@ -444,7 +444,7 @@ bool allTokensCollected(gentity_t *ent)
 		{
 			++mediumCount;
 		}
-		
+
 		if (ent->client->pers.collectedHardTokens[i])
 		{
 			++hardCount;

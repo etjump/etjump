@@ -34,7 +34,7 @@ std::string millisToString(int millis)
 std::string dateToFormat(int date)
 {
 	char buffer[128] = "\0";
-	auto t = static_cast<time_t>(date);
+	auto t           = static_cast<time_t>(date);
 	strftime(buffer, sizeof(buffer), "%d.%m.%Y", localtime(&t));
 	return buffer;
 }
@@ -232,17 +232,17 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 	if (run == end(_recordsByName))
 	{
 		Printer::SendConsoleMessage(clientNum,
-			"^3error: ^7no records found by name: " + runName);
+		                            "^3error: ^7no records found by name: " + runName);
 		return;
 	}
 
-	const auto self = _players[clientNum].get();
-	auto foundSelf = false;
+	const auto self      = _players[clientNum].get();
+	auto       foundSelf = false;
 
 	std::string buffer =
-		"^g=============================================================\n"
-		" ^2Top 50 records for map: ^7" + _currentMap + "\n"
-		"^g=============================================================\n";
+	    "^g=============================================================\n"
+	    " ^2Top 50 records for map: ^7" + _currentMap + "\n"
+	                                                    "^g=============================================================\n";
 
 	auto rank = 1;
 	buffer += " ^2Run: ^7" + run->first + "\n\n";
@@ -254,13 +254,15 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 		{
 			if (record->userId == self->userId)
 			{
-				buffer += (boost::format("^7 %5s   ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+				buffer   += (boost::format("^7 %5s   ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
 				foundSelf = true;
-			} else
+			}
+			else
 			{
 				buffer += (boost::format("^7 %5s   ^7 %s   %s\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
 			}
-		} else
+		}
+		else
 		{
 			if (foundSelf)
 			{
@@ -269,7 +271,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 
 			if (record->userId == self->userId)
 			{
-				buffer += (boost::format("^7 %4s    ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+				buffer   += (boost::format("^7 %4s    ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
 				foundSelf = true;
 			}
 		}
@@ -287,10 +289,10 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 
 void Timerun::printCurrentMapRecords(int clientNum)
 {
-	std::string buffer = 
-		"^g=============================================================\n"
-		" ^2Top records for map: ^7" + _currentMap + "\n"
-		"^g=============================================================\n";
+	std::string buffer =
+	    "^g=============================================================\n"
+	    " ^2Top records for map: ^7" + _currentMap + "\n"
+	                                                 "^g=============================================================\n";
 
 	for (const auto&run : _recordsByName)
 	{
@@ -600,7 +602,7 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
 		}
 
 		printRecordsForRun(clientNum, runName);
-		return;		
+		return;
 	}
 	Printer::SendConsoleMessage(clientNum, "This feature is not yet implemented.");
 }

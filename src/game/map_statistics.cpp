@@ -45,7 +45,7 @@ std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed
 	return std::move(mostPlayed);
 }
 
-const std::vector<std::string>* MapStatistics::getCurrentMaps()
+const std::vector<std::string> *MapStatistics::getCurrentMaps()
 {
 	return &_currentMaps;
 }
@@ -383,7 +383,7 @@ bool MapStatistics::loadMaps()
 		mi.votesPassed   = sqlite3_column_int(stmt, 4);
 		mi.timesPlayed   = sqlite3_column_int(stmt, 5);
 		mi.lastPlayed    = sqlite3_column_int(stmt, 6);
-		mi.isOnServer = false;
+		mi.isOnServer    = false;
 
 		_maps.push_back(mi);
 		rc = sqlite3_step(stmt);

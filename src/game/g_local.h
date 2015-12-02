@@ -850,7 +850,7 @@ typedef struct
 #define MAX_TOKENS_PER_DIFFICULTY 6
 	qboolean collectedEasyTokens[MAX_TOKENS_PER_DIFFICULTY];
 	qboolean collectedMediumTokens[MAX_TOKENS_PER_DIFFICULTY];
-	qboolean collectedHardTokens[MAX_TOKENS_PER_DIFFICULTY];	
+	qboolean collectedHardTokens[MAX_TOKENS_PER_DIFFICULTY];
 	int tokenCollectionStartTime;
 
 	ipFilter_t complaintips[MAX_COMPLAINTIPS];

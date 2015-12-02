@@ -3205,12 +3205,12 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale)
 		}
 		s = va("%i. %s", ownerDraw - UI_REDTEAM1 + 1, text);
 		break;
-    /*		case UI_NETSOURCE:
-                if (ui_netSource.integer < 0 || ui_netSource.integer > uiInfo.numJoinGameTypes) {
-                    ui_netSource.integer = 0;
-                }
-                s = va("Source: %s", netSources[ui_netSource.integer]);
-                break;*/
+	/*		case UI_NETSOURCE:
+	            if (ui_netSource.integer < 0 || ui_netSource.integer > uiInfo.numJoinGameTypes) {
+	                ui_netSource.integer = 0;
+	            }
+	            s = va("Source: %s", netSources[ui_netSource.integer]);
+	            break;*/
 	case UI_NETFILTER:
 		if (ui_serverFilterType.integer < 0 || ui_serverFilterType.integer > numServerFilters)
 		{
@@ -3538,9 +3538,9 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 
 	switch (ownerDraw)
 	{
-    /*		case UI_TEAMFLAG:
-                UI_DrawFlag( &rect );
-                break;*/
+	/*		case UI_TEAMFLAG:
+	            UI_DrawFlag( &rect );
+	            break;*/
 	case UI_HANDICAP:
 		UI_DrawHandicap(&rect, scale, color, textStyle);
 		break;
@@ -3570,21 +3570,21 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	case UI_GAMETYPE:
 		UI_DrawGameType(&rect, scale, color, textStyle);
 		break;
-    /*		case UI_NETGAMETYPE:
-                UI_DrawNetGameType(&rect, scale, color, textStyle);
-                break;*/
-    /*		case UI_JOINGAMETYPE:
-                UI_DrawJoinGameType(&rect, scale, color, textStyle);
-                break;*/
+	/*		case UI_NETGAMETYPE:
+	            UI_DrawNetGameType(&rect, scale, color, textStyle);
+	            break;*/
+	/*		case UI_JOINGAMETYPE:
+	            UI_DrawJoinGameType(&rect, scale, color, textStyle);
+	            break;*/
 	case UI_MAPPREVIEW:
 		UI_DrawMapPreview(&rect, scale, color, qtrue);
 		break;
 	case UI_NETMAPPREVIEW:
 		UI_DrawNetMapPreview(&rect, scale, color, qtrue);
 		break;
-    /*		case UI_MAP_TIMETOBEAT:
-                UI_DrawMapTimeToBeat(&rect, scale, color, textStyle);
-                break;*/
+	/*		case UI_MAP_TIMETOBEAT:
+	            UI_DrawMapTimeToBeat(&rect, scale, color, textStyle);
+	            break;*/
 	case UI_MAPCINEMATIC:
 		UI_DrawMapCinematic(&rect, scale, color, qfalse);
 		break;
@@ -3628,9 +3628,9 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	case UI_MB_OBJECTIVES:
 		UI_DrawMissionBriefingObjectives(&rect, scale, color, text_x, text_y, textStyle, align);
 		break;
-    /*		case UI_SKILL:
-                UI_DrawSkill(&rect, scale, color, textStyle);
-                break;*/
+	/*		case UI_SKILL:
+	            UI_DrawSkill(&rect, scale, color, textStyle);
+	            break;*/
 	case UI_BLUETEAMNAME:
 		UI_DrawTeamName(&rect, scale, color, qtrue, textStyle);
 		break;
@@ -3651,9 +3651,9 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	case UI_REDTEAM5:
 		UI_DrawTeamMember(&rect, scale, color, qfalse, ownerDraw - UI_REDTEAM1 + 1, textStyle);
 		break;
-    /*		case UI_NETSOURCE:
-                UI_DrawNetSource(&rect, scale, color, textStyle);
-                break;*/
+	/*		case UI_NETSOURCE:
+	            UI_DrawNetSource(&rect, scale, color, textStyle);
+	            break;*/
 	/*case UI_NETMAPPREVIEW:
 	    UI_DrawNetMapPreview(&rect, scale, color);
 	    break;
@@ -3663,21 +3663,21 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	case UI_NETFILTER:
 		UI_DrawNetFilter(&rect, scale, color, textStyle);
 		break;
-    /*		case UI_TIER:
-                UI_DrawTier(&rect, scale, color, textStyle);
-                break;*/
-    /*		case UI_OPPONENTMODEL:
-                UI_DrawOpponent(&rect);
-                break;*/
-    /*		case UI_TIERMAP1:
-                UI_DrawTierMap(&rect, 0);
-                break;
-            case UI_TIERMAP2:
-                UI_DrawTierMap(&rect, 1);
-                break;
-            case UI_TIERMAP3:
-                UI_DrawTierMap(&rect, 2);
-                break;*/
+	/*		case UI_TIER:
+	            UI_DrawTier(&rect, scale, color, textStyle);
+	            break;*/
+	/*		case UI_OPPONENTMODEL:
+	            UI_DrawOpponent(&rect);
+	            break;*/
+	/*		case UI_TIERMAP1:
+	            UI_DrawTierMap(&rect, 0);
+	            break;
+	        case UI_TIERMAP2:
+	            UI_DrawTierMap(&rect, 1);
+	            break;
+	        case UI_TIERMAP3:
+	            UI_DrawTierMap(&rect, 2);
+	            break;*/
 	case UI_PLAYERLOGO:
 		UI_DrawPlayerLogo(&rect, color);
 		break;
@@ -3696,12 +3696,12 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	case UI_OPPONENTLOGO_NAME:
 		UI_DrawOpponentLogoName(&rect, color);
 		break;
-    /*		case UI_TIER_MAPNAME:
-                UI_DrawTierMapName(&rect, scale, color, textStyle);
-                break;
-            case UI_TIER_GAMETYPE:
-                UI_DrawTierGameType(&rect, scale, color, textStyle);
-                break;*/
+	/*		case UI_TIER_MAPNAME:
+	            UI_DrawTierMapName(&rect, scale, color, textStyle);
+	            break;
+	        case UI_TIER_GAMETYPE:
+	            UI_DrawTierGameType(&rect, scale, color, textStyle);
+	            break;*/
 	case UI_ALLMAPS_SELECTION:
 		UI_DrawAllMapsSelection(&rect, scale, color, textStyle, qtrue);
 		break;
@@ -3714,9 +3714,9 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x, float
 	case UI_BOTNAME:
 		UI_DrawBotName(&rect, scale, color, textStyle);
 		break;
-    /*		case UI_BOTSKILL:
-                UI_DrawBotSkill(&rect, scale, color, textStyle);
-                break;*/
+	/*		case UI_BOTSKILL:
+	            UI_DrawBotSkill(&rect, scale, color, textStyle);
+	            break;*/
 	case UI_REDBLUE:
 		UI_DrawRedBlue(&rect, scale, color, textStyle);
 		break;
@@ -4467,9 +4467,9 @@ static qboolean UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, 
 	case UI_GAMETYPE:
 		return UI_GameType_HandleKey(flags, special, key, qtrue);
 		break;
-    /*    case UI_NETGAMETYPE:
-          return UI_NetGameType_HandleKey(flags, special, key);
-          break;*/
+	/*    case UI_NETGAMETYPE:
+	      return UI_NetGameType_HandleKey(flags, special, key);
+	      break;*/
 	/*case UI_JOINGAMETYPE:
 	  return UI_JoinGameType_HandleKey(flags, special, key);
 	  break;*/
@@ -4496,9 +4496,9 @@ static qboolean UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, 
 	case UI_REDTEAM5:
 		UI_TeamMember_HandleKey(flags, special, key, qfalse, ownerDraw - UI_REDTEAM1 + 1);
 		break;
-    /*		case UI_NETSOURCE:
-          UI_NetSource_HandleKey(flags, special, key);
-                break;*/
+	/*		case UI_NETSOURCE:
+	      UI_NetSource_HandleKey(flags, special, key);
+	            break;*/
 	case UI_NETFILTER:
 		UI_NetFilter_HandleKey(flags, special, key);
 		break;

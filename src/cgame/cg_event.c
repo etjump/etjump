@@ -2456,14 +2456,14 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		}
 		break;
 
-    /*	case EV_FLAMEBARREL_BOUNCE:
-            DEBUGNAME("EV_FLAMEBARREL_BOUNCE");
-            if ( rand() & 1 ) {
-                trap_S_StartSound (NULL, es->number, CHAN_AUTO, cgs.media.fbarrelexp1 );
-            } else {
-                trap_S_StartSound (NULL, es->number, CHAN_AUTO,  cgs.media.fbarrelexp2 );
-            }
-            break;*/
+	/*	case EV_FLAMEBARREL_BOUNCE:
+	        DEBUGNAME("EV_FLAMEBARREL_BOUNCE");
+	        if ( rand() & 1 ) {
+	            trap_S_StartSound (NULL, es->number, CHAN_AUTO, cgs.media.fbarrelexp1 );
+	        } else {
+	            trap_S_StartSound (NULL, es->number, CHAN_AUTO,  cgs.media.fbarrelexp2 );
+	        }
+	        break;*/
 
 	case EV_RAILTRAIL:
 		CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2, es->pos.trBase, es->dmgFlags);      //----(SA)	added 'type' field

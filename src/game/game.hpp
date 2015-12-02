@@ -16,7 +16,9 @@ class Tokens;
 
 struct Game
 {
-	Game() {}
+	Game()
+	{
+	}
 
 	std::shared_ptr<Levels> levels;
 	std::shared_ptr<Database> database;

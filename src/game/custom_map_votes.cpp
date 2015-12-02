@@ -4,7 +4,7 @@
 #include "utilities.hpp"
 #include "../json/json.h"
 
-CustomMapVotes::CustomMapVotes(MapStatistics *mapStats): _mapStats(mapStats)
+CustomMapVotes::CustomMapVotes(MapStatistics *mapStats) : _mapStats(mapStats)
 {
 }
 
@@ -68,7 +68,8 @@ bool CustomMapVotes::Load()
 				if (std::binary_search(_currentMapsOnServer->begin(), _currentMapsOnServer->end(), mapName))
 				{
 					customMapVotes_[curr].mapsOnServer.push_back(mapName);
-				} else
+				}
+				else
 				{
 					customMapVotes_[curr].otherMaps.push_back(mapName);
 				}
@@ -178,7 +179,7 @@ const std::vector<std::string> *CustomMapVotes::ListInfo(const std::string& type
 				if (count % 3)
 				{
 					lines.push_back("\n");
-				} 
+				}
 			}
 			if (lines[lines.size() - 1] != "\n")
 			{

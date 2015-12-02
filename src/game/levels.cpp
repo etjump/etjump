@@ -346,8 +346,8 @@ bool Levels::ReadFromConfig()
 	file[len] = 0;
 	trap_FS_FCloseFile(f);
 
-	char                     *token    = nullptr;
-	auto levelOpen = false;
+	char                   *token    = nullptr;
+	auto                   levelOpen = false;
 	std::shared_ptr<Level> tempLevel;
 
 	levels_.clear();

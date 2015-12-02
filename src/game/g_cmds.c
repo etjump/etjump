@@ -2477,7 +2477,7 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 	{
 		char         mapfile[MAX_QPATH];
 		fileHandle_t f;
-		const char *map = NULL;
+		const char   *map = NULL;
 
 		if (arg2[0] == '\0' || trap_Argc() == 1)
 		{

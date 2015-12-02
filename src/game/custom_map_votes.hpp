@@ -40,9 +40,9 @@ public:
 	const std::vector<std::string> *ListInfo(const std::string& name);
 	void GenerateVotesFile();
 private:
-	std::vector<MapType> customMapVotes_;
+	std::vector<MapType>           customMapVotes_;
 	const std::vector<std::string> *_currentMapsOnServer;
-	MapStatistics* _mapStats;
+	MapStatistics                  *_mapStats;
 };
 
 #endif

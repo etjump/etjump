@@ -1099,10 +1099,10 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		SnapVector(ent->s.pos.trDelta);             // save net bandwidth
 		break;
 
-    /*	case WP_SPEARGUN:
-        case WP_SPEARGUN_CO2:
-            fire_speargun(ent, ent->s.origin, dir);
-            break;*/
+	/*	case WP_SPEARGUN:
+	    case WP_SPEARGUN_CO2:
+	        fire_speargun(ent, ent->s.origin, dir);
+	        break;*/
 
 	case WP_MAPMORTAR:
 		AimAtTarget(ent);   // store in ent->s.origin2 the direction/force needed to pass through the target

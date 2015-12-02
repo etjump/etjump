@@ -518,10 +518,10 @@ cvarTable_t gameCvarTable[] =
 	{ &g_chatOptions,               "g_chatOptions",               "1",                                                      CVAR_ARCHIVE },
 	//end of randommap mode
 
-		// tokens
-	{&g_tokensMode, "g_tokensMode", "1", CVAR_ARCHIVE | CVAR_LATCH},
-	{&g_tokensPath, "g_tokensPath", "tokens", CVAR_ARCHIVE | CVAR_LATCH },
-		// end of tokens
+	// tokens
+	{ &g_tokensMode,                "g_tokensMode",                "1",                                                      CVAR_ARCHIVE | CVAR_LATCH },
+	{ &g_tokensPath,                "g_tokensPath",                "tokens",                                                 CVAR_ARCHIVE | CVAR_LATCH },
+	// end of tokens
 };
 
 // bk001129 - made static to avoid aliasing

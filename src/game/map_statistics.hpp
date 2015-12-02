@@ -49,7 +49,7 @@ public:
 	const std::vector<std::string> *getCurrentMaps();
 private:
 	std::vector<MapInformation> _maps;
-	std::vector<std::string> _currentMaps;
+	std::vector<std::string>    _currentMaps;
 	int                         _previousLevelTime;
 	// How many milliseconds have elapsed with atleast 1 player on team
 	int _currentMillisecondsPlayed;

@@ -770,10 +770,12 @@ void CG_RegisterCvars(void)
 	if (cg_noclipScale.value < 1)
 	{
 		cg.pmext.noclipScale = 1;
-	} else if (cg_noclipScale.value > 20)
+	}
+	else if (cg_noclipScale.value > 20)
 	{
 		cg.pmext.noclipScale = 20;
-	} else
+	}
+	else
 	{
 		cg.pmext.noclipScale = cg_noclipScale.value;
 	}
@@ -890,10 +892,12 @@ void CG_UpdateCvars(void)
 					if (cg_noclipScale.value < 1)
 					{
 						cg.pmext.noclipScale = 1;
-					} else if (cg_noclipScale.value > 20)
+					}
+					else if (cg_noclipScale.value > 20)
 					{
 						cg.pmext.noclipScale = 20;
-					} else
+					}
+					else
 					{
 						cg.pmext.noclipScale = cg_noclipScale.value;
 					}

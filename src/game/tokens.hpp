@@ -59,7 +59,7 @@ public:
 	void reset();
 	std::array<int, 3> getTokenCounts() const;
 private:
-	std::string _filepath;
+	std::string                              _filepath;
 	std::array<Token, TOKENS_PER_DIFFICULTY> _easyTokens;
 	std::array<Token, TOKENS_PER_DIFFICULTY> _mediumTokens;
 	std::array<Token, TOKENS_PER_DIFFICULTY> _hardTokens;

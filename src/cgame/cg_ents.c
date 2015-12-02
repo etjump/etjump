@@ -2857,14 +2857,14 @@ static vec4_t clrOrange = { 128, 128, 0, 255 };
 static void CG_TokenMarker(centity_t *cent, int difficulty)
 {
 	static int nextPrintTime = 0;
-	int i, k;
-	float quadSize = 16;
-	vec3_t point;
-	vec3_t mins = { -quadSize, -quadSize, 0 };
-	vec3_t maxs = { quadSize, quadSize, 0 };
-	float extx, exty, extz;
+	int        i, k;
+	float      quadSize = 16;
+	vec3_t     point;
+	vec3_t     mins = { -quadSize, -quadSize, 0 };
+	vec3_t     maxs = { quadSize, quadSize, 0 };
+	float      extx, exty, extz;
 	polyVert_t verts[4];
-	vec3_t corners[8];
+	vec3_t     corners[8];
 	VectorCopy(cent->lerpOrigin, point);
 	vec4_t color;
 
@@ -2919,7 +2919,8 @@ static void CG_TokenMarker(centity_t *cent, int difficulty)
 	VectorAdd(corners[0], tmpx2, corners[0]);
 
 	vec3_t tmpz = { 0.0, 0.0, -extz };
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++)
+	{
 		VectorCopy(corners[i], corners[i + 4]);
 		VectorAdd(corners[i], tmpz, corners[i]);
 	}
@@ -3011,14 +3012,14 @@ static void CG_ProcessEntity(centity_t *cent)
 	case ET_CONSTRUCTIBLE:
 		CG_Constructible(cent);
 		break;
-    /*	case ET_WAYPOINT:
-        // TAT - 8/29/2002 - draw the botgoal indicator the same way you draw the waypoint flag
-        case ET_BOTGOAL_INDICATOR:
-            CG_Waypoint( cent );
-            break;*/
-    /*	case ET_CONSTRUCTIBLE_MARKER:
-            CG_ConstructibleMarker( cent );
-            break;*/
+	/*	case ET_WAYPOINT:
+	    // TAT - 8/29/2002 - draw the botgoal indicator the same way you draw the waypoint flag
+	    case ET_BOTGOAL_INDICATOR:
+	        CG_Waypoint( cent );
+	        break;*/
+	/*	case ET_CONSTRUCTIBLE_MARKER:
+	        CG_ConstructibleMarker( cent );
+	        break;*/
 	case ET_TRAP:
 		CG_Trap(cent);
 		break;

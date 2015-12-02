@@ -32,7 +32,7 @@ std::string toString(Tokens::Difficulty difficulty)
 	case Tokens::Medium:
 		return "medium";
 	case Tokens::Hard:
-		return "hard";		
+		return "hard";
 	}
 	return "unknown";
 }
@@ -40,10 +40,10 @@ std::string toString(Tokens::Difficulty difficulty)
 
 Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 {
-	auto idx = 0;
-	auto tokenNum = 0;
-	Token *token = nullptr;
-	auto difficulty = Easy;
+	auto  idx             = 0;
+	auto  tokenNum        = 0;
+	Token *token          = nullptr;
+	auto  difficulty      = Easy;
 	float nearestDistance = 1 << 20;
 	for (auto&t : _easyTokens)
 	{
@@ -53,9 +53,9 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 			if (newDistance < nearestDistance)
 			{
 				nearestDistance = newDistance;
-				token = &t;
-				tokenNum = idx + 1;
-				difficulty = Easy;
+				token           = &t;
+				tokenNum        = idx + 1;
+				difficulty      = Easy;
 			}
 		}
 		++idx;
@@ -70,9 +70,9 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 			if (newDistance < nearestDistance)
 			{
 				nearestDistance = newDistance;
-				token = &t;
-				tokenNum = idx + 1;
-				difficulty = Medium;
+				token           = &t;
+				tokenNum        = idx + 1;
+				difficulty      = Medium;
 			}
 		}
 		++idx;
@@ -87,15 +87,15 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 			if (newDistance < nearestDistance)
 			{
 				nearestDistance = newDistance;
-				token = &t;
-				tokenNum = idx + 1;
-				difficulty = Hard;
+				token           = &t;
+				tokenNum        = idx + 1;
+				difficulty      = Hard;
 			}
 		}
 		++idx;
 	}
 
-	return NearestToken{ tokenNum, token, nearestDistance, difficulty };
+	return NearestToken { tokenNum, token, nearestDistance, difficulty };
 }
 
 
@@ -150,7 +150,7 @@ std::pair<bool, std::string> Tokens::deleteNearestToken(std::array<float, 3> coo
 std::pair<bool, std::string> Tokens::moveNearestToken(std::array<float, 3> coordinates)
 {
 	auto nearestToken = findNearestToken(coordinates);
-	
+
 	if (!nearestToken.token)
 	{
 		return std::make_pair(false, "no tokens in the map.");
@@ -181,7 +181,7 @@ std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::arr
 	}
 
 	Token *nextFreeToken = nullptr;
-	auto idx = 0;
+	auto  idx            = 0;
 	for (auto & token : *tokens)
 	{
 		if (!token.isActive)
@@ -197,10 +197,10 @@ std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::arr
 		return std::make_pair(false, "no free tokens left for the difficulty.");
 	}
 
-	nextFreeToken->isActive = true;
-	nextFreeToken->name = "";
+	nextFreeToken->isActive    = true;
+	nextFreeToken->name        = "";
 	nextFreeToken->coordinates = coordinates;
-	nextFreeToken->data->idx = idx;
+	nextFreeToken->data->idx   = idx;
 
 	createEntity(*nextFreeToken, difficulty);
 
@@ -219,13 +219,14 @@ bool Tokens::loadTokens(const std::string& filepath)
 	try
 	{
 		content = Utilities::ReadFile(filepath);
-	} catch (std::runtime_error& e)
+	}
+	catch (std::runtime_error& e)
 	{
 		Utilities::Logln(std::string("Tokens: Could not read file: ") + e.what());
 		return false;
 	}
-	
-	Json::Value root;
+
+	Json::Value  root;
 	Json::Reader reader;
 
 	if (!reader.parse(content, root))
@@ -237,9 +238,9 @@ bool Tokens::loadTokens(const std::string& filepath)
 
 	try
 	{
-		auto easyTokens = root["easyTokens"];
+		auto easyTokens   = root["easyTokens"];
 		auto mediumTokens = root["mediumTokens"];
-		auto hardTokens = root["hardTokens"];
+		auto hardTokens   = root["hardTokens"];
 
 		auto idx = 0;
 		for (auto&easyToken:easyTokens)
@@ -264,7 +265,8 @@ bool Tokens::loadTokens(const std::string& filepath)
 			_hardTokens[idx].data->idx = idx;
 			++idx;
 		}
-	} catch (std::runtime_error& e)
+	}
+	catch (std::runtime_error& e)
 	{
 		Utilities::Logln(std::string("Tokens: Could not parse configuration from file \"" + filepath + "\": ") + e.what());
 		return false;
@@ -281,89 +283,89 @@ bool Tokens::loadTokens(const std::string& filepath)
 bool allTokensCollected(gentity_t *ent);
 void Tokens::createEntity(Token& token, Difficulty difficulty)
 {
-	token.entity = G_Spawn();
+	token.entity                   = G_Spawn();
 	token.entity->tokenInformation = token.data.get();
 	Q_strncpyz(token.data->name, token.name.c_str(), sizeof(token.data->name));
 	token.data->difficulty = difficulty;
-	
+
 	switch (difficulty)
 	{
 	case Easy:
 		token.entity->classname = "token_easy";
-		token.entity->s.eType = ET_TOKEN_EASY;
+		token.entity->s.eType   = ET_TOKEN_EASY;
 		break;
 	case Medium:
 		token.entity->classname = "token_medium";
-		token.entity->s.eType = ET_TOKEN_MEDIUM;
+		token.entity->s.eType   = ET_TOKEN_MEDIUM;
 		break;
 	case Hard:
 		token.entity->classname = "token_hard";
-		token.entity->s.eType = ET_TOKEN_HARD;
+		token.entity->s.eType   = ET_TOKEN_HARD;
 		break;
 	}
 
 	token.entity->think = [](gentity_t *self)
-	{
-		vec3_t mins = { 0, 0, 0 };
-		vec3_t maxs = { 0, 0, 0 };
-		vec3_t range = { 16, 16, 16 };
-		VectorSubtract(self->r.currentOrigin, range, mins);
-		VectorAdd(self->r.currentOrigin, range, maxs);
+						  {
+							  vec3_t mins  = { 0, 0, 0 };
+							  vec3_t maxs  = { 0, 0, 0 };
+							  vec3_t range = { 16, 16, 16 };
+							  VectorSubtract(self->r.currentOrigin, range, mins);
+							  VectorAdd(self->r.currentOrigin, range, maxs);
 
-		int entityList[MAX_GENTITIES];
-		auto count = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
-		for (auto i = 0; i < count; ++i)
-		{
-			auto ent = &g_entities[entityList[i]];
+							  int  entityList[MAX_GENTITIES];
+							  auto count = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
+							  for (auto i = 0; i < count; ++i)
+							  {
+								  auto ent = &g_entities[entityList[i]];
 
-			if (!ent->client)
-			{
-				continue;
-			}
+								  if (!ent->client)
+								  {
+									  continue;
+								  }
 
-			const char *difficulty = NULL;
-			qboolean *collected = NULL;
-			switch (self->tokenInformation->difficulty)
-			{
-			case Easy:
-				difficulty = "^2easy";
-				collected = &ent->client->pers.collectedEasyTokens[self->tokenInformation->idx];
-				break;
-			case Medium:
-				difficulty = "^3medium";
-				collected = &ent->client->pers.collectedMediumTokens[self->tokenInformation->idx];
-				break;
-			case Hard:
-				difficulty = "^1hard";
-				collected = &ent->client->pers.collectedHardTokens[self->tokenInformation->idx];
-				break;
-			default:
-				G_Error("Visited unknown difficulty.");
-			}
+								  const char *difficulty = NULL;
+								  qboolean   *collected  = NULL;
+								  switch (self->tokenInformation->difficulty)
+								  {
+								  case Easy:
+									  difficulty = "^2easy";
+									  collected  = &ent->client->pers.collectedEasyTokens[self->tokenInformation->idx];
+									  break;
+								  case Medium:
+									  difficulty = "^3medium";
+									  collected  = &ent->client->pers.collectedMediumTokens[self->tokenInformation->idx];
+									  break;
+								  case Hard:
+									  difficulty = "^1hard";
+									  collected  = &ent->client->pers.collectedHardTokens[self->tokenInformation->idx];
+									  break;
+								  default:
+									  G_Error("Visited unknown difficulty.");
+								  }
 
-			if (*collected)
-			{
-				continue;
-			}
+								  if (*collected)
+								  {
+									  continue;
+								  }
 
-			*collected = qtrue;
-			C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, self->tokenInformation->idx + 1));
+								  *collected = qtrue;
+								  C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, self->tokenInformation->idx + 1));
 
-			if (allTokensCollected(ent))
-			{
-				auto millis = level.time - ent->client->pers.tokenCollectionStartTime;
-				int minutes, seconds;
-				minutes = millis / 60000;
-				millis -= minutes * 60000;
-				seconds = millis / 1000;
-				millis -= seconds * 1000;
+								  if (allTokensCollected(ent))
+								  {
+									  auto millis = level.time - ent->client->pers.tokenCollectionStartTime;
+									  int  minutes, seconds;
+									  minutes = millis / 60000;
+									  millis -= minutes * 60000;
+									  seconds = millis / 1000;
+									  millis -= seconds * 1000;
 
-				C_CPMAll(va("%s ^7collected all tokens in %02d:%02d:%03d", ent->client->pers.netname, minutes, seconds, millis));
-			}
-		}
+									  C_CPMAll(va("%s ^7collected all tokens in %02d:%02d:%03d", ent->client->pers.netname, minutes, seconds, millis));
+								  }
+							  }
 
-		self->nextthink = level.time + FRAMETIME;
-	};
+							  self->nextthink = level.time + FRAMETIME;
+						  };
 
 	token.entity->nextthink = level.time + FRAMETIME;
 	G_SetOrigin(token.entity, token.coordinates.data());
@@ -447,9 +449,9 @@ void Tokens::createEntities()
 bool Tokens::saveTokens(const std::string& filepath)
 {
 	Json::Value root;
-	root["easyTokens"] = Json::arrayValue;
+	root["easyTokens"]   = Json::arrayValue;
 	root["mediumTokens"] = Json::arrayValue;
-	root["hardTokens"] = Json::arrayValue;
+	root["hardTokens"]   = Json::arrayValue;
 	for (auto&token:_easyTokens)
 	{
 		if (token.isActive)
@@ -475,11 +477,12 @@ bool Tokens::saveTokens(const std::string& filepath)
 	}
 
 	Json::StyledWriter writer;
-	auto output = writer.write(root);
+	auto               output = writer.write(root);
 	try
 	{
 		Utilities::WriteFile(filepath, output);
-	} catch (std::runtime_error& e)
+	}
+	catch (std::runtime_error& e)
 	{
 		Utilities::Logln(std::string("Tokens: Could not save tokens to file: ") + e.what());
 		return false;
@@ -491,7 +494,7 @@ bool Tokens::saveTokens(const std::string& filepath)
 }
 
 void Tokens::Token::fromJson(const Json::Value& json)
-{	
+{
 	if (json["coordinates"].size() != 3)
 	{
 		throw std::runtime_error("Coordinates array should have 3 items.");
@@ -499,11 +502,14 @@ void Tokens::Token::fromJson(const Json::Value& json)
 	coordinates[0] = json["coordinates"][0].asFloat();
 	coordinates[1] = json["coordinates"][1].asFloat();
 	coordinates[2] = json["coordinates"][2].asFloat();
-	name = json["name"].asString();
-	isActive = true;
+	name           = json["name"].asString();
+	isActive       = true;
 }
 
-Tokens::Token::Token() : coordinates{ {0.0,0.0,0.0} }, name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))
+Tokens::Token::Token() : coordinates{
+	{
+		0.0, 0.0, 0.0
+	}}, name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))
 {
 }
 

@@ -49,7 +49,7 @@ private:
 	ConstIter FindConst(int level);
 	Iter Find(int level);
 	std::vector< std::shared_ptr< Level > > levels_;
-	std::string                               errorMessage;
+	std::string                             errorMessage;
 	std::shared_ptr<Level>                  dummyLevel_;
 };
 
