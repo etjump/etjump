@@ -7,7 +7,6 @@
 #include "custom_map_votes.hpp"
 #include "utilities.hpp"
 #include <boost/algorithm/string.hpp>
-#include "operation_queue.hpp"
 #include "motd.hpp"
 #include "random_map_mode.hpp"
 #include "timerun.hpp"
@@ -118,8 +117,6 @@ void RunFrame(int levelTime)
 
 void OnGameInit()
 {
-	game.operationQueue->Init();
-
 	if (strlen(g_levelConfig.string))
 	{
 		if (!game.levels->ReadFromConfig())
@@ -169,7 +166,6 @@ void OnGameShutdown()
 	WriteSessionData();
 //    game.database->ExecuteQueuedOperations();
 	game.database->CloseDatabase();
-	game.operationQueue->Shutdown();
 	game.mapStatistics->saveChanges();
 	game.tokens->reset();
 }
@@ -329,11 +325,6 @@ const char *CustomMapTypeExists(const char *mapType)
 	}
 
 	return NULL;
-}
-
-void CheckIfOperationsNeedToBeExecuted()
-{
-	game.operationQueue->ExecuteQueuedOperations();
 }
 
 void ClientNameChanged(gentity_t *ent)

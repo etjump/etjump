@@ -227,7 +227,6 @@
     <ClCompile Include="main_ext.cpp" />
     <ClCompile Include="map_statistics.cpp" />
     <ClCompile Include="motd.cpp" />
-    <ClCompile Include="operation_queue.cpp" />
     <ClCompile Include="printer.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
@@ -270,7 +269,6 @@
     <ClInclude Include="load_race.hpp" />
     <ClInclude Include="map_statistics.hpp" />
     <ClInclude Include="motd.hpp" />
-    <ClInclude Include="operation_queue.hpp" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="random_map_mode.hpp" />
     <ClInclude Include="resource.h" />

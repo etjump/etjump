@@ -204,9 +204,6 @@
     <ClCompile Include="user.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="operation_queue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="printer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -323,9 +320,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="load_race.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="operation_queue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="random_map_mode.hpp">

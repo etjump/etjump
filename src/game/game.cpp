@@ -5,7 +5,6 @@
 #include "levels.hpp"
 #include "database.hpp"
 #include "custom_map_votes.hpp"
-#include "operation_queue.hpp"
 #include "motd.hpp"
 #include "timerun.hpp"
 #include "map_statistics.hpp"
@@ -18,7 +17,6 @@ Game::Game()
 	session        = std::make_shared<Session>(database.get());
 	commands       = std::make_shared<Commands>();
 	saves          = std::make_shared<SaveSystem>(session.get());
-	operationQueue = std::make_shared<OperationQueue>();
 	mapStatistics  = std::make_shared<MapStatistics>();
 	customMapVotes = std::make_shared<CustomMapVotes>(mapStatistics.get());
 	motd           = std::make_shared<Motd>();

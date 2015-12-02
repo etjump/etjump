@@ -4140,8 +4140,6 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 
 	G_UpdateTeamMapData();
 
-	CheckIfOperationsNeedToBeExecuted();
-
 	if (level.gameManager)
 	{
 		level.gameManager->s.otherEntityNum  = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_AXIS);
