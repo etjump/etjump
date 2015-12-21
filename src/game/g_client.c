@@ -1671,6 +1671,7 @@ restarts.
 char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 {
 	char      *value;
+	const char *temp = NULL;
 	gclient_t *client;
 	char      userinfo[MAX_INFO_STRING];
 	gentity_t *ent;
@@ -1696,6 +1697,7 @@ char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	// recommanding PB based IP / GUID banning, the builtin system is pretty limited
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey(userinfo, "ip");
+
 	if (G_FilterIPBanPacket(value))
 	{
 		return "You are banned from this server.";
@@ -1707,9 +1709,16 @@ char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	//    return "You are banned from this server.";
 	//}
 
-	/* ETPub fakeplayers DoS fix */
+	// If we try to pass NULL to Q_strncpyz server will crash
+	// This allows users to crash the server with custom clients.
+	temp = GetParsedIP(value);
+	if (!temp)
+	{
+		return "Malformed userinfo.";
+	}
 
-	Q_strncpyz(ip, GetParsedIP(value), sizeof(ip));
+	/* ETPub fakeplayers DoS fix */
+	Q_strncpyz(ip, temp, sizeof(ip));
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
 		clientNum2 = level.sortedClients[i];
