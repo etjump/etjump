@@ -506,11 +506,9 @@ void Tokens::Token::fromJson(const Json::Value& json)
 	isActive       = true;
 }
 
-Tokens::Token::Token() : coordinates{
-	{
-		0.0, 0.0, 0.0
-	}}, name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))
+Tokens::Token::Token() : name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))
 {
+	coordinates = { 0, 0, 0 };
 }
 
 Json::Value Tokens::Token::toJson() const
