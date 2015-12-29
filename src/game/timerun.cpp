@@ -357,45 +357,106 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 	if (update)
 	{
-		if (!wrapper.prepare("UPDATE records SET time=?, record_date=?, player_name=? WHERE id=?;"))
+		if (record.id != -1)
 		{
-			Printer::LogPrintln(
-			    (boost::format("SaveRecord::couldn't prepare update statement. error code: %d. error message: %s.")
-			     % wrapper.errorCode() % wrapper.errorMessage()).str());
-			return;
-		}
+			if (!wrapper.prepare("UPDATE records SET time=?, record_date=?, player_name=? WHERE id=?;"))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't prepare update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
 
-		if (!wrapper.bindInteger(1, record.time))
-		{
-			Printer::LogPrintln(
-			    (boost::format("SaveRecord::couldn't bind time to update statement. error code: %d. error message: %s.")
-			     % wrapper.errorCode() % wrapper.errorMessage()).str());
-			return;
-		}
+			if (!wrapper.bindInteger(1, record.time))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind time to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
 
-		if (!wrapper.bindInteger(2, record.date))
-		{
-			Printer::LogPrintln(
-			    (boost::format("SaveRecord::couldn't bind date to update statement. error code: %d. error message: %s.")
-			     % wrapper.errorCode() % wrapper.errorMessage()).str());
-			return;
-		}
+			if (!wrapper.bindInteger(2, record.date))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind date to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
 
-		if (!wrapper.bindText(3, record.playerName))
-		{
-			Printer::LogPrintln(
-			    (boost::format("SaveRecord::couldn't bind name to update statement. error code: %d. error message: %s.")
-			     % wrapper.errorCode() % wrapper.errorMessage()).str());
-			return;
-		}
+			if (!wrapper.bindText(3, record.playerName))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind name to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
 
-		if (!wrapper.bindInteger(4, record.id))
+			if (!wrapper.bindInteger(4, record.id))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind id to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+		} else
 		{
-			Printer::LogPrintln(
-			    (boost::format("SaveRecord::couldn't bind id to update statement. error code: %d. error message: %s.")
-			     % wrapper.errorCode() % wrapper.errorMessage()).str());
-			return;
+			if (!wrapper.prepare("UPDATE records SET time=?, record_date=?, player_name=? WHERE map=? AND run=? and user_id=?;"))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't prepare update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+
+			if (!wrapper.bindInteger(1, record.time))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind time to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+
+			if (!wrapper.bindInteger(2, record.date))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind date to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+
+			if (!wrapper.bindText(3, record.playerName))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind name to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+
+			if (!wrapper.bindText(4, record.map))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind map name to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+
+			if (!wrapper.bindText(5, record.run))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind run name to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
+
+			if (!wrapper.bindInteger(6, record.userId))
+			{
+				Printer::LogPrintln(
+					(boost::format("SaveRecord::couldn't bind user id to update statement. error code: %d. error message: %s.")
+						% wrapper.errorCode() % wrapper.errorMessage()).str());
+				return;
+			}
 		}
+		
 	}
 	else
 	{
