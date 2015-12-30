@@ -508,7 +508,9 @@ void Tokens::Token::fromJson(const Json::Value& json)
 
 Tokens::Token::Token() : name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))
 {
-	coordinates = { 0, 0, 0 };
+	coordinates[0] = 0;
+	coordinates[1] = 0;
+	coordinates[2] = 0;
 }
 
 Json::Value Tokens::Token::toJson() const
