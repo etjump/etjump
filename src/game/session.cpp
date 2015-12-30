@@ -534,6 +534,12 @@ int Session::LevelDeleted(int adminLevel)
 
 void Session::NewName(gentity_t *ent)
 {
+	auto clientNum = ClientNum(ent);
+	if (!clients_[clientNum].user)
+	{
+		G_LogPrintf("Error: Couldn't store new user nick -- user is null.\n");
+		return;
+	}
 	database_->NewName(clients_[ClientNum(ent)].user->id, ent->client->pers.netname);
 }
 
