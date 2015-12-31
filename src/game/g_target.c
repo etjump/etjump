@@ -830,6 +830,21 @@ void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
+	if (activator && activator->client)
+	{
+		// spawnflags 8: only fires targets if the activating player is currently timerunning
+		if (self->spawnflags & 8 && !activator->client->sess.timerunActive)
+		{
+			return;
+		}
+
+		// spawnflags 16: only fires targets if the activating player is currently NOT timerunning
+		if (self->spawnflags & 16 && activator->client->sess.timerunActive)
+		{
+			return;
+		}
+	}
+
 	if (self->spawnflags & 4)
 	{
 		gentity_t *ent;

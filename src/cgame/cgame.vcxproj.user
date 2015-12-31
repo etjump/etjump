@@ -4,7 +4,7 @@
     <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
     <RemoteDebuggerDebuggerType>NativeOnly</RemoteDebuggerDebuggerType>
     <RemoteDebuggerCommand>$(ETROOT)et.exe</RemoteDebuggerCommand>
-    <RemoteDebuggerCommandArguments>+set fs_game "etjump" +map oasis</RemoteDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>+set fs_game "etjump" +map oasis +set net_port 30303</RemoteDebuggerCommandArguments>
     <RemoteDebuggerWorkingDirectory>$(ETROOT)</RemoteDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
