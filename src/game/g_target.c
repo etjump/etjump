@@ -2082,6 +2082,7 @@ void SP_target_decay(gentity_t *self)
 // 4 only reset when you reach the end
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
+	float speed = VectorLength(activator->client->ps.velocity);
 	if (!activator)
 	{
 		return;
@@ -2094,6 +2095,12 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	if (activator->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
+		return;
+	}
+
+	if (speed > self->velocityUpperLimit)
+	{
+		trap_SendServerCommand(ClientNum(activator), va("cp \"^3WARNING: ^7Timerun was not started. Too high starting speed (%.2f > %.2f)\n\"", speed, self->velocityUpperLimit));
 		return;
 	}
 
@@ -2140,6 +2147,8 @@ void SP_target_startTimer(gentity_t *self)
 	SetTimerunIndex(self);
 
 	level.hasTimerun = qtrue;
+
+	G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
 
 	self->use = target_startTimer_use;
 }
