@@ -5379,7 +5379,9 @@ static void PM_Weapon(void)
 
 	case WP_STEN:
 		addTime           = GetAmmoTableData(pm->ps->weapon)->nextShotTime;
-		aimSpreadScaleAdd = 15 + rand() % 10;   // (SA) new values for DM
+		// aimSpreadScaleAdd = 15 + rand() % 10;   // (SA) new values for DM
+		// Zero: We need a weapon with 0 spread
+		aimSpreadScaleAdd = 0;
 		break;
 
 	case WP_MOBILE_MG42:
