@@ -2467,6 +2467,7 @@ extern vmCvar_t etj_highlight;
 extern vmCvar_t etj_highlightText;
 extern vmCvar_t etj_highlightSound;
 
+extern vmCvar_t	etj_drawTokens;
 //
 // cg_main.c
 //

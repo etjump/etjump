@@ -2868,6 +2868,11 @@ static void CG_TokenMarker(centity_t *cent, int difficulty)
 	VectorCopy(cent->lerpOrigin, point);
 	vec4_t color;
 
+	if (!etj_drawTokens.integer)
+	{
+		return;
+	}
+
 	switch (difficulty)
 	{
 	case TOKEN_DIFFICULTY_EASY:

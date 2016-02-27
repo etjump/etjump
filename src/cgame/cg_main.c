@@ -424,6 +424,8 @@ vmCvar_t etj_highlightText;
 vmCvar_t etj_highlightSound;
 // End of chat highlight
 
+vmCvar_t etj_drawTokens;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -714,7 +716,8 @@ cvarTable_t cvarTable[] =
 	// Chat highlight
 	{ &etj_highlight,               "etj_highlight",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE             },
-	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             }
+	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             },
+	{&etj_drawTokens, "etj_drawTokens", "1", CVAR_ARCHIVE}
 };
 
 
