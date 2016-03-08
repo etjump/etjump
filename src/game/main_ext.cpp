@@ -180,27 +180,16 @@ void OnGameShutdown()
 	game.mapStatistics->saveChanges();
 	game.tokens->reset();
 
-	G_LogPrintf("DEBUG: Destructing levels object.\n");
 	game.levels = nullptr;
-	G_LogPrintf("DEBUG: Destructing database object.\n");
 	game.database = nullptr;
-	G_LogPrintf("DEBUG: Destructing session object.\n");
 	game.session = nullptr;
-	G_LogPrintf("DEBUG: Destructing commands object.\n");
 	game.commands = nullptr;
-	G_LogPrintf("DEBUG: Destructing saves object.\n");
 	game.saves = nullptr;
-	G_LogPrintf("DEBUG: Destructing customMapVotes object.\n");
 	game.customMapVotes = nullptr;
-	G_LogPrintf("DEBUG: Destructing motd object.\n");
 	game.motd = nullptr;
-	G_LogPrintf("DEBUG: Destructing timerun object.\n");
 	game.timerun = nullptr;
-	G_LogPrintf("DEBUG: Destructing randomMapMode object.\n");
 	game.randomMapMode = nullptr;
-	G_LogPrintf("DEBUG: Destructing mapStatistics object.\n");
 	game.mapStatistics = nullptr;
-	G_LogPrintf("DEBUG: Destructing tokens object.\n");
 	game.tokens = nullptr;
 }
 
