@@ -2104,6 +2104,11 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		return;
 	}
 
+	if (!activator->client->pers.enableTimeruns)
+	{
+		return;
+	}
+
 	activator->client->sess.runSpawnflags = self->spawnflags;
 
 	StartTimer(level.timerunNames[self->runIndex], activator);

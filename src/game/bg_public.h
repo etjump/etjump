@@ -328,6 +328,7 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 #define CGF_LOADVIEWANGLES  0x80
 #define CGF_CHEATCVARSON    0x100
 #define CGF_HIDEME          0x200
+#define CGF_ENABLE_TIMERUNS 0x400
 
 #define MAX_MOTDLINES   6
 

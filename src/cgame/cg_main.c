@@ -426,6 +426,8 @@ vmCvar_t etj_highlightSound;
 
 vmCvar_t etj_drawTokens;
 
+vmCvar_t etj_enableTimeruns;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -717,7 +719,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_highlight,               "etj_highlight",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE             },
 	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             },
-	{&etj_drawTokens, "etj_drawTokens", "1", CVAR_ARCHIVE}
+	{&etj_drawTokens, "etj_drawTokens", "1", CVAR_ARCHIVE},
+	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE}
 };
 
 
@@ -819,7 +822,8 @@ void CG_UpdateCvars(void)
 				    cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
 				    cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
 				    cv->vmCvar == &int_m_pitch  || cv->vmCvar == &cg_loadviewangles ||
-				    cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale
+				    cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
+					cv->vmCvar == &etj_enableTimeruns
 				    )
 				{
 					fSetFlags = qtrue;
@@ -937,7 +941,8 @@ void CG_setClientFlags(void)
 	                                 ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
 	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
 	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
-	                                 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0)
+									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
+									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) 
 	                                 // Add more in here, as needed
 	                             ),
 

@@ -1576,6 +1576,7 @@ void ClientUserinfoChanged(int clientNum)
 	client->pers.cgaz           = client->pers.clientFlags & CGF_CGAZ;
 	client->pers.loadViewAngles = client->pers.clientFlags & CGF_LOADVIEWANGLES;
 	client->pers.hideMe         = client->pers.clientFlags & CGF_HIDEME;
+	client->pers.enableTimeruns = client->pers.clientFlags & CGF_ENABLE_TIMERUNS;
 
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));

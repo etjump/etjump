@@ -843,6 +843,8 @@ typedef struct
 	int hideMe;
 	float noclipScale;
 
+	qboolean enableTimeruns;
+
 	int noclipCount;
 
 	raceStruct_t race;
