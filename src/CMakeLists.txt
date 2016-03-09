@@ -102,7 +102,7 @@ FILE(GLOB CGAME_SRC
 	"game/q_shared.c"
 	"ui/ui_shared.c"
 	"cgame/Drawable.cpp"
-
+  "cgame/etj_timerun_view.cpp"
 )
 
 FILE(GLOB QAGAME_SRC
@@ -174,7 +174,7 @@ FILE(GLOB QAGAME_SRC
 	"game/tokens.cpp"
 	"game/timerun.cpp"
 	"game/user.cpp"
-	"game/Utilities.cpp"
+	"game/etj_utilities.cpp"
 	"json/jsoncpp.cpp"
 	"sha-1/bg_sha.c"
 	"sha-1/sha1.c"

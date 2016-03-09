@@ -41,7 +41,7 @@ namespace ETJump
 		static void interrupt(PlayerTimerunInformation& playerTimerunInformation);
 
 		// draws the timer
-		void draw() override;
+		void draw();
 
 		// returns the currently active run if there's any
 		// e.g. if player is running => return player's run,

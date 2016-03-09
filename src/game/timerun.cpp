@@ -13,7 +13,7 @@
 #include "timerun.hpp"
 #include "sqlite_wrapper.hpp"
 #include "printer.hpp"
-#include "Utilities.h"
+#include "etj_utilities.hpp"
 
 std::string millisToString(int millis)
 {

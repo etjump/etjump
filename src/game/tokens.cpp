@@ -1,5 +1,4 @@
 #include "tokens.hpp"
-#include "Utilities.h"
 #include "../json/json.h"
 extern "C" {
 #include "g_local.h"
@@ -11,6 +10,8 @@ extern "C" {
 #ifdef min
 #undef min
 #endif
+
+#include "etj_utilities.hpp"
 
 
 Tokens::Tokens()

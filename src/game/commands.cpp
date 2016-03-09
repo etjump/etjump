@@ -9,7 +9,7 @@
 #include "timerun.hpp"
 #include "g_local.h"
 #include "map_statistics.hpp"
-#include "Utilities.h"
+#include "etj_utilities.hpp"
 #include "tokens.hpp"
 
 typedef boost::function<bool (gentity_t *ent, Arguments argv)> Command;

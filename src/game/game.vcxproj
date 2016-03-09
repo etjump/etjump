@@ -235,7 +235,7 @@
     <ClCompile Include="timerun.cpp" />
     <ClCompile Include="tokens.cpp" />
     <ClCompile Include="user.cpp" />
-    <ClCompile Include="Utilities.cpp" />
+    <ClCompile Include="etj_utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def" />
@@ -275,7 +275,7 @@
     <ClInclude Include="session.hpp" />
     <ClInclude Include="sqlite_wrapper.hpp" />
     <ClInclude Include="surfaceflags.h" />
-    <ClInclude Include="Utilities.h" />
+    <ClInclude Include="etj_utilities.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

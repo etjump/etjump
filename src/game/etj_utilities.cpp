@@ -2,7 +2,7 @@
 // Created by Jussi on 7.4.2015.
 //
 
-#include "Utilities.h"
+#include "etj_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
 extern "C" {
