@@ -23,7 +23,7 @@ Timerun::Timerun(int clientNum)
 
 void Timerun::draw()
 {
-	if (player_drawRunTimer.integer == 0 || !cg.hasTimerun)
+	/*if (player_drawRunTimer.integer == 0 || !cg.hasTimerun)
 	{
 		return;
 	}
@@ -64,7 +64,7 @@ void Timerun::draw()
 	auto x         = player_runTimerX.integer;
 	auto y         = player_runTimerY.integer;
 
-	CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0, 0, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0, 0, &cgs.media.limboFont1);*/
 }
 
 void Timerun::startTimerun(const std::string &runName, int startTime, int previousRecord)

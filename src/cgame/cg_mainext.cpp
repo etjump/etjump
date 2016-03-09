@@ -4,8 +4,10 @@ extern "C" {
 #include <string>
 #include <memory>
 #include "cg_timerun.h"
+#include "etj_timerun_view.hpp"
 
 static std::unique_ptr<Timerun> timerun;
+static std::unique_ptr<ETJump::TimerunView> timerunView;
 
 /**
  * Initializes the CPP side of client
@@ -13,6 +15,7 @@ static std::unique_ptr<Timerun> timerun;
 void InitGame()
 {
 	timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
+	timerunView = std::unique_ptr<ETJump::TimerunView>(new ETJump::TimerunView());
 }
 
 /**
@@ -97,6 +100,10 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		timerun->completion(clientNum, runName, completionTime);
 
 		return qtrue;
+	}
+	if (command == "timerun")
+	{
+		return timerunView->parseServerCommand() ? qtrue : qfalse;
 	}
 
 	return qfalse;

@@ -340,5 +340,8 @@
     <ClInclude Include="tokens.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="g_entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -253,6 +253,7 @@
     <ClInclude Include="custom_map_votes.hpp" />
     <ClInclude Include="database.hpp" />
     <ClInclude Include="game.hpp" />
+    <ClInclude Include="g_entity.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />

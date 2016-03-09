@@ -178,6 +178,13 @@ void Timerun::startNotify(int clientNum)
 	                                  % (player->currentRunName)
 	                                  % fastestCompletionTime
 	                                  ).str());
+
+	Printer::SendCommand(clientNum, (boost::format("timerun start %d %s %d")
+		% (player->runStartTime)
+		% player->currentRunName
+		% fastestCompletionTime
+		).str());
+	Printer::SendCommandToAll((boost::format("timerun other_start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
 }
 
 void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
@@ -206,6 +213,12 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		                                  % clientNum
 		                                  % millis
 		                                  % player->currentRunName).str());
+
+		Printer::SendCommand(clientNum, (boost::format("timerun stop %d %s")
+			% millis
+			% player->currentRunName).str());
+		Printer::SendCommandToAll((boost::format("timerun other_stop %d %d %s") % clientNum % millis % player->currentRunName).str());
+
 		player->currentRunName = "";
 		Utilities::stopRun(clientNum);
 	}
@@ -328,6 +341,8 @@ void Timerun::interrupt(int clientNum)
 
 	Utilities::stopRun(clientNum);
 	Printer::SendCommand(clientNum, "timerun_interrupt");
+	Printer::SendCommand(clientNum, "timerun interrupt");
+	Printer::SendCommandToAll((boost::format("timerun other_interrupt %d") % clientNum).str());
 }
 
 /**
