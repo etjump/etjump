@@ -400,6 +400,10 @@ void StopTimer(const char *runName, gentity_t *ent)
 {
 	game.timerun->stopTimer(ClientNum(ent), ent->client->ps.commandTime, runName);
 }
+void TimerunConnectNotify(gentity_t *ent)
+{
+	game.timerun->connectNotify(ClientNum(ent));
+}
 void InterruptRun(gentity_t *ent)
 {
 	game.timerun->interrupt(ClientNum(ent));

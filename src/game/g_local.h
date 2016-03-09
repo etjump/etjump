@@ -717,7 +717,7 @@ typedef struct
 	int runSpawnflags;
 
 	qboolean timerunActive;
-
+	qboolean receivedTimerunStates;
 } clientSession_t;
 
 //
@@ -2802,6 +2802,7 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);
+void TimerunConnectNotify(gentity_t *ent);
 
 void InterruptRun(gentity_t *ent);
 

@@ -1805,7 +1805,7 @@ char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		                                                //             properly in G_ReadSessionData()
 
 	}
-
+	ent->client->sess.receivedTimerunStates = qfalse;
 	client->sess.loadPreviousSavedPositions = qtrue;
 	// read or initialize the session data
 	if (firstTime)
@@ -1969,6 +1969,12 @@ void ClientBegin(int clientNum)
 		ent->client->pers.collectedHardTokens[i]   = qfalse;
 	}
 	ent->client->pers.tokenCollectionStartTime = level.time;
+
+	if (!ent->client->sess.receivedTimerunStates)
+	{
+		TimerunConnectNotify(ent);
+		ent->client->sess.receivedTimerunStates = qtrue;
+	}
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)

@@ -20,10 +20,9 @@ namespace ETJump
 	public:
 		TimerunView() : Drawable()
 		{
-			interrupt(_ownTimerunInformation);
 			for (auto& info : _playersTimerunInformation)
 			{
-				interrupt(_ownTimerunInformation);
+				interrupt(info);
 			}
 		}
 		static const int MaxClients = 64;
@@ -37,26 +36,9 @@ namespace ETJump
 		// whenever the player stops a timerun
 		void stop();
 
-		// whenever another player starts a timerun
-		void otherStart();
-
 		// whenever the player's timerun is interrupted (not finished)
 		void interrupt();
-
-		// whenever the other player's timerun is interrupted
-		void otherInterrupt();
-
-		// saves the start info
-		static void start(PlayerTimerunInformation& playerTimerunInformation);
-
-		// saves the stop info
-		static void stop(PlayerTimerunInformation& playerTimerunInformation);
-
-		// interrups the run
 		static void interrupt(PlayerTimerunInformation& playerTimerunInformation);
-
-		// whenever another player stops a timerun
-		void otherStop();
 
 		// draws the timer
 		void draw() override;

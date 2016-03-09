@@ -9,20 +9,18 @@ extern "C" {
 
 void ETJump::TimerunView::start()
 {
-	start(_ownTimerunInformation);
+	auto clientNum = atoi(CG_Argv(2));
+	_playersTimerunInformation[clientNum].startTime = atoi(CG_Argv(3));
+	_playersTimerunInformation[clientNum].runName = CG_Argv(4);
+	_playersTimerunInformation[clientNum].previousRecord = atoi(CG_Argv(5));
+	_playersTimerunInformation[clientNum].running = true;
 }
 
 void ETJump::TimerunView::stop()
 {
-	stop(_ownTimerunInformation);
-}
-
-void ETJump::TimerunView::start(PlayerTimerunInformation& playerTimerunInformation)
-{
-	playerTimerunInformation.startTime = atoi(CG_Argv(1));;
-	playerTimerunInformation.runName = CG_Argv(2);
-	playerTimerunInformation.previousRecord = atoi(CG_Argv(3));
-	playerTimerunInformation.running = true;
+	auto clientNum = atoi(CG_Argv(2));
+	_playersTimerunInformation[clientNum].completionTime = atoi(CG_Argv(3));
+	_playersTimerunInformation[clientNum].running = false;
 }
 
 void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInformation)
@@ -34,39 +32,15 @@ void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInfor
 	playerTimerunInformation.startTime = 0;
 }
 
-void ETJump::TimerunView::stop(PlayerTimerunInformation& playerTimerunInformation)
-{
-	playerTimerunInformation.completionTime = atoi(CG_Argv(1));
-	playerTimerunInformation.running = false;
-}
-
 void ETJump::TimerunView::interrupt()
 {
-	interrupt(_ownTimerunInformation);
-}
-
-void ETJump::TimerunView::otherInterrupt()
-{
-	auto clientNum = atoi(CG_Argv(1));
+	auto clientNum = atoi(CG_Argv(2));
 	interrupt(_playersTimerunInformation[clientNum]);
-}
-
-void ETJump::TimerunView::otherStart()
-{
-	auto clientNum = atoi(CG_Argv(1));
-	start(_playersTimerunInformation[clientNum]);
-}
-
-void ETJump::TimerunView::otherStop()
-{
-	auto clientNum = atoi(CG_Argv(1));
-	stop(_playersTimerunInformation[clientNum]);
 }
 
 const ETJump::PlayerTimerunInformation* ETJump::TimerunView::currentRun() const
 {
-	auto clientNum = cg.snap->ps.clientNum;
-	return clientNum == cg.clientNum ? &_ownTimerunInformation : &_playersTimerunInformation[clientNum];
+	return &_playersTimerunInformation[cg.snap->ps.clientNum];
 }
 
 void ETJump::TimerunView::draw()
@@ -89,6 +63,10 @@ void ETJump::TimerunView::draw()
 	else
 	{
 		millis = run->completionTime;
+		if (millis == -1)
+		{
+			millis = 0;
+		}
 	}
 
 	vec4_t *color = &colorWhite;
@@ -136,18 +114,9 @@ bool ETJump::TimerunView::parseServerCommand()
 	} else if (!Q_stricmp(cmd, "stop"))
 	{
 		stop();
-	} else if (!Q_stricmp(cmd, "other_start"))
-	{
-		otherStart();
-	} else if (!Q_stricmp(cmd, "other_stop"))
-	{
-		otherStop();
-	} else if (!Q_stricmp(cmd, "interrupt"))
+	}  else if (!Q_stricmp(cmd, "interrupt"))
 	{
 		interrupt();
-	}
-	else if (!Q_stricmp(cmd, "other_interrupt")) {
-		otherInterrupt();
 	} else
 	{
 		return false;

@@ -84,6 +84,12 @@ public:
 	void startNotify(int clientNum);
 
 	/**
+	 * Notifies the connection client about currently running timeruns
+	 * @param clientNum the player who is connecting
+	 **/
+	void connectNotify(int clientNum);
+
+	/**
 	 * When a player touches the stop timer this function is called.
 	 * If player is racing and the end point matches the start point,
 	 * prints the time and saves the record. Else ignored

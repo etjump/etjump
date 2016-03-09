@@ -156,6 +156,25 @@ void Timerun::startTimer(const std::string &runName, int clientNum, const std::s
 	Utilities::startRun(clientNum);
 }
 
+void Timerun::connectNotify(int clientNum)
+{
+	for (int idx = 0; idx < 64; ++idx)
+	{
+		auto player = _players[idx].get();
+		if (player && player->currentRunName.length() > 0)
+		{
+			auto previousRecord = findPreviousRecord(player);
+
+			int fastestCompletionTime = -1;
+			if (previousRecord)
+			{
+				fastestCompletionTime = previousRecord->time;
+			}
+			Printer::SendCommand(clientNum, (boost::format("timerun start %d %d %s %d") % idx % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
+		}
+	}
+}
+
 void Timerun::startNotify(int clientNum)
 {
 	auto player         = _players[clientNum].get();
@@ -179,12 +198,7 @@ void Timerun::startNotify(int clientNum)
 	                                  % fastestCompletionTime
 	                                  ).str());
 
-	Printer::SendCommand(clientNum, (boost::format("timerun start %d %s %d")
-		% (player->runStartTime)
-		% player->currentRunName
-		% fastestCompletionTime
-		).str());
-	Printer::SendCommandToAll((boost::format("timerun other_start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
+	Printer::SendCommandToAll((boost::format("timerun start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
 }
 
 void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
@@ -214,10 +228,7 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		                                  % millis
 		                                  % player->currentRunName).str());
 
-		Printer::SendCommand(clientNum, (boost::format("timerun stop %d %s")
-			% millis
-			% player->currentRunName).str());
-		Printer::SendCommandToAll((boost::format("timerun other_stop %d %d %s") % clientNum % millis % player->currentRunName).str());
+		Printer::SendCommandToAll((boost::format("timerun stop %d %d %s") % clientNum % millis % player->currentRunName).str());
 
 		player->currentRunName = "";
 		Utilities::stopRun(clientNum);
@@ -341,8 +352,7 @@ void Timerun::interrupt(int clientNum)
 
 	Utilities::stopRun(clientNum);
 	Printer::SendCommand(clientNum, "timerun_interrupt");
-	Printer::SendCommand(clientNum, "timerun interrupt");
-	Printer::SendCommandToAll((boost::format("timerun other_interrupt %d") % clientNum).str());
+	Printer::SendCommandToAll((boost::format("timerun interrupt %d") % clientNum).str());
 }
 
 /**
