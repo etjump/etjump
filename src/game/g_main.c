@@ -1967,9 +1967,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 			G_LogPrintf("------------------------------------------------------------\n");
 			G_LogPrintf("InitGame: %s\n", cs);
 			G_LogPrintf("%s %s %s %s\n", GAME_VERSION, MOD_VERSION, __DATE__, __TIME__);
-			G_ALog("------------------------------------------------------------");
-			G_ALog("Initializing the game");
-			G_ALog("------------------------------------------------------------");
 		}
 	}
 	else
@@ -2875,49 +2872,6 @@ void QDECL G_LogPrintf(const char *fmt, ...)
 	trap_FS_Write(string, strlen(string), level.logFile);
 }
 //bani
-
-/*
-=================
-G_AdminLogPrintf
-Prints to the admin logfile with a time stamp if it is open
-=================
-*/
-
-void QDECL G_ALog(const char *fmt, ...)
-{
-	va_list argptr;
-	char    string[1024];
-	qtime_t rt;
-	int     min, hour, sec, l;
-	trap_RealTime(&rt);
-
-	hour = rt.tm_hour;
-	min  = rt.tm_min;
-	sec  = rt.tm_sec;
-
-	Com_sprintf(string, sizeof(string), "%02i:%02i:%02i ", hour, min, sec);
-
-	l = strlen(string);
-
-	va_start(argptr, fmt);
-	Q_vsnprintf(string + l, sizeof(string) - l, fmt, argptr);
-	va_end(argptr);
-
-	/*
-	if ( g_dedicated.integer ) {
-	    G_Printf( "%s\n", string + l );
-	}
-	*/
-
-	if (!level.adminLogFile)
-	{
-		return;
-	}
-
-	Q_strcat(string, sizeof(string), "\n");
-
-	trap_FS_Write(string, strlen(string), level.adminLogFile);
-}
 
 /*
 ================
