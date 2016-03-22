@@ -121,7 +121,7 @@ FILE(GLOB QAGAME_SRC
 	"game/bg_tracemap.c"
 	"game/commands.cpp"
 	"game/custom_map_votes.cpp"
-	"game/database.cpp"
+	"game/etj_database.cpp"
 	"game/g_active.c"
 	"game/g_alarm.c"
 	"game/g_antilag.c"

@@ -4,7 +4,7 @@
 #include "commands.hpp"
 #include "save.hpp"
 #include "levels.hpp"
-#include "database.hpp"
+#include "etj_database.hpp"
 #include "custom_map_votes.hpp"
 #include "utilities.hpp"
 #include <boost/algorithm/string.hpp>

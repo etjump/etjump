@@ -78,6 +78,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
@@ -183,7 +184,8 @@
     <ClCompile Include="bg_tracemap.c" />
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="custom_map_votes.cpp" />
-    <ClCompile Include="database.cpp" />
+    <ClCompile Include="etj_database.cpp" />
+    <ClCompile Include="etj_moderation.cpp" />
     <ClCompile Include="g_active.c" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
@@ -251,7 +253,8 @@
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="commands.hpp" />
     <ClInclude Include="custom_map_votes.hpp" />
-    <ClInclude Include="database.hpp" />
+    <ClInclude Include="etj_database.hpp" />
+    <ClInclude Include="etj_moderation.h" />
     <ClInclude Include="game.hpp" />
     <ClInclude Include="g_entity.h" />
     <ClInclude Include="g_local.h" />
