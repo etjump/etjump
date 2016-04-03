@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame", "cgame\cgame.vcxproj", "{81AA5476-1DAF-4A10-FB98-A368D813BDF6}"
 EndProject
@@ -12,6 +12,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		DebugProgressioTracker|Win32 = DebugProgressioTracker|Win32
+		DebugProgressioTracker|x64 = DebugProgressioTracker|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
@@ -19,18 +21,27 @@ Global
 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Debug|Win32.ActiveCfg = Debug|Win32
 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Debug|Win32.Build.0 = Debug|Win32
 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Debug|x64.ActiveCfg = Debug|Win32
+		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.DebugProgressioTracker|Win32.ActiveCfg = DebugProgressioTracker|Win32
+		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.DebugProgressioTracker|Win32.Build.0 = DebugProgressioTracker|Win32
+		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.DebugProgressioTracker|x64.ActiveCfg = DebugProgressioTracker|Win32
 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Release|Win32.ActiveCfg = Release|Win32
 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Release|Win32.Build.0 = Release|Win32
 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Release|x64.ActiveCfg = Release|Win32
 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Debug|Win32.Build.0 = Debug|Win32
 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Debug|x64.ActiveCfg = Debug|Win32
+		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.DebugProgressioTracker|Win32.ActiveCfg = DebugProgressioTracker|Win32
+		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.DebugProgressioTracker|Win32.Build.0 = DebugProgressioTracker|Win32
+		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.DebugProgressioTracker|x64.ActiveCfg = DebugProgressioTracker|Win32
 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Release|Win32.ActiveCfg = Release|Win32
 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Release|Win32.Build.0 = Release|Win32
 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Release|x64.ActiveCfg = Release|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Debug|Win32.ActiveCfg = Debug|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Debug|Win32.Build.0 = Debug|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Debug|x64.ActiveCfg = Debug|Win32
+		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.DebugProgressioTracker|Win32.ActiveCfg = DebugProgressioTracker|Win32
+		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.DebugProgressioTracker|Win32.Build.0 = DebugProgressioTracker|Win32
+		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.DebugProgressioTracker|x64.ActiveCfg = DebugProgressioTracker|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|Win32.ActiveCfg = Release|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|Win32.Build.0 = Release|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|x64.ActiveCfg = Release|Win32

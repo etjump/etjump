@@ -15,4 +15,12 @@
     <LocalDebuggerCommandArguments>+set fs_game "etjump" +connect localhost:35000</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
+    <LocalDebuggerCommand>$(ETROOT)et.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>
+    <LocalDebuggerAttach>false</LocalDebuggerAttach>
+    <LocalDebuggerCommandArguments>+set fs_game "etjump" +devmap progression_trackers +set sv_pure "0"</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
 </Project>

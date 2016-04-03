@@ -1,0 +1,900 @@
+[1mdiff --git a/src/Trickjump.sln b/src/Trickjump.sln[m
+[1mindex 80af3cd..fc5aa78 100644[m
+[1m--- a/src/Trickjump.sln[m
+[1m+++ b/src/Trickjump.sln[m
+[36m@@ -1,6 +1,6 @@[m
+ Microsoft Visual Studio Solution File, Format Version 12.00[m
+ # Visual Studio 14[m
+[31m-VisualStudioVersion = 14.0.23107.0[m
+[32m+[m[32mVisualStudioVersion = 14.0.24720.0[m[41m[m
+ MinimumVisualStudioVersion = 10.0.40219.1[m
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame", "cgame\cgame.vcxproj", "{81AA5476-1DAF-4A10-FB98-A368D813BDF6}"[m
+ EndProject[m
+[36m@@ -12,6 +12,8 @@[m [mGlobal[m
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution[m
+ 		Debug|Win32 = Debug|Win32[m
+ 		Debug|x64 = Debug|x64[m
+[32m+[m		[32mDebugProgressioTracker|Win32 = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32mDebugProgressioTracker|x64 = DebugProgressioTracker|x64[m[41m[m
+ 		Release|Win32 = Release|Win32[m
+ 		Release|x64 = Release|x64[m
+ 	EndGlobalSection[m
+[36m@@ -19,18 +21,27 @@[m [mGlobal[m
+ 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Debug|Win32.ActiveCfg = Debug|Win32[m
+ 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Debug|Win32.Build.0 = Debug|Win32[m
+ 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Debug|x64.ActiveCfg = Debug|Win32[m
+[32m+[m		[32m{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.DebugProgressioTracker|Win32.ActiveCfg = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32m{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.DebugProgressioTracker|Win32.Build.0 = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32m{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.DebugProgressioTracker|x64.ActiveCfg = DebugProgressioTracker|Win32[m[41m[m
+ 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Release|Win32.ActiveCfg = Release|Win32[m
+ 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Release|Win32.Build.0 = Release|Win32[m
+ 		{81AA5476-1DAF-4A10-FB98-A368D813BDF6}.Release|x64.ActiveCfg = Release|Win32[m
+ 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Debug|Win32.ActiveCfg = Debug|Win32[m
+ 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Debug|Win32.Build.0 = Debug|Win32[m
+ 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Debug|x64.ActiveCfg = Debug|Win32[m
+[32m+[m		[32m{48B830C1-1FB5-2909-44CD-4B255F0988DF}.DebugProgressioTracker|Win32.ActiveCfg = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32m{48B830C1-1FB5-2909-44CD-4B255F0988DF}.DebugProgressioTracker|Win32.Build.0 = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32m{48B830C1-1FB5-2909-44CD-4B255F0988DF}.DebugProgressioTracker|x64.ActiveCfg = DebugProgressioTracker|Win32[m[41m[m
+ 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Release|Win32.ActiveCfg = Release|Win32[m
+ 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Release|Win32.Build.0 = Release|Win32[m
+ 		{48B830C1-1FB5-2909-44CD-4B255F0988DF}.Release|x64.ActiveCfg = Release|Win32[m
+ 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Debug|Win32.ActiveCfg = Debug|Win32[m
+ 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Debug|Win32.Build.0 = Debug|Win32[m
+ 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Debug|x64.ActiveCfg = Debug|Win32[m
+[32m+[m		[32m{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.DebugProgressioTracker|Win32.ActiveCfg = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32m{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.DebugProgressioTracker|Win32.Build.0 = DebugProgressioTracker|Win32[m[41m[m
+[32m+[m		[32m{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.DebugProgressioTracker|x64.ActiveCfg = DebugProgressioTracker|Win32[m[41m[m
+ 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|Win32.ActiveCfg = Release|Win32[m
+ 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|Win32.Build.0 = Release|Win32[m
+ 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|x64.ActiveCfg = Release|Win32[m
+[1mdiff --git a/src/cgame/cg_local.h b/src/cgame/cg_local.h[m
+[1mindex f16a468..d37e03f 100644[m
+[1m--- a/src/cgame/cg_local.h[m
+[1m+++ b/src/cgame/cg_local.h[m
+[36m@@ -708,7 +708,7 @@[m [mtypedef struct[m
+ [m
+ #define MAX_PREDICTED_EVENTS    16[m
+ [m
+[31m-#define MAX_SPAWN_VARS          64[m
+[32m+[m[32m#define MAX_SPAWN_VARS          128[m
+ #define MAX_SPAWN_VARS_CHARS    2048[m
+ [m
+ [m
+[1mdiff --git a/src/cgame/cgame.vcxproj b/src/cgame/cgame.vcxproj[m
+[1mindex fc8ee4e..38c0dd6 100644[m
+[1m--- a/src/cgame/cgame.vcxproj[m
+[1m+++ b/src/cgame/cgame.vcxproj[m
+[36m@@ -1,6 +1,10 @@[m
+ ﻿<?xml version="1.0" encoding="utf-8"?>[m
+ <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">[m
+   <ItemGroup Label="ProjectConfigurations">[m
+[32m+[m[32m    <ProjectConfiguration Include="DebugProgressioTracker|Win32">[m
+[32m+[m[32m      <Configuration>DebugProgressioTracker</Configuration>[m
+[32m+[m[32m      <Platform>Win32</Platform>[m
+[32m+[m[32m    </ProjectConfiguration>[m
+     <ProjectConfiguration Include="Debug|Win32">[m
+       <Configuration>Debug</Configuration>[m
+       <Platform>Win32</Platform>[m
+[36m@@ -27,6 +31,11 @@[m
+     <UseOfMfc>false</UseOfMfc>[m
+     <PlatformToolset>v140</PlatformToolset>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="Configuration">[m
+[32m+[m[32m    <ConfigurationType>DynamicLibrary</ConfigurationType>[m
+[32m+[m[32m    <UseOfMfc>false</UseOfMfc>[m
+[32m+[m[32m    <PlatformToolset>v140</PlatformToolset>[m
+[32m+[m[32m  </PropertyGroup>[m
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">[m
+     <ConfigurationType>DynamicLibrary</ConfigurationType>[m
+     <UseOfMfc>false</UseOfMfc>[m
+[36m@@ -38,6 +47,9 @@[m
+   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">[m
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+   </ImportGroup>[m
+[32m+[m[32m  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="PropertySheets">[m
+[32m+[m[32m    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+[32m+[m[32m  </ImportGroup>[m
+   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">[m
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+   </ImportGroup>[m
+[36m@@ -48,8 +60,11 @@[m
+     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>[m
+     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>[m
+     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>[m
+[32m+[m[32m    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</OutDir>[m
+     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>[m
+[32m+[m[32m    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</IntDir>[m
+     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>[m
+[32m+[m[32m    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</LinkIncremental>[m
+   </PropertyGroup>[m
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">[m
+     <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>[m
+[36m@@ -59,6 +74,10 @@[m
+     <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>[m
+     <TargetName>cgame_mp_x86</TargetName>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m
+[32m+[m[32m    <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>[m
+[32m+[m[32m    <TargetName>cgame_mp_x86</TargetName>[m
+[32m+[m[32m  </PropertyGroup>[m
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">[m
+     <ClCompile>[m
+       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>[m
+[36m@@ -151,6 +170,51 @@[m
+       <Command>$(SolutionDir)build\install.bat</Command>[m
+     </PostBuildEvent>[m
+   </ItemDefinitionGroup>[m
+[32m+[m[32m  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m
+[32m+[m[32m    <ClCompile>[m
+[32m+[m[32m      <Optimization>Disabled</Optimization>[m
+[32m+[m[32m      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CGAMEDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m
+[32m+[m[32m      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>[m
+[32m+[m[32m      <PrecompiledHeader>[m
+[32m+[m[32m      </PrecompiledHeader>[m
+[32m+[m[32m      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\cgame.pch</PrecompiledHeaderOutputFile>[m
+[32m+[m[32m      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>[m
+[32m+[m[32m      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>[m
+[32m+[m[32m      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>[m
+[32m+[m[32m      <BrowseInformation>true</BrowseInformation>[m
+[32m+[m[32m      <WarningLevel>Level3</WarningLevel>[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m
+[32m+[m[32m      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>[m
+[32m+[m[32m    </ClCompile>[m
+[32m+[m[32m    <Link>[m
+[32m+[m[32m      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>[m
+[32m+[m[32m      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>[m
+[32m+[m[32m      <OutputFile>$(SolutionDir)build\cgame_mp_x86.dll</OutputFile>[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m
+[32m+[m[32m      <ModuleDefinitionFile>$(ProjectDir)cgame.def</ModuleDefinitionFile>[m
+[32m+[m[32m      <GenerateDebugInformation>true</GenerateDebugInformation>[m
+[32m+[m[32m      <ProgramDatabaseFile>.\Debug/cgame_mp_x86.pdb</ProgramDatabaseFile>[m
+[32m+[m[32m      <GenerateMapFile>true</GenerateMapFile>[m
+[32m+[m[32m      <MapFileName>$(ProjectDir)Debug\cgame_mp_x86.map</MapFileName>[m
+[32m+[m[32m      <SubSystem>Windows</SubSystem>[m
+[32m+[m[32m      <BaseAddress>0x30000000</BaseAddress>[m
+[32m+[m[32m      <ImportLibrary>.\Debug/cgame_mp_x86.lib</ImportLibrary>[m
+[32m+[m[32m    </Link>[m
+[32m+[m[32m    <Midl>[m
+[32m+[m[32m      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m
+[32m+[m[32m      <MkTypLibCompatible>true</MkTypLibCompatible>[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m
+[32m+[m[32m      <TargetEnvironment>Win32</TargetEnvironment>[m
+[32m+[m[32m      <TypeLibraryName>.\Debug/cgame.tlb</TypeLibraryName>[m
+[32m+[m[32m    </Midl>[m
+[32m+[m[32m    <ResourceCompile>[m
+[32m+[m[32m      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m
+[32m+[m[32m      <Culture>0x0409</Culture>[m
+[32m+[m[32m    </ResourceCompile>[m
+[32m+[m[32m    <PostBuildEvent>[m
+[32m+[m[32m      <Command>$(SolutionDir)build\install.bat</Command>[m
+[32m+[m[32m    </PostBuildEvent>[m
+[32m+[m[32m  </ItemDefinitionGroup>[m
+   <ItemGroup>[m
+     <ClCompile Include="..\game\bg_animation.c" />[m
+     <ClCompile Include="..\game\bg_animgroup.c" />[m
+[36m@@ -159,6 +223,7 @@[m
+     <ClCompile Include="..\game\bg_classes.c" />[m
+     <ClCompile Include="..\game\bg_lib.c">[m
+       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>[m
+[32m+[m[32m      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>[m
+       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>[m
+     </ClCompile>[m
+     <ClCompile Include="..\game\bg_misc.c" />[m
+[1mdiff --git a/src/cgame/cgame.vcxproj.user b/src/cgame/cgame.vcxproj.user[m
+[1mindex 8ca6128..a52b703 100644[m
+[1m--- a/src/cgame/cgame.vcxproj.user[m
+[1m+++ b/src/cgame/cgame.vcxproj.user[m
+[36m@@ -15,4 +15,12 @@[m
+     <LocalDebuggerCommandArguments>+set fs_game "etjump" +connect localhost:35000</LocalDebuggerCommandArguments>[m
+     <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m
+[32m+[m[32m    <LocalDebuggerCommand>$(ETROOT)et.exe</LocalDebuggerCommand>[m
+[32m+[m[32m    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>[m
+[32m+[m[32m    <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>[m
+[32m+[m[32m    <LocalDebuggerAttach>false</LocalDebuggerAttach>[m
+[32m+[m[32m    <LocalDebuggerCommandArguments>+set fs_game "etjump" +devmap progression_trackers +set sv_pure "0"</LocalDebuggerCommandArguments>[m
+[32m+[m[32m    <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>[m
+[32m+[m[32m  </PropertyGroup>[m
+ </Project>[m
+\ No newline at end of file[m
+[1mdiff --git a/src/game/g_entity.h b/src/game/g_entity.h[m
+[1mdeleted file mode 100644[m
+[1mindex 099a376..0000000[m
+[1m--- a/src/game/g_entity.h[m
+[1m+++ /dev/null[m
+[36m@@ -1,316 +0,0 @@[m
+[31m-#pragma once[m
+[31m-[m
+[31m-typedef struct entityState_s entityState_t;[m
+[31m-typedef enum moverState_t;[m
+[31m-typedef struct entityShared_t;[m
+[31m-enum qboolean;[m
+[31m-typedef float vec_t;[m
+[31m-typedef vec_t vec2_t[2];[m
+[31m-typedef vec_t vec3_t[3];[m
+[31m-typedef vec_t vec4_t[4];[m
+[31m-typedef vec_t vec5_t[5];[m
+[31m-[m
+[31m-struct gentity_s[m
+[31m-{[m
+[31m-	entityState_t s;                // communicated by server to clients[m
+[31m-	entityShared_t r;               // shared by both the server system and game[m
+[31m-[m
+[31m-									// DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER[m
+[31m-									// EXPECTS THE FIELDS IN THAT ORDER![m
+[31m-									//================================[m
+[31m-[m
+[31m-	struct gclient_s *client;               // NULL if not a client[m
+[31m-[m
+[31m-	qboolean inuse;[m
+[31m-[m
+[31m-	vec3_t instantVelocity;         // ydnar: per entity instantaneous velocity, set per frame[m
+[31m-[m
+[31m-	const char *classname;              // set in QuakeEd[m
+[31m-	int spawnflags;                 // set in QuakeEd[m
+[31m-[m
+[31m-	qboolean neverFree;             // if true, FreeEntity will only unlink[m
+[31m-									// bodyque uses this[m
+[31m-[m
+[31m-	int flags;                      // FL_* variables[m
+[31m-[m
+[31m-	char *model;[m
+[31m-	char *model2;[m
+[31m-	int freetime;                   // level.time when the object was freed[m
+[31m-[m
+[31m-	int eventTime;                  // events will be cleared EVENT_VALID_MSEC after set[m
+[31m-	qboolean freeAfterEvent;[m
+[31m-	qboolean unlinkAfterEvent;[m
+[31m-[m
+[31m-	qboolean physicsObject;         // if true, it can be pushed by movers and fall off edges[m
+[31m-									// all game items are physicsObjects,[m
+[31m-	float physicsBounce;            // 1.0 = continuous bounce, 0.0 = no bounce[m
+[31m-	int clipmask;                   // brushes with this content value will be collided against[m
+[31m-									// when moving.  items and corpses do not collide against[m
+[31m-									// players, for instance[m
+[31m-[m
+[31m-	int realClipmask;               // Arnout: use these to backup the contents value when we go to state under construction[m
+[31m-	int realContents;[m
+[31m-	qboolean realNonSolidBModel;    // For script_movers with spawnflags 2 set[m
+[31m-[m
+[31m-									// movers[m
+[31m-	moverState_t moverState;[m
+[31m-	int soundPos1;[m
+[31m-	int sound1to2;[m
+[31m-	int sound2to1;[m
+[31m-	int soundPos2;[m
+[31m-	int soundLoop;[m
+[31m-	int sound2to3;[m
+[31m-	int sound3to2;[m
+[31m-	int soundPos3;[m
+[31m-[m
+[31m-	int soundSoftopen;[m
+[31m-	int soundSoftendo;[m
+[31m-	int soundSoftclose;[m
+[31m-	int soundSoftendc;[m
+[31m-[m
+[31m-	gentity_t *parent;[m
+[31m-	gentity_t *nextTrain;[m
+[31m-	gentity_t *prevTrain;[m
+[31m-	vec3_t pos1, pos2, pos3;[m
+[31m-[m
+[31m-	char *message;[m
+[31m-[m
+[31m-	int timestamp;              // body queue sinking, etc[m
+[31m-[m
+[31m-	float angle;                // set in editor, -1 = up, -2 = down[m
+[31m-	char *target;[m
+[31m-[m
+[31m-	char *targetname;[m
+[31m-	int targetnamehash;         // Gordon: adding a hash for this for faster lookups[m
+[31m-[m
+[31m-	char *team;[m
+[31m-	gentity_t *target_ent;[m
+[31m-[m
+[31m-	float speed;[m
+[31m-	float closespeed;           // for movers that close at a different speed than they open[m
+[31m-	vec3_t movedir;[m
+[31m-[m
+[31m-	int gDuration;[m
+[31m-	int gDurationBack;[m
+[31m-	vec3_t gDelta;[m
+[31m-	vec3_t gDeltaBack;[m
+[31m-[m
+[31m-	int nextthink;[m
+[31m-	void(*free)(gentity_t *self);[m
+[31m-	void(*think)(gentity_t *self);[m
+[31m-	void(*reached)(gentity_t *self);           // movers call this when hitting endpoint[m
+[31m-	void(*blocked)(gentity_t *self, gentity_t *other);[m
+[31m-	void(*touch)(gentity_t *self, gentity_t *other, trace_t *trace);[m
+[31m-	void(*use)(gentity_t *self, gentity_t *other, gentity_t *activator);[m
+[31m-	void(*pain)(gentity_t *self, gentity_t *attacker, int damage, vec3_t point);[m
+[31m-	void(*die)(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);[m
+[31m-[m
+[31m-	int pain_debounce_time;[m
+[31m-	int fly_sound_debounce_time;            // wind tunnel[m
+[31m-[m
+[31m-	int health;[m
+[31m-[m
+[31m-	qboolean takedamage;[m
+[31m-[m
+[31m-	int damage;[m
+[31m-	int splashDamage;           // quad will increase this without increasing radius[m
+[31m-	int splashRadius;[m
+[31m-	int methodOfDeath;[m
+[31m-	int splashMethodOfDeath;[m
+[31m-[m
+[31m-	int count;[m
+[31m-[m
+[31m-	gentity_t *chain;[m
+[31m-	gentity_t *enemy;[m
+[31m-	gentity_t *activator;[m
+[31m-	gentity_t *teamchain;       // next entity in team[m
+[31m-	gentity_t *teammaster;      // master of the team[m
+[31m-[m
+[31m-	meansOfDeath_t deathType;[m
+[31m-[m
+[31m-	int watertype;[m
+[31m-	int waterlevel;[m
+[31m-[m
+[31m-	int noise_index;[m
+[31m-[m
+[31m-	// timing variables[m
+[31m-	float wait;[m
+[31m-	float random;[m
+[31m-[m
+[31m-	// Rafael - sniper variable[m
+[31m-	// sniper uses delay, random, radius[m
+[31m-	int radius;[m
+[31m-	int force;[m
+[31m-	float delay;[m
+[31m-[m
+[31m-	// JOSEPH 10-11-99[m
+[31m-	int TargetFlag;[m
+[31m-	float duration;[m
+[31m-	vec3_t rotate;[m
+[31m-	vec3_t TargetAngles;[m
+[31m-	// END JOSEPH[m
+[31m-[m
+[31m-	gitem_t *item;              // for bonus items[m
+[31m-[m
+[31m-								// Ridah, AI fields[m
+[31m-	char *aiName;[m
+[31m-	int aiTeam;[m
+[31m-	void(*AIScript_AlertEntity)(gentity_t *ent);[m
+[31m-	// done.[m
+[31m-[m
+[31m-	char *aiSkin;[m
+[31m-[m
+[31m-	vec3_t dl_color;[m
+[31m-	char *dl_stylestring;[m
+[31m-	char *dl_shader;[m
+[31m-	int dl_atten;[m
+[31m-[m
+[31m-[m
+[31m-	int key;                    // used by:  target_speaker->nopvs,[m
+[31m-[m
+[31m-	qboolean active;[m
+[31m-[m
+[31m-	// Rafael - mg42[m
+[31m-	float harc;[m
+[31m-	float varc;[m
+[31m-[m
+[31m-	int props_frame_state;[m
+[31m-[m
+[31m-	// Ridah[m
+[31m-	int missionLevel;               // mission we are currently trying to complete[m
+[31m-									// gets reset each new level[m
+[31m-	int start_size;[m
+[31m-	int end_size;[m
+[31m-[m
+[31m-	// Rafael props[m
+[31m-[m
+[31m-	qboolean isProp;[m
+[31m-[m
+[31m-	int mg42BaseEnt;[m
+[31m-[m
+[31m-	gentity_t *melee;[m
+[31m-[m
+[31m-	char *spawnitem;[m
+[31m-[m
+[31m-	int flameQuota, flameQuotaTime, flameBurnEnt;[m
+[31m-[m
+[31m-	int count2;[m
+[31m-[m
+[31m-	int grenadeExplodeTime;         // we've caught a grenade, which was due to explode at this time[m
+[31m-	int grenadeFired;               // the grenade entity we last fired[m
+[31m-[m
+[31m-	char *track;[m
+[31m-[m
+[31m-	// entity scripting system[m
+[31m-	char *scriptName;[m
+[31m-[m
+[31m-	int numScriptEvents;[m
+[31m-	g_script_event_t *scriptEvents;     // contains a list of actions to perform for each event type[m
+[31m-	g_script_status_t scriptStatus;     // current status of scripting[m
+[31m-										// the accumulation buffer[m
+[31m-	int scriptAccumBuffer[G_MAX_SCRIPT_ACCUM_BUFFERS];[m
+[31m-[m
+[31m-	qboolean AASblocking;[m
+[31m-	vec3_t AASblocking_mins, AASblocking_maxs;[m
+[31m-	float accuracy;[m
+[31m-[m
+[31m-	char tagName[MAX_QPATH];            // name of the tag we are attached to[m
+[31m-	gentity_t *tagParent;[m
+[31m-	gentity_t *tankLink;[m
+[31m-[m
+[31m-	int lastHintCheckTime;                  // DHM - Nerve[m
+[31m-	int voiceChatSquelch;                   // DHM - Nerve[m
+[31m-	int voiceChatPreviousTime;              // DHM - Nerve[m
+[31m-	int lastBurnedFrameNumber;              // JPW - Nerve   : to fix FT instant-kill exploit[m
+[31m-[m
+[31m-	entState_t entstate;[m
+[31m-	char *constages;[m
+[31m-	char *desstages;[m
+[31m-	char *damageparent;[m
+[31m-	int conbmodels[MAX_CONSTRUCT_STAGES + 1];[m
+[31m-	int desbmodels[MAX_CONSTRUCT_STAGES];[m
+[31m-	int partofstage;[m
+[31m-[m
+[31m-	int allowteams;[m
+[31m-[m
+[31m-	int spawnTime;[m
+[31m-[m
+[31m-	gentity_t *dmgparent;[m
+[31m-	qboolean dmginloop;[m
+[31m-[m
+[31m-	// RF, used for linking of static entities for faster searching[m
+[31m-	gentity_t *botNextStaticEntity;[m
+[31m-	int spawnCount;                         // incremented each time this entity is spawned[m
+[31m-	int botIgnoreTime, awaitingHelpTime;[m
+[31m-	int botIgnoreHealthTime, botIgnoreAmmoTime;[m
+[31m-	int botAltGoalTime;[m
+[31m-	vec3_t botGetAreaPos;[m
+[31m-	int botGetAreaNum;[m
+[31m-	int aiInactive;             // bots should ignore this goal[m
+[31m-	int goalPriority[2];[m
+[31m-[m
+[31m-	int tagNumber;              // Gordon: "handle" to a tag header[m
+[31m-[m
+[31m-	int linkTagTime;[m
+[31m-[m
+[31m-	splinePath_t *backspline;[m
+[31m-	vec3_t backorigin;[m
+[31m-	float backdelta;[m
+[31m-	qboolean back;[m
+[31m-	qboolean moving;[m
+[31m-[m
+[31m-	int botLastAttackedTime;[m
+[31m-	int botLastAttackedEnt;[m
+[31m-[m
+[31m-	int botAreaNum;                 // last checked area num[m
+[31m-	vec3_t botAreaPos;[m
+[31m-[m
+[31m-	// TAT 10/13/2002 - for seek cover sequence - we need a pointer to a server entity[m
+[31m-	//		@ARNOUT - does this screw up the save game?[m
+[31m-	g_serverEntity_t *serverEntity;[m
+[31m-[m
+[31m-	// What sort of surface are we standing on?[m
+[31m-	int surfaceFlags;[m
+[31m-[m
+[31m-	char tagBuffer[16];[m
+[31m-[m
+[31m-	// bleh - ugly[m
+[31m-	int backupWeaponTime;[m
+[31m-	int mg42weapHeat;[m
+[31m-[m
+[31m-	vec3_t oldOrigin;[m
+[31m-[m
+[31m-	qboolean runthisframe;[m
+[31m-[m
+[31m-	g_constructible_stats_t constructibleStats;[m
+[31m-[m
+[31m-	//bani[m
+[31m-	int etpro_misc_1;[m
+[31m-[m
+[31m-	//etjump[m
+[31m-	int ident;[m
+[31m-	int reqident;[m
+[31m-	int inc; // increment val for target_increase_ident[m
+[31m-			 // How long in milliseconds it takes for the progress[m
+[31m-			 // identifier to decay back to decayValue[m
+[31m-	int decayTime;[m
+[31m-	// Value that ident decays to[m
+[31m-	int decayValue;[m
+[31m-[m
+[31m-	//Feen - PGM[m
+[31m-	gentity_t *portalBlue;[m
+[31m-	gentity_t *portalRed;[m
+[31m-	// Zero - other portal so we know where to go[m
+[31m-	// when someone goes in a team portal[m
+[31m-	gentity_t *linkedPortal;[m
+[31m-[m
+[31m-	int lastPortalTime; //Last time we teleported using portal[m
+[31m-	int portalTeam;[m
+[31m-[m
+[31m-	int runIndex;[m
+[31m-[m
+[31m-	float velocityLowerLimit;[m
+[31m-	float velocityUpperLimit;[m
+[31m-[m
+[31m-	TokenInformation *tokenInformation;[m
+[31m-};[m
+\ No newline at end of file[m
+[1mdiff --git a/src/game/g_local.h b/src/game/g_local.h[m
+[1mindex fec656b..18188a6 100644[m
+[1m--- a/src/game/g_local.h[m
+[1m+++ b/src/game/g_local.h[m
+[36m@@ -1055,7 +1055,7 @@[m [mtypedef struct ipMute_s[m
+ [m
+ [m
+ // this structure is cleared as each map is entered[m
+[31m-#define MAX_SPAWN_VARS          64[m
+[32m+[m[32m#define MAX_SPAWN_VARS          128[m
+ #define MAX_SPAWN_VARS_CHARS    2048[m
+ #define VOTE_MAXSTRING          256     // Same value as MAX_STRING_TOKENS[m
+ [m
+[1mdiff --git a/src/game/g_spawn.c b/src/game/g_spawn.c[m
+[1mindex 0efbca0..b1b4951 100644[m
+[1m--- a/src/game/g_spawn.c[m
+[1m+++ b/src/game/g_spawn.c[m
+[36m@@ -456,6 +456,7 @@[m [mvoid SP_target_endTimer(gentity_t *self);[m
+ void SP_target_activate_if_velocity(gentity_t *self);[m
+ // Scale velocity[m
+ void SP_target_scale_velocity(gentity_t *self);[m
+[32m+[m[32mvoid SP_target_tracker(gentity_t *self);[m
+ [m
+ [m
+ [m
+[36m@@ -696,6 +697,7 @@[m [mspawn_t spawns[] =[m
+ 	{ "target_stopTimer",            SP_target_endTimer             },[m
+ 	{ "target_activate_if_velocity", SP_target_activate_if_velocity },[m
+ 	{ "target_scale_velocity",       SP_target_scale_velocity       },[m
+[32m+[m	[32m{ "target_tracker",				 SP_target_tracker				},[m
+ 	{ 0,                             0                              }[m
+ };[m
+ [m
+[1mdiff --git a/src/game/g_target.c b/src/game/g_target.c[m
+[1mindex 2d6e548..9b92b45 100644[m
+[1m--- a/src/game/g_target.c[m
+[1m+++ b/src/game/g_target.c[m
+[36m@@ -2264,4 +2264,4 @@[m [mvoid SP_target_scale_velocity(gentity_t *self)[m
+ 	G_SpawnFloat("scale", "1", &self->speed);[m
+ [m
+ 	self->use = target_scale_velocity_use;[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/game/game.vcxproj b/src/game/game.vcxproj[m
+[1mindex 4b84060..195ef24 100644[m
+[1m--- a/src/game/game.vcxproj[m
+[1m+++ b/src/game/game.vcxproj[m
+[36m@@ -1,6 +1,10 @@[m
+ ﻿<?xml version="1.0" encoding="utf-8"?>[m
+ <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">[m
+   <ItemGroup Label="ProjectConfigurations">[m
+[32m+[m[32m    <ProjectConfiguration Include="DebugProgressioTracker|Win32">[m
+[32m+[m[32m      <Configuration>DebugProgressioTracker</Configuration>[m
+[32m+[m[32m      <Platform>Win32</Platform>[m
+[32m+[m[32m    </ProjectConfiguration>[m
+     <ProjectConfiguration Include="Debug|Win32">[m
+       <Configuration>Debug</Configuration>[m
+       <Platform>Win32</Platform>[m
+[36m@@ -32,6 +36,11 @@[m
+     <UseOfMfc>false</UseOfMfc>[m
+     <PlatformToolset>v140</PlatformToolset>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="Configuration">[m
+[32m+[m[32m    <ConfigurationType>DynamicLibrary</ConfigurationType>[m
+[32m+[m[32m    <UseOfMfc>false</UseOfMfc>[m
+[32m+[m[32m    <PlatformToolset>v140</PlatformToolset>[m
+[32m+[m[32m  </PropertyGroup>[m
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />[m
+   <ImportGroup Label="ExtensionSettings">[m
+   </ImportGroup>[m
+[36m@@ -41,12 +50,18 @@[m
+   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">[m
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+   </ImportGroup>[m
+[32m+[m[32m  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="PropertySheets">[m
+[32m+[m[32m    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+[32m+[m[32m  </ImportGroup>[m
+   <PropertyGroup Label="UserMacros" />[m
+   <PropertyGroup>[m
+     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>[m
+     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>[m
+[32m+[m[32m    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</OutDir>[m
+     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>[m
+[32m+[m[32m    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</IntDir>[m
+     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>[m
+[32m+[m[32m    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">false</LinkIncremental>[m
+     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</OutDir>[m
+     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>[m
+     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>[m
+[36m@@ -63,6 +78,12 @@[m
+     </CustomBuildAfterTargets>[m
+     <TargetName>qagame_mp_x86</TargetName>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m
+[32m+[m[32m    <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(IncludePath)</IncludePath>[m
+[32m+[m[32m    <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>[m
+[32m+[m[32m    <CustomBuildAfterTargets />[m
+[32m+[m[32m    <TargetName>qagame_mp_x86</TargetName>[m
+[32m+[m[32m  </PropertyGroup>[m
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">[m
+     <ClCompile>[m
+       <Optimization>Disabled</Optimization>[m
+[36m@@ -114,6 +135,57 @@[m
+       </Command>[m
+     </CustomBuildStep>[m
+   </ItemDefinitionGroup>[m
+[32m+[m[32m  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m
+[32m+[m[32m    <ClCompile>[m
+[32m+[m[32m      <Optimization>Disabled</Optimization>[m
+[32m+[m[32m      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GAMEDLL;HAVE_STRUCT_TIMESPEC;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m
+[32m+[m[32m      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>[m
+[32m+[m[32m      <PrecompiledHeader>[m
+[32m+[m[32m      </PrecompiledHeader>[m
+[32m+[m[32m      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\game.pch</PrecompiledHeaderOutputFile>[m
+[32m+[m[32m      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>[m
+[32m+[m[32m      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>[m
+[32m+[m[32m      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>[m
+[32m+[m[32m      <BrowseInformation>true</BrowseInformation>[m
+[32m+[m[32m      <WarningLevel>Level3</WarningLevel>[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m
+[32m+[m[32m      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>[m
+[32m+[m[32m      <SDLCheck>false</SDLCheck>[m
+[32m+[m[32m    </ClCompile>[m
+[32m+[m[32m    <Link>[m
+[32m+[m[32m      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>[m
+[32m+[m[32m      <AdditionalDependencies>winmm.lib;pthreadsVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>[m
+[32m+[m[32m      <OutputFile>$(SolutionDir)build\qagame_mp_x86.dll</OutputFile>[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m
+[32m+[m[32m      <ModuleDefinitionFile>$(ProjectDir)game.def</ModuleDefinitionFile>[m
+[32m+[m[32m      <GenerateDebugInformation>true</GenerateDebugInformation>[m
+[32m+[m[32m      <ProgramDatabaseFile>.\Debug/qagame_mp_x86.pdb</ProgramDatabaseFile>[m
+[32m+[m[32m      <GenerateMapFile>true</GenerateMapFile>[m
+[32m+[m[32m      <MapFileName>$(ProjectDir)Debug\qagame_mp_x86.map</MapFileName>[m
+[32m+[m[32m      <SubSystem>Windows</SubSystem>[m
+[32m+[m[32m      <BaseAddress>0x20000000</BaseAddress>[m
+[32m+[m[32m      <ImportLibrary>.\Debug/qagame_mp_x86.lib</ImportLibrary>[m
+[32m+[m[32m    </Link>[m
+[32m+[m[32m    <Midl>[m
+[32m+[m[32m      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m
+[32m+[m[32m      <MkTypLibCompatible>true</MkTypLibCompatible>[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m
+[32m+[m[32m      <TargetEnvironment>Win32</TargetEnvironment>[m
+[32m+[m[32m      <TypeLibraryName>.\Debug/game.tlb</TypeLibraryName>[m
+[32m+[m[32m    </Midl>[m
+[32m+[m[32m    <ResourceCompile>[m
+[32m+[m[32m      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m
+[32m+[m[32m      <Culture>0x0409</Culture>[m
+[32m+[m[32m    </ResourceCompile>[m
+[32m+[m[32m    <PostBuildEvent>[m
+[32m+[m[32m      <Command>$(SolutionDir)build\install.bat</Command>[m
+[32m+[m[32m      <Message>Copying debug .dlls to modding ET directory</Message>[m
+[32m+[m[32m    </PostBuildEvent>[m
+[32m+[m[32m    <CustomBuildStep>[m
+[32m+[m[32m      <Command>[m
+[32m+[m[32m      </Command>[m
+[32m+[m[32m    </CustomBuildStep>[m
+[32m+[m[32m  </ItemDefinitionGroup>[m
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">[m
+     <ClCompile>[m
+       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>[m
+[36m@@ -174,6 +246,7 @@[m
+     <ClCompile Include="bg_classes.c" />[m
+     <ClCompile Include="bg_lib.c">[m
+       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>[m
+[32m+[m[32m      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>[m
+       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>[m
+     </ClCompile>[m
+     <ClCompile Include="bg_misc.c" />[m
+[36m@@ -185,7 +258,8 @@[m
+     <ClCompile Include="commands.cpp" />[m
+     <ClCompile Include="custom_map_votes.cpp" />[m
+     <ClCompile Include="etj_database.cpp" />[m
+[31m-    <ClCompile Include="etj_moderation.cpp" />[m
+[32m+[m[32m    <ClCompile Include="etj_progression_tracker.cpp" />[m
+[32m+[m[32m    <ClCompile Include="etj_progression_tracker_parser.cpp" />[m
+     <ClCompile Include="g_active.c" />[m
+     <ClCompile Include="g_alarm.c" />[m
+     <ClCompile Include="g_antilag.c" />[m
+[36m@@ -254,9 +328,9 @@[m
+     <ClInclude Include="commands.hpp" />[m
+     <ClInclude Include="custom_map_votes.hpp" />[m
+     <ClInclude Include="etj_database.hpp" />[m
+[31m-    <ClInclude Include="etj_moderation.h" />[m
+[32m+[m[32m    <ClInclude Include="etj_progression_tracker.hpp" />[m
+[32m+[m[32m    <ClInclude Include="etj_progression_tracker_parser.hpp" />[m
+     <ClInclude Include="game.hpp" />[m
+[31m-    <ClInclude Include="g_entity.h" />[m
+     <ClInclude Include="g_local.h" />[m
+     <ClInclude Include="g_local.hpp" />[m
+     <ClInclude Include="g_public.h" />[m
+[1mdiff --git a/src/game/game.vcxproj.filters b/src/game/game.vcxproj.filters[m
+[1mindex 40a9238..137d594 100644[m
+[1m--- a/src/game/game.vcxproj.filters[m
+[1m+++ b/src/game/game.vcxproj.filters[m
+[36m@@ -13,12 +13,6 @@[m
+       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>[m
+       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>[m
+     </Filter>[m
+[31m-    <Filter Include="Header Files\Moderation">[m
+[31m-      <UniqueIdentifier>{8ac45496-a10d-4dc5-b1c9-606897f195aa}</UniqueIdentifier>[m
+[31m-    </Filter>[m
+[31m-    <Filter Include="Source Files\Moderation">[m
+[31m-      <UniqueIdentifier>{bdf15788-1f39-4db6-ac8e-b8d285d31331}</UniqueIdentifier>[m
+[31m-    </Filter>[m
+   </ItemGroup>[m
+   <ItemGroup>[m
+     <ClCompile Include="bg_animation.c">[m
+[36m@@ -237,8 +231,11 @@[m
+     <ClCompile Include="etj_database.cpp">[m
+       <Filter>Source Files</Filter>[m
+     </ClCompile>[m
+[31m-    <ClCompile Include="etj_moderation.cpp">[m
+[31m-      <Filter>Source Files\Moderation</Filter>[m
+[32m+[m[32m    <ClCompile Include="etj_progression_tracker.cpp">[m
+[32m+[m[32m      <Filter>Source Files</Filter>[m
+[32m+[m[32m    </ClCompile>[m
+[32m+[m[32m    <ClCompile Include="etj_progression_tracker_parser.cpp">[m
+[32m+[m[32m      <Filter>Source Files</Filter>[m
+     </ClCompile>[m
+   </ItemGroup>[m
+   <ItemGroup>[m
+[36m@@ -343,17 +340,17 @@[m
+     <ClInclude Include="tokens.hpp">[m
+       <Filter>Header Files</Filter>[m
+     </ClInclude>[m
+[31m-    <ClInclude Include="g_entity.h">[m
+[31m-      <Filter>Header Files</Filter>[m
+[31m-    </ClInclude>[m
+     <ClInclude Include="etj_utilities.hpp">[m
+       <Filter>Header Files</Filter>[m
+     </ClInclude>[m
+     <ClInclude Include="etj_database.hpp">[m
+       <Filter>Header Files</Filter>[m
+     </ClInclude>[m
+[31m-    <ClInclude Include="etj_moderation.h">[m
+[31m-      <Filter>Header Files\Moderation</Filter>[m
+[32m+[m[32m    <ClInclude Include="etj_progression_tracker.hpp">[m
+[32m+[m[32m      <Filter>Header Files</Filter>[m
+[32m+[m[32m    </ClInclude>[m
+[32m+[m[32m    <ClInclude Include="etj_progression_tracker_parser.hpp">[m
+[32m+[m[32m      <Filter>Header Files</Filter>[m
+     </ClInclude>[m
+   </ItemGroup>[m
+ </Project>[m
+\ No newline at end of file[m
+[1mdiff --git a/src/game/game.vcxproj.user b/src/game/game.vcxproj.user[m
+[1mindex c57b6da..bdb44f8 100644[m
+[1m--- a/src/game/game.vcxproj.user[m
+[1m+++ b/src/game/game.vcxproj.user[m
+[36m@@ -13,4 +13,11 @@[m
+     <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>[m
+     <LocalDebuggerAttach>false</LocalDebuggerAttach>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m
+[32m+[m[32m    <LocalDebuggerCommand>$(ETROOT)etded.exe</LocalDebuggerCommand>[m
+[32m+[m[32m    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>[m
+[32m+[m[32m    <LocalDebuggerCommandArguments>+set fs_game "etjump" +map oasis +set net_port 35000</LocalDebuggerCommandArguments>[m
+[32m+[m[32m    <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>[m
+[32m+[m[32m    <LocalDebuggerAttach>false</LocalDebuggerAttach>[m
+[32m+[m[32m  </PropertyGroup>[m
+ </Project>[m
+\ No newline at end of file[m
+[1mdiff --git a/src/ui/ui.vcxproj b/src/ui/ui.vcxproj[m
+[1mindex 95f4ff5..3910395 100644[m
+[1m--- a/src/ui/ui.vcxproj[m
+[1m+++ b/src/ui/ui.vcxproj[m
+[36m@@ -1,6 +1,10 @@[m
+ ﻿<?xml version="1.0" encoding="utf-8"?>[m
+ <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">[m
+   <ItemGroup Label="ProjectConfigurations">[m
+[32m+[m[32m    <ProjectConfiguration Include="DebugProgressioTracker|Win32">[m[41m[m
+[32m+[m[32m      <Configuration>DebugProgressioTracker</Configuration>[m[41m[m
+[32m+[m[32m      <Platform>Win32</Platform>[m[41m[m
+[32m+[m[32m    </ProjectConfiguration>[m[41m[m
+     <ProjectConfiguration Include="Debug|Win32">[m
+       <Configuration>Debug</Configuration>[m
+       <Platform>Win32</Platform>[m
+[36m@@ -28,6 +32,12 @@[m
+     <CharacterSet>MultiByte</CharacterSet>[m
+     <PlatformToolset>v140</PlatformToolset>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="Configuration">[m[41m[m
+[32m+[m[32m    <ConfigurationType>DynamicLibrary</ConfigurationType>[m[41m[m
+[32m+[m[32m    <UseOfMfc>false</UseOfMfc>[m[41m[m
+[32m+[m[32m    <CharacterSet>MultiByte</CharacterSet>[m[41m[m
+[32m+[m[32m    <PlatformToolset>v140</PlatformToolset>[m[41m[m
+[32m+[m[32m  </PropertyGroup>[m[41m[m
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">[m
+     <ConfigurationType>DynamicLibrary</ConfigurationType>[m
+     <UseOfMfc>false</UseOfMfc>[m
+[36m@@ -40,6 +50,9 @@[m
+   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">[m
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+   </ImportGroup>[m
+[32m+[m[32m  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="PropertySheets">[m[41m[m
+[32m+[m[32m    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m[41m[m
+[32m+[m[32m  </ImportGroup>[m[41m[m
+   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">[m
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />[m
+   </ImportGroup>[m
+[36m@@ -50,12 +63,18 @@[m
+     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>[m
+     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>[m
+     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>[m
+[32m+[m[32m    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</OutDir>[m[41m[m
+     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>[m
+[32m+[m[32m    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</IntDir>[m[41m[m
+     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>[m
+[32m+[m[32m    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</LinkIncremental>[m[41m[m
+   </PropertyGroup>[m
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">[m
+     <TargetName>ui_mp_x86</TargetName>[m
+   </PropertyGroup>[m
+[32m+[m[32m  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m[41m[m
+[32m+[m[32m    <TargetName>ui_mp_x86</TargetName>[m[41m[m
+[32m+[m[32m  </PropertyGroup>[m[41m[m
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">[m
+     <TargetName>ui_mp_x86</TargetName>[m
+   </PropertyGroup>[m
+[36m@@ -144,11 +163,54 @@[m
+       <Culture>0x0409</Culture>[m
+     </ResourceCompile>[m
+   </ItemDefinitionGroup>[m
+[32m+[m[32m  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">[m[41m[m
+[32m+[m[32m    <ClCompile>[m[41m[m
+[32m+[m[32m      <Optimization>Disabled</Optimization>[m[41m[m
+[32m+[m[32m      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;UI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m[41m[m
+[32m+[m[32m      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>[m[41m[m
+[32m+[m[32m      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>[m[41m[m
+[32m+[m[32m      <PrecompiledHeader>[m[41m[m
+[32m+[m[32m      </PrecompiledHeader>[m[41m[m
+[32m+[m[32m      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\ui.pch</PrecompiledHeaderOutputFile>[m[41m[m
+[32m+[m[32m      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>[m[41m[m
+[32m+[m[32m      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>[m[41m[m
+[32m+[m[32m      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>[m[41m[m
+[32m+[m[32m      <BrowseInformation>true</BrowseInformation>[m[41m[m
+[32m+[m[32m      <WarningLevel>Level3</WarningLevel>[m[41m[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m[41m[m
+[32m+[m[32m      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>[m[41m[m
+[32m+[m[32m    </ClCompile>[m[41m[m
+[32m+[m[32m    <Link>[m[41m[m
+[32m+[m[32m      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>[m[41m[m
+[32m+[m[32m      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>[m[41m[m
+[32m+[m[32m      <OutputFile>$(SolutionDir)build\ui_mp_x86.dll</OutputFile>[m[41m[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m[41m[m
+[32m+[m[32m      <ModuleDefinitionFile>$(ProjectDir)ui.def</ModuleDefinitionFile>[m[41m[m
+[32m+[m[32m      <GenerateDebugInformation>true</GenerateDebugInformation>[m[41m[m
+[32m+[m[32m      <ProgramDatabaseFile>../Debug/ui.pdb</ProgramDatabaseFile>[m[41m[m
+[32m+[m[32m      <GenerateMapFile>true</GenerateMapFile>[m[41m[m
+[32m+[m[32m      <MapFileName>$(ProjectDir)Debug\ui_mp_x86.map</MapFileName>[m[41m[m
+[32m+[m[32m      <BaseAddress>0x40000000</BaseAddress>[m[41m[m
+[32m+[m[32m      <ImportLibrary>.\Debug/ui_mp_x86.lib</ImportLibrary>[m[41m[m
+[32m+[m[32m    </Link>[m[41m[m
+[32m+[m[32m    <Midl>[m[41m[m
+[32m+[m[32m      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m[41m[m
+[32m+[m[32m      <MkTypLibCompatible>true</MkTypLibCompatible>[m[41m[m
+[32m+[m[32m      <SuppressStartupBanner>true</SuppressStartupBanner>[m[41m[m
+[32m+[m[32m      <TargetEnvironment>Win32</TargetEnvironment>[m[41m[m
+[32m+[m[32m      <TypeLibraryName>.\Debug/ui.tlb</TypeLibraryName>[m[41m[m
+[32m+[m[32m    </Midl>[m[41m[m
+[32m+[m[32m    <ResourceCompile>[m[41m[m
+[32m+[m[32m      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>[m[41m[m
+[32m+[m[32m      <Culture>0x0409</Culture>[m[41m[m
+[32m+[m[32m    </ResourceCompile>[m[41m[m
+[32m+[m[32m  </ItemDefinitionGroup>[m[41m[m
+   <ItemGroup>[m
+     <ClCompile Include="..\game\bg_campaign.c" />[m
+     <ClCompile Include="..\game\bg_classes.c" />[m
+     <ClCompile Include="..\game\bg_lib.c">[m
+       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>[m
+[32m+[m[32m      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>[m[41m[m
+       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>[m
+     </ClCompile>[m
+     <ClCompile Include="..\game\bg_misc.c" />[m
+warning: LF will be replaced by CRLF in src/game/g_spawn.c.
+The file will have its original line endings in your working directory.

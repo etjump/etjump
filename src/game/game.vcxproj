@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugProgressioTracker|Win32">
+      <Configuration>DebugProgressioTracker</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -32,6 +36,11 @@
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -41,12 +50,18 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -63,7 +78,64 @@
     </CustomBuildAfterTargets>
     <TargetName>qagame_mp_x86</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
+    <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
+    <CustomBuildAfterTargets />
+    <TargetName>qagame_mp_x86</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GAMEDLL;HAVE_STRUCT_TIMESPEC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>$(ProjectDir)Debug\game.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>
+      <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <SDLCheck>false</SDLCheck>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>winmm.lib;pthreadsVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)build\qagame_mp_x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>$(ProjectDir)game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug/qagame_mp_x86.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)Debug\qagame_mp_x86.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <BaseAddress>0x20000000</BaseAddress>
+      <ImportLibrary>.\Debug/qagame_mp_x86.lib</ImportLibrary>
+    </Link>
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/game.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)build\install.bat</Command>
+      <Message>Copying debug .dlls to modding ET directory</Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GAMEDLL;HAVE_STRUCT_TIMESPEC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -174,6 +246,7 @@
     <ClCompile Include="bg_classes.c" />
     <ClCompile Include="bg_lib.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="bg_misc.c" />
@@ -185,7 +258,8 @@
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="custom_map_votes.cpp" />
     <ClCompile Include="etj_database.cpp" />
-    <ClCompile Include="etj_moderation.cpp" />
+    <ClCompile Include="etj_progression_tracker.cpp" />
+    <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="g_active.c" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
@@ -254,9 +328,9 @@
     <ClInclude Include="commands.hpp" />
     <ClInclude Include="custom_map_votes.hpp" />
     <ClInclude Include="etj_database.hpp" />
-    <ClInclude Include="etj_moderation.h" />
+    <ClInclude Include="etj_progression_tracker.hpp" />
+    <ClInclude Include="etj_progression_tracker_parser.hpp" />
     <ClInclude Include="game.hpp" />
-    <ClInclude Include="g_entity.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_local.hpp" />
     <ClInclude Include="g_public.h" />

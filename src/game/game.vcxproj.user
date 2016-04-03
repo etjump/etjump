@@ -13,4 +13,11 @@
     <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
     <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
+    <LocalDebuggerCommand>$(ETROOT)etded.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>+set fs_game "etjump" +map oasis +set net_port 35000</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerAttach>false</LocalDebuggerAttach>
+  </PropertyGroup>
 </Project>

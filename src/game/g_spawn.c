@@ -456,6 +456,7 @@ void SP_target_endTimer(gentity_t *self);
 void SP_target_activate_if_velocity(gentity_t *self);
 // Scale velocity
 void SP_target_scale_velocity(gentity_t *self);
+void SP_target_tracker(gentity_t *self);
 
 
 
@@ -696,6 +697,7 @@ spawn_t spawns[] =
 	{ "target_stopTimer",            SP_target_endTimer             },
 	{ "target_activate_if_velocity", SP_target_activate_if_velocity },
 	{ "target_scale_velocity",       SP_target_scale_velocity       },
+	{ "target_tracker",				 SP_target_tracker				},
 	{ 0,                             0                              }
 };
 

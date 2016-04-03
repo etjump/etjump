@@ -1,0 +1,100 @@
+#include <memory>
+#include <boost/algorithm/string.hpp>
+#include "etj_progression_tracker_parser.hpp"
+
+extern "C" {
+#include "g_local.h"
+}
+
+#include "etj_progression_tracker.hpp"
+
+const char *ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET = "-1";
+
+ETJump::ProgressionTrackers::ProgressionTrackers()
+{
+	_progressionTrackers.clear();
+}
+
+ETJump::ProgressionTrackers::~ProgressionTrackers()
+{
+}
+
+void ETJump::ProgressionTrackers::printParserErrors(const std::vector<std::string>& errors, const std::string& text)
+{
+	auto buffer = "Tracker parse error on line: " + text + "\n";
+	buffer += boost::algorithm::join(errors, "\n");
+	G_Error(buffer.c_str());
+}
+
+void ETJump::ProgressionTrackers::updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs, int tracker[10])
+{
+	for (const auto & pair : pairs)
+	{
+		if (pair.index >= MAX_PROGRESSION_TRACKERS)
+		{
+			G_Error("Tracker error: specified index (%d) is greater than maximum number of trackers (%d)", pair.index, MAX_PROGRESSION_TRACKERS);
+		}
+
+		tracker[pair.index] = pair.value;
+	}
+}
+
+std::vector<ETJump::ProgressionTrackerParser::IndexValuePair> ETJump::ProgressionTrackers::parseKey(const std::string& key)
+{
+	auto parser = ProgressionTrackerParser(key);
+	auto errors = parser.getErrors();
+	if (errors.size())
+	{
+		printParserErrors(errors, key);
+	}
+	return parser.getParsedPairs();
+}
+
+int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys)
+{
+	auto progressionTracker = ProgressionTracker();
+
+	updateTracker(parseKey(keys.equal), progressionTracker.equal);
+	updateTracker(parseKey(keys.greaterThan), progressionTracker.greaterThan);
+	updateTracker(parseKey(keys.lessThan), progressionTracker.lessThan);
+	updateTracker(parseKey(keys.set), progressionTracker.set);
+	updateTracker(parseKey(keys.setIf), progressionTracker.setIf);
+	updateTracker(parseKey(keys.increment), progressionTracker.increment);
+	updateTracker(parseKey(keys.incrementIf), progressionTracker.incrementIf);
+
+	_progressionTrackers.push_back(progressionTracker);
+	return _progressionTrackers.size() - 1;
+}
+
+void ETJump::ProgressionTrackers::useEntity(gentity_t* ent, gentity_t* other, gentity_t* activator)
+{
+
+}
+
+namespace ETJump
+{
+	static std::unique_ptr<ProgressionTrackers> progressionTrackers;
+}
+
+extern "C" void SP_target_tracker(gentity_t *self)
+{
+	ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
+
+	G_SpawnString("tracker_eq", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.equal);
+	G_SpawnString("tracker_gt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.greaterThan);
+	G_SpawnString("tracker_lt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.lessThan);
+	G_SpawnString("tracker_set", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.set);
+	G_SpawnString("tracker_setIf", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.setIf);
+	G_SpawnString("tracker_inc", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.increment);
+	G_SpawnString("tracker_inc_if", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.incrementIf);
+
+	if (!ETJump::progressionTrackers)
+	{
+		ETJump::progressionTrackers = std::unique_ptr<ETJump::ProgressionTrackers>(new ETJump::ProgressionTrackers);
+	}
+	self->key = ETJump::progressionTrackers->registerTracker(keys);
+	self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator)
+	{
+		ETJump::progressionTrackers->useEntity(ent, other, activator);
+	};
+}

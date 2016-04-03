@@ -1055,7 +1055,7 @@ typedef struct ipMute_s
 
 
 // this structure is cleared as each map is entered
-#define MAX_SPAWN_VARS          64
+#define MAX_SPAWN_VARS          128
 #define MAX_SPAWN_VARS_CHARS    2048
 #define VOTE_MAXSTRING          256     // Same value as MAX_STRING_TOKENS
 

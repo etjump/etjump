@@ -13,12 +13,6 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="Header Files\Moderation">
-      <UniqueIdentifier>{8ac45496-a10d-4dc5-b1c9-606897f195aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Moderation">
-      <UniqueIdentifier>{bdf15788-1f39-4db6-ac8e-b8d285d31331}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bg_animation.c">
@@ -237,8 +231,11 @@
     <ClCompile Include="etj_database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_moderation.cpp">
-      <Filter>Source Files\Moderation</Filter>
+    <ClCompile Include="etj_progression_tracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_progression_tracker_parser.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,17 +340,17 @@
     <ClInclude Include="tokens.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_database.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_moderation.h">
-      <Filter>Header Files\Moderation</Filter>
+    <ClInclude Include="etj_progression_tracker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_progression_tracker_parser.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
