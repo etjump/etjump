@@ -1806,6 +1806,10 @@ char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	}
 	ent->client->sess.receivedTimerunStates = qfalse;
+	for (i = 0; i < MAX_PROGRESSION_TRACKERS; ++i)
+	{
+		ent->client->sess.progression[i] = 0;
+	}
 	client->sess.loadPreviousSavedPositions = qtrue;
 	// read or initialize the session data
 	if (firstTime)

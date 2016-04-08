@@ -175,6 +175,8 @@ FILE(GLOB QAGAME_SRC
 	"game/timerun.cpp"
 	"game/user.cpp"
 	"game/etj_utilities.cpp"
+  "game/etj_progression_tracker.cpp"
+  "game/etj_progression_tracker_parser.cpp"
 	"json/jsoncpp.cpp"
 	"sha-1/bg_sha.c"
 	"sha-1/sha1.c"

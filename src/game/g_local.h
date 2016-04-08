@@ -718,6 +718,10 @@ typedef struct
 
 	qboolean timerunActive;
 	qboolean receivedTimerunStates;
+
+	// new implementation of progression
+#define MAX_PROGRESSION_TRACKERS 10
+	int progression[MAX_PROGRESSION_TRACKERS];
 } clientSession_t;
 
 //
@@ -856,6 +860,7 @@ typedef struct
 	int tokenCollectionStartTime;
 
 	ipFilter_t complaintips[MAX_COMPLAINTIPS];
+
 } clientPersistant_t;
 
 typedef struct
@@ -1414,6 +1419,7 @@ gentity_t *G_FindByTargetname(gentity_t *from, const char *match);
 gentity_t *G_FindByTargetnameFast(gentity_t *from, const char *match, int hash);
 gentity_t *G_PickTarget(char *targetname);
 void    G_UseTargets(gentity_t *ent, gentity_t *activator);
+void G_UseTargetedEntities(gentity_t *ent, gentity_t *activator);
 void    G_SetMovedir(vec3_t angles, vec3_t movedir);
 
 void    G_InitGentity(gentity_t *e);

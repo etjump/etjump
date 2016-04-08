@@ -486,6 +486,41 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator)
 	}
 }
 
+void G_UseTargetedEntities(gentity_t *ent, gentity_t *activator)
+{
+	int hash = 0;
+	gentity_t *t = NULL;
+	if (!ent)
+	{
+		return;
+	}
+
+	if (!ent->target)
+	{
+		return;
+	}
+
+	hash = BG_StringHashValue(ent->target);
+	while ((t = G_FindByTargetnameFast(t, ent->target, hash)) != NULL)
+	{
+		if (t == ent)
+		{
+			G_Printf("WARNING: Entity used itself.\n");
+		}
+		else
+		{
+			if (t->use)
+			{
+				G_UseEntity(t, ent, activator);
+			}
+		}
+		if (!ent->inuse)
+		{
+			G_Printf("entity was removed while using targets\n");
+			return;
+		}
+	}
+}
 
 /*
 =============
