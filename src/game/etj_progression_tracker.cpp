@@ -71,19 +71,9 @@ namespace ETJump
 	static std::unique_ptr<ProgressionTrackers> progressionTrackers;
 }
 
-void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t* ent, gentity_t* other, gentity_t* activator)
+
+void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activator, const ProgressionTracker& tracker)
 {
-}
-
-void ETJump::ProgressionTrackers::useTargetTracker(gentity_t* ent, gentity_t* other, gentity_t* activator)
-{
-	auto tracker = _progressionTrackers[ent->key];
-
-	if (!activator || !activator->client)
-	{
-		return;
-	}
-
 	auto idx = 0;
 	for (auto & v : tracker.set)
 	{
@@ -93,7 +83,7 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t* ent, gentity_t* ot
 		}
 
 		++idx;
-	}	
+	}
 
 	idx = 0;
 	for (auto & v : tracker.increment)
@@ -109,8 +99,8 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t* ent, gentity_t* ot
 	{
 		auto clientTracker = activator->client->sess.progression[idx];
 
-		if ((tracker.equal[idx] != ProgressionTrackerValueNotSet && tracker.equal[idx] == clientTracker) || 
-			(tracker.lessThan[idx] != ProgressionTrackerValueNotSet && tracker.lessThan[idx] > clientTracker) || 
+		if ((tracker.equal[idx] != ProgressionTrackerValueNotSet && tracker.equal[idx] == clientTracker) ||
+			(tracker.lessThan[idx] != ProgressionTrackerValueNotSet && tracker.lessThan[idx] > clientTracker) ||
 			(tracker.greaterThan[idx] != ProgressionTrackerValueNotSet && tracker.greaterThan[idx] < clientTracker))
 		{
 			// activate
@@ -127,6 +117,30 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t* ent, gentity_t* ot
 			}
 		}
 	}
+}
+
+void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t* ent, gentity_t* activator)
+{
+	auto tracker = _progressionTrackers[ent->key];
+
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	useTracker(ent, activator, tracker);
+}
+
+void ETJump::ProgressionTrackers::useTargetTracker(gentity_t* ent, gentity_t* other, gentity_t* activator)
+{
+	auto tracker = _progressionTrackers[ent->key];
+
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	useTracker(ent, activator, tracker);
 }
 
 extern "C" void SP_target_tracker(gentity_t *self)
@@ -154,6 +168,10 @@ extern "C" void SP_target_tracker(gentity_t *self)
 
 extern "C" void SP_trigger_tracker(gentity_t *self)
 {
+	InitTrigger(self);
+	// just make it same type as trigger multiple for now
+	self->s.eType = ET_TRIGGER_MULTIPLE;
+
 	ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
 
 	G_SpawnString("tracker_eq", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.equal);
@@ -172,6 +190,10 @@ extern "C" void SP_trigger_tracker(gentity_t *self)
 	self->key = ETJump::progressionTrackers->registerTracker(keys);
 	self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator)
 	{
-		ETJump::progressionTrackers->useTriggerTracker(ent, other, activator);
+		ETJump::progressionTrackers->useTriggerTracker(ent, activator);
+	};
+	self->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace)
+	{
+		ETJump::progressionTrackers->useTriggerTracker(ent, activator);
 	};
 }

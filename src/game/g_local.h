@@ -1534,6 +1534,7 @@ void Reached_Tramcar(gentity_t *ent);
 // g_trigger.c
 //
 void Think_SetupObjectiveInfo(gentity_t *ent);
+void InitTrigger(gentity_t *self);
 
 //
 // g_misc.c

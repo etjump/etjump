@@ -50,8 +50,10 @@ namespace ETJump
 		void updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs, int tracker[MaxProgressionTrackers]);
 		int registerTracker(ProgressionTrackerKeys keys);
 		void useTargetTracker(gentity_t* ent, gentity_t* other, gentity_t* activator);
-		void useTriggerTracker(gentity_t* ent, gentity_t* other, gentity_t* activator);
+		void useTriggerTracker(gentity_t* ent, gentity_t* activator);
 	private:
+		void useTracker(gentity_t *ent, gentity_t *activator, const ProgressionTracker& tracker);
+
 		std::vector<ProgressionTracker> _progressionTrackers;
 	};
 }
