@@ -2400,6 +2400,20 @@ const char *CG_AddChatModifications(char *text, int clientNum)
 	return message;
 }
 
+void CG_FixLinesEndingWithCaret(char *text, int size)
+{
+	int len = strlen(text);
+	if (text[len - 1] != '^')
+	{
+		return;
+	}
+
+	// replace ^ with ^2
+	text[size - 3] = '^';
+	text[size - 2] = '2';
+	text[size - 1] = 0;
+}
+
 static void CG_ServerCommand(void)
 {
 	const char *cmd;
@@ -2591,6 +2605,7 @@ static void CG_ServerCommand(void)
 		s = CG_AddChatModifications(text, atoi(CG_Argv(2)));
 		Q_strncpyz(text, s, MAX_SAY_TEXT);
 
+		CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
 
 		CG_Printf("%s\n", text);
@@ -2623,6 +2638,7 @@ static void CG_ServerCommand(void)
 		s = CG_AddChatModifications(text, atoi(CG_Argv(2)));
 		Q_strncpyz(text, s, MAX_SAY_TEXT);
 
+		CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
 		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
 		CG_Printf("%s\n", text);   // JPW NERVE
 
