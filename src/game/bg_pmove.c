@@ -6751,19 +6751,6 @@ void PmoveSingle(pmove_t *pmove)
 		pm->cmd.upmove      = 0;
 	}
 
-#ifndef CGAMEDLL
-	if (pm->cmd.forwardmove == -128)
-	{
-		AC_LogCheat(pm->ps->clientNum);
-		pm->cmd.forwardmove = AC_SetSpeed();
-	}
-	else if (pm->cmd.rightmove == -128)
-	{
-		pm->cmd.rightmove = AC_SetSpeed();
-		AC_LogCheat(pm->ps->clientNum);
-	}
-#endif
-
 	if (pm->ps->pm_type == PM_SPECTATOR)
 	{
 		PM_CheckDuck();
