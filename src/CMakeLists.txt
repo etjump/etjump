@@ -107,7 +107,6 @@ FILE(GLOB CGAME_SRC
 
 FILE(GLOB QAGAME_SRC
 	"game/async_operation.cpp"
-	"game/banner.cpp"
 	"game/bg_animation.c"
 	"game/bg_animgroup.c"
 	"game/bg_campaign.c"
@@ -177,6 +176,10 @@ FILE(GLOB QAGAME_SRC
 	"game/etj_utilities.cpp"
   "game/etj_progression_tracker.cpp"
   "game/etj_progression_tracker_parser.cpp"
+  "game/etj_banner_system.cpp"
+  "game/etj_command_variables.cpp"
+  "game/etj_common.hpp"
+  "game/etj_main.cpp"
 	"json/jsoncpp.cpp"
 	"sha-1/bg_sha.c"
 	"sha-1/sha1.c"

@@ -1077,6 +1077,12 @@ qboolean    ConsoleCommand(void)
 		return qtrue;
 	}
 
+	if (!Q_stricmp(cmd, "rowtheboat"))
+	{
+		G_LogPrintf("Rowing the boat\n");
+		return qtrue;
+	}
+
 	if (OnConsoleCommand())
 	{
 		return qtrue;

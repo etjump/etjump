@@ -65,7 +65,7 @@ public:
 	 * Sends a banner print message to all clients.
 	 * @param message The message to be sent
 	 */
-	static void BroadcastBannerMessage(const std::string& message);
+	static void BroadcastLeftBannerMessage(const std::string& message);
 	/**
 	* Sends a banner print message to all clients.
 	* @param message The message to be sent
@@ -91,6 +91,18 @@ public:
 	* @param command The command to send to users
 	*/
 	static void SendCommandToAll(const std::string& command);
+
+	/**
+	* Broadcasts a top banner message to all clients
+	* @param message The message
+	*/
+	static void BroadcastTopBannerMessage(const std::string& message);
+
+	/**
+	* Broadcasts a left banner message to all clients
+	* @param message The message
+	*/
+	static void BroadcastCenterMessage(const std::string& message);
 private:
 };
 

@@ -1978,6 +1978,7 @@ extern vmCvar_t g_banner2;
 extern vmCvar_t g_banner3;
 extern vmCvar_t g_banner4;
 extern vmCvar_t g_banner5;
+extern vmCvar_t g_banners;
 
 //Feen: PGM
 extern vmCvar_t g_portalDebug;
@@ -2745,10 +2746,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNum);   //TODO add switch for 
 
 
 //Feen: END PGM
-
-// G_banner.cpp
-void SetBanners();
-void CheckBanners();
 
 // g_utilities.cpp
 // C versions of printing functions

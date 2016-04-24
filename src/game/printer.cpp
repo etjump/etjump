@@ -96,7 +96,7 @@ void Printer::BroadcastChatMessage(const std::string &message)
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastBannerMessage(const std::string &message)
+void Printer::BroadcastLeftBannerMessage(const std::string &message)
 {
 	trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
@@ -123,6 +123,18 @@ void Printer::SendBannerMessage(int clientNum, const std::string &message)
 void Printer::SendCommand(int clientNum, const std::string &command)
 {
 	trap_SendServerCommand(clientNum, command.c_str());
+}
+
+void Printer::BroadcastTopBannerMessage(const std::string& message)
+{
+	trap_SendServerCommand(-1, va("bp \"%s\n\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
+}
+
+void Printer::BroadcastCenterMessage(const std::string& message)
+{
+	trap_SendServerCommand(-1, va("cp \"%s\n\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
 }
 
 void Printer::SendCommandToAll(const std::string& command)

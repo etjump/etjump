@@ -204,9 +204,6 @@
     <ClCompile Include="custom_map_votes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="banner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -235,6 +232,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_progression_tracker_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_banner_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_command_variables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -350,6 +356,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_progression_tracker_parser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_banner_system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_command_variables.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

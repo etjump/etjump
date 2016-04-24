@@ -69,18 +69,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)pthread;D:\boost_1_57_0;$(SolutionDir)sqlite;$(IncludePath)</IncludePath>
     <TargetName>qagame_mp_x86</TargetName>
-    <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sqlite;D:\boost_1_57_0;$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
     <TargetName>qagame_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
-    <IncludePath>C:\Users\haapa\Documents\GitHub\etjump\src\sqlite;D:\boost_1_57_0;C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\haapa\Documents\GitHub\etjump\src\pthread;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)sqlite;D:\boost_1_57_0;$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets />
     <TargetName>qagame_mp_x86</TargetName>
   </PropertyGroup>
@@ -257,7 +257,10 @@
     <ClCompile Include="bg_tracemap.c" />
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="custom_map_votes.cpp" />
+    <ClCompile Include="etj_banner_system.cpp" />
+    <ClCompile Include="etj_command_variables.cpp" />
     <ClCompile Include="etj_database.cpp" />
+    <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="g_active.c" />
@@ -272,7 +275,6 @@
     <ClCompile Include="g_fireteams.c" />
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_main.c" />
-    <ClCompile Include="banner.cpp" />
     <ClCompile Include="g_match.c" />
     <ClCompile Include="g_mem.c" />
     <ClCompile Include="g_misc.c" />
@@ -327,6 +329,9 @@
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="commands.hpp" />
     <ClInclude Include="custom_map_votes.hpp" />
+    <ClInclude Include="etj_banner_system.hpp" />
+    <ClInclude Include="etj_command_variables.hpp" />
+    <ClInclude Include="etj_common.hpp" />
     <ClInclude Include="etj_database.hpp" />
     <ClInclude Include="etj_progression_tracker.hpp" />
     <ClInclude Include="etj_progression_tracker_parser.hpp" />

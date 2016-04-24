@@ -210,6 +210,7 @@ vmCvar_t g_banner2;
 vmCvar_t g_banner3;
 vmCvar_t g_banner4;
 vmCvar_t g_banner5;
+vmCvar_t g_banners;
 
 
 // Feen: PGM
@@ -487,6 +488,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_banner3,                   "g_banner3",                   "www.etjump.com",                                         CVAR_ARCHIVE },
 	{ &g_banner4,                   "g_banner4",                   "Developed by Zero, Feengur and Setup",                   CVAR_ARCHIVE },
 	{ &g_banner5,                   "g_banner5",                   "Thanks for choosing ETJump!",                            CVAR_ARCHIVE },
+	{&g_banners , "g_banners", "1", CVAR_ARCHIVE},
 
 	//Feen: PGM
 	{ &g_portalDebug,               "g_portalDebug",               "0",                                                      CVAR_CHEAT | CVAR_ARCHIVE },
@@ -1646,14 +1648,6 @@ void G_UpdateCvars(void)
 						trap_Cvar_Set(cv->cvarName, "33");
 					}
 				}
-				else if (cv->vmCvar == &g_banner1 ||
-				         cv->vmCvar == &g_banner2 ||
-				         cv->vmCvar == &g_banner3 ||
-				         cv->vmCvar == &g_banner4 ||
-				         cv->vmCvar == &g_banner5)
-				{
-					SetBanners();
-				}
 				else if (cv->vmCvar == &g_randomMapModeInterval)
 				{
 					UpdateRandomMapInterval(g_randomMapModeInterval.integer);
@@ -1801,6 +1795,8 @@ void InitGhosting()
 }
 // Fixes MAX_NUM_SPAWNTARGETS EXCEEDED
 void ResetNumSpawnTargets();
+void ETJump_InitGame(int levelTime, int randomSeed, int restart);
+
 /*
 ============
 G_InitGame
@@ -2111,16 +2107,16 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// Match init work
 	G_loadMatchGame();
 
-	SetBanners();
-
 	// Reinstate any MV views for clients -- need to do this after all init is complete
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
 
 	OnGameInit();
+	ETJump_InitGame(levelTime, randomSeed, restart);
 }
 
 
+void ETJump_ShutdownGame(int restart);
 
 /*
 =================
@@ -2131,6 +2127,7 @@ void G_ShutdownGame(int restart)
 {
 
 	OnGameShutdown();
+	ETJump_ShutdownGame(restart);
 
 	// Arnout: gametype latching
 	if  (
@@ -3979,6 +3976,8 @@ void G_RunEntity(gentity_t *ent, int msec)
 	VectorScale(ent->instantVelocity, 1000.0f / msec, ent->instantVelocity);
 }
 
+void ETJump_RunFrame(int levelTime);
+
 /*
 ================
 G_RunFrame
@@ -4087,8 +4086,6 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 	// cancel vote if timed out
 	CheckVote();
 
-	CheckBanners();
-
 	// for tracking changes
 	CheckCvars();
 
@@ -4106,6 +4103,7 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 	// Check if we are reloading, and times have expired
 	G_CheckReloadStatus();
 #endif // SAVEGAME_SUPPORT
+	ETJump_RunFrame(levelTime);
 }
 
 // Is this a single player type game - sp or coop?
