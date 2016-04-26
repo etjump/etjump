@@ -1899,6 +1899,7 @@ void SP_target_save(gentity_t *self)
 	self->use = target_save_use;
 }
 
+#define SF_REMOVE_PORTALS_NO_TEXT 0x1
 void target_remove_portals_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	if (!activator || !activator->client)
@@ -1924,7 +1925,12 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other, gentity_t *act
 		activator->portalRed = NULL;
 	}
 
-	trap_SendServerCommand(activator - g_entities, "cp \"^7Your portal gun portals have been reseted.\n\"");
+	if (self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)
+	{
+		return;
+	}
+
+	trap_SendServerCommand(activator - g_entities, "cp \"^7Your portal gun portals have been reset.\n\"");
 }
 
 void SP_target_remove_portals(gentity_t *self)
