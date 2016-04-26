@@ -3201,6 +3201,17 @@ Will perform callbacks to make the loading info screen update.
 #define DEBUG_INITPROFILE_INIT int elapsed, dbgTime = trap_Milliseconds();
 #define DEBUG_INITPROFILE_EXEC(f) if (developer.integer) { CG_Printf("^5%s passed in %i msec\n", f, elapsed = trap_Milliseconds() - dbgTime);  dbgTime += elapsed; }
 #endif // _DEBUG
+
+// Executes autoexec_mapname.cfg whenever map changes
+// if it exists.
+void CG_AutoExec_f()
+{
+	const char buffer[MAX_QPATH] = "cmd exec \"autoexec_";
+	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
+	Q_strcat(buffer, sizeof(buffer), "\"");
+	trap_SendConsoleCommand(buffer);
+}
+
 void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qboolean demoPlayback)
 {
 	const char *s;
@@ -3429,10 +3440,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 #endif // AC_SUPPORT
 	InitGame();
-	//SendGuid();
-	//SendHWID();
-	//UserinfoSendHWID();
-	//	CG_Printf("Time taken: %i\n", trap_Milliseconds() - startat);
+
+	CG_AutoExec_f();
 }
 
 /*
