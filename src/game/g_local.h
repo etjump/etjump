@@ -861,6 +861,7 @@ typedef struct
 
 	ipFilter_t complaintips[MAX_COMPLAINTIPS];
 
+	int previousSetHealthTime;
 } clientPersistant_t;
 
 typedef struct
@@ -1029,6 +1030,9 @@ struct gclient_s
 
 	// Whether the client already activated a trigger or not
 	qboolean alreadyActivatedTrigger;
+
+	// Whether the client already activated target_set_health
+	qboolean alreadyActivatedSetHealth;
 };
 
 typedef struct

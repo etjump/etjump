@@ -1979,6 +1979,8 @@ void ClientBegin(int clientNum)
 		TimerunConnectNotify(ent);
 		ent->client->sess.receivedTimerunStates = qtrue;
 	}
+
+	ent->client->pers.previousSetHealthTime = 0;
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)

@@ -2271,3 +2271,62 @@ void SP_target_scale_velocity(gentity_t *self)
 
 	self->use = target_scale_velocity_use;
 }
+
+void target_interrupt_timerun(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (activator && activator->client)
+	{
+		InterruptRun(activator);
+	}
+}
+
+void SP_target_interrupt_timerun(gentity_t *self)
+{
+	self->use = target_interrupt_timerun;
+}
+
+// target_set_health
+// Sets the health of the target to the specified value.
+// spawnflags
+// 1 => once per life
+// keys
+// delay => how long in ms before next activation by same player
+#define SF_SET_HEALTH_ONCE 0x1
+void target_set_health_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	if (self->spawnflags & SF_SET_HEALTH_ONCE && activator->client->alreadyActivatedSetHealth)
+	{
+		return;
+	}
+
+	if (activator->client->pers.previousSetHealthTime + self->wait > level.time)
+	{
+		return;
+	}
+
+	// don't heal dead players
+	if (activator->health > 0)
+	{
+		activator->health = self->count;
+		activator->client->pers.previousSetHealthTime = level.time;
+		activator->client->alreadyActivatedSetHealth = qtrue;
+	}
+}
+
+void SP_target_set_health(gentity_t *self)
+{
+	G_SpawnFloat("wait", "1000", &self->wait);
+	G_SpawnInt("health", "100", &self->count);
+
+	if (self->count <= 0)
+	{
+		G_Error("target_set_health health is less than or equal to 0: (%d)\n", self->count);
+	}
+
+	self->use = target_set_health_use;
+}

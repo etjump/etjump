@@ -406,6 +406,11 @@ void TimerunConnectNotify(gentity_t *ent)
 }
 void InterruptRun(gentity_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	game.timerun->interrupt(ClientNum(ent));
 }
 

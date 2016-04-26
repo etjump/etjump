@@ -452,12 +452,14 @@ void SP_target_savelimit_inc(gentity_t *self);
 void SP_target_decay(gentity_t *self);
 void SP_target_startTimer(gentity_t *self);
 void SP_target_endTimer(gentity_t *self);
+void SP_target_interrupt_timerun(gentity_t *self);
 // Check speed and if it's too high/low, fire the target
 void SP_target_activate_if_velocity(gentity_t *self);
 // Scale velocity
 void SP_target_scale_velocity(gentity_t *self);
 void SP_target_tracker(gentity_t *self);
 void SP_trigger_tracker(gentity_t *self);
+void SP_target_set_health(gentity_t *self);
 
 
 
@@ -696,10 +698,12 @@ spawn_t spawns[] =
 	{ "target_startTimer",           SP_target_startTimer           },
 	{ "target_stoptimer",            SP_target_endTimer             },
 	{ "target_stopTimer",            SP_target_endTimer             },
+	{"target_interrupt_timerun", SP_target_interrupt_timerun},
 	{ "target_activate_if_velocity", SP_target_activate_if_velocity },
 	{ "target_scale_velocity",       SP_target_scale_velocity       },
 	{ "trigger_tracker",			 SP_trigger_tracker				},
 	{ "target_tracker",				 SP_target_tracker				},
+	{"target_set_health", SP_target_set_health },
 	{ 0,                             0                              }
 };
 
