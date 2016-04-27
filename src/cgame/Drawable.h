@@ -18,6 +18,4 @@ public:
 	static void addDrawable(Drawable *drawable);
 };
 
-void drawDrawables();
-
 #endif

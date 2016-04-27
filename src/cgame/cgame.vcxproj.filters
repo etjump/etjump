@@ -197,9 +197,6 @@
     <ClCompile Include="cg_timerun.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cg_drawext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

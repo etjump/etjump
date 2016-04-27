@@ -653,8 +653,6 @@ cvarTable_t cvarTable[] =
 	{ &cg_personalTimerAlpha,       "etj_personalTimerAlpha",      "1",                      CVAR_ARCHIVE             },
 	{ &cg_personalTimerX,           "etj_personalTimerX",          "687",                    CVAR_ARCHIVE             },
 	{ &cg_personalTimerY,           "etj_personalTimerY",          "400",                    CVAR_ARCHIVE             },
-	{ &cg_adminpassword,            "cg_adminpassword",            "",                       CVAR_ARCHIVE             },
-	{ &cg_username,                 "cg_username",                 "",                       CVAR_ARCHIVE             },
 	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
 	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
 	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },

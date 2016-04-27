@@ -17,7 +17,7 @@ extern "C" {
 #include <boost/format.hpp>
 
 Timerun::Timerun(int clientNum)
-	: Drawable(), _runningPlayerClientNum(0), _currentTimerun(""), _startTime(0), _clientNum(clientNum), _completionTime(0), _fastestTime(-1), _running(false)
+	: Drawable(), _fastestTime(-1), _clientNum(clientNum), _runningPlayerClientNum(0), _running(false), _currentTimerun(""), _startTime(0), _completionTime(0)
 {
 }
 

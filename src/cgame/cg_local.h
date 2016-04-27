@@ -3757,8 +3757,9 @@ void SendGuid();
 char *G_SHA1(const char *str);
 
 //
-// cg_drawext.cpp
+// drawable.cpp
 //
-void drawExt();
+void ETJump_DrawDrawables();
+void ETJump_ClearDrawables();
 
 #endif // CG_LOCAL_H

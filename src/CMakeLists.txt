@@ -47,7 +47,6 @@ FILE(GLOB CGAME_SRC
 	"cgame/cg_consolecmds.c"
 	"cgame/cg_debriefing.c"
 	"cgame/cg_draw.c"
-	"cgame/cg_drawext.cpp"
 	"cgame/cg_drawCHS.c"
 	"cgame/cg_drawtools.c"
 	"cgame/cg_effects.c"

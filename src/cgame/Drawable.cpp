@@ -3,7 +3,12 @@
 
 static std::vector<Drawable *> _drawables;
 
-void drawDrawables()
+void Drawable::addDrawable(Drawable *drawable)
+{
+	_drawables.push_back(drawable);
+}
+
+extern "C" void ETJump_DrawDrawables()
 {
 	for (auto& drawable : _drawables)
 	{
@@ -11,7 +16,7 @@ void drawDrawables()
 	}
 }
 
-void Drawable::addDrawable(Drawable *drawable)
+extern "C" void ETJump_ClearDrawables()
 {
-	_drawables.push_back(drawable);
+	_drawables.clear();
 }

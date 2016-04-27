@@ -14,6 +14,7 @@ static std::unique_ptr<ETJump::TimerunView> timerunView;
  */
 void InitGame()
 {
+	ETJump_ClearDrawables();
 	timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
 	timerunView = std::unique_ptr<ETJump::TimerunView>(new ETJump::TimerunView());
 }

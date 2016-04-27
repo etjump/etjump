@@ -6112,7 +6112,7 @@ static void CG_Draw2D(void)
 		CG_Fireteams_Draw();
 	}
 
-	drawExt();
+	ETJump_DrawDrawables();
 
 	// Info overlays
 	CG_DrawOverlays();
