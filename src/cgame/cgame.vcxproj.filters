@@ -197,10 +197,10 @@
     <ClCompile Include="cg_timerun.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Drawable.cpp">
+    <ClCompile Include="etj_timerun_view.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_timerun_view.cpp">
+    <ClCompile Include="etj_drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

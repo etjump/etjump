@@ -281,7 +281,7 @@
     <ClCompile Include="..\ui\ui_shared.c" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
-    <ClCompile Include="Drawable.cpp" />
+    <ClCompile Include="etj_drawable.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
   </ItemGroup>
   <ItemGroup>

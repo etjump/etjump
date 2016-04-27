@@ -100,7 +100,7 @@ FILE(GLOB CGAME_SRC
 	"game/q_math.c"
 	"game/q_shared.c"
 	"ui/ui_shared.c"
-	"cgame/Drawable.cpp"
+	"cgame/etj_drawable.cpp"
   "cgame/etj_timerun_view.cpp"
 )
 
