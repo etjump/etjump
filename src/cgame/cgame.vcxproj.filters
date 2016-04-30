@@ -12,6 +12,9 @@
     <Filter Include="Menu files">
       <UniqueIdentifier>{e6a9f9cd-dd1d-435d-a875-8b96474931b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Menu files\ETJump">
+      <UniqueIdentifier>{47fd35f8-8d3a-40f1-b618-ceeaf544556b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\game\bg_animation.c">
@@ -465,6 +468,18 @@
     </None>
     <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu">
       <Filter>Menu files</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump.menu">
+      <Filter>Menu files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_settings.menu">
+      <Filter>Menu files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_controls.menu">
+      <Filter>Menu files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_credits.menu">
+      <Filter>Menu files\ETJump</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

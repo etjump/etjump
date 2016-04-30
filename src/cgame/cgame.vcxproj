@@ -312,6 +312,10 @@
     <None Include="..\..\etjump\ui\credits_idsoftware.menu" />
     <None Include="..\..\etjump\ui\credits_quit.menu" />
     <None Include="..\..\etjump\ui\credits_splashdamage.menu" />
+    <None Include="..\..\etjump\ui\etjump.menu" />
+    <None Include="..\..\etjump\ui\etjump_controls.menu" />
+    <None Include="..\..\etjump\ui\etjump_credits.menu" />
+    <None Include="..\..\etjump\ui\etjump_settings.menu" />
     <None Include="..\..\etjump\ui\global.menu" />
     <None Include="..\..\etjump\ui\hostgame.menu" />
     <None Include="..\..\etjump\ui\hostgame_advanced.menu" />

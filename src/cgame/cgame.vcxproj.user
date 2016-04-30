@@ -12,7 +12,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerDebuggerType>NativeOnly</LocalDebuggerDebuggerType>
     <LocalDebuggerAttach>false</LocalDebuggerAttach>
-    <LocalDebuggerCommandArguments>+set fs_game "etjump" +connect localhost:35000</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+set fs_game "etjump" +devmap oasis</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">

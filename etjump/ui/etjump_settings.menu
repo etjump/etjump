@@ -1,0 +1,60 @@
+#include "ui/menudef.h"
+
+#define WINDOW_X		16
+#define WINDOW_Y		16
+#define WINDOW_WIDTH	608
+#define WINDOW_HEIGHT	448
+#define GROUP_NAME		"groupETJumpSettings"
+
+#include "ui/menumacros.h"
+
+menuDef {
+	name		"etjump_settings"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+
+	onESC {
+		close etjump_settings;
+		open etjump;
+	}
+
+	WINDOW( "SETTINGS", 94 )
+
+	#define SUBWINDOW_WIDTH		.5*(WINDOW_WIDTH-18)
+	SUBWINDOW(6, 32, (SUBWINDOW_WIDTH), 160, "GENERAL")
+		MULTI(8, 48, (SUBWINDOW_WIDTH) - 4, 10, "Max FPS: ", .2, 8, "com_maxfps", cvarFloatList { "Low" 43 "Medium" 76 "High" 125 "Extreme" 250 }, "Sets the FPS limit")
+		YESNO(8, 60, (SUBWINDOW_WIDTH) - 4, 10, "No fatigue: ", .2, 8, "etj_nofatigue", "Toggles infinite stamina")
+		YESNO(8, 72, (SUBWINDOW_WIDTH) - 4, 10, "View log: ", .2, 8, "etj_viewlog", "Toggles separate console log window")
+		YESNO(8, 84, (SUBWINDOW_WIDTH) - 4, 10, "Draw clock: ", .2, 8, "etj_drawClock", "Toggles clock")
+		YESNO(8, 96, (SUBWINDOW_WIDTH) - 4, 10, "Load view angles: ", .2, 8, "etj_loadViewAngles", "Toggles whether view angles are loaded when position is loaded")
+		YESNO(8, 108, (SUBWINDOW_WIDTH) - 4, 10, "Weapon sound: ", .2, 8, "etj_weaponSound", "Toggles weapon sound")
+		MULTI(8, 120, (SUBWINDOW_WIDTH) - 4, 10, "Noclip scale: ", .2, 8, "etj_noclipScale", cvarFloatList { "Normal" 1 "Medium" 3 "Fast" 5 "Very fast" 10 }, "Sets how fast player moves while noclipping")
+		YESNO(8, 132, (SUBWINDOW_WIDTH) - 4, 10, "Connection issues: ", .2, 8, "etj_drawConnectionIssues", "Toggles connection issues display")
+
+	SUBWINDOW(6, 198, (SUBWINDOW_WIDTH), 52, "HIDING PLAYERS")
+		YESNO(8, 214, (SUBWINDOW_WIDTH) - 4, 10, "Hide players: ", .2, 8, "etj_hide", "Toggles whether to hide players that are too close")
+		MULTI(8, 226, (SUBWINDOW_WIDTH) - 4, 10, "Hide distance: ", .2, 8, "etj_hideDistance", cvarFloatList { "Close" 64 "Normal" 128 "Far" 256 "Very far" 512 }, "Sets how close player can move before player is hidden")
+		YESNO(8, 238, (SUBWINDOW_WIDTH) - 4, 10, "Hide self: ", .2, 8, "etj_hideMe", "Toggles whether to hide self")
+
+	SUBWINDOW(6, 258, (SUBWINDOW_WIDTH), 76, "PRESSED KEYS")
+		YESNO(8, 274, (SUBWINDOW_WIDTH) - 4, 10, "Display pressed keys: ", .2, 8, "etj_drawKeys", "Toggles whether to display pressed keys")
+		MULTI(8, 286, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys color:", .2, 8, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Set the color for the pressed keys display" )
+		MULTI(8, 298, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys size: ", .2, 8, "etj_keysSize", cvarFloatList { "Small" 32 "Normal" 48 "Large" 70 }, "Sets how big the pressed keys display will be")
+		SLIDER(8, 310, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys X:", .2, 8, "etj_keysX" 585 0 600, "Set the horizontal position of the pressed keys display")
+		SLIDER(8, 322, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys Y:", .2, 8, "etj_keysY" 585 0 500, "Set the vertical position of the pressed keys display")
+		
+	SUBWINDOW(6, 340, (SUBWINDOW_WIDTH), 76, "TRICKJUMP UTILITIES")
+		MULTI(8, 356, (SUBWINDOW_WIDTH) - 4, 10, "Overbounce detector: ", .2, 8, "etj_drawOB", cvarFloatList { "On" 1 "Advanced" 2 "Off" 0 }, "Displays overbounce detector")
+		YESNO(8, 368, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector: ", .2, 8, "etj_drawSlick", "Displays slick detector")
+		SLIDER(8, 380, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector X:", .2, 8, "etj_slickX" 315 0 600, "Set the horizontal position of the slick detector")
+		SLIDER(8, 392, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector Y:", .2, 8, "etj_slickY" 220 0 600, "Set the vertical position of the slick detector")
+
+	SUBWINDOW(6 + (SUBWINDOW_WIDTH) + 6, 32, (SUBWINDOW_WIDTH), 64, "SCOREBOARD")
+		MULTI(6 + (SUBWINDOW_WIDTH) + 8, 48, (SUBWINDOW_WIDTH) - 4, 10, "Custom scoreboard: ", .2, 8, "etj_altScoreboard", cvarFloatList { "Original" 0 "ETJump 1" 1 "ETJump 2" 2 }, "Displays alternative scoreboard")
+		YESNO(6 + (SUBWINDOW_WIDTH) + 8, 60, (SUBWINDOW_WIDTH) - 4, 10, "Draw CGaz users: ", .2, 8, "etj_drawCGazUsers", "Displays CGaz users on the original scoreboard")
+
+
+
+}

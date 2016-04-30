@@ -77,4 +77,10 @@
 	loadMenu { "ui/trickjump_view.menu" }
 	loadMenu { "ui/trickjump_settings.menu" }
 	loadMenu { "ui/ingame_map_details.menu" }
+
+	// ETJump
+	loadMenu { "ui/etjump.menu" }
+	loadMenu { "ui/etjump_settings.menu" }
+	loadMenu { "ui/etjump_controls.menu" }
+	loadMenu { "ui/etjump_credits.menu" }
 }
