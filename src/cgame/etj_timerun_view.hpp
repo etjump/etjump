@@ -2,7 +2,7 @@
 
 #include <array>
 #include <string>
-#include "Drawable.h"
+#include "etj_drawable.hpp"
 
 namespace ETJump
 {

@@ -256,10 +256,10 @@
     <ClInclude Include="cg_timerun.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Drawable.h">
+    <ClInclude Include="etj_timerun_view.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_timerun_view.hpp">
+    <ClInclude Include="etj_drawable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

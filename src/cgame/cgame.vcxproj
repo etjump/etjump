@@ -300,7 +300,7 @@
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_sha1.h" />
     <ClInclude Include="cg_timerun.h" />
-    <ClInclude Include="Drawable.h" />
+    <ClInclude Include="etj_drawable.hpp" />
     <ClInclude Include="etj_timerun_view.hpp" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
