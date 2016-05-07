@@ -481,6 +481,9 @@
     <None Include="..\..\etjump\ui\etjump_credits.menu">
       <Filter>Menu files\ETJump</Filter>
     </None>
+    <None Include="..\..\etjump\ui\etjump_settings2.menu">
+      <Filter>Menu files\ETJump</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="authentication.txt">

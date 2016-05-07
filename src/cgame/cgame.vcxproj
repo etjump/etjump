@@ -316,6 +316,7 @@
     <None Include="..\..\etjump\ui\etjump_controls.menu" />
     <None Include="..\..\etjump\ui\etjump_credits.menu" />
     <None Include="..\..\etjump\ui\etjump_settings.menu" />
+    <None Include="..\..\etjump\ui\etjump_settings2.menu" />
     <None Include="..\..\etjump\ui\global.menu" />
     <None Include="..\..\etjump\ui\hostgame.menu" />
     <None Include="..\..\etjump\ui\hostgame_advanced.menu" />

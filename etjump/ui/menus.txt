@@ -81,6 +81,7 @@
 	// ETJump
 	loadMenu { "ui/etjump.menu" }
 	loadMenu { "ui/etjump_settings.menu" }
+	loadMenu { "ui/etjump_settings2.menu" }
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
 }
