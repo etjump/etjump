@@ -427,6 +427,8 @@ vmCvar_t etj_highlightSound;
 vmCvar_t etj_drawTokens;
 
 vmCvar_t etj_enableTimeruns;
+// Ghost player transparency stuff
+vmCvar_t etj_ghostPlayersOpacity;
 
 typedef struct
 {
@@ -718,7 +720,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE             },
 	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             },
 	{&etj_drawTokens, "etj_drawTokens", "1", CVAR_ARCHIVE},
-	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE}
+	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
+	{&etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             }
 };
 
 

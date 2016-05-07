@@ -2469,6 +2469,8 @@ extern vmCvar_t etj_highlightSound;
 
 extern vmCvar_t	etj_drawTokens;
 extern vmCvar_t	etj_enableTimeruns;
+
+extern vmCvar_t	etj_ghostPlayersOpacity;
 //
 // cg_main.c
 //
