@@ -2073,7 +2073,13 @@ void CG_Player(centity_t *cent)
 	bg_character_t *character;
 	float          hilightIntensity = 0.f;
 	
-	cg.currentTransparencyValue = etj_ghostPlayersOpacity.value;
+	// re-set the value for each new entity
+	if (etj_ghostPlayersOpacity.value > 1.0) {
+		cg.currentTransparencyValue = 1.0;
+	}
+	else {
+		cg.currentTransparencyValue = etj_ghostPlayersOpacity.value;
+	}
 
 	cgsnap = &cg_entities[cg.snap->ps.clientNum];
 
@@ -2111,12 +2117,12 @@ void CG_Player(centity_t *cent)
 		int transZone = cg_hideDistance.integer + etj_ghostPlayersFadeRange.integer;
 
 		// Hide players at close range
-		if (cg_hide.integer && ci->clientNum != cg.clientNum && playerDist < cg_hideDistance.integer)
+		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < cg_hideDistance.integer)
 		{
 			return;
 		}
 
-		if (cg_hide.integer && ci->clientNum != cg.clientNum && playerDist < transZone) {
+		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < transZone) {
 
 			float diff = (transZone - playerDist) / etj_ghostPlayersFadeRange.integer;
 			cg.currentTransparencyValue = etj_ghostPlayersOpacity.value - (etj_ghostPlayersOpacity.value * diff);
@@ -2486,8 +2492,8 @@ void CG_Player(centity_t *cent)
 	cent->pe.headRefEnt = head;
 
 	// add the blob shadow
-	// check if the entity is ours or the ones who we spectate, dont make it transparent
-	if (ci->clientNum == cg.predictedPlayerState.clientNum && !cg.renderingThirdPerson) {
+	// don't make own (or spectated player's) shadows transparent
+	if (ci->clientNum == cg.snap->ps.clientNum && !cg.renderingThirdPerson) {
 		shadow = CG_PlayerShadow(cent, &shadowPlane, 1.0);
 	}
 	else {
