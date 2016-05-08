@@ -2647,8 +2647,8 @@ void CG_NewClientInfo(int clientNum);
 sfxHandle_t CG_CustomSound(int clientNum, const char *soundName);
 void CG_ParseTeamXPs(int n);
 // transparency stuff
-void CG_GhostPlayersTransparency(refEntity_t *ent);
-void CG_SetModelTransparency(refEntity_t *ent, float red, float green, float blue, float alpha);
+void CG_GhostPlayersOpacity(refEntity_t *ent);
+void CG_SetModelRGBA(refEntity_t *ent, float red, float green, float blue, float alpha);
 
 
 // Rafael particles

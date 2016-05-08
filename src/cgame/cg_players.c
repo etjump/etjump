@@ -2165,9 +2165,9 @@ void CG_Player(centity_t *cent)
 		to draw models that are not being affected by transparency but still
 		have "rgbGen" and "alphaGen" shader values set to "entity"
 	*/
-	CG_SetModelTransparency(&body, 1.0, 1.0, 1.0, 1.0);
-	CG_SetModelTransparency(&head, 1.0, 1.0, 1.0, 1.0);
-	CG_SetModelTransparency(&acc, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelRGBA(&body, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelRGBA(&head, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelRGBA(&acc, 1.0, 1.0, 1.0, 1.0);
 
 	// get the rotation information
 	CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
@@ -2292,6 +2292,8 @@ void CG_Player(centity_t *cent)
 
 	if (!hidden)
 	{
+		// calculate ghost player's body transparency
+		CG_GhostPlayersOpacity(&body);
 		CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 	}
 
@@ -2466,6 +2468,9 @@ void CG_Player(centity_t *cent)
 		head.backlerp = 0.f;
 	}
 
+	// calculate ghost player's head transparency
+	CG_GhostPlayersOpacity(&head);
+
 	// set blinking flag
 	CG_AddRefEntityWithPowerups(&head, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
@@ -2564,6 +2569,9 @@ void CG_Player(centity_t *cent)
 				continue;
 			}
 
+			// calculate ghost player's accsserorie transparency
+			CG_GhostPlayersOpacity(&acc);
+			
 			CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 		}
 	}
@@ -3472,7 +3480,7 @@ void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int
 }
 
 // sets rgba values for models
-void CG_SetModelTransparency(refEntity_t *ent, float red, float green, float blue, float alpha) {
+void CG_SetModelRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
 
 	ent->shaderRGBA[0] = (byte)(255.0 * red);
 	ent->shaderRGBA[1] = (byte)(255.0 * green);
@@ -3482,7 +3490,7 @@ void CG_SetModelTransparency(refEntity_t *ent, float red, float green, float blu
 }
 
 // sets color and transparency for ghost players and holdables
-void CG_GhostPlayersTransparency(refEntity_t *ent) {
+void CG_GhostPlayersOpacity(refEntity_t *ent) {
 
 	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
 	char *ghostString = etj_ghostPlayersColor.string;
@@ -3499,6 +3507,6 @@ void CG_GhostPlayersTransparency(refEntity_t *ent) {
 		}
 	}
 
-	CG_SetModelTransparency(ent, ghostColor[0], ghostColor[1], ghostColor[2], etj_ghostPlayersOpacity.value);
+	CG_SetModelRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], etj_ghostPlayersOpacity.value);
 
 }

@@ -2557,7 +2557,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	gun.shadowPlane = parent->shadowPlane;
 	gun.renderfx    = parent->renderfx;
 
-	CG_SetModelTransparency(&gun, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
@@ -2750,7 +2750,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	barrel.shadowPlane = parent->shadowPlane;
 	barrel.renderfx    = parent->renderfx;
 
-	CG_SetModelTransparency(&barrel, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelRGBA(&barrel, 1.0, 1.0, 1.0, 1.0);
 
 	// add barrels
 	// attach generic weapon parts to the first person weapon.
@@ -3042,7 +3042,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	flash.shadowPlane = parent->shadowPlane;
 	flash.renderfx    = parent->renderfx;
 
-	CG_SetModelTransparency(&flash, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelRGBA(&flash, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
