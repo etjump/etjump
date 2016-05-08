@@ -2471,12 +2471,13 @@ extern vmCvar_t etj_highlight;
 extern vmCvar_t etj_highlightText;
 extern vmCvar_t etj_highlightSound;
 
-extern vmCvar_t	etj_drawTokens;
-extern vmCvar_t	etj_enableTimeruns;
+extern vmCvar_t etj_drawTokens;
+extern vmCvar_t etj_enableTimeruns;
 
-extern vmCvar_t	etj_ghostPlayersOpacity;
-extern vmCvar_t	etj_ghostPlayersColor;
+extern vmCvar_t etj_ghostPlayersOpacity;
+extern vmCvar_t etj_ghostPlayersColor;
 extern vmCvar_t etj_ghostPlayersFadeRange;
+extern vmCvar_t etj_ghostPlayersAlt;
 
 //
 // cg_main.c

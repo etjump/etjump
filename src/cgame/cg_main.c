@@ -431,6 +431,7 @@ vmCvar_t etj_enableTimeruns;
 vmCvar_t etj_ghostPlayersOpacity;
 vmCvar_t etj_ghostPlayersColor;
 vmCvar_t etj_ghostPlayersFadeRange;
+vmCvar_t etj_ghostPlayersAlt;
 
 typedef struct
 {
@@ -726,6 +727,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
+	{ &etj_ghostPlayersAlt,          "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE             },
 };
 
 

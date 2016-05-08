@@ -3516,6 +3516,10 @@ void CG_GhostPlayersColor(refEntity_t *ent) {
 		}
 	}
 
+	if (etj_ghostPlayersAlt.integer > 0) {
+		ent->customShader = cgs.media.ghostPlayersAltColorShader;
+	}
+
 	CG_SetModelRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
 
 }

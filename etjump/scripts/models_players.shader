@@ -959,7 +959,9 @@ models/players/hud/eye03 {
 etjump/ghost_player_alt {
     cull none
     {
-        map textures/sfx/construction.tga
+        map models/players/ghost.tga
+		tcmod scale 4 6
+		tcmod scroll 0 -0.1
         blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         rgbGen entity
         alphaGen entity
