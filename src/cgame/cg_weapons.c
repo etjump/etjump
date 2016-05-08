@@ -2608,6 +2608,9 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 		{
 			gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[0];   // if not loaded it's 0 so doesn't do any harm
 		}
+
+		CG_GhostPlayersColor(&gun);
+
 	}
 
 	if (!gun.hModel)
@@ -2884,6 +2887,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 						satchelDetPart.shadowPlane = parent->shadowPlane;
 						satchelDetPart.renderfx    = parent->renderfx;
 
+						CG_SetModelRGBA(&satchelDetPart, 1.0, 1.0, 1.0, 1.0);
+
 						satchelDetPart.hModel = weapon->modModels[0];
 						CG_PositionEntityOnTag(&satchelDetPart, &barrel, "tag_rlight", 0, NULL);
 						satchelDetPart.customShader = inRange ? weapon->modModels[2] : weapon->modModels[3];
@@ -2918,6 +2923,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 							VectorCopy(parent->lightingOrigin, bipodLeg.lightingOrigin);
 							bipodLeg.shadowPlane = parent->shadowPlane;
 							bipodLeg.renderfx    = parent->renderfx;
+
+							CG_SetModelRGBA(&bipodLeg, 1.0, 1.0, 1.0, 1.0);
 
 							bipodLeg.hModel = weapon->partModels[W_FP_MODEL][3].model;
 							CG_PositionEntityOnTag(&bipodLeg, &barrel, "tag_barrel4", 0, NULL);
@@ -2986,6 +2993,9 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	// 3rd person attachements
 	else
 	{
+
+		CG_GhostPlayersColor(&barrel);
+
 		if (weaponNum == WP_M7 || weaponNum == WP_GPG40 /* || weaponNum == WP_CARBINE || weaponNum == WP_KAR98*/)
 		{
 			// the holder
