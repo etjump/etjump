@@ -727,6 +727,8 @@ static void CG_Item(centity_t *cent)
 
 	memset(&ent, 0, sizeof(ent));
 
+	CG_SetModelTransparency(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	ent.nonNormalizedAxes = qfalse;
 
 	if (item->giType == IT_WEAPON)
@@ -1214,6 +1216,8 @@ static void CG_Missile(centity_t *cent)
 	memset(&ent, 0, sizeof(ent));
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(cent->lerpOrigin, ent.oldorigin);
+
+	CG_SetModelTransparency(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	// flicker between two skins
 	ent.skinNum = cg.clientFrame & 1;
@@ -2368,6 +2372,8 @@ void CG_Cabinet(centity_t *cent, cabinetType_t type)
 
 	memset(&cabinet, 0, sizeof(cabinet));
 	memset(&mini_me, 0, sizeof(mini_me));
+
+	CG_SetModelTransparency(&mini_me, 1.0, 1.0, 1.0, 1.0);
 
 	cabinet.hModel = cabinetInfo[type].model;
 //	cabinet.hModel =	cabinetInfo[type].itemmodels[0];

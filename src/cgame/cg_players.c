@@ -2160,6 +2160,15 @@ void CG_Player(centity_t *cent)
 	memset(&head, 0, sizeof(head));
 	memset(&acc, 0, sizeof(acc));
 
+	/*
+		by default rgba values are all set to zero, so we have to re-set that
+		to draw models that are not being affected by transparency but still
+		have "rgbGen" and "alphaGen" shader values set to "entity"
+	*/
+	CG_SetModelTransparency(&body, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelTransparency(&head, 1.0, 1.0, 1.0, 1.0);
+	CG_SetModelTransparency(&acc, 1.0, 1.0, 1.0, 1.0);
+
 	// get the rotation information
 	CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
 

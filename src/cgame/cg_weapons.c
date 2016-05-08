@@ -2557,6 +2557,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	gun.shadowPlane = parent->shadowPlane;
 	gun.renderfx    = parent->renderfx;
 
+	CG_SetModelTransparency(&gun, 1.0, 1.0, 1.0, 1.0);
+
 	if (ps)
 	{
 		team_t team = ps->persistant[PERS_TEAM];
@@ -2747,6 +2749,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	VectorCopy(parent->lightingOrigin, barrel.lightingOrigin);
 	barrel.shadowPlane = parent->shadowPlane;
 	barrel.renderfx    = parent->renderfx;
+
+	CG_SetModelTransparency(&barrel, 1.0, 1.0, 1.0, 1.0);
 
 	// add barrels
 	// attach generic weapon parts to the first person weapon.
@@ -3037,6 +3041,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	VectorCopy(parent->lightingOrigin, flash.lightingOrigin);
 	flash.shadowPlane = parent->shadowPlane;
 	flash.renderfx    = parent->renderfx;
+
+	CG_SetModelTransparency(&flash, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
