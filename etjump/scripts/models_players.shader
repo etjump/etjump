@@ -956,7 +956,7 @@ models/players/hud/eye03 {
 }
 
 /* ry: one model - one shader, used for guns and players to cover fully */
-etjump/translucent-player {
+etjump/ghost_player_alt {
     cull none
     {
         map textures/sfx/construction.tga

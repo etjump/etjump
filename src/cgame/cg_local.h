@@ -1246,6 +1246,8 @@ typedef struct
 
 	float currentFovValue;
 	qboolean hasTimerun;
+
+	float currentTransparencyValue;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -1821,6 +1823,8 @@ typedef struct
 
 	//Feen: CGaz Shader
 	qhandle_t CGazArrow;
+	// alternative ghost players visualisation
+	qhandle_t ghostPlayersAltColorShader;
 
 } cgMedia_t;
 
@@ -2472,6 +2476,8 @@ extern vmCvar_t	etj_enableTimeruns;
 
 extern vmCvar_t	etj_ghostPlayersOpacity;
 extern vmCvar_t	etj_ghostPlayersColor;
+extern vmCvar_t etj_ghostPlayersFadeRange;
+
 //
 // cg_main.c
 //

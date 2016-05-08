@@ -2072,7 +2072,8 @@ void CG_Player(centity_t *cent)
 	centity_t      *cgsnap;
 	bg_character_t *character;
 	float          hilightIntensity = 0.f;
-	qboolean       hidden           = qfalse;
+	
+	cg.currentTransparencyValue = etj_ghostPlayersOpacity.value;
 
 	cgsnap = &cg_entities[cg.snap->ps.clientNum];
 
@@ -2105,10 +2106,21 @@ void CG_Player(centity_t *cent)
 	// Only hide if ghostPlayers is on
 	if (cg_ghostPlayers.integer == 1)
 	{
+
+		vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
+		int transZone = cg_hideDistance.integer + etj_ghostPlayersFadeRange.integer;
+
 		// Hide players at close range
-		if (cg_hide.integer && ci->clientNum != cg.clientNum && Distance(cgsnap->lerpOrigin, cent->lerpOrigin) < cg_hideDistance.integer)
+		if (cg_hide.integer && ci->clientNum != cg.clientNum && playerDist < cg_hideDistance.integer)
 		{
 			return;
+		}
+
+		if (cg_hide.integer && ci->clientNum != cg.clientNum && playerDist < transZone) {
+
+			float diff = (transZone - playerDist) / etj_ghostPlayersFadeRange.integer;
+			cg.currentTransparencyValue = etj_ghostPlayersOpacity.value - (etj_ghostPlayersOpacity.value * diff);
+
 		}
 
 		if (ci->hideMe)
@@ -2290,12 +2302,9 @@ void CG_Player(centity_t *cent)
 	// (SA) only need to set this once...
 	VectorCopy(lightorigin, acc.lightingOrigin);
 
-	if (!hidden)
-	{
-		// calculate ghost player's body transparency and color
-		CG_GhostPlayersColor(&body);
-		CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
-	}
+	// calculate ghost player's body transparency and color
+	CG_GhostPlayersColor(&body);
+	CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
 	// ydnar debug
 	#if 0
@@ -3507,6 +3516,6 @@ void CG_GhostPlayersColor(refEntity_t *ent) {
 		}
 	}
 
-	CG_SetModelRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], etj_ghostPlayersOpacity.value);
+	CG_SetModelRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
 
 }

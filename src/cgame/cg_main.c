@@ -430,6 +430,7 @@ vmCvar_t etj_enableTimeruns;
 // Ghost player transparency stuff
 vmCvar_t etj_ghostPlayersOpacity;
 vmCvar_t etj_ghostPlayersColor;
+vmCvar_t etj_ghostPlayersFadeRange;
 
 typedef struct
 {
@@ -724,6 +725,7 @@ cvarTable_t cvarTable[] =
 	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
 	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
+	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
 };
 
 
@@ -2433,6 +2435,8 @@ static void CG_RegisterGraphics(void)
 	//Feen: PGM - Register shaders...
 	cgs.media.portal_blueShader = trap_R_RegisterShader("gfx/misc/portal_blueShader");                //trap_R_RegisterShader( "gfx/misc/electricity_portal2" );
 	cgs.media.portal_redShader  = trap_R_RegisterShader("gfx/misc/portal_redShader");                //Change to red later...
+
+	cgs.media.ghostPlayersAltColorShader = trap_R_RegisterShader("etjump/ghost_player_alt");
 
 	CG_LoadingString(" - game media done");
 }
