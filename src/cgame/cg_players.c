@@ -1519,7 +1519,7 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 	ent.shaderRGBA[0] = 255;
 	ent.shaderRGBA[1] = 255;
 	ent.shaderRGBA[2] = 255;
-	ent.shaderRGBA[3] = 255;
+	ent.shaderRGBA[3] = (byte)(255.0 * cg.currentTransparencyValue);
 	trap_R_AddRefEntityToScene(&ent);
 }
 
