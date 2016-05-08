@@ -2471,6 +2471,7 @@ extern vmCvar_t	etj_drawTokens;
 extern vmCvar_t	etj_enableTimeruns;
 
 extern vmCvar_t	etj_ghostPlayersOpacity;
+extern vmCvar_t	etj_ghostPlayersColor;
 //
 // cg_main.c
 //
@@ -2645,7 +2646,9 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team, entit
 void CG_NewClientInfo(int clientNum);
 sfxHandle_t CG_CustomSound(int clientNum, const char *soundName);
 void CG_ParseTeamXPs(int n);
-
+// transparency stuff
+void CG_GhostPlayersTransparency(refEntity_t *ent);
+void CG_SetModelTransparency(refEntity_t *ent, float red, float green, float blue, float alpha);
 
 
 // Rafael particles

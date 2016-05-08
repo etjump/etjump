@@ -3461,3 +3461,35 @@ void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int
 	*frame    = lf->frame;
 	*backlerp = lf->backlerp;
 }
+
+// sets rgba values for models
+void CG_SetModelTransparency(refEntity_t *ent, float red, float green, float blue, float alpha) {
+
+	ent->shaderRGBA[0] = (byte)(255.0 * red);
+	ent->shaderRGBA[1] = (byte)(255.0 * green);
+	ent->shaderRGBA[2] = (byte)(255.0 * blue);
+	ent->shaderRGBA[3] = (byte)(255.0 * alpha);
+
+}
+
+// sets color and transparency for ghost players and holdables
+void CG_GhostPlayersTransparency(refEntity_t *ent) {
+
+	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
+	char *ghostString = etj_ghostPlayersColor.string;
+	char *ghostToken;
+	int i;
+
+	for (i = 0; i < 3; i++) {
+		ghostToken = COM_Parse(&ghostString);
+		if (ghostToken) {
+			ghostColor[i] = atof(ghostToken);
+		}
+		else {
+			ghostColor[i] = 1.f;
+		}
+	}
+
+	CG_SetModelTransparency(ent, ghostColor[0], ghostColor[1], ghostColor[2], etj_ghostPlayersOpacity.value);
+
+}
