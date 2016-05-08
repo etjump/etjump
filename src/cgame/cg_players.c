@@ -2292,8 +2292,8 @@ void CG_Player(centity_t *cent)
 
 	if (!hidden)
 	{
-		// calculate ghost player's body transparency
-		CG_GhostPlayersOpacity(&body);
+		// calculate ghost player's body transparency and color
+		CG_GhostPlayersColor(&body);
 		CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 	}
 
@@ -2468,8 +2468,8 @@ void CG_Player(centity_t *cent)
 		head.backlerp = 0.f;
 	}
 
-	// calculate ghost player's head transparency
-	CG_GhostPlayersOpacity(&head);
+	// calculate ghost player's head transparency and color
+	CG_GhostPlayersColor(&head);
 
 	// set blinking flag
 	CG_AddRefEntityWithPowerups(&head, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
@@ -2569,8 +2569,8 @@ void CG_Player(centity_t *cent)
 				continue;
 			}
 
-			// calculate ghost player's accsserorie transparency
-			CG_GhostPlayersOpacity(&acc);
+			// calculate ghost player's accsserorie transparency and color
+			CG_GhostPlayersColor(&acc);
 			
 			CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 		}
@@ -3490,7 +3490,7 @@ void CG_SetModelRGBA(refEntity_t *ent, float red, float green, float blue, float
 }
 
 // sets color and transparency for ghost players and holdables
-void CG_GhostPlayersOpacity(refEntity_t *ent) {
+void CG_GhostPlayersColor(refEntity_t *ent) {
 
 	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
 	char *ghostString = etj_ghostPlayersColor.string;
