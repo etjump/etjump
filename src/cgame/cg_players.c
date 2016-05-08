@@ -1620,7 +1620,7 @@ typedef struct
 	qhandle_t shader;
 } shadowPart_t;
 
-static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane)
+static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane, float opacity)
 {
 	vec3_t       end;
 	trace_t      trace;
@@ -1683,7 +1683,7 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane)
 	// add the mark as a temporary, so it goes directly to the renderer
 	// without taking a spot in the cg_marks array
 	dist     = VectorDistance(cent->lerpOrigin, cg.refdef_current->vieworg); //%	cg.snap->ps.origin );
-	distFade = 1.0f;
+	distFade = 1.0f - (1.0f - opacity);
 	if (!(cent->currentState.eFlags & EF_ZOOMING) && (dist > SHADOW_MIN_DIST))
 	{
 		if (dist > SHADOW_MAX_DIST)
@@ -2485,9 +2485,14 @@ void CG_Player(centity_t *cent)
 
 	cent->pe.headRefEnt = head;
 
-	// add the
-
-	shadow = CG_PlayerShadow(cent, &shadowPlane);
+	// add the blob shadow
+	// check if the entity is ours or the ones who we spectate, dont make it transparent
+	if (ci->clientNum == cg.predictedPlayerState.clientNum && !cg.renderingThirdPerson) {
+		shadow = CG_PlayerShadow(cent, &shadowPlane, 1.0);
+	}
+	else {
+		shadow = CG_PlayerShadow(cent, &shadowPlane, cg.currentTransparencyValue);
+	}
 
 	// set the shadowplane for accessories
 	acc.shadowPlane = shadowPlane;
@@ -2509,6 +2514,9 @@ void CG_Player(centity_t *cent)
 	{
 		acc.hModel = cgs.media.thirdPersonBinocModel;
 		CG_PositionEntityOnTag(&acc, &body, "tag_weapon", 0, NULL);
+
+		CG_GhostPlayersColor(&acc);
+
 		CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 	}
 
