@@ -1519,7 +1519,10 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 	ent.shaderRGBA[0] = 255;
 	ent.shaderRGBA[1] = 255;
 	ent.shaderRGBA[2] = 255;
-	ent.shaderRGBA[3] = (byte)(255.0 * cg.currentTransparencyValue);
+	ent.shaderRGBA[3] = 255;
+
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, cg.currentTransparencyValue);
+
 	trap_R_AddRefEntityToScene(&ent);
 }
 
@@ -2183,9 +2186,9 @@ void CG_Player(centity_t *cent)
 		to draw models that are not being affected by transparency but still
 		have "rgbGen" and "alphaGen" shader values set to "entity"
 	*/
-	CG_SetModelRGBA(&body, 1.0, 1.0, 1.0, 1.0);
-	CG_SetModelRGBA(&head, 1.0, 1.0, 1.0, 1.0);
-	CG_SetModelRGBA(&acc, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&body, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&head, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&acc, 1.0, 1.0, 1.0, 1.0);
 
 	// get the rotation information
 	CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
@@ -3502,8 +3505,8 @@ void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int
 	*backlerp = lf->backlerp;
 }
 
-// sets rgba values for models
-void CG_SetModelRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
+// sets normalized rgba values for entity (alphaGen/rgbGen should be set to entity)
+void CG_EntitySetRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
 
 	ent->shaderRGBA[0] = (byte)(255.0 * red);
 	ent->shaderRGBA[1] = (byte)(255.0 * green);
@@ -3512,28 +3515,31 @@ void CG_SetModelRGBA(refEntity_t *ent, float red, float green, float blue, float
 
 }
 
-// sets color and transparency for ghost players and holdables
+// sets color and transparency values based on cvars for entity
 void CG_GhostPlayersColor(refEntity_t *ent) {
 
 	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
-	char *ghostString = etj_ghostPlayersColor.string;
-	char *ghostToken;
-	int i;
-
-	for (i = 0; i < 3; i++) {
-		ghostToken = COM_Parse(&ghostString);
-		if (ghostToken) {
-			ghostColor[i] = atof(ghostToken);
-		}
-		else {
-			ghostColor[i] = 1.f;
-		}
-	}
-
+	
+	// use single shader for all entities
 	if (etj_ghostPlayersAlt.integer > 0) {
+		
+		// don't allow colors to affect default skins/shaders
+		char *ghostString = etj_ghostPlayersColor.string;
+		char *ghostToken;
+
+		for (int i = 0; i < 3; i++) {
+			ghostToken = COM_Parse(&ghostString);
+			if (ghostToken) {
+				ghostColor[i] = atof(ghostToken);
+			}
+			else {
+				ghostColor[i] = 1.f;
+			}
+		}
+	
 		ent->customShader = cgs.media.ghostPlayersAltColorShader;
 	}
 
-	CG_SetModelRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
+	CG_EntitySetRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
 
 }

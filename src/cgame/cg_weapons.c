@@ -2557,7 +2557,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	gun.shadowPlane = parent->shadowPlane;
 	gun.renderfx    = parent->renderfx;
 
-	CG_SetModelRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
@@ -2753,7 +2753,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	barrel.shadowPlane = parent->shadowPlane;
 	barrel.renderfx    = parent->renderfx;
 
-	CG_SetModelRGBA(&barrel, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&barrel, 1.0, 1.0, 1.0, 1.0);
 
 	// add barrels
 	// attach generic weapon parts to the first person weapon.
@@ -2887,7 +2887,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 						satchelDetPart.shadowPlane = parent->shadowPlane;
 						satchelDetPart.renderfx    = parent->renderfx;
 
-						CG_SetModelRGBA(&satchelDetPart, 1.0, 1.0, 1.0, 1.0);
+						CG_EntitySetRGBA(&satchelDetPart, 1.0, 1.0, 1.0, 1.0);
 
 						satchelDetPart.hModel = weapon->modModels[0];
 						CG_PositionEntityOnTag(&satchelDetPart, &barrel, "tag_rlight", 0, NULL);
@@ -2924,7 +2924,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 							bipodLeg.shadowPlane = parent->shadowPlane;
 							bipodLeg.renderfx    = parent->renderfx;
 
-							CG_SetModelRGBA(&bipodLeg, 1.0, 1.0, 1.0, 1.0);
+							CG_EntitySetRGBA(&bipodLeg, 1.0, 1.0, 1.0, 1.0);
 
 							bipodLeg.hModel = weapon->partModels[W_FP_MODEL][3].model;
 							CG_PositionEntityOnTag(&bipodLeg, &barrel, "tag_barrel4", 0, NULL);
@@ -3052,7 +3052,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	flash.shadowPlane = parent->shadowPlane;
 	flash.renderfx    = parent->renderfx;
 
-	CG_SetModelRGBA(&flash, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&flash, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
