@@ -5,22 +5,28 @@
 
 models/weapons2/tesla/base_tesla4
 {
-	{
-		map textures/effects/envmap_gold.tga
-		rgbGen lightingdiffuse
-		tcGen environment
-	}
-	{
-		map models/weapons2/tesla/base_tesla4.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		rgbGen lightingdiffuse
-	}
+    {
+        map textures/effects/envmap_gold.tga
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+        rgbGen lightingdiffuse
+        tcGen environment
+        alphaGen normalzfade 1.0 -200 200
+        depthWrite
+
+    }
+    {
+        map models/weapons2/tesla/base_tesla4.tga
+        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        rgbGen lightingdiffuse
+        alphaGen normalzfade 1.0 -200 200
+        depthWrite
+    }
 }
 
 models/weapons2/tesla/zap_scroll2b
 {
-        q3map_surfacelight	1000
-        surfaceparm	trans
+    q3map_surfacelight	1000
+    surfaceparm	trans
 	surfaceparm nomarks
 	surfaceparm nolightmap
 //	qer_editorimage models/weapons2/tesla/zap_scroll.tga

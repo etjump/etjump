@@ -1,31 +1,3 @@
-models/players/temperate/allied/strap
-{
-	
-	{
-		map models/players/temperate/allied/inside.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
-models/players/temperate/allied/inside
-{
-	
-	{
-		map models/players/temperate/allied/inside.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
 models/players/multi/acc/backpack/backpack_lieu
 {
 	cull disable //Rich - Why does this shader have cull disable??
@@ -204,759 +176,718 @@ models/players/temperate/allied/ranks/1stclass
 	}
 }
 
+/****************************************
+
+	Axis body
+
+****************************************/
 models/players/temperate/axis/engineer/body_engineer
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/engineer/body_engineer.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/axis/cvops/body_cvops
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/cvops/body_cvops.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/axis/fieldops/body_fieldops
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/fieldops/body_fieldops.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/axis/medic/axis_medic
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/medic/axis_medic.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/axis/soldier/body_soldier
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/soldier/body_soldier.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
-/*
+/*****************************************
 
 	Axis gloves
 
-*/
-
+*****************************************/
 models/players/temperate/axis/body01
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/body01.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/* 
+/******************************************
 	
 	Axis legs
 
-*/
-
-models/players/temperate/axis/medic/legs_medic {
-
+******************************************/
+models/players/temperate/axis/medic/legs_medic
+{
+	sort 16
 	{
 		map models/players/temperate/axis/medic/legs_medic.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/legs01 {
-
+models/players/temperate/axis/legs01 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/legs01.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/*
+/*******************************************
 	
 	Axis backpacks
 
-*/
-
-models/players/temperate/axis/medic/acc/backpack {
-	
+*******************************************/
+models/players/temperate/axis/medic/acc/backpack 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/medic/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/medic/acc/backpack2 {
-	
+models/players/temperate/axis/medic/acc/backpack2 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/medic/acc/backpack2.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/cvops/acc/backpack {
-	
+models/players/temperate/axis/cvops/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/cvops/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/cvops/acc/fieldkit {
-	
+models/players/temperate/axis/cvops/acc/fieldkit 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/cvops/acc/fieldkit.tga 
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/engineer/acc/backpack {
-	
+models/players/temperate/axis/engineer/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/engineer/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/engineer/acc/shovel {
-	
+models/players/temperate/axis/engineer/acc/shovel 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/engineer/acc/shovel.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/fieldops/acc/backpack {
-	
+models/players/temperate/axis/fieldops/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/fieldops/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/soldier/acc/backpack {
-	
+models/players/temperate/axis/soldier/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/axis/soldier/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/*
-
-	Axis heads
-
-*/
-
-models/players/hud/axis_medic {
-
-	{
-		map models/players/hud/axis_medic.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
-models/players/hud/axis_cvops {
-	
-	{
-		map models/players/hud/axis_cvops.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
-models/players/hud/axis_engineer {
-
-	{
-		map models/players/hud/axis_engineer.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
-models/players/hud/axis_field {
-
-	{
-		map models/players/hud/axis_field.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
-models/players/hud/axis_soldier {
-
-	{
-		map models/players/hud/axis_soldier.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
-		depthWrite
-	}
-
-}
-
-/*
+/********************************************
 
 	Axis helmets
 
-*/
-
-models/players/temperate/axis/medic/helmet {
-
+********************************************/
+models/players/temperate/axis/medic/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/medic/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/cvops/cap {
-
+models/players/temperate/axis/cvops/cap 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/cvops/cap.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/engineer/helmet {
-
+models/players/temperate/axis/engineer/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/engineer/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/fieldops/helmet {
-
+models/players/temperate/axis/fieldops/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/fieldops/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/axis/soldier/helmet {
-
+models/players/temperate/axis/soldier/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/axis/soldier/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
 models/players/temperate/axis/inside
 {
-	
+	sort 16
 	{
 		map models/players/temperate/axis/inside.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
+/*****************************************
 
-/*
+	Axis heads
+
+*****************************************/
+models/players/hud/axis_medic 
+{
+	sort 16
+	{
+		map models/players/hud/axis_medic.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+models/players/hud/axis_cvops 
+{
+	sort 16	
+	{
+		map models/players/hud/axis_cvops.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+models/players/hud/axis_engineer 
+{
+	sort 16
+	{
+		map models/players/hud/axis_engineer.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+models/players/hud/axis_field 
+{
+	sort 16
+	{
+		map models/players/hud/axis_field.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+models/players/hud/axis_soldier 
+{
+	sort 16
+	{
+		map models/players/hud/axis_soldier.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+/****************************************
 	
-	Allies bodies
+	Allies body
 
-*/
-
+*****************************************/
 models/players/temperate/allied/soldier/body
 {
-	
+	sort 16
 	{
 		map models/players/temperate/allied/soldier/body.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/allied/medic/body
 {
-	
+	sort 16
 	{
 		map models/players/temperate/allied/medic/body.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/allied/engineer/body
 {
-	
+	sort 16
 	{
 		map models/players/temperate/allied/engineer/body.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/allied/fieldops/body
 {
-	
+	sort 16
 	{
 		map models/players/temperate/allied/fieldops/body.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
 models/players/temperate/allied/cvops/body
 {
-	
+	sort 16
 	{
 		map models/players/temperate/allied/cvops/body.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
 }
 
-/* 
+/****************************************
 	
-	Allies Legs
+	Allies pants
 
-*/
-
-models/players/temperate/allied/leg01 {
-
+*****************************************/
+models/players/temperate/allied/leg01 
+{
+	sort 16
 	{
 		map models/players/temperate/allied/leg01.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/* 
+/***************************************** 
 	
 	Allies backpacks
 
-*/
-
-models/players/temperate/allied/medic/acc/backpack {
-	
+*****************************************/
+models/players/temperate/allied/medic/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/allied/medic/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/medic/acc/backpack2 {
-	
+models/players/temperate/allied/medic/acc/backpack2 
+{
+	sort 16	
 	{
 		map models/players/temperate/allied/medic/acc/backpack2.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/engineer/acc/backpack {
-	
+models/players/temperate/allied/engineer/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/allied/engineer/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/engineer/acc/shovel {
-	
+models/players/temperate/allied/engineer/acc/shovel 
+{
+	sort 16	
 	{
 		map models/players/temperate/allied/engineer/acc/shovel.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/fieldops/acc/backpack {
-	
+models/players/temperate/allied/fieldops/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/allied/fieldops/acc/backpack.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/soldier/acc/backpack {
-	
+models/players/temperate/allied/soldier/acc/backpack 
+{
+	sort 16	
 	{
 		map models/players/temperate/allied/soldier/acc/backpack.jpg
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/*
+/******************************************
 	
 	Allies helmets
 
-*/
-
-models/players/temperate/allied/medic/helmet {
-
+******************************************/
+models/players/temperate/allied/medic/helmet
+{
+	sort 16
 	{
 		map models/players/temperate/allied/medic/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/cvops/cap {
-
+models/players/temperate/allied/cvops/cap 
+{
+	sort 16
 	{
 		map models/players/temperate/allied/cvops/cap.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/engineer/helmet {
-
+models/players/temperate/allied/engineer/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/allied/engineer/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/fieldops/helmet {
-
+models/players/temperate/allied/fieldops/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/allied/fieldops/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/temperate/allied/soldier/helmet {
-
+models/players/temperate/allied/soldier/helmet 
+{
+	sort 16
 	{
 		map models/players/temperate/allied/soldier/helmet.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/*
+models/players/temperate/allied/strap
+{
+	sort 16
+	{
+		map models/players/temperate/allied/inside.tga 
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+models/players/temperate/allied/inside
+{
+	sort 16
+	{
+		map models/players/temperate/allied/inside.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
+		depthWrite
+	}
+}
+
+/*******************************************
 	
-	Allies Heads
+	Allies heads
 
-*/
-
-models/players/hud/allied_medic {
-
+*******************************************/
+models/players/hud/allied_medic 
+{
+	sort 16
 	{
 		map models/players/hud/allied_medic.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/hud/allied_cvops {
-	
+models/players/hud/allied_cvops 
+{
+	sort 16	
 	{
 		map models/players/hud/allied_cvops.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/hud/allied_engineer {
-
+models/players/hud/allied_engineer 
+{
+	sort 16
 	{
 		map models/players/hud/allied_engineer.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/hud/allied_field {
-
+models/players/hud/allied_field 
+{
+	sort 16
 	{
 		map models/players/hud/allied_field.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/hud/allied_soldier {
-
+models/players/hud/allied_soldier 
+{
+	sort 16
 	{
 		map models/players/hud/allied_soldier.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/* 
-	
-	Other common head stuff 
-
-*/
-
-models/players/hud/teeth01 {
-
-	/* lets hide teeth, so it wont look ugly with transparency */
-
+models/players/hud/teeth01 
+{
+	/* lets hide teeth, so it won't look ugly with transparency */
+    {
+    	map models/players/hud/teeth01.tga
+    	blendFunc GL_ZERO GL_ONE
+    }
 }
 
-models/players/hud/eye01 {
-	
+models/players/hud/eye01 
+{	
 	{
 		map models/players/hud/eye01.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/hud/eye02 {
-	
+models/players/hud/eye02 
+{	
 	{
 		map models/players/hud/eye02.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-models/players/hud/eye03 {
-	
+models/players/hud/eye03 
+{	
 	{
 		map models/players/hud/eye03.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphaFunc GT0
-		rgbGen entity
-		alphaGen entity
+		alphaGen normalzfade 1 -200 200
+		rgbGen lightingdiffuse
 		depthWrite
 	}
-
 }
 
-/* ry: one model - one shader, used for guns and players to cover fully */
-etjump/ghost_player_alt {
+// alternative ghost players representation through single shader
+etjump/ghost_player_alt 
+{
     cull none
     {
         map models/players/ghost.tga

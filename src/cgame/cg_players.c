@@ -2132,6 +2132,10 @@ void CG_Player(centity_t *cent)
 
 		}
 
+		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && cg.currentTransparencyValue <= 0) {
+			return;
+		}
+
 		if (ci->hideMe)
 		{
 			return;
