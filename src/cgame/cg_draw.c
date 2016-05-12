@@ -601,6 +601,11 @@ static void CG_DrawSpeed2(void)
 	int          x, y, w;
 	static vec_t speed;
 	static vec_t topSpeed;
+	int textStyle = ITEM_TEXTSTYLE_NORMAL;
+
+	if (etj_speedShadow.integer) {
+		textStyle = ITEM_TEXTSTYLE_SHADOWED;
+	}
 
 	if (cg.resetmaxspeed)
 	{
@@ -662,7 +667,7 @@ static void CG_DrawSpeed2(void)
 		w = 0;
 	}
 
-	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, 0, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, textStyle, &cgs.media.limboFont1);
 }
 
 
