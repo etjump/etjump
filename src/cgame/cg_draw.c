@@ -883,6 +883,20 @@ static void CG_DrawTeamInfo(void)
 
 	int chatWidth = 640 - CHATLOC_X - 100;
 
+	int textStyle = ITEM_TEXTSTYLE_NORMAL;
+	float textAlpha = etj_chatAlpha.value;
+
+	if (etj_chatShadow.integer) {
+		textStyle = ITEM_TEXTSTYLE_SHADOWED;
+	}
+
+	if (textAlpha > 1.0) {
+		textAlpha = 1.0;
+	}
+	else if (textAlpha < 0.0) {
+		textAlpha = 0.0;
+	}
+
 	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
 	{
 		chatHeight = cg_teamChatHeight.integer;
@@ -966,28 +980,32 @@ static void CG_DrawTeamInfo(void)
 			CG_DrawPic(CHATLOC_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i) * lineHeight, chatWidth, lineHeight, cgs.media.teamStatusBar);
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
-			hcolor[3] = alphapercent;
+			hcolor[3] = alphapercent * textAlpha;
 			trap_R_SetColor(hcolor);
 
-			if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
-			{
-				flag = cgs.media.axisFlag;
-			}
-			else if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_ALLIES)
-			{
-				flag = cgs.media.alliedFlag;
-			}
-			else
-			{
-				flag = 0;
-			}
-			if (flag)
-			{
-				CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
-				           12, 8, flag);
+			if (etj_chatFlags.integer) {
+				
+				if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
+				{
+					flag = cgs.media.axisFlag;
+				}
+				else if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_ALLIES)
+				{
+					flag = cgs.media.alliedFlag;
+				}
+				else
+				{
+					flag = 0;
+				}
+				if (flag)
+				{
+					CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
+						12, 8, flag);
+				}
+
 			}
 
-			CG_Text_Paint_Ext(CHATLOC_TEXT_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(CHATLOC_TEXT_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
 		}
 	}
 }

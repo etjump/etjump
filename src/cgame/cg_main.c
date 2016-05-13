@@ -358,6 +358,9 @@ vmCvar_t cg_viewPlayerPortals;            //Enable/Disable viewing other player 
 vmCvar_t cg_chatPosX;
 vmCvar_t cg_chatPosY;
 vmCvar_t cg_chatBackgroundAlpha;
+vmCvar_t etj_chatFlags;
+vmCvar_t etj_chatShadow;
+vmCvar_t etj_chatAlpha;
 
 // crosshair stats
 vmCvar_t cg_drawCHS1;
@@ -663,6 +666,9 @@ cvarTable_t cvarTable[] =
 	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
+	{ &etj_chatFlags,				"etj_chatFlags",			   "1",                      CVAR_ARCHIVE             },
+	{ &etj_chatShadow,				"etj_chatShadow",			   "0",                      CVAR_ARCHIVE             },
+	{ &etj_chatAlpha,				"etj_chatAlpha",			   "1",                      CVAR_ARCHIVE             },
 
 	// crosshair stats
 	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
