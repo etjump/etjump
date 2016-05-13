@@ -6013,8 +6013,6 @@ static void CG_Draw2D(void)
 			CG_DrawCrosshair();
 			CG_DrawCrosshairNames();
 
-			// NERVE - SMF - we need to do this for spectators as well
-			CG_DrawTeamInfo();
 		}
 		else
 		{
@@ -6031,8 +6029,6 @@ static void CG_Draw2D(void)
 //				CG_DrawPickupItem();
 			}
 
-			CG_DrawTeamInfo();
-
 			if (cg_drawStatus.integer)
 			{
 				Menu_PaintAll();
@@ -6040,9 +6036,6 @@ static void CG_Draw2D(void)
 			}
 		}
 
-		CG_DrawVote();
-
-		CG_DrawLagometer();
 	}
 
 	// don't draw center string if scoreboard is up
@@ -6077,6 +6070,12 @@ static void CG_Draw2D(void)
 
 			// Stats Debugging
 			CG_DrawStatsDebug();
+		}
+
+		if (!cg.cameraMode) {
+			CG_DrawTeamInfo();
+			CG_DrawVote();
+			CG_DrawLagometer();
 		}
 
 		if (!cg_paused.integer)
