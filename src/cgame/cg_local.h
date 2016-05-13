@@ -2424,6 +2424,13 @@ extern vmCvar_t cg_CHS2Info5;
 extern vmCvar_t cg_CHS2Info6;
 extern vmCvar_t cg_CHS2Info7;
 extern vmCvar_t cg_CHS2Info8;
+// chs2 position
+extern vmCvar_t etj_CHS2PosX;
+extern vmCvar_t etj_CHS2PosY;
+// common CHS things
+extern vmCvar_t etj_CHSShadow;
+extern vmCvar_t etj_CHSAlpha;
+extern vmCvar_t etj_CHSColor;
 
 extern vmCvar_t cg_itemPickupText;
 

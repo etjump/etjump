@@ -381,6 +381,13 @@ vmCvar_t cg_CHS2Info5;
 vmCvar_t cg_CHS2Info6;
 vmCvar_t cg_CHS2Info7;
 vmCvar_t cg_CHS2Info8;
+// chs2 position
+vmCvar_t etj_CHS2PosX;
+vmCvar_t etj_CHS2PosY;
+// common CHS things
+vmCvar_t etj_CHSShadow;
+vmCvar_t etj_CHSAlpha;
+vmCvar_t etj_CHSColor;
 
 vmCvar_t cg_itemPickupText;
 
@@ -666,9 +673,9 @@ cvarTable_t cvarTable[] =
 	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
-	{ &etj_chatFlags,				"etj_chatFlags",			   "1",                      CVAR_ARCHIVE             },
-	{ &etj_chatShadow,				"etj_chatShadow",			   "0",                      CVAR_ARCHIVE             },
-	{ &etj_chatAlpha,				"etj_chatAlpha",			   "1",                      CVAR_ARCHIVE             },
+	{ &etj_chatFlags,               "etj_chatFlags",               "1",                      CVAR_ARCHIVE             },
+	{ &etj_chatShadow,              "etj_chatShadow",              "0",                      CVAR_ARCHIVE             },
+	{ &etj_chatAlpha,               "etj_chatAlpha",               "1.0",                    CVAR_ARCHIVE             },
 
 	// crosshair stats
 	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
@@ -689,6 +696,11 @@ cvarTable_t cvarTable[] =
 	{ &cg_CHS2Info6,                "etj_CHS2Info6",               "0",                      CVAR_ARCHIVE             },
 	{ &cg_CHS2Info7,                "etj_CHS2Info7",               "0",                      CVAR_ARCHIVE             },
 	{ &cg_CHS2Info8,                "etj_CHS2Info8",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2PosX,                "etj_CHS2PosX",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2PosY,                "etj_CHS2PosY",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHSShadow,               "etj_CHSShadow",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHSAlpha,                "etj_CHSAlpha",                "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_CHSColor,                "etj_CHSColor",                "1.0 1.0 1.0",            CVAR_ARCHIVE             },
 
 	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },

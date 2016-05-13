@@ -490,6 +490,37 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName, ali
 	int  l = 0;
 	int  x_off, y_off;
 
+	// alpha, shadow and color stuff
+	int textStyle = ITEM_TEXTSTYLE_NORMAL;
+	float textAlpha = etj_CHSAlpha.value;
+	vec4_t CHSColor = { 1.f, 1.f, 1.f, 1.f };
+	char *colorString = etj_CHSColor.string;
+	char *colorToken;
+
+	if (etj_CHSShadow.integer) {
+		textStyle = ITEM_TEXTSTYLE_SHADOWED;
+	}
+
+	for (int i = 0; i < 3; i++) {
+		colorToken = COM_Parse(&colorString);
+		if (colorToken) {
+			CHSColor[i] = atof(colorToken);
+		}
+		else {
+			CHSColor[i] = 1.f;
+		}
+	}
+
+	if (textAlpha > 1.0) {
+		textAlpha = 1.0;
+	}
+	else if (textAlpha < 0.0) {
+		textAlpha = 0.0;
+	}
+
+	CHSColor[3] = textAlpha;
+	// end alpha, shadow and color stuff
+
 	if (drawName)
 	{
 		CG_CHS_GetName(buf, sizeof(buf), stat);
@@ -510,13 +541,16 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName, ali
 	case ALIGN_RIGHT:
 		break;
 	}
+
+
 	CG_Text_Paint_Ext(x - x_off, y + y_off, CHSCHAR_SIZEX, CHSCHAR_SIZEY,
-	                  colorWhite, buf, 0, 0, 0, &cgs.media.limboFont1);
+		CHSColor, buf, 0, 0, textStyle, &cgs.media.limboFont1);
 }
 
 void CG_DrawCHS(void)
 {
 	int x, y;
+	int CHS2Align = ALIGN_LEFT;
 
 	// CHS1
 	if (cg_drawCHS1.integer)
@@ -542,16 +576,22 @@ void CG_DrawCHS(void)
 	// CHS2
 	if (cg_drawCHS2.integer)
 	{
-		x = 30;
-		y = (SCREEN_HEIGHT / 2) + 40;
-		CG_CHS_DrawSingleInfo(x, y +  0, cg_CHS2Info1.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 10, cg_CHS2Info2.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 20, cg_CHS2Info3.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 30, cg_CHS2Info4.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 40, cg_CHS2Info5.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 50, cg_CHS2Info6.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 60, cg_CHS2Info7.integer, qtrue, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 70, cg_CHS2Info8.integer, qtrue, ALIGN_LEFT);
+
+		if (cg_drawCHS2.integer > 1) {
+			CHS2Align = ALIGN_RIGHT;
+		}
+
+		x = 30 + etj_CHS2PosX.integer;
+		y = (SCREEN_HEIGHT / 2) + 40 + etj_CHS2PosY.integer;
+
+		CG_CHS_DrawSingleInfo(x, y +  0, cg_CHS2Info1.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 10, cg_CHS2Info2.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 20, cg_CHS2Info3.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 30, cg_CHS2Info4.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 40, cg_CHS2Info5.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 50, cg_CHS2Info6.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 60, cg_CHS2Info7.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 70, cg_CHS2Info8.integer, qtrue, CHS2Align);
 	}
 }
 
