@@ -2393,6 +2393,10 @@ extern vmCvar_t cg_popupStayTime;
 extern vmCvar_t cg_popupFadeTime;
 extern vmCvar_t cg_numPopups;
 
+extern vmCvar_t etj_popupGrouped;
+extern vmCvar_t etj_popupShadow;
+extern vmCvar_t etj_popupAlpha;
+
 //Feen: PGM client cvars
 extern vmCvar_t cg_viewPlayerPortals;         //Enable/Disable viewing other player portals
 //TODO: May add cvars to allow players to override portal colors

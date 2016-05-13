@@ -15,6 +15,7 @@ struct pmStackItem_s
 	int time;
 	char message[128];
 	qhandle_t shader;
+	int repeats;
 
 	pmListItem_t *next;
 };
@@ -312,6 +313,15 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 		listItem->shader = cgs.media.pmImages[type];
 	}
 
+	listItem->repeats = 1;
+
+	// don't add repeats into stack
+	if (etj_popupGrouped.integer && cg_pmWaitingList && !Q_stricmp(message, cg_pmWaitingList->message)) {	
+		cg_pmWaitingList->time = cg.time;
+		cg_pmWaitingList->repeats++;
+		return;
+	}
+
 	listItem->inuse = qtrue;
 	listItem->type  = type;
 	Q_strncpyz(listItem->message, message, sizeof(cg_pmStack[0].message));
@@ -427,6 +437,21 @@ void CG_DrawPMItems(void)
 	pmListItem_t *listItem = cg_pmOldList;
 	float        y         = 360;
 
+	char *msg;
+	float textAlpha = etj_popupAlpha.value;
+	int textStyle = ITEM_TEXTSTYLE_NORMAL;
+
+	if (etj_popupShadow.integer) {
+		textStyle = ITEM_TEXTSTYLE_SHADOWED;
+	}
+
+	if (textAlpha > 1.0) {
+		textAlpha = 1.0;
+	}
+	else if (textAlpha < 0.0) {
+		textAlpha = 0.0;
+	}
+
 	if (cg_drawSmallPopupIcons.integer)
 	{
 		size = PM_ICON_SIZE_SMALL;
@@ -443,16 +468,28 @@ void CG_DrawPMItems(void)
 		return;
 	}
 
+	// show repeats
+	if (cg_pmWaitingList->repeats > 1) {
+		msg = va("%s (x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
+	}
+	else {
+		msg = &cg_pmWaitingList->message;
+	}
+
 	t = cg_pmWaitingList->time + CG_TimeForPopup(cg_pmWaitingList->type) + cg_popupStayTime.integer;
 	if (cg.time > t)
 	{
-		colourText[3] = colour[3] = 1 - ((cg.time - t) / (float)cg_popupFadeTime.integer);
+		colourText[3] = colour[3] = (1 - ((cg.time - t) / (float)cg_popupFadeTime.integer)) * textAlpha;
+	}
+	else {
+		colourText[3] = colour[3] = textAlpha;
 	}
 
 	trap_R_SetColor(colourText);
 	CG_DrawPic(4, y, size, size, cg_pmWaitingList->shader);
 	trap_R_SetColor(NULL);
-	CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, cg_pmWaitingList->message, 0, 0, 0, &cgs.media.limboFont2);
+
+	CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
 
 	for (i = 0; i < cg_numPopups.integer - 1 && listItem; i++, listItem = listItem->next)
 	{
@@ -461,17 +498,24 @@ void CG_DrawPMItems(void)
 		t = listItem->time + CG_TimeForPopup(listItem->type) + cg_popupStayTime.integer;
 		if (cg.time > t)
 		{
-			colourText[3] = colour[3] = 1 - ((cg.time - t) / (float)cg_popupFadeTime.integer);
+			colourText[3] = colour[3] = (1 - ((cg.time - t) / (float)cg_popupFadeTime.integer)) * textAlpha;
 		}
 		else
 		{
-			colourText[3] = colour[3] = 1.f;
+			colourText[3] = colour[3] = textAlpha;
+		}
+
+		if (listItem->repeats > 1) {
+			msg = va("%s (x%d)", listItem->message, listItem->repeats);
+		}
+		else {
+			msg = &listItem->message;
 		}
 
 		trap_R_SetColor(colourText);
 		CG_DrawPic(4, y, size, size, listItem->shader);
 		trap_R_SetColor(NULL);
-		CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, listItem->message, 0, 0, 0, &cgs.media.limboFont2);
+		CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
 	}
 }
 
