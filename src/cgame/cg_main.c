@@ -398,6 +398,11 @@ vmCvar_t cg_HUD_playerHead;
 vmCvar_t cg_HUD_playerHealth;
 vmCvar_t cg_HUD_weaponIcon;
 vmCvar_t cg_HUD_xpInfo;
+vmCvar_t etj_HUD_fireteam;
+
+vmCvar_t etj_fireteamPosX;
+vmCvar_t etj_fireteamPosY;
+vmCvar_t etj_fireteamAlpha;
 
 vmCvar_t cg_logConsole;
 vmCvar_t cg_weaponSound;
@@ -710,6 +715,12 @@ cvarTable_t cvarTable[] =
 	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_fireteam,            "etj_HUD_fireteam",            "1",                      CVAR_ARCHIVE             },
+	// fireteam
+	{ &etj_fireteamPosX,            "etj_fireteamPosX",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_fireteamPosY,            "etj_fireteamPosY",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_fireteamAlpha,           "etj_fireteamAlpha",           "1",                      CVAR_ARCHIVE             },
+	
 	{ &cg_logConsole,               "etj_logConsole",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },

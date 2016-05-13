@@ -813,7 +813,7 @@ static void CG_DrawUpperRight(void)
 
 	y = 20 + 100 + 32;
 
-	if (CG_IsOnFireteam(cg.clientNum))
+	if (etj_HUD_fireteam.integer && CG_IsOnFireteam(cg.clientNum))
 	{
 		rectDef_t rect = { 10, 10, 100, 100 };
 		CG_DrawFireTeamOverlay(&rect);

@@ -2441,6 +2441,11 @@ extern vmCvar_t cg_HUD_playerHead;
 extern vmCvar_t cg_HUD_playerHealth;
 extern vmCvar_t cg_HUD_weaponIcon;
 extern vmCvar_t cg_HUD_xpInfo;
+extern vmCvar_t etj_HUD_fireteam;
+
+extern vmCvar_t etj_fireteamPosX;
+extern vmCvar_t etj_fireteamPosY;
+extern vmCvar_t etj_fireteamAlpha;
 
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t cg_logConsole;
