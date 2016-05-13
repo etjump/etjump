@@ -3029,7 +3029,7 @@ int CG_LimboPanel_WeaponCount_ForSlot(int number)
 	{
 		if (cgs.clientinfo[cg.clientNum].skill[SK_HEAVY_WEAPONS] >= 4 && CG_LimboPanel_GetClass() == PC_SOLDIER)
 		{
-			if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 4)
+			if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 0)
 			{
 				return 3;
 			}
@@ -3040,7 +3040,7 @@ int CG_LimboPanel_WeaponCount_ForSlot(int number)
 		}
 		else
 		{
-			if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 4)
+			if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 0)
 			{
 				return 2;
 			}
@@ -3128,7 +3128,7 @@ weapon_t CG_LimboPanel_GetWeaponForNumber(int number, int slot, qboolean ignoreD
 			}
 		}
 
-		if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 4)
+		if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 0)
 		{
 			if (number >= 1)
 			{
