@@ -1520,6 +1520,9 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 	ent.shaderRGBA[1] = 255;
 	ent.shaderRGBA[2] = 255;
 	ent.shaderRGBA[3] = 255;
+
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, cg.currentTransparencyValue);
+
 	trap_R_AddRefEntityToScene(&ent);
 }
 
@@ -1620,7 +1623,7 @@ typedef struct
 	qhandle_t shader;
 } shadowPart_t;
 
-static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane)
+static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane, float opacity)
 {
 	vec3_t       end;
 	trace_t      trace;
@@ -1683,7 +1686,7 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane)
 	// add the mark as a temporary, so it goes directly to the renderer
 	// without taking a spot in the cg_marks array
 	dist     = VectorDistance(cent->lerpOrigin, cg.refdef_current->vieworg); //%	cg.snap->ps.origin );
-	distFade = 1.0f;
+	distFade = 1.0f - (1.0f - opacity);
 	if (!(cent->currentState.eFlags & EF_ZOOMING) && (dist > SHADOW_MIN_DIST))
 	{
 		if (dist > SHADOW_MAX_DIST)
@@ -2072,7 +2075,14 @@ void CG_Player(centity_t *cent)
 	centity_t      *cgsnap;
 	bg_character_t *character;
 	float          hilightIntensity = 0.f;
-	qboolean       hidden           = qfalse;
+	
+	// re-set the value for each new entity
+	if (etj_ghostPlayersOpacity.value > 1.0) {
+		cg.currentTransparencyValue = 1.0;
+	}
+	else {
+		cg.currentTransparencyValue = etj_ghostPlayersOpacity.value;
+	}
 
 	cgsnap = &cg_entities[cg.snap->ps.clientNum];
 
@@ -2105,9 +2115,24 @@ void CG_Player(centity_t *cent)
 	// Only hide if ghostPlayers is on
 	if (cg_ghostPlayers.integer == 1)
 	{
+
+		vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
+		int transZone = cg_hideDistance.integer + etj_ghostPlayersFadeRange.integer;
+
 		// Hide players at close range
-		if (cg_hide.integer && ci->clientNum != cg.clientNum && Distance(cgsnap->lerpOrigin, cent->lerpOrigin) < cg_hideDistance.integer)
+		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < cg_hideDistance.integer)
 		{
+			return;
+		}
+
+		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < transZone) {
+
+			float diff = (transZone - playerDist) / etj_ghostPlayersFadeRange.integer;
+			cg.currentTransparencyValue = etj_ghostPlayersOpacity.value - (etj_ghostPlayersOpacity.value * diff);
+
+		}
+
+		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && cg.currentTransparencyValue <= 0) {
 			return;
 		}
 
@@ -2159,6 +2184,15 @@ void CG_Player(centity_t *cent)
 	memset(&body, 0, sizeof(body));
 	memset(&head, 0, sizeof(head));
 	memset(&acc, 0, sizeof(acc));
+
+	/*
+		by default rgba values are all set to zero, so we have to re-set that
+		to draw models that are not being affected by transparency but still
+		have "rgbGen" and "alphaGen" shader values set to "entity"
+	*/
+	CG_EntitySetRGBA(&body, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&head, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(&acc, 1.0, 1.0, 1.0, 1.0);
 
 	// get the rotation information
 	CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
@@ -2281,10 +2315,9 @@ void CG_Player(centity_t *cent)
 	// (SA) only need to set this once...
 	VectorCopy(lightorigin, acc.lightingOrigin);
 
-	if (!hidden)
-	{
-		CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
-	}
+	// calculate ghost player's body transparency and color
+	CG_GhostPlayersColor(&body);
+	CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
 	// ydnar debug
 	#if 0
@@ -2457,14 +2490,22 @@ void CG_Player(centity_t *cent)
 		head.backlerp = 0.f;
 	}
 
+	// calculate ghost player's head transparency and color
+	CG_GhostPlayersColor(&head);
+
 	// set blinking flag
 	CG_AddRefEntityWithPowerups(&head, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
 	cent->pe.headRefEnt = head;
 
-	// add the
-
-	shadow = CG_PlayerShadow(cent, &shadowPlane);
+	// add the blob shadow
+	// don't make own (or spectated player's) shadows transparent
+	if (ci->clientNum == cg.snap->ps.clientNum && !cg.renderingThirdPerson) {
+		shadow = CG_PlayerShadow(cent, &shadowPlane, 1.0);
+	}
+	else {
+		shadow = CG_PlayerShadow(cent, &shadowPlane, cg.currentTransparencyValue);
+	}
 
 	// set the shadowplane for accessories
 	acc.shadowPlane = shadowPlane;
@@ -2486,6 +2527,9 @@ void CG_Player(centity_t *cent)
 	{
 		acc.hModel = cgs.media.thirdPersonBinocModel;
 		CG_PositionEntityOnTag(&acc, &body, "tag_weapon", 0, NULL);
+
+		CG_GhostPlayersColor(&acc);
+
 		CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 	}
 
@@ -2555,6 +2599,9 @@ void CG_Player(centity_t *cent)
 				continue;
 			}
 
+			// calculate ghost player's accsserorie transparency and color
+			CG_GhostPlayersColor(&acc);
+			
 			CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 		}
 	}
@@ -3460,4 +3507,43 @@ void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int
 	*oldframe = lf->oldFrame;
 	*frame    = lf->frame;
 	*backlerp = lf->backlerp;
+}
+
+// sets normalized rgba values for entity (alphaGen/rgbGen should be set to entity)
+void CG_EntitySetRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
+
+	ent->shaderRGBA[0] = (byte)(255.0 * red);
+	ent->shaderRGBA[1] = (byte)(255.0 * green);
+	ent->shaderRGBA[2] = (byte)(255.0 * blue);
+	ent->shaderRGBA[3] = (byte)(255.0 * alpha);
+
+}
+
+// sets color and transparency values based on cvars for entity
+void CG_GhostPlayersColor(refEntity_t *ent) {
+
+	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
+	
+	// use single shader for all entities
+	if (etj_ghostPlayersAlt.integer > 0) {
+		
+		// don't allow colors to affect default skins/shaders
+		char *ghostString = etj_ghostPlayersColor.string;
+		char *ghostToken;
+
+		for (int i = 0; i < 3; i++) {
+			ghostToken = COM_Parse(&ghostString);
+			if (ghostToken) {
+				ghostColor[i] = atof(ghostToken);
+			}
+			else {
+				ghostColor[i] = 1.f;
+			}
+		}
+	
+		ent->customShader = cgs.media.ghostPlayersAltColorShader;
+	}
+
+	CG_EntitySetRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
+
 }

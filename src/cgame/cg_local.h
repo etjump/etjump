@@ -1246,6 +1246,8 @@ typedef struct
 
 	float currentFovValue;
 	qboolean hasTimerun;
+
+	float currentTransparencyValue;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -1821,6 +1823,8 @@ typedef struct
 
 	//Feen: CGaz Shader
 	qhandle_t CGazArrow;
+	// alternative ghost players visualisation
+	qhandle_t ghostPlayersAltColorShader;
 
 } cgMedia_t;
 
@@ -2467,8 +2471,14 @@ extern vmCvar_t etj_highlight;
 extern vmCvar_t etj_highlightText;
 extern vmCvar_t etj_highlightSound;
 
-extern vmCvar_t	etj_drawTokens;
-extern vmCvar_t	etj_enableTimeruns;
+extern vmCvar_t etj_drawTokens;
+extern vmCvar_t etj_enableTimeruns;
+
+extern vmCvar_t etj_ghostPlayersOpacity;
+extern vmCvar_t etj_ghostPlayersColor;
+extern vmCvar_t etj_ghostPlayersFadeRange;
+extern vmCvar_t etj_ghostPlayersAlt;
+
 //
 // cg_main.c
 //
@@ -2643,7 +2653,9 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team, entit
 void CG_NewClientInfo(int clientNum);
 sfxHandle_t CG_CustomSound(int clientNum, const char *soundName);
 void CG_ParseTeamXPs(int n);
-
+// transparency stuff
+void CG_GhostPlayersColor(refEntity_t *ent);
+void CG_EntitySetRGBA(refEntity_t *ent, float red, float green, float blue, float alpha);
 
 
 // Rafael particles

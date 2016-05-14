@@ -2557,6 +2557,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	gun.shadowPlane = parent->shadowPlane;
 	gun.renderfx    = parent->renderfx;
 
+	CG_EntitySetRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
+
 	if (ps)
 	{
 		team_t team = ps->persistant[PERS_TEAM];
@@ -2606,6 +2608,9 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 		{
 			gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[0];   // if not loaded it's 0 so doesn't do any harm
 		}
+
+		CG_GhostPlayersColor(&gun);
+
 	}
 
 	if (!gun.hModel)
@@ -2748,6 +2753,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	barrel.shadowPlane = parent->shadowPlane;
 	barrel.renderfx    = parent->renderfx;
 
+	CG_EntitySetRGBA(&barrel, 1.0, 1.0, 1.0, 1.0);
+
 	// add barrels
 	// attach generic weapon parts to the first person weapon.
 	// if a barrel should be attached for third person, add it in the (!ps) section below
@@ -2880,6 +2887,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 						satchelDetPart.shadowPlane = parent->shadowPlane;
 						satchelDetPart.renderfx    = parent->renderfx;
 
+						CG_EntitySetRGBA(&satchelDetPart, 1.0, 1.0, 1.0, 1.0);
+
 						satchelDetPart.hModel = weapon->modModels[0];
 						CG_PositionEntityOnTag(&satchelDetPart, &barrel, "tag_rlight", 0, NULL);
 						satchelDetPart.customShader = inRange ? weapon->modModels[2] : weapon->modModels[3];
@@ -2914,6 +2923,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 							VectorCopy(parent->lightingOrigin, bipodLeg.lightingOrigin);
 							bipodLeg.shadowPlane = parent->shadowPlane;
 							bipodLeg.renderfx    = parent->renderfx;
+
+							CG_EntitySetRGBA(&bipodLeg, 1.0, 1.0, 1.0, 1.0);
 
 							bipodLeg.hModel = weapon->partModels[W_FP_MODEL][3].model;
 							CG_PositionEntityOnTag(&bipodLeg, &barrel, "tag_barrel4", 0, NULL);
@@ -2982,6 +2993,9 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	// 3rd person attachements
 	else
 	{
+
+		CG_GhostPlayersColor(&barrel);
+
 		if (weaponNum == WP_M7 || weaponNum == WP_GPG40 /* || weaponNum == WP_CARBINE || weaponNum == WP_KAR98*/)
 		{
 			// the holder
@@ -3037,6 +3051,8 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	VectorCopy(parent->lightingOrigin, flash.lightingOrigin);
 	flash.shadowPlane = parent->shadowPlane;
 	flash.renderfx    = parent->renderfx;
+
+	CG_EntitySetRGBA(&flash, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
