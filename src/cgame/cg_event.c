@@ -2990,7 +2990,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		len = 1.0f - (len / (float)cent->currentState.onFireStart);
 		len = min(1.f, len);
 
-		CG_StartShakeCamera(len);
+		CG_StartShakeCamera(len, es);
 	}
 
 	break;
