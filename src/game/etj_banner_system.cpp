@@ -39,13 +39,13 @@ void ETJump::BannerSystem::check(int levelTime)
 		Printer::BroadcastCenterMessage(message);
 		break;
 	case Top: 
-		Printer::BroadcastLeftBannerMessage(message);
+		Printer::BroadcastTopBannerMessage(message);
 		break;
 	case Chat: 
 		Printer::BroadcastChatMessage(message);
 		break;
 	case Left: 
-		Printer::BroadcastTopBannerMessage(message);
+		Printer::BroadcastLeftBannerMessage(message);
 		break;
 	default: 
 		Printer::BroadcastTopBannerMessage(message);
