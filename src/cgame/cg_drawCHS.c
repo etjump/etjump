@@ -577,12 +577,13 @@ void CG_DrawCHS(void)
 	if (cg_drawCHS2.integer)
 	{
 
-		if (cg_drawCHS2.integer > 1) {
-			CHS2Align = ALIGN_RIGHT;
-		}
-
 		x = 30 + etj_CHS2PosX.integer;
 		y = (SCREEN_HEIGHT / 2) + 40 + etj_CHS2PosY.integer;
+
+		if (cg_drawCHS2.integer > 1) {
+			CHS2Align = ALIGN_RIGHT;
+			x = SCREEN_WIDTH - 30 + etj_CHS2PosX.integer;
+		}
 
 		CG_CHS_DrawSingleInfo(x, y +  0, cg_CHS2Info1.integer, qtrue, CHS2Align);
 		CG_CHS_DrawSingleInfo(x, y + 10, cg_CHS2Info2.integer, qtrue, CHS2Align);
