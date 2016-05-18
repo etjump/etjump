@@ -2541,7 +2541,7 @@ void G_teamready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fDump);
 void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state);
 void G_weaponStats_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fDump);
 void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop, qboolean doWindow);
-void    G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, const char *id, qboolean voiceonly);
+void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboolean voiceonly);
 
 
 

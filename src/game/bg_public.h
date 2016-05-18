@@ -2564,3 +2564,10 @@ static const struct Manual commandManuals[] = {
 };
 
 #endif
+
+typedef struct
+{
+	const char id[32]; // voice chat id
+	const char custom[128]; // voice chat custom text
+	int variant; // voice chat variation 
+} vsayCmd_t;
