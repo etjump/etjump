@@ -351,9 +351,12 @@ vmCvar_t cg_popupStayTime;
 vmCvar_t cg_popupFadeTime;
 vmCvar_t cg_numPopups;
 
+vmCvar_t etj_HUD_popup;
 vmCvar_t etj_popupGrouped;
 vmCvar_t etj_popupShadow;
 vmCvar_t etj_popupAlpha;
+vmCvar_t etj_popupPosX;
+vmCvar_t etj_popupPosY;
 
 //Feen: PGM client cvars
 vmCvar_t cg_viewPlayerPortals;            //Enable/Disable viewing other player portals
@@ -678,9 +681,12 @@ cvarTable_t cvarTable[] =
 	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },
 	{ &cg_numPopups,                "etj_numPopups",               "5",                      CVAR_ARCHIVE             },
 	
+	{ &etj_HUD_popup,               "etj_HUD_popup",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_popupGrouped,            "etj_popupGrouped",            "1",                      CVAR_ARCHIVE             },
 	{ &etj_popupShadow,             "etj_popupShadow",             "0",                      CVAR_ARCHIVE             },
 	{ &etj_popupAlpha,              "etj_popupAlpha",              "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_popupPosX,               "etj_popupPosX",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_popupPosY,               "etj_popupPosY",               "0",                      CVAR_ARCHIVE             },
 
 	
 	{ &cg_viewPlayerPortals,        "etj_viewPlayerPortals",       "1",                      CVAR_ARCHIVE             }, //Feen: PGM - View other player portals

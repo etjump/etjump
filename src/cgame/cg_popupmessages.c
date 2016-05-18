@@ -435,11 +435,16 @@ void CG_DrawPMItems(void)
 	float        t;
 	int          i, size;
 	pmListItem_t *listItem = cg_pmOldList;
-	float        y         = 360;
+	float        y         = 360 + etj_popupPosY.integer;
+	int			 x         = 4 + etj_popupPosX.integer;
+	int          x_off     = 0;
+	char         *msg;
+	float        textAlpha = etj_popupAlpha.value;
+	int          textStyle = ITEM_TEXTSTYLE_NORMAL;
 
-	char *msg;
-	float textAlpha = etj_popupAlpha.value;
-	int textStyle = ITEM_TEXTSTYLE_NORMAL;
+	if (!etj_HUD_popup.integer) {
+		return;
+	}
 
 	if (etj_popupShadow.integer) {
 		textStyle = ITEM_TEXTSTYLE_SHADOWED;
@@ -485,11 +490,16 @@ void CG_DrawPMItems(void)
 		colourText[3] = colour[3] = textAlpha;
 	}
 
+	if (etj_HUD_popup.integer > 1) {
+		x_off = CG_Text_Width_Ext(msg, 0.2f, 0, &cgs.media.limboFont2) + size + 4;
+		x = SCREEN_WIDTH - size - 4 + etj_popupPosX.integer;
+	}
+
 	trap_R_SetColor(colourText);
-	CG_DrawPic(4, y, size, size, cg_pmWaitingList->shader);
+	CG_DrawPic(x, y, size, size, cg_pmWaitingList->shader);
 	trap_R_SetColor(NULL);
 
-	CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
+	CG_Text_Paint_Ext(x + size + 2 - x_off, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
 
 	for (i = 0; i < cg_numPopups.integer - 1 && listItem; i++, listItem = listItem->next)
 	{
@@ -512,10 +522,14 @@ void CG_DrawPMItems(void)
 			msg = &listItem->message;
 		}
 
+		if (etj_HUD_popup.integer > 1) {
+			x_off = CG_Text_Width_Ext(msg, 0.2f, 0, &cgs.media.limboFont2) + size + 4;
+		}
+		
 		trap_R_SetColor(colourText);
-		CG_DrawPic(4, y, size, size, listItem->shader);
+		CG_DrawPic(x, y, size, size, listItem->shader);
 		trap_R_SetColor(NULL);
-		CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
+		CG_Text_Paint_Ext(x + size + 2 - x_off, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
 	}
 }
 
