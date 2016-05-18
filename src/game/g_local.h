@@ -2025,6 +2025,9 @@ extern vmCvar_t g_tokensPath;
 
 extern vmCvar_t g_chatOptions;
 
+// vchat customization
+extern vmCvar_t g_customVoiceChat;
+
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);
 int     trap_Milliseconds(void);
