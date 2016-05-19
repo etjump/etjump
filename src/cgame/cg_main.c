@@ -406,6 +406,7 @@ vmCvar_t player_drawRunTimer;
 vmCvar_t player_runTimerX;
 vmCvar_t player_runTimerY;
 vmCvar_t player_runTimerColor;
+vmCvar_t etj_runTimerShadow;
 
 vmCvar_t player_drawMessageTime;
 
@@ -706,9 +707,11 @@ cvarTable_t cvarTable[] =
 	{ &player_spectatorInfoX,       "etj_spectatorInfoX",          "320",                    CVAR_ARCHIVE             },
 	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
 	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
-	{ &player_runTimerX,            "etj_runTimerX",               "280",                    CVAR_ARCHIVE             },
+	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
 	{ &player_runTimerY,            "etj_runTimerY",               "380",                    CVAR_ARCHIVE             },
 	{ &player_runTimerColor,        "etj_runTimerColor",           "white",                  CVAR_ARCHIVE             },
+	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
+	
 	{ &player_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE             },
 
 	{ &movie_changeFovBasedOnSpeed, "movie_changeFovBasedOnSpeed", "0",                      CVAR_ARCHIVE             },
