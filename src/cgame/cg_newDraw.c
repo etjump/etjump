@@ -350,7 +350,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int alig
 	}
 
 
-	if (icon)
+	if (cg_HUD_weaponIcon.integer && icon)
 	{
 		float x, y, w, h;
 
@@ -383,7 +383,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int alig
 			h = rect->h + scale;
 		}
 
-
+		CG_DrawWeapHeat(rect, HUD_HORIZONTAL);
 		trap_R_SetColor(hcolor);   // JPW NERVE
 		CG_DrawPic(x, y, w, h, icon);
 	}

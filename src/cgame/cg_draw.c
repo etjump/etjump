@@ -5525,19 +5525,19 @@ static void CG_DrawPlayerStatus(void)
 	rect.y = 480 - 56;
 	rect.w = 60;
 	rect.h = 32;
+
+	if (cg.mvTotalClients < 1 && cg_drawWeaponIconFlash.integer == 0)
+	{
+		CG_DrawPlayerWeaponIcon(&rect, qtrue, ITEM_ALIGN_RIGHT, &colorWhite);
+	}
+	else
+	{
+		int ws = (cg.mvTotalClients > 0) ? cgs.clientinfo[cg.snap->ps.clientNum].weaponState : BG_simpleWeaponState(cg.snap->ps.weaponstate);
+		CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE), ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH) ? &colorWhite : (ws == WSTATE_FIRE) ? &colorRed : &colorYellow));
+	}
+	
 	if (cg_HUD_weaponIcon.integer)
 	{
-		CG_DrawWeapHeat(&rect, HUD_HORIZONTAL);
-		if (cg.mvTotalClients < 1 && cg_drawWeaponIconFlash.integer == 0)
-		{
-			CG_DrawPlayerWeaponIcon(&rect, qtrue, ITEM_ALIGN_RIGHT, &colorWhite);
-		}
-		else
-		{
-			int ws = (cg.mvTotalClients > 0) ? cgs.clientinfo[cg.snap->ps.clientNum].weaponState : BG_simpleWeaponState(cg.snap->ps.weaponstate);
-			CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE), ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH) ? &colorWhite : (ws == WSTATE_FIRE) ? &colorRed : &colorYellow));
-		}
-
 		// Draw ammo
 		weap = CG_PlayerAmmoValue(&value, &value2, &value3);
 		if (value3 >= 0)
