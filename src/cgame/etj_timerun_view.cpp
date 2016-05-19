@@ -70,12 +70,19 @@ void ETJump::TimerunView::draw()
 	}
 
 	vec4_t *color = &colorWhite;
+	vec4_t incolor;
+
+	int range = 10000; // 10s
 
 	if (run->previousRecord > 0)
 	{
 		if (millis > run->previousRecord)
 		{
 			color = &colorRed;
+		}
+		else if ( millis + range >= run->previousRecord ) {
+			CG_InterpolateColors(&incolor, &colorWhite, &colorRed, run->previousRecord - range, run->previousRecord, millis);
+			color = &incolor;
 		}
 	}
 
