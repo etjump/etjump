@@ -709,7 +709,7 @@ cvarTable_t cvarTable[] =
 	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
 	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
 	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
-	{ &player_runTimerY,            "etj_runTimerY",               "380",                    CVAR_ARCHIVE             },
+	{ &player_runTimerY,            "etj_runTimerY",               "400",                    CVAR_ARCHIVE             },
 	{ &player_runTimerColor,        "etj_runTimerColor",           "white",                  CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
