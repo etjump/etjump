@@ -13,6 +13,8 @@ namespace ETJump
 		std::string runName;
 		int previousRecord;
 		bool running;
+		// used for fading
+		int lastRunTimer;
 	};
 
 	class TimerunView : Drawable

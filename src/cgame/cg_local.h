@@ -1132,7 +1132,6 @@ typedef struct
 	vec4_t keysColor;
 	vec4_t personalTimerColor;
 	vec4_t runTimerColor;
-	int lastRunTimer;
 
 	// Arnout: allow overriding of countdown sounds
 	char fiveMinuteSound_g[MAX_QPATH];

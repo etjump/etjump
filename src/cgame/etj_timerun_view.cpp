@@ -21,8 +21,7 @@ void ETJump::TimerunView::stop()
 	auto clientNum = atoi(CG_Argv(2));
 	_playersTimerunInformation[clientNum].completionTime = atoi(CG_Argv(3));
 	_playersTimerunInformation[clientNum].running = false;
-
-	cg.lastRunTimer = cg.time;
+	_playersTimerunInformation[clientNum].lastRunTimer = cg.time;
 }
 
 void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInformation)
@@ -32,8 +31,7 @@ void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInfor
 	playerTimerunInformation.completionTime = -1;
 	playerTimerunInformation.previousRecord = 0;
 	playerTimerunInformation.startTime = 0;
-
-	cg.lastRunTimer = cg.time;
+	playerTimerunInformation.lastRunTimer = cg.time;
 }
 
 void ETJump::TimerunView::interrupt()
@@ -73,12 +71,12 @@ void ETJump::TimerunView::draw()
 		}
 	}
 
-	vec4_t *color = &colorWhite;
+	auto color = &colorWhite;
 	vec4_t incolor;
-	int range = 10000; // 10s
+	auto range = 10000; // 10s
 	int style = ITEM_TEXTSTYLE_NORMAL;
-	int fadeOut = 2000; //2s fade out
-	int fadeStart = 5000; //5s pause
+	auto fadeOut = 2000; //2s fade out
+	auto fadeStart = 5000; //5s pause
 
 	if (etj_runTimerShadow.integer) {
 		style = ITEM_TEXTSTYLE_SHADOWED;
@@ -115,9 +113,8 @@ void ETJump::TimerunView::draw()
 	auto y = player_runTimerY.integer;
 
 	if (!run->running && etj_runTimerAutoHide.integer) {
-
-		int fstart = cg.lastRunTimer + fadeStart;
-		int fend = fstart + fadeOut;
+		auto fstart = run->lastRunTimer + fadeStart;
+		auto fend = fstart + fadeOut;
 
 		if (fstart >= cg.time) {
 			// don't do anything before we stat to fade
