@@ -2000,7 +2000,7 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded)
 }
 
 // NERVE - SMF
-void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, const char *id, qboolean voiceonly)
+void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboolean voiceonly)
 {
 	int  color;
 	char *cmd;
@@ -2073,16 +2073,16 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, const char *id, qbool
 
 	if (mode == SAY_TEAM || mode == SAY_BUDDY)
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i", cmd, voiceonly, ent - g_entities, color, id, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2]));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2], vsay->variant, vsay->custom));
 	}
 	else
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s", cmd, voiceonly, ent - g_entities, color, id));
+		CPx(other - g_entities, va("%s %d %d %d %s %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->custom));
 	}
 }
 
 
-void G_Voice(gentity_t *ent, gentity_t *target, int mode, const char *id, qboolean voiceonly)
+void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qboolean voiceonly)
 {
 	int j;
 
@@ -2119,14 +2119,14 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, const char *id, qboole
 
 	if (target)
 	{
-		G_VoiceTo(ent, target, mode, id, voiceonly);
+		G_VoiceTo(ent, target, mode, vsay, voiceonly);
 		return;
 	}
 
 	// echo the text to the console
 	if (g_dedicated.integer)
 	{
-		G_Printf("voice: %s %s\n", ent->client->pers.netname, id);
+		G_Printf("voice: %s %s\n", ent->client->pers.netname, vsay->id);
 	}
 
 	if (mode == SAY_BUDDY)
@@ -2184,7 +2184,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, const char *id, qboole
 				}
 			}
 
-			G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, id, voiceonly);
+			G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, vsay, voiceonly);
 		}
 	}
 	else
@@ -2193,7 +2193,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, const char *id, qboole
 		// send it to all the apropriate clients
 		for (j = 0; j < level.numConnectedClients; j++)
 		{
-			G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, id, voiceonly);
+			G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, vsay, voiceonly);
 		}
 	}
 }
@@ -2205,13 +2205,32 @@ Cmd_Voice_f
 */
 static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceonly)
 {
+
+	vsayCmd_t vsay;
+	int id = 1, cust = 2;
+	char variant[2];
+
+	memset(&vsay, 0, sizeof(vsay));
+
 	if (mode != SAY_BUDDY)
 	{
+
 		if (trap_Argc() < 2 && !arg0)
 		{
 			return;
 		}
-		G_Voice(ent, NULL, mode, ConcatArgs(((arg0) ? 0 : 1)), voiceonly);
+
+		trap_Argv(1, variant, sizeof(variant));
+
+		if (Q_isnumeric(variant[0])) {
+			id = 2;
+			cust = 3;
+			vsay.variant = atoi(variant);				
+		}
+
+		trap_Argv(id, vsay.id, sizeof(vsay.id));
+		memcpy(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
+
 	}
 	else
 	{
@@ -2229,8 +2248,31 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 		{
 			return;
 		}
-		G_Voice(ent, NULL, mode, ConcatArgs(((arg0) ? 2 + index : 3 + index)), voiceonly);
+
+		trap_Argv(3 + index, variant, sizeof(variant));
+
+		if (Q_isnumeric(variant[0])) {
+			id = 4 + index;
+			cust = 5 + index;
+			vsay.variant = atoi(variant);
+		}
+		else {
+			id = 3;
+			cust = 4;
+		}
+
+		trap_Argv(id, vsay.id, sizeof(vsay.id));
+		memcpy(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
+
 	}
+
+	if (g_customVoiceChat.integer) {
+		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+	}
+	else {
+		G_Voice(ent, NULL, mode, vsay.id, voiceonly);
+	}
+
 }
 
 // TTimo gcc: defined but not used

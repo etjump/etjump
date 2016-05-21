@@ -1402,15 +1402,27 @@ int CG_HeadModelVoiceChats(char *filename)
 CG_GetVoiceChat
 =================
 */
-int CG_GetVoiceChat(voiceChatList_t *voiceChatList, const char *id, sfxHandle_t *snd, qhandle_t *sprite, char **chat)
+int CG_GetVoiceChat(voiceChatList_t *voiceChatList, vsayCmd_t *vsay, sfxHandle_t *snd, qhandle_t *sprite, char **chat)
 {
 	int i, rnd;
 
 	for (i = 0; i < voiceChatList->numVoiceChats; i++)
 	{
-		if (!Q_stricmp(id, voiceChatList->voiceChats[i].id))
+		if (!Q_stricmp(vsay->id, voiceChatList->voiceChats[i].id))
 		{
-			rnd     = random() * voiceChatList->voiceChats[i].numSounds;
+			if (vsay->variant > 0) {
+
+				if (vsay->variant >= voiceChatList->voiceChats[i].numSounds) {
+					rnd = voiceChatList->voiceChats[i].numSounds - 1;
+				}
+				else {
+					rnd = vsay->variant - 1;
+				}
+				 
+			} else {
+				rnd = random() * voiceChatList->voiceChats[i].numSounds;
+			}
+			
 			*snd    = voiceChatList->voiceChats[i].sounds[rnd];
 			*sprite = voiceChatList->voiceChats[i].sprite[rnd];
 			*chat   = voiceChatList->voiceChats[i].chats[rnd];
@@ -1549,7 +1561,7 @@ void CG_AddBufferedVoiceChat(bufferedVoiceChat_t *vchat)
 CG_VoiceChatLocal
 =================
 */
-void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, const char *cmd, vec3_t origin)
+void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, vsayCmd_t *vsay, vec3_t origin)
 {
 	char                *chat;
 	voiceChatList_t     *voiceChatList;
@@ -1576,7 +1588,7 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, c
 
 	voiceChatList = CG_VoiceChatListForClient(clientNum);
 
-	if (CG_GetVoiceChat(voiceChatList, cmd, &snd, &sprite, &chat))
+	if (CG_GetVoiceChat(voiceChatList, vsay, &snd, &sprite, &chat))
 	{
 		//
 		if (mode == SAY_TEAM || !cg_teamChatsOnly.integer)
@@ -1586,7 +1598,7 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, c
 			vchat.sprite    = sprite;
 			vchat.voiceOnly = voiceOnly;
 			VectorCopy(origin, vchat.origin);       // NERVE - SMF
-			Q_strncpyz(vchat.cmd, cmd, sizeof(vchat.cmd));
+			Q_strncpyz(vchat.cmd, vsay->id, sizeof(vchat.cmd));
 
 			if (mode != SAY_ALL)
 			{
@@ -1596,6 +1608,10 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, c
 				{
 					loc = " ";
 				}
+			}
+
+			if (vsay->custom[0] != '\0') {
+				chat = vsay->custom;
 			}
 
 			if (mode == SAY_TEAM)
@@ -1665,9 +1681,12 @@ CG_VoiceChat
 void CG_VoiceChat(int mode)
 {
 	const char *cmd;
-	int        clientNum, color;
+	int        clientNum, color, variant = 5, custom = 6;
 	qboolean   voiceOnly;
 	vec3_t     origin;      // NERVE - SMF
+	vsayCmd_t  vsay;
+
+	memset(&vsay, 0, sizeof(vsay));
 
 	voiceOnly = atoi(CG_Argv(1));
 	clientNum = atoi(CG_Argv(2));
@@ -1679,9 +1698,14 @@ void CG_VoiceChat(int mode)
 		origin[0] = atoi(CG_Argv(5));
 		origin[1] = atoi(CG_Argv(6));
 		origin[2] = atoi(CG_Argv(7));
+
+		variant = 8;
+		custom = 9;
 	}
 
-	cmd = CG_Argv(4);
+	vsay.variant = atoi(CG_Argv(variant));
+	trap_Argv(4, vsay.id, sizeof(vsay.id));
+	trap_Argv(custom, vsay.custom, sizeof(vsay.custom));
 
 	if (cg_noTaunt.integer != 0)
 	{
@@ -1693,7 +1717,7 @@ void CG_VoiceChat(int mode)
 		}
 	}
 
-	CG_VoiceChatLocal(mode, voiceOnly, clientNum, color, cmd, origin);
+	CG_VoiceChatLocal(mode, voiceOnly, clientNum, color, &vsay, origin);
 }
 // -NERVE - SMF
 

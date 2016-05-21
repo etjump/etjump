@@ -259,6 +259,9 @@ vmCvar_t g_tokensMode;
 vmCvar_t g_tokensPath;
 // end of tokens
 
+// vchat customization
+vmCvar_t g_customVoiceChat;
+
 
 cvarTable_t gameCvarTable[] =
 {
@@ -524,6 +527,9 @@ cvarTable_t gameCvarTable[] =
 	{ &g_tokensMode,                "g_tokensMode",                "1",                                                      CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_tokensPath,                "g_tokensPath",                "tokens",                                                 CVAR_ARCHIVE | CVAR_LATCH },
 	// end of tokens
+
+	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
+
 };
 
 // bk001129 - made static to avoid aliasing
