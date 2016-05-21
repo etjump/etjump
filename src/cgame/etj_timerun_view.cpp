@@ -21,6 +21,8 @@ void ETJump::TimerunView::stop()
 	auto clientNum = atoi(CG_Argv(2));
 	_playersTimerunInformation[clientNum].completionTime = atoi(CG_Argv(3));
 	_playersTimerunInformation[clientNum].running = false;
+
+	cg.lastRunTimer = cg.time;
 }
 
 void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInformation)
@@ -30,6 +32,8 @@ void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInfor
 	playerTimerunInformation.completionTime = -1;
 	playerTimerunInformation.previousRecord = 0;
 	playerTimerunInformation.startTime = 0;
+
+	cg.lastRunTimer = cg.time;
 }
 
 void ETJump::TimerunView::interrupt()
@@ -70,12 +74,29 @@ void ETJump::TimerunView::draw()
 	}
 
 	vec4_t *color = &colorWhite;
+	vec4_t incolor;
+	int range = 10000; // 10s
+	int style = ITEM_TEXTSTYLE_NORMAL;
+	int fadeOut = 2000; //2s fade out
+	int fadeStart = 5000; //5s pause
+
+	if (etj_runTimerShadow.integer) {
+		style = ITEM_TEXTSTYLE_SHADOWED;
+	}
 
 	if (run->previousRecord > 0)
 	{
+		if (range >= run->previousRecord) {
+			range = (run->previousRecord / 2); //lower range down
+		}
+
 		if (millis > run->previousRecord)
 		{
 			color = &colorRed;
+		}
+		else if ( millis + range >= run->previousRecord ) {
+			CG_InterpolateColors(&incolor, &colorWhite, &colorRed, run->previousRecord - range, run->previousRecord, millis);
+			color = &incolor;
 		}
 	}
 
@@ -93,7 +114,29 @@ void ETJump::TimerunView::draw()
 	auto x = player_runTimerX.integer;
 	auto y = player_runTimerY.integer;
 
-	CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0, 0, &cgs.media.limboFont1);
+	if (!run->running && etj_runTimerAutoHide.integer) {
+
+		int fstart = cg.lastRunTimer + fadeStart;
+		int fend = fstart + fadeOut;
+
+		if (fstart >= cg.time) {
+			// don't do anything before we stat to fade
+		}
+		else if (fend >= cg.time) {
+
+			vec4_t toColor = { 1.0, 1.0, 1.0, 0.0 };
+
+			CG_InterpolateColors(&incolor, color, &toColor, fstart, fend, cg.time);
+			color = &incolor;
+		
+		}
+		else {
+			return;
+		}
+
+	}
+
+	CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0, style, &cgs.media.limboFont1);
 }
 
 bool ETJump::TimerunView::parseServerCommand()
