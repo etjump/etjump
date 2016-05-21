@@ -3593,12 +3593,3 @@ void CG_DecodeQP(char *line)
 	}
 	*o = '\0';
 }
-
-void CG_InterpolateColors(vec4_t *color, vec4_t *from, vec4_t *to, int start, int end, int current)
-{
-	float step = (current - start) / (float)(end - start); // current position between start and end
-	
-	for (int i = 0; i < 4; i++) {
-		(*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
-	}
-}
