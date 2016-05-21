@@ -6127,8 +6127,21 @@ static void CG_Draw2D(void)
 }
 
 // NERVE - SMF
-void CG_StartShakeCamera(float p)
+void CG_StartShakeCamera(float p, entityState_t *es)
 {
+	// cam does not shake
+	if (etj_explosivesShake.integer == 0) {
+		return;
+	}
+	// cam shakes only if this is not your explosion
+	else if (etj_explosivesShake.integer == 1 && es->clientNum == cg.clientNum) {
+		return;
+	}
+	// cam shakes if you are the one who caused explosion
+	else if (etj_explosivesShake.integer == 2 && es->clientNum != cg.clientNum) {
+		return;
+	}
+
 	cg.cameraShakeScale = p;
 
 	cg.cameraShakeLength = 1000 * (p * p);
