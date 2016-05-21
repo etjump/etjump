@@ -2404,6 +2404,7 @@ extern vmCvar_t cg_viewPlayerPortals;         //Enable/Disable viewing other pla
 extern vmCvar_t cg_chatPosX;
 extern vmCvar_t cg_chatPosY;
 extern vmCvar_t cg_chatBackgroundAlpha;
+extern vmCvar_t etj_chatFlags;
 
 // crosshair stats
 extern vmCvar_t cg_drawCHS1;
