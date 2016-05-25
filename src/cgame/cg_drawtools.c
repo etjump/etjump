@@ -16,29 +16,32 @@ Adjusted for resolution and screen aspect ratio
 */
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 {
-#if 0
-	// adjust for wide screens
-	if (cgs.glconfig.vidWidth * 480 > cgs.glconfig.vidHeight * 640)
-	{
-		*x += 0.5 * (cgs.glconfig.vidWidth - (cgs.glconfig.vidHeight * 640 / 480));
-	}
-#endif
-
-/*	if ( (cg.showGameView) && cg.refdef_current->width ) {
-        float xscale = ( ( cg.refdef_current->width / cgs.screenXScale ) / 640.f );
-        float yscale = ( ( cg.refdef_current->height / cgs.screenYScale ) / 480.f );
-
-        (*x) = (*x) * xscale + ( cg.refdef_current->x / cgs.screenXScale );
-        (*y) = (*y) * yscale + ( cg.refdef_current->y / cgs.screenYScale );
-        (*w) *= xscale;
-        (*h) *= yscale;
-    }*/
-
-	// scale for screen sizes
 	*x *= cgs.screenXScale;
 	*y *= cgs.screenYScale;
-	*w *= cgs.screenXScale;
-	*h *= cgs.screenYScale;
+
+	if (w && h) {
+		*w *= cgs.screenXScale;
+		*h *= cgs.screenYScale;
+	}
+
+}
+
+int CG_GetScreenWidth() {
+
+	int width = cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight;
+
+	if (width < 640) {
+		width = 640;
+	}
+
+	return width;
+
+}
+
+void CG_AdjustPosX(float *x) {
+	
+	*x *= (SCREEN_WIDTH / 640.f);
+
 }
 
 /*

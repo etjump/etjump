@@ -114,8 +114,10 @@ void ETJump::TimerunView::draw()
 		% millis).str();
 
 	auto textWidth = CG_Text_Width_Ext(text.c_str(), 0.3, 0, &cgs.media.limboFont1) / 2;
-	auto x = player_runTimerX.integer;
+	auto x = player_runTimerX.value;
 	auto y = player_runTimerY.integer;
+
+	CG_AdjustPosX(&x);
 
 	if (!run->running && etj_runTimerAutoHide.integer) {
 		auto fstart = run->lastRunTimer + fadeStart;

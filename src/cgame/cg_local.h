@@ -3622,7 +3622,7 @@ void CG_CommandMap_SetHighlightText(const char *text, float x, float y);
 void CG_CommandMap_DrawHighlightText(void);
 qboolean CG_CommandCentreSpawnPointClick(void);
 
-#define LIMBO_3D_X  287 //%	280
+#define LIMBO_3D_X  287 + SCREEN_OFFSET_X //% 280
 #define LIMBO_3D_Y  382
 #define LIMBO_3D_W  128
 #define LIMBO_3D_H  96  //%	94
@@ -3725,7 +3725,6 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button);
 void CG_LoadPanel_KeyHandling(int key, qboolean down);
 qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key);
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh);
-void CG_DrawMapDetails();
 
 qboolean CG_Debriefing2_Maps_KeyDown(panel_button_t *button, int key);
 void CG_Debriefing2TeamSkillHeaders_Draw(panel_button_t *button);
@@ -3780,6 +3779,8 @@ void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
 void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
+void CG_AdjustPosX(float *x);
+int CG_GetScreenWidth();
 
 #endif // CG_LOCAL_H
 

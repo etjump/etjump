@@ -3264,7 +3264,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	// get the rendering configuration from the client system
 	trap_GetGlconfig(&cgs.glconfig);
-	cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
+	cgs.screenXScale = cgs.glconfig.vidWidth / (float)SCREEN_WIDTH;
 	cgs.screenYScale = cgs.glconfig.vidHeight / 480.0;
 
 	// RF, init the anim scripting

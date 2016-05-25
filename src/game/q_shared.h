@@ -448,8 +448,18 @@ extern vec3_t bytedirs[NUMVERTEXNORMALS];
 
 // all drawing is done to a 640*480 virtual screen size
 // and will be automatically scaled to the real resolution
-#define SCREEN_WIDTH        640
+
+#if defined(GAMEDLL)
+	#define SCREEN_WIDTH       640
+#else
+	#define SCREEN_WIDTH       CG_GetScreenWidth()
+#endif
+
 #define SCREEN_HEIGHT       480
+
+#define SCREEN_OFFSET_X     (SCREEN_WIDTH - 640) / 2.f
+#define SCREEN_CENTER_X      SCREEN_WIDTH / 2.f
+#define SCREEN_CENTER_Y      SCREEN_HEIGHT / 2.f
 
 #define TINYCHAR_WIDTH      (SMALLCHAR_WIDTH)
 #define TINYCHAR_HEIGHT     (SMALLCHAR_HEIGHT)
