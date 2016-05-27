@@ -443,6 +443,9 @@ static void CG_General(centity_t *cent)
 
 	if (cent->currentState.eType == ET_MG42_BARREL)
 	{
+
+		CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 		// grab angles from first person user or self if not
 		// ATVI Wolfenstein Misc #469 - don't track until viewlocked
 		if (cent->currentState.otherEntityNum == cg.snap->ps.clientNum && cg.snap->ps.viewlocked)
