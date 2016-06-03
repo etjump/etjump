@@ -53,8 +53,6 @@ void ETJump::TimerunView::draw()
 	}
 
 	auto run = currentRun();
-
-
 	auto startTime = run->startTime;
 	auto millis = 0;
 
@@ -72,11 +70,15 @@ void ETJump::TimerunView::draw()
 	}
 
 	auto color = &colorWhite;
+	
 	vec4_t incolor;
-	auto range = 10000; // 10s
-	int style = ITEM_TEXTSTYLE_NORMAL;
-	auto fadeOut = 2000; //2s fade out
-	auto fadeStart = 5000; //5s pause
+	vec4_t ryGreen = { 0.627, 0.941, 0.349, 1.0 };
+	vec4_t ryRed = { 0.976, 0.262, 0.262, 1.0 };
+
+	auto range = getTransitionRange(run->previousRecord);
+	auto style = ITEM_TEXTSTYLE_NORMAL;
+	auto fadeOut = 2000; // 2s fade out
+	auto fadeStart = 5000; // 5s pause
 
 	if (etj_runTimerShadow.integer) {
 		style = ITEM_TEXTSTYLE_SHADOWED;
@@ -84,25 +86,26 @@ void ETJump::TimerunView::draw()
 
 	if (run->previousRecord > 0)
 	{
-		if (range >= run->previousRecord) {
-			range = (run->previousRecord / 2); //lower range down
-		}
-
 		if (millis > run->previousRecord)
 		{
-			color = &colorRed;
+			color = &ryRed;
 		}
+		// add timer color transition when player gets closer to his pb
 		else if ( millis + range >= run->previousRecord ) {
-
 			auto start = run->previousRecord - range;
 			auto step = (millis - start) / (float)(run->previousRecord - start);
 			
-			CG_LerpColors(&colorWhite, &colorRed, &incolor, step);
+			CG_LerpColors(&colorWhite, &ryRed, &incolor, step / 2);
 			color = &incolor;
-		
 		}
 	}
 
+	// set green color for pb time
+	if (!run->running && millis && (run->previousRecord > millis || run->previousRecord == -1)) {
+		color = &ryGreen;
+	}
+
+	auto ms = millis;
 	auto minutes = millis / 60000;
 	millis -= minutes * 60000;
 	auto seconds = millis / 1000;
@@ -117,14 +120,12 @@ void ETJump::TimerunView::draw()
 	auto x = player_runTimerX.integer;
 	auto y = player_runTimerY.integer;
 
+	// timer fading/hiding routine
 	if (!run->running && etj_runTimerAutoHide.integer) {
 		auto fstart = run->lastRunTimer + fadeStart;
 		auto fend = fstart + fadeOut;
 
-		if (fstart >= cg.time) {
-			// don't do anything before we stat to fade
-		}
-		else if (fend >= cg.time) {
+		if (fstart < cg.time && fend > cg.time) {
 
 			vec4_t toColor;
 			memcpy(&toColor, color, sizeof(toColor));
@@ -136,13 +137,73 @@ void ETJump::TimerunView::draw()
 			color = &incolor;
 		
 		}
-		else {
+		else if(cg.time > fend) {
+			// dont draw timer once fading is done
 			return;
 		}
 
 	}
 
+	if (run->running) {
+
+		if (run->previousRecord != -1 && ms > run->previousRecord)
+		{
+			pastRecordAnimation(color, text.c_str(), ms, run->previousRecord);
+		}
+	}
+
 	CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0, style, &cgs.media.limboFont1);
+}
+
+int ETJump::TimerunView::getTransitionRange(int previousRunTime)
+{
+	auto range = 10000;
+
+	if (3 * 1000 > previousRunTime) {
+		range = 0;
+	} else if (10 * 1000 > previousRunTime) {
+		range = 500; // just for a nice short transition effect, could be 0
+	}
+	else if (30 * 1000 > previousRunTime) {
+		range = 2000;
+	}
+	else if (60 * 1000 > previousRunTime) {
+		range = 3500;
+	}
+	else if (120 * 1000 > previousRunTime) {
+		range = 5000;
+	}
+
+	return range;
+}
+
+void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, int timerTime, int record)
+{
+	auto animationTime = 300;
+	
+	if (timerTime - record > animationTime) {
+		return;
+	}
+
+	vec4_t toColor;
+	vec4_t incolor;
+
+	auto x = player_runTimerX.value;
+	auto y = player_runTimerY.value;
+
+	auto step = ((float)(timerTime - record) / animationTime);
+	auto scale = 0.3 + 0.25 * step;
+
+	auto originalTextHeight = CG_Text_Height_Ext(text, 0.3, 0, &cgs.media.limboFont1);
+	auto textWidth = CG_Text_Width_Ext(text, scale, 0, &cgs.media.limboFont1) / 2;
+	auto textHeight = (CG_Text_Height_Ext(text, scale, 0, &cgs.media.limboFont1) - originalTextHeight) / 2;
+
+	memcpy(&toColor, color, sizeof(toColor));
+	toColor[3] = 0;
+
+	CG_LerpColors(color, &toColor, &incolor, step);
+
+	CG_Text_Paint_Ext(x - textWidth, y + textHeight, scale, scale, incolor, text, 0, 0, 0, &cgs.media.limboFont1);
 }
 
 bool ETJump::TimerunView::parseServerCommand()

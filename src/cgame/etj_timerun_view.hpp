@@ -45,6 +45,10 @@ namespace ETJump
 		// draws the timer
 		void draw();
 
+		int getTransitionRange(int previousRunTime);
+
+		void pastRecordAnimation(vec4_t *color, const char* text, int timerTime, int record);
+
 		// returns the currently active run if there's any
 		// e.g. if player is running => return player's run,
 		// else if player is running and we're speccing the player
