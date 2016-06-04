@@ -648,7 +648,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
-	{ &cg_speedY,                   "etj_speedY",                  "400",                    CVAR_ARCHIVE             },
+	{ &cg_speedY,                   "etj_speedY",                  "360",                    CVAR_ARCHIVE             },
 	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
