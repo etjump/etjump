@@ -285,6 +285,10 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 		bg_loadscreeninited = qtrue;
 	}
 
+	// black background for wide screens
+	vec4_t sideColor = { 0.145, 0.172, 0.145, 1 };
+	DC->fillRect(0, 0, SCREEN_WIDTH, 480, sideColor);
+
 	BG_PanelButtonsRender(loadpanelButtons);
 
 	if (interactive)
@@ -310,11 +314,11 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
         CG_DrawRect_FixedBorder( 8, 23, 230, 216, 1, colorMdGrey );*/
 #define ETJUMP_VERSION ("ETJump " MOD_VERSION)
 		y = 322;
-		CG_Text_Paint_Centred_Ext(540, y, 0.22f, 0.22f, clr3, ETJUMP_VERSION, 0, 0, 0, &bg_loadscreenfont1);
+		CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.22f, 0.22f, clr3, ETJUMP_VERSION, 0, 0, 0, &bg_loadscreenfont1);
 
 		y   = 340;
 		str = Info_ValueForKey(buffer, "sv_hostname");
-		CG_Text_Paint_Centred_Ext(540, y, 0.2f, 0.2f, colorWhite, str && *str ? str : "ETHost", 0, 26, 0, &bg_loadscreenfont2);
+		CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f, colorWhite, str && *str ? str : "ETHost", 0, 26, 0, &bg_loadscreenfont2);
 
 
 		y += 14;
@@ -326,7 +330,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 				break;
 			}
 
-			CG_Text_Paint_Centred_Ext(540, y, 0.2f, 0.2f, colorWhite, str, 0, 26, 0, &bg_loadscreenfont2);
+			CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f, colorWhite, str, 0, 26, 0, &bg_loadscreenfont2);
 
 			y += 10;
 		}
@@ -335,21 +339,21 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 
 		if (enabled)
 		{
-			x = 489;
+			x = SCREEN_OFFSET_X + 489;
 			CG_DrawPic(x, y, 16, 16, bg_filter_lv);
 		}
 
 		str = Info_ValueForKey(buffer, "sv_punkbuster");
 		if (str && *str && atoi(str))
 		{
-			x = 518;
+			x = SCREEN_OFFSET_X + 518;
 			CG_DrawPic(x, y, 16, 16, bg_filter_pb);
 		}
 
 		str = Info_ValueForKey(buffer, "g_antilag");
 		if (str && *str && atoi(str))
 		{
-			x = 575;
+			x = SCREEN_OFFSET_X + 575;
 			CG_DrawPic(x, y, 16, 16, bg_filter_al);
 		}
 	}
@@ -367,12 +371,12 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 		}
 
 		trap_R_SetColor(colorBlack);
-		CG_DrawPic(16 + 1, 2 + 1, 192, 144, bg_mappic);
+		CG_DrawPic(SCREEN_OFFSET_X + 16 + 1, 2 + 1, 192, 144, bg_mappic);
 
 		trap_R_SetColor(NULL);
-		CG_DrawPic(16, 2, 192, 144, bg_mappic);
+		CG_DrawPic(SCREEN_OFFSET_X + 16, 2, 192, 144, bg_mappic);
 
-		CG_DrawPic(16 + 80, 2 + 6, 20, 20, bg_pin);
+		CG_DrawPic(SCREEN_OFFSET_X + 16 + 80, 2 + 6, 20, 20, bg_pin);
 	}
 
 	if (forcerefresh)
@@ -381,135 +385,6 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 	}
 
 	inside = qfalse;
-}
-
-#define MAX_BRIEFING_LINE_LEN 40
-
-void CG_PrintMapDetailsBriefing()
-{
-
-/*
-MapDetails UI menu size
-*/
-#define WINDOW_X        276
-#define WINDOW_Y        16
-#define WINDOW_WIDTH    252
-#define WINDOW_HEIGHT   360
-
-	int lineCount = 0;
-
-	const char *p1 = 0;
-	char       *p2 = 0;
-
-	char briefing[MAX_CVAR_VALUE_STRING];
-	char lineToPrint[MAX_BRIEFING_LINE_LEN + 1];
-
-	// Get briefing
-	trap_Cvar_LatchedVariableStringBuffer("ui_details_briefing", briefing, sizeof(briefing));
-
-	p1 = briefing;
-	p2 = lineToPrint;
-
-	*p2 = 0;
-
-	for (; *p1; p1++)
-	{
-		if (*p1 == '*' || (p2 - lineToPrint) == MAX_BRIEFING_LINE_LEN)
-		{
-			if (lineCount > 8)
-			{
-				break;
-			}
-			if (*lineToPrint)
-			{
-				*p2 = 0;
-				CG_Text_Paint_Ext(WINDOW_X + 32, WINDOW_Y + WINDOW_WIDTH + (10 * lineCount), 0.15, 0.15,
-				                  colorWhite, lineToPrint,
-				                  0, 0, ITEM_TEXTSTYLE_SHADOWED,
-				                  &cgs.media.limboFont2);
-				lineCount++;
-				p1--;
-			}
-
-			p2 = lineToPrint;
-			continue;
-		}
-		if (*p1 == '*')
-		{
-			continue;
-		}
-		*p2++ = *p1;
-	}
-
-	if (*lineToPrint)
-	{
-		*p2 = 0;
-		CG_Text_Paint_Ext(WINDOW_X + 32, WINDOW_Y + WINDOW_WIDTH + (10 * lineCount), 0.15, 0.15,
-		                  colorWhite, lineToPrint,
-		                  0, 0, ITEM_TEXTSTYLE_SHADOWED,
-		                  &cgs.media.limboFont2);
-	}
-
-	if (lineCount > 8)
-	{
-		CG_Text_Paint_Ext(WINDOW_X + 32, WINDOW_Y + WINDOW_WIDTH + (10 * lineCount), 0.15, 0.15,
-		                  colorWhite, "...",
-		                  0, 0, ITEM_TEXTSTYLE_SHADOWED,
-		                  &cgs.media.limboFont2);
-	}
-
-}
-
-void CG_DrawMapDetails()
-{
-	char isUIopen_str[MAX_CVAR_VALUE_STRING];
-	char mapName[128] = "\0";
-
-	trap_Cvar_LatchedVariableStringBuffer("ui_map_details", isUIopen_str, sizeof(isUIopen_str));
-
-	if (atoi(isUIopen_str) != 1)
-	{
-		return;
-	}
-
-	trap_Cvar_LatchedVariableStringBuffer("ui_details_map_name", mapName, sizeof(mapName));
-
-	/*
-	map levelshot
-	*/
-
-	bg_mappic = DC->registerShaderNoMip(va("levelshots/%s", mapName));
-
-	if (!bg_mappic)
-	{
-		bg_mappic = DC->registerShaderNoMip("levelshots/unknownmap");
-	}
-
-#define WINDOW_X        276
-#define WINDOW_Y        16
-#define WINDOW_WIDTH    252
-#define WINDOW_HEIGHT   360
-
-	trap_R_SetColor(colorBlack);
-	CG_DrawPic(WINDOW_X + 32, WINDOW_Y + 32, WINDOW_WIDTH - 64, WINDOW_WIDTH - 64, bg_mappic);
-	//CG_DrawPic( button->rect.x, button->rect.y, button->rect.w, button->rect.h, bg_mappic );
-
-	trap_R_SetColor(NULL);
-	CG_DrawPic(WINDOW_X + 32, WINDOW_Y + 32, WINDOW_WIDTH - 64, WINDOW_WIDTH - 64, bg_mappic);
-	//CG_DrawPic( button->rect.x, button->rect.y, button->rect.w, button->rect.h, bg_mappic );
-
-	/*
-	map briefing
-	*/
-
-	CG_PrintMapDetailsBriefing();
-
-	// Print mapn name
-	CG_Text_Paint_Ext(WINDOW_X + 32, WINDOW_Y + WINDOW_WIDTH - 16, 0.25, 0.25,
-	                  colorWhite, mapName,
-	                  0, 0, ITEM_TEXTSTYLE_SHADOWED,
-	                  &cgs.media.limboFont1);
-
 }
 
 void CG_LoadPanel_RenderLoadingBar(panel_button_t *button)
@@ -556,6 +431,7 @@ void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button)
 {
 	const char *cs;
 	float      w;
+
 	//char buffer[1024];
 	//int gametype;
 
@@ -597,6 +473,7 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button)
 	char       *s, *p;
 	char       buffer[1024];
 	float      y;
+
 	//int gametype;
 
 	//DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
@@ -694,13 +571,13 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float 
 	w = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
 	if (px + 30 + w > 440)
 	{
-		DC->fillRect(px - w - 28 + 2, py - (backheight / 2.f) + 2, 28 + w, backheight, colourFadedBlack);
-		DC->fillRect(px - w - 28, py - (backheight / 2.f), 28 + w, backheight, colorBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px - w - 28 + 2, py - (backheight / 2.f) + 2, 28 + w, backheight, colourFadedBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px - w - 28, py - (backheight / 2.f), 28 + w, backheight, colorBlack);
 	}
 	else
 	{
-		DC->fillRect(px + 2, py - (backheight / 2.f) + 2, 28 + w, backheight, colourFadedBlack);
-		DC->fillRect(px, py - (backheight / 2.f), 28 + w, backheight, colorBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px + 2, py - (backheight / 2.f) + 2, 28 + w, backheight, colourFadedBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px, py - (backheight / 2.f), 28 + w, backheight, colorBlack);
 	}
 
 	x = px - pinsize;
@@ -708,15 +585,15 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float 
 	w = pinsize * 2.f;
 	h = pinsize * 2.f;
 
-	DC->drawHandlePic(x, y, w, h, shader);
+	DC->drawHandlePic(SCREEN_OFFSET_X + x, y, w, h, shader);
 
 	if (px + 30 + w > 440)
 	{
-		DC->drawTextExt(px - 12 - w - 28, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
+		DC->drawTextExt(SCREEN_OFFSET_X + px - 12 - w - 28, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
 	}
 	else
 	{
-		DC->drawTextExt(px + 16, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
+		DC->drawTextExt(SCREEN_OFFSET_X + px + 16, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
 	}
 }
 

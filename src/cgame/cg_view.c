@@ -1151,6 +1151,8 @@ static int CG_CalcFov(void)
 	{
 		fov_x = fov_y = 60.f;
 	}
+	// etlegacy fov fix for wide screens
+	fov_x = atan(tan(fov_x * M_PI / 360.0f) * 0.75f * (float)cgs.glconfig.vidWidth / (float)cgs.glconfig.vidHeight) * 360.0f / M_PI;
 
 	// Arnout: this is weird... (but ensures square pixel ratio!)
 	x     = cg.refdef_current->width / tan(fov_x / 360 * M_PI);

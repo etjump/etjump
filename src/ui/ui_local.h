@@ -924,6 +924,10 @@ typedef struct
 	qhandle_t teamBalanceFilter;
 
 	qhandle_t campaignMap;
+
+	fontInfo_t loadscreenfont1;
+	fontInfo_t loadscreenfont2;
+
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -1198,4 +1202,6 @@ void UI_InitGameinfo(void);
 const char *UI_DescriptionForCampaign(void);
 const char *UI_NameForCampaign(void);
 
+int CG_GetScreenWidth();
+void UI_DrawMapDetails();
 #endif

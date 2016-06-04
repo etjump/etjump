@@ -289,6 +289,19 @@ void UI_AdjustFrom640(float *x, float *y, float *w, float *h)
 
 }
 
+int CG_GetScreenWidth() {
+
+	int width = uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight;
+
+	if (width < 640) {
+		width = 640;
+	}
+
+	return width;
+
+}
+
+
 void UI_DrawNamedPic(float x, float y, float width, float height, const char *picname)
 {
 	qhandle_t hShader;
