@@ -4951,6 +4951,11 @@ static void CG_DrawNewCompass(void)
 
 	CG_DrawAutoMap();
 
+	if (!cg_drawCompass.integer)
+	{
+		return;
+	}
+
 	if (cgs.autoMapExpanded)
 	{
 		if (cg.time - cgs.autoMapExpandTime < 100.f)
@@ -6021,10 +6026,7 @@ static void CG_Draw2D(void)
 
 		CG_DrawNotify();
 
-		if (cg_drawCompass.integer)
-		{
-			CG_DrawNewCompass();
-		}
+		CG_DrawNewCompass();
 
 		CG_DrawObjectiveInfo();
 

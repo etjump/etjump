@@ -1309,8 +1309,12 @@ void CG_DrawAutoMap(void)
 		}
 	}
 
-	mapScissor.circular = qtrue;
+	if (!cg_drawCompass.integer)
+	{
+		return;
+	}
 
+	mapScissor.circular = qtrue;
 
 	mapScissor.zoomFactor = automapZoom;
 
