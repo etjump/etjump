@@ -1,6 +1,12 @@
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info, etc
 #include "cg_local.h"
 
+void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step)
+{
+	for (int i = 0; i < 4; i++) {
+		(*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
+	}
+}
 /*
 ================
 CG_AdjustFrom640

@@ -964,22 +964,26 @@ static void CG_DrawTeamInfo(void)
 			hcolor[3] = alphapercent;
 			trap_R_SetColor(hcolor);
 
-			if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
-			{
-				flag = cgs.media.axisFlag;
-			}
-			else if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_ALLIES)
-			{
-				flag = cgs.media.alliedFlag;
-			}
-			else
-			{
-				flag = 0;
-			}
-			if (flag)
-			{
-				CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
-				           12, 8, flag);
+			if (etj_chatFlags.integer) {
+
+				if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
+				{
+					flag = cgs.media.axisFlag;
+				}
+				else if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_ALLIES)
+				{
+					flag = cgs.media.alliedFlag;
+				}
+				else
+				{
+					flag = 0;
+				}
+				if (flag)
+				{
+					CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
+						12, 8, flag);
+				}
+			
 			}
 
 			CG_Text_Paint_Ext(CHATLOC_TEXT_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);

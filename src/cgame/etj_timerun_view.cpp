@@ -93,8 +93,13 @@ void ETJump::TimerunView::draw()
 			color = &colorRed;
 		}
 		else if ( millis + range >= run->previousRecord ) {
-			CG_InterpolateColors(&incolor, &colorWhite, &colorRed, run->previousRecord - range, run->previousRecord, millis);
+
+			auto start = run->previousRecord - range;
+			auto step = (millis - start) / (float)(run->previousRecord - start);
+			
+			CG_LerpColors(&colorWhite, &colorRed, &incolor, step);
 			color = &incolor;
+		
 		}
 	}
 
@@ -121,9 +126,13 @@ void ETJump::TimerunView::draw()
 		}
 		else if (fend >= cg.time) {
 
-			vec4_t toColor = { 1.0, 1.0, 1.0, 0.0 };
+			vec4_t toColor;
+			memcpy(&toColor, color, sizeof(toColor));
+			toColor[3] = 0;
 
-			CG_InterpolateColors(&incolor, color, &toColor, fstart, fend, cg.time);
+			auto step = (cg.time - fstart) / (float)(fend - fstart);
+
+			CG_LerpColors(color, &toColor, &incolor, step);
 			color = &incolor;
 		
 		}

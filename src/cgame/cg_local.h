@@ -2404,6 +2404,7 @@ extern vmCvar_t cg_viewPlayerPortals;         //Enable/Disable viewing other pla
 extern vmCvar_t cg_chatPosX;
 extern vmCvar_t cg_chatPosY;
 extern vmCvar_t cg_chatBackgroundAlpha;
+extern vmCvar_t etj_chatFlags;
 
 // crosshair stats
 extern vmCvar_t cg_drawCHS1;
@@ -3778,7 +3779,7 @@ char *G_SHA1(const char *str);
 void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
-void CG_InterpolateColors(vec4_t *color, vec4_t *from, vec4_t *to, int start, int end, int current);
+void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 
 #endif // CG_LOCAL_H
 

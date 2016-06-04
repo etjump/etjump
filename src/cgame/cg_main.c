@@ -357,6 +357,7 @@ vmCvar_t cg_viewPlayerPortals;            //Enable/Disable viewing other player 
 vmCvar_t cg_chatPosX;
 vmCvar_t cg_chatPosY;
 vmCvar_t cg_chatBackgroundAlpha;
+vmCvar_t etj_chatFlags;
 
 // crosshair stats
 vmCvar_t cg_drawCHS1;
@@ -670,7 +671,8 @@ cvarTable_t cvarTable[] =
 	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
-
+	{ &etj_chatFlags,				"etj_chatFlags",			   "1",                      CVAR_ARCHIVE             },
+	
 	// crosshair stats
 	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_CHS1Info1,                "etj_CHS1Info1",               "0",                      CVAR_ARCHIVE             },
@@ -3590,13 +3592,4 @@ void CG_DecodeQP(char *line)
 		}
 	}
 	*o = '\0';
-}
-
-void CG_InterpolateColors(vec4_t *color, vec4_t *from, vec4_t *to, int start, int end, int current)
-{
-	float step = (current - start) / (float)(end - start); // current position between start and end
-	
-	for (int i = 0; i < 4; i++) {
-		(*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
-	}
 }
