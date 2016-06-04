@@ -335,6 +335,7 @@ vmCvar_t cg_speedSizeX;
 vmCvar_t cg_speedSizeY;
 vmCvar_t cg_speedColor;
 vmCvar_t cg_speedAlpha;
+vmCvar_t etj_speedShadow;
 
 vmCvar_t cg_drawPersonalTimer;
 vmCvar_t cg_personalTimerColor;
@@ -658,6 +659,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
 	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
 	// Personal timer
 	{ &cg_drawPersonalTimer,        "etj_drawPersonalTimer",       "0",                      CVAR_ARCHIVE             },
 	{ &cg_personalTimerColor,       "etj_personalTimerColor",      "White",                  CVAR_ARCHIVE             },

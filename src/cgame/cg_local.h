@@ -2384,6 +2384,7 @@ extern vmCvar_t cg_speedSizeX;
 extern vmCvar_t cg_speedSizeY;
 extern vmCvar_t cg_speedColor;
 extern vmCvar_t cg_speedAlpha;
+extern vmCvar_t etj_speedShadow;
 extern vmCvar_t cg_drawPersonalTimer;
 extern vmCvar_t cg_personalTimerColor;
 extern vmCvar_t cg_personalTimerAlpha;

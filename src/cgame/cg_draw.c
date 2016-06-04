@@ -601,6 +601,7 @@ static void CG_DrawSpeed2(void)
 	float        x, y, w;
 	static vec_t speed;
 	static vec_t topSpeed;
+	int          style = ITEM_TEXTSTYLE_NORMAL;
 
 	if (cg.resetmaxspeed)
 	{
@@ -611,6 +612,10 @@ static void CG_DrawSpeed2(void)
 	if (!cg_drawSpeed2.integer)
 	{
 		return;
+	}
+
+	if (etj_speedShadow.integer) {
+		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
 	speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
@@ -663,7 +668,7 @@ static void CG_DrawSpeed2(void)
 		w = 0;
 	}
 
-	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, 0, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, style, &cgs.media.limboFont1);
 }
 
 
