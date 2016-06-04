@@ -773,23 +773,73 @@ void Menu_UpdatePosition(menuDef_t *menu)
 {
 	int   i;
 	float x, y;
+	rectDef_t  *r;
+	qboolean fullscreenItem = qfalse;
+	qboolean fullscreenMenu = qfalse;
+	qboolean centered = qfalse;
+	const char *menuName = NULL;
+	const char *itemName = NULL;
 
 	if (menu == NULL)
 	{
 		return;
 	}
 
-	x = menu->window.rect.x;
-	y = menu->window.rect.y;
+	r = &menu->window.rect;
+	fullscreenMenu = (r->x == 0 && r->y == 0 && r->w == 640 && r->h == SCREEN_HEIGHT);
+	centered = (r->x == 16 && r->w == 608);
+	menuName = menu->window.name;
 
-	/*if (menu->window.border != 0) {
-	    x += menu->window.borderSize;
-	    y += menu->window.borderSize;
-	}*/
+	x = r->x;
+	y = r->y;
 
 	for (i = 0; i < menu->itemCount; i++)
 	{
-		Item_SetScreenCoords(menu->items[i], x, y);
+		
+		itemName = menu->items[i]->window.name;
+		r = &menu->items[i]->window.rectClient;
+		fullscreenItem = (r->x == 0 && r->y == 0 && r->w == 640 && r->h == SCREEN_HEIGHT);
+
+		if (!Q_stricmp(itemName, "clouds"))
+		{
+			r->w = r->w + 2 * SCREEN_OFFSET_X;
+		}
+		else if (fullscreenItem) {
+			r->w = SCREEN_WIDTH;
+		}
+
+		// etlegacy menu alignment..
+		if ((fullscreenMenu && !fullscreenItem) || !Q_stricmp(menuName, "main") || !Q_stricmp(menuName, "ingame_main") || centered)
+		{
+			// align to right of screen..
+			if (!Q_stricmp(itemName, "atvi_logo") ||
+				!Q_stricmp(itemName, "id_logo"))
+			{
+				Item_SetScreenCoords(menu->items[i], x + 2 * SCREEN_OFFSET_X, y);
+			}
+			// horizontally centered..
+			else if (!Q_stricmp(itemName, "et_logo"))
+			{
+				Item_SetScreenCoords(menu->items[i], x + SCREEN_OFFSET_X, y);
+			}
+			// normal (left aligned)..
+			else if (!Q_stricmp(menuName, "main") || !Q_stricmp(menuName, "ingame_main"))
+			{
+				Item_SetScreenCoords(menu->items[i], x, y);
+
+			}
+			else
+			{
+				// horizontally centered..
+				Item_SetScreenCoords(menu->items[i], x + SCREEN_OFFSET_X, y);
+			}
+		}
+		// normal (left aligned)..
+		else
+		{
+			Item_SetScreenCoords(menu->items[i], x, y);
+		}
+
 	}
 }
 
@@ -9319,6 +9369,7 @@ void BG_PanelButtonsSetup(panel_button_t **buttons)
 	for ( ; *buttons; buttons++)
 	{
 		button = (*buttons);
+		button->rect.x += SCREEN_OFFSET_X;
 
 		if (button->shaderNormal)
 		{
@@ -9491,3 +9542,135 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo
 
 	*c = '\0';
 }
+
+#ifndef CGAMEDLL
+
+#define MAX_BRIEFING_LINE_LEN 40
+
+void UI_PrintMapDetailsBriefing()
+{
+
+	/*
+	MapDetails UI menu size
+	*/
+	int x = 276;
+	int y = 16;
+	int w = 252;
+	int h = 360;
+
+	int lineCount = 0;
+
+	const char *p1 = 0;
+	char       *p2 = 0;
+
+	char briefing[MAX_CVAR_VALUE_STRING];
+	char lineToPrint[MAX_BRIEFING_LINE_LEN + 1];
+
+	// Get briefing
+	trap_Cvar_LatchedVariableStringBuffer("ui_details_briefing", briefing, sizeof(briefing));
+
+	p1 = briefing;
+	p2 = lineToPrint;
+
+	*p2 = 0;
+
+	for (; *p1; p1++)
+	{
+		if (*p1 == '*' || (p2 - lineToPrint) == MAX_BRIEFING_LINE_LEN)
+		{
+			if (lineCount > 8)
+			{
+				break;
+			}
+			if (*lineToPrint)
+			{
+				*p2 = 0;
+				uiInfo.uiDC.drawTextExt(x + 32, y + w + (10 * lineCount), 0.15, 0.15,
+					colorWhite, lineToPrint,
+					0, 0, ITEM_TEXTSTYLE_SHADOWED,
+					&uiInfo.loadscreenfont2);
+				lineCount++;
+				p1--;
+			}
+
+			p2 = lineToPrint;
+			continue;
+		}
+		if (*p1 == '*')
+		{
+			continue;
+		}
+		*p2++ = *p1;
+	}
+
+	if (*lineToPrint)
+	{
+		*p2 = 0;
+		uiInfo.uiDC.drawTextExt(x + 32, y + w + (10 * lineCount), 0.15, 0.15,
+			colorWhite, lineToPrint,
+			0, 0, ITEM_TEXTSTYLE_SHADOWED,
+			&uiInfo.loadscreenfont2);
+	}
+
+	if (lineCount > 8)
+	{
+		uiInfo.uiDC.drawTextExt(x + 32, y + w + (10 * lineCount), 0.15, 0.15,
+			colorWhite, "...",
+			0, 0, ITEM_TEXTSTYLE_SHADOWED,
+			&uiInfo.loadscreenfont2);
+	}
+
+}
+
+void UI_DrawMapDetails()
+{
+
+	int x = 276;
+	int y = 16;
+	int w = 252;
+	int h = 360;
+
+	char isUIopen_str[MAX_CVAR_VALUE_STRING];
+	char mapName[128] = "\0";
+	qhandle_t bg_mappic;
+
+	trap_Cvar_LatchedVariableStringBuffer("ui_map_details", isUIopen_str, sizeof(isUIopen_str));
+
+	if (atoi(isUIopen_str) != 1)
+	{
+		return;
+	}
+
+	trap_Cvar_LatchedVariableStringBuffer("ui_details_map_name", mapName, sizeof(mapName));
+
+	/*
+	map levelshot
+	*/
+
+	bg_mappic = uiInfo.uiDC.registerShaderNoMip(va("levelshots/%s", mapName));
+
+	if (!bg_mappic)
+	{
+		bg_mappic = uiInfo.uiDC.registerShaderNoMip("levelshots/unknownmap");
+	}
+
+	trap_R_SetColor(colorBlack);
+	uiInfo.uiDC.drawHandlePic(x + 32, y + 32, w - 64, w - 64, bg_mappic);
+
+	trap_R_SetColor(NULL);
+	uiInfo.uiDC.drawHandlePic(x + 32, y + 32, w - 64, w - 64, bg_mappic);
+
+	/*
+	map briefing
+	*/
+	UI_PrintMapDetailsBriefing();
+
+	// Print map name
+	uiInfo.uiDC.drawTextExt(x + 32, y + w - 16, 0.25, 0.25,
+		colorWhite, mapName,
+		0, 0, ITEM_TEXTSTYLE_SHADOWED,
+		&uiInfo.loadscreenfont2);
+
+}
+
+#endif

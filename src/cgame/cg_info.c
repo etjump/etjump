@@ -517,7 +517,7 @@ qboolean CG_ViewingDraw()
 
 
 
-#define GS_X    166
+#define GS_X    166 + SCREEN_OFFSET_X
 #define GS_Y    10
 #define GS_W    308
 
@@ -674,7 +674,7 @@ void CG_GameStatsDraw()
 	}
 }
 
-#define TS_X    -20     // spacing from right
+#define TS_X    SCREEN_WIDTH - 20     // spacing from right
 #define TS_Y    -60     // spacing from bottom
 #define TS_W    308
 
@@ -687,7 +687,7 @@ void CG_TopShotsDraw()
 	}
 	else
 	{
-		int            i, x = 640 + TS_X - TS_W, y = 480, h;
+		int            i, x = TS_X - TS_W, y = 480, h;
 		topshotStats_t *ts = &cgs.topshots;
 
 		vec4_t bgColor     = COLOR_BG;          // window
@@ -792,7 +792,7 @@ void CG_TopShotsDraw()
 		x += 32;
 		CG_Text_Paint_Ext(x, y, hScale2, hScaleY2, hdrColor, "Player", 0.0f, 0, hStyle2, hFont2);
 
-		x  = 640 + TS_X - TS_W + 4;
+		x  = TS_X - TS_W + 4;
 		y += 1;
 
 		if (ts->cWeapons == 0)
@@ -813,7 +813,7 @@ void CG_TopShotsDraw()
 
 
 
-#define DH_X    -20     // spacing from right
+#define DH_X    SCREEN_WIDTH - 20     // spacing from right
 #define DH_Y    -60     // spacing from bottom
 #define DH_W    148
 
@@ -881,7 +881,7 @@ void CG_DemoHelpDraw()
 
 		// FIXME: Should compute this beforehand
 		w = DH_W + ((cg.mvTotalClients > 1) ? 12 : 0);
-		x = 640 + DH_X - w;
+		x = DH_X - w;
 		h = 2 + tSpacing + 2 +                                  // Header
 		    2 + 1 +
 		    tSpacing * (2 + (sizeof(help) + ((cg.mvTotalClients > 1) ? sizeof(mvhelp) : 0)) / sizeof(char *)) +

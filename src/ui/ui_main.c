@@ -1123,7 +1123,7 @@ void _UI_Refresh(int realtime)
 	// OSP - blackout if speclocked
 	if (ui_blackout.integer > 0)
 	{
-		UI_FillRect(-10, -10, 650, 490, colorBlack);
+		UI_FillRect(-10, -10, SCREEN_WIDTH + 10, 490, colorBlack);
 	}
 
 	if (Menu_Count() > 0)
@@ -1136,6 +1136,8 @@ void _UI_Refresh(int realtime)
 		UI_BuildServerStatus(qfalse);
 		// refresh find player list
 		UI_BuildFindPlayerList(qfalse);
+
+		UI_DrawMapDetails();
 	}
 
 	// draw cursor
@@ -9051,8 +9053,9 @@ void _UI_Init(qboolean inGameLoad)
 	UI_ParseGLConfig();
 
 	// for 640x480 virtualized screen
-	uiInfo.uiDC.yscale = uiInfo.uiDC.glconfig.vidHeight * (1.0 / 480.0);
-	uiInfo.uiDC.xscale = uiInfo.uiDC.glconfig.vidWidth * (1.0 / 640.0);
+	uiInfo.uiDC.yscale = uiInfo.uiDC.glconfig.vidHeight / 480.0;
+	uiInfo.uiDC.xscale = uiInfo.uiDC.glconfig.vidWidth / (float)SCREEN_WIDTH;
+
 	if (uiInfo.uiDC.glconfig.vidWidth * 480 > uiInfo.uiDC.glconfig.vidHeight * 640)
 	{
 		// wide screen
@@ -9157,6 +9160,9 @@ void _UI_Init(qboolean inGameLoad)
 	uiInfo.teamBalanceFilter        = trap_R_RegisterShaderNoMip("ui/assets/filter_balance.tga");
 
 	uiInfo.campaignMap = trap_R_RegisterShaderNoMip("gfx/loading/camp_map.tga");
+
+	trap_R_RegisterFont("ariblk", 27, &uiInfo.loadscreenfont1);
+	trap_R_RegisterFont("courbd", 30, &uiInfo.loadscreenfont2);
 
 	start = trap_Milliseconds();
 

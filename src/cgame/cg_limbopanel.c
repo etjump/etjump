@@ -391,7 +391,7 @@ panel_button_t playerXPCounter =
 	CG_LimboPanel_RenderCounter,
 	NULL,
 };
-
+ 
 panel_button_t playerSkillCounter0 =
 {
 	NULL,
@@ -2797,6 +2797,11 @@ qboolean CG_LimboPanel_Draw(void)
 		//%	CG_DrawPic( LIMBO_3D_X, LIMBO_3D_Y, LIMBO_3D_W, LIMBO_3D_H, cgs.media.limboRadioBroadcast );
 		CG_DrawPic(LIMBO_3D_X + 4, LIMBO_3D_Y - 8, LIMBO_3D_W - 8, LIMBO_3D_W - 8, cgs.media.limboRadioBroadcast);
 	}
+
+	// side frames to block view
+	vec4_t sideColor = { 0.145, 0.172, 0.145, 1 };
+	CG_FillRect(0, 0, SCREEN_OFFSET_X, 480, sideColor);
+	CG_FillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, sideColor);
 
 	BG_PanelButtonsRender(limboPanelButtons);
 

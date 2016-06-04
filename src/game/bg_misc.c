@@ -5211,6 +5211,7 @@ qboolean PC_Int_Parse(int handle, int *i)
 		return qfalse;
 	}
 	*i = token.intvalue;
+	
 	if (negative)
 	{
 		*i = -*i;

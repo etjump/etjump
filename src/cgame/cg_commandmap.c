@@ -1144,7 +1144,6 @@ void CG_DrawExpandedAutoMap(void)
 	w = CC_2D_W;
 	h = CC_2D_H;
 
-
 	if (cgs.autoMapExpanded)
 	{
 		if (cg.time - cgs.autoMapExpandTime < 250.f)
@@ -1276,7 +1275,7 @@ void CG_DrawAutoMap(void)
 		cgs.ccSelectedLayer = CG_CurLayerForZ((int)cg.predictedPlayerEntity.lerpOrigin[2]);
 	}
 
-	x = 520;
+	x = SCREEN_WIDTH - 120;
 	y = 20;
 	w = 100;
 	h = 100;

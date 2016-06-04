@@ -164,6 +164,11 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack
 		bg_loadscreeninited = qtrue;
 	}
 
+	// side frames to block view
+	vec4_t sideColor = { 0.145, 0.172, 0.145, 1 };
+	uiInfo.uiDC.fillRect(0, 0, SCREEN_OFFSET_X, 480, sideColor);
+	uiInfo.uiDC.fillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, sideColor);
+
 	BG_PanelButtonsRender(loadpanelButtons);
 
 	if (forcerefresh)

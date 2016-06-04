@@ -31,12 +31,12 @@ void CG_DrawHeader(float x, float y, float fade)
 	header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
 
 	y += ALT_SCOREBOARD_VERTICAL_DELTA;
-	CG_Text_Paint_Ext(ALT_SCOREBOARD_WIDTH / 2 - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
+	CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
 	                  y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 
 	y     += ALT_SCOREBOARD_VERTICAL_DELTA;
 	header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
-	CG_Text_Paint_Ext(ALT_SCOREBOARD_WIDTH / 2 - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2, y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+	CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2, y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 }
 
 void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t textColor, float fade)
@@ -147,13 +147,13 @@ void CG_DrawPlayers(float x, float y, float fade)
 
 void CG_DrawAltScoreboard(float fade)
 {
-	float  x = 20;
+	float  x = 20 + SCREEN_OFFSET_X;
 	float  y = 10;
 	vec4_t currentClrUiBack;
 	Vector4Copy(clrUiBack, currentClrUiBack);
 	currentClrUiBack[3] = currentClrUiBack[3] * fade;
-	CG_FillRect(x, y, 640 - 2 * x, 480 - 2 * y, currentClrUiBack);
-	CG_DrawRect_FixedBorder(x, y, 640 - 2 * x, 480 - 2 * y, 1, colorBlack);
+	CG_FillRect(x, y, 640 - 2 * 20, 480 - 2 * y, currentClrUiBack);
+	CG_DrawRect_FixedBorder(x, y, 640 - 2 * 20, 480 - 2 * y, 1, colorBlack);
 	y += 10;
 	CG_DrawHeader(x, y, fade);
 	CG_DrawPlayers(x, y, fade);
@@ -337,7 +337,7 @@ void CG_DrawPlayers2(float x, float y, float fade)
 
 void CG_DrawAltScoreboard2(float fade)
 {
-	float  x               = 20;
+	float  x               = 20 + SCREEN_OFFSET_X;
 	float  tempX           = x;
 	float  y               = 10;
 	float  tempY           = y;
@@ -535,18 +535,18 @@ int WM_DrawObjectives(int x, int y, int width, float fade)
 
 		if (flagshader)
 		{
-			CG_DrawPic(100, 10, 210, 136, trap_R_RegisterShaderNoMip(flagshader));
-			CG_DrawPic(325, 10, 210, 136, trap_R_RegisterShaderNoMip(flagshader));
+			CG_DrawPic(SCREEN_OFFSET_X + 100, 10, 210, 136, trap_R_RegisterShaderNoMip(flagshader));
+			CG_DrawPic(SCREEN_OFFSET_X + 325, 10, 210, 136, trap_R_RegisterShaderNoMip(flagshader));
 		}
 
 		if (shader)
 		{
-			CG_DrawPic(229, 10, 182, 136, trap_R_RegisterShaderNoMip(shader));
+			CG_DrawPic(SCREEN_OFFSET_X + 229, 10, 182, 136, trap_R_RegisterShaderNoMip(shader));
 		}
 		if (nameshader)
 		{
-			CG_DrawPic(140, 50, 127, 64, trap_R_RegisterShaderNoMip(nameshader));
-			CG_DrawPic(365, 50, 127, 64, trap_R_RegisterShaderNoMip("ui/assets/portraits/text_win.tga"));
+			CG_DrawPic(SCREEN_OFFSET_X + 140, 50, 127, 64, trap_R_RegisterShaderNoMip(nameshader));
+			CG_DrawPic(SCREEN_OFFSET_X + 365, 50, 127, 64, trap_R_RegisterShaderNoMip("ui/assets/portraits/text_win.tga"));
 		}
 		return y;
 	}
@@ -599,9 +599,9 @@ int WM_DrawObjectives(int x, int y, int width, float fade)
 		//	CG_Text_Paint_Ext( x, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1 );
 
 		s = va(CG_TranslateString(va("^<%s", cgs.rawmapname)));
-		CG_Text_Paint_Ext(640 / 2 - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
+		CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
 		s = CG_TranslateString("^<www.etjump.com");
-		CG_Text_Paint_Ext(640 - 80 - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
+		CG_Text_Paint_Ext(SCREEN_WIDTH - SCREEN_OFFSET_X - 80 - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
 
 		if (cgs.gametype != GT_WOLF_LMS)
 		{
@@ -904,12 +904,12 @@ static int WM_DrawInfoLine(int x, int y, float fade)
 		s = CG_TranslateString(s);
 	}
 
-	CG_FillRect(320 - w / 2, y, w, 20, clrUiBar);
-	CG_DrawRect_FixedBorder(320 - w / 2, y, w, 20, 1, colorBlack);
+	CG_FillRect(SCREEN_OFFSET_X + 320 - w / 2, y, w, 20, clrUiBar);
+	CG_DrawRect_FixedBorder(SCREEN_OFFSET_X + 320 - w / 2, y, w, 20, 1, colorBlack);
 
 	w = CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont1);
 
-	CG_Text_Paint_Ext(320 - w * 0.5f, y + 15, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(SCREEN_OFFSET_X + 320 - w * 0.5f, y + 15, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1);
 //	CG_DrawSmallString( 320 - w/2, ( y + INFO_LINE_HEIGHT / 2 ) - SMALLCHAR_HEIGHT / 2, s, fade );
 	return y + INFO_LINE_HEIGHT + 6;
 }
@@ -1111,7 +1111,7 @@ qboolean CG_DrawScoreboard(void)
 	x = 20;
 	y = 10;
 
-	x_right = 640 - x - (INFO_TOTAL_WIDTH - 5);
+	x_right = SCREEN_WIDTH - SCREEN_OFFSET_X - x - (INFO_TOTAL_WIDTH - 5);
 
 	// don't draw anything if the menu or console is up
 	if (cg_paused.integer)
@@ -1161,14 +1161,14 @@ qboolean CG_DrawScoreboard(void)
 		return qtrue;
 	}
 
-	y = WM_DrawObjectives(x, y, 640 - 2 * x + 5, fade);
+	y = WM_DrawObjectives(SCREEN_OFFSET_X + x, y, 640 - 2 * x + 5, fade);
 
 	// Dini, Note, positions \ draws the team container thingies etc
 	if (cgs.gametype == GT_WOLF_STOPWATCH && (cg.snap->ps.pm_type == PM_INTERMISSION))
 	{
-		y = WM_DrawInfoLine(x, 155, fade);
+		y = WM_DrawInfoLine(SCREEN_OFFSET_X + x, 155, fade);
 
-		WM_TeamScoreboard(x, y, TEAM_AXIS, fade, 8);
+		WM_TeamScoreboard(SCREEN_OFFSET_X + x, y, TEAM_AXIS, fade, 8);
 		x = x_right;
 		WM_TeamScoreboard(x, y, TEAM_ALLIES, fade, 8);
 	}
@@ -1176,13 +1176,13 @@ qboolean CG_DrawScoreboard(void)
 	{
 		if (cg.snap->ps.pm_type == PM_INTERMISSION)
 		{
-			WM_TeamScoreboard(x, y, TEAM_AXIS, fade, 9);
+			WM_TeamScoreboard(SCREEN_OFFSET_X + x, y, TEAM_AXIS, fade, 9);
 			x = x_right;
 			WM_TeamScoreboard(x, y, TEAM_ALLIES, fade, 9);
 		}
 		else
 		{
-			WM_TeamScoreboard(x, y, TEAM_AXIS, fade, 25);
+			WM_TeamScoreboard(SCREEN_OFFSET_X + x, y, TEAM_AXIS, fade, 25);
 			x = x_right;
 			WM_TeamScoreboard(x + 56, y, TEAM_ALLIES, fade, 25);
 		}
