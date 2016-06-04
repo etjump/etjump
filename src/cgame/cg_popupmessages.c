@@ -15,6 +15,7 @@ struct pmStackItem_s
 	int time;
 	char message[128];
 	qhandle_t shader;
+	int repeats;
 
 	pmListItem_t *next;
 };
@@ -312,6 +313,15 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 		listItem->shader = cgs.media.pmImages[type];
 	}
 
+	listItem->repeats = 1;
+	
+	// don't add repeats into stack, but count them
+	if (etj_popupGrouped.integer && cg_pmWaitingList && !Q_stricmp(message, cg_pmWaitingList->message)) {
+		cg_pmWaitingList->time = cg.time;
+		cg_pmWaitingList->repeats++;
+		return;
+	}
+
 	listItem->inuse = qtrue;
 	listItem->type  = type;
 	Q_strncpyz(listItem->message, message, sizeof(cg_pmStack[0].message));
@@ -426,6 +436,7 @@ void CG_DrawPMItems(void)
 	int          i, size;
 	pmListItem_t *listItem = cg_pmOldList;
 	float        y         = 360;
+	char         *msg;
 
 	if (cg_drawSmallPopupIcons.integer)
 	{
@@ -443,6 +454,14 @@ void CG_DrawPMItems(void)
 		return;
 	}
 
+	// show repeats counter
+	if (cg_pmWaitingList->repeats > 1) {
+		msg = va("%s (x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
+	}
+	else {
+		msg = &cg_pmWaitingList->message;
+	}
+
 	t = cg_pmWaitingList->time + CG_TimeForPopup(cg_pmWaitingList->type) + cg_popupStayTime.integer;
 	if (cg.time > t)
 	{
@@ -452,7 +471,7 @@ void CG_DrawPMItems(void)
 	trap_R_SetColor(colourText);
 	CG_DrawPic(4, y, size, size, cg_pmWaitingList->shader);
 	trap_R_SetColor(NULL);
-	CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, cg_pmWaitingList->message, 0, 0, 0, &cgs.media.limboFont2);
+	CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, 0, &cgs.media.limboFont2);
 
 	for (i = 0; i < cg_numPopups.integer - 1 && listItem; i++, listItem = listItem->next)
 	{
@@ -468,10 +487,17 @@ void CG_DrawPMItems(void)
 			colourText[3] = colour[3] = 1.f;
 		}
 
+		if (listItem->repeats > 1) {
+			msg = va("%s (x%d)", listItem->message, listItem->repeats);
+		}
+		else {
+			msg = &listItem->message;
+		}
+
 		trap_R_SetColor(colourText);
 		CG_DrawPic(4, y, size, size, listItem->shader);
 		trap_R_SetColor(NULL);
-		CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, listItem->message, 0, 0, 0, &cgs.media.limboFont2);
+		CG_Text_Paint_Ext(4 + size + 2, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, 0, &cgs.media.limboFont2);
 	}
 }
 
