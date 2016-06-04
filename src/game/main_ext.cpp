@@ -9,7 +9,6 @@
 #include "utilities.hpp"
 #include <boost/algorithm/string.hpp>
 #include "motd.hpp"
-#include "random_map_mode.hpp"
 #include "timerun.hpp"
 #include "map_statistics.hpp"
 #include "tokens.hpp"
@@ -70,15 +69,6 @@ void WriteSessionData()
 }
 
 /*
-Informs user about a map change happening in
-"minutes" minutes.
-*/
-void InformUsersAboutMapChange(int minutes)
-{
-	CPAll((boost::format("^zChanging map to a random map in ^2%d ^zminutes.") % minutes).str());
-}
-
-/*
 Changes map to a random map
 */
 void ChangeMap()
@@ -88,30 +78,8 @@ void ChangeMap()
 	trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
 }
 
-/*
-Whenever g_randomMapInterval is updated, update the value in the
-handling object too
-*/
-void UpdateRandomMapInterval(int interval)
-{
-	if (game.randomMapMode->updateInterval(interval) == true)
-	{
-		// interval exceeded already. Print information about a map change in 1 minute
-		InformUsersAboutMapChange(1);
-	}
-	else
-	{
-		CPAll((boost::format("^zChanged random map vote interval to ^2%d^z minutes.") % interval).str());
-	}
-}
-
 void RunFrame(int levelTime)
 {
-	if (g_randomMapMode.integer)
-	{
-		game.randomMapMode->checkTime(levelTime);
-	}
-
 	game.mapStatistics->runFrame(levelTime);
 }
 
@@ -163,13 +131,6 @@ void OnGameInit()
 		auto path = std::string(g_tokensPath.string) + "/" + std::string(level.rawmapname) + ".json";
 		game.tokens->loadTokens(path);
 	}
-
-
-	// this has to be initialized here
-	game.randomMapMode = std::shared_ptr<RandomMapMode>(new RandomMapMode(level.time,
-	                                                                      g_randomMapModeInterval.integer,
-	                                                                      InformUsersAboutMapChange,
-	                                                                      ChangeMap));
 }
 
 void OnGameShutdown()
@@ -188,7 +149,6 @@ void OnGameShutdown()
 	game.customMapVotes = nullptr;
 	game.motd = nullptr;
 	game.timerun = nullptr;
-	game.randomMapMode = nullptr;
 	game.mapStatistics = nullptr;
 	game.tokens = nullptr;
 }

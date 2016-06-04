@@ -31,7 +31,7 @@ typedef struct
 {
 	unsigned int dwGameTypes;
 	const char *pszVoteName;
-	int (*pVoteCommand)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
+	int (*pVoteCommand)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2);
 	const char *pszVoteMessage;
 	const char *pszVoteHelp;
 } vote_reference_t;
@@ -39,29 +39,36 @@ typedef struct
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] =
 {
-	{ 0x1ff, "kick",          G_Kick_v,          "KICK",
-	  " <player_id>^7\n  Attempts to kick player from server" },
-	{ 0x1ff, "mute",          G_Mute_v,          "MUTE",
-	  " <player_id>^7\n  Removes the chat capabilities of a player" },
-	{ 0x1ff, "unmute",        G_UnMute_v,        "UN-MUTE",
-	  " <player_id>^7\n  Restores the chat capabilities of a player" },
 	{ 0x1ff, "map",           G_Map_v,           "Change map to",
 	  " <mapname>^7\n  Votes for a new map to be loaded" },
 	{ 0x1ff, "maprestart",    G_MapRestart_v,    "Map Restart",
 	  "^7\n  Restarts the current map in progress" },
-	{ 0x1ff, "referee",       G_Referee_v,       "Referee",
-	  " <player_id>^7\n  Elects a player to have admin abilities" },
-	{ 0x1ff, "unreferee",     G_Unreferee_v,     "UNReferee",
-	  " <player_id>^7\n  Elects a player to have admin abilities removed" },
 	{ 0x1ff, "randommap",     G_RandomMap_v,     "Random Map",
 	  " ^7\n Votes a new random map to be loaded" },
-	{ 0x1ff, "randommapmode", G_RandomMapMode_v, "Random Map Mode" },
 	{ 0,     0,               NULL,              0 }
 };
 
+void G_cpmPrintf(gentity_t *ent, const char *fmt, ...)
+{
+	va_list argptr;
+	char    text[1024];
+
+	va_start(argptr, fmt);
+	Q_vsnprintf(text, sizeof(text), fmt, argptr);
+	va_end(argptr);
+
+	if (ent == NULL)
+	{
+		trap_Printf(text);
+	}
+	else
+	{
+		CP(va("cpm \"%s\n\"", text));
+	}
+}
 
 // Checks for valid custom callvote requests from the client.
-int G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2, qboolean fRefereeCmd)
+int G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2)
 {
 	unsigned int i, cVoteCommands = sizeof(aVoteInfo) / sizeof(aVoteInfo[0]);
 
@@ -69,7 +76,7 @@ int G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2, qboolean fRefereeCmd)
 	{
 		if (!Q_stricmp(arg, aVoteInfo[i].pszVoteName))
 		{
-			int hResult = aVoteInfo[i].pVoteCommand(ent, i, arg, arg2, fRefereeCmd);
+			int hResult = aVoteInfo[i].pVoteCommand(ent, i, arg, arg2);
 
 			if (hResult == G_OK)
 			{
@@ -125,25 +132,25 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote)
 	{
 		if (i + rows * 3 + 1 <= num_cmds)
 		{
-			G_refPrintf(ent, "^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+			G_cpmPrintf(ent, "^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
 			            aVoteInfo[vi[i + rows]].pszVoteName,
 			            aVoteInfo[vi[i + rows * 2]].pszVoteName,
 			            aVoteInfo[vi[i + rows * 3]].pszVoteName);
 		}
 		else if (i + rows * 2 + 1 <= num_cmds)
 		{
-			G_refPrintf(ent, "^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+			G_cpmPrintf(ent, "^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
 			            aVoteInfo[vi[i + rows]].pszVoteName,
 			            aVoteInfo[vi[i + rows * 2]].pszVoteName);
 		}
 		else if (i + rows + 1 <= num_cmds)
 		{
-			G_refPrintf(ent, "^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+			G_cpmPrintf(ent, "^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
 			            aVoteInfo[vi[i + rows]].pszVoteName);
 		}
 		else
 		{
-			G_refPrintf(ent, "^5%-17s", aVoteInfo[vi[i]].pszVoteName);
+			G_cpmPrintf(ent, "^5%-17s", aVoteInfo[vi[i]].pszVoteName);
 		}
 	}
 
@@ -175,10 +182,9 @@ void G_voteFlags(void)
 }
 
 // Prints specific callvote command help description.
-qboolean G_voteDescription(gentity_t *ent, qboolean fRefereeCmd, int cmd)
+qboolean G_voteDescription(gentity_t *ent, int cmd)
 {
 	char arg[MAX_TOKEN_CHARS];
-	char *ref_cmd = (fRefereeCmd) ? "\\ref" : "\\callvote";
 
 	if (!ent)
 	{
@@ -189,7 +195,7 @@ qboolean G_voteDescription(gentity_t *ent, qboolean fRefereeCmd, int cmd)
 	if (!Q_stricmp(arg, "?") || trap_Argc() == 2)
 	{
 		trap_Argv(1, arg, sizeof(arg));
-		G_refPrintf(ent, "\nUsage: ^3%s %s%s\n", ref_cmd, arg, aVoteInfo[cmd].pszVoteHelp);
+		G_cpmPrintf(ent, "\nUsage: ^3\\vote %s%s\n", arg, aVoteInfo[cmd].pszVoteHelp);
 		return(qtrue);
 	}
 
@@ -200,34 +206,34 @@ qboolean G_voteDescription(gentity_t *ent, qboolean fRefereeCmd, int cmd)
 // Localize disable message info.
 void G_voteDisableMessage(gentity_t *ent, const char *cmd)
 {
-	G_refPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled", cmd);
+	G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled", cmd);
 }
 
 
 // Player ID message stub.
 void G_playersMessage(gentity_t *ent)
 {
-	G_refPrintf(ent, "Use the ^3players^7 command to find a valid player ID.");
+	G_cpmPrintf(ent, "Use the ^3players^7 command to find a valid player ID.");
 }
 
 
 // Localize current parameter setting.
 void G_voteCurrentSetting(gentity_t *ent, const char *cmd, const char *setting)
 {
-	G_refPrintf(ent, "^2%s^7 is currently ^3%s\n", cmd, setting);
+	G_cpmPrintf(ent, "^2%s^7 is currently ^3%s\n", cmd, setting);
 }
 
 
 // Vote toggling
-int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, qboolean fRefereeCmd, int curr_setting, int vote_allow, int vote_type)
+int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting, int vote_allow, int vote_type)
 {
-	if (!vote_allow && ent && !ent->client->sess.referee)
+	if (!vote_allow && ent)
 	{
 		G_voteDisableMessage(ent, aVoteInfo[vote_type].pszVoteName);
 		G_voteCurrentSetting(ent, aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
 		return(G_INVALID);
 	}
-	if (G_voteDescription(ent, fRefereeCmd, vote_type))
+	if (G_voteDescription(ent, vote_type))
 	{
 		G_voteCurrentSetting(ent, aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
 		return(G_INVALID);
@@ -235,7 +241,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, qboolean fRefereeC
 
 	if ((atoi(arg2) && curr_setting) || (!atoi(arg2) && !curr_setting))
 	{
-		G_refPrintf(ent, "^3%s^5 is already %s!", aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
+		G_cpmPrintf(ent, "^3%s^5 is already %s!", aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
 		return(G_INVALID);
 	}
 
@@ -280,192 +286,8 @@ void G_voteSetVoteString(const char *desc)
 //
 ////////////////////////////////////////////////////////
 
-
-// *** Player Kick ***
-int G_Kick_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
-{
-	// Vote request (vote is being initiated)
-	if (arg)
-	{
-		int pid;
-
-		if (!vote_allow_kick.integer && ent && !ent->client->sess.referee)
-		{
-			G_voteDisableMessage(ent, arg);
-			return G_INVALID;
-		}
-		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
-		{
-			return G_INVALID;
-		}
-		else if ((pid = ClientNumberFromString(ent, arg2)) == -1)
-		{
-			return G_INVALID;
-		}
-
-		if (level.clients[pid].sess.referee)
-		{
-			G_refPrintf(ent, "Can't vote to kick referees!");
-			return G_INVALID;
-		}
-
-		if (!fRefereeCmd && ent)
-		{
-			if (level.clients[pid].sess.sessionTeam != TEAM_SPECTATOR && level.clients[pid].sess.sessionTeam != ent->client->sess.sessionTeam)
-			{
-				G_refPrintf(ent, "Can't vote to kick players on opposing team!");
-				return G_INVALID;
-			}
-		}
-
-		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid);
-		Com_sprintf(arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname);
-
-		// Vote action (vote has passed)
-	}
-	else
-	{
-		trap_SendConsoleCommand(EXEC_APPEND, va("ref kick %d\n", atoi(level.voteInfo.vote_value)));
-		AP(va("cp \"%s\n^3has been kicked!\n\"", level.clients[atoi(level.voteInfo.vote_value)].pers.netname));
-	}
-
-	return G_OK;
-}
-
-// *** Player Mute ***
-int G_Mute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
-{
-	if (fRefereeCmd)
-	{
-		// handled elsewhere
-		return(G_NOTFOUND);
-	}
-
-	// Vote request (vote is being initiated)
-	if (arg)
-	{
-		int pid;
-
-		if (!vote_allow_muting.integer && ent && !ent->client->sess.referee)
-		{
-			G_voteDisableMessage(ent, arg);
-			return(G_INVALID);
-		}
-		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
-		{
-			return(G_INVALID);
-		}
-		else if ((pid = ClientNumberFromString(ent, arg2)) == -1)
-		{
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].sess.referee)
-		{
-			G_refPrintf(ent, "Can't vote to mute referees!");
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].sess.muted)
-		{
-			G_refPrintf(ent, "Player is already muted!");
-			return(G_INVALID);
-		}
-
-		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid);
-		Com_sprintf(arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname);
-
-		// Vote action (vote has passed)
-	}
-	else
-	{
-		int pid = atoi(level.voteInfo.vote_value);
-
-		// Mute a player
-		if (level.clients[pid].sess.referee != RL_RCON)
-		{
-			trap_SendServerCommand(pid, va("cpm \"^3You have been muted\""));
-			level.clients[pid].sess.muted = qtrue;
-			AP(va("cp \"%s\n^3has been muted!\n\"", level.clients[pid].pers.netname));
-			ClientUserinfoChanged(pid);
-		}
-		else
-		{
-			G_Printf("Cannot mute a referee.\n");
-		}
-	}
-
-	return(G_OK);
-}
-
-// *** Player Un-Mute ***
-int G_UnMute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
-{
-	if (fRefereeCmd)
-	{
-		// handled elsewhere
-		return(G_NOTFOUND);
-	}
-
-	// Vote request (vote is being initiated)
-	if (arg)
-	{
-		int pid;
-
-		if (!vote_allow_muting.integer && ent && !ent->client->sess.referee)
-		{
-			G_voteDisableMessage(ent, arg);
-			return(G_INVALID);
-		}
-		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
-		{
-			return(G_INVALID);
-		}
-		else if ((pid = ClientNumberFromString(ent, arg2)) == -1)
-		{
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].sess.referee)
-		{
-			G_refPrintf(ent, "Can't vote to un-mute referees!");
-			return(G_INVALID);
-		}
-
-		if (!level.clients[pid].sess.muted)
-		{
-			G_refPrintf(ent, "Player is not muted!");
-			return(G_INVALID);
-		}
-
-		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid);
-		Com_sprintf(arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname);
-
-		// Vote action (vote has passed)
-	}
-	else
-	{
-		int pid = atoi(level.voteInfo.vote_value);
-
-		// Mute a player
-		if (level.clients[pid].sess.referee != RL_RCON)
-		{
-			trap_SendServerCommand(pid, va("cpm \"^3You have been un-muted\""));
-			level.clients[pid].sess.muted = qfalse;
-			AP(va("cp \"%s\n^3has been un-muted!\n\"", level.clients[pid].pers.netname));
-			ClientUserinfoChanged(pid);
-		}
-		else
-		{
-			G_Printf("Cannot un-mute a referee.\n");
-		}
-	}
-
-	return(G_OK);
-}
-
 int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
-                  char *arg2, qboolean fRefereeCmd)
+                  char *arg2)
 {
 	const char *map = NULL;
 	// We know that arg2 is a type that exists.
@@ -503,39 +325,9 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 	return G_OK;
 }
 
-int G_RandomMapMode_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
-{
-	if (arg)
-	{
-		if (vote_randomMapMode.integer == 0)
-		{
-			C_CPTo(ent, "^zVoting for random map mode is disabled.");
-			return G_INVALID;
-		}
-	}
-	else
-	{
-		if (vote_randomMapMode.integer)
-		{
-			if (trap_Cvar_VariableIntegerValue("g_randomMapMode") == 0)
-			{
-				trap_Cvar_Set("g_randomMapMode", "1");
-				trap_Cvar_Update(&g_randomMapMode);
-				C_CPAll(va("^zActivating random map mode. A new random ^zmap is chosen every ^2%d^z minutes.", g_randomMapModeInterval.integer));
-			}
-			else
-			{
-				trap_Cvar_Set("g_randomMapMode", "0");
-				trap_Cvar_Update(&g_randomMapMode);
-				C_CPAll(va("^zRandom map mode is no longer active.", g_randomMapModeInterval.integer));
-			}
-		}
-	}
-	return G_OK;
-}
 
 // *** Map - simpleton: we dont verify map is allowed/exists ***
-int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
+int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 {
 	// Vote request (vote is being initiated)
 	if (arg)
@@ -543,13 +335,13 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qbo
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
-		if (!vote_allow_map.integer && ent && !ent->client->sess.referee)
+		if (!vote_allow_map.integer && ent)
 		{
 			G_voteDisableMessage(ent, arg);
 			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
 			return(G_INVALID);
 		}
-		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
+		if (G_voteDescription(ent, dwVoteIndex))
 		{
 			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
 			return(G_INVALID);
@@ -584,7 +376,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qbo
 }
 
 // *** Map Restart ***
-int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
+int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 {
 	// Vote request (vote is being initiated)
 	if (arg)
@@ -593,7 +385,7 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 		{
 			if (!Q_stricmp(arg2, "?"))
 			{
-				G_refPrintf(ent, "Usage: ^3%s %s%s\n", ((fRefereeCmd) ? "\\ref" : "\\callvote"), arg, aVoteInfo[dwVoteIndex].pszVoteHelp);
+				G_cpmPrintf(ent, "Usage: ^3\\callvote %s%s\n", arg, aVoteInfo[dwVoteIndex].pszVoteHelp);
 				return(G_INVALID);
 			}
 		}
@@ -610,140 +402,3 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	return(G_OK);
 }
 
-// *** Referee voting ***
-int G_Referee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
-{
-	// Vote request (vote is being initiated)
-	if (arg)
-	{
-		int pid;
-
-		if (!vote_allow_referee.integer && ent && !ent->client->sess.referee)
-		{
-			G_voteDisableMessage(ent, arg);
-			return(G_INVALID);
-		}
-
-		if (!ent->client->sess.referee && level.numPlayingClients < 3)
-		{
-			G_refPrintf(ent, "Sorry, not enough clients in the game to vote for a referee");
-			return(G_INVALID);
-		}
-
-		if (ent->client->sess.referee && trap_Argc() == 2)
-		{
-			G_playersMessage(ent);
-			return(G_INVALID);
-		}
-		else if (trap_Argc() == 2)
-		{
-			pid = ent - g_entities;
-		}
-		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
-		{
-			return(G_INVALID);
-		}
-		else if ((pid = ClientNumberFromString(ent, arg2)) == -1)
-		{
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].sess.referee)
-		{
-			G_refPrintf(ent, "[lof]%s [lon]is already a referee!", level.clients[pid].pers.netname);
-			return(-1);
-		}
-
-		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid);
-		Com_sprintf(arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname);
-
-		// Vote action (vote has passed)
-	}
-	else
-	{
-		// Voting in a new referee
-		gclient_t *cl = &level.clients[atoi(level.voteInfo.vote_value)];
-
-		if (cl->pers.connected == CON_DISCONNECTED)
-		{
-			AP("print \"Player left before becoming referee\n\"");
-		}
-		else
-		{
-			cl->sess.referee     = RL_REFEREE; // FIXME: Differentiate voted refs from passworded refs
-			cl->sess.spec_invite = TEAM_AXIS | TEAM_ALLIES;
-			AP(va("cp \"%s^7 is now a referee\n\"", cl->pers.netname));
-			ClientUserinfoChanged(atoi(level.voteInfo.vote_value));
-		}
-	}
-	return(G_OK);
-}
-
-// *** Un-Referee voting ***
-int G_Unreferee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd)
-{
-	// Vote request (vote is being initiated)
-	if (arg)
-	{
-		int pid;
-
-		if (!vote_allow_referee.integer && ent && !ent->client->sess.referee)
-		{
-			G_voteDisableMessage(ent, arg);
-			return(G_INVALID);
-		}
-
-		if (ent->client->sess.referee && trap_Argc() == 2)
-		{
-			G_playersMessage(ent);
-			return(G_INVALID);
-		}
-		else if (trap_Argc() == 2)
-		{
-			pid = ent - g_entities;
-		}
-		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
-		{
-			return(G_INVALID);
-		}
-		else if ((pid = ClientNumberFromString(ent, arg2)) == -1)
-		{
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].sess.referee == RL_NONE)
-		{
-			G_refPrintf(ent, "[lof]%s [lon]isn't a referee!", level.clients[pid].pers.netname);
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].sess.referee == RL_RCON)
-		{
-			G_refPrintf(ent, "[lof]%s's [lon]status cannot be removed", level.clients[pid].pers.netname);
-			return(G_INVALID);
-		}
-
-		if (level.clients[pid].pers.localClient)
-		{
-			G_refPrintf(ent, "[lof]%s's [lon]is the Server Host", level.clients[pid].pers.netname);
-			return(G_INVALID);
-		}
-
-		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid);
-		Com_sprintf(arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname);
-
-		// Vote action (vote has passed)
-	}
-	else
-	{
-		// Stripping of referee status
-		gclient_t *cl = &level.clients[atoi(level.voteInfo.vote_value)];
-
-		cl->sess.referee     = RL_NONE;
-		cl->sess.spec_invite = 0;
-		AP(va("cp \"%s^7\nis no longer a referee\n\"", cl->pers.netname));
-		ClientUserinfoChanged(atoi(level.voteInfo.vote_value));
-	}
-
-	return(G_OK);
-}

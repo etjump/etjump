@@ -29,7 +29,7 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart)
 		G_deleteStats(client - level.clients);
 	}
 
-	s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 	       client->sess.sessionTeam,
 	       client->sess.spectatorTime,
 	       client->sess.spectatorState,
@@ -46,7 +46,6 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart)
 	       client->sess.deaths,
 	       client->sess.game_points,
 	       client->sess.kills,
-	       client->sess.referee,
 	       client->sess.spec_invite,
 	       client->sess.spec_team,
 	       client->sess.suicides,
@@ -198,7 +197,7 @@ void G_ReadSessionData(gclient_t *client)
 
 	trap_Cvar_VariableStringBuffer(va("session%i", client - level.clients), s, sizeof(s));
 
-	sscanf(s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	sscanf(s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 	       (int *)&client->sess.sessionTeam,
 	       &client->sess.spectatorTime,
 	       (int *)&client->sess.spectatorState,
@@ -215,7 +214,6 @@ void G_ReadSessionData(gclient_t *client)
 	       &client->sess.deaths,
 	       &client->sess.game_points,
 	       &client->sess.kills,
-	       &client->sess.referee,
 	       &client->sess.spec_invite,
 	       &client->sess.spec_team,
 	       &client->sess.suicides,
@@ -342,7 +340,6 @@ void G_InitSessionData(gclient_t *client, char *userinfo)
 
 	// OSP
 	sess->coach_team                 = 0;
-	sess->referee                    = (client->pers.localClient) ? RL_REFEREE : RL_NONE;
 	sess->spec_invite                = 0;
 	sess->spec_team                  = 0;
 	sess->firstTime                  = qtrue;

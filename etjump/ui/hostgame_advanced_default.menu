@@ -34,7 +34,6 @@
 							setcvar match_minplayers 4 ;			\
 							setcvar match_readypercent 100 ;		\
 							setcvar match_latejoin 1 ;				\
-							setcvar match_mutespecs 0 ;				\
 							setcvar match_warmupDamage 1 ;			\
 							setcvar team_maxplayers 0 ;				\
 							setcvar team_nocontrols 0 ;				\

@@ -652,7 +652,6 @@ typedef struct
 	int deaths;
 	int game_points;
 	int kills;
-	int referee;
 	int rounds;
 	int spec_invite;
 	int spec_team;
@@ -764,8 +763,6 @@ typedef struct raceStruct_s
 	int saveLimit;
 } raceStruct_t;
 
-#define MAX_COMPLAINTIPS 5
-
 // client data that stays across multiple respawns, but is cleared
 // on each level change or team change at ClientBegin()
 typedef struct
@@ -792,10 +789,6 @@ typedef struct
 	playerTeamState_t teamState;    // status in teamplay games
 	int voteCount;                  // to prevent people from constantly calling votes
 	int teamVoteCount;              // to prevent people from constantly calling votes
-
-	int complaints;                     // DHM - Nerve :: number of complaints lodged against this client
-	int complaintClient;                // DHM - Nerve :: able to lodge complaint against this client
-	int complaintEndTime;               // DHM - Nerve :: until this time has expired
 
 	int lastReinforceTime;              // DHM - Nerve :: last reinforcement
 
@@ -858,8 +851,6 @@ typedef struct
 	qboolean collectedMediumTokens[MAX_TOKENS_PER_DIFFICULTY];
 	qboolean collectedHardTokens[MAX_TOKENS_PER_DIFFICULTY];
 	int tokenCollectionStartTime;
-
-	ipFilter_t complaintips[MAX_COMPLAINTIPS];
 
 	int previousSetHealthTime;
 } clientPersistant_t;
@@ -1651,7 +1642,7 @@ void G_SendScore(gentity_t *client);
 //
 void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
              const char *name, const char *message, qboolean localize, qboolean encoded); // JPW NERVE removed static declaration so it would link
-qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
+void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded);
 void Cmd_Team_f(gentity_t *ent);
@@ -1815,8 +1806,6 @@ extern vmCvar_t g_warmup;
 extern vmCvar_t voteFlags;
 
 // DHM - Nerve :: The number of complaints allowed before kick/ban
-extern vmCvar_t g_complaintlimit;
-extern vmCvar_t g_ipcomplaintlimit;
 extern vmCvar_t g_filtercams;
 extern vmCvar_t g_voiceChatsAllowed;        // DHM - Nerve :: number before spam control
 extern vmCvar_t g_fastres;                  // Xian - Fast medic res'ing
@@ -1913,21 +1902,8 @@ extern vmCvar_t team_nocontrols;
 // NOTE!!! If any vote flags are added, MAKE SURE to update the voteFlags struct in bg_misc.c w/appropriate info,
 //         menudef.h for the mask and g_main.c for vote_allow_* flag updates
 //
-extern vmCvar_t vote_allow_comp;
-extern vmCvar_t vote_allow_gametype;
-extern vmCvar_t vote_allow_kick;
 extern vmCvar_t vote_allow_map;
 extern vmCvar_t vote_allow_matchreset;
-extern vmCvar_t vote_allow_mutespecs;
-extern vmCvar_t vote_allow_nextmap;
-extern vmCvar_t vote_allow_pub;
-extern vmCvar_t vote_allow_referee;
-extern vmCvar_t vote_allow_shuffleteamsxp;
-extern vmCvar_t vote_allow_swapteams;
-extern vmCvar_t vote_allow_timelimit;
-extern vmCvar_t vote_allow_warmupdamage;
-extern vmCvar_t vote_allow_antilag;
-extern vmCvar_t vote_allow_muting;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
 extern vmCvar_t z_serverflags;
@@ -1939,8 +1915,6 @@ extern vmCvar_t g_autoFireteams;
 
 extern vmCvar_t g_nextmap;
 extern vmCvar_t g_nextcampaign;
-
-extern vmCvar_t g_disableComplaints;
 
 extern vmCvar_t bot_debug;                  // if set, draw "thought bubbles" for crosshair-selected bot
 extern vmCvar_t bot_debug_curAINode;        // the text of the current ainode for the bot begin debugged
@@ -2011,12 +1985,6 @@ extern vmCvar_t g_customMapVotesFile;
 // Start of timeruns support
 extern vmCvar_t g_timerunsDatabase;
 // End of timeruns support
-
-// Start of randommap mode
-extern vmCvar_t g_randomMapMode;
-extern vmCvar_t g_randomMapModeInterval;
-extern vmCvar_t vote_randomMapMode;
-// end of randommap mode
 
 // tokens
 extern vmCvar_t g_tokensMode;
@@ -2569,28 +2537,6 @@ void G_statsPrint(gentity_t *ent, int nType);
 unsigned int G_weapStatIndex_MOD(int iWeaponMOD);
 
 ///////////////////////
-// g_referee.c
-//
-void Cmd_AuthRcon_f(gentity_t *ent);
-void G_ref_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
-qboolean G_refCommandCheck(gentity_t *ent, char *cmd);
-void G_refHelp_cmd(gentity_t *ent);
-void G_refPlayerPut_cmd(gentity_t *ent, int team_id);
-void G_refRemove_cmd(gentity_t *ent);
-void G_refWarning_cmd(gentity_t *ent);
-void G_refMute_cmd(gentity_t *ent, qboolean mute);
-int  G_refClientnumForName(gentity_t *ent, const char *name);
-void G_refPrintf(gentity_t *ent, const char *fmt, ...);
-void G_PlayerBan(void);
-void G_MakeReferee(void);
-void G_RemoveReferee(void);
-void G_MuteClient(void);
-void G_UnMuteClient(void);
-void G_ref_con(void);
-
-
-
-///////////////////////
 // g_team.c
 //
 extern char      *aTeams[TEAM_NUM_TEAMS];
@@ -2613,55 +2559,18 @@ void G_verifyMatchState(int team_id);
 ///////////////////////
 // g_vote.c
 //
-int  G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2, qboolean fRefereeCmd);
+void G_cpmPrintf(gentity_t *ent, const char *fmt, ...);
+int  G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2);
 void G_voteFlags(void);
 void G_voteHelp(gentity_t *ent, qboolean fShowVote);
 void G_playersMessage(gentity_t *ent);
 // Actual voting commands
-int G_Comp_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-             char *arg2, qboolean fRefereeCmd);
-int G_Gametype_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                 char *arg2, qboolean fRefereeCmd);
-int G_Kick_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-             char *arg2, qboolean fRefereeCmd);
-int G_Mute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-             char *arg2, qboolean fRefereeCmd);
-int G_UnMute_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-               char *arg2, qboolean fRefereeCmd);
 int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-            char *arg2, qboolean fRefereeCmd);
-int G_Campaign_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                 char *arg2, qboolean fRefereeCmd);
+            char *arg2);
 int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                   char *arg2, qboolean fRefereeCmd);
-int G_MatchReset_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                   char *arg2, qboolean fRefereeCmd);
-int G_Mutespecs_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                  char *arg2, qboolean fRefereeCmd);
-int G_Nextmap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                char *arg2, qboolean fRefereeCmd);
-int G_Pub_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-            char *arg2, qboolean fRefereeCmd);
-int G_Referee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                char *arg2, qboolean fRefereeCmd);
-int G_ShuffleTeams_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                     char *arg2, qboolean fRefereeCmd);
-int G_StartMatch_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                   char *arg2, qboolean fRefereeCmd);
-int G_SwapTeams_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                  char *arg2, qboolean fRefereeCmd);
-int G_Timelimit_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                  char *arg2, qboolean fRefereeCmd);
-int G_Warmupfire_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                   char *arg2, qboolean fRefereeCmd);
-int G_Unreferee_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                  char *arg2, qboolean fRefereeCmd);
-int G_AntiLag_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                char *arg2, qboolean fRefereeCmd);
+                   char *arg2);
 int G_RandomMap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                  char *arg2, qboolean fRefereeCmd);
-int G_RandomMapMode_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                      char *arg2, qboolean fRefereeCmd);
+                  char *arg2);
 
 void G_LinkDebris(void);
 void G_LinkDamageParents(void);
@@ -2817,7 +2726,6 @@ void TimerunConnectNotify(gentity_t *ent);
 void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
-void UpdateRandomMapInterval(int interval);
 const char *G_MatchOneMap(const char *arg);
 
 #endif // G_LOCAL_H

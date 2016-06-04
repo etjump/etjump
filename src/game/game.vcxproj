@@ -281,7 +281,6 @@
     <ClCompile Include="g_missile.c" />
     <ClCompile Include="g_mover.c" />
     <ClCompile Include="g_props.c" />
-    <ClCompile Include="g_referee.c" />
     <ClCompile Include="save.cpp" />
     <ClCompile Include="g_script.c" />
     <ClCompile Include="g_script_actions.c" />
@@ -307,7 +306,6 @@
     <ClCompile Include="printer.cpp" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
-    <ClCompile Include="random_map_mode.cpp" />
     <ClCompile Include="session.cpp" />
     <ClCompile Include="sqlite_wrapper.cpp" />
     <ClCompile Include="timerun.cpp" />
@@ -352,7 +350,6 @@
     <ClInclude Include="map_statistics.hpp" />
     <ClInclude Include="motd.hpp" />
     <ClInclude Include="q_shared.h" />
-    <ClInclude Include="random_map_mode.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="session.hpp" />
     <ClInclude Include="sqlite_wrapper.hpp" />

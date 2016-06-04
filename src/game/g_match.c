@@ -722,11 +722,7 @@ int G_checkServerToggle(vmCvar_t *cv)
 {
 	int nFlag;
 
-	if (cv == &match_mutespecs)
-	{
-		nFlag = CV_SVS_MUTESPECS;
-	}
-	else if (cv == &g_antilag)
+	if (cv == &g_antilag)
 	{
 		nFlag = CV_SVS_ANTILAG;
 	}

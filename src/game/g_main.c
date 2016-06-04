@@ -63,8 +63,6 @@ vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
 vmCvar_t voteFlags;
-vmCvar_t g_complaintlimit;          // DHM - Nerve
-vmCvar_t g_ipcomplaintlimit;
 vmCvar_t g_filtercams;
 vmCvar_t g_voiceChatsAllowed;       // DHM - Nerve
 vmCvar_t g_fastres;                 // Xian
@@ -105,7 +103,6 @@ vmCvar_t g_antilag;
 vmCvar_t g_spectatorInactivity;
 vmCvar_t match_latejoin;
 vmCvar_t match_minplayers;
-vmCvar_t match_mutespecs;
 vmCvar_t match_readypercent;
 vmCvar_t match_timeoutcount;
 vmCvar_t match_timeoutlength;
@@ -120,21 +117,8 @@ vmCvar_t server_motd2;
 vmCvar_t server_motd3;
 vmCvar_t server_motd4;
 vmCvar_t server_motd5;
-vmCvar_t vote_allow_comp;
-vmCvar_t vote_allow_gametype;
-vmCvar_t vote_allow_kick;
 vmCvar_t vote_allow_map;
 vmCvar_t vote_allow_matchreset;
-vmCvar_t vote_allow_mutespecs;
-vmCvar_t vote_allow_nextmap;
-vmCvar_t vote_allow_pub;
-vmCvar_t vote_allow_referee;
-vmCvar_t vote_allow_shuffleteamsxp;
-vmCvar_t vote_allow_swapteams;
-vmCvar_t vote_allow_timelimit;
-vmCvar_t vote_allow_warmupdamage;
-vmCvar_t vote_allow_antilag;
-vmCvar_t vote_allow_muting;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t z_serverflags;
@@ -174,8 +158,6 @@ vmCvar_t g_autoFireteams;
 
 vmCvar_t g_nextmap;
 vmCvar_t g_nextcampaign;
-
-vmCvar_t g_disableComplaints;
 
 vmCvar_t g_dailyLogs;
 
@@ -244,14 +226,6 @@ vmCvar_t g_customMapVotesFile;
 vmCvar_t g_timerunsDatabase;
 // End of timeruns support
 
-// Start of random map mode
-// on off
-vmCvar_t g_randomMapMode;
-// how often in minutes
-vmCvar_t g_randomMapModeInterval;
-// allow vote
-vmCvar_t vote_randomMapMode;
-// End of random map mode
 vmCvar_t g_chatOptions;
 
 // tokens
@@ -348,8 +322,6 @@ cvarTable_t gameCvarTable[] =
 
 	{ &voteFlags,                   "voteFlags",                   "0",                                                      CVAR_TEMP | CVAR_ROM | CVAR_SERVERINFO,          0, qfalse},
 
-	{ &g_complaintlimit,            "g_complaintlimit",            "6",                                                      CVAR_ARCHIVE,                                    0, qtrue}, // DHM - Nerve
-	{ &g_ipcomplaintlimit,          "g_ipcomplaintlimit",          "3",                                                      CVAR_ARCHIVE,                                    0, qtrue},
 	{ &g_filtercams,                "g_filtercams",                "0",                                                      CVAR_ARCHIVE,                                    0, qfalse},
 	{ &g_voiceChatsAllowed,         "g_voiceChatsAllowed",         "4",                                                      CVAR_ARCHIVE,                                    0, qfalse}, // DHM - Nerve
 
@@ -377,7 +349,6 @@ cvarTable_t gameCvarTable[] =
 	{ &g_spectatorInactivity,       "g_spectatorInactivity",       "0",                                                      0,                                               0, qfalse, qfalse},
 	{ &match_latejoin,              "match_latejoin",              "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &match_minplayers,            "match_minplayers",            MATCH_MINPLAYERS,                                         0,                                               0, qfalse, qfalse},
-	{ &match_mutespecs,             "match_mutespecs",             "0",                                                      0,                                               0, qfalse, qtrue},
 	{ &match_readypercent,          "match_readypercent",          "100",                                                    0,                                               0, qfalse, qtrue},
 	{ &match_timeoutcount,          "match_timeoutcount",          "3",                                                      0,                                               0, qfalse, qtrue},
 	{ &match_timeoutlength,         "match_timeoutlength",         "180",                                                    0,                                               0, qfalse, qtrue},
@@ -392,21 +363,8 @@ cvarTable_t gameCvarTable[] =
 	{ &team_maxPanzers,             "team_maxPanzers",             "-1",                                                     0,                                               0, qfalse, qfalse},
 	{ &team_maxplayers,             "team_maxplayers",             "0",                                                      0,                                               0, qfalse, qfalse},
 	{ &team_nocontrols,             "team_nocontrols",             "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_comp,             "vote_allow_comp",             "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_gametype,         "vote_allow_gametype",         "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_kick,             "vote_allow_kick",             "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_allow_map,              "vote_allow_map",              "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_allow_matchreset,       "vote_allow_matchreset",       "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_mutespecs,        "vote_allow_mutespecs",        "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_nextmap,          "vote_allow_nextmap",          "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_pub,              "vote_allow_pub",              "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_referee,          "vote_allow_referee",          "0",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_shuffleteamsxp,   "vote_allow_shuffleteamsxp",   "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_swapteams,        "vote_allow_swapteams",        "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_timelimit,        "vote_allow_timelimit",        "0",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_warmupdamage,     "vote_allow_warmupdamage",     "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_antilag,          "vote_allow_antilag",          "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_allow_muting,           "vote_allow_muting",           "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_limit,                  "vote_limit",                  "5",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_percent,                "vote_percent",                "50",                                                     0,                                               0, qfalse, qfalse},
 
@@ -450,8 +408,6 @@ cvarTable_t gameCvarTable[] =
 
 	{ &g_nextmap,                   "nextmap",                     "",                                                       CVAR_TEMP },
 	{ &g_nextcampaign,              "nextcampaign",                "",                                                       CVAR_TEMP },
-
-	{ &g_disableComplaints,         "g_disableComplaints",         "0",                                                      CVAR_ARCHIVE },
 
 	{ &g_dailyLogs,                 "g_dailyLogs",                 "1",                                                      CVAR_ARCHIVE },
 
@@ -516,12 +472,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_timerunsDatabase,          "g_timerunsDatabase",          "timeruns.db",                                            CVAR_ARCHIVE },
 	// End of timeruns support
 
-	// start of randommap mode
-	{ &g_randomMapMode,             "g_randomMapMode",             "0",                                                      CVAR_ARCHIVE },
-	{ &g_randomMapModeInterval,     "g_randomMapModeInterval",     "30",                                                     CVAR_ARCHIVE },
-	{ &vote_randomMapMode,          "vote_randomMapMode",          "1",                                                      CVAR_ARCHIVE },
 	{ &g_chatOptions,               "g_chatOptions",               "1",                                                      CVAR_ARCHIVE },
-	//end of randommap mode
 
 	// tokens
 	{ &g_tokensMode,                "g_tokensMode",                "1",                                                      CVAR_ARCHIVE | CVAR_LATCH },
@@ -1654,22 +1605,11 @@ void G_UpdateCvars(void)
 						trap_Cvar_Set(cv->cvarName, "33");
 					}
 				}
-				else if (cv->vmCvar == &g_randomMapModeInterval)
-				{
-					UpdateRandomMapInterval(g_randomMapModeInterval.integer);
-				}
 				// OSP - Update vote info for clients, if necessary
 				else if (!G_IsSinglePlayerGame())
 				{
-					if (cv->vmCvar == &vote_allow_comp               || cv->vmCvar == &vote_allow_gametype       ||
-					    cv->vmCvar == &vote_allow_kick              || cv->vmCvar == &vote_allow_map            ||
-					    cv->vmCvar == &vote_allow_matchreset        || cv->vmCvar == &vote_allow_mutespecs      ||
-					    cv->vmCvar == &vote_allow_nextmap           || cv->vmCvar == &vote_allow_muting         ||
-					    cv->vmCvar == &vote_allow_pub               || cv->vmCvar == &vote_allow_referee        ||
-					    cv->vmCvar == &vote_allow_shuffleteamsxp    || cv->vmCvar == &vote_allow_swapteams      ||
-					    cv->vmCvar == &vote_allow_timelimit         || cv->vmCvar == &vote_allow_warmupdamage   ||
-					    cv->vmCvar == &vote_allow_antilag
-					    )
+					if (cv->vmCvar == &vote_allow_map ||
+					    cv->vmCvar == &vote_allow_matchreset)
 					{
 						fVoteFlags = qtrue;
 					}
@@ -3291,42 +3231,13 @@ void CheckVote(void)
 			pcnt = 1;
 		}
 
-		if (level.voteInfo.vote_fn == G_Kick_v)
-		{
-			gentity_t *other = &g_entities[atoi(level.voteInfo.vote_value)];
-			if (!other->client || other->client->sess.sessionTeam == TEAM_SPECTATOR)
-			{
-				total = level.voteInfo.numVotingClients;
-			}
-			else
-			{
-				total = level.voteInfo.numVotingTeamClients[other->client->sess.sessionTeam == TEAM_AXIS ? 0 : 1];
-			}
-		}
-		else
-		{
-			total = level.voteInfo.numVotingClients;
-		}
+		total = level.voteInfo.numVotingClients;
 
 		if (level.voteInfo.voteYes > pcnt * total / 100)
 		{
 			// execute the command, then remove the vote
-			if (level.voteInfo.voteYes > total + 1)
-			{
-				// Don't announce some votes, as in comp mode, it is generally a ref
-				// who is policing people who shouldn't be joining and players don't want
-				// this sort of spam in the console
-				if (level.voteInfo.vote_fn != G_Kick_v)
-				{
-					AP(va("cpm \"^5Referee changed setting! ^7(%s)\n\"", level.voteInfo.voteString));
-				}
-				G_LogPrintf("Referee Setting: %s\n", level.voteInfo.voteString);
-			}
-			else
-			{
-				AP("cpm \"^5Vote passed!\n\"");
-				G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
-			}
+			AP("cpm \"^5Vote passed!\n\"");
+			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
 			// Perform the passed vote
 			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);

@@ -3329,7 +3329,6 @@ static void UI_BuildPlayerList()
 			{
 				uiInfo.playerMuted[uiInfo.playerCount] = qfalse;
 			}
-			uiInfo.playerRefereeStatus[uiInfo.playerCount] = atoi(Info_ValueForKey(info, "ref"));
 			uiInfo.playerCount++;
 			team2 = atoi(Info_ValueForKey(info, "t"));
 			if (team2 == team)
@@ -3946,18 +3945,11 @@ qboolean UI_OwnerDrawVisible(int flags)
 
 		if (flags & UI_SHOW_PLAYERNOREFEREE)
 		{
-			if (uiInfo.playerRefereeStatus[uiInfo.playerIndex] != RL_NONE)
-			{
-				vis = qfalse;
-			}
 			flags &= ~UI_SHOW_PLAYERNOREFEREE;
 		}
 		if (flags & UI_SHOW_PLAYERREFEREE)
 		{
-			if (uiInfo.playerRefereeStatus[uiInfo.playerIndex] != RL_REFEREE)
-			{
-				vis = qfalse;
-			}
+			vis = qfalse;
 			flags &= ~UI_SHOW_PLAYERREFEREE;
 		}
 
@@ -9473,7 +9465,6 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu)
 			UI_BuildPlayerList();
 			Menu_SetFeederSelection(NULL, FEEDER_PLAYER_LIST, 0, NULL);
 			Menus_CloseAll();
-			//trap_Cvar_Set( "authLevel", "0" ); // just used for testing...
 			Menus_ActivateByName("ingame_main", qtrue);
 			return;
 
@@ -10219,7 +10210,6 @@ cvarTable_t cvarTable[] =
 	{ NULL,                             "g_spectatorInactivity",           "0",                          CVAR_ARCHIVE                   },
 	{ NULL,                             "match_latejoin",                  "1",                          CVAR_ARCHIVE                   },
 	{ NULL,                             "match_minplayers",                MATCH_MINPLAYERS,             CVAR_ARCHIVE                   },
-	{ NULL,                             "match_mutespecs",                 "0",                          CVAR_ARCHIVE                   },
 	{ NULL,                             "match_readypercent",              "100",                        CVAR_ARCHIVE                   },
 	{ NULL,                             "match_timeoutcount",              "3",                          CVAR_ARCHIVE                   },
 	{ NULL,                             "match_timeoutlength",             "180",                        CVAR_ARCHIVE                   },

@@ -1000,35 +1000,6 @@ qboolean    ConsoleCommand(void)
 		return qtrue;
 	}
 
-	// -NERVE - SMF
-
-	if (Q_stricmp(cmd, "makeReferee") == 0)
-	{
-		G_MakeReferee();
-		return qtrue;
-	}
-
-	if (Q_stricmp(cmd, "removeReferee") == 0)
-	{
-		G_RemoveReferee();
-		return qtrue;
-	}
-
-	/*if (Q_stricmp (cmd, "mute") == 0) {
-	    G_MuteClient();
-	    return qtrue;
-	}
-
-	if (Q_stricmp (cmd, "unmute") == 0) {
-	    G_UnMuteClient();
-	    return qtrue;
-	}*/
-
-	if (Q_stricmp(cmd, "ban") == 0)
-	{
-		G_PlayerBan();
-		return qtrue;
-	}
 
 // START - Mad Doc - TDF
 	if (Q_stricmp(cmd, "revive") == 0)
@@ -1053,12 +1024,6 @@ qboolean    ConsoleCommand(void)
 		return qtrue;
 	}
 
-	if (!Q_stricmp(cmd, "ref"))
-	{
-		G_ref_con();
-		return qtrue;
-	}
-
 	if (!Q_stricmp(cmd, "ipmutes"))
 	{
 		G_ListIPMutes();
@@ -1074,12 +1039,6 @@ qboolean    ConsoleCommand(void)
 	if (!Q_stricmp(cmd, "mod_information"))
 	{
 		G_LogPrintf("%s %s\n", GAME_VERSION " " MOD_VERSION, BUILD_TIME);
-		return qtrue;
-	}
-
-	if (!Q_stricmp(cmd, "rowtheboat"))
-	{
-		G_LogPrintf("Rowing the boat\n");
 		return qtrue;
 	}
 

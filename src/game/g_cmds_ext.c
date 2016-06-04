@@ -34,7 +34,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "autorecord",     qtrue,  qtrue,  NULL,                  ":^7 Creates a demo with a consistent naming scheme"                                         },
 	{ "autoscreenshot", qtrue,  qtrue,  NULL,                  ":^7 Creates a screenshot with a consistent naming scheme"                                   },
 	{ "bottomshots",    qtrue,  qfalse, G_weaponRankings_cmd,  ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all stats for a weapon" },
-	{ "callvote",       qtrue,  qfalse, (void (*)(gentity_t *, unsigned int, qboolean))Cmd_CallVote_f, " <params>:^7 Calls a vote"                          },
+	{ "callvote",       qtrue,  qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"                          },
 	{ "commands",       qtrue,  qtrue,  G_commands_cmd,        ":^7 Gives a list of OSP-specific commands"                                                  },
 	{ "currenttime",    qtrue,  qtrue,  NULL,                  ":^7 Displays current local time"                                                            },
 	{ "follow",         qtrue,  qtrue,  Cmd_Follow_f,          " <player_ID|allies|axis>:^7 Spectates a particular player or team"                          },
@@ -42,7 +42,6 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "players",        qtrue,  qtrue,  G_players_cmd,         ":^7 Lists all active players and their IDs/information"                                     },
 	{ "ready",          qtrue,  qtrue,  G_ready_cmd,           ":^7 Sets your status to ^5ready^7 to start a match"                                         },
 	{ "readyteam",      qfalse, qtrue,  G_teamready_cmd,       ":^7 Sets an entire team's status to ^5ready^7 to start a match"                             },
-	{ "ref",            qtrue,  qtrue,  G_ref_cmd,             " <password>:^7 Become a referee (admin access)"                                             },
 	{ "say_teamnl",     qtrue,  qtrue,  G_say_teamnl_cmd,      "<msg>:^7 Sends a team chat without location info"                                           },
 	{ "scores",         qtrue,  qtrue,  G_scores_cmd,          ":^7 Displays current match stat info"                                                       },
 	{ "specinvite",     qtrue,  qtrue,  Cmd_SpecInvite_f,      ":^7 Invites a player to spectate"                                                           },
@@ -267,11 +266,6 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 			{
 				strcpy(ready, ((ent) ? "NOTREADY^1 :" : "NOTREADY :"));
 			}
-		}
-
-		if (cl->sess.referee)
-		{
-			strcpy(ref, "REF");
 		}
 
 		if (cl->sess.coach_team)
@@ -880,11 +874,6 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
 		other = g_entities + level.sortedClients[i];
-
-		if (other->client->sess.referee)
-		{
-			continue;
-		}
 
 		if (other->client->sess.sessionTeam != TEAM_SPECTATOR)
 		{

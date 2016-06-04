@@ -1147,10 +1147,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1, wea
 	if (team == TEAM_SPECTATOR)
 	{
 		client->sess.spectatorTime = level.time;
-		if (!client->sess.referee)
-		{
-			client->pers.invite = 0;
-		}
+		client->pers.invite = 0;
 	}
 
 	G_LeaveTank(ent, qfalse);
@@ -1861,46 +1858,36 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
 		return;
 	}
 
-	// NERVE - SMF - if spectator, no chatting to players in WolfMP
-	if (match_mutespecs.integer > 0 && ent->client->sess.referee == 0 &&    // OSP
-	    ((ent->client->sess.sessionTeam == TEAM_FREE && other->client->sess.sessionTeam != TEAM_FREE) ||
-	     (ent->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != TEAM_SPECTATOR)))
+	if (mode == SAY_BUDDY)      // send only to people who have the sender on their buddy list
 	{
-		return;
+		if (ent->s.clientNum != other->s.clientNum)
+		{
+			fireteamData_t *ft1, *ft2;
+			if (!G_IsOnFireteam(other - g_entities, &ft1))
+			{
+				return;
+			}
+			if (!G_IsOnFireteam(ent - g_entities, &ft2))
+			{
+				return;
+			}
+			if (ft1 != ft2)
+			{
+				return;
+			}
+		}
+	}
+
+	if (encoded)
+	{
+		cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "enc_tchat" : "enc_chat";
 	}
 	else
 	{
-		if (mode == SAY_BUDDY)      // send only to people who have the sender on their buddy list
-		{
-			if (ent->s.clientNum != other->s.clientNum)
-			{
-				fireteamData_t *ft1, *ft2;
-				if (!G_IsOnFireteam(other - g_entities, &ft1))
-				{
-					return;
-				}
-				if (!G_IsOnFireteam(ent - g_entities, &ft2))
-				{
-					return;
-				}
-				if (ft1 != ft2)
-				{
-					return;
-				}
-			}
-		}
-
-		if (encoded)
-		{
-			cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "enc_tchat" : "enc_chat";
-		}
-		else
-		{
-			cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "tchat" : "chat";
-		}
-
-		trap_SendServerCommand(other - g_entities, va("%s \"%s%c%c%s\" %i %i", cmd, name, Q_COLOR_ESCAPE, color, message, ent - g_entities, localize));
+		cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "tchat" : "chat";
 	}
+
+	trap_SendServerCommand(other - g_entities, va("%s \"%s%c%c%s\" %i %i", cmd, name, Q_COLOR_ESCAPE, color, message, ent - g_entities, localize));
 }
 
 void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *chatText)
@@ -2018,13 +2005,6 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 		return;
 	}
 	if (mode == SAY_TEAM && !OnSameTeam(ent, other))
-	{
-		return;
-	}
-
-	// OSP - spec vchat rules follow the same as normal chatting rules
-	if (match_mutespecs.integer > 0 && ent->client->sess.referee == 0 &&
-	    ent->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != TEAM_SPECTATOR)
 	{
 		return;
 	}
@@ -2431,63 +2411,58 @@ void Cmd_Where_f(gentity_t *ent)
 Cmd_CallVote_f
 ==================
 */
-qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCommand)
+void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 {
 	int        i;
 	char       arg1[MAX_STRING_TOKENS];
 	char       arg2[MAX_STRING_TOKENS];
 	const char *customMapType = NULL;
 
-	// Normal checks, if its not being issued as a referee command
-	if (!fRefCommand)
+	if (level.voteInfo.voteTime)
 	{
-		if (level.voteInfo.voteTime)
-		{
-			CP("cpm \"A vote is already in progress.\n\"");
-			return qfalse;
-		}
-		else if (level.intermissiontime)
-		{
-			CP("cpm \"Cannot callvote during intermission.\n\"");
-			return qfalse;
-		}
-		else if (!ent->client->sess.referee)
-		{
-			if (voteFlags.integer == VOTING_DISABLED)
-			{
-				CP("cpm \"Voting not enabled on this server.\n\"");
-				return qfalse;
-			}
-			else if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer)
-			{
-				CP(va("cpm \"You have already called the maximum number of votes (%d).\n\"", vote_limit.integer));
-				return qfalse;
-			}
-		}
+		CP("cpm \"A vote is already in progress.\n\"");
+		return;
+	}
+	if (level.intermissiontime)
+	{
+		CP("cpm \"Cannot callvote during intermission.\n\"");
+		return;
+	}
+	if (voteFlags.integer == VOTING_DISABLED)
+	{
+		CP("cpm \"Voting not enabled on this server.\n\"");
+		return;
+	}
+	if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer)
+	{
+		CP(va("cpm \"You have already called the maximum number of votes (%d).\n\"", vote_limit.integer));
+		return;
 	}
 
 	if (level.time - level.startTime < g_disableVoteAfterMapChange.integer)
 	{
 		CP(va("cpm \"Vote is disabled for %d seconds after a map change.\n\"", g_disableVoteAfterMapChange.integer / 1000));
-		return qfalse;
+		return;
 	}
 
-	if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR
-	    && !fRefCommand)
+	if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator\n\"");
-		return qfalse;
+		return;
 	}
 
-	if (ent && ent->client->sess.muted && g_mute.integer & 2 &&
-	    !fRefCommand)
+	if (ent && ent->client->sess.muted && g_mute.integer & 2)
 	{
 		CP("print \"^3callvote: ^7not allowed to call a vote while muted.\n\"");
-		return qfalse;
+		return;
 	}
 
-
-
+	if (level.time - ent->client->lastVoteTime < 1000 * g_voteCooldown.integer)
+	{
+		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again\n\"",
+			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000)));
+		return;
+	}
 
 	// make sure it is a valid command to vote on
 	trap_Argv(1, arg1, sizeof(arg1));
@@ -2495,22 +2470,19 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 
 	if (strchr(arg1, ';') || strchr(arg2, ';'))
 	{
-		char *strCmdBase = (!fRefCommand) ? "vote" : "ref command";
-
-		G_refPrintf(ent, "Invalid %s string.", strCmdBase);
-		return(qfalse);
+		G_cpmPrintf(ent, "Invalid vote string.");
+		return;
 	}
 
 	if (!Q_stricmp(arg1, "randommap"))
 	{
-
 		if (trap_Argc() == 3)
 		{
 			customMapType = CustomMapTypeExists(arg2);
 			if (!customMapType)
 			{
-				G_refPrintf(ent, "^7Map type %s does not exists.", arg2);
-				return qfalse;
+				G_cpmPrintf(ent, "^7Map type %s does not exists.", arg2);
+				return;
 			}
 		}
 	}
@@ -2524,105 +2496,57 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 		if (arg2[0] == '\0' || trap_Argc() == 1)
 		{
 			CP("print \"^3callvote: ^7No map specified.\n\"");
-			return qfalse;
+			return;
 		}
 
 		map = G_MatchOneMap(arg2);
 		if (!map)
 		{
 			CP(va("print \"^3callvote: ^7could not find a single map matching %s.\n\"", arg2));
-			return qfalse;
+			return;
 		}
 		Q_strncpyz(arg2, map, sizeof(arg2));
 
 		if (!Q_stricmp(arg2, level.rawmapname))
 		{
 			CP(va("print \"^3callvote: ^7%s is the current map.\n\"", level.rawmapname));
-			return qfalse;
+			return;
 		}
 
 		if (strstr(Q_strlwr(g_blockedMaps.string), Q_strlwr(arg2)) != NULL)
 		{
 			CP(va("print \"Voting for %s is not allowed.\n\"", arg2));
-			return qfalse;
+			return;
 		}
 
 	}
 
 	if (trap_Argc() > 1 &&
-	    (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND)   //  --OSP
+	    (i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK)   //  --OSP
 	{
-		if (i != G_OK)
-		{
-			if (i == G_NOTFOUND)
-			{
-				return(qfalse);                 // Command error
-			}
-			else
-			{
-				return(qtrue);
-			}
-		}
-	}
-	else
-	{
-		if (!fRefCommand)
-		{
-			CP(va("print \"\n^3>>> Unknown vote command: ^7%s %s\n\"", arg1, arg2));
-			G_voteHelp(ent, qtrue);
-		}
-		return(qfalse);
+		return;
 	}
 
-	if (level.time - ent->client->lastVoteTime < 1000 * g_voteCooldown.integer)
-	{
-		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again\n\"",
-		      g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000)));
-		return qfalse;
-	}
 	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
 
+	// Zero: NOTE! if we call a randommap vote with a custom map type
+	// it only changes the clientside info text, not everything.
 
-	// start the voting, the caller automatically votes yes
-	// If a referee, vote automatically passes.	// OSP
-	if (fRefCommand)
+	level.voteInfo.voteYes = 1;
+	if (customMapType)
 	{
-//		level.voteInfo.voteYes = level.voteInfo.numVotingClients + 10;	// JIC :)
-		// Don't announce some votes, as in comp mode, it is generally a ref
-		// who is policing people who shouldn't be joining and players don't want
-		// this sort of spam in the console
-		if (level.voteInfo.vote_fn != G_Kick_v && level.voteInfo.vote_fn != G_Mute_v)
-		{
-			AP("cp \"^1** Referee Server Setting Change **\n\"");
-		}
-
-		// Gordon: just call the stupid thing.... don't bother with the voting faff
-		level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
-
-		G_globalSound("sound/misc/referee.wav");
+		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, customMapType));
+		AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
+		G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, customMapType);
 	}
 	else
 	{
-
-		// Zero: NOTE! if we call a randommap vote with a custom map type
-		// it only changes the clientside info text, not everything.
-
-		level.voteInfo.voteYes = 1;
-		if (customMapType)
-		{
-			AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, customMapType));
-			AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
-			G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, customMapType);
-		}
-		else
-		{
-			AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, level.voteInfo.voteString));
-			AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
-			G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
-		}
-
-		G_globalSound("sound/misc/vote.wav");
+		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, level.voteInfo.voteString));
+		AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
+		G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
 	}
+
+	G_globalSound("sound/misc/vote.wav");
 
 	level.voteInfo.voteTime   = level.time;
 	level.voteInfo.voteNo     = 0;
@@ -2631,60 +2555,29 @@ qboolean Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fRefCom
 
 	ent->client->lastVoteTime = level.time;
 
-	// Don't send the vote info if a ref initiates (as it will automatically pass)
-	if (!fRefCommand)
+	for (i = 0; i < level.numConnectedClients; i++)
 	{
-		for (i = 0; i < level.numConnectedClients; i++)
-		{
-			level.clients[level.sortedClients[i]].ps.eFlags &= ~EF_VOTED;
-		}
-
-		ent->client->pers.voteCount++;
-		ent->client->ps.eFlags |= EF_VOTED;
-
-		trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
-		trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
-
-		if (!customMapType)
-		{
-			trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
-		}
-		else
-		{
-			trap_SetConfigstring(CS_VOTE_STRING, customMapType);
-		}
-
-		trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
+		level.clients[level.sortedClients[i]].ps.eFlags &= ~EF_VOTED;
 	}
 
-	return(qtrue);
-}
+	ent->client->pers.voteCount++;
+	ent->client->ps.eFlags |= EF_VOTED;
 
-qboolean StringToFilter(const char *s, ipFilter_t *f);
+	trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+	trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 
-qboolean G_FindFreeComplainIP(gclient_t *cl, ipFilter_t *ip)
-{
-	int i = 0;
-
-	if (!g_ipcomplaintlimit.integer)
+	if (!customMapType)
 	{
-		return qtrue;
+		trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
+	}
+	else
+	{
+		trap_SetConfigstring(CS_VOTE_STRING, customMapType);
 	}
 
-	for (i = 0; i < MAX_COMPLAINTIPS && i < g_ipcomplaintlimit.integer; i++)
-	{
-		if (!cl->pers.complaintips[i].compare && !cl->pers.complaintips[i].mask)
-		{
-			cl->pers.complaintips[i].compare = ip->compare;
-			cl->pers.complaintips[i].mask    = ip->mask;
-			return qtrue;
-		}
-		if ((cl->pers.complaintips[i].compare & cl->pers.complaintips[i].mask) == (ip->compare & ip->mask))
-		{
-			return qtrue;
-		}
-	}
-	return qfalse;
+	trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
+
+	return;
 }
 
 /*
@@ -2696,76 +2589,6 @@ void Cmd_Vote_f(gentity_t *ent)
 {
 	char msg[64];
 	int  num;
-
-	// DHM - Nerve :: Complaints supercede voting (and share command)
-	if (ent->client->pers.complaintEndTime > level.time && g_gamestate.integer == GS_PLAYING && g_complaintlimit.integer)
-	{
-
-		gentity_t *other = &g_entities[ent->client->pers.complaintClient];
-		gclient_t *cl    = other->client;
-		if (!cl)
-		{
-			return;
-		}
-		if (cl->pers.connected != CON_CONNECTED)
-		{
-			return;
-		}
-		if (cl->pers.localClient)
-		{
-			trap_SendServerCommand(ent - g_entities, "complaint -3");
-			return;
-		}
-
-		trap_Argv(1, msg, sizeof(msg));
-
-		if (msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1')
-		{
-			// Increase their complaint counter
-			cl->pers.complaints++;
-
-			num = g_complaintlimit.integer - cl->pers.complaints;
-
-			if (!cl->pers.localClient)
-			{
-
-				const char *value;
-				char       userinfo[MAX_INFO_STRING];
-				ipFilter_t ip;
-
-				trap_GetUserinfo(ent - g_entities, userinfo, sizeof(userinfo));
-				value = Info_ValueForKey(userinfo, "ip");
-
-				StringToFilter(value, &ip);
-
-				if (num <= 0 || !G_FindFreeComplainIP(cl, &ip))
-				{
-					trap_DropClient(cl - level.clients, "kicked after too many complaints.", cl->sess.referee ? 0 : 300);
-					trap_SendServerCommand(ent - g_entities, "complaint -1");
-					return;
-				}
-			}
-
-			trap_SendServerCommand(ent->client->pers.complaintClient, va("cpm \"^1Warning^7: Complaint filed against you by %s^* You have Lost XP.\n\"", ent->client->pers.netname));
-			trap_SendServerCommand(ent - g_entities, "complaint -1");
-
-			AddScore(other, WOLF_FRIENDLY_PENALTY);
-
-			G_LoseKillSkillPoints(other, ent->sound2to1, ent->sound1to2, ent->sound2to3 ? qtrue : qfalse);
-		}
-		else
-		{
-			trap_SendServerCommand(ent->client->pers.complaintClient, "cpm \"No complaint filed against you.\n\"");
-			trap_SendServerCommand(ent - g_entities, "complaint -2");
-		}
-
-		// Reset this ent's complainEndTime so they can't send multiple complaints
-		ent->client->pers.complaintEndTime = -1;
-		ent->client->pers.complaintClient  = -1;
-
-		return;
-	}
-	// dhm
 
 	if (ent->client->pers.applicationEndTime > level.time)
 	{
@@ -2951,11 +2774,6 @@ void Cmd_Vote_f(gentity_t *ent)
 	ent->client->pers.propositionClient  = -1;
 	ent->client->pers.propositionClient2 = -1;
 
-	// dhm
-	// Reset this ent's complainEndTime so they can't send multiple complaints
-	ent->client->pers.complaintEndTime = -1;
-	ent->client->pers.complaintClient  = -1;
-
 	if (!level.voteInfo.voteTime)
 	{
 		trap_SendServerCommand(ent - g_entities, "print \"No vote in progress.\n\"");
@@ -2964,21 +2782,6 @@ void Cmd_Vote_f(gentity_t *ent)
 	if (ent->client->ps.eFlags & EF_VOTED)
 	{
 		trap_Argv(1, msg, sizeof(msg));
-		if (ent->client->sess.referee > 0)
-		{
-			if ((msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1'))
-			{
-				level.voteInfo.voteYes = level.numConnectedClients;
-				level.voteInfo.voteNo  = 0;
-			}
-			else
-			{
-				level.voteInfo.voteCanceled = qtrue;
-				level.voteInfo.voteNo       = level.numConnectedClients;
-				level.voteInfo.voteYes      = 0;
-			}
-			return;
-		}
 		// If the caller decides to hit f2 after calling the vote
 		// cancel it.
 		if (ClientNum(ent) == level.voteInfo.voter_cn)
@@ -3004,21 +2807,6 @@ void Cmd_Vote_f(gentity_t *ent)
 	    return;
 	}
 	*/
-
-	if (level.voteInfo.vote_fn == G_Kick_v)
-	{
-		int pid = atoi(level.voteInfo.vote_value);
-		if (!g_entities[pid].client)
-		{
-			return;
-		}
-
-		if (g_entities[pid].client->sess.sessionTeam != TEAM_SPECTATOR && ent->client->sess.sessionTeam != g_entities[pid].client->sess.sessionTeam)
-		{
-			trap_SendServerCommand(ent - g_entities, "print \"Cannot vote to kick player on opposing team.\n\"");
-			return;
-		}
-	}
 
 	trap_SendServerCommand(ent - g_entities, "print \"Vote cast.\n\"");
 
@@ -4727,7 +4515,6 @@ static command_t anyTimeCommands[] =
 	{ "vote",      qtrue,  Cmd_Vote_f                          },
 	{ "fireteam",  qfalse, Cmd_FireTeam_MP_f                   },
 	{ "showstats", qfalse, G_PrintAccuracyLog                  },
-	{ "rconauth",  qfalse, Cmd_AuthRcon_f                      },
 	{ "ignore",    qfalse, Cmd_Ignore_f                        },
 	{ "unignore",  qfalse, Cmd_UnIgnore_f                      },
 	{ "obj",       qfalse, Cmd_SelectedObjective_f             },

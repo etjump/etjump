@@ -230,9 +230,6 @@ void CG_NewClientInfo(int clientNum)
 	v                       = Info_ValueForKey(configstring, "sw");
 	newInfo.secondaryweapon = atoi(v);
 
-	v                 = Info_ValueForKey(configstring, "ref");
-	newInfo.refStatus = atoi(v);
-
 	// pmove_fixed
 	v                  = Info_ValueForKey(configstring, "pm");
 	newInfo.pmoveFixed = atoi(v);
@@ -332,26 +329,6 @@ void CG_NewClientInfo(int clientNum)
 			// clear these
 			memset(cg.artilleryRequestPos, 0, sizeof(cg.artilleryRequestPos));
 			memset(cg.artilleryRequestTime, 0, sizeof(cg.artilleryRequestTime));
-		}
-
-		trap_Cvar_Set("authLevel", va("%i", newInfo.refStatus));
-
-		if (newInfo.refStatus != ci->refStatus)
-		{
-			if (newInfo.refStatus <= RL_NONE)
-			{
-				const char *info = CG_ConfigString(CS_SERVERINFO);
-
-				trap_Cvar_Set("cg_ui_voteFlags", Info_ValueForKey(info, "voteFlags"));
-				CG_Printf("[cgnotify]^3*** You have been stripped of your referee status! ***\n");
-
-			}
-			else
-			{
-				trap_Cvar_Set("cg_ui_voteFlags", "0");
-				CG_Printf("[cgnotify]^2*** You have been authorized \"%s\" status ***\n", ((newInfo.refStatus == RL_RCON) ? "rcon" : "referee"));
-				CG_Printf("Type: ^3ref^7 (by itself) for a list of referee commands.\n");
-			}
 		}
 	}
 

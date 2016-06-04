@@ -533,34 +533,6 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	{
 		if (attacker == self || OnSameTeam(self, attacker))
 		{
-
-			// DHM - Nerve :: Complaint lodging
-			if (attacker != self && level.warmupTime <= 0 && g_gamestate.integer == GS_PLAYING)
-			{
-				if (attacker->client->pers.localClient)
-				{
-					trap_SendServerCommand(self - g_entities, "complaint -4");
-				}
-				else
-				{
-					if (meansOfDeath != MOD_CRUSH_CONSTRUCTION && meansOfDeath != MOD_CRUSH_CONSTRUCTIONDEATH && meansOfDeath != MOD_CRUSH_CONSTRUCTIONDEATH_NOATTACKER)
-					{
-						if (g_complaintlimit.integer)
-						{
-
-							if (!(meansOfDeath == MOD_LANDMINE && g_disableComplaints.integer & TKFL_MINES) &&
-							    !((meansOfDeath == MOD_ARTY || meansOfDeath == MOD_AIRSTRIKE) && g_disableComplaints.integer & TKFL_AIRSTRIKE) &&
-							    !(meansOfDeath == MOD_MORTAR && g_disableComplaints.integer & TKFL_MORTAR))
-							{
-								trap_SendServerCommand(self - g_entities, va("complaint %i", attacker->s.number));
-								self->client->pers.complaintClient  = attacker->s.clientNum;
-								self->client->pers.complaintEndTime = level.time + 20500;
-							}
-						}
-					}
-				}
-			}
-
 			// high penalty to offset medic heal
 /*			AddScore( attacker, WOLF_FRIENDLY_PENALTY ); */
 

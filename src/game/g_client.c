@@ -1615,7 +1615,7 @@ void ClientUserinfoChanged(int clientNum)
 	// send over a subset of the userinfo keys so other clients can
 	// print scoreboards, display models, and play custom sounds
 
-	s = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\ref\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i",
+	s = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i",
 	       client->pers.netname,
 	       client->sess.sessionTeam,
 	       client->sess.playerType,
@@ -1628,7 +1628,6 @@ void ClientUserinfoChanged(int clientNum)
 	       client->sess.latchPlayerWeapon,
 	       client->sess.latchPlayerWeapon2,
 	       client->sess.muted ? 1 : 0,
-	       client->sess.referee,
 	       client->pers.pmoveFixed ? 1 : 0,
 	       client->pers.maxFPS < 999 && client->pers.maxFPS > 0 ? client->pers.maxFPS : 0,
 	       client->pers.cgaz > 0 ? client->pers.cgaz : 0,
@@ -1918,10 +1917,6 @@ void ClientBegin(int clientNum)
 	memset(&client->ps, 0, sizeof(client->ps));
 	client->ps.eFlags                       = flags;
 	client->ps.persistant[PERS_SPAWN_COUNT] = spawn_count;
-
-
-	client->pers.complaintClient  = -1;
-	client->pers.complaintEndTime = -1;
 
 	// locate ent at a spawn point
 	ClientSpawn(ent, qfalse);
@@ -2462,19 +2457,6 @@ void ClientDisconnect(int clientNum)
 		    && flag->client->sess.spectatorClient == clientNum)
 		{
 			Cmd_FollowCycle_f(flag, 1);
-		}
-	}
-
-	// NERVE - SMF - remove complaint client
-	for (i = 0 ; i < level.numConnectedClients ; i++)
-	{
-		if (flag->client->pers.complaintEndTime > level.time && flag->client->pers.complaintClient == clientNum)
-		{
-			flag->client->pers.complaintClient  = -1;
-			flag->client->pers.complaintEndTime = -1;
-
-			CPx(level.sortedClients[i], "complaint -2");
-			break;
 		}
 	}
 

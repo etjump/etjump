@@ -102,9 +102,6 @@
     <ClCompile Include="g_props.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_referee.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_script.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -208,9 +205,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main_ext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="random_map_mode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sqlite_wrapper.cpp">
@@ -324,9 +318,6 @@
     </ClInclude>
     <ClInclude Include="load_race.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="random_map_mode.hpp">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="timerun.hpp">
       <Filter>Header Files</Filter>

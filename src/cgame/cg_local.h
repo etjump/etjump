@@ -555,8 +555,6 @@ typedef struct clientInfo_s
 	int secondaryweapon;
 	int latchedweapon;
 
-	int refStatus;
-
 	bg_character_t *character;
 
 	// Gordon: caching fireteam pointer here, better than trying to work it out all the time
@@ -2277,7 +2275,6 @@ extern vmCvar_t cg_antilag;
 extern vmCvar_t developer;
 
 // OSP
-extern vmCvar_t authLevel;
 extern vmCvar_t cf_wstats;
 extern vmCvar_t cf_wtopshots;
 //extern vmCvar_t			cg_announcer;

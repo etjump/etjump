@@ -2171,7 +2171,7 @@ void G_removeSpecInvite(int team)
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
 		cl = g_entities + level.sortedClients[i];
-		if (!cl->inuse || cl->client->sess.referee || cl->client->sess.coach_team == team)
+		if (!cl->inuse || cl->client->sess.coach_team == team)
 		{
 			continue;
 		}

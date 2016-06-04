@@ -220,9 +220,6 @@ vmCvar_t cg_antilag;
 
 vmCvar_t developer;
 
-// OSP
-vmCvar_t authLevel;
-
 vmCvar_t cf_wstats;                     // Font scale for +wstats window
 vmCvar_t cf_wtopshots;                  // Font scale for +wtopshots window
 
@@ -596,7 +593,6 @@ cvarTable_t cvarTable[] =
 	{ &int_sensitivity,             "sensitivity",                 "5",                      CVAR_ARCHIVE             },
 	{ &int_ui_blackout,             "ui_blackout",                 "0",                      CVAR_ROM                 },
 	{ &cg_atmosphericEffects,       "cg_atmosphericEffects",       "1",                      CVAR_ARCHIVE             },
-	{ &authLevel,                   "authLevel",                   "0",                      CVAR_TEMP | CVAR_ROM     },
 
 	{ &cg_rconPassword,             "auth_rconPassword",           "",                       CVAR_TEMP                },
 	{ &cg_refereePassword,          "auth_refereePassword",        "",                       CVAR_TEMP                },
