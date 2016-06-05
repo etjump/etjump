@@ -432,7 +432,6 @@ bool MapStatistics::createDatabase()
 
 const char *MapStatistics::randomMap() const
 {
-	auto        *mapInformation = &_maps[0];
 	static char map[256]        = "\0";
 	if (_maps.size() == 1)
 	{

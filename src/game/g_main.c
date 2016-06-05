@@ -3230,7 +3230,7 @@ void CheckVote(void)
 		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
 		// Perform the passed vote
-		level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
+		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
 		// Same thing applies for voteNo count
 	} else if (level.voteInfo.voteNo > numClients - required)
 	{
@@ -3250,7 +3250,7 @@ void CheckVote(void)
 			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
 			// Perform the passed vote
-			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
+			level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
 
 		}
 		else if (level.voteInfo.voteNo && level.voteInfo.voteNo >= (100 - pcnt) * total / 100)

@@ -13,7 +13,7 @@
 
 #define GAME_VERSION    "etjump"
 
-#define MOD_VERSION     "2.1.0 RC1"
+#define MOD_VERSION     "2.1.0 RC2"
 
 #define BUILD_TIME __DATE__ " " __TIME__
 
@@ -2563,11 +2563,12 @@ static const struct Manual commandManuals[] = {
 	{ "userinfo",     "!userinfo -id [id]",                                                                                                                                                             "Prints user info."                                                                  }
 };
 
-#endif
-
 typedef struct
 {
-	const char id[32]; // voice chat id
-	const char custom[128]; // voice chat custom text
+	char id[32]; // voice chat id
+	char custom[128]; // voice chat custom text
 	int variant; // voice chat variation 
 } vsayCmd_t;
+
+#endif // __BG_PUBLIC_H__
+

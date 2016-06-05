@@ -1902,7 +1902,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	qboolean   localize     = qfalse;
 	char       *loc;
 	const char *printText           = NULL;
-	const char *interpolatedMessage = NULL;
 
 	switch (mode)
 	{
@@ -2209,7 +2208,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 		}
 
 		trap_Argv(id, vsay.id, sizeof(vsay.id));
-		memcpy(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
+		Q_strncpyz(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
 
 	}
 	else
@@ -2242,7 +2241,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 		}
 
 		trap_Argv(id, vsay.id, sizeof(vsay.id));
-		memcpy(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
+		Q_strncpyz(vsay.custom, ConcatArgs(cust), sizeof(vsay.custom));
 
 	}
 
@@ -2250,7 +2249,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 		G_Voice(ent, NULL, mode, &vsay, voiceonly);
 	}
 	else {
-		G_Voice(ent, NULL, mode, vsay.id, voiceonly);
+		G_Voice(ent, NULL, mode, &vsay, voiceonly);
 	}
 
 }
@@ -2489,8 +2488,6 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	if (!Q_stricmp(arg1, "map"))
 	{
-		char         mapfile[MAX_QPATH];
-		fileHandle_t f;
 		const char   *map = NULL;
 
 		if (arg2[0] == '\0' || trap_Argc() == 1)
@@ -2588,7 +2585,6 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent)
 {
 	char msg[64];
-	int  num;
 
 	if (ent->client->pers.applicationEndTime > level.time)
 	{

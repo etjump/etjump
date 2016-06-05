@@ -139,7 +139,6 @@ FILE(GLOB QAGAME_SRC
 	"game/g_missile.c"
 	"game/g_mover.c"
 	"game/g_props.c"
-	"game/g_referee.c"
 	"game/g_script.c"
 	"game/g_script_actions.c"
 	"game/g_session.c"

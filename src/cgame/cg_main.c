@@ -3208,7 +3208,7 @@ Will perform callbacks to make the loading info screen update.
 // if it exists.
 void CG_AutoExec_f()
 {
-	const char buffer[MAX_QPATH] = "cmd exec \"autoexec_";
+	char buffer[MAX_QPATH] = "cmd exec \"autoexec_";
 	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
 	Q_strcat(buffer, sizeof(buffer), "\"");
 	trap_SendConsoleCommand(buffer);

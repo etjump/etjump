@@ -1071,7 +1071,7 @@ typedef struct voteInfo_s
 	int voteNo;
 	int numVotingClients;               // set by CalculateRanks
 	int numVotingTeamClients[2];
-	int (*vote_fn)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd);
+	int (*vote_fn)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2);
 	char vote_value[VOTE_MAXSTRING];        // Desired vote item setting.
 	char voter_team;
 	int voter_cn;

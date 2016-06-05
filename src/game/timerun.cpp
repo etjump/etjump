@@ -644,8 +644,6 @@ void Timerun::sortRecords()
 
 void Timerun::checkRecord(Player *player, int clientNum)
 {
-	Record *recordToUpdate = nullptr;
-	bool   update          = false;
 	time_t t;
 	time(&t);
 
