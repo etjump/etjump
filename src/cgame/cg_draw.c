@@ -601,6 +601,7 @@ static void CG_DrawSpeed2(void)
 	float        x, y, w;
 	static vec_t speed;
 	static vec_t topSpeed;
+	int          style = ITEM_TEXTSTYLE_NORMAL;
 
 	if (cg.resetmaxspeed)
 	{
@@ -611,6 +612,10 @@ static void CG_DrawSpeed2(void)
 	if (!cg_drawSpeed2.integer)
 	{
 		return;
+	}
+
+	if (etj_speedShadow.integer) {
+		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
 	speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
@@ -663,7 +668,7 @@ static void CG_DrawSpeed2(void)
 		w = 0;
 	}
 
-	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, 0, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, style, &cgs.media.limboFont1);
 }
 
 
@@ -1467,7 +1472,7 @@ void CG_BannerPrint(const char *str)
 
 	// show the banner in the console
 	// Dens: only if the client wants that
-	if (cg_logConsole.integer & CONLOG_BANNERPRINT)
+	if (etj_logBanner.integer & CONLOG_BANNERPRINT)
 	{
 		CG_Printf("^9banner: ^7%s\n", buff);
 	}
@@ -3303,80 +3308,6 @@ static void CG_DrawLimboMessage(void)
 }
 // -NERVE - SMF
 
-/*
-=================
-Personal timer
-=================
-*/
-
-static void CG_DrawPersonalTimer(void)
-{
-	int   msec, min, sec;
-	float x, y, w;
-	char  time[128];
-
-	if (!cg_drawPersonalTimer.integer)
-	{
-		return;
-	}
-
-	if ((cg.snap->ps.pm_flags & PMF_FOLLOW))
-	{
-		if (cgs.clientinfo[cg.snap->ps.clientNum].personalTimerActive)
-		{
-			msec = cg.time - cgs.clientinfo[cg.snap->ps.clientNum].personalStartTime;
-		}
-		else
-		{
-			msec = cg.stopTime - cgs.clientinfo[cg.snap->ps.clientNum].personalStopTime;
-		}
-
-		min   = msec / 60000;
-		msec -= min * 60000;
-		sec   = msec / 1000;
-		msec -= sec * 1000;
-
-		x = cg_personalTimerX.value;
-		y = cg_personalTimerY.value;
-
-		CG_AdjustPosX(&x);
-
-		Com_sprintf(time, sizeof(time), va("%02d:%02d.%03d", min, sec, msec));
-
-		w = CG_Text_Width_Ext(time, 0.3, 0, &cgs.media.limboFont1) / 2;
-
-		CG_Text_Paint_Ext(x - w, y, 0.3, 0.3, cg.personalTimerColor, time, 0, 0, 0, &cgs.media.limboFont1);
-	}
-	else
-	{
-
-		if (cg.activeTimer)
-		{
-			msec = cg.time - cg.startTime;
-		}
-		else
-		{
-			msec = cg.stopTime - cg.startTime;
-		}
-
-		min   = msec / 60000;
-		msec -= min * 60000;
-		sec   = msec / 1000;
-		msec -= sec * 1000;
-
-		x = cg_personalTimerX.value;
-		y = cg_personalTimerY.value;
-
-		CG_AdjustPosX(&x);
-
-		Com_sprintf(time, sizeof(time), va("%02d:%02d.%03d", min, sec, msec));
-
-		w = CG_Text_Width_Ext(time, 0.3, 0, &cgs.media.limboFont1) / 2;
-
-		CG_Text_Paint_Ext(x - w, y, 0.3, 0.3, cg.personalTimerColor, time, 0, 0, 0, &cgs.media.limboFont1);
-	}
-}
-
 static void CG_DrawRunTimer(void)
 {
 //    int millis, seconds, minutes;
@@ -5019,6 +4950,11 @@ static void CG_DrawNewCompass(void)
 
 	CG_DrawAutoMap();
 
+	if (!cg_drawCompass.integer)
+	{
+		return;
+	}
+
 	if (cgs.autoMapExpanded)
 	{
 		if (cg.time - cgs.autoMapExpandTime < 100.f)
@@ -6089,10 +6025,7 @@ static void CG_Draw2D(void)
 
 		CG_DrawNotify();
 
-		if (cg_drawCompass.integer)
-		{
-			CG_DrawNewCompass();
-		}
+		CG_DrawNewCompass();
 
 		CG_DrawObjectiveInfo();
 
@@ -6107,7 +6040,6 @@ static void CG_Draw2D(void)
 
 		CG_DrawCHS();
 
-		CG_DrawPersonalTimer();
 		CG_DrawRunTimer();
 
 		CG_DrawSpeed2();

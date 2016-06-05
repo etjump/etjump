@@ -332,12 +332,7 @@ vmCvar_t cg_speedSizeX;
 vmCvar_t cg_speedSizeY;
 vmCvar_t cg_speedColor;
 vmCvar_t cg_speedAlpha;
-
-vmCvar_t cg_drawPersonalTimer;
-vmCvar_t cg_personalTimerColor;
-vmCvar_t cg_personalTimerAlpha;
-vmCvar_t cg_personalTimerX;
-vmCvar_t cg_personalTimerY;
+vmCvar_t etj_speedShadow;
 
 vmCvar_t cg_adminpassword;
 vmCvar_t cg_username;
@@ -387,7 +382,7 @@ vmCvar_t cg_HUD_playerHealth;
 vmCvar_t cg_HUD_weaponIcon;
 vmCvar_t cg_HUD_xpInfo;
 
-vmCvar_t cg_logConsole;
+vmCvar_t etj_logBanner;
 vmCvar_t cg_weaponSound;
 vmCvar_t cg_noclipScale;
 
@@ -649,17 +644,13 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
-	{ &cg_speedY,                   "etj_speedY",                  "400",                    CVAR_ARCHIVE             },
+	{ &cg_speedY,                   "etj_speedY",                  "360",                    CVAR_ARCHIVE             },
 	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
 	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
-	// Personal timer
-	{ &cg_drawPersonalTimer,        "etj_drawPersonalTimer",       "0",                      CVAR_ARCHIVE             },
-	{ &cg_personalTimerColor,       "etj_personalTimerColor",      "White",                  CVAR_ARCHIVE             },
-	{ &cg_personalTimerAlpha,       "etj_personalTimerAlpha",      "1",                      CVAR_ARCHIVE             },
-	{ &cg_personalTimerX,           "etj_personalTimerX",          "320",                    CVAR_ARCHIVE             },
-	{ &cg_personalTimerY,           "etj_personalTimerY",          "420",                    CVAR_ARCHIVE             },
+	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
+
 	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
 	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
 	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },
@@ -699,7 +690,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
-	{ &cg_logConsole,               "etj_logConsole",              "1",                      CVAR_ARCHIVE             },
+	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
@@ -784,7 +775,6 @@ void CG_RegisterCvars(void)
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
-	BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor, cg_personalTimerAlpha.value, "cg_personalTimerColor");
 	BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1, "player_runTimerColor");
 	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
@@ -858,11 +848,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_keysColor)
 				{
 					BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
-				}
-				else if (cv->vmCvar == &cg_personalTimerColor)
-				{
-					BG_setColor(cg_personalTimerColor.string, cg.personalTimerColor,
-					            cg_personalTimerAlpha.value, "cg_personalTimerColor");
 				}
 				else if (cv->vmCvar == &player_runTimerColor)
 				{

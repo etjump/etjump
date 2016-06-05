@@ -193,6 +193,8 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, i
 	auto x = player_runTimerX.value;
 	auto y = player_runTimerY.value;
 
+	CG_AdjustPosX(&x);
+
 	auto step = ((float)(timerTime - record) / animationTime);
 	auto scale = 0.3 + 0.25 * step;
 

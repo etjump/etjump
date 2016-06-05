@@ -54,7 +54,7 @@
 #define TEXT_ICON_SPACE     4
 
 #define TEAMCHAT_WIDTH      70
-#define TEAMCHAT_HEIGHT     8
+#define TEAMCHAT_HEIGHT     14
 
 #define NOTIFY_WIDTH        80
 #define NOTIFY_HEIGHT       5
@@ -585,9 +585,6 @@ typedef struct clientInfo_s
 	int weaponState;
 	int weaponState_last;
 	int hideMe;
-	qboolean personalTimerActive;
-	int personalStartTime;
-	int personalStopTime;
 } clientInfo_t;
 
 typedef enum
@@ -1128,7 +1125,6 @@ typedef struct
 	vec4_t xhairColorAlt;
 	vec4_t speedColor;
 	vec4_t keysColor;
-	vec4_t personalTimerColor;
 	vec4_t runTimerColor;
 
 	// Arnout: allow overriding of countdown sounds
@@ -2381,11 +2377,7 @@ extern vmCvar_t cg_speedSizeX;
 extern vmCvar_t cg_speedSizeY;
 extern vmCvar_t cg_speedColor;
 extern vmCvar_t cg_speedAlpha;
-extern vmCvar_t cg_drawPersonalTimer;
-extern vmCvar_t cg_personalTimerColor;
-extern vmCvar_t cg_personalTimerAlpha;
-extern vmCvar_t cg_personalTimerX;
-extern vmCvar_t cg_personalTimerY;
+extern vmCvar_t etj_speedShadow;
 extern vmCvar_t cg_adminpassword;
 extern vmCvar_t cg_username;
 extern vmCvar_t cg_popupTime;
@@ -2435,7 +2427,7 @@ extern vmCvar_t cg_HUD_weaponIcon;
 extern vmCvar_t cg_HUD_xpInfo;
 
 #define CONLOG_BANNERPRINT 1
-extern vmCvar_t cg_logConsole;
+extern vmCvar_t etj_logBanner;
 extern vmCvar_t cg_weaponSound;
 
 extern vmCvar_t cg_noclipScale;
