@@ -2473,6 +2473,7 @@ extern vmCvar_t etj_ghostPlayersFadeRange;
 extern vmCvar_t etj_ghostPlayersAlt;
 
 extern vmCvar_t etj_explosivesShake;
+extern vmCvar_t etj_realFov;
 
 //
 // cg_main.c
