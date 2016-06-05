@@ -3212,26 +3212,36 @@ void CheckVote(void)
 		level.voteInfo.voteNo  = level.numConnectedClients;
 	}
 
-	if (level.time - level.voteInfo.voteTime >= VOTE_TIME)
+	// wait full 30 seconds unless the amount of f2s is over the limit
+	// when accounting for all players on the server
+	int pcnt = vote_percent.integer;
+	pcnt = pcnt > 99 ? 99 : pcnt;
+	pcnt = pcnt < 1 ? 1 : pcnt;
+	int numClients = level.numConnectedClients;
+	// how many are required for instant pass (no need to wait for 30 seconds)
+	int required = ceil(numClients / 100.0 * pcnt);
+
+	// we can pass vote instantly if the voteYes count has exceeded
+	// the percentage of total players (not just voted ones)
+	if (level.voteInfo.voteYes >= required)
 	{
+		// execute the command, then remove the vote
+		AP("cpm \"^5Vote passed!\n\"");
+		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
+
+		// Perform the passed vote
+		level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
+		// Same thing applies for voteNo count
+	} else if (level.voteInfo.voteNo > numClients - required)
+	{
+		// same behavior as a no response vote
 		AP(va("cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
 		G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
-	}
-	else
+	} else if (level.time - level.voteInfo.voteTime >= VOTE_TIME)
 	{
-		int pcnt = vote_percent.integer;
-		int total;
-
-		if (pcnt > 99)
-		{
-			pcnt = 99;
-		}
-		if (pcnt < 1)
-		{
-			pcnt = 1;
-		}
-
-		total = level.voteInfo.numVotingClients;
+		// we've waited for full 30 seconds and can now check if the vote yes count
+		// of numVotingClients is enough
+		int total = level.voteInfo.numVotingClients;
 
 		if (level.voteInfo.voteYes > pcnt * total / 100)
 		{
@@ -3257,11 +3267,9 @@ void CheckVote(void)
 				G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 			}
 		}
-		else
-		{
-			// still waiting for a majority
-			return;
-		}
+	} else
+	{
+		return;
 	}
 
 	level.voteInfo.voteTime = 0;
