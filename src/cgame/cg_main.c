@@ -385,7 +385,7 @@ vmCvar_t cg_HUD_playerHealth;
 vmCvar_t cg_HUD_weaponIcon;
 vmCvar_t cg_HUD_xpInfo;
 
-vmCvar_t cg_logConsole;
+vmCvar_t etj_logBanner;
 vmCvar_t cg_weaponSound;
 vmCvar_t cg_noclipScale;
 
@@ -694,7 +694,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
-	{ &cg_logConsole,               "etj_logConsole",              "1",                      CVAR_ARCHIVE             },
+	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },

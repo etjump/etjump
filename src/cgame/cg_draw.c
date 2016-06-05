@@ -1472,7 +1472,7 @@ void CG_BannerPrint(const char *str)
 
 	// show the banner in the console
 	// Dens: only if the client wants that
-	if (cg_logConsole.integer & CONLOG_BANNERPRINT)
+	if (etj_logBanner.integer & CONLOG_BANNERPRINT)
 	{
 		CG_Printf("^9banner: ^7%s\n", buff);
 	}

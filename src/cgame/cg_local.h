@@ -2430,7 +2430,7 @@ extern vmCvar_t cg_HUD_weaponIcon;
 extern vmCvar_t cg_HUD_xpInfo;
 
 #define CONLOG_BANNERPRINT 1
-extern vmCvar_t cg_logConsole;
+extern vmCvar_t etj_logBanner;
 extern vmCvar_t cg_weaponSound;
 
 extern vmCvar_t cg_noclipScale;
