@@ -3511,6 +3511,12 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
+
+		if (etj_stretchCgaz.integer) {
+			CG_DisableProperScaling(qtrue);
+			scx -= SCREEN_OFFSET_X;
+		}
+
 		vel_relang = DEG2RAD(vel_relang);
 		per_angle  = DEG2RAD(per_angle);
 
@@ -3532,7 +3538,11 @@ static void CG_DrawCGazHUD(void)
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang - per_angle),
 			scy - vel_size * cos(vel_relang - per_angle), colorRed);
+		
+		CG_DisableProperScaling(qfalse);
+		
 		return;
+
 	}
 
 
