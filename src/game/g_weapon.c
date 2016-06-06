@@ -4383,7 +4383,7 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType)
 		forward[2] *= 1500 * 1.1f;
 	}
 
-	trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos, ent->s.number, MASK_MISSILESHOT);
+	trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos, ent->s.number, CONTENTS_SOLID | CONTENTS_MISSILECLIP);
 
 	if (tr.fraction < 1)    // oops, bad launch spot
 	{
