@@ -1570,6 +1570,9 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 	qhandle_t           sprite;
 	bufferedVoiceChat_t vchat;
 	const char          *loc = " "; // NERVE - SMF
+	const char          *msgColor = "^z";
+	const char          *msgTime = "";
+	qtime_t             t;
 
 /*	// NERVE - SMF - don't do this in wolfMP
     // if we are going into the intermission, don't start any voices
@@ -1577,6 +1580,8 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
         return;
     }
 */
+
+	trap_RealTime(&t);
 
 	if (clientNum < 0 || clientNum >= MAX_CLIENTS)
 	{
@@ -1614,20 +1619,36 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 				chat = vsay->custom;
 			}
 
+			if (player_drawMessageTime.integer)
+			{
+				if (cg.clientNum == clientNum)
+				{
+					msgColor = "^g";
+				}
+				if (player_drawMessageTime.integer == 2)
+				{
+					msgTime = va("%s[%02d:%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min, t.tm_sec);
+				}
+				else
+				{
+					msgTime = va("%s[%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min);
+				}
+			}
+
 			if (mode == SAY_TEAM)
 			{
-				Com_sprintf(vchat.message, sizeof(vchat.message), "(%s)%c%c(%s): %c%c%s",
-				            ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+				Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s)%c%c(%s): %c%c%s", 
+					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
 			else if (mode == SAY_BUDDY)
 			{
-				Com_sprintf(vchat.message, sizeof(vchat.message), "<%s>%c%c<%s>: %c%c%s",
-				            ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+				Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s>%c%c<%s>: %c%c%s", 
+					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
 			else
 			{
-				Com_sprintf(vchat.message, sizeof(vchat.message), "%s%c%c: %c%c%s",
-				            ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+				Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s%c%c: %c%c%s", 
+					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
 			CG_AddBufferedVoiceChat(&vchat);
 		}
