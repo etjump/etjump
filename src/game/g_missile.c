@@ -2195,7 +2195,7 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir, int grenadeWP
 	bolt->splashRadius = G_GetWeaponDamage(grenadeWPID);
 // jpw
 
-	bolt->clipmask = MASK_MISSILESHOT;
+	bolt->clipmask = CONTENTS_SOLID | CONTENTS_MISSILECLIP;
 
 	bolt->s.pos.trType = TR_GRAVITY;
 	bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;     // move a bit on the very first frame
@@ -2253,7 +2253,7 @@ gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir)
 	bolt->methodOfDeath       = MOD_PANZERFAUST;
 	bolt->splashMethodOfDeath = MOD_PANZERFAUST;
 //	bolt->clipmask = MASK_SHOT;
-	bolt->clipmask = MASK_MISSILESHOT;
+	bolt->clipmask = CONTENTS_SOLID | CONTENTS_MISSILECLIP;
 
 	bolt->s.pos.trType = TR_LINEAR;
 	bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;     // move a bit on the very first frame

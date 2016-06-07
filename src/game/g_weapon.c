@@ -3692,7 +3692,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker, vec3_t sta
 		waslinked                               = qtrue;
 	}
 
-	G_Trace(source, &tr, start, NULL, NULL, end, source->s.number, MASK_SHOT);
+	G_Trace(source, &tr, start, NULL, NULL, end, source->s.number, MASK_SOLID);
 
 	//bani - prevent shooting ourselves in the head when prone, firing through a breakable
 	if (waslinked == qtrue)
@@ -3816,7 +3816,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker, vec3_t sta
 
 		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 
-		G_Trace(source, &tr2, start, NULL, NULL, end, source->s.number, MASK_WATER | MASK_SHOT);
+		G_Trace(source, &tr2, start, NULL, NULL, end, source->s.number, MASK_WATER | MASK_SOLID);
 
 		if ((tr.entityNum != tr2.entityNum && tr2.fraction != 1))
 		{
@@ -4383,7 +4383,7 @@ gentity_t *weapon_mortar_fire(gentity_t *ent, int grenType)
 		forward[2] *= 1500 * 1.1f;
 	}
 
-	trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos, ent->s.number, MASK_MISSILESHOT);
+	trap_Trace(&tr, testPos, tv(-4.f, -4.f, 0.f), tv(4.f, 4.f, 6.f), launchPos, ent->s.number, CONTENTS_SOLID | CONTENTS_MISSILECLIP);
 
 	if (tr.fraction < 1)    // oops, bad launch spot
 	{

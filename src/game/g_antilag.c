@@ -285,12 +285,21 @@ void G_Trace(gentity_t *ent, trace_t *results, const vec3_t start, const vec3_t 
 {
 	int    res;
 	vec3_t dir;
+	gentity_t *resEnt;
 
 	G_AttachBodyParts(ent);
 
 	trap_Trace(results, start, mins, maxs, end, passEntityNum, contentmask);
 
-	res = G_SwitchBodyPartEntity(&g_entities[results->entityNum]);
+	resEnt = &g_entities[results->entityNum];
+
+	// skip head
+	while (resEnt->s.eType == ET_TEMPHEAD) {
+		trap_Trace(results, results->endpos, mins, maxs, end, results->entityNum, contentmask);
+		resEnt = &g_entities[results->entityNum];
+	}
+
+	res = G_SwitchBodyPartEntity(resEnt);
 	POSITION_READJUST
 
 	G_DettachBodyParts();
