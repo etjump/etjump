@@ -1774,7 +1774,7 @@ bool Spectate(gentity_t *ent, Arguments argv)
 
 	if (!target)
 	{
-		ChatPrintTo(ent, "^spectate: ^7" + error);
+		ChatPrintTo(ent, "^3spectate: ^7" + error);
 		return false;
 	}
 
