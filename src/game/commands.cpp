@@ -1087,6 +1087,8 @@ bool ListBans(gentity_t *ent, Arguments argv)
 		}
 	}
 
+	if (page < 1) page = 1;
+
 	game.database->ListBans(ent, page);
 
 	return true;
