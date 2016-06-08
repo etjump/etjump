@@ -5717,6 +5717,13 @@ char *BG_GetLocationString(vec_t *pos)
 		y = 0;
 	}
 
+	// if coords get pretty big, 
+	// mostly because of getting out of mapcoords, and gridstep being calculated wrong
+	// just set them to 0 character
+	if (x > 26) {
+		x = -17;
+	}
+
 	Com_sprintf(coord, sizeof(coord), "%c,%i", 'A' + x, y);
 
 	return coord;
