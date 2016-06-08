@@ -705,7 +705,7 @@ bool Database::AddUser(std::string const& guid, std::string const& hwid, std::st
 	User newUser(new User_s(id, guid, name, hwid));
 
 	// Automatically generated type.. :D
-	std::pair<detail::bidir_node_iterator<detail::ordered_index_node<detail::ordered_index_node<detail::index_node_base<boost::shared_ptr<User_s>, std::allocator<boost::shared_ptr<User_s> > > > > >, bool> ret = users_.insert(newUser);
+	auto ret = users_.insert(newUser);
 	if (!ret.second)
 	{
 		message_ = "User guid is not unique.";

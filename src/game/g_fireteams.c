@@ -798,7 +798,6 @@ void G_TeamJumpMode(int clientNum)
 
 void G_FireteamRace(int clientNum)
 {
-	char           arg[MAX_TOKEN_CHARS];
 	fireteamData_t *ft;
 	if (!G_IsOnFireteam(clientNum, &ft))
 	{
