@@ -72,7 +72,7 @@
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;D:\boost_1_57_0;$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
