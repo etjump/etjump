@@ -72,8 +72,8 @@ void ETJump::TimerunView::draw()
 	auto color = &colorWhite;
 	
 	vec4_t incolor;
-	vec4_t ryGreen = { 0.627, 0.941, 0.349, 1.0 };
-	vec4_t ryRed = { 0.976, 0.262, 0.262, 1.0 };
+	vec4_t ryGreen = { 0.627f, 0.941f, 0.349f, 1.0f };
+	vec4_t ryRed = { 0.976f, 0.262f, 0.262f, 1.0f };
 
 	auto range = getTransitionRange(run->previousRecord);
 	auto style = ITEM_TEXTSTYLE_NORMAL;

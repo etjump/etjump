@@ -1629,60 +1629,6 @@ void Info_SetValueForKey(char *s, const char *key, const char *value)
 	strcat(s, newi);
 }
 
-/*
-==================
-Info_SetValueForKey_Big
-
-Changes or adds a key/value pair
-==================
-*/
-void Info_SetValueForKey_Big(char *s, const char *key, const char *value)
-{
-	char newi[BIG_INFO_STRING];
-
-	if (strlen(s) >= BIG_INFO_STRING)
-	{
-		Com_Error(ERR_DROP, "Info_SetValueForKey: oversize infostring [%s] [%s] [%s]", s, key, value);
-	}
-
-	if (strchr(key, '\\') || strchr(value, '\\'))
-	{
-		Com_Printf("Can't use keys or values with a \\\n");
-		return;
-	}
-
-	if (strchr(key, ';') || strchr(value, ';'))
-	{
-		Com_Printf("Can't use keys or values with a semicolon\n");
-		return;
-	}
-
-	if (strchr(key, '\"') || strchr(value, '\"'))
-	{
-		Com_Printf("Can't use keys or values with a \"\n");
-		return;
-	}
-
-	Info_RemoveKey_Big(s, key);
-	if (!value || !strlen(value))
-	{
-		return;
-	}
-
-	Com_sprintf(newi, sizeof(newi), "\\%s\\%s", key, value);
-
-	if (strlen(newi) + strlen(s) > BIG_INFO_STRING)
-	{
-		Com_Printf("BIG Info string length exceeded\n");
-		return;
-	}
-
-	strcat(s, newi);
-}
-
-
-
-
 //====================================================================
 
 

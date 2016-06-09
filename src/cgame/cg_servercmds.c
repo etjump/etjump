@@ -1701,7 +1701,7 @@ CG_VoiceChat
 */
 void CG_VoiceChat(int mode)
 {
-	const char *cmd;
+	const char *cmd = "";
 	int        clientNum, color, variant = 5, custom = 6;
 	qboolean   voiceOnly;
 	vec3_t     origin;      // NERVE - SMF

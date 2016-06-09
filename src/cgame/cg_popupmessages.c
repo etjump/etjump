@@ -459,7 +459,7 @@ void CG_DrawPMItems(void)
 		msg = va("%s (x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
 	}
 	else {
-		msg = &cg_pmWaitingList->message;
+		msg = (char*)&cg_pmWaitingList->message;
 	}
 
 	t = cg_pmWaitingList->time + CG_TimeForPopup(cg_pmWaitingList->type) + cg_popupStayTime.integer;
@@ -491,7 +491,7 @@ void CG_DrawPMItems(void)
 			msg = va("%s (x%d)", listItem->message, listItem->repeats);
 		}
 		else {
-			msg = &listItem->message;
+			msg = (char*)&listItem->message;
 		}
 
 		trap_R_SetColor(colourText);
