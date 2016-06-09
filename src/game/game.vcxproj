@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -67,7 +67,7 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)pthread;D:\boost_1_57_0;$(SolutionDir)sqlite;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <TargetName>qagame_mp_x86</TargetName>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -79,7 +79,7 @@
     <TargetName>qagame_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;D:\boost_1_57_0;$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets />
     <TargetName>qagame_mp_x86</TargetName>
