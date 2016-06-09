@@ -316,9 +316,6 @@
     <ClInclude Include="utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="load_race.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="timerun.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

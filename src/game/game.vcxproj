@@ -346,7 +346,6 @@
     <ClInclude Include="g_team.h" />
     <ClInclude Include="iauthentication.hpp" />
     <ClInclude Include="levels.hpp" />
-    <ClInclude Include="load_race.hpp" />
     <ClInclude Include="map_statistics.hpp" />
     <ClInclude Include="motd.hpp" />
     <ClInclude Include="q_shared.h" />
