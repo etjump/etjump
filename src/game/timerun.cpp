@@ -252,14 +252,27 @@ std::string rankToString(int rank)
 
 void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 {
-	const auto run = _recordsByName.find(runName);
-	if (run == end(_recordsByName))
+	auto lowercaseName = runName;
+	transform(begin(lowercaseName), end(lowercaseName), begin(lowercaseName), tolower);
+
+	const std::pair<const std::basic_string<char>, std::vector<std::unique_ptr<Record>>> *run = nullptr;
+	for (const auto& iter : _recordsByName)
 	{
-		Printer::SendConsoleMessage(clientNum,
-		                            "^3error: ^7no records found by name: " + runName);
-		return;
+		auto currentLowercaseName = iter.first;
+		transform(begin(currentLowercaseName), end(currentLowercaseName), begin(currentLowercaseName), tolower);
+		if (currentLowercaseName == lowercaseName)
+		{
+			run = &iter;
+		}
 	}
 
+	if (run == nullptr)
+	{
+		Printer::SendConsoleMessage(clientNum,
+			"^3error: ^7no records found by name: " + runName);
+		return;
+	}
+	
 	const auto self      = _players[clientNum].get();
 	auto       foundSelf = false;
 
