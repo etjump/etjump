@@ -497,6 +497,8 @@ static void CG_General(centity_t *cent)
 		VectorScale(ent.axis[2], cent->currentState.angles2[2], ent.axis[2]);
 		ent.nonNormalizedAxes = qtrue;
 
+		CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 		if (cent->currentState.apos.trType)
 		{
 			ent.reFlags |= REFLAG_ORIENT_LOD;
