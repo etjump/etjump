@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "game\game.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui", "ui\ui.vcxproj", "{FC333AAC-4E2D-D107-0199-A82ED1B615CA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tests", "tests\tests.vcxproj", "{74982B6B-A007-4362-A626-D90E8D7C0192}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -34,6 +36,12 @@ Global
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|Win32.ActiveCfg = Release|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|Win32.Build.0 = Release|Win32
 		{FC333AAC-4E2D-D107-0199-A82ED1B615CA}.Release|x64.ActiveCfg = Release|Win32
+		{74982B6B-A007-4362-A626-D90E8D7C0192}.Debug|Win32.ActiveCfg = Debug|Win32
+		{74982B6B-A007-4362-A626-D90E8D7C0192}.Debug|x64.ActiveCfg = Debug|x64
+		{74982B6B-A007-4362-A626-D90E8D7C0192}.Debug|x64.Build.0 = Debug|x64
+		{74982B6B-A007-4362-A626-D90E8D7C0192}.Release|Win32.ActiveCfg = Release|Win32
+		{74982B6B-A007-4362-A626-D90E8D7C0192}.Release|x64.ActiveCfg = Release|x64
+		{74982B6B-A007-4362-A626-D90E8D7C0192}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
