@@ -431,6 +431,7 @@ vmCvar_t etj_ghostPlayersAlt;
 
 vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
+vmCvar_t etj_stretchCgaz;
 
 typedef struct
 {
@@ -729,6 +730,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_ghostPlayersAlt,          "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE             },
 	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
+	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
 };
 
 

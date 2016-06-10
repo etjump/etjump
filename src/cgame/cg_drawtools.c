@@ -44,6 +44,17 @@ void CG_AdjustPosX(float *x) {
 
 }
 
+void CG_DisableProperScaling(qboolean yes) {
+
+	if (yes) {
+		cgs.screenXScale = cgs.glconfig.vidWidth / (float)640;
+	}
+	else {
+		cgs.screenXScale = cgs.glconfig.vidWidth / (float)SCREEN_WIDTH;
+	}
+
+}
+
 /*
 ================
 CG_FillRect
