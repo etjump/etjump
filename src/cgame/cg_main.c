@@ -728,7 +728,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersAlt,          "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE             },
 	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
-	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "0",                      CVAR_ARCHIVE             },
+	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
 };
 
 
