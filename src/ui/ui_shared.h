@@ -294,6 +294,12 @@ typedef struct itemDef_s
 
 	struct itemDef_s *toolTipData;  // OSP - Tag an item to this item for auto-help popups
 
+	qboolean cvarLength;
+	qboolean multiline;
+
+	int cursorDir; //cursor vertical direction 1 down, -1 up
+	vec4_t cursorColor;
+
 } itemDef_t;
 
 typedef struct
@@ -412,7 +418,7 @@ typedef struct
 	void (*getCVarString)(const char *cvar, char *buffer, int bufsize);
 	float (*getCVarValue)(const char *cvar);
 	void (*setCVar)(const char *cvar, const char *value);
-	void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int limit, int style);
+	void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text, int cursorPos, char cursor, int limit, int style);
 	void (*setOverstrikeMode)(qboolean b);
 	qboolean (*getOverstrikeMode)();
 	void (*startLocalSound)(sfxHandle_t sfx, int channelNum);

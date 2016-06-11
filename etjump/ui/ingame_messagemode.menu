@@ -27,7 +27,7 @@ menuDef
 	onOpen
 	{
 		closeAllOtherMenus ;
-		setEditFocus "efleftSay:"	// note this depends on the macro + item name
+		setEditFocus "efleftmessageText"	// note this depends on the macro + item name
 	}
 	
 	onESC
@@ -44,9 +44,9 @@ menuDef
 // Subwindows //
 
 #define SUBWINDOW_WIDTH		320
-#define SUBWINDOW_HEIGHT	64
+#define SUBWINDOW_HEIGHT	128
 #define SUBWINDOW_X			.5*(WINDOW_WIDTH-SUBWINDOW_WIDTH)
-#define SUBWINDOW_Y			320	// .5*(WINDOW_HEIGHT-SUBWINDOW_HEIGHT)
+#define SUBWINDOW_Y			260	// .5*(WINDOW_HEIGHT-SUBWINDOW_HEIGHT)
 
 	SUBWINDOWBLACK( SUBWINDOW_X, SUBWINDOW_Y, SUBWINDOW_WIDTH, SUBWINDOW_HEIGHT, "SEND MESSAGE" )
 	
@@ -55,17 +55,56 @@ menuDef
 	itemDef {
 		name		"efleftbackSay:"
 		group		GROUP_NAME
-		rect		$evalfloat((SUBWINDOW_X+4)+24+6) $evalfloat(SUBWINDOW_Y+16) $evalfloat((SUBWINDOW_WIDTH)-8-24-6) $evalfloat(10)
+		rect		$evalfloat((SUBWINDOW_X+8)) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-16) $evalfloat(60)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1
 		decoration
 	}
-	EDITFIELDLEFT( SUBWINDOW_X+4, SUBWINDOW_Y+16, (SUBWINDOW_WIDTH)-12, 10,
-		"Say:", .2, 8, "cg_messageText" onEsc { close ingame_messagemode }, 128, 128, "Enter text here - press ESCAPE twice to cancel" )
 	
-	MULTILEFT( SUBWINDOW_X+4, SUBWINDOW_Y+28, (SUBWINDOW_WIDTH)-12, 10,
+ 	//multiline texteditor
+	itemDef {
+		name			"efleftmessageText"
+      	group			GROUP_NAME
+      	rect			$evalfloat(SUBWINDOW_X+10) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-28) 60
+		type			ITEM_TYPE_EDITFIELD
+		textfont		UI_FONT_COURBD_21
+		textstyle		ITEM_TEXTSTYLE_SHADOWED
+		textscale		.2
+		textaligny		8
+		forecolor		.6 .6 .6 1
+		cursorColor     1 1 1 1
+		cvar			"cg_messageText"
+		maxChars		200
+		maxPaintChars	200
+		visible			1
+		tooltip			"Enter text here - press ESCAPE twice to cancel"
+		multiline
+		onEsc { close ingame_messagemode }
+    }
+	
+	MULTILEFT( SUBWINDOW_X+8, SUBWINDOW_Y+88, (SUBWINDOW_WIDTH)-12, 10,
 		"To:", .2, 8, "cg_messageType", cvarFloatList { "All" 1 "Team" 2 "Fireteam" 3 }, "Select the desitnation for your text (To all, team only or fire-team only)" )
+
+	// measure text length of the specific cvar 
+	itemDef {
+		name			"measureText"
+		text            "chars left: "
+      	group			GROUP_NAME
+		rect			$evalfloat(SUBWINDOW_X+SUBWINDOW_WIDTH-8) $evalfloat(SUBWINDOW_Y+88) 0 0
+		type			ITEM_TYPE_TEXT
+		textfont		UI_FONT_COURBD_21
+		textstyle		ITEM_TEXTSTYLE_SHADOWED
+		textscale		0.2
+		textalign		ITEM_ALIGN_RIGHT
+		textalignx		0
+		textaligny		8
+		forecolor		.6 .6 .6 1
+		cvar			"cg_messageText"
+		cvarLength
+		visible			1
+		decoration
+    }
 	
 	BUTTON( SUBWINDOW_X+6, SUBWINDOW_Y+SUBWINDOW_HEIGHT-24, .5*(SUBWINDOW_WIDTH-18), 18,
 		"CANCEL", .3, 14, close ingame_messagemode ; )

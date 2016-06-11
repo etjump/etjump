@@ -879,7 +879,7 @@ void Text_AutoWrap_Paint(float x, float y, int width, int height, float scale, v
 	while (ret < end);
 }
 
-void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int limit, int style)
+void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text, int cursorPos, char cursor, int limit, int style)
 {
 	int         len, count;
 	vec4_t      newColor;

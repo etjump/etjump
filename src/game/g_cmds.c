@@ -1842,7 +1842,7 @@ void G_EntitySoundNoCut(
 G_Say
 ==================
 */
-#define MAX_SAY_TEXT    150
+#define MAX_SAY_TEXT    265 - 64
 
 void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
              const char *name, const char *message, qboolean localize, qboolean encoded)
@@ -1892,7 +1892,7 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
 
 void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *chatText)
 {
-	int       j;
+	int       j, len;
 	gentity_t *other;
 	int       color;
 	char      name[64];
@@ -1931,8 +1931,18 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 		color = COLOR_CYAN;
 		break;
 	}
+	
+	len = sizeof(text);
+	Q_strncpyz(text, chatText, len);
 
-	Q_strncpyz(text, chatText, sizeof(text));
+	// if chat message is too long, e.g. being send from console
+	// cut it and put ellipsis at the end
+	if (strnlen(chatText, 256) > len) {
+		text[len - 2] = '.';
+		text[len - 3] = '.';
+		text[len - 4] = '.';
+	}
+
 	printText   = text;
 	escapedName = EscapeString(name);
 

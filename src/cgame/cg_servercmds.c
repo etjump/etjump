@@ -2407,7 +2407,7 @@ void CG_ForceTapOut_f(void);
  */
 const char *CG_AddChatModifications(char *text, int clientNum)
 {
-	static char message[MAX_SAY_TEXT] = "\0";
+	static char message[MAX_SAY_TEXT + 32] = "\0";
 	const char  *msgColor             = "^z";
 	qtime_t     t;
 
@@ -2641,19 +2641,17 @@ static void CG_ServerCommand(void)
 		}
 
 		Q_strncpyz(text, s, MAX_SAY_TEXT);
+
 		if (enc)
 		{
 			CG_DecodeQP(text);
 		}
+
 		CG_RemoveChatEscapeChar(text);
-
-		s = CG_AddChatModifications(text, atoi(CG_Argv(2)));
-		Q_strncpyz(text, s, MAX_SAY_TEXT);
-
 		CG_FixLinesEndingWithCaret(text, MAX_SAY_TEXT);
-		CG_AddToTeamChat(text, atoi(CG_Argv(2)));
-
-		CG_Printf("%s\n", text);
+		s = CG_AddChatModifications(text, atoi(CG_Argv(2)));
+		CG_AddToTeamChat(s, atoi(CG_Argv(2)));
+		CG_Printf("%s\n", s);
 
 		return;
 	}
