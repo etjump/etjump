@@ -2474,6 +2474,7 @@ extern vmCvar_t etj_ghostPlayersAlt;
 
 extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
+extern vmCvar_t etj_stretchCgaz;
 
 //
 // cg_main.c
@@ -3772,6 +3773,7 @@ void ETJump_ClearDrawables();
 void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
+void CG_DisableProperScaling(qboolean yes);
 
 #endif // CG_LOCAL_H
 
