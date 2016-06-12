@@ -116,7 +116,7 @@ void Tooltip_ComputePosition(itemDef_t *item)
 int etj_chatlen (unsigned char *text) {
 	int i, len, result, max;
 
-	max = MAX_SAY_TEXT - 64;
+	max = MAX_CHAT_TEXT;
 	len = strlen(text);
 	result = 0;
 
@@ -4919,7 +4919,7 @@ void Item_Text_Paint(itemDef_t *item)
 				DC->getCVarString(item->cvar, text, sizeof(text));
 				size = etj_chatlen(text);
 				
-				textPtr = va("%s%i", item->text, MAX_SAY_TEXT - 64 - 1 - size);
+				textPtr = va("%s%i", item->text, MAX_CHAT_TEXT - 1 - size);
 			}
 			else {
 				DC->getCVarString(item->cvar, text, sizeof(text));
