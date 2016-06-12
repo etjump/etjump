@@ -1842,8 +1842,6 @@ void G_EntitySoundNoCut(
 G_Say
 ==================
 */
-#define MAX_SAY_TEXT    265 - 64
-
 void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
              const char *name, const char *message, qboolean localize, qboolean encoded)
 {
@@ -1897,7 +1895,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	int       color;
 	char      name[64];
 	// don't let text be too long for malicious reasons
-	char       text[MAX_SAY_TEXT];
+	char       text[MAX_SAY_TEXT - 64];
 	const char *escapedName = NULL;
 	qboolean   localize     = qfalse;
 	char       *loc;

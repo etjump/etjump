@@ -27,7 +27,7 @@ menuDef
 	onOpen
 	{
 		closeAllOtherMenus ;
-		setEditFocus "efleftmessageText"	// note this depends on the macro + item name
+		setEditFocus "inChatMessageText"	// note this depends on the macro + item name
 	}
 	
 	onESC
@@ -64,7 +64,7 @@ menuDef
 	
  	//multiline texteditor
 	itemDef {
-		name			"efleftmessageText"
+		name			"inChatMessageText"
       	group			GROUP_NAME
       	rect			$evalfloat(SUBWINDOW_X+10) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-28) 60
 		type			ITEM_TYPE_EDITFIELD
@@ -73,7 +73,7 @@ menuDef
 		textscale		.2
 		textaligny		8
 		forecolor		.6 .6 .6 1
-		cursorColor     1 1 1 1
+		cursorColor     0.7 0.7 0.7 1
 		cvar			"cg_messageText"
 		maxChars		200
 		maxPaintChars	200

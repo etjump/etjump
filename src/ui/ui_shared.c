@@ -113,6 +113,30 @@ void Tooltip_ComputePosition(itemDef_t *item)
 	item->toolTipData->window.flags |= WINDOW_VISIBLE;
 }
 
+int etj_chatlen (unsigned char *text) {
+	int i, len, result, max;
+
+	max = MAX_SAY_TEXT - 64;
+	len = strlen(text);
+	result = 0;
+
+	for (i = 0; i < len && i < max; i++) {
+		if (text[i] > 127) {
+			result += 3;
+		}
+		else {
+			result += 1;
+		}
+	}
+
+	return result;
+}
+
+int etj_charLen(int c) {
+
+	return (c > 127) ? 3 : 1;
+
+}
 
 /*
 ===============
@@ -3439,7 +3463,7 @@ qboolean Item_Multi_HandleKey(itemDef_t *item, int key)
 qboolean Item_TextField_HandleKey(itemDef_t *item, int key)
 {
 	char           buff[1024];
-	int            len;
+	int            len, charLen, textLen;
 	itemDef_t      *newItem = NULL;
 	editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
 
@@ -3449,7 +3473,7 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key)
 		memset(buff, 0, sizeof(buff));
 		DC->getCVarString(item->cvar, buff, sizeof(buff));
 		len = strlen(buff);
-
+		textLen = etj_chatlen(buff);
 
 		if (editPtr->maxChars && len > editPtr->maxChars)
 		{
@@ -3465,19 +3489,20 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key)
 		if (key & K_CHAR_FLAG)
 		{
 			key &= ~K_CHAR_FLAG;
+			charLen = etj_charLen(key);
 
 
 			if (key == 'h' - 'a' + 1)       // ctrl-h is backspace
 			{
 				if (item->cursorPos > 0)
 				{
-					memmove(&buff[item->cursorPos - 1], &buff[item->cursorPos], len + 1 - item->cursorPos);
+					memmove(&buff[item->cursorPos - 1], &buff[item->cursorPos], textLen + 1 - item->cursorPos);
 					item->cursorPos--;
 					if (item->cursorPos < editPtr->paintOffset)
 					{
 						editPtr->paintOffset--;
 					}
-					buff[len] = '\0';
+					buff[textLen] = '\0';
 				}
 				DC->setCVar(item->cvar, buff);
 				return qtrue;
@@ -3502,11 +3527,11 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key)
 
 			if (DC->getOverstrikeMode && !DC->getOverstrikeMode())
 			{
-				if ((len == MAX_EDITFIELD - 1) || (editPtr->maxChars && len >= editPtr->maxChars))
+				if ((textLen == MAX_EDITFIELD - 1) || (editPtr->maxChars && textLen >= editPtr->maxChars))
 				{
 					return qtrue;
 				}
-				memmove(&buff[item->cursorPos + 1], &buff[item->cursorPos], len + 1 - item->cursorPos);
+				memmove(&buff[item->cursorPos + 1], &buff[item->cursorPos], textLen + 1 - item->cursorPos);
 			}
 			else
 			{
@@ -3516,16 +3541,17 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key)
 				}
 			}
 
-			buff[item->cursorPos] = key;
-
-			DC->setCVar(item->cvar, buff);
-
-			if (item->cursorPos < len + 1)
-			{
-				item->cursorPos++;
-				if (editPtr->maxPaintChars && item->cursorPos > editPtr->maxPaintChars)
+			if (editPtr->maxChars >= textLen + charLen) {
+				buff[item->cursorPos] = key;
+				DC->setCVar(item->cvar, buff);
+				
+				if (item->cursorPos < textLen + 1)
 				{
-					editPtr->paintOffset++;
+					item->cursorPos++;
+					if (editPtr->maxPaintChars && item->cursorPos > editPtr->maxPaintChars)
+					{
+						editPtr->paintOffset++;
+					}
 				}
 			}
 
@@ -4891,7 +4917,7 @@ void Item_Text_Paint(itemDef_t *item)
 		{
 			if (item->cvarLength) {
 				DC->getCVarString(item->cvar, text, sizeof(text));
-				size = strnlen(text, MAX_SAY_TEXT - 64);
+				size = etj_chatlen(text);
 				
 				textPtr = va("%s%i", item->text, MAX_SAY_TEXT - 64 - 1 - size);
 			}
