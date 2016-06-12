@@ -3596,22 +3596,43 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key)
 			}
 		}
 
-		if (key == K_TAB || key == K_DOWNARROW || key == K_KP_DOWNARROW)
-		{
-			newItem = Menu_SetNextCursorItem(item->parent);
-			if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD || newItem->type == ITEM_TYPE_NUMERICFIELD))
+		if (item->multiline) {
+			if (key == K_TAB)
 			{
-				g_editItem = newItem;
+				newItem = Menu_SetNextCursorItem(item->parent);
+				if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD || newItem->type == ITEM_TYPE_NUMERICFIELD))
+				{
+					g_editItem = newItem;
+				}
+			}
+			// going down
+			if (key == K_DOWNARROW || key == K_KP_DOWNARROW) {
+				item->cursorDir = 1;
+			}
+			// going up
+			if (key == K_UPARROW || key == K_KP_UPARROW)
+			{
+				item->cursorDir = -1;
 			}
 		}
-
-		if (key == K_UPARROW || key == K_KP_UPARROW)
-		{
-			newItem = Menu_SetPrevCursorItem(item->parent);
-			if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD || newItem->type == ITEM_TYPE_NUMERICFIELD))
+		else {
+			if (key == K_TAB || key == K_DOWNARROW || key == K_KP_DOWNARROW)
 			{
-				g_editItem = newItem;
+				newItem = Menu_SetNextCursorItem(item->parent);
+				if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD || newItem->type == ITEM_TYPE_NUMERICFIELD))
+				{
+					g_editItem = newItem;
+				}
 			}
+
+			if (key == K_UPARROW || key == K_KP_UPARROW)
+			{
+				newItem = Menu_SetPrevCursorItem(item->parent);
+				if (newItem && (newItem->type == ITEM_TYPE_EDITFIELD || newItem->type == ITEM_TYPE_NUMERICFIELD))
+				{
+					g_editItem = newItem;
+				}
+			}			
 		}
 
 		// NERVE - SMF
@@ -4600,18 +4621,169 @@ void Item_TextColor(itemDef_t *item, vec4_t *newColor)
 	}
 }
 
+void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean hasCursor)
+{
+	const char *p, *newLinePtr;
+	char       buff[1024], cursor;
+	int        width, height, len, textWidth, newLine, newLineWidth, cursorPos, startLine, previousLine;
+	qboolean   hasWhitespace;
+	float      y;
+	vec4_t     color, cursorColor;
+
+	textWidth = 0;
+	newLinePtr = NULL;
+
+	Item_TextColor(item, &color);
+	Item_SetTextExtents(item, &width, &height, textPtr);
+
+	if (hasCursor) {
+
+		if (item->cursorColor) {
+			memcpy(cursorColor, &item->cursorColor, sizeof(vec4_t));
+		}
+		else {
+			memcpy(cursorColor, &color, sizeof(vec4_t));
+		}
+
+	}
+
+	y = item->textaligny;
+	len = 0;
+	cursorPos = 0;
+	startLine = 0;
+	previousLine = 0;
+	buff[0] = '\0';
+	newLine = 0;
+	newLineWidth = 0;
+	hasWhitespace = qfalse;
+	p = textPtr;
+	cursor = DC->getOverstrikeMode() ? '_' : '|';
+
+	while (p)
+	{
+		textWidth = DC->textWidth(buff, item->textscale, 0);
+		if (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\0')
+		{
+			newLine = len;
+			newLinePtr = p + 1;
+			newLineWidth = textWidth;
+			hasWhitespace = qtrue;
+		}
+		else if (!hasWhitespace && textWidth > item->window.rect.w)
+		{
+			newLine = len;
+			newLinePtr = p;
+			newLineWidth = textWidth;
+		}
+		if ((newLine && textWidth > item->window.rect.w) || *p == '\n' || *p == '\0')
+		{
+			if (len)
+			{
+				if (item->textalignment == ITEM_ALIGN_LEFT)
+				{
+					item->textRect.x = item->textalignx;
+				}
+				else if (item->textalignment == ITEM_ALIGN_RIGHT)
+				{
+					item->textRect.x = item->textalignx - newLineWidth;
+				}
+				else if (item->textalignment == ITEM_ALIGN_CENTER)
+				{
+					item->textRect.x = item->textalignx - newLineWidth / 2;
+				}
+				item->textRect.y = y;
+				ToWindowCoords(&item->textRect.x, &item->textRect.y, &item->window);
+
+				buff[newLine] = '\0';
+				cursorPos = item->cursorPos - startLine; //position relatively to line
+
+				// the line we are suppose to draw caret on
+				if (hasCursor && cursorPos >= 0 && newLine >= cursorPos) {
+
+					// avoid drawing caret on two different lines in the same time
+					if (newLine == cursorPos && !hasWhitespace) {
+						DC->drawText(item->textRect.x, item->textRect.y, item->textscale, color, buff, 0, 0, item->textStyle);
+					}
+					else {
+						// caret jumps up
+						if (item->cursorDir == -1) {
+							item->cursorDir = 0;
+							// check for line overflow, snap to the last line character
+							if (startLine > previousLine && previousLine + cursorPos > startLine) {
+								item->cursorPos = startLine - 1;
+							}
+							else {
+								item->cursorPos = previousLine + cursorPos;
+							}
+						}
+
+						DC->drawTextWithCursor(item->textRect.x, item->textRect.y, item->textscale, color, cursorColor, buff, cursorPos, cursor, 0, item->textStyle);
+					}
+				} 
+				// draw caret even if the last character on the line is space
+				else if (hasCursor && (newLine + 1) == cursorPos && *p == ' ' && *newLinePtr == '\0') {
+					DC->drawTextWithCursor(item->textRect.x, item->textRect.y, item->textscale, color, cursorColor, buff, cursorPos - 1, cursor, 0, item->textStyle);
+				}
+				else {
+					// caret jumps down
+					if (startLine > item->cursorPos && item->cursorDir == 1) {
+						item->cursorDir = 0;
+						// calculate new caret position
+						cursorPos = item->cursorPos - previousLine;
+						// check if we can set caret on the same position under the current line
+						if (startLine + cursorPos > startLine + newLine) {
+							item->cursorPos = startLine + newLine;
+						}
+						else {
+							item->cursorPos = startLine + cursorPos;
+						}
+					}
+
+					DC->drawText(item->textRect.x, item->textRect.y, item->textscale, color, buff, 0, 0, item->textStyle);
+				}
+
+			}
+			if (*p == '\0')
+			{
+				// draw caret on empty line
+				if (hasCursor && *textPtr == '\0') {
+
+					item->textRect.y = y;
+					item->textRect.x = item->textalignx;
+					ToWindowCoords(&item->textRect.x, &item->textRect.y, &item->window);
+
+					DC->drawTextWithCursor(item->textRect.x, item->textRect.y, item->textscale, color, cursorColor, buff, 0, cursor, 0, item->textStyle);
+				}
+
+				break;
+			}
+			
+			y += height + 5;
+			p = newLinePtr;
+			previousLine = startLine;
+			startLine += hasWhitespace ? newLine + 1 : newLine;			
+			len = 0;
+			newLine = 0;
+			newLineWidth = 0;
+			hasWhitespace = qfalse;
+			continue;
+		}
+		buff[len++] = *p++;
+
+		if (buff[len - 1] == 13)
+		{
+			buff[len - 1] = ' ';
+		}
+
+		buff[len] = '\0';
+	}
+
+}
+
 void Item_Text_AutoWrapped_Paint(itemDef_t *item)
 {
 	char       text[1024];
-	const char *p, *textPtr, *newLinePtr;
-	char       buff[1024];
-	int        width, height, len, textWidth, newLine, newLineWidth;
-	qboolean   hasWhitespace;
-	float      y;
-	vec4_t     color;
-
-	textWidth  = 0;
-	newLinePtr = NULL;
+	const char *textPtr;
 
 	if (item->text == NULL)
 	{
@@ -4633,76 +4805,8 @@ void Item_Text_AutoWrapped_Paint(itemDef_t *item)
 	{
 		return;
 	}
-	Item_TextColor(item, &color);
-	Item_SetTextExtents(item, &width, &height, textPtr);
 
-	y             = item->textaligny;
-	len           = 0;
-	buff[0]       = '\0';
-	newLine       = 0;
-	newLineWidth  = 0;
-	hasWhitespace = qfalse;
-	p             = textPtr;
-	while (p)
-	{
-		textWidth = DC->textWidth(buff, item->textscale, 0);
-		if (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\0')
-		{
-			newLine       = len;
-			newLinePtr    = p + 1;
-			newLineWidth  = textWidth;
-			hasWhitespace = qtrue;
-		}
-		else if (!hasWhitespace && textWidth > item->window.rect.w)
-		{
-			newLine      = len;
-			newLinePtr   = p;
-			newLineWidth = textWidth;
-		}
-		if ((newLine && textWidth > item->window.rect.w) || *p == '\n' || *p == '\0')
-		{
-			if (len)
-			{
-				if (item->textalignment == ITEM_ALIGN_LEFT)
-				{
-					item->textRect.x = item->textalignx;
-				}
-				else if (item->textalignment == ITEM_ALIGN_RIGHT)
-				{
-					item->textRect.x = item->textalignx - newLineWidth;
-				}
-				else if (item->textalignment == ITEM_ALIGN_CENTER)
-				{
-					item->textRect.x = item->textalignx - newLineWidth / 2;
-				}
-				item->textRect.y = y;
-				ToWindowCoords(&item->textRect.x, &item->textRect.y, &item->window);
-				//
-				buff[newLine] = '\0';
-				DC->drawText(item->textRect.x, item->textRect.y, item->textscale, color, buff, 0, 0, item->textStyle);
-			}
-			if (*p == '\0')
-			{
-				break;
-			}
-			//
-			y            += height + 5;
-			p             = newLinePtr;
-			len           = 0;
-			newLine       = 0;
-			newLineWidth  = 0;
-			hasWhitespace = qfalse;
-			continue;
-		}
-		buff[len++] = *p++;
-
-		if (buff[len - 1] == 13)
-		{
-			buff[len - 1] = ' ';
-		}
-
-		buff[len] = '\0';
-	}
+	Item_Text_DrawAutoWrapped(item, textPtr, qfalse);
 }
 
 void Item_Text_Wrapped_Paint(itemDef_t *item)
@@ -4761,7 +4865,7 @@ void Item_Text_Paint(itemDef_t *item)
 {
 	char       text[1024];
 	const char *textPtr;
-	int        height, width;
+	int        height, width, size;
 	vec4_t     color;
 	int        seconds;
 	menuDef_t  *menu = (menuDef_t *) item->parent;
@@ -4777,7 +4881,7 @@ void Item_Text_Paint(itemDef_t *item)
 		return;
 	}
 
-	if (item->text == NULL)
+	if (item->cvarLength || item->text == NULL)
 	{
 		if (item->cvar == NULL)
 		{
@@ -4785,19 +4889,29 @@ void Item_Text_Paint(itemDef_t *item)
 		}
 		else
 		{
-			DC->getCVarString(item->cvar, text, sizeof(text));
-			if (item->window.flags & WINDOW_TEXTASINT)
-			{
-				COM_StripExtension(text, text);
-				item->textRect.w = 0;   // force recalculation
+			if (item->cvarLength) {
+				DC->getCVarString(item->cvar, text, sizeof(text));
+				size = strnlen(text, MAX_SAY_TEXT - 64);
+				
+				textPtr = va("%s%i", item->text, MAX_SAY_TEXT - 64 - 1 - size);
 			}
-			else if (item->window.flags & WINDOW_TEXTASFLOAT)
-			{
-				char *s = va("%.2f", atof(text));
-				Q_strncpyz(text, s, sizeof(text));
-				item->textRect.w = 0;   // force recalculation
+			else {
+				DC->getCVarString(item->cvar, text, sizeof(text));
+				
+				if (item->window.flags & WINDOW_TEXTASINT)
+				{
+					COM_StripExtension(text, text);
+					item->textRect.w = 0;   // force recalculation
+				}
+				else if (item->window.flags & WINDOW_TEXTASFLOAT)
+				{
+					char *s = va("%.2f", atof(text));
+					Q_strncpyz(text, s, sizeof(text));
+					item->textRect.w = 0;   // force recalculation
+				}
+				
+				textPtr = text;
 			}
-			textPtr = text;
 		}
 	}
 	else
@@ -4870,12 +4984,30 @@ void Item_Text_Paint(itemDef_t *item)
 	DC->drawText(item->textRect.x, item->textRect.y, item->textscale, color, textPtr, 0, 0, item->textStyle);
 }
 
+void Item_TextMultiline_Paint(itemDef_t *item) {
+		
+	char           buff[1024];
+	editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
+	
+	if (!item->cvar)
+	{
+		return;
+	}
 
+	if (item->text) {
+		Item_Text_Paint(item);
+	}
+
+	DC->getCVarString(item->cvar, buff, sizeof(buff));
+	
+	//wraps texts and handles caret position
+	Item_Text_DrawAutoWrapped(item, buff, qtrue);
+}
 
 void Item_TextField_Paint(itemDef_t *item)
 {
 	char           buff[1024];
-	vec4_t         newColor, lowLight;
+	vec4_t         newColor, lowLight, cursorColor;
 	int            offset;
 	int            text_len = 0; // screen length of the editfield text that will be printed
 	int            field_offset; // character offset in the editfield string
@@ -4883,9 +5015,9 @@ void Item_TextField_Paint(itemDef_t *item)
 	menuDef_t      *parent  = (menuDef_t *)item->parent;
 	editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
 
-	Item_Text_Paint(item);
-
 	buff[0] = '\0';
+
+	Item_Text_Paint(item);
 
 	if (item->cvar)
 	{
@@ -4905,6 +5037,13 @@ void Item_TextField_Paint(itemDef_t *item)
 	else
 	{
 		memcpy(&newColor, &item->window.foreColor, sizeof(vec4_t));
+	}
+
+	if (item->cursorColor) {
+		memcpy(&cursorColor, &item->cursorColor, sizeof(vec4_t));
+	}
+	else {
+		memcpy(&cursorColor, &item->window.foreColor, sizeof(vec4_t));
 	}
 
 	// NOTE: offset from the editfield prefix (like "Say: " in limbo menu)
@@ -4942,7 +5081,7 @@ void Item_TextField_Paint(itemDef_t *item)
 	if (item->window.flags & WINDOW_HASFOCUS && g_editingField)
 	{
 		char cursor = DC->getOverstrikeMode() ? '_' : '|';
-		DC->drawTextWithCursor(item->textRect.x + item->textRect.w + offset + screen_offset, item->textRect.y, item->textscale, newColor, buff + editPtr->paintOffset + field_offset, item->cursorPos - editPtr->paintOffset - field_offset, cursor, editPtr->maxPaintChars, item->textStyle);
+		DC->drawTextWithCursor(item->textRect.x + item->textRect.w + offset + screen_offset, item->textRect.y, item->textscale, newColor, cursorColor, buff + editPtr->paintOffset + field_offset, item->cursorPos - editPtr->paintOffset - field_offset, cursor, editPtr->maxPaintChars, item->textStyle);
 	}
 	else
 	{
@@ -6317,7 +6456,12 @@ void Item_Paint(itemDef_t *item)
 		break;
 	case ITEM_TYPE_EDITFIELD:
 	case ITEM_TYPE_NUMERICFIELD:
-		Item_TextField_Paint(item);
+		if (item->multiline) {
+			Item_TextMultiline_Paint(item);
+		}
+		else {
+			Item_TextField_Paint(item);
+		}
 		break;
 	case ITEM_TYPE_COMBO:
 		break;
@@ -7494,6 +7638,23 @@ qboolean ItemParse_contextMenu(itemDef_t *item, int handle)
 	return qtrue;
 }
 
+qboolean ItemParse_cursorColor(itemDef_t *item, int handle)
+{
+	int   i;
+	float f = 0.0f;
+
+	for (i = 0; i < 4; i++)
+	{
+		if (!PC_Float_Parse(handle, &f))
+		{
+			return qfalse;
+		}
+		item->cursorColor[i] = f;
+	}
+
+	return qtrue;
+}
+
 qboolean ItemParse_onFocus(itemDef_t *item, int handle)
 {
 	if (!PC_Script_Parse(handle, &item->onFocus))
@@ -7546,6 +7707,14 @@ qboolean ItemParse_mouseExitText(itemDef_t *item, int handle)
 		return qfalse;
 	}
 	return qtrue;
+}
+
+qboolean ItemParse_multiline(itemDef_t *item, int handle) {
+
+	item->multiline = qtrue;
+
+	return qtrue;
+
 }
 
 qboolean ItemParse_action(itemDef_t *item, int handle)
@@ -7646,6 +7815,12 @@ qboolean ItemParse_maxPaintChars(itemDef_t *item, int handle)
 	return qtrue;
 }
 
+
+qboolean ItemParse_cvarLength(itemDef_t *item, int handle)
+{
+	item->cvarLength = qtrue;
+	return qtrue;
+}
 
 
 qboolean ItemParse_cvarFloat(itemDef_t *item, int handle)
@@ -7990,6 +8165,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "cinematic",         ItemParse_cinematic,         NULL },
 	{ "columns",           ItemParse_columns,           NULL },
 	{ "contextmenu",       ItemParse_contextMenu,       NULL },
+	{ "cursorColor",       ItemParse_cursorColor,       NULL },
 	{ "cvar",              ItemParse_cvar,              NULL },
 	{ "cvarFloat",         ItemParse_cvarFloat,         NULL },
 	{ "cvarFloatList",     ItemParse_cvarFloatList,     NULL },
@@ -8017,6 +8193,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "leaveFocus",        ItemParse_leaveFocus,        NULL },
 	{ "maxChars",          ItemParse_maxChars,          NULL },
 	{ "maxPaintChars",     ItemParse_maxPaintChars,     NULL },
+	{ "cvarLength",        ItemParse_cvarLength,        NULL },
 	{ "model_angle",       ItemParse_model_angle,       NULL },
 	{ "model_animplay",    ItemParse_model_animplay,    NULL },
 	{ "model_fovx",        ItemParse_model_fovx,        NULL },
@@ -8027,6 +8204,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "mouseEnterText",    ItemParse_mouseEnterText,    NULL },
 	{ "mouseExit",         ItemParse_mouseExit,         NULL },
 	{ "mouseExitText",     ItemParse_mouseExitText,     NULL },
+	{ "multiline",         ItemParse_multiline,         NULL },
 	{ "name",              ItemParse_name,              NULL },
 	{ "noToggle",          ItemParse_noToggle,          NULL }, // TTimo: use with ITEM_TYPE_YESNO and an action script (see sv_punkbuster)
 	{ "notselectable",     ItemParse_notselectable,     NULL },
