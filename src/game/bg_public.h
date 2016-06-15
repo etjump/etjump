@@ -329,6 +329,7 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 #define CGF_CHEATCVARSON    0x100
 #define CGF_HIDEME          0x200
 #define CGF_ENABLE_TIMERUNS 0x400
+#define CGF_NOACTIVELEAN    0x800
 
 #define MAX_MOTDLINES   6
 
@@ -537,6 +538,7 @@ typedef struct
 	qboolean releasedFire;
 	float noclipScale;
 
+	qboolean noActiveLean;
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
 

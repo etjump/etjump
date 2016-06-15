@@ -2064,7 +2064,6 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 	cg.time -= snapshotDelayTime;
 #endif // _DEBUG
 
-
 #ifdef DEBUGTIME_ENABLED
 	CG_Printf("\n");
 #endif
@@ -2081,6 +2080,11 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 	{
 		CG_DrawInformation(qfalse);
 		return;
+	}
+
+	// no active lean
+	if (etj_noActiveLean.integer) {
+		CG_CheckActiveLean();
 	}
 
 	CG_PB_ClearPolyBuffers();

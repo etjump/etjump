@@ -1242,6 +1242,8 @@ typedef struct
 	qboolean hasTimerun;
 
 	float currentTransparencyValue;
+	// used for noactivatelean
+	int etjActivateKey;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -2475,6 +2477,7 @@ extern vmCvar_t etj_ghostPlayersAlt;
 extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
 extern vmCvar_t etj_stretchCgaz;
+extern vmCvar_t etj_noActiveLean;
 
 //
 // cg_main.c
@@ -3774,6 +3777,7 @@ void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
+void CG_CheckActiveLean();
 
 #endif // CG_LOCAL_H
 
