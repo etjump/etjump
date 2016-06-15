@@ -882,7 +882,7 @@ void Text_AutoWrap_Paint(float x, float y, int width, int height, float scale, v
 void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text, int cursorPos, char cursor, int limit, int style)
 {
 	int         len, count;
-	vec4_t      newColor;
+	vec4_t      newColor, newCursorColor;
 	glyphInfo_t *glyph, *glyph2;
 	float       yadj;
 	float       useScale;
@@ -895,6 +895,7 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cu
 		const char *s = text;
 		trap_R_SetColor(color);
 		memcpy(&newColor[0], &color[0], sizeof(vec4_t));
+
 		len = strlen(text);
 		if (limit > 0 && len > limit)
 		{
@@ -946,6 +947,7 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cu
 				yadj = useScale * glyph2->top;
 				if (count == cursorPos && !((uiInfo.uiDC.realTime / BLINK_DIVISOR) & 1))
 				{
+					trap_R_SetColor(cursorColor);
 					Text_PaintChar(x + (glyph->pitch * useScale), y - yadj,
 					               glyph2->imageWidth,
 					               glyph2->imageHeight,
@@ -955,6 +957,7 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cu
 					               glyph2->s2,
 					               glyph2->t2,
 					               glyph2->glyph);
+					trap_R_SetColor(color);
 				}
 
 				x += (glyph->xSkip * useScale);
@@ -965,6 +968,7 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cu
 		// need to paint cursor at end of text
 		if (cursorPos == len && !((uiInfo.uiDC.realTime / BLINK_DIVISOR) & 1))
 		{
+			trap_R_SetColor(cursorColor);
 			yadj = useScale * glyph2->top;
 			Text_PaintChar(x + (glyph2->pitch * useScale), y - yadj,
 			               glyph2->imageWidth,
