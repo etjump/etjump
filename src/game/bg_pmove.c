@@ -5619,6 +5619,12 @@ void PM_UpdateLean(playerState_t *ps, usercmd_t *cmd, pmove_t *tpm)
 		{
 			leaning += 1;
 		}
+
+		// client still can send leaning command while having +activate
+		// disable that, so we won't have micro leaning
+		if ((cmd->buttons & BUTTON_ACTIVATE) && pm->pmext->noActiveLean) {
+			return;
+		}
 	}
 
 	if (BG_PlayerMounted(ps->eFlags))

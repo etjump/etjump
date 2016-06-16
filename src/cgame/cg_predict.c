@@ -1263,6 +1263,14 @@ void CG_PredictPlayerState(void)
 
 		fflush(stdout);
 
+		// bg_pmove uses it
+		if (etj_noActiveLean.integer) {
+			cg_pmove.pmext->noActiveLean = qtrue;
+		}
+		else {
+			cg_pmove.pmext->noActiveLean = qfalse;
+		}
+
 		Pmove(&cg_pmove);
 
 		moved = qtrue;

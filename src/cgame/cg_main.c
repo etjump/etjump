@@ -432,6 +432,7 @@ vmCvar_t etj_ghostPlayersAlt;
 vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
 vmCvar_t etj_stretchCgaz;
+vmCvar_t etj_noActiveLean;
 
 typedef struct
 {
@@ -731,6 +732,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
+	{ &etj_noActiveLean,             "etj_noActiveLean",            "0",                      CVAR_ARCHIVE             },
 };
 
 
@@ -825,14 +827,14 @@ void CG_UpdateCvars(void)
 
 				// Check if we need to update any client flags to be sent to the server
 				if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
-				    cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-				    cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
-				    cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-				    cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
-				    cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
-				    cv->vmCvar == &int_m_pitch  || cv->vmCvar == &cg_loadviewangles ||
-				    cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
-					cv->vmCvar == &etj_enableTimeruns
+					cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
+					cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
+					cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
+					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
+					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
+					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
+					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
+					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActiveLean
 				    )
 				{
 					fSetFlags = qtrue;
@@ -946,7 +948,8 @@ void CG_setClientFlags(void)
 	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
 	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
 									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
-									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) 
+									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
+									 ((etj_noActiveLean.integer > 0) ? CGF_NOACTIVELEAN : 0)
 	                                 // Add more in here, as needed
 	                             ),
 
@@ -3439,6 +3442,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
+	cg.etjActivateKey = -1; //set default to -1 => none
 #ifdef AC_SUPPORT
 
 	InitAntiCheat(clientAC);
@@ -3579,4 +3583,34 @@ void CG_DecodeQP(char *line)
 		}
 	}
 	*o = '\0';
+}
+
+void CG_CheckActiveLean() {
+	usercmd_t ucmd;
+	int num = trap_GetCurrentCmdNumber();
+
+	trap_GetUserCmd(num, &ucmd);
+	// Do we have +activate button pressed right now?
+	if (ucmd.buttons & BUTTON_ACTIVATE) {
+		// Do we also try to lean currently?
+		if ((ucmd.wbuttons & WBUTTON_LEANLEFT) || (ucmd.wbuttons & WBUTTON_LEANRIGHT)) {
+			int key = trap_Key_GetKey("+activate");
+			// unbind +activate button so it wont trigger +activate in the next frame,
+			// this way we avoid spamming -activate
+			trap_Key_SetBinding(key, "-activate");
+			// send -activate command, to be executed and to disable current +activate
+			trap_SendConsoleCommand("-activate");
+			// cache the key to be restored later
+			cg.etjActivateKey = key;
+		}
+	}
+	// Do we have key cached already?
+	else if (cg.etjActivateKey != -1) {
+		// Key is not pressed anymore?
+		if (trap_Key_IsDown(cg.etjActivateKey) == qfalse) {
+			// Bind it back
+			trap_Key_SetBinding(cg.etjActivateKey, "+activate");
+			cg.etjActivateKey = -1;
+		}
+	}
 }
