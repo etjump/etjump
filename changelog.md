@@ -12,9 +12,9 @@ Timer will not be started if player's speed is higher than the value. Default va
 A replacement for `target_activate` that's easier to use and allows more complex designs.
 * Fixed lines ending with a ^ breaking newlines.
 * `g_banners` to enable/disable banners altogether.
-* Client side autoexec for map specific configs. (autoexec_mapname.cfg).
+* Client side autoexec for map specific configs. (autoexec_mapname.cfg)
 * Added spawnflags 1 to `target_remove_portals` to disable the text print.
-* Added `target_interrupt_timerun`to stop any timerun without setting a record.
+* Added `target_interrupt_timerun` to stop any timerun without setting a record.
 * Added `target_set_health`.  
 Set's activator's health to the value specified by the health key.  
 Spawnflags __1__ to set once per life.
@@ -22,7 +22,7 @@ Spawnflags __1__ to set once per life.
 * Added cvars to control ghost player's transparency:  
 `etj_ghostPlayersOpacity` controls ghostplayer's transparency.  
 `etj_ghostPlayersFadeRange`  controls distance when ghostplayer starts to fade.
-* Custom vsays: /vsay <variation> <id> <custom text> e.g. `/vsay 4 hi Good evening!`.
+* Custom vsays: /vsay &lt;variation&gt;  &lt;id&gt;  &lt;custom text&gt; e.g. `/vsay 4 hi Good evening!`.
 * UI enhancements:
   * optional shadows for runtimer and speed
   * runtimer user experience improved 
@@ -38,10 +38,10 @@ Specs can no longer vote.
 Votes will stay for full 30 seconds unless the percentage needed out of number of connected clients has exceeded for either yes or no votes.  
 For example: 51% => 2 players are in team, 2 in spec => 3 votes are needed. If both players in team vote yes it will wait for 30 seconds and pass. If one of the specs join team vote yes, it will pass instantly. If one of the specs join team and vote no, it will wait for the vote to expire and pass.
 * Fixed a bug in listbans.
-* Fixed weird coordinates in the chat causing undesired mouse movements
-* Bullets and explosives go through ghost players
-* vsay correctly displays timestamp
-* Added cvar to disable lean when holding `+activate` key along with strafe keys `etj_noActivateLean`
+* Fixed weird coordinates in the chat causing undesired mouse movements.
+* Bullets and explosives go through ghost players.
+* vsay correctly displays timestamp.
+* Added cvar to disable lean when holding `+activate` key along with strafe keys `etj_noActivateLean`.
 * Chat improvements:
   * Increased chat messages up to 200 chars
   * New multiline chat textbox with character counter
