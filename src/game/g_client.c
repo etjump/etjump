@@ -1571,11 +1571,11 @@ void ClientUserinfoChanged(int clientNum)
 		client->ps.powerups[PW_ADRENALINE] = 0;
 	}
 
-	if (client->pers.clientFlags & CGF_NOACTIVELEAN) {
-		client->pmext.noActiveLean = qtrue;
+	if (client->pers.clientFlags & CGF_NOACTIVATELEAN) {
+		client->pmext.noActivateLean = qtrue;
 	}
 	else {
-		client->pmext.noActiveLean = qfalse;
+		client->pmext.noActivateLean = qfalse;
 	}
 
 	client->pers.nofatigue      = client->pers.clientFlags & CGF_NOFATIGUE;
