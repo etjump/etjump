@@ -432,7 +432,7 @@ vmCvar_t etj_ghostPlayersAlt;
 vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
 vmCvar_t etj_stretchCgaz;
-vmCvar_t etj_noActiveLean;
+vmCvar_t etj_noActivateLean;
 
 typedef struct
 {
@@ -732,7 +732,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
-	{ &etj_noActiveLean,             "etj_noActiveLean",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
 };
 
 
@@ -834,7 +834,7 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
 					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
-					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActiveLean
+					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean
 				    )
 				{
 					fSetFlags = qtrue;
@@ -949,7 +949,7 @@ void CG_setClientFlags(void)
 	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
 									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
 									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
-									 ((etj_noActiveLean.integer > 0) ? CGF_NOACTIVELEAN : 0)
+									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0)
 	                                 // Add more in here, as needed
 	                             ),
 
@@ -3585,7 +3585,7 @@ void CG_DecodeQP(char *line)
 	*o = '\0';
 }
 
-void CG_CheckActiveLean() {
+void CG_CheckActivateLean() {
 	usercmd_t ucmd;
 	int num = trap_GetCurrentCmdNumber();
 
