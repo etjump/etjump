@@ -207,24 +207,20 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\game\bg_campaign.c" />
-    <ClCompile Include="..\game\bg_classes.c" />
-    <ClCompile Include="..\game\bg_lib.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_misc.c" />
-    <ClCompile Include="..\game\q_math.c" />
-    <ClCompile Include="..\game\q_shared.c" />
-    <ClCompile Include="ui_atoms.c" />
-    <ClCompile Include="ui_gameinfo.c" />
-    <ClCompile Include="ui_loadpanel.c" />
-    <ClCompile Include="ui_main.c" />
-    <ClCompile Include="ui_players.c" />
-    <ClCompile Include="ui_shared.c" />
-    <ClCompile Include="ui_syscalls.c" />
-    <ClCompile Include="ui_util.c" />
+    <ClCompile Include="..\game\bg_campaign.cpp" />
+    <ClCompile Include="..\game\bg_classes.cpp" />
+    <ClCompile Include="..\game\bg_lib.cpp" />
+    <ClCompile Include="..\game\bg_misc.cpp" />
+    <ClCompile Include="..\game\q_math.cpp" />
+    <ClCompile Include="..\game\q_shared.cpp" />
+    <ClCompile Include="ui_atoms.cpp" />
+    <ClCompile Include="ui_gameinfo.cpp" />
+    <ClCompile Include="ui_loadpanel.cpp" />
+    <ClCompile Include="ui_main.cpp" />
+    <ClCompile Include="ui_players.cpp" />
+    <ClCompile Include="ui_shared.cpp" />
+    <ClCompile Include="ui_syscalls.cpp" />
+    <ClCompile Include="ui_util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\trickjump\ui\credits_activision.menu" />
