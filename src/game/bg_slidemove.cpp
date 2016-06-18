@@ -263,7 +263,7 @@ qboolean    PM_SlideMove(qboolean gravity)
 		VectorCopy(primal_velocity, pm->ps->velocity);
 	}
 
-	return (bumpcount != 0);
+	return (bumpcount != 0) ? qtrue : qfalse;
 }
 
 /*
@@ -291,7 +291,7 @@ void PM_StepSlideMove(qboolean gravity)
 		PM_TraceAll(&trace, pm->ps->origin, pm->ps->origin);
 		wassolid = trace.allsolid;
 
-		slidesucceed = (PM_SlideMove(gravity) == 0);
+		slidesucceed = (PM_SlideMove(gravity) == 0) ? qtrue : qfalse; 
 
 		PM_TraceAll(&trace, pm->ps->origin, pm->ps->origin);
 		if (trace.allsolid && !wassolid)

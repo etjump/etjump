@@ -15,154 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bg_animation.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_animgroup.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_campaign.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_character.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_classes.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_lib.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_misc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_pmove.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_slidemove.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_sscript.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_stats.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bg_tracemap.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_active.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_alarm.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_antilag.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_buddy_list.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_character.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_client.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_cmds.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_cmds_ext.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_combat.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_fireteams.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_items.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_match.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_mem.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_misc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_missile.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_mover.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_props.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_script.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_script_actions.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_session.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_spawn.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_stats.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_sv_entities.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_svcmds.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_syscalls.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_systemmsg.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_target.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_team.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_teammapdata.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_trigger.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_utils.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_vote.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_weapon.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="q_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\sha-1\sha1.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sha-1\bg_sha.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_utilities.cpp">
@@ -235,6 +88,153 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_command_variables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_animgroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_campaign.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_classes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_lib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_misc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_pmove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sha-1\bg_sha.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_slidemove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_sscript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bg_tracemap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_active.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_alarm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_antilag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_buddy_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_cmds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_cmds_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_combat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_fireteams.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_items.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_match.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_mem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_misc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_missile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_mover.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_props.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_script_actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_spawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_sv_entities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_svcmds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_syscalls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_systemmsg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_target.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_team.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_teammapdata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_trigger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_weapon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_vote.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="q_math.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="q_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

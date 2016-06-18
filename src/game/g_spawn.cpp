@@ -784,7 +784,7 @@ char *G_NewString(const char *string)
 
 	l = strlen(string) + 1;
 
-	newb = G_Alloc(l);
+	newb = static_cast<char *>(G_Alloc(l));
 
 	new_p = newb;
 
@@ -1074,17 +1074,17 @@ void SP_worldspawn(void)
 	G_SpawnString("noexplosives", "0", &s);
 	if (atoi(s))
 	{
-		int val = atoi(s);
-		if (val > 2)
+		int noExplosives = atoi(s);
+		if (noExplosives > 2)
 		{
-			val = 2;
+			noExplosives = 2;
 		}
-		else if (val < 0)
+		else if (noExplosives < 0)
 		{
-			val = 0;
+			noExplosives = 0;
 		}
 
-		level.noExplosives = val;
+		level.noExplosives = noExplosives;
 	}
 
 	G_SpawnString("nosave", "0", &s);

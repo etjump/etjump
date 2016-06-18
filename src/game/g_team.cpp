@@ -1310,7 +1310,7 @@ void SP_team_WOLF_objective(gentity_t *ent)
 
 
 	// Gordon: wtf is this g_alloced? just use a static buffer fgs...
-	ent->message = G_Alloc(strlen(desc) + 1);
+	ent->message = static_cast<char *>(G_Alloc(strlen(desc) + 1));
 	Q_strncpyz(ent->message, desc, strlen(desc) + 1);
 
 	ent->nextthink = level.time + FRAMETIME;
@@ -1865,7 +1865,7 @@ team_info teamInfo[TEAM_NUM_TEAMS];
 // Resets a team's settings
 void G_teamReset(int team_num, qboolean fClearSpecLock)
 {
-	teamInfo[team_num].team_lock    = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+	teamInfo[team_num].team_lock    = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING) ? qtrue : qfalse;
 	teamInfo[team_num].team_name[0] = 0;
 	teamInfo[team_num].team_score   = 0;
 	teamInfo[team_num].timeouts     = match_timeoutcount.integer;
@@ -1975,7 +1975,7 @@ void G_shuffleTeams(void)
 			G_FadeItems(g_entities + sortClients[i], MOD_SATCHEL);
 		}
 
-		cl->sess.sessionTeam = cTeam;
+		cl->sess.sessionTeam = static_cast<team_t>(cTeam);
 
 		G_UpdateCharacter(cl);
 		ClientUserinfoChanged(sortClients[i]);
@@ -2040,7 +2040,7 @@ qboolean G_checkReady(void)
 	}
 
 	// Do we have enough "ready" players?
-	return(level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer));
+	return(level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer)) ? qtrue : qfalse;
 }
 
 
@@ -2067,7 +2067,7 @@ qboolean G_readyMatchState(void)
 		{
 			AP("cp \"^1COUNTDOWN STOPPED!^7  Back to warmup...\n\"");
 		}
-		level.lastRestartTime = level.time;
+		level.lastRestartTime = level.time ? qtrue : qfalse;
 		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 //		G_LogPrintf("Warmup:\n");
 	}
@@ -2079,7 +2079,7 @@ qboolean G_readyMatchState(void)
 // Check if we need to reset the game state due to an empty team
 void G_verifyMatchState(int nTeam)
 {
-	gamestate_t gs = g_gamestate.integer;
+	gamestate_t gs = static_cast<gamestate_t>(g_gamestate.integer);
 
 	if ((level.lastRestartTime + 1000) < level.time && (nTeam == TEAM_ALLIES || nTeam == TEAM_AXIS) &&
 	    (gs == GS_PLAYING || gs == GS_WARMUP_COUNTDOWN || gs == GS_INTERMISSION))
@@ -2204,7 +2204,7 @@ qboolean G_allowFollow(gentity_t *ent, int nTeam)
 		}
 	}
 
-	return ((!teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || (ent->client->sess.spec_invite & nTeam) == nTeam));
+	return ((!teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || (ent->client->sess.spec_invite & nTeam) == nTeam)) ? qtrue : qfalse;
 }
 
 

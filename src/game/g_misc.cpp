@@ -690,7 +690,7 @@ void use_spotlight(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		tent = G_PickTarget(ent->target);
 		VectorCopy(tent->s.origin, ent->s.origin2);
 
-		ent->active = 0;
+		ent->active = qfalse;
 		trap_LinkEntity(ent);
 	}
 }
@@ -700,7 +700,7 @@ void spotlight_finish_spawning(gentity_t *ent)
 {
 	if (ent->spawnflags & 1)     // START_ON
 	{
-		ent->active = 0;
+		ent->active = qfalse;
 		trap_LinkEntity(ent);
 	}
 
@@ -870,7 +870,7 @@ void SP_misc_gamemodel(gentity_t *ent)
 	// Gordon: hmmmmm, think this flag is prolly b0rked
 	if (ent->spawnflags & 1)
 	{
-		ent->s.apos.trType = 1; // misc_gamemodels (since they have no movement) will use type = 0 for static models, type = 1 for auto-aligning models
+		ent->s.apos.trType = TR_INTERPOLATE; // misc_gamemodels (since they have no movement) will use type = 0 for static models, type = 1 for auto-aligning models
 
 	}
 	trap_LinkEntity(ent);
@@ -1211,7 +1211,7 @@ void use_corona(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	}
 	else
 	{
-		ent->active = 0;
+		ent->active = qfalse;
 		trap_LinkEntity(ent);
 	}
 }
@@ -1365,7 +1365,7 @@ void use_dlight(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	}
 	else
 	{
-		ent->active = 0;
+		ent->active = qfalse;
 		trap_LinkEntity(ent);
 
 		if (ent->spawnflags & 4)     // ONETIME
@@ -1728,7 +1728,7 @@ void aagun_think(gentity_t *self)
 	if (owner->client)
 	{
 		vec3_t dang;
-		int    i;
+		int    j;
 
 		VectorSubtract(self->r.currentOrigin, owner->r.currentOrigin, vec);
 
@@ -1740,9 +1740,9 @@ void aagun_think(gentity_t *self)
 			self->nextthink = level.time + 50;
 			self->timestamp = level.time + 1000;
 
-			for (i = 0; i < 3; i++)
+			for (j = 0; j < 3; j++)
 			{
-				dang[i] = SHORT2ANGLE(owner->client->pers.cmd.angles[i]);
+				dang[j] = SHORT2ANGLE(owner->client->pers.cmd.angles[j]);
 			}
 
 			// now tell the client to lock the view in the direction of the gun

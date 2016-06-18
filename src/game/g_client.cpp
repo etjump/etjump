@@ -685,7 +685,7 @@ team_t TeamCount(int ignoreClientNum, int team)
 		}
 	}
 
-	return(count);
+	return static_cast<team_t>(count);
 }
 // -NERVE - SMF
 
@@ -1131,7 +1131,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					}
 					else if (client->sess.skill[SK_LIGHT_WEAPONS] >= 4 && client->sess.playerWeapon2 == WP_AKIMBO_LUGER)
 					{
-						client->ps.ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(WP_AKIMBO_LUGER))] = GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
+						client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_LUGER)))] = GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
 						AddWeaponToPlayer(client, WP_AKIMBO_LUGER, GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingAmmo, GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip, qfalse);
 					}
 					else
@@ -1143,7 +1143,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				case PC_COVERTOPS:
 					if (client->sess.skill[SK_LIGHT_WEAPONS] >= 4 && (client->sess.playerWeapon2 == WP_AKIMBO_SILENCEDLUGER || client->sess.playerWeapon2 == WP_AKIMBO_LUGER))
 					{
-						client->ps.ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(WP_AKIMBO_SILENCEDLUGER))] = GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingClip;
+						client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_SILENCEDLUGER)))] = GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingClip;
 						AddWeaponToPlayer(client, WP_AKIMBO_SILENCEDLUGER, GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingAmmo, GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingClip, qfalse);
 					}
 					else
@@ -1157,7 +1157,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				default:
 					if (client->sess.skill[SK_LIGHT_WEAPONS] >= 4 && client->sess.playerWeapon2 == WP_AKIMBO_LUGER)
 					{
-						client->ps.ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(WP_AKIMBO_LUGER))] = GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
+						client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_LUGER)))] = GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
 						AddWeaponToPlayer(client, WP_AKIMBO_LUGER, GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingAmmo, GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip, qfalse);
 					}
 					else
@@ -1177,7 +1177,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					}
 					else if (client->sess.skill[SK_LIGHT_WEAPONS] >= 4 && client->sess.playerWeapon2 == WP_AKIMBO_COLT)
 					{
-						client->ps.ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(WP_AKIMBO_COLT))] = GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
+						client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_COLT)))] = GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
 						AddWeaponToPlayer(client, WP_AKIMBO_COLT, GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingAmmo, GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip, qfalse);
 					}
 					else
@@ -1189,7 +1189,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				case PC_COVERTOPS:
 					if (client->sess.skill[SK_LIGHT_WEAPONS] >= 4 && (client->sess.playerWeapon2 == WP_AKIMBO_SILENCEDCOLT || client->sess.playerWeapon2 == WP_AKIMBO_COLT))
 					{
-						client->ps.ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(WP_AKIMBO_SILENCEDCOLT))] = GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingClip;
+						client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_SILENCEDCOLT)))] = GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingClip;
 						AddWeaponToPlayer(client, WP_AKIMBO_SILENCEDCOLT, GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingAmmo, GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingClip, qfalse);
 					}
 					else
@@ -1203,7 +1203,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 				default:
 					if (client->sess.skill[SK_LIGHT_WEAPONS] >= 4 && client->sess.playerWeapon2 == WP_AKIMBO_COLT)
 					{
-						client->ps.ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(WP_AKIMBO_COLT))] = GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
+						client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_COLT)))] = GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
 						AddWeaponToPlayer(client, WP_AKIMBO_COLT, GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingAmmo, GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip, qfalse);
 					}
 					else
@@ -1553,7 +1553,7 @@ void ClientUserinfoChanged(int clientNum)
 	       &client->pers.noclipScale);
 
 	client->pers.autoActivate      = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
-	client->pers.predictItemPickup = ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0);
+	client->pers.predictItemPickup = ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0) ? qtrue : qfalse;
 
 	if (client->pers.clientFlags & CGF_AUTORELOAD)
 	{
@@ -1578,12 +1578,12 @@ void ClientUserinfoChanged(int clientNum)
 		client->pmext.noActivateLean = qfalse;
 	}
 
-	client->pers.nofatigue      = client->pers.clientFlags & CGF_NOFATIGUE;
-	client->pers.pmoveFixed     = client->pers.clientFlags & CGF_PMOVEFIXED;
-	client->pers.cgaz           = client->pers.clientFlags & CGF_CGAZ;
-	client->pers.loadViewAngles = client->pers.clientFlags & CGF_LOADVIEWANGLES;
-	client->pers.hideMe         = client->pers.clientFlags & CGF_HIDEME;
-	client->pers.enableTimeruns = client->pers.clientFlags & CGF_ENABLE_TIMERUNS;
+	client->pers.nofatigue      = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
+	client->pers.pmoveFixed     = (client->pers.clientFlags & CGF_PMOVEFIXED) != 0 ? qtrue : qfalse;
+	client->pers.cgaz           = (client->pers.clientFlags & CGF_CGAZ) != 0 ? qtrue : qfalse;
+	client->pers.loadViewAngles = (client->pers.clientFlags & CGF_LOADVIEWANGLES) != 0 ? qtrue : qfalse;
+	client->pers.hideMe         = (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
+	client->pers.enableTimeruns = (client->pers.clientFlags & CGF_ENABLE_TIMERUNS) != 0 ? qtrue : qfalse;
 
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));
@@ -1948,7 +1948,7 @@ void ClientBegin(int clientNum)
 		trap_SendServerCommand(-1, va("print \"[lof]%s" S_COLOR_WHITE " [lon]entered the game\n\"", client->pers.netname));
 	}
 
-	client->pers.nofatigue = client->pers.clientFlags & CGF_NOFATIGUE;
+	client->pers.nofatigue = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
 
 	G_LogPrintf("ClientBegin: %i\n", clientNum);
 
@@ -2249,7 +2249,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 
 		client->sess.playerType = client->sess.latchPlayerType;
 
-		if (G_IsWeaponDisabled(ent, client->sess.latchPlayerWeapon))
+		if (G_IsWeaponDisabled(ent, static_cast<weapon_t>(client->sess.latchPlayerWeapon)))
 		{
 			bg_playerclass_t *classInfo = BG_PlayerClassForPlayerState(&ent->client->ps);
 			client->sess.latchPlayerWeapon = classInfo->classWeapons[0];
@@ -2262,7 +2262,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 			update                    = qtrue;
 		}
 
-		if (G_IsWeaponDisabled(ent, client->sess.playerWeapon))
+		if (G_IsWeaponDisabled(ent, static_cast<weapon_t>(client->sess.playerWeapon)))
 		{
 			bg_playerclass_t *classInfo = BG_PlayerClassForPlayerState(&ent->client->ps);
 			client->sess.playerWeapon = classInfo->classWeapons[0];
@@ -2561,7 +2561,7 @@ void ClientDisconnect(int clientNum)
 	ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
 	i                                     = ent->client->sess.sessionTeam;
 	ent->client->sess.sessionTeam         = TEAM_FREE;
-	ent->active                           = 0;
+	ent->active                           = qfalse;
 	ent->client->sess.muted               = qfalse;
 
 	trap_SetConfigstring(CS_PLAYERS + clientNum, "");

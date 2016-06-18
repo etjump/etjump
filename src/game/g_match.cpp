@@ -303,81 +303,81 @@ void G_addStatsHeadShot(gentity_t *attacker, int mod)
 //
 static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] =
 {
-	{ MOD_UNKNOWN,                 WS_MAX             },
-	{ MOD_MACHINEGUN,              WS_MG42            },
-	{ MOD_GRENADE,                 WS_GRENADE         },
-	{ MOD_ROCKET,                  WS_PANZERFAUST     },
+	{ (weapon_t)MOD_UNKNOWN,                 WS_MAX             },
+	{ (weapon_t)MOD_MACHINEGUN,              WS_MG42            },
+	{ (weapon_t)MOD_GRENADE,                 WS_GRENADE         },
+	{ (weapon_t)MOD_ROCKET,                  WS_PANZERFAUST     },
 
-	{ MOD_KNIFE,                   WS_KNIFE           },
-	{ MOD_LUGER,                   WS_LUGER           },
-	{ MOD_COLT,                    WS_COLT            },
-	{ MOD_MP40,                    WS_MP40            },
-	{ MOD_THOMPSON,                WS_THOMPSON        },
-	{ MOD_STEN,                    WS_STEN            },
-	{ MOD_GARAND,                  WS_GARAND          },
-	{ MOD_SILENCER,                WS_LUGER           },
-	{ MOD_FG42,                    WS_FG42            },
-	{ MOD_FG42SCOPE,               WS_FG42            },
-	{ MOD_PANZERFAUST,             WS_PANZERFAUST     },
-	{ MOD_GRENADE_LAUNCHER,        WS_GRENADE         },
-	{ MOD_FLAMETHROWER,            WS_FLAMETHROWER    },
-	{ MOD_GRENADE_PINEAPPLE,       WS_GRENADE         },
-	{ MOD_CROSS,                   WS_MAX             },
-	{ MOD_AKIMBO_COLT,             WS_COLT            },
-	{ MOD_AKIMBO_LUGER,            WS_LUGER           },
-	{ MOD_AKIMBO_SILENCEDCOLT,     WS_COLT            },
-	{ MOD_AKIMBO_SILENCEDLUGER,    WS_LUGER           },
+	{ (weapon_t)MOD_KNIFE,                   WS_KNIFE           },
+	{ (weapon_t)MOD_LUGER,                   WS_LUGER           },
+	{ (weapon_t)MOD_COLT,                    WS_COLT            },
+	{ (weapon_t)MOD_MP40,                    WS_MP40            },
+	{ (weapon_t)MOD_THOMPSON,                WS_THOMPSON        },
+	{ (weapon_t)MOD_STEN,                    WS_STEN            },
+	{ (weapon_t)MOD_GARAND,                  WS_GARAND          },
+	{ (weapon_t)MOD_SILENCER,                WS_LUGER           },
+	{ (weapon_t)MOD_FG42,                    WS_FG42            },
+	{ (weapon_t)MOD_FG42SCOPE,               WS_FG42            },
+	{ (weapon_t)MOD_PANZERFAUST,             WS_PANZERFAUST     },
+	{ (weapon_t)MOD_GRENADE_LAUNCHER,        WS_GRENADE         },
+	{ (weapon_t)MOD_FLAMETHROWER,            WS_FLAMETHROWER    },
+	{ (weapon_t)MOD_GRENADE_PINEAPPLE,       WS_GRENADE         },
+	{ (weapon_t)MOD_CROSS,                   WS_MAX             },
+	{ (weapon_t)MOD_AKIMBO_COLT,             WS_COLT            },
+	{ (weapon_t)MOD_AKIMBO_LUGER,            WS_LUGER           },
+	{ (weapon_t)MOD_AKIMBO_SILENCEDCOLT,     WS_COLT            },
+	{ (weapon_t)MOD_AKIMBO_SILENCEDLUGER,    WS_LUGER           },
 
-	{ MOD_MAPMORTAR,               WS_MORTAR          },
-	{ MOD_MAPMORTAR_SPLASH,        WS_MORTAR          },
+	{ (weapon_t)MOD_MAPMORTAR,               WS_MORTAR          },
+	{ (weapon_t)MOD_MAPMORTAR_SPLASH,        WS_MORTAR          },
 
-	{ MOD_KICKED,                  WS_MAX             },
-	{ MOD_GRABBER,                 WS_MAX             },
+	{ (weapon_t)MOD_KICKED,                  WS_MAX             },
+	{ (weapon_t)MOD_GRABBER,                 WS_MAX             },
 
-	{ MOD_DYNAMITE,                WS_DYNAMITE        },
-	{ MOD_AIRSTRIKE,               WS_AIRSTRIKE       },
-	{ MOD_SYRINGE,                 WS_SYRINGE         },
-	{ MOD_AMMO,                    WS_MAX             },
-	{ MOD_ARTY,                    WS_ARTILLERY       },
+	{ (weapon_t)MOD_DYNAMITE,                WS_DYNAMITE        },
+	{ (weapon_t)MOD_AIRSTRIKE,               WS_AIRSTRIKE       },
+	{ (weapon_t)MOD_SYRINGE,                 WS_SYRINGE         },
+	{ (weapon_t)MOD_AMMO,                    WS_MAX             },
+	{ (weapon_t)MOD_ARTY,                    WS_ARTILLERY       },
 
-	{ MOD_WATER,                   WS_MAX             },
-	{ MOD_SLIME,                   WS_MAX             },
-	{ MOD_LAVA,                    WS_MAX             },
-	{ MOD_CRUSH,                   WS_MAX             },
-	{ MOD_TELEFRAG,                WS_MAX             },
-	{ MOD_FALLING,                 WS_MAX             },
-	{ MOD_SUICIDE,                 WS_MAX             },
-	{ MOD_TARGET_LASER,            WS_MAX             },
-	{ MOD_TRIGGER_HURT,            WS_MAX             },
-	{ MOD_EXPLOSIVE,               WS_MAX             },
+	{ (weapon_t)MOD_WATER,                   WS_MAX             },
+	{ (weapon_t)MOD_SLIME,                   WS_MAX             },
+	{ (weapon_t)MOD_LAVA,                    WS_MAX             },
+	{ (weapon_t)MOD_CRUSH,                   WS_MAX             },
+	{ (weapon_t)MOD_TELEFRAG,                WS_MAX             },
+	{ (weapon_t)MOD_FALLING,                 WS_MAX             },
+	{ (weapon_t)MOD_SUICIDE,                 WS_MAX             },
+	{ (weapon_t)MOD_TARGET_LASER,            WS_MAX             },
+	{ (weapon_t)MOD_TRIGGER_HURT,            WS_MAX             },
+	{ (weapon_t)MOD_EXPLOSIVE,               WS_MAX             },
 
-	{ MOD_CARBINE,                 WS_GARAND          },
+	{ (weapon_t)MOD_CARBINE,                 WS_GARAND          },
 
-	{ MOD_KAR98,                   WS_K43             },
-	{ MOD_GPG40,                   WS_GRENADELAUNCHER },
-	{ MOD_M7,                      WS_GRENADELAUNCHER },
-	{ MOD_LANDMINE,                WS_LANDMINE        },
-	{ MOD_SATCHEL,                 WS_SATCHEL         },
-	{ MOD_TRIPMINE,                WS_LANDMINE        },
-	{ MOD_SMOKEBOMB,               WS_SMOKE           }, // ??
-	{ MOD_SMOKEGRENADE,            WS_AIRSTRIKE       }, // rain - airstrike tag
-	{ MOD_MOBILE_MG42,             WS_MG42            },
-	{ MOD_SILENCED_COLT,           WS_COLT            }, // where is silencer? // Gordon: up top^
-	{ MOD_GARAND_SCOPE,            WS_GARAND          },
+	{ (weapon_t)MOD_KAR98,                   WS_K43             },
+	{ (weapon_t)MOD_GPG40,                   WS_GRENADELAUNCHER },
+	{ (weapon_t)MOD_M7,                      WS_GRENADELAUNCHER },
+	{ (weapon_t)MOD_LANDMINE,                WS_LANDMINE        },
+	{ (weapon_t)MOD_SATCHEL,                 WS_SATCHEL         },
+	{ (weapon_t)MOD_TRIPMINE,                WS_LANDMINE        },
+	{ (weapon_t)MOD_SMOKEBOMB,               WS_SMOKE           }, // ??
+	{ (weapon_t)MOD_SMOKEGRENADE,            WS_AIRSTRIKE       }, // rain - airstrike tag
+	{ (weapon_t)MOD_MOBILE_MG42,             WS_MG42            },
+	{ (weapon_t)MOD_SILENCED_COLT,           WS_COLT            }, // where is silencer? // Gordon: up top^
+	{ (weapon_t)MOD_GARAND_SCOPE,            WS_GARAND          },
 
-	{ MOD_CRUSH_CONSTRUCTION,      WS_MAX             },
-	{ MOD_CRUSH_CONSTRUCTIONDEATH, WS_MAX             },
+	{ (weapon_t)MOD_CRUSH_CONSTRUCTION,      WS_MAX             },
+	{ (weapon_t)MOD_CRUSH_CONSTRUCTIONDEATH, WS_MAX             },
 
-	{ MOD_K43,                     WS_K43             },
-	{ MOD_K43_SCOPE,               WS_K43             },
+	{ (weapon_t)MOD_K43,                     WS_K43             },
+	{ (weapon_t)MOD_K43_SCOPE,               WS_K43             },
 
-	{ MOD_MORTAR,                  WS_MORTAR          },
+	{ (weapon_t)MOD_MORTAR,                  WS_MORTAR          },
 
-	{ MOD_PORTAL_GUN,              WS_PORTAL_GUN      },
+	{ (weapon_t)MOD_PORTAL_GUN,              WS_PORTAL_GUN      },
 
-	{ MOD_SWAP_PLACES,             WS_MAX             },
+	{ (weapon_t)MOD_SWAP_PLACES,             WS_MAX             },
 
-	{ MOD_SWITCHTEAM,              WS_MAX             }
+	{ (weapon_t)MOD_SWITCHTEAM,              WS_MAX             }
 
 };
 

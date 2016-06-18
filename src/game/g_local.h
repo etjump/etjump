@@ -1173,7 +1173,7 @@ typedef struct
 
 	int totalHeadshots;
 	int missedHeadshots;
-	qboolean lastRestartTime;
+	int lastRestartTime;
 
 	int numFinalDead[2];                // DHM - Nerve :: unable to respawn and in limbo (per team)
 	int numOidTriggers;                 // DHM - Nerve

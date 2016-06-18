@@ -152,7 +152,7 @@ void G_CalcRank(gclient_t *client)
 
 	for (i = 0; i < SK_NUM_SKILLS; i++)
 	{
-		G_SetPlayerSkill(client, i);
+		G_SetPlayerSkill(client, static_cast<skillType_t>(i));
 		if (client->sess.skill[i] > highestskill)
 		{
 			highestskill = client->sess.skill[i];
@@ -276,7 +276,7 @@ void G_ReadSessionData(gclient_t *client)
 
 	G_CalcRank(client);
 
-	test = (g_altStopwatchMode.integer != 0 || g_currentRound.integer == 1);
+	test = (g_altStopwatchMode.integer != 0 || g_currentRound.integer == 1) ? qtrue : qfalse;
 
 	if (g_gametype.integer == GT_WOLF_STOPWATCH && g_gamestate.integer != GS_PLAYING && test)
 	{

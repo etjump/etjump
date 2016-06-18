@@ -217,23 +217,21 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\game\bg_animation.c" />
-    <ClCompile Include="..\game\bg_animgroup.c" />
-    <ClCompile Include="..\game\bg_campaign.c" />
-    <ClCompile Include="..\game\bg_character.c" />
-    <ClCompile Include="..\game\bg_classes.c" />
-    <ClCompile Include="..\game\bg_lib.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_misc.c" />
-    <ClCompile Include="..\game\bg_pmove.c" />
+    <ClCompile Include="..\game\bg_animation.cpp" />
+    <ClCompile Include="..\game\bg_animgroup.cpp" />
+    <ClCompile Include="..\game\bg_campaign.cpp" />
+    <ClCompile Include="..\game\bg_character.cpp" />
+    <ClCompile Include="..\game\bg_classes.cpp" />
+    <ClCompile Include="..\game\bg_lib.cpp" />
+    <ClCompile Include="..\game\bg_misc.cpp" />
+    <ClCompile Include="..\game\bg_pmove.cpp" />
     <ClCompile Include="..\game\bg_slidemove.c" />
-    <ClCompile Include="..\game\bg_sscript.c" />
-    <ClCompile Include="..\game\bg_stats.c" />
-    <ClCompile Include="..\game\bg_tracemap.c" />
-    <ClCompile Include="..\sha-1\bg_sha.c" />
+    <ClCompile Include="..\game\bg_slidemove.cpp" />
+    <ClCompile Include="..\game\bg_sscript.cpp" />
+    <ClCompile Include="..\game\bg_stats.cpp" />
+    <ClCompile Include="..\game\bg_tracemap.cpp" />
+    <ClCompile Include="..\game\q_math.cpp" />
+    <ClCompile Include="..\game\q_shared.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="cg_manual.c" />
     <ClCompile Include="cg_atmospheric.c" />
@@ -277,8 +275,6 @@
     <ClCompile Include="cg_view.c" />
     <ClCompile Include="cg_weapons.c" />
     <ClCompile Include="cg_window.c" />
-    <ClCompile Include="..\game\q_math.c" />
-    <ClCompile Include="..\game\q_shared.c" />
     <ClCompile Include="..\ui\ui_shared.c" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />

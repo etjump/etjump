@@ -577,7 +577,7 @@ gitem_t bg_itemlist[] =
 		NULL,   // ammo icon
 		NULL,   // pickup
 		0,
-		0,
+	IT_BAD,
 		0,
 		0,          // ammotype
 		0,          // cliptype
@@ -2610,11 +2610,11 @@ weapon_t BG_FindClipForWeapon(weapon_t weapon)
 	{
 		if (it->giType == IT_WEAPON && it->giTag == weapon)
 		{
-			return it->giClipIndex;
+			return static_cast<weapon_t>(it->giClipIndex);
 		}
 	}
 
-	return 0;
+	return WP_NONE;
 }
 
 
@@ -2632,10 +2632,10 @@ weapon_t BG_FindAmmoForWeapon(weapon_t weapon)
 	{
 		if (it->giType == IT_WEAPON && it->giTag == weapon)
 		{
-			return it->giAmmoIndex;
+			return static_cast<weapon_t>(it->giAmmoIndex);
 		}
 	}
-	return 0;
+	return WP_NONE;
 }
 
 /*
@@ -2984,9 +2984,9 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 	// Gordon: handle grenades first
 
 	i      = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS], skill);
-	weapon = BG_GrenadeTypeForTeam(teamNum);
+	weapon = BG_GrenadeTypeForTeam(static_cast<team_t>(teamNum));
 
-	clip = BG_FindClipForWeapon(weapon);
+	clip = BG_FindClipForWeapon(static_cast<weapon_t>(weapon));
 	if (ps->ammoclip[clip] < i)
 	{
 
@@ -3038,12 +3038,12 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 		weapon = reloadableWeapons[i];
 		if (COM_BitCheck(ps->weapons, weapon))
 		{
-			maxammo = BG_MaxAmmoForWeapon(weapon, skill);
+			maxammo = BG_MaxAmmoForWeapon(static_cast<weapon_t>(weapon), skill);
 
 			// Handle weapons that just use clip, and not ammo
 			if (weapon == WP_FLAMETHROWER)
 			{
-				clip = BG_FindAmmoForWeapon(weapon);
+				clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
 				if (ps->ammoclip[clip] < maxammo)
 				{
 					// early out
@@ -3058,7 +3058,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 			}
 			else if (weapon == WP_PANZERFAUST)      //%	|| weapon == WP_MORTAR ) {
 			{
-				clip = BG_FindAmmoForWeapon(weapon);
+				clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
 				if (ps->ammoclip[clip] < maxammo)
 				{
 					// early out
@@ -3077,7 +3077,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 			}
 			else
 			{
-				clip = BG_FindAmmoForWeapon(weapon);
+				clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
 				if (ps->ammo[clip] < maxammo)
 				{
 					// early out
@@ -3106,7 +3106,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 			}
 		}
 	}
-	return ammoAdded;
+	return ammoAdded ? qtrue : qfalse;
 }
 
 /*
@@ -3133,12 +3133,12 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon)
 		else if (weapon == WP_MP40
 		         || weapon == WP_KAR98)
 		{
-			return (teamNum == TEAM_AXIS);
+			return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
 		}
 		else if (weapon == WP_THOMPSON
 		         || weapon == WP_CARBINE)
 		{
-			return (teamNum == TEAM_ALLIES);
+			return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
 		}
 	case PC_FIELDOPS:
 		// TAT 1/11/2003 - in SP, field op can only use handgun, check after switch below
@@ -3153,11 +3153,11 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon)
 		}
 		else if (weapon == WP_MP40)
 		{
-			return (teamNum == TEAM_AXIS);
+			return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
 		}
 		else if (weapon == WP_THOMPSON)
 		{
-			return (teamNum == TEAM_ALLIES);
+			return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
 		}
 		break;
 	case PC_SOLDIER:
@@ -3175,11 +3175,11 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon)
 		}
 		else if (weapon == WP_MP40)
 		{
-			return (teamNum == TEAM_AXIS);
+			return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
 		}
 		else if (weapon == WP_THOMPSON)
 		{
-			return (teamNum == TEAM_ALLIES);
+			return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
 		}
 		break;
 
@@ -3196,11 +3196,11 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon)
 		}
 		else if (weapon == WP_MP40)
 		{
-			return (teamNum == TEAM_AXIS);
+			return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
 		}
 		else if (weapon == WP_THOMPSON)
 		{
-			return (teamNum == TEAM_ALLIES);
+			return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
 		}
 		break;
 	case PC_COVERTOPS:
@@ -3215,11 +3215,11 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon)
 		}
 		else if (weapon == WP_K43)
 		{
-			return (teamNum == TEAM_AXIS);
+			return (teamNum == TEAM_AXIS) ? qtrue : qfalse;
 		}
 		else if (weapon == WP_GARAND)
 		{
-			return (teamNum == TEAM_ALLIES);
+			return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
 		}
 		break;
 	}
@@ -4551,17 +4551,17 @@ gitem_t *BG_ValidStatWeapon(weapon_t weap)
 
 weapon_t BG_WeaponForMOD(int MOD)
 {
-	weapon_t i;
+	int i;
 
 	for (i = 0; i < WP_NUM_WEAPONS; i++)
 	{
 		if (GetAmmoTableData(i)->mod == MOD)
 		{
-			return i;
+			return static_cast<weapon_t>(i);
 		}
 	}
 
-	return 0;
+	return static_cast<weapon_t>(0);
 }
 
 const char *rankSoundNames_Allies[NUM_EXPERIENCE_LEVELS] =

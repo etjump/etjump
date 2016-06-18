@@ -2805,7 +2805,7 @@ static void PM_BeginWeaponReload(int weapon)
 		return;
 	}
 
-	item = BG_FindItemForWeapon(weapon);
+	item = BG_FindItemForWeapon(static_cast<weapon_t>(weapon));
 	if (!item)
 	{
 		return;
@@ -3236,7 +3236,7 @@ static void PM_FinishWeaponChange(void)
 		if (newweapon == weapAlts[oldweapon])
 		{
 			//switchtime = 2000;
-			if (pm->ps->ammoclip[BG_FindAmmoForWeapon(oldweapon)])
+			if (pm->ps->ammoclip[BG_FindAmmoForWeapon(static_cast<weapon_t>(oldweapon))])
 			{
 				switchtime = 1347;
 			}
@@ -3259,7 +3259,7 @@ static void PM_FinishWeaponChange(void)
 		if (newweapon == weapAlts[oldweapon])
 		{
 			//switchtime = 2000;
-			if (pm->ps->ammoclip[BG_FindAmmoForWeapon(oldweapon)])
+			if (pm->ps->ammoclip[BG_FindAmmoForWeapon(static_cast<weapon_t>(oldweapon))])
 			{
 				switchtime = 1347;
 			}
@@ -3365,8 +3365,8 @@ static void PM_ReloadClip(int weapon)
 {
 	int ammoreserve, ammoclip, ammomove;
 
-	ammoreserve = pm->ps->ammo[BG_FindAmmoForWeapon(weapon)];
-	ammoclip    = pm->ps->ammoclip[BG_FindClipForWeapon(weapon)];
+	ammoreserve = pm->ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon))];
+	ammoclip    = pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))];
 
 	ammomove = GetAmmoTableData(weapon)->maxclip - ammoclip;
 
@@ -3377,8 +3377,8 @@ static void PM_ReloadClip(int weapon)
 
 	if (ammomove)
 	{
-		pm->ps->ammo[BG_FindAmmoForWeapon(weapon)]     -= ammomove;
-		pm->ps->ammoclip[BG_FindClipForWeapon(weapon)] += ammomove;
+		pm->ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon))]     -= ammomove;
+		pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))] += ammomove;
 	}
 
 	// reload akimbo stuff
@@ -3441,9 +3441,9 @@ void PM_CheckForReload(int weapon)
 		break;
 	}
 
-	autoreload = pm->pmext->bAutoReload || !IS_AUTORELOAD_WEAPON(weapon);
-	clipWeap   = BG_FindClipForWeapon(weapon);
-	ammoWeap   = BG_FindAmmoForWeapon(weapon);
+	autoreload = (pm->pmext->bAutoReload || !IS_AUTORELOAD_WEAPON(weapon)) ? qtrue : qfalse;
+	clipWeap   = BG_FindClipForWeapon(static_cast<weapon_t>(weapon));
+	ammoWeap   = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
 
 	switch (weapon)
 	{
@@ -3475,7 +3475,7 @@ void PM_CheckForReload(int weapon)
 				// akimbo should also check other weapon status
 				if (BG_IsAkimboWeapon(weapon))
 				{
-					if (pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(weapon))] < GetAmmoTableData(BG_FindClipForWeapon(BG_AkimboSidearm(weapon)))->maxclip)
+					if (pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(static_cast<weapon_t>(weapon))))] < GetAmmoTableData(BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(static_cast<weapon_t>(weapon)))))->maxclip)
 					{
 						doReload = qtrue;
 					}
@@ -3488,7 +3488,7 @@ void PM_CheckForReload(int weapon)
 			{
 				if (BG_IsAkimboWeapon(weapon))
 				{
-					if (!pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(weapon))])
+					if (!pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(static_cast<weapon_t>(weapon))))])
 					{
 						doReload = qtrue;
 					}
@@ -3530,12 +3530,12 @@ static void PM_SwitchIfEmpty(void)
 		return;
 	}
 
-	if (pm->ps->ammoclip[BG_FindClipForWeapon(pm->ps->weapon)]) // still got ammo in clip
+	if (pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(pm->ps->weapon))]) // still got ammo in clip
 	{
 		return;
 	}
 
-	if (pm->ps->ammo[BG_FindAmmoForWeapon(pm->ps->weapon)]) // still got ammo in reserve
+	if (pm->ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(pm->ps->weapon))]) // still got ammo in reserve
 	{
 		return;
 	}
@@ -3564,8 +3564,9 @@ PM_WeaponUseAmmo
     accounts for clips being used/not used
 ==============
 */
-void PM_WeaponUseAmmo(int wp, int amount)
+void PM_WeaponUseAmmo(int inWp, int amount)
 {
+	weapon_t wp = static_cast<weapon_t>(inWp);
 	int takeweapon;
 
 	if (pm->noWeapClips)
@@ -3578,7 +3579,7 @@ void PM_WeaponUseAmmo(int wp, int amount)
 
 		if (BG_IsAkimboWeapon(wp))
 		{
-			if (!BG_AkimboFireSequence(wp, pm->ps->ammoclip[BG_FindClipForWeapon(wp)], pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(wp))]))
+			if (!BG_AkimboFireSequence(wp, pm->ps->ammoclip[BG_FindClipForWeapon(wp)], pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(wp)))]))
 			{
 				takeweapon = BG_AkimboSidearm(wp);
 			}
@@ -3595,8 +3596,9 @@ PM_WeaponAmmoAvailable
     accounts for clips being used/not used
 ==============
 */
-int PM_WeaponAmmoAvailable(int wp)
+int PM_WeaponAmmoAvailable(int inWp)
 {
+	auto wp = static_cast<weapon_t>(inWp);
 	int takeweapon;
 
 	if (pm->noWeapClips)
@@ -3610,7 +3612,7 @@ int PM_WeaponAmmoAvailable(int wp)
 
 		if (BG_IsAkimboWeapon(wp))
 		{
-			if (!BG_AkimboFireSequence(wp, pm->ps->ammoclip[BG_FindClipForWeapon(wp)], pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(wp))]))
+			if (!BG_AkimboFireSequence(wp, pm->ps->ammoclip[BG_FindClipForWeapon(wp)], pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(wp)))]))
 			{
 				takeweapon = BG_AkimboSidearm(wp);
 			}
@@ -3626,8 +3628,9 @@ PM_WeaponClipEmpty
     accounts for clips being used/not used
 ==============
 */
-int PM_WeaponClipEmpty(int wp)
+int PM_WeaponClipEmpty(int inWp)
 {
+	auto wp = static_cast<weapon_t>(inWp);
 	if (pm->noWeapClips)
 	{
 		if (!(pm->ps->ammo[BG_FindAmmoForWeapon(wp)]))
@@ -4190,7 +4193,7 @@ static void PM_Weapon(void)
 
 	if (BG_IsAkimboWeapon(pm->ps->weapon))
 	{
-		akimboFire = BG_AkimboFireSequence(pm->ps->weapon, pm->ps->ammoclip[BG_FindClipForWeapon(pm->ps->weapon)], pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(pm->ps->weapon))]);
+		akimboFire = BG_AkimboFireSequence(pm->ps->weapon, pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(pm->ps->weapon))], pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(pm->ps->weapon)))]);
 	}
 	else
 	{
@@ -5016,7 +5019,7 @@ static void PM_Weapon(void)
 		if (ammoNeeded > ammoAvailable)
 		{
 			// you have ammo for this, just not in the clip
-			reloading = (qboolean)(ammoNeeded <= pm->ps->ammo[BG_FindAmmoForWeapon(pm->ps->weapon)]);
+			reloading = (qboolean)(ammoNeeded <= pm->ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(pm->ps->weapon))]);
 
 			// if not in auto-reload mode, and reload was not explicitely requested, just play the 'out of ammo' sound
 			if (!pm->pmext->bAutoReload && IS_AUTORELOAD_WEAPON(pm->ps->weapon) && !(pm->cmd.wbuttons & WBUTTON_RELOAD))
@@ -5222,7 +5225,7 @@ static void PM_Weapon(void)
 	}
 
 	// WP_M7 and WP_GPG40 run out of ammo immediately after firing their last grenade
-	if ((pm->ps->weapon == WP_M7 || pm->ps->weapon == WP_GPG40) && !pm->ps->ammo[BG_FindAmmoForWeapon(pm->ps->weapon)])
+	if ((pm->ps->weapon == WP_M7 || pm->ps->weapon == WP_GPG40) && !pm->ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(pm->ps->weapon))])
 	{
 		PM_AddEvent(EV_NOAMMO);
 	}
@@ -5302,14 +5305,14 @@ static void PM_Weapon(void)
 		addTime = GetAmmoTableData(pm->ps->weapon)->nextShotTime;
 
 		// added check for last shot in both guns so there's no delay for the last shot
-		if (!pm->ps->ammoclip[BG_FindClipForWeapon(pm->ps->weapon)])
+		if (!pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(pm->ps->weapon))])
 		{
 			if (!akimboFire)
 			{
 				addTime = 2 * GetAmmoTableData(pm->ps->weapon)->nextShotTime;
 			}
 		}
-		else if (!pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(pm->ps->weapon))])
+		else if (!pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(pm->ps->weapon)))])
 		{
 			if (akimboFire)
 			{
@@ -5328,14 +5331,14 @@ static void PM_Weapon(void)
 
 		// rain - fixed the swapped usage of akimboFire vs. the colt
 		// so that the last shot isn't delayed
-		if (!pm->ps->ammoclip[BG_FindClipForWeapon(pm->ps->weapon)])
+		if (!pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(pm->ps->weapon))])
 		{
 			if (!akimboFire)
 			{
 				addTime = 2 * GetAmmoTableData(pm->ps->weapon)->nextShotTime;
 			}
 		}
-		else if (!pm->ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(pm->ps->weapon))])
+		else if (!pm->ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(pm->ps->weapon)))])
 		{
 			if (akimboFire)
 			{
@@ -6191,7 +6194,7 @@ void PM_CheckLadderMove(void)
 		tracedist = TRACE_LADDER_DIST;
 	}
 
-	wasOnLadder = ((pm->ps->pm_flags & PMF_LADDER) != 0);
+	wasOnLadder = ((pm->ps->pm_flags & PMF_LADDER) != 0) ? qtrue : qfalse;
 
 	pml.ladder        = qfalse;
 	pm->ps->pm_flags &= ~PMF_LADDER;    // clear ladder bit

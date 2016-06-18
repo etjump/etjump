@@ -404,7 +404,7 @@ void G_Script_ScriptLoad(void)
 	// Arnout: make sure we terminate the script with a '\0' to prevent parser from choking
 	//level.scriptEntity = G_Alloc( len );
 	//trap_FS_Read( level.scriptEntity, len, f );
-	level.scriptEntity = G_Alloc(len + 1);
+	level.scriptEntity = static_cast<char *>(G_Alloc(len + 1));
 	trap_FS_Read(level.scriptEntity, len, f);
 	*(level.scriptEntity + len) = '\0';
 
@@ -521,7 +521,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 		return;
 	}
 
-	buildScript = trap_Cvar_VariableIntegerValue("com_buildScript");
+	buildScript = trap_Cvar_VariableIntegerValue("com_buildScript") ? qtrue : qfalse;
 
 	pScript  = level.scriptEntity;
 	wantName = qtrue;
@@ -623,7 +623,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 
 			if (strlen(params))         // copy the params into the event
 			{
-				curEvent->params = G_Alloc(strlen(params) + 1);
+				curEvent->params = static_cast<char *>(G_Alloc(strlen(params) + 1));
 				Q_strncpyz(curEvent->params, params, strlen(params) + 1);
 			}
 
@@ -745,7 +745,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 
 				if (strlen(params))
 				{   // copy the params into the event
-					curEvent->stack.items[curEvent->stack.numItems].params = G_Alloc(strlen(params) + 1);
+					curEvent->stack.items[curEvent->stack.numItems].params = static_cast<char *>(G_Alloc(strlen(params) + 1));
 					Q_strncpyz(curEvent->stack.items[curEvent->stack.numItems].params, params, strlen(params) + 1);
 				}
 
@@ -785,7 +785,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 	// alloc and copy the events into the gentity_t for this cast
 	if (numEventItems > 0)
 	{
-		ent->scriptEvents = G_Alloc(sizeof(g_script_event_t) * numEventItems);
+		ent->scriptEvents = static_cast<g_script_event_t *>(G_Alloc(sizeof(g_script_event_t) * numEventItems));
 		memcpy(ent->scriptEvents, events, sizeof(g_script_event_t) * numEventItems);
 		ent->numScriptEvents = numEventItems;
 	}

@@ -535,7 +535,7 @@ int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int ar
 		G_ShutdownGame(arg0);
 		return 0;
 	case GAME_CLIENT_CONNECT:
-		return (int)ClientConnect(arg0, arg1, arg2);
+		return (int)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
 	case GAME_CLIENT_THINK:
 		ClientThink(arg0);
 		return 0;
@@ -1137,7 +1137,7 @@ void G_CheckForCursorHints(gentity_t *ent)
 
 					if (!canPickup)
 					{
-						canPickup = G_CanPickupWeapon(it->giTag, ent);
+						canPickup = G_CanPickupWeapon(static_cast<weapon_t>(it->giTag), ent);
 					}
 
 					if (canPickup)
@@ -1441,7 +1441,7 @@ void G_RegisterCvars(void)
 			}
 		}
 
-		remapped = (remapped || cv->teamShader);
+		remapped = (remapped || cv->teamShader) ? qtrue : qfalse;
 	}
 
 	if (remapped)
@@ -1615,7 +1615,7 @@ void G_UpdateCvars(void)
 					}
 					else
 					{
-						fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles);
+						fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
 					}
 				}
 
@@ -2121,7 +2121,7 @@ void G_ShutdownGame(int restart)
 #endif
 
 	// write all the client session data so we can get it back
-	G_WriteSessionData(restart);
+	G_WriteSessionData(restart ? qtrue : qfalse);
 }
 
 
@@ -2131,7 +2131,7 @@ void G_ShutdownGame(int restart)
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and bg_*.c can link
 
-void QDECL Com_Error(int level, const char *error, ...)
+void QDECL Com_Error(int unused, const char *error, ...)
 {
 	va_list argptr;
 	char    text[1024];
@@ -2290,7 +2290,7 @@ void etpro_PlayerInfo(void)
 
 		if (e->inuse == qfalse)
 		{
-			playerteam = 0;
+			playerteam = TEAM_FREE;
 		}
 		else
 		{
@@ -2968,7 +2968,7 @@ qboolean ScoreIsTied(void)
 	buf = Info_ValueForKey(cs, "winner");
 	a   = atoi(buf);
 
-	return a == -1;
+	return a == -1 ? qtrue : qfalse;
 }
 
 qboolean G_ScriptAction_SetWinner(gentity_t *ent, char *params);

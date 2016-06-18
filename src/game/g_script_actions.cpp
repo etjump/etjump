@@ -138,7 +138,7 @@ qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params)
 	{
 		G_Error("G_Scripting: setautospawn must have a target team\n");
 	}
-	team           = atoi(token);
+	team           = static_cast<team_t>(atoi(token));
 	pTeamAutoSpawn = team == 0 ? &(level.axisAutoSpawn) : &(level.alliesAutoSpawn);
 
 	tent = G_Find(NULL, FOFS(message), spawnname);
@@ -888,7 +888,7 @@ qboolean G_ScriptAction_SetChargeTimeFactor(gentity_t *ent, char *params)
 		G_Error("G_Scripting: setchargetimefactor must have a team\n");
 	}
 
-	team = atoi(token);
+	team = static_cast<team_t>(atoi(token));
 
 	token = COM_ParseExt(&pString, qfalse);
 	if (!token[0])
@@ -1141,7 +1141,7 @@ qboolean G_ScriptAction_DisableMessage(gentity_t *ent, char *params)
 	target = G_FindByTargetname(target, token);
 	while (target)
 	{
-		target->s.aiState = 1;
+		target->s.aiState = AISTATE_QUERY;
 	}
 
 	return qtrue;
@@ -1191,7 +1191,7 @@ qboolean G_ScriptAction_SetGlobalFog(gentity_t *ent, char *params)
 		G_Error("G_Scripting: setglobalfog must have a restore value\n");
 	}
 
-	restore = atoi(token);
+	restore = atoi(token) ? qtrue : qfalse;
 
 	token = COM_ParseExt(&pString, qfalse);
 	if (!token[0])
@@ -1389,7 +1389,7 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params)
 			if (trType != TR_LINEAR_STOP)   // allow for acceleration/decceleration
 			{
 				ent->s.pos.trDuration = 1000.0 * dist / (speed / 2.0);
-				ent->s.pos.trType     = trType;
+				ent->s.pos.trType     = static_cast<trType_t>(trType);
 			}
 			ent->reached = NULL;
 
@@ -1421,7 +1421,7 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params)
 				if (trType != TR_LINEAR_STOP)   // allow for acceleration/decceleration
 				{
 					ent->s.pos.trDuration = 1000.0 * dist / (speed / 2.0);
-					ent->s.pos.trType     = trType;
+					ent->s.pos.trType     = static_cast<trType_t>(trType);
 				}
 			}
 
@@ -1544,11 +1544,11 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params)
 			return qtrue;
 		}
 
-		return !(rand() % (int)((max - min) * 0.02f));
+		return !(rand() % (int)((max - min) * 0.02f)) ? qtrue : qfalse;
 	}
 
 	duration = atoi(token);
-	return (ent->scriptStatus.scriptStackChangeTime + duration < level.time);
+	return (ent->scriptStatus.scriptStackChangeTime + duration < level.time) ? qtrue : qfalse;
 }
 
 /*
@@ -1589,7 +1589,7 @@ qboolean G_ScriptAction_Trigger(gentity_t *ent, char *params)
 		oldId = trent->scriptStatus.scriptId;
 		G_Script_ScriptEvent(trent, "trigger", trigger);
 		// if the script changed, return false so we don't muck with it's variables
-		return ((trent != ent) || (oldId == trent->scriptStatus.scriptId));
+		return ((trent != ent) || (oldId == trent->scriptStatus.scriptId)) ? qtrue : qfalse;
 	}
 	else if (!Q_stricmp(name, "global"))
 	{
@@ -2066,7 +2066,7 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params)
 		return qtrue;   // continue to the next command
 	}
 
-	return (endtime <= level.time);
+	return (endtime <= level.time) ? qtrue : qfalse;
 };
 
 /*
@@ -2882,7 +2882,7 @@ qboolean G_ScriptAction_FaceAngles(gentity_t *ent, char *params)
 			{
 				ent->s.apos.trDelta[i] = 2.0 * 1000.0 * diff[i] / (float)duration;
 			}
-			ent->s.apos.trType = trType;
+			ent->s.apos.trType = static_cast<trType_t>(trType);
 		}
 
 	}
@@ -3316,7 +3316,7 @@ qboolean G_ScriptAction_VoiceAnnounce(gentity_t *ent, char *params)
 		G_Error("G_ScriptAction_VoiceAnnounce: invalid system message\n");
 	}
 
-	G_SendSystemMessage(sysmsg, !num ? TEAM_AXIS : TEAM_ALLIES);
+	G_SendSystemMessage(static_cast<sysMsg_t>(sysmsg), !num ? TEAM_AXIS : TEAM_ALLIES);
 
 	return qtrue;
 }
@@ -3967,7 +3967,7 @@ qboolean G_ScriptAction_SetHQStatus(gentity_t *ent, char *params)
 		G_Error("G_Scripting: sethqstatus must have a team\n");
 	}
 
-	team = atoi(token);
+	team = static_cast<team_t>(atoi(token));
 
 	token = COM_ParseExt(&pString, qfalse);
 	if (!token[0])
@@ -3975,7 +3975,7 @@ qboolean G_ScriptAction_SetHQStatus(gentity_t *ent, char *params)
 		G_Error("G_Scripting: sethqstatus must have a status\n");
 	}
 
-	exists = atoi(token);
+	exists = atoi(token) ? qtrue : qfalse;
 
 	// just in case
 	if (!level.gameManager)

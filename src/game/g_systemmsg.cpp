@@ -149,7 +149,7 @@ void G_CheckForNeededClasses(void)
 	{
 		if (!playerClasses[PC_ENGINEER - 1])
 		{
-			playerClasses[PC_ENGINEER - 1][0] = G_NeedEngineers(TEAM_ALLIES) ? 0 : 1;
+			playerClasses[PC_ENGINEER - 1][0] = G_NeedEngineers(TEAM_ALLIES) ? qfalse : qtrue;
 		}
 
 		cnt = 0;
@@ -171,7 +171,7 @@ void G_CheckForNeededClasses(void)
 				{
 					if (cnt-- == 0)
 					{
-						G_SendSystemMessage(SM_NEED_MEDIC + i, TEAM_AXIS);
+						G_SendSystemMessage(static_cast<sysMsg_t>(SM_NEED_MEDIC + i), TEAM_AXIS);
 					}
 				}
 			}
@@ -183,7 +183,7 @@ void G_CheckForNeededClasses(void)
 	{
 		if (!playerClasses[PC_ENGINEER - 1])
 		{
-			playerClasses[PC_ENGINEER - 1][1] = G_NeedEngineers(TEAM_AXIS) ? 0 : 1;
+			playerClasses[PC_ENGINEER - 1][1] = G_NeedEngineers(TEAM_AXIS) ? qfalse : qtrue;
 		}
 
 		cnt = 0;
@@ -205,7 +205,7 @@ void G_CheckForNeededClasses(void)
 				{
 					if (cnt-- == 0)
 					{
-						G_SendSystemMessage(SM_NEED_MEDIC + i, TEAM_ALLIES);
+						G_SendSystemMessage(static_cast<sysMsg_t>(SM_NEED_MEDIC + i), TEAM_ALLIES);
 					}
 				}
 			}

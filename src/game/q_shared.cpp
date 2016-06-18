@@ -142,7 +142,7 @@ qboolean COM_BitCheck(const int array[], int bitNum)
 		bitNum -= 32;
 	}
 
-	return ((array[i] & (1 << bitNum)) != 0);   // (SA) heh, whoops. :)
+	return ((array[i] & (1 << bitNum)) != 0) ? qtrue : qfalse;   // (SA) heh, whoops. :)
 }
 
 /*
@@ -1636,7 +1636,7 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 {
 	static char final[MAX_STRING_CHARS] = { "" };
 	char        dest[MAX_STRING_CHARS]  = { "" };
-	char        new[MAX_STRING_CHARS]   = { "" };
+	char        newString[MAX_STRING_CHARS]   = { "" };
 	char        *destp;
 	int         needle_len = 0;
 	int         new_len    = 0;
@@ -1652,18 +1652,18 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 	}
 	if (*newp)
 	{
-		Q_strncpyz(new, newp, sizeof(new));
+		Q_strncpyz(newString, newp, sizeof(newString));
 	}
 
 	dest[0]    = '\0';
 	needle_len = strlen(needle);
-	new_len    = strlen(new);
+	new_len    = strlen(newString);
 	destp      = &dest[0];
 	while (*haystack)
 	{
 		if (!Q_stricmpn(haystack, needle, needle_len))
 		{
-			Q_strcat(dest, sizeof(dest), new);
+			Q_strcat(dest, sizeof(dest), newString);
 			haystack += needle_len;
 			destp    += new_len;
 			continue;

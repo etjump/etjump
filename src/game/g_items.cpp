@@ -277,14 +277,14 @@ int AddToClip(
     int outOfReserve)           // is the amount to be added out of reserve
 {
 	int inclip, maxclip;
-	int ammoweap = BG_FindAmmoForWeapon(weapon);
+	int ammoweap = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
 
 	if (weapon < WP_LUGER || weapon >= WP_NUM_WEAPONS)
 	{
 		return qfalse;
 	}
 
-	inclip  = ps->ammoclip[BG_FindClipForWeapon(weapon)];
+	inclip  = ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))];
 	maxclip = GetAmmoTableData(weapon)->maxclip;
 
 	if (!ammomove)  // amount to add to the clip not specified
@@ -311,7 +311,7 @@ int AddToClip(
 		{
 			ps->ammo[ammoweap] -= ammomove;
 		}
-		ps->ammoclip[BG_FindClipForWeapon(weapon)] += ammomove;
+		ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))] += ammomove;
 		return qtrue;
 	}
 	return qfalse;
@@ -343,9 +343,9 @@ Add_Ammo
 // xkan, 10/25/2002 - modified to return whether any ammo was added.
 int Add_Ammo(gentity_t *ent, int weapon, int count, qboolean fillClip)
 {
-	int ammoweap = BG_FindAmmoForWeapon(weapon);
+	int ammoweap = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
 	int originalCount;
-	int maxammo = BG_MaxAmmoForWeapon(ammoweap, ent->client->sess.skill);
+	int maxammo = BG_MaxAmmoForWeapon(static_cast<weapon_t>(ammoweap), ent->client->sess.skill);
 
 	originalCount = ent->client->ps.ammo[ammoweap];
 
@@ -579,7 +579,7 @@ void G_DropWeapon(gentity_t *ent, weapon_t weapon)
 
 	if (weapon == WP_KAR98 || weapon == WP_CARBINE)
 	{
-		ent2->delay = client->ps.ammo[BG_FindAmmoForWeapon(weapAlts[weapon])];
+		ent2->delay = client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(weapAlts[weapon]))];
 	}
 	else
 	{
@@ -695,7 +695,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 		}
 
 		// See if we can pick it up
-		if (G_CanPickupWeapon(ent->item->giTag, other))
+		if (G_CanPickupWeapon(static_cast<weapon_t>(ent->item->giTag), other))
 		{
 			weapon_t primaryWeapon = G_GetPrimaryWeaponForClient(other->client);
 
@@ -746,12 +746,12 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 					COM_BitSet(other->client->ps.weapons, WP_GPG40);
 				}
 
-				other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = 0;
-				other->client->ps.ammo[BG_FindAmmoForWeapon(ent->item->giTag)]     = 0;
+				other->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = 0;
+				other->client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ent->item->giTag))]     = 0;
 
 				if (ent->item->giTag == WP_MORTAR)
 				{
-					other->client->ps.ammo[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
+					other->client->ps.ammo[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = quantity;
 
 					// Gordon: secondary weapon ammo
 					if (ent->delay)
@@ -761,7 +761,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 				}
 				else
 				{
-					other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
+					other->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = quantity;
 
 					// Gordon: secondary weapon ammo
 					if (ent->delay)

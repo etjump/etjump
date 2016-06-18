@@ -606,7 +606,7 @@ qboolean ClientInactivityTimer(gclient_t *client)
 			client->sess.teamBeforeInactivitySpec  = client->sess.sessionTeam;
 			G_LogPrintf("%f %f %f\n", client->sess.posBeforeInactivity[0], client->sess.posBeforeInactivity[1], client->sess.posBeforeInactivity[2]);
 			AP(va("cpm \"%s ^7was removed from teams due to inactivity! (%i seconds) \n\"", client->pers.netname, g_inactivity.integer));
-			SetTeam(g_entities + (client - level.clients), "s", qtrue, -1, -1, qfalse);
+			SetTeam(g_entities + (client - level.clients), "s", qtrue, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 
 			return(qfalse);
 		}
@@ -1518,7 +1518,7 @@ void ClientThink_real(gentity_t *ent)
 
 		if (ucmd->upmove > 0)
 		{
-			limbo(ent, (client->ps.stats[STAT_HEALTH] > GIB_HEALTH));
+			limbo(ent, (client->ps.stats[STAT_HEALTH] > GIB_HEALTH) ? qtrue : qfalse);
 		}
 
 		// See if we need to hop to limbo
@@ -1526,7 +1526,7 @@ void ClientThink_real(gentity_t *ent)
 		{
 			if ((g_forcerespawn.integer > 0 && level.timeCurrent - client->respawnTime > g_forcerespawn.integer * 1000) || client->ps.stats[STAT_HEALTH] <= GIB_HEALTH)
 			{
-				limbo(ent, (client->ps.stats[STAT_HEALTH] > GIB_HEALTH));
+				limbo(ent, (client->ps.stats[STAT_HEALTH] > GIB_HEALTH) ? qtrue : qfalse);
 			}
 		}
 
@@ -1575,7 +1575,7 @@ void ClientThink_real(gentity_t *ent)
 			CP("chat \"^3Notification: ^7cheat cvars are disabled on this server. Check console for more information");
 			CP(message);
 			trap_SendServerCommand(ent - g_entities, "cheatCvarsOff");
-			SetTeam(ent, "s", qtrue, -1, -1, qfalse);
+			SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 		}
 	}
 }
@@ -1696,7 +1696,7 @@ void SpectatorClientEndFrame(gentity_t *ent)
 					int savedClass  = ent->client->ps.stats[STAT_PLAYER_CLASS];
 					int savedMVList = ent->client->ps.powerups[PW_MVCLIENTLIST];
 
-					do_respawn = ent->client->ps.pm_time;
+					do_respawn = static_cast<qboolean>(ent->client->ps.pm_time);
 
 					ent->client->ps           = cl->ps;
 					ent->client->ps.pm_flags |= PMF_FOLLOW;

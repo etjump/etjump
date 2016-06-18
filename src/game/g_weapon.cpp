@@ -286,14 +286,14 @@ void G_PlaceTripmine(gentity_t *ent)
 	vec3_t    start, end;
 	trace_t   trace;
 	gentity_t *bomb;
-	vec3_t    forward;
+	vec3_t    fwd;
 
 	VectorCopy(ent->client->ps.origin, start);
 	start[2] += ent->client->ps.viewheight;
 
-	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
+	AngleVectors(ent->client->ps.viewangles, fwd, NULL, NULL);
 
-	VectorMA(start, 64, forward, end);
+	VectorMA(start, 64, fwd, end);
 
 	trap_Trace(&trace, start, NULL, NULL, end, ent->s.number, MASK_SHOT);
 
@@ -1639,12 +1639,12 @@ qboolean G_LandmineArmed(gentity_t *ent)
 
 qboolean G_LandmineUnarmed(gentity_t *ent)
 {
-	return (!G_LandmineArmed(ent) && !G_LandmineTriggered(ent));
+	return (!G_LandmineArmed(ent) && !G_LandmineTriggered(ent)) ? qtrue : qfalse;
 }
 
 team_t G_LandmineTeam(gentity_t *ent)
 {
-	return (ent->s.teamNum % 4);
+	return static_cast<team_t>(ent->s.teamNum % 4);
 }
 
 qboolean G_LandmineSpotted(gentity_t *ent)
@@ -2620,7 +2620,7 @@ qboolean G_AvailableAirstrikes(gentity_t *ent)
 
 void G_AddAirstrikeToCounters(gentity_t *ent)
 {
-	int max = min(6, 2 * (ceil(G_TeamCount(ent, -1) * 0.1f * 10 * 0.01f)));
+	int max = min(6, 2 * (ceil(G_TeamCount(ent, (weapon_t)-1) * 0.1f * 10 * 0.01f)));
 
 
 
@@ -5267,7 +5267,7 @@ void FireWeapon(gentity_t *ent)
 #ifndef DEBUG_STATS
 	if (g_gamestate.integer == GS_PLAYING)
 #endif
-	ent->client->sess.aWeaponStats[BG_WeapStatForWeapon(ent->s.weapon)].atts += shots;
+	ent->client->sess.aWeaponStats[BG_WeapStatForWeapon(static_cast<weapon_t>(ent->s.weapon))].atts += shots;
 }
 
 

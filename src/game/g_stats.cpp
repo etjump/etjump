@@ -92,7 +92,7 @@ void G_PrintAccuracyLog(gentity_t *ent)
 
 	for (i = 0; i < WP_NUM_WEAPONS; i++)
 	{
-		if (!BG_ValidStatWeapon(i))
+		if (!BG_ValidStatWeapon(static_cast<weapon_t>(i)))
 		{
 			continue;
 		}

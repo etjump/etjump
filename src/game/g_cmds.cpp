@@ -490,8 +490,10 @@ void Cmd_ListBotGoals_f(gentity_t *ent)
 		return;
 	}
 
-	for (t = TEAM_AXIS; t <= TEAM_ALLIES; t++)
+	int ti = TEAM_AXIS;
+	for (ti = TEAM_AXIS; ti <= TEAM_ALLIES; ti++)
 	{
+		t = static_cast<team_t>(ti);
 		gentity_t *list = g_entities, *targ;
 
 		G_Printf("\n%s bot goals\n=====================\n", (t == TEAM_AXIS ? "Axis" : "Allies"));
@@ -574,8 +576,8 @@ void Cmd_Give_f(gentity_t *ent)
 		{
 			if (amount >= 0 && amount < SK_NUM_SKILLS)
 			{
-				G_AddSkillPoints(ent, amount, 20);
-				G_DebugAddSkillPoints(ent, amount, 20, "give skill");
+				G_AddSkillPoints(ent, static_cast<skillType_t>(amount), 20);
+				G_DebugAddSkillPoints(ent, static_cast<skillType_t>(amount), 20, "give skill");
 			}
 		}
 		else
@@ -583,8 +585,8 @@ void Cmd_Give_f(gentity_t *ent)
 			// bumps all skills with 1 level
 			for (i = 0; i < SK_NUM_SKILLS; i++)
 			{
-				G_AddSkillPoints(ent, i, 20);
-				G_DebugAddSkillPoints(ent, i, 20, "give skill");
+				G_AddSkillPoints(ent, static_cast<skillType_t>(i), 20);
+				G_DebugAddSkillPoints(ent, static_cast<skillType_t>(i), 20, "give skill");
 			}
 		}
 		return;
@@ -981,7 +983,7 @@ void Cmd_Noclip_f(gentity_t *ent)
 	}
 	else
 	{
-		ent->client->noclip = !ent->client->noclip;
+		ent->client->noclip = !ent->client->noclip ? qtrue : qfalse;
 	}
 
 	if (ent->client->noclip)
@@ -1074,7 +1076,7 @@ void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team, spect
 		*team = PickTeam(clientNum);
 		if (!G_teamJoinCheck(*team, &g_entities[clientNum]))
 		{
-			*team = ((TEAM_AXIS | TEAM_ALLIES) & ~*team);
+			*team = static_cast<team_t>((TEAM_AXIS | TEAM_ALLIES) & ~*team);
 		}
 	}
 }
@@ -1294,7 +1296,7 @@ void StopFollowing(gentity_t *ent)
 //		pos[2] += 16; // Gordon: removing for now
 		VectorCopy(client->ps.viewangles, angle);
 		// Need this as it gets spec mode reset properly
-		SetTeam(ent, "s", qtrue, -1, -1, qfalse);
+		SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 		VectorCopy(pos, client->ps.origin);
 		SetClientViewAngle(ent, angle);
 	}
@@ -1492,8 +1494,8 @@ void Cmd_Team_f(gentity_t *ent)
 	trap_Argv(3, weap, sizeof(weap));
 	trap_Argv(4, weap2, sizeof(weap2));
 
-	w  = atoi(weap);
-	w2 = atoi(weap2);
+	w  = static_cast<weapon_t>(atoi(weap));
+	w2 = static_cast<weapon_t>(atoi(weap2));
 
 	ent->client->sess.latchPlayerType = atoi(ptype);
 	if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS)
@@ -1709,7 +1711,7 @@ void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	// first set them to spectator
 	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 	{
-		SetTeam(ent, "spectator", qfalse, -1, -1, qfalse);
+		SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 	}
 
 	ent->client->sess.spectatorState  = SPECTATOR_FOLLOW;
@@ -1729,7 +1731,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir)
 	// first set them to spectator
 	if ((ent->client->sess.spectatorState == SPECTATOR_NOT) && (!(ent->client->ps.pm_flags & PMF_LIMBO)))       // JPW NERVE for limbo state
 	{
-		SetTeam(ent, "spectator", qfalse, -1, -1, qfalse);
+		SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 	}
 
 	if (dir != 1 && dir != -1)
@@ -3778,7 +3780,7 @@ void Cmd_WeaponStat_f(gentity_t *ent)
 		return;
 	}
 	trap_Argv(1, buffer, 16);
-	stat = atoi(buffer);
+	stat = static_cast<extWeaponStats_t>(atoi(buffer));
 	if (stat >= 0 && stat < WS_MAX)
 	{
 		trap_SendServerCommand(ent - g_entities, va("rws %i %i", ent->client->sess.aWeaponStats[stat].atts, ent->client->sess.aWeaponStats[stat].hits));
@@ -4088,7 +4090,7 @@ void Cmd_Goto_f(gentity_t *ent)
 
 	if (ent->client->sess.sessionTeam != other->client->sess.sessionTeam)
 	{
-		const weapon_t w = -1;
+		const weapon_t w = static_cast<weapon_t>(-1);
 		if (other->client->sess.sessionTeam == TEAM_AXIS)
 		{
 			SetTeam(ent, "r", qfalse, w, w, qtrue);
@@ -4194,7 +4196,7 @@ void Cmd_Call_f(gentity_t *ent)
 
 	if (other->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != ent->client->sess.sessionTeam)
 	{
-		const weapon_t w = -1;
+		const weapon_t w = static_cast<weapon_t>(-1);
 		if (ent->client->sess.sessionTeam == TEAM_AXIS)
 		{
 			SetTeam(other, "r", qfalse, w, w, qtrue);
@@ -4319,7 +4321,7 @@ qboolean G_AllowFollow(gentity_t *ent, gentity_t *other)
 {
 	// Check if target is speclocked, if it is check if we're invited
 	return (!other->client->sess.specLocked
-	        || COM_BitCheck(other->client->sess.specInvitedClients, ClientNum(ent)));
+	        || COM_BitCheck(other->client->sess.specInvitedClients, ClientNum(ent))) ? qtrue : qfalse;
 }
 
 /*
@@ -4327,9 +4329,9 @@ qboolean G_AllowFollow(gentity_t *ent, gentity_t *other)
  */
 qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other)
 {
-	return G_AllowFollow(ent, other)
+	return (G_AllowFollow(ent, other)
 	       && (ent->client->sess.spec_team == 0
-	           || ent->client->sess.spec_team == other->client->sess.sessionTeam);
+	           || ent->client->sess.spec_team == other->client->sess.sessionTeam)) ? qtrue : qfalse;
 }
 
 void Cmd_Class_f(gentity_t *ent)
@@ -4416,8 +4418,8 @@ void Cmd_Class_f(gentity_t *ent)
 
 
 
-	w  = atoi(weap);
-	w2 = atoi(weap2);
+	w  = static_cast<weapon_t>(atoi(weap));
+	w2 = static_cast<weapon_t>(atoi(weap2));
 
 	ent->client->sess.latchPlayerType = atoi(ptype);
 	if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS)
@@ -4635,7 +4637,7 @@ void ClientCommand(int clientNum)
 	// Let's handle rest of the commands after checking if we're really connected.
 
 	// handle say/vsay commands
-	enc = !Q_stricmp(cmd, "enc_say");
+	enc = !Q_stricmp(cmd, "enc_say") ? qtrue : qfalse;
 	if (!Q_stricmp(cmd, "say") || enc)
 	{
 		if (ClientIsFlooding(ent))
@@ -4648,7 +4650,7 @@ void ClientCommand(int clientNum)
 		}
 		return;
 	}
-	enc = !Q_stricmp(cmd, "enc_say_team");
+	enc = !Q_stricmp(cmd, "enc_say_team") ? qtrue : qfalse;
 	if (!Q_stricmp(cmd, "say_team") || enc)
 	{
 		if (ClientIsFlooding(ent))
@@ -4686,7 +4688,7 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
-	enc = !Q_stricmp(cmd, "enc_say_buddy");
+	enc = !Q_stricmp(cmd, "enc_say_buddy") ? qtrue : qfalse;
 	if (!Q_stricmp(cmd, "say_buddy") || enc)
 	{
 		if (ClientIsFlooding(ent))

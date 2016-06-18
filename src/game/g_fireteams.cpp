@@ -67,7 +67,7 @@ team_t G_GetFireteamTeam(fireteamData_t *ft)
 {
 	if (!ft->inuse)
 	{
-		return -1;
+		return static_cast<team_t>(-1);
 	}
 
 	if (ft->joinOrder[0] == -1 || !g_entities[(int)ft->joinOrder[0]].client)
@@ -275,7 +275,7 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum)
 	ft->joinOrder[0] = leader - g_entities;
 	ft->ident        = ident;
 	ft->saveLimit    = 0;
-	ft->teamJumpMode = 0;
+	ft->teamJumpMode = qfalse;
 
 	if (g_autoFireteams.integer)
 	{

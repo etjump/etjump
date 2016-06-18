@@ -201,12 +201,12 @@ int trap_PointContents(const vec3_t point, int passEntityNum)
 
 qboolean trap_InPVS(const vec3_t p1, const vec3_t p2)
 {
-	return syscall(G_IN_PVS, p1, p2);
+	return syscall(G_IN_PVS, p1, p2) ? qtrue : qfalse;
 }
 
 qboolean trap_InPVSIgnorePortals(const vec3_t p1, const vec3_t p2)
 {
-	return syscall(G_IN_PVS_IGNORE_PORTALS, p1, p2);
+	return syscall(G_IN_PVS_IGNORE_PORTALS, p1, p2) ? qtrue : qfalse;
 }
 
 void trap_AdjustAreaPortalState(gentity_t *ent, qboolean open)
@@ -216,7 +216,7 @@ void trap_AdjustAreaPortalState(gentity_t *ent, qboolean open)
 
 qboolean trap_AreasConnected(int area1, int area2)
 {
-	return syscall(G_AREAS_CONNECTED, area1, area2);
+	return syscall(G_AREAS_CONNECTED, area1, area2) ? qtrue : qfalse;
 }
 
 void trap_LinkEntity(gentity_t *ent)
@@ -237,12 +237,12 @@ int trap_EntitiesInBox(const vec3_t mins, const vec3_t maxs, int *list, int maxc
 
 qboolean trap_EntityContact(const vec3_t mins, const vec3_t maxs, const gentity_t *ent)
 {
-	return syscall(G_ENTITY_CONTACT, mins, maxs, ent);
+	return syscall(G_ENTITY_CONTACT, mins, maxs, ent) ? qtrue : qfalse;
 }
 
 qboolean trap_EntityContactCapsule(const vec3_t mins, const vec3_t maxs, const gentity_t *ent)
 {
-	return syscall(G_ENTITY_CONTACTCAPSULE, mins, maxs, ent);
+	return syscall(G_ENTITY_CONTACTCAPSULE, mins, maxs, ent) ? qtrue : qfalse;
 }
 
 int trap_BotAllocateClient(int clientNum)
@@ -330,7 +330,7 @@ void trap_GetUsercmd(int clientNum, usercmd_t *cmd)
 
 qboolean trap_GetEntityToken(char *buffer, int bufferSize)
 {
-	return syscall(G_GET_ENTITY_TOKEN, buffer, bufferSize);
+	return syscall(G_GET_ENTITY_TOKEN, buffer, bufferSize) ? qtrue : qfalse;
 }
 
 int trap_DebugPolygonCreate(int color, int numPoints, vec3_t *points)
@@ -356,12 +356,12 @@ void trap_SnapVector(float *v)
 
 qboolean trap_GetTag(int clientNum, int tagFileNumber, char *tagName, orientation_t *orientation)
 {
-	return syscall(G_GETTAG, clientNum, tagFileNumber, tagName, orientation);
+	return syscall(G_GETTAG, clientNum, tagFileNumber, tagName, orientation) ? qtrue : qfalse;
 }
 
 qboolean trap_LoadTag(const char *filename)
 {
-	return syscall(G_REGISTERTAG, filename);
+	return syscall(G_REGISTERTAG, filename) ? qtrue : qfalse;
 }
 
 // BotLib traps start here
@@ -507,7 +507,7 @@ void trap_AAS_AreaCenter(int areanum, vec3_t center)
 
 qboolean trap_AAS_AreaWaypoint(int areanum, vec3_t center)
 {
-	return syscall(BOTLIB_AAS_AREA_WAYPOINT, areanum, center);
+	return syscall(BOTLIB_AAS_AREA_WAYPOINT, areanum, center) ? qtrue : qfalse;
 }
 
 int trap_AAS_PointContents(vec3_t point)
@@ -1167,5 +1167,5 @@ void trap_SendMessage(int clientNum, char *buf, int buflen)
 
 messageStatus_t trap_MessageStatus(int clientNum)
 {
-	return syscall(G_MESSAGESTATUS, clientNum);
+	return static_cast<messageStatus_t>(syscall(G_MESSAGESTATUS, clientNum));
 }

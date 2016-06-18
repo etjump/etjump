@@ -11,7 +11,7 @@ alarmbox_updateparts
 void alarmbox_updateparts(gentity_t *ent, qboolean matestoo)
 {
 	gentity_t *t, *mate;
-	qboolean  alarming = (ent->s.frame == 1);
+	qboolean  alarming = (ent->s.frame == 1) ? qtrue : qfalse;
 
 	// update teammates
 	if (matestoo)

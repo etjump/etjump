@@ -379,7 +379,8 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 		{
 			if (attacker->client)
 			{
-				attacker->client->combatState |= (1 << COMBATSTATE_KILLEDPLAYER);
+				auto state = attacker->client->combatState | (1 << COMBATSTATE_KILLEDPLAYER);
+				attacker->client->combatState = static_cast<combatstate_t>(state);
 			}
 		}
 	}
@@ -1189,7 +1190,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 	}
 
 	// xkan, 12/23/2002 - was the bot alive before applying any damage?
-	wasAlive = (targ->health > 0);
+	wasAlive = (targ->health > 0) ? qtrue : qfalse;
 
 	// Arnout: combatstate
 	if (targ->client && attacker && attacker->client && attacker != targ)
@@ -1224,8 +1225,11 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 		{
 			if (!OnSameTeam(attacker, targ))
 			{
-				targ->client->combatState     |= (1 << COMBATSTATE_DAMAGERECEIVED);
-				attacker->client->combatState |= (1 << COMBATSTATE_DAMAGEDEALT);
+				auto targetCombatState = targ->client->combatState | (1 << COMBATSTATE_DAMAGERECEIVED);
+				auto attackerCombatState = attacker->client->combatState | (1 << COMBATSTATE_DAMAGEDEALT);
+
+				targ->client->combatState     = static_cast<combatstate_t>(targetCombatState);
+				attacker->client->combatState = static_cast<combatstate_t>(attackerCombatState);
 			}
 		}
 	}
@@ -1273,7 +1277,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 		default:
 		    return;	// no damage from other weapons
 		}*/
-		if (!G_WeaponIsExplosive(mod))
+		if (!G_WeaponIsExplosive(static_cast<meansOfDeath_t>(mod)))
 		{
 			return;
 		}
@@ -1328,7 +1332,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 		    }
 		}*/
 
-		if (targ->parent && G_GetWeaponClassForMOD(mod) == 2)
+		if (targ->parent && G_GetWeaponClassForMOD(static_cast<meansOfDeath_t>(mod)) == 2)
 		{
 			return;
 		}
@@ -1342,7 +1346,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 			return;
 		}
 
-		if (G_GetWeaponClassForMOD(mod) < targ->constructibleStats.weaponclass)
+		if (G_GetWeaponClassForMOD(static_cast<meansOfDeath_t>(mod)) < targ->constructibleStats.weaponclass)
 		{
 			return;
 		}
@@ -1351,7 +1355,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 	{
 		if (targ->s.modelindex2)
 		{
-			if (G_WeaponIsExplosive(mod))
+			if (G_WeaponIsExplosive(static_cast<meansOfDeath_t>(mod)))
 			{
 				mapEntityData_t *mEnt;
 
@@ -1384,7 +1388,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 			return;
 		}
 
-		if (G_GetWeaponClassForMOD(mod) < targ->constructibleStats.weaponclass)
+		if (G_GetWeaponClassForMOD(static_cast<meansOfDeath_t>(mod)) < targ->constructibleStats.weaponclass)
 		{
 			return;
 		}
@@ -1771,7 +1775,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 		//if ( attacker == inflictor && targ->health <= GIB_HEALTH) {
 		if (targ->health <= GIB_HEALTH)
 		{
-			if (!G_WeaponIsExplosive(mod))
+			if (!G_WeaponIsExplosive(static_cast<meansOfDeath_t>(mod)))
 			{
 				targ->health = GIB_HEALTH + 1;
 			}
@@ -1825,7 +1829,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 				{
 					if (G_GetTeamFromEntity(inflictor) != G_GetTeamFromEntity(targ))
 					{
-						G_AddKillSkillPoints(attacker, mod, hr, (dflags & DAMAGE_RADIUS));
+						G_AddKillSkillPoints(attacker, static_cast<meansOfDeath_t>(mod), hr, (dflags & DAMAGE_RADIUS) ? qtrue : qfalse);
 					}
 				}
 
@@ -1836,7 +1840,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 
 
 				targ->enemy     = attacker;
-				targ->deathType = mod;
+				targ->deathType = static_cast<meansOfDeath_t>(mod);
 
 				// Ridah, mg42 doesn't have die func (FIXME)
 				if (targ->die)

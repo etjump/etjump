@@ -258,10 +258,10 @@ qboolean G_FilterPacket(ipFilterList_t *ipFilterList, char *from)
 	for (i = 0; i < ipFilterList->numIPFilters; i++)
 		if ((in & ipFilterList->ipFilters[i].mask) == ipFilterList->ipFilters[i].compare)
 		{
-			return g_filterBan.integer != 0;
+			return g_filterBan.integer != 0 ? qtrue : qfalse;
 		}
 
-	return g_filterBan.integer == 0;
+	return g_filterBan.integer == 0 ? qtrue : qfalse;
 }
 
 qboolean G_FilterIPBanPacket(char *from)
@@ -735,7 +735,7 @@ void Svcmd_ForceTeam_f(void)
 
 	// set the team
 	trap_Argv(2, str, sizeof(str));
-	SetTeam(&g_entities[cl - level.clients], str, qfalse, cl->sess.playerWeapon, cl->sess.playerWeapon2, qtrue);
+	SetTeam(&g_entities[cl - level.clients], str, qfalse, static_cast<weapon_t>(cl->sess.playerWeapon), static_cast<weapon_t>(cl->sess.playerWeapon2), qtrue);
 }
 
 /*
@@ -751,7 +751,7 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart)
 
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
-		g_entities[level.sortedClients[i]].client->pers.ready = 0;
+		g_entities[level.sortedClients[i]].client->pers.ready = qfalse;
 	}
 
 	if (fDoRestart)
