@@ -3,46 +3,46 @@ cmake_minimum_required(VERSION 2.8.1)
 cmake_policy(SET CMP0015 NEW)
 
 # Release
-SET(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Release)
 
 # Store compiled binaries to folder
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 
 # Set the used compiler
-# SET(CMAKE_C_COMPILER gcc-4.6)
-# SET(CMAKE_CXX_COMPILER g++-4.6)
+set(CMAKE_C_COMPILER gcc-4.8)
+set(CMAKE_CXX_COMPILER g++-4.8)
 
-SET(ARCH "i386")
+set(ARCH "i386")
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-IF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
 	# This has to be set to compile with -ffast-math
 	# Doesn't matter in ETJumps case as we don't store fps
 	add_definitions(-DSQLITE_OMIT_FLOATING_POINT)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-ENDIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+endif(${CMAKE_BUILD_TYPE} MATCHES "Release")
 
-SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
-SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/game)
-SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/game)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
-FILE(GLOB CGAME_SRC
+file(GLOB CGAME_SRC
 	"cgame/cg_atmospheric.c"
 	"cgame/cg_character.c"
 	"cgame/cg_commandmap.c"
@@ -106,7 +106,7 @@ FILE(GLOB CGAME_SRC
   "cgame/etj_timerun_view.cpp"
 )
 
-FILE(GLOB QAGAME_SRC
+file(GLOB QAGAME_SRC
 	"game/async_operation.cpp"
 	"game/bg_animation.c"
 	"game/bg_animgroup.c"
@@ -186,7 +186,7 @@ FILE(GLOB QAGAME_SRC
 	"sqlite/sqlite3.c"
 )
 
-FILE(GLOB UI_SRC
+file(GLOB UI_SRC
 	"ui/ui_atoms.c"
 	"ui/ui_gameinfo.c"
 	"ui/ui_loadpanel.c"
