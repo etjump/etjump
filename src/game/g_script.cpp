@@ -221,8 +221,8 @@ g_script_stack_action_t gScriptActions[] =
 	{ NULL,                             NULL                                         }
 };
 
-qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, char *eventParm);
-qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, char *eventParm);
+qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, const char *eventParm);
+qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, const char *eventParm);
 
 // the list of events that can start an action sequence
 g_script_event_define_t gScriptEvents[] =
@@ -253,7 +253,7 @@ g_script_event_define_t gScriptEvents[] =
 G_Script_EventMatch_StringEqual
 ===============
 */
-qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, char *eventParm)
+qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, const char *eventParm)
 {
 	if (eventParm && !Q_stricmp(event->params, eventParm))
 	{
@@ -270,13 +270,13 @@ qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, char *eventPar
 G_Script_EventMatch_IntInRange
 ===============
 */
-qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, char *eventParm)
+qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, const char *eventParm)
 {
 	char *pString, *token;
 	int  int1, int2, eInt;
 
 	// get the cast name
-	pString = eventParm;
+	pString = (char *)eventParm;
 	token   = COM_ParseExt(&pString, qfalse);
 	int1    = atoi(token);
 	token   = COM_ParseExt(&pString, qfalse);
@@ -845,7 +845,7 @@ G_Script_GetEventIndex
   xkan, 10/28/2002 - extracted from G_Script_ScriptEvent.
 ================
 */
-int G_Script_GetEventIndex(gentity_t *ent, char *eventStr, char *params)
+int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr, const char *params)
 {
 	int i, eventNum = -1;
 
@@ -898,7 +898,7 @@ G_Script_ScriptEvent
   An event has occured, for which a script may exist
 ================
 */
-void G_Script_ScriptEvent(gentity_t *ent, char *eventStr, char *params)
+void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr, const char *params)
 {
 	int i = G_Script_GetEventIndex(ent, eventStr, params);
 

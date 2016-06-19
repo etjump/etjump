@@ -478,7 +478,7 @@ BG_IndexForString
   errors out if no match found
 =================
 */
-int BG_IndexForString(const char *token, animStringItem_t *strings, qboolean allowFail)
+int BG_IndexForString(char *token, animStringItem_t *strings, qboolean allowFail)
 {
 	int              i, hash;
 	animStringItem_t *strav;

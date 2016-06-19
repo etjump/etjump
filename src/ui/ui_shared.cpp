@@ -1866,7 +1866,7 @@ void Menu_TransitionItemByName(menuDef_t *menu, const char *p, rectDef_t rectFro
 			item->window.offsetTime = time;
 			memcpy(&item->window.rectClient, &rectFrom, sizeof(rectDef_t));
 			memcpy(&item->window.rectEffects, &rectTo, sizeof(rectDef_t));
-			item->window.rectEffects2.x = abs(rectTo.x - rectFrom.x) / amt;
+			item->window.rectEffects2.x = std::abs(rectTo.x - rectFrom.x) / amt;
 			item->window.rectEffects2.y = abs(rectTo.y - rectFrom.y) / amt;
 			item->window.rectEffects2.w = abs(rectTo.w - rectFrom.w) / amt;
 			item->window.rectEffects2.h = abs(rectTo.h - rectFrom.h) / amt;

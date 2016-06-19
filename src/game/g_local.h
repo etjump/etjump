@@ -166,7 +166,7 @@ typedef struct
 typedef struct
 {
 	const char *eventStr;
-	qboolean (*eventMatch)(g_script_event_t *event, char *eventParm);
+	qboolean (*eventMatch)(g_script_event_t *event, const char *eventParm);
 	int hash;
 } g_script_event_define_t;
 //
