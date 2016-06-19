@@ -1546,7 +1546,7 @@ void CG_ParticleDirtBulletDebris_Core(vec3_t org, vec3_t vel, int duration, floa
 	p->endheight = p->height;
 	p->endwidth  = p->width;
 
-	p->rotate = 0;
+	p->rotate = qfalse;
 
 	p->type = P_SMOKE;
 
@@ -1554,7 +1554,7 @@ void CG_ParticleDirtBulletDebris_Core(vec3_t org, vec3_t vel, int duration, floa
 	if (cg_fxflags & 1)
 	{
 		p->pshader = getTestShader();
-		p->rotate  = 0;
+		p->rotate  = qfalse;
 		p->roll    = 0;
 		p->type    = P_SPRITE;
 	}
@@ -1667,7 +1667,7 @@ int CG_NewParticleArea(int num)
 	int    numparticles;
 	int    snum;
 
-	str = (char *) CG_ConfigString(num);
+	str = (char *)CG_ConfigString(num);
 	if (!str[0])
 	{
 		return (0);

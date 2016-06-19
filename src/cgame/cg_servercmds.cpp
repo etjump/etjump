@@ -103,10 +103,10 @@ and whenever the server updates any serverinfo flagged cvars
 void CG_ParseServerinfo(void)
 {
 	const char *info;
-	char       *mapname;
+	const char       *mapname;
 
 	info                = CG_ConfigString(CS_SERVERINFO);
-	cg_gameType.integer = cgs.gametype = atoi(Info_ValueForKey(info, "g_gametype"));
+	cg_gameType.integer = cgs.gametype = (gametype_t)atoi(Info_ValueForKey(info, "g_gametype"));
 	cg_antilag.integer  = cgs.antilag = atoi(Info_ValueForKey(info, "g_antilag"));
 	if (!cgs.localServer)
 	{
@@ -295,7 +295,7 @@ void CG_ParseWolfinfo(void)
 
 	cgs.currentRound       = atoi(Info_ValueForKey(info, "g_currentRound"));
 	cgs.nextTimeLimit      = atof(Info_ValueForKey(info, "g_nextTimeLimit"));
-	cgs.gamestate          = atoi(Info_ValueForKey(info, "gamestate"));
+	cgs.gamestate          = (gamestate_t)atoi(Info_ValueForKey(info, "gamestate"));
 	cgs.currentCampaign    = Info_ValueForKey(info, "g_currentCampaign");
 	cgs.currentCampaignMap = atoi(Info_ValueForKey(info, "g_currentCampaignMap"));
 
@@ -389,7 +389,7 @@ void CG_ParseSpawns(void)
 		{
 			cg.spawnTeams_old[i]        = cg.spawnTeams[i];
 			cg.spawnTeams_changeTime[i] = cg.time;
-			cg.spawnTeams[i]            = newteam;
+			cg.spawnTeams[i]            = (team_t)newteam;
 		}
 
 		s                       = Info_ValueForKey(info, "c");
@@ -404,17 +404,17 @@ CG_ParseScreenFade
 */
 static void CG_ParseScreenFade(void)
 {
-	const char *info;
+	char *info;
 	char       *token;
 
-	info = CG_ConfigString(CS_SCREENFADE);
+	info = (char *)CG_ConfigString(CS_SCREENFADE);
 
-	token         = COM_Parse((char **)&info);
+	token         = COM_Parse(&info);
 	cgs.fadeAlpha = atof(token);
 
-	token             = COM_Parse((char **)&info);
+	token             = COM_Parse(&info);
 	cgs.fadeStartTime = atoi(token);
-	token             = COM_Parse((char **)&info);
+	token             = COM_Parse(&info);
 	cgs.fadeDuration  = atoi(token);
 
 	if (cgs.fadeStartTime + cgs.fadeDuration < cg.time)
@@ -436,20 +436,20 @@ CG_ParseFog
 */
 static void CG_ParseFog(void)
 {
-	const char *info;
+	char *info;
 	char       *token;
 	float      ne, fa, r, g, b, density;
 	int        time;
 
-	info = CG_ConfigString(CS_FOGVARS);
+	info = (char *)CG_ConfigString(CS_FOGVARS);
 
-	token = COM_Parse((char **)&info);    ne = atof(token);
-	token = COM_Parse((char **)&info);    fa = atof(token);
-	token = COM_Parse((char **)&info);    density = atof(token);
-	token = COM_Parse((char **)&info);    r = atof(token);
-	token = COM_Parse((char **)&info);    g = atof(token);
-	token = COM_Parse((char **)&info);    b = atof(token);
-	token = COM_Parse((char **)&info);    time = atoi(token);
+	token = COM_Parse(&info);    ne = atof(token);
+	token = COM_Parse(&info);    fa = atof(token);
+	token = COM_Parse(&info);    density = atof(token);
+	token = COM_Parse(&info);    r = atof(token);
+	token = COM_Parse(&info);    g = atof(token);
+	token = COM_Parse(&info);    b = atof(token);
+	token = COM_Parse(&info);    time = atoi(token);
 
 	if (fa)      // far of '0' from a target_fog means "return to map fog"
 	{
@@ -464,16 +464,16 @@ static void CG_ParseFog(void)
 
 static void CG_ParseGlobalFog(void)
 {
-	const char *info;
+	char *info;
 	char       *token;
 	qboolean   restore;
 	float      r, g, b, depthForOpaque;
 	int        duration;
 
-	info = CG_ConfigString(CS_GLOBALFOGVARS);
+	info = (char *)CG_ConfigString(CS_GLOBALFOGVARS);
 
-	token = COM_Parse((char **)&info);    restore = atoi(token);
-	token = COM_Parse((char **)&info);    duration = atoi(token);
+	token = COM_Parse(&info);    restore = atoi(token) ? qtrue : qfalse;
+	token = COM_Parse(&info);    duration = atoi(token);
 
 	if (restore)
 	{
@@ -481,10 +481,10 @@ static void CG_ParseGlobalFog(void)
 	}
 	else
 	{
-		token = COM_Parse((char **)&info);    r = atof(token);
-		token = COM_Parse((char **)&info);    g = atof(token);
-		token = COM_Parse((char **)&info);    b = atof(token);
-		token = COM_Parse((char **)&info);    depthForOpaque = atof(token);
+		token = COM_Parse(&info);    r = atof(token);
+		token = COM_Parse(&info);    g = atof(token);
+		token = COM_Parse(&info);    b = atof(token);
+		token = COM_Parse(&info);    depthForOpaque = atof(token);
 
 		trap_R_SetGlobalFog(qfalse, duration, r, g, b, depthForOpaque);
 	}
@@ -574,7 +574,7 @@ void CG_ShaderStateChanged(void)
 	char       newShader[MAX_QPATH];
 	char       timeOffset[16];
 	const char *o;
-	char       *n, *t;
+	const char       *n, *t;
 
 	o = CG_ConfigString(CS_SHADERSTATE);
 	while (o && *o)
@@ -731,7 +731,7 @@ static void CG_ConfigStringModified(void)
 	}
 	else if (num == CS_INTERMISSION)
 	{
-		cg.intermissionStarted = atoi(str);
+		cg.intermissionStarted = atoi(str) ? qtrue : qfalse;
 	}
 	else if (num == CS_SCREENFADE)
 	{
@@ -1057,7 +1057,7 @@ static void CG_MapRestart(void)
 	// clear pmext
 	memset(&cg.pmext, 0, sizeof(cg.pmext));
 
-	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
+	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
 
 	numSplinePaths     = 0;
 	numPathCorners     = 0;
@@ -1709,7 +1709,7 @@ void CG_VoiceChat(int mode)
 
 	memset(&vsay, 0, sizeof(vsay));
 
-	voiceOnly = atoi(CG_Argv(1));
+	voiceOnly = atoi(CG_Argv(1)) ? qtrue : qfalse;
 	clientNum = atoi(CG_Argv(2));
 	color     = atoi(CG_Argv(3));
 
@@ -2054,7 +2054,7 @@ void CG_parseWeaponStatsGS_cmd(void)
 void CG_parseWeaponStats_cmd(void(txt_dump)(char *))
 {
 	clientInfo_t *ci;
-	qboolean     fFull     = (txt_dump != CG_printWindow);
+	qboolean     fFull     = (txt_dump != CG_printWindow) ? qtrue : qfalse;
 	qboolean     fHasStats = qfalse;
 	char         strName[MAX_STRING_CHARS];
 	int          atts, deaths, dmg_given, dmg_rcvd, hits, kills, team_dmg, headshots;
@@ -2217,7 +2217,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(char *))
 void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(char *))
 {
 	int      iArg  = 1;
-	qboolean fFull = (txt_dump != CG_printWindow);
+	qboolean fFull = (txt_dump != CG_printWindow) ? qtrue : qfalse;
 
 	int iWeap = atoi(CG_Argv(iArg++));
 	if (!iWeap)
@@ -2496,7 +2496,7 @@ static void CG_ServerCommand(void)
 		for (i = 0; i < WP_NUM_WEAPONS; i++)
 		{
 
-			if (!BG_ValidStatWeapon(i))
+			if (!BG_ValidStatWeapon((weapon_t)i))
 			{
 				continue;
 			}
@@ -2532,7 +2532,7 @@ static void CG_ServerCommand(void)
 
 	if (!Q_stricmp(cmd, "hasTimerun"))
 	{
-		cg.hasTimerun = atoi(CG_Argv(1));
+		cg.hasTimerun = atoi(CG_Argv(1)) ? qtrue : qfalse;
 		return;
 	}
 
@@ -2621,7 +2621,7 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
-	enc = !Q_stricmp(cmd, "enc_chat");
+	enc = !Q_stricmp(cmd, "enc_chat") ? qtrue : qfalse;
 	if (!Q_stricmp(cmd, "chat") || enc)
 	{
 		const char *s;
@@ -2656,7 +2656,7 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
-	enc = !Q_stricmp(cmd, "enc_tchat");
+	enc = !Q_stricmp(cmd, "enc_tchat") ? qtrue : qfalse;
 	if (!Q_stricmp(cmd, "tchat") || enc)
 	{
 
@@ -2805,13 +2805,13 @@ static void CG_ServerCommand(void)
 
 	if (!Q_stricmp(cmd, "startCam"))
 	{
-		CG_StartCamera(CG_Argv(1), atoi(CG_Argv(2)));
+		CG_StartCamera(CG_Argv(1), atoi(CG_Argv(2)) ? qtrue : qfalse);
 		return;
 	}
 
 	if (!Q_stricmp(cmd, "SetInitialCamera"))
 	{
-		CG_SetInitialCamera(CG_Argv(1), atoi(CG_Argv(2)));
+		CG_SetInitialCamera(CG_Argv(1), atoi(CG_Argv(2)) ? qtrue : qfalse);
 		return;
 	}
 
@@ -2978,7 +2978,7 @@ static void CG_ServerCommand(void)
 
 	if (!Q_stricmp(cmd, "snd_fade"))
 	{
-		trap_S_FadeAllSound(atof(CG_Argv(1)), atoi(CG_Argv(2)), atoi(CG_Argv(3)));
+		trap_S_FadeAllSound(atof(CG_Argv(1)), atoi(CG_Argv(2)), atoi(CG_Argv(3)) ? qtrue : qfalse);
 		return;
 	}
 

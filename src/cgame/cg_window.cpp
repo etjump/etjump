@@ -432,7 +432,7 @@ void CG_windowCleanup(void)
 
 void CG_demoAviFPSDraw(void)
 {
-	qboolean fKeyDown = cgs.fKeyPressed[K_F1] | cgs.fKeyPressed[K_F2] | cgs.fKeyPressed[K_F3] | cgs.fKeyPressed[K_F4] | cgs.fKeyPressed[K_F5];
+	qboolean fKeyDown = (cgs.fKeyPressed[K_F1] | cgs.fKeyPressed[K_F2] | cgs.fKeyPressed[K_F3] | cgs.fKeyPressed[K_F4] | cgs.fKeyPressed[K_F5]) ? qtrue : qfalse;
 
 	if (cg.demoPlayback && fKeyDown && cgs.aviDemoRate >= 0)
 	{
@@ -464,7 +464,7 @@ void CG_windowDraw(void)
 	cg_window_t *w;
 	qboolean    fCleanup = qfalse;
 	// Gordon: FIXME, the limbomenu var no longer exists
-	qboolean fAllowMV = (cg.snap != NULL && cg.snap->ps.pm_type != PM_INTERMISSION /*&& !cg.limboMenu*/);
+	qboolean fAllowMV = (cg.snap != NULL && cg.snap->ps.pm_type != PM_INTERMISSION /*&& !cg.limboMenu*/) ? qtrue : qfalse;
 	vec4_t   *bg;
 	vec4_t   textColor, borderColor, bgColor;
 
@@ -856,14 +856,14 @@ void CG_cursorUpdate(void)
 		nx = 640.0 * (65536.0 - cg_pmove.cmd.angles[1]) / 65536.0;
 		ny = 480.0 / 65536.0 * ((int_m_pitch.value < 0.0) ? (65536.0 - cg_pmove.cmd.angles[0]) : cg_pmove.cmd.angles[0]);
 
-		fSelect = ((cg_pmove.cmd.buttons & BUTTON_ATTACK) != 0);
+		fSelect = ((cg_pmove.cmd.buttons & BUTTON_ATTACK) != 0) ? qtrue : qfalse;
 
 		if (cgs.cursorX == (int)nx  && cgs.cursorY == (int)ny && !fSelect)
 		{
 			return;
 		}
 
-		fResize = ((cg_pmove.cmd.buttons & BUTTON_SPRINT) != 0);
+		fResize = ((cg_pmove.cmd.buttons & BUTTON_SPRINT) != 0) ? qtrue : qfalse;
 
 		cgs.cursorUpdate = cg.time + 5000;
 		cgs.cursorX      = nx;

@@ -579,7 +579,7 @@ CG_GetOriginForTag
   returns the index of the tag it used, so we can cycle through tag's with the same name
 ======================
 */
-int CG_GetOriginForTag(centity_t *cent, refEntity_t *parent, char *tagName, int startIndex, vec3_t org, vec3_t axis[3])
+int CG_GetOriginForTag(centity_t *cent, refEntity_t *parent, const char *tagName, int startIndex, vec3_t org, vec3_t axis[3])
 {
 	int           i;
 	orientation_t lerped;

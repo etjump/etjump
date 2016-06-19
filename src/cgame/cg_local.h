@@ -1978,7 +1978,7 @@ typedef struct
 
 	int cursorX;
 	int cursorY;
-	qboolean eventHandling;
+	int eventHandling;
 	qboolean mouseCaptured;
 	qboolean sizingHud;
 	void *capturedItem;
@@ -2000,7 +2000,7 @@ typedef struct
 	float nextTimeLimit;
 	int minclients;
 	gamestate_t gamestate;
-	char *currentCampaign;
+	const char *currentCampaign;
 	int currentCampaignMap;
 
 	int complaintClient;        // DHM - Nerve
@@ -2853,7 +2853,7 @@ void    CG_AddLocalEntities(void);
 //
 // cg_effects.c
 //
-int CG_GetOriginForTag(centity_t * cent, refEntity_t * parent, char *tagName, int startIndex, vec3_t org, vec3_t axis[3]);
+int CG_GetOriginForTag(centity_t * cent, refEntity_t * parent, const char *tagName, int startIndex, vec3_t org, vec3_t axis[3]);
 localEntity_t *CG_SmokePuff(const vec3_t p,
                             const vec3_t vel,
                             float radius,

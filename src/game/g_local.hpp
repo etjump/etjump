@@ -4,9 +4,7 @@
 
 // Local C++ definitions for game module
 
-extern "C" {
 #include "g_local.h"
-}
 
 #ifdef max
 #undef max

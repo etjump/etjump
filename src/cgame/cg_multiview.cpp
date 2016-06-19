@@ -354,7 +354,7 @@ void CG_mvUpdateClientInfo(int pID)
 
 		ci->ammo        = (ps->ammo[id - 1])       & 0x3FF;
 		ci->weaponState = (ps->ammo[id - 1] >> 11) & 0x03;
-		ci->fCrewgun    = (ps->ammo[id - 1] >> 13) & 0x01;
+		ci->fCrewgun    = ((ps->ammo[id - 1] >> 13) & 0x01) ? qtrue : qfalse;
 		ci->cursorHint  = (ps->ammo[id - 1] >> 14) & 0x03;
 
 		ci->ammoclip   = (ps->ammoclip[id - 1])       & 0x1FF;
@@ -411,7 +411,7 @@ void CG_mvTransitionPlayerState(playerState_t *ps)
 	cent->currentState.eType       = ET_PLAYER;
 	ps->eFlags                     = cent->currentState.eFlags;
 	cg.predictedPlayerState.eFlags = cent->currentState.eFlags;
-	cg.zoomedBinoc                 = ((cent->currentState.eFlags & EF_ZOOMING) != 0 && ci->health > 0);
+	cg.zoomedBinoc                 = ((cent->currentState.eFlags & EF_ZOOMING) != 0 && ci->health > 0) ? qtrue : qfalse;
 
 	x = cent->currentState.teamNum;
 	if (x == PC_MEDIC)
@@ -451,8 +451,8 @@ void CG_mvTransitionPlayerState(playerState_t *ps)
 	ps->grenadeTimeLeft = ci->grenadeTimeLeft;
 
 	// Safe as we've already pull data before clobbering
-	ps->ammo[BG_FindAmmoForWeapon(ps->weapon)]     = ci->ammo;
-	ps->ammoclip[BG_FindClipForWeapon(ps->weapon)] = ci->ammoclip;
+	ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ps->weapon))]     = ci->ammo;
+	ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ps->weapon))] = ci->ammoclip;
 
 	ps->persistant[PERS_SCORE] = ci->score;
 	ps->persistant[PERS_TEAM]  = ci->team;
@@ -658,7 +658,7 @@ void CG_mvDraw(cg_window_t *sw)
 	cg.refdef_current = &cg.refdef;
 #endif
 
-	CG_mvWindowOverlay(pID, b_x, b_y, b_w, b_h, s, sw->state, (sw == cg.mvCurrentActive));
+	CG_mvWindowOverlay(pID, b_x, b_y, b_w, b_h, s, sw->state, (sw == cg.mvCurrentActive) ? qtrue : qfalse);
 	if (sw == cg.mvCurrentActive)
 	{
 		trap_S_Respatialize(cg.clientNum, refdef.vieworg, refdef.viewaxis, qfalse);
@@ -732,7 +732,7 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, flo
 	rect.h                                  = 25;
 	cg.predictedPlayerState.grenadeTimeLeft = 0;
 	cg.predictedPlayerState.weapon          = cent->currentState.weapon;
-	CG_DrawPlayerWeaponIcon(&rect, (ci->weaponState > WSTATE_IDLE), ITEM_ALIGN_RIGHT,
+	CG_DrawPlayerWeaponIcon(&rect, (ci->weaponState > WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT,
 	                        ((ci->weaponState == WSTATE_SWITCH) ? &colorWhite :
 	                         (ci->weaponState == WSTATE_FIRE) ? &colorRed :
 	                         &colorYellow));
@@ -904,7 +904,7 @@ void CG_mvOverlayDisplay(void)
 
 			if (cg.mvTotalTeam[j] == 0)
 			{
-				char *flag = (j == TEAM_AXIS) ? "ui/assets/ger_flag.tga" : "ui/assets/usa_flag.tga";
+				const char *flag = (j == TEAM_AXIS) ? "ui/assets/ger_flag.tga" : "ui/assets/usa_flag.tga";
 				y += 2 * (MVINFO_TEXTSIZE + 1);
 				CG_DrawPic(MVINFO_RIGHT - (2 * MVINFO_TEXTSIZE), y, 2 * MVINFO_TEXTSIZE, MVINFO_TEXTSIZE, trap_R_RegisterShaderNoMip(flag));
 			}

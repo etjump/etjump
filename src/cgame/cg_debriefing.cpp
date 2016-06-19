@@ -2744,39 +2744,37 @@ const char *awardNames[NUM_ENDGAME_AWARDS] =
 
 void CG_Debreifing2_Awards_Parse(void)
 {
-	int        i   = 0;
-	char       *cs = (char *)CG_ConfigString(CS_ENDGAME_STATS);
-	const char *token;
-	char       *s;
-	int        size, len;
-	char       buffer[sizeof(cgs.dbAwardNamesBuffer)];
+	int i = 0;
+	char* cs = (char*)CG_ConfigString(CS_ENDGAME_STATS);
+	const char* token;
+	char* s;
+	int size, len;
+	char buffer[sizeof(cgs.dbAwardNamesBuffer)];
 
 	Q_strncpyz(buffer, cs, sizeof(cgs.dbAwardNamesBuffer));
 	cs = buffer;
 
-	for (s = strchr(cs, ';'); s; s = strchr(cs, ';'))
-	{
+	while ((s = strchr(cs, ';'))) {
 		*s = '"';
 	}
 
-	s    = cgs.dbAwardNamesBuffer;
+	s = cgs.dbAwardNamesBuffer;
 	size = sizeof(cgs.dbAwardNamesBuffer);
 
-	for (i = 0; i < NUM_ENDGAME_AWARDS; i++)
-	{
+	for (i = 0; i < NUM_ENDGAME_AWARDS; i++) {
 		token = COM_Parse(&cs);
 
 		Q_strncpyz(s, token, size);
 
 		cgs.dbAwardNames[i] = s;
 
-		len   = strlen(token);
+		len = strlen(token);
 		size -= len;
-		s    += len + 1;
+		s += len + 1;
 
 		token = COM_Parse(&cs);
 
-		cgs.dbAwardTeams[i] = atoi(token);
+		cgs.dbAwardTeams[i] = (team_t)atoi(token);
 	}
 
 	cgs.dbAwardsParsed = qtrue;

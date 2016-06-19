@@ -1,6 +1,4 @@
-extern "C" {
 #include "cg_mainext.h"
-}
 #include <string>
 #include <memory>
 #include "cg_timerun.h"

@@ -5,9 +5,7 @@
 #include "printer.hpp"
 #include <boost/format.hpp>
 
-extern "C" {
 #include "g_local.h"
-}
 
 void Printer::LogPrint(std::string message)
 {

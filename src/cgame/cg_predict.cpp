@@ -602,9 +602,9 @@ static void CG_TouchItem(centity_t *cent)
 	{
 		COM_BitSet(cg.predictedPlayerState.weapons, item->giTag);
 
-		if (!cg.predictedPlayerState.ammo[BG_FindAmmoForWeapon(item->giTag)])
+		if (!cg.predictedPlayerState.ammo[BG_FindAmmoForWeapon((weapon_t)item->giTag)])
 		{
-			cg.predictedPlayerState.ammo[BG_FindAmmoForWeapon(item->giTag)] = 1;
+			cg.predictedPlayerState.ammo[BG_FindAmmoForWeapon((weapon_t)item->giTag)] = 1;
 		}
 	}
 }
@@ -636,7 +636,7 @@ static void CG_TouchTriggerPrediction(void)
 		return;
 	}
 
-	spectator = ((cg.predictedPlayerState.pm_type == PM_SPECTATOR) || (cg.predictedPlayerState.pm_flags & PMF_LIMBO));   // JPW NERVE
+	spectator = ((cg.predictedPlayerState.pm_type == PM_SPECTATOR) || (cg.predictedPlayerState.pm_flags & PMF_LIMBO)) ? qtrue : qfalse;   // JPW NERVE
 
 	if (cg.predictedPlayerState.pm_type != PM_NORMAL && !spectator)
 	{

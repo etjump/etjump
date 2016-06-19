@@ -81,7 +81,7 @@ qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime)
 }
 
 // Prints specific command help info.
-qboolean G_commandHelp(gentity_t *ent, char *pszCommand, unsigned int dwCommand)
+qboolean G_commandHelp(gentity_t *ent, const char *pszCommand, unsigned int dwCommand)
 {
 	char arg[MAX_TOKEN_CHARS];
 
@@ -189,7 +189,9 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	gclient_t *cl;
 	gentity_t *cl_ent;
 	char      n2[MAX_NETNAME], ready[16], ref[16], rate[256];
-	char      *s, *tc, *coach, userinfo[MAX_INFO_STRING];
+	const char      *s = nullptr; 
+	char userinfo[MAX_INFO_STRING];
+	const char *coach = nullptr, *tc = nullptr;
 
 
 	if (g_gamestate.integer == GS_PLAYING)

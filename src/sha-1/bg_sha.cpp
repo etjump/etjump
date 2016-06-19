@@ -1,4 +1,6 @@
+extern "C" {
 #include "sha1.h"
+}
 #ifdef CGAMEDLL
 #include "../cgame/cg_local.h"
 #else

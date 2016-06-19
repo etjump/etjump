@@ -165,7 +165,7 @@ typedef struct
 //
 typedef struct
 {
-	char *eventStr;
+	const char *eventStr;
 	qboolean (*eventMatch)(g_script_event_t *event, char *eventParm);
 	int hash;
 } g_script_event_define_t;
@@ -189,7 +189,7 @@ typedef struct
 //
 #define G_MAX_SCRIPT_ACCUM_BUFFERS 10
 //
-void G_Script_ScriptEvent(gentity_t *ent, char *eventStr, char *params);
+void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr, const char *params);
 //====================================================================
 
 typedef struct g_constructible_stats_s
@@ -1600,7 +1600,7 @@ void G_UpdateCharacter(gclient_t *client);
 //
 qboolean ConsoleCommand(void);
 void G_ProcessIPBans(void);
-qboolean G_FilterIPBanPacket(char *from);
+qboolean G_FilterIPBanPacket(const char *from);
 ipXPStorage_t *G_FindXPBackup(char *from);
 void G_AddXPBackup(gentity_t *ent);
 void G_StoreXPBackup(void);
@@ -1754,7 +1754,7 @@ void G_LoadPersistant(void);
 // g_script.c
 void G_Script_ScriptParse(gentity_t *ent);
 qboolean G_Script_ScriptRun(gentity_t *ent);
-void G_Script_ScriptEvent(gentity_t *ent, char *eventStr, char *params);
+void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr, const char *params);
 void G_Script_ScriptLoad(void);
 void G_Script_EventStringInit(void);
 
@@ -2496,7 +2496,7 @@ void G_wipeCvars(void);
 ///////////////////////
 // g_cmds_ext.c
 //
-qboolean G_commandHelp(gentity_t *ent, char *pszCommand, unsigned int dwCommand);
+qboolean G_commandHelp(gentity_t *ent, const char *pszCommand, unsigned int dwCommand);
 qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_commands_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fDump);
@@ -2638,7 +2638,7 @@ qboolean G_LandmineSnapshotCallback(int entityNum, int clientNum);
 
 void G_AddIpMute(char *ip);
 void G_RemoveIPMute(char *ip);
-qboolean G_isIPMuted(char *ip);
+qboolean G_isIPMuted(const char *ip);
 void G_ClearIPMutes();
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime);
 // g_admin.c

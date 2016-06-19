@@ -105,9 +105,6 @@
     <ClCompile Include="bg_classes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_lib.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bg_misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

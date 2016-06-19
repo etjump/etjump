@@ -1,6 +1,4 @@
-extern "C" {
 #include "g_local.h"
-}
 
 #include <memory>
 #include "etj_banner_system.hpp"
@@ -49,7 +47,7 @@ namespace ETJump
 
 
 // Initializes the ETJump subsystems
-extern "C" void ETJump_InitGame(int levelTime, int randomSeed, int restart)
+void ETJump_InitGame(int levelTime, int randomSeed, int restart)
 {
 	Printer::LogPrint(
 		"--------------------------------------------------------------------------------\n"
@@ -72,7 +70,7 @@ extern "C" void ETJump_InitGame(int levelTime, int randomSeed, int restart)
 }
 
 // Shuts down the ETJump subsystems
-extern "C" void ETJump_ShutdownGame(int restart)
+void ETJump_ShutdownGame(int restart)
 {
 	Printer::LogPrint(
 		"--------------------------------------------------------------------------------\n"
@@ -89,7 +87,7 @@ extern "C" void ETJump_ShutdownGame(int restart)
 	);
 }
 
-extern "C" void ETJump_RunFrame(int levelTime)
+void ETJump_RunFrame(int levelTime)
 {
 	for (auto & callback : runFrameCallbacks)
 	{

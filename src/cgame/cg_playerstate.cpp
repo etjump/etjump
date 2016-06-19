@@ -63,7 +63,7 @@ void CG_CheckAmmo(void)
 		case WP_K43:
 		case WP_MORTAR_SET:
 		default:
-			total += cg.snap->ps.ammo[BG_FindAmmoForWeapon(i)] * 1000;
+			total += cg.snap->ps.ammo[BG_FindAmmoForWeapon((weapon_t)i)] * 1000;
 			break;
 //			default:
 //				total += cg.snap->ps.ammo[BG_FindAmmoForWeapon(i)] * 200;
@@ -274,7 +274,7 @@ void CG_Respawn(qboolean revived)
 	memset(&cg.pmext, 0, sizeof(cg.pmext));
 
 	cg.pmext.noclipScale = (cg_noclipScale.value);
-	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
+	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
 
 	cg.pmext.sprintTime = SPRINTTIME;
 

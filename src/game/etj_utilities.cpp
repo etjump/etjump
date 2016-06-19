@@ -5,9 +5,7 @@
 #include "etj_utilities.hpp"
 #include <boost/algorithm/string.hpp>
 
-extern "C" {
 #include "g_local.h"
-}
 
 std::vector<int> Utilities::getSpectators(int clientNum)
 {

@@ -69,7 +69,7 @@ static qboolean CG_ParseHudHeadConfig(const char *filename, animation_t *hha)
 	int          len;
 	int          i;
 	float        fps;
-	char         *token;
+	const char         *token;
 	fileHandle_t f;
 
 	// load the file

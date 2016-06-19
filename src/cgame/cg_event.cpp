@@ -788,7 +788,7 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 
 			le->lifeRate   = 1.0 / (le->endTime - le->startTime);
 			le->leFlags    = LEF_TUMBLE;
-			le->leMarkType = 0;
+			le->leMarkType = LEMT_NONE;
 
 			VectorCopy(origin, re->origin);
 			AxisCopy(axisDefault, re->axis);
@@ -1173,7 +1173,7 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 
 			le->lifeRate   = 1.0 / (le->endTime - le->startTime);
 			le->leFlags    = LEF_TUMBLE;
-			le->leMarkType = 0;
+			le->leMarkType = LEMT_NONE;
 
 			VectorCopy(origin, re->origin);
 			AxisCopy(axisDefault, re->axis);
@@ -1476,7 +1476,7 @@ void CG_Shard(centity_t *cent, vec3_t origin, vec3_t dir)
 		le->leFlags      = LEF_TUMBLE;
 		le->bounceFactor = 0.4;
 		// le->leBounceSoundType	= LEBS_WOOD;
-		le->leMarkType = 0;
+		le->leMarkType = LEMT_NONE;
 
 		VectorCopy(origin, re->origin);
 		AxisCopy(axisDefault, re->axis);
@@ -1613,7 +1613,7 @@ void CG_ShardJunk(centity_t *cent, vec3_t origin, vec3_t dir)
 	le->lifeRate     = 1.0 / (le->endTime - le->startTime);
 	le->leFlags      = LEF_TUMBLE;
 	le->bounceFactor = 0.4;
-	le->leMarkType   = 0;
+	le->leMarkType   = LEMT_NONE;
 
 	VectorCopy(origin, re->origin);
 	AxisCopy(axisDefault, re->axis);
@@ -1666,7 +1666,7 @@ void CG_Debris(centity_t *cent, vec3_t origin, vec3_t dir)
 	le->lifeRate     = 1.0 / (le->endTime - le->startTime);
 	le->leFlags      = LEF_TUMBLE | LEF_TUMBLE_SLOW;
 	le->bounceFactor = 0.4;
-	le->leMarkType   = 0;
+	le->leMarkType   = LEMT_NONE;
 	le->breakCount   = 1;
 	le->sizeScale    = 0.5;
 
@@ -2792,7 +2792,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		break;
 
 	case EV_FLAMETHROWER_EFFECT:
-		CG_FireFlameChunks(cent, cent->currentState.origin, cent->currentState.apos.trBase, 0.6, 2);
+		CG_FireFlameChunks(cent, cent->currentState.origin, cent->currentState.apos.trBase, 0.6, (qboolean)2);
 		break;
 
 	case EV_DUST:
@@ -3012,7 +3012,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		qhandle_t  shader = CG_GetPMItemIcon(cent);
 		if (str)
 		{
-			CG_AddPMItem(cent->currentState.effect1Time, str, shader);
+			CG_AddPMItem(static_cast<popupMessageType_t>(cent->currentState.effect1Time), str, shader);
 		}
 		CG_PlayPMItemSound(cent);
 	}

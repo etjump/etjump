@@ -742,7 +742,7 @@ float   UI_MachinegunSpinAngle(playerInfo_t *pi)
 	{
 		pi->barrelTime     = dp_realtime;
 		pi->barrelAngle    = AngleMod(angle);
-		pi->barrelSpinning = !!(torsoAnim == TORSO_ATTACK);
+		pi->barrelSpinning = (!!(torsoAnim == TORSO_ATTACK)) ? qtrue : qfalse;
 	}
 
 	return angle;
@@ -806,7 +806,7 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 	{
 		pi->weapon        = pi->pendingWeapon;
 		pi->lastWeapon    = pi->pendingWeapon;
-		pi->pendingWeapon = -1;
+		pi->pendingWeapon = static_cast<weapon_t>(-1);
 		pi->weaponTimer   = 0;
 		if (pi->currentWeapon != pi->weapon)
 		{
@@ -1555,7 +1555,7 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 	}
 
 	// NERVE - SMF - set weapon
-	pi->weapon = trap_Cvar_VariableValue("mp_weapon");
+	pi->weapon = static_cast<weapon_t>((int)trap_Cvar_VariableValue("mp_weapon"));
 	UI_PlayerInfo_SetWeapon(pi, pi->weapon);
 
 	// NERVE - SMF - determine skin
@@ -1742,7 +1742,7 @@ void UI_PlayerInfo_SetModel(playerInfo_t *pi, const char *model)
 //	pi->weapon = WP_MP40;
 	pi->currentWeapon = pi->weapon;
 	pi->lastWeapon    = pi->weapon;
-	pi->pendingWeapon = -1;
+	pi->pendingWeapon = static_cast<weapon_t>(-1);
 	pi->weaponTimer   = 0;
 	pi->chat          = qfalse;
 	pi->newModel      = qtrue;
@@ -1788,7 +1788,7 @@ void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t
 			pi->weapon        = weaponNumber;
 			pi->currentWeapon = weaponNumber;
 			pi->lastWeapon    = weaponNumber;
-			pi->pendingWeapon = -1;
+			pi->pendingWeapon = static_cast<weapon_t>(-1);
 			pi->weaponTimer   = 0;
 			UI_PlayerInfo_SetWeapon(pi, pi->weapon);
 		}
@@ -1799,7 +1799,7 @@ void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t
 	// weapon
 	if (weaponNumber == -1)
 	{
-		pi->pendingWeapon = -1;
+		pi->pendingWeapon = static_cast<weapon_t>(-1);
 		pi->weaponTimer   = 0;
 	}
 	else if (weaponNumber != WP_NONE)

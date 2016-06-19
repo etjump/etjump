@@ -3208,7 +3208,7 @@ qboolean G_ScriptAction_ObjectiveStatus(gentity_t *ent, char *params)
 {
 	char *pString, *token;
 	char cs[MAX_STRING_CHARS];
-	char *parm;
+	const char *parm;
 
 	int num;
 

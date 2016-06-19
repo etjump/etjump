@@ -3,7 +3,6 @@
 //
 
 #include "cg_timerun.h"
-extern "C" {
 #include "cg_local.h"
 #ifdef min
 #undef min
@@ -11,7 +10,6 @@ extern "C" {
 #ifdef max
 #undef max
 #endif
-}
 
 #include <string>
 #include <boost/format.hpp>

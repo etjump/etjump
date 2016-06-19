@@ -1,9 +1,7 @@
 #include <string>
 #include <boost/format.hpp>
 
-extern "C" {
 #include "cg_local.h"
-}
 
 #include "etj_timerun_view.hpp"
 

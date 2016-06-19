@@ -245,11 +245,6 @@
     <ClCompile Include="bg_campaign.cpp" />
     <ClCompile Include="bg_character.cpp" />
     <ClCompile Include="bg_classes.cpp" />
-    <ClCompile Include="bg_lib.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="bg_misc.cpp" />
     <ClCompile Include="bg_pmove.cpp" />
     <ClCompile Include="bg_slidemove.cpp" />

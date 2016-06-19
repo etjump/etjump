@@ -1575,7 +1575,7 @@ void Cmd_TeamBot_f(gentity_t *foo)
 	char ptype[4], weap[4], fireteam[4];
 	char entNumStr[4];
 	int  entNum;
-	char *weapon;
+	const char *weapon;
 	char weaponBuf[MAX_INFO_STRING];
 	char userinfo[MAX_INFO_STRING];
 
@@ -1847,7 +1847,7 @@ G_Say
 void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
              const char *name, const char *message, qboolean localize, qboolean encoded)
 {
-	char *cmd;
+	const char *cmd;
 
 	if (!other || !other->inuse || !other->client)
 	{

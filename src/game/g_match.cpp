@@ -786,7 +786,7 @@ int G_checkServerToggle(vmCvar_t *cv)
 void G_statsPrint(gentity_t *ent, int nType)
 {
 	int  pid;
-	char *cmd = (nType == 0) ? "ws" : ((nType == 1) ? "wws" : "gstats");    // Yes, not the cleanest
+	const char *cmd = (nType == 0) ? "ws" : ((nType == 1) ? "wws" : "gstats");    // Yes, not the cleanest
 	char arg[MAX_TOKEN_CHARS];
 
 	if (!ent || (ent->r.svFlags & SVF_BOT))

@@ -424,7 +424,7 @@ BG_ModelInfoForModelname
 BG_AnimationIndexForString
 =================
 */
-static int BG_AnimationIndexForString(char *string, animModelInfo_t *animModelInfo)
+static int BG_AnimationIndexForString(const char *string, animModelInfo_t *animModelInfo)
 {
 	int         i, hash;
 	animation_t *anim;
@@ -478,7 +478,7 @@ BG_IndexForString
   errors out if no match found
 =================
 */
-int BG_IndexForString(char *token, animStringItem_t *strings, qboolean allowFail)
+int BG_IndexForString(const char *token, animStringItem_t *strings, qboolean allowFail)
 {
 	int              i, hash;
 	animStringItem_t *strav;
@@ -511,7 +511,7 @@ int BG_IndexForString(char *token, animStringItem_t *strings, qboolean allowFail
 BG_CopyStringIntoBuffer
 ===============
 */
-char *BG_CopyStringIntoBuffer(char *string, char *buffer, int bufSize, int *offset)
+char *BG_CopyStringIntoBuffer(const char *string, char *buffer, int bufSize, int *offset)
 {
 	char *pch;
 
@@ -631,7 +631,7 @@ void BG_ParseConditionBits(char **text_pp, animStringItem_t *stringTable, int co
 		{   // check for a comma (end of indexes)
 			if (token[strlen(token) - 1] == ',')
 			{
-				endFlag                  = qtrue;
+				endFlag = qtrue;
 				token[strlen(token) - 1] = '\0';
 			}
 			// append this to the currentString
@@ -770,7 +770,7 @@ qboolean BG_ParseConditions(char **text_pp, animScriptItem_t *scriptItem)
 		}
 
 		// now append this condition to the item
-		scriptItem->conditions[scriptItem->numConditions].index    = conditionIndex;
+		scriptItem->conditions[scriptItem->numConditions].index = conditionIndex;
 		scriptItem->conditions[scriptItem->numConditions].value[0] = conditionValue[0];
 		scriptItem->conditions[scriptItem->numConditions].value[1] = conditionValue[1];
 		scriptItem->numConditions++;
@@ -955,7 +955,8 @@ void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo, animScriptData_t *sc
 
 	// FIXME: change this to use the botlib parser
 
-	char                  *text_p, *token;
+	char                  *text_p;
+	char *token;
 	animScriptParseMode_t parseMode;
 	animScript_t          *currentScript;
 	animScriptItem_t      tempScriptItem;

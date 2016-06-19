@@ -229,12 +229,12 @@ ipXPStorage_t *G_FindIpData(ipXPStorageList_t *ipXPStorageList, char *from)
 G_FilterPacket
 =================
 */
-qboolean G_FilterPacket(ipFilterList_t *ipFilterList, char *from)
+qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from)
 {
 	int      i;
 	unsigned in;
 	byte     m[4];
-	char     *p;
+	const char     *p;
 
 	i = 0;
 	p = from;
@@ -264,7 +264,7 @@ qboolean G_FilterPacket(ipFilterList_t *ipFilterList, char *from)
 	return g_filterBan.integer == 0 ? qtrue : qfalse;
 }
 
-qboolean G_FilterIPBanPacket(char *from)
+qboolean G_FilterIPBanPacket(const char *from)
 {
 	return(G_FilterPacket(&ipFilters, from));
 }
@@ -761,7 +761,7 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart)
 }
 
 // ydnar: modified from maddoc sp func
-extern void ReviveEntity(gentity_t *ent, gentity_t *traceEnt);
+extern qboolean ReviveEntity(gentity_t *ent, gentity_t *traceEnt);
 extern int FindClientByName(char *name);
 
 void Svcmd_RevivePlayer(char *name)
@@ -854,9 +854,11 @@ void G_AddIpMute(char *ip)
 	level.ipMutes[i].inuse = qtrue;
 }
 
-qboolean G_isIPMuted(char *ip)
+qboolean G_isIPMuted(const char *originalIp)
 {
-	int i = 0;
+	char ip[32] = "\0";
+	int i = 0; 
+	Q_strncpyz(ip, originalIp, sizeof(ip));
 
 	// Must remove port from ip
 	for (i = 0; i < strlen(ip); i++)

@@ -1,8 +1,6 @@
 #include "tokens.hpp"
 #include "../json/json.h"
-extern "C" {
 #include "g_local.h"
-}
 
 #ifdef max
 #undef max

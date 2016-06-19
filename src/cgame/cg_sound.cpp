@@ -619,7 +619,7 @@ qboolean CG_SaveSpeakersToScript(void)
 	int          i;
 	bg_speaker_t *speaker;
 	fileHandle_t fh;
-	char         *s;
+	const char         *s;
 
 	if (trap_FS_FOpenFile(va("sound/maps/%s.sps", cgs.rawmapname), &fh, FS_WRITE) < 0)
 	{
@@ -1450,7 +1450,7 @@ qboolean CG_SpeakerEditor_Looped_KeyUp(panel_button_t *button, int key)
 
 				if (BG_CursorInRect(&rect))
 				{
-					button->data[1] = editSpeaker->loop = i;
+					button->data[1] = editSpeaker->loop = (speakerLoopType_t)i;
 					break;
 				}
 			}
@@ -1495,7 +1495,7 @@ qboolean CG_SpeakerEditor_Broadcast_KeyUp(panel_button_t *button, int key)
 
 				if (BG_CursorInRect(&rect))
 				{
-					button->data[1] = editSpeaker->broadcast = i;
+					button->data[1] = editSpeaker->broadcast = (speakerBroadcastType_t)i;
 					break;
 				}
 			}
@@ -2321,7 +2321,7 @@ void CG_ToggleActiveOnScriptSpeaker(int index)
 
 	if (speaker)
 	{
-		speaker->activated = !speaker->activated;
+		speaker->activated = !speaker->activated ? qtrue : qfalse;
 	}
 }
 

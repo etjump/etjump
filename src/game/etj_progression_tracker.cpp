@@ -2,9 +2,7 @@
 #include <boost/algorithm/string.hpp>
 #include "etj_progression_tracker_parser.hpp"
 
-extern "C" {
 #include "g_local.h"
-}
 
 #include "etj_progression_tracker.hpp"
 
@@ -143,7 +141,7 @@ void ETJump::ProgressionTrackers::useTargetTracker(gentity_t* ent, gentity_t* ot
 	useTracker(ent, activator, tracker);
 }
 
-extern "C" void SP_target_tracker(gentity_t *self)
+void SP_target_tracker(gentity_t *self)
 {
 	ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
 
@@ -166,7 +164,7 @@ extern "C" void SP_target_tracker(gentity_t *self)
 	};
 }
 
-extern "C" void SP_trigger_tracker(gentity_t *self)
+void SP_trigger_tracker(gentity_t *self)
 {
 	InitTrigger(self);
 	// just make it same type as trigger multiple for now

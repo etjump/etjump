@@ -712,7 +712,7 @@ static void CG_SelectBuddy_f(void)
 			break;     // there was no-one in this position
 		}
 
-		ci->selected ^= qtrue;
+		ci->selected = (ci->selected ^ qtrue) ? qtrue : qfalse;
 
 		break;
 
@@ -807,7 +807,7 @@ static void CG_AutomapExpandUp_f(void)
 
 static void CG_ToggleAutomap_f(void)
 {
-	cgs.autoMapOff = !cgs.autoMapOff;
+	cgs.autoMapOff = !cgs.autoMapOff ? qtrue : qfalse;
 }
 
 // OSP
@@ -1130,7 +1130,7 @@ void CG_ToggleFreeCam(void)
 		return;
 	}
 
-	cg.freeCam = cg.freeCam ? 0 : 1;
+	cg.freeCam = cg.freeCam ? qfalse : qtrue;
 	if (cg.freeCam)
 	{
 		trap_Cvar_Set("cg_thirdperson", "1");

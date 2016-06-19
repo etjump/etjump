@@ -619,7 +619,8 @@ void reinforce(gentity_t *ent)
 {
 	int       p;// numDeployable=0, finished=0; // TTimo unused
 	gclient_t *rclient;
-	char      userinfo[MAX_INFO_STRING], *respawnStr;
+	char      userinfo[MAX_INFO_STRING];
+	const char *respawnStr = "";
 
 	if (ent->r.svFlags & SVF_BOT)
 	{
@@ -1506,7 +1507,7 @@ if desired.
 void ClientUserinfoChanged(int clientNum)
 {
 	gentity_t *ent;
-	char      *s;
+	const char      *s;
 	char      oldname[MAX_STRING_CHARS];
 	char      userinfo[MAX_INFO_STRING];
 	gclient_t *client;
@@ -1677,7 +1678,7 @@ restarts.
 */
 char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 {
-	char      *value;
+	const char      *value;
 	const char *temp = NULL;
 	gclient_t *client;
 	char      userinfo[MAX_INFO_STRING];
@@ -1989,7 +1990,7 @@ gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spaw
 {
 	char      *pStr, *token;
 	gentity_t *spawnPoint = NULL, *trav;
-	#define MAX_SPAWNPOINTFROMLIST_POINTS   16
+#define MAX_SPAWNPOINTFROMLIST_POINTS   16
 	int valid[MAX_SPAWNPOINTFROMLIST_POINTS];
 	int numValid;
 

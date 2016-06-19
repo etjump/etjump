@@ -346,7 +346,7 @@ player_die
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath)
 {
 	int       contents    = 0, i, killer = ENTITYNUM_WORLD;
-	char      *killerName = "<world>";
+	const char      *killerName = "<world>";
 	qboolean  nogib       = qtrue;
 	gitem_t   *item       = NULL;
 	gentity_t *ent;
@@ -815,13 +815,13 @@ qboolean IsHeadShotWeapon(int mod)
 gentity_t *G_BuildHead(gentity_t *ent)
 {
 	gentity_t     *head;
-	orientation_t or;           // DHM - Nerve
+	orientation_t orientation;           // DHM - Nerve
 
 	head = G_Spawn();
 
-	if (trap_GetTag(ent->s.number, 0, "tag_head", &or))
+	if (trap_GetTag(ent->s.number, 0, "tag_head", &orientation))
 	{
-		G_SetOrigin(head, or.origin);
+		G_SetOrigin(head, orientation.origin);
 	}
 	else
 	{

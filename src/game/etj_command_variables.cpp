@@ -1,9 +1,6 @@
 #include "etj_command_variables.hpp"
 
-extern "C" {
 #include "g_local.h"
-}
-
 
 std::string ETJump::CommandVariables::getCvarString(const std::string& name)
 {

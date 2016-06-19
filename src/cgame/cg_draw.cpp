@@ -4197,7 +4197,7 @@ static void CG_DrawFlashFade(void)
 	static int lastTime;
 	int        elapsed, time;
 	vec4_t     col;
-	qboolean   fBlackout = (!CG_IsSinglePlayer() && int_ui_blackout.integer > 0);
+	qboolean   fBlackout = (!CG_IsSinglePlayer() && int_ui_blackout.integer > 0) ? qtrue : qfalse;
 
 	if (cgs.fadeStartTime + cgs.fadeDuration < cg.time)
 	{
@@ -4991,7 +4991,7 @@ static void CG_DrawNewCompass(void)
 		}
 		else
 		{
-			rectDef_t compassHintRect = { SCREEN_WIDTH - 22, 128, 20, 20 };
+			rectDef_t compassHintRect = { SCREEN_WIDTH - 22.0f, 128.0f, 20.0f, 20.0f };
 
 			CG_DrawKeyHint(&compassHintRect, "+mapexpand");
 		}
@@ -5217,14 +5217,14 @@ int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo)
 	}
 
 	// total ammo in clips
-	*clips = cg.snap->ps.ammo[BG_FindAmmoForWeapon(weap)];
+	*clips = cg.snap->ps.ammo[BG_FindAmmoForWeapon((weapon_t)weap)];
 
 	// current clip
-	*ammo = ps->ammoclip[BG_FindClipForWeapon(weap)];
+	*ammo = ps->ammoclip[BG_FindClipForWeapon((weapon_t)weap)];
 
 	if (BG_IsAkimboWeapon(weap))
 	{
-		*akimboammo = ps->ammoclip[BG_FindClipForWeapon(BG_AkimboSidearm(weap))];
+		*akimboammo = ps->ammoclip[BG_FindClipForWeapon((weapon_t)BG_AkimboSidearm(weap))];
 	}
 	else
 	{
@@ -5275,7 +5275,7 @@ static void CG_DrawPlayerStatusHead(void)
 
 	qhandle_t painshader = 0;
 
-	anim = cg.idleAnim;
+	anim = (hudHeadAnimNumber_t)cg.idleAnim;
 
 	if (cg.weaponFireTime > 500)
 	{
@@ -5499,7 +5499,7 @@ static void CG_DrawPlayerStatus(void)
 	else
 	{
 		int ws = (cg.mvTotalClients > 0) ? cgs.clientinfo[cg.snap->ps.clientNum].weaponState : BG_simpleWeaponState(cg.snap->ps.weaponstate);
-		CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE), ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH) ? &colorWhite : (ws == WSTATE_FIRE) ? &colorRed : &colorYellow));
+		CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH) ? &colorWhite : (ws == WSTATE_FIRE) ? &colorRed : &colorYellow));
 	}
 	
 	if (cg_HUD_weaponIcon.integer)
@@ -6358,7 +6358,7 @@ void CG_DrawActive(stereoFrame_t stereoView)
 		VectorMA(cg.refdef_current->vieworg, -separation, cg.refdef_current->viewaxis[1], cg.refdef_current->vieworg);
 	}
 
-	cg.refdef_current->glfog.registered = 0;    // make sure it doesn't use fog from another scene
+	cg.refdef_current->glfog.registered = qfalse;    // make sure it doesn't use fog from another scene
 
 	CG_ActivateLimboMenu();
 

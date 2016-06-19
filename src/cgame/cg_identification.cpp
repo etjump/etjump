@@ -24,9 +24,7 @@
 // require user to have a guid will print an error message upon execution.
 
 
-extern "C" {
 #include "cg_local.h"
-}
 
 #include <string>
 #include <fstream>

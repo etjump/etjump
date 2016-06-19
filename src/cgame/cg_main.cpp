@@ -40,7 +40,7 @@ int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int ar
 	switch (command)
 	{
 	case CG_INIT:
-		CG_Init(arg0, arg1, arg2, arg3);
+		CG_Init(arg0, arg1, arg2, arg3 ? qtrue : qfalse);
 		cgs.initing = qfalse;
 		return 0;
 	case CG_SHUTDOWN:
@@ -49,14 +49,14 @@ int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int ar
 	case CG_CONSOLE_COMMAND:
 		return CG_ConsoleCommand();
 	case CG_DRAW_ACTIVE_FRAME:
-		CG_DrawActiveFrame(arg0, arg1, arg2);
+		CG_DrawActiveFrame(arg0, static_cast<stereoFrame_t>(arg1), arg2 ? qtrue : qfalse);
 		return 0;
 	case CG_CROSSHAIR_PLAYER:
 		return CG_CrosshairPlayer();
 	case CG_LAST_ATTACKER:
 		return CG_LastAttacker();
 	case CG_KEY_EVENT:
-		CG_KeyEvent(arg0, arg1);
+		CG_KeyEvent(arg0, arg1 ? qtrue : qfalse);
 		return 0;
 	case CG_MOUSE_EVENT:
 		cgDC.cursorx = cgs.cursorX;
@@ -437,8 +437,8 @@ vmCvar_t etj_noActivateLean;
 typedef struct
 {
 	vmCvar_t *vmCvar;
-	char *cvarName;
-	char *defaultString;
+	const char *cvarName;
+	const char *defaultString;
 	int cvarFlags;
 	int modificationCount;
 } cvarTable_t;
@@ -773,7 +773,7 @@ void CG_RegisterCvars(void)
 
 	// see if we are also running the server on this machine
 	trap_Cvar_VariableStringBuffer("sv_running", var, sizeof(var));
-	cgs.localServer = atoi(var);
+	cgs.localServer = atoi(var) ? qtrue : qfalse;
 
 	// Gordon: um, here, why?
 	CG_setClientFlags();
@@ -933,7 +933,7 @@ void CG_setClientFlags(void)
 		return;
 	}
 
-	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
+	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
 	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f",
 	                             // Client Flags
 	                             (
@@ -1304,7 +1304,7 @@ void CG_SetupDlightstyles(void)
 
 	for (i = 1; i < MAX_DLIGHT_CONFIGSTRINGS; i++)
 	{
-		str = (char *) CG_ConfigString(CS_DLIGHTS + i);
+		str = (char *)CG_ConfigString(CS_DLIGHTS + i);
 		if (!strlen(str))
 		{
 			break;
@@ -1670,7 +1670,7 @@ static void CG_RegisterGraphics(void)
 {
 	char        name[1024];
 	int         i;
-	static char *sb_nums[11] =
+	static const char *sb_nums[11] =
 	{
 		"gfx/2d/numbers/zero_32b",
 		"gfx/2d/numbers/one_32b",
@@ -2825,7 +2825,7 @@ qboolean CG_Load_Menu(char **p)
 
 
 
-void CG_LoadMenus(const char *menuFile)
+void CG_LoadMenus(char *menuFile)
 {
 	char         *token;
 	char         *p;
@@ -3126,7 +3126,8 @@ void CG_LoadHudMenu()
 	cgDC.setCVar             = trap_Cvar_Set;
 	cgDC.getCVarString       = trap_Cvar_VariableStringBuffer;
 	cgDC.getCVarValue        = CG_Cvar_Get;
-	cgDC.drawTextWithCursor  = &CG_Text_PaintWithCursor;
+	// wtf?
+	cgDC.drawTextWithCursor  = reinterpret_cast<void(*)(float, float, float, vec_t[], vec_t[], const char *, int, char, int, int)>(&CG_Text_PaintWithCursor);
 	cgDC.setOverstrikeMode   = &trap_Key_SetOverstrikeMode;
 	cgDC.getOverstrikeMode   = &trap_Key_GetOverstrikeMode;
 	cgDC.startLocalSound     = &trap_S_StartLocalSound;
