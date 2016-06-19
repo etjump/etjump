@@ -1,6 +1,6 @@
 #include <boost/algorithm/string.hpp>
-#include "levels.hpp"
-#include "g_local.hpp"
+#include "etj_levels.h"
+#include "etj_local.h"
 #include "utilities.hpp"
 
 Levels::Level::Level(int level, std::string const& name, std::string const& greeting, std::string const& commands)

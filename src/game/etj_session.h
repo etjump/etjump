@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 #include <bitset>
-#include "g_local.hpp"
-#include "levels.hpp"
-#include "etj_database.hpp"
-#include "iauthentication.hpp"
+#include "etj_local.h"
+#include "etj_levels.h"
+#include "etj_database.h"
+#include "etj_iauthentication.h"
 
 
 class Session

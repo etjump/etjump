@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include <sqlite3.h>
 #include <string>
-#include "g_local.hpp"
+#include "etj_local.h"
 
 // All async operation objects need to be dynamically allocated
 class AsyncOperation {

@@ -295,8 +295,8 @@
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
-    <ClInclude Include="etj_drawable.hpp" />
-    <ClInclude Include="etj_timerun_view.hpp" />
+    <ClInclude Include="etj_drawable.h" />
+    <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>

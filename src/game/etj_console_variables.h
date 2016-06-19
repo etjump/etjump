@@ -3,7 +3,7 @@
 
 namespace ETJump
 {
-	class CommandVariables
+	class ConsoleVariables
 	{
 	public:
 		// returns the variable with the specified name

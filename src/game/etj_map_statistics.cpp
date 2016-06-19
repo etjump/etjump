@@ -1,7 +1,7 @@
-#include "map_statistics.hpp"
+#include "etj_map_statistics.h"
 #include <sqlite3.h>
 #include <algorithm>
-#include "etj_utilities.hpp"
+#include "etj_utilities.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 

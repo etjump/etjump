@@ -6,7 +6,7 @@
 #define ETJUMP_UTILITIES_H
 
 #include <vector>
-#include "levels.hpp"
+#include "etj_levels.h"
 
 class Utilities {
 public:

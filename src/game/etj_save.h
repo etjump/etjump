@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/circular_buffer.hpp>
 
-#include "g_local.hpp"
+#include "etj_local.h"
 
 class Session;
 

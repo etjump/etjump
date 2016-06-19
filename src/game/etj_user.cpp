@@ -1,4 +1,4 @@
-#include "user.hpp"
+#include "etj_user.h"
 #include <boost/algorithm/string/join.hpp>
 #include "utilities.hpp"
 

@@ -1,10 +1,10 @@
 #include <memory>
 #include <boost/algorithm/string.hpp>
-#include "etj_progression_tracker_parser.hpp"
+#include "etj_progression_tracker_parser.h"
 
 #include "g_local.h"
 
-#include "etj_progression_tracker.hpp"
+#include "etj_progression_tracker.h"
 
 const char *ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET = "-1";
 

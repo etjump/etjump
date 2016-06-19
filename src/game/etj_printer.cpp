@@ -2,7 +2,7 @@
 // Created by Jussi on 5.4.2015.
 //
 
-#include "printer.hpp"
+#include "etj_printer.h"
 #include <boost/format.hpp>
 
 #include "g_local.h"

@@ -3,7 +3,7 @@
 //
 
 #include <string>
-#include "sqlite_wrapper.hpp"
+#include "etj_sqlite_wrapper.h"
 #include <cassert>
 
 bool SQLiteWrapper::open(const std::string &database)

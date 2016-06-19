@@ -1,7 +1,7 @@
 #ifndef IAUTHENTICATION_HH
 #define IAUTHENTICATION_HH
 #include <string>
-#include "user.hpp"
+#include "etj_user.h"
 
 /**
  * Session interface for database

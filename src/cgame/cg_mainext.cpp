@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 #include "cg_timerun.h"
-#include "etj_timerun_view.hpp"
+#include "etj_timerun_view.h"
 
 static std::unique_ptr<Timerun> timerun;
 static std::unique_ptr<ETJump::TimerunView> timerunView;

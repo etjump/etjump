@@ -1,16 +1,16 @@
 #include <bitset>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include "commands.hpp"
-#include "g_local.hpp"
-#include "save.hpp"
-#include "session.hpp"
-#include "custom_map_votes.hpp"
-#include "timerun.hpp"
+#include "etj_commands.h"
+#include "etj_local.h"
+#include "etj_save.h"
+#include "etj_session.h"
+#include "etj_custom_map_votes.h"
+#include "etj_timerun.h"
 #include "g_local.h"
-#include "map_statistics.hpp"
-#include "etj_utilities.hpp"
-#include "tokens.hpp"
+#include "etj_map_statistics.h"
+#include "etj_utilities.h"
+#include "etj_tokens.h"
 
 typedef boost::function<bool (gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<boost::function<bool (gentity_t *ent, Arguments argv)>, char> AdminCommandPair;

@@ -1,8 +1,8 @@
-#include "g_local.h"
+#include "etj_local.h"
 
 #include <memory>
-#include "etj_banner_system.hpp"
-#include "printer.hpp"
+#include "etj_banner_system.h"
+#include "etj_printer.h"
 
 namespace 
 {

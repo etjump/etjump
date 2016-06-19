@@ -10,10 +10,10 @@
 #include <memory>
 #include <array>
 #include <map>
-#include "timerun.hpp"
-#include "sqlite_wrapper.hpp"
-#include "printer.hpp"
-#include "etj_utilities.hpp"
+#include "etj_timerun.h"
+#include "etj_sqlite_wrapper.h"
+#include "etj_printer.h"
+#include "etj_utilities.h"
 
 std::string millisToString(int millis)
 {

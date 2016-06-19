@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <boost/format.hpp>
-#include "g_local.hpp"
+#include "etj_local.h"
 
 typedef float vec_t;
 typedef vec_t vec2_t[2];

@@ -1,6 +1,6 @@
-#include "session.hpp"
+#include "etj_session.h"
 #include "utilities.hpp"
-#include "levels.hpp"
+#include "etj_levels.h"
 #include <boost/algorithm/string.hpp>
 
 Session::Session(IAuthentication *database)

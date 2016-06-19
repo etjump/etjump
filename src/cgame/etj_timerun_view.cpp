@@ -3,7 +3,7 @@
 
 #include "cg_local.h"
 
-#include "etj_timerun_view.hpp"
+#include "etj_timerun_view.h"
 
 void ETJump::TimerunView::start()
 {

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "utilities.hpp"
-#include "g_local.hpp"
+#include "etj_local.h"
 
 using std::string;
 using std::vector;

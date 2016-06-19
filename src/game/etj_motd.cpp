@@ -1,6 +1,6 @@
-#include "motd.hpp"
+#include "etj_motd.h"
 #include "../json/json.h"
-#include "g_local.hpp"
+#include "etj_local.h"
 #include "utilities.hpp"
 #include <fstream>
 

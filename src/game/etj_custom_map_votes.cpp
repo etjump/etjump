@@ -1,5 +1,5 @@
-#include "custom_map_votes.hpp"
-#include "map_statistics.hpp"
+#include "etj_custom_map_votes.h"
+#include "etj_map_statistics.h"
 #include <fstream>
 #include "utilities.hpp"
 #include "../json/json.h"

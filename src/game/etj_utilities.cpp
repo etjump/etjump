@@ -2,7 +2,7 @@
 // Created by Jussi on 7.4.2015.
 //
 
-#include "etj_utilities.hpp"
+#include "etj_utilities.h"
 #include <boost/algorithm/string.hpp>
 
 #include "g_local.h"

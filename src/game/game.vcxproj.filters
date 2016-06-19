@@ -27,48 +27,6 @@
     <ClCompile Include="..\json\jsoncpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="motd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="map_statistics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="commands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="levels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="session.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="user.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="printer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="async_operation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="custom_map_votes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="save.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main_ext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sqlite_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="timerun.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tokens.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -234,6 +192,48 @@
     <ClCompile Include="q_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_async_operation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_commands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_custom_map_votes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_levels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_main_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_map_statistics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_motd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_save.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_sqlite_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_timerun.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_tokens.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_user.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -268,9 +268,6 @@
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="g_local.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\sqlite\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -283,73 +280,76 @@
     <ClInclude Include="..\json\json-forwards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="motd.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="commands.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="session.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="iauthentication.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="levels.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="async_operation.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="custom_map_votes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="save.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="timerun.hpp">
+    <ClInclude Include="etj_banner_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="printer.hpp">
+    <ClInclude Include="etj_console_variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="map_statistics.hpp">
+    <ClInclude Include="etj_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sqlite_wrapper.hpp">
+    <ClInclude Include="etj_database.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="user.hpp">
+    <ClInclude Include="etj_progression_tracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tokens.hpp">
+    <ClInclude Include="etj_progression_tracker_parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_utilities.hpp">
+    <ClInclude Include="etj_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_database.hpp">
+    <ClInclude Include="etj_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_progression_tracker.hpp">
+    <ClInclude Include="etj_game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_progression_tracker_parser.hpp">
+    <ClInclude Include="etj_async_operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_banner_system.hpp">
+    <ClInclude Include="etj_iauthentication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_command_variables.hpp">
+    <ClInclude Include="etj_levels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_common.hpp">
+    <ClInclude Include="etj_map_statistics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_motd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_printer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_save.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_sqlite_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_timerun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_tokens.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_user.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_custom_map_votes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_commands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

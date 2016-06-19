@@ -1,6 +1,6 @@
-#include "etj_banner_system.hpp"
-#include "etj_common.hpp"
-#include "printer.hpp"
+#include "etj_banner_system.h"
+#include "etj_common.h"
+#include "etj_printer.h"
 
 static const char *LocationText[] = {
 	"Center",

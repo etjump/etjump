@@ -253,10 +253,10 @@
     <ClInclude Include="cg_timerun.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_timerun_view.hpp">
+    <ClInclude Include="etj_drawable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_drawable.hpp">
+    <ClInclude Include="etj_timerun_view.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

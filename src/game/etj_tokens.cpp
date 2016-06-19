@@ -1,4 +1,4 @@
-#include "tokens.hpp"
+#include "etj_tokens.h"
 #include "../json/json.h"
 #include "g_local.h"
 
@@ -9,7 +9,7 @@
 #undef min
 #endif
 
-#include "etj_utilities.hpp"
+#include "etj_utilities.h"
 
 
 Tokens::Tokens()

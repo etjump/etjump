@@ -7,7 +7,7 @@
 
 #include <map>
 #include <string>
-#include "etj_drawable.hpp"
+#include "etj_drawable.h"
 
 class Timerun : Drawable {
 public:

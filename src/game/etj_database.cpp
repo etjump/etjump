@@ -1,4 +1,4 @@
-#include "etj_database.hpp"
+#include "etj_database.h"
 #include "utilities.hpp"
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>

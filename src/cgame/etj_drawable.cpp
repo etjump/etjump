@@ -1,5 +1,5 @@
 #include <vector>
-#include "etj_drawable.hpp"
+#include "etj_drawable.h"
 
 static std::vector<Drawable *> _drawables;
 

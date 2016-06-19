@@ -3,9 +3,9 @@
 using std::string;
 using std::vector;
 
-#include "save.hpp"
+#include "etj_save.h"
 #include "utilities.hpp"
-#include "session.hpp"
+#include "etj_session.h"
 
 SaveSystem::Client::Client()
 {

@@ -4,11 +4,11 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/shared_ptr.hpp>
-#include "g_local.hpp"
+#include "etj_local.h"
 #include <sqlite3.h>
 #include <vector>
-#include "iauthentication.hpp"
-#include "async_operation.hpp"
+#include "etj_iauthentication.h"
+#include "etj_async_operation.h"
 
 using namespace boost::multi_index;
 

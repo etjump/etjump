@@ -1,4 +1,4 @@
-#include "etj_progression_tracker_parser.hpp"
+#include "etj_progression_tracker_parser.h"
 #include <algorithm>
 #include <vector>
 #include <string>

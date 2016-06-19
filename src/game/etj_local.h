@@ -1,6 +1,6 @@
 #ifndef g_local_hpp__
 #define g_local_hpp__
-#include "game.hpp"
+#include "etj_game.h"
 
 // Local C++ definitions for game module
 
