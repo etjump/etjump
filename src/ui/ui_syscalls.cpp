@@ -10,7 +10,7 @@ static int(QDECL * syscall)(int arg, ...) = (int(QDECL *)(int, ...)) - 1;
 #pragma export on
 #endif
 #endif
-void dllEntry(int(QDECL * syscallptr)(int arg, ...))
+extern "C" FN_PUBLIC void dllEntry(int(QDECL * syscallptr)(int arg, ...))
 {
 	syscall = syscallptr;
 }

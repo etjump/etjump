@@ -1,8 +1,9 @@
 #include "cg_mainext.h"
-#include <string>
-#include <memory>
 #include "cg_timerun.h"
 #include "etj_timerun_view.h"
+
+#include <string>
+#include <memory>
 
 static std::unique_ptr<Timerun> timerun;
 static std::unique_ptr<ETJump::TimerunView> timerunView;

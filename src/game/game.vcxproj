@@ -330,6 +330,7 @@
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
+    <ClInclude Include="etj_public.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="etj_local.h" />
     <ClInclude Include="g_public.h" />

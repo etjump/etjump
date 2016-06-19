@@ -514,18 +514,9 @@ This is the only way control passes into the module.
 This must be the very first function compiled into the .q3vm file
 ================
 */
-#if defined(__MACOS__)
-#ifndef __GNUC__
-#pragma export on
-#endif
-#endif
-int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
+
+extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
 {
-#if defined(__MACOS__)
-#ifndef __GNUC__
-#pragma export off
-#endif
-#endif
 	switch (command)
 	{
 	case GAME_INIT:
@@ -557,23 +548,11 @@ int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int ar
 	case GAME_CONSOLE_COMMAND:
 		return ConsoleCommand();
 	case BOTAI_START_FRAME:
-#ifdef NO_BOT_SUPPORT
 		return 0;
-#else
-		return BotAIStartFrame(arg0);
-#endif // NO_BOT_SUPPORT
 	case BOT_VISIBLEFROMPOS:
-#ifdef NO_BOT_SUPPORT
 		return qfalse;
-#else
-		return BotVisibleFromPos((float *)arg0, arg1, (float *)arg2, arg3, arg4);
-#endif // NO_BOT_SUPPORT
 	case BOT_CHECKATTACKATPOS:
-#ifdef NO_BOT_SUPPORT
 		return qfalse;
-#else
-		return BotCheckAttackAtPos(arg0, arg1, (float *)arg2, arg3, arg4);
-#endif // NO_BOT_SUPPORT
 	case GAME_SNAPSHOT_CALLBACK:
 		return G_SnapshotCallback(arg0, arg1);
 	case GAME_MESSAGERECEIVED:

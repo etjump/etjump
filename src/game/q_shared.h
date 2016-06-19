@@ -96,6 +96,8 @@
 
 #endif
 
+#include "etj_public.h"
+
 #ifdef _WIN32
 
 //#pragma intrinsic( memset, memcpy )
