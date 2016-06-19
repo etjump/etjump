@@ -1593,7 +1593,7 @@ Returns the Z component of the surface being shadowed
 
 typedef struct
 {
-	char *tagname;
+	const char *tagname;
 	float size;
 	float maxdist;
 	float maxalpha;
@@ -2743,7 +2743,7 @@ qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation)
 CG_GetWeaponTag
 ===============
 */
-qboolean CG_GetWeaponTag(int clientNum, char *tagname, orientation_t *orientation)
+qboolean CG_GetWeaponTag(int clientNum, const char *tagname, orientation_t *orientation)
 {
 	clientInfo_t *ci;
 	centity_t    *cent;

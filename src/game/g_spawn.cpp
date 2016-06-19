@@ -92,7 +92,7 @@ typedef enum
 
 typedef struct
 {
-	char *name;
+	const char *name;
 	int ofs;
 	fieldtype_t type;
 	int flags;
@@ -185,7 +185,7 @@ field_t fields[] =
 
 typedef struct
 {
-	char *name;
+	const char *name;
 	void (*spawn)(gentity_t *ent);
 } spawn_t;
 

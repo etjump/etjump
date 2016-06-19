@@ -1176,7 +1176,7 @@ int CG_findClientNum(char *s)
 	return(-1);
 }
 
-void CG_printConsoleString(char *str)
+void CG_printConsoleString(const char *str)
 {
 	CG_Printf("[skipnotify]%s", str);
 }
@@ -1366,7 +1366,7 @@ static void CG_RegisterItemSounds(int itemNum)
 {
 	gitem_t *item;
 	char    data[MAX_QPATH];
-	char    *s, *start;
+	const char    *s, *start;
 	int     len;
 
 	item = &bg_itemlist[itemNum];

@@ -880,7 +880,7 @@ int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr, const char *par
 	for (i = 0; i < ent->numScriptEvents; i++)
 	{
 		if (ent->scriptEvents[i].eventNum == eventNum)
-		{
+		{	
 			if ((!ent->scriptEvents[i].params) || (!gScriptEvents[eventNum].eventMatch || gScriptEvents[eventNum].eventMatch(&ent->scriptEvents[i], params)))
 			{
 				return i;

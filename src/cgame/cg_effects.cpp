@@ -637,7 +637,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir)
 	int      j;
 	vec3_t   axis[3], angles;
 
-	char *JunctiongibTags[] =
+	const char *JunctiongibTags[] =
 	{
 		// leg tag
 		"tag_footright",
@@ -653,7 +653,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir)
 		"tag_chest"
 	};
 
-	char *ConnectTags[] =
+	const char *ConnectTags[] =
 	{
 		// legs tags
 		"tag_legright",
@@ -669,7 +669,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir)
 		"tag_torso",
 	};
 
-	char *gibTags[] =
+	const char *gibTags[] =
 	{
 		// tags in the legs
 		"tag_footright",

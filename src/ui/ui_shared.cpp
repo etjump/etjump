@@ -5262,7 +5262,7 @@ void Item_Multi_Paint(itemDef_t *item)
 
 typedef struct
 {
-	char *command;
+	const char *command;
 	int id;
 	int defaultbind1_right;
 	int defaultbind2_right;
@@ -5274,7 +5274,7 @@ typedef struct
 
 typedef struct
 {
-	char *name;
+	const char *name;
 	float defaultvalue;
 	float value;
 } configcvar_t;
@@ -6944,12 +6944,12 @@ Keyword Hash
 
 typedef struct keywordHash_s
 {
-	char *keyword;
+	const char *keyword;
 	qboolean (*func)(itemDef_t *item, int handle);
 	struct keywordHash_s *next;
 } keywordHash_t;
 
-int KeywordHash_Key(char *keyword)
+int KeywordHash_Key(const char *keyword)
 {
 	int register hash, i;
 

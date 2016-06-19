@@ -1290,8 +1290,8 @@ typedef enum
 } animNumber_t;
 
 // text represenation for scripting
-extern char *animStrings[];     // defined in bg_misc.c
-extern char *animStringsOld[];      // defined in bg_misc.c
+extern const char *animStrings[];     // defined in bg_misc.c
+extern const char *animStringsOld[];      // defined in bg_misc.c
 
 
 typedef enum
@@ -1568,13 +1568,13 @@ typedef enum
 // JOSEPH 4-17-00
 typedef struct gitem_s
 {
-	char *classname;        // spawning name
-	char *pickup_sound;
-	char *world_model[MAX_ITEM_MODELS];
+	const char *classname;        // spawning name
+	const char *pickup_sound;
+	const char *world_model[MAX_ITEM_MODELS];
 
-	char *icon;
-	char *ammoicon;
-	char *pickup_name;          // for printing on pickup
+	const char *icon;
+	const char *ammoicon;
+	const char *pickup_name;          // for printing on pickup
 
 	int quantity;               // for ammo how much, or duration of powerup (value not necessary for ammo/health.  that value set in gameskillnumber[] below)
 	itemType_t giType;          // IT_* flags
@@ -1584,8 +1584,8 @@ typedef struct gitem_s
 	int giAmmoIndex;            // type of weapon ammo this uses.  (ex. WP_MP40 and WP_LUGER share 9mm ammo, so they both have WP_LUGER for giAmmoIndex)
 	int giClipIndex;            // which clip this weapon uses.  this allows the sniper rifle to use the same clip as the garand, etc.
 
-	char *precaches;            // string of all models and images this item will use
-	char *sounds;               // string of all sounds this item will use
+	const char *precaches;            // string of all models and images this item will use
+	const char *sounds;               // string of all sounds this item will use
 
 //	int			gameskillnumber[5];
 } gitem_t;
@@ -2275,15 +2275,15 @@ void BG_RotatePoint(vec3_t point, const vec3_t matrix[3]);
 void BG_TransposeMatrix(const vec3_t matrix[3], vec3_t transpose[3]);
 void BG_CreateRotationMatrix(const vec3_t angles, vec3_t matrix[3]);
 
-int trap_PC_AddGlobalDefine(char *define);
+int trap_PC_AddGlobalDefine(const char *define);
 int trap_PC_LoadSource(const char *filename);
 int trap_PC_FreeSource(int handle);
 int trap_PC_ReadToken(int handle, pc_token_t *pc_token);
 int trap_PC_SourceFileAndLine(int handle, char *filename, int *line);
 int trap_PC_UnReadToken(int handle);
 
-void PC_SourceError(int handle, char *format, ...);
-void PC_SourceWarning(int handle, char *format, ...);
+void PC_SourceError(int handle, const char *format, ...);
+void PC_SourceWarning(int handle, const char *format, ...);
 
 #ifdef GAMEDLL
 const char *PC_String_Parse(int handle);
@@ -2348,9 +2348,9 @@ int BG_strRelPos(char *in, int index);
 int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF);
 
 // Crosshair support
-void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
+void BG_setCrosshair(char *colString, float *col, float alpha, const char *cvarName);
 // color support
-void BG_setColor(char *colString, vec4_t col, float alpha, char *cvarName);
+void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName);
 
 // Voting
 #define VOTING_DISABLED     ((1 << numVotesAvailable) - 1)

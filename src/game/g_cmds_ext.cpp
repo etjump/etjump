@@ -9,7 +9,6 @@ int iWeap = WS_MAX;
 static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean invite /* or uninvite */);
 static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock);
 static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand, qboolean notUsed);
-char *lock_status[2] = { "unlock", "lock" };
 
 //
 // Update info:
@@ -18,7 +17,7 @@ char *lock_status[2] = { "unlock", "lock" };
 //
 typedef struct
 {
-	char *pszCommandName;
+	const char *pszCommandName;
 	qboolean fAnytime;
 	qboolean fValue;
 	void (*pCommand)(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
@@ -341,7 +340,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 // Sets a player's "ready" status.
 void G_ready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state)
 {
-	char *status[2] = { " NOT", "" };
+	const char *status[2] = { " NOT", "" };
 
 	if (g_gamestate.integer == GS_PLAYING || g_gamestate.integer == GS_INTERMISSION)
 	{

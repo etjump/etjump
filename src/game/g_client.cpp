@@ -1676,7 +1676,7 @@ to the server machine, but qfalse on map changes and tournement
 restarts.
 ============
 */
-char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
+const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 {
 	const char      *value;
 	const char *temp = NULL;

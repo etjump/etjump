@@ -8,7 +8,7 @@
 bg_character_t alliedClassCharacters[NUM_PLAYER_CLASSES];
 bg_character_t axisClassCharacters[NUM_PLAYER_CLASSES];
 
-static qboolean BG_PCF_ParseError(int handle, char *format, ...)
+static qboolean BG_PCF_ParseError(int handle, const char *format, ...)
 {
 	int         line;
 	char        filename[128];

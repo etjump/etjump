@@ -742,7 +742,7 @@ argv(0) god
 */
 void Cmd_God_f(gentity_t *ent)
 {
-	char     *msg;
+	const char     *msg;
 	char     *name;
 	qboolean godAll = qfalse;
 
@@ -864,7 +864,7 @@ argv(0) nofatigue
 
 void Cmd_Nofatigue_f(gentity_t *ent)
 {
-	char *msg;
+	const char *msg;
 
 	char *name = ConcatArgs(1);
 
@@ -909,7 +909,7 @@ argv(0) notarget
 */
 void Cmd_Notarget_f(gentity_t *ent)
 {
-	char *msg;
+	const char *msg;
 
 	if (!CheatsOk(ent))
 	{
@@ -939,7 +939,7 @@ argv(0) noclip
 */
 void Cmd_Noclip_f(gentity_t *ent)
 {
-	char *msg;
+	const char *msg;
 
 	char *name = ConcatArgs(1);
 
@@ -1999,7 +1999,7 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded)
 void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboolean voiceonly)
 {
 	int  color;
-	char *cmd;
+	const char *cmd;
 
 	if (!other)
 	{
@@ -2994,30 +2994,6 @@ void Cmd_SetCameraOrigin_f(gentity_t *ent)
 }
 
 extern gentity_t *BotFindEntityForName(char *name);
-
-/*
-==============
-Cmd_InterruptCamera_f
-==============
-*/
-void Cmd_InterruptCamera_f(gentity_t *ent)
-{
-	gentity_t *player;
-
-	if (g_gametype.integer != GT_SINGLE_PLAYER && g_gametype.integer != GT_COOP)
-	{
-		return;
-	}
-
-	player = BotFindEntityForName("player");
-
-	if (!player)
-	{
-		return;
-	}
-
-	G_Script_ScriptEvent(player, "trigger", "cameraInterrupt");
-}
 
 extern vec3_t playerMins;
 extern vec3_t playerMaxs;
@@ -4284,7 +4260,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent)
 
 void Cmd_noGoto_f(gentity_t *ent)
 {
-	char *msg;
+	const char *msg;
 	if (ent->client->sess.noGoto == qtrue)
 	{
 		ent->client->sess.noGoto = qfalse;
@@ -4300,7 +4276,7 @@ void Cmd_noGoto_f(gentity_t *ent)
 
 void Cmd_noCall_f(gentity_t *ent)
 {
-	char *msg;
+	const char *msg;
 	if (ent->client->sess.noCall == qtrue)
 	{
 		ent->client->sess.noCall = qfalse;
@@ -4509,7 +4485,7 @@ void Cmd_SwapPlacesWithBot_f(gentity_t *ent, int botNum)
 
 typedef struct
 {
-	char *cmd;
+	const char *cmd;
 	qboolean floodProtected;
 	void (*function)(gentity_t *ent);
 } command_t;

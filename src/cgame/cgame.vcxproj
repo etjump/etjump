@@ -294,7 +294,6 @@
     <ClInclude Include="..\..\main\ui\menudef.h" />
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
-    <ClInclude Include="cg_sha1.h" />
     <ClInclude Include="cg_timerun.h" />
     <ClInclude Include="etj_drawable.hpp" />
     <ClInclude Include="etj_timerun_view.hpp" />

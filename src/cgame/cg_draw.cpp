@@ -2801,7 +2801,7 @@ CG_DrawVote
 */
 static void CG_DrawVote(void)
 {
-	char  *s;
+	const char  *s;
 	char  str1[32], str2[32];
 	float color[4] = { 1, 1, 0, 1 };
 	int   sec;
@@ -4259,8 +4259,8 @@ static void CG_DrawFlashFade(void)
 		if (fBlackout)
 		{
 			int   i, nOffset = 90;
-			char  *str, *format = "The %s team is speclocked!";
-			char  *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIES", "???" };
+			const char  *str, *format = "The %s team is speclocked!";
+			const char  *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIES", "???" };
 			float color[4]               = { 1, 1, 0, 1 };
 
 			for (i = TEAM_AXIS; i <= TEAM_ALLIES; i++)

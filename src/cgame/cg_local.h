@@ -2490,7 +2490,7 @@ float CG_Cvar_Get(const char *cvar);
 
 char *CG_generateFilename(void);
 int CG_findClientNum(char *s);
-void CG_printConsoleString(char *str);
+void CG_printConsoleString(const char *str);
 
 void CG_LoadObjectiveData(void);
 
@@ -2510,7 +2510,7 @@ void CG_MouseEvent(int x, int y);
 void CG_EventHandling(int type, qboolean fForced);
 
 qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation);
-qboolean CG_GetWeaponTag(int clientNum, char *tagname, orientation_t *orientation);
+qboolean CG_GetWeaponTag(int clientNum, const char *tagname, orientation_t *orientation);
 
 void CG_EncodeQP(const char *in, char *out, int maxlen);
 void CG_DecodeQP(char *line);
@@ -2780,7 +2780,7 @@ void    CG_ParticleDust(centity_t *cent, vec3_t origin, vec3_t dir);
 void    CG_ParticleMisc(qhandle_t pshader, vec3_t origin, int size, int duration, float alpha);
 
 // Ridah
-void CG_ParticleExplosion(char *animStr, vec3_t origin, vec3_t vel, int duration, int sizeStart, int sizeEnd, qboolean dlight);
+void CG_ParticleExplosion(const char *animStr, vec3_t origin, vec3_t vel, int duration, int sizeStart, int sizeEnd, qboolean dlight);
 
 // Rafael snow pvs check
 void    CG_SnowLink(centity_t *cent, qboolean particleOn);
@@ -3035,9 +3035,9 @@ void CG_AddToNotify(const char *str);
 const char *CG_LocalizeServerCommand(const char *buf);
 void CG_wstatsParse_cmd(void);
 void CG_wtopshotsParse_cmd(qboolean doBest);
-void CG_parseWeaponStats_cmd(void(txt_dump)(char *));
-void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(char *));
-void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(char *));
+void CG_parseWeaponStats_cmd(void(txt_dump)(const char *));
+void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
+void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
 void CG_scores_cmd(void);
 
 //
@@ -3479,7 +3479,7 @@ void CG_mvZoomBinoc(float x, float y, float w, float h);
 void CG_mvZoomSniper(float x, float y, float w, float h);
 
 // cg_window.c
-qboolean CG_addString(cg_window_t *w, char *buf);
+qboolean CG_addString(cg_window_t *w, const char *buf);
 //void CG_createDemoHelpWindow(void);
 //void CG_createSpecHelpWindow(void);
 void CG_createStatsWindow(void);
@@ -3489,7 +3489,7 @@ void CG_createWtopshotsMsgWindow(void);
 void CG_createMOTDWindow(void);
 void CG_cursorUpdate(void);
 void CG_initStrings(void);
-void CG_printWindow(char *str);
+void CG_printWindow(const char *str);
 void CG_removeStrings(cg_window_t *w);
 cg_window_t *CG_windowAlloc(int fx, int startupLength);
 void CG_windowDraw(void);
@@ -3765,7 +3765,7 @@ void SendGuid();
 
 
 
-char *G_SHA1(const char *str);
+const char *G_SHA1(const char *str);
 
 //
 // drawable.cpp

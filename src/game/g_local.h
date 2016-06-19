@@ -130,7 +130,7 @@ typedef struct g_serverEntity_s g_serverEntity_t;
 // Scripting, these structure are not saved into savegames (parsed each start)
 typedef struct
 {
-	char *actionString;
+	const char *actionString;
 	qboolean (*actionFunc)(gentity_t *ent, char *params);
 	int hash;
 } g_script_stack_action_t;
@@ -395,7 +395,7 @@ struct gentity_s
 	char *aiSkin;
 
 	vec3_t dl_color;
-	char *dl_stylestring;
+	const char *dl_stylestring;
 	char *dl_shader;
 	int dl_atten;
 
@@ -436,7 +436,7 @@ struct gentity_s
 	char *track;
 
 	// entity scripting system
-	char *scriptName;
+	const char *scriptName;
 
 	int numScriptEvents;
 	g_script_event_t *scriptEvents;     // contains a list of actions to perform for each event type
@@ -1398,7 +1398,7 @@ void Spawn_Shard(gentity_t *ent, gentity_t *inflictor, int quantity, int type);
 // Ridah
 int G_FindConfigstringIndex(const char *name, int start, int max, qboolean create);
 // done.
-int     G_ModelIndex(char *name);
+int     G_ModelIndex(const char *name);
 int     G_SoundIndex(const char *name);
 int     G_SkinIndex(const char *name);
 int     G_ShaderIndex(char *name);
@@ -1670,7 +1670,7 @@ qboolean G_IsSinglePlayerGame();
 //
 // g_client.c
 //
-char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
 void ClientUserinfoChanged(int clientNum);
 void ClientDisconnect(int clientNum);
 void ClientBegin(int clientNum);
@@ -2043,7 +2043,7 @@ int     trap_BotAllocateClient(int clientNum);
 void    trap_BotFreeClient(int clientNum);
 void    trap_GetUsercmd(int clientNum, usercmd_t *cmd);
 qboolean    trap_GetEntityToken(char *buffer, int bufferSize);
-qboolean trap_GetTag(int clientNum, int tagFileNumber, char *tagName, orientation_t *orientation);
+qboolean trap_GetTag(int clientNum, int tagFileNumber, const char *tagName, orientation_t *orientation);
 qboolean trap_LoadTag(const char *filename);
 
 int     trap_RealTime(qtime_t *qtime);
@@ -2249,7 +2249,7 @@ void Svcmd_StartMatch_f(void);
 void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart);
 void Svcmd_SwapTeams_f(void);
 
-void trap_PbStat(int clientNum, char *category, char *values) ;
+void trap_PbStat(int clientNum, const char *category, const char *values) ;
 
 // g_antilag.c
 void G_StoreClientPosition(gentity_t *ent);
@@ -2379,7 +2379,7 @@ void GetBotAmmo(int clientNum, int *weapon, int *ammo, int *ammoclip);
 void G_UpdateFireteamConfigString(fireteamData_t *ft);
 void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print);
 
-void G_PrintClientSpammyCenterPrint(int entityNum, char *text);
+void G_PrintClientSpammyCenterPrint(int entityNum, const char *text);
 
 void aagun_fire(gentity_t *other);
 
@@ -2525,13 +2525,13 @@ int G_checkServerToggle(vmCvar_t *cv);
 char *G_createStats(gentity_t *refEnt);
 void G_deleteStats(int nClient);
 qboolean G_desiredFollow(gentity_t *ent, int nTeam);
-void G_globalSound(char *sound);
+void G_globalSound(const char *sound);
 void G_initMatch(void);
 void G_loadMatchGame(void);
 void G_matchInfoDump(unsigned int dwDumpType);
 void G_printMatchInfo(gentity_t *ent);
 void G_parseStats(char *pszStatsInfo);
-void G_printFull(char *str, gentity_t *ent);
+void G_printFull(const char *str, gentity_t *ent);
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
 void G_statsPrint(gentity_t *ent, int nType);
 unsigned int G_weapStatIndex_MOD(int iWeaponMOD);
@@ -2539,7 +2539,7 @@ unsigned int G_weapStatIndex_MOD(int iWeaponMOD);
 ///////////////////////
 // g_team.c
 //
-extern char      *aTeams[TEAM_NUM_TEAMS];
+extern const char      *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
 
 qboolean G_allowFollow(gentity_t *ent, int nTeam);
@@ -2642,7 +2642,7 @@ qboolean G_isIPMuted(const char *ip);
 void G_ClearIPMutes();
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime);
 // g_admin.c
-char *G_SHA1(const char *string);
+const char *G_SHA1(const char *string);
 char *Q_SayConcatArgs(int start);
 void DecolorString(char *in, char *out);
 char *Q_StrReplace(char *haystack, char *needle, char *newp);

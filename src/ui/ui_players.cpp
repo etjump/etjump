@@ -306,7 +306,7 @@ UI_PositionEntityOnTag
 ======================
 */
 static void UI_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
-                                   clipHandle_t parentModel, char *tagName)
+                                   clipHandle_t parentModel, const char *tagName)
 {
 	int           i;
 	orientation_t lerped;
@@ -333,7 +333,7 @@ UI_PositionRotatedEntityOnTag
 ======================
 */
 static void UI_PositionRotatedEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
-                                          clipHandle_t parentModel, char *tagName)
+                                          clipHandle_t parentModel, const char *tagName)
 {
 	int           i;
 	orientation_t lerped;

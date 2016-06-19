@@ -758,8 +758,8 @@ int     COM_GetCurrentParseLine(void);
 char *COM_Parse(char **data_p);
 char *COM_ParseExt(char **data_p, qboolean allowLineBreak);
 int     COM_Compress(char *data_p);
-void    COM_ParseError(char *format, ...);
-void    COM_ParseWarning(char *format, ...);
+void    COM_ParseError(const char *format, ...);
+void    COM_ParseWarning(const char *format, ...);
 int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING]);
 
 qboolean COM_BitCheck(const int array[], int bitNum);
@@ -790,7 +790,7 @@ typedef struct pc_token_s
 
 // data is an in/out parm, returns a parsed out token
 
-void    COM_MatchToken(char **buf_p, char *match);
+void    COM_MatchToken(char **buf_p, const char *match);
 
 void SkipBracedSection(char **program);
 void SkipBracedSection_Depth(char **program, int depth);  // start at given depth if already

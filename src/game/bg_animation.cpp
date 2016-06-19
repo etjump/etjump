@@ -584,6 +584,7 @@ void BG_ParseConditionBits(char **text_pp, animStringItem_t *stringTable, int co
 	char               currentString[MAX_QPATH];
 	qboolean           minus = qfalse;
 	char               *token;
+	char MINUS[] = "MINUS";
 
 	//indexBits = 0;
 	currentString[0] = '\0';
@@ -624,7 +625,7 @@ void BG_ParseConditionBits(char **text_pp, animStringItem_t *stringTable, int co
 
 		if (!Q_stricmp(token, "NOT"))
 		{
-			token = "MINUS";    // NOT is equivalent to MINUS
+			token = MINUS;    // NOT is equivalent to MINUS
 		}
 
 		if (!endFlag && Q_stricmp(token, "AND") && Q_stricmp(token, "MINUS"))           // must be a index

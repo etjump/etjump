@@ -248,7 +248,7 @@ void body_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int da
 
 
 // these are just for logging, the client prints its own messages
-char *modNames[] =
+const char *modNames[] =
 {
 	"MOD_UNKNOWN",
 	"MOD_MACHINEGUN",
@@ -486,7 +486,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 
 	if (g_gamestate.integer == GS_PLAYING)
 	{
-		char *obit;
+		const char *obit;
 
 		if (meansOfDeath < 0 || meansOfDeath >= sizeof(modNames) / sizeof(modNames[0]))
 		{

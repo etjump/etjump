@@ -60,7 +60,7 @@ static int const numETGameTypes = sizeof(ETGameTypes) / sizeof(const char*);*/
 
 static const int numServerFilters = sizeof(serverFilters) / sizeof(serverFilter_t);
 
-static char *netnames[] =
+static const char *netnames[] =
 {
 	"???",
 	"UDP",
@@ -1581,7 +1581,7 @@ void UI_Load()
 {
 	char      lastName[1024];
 	menuDef_t *menu    = Menu_GetFocused();
-	char      *menuSet = UI_Cvar_VariableString("ui_menuFiles");
+	const char      *menuSet = UI_Cvar_VariableString("ui_menuFiles");
 	if (menu && menu->window.name)
 	{
 		strcpy(lastName, menu->window.name);
@@ -7191,7 +7191,7 @@ static void UI_BuildServerDisplayList(qboolean force)
 
 typedef struct
 {
-	char *name, *altName;
+	const char *name, *altName;
 } serverStatusCvar_t;
 
 serverStatusCvar_t serverStatusCvars[] =
@@ -7216,7 +7216,7 @@ UI_SortServerStatusInfo
 static void UI_SortServerStatusInfo(serverStatusInfo_t *info)
 {
 	int  i, j, index;
-	char *tmp1, *tmp2;
+	const char *tmp1, *tmp2;
 
 	// FIXME: if "gamename" == "baseq3" or "missionpack" then
 	// replace the gametype number by FFA, CTF etc.
@@ -9994,8 +9994,8 @@ cvars
 typedef struct
 {
 	vmCvar_t *vmCvar;
-	char *cvarName;
-	char *defaultString;
+	const char *cvarName;
+	const char *defaultString;
 	int cvarFlags;
 	int modificationCount;          // for tracking changes
 } cvarTable_t;

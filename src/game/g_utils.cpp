@@ -115,7 +115,7 @@ int G_FindConfigstringIndex(const char *name, int start, int max, qboolean creat
 }
 
 
-int G_ModelIndex(char *name)
+int G_ModelIndex(const char *name)
 {
 	return G_FindConfigstringIndex(name, CS_MODELS, MAX_MODELS, qtrue);
 }
@@ -1609,7 +1609,7 @@ void G_ParseCampaigns(void)
 	}
 }
 
-void G_PrintClientSpammyCenterPrint(int entityNum, char *text)
+void G_PrintClientSpammyCenterPrint(int entityNum, const char *text)
 {
 	if (!g_entities[entityNum].client)
 	{
@@ -1901,7 +1901,7 @@ float AngleDifference(float ang1, float ang2)
 ClientName
 ==================
 */
-char *ClientName(int client, char *name, int size)
+const char *ClientName(int client, char *name, int size)
 {
 	char buf[MAX_INFO_STRING];
 

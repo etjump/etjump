@@ -226,8 +226,8 @@ void G_ReadSessionData(gclient_t *client)
 	       &client->sess.ignoreClients[1],
 	       &client->pers.enterTime,
 	       &client->sess.spawnObjectiveIndex,
-	       &client->sess.firstTime,
-	       &client->sess.loadPreviousSavedPositions
+	       (int*)&client->sess.firstTime,
+	       (int*)&client->sess.loadPreviousSavedPositions
 	       );
 
 	// OSP -- pull and parse weapon stats

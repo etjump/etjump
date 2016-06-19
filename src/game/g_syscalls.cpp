@@ -354,7 +354,7 @@ void trap_SnapVector(float *v)
 	return;
 }
 
-qboolean trap_GetTag(int clientNum, int tagFileNumber, char *tagName, orientation_t *orientation)
+qboolean trap_GetTag(int clientNum, int tagFileNumber, const char *tagName, orientation_t *orientation)
 {
 	return syscall(G_GETTAG, clientNum, tagFileNumber, tagName, orientation) ? qtrue : qfalse;
 }
@@ -390,7 +390,7 @@ int trap_BotLibDefine(char *string)
 	return syscall(BOTLIB_PC_ADD_GLOBAL_DEFINE, string);
 }
 
-int trap_PC_AddGlobalDefine(char *define)
+int trap_PC_AddGlobalDefine(const char *define)
 {
 	return syscall(BOTLIB_PC_ADD_GLOBAL_DEFINE, define);
 }
@@ -1155,7 +1155,7 @@ int trap_GeneticParentsAndChildSelection(int numranks, float *ranks, int *parent
 	return syscall(BOTLIB_AI_GENETIC_PARENTS_AND_CHILD_SELECTION, numranks, ranks, parent1, parent2, child);
 }
 
-void trap_PbStat(int clientNum, char *category, char *values)
+void trap_PbStat(int clientNum, const char *category, const char *values)
 {
 	syscall(PB_STAT_REPORT, clientNum, category, values) ;
 }

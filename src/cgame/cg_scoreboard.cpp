@@ -668,7 +668,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float *color, float
 	vec4_t       hcolor;
 	clientInfo_t *ci;
 	int          w;
-	char         *cgazOn;
+	const char         *cgazOn;
 
 	if (y + SMALLCHAR_HEIGHT >= 470)
 	{

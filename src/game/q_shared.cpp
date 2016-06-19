@@ -400,7 +400,7 @@ char *COM_Parse(char **data_p)
 	return COM_ParseExt(data_p, qtrue);
 }
 
-void COM_ParseError(char *format, ...)
+void COM_ParseError(const char *format, ...)
 {
 	va_list     argptr;
 	static char string[4096];
@@ -684,7 +684,7 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks)
 COM_MatchToken
 ==================
 */
-void COM_MatchToken(char **buf_p, char *match)
+void COM_MatchToken(char **buf_p, const char *match)
 {
 	char *token;
 
@@ -1323,7 +1323,10 @@ char *Info_ValueForKey(const char *s, const char *key)
 
 	if (!s || !key)
 	{
-		return "";
+		valueindex ^= 1;
+		// return an empty string
+		value[valueindex][0] = 0;
+		return value[valueindex];
 	}
 
 	if (strlen(s) >= BIG_INFO_STRING)
@@ -1343,7 +1346,9 @@ char *Info_ValueForKey(const char *s, const char *key)
 		{
 			if (!*s)
 			{
-				return "";
+				// return an empty string
+				value[valueindex][0] = 0;
+				return value[valueindex];
 			}
 			*o++ = *s++;
 		}
@@ -1370,7 +1375,9 @@ char *Info_ValueForKey(const char *s, const char *key)
 		s++;
 	}
 
-	return "";
+	// return an empty string
+	value[valueindex][0] = 0;
+	return value[valueindex];
 }
 
 

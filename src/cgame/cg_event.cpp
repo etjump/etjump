@@ -15,8 +15,8 @@ static void CG_Obituary(entityState_t *ent)
 {
 	int          mod;
 	int          target, attacker;
-	char         *message;
-	char         *message2;
+	const char         *message;
+	const char         *message2;
 	char         targetName[32];
 	clientInfo_t *ci, *ca;    // JPW NERVE ca = attacker
 
@@ -265,7 +265,7 @@ typedef struct
 
 void CG_PainEvent(centity_t *cent, int health, qboolean crouching)
 {
-	char *snd;
+	const char *snd;
 
 	// don't do more than two pain sounds a second
 	if (cg.time - cent->pe.painTime < 500)

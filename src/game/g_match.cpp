@@ -57,7 +57,7 @@ void G_loadMatchGame(void)
 
 
 // Simple alias for sure-fire print :)
-void G_printFull(char *str, gentity_t *ent)
+void G_printFull(const char *str, gentity_t *ent)
 {
 	if (ent != NULL)
 	{
@@ -73,7 +73,7 @@ void G_printFull(char *str, gentity_t *ent)
 
 
 // Plays specified sound globally.
-void G_globalSound(char *sound)
+void G_globalSound(const char *sound)
 {
 	gentity_t *te = G_TempEntity(level.intermission_origin, EV_GLOBAL_SOUND);
 	te->s.eventParm = G_SoundIndex(sound);
@@ -148,7 +148,7 @@ void G_delayPrint(gentity_t *dpent)
 	}
 }
 
-static char *pszDPInfo[] =
+static const char *pszDPInfo[] =
 {
 	"DPRINTF_PAUSEINFO",
 	"DPRINTF_UNPAUSING",
@@ -514,7 +514,7 @@ void G_printMatchInfo(gentity_t *ent)
 	int       i, j, cnt, eff;
 	int       tot_kills, tot_deaths, tot_gp, tot_sui, tot_tk, tot_dg, tot_dr, tot_td;
 	gclient_t *cl;
-	char      *ref;
+	const char      *ref;
 	char      n2[MAX_STRING_CHARS];
 
 

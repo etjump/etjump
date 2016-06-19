@@ -249,7 +249,7 @@ void SP_trigger_objective_info(void)
 
 typedef struct
 {
-	char *name;
+	const char *name;
 	void (*spawn)(void);
 } spawn_t;
 
@@ -268,7 +268,7 @@ spawn_t spawns[] =
 
 /*
 ===================
-CG_ParseEntityFromSpawnVars
+CG_ParseEntityFromSpawnVar
 
 Spawn an entity and fill in all of the level fields from
 cg.spawnVars[], then call the class specfic spawn function

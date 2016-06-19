@@ -1258,7 +1258,7 @@ void SP_corona(gentity_t *ent)
 // char* predef_lightstyles[] = {
 //	{"mmnmmommommnonmmonqnmmo"},
 
-char *predef_lightstyles[] =
+const char *predef_lightstyles[] =
 {
 	"mmnmmommommnonmmonqnmmo",
 	"abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba",

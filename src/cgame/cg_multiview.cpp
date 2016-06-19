@@ -807,7 +807,7 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, flo
 //
 ////////////////////////////////////////////////////
 
-char *strClassHighlights[] =
+const char *strClassHighlights[] =
 {
 	S_COLOR_RED, S_COLOR_MDRED,         // Soldier
 	S_COLOR_WHITE, S_COLOR_MDGREY,      // Medic

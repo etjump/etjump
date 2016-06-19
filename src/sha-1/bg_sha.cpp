@@ -7,7 +7,7 @@ extern "C" {
 #include "../game/g_local.h"
 #endif
 
-char *G_SHA1(const char *string)
+const char *G_SHA1(const char *string)
 {
 	SHA1Context sha;
 

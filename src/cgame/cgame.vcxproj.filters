@@ -238,9 +238,6 @@
     <ClInclude Include="..\ui\ui_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cg_sha1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>

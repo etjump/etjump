@@ -276,7 +276,7 @@ int weapAlts[] =
 
 
 // new (10/18/00)
-char *animStrings[] =
+const char *animStrings[] =
 {
 	"BOTH_DEATH1",
 	"BOTH_DEAD1",
@@ -435,7 +435,7 @@ char *animStrings[] =
 
 
 // old
-char *animStringsOld[] =
+const char *animStringsOld[] =
 {
 	"BOTH_DEATH1",
 	"BOTH_DEAD1",
@@ -4073,7 +4073,7 @@ void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out)
 }
 
 
-char *eventnames[] =
+const char *eventnames[] =
 {
 	"EV_NONE",
 	"EV_FOOTSTEP",
@@ -5058,7 +5058,7 @@ void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right, 
 PC_SourceWarning
 =================
 */
-void PC_SourceWarning(int handle, char *format, ...)
+void PC_SourceWarning(int handle, const char *format, ...)
 {
 	int         line;
 	char        filename[128];
@@ -5081,7 +5081,7 @@ void PC_SourceWarning(int handle, char *format, ...)
 PC_SourceError
 =================
 */
-void PC_SourceError(int handle, char *format, ...)
+void PC_SourceError(int handle, const char *format, ...)
 {
 	int         line;
 	char        filename[128];
@@ -5534,7 +5534,7 @@ int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboo
 // Only used locally
 typedef struct
 {
-	char *colorname;
+	const char *colorname;
 	vec4_t *color;
 } colorTable_t;
 
@@ -5565,7 +5565,7 @@ colorTable_t OSP_Colortable[] =
 
 extern void trap_Cvar_Set(const char *var_name, const char *value);
 
-void BG_setColor(char *colString, vec4_t col, float alpha, char *cvarName)
+void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName)
 {
 	char *s = colString;
 
@@ -5605,7 +5605,7 @@ void BG_setColor(char *colString, vec4_t col, float alpha, char *cvarName)
 	trap_Cvar_Set(cvarName, "White");
 }
 
-void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName)
+void BG_setCrosshair(char *colString, float *col, float alpha, const char *cvarName)
 {
 	char *s = colString;
 

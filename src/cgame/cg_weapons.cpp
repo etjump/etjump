@@ -1121,7 +1121,7 @@ static qboolean CG_ParseWeaponConfig(const char *filename, weaponInfo_t *wi)
 }
 
 
-static qboolean CG_RW_ParseError(int handle, char *format, ...)
+static qboolean CG_RW_ParseError(int handle, const char *format, ...)
 {
 	int         line;
 	char        filename[128];
@@ -1869,7 +1869,7 @@ CG_RegisterWeapon
 void CG_RegisterWeapon(int weaponNum, qboolean force)
 {
 	weaponInfo_t *weaponInfo;
-	char         *filename;
+	const char         *filename;
 
 	if (weaponNum <= 0 || weaponNum >= WP_NUM_WEAPONS)
 	{

@@ -700,7 +700,7 @@ void CG_windowNormalizeOnText(cg_window_t *w)
 }
 
 
-void CG_printWindow(char *str)
+void CG_printWindow(const char *str)
 {
 	int         pos = 0, pos2 = 0;
 	char        buf[MAX_STRING_CHARS];
@@ -760,7 +760,7 @@ void CG_initStrings(void)
 	}
 }
 
-qboolean CG_addString(cg_window_t *w, char *buf)
+qboolean CG_addString(cg_window_t *w, const char *buf)
 {
 	int i;
 
