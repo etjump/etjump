@@ -2506,12 +2506,6 @@ void PM_TraceAll(trace_t *trace, vec3_t start, vec3_t end);
 //Feen: Color Methods
 void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB);
 
-/*
- * Admin system HWID & GUID transfer protocol consts
- */
-#define HWID_REQUEST "HWIDREQUEST"
-#define GUID_REQUEST "GUIDREQUEST"
-
 struct Manual
 {
 	const char *cmd;

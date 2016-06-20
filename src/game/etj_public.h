@@ -8,3 +8,13 @@
 #else
 #error "Unsupported compiler"
 #endif
+
+namespace ETJump
+{
+	namespace Authentication
+	{
+		// server sends this to request guid and hardware id from client
+		const char GUID_REQUEST[] = "GUIDREQUEST";
+	}
+}
+

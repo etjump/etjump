@@ -2,8 +2,12 @@
 // these are processed at snapshot transition time, so there will definately
 // be a valid snapshot this frame
 
+#include <vector>
+#include <string>
+
 #include "cg_local.h"
 #include "cg_mainext.h"
+#include "etj_server_commands_handler.h"
 
 #define SCOREPARSE_COUNT    9
 
@@ -2524,12 +2528,6 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
-	if (!Q_stricmp(cmd, GUID_REQUEST))
-	{
-		SendGuid();
-		return;
-	}
-
 	if (!Q_stricmp(cmd, "hasTimerun"))
 	{
 		cg.hasTimerun = atoi(CG_Argv(1)) ? qtrue : qfalse;
@@ -2992,36 +2990,6 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
-	if (!Q_stricmp(cmd, "guid_request"))
-	{
-		SendGuid();
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "route_designer"))
-	{
-		int  argc = trap_Argc();
-		char arg[MAX_TOKEN_CHARS];
-
-		if (argc != 2)
-		{
-			return;
-		}
-
-		trap_Argv(1, arg, sizeof(arg));
-
-		if (!Q_stricmp(arg, "1"))
-		{
-			cg.routeDesigner = qtrue;
-		}
-		else
-		{
-			cg.routeDesigner = qfalse;
-		}
-
-		return;
-	}
-
 	if (!Q_stricmp(cmd, "manual"))
 	{
 		CG_Manual_f();
@@ -3094,6 +3062,14 @@ static void CG_ServerCommand(void)
 		// fade out over the course of 5 seconds, should be enough (nuking: atvi bug 3793)
 		//%	CG_Fade( 0, 0, 0, 255, cg.time, 5000 );
 
+		return;
+	}
+
+	std::vector<std::string> arguments;
+	for (int i = 0, argc = trap_Argc(); i < argc; ++i)
+		arguments.push_back(CG_Argv(i));
+	if (ETJump::serverCommandsHandler->check(cmd, arguments))
+	{
 		return;
 	}
 

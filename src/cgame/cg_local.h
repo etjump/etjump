@@ -12,6 +12,8 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <memory>
+
 #include "../game/q_shared.h"
 #include "tr_types.h"
 #include "../game/bg_public.h"
@@ -3778,6 +3780,19 @@ void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
 void CG_CheckActivateLean();
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class ServerCommandsHandler;
+
+	extern std::unique_ptr<ServerCommandsHandler> serverCommandsHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // CG_LOCAL_H
 

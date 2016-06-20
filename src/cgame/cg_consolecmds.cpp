@@ -7,6 +7,7 @@
 
 
 #include "cg_local.h"
+#include "etj_platform_specific.h"
 
 void CG_TargetCommand_f(void)
 {
@@ -1331,8 +1332,8 @@ static consoleCommand_t commands[] =
 	{ "stopTimer",           CG_StopTimer            },
 	{ "portal",              CG_portalinfo_f         },
 	{ "chs",                 CG_InfoCHS_f            },
-	{ "minimize",            CG_Minimize_f           },
-	{ "min",                 CG_Minimize_f           },
+	{ "minimize",            ETJump::PlatformSpecific::minimize },
+	{ "min",                 ETJump::PlatformSpecific::minimize },
 	{ "help",                CG_Manual_f             },
 	{ "man",                 CG_Manual_f             },
 	{ "manual",              CG_Manual_f             },

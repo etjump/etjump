@@ -8,6 +8,9 @@
 
 #include "cg_local.h"
 #include "cg_mainext.h"
+#include <memory>
+#include "etj_server_commands_handler.h"
+#include "etj_client_authentication.h"
 
 displayContextDef_t cgDC;
 
@@ -70,6 +73,18 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 	}
 	return -1;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	std::unique_ptr<ClientAuthentication> authentication;
+	std::unique_ptr<ServerCommandsHandler> serverCommandsHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 cg_t         cg;
 cgs_t        cgs;
@@ -3426,20 +3441,33 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 		trap_S_FadeAllSound(1.0f, 0, qfalse);           // fade sound up
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump initialization
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("ETJump initialization started.");
+	CG_Printf("--------------------------------------------------------------------------------\n");
+
+	// NOTE: server commands handler must be created before other modules as other modules use the module
+	// to register command callbacks
+	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
+	ETJump::authentication = std::unique_ptr<ETJump::ClientAuthentication>(new ETJump::ClientAuthentication);
+	
+	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("ETJump initialized.");
+	CG_Printf("--------------------------------------------------------------------------------\n");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// OSP
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
-	cg.routeDesigner  = qfalse;
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
 	cg.etjActivateKey = -1; //set default to -1 => none
-#ifdef AC_SUPPORT
 
-	InitAntiCheat(clientAC);
-	clientAC.vmMain = vmMain;
-
-#endif // AC_SUPPORT
 	InitGame();
 
 	CG_AutoExec_f();
@@ -3462,6 +3490,16 @@ void CG_Shutdown(void)
 	{
 		trap_Cvar_Set("timescale", "1");
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump shutdown
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	ETJump::authentication = nullptr;
+	// NOTE: other modules unsubscribe commands so this should be the last module to get destroyed
+	ETJump::serverCommandsHandler = nullptr;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 // returns true if game is single player (or coop)

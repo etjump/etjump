@@ -27,7 +27,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		G_DPrintf("Requesting guid from %d\n", clientNum);
 
 		trap_SendServerCommand(clientNum,
-		                       GUID_REQUEST);
+		                       ETJump::Authentication::GUID_REQUEST);
 	}
 	else
 	{
