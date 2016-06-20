@@ -75,7 +75,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Global ETJump objects
+// ETJump objects
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace ETJump
@@ -3450,7 +3450,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	CG_Printf("--------------------------------------------------------------------------------\n");
 
 	// NOTE: server commands handler must be created before other modules as other modules use the module
-	// to register command callbacks
+	// to subcribe to commands received from server
 	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
 	ETJump::authentication = std::unique_ptr<ETJump::ClientAuthentication>(new ETJump::ClientAuthentication);
 	
@@ -3496,7 +3496,8 @@ void CG_Shutdown(void)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::authentication = nullptr;
-	// NOTE: other modules unsubscribe commands so this should be the last module to get destroyed
+	// NOTE: other modules unsubscribe commands received from the server so this should be the destroyed 
+	// after all the modules dealing with server commands have been destroyed
 	ETJump::serverCommandsHandler = nullptr;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
