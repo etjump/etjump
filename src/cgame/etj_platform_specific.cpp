@@ -3,6 +3,10 @@
 
 #if defined __linux__
 
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/in.h>
+
 void ETJump::PlatformSpecific::minimize()
 {
 	// TODO: implement

@@ -4,7 +4,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "etj_client_authentication.h"
-#include "etj_server_commands_handler.h"
+#include "etj_client_commands_handler.h"
 #include "cg_local.h"
 #include "etj_platform_specific.h"
 

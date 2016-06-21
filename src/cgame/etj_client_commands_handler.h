@@ -6,11 +6,11 @@
 
 namespace ETJump
 {
-	class ServerCommandsHandler
+	class ClientCommandsHandler
 	{
 	public:
-		ServerCommandsHandler();
-		~ServerCommandsHandler();
+		ClientCommandsHandler();
+		~ClientCommandsHandler();
 
 		// returns true if a match was found and function was called
 		bool check(const std::string& command, const std::vector<std::string>& arguments);

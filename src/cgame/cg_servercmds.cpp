@@ -7,7 +7,7 @@
 
 #include "cg_local.h"
 #include "cg_mainext.h"
-#include "etj_server_commands_handler.h"
+#include "etj_client_commands_handler.h"
 
 #define SCOREPARSE_COUNT    9
 
@@ -3066,7 +3066,7 @@ static void CG_ServerCommand(void)
 	}
 
 	std::vector<std::string> arguments;
-	for (int i = 0, argc = trap_Argc(); i < argc; ++i)
+	for (auto i = 1, argc = trap_Argc(); i < argc; ++i)
 		arguments.push_back(CG_Argv(i));
 	if (ETJump::serverCommandsHandler->check(cmd, arguments))
 	{

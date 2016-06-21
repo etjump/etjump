@@ -3787,9 +3787,10 @@ void CG_CheckActivateLean();
 
 namespace ETJump
 {
-	class ServerCommandsHandler;
+	class ClientCommandsHandler;
 
-	extern std::unique_ptr<ServerCommandsHandler> serverCommandsHandler;
+	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
+	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

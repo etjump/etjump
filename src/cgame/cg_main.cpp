@@ -9,7 +9,7 @@
 #include "cg_local.h"
 #include "cg_mainext.h"
 #include <memory>
-#include "etj_server_commands_handler.h"
+#include "etj_client_commands_handler.h"
 #include "etj_client_authentication.h"
 
 displayContextDef_t cgDC;
@@ -81,7 +81,8 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 namespace ETJump
 {
 	std::unique_ptr<ClientAuthentication> authentication;
-	std::unique_ptr<ServerCommandsHandler> serverCommandsHandler;
+	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
+	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3449,9 +3450,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	CG_Printf("ETJump initialization started.");
 	CG_Printf("--------------------------------------------------------------------------------\n");
 
-	// NOTE: server commands handler must be created before other modules as other modules use the module
-	// to subcribe to commands received from server
-	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
+	// NOTE: client server commands handlers must be created before other modules as other modules use them
+	// to subcribe to commands 
+	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler);
+	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler);
 	ETJump::authentication = std::unique_ptr<ETJump::ClientAuthentication>(new ETJump::ClientAuthentication);
 	
 	CG_Printf("--------------------------------------------------------------------------------\n");

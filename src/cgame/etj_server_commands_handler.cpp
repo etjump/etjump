@@ -1,18 +1,18 @@
-#include "etj_server_commands_handler.h"
+#include "etj_commands_handler.h"
 
 
 
-ETJump::ServerCommandsHandler::ServerCommandsHandler()
+ETJump::CommandsHandler::CommandsHandler()
 {
 	_callbacks.clear();
 }
 
 
-ETJump::ServerCommandsHandler::~ServerCommandsHandler()
+ETJump::CommandsHandler::~CommandsHandler()
 {
 }
 
-bool ETJump::ServerCommandsHandler::check(const std::string& command, const std::vector<std::string>& arguments)
+bool ETJump::CommandsHandler::check(const std::string& command, const std::vector<std::string>& arguments)
 {
 	auto match = _callbacks.find(command);
 	if (match != end(_callbacks))
@@ -23,7 +23,7 @@ bool ETJump::ServerCommandsHandler::check(const std::string& command, const std:
 	return false;
 }
 
-bool ETJump::ServerCommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback)
+bool ETJump::CommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback)
 {
 	if (_callbacks.find(command) != end(_callbacks))
 	{
@@ -34,7 +34,7 @@ bool ETJump::ServerCommandsHandler::subscribe(const std::string& command, std::f
 	return true;
 }
 
-bool ETJump::ServerCommandsHandler::unsubcribe(const std::string& command)
+bool ETJump::CommandsHandler::unsubcribe(const std::string& command)
 {
 	auto callback = _callbacks.find(command);
 	if (callback != end(_callbacks))

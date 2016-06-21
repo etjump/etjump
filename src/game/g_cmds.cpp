@@ -1,4 +1,9 @@
+#include <string>
+#include <vector>
+
 #include "g_local.h"
+#include "etj_server_commands_handler.h"
+
 
 void BotDebug(int clientNum);
 void GetBotAutonomies(int clientNum, int *weapAutonomy, int *moveAutonomy);
@@ -4569,6 +4574,13 @@ qboolean ClientIsFlooding(gentity_t *ent)
 	return qfalse;
 }
 
+const char *G_Argv(int arg)
+{
+	static char buffer[MAX_STRING_CHARS] = "";
+	trap_Argv(arg, buffer, sizeof(buffer));
+	return buffer;
+}
+
 void ClientCommand(int clientNum)
 {
 	gentity_t *ent;
@@ -4785,6 +4797,14 @@ void ClientCommand(int clientNum)
 	}
 
 	if (G_commandCheck(ent, cmd, qtrue))
+	{
+		return;
+	}
+
+	std::vector<std::string> arguments;
+	for (auto idx = 1, argc = trap_Argc(); idx < argc; ++idx)
+		arguments.push_back(G_Argv(idx));
+	if (ETJump::commandsHandler->check(cmd, clientNum, arguments))
 	{
 		return;
 	}

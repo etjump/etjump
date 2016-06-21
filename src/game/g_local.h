@@ -5,6 +5,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
+#include <memory>
 
 //==================================================================
 
@@ -2727,5 +2728,18 @@ void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
 const char *G_MatchOneMap(const char *arg);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class ServerCommandsHandler;
+
+	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // G_LOCAL_H

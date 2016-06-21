@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -39,6 +43,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -279,7 +286,7 @@
     <ClCompile Include="etj_client_authentication.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
     <ClCompile Include="etj_platform_specific.cpp" />
-    <ClCompile Include="etj_server_commands_handler.cpp" />
+    <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -300,7 +307,7 @@
     <ClInclude Include="etj_client_authentication.h" />
     <ClInclude Include="etj_drawable.h" />
     <ClInclude Include="etj_platform_specific.h" />
-    <ClInclude Include="etj_server_commands_handler.h" />
+    <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />

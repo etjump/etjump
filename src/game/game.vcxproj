@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -39,6 +43,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -259,6 +266,7 @@
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
+    <ClCompile Include="etj_server_commands_handler.cpp" />
     <ClCompile Include="g_active.cpp" />
     <ClCompile Include="g_alarm.cpp" />
     <ClCompile Include="g_antilag.cpp" />
@@ -331,6 +339,7 @@
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
     <ClInclude Include="etj_public.h" />
+    <ClInclude Include="etj_server_commands_handler.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="etj_local.h" />
     <ClInclude Include="g_public.h" />

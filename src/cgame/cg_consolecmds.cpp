@@ -6,8 +6,10 @@
 */
 
 
+#include <vector>
 #include "cg_local.h"
 #include "etj_platform_specific.h"
+#include "etj_client_commands_handler.h"
 
 void CG_TargetCommand_f(void)
 {
@@ -1213,18 +1215,6 @@ void CG_FreeCamSetPos(void)
 
 }
 
-#ifdef AC_SUPPORT
-
-void CG_Ptr_f(void)
-{
-	InitAntiCheat(clientAC);
-	CG_Printf("Base addr: %X\n", (int)clientAC.baseAddress);
-	CG_Printf("vmMain addr: %X\n", (int)clientAC.vmMain);
-	CG_Printf("Diff: %X\n", (int)clientAC.vmMain - (int)clientAC.baseAddress);
-}
-
-#endif // AC_SUPPORT
-
 typedef struct
 {
 	const char *cmd;
@@ -1370,6 +1360,14 @@ qboolean CG_ConsoleCommand(void)
 			commands[i].function();
 			return qtrue;
 		}
+	}
+
+	std::vector<std::string> arguments;
+	for (auto i = 1, argc = trap_Argc(); i < argc; ++i)
+		arguments.push_back(CG_Argv(i));
+	if (ETJump::consoleCommandsHandler->check(cmd, arguments))
+	{
+		return qtrue;
 	}
 
 	return qfalse;

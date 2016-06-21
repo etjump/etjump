@@ -1,3 +1,5 @@
 Debug/
 Release/
+Tests/
 *.vcxproj.user
+*.exe
