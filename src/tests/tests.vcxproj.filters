@@ -16,6 +16,9 @@
     <Filter Include="Source Files\game">
       <UniqueIdentifier>{a51dcbd2-dc60-4f3e-875d-befcc124cb63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\cgame">
+      <UniqueIdentifier>{b9281d32-c927-4694-8bd1-9018924257f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests_main.cpp">
@@ -26,6 +29,12 @@
     </ClCompile>
     <ClCompile Include="..\game\etj_server_commands_handler.cpp">
       <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="client_commands_handler_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cgame\etj_client_commands_handler.cpp">
+      <Filter>Source Files\cgame</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
