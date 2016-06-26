@@ -36,5 +36,11 @@
     <ClCompile Include="..\cgame\etj_client_commands_handler.cpp">
       <Filter>Source Files\cgame</Filter>
     </ClCompile>
+    <ClCompile Include="commands_parser_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_commands_parser.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
