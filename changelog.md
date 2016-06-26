@@ -1,3 +1,7 @@
+# ETJump 2.2.0
+
+* Changed all .c modules to .cpp modules.
+
 # ETJump 2.1.0
 
 * Extended `target_relay`:  
