@@ -4655,6 +4655,7 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 	qboolean   hasWhitespace;
 	float      y;
 	vec4_t     color, cursorColor;
+	int        linesCount = 0;
 
 	textWidth = 0;
 	newLinePtr = NULL;
@@ -4722,6 +4723,7 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 
 				buff[newLine] = '\0';
 				cursorPos = item->cursorPos - startLine; //position relatively to line
+				linesCount++;
 
 				// the line we are suppose to draw caret on
 				if (hasCursor && cursorPos >= 0 && newLine >= cursorPos) {
@@ -4804,6 +4806,15 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 		buff[len] = '\0';
 	}
 
+	// calculate offset height for specific element
+	if (hasCursor) {
+		if (linesCount > 2) {
+			DC->setCVar("ui_mtOffset", va("%i", (linesCount - 2) * 10));
+		}
+		else {
+			DC->setCVar("ui_mtOffset", va("%i", 0));
+		}		
+	}
 }
 
 void Item_Text_AutoWrapped_Paint(itemDef_t *item)
@@ -6265,6 +6276,17 @@ void Item_Paint(itemDef_t *item)
 		return;
 	}
 
+	if (item->hOffset) {
+		float off = DC->getCVarValue(item->hOffset);
+		item->window.rect.h = item->window.rectClient.h + off;
+	}
+
+	if (item->yOffset) {
+		float off = DC->getCVarValue(item->yOffset);
+		item->window.rect.y = item->window.rectClient.y + off;
+		item->textRect.y = item->window.rectClient.y + item->textaligny + off;
+	}
+
 	if (DC->textFont)
 	{
 		DC->textFont(item->font);
@@ -7069,6 +7091,23 @@ qboolean ItemParse_group(itemDef_t *item, int handle)
 	return qtrue;
 }
 
+qboolean ItemParse_hOffset(itemDef_t *item, int handle)
+{
+	if (!PC_String_Parse(handle, &item->hOffset))
+	{
+		return qfalse;
+	}
+	return qtrue;
+}
+
+qboolean ItemParse_yOffset(itemDef_t *item, int handle)
+{
+	if (!PC_String_Parse(handle, &item->yOffset))
+	{
+		return qfalse;
+	}
+	return qtrue;
+}
 
 // asset_model <string>
 qboolean ItemParse_asset_model(itemDef_t *item, int handle)
@@ -8214,6 +8253,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "focusSound",        ItemParse_focusSound,        NULL },
 	{ "forecolor",         ItemParse_forecolor,         NULL },
 	{ "group",             ItemParse_group,             NULL },
+	{ "hOffset",           ItemParse_hOffset,           NULL },
 	{ "hideCvar",          ItemParse_hideCvar,          NULL },
 	{ "horizontalscroll",  ItemParse_horizontalscroll,  NULL },
 	{ "leaveFocus",        ItemParse_leaveFocus,        NULL },
@@ -8260,6 +8300,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "visible",           ItemParse_visible,           NULL },
 	{ "voteFlag",          ItemParse_voteFlag,          NULL }, // OSP - vote check
 	{ "wrapped",           ItemParse_wrapped,           NULL },
+	{ "yOffset",           ItemParse_yOffset,           NULL },
 
 	{ NULL,                NULL,                        NULL }
 };

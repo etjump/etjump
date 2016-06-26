@@ -13,7 +13,7 @@
 
 #define GAME_VERSION    "etjump"
 
-#define MOD_VERSION     "2.1.0 RC3"
+#define MOD_VERSION     "2.1.0"
 
 #define BUILD_TIME __DATE__ " " __TIME__
 

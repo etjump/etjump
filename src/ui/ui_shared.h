@@ -300,6 +300,9 @@ typedef struct itemDef_s
 	int cursorDir; //cursor vertical direction 1 down, -1 up
 	vec4_t cursorColor;
 
+	const char *hOffset;
+	const char *yOffset;
+
 } itemDef_t;
 
 typedef struct
