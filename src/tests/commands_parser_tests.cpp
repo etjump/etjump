@@ -16,6 +16,14 @@ public:
 	CommandsParser parser;
 };
 
+constexpr const auto second = 1000;
+constexpr const auto minute = 60 * second;
+constexpr const auto hour = 60 * minute;
+constexpr const auto day = 24 * hour;
+constexpr const auto week = 7 * day;
+constexpr const auto month = 30 * day;
+constexpr const auto year = 365 * day;
+
 bool OptionExists(const CommandsParser::ParsedCommand& command, const std::string& option)
 {
 	return command.options.find(option) != end(command.options);
@@ -41,9 +49,9 @@ TEST_F(CommandsParserTests, TestRegularCommandWithNoOptions)
 TEST_F(CommandsParserTests, TestCommandWithJustOptions)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("player", CommandsParser::OptionDefinition::Type::Token, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("tester", CommandsParser::OptionDefinition::Type::Token, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("player", CommandsParser::OptionDefinition::Type::Boolean, "A description"));
+	options.optionDefinitions.push_back({ "player", CommandsParser::OptionDefinition::Type::Token, "A description" });
+	options.optionDefinitions.push_back({ "tester", CommandsParser::OptionDefinition::Type::Token, "A description" });
+	options.optionDefinitions.push_back({ "thingIsActive", CommandsParser::OptionDefinition::Type::Boolean, "A description" });
 
 	std::vector<std::string> args = {
 		"!throw",
@@ -55,7 +63,7 @@ TEST_F(CommandsParserTests, TestCommandWithJustOptions)
 	};
 
 	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "throw");
+	ASSERT_EQ(parsedCommand.command, "!throw");
 	ASSERT_EQ(parsedCommand.arguments.size(), 0);
 	ASSERT_TRUE(OptionExists(parsedCommand, "player"));
 	ASSERT_EQ(parsedCommand.options["player"].text, "thisIsAPlayer");
@@ -69,9 +77,9 @@ TEST_F(CommandsParserTests, TestCommandWithJustOptions)
 TEST_F(CommandsParserTests, TestCommandWithOptionsAndArgs)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("player", CommandsParser::OptionDefinition::Type::Token, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("tester", CommandsParser::OptionDefinition::Type::Token, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("player", CommandsParser::OptionDefinition::Type::Boolean, "A description"));
+	options.optionDefinitions.push_back({ "player", CommandsParser::OptionDefinition::Type::Token, "A description" });
+	options.optionDefinitions.push_back({ "tester", CommandsParser::OptionDefinition::Type::Token, "A description" });
+	options.optionDefinitions.push_back({ "thingIsActive", CommandsParser::OptionDefinition::Type::Boolean, "A description" });
 
 	std::vector<std::string> args = {
 		"!throw",
@@ -86,7 +94,7 @@ TEST_F(CommandsParserTests, TestCommandWithOptionsAndArgs)
 	};
 
 	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "throw");
+	ASSERT_EQ(parsedCommand.command, "!throw");
 	ASSERT_EQ(parsedCommand.arguments.size(), 3);
 	ASSERT_EQ(parsedCommand.arguments[0], "arguments");
 	ASSERT_EQ(parsedCommand.arguments[1], "are");
@@ -103,9 +111,9 @@ TEST_F(CommandsParserTests, TestCommandWithOptionsAndArgs)
 TEST_F(CommandsParserTests, TestCommandWithMixedOptionsAndArgs)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("player", CommandsParser::OptionDefinition::Type::Token, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("tester", CommandsParser::OptionDefinition::Type::Token, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("player", CommandsParser::OptionDefinition::Type::Boolean, "A description"));
+	options.optionDefinitions.push_back({ "player", CommandsParser::OptionDefinition::Type::Token, "A description" });
+	options.optionDefinitions.push_back({ "tester", CommandsParser::OptionDefinition::Type::Token, "A description" });
+	options.optionDefinitions.push_back({ "thingIsActive", CommandsParser::OptionDefinition::Type::Boolean, "A description" });
 
 	std::vector<std::string> args = {
 		"!throw",
@@ -123,7 +131,7 @@ TEST_F(CommandsParserTests, TestCommandWithMixedOptionsAndArgs)
 	};
 
 	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "throw");
+	ASSERT_EQ(parsedCommand.command, "!throw");
 	ASSERT_EQ(parsedCommand.arguments.size(), 6);
 	ASSERT_EQ(parsedCommand.arguments[0], "so");
 	ASSERT_EQ(parsedCommand.arguments[1], "it");
@@ -143,7 +151,7 @@ TEST_F(CommandsParserTests, TestCommandWithMixedOptionsAndArgs)
 TEST_F(CommandsParserTests, TestMultiToken)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("message", CommandsParser::OptionDefinition::Type::MultiToken, "A description"));
+	options.optionDefinitions.push_back({ "message", CommandsParser::OptionDefinition::Type::MultiToken, "A description" });
 
 	std::vector<std::string> args = {
 		"!print",
@@ -154,7 +162,7 @@ TEST_F(CommandsParserTests, TestMultiToken)
 	};
 
 	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "print");
+	ASSERT_EQ(parsedCommand.command, "!print");
 	ASSERT_EQ(parsedCommand.arguments.size(), 0);
 	ASSERT_TRUE(OptionExists(parsedCommand, "message"));
 	ASSERT_EQ(parsedCommand.options["message"].text, "a long message");
@@ -163,7 +171,7 @@ TEST_F(CommandsParserTests, TestMultiToken)
 TEST_F(CommandsParserTests, TestToken)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("message", CommandsParser::OptionDefinition::Type::Token, "A description"));
+	options.optionDefinitions.push_back({ "token", CommandsParser::OptionDefinition::Type::Token, "A description" });
 
 	std::vector<std::string> args = {
 		"!print",
@@ -174,7 +182,7 @@ TEST_F(CommandsParserTests, TestToken)
 	};
 
 	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "print");
+	ASSERT_EQ(parsedCommand.command, "!print");
 	ASSERT_EQ(parsedCommand.arguments.size(), 2);
 	ASSERT_TRUE(OptionExists(parsedCommand, "token"));
 	ASSERT_EQ(parsedCommand.options["token"].text, "token");
@@ -183,7 +191,7 @@ TEST_F(CommandsParserTests, TestToken)
 TEST_F(CommandsParserTests, TestDuration)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("duration", CommandsParser::OptionDefinition::Type::Duration, "A description"));
+	options.optionDefinitions.push_back({ "duration", CommandsParser::OptionDefinition::Type::Duration, "A description" });
 
 	std::vector<std::string> args = {
 		"!displayDuration",
@@ -193,44 +201,44 @@ TEST_F(CommandsParserTests, TestDuration)
 
 	auto parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 37 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, 37 * second);
 
 	args[2] = "3min";
 	parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 3 * 60 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, 3 * minute);
 
 
 	args[2] = "5h";
 	parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 5 * 60 * 60 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, 5 * hour);
 
 	args[2] = "7d";
 	parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 7 * 24 * 60 * 60 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, 7 * day);
 
 	args[2] = "9w";
 	parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 9 * 7 * 24 * 60 * 60 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, int64_t(9 * 7) * day);
 
 	args[2] = "11mon";
 	parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 11 * 30 * 24 * 60 * 60 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, int64_t(11 * 30) * day);
 
 	args[2] = "13y";
 	parsedCommand = CommandsParser::parse(args, options);
 	ASSERT_TRUE(OptionExists(parsedCommand, "duration"));
-	ASSERT_EQ(parsedCommand.options["duration"].duration, 13 * 12 * 30 * 24 * 60 * 60 * 1000);
+	ASSERT_EQ(parsedCommand.options["duration"].duration, int64_t(13 * 365) * day);
 }
 
 TEST_F(CommandsParserTests, TestInteger)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("integer", CommandsParser::OptionDefinition::Type::Integer, "A description"));
+	options.optionDefinitions.push_back({ "integer", CommandsParser::OptionDefinition::Type::Integer, "A description" });
 
 	std::vector<std::string> args = {
 		"!throw",
@@ -254,69 +262,13 @@ TEST_F(CommandsParserTests, TestInteger)
 	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
 	ASSERT_GT(parsedCommand.options["integer"].errorMessage.length(), 0);
 
-}
-
-TEST_F(CommandsParserTests, TestPositiveInteger)
-{
-	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("integer", CommandsParser::OptionDefinition::Type::Integer, "A description"));
-
-	std::vector<std::string> args = {
-		"!throw",
-		"-integer",
-		"1000"
-	};
-	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "!throw");
-	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
-	ASSERT_EQ(parsedCommand.options["integer"].integer, 1000);
-
-	args[2] = "-1000";
-	parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "!throw");
-	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
-	ASSERT_GT(parsedCommand.options["integer"].errorMessage.length(), 0);
-
-	args[2] = "a string";
-	parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "!throw");
-	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
-	ASSERT_GT(parsedCommand.options["integer"].errorMessage.length(), 0);
-}
-
-TEST_F(CommandsParserTests, TestNegativeInteger)
-{
-	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("integer", CommandsParser::OptionDefinition::Type::Integer, "A description"));
-
-	std::vector<std::string> args = {
-		"!throw",
-		"-integer",
-		"1000"
-	};
-	auto parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "!throw");
-	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
-	ASSERT_GT(parsedCommand.options["integer"].errorMessage.length(), 0);
-
-	args[2] = "-1000";
-	parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "!throw");
-	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
-	ASSERT_EQ(parsedCommand.options["integer"].integer, -1000);
-
-	args[2] = "a string";
-	parsedCommand = CommandsParser::parse(args, options);
-	ASSERT_EQ(parsedCommand.command, "!throw");
-	ASSERT_TRUE(OptionExists(parsedCommand, "integer"));
-	ASSERT_GT(parsedCommand.options["integer"].errorMessage.length(), 0);
 }
 
 TEST_F(CommandsParserTests, TestBoolean)
 {
 	struct CommandsParser::ParseOptions options;
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("boolean", CommandsParser::OptionDefinition::Type::Boolean, "A description"));
-	options.optionDefinitions.push_back(CommandsParser::OptionDefinition("boolean2", CommandsParser::OptionDefinition::Type::Boolean, "A description"));
+	options.optionDefinitions.push_back({ "boolean", CommandsParser::OptionDefinition::Type::Boolean, "A description" });
+	options.optionDefinitions.push_back({ "boolean2", CommandsParser::OptionDefinition::Type::Boolean, "A description" });
 
 	std::vector<std::string> args = {
 		"!throw",
