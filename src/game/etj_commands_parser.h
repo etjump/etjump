@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/variant.hpp>
 
 namespace ETJump
 {
@@ -26,21 +25,32 @@ namespace ETJump
 				MultiToken,
 				// A single token that has to fit to an integer
 				Integer,
+				// Only positive integers
+				PositiveInteger,
+				// Only negative integers
+				NegativeInteger,
 				// Duration e.g. 1s 3min 5h 7d 9w 11mon 13y
 				Duration
 			};
-			std::string description;
+			OptionDefinition(std::string name, Type type, std::string description = ""): name(name), type(type), description(description) {};
 			std::string name;
 			Type type;
+			std::string description;
 		};
 
 		struct Option
 		{
+			Option(): type(OptionDefinition::Type::Token), integer(0), duration(0), text(""), active(false) {}
 			OptionDefinition::Type type;
 			// int holds integer
+			int integer;
 			// long holds duration in ms
+			long duration;
 			// string holds token and multitoken>
-			boost::variant<bool, int, long, std::string> value;
+			std::string text;
+			bool active;
+			// if there was an error while parsing the option, this will be updated
+			std::string errorMessage;
 		};
 
 		struct ParsedCommand
@@ -52,7 +62,7 @@ namespace ETJump
 
 		struct ParseOptions
 		{
-			
+			std::vector<OptionDefinition> optionDefinitions;
 		};
 
 		CommandsParser();
