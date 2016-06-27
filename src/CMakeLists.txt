@@ -122,7 +122,7 @@ file(GLOB QAGAME_SRC
 	"game/bg_tracemap.cpp"
 	"game/etj_async_operation.cpp"
 	"game/etj_banner_system.cpp"
-	"game/etj_command_variables.cpp"
+	"game/etj_console_variables.cpp"
 	"game/etj_commands.cpp"
 	"game/etj_common.h"
 	"game/etj_custom_map_votes.cpp"
