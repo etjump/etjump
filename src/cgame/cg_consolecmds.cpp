@@ -1370,8 +1370,8 @@ qboolean CG_ConsoleCommand(void)
 			return qtrue;
 		}
 	}
-
-	return qfalse;
+	
+	return CG_ConsoleCommandExt(cmd);
 }
 
 

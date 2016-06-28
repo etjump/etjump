@@ -3771,8 +3771,6 @@ void CG_Minimize_f(void);
 
 void SendGuid();
 
-
-
 const char *G_SHA1(const char *str);
 
 //
@@ -3786,6 +3784,8 @@ void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
 void CG_CheckActivateLean();
+
+qboolean CG_ConsoleCommandExt(const char *cmd);
 
 #endif // CG_LOCAL_H
 
