@@ -3,22 +3,23 @@
 #include <boost/algorithm/string.hpp>
 #include "etj_printer.h"
 
-ETJump::Session::Session()
+ETJump::Session::Session(IUserRepository* userRepository): _userRepository(userRepository)
 {
 	if (!commandsHandler->subscribe("etguid", [&](int clientNum, const std::vector<std::string>& arguments)
 	{
-		if (!_clients[clientNum].parseIdsResponse(arguments))
+		if (!_clients[clientNum].authenticate(arguments))
 		{
 			Printer::LogPrintln((boost::format("Possible GUID or Hardware ID spoof attempt from IP address: %s.") % _clients[clientNum].ipAddress()).str());
 			_clients[clientNum].drop("Possible GUID or Hardware ID spoof attempt.");
 			_clients[clientNum] = Client();
+			return;
 		}
+		_clients[clientNum].authorize(userRepository);
 	}))
 	{
 		throw std::runtime_error("Tried to subscribe to `etguid` event twice. Contact mod developer.");
 	}
 }
-
 
 ETJump::Session::~Session()
 {
@@ -37,3 +38,7 @@ std::string ETJump::Session::clientConnect(int clientNum, bool firstTime, const 
 	return "";
 }
 
+void ETJump::Session::clientThink(int clientNum)
+{
+	_clients[clientNum].checkPendingAuthorization();
+}

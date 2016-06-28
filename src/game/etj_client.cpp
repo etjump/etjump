@@ -2,16 +2,16 @@
 #include "etj_public.h"
 #include "etj_local.h"
 #include "etj_printer.h"
+#include "etj_user.h"
 
 ETJump::Client::Client(int clientNum, bool connected, const std::string& ipAddress): 
 	_slot(0),
 	_connected(false), 
-	_ipAddress(ipAddress), 
-	_user(nullptr)
+	_ipAddress(ipAddress)
 {
 }
 
-ETJump::Client::Client(): _slot(-1), _connected(false), _user(nullptr) 
+ETJump::Client::Client(): _slot(-1), _connected(false)
 {
 }
 
@@ -24,7 +24,7 @@ void ETJump::Client::requestGuid()
 	Printer::SendCommand(_slot, Authentication::GUID_REQUEST);
 }
 
-bool ETJump::Client::parseIdsResponse(const std::vector<std::string>& arguments)
+bool ETJump::Client::authenticate(const std::vector<std::string>& arguments)
 {
 	const auto HASH_LENGTH = 40;
 	if (arguments.size() != 3)
@@ -55,4 +55,25 @@ bool ETJump::Client::parseIdsResponse(const std::vector<std::string>& arguments)
 void ETJump::Client::drop(const std::string& message)
 {
 	trap_DropClient(_slot, message.c_str(), message.length());
+}
+
+void ETJump::Client::authorize(IUserRepository* userRepository)
+{
+	auto result = userRepository->get(_guid);
+	// if it is cached, take it immediately
+	if (result.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+	{
+		_user = result.get();
+	} else
+	{
+		_pendingAuthorization = move(result);
+	}
+}
+
+void ETJump::Client::checkPendingAuthorization()
+{
+	if (_pendingAuthorization.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+	{
+		_user = _pendingAuthorization.get();
+	}
 }

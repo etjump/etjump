@@ -8,7 +8,7 @@ namespace ETJump
 	class User
 	{
 	public:
-		User();
+		User(int64_t id, const std::string& guid);
 		~User();
 	private:
 		int64_t _id;

@@ -1,4 +1,4 @@
-
+#include "etj_session.h"
 #include "g_local.h"
 
 /*
@@ -1604,6 +1604,8 @@ void ClientThink(int clientNum)
 #endif // ALLOW_GSYNC
 	{
 		ClientThink_real(ent);
+
+		ETJump::session->clientThink(clientNum);
 	}
 
 	// if this is the locally playing client, do bot thinks
