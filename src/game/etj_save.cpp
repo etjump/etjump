@@ -5,7 +5,6 @@ using std::vector;
 
 #include "etj_save.h"
 #include "utilities.hpp"
-#include "etj_session.h"
 
 SaveSystem::Client::Client()
 {
@@ -378,46 +377,46 @@ void SaveSystem::ResetSavedPositions(gentity_t *ent)
 void SaveSystem::SavePositionsToDatabase(gentity_t *ent)
 {
 
-	if (!ent->client)
-	{
-		return;
-	}
+	//if (!ent->client)
+	//{
+	//	return;
+	//}
 
-	string guid = session_->Guid(ent);
+	//string guid = session_->Guid(ent);
 
-	DisconnectedClient client;
+	//DisconnectedClient client;
 
-	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
-	{
-		// Allied
-		VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].origin,
-		           client.alliesSavedPositions[i].origin);
-		VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].vangles,
-		           client.alliesSavedPositions[i].vangles);
-		client.alliesSavedPositions[i].isValid =
-		    clients_[ClientNum(ent)].alliesSavedPositions[i].isValid;
-		// Axis
-		VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].origin,
-		           client.axisSavedPositions[i].origin);
-		VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].vangles,
-		           client.axisSavedPositions[i].vangles);
-		client.axisSavedPositions[i].isValid
-		    = clients_[ClientNum(ent)].axisSavedPositions[i].isValid;
-	}
+	//for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
+	//{
+	//	// Allied
+	//	VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].origin,
+	//	           client.alliesSavedPositions[i].origin);
+	//	VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].vangles,
+	//	           client.alliesSavedPositions[i].vangles);
+	//	client.alliesSavedPositions[i].isValid =
+	//	    clients_[ClientNum(ent)].alliesSavedPositions[i].isValid;
+	//	// Axis
+	//	VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].origin,
+	//	           client.axisSavedPositions[i].origin);
+	//	VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].vangles,
+	//	           client.axisSavedPositions[i].vangles);
+	//	client.axisSavedPositions[i].isValid
+	//	    = clients_[ClientNum(ent)].axisSavedPositions[i].isValid;
+	//}
 
-	client.progression                           = ent->client->sess.clientMapProgression;
-	ent->client->sess.loadPreviousSavedPositions = qfalse;
+	//client.progression                           = ent->client->sess.clientMapProgression;
+	//ent->client->sess.loadPreviousSavedPositions = qfalse;
 
-	std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+	//std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
-	if (it != savedPositions.end())
-	{
-		it->second = client;
-	}
-	else
-	{
-		savedPositions.insert(std::make_pair(guid, client));
-	}
+	//if (it != savedPositions.end())
+	//{
+	//	it->second = client;
+	//}
+	//else
+	//{
+	//	savedPositions.insert(std::make_pair(guid, client));
+	//}
 
 }
 
@@ -425,61 +424,61 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent)
 void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent)
 {
 
-	if (!ent->client)
-	{
-		return;
-	}
+	//if (!ent->client)
+	//{
+	//	return;
+	//}
 
-	if (!ent->client->sess.loadPreviousSavedPositions)
-	{
-		return;
-	}
+	//if (!ent->client->sess.loadPreviousSavedPositions)
+	//{
+	//	return;
+	//}
 
-	string guid = session_->Guid(ent);
+	//string guid = session_->Guid(ent);
 
-	std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+	//std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
 
-	if (it != savedPositions.end())
-	{
+	//if (it != savedPositions.end())
+	//{
 
-		unsigned validPositionsCount = 0;
+	//	unsigned validPositionsCount = 0;
 
-		for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
-		{
-			// Allied
-			VectorCopy(it->second.alliesSavedPositions[i].origin,
-			           clients_[ClientNum(ent)].alliesSavedPositions[i].origin);
-			VectorCopy(it->second.alliesSavedPositions[i].vangles,
-			           clients_[ClientNum(ent)].alliesSavedPositions[i].vangles);
-			clients_[ClientNum(ent)].alliesSavedPositions[i].isValid =
-			    it->second.alliesSavedPositions[i].isValid;
+	//	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
+	//	{
+	//		// Allied
+	//		VectorCopy(it->second.alliesSavedPositions[i].origin,
+	//		           clients_[ClientNum(ent)].alliesSavedPositions[i].origin);
+	//		VectorCopy(it->second.alliesSavedPositions[i].vangles,
+	//		           clients_[ClientNum(ent)].alliesSavedPositions[i].vangles);
+	//		clients_[ClientNum(ent)].alliesSavedPositions[i].isValid =
+	//		    it->second.alliesSavedPositions[i].isValid;
 
-			if (it->second.alliesSavedPositions[i].isValid)
-			{
-				++validPositionsCount;
-			}
+	//		if (it->second.alliesSavedPositions[i].isValid)
+	//		{
+	//			++validPositionsCount;
+	//		}
 
-			// Axis
-			VectorCopy(it->second.axisSavedPositions[i].origin,
-			           clients_[ClientNum(ent)].axisSavedPositions[i].origin);
-			VectorCopy(it->second.axisSavedPositions[i].vangles,
-			           clients_[ClientNum(ent)].axisSavedPositions[i].vangles);
-			clients_[ClientNum(ent)].axisSavedPositions[i].isValid =
-			    it->second.axisSavedPositions[i].isValid;
+	//		// Axis
+	//		VectorCopy(it->second.axisSavedPositions[i].origin,
+	//		           clients_[ClientNum(ent)].axisSavedPositions[i].origin);
+	//		VectorCopy(it->second.axisSavedPositions[i].vangles,
+	//		           clients_[ClientNum(ent)].axisSavedPositions[i].vangles);
+	//		clients_[ClientNum(ent)].axisSavedPositions[i].isValid =
+	//		    it->second.axisSavedPositions[i].isValid;
 
-			if (it->second.axisSavedPositions[i].isValid)
-			{
-				++validPositionsCount;
-			}
-		}
+	//		if (it->second.axisSavedPositions[i].isValid)
+	//		{
+	//			++validPositionsCount;
+	//		}
+	//	}
 
-		ent->client->sess.loadPreviousSavedPositions = qfalse;
-		ent->client->sess.clientMapProgression       = it->second.progression;
-		if (validPositionsCount)
-		{
-			ChatPrintTo(ent, "^<ETJump: ^7loaded saved positions from previous session.");
-		}
-	}
+	//	ent->client->sess.loadPreviousSavedPositions = qfalse;
+	//	ent->client->sess.clientMapProgression       = it->second.progression;
+	//	if (validPositionsCount)
+	//	{
+	//		ChatPrintTo(ent, "^<ETJump: ^7loaded saved positions from previous session.");
+	//	}
+	//}
 }
 
 // Saves backup position
@@ -547,9 +546,7 @@ void SaveSystem::Print(gentity_t *ent)
 	ConsolePrintTo(NULL, toPrint);
 }
 
-SaveSystem::SaveSystem(const Session *session) :
-	session_(session)
-	//:guidInterface_(guidInterface)
+SaveSystem::SaveSystem()
 {
 
 }
@@ -561,25 +558,25 @@ SaveSystem::~SaveSystem()
 
 void ForceSave(gentity_t *location, gentity_t *ent)
 {
-	game.saves->ForceSave(location, ent);
+	//game.saves->ForceSave(location, ent);
 }
 
 void ResetSavedPositions(gentity_t *ent)
 {
-	game.saves->ResetSavedPositions(ent);
+	//game.saves->ResetSavedPositions(ent);
 }
 
 void InitSaveSystem()
 {
-	game.saves->Reset();
+	//game.saves->Reset();
 }
 
 void SavePositionsToDatabase(gentity_t *ent)
 {
-	game.saves->SavePositionsToDatabase(ent);
+	//game.saves->SavePositionsToDatabase(ent);
 }
 
 void LoadPositionsFromDatabase(gentity_t *ent)
 {
-	game.saves->LoadPositionsFromDatabase(ent);
+	//game.saves->LoadPositionsFromDatabase(ent);
 }

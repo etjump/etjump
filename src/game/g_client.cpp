@@ -1596,8 +1596,6 @@ void ClientUserinfoChanged(int clientNum)
 		if (strcmp(oldname, client->pers.netname))
 		{
 
-			ClientNameChanged(ent);
-
 			trap_SendServerCommand(-1,
 			                       va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"",
 			                          oldname, client->pers.netname));
@@ -1698,7 +1696,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	// Zero: has to be here because else it'll reset the ip we'll
 	// set a bit later
-	OnClientConnect(clientNum, firstTime, isBot);
+	//OnClientConnect(clientNum, firstTime, isBot);
 
 	// IP filtering
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
@@ -1960,7 +1958,6 @@ void ClientBegin(int clientNum)
 	ent->surfaceFlags = 0;
 
 	LoadPositionsFromDatabase(ent);
-	OnClientBegin(ent);
 	if (level.hasTimerun)
 	{
 		trap_SendServerCommand(clientNum, "hasTimerun 1");
@@ -1979,7 +1976,7 @@ void ClientBegin(int clientNum)
 
 	if (!ent->client->sess.receivedTimerunStates)
 	{
-		TimerunConnectNotify(ent);
+		//TimerunConnectNotify(ent);
 		ent->client->sess.receivedTimerunStates = qtrue;
 	}
 
@@ -2446,7 +2443,6 @@ void ClientDisconnect(int clientNum)
 		return;
 	}
 
-	OnClientDisconnect(ent);
 	G_RemoveClientFromFireteams(clientNum, qtrue, qfalse);
 	G_RemoveFromAllIgnoreLists(clientNum);
 	G_LeaveTank(ent, qfalse);

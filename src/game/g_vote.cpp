@@ -295,22 +295,24 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 	{
 		if (strlen(arg2) > 0)
 		{
-			map = GetRandomMapByType(arg2);
+			map = "oasis";
+			//map = GetRandomMapByType(arg2);
 
 			if (strlen(map) == 0)
 			{
 				C_ChatPrintTo(ent, "^3randommap: ^7no maps on the requested map list.");
 				return G_INVALID;
 			}
-			else if (!G_MapExists(map))
+			/*else if (!G_MapExists(map))
 			{
 				C_ChatPrintTo(ent, va("^1ERROR: ^7map %s is not on the server. Please update customvotes.json.", map));
 				return G_INVALID;
-			}
+			}*/
 		}
 		else
 		{
-			map = GetRandomMap();
+			map = "oasis";
+			//map = GetRandomMap();
 		}
 
 		Q_strncpyz(level.voteInfo.vote_value,
@@ -349,7 +351,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 
 		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
 
-		G_increaseCallvoteCount(arg2);
+		//G_increaseCallvoteCount(arg2);
 
 		// Vote action (vote has passed)
 	}
@@ -357,7 +359,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 	{
 		char s[MAX_STRING_CHARS];
 
-		G_increasePassedCount(level.voteInfo.vote_value);
+		//G_increasePassedCount(level.voteInfo.vote_value);
 
 		if (g_gametype.integer == GT_WOLF_CAMPAIGN)
 		{

@@ -776,7 +776,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	if (self->client->sess.runSpawnflags == 0
 	    || self->client->sess.runSpawnflags & TIMERUN_RESET_ON_DEATH)
 	{
-		InterruptRun(self);
+		//InterruptRun(self);
 	}
 }
 

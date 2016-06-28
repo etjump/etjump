@@ -2049,7 +2049,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// --- maybe not the best place to do this... seems to be some race conditions on map_restart
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
 
-	OnGameInit();
 	ETJump_InitGame(levelTime, randomSeed, restart);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2072,7 +2071,6 @@ G_ShutdownGame
 void G_ShutdownGame(int restart)
 {
 
-	OnGameShutdown();
 	ETJump_ShutdownGame(restart);
 
 	// Arnout: gametype latching
@@ -4021,8 +4019,6 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 		level.gameManager->s.otherEntityNum  = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_AXIS);
 		level.gameManager->s.otherEntityNum2 = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_ALLIES);
 	}
-
-	RunFrame(levelTime);
 
 #ifdef SAVEGAME_SUPPORT
 	// Check if we are reloading, and times have expired

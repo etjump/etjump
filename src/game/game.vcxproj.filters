@@ -30,9 +30,6 @@
     <ClCompile Include="etj_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_database.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_progression_tracker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -192,16 +189,10 @@
     <ClCompile Include="etj_async_operation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_commands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_custom_map_votes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_levels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="etj_main_ext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_map_statistics.cpp">
@@ -216,9 +207,6 @@
     <ClCompile Include="etj_save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_session.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_sqlite_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -228,9 +216,6 @@
     <ClCompile Include="etj_tokens.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_user.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_server_commands_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -238,6 +223,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_console_variables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_user2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -298,9 +289,6 @@
     <ClInclude Include="etj_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_database.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_progression_tracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -313,13 +301,7 @@
     <ClInclude Include="etj_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_async_operation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_iauthentication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_levels.h">
@@ -337,9 +319,6 @@
     <ClInclude Include="etj_save.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_session.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_sqlite_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -349,13 +328,7 @@
     <ClInclude Include="etj_tokens.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_user.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_custom_map_votes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_commands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_public.h">
@@ -365,6 +338,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_commands_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_user2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

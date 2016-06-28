@@ -350,7 +350,7 @@ void Tokens::createEntity(Token& token, Difficulty difficulty)
 								  *collected = qtrue;
 								  C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, self->tokenInformation->idx + 1));
 
-								  if (allTokensCollected(ent))
+								  /*if (allTokensCollected(ent))
 								  {
 									  auto millis = level.time - ent->client->pers.tokenCollectionStartTime;
 									  int  minutes, seconds;
@@ -360,7 +360,7 @@ void Tokens::createEntity(Token& token, Difficulty difficulty)
 									  millis -= seconds * 1000;
 
 									  C_CPMAll(va("%s ^7collected all tokens in %02d:%02d:%03d", ent->client->pers.netname, minutes, seconds, millis));
-								  }
+								  }*/
 							  }
 
 							  self->nextthink = level.time + FRAMETIME;

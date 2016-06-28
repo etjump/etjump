@@ -2687,47 +2687,18 @@ qboolean StringToInt(const char *toConvert, int *value);
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
 
-// mainext.cpp
-void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
-void OnClientBegin(gentity_t *ent);
-void OnClientDisconnect(gentity_t *ent);
-qboolean OnConnectedClientCommand(gentity_t *ent);
-qboolean OnClientCommand(gentity_t *ent);
-qboolean OnConsoleCommand();
-void OnGameInit();
-void OnGameShutdown();
-qboolean G_MapExists(const char *map);
-const char *GetRandomMap();
-const char *GetRandomMapByType(const char *customType);
-qboolean AdminCommandCheck(gentity_t *ent);
-//void StartRace(gentity_t *ent);
-const char *CustomMapTypeExists(const char *mapType);
-void CheckIfOperationsNeedToBeExecuted();
-void ClientNameChanged(gentity_t *ent);
-void G_increaseCallvoteCount(const char *mapName);
-void G_increasePassedCount(const char *mapName);
 // g_save.cpp
 void ForceSave(gentity_t *location, gentity_t *ent);
 void SavePositionsToDatabase(gentity_t *ent);
 void LoadPositionsFromDatabase(gentity_t *ent);
 void InitSaveSystem();
 void ResetSavedPositions(gentity_t *ent);
-void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
 #define TIMERUN_RESET_ON_TEAM_CHANGE    0x1
 #define TIMERUN_RESET_ON_DEATH          0x2
 #define TIMERUN_RESET_ON_END            0x4
-
-void StartTimer(const char *runName, gentity_t *ent);
-void StopTimer(const char *runName, gentity_t *ent);
-void TimerunConnectNotify(gentity_t *ent);
-
-void InterruptRun(gentity_t *ent);
-
-void RunFrame(int levelTime);
-const char *G_MatchOneMap(const char *arg);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global ETJump objects

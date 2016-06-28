@@ -2117,7 +2117,7 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	activator->client->sess.runSpawnflags = self->spawnflags;
 
-	StartTimer(level.timerunNames[self->runIndex], activator);
+	//StartTimer(level.timerunNames[self->runIndex], activator);
 }
 
 void SetTimerunIndex(gentity_t *self)
@@ -2183,7 +2183,7 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 		return;
 	}
 
-	StopTimer(level.timerunNames[self->runIndex], activator);
+	//StopTimer(level.timerunNames[self->runIndex], activator);
 }
 
 // Stops a time run if the names match
@@ -2276,7 +2276,7 @@ void target_interrupt_timerun(gentity_t *self, gentity_t *other, gentity_t *acti
 {
 	if (activator && activator->client)
 	{
-		InterruptRun(activator);
+		//InterruptRun(activator);
 	}
 }
 

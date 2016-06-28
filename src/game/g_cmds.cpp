@@ -1526,7 +1526,7 @@ void Cmd_Team_f(gentity_t *ent)
 	if (ent->client->sess.runSpawnflags == 0 ||
 	    ent->client->sess.runSpawnflags & TIMERUN_RESET_ON_TEAM_CHANGE)
 	{
-		InterruptRun(ent);
+		//InterruptRun(ent);
 	}
 }
 
@@ -1981,8 +1981,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, escapedName, printText, localize, encoded);
 		}
 	}
-
-	AdminCommandCheck(ent);
 }
 
 
@@ -2492,7 +2490,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	{
 		if (trap_Argc() == 3)
 		{
-			customMapType = CustomMapTypeExists(arg2);
+			//customMapType = CustomMapTypeExists(arg2);
 			if (!customMapType)
 			{
 				G_cpmPrintf(ent, "^7Map type %s does not exists.", arg2);
@@ -2511,7 +2509,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 			return;
 		}
 
-		map = G_MatchOneMap(arg2);
+		//map = G_MatchOneMap(arg2);
 		if (!map)
 		{
 			CP(va("print \"^3callvote: ^7could not find a single map matching %s.\n\"", arg2));
@@ -4597,26 +4595,6 @@ void ClientCommand(int clientNum)
 	}
 	trap_Argv(0, cmd, sizeof(cmd));
 
-	// Received client guid
-	//  if(!Q_stricmp(cmd, "etguid")) {
-	//GuidReceived(ent);
-	//      return;
-	//  }
-
-	//if(!Q_stricmp(cmd, "HWID")) {
-	//    // HWIDReceived(ent);
-	//    return;
-	//}
-
-	//if(!Q_stricmp(cmd, "NOHWID")) {
-	//  //  HWIDReceived(ent);
-	//}
-
-	if (OnClientCommand(ent))
-	{
-		return;
-	}
-
 	if (ent->client->pers.connected != CON_CONNECTED)
 	{
 		return;
@@ -4771,11 +4749,6 @@ void ClientCommand(int clientNum)
 	if (!Q_stricmp(cmd, "mod_information"))
 	{
 		C_ConsolePrintTo(ent, va("%s %s", GAME_VERSION " " MOD_VERSION, BUILD_TIME));
-		return;
-	}
-
-	if (OnConnectedClientCommand(ent))
-	{
 		return;
 	}
 
