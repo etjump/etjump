@@ -1500,4 +1500,23 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("records");
 	trap_AddCommand("times");
 	trap_AddCommand("ranks");
+
+	// XIS tjl command
+	trap_AddCommand("tjl_enableline"); // display a route by it number (start at 0 to total - 1)
+	trap_AddCommand("tjl_enablejumpmarker"); // display a route by it number (start at 0 to total - 1)
+
+	trap_AddCommand("tjl_record"); // Start record
+	trap_AddCommand("tjl_stoprecord"); // Stop record
+	trap_AddCommand("tjl_listroute"); // Display in console all loaded route or recorded
+	trap_AddCommand("tjl_displaybyname"); // Render a route if name exist
+	trap_AddCommand("tjl_displaynearestroute"); // Render the nearest route to the player position
+	trap_AddCommand("tjl_renameroute"); // Rename a route in the vector 
+	trap_AddCommand("tjl_saveroute"); // Save route in a file
+	trap_AddCommand("tjl_loadroute"); // Load route from a file
+
+	trap_AddCommand("tjl_deleteroute"); // Delete a route
+	trap_AddCommand("tjl_overwriterecording"); // Overwrite a route by name if possible
+
+	trap_AddCommand("tjl_clearrender"); // Clear the current displayed route.
+	trap_AddCommand("tjl_displaybynumber"); // display a route by it number (start at 0 to total - 1)
 }

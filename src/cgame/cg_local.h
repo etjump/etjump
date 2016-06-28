@@ -2469,6 +2469,14 @@ extern vmCvar_t etj_highlightSound;
 extern vmCvar_t etj_drawTokens;
 extern vmCvar_t etj_enableTimeruns;
 
+extern vmCvar_t etj_tjlEnableLine;
+extern vmCvar_t etj_tjlEnableMarker;
+extern vmCvar_t etj_tjlLineColor;
+extern vmCvar_t etj_tjlMarkerColor;
+extern vmCvar_t etj_tjlMarkerEndColor;
+extern vmCvar_t etj_tjlNearestInterval;
+extern vmCvar_t etj_tjlAlwaysLoadTJL;
+
 extern vmCvar_t etj_ghostPlayersOpacity;
 extern vmCvar_t etj_ghostPlayersColor;
 extern vmCvar_t etj_ghostPlayersFadeRange;

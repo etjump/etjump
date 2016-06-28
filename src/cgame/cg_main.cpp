@@ -412,6 +412,14 @@ vmCvar_t etj_highlightSound;
 
 vmCvar_t etj_drawTokens;
 
+vmCvar_t etj_tjlEnableLine;
+vmCvar_t etj_tjlEnableMarker;
+vmCvar_t etj_tjlLineColor;
+vmCvar_t etj_tjlMarkerColor;
+vmCvar_t etj_tjlMarkerEndColor;
+vmCvar_t etj_tjlNearestInterval;
+vmCvar_t etj_tjlAlwaysLoadTJL;
+
 vmCvar_t etj_enableTimeruns;
 // Ghost player transparency stuff
 vmCvar_t etj_ghostPlayersOpacity;
@@ -713,8 +721,18 @@ cvarTable_t cvarTable[] =
 	{ &etj_highlight,               "etj_highlight",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE             },
 	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             },
-	{&etj_drawTokens, "etj_drawTokens", "1", CVAR_ARCHIVE},
-	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
+	{&etj_drawTokens,               "etj_drawTokens",               "1",                     CVAR_ARCHIVE             },
+	
+    { &etj_tjlEnableLine,			"etj_tjlEnableLine",			"0",					 CVAR_ARCHIVE			  },
+	{ &etj_tjlEnableMarker,			"etj_tjlEnableMarker",			"0",					 CVAR_ARCHIVE			  },
+	{ &etj_tjlLineColor,			"etj_tjlLineColor",				"green",				 CVAR_ARCHIVE			  },
+	{ &etj_tjlMarkerColor,			"etj_tjlMarkerColor",			"green",				 CVAR_ARCHIVE			  },
+	{ &etj_tjlMarkerEndColor,		"etj_tjlMarkerEndColor",		"red",					 CVAR_ARCHIVE			  },
+	{ &etj_tjlNearestInterval,		"etj_tjlNearestInterval",		"0",					 CVAR_ARCHIVE			  },
+	{ &etj_tjlAlwaysLoadTJL,		"etj_tjlAlwaysLoadTJL",			"1",					 CVAR_ARCHIVE			  },	
+		    
+    
+    {&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
 	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
