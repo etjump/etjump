@@ -88,6 +88,18 @@ namespace ETJump
 	
 		// initializes the bool option flags
 		static void initializeBooleanOptions(ParsedCommand& parsedCommand, const ParseOptions& options);
+
+		// checks whether argument is possibly a new option
+		static bool isPossibleOption(const std::string& argument);
+
+		// parses an integer from the argument and updates the option
+		static void parseInteger(Option& option, const std::string& argument);
+
+		// parses a duration from the argument and updates the option
+		static void parseDuration(Option& option, const std::string& argument);
+
+		// parses the arguments and updates the parsed command
+		static void parseArguments(const Arguments& arguments, const ParseOptions& options, ParsedCommand& parsedCommand);
 	};
 }
 
