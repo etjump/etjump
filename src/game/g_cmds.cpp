@@ -4775,7 +4775,7 @@ void ClientCommand(int clientNum)
 	}
 
 	std::vector<std::string> arguments;
-	for (auto idx = 1, argc = trap_Argc(); idx < argc; ++idx)
+	for (auto idx = 0, argc = trap_Argc(); idx < argc; ++idx)
 		arguments.push_back(G_Argv(idx));
 	if (ETJump::commandsHandler->check(cmd, clientNum, arguments))
 	{

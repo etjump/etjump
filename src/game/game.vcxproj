@@ -270,7 +270,8 @@
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_server_commands_handler.cpp" />
-    <ClCompile Include="etj_user2.cpp" />
+    <ClCompile Include="etj_session.cpp" />
+    <ClCompile Include="etj_user.cpp" />
     <ClCompile Include="g_active.cpp" />
     <ClCompile Include="g_alarm.cpp" />
     <ClCompile Include="g_antilag.cpp" />
@@ -340,7 +341,8 @@
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_public.h" />
     <ClInclude Include="etj_server_commands_handler.h" />
-    <ClInclude Include="etj_user2.h" />
+    <ClInclude Include="etj_session.h" />
+    <ClInclude Include="etj_user.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="etj_local.h" />
     <ClInclude Include="g_public.h" />

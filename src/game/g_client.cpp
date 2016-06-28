@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include "etj_session.h"
 #include "../../etjump/ui/menudef.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -1694,10 +1695,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
-	// Zero: has to be here because else it'll reset the ip we'll
-	// set a bit later
-	//OnClientConnect(clientNum, firstTime, isBot);
-
 	// IP filtering
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
 	// recommanding PB based IP / GUID banning, the builtin system is pretty limited
@@ -1707,6 +1704,13 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	if (G_FilterIPBanPacket(value))
 	{
 		return "You are banned from this server.";
+	}
+
+	// Zero: has to be here because else it'll reset the ip we'll
+	// set a bit later
+	auto message = ETJump::session->clientConnect(clientNum, firstTime == qtrue, value);
+	if (message.length() > 0) {
+		return message.c_str();
 	}
 
 	//if(IsBanned(ip))

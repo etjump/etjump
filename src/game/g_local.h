@@ -2706,8 +2706,10 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
 namespace ETJump
 {
+	class Session;
 	class ServerCommandsHandler;
 
+	extern std::unique_ptr<Session> session;
 	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
 }
 

@@ -1,5 +1,6 @@
 #include <memory>
 #include "g_local.h"
+#include "etj_session.h"
 #include "etj_server_commands_handler.h"
 
 level_locals_t level;
@@ -570,6 +571,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
+	std::unique_ptr<Session> session;
 	std::unique_ptr<ServerCommandsHandler> commandsHandler;
 }
 
@@ -2056,6 +2058,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
+	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
@@ -2120,6 +2123,15 @@ void G_ShutdownGame(int restart)
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData(restart ? qtrue : qfalse);
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump server shutdown
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	ETJump::session = nullptr;
+	ETJump::commandsHandler = nullptr;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 
