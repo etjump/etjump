@@ -51,6 +51,14 @@ namespace ETJump
 			std::string errorMessage;
 		};
 
+		static constexpr const int64_t second = 1000;
+		static constexpr const int64_t minute = 60 * second;
+		static constexpr const int64_t hour = 60 * minute;
+		static constexpr const int64_t day = 24 * hour;
+		static constexpr const int64_t week = 7 * day;
+		static constexpr const int64_t month = 30 * day;
+		static constexpr const int64_t year = 365 * day;
+
 		typedef std::vector<std::string> Arguments;
 		typedef std::map<std::string, Option> ParsedCommandOptions;
 		struct ParsedCommand
@@ -77,6 +85,9 @@ namespace ETJump
 
 		// is option a single token option or multitoken
 		static bool isSingleToken(const OptionDefinition& optionDefinition);
+	
+		// initializes the bool option flags
+		static void initializeBooleanOptions(ParsedCommand& parsedCommand, const ParseOptions& options);
 	};
 }
 

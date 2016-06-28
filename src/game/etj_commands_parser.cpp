@@ -23,15 +23,7 @@ ETJump::CommandsParser::ParsedCommand ETJump::CommandsParser::parse(const Argume
 		return parsedCommand;
 	}
 
-	// initialize booleans with false
-	for (const auto & def : options.optionDefinitions)
-	{
-		if (def.type == OptionDefinition::Type::Boolean)
-		{
-			parsedCommand.options[def.name].type = OptionDefinition::Type::Boolean;
-			parsedCommand.options[def.name].active = false;
-		}
-	}
+	initializeBooleanOptions(parsedCommand, options);
 
 	Option option;
 	auto currentDefinition = end(options.optionDefinitions);
@@ -45,6 +37,7 @@ ETJump::CommandsParser::ParsedCommand ETJump::CommandsParser::parse(const Argume
 			first = false;
 			continue;
 		}
+
 		// Check if current argument is a new option 
 		if (argument[0] == '-')
 		{
@@ -52,8 +45,10 @@ ETJump::CommandsParser::ParsedCommand ETJump::CommandsParser::parse(const Argume
 			newDefinition = matchingDefinition(options, argument.substr(1));
 			if (newDefinition != end(options.optionDefinitions))
 			{
+				// Make sure the option definition is always set
 				if (newDefinition->type == OptionDefinition::Type::None)
 					throw std::runtime_error((boost::format("No type was specified for option: %s.") % newDefinition->name).str());
+
 				// If we're currently parsing an option, finish it and start a new one
 				// unless it's a boolean
 				if (currentDefinition != end(options.optionDefinitions))
@@ -126,19 +121,11 @@ ETJump::CommandsParser::ParsedCommand ETJump::CommandsParser::parse(const Argume
 					option.duration = boost::lexical_cast<int64_t>(argument.substr(0, modifierIdx));
 				} catch (const std::out_of_range&)
 				{
-					option.errorMessage = (boost::format("%s is out of range. Allow values are between %d - %d.") % argument % std::numeric_limits<long>::min() % std::numeric_limits<long>::max()).str();
+					option.errorMessage = (boost::format("%s is out of range. Allowed values are between %d - %d.") % argument % std::numeric_limits<long>::min() % std::numeric_limits<long>::max()).str();
 				} catch (const std::invalid_argument&)
 				{
 					option.errorMessage = (boost::format("Beginning of %s is not an integer.") % argument).str();
 				}
-
-				constexpr const int64_t second = 1000;
-				constexpr const int64_t minute = 60 * second;
-				constexpr const int64_t hour = 60 * minute;
-				constexpr const int64_t day = 24 * hour;
-				constexpr const int64_t week = 7 * day;
-				constexpr const int64_t month = 30 * day;
-				constexpr const int64_t year = 365 * day;
 
 				if (modifier == "s")
 				{
@@ -188,6 +175,7 @@ ETJump::CommandsParser::ParsedCommand ETJump::CommandsParser::parse(const Argume
 				}
 				option.text += argument;
 				break;
+			default: break;
 			}
 		}
 	}
@@ -210,4 +198,17 @@ ETJump::CommandsParser::OptionDefinitions::const_iterator ETJump::CommandsParser
 bool ETJump::CommandsParser::isSingleToken(const OptionDefinition& optionDefinition)
 {
 	return optionDefinition.type != OptionDefinition::Type::MultiToken;
+}
+
+void ETJump::CommandsParser::initializeBooleanOptions(ParsedCommand& parsedCommand, const ParseOptions& options)
+{
+	// initialize booleans with false
+	for (const auto & def : options.optionDefinitions)
+	{
+		if (def.type == OptionDefinition::Type::Boolean)
+		{
+			parsedCommand.options[def.name].type = OptionDefinition::Type::Boolean;
+			parsedCommand.options[def.name].active = false;
+		}
+	}
 }
