@@ -37,7 +37,7 @@ void ETJump::ClientAuthentication::initialize()
 
 	_hardwareId = PlatformSpecific::hardwareId();
 
-	serverCommandsHandler->subscribe(Authentication::GUID_REQUEST, [=](const std::vector<std::string>& arguments)
+	serverCommandsHandler->subscribe(Authentication::GUID_REQUEST, [&](const std::vector<std::string>& arguments)
 	{
 		authenticate();
 	});

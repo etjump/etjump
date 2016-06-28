@@ -12,7 +12,7 @@ static const char *LocationText[] = {
 ETJump::BannerSystem::BannerSystem(Options options): _bannerIdx(0)
 {
 	_options = options;
-	subcribeToRunFrame([=](int levelTime)
+	subcribeToRunFrame([&](int levelTime)
 	{
 		check(levelTime);
 	});

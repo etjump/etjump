@@ -63,14 +63,20 @@ namespace ETJump
 		typedef std::map<std::string, Option> ParsedCommandOptions;
 		struct ParsedCommand
 		{
+			// name of the command
 			std::string command;
+			// list of arguments
 			Arguments arguments;
+			// parsed options
 			ParsedCommandOptions options;
 		};
 
 		typedef std::vector<OptionDefinition> OptionDefinitions;
 		struct ParseOptions
 		{
+			// command description
+			std::string description;
+			// command options
 			OptionDefinitions optionDefinitions;
 		};
 
