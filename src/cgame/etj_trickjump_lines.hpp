@@ -27,8 +27,6 @@ public:
 	typedef vec_c vec4_c[4];
 
 	std::map<std::string, std::vector<unsigned char>> colorMap;
-	//std::map<std::string, vec4_c> colorMap;
-	//std::map<std::string, int> colorMap;
 
 	struct Node
 	{
@@ -80,9 +78,7 @@ public:
 
 	bool isEnableLine();
 	bool isEnableMarker();
-
-
-
+	
 	void listRoutes();
 	void displayByName(const char *name);
 	void displayNearestRoutes();
@@ -94,7 +90,6 @@ public:
 	void overwriteRecording(const char *name);
 
 	void saveRoutes(const char *savename);
-	//void loadRoutes(int type);
 	void loadRoutes(const char *loadname);
 	bool loadedRoutes(const char *loadname);
 
@@ -106,8 +101,7 @@ public:
 
 	bool getEnableMarker(){ return _enableMarker; }
 	void setEnableMarker(bool state){ _enableMarker = state; }
-
-	
+		
 private:
 
 	// Private function.
@@ -156,7 +150,7 @@ private:
 		for (int i = 0; i < 3; i++)
 			sum += (a[i] - b[i])*(a[i] - b[i]);
 
-		return (std::sqrt(sum));
+		return std::sqrt(sum);
 	}	
 };
 #endif

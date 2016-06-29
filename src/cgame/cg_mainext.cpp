@@ -64,7 +64,7 @@ void InitGame()
  */
 qboolean CG_ServerCommandExt(const char *cmd)
 {
-	std::string command = cmd != nullptr ? cmd : "";
+	const std::string command = cmd != nullptr ? cmd : "";
 
 	// timerun_start runStartTime{integer} runName{string}
 	if (command == "timerun_start")
@@ -144,6 +144,16 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		return timerunView->parseServerCommand() ? qtrue : qfalse;
 	}
 
+	if (command == "tjl_displaybyname")
+	{
+		return CG_displaybyname();
+	}
+
+	if (command == "tjl_displaybynumber")
+	{
+		return CG_displaybynumber();
+	}
+
 	return qfalse;
 }
 
@@ -155,60 +165,28 @@ qboolean CG_ServerCommandExt(const char *cmd)
 */
 qboolean CG_ConsoleCommandExt(const char *cmd)
 {
-	std::string command = cmd ? cmd : "";
+	const std::string command = cmd ? cmd : "";
 
 	if (command == "tjl_displaybyname")
 	{
-		auto argc = trap_Argc();
-
-		if (argc > 1)
-		{
-			auto name = CG_Argv(1);
-			trickjumpLines->displayByName(name);
-			return qtrue;
-		}
-		else
-		{
-			trickjumpLines->displayByName(nullptr);
-		}
-
+		return CG_displaybyname();
 	}
 
 	if (command == "tjl_displaybynumber")
 	{
-		auto argc = trap_Argc();
-
-		if (argc > 1)
-		{
-			auto number = atoi(CG_Argv(1));
-			auto total = trickjumpLines->countRoute();
-
-			if (number > -1 && number < total)
-			{
-				trickjumpLines->setCurrentRouteToRender(number);
-				return qtrue;
-			}
-		}
-		else
-		{
-			CG_Printf("You need to pass the route numnber by argument. Use command /tjl_listroute to get number. \n");
-			return qfalse;
-		}
+		return CG_displaybynumber();
 	}
 
 	if (command == "tjl_clearrender")
 	{
 		trickjumpLines->setCurrentRouteToRender(-1);
-
 		return qtrue;
 	}
-
 
 	// TODO: could just make an array out of this and go thru it
 	if (command == "tjl_record")
 	{
-		auto argc = trap_Argc();
-
+		const auto argc = trap_Argc();
 		if (argc == 1)
 		{
 			trickjumpLines->record(nullptr);
@@ -224,14 +202,12 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 	if (command == "tjl_stoprecord")
 	{
 		trickjumpLines->stopRecord();
-
 		return qtrue;
 	}
 
 	if (command == "tjl_listroute")
 	{
 		trickjumpLines->listRoutes();
-
 		return qtrue;
 	}
 
@@ -239,56 +215,49 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 	if (command == "tjl_displaynearestroute")
 	{
 		trickjumpLines->displayNearestRoutes();
-
 		return qtrue;
 	}
 
 	if (command == "tjl_renameroute")
 	{
 
-		auto argc = trap_Argc();
+		const auto argc = trap_Argc();
 
 		if (argc > 2)
 		{
-			std::string name = CG_Argv(1);
-			std::string name2 = CG_Argv(2);
-
+			const std::string name = CG_Argv(1);
+			const std::string name2 = CG_Argv(2);
 			trickjumpLines->renameRoute(name.c_str(), name2.c_str());
-			return qtrue;
 		}
 		else
 		{
 			trickjumpLines->renameRoute(nullptr, nullptr);
 		}
-
 		return qtrue;
 	}
 
 	if (command == "tjl_saveroute")
 	{
-		auto argc = trap_Argc();
-
+		const auto argc = trap_Argc();
 		if (argc > 1)
 		{
-			auto name = CG_Argv(1);
+			const auto name = CG_Argv(1);
 			trickjumpLines->saveRoutes(name);
+			return qtrue;
 		}
 		else
 		{
 			CG_Printf("Please provide a name to save your TJL. (without .tjl extension). \n");
 			return qfalse;
 		}
-
-		return qtrue;
 	}
 
 	if (command == "tjl_loadroute")
 	{
-		auto argc = trap_Argc();
-
+		const auto argc = trap_Argc();
 		if (argc > 1)
 		{
-			auto name = CG_Argv(1);
+			const auto name = CG_Argv(1);
 			trickjumpLines->loadRoutes(name);
 		}
 		else
@@ -300,41 +269,37 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 
 	if (command == "tjl_deleteroute")
 	{
-		auto argc = trap_Argc();
-
+		const auto argc = trap_Argc();
 		if (argc > 1)
 		{
-			auto name = CG_Argv(1);
+			const auto name = CG_Argv(1);
 			trickjumpLines->deleteRoute(name);
-			return qtrue;
 		}
 		else
 		{
 			trickjumpLines->deleteRoute(nullptr);
 		}
+		return qtrue;
 	}
 
 	if (command == "tjl_overwriterecording")
 	{
-		auto argc = trap_Argc();
-
-
+		const auto argc = trap_Argc();
 		if (argc == 1)
 		{
 			trickjumpLines->overwriteRecording(nullptr);
 		}
 		else
 		{
-			auto name = CG_Argv(1);
+			const auto name = CG_Argv(1);
 			trickjumpLines->overwriteRecording(name);
 		}
-
 		return qtrue;
 	}
 
 	if (command == "tjl_enableline")
 	{
-		auto argc = trap_Argc();
+		const auto argc = trap_Argc();
 		if (argc == 1)
 		{
 			CG_Printf("Please add 0 or 1 as argument to enable or disable line.\n");
@@ -342,8 +307,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		}
 		else
 		{
-			std::string state = CG_Argv(1);
-
+			const std::string state = CG_Argv(1);
 			if (state == "0")
 			{
 				trickjumpLines->toggleRoutes(false);
@@ -358,9 +322,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 
 	if (command == "tjl_enablejumpmarker")
 	{
-		auto argc = trap_Argc();
-
-
+		const auto argc = trap_Argc();
 		if (argc == 1)
 		{
 			CG_Printf("Please add 0 or 1 as argument to enable or disable marker.\n");
@@ -381,8 +343,6 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 			return qtrue;
 		}
 	}
-
-
 	return qfalse;
 }
 
@@ -390,9 +350,6 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 // for now.. :P
 void CG_DrawActiveFrameExt()
 {
-	//CG_Printf("Draw ghost!\n");
-	//CG_AddCEntity(trickjump_ghost);
-
 	// Check if recording
 	if (trickjumpLines->isRecording())
 	{
@@ -430,5 +387,40 @@ void CG_DrawActiveFrameExt()
 				}
 			}
 		}
+	}
+}
+
+qboolean CG_displaybyname()
+{
+	const auto argc = trap_Argc();
+	if (argc > 1)
+	{
+		const auto name = CG_Argv(1);
+		trickjumpLines->displayByName(name);
+	}
+	else
+	{
+		trickjumpLines->displayByName(nullptr);
+	}
+	return qtrue;
+}
+
+qboolean CG_displaybynumber()
+{
+	const auto argc = trap_Argc();
+	if (argc > 1)
+	{
+		const auto number = atoi(CG_Argv(1));
+		const auto total = trickjumpLines->countRoute();
+		if (number > -1 && number < total)
+		{
+			trickjumpLines->setCurrentRouteToRender(number);
+			return qtrue;
+		}
+	}
+	else
+	{
+		CG_Printf("You need to pass the route numnber by argument. Use command /tjl_listroute to get number. \n");
+		return qfalse;
 	}
 }

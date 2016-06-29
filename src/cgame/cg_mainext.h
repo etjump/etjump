@@ -25,4 +25,7 @@ qboolean CG_ServerCommandExt(const char *cmd);
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();
 
+qboolean CG_displaybyname();
+qboolean CG_displaybynumber();
+
 #endif

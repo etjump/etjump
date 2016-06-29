@@ -1,0 +1,77 @@
+#include "ui/menudef.h"
+
+// Defines //
+
+#define WINDOW_X		16
+#define WINDOW_Y		16
+#define WINDOW_WIDTH	400
+#define WINDOW_HEIGHT 231
+#define GROUP_NAME		"grpView"
+
+// Macros //
+
+#include "ui/menumacros.h"
+		
+// Options Menu //
+	
+menuDef {
+	name		"trickjump_view"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+	
+	onESC {
+		close trickjump_view ;
+		open trickjump ;
+	}
+
+// Window //
+
+#define SUBWINDOW_WIDTH WINDOW_WIDTH-12
+
+WINDOW( "VIEW", 106 )
+
+	SUBWINDOW( 6, 32, (SUBWINDOW_WIDTH), 168, "HUD DISPLAY" )
+MULTI( 8, 48, (SUBWINDOW_WIDTH)-4, 10, "Trickjump HUD:", 	.2, 8, "etj_drawTJHud", cvarFloatList { "Off" 0 "1" 1 "2" 2 }, "" )
+
+MULTI( 8, 60, (SUBWINDOW_WIDTH)-4, 10, "Draw speed:", 	.2, 8, "etj_drawSpeed", cvarFloatList { "Off" 0 "1" 1 "2" 2 }, "" )
+
+YESNO( 8, 72, (SUBWINDOW_WIDTH)-4, 10, "Drawspeed2:", .2, 8, "etj_drawSpeed2", "Show a movable speedometer." )
+
+MULTI( 8, 84, (SUBWINDOW_WIDTH)-4, 10, "Drawspeed color:", .2, 8, "etj_speedColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Set the color for your speedometer." )
+
+YESNO( 8, 96, (SUBWINDOW_WIDTH)-4, 10, "Draw overbounce detector:", .2, 8, "etj_drawOB", "Draws an overbounce detector." )
+MULTI( 8, 108, (SUBWINDOW_WIDTH)-4, 10, "Draw CGaz:", 	.2, 8, "etj_drawCgaz", cvarFloatList { "Off" 0 "1" 1 "2" 2 "3" 3 "4" 4}, "" )
+
+YESNO( 8, 120, (SUBWINDOW_WIDTH)-4, 10, "Draw keys:", .2, 8, "etj_drawKeys", "Draws the keys user is pressing." )
+
+MULTI( 8, 132, (SUBWINDOW_WIDTH)-4, 10, "Draw keys color:", .2, 8, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Set the color for your keypresses." )
+
+YESNO( 8, 144, (SUBWINDOW_WIDTH)-4, 10, "Draw clock:", .2, 8, "etj_drawClock", "Draws the clock." )
+
+YESNO( 8, 156, (SUBWINDOW_WIDTH)-4, 10, "Draw cgaz users:", .2, 8, "etj_drawCGazUsers", "Draws the cgaz users on scoreboard." )
+
+YESNO( 8, 168, (SUBWINDOW_WIDTH)-4, 10, "Draw personal timer:", .2, 8, "etj_drawPersonalTimer", "Draws the personal timer (/startTimer /stopTimer.) \nUse etj_personalTimerX & etj_personalTimerY to set the position." )
+
+MULTI( 8, 180, (SUBWINDOW_WIDTH)-4, 10, "Personal timer color:", .2, 8, "etj_personalTimerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Set the color for your personal timer.)")
+
+YESNO( 8, 192, (SUBWINDOW_WIDTH)-4, 10, "Enable trickjump line:", .2, 8, "etj_tjlEnableLine", "Draw trickjump lines if they are loaded or call by a map entities." )
+
+YESNO( 8, 204, (SUBWINDOW_WIDTH)-4, 10, "Enable trickjump marker:", .2, 8, "etj_tjlEnableMarker", "Draw trickjump marker if they are loaded or call by a map entities." )
+
+MULTI( 8, 216, (SUBWINDOW_WIDTH)-4, 10, "Trickjump line color:", .2, 8, "etj_tjlLineColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Cyan"; "cyan"; "Orange"; "orange"; "Magenta" ; "magenta"; "Black"; "black"; "Speed"; "speed"; }, "Set the color for your personal trickjump line.)")
+
+MULTI( 8, 228, (SUBWINDOW_WIDTH)-4, 10, "Trickjump marker color:", .2, 8, "etj_tjlMarkerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Cyan"; "cyan"; "Orange"; "orange"; "Magenta"; "magenta"; "Black"; "black"; }, "Set the color for your personal trickjump marker.)")
+
+MULTI( 8, 240, (SUBWINDOW_WIDTH)-4, 10, "Trickjump marker Start/End color:", .2, 8, "etj_tjlMarkerEndColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Cyan"; "cyan"; "Orange"; "orange"; "Magenta"; "magenta"; "Black"; "black";  }, "Set the color for your personal trickjump marker start/end.)")
+
+MULTI( 8, 252, (SUBWINDOW_WIDTH)-4, 10, "Trickjump nearest mode:", 	.2, 8, "etj_tjlNearestInterval", cvarFloatList { "Off" 0 "1s" 1 "3s" 3 "5s" 5 "10s" 10 }, "Select number of second when to check for nearest TJL." )
+
+YESNO( 8, 264, (SUBWINDOW_WIDTH)-4, 10, "Enable trickjump line load on connect:", .2, 8, "etj_tjlAlwaysLoadTJL", "" )
+
+
+BUTTON ( 6, 290, WINDOW_WIDTH-12, 18, "BACK", .3, 14, close trickjump_view ; open trickjump )
+
+}
+

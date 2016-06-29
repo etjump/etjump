@@ -547,6 +547,9 @@ struct gentity_s
 	float velocityUpperLimit;
 
 	TokenInformation *tokenInformation;
+
+	int tjlLineNumber;
+	char *tjlLineName;
 };
 
 // Ridah

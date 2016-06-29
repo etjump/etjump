@@ -3786,6 +3786,7 @@ void CG_DisableProperScaling(qboolean yes);
 void CG_CheckActivateLean();
 
 qboolean CG_ConsoleCommandExt(const char *cmd);
+void CG_DrawActiveFrameExt();
 
 #endif // CG_LOCAL_H
 
