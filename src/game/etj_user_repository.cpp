@@ -14,6 +14,7 @@ std::future<ETJump::User> ETJump::UserRepository::get(const std::string& guid) c
 {
 	return std::async(std::launch::async, [=]()
 	{
+		std::this_thread::sleep_for(std::chrono::seconds(2));
 		return User(1, guid);
 	});
 }

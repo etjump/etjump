@@ -14,7 +14,7 @@ ETJump::Session::Session(IUserRepository* userRepository): _userRepository(userR
 			_clients[clientNum] = Client();
 			return;
 		}
-		_clients[clientNum].authorize(userRepository);
+		_clients[clientNum].authorize(_userRepository);
 	}))
 	{
 		throw std::runtime_error("Tried to subscribe to `etguid` event twice. Contact mod developer.");
@@ -31,7 +31,9 @@ std::string ETJump::Session::clientConnect(int clientNum, bool firstTime, const 
 	std::vector<std::string> split;
 	boost::split(split, ipAddress, boost::is_any_of(":"));
 
-	auto client = _clients[clientNum] = Client(clientNum, true, split[0]);
+	
+	auto client = Client(clientNum, true, split[0]);
+	_clients[clientNum] = client;
 
 	client.requestGuid();
 

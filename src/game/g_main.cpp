@@ -1,6 +1,7 @@
 #include <memory>
 #include "g_local.h"
 #include "etj_session.h"
+#include "etj_user_repository.h"
 #include "etj_server_commands_handler.h"
 
 level_locals_t level;
@@ -573,6 +574,7 @@ namespace ETJump
 {
 	std::unique_ptr<Session> session;
 	std::unique_ptr<ServerCommandsHandler> commandsHandler;
+	std::unique_ptr<IUserRepository> userRepository;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2058,7 +2060,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
-	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session);
+	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository);
+	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get()));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

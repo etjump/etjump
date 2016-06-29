@@ -7,16 +7,35 @@
 ETJump::Client::Client(int clientNum, bool connected, const std::string& ipAddress): 
 	_slot(0),
 	_connected(false), 
-	_ipAddress(ipAddress)
+	_ipAddress(ipAddress), 
+	_user(0, ""), 
+	_authorizationIsPending(false)
 {
 }
 
-ETJump::Client::Client(): _slot(-1), _connected(false)
+ETJump::Client::Client(): _slot(-1), _connected(false), _user(0, ""), _authorizationIsPending(false)
 {
 }
 
 ETJump::Client::~Client()
 {
+}
+
+ETJump::Client::Client(const Client& client): _user(0, ""), _authorizationIsPending(false)
+{
+	*this = client;
+}
+
+ETJump::Client& ETJump::Client::operator=(const Client& client)
+{
+	_slot = client._slot;
+	_connected = client._connected;
+	_ipAddress = client._ipAddress;
+	_guid = client._guid;
+	_hardwareId = client._hardwareId;
+	_user = client._user;
+	_authorizationIsPending = false;
+	return *this;
 }
 
 void ETJump::Client::requestGuid()
@@ -66,14 +85,17 @@ void ETJump::Client::authorize(IUserRepository* userRepository)
 		_user = result.get();
 	} else
 	{
+		_authorizationIsPending = true;
 		_pendingAuthorization = move(result);
 	}
 }
 
 void ETJump::Client::checkPendingAuthorization()
 {
-	if (_pendingAuthorization.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+	if (_authorizationIsPending && (_pendingAuthorization.wait_for(std::chrono::seconds(0)) == std::future_status::ready))
 	{
 		_user = _pendingAuthorization.get();
+		_authorizationIsPending = false;
+		Printer::BroadcastChatMessage((boost::format("Authorized user: %s") % _user).str());
 	}
 }

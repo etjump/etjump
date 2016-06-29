@@ -11,6 +11,8 @@ namespace ETJump
 		explicit Client(int clientNum, bool connected, const std::string& ipAddress);
 		Client();
 		~Client();
+		Client(const Client& client);
+		Client& operator=(const Client& client);
 
 		// sends a guid request to client
 		void requestGuid();
@@ -68,6 +70,7 @@ namespace ETJump
 		// Note: this is a local copy and changing this will not
 		// change the database copy
 		User _user;
+		bool _authorizationIsPending;
 		std::future<User> _pendingAuthorization;
 	};
 }
