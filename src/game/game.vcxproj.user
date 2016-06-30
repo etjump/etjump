@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>$(ETROOT)etded.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+set fs_game etjump +set sv_pure 0 +devmap oasis</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+set fs_game etjump +set sv_pure 0 +devmap oasis +set net_port 50505</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(ETROOT)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

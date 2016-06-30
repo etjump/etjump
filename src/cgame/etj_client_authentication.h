@@ -12,14 +12,14 @@ namespace ETJump
 		~ClientAuthentication();
 
 		void initialize();
-		void authenticate();
+		void authenticate() const;
 	private:
 		// tries to load the guid. if guid does not exist, returns false
 		bool readGuid();
 		// creates a new guid
 		std::string createGuid() const;
 		// tries to save the guid to a file
-		bool saveGuid();
+		bool saveGuid() const;
 
 		std::string _guid;
 		std::string _hardwareId;

@@ -5,15 +5,15 @@
 #include "etj_user.h"
 
 ETJump::Client::Client(int clientNum, bool connected, const std::string& ipAddress): 
-	_slot(0),
+	_slot(clientNum),
 	_connected(false), 
 	_ipAddress(ipAddress), 
-	_user(0, ""), 
+	_user(NOT_AUTHORIZED, ""),
 	_authorizationIsPending(false)
 {
 }
 
-ETJump::Client::Client(): _slot(-1), _connected(false), _user(0, ""), _authorizationIsPending(false)
+ETJump::Client::Client(): _slot(INVALID_SLOT), _connected(false), _user(NOT_AUTHORIZED, ""), _authorizationIsPending(false)
 {
 }
 
@@ -21,7 +21,7 @@ ETJump::Client::~Client()
 {
 }
 
-ETJump::Client::Client(const Client& client): _user(0, ""), _authorizationIsPending(false)
+ETJump::Client::Client(const Client& client): _user(NOT_AUTHORIZED, ""), _authorizationIsPending(false)
 {
 	*this = client;
 }
@@ -38,7 +38,7 @@ ETJump::Client& ETJump::Client::operator=(const Client& client)
 	return *this;
 }
 
-void ETJump::Client::requestGuid()
+void ETJump::Client::requestGuid() const
 {
 	Printer::SendCommand(_slot, Authentication::GUID_REQUEST);
 }
@@ -71,7 +71,7 @@ bool ETJump::Client::authenticate(const std::vector<std::string>& arguments)
 	return true;
 }
 
-void ETJump::Client::drop(const std::string& message)
+void ETJump::Client::drop(const std::string& message) const
 {
 	trap_DropClient(_slot, message.c_str(), message.length());
 }

@@ -31,9 +31,10 @@ void ETJump::ClientAuthentication::initialize()
 		{
 			CG_Printf("^1Error: ^7Could not save guid to file.\n");
 		}
-		return;
+	} else
+	{
+		CG_Printf("^2Successfully loaded existing GUID.");
 	}
-	CG_Printf("^2Successfully loaded existing GUID.");
 
 	_hardwareId = PlatformSpecific::hardwareId();
 
@@ -43,7 +44,7 @@ void ETJump::ClientAuthentication::initialize()
 	});
 }
 
-void ETJump::ClientAuthentication::authenticate()
+void ETJump::ClientAuthentication::authenticate() const
 {
 	trap_SendClientCommand(va("etguid %s %s", G_SHA1(_guid.c_str()), _hardwareId.c_str()));
 }
@@ -90,7 +91,7 @@ std::string ETJump::ClientAuthentication::createGuid() const
 	return guid;
 }
 
-bool ETJump::ClientAuthentication::saveGuid()
+bool ETJump::ClientAuthentication::saveGuid() const
 {
 	auto f = -1;
 
