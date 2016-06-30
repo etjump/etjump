@@ -385,5 +385,8 @@
     <ClInclude Include="etj_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_isession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

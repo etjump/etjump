@@ -3,6 +3,7 @@
 //
 
 #include "etj_utilities.h"
+#include "etj_save.h"
 #include <boost/algorithm/string.hpp>
 
 #include "g_local.h"
@@ -86,7 +87,7 @@ void Utilities::startRun(int clientNum)
 	}
 	// same thing for god mode
 	player->flags &= ~FL_GODMODE;
-	ResetSavedPositions(player);
+	ETJump::saveSystem->resetSavedPositions(player);
 
 	auto disallowed = std::vector<int>{
 		WP_DYNAMITE,

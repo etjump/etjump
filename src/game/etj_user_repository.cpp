@@ -15,7 +15,7 @@ ETJump::UserRepository::~UserRepository()
 {
 }
 
-std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::getOrCreate(const std::string& guid, const std::string& hardwareId)
+std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::getOrCreate(const std::string& guid, const std::string& hardwareId, const std::string& name)
 {
 	return std::async(std::launch::async, [=]()
 	{
@@ -30,7 +30,7 @@ std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::getOrCreate
 				int id = query.getColumn(0);
 				int level = query.getColumn(1);
 				int lastSeen = query.getColumn(2);
-				std::string name = query.getColumn(3);
+				std::string prevName = query.getColumn(3);
 				std::string title = query.getColumn(4);
 				std::string commands = query.getColumn(5);
 				std::string greeting = query.getColumn(6);
@@ -49,7 +49,7 @@ std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::getOrCreate
 					insertHardwareId.bind(2, id);
 					insertHardwareId.exec();
 				}
-				return Result{ User(id, guid, level, lastSeen, name, title, commands, greeting, {}), "" };
+				return Result{ User(id, guid, level, lastSeen, prevName, title, commands, greeting, {}), "" };
 			}
 			else
 			{
@@ -57,7 +57,7 @@ std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::getOrCreate
 				insert.bind(1, 0);
 				insert.bind(2, 0);
 				insert.bind(3, guid);
-				insert.bind(4, "");
+				insert.bind(4, name);
 				insert.bind(5, "");
 				insert.bind(6, "");
 				insert.bind(7, "");

@@ -15,7 +15,7 @@ namespace ETJump
 			std::string errorMessage;
 		};
 
-		virtual std::future<Result> getOrCreate(const std::string& guid, const std::string& hardwareId) = 0;
+		virtual std::future<Result> getOrCreate(const std::string& guid, const std::string& hardwareId, const std::string& name) = 0;
 		virtual std::future<Result> edit(User user) = 0;
 	};
 }

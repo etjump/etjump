@@ -4,7 +4,7 @@
  * desc:
  *
 */
-
+#include "etj_save.h"
 #include "g_local.h"
 
 //==========================================================
@@ -656,7 +656,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		{
 			VectorMA(activator->client->ps.origin, (other->r.mins[0] - activator->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[0]);
 			VectorMA(activator->client->ps.origin, (other->r.maxs[0] - activator->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[3]);
-			minDistYZ = min(VectorDistance(activator->client->ps.origin, sPlane[0]), VectorDistance(activator->client->ps.origin, sPlane[3]));
+			minDistYZ = std::min(VectorDistance(activator->client->ps.origin, sPlane[0]), VectorDistance(activator->client->ps.origin, sPlane[3]));
 		}
 		else
 		{
@@ -666,7 +666,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		{
 			VectorMA(activator->client->ps.origin, (other->r.mins[1] - activator->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[1]);
 			VectorMA(activator->client->ps.origin, (other->r.maxs[1] - activator->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[4]);
-			minDistXZ = min(VectorDistance(activator->client->ps.origin, sPlane[1]), VectorDistance(activator->client->ps.origin, sPlane[4]));
+			minDistXZ = std::min(VectorDistance(activator->client->ps.origin, sPlane[1]), VectorDistance(activator->client->ps.origin, sPlane[4]));
 		}
 		else
 		{
@@ -676,7 +676,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		{
 			VectorMA(activator->client->ps.origin, (other->r.mins[2] - activator->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[2]);
 			VectorMA(activator->client->ps.origin, (other->r.maxs[2] - activator->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[5]);
-			minDistXY = min(VectorDistance(activator->client->ps.origin, sPlane[2]), VectorDistance(activator->client->ps.origin, sPlane[5]));
+			minDistXY = std::min(VectorDistance(activator->client->ps.origin, sPlane[2]), VectorDistance(activator->client->ps.origin, sPlane[5]));
 		}
 		else
 		{
@@ -1826,7 +1826,7 @@ void target_savereset_use(gentity_t *self, gentity_t *other, gentity_t *activato
 
 	if (activator->client)
 	{
-		ResetSavedPositions(activator);
+		ETJump::saveSystem->resetSavedPositions(activator);
 		CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 	}
 }
@@ -1890,7 +1890,7 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 	}
 
 	// TODO: need force save here
-	ForceSave(self, activator);
+	ETJump::saveSystem->forceSave(self, activator);
 	trap_SendServerCommand(activator - g_entities, g_savemsg.string);
 }
 

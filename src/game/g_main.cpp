@@ -4,6 +4,7 @@
 #include "etj_user_repository.h"
 #include "etj_server_commands_handler.h"
 #include "etj_utilities.h"
+#include "etj_save.h"
 
 level_locals_t level;
 
@@ -576,6 +577,7 @@ namespace ETJump
 	std::unique_ptr<Session> session;
 	std::unique_ptr<ServerCommandsHandler> commandsHandler;
 	std::unique_ptr<IUserRepository> userRepository;
+	std::unique_ptr<SaveSystem> saveSystem;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2063,6 +2065,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
 	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository(Utilities::getPath(""), g_userConfig.string));
 	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get()));
+	ETJump::saveSystem = std::unique_ptr<ETJump::SaveSystem>(new ETJump::SaveSystem(ETJump::session.get(), ETJump::commandsHandler.get()));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
@@ -2132,8 +2135,10 @@ void G_ShutdownGame(int restart)
 	// ETJump server shutdown
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	ETJump::saveSystem = nullptr;
 	ETJump::session = nullptr;
 	ETJump::commandsHandler = nullptr;
+	ETJump::userRepository = nullptr;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

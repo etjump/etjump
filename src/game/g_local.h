@@ -2687,13 +2687,6 @@ qboolean StringToInt(const char *toConvert, int *value);
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
 
-// g_save.cpp
-void ForceSave(gentity_t *location, gentity_t *ent);
-void SavePositionsToDatabase(gentity_t *ent);
-void LoadPositionsFromDatabase(gentity_t *ent);
-void InitSaveSystem();
-void ResetSavedPositions(gentity_t *ent);
-
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
 #define TIMERUN_RESET_ON_TEAM_CHANGE    0x1
@@ -2709,10 +2702,12 @@ namespace ETJump
 	class Session;
 	class IUserRepository;
 	class ServerCommandsHandler;
+	class SaveSystem;
 
 	extern std::unique_ptr<Session> session;
 	extern std::unique_ptr<IUserRepository> userRepository;
 	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
+	extern std::unique_ptr<SaveSystem> saveSystem;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

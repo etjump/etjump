@@ -44,3 +44,12 @@ void ETJump::Session::clientThink(int clientNum)
 {
 	_clients[clientNum].checkPendingAuthorization();
 }
+
+const ETJump::Client* ETJump::Session::client(int clientNum)
+{
+	if (!_clients[clientNum].connected())
+	{
+		return nullptr;
+	}
+	return &_clients[clientNum];
+}

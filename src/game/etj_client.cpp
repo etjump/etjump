@@ -78,7 +78,7 @@ void ETJump::Client::drop(const std::string& message) const
 
 void ETJump::Client::authorize(IUserRepository* userRepository)
 {
-	auto result = userRepository->getOrCreate(_guid, _hardwareId);
+	auto result = userRepository->getOrCreate(_guid, _hardwareId, (g_entities + _slot)->client->pers.netname);
 	_authorizationIsPending = true;
 	_pendingAuthorization = move(result);
 }

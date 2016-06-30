@@ -2,15 +2,16 @@
 #include "etj_local.h"
 #include <array>
 #include "etj_client.h"
+#include "etj_isession.h"
 
 namespace ETJump
 {
 	class IUserRepository;
 
-	class Session
+	class Session : public ISession
 	{
 	public:
-		Session(IUserRepository *userRepository);
+		explicit Session(IUserRepository *userRepository);
 		~Session();
 
 		// if a non empty string is returned, client is dropped
@@ -18,6 +19,10 @@ namespace ETJump
 
 		// called whenever a command was received from the client
 		void clientThink(int clientNum);
+
+		// returns nullptr if not connected
+		const Client* client(int clientNum) override;
+
 	private:
 		IUserRepository *_userRepository;
 		std::array<Client, MAX_CLIENTS> _clients;
