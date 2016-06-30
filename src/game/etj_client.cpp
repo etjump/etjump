@@ -78,24 +78,30 @@ void ETJump::Client::drop(const std::string& message)
 
 void ETJump::Client::authorize(IUserRepository* userRepository)
 {
-	auto result = userRepository->get(_guid);
-	// if it is cached, take it immediately
-	if (result.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-	{
-		_user = result.get();
-	} else
-	{
-		_authorizationIsPending = true;
-		_pendingAuthorization = move(result);
-	}
+	auto result = userRepository->getOrCreate(_guid, _hardwareId);
+	_authorizationIsPending = true;
+	_pendingAuthorization = move(result);
 }
 
 void ETJump::Client::checkPendingAuthorization()
 {
-	if (_authorizationIsPending && (_pendingAuthorization.wait_for(std::chrono::seconds(0)) == std::future_status::ready))
+	try
 	{
-		_user = _pendingAuthorization.get();
-		_authorizationIsPending = false;
-		Printer::BroadcastChatMessage((boost::format("Authorized user: %s") % _user).str());
+		if (_authorizationIsPending && (_pendingAuthorization.wait_for(std::chrono::seconds(0)) == std::future_status::ready))
+		{
+			auto result = _pendingAuthorization.get();
+			if (result.errorMessage.length() > 0)
+			{
+				Printer::LogPrintln((boost::format("Could not authorize user: %s.") % result.errorMessage).str());
+				return;
+			}
+			_user = result.user;
+			_authorizationIsPending = false;
+			Printer::BroadcastChatMessage((boost::format("Authorized user: %s") % _user).str());
+		}
+	} catch (const std::future_error& exception)
+	{
+		Printer::LogPrintln((boost::format("Could not authorize user: %s.") % exception.what()).str());
 	}
+
 }

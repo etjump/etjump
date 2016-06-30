@@ -71,7 +71,7 @@ namespace ETJump
 		// change the database copy
 		User _user;
 		bool _authorizationIsPending;
-		std::future<User> _pendingAuthorization;
+		std::future<IUserRepository::Result> _pendingAuthorization;
 	};
 }
 

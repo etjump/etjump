@@ -13,6 +13,9 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Source Files\SQLiteCpp">
+      <UniqueIdentifier>{b68507a6-479a-4e54-9916-9986c4c74d4a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sha-1\sha1.c">
@@ -236,6 +239,21 @@
     </ClCompile>
     <ClCompile Include="etj_user_repository.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Backup.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Column.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Database.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Statement.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

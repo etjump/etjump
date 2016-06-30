@@ -74,12 +74,12 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
     <TargetName>qagame_mp_x86</TargetName>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -200,7 +200,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GAMEDLL;_CRT_SECURE_NO_DEPRECATE;HAVE_STRUCT_TIMESPEC;_TIMESPEC_DEFINED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GAMEDLL;_CRT_SECURE_NO_DEPRECATE;HAVE_STRUCT_TIMESPEC;_TIMESPEC_DEFINED;SQLITE_DEFAULT_FOREIGN_KEYS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -248,6 +248,11 @@
     <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="..\SQLiteCpp\src\Backup.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Column.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Database.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Statement.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="etj_async_operation.cpp" />
     <ClCompile Include="bg_animation.cpp" />

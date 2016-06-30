@@ -9,6 +9,28 @@ namespace ETJump
 	{
 	public:
 		User(int64_t id, const std::string& guid);
+
+		User(int64_t id, 
+			const std::string& guid, 
+			int level, 
+			int64_t lastSeen, 
+			const std::string& name, 
+			const std::string& title, 
+			const std::string& commands, 
+			const std::string& greeting, 
+			const std::vector<std::string>& hardwareIds)
+			: _id(id),
+			  _guid(guid),
+			  _level(level),
+			  _lastSeen(lastSeen),
+			  _name(name),
+			  _title(title),
+			  _commands(commands),
+			  _greeting(greeting),
+			  hardwareIds(hardwareIds)
+		{
+		}
+
 		User();
 		~User();
 
