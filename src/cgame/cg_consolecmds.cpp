@@ -1363,9 +1363,10 @@ qboolean CG_ConsoleCommand(void)
 	}
 
 	std::vector<std::string> arguments;
-	for (auto i = 1, argc = trap_Argc(); i < argc; ++i)
+	std::string command = cmd;
+	for (auto i = 0, argc = trap_Argc(); i < argc; ++i)
 		arguments.push_back(CG_Argv(i));
-	if (ETJump::consoleCommandsHandler->check(cmd, arguments))
+	if (ETJump::consoleCommandsHandler->check(command, arguments))
 	{
 		return qtrue;
 	}

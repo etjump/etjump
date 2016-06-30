@@ -9,6 +9,7 @@
 #include "cg_local.h"
 #include "cg_mainext.h"
 #include <memory>
+#include "../game/etj_file.h"
 #include "etj_client_commands_handler.h"
 #include "etj_client_authentication.h"
 

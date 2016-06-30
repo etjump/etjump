@@ -54,6 +54,9 @@ namespace ETJump
 		// throws WriteFailedException if written bytes count != data bytes count
 		void write(const std::string& data) const;
 
+		// lists files in a dir with extension
+		static std::vector<std::string> fileList(const std::string& path, const std::string& extension);
+
 		// builds the quake file system path from the file name
 		static std::string getPath(const std::string file);
 	private:

@@ -71,6 +71,29 @@ void ETJump::File::write(const std::string& data) const
 	}
 }
 
+std::vector<std::string> ETJump::File::fileList(const std::string& path, const std::string& extension)
+{
+	std::vector<std::string> files;
+	char buffer[1 << 16] = "";
+	auto numDirs = trap_FS_GetFileList(path.c_str(), extension.c_str(), buffer, sizeof(buffer));
+	auto dirPtr = buffer;
+	auto dirLen = 0;
+
+	for (auto i = 0; i < numDirs; i++, dirPtr += dirLen + 1)
+	{
+		dirLen = strlen(dirPtr);
+		if (strlen(dirPtr) > 4)
+		{
+			dirPtr[strlen(dirPtr) - 4] = 0;
+		}
+
+		char file[MAX_QPATH] = "";
+		Q_strncpyz(file, dirPtr, sizeof(file));
+		files.push_back(file);
+	}
+	return move(files);
+}
+
 std::string ETJump::File::getPath(const std::string file)
 {
 	char game[MAX_CVAR_VALUE_STRING] = "";
