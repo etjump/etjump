@@ -271,6 +271,7 @@
     <ClCompile Include="etj_custom_map_votes.cpp" />
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_console_variables.cpp" />
+    <ClCompile Include="etj_event_system.cpp" />
     <ClCompile Include="etj_file.cpp" />
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="etj_banner_system.h" />
     <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
+    <ClInclude Include="etj_event_system.h" />
     <ClInclude Include="etj_file.h" />
     <ClInclude Include="etj_isession.h" />
     <ClInclude Include="etj_iuser_repository.h" />
