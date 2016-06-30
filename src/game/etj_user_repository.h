@@ -19,8 +19,6 @@ namespace ETJump
 		explicit UserRepository(const std::string& directory, const std::string& file);
 		~UserRepository();
 
-		std::future<Result> get(const std::string& guid) const override;
-		std::future<Result> create(User user) override;
 		std::future<Result> getOrCreate(const std::string& guid, const std::string& hardwareId) override;
 		std::future<Result> edit(User user) override;
 	private:

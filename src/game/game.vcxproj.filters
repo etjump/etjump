@@ -255,6 +255,9 @@
     <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp">
       <Filter>Source Files\SQLiteCpp</Filter>
     </ClCompile>
+    <ClCompile Include="etj_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -377,6 +380,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_user_repository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,11 +2,12 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/algorithm/string.hpp>
-
 #include "etj_client_authentication.h"
 #include "etj_client_commands_handler.h"
 #include "cg_local.h"
 #include "etj_platform_specific.h"
+#include "../game/etj_file.h"
+#include <boost/format.hpp>
 
 const char* ETJump::ClientAuthentication::guidFile = "etguid.dat";
 
@@ -26,14 +27,14 @@ void ETJump::ClientAuthentication::initialize()
 	if (!readGuid())
 	{
 		_guid = createGuid();
-		CG_Printf("^2Successfully created a new GUID.");
+		CG_Printf("^2Successfully created a new GUID.\n");
 		if (!saveGuid())
 		{
 			CG_Printf("^1Error: ^7Could not save guid to file.\n");
 		}
 	} else
 	{
-		CG_Printf("^2Successfully loaded existing GUID.");
+		CG_Printf("^2Successfully loaded existing GUID.\n");
 	}
 
 	_hardwareId = PlatformSpecific::hardwareId();
@@ -51,34 +52,23 @@ void ETJump::ClientAuthentication::authenticate() const
 
 bool ETJump::ClientAuthentication::readGuid()
 {
-	fileHandle_t f = -1;
-
-	auto len = trap_FS_FOpenFile(guidFile, &f, FS_READ);
-
-	// don't bother reading anything if it's not exactly 40 characters
-	if (len != GUID_LEN)
+	try
 	{
-		trap_FS_FCloseFile(f);
-		return false;
-	}
-
-	char buffer[GUID_LEN + 1] = "";
-	trap_FS_Read(buffer, len, f);
-	buffer[GUID_LEN] = 0;
-	trap_FS_FCloseFile(f);
-
-
-	if (std::any_of(buffer, buffer + len, [](char c)
-	{
-		return c < '0' || c > 'F';
-	}))
+		File file(guidFile);
+		auto guid = file.read();
+		if (std::any_of(begin(guid), end(guid), [](char c)
+		{
+			return c < '0' || c > 'F';
+		}))
+		{
+			return false;
+		}
+		_guid = std::string(guid.data(), guid.size());
+		return true;
+	} catch (const File::FileNotFoundException&)
 	{
 		return false;
 	}
-
-	_guid = buffer;
-
-	return true;
 }
 
 std::string ETJump::ClientAuthentication::createGuid() const
@@ -93,15 +83,15 @@ std::string ETJump::ClientAuthentication::createGuid() const
 
 bool ETJump::ClientAuthentication::saveGuid() const
 {
-	auto f = -1;
-
-	if (trap_FS_FOpenFile(guidFile, &f, FS_WRITE) < 0)
+	try
 	{
+		File file(guidFile, File::Mode::Write);
+		file.write(_guid);
+		return true;
+	} catch (const File::WriteFailedException& exception)
+	{
+		CG_Printf((boost::format("%s\n") % exception.what()).str().c_str());
 		return false;
 	}
-
-	trap_FS_Write(_guid.c_str(), _guid.length(), f);
-	trap_FS_FCloseFile(f);
-	return true;
 }
 

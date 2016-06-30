@@ -15,23 +15,6 @@ ETJump::UserRepository::~UserRepository()
 {
 }
 
-std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::get(const std::string& guid) const
-{
-	return std::async(std::launch::async, [=]()
-	{
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		return Result{ User(1, guid), "" };
-	});
-}
-
-std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::create(User user)
-{
-	return std::async(std::launch::async, [=]()
-	{
-		return Result{ user, "" };
-	});
-}
-
 std::future<ETJump::IUserRepository::Result> ETJump::UserRepository::getOrCreate(const std::string& guid, const std::string& hardwareId)
 {
 	return std::async(std::launch::async, [=]()
