@@ -9,6 +9,7 @@
 namespace ETJump
 {
 	class ISession;
+	class ServerCommandsHandler;
 
 	class SaveSystem {
 	public:

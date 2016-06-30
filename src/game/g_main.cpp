@@ -220,7 +220,6 @@ vmCvar_t g_lastVisitedMessage;
 vmCvar_t g_mapDatabase;
 vmCvar_t g_banDatabase;
 
-vmCvar_t troll_speed;
 vmCvar_t g_raceDatabase;
 
 vmCvar_t g_disableVoteAfterMapChange;
@@ -574,10 +573,10 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
-	std::unique_ptr<Session> session;
-	std::unique_ptr<ServerCommandsHandler> commandsHandler;
-	std::unique_ptr<IUserRepository> userRepository;
-	std::unique_ptr<SaveSystem> saveSystem;
+	std::unique_ptr<Session> session = nullptr;
+	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
+	std::unique_ptr<IUserRepository> userRepository = nullptr;
+	std::unique_ptr<SaveSystem> saveSystem = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2064,7 +2063,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
 	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository(Utilities::getPath(""), g_userConfig.string));
-	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get()));
+	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get(), ETJump::commandsHandler.get()));
 	ETJump::saveSystem = std::unique_ptr<ETJump::SaveSystem>(new ETJump::SaveSystem(ETJump::session.get(), ETJump::commandsHandler.get()));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////

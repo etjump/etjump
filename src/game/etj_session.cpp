@@ -3,9 +3,9 @@
 #include <boost/algorithm/string.hpp>
 #include "etj_printer.h"
 
-ETJump::Session::Session(IUserRepository* userRepository): _userRepository(userRepository)
+ETJump::Session::Session(IUserRepository* userRepository, ServerCommandsHandler *commandsHandler): _userRepository(userRepository), _commandsHandler(commandsHandler)
 {
-	if (!commandsHandler->subscribe("etguid", [&](int clientNum, const std::vector<std::string>& arguments)
+	if (!_commandsHandler->subscribe("etguid", [&](int clientNum, const std::vector<std::string>& arguments)
 	{
 		if (!_clients[clientNum].authenticate(arguments))
 		{
@@ -23,7 +23,7 @@ ETJump::Session::Session(IUserRepository* userRepository): _userRepository(userR
 
 ETJump::Session::~Session()
 {
-	commandsHandler->unsubcribe("etguid");
+	_commandsHandler->unsubcribe("etguid");
 }
 
 std::string ETJump::Session::clientConnect(int clientNum, bool firstTime, const std::string& ipAddress)

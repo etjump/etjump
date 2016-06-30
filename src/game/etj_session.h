@@ -7,11 +7,12 @@
 namespace ETJump
 {
 	class IUserRepository;
+	class ServerCommandsHandler;
 
 	class Session : public ISession
 	{
 	public:
-		explicit Session(IUserRepository *userRepository);
+		explicit Session(IUserRepository *userRepository, ServerCommandsHandler *commandsHandler);
 		~Session();
 
 		// if a non empty string is returned, client is dropped
@@ -26,6 +27,7 @@ namespace ETJump
 	private:
 		IUserRepository *_userRepository;
 		std::array<Client, MAX_CLIENTS> _clients;
+		ServerCommandsHandler* _commandsHandler;
 	};
 }
 

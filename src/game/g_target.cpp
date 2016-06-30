@@ -1966,30 +1966,27 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 		G_ActivateTarget(self, activator);
 		return;
 	}
-	else
+	int i = 0;
+	if (activatorsFt->teamJumpMode == qfalse)
 	{
-		int i = 0;
-		if (activatorsFt->teamJumpMode == qfalse)
+		// Let's use it just for the activator
+		G_ActivateTarget(self, activator);
+		return;
+	}
+
+	for (; i < level.numConnectedClients; i++)
+	{
+		int cnum = level.sortedClients[i];
+
+		if (!G_IsOnFireteam(cnum, &otherFt))
 		{
-			// Let's use it just for the activator
-			G_ActivateTarget(self, activator);
-			return;
+			continue;
 		}
-
-		for (; i < level.numConnectedClients; i++)
+		else
 		{
-			int cnum = level.sortedClients[i];
-
-			if (!G_IsOnFireteam(cnum, &otherFt))
+			if (activatorsFt == otherFt)
 			{
-				continue;
-			}
-			else
-			{
-				if (activatorsFt == otherFt)
-				{
-					G_ActivateTarget(self, g_entities + cnum);
-				}
+				G_ActivateTarget(self, g_entities + cnum);
 			}
 		}
 	}

@@ -1975,7 +1975,6 @@ extern vmCvar_t g_lastVisitedMessage;
 extern vmCvar_t g_mapDatabase;
 extern vmCvar_t g_banDatabase;
 
-extern vmCvar_t troll_speed;
 extern vmCvar_t g_raceDatabase;
 
 extern vmCvar_t g_disableVoteAfterMapChange;
@@ -2700,13 +2699,13 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 namespace ETJump
 {
 	class Session;
-	class IUserRepository;
-	class ServerCommandsHandler;
+	//class IUserRepository;
+	//class ServerCommandsHandler;
 	class SaveSystem;
 
 	extern std::unique_ptr<Session> session;
-	extern std::unique_ptr<IUserRepository> userRepository;
-	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
+	//extern std::unique_ptr<IUserRepository> userRepository;
+	//extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
 	extern std::unique_ptr<SaveSystem> saveSystem;
 }
 
