@@ -42,5 +42,11 @@
     <ClCompile Include="..\game\etj_commands_parser.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="event_aggregator_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_event_aggregator.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -14,14 +14,13 @@ namespace ETJump
 		{
 			InitGame,
 			ShutdownGame,
-			RunFrame,
-			NumServerEvents
+			RunFrame
 		};
 
 		struct ServerEventHandler
 		{
 			EventHandle handle;
-			ServerEventType 
+			ServerEventType type;
 		};
 
 		enum class ClientEventType
@@ -38,16 +37,35 @@ namespace ETJump
 
 		// Subscribes to a server event. 
 		// @return handle to unsubscribe from the event
-		int subscribe(ServerEventType, std::function<void()>);
+		int subscribe(ServerEventType eventType, std::function<void()> callback);
 		// Subscribes to a client event. 
 		// @return handle to unsubscribe from the event
-		int subscribe(ClientEventType, std::function<void(int clientNum)>);
+		int subscribe(ClientEventType eventType, std::function<void(int clientNum)> callback);
 		// unsubscribes from the event.
 		void unsubcribe(int eventHandle);
+		// called when the event occurs
+		void clientEvent(ClientEventType eventType, int clientNum);
+		void serverEvent(ServerEventType eventType);
 	private:
-		int _nextFreeHandle;
-		std::vector < std::pair<int, std::function<void()> > > _serverCallbacks;
-		std::vector < std::pair<int, std::function<void(int clientNum)> > > _clientCallbacks;
+		struct ServerCallback
+		{
+			bool inUse;
+			EventHandle handle;
+			ServerEventType type;
+			std::function<void()> callback;
+		};
+
+		struct ClientCallback
+		{
+			bool inUse;
+			EventHandle handle;
+			ClientEventType type;
+			std::function<void(int clientNum)> callback;
+		};
+
+		EventHandle _nextFreeHandle;
+		std::vector<ServerCallback> _serverCallbacks;
+		std::vector<ClientCallback> _clientCallbacks;
 	};
 }
 

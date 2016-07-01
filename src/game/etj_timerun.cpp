@@ -45,7 +45,7 @@ std::string GetColumnText(sqlite3_stmt *stmt, int index)
 	return text ? text : "";
 }
 
-bool Timerun::init(const std::string &database, const std::string &currentMap)
+bool ETJump::Timerun::init(const std::string &database, const std::string &currentMap)
 {
 	SQLiteWrapper wrapper;
 
@@ -132,7 +132,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 	return true;
 }
 
-void Timerun::startTimer(const std::string &runName, int clientNum, const std::string& currentName, int raceStartTime)
+void ETJump::Timerun::startTimer(const std::string &runName, int clientNum, const std::string& currentName, int raceStartTime)
 {
 	auto player = _players[clientNum].get();
 
@@ -156,7 +156,7 @@ void Timerun::startTimer(const std::string &runName, int clientNum, const std::s
 	Utilities::startRun(clientNum);
 }
 
-void Timerun::connectNotify(int clientNum)
+void ETJump::Timerun::connectNotify(int clientNum)
 {
 	for (int idx = 0; idx < 64; ++idx)
 	{
@@ -175,7 +175,7 @@ void Timerun::connectNotify(int clientNum)
 	}
 }
 
-void Timerun::startNotify(int clientNum)
+void ETJump::Timerun::startNotify(int clientNum)
 {
 	auto player         = _players[clientNum].get();
 	auto spectators     = Utilities::getSpectators(clientNum);
@@ -201,7 +201,7 @@ void Timerun::startNotify(int clientNum)
 	Printer::SendCommandToAll((boost::format("timerun start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
 }
 
-void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
+void ETJump::Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 {
 	Player *player = _players[clientNum].get();
 
@@ -250,7 +250,7 @@ std::string rankToString(int rank)
 	}
 }
 
-void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
+void ETJump::Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 {
 	auto lowercaseName = runName;
 	transform(begin(lowercaseName), end(lowercaseName), begin(lowercaseName), tolower);
@@ -324,7 +324,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 	Printer::SendConsoleMessage(clientNum, buffer);
 }
 
-void Timerun::printCurrentMapRecords(int clientNum)
+void ETJump::Timerun::printCurrentMapRecords(int clientNum)
 {
 	std::string buffer =
 	    "^g=============================================================\n"
@@ -351,7 +351,7 @@ void Timerun::printCurrentMapRecords(int clientNum)
 	Printer::SendConsoleMessage(clientNum, buffer);
 }
 
-void Timerun::interrupt(int clientNum)
+void ETJump::Timerun::interrupt(int clientNum)
 {
 	Player *player = _players[clientNum].get();
 
@@ -374,7 +374,7 @@ void Timerun::interrupt(int clientNum)
  * @param database The database file name
  * @param record The actual record
  */
-static void SaveRecord(bool update, std::string database, Timerun::Record record)
+static void SaveRecord(bool update, std::string database, ETJump::Timerun::Record record)
 {
 	SQLiteWrapper wrapper;
 	if (!wrapper.open(database))
@@ -564,13 +564,13 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 	}
 }
 
-void Timerun::SaveRecord(Record *record, bool update)
+void ETJump::Timerun::SaveRecord(Record *record, bool update)
 {
 	std::thread thr(::SaveRecord, update, _database, *record);
 	thr.detach();
 }
 
-void Timerun::addNewRecord(Player *player, int clientNum)
+void ETJump::Timerun::addNewRecord(Player *player, int clientNum)
 {
 	auto   record = new Record();
 	time_t currentTime;
@@ -590,7 +590,7 @@ void Timerun::addNewRecord(Player *player, int clientNum)
 	                           % player->completionTime).str());
 }
 
-void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int clientNum)
+void ETJump::Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int clientNum)
 {
 	time_t currentTime;
 	time(&currentTime);
@@ -617,7 +617,7 @@ void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int c
 	}
 }
 
-Timerun::Record *Timerun::findPreviousRecord(Player *player)
+ETJump::Timerun::Record *ETJump::Timerun::findPreviousRecord(Player *player)
 {
 	auto run = _recordsByName.find(player->currentRunName);
 	if (run == _recordsByName.end())
@@ -638,7 +638,7 @@ Timerun::Record *Timerun::findPreviousRecord(Player *player)
 	return nullptr;
 }
 
-void Timerun::sortRecords()
+void ETJump::Timerun::sortRecords()
 {
 	for (auto& record : _recordsByName)
 	{
@@ -655,7 +655,7 @@ void Timerun::sortRecords()
 	}
 }
 
-void Timerun::checkRecord(Player *player, int clientNum)
+void ETJump::Timerun::checkRecord(Player *player, int clientNum)
 {
 	time_t t;
 	time(&t);
@@ -678,7 +678,7 @@ void Timerun::checkRecord(Player *player, int clientNum)
 
 }
 
-bool Timerun::clientConnect(int clientNum, int userId)
+bool ETJump::Timerun::initClient(int clientNum, int userId)
 {
 	_players[clientNum] = std::unique_ptr<Player>(new Player(userId));
 
@@ -687,7 +687,7 @@ bool Timerun::clientConnect(int clientNum, int userId)
 
 
 
-void Timerun::printRecords(int clientNum, const std::string &map, const std::string &runName)
+void ETJump::Timerun::printRecords(int clientNum, const std::string &map, const std::string &runName)
 {
 	sortRecords();
 	if (!map.length() || map == _currentMap)

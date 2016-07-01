@@ -70,11 +70,6 @@ public:
 	static bool anyonePlaying();
 
 	/**
-	 * Returns the q3 engine path for a file
-	 */
-	static std::string getPath(const std::string& name);
-
-	/**
 	 * Converts timestamp to date
 	 */
 	static std::string timestampToString(int timestamp, const char *format = "%d/%m/%y %H:%M:%S", const char *start = "never");

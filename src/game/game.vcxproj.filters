@@ -258,7 +258,7 @@
     <ClCompile Include="etj_file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_event_system.cpp">
+    <ClCompile Include="etj_event_aggregator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -391,7 +391,7 @@
     <ClInclude Include="etj_isession.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_event_system.h">
+    <ClInclude Include="etj_event_aggregator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

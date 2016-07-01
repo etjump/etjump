@@ -3,7 +3,7 @@
 #include "etj_session.h"
 #include "etj_user_repository.h"
 #include "etj_server_commands_handler.h"
-#include "etj_utilities.h"
+#include "etj_file.h"
 #include "etj_save.h"
 
 level_locals_t level;
@@ -467,7 +467,6 @@ cvarTable_t gameCvarTable[] =
 	{ &g_lastVisitedMessage,        "g_lastVisitedMessage",        "^2Welcome back! Your last visit was on [t].",            CVAR_ARCHIVE },
 	{ &g_mapDatabase,               "g_mapDatabase",               "maps.dat",                                               CVAR_ARCHIVE },
 	{ &g_banDatabase,               "g_banDatabase",               "bans.dat",                                               CVAR_ARCHIVE },
-	{ &troll_speed,                 "troll_speed",                 "127",                                                    CVAR_ARCHIVE },
 	{ &g_raceDatabase,              "g_raceDatabase",              "races.db",                                               CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000",                                                  CVAR_ARCHIVE },
 	{ &g_motdFile,                  "g_motdFile",                  "motd.json",                                              CVAR_ARCHIVE },
@@ -2062,7 +2061,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
-	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository(Utilities::getPath(""), g_userConfig.string));
+	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository(ETJump::File::getPath(""), g_userConfig.string));
 	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get(), ETJump::commandsHandler.get()));
 	ETJump::saveSystem = std::unique_ptr<ETJump::SaveSystem>(new ETJump::SaveSystem(ETJump::session.get(), ETJump::commandsHandler.get()));
 

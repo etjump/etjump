@@ -2700,12 +2700,12 @@ namespace ETJump
 {
 	class Session;
 	//class IUserRepository;
-	//class ServerCommandsHandler;
+	class ServerCommandsHandler;
 	class SaveSystem;
 
 	extern std::unique_ptr<Session> session;
 	//extern std::unique_ptr<IUserRepository> userRepository;
-	//extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
+	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
 	extern std::unique_ptr<SaveSystem> saveSystem;
 }
 

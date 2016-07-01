@@ -4,7 +4,7 @@
 #include "etj_utilities.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-
+#include "etj_file.h"
 
 
 MapStatistics::MapStatistics() : _previousLevelTime(0), _currentMillisecondsPlayed(0), _currentMillisecondsOnServer(0), _currentMap(nullptr)
@@ -138,7 +138,7 @@ void MapStatistics::saveChanges()
 	_currentMap->lastPlayed = static_cast<int>(t);
 
 	sqlite3 *db = nullptr;
-	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto    rc  = sqlite3_open(ETJump::File::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to open database. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
@@ -295,7 +295,7 @@ void MapStatistics::addNewMaps()
 void MapStatistics::saveNewMaps(std::vector<std::string> newMaps)
 {
 	sqlite3 *db = nullptr;
-	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto    rc  = sqlite3_open(ETJump::File::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::saveNewMaps: Error: Could not open map database %s\n") % _databaseName).str());
@@ -351,7 +351,7 @@ bool MapStatistics::loadMaps()
 {
 	sqlite3 *db = nullptr;
 
-	auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto rc = sqlite3_open(ETJump::File::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Failed to open database %s\n")
@@ -407,7 +407,7 @@ bool MapStatistics::loadMaps()
 bool MapStatistics::createDatabase()
 {
 	sqlite3 *db = nullptr;
-	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
+	auto    rc  = sqlite3_open(ETJump::File::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
 		Utilities::Error((boost::format("MapStatistics::createDatabase: Error: Failed to open database %s\n")

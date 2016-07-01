@@ -153,9 +153,11 @@
   <ItemGroup>
     <ClCompile Include="..\cgame\etj_client_commands_handler.cpp" />
     <ClCompile Include="..\game\etj_commands_parser.cpp" />
+    <ClCompile Include="..\game\etj_event_aggregator.cpp" />
     <ClCompile Include="..\game\etj_server_commands_handler.cpp" />
     <ClCompile Include="client_commands_handler_tests.cpp" />
     <ClCompile Include="commands_parser_tests.cpp" />
+    <ClCompile Include="event_aggregator_tests.cpp" />
     <ClCompile Include="server_commands_handler_tests.cpp" />
     <ClCompile Include="tests_main.cpp" />
   </ItemGroup>
