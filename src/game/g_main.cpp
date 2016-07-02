@@ -1915,10 +1915,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		G_Printf("Not logging to disk.\n");
 	}
 
-#ifdef BETATEST
-	trap_FS_FOpenFile("bug_report.txt", &level.bugReportFile, FS_APPEND_SYNC);
-#endif //BETATEST
-
 	G_InitWorldSession();
 
 	// DHM - Nerve :: Clear out spawn target config strings
@@ -2120,14 +2116,6 @@ void G_ShutdownGame(int restart)
 		trap_FS_FCloseFile(level.adminLogFile);
 		level.adminLogFile = 0;
 	}
-
-#ifdef BETATEST
-	if (level.bugReportFile)
-	{
-		trap_FS_FCloseFile(level.bugReportFile);
-		level.bugReportFile = 0;
-	}
-#endif
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData(restart ? qtrue : qfalse);
