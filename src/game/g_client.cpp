@@ -1,6 +1,7 @@
 #include "g_local.h"
 #include "etj_session.h"
 #include "etj_save.h"
+#include "etj_event_aggregator.h"
 #include "../../etjump/ui/menudef.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -1651,6 +1652,8 @@ void ClientUserinfoChanged(int clientNum)
 		return;
 	}
 
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientUserinfoChanged, clientNum);
+
 	G_LogPrintf("ClientUserinfoChanged: %i %s\n", clientNum, s);
 	G_DPrintf("ClientUserinfoChanged: %i :: %s\n", clientNum, s);
 }
@@ -1878,6 +1881,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		ent->client->sess.muted = qtrue;
 	}
 
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, clientNum);
+
 	ETJump::saveSystem->resetSavedPositions(ent);
 
 	return NULL;
@@ -1986,6 +1991,8 @@ void ClientBegin(int clientNum)
 	}
 
 	ent->client->pers.previousSetHealthTime = 0;
+
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientBegin, clientNum);
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)
@@ -2578,6 +2585,8 @@ void ClientDisconnect(int clientNum)
 	ETJump::saveSystem->savePositionsToDatabase(ent);
 
 	ClearPortals(ent);
+
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientDisconnect, clientNum);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

@@ -254,7 +254,6 @@
     <ClCompile Include="..\SQLiteCpp\src\Statement.cpp" />
     <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
-    <ClCompile Include="etj_async_operation.cpp" />
     <ClCompile Include="bg_animation.cpp" />
     <ClCompile Include="bg_animgroup.cpp" />
     <ClCompile Include="bg_campaign.cpp" />
@@ -335,7 +334,6 @@
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
-    <ClInclude Include="etj_async_operation.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />

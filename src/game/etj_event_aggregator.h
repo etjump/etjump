@@ -12,8 +12,6 @@ namespace ETJump
 
 		enum class ServerEventType
 		{
-			InitGame,
-			ShutdownGame,
 			RunFrame
 		};
 
@@ -28,6 +26,7 @@ namespace ETJump
 			ClientBegin,
 			ClientThink,
 			ClientConnect,
+			ClientUserinfoChanged,
 			ClientDisconnect,
 			NumClientEvents
 		};

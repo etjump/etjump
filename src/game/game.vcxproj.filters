@@ -189,9 +189,6 @@
     <ClCompile Include="q_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_async_operation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_custom_map_votes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -329,9 +326,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_local.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_async_operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_levels.h">
