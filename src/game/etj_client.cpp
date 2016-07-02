@@ -83,7 +83,7 @@ void ETJump::Client::authorize(IUserRepository* userRepository)
 	_pendingAuthorization = move(result);
 }
 
-void ETJump::Client::checkPendingAuthorization()
+bool ETJump::Client::checkPendingAuthorization()
 {
 	try
 	{
@@ -98,10 +98,11 @@ void ETJump::Client::checkPendingAuthorization()
 			_user = result.user;
 			_authorizationIsPending = false;
 			Printer::BroadcastChatMessage((boost::format("Authorized user: %s") % _user).str());
+			return true;
 		}
 	} catch (const std::future_error& exception)
 	{
 		Printer::LogPrintln((boost::format("Could not authorize user: %s.") % exception.what()).str());
 	}
-
+	return false;
 }

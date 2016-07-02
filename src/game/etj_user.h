@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <boost/functional/hash.hpp>
 
 namespace ETJump
 {
@@ -45,6 +46,52 @@ namespace ETJump
 				<< " _title: " << obj._title
 				<< " _commands: " << obj._commands
 				<< " _greeting: " << obj._greeting;
+		}
+
+
+		int64_t id() const
+		{
+			return _id;
+		}
+
+		std::string guid() const
+		{
+			return _guid;
+		}
+
+		int level() const
+		{
+			return _level;
+		}
+
+		int64_t lastSeen() const
+		{
+			return _lastSeen;
+		}
+
+		std::string name() const
+		{
+			return _name;
+		}
+
+		std::string title() const
+		{
+			return _title;
+		}
+
+		std::string commands() const
+		{
+			return _commands;
+		}
+
+		std::string greeting() const
+		{
+			return _greeting;
+		}
+
+		std::vector<std::string> hardwareIds1() const
+		{
+			return hardwareIds;
 		}
 
 	private:

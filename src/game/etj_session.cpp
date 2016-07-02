@@ -2,8 +2,9 @@
 #include "etj_server_commands_handler.h"
 #include <boost/algorithm/string.hpp>
 #include "etj_printer.h"
+#include "etj_event_aggregator.h"
 
-ETJump::Session::Session(IUserRepository* userRepository, ServerCommandsHandler *commandsHandler): _userRepository(userRepository), _commandsHandler(commandsHandler)
+ETJump::Session::Session(IUserRepository* userRepository, ServerCommandsHandler *commandsHandler, EventAggregator *eventAggregator): _userRepository(userRepository), _commandsHandler(commandsHandler), _eventAggregator(eventAggregator)
 {
 	if (!_commandsHandler->subscribe("etguid", [&](int clientNum, const std::vector<std::string>& arguments)
 	{
@@ -42,7 +43,11 @@ std::string ETJump::Session::clientConnect(int clientNum, bool firstTime, const 
 
 void ETJump::Session::clientThink(int clientNum)
 {
-	_clients[clientNum].checkPendingAuthorization();
+	if (_clients[clientNum].checkPendingAuthorization())
+	{
+		EventAggregator::Payload payload{ std::vector<int>{clientNum}, _clients[clientNum].user()->id() };
+		eventAggregator->clientEvent(EventAggregator::ClientEventType::ClientAuthorized, &payload);
+	}
 }
 
 const ETJump::Client* ETJump::Session::client(int clientNum)

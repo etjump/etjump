@@ -1092,10 +1092,6 @@ typedef struct
 	fileHandle_t logFile;
 	fileHandle_t adminLogFile;
 
-#ifdef BETATEST
-	fileHandle_t bugReportFile;
-#endif // BETATEST
-
 	char rawmapname[MAX_QPATH];
 
 	// store latched cvars here that we want to get at often

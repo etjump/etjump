@@ -47,8 +47,6 @@ std::string GetColumnText(sqlite3_stmt *stmt, int index)
 
 bool ETJump::Timerun::init(const std::string &database, const std::string &currentMap)
 {
-	SQLiteWrapper wrapper;
-
 	Printer::LogPrintln("Opening timeruns database: " + database);
 
 	_recordsByName.clear();

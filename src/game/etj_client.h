@@ -31,7 +31,7 @@ namespace ETJump
 		void authorize(IUserRepository* userRepository);
 		// checks if there are any pending results and parses them
 		// if there are some
-		void checkPendingAuthorization();
+		bool checkPendingAuthorization();
 
 		int slot() const
 		{

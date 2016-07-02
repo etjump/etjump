@@ -9,7 +9,7 @@ ETJump::EventAggregator::~EventAggregator()
 	_clientCallbacks.clear();
 }
 
-int ETJump::EventAggregator::subscribe(ServerEventType eventType, std::function<void()> callback)
+int ETJump::EventAggregator::subscribe(ServerEventType eventType, std::function<void(const Payload *)> callback)
 {
 	auto handle = _nextFreeHandle++;
 
@@ -18,7 +18,7 @@ int ETJump::EventAggregator::subscribe(ServerEventType eventType, std::function<
 	return handle;
 }
 
-int ETJump::EventAggregator::subscribe(ClientEventType eventType, std::function<void(int clientNum)> callback)
+int ETJump::EventAggregator::subscribe(ClientEventType eventType, std::function<void(const Payload *)> callback)
 {
 	auto handle = _nextFreeHandle++;
 
@@ -48,24 +48,24 @@ void ETJump::EventAggregator::unsubcribe(int eventHandle)
 	}
 }
 
-void ETJump::EventAggregator::clientEvent(ClientEventType eventType, int clientNum)
+void ETJump::EventAggregator::clientEvent(ClientEventType eventType, const Payload *payload)
 {
 	for (const auto & c : _clientCallbacks)
 	{
 		if (c.type == eventType && c.inUse)
 		{
-			c.callback(clientNum);
+			c.callback(payload);
 		}
 	}
 }
 
-void ETJump::EventAggregator::serverEvent(ServerEventType eventType)
+void ETJump::EventAggregator::serverEvent(ServerEventType eventType, const Payload *payload)
 {
 	for (const auto & s : _serverCallbacks)
 	{
 		if (s.type == eventType && s.inUse)
 		{
-			s.callback();
+			s.callback(payload);
 		}
 	}
 }

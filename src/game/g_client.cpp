@@ -1652,7 +1652,8 @@ void ClientUserinfoChanged(int clientNum)
 		return;
 	}
 
-	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientUserinfoChanged, clientNum);
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientUserinfoChanged, &payload);
 
 	G_LogPrintf("ClientUserinfoChanged: %i %s\n", clientNum, s);
 	G_DPrintf("ClientUserinfoChanged: %i :: %s\n", clientNum, s);
@@ -1881,7 +1882,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		ent->client->sess.muted = qtrue;
 	}
 
-	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, clientNum);
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum, static_cast<int>(firstTime), static_cast<int>(isBot)} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, &payload);
 
 	ETJump::saveSystem->resetSavedPositions(ent);
 
@@ -1992,7 +1994,8 @@ void ClientBegin(int clientNum)
 
 	ent->client->pers.previousSetHealthTime = 0;
 
-	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientBegin, clientNum);
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientBegin, &payload);
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)
@@ -2586,7 +2589,8 @@ void ClientDisconnect(int clientNum)
 
 	ClearPortals(ent);
 
-	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientDisconnect, clientNum);
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientDisconnect, &payload);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,
