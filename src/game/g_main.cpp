@@ -1982,6 +1982,18 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// it'll mess up the g_ghostPlayers value.
 	InitGhosting();
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump server initialization
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	ETJump::eventAggregator = std::unique_ptr<ETJump::EventAggregator>(new ETJump::EventAggregator());
+	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
+	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository(ETJump::File::getPath(""), g_userConfig.string));
+	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get(), ETJump::commandsHandler.get(), ETJump::eventAggregator.get()));
+	ETJump::saveSystem = std::unique_ptr<ETJump::SaveSystem>(new ETJump::SaveSystem(ETJump::session.get(), ETJump::commandsHandler.get()));
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
 
@@ -2053,18 +2065,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	G_spawnPrintf(DP_MVSPAWN, level.time + 2000, NULL);
 
 	ETJump_InitGame(levelTime, randomSeed, restart);
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// ETJump server initialization
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	ETJump::eventAggregator = std::unique_ptr<ETJump::EventAggregator>(new ETJump::EventAggregator());
-	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler);
-	ETJump::userRepository = std::unique_ptr<ETJump::IUserRepository>(new ETJump::UserRepository(ETJump::File::getPath(""), g_userConfig.string));
-	ETJump::session = std::unique_ptr<ETJump::Session>(new ETJump::Session(ETJump::userRepository.get(), ETJump::commandsHandler.get()));
-	ETJump::saveSystem = std::unique_ptr<ETJump::SaveSystem>(new ETJump::SaveSystem(ETJump::session.get(), ETJump::commandsHandler.get()));
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 

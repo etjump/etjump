@@ -6,6 +6,9 @@
 */
 
 #include "g_local.h"
+#include <vector>
+#include <functional>
+
 qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out, const char *file, int line)
 {
 	int i;
@@ -185,8 +188,8 @@ field_t fields[] =
 
 typedef struct
 {
-	const char *name;
-	void (*spawn)(gentity_t *ent);
+	std::string name;
+	std::function<void(gentity_t *ent)> spawn;
 } spawn_t;
 
 void SP_info_player_start(gentity_t *ent);
@@ -462,250 +465,246 @@ void SP_trigger_tracker(gentity_t *self);
 void SP_target_set_health(gentity_t *self);
 
 
-
-spawn_t spawns[] =
-{
-	// info entities don't do anything at all, but provide positional
-	// information for things controlled by other processes
-	{ "info_player_start",           SP_info_player_start           },
-	{ "info_player_checkpoint",      SP_info_player_checkpoint      },
-	{ "info_player_deathmatch",      SP_info_player_deathmatch      },
-	{ "info_player_intermission",    SP_info_player_intermission    },
-	{ "info_null",                   SP_info_null                   },
-	{ "info_notnull",                SP_info_notnull                }, // use target_position instead
-	{ "info_notnull_big",            SP_info_notnull                }, // use target_position instead
-	{ "info_camp",                   SP_info_camp                   },
+std::vector<spawn_t> spawns{
+	{ "info_player_start",           SP_info_player_start },
+	{ "info_player_checkpoint",      SP_info_player_checkpoint },
+	{ "info_player_deathmatch",      SP_info_player_deathmatch },
+	{ "info_player_intermission",    SP_info_player_intermission },
+	{ "info_null",                   SP_info_null },
+	{ "info_notnull",                SP_info_notnull }, // use target_position instead
+	{ "info_notnull_big",            SP_info_notnull }, // use target_position instead
+	{ "info_camp",                   SP_info_camp },
 
 	// Gordon: debris test
-	{ "func_debris",                 SP_func_debris                 },
+	{ "func_debris",                 SP_func_debris },
 	// ===================
 
-	{ "func_plat",                   SP_func_plat                   },
-	{ "func_button",                 SP_func_button                 },
-	{ "func_explosive",              SP_func_explosive              },
-	{ "func_door",                   SP_func_door                   },
-	{ "func_static",                 SP_func_static                 },
-	{ "func_leaky",                  SP_func_leaky                  },
-	{ "func_rotating",               SP_func_rotating               },
-	{ "func_bobbing",                SP_func_bobbing                },
-	{ "func_pendulum",               SP_func_pendulum               },
-	{ "func_train",                  SP_func_train                  },
-	{ "func_group",                  SP_info_null                   },
+	{ "func_plat",                   SP_func_plat },
+	{ "func_button",                 SP_func_button },
+	{ "func_explosive",              SP_func_explosive },
+	{ "func_door",                   SP_func_door },
+	{ "func_static",                 SP_func_static },
+	{ "func_leaky",                  SP_func_leaky },
+	{ "func_rotating",               SP_func_rotating },
+	{ "func_bobbing",                SP_func_bobbing },
+	{ "func_pendulum",               SP_func_pendulum },
+	{ "func_train",                  SP_func_train },
+	{ "func_group",                  SP_info_null },
 	// JOSEPH 1-26-00
-	{ "func_train_rotating",         SP_func_train_rotating         },
-	{ "func_secret",                 SP_func_secret                 },
+	{ "func_train_rotating",         SP_func_train_rotating },
+	{ "func_secret",                 SP_func_secret },
 	// END JOSEPH
 	// Rafael
-	{ "func_door_rotating",          SP_func_door_rotating          },
+	{ "func_door_rotating",          SP_func_door_rotating },
 
-	{ "func_timer",                  SP_func_timer                  }, // rename trigger_timer?
+	{ "func_timer",                  SP_func_timer }, // rename trigger_timer?
 
-	{ "func_invisible_user",         SP_func_invisible_user         },
+	{ "func_invisible_user",         SP_func_invisible_user },
 
 	// Triggers are brush objects that cause an effect when contacted
 	// by a living player, usually involving firing targets.
 	// While almost everything could be done with
 	// a single trigger class and different targets, triggered effects
 	// could not be client side predicted (push and teleport).
-	{ "trigger_always",              SP_trigger_always              },
-	{ "trigger_multiple",            SP_trigger_multiple            },
-	{ "trigger_multiple_ext",        SP_trigger_multiple_ext        },
-	{ "trigger_push",                SP_trigger_push                },
-	{ "trigger_teleport",            SP_trigger_teleport            },
-	{ "trigger_hurt",                SP_trigger_hurt                },
-	{ "trigger_savereset",           SP_trigger_savereset           },
+	{ "trigger_always",              SP_trigger_always },
+	{ "trigger_multiple",            SP_trigger_multiple },
+	{ "trigger_multiple_ext",        SP_trigger_multiple_ext },
+	{ "trigger_push",                SP_trigger_push },
+	{ "trigger_teleport",            SP_trigger_teleport },
+	{ "trigger_hurt",                SP_trigger_hurt },
+	{ "trigger_savereset",           SP_trigger_savereset },
 
 	//---- (SA) Wolf triggers
-	{ "trigger_concussive_dust",     SP_trigger_concussive_dust     }, // JPW NERVE
-	{ "trigger_once",                SP_trigger_once                },
+	{ "trigger_concussive_dust",     SP_trigger_concussive_dust }, // JPW NERVE
+	{ "trigger_once",                SP_trigger_once },
 	//---- done
 
 	// Mad Doc - TDf
 	// I'm going to put trigger_aidoors back in. I'll make sure they only work in single player
-	{ "trigger_aidoor",              SP_trigger_aidoor              },
+	{ "trigger_aidoor",              SP_trigger_aidoor },
 	// START	xkan,	9/17/2002
-	{ "trigger_heal",                SP_trigger_heal                },
-	{ "trigger_ammo",                SP_trigger_ammo                },
+	{ "trigger_heal",                SP_trigger_heal },
+	{ "trigger_ammo",                SP_trigger_ammo },
 	// END		xkan,	9/17/2002
 
 	// Gordon: 16/12/02: adding the model things to go with the triggers
-	{ "misc_cabinet_health",         SP_misc_cabinet_health         },
-	{ "misc_cabinet_supply",         SP_misc_cabinet_supply         },
+	{ "misc_cabinet_health",         SP_misc_cabinet_health },
+	{ "misc_cabinet_supply",         SP_misc_cabinet_supply },
 	// end
 
 
 	// Rafael
-//	{"trigger_aidoor", SP_trigger_aidoor},
-//	{"trigger_deathCheck",SP_trigger_deathCheck},
+	//	{"trigger_aidoor", SP_trigger_aidoor},
+	//	{"trigger_deathCheck",SP_trigger_deathCheck},
 
 	// targets perform no action by themselves, but must be triggered
 	// by another entity
-	{ "target_give",                 SP_target_give                 },
-	{ "target_remove_powerups",      SP_target_remove_powerups      },
-	{ "target_delay",                SP_target_delay                },
-	{ "target_speaker",              SP_target_speaker              },
-	{ "target_print",                SP_target_print                },
-	{ "target_laser",                SP_target_laser                },
-	{ "target_score",                SP_target_score                },
-	{ "target_teleporter",           SP_target_teleporter           },
-	{ "target_relay",                SP_target_relay                },
-	{ "target_kill",                 SP_target_kill                 },
-	{ "target_position",             SP_target_position             },
-	{ "target_location",             SP_target_location             },
-	{ "target_push",                 SP_target_push                 },
-	{ "target_script_trigger",       SP_target_script_trigger       },
+	{ "target_give",                 SP_target_give },
+	{ "target_remove_powerups",      SP_target_remove_powerups },
+	{ "target_delay",                SP_target_delay },
+	{ "target_speaker",              SP_target_speaker },
+	{ "target_print",                SP_target_print },
+	{ "target_laser",                SP_target_laser },
+	{ "target_score",                SP_target_score },
+	{ "target_teleporter",           SP_target_teleporter },
+	{ "target_relay",                SP_target_relay },
+	{ "target_kill",                 SP_target_kill },
+	{ "target_position",             SP_target_position },
+	{ "target_location",             SP_target_location },
+	{ "target_push",                 SP_target_push },
+	{ "target_script_trigger",       SP_target_script_trigger },
 
 	//---- (SA) Wolf targets
-	{ "target_alarm",                SP_target_alarm                },
-	{ "target_counter",              SP_target_counter              },
-	{ "target_lock",                 SP_target_lock                 },
-	{ "target_effect",               SP_target_effect               },
-	{ "target_fog",                  SP_target_fog                  },
-	{ "target_autosave",             SP_target_autosave             }, //----(SA)	added
-	//---- done
+	{ "target_alarm",                SP_target_alarm },
+	{ "target_counter",              SP_target_counter },
+	{ "target_lock",                 SP_target_lock },
+	{ "target_effect",               SP_target_effect },
+	{ "target_fog",                  SP_target_fog },
+	{ "target_autosave",             SP_target_autosave }, //----(SA)	added
+														   //---- done
 
-	{ "target_rumble",               SP_target_rumble               },
-
-
-	{ "light",                       SP_light                       },
-
-	{ "lightJunior",                 SP_lightJunior                 },
-
-	{ "path_corner",                 SP_path_corner                 },
-	{ "path_corner_2",               SP_path_corner_2               },
-
-	{ "info_train_spline_main",      SP_info_train_spline_main      },
-	{ "info_train_spline_control",   SP_path_corner_2               },
-	{ "info_limbo_camera",           SP_info_limbo_camera           },
-
-	{ "misc_teleporter_dest",        SP_misc_teleporter_dest        },
-	{ "misc_model",                  SP_misc_model                  },
-	{ "misc_gamemodel",              SP_misc_gamemodel              },
-	{ "misc_portal_surface",         SP_misc_portal_surface         },
-	{ "misc_portal_camera",          SP_misc_portal_camera          },
-
-	{ "misc_commandmap_marker",      SP_misc_commandmap_marker      },
-
-	{ "misc_vis_dummy",              SP_misc_vis_dummy              },
-	{ "misc_vis_dummy_multiple",     SP_misc_vis_dummy_multiple     },
-	{ "misc_light_surface",          SP_misc_light_surface          },
-	{ "misc_grabber_trap",           SP_misc_grabber_trap           },
-	{ "misc_spotlight",              SP_misc_spotlight              },
+	{ "target_rumble",               SP_target_rumble },
 
 
-	{ "misc_mg42",                   SP_mg42                        },
-	{ "misc_aagun",                  SP_aagun                       },
+	{ "light",                       SP_light },
 
-	{ "misc_flak",                   SP_misc_flak                   },
-	{ "misc_firetrails",             SP_misc_firetrails             },
+	{ "lightJunior",                 SP_lightJunior },
 
-	{ "shooter_rocket",              SP_shooter_rocket              },
-	{ "shooter_grenade",             SP_shooter_grenade             },
+	{ "path_corner",                 SP_path_corner },
+	{ "path_corner_2",               SP_path_corner_2 },
 
-	{ "shooter_mortar",              SP_shooter_mortar              },
-	{ "alarm_box",                   SP_alarm_box                   },
+	{ "info_train_spline_main",      SP_info_train_spline_main },
+	{ "info_train_spline_control",   SP_path_corner_2 },
+	{ "info_limbo_camera",           SP_info_limbo_camera },
+
+	{ "misc_teleporter_dest",        SP_misc_teleporter_dest },
+	{ "misc_model",                  SP_misc_model },
+	{ "misc_gamemodel",              SP_misc_gamemodel },
+	{ "misc_portal_surface",         SP_misc_portal_surface },
+	{ "misc_portal_camera",          SP_misc_portal_camera },
+
+	{ "misc_commandmap_marker",      SP_misc_commandmap_marker },
+
+	{ "misc_vis_dummy",              SP_misc_vis_dummy },
+	{ "misc_vis_dummy_multiple",     SP_misc_vis_dummy_multiple },
+	{ "misc_light_surface",          SP_misc_light_surface },
+	{ "misc_grabber_trap",           SP_misc_grabber_trap },
+	{ "misc_spotlight",              SP_misc_spotlight },
+
+
+	{ "misc_mg42",                   SP_mg42 },
+	{ "misc_aagun",                  SP_aagun },
+
+	{ "misc_flak",                   SP_misc_flak },
+	{ "misc_firetrails",             SP_misc_firetrails },
+
+	{ "shooter_rocket",              SP_shooter_rocket },
+	{ "shooter_grenade",             SP_shooter_grenade },
+
+	{ "shooter_mortar",              SP_shooter_mortar },
+	{ "alarm_box",                   SP_alarm_box },
 
 	// Gordon: FIXME remove
-	{ "team_CTF_redplayer",          SP_team_CTF_redplayer          },
-	{ "team_CTF_blueplayer",         SP_team_CTF_blueplayer         },
+	{ "team_CTF_redplayer",          SP_team_CTF_redplayer },
+	{ "team_CTF_blueplayer",         SP_team_CTF_blueplayer },
 
-	{ "team_CTF_redspawn",           SP_team_CTF_redspawn           },
-	{ "team_CTF_bluespawn",          SP_team_CTF_bluespawn          },
+	{ "team_CTF_redspawn",           SP_team_CTF_redspawn },
+	{ "team_CTF_bluespawn",          SP_team_CTF_bluespawn },
 
-	{ "team_WOLF_objective",         SP_team_WOLF_objective         },
+	{ "team_WOLF_objective",         SP_team_WOLF_objective },
 
-	{ "team_WOLF_checkpoint",        SP_team_WOLF_checkpoint        },
+	{ "team_WOLF_checkpoint",        SP_team_WOLF_checkpoint },
 
-	{ "target_smoke",                SP_target_smoke                },
+	{ "target_smoke",                SP_target_smoke },
 
-	{ "misc_spawner",                SP_misc_spawner                },
+	{ "misc_spawner",                SP_misc_spawner },
 
-	{ "props_box_32",                SP_props_box_32                },
-	{ "props_box_48",                SP_props_box_48                },
-	{ "props_box_64",                SP_props_box_64                },
+	{ "props_box_32",                SP_props_box_32 },
+	{ "props_box_48",                SP_props_box_48 },
+	{ "props_box_64",                SP_props_box_64 },
 
-	{ "props_smokedust",             SP_SmokeDust                   },
-	{ "props_dust",                  SP_Dust                        },
-	{ "props_sparks",                SP_props_sparks                },
-	{ "props_gunsparks",             SP_props_gunsparks             },
+	{ "props_smokedust",             SP_SmokeDust },
+	{ "props_dust",                  SP_Dust },
+	{ "props_sparks",                SP_props_sparks },
+	{ "props_gunsparks",             SP_props_gunsparks },
 
-	{ "props_bench",                 SP_Props_Bench                 },
-	{ "props_radio",                 SP_Props_Radio                 },
-	{ "props_chair",                 SP_Props_Chair                 },
-	{ "props_chair_hiback",          SP_Props_ChairHiback           },
-	{ "props_chair_side",            SP_Props_ChairSide             },
-	{ "props_chair_chat",            SP_Props_ChairChat             },
-	{ "props_chair_chatarm",         SP_Props_ChairChatArm          },
-	{ "props_damageinflictor",       SP_Props_DamageInflictor       },
-	{ "props_locker_tall",           SP_Props_Locker_Tall           },
-	{ "props_desklamp",              SP_Props_Desklamp              },
-	{ "props_flamebarrel",           SP_Props_Flamebarrel           },
-	{ "props_crate_64",              SP_crate_64                    },
-	{ "props_flippy_table",          SP_Props_Flipping_Table        },
-	{ "props_crate_32",              SP_crate_32                    },
-	{ "props_crate_32x64",           SP_Props_Crate32x64            },
-	{ "props_58x112tablew",          SP_Props_58x112tablew          },
-	{ "props_radioSEVEN",            SP_Props_RadioSEVEN            },
-	{ "props_snowGenerator",         SP_props_snowGenerator         },
-//	{"props_FireColumn", SP_propsFireColumn},
-	{ "props_decoration",            SP_props_decoration            },
-	{ "props_decorBRUSH",            SP_props_decorBRUSH            },
-	{ "props_statue",                SP_props_statue                },
-	{ "props_statueBRUSH",           SP_props_statueBRUSH           },
-	{ "props_skyportal",             SP_skyportal                   },
-	{ "props_footlocker",            SP_props_footlocker            },
-	{ "props_flamethrower",          SP_props_flamethrower          },
-	{ "props_decoration_scale",      SP_props_decor_Scale           },
+	{ "props_bench",                 SP_Props_Bench },
+	{ "props_radio",                 SP_Props_Radio },
+	{ "props_chair",                 SP_Props_Chair },
+	{ "props_chair_hiback",          SP_Props_ChairHiback },
+	{ "props_chair_side",            SP_Props_ChairSide },
+	{ "props_chair_chat",            SP_Props_ChairChat },
+	{ "props_chair_chatarm",         SP_Props_ChairChatArm },
+	{ "props_damageinflictor",       SP_Props_DamageInflictor },
+	{ "props_locker_tall",           SP_Props_Locker_Tall },
+	{ "props_desklamp",              SP_Props_Desklamp },
+	{ "props_flamebarrel",           SP_Props_Flamebarrel },
+	{ "props_crate_64",              SP_crate_64 },
+	{ "props_flippy_table",          SP_Props_Flipping_Table },
+	{ "props_crate_32",              SP_crate_32 },
+	{ "props_crate_32x64",           SP_Props_Crate32x64 },
+	{ "props_58x112tablew",          SP_Props_58x112tablew },
+	{ "props_radioSEVEN",            SP_Props_RadioSEVEN },
+	{ "props_snowGenerator",         SP_props_snowGenerator },
+	//	{"props_FireColumn", SP_propsFireColumn},
+	{ "props_decoration",            SP_props_decoration },
+	{ "props_decorBRUSH",            SP_props_decorBRUSH },
+	{ "props_statue",                SP_props_statue },
+	{ "props_statueBRUSH",           SP_props_statueBRUSH },
+	{ "props_skyportal",             SP_skyportal },
+	{ "props_footlocker",            SP_props_footlocker },
+	{ "props_flamethrower",          SP_props_flamethrower },
+	{ "props_decoration_scale",      SP_props_decor_Scale },
 
-	{ "dlight",                      SP_dlight                      },
+	{ "dlight",                      SP_dlight },
 
-	{ "corona",                      SP_corona                      },
+	{ "corona",                      SP_corona },
 
-	{ "trigger_flagonly",            SP_trigger_flagonly            },
-	{ "trigger_flagonly_multiple",   SP_trigger_flagonly_multiple   },
+	{ "trigger_flagonly",            SP_trigger_flagonly },
+	{ "trigger_flagonly_multiple",   SP_trigger_flagonly_multiple },
 
-	{ "test_gas",                    SP_gas                         },
-	{ "trigger_objective_info",      SP_trigger_objective_info      },
+	{ "test_gas",                    SP_gas },
+	{ "trigger_objective_info",      SP_trigger_objective_info },
 
 	// RF, scripting
-	{ "script_model_med",            SP_script_model_med            },
-	{ "script_mover",                SP_script_mover                },
-	{ "script_multiplayer",          SP_script_multiplayer          },
+	{ "script_model_med",            SP_script_model_med },
+	{ "script_mover",                SP_script_mover },
+	{ "script_multiplayer",          SP_script_multiplayer },
 
-	{ "func_constructible",          SP_func_constructible          },
-	{ "func_brushmodel",             SP_func_brushmodel             },
-	{ "misc_beam",                   SP_misc_beam                   },
-	{ "misc_constructiblemarker",    SP_misc_constructiblemarker    },
-	{ "target_explosion",            SP_target_explosion            },
-	{ "misc_landmine",               SP_misc_landmine               },
-	{ "target_setident",             SP_target_set_ident            },
-	{ "target_activate",             SP_target_activate             },
-	{ "target_printname",            SP_target_printname            },
+	{ "func_constructible",          SP_func_constructible },
+	{ "func_brushmodel",             SP_func_brushmodel },
+	{ "misc_beam",                   SP_misc_beam },
+	{ "misc_constructiblemarker",    SP_misc_constructiblemarker },
+	{ "target_explosion",            SP_target_explosion },
+	{ "misc_landmine",               SP_misc_landmine },
+	{ "target_setident",             SP_target_set_ident },
+	{ "target_activate",             SP_target_activate },
+	{ "target_printname",            SP_target_printname },
 	/*{"etjump_target_relay",	SP_target_fireonce },*/  //Changed for RC1 - Feen
-	{ "etjump2_target_relay",        SP_target_fireonce             },
-	{ "etjump203_target_relay",      SP_target_fireonce             },
-	{ "func_fakebrush",              SP_func_fakebrush              },
-	{ "target_savereset",            SP_target_savereset            },
-	{ "weapon_portalgun",            SP_weapon_portalgun            }, //Feen: PGM
-	{ "target_increase_ident",       SP_target_increase_ident       },
-	{ "target_save",                 SP_target_save                 },
-	{ "target_remove_portals",       SP_target_remove_portals       },
-	{ "target_ftrelay",              SP_target_ftrelay              },
-	{ "target_savelimit_set",        SP_target_savelimit_set        },
-	{ "target_savelimit_inc",        SP_target_savelimit_inc        },
-	{ "target_decay",                SP_target_decay                },
-	{ "target_starttimer",           SP_target_startTimer           },
-	{ "target_startTimer",           SP_target_startTimer           },
-	{ "target_stoptimer",            SP_target_endTimer             },
-	{ "target_stopTimer",            SP_target_endTimer             },
-	{"target_interrupt_timerun", SP_target_interrupt_timerun},
+	{ "etjump2_target_relay",        SP_target_fireonce },
+	{ "etjump203_target_relay",      SP_target_fireonce },
+	{ "func_fakebrush",              SP_func_fakebrush },
+	{ "target_savereset",            SP_target_savereset },
+	{ "weapon_portalgun",            SP_weapon_portalgun }, //Feen: PGM
+	{ "target_increase_ident",       SP_target_increase_ident },
+	{ "target_save",                 SP_target_save },
+	{ "target_remove_portals",       SP_target_remove_portals },
+	{ "target_ftrelay",              SP_target_ftrelay },
+	{ "target_savelimit_set",        SP_target_savelimit_set },
+	{ "target_savelimit_inc",        SP_target_savelimit_inc },
+	{ "target_decay",                SP_target_decay },
+	{ "target_starttimer",           SP_target_startTimer },
+	{ "target_startTimer",           SP_target_startTimer },
+	{ "target_stoptimer",            SP_target_endTimer },
+	{ "target_stopTimer",            SP_target_endTimer },
+	{ "target_interrupt_timerun", SP_target_interrupt_timerun },
 	{ "target_activate_if_velocity", SP_target_activate_if_velocity },
-	{ "target_scale_velocity",       SP_target_scale_velocity       },
-	{ "trigger_tracker",			 SP_trigger_tracker				},
-	{ "target_tracker",				 SP_target_tracker				},
-	{"target_set_health", SP_target_set_health },
-	{ 0,                             0                              }
+	{ "target_scale_velocity",       SP_target_scale_velocity },
+	{ "trigger_tracker",			 SP_trigger_tracker },
+	{ "target_tracker",				 SP_target_tracker },
+	{ "target_set_health", SP_target_set_health }
 };
+
 
 /*
 ===============
@@ -717,7 +716,6 @@ returning qfalse if not found
 */
 qboolean G_CallSpawn(gentity_t *ent)
 {
-	spawn_t *s;
 	gitem_t *item;
 
 	if (!ent->classname)
@@ -747,13 +745,12 @@ qboolean G_CallSpawn(gentity_t *ent)
 		}
 	}
 
-	// check normal spawn functions
-	for (s = spawns ; s->name ; s++)
+	for (const auto & entity : spawns)
 	{
-		if (!strcmp(s->name, ent->classname))
+		if (entity.name == ent->classname)
 		{
 			// found it
-			s->spawn(ent);
+			entity.spawn(ent);
 
 			// RF, entity scripting
 			if (/*ent->s.number >= MAX_CLIENTS &&*/ ent->scriptName)
@@ -765,6 +762,7 @@ qboolean G_CallSpawn(gentity_t *ent)
 			return qtrue;
 		}
 	}
+	
 	G_Printf("%s doesn't have a spawn function\n", ent->classname);
 	return qfalse;
 }

@@ -48,5 +48,11 @@
     <ClCompile Include="..\game\etj_event_aggregator.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="timerun_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_timerun_session.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

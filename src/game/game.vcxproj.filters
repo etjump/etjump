@@ -22,6 +22,12 @@
     <Filter Include="Header Files\SHA1">
       <UniqueIdentifier>{e976a9bd-02a5-47d0-89cd-98c036d26ceb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Entities">
+      <UniqueIdentifier>{e57626ea-26f9-48c2-8932-cb7070f073df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Entities">
+      <UniqueIdentifier>{03cd20a0-d552-48bf-adee-632cd8611726}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="g_utilities.cpp">
@@ -207,9 +213,6 @@
     <ClCompile Include="etj_sqlite_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_timerun.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_tokens.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -260,6 +263,21 @@
     </ClCompile>
     <ClCompile Include="..\sha-1\bg_sha.cpp">
       <Filter>Source Files\SHA1</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_timerun_session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_start_timer.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_stop_timer.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_entity_base.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\sqlite3\sqlite3.c">
+      <Filter>Source Files\SQLiteCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,12 +358,6 @@
     <ClInclude Include="etj_save.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_sqlite_wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_timerun.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_tokens.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -387,6 +399,18 @@
     </ClInclude>
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files\SHA1</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_timerun_session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_start_timer.h">
+      <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_stop_timer.h">
+      <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_entity_base.h">
+      <Filter>Header Files\Entities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
