@@ -15,6 +15,9 @@
     <Filter Include="Menu files\ETJump">
       <UniqueIdentifier>{47fd35f8-8d3a-40f1-b618-ceeaf544556b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SHA1">
+      <UniqueIdentifier>{b6ebf603-db6e-4c46-9df3-4638683d1707}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sha-1\sha1.c">
@@ -197,9 +200,6 @@
     <ClCompile Include="..\ui\ui_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\sha-1\bg_sha.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_client_authentication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -211,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="..\game\etj_file.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sha-1\bg_sha.cpp">
+      <Filter>Source Files\SHA1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

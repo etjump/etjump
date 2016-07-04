@@ -93,7 +93,7 @@ bool ETJump::Client::checkPendingAuthorization()
 			if (result.errorMessage.length() > 0)
 			{
 				Printer::LogPrintln((boost::format("Could not authorize user: %s.") % result.errorMessage).str());
-				return;
+				return false;
 			}
 			_user = result.user;
 			_authorizationIsPending = false;

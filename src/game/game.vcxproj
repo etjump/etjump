@@ -74,12 +74,12 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(BOOST_ROOT);$(SolutionDir)SQLiteCpp\sqlite3;$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
     <TargetName>qagame_mp_x86</TargetName>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)SQLiteCpp\sqlite3;$(BOOST_ROOT);$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -253,7 +253,6 @@
     <ClCompile Include="..\SQLiteCpp\src\Database.cpp" />
     <ClCompile Include="..\SQLiteCpp\src\Statement.cpp" />
     <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp" />
-    <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="bg_animation.cpp" />
     <ClCompile Include="bg_animgroup.cpp" />
     <ClCompile Include="bg_campaign.cpp" />
@@ -333,7 +332,6 @@
     <ClInclude Include="..\json\json-forwards.h" />
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
-    <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />

@@ -16,15 +16,15 @@
     <Filter Include="Source Files\SQLiteCpp">
       <UniqueIdentifier>{b68507a6-479a-4e54-9916-9986c4c74d4a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SHA1">
+      <UniqueIdentifier>{93a01abe-c001-46df-8203-f0c637bd513c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SHA1">
+      <UniqueIdentifier>{e976a9bd-02a5-47d0-89cd-98c036d26ceb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\sha-1\sha1.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_utilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\json\jsoncpp.cpp">
@@ -64,9 +64,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="bg_pmove.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sha-1\bg_sha.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="bg_slidemove.cpp">
@@ -258,6 +255,12 @@
     <ClCompile Include="etj_event_aggregator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\sha-1\sha1.c">
+      <Filter>Source Files\SHA1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sha-1\bg_sha.cpp">
+      <Filter>Source Files\SHA1</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -287,12 +290,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="surfaceflags.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\sha-1\sha1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\sqlite\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -387,6 +384,9 @@
     </ClInclude>
     <ClInclude Include="etj_event_aggregator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sha-1\sha1.h">
+      <Filter>Header Files\SHA1</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
