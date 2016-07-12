@@ -1853,7 +1853,7 @@ qboolean CG_CommandCentreSpawnPointClick(void)
 			}
 		}
 
-		point[0] = cg.spawnCoords[i][0];
+		point[0] = cg.spawnCoords[i][0] + SCREEN_OFFSET_X;
 		point[1] = cg.spawnCoords[i][1];
 
 		if (BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f, point[1] - FLAGSIZE_NORMAL * 0.5f, FLAGSIZE_NORMAL, FLAGSIZE_NORMAL, cgDC.cursorx, cgDC.cursory))

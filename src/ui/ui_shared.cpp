@@ -865,6 +865,11 @@ void Menu_UpdatePosition(menuDef_t *menu)
 		}
 
 	}
+
+	if (centered) {
+		menu->window.rect.x += SCREEN_OFFSET_X;
+	}
+
 }
 
 void Menu_PostParse(menuDef_t *menu)

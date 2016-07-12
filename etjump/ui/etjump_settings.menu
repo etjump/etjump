@@ -26,7 +26,7 @@ menuDef {
 	SUBWINDOW(8, 32, (SUBWINDOW_WIDTH), 112, "GENERAL")
 		MULTI(8, 48, (SUBWINDOW_WIDTH) - 4, 10, "Max FPS: ", .2, 8, "com_maxfps", cvarFloatList { "Low" 43 "Medium" 76 "High" 125 "Very high" 125 "Extreme" 250 }, "Sets the FPS limit")
 		YESNO(8, 60, (SUBWINDOW_WIDTH) - 4, 10, "No fatigue: ", .2, 8, "etj_nofatigue", "Toggles infinite stamina")
-		YESNO(8, 72, (SUBWINDOW_WIDTH) - 4, 10, "View log: ", .2, 8, "etj_viewlog", "Toggles separate console log window")
+		YESNO(8, 72, (SUBWINDOW_WIDTH) - 4, 10, "View log: ", .2, 8, "etj_viewlog", "Toggles separate console log window. Alt+tab when enabling.")
 		YESNO(8, 84, (SUBWINDOW_WIDTH) - 4, 10, "Draw clock: ", .2, 8, "etj_drawClock", "Toggles clock")
 		YESNO(8, 96, (SUBWINDOW_WIDTH) - 4, 10, "Load view angles: ", .2, 8, "etj_loadViewAngles", "Toggles whether view angles are loaded when position is loaded")
 		YESNO(8, 108, (SUBWINDOW_WIDTH) - 4, 10, "Weapon sound: ", .2, 8, "etj_weaponSound", "Toggles weapon sound")
