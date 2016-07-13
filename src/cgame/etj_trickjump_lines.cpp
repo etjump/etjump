@@ -44,7 +44,7 @@ void TrickjumpLines::record(const char *name)
 {
 	if (isRecording())
 	{		
-		CG_Printf("Already recording. \n");		
+		CG_Printf("You are already recording. \n");		
 		return;
 	}
 
@@ -61,7 +61,7 @@ void TrickjumpLines::record(const char *name)
 				route.name = "tjl_" + std::to_string(_nextRecording++);
 				if (getRoutePositionByName(route.name.c_str()) == -1)
 				{
-					CG_Printf(" Route can be created with number : %d \n", _nextRecording);
+					CG_Printf("Route will be created with number : %d \n", _nextRecording);
 					break;
 				}
 			}
@@ -91,7 +91,7 @@ void TrickjumpLines::overwriteRecording(const char *name)
 {
 	if (isRecording())
 	{		
-		CG_Printf("Already recording. \n");		
+		CG_Printf("You are already recording. \n");
 		return;
 	}
 	
@@ -104,14 +104,14 @@ void TrickjumpLines::overwriteRecording(const char *name)
 	const int z = getRoutePositionByName(name);
 	if (z == -1)
 	{
-		CG_Printf("No route with this name. \n");		
+		CG_Printf("No route exists with this name. \n");		
 		return;
 	}
 	else
 	{
 		if (_routes[z].status == routeStatus::map)
 		{			
-			CG_Printf("You can't overwrite this route. Mapper tjl are read-only. \n");
+			CG_Printf("You can't overwrite this route. Mapper TJL are read-only. \n");
 			return;
 		}
 	}
@@ -199,12 +199,10 @@ void TrickjumpLines::stopRecord()
 	_recording = false;
 	_routes.push_back(_currentRoute);
 
-	if (isDebug())
-	{
-		CG_Printf("Stopped recording: %s\n", _currentRoute.name.c_str());
-		CG_Printf("Total of trail in this route : %d\n", _currentRoute.trails.size());
-	}
-
+	
+	CG_Printf("Stopped recording: %s\n", _currentRoute.name.c_str());
+	CG_Printf("Total of trail in this route : %d\n", _currentRoute.trails.size());
+	
 	setCurrentRouteToRender(countRoute() - 1);
 	displayCurrentRoute(getCurrentRouteToRender());
 }
@@ -638,7 +636,7 @@ bool TrickjumpLines::loadedRoutes(const char *loadname)
 	{		
 		if (loadname == nullptr)
 		{
-			CG_Printf("Request for mapper file.\n");
+			CG_Printf("You request to load mapper TJL.\n");
 			if (route.status == routeStatus::map)
 				return true;
 		}		
@@ -662,7 +660,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	//Check if already loaded 
 	if (loadedRoutes(loadname))
 	{
-		CG_Printf("File already loaded : %s.\n", loadname);
+		CG_Printf("This file is already loaded : %s.\n", loadname);
 		return;
 	}
 	// Always load mapper map, and
@@ -670,7 +668,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	{		
 		map = (std::string("tjllines/mapper/") + cgs.rawmapname + std::string(".tjl"));
 		loadStatus = routeStatus::map;
-		CG_Printf("Will load mapper tjl for map : %s.\n", cgs.rawmapname);
+		CG_Printf("Will load mapper TJL for map : %s.\n", cgs.rawmapname);
 	}
 	else if (loadname != nullptr)
 	{
@@ -679,18 +677,14 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 
 		if (trap_FS_FOpenFile(map.c_str(), &f, FS_READ) > 0)
 		{
-			CG_Printf("Will load local : %s.\n", loadname);
-		}
-		else
-		{
-			return;
+			CG_Printf("Will load local TJL file : %s.\n", loadname);
 		}
 	}	
 
 	const int len = trap_FS_FOpenFile(map.c_str(), &f, FS_READ);
 	if (len <= 0)
 	{		
-		CG_Printf("File not found while loading : %s.\n", map.c_str());			
+		CG_Printf("File not found : %s.\n", map.c_str());			
 		return;		
 	}
 	
@@ -709,11 +703,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	}
 
 	try
-	{
-		if (isDebug())
-		{
-			CG_Printf("Start loading file : %s \n", map.c_str());
-		}
+	{		
 		// Loop on each route (tjl)
 		for (int i = 0; i < root.size(); i++)
 		{
@@ -771,7 +761,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 	fileHandle_t f = 0;
 	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".tjl")).c_str(), &f, FS_READ) > 0)
 	{
-		CG_Printf("File already exist, cannot save it.\n");
+		CG_Printf("This file already exists, cannot save.\n");
 		return;
 	}
 
@@ -812,7 +802,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 		}
 	}		
 	 
-	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename).c_str(), &f, FS_WRITE) < 0)
+	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".tjl")).c_str(), &f, FS_WRITE) < 0)
 	{
 		throw "ERROR: couldn't open file for saving tjlines";
 	}
@@ -889,7 +879,7 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 
 void TrickjumpLines::listRoutes()
 {
-	CG_Printf("All routes names currently loaded. \n");
+	CG_Printf("All routes names (and their number) currently loaded. \n");
 
 	// Display name of the route with the associate status.
 	int id = 0;
@@ -935,7 +925,7 @@ void TrickjumpLines::displayByName(const char *name)
 		return;
 	}
 	
-	CG_Printf("No route with name : %s as been found. \n", name);	
+	CG_Printf("No route with name : %s has been found. \n", name);	
 	return;
 }
 
@@ -1030,7 +1020,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		// If the route is create by the mapper, that mean is read-only.
 		if (_routes[z].status == routeStatus::map)
 		{			
-			CG_Printf("You can't rename this route. Mapper tjl are read-only. \n");			
+			CG_Printf("You can't rename this route. Mapper TJL are read-only. \n");			
 			return;
 		}
 
@@ -1040,7 +1030,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		return;
 	}
 	
-	CG_Printf("No route with name : %s as been found to replace to %s. \n", oldName, newName);
+	CG_Printf("No route with name : %s has been found to replace to %s. \n", oldName, newName);
 	return;
 }
 
@@ -1165,7 +1155,7 @@ int TrickjumpLines::getRoutePositionByName(const char *name)
 	}
 	if (isDebug())
 	{
-		CG_Printf("No route with name : %s as been found. \n", name);
+		CG_Printf("No route with name : %s has been found. \n", name);
 	}
 	
 	return -1;
@@ -1184,7 +1174,7 @@ void TrickjumpLines::deleteRoute(const char *name)
 	{
 		if (_routes[z].status == routeStatus::map)
 		{
-			CG_Printf("You can't delete this route. Mapper tjl are read-only. \n");
+			CG_Printf("You can't delete this route. Mapper TJL are read-only. \n");
 			return;
 		}
 		_routes.erase(_routes.begin() + z);
@@ -1205,7 +1195,7 @@ void TrickjumpLines::toggleRoutes(bool state)
 	}
 	else
 	{		
-		CG_Printf("Trickjump line are now disable. This only toggle for current session, change cvar : etj_tjlEnableLine for next session. \n");
+		CG_Printf("Trickjump line are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableLine for futur session. \n");
 	}
 	setEnableLine(state);
 	return;
@@ -1219,7 +1209,7 @@ void TrickjumpLines::toggleMarker(bool state)
 	}
 	else
 	{		
-		CG_Printf("Trickjump marker are now disable. This only toggle for current session, change cvar : etj_tjlEnableMarker for next session. \n");
+		CG_Printf("Trickjump marker are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableMarker for futur session. \n");
 	}
 	setEnableMarker(state);
 	return;

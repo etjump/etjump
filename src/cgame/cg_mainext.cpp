@@ -23,17 +23,11 @@ void InitGame()
 	timerunView = std::unique_ptr<ETJump::TimerunView>(new ETJump::TimerunView());
 
 	trickjumpLines = std::unique_ptr<TrickjumpLines>(new TrickjumpLines);
-
-	// TODO: (XIS) Those variable are not set !!! Warning! Too fast, cvar aren't loaded yet.
-	CG_Printf(" What is my cvar in mainext initgame : %d \n", etj_tjlAlwaysLoadTJL.integer);
-
+	
 	// Check if load TJL on connection is enable
 	if (etj_tjlAlwaysLoadTJL.integer == 1)
-	{
-		if (trickjumpLines->isDebug())
-		{
-			CG_Printf("Load all routes!  \n");
-		}
+	{		
+		CG_Printf("All mapper Trickjump lines will be loaded due to your cvar : etj_tjlAlwaysLoadTJL. \n");
 		trickjumpLines->loadRoutes(nullptr);
 	}
 
@@ -220,7 +214,6 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 
 	if (command == "tjl_renameroute")
 	{
-
 		const auto argc = trap_Argc();
 
 		if (argc > 2)
@@ -420,7 +413,7 @@ qboolean CG_displaybynumber()
 	}
 	else
 	{
-		CG_Printf("You need to pass the route numnber by argument. Use command /tjl_listroute to get number. \n");
+		CG_Printf("You need to pass the route number by argument. Use command /tjl_listroute to get number. \n");
 		return qfalse;
 	}
 }
