@@ -265,12 +265,14 @@
     <ClCompile Include="bg_sscript.cpp" />
     <ClCompile Include="bg_stats.cpp" />
     <ClCompile Include="bg_tracemap.cpp" />
+    <ClCompile Include="etj_checkpoint.cpp" />
     <ClCompile Include="etj_client.cpp" />
     <ClCompile Include="etj_commands_parser.cpp" />
     <ClCompile Include="etj_custom_map_votes.cpp" />
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_console_variables.cpp" />
-    <ClCompile Include="etj_entity_base.cpp" />
+    <ClCompile Include="etj_entity.cpp" />
+    <ClCompile Include="etj_map_entity.cpp" />
     <ClCompile Include="etj_start_timer.cpp" />
     <ClCompile Include="etj_event_aggregator.cpp" />
     <ClCompile Include="etj_file.cpp" />
@@ -325,7 +327,6 @@
     <ClCompile Include="etj_printer.cpp" />
     <ClCompile Include="q_math.cpp" />
     <ClCompile Include="q_shared.cpp" />
-    <ClCompile Include="etj_sqlite_wrapper.cpp" />
     <ClCompile Include="etj_tokens.cpp" />
     <ClCompile Include="etj_utilities.cpp" />
   </ItemGroup>
@@ -339,13 +340,15 @@
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
+    <ClInclude Include="etj_checkpoint.h" />
     <ClInclude Include="etj_client.h" />
     <ClInclude Include="etj_commands_parser.h" />
     <ClInclude Include="etj_custom_map_votes.h" />
     <ClInclude Include="etj_banner_system.h" />
     <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
-    <ClInclude Include="etj_entity_base.h" />
+    <ClInclude Include="etj_entity.h" />
+    <ClInclude Include="etj_map_entity.h" />
     <ClInclude Include="etj_start_timer.h" />
     <ClInclude Include="etj_event_aggregator.h" />
     <ClInclude Include="etj_file.h" />

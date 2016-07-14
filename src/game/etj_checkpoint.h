@@ -3,16 +3,13 @@
 
 namespace ETJump
 {
-	class StartTimer : public MapEntity
+	class Checkpoint : public MapEntity
 	{
 	public:
-		explicit StartTimer(gentity_t *entity);
-		~StartTimer();
+		explicit Checkpoint(gentity_t *entity);
+		~Checkpoint();
 
 		void use(gentity_t* other, gentity_t* activator) override;
 		void think(gentity_t* other, gentity_t* activator) override;
 	};
 }
-
-
-

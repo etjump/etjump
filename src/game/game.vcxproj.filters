@@ -28,6 +28,12 @@
     <Filter Include="Header Files\Entities">
       <UniqueIdentifier>{03cd20a0-d552-48bf-adee-632cd8611726}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Entities\MapEntities">
+      <UniqueIdentifier>{e44e5fef-4d42-4363-8a44-faf3e401cb4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Entities\MapEntities">
+      <UniqueIdentifier>{0d725608-d98f-460a-8711-b0f79492fcef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="g_utilities.cpp">
@@ -210,9 +216,6 @@
     <ClCompile Include="etj_save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_sqlite_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_tokens.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -267,17 +270,23 @@
     <ClCompile Include="etj_timerun_session.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_start_timer.cpp">
-      <Filter>Source Files\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="etj_stop_timer.cpp">
-      <Filter>Source Files\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="etj_entity_base.cpp">
-      <Filter>Source Files\Entities</Filter>
-    </ClCompile>
     <ClCompile Include="..\SQLiteCpp\sqlite3\sqlite3.c">
       <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_checkpoint.cpp">
+      <Filter>Source Files\Entities\MapEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_start_timer.cpp">
+      <Filter>Source Files\Entities\MapEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_stop_timer.cpp">
+      <Filter>Source Files\Entities\MapEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_entity.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_map_entity.cpp">
+      <Filter>Source Files\Entities\MapEntities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -403,13 +412,19 @@
     <ClInclude Include="etj_timerun_session.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_checkpoint.h">
+      <Filter>Header Files\Entities\MapEntities</Filter>
+    </ClInclude>
     <ClInclude Include="etj_start_timer.h">
-      <Filter>Header Files\Entities</Filter>
+      <Filter>Header Files\Entities\MapEntities</Filter>
     </ClInclude>
     <ClInclude Include="etj_stop_timer.h">
-      <Filter>Header Files\Entities</Filter>
+      <Filter>Header Files\Entities\MapEntities</Filter>
     </ClInclude>
-    <ClInclude Include="etj_entity_base.h">
+    <ClInclude Include="etj_map_entity.h">
+      <Filter>Header Files\Entities\MapEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_entity.h">
       <Filter>Header Files\Entities</Filter>
     </ClInclude>
   </ItemGroup>

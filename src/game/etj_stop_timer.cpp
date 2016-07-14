@@ -1,12 +1,19 @@
 #include "etj_stop_timer.h"
 
+ETJump::StopTimer::StopTimer(gentity_t* entity) : MapEntity(entity)
+{
+	
+}
 
-
-etj_stop_timer::etj_stop_timer()
+ETJump::StopTimer::~StopTimer()
 {
 }
 
+void ETJump::StopTimer::use(gentity_t* other, gentity_t* activator)
+{
+	
+}
 
-etj_stop_timer::~etj_stop_timer()
+void ETJump::StopTimer::think(gentity_t* other, gentity_t* activator)
 {
 }
