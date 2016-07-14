@@ -2226,6 +2226,10 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 			DEBUGTIME
 
 			CG_AddAtmosphericEffects();
+
+			DEBUGTIME
+
+			CG_DrawActiveFrameExt();
 		}
 
 		// Rafael mg42

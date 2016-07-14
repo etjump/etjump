@@ -2469,6 +2469,14 @@ extern vmCvar_t etj_highlightSound;
 extern vmCvar_t etj_drawTokens;
 extern vmCvar_t etj_enableTimeruns;
 
+extern vmCvar_t etj_tjlEnableLine;
+extern vmCvar_t etj_tjlEnableMarker;
+extern vmCvar_t etj_tjlLineColor;
+extern vmCvar_t etj_tjlMarkerColor;
+extern vmCvar_t etj_tjlMarkerEndColor;
+extern vmCvar_t etj_tjlNearestInterval;
+extern vmCvar_t etj_tjlAlwaysLoadTJL;
+
 extern vmCvar_t etj_ghostPlayersOpacity;
 extern vmCvar_t etj_ghostPlayersColor;
 extern vmCvar_t etj_ghostPlayersFadeRange;
@@ -3763,8 +3771,6 @@ void CG_Minimize_f(void);
 
 void SendGuid();
 
-
-
 const char *G_SHA1(const char *str);
 
 //
@@ -3778,6 +3784,9 @@ void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
 void CG_CheckActivateLean();
+
+qboolean CG_ConsoleCommandExt(const char *cmd);
+void CG_DrawActiveFrameExt();
 
 #endif // CG_LOCAL_H
 

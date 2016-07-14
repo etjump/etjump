@@ -461,6 +461,10 @@ void SP_target_tracker(gentity_t *self);
 void SP_trigger_tracker(gentity_t *self);
 void SP_target_set_health(gentity_t *self);
 
+// TJL trigger
+void SP_target_tjlclear(gentity_t *self);
+void SP_target_tjldisplay(gentity_t *self);
+
 
 
 spawn_t spawns[] =
@@ -698,12 +702,14 @@ spawn_t spawns[] =
 	{ "target_startTimer",           SP_target_startTimer           },
 	{ "target_stoptimer",            SP_target_endTimer             },
 	{ "target_stopTimer",            SP_target_endTimer             },
-	{"target_interrupt_timerun", SP_target_interrupt_timerun},
+	{"target_interrupt_timerun",	 SP_target_interrupt_timerun	},
 	{ "target_activate_if_velocity", SP_target_activate_if_velocity },
 	{ "target_scale_velocity",       SP_target_scale_velocity       },
 	{ "trigger_tracker",			 SP_trigger_tracker				},
 	{ "target_tracker",				 SP_target_tracker				},
-	{"target_set_health", SP_target_set_health },
+	{"target_set_health",			 SP_target_set_health			},
+	{ "target_displaytjl",			 SP_target_tjldisplay			},
+	{ "target_cleartjl",			 SP_target_tjlclear				},
 	{ 0,                             0                              }
 };
 
