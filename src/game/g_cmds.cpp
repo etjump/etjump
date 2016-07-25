@@ -2062,11 +2062,11 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 
 	if (mode == SAY_TEAM || mode == SAY_BUDDY)
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2], vsay->variant, vsay->custom));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, static_cast<int>(ent->s.pos.trBase[0]), static_cast<int>(ent->s.pos.trBase[1]), static_cast<int>(ent->s.pos.trBase[2]), vsay->variant, vsay->random, vsay->custom));
 	}
 	else
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->custom));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->random, vsay->custom));
 	}
 }
 
@@ -2204,10 +2204,12 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 {
 
 	vsayCmd_t vsay;
-	int id = 1, cust = 2;
+	auto id = 1, cust = 2;
 	char variant[2];
 
 	memset(&vsay, 0, sizeof(vsay));
+	// get random seed beforehand to keep it same for all clients
+	vsay.random = random();
 
 	if (mode != SAY_BUDDY)
 	{
@@ -2264,10 +2266,10 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 	}
 
 	if (g_customVoiceChat.integer) {
-		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+		G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 	}
 	else {
-		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+		G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 	}
 
 }
