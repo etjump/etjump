@@ -1420,7 +1420,7 @@ int CG_GetVoiceChat(voiceChatList_t *voiceChatList, vsayCmd_t *vsay, sfxHandle_t
 				}
 				 
 			} else {
-				rnd = random() * voiceChatList->voiceChats[i].numSounds;
+				rnd = vsay->random * voiceChatList->voiceChats[i].numSounds;
 			}
 			
 			*snd    = voiceChatList->voiceChats[i].sounds[rnd];
@@ -1701,8 +1701,8 @@ CG_VoiceChat
 */
 void CG_VoiceChat(int mode)
 {
-	const char *cmd = "";
-	int        clientNum, color, variant = 5, custom = 6;
+	auto       *cmd = "";
+	int        clientNum, color, variant = 5, rand = 6, custom = 7;
 	qboolean   voiceOnly;
 	vec3_t     origin;      // NERVE - SMF
 	vsayCmd_t  vsay;
@@ -1721,11 +1721,13 @@ void CG_VoiceChat(int mode)
 		origin[2] = atoi(CG_Argv(7));
 
 		variant = 8;
-		custom = 9;
+		rand = 9;
+		custom = 10;
 	}
 
 	vsay.variant = atoi(CG_Argv(variant));
 	trap_Argv(4, vsay.id, sizeof(vsay.id));
+	vsay.random = atof(CG_Argv(rand));
 	trap_Argv(custom, vsay.custom, sizeof(vsay.custom));
 
 	if (cg_noTaunt.integer != 0)
