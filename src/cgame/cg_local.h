@@ -1125,7 +1125,6 @@ typedef struct
 	vec4_t xhairColorAlt;
 	vec4_t speedColor;
 	vec4_t keysColor;
-	vec4_t runTimerColor;
 
 	// Arnout: allow overriding of countdown sounds
 	char fiveMinuteSound_g[MAX_QPATH];
@@ -2353,8 +2352,6 @@ extern vmCvar_t cg_CGazWidth;
 extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
 extern vmCvar_t cg_drawOB;
-extern vmCvar_t cg_drawspeedX;
-extern vmCvar_t cg_drawspeedY;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
 extern vmCvar_t cg_keysX;
@@ -2447,7 +2444,6 @@ extern vmCvar_t player_spectatorInfoY;
 extern vmCvar_t player_drawRunTimer;
 extern vmCvar_t player_runTimerX;
 extern vmCvar_t player_runTimerY;
-extern vmCvar_t player_runTimerColor;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 
