@@ -886,6 +886,15 @@ typedef struct debrisChunk_s
 
 #define MAX_DEBRISCHUNKS        256
 
+// storea client voting information
+struct etj_votingInfo_t
+{
+	bool isVotedYes; // is the client voted yes
+	int  time; // last time client voted, used for timeouts between revotes
+	int  attempts; // revote attempts
+	bool isWarned; // if client attempts to revote but timeout doesn't allow yet, notification will be sent
+};
+
 // ===================
 
 // this structure is cleared on each ClientSpawn(),
@@ -1024,6 +1033,8 @@ struct gclient_s
 
 	// Whether the client already activated target_set_health
 	qboolean alreadyActivatedSetHealth;
+
+	etj_votingInfo_t votingInfo;
 };
 
 typedef struct

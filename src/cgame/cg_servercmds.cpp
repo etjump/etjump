@@ -2708,6 +2708,12 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "voted"))
+	{
+		cgs.votedYes = !Q_strncmp(CG_Argv(1), "y", 1) ? true : false;
+		return;
+	}
+
 	// DHM - Nerve :: Allow client to lodge a complaing
 	if (!Q_stricmp(cmd, "complaint") && cgs.gamestate == GS_PLAYING)
 	{
