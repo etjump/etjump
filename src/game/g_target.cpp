@@ -2117,6 +2117,16 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	activator->client->sess.runSpawnflags = self->spawnflags;
 
+	// disable timer if pmove is not fixed
+	if (activator->client->sess.runSpawnflags == 0
+			|| activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
+	{
+		if (activator->client->pers.pmoveFixed == qfalse)
+		{
+			return;
+		}
+	}
+
 	StartTimer(level.timerunNames[self->runIndex], activator);
 }
 
