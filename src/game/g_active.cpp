@@ -843,11 +843,6 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 			FireWeapon(ent);
 			break;
 
-		//Feen: PGM -
-		case EV_PORTAL2_FIRE:
-			Weapon_Portal_Fire(ent, 2); //Red Portal
-			break;
-
 		default:
 			break;
 		} //switch case

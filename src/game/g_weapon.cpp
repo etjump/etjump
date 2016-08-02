@@ -3880,7 +3880,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	                              //      just have to play around with it...
 	                              //      and move it to g_local.h...
 
-	#define PORTAL_MIN_DIST 75.0f //Arbitrary, but it works...
+	#define PORTAL_MIN_DIST 24.0f // should be suitable for 12units thick wall
 
 
 	gentity_t *portal, *tent;
@@ -5256,7 +5256,15 @@ void FireWeapon(gentity_t *ent)
 
 	//Feen: PGM
 	case WP_PORTAL_GUN:
-		Weapon_Portal_Fire(ent, 1);   //Feen: '1' indicates blue portal, red portal calls will be made from weapaltfire calls
+
+		// '1' indicates blue portal, '2' indicates red portal
+		if (ent->client->wbuttons & WBUTTON_ATTACK2)
+		{
+			Weapon_Portal_Fire(ent, 2);
+		} else
+		{
+			Weapon_Portal_Fire(ent, 1);
+		}
 		break;
 
 	default:

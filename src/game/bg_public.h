@@ -1123,7 +1123,6 @@ typedef enum
 	EV_ARTYMESSAGE,
 	EV_AIRSTRIKEMESSAGE,
 	EV_MEDIC_CALL,
-	EV_PORTAL2_FIRE, //Feen: PGM - Portal Gun Events - NOTE: EV_PORTAL1_FIRE event is covered by EV_FIRE_WEAPON event...
 	EV_PORTAL_TELEPORT,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
