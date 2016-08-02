@@ -5356,7 +5356,7 @@ static void PM_Weapon(void)
 	case WP_KAR98:
 	case WP_CARBINE:
 		addTime           = GetAmmoTableData(pm->ps->weapon)->nextShotTime;
-		aimSpreadScaleAdd = 50;
+		aimSpreadScaleAdd = 0;
 		break;
 
 	case WP_GARAND_SCOPE:

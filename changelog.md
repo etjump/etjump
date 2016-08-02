@@ -1,6 +1,9 @@
 # ETJump 2.2.0
 
 * Changed all .c modules to .cpp modules.
+* Increased progression tracker limit from 10 to 50.
+* K43 and Garand no longer have any spread.
+
 
 # ETJump 2.1.0
 

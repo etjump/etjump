@@ -3433,10 +3433,10 @@ float G_GetWeaponSpread(int weapon)
 	case WP_CARBINE:
 	case WP_KAR98:
 	case WP_K43:
-		return 250;
+		return 0;
 	case WP_GARAND_SCOPE:
 	case WP_K43_SCOPE:
-		return 700;
+		return 0;
 	case WP_MOBILE_MG42:
 	case WP_MOBILE_MG42_SET:
 		return 2500;
