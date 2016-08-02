@@ -3901,35 +3901,6 @@ static void PM_Weapon(void)
 	//Feen Weapon Dbug
 //#ifdef GAMEDLL
 
-	//PGM Test...
-	if (pm->cmd.wbuttons & WBUTTON_ATTACK2)
-	{
-
-		if (pm->ps->weaponTime > 0)
-		{
-			pm->ps->weaponTime -= pml.msec;
-
-			if (pm->ps->weaponTime <= 0)
-			{
-				pm->ps->weaponTime = 0;
-			}
-
-		}
-		else
-		{
-
-			if (pm->cmd.weapon == WP_PORTAL_GUN)
-			{
-				PM_AddEvent(EV_PORTAL2_FIRE);
-			}
-			//Com_Printf("FWD: EV_PORTAL2_FIRE Added...\n");
-			pm->ps->weaponTime += 1000; //Feen: This equates to about .5 seconds
-
-			BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_FIREWEAPON, qfalse, qtrue);   //TEST
-
-		}
-	}
-
 #ifdef FEEN_WPN_DBG
 	//REGULAR BUTTONS
 	if (pm->cmd.buttons & BUTTON_ATTACK)
@@ -4376,14 +4347,6 @@ static void PM_Weapon(void)
 		{
 			pm->ps->weaponDelay = 0;
 			delayedFire         = qtrue; // weapon delay has expired.  Fire this frame
-
-			// double check the player is still holding the fire button down for these weapons
-			// so you don't get a delayed "non-fire" (fire hit and released, then shot fires)
-			switch (pm->ps->weapon)
-			{
-			default:
-				break;
-			}
 		}
 	}
 
@@ -4718,8 +4681,8 @@ static void PM_Weapon(void)
 	// check for fire
 	// if not on fire button and there's not a delayed shot this frame...
 	// consider also leaning, with delayed attack reset
-	if ((!(pm->cmd.buttons & (BUTTON_ATTACK | WBUTTON_ATTACK2)) && !delayedFire) ||
-	    (pm->ps->leanf != 0 && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_SMOKE_BOMB))
+	if ((!(pm->cmd.buttons & BUTTON_ATTACK) && !(pm->cmd.wbuttons & WBUTTON_ATTACK2) && !delayedFire) ||
+		(pm->ps->leanf != 0 && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_SMOKE_BOMB))
 	{
 		pm->ps->weaponTime  = 0;
 		pm->ps->weaponDelay = 0;

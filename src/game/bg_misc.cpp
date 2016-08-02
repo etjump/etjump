@@ -4203,7 +4203,6 @@ const char *eventnames[] =
 	"EV_ARTYMESSAGE",
 	"EV_AIRSTRIKEMESSAGE",
 	"EV_MEDIC_CALL",
-	"EV_PORTAL2_FIRE", //Feen: PGM
 	"EV_MAX_EVENTS",
 };
 

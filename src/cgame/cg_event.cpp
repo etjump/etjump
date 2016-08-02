@@ -3123,12 +3123,6 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		break;
 
-	//Feen: PGM
-	case EV_PORTAL2_FIRE:
-		DEBUGNAME("EV_PORTAL2_FIRE");
-		//CG_Printf( "^1Portal Debug: ^7CG_EntityEvent() EV_PORTAL2_FIRE - received\n");
-		break;
-
 	case EV_PORTAL_TELEPORT:
 		DEBUGNAME("EV_PORTAL_TELEPORT");
 		portalDetected = qtrue; //Used below.....
