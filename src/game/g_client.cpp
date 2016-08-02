@@ -1651,6 +1651,15 @@ void ClientUserinfoChanged(int clientNum)
 		return;
 	}
 
+	if (client->pers.pmoveFixed == qfalse)
+	{
+		if (client->sess.runSpawnflags == 0
+			|| client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
+		{
+			InterruptRun(ent);
+		}
+	}
+
 	G_LogPrintf("ClientUserinfoChanged: %i %s\n", clientNum, s);
 	G_DPrintf("ClientUserinfoChanged: %i :: %s\n", clientNum, s);
 }

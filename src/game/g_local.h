@@ -2729,6 +2729,7 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 #define TIMERUN_RESET_ON_TEAM_CHANGE    0x1
 #define TIMERUN_RESET_ON_DEATH          0x2
 #define TIMERUN_RESET_ON_END            0x4
+#define TIMERUN_RESET_ON_PMOVE_NULL     0x8
 
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);
