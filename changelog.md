@@ -3,7 +3,19 @@
 * Changed all .c modules to .cpp modules.
 * Increased progression tracker limit from 10 to 50.
 * K43 and Garand no longer have any spread.
-
+* Added spawnflag 8 to `target_startTimer` to disable `pmove_fixed` 0 while on a timerun.
+* Portal gun changes:
+  - Both portal gun fire rates are now equal.
+  - Lowered the minimum allowed distance between the portal gun portals.
+  - Changed other players' portal color 1 to green to make it more distinct on light surfaces.
+* Enhanced vote UX
+  - Spectators can now see the y/n count.
+  - Selected y/n is highlighted.
+  - Revoting is now possible. Players can change their vote 3 times 10 seconds after the vote.
+* Removed unused cvars.
+* Vsay now plays the same voice for every player.
+* Fixed a click event issue in the widescreen UI.
+* `shooter_rocket` can now hit players.
 
 # ETJump 2.1.0
 
