@@ -24,7 +24,7 @@ void ETJump::ProgressionTrackers::printParserErrors(const std::vector<std::strin
 	G_Error(buffer.c_str());
 }
 
-void ETJump::ProgressionTrackers::updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs, int tracker[10])
+void ETJump::ProgressionTrackers::updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs, int tracker[MaxProgressionTrackers])
 {
 	for (const auto & pair : pairs)
 	{

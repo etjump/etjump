@@ -719,7 +719,7 @@ typedef struct
 	qboolean receivedTimerunStates;
 
 	// new implementation of progression
-#define MAX_PROGRESSION_TRACKERS 10
+#define MAX_PROGRESSION_TRACKERS 50
 	int progression[MAX_PROGRESSION_TRACKERS];
 } clientSession_t;
 
