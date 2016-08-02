@@ -292,8 +292,6 @@ vmCvar_t cg_CGazHeight;
 vmCvar_t cg_CGazWidth;
 vmCvar_t cg_CGazAlpha;
 vmCvar_t cg_drawOB;
-vmCvar_t cg_drawspeedX;
-vmCvar_t cg_drawspeedY;
 vmCvar_t cg_drawKeys;
 vmCvar_t cg_keysColor;
 vmCvar_t cg_keysX;
@@ -389,7 +387,6 @@ vmCvar_t player_spectatorInfoY;
 vmCvar_t player_drawRunTimer;
 vmCvar_t player_runTimerX;
 vmCvar_t player_runTimerY;
-vmCvar_t player_runTimerColor;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 
@@ -621,8 +618,6 @@ cvarTable_t cvarTable[] =
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawspeedX,               "etj_drawspeedX",              "-10",                    CVAR_ARCHIVE             },
-	{ &cg_drawspeedY,               "etj_drawspeedY",              "-20",                    CVAR_ARCHIVE             },
 	{ &cg_drawKeys,                 "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
 	{ &cg_keysColor,                "etj_keysColor",               "White",                  CVAR_ARCHIVE             },
 	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
@@ -696,7 +691,6 @@ cvarTable_t cvarTable[] =
 	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
 	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
 	{ &player_runTimerY,            "etj_runTimerY",               "380",                    CVAR_ARCHIVE             },
-	{ &player_runTimerColor,        "etj_runTimerColor",           "white",                  CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
 	
@@ -771,7 +765,6 @@ void CG_RegisterCvars(void)
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
-	BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1, "player_runTimerColor");
 	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
 	if (cg_noclipScale.value < 1)
@@ -844,11 +837,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_keysColor)
 				{
 					BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
-				}
-				else if (cv->vmCvar == &player_runTimerColor)
-				{
-					BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1,
-					            "player_runTimerColor");
 				}
 				else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string)
 				{

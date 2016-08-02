@@ -4,6 +4,20 @@ void BotDebug(int clientNum);
 void GetBotAutonomies(int clientNum, int *weapAutonomy, int *moveAutonomy);
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
+namespace ETJump
+{
+	enum class VotingTypes
+	{
+		VoteYes,
+		VoteNo,
+		RevoteYes,
+		RevoteNo
+	};
+
+	const static int VOTING_ATTEMPTS { 3 };
+	const static int VOTING_TIMEOUT { 2000 };
+}
+
 /*
 ==================
 G_SendScore
@@ -470,6 +484,45 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len)
 		return qfalse;
 	}
 	return qtrue;
+}
+
+// Updates voting stats
+void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote)
+{
+	switch (vote)
+	{
+	case ETJump::VotingTypes::VoteYes:
+		level.voteInfo.voteYes++;
+		client->votingInfo.isVotedYes = true;
+		break;
+	case ETJump::VotingTypes::VoteNo:
+		level.voteInfo.voteNo++;
+		client->votingInfo.isVotedYes = false;
+		break;
+	case ETJump::VotingTypes::RevoteYes:
+		level.voteInfo.voteYes++;
+		level.voteInfo.voteNo--;
+		client->votingInfo.isVotedYes = true;
+		break;
+	case ETJump::VotingTypes::RevoteNo:
+		level.voteInfo.voteYes--;
+		level.voteInfo.voteNo++;
+		client->votingInfo.isVotedYes = false;
+	}
+
+	if (client->votingInfo.isVotedYes)
+	{
+		trap_SendServerCommand(client->ps.clientNum, "voted yes");
+	} else
+	{
+		trap_SendServerCommand(client->ps.clientNum, "voted no");
+	}
+
+	client->votingInfo.time = level.time;
+	client->votingInfo.attempts++;
+
+	trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+	trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 }
 
 
@@ -2062,11 +2115,11 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 
 	if (mode == SAY_TEAM || mode == SAY_BUDDY)
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2], vsay->variant, vsay->custom));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, static_cast<int>(ent->s.pos.trBase[0]), static_cast<int>(ent->s.pos.trBase[1]), static_cast<int>(ent->s.pos.trBase[2]), vsay->variant, vsay->random, vsay->custom));
 	}
 	else
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->custom));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->random, vsay->custom));
 	}
 }
 
@@ -2204,10 +2257,12 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 {
 
 	vsayCmd_t vsay;
-	int id = 1, cust = 2;
+	auto id = 1, cust = 2;
 	char variant[2];
 
 	memset(&vsay, 0, sizeof(vsay));
+	// get random seed beforehand to keep it same for all clients
+	vsay.random = random();
 
 	if (mode != SAY_BUDDY)
 	{
@@ -2264,10 +2319,10 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 	}
 
 	if (g_customVoiceChat.integer) {
-		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+		G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 	}
 	else {
-		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+		G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 	}
 
 }
@@ -2548,6 +2603,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	// it only changes the clientside info text, not everything.
 
 	level.voteInfo.voteYes = 1;
+	trap_SendServerCommand(ent - g_entities, "voted yes");
+
 	if (customMapType)
 	{
 		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, customMapType));
@@ -2603,11 +2660,13 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent)
 {
 	char msg[64];
+	auto *client = ent->client;
 
 	if (ent->client->pers.applicationEndTime > level.time)
 	{
 
 		gclient_t *cl = g_entities[ent->client->pers.applicationClient].client;
+
 		if (!cl)
 		{
 			return;
@@ -2800,7 +2859,7 @@ void Cmd_Vote_f(gentity_t *ent)
 		// cancel it.
 		if (ClientNum(ent) == level.voteInfo.voter_cn)
 		{
-			if ((msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1'))
+			if ((msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1'))
 			{
 				// Do nothing...
 			}
@@ -2812,7 +2871,60 @@ void Cmd_Vote_f(gentity_t *ent)
 				return;
 			}
 		}
-		trap_SendServerCommand(ent - g_entities, "print \"Vote already cast.\n\"");
+
+		// so it's first 10s if vote time set to 30s
+		auto allowedRevoteTimeRange = level.voteInfo.voteTime + (VOTE_TIME / 3);
+
+		// don't allow to revote anymore if time range is passed or there are no attempts left
+		if (level.time > allowedRevoteTimeRange || client->votingInfo.attempts > ETJump::VOTING_ATTEMPTS)
+		{
+			if (client->votingInfo.time + ETJump::VOTING_TIMEOUT > level.time)
+			{
+				// stops excessive spam from server if user keeps votting in timeouts
+				if (!client->votingInfo.isWarned)
+				{
+					client->votingInfo.isWarned = true;
+					trap_SendServerCommand(ent - g_entities, "print \"You can't revote anymore.\n\"");
+				}
+				return;
+			}
+			
+			client->votingInfo.time = level.time;
+			client->votingInfo.isWarned = false;
+			return;
+		}
+
+		// defaults to 2s timeout
+		if (client->votingInfo.time + ETJump::VOTING_TIMEOUT > level.time)
+		{
+			// stops excessive spam from server if user keeps votting in timeouts
+			if(!client->votingInfo.isWarned)
+			{
+				client->votingInfo.isWarned = true;
+				trap_SendServerCommand(ent - g_entities, "print \"You can't revote that often.\n\"");
+			}
+			return;
+		}
+
+		client->votingInfo.isWarned = false;
+		
+		// allow revote
+		if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')
+		{
+			if (!client->votingInfo.isVotedYes)
+			{
+				etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteYes);
+				trap_SendServerCommand(ent - g_entities, va("print \"Vote cast, you have %d attempts left.\n\"", ETJump::VOTING_ATTEMPTS + 1 - client->votingInfo.attempts));
+			} 
+		} else
+		{
+			if (client->votingInfo.isVotedYes)
+			{
+				etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteNo);
+				trap_SendServerCommand(ent - g_entities, va("print \"Vote cast, you have %d attempts left.\n\"", ETJump::VOTING_ATTEMPTS + 1 - client->votingInfo.attempts));
+			}
+		}
+
 		return;
 	}
 	
@@ -2830,15 +2942,14 @@ void Cmd_Vote_f(gentity_t *ent)
 
 	trap_Argv(1, msg, sizeof(msg));
 
-	if (msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1')
+	if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')
 	{
-		level.voteInfo.voteYes++;
-		trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+		etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteYes);
+	
 	}
 	else
 	{
-		level.voteInfo.voteNo++;
-		trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+		etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteNo);
 	}
 
 	// a majority will be determined in G_CheckVote, which will also account

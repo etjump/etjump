@@ -2570,6 +2570,7 @@ typedef struct
 	char id[32]; // voice chat id
 	char custom[128]; // voice chat custom text
 	int variant; // voice chat variation 
+	float random; // recieve random from the server
 } vsayCmd_t;
 
 #endif // __BG_PUBLIC_H__

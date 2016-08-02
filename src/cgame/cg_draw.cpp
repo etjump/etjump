@@ -2922,7 +2922,7 @@ static void CG_DrawVote(void)
 			// Zero: didn't want to delete this yet, not sure if I want specs to be able to vote.
 			
 			if( cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES ) {
-			    s = CG_TranslateString( "Cannot vote as Spectator" );
+				s = va("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, CG_TranslateString("Cannot vote as Spectator"));
 			} else {
 				s = va(CG_TranslateString("YES(%s):%i, NO(%s):%i"), str1, cgs.voteYes, str2, cgs.voteNo);
 			}
@@ -2933,9 +2933,15 @@ static void CG_DrawVote(void)
 		{
 			s = va(CG_TranslateString("(%i) YOU VOTED ON: %s"), sec, cgs.voteString);
 			CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-
-			s = va(CG_TranslateString("Y:%i, N:%i"), cgs.voteYes, cgs.voteNo);
-			CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
+			if (cgs.votedYes)
+			{
+				s = va("^2Y:%i^3, N:%i", cgs.voteYes, cgs.voteNo);
+			}
+			else {
+				s = va("^3Y:%i, ^2N:%i^3", cgs.voteYes, cgs.voteNo);
+			}
+			
+			CG_DrawStringExt(8, 214, s, color, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 			return;
 		}
 	}
