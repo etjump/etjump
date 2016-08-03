@@ -31,6 +31,7 @@ void ETJump::ProgressionTrackers::updateTracker(std::vector<ProgressionTrackerPa
 		if (pair.index >= MaxProgressionTrackers)
 		{
 			G_Error("Tracker error: specified index (%d) is greater than maximum number of trackers (%d)", pair.index, MaxProgressionTrackers);
+			return;
 		}
 
 		tracker[pair.index] = pair.value;
