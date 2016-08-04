@@ -16,6 +16,7 @@
 * Vsay now plays the same voice for every player.
 * Fixed a click event issue in the widescreen UI.
 * `shooter_rocket` can now hit players.
+* renamed target_tracker `tracker_setIf` key to `tracker_set_if` to match the other keys.
 
 # ETJump 2.1.0
 
