@@ -150,7 +150,7 @@ void SP_target_tracker(gentity_t *self)
 	G_SpawnString("tracker_gt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.greaterThan);
 	G_SpawnString("tracker_lt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.lessThan);
 	G_SpawnString("tracker_set", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.set);
-	G_SpawnString("tracker_setIf", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.setIf);
+	G_SpawnString("tracker_set_if", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.setIf);
 	G_SpawnString("tracker_inc", "0", &keys.increment);
 	G_SpawnString("tracker_inc_if", "0", &keys.incrementIf);
 
