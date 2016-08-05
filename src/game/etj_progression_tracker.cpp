@@ -94,17 +94,28 @@ void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activato
 		++idx;
 	}
 
+	auto activate = true;
+
 	for (idx = 0; idx < MaxProgressionTrackers; ++idx)
 	{
 		auto clientTracker = activator->client->sess.progression[idx];
 
-		if ((tracker.equal[idx] != ProgressionTrackerValueNotSet && tracker.equal[idx] == clientTracker) ||
-			(tracker.lessThan[idx] != ProgressionTrackerValueNotSet && tracker.lessThan[idx] > clientTracker) ||
-			(tracker.greaterThan[idx] != ProgressionTrackerValueNotSet && tracker.greaterThan[idx] < clientTracker))
-		{
-			// activate
-			G_UseTargetedEntities(ent, activator);
 
+		if ((tracker.equal[idx] != ProgressionTrackerValueNotSet && tracker.equal[idx] != clientTracker) ||
+			(tracker.lessThan[idx] != ProgressionTrackerValueNotSet && tracker.lessThan[idx] <= clientTracker) ||
+			(tracker.greaterThan[idx] != ProgressionTrackerValueNotSet && tracker.greaterThan[idx] >= clientTracker))
+		{
+			activate = false;
+			break;
+		}
+	}
+
+	if (activate)
+	{
+		G_UseTargets(ent, activator);
+
+		for (idx = 0; idx < MaxProgressionTrackers; ++idx)
+		{
 			if (tracker.setIf[idx] >= 0)
 			{
 				activator->client->sess.progression[idx] = tracker.setIf[idx];
