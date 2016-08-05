@@ -600,8 +600,12 @@ int WM_DrawObjectives(int x, int y, int width, float fade)
 
 		s = va(CG_TranslateString(va("^<%s", cgs.rawmapname)));
 		CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
-		s = CG_TranslateString("^<www.etjump.com");
-		CG_Text_Paint_Ext(SCREEN_WIDTH - SCREEN_OFFSET_X - 80 - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
+		
+		s = va("^<%s", ETJUMP_WEB);
+		CG_Text_Paint_Ext(SCREEN_WIDTH - SCREEN_OFFSET_X - 22 - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2), y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
+		
+		s = va("^<%s", ETJUMP_VERSION);
+		CG_Text_Paint_Ext(SCREEN_OFFSET_X + 22, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
 
 		if (cgs.gametype != GT_WOLF_LMS)
 		{

@@ -312,7 +312,6 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 
         CG_FillRect( 8, 23, 230, 210, clr2 );
         CG_DrawRect_FixedBorder( 8, 23, 230, 216, 1, colorMdGrey );*/
-#define ETJUMP_VERSION ("ETJump " MOD_VERSION)
 		y = 322;
 		CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.22f, 0.22f, clr3, ETJUMP_VERSION, 0, 0, 0, &bg_loadscreenfont1);
 
@@ -567,6 +566,7 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float 
 {
 	float  x, y, w, h;
 	vec4_t colourFadedBlack = { 0.f, 0.f, 0.f, 0.4f };
+	auto textWidth = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
 
 	w = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
 	if (px + 30 + w > 440)
@@ -589,7 +589,7 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float 
 
 	if (px + 30 + w > 440)
 	{
-		DC->drawTextExt(SCREEN_OFFSET_X + px - 12 - w - 28, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
+		DC->drawTextExt(SCREEN_OFFSET_X + px - 20 - textWidth, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
 	}
 	else
 	{
