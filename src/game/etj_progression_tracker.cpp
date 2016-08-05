@@ -112,7 +112,7 @@ void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activato
 
 	if (activate)
 	{
-		G_UseTargets(ent, activator);
+		G_UseTargetedEntities(ent, activator);
 
 		for (idx = 0; idx < MaxProgressionTrackers; ++idx)
 		{
