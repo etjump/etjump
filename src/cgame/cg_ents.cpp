@@ -832,6 +832,10 @@ static void CG_Item(centity_t *cent)
 		}
 	}
 
+	if (es->eFlags & EF_BOBBING)
+	{
+		ent.origin[2] += 10 * (0.5 + 0.5 * sin(static_cast<float>(cg.time) / 150.0));
+	}
 
 	if (es->modelindex2)     // modelindex2 was specified for the ent, meaning it probably has an alternate model (as opposed to the one in the itemlist)
 	{                       // try to load it first, and if it fails, default to the itemlist model

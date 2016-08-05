@@ -1271,6 +1271,10 @@ void FinishSpawningItem(gentity_t *ent)
 		ent->s.eFlags |= EF_SPINNING;
 	}
 
+	if (ent->spawnflags & 4)
+	{
+		ent->s.eFlags |= EF_BOBBING; // bobbing
+	}
 
 	// team slaves and targeted items aren't present at start
 	if ((ent->flags & FL_TEAMSLAVE) || ent->targetname)
