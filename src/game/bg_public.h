@@ -14,6 +14,8 @@
 #define GAME_VERSION    "etjump"
 
 #define MOD_VERSION     "2.2.0 Alpha"
+#define ETJUMP_VERSION ("ETJump " MOD_VERSION)
+#define ETJUMP_WEB      "www.etjump.com"
 
 #define BUILD_TIME __DATE__ " " __TIME__
 
