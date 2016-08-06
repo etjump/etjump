@@ -2862,6 +2862,7 @@ void Cmd_Vote_f(gentity_t *ent)
 			if ((msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1'))
 			{
 				// Do nothing...
+				return;
 			}
 			else
 			{
