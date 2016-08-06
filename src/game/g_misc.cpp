@@ -350,6 +350,16 @@ void SP_weapon_portalgun(gentity_t *ent)
 	ent->think     = weapon_portal_think;
 	ent->nextthink = level.time + 100;
 
+	if (ent->spawnflags & 2)        // spin
+	{
+		ent->s.eFlags |= EF_SPINNING;
+	}
+
+	if (ent->spawnflags & 4)
+	{
+		ent->s.eFlags |= EF_BOBBING; // bobbing
+	}
+
 	G_SetOrigin(ent, ent->s.origin);
 	G_SetAngle(ent, ent->s.angles);
 
