@@ -17,6 +17,9 @@
 * Fixed a click event issue in the widescreen UI.
 * `shooter_rocket` can now hit players.
 * renamed target_tracker `tracker_setIf` key to `tracker_set_if` to match the other keys.
+* fixed long map name not flipped correctly on map loading
+* added spawnflags __2__ for `weapon_portalgun` entity to make it rotating around its center
+* added spawnflags __4__ for all `item_*` and `weapon_*` entities to make them bobbing if they are floating in the air (__1__)
 
 # ETJump 2.1.0
 
