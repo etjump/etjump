@@ -2726,10 +2726,11 @@ void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
-#define TIMERUN_RESET_ON_TEAM_CHANGE    0x1
-#define TIMERUN_RESET_ON_DEATH          0x2
-#define TIMERUN_RESET_ON_END            0x4
-#define TIMERUN_RESET_ON_PMOVE_NULL     0x8
+#define TIMERUN_RESET_ON_TEAM_CHANGE    0x01
+#define TIMERUN_RESET_ON_DEATH          0x02
+#define TIMERUN_RESET_ON_END            0x04
+#define TIMERUN_RESET_ON_PMOVE_NULL     0x08
+#define TIMERUN_DISABLE_BACKUPS         0x10
 
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);

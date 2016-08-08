@@ -76,9 +76,13 @@ public:
 
 	// Prints entire db
 	void Print(gentity_t *ent);
+
 private:
 	// Saves backup position
 	void SaveBackupPosition(gentity_t *ent, SavePosition *pos);
+
+	// Teleports player to the saved position
+	static void TeleportPlayer(gentity_t* ent, SavePosition* pos);
 
 	// All clients' save related data
 	Client clients_[MAX_CLIENTS];
