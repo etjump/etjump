@@ -3,7 +3,8 @@
 * Changed all .c modules to .cpp modules.
 * Increased progression tracker limit from 10 to 50.
 * K43 and Garand no longer have any spread.
-* Added spawnflag 8 to `target_startTimer` to disable `pmove_fixed` 0 while on a timerun.
+* Added spawnflag 8 to `target_startTimer` to reset the runtimer if pmove is not fixed
+* Added spawnflag 16 to `target_startTimer` to disable use of save slots and backups
 * Portal gun changes:
   - Both portal gun fire rates are now equal.
   - Lowered the minimum allowed distance between the portal gun portals.
