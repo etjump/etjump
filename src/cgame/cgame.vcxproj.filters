@@ -203,6 +203,7 @@
     <ClCompile Include="..\sha-1\bg_sha.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_client_commands_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -257,6 +258,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_timerun_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_commands_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

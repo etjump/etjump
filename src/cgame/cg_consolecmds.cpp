@@ -7,6 +7,9 @@
 
 
 #include "cg_local.h"
+#include <string>
+#include <vector>
+#include "etj_client_commands_handler.h"
 
 void CG_TargetCommand_f(void)
 {
@@ -1369,6 +1372,15 @@ qboolean CG_ConsoleCommand(void)
 			commands[i].function();
 			return qtrue;
 		}
+	}
+
+	std::vector<std::string> arguments;
+	std::string command = cmd;
+	for (auto i = 0, argc = trap_Argc(); i < argc; ++i)
+		arguments.push_back(CG_Argv(i));
+	if (ETJump::consoleCommandsHandler->check(command, arguments))
+	{
+		return qtrue;
 	}
 
 	return qfalse;

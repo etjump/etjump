@@ -4,6 +4,8 @@
 
 #include "cg_local.h"
 #include "cg_mainext.h"
+#include <vector>
+#include "etj_client_commands_handler.h"
 
 #define SCOREPARSE_COUNT    9
 
@@ -3102,6 +3104,14 @@ static void CG_ServerCommand(void)
 		// fade out over the course of 5 seconds, should be enough (nuking: atvi bug 3793)
 		//%	CG_Fade( 0, 0, 0, 255, cg.time, 5000 );
 
+		return;
+	}
+
+	std::vector<std::string> arguments;
+	for (auto i = 1, argc = trap_Argc(); i < argc; ++i)
+		arguments.push_back(CG_Argv(i));
+	if (ETJump::serverCommandsHandler->check(cmd, arguments))
+	{
 		return;
 	}
 

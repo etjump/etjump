@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -39,6 +43,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -277,6 +284,7 @@
     <ClCompile Include="..\ui\ui_shared.cpp" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
   </ItemGroup>
@@ -295,6 +303,7 @@
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
+    <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_drawable.h" />
     <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="tr_types.h" />

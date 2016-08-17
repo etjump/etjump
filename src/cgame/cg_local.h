@@ -17,6 +17,7 @@
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/ui_shared.h"
+#include <memory>
 
 #define MAX_LOCATIONS       256
 #define POWERUP_BLINKS      5
@@ -3775,6 +3776,20 @@ void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
 void CG_CheckActivateLean();
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class ClientCommandsHandler;
+
+	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
+	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // CG_LOCAL_H
 

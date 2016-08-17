@@ -8,6 +8,7 @@
 
 #include "cg_local.h"
 #include "cg_mainext.h"
+#include "etj_client_commands_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -70,6 +71,18 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 	}
 	return -1;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
+	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 cg_t         cg;
 cgs_t        cgs;
@@ -3413,6 +3426,25 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	{
 		trap_S_FadeAllSound(1.0f, 0, qfalse);           // fade sound up
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump initialization
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("ETJump initialization started.");
+	CG_Printf("--------------------------------------------------------------------------------\n");
+
+	// NOTE: client server commands handlers must be created before other modules as other modules use them
+	// to subcribe to commands 
+	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
+	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
+
+	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("ETJump initialized.");
+	CG_Printf("--------------------------------------------------------------------------------\n");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// OSP
 	cgs.dumpStatsFile = 0;
