@@ -477,9 +477,4 @@
       <Filter>Menu files\ETJump</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="authentication.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-  </ItemGroup>
 </Project>

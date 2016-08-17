@@ -382,9 +382,6 @@
     <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu" />
     <None Include="cgame.def" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="authentication.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
