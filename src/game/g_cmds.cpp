@@ -4531,6 +4531,22 @@ void Cmd_shrug_f(gentity_t *ent)
 	BG_AnimScriptEvent(&ent->client->ps, ent->client->pers.character->animModelInfo, ANIM_ET_NOPOWER, qtrue, qfalse);
 }
 
+// sends back timerun specific information, used to restore runtimer after cgame restart
+void Cmd_timerunStatus_f(gentity_t *ent)
+{
+	if (level.hasTimerun)
+	{
+		trap_SendServerCommand(ClientNum(ent), "hasTimerun 1");
+	}
+	else
+	{
+		trap_SendServerCommand(ClientNum(ent), "hasTimerun 0");
+	}
+
+	TimerunConnectNotify(ent);
+}
+
+
 /*
 =================
 Cmd_SwapPlacesWithBot_f
@@ -4655,7 +4671,7 @@ static command_t noIntermissionCommands[] =
 	//{ "save",				qfalse,	Cmd_Save_f },
 	{ "shrug",           qfalse, Cmd_shrug_f           },
 	//{ "savereset",          qfalse, Cmd_SaveReset_f },
-
+	{ "timerun_status",  qfalse, Cmd_timerunStatus_f   },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
