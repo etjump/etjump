@@ -540,23 +540,24 @@ std::string ToString(vec_t x, vec_t y, vec_t z)
 	return vec3;
 }
 
-gentity_t *PlayerGentityFromString(char *name, char *err, int size)
+gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filter)
 {
 	int       pids[MAX_CLIENTS];
 	gentity_t *player;
 
 	if (ClientNumbersFromString(name, pids) != 1)
 	{
-		G_MatchOnePlayer(pids, err, size);
-		return NULL;
+		if(!G_MatchOnePlayer(pids, err, size, filter))
+		{
+			return nullptr;
+		}
 	}
 
 	player = g_entities + pids[0];
 	return player;
 }
 
-gentity_t *PlayerGentityFromString
-    (const std::string& name, std::string& err)
+gentity_t *PlayerGentityFromString( const std::string& name, std::string& err, team_t filter)
 {
 	char      errorMsg[MAX_TOKEN_CHARS] = "\0";
 	int       pids[MAX_CLIENTS];
@@ -564,9 +565,11 @@ gentity_t *PlayerGentityFromString
 
 	if (ClientNumbersFromString(name.c_str(), pids) != 1)
 	{
-		G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg));
-		err = errorMsg;
-		return NULL;
+		if(!G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg), filter))
+		{
+			err = errorMsg;
+			return nullptr;
+		}
 	}
 
 	player = g_entities + pids[0];

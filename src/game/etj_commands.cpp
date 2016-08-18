@@ -1770,7 +1770,8 @@ bool Spectate(gentity_t *ent, Arguments argv)
 	}
 
 	std::string error;
-	gentity_t   *target = PlayerGentityFromString(argv->at(1), error);
+	//ETJump: match only players that are in game, filter out spectators
+	gentity_t   *target = PlayerGentityFromString(argv->at(1), error, TEAM_SPECTATOR);
 
 	if (!target)
 	{

@@ -447,11 +447,12 @@ int ClientNumbersFromString(const char *s, int *plist)
 	return found;
 }
 
-qboolean G_MatchOnePlayer(int *plist, char *err, int len)
+qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter)
 {
 	gclient_t *cl;
 	int       *p;
 	char      line[MAX_NAME_LENGTH + 10];
+	int       matches = 0;
 
 	err[0]  = '\0';
 	line[0] = '\0';
@@ -465,11 +466,18 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len)
 	{
 		Q_strcat(err, len, "more than one player name matches. "
 		                   "be more specific or use the slot #:");
+
 		for (p = plist; *p != -1; p++)
 		{
 			cl = &level.clients[*p];
 			if (cl->pers.connected == CON_CONNECTED || cl->pers.connected == CON_CONNECTING)
 			{
+				//ETJump: filtering out specific team
+ 				if (cl->sess.sessionTeam == filter)
+				{
+					continue;
+				}
+
 				Com_sprintf(line, MAX_NAME_LENGTH + 10,
 				            "\n%2i - %s^7",
 				            *p,
@@ -478,9 +486,28 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len)
 				{
 					break;
 				}
-				Q_strcat(err, len, line);
+
+				Q_strcat(err, len, line);		
+				//ETJump: save the last matching result in plist, so we could
+				//        use it if we end up having 1 match
+				*plist = *p;
+
+				matches++;
 			}
 		}
+		//ETJump: we get one match after filtering out spectators,
+		//        plist holds the result
+		if (matches == 1)
+		{
+			return qtrue;
+		}
+		//ETJump: no matches after filtering out spectators
+		if (!matches)
+		{
+			err[0] = '\0';
+			Q_strcat(err, len, "no active player by that name or slot #");
+		}
+
 		return qfalse;
 	}
 	return qtrue;
