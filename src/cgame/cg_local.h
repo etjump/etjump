@@ -1243,6 +1243,8 @@ typedef struct
 	float currentTransparencyValue;
 	// used for noactivatelean
 	int etjActivateKey;
+	// hold last jump position
+	vec3_t etjLastJumpPos;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
