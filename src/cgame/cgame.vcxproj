@@ -235,6 +235,7 @@
     <ClCompile Include="..\game\bg_sscript.cpp" />
     <ClCompile Include="..\game\bg_stats.cpp" />
     <ClCompile Include="..\game\bg_tracemap.cpp" />
+    <ClCompile Include="..\game\etj_file.cpp" />
     <ClCompile Include="..\game\q_math.cpp" />
     <ClCompile Include="..\game\q_shared.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
@@ -284,9 +285,12 @@
     <ClCompile Include="..\ui\ui_shared.cpp" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="etj_client.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
+    <ClCompile Include="etj_client_print_utilities.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
+    <ClCompile Include="etj_trickjump_lines.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\etjump\ui\menudef.h" />
@@ -303,9 +307,12 @@
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
+    <ClInclude Include="etj_client.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
+    <ClInclude Include="etj_client_print_utilities.h" />
     <ClInclude Include="etj_drawable.h" />
     <ClInclude Include="etj_timerun_view.h" />
+    <ClInclude Include="etj_trickjump_lines.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>

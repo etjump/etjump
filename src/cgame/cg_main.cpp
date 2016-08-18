@@ -9,6 +9,7 @@
 #include "cg_local.h"
 #include "cg_mainext.h"
 #include "etj_client_commands_handler.h"
+#include "etj_trickjump_lines.h"
 
 displayContextDef_t cgDC;
 
@@ -80,6 +81,7 @@ namespace ETJump
 {
 	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
 	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::unique_ptr<TrickjumpLines> trickjumpLines;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3439,6 +3441,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// to subcribe to commands 
 	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
 	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
+	ETJump::trickjumpLines = std::unique_ptr<ETJump::TrickjumpLines>(new ETJump::TrickjumpLines(ETJump::consoleCommandsHandler.get(), ETJump::serverCommandsHandler.get()));
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");
@@ -3482,6 +3485,18 @@ void CG_Shutdown(void)
 	{
 		trap_Cvar_Set("timescale", "1");
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump shutdown
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	ETJump::trickjumpLines = nullptr;
+	// NOTE: other modules unsubscribe commands received from the server so this should be the destroyed 
+	// after all the modules dealing with server commands have been destroyed
+	ETJump::serverCommandsHandler = nullptr;
+	ETJump::consoleCommandsHandler = nullptr;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 // returns true if game is single player (or coop)

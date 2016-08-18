@@ -204,6 +204,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_client_commands_handler.cpp" />
+    <ClCompile Include="etj_client.cpp" />
+    <ClCompile Include="etj_trickjump_lines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_file.cpp" />
+    <ClCompile Include="etj_client_print_utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -261,6 +267,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_client_commands_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_trickjump_lines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_print_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

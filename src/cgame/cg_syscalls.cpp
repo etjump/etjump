@@ -104,9 +104,9 @@ void    trap_FS_Read(void *buffer, int len, fileHandle_t f)
 	syscall(CG_FS_READ, buffer, len, f);
 }
 
-void    trap_FS_Write(const void *buffer, int len, fileHandle_t f)
+int    trap_FS_Write(const void *buffer, int len, fileHandle_t f)
 {
-	syscall(CG_FS_WRITE, buffer, len, f);
+	return syscall(CG_FS_WRITE, buffer, len, f);
 }
 
 void    trap_FS_FCloseFile(fileHandle_t f)

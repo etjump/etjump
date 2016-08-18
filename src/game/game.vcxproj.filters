@@ -234,6 +234,9 @@
     <ClCompile Include="etj_user.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -353,6 +356,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -263,6 +263,7 @@
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_command_variables.cpp" />
     <ClCompile Include="etj_database.cpp" />
+    <ClCompile Include="etj_file.cpp" />
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
@@ -334,6 +335,7 @@
     <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
     <ClInclude Include="etj_database.h" />
+    <ClInclude Include="etj_file.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
