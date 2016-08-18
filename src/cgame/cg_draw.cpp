@@ -6099,21 +6099,24 @@ static void CG_Draw2D(void)
 // NERVE - SMF
 void CG_StartShakeCamera(float p, entityState_t *es)
 {
-	// cam does not shake
+	auto attacker = static_cast<char>(es->clientNum);
+
+	//ETJump: never shake cam from explosions
 	if (etj_explosivesShake.integer == 0) {
 		return;
 	}
-	// cam shakes only if this is not your explosion
-	else if (etj_explosivesShake.integer == 1 && es->clientNum == cg.clientNum) {
+
+	//ETJump: shake cam only from other players explosives
+	if (etj_explosivesShake.integer == 1 && attacker == cg.clientNum) {
 		return;
 	}
-	// cam shakes if you are the one who caused explosion
-	else if (etj_explosivesShake.integer == 2 && es->clientNum != cg.clientNum) {
+
+	//ETJump: shake cam only from own explosives
+	if (etj_explosivesShake.integer == 2 && attacker != cg.clientNum) {
 		return;
 	}
 
 	cg.cameraShakeScale = p;
-
 	cg.cameraShakeLength = 1000 * (p * p);
 	cg.cameraShakeTime   = cg.time + cg.cameraShakeLength;
 	cg.cameraShakePhase  = crandom() * M_PI; // start chain in random dir
