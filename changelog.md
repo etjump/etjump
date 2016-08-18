@@ -21,6 +21,8 @@
 * fixed long map name not flipped correctly on map loading
 * added spawnflags __2__ for `weapon_portalgun` entity to make it rotating around its center
 * added spawnflags __4__ for all `item_*` and `weapon_*` entities to make them bobbing if they are floating in the air (__1__)
+* `vid_restart` no longer breaks timerun timer.
+* `misc_landmine` no longer crashes the client.
 
 # ETJump 2.1.0
 
