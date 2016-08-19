@@ -23,6 +23,7 @@
 * added spawnflags __4__ for all `item_*` and `weapon_*` entities to make them bobbing if they are floating in the air (__1__)
 * `vid_restart` no longer breaks timerun timer.
 * `misc_landmine` no longer crashes the client.
+* CHS 50 displays the last jump coordinates.
 
 # ETJump 2.1.0
 
