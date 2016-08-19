@@ -281,6 +281,13 @@ void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 
+	// ETJump: disable portalgun pickup
+	if (other->client->sess.timerunActive &&
+		(other->client->sess.runSpawnflags & TIMERUN_DISABLE_PORTALGUN_PICKUP))
+	{
+		return;
+	}
+
 	// If portal team value is higher than 0 let's set users pteam value
 	// to that of the entity.
 	if (self->portalTeam > 0)

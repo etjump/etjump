@@ -2894,6 +2894,29 @@ qboolean BG_WeaponInWolfMP(int weapon)
 	}
 }
 
+qboolean BG_WeaponIsExplosive(int weap)
+{
+	switch (weap)
+	{
+	case WP_CARBINE:
+	case WP_KAR98:
+	case WP_M7:
+	case WP_GRENADE_LAUNCHER:
+	case WP_GRENADE_PINEAPPLE:
+	case WP_PANZERFAUST:
+	case WP_LANDMINE:
+	case WP_ARTY:
+	case WP_GPG40:
+	case WP_FLAMETHROWER:
+	case WP_MORTAR:
+	case WP_SATCHEL:
+	case WP_DYNAMITE:
+		return qtrue;
+	default:
+		return qfalse;
+	}
+}
+
 /*
 ============
 BG_PlayerTouchesItem

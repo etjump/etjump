@@ -2080,14 +2080,17 @@ void SP_target_decay(gentity_t *self)
 // Begin of timeruns support
 
 // target_starttimer
+//------------------
 // name:    run name.
 // spawnflags:
-//  0 always reset the run
-//  1 reset the run on team change
-//  2 reset the run on death
-//  4 only reset when you reach the end
-//  8 reset the run if player doesnt use fixed pmove
-// 16 disable use of save slots and backups
+//    0 always reset the run
+//    1 reset the run on team change
+//    2 reset the run on death
+//    4 only reset when you reach the end
+//    8 reset/disable the run if player doesnt use fixed pmove
+//   16 disable use of save slots and backups
+//   32 disable explosive weapons pickup
+//   64 disable potralgun pickup
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	float speed = VectorLength(activator->client->ps.velocity);
