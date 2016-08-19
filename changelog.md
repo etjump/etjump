@@ -24,6 +24,10 @@
 * `vid_restart` no longer breaks timerun timer.
 * `misc_landmine` no longer crashes the client.
 * CHS 50 displays the last jump coordinates.
+* !spec now correctly only tries to match players that are not spectating.
+* Added two new spawnflags for target_startTimer
+  32 disable explosive weapons pickup
+  64 disable portal gun pickup
 
 # ETJump 2.1.0
 
