@@ -1361,7 +1361,7 @@ void G_EntitySound(gentity_t *ent, const char *soundId, int volume);
 void G_EntitySoundNoCut(gentity_t *ent, const char *soundId, int volume);
 int ClientNumberFromString(gentity_t *to, char *s);
 int ClientNumbersFromString(const char *s, int *plist);
-qboolean G_MatchOnePlayer(int *plist, char *err, int len) ;
+qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter = TEAM_FREE);
 void SanitizeString(char *in, char *out, qboolean fToLower);
 void SanitizeConstString(const char *in, char *out, qboolean fToLower);
 int CleanStrlen(const char *in);
