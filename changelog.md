@@ -29,6 +29,8 @@
   - 32 disable explosive weapons pickup
   - 64 disable portal gun pickup
 * Drowned players are now correctly put to spec after a period of inactivity.
+* Added worldspawn key nooverbounce.  Disables overbounce if set to anything but 0.
+  - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
 
 # ETJump 2.1.0
 

@@ -1294,6 +1294,7 @@ typedef struct
 	qboolean noNoclip;
 	qboolean noGod;
 	qboolean noGoto;
+	bool noOverbounce;
 
 	int portalEnabled;         //Feen: PGM - Enabled/Disabled by map key
 	qboolean portalSurfaces;
@@ -2006,6 +2007,8 @@ extern vmCvar_t g_chatOptions;
 
 // vchat customization
 extern vmCvar_t g_customVoiceChat;
+
+extern vmCvar_t shared;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);

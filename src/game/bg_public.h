@@ -594,6 +594,9 @@ typedef struct
 	int pmove_fixed;
 	int pmove_msec;
 
+	// ETJump: shared values between client & server
+	int shared;
+
 	qboolean walking;
 	trace_t groundTrace;
 
@@ -2575,6 +2578,9 @@ typedef struct
 	int variant; // voice chat variation 
 	float random; // recieve random from the server
 } vsayCmd_t;
+
+// Overbounce is disabled on current map
+const int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
 
 #endif // __BG_PUBLIC_H__
 

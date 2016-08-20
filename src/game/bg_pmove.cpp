@@ -2274,6 +2274,11 @@ static void PM_GroundTrace(void)
 
 		PM_CrashLand();
 
+		// Disable overbounce?
+		if (pm->shared & BG_LEVEL_NO_OVERBOUNCE && !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
+			PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+		}
+
 		// don't do landing time if we were just going down a slope
 		if (pml.previous_velocity[2] < -200)
 		{
@@ -2284,6 +2289,11 @@ static void PM_GroundTrace(void)
 	}
 
 	pm->ps->groundEntityNum = trace.entityNum;
+
+	// Disable overbounce?
+	if (pm->shared & BG_LEVEL_NO_OVERBOUNCE && trace.plane.normal[2] == 1 && !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)) {
+		pm->ps->velocity[2] = 0;
+	}
 
 	// don't reset the z velocity for slopes
 //	pm->ps->velocity[2] = 0;

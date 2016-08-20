@@ -434,6 +434,8 @@ vmCvar_t etj_realFov;
 vmCvar_t etj_stretchCgaz;
 vmCvar_t etj_noActivateLean;
 
+vmCvar_t shared;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -730,6 +732,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
 	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
+	{ &shared, "shared", "0", CVAR_ROM }
 };
 
 

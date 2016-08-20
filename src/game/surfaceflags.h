@@ -61,9 +61,9 @@
 #define SURF_GLASS              0x00200000  // out of surf's, so replacing unused 'SURF_SMGROUP'
 #define SURF_SNOW               0x00400000
 #define SURF_ROOF               0x00800000
-#define SURF_RUBBLE             0x01000000
+#define SURF_RUBBLE             0x01000000 //Zero: UNUSED. Only used in a piece of code that's never reached
 #define SURF_CARPET             0x02000000
-#define SURF_MONSTERSLICK       0x04000000  // slick surf that only affects ai's
+#define SURF_MONSTERSLICK       0x04000000  // slick surf that only affects ai's // Zero: this could be refactored to be usable for ETJump purposes
 /*
 #define SURF_MONSLICK_W			0x08000000  //Feen: MONSLICK_W -> MONSLICK_S don't appear to be in use..
 #define SURF_MONSLICK_N			0x10000000  //		However, MONSTERSLICK does...
@@ -73,9 +73,10 @@
 
 //Feen: New ETJump Surfaces...
 #define SURF_PORTALGATE         0x08000000  //Feen: I hereby declare these's SURF's in the name of ETJump!
-#define SURF_MONSLICK_N         0x10000000  //Feen: surfaceparm monsterslicknorth - Indicates a portalable surface
+#define SURF_MONSLICK_N         0x10000000  //Zero: UNUSED
 #define SURF_MONSLICK_E         0x20000000  //Zero: I hereby declare this SURF as a portalable/unportalable surface (depends on level.portalSurfaces)
-#define SURF_MONSLICK_S         0x40000000
+#define SURF_MONSLICK_S         0x40000000	//Zero: see SURF_OVERBOUNCE
+#define SURF_OVERBOUNCE			0x40000000
 //END New ETJump Surfaces
 
 #define SURF_LANDMINE           0x80000000  // ydnar: ok to place landmines on this surface

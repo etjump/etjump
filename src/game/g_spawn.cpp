@@ -1033,6 +1033,25 @@ qboolean G_ParseSpawnVars(void)
 }
 
 
+void ETJump_InitNoOverbounce()
+{
+	char *s = nullptr;
+	auto val = 0;
+	G_SpawnString("nooverbounce", "0", &s);
+	val = atoi(s);
+	level.noOverbounce = val != 0;
+
+	auto currentShared = shared.integer;
+
+	level.noOverbounce
+		? currentShared |= BG_LEVEL_NO_OVERBOUNCE
+		: currentShared &= ~BG_LEVEL_NO_OVERBOUNCE;
+
+	trap_Cvar_Set("shared", va("%d", currentShared));
+
+	G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
+}
+
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
 
 Every map should have exactly one worldspawn.
@@ -1071,6 +1090,8 @@ void SP_worldspawn(void)
 		level.ccLayers = qtrue;
 	}
 
+	G_Printf("ETJump: checking worldspawn key values:\n");
+
 	G_SpawnString("noexplosives", "0", &s);
 	if (atoi(s))
 	{
@@ -1086,6 +1107,7 @@ void SP_worldspawn(void)
 
 		level.noExplosives = noExplosives;
 	}
+	G_Printf("Explosives are %s.\n", level.noExplosives ? "disabled" : "enabled");
 
 	G_SpawnString("nosave", "0", &s);
 	if (atoi(s))
@@ -1096,6 +1118,8 @@ void SP_worldspawn(void)
 	{
 		level.noSave = qfalse;
 	}
+	G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
+
 	G_SpawnString("nonoclip", "0", &s);
 	if (atoi(s))
 	{
@@ -1105,6 +1129,7 @@ void SP_worldspawn(void)
 	{
 		level.noNoclip = qfalse;
 	}
+	G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
 
 	G_SpawnString("nogod", "0", &s);
 	if (atoi(s))
@@ -1115,6 +1140,9 @@ void SP_worldspawn(void)
 	{
 		level.noGod = qfalse;
 	}
+	G_Printf("God mode is %s.\n", level.noGod ? "disabled" : "enabled");
+
+
 	G_SpawnString("nogoto", "0", &s);
 	if (atoi(s))
 	{
@@ -1124,17 +1152,22 @@ void SP_worldspawn(void)
 	{
 		level.noGoto = qfalse;
 	}
+	G_Printf("Goto is %s.\n", level.noGoto ? "disabled" : "enabled");
+
 	//Feen: PGM - Enable/Disable frivolous use
 	//			  of portal gun....
 	G_SpawnString("portalgun_spawn", "1", &s);
 	if (atoi(s))
 	{
 		level.portalEnabled = qtrue;
+		G_Printf("Players spawn with portal gun by default.\n");
 	}
 	else
 	{
 		level.portalEnabled = qfalse;
+		G_Printf("Players do not spawn with portal gun by default.\n");
 	}
+
 	G_SpawnString("portalsurfaces", "1", &s);
 	if (atoi(s))
 	{
@@ -1144,6 +1177,7 @@ void SP_worldspawn(void)
 	{
 		level.portalSurfaces = qfalse;
 	}
+	G_Printf("Surfaces are %s by default for portals.\n", level.portalSurfaces ? "enabled" : "disabled");
 
 	G_SpawnString("noghost", "0", &s);
 	if (atoi(s))
@@ -1156,6 +1190,7 @@ void SP_worldspawn(void)
 
 		trap_Cvar_Set("g_ghostPlayers", buf);
 		trap_Cvar_Update(&g_ghostPlayers);
+		G_Printf("Ghosting is disabled.\n");
 	}
 	else
 	{
@@ -1167,16 +1202,19 @@ void SP_worldspawn(void)
 
 		trap_Cvar_Set("g_ghostPlayers", buf);
 		trap_Cvar_Update(&g_ghostPlayers);
+		G_Printf("Ghosting is enabled.\n");
 	}
 
 	G_SpawnString("savelimit", "0", &s);
 	if (atoi(s))
 	{
 		level.saveLimit = qtrue;
+		G_Printf("Save is limited.\n");
 	}
 	else
 	{
 		level.saveLimit = qfalse;
+		G_Printf("Save is not limited.\n");
 	}
 
 	G_SpawnString("portalteam", "0", &s);
@@ -1192,6 +1230,9 @@ void SP_worldspawn(void)
 			level.portalTeam = 2;
 		}
 	}
+	G_Printf("Portal team is set to %d.\n", val);
+
+	ETJump_InitNoOverbounce();
 
 	level.mapcoordsValid = qfalse;
 	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&    // top left

@@ -1114,6 +1114,9 @@ void CG_PredictPlayerState(void)
 	cg_pmove.pmove_fixed = pmove_fixed.integer;
 	cg_pmove.pmove_msec  = pmove_msec.integer;
 
+	// Zero: shared values between server & client
+	cg_pmove.shared = shared.integer;
+
 	// run cmds
 	moved = qfalse;
 	for (cmdNum = current - CMD_BACKUP + 1 ; cmdNum <= current ; cmdNum++)

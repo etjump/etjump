@@ -236,6 +236,10 @@ vmCvar_t g_tokensPath;
 // vchat customization
 vmCvar_t g_customVoiceChat;
 
+// ETJump client/server shared data
+// TODO: refactor ghostPlayers into this
+vmCvar_t shared;
+
 
 cvarTable_t gameCvarTable[] =
 {
@@ -480,6 +484,8 @@ cvarTable_t gameCvarTable[] =
 	// end of tokens
 
 	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
+
+	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM }
 
 };
 

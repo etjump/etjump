@@ -2479,6 +2479,8 @@ extern vmCvar_t etj_realFov;
 extern vmCvar_t etj_stretchCgaz;
 extern vmCvar_t etj_noActivateLean;
 
+extern vmCvar_t shared;
+
 //
 // cg_main.c
 //

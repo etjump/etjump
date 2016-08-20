@@ -1281,6 +1281,7 @@ void ClientThink_real(gentity_t *ent)
 
 	pm.pmove_fixed = client->pers.pmoveFixed;
 	pm.pmove_msec  = pmove_msec.integer;
+	pm.shared = shared.integer;
 
 	pm.noWeapClips = qfalse;
 
