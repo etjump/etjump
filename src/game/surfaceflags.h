@@ -76,7 +76,7 @@
 #define SURF_MONSLICK_N         0x10000000  //Zero: UNUSED
 #define SURF_MONSLICK_E         0x20000000  //Zero: I hereby declare this SURF as a portalable/unportalable surface (depends on level.portalSurfaces)
 #define SURF_MONSLICK_S         0x40000000	//Zero: see SURF_OVERBOUNCE
-#define SURF_OVERBOUNCE			0x40000000
+const int SURF_OVERBOUNCE =		0x40000000;
 //END New ETJump Surfaces
 
 #define SURF_LANDMINE           0x80000000  // ydnar: ok to place landmines on this surface

@@ -3685,6 +3685,17 @@ static qboolean CG_IsOverBounce(float vel, float initHeight,
 	return qfalse;
 }
 
+static bool CG_SurfaceAllowsOverbounce(trace_t *trace)
+{
+	if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE)
+	{
+		return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
+	} else
+	{
+		return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
+	}
+}
+
 /*
 =========
 CG_DrawOB
@@ -3747,7 +3758,7 @@ static void CG_DrawOB(void)
 			t = trace.endpos[2];
 
 			// below ob
-			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity))
+			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 			{
 				CG_DrawStringExt(SCREEN_CENTER_X + 10, 220, "B", colorWhite, qfalse, qtrue,
 				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3771,7 +3782,7 @@ static void CG_DrawOB(void)
 		//CG_Printf("h0=%f, t=%f\n", h0, t);
 
 		// fall ob
-		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity))
+		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X - 10, 220, "F", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3780,7 +3791,7 @@ static void CG_DrawOB(void)
 
 		// jump ob
 		if (ps->groundEntityNum != ENTITYNUM_NONE
-		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity))
+		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X, 220, "J", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3800,7 +3811,7 @@ static void CG_DrawOB(void)
 		//CG_Printf("h0=%f, t=%f\n", h0, t);
 
 		// sticky fall ob
-		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity))
+		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X - 10, 220, "F", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3809,14 +3820,14 @@ static void CG_DrawOB(void)
 
 		// sticky jump ob
 		if (ps->groundEntityNum != ENTITYNUM_NONE
-		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity))
+		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X, 220, "J", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
-		if (b)
+		if (b && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X - 20, 220, "S", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
