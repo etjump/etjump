@@ -26,8 +26,9 @@
 * CHS 50 displays the last jump coordinates.
 * !spec now correctly only tries to match players that are not spectating.
 * Added two new spawnflags for target_startTimer
-  32 disable explosive weapons pickup
-  64 disable portal gun pickup
+  - 32 disable explosive weapons pickup
+  - 64 disable portal gun pickup
+* Drowned players are now correctly put to spec after a period of inactivity.
 
 # ETJump 2.1.0
 
