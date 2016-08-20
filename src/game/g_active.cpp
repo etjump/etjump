@@ -584,7 +584,8 @@ qboolean ClientInactivityTimer(gclient_t *client)
 	         (client->pers.cmd.buttons & BUTTON_ATTACK) ||
 	         (client->pers.cmd.wbuttons & WBUTTON_LEANLEFT) ||
 	         (client->pers.cmd.wbuttons & WBUTTON_LEANRIGHT)
-	         || client->ps.pm_type == PM_DEAD)
+			 // ETJump: we don't care about limbo players
+	         /*|| client->ps.pm_type == PM_DEAD*/)
 	{
 
 		client->inactivityWarning = qfalse;
