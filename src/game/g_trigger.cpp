@@ -379,13 +379,17 @@ void SP_target_push(gentity_t *self)
 }
 
 /*
-==============================================================================
-
-trigger_teleport
-
-==============================================================================
+trigger_teleporter
+=====================
+spawnflags:
+	0	Sets destination angles, but preserves player's velocity direction,
+		so we move exactly same direction as before
+	1	Sets destination angles and resets velocity
+	2	Sets destination angles and converts velocity to match destination direction,
+		so we are now moving same way as our teleporter_dest angle is pointing at
+	4	Converts player's angles(yaw) and velocity to be relative to the new destination angles
+	8   Same as 4 but also preserves pitch
 */
-
 void trigger_teleporter_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
 	gentity_t *dest;
@@ -403,6 +407,29 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	if (!dest)
 	{
 		G_Printf("Couldn't find teleporter destination\n");
+		return;
+	}
+
+	if (self->spawnflags & 1)
+	{
+		VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
+	}
+
+	if (self->spawnflags & 2)
+	{
+		TeleportPlayerExt(other, dest->s.origin, dest->s.angles);
+		return;
+	}
+
+	if (self->spawnflags & 4)
+	{
+		TeleportPlayerKeepAngles_Clank(other, self, dest->s.origin, dest->s.angles);
+		return;
+	}
+
+	if (self->spawnflags & 8)
+	{
+		TeleportPlayerKeepAngles(other, self, dest->s.origin, dest->s.angles);
 		return;
 	}
 
