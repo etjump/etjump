@@ -168,7 +168,163 @@ void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles)
 	}
 }
 
-// ETJump: teleports player in specific origin, converts angles and velocity 
+// ETJump: teleports player in specific origin, converts angles(yaw) and velocity 
+//         to be relative to the new destination angles
+//         created for clank's map
+void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles)
+{
+	vec3_t   newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
+	vec3_t   triggerOrigin, tempActivator, tempOrigin;
+	vec3_t   normalizedVelocity, veloAngles;
+	vec3_t   sPlane[6];
+	vec_t    minDistYZ, minDistXZ, minDistXY;
+	vec_t    speed, length;
+	auto     negDir = qfalse;
+
+	// normalized velocity is the directionvector for calculating the intersectionpoints
+	VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
+
+	// calculate the origin of the triggerbrush
+	VectorSubtract(trigger->r.maxs, trigger->r.mins, tempOrigin);
+	VectorMA(trigger->r.mins, 0.5f, tempOrigin, triggerOrigin);
+
+	// calculate the intersection-points of playermovement with the 6 planes of the triggerbrush
+	// the shortest distance between player and intersectionpoints selects the plane
+	// (where did we get into the trigger, from what side?)
+	if (normalizedVelocity[0] != 0.0f)
+	{
+		VectorMA(player->client->ps.origin, (trigger->r.mins[0] - player->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[0]);
+		VectorMA(player->client->ps.origin, (trigger->r.maxs[0] - player->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[3]);
+		minDistYZ = min(VectorDistance(player->client->ps.origin, sPlane[0]), VectorDistance(player->client->ps.origin, sPlane[3]));
+	}
+	else
+	{
+		minDistYZ = 10000.0f;
+	}
+	if (normalizedVelocity[1] != 0.0f)
+	{
+		VectorMA(player->client->ps.origin, (trigger->r.mins[1] - player->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[1]);
+		VectorMA(player->client->ps.origin, (trigger->r.maxs[1] - player->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[4]);
+		minDistXZ = min(VectorDistance(player->client->ps.origin, sPlane[1]), VectorDistance(player->client->ps.origin, sPlane[4]));
+	}
+	else
+	{
+		minDistXZ = 10000.0f;
+	}
+	if (normalizedVelocity[2] != 0.0f)
+	{
+		VectorMA(player->client->ps.origin, (trigger->r.mins[2] - player->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[2]);
+		VectorMA(player->client->ps.origin, (trigger->r.maxs[2] - player->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[5]);
+		minDistXY = min(VectorDistance(player->client->ps.origin, sPlane[2]), VectorDistance(player->client->ps.origin, sPlane[5]));
+	}
+	else
+	{
+		minDistXY = 10000.0f;
+	}
+
+
+	// copy origins to tempvars
+	VectorCopy(triggerOrigin, tempOrigin);
+	VectorCopy(player->client->ps.origin, tempActivator);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	// PLANE YZ (NORMAL X)
+	if (minDistYZ < minDistXZ && minDistYZ < minDistXY)
+	{
+		// check +/- direction of trigger
+		if (triggerOrigin[0] < player->client->ps.origin[0])
+		{
+			negDir = qtrue;
+		}
+
+		// calc viewangles
+		VectorCopy(angles, newViewAngles);
+		newViewAngles[YAW] += player->client->ps.viewangles[YAW];
+
+		// calc velocity
+		speed = VectorLength(player->client->ps.velocity);
+		vectoangles(player->client->ps.velocity, veloAngles);
+		veloAngles[YAW] += angles[YAW];
+		if (negDir)
+		{
+			veloAngles[YAW] += 180.0f;
+		}
+		AngleVectors(veloAngles, newVelocity, nullptr, nullptr);
+		VectorScale(newVelocity, speed, newVelocity);
+
+		// calc origin
+		tempOrigin[0] = tempActivator[0] = 0.0f;
+		VectorSubtract(tempActivator, tempOrigin, offset);
+		if (negDir)
+		{
+			offset[1] *= -1.0f;
+		}
+		length = offset[1];
+		offset[0] = sin(-DEG2RAD(angles[1])) * length;
+		offset[1] = cos(-DEG2RAD(angles[1])) * length;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////
+	// PLANE XZ (NORMAL Y)
+	else if (minDistXZ < minDistYZ && minDistXZ < minDistXY)
+	{
+		// check +/- direction of trigger
+		if (triggerOrigin[1] < player->client->ps.origin[1])
+		{
+			negDir = qtrue;
+		}
+
+		// calc viewangles
+		VectorCopy(angles, newViewAngles);
+		newViewAngles[YAW] += (player->client->ps.viewangles[YAW] - 90.0f);
+
+		// calc velocity
+		speed = VectorLength(player->client->ps.velocity);
+		vectoangles(player->client->ps.velocity, veloAngles);
+		veloAngles[YAW] += angles[YAW] - 90.0f;
+		if (negDir)
+		{
+			veloAngles[YAW] += 180.0f;
+		}
+		AngleVectors(veloAngles, newVelocity, nullptr, nullptr);
+		VectorScale(newVelocity, speed, newVelocity);
+
+		// calc origin offset
+		tempOrigin[1] = tempActivator[1] = 0.0f;
+		VectorSubtract(tempActivator, tempOrigin, offset);
+		if (triggerOrigin[1] < player->client->ps.origin[1])
+		{
+			offset[0] *= -1.0f;
+		}
+		length = offset[0];
+		offset[1] = sin(DEG2RAD(angles[1] - 90.0f)) * length;
+		offset[0] = cos(DEG2RAD(angles[1] - 90.0f)) * length;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////
+	// PLANE XY (NORMAL Z) // makes no sense, set dest values
+	else if (minDistXY < minDistXZ && minDistXY < minDistYZ)
+	{
+		// viewangles
+		VectorCopy(angles, newViewAngles);
+		// velocity
+		VectorCopy(vec3_origin, newVelocity);
+		// origin
+		VectorCopy(vec3_origin, offset);
+	}
+
+	// add origin offset
+	VectorAdd(origin, offset, newOrigin);
+	// set velocity
+	VectorCopy(newVelocity, player->client->ps.velocity);
+	// correct Viewangles
+	if (negDir)
+	{
+		newViewAngles[YAW] += 180.0f;
+	}
+
+	TeleportPlayer(player, newOrigin, newViewAngles);
+}
+
+// ETJump: teleports player in specific origin, converts angles(yaw, pitch) and velocity 
 //         to be relative to the new destination angles
 void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles)
 {

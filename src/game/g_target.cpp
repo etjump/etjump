@@ -614,7 +614,8 @@ spawnflags:
 	1	Sets destination angles and resets velocity
 	2	Sets destination angles and converts velocity to match destination direction,
 		so we are now moving same way as our teleporter_dest angle is pointing at
-	4	Converts player's angles and velocity to be relative to the new destination angles
+	4	Converts player's angles(yaw) and velocity to be relative to the new destination angles
+	8   Same as 4 but also preserves pitch
 */
 void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
@@ -645,6 +646,12 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	}
 
 	if (self->spawnflags & 4)
+	{
+		TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin, dest->s.angles);
+		return;
+	}
+
+	if (self->spawnflags & 8)
 	{
 		TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
 		return;
