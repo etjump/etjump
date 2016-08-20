@@ -25,13 +25,14 @@
 * `misc_landmine` no longer crashes the client.
 * CHS 50 displays the last jump coordinates.
 * !spec now correctly only tries to match players that are not spectating.
-* Added two new spawnflags for target_startTimer
-  - 32 disable explosive weapons pickup
-  - 64 disable portal gun pickup
+* Added two new spawnflags for `target_startTimer`
+  - __32__ disable explosive weapons pickup
+  - __64__ disable portal gun pickup
 * Drowned players are now correctly put to spec after a period of inactivity.
-* Added worldspawn key nooverbounce.  Disables overbounce if set to anything but 0.
+* Added worldspawn key `nooverbounce`.  Disables overbounce if set to anything but __0__.
   - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
-* Added spawnflag 8 to target_teleporter. Works like 4 except keeps the pitch value as well.
+* Added spawnflag __8__ to `target_teleporter`. Works like __4__ (preserves yaw) except keeps the pitch value as well.
+* `trigger_teleporter` now supports same spawnflags as `target_teleporter`.
 
 # ETJump 2.1.0
 
