@@ -31,6 +31,7 @@
 * Drowned players are now correctly put to spec after a period of inactivity.
 * Added worldspawn key nooverbounce.  Disables overbounce if set to anything but 0.
   - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
+* Added spawnflag 8 to target_teleporter. Works like 4 except keeps the pitch value as well.
 
 # ETJump 2.1.0
 
