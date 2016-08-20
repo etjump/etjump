@@ -18,7 +18,7 @@ namespace ETJump
 		// A single node in a tjline
 		struct Node
 		{
-			vec3_t coordinate;
+			vec3_t coordinates;
 			float speed;
 		};
 
@@ -32,7 +32,7 @@ namespace ETJump
 			float width;
 		};
 
-		TrickjumpLines(ClientCommandsHandler *clientCommandsHandler, ClientCommandsHandler *serverCommandsHandler);
+		TrickjumpLines(ClientCommandsHandler *clientCommandsHandler, ClientCommandsHandler *serverCommandsHandler, const std::string& currentMap);
 		~TrickjumpLines();
 
 	private:
@@ -44,13 +44,23 @@ namespace ETJump
 
 		// Lists all currently available tjline file (files with .json extension
 		// in etjump/tjlines/
-		void listFiles();
+		void listFiles() const;
+
+		// Gets all namespaces from pk3 and local files
+		std::vector<std::string> getSortedNamespaces();
+
+		void loadNamespace(const std::_Simple_types<std::basic_string<char>>::value_type& cs);
+		// Tries to load a tjline file.
+		void loadNamespaces(const std::vector<std::string>& args);
 
 		ClientCommandsHandler *_clientCommandsHandler;
 		ClientCommandsHandler *_serverCommandsHandler;
 
 		// namespaced routes
-		std::map<std::string, Route> _routes;
+		std::map<std::string, std::vector<Route>> _routes;
+
+		// where the current map's tjlines are at
+		std::string _tjlDirectory;
 	};
 }
 

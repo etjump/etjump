@@ -3441,7 +3441,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// to subcribe to commands 
 	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
 	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
-	ETJump::trickjumpLines = std::unique_ptr<ETJump::TrickjumpLines>(new ETJump::TrickjumpLines(ETJump::consoleCommandsHandler.get(), ETJump::serverCommandsHandler.get()));
+	ETJump::trickjumpLines = std::unique_ptr<ETJump::TrickjumpLines>(new ETJump::TrickjumpLines(ETJump::consoleCommandsHandler.get(), ETJump::serverCommandsHandler.get(), cgs.rawmapname));
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");

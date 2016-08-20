@@ -13,9 +13,14 @@ void ETJump::ClientPrintUtilities::printToConsole(std::string text)
 		text = text.substr(CG_PRINTF_BUF_LIMIT);
 		CG_Printf("%s", current.c_str());
 	}
+
+	if (text.length() > 0)
+	{
+		CG_Printf("%s", text.c_str());
+	}
 }
 
 void ETJump::ClientPrintUtilities::printToConsole(const boost::format& fmt)
-{
+{	
 	ClientPrintUtilities::printToConsole(fmt.str());
 }

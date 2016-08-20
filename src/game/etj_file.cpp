@@ -1,5 +1,7 @@
 #include "etj_file.h"
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
+#include <fstream>
 #ifdef GAMEDLL
 #include "g_local.h"
 #elif CGAMEDLL
@@ -117,6 +119,7 @@ std::vector<std::string> ETJump::File::localFileList(const std::string& path, co
 		tinydir_file file;
 		if (tinydir_readfile_n(&dir, &file, i) == -1)
 		{
+			tinydir_close(&dir);
 			throw std::runtime_error("Unknown runtime error while listing directory contents.");
 		}
 
@@ -125,8 +128,14 @@ std::vector<std::string> ETJump::File::localFileList(const std::string& path, co
 			continue;
 		}
 
+		if (!boost::ends_with(file.name, extension))
+		{
+			continue;
+		}
+
 		files.push_back(file.name);
 	}
+	tinydir_close(&dir);
 	return files;
 }
 
