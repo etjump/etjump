@@ -33,6 +33,12 @@
   - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
 * Added spawnflag __8__ to `target_teleporter`. Works like __4__ (preserves yaw) except keeps the pitch value as well.
 * `trigger_teleporter` now supports same spawnflags as `target_teleporter`.
+* Added overbounce watcher. You can save a position and the watcher will display whenever you are pointing at an OB location.
+  - `etj_drawObWatcher` to toggle the OB watcher.
+  - `etj_obWatcherX/Y` to change the location of the watcher.
+  - `ob_save <optional name>` to save the current position. Saved position will be displayed.
+  - `ob_load <optional name>` to load the saved position to be displayed. 
+  - `ob_reset` to remove the displayed position. (Nothing will be displayed)
 
 # ETJump 2.1.0
 
