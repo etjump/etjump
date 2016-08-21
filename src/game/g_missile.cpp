@@ -2261,7 +2261,7 @@ gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir)
 	}
 	// map shoots & hits
 	else {
-		bolt->clipmask = MASK_SHOT;
+		bolt->clipmask = MASK_MISSILESHOT;
 	}
 
 	bolt->s.pos.trType = TR_LINEAR;
