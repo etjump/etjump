@@ -9,6 +9,7 @@
 #include "cg_local.h"
 #include "cg_mainext.h"
 #include "etj_client_commands_handler.h"
+#include "etj_overbounce_watcher.h"
 
 displayContextDef_t cgDC;
 
@@ -80,6 +81,7 @@ namespace ETJump
 {
 	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
 	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +438,10 @@ vmCvar_t etj_noActivateLean;
 
 vmCvar_t shared;
 
+vmCvar_t etj_drawObWatcher;
+vmCvar_t etj_obWatcherX;
+vmCvar_t etj_obWatcherY;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -732,7 +738,10 @@ cvarTable_t cvarTable[] =
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
 	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
-	{ &shared, "shared", "0", CVAR_ROM }
+	{ &shared, "shared", "0", CVAR_ROM },
+	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
+	{&etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
+	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE}
 };
 
 
@@ -3439,9 +3448,15 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	CG_Printf("--------------------------------------------------------------------------------\n");
 
 	// NOTE: client server commands handlers must be created before other modules as other modules use them
-	// to subcribe to commands 
-	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
-	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler());
+	// to subcribe to commands.
+	// Generally all modules should get these as constructor params but they're still being used in the C code
+	// => make sure they're created first
+	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(nullptr));
+	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(trap_AddCommand));
+
+	// initialize renderables
+	// Overbounce watcher
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::OverbounceWatcher(ETJump::consoleCommandsHandler.get())));
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");

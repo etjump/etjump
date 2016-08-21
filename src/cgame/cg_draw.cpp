@@ -3,6 +3,7 @@
 
 #include "cg_local.h"
 #include "../game/q_shared.h"
+#include "etj_irenderable.h"
 
 
 #define STATUSBARHEIGHT 452
@@ -6094,6 +6095,11 @@ static void CG_Draw2D(void)
 	}
 
 	ETJump_DrawDrawables();
+
+	for (const auto & r : ETJump::renderables)
+	{
+		r->render();
+	}
 
 	// Info overlays
 	CG_DrawOverlays();

@@ -18,6 +18,7 @@
 #include "cg_public.h"
 #include "../ui/ui_shared.h"
 #include <memory>
+#include <vector>
 
 #define MAX_LOCATIONS       256
 #define POWERUP_BLINKS      5
@@ -2481,6 +2482,10 @@ extern vmCvar_t etj_noActivateLean;
 
 extern vmCvar_t shared;
 
+extern vmCvar_t etj_drawObWatcher;
+extern vmCvar_t etj_obWatcherX;
+extern vmCvar_t etj_obWatcherY;
+
 //
 // cg_main.c
 //
@@ -3064,16 +3069,13 @@ void CG_AddAtmosphericEffects();
 
 void trap_PumpEventLoop(void);
 
-// print message on the local console
-void        trap_Print(const char *fmt);
-
-// abort the game
-void        trap_Error(const char *fmt);
-
 // milliseconds should only be used for performance tuning, never
 // for anything game related.  Get time from the CG_DrawActiveFrame parameter
 int         trap_Milliseconds(void);
 int         trap_RealTime(qtime_t *qtime);
+
+// ETJump: refactored print related syscalls to own file
+#include "cg_print_syscalls.h"
 
 // console variable interaction
 void        trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);
@@ -3788,9 +3790,11 @@ void CG_CheckActivateLean();
 namespace ETJump
 {
 	class ClientCommandsHandler;
+	class IRenderable;
 
 	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

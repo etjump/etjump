@@ -206,6 +206,9 @@
     <ClCompile Include="etj_client_commands_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_overbounce_watcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -263,6 +266,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_client_commands_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_overbounce_watcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_print_syscalls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_irenderable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

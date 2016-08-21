@@ -286,6 +286,7 @@
     <ClCompile Include="cg_timerun.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
+    <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -297,6 +298,7 @@
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="cg_mainext.h" />
+    <ClInclude Include="cg_print_syscalls.h" />
     <ClInclude Include="cg_public.h" />
     <ClInclude Include="..\ui\keycodes.h" />
     <ClInclude Include="..\..\main\ui\menudef.h" />
@@ -305,6 +307,8 @@
     <ClInclude Include="cg_timerun.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_drawable.h" />
+    <ClInclude Include="etj_irenderable.h" />
+    <ClInclude Include="etj_overbounce_watcher.h" />
     <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />

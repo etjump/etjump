@@ -2,7 +2,8 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 
-ETJump::ClientCommandsHandler::ClientCommandsHandler()
+ETJump::ClientCommandsHandler::ClientCommandsHandler(void (*addToAutocompleteList)(const char *)):
+	_addToAutocompleteList{addToAutocompleteList}
 {
 	_callbacks.clear();
 }
@@ -24,7 +25,7 @@ bool ETJump::ClientCommandsHandler::check(const std::string& command, const std:
 	return false;
 }
 
-bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback)
+bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback, bool autocomplete)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
 	if (_callbacks.find(lowercaseCommand) != end(_callbacks))
@@ -33,6 +34,10 @@ bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::f
 	}
 
 	_callbacks[lowercaseCommand] = callback;
+	if (_addToAutocompleteList != nullptr && autocomplete)
+	{
+		_addToAutocompleteList(command.c_str());
+	}
 	return true;
 }
 
