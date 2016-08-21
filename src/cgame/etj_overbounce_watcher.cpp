@@ -157,6 +157,12 @@ void ETJump::OverbounceWatcher::render() const
 				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
+
+		if (b)
+		{
+			CG_DrawStringExt(etj_obWatcherX.integer - 10, etj_obWatcherY.integer, "S", colorWhite, qfalse, qtrue,
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		}
 	}
 }
 
