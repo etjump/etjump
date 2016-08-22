@@ -139,7 +139,6 @@ CheatsOk
 */
 qboolean    CheatsOk(gentity_t *ent)
 {
-#ifdef EDITION999
 	if (!g_cheats.integer)
 	{
 		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
@@ -151,19 +150,6 @@ qboolean    CheatsOk(gentity_t *ent)
 		return qfalse;
 	}
 	return qtrue;
-#else
-	if (!g_cheats.integer)
-	{
-		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
-		return qfalse;
-	}
-	if (ent->health <= 0)
-	{
-		trap_SendServerCommand(ent - g_entities, va("print \"You must be alive to use this command.\n\""));
-		return qfalse;
-	}
-	return qtrue;
-#endif
 }
 
 
@@ -618,17 +604,10 @@ void Cmd_Give_f(gentity_t *ent)
 //	trace_t		trace;
 	int      amount;
 	qboolean hasAmount = qfalse;
-#ifdef EDITION999
 	if (!CheatsOk(ent))
 	{
 		return;
 	}
-#else
-	if (!CheatsOk(ent))
-	{
-		return;
-	}
-#endif
 
 	//----(SA)	check for an amount (like "give health 30")
 	amt = ConcatArgs(2);
@@ -832,8 +811,6 @@ void Cmd_God_f(gentity_t *ent)
 		return;
 	}
 
-
-#ifdef EDITION999
 	if (!CheatsOk(ent))
 	{
 		return;
@@ -844,18 +821,6 @@ void Cmd_God_f(gentity_t *ent)
 		CP("cp \"God has been disabled on this map.\n\"");
 		return;
 	}
-#else
-	if (!CheatsOk(ent))
-	{
-		return;
-	}
-
-	if (level.noGod)
-	{
-		CP("cp \"God has been disabled on this map.\n\"");
-		return;
-	}
-#endif // EDITION999
 
 	name = ConcatArgs(1);
 
