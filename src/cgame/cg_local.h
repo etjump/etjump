@@ -2579,6 +2579,16 @@ void CG_DrawBigStringColor2(int x, int y, const char *s, vec4_t color);
 // END JOSEPH
 int CG_DrawStrlen(const char *str);
 
+namespace ETJump
+{
+	int DrawStringWidth(const char* text, float scalex);
+	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style);
+	void DrawMiniString(int x, int y, const char *s, float alpha);
+	void DrawSmallString(int x, int y, const char *s, float alpha);
+	void DrawBigString(int x, int y, const char *s, float alpha);
+}
+
+
 float *CG_FadeColor(int startMsec, int totalMsec);
 float *CG_TeamColor(int team);
 void CG_TileClear(void);
