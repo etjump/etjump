@@ -1376,8 +1376,14 @@ qboolean CG_ConsoleCommand(void)
 
 	std::vector<std::string> arguments;
 	std::string command = cmd;
-	for (auto i = 0, argc = trap_Argc(); i < argc; ++i)
-		arguments.push_back(CG_Argv(i));
+	auto argc = trap_Argc();
+	for (i = 0; i < argc; ++i)
+	{
+		// Zero: cannot use CG_Argv here either. Check serverCommandsHandler on cg_servercommands.c for more info
+		char buf[MAX_TOKEN_CHARS]{};
+		trap_Argv(1, buf, sizeof(buf));
+		arguments.push_back(buf);
+	}
 	if (ETJump::consoleCommandsHandler->check(command, arguments))
 	{
 		return qtrue;
