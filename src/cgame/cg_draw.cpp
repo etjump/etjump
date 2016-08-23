@@ -6251,24 +6251,6 @@ void CG_DrawActive(stereoFrame_t stereoView)
 //		}
 //	}
 
-	if (cg.showGameView)
-	{
-		float x, y, w, h;
-		x = LIMBO_3D_X;
-		y = LIMBO_3D_Y;
-		w = LIMBO_3D_W;
-		h = LIMBO_3D_H;
-
-		CG_AdjustFrom640(&x, &y, &w, &h);
-
-		cg.refdef_current->x      = x;
-		cg.refdef_current->y      = y;
-		cg.refdef_current->width  = w;
-		cg.refdef_current->height = h;
-
-		CG_Letterbox((LIMBO_3D_W / 640.f) * 100, (LIMBO_3D_H / 480.f) * 100, qfalse);
-	}
-
 	CG_ShakeCamera();       // NERVE - SMF
 
 	// Gordon
