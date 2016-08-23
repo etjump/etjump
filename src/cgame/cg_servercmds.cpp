@@ -3109,7 +3109,14 @@ static void CG_ServerCommand(void)
 
 	std::vector<std::string> arguments;
 	for (auto i = 1, argc = trap_Argc(); i < argc; ++i)
-		arguments.push_back(CG_Argv(i));
+	{
+		// Zero: CG_Argv cannot be used here as it uses a single static
+		// buffer and breaks the CG_ServerCommandExt as cmd will be replaced
+		// with whatever was the last argument
+		char buf[MAX_TOKEN_CHARS]{};
+		trap_Argv(i, buf, sizeof(buf));
+		arguments.push_back(buf);
+	}
 	if (ETJump::serverCommandsHandler->check(cmd, arguments))
 	{
 		return;
