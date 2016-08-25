@@ -166,6 +166,10 @@ void ETJump::OverbounceWatcher::render() const
 	}
 }
 
+void ETJump::OverbounceWatcher::beforeRender()
+{
+}
+
 void ETJump::OverbounceWatcher::save(const std::string& name, Coordinate coordinate)
 {
 	auto pos = _positions.find(name);

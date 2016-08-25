@@ -21,6 +21,7 @@ namespace ETJump
 		~OverbounceWatcher();
 
 		void render() const override;
+		void beforeRender() override;
 	private:
 		ClientCommandsHandler *_clientCommandsHandler;
 

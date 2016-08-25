@@ -6098,6 +6098,7 @@ static void CG_Draw2D(void)
 
 	for (const auto & r : ETJump::renderables)
 	{
+		r->beforeRender();
 		r->render();
 	}
 
