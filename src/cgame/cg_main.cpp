@@ -653,7 +653,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
-	{ &cg_speedY,                   "etj_speedY",                  "360",                    CVAR_ARCHIVE             },
+	{ &cg_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE             },
 	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
@@ -711,7 +711,7 @@ cvarTable_t cvarTable[] =
 	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
 	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
 	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
-	{ &player_runTimerY,            "etj_runTimerY",               "380",                    CVAR_ARCHIVE             },
+	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
 	

@@ -20,7 +20,7 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 	*y *= cgs.screenYScale;
 
 	if (w && h) {
-		*w *= cgs.screenXScale;
+		*w *= cgs.screenYScale;
 		*h *= cgs.screenYScale;
 	}
 
@@ -1521,4 +1521,98 @@ char *CG_TranslateString(const char *string)
 	trap_TranslateString(string, buf);
 
 	return buf;
+}
+
+namespace ETJump
+{
+	int DrawStringWidth(const char* text, float scalex)
+	{
+		return CG_Text_Width_Ext(text, scalex, 0, &cgs.media.limboFont2);
+	}
+
+	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style)
+	{
+		int         len, count;
+		vec4_t      newColor;
+		glyphInfo_t *glyph;
+		fontInfo_t  *font = &cgs.media.limboFont2;
+		float       adjust = 0.0;
+
+		scalex *= font->glyphScale;
+		scaley *= font->glyphScale;
+
+		if (text)
+		{
+			const char *s = text;
+			trap_R_SetColor(color);
+			memcpy(&newColor[0], &color[0], sizeof(vec4_t));
+			len = strlen(text);
+			if (limit > 0 && len > limit)
+			{
+				len = limit;
+			}
+			count = 0;
+			while (s && *s && count < len)
+			{
+				glyph = &font->glyphs[static_cast<unsigned char>(*s)];
+				if (Q_IsColorString(s))
+				{
+					if (!forceColor)
+					{
+						if (*(s + 1) == COLOR_NULL)
+						{
+							memcpy(newColor, color, sizeof(newColor));
+						}
+						else
+						{
+							memcpy(newColor, g_color_table[ColorIndex(*(s + 1))], sizeof(newColor));
+							newColor[3] = color[3];
+						}
+						trap_R_SetColor(newColor);
+					}
+					s += 2;
+				}
+				else
+				{
+					float yadj = scaley * glyph->top;
+					if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+					{
+						int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+						colorBlack[3] = newColor[3];
+						trap_R_SetColor(colorBlack);
+						CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs, y - yadj + ofs, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+						colorBlack[3] = 1.0;
+						trap_R_SetColor(newColor);
+					}
+
+					CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex), y - yadj, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+					x += (glyph->xSkip * scalex) + adjust;
+					s++;
+					count++;
+				}
+			}
+			trap_R_SetColor(nullptr);
+		}
+	}
+
+	void DrawMiniString(int x, int y, const char *s, float alpha)
+	{
+		vec4_t color;
+		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
+		DrawString(x, y, 0.20f, 0.22f, color, qfalse, s, 0, 0);
+	}
+
+	void DrawSmallString(int x, int y, const char *s, float alpha)
+	{
+		vec4_t color;
+		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
+		DrawString(x, y, 0.23f, 0.25f, color, qfalse, s, 0, 0);
+	}
+
+	void DrawBigString(int x, int y, const char *s, float alpha)
+	{
+		vec4_t color;
+		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
+		DrawString(x, y, 0.3f, 0.3f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
+	}
 }

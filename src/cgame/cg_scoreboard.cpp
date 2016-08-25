@@ -445,234 +445,66 @@ WM_DrawObjectives
 =================
 */
 
-#define INFO_XP_WIDTH           36
-#define INFO_LIVES_WIDTH        20
-#define INFO_PLAYER_WIDTH       100
-#define INFO_CGAZ_WIDTH         35
-#define INFO_SCORE_WIDTH        56
-#define INFO_FPS_WIDTH          36
-#define INFO_CLASS_WIDTH        20
-#define INFO_LATENCY_WIDTH      40
-#define INFO_PMOVE_WIDTH        54
-#define INFO_TEAM_HEIGHT        24
-#define INFO_BORDER             0
-#define INFO_LINE_HEIGHT        30
-#define INFO_TOTAL_WIDTH        (INFO_PLAYER_WIDTH + INFO_CLASS_WIDTH + INFO_FPS_WIDTH + INFO_SCORE_WIDTH + INFO_PMOVE_WIDTH + INFO_LATENCY_WIDTH + INFO_CGAZ_WIDTH)
+namespace INFO
+{
+	static const int TOTAL_WIDTH =   280;
+	static const int PLAYER_WIDTH =  0.54 * TOTAL_WIDTH;
+	static const int FPS_WIDTH =     0.09 * TOTAL_WIDTH;
+	static const int PMOVE_WIDTH =   0.14 * TOTAL_WIDTH;
+	static const int CGAZ_WIDTH =    0.12 * TOTAL_WIDTH;
+	static const int LATENCY_WIDTH = 0.11 * TOTAL_WIDTH;
+	static const int TEAM_HEIGHT =   20;
+	static const int LINE_HEIGHT =   16;
+	static const int MAX_LINES =     22;
+}
 
 int WM_DrawObjectives(int x, int y, int width, float fade)
 {
-	const char *s, *str;
-	int        tempy, rows;
-	int        msec, mins, seconds, tens; // JPW NERVE
-	vec4_t     tclr = { 0.6f, 0.6f, 0.6f, 1.0f };
+	const char *s;
+	auto       height = 26;
+	float      textWidth;
+	auto       font = &cgs.media.limboFont2;
+	vec4_t     color1, color2;
 
-	if (cg.snap->ps.pm_type == PM_INTERMISSION)
-	{
-		const char *s, *buf, *shader = NULL, *flagshader = NULL, *nameshader = NULL;
+	VectorCopy(colorMdGreen, color1);
+	VectorCopy(colorWhite, color2);
+	color1[3] = fade;
+	color2[3] = fade;
 
-		// Moved to CG_DrawIntermission
-/*		static int doScreenshot = 0, doDemostop = 0;
+	CG_FillRect(x, y, width, height, clrUiBack);
+	CG_FillRect(x, y, width, height, clrUiBar);
+	CG_DrawRect_FixedBorder(x, y, width, height, 1, colorBlack);
 
-        // OSP - End-of-level autoactions
-        if(!cg.demoPlayback) {
-            if(!cg.latchVictorySound) {
-                if(cg_autoAction.integer & AA_SCREENSHOT) {
-                    doScreenshot = cg.time + 1000;
-                }
-                if(cg_autoAction.integer & AA_STATSDUMP) {
-                    CG_dumpStats_f();
-                }
-                if((cg_autoAction.integer & AA_DEMORECORD) && (cgs.gametype == GT_WOLF_STOPWATCH && cgs.currentRound != 1)) {
-                    doDemostop = cg.time + 5000;	// stats should show up within 5 seconds
-                }
-            }
-            if(doScreenshot > 0 && doScreenshot < cg.time) {
-                CG_autoScreenShot_f();
-                doScreenshot = 0;
-            }
-            if(doDemostop > 0 && doDemostop < cg.time) {
-                trap_SendConsoleCommand("stoprecord\n");
-                doDemostop = 0;
-            }
-        }
-*/
-		rows = 8;
-		y   += SMALLCHAR_HEIGHT * (rows - 1);
+	// ETJump: ETJump version
+	s = ETJUMP_VERSION;
+	CG_Text_Paint_Ext(
+		x + 5,
+		y + 17,
+		0.25f, 0.25f, color1, s, 0, 0, 0, font);
 
-		s   = CG_ConfigString(CS_MULTI_MAPWINNER);
-		buf = Info_ValueForKey(s, "winner");
+	// ETJump: map name on the center
+	s = cgs.rawmapname;
+	textWidth = CG_Text_Width_Ext(s, 0.25f, 0, font);
+	CG_Text_Paint_Ext(
+		x + width / 2 - textWidth / 2,
+		y + 17, 
+		0.25f, 0.25f, color2, s, 0, 0, 0, font);
+	
+	// ETJump: ETJump website link
+	s = ETJUMP_WEB;
+	textWidth = CG_Text_Width_Ext(s, 0.25f, 0, font);
+	CG_Text_Paint_Ext(
+		x + width - 5 - textWidth, 
+		y + 17, 
+		0.25f, 0.25f, color1, s, 0, 0, 0, font);
 
-		if (atoi(buf) == -1)
-		{
-			str = "ITS A TIE!";
-		}
-		else if (atoi(buf))
-		{
-			str = "ALLIES";
-//			shader = "ui/assets/portraits/allies_win";
-			flagshader = "ui/assets/portraits/allies_win_flag.tga";
-			nameshader = "ui/assets/portraits/text_allies.tga";
-
-/*			if ( !cg.latchVictorySound ) {
-                cg.latchVictorySound = qtrue;
-                trap_S_StartLocalSound( trap_S_RegisterSound( "sound/music/allies_win.wav", qtrue ), CHAN_LOCAL_SOUND );	// FIXME: stream
-            }*/
-		}
-		else
-		{
-			str = "AXIS";
-//			shader = "ui/assets/portraits/axis_win";
-			flagshader = "ui/assets/portraits/axis_win_flag.tga";
-			nameshader = "ui/assets/portraits/text_axis.tga";
-
-/*			if ( !cg.latchVictorySound ) {
-                cg.latchVictorySound = qtrue;
-                trap_S_StartLocalSound( trap_S_RegisterSound( "sound/music/axis_win.wav", qtrue ), CHAN_LOCAL_SOUND );	// FIXME: stream
-            }*/
-		}
-
-		y += SMALLCHAR_HEIGHT * ((rows - 2) / 2);
-
-		if (flagshader)
-		{
-			CG_DrawPic(SCREEN_OFFSET_X + 100, 10, 210, 136, trap_R_RegisterShaderNoMip(flagshader));
-			CG_DrawPic(SCREEN_OFFSET_X + 325, 10, 210, 136, trap_R_RegisterShaderNoMip(flagshader));
-		}
-
-		if (shader)
-		{
-			CG_DrawPic(SCREEN_OFFSET_X + 229, 10, 182, 136, trap_R_RegisterShaderNoMip(shader));
-		}
-		if (nameshader)
-		{
-			CG_DrawPic(SCREEN_OFFSET_X + 140, 50, 127, 64, trap_R_RegisterShaderNoMip(nameshader));
-			CG_DrawPic(SCREEN_OFFSET_X + 365, 50, 127, 64, trap_R_RegisterShaderNoMip("ui/assets/portraits/text_win.tga"));
-		}
-		return y;
-	}
-// JPW NERVE -- mission time & reinforce time
-	else
-	{
-		tempy = y;
-		rows  = 1;
-
-		CG_FillRect(x - 5, y - 2, width + 5, 21, clrUiBack);
-		CG_FillRect(x - 5, y - 2, width + 5, 21, clrUiBar);
-		CG_DrawRect_FixedBorder(x - 5, y - 2, width + 5, 21, 1, colorBlack);
-
-		y += SMALLCHAR_HEIGHT * (rows - 1);
-		if (cgs.timelimit > 0.0f)
-		{
-			msec = (cgs.timelimit * 60.f * 1000.f) - (cg.time - cgs.levelStartTime);
-
-			seconds  = msec / 1000;
-			mins     = seconds / 60;
-			seconds -= mins * 60;
-			tens     = seconds / 10;
-			seconds -= tens * 10;
-		}
-		else
-		{
-			msec = mins = tens = seconds = 0;
-		}
-
-		if (cgs.gamestate != GS_PLAYING)
-		{
-			s = va("%s %s", CG_TranslateString("MISSION TIME:"), CG_TranslateString("WARMUP"));
-		}
-		else if (msec < 0 && cgs.timelimit > 0.0f)
-		{
-			if (cgs.gamestate == GS_WAITING_FOR_PLAYERS)
-			{
-				s = va("%s %s", CG_TranslateString("MISSION TIME:"), CG_TranslateString("GAME STOPPED"));
-			}
-			else
-			{
-				s = va("%s %s", CG_TranslateString("MISSION TIME:"), CG_TranslateString("SUDDEN DEATH"));
-			}
-		}
-		else
-		{
-			s = va("%s   %2.0f:%i%i", CG_TranslateString("MISSION TIME:"), (float)mins, tens, seconds);     // float cast to line up with reinforce time
-		}
-
-		//	CG_Text_Paint_Ext( x, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1 );
-
-		s = va(CG_TranslateString(va("^<%s", cgs.rawmapname)));
-		CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2) / 2, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
-		
-		s = va("^<%s", ETJUMP_WEB);
-		CG_Text_Paint_Ext(SCREEN_WIDTH - SCREEN_OFFSET_X - 22 - CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont2), y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
-		
-		s = va("^<%s", ETJUMP_VERSION);
-		CG_Text_Paint_Ext(SCREEN_OFFSET_X + 22, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont2);
-
-		if (cgs.gametype != GT_WOLF_LMS)
-		{
-			if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_AXIS || cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_ALLIES)
-			{
-				msec = CG_CalculateReinfTime(qfalse) * 1000;
-			}
-			else // no team (spectator mode)
-			{
-				msec = 0;
-			}
-
-			if (msec)
-			{
-				seconds  = msec / 1000;
-				mins     = seconds / 60;
-				seconds -= mins * 60;
-				tens     = seconds / 10;
-				seconds -= tens * 10;
-
-				s = va("%s %2.0f:%i%i", CG_TranslateString("REINFORCE TIME:"), (float)mins, tens, seconds);
-				//	CG_Text_Paint_Ext( 640 - 20 - CG_Text_Width_Ext( s, 0.25f, 0, &cgs.media.limboFont1 ), y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1 );
-			}
-		}
-
-		// NERVE - SMF
-		if (cgs.gametype == GT_WOLF_STOPWATCH)
-		{
-			int w;
-			s = va("%s %i", CG_TranslateString("STOPWATCH ROUND"), cgs.currentRound + 1);
-
-			w = CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont1);
-
-			//CG_Text_Paint_Ext( x + 300 - w*0.5f, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1 );
-		}
-		else if (cgs.gametype == GT_WOLF_LMS)
-		{
-			int w;
-			s = va("%s %i  %s %i-%i", CG_TranslateString("ROUND"), cgs.currentRound + 1, CG_TranslateString("SCORE"), cg.teamWonRounds[1], cg.teamWonRounds[0]);
-			w = CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont1);
-
-			//CG_Text_Paint_Ext( x + 300 - w*0.5f, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1 );
-		}
-		else if (cgs.gametype == GT_WOLF_CAMPAIGN)
-		{
-			int w;
-			s = va("MAP %i of %i", cgs.currentCampaignMap + 1, cgs.campaignData.mapCount);
-			w = CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont1);
-
-			//CG_Text_Paint_Ext( x + 300 - w*0.5f, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1 );
-		}
-
-		y += SMALLCHAR_HEIGHT * 2;
-	}
-// jpw
-
-	return y;
+	return y + height;
 }
 
-static void WM_DrawClientScore(int x, int y, score_t *score, float *color, float fade)
+static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 {
-	int          offset;
-	float        tempx;
 	vec4_t       hcolor;
 	clientInfo_t *ci;
-	int          w;
-	const char         *cgazOn;
 
 	if (y + SMALLCHAR_HEIGHT >= 470)
 	{
@@ -683,374 +515,139 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float *color, float
 
 	if (score->client == cg.snap->ps.clientNum)
 	{
-		tempx = x;
+		Vector4Set(hcolor, .5f, .5f, .2f, fade * 0.3);
+		CG_FillRect(x, y, INFO::TOTAL_WIDTH, INFO::LINE_HEIGHT, hcolor);
+	}
 
-		hcolor[3] = fade * 0.3;
-		VectorSet(hcolor, .5f, .5f, .2f);           // DARK-RED
+	{
+		const char *s;
+		int textWidth;
+		// DHM - Nerve
+		Vector4Set(hcolor, 1, 1, 1, fade);
+		
+		// draw class icons
+		if (ci->team != TEAM_SPECTATOR) {
+			int playerType;
+			playerType = ci->cls;
 
-		// FIXME Removed INFO_CGAZ_WIDTH x1
-		CG_FillRect(tempx - 4, y + 1, INFO_PLAYER_WIDTH - INFO_BORDER + 4, SMALLCHAR_HEIGHT - 1, hcolor);
-		tempx += INFO_PLAYER_WIDTH;
+			if (playerType == PC_MEDIC)
+			{
+			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID]);
+			}
+			else if (playerType == PC_ENGINEER)
+			{
+			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION]);
+			}
+			else if (playerType == PC_FIELDOPS)
+			{
+			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_SIGNALS]);
+			}
+			else if (playerType == PC_COVERTOPS)
+			{
+			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS]);
+			}
+			else
+			{
+			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS]);
+			}
+		}
 
 		if (ci->team == TEAM_SPECTATOR)
 		{
-			int width;
-			width = INFO_CLASS_WIDTH + INFO_SCORE_WIDTH  + INFO_CGAZ_WIDTH + INFO_LATENCY_WIDTH * 2 - 6;
+			ETJump::DrawString(
+				x + 4,
+				y + 12,
+				0.23f, 0.25f, hcolor, qfalse, ci->name, 18, 0);
+			x += INFO::PLAYER_WIDTH;
 
-			CG_FillRect(tempx, y + 1, width - INFO_BORDER, SMALLCHAR_HEIGHT - 1, hcolor);
-			tempx += width;
-		}
-		else
-		{
-			int width;
-			width = INFO_CLASS_WIDTH + INFO_SCORE_WIDTH  + INFO_CGAZ_WIDTH + INFO_LATENCY_WIDTH * 2 - 6;
-
-			CG_FillRect(tempx, y + 1, width - INFO_BORDER, SMALLCHAR_HEIGHT - 1, hcolor);
-		}
-	}
-
-	tempx = x;
-
-	// DHM - Nerve
-	VectorSet(hcolor, 1, 1, 1);
-	hcolor[3] = fade;
-
-	offset = 0;
-
-	// draw name, 12 chars if drawing cgaz users, else 16
-	if (cg_drawCGazUsers.integer)
-	{
-		CG_DrawStringExt(tempx, y, ci->name, hcolor, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 12);
-	}
-	else
-	{
-		CG_DrawStringExt(tempx, y, ci->name, hcolor, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 16);
-	}
-
-	tempx += INFO_PLAYER_WIDTH - offset;
-
-	if (ci->team == TEAM_SPECTATOR)
-	{
-		const char *s;
-		int        totalwidth;
-
-		totalwidth = INFO_CLASS_WIDTH + INFO_SCORE_WIDTH + INFO_CGAZ_WIDTH + INFO_LATENCY_WIDTH - 8 + INFO_CGAZ_WIDTH;
-
-		if (!cg_drawCGazUsers.integer)
-		{
-			tempx += INFO_CGAZ_WIDTH;
-		}
-
-		tempx += 19;
-
-		if (score->ping == -1)
-		{
-			s = CG_TranslateString("^3CONNECTING");
-			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-			CG_DrawSmallString(tempx + 10, y, s, fade);
-		}
-		else if (ci->clientNum == score->followedClient)
-		{
-			s = CG_TranslateString("^3SPECTATOR");
-			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-			CG_DrawSmallString(tempx + 12, y, s, fade);
-		}
-		else
-		{
-			s = cgs.clientinfo[score->followedClient].name;
-
-			// Draws max 12 chars of the name
-			CG_DrawStringExt(tempx + 3, y, s, hcolor, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 12);
-
-			CG_DrawSmallString(tempx - 16, y, CG_TranslateString("^3>"), fade);
-		}
-
-		if (!cg_drawCGazUsers.integer)
-		{
-			tempx -= 27;
-		}
-		CG_DrawSmallString(tempx + 10 + INFO_PMOVE_WIDTH + INFO_FPS_WIDTH, y, va("^z%5i", score->ping), fade);
-		return;
-	}
-	else
-	{
-		int playerType;
-		playerType = ci->cls;
-
-		if (!cg_drawCGazUsers.integer)
-		{
-			tempx += INFO_CGAZ_WIDTH;
-		}
-
-		if (playerType == PC_MEDIC)
-		{
-			CG_DrawPic(tempx + 1, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID]);
-		}
-		else if (playerType == PC_ENGINEER)
-		{
-			CG_DrawPic(tempx + 1, y + 2, 12, 12, cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION]);
-		}
-		else if (playerType == PC_FIELDOPS)
-		{
-			CG_DrawPic(tempx + 1, y + 2, 12, 12, cgs.media.skillPics[SK_SIGNALS]);
-		}
-		else if (playerType == PC_COVERTOPS)
-		{
-			CG_DrawPic(tempx + 1, y + 2, 12, 12, cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS]);
-		}
-		else
-		{
-			CG_DrawPic(tempx + 1, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS]);
-		}
-	}
-
-	tempx += INFO_CLASS_WIDTH;
-
-
-	// Dini, shows current FPS..
-	CG_DrawSmallString(tempx, y, va("%3i", ci->maxFPS), fade);
-	tempx += (INFO_FPS_WIDTH / 2) - 5;
-
-	// Dini, shows current Pmove..
-	CG_DrawSmallString(tempx + 15, y, va("%4i", ci->pmoveFixed), fade);
-	tempx += (INFO_PMOVE_WIDTH / 2) - 5;
-
-	if (cg_drawCGazUsers.integer)
-	{
-
-		if (ci->CGaz)
-		{
-			cgazOn = "Yes";
-		}
-		else
-		{
-			cgazOn = " No";
-		}
-
-		CG_DrawSmallString(tempx + 50, y, va("%s", cgazOn), fade);
-		tempx += (INFO_CGAZ_WIDTH / 2) - 5;
-
-	}
-	else
-	{
-		tempx -= 13;
-	}
-
-	// Ping
-	CG_DrawSmallString(tempx + 50, y, va("%5i", score->ping), fade);
-
-}
-
-const char *WM_TimeToString(float msec)
-{
-	int mins, seconds, tens;
-
-	seconds  = msec / 1000;
-	mins     = seconds / 60;
-	seconds -= mins * 60;
-	tens     = seconds / 10;
-	seconds -= tens * 10;
-
-	return va("%i:%i%i", mins, tens, seconds);
-}
-
-static int WM_DrawInfoLine(int x, int y, float fade)
-{
-	int        w, defender, winner;
-	const char *s;
-	vec4_t     tclr = { 0.6f, 0.6f, 0.6f, 1.0f };
-
-	if (cg.snap->ps.pm_type != PM_INTERMISSION)
-	{
-		return y;
-	}
-
-	w = 360;
-//	CG_DrawPic( 320 - w/2, y, w, INFO_LINE_HEIGHT, trap_R_RegisterShaderNoMip( "ui/assets/mp_line_strip.tga" ) );
-
-	s        = CG_ConfigString(CS_MULTI_INFO);
-	defender = atoi(Info_ValueForKey(s, "defender"));
-
-	s      = CG_ConfigString(CS_MULTI_MAPWINNER);
-	winner = atoi(Info_ValueForKey(s, "winner"));
-
-	if (cgs.currentRound)
-	{
-		// first round
-		s = va(CG_TranslateString("CLOCK IS NOW SET TO %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
-	}
-	else
-	{
-		// second round
-		if (!defender)
-		{
-			if (winner != defender)
+			if (score->ping == -1)
 			{
-				s = "ALLIES SUCCESSFULLY BEAT THE CLOCK!";
+				s = CG_TranslateString("^3CONNECTING");
+				ETJump::DrawSmallString(
+					x + 13, 
+					y + 12, 
+					s, fade);
+			}
+			else if (ci->clientNum == score->followedClient)
+			{
+				s = CG_TranslateString("^3SPECTATOR");
+				ETJump::DrawSmallString(
+					x + 13, 
+					y + 12, 
+					s, fade);
 			}
 			else
 			{
-				s = "ALLIES COULDN'T BEAT THE CLOCK!";
+				s = va("%s%s", "^3> ^7", cgs.clientinfo[score->followedClient].name);
+				ETJump::DrawString(x - 12, y + 12, 0.23f, 0.25f, hcolor, qfalse, s, 14, 0);
 			}
-		}
+
+			x += INFO::FPS_WIDTH + INFO::PMOVE_WIDTH + INFO::CGAZ_WIDTH;
+
+			s = va("%i", score->ping);
+			textWidth = ETJump::DrawStringWidth(s, 0.23f);
+			ETJump::DrawSmallString(
+				x + INFO::LATENCY_WIDTH / 2 - textWidth / 2 - 1,
+				y + 12,
+				s, fade);
+		} 
 		else
 		{
-			if (winner != defender)
-			{
-				s = "AXIS SUCCESSFULLY BEAT THE CLOCK!";
-			}
-			else
-			{
-				s = "AXIS COULDN'T BEAT THE CLOCK!";
-			}
+			ETJump::DrawString(
+				x + 4 + 12 + 2,
+				y + 12,
+				0.23f, 0.25f, hcolor, qfalse, ci->name, 18, 0);
+			x += INFO::PLAYER_WIDTH;
+
+			s = va("%i", ci->maxFPS);
+			textWidth = ETJump::DrawStringWidth(s, 0.23f);
+			ETJump::DrawSmallString(
+				x + INFO::FPS_WIDTH / 2 - textWidth / 2 - 1,
+				y + 12,
+				s, fade);
+			x += INFO::FPS_WIDTH;
+
+			s = va("%i", ci->pmoveFixed);
+			textWidth = ETJump::DrawStringWidth(s, 0.23f);
+			ETJump::DrawSmallString(
+				x + INFO::PMOVE_WIDTH / 2 - textWidth / 2 - 1,
+				y + 12,
+				s, fade);
+			x += INFO::PMOVE_WIDTH;
+
+			s = va("%s", ci->CGaz ? "Yes" : "No");
+			textWidth = ETJump::DrawStringWidth(s, 0.23f);
+			ETJump::DrawSmallString(
+				x + INFO::CGAZ_WIDTH / 2 - textWidth / 2 - 1,
+				y + 12,
+				s, fade);
+			x += INFO::CGAZ_WIDTH;
+
+			s = va("%i", score->ping);
+			textWidth = ETJump::DrawStringWidth(s, 0.23f);
+			ETJump::DrawSmallString(
+				x + INFO::LATENCY_WIDTH / 2 - textWidth / 2 - 1,
+				y + 12,
+				s, fade);
 		}
-
-		s = CG_TranslateString(s);
 	}
-
-	CG_FillRect(SCREEN_OFFSET_X + 320 - w / 2, y, w, 20, clrUiBar);
-	CG_DrawRect_FixedBorder(SCREEN_OFFSET_X + 320 - w / 2, y, w, 20, 1, colorBlack);
-
-	w = CG_Text_Width_Ext(s, 0.25f, 0, &cgs.media.limboFont1);
-
-	CG_Text_Paint_Ext(SCREEN_OFFSET_X + 320 - w * 0.5f, y + 15, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1);
-//	CG_DrawSmallString( 320 - w/2, ( y + INFO_LINE_HEIGHT / 2 ) - SMALLCHAR_HEIGHT / 2, s, fade );
-	return y + INFO_LINE_HEIGHT + 6;
 }
 
 static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 {
 	vec4_t hcolor;
-	float  tempx, tempy;
-	int    height, width;
-	int    i;
-	int    count = 0;
-	vec4_t tclr  = { 0.6f, 0.6f, 0.6f, 1.0f };
+	int    width;
+	vec4_t tclr  = { 0.6f, 0.6f, 0.6f, fade };
+	auto   boldFont = &cgs.media.limboFont1;
+	int    textWidth, tempy;
+	const  char* text;
+	vec4_t borderColor = { 0.0f, 0.0f, 0.0f, 0.6 * fade };
+	vec4_t borderColor2 = { 0.0f, 0.0f, 0.0f, fade };
 
-	height = SMALLCHAR_HEIGHT * maxrows;
-
-	width = INFO_PLAYER_WIDTH + INFO_CLASS_WIDTH + INFO_PMOVE_WIDTH + INFO_FPS_WIDTH + INFO_LATENCY_WIDTH + INFO_CGAZ_WIDTH;
-
-	CG_FillRect(x - 5, y - 2, width + 5, 21, clrUiBack);
-	CG_FillRect(x - 5, y - 2, width + 5, 21, clrUiBar);
-
-	Vector4Set(hcolor, 0, 0, 0, fade);
-	CG_DrawRect_FixedBorder(x - 5, y - 2, width + 5, 21, 1, colorBlack);
-
-	// draw header
-	if (cg_gameType.integer == GT_WOLF_LMS)
-	{
-		char *s;
-		if (team == TEAM_AXIS)
-		{
-			s = va("%s [%d] (%d %s)", CG_TranslateString("AXIS"), cg.teamScores[0], cg.teamPlayers[team], CG_TranslateString("PLAYERS"));
-			s = va("%s ^3%s", s, cg.teamFirstBlood == TEAM_AXIS ? CG_TranslateString("FIRST BLOOD") : "");
-
-			CG_Text_Paint_Ext(x, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1);
-		}
-		else if (team == TEAM_ALLIES)
-		{
-			s = va("%s [%d] (%d %s)", CG_TranslateString("ALLIES"), cg.teamScores[1], cg.teamPlayers[team], CG_TranslateString("PLAYERS"));
-			s = va("%s ^3%s", s, cg.teamFirstBlood == TEAM_ALLIES ? CG_TranslateString("FIRST BLOOD") : "");
-
-			CG_Text_Paint_Ext(x, y + 13, 0.25f, 0.25f, tclr, s, 0, 0, 0, &cgs.media.limboFont1);
-		}
-	}
-	else
-	{
-		if (team == TEAM_AXIS)
-		{
-			CG_Text_Paint_Ext(x, y + 13, 0.25f, 0.25f, tclr, va("%s [%d] (%d %s)", CG_TranslateString("AXIS"), cg.teamScores[0], cg.teamPlayers[team], CG_TranslateString("PLAYERS")), 0, 0, 0, &cgs.media.limboFont1);
-		}
-		else if (team == TEAM_ALLIES)
-		{
-			CG_Text_Paint_Ext(x, y + 13, 0.25f, 0.25f, tclr, va("%s [%d] (%d %s)", CG_TranslateString("ALLIES"), cg.teamScores[1], cg.teamPlayers[team], CG_TranslateString("PLAYERS")), 0, 0, 0, &cgs.media.limboFont1);
-		}
-	}
-
-
-	y += SMALLCHAR_HEIGHT + 3;
-
-	// save off y val
-	tempy = y;
-
-	// draw color bands
-	for (i = 0; i <= maxrows; i++)
-	{
-		if (i % 2 == 0)
-		{
-			VectorSet(hcolor, (80.f / 255.f), (80.f / 255.f), (80.f / 255.f));          // LIGHT BLUE
-		}
-		else
-		{
-			VectorSet(hcolor, (0.f / 255.f), (0.f / 255.f), (0.f / 255.f));         // DARK BLUE
-		}
-		hcolor[3] = fade * 0.3;
-
-		CG_FillRect(x - 5, y, width + 5, SMALLCHAR_HEIGHT + 1, hcolor);
-		trap_R_SetColor(colorBlack);
-		CG_DrawTopBottom(x - 5, y, width + 5, SMALLCHAR_HEIGHT + 1, 1);
-		trap_R_SetColor(NULL);
-
-		y += SMALLCHAR_HEIGHT;
-	}
-	hcolor[3] = 1;
-
-	y = tempy;
-
-	tempx = x;
-
-	CG_FillRect(x - 5, y - 1, width + 5, 18, clrUiBack);
-	//CG_FillRect( x-5, y-1, width+5, 18, clrUiBar );
-	trap_R_SetColor(colorBlack);
-	CG_DrawTopBottom(x - 5, y - 1, width + 5, 18, 1);
-	trap_R_SetColor(NULL);
-
-	// draw player info headings
-	CG_DrawSmallString(tempx, y, CG_TranslateString("Name"), fade);
-	if (cg_drawCGazUsers.integer)
-	{
-		tempx += INFO_PLAYER_WIDTH;
-	}
-	else
-	{
-		tempx += (INFO_PLAYER_WIDTH + 35);
-	}
-
-	CG_DrawSmallString(tempx + 2, y, CG_TranslateString("C"), fade);
-	tempx += INFO_CLASS_WIDTH;
-
-	CG_DrawSmallString(tempx, y, CG_TranslateString("FPS"), fade);
-	tempx += INFO_FPS_WIDTH;
-
-	CG_DrawSmallString(tempx, y, CG_TranslateString("Pmove"), fade);
-	if (cg_drawCGazUsers.integer)
-	{
-		tempx += INFO_PMOVE_WIDTH - 10;
-	}
-	else
-	{
-		tempx += INFO_PMOVE_WIDTH;
-	}
-
-	if (cg_drawCGazUsers.integer)
-	{
-		CG_DrawSmallString(tempx, y, CG_TranslateString("CGaz"), fade);
-		tempx += INFO_CGAZ_WIDTH;
-	}
-
-	CG_DrawSmallString(tempx, y, CG_TranslateString("Ping"), fade);
-	tempx += INFO_LATENCY_WIDTH;
-
-
-	y += SMALLCHAR_HEIGHT;
-
-	// draw player info
-	VectorSet(hcolor, 1, 1, 1);
-	hcolor[3] = fade;
+	width = INFO::TOTAL_WIDTH;
 
 	cg.teamPlayers[team] = 0; // JPW NERVE
-	for (i = 0; i < cg.numScores; i++)
+	for (auto i = 0; i < cg.numScores; i++)
 	{
 		if (team != cgs.clientinfo[cg.scores[i].client].team)
 		{
@@ -1060,28 +657,95 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 		cg.teamPlayers[team]++;
 	}
 
-	count = 0;
-	for (i = 0; i < cg.numScores && count < maxrows; i++)
+	// team main header
 	{
-		if (team != cgs.clientinfo[cg.scores[i].client].team)
+		CG_FillRect(x, y, width, INFO::TEAM_HEIGHT, clrUiBack);
+		CG_FillRect(x, y, width, INFO::TEAM_HEIGHT, clrUiBar);
+
+		Vector4Set(hcolor, 0, 0, 0, fade);
+		CG_DrawRect_FixedBorder(x, y, width, INFO::TEAM_HEIGHT, 1, hcolor);
+
+		if (team == TEAM_AXIS)
 		{
-			continue;
+			text = va("%s (%d %s)", CG_TranslateString("AXIS"), cg.teamPlayers[team], CG_TranslateString("PLAYERS"));
+		}
+		else
+		{
+			text = va("%s (%d %s)", CG_TranslateString("ALLIES"), cg.teamPlayers[team], CG_TranslateString("PLAYERS"));
 		}
 
-		WM_DrawClientScore(x, y, &cg.scores[i], hcolor, fade);
-		y += SMALLCHAR_HEIGHT;
-		count++;
+		textWidth = CG_Text_Width_Ext(text, 0.22f, 0, boldFont);
+		CG_Text_Paint_Ext(
+			x + width / 2 - textWidth / 2,
+			y + 14,
+			0.22f, 0.22f, tclr, text, 0, 0, 0, boldFont);
+
+		y += INFO::TEAM_HEIGHT;
+	}
+
+	// team table header
+	{
+		CG_FillRect(x, y, width, INFO::LINE_HEIGHT, clrUiBack);
+		CG_FillRect(x, y + INFO::LINE_HEIGHT - 1, width, 1, borderColor2);
+		int tempx = x;
+
+		// draw player info headings
+		ETJump::DrawSmallString(tempx + 5, y + 12, CG_TranslateString("Name"), fade);
+		tempx += INFO::PLAYER_WIDTH;
+
+		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("FPS"), fade);
+		tempx += INFO::FPS_WIDTH;
+
+		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Pmove"), fade);
+		tempx += INFO::PMOVE_WIDTH;
+
+		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("CGaz"), fade);
+		tempx += INFO::CGAZ_WIDTH;
+
+		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Ping"), fade);
+
+		y += INFO::LINE_HEIGHT;
+	}
+
+	// draw color bands
+	tempy = y;
+	for (auto i = 0; i < maxrows; i++)
+	{
+		if (i % 2 == 0)
+		{
+			Vector4Set(hcolor, 0.3f, 0.3f, 0.3f, fade * 0.3);
+		}
+		else
+		{
+			Vector4Set(hcolor, 0.0f, 0.0f, 0.0f, fade * 0.3);
+		}
+
+		// ETJump: background
+		CG_FillRect(x, tempy, width, INFO::LINE_HEIGHT, hcolor);
+		// ETJump: bottom border
+		CG_FillRect(x, tempy + INFO::LINE_HEIGHT, width, 1, borderColor);
+
+		tempy += INFO::LINE_HEIGHT;
+	}
+
+	// draw active players
+	for (auto i = 0; i < cg.numScores && i < maxrows; i++)
+	{
+		if (team == cgs.clientinfo[cg.scores[i].client].team)
+		{
+			WM_DrawClientScore(x, y, &cg.scores[i], fade);
+			y += INFO::LINE_HEIGHT;
+		}
 	}
 
 	// draw spectators
-	y += SMALLCHAR_HEIGHT;
-
-	for (i = 0; i < cg.numScores; i++)
+	for (auto i = 0; i < cg.numScores && i < maxrows; i++)
 	{
 		if (cgs.clientinfo[cg.scores[i].client].team != TEAM_SPECTATOR)
 		{
 			continue;
 		}
+
 		if (team == TEAM_AXIS && (i % 2))
 		{
 			continue;
@@ -1091,11 +755,11 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 			continue;
 		}
 
-		WM_DrawClientScore(x, y, &cg.scores[i], hcolor, fade);
-		y += SMALLCHAR_HEIGHT;
+		y += INFO::LINE_HEIGHT;
+		WM_DrawClientScore(x, y, &cg.scores[i], fade);
 	}
 
-	return y;
+	return tempy;
 }
 // -NERVE - SMF
 
@@ -1108,14 +772,8 @@ Draw the normal in-game scoreboard
 */
 qboolean CG_DrawScoreboard(void)
 {
-	int   x = 0, y = 0, x_right;
 	float fade;
 	float *fadeColor;
-
-	x = 20;
-	y = 10;
-
-	x_right = SCREEN_WIDTH - SCREEN_OFFSET_X - x - (INFO_TOTAL_WIDTH - 5);
 
 	// don't draw anything if the menu or console is up
 	if (cg_paused.integer)
@@ -1139,7 +797,6 @@ qboolean CG_DrawScoreboard(void)
 	if (cg.showScores || cg.predictedPlayerState.pm_type == PM_INTERMISSION)
 	{
 		fade      = 1.0;
-		fadeColor = colorWhite;
 	}
 	else
 	{
@@ -1159,49 +816,19 @@ qboolean CG_DrawScoreboard(void)
 		CG_DrawAltScoreboard(fade);
 		return qtrue;
 	}
-	else if (cg_altScoreboard.integer == 2)
+	
+	if (cg_altScoreboard.integer == 2)
 	{
 		CG_DrawAltScoreboard2(fade);
 		return qtrue;
 	}
 
-	y = WM_DrawObjectives(SCREEN_OFFSET_X + x, y, 640 - 2 * x + 5, fade);
+	auto x = SCREEN_OFFSET_X + 20;
+	auto y = 10, scy = 0, width = INFO::TOTAL_WIDTH * 2 + 40;
 
-	// Dini, Note, positions \ draws the team container thingies etc
-	if (cgs.gametype == GT_WOLF_STOPWATCH && (cg.snap->ps.pm_type == PM_INTERMISSION))
-	{
-		y = WM_DrawInfoLine(SCREEN_OFFSET_X + x, 155, fade);
-
-		WM_TeamScoreboard(SCREEN_OFFSET_X + x, y, TEAM_AXIS, fade, 8);
-		x = x_right;
-		WM_TeamScoreboard(x, y, TEAM_ALLIES, fade, 8);
-	}
-	else
-	{
-		if (cg.snap->ps.pm_type == PM_INTERMISSION)
-		{
-			WM_TeamScoreboard(SCREEN_OFFSET_X + x, y, TEAM_AXIS, fade, 9);
-			x = x_right;
-			WM_TeamScoreboard(x, y, TEAM_ALLIES, fade, 9);
-		}
-		else
-		{
-			WM_TeamScoreboard(SCREEN_OFFSET_X + x, y, TEAM_AXIS, fade, 25);
-			x = x_right;
-			WM_TeamScoreboard(x + 56, y, TEAM_ALLIES, fade, 25);
-		}
-	}
-
-	/*	if(!CG_IsSinglePlayer()) {
-	        qtime_t ct;
-
-	        G_showWindowMessages();
-	        trap_RealTime(&ct);
-	        s = va("^3%02d:%02d:%02d - %02d %s %d",
-	                            ct.tm_hour, ct.tm_min, ct.tm_sec,
-	                            ct.tm_mday, aMonths[ct.tm_mon], 1900 + ct.tm_year);
-	        CG_DrawStringExt(444, 12, s, colorWhite, qfalse, qtrue, 8, 8, 0);
-	    }
-	*/
+	y = WM_DrawObjectives(x, y, INFO::TOTAL_WIDTH * 2 + 40, fade);
+	WM_TeamScoreboard(x, y + 5, TEAM_AXIS, fade, INFO::MAX_LINES);
+	WM_TeamScoreboard(x + INFO::TOTAL_WIDTH + 40, y + 5, TEAM_ALLIES, fade, INFO::MAX_LINES);
+	
 	return qtrue;
 }

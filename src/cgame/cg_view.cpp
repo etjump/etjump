@@ -241,7 +241,7 @@ static void CG_CalcVrect(void)
 		cg.refdef.width  = w;
 		cg.refdef.height = h;
 
-		CG_Letterbox((LIMBO_3D_W / 640.f) * 100, (LIMBO_3D_H / 480.f) * 100, qfalse);
+		CG_Letterbox((LIMBO_3D_W / static_cast<float>(SCREEN_WIDTH)) * 100, (LIMBO_3D_H / 480.f) * 100, qfalse);
 		return;
 	}
 
