@@ -2382,6 +2382,11 @@ extern vmCvar_t cg_speedSizeY;
 extern vmCvar_t cg_speedColor;
 extern vmCvar_t cg_speedAlpha;
 extern vmCvar_t etj_speedShadow;
+extern vmCvar_t etj_drawMaxSpeed;
+extern vmCvar_t etj_maxSpeedX;
+extern vmCvar_t etj_maxSpeedY;
+extern vmCvar_t etj_maxSpeedDuration;
+
 extern vmCvar_t cg_adminpassword;
 extern vmCvar_t cg_username;
 extern vmCvar_t cg_popupTime;
@@ -2595,6 +2600,7 @@ namespace ETJump
 
 
 float *CG_FadeColor(int startMsec, int totalMsec);
+float CG_FadeAlpha(int startMsec, int totalMsec);
 float *CG_TeamColor(int team);
 void CG_TileClear(void);
 void CG_ColorForHealth(vec4_t hcolor);
@@ -3800,10 +3806,12 @@ void CG_CheckActivateLean();
 namespace ETJump
 {
 	class ClientCommandsHandler;
+	class EntityEventsHandler;
 	class IRenderable;
 
 	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::unique_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 

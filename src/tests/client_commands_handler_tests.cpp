@@ -7,13 +7,12 @@ class ClientCommandsHandlerTests : public testing::Test
 {
 public:
 	void SetUp() override {
-		handler = ClientCommandsHandler();
 	}
 
 	void TearDown() override {
 	}
 
-	ClientCommandsHandler handler;
+	ClientCommandsHandler handler{ ClientCommandsHandler(nullptr) };
 };
 
 TEST_F(ClientCommandsHandlerTests, SubscribeShouldCreateACallback)

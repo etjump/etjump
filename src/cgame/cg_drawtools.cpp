@@ -963,6 +963,39 @@ float *CG_FadeColor(int startMsec, int totalMsec)
 	return color;
 }
 
+/*
+================
+CG_FadeAlpha
+================
+*/
+float CG_FadeAlpha(int startMsec, int totalMsec)
+{
+	float alpha = 0.0;
+	int   t;
+
+	if (startMsec == 0)
+	{
+		return alpha;
+	}
+
+	t = cg.time - startMsec;
+
+	if (t >= totalMsec)
+	{
+		return alpha;
+	}
+
+	// fade out
+	if (totalMsec - t < FADE_TIME)
+	{
+		alpha = (totalMsec - t) * 1.0 / FADE_TIME;
+	} else
+	{
+		alpha = 1.0;
+	}
+
+	return alpha;
+}
 
 /*
 ================

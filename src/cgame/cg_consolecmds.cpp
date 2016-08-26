@@ -1518,5 +1518,4 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("records");
 	trap_AddCommand("times");
 	trap_AddCommand("ranks");
-	trap_AddCommand("mod_information");
 }

@@ -1130,6 +1130,7 @@ typedef enum
 	EV_AIRSTRIKEMESSAGE,
 	EV_MEDIC_CALL,
 	EV_PORTAL_TELEPORT,
+	EV_LOAD_TELEPORT,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 

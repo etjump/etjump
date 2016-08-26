@@ -1,6 +1,7 @@
 // cg_event.c -- handle entity events at snapshot or playerstate transitions
 
 #include "cg_local.h"
+#include "etj_entity_events_handler.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -3129,6 +3130,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		portalDetected = qtrue; //Used below.....
 		break;
 
+	case EV_LOAD_TELEPORT:
+		ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
+		break;
 	default:
 		DEBUGNAME("UNKNOWN");
 		break;

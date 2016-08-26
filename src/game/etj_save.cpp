@@ -562,6 +562,7 @@ void SaveSystem::Print(gentity_t *ent)
 void SaveSystem::TeleportPlayer(gentity_t* ent, SavePosition* pos)
 {
 	ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+	G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
 
 	VectorCopy(pos->origin, ent->client->ps.origin);
 	VectorClear(ent->client->ps.velocity);

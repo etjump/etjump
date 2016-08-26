@@ -286,6 +286,8 @@
     <ClCompile Include="cg_timerun.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
+    <ClCompile Include="etj_entity_events_handler.cpp" />
+    <ClCompile Include="etj_maxspeed.cpp" />
     <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
   </ItemGroup>
@@ -307,7 +309,9 @@
     <ClInclude Include="cg_timerun.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_drawable.h" />
+    <ClInclude Include="etj_entity_events_handler.h" />
     <ClInclude Include="etj_irenderable.h" />
+    <ClInclude Include="etj_maxspeed.h" />
     <ClInclude Include="etj_overbounce_watcher.h" />
     <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="tr_types.h" />
