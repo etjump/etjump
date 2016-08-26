@@ -42,6 +42,7 @@
 * Hud/ui clean up (replaced some drawchars on proper text drawing method)
 * Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer(ignores hundreds & thousands)
 * Added 'etj_drawMaxSpeed' variable and rest(etj_maxSpeedX/Y/Duration) to display max speed from previous load session
+* Fixed `etj_noActivateLean`, should work stable now
 
 # ETJump 2.1.0
 
