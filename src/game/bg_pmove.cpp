@@ -6541,7 +6541,7 @@ void PmoveSingle(pmove_t *pmove)
 	{
 		if (pm->cmd.wbuttons & WBUTTON_LEANLEFT && pm->cmd.buttons & BUTTON_ACTIVATE)
 		{
-			pm->cmd.rightmove = -128;
+			pm->cmd.rightmove = -127;
 			pm->cmd.wbuttons ^= WBUTTON_LEANLEFT;
 		}
 		else if (pm->cmd.wbuttons & WBUTTON_LEANRIGHT && pm->cmd.buttons & BUTTON_ACTIVATE)
