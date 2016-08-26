@@ -1242,10 +1242,10 @@ typedef struct
 	float currentFovValue;
 	qboolean hasTimerun;
 
+	// ETJump: player transparency
 	float currentTransparencyValue;
-	// used for noactivatelean
-	int etjActivateKey;
-	// hold last jump position
+
+	// ETJump: hold last jump position for chs
 	vec3_t etjLastJumpPos;
 } cg_t;
 
@@ -3791,7 +3791,6 @@ void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
-void CG_CheckActivateLean();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global ETJump objects

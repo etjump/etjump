@@ -5606,12 +5606,6 @@ void PM_UpdateLean(playerState_t *ps, usercmd_t *cmd, pmove_t *tpm)
 
 	if ((cmd->wbuttons & (WBUTTON_LEANLEFT | WBUTTON_LEANRIGHT))  && !cmd->forwardmove && cmd->upmove <= 0)
 	{
-		// client still can send activate lean commands
-		// disable that, so we won't experience micro leans
-		if ((cmd->buttons & BUTTON_ACTIVATE) && pm->pmext->noActivateLean) {
-			return;
-		}
-
 		// if both are pressed, result is no lean
 		if (cmd->wbuttons & WBUTTON_LEANLEFT)
 		{
@@ -6540,6 +6534,21 @@ void PmoveSingle(pmove_t *pmove)
 	{
 		pm->tracemask  &= ~CONTENTS_BODY;   // corpses can fly through bodies
 		pm->ps->eFlags &= ~EF_ZOOMING;
+	}
+
+	// ETJump: no activate lean
+	if (pm->pmext->noActivateLean)
+	{
+		if (pm->cmd.wbuttons & WBUTTON_LEANLEFT && pm->cmd.buttons & BUTTON_ACTIVATE)
+		{
+			pm->cmd.rightmove = -128;
+			pm->cmd.wbuttons ^= WBUTTON_LEANLEFT;
+		}
+		else if (pm->cmd.wbuttons & WBUTTON_LEANRIGHT && pm->cmd.buttons & BUTTON_ACTIVATE)
+		{
+			pm->cmd.rightmove = 127;
+			pm->cmd.wbuttons ^= WBUTTON_LEANRIGHT;
+		}
 	}
 
 	// setup - copy pressed keys into playerstate

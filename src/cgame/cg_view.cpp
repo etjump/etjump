@@ -2082,11 +2082,6 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 		return;
 	}
 
-	// no activate lean
-	if (etj_noActivateLean.integer) {
-		CG_CheckActivateLean();
-	}
-
 	CG_PB_ClearPolyBuffers();
 
 	CG_UpdatePMLists();

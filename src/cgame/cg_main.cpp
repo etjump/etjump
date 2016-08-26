@@ -3471,7 +3471,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
-	cg.etjActivateKey = -1; //set default to -1 => none
 #ifdef AC_SUPPORT
 
 	InitAntiCheat(clientAC);
@@ -3612,34 +3611,4 @@ void CG_DecodeQP(char *line)
 		}
 	}
 	*o = '\0';
-}
-
-void CG_CheckActivateLean() {
-	usercmd_t ucmd;
-	int num = trap_GetCurrentCmdNumber();
-
-	trap_GetUserCmd(num, &ucmd);
-	// Do we have +activate button pressed right now?
-	if (ucmd.buttons & BUTTON_ACTIVATE) {
-		// Do we also try to lean currently?
-		if ((ucmd.wbuttons & WBUTTON_LEANLEFT) || (ucmd.wbuttons & WBUTTON_LEANRIGHT)) {
-			int key = trap_Key_GetKey("+activate");
-			// unbind +activate button so it wont trigger +activate in the next frame,
-			// this way we avoid spamming -activate
-			trap_Key_SetBinding(key, "-activate");
-			// send -activate command, to be executed and to disable current +activate
-			trap_SendConsoleCommand("-activate");
-			// cache the key to be restored later
-			cg.etjActivateKey = key;
-		}
-	}
-	// Do we have key cached already?
-	else if (cg.etjActivateKey != -1) {
-		// Key is not pressed anymore?
-		if (trap_Key_IsDown(cg.etjActivateKey) == qfalse) {
-			// Bind it back
-			trap_Key_SetBinding(cg.etjActivateKey, "+activate");
-			cg.etjActivateKey = -1;
-		}
-	}
 }
