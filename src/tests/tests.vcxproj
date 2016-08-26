@@ -87,7 +87,7 @@
     <LibraryPath>$(GOOGLE_TEST_ROOT)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(GOOGLE_TEST_ROOT)\include;$(BOOST_ROOT);$(IncludePath)</IncludePath>
+    <IncludePath>$(GOOGLE_TEST_ROOT)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GOOGLE_TEST_ROOT)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
