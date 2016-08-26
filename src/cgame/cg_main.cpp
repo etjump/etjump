@@ -9,7 +9,9 @@
 #include "cg_local.h"
 #include "cg_mainext.h"
 #include "etj_client_commands_handler.h"
+#include "etj_entity_events_handler.h"
 #include "etj_overbounce_watcher.h"
+#include "etj_maxspeed.h"
 
 displayContextDef_t cgDC;
 
@@ -81,6 +83,7 @@ namespace ETJump
 {
 	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
 	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::unique_ptr<EntityEventsHandler> entityEventsHandler;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 
@@ -336,6 +339,10 @@ vmCvar_t cg_speedSizeY;
 vmCvar_t cg_speedColor;
 vmCvar_t cg_speedAlpha;
 vmCvar_t etj_speedShadow;
+vmCvar_t etj_drawMaxSpeed;
+vmCvar_t etj_maxSpeedX;
+vmCvar_t etj_maxSpeedY;
+vmCvar_t etj_maxSpeedDuration;
 
 vmCvar_t cg_adminpassword;
 vmCvar_t cg_username;
@@ -659,6 +666,10 @@ cvarTable_t cvarTable[] =
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
 	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawMaxSpeed,            "etj_drawMaxSpeed",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_maxSpeedX,               "etj_maxSpeedX",               "320",                    CVAR_ARCHIVE             },
+	{ &etj_maxSpeedY,               "etj_maxSpeedY",               "320",                    CVAR_ARCHIVE             },
+	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE             },
 
 	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
 	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
@@ -3453,10 +3464,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// => make sure they're created first
 	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(nullptr));
 	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(trap_AddCommand));
+	ETJump::entityEventsHandler = std::unique_ptr<ETJump::EntityEventsHandler>(new ETJump::EntityEventsHandler());
 
 	// initialize renderables
 	// Overbounce watcher
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::OverbounceWatcher(ETJump::consoleCommandsHandler.get())));
+	// Display max speed from previous load session
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");

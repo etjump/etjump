@@ -7,7 +7,7 @@ class ClientCommandsHandlerTests : public testing::Test
 {
 public:
 	void SetUp() override {
-		handler = ClientCommandsHandler();
+		handler = ClientCommandsHandler(nullptr);
 	}
 
 	void TearDown() override {

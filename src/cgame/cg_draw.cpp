@@ -5,7 +5,6 @@
 #include "../game/q_shared.h"
 #include "etj_irenderable.h"
 
-
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
 void Controls_GetConfig(void);
@@ -637,9 +636,6 @@ static void CG_DrawSpeed2(void)
 
 	switch (cg_drawSpeed2.integer)
 	{
-	case 1:
-		Com_sprintf(status, sizeof(status), va("%.0f", speed));
-		break;
 	case 2:
 		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
 		break;
@@ -661,6 +657,14 @@ static void CG_DrawSpeed2(void)
 	case 8:
 		Com_sprintf(status, sizeof(status), va("Speed: %.0f", speed));
 		break;
+	case 9:
+	{
+		auto tens = static_cast<int>(speed) / 10 % 10 * 10;
+		Com_sprintf(status, sizeof status, va("%02i", tens));
+	}
+		break;
+	default:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
 	}
 
 	w = CG_Text_Width_Ext(status, sizex, 0, &cgs.media.limboFont2) / 2;
