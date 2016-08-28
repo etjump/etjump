@@ -6423,16 +6423,7 @@ void UI_RunMenuScript(char **args)
 		}
 		if (Q_stricmp(name, "clientCheckVote") == 0)
 		{
-			int flags = trap_Cvar_VariableValue("cg_ui_voteFlags");
-
-			if (flags == VOTING_DISABLED)
-			{
-				trap_Cvar_SetValue("cg_ui_novote", 1);
-			}
-			else
-			{
-				trap_Cvar_SetValue("cg_ui_novote", 0);
-			}
+			trap_Cvar_SetValue("cg_ui_novote", 0);
 			return;
 		}
 		if (Q_stricmp(name, "reconnect") == 0)

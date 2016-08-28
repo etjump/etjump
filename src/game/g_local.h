@@ -796,20 +796,6 @@ typedef struct
 
 	qboolean bAutoReloadAux;            // TTimo - auxiliary storage for pmoveExt_t::bAutoReload, to achieve persistance
 
-	int applicationClient;              // Gordon: this client has requested to join your fireteam
-	int applicationEndTime;             // Gordon: you have X seconds to reply or this message will self destruct!
-
-	int invitationClient;               // Gordon: you have been invited to join this client's fireteam
-	int invitationEndTime;              // Gordon: quickly now, chop chop!.....
-
-	int propositionClient;              // Gordon: propositionClient2 has requested you invite this client to join the fireteam
-	int propositionClient2;             // Gordon:
-	int propositionEndTime;             // Gordon: tick, tick, tick....
-
-	int autofireteamEndTime;
-	int autofireteamCreateEndTime;
-	int autofireteamJoinEndTime;
-
 	playerStats_t playerStats;
 
 	//gentity_t	*wayPoint;
@@ -885,15 +871,6 @@ typedef struct debrisChunk_s
 } debrisChunk_t;
 
 #define MAX_DEBRISCHUNKS        256
-
-// storea client voting information
-struct etj_votingInfo_t
-{
-	bool isVotedYes; // is the client voted yes
-	int  time; // last time client voted, used for timeouts between revotes
-	int  attempts; // revote attempts
-	bool isWarned; // if client attempts to revote but timeout doesn't allow yet, notification will be sent
-};
 
 // ===================
 
@@ -1033,8 +1010,6 @@ struct gclient_s
 
 	// Whether the client already activated target_set_health
 	qboolean alreadyActivatedSetHealth;
-
-	etj_votingInfo_t votingInfo;
 };
 
 typedef struct
@@ -1073,21 +1048,6 @@ typedef struct ipMute_s
 #define MAX_SCRIPT_ACCUM_BUFFERS    8
 
 #define MAX_BUFFERED_CONFIGSTRINGS 128
-
-typedef struct voteInfo_s
-{
-	char voteString[MAX_STRING_CHARS];
-	int voteTime;                       // level.time vote was called
-	int voteYes;
-	int voteNo;
-	int numVotingClients;               // set by CalculateRanks
-	int numVotingTeamClients[2];
-	int (*vote_fn)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2);
-	char vote_value[VOTE_MAXSTRING];        // Desired vote item setting.
-	char voter_team;
-	int voter_cn;
-	qboolean voteCanceled;
-} voteInfo_t;
 
 typedef struct
 {
@@ -1135,8 +1095,6 @@ typedef struct
 //	int			snd_fry;				// sound index for standing in lava
 
 	int warmupModificationCount;            // for detecting if g_warmup is changed
-
-	voteInfo_t voteInfo;
 
 	int numTeamClients[2];
 	int numVotingTeamClients[2];
@@ -1925,7 +1883,6 @@ extern vmCvar_t g_letterbox;
 extern vmCvar_t bot_enable;
 
 extern vmCvar_t g_debugSkills;
-extern vmCvar_t g_autoFireteams;
 
 extern vmCvar_t g_nextmap;
 extern vmCvar_t g_nextcampaign;
@@ -2577,7 +2534,6 @@ void G_verifyMatchState(int team_id);
 //
 void G_cpmPrintf(gentity_t *ent, const char *fmt, ...);
 int  G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2);
-void G_voteFlags(void);
 void G_voteHelp(gentity_t *ent, qboolean fShowVote);
 void G_playersMessage(gentity_t *ent);
 // Actual voting commands

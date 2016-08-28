@@ -31,9 +31,6 @@ void G_loadMatchGame(void)
 	trap_SetConfigstring(CS_CUSTMOTD + 4, server_motd4.string);
 	trap_SetConfigstring(CS_CUSTMOTD + 5, server_motd5.string);
 
-	// Voting flags
-	G_voteFlags();
-
 	// Set version info for demoplayback compatibility
 //	trap_SetConfigstring(CS_OSPVERSION, va("%s", G_BASEVERSION));	// Add more tokens as needed
 

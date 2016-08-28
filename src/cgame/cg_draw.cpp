@@ -2800,180 +2800,180 @@ CG_DrawVote
 */
 static void CG_DrawVote(void)
 {
-	char  str1[32], str2[32];
-	vec4_t color{ 1, 1, 0, 1 };
+	//char  str1[32], str2[32];
+	//vec4_t color{ 1, 1, 0, 1 };
 
-	const char *line_a = nullptr;
-	const char *line_b = nullptr;
-	auto x_a = 8;
-	auto x_b = 8;
+	//const char *line_a = nullptr;
+	//const char *line_b = nullptr;
+	//auto x_a = 8;
+	//auto x_b = 8;
 
-	Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-	Q_strncpyz(str2, BindingFromName("vote no"), 32);
+	//Q_strncpyz(str1, BindingFromName("vote yes"), 32);
+	//Q_strncpyz(str2, BindingFromName("vote no"), 32);
 
-	if (cgs.applicationEndTime > cg.time && cgs.applicationClient >= 0)
-	{
-		line_a = va(CG_TranslateString("Accept %s's application to join your fireteam?"), cgs.clientinfo[cgs.applicationClient].name);
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-	}
+	//if (cgs.applicationEndTime > cg.time && cgs.applicationClient >= 0)
+	//{
+	//	line_a = va(CG_TranslateString("Accept %s's application to join your fireteam?"), cgs.clientinfo[cgs.applicationClient].name);
+	//	line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+	//}
 
-	if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0)
-	{
-		line_a = va(CG_TranslateString("Accept %s's proposition to invite %s to join your fireteam?"), cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-	}
+	//if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0)
+	//{
+	//	line_a = va(CG_TranslateString("Accept %s's proposition to invite %s to join your fireteam?"), cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
+	//	line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+	//}
 
-	if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0)
-	{
-		line_a = va(CG_TranslateString("Accept %s's invitation to join their fireteam?"), cgs.clientinfo[cgs.invitationClient].name);
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-	}
+	//if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0)
+	//{
+	//	line_a = va(CG_TranslateString("Accept %s's invitation to join their fireteam?"), cgs.clientinfo[cgs.invitationClient].name);
+	//	line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+	//}
 
-	if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1)
-	{
-		line_a = va(CG_TranslateString("Make Fireteam private?"));
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-	}
+	//if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1)
+	//{
+	//	line_a = va(CG_TranslateString("Make Fireteam private?"));
+	//	line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+	//}
 
-	if (cgs.voteTime)
-	{
-		// play a talk beep whenever it is modified
-		if (cgs.voteModified)
-		{
-			cgs.voteModified = qfalse;
-		}
+	//if (cgs.voteTime)
+	//{
+	//	// play a talk beep whenever it is modified
+	//	if (cgs.voteModified)
+	//	{
+	//		cgs.voteModified = qfalse;
+	//	}
 
-		int sec = (VOTE_TIME - (cg.time - cgs.voteTime)) / 1000;
-		if (sec < 0)
-		{
-			sec = 0;
-		}
+	//	int sec = (VOTE_TIME - (cg.time - cgs.voteTime)) / 1000;
+	//	if (sec < 0)
+	//	{
+	//		sec = 0;
+	//	}
 
-		if (!Q_stricmpn(cgs.voteString, "kick", 4))
-		{
-			if (strlen(cgs.voteString) > 5)
-			{
-				int  nameindex;
-				char buffer[128];
-				Q_strncpyz(buffer, cgs.voteString + 5, sizeof(buffer));
-				Q_CleanStr(buffer);
+	//	if (!Q_stricmpn(cgs.voteString, "kick", 4))
+	//	{
+	//		if (strlen(cgs.voteString) > 5)
+	//		{
+	//			int  nameindex;
+	//			char buffer[128];
+	//			Q_strncpyz(buffer, cgs.voteString + 5, sizeof(buffer));
+	//			Q_CleanStr(buffer);
 
-				for (nameindex = 0; nameindex < MAX_CLIENTS; nameindex++)
-				{
-					if (!cgs.clientinfo[nameindex].infoValid)
-					{
-						continue;
-					}
+	//			for (nameindex = 0; nameindex < MAX_CLIENTS; nameindex++)
+	//			{
+	//				if (!cgs.clientinfo[nameindex].infoValid)
+	//				{
+	//					continue;
+	//				}
 
-					if (!Q_stricmp(cgs.clientinfo[nameindex].cleanname, buffer))
-					{
-						if (cgs.clientinfo[nameindex].team != TEAM_SPECTATOR && cgs.clientinfo[nameindex].team != cgs.clientinfo[cg.clientNum].team)
-						{
-							return;
-						}
-					}
-				}
-			}
-		}
+	//				if (!Q_stricmp(cgs.clientinfo[nameindex].cleanname, buffer))
+	//				{
+	//					if (cgs.clientinfo[nameindex].team != TEAM_SPECTATOR && cgs.clientinfo[nameindex].team != cgs.clientinfo[cg.clientNum].team)
+	//					{
+	//						return;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
 
-		if (!(cg.snap->ps.eFlags & EF_VOTED))
-		{
-			line_a = va("VOTE(%i): %s", sec, cgs.voteString);
-			
-			if( cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES ) {
-				line_b = va("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
-			} else {
-				line_b = va("YES(%s):%i, NO(%s):%i", str1, cgs.voteYes, str2, cgs.voteNo);
-			}
-		}
-		else
-		{
-			line_a = va("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
-			line_b = va("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
-			x_b = 13;
+	//	if (!(cg.snap->ps.eFlags & EF_VOTED))
+	//	{
+	//		line_a = va("VOTE(%i): %s", sec, cgs.voteString);
+	//		
+	//		if( cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES ) {
+	//			line_b = va("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
+	//		} else {
+	//			line_b = va("YES(%s):%i, NO(%s):%i", str1, cgs.voteYes, str2, cgs.voteNo);
+	//		}
+	//	}
+	//	else
+	//	{
+	//		line_a = va("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+	//		line_b = va("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
+	//		x_b = 13;
 
-			if (cgs.votedYes)
-			{
-				CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
-			}
-			else {
-				auto textWidth = ETJump::DrawStringWidth(va("Y:%i", cgs.voteYes), 0.23f);
-				CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1, color);
-			}
-		}
-	}
+	//		if (cgs.votedYes)
+	//		{
+	//			CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
+	//		}
+	//		else {
+	//			auto textWidth = ETJump::DrawStringWidth(va("Y:%i", cgs.voteYes), 0.23f);
+	//			CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1, color);
+	//		}
+	//	}
+	//}
 
-	if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0)
-	{
-		switch (cgs.applicationClient)
-		{
-		case -1:
-			line_a = CG_TranslateString("Your application has been submitted");
-			break;
-		case -2:
-			line_a = CG_TranslateString("Your application failed");
-			break;
-		case -3:
-			line_a = CG_TranslateString("Your application has been approved");
-			break;
-		case -4:
-			line_a = CG_TranslateString("Your application reply has been sent");
-			break;
-		}
-	}
+	//if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0)
+	//{
+	//	switch (cgs.applicationClient)
+	//	{
+	//	case -1:
+	//		line_a = CG_TranslateString("Your application has been submitted");
+	//		break;
+	//	case -2:
+	//		line_a = CG_TranslateString("Your application failed");
+	//		break;
+	//	case -3:
+	//		line_a = CG_TranslateString("Your application has been approved");
+	//		break;
+	//	case -4:
+	//		line_a = CG_TranslateString("Your application reply has been sent");
+	//		break;
+	//	}
+	//}
 
-	if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0)
-	{
-		switch (cgs.propositionClient) 
-		{
-		case -1:
-			line_a = CG_TranslateString("Your proposition has been submitted");
-			break;
-		case -2:
-			line_a = CG_TranslateString("Your proposition was rejected");
-			break;
-		case -3:
-			line_a = CG_TranslateString("Your proposition was accepted");
-			break;
-		case -4:
-			line_a = CG_TranslateString("Your proposition reply has been sent");
-			break;
-		}
-	}
+	//if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0)
+	//{
+	//	switch (cgs.propositionClient) 
+	//	{
+	//	case -1:
+	//		line_a = CG_TranslateString("Your proposition has been submitted");
+	//		break;
+	//	case -2:
+	//		line_a = CG_TranslateString("Your proposition was rejected");
+	//		break;
+	//	case -3:
+	//		line_a = CG_TranslateString("Your proposition was accepted");
+	//		break;
+	//	case -4:
+	//		line_a = CG_TranslateString("Your proposition reply has been sent");
+	//		break;
+	//	}
+	//}
 
-	if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0)
-	{
-		switch (cgs.invitationClient)
-		{
-		case -1:
-			line_a = CG_TranslateString("Your invitation has been submitted");
-			break;
-		case -2:
-			line_a = CG_TranslateString("Your invitation was rejected");
-			break;
-		case -3:
-			line_a = CG_TranslateString("Your invitation was accepted");
-			break;
-		case -4:
-			line_a = CG_TranslateString("Your invitation reply has been sent");
-			break;
-		}
-	}
+	//if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0)
+	//{
+	//	switch (cgs.invitationClient)
+	//	{
+	//	case -1:
+	//		line_a = CG_TranslateString("Your invitation has been submitted");
+	//		break;
+	//	case -2:
+	//		line_a = CG_TranslateString("Your invitation was rejected");
+	//		break;
+	//	case -3:
+	//		line_a = CG_TranslateString("Your invitation was accepted");
+	//		break;
+	//	case -4:
+	//		line_a = CG_TranslateString("Your invitation reply has been sent");
+	//		break;
+	//	}
+	//}
 
-	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) || 
-		(cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) || 
-		(cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
-	{
-		line_a = "Response Sent";
-	}
+	//if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) || 
+	//	(cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) || 
+	//	(cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
+	//{
+	//	line_a = "Response Sent";
+	//}
 
-	if (line_a) {
-		ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a, 80, ITEM_TEXTSTYLE_SHADOWED);
-	}
+	//if (line_a) {
+	//	ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a, 80, ITEM_TEXTSTYLE_SHADOWED);
+	//}
 
-	if (line_b) {
-		ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b, 80, ITEM_TEXTSTYLE_SHADOWED);
-	}
+	//if (line_b) {
+	//	ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b, 80, ITEM_TEXTSTYLE_SHADOWED);
+	//}
 }
 
 /*

@@ -405,7 +405,7 @@ bool Ban(gentity_t *ent, Arguments argv)
 
 bool Cancelvote(gentity_t *ent, Arguments argv)
 {
-	if (level.voteInfo.voteTime)
+	/*if (level.voteInfo.voteTime)
 	{
 		level.voteInfo.voteYes = 0;
 		level.voteInfo.voteNo  = level.numConnectedClients;
@@ -414,7 +414,7 @@ bool Cancelvote(gentity_t *ent, Arguments argv)
 	else
 	{
 		ChatPrintTo(ent, "^3cancelvote: ^7no vote in progress.");
-	}
+	}*/
 	return true;
 }
 
@@ -1526,7 +1526,7 @@ bool NoSave(gentity_t *ent, Arguments argv)
 
 bool Passvote(gentity_t *ent, Arguments argv)
 {
-	if (level.voteInfo.voteTime)
+	/*if (level.voteInfo.voteTime)
 	{
 		level.voteInfo.voteNo  = 0;
 		level.voteInfo.voteYes = level.numConnectedClients;
@@ -1535,7 +1535,7 @@ bool Passvote(gentity_t *ent, Arguments argv)
 	else
 	{
 		ChatPrintAll("^3passvote:^7 no vote in progress.");
-	}
+	}*/
 	return qtrue;
 }
 

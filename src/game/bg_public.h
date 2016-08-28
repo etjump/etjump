@@ -699,7 +699,7 @@ typedef enum
 #define EF_HEADSHOT         0x00001000      // last hit to player was head shot (Gordon: NOTE: not last hit, but has BEEN shot in the head since respawn)
 #define EF_SMOKING          0x00002000      // DHM - Nerve :: ET_GENERAL ents will emit smoke if set // JPW switched to this after my code change
 #define EF_OVERHEATING      (EF_SMOKING | EF_SMOKINGBLACK)  // ydnar: light smoke/steam effect
-#define EF_VOTED            0x00004000      // already cast a vote
+#define EF_ETJUMP_UNUSED1   0x00004000      // Zero: unused
 #define EF_TAGCONNECT       0x00008000      // connected to another entity via tag
 #define EF_MOUNTEDTANK      EF_TAGCONNECT   // Gordon: duplicated for clarity
 
@@ -2361,15 +2361,6 @@ void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName)
 
 // Voting
 #define VOTING_DISABLED     ((1 << numVotesAvailable) - 1)
-
-typedef struct
-{
-	const char *pszCvar;
-	int flag;
-} voteType_t;
-
-extern const voteType_t voteToggles[];
-extern int              numVotesAvailable;
 
 // Tracemap
 #ifdef CGAMEDLL

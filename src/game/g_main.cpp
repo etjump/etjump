@@ -154,7 +154,6 @@ vmCvar_t g_letterbox;
 vmCvar_t bot_enable;
 
 vmCvar_t g_debugSkills;
-vmCvar_t g_autoFireteams;
 
 vmCvar_t g_nextmap;
 vmCvar_t g_nextcampaign;
@@ -408,7 +407,6 @@ cvarTable_t gameCvarTable[] =
 	{ &bot_enable,                  "bot_enable",                  "0",                                                      0 },
 
 	{ &g_debugSkills,               "g_debugSkills",               "0",                                                      0 },
-	{ &g_autoFireteams,             "g_autoFireteams",             "1",                                                      CVAR_ARCHIVE },
 
 	{ &g_nextmap,                   "nextmap",                     "",                                                       CVAR_TEMP },
 	{ &g_nextcampaign,              "nextcampaign",                "",                                                       CVAR_TEMP },
@@ -1610,11 +1608,6 @@ void G_UpdateCvars(void)
 		}
 	}
 
-	if (fVoteFlags)
-	{
-		G_voteFlags();
-	}
-
 	if (fToggles)
 	{
 		trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
@@ -1784,13 +1777,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	i = level.server_settings;
 	{
 		qboolean   oldspawning = level.spawning;
-		voteInfo_t votedata;
-
-		memcpy(&votedata, &level.voteInfo, sizeof(voteInfo_t));
 
 		memset(&level, 0, sizeof(level));
-
-		memcpy(&level.voteInfo, &votedata, sizeof(voteInfo_t));
 
 		level.spawning = oldspawning;
 	}
@@ -2319,13 +2307,9 @@ void CalculateRanks(void)
 	level.numConnectedClients       = 0;
 	level.numNonSpectatorClients    = 0;
 	level.numPlayingClients         = 0;
-	level.voteInfo.numVotingClients = 0;        // don't count bots
 
 	level.numFinalDead[0] = 0;      // NERVE - SMF
 	level.numFinalDead[1] = 0;      // NERVE - SMF
-
-	level.voteInfo.numVotingTeamClients[0] = 0;
-	level.voteInfo.numVotingTeamClients[1] = 0;
 
 	for (i = 0; i < TEAM_NUM_TEAMS; i++)
 	{
@@ -2345,14 +2329,6 @@ void CalculateRanks(void)
 			level.sortedClients[level.numConnectedClients] = i;
 			level.numConnectedClients++;
 
-			if (team == TEAM_SPECTATOR)
-			{
-				if (level.clients[i].ps.eFlags & EF_VOTED)
-				{
-					level.voteInfo.numVotingClients++;
-				}
-			}
-
 			if (team != TEAM_SPECTATOR)
 			{
 				level.numNonSpectatorClients++;
@@ -2365,10 +2341,6 @@ void CalculateRanks(void)
 				{
 					int teamIndex = level.clients[i].sess.sessionTeam == TEAM_AXIS ? 0 : 1;
 					level.numPlayingClients++;
-					if (!(g_entities[i].r.svFlags & SVF_BOT))
-					{
-						level.voteInfo.numVotingClients++;
-					}
 
 					if (level.clients[i].sess.sessionTeam == TEAM_AXIS ||
 					    level.clients[i].sess.sessionTeam == TEAM_ALLIES)
@@ -2382,10 +2354,6 @@ void CalculateRanks(void)
 						}
 
 						level.numTeamClients[teamIndex]++;
-						if (!(g_entities[i].r.svFlags & SVF_BOT))
-						{
-							level.voteInfo.numVotingTeamClients[teamIndex]++;
-						}
 					}
 
 					if (level.follow1 == -1)
@@ -3176,91 +3144,6 @@ void CheckWolfMP()
 	}
 }
 
-/*
-==================
-CheckVote
-==================
-*/
-void CheckVote(void)
-{
-	gentity_t *other = g_entities + level.voteInfo.voter_cn;
-	if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < 1000)
-	{
-		return;
-	}
-
-	if (level.voteInfo.voter_team != other->client->sess.sessionTeam)
-	{
-		AP("cpm \"^7Vote canceled: voter switched teams.\n\"");
-		G_LogPrintf("Vote Failed: %s (voter %s switched teams)\n", level.voteInfo.voteString, other->client->pers.netname);
-		level.voteInfo.voteYes = 0;
-		level.voteInfo.voteNo  = level.numConnectedClients;
-	}
-
-	// wait full 30 seconds unless the amount of f2s is over the limit
-	// when accounting for all players on the server
-	int pcnt = vote_percent.integer;
-	pcnt = pcnt > 99 ? 99 : pcnt;
-	pcnt = pcnt < 1 ? 1 : pcnt;
-	int numClients = level.numConnectedClients;
-	// how many are required for instant pass (no need to wait for 30 seconds)
-	int required = ceil(numClients / 100.0 * pcnt);
-
-	// we can pass vote instantly if the voteYes count has exceeded
-	// the percentage of total players (not just voted ones)
-	if (level.voteInfo.voteYes >= required)
-	{
-		// execute the command, then remove the vote
-		AP("cpm \"^5Vote passed!\n\"");
-		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
-
-		// Perform the passed vote
-		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-		// Same thing applies for voteNo count
-	} else if (level.voteInfo.voteNo > numClients - required)
-	{
-		// same behavior as a no response vote
-		AP(va("cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
-		G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
-	} else if (level.time - level.voteInfo.voteTime >= VOTE_TIME)
-	{
-		// we've waited for full 30 seconds and can now check if the vote yes count
-		// of numVotingClients is enough
-		int total = level.voteInfo.numVotingClients;
-
-		if (level.voteInfo.voteYes > pcnt * total / 100)
-		{
-			// execute the command, then remove the vote
-			AP("cpm \"^5Vote passed!\n\"");
-			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
-
-			// Perform the passed vote
-			level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-
-		}
-		else if (level.voteInfo.voteNo && level.voteInfo.voteNo >= (100 - pcnt) * total / 100)
-		{
-			if (level.voteInfo.voteCanceled)
-			{
-				AP(va("cpm \"^7Vote cancelled!\n\""));
-				G_Printf("Vote cancelled!\n\"");
-			}
-			else
-			{
-				// same behavior as a no response vote
-				AP(va("cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
-				G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
-			}
-		}
-	} else
-	{
-		return;
-	}
-
-	level.voteInfo.voteTime = 0;
-	trap_SetConfigstring(CS_VOTE_TIME, "");
-}
-
 #ifdef SAVEGAME_SUPPORT
 /*
 =============
@@ -3992,9 +3875,6 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 
 	// update to team status?
 	CheckTeamStatus();
-
-	// cancel vote if timed out
-	CheckVote();
 
 	// for tracking changes
 	CheckCvars();

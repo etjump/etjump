@@ -183,9 +183,6 @@
     <ClCompile Include="g_weapon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_vote.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="q_math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +229,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_user.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_vote_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -353,6 +353,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_vote_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

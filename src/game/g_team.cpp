@@ -2010,7 +2010,7 @@ qboolean G_checkReady(void)
 	}
 
 	// Ensure we have enough real players
-	if (level.numNonSpectatorClients >= match_minplayers.integer && level.voteInfo.numVotingClients > 0)
+	if (level.numNonSpectatorClients >= match_minplayers.integer)
 	{
 		// Step through all active clients
 		notReady = 0;

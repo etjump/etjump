@@ -276,18 +276,7 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum)
 	ft->ident        = ident;
 	ft->saveLimit    = 0;
 	ft->teamJumpMode = qfalse;
-
-	if (g_autoFireteams.integer)
-	{
-		ft->priv = qfalse;
-
-		trap_SendServerCommand(entityNum, "aft -1");
-		leader->client->pers.autofireteamEndTime = level.time + 20500;
-	}
-	else
-	{
-		ft->priv = qfalse;
-	}
+	ft->priv = qfalse;
 
 //	Q_strncpyz(ft->name, name, 32);
 	G_UpdateFireteamConfigString(ft);
@@ -463,13 +452,6 @@ void G_InviteToFireTeam(int entityNum, int otherEntityNum)
 		// Gordon: bots auto join
 		G_AddClientToFireteam(otherEntityNum, entityNum);
 	}
-	else
-	{
-		trap_SendServerCommand(entityNum, va("invitation -1"));
-		trap_SendServerCommand(otherEntityNum, va("invitation %i", entityNum));
-		g_entities[otherEntityNum].client->pers.invitationClient  = entityNum;
-		g_entities[otherEntityNum].client->pers.invitationEndTime = level.time + 20500;
-	}
 }
 
 void G_DestroyFireteam(int entityNum)
@@ -604,8 +586,6 @@ void G_ApplyToFireTeam(int entityNum, int fireteamNum)
 
 	trap_SendServerCommand(entityNum, va("application -1"));
 	trap_SendServerCommand(leader - g_entities, va("application %i", entityNum));
-	leader->client->pers.applicationClient  = entityNum;
-	leader->client->pers.applicationEndTime = level.time + 20000;
 }
 
 void G_ProposeFireTeamPlayer(int entityNum, int otherEntityNum)
@@ -653,9 +633,6 @@ void G_ProposeFireTeamPlayer(int entityNum, int otherEntityNum)
 
 	trap_SendServerCommand(entityNum, va("proposition -1"));
 	trap_SendServerCommand(leader - g_entities, va("proposition %i %i", otherEntityNum, entityNum));
-	leader->client->pers.propositionClient  = otherEntityNum;
-	leader->client->pers.propositionClient2 = entityNum;
-	leader->client->pers.propositionEndTime = level.time + 20000;
 }
 
 
