@@ -33,7 +33,6 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "autorecord",     qtrue,  qtrue,  NULL,                  ":^7 Creates a demo with a consistent naming scheme"                                         },
 	{ "autoscreenshot", qtrue,  qtrue,  NULL,                  ":^7 Creates a screenshot with a consistent naming scheme"                                   },
 	{ "bottomshots",    qtrue,  qfalse, G_weaponRankings_cmd,  ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all stats for a weapon" },
-	{ "callvote",       qtrue,  qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"                          },
 	{ "commands",       qtrue,  qtrue,  G_commands_cmd,        ":^7 Gives a list of OSP-specific commands"                                                  },
 	{ "currenttime",    qtrue,  qtrue,  NULL,                  ":^7 Displays current local time"                                                            },
 	{ "follow",         qtrue,  qtrue,  Cmd_Follow_f,          " <player_ID|allies|axis>:^7 Spectates a particular player or team"                          },

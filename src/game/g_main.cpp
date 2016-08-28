@@ -1,6 +1,7 @@
 #include <memory>
 #include "g_local.h"
 #include "etj_server_commands_handler.h"
+#include "etj_vote_system.h"
 
 level_locals_t level;
 
@@ -575,6 +576,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 namespace ETJump
 {
 	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
+	std::unique_ptr<VoteSystem> voteSystem = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1979,6 +1981,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
+	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(ETJump::commandsHandler.get()));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2122,6 +2125,7 @@ void G_ShutdownGame(int restart)
 	// ETJump server shutdown
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	ETJump::voteSystem = nullptr;
 	ETJump::commandsHandler = nullptr;
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
@@ -3923,6 +3927,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 	G_CheckReloadStatus();
 #endif // SAVEGAME_SUPPORT
 	ETJump_RunFrame(levelTime);
+
+	ETJump::voteSystem->runFrame(levelTime);
 }
 
 // Is this a single player type game - sp or coop?
