@@ -12,13 +12,14 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <memory>
+#include <vector>
+
 #include "../game/q_shared.h"
 #include "tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/ui_shared.h"
-#include <memory>
-#include <vector>
 
 #define MAX_LOCATIONS       256
 #define POWERUP_BLINKS      5
