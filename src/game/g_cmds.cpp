@@ -1,4 +1,8 @@
+#include <vector>
+#include <string>
+
 #include "g_local.h"
+#include "etj_server_commands_handler.h"
 
 void BotDebug(int clientNum);
 void GetBotAutonomies(int clientNum, int *weapAutonomy, int *moveAutonomy);
@@ -4377,6 +4381,14 @@ void ClientCommand(int clientNum)
 	}
 
 	if (G_commandCheck(ent, cmd, qtrue))
+	{
+		return;
+	}
+
+	std::vector<std::string> arguments;
+	for (auto idx = 0, argc = trap_Argc(); idx < argc; ++idx)
+		arguments.push_back(trap_Argv(idx));
+	if (ETJump::commandsHandler->check(cmd, clientNum, arguments))
 	{
 		return;
 	}

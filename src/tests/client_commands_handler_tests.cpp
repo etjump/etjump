@@ -6,6 +6,9 @@ using namespace ETJump;
 class ClientCommandsHandlerTests : public testing::Test
 {
 public:
+	ClientCommandsHandlerTests(): handler(nullptr) {};
+	~ClientCommandsHandlerTests() {};
+
 	void SetUp() override {
 		handler = ClientCommandsHandler(nullptr);
 	}

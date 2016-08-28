@@ -234,6 +234,9 @@
     <ClCompile Include="etj_vote_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_server_commands_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -356,6 +359,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_vote_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_server_commands_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 #include "g_local.h"
+#include <string>
 
 // this file is only included when building a dll
 // g_syscalls.asm is included instead when building a qvm
@@ -51,6 +52,13 @@ int     trap_Argc(void)
 void    trap_Argv(int n, char *buffer, int bufferLength)
 {
 	syscall(G_ARGV, n, buffer, bufferLength);
+}
+
+std::string trap_Argv(int n)
+{
+	char buffer[MAX_TOKEN_CHARS] = "";
+	syscall(G_ARGV, n, buffer, sizeof(buffer));
+	return buffer;
 }
 
 // returns -1 length if failed.

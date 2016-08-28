@@ -2,6 +2,9 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
+#include <memory>
+#include <string>
+
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
@@ -1974,6 +1977,7 @@ void    trap_Error(const char *fmt);
 int     trap_Milliseconds(void);
 int     trap_Argc(void);
 void    trap_Argv(int n, char *buffer, int bufferLength);
+std::string trap_Argv(int n);
 void    trap_Args(char *buffer, int bufferLength);
 int     trap_FS_FOpenFile(const char *qpath, fileHandle_t *f, fsMode_t mode);
 void    trap_FS_Read(void *buffer, int len, fileHandle_t f);
@@ -2703,5 +2707,18 @@ void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
 const char *G_MatchOneMap(const char *arg);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class ServerCommandsHandler;
+
+	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif // G_LOCAL_H

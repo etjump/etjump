@@ -16,6 +16,9 @@
     <Filter Include="Source Files\cgame">
       <UniqueIdentifier>{ced4f2f3-4557-4024-8fbc-a42ea371433f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\game">
+      <UniqueIdentifier>{092e9328-33fa-40e3-81fb-4cfdd9b58ae5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests_main.cpp">
@@ -32,6 +35,12 @@
     </ClCompile>
     <ClCompile Include="entity_events_handler_tests.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="server_commands_handler_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_server_commands_handler.cpp">
+      <Filter>Source Files\game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

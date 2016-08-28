@@ -151,8 +151,10 @@
   <ItemGroup>
     <ClCompile Include="..\cgame\etj_client_commands_handler.cpp" />
     <ClCompile Include="..\cgame\etj_entity_events_handler.cpp" />
+    <ClCompile Include="..\game\etj_server_commands_handler.cpp" />
     <ClCompile Include="client_commands_handler_tests.cpp" />
     <ClCompile Include="entity_events_handler_tests.cpp" />
+    <ClCompile Include="server_commands_handler_tests.cpp" />
     <ClCompile Include="tests_main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
