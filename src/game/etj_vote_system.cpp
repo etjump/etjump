@@ -1,15 +1,27 @@
 #include "etj_vote_system.h"
+#include "etj_imap_queries.h"
 #include "etj_server_commands_handler.h"
 #include <stdexcept>
 #include "etj_printer.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 
-ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler): _commandsHandler(commandsHandler), _voteQueue{}, _currentVote(nullptr), _levelTime(0)
+ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, IMapQueries* mapQueries):
+	_commandsHandler(commandsHandler),
+	_mapQueries(mapQueries),
+	_voteQueue{},
+	_currentVote(nullptr),
+	_levelTime(0)
 {
 	if (_commandsHandler == nullptr)
 	{
-		throw std::runtime_error("commandsHandler is undefined.");
+		throw std::runtime_error("commandsHandler is null.");
+	}
+
+	if (_mapQueries == nullptr)
+	{
+		throw std::runtime_error("mapQueries is null.");
 	}
 
 	initCommands();
@@ -30,17 +42,17 @@ void ETJump::VoteSystem::runFrame(int levelTime)
 void ETJump::VoteSystem::initCommands()
 {
 	if (!_commandsHandler->subscribe("vote", [&](int clientNum, const std::vector<std::string>& args)
-	{
-		vote(clientNum, args);
-	}))
+	                                 {
+		                                 vote(clientNum, args);
+	                                 }))
 	{
 		throw std::runtime_error("vote command has already been subscribed to.");
 	}
 
 	if (!_commandsHandler->subscribe("callvote", [&](int clientNum, const std::vector<std::string>& args)
-	{
-		callVote(clientNum, args);
-	}))
+	                                 {
+		                                 callVote(clientNum, args);
+	                                 }))
 	{
 		throw std::runtime_error("callvote command has already been subscribed to.");
 	}
@@ -72,10 +84,12 @@ ETJump::VoteSystem::VoteParseResult ETJump::VoteSystem::parseVoteArgs(const std:
 	if (lwr == 'y' || lwr == '1')
 	{
 		result.voted = Voted::Yes;
-	} else if (lwr == 'n' || lwr == '0')
+	}
+	else if (lwr == 'n' || lwr == '0')
 	{
 		result.voted = Voted::No;
-	} else
+	}
+	else
 	{
 		result.success = false;
 	}
@@ -85,17 +99,26 @@ ETJump::VoteSystem::VoteParseResult ETJump::VoteSystem::parseVoteArgs(const std:
 
 void ETJump::VoteSystem::callVote(int clientNum, const std::vector<std::string>& args)
 {
-	auto vote = boost::to_lower_copy(args[1]);
-	if (vote == "map")
+	if (args.size() == 1)
+	{
+		Printer::SendConsoleMessage(clientNum, "^3usage: ^7/callvote <vote> <additional parameters>");
+		return;
+	}
+
+	auto type = boost::to_lower_copy(args[1]);
+	if (type == "map")
 	{
 		mapVote(clientNum, args);
-	} else if (vote == "randommap")
+	}
+	else if (type == "randommap")
 	{
 		createSimpleVote(clientNum, VoteType::RandomMap);
-	} else if (vote == "maprestart")
+	}
+	else if (type == "maprestart")
 	{
 		createSimpleVote(clientNum, VoteType::MapRestart);
-	} else
+	}
+	else
 	{
 		Printer::SendConsoleMessage(clientNum, (boost::format("^3error: ^7unknown vote type: %s.") % args[1]).str());
 		return;
@@ -107,9 +130,24 @@ void ETJump::VoteSystem::mapVote(int clientNum, const std::vector<std::string>& 
 	std::unique_ptr<Vote> vote(new Vote());
 	vote->type = VoteType::Map;
 
-	if (args.size() == 1)
+	if (args.size() != 3)
 	{
-		
+		Printer::SendConsoleMessage(clientNum, "^3usage: /callvote map <map name>");
+		return;
+	}
+
+	auto map = boost::to_lower_copy(args[2]);
+	auto matches = _mapQueries->matches(map);
+	if (matches.size() == 0)
+	{
+		Printer::SendConsoleMessage(clientNum, (boost::format("^1error: ^7could not find a matching map with name: \"%s\"") % map).str());
+		return;
+	}
+
+	if (matches.size() > 1)
+	{
+		Printer::SendConsoleMessage(clientNum, (boost::format("^1error: ^7found multiple matching maps:\n* %s") % boost::join(matches, "\n* ")).str());
+		return;
 	}
 }
 
@@ -119,8 +157,8 @@ void ETJump::VoteSystem::createSimpleVote(int clientNum, VoteType type)
 	vote->type = type;
 	if (callOrQueueVote(move(vote)) == QueuedVote::Yes)
 	{
-		Printer::SendConsoleMessage(clientNum, (boost::format("^gVote: ^7Vote is currently in progress. Your vote has been added to the vote queue. There are currently %d votes in the queue.\n") % _voteQueue.size()).str());
-	} 
+		Printer::SendConsoleMessage(clientNum, (boost::format("^gvote: ^7vote is currently in progress. Your vote has been added to the vote queue. There are currently %d votes in the queue.\n") % _voteQueue.size()).str());
+	}
 }
 
 ETJump::VoteSystem::QueuedVote ETJump::VoteSystem::callOrQueueVote(std::unique_ptr<Vote> vote)

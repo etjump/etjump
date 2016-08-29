@@ -13,6 +13,9 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Header Files\interfaces">
+      <UniqueIdentifier>{dc659ed7-3a72-4fa0-a41f-280bbd1c7724}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sha-1\sha1.c">
@@ -363,6 +366,9 @@
     </ClInclude>
     <ClInclude Include="etj_server_commands_handler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_imap_queries.h">
+      <Filter>Header Files\interfaces</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

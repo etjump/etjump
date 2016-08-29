@@ -2,6 +2,7 @@
 #include "g_local.h"
 #include "etj_server_commands_handler.h"
 #include "etj_vote_system.h"
+#include "etj_map_statistics.h"
 
 level_locals_t level;
 
@@ -577,6 +578,7 @@ namespace ETJump
 {
 	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
 	std::unique_ptr<VoteSystem> voteSystem = nullptr;
+	std::unique_ptr<MapStatistics> mapStats = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1981,7 +1983,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
-	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(ETJump::commandsHandler.get()));
+	ETJump::mapStats = std::unique_ptr<MapStatistics>(new MapStatistics());
+	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(ETJump::commandsHandler.get(), ETJump::mapStats.get()));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2124,7 +2127,7 @@ void G_ShutdownGame(int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ETJump server shutdown
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	ETJump::mapStats = nullptr;
 	ETJump::voteSystem = nullptr;
 	ETJump::commandsHandler = nullptr;
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////

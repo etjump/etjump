@@ -3,8 +3,9 @@
 #include <string>
 #include <vector>
 #include <random>
+#include "etj_imap_queries.h"
 
-class MapStatistics
+class MapStatistics : public ETJump::IMapQueries
 {
 public:
 	MapStatistics();
@@ -12,10 +13,10 @@ public:
 
 	struct MapInformation
 	{
-		MapInformation() : id(0), secondsPlayed(0), callvoted(0), votesPassed(0), timesPlayed(0), isOnServer(false), changed(true)
+		MapInformation() : id(0), secondsPlayed(0), callvoted(0), votesPassed(0), timesPlayed(0), lastPlayed(0), isOnServer(false), changed(true)
 		{
-
 		}
+
 		long id;
 		std::string name;
 		int secondsPlayed;
@@ -47,6 +48,16 @@ public:
 	std::vector<const MapInformation *> getLeastPlayed();
 	std::vector<std::string> getMaps();
 	const std::vector<std::string> *getCurrentMaps();
+
+	//////////////////////////////////////
+	// IMapQueries
+	//////////////////////////////////////
+	bool mapExists(const std::string& map) const override;
+	std::vector<std::string> maps() const override;
+	std::string currentMap() const override;
+	std::vector<std::string> matches(const std::string& map) const override;
+	//////////////////////////////////////
+
 private:
 	std::vector<MapInformation> _maps;
 	std::vector<std::string>    _currentMaps;

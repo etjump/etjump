@@ -7,6 +7,7 @@
 
 namespace ETJump
 {
+	class IMapQueries;
 	class ServerCommandsHandler;
 
 	class VoteSystem
@@ -48,7 +49,7 @@ namespace ETJump
 			Yes
 		};
 
-		explicit VoteSystem(ServerCommandsHandler *commandsHandler);
+		explicit VoteSystem(ServerCommandsHandler *commandsHandler, IMapQueries *mapQueries);
 		~VoteSystem();
 
 		// update the state on every frame
@@ -65,6 +66,9 @@ namespace ETJump
 
 		// for registering the commands
 		ServerCommandsHandler *_commandsHandler;
+
+		// for querying map data
+		IMapQueries *_mapQueries;
 
 		// client wants to start a new vote
 		void callVote(int clientNum, const std::vector<std::string>& args);

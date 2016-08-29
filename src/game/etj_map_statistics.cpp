@@ -50,6 +50,43 @@ const std::vector<std::string> *MapStatistics::getCurrentMaps()
 	return &_currentMaps;
 }
 
+bool MapStatistics::mapExists(const std::string& map) const
+{
+	return find_if(begin(_maps), end(_maps), [&](const MapInformation& mi)
+	{
+		return mi.name == map;
+	}) != end(_maps);
+}
+
+std::vector<std::string> MapStatistics::maps() const
+{
+	std::vector<std::string> maps;
+	maps.reserve(_maps.size());
+	for (const auto & m : _maps)
+	{
+		maps.push_back(m.name);
+	}
+	return maps;
+}
+
+std::string MapStatistics::currentMap() const
+{
+	return _currentMap->name;
+}
+
+std::vector<std::string> MapStatistics::matches(const std::string& map) const
+{
+	std::vector<std::string> matches{};
+	for (const auto m : _maps)
+	{
+		if (m.name.find(map) != std::string::npos)
+		{
+			matches.push_back(m.name);
+		}
+	}
+	return matches;
+}
+
 std::vector<std::string> MapStatistics::getMaps()
 {
 	std::vector<std::string> maps;

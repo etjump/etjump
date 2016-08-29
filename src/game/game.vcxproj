@@ -335,6 +335,7 @@
     <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
     <ClInclude Include="etj_database.h" />
+    <ClInclude Include="etj_imap_queries.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
