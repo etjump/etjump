@@ -3,6 +3,7 @@
 #include "etj_server_commands_handler.h"
 #include "etj_vote_system.h"
 #include "etj_map_statistics.h"
+#include "etj_map_stats.h"
 
 level_locals_t level;
 
@@ -578,7 +579,7 @@ namespace ETJump
 {
 	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
 	std::unique_ptr<VoteSystem> voteSystem = nullptr;
-	std::unique_ptr<MapStatistics> mapStats = nullptr;
+	std::unique_ptr<MapStats> mapStats = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1983,7 +1984,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
-	ETJump::mapStats = std::unique_ptr<MapStatistics>(new MapStatistics());
+	ETJump::mapStats = std::unique_ptr<ETJump::MapStats>(new ETJump::MapStats(g_mapDatabase.string, level.rawmapname));
 	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(ETJump::commandsHandler.get(), ETJump::mapStats.get()));
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////

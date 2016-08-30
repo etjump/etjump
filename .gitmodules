@@ -1,0 +1,6 @@
+[submodule "src/-f"]
+	path = src/-f
+	url = https://github.com/SRombauts/SQLiteCpp.git
+[submodule "src/SQLiteCpp"]
+	path = src/SQLiteCpp
+	url = https://github.com/SRombauts/SQLiteCpp.git

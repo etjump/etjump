@@ -13,8 +13,14 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="Header Files\interfaces">
-      <UniqueIdentifier>{dc659ed7-3a72-4fa0-a41f-280bbd1c7724}</UniqueIdentifier>
+    <Filter Include="Source Files\SQLiteCpp">
+      <UniqueIdentifier>{9e1d8fb1-ca95-4ec7-85d3-84288471edb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MapStats">
+      <UniqueIdentifier>{237d6505-adb6-4c96-9715-62c481cc5f03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MapStats">
+      <UniqueIdentifier>{3ae12e86-58fe-42a5-946b-9ea6073928f3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +246,33 @@
     <ClCompile Include="etj_server_commands_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Backup.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Column.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Database.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Exception.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Statement.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_map_stats.cpp">
+      <Filter>Source Files\MapStats</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -367,8 +400,20 @@
     <ClInclude Include="etj_server_commands_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_map_stats.h">
+      <Filter>Header Files\MapStats</Filter>
+    </ClInclude>
     <ClInclude Include="etj_imap_queries.h">
-      <Filter>Header Files\interfaces</Filter>
+      <Filter>Header Files\MapStats</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_map.h">
+      <Filter>Header Files\MapStats</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_log.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

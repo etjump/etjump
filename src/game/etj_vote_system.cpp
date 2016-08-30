@@ -5,6 +5,7 @@
 #include "etj_printer.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include "etj_log.h"
 
 
 ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, IMapQueries* mapQueries):
@@ -16,12 +17,14 @@ ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, IMapQueri
 {
 	if (_commandsHandler == nullptr)
 	{
-		throw std::runtime_error("commandsHandler is null.");
+		Log::error("commandsHandler is null.");
+		return;
 	}
 
 	if (_mapQueries == nullptr)
 	{
-		throw std::runtime_error("mapQueries is null.");
+		Log::error("mapQueries is null.");
+		return;
 	}
 
 	initCommands();
@@ -46,7 +49,8 @@ void ETJump::VoteSystem::initCommands()
 		                                 vote(clientNum, args);
 	                                 }))
 	{
-		throw std::runtime_error("vote command has already been subscribed to.");
+		Log::error("vote command has already been subscribed to.");
+		return;
 	}
 
 	if (!_commandsHandler->subscribe("callvote", [&](int clientNum, const std::vector<std::string>& args)
@@ -54,7 +58,8 @@ void ETJump::VoteSystem::initCommands()
 		                                 callVote(clientNum, args);
 	                                 }))
 	{
-		throw std::runtime_error("callvote command has already been subscribed to.");
+		Log::error("callvote command has already been subscribed to.");
+		return;
 	}
 }
 
@@ -149,6 +154,8 @@ void ETJump::VoteSystem::mapVote(int clientNum, const std::vector<std::string>& 
 		Printer::SendConsoleMessage(clientNum, (boost::format("^1error: ^7found multiple matching maps:\n* %s") % boost::join(matches, "\n* ")).str());
 		return;
 	}
+
+
 }
 
 void ETJump::VoteSystem::createSimpleVote(int clientNum, VoteType type)

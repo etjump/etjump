@@ -1,5 +1,9 @@
 #pragma once
-#include <string>
+
+/**
+ * Interface for querying map related information
+ */
+
 #include <vector>
 
 namespace ETJump

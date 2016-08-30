@@ -79,7 +79,7 @@
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(SolutionDir)SQLiteCpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -245,6 +245,12 @@
     <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="..\SQLiteCpp\src\Backup.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Column.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Database.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Exception.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Statement.cpp" />
+    <ClCompile Include="..\SQLiteCpp\src\Transaction.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="etj_async_operation.cpp" />
     <ClCompile Include="bg_animation.cpp" />
@@ -263,7 +269,10 @@
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_command_variables.cpp" />
     <ClCompile Include="etj_database.cpp" />
+    <ClCompile Include="etj_file.cpp" />
+    <ClCompile Include="etj_log.cpp" />
     <ClCompile Include="etj_main.cpp" />
+    <ClCompile Include="etj_map_stats.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_server_commands_handler.cpp" />
@@ -335,7 +344,11 @@
     <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
     <ClInclude Include="etj_database.h" />
+    <ClInclude Include="etj_file.h" />
     <ClInclude Include="etj_imap_queries.h" />
+    <ClInclude Include="etj_log.h" />
+    <ClInclude Include="etj_map.h" />
+    <ClInclude Include="etj_map_stats.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
