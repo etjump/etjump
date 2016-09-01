@@ -39,10 +39,10 @@
   - `ob_save <optional name>` to save the current position. Saved position will be displayed.
   - `ob_load <optional name>` to load the saved position to be displayed. 
   - `ob_reset` to remove the displayed position. (Nothing will be displayed)
-* Hud/ui clean up (replaced some drawchars on proper text drawing method)
-* Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer(ignores hundreds & thousands)
-* Added 'etj_drawMaxSpeed' variable and rest(etj_maxSpeedX/Y/Duration) to display max speed from previous load session
-* Fixed `etj_noActivateLean`, should work stable now
+* HUD/UI clean up (replaced some drawchars on proper text drawing method)
+* Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer (ignores hundreds & thousands)
+* Added 'etj_drawMaxSpeed' variable and etj_maxSpeedX/Y/Duration to display max speed from previous load session
+* Fixed a bug in `etj_noActivateLean`
 
 # ETJump 2.1.0
 
