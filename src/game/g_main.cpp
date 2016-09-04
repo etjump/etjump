@@ -4,6 +4,7 @@
 #include "etj_vote_system.h"
 #include "etj_map_statistics.h"
 #include "etj_map_stats.h"
+#include "etj_event_aggregator.h"
 
 level_locals_t level;
 
@@ -580,6 +581,7 @@ namespace ETJump
 	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
 	std::unique_ptr<VoteSystem> voteSystem = nullptr;
 	std::unique_ptr<MapStats> mapStats = nullptr;
+	std::unique_ptr<EventAggregator> eventAggregator = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1984,9 +1986,9 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
+	ETJump::eventAggregator = std::unique_ptr<ETJump::EventAggregator>(new ETJump::EventAggregator());
 	ETJump::mapStats = std::unique_ptr<ETJump::MapStats>(new ETJump::MapStats(g_mapDatabase.string, level.rawmapname));
 	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(ETJump::commandsHandler.get(), ETJump::mapStats.get()));
-
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// parse the key/value pairs and spawn gentities
@@ -2131,6 +2133,7 @@ void G_ShutdownGame(int restart)
 	ETJump::mapStats = nullptr;
 	ETJump::voteSystem = nullptr;
 	ETJump::commandsHandler = nullptr;
+	ETJump::eventAggregator = nullptr;
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -3932,6 +3935,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 #endif // SAVEGAME_SUPPORT
 	ETJump_RunFrame(levelTime);
 
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{levelTime} };
+	ETJump::eventAggregator->serverEvent(ETJump::EventAggregator::ServerEventType::RunFrame, &payload);
 	ETJump::voteSystem->runFrame(levelTime);
 }
 

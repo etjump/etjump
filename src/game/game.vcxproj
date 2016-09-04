@@ -269,6 +269,7 @@
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_command_variables.cpp" />
     <ClCompile Include="etj_database.cpp" />
+    <ClCompile Include="etj_event_aggregator.cpp" />
     <ClCompile Include="etj_file.cpp" />
     <ClCompile Include="etj_log.cpp" />
     <ClCompile Include="etj_main.cpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
     <ClInclude Include="etj_database.h" />
+    <ClInclude Include="etj_event_aggregator.h" />
     <ClInclude Include="etj_file.h" />
     <ClInclude Include="etj_imap_queries.h" />
     <ClInclude Include="etj_log.h" />

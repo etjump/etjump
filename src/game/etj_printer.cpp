@@ -57,6 +57,11 @@ void Printer::SendConsoleMessage(int clientNum, std::string message)
 	}
 }
 
+void Printer::SendConsoleMessage(int clientNum, const boost::format& fmt)
+{
+	return SendConsoleMessage(clientNum, fmt.str());
+}
+
 void Printer::SendChatMessage(int clientNum, const std::string &message)
 {
 	if (clientNum == CONSOLE_CLIENT_NUMBER)
@@ -86,6 +91,11 @@ void Printer::BroadcastConsoleMessage(std::string message)
 		G_Printf("%s", message.c_str());
 		trap_SendServerCommand(-1, va("print \"%s\"", message.c_str()));
 	}
+}
+
+void Printer::BroadcastConsoleMessage(const boost::format& fmt)
+{
+	BroadcastConsoleMessage(fmt.str());
 }
 
 void Printer::BroadcastChatMessage(const std::string &message)

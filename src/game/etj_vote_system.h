@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
+#include "etj_log.h"
 
 namespace ETJump
 {
@@ -28,7 +29,12 @@ namespace ETJump
 			// type of the vote
 			VoteType type;
 
+			std::string toString();
+		};
 
+		struct MapVote : public Vote
+		{
+			std::string map;
 		};
 
 		enum class Voted
@@ -72,6 +78,9 @@ namespace ETJump
 
 		// client wants to start a new vote
 		void callVote(int clientNum, const std::vector<std::string>& args);
+
+		// handles the printing after a vote has been queued
+		void displayVoteQueueResult(int clientNum, QueuedVote voteWasQueued);
 
 		// client wants to start a new map vote
 		void mapVote(int clientNum, const std::vector<std::string>& args);

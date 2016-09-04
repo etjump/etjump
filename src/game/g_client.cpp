@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "../../etjump/ui/menudef.h"
+#include "etj_event_aggregator.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -1493,6 +1494,10 @@ const char *GetParsedIP(const char *ipadd)
 	return ipge;
 }
 
+namespace ETJump
+{
+	extern std::unique_ptr<EventAggregator> eventAggregator;
+}
 /*
 ===========
 ClientUserInfoChanged
@@ -1659,6 +1664,9 @@ void ClientUserinfoChanged(int clientNum)
 			InterruptRun(ent);
 		}
 	}
+
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientUserinfoChanged, &payload);
 
 	G_LogPrintf("ClientUserinfoChanged: %i %s\n", clientNum, s);
 	G_DPrintf("ClientUserinfoChanged: %i :: %s\n", clientNum, s);
@@ -1884,6 +1892,9 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		ent->client->sess.muted = qtrue;
 	}
 
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum, static_cast<int>(firstTime), static_cast<int>(isBot)} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, &payload);
+
 	ResetSavedPositions(ent);
 
 	return NULL;
@@ -1993,6 +2004,9 @@ void ClientBegin(int clientNum)
 	}
 
 	ent->client->pers.previousSetHealthTime = 0;
+
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientBegin, &payload);
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)
@@ -2585,6 +2599,9 @@ void ClientDisconnect(int clientNum)
 	SavePositionsToDatabase(ent);
 
 	ClearPortals(ent);
+
+	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientDisconnect, &payload);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

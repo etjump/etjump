@@ -33,6 +33,7 @@ public:
 	 * @param message The message to be sent
 	 */
 	static void SendConsoleMessage(int clientNum, std::string message);
+	static void SendConsoleMessage(int clientNum, const boost::format& fmt);
 
 	/**
 	 * Sends a console message to everyone in the server and to server console.
@@ -40,6 +41,7 @@ public:
 	 * @param message The message to be sent
 	 */
 	static void BroadcastConsoleMessage(std::string message);
+	static void BroadcastConsoleMessage(const boost::format& fmt);
 
 	/**
 	 * Prints to client chat. If client num is -1 sends to console

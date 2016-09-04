@@ -8,6 +8,19 @@
 #include "etj_log.h"
 
 
+std::string ETJump::VoteSystem::Vote::toString()
+{
+	switch (type)
+	{
+	case VoteType::MapRestart: return "Restart map";
+	case VoteType::Map: return (boost::format("Change map to: %s") % reinterpret_cast<MapVote*>(this)->map).str();
+	case VoteType::RandomMap: return "Random map";
+	default: 
+		Log::error("Unknown vote type.");
+		return "";
+	}
+}
+
 ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, IMapQueries* mapQueries):
 	_commandsHandler(commandsHandler),
 	_mapQueries(mapQueries),
@@ -130,9 +143,20 @@ void ETJump::VoteSystem::callVote(int clientNum, const std::vector<std::string>&
 	}
 }
 
+void ETJump::VoteSystem::displayVoteQueueResult(int clientNum, QueuedVote voteWasQueued)
+{
+	if (voteWasQueued == QueuedVote::Yes)
+	{
+		Printer::SendConsoleMessage(clientNum, boost::format("^gvote:^7 vote is currently in progress. Your vote has been added to the vote queue. There are currently %d votes in the queue.") % _voteQueue.size());
+	} else
+	{
+		Printer::BroadcastConsoleMessage(boost::format("^7%s ^7called a vote: %s") % std::to_string(clientNum) % _currentVote.get()->toString());
+	}
+}
+
 void ETJump::VoteSystem::mapVote(int clientNum, const std::vector<std::string>& args)
 {
-	std::unique_ptr<Vote> vote(new Vote());
+	std::unique_ptr<Vote> vote(new MapVote());
 	vote->type = VoteType::Map;
 
 	if (args.size() != 3)
@@ -155,17 +179,16 @@ void ETJump::VoteSystem::mapVote(int clientNum, const std::vector<std::string>& 
 		return;
 	}
 
+	reinterpret_cast<MapVote*>(vote.get())->map = matches[0];
 
+	displayVoteQueueResult(clientNum, callOrQueueVote(move(vote)));
 }
 
 void ETJump::VoteSystem::createSimpleVote(int clientNum, VoteType type)
 {
 	std::unique_ptr<Vote> vote(new Vote());
 	vote->type = type;
-	if (callOrQueueVote(move(vote)) == QueuedVote::Yes)
-	{
-		Printer::SendConsoleMessage(clientNum, (boost::format("^gvote: ^7vote is currently in progress. Your vote has been added to the vote queue. There are currently %d votes in the queue.\n") % _voteQueue.size()).str());
-	}
+	displayVoteQueueResult(clientNum, callOrQueueVote(move(vote)));
 }
 
 ETJump::VoteSystem::QueuedVote ETJump::VoteSystem::callOrQueueVote(std::unique_ptr<Vote> vote)
