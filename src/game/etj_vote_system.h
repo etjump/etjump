@@ -5,6 +5,7 @@
 #include <queue>
 #include <memory>
 #include "etj_log.h"
+#include "etj_event_aggregator.h"
 
 namespace ETJump
 {
@@ -55,14 +56,14 @@ namespace ETJump
 			Yes
 		};
 
-		explicit VoteSystem(ServerCommandsHandler *commandsHandler, IMapQueries *mapQueries);
+		explicit VoteSystem(ServerCommandsHandler *commandsHandler, EventAggregator *eventAggregator, IMapQueries *mapQueries);
 		~VoteSystem();
-
-		// update the state on every frame
-		void runFrame(int levelTime);
 	private:
 		// initialize the client commands that the vote system will handle
 		void initCommands();
+
+		// initialize the server event listening
+		void initEventListening();
 
 		// client is trying to vote 
 		void vote(int clientNum, const std::vector<std::string>& args);
@@ -75,6 +76,12 @@ namespace ETJump
 
 		// for querying map data
 		IMapQueries *_mapQueries;
+
+		// for subscribing to runframe
+		EventAggregator* _eventAggregator;
+
+		// event handles returned from event aggregator
+		std::vector<int> _eventHandles;
 
 		// client wants to start a new vote
 		void callVote(int clientNum, const std::vector<std::string>& args);

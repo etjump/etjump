@@ -6,6 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include "etj_log.h"
+#include "etj_event_aggregator.h"
 
 
 std::string ETJump::VoteSystem::Vote::toString()
@@ -21,9 +22,12 @@ std::string ETJump::VoteSystem::Vote::toString()
 	}
 }
 
-ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, IMapQueries* mapQueries):
+ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, EventAggregator* eventAggregator, IMapQueries* mapQueries):
+
 	_commandsHandler(commandsHandler),
 	_mapQueries(mapQueries),
+	_eventAggregator(eventAggregator),
+	_eventHandles{},
 	_voteQueue{},
 	_currentVote(nullptr),
 	_levelTime(0)
@@ -40,7 +44,14 @@ ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler, IMapQueri
 		return;
 	}
 
+	if (_eventAggregator == nullptr)
+	{
+		Log::error("eventAggregator is null.");
+		return;
+	}
+
 	initCommands();
+	initEventListening();
 }
 
 ETJump::VoteSystem::~VoteSystem()
@@ -48,11 +59,10 @@ ETJump::VoteSystem::~VoteSystem()
 	_currentVote = nullptr;
 	// empty the queue on map change
 	_voteQueue = std::queue<std::unique_ptr<Vote>>{};
-}
-
-void ETJump::VoteSystem::runFrame(int levelTime)
-{
-	_levelTime = levelTime;
+	for (const auto & h : _eventHandles)
+	{
+		_eventAggregator->unsubcribe(h);
+	}
 }
 
 void ETJump::VoteSystem::initCommands()
@@ -74,6 +84,14 @@ void ETJump::VoteSystem::initCommands()
 		Log::error("callvote command has already been subscribed to.");
 		return;
 	}
+}
+
+void ETJump::VoteSystem::initEventListening()
+{
+	_eventHandles.push_back(_eventAggregator->subscribe(EventAggregator::ServerEventType::RunFrame, [&](const EventAggregator::Payload *payload)
+	{
+		_levelTime = payload->integers[0];
+	}));
 }
 
 void ETJump::VoteSystem::vote(int clientNum, const std::vector<std::string>& args)

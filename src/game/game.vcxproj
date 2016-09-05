@@ -267,7 +267,7 @@
     <ClCompile Include="etj_commands.cpp" />
     <ClCompile Include="etj_custom_map_votes.cpp" />
     <ClCompile Include="etj_banner_system.cpp" />
-    <ClCompile Include="etj_command_variables.cpp" />
+    <ClCompile Include="etj_console_variables.cpp" />
     <ClCompile Include="etj_database.cpp" />
     <ClCompile Include="etj_event_aggregator.cpp" />
     <ClCompile Include="etj_file.cpp" />

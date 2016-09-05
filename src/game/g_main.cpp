@@ -1988,7 +1988,11 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
 	ETJump::eventAggregator = std::unique_ptr<ETJump::EventAggregator>(new ETJump::EventAggregator());
 	ETJump::mapStats = std::unique_ptr<ETJump::MapStats>(new ETJump::MapStats(g_mapDatabase.string, level.rawmapname));
-	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(ETJump::commandsHandler.get(), ETJump::mapStats.get()));
+	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(
+		ETJump::commandsHandler.get(), 
+		ETJump::eventAggregator.get(), 
+		ETJump::mapStats.get())
+	);
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// parse the key/value pairs and spawn gentities
@@ -3937,7 +3941,6 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 
 	ETJump::EventAggregator::Payload payload{ std::vector<int>{levelTime} };
 	ETJump::eventAggregator->serverEvent(ETJump::EventAggregator::ServerEventType::RunFrame, &payload);
-	ETJump::voteSystem->runFrame(levelTime);
 }
 
 // Is this a single player type game - sp or coop?

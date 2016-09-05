@@ -54,9 +54,6 @@
     <ClCompile Include="etj_banner_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_command_variables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bg_animation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -274,6 +271,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_event_aggregator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_console_variables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
