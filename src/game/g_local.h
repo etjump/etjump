@@ -556,12 +556,12 @@ struct gentity_s
 //#include "ai_cast_global.h"
 // done.
 
-typedef enum
+enum class ClientConnected
 {
-	CON_DISCONNECTED,
-	CON_CONNECTING,
-	CON_CONNECTED
-} clientConnected_t;
+	Disconnected,
+	Connecting,
+	Connected
+};
 
 typedef enum
 {
@@ -770,7 +770,7 @@ typedef struct raceStruct_s
 // on each level change or team change at ClientBegin()
 typedef struct
 {
-	clientConnected_t connected;
+	ClientConnected connected;
 	usercmd_t cmd;                  // we would lose angles if not persistant
 	usercmd_t oldcmd;               // previous command processed by pmove()
 	qboolean localClient;           // true if "ip" info key is "localhost"

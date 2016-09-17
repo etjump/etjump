@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/container/allocator_traits.hpp>
 #include <string>
+#include <array>
 #include <vector>
 #include <queue>
 #include <memory>
@@ -15,6 +16,18 @@ namespace ETJump
 	class VoteSystem
 	{
 	public:
+		static const int MAX_VOTERS = 64;
+
+		struct VoteSystemOptions
+		{
+			VoteSystemOptions(): maxRevotes(5), voteDurationMs(30000)
+			{
+				
+			}
+			int maxRevotes;
+			int voteDurationMs;
+		};
+
 		enum class VoteType
 		{
 			MapRestart,
@@ -30,6 +43,9 @@ namespace ETJump
 			// type of the vote
 			VoteType type;
 
+			// who voted
+			std::string voter;
+
 			std::string toString();
 		};
 
@@ -38,15 +54,24 @@ namespace ETJump
 			std::string map;
 		};
 
-		enum class Voted
+		enum class VoteStatus
 		{
 			No,
-			Yes
+			Yes,
+			NotYetVoted
+		};
+
+		// a player
+		struct Voter
+		{
+			VoteStatus status;
+			// how many times client has revoted during the current vote
+			int numRevotes;
 		};
 
 		struct VoteParseResult
 		{
-			Voted voted;
+			VoteStatus voted;
 			bool success;
 		};
 
@@ -56,7 +81,7 @@ namespace ETJump
 			Yes
 		};
 
-		explicit VoteSystem(ServerCommandsHandler *commandsHandler, EventAggregator *eventAggregator, IMapQueries *mapQueries);
+		explicit VoteSystem(ServerCommandsHandler *commandsHandler, EventAggregator *eventAggregator, IMapQueries *mapQueries, VoteSystemOptions options = VoteSystemOptions());
 		~VoteSystem();
 	private:
 		// initialize the client commands that the vote system will handle
@@ -64,6 +89,9 @@ namespace ETJump
 
 		// initialize the server event listening
 		void initEventListening();
+
+		// initialize the voter structures
+		void initVoters();
 
 		// client is trying to vote 
 		void vote(int clientNum, const std::vector<std::string>& args);
@@ -98,13 +126,26 @@ namespace ETJump
 		// calls a vote if none exist, else queues it
 		QueuedVote callOrQueueVote(const std::unique_ptr<Vote> vote);
 
+		// gets the next vote or nullptr from vote queue
+		std::unique_ptr<Vote> popNextVote();
+
+		// checks the current vote status
+		void checkVote();
+
 		// list of votes. It is possible to queue multiple votes
 		std::queue<std::unique_ptr<Vote>> _voteQueue;
 
 		// current vote
 		std::unique_ptr<Vote> _currentVote;
 
+		// current time
 		int _levelTime;
+
+		// player's vote state
+		std::array<Voter, MAX_VOTERS> _voters;
+
+		// options
+		VoteSystemOptions _options;
 	};
 }
 

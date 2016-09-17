@@ -1071,7 +1071,7 @@ void ClientThink_real(gentity_t *ent)
 
 
 	// don't think if the client is not yet connected (and thus not yet spawned in)
-	if (client->pers.connected != CON_CONNECTED)
+	if (client->pers.connected != ClientConnected::Connected)
 	{
 		return;
 	}
@@ -1682,7 +1682,7 @@ void SpectatorClientEndFrame(gentity_t *ent)
 		if (clientNum >= 0)
 		{
 			cl = &level.clients[clientNum];
-			if (cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR)
+			if (cl->pers.connected == ClientConnected::Connected && cl->sess.sessionTeam != TEAM_SPECTATOR)
 			{
 				int flags = cl->ps.eFlags;
 				int ping  = ent->client->ps.ping;

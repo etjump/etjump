@@ -237,7 +237,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 		{
 			strcpy(rate, va("%s%s%s%s", "[BOT]", " -----", "       --", "     --"));
 		}
-		else if (cl->pers.connected == CON_CONNECTING)
+		else if (cl->pers.connected == ClientConnected::Connecting)
 		{
 			strcpy(rate, va("%s", "^3>>> CONNECTING <<<"));
 		}
@@ -254,7 +254,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 		if (g_gamestate.integer != GS_PLAYING)
 		{
-			if (cl->sess.sessionTeam == TEAM_SPECTATOR || cl->pers.connected == CON_CONNECTING)
+			if (cl->sess.sessionTeam == TEAM_SPECTATOR || cl->pers.connected == ClientConnected::Connecting)
 			{
 				strcpy(ready, ((ent) ? "^5--------^1 :" : "-------- :"));
 			}
@@ -602,11 +602,11 @@ int QDECL SortStats(const void *a, const void *b)
 	cb = &level.clients[*(int *)b];
 
 	// then connecting clients
-	if (ca->pers.connected == CON_CONNECTING)
+	if (ca->pers.connected == ClientConnected::Connecting)
 	{
 		return(1);
 	}
-	if (cb->pers.connected == CON_CONNECTING)
+	if (cb->pers.connected == ClientConnected::Connecting)
 	{
 		return(-1);
 	}

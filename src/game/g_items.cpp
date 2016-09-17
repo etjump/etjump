@@ -92,7 +92,7 @@ int Pickup_Powerup(gentity_t *ent, gentity_t *other)
 		{
 			continue;
 		}
-		if (client->pers.connected == CON_DISCONNECTED)
+		if (client->pers.connected == ClientConnected::Disconnected)
 		{
 			continue;
 		}

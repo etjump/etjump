@@ -1037,7 +1037,7 @@ void TeamplayInfoMessage(team_t team)
 		player = g_entities + level.sortedClients[i];
 		if (player->inuse && player->client->sess.sessionTeam == team)
 		{
-			if (player->client->pers.connected == CON_CONNECTED)
+			if (player->client->pers.connected == ClientConnected::Connected)
 			{
 				trap_SendServerCommand(player - g_entities, tinfo);
 			}
@@ -2018,7 +2018,7 @@ qboolean G_checkReady(void)
 		{
 			cl = level.clients + level.sortedClients[i];
 
-			if (cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam == TEAM_SPECTATOR)
+			if (cl->pers.connected != ClientConnected::Connected || cl->sess.sessionTeam == TEAM_SPECTATOR)
 			{
 				continue;
 			}

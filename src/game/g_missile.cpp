@@ -1729,7 +1729,7 @@ void G_FreeSatchel(gentity_t *ent)
 
 	other = &g_entities[ent->s.clientNum];
 
-	if (!other->client || other->client->pers.connected != CON_CONNECTED)
+	if (!other->client || other->client->pers.connected != ClientConnected::Connected)
 	{
 		return;
 	}

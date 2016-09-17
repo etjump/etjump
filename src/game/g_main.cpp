@@ -2210,11 +2210,11 @@ int QDECL SortRanks(const void *a, const void *b)
 	}
 
 	// then connecting clients
-	if (ca->pers.connected == CON_CONNECTING)
+	if (ca->pers.connected == ClientConnected::Connecting)
 	{
 		return 1;
 	}
-	if (cb->pers.connected == CON_CONNECTING)
+	if (cb->pers.connected == ClientConnected::Connecting)
 	{
 		return -1;
 	}
@@ -2296,7 +2296,7 @@ void etpro_PlayerInfo(void)
 	e          = &g_entities[0];
 	for (i = 0; i < MAX_CLIENTS; i++, e++)
 	{
-		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED)
+		if (e->client == NULL || e->client->pers.connected == ClientConnected::Disconnected)
 		{
 			playerinfo[i] = '-';
 			continue;
@@ -2366,7 +2366,7 @@ void CalculateRanks(void)
 
 	for (i = 0 ; i < level.maxclients ; i++)
 	{
-		if (level.clients[i].pers.connected != CON_DISCONNECTED)
+		if (level.clients[i].pers.connected != ClientConnected::Disconnected)
 		{
 			int team = level.clients[i].sess.sessionTeam;
 
@@ -2381,7 +2381,7 @@ void CalculateRanks(void)
 				Q_strcat(teaminfo[team], sizeof(teaminfo[team]) - 1, va("%d ", level.numConnectedClients));
 
 				// decide if this should be auto-followed
-				if (level.clients[i].pers.connected == CON_CONNECTED)
+				if (level.clients[i].pers.connected == ClientConnected::Connected)
 				{
 					int teamIndex = level.clients[i].sess.sessionTeam == TEAM_AXIS ? 0 : 1;
 					level.numPlayingClients++;
@@ -2490,7 +2490,7 @@ void SendScoreboardMessageToAllClients(void)
 
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
-		if (level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED)
+		if (level.clients[level.sortedClients[i]].pers.connected == ClientConnected::Connected)
 		{
 			level.clients[level.sortedClients[i]].wantsscore = qtrue;
 //			G_SendScore(g_entities + level.sortedClients[i]);
@@ -2744,7 +2744,7 @@ void ExitLevel(void)
 		for (i = 0 ; i < g_maxclients.integer ; i++)
 		{
 			cl = level.clients + i;
-			if (cl->pers.connected != CON_CONNECTED)
+			if (cl->pers.connected != ClientConnected::Connected)
 			{
 				continue;
 			}
@@ -2752,7 +2752,7 @@ void ExitLevel(void)
 		}
 	}
 
-	// we need to do this here before chaning to CON_CONNECTING
+	// we need to do this here before chaning to Connecting
 	G_WriteSessionData(qfalse);
 
 
@@ -2762,9 +2762,9 @@ void ExitLevel(void)
 	for (i = 0 ; i < g_maxclients.integer ; i++)
 	{
 
-		if (level.clients[i].pers.connected == CON_CONNECTED)
+		if (level.clients[i].pers.connected == ClientConnected::Connected)
 		{
-			level.clients[i].pers.connected = CON_CONNECTING;
+			level.clients[i].pers.connected = ClientConnected::Connecting;
 			trap_UnlinkEntity(&g_entities[i]);
 		}
 	}
@@ -2857,7 +2857,7 @@ void LogExit(const char *string)
 		{
 			continue;
 		}
-		if (cl->pers.connected == CON_CONNECTING)
+		if (cl->pers.connected == ClientConnected::Connecting)
 		{
 			continue;
 		}
@@ -2911,7 +2911,7 @@ void CheckIntermissionExit(void)
 
 		cl = level.clients + level.sortedClients[i];
 
-		if (cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam == TEAM_SPECTATOR)
+		if (cl->pers.connected != ClientConnected::Connected || cl->sess.sessionTeam == TEAM_SPECTATOR)
 		{
 			continue;
 		}
@@ -3283,7 +3283,7 @@ static void G_CheckLoadGame(void)
 		{
 			ready = qfalse;
 		}
-		else if (!ent->client || ent->client->pers.connected != CON_CONNECTED)
+		else if (!ent->client || ent->client->pers.connected != Connected)
 		{
 			ready = qfalse;
 		}
@@ -3318,7 +3318,7 @@ static void G_CheckLoadGame(void)
 		{
 			ready = qfalse;
 		}
-		else if (!ent->client || ent->client->pers.connected != CON_CONNECTED)
+		else if (!ent->client || ent->client->pers.connected != Connected)
 		{
 			ready = qfalse;
 		}

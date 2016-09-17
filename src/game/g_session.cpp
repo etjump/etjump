@@ -500,7 +500,7 @@ void G_WriteSessionData(qboolean restart)
 
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
-		if (level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED)
+		if (level.clients[level.sortedClients[i]].pers.connected == ClientConnected::Connected)
 		{
 			G_WriteClientSessionData(&level.clients[level.sortedClients[i]], restart);
 			// For slow connecters and a short warmup

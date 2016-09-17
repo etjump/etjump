@@ -161,7 +161,7 @@ qboolean OnConnectedClientCommand(gentity_t *ent)
 	auto command = (*argv)[0];
 	boost::to_lower(command);
 
-	if (ent->client->pers.connected != CON_CONNECTED)
+	if (ent->client->pers.connected != ClientConnected::Connected)
 	{
 		return qfalse;
 	}

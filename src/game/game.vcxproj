@@ -274,6 +274,7 @@
     <ClCompile Include="etj_log.cpp" />
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_map_stats.cpp" />
+    <ClCompile Include="etj_player_queries.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_server_commands_handler.cpp" />
@@ -348,9 +349,11 @@
     <ClInclude Include="etj_event_aggregator.h" />
     <ClInclude Include="etj_file.h" />
     <ClInclude Include="etj_imap_queries.h" />
+    <ClInclude Include="etj_iplayer_queries.h" />
     <ClInclude Include="etj_log.h" />
     <ClInclude Include="etj_map.h" />
     <ClInclude Include="etj_map_stats.h" />
+    <ClInclude Include="etj_player_queries.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />

@@ -64,7 +64,7 @@ void G_SendScore(gentity_t *ent)
 			playerClass = cl->ps.stats[STAT_PLAYER_CLASS];
 
 
-			if (cl->pers.connected == CON_CONNECTING)
+			if (cl->pers.connected == ClientConnected::Connecting)
 			{
 				ping = -1;
 			}
@@ -298,7 +298,7 @@ int ClientNumberFromString(gentity_t *to, char *s)
 	SanitizeString(s, s2, qtrue);
 	for (idnum = 0, cl = level.clients; idnum < level.maxclients; idnum++, cl++)
 	{
-		if (cl->pers.connected != CON_CONNECTED)
+		if (cl->pers.connected != ClientConnected::Connected)
 		{
 			continue;
 		}
@@ -327,7 +327,7 @@ int ClientNumberFromString(gentity_t *to, char *s)
 		}
 
 		cl = &level.clients[idnum];
-		if (cl->pers.connected != CON_CONNECTED)
+		if (cl->pers.connected != ClientConnected::Connected)
 		{
 			CPx(to - g_entities, va("print \"Client[lof] %i [lon]is not active\n\"", idnum));
 			return -1;
@@ -385,8 +385,8 @@ int ClientNumbersFromString(const char *s, int *plist)
 		if (i >= 0 && i < level.maxclients)
 		{
 			p = &level.clients[i];
-			if (p->pers.connected == CON_CONNECTED ||
-			    p->pers.connected == CON_CONNECTING)
+			if (p->pers.connected == ClientConnected::Connected ||
+			    p->pers.connected == ClientConnected::Connecting)
 			{
 
 				*plist++ = i;
@@ -405,8 +405,8 @@ int ClientNumbersFromString(const char *s, int *plist)
 	for (i = 0; i < level.maxclients; i++)
 	{
 		p = &level.clients[i];
-		if (p->pers.connected != CON_CONNECTED &&
-		    p->pers.connected != CON_CONNECTING)
+		if (p->pers.connected != ClientConnected::Connected &&
+		    p->pers.connected != ClientConnected::Connecting)
 		{
 
 			continue;
@@ -446,7 +446,7 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter)
 		for (p = plist; *p != -1; p++)
 		{
 			cl = &level.clients[*p];
-			if (cl->pers.connected == CON_CONNECTED || cl->pers.connected == CON_CONNECTING)
+			if (cl->pers.connected == ClientConnected::Connected || cl->pers.connected == ClientConnected::Connecting)
 			{
 				//ETJump: filtering out specific team
  				if (cl->sess.sessionTeam == filter)
@@ -1725,7 +1725,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir)
 		}
 
 		// can only follow connected clients
-		if (level.clients[clientNum].pers.connected != CON_CONNECTED)
+		if (level.clients[clientNum].pers.connected != ClientConnected::Connected)
 		{
 			continue;
 		}
@@ -4089,7 +4089,6 @@ typedef struct
 static command_t anyTimeCommands[] =
 {
 	{ "score",     qfalse, Cmd_Score_f                         },
-	{ "vote",      qtrue,  Cmd_Vote_f                          },
 	{ "fireteam",  qfalse, Cmd_FireTeam_MP_f                   },
 	{ "showstats", qfalse, G_PrintAccuracyLog                  },
 	{ "ignore",    qfalse, Cmd_Ignore_f                        },
@@ -4201,7 +4200,7 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
-	if (ent->client->pers.connected != CON_CONNECTED)
+	if (ent->client->pers.connected != ClientConnected::Connected)
 	{
 		return;
 	}

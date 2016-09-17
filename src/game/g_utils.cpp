@@ -161,7 +161,7 @@ void G_TeamCommand(team_t team, char *cmd)
 
 	for (i = 0 ; i < level.maxclients ; i++)
 	{
-		if (level.clients[i].pers.connected == CON_CONNECTED)
+		if (level.clients[i].pers.connected == ClientConnected::Connected)
 		{
 			if (level.clients[i].sess.sessionTeam == team)
 			{

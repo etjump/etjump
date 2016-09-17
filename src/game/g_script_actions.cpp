@@ -1637,7 +1637,7 @@ qboolean G_ScriptAction_Trigger(gentity_t *ent, char *params)
 	{
 		for (i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (level.clients[i].pers.connected != CON_CONNECTED)
+			if (level.clients[i].pers.connected != ClientConnected::Connected)
 			{
 				continue;
 			}

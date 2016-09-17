@@ -539,7 +539,7 @@ void G_printMatchInfo(gentity_t *ent)
 		{
 			cl = level.clients + level.sortedClients[j];
 
-			if (cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != i)
+			if (cl->pers.connected != ClientConnected::Connected || cl->sess.sessionTeam != i)
 			{
 				continue;
 			}
@@ -628,7 +628,7 @@ void G_matchInfoDump(unsigned int dwDumpType)
 		ent = &g_entities[ref];
 		cl  = ent->client;
 
-		if (cl->pers.connected != CON_CONNECTED)
+		if (cl->pers.connected != ClientConnected::Connected)
 		{
 			continue;
 		}

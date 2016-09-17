@@ -1596,7 +1596,7 @@ void ClientUserinfoChanged(int clientNum)
 	s = Info_ValueForKey(userinfo, "name");
 	ClientCleanName(s, client->pers.netname, sizeof(client->pers.netname));
 
-	if (client->pers.connected == CON_CONNECTED)
+	if (client->pers.connected == ClientConnected::Connected)
 	{
 		if (strcmp(oldname, client->pers.netname))
 		{
@@ -1803,7 +1803,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	memset(client, 0, sizeof(*client));
 
-	client->pers.connected   = CON_CONNECTING;
+	client->pers.connected   = ClientConnected::Connecting;
 	client->pers.connectTime = level.time;          // DHM - Nerve
 
 	if (firstTime)
@@ -1931,7 +1931,7 @@ void ClientBegin(int clientNum)
 	ent->pain   = 0;
 	ent->client = client;
 
-	client->pers.connected       = CON_CONNECTED;
+	client->pers.connected       = ClientConnected::Connected;
 	client->pers.teamState.state = TEAM_BEGIN;
 
 	// save eflags around this, because changing teams will
@@ -2524,7 +2524,7 @@ void ClientDisconnect(int clientNum)
 	}
 
 	// send effect if they were completely connected
-	if (ent->client->pers.connected == CON_CONNECTED
+	if (ent->client->pers.connected == ClientConnected::Connected
 	    && ent->client->sess.sessionTeam != TEAM_SPECTATOR
 	    && !(ent->client->ps.pm_flags & PMF_LIMBO))
 	{
@@ -2580,7 +2580,7 @@ void ClientDisconnect(int clientNum)
 	ent->s.modelindex                     = 0;
 	ent->inuse                            = qfalse;
 	ent->classname                        = "disconnected";
-	ent->client->pers.connected           = CON_DISCONNECTED;
+	ent->client->pers.connected           = ClientConnected::Disconnected;
 	ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
 	i                                     = ent->client->sess.sessionTeam;
 	ent->client->sess.sessionTeam         = TEAM_FREE;

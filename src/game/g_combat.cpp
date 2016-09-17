@@ -627,7 +627,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	{
 		gclient_t *client = &level.clients[level.sortedClients[i]];
 
-		if (client->pers.connected != CON_CONNECTED)
+		if (client->pers.connected != ClientConnected::Connected)
 		{
 			continue;
 		}

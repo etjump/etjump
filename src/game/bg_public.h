@@ -1402,7 +1402,7 @@ typedef struct headAnimation_s
 #define ANIM_TOGGLEBIT      (1 << (ANIM_BITS - 1))
 
 // Gordon: renamed these to team_axis/allies, it really was awful....
-typedef enum
+enum class team_t
 {
 	TEAM_FREE,
 	TEAM_AXIS,
@@ -1410,7 +1410,7 @@ typedef enum
 	TEAM_SPECTATOR,
 
 	TEAM_NUM_TEAMS
-} team_t;
+};
 
 // Time between location updates
 #define TEAM_LOCATION_UPDATE_TIME       1000

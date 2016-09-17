@@ -505,7 +505,7 @@ int refClientNumFromString(char *s)
 	SanitizeString(s, s2, qtrue);
 	for (idnum = 0, cl = level.clients; idnum < level.maxclients; idnum++, cl++)
 	{
-		if (cl->pers.connected != CON_CONNECTED)
+		if (cl->pers.connected != ClientConnected::Connected)
 		{
 			continue;
 		}
@@ -535,7 +535,7 @@ int refClientNumFromString(char *s)
 		}
 
 		cl = &level.clients[idnum];
-		if (cl->pers.connected != CON_CONNECTED)
+		if (cl->pers.connected != ClientConnected::Connected)
 		{
 			G_Printf("Client ^3%i^7 is not active\n", idnum);
 			return -1;
@@ -572,7 +572,7 @@ gclient_t *ClientForString(const char *s)
 	for (i = 0 ; i < level.maxclients ; i++)
 	{
 		cl = &level.clients[i];
-		if (cl->pers.connected == CON_DISCONNECTED)
+		if (cl->pers.connected == ClientConnected::Disconnected)
 		{
 			continue;
 		}
@@ -593,7 +593,7 @@ gclient_t *ClientForString(const char *s)
 		}
 
 		cl = &level.clients[idnum];
-		if (cl->pers.connected == CON_DISCONNECTED)
+		if (cl->pers.connected == ClientConnected::Disconnected)
 		{
 			G_Printf("Client %i is not connected\n", idnum);
 			return NULL;
@@ -646,7 +646,7 @@ gclient_t *G_GetPlayerByNum(int clientNum)
 	}
 
 	cl = &level.clients[clientNum];
-	if (cl->pers.connected == CON_DISCONNECTED)
+	if (cl->pers.connected == ClientConnected::Disconnected)
 	{
 		G_Printf("Client %i is not connected\n", clientNum);
 		return NULL;
