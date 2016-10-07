@@ -6,10 +6,13 @@ namespace ETJump
 	/**
 	 * A wrapper for player related
 	 */
-	class Player : public IPlayerQueries
+	class PlayerQueries : public IPlayerQueries
 	{
 	public:
+		int connectedPlayerCount() const override;
+		int playingPlayerCount() const override;
 		std::string name(int clientNum) const override;
+		Team team(int clientNum) const override;
 	};
 }
 

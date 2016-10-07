@@ -105,6 +105,7 @@ public:
 	* @param message The message
 	*/
 	static void BroadcastCenterMessage(const std::string& message);
+	static void BroadcastCenterMessage(const boost::format& fmt);
 private:
 };
 

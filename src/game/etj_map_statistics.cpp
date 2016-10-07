@@ -26,7 +26,7 @@ std::vector<const MapStatistics::MapInformation *> MapStatistics::getMostPlayed(
 		return lhs->secondsPlayed > rhs->secondsPlayed;
 	});
 
-	return std::move(mostPlayed);
+	return mostPlayed;
 }
 
 std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed()
@@ -42,7 +42,7 @@ std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed
 		return lhs->secondsPlayed < rhs->secondsPlayed;
 	});
 
-	return std::move(mostPlayed);
+	return mostPlayed;
 }
 
 const std::vector<std::string> *MapStatistics::getCurrentMaps()
@@ -87,6 +87,10 @@ std::vector<std::string> MapStatistics::matches(const std::string& map) const
 	return matches;
 }
 
+void MapStatistics::changeMap(const std::string& newMap)
+{
+}
+
 std::vector<std::string> MapStatistics::getMaps()
 {
 	std::vector<std::string> maps;
@@ -99,7 +103,7 @@ std::vector<std::string> MapStatistics::getMaps()
 		}
 	}
 
-	return std::move(maps);
+	return maps;
 }
 
 const MapStatistics::MapInformation *MapStatistics::getMapInformation(const std::string& mapName)

@@ -28,6 +28,21 @@
     <Filter Include="Source Files\Player">
       <UniqueIdentifier>{2cafd150-806d-453a-b5f7-ccb143b3990b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Interfaces">
+      <UniqueIdentifier>{aa06d86c-b6b0-4dbe-98fe-c6b9606035bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Vote">
+      <UniqueIdentifier>{17a18426-0a16-4c52-aeca-d40d0f16ea92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Vote">
+      <UniqueIdentifier>{9a1fd61c-2e0a-4722-b74c-2d3488aee4a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Facades">
+      <UniqueIdentifier>{0b16b7eb-305e-43f2-97e2-69607900daa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Facades">
+      <UniqueIdentifier>{2a335d51-bebc-469e-a6cc-9079369165f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sha-1\sha1.c">
@@ -243,9 +258,6 @@
     <ClCompile Include="etj_user.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_vote_system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_server_commands_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -284,6 +296,18 @@
     </ClCompile>
     <ClCompile Include="etj_player_queries.cpp">
       <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_cvar_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_vote_system.cpp">
+      <Filter>Source Files\Vote</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_default_vote_strategy.cpp">
+      <Filter>Source Files\Vote</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_syscalls_facade.cpp">
+      <Filter>Source Files\Facades</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -406,16 +430,10 @@
     <ClInclude Include="etj_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_vote_system.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_server_commands_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_map_stats.h">
-      <Filter>Header Files\MapStats</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_imap_queries.h">
       <Filter>Header Files\MapStats</Filter>
     </ClInclude>
     <ClInclude Include="etj_map.h">
@@ -435,6 +453,30 @@
     </ClInclude>
     <ClInclude Include="etj_player_queries.h">
       <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cvar_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_icvar_manager.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_vote_system.h">
+      <Filter>Header Files\Vote</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_ivote_strategy.h">
+      <Filter>Header Files\Vote</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_default_vote_strategy.h">
+      <Filter>Header Files\Vote</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_syscalls_facade.h">
+      <Filter>Header Files\Facades</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_isyscalls_facade.h">
+      <Filter>Source Files\Facades</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_imap_facade.h">
+      <Filter>Header Files\MapStats</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

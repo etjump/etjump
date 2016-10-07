@@ -5,6 +5,11 @@
 #include "etj_map_statistics.h"
 #include "etj_map_stats.h"
 #include "etj_event_aggregator.h"
+#include "etj_player_queries.h"
+#include "etj_cvar_manager.h"
+#include "etj_ivote_strategy.h"
+#include "etj_default_vote_strategy.h"
+#include "etj_syscalls_facade.h"
 
 level_locals_t level;
 
@@ -374,8 +379,8 @@ cvarTable_t gameCvarTable[] =
 	{ &team_nocontrols,             "team_nocontrols",             "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_allow_map,              "vote_allow_map",              "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_allow_matchreset,       "vote_allow_matchreset",       "1",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_limit,                  "vote_limit",                  "5",                                                      0,                                               0, qfalse, qfalse},
-	{ &vote_percent,                "vote_percent",                "50",                                                     0,                                               0, qfalse, qfalse},
+	{ &vote_limit,                  ETJump::Cvars::Vote::Limit,                  "5",                                                      0,                                               0, qfalse, qfalse},
+	{ &vote_percent,                ETJump::Cvars::Vote::Percent,                "50",                                                     0,                                               0, qfalse, qfalse},
 
 	// state vars
 	{ &z_serverflags,               "z_serverflags",               "0",                                                      0,                                               0, qfalse, qfalse},
@@ -578,10 +583,14 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
+	std::unique_ptr<SyscallsFacade> syscallsFacade = nullptr;
 	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
 	std::unique_ptr<VoteSystem> voteSystem = nullptr;
 	std::unique_ptr<MapStats> mapStats = nullptr;
 	std::unique_ptr<EventAggregator> eventAggregator = nullptr;
+	std::unique_ptr<PlayerQueries> playerQueries = nullptr;
+	std::unique_ptr<CvarManager> cvarManager = nullptr;
+	std::unique_ptr<DefaultVoteStrategy> defaultVoteStrategy = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1985,14 +1994,21 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// ETJump server initialization
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	ETJump::syscallsFacade = std::unique_ptr<ETJump::SyscallsFacade>(new ETJump::SyscallsFacade());
+	ETJump::defaultVoteStrategy = std::unique_ptr<ETJump::DefaultVoteStrategy>(new ETJump::DefaultVoteStrategy());
+	ETJump::cvarManager = std::unique_ptr<ETJump::CvarManager>(new ETJump::CvarManager());
+	ETJump::playerQueries = std::unique_ptr<ETJump::PlayerQueries>(new ETJump::PlayerQueries());
 	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
 	ETJump::eventAggregator = std::unique_ptr<ETJump::EventAggregator>(new ETJump::EventAggregator());
-	ETJump::mapStats = std::unique_ptr<ETJump::MapStats>(new ETJump::MapStats(g_mapDatabase.string, level.rawmapname));
+	ETJump::mapStats = std::unique_ptr<ETJump::MapStats>(new ETJump::MapStats(g_mapDatabase.string, level.rawmapname, ETJump::syscallsFacade.get()));
 	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(
 		ETJump::commandsHandler.get(), 
 		ETJump::eventAggregator.get(), 
-		ETJump::mapStats.get())
-	);
+		ETJump::mapStats.get(),
+		ETJump::playerQueries.get(),
+		ETJump::cvarManager.get(),
+		ETJump::defaultVoteStrategy.get()
+	));
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// parse the key/value pairs and spawn gentities
@@ -2138,6 +2154,10 @@ void G_ShutdownGame(int restart)
 	ETJump::voteSystem = nullptr;
 	ETJump::commandsHandler = nullptr;
 	ETJump::eventAggregator = nullptr;
+	ETJump::playerQueries = nullptr;
+	ETJump::cvarManager = nullptr;
+	ETJump::defaultVoteStrategy = nullptr;
+	ETJump::syscallsFacade = nullptr;
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -3939,7 +3959,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 #endif // SAVEGAME_SUPPORT
 	ETJump_RunFrame(levelTime);
 
-	ETJump::EventAggregator::Payload payload{ std::vector<int>{levelTime} };
+	ETJump::EventAggregator::RunFramePayload payload{};
+	payload.levelTime = levelTime;
 	ETJump::eventAggregator->serverEvent(ETJump::EventAggregator::ServerEventType::RunFrame, &payload);
 }
 

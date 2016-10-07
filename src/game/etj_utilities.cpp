@@ -36,7 +36,7 @@ std::vector<int> Utilities::getSpectators(int clientNum)
 		}
 	}
 
-	return std::move(spectators);
+	return spectators;
 }
 
 static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowed)
@@ -254,7 +254,7 @@ std::string Utilities::ReadFile(const std::string& filepath)
 	trap_FS_Read(buf.get(), len, f);
 	trap_FS_FCloseFile(f);
 	buf[len] = 0;
-	return std::move(std::string(buf.get()));
+	return std::string(buf.get());
 }
 
 void Utilities::WriteFile(const std::string& filepath, const std::string& content)
@@ -317,5 +317,5 @@ std::vector<std::string> Utilities::getMaps()
 		maps.push_back(buf);
 	}
 
-	return std::move(maps);
+	return maps;
 }

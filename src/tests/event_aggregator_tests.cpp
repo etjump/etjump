@@ -20,14 +20,18 @@ TEST_F(EventAggregatorTests, ClientEventCallbackShouldBeCalled)
 	auto calledWith = -1;
 	eventAggregator.subscribe(ETJump::EventAggregator::ClientEventType::ClientConnect, [&](const ETJump::EventAggregator::Payload *payload)
 	{
-		ASSERT_NE(payload, nullptr);
-		ASSERT_EQ(payload->integers.size(), 1);
-		calledWith = payload->integers[0];
+		auto connectPayload = reinterpret_cast<const ETJump::EventAggregator::ClientConnectPayload*>(payload);
+		ASSERT_NE(connectPayload, nullptr);
+		ASSERT_EQ(connectPayload->clientNum, 3);
+		ASSERT_EQ(connectPayload->isBot, 1);
+		ASSERT_EQ(connectPayload->firstTime, 1);
 	});
 	const auto clientNum = 3;
-	auto payload = ETJump::EventAggregator::Payload{ std::vector<int>{clientNum} };
+	auto payload = ETJump::EventAggregator::ClientConnectPayload{};
+	payload.clientNum = 3;
+	payload.isBot = 1;
+	payload.firstTime = 1;
 	eventAggregator.clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, &payload);
-	ASSERT_EQ(calledWith, clientNum);
 }
 
 TEST_F(EventAggregatorTests, UnsubscribedClientEventCallbackShouldntBeCalled)
@@ -35,17 +39,19 @@ TEST_F(EventAggregatorTests, UnsubscribedClientEventCallbackShouldntBeCalled)
 	auto calledWith = -1;
 	int handle = eventAggregator.subscribe(ETJump::EventAggregator::ClientEventType::ClientConnect, [&](const ETJump::EventAggregator::Payload *payload)
 	{
-		ASSERT_NE(payload, nullptr);
-		ASSERT_EQ(payload->integers.size(), 1);
-		calledWith = payload->integers[0];
+		auto cnPayload = reinterpret_cast<const ETJump::EventAggregator::ClientNumPayload*>(payload);
+		ASSERT_NE(cnPayload, nullptr);
+		ASSERT_EQ(cnPayload->clientNum, 32);
+		calledWith = cnPayload->clientNum;
 	});
-	auto clientNum = 3;
-	auto payload = ETJump::EventAggregator::Payload{ std::vector<int>{clientNum} };
+	auto clientNum = 32;
+	auto payload = ETJump::EventAggregator::ClientNumPayload{};
+	payload.clientNum = clientNum;
 	eventAggregator.clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, &payload);
 	ASSERT_EQ(calledWith, clientNum);
 	eventAggregator.unsubcribe(handle);
 	clientNum = 5;
-	payload.integers[0] = 5;
+	payload.clientNum = 5;
 	eventAggregator.clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, &payload);
 	ASSERT_NE(calledWith, clientNum);
 }
@@ -95,7 +101,8 @@ TEST_F(EventAggregatorTests, NotAllEventsShouldBeCalled)
 	{
 		secondCalled = true;
 	});
-	const ETJump::EventAggregator::Payload payload{ std::vector<int>{0} };
+	ETJump::EventAggregator::ClientNumPayload payload{};
+	payload.clientNum = 0;
 	eventAggregator.clientEvent(ETJump::EventAggregator::ClientEventType::ClientThink, &payload);
 	ASSERT_FALSE(firstCalled);
 	ASSERT_TRUE(secondCalled);

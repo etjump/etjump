@@ -5,12 +5,20 @@
 #include "etj_map.h"
 #include "etj_file.h"
 #include <SQLiteCpp/Transaction.h>
+#include "etj_log.h"
 
-ETJump::MapStats::MapStats(const std::string& database, const std::string& currentMap):
+ETJump::MapStats::MapStats(const std::string& database, const std::string& currentMap, ISyscallsFacade *syscallsFacade):
 	_database(File::getPath(database)),
 	_currentMapName(currentMap),
-	_currentMapsOnServer(getCurrentMaps())
+	_currentMapsOnServer(getCurrentMaps()),
+	_syscallsFacade(syscallsFacade)
 {
+	if (_syscallsFacade == nullptr)
+	{
+		Log::error("syscallsFacade is null.");
+		return;
+	}
+
 	createDatabase();
 	insertNewMaps();
 }
@@ -45,6 +53,11 @@ std::vector<std::string> ETJump::MapStats::matches(const std::string& map) const
 		}
 	}
 	return matches;
+}
+
+void ETJump::MapStats::changeMap(const std::string& newMap)
+{
+	_syscallsFacade->execConsoleCommand(ISyscallsFacade::CbufExec::Append, "map " + newMap);
 }
 
 void ETJump::MapStats::createDatabase()

@@ -34,9 +34,29 @@ namespace ETJump
 			ClientDisconnect
 		};
 
-		struct Payload
+		class Payload
 		{
-			std::vector<int> integers;
+		public:
+		};
+
+		class ClientNumPayload : public Payload
+		{
+		public:
+			int clientNum;
+		};
+
+		class ClientConnectPayload : public Payload
+		{
+		public: 
+			int clientNum;
+			int firstTime;
+			int isBot;
+		};
+
+		class RunFramePayload : public Payload
+		{
+		public:
+			int levelTime;
 		};
 
 		EventAggregator();

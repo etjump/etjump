@@ -53,7 +53,7 @@ std::vector<char> ETJump::File::read(int bytes)
 	auto buffer = std::vector<char>(readBytes);
 
 	trap_FS_Read(buffer.data(), readBytes, _handle);
-	return move(buffer);
+	return buffer;
 }
 
 void ETJump::File::write(const std::string& data) const
@@ -91,7 +91,7 @@ std::vector<std::string> ETJump::File::fileList(const std::string& path, const s
 		Q_strncpyz(file, dirPtr, sizeof(file));
 		files.push_back(file);
 	}
-	return move(files);
+	return files;
 }
 
 std::string ETJump::File::getPath(const std::string file)
@@ -109,5 +109,5 @@ std::string ETJump::File::getPath(const std::string file)
 			c = PATH_SEP;
 		}
 	}
-	return move(path);
+	return path;
 }

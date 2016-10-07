@@ -145,6 +145,11 @@ void Printer::BroadcastCenterMessage(const std::string& message)
 	G_Printf("%s\n", message.c_str());
 }
 
+void Printer::BroadcastCenterMessage(const boost::format& fmt)
+{
+	BroadcastCenterMessage(fmt.str());
+}
+
 void Printer::SendCommandToAll(const std::string& command)
 {
 	trap_SendServerCommand(-1, command.c_str());

@@ -1665,7 +1665,8 @@ void ClientUserinfoChanged(int clientNum)
 		}
 	}
 
-	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::EventAggregator::ClientNumPayload payload;
+	payload.clientNum = clientNum;
 	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientUserinfoChanged, &payload);
 
 	G_LogPrintf("ClientUserinfoChanged: %i %s\n", clientNum, s);
@@ -1892,7 +1893,10 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		ent->client->sess.muted = qtrue;
 	}
 
-	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum, static_cast<int>(firstTime), static_cast<int>(isBot)} };
+	ETJump::EventAggregator::ClientConnectPayload payload{};
+	payload.clientNum = clientNum; 
+	payload.firstTime = static_cast<int>(firstTime); 
+	payload.isBot = static_cast<int>(isBot);
 	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientConnect, &payload);
 
 	ResetSavedPositions(ent);
@@ -2005,7 +2009,8 @@ void ClientBegin(int clientNum)
 
 	ent->client->pers.previousSetHealthTime = 0;
 
-	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::EventAggregator::ClientNumPayload payload{};
+	payload.clientNum = clientNum;
 	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientBegin, &payload);
 }
 
@@ -2600,7 +2605,8 @@ void ClientDisconnect(int clientNum)
 
 	ClearPortals(ent);
 
-	ETJump::EventAggregator::Payload payload{ std::vector<int>{clientNum} };
+	ETJump::EventAggregator::ClientNumPayload payload{};
+	payload.clientNum = clientNum;
 	ETJump::eventAggregator->clientEvent(ETJump::EventAggregator::ClientEventType::ClientDisconnect, &payload);
 }
 

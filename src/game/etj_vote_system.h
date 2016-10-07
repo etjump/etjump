@@ -7,11 +7,23 @@
 #include <memory>
 #include "etj_log.h"
 #include "etj_event_aggregator.h"
+#include "etj_iplayer_queries.h"
+#include "etj_icvar_manager.h"
+#include "etj_ivote_strategy.h"
+#include "etj_imap_facade.h"
 
 namespace ETJump
 {
-	class IMapQueries;
 	class ServerCommandsHandler;
+
+	namespace Cvars
+	{
+		namespace Vote
+		{
+			const auto Percent = "vote_percent";
+			const auto Limit = "vote_limit";
+		}
+	}
 
 	class VoteSystem
 	{
@@ -35,8 +47,13 @@ namespace ETJump
 			RandomMap
 		};
 
-		struct Vote
+		class Vote
 		{
+		public:
+			virtual ~Vote()
+			{
+			}
+
 			// level.time when the vote was started
 			int startTime;
 
@@ -44,14 +61,35 @@ namespace ETJump
 			VoteType type;
 
 			// who voted
-			std::string voter;
+			int voterClientNum;
 
 			std::string toString();
+			
+			// what to do with the vote
+			virtual void execute() = 0;
 		};
 
-		struct MapVote : public Vote
+		class MapVote : public Vote
 		{
+		public:
+			explicit MapVote(IMapFacade *mapFacade);
 			std::string map;
+
+			void execute() override;
+		private:
+			IMapFacade *_mapFacade;
+		};
+
+		class MapRestartVote : public Vote
+		{
+		public:
+			void execute() override;
+		};
+
+		class RandomMapVote : public Vote
+		{
+		public:
+			void execute() override;
 		};
 
 		enum class VoteStatus
@@ -81,7 +119,30 @@ namespace ETJump
 			Yes
 		};
 
-		explicit VoteSystem(ServerCommandsHandler *commandsHandler, EventAggregator *eventAggregator, IMapQueries *mapQueries, VoteSystemOptions options = VoteSystemOptions());
+		/**
+		 * Current vote requirements based on cvars / state of the game
+		 */
+		struct VoteRequirements
+		{
+			int votePercent;
+		};
+
+		/**
+		 * Result from a vote creation function
+		 */
+		struct CreateVoteResult
+		{
+			std::unique_ptr<Vote> vote;
+			std::string error;
+		};
+
+		explicit VoteSystem(ServerCommandsHandler *commandsHandler, 
+			EventAggregator *eventAggregator, 
+				IMapFacade *mapFacade, 
+				IPlayerQueries *playerQueries, 
+				ICvarManager *cvars,
+				IVoteStrategy *voteStrategy,
+				VoteSystemOptions options = VoteSystemOptions());
 		~VoteSystem();
 	private:
 		// initialize the client commands that the vote system will handle
@@ -103,7 +164,13 @@ namespace ETJump
 		ServerCommandsHandler *_commandsHandler;
 
 		// for querying map data
-		IMapQueries *_mapQueries;
+		IMapFacade *_mapFacade;
+
+		// for querying player data
+		IPlayerQueries* _playerQueries;
+
+		// for querying cvar values
+		ICvarManager* _cvarManager;
 
 		// for subscribing to runframe
 		EventAggregator* _eventAggregator;
@@ -111,26 +178,35 @@ namespace ETJump
 		// event handles returned from event aggregator
 		std::vector<int> _eventHandles;
 
+		// logic on how to pass votes
+		IVoteStrategy* _voteStrategy;
+
 		// client wants to start a new vote
 		void callVote(int clientNum, const std::vector<std::string>& args);
 
 		// handles the printing after a vote has been queued
-		void displayVoteQueueResult(int clientNum, QueuedVote voteWasQueued);
+		void displayVoteQueueResult(int clientNum, QueuedVote voteWasQueued) const;
 
 		// client wants to start a new map vote
-		void mapVote(int clientNum, const std::vector<std::string>& args);
+		CreateVoteResult createMapVote(int clientNum, const std::vector<std::string>& args) const;
 
 		// creates a simple vote (that requires no parameters) and adds it to the queue/current vote
-		void createSimpleVote(int clientNum, VoteType type);
+		CreateVoteResult createSimpleVote(int clientNum, VoteType type) const;
 
 		// calls a vote if none exist, else queues it
 		QueuedVote callOrQueueVote(const std::unique_ptr<Vote> vote);
 
+		// reset the vote status of each player
+		void resetPlayersVotes();
+
 		// gets the next vote or nullptr from vote queue
 		std::unique_ptr<Vote> popNextVote();
 
-		// checks the current vote status
-		void checkVote();
+		// get vote requirements that are currently active
+		VoteRequirements getVoteRequirements() const;
+
+		// current vote's requirements
+		VoteRequirements _voteRequirements;
 
 		// list of votes. It is possible to queue multiple votes
 		std::queue<std::unique_ptr<Vote>> _voteQueue;

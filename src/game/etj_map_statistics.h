@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 #include <random>
-#include "etj_imap_queries.h"
+#include "etj_imap_facade.h"
 
-class MapStatistics : public ETJump::IMapQueries
+class MapStatistics : public ETJump::IMapFacade
 {
 public:
 	MapStatistics();
@@ -50,14 +50,14 @@ public:
 	const std::vector<std::string> *getCurrentMaps();
 
 	//////////////////////////////////////
-	// IMapQueries
+	// IMapFacade
 	//////////////////////////////////////
 	bool mapExists(const std::string& map) const override;
 	std::vector<std::string> maps() const override;
 	std::string currentMap() const override;
 	std::vector<std::string> matches(const std::string& map) const override;
+	void changeMap(const std::string& newMap) override;
 	//////////////////////////////////////
-
 private:
 	std::vector<MapInformation> _maps;
 	std::vector<std::string>    _currentMaps;
