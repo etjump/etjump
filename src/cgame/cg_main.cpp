@@ -12,6 +12,7 @@
 #include "etj_entity_events_handler.h"
 #include "etj_overbounce_watcher.h"
 #include "etj_maxspeed.h"
+#include "etj_client_vote_manager.h"
 
 displayContextDef_t cgDC;
 
@@ -85,6 +86,7 @@ namespace ETJump
 	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
 	std::unique_ptr<EntityEventsHandler> entityEventsHandler;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
+	std::unique_ptr<ClientVoteManager> clientVoteManager;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3465,6 +3467,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(nullptr));
 	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(trap_AddCommand));
 	ETJump::entityEventsHandler = std::unique_ptr<ETJump::EntityEventsHandler>(new ETJump::EntityEventsHandler());
+	ETJump::clientVoteManager = std::unique_ptr<ETJump::ClientVoteManager>(new ETJump::ClientVoteManager(ETJump::consoleCommandsHandler.get()));
 
 	// initialize renderables
 	// Overbounce watcher
