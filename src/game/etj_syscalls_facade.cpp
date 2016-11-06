@@ -10,12 +10,16 @@ void ETJump::SyscallsFacade::execConsoleCommand(CbufExec execWhen, const std::st
 	{
 	case CbufExec::Now: 
 		exec = EXEC_NOW;
+		break;
 	case CbufExec::Insert: 
 		exec = EXEC_INSERT;
-	case CbufExec::Append: 
+		break;
+	case CbufExec::Append:
 		exec = EXEC_APPEND;
-	default: 
+		break;
+	default:
 		Log::error(boost::format("Unknown execWhen: %d") % static_cast<int>(execWhen));
+		return;
 	}
 
 	trap_SendConsoleCommand(exec, command.c_str());
