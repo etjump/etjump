@@ -315,8 +315,12 @@ void ETJump::VoteSystem::callVote(int clientNum, const std::vector<std::string>&
 	}
 	else
 	{
-		displayVoteQueueResult(clientNum, callOrQueueVote(move(vote.vote)));
-		_voters[clientNum].status = VoteStatus::Yes;
+		auto result = callOrQueueVote(move(vote.vote));
+		displayVoteQueueResult(clientNum, result);
+		if (result == QueuedVote::No)
+		{
+			_voters[clientNum].status = VoteStatus::Yes;
+		}
 	}
 }
 
