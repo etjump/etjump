@@ -72,12 +72,12 @@ namespace ETJump
 		class MapVote : public Vote
 		{
 		public:
-			explicit MapVote(IMapFacade *mapFacade);
+			explicit MapVote(std::shared_ptr<IMapFacade> mapFacade);
 			std::string map;
 
 			void execute() override;
 		private:
-			IMapFacade *_mapFacade;
+			std::shared_ptr<IMapFacade> _mapFacade;
 		};
 
 		class MapRestartVote : public Vote
@@ -136,12 +136,12 @@ namespace ETJump
 			std::string error;
 		};
 
-		explicit VoteSystem(ServerCommandsHandler *commandsHandler, 
-			EventAggregator *eventAggregator, 
-				IMapFacade *mapFacade, 
-				IPlayerQueries *playerQueries, 
-				ICvarManager *cvars,
-				IVoteStrategy *voteStrategy,
+		explicit VoteSystem(std::shared_ptr<ServerCommandsHandler> commandsHandler, 
+			std::shared_ptr<EventAggregator> eventAggregator, 
+			std::shared_ptr<IMapFacade> mapFacade,
+			std::shared_ptr<IPlayerQueries> playerQueries,
+			std::shared_ptr<ICvarManager> cvars,
+			std::shared_ptr<IVoteStrategy> voteStrategy,
 				VoteSystemOptions options = VoteSystemOptions());
 		~VoteSystem();
 	private:
@@ -161,25 +161,25 @@ namespace ETJump
 		static VoteParseResult parseVoteArgs(const std::vector<std::string>& args);
 
 		// for registering the commands
-		ServerCommandsHandler *_commandsHandler;
+		std::shared_ptr<ServerCommandsHandler> _commandsHandler;
 
 		// for querying map data
-		IMapFacade *_mapFacade;
+		std::shared_ptr<IMapFacade> _mapFacade;
 
 		// for querying player data
-		IPlayerQueries* _playerQueries;
+		std::shared_ptr<IPlayerQueries> _playerQueries;
 
 		// for querying cvar values
-		ICvarManager* _cvarManager;
+		std::shared_ptr<ICvarManager> _cvarManager;
 
 		// for subscribing to runframe
-		EventAggregator* _eventAggregator;
+		std::shared_ptr<EventAggregator> _eventAggregator;
 
 		// event handles returned from event aggregator
 		std::vector<int> _eventHandles;
 
 		// logic on how to pass votes
-		IVoteStrategy* _voteStrategy;
+		std::shared_ptr<IVoteStrategy> _voteStrategy;
 
 		// client wants to start a new vote
 		void callVote(int clientNum, const std::vector<std::string>& args);

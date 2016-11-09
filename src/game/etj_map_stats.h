@@ -3,13 +3,14 @@
 #include <string>
 #include "etj_imap_facade.h"
 #include "etj_isyscalls_facade.h"
+#include <memory>
 
 namespace ETJump
 {
 	class MapStats : public IMapFacade
 	{
 	public:
-		explicit MapStats(const std::string& database, const std::string& currentMap, ISyscallsFacade *syscallsFacade);
+		explicit MapStats(const std::string& database, const std::string& currentMap, std::shared_ptr<ISyscallsFacade> syscallsFacade);
 		~MapStats();
 		//////////////
 		// IMapFacade
@@ -34,6 +35,6 @@ namespace ETJump
 		std::string _database;
 		std::string _currentMapName;
 		std::vector<std::string> _currentMapsOnServer;
-		ISyscallsFacade* _syscallsFacade;
+		std::shared_ptr<ISyscallsFacade> _syscallsFacade;
 	};
 }

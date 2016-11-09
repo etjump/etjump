@@ -1496,7 +1496,7 @@ const char *GetParsedIP(const char *ipadd)
 
 namespace ETJump
 {
-	extern std::unique_ptr<EventAggregator> eventAggregator;
+	extern std::shared_ptr<EventAggregator> eventAggregator;
 }
 /*
 ===========

@@ -20,7 +20,7 @@ std::string ETJump::VoteSystem::Vote::toString()
 	}
 }
 
-ETJump::VoteSystem::MapVote::MapVote(IMapFacade* mapFacade): _mapFacade(mapFacade)
+ETJump::VoteSystem::MapVote::MapVote(std::shared_ptr<IMapFacade> mapFacade): _mapFacade(mapFacade)
 {
 }
 
@@ -37,12 +37,12 @@ void ETJump::VoteSystem::RandomMapVote::execute()
 {
 }
 
-ETJump::VoteSystem::VoteSystem(ServerCommandsHandler* commandsHandler,
-	EventAggregator* eventAggregator,
-	IMapFacade* mapFacade,
-	IPlayerQueries* playerQueries,
-	ICvarManager* cvars,
-	IVoteStrategy* voteStrategy,
+ETJump::VoteSystem::VoteSystem(std::shared_ptr<ServerCommandsHandler> commandsHandler,
+	std::shared_ptr<EventAggregator> eventAggregator,
+	std::shared_ptr<IMapFacade> mapFacade,
+	std::shared_ptr<IPlayerQueries> playerQueries,
+	std::shared_ptr<ICvarManager> cvars,
+	std::shared_ptr<IVoteStrategy> voteStrategy,
 	VoteSystemOptions options):
 
 	_commandsHandler(commandsHandler),

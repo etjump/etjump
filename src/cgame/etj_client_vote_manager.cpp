@@ -53,12 +53,5 @@ ETJump::ClientVoteManager::~ClientVoteManager()
 
 std::string ETJump::ClientVoteManager::handleVote(VoteParameter voteParameter)
 {
-	/*if (_currentQuery == nullptr)
-	{
-		return "^3vote: ^7there is currently no active vote.";
-	}
-*/
-	
-	return "foo";
-
+	return "";
 }

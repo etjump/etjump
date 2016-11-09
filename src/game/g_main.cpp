@@ -583,14 +583,14 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
-	std::unique_ptr<SyscallsFacade> syscallsFacade = nullptr;
-	std::unique_ptr<ServerCommandsHandler> commandsHandler = nullptr;
-	std::unique_ptr<VoteSystem> voteSystem = nullptr;
-	std::unique_ptr<MapStats> mapStats = nullptr;
-	std::unique_ptr<EventAggregator> eventAggregator = nullptr;
-	std::unique_ptr<PlayerQueries> playerQueries = nullptr;
-	std::unique_ptr<CvarManager> cvarManager = nullptr;
-	std::unique_ptr<DefaultVoteStrategy> defaultVoteStrategy = nullptr;
+	std::shared_ptr<SyscallsFacade> syscallsFacade = nullptr;
+	std::shared_ptr<ServerCommandsHandler> commandsHandler = nullptr;
+	std::shared_ptr<VoteSystem> voteSystem = nullptr;
+	std::shared_ptr<MapStats> mapStats = nullptr;
+	std::shared_ptr<EventAggregator> eventAggregator = nullptr;
+	std::shared_ptr<PlayerQueries> playerQueries = nullptr;
+	std::shared_ptr<CvarManager> cvarManager = nullptr;
+	std::shared_ptr<DefaultVoteStrategy> defaultVoteStrategy = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1994,21 +1994,21 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// ETJump server initialization
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ETJump::syscallsFacade = std::unique_ptr<ETJump::SyscallsFacade>(new ETJump::SyscallsFacade());
-	ETJump::defaultVoteStrategy = std::unique_ptr<ETJump::DefaultVoteStrategy>(new ETJump::DefaultVoteStrategy());
-	ETJump::cvarManager = std::unique_ptr<ETJump::CvarManager>(new ETJump::CvarManager());
-	ETJump::playerQueries = std::unique_ptr<ETJump::PlayerQueries>(new ETJump::PlayerQueries());
-	ETJump::commandsHandler = std::unique_ptr<ETJump::ServerCommandsHandler>(new ETJump::ServerCommandsHandler());
-	ETJump::eventAggregator = std::unique_ptr<ETJump::EventAggregator>(new ETJump::EventAggregator());
-	ETJump::mapStats = std::unique_ptr<ETJump::MapStats>(new ETJump::MapStats(g_mapDatabase.string, level.rawmapname, ETJump::syscallsFacade.get()));
-	ETJump::voteSystem = std::unique_ptr<ETJump::VoteSystem>(new ETJump::VoteSystem(
-		ETJump::commandsHandler.get(), 
-		ETJump::eventAggregator.get(), 
-		ETJump::mapStats.get(),
-		ETJump::playerQueries.get(),
-		ETJump::cvarManager.get(),
-		ETJump::defaultVoteStrategy.get()
-	));
+	ETJump::syscallsFacade = std::make_shared<ETJump::SyscallsFacade>();
+	ETJump::defaultVoteStrategy = std::make_shared<ETJump::DefaultVoteStrategy>();
+	ETJump::cvarManager = std::make_shared<ETJump::CvarManager>();
+	ETJump::playerQueries = std::make_shared<ETJump::PlayerQueries>();
+	ETJump::commandsHandler = std::make_shared<ETJump::ServerCommandsHandler>();
+	ETJump::eventAggregator = std::make_shared<ETJump::EventAggregator>();
+	ETJump::mapStats = std::make_shared<ETJump::MapStats>(g_mapDatabase.string, level.rawmapname, ETJump::syscallsFacade);
+	ETJump::voteSystem = std::make_shared<ETJump::VoteSystem>(
+		ETJump::commandsHandler, 
+		ETJump::eventAggregator, 
+		ETJump::mapStats,
+		ETJump::playerQueries,
+		ETJump::cvarManager,
+		ETJump::defaultVoteStrategy
+	);
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// parse the key/value pairs and spawn gentities

@@ -309,6 +309,9 @@
     <ClCompile Include="etj_syscalls_facade.cpp">
       <Filter>Source Files\Facades</Filter>
     </ClCompile>
+    <ClCompile Include="etj_config_string_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -477,6 +480,9 @@
     </ClInclude>
     <ClInclude Include="etj_imap_facade.h">
       <Filter>Header Files\MapStats</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_config_string_manager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

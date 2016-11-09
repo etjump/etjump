@@ -2716,7 +2716,7 @@ namespace ETJump
 {
 	class ServerCommandsHandler;
 
-	extern std::unique_ptr<ServerCommandsHandler> commandsHandler;
+	extern std::shared_ptr<ServerCommandsHandler> commandsHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

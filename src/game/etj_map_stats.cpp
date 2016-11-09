@@ -7,7 +7,7 @@
 #include <SQLiteCpp/Transaction.h>
 #include "etj_log.h"
 
-ETJump::MapStats::MapStats(const std::string& database, const std::string& currentMap, ISyscallsFacade *syscallsFacade):
+ETJump::MapStats::MapStats(const std::string& database, const std::string& currentMap, std::shared_ptr<ISyscallsFacade> syscallsFacade):
 	_database(File::getPath(database)),
 	_currentMapName(currentMap),
 	_currentMapsOnServer(getCurrentMaps()),
