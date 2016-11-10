@@ -43,6 +43,7 @@ ETJump::VoteSystem::VoteSystem(std::shared_ptr<ServerCommandsHandler> commandsHa
 	std::shared_ptr<IPlayerQueries> playerQueries,
 	std::shared_ptr<ICvarManager> cvars,
 	std::shared_ptr<IVoteStrategy> voteStrategy,
+	std::shared_ptr<IConfigStringFacade> configStringFacade,
 	VoteSystemOptions options):
 
 	_commandsHandler(commandsHandler),
@@ -50,6 +51,7 @@ ETJump::VoteSystem::VoteSystem(std::shared_ptr<ServerCommandsHandler> commandsHa
 	_playerQueries(playerQueries),
 	_cvarManager(cvars),
 	_eventAggregator(eventAggregator),
+	_configStringFacade(configStringFacade),
 	_eventHandles{},
 	_voteStrategy(voteStrategy),
 	_voteQueue{},
@@ -89,6 +91,12 @@ ETJump::VoteSystem::VoteSystem(std::shared_ptr<ServerCommandsHandler> commandsHa
 	if (_voteStrategy == nullptr)
 	{
 		Log::error("voteStrategy is null.");
+		return;
+	}
+
+	if (_configStringFacade == nullptr)
+	{
+		Log::error("configStringFacade is null.");
 		return;
 	}
 
@@ -193,6 +201,9 @@ void ETJump::VoteSystem::initEventListening()
 			{
 				Printer::BroadcastCenterMessage(boost::format("%s called a vote: %s.") % _playerQueries->name(_currentVote->voterClientNum) % _currentVote->toString());
 				_voters[_currentVote->voterClientNum].status = VoteStatus::Yes;
+				updateClientVoteCounts();
+				updateClientVoteText(_currentVote->toString());
+				updateClientVoteTime(_currentVote->startTime);
 			}
 		}));
 }
@@ -320,6 +331,8 @@ void ETJump::VoteSystem::callVote(int clientNum, const std::vector<std::string>&
 		if (result == QueuedVote::No)
 		{
 			_voters[clientNum].status = VoteStatus::Yes;
+			updateClientVoteCounts();
+			updateClientVoteText(_currentVote->toString());
 		}
 	}
 }
@@ -394,6 +407,29 @@ ETJump::VoteSystem::QueuedVote ETJump::VoteSystem::callOrQueueVote(std::unique_p
 
 	_voteQueue.push(move(vote));
 	return QueuedVote::Yes;
+}
+
+void ETJump::VoteSystem::updateClientVoteCounts() const
+{
+	auto numNo = 0;
+	auto numYes = 0;
+	for (const auto& voter : _voters)
+	{
+		if (voter.status == VoteStatus::No) ++numNo;
+		if (voter.status == VoteStatus::Yes) ++numYes;
+	}
+	_configStringFacade->set(CS_VOTE_NO, numNo);
+	_configStringFacade->set(CS_VOTE_YES, numYes);
+}
+
+void ETJump::VoteSystem::updateClientVoteText(const std::string& text) const
+{
+	_configStringFacade->set(CS_VOTE_STRING, text);
+}
+
+void ETJump::VoteSystem::updateClientVoteTime(int voteTime) const
+{
+	_configStringFacade->set(CS_VOTE_TIME, voteTime);
 }
 
 void ETJump::VoteSystem::resetPlayersVotes()

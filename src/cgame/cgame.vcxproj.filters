@@ -215,8 +215,12 @@
     <ClCompile Include="etj_entity_events_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_client_vote_manager.cpp" />
-    <ClCompile Include="etj_client_printer.cpp" />
+    <ClCompile Include="etj_client_printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_client_vote_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">

@@ -10,6 +10,7 @@
 #include "etj_ivote_strategy.h"
 #include "etj_default_vote_strategy.h"
 #include "etj_syscalls_facade.h"
+#include "etj_config_string_facade.h"
 
 level_locals_t level;
 
@@ -591,6 +592,7 @@ namespace ETJump
 	std::shared_ptr<PlayerQueries> playerQueries = nullptr;
 	std::shared_ptr<CvarManager> cvarManager = nullptr;
 	std::shared_ptr<DefaultVoteStrategy> defaultVoteStrategy = nullptr;
+	std::shared_ptr<ConfigStringFacade> configStringFacade = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2001,13 +2003,15 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	ETJump::commandsHandler = std::make_shared<ETJump::ServerCommandsHandler>();
 	ETJump::eventAggregator = std::make_shared<ETJump::EventAggregator>();
 	ETJump::mapStats = std::make_shared<ETJump::MapStats>(g_mapDatabase.string, level.rawmapname, ETJump::syscallsFacade);
+	ETJump::configStringFacade = std::make_shared<ETJump::ConfigStringFacade>(trap_GetConfigstring, trap_SetConfigstring);
 	ETJump::voteSystem = std::make_shared<ETJump::VoteSystem>(
 		ETJump::commandsHandler, 
 		ETJump::eventAggregator, 
 		ETJump::mapStats,
 		ETJump::playerQueries,
 		ETJump::cvarManager,
-		ETJump::defaultVoteStrategy
+		ETJump::defaultVoteStrategy,
+		ETJump::configStringFacade
 	);
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2158,6 +2162,7 @@ void G_ShutdownGame(int restart)
 	ETJump::cvarManager = nullptr;
 	ETJump::defaultVoteStrategy = nullptr;
 	ETJump::syscallsFacade = nullptr;
+	ETJump::configStringFacade = nullptr;
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 

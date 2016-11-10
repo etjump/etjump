@@ -265,7 +265,7 @@
     <ClCompile Include="bg_stats.cpp" />
     <ClCompile Include="bg_tracemap.cpp" />
     <ClCompile Include="etj_commands.cpp" />
-    <ClCompile Include="etj_config_string_manager.cpp" />
+    <ClCompile Include="etj_config_string_facade.cpp" />
     <ClCompile Include="etj_custom_map_votes.cpp" />
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_console_variables.cpp" />
@@ -345,7 +345,7 @@
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="etj_commands.h" />
-    <ClInclude Include="etj_config_string_manager.h" />
+    <ClInclude Include="etj_config_string_facade.h" />
     <ClInclude Include="etj_custom_map_votes.h" />
     <ClInclude Include="etj_banner_system.h" />
     <ClInclude Include="etj_console_variables.h" />
@@ -355,10 +355,10 @@
     <ClInclude Include="etj_default_vote_strategy.h" />
     <ClInclude Include="etj_event_aggregator.h" />
     <ClInclude Include="etj_file.h" />
+    <ClInclude Include="etj_iconfig_string_facade.h" />
     <ClInclude Include="etj_icvar_manager.h" />
     <ClInclude Include="etj_imap_facade.h" />
     <ClInclude Include="etj_iplayer_queries.h" />
-    <ClInclude Include="etj_isyscalls_facade.h" />
     <ClInclude Include="etj_ivote_strategy.h" />
     <ClInclude Include="etj_log.h" />
     <ClInclude Include="etj_map.h" />

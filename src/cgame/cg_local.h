@@ -3809,9 +3809,9 @@ namespace ETJump
 	class EntityEventsHandler;
 	class IRenderable;
 
-	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
-	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	extern std::unique_ptr<EntityEventsHandler> entityEventsHandler;
+	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 

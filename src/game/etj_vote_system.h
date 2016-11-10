@@ -11,6 +11,7 @@
 #include "etj_icvar_manager.h"
 #include "etj_ivote_strategy.h"
 #include "etj_imap_facade.h"
+#include "etj_iconfig_string_facade.h"
 
 namespace ETJump
 {
@@ -29,6 +30,11 @@ namespace ETJump
 	{
 	public:
 		static const int MAX_VOTERS = 64;
+		// keep in sync with bg_public.h:~350
+		static const int CS_VOTE_TIME = 6;
+		static const int CS_VOTE_STRING = 7;
+		static const int CS_VOTE_YES = 8;
+		static const int CS_VOTE_NO = 9;
 
 		struct VoteSystemOptions
 		{
@@ -142,7 +148,8 @@ namespace ETJump
 			std::shared_ptr<IPlayerQueries> playerQueries,
 			std::shared_ptr<ICvarManager> cvars,
 			std::shared_ptr<IVoteStrategy> voteStrategy,
-				VoteSystemOptions options = VoteSystemOptions());
+			std::shared_ptr<IConfigStringFacade> configStringFacade,
+			VoteSystemOptions options = VoteSystemOptions());
 		~VoteSystem();
 	private:
 		// initialize the client commands that the vote system will handle
@@ -175,6 +182,9 @@ namespace ETJump
 		// for subscribing to runframe
 		std::shared_ptr<EventAggregator> _eventAggregator;
 
+		// managing cs
+		std::shared_ptr<IConfigStringFacade> _configStringFacade;
+
 		// event handles returned from event aggregator
 		std::vector<int> _eventHandles;
 
@@ -195,6 +205,15 @@ namespace ETJump
 
 		// calls a vote if none exist, else queues it
 		QueuedVote callOrQueueVote(const std::unique_ptr<Vote> vote);
+
+		// updates the yes/no vote counts
+		void updateClientVoteCounts() const;
+
+		// updates the vote string config string
+		void updateClientVoteText(const std::string& text) const;
+
+		// update the vote time config string
+		void updateClientVoteTime(int voteTime) const;
 
 		// reset the vote status of each player
 		void resetPlayersVotes();

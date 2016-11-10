@@ -8,7 +8,8 @@ void printVoteUsage()
 	ETJump::ClientPrinter::writeLine("^3usage: ^7/vote yes|no");
 }
 
-ETJump::ClientVoteManager::ClientVoteManager(IClientCommandsHandler* clientCommandsHandler): _clientCommandsHandler(clientCommandsHandler)
+ETJump::ClientVoteManager::ClientVoteManager(std::shared_ptr<IClientCommandsHandler> clientCommandsHandler):
+	_clientCommandsHandler(clientCommandsHandler)
 {
 	if (_clientCommandsHandler == nullptr)
 	{

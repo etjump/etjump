@@ -82,11 +82,11 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
-	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
-	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	std::unique_ptr<EntityEventsHandler> entityEventsHandler;
+	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+	std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
-	std::unique_ptr<ClientVoteManager> clientVoteManager;
+	std::shared_ptr<ClientVoteManager> clientVoteManager;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3073,11 +3073,6 @@ void CG_Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const 
 
 static int CG_OwnerDrawWidth(int ownerDraw, float scale)
 {
-	switch (ownerDraw)
-	{
-	default:
-		break;
-	}
 	return 0;
 }
 
@@ -3464,10 +3459,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// to subcribe to commands.
 	// Generally all modules should get these as constructor params but they're still being used in the C code
 	// => make sure they're created first
-	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(nullptr));
-	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(trap_AddCommand));
-	ETJump::entityEventsHandler = std::unique_ptr<ETJump::EntityEventsHandler>(new ETJump::EntityEventsHandler());
-	ETJump::clientVoteManager = std::unique_ptr<ETJump::ClientVoteManager>(new ETJump::ClientVoteManager(ETJump::consoleCommandsHandler.get()));
+	ETJump::serverCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
+	ETJump::consoleCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(trap_AddCommand);
+	ETJump::entityEventsHandler = std::make_shared<ETJump::EntityEventsHandler>();
+	ETJump::clientVoteManager = std::make_shared<ETJump::ClientVoteManager>(ETJump::consoleCommandsHandler);
 
 	// initialize renderables
 	// Overbounce watcher

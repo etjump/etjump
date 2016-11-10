@@ -714,21 +714,25 @@ static void CG_ConfigStringModified(void)
 	}
 	else if (num == CS_VOTE_TIME)
 	{
+		CG_Printf("time: %s\n", str);
 		cgs.voteTime     = atoi(str);
 		cgs.voteModified = qtrue;
 	}
 	else if (num == CS_VOTE_YES)
 	{
+		CG_Printf("yes: %s\n", str);
 		cgs.voteYes      = atoi(str);
 		cgs.voteModified = qtrue;
 	}
 	else if (num == CS_VOTE_NO)
 	{
+		CG_Printf("no: %s\n", str);
 		cgs.voteNo       = atoi(str);
 		cgs.voteModified = qtrue;
 	}
 	else if (num == CS_VOTE_STRING)
 	{
+		CG_Printf("vote: %s\n", str);
 		Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
 	}
 	else if (num == CS_INTERMISSION)

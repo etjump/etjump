@@ -309,8 +309,8 @@
     <ClCompile Include="etj_syscalls_facade.cpp">
       <Filter>Source Files\Facades</Filter>
     </ClCompile>
-    <ClCompile Include="etj_config_string_manager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="etj_config_string_facade.cpp">
+      <Filter>Source Files\Facades</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -475,14 +475,14 @@
     <ClInclude Include="etj_syscalls_facade.h">
       <Filter>Header Files\Facades</Filter>
     </ClInclude>
-    <ClInclude Include="etj_isyscalls_facade.h">
-      <Filter>Source Files\Facades</Filter>
-    </ClInclude>
     <ClInclude Include="etj_imap_facade.h">
       <Filter>Header Files\MapStats</Filter>
     </ClInclude>
-    <ClInclude Include="etj_config_string_manager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="etj_config_string_facade.h">
+      <Filter>Header Files\Facades</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_iconfig_string_facade.h">
+      <Filter>Header Files\Facades</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
