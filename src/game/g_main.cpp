@@ -3912,6 +3912,7 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 	}
 #endif
 
+	
 #ifdef SAVEGAME_SUPPORT
 	G_CheckLoadGame();
 #endif // SAVEGAME_SUPPORT

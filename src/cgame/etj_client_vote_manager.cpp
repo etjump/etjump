@@ -8,8 +8,10 @@ void printVoteUsage()
 	ETJump::ClientPrinter::writeLine("^3usage: ^7/vote yes|no");
 }
 
-ETJump::ClientVoteManager::ClientVoteManager(std::shared_ptr<IClientCommandsHandler> clientCommandsHandler):
-	_clientCommandsHandler(clientCommandsHandler)
+ETJump::ClientVoteManager::ClientVoteManager(std::shared_ptr<IClientCommandsHandler> clientCommandsHandler, std::shared_ptr<IClientCommandsHandler> serverCommandsHandler, std::shared_ptr<IConfigStringEventsHandler> configStringEventsHandler):
+	_clientCommandsHandler(clientCommandsHandler),
+	_serverCommandsHandler(serverCommandsHandler),
+	_configStringEventsHandler(configStringEventsHandler)
 {
 	if (_clientCommandsHandler == nullptr)
 	{
@@ -46,6 +48,11 @@ ETJump::ClientVoteManager::ClientVoteManager(std::shared_ptr<IClientCommandsHand
 				ClientPrinter::writeLine(message);
 			}
 		});
+
+	_eventHandlerId = _configStringEventsHandler->subscribe([&](int configString, const std::string& value)
+	{
+		this->configStringModified(configString, value);
+	});
 }
 
 ETJump::ClientVoteManager::~ClientVoteManager()
@@ -55,4 +62,9 @@ ETJump::ClientVoteManager::~ClientVoteManager()
 std::string ETJump::ClientVoteManager::handleVote(VoteParameter voteParameter)
 {
 	return "";
+}
+
+void ETJump::ClientVoteManager::configStringModified(int configString, const std::string value)
+{
+	CG_Printf("%d: %s\n", configString, value.c_str());
 }

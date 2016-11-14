@@ -418,18 +418,18 @@ void ETJump::VoteSystem::updateClientVoteCounts() const
 		if (voter.status == VoteStatus::No) ++numNo;
 		if (voter.status == VoteStatus::Yes) ++numYes;
 	}
-	_configStringFacade->set(CS_VOTE_NO, numNo);
-	_configStringFacade->set(CS_VOTE_YES, numYes);
+	_configStringFacade->set(CONFIG_STRING_VOTE_NO, numNo);
+	_configStringFacade->set(CONFIG_STRING_VOTE_YES, numYes);
 }
 
 void ETJump::VoteSystem::updateClientVoteText(const std::string& text) const
 {
-	_configStringFacade->set(CS_VOTE_STRING, text);
+	_configStringFacade->set(CONFIG_STRING_VOTE_STRING, text);
 }
 
 void ETJump::VoteSystem::updateClientVoteTime(int voteTime) const
 {
-	_configStringFacade->set(CS_VOTE_TIME, voteTime);
+	_configStringFacade->set(CONFIG_STRING_VOTE_TIME, voteTime);
 }
 
 void ETJump::VoteSystem::resetPlayersVotes()

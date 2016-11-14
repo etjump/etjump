@@ -15,6 +15,12 @@
     <Filter Include="Menu files\ETJump">
       <UniqueIdentifier>{47fd35f8-8d3a-40f1-b618-ceeaf544556b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Vote">
+      <UniqueIdentifier>{4028d176-3788-43e7-b006-e28a33c3bc70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Vote">
+      <UniqueIdentifier>{a4c3017b-b81a-4dcb-8e68-71975f65a03f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sha-1\sha1.c">
@@ -221,6 +227,12 @@
     <ClCompile Include="etj_client_vote_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_vote_view.cpp">
+      <Filter>Source Files\Vote</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_config_string_events_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -302,6 +314,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_client_printer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_vote_view.h">
+      <Filter>Header Files\Vote</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_config_string_events_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_iconfig_string_events_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

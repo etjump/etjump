@@ -1,11 +1,8 @@
 #pragma once
-#include <boost/container/allocator_traits.hpp>
-#include <string>
 #include <array>
 #include <vector>
 #include <queue>
 #include <memory>
-#include "etj_log.h"
 #include "etj_event_aggregator.h"
 #include "etj_iplayer_queries.h"
 #include "etj_icvar_manager.h"
@@ -31,10 +28,10 @@ namespace ETJump
 	public:
 		static const int MAX_VOTERS = 64;
 		// keep in sync with bg_public.h:~350
-		static const int CS_VOTE_TIME = 6;
-		static const int CS_VOTE_STRING = 7;
-		static const int CS_VOTE_YES = 8;
-		static const int CS_VOTE_NO = 9;
+		static const int CONFIG_STRING_VOTE_TIME = 6;
+		static const int CONFIG_STRING_VOTE_STRING = 7;
+		static const int CONFIG_STRING_VOTE_YES = 8;
+		static const int CONFIG_STRING_VOTE_NO = 9;
 
 		struct VoteSystemOptions
 		{

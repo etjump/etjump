@@ -13,6 +13,7 @@
 #include "etj_overbounce_watcher.h"
 #include "etj_maxspeed.h"
 #include "etj_client_vote_manager.h"
+#include "etj_config_string_events_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -87,6 +88,7 @@ namespace ETJump
 	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
 	std::shared_ptr<ClientVoteManager> clientVoteManager;
+	std::shared_ptr<ConfigStringEventsHandler> configStringEventsHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3462,7 +3464,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::serverCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
 	ETJump::consoleCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(trap_AddCommand);
 	ETJump::entityEventsHandler = std::make_shared<ETJump::EntityEventsHandler>();
-	ETJump::clientVoteManager = std::make_shared<ETJump::ClientVoteManager>(ETJump::consoleCommandsHandler);
+	ETJump::configStringEventsHandler = std::make_shared<ETJump::ConfigStringEventsHandler>();
+	ETJump::clientVoteManager = std::make_shared<ETJump::ClientVoteManager>(ETJump::consoleCommandsHandler, ETJump::serverCommandsHandler, ETJump::configStringEventsHandler);
 
 	// initialize renderables
 	// Overbounce watcher

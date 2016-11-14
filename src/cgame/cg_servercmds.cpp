@@ -6,6 +6,7 @@
 #include "cg_mainext.h"
 #include <vector>
 #include "etj_client_commands_handler.h"
+#include "etj_config_string_events_handler.h"
 
 #define SCOREPARSE_COUNT    9
 
@@ -639,6 +640,11 @@ void CG_ChargeTimesChanged(void)
 	cg.covertopsChargeTime[1] = atoi(Info_ValueForKey(info, "ald_cvo"));
 }
 
+namespace ETJump
+{
+	extern std::shared_ptr<ConfigStringEventsHandler> configStringEventsHandler;
+}
+
 /*
 ================
 CG_ConfigStringModified
@@ -829,6 +835,8 @@ static void CG_ConfigStringModified(void)
 	{
 		CG_ParseOIDInfo(num);
 	}
+
+	ETJump::configStringEventsHandler->configStringModified(num, str);
 }
 
 /*
