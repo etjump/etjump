@@ -6,6 +6,7 @@
 */
 
 #include "g_local.h"
+#include <boost/algorithm/string.hpp>
 
 //==========================================================
 
@@ -131,7 +132,15 @@ void SP_target_score(gentity_t *ent)
 	ent->use = Use_Target_Score;
 }
 
-
+enum class TargetPrintSpawnFlags
+{
+	None = 0,
+	AxisOnly = 1,
+	AlliedOnly = 2,
+	Private = 4,
+	LocationCPM = 8,
+	ReplaceETJumpShortcuts = 16
+};
 
 //==========================================================
 
@@ -141,7 +150,18 @@ If "private", only the activator gets the message.  If no checks, all clients ge
 */
 void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
-	if ((ent->spawnflags & 4))
+	auto location = ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
+		? "cpm" : "cp";
+	char message[MAX_TOKEN_CHARS]{};
+	Q_strncpyz(message, ent->message, sizeof(message));
+	if (ent->client && ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts))
+	{
+		std::string msg = message;
+		boost::replace_all(msg, "[n]", ent->client->pers.netname);
+		Q_strncpyz(message, msg.c_str(), sizeof(message));
+	}
+
+	if ((ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::Private)))
 	{
 		if (!activator)
 		{
@@ -150,25 +170,25 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 
 		if (activator->client)
 		{
-			trap_SendServerCommand(activator - g_entities, va("cp \"%s\"", ent->message));
+			trap_SendServerCommand(activator - g_entities, va("%s \"%s\"", location, message));
 			return;
 		}
 	}
 
 	if (ent->spawnflags & 3)
 	{
-		if (ent->spawnflags & 1)
+		if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AxisOnly))
 		{
-			G_TeamCommand(TEAM_AXIS, va("cp \"%s\"", ent->message));
+			G_TeamCommand(TEAM_AXIS, va("%s \"%s\"", location, message));
 		}
-		if (ent->spawnflags & 2)
+		if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AlliedOnly))
 		{
-			G_TeamCommand(TEAM_ALLIES, va("cp \"%s\"", ent->message));
+			G_TeamCommand(TEAM_ALLIES, va("%s \"%s\"", location, message));
 		}
 		return;
 	}
 
-	trap_SendServerCommand(-1, va("cp \"%s\"", ent->message));
+	trap_SendServerCommand(-1, va("%s \"%s\"", location, message));
 }
 
 void SP_target_print(gentity_t *ent)
