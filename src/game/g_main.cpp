@@ -240,6 +240,9 @@ vmCvar_t g_customVoiceChat;
 // TODO: refactor ghostPlayers into this
 vmCvar_t shared;
 
+// minimum time to wait before vote result will be checked
+vmCvar_t vote_minVoteDuration;
+
 
 cvarTable_t gameCvarTable[] =
 {
@@ -485,7 +488,8 @@ cvarTable_t gameCvarTable[] =
 
 	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
 
-	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM }
+	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
+	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE }
 
 };
 
@@ -3176,6 +3180,27 @@ void CheckWolfMP()
 	}
 }
 
+int getNumPlayingClients()
+{
+	auto numPlayingClients = 0;
+	for (auto i = 0, len = level.numConnectedClients; i < len; ++i)
+	{
+		auto clientNum = level.sortedClients[i];
+		if ((g_entities + clientNum)->client->sess.sessionTeam != TEAM_SPECTATOR)
+		{
+			++numPlayingClients;
+		}
+	}
+	return numPlayingClients;
+}
+
+void resetVote()
+{
+	level.voteInfo.voteTime = 0;
+	level.voteInfo.voteCanceled = qfalse;
+	trap_SetConfigstring(CS_VOTE_TIME, "");
+}
+
 /*
 ==================
 CheckVote
@@ -3183,82 +3208,57 @@ CheckVote
 */
 void CheckVote(void)
 {
-	gentity_t *other = g_entities + level.voteInfo.voter_cn;
-	if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < 1000)
+	if (level.voteInfo.voteCanceled)
+	{
+		AP(va("cpm \"^7Vote cancelled!\n\""));
+		G_Printf("Vote cancelled!\n\"");
+		resetVote();
+		return;
+	}
+	if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < 5000)
 	{
 		return;
 	}
 
-	if (level.voteInfo.voter_team != other->client->sess.sessionTeam)
+	auto requiredPercentage = vote_percent.integer;
+	requiredPercentage = requiredPercentage > 99 ? 99 : requiredPercentage;
+	requiredPercentage = requiredPercentage < 1 ? 1 : requiredPercentage;
+
+	auto minVoteDuration = vote_minVoteDuration.integer;
+	minVoteDuration = minVoteDuration > 29000 ? 29000 : minVoteDuration;
+	minVoteDuration = minVoteDuration < 1000 ? 1000 : minVoteDuration;
+
+	auto numConnectedClients = level.numConnectedClients;
+
+	auto numPlayingClients = getNumPlayingClients();
+	auto requiredClients = numPlayingClients / 100.0f * requiredPercentage;
+
+	auto voter = g_entities + level.voteInfo.voter_cn;
+	if (level.voteInfo.voter_team != voter->client->sess.sessionTeam)
 	{
 		AP("cpm \"^7Vote canceled: voter switched teams.\n\"");
-		G_LogPrintf("Vote Failed: %s (voter %s switched teams)\n", level.voteInfo.voteString, other->client->pers.netname);
+		G_LogPrintf("Vote Failed: %s (voter %s switched teams)\n", level.voteInfo.voteString, voter->client->pers.netname);
 		level.voteInfo.voteYes = 0;
-		level.voteInfo.voteNo  = level.numConnectedClients;
-	}
-
-	// wait full 30 seconds unless the amount of f2s is over the limit
-	// when accounting for all players on the server
-	int pcnt = vote_percent.integer;
-	pcnt = pcnt > 99 ? 99 : pcnt;
-	pcnt = pcnt < 1 ? 1 : pcnt;
-	int numClients = level.numConnectedClients;
-	// how many are required for instant pass (no need to wait for 30 seconds)
-	int required = ceil(numClients / 100.0 * pcnt);
-
-	// we can pass vote instantly if the voteYes count has exceeded
-	// the percentage of total players (not just voted ones)
-	if (level.voteInfo.voteYes >= required)
+		level.voteInfo.voteNo = level.numConnectedClients;
+	} else if (level.voteInfo.voteYes > requiredClients)
 	{
-		// execute the command, then remove the vote
 		AP("cpm \"^5Vote passed!\n\"");
 		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
-
-		// Perform the passed vote
+		level.voteInfo.voteTime = 0;
+		level.voteInfo.voteCanceled = qfalse;
 		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-		// Same thing applies for voteNo count
-	} else if (level.voteInfo.voteNo > numClients - required)
+	} else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients || level.time - level.voteInfo.voteTime >= VOTE_TIME)
 	{
-		// same behavior as a no response vote
-		AP(va("cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
+		AP(va("cpm \"^3Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
 		G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
-	} else if (level.time - level.voteInfo.voteTime >= VOTE_TIME)
-	{
-		// we've waited for full 30 seconds and can now check if the vote yes count
-		// of numVotingClients is enough
-		int total = level.voteInfo.numVotingClients;
-
-		if (level.voteInfo.voteYes > pcnt * total / 100)
-		{
-			// execute the command, then remove the vote
-			AP("cpm \"^5Vote passed!\n\"");
-			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
-
-			// Perform the passed vote
-			level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-
-		}
-		else if (level.voteInfo.voteNo && level.voteInfo.voteNo >= (100 - pcnt) * total / 100)
-		{
-			if (level.voteInfo.voteCanceled)
-			{
-				AP(va("cpm \"^7Vote cancelled!\n\""));
-				G_Printf("Vote cancelled!\n\"");
-			}
-			else
-			{
-				// same behavior as a no response vote
-				AP(va("cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
-				G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
-			}
-		}
+		level.voteInfo.voteTime = 0;
+		level.voteInfo.voteCanceled = qfalse;
+		
 	} else
 	{
 		return;
 	}
-
-	level.voteInfo.voteTime = 0;
-	trap_SetConfigstring(CS_VOTE_TIME, "");
+	resetVote();
 }
 
 #ifdef SAVEGAME_SUPPORT
