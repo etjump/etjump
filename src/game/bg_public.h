@@ -13,7 +13,7 @@
 
 #define GAME_VERSION    "etjump"
 
-#define MOD_VERSION     "2.2.0 Alpha"
+#define MOD_VERSION     "2.2.0"
 #define ETJUMP_VERSION ("ETJump " MOD_VERSION)
 #define ETJUMP_WEB      "www.etjump.com"
 
