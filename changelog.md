@@ -1,3 +1,5 @@
+# ETJump 2.3.0
+
 # ETJump 2.2.0
 
 * Changed all .c modules to .cpp modules.
@@ -43,6 +45,7 @@
 * Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer (ignores hundreds & thousands)
 * Added 'etj_drawMaxSpeed' variable and etj_maxSpeedX/Y/Duration to display max speed from previous load session
 * Fixed a bug in `etj_noActivateLean`
+* Added `vote_minVoteDuration` to limit how fast a vote can pass after the callvote.
 
 # ETJump 2.1.0
 
