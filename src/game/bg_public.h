@@ -11,10 +11,12 @@
 #ifndef __BG_PUBLIC_H__
 #define __BG_PUBLIC_H__
 
+#include <boost/preprocessor/facilities/is_empty.hpp>
+
 #define GAME_VERSION    "etjump"
 
-#ifndef MOD_VERSION
-#define MOD_VERSION "dev"
+#if !defined(MOD_VERSION) || BOOST_PP_IS_EMPTY(MOD_VERSION) 
+#define MOD_VERSION "dev " __DATE__ " " __TIME__
 #endif
 //#define MOD_VERSION     "2.2.0"
 #define ETJUMP_VERSION ("ETJump " MOD_VERSION)
