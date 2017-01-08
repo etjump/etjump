@@ -5,6 +5,7 @@
  *
 */
 
+#include "etj_deathrun_system.h"
 #include "g_local.h"
 #include "../game/q_shared.h"
 
@@ -778,6 +779,10 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	{
 		InterruptRun(self);
 	}
+
+	auto score = ETJump::deathrunSystem->hitEnd(ClientNum(self));
+	// TODO: proper implementation
+	trap_SendServerCommand(ClientNum(self), va("cpm \"Deathrun score: %d\n\"", score));
 }
 
 qboolean IsHeadShotWeapon(int mod)

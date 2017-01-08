@@ -2,6 +2,7 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
+#include <memory>
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
@@ -266,6 +267,8 @@ struct gentity_s
 	                                // bodyque uses this
 
 	int flags;                      // FL_* variables
+
+	int id;							// Identifier for the entity for other systems
 
 	char *model;
 	char *model2;
@@ -1101,10 +1104,6 @@ typedef struct
 
 	fileHandle_t logFile;
 	fileHandle_t adminLogFile;
-
-#ifdef BETATEST
-	fileHandle_t bugReportFile;
-#endif // BETATEST
 
 	char rawmapname[MAX_QPATH];
 
@@ -2747,5 +2746,18 @@ void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
 const char *G_MatchOneMap(const char *arg);
+
+///////////////////////////////////////////////////////////////////////////////
+// ETJump global systems
+///////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class DeathrunSystem;
+	extern std::shared_ptr<ETJump::DeathrunSystem> deathrunSystem;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 
 #endif // G_LOCAL_H

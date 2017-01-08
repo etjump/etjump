@@ -151,7 +151,11 @@
   <ItemGroup>
     <ClCompile Include="..\cgame\etj_client_commands_handler.cpp" />
     <ClCompile Include="..\cgame\etj_entity_events_handler.cpp" />
+    <ClCompile Include="..\game\etj_command_parser.cpp" />
+    <ClCompile Include="..\game\etj_deathrun_system.cpp" />
     <ClCompile Include="client_commands_handler_tests.cpp" />
+    <ClCompile Include="command_parser_tests.cpp" />
+    <ClCompile Include="deathrun_system_tests.cpp" />
     <ClCompile Include="entity_events_handler_tests.cpp" />
     <ClCompile Include="tests_main.cpp" />
   </ItemGroup>

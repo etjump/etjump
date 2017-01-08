@@ -16,6 +16,9 @@
     <Filter Include="Source Files\cgame">
       <UniqueIdentifier>{ced4f2f3-4557-4024-8fbc-a42ea371433f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\game">
+      <UniqueIdentifier>{334be7bc-7007-427e-b12a-07f937165a5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests_main.cpp">
@@ -32,6 +35,18 @@
     </ClCompile>
     <ClCompile Include="entity_events_handler_tests.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="command_parser_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="deathrun_system_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_command_parser.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_deathrun_system.cpp">
+      <Filter>Source Files\game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

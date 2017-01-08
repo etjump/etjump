@@ -6,6 +6,7 @@
 */
 
 #include <boost/algorithm/string.hpp>
+#include "etj_deathrun_system.h"
 #include "g_local.h"
 
 //==========================================================
@@ -2235,4 +2236,43 @@ void SP_target_set_health(gentity_t *self)
 	}
 
 	self->use = target_set_health_use;
+}
+
+void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	if (!ETJump::deathrunSystem->hitStart(ClientNum(activator)))
+	{
+		return;
+	}
+
+
+}
+
+void SP_target_deathrun_start(gentity_t *self)
+{
+	self->use = target_deathrun_start_use;
+}
+
+void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	if (!ETJump::deathrunSystem->hitCheckpoint(self->id, ClientNum(activator)))
+	{
+		return;
+	}
+}
+
+void SP_target_deathrun_checkpoint(gentity_t *self)
+{
+	self->id = ETJump::deathrunSystem->createCheckpoint();
+	self->use = target_deathrun_checkpoint_use;
 }

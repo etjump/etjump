@@ -1,4 +1,6 @@
 #include "g_local.h"
+#include "etj_deathrun_system.h"
+#include <memory>
 
 level_locals_t level;
 
@@ -13,6 +15,35 @@ typedef struct
 	qboolean fConfigReset;          // OSP: set this var to the default on a config reset
 	qboolean teamShader;            // track and if changed, update shader state
 } cvarTable_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// ETJump global systems
+///////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	std::shared_ptr<DeathrunSystem> deathrunSystem;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ETJump initialization
+///////////////////////////////////////////////////////////////////////////////
+
+static void initializeETJump()
+{
+	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ETJump shutdown
+///////////////////////////////////////////////////////////////////////////////
+
+static void shutdownETJump()
+{
+	ETJump::deathrunSystem = nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 gentity_t g_entities[MAX_GENTITIES];
 gclient_t g_clients[MAX_CLIENTS];
@@ -1905,10 +1936,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		G_Printf("Not logging to disk.\n");
 	}
 
-#ifdef BETATEST
-	trap_FS_FOpenFile("bug_report.txt", &level.bugReportFile, FS_APPEND_SYNC);
-#endif //BETATEST
-
 	G_InitWorldSession();
 
 	// DHM - Nerve :: Clear out spawn target config strings
@@ -1975,6 +2002,9 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// This must be called before G_SpawnEntitiesFromString, else
 	// it'll mess up the g_ghostPlayers value.
 	InitGhosting();
+
+	// Must be called before entities are created
+	initializeETJump();
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
@@ -2088,6 +2118,7 @@ void G_ShutdownGame(int restart)
 
 	G_DebugCloseSkillLog();
 
+	shutdownETJump();
 	if (level.logFile)
 	{
 		G_LogPrintf("ShutdownGame:\n");
@@ -2100,14 +2131,6 @@ void G_ShutdownGame(int restart)
 		trap_FS_FCloseFile(level.adminLogFile);
 		level.adminLogFile = 0;
 	}
-
-#ifdef BETATEST
-	if (level.bugReportFile)
-	{
-		trap_FS_FCloseFile(level.bugReportFile);
-		level.bugReportFile = 0;
-	}
-#endif
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData(restart ? qtrue : qfalse);
