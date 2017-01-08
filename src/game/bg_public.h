@@ -15,9 +15,14 @@
 
 #define GAME_VERSION    "etjump"
 
-#if !defined(MOD_VERSION) || BOOST_PP_IS_EMPTY(MOD_VERSION) 
+#if DEBUG
 #define MOD_VERSION "dev " __DATE__ " " __TIME__
+#else
+#if !defined(MOD_VERSION) || BOOST_PP_IS_EMPTY(MOD_VERSION) 
+#define MOD_VERSION "2.3.0"
 #endif
+#endif
+
 //#define MOD_VERSION     "2.2.0"
 #define ETJUMP_VERSION ("ETJump " MOD_VERSION)
 #define ETJUMP_WEB      "www.etjump.com"
