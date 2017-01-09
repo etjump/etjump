@@ -620,6 +620,12 @@ typedef struct
 	unsigned int kills;
 } weapon_stat_t;
 
+enum class DeathrunFlags
+{
+	None,
+	NoDamageRuns
+};
+
 #define MAX_IP_LEN 15
 
 // client data that stays across multiple levels or tournament restarts
@@ -724,6 +730,7 @@ typedef struct
 	// new implementation of progression
 #define MAX_PROGRESSION_TRACKERS 50
 	int progression[MAX_PROGRESSION_TRACKERS];
+	int deathrunFlags;
 } clientSession_t;
 
 //

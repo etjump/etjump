@@ -643,8 +643,9 @@ void ClientTimerActions(gentity_t *ent, int msec)
 	{
 		client->timeResidual -= 1000;
 
-		// regenerate
-		if (client->sess.playerType == PC_MEDIC)
+		// regenerate if not deathrunning
+		if (client->sess.playerType == PC_MEDIC && 
+			!(client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoDamageRuns)))
 		{
 			if (ent->health < client->ps.stats[STAT_MAX_HEALTH])
 			{

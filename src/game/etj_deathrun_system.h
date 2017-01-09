@@ -33,6 +33,12 @@ namespace ETJump
 		 * @returns score
 		 */
 		int hitEnd(int clientNum);
+		/**
+		* Gets score for specific player
+		* @param clientNum
+		* @returns Score
+		*/
+		int getScore(int clientNum);
 	private:
 		struct RunStatus
 		{
@@ -62,12 +68,6 @@ namespace ETJump
 		 * @returns 
 		 */
 		bool alreadyReached(int checkpointId, int clientNum);
-		/**
-		 * Gets score for specific player
-		 * @param clientNum
-		 * @returns Score
-		 */
-		int getScore(int clientNum);
 
 		static const int MaxClients = 64;
 		std::array<RunStatus, MaxClients> _runStatuses;

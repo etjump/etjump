@@ -2250,7 +2250,11 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 		return;
 	}
 
-
+	if (self->spawnflags & static_cast<int>(DeathrunFlags::NoDamageRuns))
+	{
+		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoDamageRuns);
+		activator->health = 1;
+	}
 }
 
 void SP_target_deathrun_start(gentity_t *self)
@@ -2269,6 +2273,9 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t
 	{
 		return;
 	}
+
+	auto clientNum = ClientNum(activator);
+	trap_SendServerCommand(clientNum, va("cpm \"Score: %d\n\"", ETJump::deathrunSystem->getScore(clientNum)));
 }
 
 void SP_target_deathrun_checkpoint(gentity_t *self)
