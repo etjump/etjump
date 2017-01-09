@@ -623,9 +623,9 @@ typedef struct
 enum class DeathrunFlags
 {
 	None = 0,
-	Active = 1, // Run is currently active
-	NoDamageRuns = 2, 
-	NoSave = 4
+	Active = (1 << 31) - 1, // Run is currently active
+	NoDamageRuns = 1 << 0, 
+	NoSave = 1 << 1
 };
 
 #define MAX_IP_LEN 15
