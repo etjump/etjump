@@ -2255,6 +2255,11 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoDamageRuns);
 		activator->health = 1;
 	}
+
+	if (self->spawnflags & static_cast<int>(DeathrunFlags::NoSave))
+	{
+		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoSave);
+	}
 }
 
 void SP_target_deathrun_start(gentity_t *self)

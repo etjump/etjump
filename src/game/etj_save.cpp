@@ -56,6 +56,12 @@ void SaveSystem::Save(gentity_t *ent)
 		return;
 	}
 
+	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	{
+		CPTo(ent, "^3Save ^7is disabled for death run");
+		return;
+	}
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
@@ -196,6 +202,12 @@ void SaveSystem::Load(gentity_t *ent)
 		return;
 	}
 
+	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+		{
+		CPTo(ent, "^3Load ^7is disabled for death run");
+		return;
+	}
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
@@ -305,6 +317,12 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 	{
 		CPTo(ent, "You are not allowed to use backup command.");
+		return;
+	}
+
+	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	{
+		CPTo(ent, "^3Backup ^7is disabled for death run");
 		return;
 	}
 
