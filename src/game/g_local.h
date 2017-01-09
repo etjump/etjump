@@ -2,6 +2,7 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
+#include <climits>
 #include <memory>
 #include "q_shared.h"
 #include "bg_public.h"
@@ -623,7 +624,7 @@ typedef struct
 enum class DeathrunFlags
 {
 	None = 0,
-	Active = (1 << 31) - 1, // Run is currently active
+	Active = INT_MAX, // Run is currently active
 	NoDamageRuns = 1 << 0, 
 	NoSave = 1 << 1
 };
