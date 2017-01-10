@@ -2250,6 +2250,8 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 		return;
 	}
 
+	ResetSavedPositions(activator);
+
 	if (self->spawnflags & static_cast<int>(DeathrunFlags::NoDamageRuns))
 	{
 		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoDamageRuns);
