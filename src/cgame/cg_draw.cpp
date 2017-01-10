@@ -3200,6 +3200,27 @@ cg_drawCGaz
 All the cgaz huds
 =================
 */
+
+static vec4_t* GetColorFromString(char *colorString) {
+	vec4_t color = { 1.f, 1.f, 1.f, 1.f };
+	const char *token;
+
+	for (auto i = 0; i < 4; i++) {
+		token = COM_Parse(&colorString);
+		if (token) {
+			float value = atof(token);
+			if (value > 1) value = 1.0;
+			else if (value < 0) value = 0.0;
+			color[i] = value;
+		}
+		else {
+			color [i] = 1.f;
+		}
+	}
+
+	return &color;
+}
+
 // Dzikie
 static void PutPixel(float x, float y)
 {
@@ -3246,6 +3267,7 @@ static void CG_DrawCGazHUD(void)
 	playerState_t *ps;
 	int           right = 0, forward = 0;
 	int           scx = SCREEN_CENTER_X - 1, scy = SCREEN_CENTER_Y - 1;
+	vec4_t        color1, color2;
 
 	ps = &cg.predictedPlayerState;
 
@@ -3387,6 +3409,8 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
+		Vector4Copy(*GetColorFromString(etj_CGazColor1.string), color1);
+		Vector4Copy(*GetColorFromString(etj_CGazColor2.string), color2);
 
 		if (etj_stretchCgaz.integer) {
 			CG_DisableProperScaling(qtrue);
@@ -3397,12 +3421,12 @@ static void CG_DrawCGazHUD(void)
 		per_angle  = DEG2RAD(per_angle);
 
 		DrawLine(scx, scy,
-			scx + right, scy - forward, colorCyan);
+			scx + right, scy - forward, color2);
 
 		vel_size /= 5;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang),
-			scy - vel_size * cos(vel_relang), colorRed);
+			scy - vel_size * cos(vel_relang), color1);
 		if (vel_size > SCREEN_HEIGHT / 2)
 		{
 			vel_size = SCREEN_HEIGHT / 2;
@@ -3410,10 +3434,10 @@ static void CG_DrawCGazHUD(void)
 		vel_size /= 2;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang + per_angle),
-			scy - vel_size * cos(vel_relang + per_angle), colorRed);
+			scy - vel_size * cos(vel_relang + per_angle), color1);
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang - per_angle),
-			scy - vel_size * cos(vel_relang - per_angle), colorRed);
+			scy - vel_size * cos(vel_relang - per_angle), color1);
 		
 		CG_DisableProperScaling(qfalse);
 		

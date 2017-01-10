@@ -304,11 +304,15 @@ vmCvar_t cg_hideMe;
 vmCvar_t cg_nofatigue;
 vmCvar_t com_maxfps;
 vmCvar_t com_hunkmegs;
+
 vmCvar_t cg_drawCGaz;
 vmCvar_t cg_CGazY;
 vmCvar_t cg_CGazHeight;
 vmCvar_t cg_CGazWidth;
+vmCvar_t etj_CGazColor1;
+vmCvar_t etj_CGazColor2;
 vmCvar_t cg_CGazAlpha;
+
 vmCvar_t cg_drawOB;
 vmCvar_t cg_drawKeys;
 vmCvar_t cg_keysColor;
@@ -637,12 +641,16 @@ cvarTable_t cvarTable[] =
 	{ &cg_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE             },
 	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
 	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
+
 	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
 	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
 	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
+	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
+	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
 	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
