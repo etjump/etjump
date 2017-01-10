@@ -7,13 +7,51 @@ namespace ETJump
 	class DeathrunSystem
 	{
 	public:
+		enum class PrintLocation
+		{
+			Unspecified,
+			Console,
+			Chat,
+			Center,
+			Left
+		};
+
+		struct CheckpointData
+		{
+			PrintLocation location;
+			std::string message;
+			std::string soundPath;
+		};
+
 		DeathrunSystem();
 		~DeathrunSystem();
+		/**
+		 * Adds a start message that will be displayed when the run starts
+		 * @param startMessage
+		 */
+		void addStartMessage(const std::string& startMessage);
+		/**
+		 * Adds the default message. Displays the message on checkpoint hit if no custom
+		 * message was specified
+		 * @param defaultMessage
+		 */
+		void addDefaultCheckpointMessage(const std::string& defaultMessage);
+		/**
+		 * Adds the default sound. Plays the sound when checkpoint is hit if the checkpoint
+		 * has no custom sound
+		 * @param defaultSoundPath
+		 */
+		void addDefaultSoundPath(const std::string& defaultSoundPath);
+		/**
+		 * Adds the default location for start + checkpoints
+		 * @param location
+		 */
+		void addStartAndCheckpointMessageLocation(PrintLocation location);
 		/**
 		 * Creates a checkpoint
 		 * @returns id for the created checkpoint
 		 */
-		int createCheckpoint();
+		int createCheckpoint(PrintLocation location, const std::string& message, const std::string& soundPath);
 		/**
 		 * Activates run for the player
 		 * @param clientNum ID of the activating player
@@ -39,6 +77,32 @@ namespace ETJump
 		* @returns Score
 		*/
 		int getScore(int clientNum);
+		/**
+		* Returns the default print location 
+		*/
+		PrintLocation getPrintLocation() const;
+		/**
+		 * Returns the print location for specific checkpoint 
+		 * @param checkpointId
+		 */
+		PrintLocation getPrintLocation(int checkpointId);
+		/**
+		 * Returns the start message
+		 * @returns start message
+		 */
+		std::string getStartMessage() const;
+		/**
+		 * Returns the printable message for checkpoint
+		 * @param checkpointId
+		 * @returns 
+		 */
+		std::string getCheckpointMessage(int checkpointId) const;
+		/**
+		 * Returns the sound path for checkpoint
+		 * @param checkpointId
+		 * @returns 
+		 */
+		std::string getSoundPath(int checkpointId) const;
 	private:
 		struct RunStatus
 		{
@@ -69,6 +133,11 @@ namespace ETJump
 		 */
 		bool alreadyReached(int checkpointId, int clientNum);
 
+		PrintLocation _defaultLocation;
+		std::string _startMessage;
+		std::string _defaultMessage;
+		std::string _defaultSoundPath;
+		std::vector<CheckpointData> _checkpointData;
 		static const int MaxClients = 64;
 		std::array<RunStatus, MaxClients> _runStatuses;
 	};

@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include "etj_deathrun_system.h"
 #include "g_local.h"
+#include "etj_utilities.h"
 
 //==========================================================
 
@@ -2238,6 +2239,44 @@ void SP_target_set_health(gentity_t *self)
 	self->use = target_set_health_use;
 }
 
+std::string getDeathrunMessageFormatString(ETJump::DeathrunSystem::PrintLocation location)
+{
+	switch (location)
+	{
+	case ETJump::DeathrunSystem::PrintLocation::Chat:
+		return "chat \"%s\"";
+	case ETJump::DeathrunSystem::PrintLocation::Center:
+		return "cp \"%s\n\"";
+	case ETJump::DeathrunSystem::PrintLocation::Left:
+		return "cpm \"%s\n\"";
+	case ETJump::DeathrunSystem::PrintLocation::Console:
+	default:
+		return "print \"%s\n\"";
+	}
+}
+
+ETJump::DeathrunSystem::PrintLocation parseLocation(const char* locationStr)
+{
+	if (!Q_stricmp(locationStr, "console"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Console;
+	}
+	if (!Q_stricmp(locationStr, "chat"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Chat;
+	}
+	if (!Q_stricmp(locationStr, "center"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Center;
+	}
+	if (!Q_stricmp(locationStr, "left"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Left;
+	}
+	G_Error("target_deathrun_checkpoint: unknown value for key `location`: `%s`\nAvailable values are: \n* console\n* chat\n* center\n* left\n", std::string(locationStr).c_str());
+	return ETJump::DeathrunSystem::PrintLocation::Left;
+}
+
 void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	if (!activator || !activator->client)
@@ -2262,11 +2301,37 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 	{
 		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoSave);
 	}
+
+	auto clientNum = ClientNum(activator);
+	auto affectedClients = Utilities::getSpectators(clientNum);
+	affectedClients.push_back(clientNum);
+	auto message = ETJump::deathrunSystem->getStartMessage();
+	auto location = ETJump::deathrunSystem->getPrintLocation();
+	if (message.length() > 0)
+	{
+		boost::replace_all(message, "[n]", activator->client->pers.netname);
+		auto fmtString = getDeathrunMessageFormatString(location);
+		auto output = va(fmtString.c_str(), message.c_str());
+		for (const auto & c : affectedClients)
+		{
+			trap_SendServerCommand(c, output);
+		}
+	}
 }
 
 void SP_target_deathrun_start(gentity_t *self)
 {
 	self->use = target_deathrun_start_use;
+
+	char *s = nullptr; 
+	G_SpawnString("message", "[n] ^7started death run!", &s);
+	ETJump::deathrunSystem->addStartMessage(s);
+	G_SpawnString("checkpointMessage", "[n] ^7hit the checkpoint! Score: [s]", &s);
+	ETJump::deathrunSystem->addDefaultCheckpointMessage(s);
+	G_SpawnString("sound", "", &s);
+	ETJump::deathrunSystem->addDefaultSoundPath(s);
+	G_SpawnString("location", "left", &s);
+	ETJump::deathrunSystem->addStartAndCheckpointMessageLocation(parseLocation(s));
 }
 
 void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t *activator)
@@ -2281,12 +2346,46 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t
 		return;
 	}
 
+	auto message = ETJump::deathrunSystem->getCheckpointMessage(self->id);
+	auto sound = ETJump::deathrunSystem->getSoundPath(self->id);
 	auto clientNum = ClientNum(activator);
-	trap_SendServerCommand(clientNum, va("cpm \"Score: %d\n\"", ETJump::deathrunSystem->getScore(clientNum)));
+	auto affectedPlayers = Utilities::getSpectators(clientNum);
+	affectedPlayers.push_back(clientNum);
+
+	if (sound.length() > 0)
+	{
+		auto soundIndex = G_SoundIndex(sound.c_str());
+		for (const auto & cnum : affectedPlayers)
+		{
+			G_AddEvent((g_entities + cnum), EV_GENERAL_SOUND, soundIndex);
+		}
+	}
+
+	if (message.length() > 0)
+	{
+		auto location = ETJump::deathrunSystem->getPrintLocation(self->id);
+		auto fmtString = getDeathrunMessageFormatString(location);
+		auto checkpointMessage = ETJump::deathrunSystem->getCheckpointMessage(self->id);
+		auto score = ETJump::deathrunSystem->getScore(clientNum);
+		boost::replace_all(message, "[n]", activator->client->pers.netname);
+		boost::replace_all(message, "[s]", std::to_string(score));
+		auto output = va(fmtString.c_str(), message.c_str());
+		for (const auto & cnum : affectedPlayers)
+		{
+			trap_SendServerCommand(cnum, output);
+		}
+	}
 }
 
 void SP_target_deathrun_checkpoint(gentity_t *self)
 {
-	self->id = ETJump::deathrunSystem->createCheckpoint();
+	char *locationStr = nullptr;
+	char *message = nullptr;
+	char *sound = nullptr;
+	G_SpawnString("location", "left", &locationStr);
+	auto location = parseLocation(locationStr);
+	G_SpawnString("message", "", &message);
+	G_SpawnString("sound", "", &sound);
+	self->id = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
 	self->use = target_deathrun_checkpoint_use;
 }

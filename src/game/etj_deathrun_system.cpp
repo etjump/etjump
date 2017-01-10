@@ -9,12 +9,33 @@ ETJump::DeathrunSystem::~DeathrunSystem()
 {
 }
 
-int ETJump::DeathrunSystem::createCheckpoint()
+void ETJump::DeathrunSystem::addStartMessage(const std::string& startMessage)
+{
+	_startMessage = startMessage;
+}
+
+void ETJump::DeathrunSystem::addDefaultCheckpointMessage(const std::string& defaultMessage)
+{
+	_defaultMessage = defaultMessage;
+}
+
+void ETJump::DeathrunSystem::addDefaultSoundPath(const std::string& defaultSoundPath)
+{
+	_defaultSoundPath = defaultSoundPath;
+}
+
+void ETJump::DeathrunSystem::addStartAndCheckpointMessageLocation(PrintLocation location)
+{
+	_defaultLocation = location;
+}
+
+int ETJump::DeathrunSystem::createCheckpoint(PrintLocation location, const std::string& message, const std::string& soundPath)
 {
 	for (auto & rs : _runStatuses)
 	{
 		rs.checkpointStatuses.push_back(false);
 	}
+	_checkpointData.push_back({ location, message, soundPath });
 	return _runStatuses[0].checkpointStatuses.size() - 1;
 }
 
@@ -79,4 +100,42 @@ int ETJump::DeathrunSystem::getScore(int clientNum)
 	{
 		return b;
 	});
+}
+
+ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation() const
+{
+	return _defaultLocation;
+}
+
+ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation(int checkpointId)
+{
+	auto location = _defaultLocation;
+	if (_checkpointData[checkpointId].location != PrintLocation::Unspecified)
+	{
+		location = _checkpointData[checkpointId].location;
+	}
+	return location;
+}
+
+std::string ETJump::DeathrunSystem::getStartMessage() const
+{
+	return _startMessage;
+}
+
+std::string ETJump::DeathrunSystem::getCheckpointMessage(int checkpointId) const
+{
+	if (_checkpointData[checkpointId].message.length() == 0)
+	{
+		return _defaultMessage;
+	}
+	return _checkpointData[checkpointId].message;
+}
+
+std::string ETJump::DeathrunSystem::getSoundPath(int checkpointId) const
+{
+	if (_checkpointData[checkpointId].soundPath.length() == 0)
+	{
+		return _defaultSoundPath;
+	}
+	return _checkpointData[checkpointId].soundPath;
 }
