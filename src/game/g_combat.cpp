@@ -781,6 +781,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	}
 
 	auto score = ETJump::deathrunSystem->hitEnd(ClientNum(self));
+	self->client->sess.deathrunFlags = 0;
 	// TODO: proper implementation
 	trap_SendServerCommand(ClientNum(self), va("cpm \"Deathrun score: %d\n\"", score));
 }

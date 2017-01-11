@@ -83,6 +83,11 @@ void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 
+	if ((self->spawnflags & static_cast<int>(TriggerMultipleFlags::DeathrunOnly)) != 0 && (other->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) == 0)
+	{
+		return;
+	}
+
 	if (self->spawnflags & 1)
 	{
 		if (other->client->sess.sessionTeam != TEAM_AXIS)
