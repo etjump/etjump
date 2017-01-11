@@ -31,6 +31,11 @@ namespace ETJump
 		 */
 		void addStartMessage(const std::string& startMessage);
 		/**
+		 * Adds an end message that will be displayed when the player dies
+		 * @param endMessage
+		 */
+		void addEndMessage(const std::string& endMessage);
+		/**
 		 * Adds the default message. Displays the message on checkpoint hit if no custom
 		 * message was specified
 		 * @param defaultMessage
@@ -103,6 +108,12 @@ namespace ETJump
 		 * @returns 
 		 */
 		std::string getSoundPath(int checkpointId) const;
+		/**
+		 * Returns the end message
+		 * @returns end message
+		 */
+		std::string getEndMessage();
+		static std::string getMessageFormat(PrintLocation location);
 	private:
 		struct RunStatus
 		{
@@ -135,6 +146,7 @@ namespace ETJump
 
 		PrintLocation _defaultLocation;
 		std::string _startMessage;
+		std::string _endMessage;
 		std::string _defaultMessage;
 		std::string _defaultSoundPath;
 		std::vector<CheckpointData> _checkpointData;

@@ -2239,22 +2239,6 @@ void SP_target_set_health(gentity_t *self)
 	self->use = target_set_health_use;
 }
 
-std::string getDeathrunMessageFormatString(ETJump::DeathrunSystem::PrintLocation location)
-{
-	switch (location)
-	{
-	case ETJump::DeathrunSystem::PrintLocation::Chat:
-		return "chat \"%s\"";
-	case ETJump::DeathrunSystem::PrintLocation::Center:
-		return "cp \"%s\n\"";
-	case ETJump::DeathrunSystem::PrintLocation::Left:
-		return "cpm \"%s\n\"";
-	case ETJump::DeathrunSystem::PrintLocation::Console:
-	default:
-		return "print \"%s\n\"";
-	}
-}
-
 ETJump::DeathrunSystem::PrintLocation parseLocation(const char* locationStr)
 {
 	if (!Q_stricmp(locationStr, "console"))
@@ -2312,7 +2296,7 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 	if (message.length() > 0)
 	{
 		boost::replace_all(message, "[n]", activator->client->pers.netname);
-		auto fmtString = getDeathrunMessageFormatString(location);
+		auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
 		auto output = va(fmtString.c_str(), message.c_str());
 		for (const auto & c : affectedClients)
 		{
@@ -2328,6 +2312,8 @@ void SP_target_deathrun_start(gentity_t *self)
 	char *s = nullptr; 
 	G_SpawnString("message", "[n] ^7started death run!", &s);
 	ETJump::deathrunSystem->addStartMessage(s);
+	G_SpawnString("endMessage", "[n] ^7died! Score: [s]", &s);
+	ETJump::deathrunSystem->addEndMessage(s);
 	G_SpawnString("checkpointMessage", "[n] ^7hit the checkpoint! Score: [s]", &s);
 	ETJump::deathrunSystem->addDefaultCheckpointMessage(s);
 	G_SpawnString("sound", "", &s);
@@ -2366,7 +2352,7 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t
 	if (message.length() > 0)
 	{
 		auto location = ETJump::deathrunSystem->getPrintLocation(self->id);
-		auto fmtString = getDeathrunMessageFormatString(location);
+		auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
 		auto checkpointMessage = ETJump::deathrunSystem->getCheckpointMessage(self->id);
 		auto score = ETJump::deathrunSystem->getScore(clientNum);
 		boost::replace_all(message, "[n]", activator->client->pers.netname);

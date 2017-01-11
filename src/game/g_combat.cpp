@@ -8,6 +8,8 @@
 #include "etj_deathrun_system.h"
 #include "g_local.h"
 #include "../game/q_shared.h"
+#include <boost/algorithm/string/replace.hpp>
+#include "etj_utilities.h"
 
 extern vec3_t muzzleTrace;
 
@@ -780,10 +782,19 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 		InterruptRun(self);
 	}
 
-	auto score = ETJump::deathrunSystem->hitEnd(ClientNum(self));
+	auto clientNum = ClientNum(self);
+	auto score = ETJump::deathrunSystem->hitEnd(clientNum);
 	self->client->sess.deathrunFlags = 0;
-	// TODO: proper implementation
-	trap_SendServerCommand(ClientNum(self), va("cpm \"Deathrun score: %d\n\"", score));
+	auto fmt = ETJump::DeathrunSystem::getMessageFormat(ETJump::deathrunSystem->getPrintLocation());
+	auto message = ETJump::deathrunSystem->getEndMessage();
+	boost::replace_all(message, "[n]", self->client->pers.netname);
+	boost::replace_all(message, "[s]", std::to_string(score));
+	auto affectedPlayers = Utilities::getSpectators(clientNum);
+	affectedPlayers.push_back(clientNum);
+	for (const auto & c : affectedPlayers)
+	{
+		trap_SendServerCommand(c, va(fmt.c_str(), message.c_str()));
+	}
 }
 
 qboolean IsHeadShotWeapon(int mod)

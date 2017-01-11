@@ -14,6 +14,11 @@ void ETJump::DeathrunSystem::addStartMessage(const std::string& startMessage)
 	_startMessage = startMessage;
 }
 
+void ETJump::DeathrunSystem::addEndMessage(const std::string& endMessage)
+{
+	_endMessage = endMessage;
+}
+
 void ETJump::DeathrunSystem::addDefaultCheckpointMessage(const std::string& defaultMessage)
 {
 	_defaultMessage = defaultMessage;
@@ -138,4 +143,25 @@ std::string ETJump::DeathrunSystem::getSoundPath(int checkpointId) const
 		return _defaultSoundPath;
 	}
 	return _checkpointData[checkpointId].soundPath;
+}
+
+std::string ETJump::DeathrunSystem::getEndMessage()
+{
+	return _endMessage;
+}
+
+std::string ETJump::DeathrunSystem::getMessageFormat(PrintLocation location)
+{
+	switch (location)
+	{
+	case ETJump::DeathrunSystem::PrintLocation::Chat:
+		return "chat \"%s\"";
+	case ETJump::DeathrunSystem::PrintLocation::Center:
+		return "cp \"%s\n\"";
+	case ETJump::DeathrunSystem::PrintLocation::Left:
+		return "cpm \"%s\n\"";
+	case ETJump::DeathrunSystem::PrintLocation::Console:
+	default:
+		return "print \"%s\n\"";
+	}
 }
