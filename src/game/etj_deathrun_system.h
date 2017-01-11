@@ -112,7 +112,7 @@ namespace ETJump
 		 * Returns the end message
 		 * @returns end message
 		 */
-		std::string getEndMessage();
+		std::string getEndMessage() const;
 		static std::string getMessageFormat(PrintLocation location);
 	private:
 		struct RunStatus

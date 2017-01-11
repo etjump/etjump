@@ -1,7 +1,7 @@
 #include "etj_deathrun_system.h"
 
 
-ETJump::DeathrunSystem::DeathrunSystem()
+ETJump::DeathrunSystem::DeathrunSystem(): _defaultLocation(PrintLocation::Left)
 {
 }
 
@@ -145,7 +145,7 @@ std::string ETJump::DeathrunSystem::getSoundPath(int checkpointId) const
 	return _checkpointData[checkpointId].soundPath;
 }
 
-std::string ETJump::DeathrunSystem::getEndMessage()
+std::string ETJump::DeathrunSystem::getEndMessage() const
 {
 	return _endMessage;
 }
