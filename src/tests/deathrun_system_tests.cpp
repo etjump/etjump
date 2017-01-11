@@ -15,17 +15,23 @@ public:
 	static DeathrunSystem createSystemWithCheckpoints()
 	{
 		auto system = DeathrunSystem();
-		system.createCheckpoint();
-		system.createCheckpoint();
-		system.createCheckpoint();
+		auto location = DeathrunSystem::PrintLocation::Chat;
+		auto msg = "";
+		auto sound = "";
+		system.createCheckpoint(location, msg, sound);
+		system.createCheckpoint(location, msg, sound);
+		system.createCheckpoint(location, msg, sound);
 		return system;
 	}
 };
 
 TEST_F(DeathrunSystemTests, CreateCheckpoint_Returns_DifferentId_OnMultipleCalls)
 {
+	auto location = DeathrunSystem::PrintLocation::Chat;
+	auto msg = "";
+	auto sound = "";
 	auto system = DeathrunSystem();
-	ASSERT_NE(system.createCheckpoint(), system.createCheckpoint());
+	ASSERT_NE(system.createCheckpoint(location, msg, sound), system.createCheckpoint(location, msg, sound));
 }
 
 TEST_F(DeathrunSystemTests, HitCheckpoint_Returns_0_WhenRunHasntStarted)
