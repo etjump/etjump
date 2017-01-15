@@ -146,6 +146,9 @@
     </Link>
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SDLCheck>true</SDLCheck>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -158,6 +161,9 @@
     <ClCompile Include="deathrun_system_tests.cpp" />
     <ClCompile Include="entity_events_handler_tests.cpp" />
     <ClCompile Include="tests_main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vector_compare.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
