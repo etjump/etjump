@@ -240,6 +240,12 @@
     <ClCompile Include="etj_deathrun_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_command_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_result_set_formatter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -365,6 +371,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_deathrun_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_command_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_result_set_formatter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
