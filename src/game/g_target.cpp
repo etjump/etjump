@@ -1618,7 +1618,7 @@ void target_printname_use(gentity_t *ent, gentity_t *other, gentity_t *activator
 	char text[MAX_TOKEN_CHARS];
 	int  i = 0;
 
-	Com_sprintf(msg, sizeof(msg), "cpm \"%s", ent->message);
+	Com_sprintf(msg, sizeof(msg), "cpm \"%s\"", ent->message);
 
 	while (msg[i])
 	{
