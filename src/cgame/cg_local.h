@@ -2492,6 +2492,8 @@ extern vmCvar_t etj_drawObWatcher;
 extern vmCvar_t etj_obWatcherX;
 extern vmCvar_t etj_obWatcherY;
 
+extern vmCvar_t etj_demo_lookAt;
+
 //
 // cg_main.c
 //

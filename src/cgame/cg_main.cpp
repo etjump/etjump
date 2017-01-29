@@ -449,6 +449,8 @@ vmCvar_t etj_drawObWatcher;
 vmCvar_t etj_obWatcherX;
 vmCvar_t etj_obWatcherY;
 
+vmCvar_t etj_demo_lookAt;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -752,7 +754,10 @@ cvarTable_t cvarTable[] =
 	{ &shared, "shared", "0", CVAR_ROM },
 	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
 	{&etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
-	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE}
+	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
+	{ &etj_demo_lookAt,              "etj_demo_lookAt",             "-1",                     CVAR_ARCHIVE             },
+	// backward compatibility with camtrace3d generated configs
+	{ &etj_demo_lookAt,              "b_demo_lookAt",               "-1",                     CVAR_ARCHIVE             },
 };
 
 
