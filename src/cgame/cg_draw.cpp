@@ -3207,14 +3207,14 @@ static vec4_t* GetColorFromString(char *colorString) {
 
 	for (auto i = 0; i < 4; i++) {
 		token = COM_Parse(&colorString);
-		if (token) {
+		if (*token == '\0') {
+			color[i] = 1.f;
+		}
+		else {
 			float value = atof(token);
 			if (value > 1) value = 1.0;
 			else if (value < 0) value = 0.0;
 			color[i] = value;
-		}
-		else {
-			color [i] = 1.f;
 		}
 	}
 
