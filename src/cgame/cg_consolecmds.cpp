@@ -1185,11 +1185,28 @@ void CG_FreeCamMoveRight(void)
 
 void CG_FreeCamSetPos(void)
 {
-	int    i = 0;
 	char   buffer[MAX_TOKEN_CHARS];
 	vec3_t origin, angles;
+	auto argc = trap_Argc();
 
-	if (trap_Argc() < 7)
+	// if demolookat is used: freecamsetpos x y z 
+	if (argc == 4)
+	{
+		VectorClear(angles);
+
+		for (auto i = 0; i < 3; i++)
+		{
+			trap_Argv(i + 1, buffer, sizeof(buffer));
+			origin[i] = atof(buffer);
+		}
+
+		VectorCopy(origin, cg.freeCamPos);
+		VectorCopy(angles, cg.freeCamAngles);
+
+		return;
+	}
+	
+	if (argc < 7)
 	{
 		CG_Printf("usage: setviewpos x y z pitch yaw roll\n");
 		return;
@@ -1197,7 +1214,7 @@ void CG_FreeCamSetPos(void)
 
 	VectorClear(angles);
 
-	for (i = 0; i < 3; i++)
+	for (auto i = 0; i < 3; i++)
 	{
 		trap_Argv(i + 1, buffer, sizeof(buffer));
 		origin[i] = atof(buffer);

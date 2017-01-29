@@ -1384,7 +1384,24 @@ int CG_CalcViewValues(void)
 		float x;
 
 		VectorCopy(cg.freeCamPos, cg.refdef.vieworg);
-		VectorCopy(cg.freeCamAngles, cg.refdefViewAngles);
+		
+		if (etj_demo_lookAt.integer >= 0 && etj_demo_lookAt.integer < 1024) {
+			centity_t *tent;
+			vec3_t    vec;
+
+			tent = &cg_entities[etj_demo_lookAt.integer];
+
+			if (tent)
+			{
+				VectorCopy(tent->lerpOrigin, vec);
+				VectorSubtract(vec, cg.refdef_current->vieworg, vec);
+				vectoangles(vec, cg.refdefViewAngles);
+			}
+		} else
+		{
+			VectorCopy(cg.freeCamAngles, cg.refdefViewAngles);
+		}
+
 		AnglesToAxis(cg.refdefViewAngles, cg.refdef.viewaxis);
 		VectorCopy(cg.freeCamPos, cg.refdef_current->vieworg);
 
