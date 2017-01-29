@@ -2351,12 +2351,16 @@ extern vmCvar_t cg_hideMe;
 extern vmCvar_t cg_nofatigue;
 extern vmCvar_t com_maxfps;
 extern vmCvar_t com_hunkmegs;
+
 extern vmCvar_t cg_drawCGaz;
 extern vmCvar_t cg_CGazY;
 extern vmCvar_t cg_CGazHeight;
 extern vmCvar_t cg_CGazWidth;
+extern vmCvar_t etj_CGazColor1;
+extern vmCvar_t etj_CGazColor2;
 extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
+
 extern vmCvar_t cg_drawOB;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;

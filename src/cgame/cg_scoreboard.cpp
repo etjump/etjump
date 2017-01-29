@@ -6,6 +6,7 @@
 vec4_t clrUiBack = { 0.f, 0.f, 0.f, .6f };
 vec4_t clrUiBackDark = { 0.f, 0.f, 0.f, .8f };
 vec4_t clrUiBar = { .16f, .2f, .17f, .8f };
+vec4_t clrUiBorder = { 0.f, 0.f, 0.f, 1.f };
 
 // Begin of alt scoreboard 1
 
@@ -39,12 +40,13 @@ void CG_DrawHeader(float x, float y, float fade)
 	CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2, y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 }
 
-void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t textColor, float fade)
+void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t color, float fade)
 {
 	clientInfo_t *ci = &cgs.clientinfo[score->client];
-
+	vec4_t textColor;
 	float tempX = x;
-	textColor[4] *= fade;
+	Vector4Copy(color, textColor);
+	textColor[3] *= fade;
 
 	CG_DrawStringExt(tempX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 12);
 	tempX += ALT_SCOREBOARD_PLAYER_WIDTH;
@@ -150,10 +152,13 @@ void CG_DrawAltScoreboard(float fade)
 	float  x = 20 + SCREEN_OFFSET_X;
 	float  y = 10;
 	vec4_t currentClrUiBack;
+	vec4_t currentClrUiBorder;
 	Vector4Copy(clrUiBack, currentClrUiBack);
-	currentClrUiBack[3] = currentClrUiBack[3] * fade;
+	Vector4Copy(clrUiBorder, currentClrUiBorder);
+	currentClrUiBack[3]   *= fade;
+	currentClrUiBorder[3] *= fade;
 	CG_FillRect(x, y, 640 - 2 * 20, 480 - 2 * y, currentClrUiBack);
-	CG_DrawRect_FixedBorder(x, y, 640 - 2 * 20, 480 - 2 * y, 1, colorBlack);
+	CG_DrawRect_FixedBorder(x, y, 640 - 2 * 20, 480 - 2 * y, 1, currentClrUiBorder);
 	y += 10;
 	CG_DrawHeader(x, y, fade);
 	CG_DrawPlayers(x, y, fade);
@@ -248,12 +253,13 @@ void CG_DrawHeader2(float x, float y, float fade)
 
 }
 
-void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t textColor, float fade)
+void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t color, float fade)
 {
 	clientInfo_t *ci = &cgs.clientinfo[score->client];
-
+	vec4_t textColor;
 	float tempX = x;
-	textColor[4] *= fade;
+	Vector4Copy(color, textColor);
+	textColor[3] *= fade;
 
 	if (ci->team == TEAM_SPECTATOR)
 	{
@@ -346,32 +352,34 @@ void CG_DrawAltScoreboard2(float fade)
 	float  distanceFromTop = y;
 	vec4_t currentClrUiBack;
 	vec4_t currentClrUiBackLight;
+	vec4_t currentClrUiBorder;
 	Vector4Copy(clrUiBack, currentClrUiBack);
 	Vector4Copy(clrUiBack, currentClrUiBackLight);
+	Vector4Copy(clrUiBorder, currentClrUiBorder);
 	currentClrUiBackLight[3] = 0.3f;
-	currentClrUiBack[3]      = currentClrUiBack[3] * fade;
-	currentClrUiBackLight[3] = currentClrUiBackLight[3] * fade;
-
+	currentClrUiBack[3]      *= fade;
+	currentClrUiBackLight[3] *= fade;
+	currentClrUiBorder[3]    *= fade;
 
 	// Draw server info bar
 	CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
-	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
 
 	distanceFromTop += height;
 
 	tempY += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
 	height = THIRD_SCOREBOARD_SUBHEADER_HEIGHT;
-	width  = ALT_SCOREBOARD_WIDTH / 2 - 2;
+	width = ALT_SCOREBOARD_WIDTH / 2 - 2;
 
 	// Draw the jumping header bar
 	CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
-	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
 
 	tempX += width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
 
 	// Draw the spectating header bar
 	CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
-	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
 
 	// Go back to start
 	tempX            = x;
@@ -390,12 +398,12 @@ void CG_DrawAltScoreboard2(float fade)
 	// Draws the bottom side of the outer box
 	CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
 	// Draws the outline of the outer box
-	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
 	// Draws the inner box
 	tempX += THIRD_SCOREBOARD_DIVIDER_WIDTH;
 	tempY += THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
 	CG_FillRect(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT - THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBackLight);
-	CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1, currentClrUiBorder);
 
 	tempX  = x + width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
 	tempY -= THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
@@ -410,12 +418,12 @@ void CG_DrawAltScoreboard2(float fade)
 	// Draws the bottom side of the outer box
 	CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
 	// Draws the outline of the outer box
-	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
 	// Draws the inner box
 	tempX += THIRD_SCOREBOARD_DIVIDER_WIDTH;
 	tempY += THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
 	CG_FillRect(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT - THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBackLight);
-	CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1, colorBlack);
+	CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH, height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1, currentClrUiBorder);
 
 
 
@@ -465,15 +473,22 @@ int WM_DrawObjectives(int x, int y, int width, float fade)
 	float      textWidth;
 	auto       font = &cgs.media.limboFont2;
 	vec4_t     color1, color2;
+	vec4_t currentClrUiBar, currentClrUiBack, currentClrUiBorder;
+	Vector4Copy(clrUiBar, currentClrUiBar);
+	Vector4Copy(clrUiBack, currentClrUiBack);
+	Vector4Copy(clrUiBorder, currentClrUiBorder);
+	currentClrUiBar[3]    *= fade;
+	currentClrUiBack[3]   *= fade;
+	currentClrUiBorder[3] *= fade;
 
 	VectorCopy(colorMdGreen, color1);
 	VectorCopy(colorWhite, color2);
 	color1[3] = fade;
 	color2[3] = fade;
 
-	CG_FillRect(x, y, width, height, clrUiBack);
-	CG_FillRect(x, y, width, height, clrUiBar);
-	CG_DrawRect_FixedBorder(x, y, width, height, 1, colorBlack);
+	CG_FillRect(x, y, width, height, currentClrUiBack);
+	CG_FillRect(x, y, width, height, currentClrUiBar);
+	CG_DrawRect_FixedBorder(x, y, width, height, 1, currentClrUiBorder);
 
 	// ETJump: ETJump version
 	s = ETJUMP_VERSION;
@@ -643,6 +658,11 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 	const  char* text;
 	vec4_t borderColor = { 0.0f, 0.0f, 0.0f, 0.6 * fade };
 	vec4_t borderColor2 = { 0.0f, 0.0f, 0.0f, fade };
+	vec4_t currentClrUiBar, currentClrUiBack;
+	Vector4Copy(clrUiBack, currentClrUiBack);
+	Vector4Copy(clrUiBar, currentClrUiBar);
+	currentClrUiBack[3] *= fade;
+	currentClrUiBar[3] *= fade;
 
 	width = INFO::TOTAL_WIDTH;
 
@@ -659,8 +679,8 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 
 	// team main header
 	{
-		CG_FillRect(x, y, width, INFO::TEAM_HEIGHT, clrUiBack);
-		CG_FillRect(x, y, width, INFO::TEAM_HEIGHT, clrUiBar);
+		CG_FillRect(x, y, width, INFO::TEAM_HEIGHT, currentClrUiBack);
+		CG_FillRect(x, y, width, INFO::TEAM_HEIGHT, currentClrUiBar);
 
 		Vector4Set(hcolor, 0, 0, 0, fade);
 		CG_DrawRect_FixedBorder(x, y, width, INFO::TEAM_HEIGHT, 1, hcolor);
@@ -685,7 +705,7 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 
 	// team table header
 	{
-		CG_FillRect(x, y, width, INFO::LINE_HEIGHT, clrUiBack);
+		CG_FillRect(x, y, width, INFO::LINE_HEIGHT, currentClrUiBack);
 		CG_FillRect(x, y + INFO::LINE_HEIGHT - 1, width, 1, borderColor2);
 		int tempx = x;
 
