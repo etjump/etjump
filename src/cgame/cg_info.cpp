@@ -120,14 +120,6 @@ void CG_ShowHelp_Off(int *status)
 	}
 }
 
-void CG_ToggleFreeCam(void);
-void CG_FreeCamMoveForward(void);
-void CG_FreeCamMoveBackward(void);
-void CG_FreeCamMoveLeft(void);
-void CG_FreeCamMoveRight(void);
-void CG_FreeCamSetPos(void);
-
-
 // Demo playback key catcher support
 void CG_DemoClick(int key, qboolean down)
 {
@@ -400,36 +392,6 @@ void CG_DemoClick(int key, qboolean down)
 		else
 		{
 			trap_Cvar_Set("cl_avidemo", demo_avifpsF5.string);
-		}
-		return;
-	case K_KP_ENTER:
-		if (!down)
-		{
-			CG_ToggleFreeCam();
-		}
-		return;
-	case 'w':
-		if (down)
-		{
-			CG_FreeCamMoveForward();
-		}
-		return;
-	case 's':
-		if (down)
-		{
-			CG_FreeCamMoveBackward();
-		}
-		return;
-	case 'a':
-		if (down)
-		{
-			CG_FreeCamMoveLeft();
-		}
-		return;
-	case 'd':
-		if (down)
-		{
-			CG_FreeCamMoveRight();
 		}
 		return;
 	default:

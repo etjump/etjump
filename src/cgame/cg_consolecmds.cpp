@@ -1125,113 +1125,6 @@ void CG_portalinfo_f(void)
 	CG_Printf("^7The ^1second ^7portal is placed using +attack2 which you will need to bind by typing '/bind key +attack2' in the console.\n");
 }
 
-// Start freecam support
-void CG_ToggleFreeCam(void)
-{
-	if (!cg.demoPlayback)
-	{
-		return;
-	}
-
-	cg.freeCam = cg.freeCam ? qfalse : qtrue;
-	if (cg.freeCam)
-	{
-		trap_Cvar_Set("cg_thirdperson", "1");
-	}
-	else
-	{
-		trap_Cvar_Set("cg_thirdperson", "0");
-	}
-
-	VectorCopy(cg.refdef.vieworg, cg.freeCamPos);
-	VectorCopy(cg.refdefViewAngles, cg.freeCamAngles);
-}
-
-void CG_FreeCamMoveForward(void)
-{
-	vec3_t vector;
-	vector[0] = 0.0f;
-	vector[1] = 127.0f;
-	vector[2] = 0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamMoveBackward(void)
-{
-	vec3_t vector;
-	vector[0] = 0.0f;
-	vector[1] = -127.0f;
-	vector[2] = -0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamMoveLeft(void)
-{
-	vec3_t vector;
-	vector[0] = -127.0f;
-	vector[1] = 0.0;
-	vector[2] = -0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamMoveRight(void)
-{
-	vec3_t vector;
-	vector[0] = 127.0f;
-	vector[1] = 0.0f;
-	vector[2] = -0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamSetPos(void)
-{
-	char   buffer[MAX_TOKEN_CHARS];
-	vec3_t origin, angles;
-	auto argc = trap_Argc();
-
-	// if demolookat is used: freecamsetpos x y z 
-	if (argc == 4)
-	{
-		VectorClear(angles);
-
-		for (auto i = 0; i < 3; i++)
-		{
-			trap_Argv(i + 1, buffer, sizeof(buffer));
-			origin[i] = atof(buffer);
-		}
-
-		VectorCopy(origin, cg.freeCamPos);
-		VectorCopy(angles, cg.freeCamAngles);
-
-		return;
-	}
-	
-	if (argc < 7)
-	{
-		CG_Printf("usage: setviewpos x y z pitch yaw roll\n");
-		return;
-	}
-
-	VectorClear(angles);
-
-	for (auto i = 0; i < 3; i++)
-	{
-		trap_Argv(i + 1, buffer, sizeof(buffer));
-		origin[i] = atof(buffer);
-	}
-
-	trap_Argv(4, buffer, sizeof(buffer));
-	angles[PITCH] = atof(buffer);
-	trap_Argv(5, buffer, sizeof(buffer));
-	angles[YAW] = atof(buffer);
-	trap_Argv(6, buffer, sizeof(buffer));
-	angles[ROLL] = atof(buffer);
-
-	VectorCopy(origin, cg.freeCamPos);
-	VectorCopy(angles, cg.freeCamAngles);
-
-}
-
 #ifdef AC_SUPPORT
 
 void CG_Ptr_f(void)
@@ -1356,8 +1249,6 @@ static consoleCommand_t commands[] =
 	{ "help",                CG_Manual_f             },
 	{ "man",                 CG_Manual_f             },
 	{ "manual",              CG_Manual_f             },
-	{ "freecam",             CG_ToggleFreeCam        },
-	{ "freecamsetpos",       CG_FreeCamSetPos        }
 };
 
 

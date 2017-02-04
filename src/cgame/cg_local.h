@@ -1215,10 +1215,6 @@ typedef struct
 	qboolean resetmaxspeed;
 	qboolean routeDesigner;
 
-	qboolean freeCam;
-	vec3_t freeCamPos;
-	vec3_t freeCamAngles;
-
 	char ipAddr[128];
 	int lastScoreTime;
 

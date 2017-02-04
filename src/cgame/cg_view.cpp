@@ -1378,41 +1378,6 @@ int CG_CalcViewValues(void)
 
 	ps = &cg.predictedPlayerState;
 
-	if (cg.demoPlayback && cg.freeCam)
-	{
-		float fov = 90;
-		float x;
-
-		VectorCopy(cg.freeCamPos, cg.refdef.vieworg);
-		
-		if (etj_demo_lookAt.integer >= 0 && etj_demo_lookAt.integer < 1024) {
-			centity_t *tent;
-			vec3_t    vec;
-
-			tent = &cg_entities[etj_demo_lookAt.integer];
-
-			if (tent)
-			{
-				VectorCopy(tent->lerpOrigin, vec);
-				VectorSubtract(vec, cg.refdef_current->vieworg, vec);
-				vectoangles(vec, cg.refdefViewAngles);
-			}
-		} else
-		{
-			VectorCopy(cg.freeCamAngles, cg.refdefViewAngles);
-		}
-
-		AnglesToAxis(cg.refdefViewAngles, cg.refdef.viewaxis);
-		VectorCopy(cg.freeCamPos, cg.refdef_current->vieworg);
-
-		x                        = cg.refdef.width / tan(fov / 360 * M_PI);
-		cg.refdef_current->fov_y = atan2(cg.refdef_current->height, x);
-		cg.refdef_current->fov_y = cg.refdef_current->fov_y * 360 / M_PI;
-		cg.refdef_current->fov_x = fov;
-
-		return CG_CalcFov();
-	}
-
 	if (cg.cameraMode)
 	{
 		vec3_t origin, angles;
