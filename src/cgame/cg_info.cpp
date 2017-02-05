@@ -138,11 +138,6 @@ void CG_DemoClick(int key, qboolean down)
 
 	switch (key)
 	{
-	case K_ESCAPE:
-		CG_ShowHelp_Off(&cg.demohelpWindow);
-		CG_keyOff_f();
-		return;
-
 	case K_TAB:
 		if (down)
 		{
@@ -185,6 +180,11 @@ void CG_DemoClick(int key, qboolean down)
 
 	// Window controls
 	case K_SHIFT:
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			CG_RunBinding(key, down);
+			return;
+		}
 	case K_CTRL:
 	case K_MOUSE4:
 		cgs.fResize = down;
@@ -223,64 +223,117 @@ void CG_DemoClick(int key, qboolean down)
 	case K_ENTER:
 		if (!down)
 		{
+			if (cgs.demoCam.renderingFreeCam)
+			{
+				cgs.demoCam.renderingFreeCam = qfalse;
+			}
+
 			trap_Cvar_Set("cg_thirdperson", ((cg_thirdPerson.integer == 0) ? "1" : "0"));
 		}
 		return;
 	case K_UPARROW:
-		if (milli > cgs.thirdpersonUpdate)
-		{
-			float range = cg_thirdPersonRange.value;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			range                -= ((range >= 4 * DEMO_RANGEDELTA) ? DEMO_RANGEDELTA : (range - DEMO_RANGEDELTA));
-			trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
-		}
-		return;
 	case K_DOWNARROW:
-		if (milli > cgs.thirdpersonUpdate)
-		{
-			float range = cg_thirdPersonRange.value;
 
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			range                += ((range >= 120 * DEMO_RANGEDELTA) ? 0 : DEMO_RANGEDELTA);
-			trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
+		// when not in thirdperson, arrowkeys should be bindable to +freecam_turnleft, ...
+		if (cg.renderingThirdPerson && !cgs.demoCam.renderingFreeCam)
+		{
+			if (milli > cgs.thirdpersonUpdate)
+			{
+				float range = cg_thirdPersonRange.value;
+
+				cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
+				if (key == K_UPARROW)
+				{
+					range -= ((range >= 4 * DEMO_RANGEDELTA) ? DEMO_RANGEDELTA : (range - DEMO_RANGEDELTA));
+				}
+				else
+				{
+					range += ((range >= 120 * DEMO_RANGEDELTA) ? 0 : DEMO_RANGEDELTA);
+				}
+				trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
+			}
+		}
+		else
+		{
+			CG_RunBinding(key, down);
 		}
 		return;
 	case K_RIGHTARROW:
-		if (milli > cgs.thirdpersonUpdate)
-		{
-			float angle = cg_thirdPersonAngle.value - DEMO_ANGLEDELTA;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			if (angle < 0)
-			{
-				angle += 360.0f;
-			}
-			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
-		}
-		return;
 	case K_LEFTARROW:
-		if (milli > cgs.thirdpersonUpdate)
+		if (cg.renderingThirdPerson && !cgs.demoCam.renderingFreeCam)
 		{
-			float angle = cg_thirdPersonAngle.value + DEMO_ANGLEDELTA;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			if (angle >= 360.0f)
+			if (milli > cgs.thirdpersonUpdate)
 			{
-				angle -= 360.0f;
+				float angle = cg_thirdPersonAngle.value;
+				cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
+				if (key == K_RIGHTARROW)
+				{
+					angle -= DEMO_ANGLEDELTA;
+					if (angle < 0)
+					{
+						angle += 360.0f;
+					}
+				}
+				else
+				{
+					angle += DEMO_ANGLEDELTA;
+					if (angle >= 360.0f)
+					{
+						angle -= 360.0f;
+					}
+				}
+				trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
 			}
-			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
+		}
+		else
+		{
+			CG_RunBinding(key, down);
 		}
 		return;
-
 	// Timescale controls
 	case K_KP_5:
-	case K_KP_INS:
 	case K_SPACE:
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			CG_RunBinding(key, down);
+			return;
+		}
+	case K_ESCAPE:
 		if (!down)
 		{
 			trap_Cvar_Set("timescale", "1");
 			cgs.timescaleUpdate = cg.time + 1000;
+		}
+		return;
+	case K_KP_ENTER:
+		if (!down)
+		{
+			if (cg.snap->ps.leanf && !cgs.demoCam.renderingFreeCam)
+			{
+				cgs.demoCam.startLean = qtrue;
+			}
+
+			cgs.demoCam.renderingFreeCam = cgs.demoCam.renderingFreeCam? qfalse : qtrue;
+
+			if (cgs.demoCam.renderingFreeCam)
+			{
+				int viewheight;
+
+				if (cg.snap->ps.eFlags & EF_CROUCHING)
+				{
+					viewheight = CROUCH_VIEWHEIGHT;
+				}
+				else if (cg.snap->ps.eFlags & EF_PRONE || cg.snap->ps.eFlags & EF_PRONE_MOVING)
+				{
+					viewheight = PRONE_VIEWHEIGHT;
+				}
+				else
+				{
+					viewheight = DEFAULT_VIEWHEIGHT;
+				}
+				cgs.demoCam.camOrigin[2] += viewheight;
+			}
+
 		}
 		return;
 	case K_KP_DOWNARROW:
@@ -395,11 +448,7 @@ void CG_DemoClick(int key, qboolean down)
 		}
 		return;
 	default:
-		if (down)
-		{
-			trap_Key_GetBindingBuf(key, buf, sizeof(buf));
-			trap_SendConsoleCommand(va("%s\n", buf));
-		}
+		CG_RunBinding(key, down);
 	}
 }
 
@@ -802,7 +851,9 @@ void CG_DemoHelpDraw()
 			NULL,
 			"^nENTER     ^mExternal view",
 			"^nLFT/RGHT  ^mChange angle",
-			"^nUP/DOWN   ^mMove in/out"
+			"^nUP/DOWN   ^mMove in/out",
+			NULL,
+			va("^nKP_ENTER  ^mFreecam    ^m%s", cgs.demoCam.renderingFreeCam? "ON" : "OFF"),
 		};
 
 		const char *mvhelp[] =
@@ -1112,7 +1163,7 @@ void CG_DrawOverlays(void)
 #ifdef MV_SUPPORT
 	CG_SpecHelpDraw();
 #endif
-	if (cg.demoPlayback)
+	if (cg.demoPlayback && etj_predefineddemokeys.integer)
 	{
 		CG_DemoHelpDraw();
 	}

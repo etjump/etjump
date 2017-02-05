@@ -250,6 +250,28 @@ static void CG_CalcVrect(void)
 
 //==============================================================================
 
+static void CG_OffsetFreeCamView(void)
+{
+
+	if (cgs.demoCam.setCamAngles)
+	{
+		VectorCopy(cgs.demoCam.camAngle, cg.refdefViewAngles);
+	}
+
+	VectorCopy(cgs.demoCam.camOrigin, cg.refdef_current->vieworg);
+
+	if (etj_demo_lookat.integer != -1)
+	{
+		centity_t *temp;
+		vec3_t    dir;
+
+		temp = &cg_entities[etj_demo_lookat.integer];
+		VectorSubtract(temp->lerpOrigin, cgs.demoCam.camOrigin, dir);
+
+		vectoangles(dir, cg.refdefViewAngles);
+	}
+}
+
 /*
 ===============
 CG_OffsetThirdPersonView
@@ -1056,6 +1078,14 @@ static int CG_CalcFov(void)
 		cg.zoomval     = 0;
 	}
 
+	//fix for edv
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		cg.zoomedBinoc = qfalse;
+		cg.zoomTime = 0;
+		cg.zoomval = 0;
+	}
+
 	if (cg.predictedPlayerState.pm_type == PM_INTERMISSION)
 	{
 		// if in intermission, use a fixed value
@@ -1133,8 +1163,12 @@ static int CG_CalcFov(void)
 
 	cg.refdef_current->rdflags &= ~RDF_SNOOPERVIEW;
 
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		//do nothing
+	}
 	// Arnout: mg42 zoom
-	if (cg.snap->ps.persistant[PERS_HWEAPON_USE])
+	else if (cg.snap->ps.persistant[PERS_HWEAPON_USE])
 	{
 		fov_x = 55;
 	}
@@ -1448,6 +1482,10 @@ int CG_CalcViewValues(void)
 			VectorCopy(cgs.ccPortalAngles, cg.refdefViewAngles);
 		}
 	}
+	else if (cgs.demoCam.renderingFreeCam)
+	{
+		//do nothing
+	}
 	else if (cg.renderingThirdPerson && (ps->eFlags & EF_MG42_ACTIVE || ps->eFlags & EF_AAGUN_ACTIVE))      // Arnout: see if we're attached to a gun
 	{
 		centity_t *mg42 = &cg_entities[ps->viewlocked_entNum];
@@ -1467,8 +1505,11 @@ int CG_CalcViewValues(void)
 	}
 	else
 	{
-		VectorCopy(ps->origin, cg.refdef_current->vieworg);
-		VectorCopy(ps->viewangles, cg.refdefViewAngles);
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			VectorCopy(ps->origin, cg.refdef_current->vieworg);
+			VectorCopy(ps->viewangles, cg.refdefViewAngles);
+		}
 	}
 
 	if (!cg.showGameView)
@@ -1492,7 +1533,7 @@ int CG_CalcViewValues(void)
 		}
 
 		// Ridah, lock the viewangles if the game has told us to
-		if (ps->viewlocked)
+		if (ps->viewlocked && !cgs.demoCam.renderingFreeCam)
 		{
 
 			/*
@@ -1517,13 +1558,22 @@ int CG_CalcViewValues(void)
 			}
 		}
 
-		if (cg.renderingThirdPerson)
+		if (cgs.demoCam.renderingFreeCam)
 		{
+			CG_OffsetFreeCamView();
+		}
+		else if (cg.renderingThirdPerson)
+		{
+			VectorCopy(cg.refdef.vieworg, cgs.demoCam.camOrigin);
+			VectorCopy(cg.refdefViewAngles, cgs.demoCam.camAngle);
+
 			// back away from character
 			CG_OffsetThirdPersonView();
 		}
 		else
 		{
+			VectorCopy(cg.refdef.vieworg, cgs.demoCam.camOrigin);
+			VectorCopy(cg.refdefViewAngles, cgs.demoCam.camAngle);
 
 			// offset for local bobbing and kicks
 			CG_OffsetFirstPersonView();
@@ -1534,8 +1584,13 @@ int CG_CalcViewValues(void)
 			}
 		}
 
+		//freecam must not get viewlocked
+		if (ps->viewlocked && cgs.demoCam.renderingFreeCam)
+		{
+			//do nothing
+		}
 		// Ridah, lock the viewangles if the game has told us to
-		if (ps->viewlocked == 7)
+		else if (ps->viewlocked == 7)
 		{
 			centity_t *tent;
 			vec3_t    vec;
@@ -1570,6 +1625,13 @@ int CG_CalcViewValues(void)
 		}
 		// done.
 	}
+
+	if (cgs.demoCam.startLean)
+	{
+		cg.refdefViewAngles[2] = 0.0;
+	}
+
+	cgs.demoCam.startLean = qfalse;
 
 	// position eye reletive to origin
 	AnglesToAxis(cg.refdefViewAngles, cg.refdef_current->viewaxis);
@@ -2118,6 +2180,10 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 
 	DEBUGTIME
 
+	if (cg.demoPlayback) {
+		CG_EDV_RunInput();
+	}
+
 	// if we have been told not to render, don't
 	if (cg_norender.integer)
 	{
@@ -2148,7 +2214,7 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 		DEBUGTIME
 
 		// decide on third person view
-		cg.renderingThirdPerson = (cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0) || cg.showGameView) ? qtrue : qfalse;
+		cg.renderingThirdPerson = (cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0) || cg.showGameView || cgs.demoCam.renderingFreeCam) ? qtrue : qfalse;
 
 		// build cg.refdef
 		inwater = CG_CalcViewValues();

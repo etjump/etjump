@@ -2788,7 +2788,15 @@ CG_DrawSpectator
 */
 static void CG_DrawSpectator(void)
 {
-	const char *s = CG_TranslateString("SPECTATOR");
+	const char *s;
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		s = CG_TranslateString("FREECAM");
+	}
+	else
+	{
+		s = CG_TranslateString("SPECTATOR");
+	}
 	auto textWidth = ETJump::DrawStringWidth(s, 0.3f);
 	ETJump::DrawBigString(SCREEN_CENTER_X - textWidth / 2, 440 + 10, s, 0.95f);
 }
@@ -3075,6 +3083,11 @@ static void CG_DrawSpectatorMessage(void)
 	float      x, y;
 	static int lastconfigGet = 0;
 
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		return;
+	}
+
 	if (!cg_descriptiveText.integer)
 	{
 		return;
@@ -3161,11 +3174,13 @@ static void CG_DrawLimboMessage(void)
 {
 	float         color[4] = { 1, 1, 1, 1 };
 	const char    *str;
-	playerState_t *ps;
+	playerState_t *ps = &cg.snap->ps;
 	int           y = 130;
 
-
-	ps = &cg.snap->ps;
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		return;
+	}
 
 	if (ps->stats[STAT_HEALTH] > 0)
 	{
@@ -5856,9 +5871,12 @@ static void CG_Draw2D(void)
 
 	if (!cg.cameraMode)
 	{
-		CG_DrawFlashBlendBehindHUD();
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			CG_DrawFlashBlendBehindHUD();
+		}
 
-		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || cgs.demoCam.renderingFreeCam)
 		{
 			CG_DrawSpectator();
 			CG_DrawCrosshair();
@@ -5893,13 +5911,12 @@ static void CG_Draw2D(void)
 
 		CG_DrawVote();
 
-		CG_DrawLagometer();
 	}
 
 	// don't draw center string if scoreboard is up
 	if (!CG_DrawScoreboard())
 	{
-		if (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)
+		if (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR && !cgs.demoCam.renderingFreeCam)
 		{
 			rectDef_t rect;
 
@@ -5938,13 +5955,9 @@ static void CG_Draw2D(void)
 		CG_DrawCenterString();
 		CG_DrawPMItems();
 		CG_DrawPMItemsBig();
-
-		CG_DrawFollow();
 		CG_DrawWarmup();
 
 		CG_DrawNotify();
-
-		CG_DrawNewCompass();
 
 		CG_DrawObjectiveInfo();
 
@@ -5952,16 +5965,21 @@ static void CG_Draw2D(void)
 
 		CG_DrawLimboMessage();
 
-		CG_DrawCGazHUD();
-
-		CG_DrawOB();
-		CG_DrawSlick();
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			CG_DrawLagometer();
+			CG_DrawNewCompass();
+			CG_DrawFollow();
+			CG_DrawCGazHUD();
+			CG_DrawOB();
+			CG_DrawSlick();
+			CG_DrawSpeed2();
+			CG_DrawRouteDesign();
+			CG_DrawKeys();
+		}
 
 		CG_DrawCHS();
 
-		CG_DrawSpeed2();
-		CG_DrawRouteDesign();
-		CG_DrawKeys();
 		CG_DrawSpectatorInfo();
 	}
 	else
@@ -5982,23 +6000,29 @@ static void CG_Draw2D(void)
 	{
 		CG_Fireteams_Draw();
 	}
-
-	ETJump_DrawDrawables();
-
-	for (const auto & r : ETJump::renderables)
+	
+	if (!cgs.demoCam.renderingFreeCam)
 	{
-		r->beforeRender();
-		r->render();
+		ETJump_DrawDrawables();
+
+		for (const auto & r : ETJump::renderables)
+		{
+			r->beforeRender();
+			r->render();
+		}
 	}
 
 	// Info overlays
 	CG_DrawOverlays();
+	
+	if (!cgs.demoCam.renderingFreeCam)
+	{
+		// OSP - window updates
+		CG_windowDraw();
 
-	// OSP - window updates
-	CG_windowDraw();
-
-	// Ridah, draw flash blends now
-	CG_DrawFlashBlend();
+		// Ridah, draw flash blends now
+		CG_DrawFlashBlend();
+	}
 
 	CG_DrawDemoRecording();
 }

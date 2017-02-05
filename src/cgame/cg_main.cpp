@@ -453,7 +453,12 @@ vmCvar_t etj_drawObWatcher;
 vmCvar_t etj_obWatcherX;
 vmCvar_t etj_obWatcherY;
 
-vmCvar_t etj_demo_lookAt;
+vmCvar_t etj_demo_yawturnspeed;
+vmCvar_t etj_demo_pitchturnspeed;
+vmCvar_t etj_demo_rollspeed;
+vmCvar_t etj_demo_lookat;
+vmCvar_t etj_demo_freecamspeed;
+vmCvar_t etj_predefineddemokeys;
 
 typedef struct
 {
@@ -763,9 +768,12 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
 	{&etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
 	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
-	{ &etj_demo_lookAt,              "etj_demo_lookAt",             "-1",                     CVAR_ARCHIVE             },
-	// backward compatibility with camtrace3d generated configs
-	{ &etj_demo_lookAt,              "b_demo_lookAt",               "-1",                     CVAR_ARCHIVE             },
+	{ &etj_demo_yawturnspeed, "etj_demo_yawturnspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_pitchturnspeed, "etj_demo_pitchturnspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_rollspeed, "etj_demo_rollspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_freecamspeed, "etj_demo_freecamspeed", "800", CVAR_ARCHIVE },
+	{ &etj_demo_lookat, "b_demo_lookat", "-1", CVAR_CHEAT },
+	{ &etj_predefineddemokeys, "etj_predefineddemokeys", "1", CVAR_CHEAT | CVAR_ARCHIVE },
 };
 
 
@@ -3498,6 +3506,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
+
+	VectorSet(cgs.demoCam.velocity, 0.0, 0.0, 0.0);
+	cgs.demoCam.startLean = qfalse;
+	cgs.demoCam.noclip = qfalse;
 #ifdef AC_SUPPORT
 
 	InitAntiCheat(clientAC);
