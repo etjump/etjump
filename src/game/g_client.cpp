@@ -1572,19 +1572,13 @@ void ClientUserinfoChanged(int clientNum)
 		client->ps.powerups[PW_ADRENALINE] = 0;
 	}
 
-	if (client->pers.clientFlags & CGF_NOACTIVATELEAN) {
-		client->pmext.noActivateLean = qtrue;
-	}
-	else {
-		client->pmext.noActivateLean = qfalse;
-	}
-
 	client->pers.nofatigue      = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
 	client->pers.pmoveFixed     = (client->pers.clientFlags & CGF_PMOVEFIXED) != 0 ? qtrue : qfalse;
 	client->pers.cgaz           = (client->pers.clientFlags & CGF_CGAZ) != 0 ? qtrue : qfalse;
 	client->pers.loadViewAngles = (client->pers.clientFlags & CGF_LOADVIEWANGLES) != 0 ? qtrue : qfalse;
 	client->pers.hideMe         = (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
 	client->pers.enableTimeruns = (client->pers.clientFlags & CGF_ENABLE_TIMERUNS) != 0 ? qtrue : qfalse;
+	client->pers.noActivateLean = (client->pers.clientFlags & CGF_NOACTIVATELEAN) != 0 ? qtrue : qfalse;
 
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));

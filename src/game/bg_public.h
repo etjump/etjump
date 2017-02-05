@@ -549,8 +549,6 @@ typedef struct
 
 	qboolean releasedFire;
 	float noclipScale;
-
-	qboolean noActivateLean;
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
 
@@ -606,6 +604,8 @@ typedef struct
 
 	// ETJump: shared values between client & server
 	int shared;
+	// ETJump: enable/disable strafe + activate = lean
+	qboolean noActivateLean;
 
 	qboolean walking;
 	trace_t groundTrace;

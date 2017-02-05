@@ -1251,6 +1251,9 @@ void CG_PredictPlayerState(void)
 			cg_pmove.covertopsChargeTime = cg.covertopsChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
 		}
 
+		// ETJump: client side no activate lean
+		cg_pmove.noActivateLean = etj_noActivateLean.integer ? qtrue : qfalse;
+
 #ifdef SAVEGAME_SUPPORT
 		if (CG_IsSinglePlayer() && cg_reloading.integer)
 		{
@@ -1265,14 +1268,6 @@ void CG_PredictPlayerState(void)
 		memcpy(&pmext, &oldpmext[cmdNum & CMD_MASK], sizeof(pmoveExt_t));
 
 		fflush(stdout);
-
-		// bg_pmove uses it
-		if (etj_noActivateLean.integer) {
-			cg_pmove.pmext->noActivateLean = qtrue;
-		}
-		else {
-			cg_pmove.pmext->noActivateLean = qfalse;
-		}
 
 		Pmove(&cg_pmove);
 
