@@ -3216,24 +3216,20 @@ All the cgaz huds
 =================
 */
 
-static vec4_t* GetColorFromString(char *colorString) {
-	vec4_t color = { 1.f, 1.f, 1.f, 1.f };
+void GetColorFromString(vec4_t *output, char *colorString) {
 	const char *token;
-
 	for (auto i = 0; i < 4; i++) {
 		token = COM_Parse(&colorString);
 		if (*token == '\0') {
-			color[i] = 1.f;
+			(*output)[i] = 1.f;
 		}
 		else {
 			float value = atof(token);
 			if (value > 1) value = 1.0;
 			else if (value < 0) value = 0.0;
-			color[i] = value;
+			(*output)[i] = value;
 		}
 	}
-
-	return &color;
 }
 
 // Dzikie
@@ -3424,8 +3420,8 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
-		Vector4Copy(*GetColorFromString(etj_CGazColor1.string), color1);
-		Vector4Copy(*GetColorFromString(etj_CGazColor2.string), color2);
+		GetColorFromString(&color1, etj_CGazColor1.string);
+		GetColorFromString(&color2, etj_CGazColor2.string);
 
 		if (etj_stretchCgaz.integer) {
 			CG_DisableProperScaling(qtrue);
