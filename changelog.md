@@ -1,5 +1,11 @@
 # ETJump 2.3.0
 
+* hud/ui clean up: replaced blurry charset with sharp font
+* fixed `etj_noActivateLean` not being persistent on respawn causing incorrect behaviour
+* added `etj_CGazColor1/2` cvars to set custom colors for `etj_drawCGAZ` __2__
+* added `freecam` and `noclip` support for demo playback (compatible with Camtrace3D)
+* added `b_demo_lookat` support for demo playback, to viewlock on specific player/entity
+
 # ETJump 2.2.0
 
 * Changed all .c modules to .cpp modules.

@@ -1341,6 +1341,12 @@ void CG_NoClip_f(void)
 	}
 }
 
+// ModInformation autocomplete
+void CG_ModInformation_f()
+{
+	trap_SendClientCommand("mod_information\n");
+}
+
 
 typedef struct
 {
@@ -1472,8 +1478,9 @@ static consoleCommand_t commands[] =
 	{ "freecam",             CG_Freecam_f },
 	{ "freecamsetpos",       CG_FreecamSetPos_f },
 	{ "freecamgetpos",       CG_FreecamGetPos_f },
-
 	{ "noclip",              CG_NoClip_f },
+
+	{ "mod_information",     CG_ModInformation_f },
 };
 
 
