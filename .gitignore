@@ -185,3 +185,9 @@ src/cmake
 src/build
 src/.idea/*
 src/.idea
+<<<<<<< HEAD
+=======
+src/build/install.bat
+src/build/install.bat
+src/cgame/cgame.vcxproj.user
+>>>>>>> f69652e19d8ce3a6febf9b1eb364a11b480e0ac6

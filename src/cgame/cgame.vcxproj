@@ -238,6 +238,7 @@
     <ClCompile Include="..\game\bg_tracemap.cpp" />
     <ClCompile Include="..\game\q_math.cpp" />
     <ClCompile Include="..\game\q_shared.cpp" />
+    <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="cg_manual.cpp" />
@@ -291,6 +292,7 @@
     <ClCompile Include="etj_maxspeed.cpp" />
     <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
+    <ClCompile Include="etj_trickjump_lines.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\etjump\ui\menudef.h" />
@@ -298,6 +300,7 @@
     <ClInclude Include="..\game\bg_classes.h" />
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
+    <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="cg_mainext.h" />
@@ -309,12 +312,15 @@
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
-    <ClInclude Include="etj_drawable.h" />
     <ClInclude Include="etj_entity_events_handler.h" />
     <ClInclude Include="etj_irenderable.h" />
     <ClInclude Include="etj_maxspeed.h" />
     <ClInclude Include="etj_overbounce_watcher.h" />
+    <ClInclude Include="etj_client_utilities.h" />
+    <ClInclude Include="etj_drawable.h" />
+    <ClInclude Include="etj_rotation_matrix.hpp" />
     <ClInclude Include="etj_timerun_view.h" />
+    <ClInclude Include="etj_trickjump_lines.hpp" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>

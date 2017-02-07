@@ -2094,6 +2094,7 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 	StopTimer(level.timerunNames[self->runIndex], activator);
 }
 
+
 // Stops a time run if the names match
 // each run has a name that is used as
 // an identifier
@@ -2106,6 +2107,55 @@ void SP_target_endTimer(gentity_t *self)
 
 // End of timeruns support
 
+// target_displaytjl
+// # Keys
+// linenumber : indicate the line number. 
+// or
+// linename : indicate the line string name.
+
+void target_tjldisplay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (self->tjlLineNumber > -1)
+	{
+		G_Printf("Inside g_target.cpp, calling the tjl_displaybynumber with : %d", self->tjlLineNumber);
+		trap_SendServerCommand((activator - g_entities), va("tjl_displaybynumber %d", self->tjlLineNumber));
+	}
+	else
+	{
+		//trap_SendServerCommand((activator - g_entities), va("tjl_displaybyname %s", self->tjlLineName));
+		trap_SendServerCommand(-1, va("tjl_displaybyname %s", self->tjlLineName));
+	}
+
+}
+
+void SP_target_tjldisplay(gentity_t *self)
+{
+	G_SpawnInt("linenumber", "-1", &self->tjlLineNumber);
+
+	// Check if player used linenumber or not.
+	if (self->tjlLineNumber == -1)
+	{
+		char *str;
+		G_SpawnString("linename", "default", &str);
+		if (*str)
+		{
+			self->tjlLineName = G_NewString(str);
+		}
+	}
+
+	self->use = target_tjldisplay_use;
+}
+
+// target_cleartjl
+void target_tjlclear_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	trap_SendServerCommand((activator - g_entities), "tjl_clearrender");
+}
+
+void SP_target_tjlclear(gentity_t *self)
+{
+	self->use = target_tjlclear_use;
+}
 
 // target_activate_if_velocity
 // # Keys
