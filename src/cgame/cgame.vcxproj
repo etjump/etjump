@@ -241,6 +241,7 @@
     <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="cg_edv.cpp" />
     <ClCompile Include="cg_manual.cpp" />
     <ClCompile Include="cg_atmospheric.cpp" />
     <ClCompile Include="cg_character.cpp" />

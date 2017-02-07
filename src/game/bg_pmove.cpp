@@ -6537,7 +6537,7 @@ void PmoveSingle(pmove_t *pmove)
 	}
 
 	// ETJump: no activate lean
-	if (pm->pmext->noActivateLean)
+	if (pm->noActivateLean)
 	{
 		if (pm->cmd.wbuttons & WBUTTON_LEANLEFT && pm->cmd.buttons & BUTTON_ACTIVATE)
 		{

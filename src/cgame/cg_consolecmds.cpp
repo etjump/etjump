@@ -1125,96 +1125,6 @@ void CG_portalinfo_f(void)
 	CG_Printf("^7The ^1second ^7portal is placed using +attack2 which you will need to bind by typing '/bind key +attack2' in the console.\n");
 }
 
-// Start freecam support
-void CG_ToggleFreeCam(void)
-{
-	if (!cg.demoPlayback)
-	{
-		return;
-	}
-
-	cg.freeCam = cg.freeCam ? qfalse : qtrue;
-	if (cg.freeCam)
-	{
-		trap_Cvar_Set("cg_thirdperson", "1");
-	}
-	else
-	{
-		trap_Cvar_Set("cg_thirdperson", "0");
-	}
-
-	VectorCopy(cg.refdef.vieworg, cg.freeCamPos);
-	VectorCopy(cg.refdefViewAngles, cg.freeCamAngles);
-}
-
-void CG_FreeCamMoveForward(void)
-{
-	vec3_t vector;
-	vector[0] = 0.0f;
-	vector[1] = 127.0f;
-	vector[2] = 0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamMoveBackward(void)
-{
-	vec3_t vector;
-	vector[0] = 0.0f;
-	vector[1] = -127.0f;
-	vector[2] = -0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamMoveLeft(void)
-{
-	vec3_t vector;
-	vector[0] = -127.0f;
-	vector[1] = 0.0;
-	vector[2] = -0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamMoveRight(void)
-{
-	vec3_t vector;
-	vector[0] = 127.0f;
-	vector[1] = 0.0f;
-	vector[2] = -0.0f;
-	VectorAdd(cg.freeCamPos, vector, cg.freeCamPos);
-}
-
-void CG_FreeCamSetPos(void)
-{
-	int    i = 0;
-	char   buffer[MAX_TOKEN_CHARS];
-	vec3_t origin, angles;
-
-	if (trap_Argc() < 7)
-	{
-		CG_Printf("usage: setviewpos x y z pitch yaw roll\n");
-		return;
-	}
-
-	VectorClear(angles);
-
-	for (i = 0; i < 3; i++)
-	{
-		trap_Argv(i + 1, buffer, sizeof(buffer));
-		origin[i] = atof(buffer);
-	}
-
-	trap_Argv(4, buffer, sizeof(buffer));
-	angles[PITCH] = atof(buffer);
-	trap_Argv(5, buffer, sizeof(buffer));
-	angles[YAW] = atof(buffer);
-	trap_Argv(6, buffer, sizeof(buffer));
-	angles[ROLL] = atof(buffer);
-
-	VectorCopy(origin, cg.freeCamPos);
-	VectorCopy(angles, cg.freeCamAngles);
-
-}
-
 #ifdef AC_SUPPORT
 
 void CG_Ptr_f(void)
@@ -1226,6 +1136,217 @@ void CG_Ptr_f(void)
 }
 
 #endif // AC_SUPPORT
+
+void CG_FreecamTurnLeftDown_f(void)
+{
+	cgs.demoCam.turn |= 0x01;
+}
+
+void CG_FreecamTurnLeftUp_f(void)
+{
+	cgs.demoCam.turn &= ~0x01;
+}
+
+void CG_FreecamTurnRightDown_f(void)
+{
+	cgs.demoCam.turn |= 0x02;
+}
+
+void CG_FreecamTurnRightUp_f(void)
+{
+	cgs.demoCam.turn &= ~0x02;
+}
+
+void CG_FreecamTurnDownDown_f(void)
+{
+	cgs.demoCam.turn |= 0x04;
+}
+
+void CG_FreecamTurnDownUp_f(void)
+{
+	cgs.demoCam.turn &= ~0x04;
+}
+
+void CG_FreecamTurnUpDown_f(void)
+{
+	cgs.demoCam.turn |= 0x08;
+}
+
+void CG_FreecamTurnUpUp_f(void)
+{
+	cgs.demoCam.turn &= ~0x08;
+}
+
+void CG_FreecamRollLeftDown_f(void)
+{
+	cgs.demoCam.turn |= 0x20;
+}
+
+void CG_FreecamRollLeftUp_f(void)
+{
+	cgs.demoCam.turn &= ~0x20;
+}
+
+void CG_FreecamRollRightDown_f(void)
+{
+	cgs.demoCam.turn |= 0x10;
+}
+
+void CG_FreecamRollRightUp_f(void)
+{
+	cgs.demoCam.turn &= ~0x10;
+}
+
+void CG_Freecam_f(void)
+{
+	char state[MAX_TOKEN_CHARS];
+
+	if (!cg.demoPlayback)
+	{
+		CG_Printf("Not playing a demo.\n");
+		return;
+	}
+
+	trap_Argv(1, state, sizeof(state));
+
+	if (!Q_stricmp(state, "on"))
+	{
+		cgs.demoCam.renderingFreeCam = qtrue;
+	}
+	else if (!Q_stricmp(state, "off"))
+	{
+		cgs.demoCam.renderingFreeCam = qfalse;
+	}
+	else
+	{
+		cgs.demoCam.renderingFreeCam = cgs.demoCam.renderingFreeCam? qfalse : qtrue;
+	}
+
+	CG_Printf("freecam %s\n", cgs.demoCam.renderingFreeCam ? "ON" : "OFF");
+
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		int viewheight;
+
+		if (cg.snap->ps.eFlags & EF_CROUCHING)
+		{
+			viewheight = CROUCH_VIEWHEIGHT;
+		}
+		else if (cg.snap->ps.eFlags & EF_PRONE || cg.snap->ps.eFlags & EF_PRONE_MOVING)
+		{
+			viewheight = PRONE_VIEWHEIGHT;
+		}
+		else
+		{
+			viewheight = DEFAULT_VIEWHEIGHT;
+		}
+		cgs.demoCam.camOrigin[2] += viewheight;
+	}
+}
+
+void CG_FreecamGetPos_f(void)
+{
+	if (cg.demoPlayback)
+	{
+		CG_Printf("freecam origin: %.0f %.0f %.0f\n", cgs.demoCam.camOrigin[0], cgs.demoCam.camOrigin[1], cgs.demoCam.camOrigin[2]);
+	}
+	else
+	{
+		CG_Printf("freecam origin: %.0f %.0f %.0f\n", cg.refdef_current->vieworg[0], cg.refdef_current->vieworg[1], cg.refdef_current->vieworg[2]);
+	}
+}
+
+float etpro_float_Argv(int argnum)
+{
+	char buffer[MAX_TOKEN_CHARS];
+
+	trap_Argv(argnum, buffer, sizeof(buffer));
+	return atof(buffer);
+}
+
+void CG_FreecamSetPos_f(void)
+{
+	int n;
+
+	if (!cg.demoPlayback)
+	{
+		CG_Printf("Cheats must be enabled.\n");
+		return;
+	}
+
+	n = trap_Argc();
+	if (n < 4)
+	{
+		CG_Printf("^1Syntax: freecamSetPos x y z\n");
+		return;
+	}
+	if (n > 4 && n < 7)
+	{
+		CG_Printf("^1Syntax: freecamSetPos x y z pitch yaw roll\n");
+		return;
+	}
+
+	cgs.demoCam.camOrigin[0] = etpro_float_Argv(1);
+	cgs.demoCam.camOrigin[1] = etpro_float_Argv(2);
+	cgs.demoCam.camOrigin[2] = etpro_float_Argv(3);
+
+	if (n >= 7)
+	{
+		cgs.demoCam.camAngle[0] = etpro_float_Argv(4);
+		cgs.demoCam.camAngle[1] = etpro_float_Argv(5);
+		cgs.demoCam.camAngle[2] = etpro_float_Argv(6);
+		cgs.demoCam.setCamAngles = qtrue;
+	}
+	else
+	{
+		cgs.demoCam.setCamAngles = qfalse;
+	}
+
+}
+// noclip in demos
+void CG_NoClip_f(void)
+{
+	char buffer[MAX_TOKEN_CHARS];
+	char state[MAX_TOKEN_CHARS];
+
+	trap_Argv(0, buffer, sizeof(buffer));
+	trap_Args(state, sizeof(state));
+
+	if (!cg.demoPlayback)
+	{
+		if (trap_Argc() > 1)
+		{
+			trap_SendClientCommand(va("noclip %s\n", state));
+		}
+		else
+		{
+			trap_SendClientCommand("noclip\n");
+		}
+	}
+	else
+	{
+		if (!Q_stricmp(state, "on"))
+		{
+			cgs.demoCam.noclip = qtrue;
+		}
+		else if (!Q_stricmp(state, "off"))
+		{
+			cgs.demoCam.noclip = qfalse;
+		}
+		else
+		{
+			cgs.demoCam.noclip = cgs.demoCam.noclip? qfalse : qtrue;
+		}
+		CG_Printf("noclip %s\n", cgs.demoCam.noclip ? "ON" : "OFF");
+	}
+}
+
+// ModInformation autocomplete
+void CG_ModInformation_f()
+{
+	trap_SendClientCommand("mod_information\n");
+}
+
 
 typedef struct
 {
@@ -1339,8 +1460,27 @@ static consoleCommand_t commands[] =
 	{ "help",                CG_Manual_f             },
 	{ "man",                 CG_Manual_f             },
 	{ "manual",              CG_Manual_f             },
-	{ "freecam",             CG_ToggleFreeCam        },
-	{ "freecamsetpos",       CG_FreeCamSetPos        }
+
+	{ "+freecam_turnleft",   CG_FreecamTurnLeftDown_f },
+	{ "-freecam_turnleft",   CG_FreecamTurnLeftUp_f },
+	{ "+freecam_turnright",  CG_FreecamTurnRightDown_f },
+	{ "-freecam_turnright",  CG_FreecamTurnRightUp_f },
+
+	{ "+freecam_turnup",     CG_FreecamTurnUpDown_f },
+	{ "-freecam_turnup",     CG_FreecamTurnUpUp_f },
+	{ "+freecam_turndown",   CG_FreecamTurnDownDown_f },
+	{ "-freecam_turndown",   CG_FreecamTurnDownUp_f },
+
+	{ "+freecam_rollleft",   CG_FreecamRollLeftDown_f },
+	{ "-freecam_rollleft",   CG_FreecamRollLeftUp_f },
+	{ "+freecam_rollright",  CG_FreecamRollRightDown_f },
+	{ "-freecam_rollright",  CG_FreecamRollRightUp_f },
+	{ "freecam",             CG_Freecam_f },
+	{ "freecamsetpos",       CG_FreecamSetPos_f },
+	{ "freecamgetpos",       CG_FreecamGetPos_f },
+	{ "noclip",              CG_NoClip_f },
+
+	{ "mod_information",     CG_ModInformation_f },
 };
 
 

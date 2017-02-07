@@ -2670,12 +2670,26 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		if (cgs.gameSounds[es->eventParm])
 		{
-			trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, cgs.gameSounds[es->eventParm]);
+			if (cgs.demoCam.renderingFreeCam)
+			{
+				trap_S_StartLocalSound(cgs.gameSounds[es->eventParm], CHAN_AUTO);
+			}
+			else
+			{
+				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, cgs.gameSounds[es->eventParm]);
+			}
 		}
 		else
 		{
 			s = CG_ConfigString(CS_SOUNDS + es->eventParm);
-			trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, CG_CustomSound(es->number, s));
+			if (cgs.demoCam.renderingFreeCam)
+			{
+				trap_S_StartLocalSound(CG_CustomSound(es->number, s), CHAN_AUTO);
+			} 
+			else
+			{
+				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, CG_CustomSound(es->number, s));
+			}
 		}
 		break;
 
@@ -2981,6 +2995,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		DEBUGNAME("EV_SHAKE");
 
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			break;
+		}
+
 		VectorSubtract(cg.snap->ps.origin, cent->lerpOrigin, v);
 		len = VectorLength(v);
 
@@ -3023,6 +3042,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_AIRSTRIKEMESSAGE:
 	{
 		const char *wav = NULL;
+
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			break;
+		}
 
 		switch (cent->currentState.density)
 		{
@@ -3068,6 +3092,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_ARTYMESSAGE:
 	{
 		const char *wav = NULL;
+
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			break;
+		}
 
 		switch (cent->currentState.density)
 		{

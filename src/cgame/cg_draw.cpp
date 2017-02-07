@@ -2788,7 +2788,15 @@ CG_DrawSpectator
 */
 static void CG_DrawSpectator(void)
 {
-	const char *s = CG_TranslateString("SPECTATOR");
+	const char *s;
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		s = CG_TranslateString("FREECAM");
+	}
+	else
+	{
+		s = CG_TranslateString("SPECTATOR");
+	}
 	auto textWidth = ETJump::DrawStringWidth(s, 0.3f);
 	ETJump::DrawBigString(SCREEN_CENTER_X - textWidth / 2, 440 + 10, s, 0.95f);
 }
@@ -3075,6 +3083,11 @@ static void CG_DrawSpectatorMessage(void)
 	float      x, y;
 	static int lastconfigGet = 0;
 
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		return;
+	}
+
 	if (!cg_descriptiveText.integer)
 	{
 		return;
@@ -3161,11 +3174,13 @@ static void CG_DrawLimboMessage(void)
 {
 	float         color[4] = { 1, 1, 1, 1 };
 	const char    *str;
-	playerState_t *ps;
+	playerState_t *ps = &cg.snap->ps;
 	int           y = 130;
 
-
-	ps = &cg.snap->ps;
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		return;
+	}
 
 	if (ps->stats[STAT_HEALTH] > 0)
 	{
@@ -3200,6 +3215,23 @@ cg_drawCGaz
 All the cgaz huds
 =================
 */
+
+void GetColorFromString(vec4_t *output, char *colorString) {
+	const char *token;
+	for (auto i = 0; i < 4; i++) {
+		token = COM_Parse(&colorString);
+		if (*token == '\0') {
+			(*output)[i] = 1.f;
+		}
+		else {
+			float value = atof(token);
+			if (value > 1) value = 1.0;
+			else if (value < 0) value = 0.0;
+			(*output)[i] = value;
+		}
+	}
+}
+
 // Dzikie
 static void PutPixel(float x, float y)
 {
@@ -3246,6 +3278,7 @@ static void CG_DrawCGazHUD(void)
 	playerState_t *ps;
 	int           right = 0, forward = 0;
 	int           scx = SCREEN_CENTER_X - 1, scy = SCREEN_CENTER_Y - 1;
+	vec4_t        color1, color2;
 
 	ps = &cg.predictedPlayerState;
 
@@ -3387,6 +3420,8 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
+		GetColorFromString(&color1, etj_CGazColor1.string);
+		GetColorFromString(&color2, etj_CGazColor2.string);
 
 		if (etj_stretchCgaz.integer) {
 			CG_DisableProperScaling(qtrue);
@@ -3397,12 +3432,12 @@ static void CG_DrawCGazHUD(void)
 		per_angle  = DEG2RAD(per_angle);
 
 		DrawLine(scx, scy,
-			scx + right, scy - forward, colorCyan);
+			scx + right, scy - forward, color2);
 
 		vel_size /= 5;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang),
-			scy - vel_size * cos(vel_relang), colorRed);
+			scy - vel_size * cos(vel_relang), color1);
 		if (vel_size > SCREEN_HEIGHT / 2)
 		{
 			vel_size = SCREEN_HEIGHT / 2;
@@ -3410,10 +3445,10 @@ static void CG_DrawCGazHUD(void)
 		vel_size /= 2;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang + per_angle),
-			scy - vel_size * cos(vel_relang + per_angle), colorRed);
+			scy - vel_size * cos(vel_relang + per_angle), color1);
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang - per_angle),
-			scy - vel_size * cos(vel_relang - per_angle), colorRed);
+			scy - vel_size * cos(vel_relang - per_angle), color1);
 		
 		CG_DisableProperScaling(qfalse);
 		
@@ -5832,9 +5867,12 @@ static void CG_Draw2D(void)
 
 	if (!cg.cameraMode)
 	{
-		CG_DrawFlashBlendBehindHUD();
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			CG_DrawFlashBlendBehindHUD();
+		}
 
-		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || cgs.demoCam.renderingFreeCam)
 		{
 			CG_DrawSpectator();
 			CG_DrawCrosshair();
@@ -5869,13 +5907,12 @@ static void CG_Draw2D(void)
 
 		CG_DrawVote();
 
-		CG_DrawLagometer();
 	}
 
 	// don't draw center string if scoreboard is up
 	if (!CG_DrawScoreboard())
 	{
-		if (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)
+		if (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR && !cgs.demoCam.renderingFreeCam)
 		{
 			rectDef_t rect;
 
@@ -5914,13 +5951,9 @@ static void CG_Draw2D(void)
 		CG_DrawCenterString();
 		CG_DrawPMItems();
 		CG_DrawPMItemsBig();
-
-		CG_DrawFollow();
 		CG_DrawWarmup();
 
 		CG_DrawNotify();
-
-		CG_DrawNewCompass();
 
 		CG_DrawObjectiveInfo();
 
@@ -5928,16 +5961,21 @@ static void CG_Draw2D(void)
 
 		CG_DrawLimboMessage();
 
-		CG_DrawCGazHUD();
-
-		CG_DrawOB();
-		CG_DrawSlick();
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			CG_DrawLagometer();
+			CG_DrawNewCompass();
+			CG_DrawFollow();
+			CG_DrawCGazHUD();
+			CG_DrawOB();
+			CG_DrawSlick();
+			CG_DrawSpeed2();
+			CG_DrawRouteDesign();
+			CG_DrawKeys();
+		}
 
 		CG_DrawCHS();
 
-		CG_DrawSpeed2();
-		CG_DrawRouteDesign();
-		CG_DrawKeys();
 		CG_DrawSpectatorInfo();
 	}
 	else
@@ -5958,23 +5996,29 @@ static void CG_Draw2D(void)
 	{
 		CG_Fireteams_Draw();
 	}
-
-	ETJump_DrawDrawables();
-
-	for (const auto & r : ETJump::renderables)
+	
+	if (!cgs.demoCam.renderingFreeCam)
 	{
-		r->beforeRender();
-		r->render();
+		ETJump_DrawDrawables();
+
+		for (const auto & r : ETJump::renderables)
+		{
+			r->beforeRender();
+			r->render();
+		}
 	}
 
 	// Info overlays
 	CG_DrawOverlays();
+	
+	if (!cgs.demoCam.renderingFreeCam)
+	{
+		// OSP - window updates
+		CG_windowDraw();
 
-	// OSP - window updates
-	CG_windowDraw();
-
-	// Ridah, draw flash blends now
-	CG_DrawFlashBlend();
+		// Ridah, draw flash blends now
+		CG_DrawFlashBlend();
+	}
 
 	CG_DrawDemoRecording();
 }
@@ -6136,7 +6180,7 @@ static void CG_ChangeFovBasedOnSpeed()
 	float currentSpeedFov = movie_fovMin.value;
 	static int fpsValue   = 0;
 
-	if (!movie_changeFovBasedOnSpeed.integer && !cg.demoPlayback)
+	if (!movie_changeFovBasedOnSpeed.integer && !cg.demoPlayback || cgs.demoCam.renderingFreeCam)
 	{
 		return;
 	}

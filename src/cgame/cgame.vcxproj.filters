@@ -222,6 +222,9 @@
 >>>>>>> f69652e19d8ce3a6febf9b1eb364a11b480e0ac6
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cg_edv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">

@@ -772,68 +772,106 @@ void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y
 	}
 }
 
+int old_mouse_x_pos = 0, old_mouse_y_pos = 0;
+
 void CG_MouseEvent(int x, int y)
 {
 	switch (cgs.eventHandling)
 	{
+	case CGAME_EVENT_DEMO:
 	case CGAME_EVENT_SPEAKEREDITOR:
 	case CGAME_EVENT_GAMEVIEW:
 	case CGAME_EVENT_CAMPAIGNBREIFING:
 	case CGAME_EVENT_FIRETEAMMSG:
-		cgs.cursorX += x;
-		if (cgs.cursorX < 0)
+		if (!cgs.demoCam.renderingFreeCam)
 		{
-			cgs.cursorX = 0;
-		}
-		else if (cgs.cursorX > SCREEN_WIDTH)
-		{
-			cgs.cursorX = SCREEN_WIDTH;
-		}
+			cgs.cursorX += x;
+			if (cgs.cursorX < 0)
+			{
+				cgs.cursorX = 0;
+			}
+			else if (cgs.cursorX > SCREEN_WIDTH)
+			{
+				cgs.cursorX = SCREEN_WIDTH;
+			}
 
-		cgs.cursorY += y;
-		if (cgs.cursorY < 0)
-		{
-			cgs.cursorY = 0;
-		}
-		else if (cgs.cursorY > 480)
-		{
-			cgs.cursorY = 480;
-		}
+			cgs.cursorY += y;
+			if (cgs.cursorY < 0)
+			{
+				cgs.cursorY = 0;
+			}
+			else if (cgs.cursorY > 480)
+			{
+				cgs.cursorY = 480;
+			}
 
-		if (cgs.eventHandling == CGAME_EVENT_SPEAKEREDITOR)
+			if (cgs.eventHandling == CGAME_EVENT_SPEAKEREDITOR)
+			{
+				CG_SpeakerEditorMouseMove_Handling(x, y);
+			}
+		}
+		else
 		{
-			CG_SpeakerEditorMouseMove_Handling(x, y);
+			// mousemovement *should* feel the same as ingame
+			char buffer[64];
+			int  mx = 0, my = 0;
+			int  mouse_x_pos = 0, mouse_y_pos = 0;
+
+			float sensitivity, m_pitch, m_yaw;
+			int   m_filter = 0;
+
+			if (etj_demo_lookat.integer != -1)
+			{
+				return;
+			}
+
+			mx += x;
+			my += y;
+
+			trap_Cvar_VariableStringBuffer("m_filter", buffer, sizeof(buffer));
+			m_filter = atoi(buffer);
+
+			trap_Cvar_VariableStringBuffer("sensitivity", buffer, sizeof(buffer));
+			sensitivity = atof(buffer);
+
+			trap_Cvar_VariableStringBuffer("m_pitch", buffer, sizeof(buffer));
+			m_pitch = atof(buffer);
+
+			trap_Cvar_VariableStringBuffer("m_yaw", buffer, sizeof(buffer));
+			m_yaw = atof(buffer);
+
+			if (m_filter)
+			{
+				mouse_x_pos = (mx + old_mouse_x_pos) * 0.5;
+				mouse_y_pos = (my + old_mouse_y_pos) * 0.5;
+			}
+			else
+			{
+				mouse_x_pos = mx;
+				mouse_y_pos = my;
+			}
+
+			old_mouse_x_pos = mx;
+			old_mouse_y_pos = my;
+
+			mouse_x_pos *= sensitivity;
+			mouse_y_pos *= sensitivity;
+
+			cg.refdefViewAngles[YAW] -= m_yaw * mouse_x_pos;
+			cg.refdefViewAngles[PITCH] += m_pitch * mouse_y_pos;
+
+			if (cg.refdefViewAngles[PITCH] < -90)
+			{
+				cg.refdefViewAngles[PITCH] = -90;
+			}
+
+			if (cg.refdefViewAngles[PITCH] > 90)
+			{
+				cg.refdefViewAngles[PITCH] = 90;
+			}
 		}
 
 		break;
-	case CGAME_EVENT_DEMO:
-		cgs.cursorX += x;
-		if (cgs.cursorX < 0)
-		{
-			cgs.cursorX = 0;
-		}
-		else if (cgs.cursorX > SCREEN_WIDTH)
-		{
-			cgs.cursorX = SCREEN_WIDTH;
-		}
-
-		cgs.cursorY += y;
-		if (cgs.cursorY < 0)
-		{
-			cgs.cursorY = 0;
-		}
-		else if (cgs.cursorY > 480)
-		{
-			cgs.cursorY = 480;
-		}
-
-		if (x != 0 || y != 0)
-		{
-			cgs.cursorUpdate = cg.time + 5000;
-		}
-		break;
-
-
 	default:
 		if (cg.snap->ps.pm_type == PM_INTERMISSION)
 		{
@@ -974,7 +1012,14 @@ void CG_KeyEvent(int key, qboolean down)
 	{
 	// Demos get their own keys
 	case CGAME_EVENT_DEMO:
-		CG_DemoClick(key, down);
+		if (etj_predefineddemokeys.integer)
+		{
+			CG_DemoClick(key, down);
+		}
+		else
+		{
+			CG_RunBinding(key, down);
+		}
 		return;
 
 	case CGAME_EVENT_CAMPAIGNBREIFING:

@@ -304,11 +304,15 @@ vmCvar_t cg_hideMe;
 vmCvar_t cg_nofatigue;
 vmCvar_t com_maxfps;
 vmCvar_t com_hunkmegs;
+
 vmCvar_t cg_drawCGaz;
 vmCvar_t cg_CGazY;
 vmCvar_t cg_CGazHeight;
 vmCvar_t cg_CGazWidth;
+vmCvar_t etj_CGazColor1;
+vmCvar_t etj_CGazColor2;
 vmCvar_t cg_CGazAlpha;
+
 vmCvar_t cg_drawOB;
 vmCvar_t cg_drawKeys;
 vmCvar_t cg_keysColor;
@@ -456,6 +460,13 @@ vmCvar_t shared;
 vmCvar_t etj_drawObWatcher;
 vmCvar_t etj_obWatcherX;
 vmCvar_t etj_obWatcherY;
+
+vmCvar_t etj_demo_yawturnspeed;
+vmCvar_t etj_demo_pitchturnspeed;
+vmCvar_t etj_demo_rollspeed;
+vmCvar_t etj_demo_lookat;
+vmCvar_t etj_demo_freecamspeed;
+vmCvar_t etj_predefineddemokeys;
 
 typedef struct
 {
@@ -645,12 +656,16 @@ cvarTable_t cvarTable[] =
 	{ &cg_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE             },
 	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
 	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
+
 	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
 	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
 	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
+	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
+	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
 	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
@@ -770,7 +785,13 @@ cvarTable_t cvarTable[] =
 	{ &shared, "shared", "0", CVAR_ROM },
 	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
 	{&etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
-	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE}
+	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
+	{ &etj_demo_yawturnspeed, "etj_demo_yawturnspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_pitchturnspeed, "etj_demo_pitchturnspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_rollspeed, "etj_demo_rollspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_freecamspeed, "etj_demo_freecamspeed", "800", CVAR_ARCHIVE },
+	{ &etj_demo_lookat, "b_demo_lookat", "-1", CVAR_CHEAT },
+	{ &etj_predefineddemokeys, "etj_predefineddemokeys", "1", CVAR_CHEAT | CVAR_ARCHIVE },
 };
 
 
@@ -3503,6 +3524,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
+
+	VectorSet(cgs.demoCam.velocity, 0.0, 0.0, 0.0);
+	cgs.demoCam.startLean = qfalse;
+	cgs.demoCam.noclip = qfalse;
 #ifdef AC_SUPPORT
 
 	InitAntiCheat(clientAC);

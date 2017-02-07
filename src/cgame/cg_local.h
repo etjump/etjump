@@ -1215,10 +1215,6 @@ typedef struct
 	qboolean resetmaxspeed;
 	qboolean routeDesigner;
 
-	qboolean freeCam;
-	vec3_t freeCamPos;
-	vec3_t freeCamAngles;
-
 	char ipAddr[128];
 	int lastScoreTime;
 
@@ -1907,6 +1903,23 @@ typedef struct oidInfo_s
 
 #define NUM_ENDGAME_AWARDS 14
 
+typedef struct demoCam_s
+{
+	qboolean renderingFreeCam;
+	qboolean setCamAngles;   //are we overriding angles via freecamSetPos
+
+	vec3_t camAngle; // stores the angle of our cam
+	vec3_t camOrigin; // stores the origin of our cam
+	vec3_t velocity;
+
+	qboolean startLean;
+	qboolean noclip;
+
+	int commandTime;
+
+	int move;
+	int turn;
+} demoCam_t;
 
 // The client game static (cgs) structure hold everything
 // loaded or calculated from the gamestate.  It will NOT
@@ -2130,6 +2143,8 @@ typedef struct
 	oidInfo_t oidInfo[MAX_OID_TRIGGERS];
 
 	qboolean initing;
+
+	demoCam_t demoCam;
 } cgs_t;
 
 //==============================================================================
@@ -2351,12 +2366,16 @@ extern vmCvar_t cg_hideMe;
 extern vmCvar_t cg_nofatigue;
 extern vmCvar_t com_maxfps;
 extern vmCvar_t com_hunkmegs;
+
 extern vmCvar_t cg_drawCGaz;
 extern vmCvar_t cg_CGazY;
 extern vmCvar_t cg_CGazHeight;
 extern vmCvar_t cg_CGazWidth;
+extern vmCvar_t etj_CGazColor1;
+extern vmCvar_t etj_CGazColor2;
 extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
+
 extern vmCvar_t cg_drawOB;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
@@ -2499,6 +2518,13 @@ extern vmCvar_t shared;
 extern vmCvar_t etj_drawObWatcher;
 extern vmCvar_t etj_obWatcherX;
 extern vmCvar_t etj_obWatcherY;
+
+extern vmCvar_t etj_demo_yawturnspeed;
+extern vmCvar_t etj_demo_pitchturnspeed;
+extern vmCvar_t etj_demo_rollspeed;
+extern vmCvar_t etj_demo_lookat;
+extern vmCvar_t etj_demo_freecamspeed;
+extern vmCvar_t etj_predefineddemokeys;
 
 //
 // cg_main.c
@@ -2704,6 +2730,9 @@ void CG_FTTrace(trace_t *result, const vec3_t start, const vec3_t mins, const ve
 void CG_PredictPlayerState(void);
 //void CG_LoadDeferredPlayers( void );
 
+void CG_RunBindingBuf(int key, qboolean down, char *buf);
+void CG_RunBinding(int key, qboolean down);
+void CG_EDV_RunInput(void);
 
 //
 // cg_events.c
@@ -3048,6 +3077,22 @@ void CG_Info_f(void);
 //
 
 void CG_Manual_f(void);
+
+void CG_FreecamTurnLeftDown_f(void);
+void CG_FreecamTurnLeftUp_f(void);
+void CG_FreecamTurnRightDown_f(void);
+void CG_FreecamTurnRightUp_f(void);
+void CG_FreecamTurnUpDown_f(void);
+void CG_FreecamTurnUpUp_f(void);
+void CG_FreecamTurnDownDown_f(void);
+void CG_FreecamTurnDownUp_f(void);
+void CG_FreecamRollLeftDown_f(void);
+void CG_FreecamRollLeftUp_f(void);
+void CG_FreecamRollRightDown_f(void);
+void CG_FreecamRollRightUp_f(void);
+void CG_Freecam_f(void);
+void CG_FreecamSetPos_f(void);
+void CG_FreecamGetPos_f(void);
 
 //
 // cg_servercmds.c
