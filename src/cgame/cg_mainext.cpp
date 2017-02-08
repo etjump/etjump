@@ -21,6 +21,8 @@ void InitGame()
 	ETJump_ClearDrawables();
 	timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
 	timerunView = std::unique_ptr<ETJump::TimerunView>(new ETJump::TimerunView());
+	// restores timerun after vid_restart (if required)
+	trap_SendClientCommand("timerun_status");
 
 	trickjumpLines = std::unique_ptr<TrickjumpLines>(new TrickjumpLines);
 	
@@ -410,6 +412,7 @@ qboolean CG_displaybynumber()
 			trickjumpLines->setCurrentRouteToRender(number);
 			return qtrue;
 		}
+		return qfalse;
 	}
 	else
 	{
