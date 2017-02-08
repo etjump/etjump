@@ -410,6 +410,8 @@ static void CG_General(centity_t *cent)
 
 	memset(&ent, 0, sizeof(ent));
 
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	// set frame
 
 	ent.frame    = s1->frame;
@@ -443,8 +445,6 @@ static void CG_General(centity_t *cent)
 
 	if (cent->currentState.eType == ET_MG42_BARREL)
 	{
-
-		CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 		// grab angles from first person user or self if not
 		// ATVI Wolfenstein Misc #469 - don't track until viewlocked
@@ -496,8 +496,6 @@ static void CG_General(centity_t *cent)
 		VectorScale(ent.axis[1], cent->currentState.angles2[1], ent.axis[1]);
 		VectorScale(ent.axis[2], cent->currentState.angles2[2], ent.axis[2]);
 		ent.nonNormalizedAxes = qtrue;
-
-		CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 		if (cent->currentState.apos.trType)
 		{
@@ -1438,6 +1436,8 @@ static void CG_Trap(centity_t *cent)
 
 	memset(&ent, 0, sizeof(ent));
 
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	cs = &cent->currentState;
 
 	traplf = &cent->lerpFrame;
@@ -1627,6 +1627,9 @@ static void CG_Explosive(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
+
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	VectorCopy(cent->lerpOrigin, ent.origin);
 //	VectorCopy( cent->lerpOrigin, ent.oldorigin);
 //	VectorCopy( ent.origin, cent->lerpOrigin);
@@ -1678,6 +1681,8 @@ static void CG_Constructible(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(cent->lerpOrigin, ent.oldorigin);
 //	VectorCopy( ent.origin, cent->lerpOrigin);
@@ -1829,6 +1834,7 @@ static void CG_Mover(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(cent->lerpOrigin, ent.oldorigin);
@@ -1984,7 +1990,6 @@ void CG_Mover_PostProcess(centity_t *cent)
 		return;
 	}
 
-
 	if (cg.snap->ps.eFlags & EF_MOUNTEDTANK && cg_entities[cg.snap->ps.clientNum].tagParent == cent->currentState.effect3Time)
 	{
 		i = cg.snap->ps.clientNum;
@@ -2074,6 +2079,8 @@ void CG_Beam_2(centity_t *cent)
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
 
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	VectorCopy(origin, ent.origin);
 	VectorCopy(origin2, ent.oldorigin);
 
@@ -2107,6 +2114,7 @@ void CG_Beam(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 	VectorCopy(s1->pos.trBase, ent.origin);
 	VectorCopy(s1->origin2, ent.oldorigin);
 
@@ -2149,6 +2157,7 @@ static void CG_Portal(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(s1->origin2, ent.oldorigin);
 	ByteToDir(s1->eventParm, ent.axis[0]);
@@ -2183,6 +2192,7 @@ static void CG_Prop(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
+	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	if (cg.renderingThirdPerson)
 	{
@@ -2378,6 +2388,7 @@ void CG_Cabinet(centity_t *cent, cabinetType_t type)
 	memset(&cabinet, 0, sizeof(cabinet));
 	memset(&mini_me, 0, sizeof(mini_me));
 
+	CG_EntitySetRGBA(&cabinet, 1.0, 1.0, 1.0, 1.0);
 	CG_EntitySetRGBA(&mini_me, 1.0, 1.0, 1.0, 1.0);
 
 	cabinet.hModel = cabinetInfo[type].model;
@@ -3519,6 +3530,12 @@ void CG_AttachBitsToTank(centity_t *tank, refEntity_t *mg42base, refEntity_t *mg
 	memset(mg42upper, 0, sizeof(refEntity_t));
 	memset(player, 0, sizeof(refEntity_t));
 	memset(flash, 0, sizeof(refEntity_t));
+
+	CG_EntitySetRGBA(mg42base, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(mg42upper, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(mg42gun, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(player, 1.0, 1.0, 1.0, 1.0);
+	CG_EntitySetRGBA(flash, 1.0, 1.0, 1.0, 1.0);
 
 	mg42base->hModel  = cgs.media.hMountedMG42Base;
 	mg42upper->hModel = cgs.media.hMountedMG42Nest;

@@ -2074,6 +2074,7 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qboolean voiceonly)
 {
 	int j;
+	gentity_t *other;
 
 	// DHM - Nerve :: Don't allow excessive spamming of voice chats
 	ent->voiceChatSquelch     -= (level.time - ent->voiceChatPreviousTime);
@@ -2108,7 +2109,10 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qbool
 
 	if (target)
 	{
-		G_VoiceTo(ent, target, mode, vsay, voiceonly);
+		if (!COM_BitCheck(target->client->sess.ignoreClients, ent - g_entities))
+		{
+			G_VoiceTo(ent, target, mode, vsay, voiceonly);
+		}
 		return;
 	}
 
@@ -2182,7 +2186,11 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qbool
 		// send it to all the apropriate clients
 		for (j = 0; j < level.numConnectedClients; j++)
 		{
-			G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, vsay, voiceonly);
+			other = &g_entities[level.sortedClients[j]];
+			if (!COM_BitCheck(other->client->sess.ignoreClients, ent - g_entities))
+			{
+				G_VoiceTo(ent, other, mode, vsay, voiceonly);
+			}
 		}
 	}
 }
