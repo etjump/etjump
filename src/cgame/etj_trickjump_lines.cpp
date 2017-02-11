@@ -550,7 +550,6 @@ void TrickjumpLines::addTrickjumpLines(std::vector< Node > points, vec4_c color,
 	{
 		if (nextPrintTime < cg.time)
 		{
-			//CG_Printf("Exit line drawing, not enought points. \n");
 			nextPrintTime = cg.time + 1000;
 		}
 		return;

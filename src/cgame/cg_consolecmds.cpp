@@ -1125,18 +1125,6 @@ void CG_portalinfo_f(void)
 	CG_Printf("^7The ^1second ^7portal is placed using +attack2 which you will need to bind by typing '/bind key +attack2' in the console.\n");
 }
 
-#ifdef AC_SUPPORT
-
-void CG_Ptr_f(void)
-{
-	InitAntiCheat(clientAC);
-	CG_Printf("Base addr: %X\n", (int)clientAC.baseAddress);
-	CG_Printf("vmMain addr: %X\n", (int)clientAC.vmMain);
-	CG_Printf("Diff: %X\n", (int)clientAC.vmMain - (int)clientAC.baseAddress);
-}
-
-#endif // AC_SUPPORT
-
 void CG_FreecamTurnLeftDown_f(void)
 {
 	cgs.demoCam.turn |= 0x01;
@@ -1455,8 +1443,6 @@ static consoleCommand_t commands[] =
 	{ "stopTimer",           CG_StopTimer            },
 	{ "portal",              CG_portalinfo_f         },
 	{ "chs",                 CG_InfoCHS_f            },
-	{ "minimize",            CG_Minimize_f           },
-	{ "min",                 CG_Minimize_f           },
 	{ "help",                CG_Manual_f             },
 	{ "man",                 CG_Manual_f             },
 	{ "manual",              CG_Manual_f             },
