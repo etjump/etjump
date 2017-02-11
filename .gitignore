@@ -186,8 +186,4 @@ src/build
 src/.idea/*
 src/.idea
 src/build/install.bat
-src/build/install.bat
 src/cgame/cgame.vcxproj.user
-src/build/install.bat
-src/cgame/cgame.vcxproj.user
-src/build/install.bat

@@ -3,7 +3,7 @@
 
 #include "cg_local.h"
 #include "../game/q_shared.h"
-
+#include "etj_irenderable.h"
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -636,9 +636,6 @@ static void CG_DrawSpeed2(void)
 
 	switch (cg_drawSpeed2.integer)
 	{
-	case 1:
-		Com_sprintf(status, sizeof(status), va("%.0f", speed));
-		break;
 	case 2:
 		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
 		break;
@@ -660,6 +657,14 @@ static void CG_DrawSpeed2(void)
 	case 8:
 		Com_sprintf(status, sizeof(status), va("Speed: %.0f", speed));
 		break;
+	case 9:
+	{
+		auto tens = static_cast<int>(speed) / 10 % 10 * 10;
+		Com_sprintf(status, sizeof status, va("%02i", tens));
+	}
+		break;
+	default:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
 	}
 
 	w = CG_Text_Width_Ext(status, sizex, 0, &cgs.media.limboFont2) / 2;
@@ -2715,16 +2720,16 @@ static void CG_DrawCrosshairNames(void)
 				return;
 			}
 
-			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-			CG_DrawSmallStringColor(SCREEN_CENTER_X - w / 2, 170, s, color);
+			w = ETJump::DrawStringWidth(s, 0.23f);
+			ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 		}
 		else if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_CONSTRUCTIBLE_MARKER)
 		{
 			s = Info_ValueForKey(CG_ConfigString(CS_CONSTRUCTION_NAMES), va("%i", cg.crosshairClientNum));
 			if (*s)
 			{
-				w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-				CG_DrawSmallStringColor(SCREEN_CENTER_X - w / 2, 170, s, color);
+				w = ETJump::DrawStringWidth(s, 0.23f);
+				ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 			}
 			return;
 		}
@@ -2756,17 +2761,9 @@ static void CG_DrawCrosshairNames(void)
 
 		name = cgs.clientinfo[cg.crosshairClientNum].name;
 		s    = va("%s", name);
-		w    = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+		w    = ETJump::DrawStringWidth(s, 0.23f);
 
-		// draw the name and class
-		if (cg_drawCrosshairNames.integer == 2)
-		{
-			CG_DrawSmallStringColor(SCREEN_CENTER_X - w / 2, 170, s, color);
-		}
-		else
-		{
-			CG_DrawStringExt(SCREEN_CENTER_X - w / 2, 170, s, color, qfalse, qtrue, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 0);
-		}
+		ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
 	// -NERVE - SMF
@@ -2791,7 +2788,17 @@ CG_DrawSpectator
 */
 static void CG_DrawSpectator(void)
 {
-	CG_DrawBigString(SCREEN_CENTER_X - 9 * 8, 440, CG_TranslateString("SPECTATOR"), 1.f);
+	const char *s;
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		s = CG_TranslateString("FREECAM");
+	}
+	else
+	{
+		s = CG_TranslateString("SPECTATOR");
+	}
+	auto textWidth = ETJump::DrawStringWidth(s, 0.3f);
+	ETJump::DrawBigString(SCREEN_CENTER_X - textWidth / 2, 440 + 10, s, 0.95f);
 }
 
 /*
@@ -2801,88 +2808,50 @@ CG_DrawVote
 */
 static void CG_DrawVote(void)
 {
-	const char  *s;
 	char  str1[32], str2[32];
-	float color[4] = { 1, 1, 0, 1 };
-	int   sec;
+	vec4_t color{ 1, 1, 0, 1 };
 
-	if (cgs.complaintEndTime > cg.time && !cg.demoPlayback && cg_complaintPopUp.integer > 0 && cgs.complaintClient >= 0)
-	{
-		Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-		Q_strncpyz(str2, BindingFromName("vote no"), 32);
+	const char *line_a = nullptr;
+	const char *line_b = nullptr;
+	auto x_a = 8;
+	auto x_b = 8;
 
-		s = va(CG_TranslateString("File complaint against %s for team-killing?"), cgs.clientinfo[cgs.complaintClient].name);
-		CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-
-		s = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-		CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-		return;
-	}
+	Q_strncpyz(str1, BindingFromName("vote yes"), 32);
+	Q_strncpyz(str2, BindingFromName("vote no"), 32);
 
 	if (cgs.applicationEndTime > cg.time && cgs.applicationClient >= 0)
 	{
-		Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-		Q_strncpyz(str2, BindingFromName("vote no"), 32);
-
-		s = va(CG_TranslateString("Accept %s's application to join your fireteam?"), cgs.clientinfo[cgs.applicationClient].name);
-		CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-
-		s = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-		CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-		return;
+		line_a = va(CG_TranslateString("Accept %s's application to join your fireteam?"), cgs.clientinfo[cgs.applicationClient].name);
+		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
 	}
 
 	if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0)
 	{
-		Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-		Q_strncpyz(str2, BindingFromName("vote no"), 32);
-
-		s = va(CG_TranslateString("Accept %s's proposition to invite %s to join your fireteam?"), cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
-		CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-
-		s = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-		CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-		return;
+		line_a = va(CG_TranslateString("Accept %s's proposition to invite %s to join your fireteam?"), cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
+		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
 	}
 
 	if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0)
 	{
-		Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-		Q_strncpyz(str2, BindingFromName("vote no"), 32);
-
-		s = va(CG_TranslateString("Accept %s's invitation to join their fireteam?"), cgs.clientinfo[cgs.invitationClient].name);
-		CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-
-		s = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-		CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-		return;
+		line_a = va(CG_TranslateString("Accept %s's invitation to join their fireteam?"), cgs.clientinfo[cgs.invitationClient].name);
+		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
 	}
 
 	if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1)
 	{
-		Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-		Q_strncpyz(str2, BindingFromName("vote no"), 32);
-
-		s = "Make Fireteam private?";
-		CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-
-		s = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
-		CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-		return;
+		line_a = va(CG_TranslateString("Make Fireteam private?"));
+		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
 	}
 
 	if (cgs.voteTime)
 	{
-		Q_strncpyz(str1, BindingFromName("vote yes"), 32);
-		Q_strncpyz(str2, BindingFromName("vote no"), 32);
-
 		// play a talk beep whenever it is modified
 		if (cgs.voteModified)
 		{
 			cgs.voteModified = qfalse;
 		}
 
-		sec = (VOTE_TIME - (cg.time - cgs.voteTime)) / 1000;
+		int sec = (VOTE_TIME - (cg.time - cgs.voteTime)) / 1000;
 		if (sec < 0)
 		{
 			sec = 0;
@@ -2917,160 +2886,101 @@ static void CG_DrawVote(void)
 
 		if (!(cg.snap->ps.eFlags & EF_VOTED))
 		{
-			s = va(CG_TranslateString("VOTE(%i): %s"), sec, cgs.voteString);
-			CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			// Zero: didn't want to delete this yet, not sure if I want specs to be able to vote.
+			line_a = va("VOTE(%i): %s", sec, cgs.voteString);
 			
 			if( cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES ) {
-			    s = CG_TranslateString( "Cannot vote as Spectator" );
+				line_b = va("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
 			} else {
-				s = va(CG_TranslateString("YES(%s):%i, NO(%s):%i"), str1, cgs.voteYes, str2, cgs.voteNo);
+				line_b = va("YES(%s):%i, NO(%s):%i", str1, cgs.voteYes, str2, cgs.voteNo);
 			}
-			CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 60);
-			return;
 		}
 		else
 		{
-			s = va(CG_TranslateString("(%i) YOU VOTED ON: %s"), sec, cgs.voteString);
-			CG_DrawStringExt(8, 200, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
+			line_a = va("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+			line_b = va("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
+			x_b = 13;
 
-			s = va(CG_TranslateString("Y:%i, N:%i"), cgs.voteYes, cgs.voteNo);
-			CG_DrawStringExt(8, 214, s, color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
-			return;
-		}
-	}
-
-	if (cgs.complaintEndTime > cg.time && !cg.demoPlayback && cg_complaintPopUp.integer > 0 && cgs.complaintClient < 0)
-	{
-		if (cgs.complaintClient == -1)
-		{
-			s = "Your complaint has been filed";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-		if (cgs.complaintClient == -2)
-		{
-			s = "Complaint dismissed";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-		if (cgs.complaintClient == -3)
-		{
-			s = "Server Host cannot be complained against";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-		if (cgs.complaintClient == -4)
-		{
-			s = "You were team-killed by the Server Host";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
+			if (cgs.votedYes)
+			{
+				CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
+			}
+			else {
+				auto textWidth = ETJump::DrawStringWidth(va("Y:%i", cgs.voteYes), 0.23f);
+				CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1, color);
+			}
 		}
 	}
 
 	if (cgs.applicationEndTime > cg.time && cgs.applicationClient < 0)
 	{
-		if (cgs.applicationClient == -1)
+		switch (cgs.applicationClient)
 		{
-			s = "Your application has been submitted";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.applicationClient == -2)
-		{
-			s = "Your application failed";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.applicationClient == -3)
-		{
-			s = "Your application has been approved";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.applicationClient == -4)
-		{
-			s = "Your application reply has been sent";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
+		case -1:
+			line_a = CG_TranslateString("Your application has been submitted");
+			break;
+		case -2:
+			line_a = CG_TranslateString("Your application failed");
+			break;
+		case -3:
+			line_a = CG_TranslateString("Your application has been approved");
+			break;
+		case -4:
+			line_a = CG_TranslateString("Your application reply has been sent");
+			break;
 		}
 	}
 
 	if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0)
 	{
-		if (cgs.propositionClient == -1)
+		switch (cgs.propositionClient) 
 		{
-			s = "Your proposition has been submitted";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.propositionClient == -2)
-		{
-			s = "Your proposition was rejected";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.propositionClient == -3)
-		{
-			s = "Your proposition was accepted";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.propositionClient == -4)
-		{
-			s = "Your proposition reply has been sent";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
+		case -1:
+			line_a = CG_TranslateString("Your proposition has been submitted");
+			break;
+		case -2:
+			line_a = CG_TranslateString("Your proposition was rejected");
+			break;
+		case -3:
+			line_a = CG_TranslateString("Your proposition was accepted");
+			break;
+		case -4:
+			line_a = CG_TranslateString("Your proposition reply has been sent");
+			break;
 		}
 	}
 
 	if (cgs.invitationEndTime > cg.time && cgs.invitationClient < 0)
 	{
-		if (cgs.invitationClient == -1)
+		switch (cgs.invitationClient)
 		{
-			s = "Your invitation has been submitted";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.invitationClient == -2)
-		{
-			s = "Your invitation was rejected";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.invitationClient == -3)
-		{
-			s = "Your invitation was accepted";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.invitationClient == -4)
-		{
-			s = "Your invitation reply has been sent";
-			CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-			return;
-		}
-
-		if (cgs.invitationClient < 0)
-		{
-			return;
+		case -1:
+			line_a = CG_TranslateString("Your invitation has been submitted");
+			break;
+		case -2:
+			line_a = CG_TranslateString("Your invitation was rejected");
+			break;
+		case -3:
+			line_a = CG_TranslateString("Your invitation was accepted");
+			break;
+		case -4:
+			line_a = CG_TranslateString("Your invitation reply has been sent");
+			break;
 		}
 	}
 
-	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) || (cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) || (cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
+	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) || 
+		(cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) || 
+		(cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
 	{
-		s = "Response Sent";
-		CG_DrawStringExt(8, 200, CG_TranslateString(s), color, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-		return;
+		line_a = "Response Sent";
+	}
+
+	if (line_a) {
+		ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a, 80, ITEM_TEXTSTYLE_SHADOWED);
+	}
+
+	if (line_b) {
+		ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b, 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
 }
 
@@ -3173,6 +3083,11 @@ static void CG_DrawSpectatorMessage(void)
 	float      x, y;
 	static int lastconfigGet = 0;
 
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		return;
+	}
+
 	if (!cg_descriptiveText.integer)
 	{
 		return;
@@ -3201,11 +3116,11 @@ static void CG_DrawSpectatorMessage(void)
 		str2 = "ESCAPE";
 	}
 	str = va(CG_TranslateString("Press %s to open Limbo Menu"), str2);
-	CG_DrawStringExt(8, 154, str, colorWhite, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+	ETJump::DrawString(8, 154 + 12, 0.23f, 0.25f, colorWhite, qtrue, str, 0, ITEM_TEXTSTYLE_SHADOWED);
 
 	str2 = BindingFromName("+attack");
 	str  = va(CG_TranslateString("Press %s to follow next player"), str2);
-	CG_DrawStringExt(8, 172, str, colorWhite, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+	ETJump::DrawString(8, 172 + 12, 0.23f, 0.25f, colorWhite, qtrue, str, 0, ITEM_TEXTSTYLE_SHADOWED);
 
 #ifdef MV_SUPPORT
 	str2 = BindingFromName("mvactivate");
@@ -3259,11 +3174,13 @@ static void CG_DrawLimboMessage(void)
 {
 	float         color[4] = { 1, 1, 1, 1 };
 	const char    *str;
-	playerState_t *ps;
-	int           y = 118;
+	playerState_t *ps = &cg.snap->ps;
+	int           y = 130;
 
-
-	ps = &cg.snap->ps;
+	if (cgs.demoCam.renderingFreeCam)
+	{
+		return;
+	}
 
 	if (ps->stats[STAT_HEALTH] > 0)
 	{
@@ -3278,45 +3195,19 @@ static void CG_DrawLimboMessage(void)
 	if (cg_descriptiveText.integer)
 	{
 		str = CG_TranslateString("You are wounded and waiting for a medic.");
-		CG_DrawSmallStringColor(INFOTEXT_STARTX, y, str, color);
+		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str, 0, 0);
 		y += 18;
-
-		if (cgs.gametype == GT_WOLF_LMS)
-		{
-			trap_R_SetColor(NULL);
-			return;
-		}
 
 		str = CG_TranslateString("Press JUMP to go into reinforcement queue.");
-		CG_DrawSmallStringColor(INFOTEXT_STARTX, 134, str, color);
+		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str, 0, 0);
 		y += 18;
-	}
-	else if (cgs.gametype == GT_WOLF_LMS)
-	{
-		trap_R_SetColor(NULL);
-		return;
 	}
 
 	// JPW NERVE
 	str = va(CG_TranslateString("Reinforcements deploy in %d seconds."), CG_CalculateReinfTime(qfalse));
-
-	CG_DrawSmallStringColor(INFOTEXT_STARTX, y, str, color);
-	y += 18;
-	// jpw
-
-	trap_R_SetColor(NULL);
+	ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str, 0, 0);
 }
 // -NERVE - SMF
-
-static void CG_DrawRunTimer(void)
-{
-//    int millis, seconds, minutes;
-
-	if (player_drawRunTimer.integer == 0)
-	{
-		return;
-	}
-}
 
 /*
 =================
@@ -3324,6 +3215,23 @@ cg_drawCGaz
 All the cgaz huds
 =================
 */
+
+void GetColorFromString(vec4_t *output, char *colorString) {
+	const char *token;
+	for (auto i = 0; i < 4; i++) {
+		token = COM_Parse(&colorString);
+		if (*token == '\0') {
+			(*output)[i] = 1.f;
+		}
+		else {
+			float value = atof(token);
+			if (value > 1) value = 1.0;
+			else if (value < 0) value = 0.0;
+			(*output)[i] = value;
+		}
+	}
+}
+
 // Dzikie
 static void PutPixel(float x, float y)
 {
@@ -3370,6 +3278,7 @@ static void CG_DrawCGazHUD(void)
 	playerState_t *ps;
 	int           right = 0, forward = 0;
 	int           scx = SCREEN_CENTER_X - 1, scy = SCREEN_CENTER_Y - 1;
+	vec4_t        color1, color2;
 
 	ps = &cg.predictedPlayerState;
 
@@ -3511,6 +3420,8 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
+		GetColorFromString(&color1, etj_CGazColor1.string);
+		GetColorFromString(&color2, etj_CGazColor2.string);
 
 		if (etj_stretchCgaz.integer) {
 			CG_DisableProperScaling(qtrue);
@@ -3521,12 +3432,12 @@ static void CG_DrawCGazHUD(void)
 		per_angle  = DEG2RAD(per_angle);
 
 		DrawLine(scx, scy,
-			scx + right, scy - forward, colorCyan);
+			scx + right, scy - forward, color2);
 
 		vel_size /= 5;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang),
-			scy - vel_size * cos(vel_relang), colorRed);
+			scy - vel_size * cos(vel_relang), color1);
 		if (vel_size > SCREEN_HEIGHT / 2)
 		{
 			vel_size = SCREEN_HEIGHT / 2;
@@ -3534,10 +3445,10 @@ static void CG_DrawCGazHUD(void)
 		vel_size /= 2;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang + per_angle),
-			scy - vel_size * cos(vel_relang + per_angle), colorRed);
+			scy - vel_size * cos(vel_relang + per_angle), color1);
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang - per_angle),
-			scy - vel_size * cos(vel_relang - per_angle), colorRed);
+			scy - vel_size * cos(vel_relang - per_angle), color1);
 		
 		CG_DisableProperScaling(qfalse);
 		
@@ -3679,6 +3590,17 @@ static qboolean CG_IsOverBounce(float vel, float initHeight,
 	return qfalse;
 }
 
+static bool CG_SurfaceAllowsOverbounce(trace_t *trace)
+{
+	if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE)
+	{
+		return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
+	} else
+	{
+		return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
+	}
+}
+
 /*
 =========
 CG_DrawOB
@@ -3741,7 +3663,7 @@ static void CG_DrawOB(void)
 			t = trace.endpos[2];
 
 			// below ob
-			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity))
+			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 			{
 				CG_DrawStringExt(SCREEN_CENTER_X + 10, 220, "B", colorWhite, qfalse, qtrue,
 				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3765,7 +3687,7 @@ static void CG_DrawOB(void)
 		//CG_Printf("h0=%f, t=%f\n", h0, t);
 
 		// fall ob
-		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity))
+		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X - 10, 220, "F", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3774,7 +3696,7 @@ static void CG_DrawOB(void)
 
 		// jump ob
 		if (ps->groundEntityNum != ENTITYNUM_NONE
-		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity))
+		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X, 220, "J", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3794,7 +3716,7 @@ static void CG_DrawOB(void)
 		//CG_Printf("h0=%f, t=%f\n", h0, t);
 
 		// sticky fall ob
-		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity))
+		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X - 10, 220, "F", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -3803,14 +3725,14 @@ static void CG_DrawOB(void)
 
 		// sticky jump ob
 		if (ps->groundEntityNum != ENTITYNUM_NONE
-		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity))
+		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X, 220, "J", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
-		if (b)
+		if (b && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(SCREEN_CENTER_X - 20, 220, "S", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -4001,10 +3923,8 @@ static qboolean CG_DrawFollow(void)
 
 	if (cg.snap->ps.clientNum != cg.clientNum)
 	{
-		// Show in colors
-		CG_DrawStringExt(INFOTEXT_STARTX, 118,
-		                 va("^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name),
-		                 colorWhite, qtrue, qtrue, BIGCHAR_WIDTH / 2, BIGCHAR_HEIGHT, 0);
+		const char *str = va("^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
+		ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite, qfalse, str, 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
 	return(qtrue);
@@ -5891,8 +5811,8 @@ void CG_DrawSpectatorInfo(void)
 				float x = player_spectatorInfoX.integer;
 				CG_AdjustPosX(&x);
 				// spectating me
-				CG_DrawSmallString(x, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
-				y += 10;
+				ETJump::DrawSmallString(x, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
+				y += 12;
 			}
 		}
 	}
@@ -5947,9 +5867,12 @@ static void CG_Draw2D(void)
 
 	if (!cg.cameraMode)
 	{
-		CG_DrawFlashBlendBehindHUD();
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			CG_DrawFlashBlendBehindHUD();
+		}
 
-		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || cgs.demoCam.renderingFreeCam)
 		{
 			CG_DrawSpectator();
 			CG_DrawCrosshair();
@@ -5984,13 +5907,12 @@ static void CG_Draw2D(void)
 
 		CG_DrawVote();
 
-		CG_DrawLagometer();
 	}
 
 	// don't draw center string if scoreboard is up
 	if (!CG_DrawScoreboard())
 	{
-		if (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)
+		if (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR && !cgs.demoCam.renderingFreeCam)
 		{
 			rectDef_t rect;
 
@@ -6029,13 +5951,9 @@ static void CG_Draw2D(void)
 		CG_DrawCenterString();
 		CG_DrawPMItems();
 		CG_DrawPMItemsBig();
-
-		CG_DrawFollow();
 		CG_DrawWarmup();
 
 		CG_DrawNotify();
-
-		CG_DrawNewCompass();
 
 		CG_DrawObjectiveInfo();
 
@@ -6043,18 +5961,21 @@ static void CG_Draw2D(void)
 
 		CG_DrawLimboMessage();
 
-		CG_DrawCGazHUD();
-
-		CG_DrawOB();
-		CG_DrawSlick();
+		if (!cgs.demoCam.renderingFreeCam)
+		{
+			CG_DrawLagometer();
+			CG_DrawNewCompass();
+			CG_DrawFollow();
+			CG_DrawCGazHUD();
+			CG_DrawOB();
+			CG_DrawSlick();
+			CG_DrawSpeed2();
+			CG_DrawRouteDesign();
+			CG_DrawKeys();
+		}
 
 		CG_DrawCHS();
 
-		CG_DrawRunTimer();
-
-		CG_DrawSpeed2();
-		CG_DrawRouteDesign();
-		CG_DrawKeys();
 		CG_DrawSpectatorInfo();
 	}
 	else
@@ -6075,17 +5996,29 @@ static void CG_Draw2D(void)
 	{
 		CG_Fireteams_Draw();
 	}
+	
+	if (!cgs.demoCam.renderingFreeCam)
+	{
+		ETJump_DrawDrawables();
 
-	ETJump_DrawDrawables();
+		for (const auto & r : ETJump::renderables)
+		{
+			r->beforeRender();
+			r->render();
+		}
+	}
 
 	// Info overlays
 	CG_DrawOverlays();
+	
+	if (!cgs.demoCam.renderingFreeCam)
+	{
+		// OSP - window updates
+		CG_windowDraw();
 
-	// OSP - window updates
-	CG_windowDraw();
-
-	// Ridah, draw flash blends now
-	CG_DrawFlashBlend();
+		// Ridah, draw flash blends now
+		CG_DrawFlashBlend();
+	}
 
 	CG_DrawDemoRecording();
 }
@@ -6093,21 +6026,24 @@ static void CG_Draw2D(void)
 // NERVE - SMF
 void CG_StartShakeCamera(float p, entityState_t *es)
 {
-	// cam does not shake
+	auto attacker = static_cast<char>(es->clientNum);
+
+	//ETJump: never shake cam from explosions
 	if (etj_explosivesShake.integer == 0) {
 		return;
 	}
-	// cam shakes only if this is not your explosion
-	else if (etj_explosivesShake.integer == 1 && es->clientNum == cg.clientNum) {
+
+	//ETJump: shake cam only from other players explosives
+	if (etj_explosivesShake.integer == 1 && attacker == cg.clientNum) {
 		return;
 	}
-	// cam shakes if you are the one who caused explosion
-	else if (etj_explosivesShake.integer == 2 && es->clientNum != cg.clientNum) {
+
+	//ETJump: shake cam only from own explosives
+	if (etj_explosivesShake.integer == 2 && attacker != cg.clientNum) {
 		return;
 	}
 
 	cg.cameraShakeScale = p;
-
 	cg.cameraShakeLength = 1000 * (p * p);
 	cg.cameraShakeTime   = cg.time + cg.cameraShakeLength;
 	cg.cameraShakePhase  = crandom() * M_PI; // start chain in random dir
@@ -6244,7 +6180,7 @@ static void CG_ChangeFovBasedOnSpeed()
 	float currentSpeedFov = movie_fovMin.value;
 	static int fpsValue   = 0;
 
-	if (!movie_changeFovBasedOnSpeed.integer && !cg.demoPlayback)
+	if (!movie_changeFovBasedOnSpeed.integer && !cg.demoPlayback || cgs.demoCam.renderingFreeCam)
 	{
 		return;
 	}
@@ -6369,24 +6305,6 @@ void CG_DrawActive(stereoFrame_t stereoView)
 //			return;
 //		}
 //	}
-
-	if (cg.showGameView)
-	{
-		float x, y, w, h;
-		x = LIMBO_3D_X;
-		y = LIMBO_3D_Y;
-		w = LIMBO_3D_W;
-		h = LIMBO_3D_H;
-
-		CG_AdjustFrom640(&x, &y, &w, &h);
-
-		cg.refdef_current->x      = x;
-		cg.refdef_current->y      = y;
-		cg.refdef_current->width  = w;
-		cg.refdef_current->height = h;
-
-		CG_Letterbox((LIMBO_3D_W / 640.f) * 100, (LIMBO_3D_H / 480.f) * 100, qfalse);
-	}
 
 	CG_ShakeCamera();       // NERVE - SMF
 

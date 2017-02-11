@@ -518,7 +518,9 @@ void G_ExplodeMissile(gentity_t *ent)
 			gentity_t *tent = G_TempEntity(ent->r.currentOrigin, EV_SHAKE);
 			tent->s.onFireStart = ent->splashDamage * 4;
 			tent->r.svFlags    |= SVF_BROADCAST;
-			tent->s.clientNum   = ent->parent->client->ps.clientNum; // send attacker's id
+			
+			//ETJump: map entities don't have attacker id so we send -1
+			tent->s.clientNum = (ent->parent) ? ent->parent->client->ps.clientNum : -1; //ETJump: send attacker's id
 		}
 	}
 }
@@ -2259,7 +2261,7 @@ gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir)
 	}
 	// map shoots & hits
 	else {
-		bolt->clipmask = MASK_SHOT;
+		bolt->clipmask = MASK_MISSILESHOT;
 	}
 
 	bolt->s.pos.trType = TR_LINEAR;

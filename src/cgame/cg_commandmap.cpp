@@ -1309,7 +1309,7 @@ void CG_DrawAutoMap(void)
 		}
 	}
 
-	if (!cg_drawCompass.integer)
+	if (cgs.demoCam.renderingFreeCam || !cg_drawCompass.integer)
 	{
 		return;
 	}

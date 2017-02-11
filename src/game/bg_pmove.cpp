@@ -2274,6 +2274,21 @@ static void PM_GroundTrace(void)
 
 		PM_CrashLand();
 
+		// Disable overbounce?
+		if (pm->shared & BG_LEVEL_NO_OVERBOUNCE)
+		{
+			if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+			{
+				PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+			}
+		} else
+		{
+			if (((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+			{
+				PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+			}
+		}
+
 		// don't do landing time if we were just going down a slope
 		if (pml.previous_velocity[2] < -200)
 		{
@@ -2285,6 +2300,21 @@ static void PM_GroundTrace(void)
 
 	pm->ps->groundEntityNum = trace.entityNum;
 
+	// Disable overbounce?
+	if (pm->shared & BG_LEVEL_NO_OVERBOUNCE)
+	{
+		if (trace.plane.normal[2] == 1 && !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+		{
+			pm->ps->velocity[2] = 0;
+		}
+	} else
+	{
+		if (trace.plane.normal[2] == 1 && ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+		{
+			pm->ps->velocity[2] = 0;
+		}
+	}
+	
 	// don't reset the z velocity for slopes
 //	pm->ps->velocity[2] = 0;
 
@@ -3901,35 +3931,6 @@ static void PM_Weapon(void)
 	//Feen Weapon Dbug
 //#ifdef GAMEDLL
 
-	//PGM Test...
-	if (pm->cmd.wbuttons & WBUTTON_ATTACK2)
-	{
-
-		if (pm->ps->weaponTime > 0)
-		{
-			pm->ps->weaponTime -= pml.msec;
-
-			if (pm->ps->weaponTime <= 0)
-			{
-				pm->ps->weaponTime = 0;
-			}
-
-		}
-		else
-		{
-
-			if (pm->cmd.weapon == WP_PORTAL_GUN)
-			{
-				PM_AddEvent(EV_PORTAL2_FIRE);
-			}
-			//Com_Printf("FWD: EV_PORTAL2_FIRE Added...\n");
-			pm->ps->weaponTime += 1000; //Feen: This equates to about .5 seconds
-
-			BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_FIREWEAPON, qfalse, qtrue);   //TEST
-
-		}
-	}
-
 #ifdef FEEN_WPN_DBG
 	//REGULAR BUTTONS
 	if (pm->cmd.buttons & BUTTON_ATTACK)
@@ -4376,14 +4377,6 @@ static void PM_Weapon(void)
 		{
 			pm->ps->weaponDelay = 0;
 			delayedFire         = qtrue; // weapon delay has expired.  Fire this frame
-
-			// double check the player is still holding the fire button down for these weapons
-			// so you don't get a delayed "non-fire" (fire hit and released, then shot fires)
-			switch (pm->ps->weapon)
-			{
-			default:
-				break;
-			}
 		}
 	}
 
@@ -4718,8 +4711,8 @@ static void PM_Weapon(void)
 	// check for fire
 	// if not on fire button and there's not a delayed shot this frame...
 	// consider also leaning, with delayed attack reset
-	if ((!(pm->cmd.buttons & (BUTTON_ATTACK | WBUTTON_ATTACK2)) && !delayedFire) ||
-	    (pm->ps->leanf != 0 && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_SMOKE_BOMB))
+	if ((!(pm->cmd.buttons & BUTTON_ATTACK) && !(pm->cmd.wbuttons & WBUTTON_ATTACK2) && !delayedFire) ||
+		(pm->ps->leanf != 0 && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_SMOKE_BOMB))
 	{
 		pm->ps->weaponTime  = 0;
 		pm->ps->weaponDelay = 0;
@@ -5356,7 +5349,7 @@ static void PM_Weapon(void)
 	case WP_KAR98:
 	case WP_CARBINE:
 		addTime           = GetAmmoTableData(pm->ps->weapon)->nextShotTime;
-		aimSpreadScaleAdd = 50;
+		aimSpreadScaleAdd = 0;
 		break;
 
 	case WP_GARAND_SCOPE:
@@ -5613,12 +5606,6 @@ void PM_UpdateLean(playerState_t *ps, usercmd_t *cmd, pmove_t *tpm)
 
 	if ((cmd->wbuttons & (WBUTTON_LEANLEFT | WBUTTON_LEANRIGHT))  && !cmd->forwardmove && cmd->upmove <= 0)
 	{
-		// client still can send activate lean commands
-		// disable that, so we won't experience micro leans
-		if ((cmd->buttons & BUTTON_ACTIVATE) && pm->pmext->noActivateLean) {
-			return;
-		}
-
 		// if both are pressed, result is no lean
 		if (cmd->wbuttons & WBUTTON_LEANLEFT)
 		{
@@ -6547,6 +6534,21 @@ void PmoveSingle(pmove_t *pmove)
 	{
 		pm->tracemask  &= ~CONTENTS_BODY;   // corpses can fly through bodies
 		pm->ps->eFlags &= ~EF_ZOOMING;
+	}
+
+	// ETJump: no activate lean
+	if (pm->noActivateLean)
+	{
+		if (pm->cmd.wbuttons & WBUTTON_LEANLEFT && pm->cmd.buttons & BUTTON_ACTIVATE)
+		{
+			pm->cmd.rightmove = -127;
+			pm->cmd.wbuttons ^= WBUTTON_LEANLEFT;
+		}
+		else if (pm->cmd.wbuttons & WBUTTON_LEANRIGHT && pm->cmd.buttons & BUTTON_ACTIVATE)
+		{
+			pm->cmd.rightmove = 127;
+			pm->cmd.wbuttons ^= WBUTTON_LEANRIGHT;
+		}
 	}
 
 	// setup - copy pressed keys into playerstate

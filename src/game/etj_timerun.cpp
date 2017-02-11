@@ -584,7 +584,7 @@ void Timerun::addNewRecord(Player *player, int clientNum)
 	_recordsByName[player->currentRunName].push_back(std::unique_ptr<Record>(record));
 	_sorted[player->currentRunName] = false;
 	SaveRecord(record, false);
-	Printer::SendCommandToAll((boost::format("record %d %s %d")
+	Printer::SendCommandToAll((boost::format("record %d \"%s\" %d")
 	                           % clientNum
 	                           % player->currentRunName
 	                           % player->completionTime).str());
@@ -597,7 +597,7 @@ void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int c
 
 	if (previousRecord->time > player->completionTime)
 	{
-		Printer::SendCommandToAll((boost::format("record %d %s %d")
+		Printer::SendCommandToAll((boost::format("record %d \"%s\" %d")
 		                           % clientNum
 		                           % player->currentRunName
 		                           % player->completionTime).str());
@@ -610,7 +610,7 @@ void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int c
 	}
 	else // Previous record was faster
 	{
-		Printer::SendCommandToAll((boost::format("completion %d %s %d")
+		Printer::SendCommandToAll((boost::format("completion %d \"%s\" %d")
 		                           % clientNum
 		                           % player->currentRunName
 		                           % player->completionTime).str());

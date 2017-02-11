@@ -231,18 +231,43 @@ void        trap_R_ClearDecals(void)
 
 void    trap_S_StartSound(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx)
 {
-	syscall(CG_S_STARTSOUND, origin, entityNum, entchannel, sfx, 127 /* Gordon: default volume always for the moment*/);
+	//explicitly respatialize all local sounds in freecam
+	if (cgs.demoCam.renderingFreeCam && entityNum == cg.snap->ps.clientNum)
+	{
+		syscall(CG_S_STARTSOUND, cg.snap->ps.origin, -1, entchannel, sfx, 127 /* Gordon: default volume always for the moment*/);
+	}
+	else
+	{
+
+		syscall(CG_S_STARTSOUND, origin, entityNum, entchannel, sfx, 127 /* Gordon: default volume always for the moment*/);
+	}
 }
 
 void    trap_S_StartSoundVControl(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int volume)
 {
-	syscall(CG_S_STARTSOUND, origin, entityNum, entchannel, sfx, volume);
+	//explicitly respatialize all local sounds in freecam
+	if (cgs.demoCam.renderingFreeCam && entityNum == cg.snap->ps.clientNum)
+	{
+		syscall(CG_S_STARTSOUND, cg.snap->ps.origin, -1, entchannel, sfx, 127 /* Gordon: default volume always for the moment*/);
+	}
+	else
+	{
+		syscall(CG_S_STARTSOUND, origin, entityNum, entchannel, sfx, volume);
+	}
 }
 
 //----(SA)	added
 void    trap_S_StartSoundEx(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int flags)
 {
-	syscall(CG_S_STARTSOUNDEX, origin, entityNum, entchannel, sfx, flags, 127 /* Gordon: default volume always for the moment*/);
+	//explicitly respatialize all local sounds in freecam
+	if (cgs.demoCam.renderingFreeCam && entityNum == cg.snap->ps.clientNum)
+	{
+		syscall(CG_S_STARTSOUND, cg.snap->ps.origin, -1, entchannel, sfx, 127 /* Gordon: default volume always for the moment*/);
+	}
+	else
+	{
+		syscall(CG_S_STARTSOUNDEX, origin, entityNum, entchannel, sfx, flags, 127 /* Gordon: default volume always for the moment*/);
+	}
 }
 //----(SA)	end
 

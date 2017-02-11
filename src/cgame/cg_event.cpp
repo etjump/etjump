@@ -1,6 +1,7 @@
 // cg_event.c -- handle entity events at snapshot or playerstate transitions
 
 #include "cg_local.h"
+#include "etj_entity_events_handler.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -2103,6 +2104,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 	case EV_JUMP:
 		DEBUGNAME("EV_JUMP");
+		VectorCopy(cent->lerpOrigin, cg.etjLastJumpPos);
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, "*jump1.wav"));
 		break;
 	case EV_TAUNT:
@@ -2668,12 +2670,26 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		if (cgs.gameSounds[es->eventParm])
 		{
-			trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, cgs.gameSounds[es->eventParm]);
+			if (cgs.demoCam.renderingFreeCam)
+			{
+				trap_S_StartLocalSound(cgs.gameSounds[es->eventParm], CHAN_AUTO);
+			}
+			else
+			{
+				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, cgs.gameSounds[es->eventParm]);
+			}
 		}
 		else
 		{
 			s = CG_ConfigString(CS_SOUNDS + es->eventParm);
-			trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, CG_CustomSound(es->number, s));
+			if (cgs.demoCam.renderingFreeCam)
+			{
+				trap_S_StartLocalSound(CG_CustomSound(es->number, s), CHAN_AUTO);
+			} 
+			else
+			{
+				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, CG_CustomSound(es->number, s));
+			}
 		}
 		break;
 
@@ -2979,6 +2995,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		DEBUGNAME("EV_SHAKE");
 
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			break;
+		}
+
 		VectorSubtract(cg.snap->ps.origin, cent->lerpOrigin, v);
 		len = VectorLength(v);
 
@@ -3021,6 +3042,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_AIRSTRIKEMESSAGE:
 	{
 		const char *wav = NULL;
+
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			break;
+		}
 
 		switch (cent->currentState.density)
 		{
@@ -3066,6 +3092,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_ARTYMESSAGE:
 	{
 		const char *wav = NULL;
+
+		if (cgs.demoCam.renderingFreeCam)
+		{
+			break;
+		}
 
 		switch (cent->currentState.density)
 		{
@@ -3123,17 +3154,14 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		break;
 
-	//Feen: PGM
-	case EV_PORTAL2_FIRE:
-		DEBUGNAME("EV_PORTAL2_FIRE");
-		//CG_Printf( "^1Portal Debug: ^7CG_EntityEvent() EV_PORTAL2_FIRE - received\n");
-		break;
-
 	case EV_PORTAL_TELEPORT:
 		DEBUGNAME("EV_PORTAL_TELEPORT");
 		portalDetected = qtrue; //Used below.....
 		break;
 
+	case EV_LOAD_TELEPORT:
+		ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
+		break;
 	default:
 		DEBUGNAME("UNKNOWN");
 		break;

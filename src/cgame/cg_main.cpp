@@ -8,6 +8,10 @@
 
 #include "cg_local.h"
 #include "cg_mainext.h"
+#include "etj_client_commands_handler.h"
+#include "etj_entity_events_handler.h"
+#include "etj_overbounce_watcher.h"
+#include "etj_maxspeed.h"
 
 displayContextDef_t cgDC;
 
@@ -70,6 +74,20 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 	}
 	return -1;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
+	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::unique_ptr<EntityEventsHandler> entityEventsHandler;
+	std::vector<std::unique_ptr<IRenderable>> renderables;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 cg_t         cg;
 cgs_t        cgs;
@@ -286,14 +304,16 @@ vmCvar_t cg_hideMe;
 vmCvar_t cg_nofatigue;
 vmCvar_t com_maxfps;
 vmCvar_t com_hunkmegs;
+
 vmCvar_t cg_drawCGaz;
 vmCvar_t cg_CGazY;
 vmCvar_t cg_CGazHeight;
 vmCvar_t cg_CGazWidth;
+vmCvar_t etj_CGazColor1;
+vmCvar_t etj_CGazColor2;
 vmCvar_t cg_CGazAlpha;
+
 vmCvar_t cg_drawOB;
-vmCvar_t cg_drawspeedX;
-vmCvar_t cg_drawspeedY;
 vmCvar_t cg_drawKeys;
 vmCvar_t cg_keysColor;
 vmCvar_t cg_keysX;
@@ -323,6 +343,10 @@ vmCvar_t cg_speedSizeY;
 vmCvar_t cg_speedColor;
 vmCvar_t cg_speedAlpha;
 vmCvar_t etj_speedShadow;
+vmCvar_t etj_drawMaxSpeed;
+vmCvar_t etj_maxSpeedX;
+vmCvar_t etj_maxSpeedY;
+vmCvar_t etj_maxSpeedDuration;
 
 vmCvar_t cg_adminpassword;
 vmCvar_t cg_username;
@@ -389,7 +413,6 @@ vmCvar_t player_spectatorInfoY;
 vmCvar_t player_drawRunTimer;
 vmCvar_t player_runTimerX;
 vmCvar_t player_runTimerY;
-vmCvar_t player_runTimerColor;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 
@@ -431,6 +454,19 @@ vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
 vmCvar_t etj_stretchCgaz;
 vmCvar_t etj_noActivateLean;
+
+vmCvar_t shared;
+
+vmCvar_t etj_drawObWatcher;
+vmCvar_t etj_obWatcherX;
+vmCvar_t etj_obWatcherY;
+
+vmCvar_t etj_demo_yawturnspeed;
+vmCvar_t etj_demo_pitchturnspeed;
+vmCvar_t etj_demo_rollspeed;
+vmCvar_t etj_demo_lookat;
+vmCvar_t etj_demo_freecamspeed;
+vmCvar_t etj_predefineddemokeys;
 
 typedef struct
 {
@@ -620,17 +656,19 @@ cvarTable_t cvarTable[] =
 	{ &cg_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE             },
 	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
 	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
+
 	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
 	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
 	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
+	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
+	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
 	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawspeedX,               "etj_drawspeedX",              "-10",                    CVAR_ARCHIVE             },
-	{ &cg_drawspeedY,               "etj_drawspeedY",              "-20",                    CVAR_ARCHIVE             },
 	{ &cg_drawKeys,                 "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
 	{ &cg_keysColor,                "etj_keysColor",               "White",                  CVAR_ARCHIVE             },
 	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
@@ -645,12 +683,16 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
-	{ &cg_speedY,                   "etj_speedY",                  "360",                    CVAR_ARCHIVE             },
+	{ &cg_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE             },
 	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
 	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawMaxSpeed,            "etj_drawMaxSpeed",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_maxSpeedX,               "etj_maxSpeedX",               "320",                    CVAR_ARCHIVE             },
+	{ &etj_maxSpeedY,               "etj_maxSpeedY",               "320",                    CVAR_ARCHIVE             },
+	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE             },
 
 	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
 	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
@@ -703,8 +745,7 @@ cvarTable_t cvarTable[] =
 	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
 	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
 	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
-	{ &player_runTimerY,            "etj_runTimerY",               "380",                    CVAR_ARCHIVE             },
-	{ &player_runTimerColor,        "etj_runTimerColor",           "white",                  CVAR_ARCHIVE             },
+	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
 	
@@ -741,6 +782,16 @@ cvarTable_t cvarTable[] =
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
 	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
+	{ &shared, "shared", "0", CVAR_ROM },
+	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
+	{&etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
+	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
+	{ &etj_demo_yawturnspeed, "etj_demo_yawturnspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_pitchturnspeed, "etj_demo_pitchturnspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_rollspeed, "etj_demo_rollspeed", "140", CVAR_ARCHIVE },
+	{ &etj_demo_freecamspeed, "etj_demo_freecamspeed", "800", CVAR_ARCHIVE },
+	{ &etj_demo_lookat, "b_demo_lookat", "-1", CVAR_CHEAT },
+	{ &etj_predefineddemokeys, "etj_predefineddemokeys", "1", CVAR_CHEAT | CVAR_ARCHIVE },
 };
 
 
@@ -789,7 +840,6 @@ void CG_RegisterCvars(void)
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
-	BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1, "player_runTimerColor");
 	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
 	if (cg_noclipScale.value < 1)
@@ -862,11 +912,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_keysColor)
 				{
 					BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
-				}
-				else if (cv->vmCvar == &player_runTimerColor)
-				{
-					BG_setColor(player_runTimerColor.string, cg.runTimerColor, 1,
-					            "player_runTimerColor");
 				}
 				else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string)
 				{
@@ -3444,6 +3489,34 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 		trap_S_FadeAllSound(1.0f, 0, qfalse);           // fade sound up
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump initialization
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("ETJump initialization started.");
+	CG_Printf("--------------------------------------------------------------------------------\n");
+
+	// NOTE: client server commands handlers must be created before other modules as other modules use them
+	// to subcribe to commands.
+	// Generally all modules should get these as constructor params but they're still being used in the C code
+	// => make sure they're created first
+	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(nullptr));
+	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(trap_AddCommand));
+	ETJump::entityEventsHandler = std::unique_ptr<ETJump::EntityEventsHandler>(new ETJump::EntityEventsHandler());
+
+	// initialize renderables
+	// Overbounce watcher
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::OverbounceWatcher(ETJump::consoleCommandsHandler.get())));
+	// Display max speed from previous load session
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
+
+	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("ETJump initialized.");
+	CG_Printf("--------------------------------------------------------------------------------\n");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// OSP
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
@@ -3451,7 +3524,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
-	cg.etjActivateKey = -1; //set default to -1 => none
+
+	VectorSet(cgs.demoCam.velocity, 0.0, 0.0, 0.0);
+	cgs.demoCam.startLean = qfalse;
+	cgs.demoCam.noclip = qfalse;
 #ifdef AC_SUPPORT
 
 	InitAntiCheat(clientAC);
@@ -3592,34 +3668,4 @@ void CG_DecodeQP(char *line)
 		}
 	}
 	*o = '\0';
-}
-
-void CG_CheckActivateLean() {
-	usercmd_t ucmd;
-	int num = trap_GetCurrentCmdNumber();
-
-	trap_GetUserCmd(num, &ucmd);
-	// Do we have +activate button pressed right now?
-	if (ucmd.buttons & BUTTON_ACTIVATE) {
-		// Do we also try to lean currently?
-		if ((ucmd.wbuttons & WBUTTON_LEANLEFT) || (ucmd.wbuttons & WBUTTON_LEANRIGHT)) {
-			int key = trap_Key_GetKey("+activate");
-			// unbind +activate button so it wont trigger +activate in the next frame,
-			// this way we avoid spamming -activate
-			trap_Key_SetBinding(key, "-activate");
-			// send -activate command, to be executed and to disable current +activate
-			trap_SendConsoleCommand("-activate");
-			// cache the key to be restored later
-			cg.etjActivateKey = key;
-		}
-	}
-	// Do we have key cached already?
-	else if (cg.etjActivateKey != -1) {
-		// Key is not pressed anymore?
-		if (trap_Key_IsDown(cg.etjActivateKey) == qfalse) {
-			// Bind it back
-			trap_Key_SetBinding(cg.etjActivateKey, "+activate");
-			cg.etjActivateKey = -1;
-		}
-	}
 }

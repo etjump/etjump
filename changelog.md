@@ -1,6 +1,57 @@
+# ETJump 2.3.0
+
+* hud/ui clean up: replaced blurry charset with sharp font
+* fixed `etj_noActivateLean` not being persistent on respawn causing incorrect behaviour
+* added `etj_CGazColor1/2` cvars to set custom colors for `etj_drawCGAZ` __2__
+* added `freecam` and `noclip` support for demo playback (compatible with Camtrace3D)
+* added `b_demo_lookat` support for demo playback, to viewlock on specific player/entity
+
 # ETJump 2.2.0
 
 * Changed all .c modules to .cpp modules.
+* Increased progression tracker limit from 10 to 50.
+* K43 and Garand no longer have any spread.
+* Added spawnflag 8 to `target_startTimer` to reset the runtimer if pmove is not fixed
+* Added spawnflag 16 to `target_startTimer` to disable use of save slots and backups
+* Portal gun changes:
+  - Both portal gun fire rates are now equal.
+  - Lowered the minimum allowed distance between the portal gun portals.
+  - Changed other players' portal color 1 to green to make it more distinct on light surfaces.
+* Enhanced vote UX
+  - Spectators can now see the y/n count.
+  - Selected y/n is highlighted.
+  - Revoting is now possible. Players can change their vote 3 times 10 seconds after the vote.
+* Removed unused cvars.
+* Vsay now plays the same voice for every player.
+* Fixed a click event issue in the widescreen UI.
+* `shooter_rocket` can now hit players.
+* renamed target_tracker `tracker_setIf` key to `tracker_set_if` to match the other keys.
+* fixed long map name not flipped correctly on map loading
+* added spawnflags __2__ for `weapon_portalgun` entity to make it rotating around its center
+* added spawnflags __4__ for all `item_*` and `weapon_*` entities to make them bobbing if they are floating in the air (__1__)
+* `vid_restart` no longer breaks timerun timer.
+* `misc_landmine` no longer crashes the client.
+* CHS 50 displays the last jump coordinates.
+* !spec now correctly only tries to match players that are not spectating.
+* Added two new spawnflags for `target_startTimer`
+  - __32__ disable explosive weapons pickup
+  - __64__ disable portal gun pickup
+* Drowned players are now correctly put to spec after a period of inactivity.
+* Added worldspawn key `nooverbounce`.  Disables overbounce if set to anything but __0__.
+  - Surfaceparm monsterslicksouth enables overbounce on maps with no overbounce enabled.
+* Added spawnflag __8__ to `target_teleporter`. Works like __4__ (preserves yaw) except keeps the pitch value as well.
+* `trigger_teleporter` now supports same spawnflags as `target_teleporter`.
+* Added overbounce watcher. You can save a position and the watcher will display whenever you are pointing at an OB location.
+  - `etj_drawObWatcher` to toggle the OB watcher.
+  - `etj_obWatcherX/Y` to change the location of the watcher.
+  - `ob_save <optional name>` to save the current position. Saved position will be displayed.
+  - `ob_load <optional name>` to load the saved position to be displayed. 
+  - `ob_reset` to remove the displayed position. (Nothing will be displayed)
+* HUD/UI clean up (replaced some drawchars on proper text drawing method)
+* Value __9__ for `etj_drawSpeed2` now displays only tens in speedometer (ignores hundreds & thousands)
+* Added 'etj_drawMaxSpeed' variable and etj_maxSpeedX/Y/Duration to display max speed from previous load session
+* Fixed a bug in `etj_noActivateLean`
+* Added `vote_minVoteDuration` to limit how fast a vote can pass after the callvote.
 
 # ETJump 2.1.0
 

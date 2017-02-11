@@ -56,6 +56,12 @@ void SaveSystem::Save(gentity_t *ent)
 		return;
 	}
 
+	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	{
+		CPTo(ent, "^3Save ^7is disabled for death run");
+		return;
+	}
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
@@ -66,6 +72,14 @@ void SaveSystem::Save(gentity_t *ent)
 		if (position < 0 || position >= MAX_SAVED_POSITIONS)
 		{
 			CPTo(ent, "Invalid position.");
+			return;
+		}
+
+		if (position > 0 &&
+			ent->client->sess.timerunActive &&
+			ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+		{
+			CPTo(ent, "You are not allowed to use save slots.");
 			return;
 		}
 	}
@@ -188,6 +202,12 @@ void SaveSystem::Load(gentity_t *ent)
 		return;
 	}
 
+	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+		{
+		CPTo(ent, "^3Load ^7is disabled for death run");
+		return;
+	}
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
@@ -200,6 +220,14 @@ void SaveSystem::Load(gentity_t *ent)
 			CPTo(ent, "^7Invalid position.");
 			return;
 		}
+
+		if (position > 0 &&
+			ent->client->sess.timerunActive &&
+			ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+		{
+			CPTo(ent, "You are not allowed to use load slots.");
+			return;
+		}
 	}
 
 	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
@@ -208,7 +236,7 @@ void SaveSystem::Load(gentity_t *ent)
 		return;
 	}
 
-	SavePosition *pos = 0;
+	SavePosition *pos = nullptr;
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
 	{
 		pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
@@ -220,15 +248,7 @@ void SaveSystem::Load(gentity_t *ent)
 
 	if (pos->isValid)
 	{
-		ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-		VectorCopy(pos->origin, ent->client->ps.origin);
-		VectorClear(ent->client->ps.velocity);
-		if (ent->client->pers.loadViewAngles)
-		{
-			SetClientViewAngle(ent, pos->vangles);
-		}
-		// Crashland + instant load bug fix.
-		ent->client->ps.pm_time = 1;
+		TeleportPlayer(ent, pos);
 	}
 	else
 	{
@@ -293,6 +313,19 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		return;
 	}
 
+	if (ent->client->sess.timerunActive &&
+		ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+	{
+		CPTo(ent, "You are not allowed to use backup command.");
+		return;
+	}
+
+	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	{
+		CPTo(ent, "^3Backup ^7is disabled for death run");
+		return;
+	}
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
@@ -318,7 +351,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		return;
 	}
 
-	SavePosition *pos = 0;
+	SavePosition *pos = nullptr;
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
 	{
 		pos = &clients_[ClientNum(ent)].alliesBackupPositions[position];
@@ -330,15 +363,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 
 	if (pos->isValid)
 	{
-		ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-		VectorCopy(pos->origin, ent->client->ps.origin);
-		VectorClear(ent->client->ps.velocity);
-		if (ent->client->pers.loadViewAngles)
-		{
-			SetClientViewAngle(ent, pos->vangles);
-		}
-		// Crashland + instant load bug fix.
-		ent->client->ps.pm_time = 1;
+		TeleportPlayer(ent, pos);
 	}
 	else
 	{
@@ -491,6 +516,11 @@ void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos)
 		return;
 	}
 
+	if (ent->client->sess.timerunActive &&
+		ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS) {
+		return;
+	}
+
 	SavePosition backup;
 	VectorCopy(pos->origin, backup.origin);
 	VectorCopy(pos->vangles, backup.vangles);
@@ -545,6 +575,22 @@ void SaveSystem::Print(gentity_t *ent)
 		it++;
 	}
 	ConsolePrintTo(NULL, toPrint);
+}
+
+void SaveSystem::TeleportPlayer(gentity_t* ent, SavePosition* pos)
+{
+	ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+	G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
+
+	VectorCopy(pos->origin, ent->client->ps.origin);
+	VectorClear(ent->client->ps.velocity);
+
+	if (ent->client->pers.loadViewAngles)
+	{
+		SetClientViewAngle(ent, pos->vangles);
+	}
+
+	ent->client->ps.pm_time = 1; // Crashland + instant load bug fix.
 }
 
 SaveSystem::SaveSystem(const Session *session) :

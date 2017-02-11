@@ -12,6 +12,9 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <memory>
+#include <vector>
+
 #include "../game/q_shared.h"
 #include "tr_types.h"
 #include "../game/bg_public.h"
@@ -1125,7 +1128,6 @@ typedef struct
 	vec4_t xhairColorAlt;
 	vec4_t speedColor;
 	vec4_t keysColor;
-	vec4_t runTimerColor;
 
 	// Arnout: allow overriding of countdown sounds
 	char fiveMinuteSound_g[MAX_QPATH];
@@ -1213,10 +1215,6 @@ typedef struct
 	qboolean resetmaxspeed;
 	qboolean routeDesigner;
 
-	qboolean freeCam;
-	vec3_t freeCamPos;
-	vec3_t freeCamAngles;
-
 	char ipAddr[128];
 	int lastScoreTime;
 
@@ -1241,9 +1239,11 @@ typedef struct
 	float currentFovValue;
 	qboolean hasTimerun;
 
+	// ETJump: player transparency
 	float currentTransparencyValue;
-	// used for noactivatelean
-	int etjActivateKey;
+
+	// ETJump: hold last jump position for chs
+	vec3_t etjLastJumpPos;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -1903,6 +1903,23 @@ typedef struct oidInfo_s
 
 #define NUM_ENDGAME_AWARDS 14
 
+typedef struct demoCam_s
+{
+	qboolean renderingFreeCam;
+	qboolean setCamAngles;   //are we overriding angles via freecamSetPos
+
+	vec3_t camAngle; // stores the angle of our cam
+	vec3_t camOrigin; // stores the origin of our cam
+	vec3_t velocity;
+
+	qboolean startLean;
+	qboolean noclip;
+
+	int commandTime;
+
+	int move;
+	int turn;
+} demoCam_t;
 
 // The client game static (cgs) structure hold everything
 // loaded or calculated from the gamestate.  It will NOT
@@ -1937,6 +1954,7 @@ typedef struct
 	int voteNo;
 	qboolean voteModified;                  // beep whenever changed
 	char voteString[MAX_STRING_TOKENS];
+	bool votedYes;
 
 	int teamVoteTime[2];
 	int teamVoteYes[2];
@@ -2125,6 +2143,8 @@ typedef struct
 	oidInfo_t oidInfo[MAX_OID_TRIGGERS];
 
 	qboolean initing;
+
+	demoCam_t demoCam;
 } cgs_t;
 
 //==============================================================================
@@ -2346,15 +2366,17 @@ extern vmCvar_t cg_hideMe;
 extern vmCvar_t cg_nofatigue;
 extern vmCvar_t com_maxfps;
 extern vmCvar_t com_hunkmegs;
+
 extern vmCvar_t cg_drawCGaz;
 extern vmCvar_t cg_CGazY;
 extern vmCvar_t cg_CGazHeight;
 extern vmCvar_t cg_CGazWidth;
+extern vmCvar_t etj_CGazColor1;
+extern vmCvar_t etj_CGazColor2;
 extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
+
 extern vmCvar_t cg_drawOB;
-extern vmCvar_t cg_drawspeedX;
-extern vmCvar_t cg_drawspeedY;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
 extern vmCvar_t cg_keysX;
@@ -2380,6 +2402,11 @@ extern vmCvar_t cg_speedSizeY;
 extern vmCvar_t cg_speedColor;
 extern vmCvar_t cg_speedAlpha;
 extern vmCvar_t etj_speedShadow;
+extern vmCvar_t etj_drawMaxSpeed;
+extern vmCvar_t etj_maxSpeedX;
+extern vmCvar_t etj_maxSpeedY;
+extern vmCvar_t etj_maxSpeedDuration;
+
 extern vmCvar_t cg_adminpassword;
 extern vmCvar_t cg_username;
 extern vmCvar_t cg_popupTime;
@@ -2447,7 +2474,6 @@ extern vmCvar_t player_spectatorInfoY;
 extern vmCvar_t player_drawRunTimer;
 extern vmCvar_t player_runTimerX;
 extern vmCvar_t player_runTimerY;
-extern vmCvar_t player_runTimerColor;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 
@@ -2486,6 +2512,19 @@ extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
 extern vmCvar_t etj_stretchCgaz;
 extern vmCvar_t etj_noActivateLean;
+
+extern vmCvar_t shared;
+
+extern vmCvar_t etj_drawObWatcher;
+extern vmCvar_t etj_obWatcherX;
+extern vmCvar_t etj_obWatcherY;
+
+extern vmCvar_t etj_demo_yawturnspeed;
+extern vmCvar_t etj_demo_pitchturnspeed;
+extern vmCvar_t etj_demo_rollspeed;
+extern vmCvar_t etj_demo_lookat;
+extern vmCvar_t etj_demo_freecamspeed;
+extern vmCvar_t etj_predefineddemokeys;
 
 //
 // cg_main.c
@@ -2585,7 +2624,18 @@ void CG_DrawBigStringColor2(int x, int y, const char *s, vec4_t color);
 // END JOSEPH
 int CG_DrawStrlen(const char *str);
 
+namespace ETJump
+{
+	int DrawStringWidth(const char* text, float scalex);
+	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style);
+	void DrawMiniString(int x, int y, const char *s, float alpha);
+	void DrawSmallString(int x, int y, const char *s, float alpha);
+	void DrawBigString(int x, int y, const char *s, float alpha);
+}
+
+
 float *CG_FadeColor(int startMsec, int totalMsec);
+float CG_FadeAlpha(int startMsec, int totalMsec);
 float *CG_TeamColor(int team);
 void CG_TileClear(void);
 void CG_ColorForHealth(vec4_t hcolor);
@@ -2680,6 +2730,9 @@ void CG_FTTrace(trace_t *result, const vec3_t start, const vec3_t mins, const ve
 void CG_PredictPlayerState(void);
 //void CG_LoadDeferredPlayers( void );
 
+void CG_RunBindingBuf(int key, qboolean down, char *buf);
+void CG_RunBinding(int key, qboolean down);
+void CG_EDV_RunInput(void);
 
 //
 // cg_events.c
@@ -3025,6 +3078,22 @@ void CG_Info_f(void);
 
 void CG_Manual_f(void);
 
+void CG_FreecamTurnLeftDown_f(void);
+void CG_FreecamTurnLeftUp_f(void);
+void CG_FreecamTurnRightDown_f(void);
+void CG_FreecamTurnRightUp_f(void);
+void CG_FreecamTurnUpDown_f(void);
+void CG_FreecamTurnUpUp_f(void);
+void CG_FreecamTurnDownDown_f(void);
+void CG_FreecamTurnDownUp_f(void);
+void CG_FreecamRollLeftDown_f(void);
+void CG_FreecamRollLeftUp_f(void);
+void CG_FreecamRollRightDown_f(void);
+void CG_FreecamRollRightUp_f(void);
+void CG_Freecam_f(void);
+void CG_FreecamSetPos_f(void);
+void CG_FreecamGetPos_f(void);
+
 //
 // cg_servercmds.c
 //
@@ -3070,16 +3139,13 @@ void CG_AddAtmosphericEffects();
 
 void trap_PumpEventLoop(void);
 
-// print message on the local console
-void        trap_Print(const char *fmt);
-
-// abort the game
-void        trap_Error(const char *fmt);
-
 // milliseconds should only be used for performance tuning, never
 // for anything game related.  Get time from the CG_DrawActiveFrame parameter
 int         trap_Milliseconds(void);
 int         trap_RealTime(qtime_t *qtime);
+
+// ETJump: refactored print related syscalls to own file
+#include "cg_print_syscalls.h"
 
 // console variable interaction
 void        trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);
@@ -3783,7 +3849,24 @@ void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void CG_AdjustPosX(float *x);
 int CG_GetScreenWidth();
 void CG_DisableProperScaling(qboolean yes);
-void CG_CheckActivateLean();
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class ClientCommandsHandler;
+	class EntityEventsHandler;
+	class IRenderable;
+
+	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
+	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::unique_ptr<EntityEventsHandler> entityEventsHandler;
+	extern std::vector<std::unique_ptr<IRenderable>> renderables;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();

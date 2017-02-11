@@ -5,7 +5,10 @@
  *
 */
 
+#include <boost/algorithm/string.hpp>
+#include "etj_deathrun_system.h"
 #include "g_local.h"
+#include "etj_utilities.h"
 
 //==========================================================
 
@@ -131,7 +134,15 @@ void SP_target_score(gentity_t *ent)
 	ent->use = Use_Target_Score;
 }
 
-
+enum class TargetPrintSpawnFlags
+{
+	None = 0,
+	AxisOnly = 1,
+	AlliedOnly = 2,
+	Private = 4,
+	LocationCPM = 8,
+	ReplaceETJumpShortcuts = 16
+};
 
 //==========================================================
 
@@ -141,7 +152,18 @@ If "private", only the activator gets the message.  If no checks, all clients ge
 */
 void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
-	if ((ent->spawnflags & 4))
+	auto location = ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
+		? "cpm" : "cp";
+	char message[MAX_TOKEN_CHARS]{};
+	Q_strncpyz(message, ent->message, sizeof(message));
+	if (ent->client && ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts))
+	{
+		std::string msg = message;
+		boost::replace_all(msg, "[n]", ent->client->pers.netname);
+		Q_strncpyz(message, msg.c_str(), sizeof(message));
+	}
+
+	if ((ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::Private)))
 	{
 		if (!activator)
 		{
@@ -150,25 +172,25 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 
 		if (activator->client)
 		{
-			trap_SendServerCommand(activator - g_entities, va("cp \"%s\"", ent->message));
+			trap_SendServerCommand(activator - g_entities, va("%s \"%s\"", location, message));
 			return;
 		}
 	}
 
 	if (ent->spawnflags & 3)
 	{
-		if (ent->spawnflags & 1)
+		if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AxisOnly))
 		{
-			G_TeamCommand(TEAM_AXIS, va("cp \"%s\"", ent->message));
+			G_TeamCommand(TEAM_AXIS, va("%s \"%s\"", location, message));
 		}
-		if (ent->spawnflags & 2)
+		if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AlliedOnly))
 		{
-			G_TeamCommand(TEAM_ALLIES, va("cp \"%s\"", ent->message));
+			G_TeamCommand(TEAM_ALLIES, va("%s \"%s\"", location, message));
 		}
 		return;
 	}
 
-	trap_SendServerCommand(-1, va("cp \"%s\"", ent->message));
+	trap_SendServerCommand(-1, va("%s \"%s\"", location, message));
 }
 
 void SP_target_print(gentity_t *ent)
@@ -605,8 +627,18 @@ void SP_target_laser(gentity_t *self)
 }
 
 
-//==========================================================
-
+/* 
+target_teleporter
+=====================
+spawnflags:
+	0	Sets destination angles, but preserves player's velocity direction, 
+		so we move exactly same direction as before
+	1	Sets destination angles and resets velocity
+	2	Sets destination angles and converts velocity to match destination direction,
+		so we are now moving same way as our teleporter_dest angle is pointing at
+	4	Converts player's angles(yaw) and velocity to be relative to the new destination angles
+	8   Same as 4 but also preserves pitch
+*/
 void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	gentity_t *dest;
@@ -624,8 +656,11 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	if (self->spawnflags & 1)
 	{
-		VectorClear(activator->client->ps.velocity);
+		// ETJump: we we need atleast minimal speed to make TeleportPlayerKeepAngles working with this 
+		//         spawnflag, else it doesn't know which trigger side we enter
+		VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
 	}
+
 	if (self->spawnflags & 2)
 	{
 		TeleportPlayerExt(activator, dest->s.origin, dest->s.angles);
@@ -634,155 +669,13 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	if (self->spawnflags & 4)
 	{
-		vec3_t   newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
-		vec3_t   triggerOrigin, tempActivator, tempOrigin;
-		vec3_t   normalizedVelocity, veloAngles;
-		vec3_t   sPlane[6];
-		vec_t    minDistYZ, minDistXZ, minDistXY;
-		vec_t    speed, length;
-		qboolean negDir = qfalse;
+		TeleportPlayerKeepAngles_Clank(activator, other, dest->s.origin, dest->s.angles);
+		return;
+	}
 
-		// normalized velocity is the directionvector for calculating the intersectionpoints
-		VectorNormalize2(activator->client->ps.velocity, normalizedVelocity);
-
-		// calculate the origin of the triggerbrush
-		VectorSubtract(other->r.maxs, other->r.mins, tempOrigin);
-		VectorMA(other->r.mins, 0.5f, tempOrigin, triggerOrigin);
-
-		// calculate the intersection-points of playermovement with the 6 planes of the triggerbrush
-		// the shortest distance between player and intersectionpoints selects the plane
-		// (where did we get into the trigger, from what side?)
-		if (normalizedVelocity[0] != 0.0f)
-		{
-			VectorMA(activator->client->ps.origin, (other->r.mins[0] - activator->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[0]);
-			VectorMA(activator->client->ps.origin, (other->r.maxs[0] - activator->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[3]);
-			minDistYZ = min(VectorDistance(activator->client->ps.origin, sPlane[0]), VectorDistance(activator->client->ps.origin, sPlane[3]));
-		}
-		else
-		{
-			minDistYZ = 10000.0f;
-		}
-		if (normalizedVelocity[1] != 0.0f)
-		{
-			VectorMA(activator->client->ps.origin, (other->r.mins[1] - activator->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[1]);
-			VectorMA(activator->client->ps.origin, (other->r.maxs[1] - activator->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[4]);
-			minDistXZ = min(VectorDistance(activator->client->ps.origin, sPlane[1]), VectorDistance(activator->client->ps.origin, sPlane[4]));
-		}
-		else
-		{
-			minDistXZ = 10000.0f;
-		}
-		if (normalizedVelocity[2] != 0.0f)
-		{
-			VectorMA(activator->client->ps.origin, (other->r.mins[2] - activator->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[2]);
-			VectorMA(activator->client->ps.origin, (other->r.maxs[2] - activator->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[5]);
-			minDistXY = min(VectorDistance(activator->client->ps.origin, sPlane[2]), VectorDistance(activator->client->ps.origin, sPlane[5]));
-		}
-		else
-		{
-			minDistXY = 10000.0f;
-		}
-
-
-		// copy origins to tempvars
-		VectorCopy(triggerOrigin, tempOrigin);
-		VectorCopy(activator->client->ps.origin, tempActivator);
-
-		////////////////////////////////////////////////////////////////////////////////////////
-		// PLANE YZ (NORMAL X)
-		if (minDistYZ < minDistXZ && minDistYZ < minDistXY)
-		{
-			// check +/- direction of trigger
-			if (triggerOrigin[0] < activator->client->ps.origin[0])
-			{
-				negDir = qtrue;
-			}
-
-			// calc viewangles
-			VectorCopy(dest->s.angles, newViewAngles);
-			newViewAngles[YAW] += activator->client->ps.viewangles[YAW];
-
-			// calc velocity
-			speed = VectorLength(activator->client->ps.velocity);
-			vectoangles(activator->client->ps.velocity, veloAngles);
-			veloAngles[YAW] += dest->s.angles[YAW];
-			if (negDir)
-			{
-				veloAngles[YAW] += 180.0f;
-			}
-			AngleVectors(veloAngles, newVelocity, NULL, NULL);
-			VectorScale(newVelocity, speed, newVelocity);
-
-			// calc origin
-			tempOrigin[0] = tempActivator[0] = 0.0f;
-			VectorSubtract(tempActivator, tempOrigin, offset);
-			if (negDir)
-			{
-				offset[1] *= -1.0f;
-			}
-			length    = offset[1];
-			offset[0] = sin(-DEG2RAD(dest->s.angles[1])) * length;
-			offset[1] = cos(-DEG2RAD(dest->s.angles[1])) * length;
-		}
-		////////////////////////////////////////////////////////////////////////////////////////
-		// PLANE XZ (NORMAL Y)
-		else if (minDistXZ < minDistYZ && minDistXZ < minDistXY)
-		{
-			// check +/- direction of trigger
-			if (triggerOrigin[1] < activator->client->ps.origin[1])
-			{
-				negDir = qtrue;
-			}
-
-			// calc viewangles
-			VectorCopy(dest->s.angles, newViewAngles);
-			newViewAngles[YAW] += (activator->client->ps.viewangles[YAW] - 90.0f);
-
-			// calc velocity
-			speed = VectorLength(activator->client->ps.velocity);
-			vectoangles(activator->client->ps.velocity, veloAngles);
-			veloAngles[YAW] += dest->s.angles[YAW] - 90.0f;
-			if (negDir)
-			{
-				veloAngles[YAW] += 180.0f;
-			}
-			AngleVectors(veloAngles, newVelocity, NULL, NULL);
-			VectorScale(newVelocity, speed, newVelocity);
-
-			// calc origin offset
-			tempOrigin[1] = tempActivator[1] = 0.0f;
-			VectorSubtract(tempActivator, tempOrigin, offset);
-			if (triggerOrigin[1] < activator->client->ps.origin[1])
-			{
-				offset[0] *= -1.0f;
-			}
-			length    = offset[0];
-			offset[1] = sin(DEG2RAD(dest->s.angles[1] - 90.0f)) * length;
-			offset[0] = cos(DEG2RAD(dest->s.angles[1] - 90.0f)) * length;
-		}
-		////////////////////////////////////////////////////////////////////////////////////////
-		// PLANE XY (NORMAL Z) // makes no sense, set dest values
-		else if (minDistXY < minDistXZ && minDistXY < minDistYZ)
-		{
-			// viewangles
-			VectorCopy(dest->s.angles, newViewAngles);
-			// velocity
-			VectorCopy(vec3_origin, newVelocity);
-			// origin
-			VectorCopy(vec3_origin, offset);
-		}
-
-		// add origin offset
-		VectorAdd(dest->s.origin, offset, newOrigin);
-		// set velocity
-		VectorCopy(newVelocity, activator->client->ps.velocity);
-		// correct Viewangles
-		if (negDir)
-		{
-			newViewAngles[YAW] += 180.0f;
-		}
-
-		TeleportPlayer(activator, newOrigin, newViewAngles);
+	if (self->spawnflags & 8)
+	{
+		TeleportPlayerKeepAngles(activator, other, dest->s.origin, dest->s.angles);
 		return;
 	}
 
@@ -1725,7 +1618,7 @@ void target_printname_use(gentity_t *ent, gentity_t *other, gentity_t *activator
 	char text[MAX_TOKEN_CHARS];
 	int  i = 0;
 
-	Com_sprintf(msg, sizeof(msg), "cpm \"%s", ent->message);
+	Com_sprintf(msg, sizeof(msg), "cpm \"%s\"", ent->message);
 
 	while (msg[i])
 	{
@@ -2080,12 +1973,17 @@ void SP_target_decay(gentity_t *self)
 // Begin of timeruns support
 
 // target_starttimer
+//------------------
 // name:    run name.
 // spawnflags:
-// 0 always reset the run
-// 1 reset the run on team change
-// 2 reset the run on death
-// 4 only reset when you reach the end
+//    0 always reset the run
+//    1 reset the run on team change
+//    2 reset the run on death
+//    4 only reset when you reach the end
+//    8 reset/disable the run if player doesnt use fixed pmove
+//   16 disable use of save slots and backups
+//   32 disable explosive weapons pickup
+//   64 disable potralgun pickup
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	float speed = VectorLength(activator->client->ps.velocity);
@@ -2104,18 +2002,28 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		return;
 	}
 
+	if (!activator->client->pers.enableTimeruns)
+	{
+		return;
+	}
+
 	if (speed > self->velocityUpperLimit)
 	{
 		trap_SendServerCommand(ClientNum(activator), va("cp \"^3WARNING: ^7Timerun was not started. Too high starting speed (%.2f > %.2f)\n\"", speed, self->velocityUpperLimit));
 		return;
 	}
 
-	if (!activator->client->pers.enableTimeruns)
-	{
-		return;
-	}
-
 	activator->client->sess.runSpawnflags = self->spawnflags;
+
+	// disable timer if pmove is not fixed
+	if (activator->client->sess.runSpawnflags == 0
+			|| activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
+	{
+		if (activator->client->pers.pmoveFixed == qfalse)
+		{
+			return;
+		}
+	}
 
 	StartTimer(level.timerunNames[self->runIndex], activator);
 }
@@ -2378,4 +2286,143 @@ void SP_target_set_health(gentity_t *self)
 	}
 
 	self->use = target_set_health_use;
+}
+
+ETJump::DeathrunSystem::PrintLocation parseLocation(const char* locationStr)
+{
+	if (!Q_stricmp(locationStr, "console"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Console;
+	}
+	if (!Q_stricmp(locationStr, "chat"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Chat;
+	}
+	if (!Q_stricmp(locationStr, "center"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Center;
+	}
+	if (!Q_stricmp(locationStr, "left"))
+	{
+		return ETJump::DeathrunSystem::PrintLocation::Left;
+	}
+	G_Error("target_deathrun_checkpoint: unknown value for key `location`: `%s`\nAvailable values are: \n* console\n* chat\n* center\n* left\n", std::string(locationStr).c_str());
+	return ETJump::DeathrunSystem::PrintLocation::Left;
+}
+
+void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	if (!ETJump::deathrunSystem->hitStart(ClientNum(activator)))
+	{
+		return;
+	}
+
+	ResetSavedPositions(activator);
+
+	activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::Active);
+
+	if (self->spawnflags & static_cast<int>(DeathrunFlags::NoDamageRuns))
+	{
+		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoDamageRuns);
+		activator->health = 1;
+	}
+
+	if (self->spawnflags & static_cast<int>(DeathrunFlags::NoSave))
+	{
+		activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoSave);
+	}
+
+	auto clientNum = ClientNum(activator);
+	auto affectedClients = Utilities::getSpectators(clientNum);
+	affectedClients.push_back(clientNum);
+	auto message = ETJump::deathrunSystem->getStartMessage();
+	auto location = ETJump::deathrunSystem->getPrintLocation();
+	if (message.length() > 0)
+	{
+		boost::replace_all(message, "[n]", activator->client->pers.netname);
+		auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
+		auto output = va(fmtString.c_str(), message.c_str());
+		for (const auto & c : affectedClients)
+		{
+			trap_SendServerCommand(c, output);
+		}
+	}
+}
+
+void SP_target_deathrun_start(gentity_t *self)
+{
+	self->use = target_deathrun_start_use;
+
+	char *s = nullptr; 
+	G_SpawnString("message", "[n] ^7started death run!", &s);
+	ETJump::deathrunSystem->addStartMessage(s);
+	G_SpawnString("endMessage", "[n] ^7died! Score: [s]", &s);
+	ETJump::deathrunSystem->addEndMessage(s);
+	G_SpawnString("checkpointMessage", "[n] ^7hit the checkpoint! Score: [s]", &s);
+	ETJump::deathrunSystem->addDefaultCheckpointMessage(s);
+	G_SpawnString("sound", "", &s);
+	ETJump::deathrunSystem->addDefaultSoundPath(s);
+	G_SpawnString("location", "left", &s);
+	ETJump::deathrunSystem->addStartAndCheckpointMessageLocation(parseLocation(s));
+}
+
+void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	if (!ETJump::deathrunSystem->hitCheckpoint(self->id, ClientNum(activator)))
+	{
+		return;
+	}
+
+	auto message = ETJump::deathrunSystem->getCheckpointMessage(self->id);
+	auto sound = ETJump::deathrunSystem->getSoundPath(self->id);
+	auto clientNum = ClientNum(activator);
+	auto affectedPlayers = Utilities::getSpectators(clientNum);
+	affectedPlayers.push_back(clientNum);
+
+	if (sound.length() > 0)
+	{
+		auto soundIndex = G_SoundIndex(sound.c_str());
+		for (const auto & cnum : affectedPlayers)
+		{
+			G_AddEvent((g_entities + cnum), EV_GENERAL_SOUND, soundIndex);
+		}
+	}
+
+	if (message.length() > 0)
+	{
+		auto location = ETJump::deathrunSystem->getPrintLocation(self->id);
+		auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
+		auto checkpointMessage = ETJump::deathrunSystem->getCheckpointMessage(self->id);
+		auto score = ETJump::deathrunSystem->getScore(clientNum);
+		boost::replace_all(message, "[n]", activator->client->pers.netname);
+		boost::replace_all(message, "[s]", std::to_string(score));
+		auto output = va(fmtString.c_str(), message.c_str());
+		for (const auto & cnum : affectedPlayers)
+		{
+			trap_SendServerCommand(cnum, output);
+		}
+	}
+}
+
+void SP_target_deathrun_checkpoint(gentity_t *self)
+{
+	char *locationStr = nullptr;
+	char *message = nullptr;
+	char *sound = nullptr;
+	G_SpawnString("location", "left", &locationStr);
+	auto location = parseLocation(locationStr);
+	G_SpawnString("message", "", &message);
+	G_SpawnString("sound", "", &sound);
+	self->id = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
+	self->use = target_deathrun_checkpoint_use;
 }

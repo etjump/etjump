@@ -53,6 +53,10 @@ static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowe
 			{
 				cl->ps.weapon = WP_MP40;
 			}
+			else if (COM_BitCheck(cl->ps.weapons, WP_KAR98))
+			{
+				cl->ps.weapon = WP_KAR98;
+			}
 			else
 			{
 				cl->ps.weapon = WP_LUGER;
@@ -63,6 +67,10 @@ static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowe
 			if (COM_BitCheck(cl->ps.weapons, WP_THOMPSON))
 			{
 				cl->ps.weapon = WP_THOMPSON;
+			}
+			else if (COM_BitCheck(cl->ps.weapons, WP_CARBINE))
+			{
+				cl->ps.weapon = WP_CARBINE;
 			}
 			else
 			{
@@ -92,6 +100,7 @@ void Utilities::startRun(int clientNum)
 		WP_DYNAMITE,
 		WP_GRENADE_LAUNCHER,
 		WP_GRENADE_PINEAPPLE,
+		WP_M7,
 		WP_SATCHEL_DET,
 		WP_SATCHEL,
 		WP_MORTAR,

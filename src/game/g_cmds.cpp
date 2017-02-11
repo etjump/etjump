@@ -1,8 +1,27 @@
 #include "g_local.h"
+#include <vector>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include "etj_result_set_formatter.h"
+#include "utilities.hpp"
 
 void BotDebug(int clientNum);
 void GetBotAutonomies(int clientNum, int *weapAutonomy, int *moveAutonomy);
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
+
+namespace ETJump
+{
+	enum class VotingTypes
+	{
+		VoteYes,
+		VoteNo,
+		RevoteYes,
+		RevoteNo
+	};
+
+	const static int VOTING_ATTEMPTS { 3 };
+	const static int VOTING_TIMEOUT { 2000 };
+}
 
 /*
 ==================
@@ -125,7 +144,6 @@ CheatsOk
 */
 qboolean    CheatsOk(gentity_t *ent)
 {
-#ifdef EDITION999
 	if (!g_cheats.integer)
 	{
 		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
@@ -137,19 +155,6 @@ qboolean    CheatsOk(gentity_t *ent)
 		return qfalse;
 	}
 	return qtrue;
-#else
-	if (!g_cheats.integer)
-	{
-		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
-		return qfalse;
-	}
-	if (ent->health <= 0)
-	{
-		trap_SendServerCommand(ent - g_entities, va("print \"You must be alive to use this command.\n\""));
-		return qfalse;
-	}
-	return qtrue;
-#endif
 }
 
 
@@ -433,11 +438,12 @@ int ClientNumbersFromString(const char *s, int *plist)
 	return found;
 }
 
-qboolean G_MatchOnePlayer(int *plist, char *err, int len)
+qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter)
 {
 	gclient_t *cl;
 	int       *p;
 	char      line[MAX_NAME_LENGTH + 10];
+	int       matches = 0;
 
 	err[0]  = '\0';
 	line[0] = '\0';
@@ -451,11 +457,18 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len)
 	{
 		Q_strcat(err, len, "more than one player name matches. "
 		                   "be more specific or use the slot #:");
+
 		for (p = plist; *p != -1; p++)
 		{
 			cl = &level.clients[*p];
 			if (cl->pers.connected == CON_CONNECTED || cl->pers.connected == CON_CONNECTING)
 			{
+				//ETJump: filtering out specific team
+ 				if (cl->sess.sessionTeam == filter)
+				{
+					continue;
+				}
+
 				Com_sprintf(line, MAX_NAME_LENGTH + 10,
 				            "\n%2i - %s^7",
 				            *p,
@@ -464,12 +477,70 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len)
 				{
 					break;
 				}
-				Q_strcat(err, len, line);
+
+				Q_strcat(err, len, line);		
+				//ETJump: save the last matching result in plist, so we could
+				//        use it if we end up having 1 match
+				*plist = *p;
+
+				matches++;
 			}
 		}
+		//ETJump: we get one match after filtering out spectators,
+		//        plist holds the result
+		if (matches == 1)
+		{
+			return qtrue;
+		}
+		//ETJump: no matches after filtering out spectators
+		if (!matches)
+		{
+			err[0] = '\0';
+			Q_strcat(err, len, "no active player by that name or slot #");
+		}
+
 		return qfalse;
 	}
 	return qtrue;
+}
+
+// Updates voting stats
+void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote)
+{
+	switch (vote)
+	{
+	case ETJump::VotingTypes::VoteYes:
+		level.voteInfo.voteYes++;
+		client->votingInfo.isVotedYes = true;
+		break;
+	case ETJump::VotingTypes::VoteNo:
+		level.voteInfo.voteNo++;
+		client->votingInfo.isVotedYes = false;
+		break;
+	case ETJump::VotingTypes::RevoteYes:
+		level.voteInfo.voteYes++;
+		level.voteInfo.voteNo--;
+		client->votingInfo.isVotedYes = true;
+		break;
+	case ETJump::VotingTypes::RevoteNo:
+		level.voteInfo.voteYes--;
+		level.voteInfo.voteNo++;
+		client->votingInfo.isVotedYes = false;
+	}
+
+	if (client->votingInfo.isVotedYes)
+	{
+		trap_SendServerCommand(client->ps.clientNum, "voted yes");
+	} else
+	{
+		trap_SendServerCommand(client->ps.clientNum, "voted no");
+	}
+
+	client->votingInfo.time = level.time;
+	client->votingInfo.attempts++;
+
+	trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+	trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 }
 
 
@@ -538,17 +609,10 @@ void Cmd_Give_f(gentity_t *ent)
 //	trace_t		trace;
 	int      amount;
 	qboolean hasAmount = qfalse;
-#ifdef EDITION999
 	if (!CheatsOk(ent))
 	{
 		return;
 	}
-#else
-	if (!CheatsOk(ent))
-	{
-		return;
-	}
-#endif
 
 	//----(SA)	check for an amount (like "give health 30")
 	amt = ConcatArgs(2);
@@ -752,8 +816,6 @@ void Cmd_God_f(gentity_t *ent)
 		return;
 	}
 
-
-#ifdef EDITION999
 	if (!CheatsOk(ent))
 	{
 		return;
@@ -764,18 +826,6 @@ void Cmd_God_f(gentity_t *ent)
 		CP("cp \"God has been disabled on this map.\n\"");
 		return;
 	}
-#else
-	if (!CheatsOk(ent))
-	{
-		return;
-	}
-
-	if (level.noGod)
-	{
-		CP("cp \"God has been disabled on this map.\n\"");
-		return;
-	}
-#endif // EDITION999
 
 	name = ConcatArgs(1);
 
@@ -2062,11 +2112,11 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 
 	if (mode == SAY_TEAM || mode == SAY_BUDDY)
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2], vsay->variant, vsay->custom));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, static_cast<int>(ent->s.pos.trBase[0]), static_cast<int>(ent->s.pos.trBase[1]), static_cast<int>(ent->s.pos.trBase[2]), vsay->variant, vsay->random, vsay->custom));
 	}
 	else
 	{
-		CPx(other - g_entities, va("%s %d %d %d %s %i \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->custom));
+		CPx(other - g_entities, va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, vsay->variant, vsay->random, vsay->custom));
 	}
 }
 
@@ -2204,10 +2254,12 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 {
 
 	vsayCmd_t vsay;
-	int id = 1, cust = 2;
+	auto id = 1, cust = 2;
 	char variant[2];
 
 	memset(&vsay, 0, sizeof(vsay));
+	// get random seed beforehand to keep it same for all clients
+	vsay.random = random();
 
 	if (mode != SAY_BUDDY)
 	{
@@ -2264,10 +2316,10 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 	}
 
 	if (g_customVoiceChat.integer) {
-		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+		G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 	}
 	else {
-		G_Voice(ent, NULL, mode, &vsay, voiceonly);
+		G_Voice(ent, nullptr, mode, &vsay, voiceonly);
 	}
 
 }
@@ -2548,6 +2600,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	// it only changes the clientside info text, not everything.
 
 	level.voteInfo.voteYes = 1;
+	trap_SendServerCommand(ent - g_entities, "voted yes");
+
 	if (customMapType)
 	{
 		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, customMapType));
@@ -2603,11 +2657,13 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent)
 {
 	char msg[64];
+	auto *client = ent->client;
 
 	if (ent->client->pers.applicationEndTime > level.time)
 	{
 
 		gclient_t *cl = g_entities[ent->client->pers.applicationClient].client;
+
 		if (!cl)
 		{
 			return;
@@ -2800,9 +2856,10 @@ void Cmd_Vote_f(gentity_t *ent)
 		// cancel it.
 		if (ClientNum(ent) == level.voteInfo.voter_cn)
 		{
-			if ((msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1'))
+			if ((msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1'))
 			{
 				// Do nothing...
+				return;
 			}
 			else
 			{
@@ -2812,7 +2869,60 @@ void Cmd_Vote_f(gentity_t *ent)
 				return;
 			}
 		}
-		trap_SendServerCommand(ent - g_entities, "print \"Vote already cast.\n\"");
+
+		// so it's first 10s if vote time set to 30s
+		auto allowedRevoteTimeRange = level.voteInfo.voteTime + (VOTE_TIME / 3);
+
+		// don't allow to revote anymore if time range is passed or there are no attempts left
+		if (level.time > allowedRevoteTimeRange || client->votingInfo.attempts > ETJump::VOTING_ATTEMPTS)
+		{
+			if (client->votingInfo.time + ETJump::VOTING_TIMEOUT > level.time)
+			{
+				// stops excessive spam from server if user keeps votting in timeouts
+				if (!client->votingInfo.isWarned)
+				{
+					client->votingInfo.isWarned = true;
+					trap_SendServerCommand(ent - g_entities, "print \"You can't revote anymore.\n\"");
+				}
+				return;
+			}
+			
+			client->votingInfo.time = level.time;
+			client->votingInfo.isWarned = false;
+			return;
+		}
+
+		// defaults to 2s timeout
+		if (client->votingInfo.time + ETJump::VOTING_TIMEOUT > level.time)
+		{
+			// stops excessive spam from server if user keeps votting in timeouts
+			if(!client->votingInfo.isWarned)
+			{
+				client->votingInfo.isWarned = true;
+				trap_SendServerCommand(ent - g_entities, "print \"You can't revote that often.\n\"");
+			}
+			return;
+		}
+
+		client->votingInfo.isWarned = false;
+		
+		// allow revote
+		if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')
+		{
+			if (!client->votingInfo.isVotedYes)
+			{
+				etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteYes);
+				trap_SendServerCommand(ent - g_entities, va("print \"Vote cast, you have %d attempts left.\n\"", ETJump::VOTING_ATTEMPTS + 1 - client->votingInfo.attempts));
+			} 
+		} else
+		{
+			if (client->votingInfo.isVotedYes)
+			{
+				etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteNo);
+				trap_SendServerCommand(ent - g_entities, va("print \"Vote cast, you have %d attempts left.\n\"", ETJump::VOTING_ATTEMPTS + 1 - client->votingInfo.attempts));
+			}
+		}
+
 		return;
 	}
 	
@@ -2830,15 +2940,14 @@ void Cmd_Vote_f(gentity_t *ent)
 
 	trap_Argv(1, msg, sizeof(msg));
 
-	if (msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1')
+	if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')
 	{
-		level.voteInfo.voteYes++;
-		trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+		etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteYes);
+	
 	}
 	else
 	{
-		level.voteInfo.voteNo++;
-		trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+		etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteNo);
 	}
 
 	// a majority will be determined in G_CheckVote, which will also account
@@ -4419,6 +4528,22 @@ void Cmd_shrug_f(gentity_t *ent)
 	BG_AnimScriptEvent(&ent->client->ps, ent->client->pers.character->animModelInfo, ANIM_ET_NOPOWER, qtrue, qfalse);
 }
 
+// sends back timerun specific information, used to restore runtimer after cgame restart
+void Cmd_timerunStatus_f(gentity_t *ent)
+{
+	if (level.hasTimerun)
+	{
+		trap_SendServerCommand(ClientNum(ent), "hasTimerun 1");
+	}
+	else
+	{
+		trap_SendServerCommand(ClientNum(ent), "hasTimerun 0");
+	}
+
+	TimerunConnectNotify(ent);
+}
+
+
 /*
 =================
 Cmd_SwapPlacesWithBot_f
@@ -4543,7 +4668,7 @@ static command_t noIntermissionCommands[] =
 	//{ "save",				qfalse,	Cmd_Save_f },
 	{ "shrug",           qfalse, Cmd_shrug_f           },
 	//{ "savereset",          qfalse, Cmd_SaveReset_f },
-
+	{ "timerun_status",  qfalse, Cmd_timerunStatus_f   },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
@@ -4576,6 +4701,8 @@ qboolean ClientIsFlooding(gentity_t *ent)
 
 	return qfalse;
 }
+
+std::unique_ptr<Utilities::ResultSetFormatter> fmt = std::unique_ptr<Utilities::ResultSetFormatter>(new Utilities::ResultSetFormatter);
 
 void ClientCommand(int clientNum)
 {
@@ -4772,6 +4899,25 @@ void ClientCommand(int clientNum)
 
 	if (OnConnectedClientCommand(ent))
 	{
+		return;
+	}
+
+	if (!Q_stricmp(cmd, "rsf"))
+	{
+		auto printer = BufferPrinter(ent);
+		printer.Print("\n");
+		printer.Print(fmt->toString({ "Index", "Value1", "C", "Value2", "TestValue", "idx" }, { { { "Index", "ab" },{ "Value2", "27.2712" },{ "TestValue", "foobar1" } },{ { "Index", "123123123123" },{ "TestValue", "foobar2" } },{ { "Index", "52352352" },{ "TestValue", "foobar3" },{ "C", "Hello, world. This is a fairly long piece of stringHello, world. This is a fairly long piece of stringHello, world. This is a fairly long piece of string" } } }, 3, 0));
+		printer.Print("\n");
+		printer.Print(fmt->toString({ "Index", "Value1", "A", "Value2", "TestValue", "i", "idx", "Index" }, { { { "Index", "def" },{ "TestValue", "foobar1" } },{ { "Index", "5225552325" },{ "TestValue", "foobar2" } },{ { "Index", "523525225" },{ "TestValue", "foobar3" },{ "A", "Hello, world. This is a fairly long piece of string" } } }, 2, 1));
+		printer.Print("\n");
+		printer.Finish(false);
+		return;
+	}
+
+	if (!Q_stricmp(cmd, "test"))
+	{
+		ConsolePrintTo(ent, "    a");
+		ConsolePrintTo(ent, "\ta");
 		return;
 	}
 

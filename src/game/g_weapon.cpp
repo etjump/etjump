@@ -3433,10 +3433,10 @@ float G_GetWeaponSpread(int weapon)
 	case WP_CARBINE:
 	case WP_KAR98:
 	case WP_K43:
-		return 250;
+		return 0;
 	case WP_GARAND_SCOPE:
 	case WP_K43_SCOPE:
-		return 700;
+		return 0;
 	case WP_MOBILE_MG42:
 	case WP_MOBILE_MG42_SET:
 		return 2500;
@@ -3871,17 +3871,11 @@ Portal Gun
 ======================================================================
 */
 
-
 void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 {
-
-
-	#define PORTAL_GUN_RANGE 5000 //Feen: Iunno about this value, we'll
-	                              //      just have to play around with it...
-	                              //      and move it to g_local.h...
-
-	#define PORTAL_MIN_DIST 75.0f //Arbitrary, but it works...
-
+	const int MAX_PORTAL_RANGE   = 5000; // max range where you can place next portal gate
+	const float MIN_PORTALS_DIST = 75.0f; // min distance between two portal center points, used to avoid overlaping
+	const float MIN_ANGLES_DIFF  = 100.0f; // min angle difference between two portals, used to avoid overlaping
 
 	gentity_t *portal, *tent;
 	vec3_t    t_endpos;
@@ -3922,7 +3916,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	VectorMA(start, -4, up, start);
 
 	//End pos
-	VectorMA(trace_start, PORTAL_GUN_RANGE, forward, trace_end);
+	VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
 
 	//Trace
 	G_HistoricalTrace(ent, &tr, trace_start, NULL, NULL, trace_end, ent->s.number, MASK_PORTAL);
@@ -3958,7 +3952,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 	//Go ahead and calc new endpos just in case....
 	VectorMA(tr.endpos, 5, tr.plane.normal, t_endpos); //Changed from 32..
-
+	vectoangles(tr.plane.normal, t_portalAngles);
 
 	//check that portals aren't overlapping..
 	if ((ent->portalBlue) || (ent->portalRed))
@@ -3966,17 +3960,19 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 		if (PortalNumber == 1 && ent->portalRed)
 		{
-
-			if (Distance(t_endpos, ent->portalRed->s.origin) < PORTAL_MIN_DIST)
+			
+			if (Distance(t_portalAngles, ent->portalRed->s.angles) < MIN_ANGLES_DIFF &&
+				Distance(tr.endpos, ent->portalRed->s.origin) < MIN_PORTALS_DIST)
 			{
 				return;
-			}
+			}			
 
 		}
 		else if (PortalNumber == 2 && ent->portalBlue)
 		{
 
-			if (Distance(t_endpos, ent->portalBlue->s.origin) < PORTAL_MIN_DIST)
+			if (Distance(t_portalAngles, ent->portalBlue->s.angles) < MIN_ANGLES_DIFF &&
+				Distance(tr.endpos, ent->portalBlue->s.origin) < MIN_PORTALS_DIST)
 			{
 				return;
 			}
@@ -4001,9 +3997,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 		ent->portalRed = NULL;
 
 	}
-
-
-
 
 
 	//DEBUG - RailTrail...
@@ -4066,8 +4059,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	//Bounding box
 
 	//New bbox code... 12/10/11
-
-	vectoangles(tr.plane.normal, t_portalAngles);
 
 	//if ((t_portalAngles[PITCH] >= -105 && t_portalAngles[PITCH] <= -75) || (t_portalAngles[PITCH] >= -285 && t_portalAngles[PITCH] <= -255)) { //Horizontal portal (floor/ceiling)
 	if ((t_portalAngles[PITCH] >= -135 && t_portalAngles[PITCH] <= -45) || (t_portalAngles[PITCH] >= -315 && t_portalAngles[PITCH] <= -225))   //Horizontal portal (floor/ceiling)
@@ -5256,7 +5247,15 @@ void FireWeapon(gentity_t *ent)
 
 	//Feen: PGM
 	case WP_PORTAL_GUN:
-		Weapon_Portal_Fire(ent, 1);   //Feen: '1' indicates blue portal, red portal calls will be made from weapaltfire calls
+
+		// '1' indicates blue portal, '2' indicates red portal
+		if (ent->client->wbuttons & WBUTTON_ATTACK2)
+		{
+			Weapon_Portal_Fire(ent, 2);
+		} else
+		{
+			Weapon_Portal_Fire(ent, 1);
+		}
 		break;
 
 	default:

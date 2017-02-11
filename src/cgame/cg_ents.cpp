@@ -832,6 +832,10 @@ static void CG_Item(centity_t *cent)
 		}
 	}
 
+	if (es->eFlags & EF_BOBBING)
+	{
+		ent.origin[2] += 10 * (0.5 + 0.5 * sin(static_cast<float>(cg.time) / 150.0));
+	}
 
 	if (es->modelindex2)     // modelindex2 was specified for the ent, meaning it probably has an alternate model (as opposed to the one in the itemlist)
 	{                       // try to load it first, and if it fails, default to the itemlist model
@@ -2620,18 +2624,18 @@ static void CG_PortalGate(centity_t *cent)
 {
 
 
-	polyVert_t POLYverts[4];
-	vec3_t     verts[4];
-	vec3_t     pushedOrigin, angleInverse;
-	vec3_t     axis[3];
-	float      radius = 64.0f; // TODO: Use #define instead
-	int        i;
+	polyVert_t  POLYverts[4];
+	vec3_t      verts[4];
+	vec3_t      pushedOrigin, angleInverse;
+	vec3_t      axis[3];
+	const float radius = 64.0f;
+	int         i;
 
 	//Predefined colors
 	byte clrBlue[4]   = { 0x00, 0x01, 0xff, 0xff };
 	byte clrOrange[4] = { 0xff, 0x7e, 0x00, 0xff };
 	byte clrRed[4]    = { 0xf3, 0x32, 0x27, 0xff };
-	byte clrLBlue[4]  = { 0x27, 0x82, 0xf4, 0xff }; //This is the red complement
+	byte clrGreen[4]  = { 0x09, 0x82, 0x09, 0xff }; //This is the red complement
 
 
 	//Check if player wants to see other player portals
@@ -2799,25 +2803,25 @@ static void CG_PortalGate(centity_t *cent)
 		else
 		{
 
-			POLYverts[0].modulate[0] = clrLBlue[0];     //R
-			POLYverts[0].modulate[1] = clrLBlue[1];     //G
-			POLYverts[0].modulate[2] = clrLBlue[2];     //B
-			POLYverts[0].modulate[3] = clrLBlue[3];     //A
+			POLYverts[0].modulate[0] = clrGreen[0];     //R
+			POLYverts[0].modulate[1] = clrGreen[1];     //G
+			POLYverts[0].modulate[2] = clrGreen[2];     //B
+			POLYverts[0].modulate[3] = clrGreen[3];     //A
 
-			POLYverts[1].modulate[0] = clrLBlue[0];     //R
-			POLYverts[1].modulate[1] = clrLBlue[1];     //G
-			POLYverts[1].modulate[2] = clrLBlue[2];     //B
-			POLYverts[1].modulate[3] = clrLBlue[3];     //A
+			POLYverts[1].modulate[0] = clrGreen[0];     //R
+			POLYverts[1].modulate[1] = clrGreen[1];     //G
+			POLYverts[1].modulate[2] = clrGreen[2];     //B
+			POLYverts[1].modulate[3] = clrGreen[3];     //A
 
-			POLYverts[2].modulate[0] = clrLBlue[0];     //R
-			POLYverts[2].modulate[1] = clrLBlue[1];     //G
-			POLYverts[2].modulate[2] = clrLBlue[2];     //B
-			POLYverts[2].modulate[3] = clrLBlue[3];     //A
+			POLYverts[2].modulate[0] = clrGreen[0];     //R
+			POLYverts[2].modulate[1] = clrGreen[1];     //G
+			POLYverts[2].modulate[2] = clrGreen[2];     //B
+			POLYverts[2].modulate[3] = clrGreen[3];     //A
 
-			POLYverts[3].modulate[0] = clrLBlue[0];     //R
-			POLYverts[3].modulate[1] = clrLBlue[1];     //G
-			POLYverts[3].modulate[2] = clrLBlue[2];     //B
-			POLYverts[3].modulate[3] = clrLBlue[3];     //A
+			POLYverts[3].modulate[0] = clrGreen[0];     //R
+			POLYverts[3].modulate[1] = clrGreen[1];     //G
+			POLYverts[3].modulate[2] = clrGreen[2];     //B
+			POLYverts[3].modulate[3] = clrGreen[3];     //A
 
 		}
 

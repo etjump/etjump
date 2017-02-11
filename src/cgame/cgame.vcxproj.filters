@@ -203,10 +203,25 @@
     <ClCompile Include="..\sha-1\bg_sha.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_client_commands_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_overbounce_watcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_maxspeed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_entity_events_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="etj_trickjump_lines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\json\jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_edv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -263,6 +278,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_timerun_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_commands_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_overbounce_watcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_print_syscalls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_irenderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_maxspeed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_entity_events_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_trickjump_lines.hpp">
@@ -490,10 +523,5 @@
     <None Include="..\..\etjump\ui\etjump_settings2.menu">
       <Filter>Menu files\ETJump</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="authentication.txt">
-      <Filter>Source Files</Filter>
-    </Text>
   </ItemGroup>
 </Project>

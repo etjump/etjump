@@ -2,6 +2,9 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
+#include <climits>
+#include <memory>
+#include <string>
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
@@ -266,6 +269,8 @@ struct gentity_s
 	                                // bodyque uses this
 
 	int flags;                      // FL_* variables
+
+	int id;							// Identifier for the entity for other systems
 
 	char *model;
 	char *model2;
@@ -620,6 +625,33 @@ typedef struct
 	unsigned int kills;
 } weapon_stat_t;
 
+///////////////////////////////////////////////////////////////////////////////
+// Death run
+///////////////////////////////////////////////////////////////////////////////
+
+enum class DeathrunFlags
+{
+	None = 0,
+	Active = INT_MAX, // Run is currently active
+	NoDamageRuns = 1 << 0, 
+	NoSave = 1 << 1
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Trigger multiple
+///////////////////////////////////////////////////////////////////////////////
+
+enum class TriggerMultipleFlags
+{
+	// TODO: add the rest
+	None = 0,
+	DeathrunOnly = 1 << 10
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 #define MAX_IP_LEN 15
 
 // client data that stays across multiple levels or tournament restarts
@@ -722,8 +754,9 @@ typedef struct
 	qboolean receivedTimerunStates;
 
 	// new implementation of progression
-#define MAX_PROGRESSION_TRACKERS 10
+#define MAX_PROGRESSION_TRACKERS 50
 	int progression[MAX_PROGRESSION_TRACKERS];
+	int deathrunFlags;
 } clientSession_t;
 
 //
@@ -780,6 +813,7 @@ typedef struct
 	qboolean nofatigue;
 	qboolean cgaz;
 	qboolean loadViewAngles;
+	qboolean noActivateLean;
 
 	unsigned int maxFPS;
 	char netname[MAX_NETNAME];
@@ -888,6 +922,15 @@ typedef struct debrisChunk_s
 } debrisChunk_t;
 
 #define MAX_DEBRISCHUNKS        256
+
+// storea client voting information
+struct etj_votingInfo_t
+{
+	bool isVotedYes; // is the client voted yes
+	int  time; // last time client voted, used for timeouts between revotes
+	int  attempts; // revote attempts
+	bool isWarned; // if client attempts to revote but timeout doesn't allow yet, notification will be sent
+};
 
 // ===================
 
@@ -1027,6 +1070,8 @@ struct gclient_s
 
 	// Whether the client already activated target_set_health
 	qboolean alreadyActivatedSetHealth;
+
+	etj_votingInfo_t votingInfo;
 };
 
 typedef struct
@@ -1093,10 +1138,6 @@ typedef struct
 
 	fileHandle_t logFile;
 	fileHandle_t adminLogFile;
-
-#ifdef BETATEST
-	fileHandle_t bugReportFile;
-#endif // BETATEST
 
 	char rawmapname[MAX_QPATH];
 
@@ -1286,6 +1327,7 @@ typedef struct
 	qboolean noNoclip;
 	qboolean noGod;
 	qboolean noGoto;
+	bool noOverbounce;
 
 	int portalEnabled;         //Feen: PGM - Enabled/Disabled by map key
 	qboolean portalSurfaces;
@@ -1353,7 +1395,7 @@ void G_EntitySound(gentity_t *ent, const char *soundId, int volume);
 void G_EntitySoundNoCut(gentity_t *ent, const char *soundId, int volume);
 int ClientNumberFromString(gentity_t *to, char *s);
 int ClientNumbersFromString(const char *s, int *plist);
-qboolean G_MatchOnePlayer(int *plist, char *err, int len) ;
+qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter = TEAM_FREE);
 void SanitizeString(char *in, char *out, qboolean fToLower);
 void SanitizeConstString(const char *in, char *out, qboolean fToLower);
 int CleanStrlen(const char *in);
@@ -1539,6 +1581,8 @@ void InitTrigger(gentity_t *self);
 //
 void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles);
 void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles);
+void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles);
+void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles);
 void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles);   //Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
@@ -1998,6 +2042,8 @@ extern vmCvar_t g_chatOptions;
 
 // vchat customization
 extern vmCvar_t g_customVoiceChat;
+
+extern vmCvar_t shared;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);
@@ -2718,9 +2764,13 @@ void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
-#define TIMERUN_RESET_ON_TEAM_CHANGE    0x1
-#define TIMERUN_RESET_ON_DEATH          0x2
-#define TIMERUN_RESET_ON_END            0x4
+#define TIMERUN_RESET_ON_TEAM_CHANGE           0x01
+#define TIMERUN_RESET_ON_DEATH                 0x02
+#define TIMERUN_RESET_ON_END                   0x04
+#define TIMERUN_RESET_ON_PMOVE_NULL            0x08
+#define TIMERUN_DISABLE_BACKUPS                0x10
+#define TIMERUN_DISABLE_EXPLOSIVES_PICKUP      0x20
+#define TIMERUN_DISABLE_PORTALGUN_PICKUP       0x40
 
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);
@@ -2730,5 +2780,18 @@ void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
 const char *G_MatchOneMap(const char *arg);
+
+///////////////////////////////////////////////////////////////////////////////
+// ETJump global systems
+///////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class DeathrunSystem;
+	extern std::shared_ptr<ETJump::DeathrunSystem> deathrunSystem;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 
 #endif // G_LOCAL_H

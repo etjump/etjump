@@ -25,7 +25,7 @@ the CMakeLists.txt, it should work out of the box on Ubuntu as well.
 `http://www.boost.org/users/history/version_1_60_0.html`. Only header files are 
 used. `BOOST_ROOT` environment variable should point to the Boost directory 
 (e.g. `/Path/To/Boost/boost_1_60_0`). 
-* Google Test can be download from `https://github.com/google/googletest`. It 
+* Google Test can be downloaded from `https://github.com/google/googletest`. It 
 must be compiled and the `gtest.lib` library must be moved to the 
 googletest-release-*.*.*/lib directory. `GOOGLE_TEST_ROOT` environment variable 
 should point to the googletest-release directory. 
@@ -45,6 +45,3 @@ ETJump uses Google Test framework for unit testing. Some newer parts of the mod
 have unit tests. New features should have unit tests. More info on 
 how to write and run tests can be found at 
 `https://github.com/google/googletest`. 
-
-
-

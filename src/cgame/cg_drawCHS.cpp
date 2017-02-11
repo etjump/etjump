@@ -363,6 +363,12 @@ static void CG_CHS_Velocity_XYZ(char *buf, int size)
 	            ps->velocity[0], ps->velocity[1], ps->velocity[2]);
 }
 
+static void CG_CHS_LastJumpPosition_XYZ(char *buf, int size)
+{
+
+	Com_sprintf(buf, size, "%.0f %.0f %.0f", cg.etjLastJumpPos[0], cg.etjLastJumpPos[1], cg.etjLastJumpPos[2]);
+}
+
 typedef struct
 {
 	void (*fun)(char *, int);
@@ -430,6 +436,9 @@ static stat_t stats[] =
 /*  47 */ { CG_CHS_Velocity_XYZ, "Velocity XYZ", "velocity x y z"},
 /*  48 */ { NULL                                               }, // empty
 /*  49 */ { NULL                                               }, // empty
+
+/*  50 */ {  CG_CHS_LastJumpPosition_XYZ, "Jump XYZ", "jump x y z" },
+
 
 	{ NULL                                               }
 };

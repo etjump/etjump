@@ -4,6 +4,8 @@
 
 #include "cg_local.h"
 #include "cg_mainext.h"
+#include <vector>
+#include "etj_client_commands_handler.h"
 
 #define SCOREPARSE_COUNT    9
 
@@ -1420,7 +1422,7 @@ int CG_GetVoiceChat(voiceChatList_t *voiceChatList, vsayCmd_t *vsay, sfxHandle_t
 				}
 				 
 			} else {
-				rnd = random() * voiceChatList->voiceChats[i].numSounds;
+				rnd = vsay->random * voiceChatList->voiceChats[i].numSounds;
 			}
 			
 			*snd    = voiceChatList->voiceChats[i].sounds[rnd];
@@ -1701,8 +1703,8 @@ CG_VoiceChat
 */
 void CG_VoiceChat(int mode)
 {
-	const char *cmd = "";
-	int        clientNum, color, variant = 5, custom = 6;
+	auto       *cmd = "";
+	int        clientNum, color, variant = 5, rand = 6, custom = 7;
 	qboolean   voiceOnly;
 	vec3_t     origin;      // NERVE - SMF
 	vsayCmd_t  vsay;
@@ -1721,11 +1723,13 @@ void CG_VoiceChat(int mode)
 		origin[2] = atoi(CG_Argv(7));
 
 		variant = 8;
-		custom = 9;
+		rand = 9;
+		custom = 10;
 	}
 
 	vsay.variant = atoi(CG_Argv(variant));
 	trap_Argv(4, vsay.id, sizeof(vsay.id));
+	vsay.random = atof(CG_Argv(rand));
 	trap_Argv(custom, vsay.custom, sizeof(vsay.custom));
 
 	if (cg_noTaunt.integer != 0)
@@ -2706,6 +2710,12 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "voted"))
+	{
+		cgs.votedYes = !Q_strncmp(CG_Argv(1), "y", 1) ? true : false;
+		return;
+	}
+
 	// DHM - Nerve :: Allow client to lodge a complaing
 	if (!Q_stricmp(cmd, "complaint") && cgs.gamestate == GS_PLAYING)
 	{
@@ -3094,6 +3104,21 @@ static void CG_ServerCommand(void)
 		// fade out over the course of 5 seconds, should be enough (nuking: atvi bug 3793)
 		//%	CG_Fade( 0, 0, 0, 255, cg.time, 5000 );
 
+		return;
+	}
+
+	std::vector<std::string> arguments;
+	for (auto i = 1, argc = trap_Argc(); i < argc; ++i)
+	{
+		// Zero: CG_Argv cannot be used here as it uses a single static
+		// buffer and breaks the CG_ServerCommandExt as cmd will be replaced
+		// with whatever was the last argument
+		char buf[MAX_TOKEN_CHARS]{};
+		trap_Argv(i, buf, sizeof(buf));
+		arguments.push_back(buf);
+	}
+	if (ETJump::serverCommandsHandler->check(cmd, arguments))
+	{
 		return;
 	}
 

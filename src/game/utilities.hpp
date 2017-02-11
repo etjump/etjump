@@ -54,9 +54,9 @@ std::string LongToString(long value);
 std::string ToString(vec3_t toConvert);
 std::string ToString(vec_t x, vec_t y, vec_t z);
 
-gentity_t *PlayerGentityFromString(char *name, char *err, int size);
+gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filter = TEAM_FREE);
 gentity_t *PlayerGentityFromString(const std::string& name,
-                                   std::string& err);
+                                   std::string& err, team_t filter = TEAM_FREE);
 void CharPtrToString(const char *p, std::string& s);
 
 std::string GetPath(const std::string& file);

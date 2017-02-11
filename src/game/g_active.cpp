@@ -495,6 +495,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 		pm.tracemask     = MASK_PLAYERSOLID & ~CONTENTS_BODY; // spectators can fly through bodies
 		pm.trace         = trap_TraceCapsuleNoEnts;
 		pm.pointcontents = trap_PointContents;
+		pm.noActivateLean = client->pers.noActivateLean;
 
 #ifdef SAVEGAME_SUPPORT
 		if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer)
@@ -584,7 +585,8 @@ qboolean ClientInactivityTimer(gclient_t *client)
 	         (client->pers.cmd.buttons & BUTTON_ATTACK) ||
 	         (client->pers.cmd.wbuttons & WBUTTON_LEANLEFT) ||
 	         (client->pers.cmd.wbuttons & WBUTTON_LEANRIGHT)
-	         || client->ps.pm_type == PM_DEAD)
+			 // ETJump: we don't care about limbo players
+	         /*|| client->ps.pm_type == PM_DEAD*/)
 	{
 
 		client->inactivityWarning = qfalse;
@@ -642,8 +644,9 @@ void ClientTimerActions(gentity_t *ent, int msec)
 	{
 		client->timeResidual -= 1000;
 
-		// regenerate
-		if (client->sess.playerType == PC_MEDIC)
+		// regenerate if not deathrunning
+		if (client->sess.playerType == PC_MEDIC && 
+			!(client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoDamageRuns)))
 		{
 			if (ent->health < client->ps.stats[STAT_MAX_HEALTH])
 			{
@@ -841,11 +844,6 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 		case EV_FIRE_WEAPONB:
 		case EV_FIRE_WEAPON_LASTSHOT:
 			FireWeapon(ent);
-			break;
-
-		//Feen: PGM -
-		case EV_PORTAL2_FIRE:
-			Weapon_Portal_Fire(ent, 2); //Red Portal
 			break;
 
 		default:
@@ -1285,6 +1283,8 @@ void ClientThink_real(gentity_t *ent)
 
 	pm.pmove_fixed = client->pers.pmoveFixed;
 	pm.pmove_msec  = pmove_msec.integer;
+	pm.shared = shared.integer;
+	pm.noActivateLean = client->pers.noActivateLean;
 
 	pm.noWeapClips = qfalse;
 

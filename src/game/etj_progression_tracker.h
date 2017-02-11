@@ -21,7 +21,7 @@ namespace ETJump
 			char *incrementIf;
 		};
 		
-		static const int MaxProgressionTrackers = 10;
+		static const int MaxProgressionTrackers = 50;
 		struct ProgressionTracker
 		{
 			ProgressionTracker()

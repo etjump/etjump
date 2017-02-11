@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -39,6 +43,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -122,7 +129,8 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>$(SolutionDir)build\install.bat</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -233,6 +241,7 @@
     <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
+    <ClCompile Include="cg_edv.cpp" />
     <ClCompile Include="cg_manual.cpp" />
     <ClCompile Include="cg_atmospheric.cpp" />
     <ClCompile Include="cg_character.cpp" />
@@ -278,7 +287,11 @@
     <ClCompile Include="..\ui\ui_shared.cpp" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
+    <ClCompile Include="etj_entity_events_handler.cpp" />
+    <ClCompile Include="etj_maxspeed.cpp" />
+    <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
     <ClCompile Include="etj_trickjump_lines.cpp" />
   </ItemGroup>
@@ -292,12 +305,18 @@
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="cg_mainext.h" />
+    <ClInclude Include="cg_print_syscalls.h" />
     <ClInclude Include="cg_public.h" />
     <ClInclude Include="..\ui\keycodes.h" />
     <ClInclude Include="..\..\main\ui\menudef.h" />
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
+    <ClInclude Include="etj_client_commands_handler.h" />
+    <ClInclude Include="etj_entity_events_handler.h" />
+    <ClInclude Include="etj_irenderable.h" />
+    <ClInclude Include="etj_maxspeed.h" />
+    <ClInclude Include="etj_overbounce_watcher.h" />
     <ClInclude Include="etj_client_utilities.h" />
     <ClInclude Include="etj_drawable.h" />
     <ClInclude Include="etj_rotation_matrix.hpp" />
@@ -378,9 +397,6 @@
     <None Include="..\..\etjump\ui\wm_quickmessage.menu" />
     <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu" />
     <None Include="cgame.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="authentication.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
