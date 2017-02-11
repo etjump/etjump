@@ -34,7 +34,7 @@ TrickjumpLines::TrickjumpLines() : _nextRecording(1), _nextAddTime(0), _currentR
 	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("speed", { 0, 0, 0, 0 }));
 }
 
-TrickjumpLines::~TrickjumpLines(){}
+TrickjumpLines::~TrickjumpLines() {}
 
 // Create simple function to return cvar.
 bool TrickjumpLines::isEnableLine() { return this->_enableLine; }
@@ -43,17 +43,17 @@ bool TrickjumpLines::isEnableMarker() { return this->_enableMarker; }
 void TrickjumpLines::record(const char *name)
 {
 	if (isRecording())
-	{		
-		CG_Printf("You are already recording. \n");		
+	{
+		CG_Printf("You are already recording. \n");
 		return;
 	}
 
 	// TODO: Check if user is in spec ? (Xis)
 	Route route;
 	route.name = name != nullptr ? name : "tjl_" + std::to_string(_nextRecording++);
-		
+
 	if (getRoutePositionByName(route.name.c_str()) > -1)
-	{		
+	{
 		if (name == nullptr)
 		{
 			while (true)
@@ -71,9 +71,9 @@ void TrickjumpLines::record(const char *name)
 			CG_Printf("This route already exist. Please provide a unique name or use /tjl_overwriterecording to over-write a route. \n");
 			_nextRecording--;
 			return;
-		}		
+		}
 	}
-	
+
 	route.width = LINE_WIDTH;
 	route.status = routeStatus::record;
 	if (isDebug())
@@ -84,19 +84,19 @@ void TrickjumpLines::record(const char *name)
 
 	// Have to clear currentTrail.
 	_currentTrail.clear();
-	_recording = true;	
+	_recording = true;
 }
 
 void TrickjumpLines::overwriteRecording(const char *name)
 {
 	if (isRecording())
-	{		
+	{
 		CG_Printf("You are already recording. \n");
 		return;
 	}
-	
+
 	if (name == nullptr)
-	{		
+	{
 		CG_Printf("You need to pass a route name by argument to over-write a route. Use command /tjl_listroute to get name. \n");
 		return;
 	}
@@ -104,19 +104,19 @@ void TrickjumpLines::overwriteRecording(const char *name)
 	const int z = getRoutePositionByName(name);
 	if (z == -1)
 	{
-		CG_Printf("No route exists with this name. \n");		
+		CG_Printf("No route exists with this name. \n");
 		return;
 	}
 	else
 	{
 		if (_routes[z].status == routeStatus::map)
-		{			
+		{
 			CG_Printf("You can't overwrite this route. Mapper TJL are read-only. \n");
 			return;
 		}
 	}
-	
-	Route route = _routes[z];		
+
+	Route route = _routes[z];
 	CG_Printf("Over-writing : %s\n", route.name.c_str());
 	_currentRoute = std::move(route);
 
@@ -128,7 +128,7 @@ void TrickjumpLines::overwriteRecording(const char *name)
 void TrickjumpLines::addPosition(vec3_t pos)
 {
 	if (_recording)
-	{		
+	{
 		// Check if player is currently in air	
 		if ((cg.predictedPlayerState.stats[STAT_USERCMD_MOVE] & UMOVE_UP) && (_jumpRelease))
 		{
@@ -167,7 +167,7 @@ void TrickjumpLines::addPosition(vec3_t pos)
 
 			// TODO: (XIS) make a cvar with this hardcoded. 
 			vec[2] = pos[2] - 24;
-			 
+
 			// Copy into Node struct.
 			VectorCopy(vec, cNode.coor);
 
@@ -181,28 +181,28 @@ void TrickjumpLines::addPosition(vec3_t pos)
 			_currentTrail.push_back(cNode);
 
 			_nextAddTime = cg.time + 50; // 20 times a sec // FRAMETIME = 10 times a sec.		
-		}	
-	}	
+		}
+	}
 }
 
 void TrickjumpLines::stopRecord()
-{	
+{
 	if (!isRecording())
 	{
 		return;
 	}
-	
+
 	std::vector<Node> trail;
 	trail = std::move(_currentTrail);
-	_currentTrail.clear();	
+	_currentTrail.clear();
 	_currentRoute.trails.push_back(trail);
 	_recording = false;
 	_routes.push_back(_currentRoute);
 
-	
+
 	CG_Printf("Stopped recording: %s\n", _currentRoute.name.c_str());
 	CG_Printf("Total of trail in this route : %d\n", _currentRoute.trails.size());
-	
+
 	setCurrentRouteToRender(countRoute() - 1);
 	displayCurrentRoute(getCurrentRouteToRender());
 }
@@ -213,16 +213,16 @@ void TrickjumpLines::displayCurrentRoute(int x)
 
 	// Loop on every trail into the route.
 	const int nbTrails = _routes[x].trails.size();
-	
+
 	// Get min and max speed of the current jump.
 	float minSpeed = 9999999999999;
 	float maxSpeed = 0;
-		
-	for (auto i = 0; i < nbTrails; i++)
+
+	for (auto i = 0; i < nbTrails; ++i)
 	{
 		std::vector<Node> cTrail = _routes[x].trails[i];
 		const int nbPoints = cTrail.size();
-		for (int j = 0; j < nbPoints; j++)
+		for (int j = 0; j < nbPoints; ++j)
 		{
 			if (cTrail[j].speed < minSpeed)
 				minSpeed = cTrail[j].speed;
@@ -231,20 +231,20 @@ void TrickjumpLines::displayCurrentRoute(int x)
 				maxSpeed = cTrail[j].speed;
 		}
 	}
-			
-	for (auto i = 0; i < nbTrails; i++)
+
+	for (auto i = 0; i < nbTrails; ++i)
 	{
 		// Get current trail into tmp var.
 		std::vector<Node> cTrail = _routes[x].trails[i];
 		const int nbPoints = cTrail.size();
-		
+
 		// Add the bezier curve of this trail.		
 		if (isEnableLine())
 		{
 			//addTrickjumpRecursiveBezier(cTrail, _blue, _routes[x].width, 150);
 			const std::string tmp = etj_tjlLineColor.string;
 			if (tmp == "speed" || tmp == "Speed")
-			{			
+			{
 				addTrickjumpLinesColor(cTrail, minSpeed, maxSpeed, _routes[x].width);
 			}
 			else
@@ -257,10 +257,10 @@ void TrickjumpLines::displayCurrentRoute(int x)
 				addTrickjumpLines(cTrail, colorLine, _routes[x].width);
 			}
 		}
-		
+
 		// Add curve indicator.
 		if (isEnableMarker())
-		{			
+		{
 			vec3_t start, end;
 			VectorCopy(cTrail[0].coor, start);
 			VectorCopy(cTrail[nbPoints - 1].coor, end);
@@ -334,11 +334,10 @@ unsigned long TrickjumpLines::binomial(unsigned long n, unsigned long k) {
 	if (k >= n) return (k == n);
 	if (k > n / 2) k = n - k;
 
-	for (d = 1; d <= k; d++)
+	for (d = 1; d <= k; ++d)
 	{
 		if (r >= ULONG_MAX / n) /* Possible overflow */
 		{
-
 			unsigned long nr, dr;  /* reduced numerator / denominator */
 			g = gcd_ui(n, d);  nr = n / g;  dr = d / g;
 			g = gcd_ui(r, dr);  r = r / g;  dr = dr / g;
@@ -363,22 +362,17 @@ void TrickjumpLines::draw4VertexLine(vec3_t start, vec3_t end, float width, vec4
 	polyVert_t verts[4];
 	vec3_t up, pDraw;
 	int cIdx = 0;
-	int k, l, n;
-	float mod[4];
-	int numOutVerts;
-	polyVert_t outVerts[4 * 3];
-	polyVert_t   mid;
 
 	// Obtain Up vector, base on player location
 	GetPerpendicularViewVector(cg.refdef_current->vieworg, start, end, up);
-	
+
 	// 1 vertex
 	VectorMA(start, 0.5 * width, up, pDraw);
 	VectorCopy(pDraw, verts[cIdx].xyz);
 	verts[cIdx].st[0] = 0;
 	verts[cIdx].st[1] = 1.0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(color[k]);
 
 	++cIdx;
@@ -389,7 +383,7 @@ void TrickjumpLines::draw4VertexLine(vec3_t start, vec3_t end, float width, vec4
 	verts[cIdx].st[0] = 0;
 	verts[cIdx].st[1] = 0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(color[k]);
 
 	++cIdx;
@@ -400,7 +394,7 @@ void TrickjumpLines::draw4VertexLine(vec3_t start, vec3_t end, float width, vec4
 	verts[cIdx].st[0] = 1.0;
 	verts[cIdx].st[1] = 0.0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(color[k]);
 
 	++cIdx;
@@ -410,12 +404,12 @@ void TrickjumpLines::draw4VertexLine(vec3_t start, vec3_t end, float width, vec4
 	verts[cIdx].st[0] = 1.0;
 	verts[cIdx].st[1] = 1.0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(color[k]);
 
 	// Add vertices to scene as quad.
 	trap_R_AddPolyToScene(cgs.media.railCoreShader, 4, verts);
-		
+
 	return;
 }
 
@@ -425,11 +419,6 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 	polyVert_t verts[4];
 	vec3_t up, pDraw;
 	int cIdx = 0;
-	int k, l, n;
-	float mod[4];
-	int numOutVerts;
-	polyVert_t outVerts[4 * 3];
-	polyVert_t   mid;
 
 	// Obtain Up vector, base on player location
 	GetPerpendicularViewVector(cg.refdef_current->vieworg, start, end, up);
@@ -440,7 +429,7 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 	verts[cIdx].st[0] = 0;
 	verts[cIdx].st[1] = 1.0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(colorStart[k]);
 
 	++cIdx;
@@ -451,7 +440,7 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 	verts[cIdx].st[0] = 0;
 	verts[cIdx].st[1] = 0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(colorStart[k]);
 
 	++cIdx;
@@ -462,7 +451,7 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 	verts[cIdx].st[0] = 1.0;
 	verts[cIdx].st[1] = 0.0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(colorEnd[k]);
 
 	++cIdx;
@@ -472,14 +461,13 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 	verts[cIdx].st[0] = 1.0;
 	verts[cIdx].st[1] = 1.0;
 
-	for (k = 0; k < 4; k++)
+	for (int k = 0; k < 4; ++k)
 		verts[cIdx].modulate[k] = (unsigned char)(colorEnd[k]);
 
 	// Add vertices to scene as quad.
 	trap_R_AddPolyToScene(cgs.media.railCoreShader, 4, verts);
 
 	return;
-
 }
 
 // Compute the bezier's curves base on recursive function (so N-degree). 
@@ -491,10 +479,9 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 void TrickjumpLines::addTrickjumpRecursiveBezier(std::vector< Node > points, vec4_c color, float width, int nbDivision)
 {
 	static int nextPrintTime = 0;
-	int i, l;
 	vec3_t zeros = { 0.0, 0.0, 0.0 };
 	const int n = points.size();
-	
+
 	if (n < 2)
 	{
 		if (nextPrintTime < cg.time)
@@ -515,10 +502,10 @@ void TrickjumpLines::addTrickjumpRecursiveBezier(std::vector< Node > points, vec
 
 	// Hold previous point on each iter (start)
 	vec3_t prev;
-	VectorCopy(points[0].coor, prev);	
+	VectorCopy(points[0].coor, prev);
 
 	// Divide bezier line into nbDivision points
-	for (i = 0; i < nbDivision; i++)
+	for (int i = 0; i < nbDivision; ++i)
 	{
 		// Compute bezier cubic equation values.
 		const float t = i / (float)nbDivision;
@@ -535,7 +522,7 @@ void TrickjumpLines::addTrickjumpRecursiveBezier(std::vector< Node > points, vec
 		VectorMA(zeros, pow(u, n), points[0].coor, p);
 
 		// Do equation on P1 to Pn-1 (Control points).
-		for (l = 1; l < n; l++)
+		for (int l = 1; l < n; ++l)
 		{
 			VectorMA(zeros, binomial(n, l) * pow(u, n - l) * pow(t, l), points[l].coor, tmp);
 			VectorAdd(p, tmp, p);
@@ -557,27 +544,25 @@ void TrickjumpLines::addTrickjumpRecursiveBezier(std::vector< Node > points, vec
 void TrickjumpLines::addTrickjumpLines(std::vector< Node > points, vec4_c color, float width)
 {
 	static int nextPrintTime = 0;
-	int i;
 	const int n = points.size();
 
 	if (n < 2)
 	{
 		if (nextPrintTime < cg.time)
 		{
-			//CG_Printf("Exit line drawing, not enought points. \n");
 			nextPrintTime = cg.time + 1000;
 		}
 		return;
 	}
 
-	for (i = 0; i < n - 1; i++)
+	for (int i = 0; i < n - 1; ++i)
 	{
 		vec3_t s, e;
 		VectorCopy(points[i].coor, s);
 		VectorCopy(points[i + 1].coor, e);
 
 		// Draw line between previous and finalp with trap_R_AddPolyToScene.
-		draw4VertexLine(s,e, width, color);
+		draw4VertexLine(s, e, width, color);
 	}
 
 	return;
@@ -586,7 +571,6 @@ void TrickjumpLines::addTrickjumpLines(std::vector< Node > points, vec4_c color,
 void TrickjumpLines::addTrickjumpLinesColor(std::vector< Node > points, float minSpeed, float maxSpeed, float width)
 {
 	static int nextPrintTime = 0;
-	int i;
 	const int n = points.size();
 
 	if (n < 2)
@@ -602,7 +586,7 @@ void TrickjumpLines::addTrickjumpLinesColor(std::vector< Node > points, float mi
 		return;
 	}
 
-	for (i = 0; i < n - 1; i++)
+	for (int i = 0; i < n - 1; ++i)
 	{
 		vec3_t s, e;
 		VectorCopy(points[i].coor, s);
@@ -611,21 +595,21 @@ void TrickjumpLines::addTrickjumpLinesColor(std::vector< Node > points, float mi
 		// Obtain color base on speed.
 		vec3_t color1, color2;
 		computeColorForNode(maxSpeed, minSpeed, points[i].speed, color1);
-		computeColorForNode(maxSpeed, minSpeed, points[i+1].speed, color2);
+		computeColorForNode(maxSpeed, minSpeed, points[i + 1].speed, color2);
 
 		vec4_c c1, c2;
-		c1[0] = (unsigned char)color1[0];
-		c1[1] = (unsigned char)color1[1];
-		c1[2] = (unsigned char)color1[2];
-		c1[3] = (unsigned char)255;
+		c1[0] = static_cast<unsigned char>(color1[0]);
+		c1[1] = static_cast<unsigned char>(color1[1]);
+		c1[2] = static_cast<unsigned char>(color1[2]);
+		c1[3] = static_cast<unsigned char>(255);
 
-		c2[0] = (unsigned char)color2[0];
-		c2[1] = (unsigned char)color2[1];
-		c2[2] = (unsigned char)color2[2];
-		c2[3] = (unsigned char)255;
+		c2[0] = static_cast<unsigned char>(color2[0]);
+		c2[1] = static_cast<unsigned char>(color2[1]);
+		c2[2] = static_cast<unsigned char>(color2[2]);
+		c2[3] = static_cast<unsigned char>(255);
 
 		// Draw line between previous and finalp with trap_R_AddPolyToScene.
-		draw4VertexLine2Color(s, e, width,c1, c2);
+		draw4VertexLine2Color(s, e, width, c1, c2);
 	}
 
 }
@@ -633,13 +617,13 @@ void TrickjumpLines::addTrickjumpLinesColor(std::vector< Node > points, float mi
 bool TrickjumpLines::loadedRoutes(const char *loadname)
 {
 	for (auto&route : _routes)
-	{		
+	{
 		if (loadname == nullptr)
 		{
 			CG_Printf("You request to load mapper TJL.\n");
 			if (route.status == routeStatus::map)
 				return true;
-		}		
+		}
 		else
 		{
 			std::string tmp = loadname;
@@ -655,7 +639,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 {
 	std::string map;
 	fileHandle_t f = 0;
-	routeStatus loadStatus;	
+	routeStatus loadStatus;
 
 	//Check if already loaded 
 	if (loadedRoutes(loadname))
@@ -665,7 +649,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	}
 	// Always load mapper map, and
 	if (loadname == nullptr)
-	{		
+	{
 		map = (std::string("tjllines/mapper/") + cgs.rawmapname + std::string(".tjl"));
 		loadStatus = routeStatus::map;
 		CG_Printf("Will load mapper TJL for map : %s.\n", cgs.rawmapname);
@@ -679,68 +663,68 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 		{
 			CG_Printf("Will load local TJL file : %s.\n", loadname);
 		}
-	}	
+	}
 
 	const int len = trap_FS_FOpenFile(map.c_str(), &f, FS_READ);
 	if (len <= 0)
-	{		
-		CG_Printf("File not found : %s.\n", map.c_str());			
-		return;		
+	{
+		CG_Printf("File not found : %s.\n", map.c_str());
+		return;
 	}
-	
+
 	std::shared_ptr<char> buf(new char[len + 1], [](char *p) { delete[] p; });
 	trap_FS_Read(buf.get(), len, f);
 	buf.get()[len] = 0;
 
-	std::string json(buf.get());	
+	std::string json(buf.get());
 	Json::Value root;
 	Json::Reader reader;
 
 	if (!reader.parse(json, root))
 	{
-		CG_Printf("Json parser error in file: %s\n", map.c_str());		
+		CG_Printf("Json parser error in file: %s\n", map.c_str());
 		return;
 	}
 
 	try
-	{		
+	{
 		// Loop on each route (tjl)
-		for (int i = 0; i < root.size(); i++)
+		for (int i = 0; i < root.size(); ++i)
 		{
-			Route loadRoute;	
+			Route loadRoute;
 			if (loadname != nullptr)
-			{			
+			{
 				loadRoute.filename = loadname;
 			}
 
 			loadRoute.name = root[i]["name"].asString();
 			loadRoute.width = root[i]["width"].asFloat();
-			loadRoute.status = loadStatus;			
-			
+			loadRoute.status = loadStatus;
+
 			Json::Value colorValue = root[i]["color"];
-			for (int j = 0; j < colorValue.size(); j++)
+			for (int j = 0; j < colorValue.size(); ++j)
 			{
 				loadRoute.color[j] = (unsigned char)std::atoi(colorValue[j].asString().c_str());
-			}	
-			
+			}
+
 			// Loop on each trail in a route (tjl) 
 			Json::Value trailsValue = root[i]["trails"];
 			std::vector< std::vector< Node > > routeVec;
-			for (int j = 0; j < trailsValue.size(); j++)
+			for (int j = 0; j < trailsValue.size(); ++j)
 			{
 				// Loop on each node in a trail.
 				std::vector< Node > trailVec;
-				for (int k = 0; k < trailsValue[j].size(); k++)
+				for (int k = 0; k < trailsValue[j].size(); ++k)
 				{
-					Node loadNode;					
+					Node loadNode;
 					Json::Value coorValue = trailsValue[j][k]["coordinates"];
-					for (int l = 0; l < coorValue.size(); l++)
+					for (int l = 0; l < coorValue.size(); ++l)
 					{
 						loadNode.coor[l] = std::atof(coorValue[l].asString().c_str());
 					}
 					loadNode.speed = trailsValue[j][k]["speed"].asFloat();
 					trailVec.push_back(loadNode); // Add node to trail.
-				}				
+				}
 				routeVec.push_back(trailVec); // Add trail to route.
 			}
 			loadRoute.trails = routeVec;
@@ -748,8 +732,8 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 		}
 	}
 	catch (...)
-	{		
-		CG_Printf("There was a read error in %s parser\n", map.c_str());		
+	{
+		CG_Printf("There was a read error in %s parser\n", map.c_str());
 		return;
 	}
 	return;
@@ -773,7 +757,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 		{
 			Json::Value jsonRoute;
 			jsonRoute["name"] = route.name;
-			// TODO: based on a cvar or something? No magic values, yay!
+			// TODO: based on a cvar or something? No magic values, yay! (See trickjumplines::recording for frame information)
 			jsonRoute["nodes per second"] = 10;
 			jsonRoute["color"] = Json::arrayValue;
 			for (auto i = 0; i < 4; ++i)
@@ -800,8 +784,8 @@ void TrickjumpLines::saveRoutes(const char *savename)
 			}
 			root.append(jsonRoute);
 		}
-	}		
-	 
+	}
+
 	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".tjl")).c_str(), &f, FS_WRITE) < 0)
 	{
 		throw "ERROR: couldn't open file for saving tjlines";
@@ -819,7 +803,6 @@ void TrickjumpLines::saveRoutes(const char *savename)
 void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize)
 {
 	static int nextPrintTime = 0;
-	int i, k;
 
 	const vec3_t mins = { -quadSize, -quadSize, 0.0 };
 	const vec3_t maxs = { quadSize, quadSize, 0.0 };
@@ -830,7 +813,7 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 	const float extz = maxs[2] - mins[2];
 	polyVert_t verts[4];
 	vec3_t corners[8];
-	
+
 	// set the polygon's texture coordinates
 	verts[0].st[0] = 0;
 	verts[0].st[1] = 0;
@@ -841,14 +824,14 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 	verts[3].st[0] = 1;
 	verts[3].st[1] = 0;
 
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; ++i)
 	{
-		for (k = 0; k < 4; k++)
+		for (int k = 0; k < 4; ++k)
 		{
 			verts[i].modulate[k] = (unsigned char)color[k];
 		}
 	}
-	
+
 	VectorAdd(point, maxs, corners[3]);
 
 	VectorCopy(corners[3], corners[2]);
@@ -864,7 +847,7 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 	VectorAdd(corners[0], tmpx2, corners[0]);
 
 	const vec3_t tmpz = { 0.0, 0.0, -extz };
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; ++i) {
 		VectorCopy(corners[i], corners[i + 4]);
 		VectorAdd(corners[i], tmpz, corners[i]);
 	}
@@ -874,7 +857,7 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 	VectorCopy(corners[1], verts[1].xyz);
 	VectorCopy(corners[2], verts[2].xyz);
 	VectorCopy(corners[3], verts[3].xyz);
-	trap_R_AddPolyToScene(cgs.media.sparkParticleShader, 4, verts);	
+	trap_R_AddPolyToScene(cgs.media.sparkParticleShader, 4, verts);
 }
 
 void TrickjumpLines::listRoutes()
@@ -884,7 +867,7 @@ void TrickjumpLines::listRoutes()
 	// Display name of the route with the associate status.
 	int id = 0;
 	for (auto route : _routes)
-	{		
+	{
 		if (route.status == routeStatus::map)
 		{
 			CG_Printf("%s (# %d) with status : %s \n", (route.name).c_str(), id, getTextForEnum(route.status));
@@ -903,12 +886,12 @@ void TrickjumpLines::displayByName(const char *name)
 {
 	if (name == nullptr)
 	{
-		CG_Printf("You need to pass a route name by argument. Use command /tjl_listroute to get name. \n");		
+		CG_Printf("You need to pass a route name by argument. Use command /tjl_listroute to get name. \n");
 		return;
 	}
 
 	const std::string tmp = name;
-	int z = getRoutePositionByName(name);
+	const int z = getRoutePositionByName(name);
 
 	if (z > -1)
 	{
@@ -924,8 +907,8 @@ void TrickjumpLines::displayByName(const char *name)
 		displayCurrentRoute(getCurrentRouteToRender());
 		return;
 	}
-	
-	CG_Printf("No route with name : %s has been found. \n", name);	
+
+	CG_Printf("No route with name : %s has been found. \n", name);
 	return;
 }
 
@@ -938,32 +921,31 @@ void TrickjumpLines::displayNearestRoutes()
 	// Obtain player position
 	vec3_t p;
 	VectorCopy(cg.predictedPlayerState.origin, p);
-	
+
 	std::vector<Route> routeCopy = _routes;
 
 	// Sort the _routes with a lambda function that taking p (position of player) as search param
 	// Check if player is near by a start point of a route.
 	std::sort(begin(routeCopy), end(routeCopy),
-	[&](Route& lhs, Route& rhs){ return euclideanDist(p, lhs.trails[0][0].coor) < euclideanDist(p, rhs.trails[0][0].coor); });
+		[&](Route& lhs, Route& rhs) { return euclideanDist(p, lhs.trails[0][0].coor) < euclideanDist(p, rhs.trails[0][0].coor); });
 
 	Route nearestStart = routeCopy[0];
 
 	// Check if player is near by a end point of a route.
 	std::sort(begin(routeCopy), end(routeCopy),
-	[&](Route& lhs, Route& rhs){ 
-		
-		int endLTrail = lhs.trails.size() - 1;
-		int endLNode = lhs.trails[endLTrail].size() - 1;
-		int endRTrail = rhs.trails.size() - 1;
-		int endRNode = rhs.trails[endRTrail].size() - 1;
+		[&](Route& lhs, Route& rhs) {
+
+		const int endLTrail = lhs.trails.size() - 1;
+		const int endLNode = lhs.trails[endLTrail].size() - 1;
+		const int endRTrail = rhs.trails.size() - 1;
+		const int endRNode = rhs.trails[endRTrail].size() - 1;
 
 		return euclideanDist(p, lhs.trails[endLTrail][endLNode].coor) < euclideanDist(p, rhs.trails[endRTrail][endRNode].coor);
 	});
 
 	Route nearestEnd = routeCopy[0];
-	
-	int endTrail = nearestEnd.trails.size() - 1;
-	int endNode = nearestEnd.trails[endTrail].size() - 1;
+	const int endTrail = nearestEnd.trails.size() - 1;
+	const int endNode = nearestEnd.trails[endTrail].size() - 1;
 
 	// Check if nearest start route is nearest compare to the nearest end route.
 	if (euclideanDist(p, nearestStart.trails[0][0].coor) < euclideanDist(p, nearestEnd.trails[endTrail][endNode].coor))
@@ -975,7 +957,7 @@ void TrickjumpLines::displayNearestRoutes()
 		else
 		{
 			return displayByName((nearestStart.filename + std::string("_") + nearestStart.name).c_str()); // Display the route by its name.
-		}		
+		}
 	}
 	else
 	{
@@ -993,7 +975,7 @@ void TrickjumpLines::displayNearestRoutes()
 void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 {
 	if (oldName == nullptr || newName == nullptr)
-	{		
+	{
 		CG_Printf("You need to pass an existing route name by argument and the new route name. Use command /tjl_listroute to get name. \n");
 		return;
 	}
@@ -1003,24 +985,24 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		CG_Printf("You cannot rename a route 'default'. This name is protected for map entities trigger. \n");
 		return;
 	}
-	
+
 	const std::string tmp = oldName;
 	const std::string tmp2 = newName;
-	
+
 	if (getRoutePositionByName(tmp2.c_str()) > -1)
-	{		
+	{
 		CG_Printf("There already a route with name : %s \n", newName);
 		return;
-	}	
+	}
 
 	// Search in _routes	
-	int z = getRoutePositionByName(tmp.c_str());
+	const int z = getRoutePositionByName(tmp.c_str());
 	if (z > -1)
-	{	
+	{
 		// If the route is create by the mapper, that mean is read-only.
 		if (_routes[z].status == routeStatus::map)
-		{			
-			CG_Printf("You can't rename this route. Mapper TJL are read-only. \n");			
+		{
+			CG_Printf("You can't rename this route. Mapper TJL are read-only. \n");
 			return;
 		}
 
@@ -1029,7 +1011,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		CG_Printf("Route has been correctly rename to %s. \n", newName);
 		return;
 	}
-	
+
 	CG_Printf("No route with name : %s has been found to replace to %s. \n", oldName, newName);
 	return;
 }
@@ -1047,7 +1029,7 @@ void TrickjumpLines::computeHSV(float speed, vec3_t& hsv)
 
 	// Simple x^1.35 * maxDegree to have a nice mapping function between ups and color.
 	hsv[0] = std::powf(speed, 1.35f) * hmax;
- 	hsv[1] = 1.0;
+	hsv[1] = 1.0;
 	hsv[2] = 1.0;
 
 	// this is to revert color, blue = slow speed and red = high speed.
@@ -1055,9 +1037,9 @@ void TrickjumpLines::computeHSV(float speed, vec3_t& hsv)
 }
 
 void TrickjumpLines::hsv2rgb(vec3_t& hsv, vec3_t& rgb)
-{	
+{
 	// Source from : http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
-	
+
 	// Compute simple parameter.
 	const float c = hsv[1] * hsv[2];
 	const int angleResult = hsv[0] / 60;
@@ -1112,17 +1094,17 @@ void TrickjumpLines::hsv2rgb(vec3_t& hsv, vec3_t& rgb)
 }
 
 void TrickjumpLines::computeColorForNode(float max, float min, float speed, vec3_t& color)
-{	
+{
 	// Normalize ups speed between 0-1
 	const float norm = normalizeSpeed(max, min, speed);
-		
+
 	vec3_t hsvColor;
 	// Compute associate HSV color with speed.
 	computeHSV(norm, hsvColor);
 
 	// Transform HSV color into RGB.
 	hsv2rgb(hsvColor, color);
-	
+
 	return;
 }
 
@@ -1136,12 +1118,12 @@ int TrickjumpLines::getRoutePositionByName(const char *name)
 	}
 
 	// Search in _routes.
-	for (int z = 0; z < _routes.size(); z++)
+	for (int z = 0; z < _routes.size(); ++z)
 	{
 		if (_routes[z].status == routeStatus::map)
 		{
 			if (_routes[z].name == tmp)
-			{			 
+			{
 				return z;
 			}
 		}
@@ -1157,14 +1139,14 @@ int TrickjumpLines::getRoutePositionByName(const char *name)
 	{
 		CG_Printf("No route with name : %s has been found. \n", name);
 	}
-	
+
 	return -1;
 }
 
 void TrickjumpLines::deleteRoute(const char *name)
 {
 	if (name == nullptr)
-	{		
+	{
 		CG_Printf("You need to pass a route name by argument. Use command /tjl_listroute to get name. \n");
 		return;
 	}
@@ -1191,10 +1173,10 @@ void TrickjumpLines::toggleRoutes(bool state)
 {
 	if (state)
 	{
-		CG_Printf("Trickjump line will be display. \n");		
+		CG_Printf("Trickjump line will be display. \n");
 	}
 	else
-	{		
+	{
 		CG_Printf("Trickjump line are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableLine for futur session. \n");
 	}
 	setEnableLine(state);
@@ -1204,11 +1186,11 @@ void TrickjumpLines::toggleRoutes(bool state)
 void TrickjumpLines::toggleMarker(bool state)
 {
 	if (state)
-	{	
+	{
 		CG_Printf("Trickjump marker will be display. \n");
 	}
 	else
-	{		
+	{
 		CG_Printf("Trickjump marker are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableMarker for futur session. \n");
 	}
 	setEnableMarker(state);

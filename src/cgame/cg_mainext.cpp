@@ -412,6 +412,7 @@ qboolean CG_displaybynumber()
 			trickjumpLines->setCurrentRouteToRender(number);
 			return qtrue;
 		}
+		return qfalse;
 	}
 	else
 	{

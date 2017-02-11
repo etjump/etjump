@@ -2117,7 +2117,6 @@ void target_tjldisplay_use(gentity_t *self, gentity_t *other, gentity_t *activat
 {
 	if (self->tjlLineNumber > -1)
 	{
-		G_Printf("Inside g_target.cpp, calling the tjl_displaybynumber with : %d", self->tjlLineNumber);
 		trap_SendServerCommand((activator - g_entities), va("tjl_displaybynumber %d", self->tjlLineNumber));
 	}
 	else

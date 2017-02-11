@@ -18,7 +18,7 @@ class TrickjumpLines
 {
 
 public:
-	static const unsigned LINE_WIDTH = 8.0;
+	static const unsigned LINE_WIDTH = 8;
 
 	typedef float vec_t;
 	typedef unsigned char vec_c;
