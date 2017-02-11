@@ -2528,12 +2528,6 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
-	if (!Q_stricmp(cmd, GUID_REQUEST))
-	{
-		SendGuid();
-		return;
-	}
-
 	if (!Q_stricmp(cmd, "hasTimerun"))
 	{
 		cg.hasTimerun = atoi(CG_Argv(1)) ? qtrue : qfalse;
@@ -2999,12 +2993,6 @@ static void CG_ServerCommand(void)
 
 		cg.botMenuIcons = atoi(info);
 
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "guid_request"))
-	{
-		SendGuid();
 		return;
 	}
 

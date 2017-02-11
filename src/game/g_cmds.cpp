@@ -4720,21 +4720,6 @@ void ClientCommand(int clientNum)
 	}
 	trap_Argv(0, cmd, sizeof(cmd));
 
-	// Received client guid
-	//  if(!Q_stricmp(cmd, "etguid")) {
-	//GuidReceived(ent);
-	//      return;
-	//  }
-
-	//if(!Q_stricmp(cmd, "HWID")) {
-	//    // HWIDReceived(ent);
-	//    return;
-	//}
-
-	//if(!Q_stricmp(cmd, "NOHWID")) {
-	//  //  HWIDReceived(ent);
-	//}
-
 	if (OnClientCommand(ent))
 	{
 		return;

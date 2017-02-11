@@ -2527,7 +2527,6 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB);
  * Admin system HWID & GUID transfer protocol consts
  */
 #define HWID_REQUEST "HWIDREQUEST"
-#define GUID_REQUEST "GUIDREQUEST"
 
 struct Manual
 {

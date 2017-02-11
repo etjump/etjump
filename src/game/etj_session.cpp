@@ -114,7 +114,7 @@ bool Session::GuidReceived(gentity_t *ent)
 	char guidBuf[MAX_TOKEN_CHARS];
 	char hwidBuf[MAX_TOKEN_CHARS];
 
-	// Client sends "etguid guid hwid
+	// Client sends "AUTHENTICATE guid hwid
 	const int ARGC = 3;
 	if (argc != ARGC)
 	{

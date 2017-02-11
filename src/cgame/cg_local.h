@@ -3829,14 +3829,6 @@ void CG_DrawCHS(void);
 void CG_InfoCHS_f(void);
 
 void CG_BannerPrint(const char *str);
-void CG_Minimize_f(void);
-
-//
-// cg_identification.cpp
-//
-
-void SendGuid();
-
 const char *G_SHA1(const char *str);
 
 //
@@ -3860,9 +3852,9 @@ namespace ETJump
 	class EntityEventsHandler;
 	class IRenderable;
 
-	extern std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
-	extern std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	extern std::unique_ptr<EntityEventsHandler> entityEventsHandler;
+	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 

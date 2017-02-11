@@ -20,9 +20,6 @@
     <ClCompile Include="..\sha-1\sha1.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cg_identification.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="cg_mainext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -224,6 +221,18 @@
     <ClCompile Include="cg_edv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_client_authentication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_operating_system_linux.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_operating_system_windows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -308,6 +317,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\json\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_authentication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_operating_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\etj_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,6 +12,7 @@
 #include "etj_timerun.h"
 #include "etj_map_statistics.h"
 #include "etj_tokens.h"
+#include "etj_shared.h"
 
 Game game;
 
@@ -27,7 +28,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		G_DPrintf("Requesting guid from %d\n", clientNum);
 
 		trap_SendServerCommand(clientNum,
-		                       GUID_REQUEST);
+			ETJump::Constants::Authentication::GUID_REQUEST.c_str());
 	}
 	else
 	{
@@ -188,7 +189,7 @@ qboolean OnClientCommand(gentity_t *ent)
 	auto command = (*argv)[0];
 	boost::to_lower(command);
 
-	if (command == "etguid")
+	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
 	{
 		game.session->GuidReceived(ent);
 		game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
