@@ -12,6 +12,8 @@
 #include "etj_entity_events_handler.h"
 #include "etj_overbounce_watcher.h"
 #include "etj_maxspeed.h"
+#include "etj_client_authentication.h"
+#include "etj_operating_system.h"
 
 displayContextDef_t cgDC;
 
@@ -81,9 +83,11 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
-	std::unique_ptr<ClientCommandsHandler> serverCommandsHandler;
-	std::unique_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	std::unique_ptr<EntityEventsHandler> entityEventsHandler;
+	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+	std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
+	std::shared_ptr<ClientAuthentication> authentication;
+	std::shared_ptr<OperatingSystem> operatingSystem;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
 }
 
@@ -3501,9 +3505,30 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// to subcribe to commands.
 	// Generally all modules should get these as constructor params but they're still being used in the C code
 	// => make sure they're created first
-	ETJump::serverCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(nullptr));
-	ETJump::consoleCommandsHandler = std::unique_ptr<ETJump::ClientCommandsHandler>(new ETJump::ClientCommandsHandler(trap_AddCommand));
-	ETJump::entityEventsHandler = std::unique_ptr<ETJump::EntityEventsHandler>(new ETJump::EntityEventsHandler());
+	ETJump::serverCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
+	ETJump::consoleCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(trap_AddCommand);
+	ETJump::entityEventsHandler = std::make_shared<ETJump::EntityEventsHandler>();
+	ETJump::operatingSystem = std::make_shared<ETJump::OperatingSystem>();
+	ETJump::authentication = std::make_shared<ETJump::ClientAuthentication>([](const std::string& command)
+	{
+		trap_SendClientCommand(command.c_str());
+	}, [](const std::string& message)
+	{
+		CG_Printf(message.c_str());
+	}, bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
+		ETJump::serverCommandsHandler
+	);
+
+	////////////////////////////////////////////////////////////////
+	// TODO: move these to own client commands handler
+	////////////////////////////////////////////////////////////////
+	auto minimize = [](const std::vector<std::string>&args)
+	{
+		ETJump::operatingSystem->minimize();
+	};
+	ETJump::consoleCommandsHandler->subscribe("min", minimize);
+	ETJump::consoleCommandsHandler->subscribe("minimize", minimize);
+	////////////////////////////////////////////////////////////////
 
 	// initialize renderables
 	// Overbounce watcher
@@ -3528,12 +3553,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	VectorSet(cgs.demoCam.velocity, 0.0, 0.0, 0.0);
 	cgs.demoCam.startLean = qfalse;
 	cgs.demoCam.noclip = qfalse;
-#ifdef AC_SUPPORT
 
-	InitAntiCheat(clientAC);
-	clientAC.vmMain = vmMain;
-
-#endif // AC_SUPPORT
 	InitGame();
 
 	CG_AutoExec_f();
@@ -3556,6 +3576,24 @@ void CG_Shutdown(void)
 	{
 		trap_Cvar_Set("timescale", "1");
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ETJump shutdown
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////
+	// TODO: move these to own client commands handler
+	////////////////////////////////////////////////////////////////
+	ETJump::consoleCommandsHandler->unsubcribe("min");
+	ETJump::consoleCommandsHandler->unsubcribe("minimize");
+	////////////////////////////////////////////////////////////////
+
+	ETJump::consoleCommandsHandler = nullptr;
+	ETJump::serverCommandsHandler = nullptr;
+	ETJump::operatingSystem = nullptr;
+	ETJump::authentication = nullptr;
+	ETJump::entityEventsHandler = nullptr;
+	ETJump::renderables.clear();
 }
 
 // returns true if game is single player (or coop)

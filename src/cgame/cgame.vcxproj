@@ -236,6 +236,7 @@
     <ClCompile Include="..\game\bg_sscript.cpp" />
     <ClCompile Include="..\game\bg_stats.cpp" />
     <ClCompile Include="..\game\bg_tracemap.cpp" />
+    <ClCompile Include="..\game\etj_file.cpp" />
     <ClCompile Include="..\game\q_math.cpp" />
     <ClCompile Include="..\game\q_shared.cpp" />
     <ClCompile Include="..\json\jsoncpp.cpp" />
@@ -257,7 +258,6 @@
     <ClCompile Include="cg_fireteamoverlay.cpp" />
     <ClCompile Include="cg_fireteams.cpp" />
     <ClCompile Include="cg_flamethrower.cpp" />
-    <ClCompile Include="cg_identification.cpp" />
     <ClCompile Include="cg_info.cpp" />
     <ClCompile Include="cg_limbopanel.cpp" />
     <ClCompile Include="cg_loadpanel.cpp" />
@@ -287,10 +287,13 @@
     <ClCompile Include="..\ui\ui_shared.cpp" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="etj_client_authentication.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
     <ClCompile Include="etj_entity_events_handler.cpp" />
     <ClCompile Include="etj_maxspeed.cpp" />
+    <ClCompile Include="etj_operating_system_linux.cpp" />
+    <ClCompile Include="etj_operating_system_windows.cpp" />
     <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
     <ClCompile Include="etj_trickjump_lines.cpp" />
@@ -301,6 +304,7 @@
     <ClInclude Include="..\game\bg_classes.h" />
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
+    <ClInclude Include="..\game\etj_shared.h" />
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
@@ -312,10 +316,12 @@
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
+    <ClInclude Include="etj_client_authentication.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_entity_events_handler.h" />
     <ClInclude Include="etj_irenderable.h" />
     <ClInclude Include="etj_maxspeed.h" />
+    <ClInclude Include="etj_operating_system.h" />
     <ClInclude Include="etj_overbounce_watcher.h" />
     <ClInclude Include="etj_client_utilities.h" />
     <ClInclude Include="etj_drawable.h" />
