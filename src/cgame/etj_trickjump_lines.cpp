@@ -1,12 +1,16 @@
-﻿#include "etj_trickjump_lines.hpp"
-#include "../json/json.h"
-#include "etj_client_utilities.h"
+﻿
 #include <sstream>
 #include <memory>
 #include <string>
 #include <map>
 
+#include "../json/json.h"
+
 #include "cg_local.h"
+#include "etj_client_utilities.h"
+#include "etj_trickjump_lines.hpp"
+
+#include "../game/etj_file.h"
 
 static const char* EnumStrings[] = { "mapper", "loaded", "recorded" };
 const char* getTextForEnum(int enumVal)
@@ -644,19 +648,19 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	//Check if already loaded 
 	if (loadedRoutes(loadname))
 	{
-		CG_Printf("This file is already loaded : %s.\n", loadname);
+		CG_Printf("This file is already loaded\n");
 		return;
 	}
 	// Always load mapper map, and
 	if (loadname == nullptr)
 	{
-		map = (std::string("tjllines/mapper/") + cgs.rawmapname + std::string(".tjl"));
+		map = (std::string("tjllines/mapper/") + cgs.rawmapname + std::string(".dat"));
 		loadStatus = routeStatus::map;
 		CG_Printf("Will load mapper TJL for map : %s.\n", cgs.rawmapname);
 	}
 	else if (loadname != nullptr)
 	{
-		map = (std::string("tjllines/") + cgs.rawmapname + std::string("/") + loadname + std::string(".tjl"));
+		map = (std::string("tjllines/") + cgs.rawmapname + std::string("/") + loadname + std::string(".dat"));
 		loadStatus = routeStatus::load;
 
 		if (trap_FS_FOpenFile(map.c_str(), &f, FS_READ) > 0)
@@ -742,13 +746,16 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 void TrickjumpLines::saveRoutes(const char *savename)
 {
 	// TODO (xis) : if file name already exist, overwrite?
+	std::string filename = std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".dat");
+
 	fileHandle_t f = 0;
-	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".tjl")).c_str(), &f, FS_READ) > 0)
+	if (trap_FS_FOpenFile(filename.c_str(), &f, FS_READ) > 0)
 	{
 		CG_Printf("This file already exists, cannot save.\n");
 		return;
 	}
 
+	//	ETJump::File etjFile(filename);
 	Json::Value root = Json::arrayValue;
 	for (auto&route : _routes)
 	{
@@ -786,7 +793,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 		}
 	}
 
-	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".tjl")).c_str(), &f, FS_WRITE) < 0)
+	if (trap_FS_FOpenFile(filename.c_str(), &f, FS_WRITE) < 0)
 	{
 		throw "ERROR: couldn't open file for saving tjlines";
 	}
@@ -907,8 +914,8 @@ void TrickjumpLines::displayByName(const char *name)
 		displayCurrentRoute(getCurrentRouteToRender());
 		return;
 	}
-
 	CG_Printf("No route with name : %s has been found. \n", name);
+
 	return;
 }
 

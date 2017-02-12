@@ -242,7 +242,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		}
 		else
 		{
-			CG_Printf("Please provide a name to save your TJL. (without .tjl extension). \n");
+			CG_Printf("Please provide a name to save your TJL. (without .dat extension). \n");
 			return qfalse;
 		}
 	}
