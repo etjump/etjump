@@ -214,7 +214,7 @@ void Levels::PrintLevelInfo(gentity_t *ent, int level)
 			return;
 		}
 	}
-	ChatPrintTo(ent, "^3levelinfo: ^7undefined level: " + ToString(level));
+	ChatPrintTo(ent, "^3levelinfo: ^7undefined level: " + std::to_string(level));
 }
 
 bool Levels::LevelExists(int level) const

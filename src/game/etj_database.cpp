@@ -198,7 +198,7 @@ bool Database::UserInfo(gentity_t *ent, int id)
 
 	if (user == users_.get<0>().end())
 	{
-		ChatPrintTo(ent, "^3userinfo: ^7no user found with id " + ToString(id));
+		ChatPrintTo(ent, "^3userinfo: ^7no user found with id " + std::to_string(id));
 		return false;
 	}
 
@@ -232,7 +232,7 @@ bool Database::ListUsers(gentity_t *ent, int page)
 
 	if (page > pages)
 	{
-		ChatPrintTo(ent, "^3listusers: ^7no page #" + ToString(page));
+		ChatPrintTo(ent, "^3listusers: ^7no page #" + std::to_string(page));
 		return false;
 	}
 
@@ -310,7 +310,7 @@ bool Database::Unban(gentity_t *ent, int id)
 			return true;
 		}
 	}
-	message_ = "no ban with id " + ToString(id);
+	message_ = "no ban with id " + std::to_string(id);
 	return false;
 }
 
@@ -325,7 +325,7 @@ bool Database::ListBans(gentity_t *ent, int page)
 
 	if (page > pages)
 	{
-		ChatPrintTo(ent, "^3listbans: ^7no page #" + ToString(page));
+		ChatPrintTo(ent, "^3listbans: ^7no page #" + std::to_string(page));
 	}
 
 	ChatPrintTo(ent, "^3listbans: ^7check console for more information.");
@@ -447,7 +447,7 @@ bool Database::UpdateUser(gentity_t *ent, int id, std::string const& commands, s
 		return Save(user, updated);
 	}
 
-	message_ = "Couldn't find user with id " + ToString(id);
+	message_ = "Couldn't find user with id " + std::to_string(id);
 	return false;
 }
 
@@ -507,7 +507,7 @@ bool Database::UpdateLastSeen(int id, int lastSeen)
 
 		return true;
 	}
-	message_ = "Couldn't find user with id " + ToString(id);
+	message_ = "Couldn't find user with id " + std::to_string(id);
 	return false;
 }
 
@@ -526,7 +526,7 @@ bool Database::SetLevel(int id, int level)
 		return Save(user, Updated::LEVEL);
 	}
 
-	message_ = "Couldn't find user with id " + ToString(id);
+	message_ = "Couldn't find user with id " + std::to_string(id);
 	return false;
 }
 
@@ -694,7 +694,7 @@ bool Database::AddNewHardwareId(int id, std::string const& hwid)
 
 		return true;
 	}
-	message_ = "Couldn't find user with id " + ToString(id);
+	message_ = "Couldn't find user with id " + std::to_string(id);
 	return false;
 }
 
@@ -1482,7 +1482,7 @@ void Database::ListUserNamesOperation::Execute()
 
 	if (names.size() == 0)
 	{
-		ChatPrintTo(ent_, "^3listusernames: ^7couldn't find any names with id " + ToString(id_));
+		ChatPrintTo(ent_, "^3listusernames: ^7couldn't find any names with id " + std::to_string(id_));
 	}
 	else
 	{

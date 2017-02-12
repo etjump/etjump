@@ -567,8 +567,8 @@ void SaveSystem::Print(gentity_t *ent)
 			r2 = it->second.axisSavedPositions[i].origin[2];
 
 			toPrint +=
-			    ToString(it->second.alliesSavedPositions[i].isValid) +
-			    ToString(it->second.axisSavedPositions[i].isValid) +
+				std::to_string(it->second.alliesSavedPositions[i].isValid) +
+				std::to_string(it->second.axisSavedPositions[i].isValid) +
 			    "B: " + ToString(b0, b1, b2) +
 			    "R: " + ToString(r0, r1, r2) + NEWLINE;
 		}
