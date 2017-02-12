@@ -441,7 +441,7 @@ bool DeleteLevel(gentity_t *ent, Arguments argv)
 
 	int usersWithLevel = game.session->LevelDeleted(level);
 
-	ChatPrintTo(ent, "^3deletelevel: ^7deleted level. Set " + ToString(usersWithLevel) + " users to level 0.");
+	ChatPrintTo(ent, "^3deletelevel: ^7deleted level. Set " + std::to_string(usersWithLevel) + " users to level 0.");
 
 	return true;
 }
@@ -1206,7 +1206,7 @@ bool ListPlayers(gentity_t *ent, Arguments argv)
 
 			BufferPrint(ent, (boost::format("^7%-2d %-9d %-6d %-s\n")
 			                  % clientNum
-			                  % (id == -1 ? "-" : boost::lexical_cast<std::string>(id))
+			                  % (id == -1 ? "-" : std::to_string(id))
 			                  % game.session->GetLevel(g_entities + clientNum)
 			                  % (g_entities + clientNum)->client->pers.netname).str());
 		}
