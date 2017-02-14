@@ -1407,7 +1407,6 @@ qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other);
 void Cmd_FollowCycle_f(gentity_t *ent, int dir);
 qboolean ClientIsFlooding(gentity_t *ent);
 char *ConcatArgs(int start);
-void Cmd_SaveReset_f(gentity_t *ent);
 
 //
 // g_items.c
@@ -1416,14 +1415,10 @@ void G_RunItem(gentity_t *ent);
 void RespawnItem(gentity_t *ent);
 
 void UseHoldableItem(gentity_t *ent, int item);
-void PrecacheItem(gitem_t *it);
 gentity_t *Drop_Item(gentity_t *ent, gitem_t *item, float angle, qboolean novelocity);
 gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNum);
-void SetRespawn(gentity_t *ent, float delay);
 void G_SpawnItem(gentity_t *ent, gitem_t *item);
 void FinishSpawningItem(gentity_t *ent);
-void Think_Weapon(gentity_t *ent);
-int ArmorIndex(gentity_t *ent);
 void Fill_Clip(playerState_t *ps, int weapon);
 int Add_Ammo(gentity_t *ent, int weapon, int count, qboolean fillClip);
 void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace);
@@ -1472,7 +1467,6 @@ void    G_FreeEntity(gentity_t *e);
 //qboolean	G_EntitiesFree( void );
 
 void    G_TouchTriggers(gentity_t *ent);
-void    G_TouchSolids(gentity_t *ent);
 
 float *tv(float x, float y, float z);
 char *vtos(const vec3_t v);
@@ -1525,8 +1519,6 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos, qboolean allow
 void G_TripMinePrime(gentity_t *ent);
 qboolean G_HasDroppedItem(gentity_t *ent, int modType);
 
-// Rafael zombiespit
-void G_RunDebris(gentity_t *ent);
 
 //DHM - Nerve :: server side flamethrower collision
 void G_RunFlamechunk(gentity_t *ent);
@@ -1536,7 +1528,6 @@ gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir);
 
 gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t aimdir, int grenadeWPID);
 gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir);
-gentity_t *fire_speargun(gentity_t *self, vec3_t start, vec3_t dir);
 
 #define Fire_Lead(ent, activator, spread, damage, muzzle, forward, right, up) Fire_Lead_Ext(ent, activator, spread, damage, muzzle, forward, right, up, MOD_MACHINEGUN)
 void Fire_Lead_Ext(gentity_t *ent, gentity_t *activator, float spread, int damage, vec3_t muzzle, vec3_t forward, vec3_t right, vec3_t up, int mod);
@@ -1564,11 +1555,6 @@ void InitMover(gentity_t *ent);
 void SetMoverState(gentity_t *ent, moverState_t moverState, int time);
 
 void func_constructible_underconstructionthink(gentity_t *ent);
-
-//
-// g_tramcar.c
-//
-void Reached_Tramcar(gentity_t *ent);
 
 //
 // g_trigger.c
@@ -1617,8 +1603,6 @@ void SetClientViewAngle(gentity_t *ent, vec3_t angle);
 gentity_t *SelectSpawnPoint(vec3_t avoidPoint, vec3_t origin, vec3_t angles);
 void respawn(gentity_t *ent);
 void BeginIntermission(void);
-void InitClientPersistant(gclient_t *client);
-void InitClientResp(gclient_t *client);
 void InitBodyQue(void);
 void ClientSpawn(gentity_t *ent, qboolean revived);
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
@@ -1626,7 +1610,6 @@ void AddScore(gentity_t *ent, int score);
 void AddKillScore(gentity_t *ent, int score);
 void CalculateRanks(void);
 qboolean SpotWouldTelefrag(gentity_t *spot);
-qboolean G_CheckForExistingModelInfo(bg_playerclass_t *classInfo, const char *modelName, animModelInfo_t **modelInfo);
 void G_StartPlayerAppropriateSound(gentity_t *ent, char *soundType);
 void SetWolfSpawnWeapons(gclient_t *client);
 void limbo(gentity_t *ent, qboolean makeCorpse);   // JPW NERVE
@@ -1648,15 +1631,7 @@ void G_UpdateCharacter(gclient_t *client);
 qboolean ConsoleCommand(void);
 void G_ProcessIPBans(void);
 qboolean G_FilterIPBanPacket(const char *from);
-ipXPStorage_t *G_FindXPBackup(char *from);
-void G_AddXPBackup(gentity_t *ent);
-void G_StoreXPBackup(void);
-void G_ClearXPBackup(void);
-void G_ReadXPBackup(void);
 void AddIPBan(const char *str);
-
-void Svcmd_ShuffleTeams_f(void);
-
 
 //
 // g_weapon.c
@@ -1681,7 +1656,6 @@ qboolean IsSilencedWeapon
 // p_hud.c
 //
 void MoveClientToIntermission(gentity_t *client);
-void G_SetStats(gentity_t *ent);
 void G_SendScore(gentity_t *client);
 
 //
@@ -1695,11 +1669,6 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded);
 void Cmd_Team_f(gentity_t *ent);
 void Cmd_SetWeapons_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_SetClass_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
-
-//
-// g_pweapon.c
-//
-
 
 //
 // g_main.c
@@ -1730,14 +1699,9 @@ void ClientThink(int clientNum);
 void ClientEndFrame(gentity_t *ent);
 void G_RunClient(gentity_t *ent);
 qboolean ClientNeedsAmmo(int client);
-qboolean ClientOutOfAmmo(int client);
 
 // Does ent have enough "energy" to call artillery?
 qboolean ReadyToCallArtillery(gentity_t *ent);
-// to call airstrike?
-qboolean ReadyToCallAirstrike(gentity_t *ent);
-// to use smoke grenade?
-qboolean ReadyToThrowSmoke(gentity_t *ent);
 // Are we ready to construct?  Optionally, will also update the time while we are constructing
 qboolean ReadyToConstruct(gentity_t *ent, gentity_t *constructible, qboolean updateState);
 
@@ -1773,30 +1737,11 @@ void G_CalcRank(gclient_t *client);
 // ai_main.c
 #define MAX_FILEPATH            144
 
-// ai_dmq3.c
-//returns the number of the client with the given name
-int ClientFromName(char *name);
-
-// ai_main.c
-// TTimo - wraps to BotGetTargetExplosives, without dependency to bot_target_s (which breaks gcc build)
-int GetTargetExplosives(team_t team, qboolean ignoreDynamite);
-
 // g_cmd.c
 void Cmd_Activate_f(gentity_t *ent);
 void Cmd_Activate2_f(gentity_t *ent);
 qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt);
 void G_LeaveTank(gentity_t *ent, qboolean position);
-
-
-// Ridah
-
-// g_save.c
-#ifdef SAVEGAME_SUPPORT
-qboolean G_SaveGame(char *username);
-void G_LoadGame(void);
-qboolean G_SavePersistant(char *nextmap);
-void G_LoadPersistant(void);
-#endif // SAVEGAME_SUPPORT
 
 // g_script.c
 void G_Script_ScriptParse(gentity_t *ent);
@@ -2294,9 +2239,7 @@ messageStatus_t trap_MessageStatus(int clientNum);
 
 void G_ExplodeMissile(gentity_t *ent);
 
-void Svcmd_StartMatch_f(void);
 void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart);
-void Svcmd_SwapTeams_f(void);
 
 void trap_PbStat(int clientNum, const char *category, const char *values) ;
 
@@ -2329,7 +2272,6 @@ typedef struct
 } fireteam_t;
 
 void Cmd_FireTeam_MP_f(gentity_t *ent);
-int G_IsOnAFireTeam(int clientNum);
 
 /*
 void G_SetWayPoint( gentity_t* ent, wayPointType_t wayPointType, vec3_t loc );
@@ -2414,8 +2356,6 @@ typedef enum
 	SM_NUM_SYS_MSGS,
 } sysMsg_t;
 
-void G_CheckForNeededClasses(void);
-void G_CheckMenDown(void);
 void G_SendMapEntityInfo(gentity_t *e);
 void G_SendSystemMessage(sysMsg_t message, int team);
 int G_GetSysMessageNumber(const char *sysMsg);
@@ -2424,7 +2364,6 @@ qboolean G_SweepForLandmines(vec3_t origin, float radius, int team);
 
 void G_AddClientToFireteam(int entityNum, int leaderNum);
 void G_InviteToFireTeam(int entityNum, int otherEntityNum);
-void GetBotAmmo(int clientNum, int *weapon, int *ammo, int *ammoclip);
 void G_UpdateFireteamConfigString(fireteamData_t *ft);
 void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print);
 
@@ -2569,11 +2508,9 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 //
 void G_addStats(gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod);
 void G_addStatsHeadShot(gentity_t *attacker, int mod);
-qboolean G_allowPanzer(gentity_t *ent);
 int G_checkServerToggle(vmCvar_t *cv);
 char *G_createStats(gentity_t *refEnt);
 void G_deleteStats(int nClient);
-qboolean G_desiredFollow(gentity_t *ent, int nTeam);
 void G_globalSound(const char *sound);
 void G_initMatch(void);
 void G_loadMatchGame(void);
@@ -2618,9 +2555,8 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
             char *arg2);
 int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
                    char *arg2);
-int G_RandomMap_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                  char *arg2);
-
+int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
+	char *arg2);
 void G_LinkDebris(void);
 void G_LinkDamageParents(void);
 int EntsThatRadiusCanDamage(vec3_t origin, float radius, int *damagedList);
@@ -2728,10 +2664,6 @@ const char *EscapeString(const char *in);
 const char *interpolateNametags(const char *text);
 const char *findAndReplaceNametags(const char *text, const char *name);
 
-
-// C versions of conversion functions
-qboolean StringToInt(const char *toConvert, int *value);
-
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
 
@@ -2750,7 +2682,6 @@ const char *GetRandomMapByType(const char *customType);
 qboolean AdminCommandCheck(gentity_t *ent);
 //void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType);
-void CheckIfOperationsNeedToBeExecuted();
 void ClientNameChanged(gentity_t *ent);
 void G_increaseCallvoteCount(const char *mapName);
 void G_increasePassedCount(const char *mapName);
