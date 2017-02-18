@@ -1,7 +1,7 @@
 #ifndef ROTATION_MATRIX_HPP
 #define ROTATION_MATRIX_HPP
 
-#include <math.h> 
+#include <cmath> 
 
 #define PI 3.14159265
 

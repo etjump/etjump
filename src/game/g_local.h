@@ -2,6 +2,13 @@
 #define G_LOCAL_H
 // g_local.h -- local definitions for game module
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <climits>
 #include <memory>
 #include <string>

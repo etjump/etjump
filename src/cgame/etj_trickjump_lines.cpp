@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <algorithm>
 
 #include "cg_local.h"
 
@@ -927,13 +928,13 @@ void TrickjumpLines::displayNearestRoutes()
 	// Sort the _routes with a lambda function that taking p (position of player) as search param
 	// Check if player is near by a start point of a route.
 	std::sort(begin(routeCopy), end(routeCopy),
-		[&](Route& lhs, Route& rhs) { return euclideanDist(p, lhs.trails[0][0].coor) < euclideanDist(p, rhs.trails[0][0].coor); });
+		[&](const Route& lhs, const Route& rhs) { return euclideanDist(p, lhs.trails[0][0].coor) < euclideanDist(p, rhs.trails[0][0].coor); });
 
 	Route nearestStart = routeCopy[0];
 
 	// Check if player is near by a end point of a route.
 	std::sort(begin(routeCopy), end(routeCopy),
-		[&](Route& lhs, Route& rhs) {
+		[&](const Route& lhs, const Route& rhs) {
 
 		const int endLTrail = lhs.trails.size() - 1;
 		const int endLNode = lhs.trails[endLTrail].size() - 1;
@@ -1028,7 +1029,7 @@ void TrickjumpLines::computeHSV(float speed, vec3_t& hsv)
 	const float hmax = 300; // This need to be hardcoded (0 to 300 mean red=0 to blue=300),
 
 	// Simple x^1.35 * maxDegree to have a nice mapping function between ups and color.
-	hsv[0] = std::powf(speed, 1.35f) * hmax;
+	hsv[0] = std::pow(speed, 1.35f) * hmax;
 	hsv[1] = 1.0;
 	hsv[2] = 1.0;
 

@@ -1,4 +1,10 @@
 #include "g_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include "etj_deathrun_system.h"
 #include <memory>
 
