@@ -13,6 +13,12 @@
       <UniqueIdentifier>{da3c5bbf-3923-4a82-a1ce-eba8184609a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Header Files\SQLiteCpp">
+      <UniqueIdentifier>{e0eac11a-13a1-430e-9f2b-ce9d40cb0c4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SQLiteCpp">
+      <UniqueIdentifier>{530040fb-0265-4228-a2ac-8fe7eafe6b6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sha-1\sha1.c">
@@ -249,6 +255,27 @@
     <ClCompile Include="etj_file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_user_repository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\Backup.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\Column.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\Database.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\Exception.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\Statement.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SQLiteCpp\Transaction.cpp">
+      <Filter>Source Files\SQLiteCpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -387,6 +414,42 @@
     </ClInclude>
     <ClInclude Include="etj_shared.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_iuser_repository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_user2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_user_repository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Assertion.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Backup.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Column.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Database.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Exception.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\SQLiteCpp.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Statement.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\Transaction.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SQLiteCpp\VariadicBind.h">
+      <Filter>Header Files\SQLiteCpp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

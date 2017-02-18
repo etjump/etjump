@@ -13,6 +13,7 @@
 #include "etj_map_statistics.h"
 #include "etj_tokens.h"
 #include "etj_shared.h"
+#include "etj_user_repository.h"
 
 Game game;
 
@@ -82,6 +83,7 @@ void ChangeMap()
 void RunFrame(int levelTime)
 {
 	game.mapStatistics->runFrame(levelTime);
+	ETJump::userRepository->checkForCompletedTasks();
 }
 
 void OnGameInit()
@@ -193,6 +195,33 @@ qboolean OnClientCommand(gentity_t *ent)
 	{
 		game.session->GuidReceived(ent);
 		game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
+
+		if (trap_Argc() == 3)
+		{
+			char guid[MAX_TOKEN_CHARS];
+			char hwid[MAX_TOKEN_CHARS];
+			trap_Argv(1, guid, sizeof(guid));
+			trap_Argv(2, hwid, sizeof(hwid));
+			char *ip = NULL;
+			char userinfo[MAX_INFO_STRING] = "\0";
+			trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
+			ip = Info_ValueForKey(userinfo, "ip");
+			ETJump::userRepository->createOrUpdateAsync(ent->client->pers.netname, guid, hwid, ip, [](const std::shared_ptr<ETJump::IUserRepository::TaskResult<ETJump::User>> result)
+			{
+				if (result->error.length() > 0)
+				{
+					AP(va("print \"Error: %s\n\"", result->error.c_str()));
+					return;
+				}
+
+				AP(va("print \"Found user: %d %s %s\n\"", 
+					result->result.id(), 
+					result->result.name().c_str(),
+					result->result.commands().c_str()));
+			});
+
+		}
+
 		return qtrue;
 	}
 

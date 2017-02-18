@@ -2727,6 +2727,8 @@ namespace ETJump
 {
 	class DeathrunSystem;
 	extern std::shared_ptr<ETJump::DeathrunSystem> deathrunSystem;
+	class UserRepository;
+	extern std::shared_ptr<UserRepository> userRepository;
 }
 
 

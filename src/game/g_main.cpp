@@ -7,6 +7,8 @@
 #endif
 #include "etj_deathrun_system.h"
 #include <memory>
+#include "etj_user_repository.h"
+#include "etj_file.h"
 
 level_locals_t level;
 
@@ -29,6 +31,7 @@ typedef struct
 namespace ETJump
 {
 	std::shared_ptr<DeathrunSystem> deathrunSystem;
+	std::shared_ptr<UserRepository> userRepository;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +40,15 @@ namespace ETJump
 
 static void initializeETJump()
 {
-	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
+	try
+	{
+		ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
+		ETJump::userRepository = std::make_shared<ETJump::UserRepository>(ETJump::File::getPath("users2.db"));
+	} catch (std::runtime_error& e)
+	{
+		G_Error("%s\n", e.what());
+		return;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +58,7 @@ static void initializeETJump()
 static void shutdownETJump()
 {
 	ETJump::deathrunSystem = nullptr;
+	ETJump::userRepository = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
