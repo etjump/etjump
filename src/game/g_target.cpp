@@ -2121,7 +2121,6 @@ void target_tjldisplay_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	}
 	else
 	{
-		//trap_SendServerCommand((activator - g_entities), va("tjl_displaybyname %s", self->tjlLineName));
 		trap_SendServerCommand(-1, va("tjl_displaybyname %s", self->tjlLineName));
 	}
 
