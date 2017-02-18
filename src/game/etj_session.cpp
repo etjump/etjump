@@ -314,19 +314,6 @@ void Session::PrintGreeting(gentity_t *ent)
 	}
 }
 
-void Session::PrintSessionData()
-{
-	BeginBufferPrint();
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		BufferPrint(NULL,
-		            va("%d %s %s\n", i,
-		               clients_[i].guid.c_str(),
-		               clients_[i].hwid.c_str()));
-	}
-	FinishBufferPrint(NULL, false);
-}
-
 bool Session::SetLevel(gentity_t *target, int level)
 {
 	if (!clients_[ClientNum(target)].user)
@@ -489,12 +476,6 @@ std::bitset<256> Session::Permissions(gentity_t *ent) const
 		return all;
 	}
 	return clients_[ClientNum(ent)].permissions;
-}
-
-void Session::PrintGuid(gentity_t *ent)
-{
-	G_DPrintf("Printing GUID to %s\n", ent->client->pers.netname);
-	ChatPrintTo(ent, va("Your guid is: %s", clients_[ClientNum(ent)].guid.c_str()));
 }
 
 Session::Client::Client() :
