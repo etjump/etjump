@@ -5,8 +5,14 @@
  *
 */
 
-#include "etj_deathrun_system.h"
 #include "g_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include "etj_deathrun_system.h"
 #include "../game/q_shared.h"
 #include <boost/algorithm/string/replace.hpp>
 #include "etj_utilities.h"

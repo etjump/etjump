@@ -326,7 +326,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		else
 		{
 			std::string state = CG_Argv(1);
-			CG_Printf("Enable marker arg : %s \n", state);
+			CG_Printf("Enable marker arg : %s \n", state.c_str());
 			if (state == "0")
 			{
 				trickjumpLines->toggleMarker(false);

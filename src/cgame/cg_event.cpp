@@ -2,6 +2,7 @@
 
 #include "cg_local.h"
 #include "etj_entity_events_handler.h"
+#include <algorithm>
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -3009,7 +3010,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		}
 
 		len = 1.0f - (len / (float)cent->currentState.onFireStart);
-		len = min(1.f, len);
+		len = std::min(1.f, len);
 
 		CG_StartShakeCamera(len, es);
 	}

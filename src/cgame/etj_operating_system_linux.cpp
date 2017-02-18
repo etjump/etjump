@@ -1,13 +1,19 @@
 #if defined __linux__
 
 #include "etj_operating_system.h"
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <cstring>
+#include <boost/format.hpp>
+
 const char *G_SHA1(const char *str);
 
-void ETJump::OperationSystem::minimize()
+void ETJump::OperatingSystem::minimize()
 {
 }
 
-std::string ETJump::OperationSystem::getHwid()
+std::string ETJump::OperatingSystem::getHwid()
 {
 	struct ifreq  ifr;
 	struct ifconf ifc;
@@ -53,13 +59,14 @@ std::string ETJump::OperationSystem::getHwid()
 	if (success)
 	{
 		memcpy(mac_address, ifr.ifr_hwaddr.sa_data, 6);
-		return G_SHA1(va("%02X:%02X:%02X:%02X:%02X:%02X",
-			mac_address[0],
-			mac_address[1],
-			mac_address[2],
-			mac_address[3],
-			mac_address[4],
-			mac_address[5]));
+		boost::format fmt("%02X:%02X:%02X:%02X:%02X:%02X");
+		fmt % mac_address[0]
+			% mac_address[1]
+			% mac_address[2]
+			% mac_address[3]
+			% mac_address[4]
+			% mac_address[5];
+		return G_SHA1(fmt.str().c_str());
 	}
 	else
 	{
