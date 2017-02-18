@@ -119,7 +119,7 @@ void ETJump::UserRepository::createOrUpdateAsync(const std::string& name, const 
 					insertIp.exec();
 
 					tx.commit();
-					User user(id, 0, 0, name, guid, "", "", "", { ip }, { hardwareId });
+					User user(id, 0, 0, name, guid, "", "", "", { ip }, { name }, { hardwareId });
 					return std::make_shared<TaskResult<User>>(user, "");
 				}
 
@@ -180,7 +180,22 @@ void ETJump::UserRepository::createOrUpdateAsync(const std::string& name, const 
 				{
 					ips.push_back(ipsQuery.getColumn(0));
 				}
-
+/*
+				SELECT
+					name
+				FROM users_names WHERE user_id = :user_id;
+*/
+				SQLite::Statement namesQuery(db,
+					"SELECT "
+						"name "
+					"FROM users_names WHERE user_id = :user_id;"
+				);
+				namesQuery.bind(":user_id", id);
+				std::vector<std::string> names;
+				while (namesQuery.executeStep())
+				{
+					names.push_back(namesQuery.getColumn(0));
+				}
 /*
 				SELECT
 					id,
@@ -215,7 +230,7 @@ void ETJump::UserRepository::createOrUpdateAsync(const std::string& name, const 
 				std::string storedCommands = userQuery.getColumn(5);
 				std::string storedGreeting = userQuery.getColumn(6);
 
-				User user(id, level, lastSeen, storedName, storedGuid, storedTitle, storedCommands, storedGreeting, ips, hardwareIds);
+				User user(id, level, lastSeen, storedName, storedGuid, storedTitle, storedCommands, storedGreeting, ips, names, hardwareIds);
 
 				return std::make_shared<TaskResult<User>>(user, std::string(""));
 			} catch (const std::exception& exception)

@@ -8,7 +8,7 @@ namespace ETJump
 	public:
 		static const long long INVALID_ID = -1;
 	
-		User(const long long id, const int level, const int lastSeen, const std::string& name, const std::string& guid, const std::string& title, const std::string& commands, const std::string& greeting, const std::vector<std::string>& ips, const std::vector<std::string>& hardwareIds)
+		User(const long long id, const int level, const int lastSeen, const std::string& name, const std::string& guid, const std::string& title, const std::string& commands, const std::string& greeting, const std::vector<std::string>& ips, const std::vector<std::string>& names, const std::vector<std::string>& hardwareIds)
 			: _id(id),
 			_level(level),
 			_lastSeen(lastSeen),
@@ -18,6 +18,7 @@ namespace ETJump
 			_commands(commands),
 			_greeting(greeting),
 			_ips(ips),
+			_names(names),
 			_hardwareIds(hardwareIds)
 		{
 		}
@@ -71,6 +72,11 @@ namespace ETJump
 			return _ips;
 		}
 
+		std::vector<std::string> names() const
+		{
+			return _names;
+		}
+
 		std::vector<std::string> hardwareIds() const
 		{
 			return _hardwareIds;
@@ -86,6 +92,7 @@ namespace ETJump
 		std::string _commands;
 		std::string _greeting;
 		std::vector<std::string> _ips;
+		std::vector<std::string> _names;
 		std::vector<std::string> _hardwareIds;
 	};
 }
