@@ -9,6 +9,8 @@
 #include <memory>
 #include "etj_user_repository.h"
 #include "etj_file.h"
+#include "etj_session_service.h"
+#include "etj_session.h"
 
 level_locals_t level;
 
@@ -32,6 +34,7 @@ namespace ETJump
 {
 	std::shared_ptr<DeathrunSystem> deathrunSystem;
 	std::shared_ptr<UserRepository> userRepository;
+	std::shared_ptr<SessionService> sessionService;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,6 +47,7 @@ static void initializeETJump()
 	{
 		ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
 		ETJump::userRepository = std::make_shared<ETJump::UserRepository>(ETJump::File::getPath("users2.db"));
+		ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userRepository);
 	} catch (std::runtime_error& e)
 	{
 		G_Error("%s\n", e.what());

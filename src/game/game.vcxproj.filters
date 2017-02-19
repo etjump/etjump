@@ -276,6 +276,9 @@
     <ClCompile Include="..\SQLiteCpp\Transaction.cpp">
       <Filter>Source Files\SQLiteCpp</Filter>
     </ClCompile>
+    <ClCompile Include="etj_session_service.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -450,6 +453,15 @@
     </ClInclude>
     <ClInclude Include="..\SQLiteCpp\VariadicBind.h">
       <Filter>Header Files\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_session_service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_isession_service.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

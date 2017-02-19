@@ -278,6 +278,7 @@
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_result_set_formatter.cpp" />
+    <ClCompile Include="etj_session_service.cpp" />
     <ClCompile Include="etj_user_repository.cpp" />
     <ClCompile Include="g_active.cpp" />
     <ClCompile Include="g_alarm.cpp" />
@@ -346,6 +347,7 @@
     <ClInclude Include="..\SQLiteCpp\Transaction.h" />
     <ClInclude Include="..\SQLiteCpp\VariadicBind.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="etj_client.h" />
     <ClInclude Include="etj_command_parser.h" />
     <ClInclude Include="etj_async_operation.h" />
     <ClInclude Include="bg_classes.h" />
@@ -360,12 +362,14 @@
     <ClInclude Include="etj_database.h" />
     <ClInclude Include="etj_deathrun_system.h" />
     <ClInclude Include="etj_file.h" />
+    <ClInclude Include="etj_isession_service.h" />
     <ClInclude Include="etj_iuser_repository.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
     <ClInclude Include="etj_public.h" />
     <ClInclude Include="etj_result_set_formatter.h" />
+    <ClInclude Include="etj_session_service.h" />
     <ClInclude Include="etj_shared.h" />
     <ClInclude Include="etj_user2.h" />
     <ClInclude Include="etj_user_repository.h" />

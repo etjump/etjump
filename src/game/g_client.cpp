@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include "etj_session_service.h"
 #include "../../etjump/ui/menudef.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -1879,6 +1880,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	}
 
 	ResetSavedPositions(ent);
+
+	ETJump::sessionService->initializeClientSession(clientNum);
 
 	return NULL;
 }

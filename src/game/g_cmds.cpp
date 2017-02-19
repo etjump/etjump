@@ -12,7 +12,8 @@
 #include <boost/algorithm/string/classification.hpp>
 #include "etj_result_set_formatter.h"
 #include "utilities.hpp"
-
+#include "etj_shared.h"
+#include "etj_session_service.h"
 
 
 void BotDebug(int clientNum);
@@ -4712,7 +4713,26 @@ qboolean ClientIsFlooding(gentity_t *ent)
 	return qfalse;
 }
 
-std::unique_ptr<Utilities::ResultSetFormatter> fmt = std::unique_ptr<Utilities::ResultSetFormatter>(new Utilities::ResultSetFormatter);
+void authenticate(int clientNum)
+{
+	char guid[MAX_TOKEN_CHARS];
+	char hwid[MAX_TOKEN_CHARS];
+	trap_Argv(1, guid, sizeof(guid));
+	trap_Argv(2, hwid, sizeof(hwid));
+	char *ip = NULL;
+	char userinfo[MAX_INFO_STRING] = "\0";
+	auto ent = g_entities + clientNum;
+	trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
+	ip = Info_ValueForKey(userinfo, "ip");
+
+	if (strlen(guid) == 0 || strlen(hwid) == 0 || strlen(ip) == 0)
+	{
+		trap_DropClient(clientNum, "Invalid guid, hardware ID or IP", 0);
+		return;
+	}
+
+	ETJump::sessionService->authenticate(clientNum, ent->client->pers.netname, guid, hwid, ip);
+}
 
 void ClientCommand(int clientNum)
 {
@@ -4729,6 +4749,12 @@ void ClientCommand(int clientNum)
 
 	}
 	trap_Argv(0, cmd, sizeof(cmd));
+
+	if (cmd == ETJump::Constants::Authentication::AUTHENTICATE)
+	{
+		authenticate(clientNum);
+		return;
+	}
 
 	if (OnClientCommand(ent))
 	{
@@ -4894,25 +4920,6 @@ void ClientCommand(int clientNum)
 
 	if (OnConnectedClientCommand(ent))
 	{
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "rsf"))
-	{
-		auto printer = BufferPrinter(ent);
-		printer.Print("\n");
-		printer.Print(fmt->toString({ "Index", "Value1", "C", "Value2", "TestValue", "idx" }, { { { "Index", "ab" },{ "Value2", "27.2712" },{ "TestValue", "foobar1" } },{ { "Index", "123123123123" },{ "TestValue", "foobar2" } },{ { "Index", "52352352" },{ "TestValue", "foobar3" },{ "C", "Hello, world. This is a fairly long piece of stringHello, world. This is a fairly long piece of stringHello, world. This is a fairly long piece of string" } } }, 3, 0));
-		printer.Print("\n");
-		printer.Print(fmt->toString({ "Index", "Value1", "A", "Value2", "TestValue", "i", "idx", "Index" }, { { { "Index", "def" },{ "TestValue", "foobar1" } },{ { "Index", "5225552325" },{ "TestValue", "foobar2" } },{ { "Index", "523525225" },{ "TestValue", "foobar3" },{ "A", "Hello, world. This is a fairly long piece of string" } } }, 2, 1));
-		printer.Print("\n");
-		printer.Finish(false);
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "test"))
-	{
-		ConsolePrintTo(ent, "    a");
-		ConsolePrintTo(ent, "\ta");
 		return;
 	}
 
