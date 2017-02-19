@@ -191,6 +191,27 @@ qboolean OnClientCommand(gentity_t *ent)
 	auto command = (*argv)[0];
 	boost::to_lower(command);
 
+	if (command == "update_user")
+	{
+		char buf[MAX_TOKEN_CHARS];
+		trap_Argv(1, buf, sizeof(buf));
+		int id = atoi(buf);
+		trap_Argv(2, buf, sizeof(buf));
+		std::string value = buf;
+		ETJump::IUserRepository::UserUpdateModel uum;
+		uum.commands = value;
+		uum.name = value;
+		uum.greeting = value;
+		uum.title = value;
+		ETJump::userRepository->updateAsync(id, uum, [](const std::shared_ptr<ETJump::IUserRepository::TaskResult<ETJump::User>> result)
+		{
+			AP(va("print \"Found user: %d %s %s\n\"",
+				result->result.id(),
+				result->result.name().c_str(),
+				result->result.commands().c_str()));
+		});
+	}
+
 	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
 	{
 		game.session->GuidReceived(ent);
