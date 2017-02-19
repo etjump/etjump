@@ -36,6 +36,7 @@ void ETJump::UserRepository::createOrUpdateAsync(const std::string& name, const 
 				// if we don't have a valid id, we need to check if user is in database. If servers are 
 				// sharing database, it is possible that user has an entry already.
 				SQLite::Database db(_database, SQLite::OPEN_READWRITE);
+				db.setBusyTimeout(BUSY_TIMEOUT);
 
 				/*
 				SELECT
@@ -86,6 +87,9 @@ void ETJump::UserRepository::createOrUpdateAsync(const std::string& name, const 
 
 					tx.commit();
 					User user(id, 0, 0, name, guid, "", "", "", { ip }, { name }, { hardwareId });
+
+					_idCache[guid] = id;
+
 					return std::make_shared<TaskResult<User>>(user, "");
 				}
 
@@ -100,6 +104,8 @@ void ETJump::UserRepository::createOrUpdateAsync(const std::string& name, const 
 				tx.commit();
 
 				auto user = getUser(db, id);
+
+				_idCache[guid] = id;
 
 				return std::make_shared<TaskResult<User>>(user, std::string(""));
 			} catch (const std::exception& exception)
@@ -147,6 +153,7 @@ void ETJump::UserRepository::updateAsync(long long userId, UserUpdateModel updat
 			try
 			{
 				SQLite::Database db(_database, SQLite::OPEN_READWRITE);
+				db.setBusyTimeout(BUSY_TIMEOUT);
 
 				boost::format updateSqlFmt("UPDATE users SET %s WHERE id=:user_id;");
 				std::vector<std::string> updatedFields;
@@ -254,6 +261,15 @@ void ETJump::UserRepository::updateAsync(long long userId, UserUpdateModel updat
 void ETJump::UserRepository::createDatabaseTables()
 {
 	SQLite::Database db(_database, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+	db.setBusyTimeout(BUSY_TIMEOUT);
+
+	// The persistence of WAL mode means that applications can be converted to 
+	// using SQLite in WAL mode without making any changes to the application 
+	// itself. One has merely to run "PRAGMA journal_mode=WAL;" on the database 
+	// file(s) using the command-line shell or other utility, then restart the 
+	// application.
+	// https://www.sqlite.org/wal.html
+	db.exec("PRAGMA journal_mode=WAL;");
 
 	db.exec(
 		"CREATE TABLE IF NOT EXISTS users ("

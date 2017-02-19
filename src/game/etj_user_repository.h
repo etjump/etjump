@@ -26,6 +26,7 @@ namespace ETJump
 		void updateAsync(long long userId, UserUpdateModel updateModel, std::function<void(const std::shared_ptr<TaskResult<User>>)> onCompletionSync) override;
 
 	private:
+		static const int BUSY_TIMEOUT = 5000;
 
 		template <typename T>
 		struct ActiveTask
