@@ -1,4 +1,5 @@
 #include "etj_session_service.h"
+#include "etj_file.h"
 
 void ETJump::SessionService::initializeClientSession(int clientNum)
 {
@@ -18,6 +19,18 @@ void ETJump::SessionService::authenticate(int clientNum, const std::string& name
 
 void ETJump::SessionService::readSession(int clientNum)
 {
+	try
+	{
+		File session("session.dat");
+
+		session.read();
+	} catch (const File::FileNotFoundException& exception)
+	{
+		for (auto i = 0, len = MAX_CLIENTS_ON_SERVER; i < len; ++i)
+		{
+			_clients[i] = Client();
+		}
+	}
 }
 
 void ETJump::SessionService::writeSession(int clientNum)

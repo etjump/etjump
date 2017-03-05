@@ -2583,6 +2583,8 @@ void ClientDisconnect(int clientNum)
 	SavePositionsToDatabase(ent);
 
 	ClearPortals(ent);
+
+	ETJump::sessionService->disconnect(clientNum);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,
