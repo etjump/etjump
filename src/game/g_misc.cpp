@@ -432,7 +432,7 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t orig
 		// calc viewangles
 		VectorCopy(angles, newViewAngles);
 		newViewAngles[YAW] += (player->client->ps.viewangles[YAW] - 90.0f);
-		newViewAngles[PITCH] += (player->client->ps.viewangles[PITCH] - 90.0f);
+		newViewAngles[PITCH] += player->client->ps.viewangles[PITCH];
 
 		// calc velocity
 		speed = VectorLength(player->client->ps.velocity);
