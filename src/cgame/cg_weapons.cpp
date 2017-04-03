@@ -2443,29 +2443,26 @@ static qboolean debuggingweapon = qfalse;
 void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 {
 
-	refEntity_t  gun;
-	refEntity_t  barrel;
-	refEntity_t  flash;
+	refEntity_t  gun{};
+	refEntity_t  barrel{};
+	refEntity_t  flash{};
 	vec3_t       angles;
 	weapon_t     weaponNum;
 	weaponInfo_t *weapon;
 	centity_t    *nonPredictedCent;
 	qboolean     firing; // Ridah
 	qboolean     akimboFire = qfalse;
-
 //	qboolean	playerScaled;
 	qboolean drawpart;
-	int      i;
 	qboolean isPlayer;
-
+	int      i;
 	bg_playerclass_t *classInfo;
 
 	classInfo = BG_GetPlayerClassInfo(cgs.clientinfo[cent->currentState.clientNum].team, cgs.clientinfo[cent->currentState.clientNum].cls);
 
 	// (SA) might as well have this check consistant throughout the routine
-	isPlayer = (qboolean)(cent->currentState.clientNum == cg.snap->ps.clientNum);
-
-	weaponNum = (weapon_t)cent->currentState.weapon;
+	isPlayer = static_cast<qboolean>(cent->currentState.clientNum == cg.snap->ps.clientNum);
+	weaponNum = static_cast<weapon_t>(cent->currentState.weapon);
 
 	if (ps && cg.cameraMode)
 	{
@@ -2505,7 +2502,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 
 		if (cg.time - cent->muzzleFlashTime < MUZZLE_FLASH_TIME)
 		{
-			memset(&flash, 0, sizeof(flash));
+			ETJump_SetEntityRGBA(&flash, 1.0f, 1.0f, 1.0f, 1.0f);
 			flash.renderfx = RF_LIGHTING_ORIGIN;
 			flash.hModel   = cgs.media.mg42muzzleflash;
 
@@ -2552,12 +2549,10 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 
 
 	// add the weapon
-	memset(&gun, 0, sizeof(gun));
 	VectorCopy(parent->lightingOrigin, gun.lightingOrigin);
 	gun.shadowPlane = parent->shadowPlane;
 	gun.renderfx    = parent->renderfx;
-
-	CG_EntitySetRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&gun, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
@@ -2609,7 +2604,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 			gun.customSkin = weapon->weaponModel[W_TP_MODEL].skin[0];   // if not loaded it's 0 so doesn't do any harm
 		}
 
-		CG_GhostPlayersColor(&gun);
+		ETJump_SetEntityAutoTransparency(&gun);
 
 	}
 
@@ -2748,12 +2743,10 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 		VectorCopy(brass.origin, ejectBrassCasingOrigin);
 	}
 
-	memset(&barrel, 0, sizeof(barrel));
 	VectorCopy(parent->lightingOrigin, barrel.lightingOrigin);
 	barrel.shadowPlane = parent->shadowPlane;
 	barrel.renderfx    = parent->renderfx;
-
-	CG_EntitySetRGBA(&barrel, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&barrel, 1.0, 1.0, 1.0, 1.0);
 
 	// add barrels
 	// attach generic weapon parts to the first person weapon.
@@ -2862,7 +2855,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 					{
 						float       rangeSquared;
 						qboolean    inRange;
-						refEntity_t satchelDetPart;
+						refEntity_t satchelDetPart{};
 
 						if (cg.satchelCharge)
 						{
@@ -2882,12 +2875,10 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 							inRange = qfalse;
 						}
 
-						memset(&satchelDetPart, 0, sizeof(satchelDetPart));
 						VectorCopy(parent->lightingOrigin, satchelDetPart.lightingOrigin);
 						satchelDetPart.shadowPlane = parent->shadowPlane;
 						satchelDetPart.renderfx    = parent->renderfx;
-
-						CG_EntitySetRGBA(&satchelDetPart, 1.0, 1.0, 1.0, 1.0);
+						ETJump_SetEntityRGBA(&satchelDetPart, 1.0, 1.0, 1.0, 1.0);
 
 						satchelDetPart.hModel = weapon->modModels[0];
 						CG_PositionEntityOnTag(&satchelDetPart, &barrel, "tag_rlight", 0, NULL);
@@ -2917,14 +2908,11 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 					{
 						if (ps && !cg.renderingThirdPerson && cg.predictedPlayerState.weaponstate != WEAPON_RAISING)
 						{
-							refEntity_t bipodLeg;
-
-							memset(&bipodLeg, 0, sizeof(bipodLeg));
+							refEntity_t bipodLeg{};
 							VectorCopy(parent->lightingOrigin, bipodLeg.lightingOrigin);
 							bipodLeg.shadowPlane = parent->shadowPlane;
 							bipodLeg.renderfx    = parent->renderfx;
-
-							CG_EntitySetRGBA(&bipodLeg, 1.0, 1.0, 1.0, 1.0);
+							ETJump_SetEntityRGBA(&bipodLeg, 1.0, 1.0, 1.0, 1.0);
 
 							bipodLeg.hModel = weapon->partModels[W_FP_MODEL][3].model;
 							CG_PositionEntityOnTag(&bipodLeg, &barrel, "tag_barrel4", 0, NULL);
@@ -2994,7 +2982,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	else
 	{
 
-		CG_GhostPlayersColor(&barrel);
+		ETJump_SetEntityAutoTransparency(&barrel);
 
 		if (weaponNum == WP_M7 || weaponNum == WP_GPG40 /* || weaponNum == WP_CARBINE || weaponNum == WP_KAR98*/)
 		{
@@ -3047,12 +3035,10 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 	}
 
 	// add the flash
-	memset(&flash, 0, sizeof(flash));
 	VectorCopy(parent->lightingOrigin, flash.lightingOrigin);
 	flash.shadowPlane = parent->shadowPlane;
 	flash.renderfx    = parent->renderfx;
-
-	CG_EntitySetRGBA(&flash, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&flash, 1.0, 1.0, 1.0, 1.0);
 
 	if (ps)
 	{
@@ -3269,7 +3255,7 @@ Add the weapon, and flash for the player's view
 */
 void CG_AddViewWeapon(playerState_t *ps)
 {
-	refEntity_t  hand;
+	refEntity_t  hand{};
 	float        fovOffset;
 	vec3_t       angles;
 	vec3_t       gunoff;
@@ -3365,12 +3351,12 @@ void CG_AddViewWeapon(playerState_t *ps)
 	if (ps->eFlags & EF_MOUNTEDTANK)
 	{
 		// FIXME: Arnout: HACK dummy model to just draw _something_
-		refEntity_t flash;
+		refEntity_t flash{};
 
-		memset(&hand, 0, sizeof(hand));
 		CG_CalculateWeaponPosition(hand.origin, angles);
 		AnglesToAxis(angles, hand.axis);
 		hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;
+		ETJump_SetEntityRGBA(&hand, 1.0f, 1.0f, 1.0f, 1.0f);
 
 		if (cg_entities[cg_entities[cg_entities[ps->clientNum].tagParent].tankparent].currentState.density & 8)      // should we use a browning?
 		{
@@ -3408,9 +3394,9 @@ void CG_AddViewWeapon(playerState_t *ps)
 		}
 
 		{
-			memset(&flash, 0, sizeof(flash));
 			flash.renderfx = (RF_LIGHTING_ORIGIN | RF_DEPTHHACK);
 			flash.hModel   = cgs.media.mg42muzzleflash;
+			ETJump_SetEntityRGBA(&flash, 1.0f, 1.0f, 1.0f, 1.0f);
 
 			angles[YAW]   = 0;
 			angles[PITCH] = 0;
@@ -3433,9 +3419,8 @@ void CG_AddViewWeapon(playerState_t *ps)
 
 	if (ps->weapon > WP_NONE)
 	{
+		ETJump_SetEntityRGBA(&hand, 1.0f, 1.0f, 1.0f, 1.0f);
 		weapon = &cg_weapons[ps->weapon];
-
-		memset(&hand, 0, sizeof(hand));
 
 		// set up gun position
 		CG_CalculateWeaponPosition(hand.origin, angles);
@@ -5365,7 +5350,7 @@ void CG_MG42EFX(centity_t *cent)
 	centity_t   *mg42;
 	int         num;
 	vec3_t      forward, point;
-	refEntity_t flash;
+	refEntity_t flash{};
 
 	// find the mg42 we're attached to
 	for (num = 0 ; num < cg.snap->numEntities ; num++)
@@ -5381,7 +5366,6 @@ void CG_MG42EFX(centity_t *cent)
 			AngleVectors(cent->lerpAngles, forward, NULL, NULL);
 			VectorMA(point, 40, forward, point);
 
-			memset(&flash, 0, sizeof(flash));
 			flash.renderfx = RF_LIGHTING_ORIGIN;
 			flash.hModel   = cgs.media.mg42muzzleflash;
 
@@ -5463,7 +5447,7 @@ CG_MortarEFX
 */
 void CG_MortarEFX(centity_t *cent)
 {
-	refEntity_t flash;
+	refEntity_t flash{};
 
 	if (cent->currentState.density & 1)
 	{
@@ -5478,7 +5462,6 @@ void CG_MortarEFX(centity_t *cent)
 		trap_R_AddLightToScene(cent->currentState.origin, 256, 0.75 + 8.0 / (rand() & 31), 1.0, 1.0, 1.0, 0, 0);
 
 		// muzzle flash
-		memset(&flash, 0, sizeof(flash));
 		flash.renderfx = RF_LIGHTING_ORIGIN;
 		flash.hModel   = cgs.media.mg42muzzleflash;
 		VectorCopy(cent->currentState.origin, flash.origin);

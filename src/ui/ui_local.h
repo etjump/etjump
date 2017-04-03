@@ -1201,6 +1201,6 @@ void UI_InitGameinfo(void);
 const char *UI_DescriptionForCampaign(void);
 const char *UI_NameForCampaign(void);
 
-int CG_GetScreenWidth();
-void UI_DrawMapDetails();
+auto ETJump_GetScreenWidth() -> int;
+void ETJump_DrawMapDetails();
 #endif

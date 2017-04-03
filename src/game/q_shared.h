@@ -455,7 +455,7 @@ extern vec3_t bytedirs[NUMVERTEXNORMALS];
 #if defined(GAMEDLL)
 	#define SCREEN_WIDTH       640
 #else
-	#define SCREEN_WIDTH       CG_GetScreenWidth()
+	#define SCREEN_WIDTH       ETJump_GetScreenWidth()
 #endif
 
 #define SCREEN_HEIGHT       480

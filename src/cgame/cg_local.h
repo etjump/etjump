@@ -2711,10 +2711,9 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team, entit
 void CG_NewClientInfo(int clientNum);
 sfxHandle_t CG_CustomSound(int clientNum, const char *soundName);
 void CG_ParseTeamXPs(int n);
-// transparency stuff
-void CG_GhostPlayersColor(refEntity_t *ent);
-void CG_EntitySetRGBA(refEntity_t *ent, float red, float green, float blue, float alpha);
-
+// etjump transparency stuff
+void ETJump_SetEntityAutoTransparency(refEntity_t *ent);
+void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, float alpha);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -3837,10 +3836,10 @@ const char *G_SHA1(const char *str);
 void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
-void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
-void CG_AdjustPosX(float *x);
-int CG_GetScreenWidth();
-void CG_DisableProperScaling(qboolean yes);
+void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
+void ETJump_AdjustPosition(float *x);
+auto ETJump_GetScreenWidth() -> int;
+void ETJump_EnableWidthScale(bool enable);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global ETJump objects

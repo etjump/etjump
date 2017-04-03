@@ -7,6 +7,7 @@
 
 #include "cg_local.h"
 #include "../game/bg_classes.h"
+#include "../game/bg_classes.h"
 
 #define SWING_RIGHT 1
 #define SWING_LEFT  2
@@ -1458,7 +1459,7 @@ DHM - Nerve :: added height parameter
 static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 {
 	int         rf;
-	refEntity_t ent;
+	refEntity_t ent{};
 
 	if (cent->currentState.number == cg.snap->ps.clientNum && !cg.renderingThirdPerson)
 	{
@@ -1469,7 +1470,6 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 		rf = 0;
 	}
 
-	memset(&ent, 0, sizeof(ent));
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	ent.origin[2] += height;            // DHM - Nerve :: was '48'
 
@@ -1483,7 +1483,7 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 	}
 	else
 	{
-		if ((qboolean)cent->currentState.animMovetype)
+		if (static_cast<qboolean>(cent->currentState.animMovetype))
 		{
 			ent.origin[2] -= 18;
 		}
@@ -1498,7 +1498,7 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height)
 	ent.shaderRGBA[2] = 255;
 	ent.shaderRGBA[3] = 255;
 
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, cg.currentTransparencyValue);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, cg.currentTransparencyValue);
 
 	trap_R_AddRefEntityToScene(&ent);
 }
@@ -2038,9 +2038,9 @@ CG_Player
 void CG_Player(centity_t *cent)
 {
 	clientInfo_t *ci;
-	refEntity_t  body;
-	refEntity_t  head;
-	refEntity_t  acc;
+	refEntity_t  body{};
+	refEntity_t  head{};
+	refEntity_t  acc{};
 	vec3_t       playerOrigin = { 0, 0, 0 };
 	vec3_t       lightorigin;
 	int          clientNum, i;
@@ -2158,18 +2158,9 @@ void CG_Player(centity_t *cent)
 		VectorCopy(cent->lerpOrigin, playerOrigin);
 	}
 
-	memset(&body, 0, sizeof(body));
-	memset(&head, 0, sizeof(head));
-	memset(&acc, 0, sizeof(acc));
-
-	/*
-		by default rgba values are all set to zero, so we have to re-set that
-		to draw models that are not being affected by transparency but still
-		have "rgbGen" and "alphaGen" shader values set to "entity"
-	*/
-	CG_EntitySetRGBA(&body, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(&head, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(&acc, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&body, 1.0f, 1.0f, 1.0f, 1.0f);
+	ETJump_SetEntityRGBA(&head, 1.0f, 1.0f, 1.0f, 1.0f);
+	ETJump_SetEntityRGBA(&acc, 1.0f, 1.0f, 1.0f, 1.0f);
 
 	// get the rotation information
 	CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
@@ -2292,8 +2283,8 @@ void CG_Player(centity_t *cent)
 	// (SA) only need to set this once...
 	VectorCopy(lightorigin, acc.lightingOrigin);
 
-	// calculate ghost player's body transparency and color
-	CG_GhostPlayersColor(&body);
+	ETJump_SetEntityAutoTransparency(&body);
+
 	CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
 	// ydnar debug
@@ -2466,9 +2457,7 @@ void CG_Player(centity_t *cent)
 		head.oldframe = 0;
 		head.backlerp = 0.f;
 	}
-
-	// calculate ghost player's head transparency and color
-	CG_GhostPlayersColor(&head);
+	ETJump_SetEntityAutoTransparency(&head);
 
 	// set blinking flag
 	CG_AddRefEntityWithPowerups(&head, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
@@ -2505,7 +2494,7 @@ void CG_Player(centity_t *cent)
 		acc.hModel = cgs.media.thirdPersonBinocModel;
 		CG_PositionEntityOnTag(&acc, &body, "tag_weapon", 0, NULL);
 
-		CG_GhostPlayersColor(&acc);
+		ETJump_SetEntityAutoTransparency(&acc);
 
 		CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 	}
@@ -2577,7 +2566,7 @@ void CG_Player(centity_t *cent)
 			}
 
 			// calculate ghost player's accsserorie transparency and color
-			CG_GhostPlayersColor(&acc);
+			ETJump_SetEntityAutoTransparency(&acc);
 			
 			CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 		}
@@ -2639,8 +2628,8 @@ void CG_ResetPlayerEntity(centity_t *cent)
 void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin, int fleshEntityNum)
 {
 	clientInfo_t   *ci;
-	refEntity_t    body;
-	refEntity_t    head;
+	refEntity_t    body{};
+	refEntity_t    head{};
 	centity_t      *cent, backupCent;
 	bg_character_t *character;
 
@@ -2655,9 +2644,6 @@ void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin, int fleshEntityNu
 
 	cent       = &cg_entities[fleshEntityNum];
 	backupCent = *cent;
-
-	memset(&body, 0, sizeof(body));
-	memset(&head, 0, sizeof(head));
 
 	CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
 	CG_PlayerAnimation(cent, &body);
@@ -2950,11 +2936,11 @@ int CG_GetSelectedWeapon(void)
 void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi, int time, clientInfo_t *ci, qboolean animatedHead)
 {
 	refdef_t    refdef;
-	refEntity_t body;
-	refEntity_t head;
-	refEntity_t gun;
-	refEntity_t barrel;
-	refEntity_t acc;
+	refEntity_t body{};
+	refEntity_t head{};
+	refEntity_t gun{};
+	refEntity_t barrel{};
+	refEntity_t acc{};
 	vec3_t      origin;
 	int         renderfx;
 	vec3_t      mins = { -16, -16, -24 };
@@ -2969,11 +2955,6 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi, i
 
 	CG_AdjustFrom640(&x, &y, &w, &h);
 	y -= jumpHeight;
-
-	memset(&refdef, 0, sizeof(refdef));
-	memset(&body, 0, sizeof(body));
-	memset(&head, 0, sizeof(head));
-	memset(&acc, 0, sizeof(acc));
 
 	refdef.rdflags = RDF_NOWORLDMODEL;
 
@@ -3187,9 +3168,6 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi, i
 	//
 	{
 		int weap = CG_GetSelectedWeapon();
-
-		memset(&gun, 0, sizeof(gun));
-		memset(&barrel, 0, sizeof(barrel));
 
 		gun.hModel = cg_weapons[weap].weaponModel[W_TP_MODEL].model;
 
@@ -3487,40 +3465,26 @@ void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int
 }
 
 // sets normalized rgba values for entity (alphaGen/rgbGen should be set to entity)
-void CG_EntitySetRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
-
-	ent->shaderRGBA[0] = (byte)(255.0 * red);
-	ent->shaderRGBA[1] = (byte)(255.0 * green);
-	ent->shaderRGBA[2] = (byte)(255.0 * blue);
-	ent->shaderRGBA[3] = (byte)(255.0 * alpha);
-
+void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
+	ent->shaderRGBA[0] = 255.0 * red;
+	ent->shaderRGBA[1] = 255.0 * green;
+	ent->shaderRGBA[2] = 255.0 * blue;
+	ent->shaderRGBA[3] = 255.0 * alpha;
 }
 
 // sets color and transparency values based on cvars for entity
-void CG_GhostPlayersColor(refEntity_t *ent) {
-
+void ETJump_SetEntityAutoTransparency(refEntity_t *ent) {
 	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
-	
 	// use single shader for all entities
 	if (etj_ghostPlayersAlt.integer > 0) {
-		
 		// don't allow colors to affect default skins/shaders
-		char *ghostString = etj_ghostPlayersColor.string;
+		auto ghostString = etj_ghostPlayersColor.string;
 		const char *ghostToken;
-
-		for (int i = 0; i < 3; i++) {
+		for (auto i = 0; i < 3; i++) {
 			ghostToken = COM_Parse(&ghostString);
-			if (ghostToken) {
-				ghostColor[i] = atof(ghostToken);
-			}
-			else {
-				ghostColor[i] = 1.f;
-			}
+			ghostColor[i] = ghostToken ? atof(ghostToken) : 1.f;
 		}
-	
 		ent->customShader = cgs.media.ghostPlayersAltColorShader;
 	}
-
-	CG_EntitySetRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
-
+	ETJump_SetEntityRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
 }
