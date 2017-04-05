@@ -3838,7 +3838,7 @@ void ETJump_ClearDrawables();
 
 void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void ETJump_AdjustPosition(float *x);
-auto ETJump_GetScreenWidth() -> int;
+int ETJump_GetScreenWidth();
 void ETJump_EnableWidthScale(bool enable);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

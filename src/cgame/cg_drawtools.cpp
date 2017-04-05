@@ -20,7 +20,7 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 
 }
 
-auto ETJump_GetScreenWidth() -> int {
+int ETJump_GetScreenWidth() {
 	int width = cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight;
 	return width > 640 ? width : 640;
 }

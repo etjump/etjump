@@ -289,7 +289,7 @@ void UI_AdjustFrom640(float *x, float *y, float *w, float *h)
 
 }
 
-auto ETJump_GetScreenWidth() -> int 
+int ETJump_GetScreenWidth()
 {
 	int width = uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight;
 	return width > 640 ? width : 640;
