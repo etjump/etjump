@@ -9872,9 +9872,8 @@ void UI_PrintMapDetailsBriefing()
 
 }
 
-void UI_DrawMapDetails()
+void ETJump_DrawMapDetails()
 {
-
 	int x = 276;
 	int y = 16;
 	int w = 252;
@@ -9920,7 +9919,6 @@ void UI_DrawMapDetails()
 		colorWhite, mapName,
 		0, 0, ITEM_TEXTSTYLE_SHADOWED,
 		&uiInfo.loadscreenfont2);
-
 }
 
 #endif

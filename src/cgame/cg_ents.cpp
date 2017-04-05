@@ -410,7 +410,7 @@ static void CG_General(centity_t *cent)
 
 	memset(&ent, 0, sizeof(ent));
 
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	// set frame
 
@@ -730,7 +730,7 @@ static void CG_Item(centity_t *cent)
 
 	memset(&ent, 0, sizeof(ent));
 
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	ent.nonNormalizedAxes = qfalse;
 
@@ -1224,7 +1224,7 @@ static void CG_Missile(centity_t *cent)
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(cent->lerpOrigin, ent.oldorigin);
 
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	// flicker between two skins
 	ent.skinNum = cg.clientFrame & 1;
@@ -1434,13 +1434,11 @@ CG_Trap
 */
 static void CG_Trap(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{};
 	entityState_t *cs;
 	lerpFrame_t   *traplf;
 
-	memset(&ent, 0, sizeof(ent));
-
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	cs = &cent->currentState;
 
@@ -1623,16 +1621,12 @@ CG_Explosive
 */
 static void CG_Explosive(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{}; // create the render entity
 	entityState_t *s1;
 
 	s1 = &cent->currentState;
 
-
-	// create the render entity
-	memset(&ent, 0, sizeof(ent));
-
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	VectorCopy(cent->lerpOrigin, ent.origin);
 //	VectorCopy( cent->lerpOrigin, ent.oldorigin);
@@ -1678,14 +1672,12 @@ CG_Constructible
 */
 static void CG_Constructible(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{}; // create the render entity
 	entityState_t *s1;
 
 	s1 = &cent->currentState;
 
-	// create the render entity
-	memset(&ent, 0, sizeof(ent));
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(cent->lerpOrigin, ent.oldorigin);
@@ -1831,14 +1823,12 @@ CG_Mover
 */
 static void CG_Mover(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{}; // create the render entity
 	entityState_t *s1;
 
 	s1 = &cent->currentState;
 
-	// create the render entity
-	memset(&ent, 0, sizeof(ent));
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(cent->lerpOrigin, ent.oldorigin);
@@ -2071,7 +2061,7 @@ Gordon: new beam entity, for rope like stuff...
 */
 void CG_Beam_2(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{}; // create the render entity
 	entityState_t *s1;
 	vec3_t        origin, origin2;
 
@@ -2080,10 +2070,7 @@ void CG_Beam_2(centity_t *cent)
 	BG_EvaluateTrajectory(&s1->pos, cg.time, origin, qfalse, s1->effect1Time);
 	BG_EvaluateTrajectory(&s1->apos, cg.time, origin2, qfalse, s1->effect2Time);
 
-	// create the render entity
-	memset(&ent, 0, sizeof(ent));
-
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	VectorCopy(origin, ent.origin);
 	VectorCopy(origin2, ent.oldorigin);
@@ -2111,14 +2098,13 @@ Also called as an event
 */
 void CG_Beam(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{}; // create the render entity
 	entityState_t *s1;
 
 	s1 = &cent->currentState;
 
-	// create the render entity
-	memset(&ent, 0, sizeof(ent));
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+
 	VectorCopy(s1->pos.trBase, ent.origin);
 	VectorCopy(s1->origin2, ent.oldorigin);
 
@@ -2161,7 +2147,7 @@ static void CG_Portal(centity_t *cent)
 
 	// create the render entity
 	memset(&ent, 0, sizeof(ent));
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 	VectorCopy(cent->lerpOrigin, ent.origin);
 	VectorCopy(s1->origin2, ent.oldorigin);
 	ByteToDir(s1->eventParm, ent.axis[0]);
@@ -2187,16 +2173,14 @@ CG_Prop
 */
 static void CG_Prop(centity_t *cent)
 {
-	refEntity_t   ent;
+	refEntity_t   ent{}; // create the render entity
 	entityState_t *s1;
 	vec3_t        angles;
 	float         scale;
 
 	s1 = &cent->currentState;
 
-	// create the render entity
-	memset(&ent, 0, sizeof(ent));
-	CG_EntitySetRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&ent, 1.0, 1.0, 1.0, 1.0);
 
 	if (cg.renderingThirdPerson)
 	{
@@ -2379,8 +2363,8 @@ CG_Cabinet
 */
 void CG_Cabinet(centity_t *cent, cabinetType_t type)
 {
-	refEntity_t cabinet;
-	refEntity_t mini_me;
+	refEntity_t cabinet{};
+	refEntity_t mini_me{};
 	int         i, cnt;
 //	int k;
 
@@ -2389,11 +2373,8 @@ void CG_Cabinet(centity_t *cent, cabinetType_t type)
 		return;
 	}
 
-	memset(&cabinet, 0, sizeof(cabinet));
-	memset(&mini_me, 0, sizeof(mini_me));
-
-	CG_EntitySetRGBA(&cabinet, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(&mini_me, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&cabinet, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(&mini_me, 1.0, 1.0, 1.0, 1.0);
 
 	cabinet.hModel = cabinetInfo[type].model;
 //	cabinet.hModel =	cabinetInfo[type].itemmodels[0];
@@ -3535,11 +3516,11 @@ void CG_AttachBitsToTank(centity_t *tank, refEntity_t *mg42base, refEntity_t *mg
 	memset(player, 0, sizeof(refEntity_t));
 	memset(flash, 0, sizeof(refEntity_t));
 
-	CG_EntitySetRGBA(mg42base, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(mg42upper, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(mg42gun, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(player, 1.0, 1.0, 1.0, 1.0);
-	CG_EntitySetRGBA(flash, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(mg42base, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(mg42upper, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(mg42gun, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(player, 1.0, 1.0, 1.0, 1.0);
+	ETJump_SetEntityRGBA(flash, 1.0, 1.0, 1.0, 1.0);
 
 	mg42base->hModel  = cgs.media.hMountedMG42Base;
 	mg42upper->hModel = cgs.media.hMountedMG42Nest;

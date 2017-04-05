@@ -1130,7 +1130,7 @@ void _UI_Refresh(int realtime)
 		// refresh find player list
 		UI_BuildFindPlayerList(qfalse);
 
-		UI_DrawMapDetails();
+		ETJump_DrawMapDetails();
 	}
 
 	// draw cursor

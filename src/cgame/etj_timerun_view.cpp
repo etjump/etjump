@@ -93,7 +93,7 @@ void ETJump::TimerunView::draw()
 			auto start = run->previousRecord - range;
 			auto step = (millis - start) / (float)(run->previousRecord - start);
 			
-			CG_LerpColors(&colorWhite, &ryRed, &incolor, step / 2);
+			ETJump_LerpColors(&colorWhite, &ryRed, &incolor, step / 2);
 			color = &incolor;
 		}
 	}
@@ -119,7 +119,7 @@ void ETJump::TimerunView::draw()
 	auto y = player_runTimerY.integer;
 
 	// timer fading/hiding routine
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	if (!run->running && etj_runTimerAutoHide.integer) {
 		auto fstart = run->lastRunTimer + fadeStart;
@@ -133,7 +133,7 @@ void ETJump::TimerunView::draw()
 
 			auto step = (cg.time - fstart) / (float)(fend - fstart);
 
-			CG_LerpColors(color, &toColor, &incolor, step);
+			ETJump_LerpColors(color, &toColor, &incolor, step);
 			color = &incolor;
 		
 		}
@@ -191,7 +191,7 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, i
 	auto x = player_runTimerX.value;
 	auto y = player_runTimerY.value;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	auto step = ((float)(timerTime - record) / animationTime);
 	auto scale = 0.3 + 0.25 * step;
@@ -203,7 +203,7 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, i
 	memcpy(&toColor, color, sizeof(toColor));
 	toColor[3] = 0;
 
-	CG_LerpColors(color, &toColor, &incolor, step);
+	ETJump_LerpColors(color, &toColor, &incolor, step);
 
 	CG_Text_Paint_Ext(x - textWidth, y + textHeight, scale, scale, incolor, text, 0, 0, 0, &cgs.media.limboFont1);
 }

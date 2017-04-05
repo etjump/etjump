@@ -1,12 +1,6 @@
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info, etc
 #include "cg_local.h"
 
-void CG_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step)
-{
-	for (int i = 0; i < 4; i++) {
-		(*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
-	}
-}
 /*
 ================
 CG_AdjustFrom640
@@ -26,33 +20,29 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 
 }
 
-int CG_GetScreenWidth() {
-
+int ETJump_GetScreenWidth() {
 	int width = cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight;
-
-	if (width < 640) {
-		width = 640;
-	}
-
-	return width;
-
+	return width > 640 ? width : 640;
 }
 
-void CG_AdjustPosX(float *x) {
-	
+void ETJump_AdjustPosition(float *x) {
 	*x *= (SCREEN_WIDTH / 640.f);
-
 }
 
-void CG_DisableProperScaling(qboolean yes) {
-
-	if (yes) {
-		cgs.screenXScale = cgs.glconfig.vidWidth / (float)640;
+void ETJump_EnableWidthScale(bool enable) {
+	if (enable) {
+		cgs.screenXScale = cgs.glconfig.vidWidth / static_cast<float>(SCREEN_WIDTH);
 	}
 	else {
-		cgs.screenXScale = cgs.glconfig.vidWidth / (float)SCREEN_WIDTH;
+		cgs.screenXScale = cgs.glconfig.vidWidth / 640.f;
 	}
+}
 
+void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step)
+{
+	for (auto i = 0; i < 4; i++) {
+		(*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
+	}
 }
 
 /*

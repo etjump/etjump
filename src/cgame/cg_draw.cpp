@@ -632,7 +632,7 @@ static void CG_DrawSpeed2(void)
 	x = cg_speedX.integer;
 	y = cg_speedY.integer;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	switch (cg_drawSpeed2.integer)
 	{
@@ -3424,7 +3424,7 @@ static void CG_DrawCGazHUD(void)
 		GetColorFromString(&color2, etj_CGazColor2.string);
 
 		if (etj_stretchCgaz.integer) {
-			CG_DisableProperScaling(qtrue);
+			ETJump_EnableWidthScale(false);
 			scx -= SCREEN_OFFSET_X;
 		}
 
@@ -3450,7 +3450,7 @@ static void CG_DrawCGazHUD(void)
 			scx + vel_size * sin(vel_relang - per_angle),
 			scy - vel_size * cos(vel_relang - per_angle), color1);
 		
-		CG_DisableProperScaling(qfalse);
+		ETJump_EnableWidthScale(true);
 		
 		return;
 
@@ -3764,7 +3764,7 @@ static void CG_DrawSlick(void)
 
 	x = cg_slickX.value;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	VectorCopy(cg.refdef.vieworg, start);
 	VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
@@ -3806,7 +3806,7 @@ static void CG_DrawKeys(void)
 	x = cg_keysX.value + 2 * skew;
 	y = cg_keysY.value;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	trap_R_SetColor(cg.keysColor);
 	if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8))
@@ -3843,7 +3843,7 @@ static void CG_DrawKeys(void)
 	x  = cg_keysX.value + skew;
 	y += size;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)
 	{
@@ -3868,7 +3868,7 @@ static void CG_DrawKeys(void)
 	x  = cg_keysX.value;
 	y += size;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	// prone (bottom left)
 	if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE)
@@ -5809,7 +5809,7 @@ void CG_DrawSpectatorInfo(void)
 			if (cg.scores[i].followedClient == cg.snap->ps.clientNum)
 			{
 				float x = player_spectatorInfoX.integer;
-				CG_AdjustPosX(&x);
+				ETJump_AdjustPosition(&x);
 				// spectating me
 				ETJump::DrawSmallString(x, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
 				y += 12;
