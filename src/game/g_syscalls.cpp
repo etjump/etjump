@@ -359,9 +359,9 @@ qboolean trap_GetTag(int clientNum, int tagFileNumber, const char *tagName, orie
 	return syscall(G_GETTAG, clientNum, tagFileNumber, tagName, orientation) ? qtrue : qfalse;
 }
 
-qboolean trap_LoadTag(const char *filename)
+int trap_LoadTag(const char *filename)
 {
-	return syscall(G_REGISTERTAG, filename) ? qtrue : qfalse;
+	return syscall(G_REGISTERTAG, filename);
 }
 
 // BotLib traps start here
