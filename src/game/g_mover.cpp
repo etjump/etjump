@@ -3122,7 +3122,7 @@ void Reached_Train(gentity_t *ent)
 	// if the path_corner has a speed, use that
 	if (next->speed)
 	{
-		speed = next->speed;
+		speed = next->speed  * static_cast<float>(g_moverScale.value);
 	}
 	else
 	{
@@ -3514,7 +3514,7 @@ void Reached_Train_rotating(gentity_t *ent)
 	// if the path_corner has a speed, use that
 	if (next->speed)
 	{
-		speed = next->speed;
+		speed = next->speed * static_cast<float>(g_moverScale.value);
 	}
 	else
 	{

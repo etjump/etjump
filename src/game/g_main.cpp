@@ -279,7 +279,7 @@ vmCvar_t shared;
 
 // minimum time to wait before vote result will be checked
 vmCvar_t vote_minVoteDuration;
-
+vmCvar_t g_moverScale;
 
 cvarTable_t gameCvarTable[] =
 {
@@ -526,7 +526,8 @@ cvarTable_t gameCvarTable[] =
 	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
 
 	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
-	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE }
+	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
+	{ &g_moverScale, "g_moverScale", "1.0", 0 },
 
 };
 
@@ -1799,6 +1800,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	trap_Cvar_Set("sv_floodprotect", "0");
 
 	trap_Cvar_Set("mod_version", MOD_VERSION);
+	// reset moverscale on each map load
+	trap_Cvar_Set("g_moverScale", "1.0");
 
 	srand(randomSeed);
 
