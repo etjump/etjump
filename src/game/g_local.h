@@ -1996,6 +1996,7 @@ extern vmCvar_t g_chatOptions;
 extern vmCvar_t g_customVoiceChat;
 
 extern vmCvar_t shared;
+extern vmCvar_t g_moverScale;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);
