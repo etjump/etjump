@@ -1995,3 +1995,11 @@ const char *ClientIPAddr(gentity_t *ent)
 
 	return ent->client->sess.ip;
 }
+
+gentity_t* ETJump_SoundEvent(vec3_t origin, entity_event_t eventType, int soundIndex)
+{
+	gentity_t *te;
+	te = G_TempEntity(origin, eventType);
+	te->s.eventParm = soundIndex;
+	return te;
+}

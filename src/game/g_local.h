@@ -1495,6 +1495,7 @@ qboolean G_MapIsValidCampaignStartMap(void);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
 const char *ClientIPAddr(gentity_t *ent);
+gentity_t* ETJump_SoundEvent(vec3_t origin, entity_event_t eventType, int soundIndex);
 
 //
 // g_combat.c
