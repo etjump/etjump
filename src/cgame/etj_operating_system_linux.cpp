@@ -1,13 +1,24 @@
 #if defined __linux__
 
+#include "cg_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <unistd.h>
 #include "etj_operating_system.h"
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/in.h>
 const char *G_SHA1(const char *str);
 
-void ETJump::OperationSystem::minimize()
+void ETJump::OperatingSystem::minimize()
 {
 }
 
-std::string ETJump::OperationSystem::getHwid()
+std::string ETJump::OperatingSystem::getHwid()
 {
 	struct ifreq  ifr;
 	struct ifconf ifc;

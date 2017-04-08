@@ -1,4 +1,10 @@
 #include "g_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <vector>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>

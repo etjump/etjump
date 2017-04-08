@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <stdexcept>
 
 namespace ETJump
 {
@@ -12,7 +13,7 @@ namespace ETJump
 		{
 		public:
 			explicit FileNotFoundException(const std::string& message)
-				: runtime_error(message)
+				: std::runtime_error(message)
 			{
 			}
 		};
@@ -21,7 +22,7 @@ namespace ETJump
 		{
 		public:
 			explicit WriteFailedException(const std::string& message)
-				: runtime_error(message)
+				: std::runtime_error(message)
 			{
 			}
 		};

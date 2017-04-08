@@ -1,4 +1,5 @@
 #include "etj_deathrun_system.h"
+#include <algorithm>
 
 
 ETJump::DeathrunSystem::DeathrunSystem(): _defaultLocation(PrintLocation::Left)
@@ -77,9 +78,9 @@ int ETJump::DeathrunSystem::hitEnd(int clientNum)
 	auto score = getScore(clientNum);
 	auto& runStatus = _runStatuses[clientNum];
 	runStatus.active = false;
-	for (auto & cpStatus : runStatus.checkpointStatuses)
+	for (int i = 0, len = runStatus.checkpointStatuses.size(); i < len; ++i)
 	{
-		cpStatus = false;
+		runStatus.checkpointStatuses[i] = false;
 	}
 	return score;
 }

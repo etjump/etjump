@@ -1,6 +1,13 @@
 #include "q_shared.h"
 //#include "bg_public.h"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #ifdef GAMEDLL
 #include "g_local.h"
 #else

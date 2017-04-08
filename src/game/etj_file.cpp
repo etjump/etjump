@@ -5,6 +5,12 @@
 #elif CGAMEDLL
 #include "../cgame/cg_local.h"
 #endif
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 
 ETJump::File::File(const std::string& path, Mode mode) : _path(path), _handle(INVALID_FILE_HANDLE), _mode(mode)
 {
