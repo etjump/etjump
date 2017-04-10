@@ -233,7 +233,8 @@ void Use_Target_Speaker(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	{
 		if (ent->spawnflags & 8)
 		{
-			G_AddEvent(activator, EV_GENERAL_SOUND_VOLUME, ent->noise_index);
+			G_AddEvent(ent, EV_GENERAL_CLIENT_SOUND_VOLUME, ent->noise_index);
+			ent->s.teamNum = ClientNum(activator);
 		}
 		else if (ent->spawnflags & 4)
 		{
@@ -268,11 +269,11 @@ void target_speaker_multiple(gentity_t *ent)
 
 }
 
+
 void SP_target_speaker(gentity_t *ent)
 {
 	char buffer[MAX_QPATH];
 	char *s;
-
 	G_SpawnFloat("wait", "0", &ent->wait);
 	G_SpawnFloat("random", "0", &ent->random);
 

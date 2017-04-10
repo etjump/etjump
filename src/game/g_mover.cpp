@@ -3798,7 +3798,7 @@ void Static_Pain(gentity_t *ent, gentity_t *attacker, int damage, vec3_t point)
 
 	if (level.time > ent->wait + ent->delay + rand() % 1000 + 500)
 	{
-		G_UseTargets(ent, NULL);
+		G_UseTargets(ent, attacker);
 		ent->wait = level.time;
 	}
 
