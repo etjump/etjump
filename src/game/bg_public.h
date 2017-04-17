@@ -1062,6 +1062,7 @@ typedef enum
 	EV_GRENADE_BOUNCE,      // eventParm will be the soundindex
 	EV_GENERAL_SOUND,
 	EV_GENERAL_SOUND_VOLUME,
+	EV_GENERAL_CLIENT_SOUND_VOLUME, // ETJump: play sound from the specific entity to the client
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
 	EV_GLOBAL_TEAM_SOUND,   // no attenuation, team only

@@ -2564,7 +2564,6 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_POPUP:
 	case EV_GIVEPAGE:
 		break;
-
 	case EV_GENERAL_SOUND:
 		DEBUGNAME("EV_GENERAL_SOUND");
 		// Ridah, check for a sound script
@@ -2613,6 +2612,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		trap_S_StartSoundVControl(NULL, es->number, CHAN_VOICE, sound, 255);
 	}
 	break;
+	case EV_GENERAL_CLIENT_SOUND_VOLUME:
+		if (cg.snap->ps.clientNum != es->teamNum)
+		{
+			break;
+		}
 	case EV_GENERAL_SOUND_VOLUME:
 	{
 		int sound  = es->eventParm;
