@@ -3122,7 +3122,7 @@ void Reached_Train(gentity_t *ent)
 	// if the path_corner has a speed, use that
 	if (next->speed)
 	{
-		speed = next->speed;
+		speed = next->speed  * static_cast<float>(g_moverScale.value);
 	}
 	else
 	{
@@ -3514,7 +3514,7 @@ void Reached_Train_rotating(gentity_t *ent)
 	// if the path_corner has a speed, use that
 	if (next->speed)
 	{
-		speed = next->speed;
+		speed = next->speed * static_cast<float>(g_moverScale.value);
 	}
 	else
 	{
@@ -3798,7 +3798,7 @@ void Static_Pain(gentity_t *ent, gentity_t *attacker, int damage, vec3_t point)
 
 	if (level.time > ent->wait + ent->delay + rand() % 1000 + 500)
 	{
-		G_UseTargets(ent, NULL);
+		G_UseTargets(ent, attacker);
 		ent->wait = level.time;
 	}
 
@@ -5021,13 +5021,19 @@ void use_invisible_user(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		//----(SA)	play 'off' sound
 		//----(SA)	I think this is where this goes.  Raf, let me know if it's wrong.  I need someone to tell me what a test map is for this (I'll ask Dan tomorrow)
 		// not usable by player.  turned off.
-		G_Sound(ent, ent->soundPos1);
+		auto te = ETJump_SoundEvent(ent->r.currentOrigin, EV_GENERAL_SOUND_VOLUME, ent->soundPos1);
+		te->s.onFireStart = ent->s.onFireStart;
 		return;
 	}
 
 	if (other->client)
 	{
 		G_Script_ScriptEvent(ent, "activate", other->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+		if (ent->noise_index)
+		{
+			auto te = ETJump_SoundEvent(ent->r.currentOrigin, EV_GENERAL_SOUND_VOLUME, ent->noise_index);
+			te->s.onFireStart = ent->s.onFireStart;
+		}
 	}
 	G_UseTargets(ent, other);   //----(SA)	how about this so the triggered targets have an 'activator' as well as an 'other'?
 	                            //----(SA)	Please let me know if you forsee any problems with this.
@@ -5086,6 +5092,19 @@ void SP_func_invisible_user(gentity_t *ent)
 		}
 	}
 
+	char *s;
+	if (G_SpawnString("noise", "NOSOUND", &s))
+	{
+		char buffer[MAX_QPATH];
+		Q_strncpyz(buffer, s, sizeof(buffer));
+		ent->noise_index = G_SoundIndex(buffer);
+	}
+
+	G_SpawnInt("volume", "255", &ent->s.onFireStart);
+	if (!ent->s.onFireStart)
+	{
+		ent->s.onFireStart = 255;
+	}
 
 }
 

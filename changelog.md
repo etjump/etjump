@@ -5,6 +5,12 @@
 * added `etj_CGazColor1/2` cvars to set custom colors for `etj_drawCGAZ` __2__
 * added `freecam` and `noclip` support for demo playback (compatible with Camtrace3D)
 * added `b_demo_lookat` support for demo playback, to viewlock on specific player/entity
+* fixed mover tagging bug
+* added `g_moverScale` cvar and `!moverScale` command to control mover speed (eg. tank)  
+  *note: use flag `v` to control command access*
+* added new keys for func_invisible_user entity:
+  - `noise <sound file>` sets sound file to play when activated
+  - `volume <0-255>` controls sound volume
 
 # ETJump 2.2.0
 

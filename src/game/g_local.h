@@ -1495,6 +1495,7 @@ qboolean G_MapIsValidCampaignStartMap(void);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
 const char *ClientIPAddr(gentity_t *ent);
+gentity_t* ETJump_SoundEvent(vec3_t origin, entity_event_t eventType, int soundIndex);
 
 //
 // g_combat.c
@@ -1996,6 +1997,7 @@ extern vmCvar_t g_chatOptions;
 extern vmCvar_t g_customVoiceChat;
 
 extern vmCvar_t shared;
+extern vmCvar_t g_moverScale;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);
@@ -2045,7 +2047,7 @@ void    trap_BotFreeClient(int clientNum);
 void    trap_GetUsercmd(int clientNum, usercmd_t *cmd);
 qboolean    trap_GetEntityToken(char *buffer, int bufferSize);
 qboolean trap_GetTag(int clientNum, int tagFileNumber, const char *tagName, orientation_t *orientation);
-qboolean trap_LoadTag(const char *filename);
+int     trap_LoadTag(const char *filename);
 
 int     trap_RealTime(qtime_t *qtime);
 

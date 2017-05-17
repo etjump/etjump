@@ -62,7 +62,7 @@ void ETJump::DisplayMaxSpeed::render() const
 	auto x = etj_maxSpeedX.value;
 	auto y = etj_maxSpeedY.value;
 
-	CG_AdjustPosX(&x);
+	ETJump_AdjustPosition(&x);
 
 	auto style = ITEM_TEXTSTYLE_NORMAL;
 

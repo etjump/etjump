@@ -44,6 +44,7 @@ const char RESTART     = 'r';
 const char TOKENS      = 'V';
 const char SAVESYSTEM  = 'T';
 const char SETLEVEL    = 's';
+const char MOVERSCALE  = 'v';
 }
 
 namespace ClientCommands
@@ -2135,6 +2136,30 @@ bool UserInfo(gentity_t *ent, Arguments argv)
 	return true;
 }
 
+bool MoverScale(gentity_t *ent, Arguments argv)
+{
+	auto moverScaleValue = g_moverScale.value;
+	if (argv->size() > 1)
+	{
+		if (!ToFloat(argv->at(1), moverScaleValue))
+		{
+			moverScaleValue = 1.0f;
+		}
+		// scale range 0.1 - 5.0
+		if (moverScaleValue > 5.0f)
+		{
+			moverScaleValue = 5.0f;
+		}
+		else if (moverScaleValue < 0.1f)
+		{
+			moverScaleValue = 0.1f;
+		}
+		trap_Cvar_Set("g_moverScale", va("%f", moverScaleValue));
+	}
+	ChatPrintTo(ent, "^3Mover scale is set to: ^7" + std::to_string(moverScaleValue));
+
+	return true;
+}
 
 
 }
@@ -2188,6 +2213,7 @@ Commands::Commands()
 	adminCommands_["unban"]    = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
 	adminCommands_["unmute"]   = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
 	adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
+	adminCommands_["moverscale"] = AdminCommandPair(AdminCommands::MoverScale, CommandFlags::MOVERSCALE);
 
 	commands_["backup"] = ClientCommands::BackupLoad;
 	commands_["save"]   = ClientCommands::Save;

@@ -102,7 +102,7 @@ bool Levels::CreateDefaultLevels()
 	levels_.push_back(tempLevel);
 
 	tempLevel = std::make_shared<Level>(2, "Moderator",
-	                                    "Welcome Moderator [n]^7!§", "*-As");
+	                                    "Welcome Moderator [n]^7!", "*-Asv");
 	levels_.push_back(tempLevel);
 
 	tempLevel = std::make_shared<Level>(3, "Administrator",
