@@ -11,7 +11,7 @@ struct User_s
 	User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen,
 	       std::string const& name, std::string const& hwid, std::string const& title,
 	       std::string const& commands, std::string const& greeting);
-
+	
 	// These are needed for multi_index_container operations
 	unsigned GetId();
 	std::string GetGuid();

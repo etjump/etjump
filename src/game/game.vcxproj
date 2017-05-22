@@ -79,7 +79,7 @@
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>F:\ETJump\etjump\lib\SQLiteCpp\include;$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -243,6 +243,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\lib\SQLiteCpp\src\Backup.cpp" />
+    <ClCompile Include="..\..\lib\SQLiteCpp\src\Column.cpp" />
+    <ClCompile Include="..\..\lib\SQLiteCpp\src\Database.cpp" />
+    <ClCompile Include="..\..\lib\SQLiteCpp\src\Exception.cpp" />
+    <ClCompile Include="..\..\lib\SQLiteCpp\src\Statement.cpp" />
+    <ClCompile Include="..\..\lib\SQLiteCpp\src\Transaction.cpp" />
     <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
@@ -272,6 +278,7 @@
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_result_set_formatter.cpp" />
+    <ClCompile Include="etj_user_repository.cpp" />
     <ClCompile Include="g_active.cpp" />
     <ClCompile Include="g_alarm.cpp" />
     <ClCompile Include="g_antilag.cpp" />
@@ -350,6 +357,8 @@
     <ClInclude Include="etj_public.h" />
     <ClInclude Include="etj_result_set_formatter.h" />
     <ClInclude Include="etj_shared.h" />
+    <ClInclude Include="etj_user_new.h" />
+    <ClInclude Include="etj_user_repository.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="etj_local.h" />
     <ClInclude Include="g_public.h" />
