@@ -268,8 +268,6 @@
     <ClCompile Include="etj_database.cpp" />
     <ClCompile Include="etj_deathrun_system.cpp" />
     <ClCompile Include="etj_file.cpp" />
-    <ClCompile Include="etj_ignore_repository.cpp" />
-    <ClCompile Include="etj_ignore_service.cpp" />
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
@@ -346,10 +344,6 @@
     <ClInclude Include="etj_database.h" />
     <ClInclude Include="etj_deathrun_system.h" />
     <ClInclude Include="etj_file.h" />
-    <ClInclude Include="etj_ignore_repository.h" />
-    <ClInclude Include="etj_ignore_service.h" />
-    <ClInclude Include="etj_iignore_repository.h" />
-    <ClInclude Include="etj_iignore_service.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />

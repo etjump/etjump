@@ -249,12 +249,6 @@
     <ClCompile Include="etj_file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_ignore_service.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="etj_ignore_repository.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -392,18 +386,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_shared.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_ignore_service.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_iignore_service.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_ignore_repository.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_iignore_repository.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
