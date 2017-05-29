@@ -5,9 +5,19 @@
 
 namespace ETJump
 {
+	enum class UserChanges
+	{
+		Level = 1 << 0,
+		LastSeen = 1 << 1,
+		Name = 1 << 2,
+		Title = 1 << 3,
+		Commands = 1 << 4,
+		Greeting = 1 << 5
+	};
+
 	struct User
 	{
-		long id;
+		int64_t id;
 		std::string guid;
 		int level;
 		std::time_t lastSeen;

@@ -45,6 +45,10 @@ static void initializeETJump()
 
 	auto u = ETJump::userRepository->get("a guid");
 	ETJump::userRepository->insert("a guid", "a name", "213.130.242.66", "a hardware id");
+	ETJump::User changes;
+	changes.greeting = "griiting";
+	changes.title = "titteli";
+	ETJump::userRepository->update(4, changes, static_cast<int>(ETJump::UserChanges::Greeting) | static_cast<int>(ETJump::UserChanges::Title));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +58,7 @@ static void initializeETJump()
 static void shutdownETJump()
 {
 	ETJump::deathrunSystem = nullptr;
+	ETJump::userRepository = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

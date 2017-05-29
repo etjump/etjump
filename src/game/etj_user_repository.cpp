@@ -1,6 +1,7 @@
 #include "etj_user_repository.h"
 #include <SQLiteCpp/Database.h>
 #include <SQLiteCpp/Transaction.h>
+#include <boost/algorithm/string/join.hpp>
 
 
 ETJump::UserRepository::UserRepository::UserRepository(const std::string& databaseFile, int timeout)
@@ -91,7 +92,7 @@ void ETJump::UserRepository::UserRepository::insert(const std::string& guid, con
 	insertUser.bind(2, name);
 	insertUser.exec();
 
-	long id = db.getLastInsertRowid();
+	auto id = db.getLastInsertRowid();
 
 	SQLite::Statement insertIpAddress(db,
 		"INSERT INTO ipAddresses (userId, ipAddress) VALUES ( "
@@ -222,3 +223,90 @@ void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId
 void ETJump::UserRepository::addAlias(int id, const std::string& alias)
 {
 }
+
+void ETJump::UserRepository::update(int id, User changes, int changedFields)
+{
+	if (changedFields == 0)
+	{
+		return;
+	}
+
+	std::string editUserQuery =
+		"UPDATE users SET modified=STRFTIME('%s', 'NOW'), ";
+	std::vector<std::string> changedColumns;
+	if (changedFields & static_cast<int>(UserChanges::Level))
+	{
+		changedColumns.push_back("level");
+	}
+	if (changedFields & static_cast<int>(UserChanges::LastSeen))
+	{
+		changedColumns.push_back("lastSeen");
+	}
+	if (changedFields & static_cast<int>(UserChanges::Name))
+	{
+		changedColumns.push_back("name"); 
+	}
+	if (changedFields & static_cast<int>(UserChanges::Title))
+	{
+		changedColumns.push_back("title");
+	}
+	if (changedFields & static_cast<int>(UserChanges::Commands))
+	{
+		changedColumns.push_back("commands");
+	}
+	if (changedFields & static_cast<int>(UserChanges::Greeting))
+	{
+		changedColumns.push_back("greeting");
+	}
+
+	for (int i = 0, len = changedColumns.size(); i < len; ++i)
+	{
+		editUserQuery += " " + changedColumns[i] + "=:" + changedColumns[i];
+		if (i != len - 1)
+		{
+			editUserQuery += ", ";
+		}
+	}
+
+	editUserQuery += " WHERE id=:id";
+
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+	SQLite::Statement updateStmt(db, editUserQuery);
+
+	updateStmt.bind(":id", id);
+
+	for (int i = 0, len = changedColumns.size(); i < len; ++i)
+	{
+		if (changedColumns[i] == "level")
+		{
+			updateStmt.bind(":" + changedColumns[i], changes.level);
+		}
+		else if (changedColumns[i] == "lastSeen")
+		{
+			updateStmt.bind(":" + changedColumns[i], changes.lastSeen);
+		}
+		else if (changedColumns[i] == "name")
+		{
+			updateStmt.bind(":" + changedColumns[i], changes.name);
+		}
+		else if (changedColumns[i] == "title")
+		{
+			updateStmt.bind(":" + changedColumns[i], changes.title);
+		}
+		else if (changedColumns[i] == "commands")
+		{
+			updateStmt.bind(":" + changedColumns[i], changes.commands);
+		}
+		else if (changedColumns[i] == "greeting")
+		{
+			updateStmt.bind(":" + changedColumns[i], changes.greeting);
+		}
+		else
+		{
+			updateStmt.bind(":", "");
+		}
+	}
+	
+	updateStmt.exec();
+}
+

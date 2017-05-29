@@ -18,6 +18,7 @@ namespace ETJump
 		User get(const std::string& guid);
 		void addHardwareId(int id, const std::string& hardwareId);
 		void addAlias(int id, const std::string& alias);
+		void update(int id, User changes, int changedFields);
 	private:
 		std::string _databaseFile;
 		int _timeout;
