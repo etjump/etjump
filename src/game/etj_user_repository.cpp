@@ -218,10 +218,35 @@ ETJump::User ETJump::UserRepository::get(const std::string& guid)
 
 void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId)
 {
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+
+	SQLite::Statement insertHardwareId(db, 
+		"INSERT INTO hardwareIds (userId, hardwareId) VALUES ( "
+		"  ?, "
+		"  ? "
+		"); "
+	);
+	insertHardwareId.bind(1, id);
+	insertHardwareId.bind(2, hardwareId);
+	insertHardwareId.exec();
 }
 
 void ETJump::UserRepository::addAlias(int id, const std::string& alias)
 {
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+
+	SQLite::Statement insertAlias(db,
+		"INSERT INTO aliases (userId, alias, cleanAlias) VALUES ( "
+		"  ?, "
+		"  ?, "
+		"  ? "
+		"); "
+	);
+
+	insertAlias.bind(1, id);
+	insertAlias.bind(2, alias);
+	insertAlias.bind(3, alias);
+	insertAlias.exec();
 }
 
 void ETJump::UserRepository::update(int id, User changes, int changedFields)
