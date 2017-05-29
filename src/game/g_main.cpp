@@ -41,8 +41,10 @@ static void initializeETJump()
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
+	ETJump::userRepository->createTables();
+
 	auto u = ETJump::userRepository->get("a guid");
-	ETJump::userRepository->insert("a guid", "a name", "a hardware id");
+	ETJump::userRepository->insert("a guid", "a name", "213.130.242.66", "a hardware id");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@ namespace ETJump
 {
 	struct User
 	{
-		unsigned id;
+		long id;
 		std::string guid;
 		int level;
 		std::time_t lastSeen;
