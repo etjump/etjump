@@ -8,9 +8,11 @@
 * fixed mover tagging bug
 * added `g_moverScale` cvar and `!moverScale` command to control mover speed (eg. tank)  
   *note: use flag `v` to control command access*
-* added new keys for func_invisible_user entity:
+* added new keys for `func_invisible_user` entity:
   - `noise <sound file>` sets sound file to play when activated
   - `volume <0-255>` controls sound volume
+* fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crashed the game anymore 
+* fixed `target_speaker` spawnflag __8__ (ACTIVATOR) didn't want to play sound to the activator
 
 # ETJump 2.2.0
 
