@@ -8,6 +8,8 @@
 #include "etj_deathrun_system.h"
 #include <memory>
 #include "etj_user_repository.h"
+#include "etj_user_service.h"
+#include "etj_session_service.h"
 
 level_locals_t level;
 
@@ -31,6 +33,8 @@ namespace ETJump
 {
 	std::shared_ptr<DeathrunSystem> deathrunSystem;
 	std::shared_ptr<UserRepository> userRepository;
+	std::shared_ptr<UserService> userService;
+	std::shared_ptr<SessionService> sessionService;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,13 +46,8 @@ static void initializeETJump()
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
 	ETJump::userRepository->createTables();
-
-	auto u = ETJump::userRepository->get("a guid");
-	ETJump::userRepository->insert("a guid", "a name", "213.130.242.66", "a hardware id");
-	ETJump::User changes;
-	changes.greeting = "griiting";
-	changes.title = "titteli";
-	ETJump::userRepository->update(4, changes, static_cast<int>(ETJump::UserChanges::Greeting) | static_cast<int>(ETJump::UserChanges::Title));
+	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +58,8 @@ static void shutdownETJump()
 {
 	ETJump::deathrunSystem = nullptr;
 	ETJump::userRepository = nullptr;
+	ETJump::userService = nullptr;
+	ETJump::sessionService = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4058,6 +4059,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 	G_CheckReloadStatus();
 #endif // SAVEGAME_SUPPORT
 	ETJump_RunFrame(levelTime);
+
+	ETJump::sessionService->runFrame();
 }
 
 // Is this a single player type game - sp or coop?

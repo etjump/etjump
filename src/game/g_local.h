@@ -2728,7 +2728,13 @@ const char *G_MatchOneMap(const char *arg);
 namespace ETJump
 {
 	class DeathrunSystem;
+	class UserRepository;
+	class UserService;
+	class SessionService;
 	extern std::shared_ptr<ETJump::DeathrunSystem> deathrunSystem;
+	extern std::shared_ptr<UserRepository> userRepository;
+	extern std::shared_ptr<UserService> userService;
+	extern std::shared_ptr<SessionService> sessionService;
 }
 
 

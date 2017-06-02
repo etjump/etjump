@@ -75,9 +75,9 @@ void ETJump::UserRepository::createTables()
 	);
 }
 
-void ETJump::UserRepository::UserRepository::insert(const std::string& guid, const std::string& name, const std::string& ipAddress, const std::string& hardwareId)
+void ETJump::UserRepository::UserRepository::insert(const std::string& guid, const std::string& name, const std::string& ipAddress, const std::string& hardwareId) const
 {
-	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
 
 	SQLite::Transaction transaction(db);
 
@@ -135,9 +135,10 @@ void ETJump::UserRepository::UserRepository::insert(const std::string& guid, con
 	transaction.commit();
 }
 
-ETJump::User ETJump::UserRepository::get(const std::string& guid)
+ETJump::User ETJump::UserRepository::get(const std::string& guid) const
 {
-	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
+	db.setBusyTimeout(BUSY_TIMEOUT);
 
 	SQLite::Statement getUserQuery(db,
 		"SELECT "
@@ -169,6 +170,7 @@ ETJump::User ETJump::UserRepository::get(const std::string& guid)
 
 		User user;
 		user.id = id;
+		user.guid = guid;
 		user.level = level;
 		user.created = created;
 		user.modified = modified;
@@ -208,17 +210,32 @@ ETJump::User ETJump::UserRepository::get(const std::string& guid)
 			user.aliases.push_back(alias);
 		}
 
+		SQLite::Statement getUserIpAddresses(db,
+			"SELECT "
+			"  ipAddress "
+			"FROM ipAddresses "
+			"WHERE userId=?; "
+		);
+
+		getUserIpAddresses.bind(1, id);
+
+		while (getUserIpAddresses.executeStep())
+		{
+			const char *ipAddress = getUserIpAddresses.getColumn(0);
+			user.ipAddresses.push_back(ipAddress);
+		}
+
 		return user;
 	}
 	
 	User nonExistingUser;
-	nonExistingUser.id = -1;
+	nonExistingUser.id = NEW_USER_ID;
 	return nonExistingUser;
 }
 
-void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId)
+void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId) const
 {
-	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
 
 	SQLite::Statement insertHardwareId(db, 
 		"INSERT INTO hardwareIds (userId, hardwareId) VALUES ( "
@@ -231,9 +248,9 @@ void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId
 	insertHardwareId.exec();
 }
 
-void ETJump::UserRepository::addAlias(int id, const std::string& alias)
+void ETJump::UserRepository::addAlias(int id, const std::string& alias) const
 {
-	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
 
 	SQLite::Statement insertAlias(db,
 		"INSERT INTO aliases (userId, alias, cleanAlias) VALUES ( "
@@ -249,7 +266,7 @@ void ETJump::UserRepository::addAlias(int id, const std::string& alias)
 	insertAlias.exec();
 }
 
-void ETJump::UserRepository::update(int id, User changes, int changedFields)
+void ETJump::UserRepository::update(int id, MutableUserFields changes, int changedFields) const
 {
 	if (changedFields == 0)
 	{
@@ -259,27 +276,27 @@ void ETJump::UserRepository::update(int id, User changes, int changedFields)
 	std::string editUserQuery =
 		"UPDATE users SET modified=STRFTIME('%s', 'NOW'), ";
 	std::vector<std::string> changedColumns;
-	if (changedFields & static_cast<int>(UserChanges::Level))
+	if (changedFields & static_cast<int>(UserFields::Level))
 	{
 		changedColumns.push_back("level");
 	}
-	if (changedFields & static_cast<int>(UserChanges::LastSeen))
+	if (changedFields & static_cast<int>(UserFields::LastSeen))
 	{
 		changedColumns.push_back("lastSeen");
 	}
-	if (changedFields & static_cast<int>(UserChanges::Name))
+	if (changedFields & static_cast<int>(UserFields::Name))
 	{
 		changedColumns.push_back("name"); 
 	}
-	if (changedFields & static_cast<int>(UserChanges::Title))
+	if (changedFields & static_cast<int>(UserFields::Title))
 	{
 		changedColumns.push_back("title");
 	}
-	if (changedFields & static_cast<int>(UserChanges::Commands))
+	if (changedFields & static_cast<int>(UserFields::Commands))
 	{
 		changedColumns.push_back("commands");
 	}
-	if (changedFields & static_cast<int>(UserChanges::Greeting))
+	if (changedFields & static_cast<int>(UserFields::Greeting))
 	{
 		changedColumns.push_back("greeting");
 	}
@@ -295,7 +312,7 @@ void ETJump::UserRepository::update(int id, User changes, int changedFields)
 
 	editUserQuery += " WHERE id=:id";
 
-	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE);
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
 	SQLite::Statement updateStmt(db, editUserQuery);
 
 	updateStmt.bind(":id", id);
@@ -333,5 +350,21 @@ void ETJump::UserRepository::update(int id, User changes, int changedFields)
 	}
 	
 	updateStmt.exec();
+}
+
+void ETJump::UserRepository::addIpAddress(int64_t id, const std::string& ipAddress)
+{
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
+
+	SQLite::Statement insertAlias(db,
+		"INSERT INTO ipAddresses (userId, ipAddress) VALUES ( "
+		"  ?, "
+		"  ? "
+		"); "
+	);
+
+	insertAlias.bind(1, id);
+	insertAlias.bind(2, ipAddress);
+	insertAlias.exec();
 }
 

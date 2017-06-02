@@ -13,6 +13,7 @@
 #include "etj_map_statistics.h"
 #include "etj_tokens.h"
 #include "etj_shared.h"
+#include "etj_session_service.h"
 
 Game game;
 
@@ -191,6 +192,10 @@ qboolean OnClientCommand(gentity_t *ent)
 
 	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
 	{
+		std::string            ip = ValueForKey(ClientNum(ent), "ip");
+		std::string::size_type pos = ip.find(":");
+		std::string ipAddress = ip.substr(0, pos);
+		ETJump::sessionService->authenticate(ClientNum(ent), ent->client->pers.netname, ipAddress, *argv);
 		game.session->GuidReceived(ent);
 		game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
 		return qtrue;

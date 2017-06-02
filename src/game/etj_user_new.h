@@ -5,7 +5,7 @@
 
 namespace ETJump
 {
-	enum class UserChanges
+	enum class UserFields
 	{
 		Level = 1 << 0,
 		LastSeen = 1 << 1,
@@ -13,6 +13,16 @@ namespace ETJump
 		Title = 1 << 3,
 		Commands = 1 << 4,
 		Greeting = 1 << 5
+	};
+
+	struct MutableUserFields
+	{
+		int level;
+		std::time_t lastSeen;
+		std::string name;
+		std::string title;
+		std::string commands;
+		std::string greeting;
 	};
 
 	struct User
@@ -29,5 +39,6 @@ namespace ETJump
 		std::string greeting;
 		std::vector<std::string> hardwareIds;
 		std::vector<std::string> aliases;
+		std::vector<std::string> ipAddresses;
 	};
 }

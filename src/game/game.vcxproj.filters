@@ -273,6 +273,12 @@
     <ClCompile Include="..\..\lib\SQLiteCpp\src\Transaction.cpp">
       <Filter>Source Files\SQLiteCpp</Filter>
     </ClCompile>
+    <ClCompile Include="etj_user_service.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_session_service.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -416,6 +422,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_user_new.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_user_service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_session_service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
