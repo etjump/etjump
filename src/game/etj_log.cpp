@@ -14,7 +14,7 @@ ETJump::Log::~Log()
 ETJump::Log::LogLevel ETJump::Log::_level = ETJump::Log::LogLevel::Debug;
 
 
-void ETJump::Log::debug(const std::string& text)
+void ETJump::Log::debug(const std::string& text) const
 {
 	if (Log::_level <= LogLevel::Debug)
 	{
@@ -22,32 +22,32 @@ void ETJump::Log::debug(const std::string& text)
 	}
 }
 
-void ETJump::Log::debugLn(const std::string& text)
+void ETJump::Log::debugLn(const std::string& text) const
 {
 	debug(text + "\n");
 }
 
-void ETJump::Log::infoLn(const std::string& text)
+void ETJump::Log::infoLn(const std::string& text) const
 {
 	info(text + "\n");
 }
 
-void ETJump::Log::warnLn(const std::string& text)
+void ETJump::Log::warnLn(const std::string& text) const
 {
 	warn(text + "\n");
 }
 
-void ETJump::Log::errorLn(const std::string& text)
+void ETJump::Log::errorLn(const std::string& text) const
 {
 	error(text + "\n");
 }
 
-void ETJump::Log::fatalLn(const std::string& text)
+void ETJump::Log::fatalLn(const std::string& text) const
 {
 	fatal(text + "\n");
 }
 
-void ETJump::Log::info(const std::string& text)
+void ETJump::Log::info(const std::string& text) const
 {
 	if (Log::_level <= LogLevel::Info)
 	{
@@ -55,7 +55,7 @@ void ETJump::Log::info(const std::string& text)
 	}
 }
 
-void ETJump::Log::warn(const std::string& text)
+void ETJump::Log::warn(const std::string& text) const
 {
 	if (Log::_level <= LogLevel::Warn)
 	{
@@ -63,7 +63,7 @@ void ETJump::Log::warn(const std::string& text)
 	}
 }
 
-void ETJump::Log::error(const std::string& text)
+void ETJump::Log::error(const std::string& text) const
 {
 	if (Log::_level <= LogLevel::Error)
 	{
@@ -71,7 +71,7 @@ void ETJump::Log::error(const std::string& text)
 	}
 }
 
-void ETJump::Log::fatal(const std::string& text)
+void ETJump::Log::fatal(const std::string& text) const
 {
 	if (Log::_level <= LogLevel::Fatal)
 	{
@@ -89,7 +89,7 @@ ETJump::Log::LogLevel ETJump::Log::getLogLevel(LogLevel level)
 	return Log::_level;
 }
 
-void ETJump::Log::log(const std::string& text, LogLevel level)
+void ETJump::Log::log(const std::string& text, LogLevel level) const
 {
 	auto toBePrinted = "[" + toString(level) + "] " + _name + ": " + text;
 	while (toBePrinted.length() > MAX_SERVER_PRINT_LEN)

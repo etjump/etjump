@@ -22,10 +22,10 @@ namespace ETJump
 			std::string hardwareId;
 		};
 
-		explicit SessionService(std::shared_ptr<UserService> userService);
+		explicit SessionService(std::shared_ptr<UserService> userService, std::function<void(int clientNum, const char* reason, int timeout)> dropClient);
 		~SessionService();
 
-		void connect(int clientNum);
+		void connect(int clientNum, bool firstTime);
 		void disconnect(int clientNum);
 		void authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments);
 		void runFrame();
@@ -34,12 +34,14 @@ namespace ETJump
 		void removeClientTasks(int clientNum);
 		void removeGetUserTasks(std::function<bool(const GetUserTask&)> predicate);
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId);
+		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId, std::future<User> task);
 
 		std::shared_ptr<UserService> _userService;
 
 		std::vector<GetUserTask> _getUserTasks;
 		std::array<User, 64> _users;
 		Log _log;
+		std::function<void(int, const char*, int)> _dropClient;
 	};
 }
 

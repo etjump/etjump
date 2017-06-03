@@ -3,6 +3,7 @@
 #include "etj_user_new.h"
 #include <boost/optional/optional.hpp>
 #include <SQLiteCpp/Database.h>
+#include "etj_log.h"
 
 namespace ETJump
 {
@@ -35,6 +36,7 @@ namespace ETJump
 	private:
 		std::string _databaseFile;
 		int _timeout;
+		Log _log;
 	};
 }
 

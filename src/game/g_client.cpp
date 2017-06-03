@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "../../etjump/ui/menudef.h"
+#include "etj_session_service.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -1880,6 +1881,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	ResetSavedPositions(ent);
 
+	ETJump::sessionService->connect(clientNum, firstTime == qtrue);
+
 	return NULL;
 }
 
@@ -2580,6 +2583,8 @@ void ClientDisconnect(int clientNum)
 	SavePositionsToDatabase(ent);
 
 	ClearPortals(ent);
+
+	ETJump::sessionService->disconnect(clientNum);
 }
 
 // In just the GAME DLL, we want to store the groundtrace surface stuff,

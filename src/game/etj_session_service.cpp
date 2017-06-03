@@ -11,8 +11,8 @@ bool is_ready(std::future<R> const& f)
 
 const std::string ETJump::SessionService::INVALID_AUTH_ATTEMPT = "Invalid authentication attempt";
 
-ETJump::SessionService::SessionService(std::shared_ptr<UserService> userService)
-	: _userService(userService), _log(Log("SessionService"))
+ETJump::SessionService::SessionService(std::shared_ptr<UserService> userService, std::function<void(int clientNum, const char* reason, int timeout)> dropClient)
+	: _userService(userService), _log(Log("SessionService")), _dropClient(dropClient)
 {
 }
 
@@ -20,7 +20,7 @@ ETJump::SessionService::~SessionService()
 {
 }
 
-void ETJump::SessionService::connect(int clientNum)
+void ETJump::SessionService::connect(int clientNum, bool firstTime)
 {
 	_users[clientNum] = User();
 
@@ -38,6 +38,18 @@ void ETJump::SessionService::addGetUserTaskAsync(int clientNum, const std::strin
 {
 	auto task = GetUserTask();
 	task.user = _userService->getUser(guid);
+	task.guid = guid;
+	task.clientNum = clientNum;
+	task.alias = name;
+	task.ipAddress = ipAddress;
+	task.hardwareId = hardwareId;
+	_getUserTasks.push_back(std::move(task));
+}
+
+void ETJump::SessionService::addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId, std::future<User> getUserTask)
+{
+	auto task = GetUserTask();
+	task.user = std::move(getUserTask);
 	task.guid = guid;
 	task.clientNum = clientNum;
 	task.alias = name;
@@ -91,9 +103,10 @@ void ETJump::SessionService::runFrame()
 			auto user  = _getUserTasks[i].user.get();
 			if (user.id == ETJump::UserRepository::NEW_USER_ID)
 			{
-				_userService->insertUser(_getUserTasks[i].guid, _getUserTasks[i].alias, _getUserTasks[i].ipAddress, _getUserTasks[i].hardwareId);
+				// returns the inserted user
+				auto getUserTask = _userService->insertUser(_getUserTasks[i].guid, _getUserTasks[i].alias, _getUserTasks[i].ipAddress, _getUserTasks[i].hardwareId);
 				deletedTask.push_back(i);
-				addGetUserTaskAsync(clientNum, _getUserTasks[i].alias, _getUserTasks[i].ipAddress, _getUserTasks[i].guid, _getUserTasks[i].hardwareId);
+				addGetUserTaskAsync(clientNum, _getUserTasks[i].alias, _getUserTasks[i].ipAddress, _getUserTasks[i].guid, _getUserTasks[i].hardwareId, std::move(getUserTask));
 			} else
 			{
 				if (find(begin(user.hardwareIds), end(user.hardwareIds), _getUserTasks[i].hardwareId) == end(user.hardwareIds))
@@ -132,7 +145,9 @@ void ETJump::SessionService::runFrame()
 
 void ETJump::SessionService::dropClient(int clientNum, const std::string& reason, int seconds)
 {
+	seconds = std::max(0, seconds);
 	_log.infoLn("Dropping client " + std::to_string(clientNum) + " for: " + reason + " Duration: " + std::to_string(seconds) + "s");
+	_dropClient(clientNum, reason.c_str(), seconds);
 }
 
 void ETJump::SessionService::removeClientTasks(int clientNum)

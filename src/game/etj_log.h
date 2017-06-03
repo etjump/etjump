@@ -20,22 +20,22 @@ namespace ETJump
 		// arbitrary limit found out by testing
 		static const int MAX_SERVER_PRINT_LEN = 1013;
 
-		void debug(const std::string& text);
-		void debugLn(const std::string& text);
-		void info(const std::string& text);
-		void infoLn(const std::string& text);
-		void warn(const std::string& text);
-		void warnLn(const std::string& text);
-		void error(const std::string& text);
-		void errorLn(const std::string& text);
-		void fatal(const std::string& text);
-		void fatalLn(const std::string& text);
+		void debug(const std::string& text) const;
+		void debugLn(const std::string& text) const;
+		void info(const std::string& text) const;
+		void infoLn(const std::string& text) const;
+		void warn(const std::string& text) const;
+		void warnLn(const std::string& text) const;
+		void error(const std::string& text) const;
+		void errorLn(const std::string& text) const;
+		void fatal(const std::string& text) const;
+		void fatalLn(const std::string& text) const;
 
 		static void setLogLevel(LogLevel level);
 		static LogLevel getLogLevel(LogLevel level);
 
 	private:
-		void log(const std::string& text, LogLevel level);
+		void log(const std::string& text, LogLevel level) const;
 		static std::string toString(LogLevel level);
 
 		static LogLevel _level;

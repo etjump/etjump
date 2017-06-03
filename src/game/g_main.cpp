@@ -49,7 +49,7 @@ static void initializeETJump()
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
 	ETJump::userRepository->createTables();
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
-	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService);
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, trap_DropClient);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
