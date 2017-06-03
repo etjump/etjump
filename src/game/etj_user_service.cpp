@@ -58,3 +58,11 @@ std::future<void> ETJump::UserService::addIpAddress(int64_t id, const std::strin
 		_userRepository->addIpAddress(id, ipAddress);
 	});
 }
+
+std::future<void> ETJump::UserService::updateLastSeen(int64_t id, time_t lastSeen)
+{
+	return std::async(std::launch::async, [=]()
+	{
+		_userRepository->updateLastSeen(id, lastSeen);
+	});
+}

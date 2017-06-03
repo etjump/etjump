@@ -8,6 +8,8 @@ namespace ETJump
 	class ClientAuthentication
 	{
 	public:
+		static const int GUID_LEN = 40;
+
 		struct OperationResult
 		{
 			bool success;

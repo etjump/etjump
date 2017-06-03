@@ -17,6 +17,9 @@ namespace ETJump
 
 	struct MutableUserFields
 	{
+		MutableUserFields()
+			: level(0), lastSeen(0)
+		{}
 		int level;
 		std::time_t lastSeen;
 		std::string name;

@@ -49,7 +49,7 @@ std::vector<char> ETJump::File::read(int bytes)
 	{
 		throw std::logic_error("Cannot read from a file when mode is not Mode::Read.");
 	}
-	auto readBytes = bytes == READ_ALL_BYTES ? _length : (_length >= bytes ? bytes : _length);
+	auto readBytes = (bytes == READ_ALL_BYTES ? _length : (_length >= bytes ? bytes : _length));
 	auto buffer = std::vector<char>(readBytes);
 
 	trap_FS_Read(buffer.data(), readBytes, _handle);

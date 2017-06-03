@@ -274,11 +274,14 @@
     <ClCompile Include="etj_database.cpp" />
     <ClCompile Include="etj_deathrun_system.cpp" />
     <ClCompile Include="etj_file.cpp" />
+    <ClCompile Include="etj_log.cpp" />
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_result_set_formatter.cpp" />
     <ClCompile Include="etj_session_service.cpp" />
+    <ClCompile Include="etj_string_utilities.cpp" />
+    <ClCompile Include="etj_time_utilities.cpp" />
     <ClCompile Include="etj_user_repository.cpp" />
     <ClCompile Include="etj_user_service.cpp" />
     <ClCompile Include="g_active.cpp" />
@@ -353,6 +356,7 @@
     <ClInclude Include="etj_database.h" />
     <ClInclude Include="etj_deathrun_system.h" />
     <ClInclude Include="etj_file.h" />
+    <ClInclude Include="etj_log.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />
@@ -360,6 +364,8 @@
     <ClInclude Include="etj_result_set_formatter.h" />
     <ClInclude Include="etj_session_service.h" />
     <ClInclude Include="etj_shared.h" />
+    <ClInclude Include="etj_string_utilities.h" />
+    <ClInclude Include="etj_time_utilities.h" />
     <ClInclude Include="etj_user_new.h" />
     <ClInclude Include="etj_user_repository.h" />
     <ClInclude Include="etj_user_service.h" />

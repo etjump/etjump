@@ -10,6 +10,8 @@
 #include "etj_user_repository.h"
 #include "etj_user_service.h"
 #include "etj_session_service.h"
+#include "etj_time_utilities.h"
+#include "etj_log.h"
 
 level_locals_t level;
 
@@ -1930,6 +1932,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		trap_Cvar_Update(&g_adminLog);
 	}
 
+	ETJump::Log::setLogLevel(ETJump::Log::LogLevel::Debug);
+
 	if (g_log.string[0])
 	{
 		if (g_logSync.integer)
@@ -2828,7 +2832,7 @@ void QDECL G_LogPrintf(const char *fmt, ...)
 	min  = rt.tm_min;
 	sec  = rt.tm_sec;
 
-	Com_sprintf(string, sizeof(string), "%02i:%02i:%02i ", hour, min, sec);
+	Com_sprintf(string, sizeof(string), "%s ", ETJump::DateTime::getCurrentUtcTimestamp().c_str());
 
 	l = strlen(string);
 

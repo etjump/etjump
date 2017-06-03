@@ -30,6 +30,8 @@ namespace ETJump
 		void update(int id, MutableUserFields changes, int changedFields) const;
 		// thread safe
 		void addIpAddress(int64_t id, const std::string& ipAddress);
+		// thread safe
+		void updateLastSeen(int64_t id, time_t lastSeen);
 	private:
 		std::string _databaseFile;
 		int _timeout;

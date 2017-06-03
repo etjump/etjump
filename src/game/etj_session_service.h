@@ -2,6 +2,7 @@
 #include <array>
 #include "etj_user_service.h"
 #include "etj_commands.h"
+#include "etj_log.h"
 
 namespace ETJump
 {
@@ -32,11 +33,13 @@ namespace ETJump
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
 		void removeClientTasks(int clientNum);
 		void removeGetUserTasks(std::function<bool(const GetUserTask&)> predicate);
+		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId);
 
 		std::shared_ptr<UserService> _userService;
 
 		std::vector<GetUserTask> _getUserTasks;
 		std::array<User, 64> _users;
+		Log _log;
 	};
 }
 

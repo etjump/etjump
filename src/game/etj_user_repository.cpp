@@ -352,6 +352,20 @@ void ETJump::UserRepository::update(int id, MutableUserFields changes, int chang
 	updateStmt.exec();
 }
 
+void ETJump::UserRepository::updateLastSeen(int64_t id, time_t lastSeen)
+{
+	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
+
+	SQLite::Statement updateStmt(db,
+		"UPDATE users SET lastSeen=? WHERE id=?;"
+	);
+
+	updateStmt.bind(1, lastSeen);
+	updateStmt.bind(2, id);
+
+	updateStmt.exec();
+}
+
 void ETJump::UserRepository::addIpAddress(int64_t id, const std::string& ipAddress)
 {
 	SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);

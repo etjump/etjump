@@ -7,6 +7,7 @@
 #include "etj_client_authentication.h"
 #include "../game/etj_file.h"
 #include "../game/etj_shared.h"
+#include "../game/etj_string_utilities.h"
 
 ETJump::ClientAuthentication::ClientAuthentication(
 	std::function<void(const std::string&)> sendClientCommand, 
@@ -30,11 +31,6 @@ ETJump::ClientAuthentication::~ClientAuthentication()
 void ETJump::ClientAuthentication::login()
 {
 	auto guid = getGuid();
-	auto result = saveGuid(guid);
-	if (!result.success)
-	{
-		_print("^1Error: " + result.message);
-	}
 	auto hwid = getHwid();
 	auto authenticate = (boost::format("%s %s %s") % Constants::Authentication::AUTHENTICATE % guid % hwid).str();
 	_sendClientCommand(authenticate);
@@ -46,7 +42,11 @@ std::string ETJump::ClientAuthentication::getGuid()
 	{
 		File guidFile(GUID_FILE);
 		auto guid = guidFile.read();
-		return std::string(begin(guid), end(guid));
+		if (guid.size() != GUID_LEN)
+		{
+			return createGuid();
+		}
+		return ETJump::hash(std::string(begin(guid), end(guid)));
 	} catch (File::FileNotFoundException)
 	{
 		return createGuid();
@@ -62,7 +62,9 @@ std::string ETJump::ClientAuthentication::createGuid() const
 {
 	boost::uuids::random_generator gen;
 	auto u = gen();
-	return boost::to_upper_copy(boost::lexical_cast<std::string>(u));
+	auto guid = boost::to_upper_copy(ETJump::hash(boost::lexical_cast<std::string>(u)));
+	saveGuid(guid);
+	return guid;
 }
 
 ETJump::ClientAuthentication::OperationResult ETJump::ClientAuthentication::saveGuid(const std::string& guid) const
