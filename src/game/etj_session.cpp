@@ -34,7 +34,7 @@ void Session::Init(int clientNum)
 	std::string::size_type pos = ip.find(":");
 	clients_[clientNum].ip = ip.substr(0, pos);
 
-	WriteSessionData(clientNum);
+	//WriteSessionData(clientNum);
 }
 
 void Session::UpdateLastSeen(int clientNum)
@@ -272,7 +272,7 @@ void Session::ParsePermissions(int clientNum)
 
 void Session::OnClientDisconnect(int clientNum)
 {
-	WriteSessionData(clientNum);
+	//WriteSessionData(clientNum);
 	UpdateLastSeen(clientNum);
 
 	clients_[clientNum].user  = NULL;

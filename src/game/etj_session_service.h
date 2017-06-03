@@ -1,16 +1,22 @@
 #pragma once
 #include <array>
-#include "etj_user_service.h"
 #include "etj_commands.h"
 #include "etj_log.h"
+#include <future>
+#include "etj_user_new.h"
+#include "etj_session_repository.h"
+#include <boost/container/allocator_traits.hpp>
 
 namespace ETJump
 {
+	class UserService;
+	class SessionRepository;
 	class SessionService
 	{
 	public:
 		static const int GUID_LEN = 40;
 		static const std::string INVALID_AUTH_ATTEMPT;
+		static const int MAX_CONNECTED_CLIENTS = 64;
 
 		struct GetUserTask
 		{
@@ -22,13 +28,16 @@ namespace ETJump
 			std::string hardwareId;
 		};
 
-		explicit SessionService(std::shared_ptr<UserService> userService, std::function<void(int clientNum, const char* reason, int timeout)> dropClient);
+		explicit SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::function<void(int clientNum, const char* reason, int timeout)> dropClient);
 		~SessionService();
 
 		void connect(int clientNum, bool firstTime);
 		void disconnect(int clientNum);
 		void authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments);
 		void runFrame();
+		void readSession(int levelTime);
+		void writeSession(int numConnectedClients, int sortedClients[]);
+		std::string getSessionValue(int clientNum, const std::string& key);
 	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
 		void removeClientTasks(int clientNum);
@@ -37,11 +46,13 @@ namespace ETJump
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId, std::future<User> task);
 
 		std::shared_ptr<UserService> _userService;
+		std::shared_ptr<SessionRepository> _sessionRepository;
 
 		std::vector<GetUserTask> _getUserTasks;
-		std::array<User, 64> _users;
+		std::array<User, MAX_CONNECTED_CLIENTS> _users;
 		Log _log;
 		std::function<void(int, const char*, int)> _dropClient;
+		std::map<int, SessionRepository::Session> _sessions;
 	};
 }
 

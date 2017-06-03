@@ -12,6 +12,7 @@
 #include "etj_session_service.h"
 #include "etj_time_utilities.h"
 #include "etj_log.h"
+#include "etj_session_repository.h"
 
 level_locals_t level;
 
@@ -36,6 +37,7 @@ namespace ETJump
 	std::shared_ptr<DeathrunSystem> deathrunSystem;
 	std::shared_ptr<UserRepository> userRepository;
 	std::shared_ptr<UserService> userService;
+	std::shared_ptr<SessionRepository> sessionRepository;
 	std::shared_ptr<SessionService> sessionService;
 }
 
@@ -43,13 +45,17 @@ namespace ETJump
 // ETJump initialization
 ///////////////////////////////////////////////////////////////////////////////
 
-static void initializeETJump()
+static void initializeETJump(int levelTime, int randomSeed, int restart)
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
 	ETJump::userRepository->createTables();
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
-	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, trap_DropClient);
+	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000);
+	ETJump::sessionRepository->createTables();
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, trap_DropClient);
+
+	ETJump::sessionService->readSession(levelTime);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,6 +64,8 @@ static void initializeETJump()
 
 static void shutdownETJump()
 {
+	ETJump::sessionService->writeSession(level.numConnectedClients, level.sortedClients);
+
 	ETJump::deathrunSystem = nullptr;
 	ETJump::userRepository = nullptr;
 	ETJump::userService = nullptr;
@@ -580,49 +588,56 @@ This must be the very first function compiled into the .q3vm file
 
 extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
 {
-	switch (command)
+	try
 	{
-	case GAME_INIT:
-		G_InitGame(arg0, arg1, arg2);
-		return 0;
-	case GAME_SHUTDOWN:
-		G_ShutdownGame(arg0);
-		return 0;
-	case GAME_CLIENT_CONNECT:
-		return (int)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
-	case GAME_CLIENT_THINK:
-		ClientThink(arg0);
-		return 0;
-	case GAME_CLIENT_USERINFO_CHANGED:
-		ClientUserinfoChanged(arg0);
-		return 0;
-	case GAME_CLIENT_DISCONNECT:
-		ClientDisconnect(arg0);
-		return 0;
-	case GAME_CLIENT_BEGIN:
-		ClientBegin(arg0);
-		return 0;
-	case GAME_CLIENT_COMMAND:
-		ClientCommand(arg0);
-		return 0;
-	case GAME_RUN_FRAME:
-		G_RunFrame(arg0);
-		return 0;
-	case GAME_CONSOLE_COMMAND:
-		return ConsoleCommand();
-	case BOTAI_START_FRAME:
-		return 0;
-	case BOT_VISIBLEFROMPOS:
-		return qfalse;
-	case BOT_CHECKATTACKATPOS:
-		return qfalse;
-	case GAME_SNAPSHOT_CALLBACK:
-		return G_SnapshotCallback(arg0, arg1);
-	case GAME_MESSAGERECEIVED:
-		return -1;
-	}
+		switch (command)
+		{
+		case GAME_INIT:
+			G_InitGame(arg0, arg1, arg2);
+			return 0;
+		case GAME_SHUTDOWN:
+			G_ShutdownGame(arg0);
+			return 0;
+		case GAME_CLIENT_CONNECT:
+			return (int)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
+		case GAME_CLIENT_THINK:
+			ClientThink(arg0);
+			return 0;
+		case GAME_CLIENT_USERINFO_CHANGED:
+			ClientUserinfoChanged(arg0);
+			return 0;
+		case GAME_CLIENT_DISCONNECT:
+			ClientDisconnect(arg0);
+			return 0;
+		case GAME_CLIENT_BEGIN:
+			ClientBegin(arg0);
+			return 0;
+		case GAME_CLIENT_COMMAND:
+			ClientCommand(arg0);
+			return 0;
+		case GAME_RUN_FRAME:
+			G_RunFrame(arg0);
+			return 0;
+		case GAME_CONSOLE_COMMAND:
+			return ConsoleCommand();
+		case BOTAI_START_FRAME:
+			return 0;
+		case BOT_VISIBLEFROMPOS:
+			return qfalse;
+		case BOT_CHECKATTACKATPOS:
+			return qfalse;
+		case GAME_SNAPSHOT_CALLBACK:
+			return G_SnapshotCallback(arg0, arg1);
+		case GAME_MESSAGERECEIVED:
+			return -1;
+		}
 
-	return -1;
+		return -1;
+	} catch (const std::runtime_error& e)
+	{
+		G_Error("uncaught exception: %s\n", e.what());
+		return 0;
+	}
 }
 
 void QDECL G_Printf(const char *fmt, ...)
@@ -2030,7 +2045,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	InitGhosting();
 
 	// Must be called before entities are created
-	initializeETJump();
+	initializeETJump(levelTime, randomSeed, restart);
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();

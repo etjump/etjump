@@ -66,3 +66,4 @@ std::future<void> ETJump::UserService::updateLastSeen(int64_t id, time_t lastSee
 		_userRepository->updateLastSeen(id, lastSeen);
 	});
 }
+

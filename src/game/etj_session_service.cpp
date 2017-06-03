@@ -1,4 +1,6 @@
 #include "etj_session_service.h"
+#include "etj_session_repository.h"
+#include "etj_user_service.h"
 #include "etj_string_utilities.h"
 #include "etj_log.h"
 #include "etj_time_utilities.h"
@@ -11,9 +13,13 @@ bool is_ready(std::future<R> const& f)
 
 const std::string ETJump::SessionService::INVALID_AUTH_ATTEMPT = "Invalid authentication attempt";
 
-ETJump::SessionService::SessionService(std::shared_ptr<UserService> userService, std::function<void(int clientNum, const char* reason, int timeout)> dropClient)
-	: _userService(userService), _log(Log("SessionService")), _dropClient(dropClient)
+ETJump::SessionService::SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::function<void(int clientNum, const char* reason, int timeout)> dropClient)
+	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient)
 {
+	for (int i = 0, len = _users.size(); i < len; ++i)
+	{
+		_users[i] = User();
+	}
 }
 
 ETJump::SessionService::~SessionService()
@@ -141,6 +147,50 @@ void ETJump::SessionService::runFrame()
 		}
 	}
 	_getUserTasks = std::move(temp);
+}
+
+void ETJump::SessionService::readSession(int levelTime)
+{
+	// if level time is 0, the server just started 
+	// --> clear the session data
+	if (levelTime == 0)
+	{
+		_sessionRepository->clearSessions();
+		return;
+	}
+
+	_sessions = _sessionRepository->loadSessions();
+}
+
+void ETJump::SessionService::writeSession(int numConnectedClients, int sortedClients[])
+{
+	std::vector<SessionRepository::Session> sessions;
+
+	for (int i = 0; i < numConnectedClients; ++i)
+	{
+		auto clientNum = sortedClients[i];
+		auto session = SessionRepository::Session();
+		session.clientNum = clientNum;
+		session.values["guid"] = _users[clientNum].guid;
+		sessions.push_back(std::move(session));
+	}
+
+	_sessionRepository->writeSessions(sessions);
+}
+
+std::string ETJump::SessionService::getSessionValue(int clientNum, const std::string& key)
+{
+	auto userSession = _sessions.find(clientNum);
+	if (userSession == end(_sessions))
+	{
+		return "";
+	}
+	auto value = userSession->second.values.find(key);
+	if (value == end(userSession->second.values))
+	{
+		return "";
+	}
+	return value->second;
 }
 
 void ETJump::SessionService::dropClient(int clientNum, const std::string& reason, int seconds)

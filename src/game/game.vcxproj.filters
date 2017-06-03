@@ -288,6 +288,9 @@
     <ClCompile Include="etj_time_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_session_repository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -446,6 +449,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_time_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_session_repository.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
