@@ -47,6 +47,7 @@ namespace ETJump
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId);
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId, std::future<User> task);
 		void handleGetUserTasks();
+		void clearSession(int clientNum);
 
 		std::shared_ptr<UserService> _userService;
 		std::shared_ptr<SessionRepository> _sessionRepository;

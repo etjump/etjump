@@ -1999,6 +1999,8 @@ extern vmCvar_t g_customVoiceChat;
 extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
 
+extern vmCvar_t g_serverId;
+
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);
 int     trap_Milliseconds(void);

@@ -3,8 +3,8 @@
 #include <SQLiteCpp/Transaction.h>
 #include "etj_log.h"
 
-ETJump::SessionRepository::SessionRepository(const std::string& database, int timeout)
-	: _database(database), _timeout(timeout), _log(Log("SessionRepository"))
+ETJump::SessionRepository::SessionRepository(const std::string& database, int timeout, const std::string& serverId)
+	: _database(database), _timeout(timeout), _log(Log("SessionRepository")), _serverId(serverId)
 {
 }
 
@@ -18,10 +18,12 @@ void ETJump::SessionRepository::createTables()
 
 	db.exec(
 		"CREATE TABLE IF NOT EXISTS sessions ( "
+		"  serverId TEXT NOT NULL, "
 		"  clientNum INTEGER NOT NULL, "
 		"  key TEXT NOT NULL, "
 		"  value TEXT NOT NULL "
 		"); "
+
 	);
 }
 
@@ -34,8 +36,10 @@ std::map<int, ETJump::SessionRepository::Session> ETJump::SessionRepository::loa
 		"  clientNum, "
 		"  key, "
 		"  value "
-		"FROM sessions; "
+		"FROM sessions WHERE serverId=?; "
 	);
+
+	selectSessionsStmt.bind(1, _serverId);
 
 	std::map<int, Session> sessions;
 	while (selectSessionsStmt.executeStep())
@@ -67,7 +71,8 @@ void ETJump::SessionRepository::writeSessions(std::vector<Session> sessions)
 	SQLite::Database db(_database, SQLite::OPEN_CREATE | SQLite::OPEN_READWRITE, _timeout);
 
 	SQLite::Statement insertSessionStmt(db,
-		"INSERT INTO sessions (clientNum, key, value) VALUES ( "
+		"INSERT INTO sessions (serverId, clientNum, key, value) VALUES ( "
+		"  ?, "
 		"  ?, "
 		"  ?, "
 		"  ? "
@@ -80,9 +85,10 @@ void ETJump::SessionRepository::writeSessions(std::vector<Session> sessions)
 	{
 		for (const auto & keyValue : s.values)
 		{
-			insertSessionStmt.bind(1, s.clientNum);
-			insertSessionStmt.bind(2, keyValue.first);
-			insertSessionStmt.bind(3, keyValue.second);
+			insertSessionStmt.bind(1, _serverId);
+			insertSessionStmt.bind(2, s.clientNum);
+			insertSessionStmt.bind(3, keyValue.first);
+			insertSessionStmt.bind(4, keyValue.second);
 			insertSessionStmt.exec();
 
 			insertSessionStmt.reset();
@@ -98,7 +104,21 @@ void ETJump::SessionRepository::clearSessions()
 {
 	SQLite::Database db(_database, SQLite::OPEN_CREATE | SQLite::OPEN_READWRITE, _timeout);
 
-	db.exec("DELETE FROM sessions;");
+	SQLite::Statement deleteStmt(db, "DELETE FROM sessions WHERE serverId=?;");
+	deleteStmt.bind(1, _serverId);
+	deleteStmt.exec();
+
+	_log.infoLn("Cleared session data.");
+}
+
+void ETJump::SessionRepository::clearSession(int clientNum)
+{
+	SQLite::Database db(_database, SQLite::OPEN_CREATE | SQLite::OPEN_READWRITE, _timeout);
+
+	SQLite::Statement deleteStmt(db, "DELETE FROM sessions WHERE serverId=? AND clientNum=?;");
+	deleteStmt.bind(1, _serverId);
+	deleteStmt.bind(2, clientNum);
+	deleteStmt.exec();
 
 	_log.infoLn("Cleared session data.");
 }

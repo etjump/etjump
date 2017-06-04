@@ -13,6 +13,7 @@
 #include "etj_time_utilities.h"
 #include "etj_log.h"
 #include "etj_session_repository.h"
+#include "etj_string_utilities.h"
 
 level_locals_t level;
 
@@ -51,7 +52,7 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
 	ETJump::userRepository->createTables();
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
-	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000);
+	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000, "serverId");
 	ETJump::sessionRepository->createTables();
 	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, trap_DropClient);
 
@@ -303,6 +304,7 @@ vmCvar_t shared;
 // minimum time to wait before vote result will be checked
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
+vmCvar_t g_serverId;
 
 cvarTable_t gameCvarTable[] =
 {
@@ -551,6 +553,7 @@ cvarTable_t gameCvarTable[] =
 	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
+	{&g_serverId, "g_serverId", "", CVAR_ARCHIVE}
 
 };
 
@@ -1832,6 +1835,13 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	trap_Cvar_Set("mod_version", MOD_VERSION);
 	// reset moverscale on each map load
 	trap_Cvar_Set("g_moverScale", "1.0");
+
+	char serverId[MAX_CVAR_VALUE_STRING] = "";
+	trap_Cvar_VariableStringBuffer("g_serverId", serverId, sizeof(serverId));
+	if (strlen(serverId) == 0)
+	{
+		trap_Cvar_Set("g_serverId", ETJump::newGuid().c_str());
+	}
 
 	srand(randomSeed);
 

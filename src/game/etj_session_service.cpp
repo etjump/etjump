@@ -31,11 +31,18 @@ void ETJump::SessionService::connect(int clientNum, bool firstTime)
 {
 	_users[clientNum] = User();
 
+	if (firstTime)
+	{
+		clearSession(clientNum);
+	}
+
 	removeClientTasks(clientNum);
 }
 
 void ETJump::SessionService::disconnect(int clientNum)
 {
+	_userService->updateLastSeen(_users[clientNum].id, DateTime::now());
+
 	_users[clientNum] = User();
 
 	removeClientTasks(clientNum);
@@ -76,6 +83,7 @@ void ETJump::SessionService::handleGetUserTasks()
 			auto user = _getUserTasks[i].user.get();
 			if (user.id == ETJump::UserRepository::NEW_USER_ID)
 			{
+				_log.infoLn("Added a new user " + _getUserTasks[i].alias + " with guid " + _getUserTasks[i].guid);
 				// returns the inserted user
 				auto getUserTask = _userService->insertUser(_getUserTasks[i].guid, _getUserTasks[i].alias, _getUserTasks[i].ipAddress, _getUserTasks[i].hardwareId);
 				deletedTask.push_back(i);
@@ -117,6 +125,11 @@ void ETJump::SessionService::handleGetUserTasks()
 		}
 	}
 	_getUserTasks = std::move(temp);
+}
+
+void ETJump::SessionService::clearSession(int clientNum)
+{
+	_sessionRepository->clearSession(clientNum);
 }
 
 void ETJump::SessionService::authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments)
