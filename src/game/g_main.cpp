@@ -64,7 +64,7 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 
 static void shutdownETJump()
 {
-	ETJump::sessionService->writeSession(level.numConnectedClients, level.sortedClients);
+	ETJump::sessionService->writeSession();
 
 	ETJump::deathrunSystem = nullptr;
 	ETJump::userRepository = nullptr;

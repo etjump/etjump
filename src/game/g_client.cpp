@@ -1832,6 +1832,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	else
 	{
 		G_ReadSessionData(client);
+		ETJump::sessionService->readClientSession(clientNum, client->pers.netname, ip);
 	}
 
 	client->pers.enterTime = level.time;

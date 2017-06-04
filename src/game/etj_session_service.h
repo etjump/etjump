@@ -36,14 +36,17 @@ namespace ETJump
 		void authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments);
 		void runFrame();
 		void readSession(int levelTime);
-		void writeSession(int numConnectedClients, int sortedClients[]);
+		void writeSession();
+		void setSessionValue(int clientNum, const std::string& key, const std::string& value);
 		std::string getSessionValue(int clientNum, const std::string& key);
+		void readClientSession(int clientNum, const std::string& alias, const std::string& ipAddress);
 	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
 		void removeClientTasks(int clientNum);
 		void removeGetUserTasks(std::function<bool(const GetUserTask&)> predicate);
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId);
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId, std::future<User> task);
+		void handleGetUserTasks();
 
 		std::shared_ptr<UserService> _userService;
 		std::shared_ptr<SessionRepository> _sessionRepository;

@@ -363,6 +363,7 @@
     <ClInclude Include="etj_game.h" />
     <ClInclude Include="etj_public.h" />
     <ClInclude Include="etj_result_set_formatter.h" />
+    <ClInclude Include="etj_session_keys.h" />
     <ClInclude Include="etj_session_repository.h" />
     <ClInclude Include="etj_session_service.h" />
     <ClInclude Include="etj_shared.h" />
