@@ -109,9 +109,15 @@ void ETJump::SessionService::handleGetUserTasks()
 				deletedTask.push_back(i);
 				user.lastSeen = DateTime::now();
 				_userService->updateLastSeen(user.id, user.lastSeen);
+				_log.infoLn("User \"" + user.name + "\" logged in from ip \"" + _getUserTasks[i].ipAddress + "\" with hardware id \"" + _getUserTasks[i].hardwareId + "\"");
 				_users[_getUserTasks[i].clientNum] = user;
+				if (getSessionValue(_getUserTasks[i].clientNum, KEY_GUID).length() == 0)
+				{
+					// print greeting
+				}
 				setSessionValue(_getUserTasks[i].clientNum, KEY_GUID, user.guid);
 				setSessionValue(_getUserTasks[i].clientNum, KEY_HARDWARE_ID, _getUserTasks[i].hardwareId);
+				
 			}
 		}
 	}
@@ -197,6 +203,7 @@ void ETJump::SessionService::writeSession()
 		sessions.push_back(std::move(s.second));
 	}
 
+	_sessionRepository->clearSessions();
 	_sessionRepository->writeSessions(sessions);
 }
 

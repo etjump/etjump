@@ -1828,6 +1828,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		G_InitSessionData(client, userinfo);
 		client->pers.enterTime            = level.time;
 		client->ps.persistant[PERS_SCORE] = 0;
+		ETJump::sessionService->connect(clientNum, firstTime == qtrue);
 	}
 	else
 	{
@@ -1882,7 +1883,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	ResetSavedPositions(ent);
 
-	ETJump::sessionService->connect(clientNum, firstTime == qtrue);
 
 	return NULL;
 }

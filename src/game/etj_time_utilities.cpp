@@ -18,3 +18,11 @@ std::time_t ETJump::DateTime::now()
 	return now;
 }
 
+std::string ETJump::DateTime::toLocalTime(std::time_t time)
+{
+	auto res = localtime(&time);
+	char buf[100] = "";
+	strftime(buf, sizeof(buf), "%c", res);
+	return buf;
+}
+
