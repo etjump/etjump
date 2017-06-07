@@ -164,11 +164,8 @@ qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params)
 static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, char *params, bool isAutoSpawn)
 {
 	auto mod = isAutoSpawn ? "setplayerautospawn" : "setplayerspawn";
-	auto target = ent->target_ent;
-	auto activator = target->activator;
-	// if trigger was activated by something other than target_script_trigger
-	// then skip the action silently
-	if (!target && !activator && !activator->client)
+	auto activator = ent->activator;
+	if (!activator && !activator->client)
 	{
 		return qfalse;
 	}
@@ -240,11 +237,8 @@ qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params)
 */
 qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params)
 {
-	auto target = ent->target_ent;
-	auto activator = target->activator;
-	// if trigger was activated by something other than target_script_trigger
-	// then skip the action silently
-	if (!target && !activator && !activator->client)
+	auto activator = ent->activator;
+	if (!activator && !activator->client)
 	{
 		return qfalse;
 	}
@@ -267,11 +261,8 @@ qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params)
 */
 qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params)
 {
-	auto target = ent->target_ent;
-	auto activator = target->activator;
-	// if trigger was activated by something other than target_script_trigger
-	// then skip the action silently
-	if (!target && !activator && !activator->client)
+	auto activator = ent->activator;
+	if (!activator && !activator->client)
 	{
 		return qfalse;
 	}
