@@ -675,6 +675,7 @@ typedef struct
 	int playerWeapon;               // DHM - Nerve :: for GT_WOLF
 	int playerWeapon2;              // Gordon: secondary weapon
 	int spawnObjectiveIndex;         // JPW NERVE index of objective to spawn nearest to (returned from UI)
+	int autoSpawnObjectiveIndex;	// ETJump: player basis auto spawn support
 	int latchPlayerType;            // DHM - Nerve :: for GT_WOLF not archived
 	int latchPlayerWeapon;          // DHM - Nerve :: for GT_WOLF not archived
 	int latchPlayerWeapon2;         // Gordon: secondary weapon
