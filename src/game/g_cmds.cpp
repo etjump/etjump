@@ -3678,20 +3678,30 @@ void G_UpdateSpawnCounts(void)
 
 			if (client->sess.spawnObjectiveIndex == 0)
 			{
-				if (client->sess.sessionTeam == TEAM_AXIS)
+				if (client->sess.autoSpawnObjectiveIndex > 0)
 				{
-					if (level.axisAutoSpawn == i)
+					if (client->sess.sessionTeam == team && client->sess.autoSpawnObjectiveIndex == i + 1)
 					{
 						count++;
 						continue;
 					}
-				}
-				else
+				} else
 				{
-					if (level.alliesAutoSpawn == i)
+					if (client->sess.sessionTeam == TEAM_AXIS)
 					{
-						count++;
-						continue;
+						if (level.axisAutoSpawn == i)
+						{
+							count++;
+							continue;
+						}
+					}
+					else
+					{
+						if (level.alliesAutoSpawn == i)
+						{
+							count++;
+							continue;
+						}
 					}
 				}
 			}

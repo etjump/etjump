@@ -2103,7 +2103,16 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
             }
             //
             if( !spawnPoint ) {*/
-			spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, client->pers.teamState.state, spawn_origin, spawn_angles, client->sess.spawnObjectiveIndex);
+			auto spawnObjective = 0;
+			if (client->sess.spawnObjectiveIndex > 0)
+			{
+				spawnObjective = client->sess.spawnObjectiveIndex;
+			}
+			else if (client->sess.autoSpawnObjectiveIndex > 0)
+			{
+				spawnObjective = client->sess.autoSpawnObjectiveIndex;
+			}
+			spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, client->pers.teamState.state, spawn_origin, spawn_angles, spawnObjective);
 //			}
 		}
 	}

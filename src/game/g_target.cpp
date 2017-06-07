@@ -1320,6 +1320,7 @@ void target_script_trigger_use(gentity_t *ent, gentity_t *other, gentity_t *acti
 	{
 		if (ent->scriptName)
 		{
+			ent->target_ent = other; // ETJump
 			G_Script_ScriptEvent(ent, "trigger", ent->target);
 		}
 	}

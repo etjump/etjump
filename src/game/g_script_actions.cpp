@@ -161,6 +161,128 @@ qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params)
 	return qtrue;
 }
 
+static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, char *params, bool isAutoSpawn)
+{
+	auto mod = isAutoSpawn ? "setplayerautospawn" : "setplayerspawn";
+	auto target = ent->target_ent;
+	auto activator = target->activator;
+	// if trigger was activated by something other than target_script_trigger
+	// then skip the action silently
+	if (!target && !activator && !activator->client)
+	{
+		return qfalse;
+	}
+	// get target name
+	auto token = COM_ParseExt(&params, qfalse);
+	if (!token[0])
+	{
+		G_Error(va("G_Scripting: %s must have a target spawn\n"), mod);
+	}
+	// get objective entity
+	char spawnname[MAX_QPATH];
+	Q_strncpyz(spawnname, token, MAX_QPATH);
+	auto tent = G_Find(nullptr, FOFS(message), spawnname);
+	if (!tent)
+	{
+		G_Error(va("G_Scripting: %s, couldn't find target\n"), mod);
+	}
+	if (!tent->count)
+	{
+		return qfalse;
+	}
+	// set spawn
+	if (isAutoSpawn)
+	{
+		// set auto spawn for specific player
+		activator->client->sess.spawnObjectiveIndex = (tent->count - CS_MULTI_SPAWNTARGETS) + 1;
+		G_Printf("Force spawn change for %s to %s\n", activator->client->pers.netname, spawnname);
+	} else
+	{
+		// set auto spawn for specific player
+		activator->client->sess.autoSpawnObjectiveIndex = (tent->count - CS_MULTI_SPAWNTARGETS) + 1;
+		G_Printf("Setting auto spawn for %s to %s\n", activator->client->pers.netname, spawnname);
+	}
+	// store updates
+	G_UpdateSpawnCounts();
+	return qtrue;
+}
+
+/* 
+	ETJump
+	Description: Sets auto spawn for specific player only.
+	Usage: setplayerautospawn "objective description"
+	Note: In order to work trigger running this action should be 
+	activated by target_script_trigger as it requires activator entity.
+*/
+qboolean G_ScriptAction_SetPlayerAutoSpawn(gentity_t *ent, char *params)
+{
+	return etjump_ScriptSetPlayerSpawn(ent, params, false);
+}
+
+/*
+	ETJump
+	Description: Sets auto spawn for specific player only.
+	Usage: setplayerspawn "objective description"
+	Note: In order to work trigger running this action should be
+	activated by target_script_trigger as it requires activator entity.
+*/
+qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params)
+{
+	return etjump_ScriptSetPlayerSpawn(ent, params, true);
+}
+
+/*
+	ETJump
+	Description: Inflicts certain number of damage to the player.
+	Usage: damageplayer 10000
+	Note: In order to work trigger running this action should be
+	activated by target_script_trigger as it requires activator entity.
+*/
+qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params)
+{
+	auto target = ent->target_ent;
+	auto activator = target->activator;
+	// if trigger was activated by something other than target_script_trigger
+	// then skip the action silently
+	if (!target && !activator && !activator->client)
+	{
+		return qfalse;
+	}
+	auto token = COM_ParseExt(&params, qfalse);
+	if (!token[0])
+	{
+		G_Error("G_Scripting: damageplayer must have damage points\n");
+	}
+	auto damaged = atoi(token);
+	G_Damage(activator, nullptr, nullptr, nullptr, nullptr, damaged, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+	return qtrue;
+}
+
+/*
+	ETJump
+	Description: Kills the player, same as if the player would use /kill command. 
+	Usage: killplayer
+	Note: In order to work trigger running this action should be
+	activated by target_script_trigger as it requires activator entity.
+*/
+qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params)
+{
+	auto target = ent->target_ent;
+	auto activator = target->activator;
+	// if trigger was activated by something other than target_script_trigger
+	// then skip the action silently
+	if (!target && !activator && !activator->client)
+	{
+		return qfalse;
+	}
+	activator->flags &= ~FL_GODMODE;
+	activator->client->ps.stats[STAT_HEALTH] = activator->health = 0;
+	activator->client->ps.persistant[PERS_HWEAPON_USE] = 0;
+	player_die(activator, activator, activator, (g_gamestate.integer == GS_PLAYING) ? 100000 : 135, MOD_SUICIDE);
+	activator->client->sess.lastKillTime = level.time;
+	return qtrue;
+}
+
 qboolean G_ScriptAction_ChangeModel(gentity_t *ent, char *params)
 {
 	char *pString, *token;
@@ -1134,7 +1256,7 @@ qboolean G_ScriptAction_DisableMessage(gentity_t *ent, char *params)
 	token   = COM_ParseExt(&pString, qfalse);
 	if (!token[0])
 	{
-		G_Error("G_Scripting: setposition must have an targetname\n");
+		G_Error("G_Scripting: disablemessage must have a targetname\n");
 	}
 
 	// find the entity with the given "targetname"
