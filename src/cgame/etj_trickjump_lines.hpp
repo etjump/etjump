@@ -38,12 +38,12 @@ public:
 
 	struct Route
 	{
-		std::string name;		
-		std::vector< std::vector< Node > > trails;
-		vec4_c color;
-		float width;
-		routeStatus status;
-		std::string filename;
+		std::string name; // The real TJL name.
+		std::vector< std::vector< Node > > trails; // The points coordinates 
+		vec4_c color; // The TJL color
+		float width; // TJL line width.
+		routeStatus status; // The status can be 1-map to define the mapper TJL, 2-Load, the TJL that the user loaded and 3-Record, the current TJL that are into the user workspace.
+		std::string filename; // The filename is used as a namespace.
 	};
 
 	TrickjumpLines();
