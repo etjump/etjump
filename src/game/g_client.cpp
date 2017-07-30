@@ -1591,8 +1591,6 @@ void ClientUserinfoChanged(int clientNum)
 		if (strcmp(oldname, client->pers.netname))
 		{
 
-			ClientNameChanged(ent);
-
 			trap_SendServerCommand(-1,
 			                       va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"",
 			                          oldname, client->pers.netname));
@@ -1700,10 +1698,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
-	// Zero: has to be here because else it'll reset the ip we'll
-	// set a bit later
-	OnClientConnect(clientNum, firstTime, isBot);
-
 	// IP filtering
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
 	// recommanding PB based IP / GUID banning, the builtin system is pretty limited
@@ -1714,12 +1708,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	{
 		return "You are banned from this server.";
 	}
-
-	//if(IsBanned(ip))
-	//{
-	//    C_CPMAll(va("^5Banned player ^7%s ^5tried to connect.", ent->client->ps.clientNum));
-	//    return "You are banned from this server.";
-	//}
 
 	// If we try to pass NULL to Q_strncpyz server will crash
 	// This allows users to crash the server with custom clients.
@@ -1804,7 +1792,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		// Client has loaded position after inactivity putspec
 		// -> don't do anything anymore
 		client->sess.loadedPosBeforeInactivity = qtrue;
-		client->sess.motdPrinted               = qfalse;
 		client->sess.timerunActive             = qfalse;
 	}
 	else
@@ -1967,7 +1954,6 @@ void ClientBegin(int clientNum)
 	ent->surfaceFlags = 0;
 
 	LoadPositionsFromDatabase(ent);
-	OnClientBegin(ent);
 	if (level.hasTimerun)
 	{
 		trap_SendServerCommand(clientNum, "hasTimerun 1");
@@ -2453,7 +2439,6 @@ void ClientDisconnect(int clientNum)
 		return;
 	}
 
-	OnClientDisconnect(ent);
 	G_RemoveClientFromFireteams(clientNum, qtrue, qfalse);
 	G_RemoveFromAllIgnoreLists(clientNum);
 	G_LeaveTank(ent, qfalse);

@@ -1,10 +1,7 @@
 #include "etj_local.h"
 #include "etj_game.h"
-#include "etj_session.h"
-#include "etj_commands.h"
 #include "etj_save.h"
 #include "etj_levels.h"
-#include "etj_database.h"
 #include "etj_custom_map_votes.h"
 #include "etj_utilities.h"
 #include <boost/algorithm/string.hpp>
@@ -14,71 +11,9 @@
 #include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_session_service.h"
+#include "utilities.hpp"
 
 Game game;
-
-void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
-{
-	// Do not do g_entities + clientNum here, entity is not initialized yet
-	G_DPrintf("OnClientConnect called by %d\n", clientNum);
-
-	if (firstTime)
-	{
-		game.session->Init(clientNum);
-
-		G_DPrintf("Requesting guid from %d\n", clientNum);
-
-		trap_SendServerCommand(clientNum,
-			ETJump::Constants::Authentication::GUID_REQUEST.c_str());
-	}
-	else
-	{
-		game.session->ReadSessionData(clientNum);
-		game.timerun->clientConnect(clientNum, game.session->GetId(clientNum));
-	}
-
-	if (game.session->IsIpBanned(clientNum))
-	{
-		G_LogPrintf("Kicked banned client: %d\n", clientNum);
-		trap_DropClient(clientNum, "You are banned.", 0);
-	}
-}
-
-void OnClientBegin(gentity_t *ent)
-{
-	G_DPrintf("OnClientBegin called by %d\n", ClientNum(ent));
-	if (!ent->client->sess.motdPrinted)
-	{
-		game.motd->PrintMotd(ent);
-		ent->client->sess.motdPrinted = qtrue;
-	}
-}
-
-void OnClientDisconnect(gentity_t *ent)
-{
-	G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
-
-	game.session->OnClientDisconnect(ClientNum(ent));
-}
-
-void WriteSessionData()
-{
-	for (int i = 0; i < level.numConnectedClients; i++)
-	{
-		int clientNum = level.sortedClients[i];
-		game.session->WriteSessionData(clientNum);
-	}
-}
-
-/*
-Changes map to a random map
-*/
-void ChangeMap()
-{
-	std::string map = game.mapStatistics->randomMap();
-	CPAll((boost::format("Changing map to %s.") % map).str());
-	trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
-}
 
 void RunFrame(int levelTime)
 {
@@ -88,10 +23,7 @@ void RunFrame(int levelTime)
 void OnGameInit()
 {
 	game.levels         = std::make_shared<Levels>();
-	game.database       = std::make_shared<Database>();
-	game.session        = std::make_shared<Session>(game.database.get());
-	game.commands       = std::make_shared<Commands>();
-	game.saves          = std::make_shared<SaveSystem>(game.session.get());
+	game.saves          = std::make_shared<SaveSystem>();
 	game.mapStatistics  = std::make_shared<MapStatistics>();
 	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
 	game.motd           = std::make_shared<Motd>();
@@ -110,18 +42,6 @@ void OnGameInit()
 		}
 	}
 
-	if (strlen(g_userConfig.string) > 0)
-	{
-		if (!game.database->InitDatabase(g_userConfig.string))
-		{
-			G_LogPrintf("DATABASE ERROR: %s\n", game.database->GetMessage().c_str());
-		}
-		else
-		{
-			G_LogPrintf("Users loaded successfully from database: %s\n", g_userConfig.string);
-		}
-	}
-
 	game.mapStatistics->initialize(std::string(g_mapDatabase.string), level.rawmapname);
 	game.customMapVotes->Load();
 	game.motd->Initialize();
@@ -137,72 +57,16 @@ void OnGameInit()
 
 void OnGameShutdown()
 {
-	WriteSessionData();
-//    game.database->ExecuteQueuedOperations();
-	game.database->CloseDatabase();
 	game.mapStatistics->saveChanges();
 	game.tokens->reset();
 
 	game.levels = nullptr;
-	game.database = nullptr;
-	game.session = nullptr;
-	game.commands = nullptr;
 	game.saves = nullptr;
 	game.customMapVotes = nullptr;
 	game.motd = nullptr;
 	game.timerun = nullptr;
 	game.mapStatistics = nullptr;
 	game.tokens = nullptr;
-}
-
-qboolean OnConnectedClientCommand(gentity_t *ent)
-{
-	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
-
-	auto argv    = GetArgs();
-	auto command = (*argv)[0];
-	boost::to_lower(command);
-
-	if (ent->client->pers.connected != CON_CONNECTED)
-	{
-		return qfalse;
-	}
-
-	if (game.commands->ClientCommand(ent, command))
-	{
-		return qtrue;
-	}
-
-	if (game.commands->AdminCommand(ent))
-	{
-		return qtrue;
-	}
-
-	return qfalse;
-}
-
-// Returning qtrue means no other commands will be checked
-qboolean OnClientCommand(gentity_t *ent)
-{
-	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
-
-	auto argv    = GetArgs();
-	auto command = (*argv)[0];
-	boost::to_lower(command);
-
-	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
-	{
-		std::string            ip = ValueForKey(ClientNum(ent), "ip");
-		std::string::size_type pos = ip.find(":");
-		std::string ipAddress = ip.substr(0, pos);
-
-		ETJump::sessionService->authenticate(ClientNum(ent), ent->client->pers.netname, ipAddress, *argv);
-		game.session->GuidReceived(ent);
-		game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
-		return qtrue;
-	}
-
-	return qfalse;
 }
 
 /*
@@ -233,11 +97,6 @@ qboolean OnConsoleCommand()
 	if (command == "logstate")
 	{
 		LogServerState();
-		return qtrue;
-	}
-
-	if (game.commands->AdminCommand(NULL))
-	{
 		return qtrue;
 	}
 
@@ -315,11 +174,6 @@ const char *CustomMapTypeExists(const char *mapType)
 	}
 
 	return NULL;
-}
-
-void ClientNameChanged(gentity_t *ent)
-{
-	game.session->NewName(ent);
 }
 
 std::string GetTeamString(int clientNum)

@@ -54,7 +54,7 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
 	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000, "serverId");
 	ETJump::sessionRepository->createTables();
-	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, trap_DropClient);
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, trap_DropClient, trap_SendServerCommand);
 
 	ETJump::sessionService->readSession(levelTime);
 }

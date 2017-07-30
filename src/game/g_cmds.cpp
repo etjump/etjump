@@ -12,7 +12,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include "etj_result_set_formatter.h"
 #include "utilities.hpp"
-
+#include "etj_shared.h"
 
 
 void BotDebug(int clientNum);
@@ -2036,8 +2036,6 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, escapedName, printText, localize, encoded);
 		}
 	}
-
-	AdminCommandCheck(ent);
 }
 
 
@@ -4730,11 +4728,6 @@ void ClientCommand(int clientNum)
 	}
 	trap_Argv(0, cmd, sizeof(cmd));
 
-	if (OnClientCommand(ent))
-	{
-		return;
-	}
-
 	if (ent->client->pers.connected != CON_CONNECTED)
 	{
 		return;
@@ -4889,11 +4882,6 @@ void ClientCommand(int clientNum)
 	if (!Q_stricmp(cmd, "mod_information"))
 	{
 		C_ConsolePrintTo(ent, va("%s %s", GAME_VERSION " " MOD_VERSION, BUILD_TIME));
-		return;
-	}
-
-	if (OnConnectedClientCommand(ent))
-	{
 		return;
 	}
 

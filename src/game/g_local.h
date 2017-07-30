@@ -753,7 +753,6 @@ typedef struct
 
 	int portalTeam;
 	char ip[MAX_IP_LEN + 1];
-	qboolean motdPrinted;
 
 	int runSpawnflags;
 
@@ -2679,18 +2678,11 @@ const char *findAndReplaceNametags(const char *text, const char *name);
 int ClientNum(gentity_t *ent);
 
 // mainext.cpp
-void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
-void OnClientBegin(gentity_t *ent);
-void OnClientDisconnect(gentity_t *ent);
-qboolean OnConnectedClientCommand(gentity_t *ent);
-qboolean OnClientCommand(gentity_t *ent);
-qboolean OnConsoleCommand();
 void OnGameInit();
 void OnGameShutdown();
 qboolean G_MapExists(const char *map);
 const char *GetRandomMap();
 const char *GetRandomMapByType(const char *customType);
-qboolean AdminCommandCheck(gentity_t *ent);
 //void StartRace(gentity_t *ent);
 const char *CustomMapTypeExists(const char *mapType);
 void ClientNameChanged(gentity_t *ent);

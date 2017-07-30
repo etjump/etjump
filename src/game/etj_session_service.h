@@ -1,22 +1,20 @@
 #pragma once
 #include <array>
-#include "etj_commands.h"
 #include "etj_log.h"
 #include <future>
 #include "etj_user_new.h"
 #include "etj_session_repository.h"
-#include <boost/container/allocator_traits.hpp>
+#include "etj_shared.h"
 
 namespace ETJump
 {
 	class UserService;
 	class SessionRepository;
+
 	class SessionService
 	{
 	public:
-		static const int GUID_LEN = 40;
 		static const std::string INVALID_AUTH_ATTEMPT;
-		static const int MAX_CONNECTED_CLIENTS = 64;
 
 		struct GetUserTask
 		{
@@ -28,7 +26,7 @@ namespace ETJump
 			std::string hardwareId;
 		};
 
-		explicit SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::function<void(int clientNum, const char* reason, int timeout)> dropClient);
+		explicit SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::function<void(int clientNum, const char* reason, int timeout)> dropClient, std::function<void(int clientNum, const char *text)> sendServerCommand);
 		~SessionService();
 
 		void connect(int clientNum, bool firstTime);
@@ -53,10 +51,11 @@ namespace ETJump
 		std::shared_ptr<SessionRepository> _sessionRepository;
 
 		std::vector<GetUserTask> _getUserTasks;
-		std::array<User, MAX_CONNECTED_CLIENTS> _users;
+		std::array<User, Constants::Common::MAX_CONNECTED_CLIENTS> _users;
 		Log _log;
 		std::function<void(int, const char*, int)> _dropClient;
 		std::map<int, SessionRepository::Session> _sessions;
+		std::function<void(int, const char*)> _sendServerCommand;
 	};
 }
 

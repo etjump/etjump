@@ -14,8 +14,13 @@ bool is_ready(std::future<R> const& f)
 
 const std::string ETJump::SessionService::INVALID_AUTH_ATTEMPT = "Invalid authentication attempt";
 
-ETJump::SessionService::SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::function<void(int clientNum, const char* reason, int timeout)> dropClient)
-	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient)
+ETJump::SessionService::SessionService(
+	std::shared_ptr<UserService> userService, 
+	std::shared_ptr<SessionRepository> sessionRepository, 
+	std::function<void(int clientNum, const char* reason, int timeout)> dropClient,
+	std::function<void(int clientNum, const char *text)> sendServerCommand
+)
+	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand)
 {
 	for (int i = 0, len = _users.size(); i < len; ++i)
 	{
@@ -31,12 +36,13 @@ void ETJump::SessionService::connect(int clientNum, bool firstTime)
 {
 	_users[clientNum] = User();
 
+	removeClientTasks(clientNum);
+	
 	if (firstTime)
 	{
 		clearSession(clientNum);
+		_sendServerCommand(clientNum, Constants::Authentication::GUID_REQUEST.c_str());
 	}
-
-	removeClientTasks(clientNum);
 }
 
 void ETJump::SessionService::disconnect(int clientNum)
@@ -146,7 +152,7 @@ void ETJump::SessionService::authenticate(int clientNum, const std::string& name
 		return;
 	}
 
-	if (arguments[1].size() != GUID_LEN || arguments[2].size() != GUID_LEN)
+	if (arguments[1].size() != Constants::Authentication::GUID_LEN || arguments[2].size() != Constants::Authentication::GUID_LEN)
 	{
 		dropClient(clientNum, INVALID_AUTH_ATTEMPT);
 		return;

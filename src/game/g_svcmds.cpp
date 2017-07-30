@@ -1044,11 +1044,6 @@ qboolean    ConsoleCommand(void)
 		return qtrue;
 	}
 
-	if (OnConsoleCommand())
-	{
-		return qtrue;
-	}
-
 	// -fretn
 
 	if (g_dedicated.integer)

@@ -7,13 +7,10 @@
 
 #include "etj_local.h"
 
-class Session;
-
 class SaveSystem {
 public:
 
-	SaveSystem(const Session *session);
-	/*SaveSystem( IGuid *guidInterface );*/
+	SaveSystem();
 	~SaveSystem();
 
 	static const int MAX_SAVED_POSITIONS  = 3;
@@ -89,10 +86,6 @@ private:
 
 	// Disconnected clients saved position data
 	std::map<std::string, DisconnectedClient> savedPositions;
-
-	// Interface to get player guid
-	const Session *session_;
-	/*IGuid *guidInterface_;*/
 };
 
 #endif
