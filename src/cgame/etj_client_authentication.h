@@ -2,6 +2,7 @@
 #include <string>
 #include <functional>
 #include "etj_client_commands_handler.h"
+#include "../game/etj_operation_result.h"
 
 namespace ETJump
 {
@@ -9,12 +10,6 @@ namespace ETJump
 	{
 	public:
 		static const int GUID_LEN = 40;
-
-		struct OperationResult
-		{
-			bool success;
-			std::string message;
-		};
 
 		explicit ClientAuthentication(
 			std::function<void(const std::string&)> sendClientCommand, 

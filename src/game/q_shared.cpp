@@ -1687,3 +1687,4 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 	Q_strncpyz(final, dest, sizeof(final));
 	return final;
 }
+

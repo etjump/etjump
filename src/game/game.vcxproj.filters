@@ -291,6 +291,9 @@
     <ClCompile Include="etj_session_repository.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_level_service.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -455,6 +458,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_session_keys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_level_service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_operation_result.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -67,7 +67,7 @@ std::string ETJump::ClientAuthentication::createGuid() const
 	return guid;
 }
 
-ETJump::ClientAuthentication::OperationResult ETJump::ClientAuthentication::saveGuid(const std::string& guid) const
+ETJump::OperationResult ETJump::ClientAuthentication::saveGuid(const std::string& guid) const
 {
 	File guidFile(GUID_FILE, File::Mode::Write);
 	try
