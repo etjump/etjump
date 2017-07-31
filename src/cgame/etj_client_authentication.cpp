@@ -13,7 +13,7 @@ ETJump::ClientAuthentication::ClientAuthentication(
 	std::function<void(const std::string&)> sendClientCommand, 
 	std::function<void(const std::string&)> print,
 	std::function<std::string()> getHwid,
-	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler
+	std::shared_ptr<Client::ClientCommandsHandler> serverCommandsHandler
 		)
 	: _sendClientCommand(sendClientCommand), _print(print), _getHwid(getHwid), _serverCommandsHandler(serverCommandsHandler), GUID_FILE("etguid.dat")
 {

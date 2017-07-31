@@ -83,8 +83,8 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
-	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-	std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::shared_ptr<Client::ClientCommandsHandler> serverCommandsHandler;
+	std::shared_ptr<Client::ClientCommandsHandler> consoleCommandsHandler;
 	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	std::shared_ptr<ClientAuthentication> authentication;
 	std::shared_ptr<OperatingSystem> operatingSystem;
@@ -3505,8 +3505,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// to subcribe to commands.
 	// Generally all modules should get these as constructor params but they're still being used in the C code
 	// => make sure they're created first
-	ETJump::serverCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
-	ETJump::consoleCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(trap_AddCommand);
+	ETJump::serverCommandsHandler = std::make_shared<ETJump::Client::ClientCommandsHandler>(nullptr);
+	ETJump::consoleCommandsHandler = std::make_shared<ETJump::Client::ClientCommandsHandler>(trap_AddCommand);
 	ETJump::entityEventsHandler = std::make_shared<ETJump::EntityEventsHandler>();
 	ETJump::operatingSystem = std::make_shared<ETJump::OperatingSystem>();
 	ETJump::authentication = std::make_shared<ETJump::ClientAuthentication>([](const std::string& command)

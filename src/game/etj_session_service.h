@@ -8,6 +8,10 @@
 
 namespace ETJump
 {
+	namespace Server {
+		class ClientCommandsHandler;
+	}
+
 	class UserService;
 	class SessionRepository;
 
@@ -26,7 +30,7 @@ namespace ETJump
 			std::string hardwareId;
 		};
 
-		explicit SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::function<void(int clientNum, const char* reason, int timeout)> dropClient, std::function<void(int clientNum, const char *text)> sendServerCommand);
+		explicit SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::shared_ptr<ETJump::Server::ClientCommandsHandler> clientCommandsHandler, std::function<void(int clientNum, const char* reason, int timeout)> dropClient, std::function<void(int clientNum, const char *text)> sendServerCommand);
 		~SessionService();
 
 		void connect(int clientNum, bool firstTime);
@@ -56,6 +60,7 @@ namespace ETJump
 		std::function<void(int, const char*, int)> _dropClient;
 		std::map<int, SessionRepository::Session> _sessions;
 		std::function<void(int, const char*)> _sendServerCommand;
+		std::shared_ptr<ETJump::Server::ClientCommandsHandler> _clientCommandsHandler;
 	};
 }
 

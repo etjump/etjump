@@ -2,18 +2,18 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 
-ETJump::ClientCommandsHandler::ClientCommandsHandler(void (*addToAutocompleteList)(const char *)):
+ETJump::Client::ClientCommandsHandler::ClientCommandsHandler(void (*addToAutocompleteList)(const char *)):
 	_addToAutocompleteList{addToAutocompleteList}
 {
 	_callbacks.clear();
 }
 
 
-ETJump::ClientCommandsHandler::~ClientCommandsHandler()
+ETJump::Client::ClientCommandsHandler::~ClientCommandsHandler()
 {
 }
 
-bool ETJump::ClientCommandsHandler::check(const std::string& command, const std::vector<std::string>& arguments)
+bool ETJump::Client::ClientCommandsHandler::check(const std::string& command, const std::vector<std::string>& arguments)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
 	auto match = _callbacks.find(lowercaseCommand);
@@ -25,7 +25,7 @@ bool ETJump::ClientCommandsHandler::check(const std::string& command, const std:
 	return false;
 }
 
-bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback, bool autocomplete)
+bool ETJump::Client::ClientCommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback, bool autocomplete)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
 	if (_callbacks.find(lowercaseCommand) != end(_callbacks))
@@ -41,7 +41,7 @@ bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::f
 	return true;
 }
 
-bool ETJump::ClientCommandsHandler::unsubcribe(const std::string& command)
+bool ETJump::Client::ClientCommandsHandler::unsubcribe(const std::string& command)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
 	auto callback = _callbacks.find(lowercaseCommand);

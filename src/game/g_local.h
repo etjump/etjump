@@ -2721,6 +2721,11 @@ const char *G_MatchOneMap(const char *arg);
 
 namespace ETJump
 {
+	namespace Server
+	{
+		class ClientCommandsHandler;
+	}
+
 	class DeathrunSystem;
 	class UserRepository;
 	class UserService;
@@ -2729,6 +2734,7 @@ namespace ETJump
 	extern std::shared_ptr<UserRepository> userRepository;
 	extern std::shared_ptr<UserService> userService;
 	extern std::shared_ptr<SessionService> sessionService;
+	extern std::shared_ptr<Server::ClientCommandsHandler> clientCommandsHandler;
 }
 
 

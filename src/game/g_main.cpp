@@ -14,6 +14,7 @@
 #include "etj_log.h"
 #include "etj_session_repository.h"
 #include "etj_string_utilities.h"
+#include "etj_client_commands_handler.h"
 
 level_locals_t level;
 
@@ -39,6 +40,7 @@ namespace ETJump
 	std::shared_ptr<UserRepository> userRepository;
 	std::shared_ptr<UserService> userService;
 	std::shared_ptr<SessionRepository> sessionRepository;
+	std::shared_ptr<Server::ClientCommandsHandler> clientCommandsHandler;
 	std::shared_ptr<SessionService> sessionService;
 }
 
@@ -52,9 +54,16 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
 	ETJump::userRepository->createTables();
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
-	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000, "serverId");
+	std::string serverId = g_serverId.string;
+	if (serverId.length() == 0)
+	{
+		serverId = ETJump::newGuid();
+		trap_Cvar_Set("g_serverId", serverId.c_str());
+	}
+	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000, serverId);
 	ETJump::sessionRepository->createTables();
-	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, trap_DropClient, trap_SendServerCommand);
+	ETJump::clientCommandsHandler = std::make_shared<ETJump::Server::ClientCommandsHandler>();
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, trap_DropClient, trap_SendServerCommand);
 
 	ETJump::sessionService->readSession(levelTime);
 }
@@ -70,6 +79,7 @@ static void shutdownETJump()
 	ETJump::deathrunSystem = nullptr;
 	ETJump::userRepository = nullptr;
 	ETJump::userService = nullptr;
+	ETJump::clientCommandsHandler = nullptr;
 	ETJump::sessionService = nullptr;
 }
 
@@ -553,7 +563,7 @@ cvarTable_t gameCvarTable[] =
 	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
-	{&g_serverId, "g_serverId", "", CVAR_ARCHIVE}
+	{&g_serverId, "g_serverId", "", CVAR_TEMP | CVAR_ROM }
 
 };
 

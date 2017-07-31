@@ -13,6 +13,7 @@
 #include "etj_result_set_formatter.h"
 #include "utilities.hpp"
 #include "etj_shared.h"
+#include "etj_client_commands_handler.h"
 
 
 void BotDebug(int clientNum);
@@ -4897,13 +4898,6 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
-	if (!Q_stricmp(cmd, "test"))
-	{
-		ConsolePrintTo(ent, "    a");
-		ConsolePrintTo(ent, "\ta");
-		return;
-	}
-
 	// regular no intermission commands
 	for (i = 0 ; i < sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0]) ; i++)
 	{
@@ -4919,6 +4913,20 @@ void ClientCommand(int clientNum)
 			}
 			return;
 		}
+	}
+
+	auto argc = trap_Argc();
+	char buf[MAX_TOKEN_CHARS] = "";
+	std::vector<std::string> args;
+	for (i = 1; i < argc; ++i)
+	{
+		trap_Argv(i, buf, sizeof(buf));
+		args.push_back(buf);
+	}
+
+	if (ETJump::clientCommandsHandler->check(clientNum, cmd, args))
+	{
+		return;
 	}
 
 	if (G_commandCheck(ent, cmd, qtrue))

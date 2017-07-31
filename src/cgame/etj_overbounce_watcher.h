@@ -17,13 +17,13 @@ namespace ETJump
 	public:
 		using Coordinate = std::array<float, 3>;
 
-		explicit OverbounceWatcher(ClientCommandsHandler *clientCommandsHandler);
+		explicit OverbounceWatcher(Client::ClientCommandsHandler *clientCommandsHandler);
 		~OverbounceWatcher();
 
 		void render() const override;
 		void beforeRender() override;
 	private:
-		ClientCommandsHandler *_clientCommandsHandler;
+		Client::ClientCommandsHandler *_clientCommandsHandler;
 
 		std::map<std::string, Coordinate> _positions;
 

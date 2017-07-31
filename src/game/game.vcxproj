@@ -253,6 +253,7 @@
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_command_parser.cpp" />
     <ClCompile Include="bg_animation.cpp" />
     <ClCompile Include="bg_animgroup.cpp" />
@@ -339,6 +340,7 @@
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_command_parser.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />

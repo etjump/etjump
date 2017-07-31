@@ -15,7 +15,7 @@ namespace ETJump
 			std::function<void(const std::string&)> sendClientCommand, 
 			std::function<void(const std::string&)> print, 
 			std::function<std::string()> getHwid,
-			std::shared_ptr<ClientCommandsHandler> serverCommandsHandler
+			std::shared_ptr<Client::ClientCommandsHandler> serverCommandsHandler
 		);
 		~ClientAuthentication();
 
@@ -24,7 +24,7 @@ namespace ETJump
 		std::function<void(const std::string&)> _sendClientCommand;
 		std::function<void(const std::string&)> _print;
 		std::function<std::string()> _getHwid;
-		std::shared_ptr<ClientCommandsHandler> _serverCommandsHandler;
+		std::shared_ptr<Client::ClientCommandsHandler> _serverCommandsHandler;
 		const std::string GUID_FILE;
 		std::string getGuid();
 		std::string getHwid();

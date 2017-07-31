@@ -3846,12 +3846,15 @@ void ETJump_EnableWidthScale(bool enable);
 
 namespace ETJump
 {
-	class ClientCommandsHandler;
+	namespace Client
+	{
+		class ClientCommandsHandler;
+	}
 	class EntityEventsHandler;
 	class IRenderable;
 
-	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::shared_ptr<Client::ClientCommandsHandler> serverCommandsHandler;
+	extern std::shared_ptr<Client::ClientCommandsHandler> consoleCommandsHandler;
 	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 }

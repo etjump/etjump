@@ -2,7 +2,7 @@
 #include "etj_overbounce_watcher.h"
 #include "cg_local.h"
 
-ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler* clientCommandsHandler) :
+ETJump::OverbounceWatcher::OverbounceWatcher(Client::ClientCommandsHandler* clientCommandsHandler) :
 	_clientCommandsHandler{clientCommandsHandler},
 	_positions {},
 	_current{nullptr}

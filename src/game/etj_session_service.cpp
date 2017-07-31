@@ -5,6 +5,8 @@
 #include "etj_log.h"
 #include "etj_time_utilities.h"
 #include "etj_session_keys.h"
+#include "etj_client_commands_handler.h"
+#include "etj_local.h"
 
 template<typename R>
 bool is_ready(std::future<R> const& f)
@@ -17,19 +19,40 @@ const std::string ETJump::SessionService::INVALID_AUTH_ATTEMPT = "Invalid authen
 ETJump::SessionService::SessionService(
 	std::shared_ptr<UserService> userService, 
 	std::shared_ptr<SessionRepository> sessionRepository, 
+	std::shared_ptr<ETJump::Server::ClientCommandsHandler> clientCommandsHandler,
 	std::function<void(int clientNum, const char* reason, int timeout)> dropClient,
 	std::function<void(int clientNum, const char *text)> sendServerCommand
 )
-	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand)
+	: _userService(userService), _sessionRepository(sessionRepository), _clientCommandsHandler(clientCommandsHandler), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand)
 {
 	for (int i = 0, len = _users.size(); i < len; ++i)
 	{
 		_users[i] = User();
 	}
+
+	_clientCommandsHandler->subscribe(Constants::Authentication::AUTHENTICATE, [&](int clientNum, const std::string& command, const std::vector<std::string>& args)
+	{
+		// TODO/FIXME?: could just add callbacks for changing certain 
+		// session parameters but I guess accessing them directly 
+		// won't be too bad..
+		auto entity = g_entities + clientNum;
+		char userinfo[MAX_INFO_STRING] = "";
+
+		trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
+		auto value = Info_ValueForKey(userinfo, "ip");
+		std::string ip = "";
+		if (value != nullptr)
+		{
+			ip = value;
+		}
+
+		this->authenticate(clientNum, entity->client->pers.netname, ip, args);
+	});
 }
 
 ETJump::SessionService::~SessionService()
 {
+	_clientCommandsHandler->unsubcribe(Constants::Authentication::AUTHENTICATE);
 }
 
 void ETJump::SessionService::connect(int clientNum, bool firstTime)
@@ -146,13 +169,13 @@ void ETJump::SessionService::clearSession(int clientNum)
 
 void ETJump::SessionService::authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments)
 {
-	if (arguments.size() != 3)
+	if (arguments.size() != 2)
 	{
 		dropClient(clientNum, INVALID_AUTH_ATTEMPT);
 		return;
 	}
 
-	if (arguments[1].size() != Constants::Authentication::GUID_LEN || arguments[2].size() != Constants::Authentication::GUID_LEN)
+	if (arguments[0].size() != Constants::Authentication::GUID_LEN || arguments[1].size() != Constants::Authentication::GUID_LEN)
 	{
 		dropClient(clientNum, INVALID_AUTH_ATTEMPT);
 		return;
@@ -175,8 +198,8 @@ void ETJump::SessionService::authenticate(int clientNum, const std::string& name
 		return;
 	}
 
-	auto guid = ETJump::hash(arguments[1]);
-	auto hardwareId = ETJump::hash(arguments[2]);
+	auto guid = ETJump::hash(arguments[0]);
+	auto hardwareId = ETJump::hash(arguments[1]);
 	setSessionValue(clientNum, KEY_GUID, guid);
 	setSessionValue(clientNum, KEY_HARDWARE_ID, hardwareId);
 	addGetUserTaskAsync(clientNum, name, ipAddress, guid, hardwareId);
@@ -285,5 +308,4 @@ void ETJump::SessionService::removeGetUserTasks(std::function<bool(const GetUser
 
 	_getUserTasks = std::move(tasks);
 }
-
 
