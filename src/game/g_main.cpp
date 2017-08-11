@@ -15,6 +15,7 @@
 #include "etj_session_repository.h"
 #include "etj_string_utilities.h"
 #include "etj_client_commands_handler.h"
+#include "etj_level_service.h"
 
 level_locals_t level;
 
@@ -42,6 +43,7 @@ namespace ETJump
 	std::shared_ptr<SessionRepository> sessionRepository;
 	std::shared_ptr<Server::ClientCommandsHandler> clientCommandsHandler;
 	std::shared_ptr<SessionService> sessionService;
+	std::shared_ptr<LevelService> levelService;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +65,9 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000, serverId);
 	ETJump::sessionRepository->createTables();
 	ETJump::clientCommandsHandler = std::make_shared<ETJump::Server::ClientCommandsHandler>();
-	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, trap_DropClient, trap_SendServerCommand);
+	ETJump::levelService = std::make_shared<ETJump::LevelService>("levels.cfg");
+	ETJump::levelService->readConfig();
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, ETJump::levelService, trap_DropClient, trap_SendServerCommand);
 
 	ETJump::sessionService->readSession(levelTime);
 }

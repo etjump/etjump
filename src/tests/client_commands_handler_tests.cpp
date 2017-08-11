@@ -8,13 +8,13 @@ class ClientCommandsHandlerTests : public testing::Test
 {
 public:
 	void SetUp() override {
-		handler = std::unique_ptr<ClientCommandsHandler>(new ClientCommandsHandler(nullptr));
+		handler = std::unique_ptr<Client::ClientCommandsHandler>(new ClientCommandsHandler(nullptr));
 	}
 
 	void TearDown() override {
 	}
 
-	std::unique_ptr<ClientCommandsHandler> handler;
+	std::unique_ptr<Client::ClientCommandsHandler> handler;
 };
 
 TEST_F(ClientCommandsHandlerTests, SubscribeShouldCreateACallback)

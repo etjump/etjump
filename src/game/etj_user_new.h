@@ -30,7 +30,8 @@ namespace ETJump
 
 	struct User
 	{
-		User(): id(-1), level(0), lastSeen(0), created(0), modified(0) {}
+		static const int NO_USER_ID = -1;
+		User(): id(NO_USER_ID), level(0), lastSeen(0), created(0), modified(0) {}
 		int64_t id;
 		std::string guid;
 		int level;

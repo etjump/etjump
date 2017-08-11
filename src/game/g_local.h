@@ -2643,7 +2643,6 @@ void DecolorString(char *in, char *out);
 char *Q_StrReplace(char *haystack, char *needle, char *newp);
 int Q_SayArgc();
 qboolean Q_SayArgv(int n, char *buffer, int bufferLength);
-
 //Feen: PGM
 
 //g_portalgun.c

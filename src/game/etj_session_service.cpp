@@ -7,6 +7,7 @@
 #include "etj_session_keys.h"
 #include "etj_client_commands_handler.h"
 #include "etj_local.h"
+#include "etj_level_service.h"
 
 template<typename R>
 bool is_ready(std::future<R> const& f)
@@ -20,14 +21,16 @@ ETJump::SessionService::SessionService(
 	std::shared_ptr<UserService> userService, 
 	std::shared_ptr<SessionRepository> sessionRepository, 
 	std::shared_ptr<ETJump::Server::ClientCommandsHandler> clientCommandsHandler,
+	std::shared_ptr<LevelService> levelService,
 	std::function<void(int clientNum, const char* reason, int timeout)> dropClient,
 	std::function<void(int clientNum, const char *text)> sendServerCommand
 )
-	: _userService(userService), _sessionRepository(sessionRepository), _clientCommandsHandler(clientCommandsHandler), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand)
+	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand), _clientCommandsHandler(clientCommandsHandler), _levelService(levelService)
 {
 	for (int i = 0, len = _users.size(); i < len; ++i)
 	{
 		_users[i] = User();
+		_cachedUserData[i] = CachedUserData();
 	}
 
 	_clientCommandsHandler->subscribe(Constants::Authentication::AUTHENTICATE, [&](int clientNum, const std::string& command, const std::vector<std::string>& args)
@@ -58,6 +61,7 @@ ETJump::SessionService::~SessionService()
 void ETJump::SessionService::connect(int clientNum, bool firstTime)
 {
 	_users[clientNum] = User();
+	_cachedUserData[clientNum] = CachedUserData();
 
 	removeClientTasks(clientNum);
 	
@@ -146,7 +150,7 @@ void ETJump::SessionService::handleGetUserTasks()
 				}
 				setSessionValue(_getUserTasks[i].clientNum, KEY_GUID, user.guid);
 				setSessionValue(_getUserTasks[i].clientNum, KEY_HARDWARE_ID, _getUserTasks[i].hardwareId);
-				
+				cacheUserData(clientNum);
 			}
 		}
 	}
@@ -165,6 +169,15 @@ void ETJump::SessionService::handleGetUserTasks()
 void ETJump::SessionService::clearSession(int clientNum)
 {
 	_sessionRepository->clearSession(clientNum);
+}
+
+void ETJump::SessionService::cacheUserData(int clientNum)
+{
+	const auto user = &_users[clientNum];
+	CachedUserData userData;
+	userData.level = _levelService->get(user->level);
+	userData.permissions = parsePermissions(userData.level->commands, user->commands);
+	_cachedUserData[clientNum] = userData;
 }
 
 void ETJump::SessionService::authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments)
@@ -309,3 +322,59 @@ void ETJump::SessionService::removeGetUserTasks(std::function<bool(const GetUser
 	_getUserTasks = std::move(tasks);
 }
 
+const ETJump::User& ETJump::SessionService::getUser(int clientNum)
+{
+	if (clientNum < 0 || clientNum >= Constants::Common::MAX_CONNECTED_CLIENTS)
+	{
+		_log.fatalLn("out of bounds client number when getting user \"" + std::to_string(clientNum) + "\"");
+		throw std::runtime_error("user index out of bounds");
+	}
+
+	return _users[clientNum];
+}
+
+std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands)
+{
+	bool exclude = false;
+	std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> permissions;
+	permissions.reset();
+	for (const char c : levelCommands)
+	{
+		switch (c)
+		{
+		case '*':
+			for (int i = 0; i < ETJump::SessionService::CachedUserData::MAX_PERMISSIONS; ++i)
+			{
+				permissions[i] = true;
+			}
+			break;
+		case '-':
+			exclude = true;
+			break;
+		default:
+			permissions.set(static_cast<int>(c), !exclude);
+			break;
+		}
+	}
+
+	exclude = false;
+	for (const char c : userCommands)
+	{
+		switch (c)
+		{
+		case '*':
+			for (int i = 0; i < ETJump::SessionService::CachedUserData::MAX_PERMISSIONS; ++i)
+			{
+				permissions[i] = true;
+			}
+			break;
+		case '-':
+			exclude = true;
+			break;
+		default:
+			permissions.set(static_cast<int>(c), !exclude);
+			break;
+		}
+	}
+	return permissions;
+}

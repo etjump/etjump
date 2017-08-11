@@ -1688,3 +1688,30 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 	return final;
 }
 
+bool Q_StartsAndEndsWith(const char *text, const char *start, const char *end)
+{
+	if (!text || !start || !end)
+	{
+		return false;
+	}
+
+	auto textLen = strlen(text);
+	auto startLen = strlen(start);
+	auto endLen = strlen(end);
+
+	if (textLen < startLen || textLen < endLen)
+	{
+		return false;
+	}
+
+	if (Q_stricmpn(text, start, startLen))
+	{
+		return false;
+	}
+	if (Q_stricmpn(text + textLen - endLen, end, endLen))
+	{
+		return false;
+	}
+
+	return true;
+}
