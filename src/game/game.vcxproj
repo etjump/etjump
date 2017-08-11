@@ -270,7 +270,6 @@
     <ClCompile Include="etj_config_parser.cpp" />
     <ClCompile Include="etj_custom_map_votes.cpp" />
     <ClCompile Include="etj_banner_system.cpp" />
-    <ClCompile Include="etj_command_variables.cpp" />
     <ClCompile Include="etj_deathrun_system.cpp" />
     <ClCompile Include="etj_file.cpp" />
     <ClCompile Include="etj_level_service.cpp" />
@@ -351,7 +350,6 @@
     <ClInclude Include="etj_config_parser.h" />
     <ClInclude Include="etj_custom_map_votes.h" />
     <ClInclude Include="etj_banner_system.h" />
-    <ClInclude Include="etj_console_variables.h" />
     <ClInclude Include="etj_common.h" />
     <ClInclude Include="etj_deathrun_system.h" />
     <ClInclude Include="etj_file.h" />

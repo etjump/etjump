@@ -45,9 +45,6 @@
     <ClCompile Include="etj_banner_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_command_variables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bg_animation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -338,9 +335,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_banner_system.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_console_variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_common.h">
