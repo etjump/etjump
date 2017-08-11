@@ -83,8 +83,6 @@ namespace ETJump
 		std::shared_ptr<ETJump::Server::ClientCommandsHandler> _clientCommandsHandler;
 		std::shared_ptr<LevelService> _levelService;
 	};
-
-	std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands);
 }
 
 

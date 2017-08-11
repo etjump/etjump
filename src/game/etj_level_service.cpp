@@ -2,6 +2,7 @@
 #include "etj_log.h"
 #include "etj_file.h"
 #include <boost/algorithm/string.hpp>
+#include "etj_config_parser.h"
 
 ETJump::LevelService::LevelService(const std::string& levelsFile)
 	:_dummyLevel(0, "", "", ""), _log(Log("LevelService")), _levelsFile(levelsFile)
@@ -84,106 +85,12 @@ ETJump::OperationResult ETJump::LevelService::remove(int level)
 
 ETJump::OperationResult ETJump::LevelService::readConfig()
 {
-	auto f = 0;
-	auto len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_READ);
-	if (len < 0)
-	{
-		CreateDefaultLevels();
-		return true;
-	}
-	std::unique_ptr<char[]> file;
 	try
-	{
-		file = std::unique_ptr<char[]>(new char[len + 1]);
-	}
-	catch (...)
-	{
-		G_Error("Failed to allocate memory to parse level config.");
-		trap_FS_FCloseFile(f);
-		return false;
-	}
-
-	trap_FS_Read(file.get(), len, f);
-	file[len] = 0;
-	trap_FS_FCloseFile(f);
-
-	char                   *token = nullptr;
-	auto                   levelOpen = false;
-	std::shared_ptr<Level> tempLevel;
-
-	levels_.clear();
-
-	auto file2 = file.get();
-
-	token = COM_Parse(&file2);
-
-	while (*token)
-	{
-		if (!Q_stricmp(token, "[level]"))
-		{
-			if (levelOpen)
-			{
-				levels_.push_back(tempLevel);
-			}
-			levelOpen = false;
-		}
-		else if (!Q_stricmp(token, "cmds"))
-		{
-			ReadString(&file2, tempLevel->commands);
-		}
-		else if (!Q_stricmp(token, "level"))
-		{
-			ReadInt(&file2, tempLevel->level);
-		}
-		else if (!Q_stricmp(token, "greeting"))
-		{
-			ReadString(&file2, tempLevel->greeting);
-		}
-		else if (!Q_stricmp(token, "name"))
-		{
-			ReadString(&file2, tempLevel->name);
-		}
-		else
-		{
-			G_LogPrintf("readconfig: parse error near %s on line %d",
-				token, COM_GetCurrentParseLine());
-		}
-
-		if (!Q_stricmp(token, "[level]"))
-		{
-			try
-			{
-				tempLevel = std::make_shared<Level>(0, "", "", "");
-			}
-			catch (...)
-			{
-				G_Error("Failed to allocate memory for a level.");
-				return false;
-			}
-
-			levelOpen = true;
-		}
-
-		token = COM_Parse(&file2);
-	}
-
-	if (levelOpen)
-	{
-		_levels.push_back(tempLevel);
-	}
-	return true;
-
-	for (const auto & l : createDefaultLevels())
-	{
-		_levels[l.level] = l;
-	}
-	return OperationResult(true, "");
-	/*try
 	{
 		File configFile(_levelsFile);
 		auto config = configFile.read();
 
-		auto parseResult = ConfigParser(config).parse();
+		auto parseResult = ConfigParser(config).getEntries();
 	}
 	catch (File::FileNotFoundException)
 	{
@@ -198,7 +105,7 @@ ETJump::OperationResult ETJump::LevelService::readConfig()
 			return writeConfigResult;
 		}
 		return OperationResult(true, "Could not find levels config file " + _levelsFile + ". Creating default levels.");
-	}*/
+	}
 }
 
 ETJump::OperationResult ETJump::LevelService::writeConfig()

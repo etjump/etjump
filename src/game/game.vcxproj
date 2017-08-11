@@ -275,7 +275,6 @@
     <ClCompile Include="etj_level_service.cpp" />
     <ClCompile Include="etj_log.cpp" />
     <ClCompile Include="etj_main.cpp" />
-    <ClCompile Include="etj_parser.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_result_set_formatter.cpp" />
@@ -357,7 +356,6 @@
     <ClInclude Include="etj_level_service.h" />
     <ClInclude Include="etj_log.h" />
     <ClInclude Include="etj_operation_result.h" />
-    <ClInclude Include="etj_parser.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
     <ClInclude Include="etj_game.h" />

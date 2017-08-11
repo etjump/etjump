@@ -16,12 +16,15 @@ namespace ETJump
 	{
 	public: 
 		explicit ConfigParser(const std::string& config);
+		explicit ConfigParser(const std::vector<char>& config);
 		~ConfigParser();
 
+
+		std::string readString(char** current);
 		std::vector<ConfigEntry> getEntries();
 	private:
-
-		std::string _config;
+		std::vector<ConfigEntry> parseEntries(std::vector<char>& config);
+		std::vector<char> _config;
 		bool _configParsed;
 		std::vector<ConfigEntry> _entries;
 	};

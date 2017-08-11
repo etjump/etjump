@@ -15,6 +15,54 @@ bool is_ready(std::future<R> const& f)
 	return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
 }
 
+
+std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands)
+{
+	bool exclude = false;
+	std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> permissions;
+	permissions.reset();
+	for (const char c : levelCommands)
+	{
+		switch (c)
+		{
+		case '*':
+			for (int i = 0; i < ETJump::SessionService::CachedUserData::MAX_PERMISSIONS; ++i)
+			{
+				permissions[i] = true;
+			}
+			break;
+		case '-':
+			exclude = true;
+			break;
+		default:
+			permissions.set(static_cast<int>(c), !exclude);
+			break;
+		}
+	}
+
+	exclude = false;
+	for (const char c : userCommands)
+	{
+		switch (c)
+		{
+		case '*':
+			for (int i = 0; i < ETJump::SessionService::CachedUserData::MAX_PERMISSIONS; ++i)
+			{
+				permissions[i] = true;
+			}
+			break;
+		case '-':
+			exclude = true;
+			break;
+		default:
+			permissions.set(static_cast<int>(c), !exclude);
+			break;
+		}
+	}
+	return permissions;
+}
+
+
 const std::string ETJump::SessionService::INVALID_AUTH_ATTEMPT = "Invalid authentication attempt";
 
 ETJump::SessionService::SessionService(
@@ -331,50 +379,4 @@ const ETJump::User& ETJump::SessionService::getUser(int clientNum)
 	}
 
 	return _users[clientNum];
-}
-
-std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands)
-{
-	bool exclude = false;
-	std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> permissions;
-	permissions.reset();
-	for (const char c : levelCommands)
-	{
-		switch (c)
-		{
-		case '*':
-			for (int i = 0; i < ETJump::SessionService::CachedUserData::MAX_PERMISSIONS; ++i)
-			{
-				permissions[i] = true;
-			}
-			break;
-		case '-':
-			exclude = true;
-			break;
-		default:
-			permissions.set(static_cast<int>(c), !exclude);
-			break;
-		}
-	}
-
-	exclude = false;
-	for (const char c : userCommands)
-	{
-		switch (c)
-		{
-		case '*':
-			for (int i = 0; i < ETJump::SessionService::CachedUserData::MAX_PERMISSIONS; ++i)
-			{
-				permissions[i] = true;
-			}
-			break;
-		case '-':
-			exclude = true;
-			break;
-		default:
-			permissions.set(static_cast<int>(c), !exclude);
-			break;
-		}
-	}
-	return permissions;
 }
