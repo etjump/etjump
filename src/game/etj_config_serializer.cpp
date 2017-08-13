@@ -1,24 +1,23 @@
-#include "etj_config_parser.h"
+#include "etj_config_serializer.h"
 #include "q_shared.h"
 #include <iterator>
-#include <boost/format/free_funcs.hpp>
 #include <boost/algorithm/string.hpp>
 bool Q_StartsAndEndsWith(const char *text, const char *start, const char *end);
 
-ETJump::ConfigParser::ConfigParser(const std::string& config): _configParsed(false)
+ETJump::ConfigSerializer::ConfigSerializer(const std::string& config): _configParsed(false)
 {
 	std::copy(begin(config), end(config), std::back_inserter(_config));
 }
 
-ETJump::ConfigParser::ConfigParser(const std::vector<char>& config): _config(config), _configParsed(false)
+ETJump::ConfigSerializer::ConfigSerializer(const std::vector<char>& config): _config(config), _configParsed(false)
 {
 }
 
-ETJump::ConfigParser::~ConfigParser()
+ETJump::ConfigSerializer::~ConfigSerializer()
 {
 }
 
-std::string ETJump::ConfigParser::readString(char** current)
+std::string ETJump::ConfigSerializer::readString(char** current)
 {
 	auto token = COM_ParseExt(current, qfalse);
 
@@ -43,7 +42,7 @@ std::string ETJump::ConfigParser::readString(char** current)
 	return str;
 }
 
-std::vector<ETJump::ConfigEntry> ETJump::ConfigParser::parseEntries(std::vector<char>& config)
+std::vector<ETJump::ConfigEntry> ETJump::ConfigSerializer::deserialize(std::vector<char>& config)
 {
 	std::vector<ETJump::ConfigEntry> entries;
 	char *original = config.data();
@@ -87,13 +86,28 @@ std::vector<ETJump::ConfigEntry> ETJump::ConfigParser::parseEntries(std::vector<
 }
 
 
-std::vector<ETJump::ConfigEntry> ETJump::ConfigParser::getEntries()
+std::vector<ETJump::ConfigEntry> ETJump::ConfigSerializer::deserialize()
 {
 	if (!_configParsed)
 	{
-		_entries = parseEntries(_config);
+		_entries = deserialize(_config);
 		_configParsed = true;
 	}
 
 	return _entries;
+}
+
+std::string ETJump::ConfigSerializer::serialize(const std::vector<ConfigEntry>& entries)
+{
+	std::string buffer;
+	for (const auto & entry : entries)
+	{
+		buffer += "[" + entry.name + "]\n";
+		for (const auto & value : entry.values)
+		{
+			buffer += value.first + " = " + value.second + "\n";
+		}
+		buffer += "\n";
+	}
+	return buffer;
 }

@@ -279,7 +279,7 @@
     <ClCompile Include="etj_level_service.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_config_parser.cpp">
+    <ClCompile Include="etj_config_serializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -439,7 +439,7 @@
     <ClInclude Include="etj_level_service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_config_parser.h">
+    <ClInclude Include="etj_config_serializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,6 +20,9 @@ namespace ETJump
 		OperationResult readConfig();
 		OperationResult writeConfig();
 	private:
+		std::string getValue(const std::map<std::string, std::string>& dictionary, const std::string& key) const;
+		std::string getValue(const std::map<std::string, std::string>& dictionary, const std::vector<std::string>& keys) const;
+
 		std::map<int, Level> _levels;
 		const Level _dummyLevel;
 		Log _log;

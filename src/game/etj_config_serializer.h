@@ -12,18 +12,19 @@ namespace ETJump
 		std::map<std::string, std::string> values;
 	};
 
-	class ConfigParser
+	class ConfigSerializer
 	{
 	public: 
-		explicit ConfigParser(const std::string& config);
-		explicit ConfigParser(const std::vector<char>& config);
-		~ConfigParser();
+		explicit ConfigSerializer(const std::string& config);
+		explicit ConfigSerializer(const std::vector<char>& config);
+		~ConfigSerializer();
 
 
 		std::string readString(char** current);
-		std::vector<ConfigEntry> getEntries();
+		std::vector<ConfigEntry> deserialize();
+		static std::string serialize(const std::vector<ConfigEntry>& entries);
 	private:
-		std::vector<ConfigEntry> parseEntries(std::vector<char>& config);
+		std::vector<ConfigEntry> deserialize(std::vector<char>& config);
 		std::vector<char> _config;
 		bool _configParsed;
 		std::vector<ConfigEntry> _entries;
