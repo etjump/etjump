@@ -2,6 +2,7 @@
 #include "etj_log.h"
 #include "etj_file.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 #include "etj_config_serializer.h"
 
 ETJump::LevelService::LevelService(const std::string& levelsFile)
@@ -85,6 +86,8 @@ ETJump::OperationResult ETJump::LevelService::remove(int level)
 
 ETJump::OperationResult ETJump::LevelService::readConfig()
 {
+	std::vector<std::string> serializationErrors;
+	std::vector<std::string> parsingErrors;
 	bool anyLevelsExist = false;
 	try
 	{
@@ -92,7 +95,9 @@ ETJump::OperationResult ETJump::LevelService::readConfig()
 		File configFile(_levelsFile);
 		auto config = configFile.read();
 
-		auto parseResult = ConfigSerializer(config).deserialize();
+		auto serializer = ConfigSerializer(config);
+		auto parseResult = serializer.deserialize();
+		serializationErrors = serializer.getErrors();
 
 		for (const auto & entry : parseResult)
 		{
@@ -104,11 +109,12 @@ ETJump::OperationResult ETJump::LevelService::readConfig()
 			Level level;
 			level.name = getValue(entry.values, "name");
 			level.commands = getValue(entry.values, std::vector<std::string>({ "commands", "cmds" }));
+			level.greeting = getValue(entry.values, "greeting");
 			auto levelStr = getValue(entry.values, "level");
 			if (levelStr.length() == 0)
 			{
 				// skip definitions without level field
-				// TODO: print error
+				parsingErrors.push_back((boost::format("level block with name: \"%s\", commands: \"%s\", greeting: \"%s\" ignored due to an empty or non-existing level field.") % level.name % level.commands % level.greeting).str());
 				continue;
 			}
 
@@ -116,13 +122,13 @@ ETJump::OperationResult ETJump::LevelService::readConfig()
 			{
 				auto lvl = std::stoi(levelStr);
 				level.level = lvl;
-			} catch (const std::invalid_argument& e)
+			} catch (const std::invalid_argument&)
 			{
-				// TODO: print error
+				parsingErrors.push_back((boost::format("level block with name: \"%s\", commands: \"%s\", greeting: \"%s\" ignored due to a non-integer level: \"%s\". Levels must be numbers.") % level.name % level.commands % level.greeting % levelStr).str());
 				continue;
-			} catch (const std::out_of_range& e)
+			} catch (const std::out_of_range&)
 			{
-				// TODO: print error
+				parsingErrors.push_back((boost::format("level block with name: \"%s\", commands: \"%s\", greeting: \"%s\" ignored due to a too high level: \"%s\". Levels must be between %d and %d") % level.name % level.commands % level.greeting % levelStr % std::numeric_limits<int>::min() % std::numeric_limits<int>::max()).str());
 				continue;
 			}
 			_levels[level.level] = level;
@@ -132,6 +138,30 @@ ETJump::OperationResult ETJump::LevelService::readConfig()
 	catch (File::FileNotFoundException)
 	{
 		anyLevelsExist = false;
+	}
+
+	std::string errBuf;
+	if (serializationErrors.size() > 0)
+	{
+		errBuf = 
+			"Found " + std::to_string(serializationErrors.size()) + " errors while reading " + _levelsFile + "\n" +
+			boost::join(serializationErrors, "\n");
+	}
+
+	if (parsingErrors.size() > 0)
+	{
+		if (errBuf.size() > 0)
+		{
+			errBuf += "\n";
+		}
+		errBuf +=
+			"Found " + std::to_string(parsingErrors.size()) + " errors while parsing " + _levelsFile + "\n" +
+			boost::join(parsingErrors, "\n");
+	}
+
+	if (errBuf.size())
+	{
+		_log.warnLn(errBuf);
 	}
 
 	if (!anyLevelsExist)

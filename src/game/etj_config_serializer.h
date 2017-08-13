@@ -23,11 +23,13 @@ namespace ETJump
 		std::string readString(char** current);
 		std::vector<ConfigEntry> deserialize();
 		static std::string serialize(const std::vector<ConfigEntry>& entries);
+		std::vector<std::string> getErrors();
 	private:
 		std::vector<ConfigEntry> deserialize(std::vector<char>& config);
 		std::vector<char> _config;
 		bool _configParsed;
 		std::vector<ConfigEntry> _entries;
+		std::vector<std::string> _errors;
 	};
 }
 

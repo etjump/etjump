@@ -2,6 +2,7 @@
 #include "q_shared.h"
 #include <iterator>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 bool Q_StartsAndEndsWith(const char *text, const char *start, const char *end);
 
 ETJump::ConfigSerializer::ConfigSerializer(const std::string& config): _configParsed(false)
@@ -27,7 +28,7 @@ std::string ETJump::ConfigSerializer::readString(char** current)
 	}
 	else
 	{
-		throw std::runtime_error("readconfig: missing = before \"%s\" on line %d.");
+		throw std::runtime_error((boost::format("readconfig: missing = before \"%s\" on line %d.") % token % COM_GetCurrentParseLine()).str());
 	}
 	std::string str;
 
@@ -63,7 +64,11 @@ std::vector<ETJump::ConfigEntry> ETJump::ConfigSerializer::deserialize(std::vect
 
 			std::string tokenStr = std::string(token);
 			currentEntry.name = tokenStr.substr(1, tokenStr.length() - 2);
-		} else
+		}
+		else if (currentEntry.name.length() == 0) {
+			_errors.push_back("unexpected token " + std::string(token));
+		}
+		else
 		{
 			std::string name = token;
 			
@@ -71,9 +76,9 @@ std::vector<ETJump::ConfigEntry> ETJump::ConfigSerializer::deserialize(std::vect
 			{
 				std::string value = readString(current);
 				currentEntry.values[name] = value;
-			} catch (const std::runtime_error&)
+			} catch (const std::runtime_error& e)
 			{
-				// todo display some error?
+				_errors.push_back(e.what());
 			}
 		}
 
@@ -110,4 +115,9 @@ std::string ETJump::ConfigSerializer::serialize(const std::vector<ConfigEntry>& 
 		buffer += "\n";
 	}
 	return buffer;
+}
+
+std::vector<std::string> ETJump::ConfigSerializer::getErrors()
+{
+	return _errors;
 }
