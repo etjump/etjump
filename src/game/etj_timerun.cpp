@@ -49,7 +49,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 {
 	SQLiteWrapper wrapper;
 
-	Printer::LogPrintln("Opening timeruns database: " + database);
+	Printer::logPrintLn("Opening timeruns database: " + database);
 
 	_recordsByName.clear();
 	for (auto &p : _players)
@@ -127,7 +127,7 @@ bool Timerun::init(const std::string &database, const std::string &currentMap)
 		return false;
 	}
 
-	Printer::LogPrint((boost::format("Successfully loaded %d records from database\n") % _recordsByName.size()).str());
+	Printer::logPrint((boost::format("Successfully loaded %d records from database\n") % _recordsByName.size()).str());
 
 	return true;
 }
@@ -170,7 +170,7 @@ void Timerun::connectNotify(int clientNum)
 			{
 				fastestCompletionTime = previousRecord->time;
 			}
-			Printer::SendCommand(clientNum, (boost::format("timerun start %d %d %s %d") % idx % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
+			Printer::sendCommand(clientNum, (boost::format("timerun start %d %d %s %d") % idx % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
 		}
 	}
 }
@@ -186,19 +186,19 @@ void Timerun::startNotify(int clientNum)
 	{
 		fastestCompletionTime = previousRecord->time;
 	}
-	Printer::SendCommand(clientNum, (boost::format("timerun_start %d %s %d")
+	Printer::sendCommand(clientNum, (boost::format("timerun_start %d %s %d")
 	                                 % (player->runStartTime)
 	                                 % player->currentRunName
 	                                 % fastestCompletionTime
 	                                 ).str());
-	Printer::SendCommand(spectators, (boost::format("timerun_start_spec %d %d %s %d")
+	Printer::sendCommand(spectators, (boost::format("timerun_start_spec %d %d %s %d")
 	                                  % clientNum
 	                                  % (player->runStartTime)
 	                                  % (player->currentRunName)
 	                                  % fastestCompletionTime
 	                                  ).str());
 
-	Printer::SendCommandToAll((boost::format("timerun start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
+	Printer::sendCommandToAll((boost::format("timerun start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
 }
 
 void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
@@ -219,16 +219,16 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 
 		player->racing = false;
 
-		Printer::SendCommand(clientNum, (boost::format("timerun_stop %d %s")
+		Printer::sendCommand(clientNum, (boost::format("timerun_stop %d %s")
 		                                 % millis
 		                                 % player->currentRunName).str());
 		auto spectators = Utilities::getSpectators(clientNum);
-		Printer::SendCommand(spectators, (boost::format("timerun_stop_spec %d %d %s")
+		Printer::sendCommand(spectators, (boost::format("timerun_stop_spec %d %d %s")
 		                                  % clientNum
 		                                  % millis
 		                                  % player->currentRunName).str());
 
-		Printer::SendCommandToAll((boost::format("timerun stop %d %d %s") % clientNum % millis % player->currentRunName).str());
+		Printer::sendCommandToAll((boost::format("timerun stop %d %d %s") % clientNum % millis % player->currentRunName).str());
 
 		player->currentRunName = "";
 		Utilities::stopRun(clientNum);
@@ -268,7 +268,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 
 	if (run == nullptr)
 	{
-		Printer::SendConsoleMessage(clientNum,
+		Printer::sendConsoleMessage(clientNum,
 			"^3error: ^7no records found by name: " + runName);
 		return;
 	}
@@ -321,7 +321,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 	}
 
 	buffer += "^g=============================================================\n";
-	Printer::SendConsoleMessage(clientNum, buffer);
+	Printer::sendConsoleMessage(clientNum, buffer);
 }
 
 void Timerun::printCurrentMapRecords(int clientNum)
@@ -348,7 +348,7 @@ void Timerun::printCurrentMapRecords(int clientNum)
 		buffer += "^g=============================================================\n";
 	}
 
-	Printer::SendConsoleMessage(clientNum, buffer);
+	Printer::sendConsoleMessage(clientNum, buffer);
 }
 
 void Timerun::interrupt(int clientNum)
@@ -364,8 +364,8 @@ void Timerun::interrupt(int clientNum)
 	player->currentRunName = "";
 
 	Utilities::stopRun(clientNum);
-	Printer::SendCommand(clientNum, "timerun_interrupt");
-	Printer::SendCommandToAll((boost::format("timerun interrupt %d") % clientNum).str());
+	Printer::sendCommand(clientNum, "timerun_interrupt");
+	Printer::sendCommandToAll((boost::format("timerun interrupt %d") % clientNum).str());
 }
 
 /**
@@ -379,7 +379,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 	SQLiteWrapper wrapper;
 	if (!wrapper.open(database))
 	{
-		Printer::LogPrintln((boost::format("SaveRecord: Couldn't open database to save the record. error code: %d. error message: %s.")
+		Printer::logPrintLn((boost::format("SaveRecord: Couldn't open database to save the record. error code: %d. error message: %s.")
 		                     % wrapper.errorCode() % wrapper.errorMessage()).str());
 		return;
 	}
@@ -399,7 +399,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 		{
 			if (!wrapper.prepare("UPDATE records SET time=?, record_date=?, player_name=? WHERE id=?;"))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't prepare update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -407,7 +407,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindInteger(1, record.time))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind time to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -415,7 +415,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindInteger(2, record.date))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind date to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -423,7 +423,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindText(3, record.playerName))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind name to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -431,7 +431,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindInteger(4, record.id))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind id to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -440,7 +440,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 		{
 			if (!wrapper.prepare("UPDATE records SET time=?, record_date=?, player_name=? WHERE map=? AND run=? and user_id=?;"))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't prepare update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -448,7 +448,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindInteger(1, record.time))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind time to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -456,7 +456,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindInteger(2, record.date))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind date to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -464,7 +464,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindText(3, record.playerName))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind name to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -472,7 +472,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindText(4, record.map))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind map name to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -480,7 +480,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindText(5, record.run))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind run name to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -488,7 +488,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 			if (!wrapper.bindInteger(6, record.userId))
 			{
-				Printer::LogPrintln(
+				Printer::logPrintLn(
 					(boost::format("SaveRecord::couldn't bind user id to update statement. error code: %d. error message: %s.")
 						% wrapper.errorCode() % wrapper.errorMessage()).str());
 				return;
@@ -500,7 +500,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 	{
 		if (!wrapper.prepare("INSERT INTO records (time, record_date, map, run, user_id, player_name) VALUES (?, ?, ?, ?, ?, ?);"))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't prepare insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -508,7 +508,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 		if (!wrapper.bindInteger(1, record.time))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't bind time to insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -516,7 +516,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 		if (!wrapper.bindInteger(2, record.date))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't bind date to insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -524,7 +524,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 		if (!wrapper.bindText(3, record.map))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't bind map to insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -532,7 +532,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 		if (!wrapper.bindText(4, record.run))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't bind run to insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -540,7 +540,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 		if (!wrapper.bindInteger(5, record.userId))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't user id to insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -548,7 +548,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 		if (!wrapper.bindText(6, record.playerName))
 		{
-			Printer::LogPrintln(
+			Printer::logPrintLn(
 			    (boost::format("SaveRecord::couldn't bind player name to insert statement. error code: %d. error message: %s.")
 			     % wrapper.errorCode() % wrapper.errorMessage()).str());
 			return;
@@ -557,7 +557,7 @@ static void SaveRecord(bool update, std::string database, Timerun::Record record
 
 	if (!wrapper.execute())
 	{
-		Printer::LogPrintln(
+		Printer::logPrintLn(
 		    (boost::format("SaveRecord::couldn't execute insert or update statement. error code: %d. error message: %s.")
 		     % wrapper.errorCode() % wrapper.errorMessage()).str());
 		return;
@@ -584,7 +584,7 @@ void Timerun::addNewRecord(Player *player, int clientNum)
 	_recordsByName[player->currentRunName].push_back(std::unique_ptr<Record>(record));
 	_sorted[player->currentRunName] = false;
 	SaveRecord(record, false);
-	Printer::SendCommandToAll((boost::format("record %d \"%s\" %d")
+	Printer::sendCommandToAll((boost::format("record %d \"%s\" %d")
 	                           % clientNum
 	                           % player->currentRunName
 	                           % player->completionTime).str());
@@ -597,7 +597,7 @@ void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int c
 
 	if (previousRecord->time > player->completionTime)
 	{
-		Printer::SendCommandToAll((boost::format("record %d \"%s\" %d")
+		Printer::sendCommandToAll((boost::format("record %d \"%s\" %d")
 		                           % clientNum
 		                           % player->currentRunName
 		                           % player->completionTime).str());
@@ -610,7 +610,7 @@ void Timerun::updatePreviousRecord(Record *previousRecord, Player *player, int c
 	}
 	else // Previous record was faster
 	{
-		Printer::SendCommandToAll((boost::format("completion %d \"%s\" %d")
+		Printer::sendCommandToAll((boost::format("completion %d \"%s\" %d")
 		                           % clientNum
 		                           % player->currentRunName
 		                           % player->completionTime).str());
@@ -701,5 +701,5 @@ void Timerun::printRecords(int clientNum, const std::string &map, const std::str
 		printRecordsForRun(clientNum, runName);
 		return;
 	}
-	Printer::SendConsoleMessage(clientNum, "This feature is not yet implemented.");
+	Printer::sendConsoleMessage(clientNum, "This feature is not yet implemented.");
 }

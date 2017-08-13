@@ -8,6 +8,8 @@
 #include "etj_client_commands_handler.h"
 #include "etj_local.h"
 #include "etj_level_service.h"
+#include "etj_printer.h"
+#include <boost/algorithm/string/replace.hpp>
 
 template<typename R>
 bool is_ready(std::future<R> const& f)
@@ -84,7 +86,7 @@ ETJump::SessionService::SessionService(
 	_clientCommandsHandler->subscribe(Constants::Authentication::AUTHENTICATE, [&](int clientNum, const std::string& command, const std::vector<std::string>& args)
 	{
 		// TODO/FIXME?: could just add callbacks for changing certain 
-		// session parameters but I guess accessing them directly 
+		// session parameters in client struct but I guess accessing them directly 
 		// won't be too bad..
 		auto entity = g_entities + clientNum;
 		char userinfo[MAX_INFO_STRING] = "";
@@ -192,13 +194,22 @@ void ETJump::SessionService::handleGetUserTasks()
 				_userService->updateLastSeen(user.id, user.lastSeen);
 				_log.infoLn("User \"" + user.name + "\" logged in from ip \"" + _getUserTasks[i].ipAddress + "\" with hardware id \"" + _getUserTasks[i].hardwareId + "\"");
 				_users[_getUserTasks[i].clientNum] = user;
-				if (getSessionValue(_getUserTasks[i].clientNum, KEY_GUID).length() == 0)
-				{
-					// print greeting
-				}
 				setSessionValue(_getUserTasks[i].clientNum, KEY_GUID, user.guid);
 				setSessionValue(_getUserTasks[i].clientNum, KEY_HARDWARE_ID, _getUserTasks[i].hardwareId);
 				cacheUserData(clientNum);
+				if (getSessionValue(_getUserTasks[i].clientNum, KEY_GREETING_DISPLAYED).length() == 0)
+				{
+					auto greeting = user.greeting;
+					if (greeting.length() == 0)
+					{
+						auto level = _levelService->get(user.level);
+						greeting = level != nullptr ? level->greeting : "";
+					}
+					boost::replace_all(greeting, "[n]", (g_entities + clientNum)->client->pers.netname);
+					boost::replace_all(greeting, "[d]", DateTime::toLocalTime(user.lastSeen));
+					Printer::broadcastChatMessage(greeting);
+					setSessionValue(clientNum, KEY_GREETING_DISPLAYED, "1");
+				}
 			}
 		}
 	}

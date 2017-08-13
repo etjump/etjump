@@ -26,7 +26,7 @@ namespace
 
 	void ShutdownBannerSystem()
 	{
-		Printer::LogPrintln("Banner system shut down");
+		Printer::logPrintLn("Banner system shut down");
 		bannerSystem = nullptr;
 	}
 }
@@ -49,7 +49,7 @@ namespace ETJump
 // Initializes the ETJump subsystems
 void ETJump_InitGame(int levelTime, int randomSeed, int restart)
 {
-	Printer::LogPrint(
+	Printer::logPrint(
 		"--------------------------------------------------------------------------------\n"
 		"Initializing ETJump subsystems\n"
 		"--------------------------------------------------------------------------------\n"
@@ -62,7 +62,7 @@ void ETJump_InitGame(int levelTime, int randomSeed, int restart)
 		InitBannerSystem();
 	}
 
-	Printer::LogPrint(
+	Printer::logPrint(
 		"--------------------------------------------------------------------------------\n"
 		"ETJump subsystems initialized\n"
 		"--------------------------------------------------------------------------------\n"
@@ -72,7 +72,7 @@ void ETJump_InitGame(int levelTime, int randomSeed, int restart)
 // Shuts down the ETJump subsystems
 void ETJump_ShutdownGame(int restart)
 {
-	Printer::LogPrint(
+	Printer::logPrint(
 		"--------------------------------------------------------------------------------\n"
 		"Shutting down the ETJump subsystems\n"
 		"--------------------------------------------------------------------------------\n"
@@ -80,7 +80,7 @@ void ETJump_ShutdownGame(int restart)
 
 	ShutdownBannerSystem();
 
-	Printer::LogPrint(
+	Printer::logPrint(
 		"--------------------------------------------------------------------------------\n"
 		"ETJump subsystems shut down\n"
 		"--------------------------------------------------------------------------------\n"

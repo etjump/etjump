@@ -7,7 +7,7 @@
 
 #include "g_local.h"
 
-void Printer::LogPrint(std::string message)
+void Printer::logPrint(std::string message)
 {
 	std::string partialMessage;
 	while (message.length() > 1000)
@@ -22,12 +22,12 @@ void Printer::LogPrint(std::string message)
 	}
 }
 
-void Printer::LogPrintln(const std::string &message)
+void Printer::logPrintLn(const std::string &message)
 {
-	LogPrint(message + "\n");
+	logPrint(message + "\n");
 }
 
-void Printer::SendConsoleMessage(int clientNum, std::string message)
+void Printer::sendConsoleMessage(int clientNum, std::string message)
 {
 	std::string partialMessage;
 	const auto  BYTES_PER_PACKET = 998;
@@ -57,7 +57,7 @@ void Printer::SendConsoleMessage(int clientNum, std::string message)
 	}
 }
 
-void Printer::SendChatMessage(int clientNum, const std::string &message)
+void Printer::sendChatMessage(int clientNum, const std::string &message)
 {
 	if (clientNum == CONSOLE_CLIENT_NUMBER)
 	{
@@ -69,7 +69,7 @@ void Printer::SendChatMessage(int clientNum, const std::string &message)
 	}
 }
 
-void Printer::BroadcastConsoleMessage(std::string message)
+void Printer::broadcastConsoleMessage(std::string message)
 {
 	std::string partialMessage;
 	while (message.length() > 1000)
@@ -88,25 +88,25 @@ void Printer::BroadcastConsoleMessage(std::string message)
 	}
 }
 
-void Printer::BroadcastChatMessage(const std::string &message)
+void Printer::broadcastChatMessage(const std::string &message)
 {
 	trap_SendServerCommand(-1, va("chat \"%s\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastLeftBannerMessage(const std::string &message)
+void Printer::broadcastLeftBannerMessage(const std::string &message)
 {
 	trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadCastBannerMessage(const boost::format &fmt)
+void Printer::broadcastBannerMessage(const boost::format &fmt)
 {
 	trap_SendServerCommand(-1, va("cpm \"%s\n\"", fmt.str().c_str()));
 	G_Printf("%s\n", fmt.str().c_str());
 }
 
-void Printer::SendBannerMessage(int clientNum, const std::string &message)
+void Printer::sendBannerMessage(int clientNum, const std::string &message)
 {
 	if (clientNum == CONSOLE_CLIENT_NUMBER)
 	{
@@ -118,29 +118,29 @@ void Printer::SendBannerMessage(int clientNum, const std::string &message)
 	}
 }
 
-void Printer::SendCommand(int clientNum, const std::string &command)
+void Printer::sendCommand(int clientNum, const std::string &command)
 {
 	trap_SendServerCommand(clientNum, command.c_str());
 }
 
-void Printer::BroadcastTopBannerMessage(const std::string& message)
+void Printer::broadcastTopBannerMessage(const std::string& message)
 {
 	trap_SendServerCommand(-1, va("bp \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastCenterMessage(const std::string& message)
+void Printer::broadcastCenterMessage(const std::string& message)
 {
 	trap_SendServerCommand(-1, va("cp \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::SendCommandToAll(const std::string& command)
+void Printer::sendCommandToAll(const std::string& command)
 {
 	trap_SendServerCommand(-1, command.c_str());
 }
 
-void Printer::SendCommand(std::vector<int> clientNums, const std::string &command)
+void Printer::sendCommand(std::vector<int> clientNums, const std::string &command)
 {
 	for (auto &clientNum : clientNums)
 	{

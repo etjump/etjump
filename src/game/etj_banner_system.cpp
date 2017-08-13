@@ -16,7 +16,7 @@ ETJump::BannerSystem::BannerSystem(Options options): _bannerIdx(0)
 	{
 		check(levelTime);
 	});
-	Printer::LogPrintln(
+	Printer::logPrintLn(
 		(boost::format("Initialized banner system\n"
 		"- %d banners\n"
 		"- %ds interval\n"
@@ -36,19 +36,19 @@ void ETJump::BannerSystem::check(int levelTime)
 	switch (_options.location)
 	{
 	case Center: 
-		Printer::BroadcastCenterMessage(message);
+		Printer::broadcastCenterMessage(message);
 		break;
 	case Top: 
-		Printer::BroadcastTopBannerMessage(message);
+		Printer::broadcastTopBannerMessage(message);
 		break;
 	case Chat: 
-		Printer::BroadcastChatMessage(message);
+		Printer::broadcastChatMessage(message);
 		break;
 	case Left: 
-		Printer::BroadcastLeftBannerMessage(message);
+		Printer::broadcastLeftBannerMessage(message);
 		break;
 	default: 
-		Printer::BroadcastTopBannerMessage(message);
+		Printer::broadcastTopBannerMessage(message);
 		break;
 	}
 
