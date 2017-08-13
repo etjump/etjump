@@ -403,9 +403,6 @@
     <ClInclude Include="etj_user_repository.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_user_new.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="etj_user_service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -440,6 +437,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_config_serializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_user.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

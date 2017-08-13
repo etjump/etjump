@@ -2,7 +2,7 @@
 #include <array>
 #include "etj_log.h"
 #include <future>
-#include "etj_user_new.h"
+#include "etj_user.h"
 #include "etj_session_repository.h"
 #include "etj_shared.h"
 #include "etj_level.h"

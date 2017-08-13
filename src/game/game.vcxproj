@@ -367,7 +367,7 @@
     <ClInclude Include="etj_shared.h" />
     <ClInclude Include="etj_string_utilities.h" />
     <ClInclude Include="etj_time_utilities.h" />
-    <ClInclude Include="etj_user_new.h" />
+    <ClInclude Include="etj_user.h" />
     <ClInclude Include="etj_user_repository.h" />
     <ClInclude Include="etj_user_service.h" />
     <ClInclude Include="g_local.h" />

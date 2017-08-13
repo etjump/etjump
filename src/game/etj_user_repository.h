@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "etj_user_new.h"
+#include "etj_user.h"
 #include <boost/optional/optional.hpp>
 #include <SQLiteCpp/Database.h>
 #include "etj_log.h"
@@ -24,11 +24,11 @@ namespace ETJump
 		// thread safe
 		User get(const std::string& guid) const;
 		// thread safe
-		void addHardwareId(int id, const std::string& hardwareId) const;
+		void addHardwareId(int64_t id, const std::string& hardwareId) const;
 		// thread safe
-		void addAlias(int id, const std::string& alias) const;
+		void addAlias(int64_t id, const std::string& alias) const;
 		// thread safe
-		void update(int id, MutableUserFields changes, int changedFields) const;
+		void update(int64_t id, MutableUserFields changes, int changedFields) const;
 		// thread safe
 		void addIpAddress(int64_t id, const std::string& ipAddress);
 		// thread safe

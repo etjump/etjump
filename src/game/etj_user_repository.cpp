@@ -239,7 +239,7 @@ ETJump::User ETJump::UserRepository::get(const std::string& guid) const
 	return nonExistingUser;
 }
 
-void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId) const
+void ETJump::UserRepository::addHardwareId(int64_t id, const std::string& hardwareId) const
 {
 	try
 	{
@@ -260,7 +260,7 @@ void ETJump::UserRepository::addHardwareId(int id, const std::string& hardwareId
 	}
 }
 
-void ETJump::UserRepository::addAlias(int id, const std::string& alias) const
+void ETJump::UserRepository::addAlias(int64_t id, const std::string& alias) const
 {
 	try
 	{
@@ -285,7 +285,7 @@ void ETJump::UserRepository::addAlias(int id, const std::string& alias) const
 	
 }
 
-void ETJump::UserRepository::update(int id, MutableUserFields changes, int changedFields) const
+void ETJump::UserRepository::update(int64_t id, MutableUserFields changes, int changedFields) const
 {
 	try
 	{
