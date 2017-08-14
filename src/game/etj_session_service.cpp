@@ -206,7 +206,7 @@ void ETJump::SessionService::handleGetUserTasks()
 						greeting = level != nullptr ? level->greeting : "";
 					}
 					boost::replace_all(greeting, "[n]", (g_entities + clientNum)->client->pers.netname);
-					boost::replace_all(greeting, "[d]", DateTime::toLocalTime(user.lastSeen));
+					boost::replace_all(greeting, "[d]", Duration::fromNow(user.lastSeen));
 					Printer::broadcastChatMessage(greeting);
 					setSessionValue(clientNum, KEY_GREETING_DISPLAYED, "1");
 				}
