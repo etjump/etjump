@@ -407,7 +407,7 @@ void G_say_teamnl_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 {
 	if (!ent->client->sess.muted)
 	{
-		Cmd_Say_f(ent, SAY_TEAMNL, qfalse, qtrue);
+		Cmd_Say_f(ent, ChatMode::TeamNoLocation, qfalse, qtrue);
 	}
 }
 

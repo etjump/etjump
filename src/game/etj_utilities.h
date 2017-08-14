@@ -6,7 +6,6 @@
 #define ETJUMP_UTILITIES_H
 
 #include <vector>
-#include "etj_levels.h"
 
 class Utilities {
 public:
@@ -78,12 +77,6 @@ public:
 	 * Converts timestamp to date
 	 */
 	static std::string timestampToString(int timestamp, const char *format = "%d/%m/%y %H:%M:%S", const char *start = "never");
-
-	/**
-	 * Prints a message to entity's console
-	 * if ent == nullptr, prints to server console
-	 */
-	static void toConsole(gentity_t *ent, std::string message);
 
 	static void RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons);
 private:

@@ -60,6 +60,8 @@ namespace ETJump
 		std::string getSessionValue(int clientNum, const std::string& key);
 		void readClientSession(int clientNum, const std::string& alias, const std::string& ipAddress);
 		const User& getUser(int clientNum);
+		bool hasPermission(int clientNum, char permission);
+		static std::string getName(int clientNum);
 	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
 		void removeClientTasks(int clientNum);

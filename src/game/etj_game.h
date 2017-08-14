@@ -2,7 +2,6 @@
 #define GAME_HPP
 
 #include <memory>
-class Levels;
 class SaveSystem;
 class CustomMapVotes;
 class Motd;
@@ -16,7 +15,6 @@ struct Game
 	{
 	}
 
-	std::shared_ptr<Levels> levels;
 	std::shared_ptr<SaveSystem> saves;
 	std::shared_ptr<CustomMapVotes> customMapVotes;
 	std::shared_ptr<Motd> motd;

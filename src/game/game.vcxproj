@@ -253,6 +253,7 @@
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="etj_admin_commands_handler.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_command_parser.cpp" />
     <ClCompile Include="bg_animation.cpp" />
@@ -320,7 +321,6 @@
     <ClCompile Include="g_utils.cpp" />
     <ClCompile Include="g_vote.cpp" />
     <ClCompile Include="g_weapon.cpp" />
-    <ClCompile Include="etj_levels.cpp" />
     <ClCompile Include="etj_main_ext.cpp" />
     <ClCompile Include="etj_map_statistics.cpp" />
     <ClCompile Include="etj_motd.cpp" />
@@ -340,6 +340,7 @@
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
+    <ClInclude Include="etj_admin_commands_handler.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_command_parser.h" />
     <ClInclude Include="bg_classes.h" />
@@ -379,7 +380,6 @@
     <ClInclude Include="etj_tokens.h" />
     <ClInclude Include="utilities.hpp" />
     <ClInclude Include="g_team.h" />
-    <ClInclude Include="etj_levels.h" />
     <ClInclude Include="etj_map_statistics.h" />
     <ClInclude Include="etj_motd.h" />
     <ClInclude Include="q_shared.h" />

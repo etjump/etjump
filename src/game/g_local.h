@@ -1668,11 +1668,11 @@ void G_SendScore(gentity_t *client);
 //
 // g_cmds.c
 //
-void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
+void G_SayTo(gentity_t *ent, gentity_t *other, ChatMode mode, int color,
              const char *name, const char *message, qboolean localize, qboolean encoded); // JPW NERVE removed static declaration so it would link
 void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
-void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded);
+void Cmd_Say_f(gentity_t *ent, ChatMode mode, qboolean arg0, qboolean encoded);
 void Cmd_Team_f(gentity_t *ent);
 void Cmd_SetWeapons_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_SetClass_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
@@ -2729,11 +2729,13 @@ namespace ETJump
 	class UserRepository;
 	class UserService;
 	class SessionService;
+	class AdminCommandsHandler;
 	extern std::shared_ptr<ETJump::DeathrunSystem> deathrunSystem;
 	extern std::shared_ptr<UserRepository> userRepository;
 	extern std::shared_ptr<UserService> userService;
 	extern std::shared_ptr<SessionService> sessionService;
 	extern std::shared_ptr<Server::ClientCommandsHandler> clientCommandsHandler;
+	extern std::shared_ptr<AdminCommandsHandler> adminCommandsHandler;
 }
 
 

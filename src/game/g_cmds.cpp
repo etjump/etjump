@@ -14,6 +14,7 @@
 #include "utilities.hpp"
 #include "etj_shared.h"
 #include "etj_client_commands_handler.h"
+#include "etj_admin_commands_handler.h"
 
 
 void BotDebug(int clientNum);
@@ -1899,13 +1900,158 @@ void G_EntitySoundNoCut(
 	                              (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2]));
 }
 
+/*
+ * Chat arg parsing
+ */
+ // A replacement for trap_Argc() that can correctly handle
+ //   say "!cmd arg0 arg1"
+ // as well as
+ //   say !cmd arg0 arg1
+ // The client uses the latter for messages typed in the console
+ // and the former when the message is typed in the chat popup
+int Q_SayArgc()
+{
+	int  c = 1;
+	char *s;
+
+	s = ConcatArgs(0);
+	if (!*s)
+	{
+		return 0;
+	}
+	while (*s)
+	{
+		if (*s == ' ')
+		{
+			s++;
+			if (*s != ' ')
+			{
+				c++;
+				continue;
+			}
+			while (*s && *s == ' ')
+				s++;
+			c++;
+		}
+		s++;
+	}
+	return c;
+}
+
+// A replacement for trap_Argv() that can correctly handle
+//   say "!cmd arg0 arg1"
+// as well as
+//   say !cmd arg0 arg1
+// The client uses the latter for messages typed in the console
+// and the former when the message is typed in the chat popup
+qboolean Q_SayArgv(int n, char *buffer, int bufferLength)
+{
+	int  bc = 1;
+	int  c = 0;
+	char *s;
+
+	if (bufferLength < 1)
+	{
+		return qfalse;
+	}
+	if (n < 0)
+	{
+		return qfalse;
+	}
+	*buffer = '\0';
+	s = ConcatArgs(0);
+	while (*s)
+	{
+		if (c == n)
+		{
+			while (*s && (bc < bufferLength))
+			{
+				if (*s == ' ')
+				{
+					*buffer = '\0';
+					return qtrue;
+				}
+				*buffer = *s;
+				buffer++;
+				s++;
+				bc++;
+			}
+			*buffer = '\0';
+			return qtrue;
+		}
+		if (*s == ' ')
+		{
+			s++;
+			if (*s != ' ')
+			{
+				c++;
+				continue;
+			}
+			while (*s && *s == ' ')
+				s++;
+			c++;
+		}
+		s++;
+	}
+	return qfalse;
+}
+
+char *Q_SayConcatArgs(int start)
+{
+	char *s;
+	int  c = 0;
+
+	s = ConcatArgs(0);
+	while (*s)
+	{
+		if (c == start)
+		{
+			return s;
+		}
+		if (*s == ' ')
+		{
+			s++;
+			if (*s != ' ')
+			{
+				c++;
+				continue;
+			}
+			while (*s && *s == ' ')
+				s++;
+			c++;
+		}
+		s++;
+	}
+	return s;
+}
+
+std::vector<std::string> Q_SayArgs(int start /*= 0*/)
+{
+	int argc = Q_SayArgc();
+
+	std::vector<std::string> argv;
+
+	if (start >= argc)
+	{
+		return std::vector<std::string>();
+	}
+
+	for (int i = start; i < argc; i++)
+	{
+		char arg[MAX_TOKEN_CHARS];
+		Q_SayArgv(i, arg, sizeof(arg));
+		argv.push_back(arg);
+	}
+	return argv;
+}
+
 
 /*
 ==================
 G_Say
 ==================
 */
-void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
+void G_SayTo(gentity_t *ent, gentity_t *other, ChatMode mode, int color,
              const char *name, const char *message, qboolean localize, qboolean encoded)
 {
 	const char *cmd;
@@ -1914,12 +2060,12 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
 	{
 		return;
 	}
-	if ((mode == SAY_TEAM || mode == SAY_TEAMNL) && !OnSameTeam(ent, other))
+	if ((mode == ChatMode::Team || mode == ChatMode::TeamNoLocation) && !OnSameTeam(ent, other))
 	{
 		return;
 	}
 
-	if (mode == SAY_BUDDY)      // send only to people who have the sender on their buddy list
+	if (mode == ChatMode::Buddy)      // send only to people who have the sender on their buddy list
 	{
 		if (ent->s.clientNum != other->s.clientNum)
 		{
@@ -1941,17 +2087,17 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
 
 	if (encoded)
 	{
-		cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "enc_tchat" : "enc_chat";
+		cmd = mode == ChatMode::Team || mode == ChatMode::Buddy ? "enc_tchat" : "enc_chat";
 	}
 	else
 	{
-		cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "tchat" : "chat";
+		cmd = mode == ChatMode::Team || mode == ChatMode::Buddy ? "tchat" : "chat";
 	}
 
 	trap_SendServerCommand(other - g_entities, va("%s \"%s%c%c%s\" %i %i", cmd, name, Q_COLOR_ESCAPE, color, message, ent - g_entities, localize));
 }
 
-void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *chatText)
+void G_Say(gentity_t *ent, gentity_t *target, ChatMode mode, qboolean encoded, char *chatText)
 {
 	int       j, len;
 	gentity_t *other;
@@ -1967,26 +2113,26 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 	switch (mode)
 	{
 	default:
-	case SAY_ALL:
+	case ChatMode::All:
 		G_LogPrintf("say: %s: %s\n", ent->client->pers.netname, chatText);
 		Com_sprintf(name, sizeof(name), "%s%c%c: ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE);
 		color = COLOR_GREEN;
 		break;
-	case SAY_BUDDY:
+	case ChatMode::Buddy:
 		localize = qtrue;
 		G_LogPrintf("saybuddy: %s: %s\n", ent->client->pers.netname, chatText);
 		loc = BG_GetLocationString(ent->r.currentOrigin);
 		Com_sprintf(name, sizeof(name), "[lof](%s%c%c) (%s): ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, loc);
 		color = COLOR_YELLOW;
 		break;
-	case SAY_TEAM:
+	case ChatMode::Team:
 		localize = qtrue;
 		G_LogPrintf("sayteam: %s: %s\n", ent->client->pers.netname, chatText);
 		loc = BG_GetLocationString(ent->r.currentOrigin);
 		Com_sprintf(name, sizeof(name), "[lof](%s%c%c) (%s): ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, loc);
 		color = COLOR_CYAN;
 		break;
-	case SAY_TEAMNL:
+	case ChatMode::TeamNoLocation:
 		G_LogPrintf("sayteamnl: %s: %s\n", ent->client->pers.netname, chatText);
 		Com_sprintf(name, sizeof(name), "(%s^7): ", ent->client->pers.netname);
 		color = COLOR_CYAN;
@@ -2037,6 +2183,10 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 			G_SayTo(ent, other, mode, color, escapedName, printText, localize, encoded);
 		}
 	}
+
+		
+	
+	ETJump::adminCommandsHandler->checkCommand(ClientNum(ent), Q_SayArgs(0));
 }
 
 
@@ -2045,7 +2195,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 Cmd_Say_f
 ==================
 */
-void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded)
+void Cmd_Say_f(gentity_t *ent, ChatMode mode, qboolean arg0, qboolean encoded)
 {
 	if (trap_Argc() < 2 && !arg0)
 	{
@@ -2055,7 +2205,7 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded)
 }
 
 // NERVE - SMF
-void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboolean voiceonly)
+void G_VoiceTo(gentity_t *ent, gentity_t *other, ChatMode mode, vsayCmd_t *vsay, qboolean voiceonly)
 {
 	int  color;
 	const char *cmd;
@@ -2072,13 +2222,13 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 	{
 		return;
 	}
-	if (mode == SAY_TEAM && !OnSameTeam(ent, other))
+	if (mode == ChatMode::Team && !OnSameTeam(ent, other))
 	{
 		return;
 	}
 
 	// send only to people who have the sender on their buddy list
-	if (mode == SAY_BUDDY)
+	if (mode == ChatMode::Buddy)
 	{
 		if (ent->s.clientNum != other->s.clientNum)
 		{
@@ -2098,12 +2248,12 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 		}
 	}
 
-	if (mode == SAY_TEAM)
+	if (mode == ChatMode::Team)
 	{
 		color = COLOR_CYAN;
 		cmd   = "vtchat";
 	}
-	else if (mode == SAY_BUDDY)
+	else if (mode == ChatMode::Buddy)
 	{
 		color = COLOR_YELLOW;
 		cmd   = "vbchat";
@@ -2119,7 +2269,7 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 		voiceonly = qfalse;
 	}
 
-	if (mode == SAY_TEAM || mode == SAY_BUDDY)
+	if (mode == ChatMode::Team || mode == ChatMode::Buddy)
 	{
 		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, static_cast<int>(ent->s.pos.trBase[0]), static_cast<int>(ent->s.pos.trBase[1]), static_cast<int>(ent->s.pos.trBase[2]), vsay->variant, vsay->random, vsay->custom));
 	}
@@ -2130,7 +2280,7 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 }
 
 
-void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qboolean voiceonly)
+void G_Voice(gentity_t *ent, gentity_t *target, ChatMode mode, vsayCmd_t *vsay, qboolean voiceonly)
 {
 	int j;
 	gentity_t *other;
@@ -2181,7 +2331,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qbool
 		G_Printf("voice: %s %s\n", ent->client->pers.netname, vsay->id);
 	}
 
-	if (mode == SAY_BUDDY)
+	if (mode == ChatMode::Buddy)
 	{
 		char     buffer[32];
 		int      cls = -1, i, cnt, num;
@@ -2259,7 +2409,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qbool
 Cmd_Voice_f
 ==================
 */
-static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceonly)
+static void Cmd_Voice_f(gentity_t *ent, ChatMode mode, qboolean arg0, qboolean voiceonly)
 {
 
 	vsayCmd_t vsay;
@@ -2270,7 +2420,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceo
 	// get random seed beforehand to keep it same for all clients
 	vsay.random = random();
 
-	if (mode != SAY_BUDDY)
+	if (mode != ChatMode::Buddy)
 	{
 
 		if (trap_Argc() < 2 && !arg0)
@@ -4746,7 +4896,7 @@ void ClientCommand(int clientNum)
 		}
 		else if (!ent->client->sess.muted)
 		{
-			Cmd_Say_f(ent, SAY_ALL, qfalse, enc);
+			Cmd_Say_f(ent, ChatMode::All, qfalse, enc);
 		}
 		return;
 	}
@@ -4759,7 +4909,7 @@ void ClientCommand(int clientNum)
 		}
 		else if (!ent->client->sess.muted)
 		{
-			Cmd_Say_f(ent, SAY_TEAM, qfalse, enc);
+			Cmd_Say_f(ent, ChatMode::Team, qfalse, enc);
 		}
 		return;
 	}
@@ -4771,7 +4921,7 @@ void ClientCommand(int clientNum)
 		}
 		else if (!ent->client->sess.muted)
 		{
-			Cmd_Voice_f(ent, SAY_ALL, qfalse, qfalse);
+			Cmd_Voice_f(ent, ChatMode::All, qfalse, qfalse);
 		}
 		return;
 	}
@@ -4783,7 +4933,7 @@ void ClientCommand(int clientNum)
 		}
 		else if (!ent->client->sess.muted)
 		{
-			Cmd_Voice_f(ent, SAY_TEAM, qfalse, qfalse);
+			Cmd_Voice_f(ent, ChatMode::Team, qfalse, qfalse);
 		}
 		return;
 	}
@@ -4797,7 +4947,7 @@ void ClientCommand(int clientNum)
 		}
 		else if (!ent->client->sess.muted)
 		{
-			Cmd_Say_f(ent, SAY_BUDDY, qfalse, enc);
+			Cmd_Say_f(ent, ChatMode::Buddy, qfalse, enc);
 		}
 		return;
 	}
@@ -4809,7 +4959,7 @@ void ClientCommand(int clientNum)
 		}
 		else if (!ent->client->sess.muted)
 		{
-			Cmd_Voice_f(ent, SAY_BUDDY, qfalse, qfalse);
+			Cmd_Voice_f(ent, ChatMode::Buddy, qfalse, qfalse);
 		}
 		return;
 	}
@@ -4929,134 +5079,17 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
+	if (ETJump::adminCommandsHandler->checkCommand(ClientNum(ent), Q_SayArgs(0)))
+	{
+		return;
+	}
+
 	if (G_commandCheck(ent, cmd, qtrue))
 	{
 		return;
 	}
 
 	CP(va("print \"Unknown command %s^7.\n\"", cmd));
-}
-
-// A replacement for trap_Argc() that can correctly handle
-//   say "!cmd arg0 arg1"
-// as well as
-//   say !cmd arg0 arg1
-// The client uses the latter for messages typed in the console
-// and the former when the message is typed in the chat popup
-int Q_SayArgc()
-{
-	int  c = 1;
-	char *s;
-
-	s = ConcatArgs(0);
-	if (!*s)
-	{
-		return 0;
-	}
-	while (*s)
-	{
-		if (*s == ' ')
-		{
-			s++;
-			if (*s != ' ')
-			{
-				c++;
-				continue;
-			}
-			while (*s && *s == ' ')
-				s++;
-			c++;
-		}
-		s++;
-	}
-	return c;
-}
-
-// A replacement for trap_Argv() that can correctly handle
-//   say "!cmd arg0 arg1"
-// as well as
-//   say !cmd arg0 arg1
-// The client uses the latter for messages typed in the console
-// and the former when the message is typed in the chat popup
-qboolean Q_SayArgv(int n, char *buffer, int bufferLength)
-{
-	int  bc = 1;
-	int  c  = 0;
-	char *s;
-
-	if (bufferLength < 1)
-	{
-		return qfalse;
-	}
-	if (n < 0)
-	{
-		return qfalse;
-	}
-	*buffer = '\0';
-	s       = ConcatArgs(0);
-	while (*s)
-	{
-		if (c == n)
-		{
-			while (*s && (bc < bufferLength))
-			{
-				if (*s == ' ')
-				{
-					*buffer = '\0';
-					return qtrue;
-				}
-				*buffer = *s;
-				buffer++;
-				s++;
-				bc++;
-			}
-			*buffer = '\0';
-			return qtrue;
-		}
-		if (*s == ' ')
-		{
-			s++;
-			if (*s != ' ')
-			{
-				c++;
-				continue;
-			}
-			while (*s && *s == ' ')
-				s++;
-			c++;
-		}
-		s++;
-	}
-	return qfalse;
-}
-
-char *Q_SayConcatArgs(int start)
-{
-	char *s;
-	int  c = 0;
-
-	s = ConcatArgs(0);
-	while (*s)
-	{
-		if (c == start)
-		{
-			return s;
-		}
-		if (*s == ' ')
-		{
-			s++;
-			if (*s != ' ')
-			{
-				c++;
-				continue;
-			}
-			while (*s && *s == ' ')
-				s++;
-			c++;
-		}
-		s++;
-	}
-	return s;
 }
 
 void DecolorString(char *in, char *out)

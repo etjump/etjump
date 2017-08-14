@@ -1,7 +1,6 @@
 #include "etj_local.h"
 #include "etj_game.h"
 #include "etj_save.h"
-#include "etj_levels.h"
 #include "etj_custom_map_votes.h"
 #include "etj_utilities.h"
 #include <boost/algorithm/string.hpp>
@@ -22,26 +21,12 @@ void RunFrame(int levelTime)
 
 void OnGameInit()
 {
-	game.levels         = std::make_shared<Levels>();
 	game.saves          = std::make_shared<SaveSystem>();
 	game.mapStatistics  = std::make_shared<MapStatistics>();
 	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
 	game.motd           = std::make_shared<Motd>();
 	game.timerun        = std::make_shared<Timerun>();
 	game.tokens         = std::make_shared<Tokens>();
-
-	if (strlen(g_levelConfig.string))
-	{
-		if (!game.levels->ReadFromConfig())
-		{
-			G_LogPrintf("Error while reading admin config: %s\n", game.levels->ErrorMessage().c_str());
-		}
-		else
-		{
-			G_Printf("Successfully loaded levels from config: %s\n", g_levelConfig.string);
-		}
-	}
-
 	game.mapStatistics->initialize(std::string(g_mapDatabase.string), level.rawmapname);
 	game.customMapVotes->Load();
 	game.motd->Initialize();
@@ -60,7 +45,6 @@ void OnGameShutdown()
 	game.mapStatistics->saveChanges();
 	game.tokens->reset();
 
-	game.levels = nullptr;
 	game.saves = nullptr;
 	game.customMapVotes = nullptr;
 	game.motd = nullptr;

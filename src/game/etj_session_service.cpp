@@ -391,3 +391,22 @@ const ETJump::User& ETJump::SessionService::getUser(int clientNum)
 
 	return _users[clientNum];
 }
+
+bool ETJump::SessionService::hasPermission(int clientNum, char permission)
+{
+	if (clientNum < 0)
+	{
+		return true;
+	}
+
+	return _cachedUserData[clientNum].permissions.test(static_cast<int>(permission));
+}
+
+std::string ETJump::SessionService::getName(int clientNum)
+{
+	if (clientNum < 0)
+	{
+		return "Console";
+	}
+	return (g_entities + clientNum)->client->pers.netname;
+}

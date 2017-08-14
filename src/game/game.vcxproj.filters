@@ -192,9 +192,6 @@
     <ClCompile Include="etj_custom_map_votes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_levels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etj_main_ext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -282,6 +279,9 @@
     <ClCompile Include="etj_config_serializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_admin_commands_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -350,9 +350,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="etj_levels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_map_statistics.h">
@@ -440,6 +437,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_user.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_admin_commands_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

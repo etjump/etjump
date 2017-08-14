@@ -1563,7 +1563,7 @@ void CG_AddBufferedVoiceChat(bufferedVoiceChat_t *vchat)
 CG_VoiceChatLocal
 =================
 */
-void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, vsayCmd_t *vsay, vec3_t origin)
+void CG_VoiceChatLocal(ChatMode mode, qboolean voiceOnly, int clientNum, int color, vsayCmd_t *vsay, vec3_t origin)
 {
 	char                *chat;
 	voiceChatList_t     *voiceChatList;
@@ -1598,7 +1598,7 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 	if (CG_GetVoiceChat(voiceChatList, vsay, &snd, &sprite, &chat))
 	{
 		//
-		if (mode == SAY_TEAM || !cg_teamChatsOnly.integer)
+		if (mode == ChatMode::Team || !cg_teamChatsOnly.integer)
 		{
 			vchat.clientNum = clientNum;
 			vchat.snd       = snd;
@@ -1607,7 +1607,7 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 			VectorCopy(origin, vchat.origin);       // NERVE - SMF
 			Q_strncpyz(vchat.cmd, vsay->id, sizeof(vchat.cmd));
 
-			if (mode != SAY_ALL)
+			if (mode != ChatMode::All)
 			{
 				// NERVE - SMF - get location
 				loc = BG_GetLocationString(origin);
@@ -1637,12 +1637,12 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 				}
 			}
 
-			if (mode == SAY_TEAM)
+			if (mode == ChatMode::Team)
 			{
 				Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s)%c%c(%s): %c%c%s", 
 					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
-			else if (mode == SAY_BUDDY)
+			else if (mode == ChatMode::Buddy)
 			{
 				Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s>%c%c<%s>: %c%c%s", 
 					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
@@ -1701,7 +1701,7 @@ char *ConcatArgs(int start)
 CG_VoiceChat
 =================
 */
-void CG_VoiceChat(int mode)
+void CG_VoiceChat(ChatMode mode)
 {
 	auto       *cmd = "";
 	int        clientNum, color, variant = 5, rand = 6, custom = 7;
@@ -1715,7 +1715,7 @@ void CG_VoiceChat(int mode)
 	clientNum = atoi(CG_Argv(2));
 	color     = atoi(CG_Argv(3));
 
-	if (mode != SAY_ALL)
+	if (mode != ChatMode::All)
 	{
 		// NERVE - SMF - added origin
 		origin[0] = atoi(CG_Argv(5));
@@ -2688,19 +2688,19 @@ static void CG_ServerCommand(void)
 
 	if (!Q_stricmp(cmd, "vchat"))
 	{
-		CG_VoiceChat(SAY_ALL);              // NERVE - SMF - enabled support
+		CG_VoiceChat(ChatMode::All);              // NERVE - SMF - enabled support
 		return;
 	}
 
 	if (!Q_stricmp(cmd, "vtchat"))
 	{
-		CG_VoiceChat(SAY_TEAM);             // NERVE - SMF - enabled support
+		CG_VoiceChat(ChatMode::Team);             // NERVE - SMF - enabled support
 		return;
 	}
 
 	if (!Q_stricmp(cmd, "vbchat"))
 	{
-		CG_VoiceChat(SAY_BUDDY);
+		CG_VoiceChat(ChatMode::Buddy);
 		return;
 	}
 
