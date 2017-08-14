@@ -95,14 +95,14 @@ std::string ETJump::Duration::fromNow(std::time_t time)
 {
 	auto currentTime = ETJump::DateTime::now();
 	auto duration = currentTime - time;
-	auto isFuture = duration >= 0;
+	auto isFuture = duration < 0;
 	duration = std::abs(duration);
-	auto seconds = round(asSeconds(time));
-	auto minutes = round(asMinutes(time));
-	auto hours = round(asHours(time));
-	auto days = round(asDays(time));
-	auto months = round(asMonths(time));
-	auto years = round(asYears(time));
+	auto seconds = round(asSeconds(duration));
+	auto minutes = round(asMinutes(duration));
+	auto hours = round(asHours(duration));
+	auto days = round(asDays(duration));
+	auto months = round(asMonths(duration));
+	auto years = round(asYears(duration));
 
 	std::string output;
 	if (seconds <= thresholds.at("ss"))

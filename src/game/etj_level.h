@@ -37,7 +37,7 @@ namespace ETJump
 		return std::vector<Level>
 		{
 			Level(0, "Visitor", "a", "Welcome Visitor [n]^7! Your last visit was on [t]!"),
-			Level(1, "Friend", "a", "Welcome Friend [n]^7! Your last visit was [d] ago!"),
+			Level(1, "Friend", "a", "Welcome Friend [n]^7! Your last visit was [d]!"),
 			Level(2, "Moderator", "*-As", "Welcome Moderator [n]^7!"),
 			Level(3, "Administrator", "*", "Welcome Administrator [n]^7!"),
 		};

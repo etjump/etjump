@@ -125,6 +125,7 @@ void ETJump::SessionService::connect(int clientNum, bool firstTime)
 void ETJump::SessionService::disconnect(int clientNum)
 {
 	_userService->updateLastSeen(_users[clientNum].id, DateTime::now());
+	_sessions[clientNum].values = std::map<std::string, std::string>();
 
 	_users[clientNum] = User();
 
@@ -190,8 +191,6 @@ void ETJump::SessionService::handleGetUserTasks()
 					_userService->addIpAddress(user.id, _getUserTasks[i].ipAddress);
 				}
 				deletedTask.push_back(i);
-				user.lastSeen = DateTime::now();
-				_userService->updateLastSeen(user.id, user.lastSeen);
 				_log.infoLn("User \"" + user.name + "\" logged in from ip \"" + _getUserTasks[i].ipAddress + "\" with hardware id \"" + _getUserTasks[i].hardwareId + "\"");
 				_users[_getUserTasks[i].clientNum] = user;
 				setSessionValue(_getUserTasks[i].clientNum, KEY_GUID, user.guid);
@@ -207,6 +206,7 @@ void ETJump::SessionService::handleGetUserTasks()
 					}
 					boost::replace_all(greeting, "[n]", (g_entities + clientNum)->client->pers.netname);
 					boost::replace_all(greeting, "[d]", Duration::fromNow(user.lastSeen));
+					boost::replace_all(greeting, "[t]", DateTime::toLocalTime(user.lastSeen));
 					Printer::broadcastChatMessage(greeting);
 					setSessionValue(clientNum, KEY_GREETING_DISPLAYED, "1");
 				}
