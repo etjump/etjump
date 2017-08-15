@@ -3,6 +3,7 @@
 #include <ctime>
 #include <map>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 std::string ETJump::DateTime::getCurrentUtcTimestamp()
 {
@@ -144,4 +145,87 @@ std::string ETJump::Duration::fromNow(std::time_t time)
 	}
 	
 	return (boost::format(isFuture ? relativeTime.at("future") : relativeTime.at("past")) % output).str();
+}
+
+const int SECONDS_IN_MINUTE = 60;
+const int SECONDS_IN_HOUR = 3600;
+const int SECONDS_IN_DAY = 86400;
+const int SECONDS_IN_WEEK = 604800;
+const int SECONDS_IN_MONTH = 2592000;
+const int SECONDS_IN_YEAR = 31536000;
+
+int parseModifier(const std::string& modifier)
+{
+	if (modifier == "s")
+	{
+		return 1;
+	} 
+	
+	if (modifier == "m" || modifier == "min") 
+	{
+		return SECONDS_IN_MINUTE;
+	}
+
+	if (modifier == "h")
+	{
+		return SECONDS_IN_HOUR;
+	}
+
+	if (modifier == "d")
+	{
+		return SECONDS_IN_DAY;
+	}
+
+	if (modifier == "w")
+	{
+		return SECONDS_IN_WEEK;
+	}
+
+	if (modifier == "mon")
+	{
+		return SECONDS_IN_MONTH;
+	}
+
+	if (modifier == "y")
+	{
+		return SECONDS_IN_YEAR;
+	}
+
+	return 1;
+}
+
+long long ETJump::Duration::parseDuration(const std::string& text)
+{
+	if (text.length() == 0)
+	{
+		return 0;
+	}
+	auto locale = std::locale::classic();
+	std::string integer;
+	std::string modifier;
+	int i = 0;
+	int len = text.length();
+	for (; i < len; ++i)
+	{
+		if (std::isdigit(text[i], locale))
+		{
+			integer.push_back(text[i]);
+		} else
+		{
+			break;
+		}
+	}
+	for (; i < len; ++i)
+	{
+		modifier.push_back(text[i]);
+	}
+
+	try
+	{
+		boost::to_lower(modifier);
+		return std::stoll(integer) * parseModifier(modifier);
+	} catch (const std::exception& e)
+	{
+		return 0;
+	}
 }

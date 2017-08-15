@@ -1,6 +1,22 @@
 #include "etj_command_parser.h"
 #include <boost/algorithm/string/case_conv.hpp>
+#include "etj_time_utilities.h"
 
+
+std::string ETJump::CommandParser::toString(OptionDefinition::Type type)
+{
+	switch (type)
+	{
+	case OptionDefinition::Type::Boolean: return "boolean";
+	case OptionDefinition::Type::Token: return "token";
+	case OptionDefinition::Type::MultiToken: return "multi token";
+	case OptionDefinition::Type::Integer: return "integer";
+	case OptionDefinition::Type::Decimal: return "decimal";
+	case OptionDefinition::Type::Date: return "date";
+	case OptionDefinition::Type::Duration: return "duration";
+	default: return "unknown type";
+	}
+}
 
 ETJump::CommandParser::CommandParser()
 {
@@ -10,7 +26,7 @@ ETJump::CommandParser::~CommandParser()
 {
 }
 
-ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition definition, std::vector<std::string> args)
+ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition definition, const std::vector<std::string>& args)
 {
 	Command command;
 
@@ -53,11 +69,39 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 			case OptionDefinition::Type::Boolean:
 				throw std::runtime_error("Trying to add args for OptionDefinition::Type::Boolean.");
 				// Single token
-			case OptionDefinition::Type::Token:
 			case OptionDefinition::Type::Integer:
+				try
+				{
+					currentOption.name = optionDefinition->second.name;
+					currentOption.integer = std::stoi(arg);
+					optionDefinition = end;
+					command.options[currentOption.name] = currentOption;
+				} catch (const std::exception&)
+				{
+					command.errors.push_back("Option `" + optionDefinition->second.name + "` is of type " + toString(optionDefinition->second.type) + ". Cannot convert `" + arg + "` to the specified type.");
+				}
+				break;
 			case OptionDefinition::Type::Decimal:
+				try
+				{
+					currentOption.name = optionDefinition->second.name;
+					currentOption.decimal = std::stod(arg);
+					optionDefinition = end;
+					command.options[currentOption.name] = currentOption;
+				}
+				catch (const std::exception&)
+				{
+					command.errors.push_back("Option `" + optionDefinition->second.name + "` is of type " + toString(optionDefinition->second.type) + ". Cannot convert `" + arg + "` to the specified type.");
+				}
+				break;
 			case OptionDefinition::Type::Date:
 			case OptionDefinition::Type::Duration:
+				currentOption.name = optionDefinition->second.name;
+				currentOption.duration = ETJump::Duration::parseDuration(arg);
+				optionDefinition = end;
+				command.options[currentOption.name] = currentOption;
+				break;
+			case OptionDefinition::Type::Token:
 				currentOption.name = optionDefinition->second.name;
 				currentOption.text = arg;
 				optionDefinition = end;
@@ -69,7 +113,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 				currentOption.text += currentOption.text.length() > 0 ? " " + arg : arg;
 				break;
 			default:
-				throw std::runtime_error("Unknown option type: `" + std::to_string(static_cast<int>(optionDefinition->second.type)) + "`");
+				command.errors.push_back("Unknown option type: `" + std::to_string(static_cast<int>(optionDefinition->second.type)) + "`");
 			}
 
 			continue;
@@ -103,7 +147,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 	{
 		if (opt.second.required && command.options.find(opt.first) == std::end(command.options))
 		{
-			throw std::runtime_error("Required option `" + opt.first + "` was not specified.");
+			command.errors.push_back("Required option `" + opt.first + "` was not specified.");
 		}
 	}
 

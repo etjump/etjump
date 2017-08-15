@@ -37,13 +37,14 @@ namespace ETJump
 
 		struct Option
 		{
+			Option(): name(""), boolean(false), text(""), integer(0), decimal(0), date(0), duration(0) {}
 			std::string name;
 			bool boolean;
 			std::string text;
 			int integer;
 			double decimal;
-			long date;
-			long duration;
+			long long date;
+			long long duration;
 		};
 
 		struct Command
@@ -53,10 +54,12 @@ namespace ETJump
 			std::vector<std::string> extraArgs;
 		};
 
+		static std::string toString(OptionDefinition::Type type);
+
 		CommandParser();
 		~CommandParser();
 
-		Command parse(CommandDefinition definition, std::vector<std::string> args);
+		Command parse(CommandDefinition definition, const std::vector<std::string>& args);
 
 	private:
 		/**

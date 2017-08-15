@@ -36,7 +36,7 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 	}
 
 	std::vector<std::string> additionalArgs;
-	std::copy(begin(args) + 1, end(args), std::back_inserter(additionalArgs));
+	std::copy(begin(args) + start + 1, end(args), std::back_inserter(additionalArgs));
 
 	boost::to_lower(command);
 
@@ -66,8 +66,9 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 	if (matchingCommands.size() == 1)
 	{
 		auto name = _sessionService->getName(clientNum);
-		_log.infoLn(name + " executed command !" + command + " " + boost::join(additionalArgs, " "));
-		matchingCommands[0]->second.callback(clientNum, command, additionalArgs);
+		auto id = _sessionService->getUser(clientNum).id;
+		_log.infoLn(name + " (" + std::to_string(id) + ")" + " executed command !" + command + " " + boost::join(additionalArgs, " "));
+		matchingCommands[0]->second.callback(clientNum, command, _parser.parse(matchingCommands[0]->second.definition, additionalArgs));
 		return true;
 	}
 
@@ -87,15 +88,15 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 	return false;
 }
 
-bool ETJump::AdminCommandsHandler::subscribe(const std::string& command, char permission, Callback callback)
+bool ETJump::AdminCommandsHandler::subscribe(char permission, CommandParser::CommandDefinition definition, Callback callback)
 {
-	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
+	auto lowercaseCommand = boost::algorithm::to_lower_copy(definition.name);
 	if (_callbacks.find(lowercaseCommand) != end(_callbacks))
 	{
 		return false;
 	}
 
-	_callbacks[lowercaseCommand] = { permission, callback };
+	_callbacks[lowercaseCommand] = { permission, callback, definition };
 	_subscribedCommands.push_back(lowercaseCommand);
 	return true;
 }

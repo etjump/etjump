@@ -20,5 +20,6 @@ namespace ETJump
 		long long asMonths(std::time_t time);
 		long long asYears(std::time_t time);
 		std::string fromNow(std::time_t time);
+		long long parseDuration(const std::string& text);
 	}
 }
