@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <ostream>
 
 namespace ETJump
 {
@@ -45,6 +46,28 @@ namespace ETJump
 			double decimal;
 			long long date;
 			long long duration;
+
+			std::string toString() const
+			{
+				return "name: " + name +
+					" boolean: " + std::to_string(boolean) +
+					" text: " + text +
+					" integer: " + std::to_string(integer) +
+					" decimal: " + std::to_string(decimal) +
+					" date: " + std::to_string(date) +
+					" duration: " + std::to_string(duration);
+			}
+			friend std::ostream& operator<<(std::ostream& os, const Option& obj)
+			{
+				return os
+					<< "name: " << obj.name
+					<< " boolean: " << obj.boolean
+					<< " text: " << obj.text
+					<< " integer: " << obj.integer
+					<< " decimal: " << obj.decimal
+					<< " date: " << obj.date
+					<< " duration: " << obj.duration;
+			}
 		};
 
 		struct Command

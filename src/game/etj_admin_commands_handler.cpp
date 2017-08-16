@@ -68,7 +68,7 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 		auto name = _sessionService->getName(clientNum);
 		auto id = _sessionService->getUser(clientNum).id;
 		_log.infoLn(name + " (" + std::to_string(id) + ")" + " executed command !" + command + " " + boost::join(additionalArgs, " "));
-		matchingCommands[0]->second.callback(clientNum, command, _parser.parse(matchingCommands[0]->second.definition, additionalArgs));
+		matchingCommands[0]->second.callback(clientNum, matchingCommands[0]->first, _parser.parse(matchingCommands[0]->second.definition, additionalArgs));
 		return true;
 	}
 

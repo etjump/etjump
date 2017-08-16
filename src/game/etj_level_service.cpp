@@ -29,9 +29,14 @@ ETJump::OperationResult ETJump::LevelService::add(int level, const std::string& 
 	auto levelIter = _levels.find(level);
 	if (levelIter != end(_levels))
 	{
-		return OperationResult(false, "Level " + std::to_string(level) + "(" + levelIter->second.name + ")" + " already exists.");
+		return OperationResult(false, "Level " + std::to_string(level) + " (" + (levelIter->second.name.length() > 0 ? levelIter->second.name : "unnamed") + ")" + " already exists.");
 	}
 	_levels[level] = Level(level, name, commands, greeting);
+	auto writeConfigResult = writeConfig();
+	if (!writeConfigResult.success)
+	{
+		return writeConfigResult;
+	}
 	return OperationResult(true, "Successfully added level " + std::to_string(level));
 }
 

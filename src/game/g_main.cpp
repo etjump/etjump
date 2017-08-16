@@ -54,6 +54,48 @@ namespace ETJump
 // ETJump initialization
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODO: move elsewhere
+std::pair<std::string, ETJump::CommandParser::OptionDefinition> createOptionDefinition(const std::string& name, const std::string& description, ETJump::CommandParser::OptionDefinition::Type type, bool required)
+{
+	return {
+		name, {
+			name,
+			description,
+			type,
+			required
+		}
+	};
+}
+
+ETJump::CommandParser::CommandDefinition createCommandDefinition(const std::string& name, const std::string& description, const std::map<std::string, ETJump::CommandParser::OptionDefinition>& options = std::map<std::string, ETJump::CommandParser::OptionDefinition>())
+{
+	return {
+		name,
+		description,
+		options
+	};
+}
+
+std::string getOptionalText(const ETJump::CommandParser::Command& command, const std::string& key, const std::string& defaultValue = "")
+{
+	auto optIter = command.options.find(key);
+	if (optIter != end(command.options))
+	{
+		return optIter->second.text;
+	}
+	return defaultValue;
+}
+
+int getOptionalInteger(const ETJump::CommandParser::Command& command, const std::string& key, int defaultValue = 0)
+{
+	auto optIter = command.options.find(key);
+	if (optIter != end(command.options))
+	{
+		return optIter->second.integer;
+	}
+	return defaultValue;
+}
+
 static void initializeETJump(int levelTime, int randomSeed, int restart)
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
@@ -74,45 +116,33 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, ETJump::levelService, trap_DropClient, trap_SendServerCommand);
 	ETJump::sessionService->readSession(levelTime);
 	ETJump::adminCommandsHandler = std::make_shared<ETJump::AdminCommandsHandler>(ETJump::sessionService);
-	ETJump::CommandParser::OptionDefinition def{
-		"level",
-		"level desc",
-		ETJump::CommandParser::OptionDefinition::Type::Integer,
-		true
-	};
-	ETJump::adminCommandsHandler->subscribe('a', { "addlevel", "addlevel desc", {
-		{
-			"level", {
-				"level",
-				"level desc",
-				ETJump::CommandParser::OptionDefinition::Type::Integer,
-				true
-			}
-		},
-		{
-			"flag",{
-				"flag", "flag desc", ETJump::CommandParser::OptionDefinition::Type::Boolean,
-				false
-			}
-		},
-		{
-			"dur", {
-				"dur", "dur desc", ETJump::CommandParser::OptionDefinition::Type::Duration,
-				false
-			}
-		}
-	} }, [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+
+	ETJump::adminCommandsHandler->subscribe('a', createCommandDefinition("addlevel", "Adds a level", {
+		createOptionDefinition("level", "The level that will be added (integer)", ETJump::CommandParser::OptionDefinition::Type::Integer, true),
+		createOptionDefinition("commands", "Allowed commands for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
+		createOptionDefinition("greeting", "A greeting for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
+		createOptionDefinition("name", "A name for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
+	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
 		if (command.errors.size() > 0)
 		{
 			Printer::sendChatMessage(clientNum, "^3Invalid parameters: ^7check console for more information.");
-			Printer::sendConsoleMessage(clientNum, boost::algorithm::join(command.errors, "\n"));
-		} else
-		{
-			Printer::sendChatMessage(clientNum, "Executing command " + commandText + " " + std::to_string(command.options.at("dur").duration));
+			Printer::sendConsoleMessage(clientNum, boost::join(command.errors, "\n"));
+			return;
 		}
-		
+
+		auto level = command.options.at("level").integer;
+		std::string greeting = getOptionalText(command, "greeting");
+		std::string commands = getOptionalText(command, "commands");
+		std::string name = getOptionalText(command, "name");
+
+		auto result = ETJump::levelService->add(level, name, commands, greeting);
+		if (!result.success)
+		{
+			Printer::sendChatMessage(clientNum, "^3addlevel: ^7" + result.message);
+		}
 	});
+	
 	/*ETJump::adminCommandsHandler->subscribe("addlevel", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command, { "addlevel", "addlevel description",{ { "--flag",{ "name", "flag desc", ETJump::CommandParser::OptionDefinition::Type::Boolean, true } } } }) {
 		
 	});
