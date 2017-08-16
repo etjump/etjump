@@ -19,6 +19,7 @@
 #include "etj_admin_commands_handler.h"
 #include "etj_printer.h"
 #include <boost/algorithm/string.hpp>
+#include "etj_admin_commands.h"
 
 level_locals_t level;
 
@@ -54,48 +55,6 @@ namespace ETJump
 // ETJump initialization
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO: move elsewhere
-std::pair<std::string, ETJump::CommandParser::OptionDefinition> createOptionDefinition(const std::string& name, const std::string& description, ETJump::CommandParser::OptionDefinition::Type type, bool required)
-{
-	return {
-		name, {
-			name,
-			description,
-			type,
-			required
-		}
-	};
-}
-
-ETJump::CommandParser::CommandDefinition createCommandDefinition(const std::string& name, const std::string& description, const std::map<std::string, ETJump::CommandParser::OptionDefinition>& options = std::map<std::string, ETJump::CommandParser::OptionDefinition>())
-{
-	return {
-		name,
-		description,
-		options
-	};
-}
-
-std::string getOptionalText(const ETJump::CommandParser::Command& command, const std::string& key, const std::string& defaultValue = "")
-{
-	auto optIter = command.options.find(key);
-	if (optIter != end(command.options))
-	{
-		return optIter->second.text;
-	}
-	return defaultValue;
-}
-
-int getOptionalInteger(const ETJump::CommandParser::Command& command, const std::string& key, int defaultValue = 0)
-{
-	auto optIter = command.options.find(key);
-	if (optIter != end(command.options))
-	{
-		return optIter->second.integer;
-	}
-	return defaultValue;
-}
-
 static void initializeETJump(int levelTime, int randomSeed, int restart)
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
@@ -117,78 +76,7 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::sessionService->readSession(levelTime);
 	ETJump::adminCommandsHandler = std::make_shared<ETJump::AdminCommandsHandler>(ETJump::sessionService);
 
-	ETJump::adminCommandsHandler->subscribe('a', createCommandDefinition("addlevel", "Adds a level", {
-		createOptionDefinition("level", "The level that will be added (integer)", ETJump::CommandParser::OptionDefinition::Type::Integer, true),
-		createOptionDefinition("commands", "Allowed commands for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
-		createOptionDefinition("greeting", "A greeting for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
-		createOptionDefinition("name", "A name for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
-	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
-	{
-		if (command.errors.size() > 0)
-		{
-			Printer::sendChatMessage(clientNum, "^3Invalid parameters: ^7check console for more information.");
-			Printer::sendConsoleMessage(clientNum, boost::join(command.errors, "\n"));
-			return;
-		}
-
-		auto level = command.options.at("level").integer;
-		std::string greeting = getOptionalText(command, "greeting");
-		std::string commands = getOptionalText(command, "commands");
-		std::string name = getOptionalText(command, "name");
-
-		auto result = ETJump::levelService->add(level, name, commands, greeting);
-		if (!result.success)
-		{
-			Printer::sendChatMessage(clientNum, "^3addlevel: ^7" + result.message);
-		}
-	});
-	
-	/*ETJump::adminCommandsHandler->subscribe("addlevel", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command, { "addlevel", "addlevel description",{ { "--flag",{ "name", "flag desc", ETJump::CommandParser::OptionDefinition::Type::Boolean, true } } } }) {
-		
-	});
-	ETJump::adminCommandsHandler->subscribe("admintest", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("8ball", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("ban", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("cancelvote", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("deletelevel", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("deleteuser", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("editcommands", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("editlevel", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("edituser", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("finduser", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listusernames", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("finger", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("findmap", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("help", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("kick", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("leastplayed", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("levelinfo", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listbans", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listflags", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listmaps", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listplayers", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listusers", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("map", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("mapinfo", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("mostplayed", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("mute", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("noclip", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("nogoto", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("nosave", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("passvote", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("putteam", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("readconfig", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("rmsaves", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("rename", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("restart", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("setlevel", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("spectate", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("tokens", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("unban", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("unmute", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("userinfo", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("moverscale", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });
-	ETJump::adminCommandsHandler->subscribe("listusers", 'a', [](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command){ return true; });*/
+	ETJump::registerAdminCommands(ETJump::adminCommandsHandler, ETJump::levelService);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

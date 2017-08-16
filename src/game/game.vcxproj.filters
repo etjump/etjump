@@ -282,6 +282,9 @@
     <ClCompile Include="etj_admin_commands_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_admin_commands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -440,6 +443,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_admin_commands_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_admin_commands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
