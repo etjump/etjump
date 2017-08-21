@@ -10,6 +10,14 @@ ETJump::UserService::~UserService()
 {
 }
 
+std::future<int> ETJump::UserService::setLevelIfHasLevel(int level, int newLevel)
+{
+	return std::async(std::launch::async, [=]()
+	{
+		return _userRepository->setLevelIfHasLevel(level, newLevel);
+	});
+}
+
 std::future<ETJump::User> ETJump::UserService::getUser(const std::string& guid)
 {
 	return std::async(std::launch::async, [=]()

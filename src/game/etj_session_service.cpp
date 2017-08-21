@@ -10,13 +10,7 @@
 #include "etj_level_service.h"
 #include "etj_printer.h"
 #include <boost/algorithm/string/replace.hpp>
-
-template<typename R>
-bool is_ready(std::future<R> const& f)
-{
-	return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
-}
-
+#include "etj_task.h"
 
 std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands)
 {
@@ -277,9 +271,33 @@ void ETJump::SessionService::authenticate(int clientNum, const std::string& name
 	addGetUserTaskAsync(clientNum, name, ipAddress, guid, hardwareId);
 }
 
+void ETJump::SessionService::handleAsyncTasks()
+{
+	std::vector<int> deletedTask;
+	for (int i = 0, len = _tasks.size(); i < len; ++i)
+	{
+		if (_tasks[i]->isReady())
+		{
+			_tasks[i]->execute();
+			deletedTask.push_back(i);
+		}
+	}
+
+	std::vector<std::unique_ptr<AbstractTask>> temp;
+	for (int i = 0, len = _tasks.size(); i < len; ++i)
+	{
+		if (find(begin(deletedTask), end(deletedTask), i) == end(deletedTask))
+		{
+			temp.push_back(std::move(_tasks[i]));
+		}
+	}
+	_tasks = std::move(temp);
+}
+
 void ETJump::SessionService::runFrame()
 {
 	handleGetUserTasks();
+	handleAsyncTasks();
 }
 
 void ETJump::SessionService::readSession(int levelTime)
@@ -400,6 +418,27 @@ bool ETJump::SessionService::hasPermission(int clientNum, char permission)
 	}
 
 	return _cachedUserData[clientNum].permissions.test(static_cast<int>(permission));
+}
+
+void ETJump::SessionService::setLevelIfHasLevel(int clientNum, int level, int newLevel)
+{
+	for (auto & u : _users)
+	{
+		if (u.id != User::NO_USER_ID)
+		{
+			if (u.level == level)
+			{
+				u.level = newLevel;
+			}
+		}
+	}
+
+	auto future = _userService->setLevelIfHasLevel(level, newLevel);
+	auto task = new Task<int>(std::move(future), [=](int numAffectedPlayers)
+	{
+		Printer::sendChatMessage(clientNum, "^2ETJump: ^7set the level of " + std::to_string(numAffectedPlayers) + " players from " + std::to_string(level) + " to " + std::to_string(newLevel));
+	});
+	_tasks.push_back(std::unique_ptr<Task<int>>(task));
 }
 
 std::string ETJump::SessionService::getName(int clientNum)

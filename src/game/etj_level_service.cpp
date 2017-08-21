@@ -6,7 +6,7 @@
 #include "etj_config_serializer.h"
 
 ETJump::LevelService::LevelService(const std::string& levelsFile)
-	:_dummyLevel(0, "", "", ""), _log(Log("LevelService")), _levelsFile(levelsFile)
+	:_levels(), _dummyLevel(0, "", "", ""), _log(Log("LevelService")), _levelsFile(levelsFile)
 {
 }
 

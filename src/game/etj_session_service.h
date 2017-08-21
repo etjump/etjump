@@ -7,6 +7,7 @@
 #include "etj_shared.h"
 #include "etj_level.h"
 #include <bitset>
+#include "etj_task.h"
 
 namespace ETJump
 {
@@ -53,6 +54,7 @@ namespace ETJump
 		void connect(int clientNum, bool firstTime);
 		void disconnect(int clientNum);
 		void authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments);
+		void handleAsyncTasks();
 		void runFrame();
 		void readSession(int levelTime);
 		void writeSession();
@@ -61,6 +63,11 @@ namespace ETJump
 		void readClientSession(int clientNum, const std::string& alias, const std::string& ipAddress);
 		const User& getUser(int clientNum);
 		bool hasPermission(int clientNum, char permission);
+		/**
+		 * Finds all users (online and offline) with the specified level and sets
+		 * them to the new level
+		 */
+		void setLevelIfHasLevel(int clientNum, int level, int newLevel);
 		static std::string getName(int clientNum);
 	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
@@ -84,6 +91,7 @@ namespace ETJump
 		std::function<void(int, const char*)> _sendServerCommand;
 		std::shared_ptr<ETJump::Server::ClientCommandsHandler> _clientCommandsHandler;
 		std::shared_ptr<LevelService> _levelService;
+		std::vector<std::unique_ptr<AbstractTask>> _tasks;
 	};
 }
 

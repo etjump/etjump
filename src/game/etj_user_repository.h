@@ -33,6 +33,9 @@ namespace ETJump
 		void addIpAddress(int64_t id, const std::string& ipAddress);
 		// thread safe
 		void updateLastSeen(int64_t id, time_t lastSeen);
+		// thread safe
+		// returns the count of updated users
+		int setLevelIfHasLevel(int level, int newLevel);
 	private:
 		std::string _databaseFile;
 		int _timeout;

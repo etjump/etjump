@@ -398,6 +398,28 @@ void ETJump::UserRepository::updateLastSeen(int64_t id, time_t lastSeen)
 	
 }
 
+int ETJump::UserRepository::setLevelIfHasLevel(int level, int newLevel)
+{
+	try
+	{
+		SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
+
+		SQLite::Statement updateStmt(db,
+			"UPDATE users SET level=? WHERE level=?;"
+		);
+
+		updateStmt.bind(1, newLevel);
+		updateStmt.bind(2, level);
+		
+		updateStmt.exec();
+		return db.getTotalChanges();
+	} catch (const SQLite::Exception& e)
+	{
+		_log.errorLn("setting all users with level " + std::to_string(level) + " to level " + std::to_string(newLevel) + " failed: (" + std::to_string(e.getErrorCode()) + ") " + e.getErrorStr());
+	}
+	return 0;
+}
+
 void ETJump::UserRepository::addIpAddress(int64_t id, const std::string& ipAddress)
 {
 	try

@@ -19,6 +19,7 @@ namespace ETJump
 		std::future<void> addAlias(int64_t id, const std::string& alias);
 		std::future<void> addIpAddress(int64_t id, const std::string& cs);
 		std::future<void> updateLastSeen(int64_t id, time_t lastSeen);
+		std::future<int> setLevelIfHasLevel(int level, int newLevel);
 	private:
 		std::shared_ptr<UserRepository> _userRepository;
 	};
