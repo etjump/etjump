@@ -7,7 +7,7 @@
 #include "etj_result_set_formatter.h"
 
 
-ETJump::AdminCommandsHandler::AdminCommandsHandler(std::shared_ptr<SessionService> sessionService): _sessionService(sessionService), _log(Log("AdminCommandsHandler"))
+ETJump::AdminCommandsHandler::AdminCommandsHandler(std::shared_ptr<SessionService> sessionService): _sessionService(sessionService), _log(Log("AdminCommandsHandler")), _isSorted(false)
 {
 }
 
@@ -99,6 +99,7 @@ bool ETJump::AdminCommandsHandler::subscribe(char permission, CommandParser::Com
 
 	_callbacks[lowercaseCommand] = { permission, callback, definition };
 	_subscribedCommands.push_back(lowercaseCommand);
+	_isSorted = false;
 	return true;
 }
 
@@ -114,4 +115,24 @@ bool ETJump::AdminCommandsHandler::unsubcribe(const std::string& command)
 	_callbacks.erase(callback);
 	_subscribedCommands.erase(std::remove(begin(_subscribedCommands), end(_subscribedCommands), command), end(_subscribedCommands));
 	return true;
+}
+
+std::vector<std::string> ETJump::AdminCommandsHandler::getSortedCommands()
+{
+	if (!_isSorted)
+	{
+		sort(begin(_subscribedCommands), end(_subscribedCommands));
+		_isSorted = true;
+	}
+	return _subscribedCommands;
+}
+
+const ETJump::CommandParser::CommandDefinition* ETJump::AdminCommandsHandler::getCommandDefinition(const std::string& command)
+{
+	auto iter = _callbacks.find(command);
+	if (iter == end(_callbacks))
+	{
+		return nullptr;
+	}
+	return &iter->second.definition;
 }

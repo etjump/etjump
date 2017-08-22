@@ -8,8 +8,8 @@ std::string ETJump::CommandParser::toString(OptionDefinition::Type type)
 	switch (type)
 	{
 	case OptionDefinition::Type::Boolean: return "boolean";
-	case OptionDefinition::Type::Token: return "word";
-	case OptionDefinition::Type::MultiToken: return "text";
+	case OptionDefinition::Type::Token: return "token";
+	case OptionDefinition::Type::MultiToken: return "multi token";
 	case OptionDefinition::Type::Integer: return "integer";
 	case OptionDefinition::Type::Decimal: return "decimal";
 	case OptionDefinition::Type::Date: return "date";

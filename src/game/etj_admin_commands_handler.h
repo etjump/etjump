@@ -28,12 +28,15 @@ namespace ETJump
 		bool checkCommand(int clientNum, const std::vector<std::string>& args);
 		bool subscribe(char permission, CommandParser::CommandDefinition definition, Callback callback);
 		bool unsubcribe(const std::string& command);
+		std::vector<std::string> getSortedCommands();
+		const CommandParser::CommandDefinition *getCommandDefinition(const std::string& command);
 	private:
 		std::shared_ptr<SessionService> _sessionService;
 		std::map<std::string, Command> _callbacks;
 		std::vector<std::string> _subscribedCommands;
 		Log _log;
 		CommandParser _parser;
+		bool _isSorted;
 	};
 }
 

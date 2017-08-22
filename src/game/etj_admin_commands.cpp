@@ -5,6 +5,7 @@
 #include "etj_level_service.h"
 #include "etj_session_service.h"
 #include "etj_printer.h"
+#include "etj_result_set_formatter.h"
 
 std::pair<std::string, ETJump::CommandParser::OptionDefinition> createOptionDefinition(const std::string& name, const std::string& description, ETJump::CommandParser::OptionDefinition::Type type, bool required)
 {
@@ -57,7 +58,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	 * addlevel
 	 */
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("addlevel", "Adds a level", {
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("addlevel", "Adds a level", {
 		createOptionDefinition("level", "The level that will be added (integer)", ETJump::CommandParser::OptionDefinition::Type::Integer, true),
 		createOptionDefinition("commands", "Allowed commands for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
 		createOptionDefinition("greeting", "A greeting for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
@@ -85,22 +86,22 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* admintest
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("admintest", "admintest", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("admintest", "admintest", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* ban
 	*/
-	injectedAdminCommandsHandler->subscribe('b', createCommandDefinition("ban", "ban", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('b', createCommandDefinition("ban", "ban", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* cancelvote
 	*/
-	injectedAdminCommandsHandler->subscribe('C', createCommandDefinition("cancelvote", "cancelvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('C', createCommandDefinition("cancelvote", "cancelvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* deletelevel
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("deletelevel", "Deletes a level.", {
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("deletelevel", "Deletes a level.", {
 		createOptionDefinition("level", "Level to be deleted", CommandParser::OptionDefinition::Type::Integer, true),
 		createOptionDefinition("newlevel", "Level that users with the deleted level will be set to. 0 by default.", CommandParser::OptionDefinition::Type::Integer, false)
 	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
@@ -122,12 +123,12 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* editcommands
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("editcommands", "editcommands", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("editcommands", "editcommands", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* editlevel
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("editlevel", "editlevel", {
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("editlevel", "editlevel", {
 		createOptionDefinition("level", "The level that will be edited (integer)", ETJump::CommandParser::OptionDefinition::Type::Integer, true),
 		createOptionDefinition("commands", "Allowed commands for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
 		createOptionDefinition("greeting", "A greeting for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
@@ -170,7 +171,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* edituser
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("edituser", "edituser", {
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("edituser", "edituser", {
 		createOptionDefinition("id", "Target user ID", CommandParser::OptionDefinition::Type::Integer, true),
 		createOptionDefinition("commands", "Allowed commands for the user", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
 		createOptionDefinition("greeting", "A greeting for the user", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
@@ -211,155 +212,196 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* findmap
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("findmap", "findmap", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("findmap", "findmap", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* finduser
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("finduser", "finduser", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("finduser", "finduser", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* finger
 	*/
-	injectedAdminCommandsHandler->subscribe('f', createCommandDefinition("finger", "finger", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('f', createCommandDefinition("finger", "finger", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* help
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("help", "help", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("help", "help", {
+		createOptionDefinition("cols", "Number of columns that commands will be display on", CommandParser::OptionDefinition::Type::Integer, false)
+	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		if (command.extraArgs.size() == 0)
+		{
+			Printer::sendChatMessage(clientNum, "^3help: ^7check console for more information.");
+			Utilities::ResultSetFormatter rsf;
+			auto itemsOnCurrentRow = 0;
+			const int numItemsPerRow = getOptionalInteger(command, "cols", 4);
+			std::string buffer;
+			for (const auto & c : _adminCommandsHandler->getSortedCommands())
+			{
+				if (itemsOnCurrentRow > 0 && itemsOnCurrentRow % numItemsPerRow == 0)
+				{
+					itemsOnCurrentRow = 0;
+					buffer += "\n";
+				} 
+				buffer += (boost::format("%-20s") % c).str();
+				++itemsOnCurrentRow;
+			}
+			Printer::sendConsoleMessage(clientNum, buffer);
+		} else
+		{
+			auto targetCommand = command.extraArgs[0];
+			auto definition = _adminCommandsHandler->getCommandDefinition(targetCommand);
+			if (definition == nullptr)
+			{
+				Printer::sendChatMessage(clientNum, "^3help: ^7command " + targetCommand + " does not exist.");
+				return;
+			}
+			Printer::sendChatMessage(clientNum, "^3help: ^7check console for more information.");
+
+			std::string buffer = targetCommand + "\n\n" + definition->description + "\n\noptions";
+			for (const auto & opt : definition->options)
+			{
+				buffer += "\n" + (boost::format("%-20s %-12s %-11s %s") % opt.second.name % ETJump::CommandParser::toString(opt.second.type) % (opt.second.required ? "(required)" : " ") % opt.second.description).str();
+			}
+			Printer::sendConsoleMessage(clientNum, buffer);
+		}
+	});
 
 	/**
 	* kick
 	*/
-	injectedAdminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* leastplayed
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("leastplayed", "leastplayed", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("leastplayed", "leastplayed", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* levelinfo
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("levelinfo", "levelinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("levelinfo", "levelinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* listbans
 	*/
-	injectedAdminCommandsHandler->subscribe('L', createCommandDefinition("listbans", "listbans", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('L', createCommandDefinition("listbans", "listbans", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* listflags
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("listflags", "listflags", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("listflags", "listflags", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* listmaps
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("listmaps", "listmaps", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("listmaps", "listmaps", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* listplayers
 	*/
-	injectedAdminCommandsHandler->subscribe('l', createCommandDefinition("listplayers", "listplayers", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('l', createCommandDefinition("listplayers", "listplayers", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* listusernames
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("listusernames", "listusernames", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("listusernames", "listusernames", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* listusers
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("listusers", "listusers", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("listusers", "listusers", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* map
 	*/
-	injectedAdminCommandsHandler->subscribe('M', createCommandDefinition("map", "map", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('M', createCommandDefinition("map", "map", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* mapinfo
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("mapinfo", "mapinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("mapinfo", "mapinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* mostplayed
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("mostplayed", "mostplayed", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("mostplayed", "mostplayed", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* mute
 	*/
-	injectedAdminCommandsHandler->subscribe('m', createCommandDefinition("mute", "mute", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('m', createCommandDefinition("mute", "mute", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* noclip
 	*/
-	injectedAdminCommandsHandler->subscribe('N', createCommandDefinition("noclip", "noclip", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('N', createCommandDefinition("noclip", "noclip", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* nogoto
 	*/
-	injectedAdminCommandsHandler->subscribe('K', createCommandDefinition("nogoto", "nogoto", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('K', createCommandDefinition("nogoto", "nogoto", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* nosave
 	*/
-	injectedAdminCommandsHandler->subscribe('T', createCommandDefinition("nosave", "nosave", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('T', createCommandDefinition("nosave", "nosave", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* passvote
 	*/
-	injectedAdminCommandsHandler->subscribe('P', createCommandDefinition("passvote", "passvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('P', createCommandDefinition("passvote", "passvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* putteam
 	*/
-	injectedAdminCommandsHandler->subscribe('p', createCommandDefinition("putteam", "putteam", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('p', createCommandDefinition("putteam", "putteam", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* rename
 	*/
-	injectedAdminCommandsHandler->subscribe('R', createCommandDefinition("rename", "rename", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('R', createCommandDefinition("rename", "rename", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* restart
 	*/
-	injectedAdminCommandsHandler->subscribe('r', createCommandDefinition("restart", "restart", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('r', createCommandDefinition("restart", "restart", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* rmsaves
 	*/
-	injectedAdminCommandsHandler->subscribe('T', createCommandDefinition("rmsaves", "rmsaves", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('T', createCommandDefinition("rmsaves", "rmsaves", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* setlevel
 	*/
-	injectedAdminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* spectate
 	*/
-	injectedAdminCommandsHandler->subscribe('a', createCommandDefinition("spectate", "spectate", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("spectate", "spectate", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* tokens
 	*/
-	injectedAdminCommandsHandler->subscribe('V', createCommandDefinition("tokens", "tokens", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('V', createCommandDefinition("tokens", "tokens", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* unban
 	*/
-	injectedAdminCommandsHandler->subscribe('b', createCommandDefinition("unban", "unban", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('b', createCommandDefinition("unban", "unban", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* unmute
 	*/
-	injectedAdminCommandsHandler->subscribe('m', createCommandDefinition("unmute", "unmute", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('m', createCommandDefinition("unmute", "unmute", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* userinfo
 	*/
-	injectedAdminCommandsHandler->subscribe('A', createCommandDefinition("userinfo", "userinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("userinfo", "userinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 }
+
