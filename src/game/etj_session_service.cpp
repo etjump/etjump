@@ -449,3 +449,35 @@ std::string ETJump::SessionService::getName(int clientNum)
 	}
 	return (g_entities + clientNum)->client->pers.netname;
 }
+
+void ETJump::SessionService::updateUser(int updaterClientNum, int userId, const MutableUserFields& changes, int changedFields)
+{
+	// update the connected client if there's one
+	for (int i = 0; i < Constants::Common::MAX_CONNECTED_CLIENTS; ++i)
+	{
+		auto &u = _users[i];
+		if (u.id == userId)
+		{
+			if (changedFields & static_cast<int>(UserFields::Commands))
+			{
+				u.commands = changes.commands;
+				_cachedUserData[i].permissions = parsePermissions(_levelService->get(u.level)->commands, u.commands);
+			}
+			if (changedFields & static_cast<int>(UserFields::Greeting))
+			{
+				u.greeting = changes.greeting;
+			}
+			if (changedFields & static_cast<int>(UserFields::Title))
+			{
+				u.title = changes.title;
+			}
+			break;
+		}
+	}
+
+	auto task = new Task<int>(_userService->updateUser(userId, changes, changedFields), [updaterClientNum, userId](int _)
+	{
+		Printer::sendChatMessage(updaterClientNum, "^2ETJump: ^7updated user " + std::to_string(userId) + ".");
+	});
+	_tasks.push_back(std::unique_ptr<Task<int>>(task));
+}

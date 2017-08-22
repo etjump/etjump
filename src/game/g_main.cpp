@@ -76,7 +76,7 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::sessionService->readSession(levelTime);
 	ETJump::adminCommandsHandler = std::make_shared<ETJump::AdminCommandsHandler>(ETJump::sessionService);
 
-	ETJump::registerAdminCommands(ETJump::adminCommandsHandler, ETJump::levelService, ETJump::sessionService);
+	ETJump::registerAdminCommands(ETJump::adminCommandsHandler, ETJump::levelService, ETJump::sessionService, ETJump::userService);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

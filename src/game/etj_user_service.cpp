@@ -35,11 +35,13 @@ std::future<ETJump::User> ETJump::UserService::insertUser(const std::string& gui
 	});
 }
 
-std::future<void> ETJump::UserService::updateUser(int64_t id, MutableUserFields changes, int changedFields)
+// returns an int as Task<void> cannot be used (cannot future.get() a future<void>)
+std::future<int> ETJump::UserService::updateUser(int64_t id, MutableUserFields changes, int changedFields)
 {
 	return std::async(std::launch::async, [=]()
 	{
 		_userRepository->update(id, changes, changedFields);
+		return 0;
 	});
 }
 

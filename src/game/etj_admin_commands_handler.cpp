@@ -58,6 +58,7 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 
 	if (matchingCommands.size() == 0)
 	{
+		// TODO: only list authorized commands
 		auto match = ETJump::getBestMatch(_subscribedCommands, command);
 		Printer::sendConsoleMessage(clientNum, "^3Unknown command: ^7could not find command " + command + ". Did you mean " + match + "?\n");
 		return true;

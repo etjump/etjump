@@ -14,7 +14,8 @@ namespace ETJump
 
 		std::future<User> getUser(const std::string& guid);
 		std::future<User> insertUser(const std::string& guid, const std::string& name, const std::string& ipAddress, const std::string& hardwareId);
-		std::future<void> updateUser(int64_t id, MutableUserFields changes, int changedFields);
+		// returns an int as Task<void> cannot be used (cannot future.get() a future<void>)
+		std::future<int> updateUser(int64_t id, MutableUserFields changes, int changedFields);
 		std::future<void> addHardwareId(int64_t id, const std::string& hardwareId);
 		std::future<void> addAlias(int64_t id, const std::string& alias);
 		std::future<void> addIpAddress(int64_t id, const std::string& cs);
