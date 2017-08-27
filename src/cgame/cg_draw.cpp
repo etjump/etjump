@@ -3795,7 +3795,7 @@ static void CG_DrawKeys(void)
 
 	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
 
-	if (drawKeysValue == KeyTypes::Hidden)
+	if (drawKeysValue <= KeyTypes::Hidden)
 	{
 		return;
 	}
