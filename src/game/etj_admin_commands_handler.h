@@ -14,6 +14,8 @@ namespace ETJump
 	class AdminCommandsHandler
 	{
 	public:
+		static const int CONSOLE_CLIENTNUM = -1;
+
 		// Callback clientNum can be null if called from rcon
 		typedef std::function<void(int clientNum, const std::string& command, const CommandParser::Command& parsed)> Callback;
 		struct Command

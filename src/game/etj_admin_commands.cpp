@@ -6,6 +6,7 @@
 #include "etj_session_service.h"
 #include "etj_printer.h"
 #include "etj_result_set_formatter.h"
+#include "etj_save.h"
 
 std::pair<std::string, ETJump::CommandParser::OptionDefinition> createOptionDefinition(const std::string& name, const std::string& description, ETJump::CommandParser::OptionDefinition::Type type, bool required)
 {
@@ -86,7 +87,17 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* admintest
 	*/
-	_adminCommandsHandler->subscribe('a', createCommandDefinition("admintest", "admintest", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("admintest", "admintest", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		if (clientNum == AdminCommandsHandler::CONSOLE_CLIENTNUM)
+		{
+			return;
+		}
+		auto user = sessionService->getUser(clientNum);
+		auto level = levelService->get(user.level);
+		Printer::broadcastChatMessage((boost::format("^3admintest: ^7%s^7 is a level %d user (%s^7).") 
+			% (g_entities + clientNum)->client->pers.netname % user.level % level->name).str());
+	});
 
 	/**
 	* ban
@@ -96,7 +107,19 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* cancelvote
 	*/
-	_adminCommandsHandler->subscribe('C', createCommandDefinition("cancelvote", "cancelvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('C', createCommandDefinition("cancelvote", "cancelvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		if (level.voteInfo.voteTime)
+		{
+			level.voteInfo.voteYes = 0;
+			level.voteInfo.voteNo = level.numConnectedClients;
+			Printer::broadcastChatMessage("^3cancelvote: ^7vote has been canceled");
+		}
+		else
+		{
+			Printer::sendChatMessage(clientNum, "^3cancelvote: ^7no vote in progress.");
+		}
+	});
 
 	/**
 	* deletelevel
@@ -272,7 +295,10 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* kick
 	*/
-	_adminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		
+	});
 
 	/**
 	* leastplayed
@@ -352,7 +378,20 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* passvote
 	*/
-	_adminCommandsHandler->subscribe('P', createCommandDefinition("passvote", "passvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('P', createCommandDefinition("passvote", "passvote", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		if (level.voteInfo.voteTime)
+		{
+			level.voteInfo.voteNo = 0;
+			level.voteInfo.voteYes = level.numConnectedClients;
+			Printer::broadcastChatMessage("^3passvote:^7 vote has been passed.");
+		}
+		else
+		{
+			Printer::sendChatMessage(clientNum, "^3passvote:^7 no vote in progress.");
+		}
+		return qtrue;
+	});
 
 	/**
 	* putteam
