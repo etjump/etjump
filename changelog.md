@@ -15,6 +15,7 @@
 * fixed `target_speaker` spawnflag __8__ (ACTIVATOR) didn't want to play sound to the activator
 * fixed setting com_maxfps in menu
 * added etj_viewPlayerPortals 2 as an option to menu
+* added etj_drawKeys 2 to show DeFRaG style keys
 
 # ETJump 2.2.0
 

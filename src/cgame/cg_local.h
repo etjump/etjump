@@ -1812,6 +1812,7 @@ typedef struct
 
 	qhandle_t fireteamicons[6];
 	keys_set_t keys;
+	keys_set_t keys2;
 
 	//Feen: PGM - Portal Shaders //NOTE - Maybe add shaders for other player portals as well....
 	qhandle_t portal_blueShader;       //Portal 1
