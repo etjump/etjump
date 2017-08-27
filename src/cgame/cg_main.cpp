@@ -2488,24 +2488,24 @@ static void CG_RegisterGraphics(void)
 	cgs.media.keys.ProneNotPressedShader
 	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_prone_not_pressed");
 
-    // Aciz: Keyset 2 (DeFRaG style keys)
-    // No need for another blank key, so only visible keys
-    cgs.media.keys2.ForwardPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_forward_pressed");
-    cgs.media.keys2.BackwardPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_backward_pressed");
-    cgs.media.keys2.RightPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_right_pressed");
-    cgs.media.keys2.LeftPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_left_pressed");
-    cgs.media.keys2.JumpPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_jump_pressed");
-    cgs.media.keys2.CrouchPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_crouch_pressed");
-    cgs.media.keys2.SprintPressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_sprint_pressed");
-    cgs.media.keys2.PronePressedShader
-        = trap_R_RegisterShaderNoMip("gfx/keyset2/key_prone_pressed");
+	// Aciz: Keyset 2 (DeFRaG style keys)
+	// No need for another blank key, so only visible keys
+	cgs.media.keys2.ForwardPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_forward_pressed");
+	cgs.media.keys2.BackwardPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_backward_pressed");
+	cgs.media.keys2.RightPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_right_pressed");
+	cgs.media.keys2.LeftPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_left_pressed");
+	cgs.media.keys2.JumpPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_jump_pressed");
+	cgs.media.keys2.CrouchPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_crouch_pressed");
+	cgs.media.keys2.SprintPressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_sprint_pressed");
+	cgs.media.keys2.PronePressedShader
+		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_prone_pressed");
 
 	//Feen: CGaz - Register Shader
 	cgs.media.CGazArrow = trap_R_RegisterShaderNoMip("gfx/2d/cgaz_arrow");

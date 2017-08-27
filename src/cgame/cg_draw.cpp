@@ -3781,9 +3781,9 @@ static void CG_DrawSlick(void)
 // Define keysets
 enum class KeyTypes
 {
-    Hidden,
-    Keyset1,
-    Keyset2,
+	Hidden,
+	Keyset1,
+	Keyset2,
 };
 
 static void CG_DrawKeys(void)
@@ -3821,10 +3821,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.SprintPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.SprintPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.SprintPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.SprintNotPressedShader);
@@ -3835,10 +3835,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.ForwardPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.ForwardPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.ForwardPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.ForwardNotPressedShader);
@@ -3849,10 +3849,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.JumpPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.JumpPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.JumpPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.JumpNotPressedShader);
@@ -3869,10 +3869,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.LeftPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.LeftPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.LeftPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.LeftNotPressedShader);
@@ -3883,10 +3883,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.RightPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.RightPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.RightPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.RightNotPressedShader);
@@ -3903,10 +3903,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.PronePressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.PronePressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.PronePressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.ProneNotPressedShader);
@@ -3917,10 +3917,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.BackwardPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.BackwardPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.BackwardPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.BackwardNotPressedShader);
@@ -3931,10 +3931,10 @@ static void CG_DrawKeys(void)
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.CrouchPressedShader);
 	}
-    else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
-    {
-        CG_DrawPic(x, y, size, size, cgs.media.keys2.CrouchPressedShader);
-    }
+	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && cg_drawKeys.integer >= static_cast<int>(KeyTypes::Keyset2))
+	{
+		CG_DrawPic(x, y, size, size, cgs.media.keys2.CrouchPressedShader);
+	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.CrouchNotPressedShader);
