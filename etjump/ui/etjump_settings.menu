@@ -24,7 +24,7 @@ menuDef {
 
 	#define SUBWINDOW_WIDTH		.5*(WINDOW_WIDTH-18)
 	SUBWINDOW(8, 32, (SUBWINDOW_WIDTH), 112, "GENERAL")
-		MULTI(8, 48, (SUBWINDOW_WIDTH) - 4, 10, "Max FPS: ", .2, 8, "com_maxfps", cvarFloatList { "Low" 43 "Medium" 76 "High" 125 "Very high" 125 "Extreme" 250 }, "Sets the FPS limit")
+		MULTI(8, 48, (SUBWINDOW_WIDTH) - 4, 10, "Max FPS: ", .2, 8, "com_maxfps", cvarFloatList { "Low" 43 "Medium" 76 "High" 125 "Very high" 250 }, "Sets the FPS limit")
 		YESNO(8, 60, (SUBWINDOW_WIDTH) - 4, 10, "No fatigue: ", .2, 8, "etj_nofatigue", "Toggles infinite stamina")
 		YESNO(8, 72, (SUBWINDOW_WIDTH) - 4, 10, "View log: ", .2, 8, "etj_viewlog", "Toggles separate console log window. Alt+tab when enabling.")
 		YESNO(8, 84, (SUBWINDOW_WIDTH) - 4, 10, "Draw clock: ", .2, 8, "etj_drawClock", "Toggles clock")
@@ -77,7 +77,7 @@ menuDef {
 
 
 	SUBWINDOW(6 + (SUBWINDOW_WIDTH) + 8, 200, (SUBWINDOW_WIDTH), 28, "PORTAL GUN")
-		YESNO(6 + (SUBWINDOW_WIDTH) + 8, 216, (SUBWINDOW_WIDTH) - 4, 10, "Display portals: ", .2, 8, "etj_viewPlayerPortals", "Toggles other players' portals' visibility")
+		MULTI(6 + (SUBWINDOW_WIDTH) + 8, 216, (SUBWINDOW_WIDTH) - 4, 10, "Draw player portals: ", .2, 8, "etj_viewPlayerPortals", cvarFloatList { "Off" 0 "On" 1 "Only when spectating" 2 }, "Changes other players' portals' visibility")
 
 
 	SUBWINDOW(6 + (SUBWINDOW_WIDTH) + 8, 236, (SUBWINDOW_WIDTH), 76, "TIMERUNS")
