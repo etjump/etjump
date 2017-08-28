@@ -28,6 +28,7 @@
   * `etj_saveIndicatorX`
   * `etj_saveIndicatorY`
 * fixed no jump sounds while jumping on slopes
+* fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
 
 # ETJump 2.2.0
 
