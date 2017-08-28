@@ -1060,13 +1060,13 @@ static void ETJump_InitNoJumpDelay()
 {
 	char *s = nullptr;
 	G_SpawnString("nojumpdelay", "0", &s);
-	level.noDelayJump = atoi(s) ? true : false;
-	level.noDelayJump
+	level.noJumpDelay = atoi(s) ? true : false;
+	level.noJumpDelay
 		? shared.integer |= BG_LEVEL_NO_JUMPDELAY
 		: shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
 	
 	trap_Cvar_Set("shared", va("%d", shared.integer));
-	G_Printf("No jump delay %s.\n", level.noDelayJump ? "enabled" : "disabled");
+	G_Printf("No jump delay %s.\n", level.noJumpDelay ? "enabled" : "disabled");
 }
 
 static void ETJump_InitNoSave()

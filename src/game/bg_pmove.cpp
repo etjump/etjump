@@ -830,7 +830,6 @@ static qboolean PM_CheckJump(void)
 	{
 		return qfalse;
 	}
-	trace_t trace;
 
 	// JPW NERVE -- jumping in multiplayer uses and requires sprint juice (to prevent turbo skating, sprint + jumps)
 	// don't allow jump accel
