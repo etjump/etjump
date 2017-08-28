@@ -18,14 +18,15 @@ std::pair<std::string, ETJump::CommandParser::OptionDefinition> createOptionDefi
 			required
 		}
 	};
-}
+	}
 
-ETJump::CommandParser::CommandDefinition createCommandDefinition(const std::string& name, const std::string& description, const std::map<std::string, ETJump::CommandParser::OptionDefinition>& options = std::map<std::string, ETJump::CommandParser::OptionDefinition>())
+	ETJump::CommandParser::CommandDefinition createCommandDefinition(const std::string& name, const std::string& description, const std::map<std::string, ETJump::CommandParser::OptionDefinition>& options = std::map<std::string, ETJump::CommandParser::OptionDefinition>(), const std::vector<ETJump::CommandParser::OptionDefinition>& positionalOptions = std::vector<ETJump::CommandParser::OptionDefinition>())
 {
 	return{
 		name,
 		description,
-		options
+		options,
+		positionalOptions
 	};
 }
 
@@ -56,6 +57,8 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	static std::shared_ptr<LevelService> levelService = injectedLevelService;
 	static std::shared_ptr<SessionService> sessionService = injectedSessionService;
 	static std::shared_ptr<UserService> userService = injectedUserService;
+	static const std::string NoConnectedClientsError = "no connected players by that name or slot number";
+	static const std::string CheckConsoleForInfo = "check console for more information.";
 	/**
 	 * addlevel
 	 */
@@ -68,7 +71,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	{
 		if (command.errors.size() > 0)
 		{
-			Printer::sendChatMessage(clientNum, "^3Invalid parameters: ^7check console for more information.");
+			Printer::sendChatMessage(clientNum, "^3Invalid parameters: ^7" + CheckConsoleForInfo);
 			Printer::sendConsoleMessage(clientNum, boost::join(command.errors, "\n"));
 			return;
 		}
@@ -245,7 +248,36 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* finger
 	*/
-	_adminCommandsHandler->subscribe('f', createCommandDefinition("finger", "finger", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	auto playerOptionDefinition = createOptionDefinition("player", "Player name or number", CommandParser::OptionDefinition::Type::Token, true);
+	_adminCommandsHandler->subscribe('f', createCommandDefinition("finger", "finger", {
+		playerOptionDefinition
+	}, { playerOptionDefinition.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		if (command.errors.size() > 0)
+		{
+			Printer::sendChatMessage(clientNum, "^3Invalid parameters: ^7" + CheckConsoleForInfo);
+			Printer::sendConsoleMessage(clientNum, boost::join(command.errors, "\n"));
+			return;
+		}
+
+		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		if (targets.size() == 0)
+		{
+			Printer::sendChatMessage(clientNum, "^3finger: ^/" + NoConnectedClientsError);
+			return;
+		}
+		Printer::sendChatMessage(clientNum, "^3finger: ^7" + CheckConsoleForInfo);
+		for (const auto & t : targets)
+		{
+			auto user = sessionService->getUser(t);
+			Printer::sendConsoleMessage(clientNum, (boost::format("^7name: %s\n^7id: %d^7\noriginal name: %s\n^7level: %d\n^7title: %s^7\n")
+				% sessionService->getName(clientNum) 
+				% user.id
+				% user.name
+				% user.level
+				% user.title).str());
+		}
+	});
 
 	/**
 	* help
@@ -364,16 +396,6 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	* noclip
 	*/
 	_adminCommandsHandler->subscribe('N', createCommandDefinition("noclip", "noclip", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
-
-	/**
-	* nogoto
-	*/
-	_adminCommandsHandler->subscribe('K', createCommandDefinition("nogoto", "nogoto", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
-
-	/**
-	* nosave
-	*/
-	_adminCommandsHandler->subscribe('T', createCommandDefinition("nosave", "nosave", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* passvote

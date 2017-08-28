@@ -266,6 +266,14 @@ void SanitizeConstString(const char *in, char *out, qboolean fToLower)
 	*out = 0;
 }
 
+std::string SanitizeConstString(const char *in, bool toLower)
+{
+	auto len = strlen(in);
+	std::vector<char> out(len + 1);
+	SanitizeConstString(in, out.data(), toLower ? qtrue : qfalse);
+	return std::string(out.data());
+}
+
 int CleanStrlen(const char *in)
 {
 	int len = 0;
@@ -475,7 +483,6 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter)
 			cl = &level.clients[*p];
 			if (cl->pers.connected == CON_CONNECTED || cl->pers.connected == CON_CONNECTING)
 			{
-				//ETJump: filtering out specific team
  				if (cl->sess.sessionTeam == filter)
 				{
 					continue;
@@ -491,20 +498,15 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter)
 				}
 
 				Q_strcat(err, len, line);		
-				//ETJump: save the last matching result in plist, so we could
-				//        use it if we end up having 1 match
 				*plist = *p;
 
 				matches++;
 			}
 		}
-		//ETJump: we get one match after filtering out spectators,
-		//        plist holds the result
 		if (matches == 1)
 		{
 			return qtrue;
 		}
-		//ETJump: no matches after filtering out spectators
 		if (!matches)
 		{
 			err[0] = '\0';

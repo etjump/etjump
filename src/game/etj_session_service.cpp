@@ -481,3 +481,47 @@ void ETJump::SessionService::updateUser(int updaterClientNum, int userId, const 
 	});
 	_tasks.push_back(std::unique_ptr<Task<int>>(task));
 }
+
+std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)
+{
+	try
+	{
+		std::locale locale = std::locale::classic();
+		bool isNumeric = true; 
+		for (const auto & c : partial)
+		{
+			if (!std::isdigit(c, locale))
+			{
+				isNumeric = false;
+				break;
+			}
+		}
+		if (isNumeric)
+		{
+			auto clientNum = std::stoi(partial);
+			if (clientNum >= 0 && clientNum < Constants::Common::MAX_CONNECTED_CLIENTS)
+			{
+				return std::vector<int>{clientNum};
+			}
+		}
+	} catch (const std::out_of_range&)
+	{
+	} catch (const std::invalid_argument&)
+	{
+	}
+
+	std::vector<int> matches;
+	for (int i = 0; i < level.numConnectedClients; ++i)
+	{
+		auto clientNum = level.sortedClients[i];
+
+		auto text = ETJump::sanitize(partial, true);
+		auto name = ETJump::sanitize(partial, true);
+		if (name.find(text) == std::string::npos)
+		{
+			continue;
+		}
+		matches.push_back(clientNum);
+	}
+	return matches;
+}

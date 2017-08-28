@@ -19,7 +19,7 @@ namespace ETJump
 				MultiToken,
 				Integer,
 				Decimal,
-				Date,
+				//Date,
 				Duration
 			};
 
@@ -34,6 +34,8 @@ namespace ETJump
 			std::string name;
 			std::string description;
 			std::map<std::string, OptionDefinition> options;
+			// only single token options
+			std::vector<OptionDefinition> positionalOptions;
 		};
 
 		struct Option

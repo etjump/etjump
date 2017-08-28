@@ -70,6 +70,7 @@ namespace ETJump
 		void setLevelIfHasLevel(int clientNum, int level, int newLevel);
 		void updateUser(int updaterClientNum, int userId, const MutableUserFields& changes, int changedFields);
 		static std::string getName(int clientNum);
+		std::vector<int> findUsersByName(const std::string& name);
 	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
 		void removeClientTasks(int clientNum);

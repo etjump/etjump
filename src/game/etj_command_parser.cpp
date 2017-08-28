@@ -12,7 +12,7 @@ std::string ETJump::CommandParser::toString(OptionDefinition::Type type)
 	case OptionDefinition::Type::MultiToken: return "text";
 	case OptionDefinition::Type::Integer: return "integer";
 	case OptionDefinition::Type::Decimal: return "decimal";
-	case OptionDefinition::Type::Date: return "date";
+	//case OptionDefinition::Type::Date: return "date";
 	case OptionDefinition::Type::Duration: return "duration";
 	default: return "unknown type";
 	}
@@ -94,7 +94,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 					command.errors.push_back("Option `" + optionDefinition->second.name + "` is of type " + toString(optionDefinition->second.type) + ". Cannot convert `" + arg + "` to the specified type.");
 				}
 				break;
-			case OptionDefinition::Type::Date:
+			//case OptionDefinition::Type::Date:
 			case OptionDefinition::Type::Duration:
 				currentOption.name = optionDefinition->second.name;
 				currentOption.duration = ETJump::Duration::parseDuration(arg);
@@ -141,6 +141,66 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 	if (optionDefinition != end)
 	{
 		command.options[currentOption.name] = currentOption;
+	}
+
+	if (definition.positionalOptions.size() <= command.extraArgs.size())
+	{
+		for (int i = 0, len = definition.positionalOptions.size(); i < len; ++i)
+		{
+			auto& positionalOption = definition.positionalOptions[i];
+			auto& arg = command.extraArgs[i];
+			// always prefer explicit option
+			if (command.options.find(positionalOption.name) != command.options.end())
+			{
+				continue;
+			}
+
+			currentOption = Option{};
+
+			switch (positionalOption.type)
+			{
+			case OptionDefinition::Type::Integer: 
+				try
+				{
+					currentOption.name = positionalOption.name;
+					currentOption.integer = std::stoi(arg);
+					command.options[currentOption.name] = currentOption;
+				}
+				catch (const std::exception&)
+				{
+					command.errors.push_back("Option `" + positionalOption.name + "` is of type " + toString(positionalOption.type) + ". Cannot convert `" + arg + "` to the specified type.");
+				}
+				break;
+
+			case OptionDefinition::Type::Decimal: 
+				try
+				{
+					currentOption.name = positionalOption.name;
+					currentOption.decimal = std::stod(arg);
+					command.options[currentOption.name] = currentOption;
+				}
+				catch (const std::exception&)
+				{
+					command.errors.push_back("Option `" + positionalOption.name + "` is of type " + toString(positionalOption.type) + ". Cannot convert `" + arg + "` to the specified type.");
+				}
+				break;
+			case OptionDefinition::Type::Token: 
+				currentOption.name = positionalOption.name;
+				currentOption.text = arg;
+				command.options[currentOption.name] = currentOption;
+				break;
+			//case OptionDefinition::Type::Date: break;
+			case OptionDefinition::Type::Duration: 
+				currentOption.name = positionalOption.name;
+				currentOption.duration = ETJump::Duration::parseDuration(arg);
+				command.options[currentOption.name] = currentOption;
+				break;
+			case OptionDefinition::Type::Boolean: break;
+			case OptionDefinition::Type::MultiToken: break;
+			default: 
+				command.errors.push_back("Unsupported positional option " + toString(positionalOption.type));
+			}
+		}
 	}
 
 	for (const auto & opt : definition.options)

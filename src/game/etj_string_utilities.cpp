@@ -70,3 +70,37 @@ std::string ETJump::getBestMatch(const std::vector<std::string>& words, const st
 
 	return smallest->first;
 }
+
+void SanitizeConstString(const char *in, char *out, bool toLower)
+{
+	while (*in)
+	{
+		if (*in == 27 || *in == '^')
+		{
+			in++;       // skip color code
+			if (*in)
+			{
+				in++;
+			}
+			continue;
+		}
+
+		if (*in < 32)
+		{
+			in++;
+			continue;
+		}
+
+		*out++ = (toLower) ? tolower(*in++) : *in++;
+	}
+
+	*out = 0;
+}
+
+std::string ETJump::sanitize(const std::string& text, bool toLower)
+{
+	auto len = text.length();
+	std::vector<char> out(len + 1);
+	SanitizeConstString(text.c_str(), out.data(), toLower ? true : false);
+	return std::string(out.data());
+}
