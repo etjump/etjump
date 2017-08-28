@@ -162,3 +162,25 @@ gfx/keyset/key_prone_not_pressed
 	}
 }
 
+// save icon by Aciz
+gfx/2d/save_on
+{
+	noPicMip
+	noMipMaps
+	{
+		map gfx/2d/saveicon.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+gfx/2d/save_off
+{
+	noPicMip
+	noMipMaps
+	{
+		map gfx/2d/forbidicon.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}

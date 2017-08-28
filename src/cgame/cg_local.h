@@ -1821,6 +1821,8 @@ typedef struct
 	qhandle_t CGazArrow;
 	// alternative ghost players visualisation
 	qhandle_t ghostPlayersAltColorShader;
+	qhandle_t saveIcon;
+	qhandle_t noSaveIcon;
 
 } cgMedia_t;
 
@@ -2525,6 +2527,14 @@ extern vmCvar_t etj_demo_rollspeed;
 extern vmCvar_t etj_demo_lookat;
 extern vmCvar_t etj_demo_freecamspeed;
 extern vmCvar_t etj_predefineddemokeys;
+
+extern vmCvar_t etj_drawNoJumpDelay;
+extern vmCvar_t etj_noJumpDelayX;
+extern vmCvar_t etj_noJumpDelayY;
+
+extern vmCvar_t etj_drawSaveIndicator;
+extern vmCvar_t etj_saveIndicatorX;
+extern vmCvar_t etj_saveIndicatorY;
 
 //
 // cg_main.c

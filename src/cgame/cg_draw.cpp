@@ -3778,6 +3778,106 @@ static void CG_DrawSlick(void)
 	}
 }
 
+// ETJump: jump delay surface dector
+static void CG_DrawJumpDelay(void)
+{
+	trace_t trace;
+	vec3_t start, end;
+	float x = etj_noJumpDelayX.integer;
+	float y = etj_noJumpDelayY.integer;
+	if (!etj_drawNoJumpDelay.integer)
+	{
+		return;
+	}
+	ETJump_AdjustPosition(&x);
+	VectorCopy(cg.refdef.vieworg, start);
+	VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
+	CG_Trace(&trace, start, nullptr, nullptr, end, cg.snap->ps.clientNum, CONTENTS_SOLID);
+	if (trace.surfaceFlags & SURF_NOJUMPDELAY)
+	{
+		if (shared.integer & BG_LEVEL_NO_JUMPDELAY) {
+			CG_DrawStringExt(x, y, "D", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		} else
+		{
+			CG_DrawStringExt(x, y, "ND", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		}
+	}
+}
+
+namespace ETJump {
+	const vec4_t SaveShadowColor{ 0.f, 0.f, 0.f, 0.8f };
+	const vec4_t SaveIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
+	const vec4_t SaveForbidColor{ 1.0f, 0.2f, 0.2f, 1.f };
+	const auto SaveIconSize = 20.f;
+
+	static void DrawSaveIcon(float x, float y)
+	{
+		trap_R_SetColor(SaveShadowColor);
+		CG_DrawPic(x + 1, y + 1, SaveIconSize, SaveIconSize, cgs.media.saveIcon);
+		trap_R_SetColor(SaveIconColor);
+		CG_DrawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon);
+		trap_R_SetColor(nullptr);
+	}
+
+	static void DrawNoSaveIcon(float x, float y)
+	{
+		trap_R_SetColor(SaveForbidColor);
+		CG_DrawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon);
+		trap_R_SetColor(nullptr);
+	}
+}
+
+static void CG_DrawSaveIndicator(void)
+{
+	trace_t trace;
+	
+	float x = etj_saveIndicatorX.integer;
+	float y = etj_saveIndicatorY.integer;
+	
+	if (!etj_drawSaveIndicator.integer)
+	{
+		return;
+	}
+	// no indicator for idle specs
+	if (cg.snap->ps.pm_type & PM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
+	{
+		return;
+	}
+
+	ETJump_AdjustPosition(&x);
+
+	auto ps = cg.snap->ps;
+	CG_Trace(&trace, cg.refdef.vieworg, ps.mins, ps.maxs, cg.refdef.vieworg, ps.clientNum, CONTENTS_NOSAVE);
+	
+	if (shared.integer & BG_LEVEL_NO_SAVE)
+	{
+		if (trace.fraction != 1.0) {
+			if (etj_drawSaveIndicator.integer != 2) {
+				ETJump::DrawSaveIcon(x, y);
+			}
+		}
+		else {
+			if (etj_drawSaveIndicator.integer != 3) {
+				ETJump::DrawSaveIcon(x, y);
+				ETJump::DrawNoSaveIcon(x, y);
+			}
+		}
+	} else
+	{
+		if (trace.fraction != 1.0) {
+			if (etj_drawSaveIndicator.integer != 2) {
+				ETJump::DrawSaveIcon(x, y);
+				ETJump::DrawNoSaveIcon(x, y);
+			}
+		}
+		else {
+			if (etj_drawSaveIndicator.integer != 3) {
+				ETJump::DrawSaveIcon(x, y);
+			}
+		}
+	}
+}
+
 static void CG_DrawKeys(void)
 {
 	playerState_t *ps;
@@ -5969,6 +6069,8 @@ static void CG_Draw2D(void)
 			CG_DrawCGazHUD();
 			CG_DrawOB();
 			CG_DrawSlick();
+			CG_DrawJumpDelay();
+			CG_DrawSaveIndicator();
 			CG_DrawSpeed2();
 			CG_DrawRouteDesign();
 			CG_DrawKeys();

@@ -25,8 +25,8 @@
 #define CONTENTS_TELEPORTER         0x00040000  //NOT USED EITHER....
 #define CONTENTS_NOPORTAL           0x00080000  // Feen: PGM - Contents formerly known as CONTENTS_JUMPPAD - Used for 'emancipation grid'
 #define CONTENTS_NOSAVE             0x00100000  // CONTENTS_NOSAVE
-#define CONTENTS_NOSAVERESET        0x00200000
-#define CONTENTS_DONOTENTER_LARGE   0x00400000
+#define CONTENTS_NOSAVERESET        0x00200000	
+#define CONTENTS_DONOTENTER_LARGE   0x00400000  
 #define CONTENTS_ORIGIN             0x01000000  // removed before bsping an entity
 #define CONTENTS_BODY               0x02000000  // should never be on a brush, only in game
 #define CONTENTS_CORPSE             0x04000000
@@ -73,10 +73,11 @@
 
 //Feen: New ETJump Surfaces...
 #define SURF_PORTALGATE         0x08000000  //Feen: I hereby declare these's SURF's in the name of ETJump!
-#define SURF_MONSLICK_N         0x10000000  //Zero: UNUSED
+#define SURF_MONSLICK_N         0x10000000  //ETJump: SURF_NOJUMPDELAY
 #define SURF_MONSLICK_E         0x20000000  //Zero: I hereby declare this SURF as a portalable/unportalable surface (depends on level.portalSurfaces)
 #define SURF_MONSLICK_S         0x40000000	//Zero: see SURF_OVERBOUNCE
 const int SURF_OVERBOUNCE =		0x40000000;
+const int SURF_NOJUMPDELAY =    0x10000000;
 //END New ETJump Surfaces
 
 #define SURF_LANDMINE           0x80000000  // ydnar: ok to place landmines on this surface

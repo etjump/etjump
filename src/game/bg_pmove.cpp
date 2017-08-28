@@ -818,7 +818,6 @@ static void PM_SetMovementDir(void)
 #endif
 }
 
-
 /*
 =============
 PM_CheckJump
@@ -831,6 +830,7 @@ static qboolean PM_CheckJump(void)
 	{
 		return qfalse;
 	}
+	trace_t trace;
 
 	// JPW NERVE -- jumping in multiplayer uses and requires sprint juice (to prevent turbo skating, sprint + jumps)
 	// don't allow jump accel
@@ -839,7 +839,19 @@ static qboolean PM_CheckJump(void)
 	// fix for #166
 	if (pm->cmd.serverTime - pm->pmext->jumpTime < 850)
 	{
-		return qfalse;
+		if (pm->shared & BG_LEVEL_NO_JUMPDELAY)
+		{
+			if (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
+			{
+				return qfalse;
+			}
+		} else
+		{
+ 			if (!(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY))
+			{
+				return qfalse;
+			}
+		}
 	}
 
 	// don't allow if player tired
@@ -1955,7 +1967,7 @@ static void PM_CrashLand(void)
 		delta *= 0.5;
 	}
 
-	if (delta < 1)
+	if (delta < 1 && (pm->cmd.serverTime - pm->pmext->jumpTime > 2000))
 	{
 		return;
 	}
@@ -2035,6 +2047,11 @@ static void PM_CrashLand(void)
 		else if (delta > 7)
 		{
 			PM_AddEventExt(EV_FALL_SHORT, PM_FootstepForSurface());
+		}
+		// ETJump uphill jump sounds
+		else if (delta > 0)
+		{
+ 			PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
 		}
 
 		// Feen: Below is handled in g_active.c again.. CrashLand Fix
@@ -2164,7 +2181,6 @@ static void PM_GroundTraceMissed(void)
 	//PM_CheckPortal();
 
 }
-
 
 /*
 =============

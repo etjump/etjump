@@ -1048,16 +1048,38 @@ void ETJump_InitNoOverbounce()
 	G_SpawnString("nooverbounce", "0", &s);
 	val = atoi(s);
 	level.noOverbounce = val != 0;
-
-	auto currentShared = shared.integer;
-
 	level.noOverbounce
-		? currentShared |= BG_LEVEL_NO_OVERBOUNCE
-		: currentShared &= ~BG_LEVEL_NO_OVERBOUNCE;
+		? shared.integer |= BG_LEVEL_NO_OVERBOUNCE
+		: shared.integer &= ~BG_LEVEL_NO_OVERBOUNCE;
 
-	trap_Cvar_Set("shared", va("%d", currentShared));
-
+	trap_Cvar_Set("shared", va("%d", shared.integer));
 	G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
+}
+
+static void ETJump_InitNoJumpDelay()
+{
+	char *s = nullptr;
+	G_SpawnString("nojumpdelay", "0", &s);
+	level.noDelayJump = atoi(s) ? true : false;
+	level.noDelayJump
+		? shared.integer |= BG_LEVEL_NO_JUMPDELAY
+		: shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
+	
+	trap_Cvar_Set("shared", va("%d", shared.integer));
+	G_Printf("No jump delay %s.\n", level.noDelayJump ? "enabled" : "disabled");
+}
+
+static void ETJump_InitNoSave()
+{
+	char *s = nullptr;
+	G_SpawnString("nosave", "0", &s);
+	level.noSave = atoi(s) ? qtrue : qfalse;
+	level.noSave
+		? shared.integer |= BG_LEVEL_NO_SAVE
+		: shared.integer &= ~BG_LEVEL_NO_SAVE;
+
+	trap_Cvar_Set("shared", va("%d", shared.integer));
+	G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
 }
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1117,16 +1139,7 @@ void SP_worldspawn(void)
 	}
 	G_Printf("Explosives are %s.\n", level.noExplosives ? "disabled" : "enabled");
 
-	G_SpawnString("nosave", "0", &s);
-	if (atoi(s))
-	{
-		level.noSave = qtrue;
-	}
-	else
-	{
-		level.noSave = qfalse;
-	}
-	G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
+	ETJump_InitNoSave();
 
 	G_SpawnString("nonoclip", "0", &s);
 	if (atoi(s))
@@ -1241,6 +1254,7 @@ void SP_worldspawn(void)
 	G_Printf("Portal team is set to %d.\n", val);
 
 	ETJump_InitNoOverbounce();
+	ETJump_InitNoJumpDelay();
 
 	level.mapcoordsValid = qfalse;
 	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&    // top left
