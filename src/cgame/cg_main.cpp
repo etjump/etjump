@@ -318,6 +318,9 @@ vmCvar_t etj_CGazColor2;
 vmCvar_t cg_CGazAlpha;
 
 vmCvar_t cg_drawOB;
+//Aciz: movable drawOB
+vmCvar_t etj_OBX;
+vmCvar_t etj_OBY;
 vmCvar_t cg_drawKeys;
 vmCvar_t cg_keysColor;
 vmCvar_t cg_keysX;
@@ -663,6 +666,8 @@ cvarTable_t cvarTable[] =
 
 	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
+	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
+	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE },
 	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
 	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
 	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },

@@ -3619,6 +3619,7 @@ static void CG_DrawOB(void)
 	trace_t       trace;
 	vec3_t        start, end;
 	playerState_t *ps;
+	float         x;
 
 	if (!cg_drawOB.integer || cg_thirdPerson.integer)
 	{
@@ -3645,6 +3646,10 @@ static void CG_DrawOB(void)
 	trap_SnapVector(snap);
 	rintv = snap[2];
 
+	x = etj_OBX.value;
+
+	ETJump_AdjustPosition(&x);
+
 	if (ps->groundEntityNum == ENTITYNUM_NONE)
 	{
 		// below ob
@@ -3665,7 +3670,7 @@ static void CG_DrawOB(void)
 			// below ob
 			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 			{
-				CG_DrawStringExt(SCREEN_CENTER_X + 10, 220, "B", colorWhite, qfalse, qtrue,
+				CG_DrawStringExt(x + 10, etj_OBY.integer, "B", colorWhite, qfalse, qtrue,
 				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
 		}
@@ -3689,7 +3694,7 @@ static void CG_DrawOB(void)
 		// fall ob
 		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
-			CG_DrawStringExt(SCREEN_CENTER_X - 10, 220, "F", colorWhite, qfalse, qtrue,
+			CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
@@ -3698,7 +3703,7 @@ static void CG_DrawOB(void)
 		if (ps->groundEntityNum != ENTITYNUM_NONE
 		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
-			CG_DrawStringExt(SCREEN_CENTER_X, 220, "J", colorWhite, qfalse, qtrue,
+			CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
@@ -3718,7 +3723,7 @@ static void CG_DrawOB(void)
 		// sticky fall ob
 		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
-			CG_DrawStringExt(SCREEN_CENTER_X - 10, 220, "F", colorWhite, qfalse, qtrue,
+			CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
@@ -3727,14 +3732,14 @@ static void CG_DrawOB(void)
 		if (ps->groundEntityNum != ENTITYNUM_NONE
 		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
-			CG_DrawStringExt(SCREEN_CENTER_X, 220, "J", colorWhite, qfalse, qtrue,
+			CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
 		if (b && CG_SurfaceAllowsOverbounce(&trace))
 		{
-			CG_DrawStringExt(SCREEN_CENTER_X - 20, 220, "S", colorWhite, qfalse, qtrue,
+			CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse, qtrue,
 			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 		}
 	}

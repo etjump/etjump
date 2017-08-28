@@ -16,6 +16,7 @@
 * fixed setting com_maxfps in menu
 * added etj_viewPlayerPortals 2 as an option to menu
 * added etj_drawKeys 2 to show DeFRaG style keys
+* added etj_OBX/Y to move OB detector
 
 # ETJump 2.2.0
 
