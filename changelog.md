@@ -17,6 +17,17 @@
 * added `etj_viewPlayerPortals` __2__ as an option to menu
 * added `etj_drawKeys` __2__ to show DeFRaG style keys
 * added `etj_OBX/Y` to move OB detector
+* added worldspawn key `nojumpdelay` to control no jump delay behavior on the map  
+  *note: use surfaceparm `SURF_MONSLICK_N` to enable/disable jumps delays*
+* added no jump delay surface detector + control cvars:
+  * `etj_drawNoJumpDelay`
+  * `etj_noJumpDelayX`
+  * `etj_noJumpDelayY`
+* added save-volumes indicator + control cvars: 
+  * `etj_drawSaveIndicator`
+  * `etj_saveIndicatorX`
+  * `etj_saveIndicatorY`
+* fixed no jump sounds while jumping on slopes
 
 # ETJump 2.2.0
 
