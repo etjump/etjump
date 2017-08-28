@@ -475,6 +475,13 @@ vmCvar_t etj_demo_lookat;
 vmCvar_t etj_demo_freecamspeed;
 vmCvar_t etj_predefineddemokeys;
 
+vmCvar_t etj_drawNoJumpDelay;
+vmCvar_t etj_noJumpDelayX;
+vmCvar_t etj_noJumpDelayY;
+vmCvar_t etj_drawSaveIndicator;
+vmCvar_t etj_saveIndicatorX;
+vmCvar_t etj_saveIndicatorY;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -674,7 +681,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
 	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
 	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
-	
+
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
@@ -713,7 +720,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
 	{ &etj_chatFlags,				"etj_chatFlags",			   "1",                      CVAR_ARCHIVE             },
-	
+
 	// crosshair stats
 	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_CHS1Info1,                "etj_CHS1Info1",               "0",                      CVAR_ARCHIVE             },
@@ -757,7 +764,7 @@ cvarTable_t cvarTable[] =
 	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
-	
+
 	{ &player_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE             },
 
 	{ &movie_changeFovBasedOnSpeed, "movie_changeFovBasedOnSpeed", "0",                      CVAR_ARCHIVE             },
@@ -772,17 +779,17 @@ cvarTable_t cvarTable[] =
 	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE             },
 	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             },
 	{&etj_drawTokens,               "etj_drawTokens",               "1",                     CVAR_ARCHIVE             },
-	
-    { &etj_tjlEnableLine,			"etj_tjlEnableLine",			"0",					 CVAR_ARCHIVE			  },
+
+	{ &etj_tjlEnableLine,			"etj_tjlEnableLine",			"0",					 CVAR_ARCHIVE			  },
 	{ &etj_tjlEnableMarker,			"etj_tjlEnableMarker",			"0",					 CVAR_ARCHIVE			  },
 	{ &etj_tjlLineColor,			"etj_tjlLineColor",				"green",				 CVAR_ARCHIVE			  },
 	{ &etj_tjlMarkerColor,			"etj_tjlMarkerColor",			"green",				 CVAR_ARCHIVE			  },
 	{ &etj_tjlMarkerEndColor,		"etj_tjlMarkerEndColor",		"red",					 CVAR_ARCHIVE			  },
 	{ &etj_tjlNearestInterval,		"etj_tjlNearestInterval",		"0",					 CVAR_ARCHIVE			  },
-	{ &etj_tjlAlwaysLoadTJL,		"etj_tjlAlwaysLoadTJL",			"1",					 CVAR_ARCHIVE			  },	
-		    
-    
-    {&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
+	{ &etj_tjlAlwaysLoadTJL,		"etj_tjlAlwaysLoadTJL",			"1",					 CVAR_ARCHIVE			  },
+
+
+	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
 	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
 	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
@@ -801,6 +808,12 @@ cvarTable_t cvarTable[] =
 	{ &etj_demo_freecamspeed, "etj_demo_freecamspeed", "800", CVAR_ARCHIVE },
 	{ &etj_demo_lookat, "b_demo_lookat", "-1", CVAR_CHEAT },
 	{ &etj_predefineddemokeys, "etj_predefineddemokeys", "1", CVAR_CHEAT | CVAR_ARCHIVE },
+	{ &etj_drawNoJumpDelay, "etj_drawNoJumpDelay", "1", CVAR_ARCHIVE },
+	{ &etj_noJumpDelayX, "etj_noJumpDelayX", "290", CVAR_ARCHIVE },
+	{ &etj_noJumpDelayY, "etj_noJumpDelayY", "220", CVAR_ARCHIVE },
+	{ &etj_drawSaveIndicator, "etj_drawSaveIndicator", "3", CVAR_ARCHIVE },
+	{ &etj_saveIndicatorX, "etj_saveIndicatorX", "525", CVAR_ARCHIVE },
+	{ &etj_saveIndicatorY, "etj_saveIndicatorY", "450", CVAR_ARCHIVE },
 };
 
 
@@ -2521,6 +2534,9 @@ static void CG_RegisterGraphics(void)
 	cgs.media.portal_redShader  = trap_R_RegisterShader("gfx/misc/portal_redShader");                //Change to red later...
 
 	cgs.media.ghostPlayersAltColorShader = trap_R_RegisterShader("etjump/ghost_player_alt");
+	cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");
+	cgs.media.noSaveIcon = trap_R_RegisterShader("gfx/2d/save_off");
+
 
 	CG_LoadingString(" - game media done");
 }

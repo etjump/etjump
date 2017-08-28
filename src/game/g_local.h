@@ -1336,6 +1336,7 @@ typedef struct
 	qboolean noGod;
 	qboolean noGoto;
 	bool noOverbounce;
+	bool noJumpDelay;
 
 	int portalEnabled;         //Feen: PGM - Enabled/Disabled by map key
 	qboolean portalSurfaces;

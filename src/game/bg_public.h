@@ -2592,6 +2592,10 @@ typedef struct
 
 // Overbounce is disabled on current map
 const int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
+// jump delay is disabled
+const int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
+// Save is disabled
+const int BG_LEVEL_NO_SAVE = 1 << 2;
 
 #endif // __BG_PUBLIC_H__
 
