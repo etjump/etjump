@@ -2286,6 +2286,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 // jpw
 
 	case EV_NOAMMO:
+		if (!cg_weaponSound.integer) break;
 	case EV_WEAPONSWITCHED:
 		DEBUGNAME("EV_NOAMMO");
 		if ((es->weapon != WP_GRENADE_LAUNCHER) &&
