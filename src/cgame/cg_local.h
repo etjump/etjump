@@ -1812,6 +1812,7 @@ typedef struct
 
 	qhandle_t fireteamicons[6];
 	keys_set_t keys;
+	keys_set_t keys2;
 
 	//Feen: PGM - Portal Shaders //NOTE - Maybe add shaders for other player portals as well....
 	qhandle_t portal_blueShader;       //Portal 1
@@ -2379,6 +2380,9 @@ extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
 
 extern vmCvar_t cg_drawOB;
+// Aciz: movable drawOB
+extern vmCvar_t etj_OBX;
+extern vmCvar_t etj_OBY;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
 extern vmCvar_t cg_keysX;

@@ -13,6 +13,10 @@
   - `volume <0-255>` controls sound volume
 * fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crashed the game anymore 
 * fixed `target_speaker` spawnflag __8__ (ACTIVATOR) didn't want to play sound to the activator
+* fixed setting `com_maxfps` in menu
+* added `etj_viewPlayerPortals` __2__ as an option to menu
+* added `etj_drawKeys` __2__ to show DeFRaG style keys
+* added `etj_OBX/Y` to move OB detector
 
 # ETJump 2.2.0
 

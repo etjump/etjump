@@ -81,6 +81,10 @@ qboolean G_ScriptAction_ObjectiveStatus(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SetPosition(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params);
+qboolean G_ScriptAction_SetPlayerAutoSpawn(gentity_t *ent, char *params); // ETJump
+qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params); // ETJump
+qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params); // ETJump
+qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params); // ETJump
 qboolean G_ScriptAction_SetMainObjective(gentity_t *ent, char *params);
 qboolean G_ScriptAction_SpawnRubble(gentity_t *ent, char *params);
 qboolean G_ScriptAction_AllowTankExit(gentity_t *ent, char *params);
@@ -189,6 +193,10 @@ g_script_stack_action_t gScriptActions[] =
 	{ "setdebuglevel",                  G_ScriptAction_SetDebugLevel                 },
 	{ "setposition",                    G_ScriptAction_SetPosition                   },
 	{ "setautospawn",                   G_ScriptAction_SetAutoSpawn                  },
+	{ "setplayerautospawn", G_ScriptAction_SetPlayerAutoSpawn },
+	{ "setplayerspawn", G_ScriptAction_SetPlayerSpawn },
+	{ "damageplayer", G_ScriptAction_DamagePlayer },
+	{ "killplayer", G_ScriptAction_KillPlayer },
 
 	{ "create",                         G_ScriptAction_Create                        },
 

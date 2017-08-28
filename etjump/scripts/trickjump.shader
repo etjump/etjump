@@ -1,3 +1,7 @@
+////////////////
+// Keyset 1
+////////////////
+
 gfx/keyset/key_forward_pressed
 {
 	nopicmip
@@ -81,6 +85,8 @@ gfx/keyset/key_prone_pressed
 
 ////////////////
 // Not pressed..
+////////////////
+
 gfx/keyset/key_forward_not_pressed
 {
 	nopicmip
@@ -162,7 +168,95 @@ gfx/keyset/key_prone_not_pressed
 	}
 }
 
-// save icon by Aciz
+////////////////
+// Keyset 2
+////////////////
+
+gfx/keyset2/key_forward_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_forward_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_backward_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_backward_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_left_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_left_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_right_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_right_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_jump_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_jump_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_crouch_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_crouch_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_sprint_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_sprint_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+gfx/keyset2/key_prone_pressed
+{
+	nopicmip
+	nomipmaps
+	{
+		map gfx/keyset2/key_prone_pressed.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+////////////////
+// Save Icons
+////////////////
+
 gfx/2d/save_on
 {
 	noPicMip
