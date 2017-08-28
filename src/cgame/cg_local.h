@@ -2378,6 +2378,9 @@ extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
 
 extern vmCvar_t cg_drawOB;
+// Aciz: movable drawOB
+extern vmCvar_t etj_OBX;
+extern vmCvar_t etj_OBY;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
 extern vmCvar_t cg_keysX;
