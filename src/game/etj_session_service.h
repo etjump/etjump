@@ -69,6 +69,9 @@ namespace ETJump
 		 */
 		void setLevelIfHasLevel(int clientNum, int level, int newLevel);
 		void updateUser(int updaterClientNum, int userId, const MutableUserFields& changes, int changedFields);
+		bool isEqualOrHigherLevel(int clientNum, int target);
+		bool isHigherLevel(int clientNum, int target);
+		void mute(int target, long long duration);
 		static std::string getName(int clientNum);
 		std::vector<int> findUsersByName(const std::string& name);
 	private:

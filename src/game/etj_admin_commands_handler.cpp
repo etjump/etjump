@@ -5,6 +5,7 @@
 #include "etj_string_utilities.h"
 #include <boost/algorithm/string.hpp>
 #include "etj_result_set_formatter.h"
+#include "etj_messages.h"
 
 
 ETJump::AdminCommandsHandler::AdminCommandsHandler(std::shared_ptr<SessionService> sessionService): _sessionService(sessionService), _log(Log("AdminCommandsHandler")), _isSorted(false)
@@ -66,10 +67,18 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 
 	if (matchingCommands.size() == 1)
 	{
+		auto parsedCommand = _parser.parse(matchingCommands[0]->second.definition, additionalArgs);
+		if (parsedCommand.errors.size() > 0)
+		{
+			Printer::sendChatMessage(clientNum, "^3Invalid parameters: ^7" + Info::CheckConsoleForInfo);
+			Printer::sendConsoleMessage(clientNum, boost::join(parsedCommand.errors, "\n"));
+			return true;
+		}
+
 		auto name = _sessionService->getName(clientNum);
 		auto id = _sessionService->getUser(clientNum).id;
 		_log.infoLn(name + " (" + std::to_string(id) + ")" + " executed command !" + command + " " + boost::join(additionalArgs, " "));
-		matchingCommands[0]->second.callback(clientNum, matchingCommands[0]->first, _parser.parse(matchingCommands[0]->second.definition, additionalArgs));
+		matchingCommands[0]->second.callback(clientNum, matchingCommands[0]->first, parsedCommand);
 		return true;
 	}
 

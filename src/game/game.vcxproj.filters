@@ -454,5 +454,8 @@
     <ClInclude Include="etj_task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_messages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

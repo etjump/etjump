@@ -107,6 +107,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <SDLCheck>false</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
@@ -355,6 +356,7 @@
     <ClInclude Include="etj_banner_system.h" />
     <ClInclude Include="etj_common.h" />
     <ClInclude Include="etj_deathrun_system.h" />
+    <ClInclude Include="etj_messages.h" />
     <ClInclude Include="etj_file.h" />
     <ClInclude Include="etj_task.h" />
     <ClInclude Include="etj_level.h" />

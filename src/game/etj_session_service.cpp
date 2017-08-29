@@ -482,6 +482,21 @@ void ETJump::SessionService::updateUser(int updaterClientNum, int userId, const 
 	_tasks.push_back(std::unique_ptr<Task<int>>(task));
 }
 
+bool ETJump::SessionService::isEqualOrHigherLevel(int clientNum, int target)
+{
+	return _users[clientNum].level >= _users[target].level;
+}
+
+bool ETJump::SessionService::isHigherLevel(int clientNum, int target)
+{
+	return _users[clientNum].level > _users[target].level;
+}
+
+void ETJump::SessionService::mute(int target, long long duration)
+{
+
+}
+
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)
 {
 	try
