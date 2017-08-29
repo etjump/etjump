@@ -1335,6 +1335,46 @@ void CG_ModInformation_f()
 	trap_SendClientCommand("mod_information\n");
 }
 
+// ETJump command to increment/decrement variable by specific float
+void CG_IncrementVar_f(void) 
+{
+	static char cvarBuffer[32];
+	auto argc = trap_Argc();
+	if (argc < 4 || argc > 5) {
+		Com_Printf("usage: incrementVar <cvar> <start> <end> [<step>]\n");
+		return;
+	}
+	
+	trap_Cvar_VariableStringBuffer(CG_Argv(1), cvarBuffer, sizeof cvarBuffer);
+
+	auto start = atof(CG_Argv(2));
+	auto end = atof(CG_Argv(3));
+	auto value = atof(cvarBuffer);
+	auto step = 1.0;
+
+	if (argc == 5) {
+		step = abs(atof(CG_Argv(4)));
+	}
+
+	if (abs(end - start) < step) {
+		step = 1.f;
+	}
+
+	if (end < start) {
+		value -= step;
+		if (value < end) {
+			value = start;
+		}
+	}
+	else {
+		value += step;
+		if (value > end) {
+			value = start;
+		}
+	}
+
+	trap_Cvar_Set(CG_Argv(1), va("%f", value));
+}
 
 typedef struct
 {
@@ -1466,7 +1506,8 @@ static consoleCommand_t commands[] =
 	{ "freecamgetpos",       CG_FreecamGetPos_f },
 	{ "noclip",              CG_NoClip_f },
 
-	{ "mod_information",     CG_ModInformation_f },
+	{ "mod_information", CG_ModInformation_f },
+	{ "incrementVar", CG_IncrementVar_f },
 };
 
 
