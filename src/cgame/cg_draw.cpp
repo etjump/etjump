@@ -3852,7 +3852,7 @@ static void CG_DrawSaveIndicator(void)
 	ETJump_AdjustPosition(&x);
 
 	auto ps = cg.snap->ps;
-	CG_Trace(&trace, cg.refdef.vieworg, ps.mins, ps.maxs, cg.refdef.vieworg, ps.clientNum, CONTENTS_NOSAVE);
+	CG_TraceCapsule(&trace, ps.origin, ps.mins, ps.maxs, ps.origin, ps.clientNum, CONTENTS_NOSAVE);
 	
 	if (shared.integer & BG_LEVEL_NO_SAVE)
 	{
