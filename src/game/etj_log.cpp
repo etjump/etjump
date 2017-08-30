@@ -1,5 +1,11 @@
-#include "etj_log.h"
 #include "g_local.h"
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+#include "etj_log.h"
 #include <chrono>
 
 ETJump::Log::Log(const std::string& name)

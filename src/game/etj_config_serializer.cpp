@@ -1,5 +1,11 @@
-#include "etj_config_serializer.h"
 #include "q_shared.h"
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+#include "etj_config_serializer.h"
 #include <iterator>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>

@@ -126,8 +126,13 @@ file(GLOB QAGAME_SRC
 	"game/bg_sscript.cpp"
 	"game/bg_stats.cpp"
 	"game/bg_tracemap.cpp"
-	"game/etj_async_operation.cpp"
+	"game/etj_admin_commands.cpp"
+	"game/etj_admin_commands_handler.cpp"
 	"game/etj_banner_system.cpp"
+	"game/etj_client_commands_handler.cpp"
+	"game/etj_config_serializer.cpp"
+	"game/etj_level_service.cpp"
+	"game/etj_log.cpp"
 	"game/etj_command_parser.cpp"
 	"game/etj_command_system.cpp"
 	"game/etj_commands.cpp"
@@ -149,11 +154,16 @@ file(GLOB QAGAME_SRC
 	"game/etj_progression_tracker_parser.cpp"
 	"game/etj_random_map_mode.cpp"
 	"game/etj_save.cpp"
-	"game/etj_session.cpp"
+	"game/etj_session_repository.cpp"
+	"game/etj_session_service.cpp"
 	"game/etj_sqlite_wrapper.cpp"
+	"game/etj_string_utilities.cpp"
+	"game/etj_task.cpp"
+	"game/etj_time_utilities.cpp"
 	"game/etj_timerun.cpp"
 	"game/etj_tokens.cpp"
-	"game/etj_user.cpp"
+	"game/etj_user_repository.cpp"
+	"game/etj_user_service.cpp"
 	"game/etj_utilities.cpp"
 	"game/g_active.cpp"
 	"game/g_alarm.cpp"
@@ -196,6 +206,12 @@ file(GLOB QAGAME_SRC
 	"sqlite/sqlite3.c"
 	"sha-1/bg_sha.cpp"
 	"sha-1/sha1.c"
+	"../lib/SQLiteCpp/src/Backup.cpp"
+	"../lib/SQLiteCpp/src/Column.cpp"
+	"../lib/SQLiteCpp/src/Database.cpp"
+	"../lib/SQLiteCpp/src/Exception.cpp"
+	"../lib/SQLiteCpp/src/Statement.cpp"
+	"../lib/SQLiteCpp/src/Transaction.cpp"
 )
 
 file(GLOB UI_SRC
@@ -225,3 +241,7 @@ target_link_libraries(qagame.mp.${ARCH} pthread)
 # ui library building
 add_library (ui.mp.${ARCH} SHARED ${UI_SRC})
 set_target_properties(ui.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "UIDLL" PREFIX "")
+
+target_include_directories(qagame.mp.${ARCH} PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/../lib/SQLiteCpp/include
+)

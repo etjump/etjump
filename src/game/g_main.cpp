@@ -20,6 +20,7 @@
 #include "etj_printer.h"
 #include <boost/algorithm/string.hpp>
 #include "etj_admin_commands.h"
+#include "etj_utilities.h"
 
 level_locals_t level;
 
@@ -58,7 +59,7 @@ namespace ETJump
 static void initializeETJump(int levelTime, int randomSeed, int restart)
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
-	ETJump::userRepository = std::make_shared<ETJump::UserRepository>("etjump.db", 5000);
+	ETJump::userRepository = std::make_shared<ETJump::UserRepository>(Utilities::getPath("etjump.db"), 5000);
 	ETJump::userRepository->createTables();
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
 	std::string serverId = g_serverId.string;

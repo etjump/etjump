@@ -1,6 +1,7 @@
+#include "etj_session_service.h"
 #include "g_local.h"
 #include "../../etjump/ui/menudef.h"
-#include "etj_session_service.h"
+
 
 // g_client.c -- client functions that don't happen every frame
 

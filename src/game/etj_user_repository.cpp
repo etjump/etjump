@@ -8,6 +8,7 @@
 ETJump::UserRepository::UserRepository::UserRepository(const std::string& databaseFile, int timeout)
 	: _databaseFile(databaseFile), _timeout(timeout), _log(Log("UserRepository"))
 {
+	_log.infoLn("Using database file " + databaseFile);
 }
 
 ETJump::UserRepository::UserRepository::~UserRepository()
@@ -346,7 +347,7 @@ void ETJump::UserRepository::update(int64_t id, MutableUserFields changes, int c
 			}
 			else if (changedColumns[i] == "lastSeen")
 			{
-				updateStmt.bind(":" + changedColumns[i], changes.lastSeen);
+				updateStmt.bind(":" + changedColumns[i], static_cast<long long>(changes.lastSeen));
 			}
 			else if (changedColumns[i] == "name")
 			{
@@ -387,7 +388,7 @@ void ETJump::UserRepository::updateLastSeen(int64_t id, time_t lastSeen)
 			"UPDATE users SET lastSeen=? WHERE id=?;"
 		);
 
-		updateStmt.bind(1, lastSeen);
+		updateStmt.bind(1, static_cast<long long>(lastSeen));
 		updateStmt.bind(2, id);
 
 		updateStmt.exec();
