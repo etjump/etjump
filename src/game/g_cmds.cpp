@@ -4649,6 +4649,8 @@ namespace ETJump
 			return;
 		}
 
+		Cmd_Noclip_f(ent);
+
 		if (!client->noclip)
 		{
 			CP("print \"^3setoffset: ^7noclip should be enabled.\n\"");
@@ -4685,6 +4687,8 @@ namespace ETJump
 		// reset speed
 		VectorClear(client->ps.velocity);
 		TeleportPlayer(ent, origin, angles);
+
+		Cmd_Noclip_f(ent);
 	}
 }
 
