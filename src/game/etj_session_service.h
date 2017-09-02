@@ -55,6 +55,7 @@ namespace ETJump
 		void disconnect(int clientNum);
 		void authenticate(int clientNum, const std::string& name, const std::string& ipAddress, const std::vector<std::string>& arguments);
 		void handleAsyncTasks();
+		void checkOnceASecondTasks();
 		void runFrame();
 		void readSession(int levelTime);
 		void writeSession();
@@ -97,6 +98,7 @@ namespace ETJump
 		std::shared_ptr<ETJump::Server::ClientCommandsHandler> _clientCommandsHandler;
 		std::shared_ptr<LevelService> _levelService;
 		std::vector<std::unique_ptr<AbstractTask>> _tasks;
+		time_t _nextOnceASecondCheck;
 	};
 }
 

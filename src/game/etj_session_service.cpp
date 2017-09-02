@@ -294,10 +294,20 @@ void ETJump::SessionService::handleAsyncTasks()
 	_tasks = std::move(temp);
 }
 
+void ETJump::SessionService::checkOnceASecondTasks()
+{
+	if (_nextOnceASecondCheck < DateTime::now())
+	{
+		
+		_nextOnceASecondCheck = DateTime::now();
+	}
+}
+
 void ETJump::SessionService::runFrame()
 {
 	handleGetUserTasks();
 	handleAsyncTasks();
+	checkOnceASecondTasks();
 }
 
 void ETJump::SessionService::readSession(int levelTime)
@@ -494,7 +504,8 @@ bool ETJump::SessionService::isHigherLevel(int clientNum, int target)
 
 void ETJump::SessionService::mute(int target, long long duration)
 {
-
+	(g_entities + target)->client->sess.muted = qtrue;
+	setSessionValue(target, "mutedUntil", std::to_string(DateTime::now() + duration));
 }
 
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)
