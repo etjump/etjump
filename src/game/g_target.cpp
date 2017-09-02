@@ -152,10 +152,12 @@ If "private", only the activator gets the message.  If no checks, all clients ge
 */
 void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
+	// if no message to print, print whitespace
+	auto temp = ent->message ? ent->message : " ";
 	auto location = ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
 		? "cpm" : "cp";
 	char message[MAX_TOKEN_CHARS]{};
-	Q_strncpyz(message, ent->message, sizeof(message));
+	Q_strncpyz(message, temp, sizeof(message));
 	if (ent->client && ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts))
 	{
 		std::string msg = message;
