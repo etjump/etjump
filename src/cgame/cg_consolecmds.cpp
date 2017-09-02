@@ -1704,4 +1704,6 @@ void CG_InitConsoleCommands(void)
 
 	trap_AddCommand("tjl_clearrender"); // Clear the current displayed route.
 	trap_AddCommand("tjl_displaybynumber"); // display a route by it number (start at 0 to total - 1)
+
+	trap_AddCommand("setoffset"); // autocompletion
 }

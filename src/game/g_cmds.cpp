@@ -4636,6 +4636,62 @@ void Cmd_SwapPlacesWithBot_f(gentity_t *ent, int botNum)
 	client->pers.lastReinforceTime = 0;
 }
 
+namespace ETJump
+{
+	const float MaxOffsetDistance = 4096.f;
+
+	// sets player offset if noclip is on
+	void setPlayerOffset(gentity_t *ent)
+	{
+		auto *client = ent->client;
+		if (!client)
+		{
+			return;
+		}
+
+		Cmd_Noclip_f(ent);
+
+		if (!client->noclip)
+		{
+			CP("print \"^3setoffset: ^7noclip should be enabled.\n\"");
+			return;
+		}
+
+		vec3_t origin;
+		vec3_t angles;
+		VectorCopy(ent->client->ps.origin, origin);
+		VectorCopy(ent->client->ps.viewangles, angles);
+		static char buffer[64];
+
+		if (trap_Argc() != 4)
+		{
+			CP("print \"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector\"");
+			return;
+		}
+
+		for (auto i = 0; i < 3; i++)
+		{
+			trap_Argv(i + 1, buffer, sizeof buffer);
+			float value = atof(buffer);
+			if (value > MaxOffsetDistance)
+			{
+				value = MaxOffsetDistance;
+			}
+			else if (value < -MaxOffsetDistance)
+			{
+				value = -MaxOffsetDistance;
+			}
+			origin[i] += value;
+		}
+
+		// reset speed
+		VectorClear(client->ps.velocity);
+		TeleportPlayer(ent, origin, angles);
+
+		Cmd_Noclip_f(ent);
+	}
+}
+
 typedef struct
 {
 	const char *cmd;
@@ -4689,6 +4745,7 @@ static command_t noIntermissionCommands[] =
 	{ "shrug",           qfalse, Cmd_shrug_f           },
 	//{ "savereset",          qfalse, Cmd_SaveReset_f },
 	{ "timerun_status",  qfalse, Cmd_timerunStatus_f   },
+	{ "setoffset", qtrue, ETJump::setPlayerOffset },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
