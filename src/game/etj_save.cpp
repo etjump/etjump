@@ -375,6 +375,24 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		return;
 	}
 
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Prone))
+	{
+		if (ent->client->ps.eFlags & EF_PRONE)
+		{
+			CPTo(ent, "^3Backup ^7is disabled while proning.");
+			return;
+		}
+	}
+
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Crouch))
+	{
+		if (ent->client->ps.eFlags & EF_CROUCHING)
+		{
+			CPTo(ent, "^3Backup ^7is disabled while crouching.");
+			return;
+		}
+	}
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
