@@ -4,6 +4,10 @@
  * desc:
  *
 */
+#include <sstream>
+#include <string>
+#include <boost/algorithm/string.hpp>
+#include <unordered_map>
 
 #include "g_local.h"
 qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out, const char *file, int line)
@@ -1040,47 +1044,76 @@ qboolean G_ParseSpawnVars(void)
 	return qtrue;
 }
 
+namespace ETJump{
+	static void initNoOverbounce()
+	{
+		auto value = 0;
+		G_SpawnInt("nooverbounce", "0", &value);
+		level.noOverbounce = value > 0;
+		level.noOverbounce
+			? shared.integer |= BG_LEVEL_NO_OVERBOUNCE
+			: shared.integer &= ~BG_LEVEL_NO_OVERBOUNCE;
 
-void ETJump_InitNoOverbounce()
-{
-	char *s = nullptr;
-	auto val = 0;
-	G_SpawnString("nooverbounce", "0", &s);
-	val = atoi(s);
-	level.noOverbounce = val != 0;
-	level.noOverbounce
-		? shared.integer |= BG_LEVEL_NO_OVERBOUNCE
-		: shared.integer &= ~BG_LEVEL_NO_OVERBOUNCE;
+		trap_Cvar_Set("shared", va("%d", shared.integer));
+		G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
+	}
 
-	trap_Cvar_Set("shared", va("%d", shared.integer));
-	G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
-}
+	static void initNoJumpDelay()
+	{
+		auto value = 0;
+		G_SpawnInt("nojumpdelay", "0", &value);
+		level.noJumpDelay = value > 0;
+		level.noJumpDelay
+			? shared.integer |= BG_LEVEL_NO_JUMPDELAY
+			: shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
 
-static void ETJump_InitNoJumpDelay()
-{
-	char *s = nullptr;
-	G_SpawnString("nojumpdelay", "0", &s);
-	level.noJumpDelay = atoi(s) ? true : false;
-	level.noJumpDelay
-		? shared.integer |= BG_LEVEL_NO_JUMPDELAY
-		: shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
+		trap_Cvar_Set("shared", va("%d", shared.integer));
+		G_Printf("No jump delay %s.\n", level.noJumpDelay ? "enabled" : "disabled");
+	}
+
+	static void initNoSave()
+	{
+		auto value = 0;
+		G_SpawnInt("nosave", "0", &value);
+		level.noSave = value > 0 ? qtrue : qfalse;
+		level.noSave
+			? shared.integer |= BG_LEVEL_NO_SAVE
+			: shared.integer &= ~BG_LEVEL_NO_SAVE;
+
+		trap_Cvar_Set("shared", va("%d", shared.integer));
+		G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
+	}
 	
-	trap_Cvar_Set("shared", va("%d", shared.integer));
-	G_Printf("No jump delay %s.\n", level.noJumpDelay ? "enabled" : "disabled");
+	std::unordered_map<std::string, int> allowedStrictValues {
+		{ "default", 0 },
+		{ "crouch", 1 << 0 },
+		{ "prone", 1 << 1 },
+		{ "move", 1 << 2 },
+	};
+ 
+	static void initStrictSaveLoad()
+	{
+		char *buff = nullptr;
+		G_SpawnString("strictsaveload", "0", &buff);
+		std::istringstream str{ buff };
+		auto value = 0;
+		if (isdigit(buff[0]))
+		{
+			str >> value;
+		}
+		else
+		{
+			std::string token;
+			while (str >> token)
+			{
+				boost::algorithm::to_lower(token);
+				value |= allowedStrictValues[token]; // else 0
+			}
+		}
+		level.saveLoadRestrictions = value;
+	}
 }
 
-static void ETJump_InitNoSave()
-{
-	char *s = nullptr;
-	G_SpawnString("nosave", "0", &s);
-	level.noSave = atoi(s) ? qtrue : qfalse;
-	level.noSave
-		? shared.integer |= BG_LEVEL_NO_SAVE
-		: shared.integer &= ~BG_LEVEL_NO_SAVE;
-
-	trap_Cvar_Set("shared", va("%d", shared.integer));
-	G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
-}
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
 
@@ -1138,8 +1171,6 @@ void SP_worldspawn(void)
 		level.noExplosives = noExplosives;
 	}
 	G_Printf("Explosives are %s.\n", level.noExplosives ? "disabled" : "enabled");
-
-	ETJump_InitNoSave();
 
 	G_SpawnString("nonoclip", "0", &s);
 	if (atoi(s))
@@ -1238,6 +1269,9 @@ void SP_worldspawn(void)
 		G_Printf("Save is not limited.\n");
 	}
 
+
+
+
 	G_SpawnString("portalteam", "0", &s);
 	val = atoi(s);
 	if (val)
@@ -1253,8 +1287,10 @@ void SP_worldspawn(void)
 	}
 	G_Printf("Portal team is set to %d.\n", val);
 
-	ETJump_InitNoOverbounce();
-	ETJump_InitNoJumpDelay();
+	ETJump::initNoSave();
+	ETJump::initNoOverbounce();
+	ETJump::initNoJumpDelay();
+	ETJump::initStrictSaveLoad();
 
 	level.mapcoordsValid = qfalse;
 	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&    // top left
