@@ -62,6 +62,36 @@ void SaveSystem::Save(gentity_t *ent)
 		return;
 	}
 
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Prone))
+	{
+		if (ent->client->ps.eFlags & EF_PRONE)
+		{
+			CPTo(ent, "^3Save ^7is disabled while proning.");
+			return;
+		}
+	}
+
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Crouch))
+	{
+		if (ent->client->ps.eFlags & EF_CROUCHING)
+		{
+			CPTo(ent, "^3Save ^7is disabled while crouching.");
+			return;
+		}
+	}
+
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Move))
+	{
+		// comparing to zero vector
+		if (!VectorCompare(ent->client->ps.velocity, vec3_origin))
+		{
+			CPTo(ent, "^3Save ^7is disabled while moving.");
+			return;
+		}
+	}
+
+	// if dead cant save, avoid abuse running through damage triggers
+
 	Arguments argv = GetArgs();
 
 	int position = 0;
@@ -204,8 +234,27 @@ void SaveSystem::Load(gentity_t *ent)
 
 	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 		{
-		CPTo(ent, "^3Load ^7is disabled for death run");
+		CPTo(ent, "^3Load ^7is disabled for death run.");
 		return;
+	}
+
+
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Prone))
+	{
+		if (ent->client->ps.eFlags & EF_PRONE)
+		{
+			CPTo(ent, "^3Load ^7is disabled while proning.");
+			return;
+		}
+	}
+
+	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Crouch))
+	{
+		if (ent->client->ps.eFlags & EF_CROUCHING)
+		{
+			CPTo(ent, "^3Load ^7is disabled while crouching.");
+			return;
+		}
 	}
 
 	Arguments argv = GetArgs();

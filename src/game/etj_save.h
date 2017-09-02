@@ -50,6 +50,13 @@ public:
 		int progression;
 	};
 
+	enum class SaveLoadRestrictions
+	{
+		Crouch = 1 << 0,
+		Prone = 1 << 1,
+		Move = 1 << 2,
+	};
+
 	// Saves current position
 	void Save(gentity_t *ent);
 
