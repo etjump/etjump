@@ -388,5 +388,8 @@
     <ClInclude Include="etj_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_operation_result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

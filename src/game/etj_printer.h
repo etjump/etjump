@@ -103,6 +103,12 @@ public:
 	* @param message The message
 	*/
 	static void BroadcastCenterMessage(const std::string& message);
+	/**
+	 * Sends a center print message to target client
+	 * @param clientNum
+	 * @param message
+	 */
+	static void SendCenterMessage(int clientNum, const std::string& message);
 private:
 };
 

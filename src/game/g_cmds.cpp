@@ -12,7 +12,8 @@
 #include <boost/algorithm/string/classification.hpp>
 #include "etj_result_set_formatter.h"
 #include "utilities.hpp"
-
+#include "etj_printer.h"
+#include "etj_operation_result.h"
 
 
 void BotDebug(int clientNum);
@@ -989,6 +990,52 @@ void Cmd_Notarget_f(gentity_t *ent)
 	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", msg));
 }
 
+ETJump::OperationResult CanNoclip(gentity_t *ent)
+{
+	if (!ent || !ent->client)
+	{
+		return{ false, "Non-player entities cannot use %s." };
+	}
+
+	if (ent->client->sess.timerunActive == qtrue)
+	{
+		return {false, "Cannot use %s while timer is running."};
+	}
+
+	if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
+	{
+		return{ false, "Cannot use %s while death run is active." };
+	}
+
+	if (!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR))
+	{
+		if (level.noNoclip)
+		{
+			return{ false, "%s has been disabled on this map." };
+		}
+
+		if (ent->client->pers.noclipCount == 0 &&
+			!ent->client->noclip)
+		{
+			if (!g_noclip.integer && !CheatsOk(ent))
+			{
+				return{ false, "You can no longer use %s." };
+			}
+		}
+	}
+
+	return{ true, "" };
+}
+
+void increaseNoclipCount(gentity_t *ent)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	++ent->client->pers.noclipCount;
+}
 
 /*
 ==================
@@ -1003,33 +1050,11 @@ void Cmd_Noclip_f(gentity_t *ent)
 
 	char *name = ConcatArgs(1);
 
-	if (ent->client->sess.timerunActive == qtrue)
+	auto result = CanNoclip(ent);
+	int clientNum = ClientNum(ent);
+	if (!result.success)
 	{
-		CP("cp \"Cheats are disabled.\n\"");
-		return;
-	}
-
-	if (!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR))
-	{
-		if (level.noNoclip)
-		{
-			CP("cp \"Noclip has been disabled on this map.\n\"");
-			return;
-		}
-
-		if (ent->client->pers.noclipCount == 0 &&
-		    !ent->client->noclip)
-		{
-			if (!g_noclip.integer && !CheatsOk(ent))
-			{
-				return;
-			}
-		}
-	}
-
-	if (ent->client->sess.timerunActive)
-	{
-		CP("cp \"You cannot use cheats while timerun is active.\n\"");
+		Printer::SendCenterMessage(clientNum, (boost::format(result.message) % "noclip").str());
 		return;
 	}
 
@@ -4643,17 +4668,11 @@ namespace ETJump
 	// sets player offset if noclip is on
 	void setPlayerOffset(gentity_t *ent)
 	{
-		auto *client = ent->client;
-		if (!client)
+		auto clientNum = ClientNum(ent);
+		auto result = CanNoclip(ent);
+		if (!result.success)
 		{
-			return;
-		}
-
-		Cmd_Noclip_f(ent);
-
-		if (!client->noclip)
-		{
-			CP("print \"^3setoffset: ^7noclip should be enabled.\n\"");
+			Printer::SendConsoleMessage(clientNum, (boost::format(result.message) % "setoffset").str());
 			return;
 		}
 
@@ -4668,6 +4687,8 @@ namespace ETJump
 			CP("print \"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector\"");
 			return;
 		}
+
+		increaseNoclipCount(ent);
 
 		for (auto i = 0; i < 3; i++)
 		{
@@ -4685,10 +4706,8 @@ namespace ETJump
 		}
 
 		// reset speed
-		VectorClear(client->ps.velocity);
+		VectorClear(ent->client->ps.velocity);
 		TeleportPlayer(ent, origin, angles);
-
-		Cmd_Noclip_f(ent);
 	}
 }
 
