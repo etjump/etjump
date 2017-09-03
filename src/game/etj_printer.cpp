@@ -135,6 +135,11 @@ void Printer::BroadcastCenterMessage(const std::string& message)
 	G_Printf("%s\n", message.c_str());
 }
 
+void Printer::SendCenterMessage(int clientNum, const std::string& message)
+{
+	trap_SendServerCommand(clientNum, (boost::format("cp \"%s\n\"") % message).str().c_str());
+}
+
 void Printer::SendCommandToAll(const std::string& command)
 {
 	trap_SendServerCommand(-1, command.c_str());
