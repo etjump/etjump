@@ -1027,14 +1027,18 @@ ETJump::OperationResult CanNoclip(gentity_t *ent)
 	return{ true, "" };
 }
 
-void decreaseNoclipCount(gentity_t *ent)
+void decreaseNoclipCount(gentity_t *ent, const std::string& action)
 {
 	if (!ent || !ent->client)
 	{
 		return;
 	}
 
-	--ent->client->pers.noclipCount;
+	if (ent->client->pers.noclipCount > 0)
+	{
+		--ent->client->pers.noclipCount;
+		Printer::SendCenterMessage(ClientNum(ent), (boost::format("^7You may use %s ^2%d^7 more times.") % action % ent->client->pers.noclipCount).str());
+	}
 }
 
 /*
@@ -1075,11 +1079,7 @@ void Cmd_Noclip_f(gentity_t *ent)
 	{
 		msg = "noclip ON\n";
 
-		if (ent->client->pers.noclipCount > 0)
-		{
-			ent->client->pers.noclipCount--;
-			C_CPTo(ent, va("^7You may use noclip ^2%d^7 more times.", ent->client->pers.noclipCount));
-		}
+		decreaseNoclipCount(ent, "noclip");
 	}
 	else
 	{
@@ -4688,7 +4688,7 @@ namespace ETJump
 			return;
 		}
 
-		decreaseNoclipCount(ent);
+		decreaseNoclipCount(ent, "setoffset");
 
 		for (auto i = 0; i < 3; i++)
 		{
