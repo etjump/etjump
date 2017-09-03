@@ -990,54 +990,104 @@ void Cmd_Notarget_f(gentity_t *ent)
 	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", msg));
 }
 
-ETJump::OperationResult CanNoclip(gentity_t *ent)
+namespace ETJump
 {
-	if (!ent || !ent->client)
+	OperationResult CanNoclip(gentity_t *ent)
 	{
-		return{ false, "Non-player entities cannot use %s." };
-	}
-
-	if (ent->client->sess.timerunActive == qtrue)
-	{
-		return {false, "Cannot use %s while timer is running."};
-	}
-
-	if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
-	{
-		return{ false, "Cannot use %s while death run is active." };
-	}
-
-	if (!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR))
-	{
-		if (level.noNoclip)
+		if (!ent || !ent->client)
 		{
-			return{ false, "%s has been disabled on this map." };
+			return{ false, "Non-player entities cannot use %s." };
 		}
 
-		if (ent->client->pers.noclipCount == 0 &&
-			!ent->client->noclip)
+		if (ent->client->sess.timerunActive == qtrue)
 		{
-			if (!g_noclip.integer && !CheatsOk(ent))
+			return{ false, "Cannot use %s while timer is running." };
+		}
+
+		if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
+		{
+			return{ false, "Cannot use %s while death run is active." };
+		}
+
+		if (!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR))
+		{
+			if (level.noNoclip)
 			{
-				return{ false, "You can no longer use %s." };
+				return{ false, "%s has been disabled on this map." };
+			}
+
+			if (ent->client->pers.noclipCount == 0 &&
+				!ent->client->noclip)
+			{
+				if (!g_noclip.integer && !CheatsOk(ent))
+				{
+					return{ false, "You can no longer use %s." };
+				}
 			}
 		}
+
+		return{ true, "" };
 	}
 
-	return{ true, "" };
-}
-
-void decreaseNoclipCount(gentity_t *ent, const std::string& action)
-{
-	if (!ent || !ent->client)
+	void decreaseNoclipCount(gentity_t *ent, const std::string& action)
 	{
-		return;
+		if (!ent || !ent->client)
+		{
+			return;
+		}
+
+		if (ent->client->pers.noclipCount > 0)
+		{
+			--ent->client->pers.noclipCount;
+			Printer::SendCenterMessage(ClientNum(ent), (boost::format("^7You may use %s ^2%d^7 more times.") % action % ent->client->pers.noclipCount).str());
+		}
 	}
 
-	if (ent->client->pers.noclipCount > 0)
+	const float MaxAxisOffset = 4096.f;
+	// offsets player's position by given vector if noclip is available
+	void setPlayerOffset(gentity_t *ent)
 	{
-		--ent->client->pers.noclipCount;
-		Printer::SendCenterMessage(ClientNum(ent), (boost::format("^7You may use %s ^2%d^7 more times.") % action % ent->client->pers.noclipCount).str());
+		static char buffer[64];
+		auto clientNum = ClientNum(ent);
+		auto result = CanNoclip(ent);
+
+		if (!result.success)
+		{
+			Printer::SendConsoleMessage(clientNum, (boost::format(result.message) % "setoffset").str());
+			return;
+		}
+
+		vec3_t origin;
+		vec3_t angles;
+		VectorCopy(ent->client->ps.origin, origin);
+		VectorCopy(ent->client->ps.viewangles, angles);
+	
+		if (trap_Argc() != 4)
+		{
+			Printer::SendConsoleMessage(clientNum,"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector");
+			return;
+		}
+
+		decreaseNoclipCount(ent, "setoffset");
+
+		for (auto i = 0; i < 3; i++)
+		{
+			trap_Argv(i + 1, buffer, sizeof buffer);
+			float value = atof(buffer);
+			if (value > MaxAxisOffset)
+			{
+				value = MaxAxisOffset;
+			}
+			else if (value < -MaxAxisOffset)
+			{
+				value = -MaxAxisOffset;
+			}
+			origin[i] += value;
+		}
+
+		// reset speed
+		VectorClear(ent->client->ps.velocity);
+		TeleportPlayer(ent, origin, angles);
 	}
 }
 
@@ -1050,12 +1100,10 @@ argv(0) noclip
 */
 void Cmd_Noclip_f(gentity_t *ent)
 {
-	const char *msg;
+	auto *name = ConcatArgs(1);
+	auto clientNum = ClientNum(ent);
+	auto result = ETJump::CanNoclip(ent);
 
-	char *name = ConcatArgs(1);
-
-	auto result = CanNoclip(ent);
-	int clientNum = ClientNum(ent);
 	if (!result.success)
 	{
 		Printer::SendCenterMessage(clientNum, (boost::format(result.message) % "noclip").str());
@@ -1075,18 +1123,19 @@ void Cmd_Noclip_f(gentity_t *ent)
 		ent->client->noclip = !ent->client->noclip ? qtrue : qfalse;
 	}
 
+	const char *message;
+
 	if (ent->client->noclip)
 	{
-		msg = "noclip ON\n";
-
-		decreaseNoclipCount(ent, "noclip");
+		message = "noclip ON\n";
+		ETJump::decreaseNoclipCount(ent, "noclip");
 	}
 	else
 	{
-		msg = "noclip OFF\n";
+		message = "noclip OFF\n";
 	}
 
-	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", msg));
+	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", message));
 }
 
 /*
@@ -4659,56 +4708,6 @@ void Cmd_SwapPlacesWithBot_f(gentity_t *ent, int botNum)
 	SetClientViewAngle(ent, cl.ps.viewangles);
 	// make sure they dont respawn immediately after they die
 	client->pers.lastReinforceTime = 0;
-}
-
-namespace ETJump
-{
-	const float MaxOffsetDistance = 4096.f;
-
-	// sets player offset if noclip is on
-	void setPlayerOffset(gentity_t *ent)
-	{
-		auto clientNum = ClientNum(ent);
-		auto result = CanNoclip(ent);
-		if (!result.success)
-		{
-			Printer::SendConsoleMessage(clientNum, (boost::format(result.message) % "setoffset").str());
-			return;
-		}
-
-		vec3_t origin;
-		vec3_t angles;
-		VectorCopy(ent->client->ps.origin, origin);
-		VectorCopy(ent->client->ps.viewangles, angles);
-		static char buffer[64];
-
-		if (trap_Argc() != 4)
-		{
-			CP("print \"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector\"");
-			return;
-		}
-
-		decreaseNoclipCount(ent, "setoffset");
-
-		for (auto i = 0; i < 3; i++)
-		{
-			trap_Argv(i + 1, buffer, sizeof buffer);
-			float value = atof(buffer);
-			if (value > MaxOffsetDistance)
-			{
-				value = MaxOffsetDistance;
-			}
-			else if (value < -MaxOffsetDistance)
-			{
-				value = -MaxOffsetDistance;
-			}
-			origin[i] += value;
-		}
-
-		// reset speed
-		VectorClear(ent->client->ps.velocity);
-		TeleportPlayer(ent, origin, angles);
-	}
 }
 
 typedef struct
