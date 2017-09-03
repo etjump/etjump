@@ -67,102 +67,44 @@ void ETJump::OverbounceWatcher::render() const
 	}
 
 	auto ps = getPlayerState();
-	auto psec = pmove_msec.integer / 1000.0;
-	auto gravity = ps->gravity;
-	auto v0 = 0;
-	auto h0 = (*_current)[2] + ps->mins[2];
+	if (ps->groundEntityNum != ENTITYNUM_NONE)
+	{
+		return;
+	}
+
+	float psec = pmove_msec.integer / 1000.f;
+	int gravity = ps->gravity;
+	float velocity = ps->velocity[2];
+	float currentHeight = ps->origin[2] + ps->mins[2];
+	float finalHeight = 0;
+
 	Coordinate snap{};
 	VectorSet(snap, 0, 0, gravity * psec);
 	trap_SnapVector(snap.data());
 	auto rintv = snap[2];
+	
+	finalHeight = (*_current)[2] + ps->mins[2];
 
-	// below ob
-	Coordinate start{};
-	VectorCopy(ps->origin, start);
-	start[2] = h0;
+	// something was hit and it's a floor
+	auto b = false;
 
-	Coordinate below{};
-	VectorCopy(ps->origin, below);
-
-	Coordinate end{};
-	VectorCopy(ps->origin, end);
-	end[2] -= 131072;
-
-	trace_t trace{};
-	CG_Trace(&trace, start.data(), vec3_origin, vec3_origin, end.data(), ps->clientNum, CONTENTS_SOLID);
-
-	if (trace.fraction != 1.0 && trace.plane.type == 2)
+	// fall ob
+	if (isOverbounce(velocity, currentHeight, finalHeight, rintv, psec, gravity))
 	{
-		auto t = trace.endpos[2];
-
-		if (isOverbounce(v0, h0, t, rintv, psec, gravity) && surfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(etj_obWatcherX.integer, etj_obWatcherY.integer, "B", colorWhite, qfalse, qtrue,
-				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-		}
+		b = qtrue;
 	}
 
-	// pointing at something
-	VectorCopy(cg.refdef.vieworg, start);
-	VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
-	CG_Trace(&trace, start.data(), vec3_origin, vec3_origin, end.data(), ps->clientNum,
-		CONTENTS_SOLID);
-
-	if (trace.fraction != 1.0 && trace.plane.type == 2)
+	// jump ob
+	if (isOverbounce(velocity + 270, currentHeight, finalHeight, rintv, psec, gravity))
 	{
-		// something was hit and it's a floor
-		auto b = false;
+		b = qtrue;
+	}
 
-		auto t = trace.endpos[2];
-
-		// fall ob
-		if (isOverbounce(v0, h0, t, rintv, psec, gravity) && surfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(etj_obWatcherX.integer + 10, etj_obWatcherY.integer, "F", colorWhite, qfalse, qtrue,
-				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-			b = qtrue;
-		}
-
-		// jump ob
-		if (isOverbounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && surfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(etj_obWatcherX.integer + 20, etj_obWatcherY.integer, "J", colorWhite, qfalse, qtrue,
-				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-			b = qtrue;
-		}
-
-		// don't predict sticky ob if there is an ob already or if the sticky
-		// ob detection isn't requested
-		if (b)
-		{
-			return;
-		}
-
-		// sticky ob
-		b = qfalse;
-		h0 += 0.25;
-
-		// sticky fall ob
-		if (isOverbounce(v0, h0, t, rintv, psec, gravity) && surfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(etj_obWatcherX.integer + 10, etj_obWatcherY.integer, "F", colorWhite, qfalse, qtrue,
-				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-			b = qtrue;
-		}
-
-		// sticky jump ob
-		if (isOverbounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && surfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(etj_obWatcherX.integer + 20, etj_obWatcherY.integer, "J", colorWhite, qfalse, qtrue,
-				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-			b = qtrue;
-		}
-
-		if (b)
-		{
-			CG_DrawStringExt(etj_obWatcherX.integer - 10, etj_obWatcherY.integer, "S", colorWhite, qfalse, qtrue,
-				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-		}
+	// don't predict sticky ob if there is an ob already or if the sticky
+	// ob detection isn't requested
+	if (b)
+	{
+		CG_DrawStringExt(etj_obWatcherX.integer, etj_obWatcherY.integer, "OB", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 	}
 }
 
