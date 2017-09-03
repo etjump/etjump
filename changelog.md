@@ -34,6 +34,12 @@
 * fixed no jump sounds while jumping on slopes
 * fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
 * added `incrementVar` command, works almost like `cycle` but also support floats
+* added worldspawn `strictsaveload` key to control save load behavior:
+  * strictsaveload 0 = regular save/load restrictions (default)
+  * strictsaveload 1|crouch = can't save/load when crouched
+  * strictsaveload 2|prone = can't save/load when prone
+  * strictsaveload 4|move = can't save when moving
+* added command `setoffset x y z`: offsets player's position by given vector if noclip is available
 
 # ETJump 2.2.0
 
