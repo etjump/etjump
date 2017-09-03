@@ -992,7 +992,7 @@ void Cmd_Notarget_f(gentity_t *ent)
 
 namespace ETJump
 {
-	OperationResult CanNoclip(gentity_t *ent)
+	OperationResult canNoclip(gentity_t *ent)
 	{
 		if (!ent || !ent->client)
 		{
@@ -1049,7 +1049,7 @@ namespace ETJump
 	{
 		static char buffer[64];
 		auto clientNum = ClientNum(ent);
-		auto result = CanNoclip(ent);
+		auto result = canNoclip(ent);
 
 		if (!result.success)
 		{
@@ -1102,7 +1102,7 @@ void Cmd_Noclip_f(gentity_t *ent)
 {
 	auto *name = ConcatArgs(1);
 	auto clientNum = ClientNum(ent);
-	auto result = ETJump::CanNoclip(ent);
+	auto result = ETJump::canNoclip(ent);
 
 	if (!result.success)
 	{
