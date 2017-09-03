@@ -1027,14 +1027,14 @@ ETJump::OperationResult CanNoclip(gentity_t *ent)
 	return{ true, "" };
 }
 
-void increaseNoclipCount(gentity_t *ent)
+void decreaseNoclipCount(gentity_t *ent)
 {
 	if (!ent || !ent->client)
 	{
 		return;
 	}
 
-	++ent->client->pers.noclipCount;
+	--ent->client->pers.noclipCount;
 }
 
 /*
@@ -4688,7 +4688,7 @@ namespace ETJump
 			return;
 		}
 
-		increaseNoclipCount(ent);
+		decreaseNoclipCount(ent);
 
 		for (auto i = 0; i < 3; i++)
 		{
