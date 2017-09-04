@@ -34,6 +34,10 @@
 * fixed no jump sounds while jumping on slopes
 * fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
 * added `incrementVar` command, works almost like `cycle` but also support floats
+* reworked OB Watcher:
+  * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`
+  * `etj_obWatcherSize` to set the size
+  * `etj_obWatcherColor` to set the color
 
 # ETJump 2.2.0
 
