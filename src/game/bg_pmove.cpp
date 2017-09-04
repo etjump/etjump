@@ -2290,6 +2290,7 @@ static void PM_GroundTrace(void)
 		PM_CrashLand();
 
 		// Disable overbounce?
+		// This breaks skim ramps when OB is disabled... Is it really required?
 		if (pm->shared & BG_LEVEL_NO_OVERBOUNCE)
 		{
 			if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
@@ -2318,7 +2319,7 @@ static void PM_GroundTrace(void)
 	// Disable overbounce?
 	if (pm->shared & BG_LEVEL_NO_OVERBOUNCE)
 	{
-		if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+		if (trace.plane.normal[2] == 1 && !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 		{
 			pm->ps->velocity[2] = 0;
 			if (trace.plane.type == 2)
@@ -2329,7 +2330,7 @@ static void PM_GroundTrace(void)
 		}
 	} else
 	{
-		if ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)
+		if (trace.plane.normal[2] == 1 && ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 		{
 			pm->ps->velocity[2] = 0;
 			if (trace.plane.type == 2)
