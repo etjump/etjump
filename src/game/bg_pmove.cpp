@@ -2323,7 +2323,8 @@ static void PM_GroundTrace(void)
 			pm->ps->velocity[2] = 0;
 			if (trace.plane.type == 2)
 			{
-				pm->ps->origin[2] -= trace.fraction;
+				auto offset = pm->ps->origin[2] - trace.endpos[2];
+				pm->ps->origin[2] -= offset;
 			}
 		}
 	} else
@@ -2333,7 +2334,8 @@ static void PM_GroundTrace(void)
 			pm->ps->velocity[2] = 0;
 			if (trace.plane.type == 2)
 			{
-				pm->ps->origin[2] -= trace.fraction;
+				auto offset = pm->ps->origin[2] - trace.endpos[2];
+				pm->ps->origin[2] -= offset;
 			}
 		}
 	}
