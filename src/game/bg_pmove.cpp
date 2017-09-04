@@ -2318,15 +2318,23 @@ static void PM_GroundTrace(void)
 	// Disable overbounce?
 	if (pm->shared & BG_LEVEL_NO_OVERBOUNCE)
 	{
-		if (trace.plane.normal[2] == 1 && !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+		if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 		{
 			pm->ps->velocity[2] = 0;
+			if (trace.plane.type == 2)
+			{
+				pm->ps->origin[2] -= trace.fraction;
+			}
 		}
 	} else
 	{
-		if (trace.plane.normal[2] == 1 && ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
+		if ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0)
 		{
 			pm->ps->velocity[2] = 0;
+			if (trace.plane.type == 2)
+			{
+				pm->ps->origin[2] -= trace.fraction;
+			}
 		}
 	}
 	
