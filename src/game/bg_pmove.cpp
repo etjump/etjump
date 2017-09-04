@@ -6566,6 +6566,16 @@ void PmoveSingle(pmove_t *pmove)
 		}
 	}
 
+	if (pm->cmd.rightmove < -127)
+	{
+		pm->cmd.rightmove = -127;
+	}
+
+	if (pm->cmd.forwardmove < -127)
+	{
+		pm->cmd.forwardmove = -127;
+	}
+
 	// setup - copy pressed keys into playerstate
 	// buttons, wbuttons
 	pm->ps->stats[STAT_USERCMD_BUTTONS]  = pm->cmd.buttons << 8;
