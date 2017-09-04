@@ -46,7 +46,7 @@ namespace ETJump
 		static const playerState_t *getPlayerState();
 
 		// checks if it's possible to overbounce with current velocity and height 
-		static bool isOverbounce(float vel, float initHeight,
+		static bool isOverbounce(float vel, float currentHeight,
 			float finalHeight, float rintv,
 			float psec, int gravity);
 

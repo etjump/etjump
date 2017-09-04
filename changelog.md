@@ -40,6 +40,10 @@
   * strictsaveload 2|prone = can't save/load when prone
   * strictsaveload 4|move = can't save when moving
 * added command `setoffset x y z`: offsets player's position by given vector if noclip is available
+* reworked OB Watcher:
+  * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`
+  * `etj_obWatcherSize` to set the size
+  * `etj_obWatcherColor` to set the color
 
 # ETJump 2.2.0
 

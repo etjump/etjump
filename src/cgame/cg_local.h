@@ -1128,6 +1128,7 @@ typedef struct
 	vec4_t xhairColorAlt;
 	vec4_t speedColor;
 	vec4_t keysColor;
+	vec4_t obWatcherColor;
 
 	// Arnout: allow overriding of countdown sounds
 	char fiveMinuteSound_g[MAX_QPATH];
@@ -2524,6 +2525,8 @@ extern vmCvar_t shared;
 extern vmCvar_t etj_drawObWatcher;
 extern vmCvar_t etj_obWatcherX;
 extern vmCvar_t etj_obWatcherY;
+extern vmCvar_t etj_obWatcherSize;
+extern vmCvar_t etj_obWatcherColor;
 
 extern vmCvar_t etj_demo_yawturnspeed;
 extern vmCvar_t etj_demo_pitchturnspeed;
