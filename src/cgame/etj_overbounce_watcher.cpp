@@ -43,7 +43,7 @@ ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler* clientComman
 	clientCommandsHandler->subscribe("ob_reset", [&](const std::vector<std::string>& args)
 	                                 {
 		                                 reset();
-		                                 CG_Printf("Reseted currently displayed overbounce watcher coordinates.\n");
+		                                 CG_Printf("Reset currently displayed overbounce watcher coordinates.\n");
 	                                 });
 }
 
@@ -66,8 +66,13 @@ void ETJump::OverbounceWatcher::render() const
 		return;
 	}
 
-	auto ps = getPlayerState();
+	auto ps = &cg.predictedPlayerState;
 	if (ps->groundEntityNum != ENTITYNUM_NONE)
+	{
+		return;
+	}
+	
+	if (ps->pm_type == PM_NOCLIP)
 	{
 		return;
 	}
@@ -77,6 +82,8 @@ void ETJump::OverbounceWatcher::render() const
 	float velocity = ps->velocity[2];
 	float currentHeight = ps->origin[2] + ps->mins[2];
 	float finalHeight = 0;
+	float x = etj_obWatcherX.value;
+	float sizex, sizey;
 
 	Coordinate snap{};
 	VectorSet(snap, 0, 0, gravity * psec);
@@ -85,26 +92,17 @@ void ETJump::OverbounceWatcher::render() const
 	
 	finalHeight = (*_current)[2] + ps->mins[2];
 
-	// something was hit and it's a floor
-	auto b = false;
+	sizex = sizey = 0.1f;
+	sizex *= etj_obWatcherSize.value;
+	sizey *= etj_obWatcherSize.value;
 
-	// fall ob
+	ETJump_AdjustPosition(&x);
+
+	// determine if we are going to get OB on our saved surface and draw OB watcher accordingly
+	// TODO: Add nooverbounce check. Not critical since OB watcher is probably mostly used in original maps.
 	if (isOverbounce(velocity, currentHeight, finalHeight, rintv, psec, gravity))
 	{
-		b = qtrue;
-	}
-
-	// jump ob
-	if (isOverbounce(velocity + 270, currentHeight, finalHeight, rintv, psec, gravity))
-	{
-		b = qtrue;
-	}
-
-	// don't predict sticky ob if there is an ob already or if the sticky
-	// ob detection isn't requested
-	if (b)
-	{
-		CG_DrawStringExt(etj_obWatcherX.integer, etj_obWatcherY.integer, "OB", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		ETJump::DrawString(x, etj_obWatcherY.integer, sizex, sizey, cg.obWatcherColor, qfalse, "OB", 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 }
 
@@ -160,7 +158,7 @@ const playerState_t* ETJump::OverbounceWatcher::getPlayerState()
 		       : &cg.predictedPlayerState;
 }
 
-bool ETJump::OverbounceWatcher::isOverbounce(float vel, float initHeight,
+bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
                                              float finalHeight, float rintv,
                                              float psec, int gravity)
 {
@@ -171,11 +169,11 @@ bool ETJump::OverbounceWatcher::isOverbounce(float vel, float initHeight,
 
 	a = -psec * rintv / 2;
 	b = psec * (vel - gravity * psec / 2 + rintv / 2);
-	c = initHeight - finalHeight;
+	c = currentHeight - finalHeight;
 	n1 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
 
 	n = floor(n1);
-	hn = initHeight + psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
+	hn = currentHeight + psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
 
 	if (n && hn < finalHeight + 0.25 && hn > finalHeight)
 	{

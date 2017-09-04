@@ -467,6 +467,8 @@ vmCvar_t shared;
 vmCvar_t etj_drawObWatcher;
 vmCvar_t etj_obWatcherX;
 vmCvar_t etj_obWatcherY;
+vmCvar_t etj_obWatcherSize;
+vmCvar_t etj_obWatcherColor;
 
 vmCvar_t etj_demo_yawturnspeed;
 vmCvar_t etj_demo_pitchturnspeed;
@@ -800,8 +802,10 @@ cvarTable_t cvarTable[] =
 	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
 	{ &shared, "shared", "0", CVAR_ROM },
 	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
-	{&etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
-	{&etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
+	{ &etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
+	{ &etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
+	{ &etj_obWatcherSize , "etj_obWatcherSize", "3", CVAR_ARCHIVE },
+	{ &etj_obWatcherColor , "etj_obWatcherColor", "White", CVAR_ARCHIVE },
 	{ &etj_demo_yawturnspeed, "etj_demo_yawturnspeed", "140", CVAR_ARCHIVE },
 	{ &etj_demo_pitchturnspeed, "etj_demo_pitchturnspeed", "140", CVAR_ARCHIVE },
 	{ &etj_demo_rollspeed, "etj_demo_rollspeed", "140", CVAR_ARCHIVE },
@@ -862,6 +866,7 @@ void CG_RegisterCvars(void)
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
+	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
 	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
 	if (cg_noclipScale.value < 1)
@@ -934,6 +939,10 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_keysColor)
 				{
 					BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
+				}
+				else if (cv->vmCvar == &etj_obWatcherColor)
+				{
+					BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
 				}
 				else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string)
 				{
