@@ -1143,7 +1143,6 @@ typedef struct
 	int warmupTime;                 // restart match at this time
 
 	fileHandle_t logFile;
-	fileHandle_t adminLogFile;
 
 	char rawmapname[MAX_QPATH];
 
@@ -1942,12 +1941,6 @@ extern vmCvar_t g_nameChangeInterval;
 extern vmCvar_t g_mapScriptDir;
 extern vmCvar_t g_blockedMaps;
 
-extern vmCvar_t g_adminLog;
-extern vmCvar_t g_logCommands;
-extern vmCvar_t g_userConfig;
-extern vmCvar_t g_levelConfig;
-
-
 extern vmCvar_t g_bannerLocation;
 extern vmCvar_t g_bannerTime;
 extern vmCvar_t g_banner1;
@@ -1971,10 +1964,6 @@ extern vmCvar_t mod_version;
 extern vmCvar_t g_lastVisitedMessage;
 
 extern vmCvar_t g_mapDatabase;
-extern vmCvar_t g_banDatabase;
-
-extern vmCvar_t troll_speed;
-extern vmCvar_t g_raceDatabase;
 
 extern vmCvar_t g_disableVoteAfterMapChange;
 
@@ -1999,6 +1988,8 @@ extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
 
 extern vmCvar_t g_serverId;
+extern vmCvar_t g_database;
+extern vmCvar_t g_levelConfig;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);

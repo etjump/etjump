@@ -285,9 +285,6 @@
     <ClCompile Include="etj_admin_commands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_task.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">

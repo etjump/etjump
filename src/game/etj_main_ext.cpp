@@ -41,9 +41,16 @@ void OnGameInit()
 }
 
 void OnGameShutdown()
-{
-	game.mapStatistics->saveChanges();
-	game.tokens->reset();
+{ 
+	// if game failed to init
+	if (game.mapStatistics)
+	{
+		game.mapStatistics->saveChanges();
+	}
+	if (game.tokens)
+	{
+		game.tokens->reset();
+	}
 
 	game.saves = nullptr;
 	game.customMapVotes = nullptr;

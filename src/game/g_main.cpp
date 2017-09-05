@@ -58,8 +58,9 @@ namespace ETJump
 
 static void initializeETJump(int levelTime, int randomSeed, int restart)
 {
+	const auto defaultDb = "etjump.db";
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
-	ETJump::userRepository = std::make_shared<ETJump::UserRepository>(Utilities::getPath("etjump.db"), 5000);
+	ETJump::userRepository = std::make_shared<ETJump::UserRepository>(Utilities::getPath(ETJump::getValue(g_database.string, defaultDb)), 5000);
 	ETJump::userRepository->createTables();
 	ETJump::userService = std::make_shared<ETJump::UserService>(ETJump::userRepository);
 	std::string serverId = g_serverId.string;
@@ -68,10 +69,10 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 		serverId = ETJump::newGuid();
 		trap_Cvar_Set("g_serverId", serverId.c_str());
 	}
-	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>("etjump.db", 5000, serverId);
+	ETJump::sessionRepository = std::make_shared<ETJump::SessionRepository>(Utilities::getPath(ETJump::getValue(g_database.string, defaultDb)), 5000, serverId);
 	ETJump::sessionRepository->createTables();
 	ETJump::clientCommandsHandler = std::make_shared<ETJump::Server::ClientCommandsHandler>();
-	ETJump::levelService = std::make_shared<ETJump::LevelService>("levels.cfg");
+	ETJump::levelService = std::make_shared<ETJump::LevelService>(ETJump::getValue(g_levelConfig.string, "levels.cfg"));
 	ETJump::levelService->readConfig();
 	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, ETJump::levelService, trap_DropClient, trap_SendServerCommand);
 	ETJump::sessionService->readSession(levelTime);
@@ -263,13 +264,6 @@ vmCvar_t g_blockedMaps;
 vmCvar_t g_nameChangeLimit;
 vmCvar_t g_nameChangeInterval;
 
-// ETJump admin system
-
-vmCvar_t g_userConfig;
-vmCvar_t g_levelConfig;
-vmCvar_t g_adminLog;
-vmCvar_t g_logCommands;
-
 // Banner
 vmCvar_t g_bannerLocation;
 vmCvar_t g_bannerTime;
@@ -298,10 +292,6 @@ vmCvar_t mod_version;
 vmCvar_t g_lastVisitedMessage;
 
 vmCvar_t g_mapDatabase;
-vmCvar_t g_banDatabase;
-
-vmCvar_t troll_speed;
-vmCvar_t g_raceDatabase;
 
 vmCvar_t g_disableVoteAfterMapChange;
 
@@ -325,6 +315,9 @@ vmCvar_t g_customVoiceChat;
 // ETJump client/server shared data
 // TODO: refactor ghostPlayers into this
 vmCvar_t shared;
+
+vmCvar_t g_database;
+vmCvar_t g_levelConfig;
 
 // minimum time to wait before vote result will be checked
 vmCvar_t vote_minVoteDuration;
@@ -524,14 +517,6 @@ cvarTable_t gameCvarTable[] =
 	{ &g_mapScriptDir,              "g_mapScriptDir",              "scripts",                                                CVAR_ARCHIVE },
 	{ &g_blockedMaps,               "g_blockedMaps",               "",                                                       CVAR_ARCHIVE },
 
-
-	{ &g_adminLog,                  "g_adminLog",                  "adminsystem.log",                                        CVAR_ARCHIVE },
-	{ &g_logCommands,               "g_logCommands",               "1",                                                      CVAR_ARCHIVE },
-	{ &g_userConfig,                "g_userConfig",                "users.db",                                               CVAR_ARCHIVE },
-	{ &g_levelConfig,               "g_levelConfig",               "levels.cfg",                                             CVAR_ARCHIVE },
-
-
-
 	// BannerPrint location
 	{ &g_bannerLocation,            "g_bannerLocation",            "1",                                                      CVAR_ARCHIVE },
 	{ &g_bannerTime,                "g_bannerTime",                "60000",                                                  CVAR_ARCHIVE },
@@ -555,9 +540,6 @@ cvarTable_t gameCvarTable[] =
 
 	{ &g_lastVisitedMessage,        "g_lastVisitedMessage",        "^2Welcome back! Your last visit was on [t].",            CVAR_ARCHIVE },
 	{ &g_mapDatabase,               "g_mapDatabase",               "maps.dat",                                               CVAR_ARCHIVE },
-	{ &g_banDatabase,               "g_banDatabase",               "bans.dat",                                               CVAR_ARCHIVE },
-	{ &troll_speed,                 "troll_speed",                 "127",                                                    CVAR_ARCHIVE },
-	{ &g_raceDatabase,              "g_raceDatabase",              "races.db",                                               CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000",                                                  CVAR_ARCHIVE },
 	{ &g_motdFile,                  "g_motdFile",                  "motd.json",                                              CVAR_ARCHIVE },
 	{ &g_customMapVotesFile,        "g_customMapVotesFile",        "customvotes.json",                                       CVAR_ARCHIVE },
@@ -578,7 +560,9 @@ cvarTable_t gameCvarTable[] =
 	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
-	{&g_serverId, "g_serverId", "", CVAR_TEMP | CVAR_ROM }
+	{ &g_serverId, "g_serverId", "", CVAR_TEMP | CVAR_ROM },
+	{ &g_database, "g_database", "etjump.db", CVAR_ARCHIVE },
+	{ &g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE }
 
 };
 
@@ -1977,9 +1961,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	if (g_dailyLogs.integer)
 	{
 		trap_Cvar_Set("g_log", va("logs/%s-%02d-%02d.log", Months[ct.tm_mon], ct.tm_mday, 1900 + ct.tm_year));
-		trap_Cvar_Set("g_adminLog", va("logs/admin-%s-%02d-%02d.log", Months[ct.tm_mon], ct.tm_mday, 1900 + ct.tm_year));
 		trap_Cvar_Update(&g_log);
-		trap_Cvar_Update(&g_adminLog);
 	}
 
 	ETJump::Log::setLogLevel(ETJump::Log::LogLevel::Debug);
@@ -1989,14 +1971,12 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		if (g_logSync.integer)
 		{
 			trap_FS_FOpenFile(g_log.string, &level.logFile, FS_APPEND_SYNC);
-			trap_FS_FOpenFile(g_adminLog.string, &level.adminLogFile, FS_APPEND_SYNC);
 		}
 		else
 		{
 			trap_FS_FOpenFile(g_log.string, &level.logFile, FS_APPEND);
-			trap_FS_FOpenFile(g_adminLog.string, &level.adminLogFile, FS_APPEND);
 		}
-		if (!level.logFile || !level.adminLogFile)
+		if (!level.logFile)
 		{
 			G_Printf("WARNING: Couldn't open logfile: %s\n", g_log.string);
 		}
@@ -2201,11 +2181,6 @@ void G_ShutdownGame(int restart)
 		G_LogPrintf("------------------------------------------------------------\n");
 		trap_FS_FCloseFile(level.logFile);
 		level.logFile = 0;
-	}
-	if (level.adminLogFile)
-	{
-		trap_FS_FCloseFile(level.adminLogFile);
-		level.adminLogFile = 0;
 	}
 
 	// write all the client session data so we can get it back

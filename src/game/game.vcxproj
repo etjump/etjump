@@ -284,7 +284,6 @@
     <ClCompile Include="etj_session_repository.cpp" />
     <ClCompile Include="etj_session_service.cpp" />
     <ClCompile Include="etj_string_utilities.cpp" />
-    <ClCompile Include="etj_task.cpp" />
     <ClCompile Include="etj_time_utilities.cpp" />
     <ClCompile Include="etj_user_repository.cpp" />
     <ClCompile Include="etj_user_service.cpp" />

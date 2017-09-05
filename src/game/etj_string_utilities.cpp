@@ -71,7 +71,7 @@ std::string ETJump::getBestMatch(const std::vector<std::string>& words, const st
 	return smallest->first;
 }
 
-void SanitizeConstString(const char *in, char *out, bool toLower)
+static void SanitizeConstString(const char *in, char *out, bool toLower)
 {
 	while (*in)
 	{
@@ -103,4 +103,16 @@ std::string ETJump::sanitize(const std::string& text, bool toLower)
 	std::vector<char> out(len + 1);
 	SanitizeConstString(text.c_str(), out.data(), toLower ? true : false);
 	return std::string(out.data());
+}
+
+std::string ETJump::getValue(const char* value, const std::string& defaultValue)
+{
+	return strlen(value) > 0 ? value : defaultValue;
+}
+
+std::string ETJump::getValue(const std::string& value, const std::string& defaultValue)
+{
+	return value.length() > 0
+		? value
+		: defaultValue;
 }

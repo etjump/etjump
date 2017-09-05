@@ -161,7 +161,7 @@ static char *BuildOSPath(const char *file)
 	trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
 	trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
 
-	Com_sprintf(temp, sizeof(temp), "%s/%s", game, file);
+	Com_sprintf(temp, sizeof(temp), "/%s/%s", game, file);
 	FS_ReplaceSeparators(temp);
 	Com_sprintf(ospath[toggle], sizeof(ospath[0]), "%s%s", base, temp);
 
