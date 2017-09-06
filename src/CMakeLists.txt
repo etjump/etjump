@@ -56,6 +56,8 @@ file(GLOB CGAME_SRC
 	"cgame/cg_edv.cpp"
 	"cgame/etj_client_commands_handler.cpp"
 	"cgame/etj_client_authentication.cpp"
+	"cgame/etj_cvar_shadow.cpp"
+	"cgame/etj_cvar_update_handler.cpp"
 	"cgame/etj_entity_events_handler.cpp"
 	"cgame/etj_maxspeed.cpp"
 	"cgame/etj_operating_system_linux.cpp"
