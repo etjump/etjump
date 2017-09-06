@@ -22,7 +22,7 @@ bool ETJump::CvarUpdateHandler::check(const vmCvar_t *cvar)
 	return false;
 }
 
-bool ETJump::CvarUpdateHandler::subscribe(const	vmCvar_t *target, std::function<void(const vmCvar_t *cvar)> callback)
+bool ETJump::CvarUpdateHandler::subscribe(const vmCvar_t *target, std::function<void(const vmCvar_t *cvar)> callback)
 {
 	callbacks[target->handle].push_back(callback);
 	return true;
