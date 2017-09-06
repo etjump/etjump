@@ -14,6 +14,8 @@
 #include "etj_maxspeed.h"
 #include "etj_client_authentication.h"
 #include "etj_operating_system.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_cvar_shadow.h"
 
 displayContextDef_t cgDC;
 
@@ -89,6 +91,8 @@ namespace ETJump
 	std::shared_ptr<ClientAuthentication> authentication;
 	std::shared_ptr<OperatingSystem> operatingSystem;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
+	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +343,6 @@ vmCvar_t cl_yawspeed;
 vmCvar_t cl_freelook;
 vmCvar_t cg_drawCGazUsers;
 
-vmCvar_t cg_viewlog;
 vmCvar_t cg_drawClock;
 
 vmCvar_t cg_drawSpeed2;
@@ -483,6 +486,12 @@ vmCvar_t etj_noJumpDelayY;
 vmCvar_t etj_drawSaveIndicator;
 vmCvar_t etj_saveIndicatorX;
 vmCvar_t etj_saveIndicatorY;
+
+vmCvar_t etj_viewlog;
+vmCvar_t etj_drawFoliage;
+vmCvar_t etj_showTris;
+vmCvar_t etj_wolfFog;
+vmCvar_t etj_zFar;
 
 typedef struct
 {
@@ -697,7 +706,6 @@ cvarTable_t cvarTable[] =
 	{ &cg_speedXYonly,              "etj_speedXYonly",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedinterval,            "etj_speedinterval",           "100",                    CVAR_ARCHIVE             },
 	{ &cg_speedunit,                "etj_speedunit",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_viewlog,                  "etj_viewlog",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
@@ -818,6 +826,12 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawSaveIndicator, "etj_drawSaveIndicator", "3", CVAR_ARCHIVE },
 	{ &etj_saveIndicatorX, "etj_saveIndicatorX", "525", CVAR_ARCHIVE },
 	{ &etj_saveIndicatorY, "etj_saveIndicatorY", "450", CVAR_ARCHIVE },
+	{ &etj_drawFoliage, "etj_drawFoliage", "1", CVAR_ARCHIVE },
+	{ &etj_showTris, "etj_showTris", "0", CVAR_ARCHIVE },
+	{ &etj_wolfFog, "etj_wolfFog", "1", CVAR_ARCHIVE },
+	{ &etj_zFar, "etj_zFar", "0", CVAR_ARCHIVE },
+	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
+
 };
 
 
@@ -856,6 +870,24 @@ void CG_RegisterCvars(void)
 		}
 	}
 
+	ETJump::cvarUpdateHandler = std::make_shared<ETJump::CvarUpdateHandler>();
+
+	// shadow cvars mapping to real cvars, forces locked values change
+	std::vector<std::pair<vmCvar_t*, std::string>> cvars {
+		{ &etj_drawFoliage, "r_drawfoliage"},
+		{ &etj_showTris, "r_showtris" },
+		{ &etj_wolfFog, "r_wolffog" },
+		{ &etj_zFar, "r_zfar" },
+		{ &etj_viewlog, "viewlog" }
+	};
+
+	for (auto &shadow : cvars)
+	{
+		ETJump::cvarShadows.push_back(
+			std::unique_ptr<ETJump::CvarShadow>(new ETJump::CvarShadow{ shadow.first, shadow.second })
+		);
+	}
+
 	// see if we are also running the server on this machine
 	trap_Cvar_VariableStringBuffer("sv_running", var, sizeof(var));
 	cgs.localServer = atoi(var) ? qtrue : qfalse;
@@ -867,7 +899,6 @@ void CG_RegisterCvars(void)
 	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
-	trap_Cvar_Set("viewlog", cg_viewlog.string);
 
 	if (cg_noclipScale.value < 1)
 	{
@@ -977,11 +1008,6 @@ void CG_UpdateCvars(void)
 						trap_Cvar_Set("cg_errorDecay", "500");
 					}
 				}
-				else if (cv->vmCvar == &cg_viewlog)
-				{
-					trap_Cvar_Set("viewlog", cg_viewlog.string);
-				}
-
 
 				// This has to be if, not elseif...
 				if (cv->vmCvar == &cg_noclipScale)
@@ -999,6 +1025,8 @@ void CG_UpdateCvars(void)
 						cg.pmext.noclipScale = cg_noclipScale.value;
 					}
 				}
+
+				ETJump::cvarUpdateHandler->check(cv->vmCvar);
 			}
 		}
 	}
@@ -3644,6 +3672,8 @@ void CG_Shutdown(void)
 	ETJump::authentication = nullptr;
 	ETJump::entityEventsHandler = nullptr;
 	ETJump::renderables.clear();
+	ETJump::cvarUpdateHandler = nullptr;
+	ETJump::cvarShadows.clear();
 }
 
 // returns true if game is single player (or coop)

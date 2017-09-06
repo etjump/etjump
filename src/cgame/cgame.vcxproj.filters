@@ -233,6 +233,12 @@
     <ClCompile Include="etj_operating_system_windows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_cvar_shadow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_cvar_update_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -326,6 +332,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\game\etj_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cvar_shadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cvar_update_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

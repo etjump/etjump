@@ -2399,7 +2399,6 @@ extern pmove_t  cg_pmove;
 // Cheat cvars
 extern vmCvar_t cl_yawspeed;
 extern vmCvar_t cl_freelook;
-extern vmCvar_t cg_viewlog;
 extern vmCvar_t cg_drawClock;
 extern vmCvar_t cg_drawSpeed2;
 extern vmCvar_t cg_speedX;
@@ -2542,6 +2541,12 @@ extern vmCvar_t etj_noJumpDelayY;
 extern vmCvar_t etj_drawSaveIndicator;
 extern vmCvar_t etj_saveIndicatorX;
 extern vmCvar_t etj_saveIndicatorY;
+
+extern vmCvar_t etj_viewlog;
+extern vmCvar_t etj_drawFoliage;
+extern vmCvar_t etj_showTris;
+extern vmCvar_t etj_wolfFog;
+extern vmCvar_t etj_zFar;
 
 //
 // cg_main.c
@@ -3868,11 +3873,13 @@ namespace ETJump
 	class ClientCommandsHandler;
 	class EntityEventsHandler;
 	class IRenderable;
+	class CvarUpdateHandler;
 
 	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
+	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
