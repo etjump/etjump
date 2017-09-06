@@ -4540,29 +4540,31 @@ namespace ETJump
 void Cmd_Class_f(gentity_t *ent)
 {
 	auto args = GetArgs();
+	auto clientNum = ClientNum(ent);
 	if (args->size() < 3)
 	{
-		CP("Print \"^dUsage:\n\n\"");
-		CP("Print \"^dMedic with SMG                /class m 1\n\"");
-		CP("Print \"^dMedic with Rifle              /class m 2\n\"");
-		CP("Print \"^dMedic with Sniper Rifle       /class m 3\n\"");
-		CP("Print \"^dEngineer with SMG             /class e 1\n\"");
-		CP("Print \"^dEngineer with Rifle           /class e 2\n\"");
-		CP("Print \"^dEngineer with Sniper Rifle    /class e 3\n\"");
-		CP("Print \"^dField ops with SMG            /class f 1\n\"");
-		CP("Print \"^dField ops with Rifle          /class f 2\n\"");
-		CP("Print \"^dField ops with Sniper Rifle   /class f 3\n\"");
-		CP("Print \"^dCovert ops with Sten          /class c 1\n\"");
-		CP("Print \"^dCovert ops with FG42          /class c 2\n\"");
-		CP("Print \"^dCovert ops with Sniper Rifle  /class c 3\n\"");
-		CP("Print \"^dCovert ops with Rifle         /class c 4\n\"");
-		CP("Print \"^dSoldier with SMG              /class s 1\n\"");
-		CP("Print \"^dSoldier with MG42             /class s 2\n\"");
-		CP("Print \"^dSoldier with Flamethrower     /class s 3\n\"");
-		CP("Print \"^dSoldier with Panzerfaust      /class s 4\n\"");
-		CP("Print \"^dSoldier with Mortar           /class s 5\n\"");
-		CP("Print \"^dSoldier with Rifle            /class s 6\n\"");
-		CP("Print \"^dSoldier with Sniper Rifle     /class s 7\n\"");
+		Printer::SendConsoleMessage(clientNum, 
+			"^dUsage:\n\n"
+			"^dMedic with SMG                /class m 1\n"
+			"^dMedic with Rifle              /class m 2\n"
+			"^dMedic with Sniper Rifle       /class m 3\n"
+			"^dEngineer with SMG             /class e 1\n"
+			"^dEngineer with Rifle           /class e 2\n"
+			"^dEngineer with Sniper Rifle    /class e 3\n"
+			"^dField ops with SMG            /class f 1\n"
+			"^dField ops with Rifle          /class f 2\n"
+			"^dField ops with Sniper Rifle   /class f 3\n"
+			"^dCovert ops with Sten          /class c 1\n"
+			"^dCovert ops with FG42          /class c 2\n"
+			"^dCovert ops with Sniper Rifle  /class c 3\n"
+			"^dCovert ops with Rifle         /class c 4\n"
+			"^dSoldier with SMG              /class s 1\n"
+			"^dSoldier with MG42             /class s 2\n"
+			"^dSoldier with Flamethrower     /class s 3\n"
+			"^dSoldier with Panzerfaust      /class s 4\n"
+			"^dSoldier with Mortar           /class s 5\n"
+			"^dSoldier with Rifle            /class s 6\n"
+			"^dSoldier with Sniper Rifle     /class s 7\n");
 		return;
 	}
 
