@@ -1988,6 +1988,9 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 	saveGamePending = 0;
 
+	// must be called before scripts
+	ETJump::initRemappedShaders();
+
 	// load level script
 	G_Script_ScriptLoad();
 

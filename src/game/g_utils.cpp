@@ -19,6 +19,12 @@ typedef struct
 int           remapCount = 0;
 shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
 
+void ETJump::initRemappedShaders()
+{
+	remapCount = 0;
+	memset(remappedShaders, 0, sizeof remappedShaders);
+}
+
 void AddRemap(const char *oldShader, const char *newShader, float timeOffset)
 {
 	int i;
@@ -1996,7 +2002,7 @@ const char *ClientIPAddr(gentity_t *ent)
 	return ent->client->sess.ip;
 }
 
-gentity_t* ETJump_SoundEvent(vec3_t origin, entity_event_t eventType, int soundIndex)
+gentity_t* ETJump::soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex)
 {
 	gentity_t *te;
 	te = G_TempEntity(origin, eventType);

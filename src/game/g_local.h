@@ -1498,7 +1498,11 @@ qboolean G_MapIsValidCampaignStartMap(void);
 
 team_t G_GetTeamFromEntity(gentity_t *ent);
 const char *ClientIPAddr(gentity_t *ent);
-gentity_t* ETJump_SoundEvent(vec3_t origin, entity_event_t eventType, int soundIndex);
+namespace ETJump
+{
+	gentity_t* soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex);
+	void initRemappedShaders();
+}
 
 //
 // g_combat.c
