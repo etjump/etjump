@@ -4569,7 +4569,7 @@ void Cmd_Class_f(gentity_t *ent)
 	}
 
 	auto playerClass = ETJump::getPlayerClassType((*args)[1]);
-	auto w1 = std::max(std::min(std::stoi((*args)[2]), 11), 1);
+	auto w1 = std::max(std::min(std::stoi((*args)[2]), MAX_WEAPS_PER_CLASS), 1);
 
 	auto classList = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, playerClass);
 	auto primaryWeapon = classList->classWeapons[w1 - 1];
