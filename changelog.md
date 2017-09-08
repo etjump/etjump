@@ -46,6 +46,14 @@
   * `etj_obWatcherColor` to set the color
 * fixed `nooverbounce` allowing stickies on non-OB surfaces
 * added ability to spawn and pickup 100% accurate rifles with all classes
+* added cvars to force values on locked cvars:
+  * `etj_drawFoliage` -> `r_drawfoliage`
+  * `etj_showTris` -> `r_showtris`
+  * `etj_wolfFog` -> `r_wolffog`
+  * `etj_zFar` -> `r_zfar`
+  * `etj_viewLog` -> `viewlog` (reimplemented)
+* fixed remapped shaders were remaining from previous maps
+
 
 # ETJump 2.2.0
 
