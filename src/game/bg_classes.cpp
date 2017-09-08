@@ -14,7 +14,9 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] =
 			WP_MOBILE_MG42,
 			WP_FLAMETHROWER,
 			WP_PANZERFAUST,
-			WP_MORTAR
+			WP_MORTAR,
+			WP_CARBINE,
+			WP_GARAND
 		},
 	},
 
@@ -25,6 +27,8 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] =
 		"ui/assets/mp_arrow_blue.tga",
 		{
 			WP_THOMPSON,
+			WP_CARBINE,
+			WP_GARAND
 		},
 	},
 
@@ -36,6 +40,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] =
 		{
 			WP_THOMPSON,
 			WP_CARBINE,
+			WP_GARAND
 		},
 	},
 
@@ -46,6 +51,8 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] =
 		"ui/assets/mp_arrow_blue.tga",
 		{
 			WP_THOMPSON,
+			WP_CARBINE,
+			WP_GARAND
 		},
 	},
 
@@ -58,6 +65,7 @@ bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] =
 			WP_STEN,
 			WP_FG42,
 			WP_GARAND,
+			WP_CARBINE
 		},
 	},
 };
@@ -74,7 +82,9 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] =
 			WP_MOBILE_MG42,
 			WP_FLAMETHROWER,
 			WP_PANZERFAUST,
-			WP_MORTAR
+			WP_MORTAR,
+			WP_KAR98,
+			WP_K43
 		},
 	},
 
@@ -85,6 +95,8 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] =
 		"ui/assets/mp_arrow_red.tga",
 		{
 			WP_MP40,
+			WP_KAR98,
+			WP_K43
 		},
 	},
 
@@ -96,6 +108,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] =
 		{
 			WP_MP40,
 			WP_KAR98,
+			WP_K43
 		},
 	},
 
@@ -106,6 +119,8 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] =
 		"ui/assets/mp_arrow_red.tga",
 		{
 			WP_MP40,
+			WP_KAR98,
+			WP_K43
 		},
 	},
 
@@ -118,6 +133,7 @@ bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES] =
 			WP_STEN,
 			WP_FG42,
 			WP_K43,
+			WP_KAR98
 		},
 	},
 };

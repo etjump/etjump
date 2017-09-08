@@ -1064,7 +1064,7 @@ namespace ETJump
 	
 		if (trap_Argc() != 4)
 		{
-			Printer::SendConsoleMessage(clientNum,"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector");
+			Printer::SendConsoleMessage(clientNum,"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector\n");
 			return;
 		}
 
@@ -4521,101 +4521,64 @@ qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other)
 	           || ent->client->sess.spec_team == other->client->sess.sessionTeam)) ? qtrue : qfalse;
 }
 
+namespace ETJump
+{
+	static int getPlayerClassType(const std::string string)
+	{
+		switch (string[0])
+		{
+		case 'm': return PC_MEDIC;
+		case 'e': return PC_ENGINEER;
+		case 'f': return PC_FIELDOPS;
+		case 'c': return PC_COVERTOPS;
+		case 's':
+		default: return PC_SOLDIER;
+		}
+	}
+}
+
 void Cmd_Class_f(gentity_t *ent)
 {
-	char     ptype[4];
-	char     weap[4], weap2[4];
-	weapon_t w, w2;
-
-	if (trap_Argc() < 2)
+	auto args = GetArgs();
+	auto clientNum = ClientNum(ent);
+	if (args->size() < 3)
 	{
-		CP("Print \"^dUsage:\n\n\"");
-		CP("Print \"^dMedic                      /class m\n\"");
-		CP("Print \"^dEngineer with SMG          /class e 1\n\"");
-		CP("Print \"^dEngineer with Rifle        /class e 2\n\"");
-		CP("Print \"^dField ops                  /class f\n\"");
-		CP("Print \"^dCovert ops with sten       /class c 1\n\"");
-		CP("Print \"^dCovert ops with FG42       /class c 2\n\"");
-		CP("Print \"^dCovert ops with Rifle      /class c 3\n\"");
-		CP("Print \"^dSoldier with SMG           /class s 1\n\"");
-		CP("Print \"^dSoldier with MG42          /class s 2\n\"");
-		CP("Print \"^dSoldier with Flamethrower  /class s 3\n\"");
-		CP("Print \"^dSoldier with Panzerfaust   /class s 4\n\"");
-		CP("Print \"^dSoldier with Mortar        /class s 5\n\"");
+		Printer::SendConsoleMessage(clientNum, 
+			"^3Usage:\n"
+			"^7Medic with SMG                /class m 1\n"
+			"^7Medic with Rifle              /class m 2\n"
+			"^7Medic with Sniper Rifle       /class m 3\n"
+			"^7Engineer with SMG             /class e 1\n"
+			"^7Engineer with Rifle           /class e 2\n"
+			"^7Engineer with Sniper Rifle    /class e 3\n"
+			"^7Field ops with SMG            /class f 1\n"
+			"^7Field ops with Rifle          /class f 2\n"
+			"^7Field ops with Sniper Rifle   /class f 3\n"
+			"^7Covert ops with Sten          /class c 1\n"
+			"^7Covert ops with FG42          /class c 2\n"
+			"^7Covert ops with Sniper Rifle  /class c 3\n"
+			"^7Covert ops with Rifle         /class c 4\n"
+			"^7Soldier with SMG              /class s 1\n"
+			"^7Soldier with MG42             /class s 2\n"
+			"^7Soldier with Flamethrower     /class s 3\n"
+			"^7Soldier with Panzerfaust      /class s 4\n"
+			"^7Soldier with Mortar           /class s 5\n"
+			"^7Soldier with Rifle            /class s 6\n"
+			"^7Soldier with Sniper Rifle     /class s 7\n");
 		return;
 	}
 
-	trap_Argv(1, ptype, sizeof(ptype));
-	trap_Argv(2, weap, sizeof(weap));
-	trap_Argv(3, weap2, sizeof(weap2));
+	auto playerClass = ETJump::getPlayerClassType((*args)[1]);
+	auto w1 = std::max(std::min(std::stoi((*args)[2]), 11), 1);
 
+	auto classList = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, playerClass);
+	auto primaryWeapon = classList->classWeapons[w1 - 1];
+	auto secondaryWeapon = static_cast<weapon_t>(ent->client->sess.latchPlayerWeapon2);
 
-	if (!Q_stricmp(ptype, "m"))
-	{
-		Q_strncpyz(ptype, "1", sizeof(ptype));
-	}
-
-	if (!Q_stricmp(ptype, "e"))
-	{
-		Q_strncpyz(ptype, "2", sizeof(ptype));
-		if (!Q_stricmp(weap, "2"))
-		{
-			Q_strncpyz(weap, "23", sizeof(weap));
-		}
-	}
-
-	if (!Q_stricmp(ptype, "f"))
-	{
-		Q_strncpyz(ptype, "3", sizeof(ptype));
-	}
-
-	if (!Q_stricmp(ptype, "c"))
-	{
-		Q_strncpyz(ptype, "4", sizeof(ptype));
-		if (!Q_stricmp(weap, "2"))
-		{
-			Q_strncpyz(weap, "33", sizeof(weap));
-		}
-		else if (!Q_stricmp(weap, "3"))
-		{
-			Q_strncpyz(weap, "25", sizeof(weap));
-		}
-	}
-
-	if (!Q_stricmp(ptype, "s"))
-	{
-		Q_strncpyz(ptype, "5", sizeof(ptype));
-		if (!Q_stricmp(weap, "2"))
-		{
-			Q_strncpyz(weap, "31", sizeof(weap));
-		}
-		else if (!Q_stricmp(weap, "3"))
-		{
-			Q_strncpyz(weap, "6", sizeof(weap));
-		}
-		else if (!Q_stricmp(weap, "4"))
-		{
-			Q_strncpyz(weap, "5", sizeof(weap));
-		}
-		else if (!Q_stricmp(weap, "5"))
-		{
-			Q_strncpyz(weap, "35", sizeof(weap));
-		}
-	}
-
-
-
-	w  = static_cast<weapon_t>(atoi(weap));
-	w2 = static_cast<weapon_t>(atoi(weap2));
-
-	ent->client->sess.latchPlayerType = atoi(ptype);
-	if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS)
-	{
-		ent->client->sess.latchPlayerType = PC_SOLDIER;
-	}
-
-	G_SetClientWeapons(ent, w, w2, qtrue);
+	ent->client->sess.latchPlayerType = playerClass;
+	G_SetClientWeapons(ent, primaryWeapon, secondaryWeapon, qtrue);
 }
+
 // Little easter egg :]
 void Cmd_shrug_f(gentity_t *ent)
 {

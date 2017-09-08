@@ -44,7 +44,8 @@
   * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`
   * `etj_obWatcherSize` to set the size
   * `etj_obWatcherColor` to set the color
-* fixed `nooverbounce` allowing stickies on non-OB surfaces and slopes
+* fixed `nooverbounce` allowing stickies on non-OB surfaces
+* added ability to spawn and pickup 100% accurate rifles with all classes
 
 # ETJump 2.2.0
 
