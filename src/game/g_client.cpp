@@ -885,9 +885,8 @@ void SetWolfSpawnWeapons(gclient_t *client)
 
 			if (g_knifeonly.integer != 1)
 			{
-				switch (client->sess.sessionTeam)
+				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
-				case TEAM_AXIS:
 					switch (client->sess.playerWeapon)
 					{
 					case WP_KAR98:
@@ -910,8 +909,9 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_LANDMINE, GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo, GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
 						AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 4, qfalse);
 					}
-					break;
-				case TEAM_ALLIES:
+				}
+				else
+				{
 					switch (client->sess.playerWeapon)
 					{
 					case WP_CARBINE:
@@ -934,7 +934,6 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_LANDMINE, GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo, GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
 						AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 4, qfalse);
 					}
-					break;
 				}
 			}
 		}
@@ -949,9 +948,8 @@ void SetWolfSpawnWeapons(gclient_t *client)
 
 				//AddWeaponToPlayer(client, WP_SMOKE_MARKER, GetAmmoTableData(WP_SMOKE_MARKER)->defaultStartingAmmo, GetAmmoTableData(WP_SMOKE_MARKER)->defaultStartingClip, qfalse);
 
-				switch (client->sess.sessionTeam)
+				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
-				case TEAM_AXIS:
 					switch (client->sess.playerWeapon)
 					{
 					case WP_KAR98:
@@ -963,14 +961,15 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						break;
 					default:
 						AddWeaponToPlayer(client, WP_MP40, GetAmmoTableData(WP_MP40)->defaultStartingAmmo, GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
-						if (!level.noExplosives && !client->sess.timerunActive)
-						{
-							AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
-						}
 						break;
 					}
-					break;
-				case TEAM_ALLIES:
+					if (!level.noExplosives && !client->sess.timerunActive)
+					{
+						AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
+					}
+				}
+				else
+				{
 					switch (client->sess.playerWeapon)
 					{
 					case WP_CARBINE:
@@ -988,7 +987,6 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					{
 						AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
 					}
-					break;
 				}
 			}
 			else if (pc == PC_MEDIC)
@@ -1001,9 +999,8 @@ void SetWolfSpawnWeapons(gclient_t *client)
 
 				AddWeaponToPlayer(client, WP_MEDKIT, GetAmmoTableData(WP_MEDKIT)->defaultStartingAmmo, GetAmmoTableData(WP_MEDKIT)->defaultStartingClip, qfalse);
 
-				switch (client->sess.sessionTeam)
+				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
-				case TEAM_AXIS:
 					switch (client->sess.playerWeapon)
 					{
 					case WP_KAR98:
@@ -1015,14 +1012,15 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						break;
 					default:
 						AddWeaponToPlayer(client, WP_MP40, 0, GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
-						if (!level.noExplosives && !client->sess.timerunActive)
-						{
-							AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
-						}
 						break;
 					}
-					break;
-				case TEAM_ALLIES:
+					if (!level.noExplosives && !client->sess.timerunActive)
+					{
+						AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
+					}
+				}
+				else
+				{
 					switch (client->sess.playerWeapon)
 					{
 					case WP_CARBINE:
@@ -1035,19 +1033,17 @@ void SetWolfSpawnWeapons(gclient_t *client)
 					default:
 						AddWeaponToPlayer(client, WP_THOMPSON, 0, GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
 						break;
-						if (!level.noExplosives && !client->sess.timerunActive)
-						{
-							AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
-						}
-						break;
+					}
+					if (!level.noExplosives && !client->sess.timerunActive)
+					{
+						AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
 					}
 				}
 			}
 			else if (pc == PC_SOLDIER)
 			{
-				switch (client->sess.sessionTeam)
+				if (client->sess.sessionTeam == TEAM_AXIS)
 				{
-				case TEAM_AXIS:
 					switch (client->sess.playerWeapon)
 					{
 					default:
@@ -1084,8 +1080,9 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_K43_SCOPE, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
 						break;
 					}
-					break;
-				case TEAM_ALLIES:
+				}
+				else
+				{
 					switch (client->sess.playerWeapon)
 					{
 					default:
@@ -1122,7 +1119,6 @@ void SetWolfSpawnWeapons(gclient_t *client)
 						AddWeaponToPlayer(client, WP_GARAND_SCOPE, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip, qfalse);
 						break;
 					}
-					break;
 				}
 			}
 			else if (pc == PC_COVERTOPS)
