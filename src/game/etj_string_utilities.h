@@ -19,14 +19,14 @@ namespace ETJump
 	}
 
 	template<typename T, typename... Targs>
-	std::string stringFormat(boost::format& fmt, T&& value, Targs&&... Fargs)
+	std::string stringFormat(boost::format& fmt, const T& value, const Targs&... Fargs)
 	{
-		fmt % std::forward<T>(value);
-		return stringFormat(fmt, std::forward<Targs>(Fargs)...);
+		fmt % value;
+		return stringFormat(fmt, Fargs...);
 	}
 
 	template<typename T, typename... Targs>
-	std::string stringFormat(const std::string& fmt, T&& value, Targs&&... Fargs)
+	std::string stringFormat(const std::string& fmt, const T& value, const Targs&... Fargs)
 	{
 		return stringFormat(boost::format(fmt) % value, Fargs...);
 	}
