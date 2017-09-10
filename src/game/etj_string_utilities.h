@@ -12,19 +12,22 @@ namespace ETJump
 	// returns the value if it's specified, else the default value
 	std::string getValue(const char *value, const std::string& defaultValue = "");
 	std::string getValue(const std::string& value, const std::string& defaultValue = "");
-	template<typename T, typename... Targs>
-	std::string sprintf(boost::format& format, T&& value, Targs&&... Fargs)
+	
+	inline std::string stringFormat(boost::format& fmt)
 	{
-		format % std::forward<T>(value);
-		return sprintf(format, std::forward<Targs>(Fargs)...);
+		return fmt.str();
 	}
+
 	template<typename T, typename... Targs>
-	std::string sprintf(const std::string& format, T&& value, Targs&&... Fargs)
+	std::string stringFormat(boost::format& fmt, T&& value, Targs&&... Fargs)
 	{
-		return sprintf(boost::format(format) % value, Fargs...);
+		fmt % std::forward<T>(value);
+		return stringFormat(fmt, std::forward<Targs>(Fargs)...);
 	}
-	inline std::string sprintf(boost::format& format)
+
+	template<typename T, typename... Targs>
+	std::string stringFormat(const std::string& fmt, T&& value, Targs&&... Fargs)
 	{
-		return format.str();
+		return stringFormat(boost::format(fmt) % value, Fargs...);
 	}
 }
