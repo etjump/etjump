@@ -298,8 +298,26 @@ void ETJump::SessionService::checkOnceASecondTasks()
 {
 	if (_nextOnceASecondCheck < DateTime::now())
 	{
-		
+		std::vector<int> deletedTaskIndices;
+		for (int i = 0, len = _onceASecondTasks.size(); i < len; ++i)
+		{
+			if (_onceASecondTasks[i]())
+			{
+				deletedTaskIndices.push_back(i);
+			}
+		}
+
+		std::vector<std::function<bool()>> temp;
+		for (int i = 0, len = _onceASecondTasks.size(); i < len; ++i)
+		{
+			if (find(begin(deletedTaskIndices), end(deletedTaskIndices), i) == end(deletedTaskIndices))
+			{
+				temp.push_back(std::move(_onceASecondTasks[i]));
+			}
+		}
+
 		_nextOnceASecondCheck = DateTime::now();
+		_onceASecondTasks = std::move(temp);
 	}
 }
 
@@ -505,7 +523,21 @@ bool ETJump::SessionService::isHigherLevel(int clientNum, int target)
 void ETJump::SessionService::mute(int target, long long duration)
 {
 	(g_entities + target)->client->sess.muted = qtrue;
-	setSessionValue(target, "mutedUntil", std::to_string(DateTime::now() + duration));
+	Printer::sendChatMessage(target, "^5You've been muted.");
+	if (duration > 0)
+	{
+		auto mutedUntil = DateTime::now() + duration;
+		_onceASecondTasks.push_back([target, mutedUntil]()
+		{
+			if (DateTime::now() > mutedUntil)
+			{
+				(g_entities + target)->client->sess.muted = qfalse;
+				Printer::sendChatMessage(target, "^5You've been unmuted.");
+				return true;
+			}
+			return false;
+		});
+	}
 }
 
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)

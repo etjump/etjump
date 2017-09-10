@@ -16,6 +16,20 @@ ETJump::AdminCommandsHandler::~AdminCommandsHandler()
 {
 }
 
+std::vector<std::string> ETJump::AdminCommandsHandler::getAvailableCommands(int clientNum)
+{
+	std::vector<std::string> availableCommands;
+	for (const auto & subscribedCommand : getSortedCommands())
+	{
+		auto cmdIter = _callbacks.find(subscribedCommand);
+		if (cmdIter != end(_callbacks) && _sessionService->hasPermission(clientNum, cmdIter->second.permission))
+		{
+			availableCommands.push_back(subscribedCommand);
+		}
+	}
+	return availableCommands;
+}
+
 bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector<std::string>& args)
 {
 	int start = 0;
@@ -59,8 +73,13 @@ bool ETJump::AdminCommandsHandler::checkCommand(int clientNum, const std::vector
 
 	if (matchingCommands.size() == 0)
 	{
-		// TODO: only list authorized commands
-		auto match = ETJump::getBestMatch(_subscribedCommands, command);
+		auto availableCommands = getAvailableCommands(clientNum);
+		if (availableCommands.size() == 0)
+		{
+			Printer::sendConsoleMessage(clientNum, "^3Unknown command: ^7could not find command " + command + ".\n");
+			return true;
+		}
+		auto match = ETJump::getBestMatch(availableCommands, command);
 		Printer::sendConsoleMessage(clientNum, "^3Unknown command: ^7could not find command " + command + ". Did you mean " + match + "?\n");
 		return true;
 	}

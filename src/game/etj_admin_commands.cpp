@@ -273,7 +273,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 			auto itemsOnCurrentRow = 0;
 			const int numItemsPerRow = getOptionalInteger(command, "cols", 4);
 			std::string buffer;
-			for (const auto & c : _adminCommandsHandler->getSortedCommands())
+			for (const auto & c : _adminCommandsHandler->getAvailableCommands(clientNum))
 			{
 				if (itemsOnCurrentRow > 0 && itemsOnCurrentRow % numItemsPerRow == 0)
 				{
@@ -370,10 +370,11 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* mute
 	*/
+	auto muteDurationOption = createOptionDefinition("duration", "How long to mute the player for", CommandParser::OptionDefinition::Type::Duration, false);
 	_adminCommandsHandler->subscribe('m', createCommandDefinition("mute", "mute", {
 		requiredPlayerOption,
-		createOptionDefinition("duration", "How long to mute the player for", CommandParser::OptionDefinition::Type::Duration, false)
-	}, { requiredPlayerOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+		muteDurationOption
+	}, { requiredPlayerOption.second, muteDurationOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
 		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
 		if (targets.size() == 0)

@@ -99,6 +99,7 @@ namespace ETJump
 		std::shared_ptr<LevelService> _levelService;
 		std::vector<std::unique_ptr<AbstractTask>> _tasks;
 		time_t _nextOnceASecondCheck;
+		std::vector<std::function<bool()>> _onceASecondTasks;
 	};
 }
 

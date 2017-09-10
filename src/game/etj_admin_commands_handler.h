@@ -32,6 +32,7 @@ namespace ETJump
 		bool unsubcribe(const std::string& command);
 		std::vector<std::string> getSortedCommands();
 		const CommandParser::CommandDefinition *getCommandDefinition(const std::string& command);
+		std::vector<std::string> getAvailableCommands(int clientNum);
 	private:
 		std::shared_ptr<SessionService> _sessionService;
 		std::map<std::string, Command> _callbacks;
