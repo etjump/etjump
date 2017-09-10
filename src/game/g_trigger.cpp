@@ -269,6 +269,13 @@ trigger_push
 
 void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
+	// Disable for specs
+	if (!other->client)
+	{
+		return;
+	}
+
+	BG_TouchJumpPad(&other->client->ps, &self->s);
 }
 
 
@@ -326,6 +333,16 @@ This will be client side predicted, unlike target_push
 */
 void SP_trigger_push(gentity_t *self)
 {
+	InitTrigger(self);
+
+	// Send to client for prediction
+	self->r.svFlags &= ~SVF_NOCLIENT;
+
+	self->s.eType = ET_PUSH_TRIGGER;
+	self->touch = trigger_push_touch;
+	self->think = AimAtTarget;
+	self->nextthink = level.time + FRAMETIME;
+	trap_LinkEntity(self);
 }
 
 
