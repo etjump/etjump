@@ -125,6 +125,23 @@ bool ETJump::AdminCommandsHandler::subscribe(char permission, CommandParser::Com
 		return false;
 	}
 
+	bool optionalFound = false;
+	if (definition.positionalOptions.size() > 0)
+	{
+		for (int i = 0, len = definition.positionalOptions.size(); i < len; ++i)
+		{
+			if (optionalFound && definition.positionalOptions[i].required)
+			{
+				_log.fatalLn("Required positional options cannot be after optional positional options.");
+				return false;
+			}
+			if (!definition.positionalOptions[i].required)
+			{
+				optionalFound = true;
+			}
+		}
+	}
+
 	_callbacks[lowercaseCommand] = { permission, callback, definition };
 	_subscribedCommands.push_back(lowercaseCommand);
 	_isSorted = false;

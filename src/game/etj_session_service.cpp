@@ -557,7 +557,8 @@ std::vector<int> ETJump::SessionService::findUsersByName(const std::string& part
 		if (isNumeric)
 		{
 			auto clientNum = std::stoi(partial);
-			if (clientNum >= 0 && clientNum < Constants::Common::MAX_CONNECTED_CLIENTS)
+			if (clientNum >= 0 && clientNum < Constants::Common::MAX_CONNECTED_CLIENTS && 
+				((g_entities + clientNum)->client->pers.connected == CON_CONNECTING || (g_entities + clientNum)->client->pers.connected == CON_CONNECTED))
 			{
 				return std::vector<int>{clientNum};
 			}
@@ -574,7 +575,7 @@ std::vector<int> ETJump::SessionService::findUsersByName(const std::string& part
 		auto clientNum = level.sortedClients[i];
 
 		auto text = ETJump::sanitize(partial, true);
-		auto name = ETJump::sanitize(partial, true);
+		auto name = ETJump::sanitize((g_entities)->client->pers.netname, true);
 		if (name.find(text) == std::string::npos)
 		{
 			continue;

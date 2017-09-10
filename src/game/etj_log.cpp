@@ -97,15 +97,16 @@ ETJump::Log::LogLevel ETJump::Log::getLogLevel(LogLevel level)
 
 void ETJump::Log::log(const std::string& text, LogLevel level) const
 {
+	auto printer = level == LogLevel::Fatal ? G_Error : G_LogPrintf;
 	auto toBePrinted = "[" + toString(level) + "] " + _name + ": " + text;
 	while (toBePrinted.length() > MAX_SERVER_PRINT_LEN)
 	{
-		G_LogPrintf("%s", toBePrinted.substr(0, MAX_SERVER_PRINT_LEN).c_str());
+		printer("%s", toBePrinted.substr(0, MAX_SERVER_PRINT_LEN).c_str());
 		toBePrinted = toBePrinted.substr(MAX_SERVER_PRINT_LEN);
 	}
 	if (toBePrinted.length() > 0)
 	{
-		G_LogPrintf("%s", toBePrinted.substr(0, MAX_SERVER_PRINT_LEN).c_str());
+		printer("%s", toBePrinted.substr(0, MAX_SERVER_PRINT_LEN).c_str());
 	}
 }
 

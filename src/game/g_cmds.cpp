@@ -15,6 +15,7 @@
 #include "etj_shared.h"
 #include "etj_client_commands_handler.h"
 #include "etj_admin_commands_handler.h"
+#include "etj_string_utilities.h"
 
 
 void BotDebug(int clientNum);
@@ -5029,6 +5030,18 @@ void ClientCommand(int clientNum)
 	if (!Q_stricmp(cmd, "followprev"))
 	{
 		Cmd_FollowCycle_f(ent, -1);
+		return;
+	}
+
+	if (!Q_stricmp(cmd, "sprintf"))
+	{
+		const char *var1 = "testing";
+		int var2 = 20;
+		float var3 = 23.553;
+		std::string var4 = "fun";
+		CP(ETJump::sprintf("print \"%s %02d %.2f %-20s\n\"", var1, var2, var3, var4).c_str());
+		CP(ETJump::sprintf("print \"%s %02d %.2f %-20s\n\"", "testing", 20, 23.5553, "fun").c_str());
+
 		return;
 	}
 

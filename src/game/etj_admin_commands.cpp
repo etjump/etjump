@@ -149,11 +149,6 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	});
 
 	/**
-	* editcommands
-	*/
-	_adminCommandsHandler->subscribe('A', createCommandDefinition("editcommands", "editcommands", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
-
-	/**
 	* editlevel
 	*/
 	_adminCommandsHandler->subscribe('A', createCommandDefinition("editlevel", "editlevel", {
@@ -436,9 +431,31 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	});
 
 	/**
-	* putteam
+	* putspec
 	*/
-	_adminCommandsHandler->subscribe('p', createCommandDefinition("putteam", "putteam", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('p', createCommandDefinition("putspec", "putspec", {
+		requiredPlayerOption
+	}, { requiredPlayerOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		if (targets.size() == 0)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+			return;
+		}
+		if (targets.size() > 1)
+		{
+			// TODO: list players
+			printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
+			return;
+		}
+
+		auto targetEnt = (g_entities + targets[0]);
+		targetEnt->client->sess.lastTeamSwitch = level.time;
+
+		const weapon_t w = static_cast<weapon_t>(-1);
+		SetTeam(targetEnt, "s", qfalse, w, w, qtrue);
+	});
 
 	/**
 	* rename
@@ -451,11 +468,6 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	_adminCommandsHandler->subscribe('r', createCommandDefinition("restart", "restart", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
-	* rmsaves
-	*/
-	_adminCommandsHandler->subscribe('T', createCommandDefinition("rmsaves", "rmsaves", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
-
-	/**
 	* setlevel
 	*/
 	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
@@ -464,11 +476,6 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	* spectate
 	*/
 	_adminCommandsHandler->subscribe('a', createCommandDefinition("spectate", "spectate", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
-
-	/**
-	* tokens
-	*/
-	_adminCommandsHandler->subscribe('V', createCommandDefinition("tokens", "tokens", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 
 	/**
 	* unban
