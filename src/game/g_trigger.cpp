@@ -275,6 +275,8 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 
+	G_AddEvent(self, EV_GENERAL_SOUND, self->noise_index);
+
 	BG_TouchJumpPad(&other->client->ps, &self->s);
 }
 
@@ -333,10 +335,18 @@ This will be client side predicted, unlike target_push
 */
 void SP_trigger_push(gentity_t *self)
 {
+	char *s;
+	char buffer[MAX_QPATH];
+
 	InitTrigger(self);
 
 	// Send to client for prediction
 	self->r.svFlags &= ~SVF_NOCLIENT;
+
+	// Noise key support
+	G_SpawnString("noise", "NOSOUND", &s);
+	Q_strncpyz(buffer, s, sizeof(buffer));
+	self->noise_index = G_SoundIndex(buffer);
 
 	self->s.eType = ET_PUSH_TRIGGER;
 	self->touch = trigger_push_touch;
