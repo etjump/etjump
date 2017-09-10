@@ -727,6 +727,11 @@ static void CG_TouchTriggerPrediction(void)
 				CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
 			}
 
+			if (ent->eType == ET_PUSH_TRIGGER)
+			{
+				BG_TouchJumpPad(&cg.predictedPlayerState, ent);
+			}
+
 			continue;
 		}
 	}
