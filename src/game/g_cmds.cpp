@@ -5033,18 +5033,6 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
-	if (!Q_stricmp(cmd, "sprintf"))
-	{
-		const char *var1 = "testing";
-		int var2 = 20;
-		float var3 = 23.553;
-		std::string var4 = "fun";
-		CP(ETJump::stringFormat("print \"%s %02d %.2f %-20s\n\"", var1, var2, var3, var4).c_str());
-		CP(ETJump::stringFormat("print \"%s %02d %.2f %-20s\n\"", "testing", 20, 23.5553, "fun").c_str());
-
-		return;
-	}
-
 	if (!Q_stricmp(cmd, "mod_information"))
 	{
 		C_ConsolePrintTo(ent, va("%s %s", GAME_VERSION " " MOD_VERSION, BUILD_TIME));
