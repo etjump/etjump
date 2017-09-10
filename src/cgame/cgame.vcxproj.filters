@@ -239,6 +239,9 @@
     <ClCompile Include="etj_cvar_update_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\etj_string_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">

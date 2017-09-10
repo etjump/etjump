@@ -272,6 +272,7 @@
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
     <ClCompile Include="etj_result_set_formatter.cpp" />
+    <ClCompile Include="etj_string_utilities.cpp" />
     <ClCompile Include="g_active.cpp" />
     <ClCompile Include="g_alarm.cpp" />
     <ClCompile Include="g_antilag.cpp" />
@@ -351,6 +352,7 @@
     <ClInclude Include="etj_public.h" />
     <ClInclude Include="etj_result_set_formatter.h" />
     <ClInclude Include="etj_shared.h" />
+    <ClInclude Include="etj_string_utilities.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="etj_local.h" />
     <ClInclude Include="g_public.h" />
