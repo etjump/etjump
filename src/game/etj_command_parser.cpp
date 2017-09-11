@@ -143,9 +143,14 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 		command.options[currentOption.name] = currentOption;
 	}
 
-	if (definition.positionalOptions.size() <= command.extraArgs.size())
+	unsigned requiredCount = std::count_if(std::begin(definition.positionalOptions), std::end(definition.positionalOptions), [](const OptionDefinition& def)
 	{
-		for (int i = 0, len = definition.positionalOptions.size(); i < len; ++i)
+		return def.required;
+	});
+	if (requiredCount <= command.extraArgs.size())
+	{
+		auto len = std::max(requiredCount, std::min(definition.positionalOptions.size(), command.extraArgs.size()));
+		for (int i = 0; i < len; ++i)
 		{
 			auto& positionalOption = definition.positionalOptions[i];
 			auto& arg = command.extraArgs[i];
@@ -201,6 +206,13 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 				command.errors.push_back("Unsupported positional option " + toString(positionalOption.type));
 			}
 		}
+
+		std::vector<std::string> extraArgs{};
+		for (auto i = len; i < command.extraArgs.size(); ++i)
+		{
+			extraArgs.push_back(command.extraArgs[i]);
+		}
+		command.extraArgs = extraArgs;
 	}
 
 	for (const auto & opt : definition.options)
