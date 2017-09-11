@@ -8,7 +8,7 @@
 ETJump::UserRepository::UserRepository::UserRepository(const std::string& databaseFile, int timeout)
 	: _databaseFile(databaseFile), _timeout(timeout), _log(Log("UserRepository"))
 {
-	_log.infoLn("Using database file " + databaseFile);
+	_log.infoLn("Using database file %s", databaseFile);
 }
 
 ETJump::UserRepository::UserRepository::~UserRepository()

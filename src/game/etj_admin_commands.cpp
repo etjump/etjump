@@ -75,6 +75,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	static std::shared_ptr<SessionService> sessionService = injectedSessionService;
 	static std::shared_ptr<UserService> userService = injectedUserService;
 	static const auto requiredPlayerOption = createOptionDefinition("player", "Target player", CommandParser::OptionDefinition::Type::Token, true);
+	static const auto optionalPlayerOption = createOptionDefinition("player", "Target player", CommandParser::OptionDefinition::Type::Token, false);
 	/**
 	 * addlevel
 	 */
@@ -365,7 +366,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* mute
 	*/
-	auto muteDurationOption = createOptionDefinition("duration", "How long to mute the player for", CommandParser::OptionDefinition::Type::Duration, false);
+	static const auto muteDurationOption = createOptionDefinition("duration", "How long to mute the player for", CommandParser::OptionDefinition::Type::Duration, false);
 	_adminCommandsHandler->subscribe('m', createCommandDefinition("mute", "mute", {
 		requiredPlayerOption,
 		muteDurationOption
@@ -410,7 +411,63 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* noclip
 	*/
-	_adminCommandsHandler->subscribe('N', createCommandDefinition("noclip", "noclip", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	static const auto optionalCountOption = createOptionDefinition("count", "Number of times user is allowed to use noclip. -1 infinite.", CommandParser::OptionDefinition::Type::Integer, false);
+	_adminCommandsHandler->subscribe('N', createCommandDefinition("noclip", "noclip", {
+		optionalPlayerOption,
+		optionalCountOption
+	}, { optionalPlayerOption.second, optionalCountOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		if (level.noNoclip)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, "Noclip is disabled on this map.");
+			return;
+		}
+
+		auto player = getOptionalText(command, "player", "");
+		auto count = getOptionalInteger(command, "count", 1);
+		if (player.length() == 0)
+		{
+			if (clientNum == AdminCommandsHandler::CONSOLE_CLIENTNUM)
+			{
+				return;
+			}
+
+			auto ent = (g_entities + clientNum);
+			if (ent->client->sess.timerunActive)
+			{
+				printCommandChatInfoMessage(clientNum, commandText, "cheats are disabled while time run is active.");
+				return;
+			}
+
+			(g_entities + clientNum)->client->noclip = (g_entities + clientNum)->client->noclip 
+				? qfalse 
+				: qtrue;
+		} else
+		{
+			auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+			if (targets.size() == 0)
+			{
+				printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+				return;
+			}
+			if (targets.size() > 1)
+			{
+				// TODO: list players
+				printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
+				return;
+			}
+			auto ent = g_entities + targets[0];
+			if (count >= 0)
+			{
+				printCommandChatInfoMessage(clientNum, commandText, stringFormat("%s ^7can use /noclip %d times.", ent->client->pers.netname, count));
+				printCommandChatInfoMessage(targets[0], commandText, stringFormat("you can use noclip %d times.", count));
+			} else {
+				printCommandChatInfoMessage(clientNum, commandText, stringFormat("%s^7 can use /noclip infinitely.", ent->client->pers.netname));
+				printCommandChatInfoMessage(targets[0], commandText, "you can use /noclip infinitely.");
+			}
+			ent->client->pers.noclipCount = count;
+		}
+	});
 
 	/**
 	* passvote
@@ -473,7 +530,10 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* setlevel
 	*/
-	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+				
+	});
 
 	/**
 	* spectate

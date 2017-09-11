@@ -61,7 +61,7 @@ std::map<int, ETJump::SessionRepository::Session> ETJump::SessionRepository::loa
 		}
 	}
 
-	_log.infoLn("Loaded " + std::to_string(sessions.size()) + " sessions");
+	_log.infoLn("Loaded %d sessions", sessions.size());
 
 	return sessions;
 }
@@ -97,7 +97,7 @@ void ETJump::SessionRepository::writeSessions(std::vector<Session> sessions)
 	}
 
 	transaction.commit();
-	_log.infoLn("Saved " + std::to_string(sessions.size()) + " sessions");
+	_log.infoLn("Saved %d sessions", sessions.size());
 }
 
 void ETJump::SessionRepository::clearSessions()

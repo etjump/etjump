@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "etj_string_utilities.h"
 
 namespace ETJump
 {
@@ -22,14 +23,44 @@ namespace ETJump
 
 		void debug(const std::string& text) const;
 		void debugLn(const std::string& text) const;
+		template<typename T, typename... Targs>
+		void debugLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		{
+			debugLn(stringFormat(fmt, value, Fargs...));
+		}
+
 		void info(const std::string& text) const;
 		void infoLn(const std::string& text) const;
+		template<typename T, typename... Targs>
+		void infoLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		{
+			infoLn(stringFormat(fmt, value, Fargs...));
+		}
+
+
 		void warn(const std::string& text) const;
 		void warnLn(const std::string& text) const;
+		template<typename T, typename... Targs>
+		void warnLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		{
+			warnLn(stringFormat(fmt, value, Fargs...));
+		}
+
 		void error(const std::string& text) const;
 		void errorLn(const std::string& text) const;
+		template<typename T, typename... Targs>
+		void errorLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		{
+			errorLn(stringFormat(fmt, value, Fargs...));
+		}
+
 		void fatal(const std::string& text) const;
 		void fatalLn(const std::string& text) const;
+		template<typename T, typename... Targs>
+		void fatalLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		{
+			fatalLn(stringFormat(fmt, value, Fargs...));
+		}
 
 		static void setLogLevel(LogLevel level);
 		static LogLevel getLogLevel(LogLevel level);

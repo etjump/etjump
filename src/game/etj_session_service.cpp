@@ -161,7 +161,7 @@ void ETJump::SessionService::handleGetUserTasks()
 			auto user = _getUserTasks[i].user.get();
 			if (user.id == ETJump::UserRepository::NEW_USER_ID)
 			{
-				_log.infoLn("Added a new user " + _getUserTasks[i].alias + " with guid " + _getUserTasks[i].guid);
+				_log.infoLn("Added a new user %s with guid %s", _getUserTasks[i].alias, _getUserTasks[i].guid);
 				// returns the inserted user
 				auto getUserTask = _userService->insertUser(_getUserTasks[i].guid, _getUserTasks[i].alias, _getUserTasks[i].ipAddress, _getUserTasks[i].hardwareId);
 				deletedTask.push_back(i);
@@ -185,7 +185,7 @@ void ETJump::SessionService::handleGetUserTasks()
 					_userService->addIpAddress(user.id, _getUserTasks[i].ipAddress);
 				}
 				deletedTask.push_back(i);
-				_log.infoLn("User \"" + user.name + "\" logged in from ip \"" + _getUserTasks[i].ipAddress + "\" with hardware id \"" + _getUserTasks[i].hardwareId + "\"");
+				_log.infoLn("User \"%s\" logged in from ip \"%s\" with hardware id \"%s\"", user.name, _getUserTasks[i].ipAddress, _getUserTasks[i].hardwareId);
 				_users[_getUserTasks[i].clientNum] = user;
 				setSessionValue(_getUserTasks[i].clientNum, KEY_GUID, user.guid);
 				setSessionValue(_getUserTasks[i].clientNum, KEY_HARDWARE_ID, _getUserTasks[i].hardwareId);
@@ -400,7 +400,7 @@ void ETJump::SessionService::readClientSession(int clientNum, const std::string&
 void ETJump::SessionService::dropClient(int clientNum, const std::string& reason, int seconds)
 {
 	seconds = std::max(0, seconds);
-	_log.infoLn("Dropping client " + std::to_string(clientNum) + " for: " + reason + " Duration: " + std::to_string(seconds) + "s");
+	_log.infoLn("Dropping client %d for: %s Duration: %s", clientNum, reason, seconds);
 	_dropClient(clientNum, reason.c_str(), seconds);
 }
 
