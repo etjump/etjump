@@ -540,6 +540,18 @@ void ETJump::SessionService::mute(int target, long long duration)
 	}
 }
 
+bool ETJump::SessionService::unmute(int target)
+{
+	auto ent = (g_entities + target);
+	if (!ent->client->sess.muted)
+	{
+		return false;
+	}
+	ent->client->sess.muted = qfalse;
+	Printer::sendChatMessage(target, "^5You've been unmuted.");
+	return true;
+}
+
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)
 {
 	try

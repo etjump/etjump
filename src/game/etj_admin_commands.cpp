@@ -488,7 +488,33 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* unmute
 	*/
-	_adminCommandsHandler->subscribe('m', createCommandDefinition("unmute", "unmute", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('m', createCommandDefinition("unmute", "unmute", {
+		requiredPlayerOption,
+	}, {
+		requiredPlayerOption.second,
+	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		if (targets.size() == 0)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+			return;
+		}
+		if (targets.size() > 1)
+		{
+			// TODO: list players
+			printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
+			return;
+		}
+
+		if (ETJump::sessionService->unmute(targets[0]))
+		{
+			printCommandChatInfoMessage(clientNum, commandText, "Unmuted player " + ETJump::sessionService->getName(targets[0]));
+		} else
+		{
+			printCommandChatInfoMessage(clientNum, commandText, "Player " + ETJump::sessionService->getName(targets[0]) + "^7 is not muted.");
+		}
+	});
 
 	/**
 	* userinfo
