@@ -269,7 +269,7 @@ trigger_push
 
 void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
-	// Disable for specs
+	// Only activate for players
 	if (!other->client)
 	{
 		return;
