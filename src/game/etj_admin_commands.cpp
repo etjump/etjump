@@ -465,7 +465,10 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	/**
 	* restart
 	*/
-	_adminCommandsHandler->subscribe('r', createCommandDefinition("restart", "restart", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('r', createCommandDefinition("restart", "restart", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		Svcmd_ResetMatch_f(qfalse, qtrue);
+	});
 
 	/**
 	* setlevel
