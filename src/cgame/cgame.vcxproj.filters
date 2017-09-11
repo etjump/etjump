@@ -242,6 +242,12 @@
     <ClCompile Include="..\game\etj_string_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_console_transparency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_dynamic_shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -341,6 +347,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_cvar_update_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_console_transparency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_dynamic_shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\etj_string_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
