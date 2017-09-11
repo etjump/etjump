@@ -6048,3 +6048,20 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB)
 	return;
 
 }
+
+/*
+================
+BG_TouchJumpPad
+================
+*/
+void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
+{
+	// Disable for specs
+	if (ps->pm_type != PM_NORMAL)
+	{
+		return;
+	}
+
+	// Launch player
+	VectorCopy(jumppad->origin2, ps->velocity);
+}

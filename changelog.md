@@ -53,6 +53,7 @@
   * `etj_zFar` -> `r_zfar`
   * `etj_viewLog` -> `viewlog` (reimplemented)
 * fixed remapped shaders were remaining from previous maps
+* added trigger_push support for client predicted push events
 
 
 # ETJump 2.2.0
