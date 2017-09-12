@@ -19,7 +19,7 @@
 #include "etj_admin_commands_handler.h"
 #include "etj_printer.h"
 #include <boost/algorithm/string.hpp>
-#include "etj_admin_commands.h"
+#include "etj_admin_commands_registrar.h"
 #include "etj_utilities.h"
 
 level_locals_t level;
@@ -50,6 +50,7 @@ namespace ETJump
 	std::shared_ptr<SessionService> sessionService;
 	std::shared_ptr<LevelService> levelService;
 	std::shared_ptr<AdminCommandsHandler> adminCommandsHandler;
+	std::shared_ptr<AdminCommandsRegistrar> adminCommandsRegistrar;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,8 +78,8 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, ETJump::levelService, trap_DropClient, trap_SendServerCommand);
 	ETJump::sessionService->readSession(levelTime);
 	ETJump::adminCommandsHandler = std::make_shared<ETJump::AdminCommandsHandler>(ETJump::sessionService);
-
-	ETJump::registerAdminCommands(ETJump::adminCommandsHandler, ETJump::levelService, ETJump::sessionService, ETJump::userService);
+	ETJump::adminCommandsRegistrar = std::make_shared<ETJump::AdminCommandsRegistrar>(ETJump::adminCommandsHandler, ETJump::levelService, ETJump::sessionService, ETJump::userService);
+	ETJump::adminCommandsRegistrar->registerAdminCommands();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

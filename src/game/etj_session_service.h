@@ -75,6 +75,7 @@ namespace ETJump
 		void mute(int target, long long duration);
 		bool unmute(int target);
 		static std::string getName(int clientNum);
+		static std::vector<std::string> getNames(const std::vector<int>& clientNums);
 		std::vector<int> findUsersByName(const std::string& name);
 	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);

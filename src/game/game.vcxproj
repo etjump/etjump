@@ -254,7 +254,7 @@
     <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
-    <ClCompile Include="etj_admin_commands.cpp" />
+    <ClCompile Include="etj_admin_commands_registrar.cpp" />
     <ClCompile Include="etj_admin_commands_handler.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_command_parser.cpp" />
@@ -342,7 +342,7 @@
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
-    <ClInclude Include="etj_admin_commands.h" />
+    <ClInclude Include="etj_admin_commands_registrar.h" />
     <ClInclude Include="etj_admin_commands_handler.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_command_parser.h" />

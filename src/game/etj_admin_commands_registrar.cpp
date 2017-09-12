@@ -1,5 +1,5 @@
 #include <boost/algorithm/string.hpp>
-#include "etj_admin_commands.h"
+#include "etj_admin_commands_registrar.h"
 #include "etj_admin_commands_handler.h"
 #include "etj_user_service.h"
 #include "etj_level_service.h"
@@ -10,75 +10,11 @@
 #include "etj_messages.h"
 #include "etj_time_utilities.h"
 
-std::pair<std::string, ETJump::CommandParser::OptionDefinition> createOptionDefinition(const std::string& name, const std::string& description, ETJump::CommandParser::OptionDefinition::Type type, bool required)
+void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 {
-	return{
-		name,{
-			name,
-			description,
-			type,
-			required
-		}
-	};
-	}
-
-	ETJump::CommandParser::CommandDefinition createCommandDefinition(const std::string& name, const std::string& description, const std::map<std::string, ETJump::CommandParser::OptionDefinition>& options = std::map<std::string, ETJump::CommandParser::OptionDefinition>(), const std::vector<ETJump::CommandParser::OptionDefinition>& positionalOptions = std::vector<ETJump::CommandParser::OptionDefinition>())
-{
-	return{
-		name,
-		description,
-		options,
-		positionalOptions
-	};
-}
-
-std::string getOptionalText(const ETJump::CommandParser::Command& command, const std::string& key, const std::string& defaultValue = "")
-{
-	auto optIter = command.options.find(key);
-	if (optIter != end(command.options))
-	{
-		return optIter->second.text;
-	}
-	return defaultValue;
-}
-
-int getOptionalInteger(const ETJump::CommandParser::Command& command, const std::string& key, int defaultValue = 0)
-{
-	auto optIter = command.options.find(key);
-	if (optIter != end(command.options))
-	{
-		return optIter->second.integer;
-	}
-	return defaultValue;
-}
-
-long long getOptionalDuration(const ETJump::CommandParser::Command& command, const std::string& key, long long defaultValue = 0)
-{
-	auto optIter = command.options.find(key);
-	if (optIter != end(command.options))
-	{
-		return optIter->second.duration;
-	}
-	return defaultValue;
-}
-
-void printCommandChatInfoMessage(int clientNum, const std::string& command, const std::string& message)
-{
-	Printer::sendChatMessage(clientNum, "^3" + command + ": ^7" + message);
-}
-
-void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injectedAdminCommandsHandler, std::shared_ptr<LevelService> injectedLevelService, std::shared_ptr<SessionService> injectedSessionService, std::shared_ptr<UserService> injectedUserService)
-{
-	// store them here as the ptrs will point to null otherwise
-	static std::shared_ptr<AdminCommandsHandler> _adminCommandsHandler = injectedAdminCommandsHandler;
-	static std::shared_ptr<LevelService> levelService = injectedLevelService;
-	static std::shared_ptr<SessionService> sessionService = injectedSessionService;
-	static std::shared_ptr<UserService> userService = injectedUserService;
-	static const auto requiredPlayerOption = createOptionDefinition("player", "Target player", CommandParser::OptionDefinition::Type::Token, true);
-	static const auto optionalPlayerOption = createOptionDefinition("player", "Target player", CommandParser::OptionDefinition::Type::Token, false);
 	/**
-	 * addlevel
-	 */
+	* addlevel
+	*/
 	_adminCommandsHandler->subscribe('a', createCommandDefinition("addlevel", "Adds a level", {
 		createOptionDefinition("level", "The level that will be added (integer)", ETJump::CommandParser::OptionDefinition::Type::Integer, true),
 		createOptionDefinition("commands", "Allowed commands for the level", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
@@ -91,7 +27,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		std::string commands = getOptionalText(command, "commands");
 		std::string name = getOptionalText(command, "name");
 
-		auto result = levelService->add(level, name, commands, greeting);
+		auto result = _levelService->add(level, name, commands, greeting);
 		if (!result.success)
 		{
 			printCommandChatInfoMessage(clientNum, commandText, result.message);
@@ -106,9 +42,9 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		{
 			return;
 		}
-		auto user = sessionService->getUser(clientNum);
-		auto level = levelService->get(user.level);
-		Printer::broadcastChatMessage((boost::format("^3admintest: ^7%s^7 is a level %d user (%s^7).") 
+		auto user = _sessionService->getUser(clientNum);
+		auto level = _levelService->get(user.level);
+		Printer::broadcastChatMessage((boost::format("^3admintest: ^7%s^7 is a level %d user (%s^7).")
 			% (g_entities + clientNum)->client->pers.netname % user.level % level->name).str());
 	});
 
@@ -145,8 +81,8 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		auto level = command.options.at("level").integer;
 		auto newLevel = getOptionalInteger(command, "newlevel", 0);
 
-		levelService->remove(level);
-		sessionService->setLevelIfHasLevel(clientNum, level, newLevel);
+		_levelService->remove(level);
+		_sessionService->setLevelIfHasLevel(clientNum, level, newLevel);
 	});
 
 	/**
@@ -180,7 +116,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 			changes.name = nameIter->second.text;
 			changedFields |= static_cast<int>(LevelFields::Name);
 		}
-		levelService->edit(level, changes, changedFields);
+		_levelService->edit(level, changes, changedFields);
 
 		printCommandChatInfoMessage(clientNum, commandText, "updated level" + std::to_string(level));
 	});
@@ -216,7 +152,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 			changes.title = titleIter->second.text;
 			changedFields |= static_cast<int>(UserFields::Title);
 		}
-		sessionService->updateUser(clientNum, userId, changes, changedFields);
+		_sessionService->updateUser(clientNum, userId, changes, changedFields);
 	});
 
 	/**
@@ -233,10 +169,10 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	* finger
 	*/
 	_adminCommandsHandler->subscribe('f', createCommandDefinition("finger", "finger", {
-		requiredPlayerOption
-	}, { requiredPlayerOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+		_requiredPlayerOption
+	}, { _requiredPlayerOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
 		if (targets.size() == 0)
 		{
 			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
@@ -245,9 +181,9 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		printCommandChatInfoMessage(clientNum, commandText, Info::CheckConsoleForInfo);
 		for (const auto & t : targets)
 		{
-			auto user = sessionService->getUser(t);
+			auto user = _sessionService->getUser(t);
 			Printer::sendConsoleMessage(clientNum, (boost::format("^7name: %s\n^7id: %d^7\noriginal name: %s\n^7level: %d\n^7title: %s^7\n")
-				% sessionService->getName(clientNum) 
+				% _sessionService->getName(clientNum)
 				% user.id
 				% user.name
 				% user.level
@@ -275,12 +211,13 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 				{
 					itemsOnCurrentRow = 0;
 					buffer += "\n";
-				} 
+				}
 				buffer += (boost::format("%-20s") % c).str();
 				++itemsOnCurrentRow;
 			}
 			Printer::sendConsoleMessage(clientNum, buffer);
-		} else
+		}
+		else
 		{
 			auto targetCommand = command.extraArgs[0];
 			auto definition = _adminCommandsHandler->getCommandDefinition(targetCommand);
@@ -305,7 +242,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	*/
 	_adminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-		
+
 	});
 
 	/**
@@ -368,11 +305,11 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	*/
 	static const auto muteDurationOption = createOptionDefinition("duration", "How long to mute the player for", CommandParser::OptionDefinition::Type::Duration, false);
 	_adminCommandsHandler->subscribe('m', createCommandDefinition("mute", "mute", {
-		requiredPlayerOption,
+		_requiredPlayerOption,
 		muteDurationOption
-	}, { requiredPlayerOption.second, muteDurationOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	}, { _requiredPlayerOption, muteDurationOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
 		if (targets.size() == 0)
 		{
 			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
@@ -380,13 +317,12 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		}
 		if (targets.size() > 1)
 		{
-			// TODO: list players
-			printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
-			return;
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
+				return;
 		}
 		auto duration = getOptionalDuration(command, "duration", 0);
-		
-		if (!ETJump::sessionService->isEqualOrHigherLevel(clientNum, targets[0]))
+
+		if (!_sessionService->isEqualOrHigherLevel(clientNum, targets[0]))
 		{
 			printCommandChatInfoMessage(clientNum, commandText, "Cannot mute a fellow administrator.");
 			return;
@@ -398,13 +334,14 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 			return;
 		}
 
-		ETJump::sessionService->mute(targets[0], duration);
+		_sessionService->mute(targets[0], duration);
 		if (duration > 0)
 		{
-			printCommandChatInfoMessage(clientNum, commandText, "Muted player " + ETJump::sessionService->getName(targets[0]) + " ^7until " + DateTime::toLocalTime(DateTime::now() + duration));
-		} else
+			printCommandChatInfoMessage(clientNum, commandText, "Muted player " + _sessionService->getName(targets[0]) + " ^7until " + DateTime::toLocalTime(DateTime::now() + duration));
+		}
+		else
 		{
-			printCommandChatInfoMessage(clientNum, commandText, "Muted player " + ETJump::sessionService->getName(targets[0]));
+			printCommandChatInfoMessage(clientNum, commandText, "Muted player " + _sessionService->getName(targets[0]));
 		}
 	});
 
@@ -413,9 +350,9 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	*/
 	static const auto optionalCountOption = createOptionDefinition("count", "Number of times user is allowed to use noclip. -1 infinite.", CommandParser::OptionDefinition::Type::Integer, false);
 	_adminCommandsHandler->subscribe('N', createCommandDefinition("noclip", "noclip", {
-		optionalPlayerOption,
+		_optionalPlayerOption,
 		optionalCountOption
-	}, { optionalPlayerOption.second, optionalCountOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	}, { _optionalPlayerOption, optionalCountOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
 		if (level.noNoclip)
 		{
@@ -439,12 +376,13 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 				return;
 			}
 
-			(g_entities + clientNum)->client->noclip = (g_entities + clientNum)->client->noclip 
-				? qfalse 
+			(g_entities + clientNum)->client->noclip = (g_entities + clientNum)->client->noclip
+				? qfalse
 				: qtrue;
-		} else
+		}
+		else
 		{
-			auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+			auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
 			if (targets.size() == 0)
 			{
 				printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
@@ -452,8 +390,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 			}
 			if (targets.size() > 1)
 			{
-				// TODO: list players
-				printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
+				printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
 				return;
 			}
 			auto ent = g_entities + targets[0];
@@ -461,7 +398,8 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 			{
 				printCommandChatInfoMessage(clientNum, commandText, stringFormat("%s ^7can use /noclip %d times.", ent->client->pers.netname, count));
 				printCommandChatInfoMessage(targets[0], commandText, stringFormat("you can use noclip %d times.", count));
-			} else {
+			}
+			else {
 				printCommandChatInfoMessage(clientNum, commandText, stringFormat("%s^7 can use /noclip infinitely.", ent->client->pers.netname));
 				printCommandChatInfoMessage(targets[0], commandText, "you can use /noclip infinitely.");
 			}
@@ -491,10 +429,10 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	* putspec
 	*/
 	_adminCommandsHandler->subscribe('p', createCommandDefinition("putspec", "putspec", {
-		requiredPlayerOption
-	}, { requiredPlayerOption.second }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+		_requiredPlayerOption
+	}, { _requiredPlayerOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
 		if (targets.size() == 0)
 		{
 			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
@@ -502,8 +440,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		}
 		if (targets.size() > 1)
 		{
-			// TODO: list players
-			printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
 			return;
 		}
 
@@ -532,7 +469,7 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	*/
 	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-				
+
 	});
 
 	/**
@@ -549,12 +486,12 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	* unmute
 	*/
 	_adminCommandsHandler->subscribe('m', createCommandDefinition("unmute", "unmute", {
-		requiredPlayerOption,
+		_requiredPlayerOption,
 	}, {
-		requiredPlayerOption.second,
+		_requiredPlayerOption,
 	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-		auto targets = sessionService->findUsersByName(command.options.find("player")->second.text);
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
 		if (targets.size() == 0)
 		{
 			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
@@ -562,17 +499,17 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 		}
 		if (targets.size() > 1)
 		{
-			// TODO: list players
-			printCommandChatInfoMessage(clientNum, commandText, Error::MultipleMatchingPlayers);
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
 			return;
 		}
 
-		if (ETJump::sessionService->unmute(targets[0]))
+		if (_sessionService->unmute(targets[0]))
 		{
-			printCommandChatInfoMessage(clientNum, commandText, "Unmuted player " + ETJump::sessionService->getName(targets[0]));
-		} else
+			printCommandChatInfoMessage(clientNum, commandText, "Unmuted player " + _sessionService->getName(targets[0]));
+		}
+		else
 		{
-			printCommandChatInfoMessage(clientNum, commandText, "Player " + ETJump::sessionService->getName(targets[0]) + "^7 is not muted.");
+			printCommandChatInfoMessage(clientNum, commandText, "Player " + _sessionService->getName(targets[0]) + "^7 is not muted.");
 		}
 	});
 
@@ -582,3 +519,76 @@ void ETJump::registerAdminCommands(std::shared_ptr<AdminCommandsHandler> injecte
 	_adminCommandsHandler->subscribe('A', createCommandDefinition("userinfo", "userinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
 }
 
+std::pair<std::string, ETJump::CommandParser::OptionDefinition> ETJump::AdminCommandsRegistrar::createOptionDefinition(const std::string& name, const std::string& description, CommandParser::OptionDefinition::Type type, bool required)
+{
+	return{
+		name,{
+			name,
+			description,
+			type,
+			required
+		}
+	};
+}
+
+ETJump::CommandParser::CommandDefinition ETJump::AdminCommandsRegistrar::createCommandDefinition(const std::string& name, const std::string& description, const std::map<std::string, CommandParser::OptionDefinition>& options, const std::vector<std::pair<std::string, ETJump::CommandParser::OptionDefinition>>& positionalOptions)
+{
+	std::vector<ETJump::CommandParser::OptionDefinition> transformedPositionalOptions;
+	for (const auto & opt : positionalOptions)
+	{
+		transformedPositionalOptions.push_back(opt.second);
+	}
+	return{
+		name,
+		description,
+		options,
+		transformedPositionalOptions
+	};
+}
+
+std::string ETJump::AdminCommandsRegistrar::getOptionalText(const ETJump::CommandParser::Command& command, const std::string& key, const std::string& defaultValue)
+{
+	auto optIter = command.options.find(key);
+	if (optIter != end(command.options))
+	{
+		return optIter->second.text;
+	}
+	return defaultValue;
+}
+
+int ETJump::AdminCommandsRegistrar::getOptionalInteger(const ETJump::CommandParser::Command& command, const std::string& key, int defaultValue)
+{
+	auto optIter = command.options.find(key);
+	if (optIter != end(command.options))
+	{
+		return optIter->second.integer;
+	}
+	return defaultValue;
+}
+
+long long ETJump::AdminCommandsRegistrar::getOptionalDuration(const ETJump::CommandParser::Command& command, const std::string& key, long long defaultValue)
+{
+	auto optIter = command.options.find(key);
+	if (optIter != end(command.options))
+	{
+		return optIter->second.duration;
+	}
+	return defaultValue;
+}
+
+void ETJump::AdminCommandsRegistrar::printCommandChatInfoMessage(int clientNum, const std::string& command, const std::string& message)
+{
+	Printer::sendChatMessage(clientNum, "^3" + command + ": ^7" + message);
+}
+
+std::string ETJump::AdminCommandsRegistrar::multipleMatchingNamesError(const std::vector<std::string>& names)
+{
+	std::string buffer = ETJump::Error::MultipleMatchingPlayers + "\n";
+
+	for (const auto & n : names)
+	{
+		buffer += ETJump::stringFormat("* %s\n", n);
+	}
+
+	return buffer;
+}

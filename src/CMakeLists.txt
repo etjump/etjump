@@ -126,7 +126,7 @@ file(GLOB QAGAME_SRC
 	"game/bg_sscript.cpp"
 	"game/bg_stats.cpp"
 	"game/bg_tracemap.cpp"
-	"game/etj_admin_commands.cpp"
+	"game/etj_admin_commands_registrar.cpp"
 	"game/etj_admin_commands_handler.cpp"
 	"game/etj_banner_system.cpp"
 	"game/etj_client_commands_handler.cpp"

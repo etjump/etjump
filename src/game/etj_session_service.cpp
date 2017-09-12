@@ -478,6 +478,18 @@ std::string ETJump::SessionService::getName(int clientNum)
 	return (g_entities + clientNum)->client->pers.netname;
 }
 
+std::vector<std::string> ETJump::SessionService::getNames(const std::vector<int>& clientNums)
+{
+	std::vector<std::string> names;
+
+	for (const auto & c : clientNums)
+	{
+		names.push_back(getName(c));
+	}
+
+	return names;
+}
+
 void ETJump::SessionService::updateUser(int updaterClientNum, int userId, const MutableUserFields& changes, int changedFields)
 {
 	// update the connected client if there's one
