@@ -2547,6 +2547,8 @@ extern vmCvar_t etj_drawFoliage;
 extern vmCvar_t etj_showTris;
 extern vmCvar_t etj_wolfFog;
 extern vmCvar_t etj_zFar;
+extern vmCvar_t etj_offsetFactor;
+extern vmCvar_t etj_offsetUnits;
 
 //
 // cg_main.c
