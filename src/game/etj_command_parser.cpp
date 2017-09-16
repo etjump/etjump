@@ -150,7 +150,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 	if (requiredCount <= command.extraArgs.size())
 	{
 		auto len = std::max(requiredCount, std::min(definition.positionalOptions.size(), command.extraArgs.size()));
-		for (int i = 0; i < len; ++i)
+		for (auto i = 0; i < len; ++i)
 		{
 			auto& positionalOption = definition.positionalOptions[i];
 			auto& arg = command.extraArgs[i];
@@ -200,8 +200,8 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 				currentOption.duration = ETJump::Duration::parseDuration(arg);
 				command.options[currentOption.name] = currentOption;
 				break;
-			case OptionDefinition::Type::Boolean: break;
-			case OptionDefinition::Type::MultiToken: break;
+			case OptionDefinition::Type::Boolean: 
+			case OptionDefinition::Type::MultiToken: 
 			default: 
 				command.errors.push_back("Unsupported positional option " + toString(positionalOption.type));
 			}

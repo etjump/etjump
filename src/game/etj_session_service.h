@@ -74,6 +74,7 @@ namespace ETJump
 		bool isHigherLevel(int clientNum, int target);
 		void mute(int target, long long duration);
 		bool unmute(int target);
+		void updateUserInfoValue(int target, const std::string& key, const std::string& value);
 		static std::string getName(int clientNum);
 		static std::vector<std::string> getNames(const std::vector<int>& clientNums);
 		std::vector<int> findUsersByName(const std::string& name);

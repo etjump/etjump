@@ -564,6 +564,14 @@ bool ETJump::SessionService::unmute(int target)
 	return true;
 }
 
+void ETJump::SessionService::updateUserInfoValue(int target, const std::string& key, const std::string& value)
+{
+	char userinfo[MAX_INFO_STRING]{};
+	trap_GetUserinfo(target, userinfo, sizeof(userinfo));
+	Info_SetValueForKey(userinfo, key.c_str(), value.c_str());
+	ClientUserinfoChanged(target);
+}
+
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)
 {
 	try

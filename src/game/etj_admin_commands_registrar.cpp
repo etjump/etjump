@@ -454,7 +454,33 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* rename
 	*/
-	_adminCommandsHandler->subscribe('R', createCommandDefinition("rename", "rename", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	
+	static const auto newNameOption = createOptionDefinition("newname", "New name for target player", CommandParser::OptionDefinition::Type::MultiToken, true);
+	static const auto newNamePositionalOption = createOptionDefinition("newname", "New name for target player", CommandParser::OptionDefinition::Type::Token, true);
+	_adminCommandsHandler->subscribe('R', createCommandDefinition("rename", "rename", {
+		_requiredPlayerOption,
+		newNameOption
+	}, {
+		_requiredPlayerOption,
+		newNamePositionalOption
+	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
+		if (targets.size() == 0)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+			return;
+		}
+		if (targets.size() > 1)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
+			return;
+		}
+
+		auto name = command.options.find("newname")->second.text;
+		_sessionService->updateUserInfoValue(targets[0], "name", name);
+		Printer::sendCommand(targets[0], stringFormat("set_name \"%s\"", name));
+	});
 
 	/**
 	* restart
