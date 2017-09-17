@@ -240,9 +240,31 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* kick
 	*/
-	_adminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	static const auto reasonOption = createOptionDefinition("reason", "Reason for kicking the player", CommandParser::OptionDefinition::Type::MultiToken, false);
+	static const auto durationOption = createOptionDefinition("duration", "How long the player should be temporarily banned (not a real ban).", CommandParser::OptionDefinition::Type::Duration, false);
+	_adminCommandsHandler->subscribe('k', createCommandDefinition("kick", "kick", {
+		_requiredPlayerOption,
+		reasonOption,
+		durationOption
+	}, {
+		_requiredPlayerOption,
+		durationOption
+	}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
-
+		auto duration = getOptionalDuration(command, "duration", 0);
+		auto reason = getOptionalText(command, "reason", "Player kicked");
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
+		if (targets.size() == 0)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+			return;
+		}
+		if (targets.size() > 1)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
+			return;
+		}
+		_sessionService->dropClient(targets[0], reason, duration);
 	});
 
 	/**

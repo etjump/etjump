@@ -150,7 +150,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 	if (requiredCount <= command.extraArgs.size())
 	{
 		auto len = std::max(requiredCount, std::min(definition.positionalOptions.size(), command.extraArgs.size()));
-		for (auto i = 0; i < len; ++i)
+		for (unsigned i = 0; i < len; ++i)
 		{
 			auto& positionalOption = definition.positionalOptions[i];
 			auto& arg = command.extraArgs[i];

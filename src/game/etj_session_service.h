@@ -78,8 +78,8 @@ namespace ETJump
 		static std::string getName(int clientNum);
 		static std::vector<std::string> getNames(const std::vector<int>& clientNums);
 		std::vector<int> findUsersByName(const std::string& name);
-	private:
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
+	private:
 		void removeClientTasks(int clientNum);
 		void removeGetUserTasks(std::function<bool(const GetUserTask&)> predicate);
 		void addGetUserTaskAsync(int clientNum, const std::string& name, const std::string& ipAddress, const std::string& guid, const std::string& hardwareId);
