@@ -2548,6 +2548,8 @@ extern vmCvar_t etj_showTris;
 extern vmCvar_t etj_wolfFog;
 extern vmCvar_t etj_zFar;
 
+extern vmCvar_t etj_consoleAlpha;
+
 //
 // cg_main.c
 //

@@ -16,6 +16,7 @@
 #include "etj_operating_system.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_cvar_shadow.h"
+#include "etj_console_alpha.h"
 
 displayContextDef_t cgDC;
 
@@ -93,6 +94,7 @@ namespace ETJump
 	std::vector<std::unique_ptr<IRenderable>> renderables;
 	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
+	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -493,6 +495,8 @@ vmCvar_t etj_showTris;
 vmCvar_t etj_wolfFog;
 vmCvar_t etj_zFar;
 
+vmCvar_t etj_consoleAlpha;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -831,6 +835,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_wolfFog, "etj_wolfFog", "1", CVAR_ARCHIVE },
 	{ &etj_zFar, "etj_zFar", "0", CVAR_ARCHIVE },
 	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
+	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
 
 };
 
@@ -3614,6 +3619,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// Display max speed from previous load session
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 
+	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
+
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");
 	CG_Printf("--------------------------------------------------------------------------------\n");
@@ -3674,6 +3681,7 @@ void CG_Shutdown(void)
 	ETJump::renderables.clear();
 	ETJump::cvarUpdateHandler = nullptr;
 	ETJump::cvarShadows.clear();
+	ETJump::consoleAlphaHandler = nullptr;
 }
 
 // returns true if game is single player (or coop)

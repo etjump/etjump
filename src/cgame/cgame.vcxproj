@@ -290,6 +290,7 @@
     <ClCompile Include="cg_timerun.cpp" />
     <ClCompile Include="etj_client_authentication.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
+    <ClCompile Include="etj_console_alpha.cpp" />
     <ClCompile Include="etj_cvar_shadow.cpp" />
     <ClCompile Include="etj_cvar_update_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
@@ -300,6 +301,7 @@
     <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
     <ClCompile Include="etj_trickjump_lines.cpp" />
+    <ClCompile Include="etj_utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\etjump\ui\menudef.h" />
@@ -308,6 +310,7 @@
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="..\game\etj_shared.h" />
+    <ClInclude Include="..\game\etj_string_utilities.h" />
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
@@ -321,6 +324,7 @@
     <ClInclude Include="cg_timerun.h" />
     <ClInclude Include="etj_client_authentication.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
+    <ClInclude Include="etj_console_alpha.h" />
     <ClInclude Include="etj_cvar_shadow.h" />
     <ClInclude Include="etj_cvar_update_handler.h" />
     <ClInclude Include="etj_entity_events_handler.h" />
@@ -333,6 +337,7 @@
     <ClInclude Include="etj_rotation_matrix.hpp" />
     <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="etj_trickjump_lines.hpp" />
+    <ClInclude Include="etj_utilities.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>
