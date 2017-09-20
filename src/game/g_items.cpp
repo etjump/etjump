@@ -1240,6 +1240,7 @@ void FinishSpawningItem(gentity_t *ent)
 	ent->s.eType      = ET_ITEM;
 	ent->s.modelindex = ent->item - bg_itemlist;        // store item number in modelindex
 
+	ent->s.otherEntityNum = ENTITYNUM_WORLD;            // Store "world" as owner for etj_touchPickupWeapons 1
 	ent->s.otherEntityNum2 = 0;     // DHM - Nerve :: takes modelindex2's place in signaling a dropped item
 //----(SA)	we don't use this (yet, anyway) so I'm taking it so you can specify a model for treasure items and clipboards
 //	ent->s.modelindex2 = 0; // zero indicates this isn't a dropped item
@@ -1354,9 +1355,6 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item)
 
 	G_SpawnFloat("random", "0", &ent->random);
 	G_SpawnFloat("wait", "0", &ent->wait);
-
-	// Store "world" as owner for etj_touchPickupWeapons 1
-	ent->s.otherEntityNum = ENTITYNUM_WORLD;
 
 	ent->item = item;
 	// some movers spawn on the second frame, so delay item
