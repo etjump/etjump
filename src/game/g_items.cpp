@@ -874,8 +874,6 @@ Touch_Item
 */
 void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 {
-	qboolean pickup = qfalse;
-
 	if (other->client->pers.autoActivate == PICKUP_ACTIVATE)
 	{
 		return;
@@ -893,28 +891,17 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 				}
 				else if (other->client->pers.touchPickupWeapons == 1)
 				{
-					if (ent->s.otherEntityNum == other->s.number || ent->s.otherEntityNum == ENTITYNUM_WORLD)
-					{
-						pickup = qtrue;
-					}
-					else
+					if (ent->s.otherEntityNum != other->s.number && ent->s.otherEntityNum != ENTITYNUM_WORLD)
 					{
 						return;
 					}
-				}
-				else if (other->client->pers.touchPickupWeapons >= 2)
-				{
-					pickup = qtrue;
 				}
 			}
 		}
 	}
 
-	if (pickup = qtrue)
-	{
-		ent->active = qtrue;
-		Touch_Item(ent, other, trace);
-	}
+	ent->active = qtrue;
+	Touch_Item(ent, other, trace);
 
 	if (other->client->pers.autoActivate == PICKUP_FORCE)       // autoactivate probably forced by the "Cmd_Activate_f()" function
 	{
