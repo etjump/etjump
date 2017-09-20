@@ -1604,12 +1604,13 @@ void ClientUserinfoChanged(int clientNum)
 
 
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
-	sscanf(s, "%i %i %i %i %f",
+	sscanf(s, "%i %i %i %i %f %i",
 	       &client->pers.clientFlags,
 	       &client->pers.clientTimeNudge,
 	       &client->pers.clientMaxPackets,
 	       &client->pers.maxFPS,
-	       &client->pers.noclipScale);
+	       &client->pers.noclipScale,
+	       &client->pers.touchPickupWeapons);
 
 	client->pers.autoActivate      = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
 	client->pers.predictItemPickup = ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0) ? qtrue : qfalse;

@@ -2550,6 +2550,8 @@ extern vmCvar_t etj_zFar;
 extern vmCvar_t etj_offsetFactor;
 extern vmCvar_t etj_offsetUnits;
 
+extern vmCvar_t etj_touchPickupWeapons;
+
 //
 // cg_main.c
 //

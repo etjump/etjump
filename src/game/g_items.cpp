@@ -874,6 +874,8 @@ Touch_Item
 */
 void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 {
+	qboolean pickup = qfalse;
+
 	if (other->client->pers.autoActivate == PICKUP_ACTIVATE)
 	{
 		return;
@@ -885,13 +887,34 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 		{
 			if (!COM_BitCheck(other->client->ps.weapons, ent->item->giTag))
 			{
-				return; // force activate only
+				if (other->client->pers.touchPickupWeapons <= 0)
+				{
+					return;
+				}
+				else if (other->client->pers.touchPickupWeapons == 1)
+				{
+					if (ent->s.otherEntityNum == other->s.number || ent->s.otherEntityNum == ENTITYNUM_WORLD)
+					{
+						pickup = qtrue;
+					}
+					else
+					{
+						return;
+					}
+				}
+				else if (other->client->pers.touchPickupWeapons >= 2)
+				{
+					pickup = qtrue;
+				}
 			}
 		}
 	}
 
-	ent->active = qtrue;
-	Touch_Item(ent, other, trace);
+	if (pickup = qtrue)
+	{
+		ent->active = qtrue;
+		Touch_Item(ent, other, trace);
+	}
 
 	if (other->client->pers.autoActivate == PICKUP_FORCE)       // autoactivate probably forced by the "Cmd_Activate_f()" function
 	{
@@ -1127,6 +1150,9 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNu
 		dropped->nextthink = level.time + 30000;
 	}
 
+	// Store owner for etj_touchPickupWeapons 1
+	dropped->s.otherEntityNum = ownerNum;
+
 	dropped->flags = FL_DROPPED_ITEM;
 
 	trap_LinkEntity(dropped);
@@ -1328,6 +1354,9 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item)
 
 	G_SpawnFloat("random", "0", &ent->random);
 	G_SpawnFloat("wait", "0", &ent->wait);
+
+	// Store "world" as owner for etj_touchPickupWeapons 1
+	ent->s.otherEntityNum = ENTITYNUM_WORLD;
 
 	ent->item = item;
 	// some movers spawn on the second frame, so delay item
