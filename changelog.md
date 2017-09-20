@@ -52,7 +52,10 @@
   * `etj_wolfFog` -> `r_wolffog`
   * `etj_zFar` -> `r_zfar`
   * `etj_viewLog` -> `viewlog` (reimplemented)
+  * `etj_offsetFactor` -> `r_offsetFactor`
+  * `etj_offsetUnits` -> `r_offsetUnits`
 * fixed remapped shaders were remaining from previous maps
+* added trigger_push support for client predicted push events
 
 
 # ETJump 2.2.0

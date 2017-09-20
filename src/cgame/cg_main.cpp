@@ -494,6 +494,8 @@ vmCvar_t etj_drawFoliage;
 vmCvar_t etj_showTris;
 vmCvar_t etj_wolfFog;
 vmCvar_t etj_zFar;
+vmCvar_t etj_offsetFactor;
+vmCvar_t etj_offsetUnits;
 
 vmCvar_t etj_consoleAlpha;
 
@@ -835,7 +837,9 @@ cvarTable_t cvarTable[] =
 	{ &etj_wolfFog, "etj_wolfFog", "1", CVAR_ARCHIVE },
 	{ &etj_zFar, "etj_zFar", "0", CVAR_ARCHIVE },
 	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
-	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
+	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
+  { &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
 
 };
 
@@ -883,7 +887,9 @@ void CG_RegisterCvars(void)
 		{ &etj_showTris, "r_showtris" },
 		{ &etj_wolfFog, "r_wolffog" },
 		{ &etj_zFar, "r_zfar" },
-		{ &etj_viewlog, "viewlog" }
+		{ &etj_viewlog, "viewlog" },
+		{ &etj_offsetFactor, "r_offsetFactor" },
+		{ &etj_offsetUnits, "r_offsetUnits" }
 	};
 
 	for (auto &shadow : cvars)

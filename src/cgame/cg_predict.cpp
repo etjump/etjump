@@ -668,7 +668,8 @@ static void CG_TouchTriggerPrediction(void)
 		}
 
 		if (ent->eType == ET_CONSTRUCTIBLE ||
-		    ent->eType == ET_OID_TRIGGER
+		    ent->eType == ET_OID_TRIGGER ||
+			ent->eType == ET_PUSH_TRIGGER
 #ifdef VISIBLE_TRIGGERS
 		    || ent->eType == ET_TRIGGER_MULTIPLE
 		    || ent->eType == ET_TRIGGER_FLAGONLY
@@ -695,9 +696,12 @@ static void CG_TouchTriggerPrediction(void)
 			else
 #endif // VISIBLE_TRIGGERS
 			{
-				// expand the bbox a bit
-				VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
-				VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
+				if (ent->eType != ET_PUSH_TRIGGER)
+				{
+					// expand the bbox a bit
+					VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
+					VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
+				}	
 			}
 
 			VectorAdd(cg.predictedPlayerState.origin, cg_pmove.mins, pmins);
@@ -725,6 +729,11 @@ static void CG_TouchTriggerPrediction(void)
 			if (cs)
 			{
 				CG_ObjectivePrint(va("You are near %s\n", cs), SMALLCHAR_WIDTH);
+			}
+
+			if (ent->eType == ET_PUSH_TRIGGER)
+			{
+				BG_TouchJumpPad(&cg.predictedPlayerState, ent);
 			}
 
 			continue;
