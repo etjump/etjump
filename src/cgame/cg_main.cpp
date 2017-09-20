@@ -839,7 +839,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
 	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
 	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
-  { &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
 
 };
 
