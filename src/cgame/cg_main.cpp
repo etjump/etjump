@@ -17,6 +17,7 @@
 #include "etj_cvar_update_handler.h"
 #include "etj_cvar_shadow.h"
 #include "etj_console_alpha.h"
+#include "etj_foliage_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -95,6 +96,7 @@ namespace ETJump
 	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
 	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
+	static std::shared_ptr<FoliageHandler> foliageHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -498,6 +500,7 @@ vmCvar_t etj_offsetFactor;
 vmCvar_t etj_offsetUnits;
 
 vmCvar_t etj_consoleAlpha;
+vmCvar_t etj_removeFoliage;
 
 typedef struct
 {
@@ -840,6 +843,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
 	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
 	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_removeFoliage, "etj_removeFoliage", "0", CVAR_ARCHIVE },
 
 };
 
@@ -3626,6 +3630,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
+	ETJump::foliageHandler = std::make_shared<ETJump::FoliageHandler>();
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");
@@ -3688,6 +3693,7 @@ void CG_Shutdown(void)
 	ETJump::cvarUpdateHandler = nullptr;
 	ETJump::cvarShadows.clear();
 	ETJump::consoleAlphaHandler = nullptr;
+	ETJump::foliageHandler = nullptr;
 }
 
 // returns true if game is single player (or coop)

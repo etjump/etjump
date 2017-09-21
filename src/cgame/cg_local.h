@@ -2551,6 +2551,7 @@ extern vmCvar_t etj_offsetFactor;
 extern vmCvar_t etj_offsetUnits;
 
 extern vmCvar_t etj_consoleAlpha;
+extern vmCvar_t etj_removeFoliage;
 
 //
 // cg_main.c

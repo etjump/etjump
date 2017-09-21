@@ -24,3 +24,8 @@ std::string ETJump::composeShader(const char *name, ShaderStage general, ShaderS
 
 	return shader;
 }
+
+std::string ETJump::composeShader(const char *name, ShaderStages stages)
+{
+	return composeShader(name, { "" }, stages);
+}

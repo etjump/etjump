@@ -52,5 +52,3 @@ ConsoleAlphaHandler::~ConsoleAlphaHandler()
 	trap_R_LoadDynamicShader(shaderName, nullptr);
 	trap_R_RemapShader("console-16bit", "console-16bit", "0");
 }
-
-
