@@ -248,7 +248,7 @@
     <ClCompile Include="etj_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_foliage_handler.cpp">
+    <ClCompile Include="etj_draw_leaves_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -361,7 +361,7 @@
     <ClInclude Include="etj_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_foliage_handler.h">
+    <ClInclude Include="etj_draw_leaves_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
