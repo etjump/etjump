@@ -3692,8 +3692,10 @@ void CG_Shutdown(void)
 	ETJump::renderables.clear();
 	ETJump::cvarUpdateHandler = nullptr;
 	ETJump::cvarShadows.clear();
-	ETJump::consoleAlphaHandler = nullptr;
+
+	// clear dynamic shaders in reverse order
 	ETJump::drawLeavesHandler = nullptr;
+	ETJump::consoleAlphaHandler = nullptr;
 }
 
 // returns true if game is single player (or coop)
