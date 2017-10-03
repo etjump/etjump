@@ -16,6 +16,8 @@
 #include "etj_operating_system.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_cvar_shadow.h"
+#include "etj_console_alpha.h"
+#include "etj_draw_leaves_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -93,6 +95,8 @@ namespace ETJump
 	std::vector<std::unique_ptr<IRenderable>> renderables;
 	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
+	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
+	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -495,6 +499,9 @@ vmCvar_t etj_zFar;
 vmCvar_t etj_offsetFactor;
 vmCvar_t etj_offsetUnits;
 
+vmCvar_t etj_consoleAlpha;
+vmCvar_t etj_drawLeaves;
+
 vmCvar_t etj_touchPickupWeapons;
 
 typedef struct
@@ -837,8 +844,9 @@ cvarTable_t cvarTable[] =
 	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
 	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
 	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
+	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
-
 
 };
 
@@ -3626,6 +3634,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// Display max speed from previous load session
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 
+	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
+	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
+
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");
 	CG_Printf("--------------------------------------------------------------------------------\n");
@@ -3686,6 +3697,10 @@ void CG_Shutdown(void)
 	ETJump::renderables.clear();
 	ETJump::cvarUpdateHandler = nullptr;
 	ETJump::cvarShadows.clear();
+
+	// clear dynamic shaders in reverse order
+	ETJump::drawLeavesHandler = nullptr;
+	ETJump::consoleAlphaHandler = nullptr;
 }
 
 // returns true if game is single player (or coop)

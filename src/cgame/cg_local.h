@@ -2550,6 +2550,9 @@ extern vmCvar_t etj_zFar;
 extern vmCvar_t etj_offsetFactor;
 extern vmCvar_t etj_offsetUnits;
 
+extern vmCvar_t etj_consoleAlpha;
+extern vmCvar_t etj_drawLeaves;
+
 extern vmCvar_t etj_touchPickupWeapons;
 
 //
