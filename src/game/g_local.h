@@ -889,6 +889,8 @@ typedef struct
 
 	int noclipCount;
 
+	int touchPickupWeapons;
+
 	raceStruct_t race;
 
 #define MAX_TOKENS_PER_DIFFICULTY 6
