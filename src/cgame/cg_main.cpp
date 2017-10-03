@@ -495,6 +495,8 @@ vmCvar_t etj_zFar;
 vmCvar_t etj_offsetFactor;
 vmCvar_t etj_offsetUnits;
 
+vmCvar_t etj_touchPickupWeapons;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -835,6 +837,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
 	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
 	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
+	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
 
 
 };
@@ -957,7 +960,8 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
 					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
-					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean
+					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
+					cv->vmCvar == &etj_touchPickupWeapons
 				    )
 				{
 					fSetFlags = qtrue;
@@ -1053,7 +1057,7 @@ void CG_setClientFlags(void)
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f %d",
 	                             // Client Flags
 	                             (
 	                                 ((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -1077,7 +1081,8 @@ void CG_setClientFlags(void)
 	                             // MaxPackets
 	                             int_cl_maxpackets.integer,
 	                             com_maxfps.integer,
-	                             cg_noclipScale.value
+	                             cg_noclipScale.value,
+	                             etj_touchPickupWeapons.integer
 	                             ));
 
 }

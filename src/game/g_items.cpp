@@ -885,7 +885,17 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 		{
 			if (!COM_BitCheck(other->client->ps.weapons, ent->item->giTag))
 			{
-				return; // force activate only
+				if (other->client->pers.touchPickupWeapons <= 0)
+				{
+					return;
+				}
+				else if (other->client->pers.touchPickupWeapons == 1)
+				{
+					if (ent->s.otherEntityNum != other->s.number && ent->s.otherEntityNum != ENTITYNUM_WORLD)
+					{
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -1127,6 +1137,9 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNu
 		dropped->nextthink = level.time + 30000;
 	}
 
+	// Store owner for etj_touchPickupWeapons 1
+	dropped->s.otherEntityNum = ownerNum;
+
 	dropped->flags = FL_DROPPED_ITEM;
 
 	trap_LinkEntity(dropped);
@@ -1214,6 +1227,7 @@ void FinishSpawningItem(gentity_t *ent)
 	ent->s.eType      = ET_ITEM;
 	ent->s.modelindex = ent->item - bg_itemlist;        // store item number in modelindex
 
+	ent->s.otherEntityNum = ENTITYNUM_WORLD;            // Store "world" as owner for etj_touchPickupWeapons 1
 	ent->s.otherEntityNum2 = 0;     // DHM - Nerve :: takes modelindex2's place in signaling a dropped item
 //----(SA)	we don't use this (yet, anyway) so I'm taking it so you can specify a model for treasure items and clipboards
 //	ent->s.modelindex2 = 0; // zero indicates this isn't a dropped item

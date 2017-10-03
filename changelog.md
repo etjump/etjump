@@ -56,6 +56,11 @@
   * `etj_offsetUnits` -> `r_offsetUnits`
 * fixed remapped shaders were remaining from previous maps
 * added trigger_push support for client predicted push events
+* added `etj_touchPickupWeapons` to pickup weapons by touching them:
+  * __0__ off
+  * __1__ pickup weapons dropped by yourself and spawned in map
+  * __2__ pickup any touched weapons
+  * functionality relies on having `cg_autoactivate 1`
 
 
 # ETJump 2.2.0
