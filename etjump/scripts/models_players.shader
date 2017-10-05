@@ -176,11 +176,11 @@ models/players/temperate/allied/ranks/1stclass
 	}
 }
 
-/****************************************
-
-	Axis body
-
-****************************************/
+//****************************************
+//
+//	Axis body
+//
+//****************************************
 models/players/temperate/axis/engineer/body_engineer
 {
 	sort 16
@@ -241,11 +241,11 @@ models/players/temperate/axis/soldier/body_soldier
 	}
 }
 
-/*****************************************
-
-	Axis gloves
-
-*****************************************/
+//*****************************************
+//
+//	Axis gloves
+//
+//*****************************************
 models/players/temperate/axis/body01
 {
 	sort 16
@@ -258,11 +258,11 @@ models/players/temperate/axis/body01
 	}
 }
 
-/******************************************
-	
-	Axis legs
-
-******************************************/
+//******************************************
+//	
+//	Axis legs
+//
+//******************************************
 models/players/temperate/axis/medic/legs_medic
 {
 	sort 16
@@ -287,11 +287,11 @@ models/players/temperate/axis/legs01
 	}
 }
 
-/*******************************************
-	
-	Axis backpacks
-
-*******************************************/
+//*******************************************
+//	
+//	Axis backpacks
+//
+//*******************************************
 models/players/temperate/axis/medic/acc/backpack 
 {
 	sort 16
@@ -388,11 +388,11 @@ models/players/temperate/axis/soldier/acc/backpack
 	}
 }
 
-/********************************************
-
-	Axis helmets
-
-********************************************/
+//********************************************
+//
+//	Axis helmets
+//
+//********************************************
 models/players/temperate/axis/medic/helmet 
 {
 	sort 16
@@ -465,11 +465,11 @@ models/players/temperate/axis/inside
 	}
 }
 
-/*****************************************
-
-	Axis heads
-
-*****************************************/
+//*****************************************
+//
+//	Axis heads
+//
+//*****************************************
 models/players/hud/axis_medic 
 {
 	sort 16
@@ -530,11 +530,11 @@ models/players/hud/axis_soldier
 	}
 }
 
-/****************************************
-	
-	Allies body
-
-*****************************************/
+//****************************************
+//	
+//	Allies body
+//
+//*****************************************
 models/players/temperate/allied/soldier/body
 {
 	sort 16
@@ -595,11 +595,11 @@ models/players/temperate/allied/cvops/body
 	}
 }
 
-/****************************************
-	
-	Allies pants
-
-*****************************************/
+///****************************************
+//	
+//	Allies pants
+//
+//*****************************************
 models/players/temperate/allied/leg01 
 {
 	sort 16
@@ -612,11 +612,11 @@ models/players/temperate/allied/leg01
 	}
 }
 
-/***************************************** 
-	
-	Allies backpacks
-
-*****************************************/
+///***************************************** 
+//	
+//	Allies backpacks
+//
+//*****************************************
 models/players/temperate/allied/medic/acc/backpack 
 {
 	sort 16	
@@ -689,11 +689,11 @@ models/players/temperate/allied/soldier/acc/backpack
 	}
 }
 
-/******************************************
-	
-	Allies helmets
-
-******************************************/
+//******************************************
+//	
+//	Allies helmets
+//
+//******************************************
 models/players/temperate/allied/medic/helmet
 {
 	sort 16
@@ -778,11 +778,11 @@ models/players/temperate/allied/inside
 	}
 }
 
-/*******************************************
-	
-	Allies heads
-
-*******************************************/
+//*******************************************
+//	
+//	Allies heads
+//
+//*******************************************
 models/players/hud/allied_medic 
 {
 	sort 16
