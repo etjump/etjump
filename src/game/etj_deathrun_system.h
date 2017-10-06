@@ -114,6 +114,12 @@ namespace ETJump
 		 */
 		std::string getEndMessage() const;
 		static std::string getMessageFormat(PrintLocation location);
+		/**
+		* Checks if run is active for player
+		* @param clientNum ID of the activating player
+		* @returns is run active for player
+		*/
+		bool isActive(int clientNum);
 	private:
 		struct RunStatus
 		{
@@ -125,12 +131,6 @@ namespace ETJump
 			std::vector<bool> checkpointStatuses;
 			bool active;
 		};
-		/**
-		 * Checks if run is active for player
-		 * @param clientNum ID of the activating player
-		 * @returns is run active for player
-		 */
-		bool isActive(int clientNum);
 		/**
 		 * Resets run score and starts a new run
 		 * @param clientNum activating player ID

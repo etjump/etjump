@@ -789,17 +789,20 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	}
 
 	auto clientNum = ClientNum(self);
-	auto score = ETJump::deathrunSystem->hitEnd(clientNum);
-	self->client->sess.deathrunFlags = 0;
-	auto fmt = ETJump::DeathrunSystem::getMessageFormat(ETJump::deathrunSystem->getPrintLocation());
-	auto message = ETJump::deathrunSystem->getEndMessage();
-	boost::replace_all(message, "[n]", self->client->pers.netname);
-	boost::replace_all(message, "[s]", std::to_string(score));
-	auto affectedPlayers = Utilities::getSpectators(clientNum);
-	affectedPlayers.push_back(clientNum);
-	for (const auto & c : affectedPlayers)
+	if (ETJump::deathrunSystem->isActive(clientNum))
 	{
-		trap_SendServerCommand(c, va(fmt.c_str(), message.c_str()));
+		auto score = ETJump::deathrunSystem->hitEnd(clientNum);
+		self->client->sess.deathrunFlags = 0;
+		auto fmt = ETJump::DeathrunSystem::getMessageFormat(ETJump::deathrunSystem->getPrintLocation());
+		auto message = ETJump::deathrunSystem->getEndMessage();
+		boost::replace_all(message, "[n]", self->client->pers.netname);
+		boost::replace_all(message, "[s]", std::to_string(score));
+		auto affectedPlayers = Utilities::getSpectators(clientNum);
+		affectedPlayers.push_back(clientNum);
+		for (const auto & c : affectedPlayers)
+		{
+			trap_SendServerCommand(c, va(fmt.c_str(), message.c_str()));
+		}
 	}
 }
 
