@@ -61,6 +61,7 @@
   * __1__ pickup weapons dropped by yourself and spawned in map
   * __2__ pickup any touched weapons
   * functionality relies on having `cg_autoactivate 1`
+* fixed `movie_changeFovBasedOnSpeed` toggle not working
 
 
 # ETJump 2.2.0
