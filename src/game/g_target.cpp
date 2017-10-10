@@ -650,6 +650,20 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	{
 		return;
 	}
+
+	if (self->outSpeed > 0)
+	{
+		VectorNormalize(activator->client->ps.velocity);  // normalize velocity 
+		VectorScale(activator->client->ps.velocity, self->outSpeed, activator->client->ps.velocity); // scale it up again
+		activator->client->ps.pm_time = 160;        // hold time
+		activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+	}
+
+	if (self->noise_index)
+	{
+		G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
+	}
+
 	dest = G_PickTarget(self->target);
 	if (!dest)
 	{
@@ -690,10 +704,17 @@ The activator will be teleported away.
 */
 void SP_target_teleporter(gentity_t *self)
 {
+	char *s;
+
 	if (!self->targetname)
 	{
 		G_Printf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
 	}
+
+	G_SpawnString("noise", "", &s);
+	self->noise_index = G_SoundIndex(s);
+
+	G_SpawnInt("outspeed", "0", &self->outSpeed);
 
 	self->use = target_teleporter_use;
 }

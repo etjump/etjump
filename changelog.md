@@ -62,6 +62,10 @@
   * __2__ pickup any touched weapons
   * functionality relies on having `cg_autoactivate 1`
 * fixed `movie_changeFovBasedOnSpeed` toggle not working
+* added `noise` key for target_teleporter and trigger_teleport, plays only to client
+* added `outspeed` key for target_teleporter and trigger_teleport
+  * sets fixed speed at which player exits teleport
+  * value __0__ does NOT reset speed, instead ignores the key (default)
 
 
 # ETJump 2.2.0
