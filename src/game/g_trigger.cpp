@@ -436,6 +436,19 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 
+	if (self->outSpeed > 0)
+	{
+		VectorNormalize(other->client->ps.velocity);  // normalize velocity 
+		VectorScale(other->client->ps.velocity, self->outSpeed, other->client->ps.velocity); // scale it up again
+		other->client->ps.pm_time = 160;        // hold time
+		other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+	}
+
+	if (self->noise_index)
+	{
+		G_AddEvent(other, EV_GENERAL_SOUND, self->noise_index);
+	}
+
 	dest = G_PickTarget(self->target);
 	if (!dest)
 	{
@@ -477,12 +490,17 @@ Must point at a target_position, which will be the teleport destination.
 void SP_trigger_teleport(gentity_t *self)
 {
 	InitTrigger(self);
+	char *s;
 
 	// unlike other triggers, we need to send this one to the client
 	self->r.svFlags &= ~SVF_NOCLIENT;
 
 	// make sure the client precaches this sound
-	G_SoundIndex("sound/world/jumppad.wav");
+	// G_SoundIndex("sound/world/jumppad.wav");
+	G_SpawnString("noise", "", &s);
+	self->noise_index = G_SoundIndex(s);
+
+	G_SpawnInt("outspeed", "0", &self->outSpeed);
 
 	self->s.eType = ET_TELEPORT_TRIGGER;
 	self->touch   = trigger_teleporter_touch;

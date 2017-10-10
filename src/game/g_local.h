@@ -562,6 +562,8 @@ struct gentity_s
 
 	int tjlLineNumber;
 	char *tjlLineName;
+
+	int outSpeed;
 };
 
 // Ridah
