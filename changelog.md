@@ -66,6 +66,8 @@
 * added `outspeed` key for target_teleporter and trigger_teleport
   * sets fixed speed at which player exits teleport
   * value __0__ does NOT reset speed, instead ignores the key (default)
+* added `etj_consoleAlpha` to control console background transparency
+* added `etj_drawLeaves` to toggle original's leaves drawing
 * added spawnflag __16__ `KNOCKBACK` to target_teleporter and trigger_teleport
   * applies knockback event for a short time after getting teleported
   * makes teleportation events smoother when destination is on ground level
