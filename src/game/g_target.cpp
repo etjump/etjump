@@ -655,8 +655,6 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	{
 		VectorNormalize(activator->client->ps.velocity);  // normalize velocity 
 		VectorScale(activator->client->ps.velocity, self->outSpeed, activator->client->ps.velocity); // scale it up again
-		activator->client->ps.pm_time = 160;        // hold time
-		activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	}
 
 	if (self->noise_index)
@@ -669,6 +667,12 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	{
 		G_Printf("Couldn't find teleporter destination\n");
 		return;
+	}
+
+	if (self->spawnflags & 16)
+	{
+		activator->client->ps.pm_time = 160;        // hold time
+		activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	}
 
 	if (self->spawnflags & 1)
