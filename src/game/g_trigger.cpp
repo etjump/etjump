@@ -440,8 +440,6 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	{
 		VectorNormalize(other->client->ps.velocity);  // normalize velocity 
 		VectorScale(other->client->ps.velocity, self->outSpeed, other->client->ps.velocity); // scale it up again
-		other->client->ps.pm_time = 160;        // hold time
-		other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	}
 
 	if (self->noise_index)
@@ -454,6 +452,12 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	{
 		G_Printf("Couldn't find teleporter destination\n");
 		return;
+	}
+
+	if (self->spawnflags & 16)
+	{
+		other->client->ps.pm_time = 160;        // hold time
+		other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	}
 
 	if (self->spawnflags & 1)
