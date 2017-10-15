@@ -19,11 +19,19 @@ public:
 	static const int MAX_SAVED_POSITIONS  = 3;
 	static const int MAX_BACKUP_POSITIONS = 3;
 
+	enum SaveStance
+	{
+		Stand,
+		Crouch,
+		Prone
+	};
+
 	struct SavePosition
 	{
 		bool isValid;
 		vec3_t origin;
 		vec3_t vangles;
+		SaveStance stance;
 	};
 
 	struct Client
@@ -35,6 +43,8 @@ public:
 
 		SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
 		boost::circular_buffer<SavePosition> axisBackupPositions;
+
+
 	};
 
 	struct DisconnectedClient
@@ -52,9 +62,9 @@ public:
 
 	enum class SaveLoadRestrictions
 	{
-		Crouch = 1 << 0,
-		Prone = 1 << 1,
-		Move = 1 << 2,
+		Default = 0,
+		Stance = 1 << 0,
+		Move = 1 << 1
 	};
 
 	// Saves current position
