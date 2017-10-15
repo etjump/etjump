@@ -44,8 +44,9 @@ std::string UserDatabase_Guid(gentity_t *ent);
 // Saves current position
 void SaveSystem::Save(gentity_t *ent)
 {
+	auto *client = ent->client;
 
-	if (!ent->client)
+	if (!client)
 	{
 		return;
 	}
@@ -56,34 +57,16 @@ void SaveSystem::Save(gentity_t *ent)
 		return;
 	}
 
-	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
 		CPTo(ent, "^3Save ^7is disabled for death run");
 		return;
 	}
 
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Prone))
-	{
-		if (ent->client->ps.eFlags & EF_PRONE)
-		{
-			CPTo(ent, "^3Save ^7is disabled while proning.");
-			return;
-		}
-	}
-
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Crouch))
-	{
-		if (ent->client->ps.eFlags & EF_CROUCHING)
-		{
-			CPTo(ent, "^3Save ^7is disabled while crouching.");
-			return;
-		}
-	}
-
 	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Move))
 	{
 		// comparing to zero vector
-		if (!VectorCompare(ent->client->ps.velocity, vec3_origin))
+		if (!VectorCompare(client->ps.velocity, vec3_origin))
 		{
 			CPTo(ent, "^3Save ^7is disabled while moving.");
 			return;
@@ -91,10 +74,14 @@ void SaveSystem::Save(gentity_t *ent)
 	}
 
 	// if dead cant save, avoid abuse running through damage triggers
+	if (client->ps.pm_type == PM_DEAD)
+	{
+		CPTo(ent, "^3Save ^7is disabled while dead.");
+		return;
+	}
 
-	Arguments argv = GetArgs();
-
-	int position = 0;
+	auto argv = GetArgs();
+	auto position = 0;
 	if (argv->size() > 1)
 	{
 		ToInt((*argv)[1], position);
@@ -106,29 +93,29 @@ void SaveSystem::Save(gentity_t *ent)
 		}
 
 		if (position > 0 &&
-			ent->client->sess.timerunActive &&
-			ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+			client->sess.timerunActive &&
+			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
 			CPTo(ent, "You are not allowed to use save slots.");
 			return;
 		}
 	}
 
-	if (!ent->client->sess.saveAllowed)
+	if (!client->sess.saveAllowed)
 	{
 		CPTo(ent, "You are not allowed to save a position.");
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	if (client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		CPTo(ent, "^7You can not ^3save^7 as a spectator.");
 		return;
 	}
 
 	trace_t trace;
-	trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
-	                  ent->r.maxs, ent->client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
+	trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins,
+	                  ent->r.maxs, client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
 
 	if (level.noSave)
 	{
@@ -147,17 +134,17 @@ void SaveSystem::Save(gentity_t *ent)
 		}
 	}
 
-	if (ent->client->pers.race.isRacing)
+	if (client->pers.race.isRacing)
 	{
-		if (ent->client->pers.race.saveLimit == 0)
+		if (client->pers.race.saveLimit == 0)
 		{
 			CPTo(ent, "^5You've used all your saves.");
 			return;
 		}
 
-		if (ent->client->pers.race.saveLimit > 0)
+		if (client->pers.race.saveLimit > 0)
 		{
-			ent->client->pers.race.saveLimit--;
+			client->pers.race.saveLimit--;
 		}
 	}
 	else
@@ -167,13 +154,13 @@ void SaveSystem::Save(gentity_t *ent)
 		{
 			if (ft->saveLimit < 0)
 			{
-				ent->client->sess.saveLimit = 0;
+				client->sess.saveLimit = 0;
 			}
 			if (ft->saveLimit)
 			{
-				if (ent->client->sess.saveLimit)
+				if (client->sess.saveLimit)
 				{
-					ent->client->sess.saveLimit--;
+					client->sess.saveLimit--;
 				}
 				else
 				{
@@ -185,8 +172,8 @@ void SaveSystem::Save(gentity_t *ent)
 	}
 
 
-	SavePosition *pos = 0;
-	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
+	SavePosition *pos = nullptr;
+	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
 		pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
 	}
@@ -197,9 +184,12 @@ void SaveSystem::Save(gentity_t *ent)
 
 	SaveBackupPosition(ent, pos);
 
-	VectorCopy(ent->client->ps.origin, pos->origin);
-	VectorCopy(ent->client->ps.viewangles, pos->vangles);
+	VectorCopy(client->ps.origin, pos->origin);
+	VectorCopy(client->ps.viewangles, pos->vangles);
 	pos->isValid = true;
+	pos->stance = client->ps.eFlags & EF_CROUCHING
+		? Crouch
+		: client->ps.eFlags & EF_PRONE ? Prone : Stand;
 
 	if (position == 0)
 	{
@@ -214,8 +204,9 @@ void SaveSystem::Save(gentity_t *ent)
 // Loads position
 void SaveSystem::Load(gentity_t *ent)
 {
+	auto *client = ent->client;
 
-	if (!ent->client)
+	if (!client)
 	{
 		return;
 	}
@@ -226,40 +217,26 @@ void SaveSystem::Load(gentity_t *ent)
 		return;
 	}
 
-	if (!ent->client->sess.saveAllowed)
+	if (!client->sess.saveAllowed)
 	{
 		CPTo(ent, "You are not allowed to load a position.");
 		return;
 	}
 
-	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 		{
 		CPTo(ent, "^3Load ^7is disabled for death run.");
 		return;
 	}
 
-
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Prone))
+	if (client->ps.pm_type == PM_DEAD)
 	{
-		if (ent->client->ps.eFlags & EF_PRONE)
-		{
-			CPTo(ent, "^3Load ^7is disabled while proning.");
-			return;
-		}
+		CPTo(ent, "^3Load ^7is disabled while dead.");
+		return;
 	}
 
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Crouch))
-	{
-		if (ent->client->ps.eFlags & EF_CROUCHING)
-		{
-			CPTo(ent, "^3Load ^7is disabled while crouching.");
-			return;
-		}
-	}
-
-	Arguments argv = GetArgs();
-
-	int position = 0;
+	auto argv = GetArgs();
+	auto position = 0;
 	if (argv->size() > 1)
 	{
 		ToInt((*argv)[1], position);
@@ -271,22 +248,22 @@ void SaveSystem::Load(gentity_t *ent)
 		}
 
 		if (position > 0 &&
-			ent->client->sess.timerunActive &&
-			ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+			client->sess.timerunActive &&
+			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
 			CPTo(ent, "You are not allowed to use load slots.");
 			return;
 		}
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	if (client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
 		return;
 	}
 
 	SavePosition *pos = nullptr;
-	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
+	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
 		pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
 	}
@@ -297,6 +274,25 @@ void SaveSystem::Load(gentity_t *ent)
 
 	if (pos->isValid)
 	{
+		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
+		{
+			if (pos->stance == Crouch)
+			{
+				client->ps.eFlags &= ~EF_PRONE;
+				client->ps.pm_flags |= PMF_DUCKED;
+			}
+			else if (pos->stance == Prone)
+			{
+				client->ps.eFlags |= EF_PRONE;
+				SetClientViewAngle(ent, pos->vangles);
+			}
+			else
+			{
+				client->ps.eFlags &= ~EF_PRONE;
+				client->ps.pm_flags &= ~PMF_DUCKED;
+
+			}
+		}
 		TeleportPlayer(ent, pos);
 	}
 	else
@@ -308,35 +304,35 @@ void SaveSystem::Load(gentity_t *ent)
 // Saves position, does not check for anything. Used for target_save
 void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)
 {
+	SavePosition *pos = nullptr;
+	auto *client = ent->client;
 
-	if (!ent->client || !location)
+	if (!client || !location)
 	{
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	if (client->sess.sessionTeam == TEAM_ALLIES)
+	{
+		pos = &clients_[ClientNum(ent)].alliesSavedPositions[0];
+	}
+	else if (client->sess.sessionTeam == TEAM_AXIS)
+	{
+		pos = &clients_[ClientNum(ent)].axisSavedPositions[0];
+	}
+	else
 	{
 		return;
 	}
-	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
-	{
-		SaveBackupPosition(ent,
-		                   &clients_[ClientNum(ent)].alliesSavedPositions[0]);
-		VectorCopy(location->s.origin,
-		           clients_[ClientNum(ent)].alliesSavedPositions[0].origin);
-		VectorCopy(location->s.angles,
-		           clients_[ClientNum(ent)].alliesSavedPositions[0].vangles);
-		clients_[ClientNum(ent)].alliesSavedPositions[0].isValid = true;
-	}
-	else if (ent->client->sess.sessionTeam == TEAM_AXIS)
-	{
-		SaveBackupPosition(ent, &clients_[ClientNum(ent)].axisSavedPositions[0]);
-		VectorCopy(location->s.origin,
-		           clients_[ClientNum(ent)].axisSavedPositions[0].origin);
-		VectorCopy(location->s.angles,
-		           clients_[ClientNum(ent)].axisSavedPositions[0].vangles);
-		clients_[ClientNum(ent)].axisSavedPositions[0].isValid = true;
-	}
+
+	SaveBackupPosition(ent, pos);
+
+	VectorCopy(location->s.origin, pos->origin);
+	VectorCopy(location->s.angles, pos->vangles);
+	pos->isValid = true;
+	pos->stance = client->ps.eFlags & EF_CROUCHING
+		? Crouch
+		: client->ps.eFlags & EF_PRONE ? Prone : Stand;
 
 	trap_SendServerCommand(ent - g_entities, g_savemsg.string);
 }
@@ -344,8 +340,9 @@ void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)
 // Loads backup position
 void SaveSystem::LoadBackupPosition(gentity_t *ent)
 {
+	auto *client = ent->client;
 
-	if (!ent->client)
+	if (!client)
 	{
 		return;
 	}
@@ -356,46 +353,33 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		return;
 	}
 
-	if (!ent->client->sess.saveAllowed)
+	if (!client->sess.saveAllowed)
 	{
 		CPTo(ent, "You are not allowed to load a position.");
 		return;
 	}
 
-	if (ent->client->sess.timerunActive &&
-		ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+	if (client->sess.timerunActive &&
+		client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 	{
 		CPTo(ent, "You are not allowed to use backup command.");
 		return;
 	}
 
-	if ((ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
 		CPTo(ent, "^3Backup ^7is disabled for death run");
 		return;
 	}
 
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Prone))
+	if (client->ps.pm_type == PM_DEAD)
 	{
-		if (ent->client->ps.eFlags & EF_PRONE)
-		{
-			CPTo(ent, "^3Backup ^7is disabled while proning.");
-			return;
-		}
+		CPTo(ent, "^3Backup ^7is disabled while dead.");
+		return;
 	}
 
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Crouch))
-	{
-		if (ent->client->ps.eFlags & EF_CROUCHING)
-		{
-			CPTo(ent, "^3Backup ^7is disabled while crouching.");
-			return;
-		}
-	}
-
-	Arguments argv = GetArgs();
-
-	int position = 0;
+	auto argv = GetArgs();
+	auto position = 0;
 	if (argv->size() > 1)
 	{
 		ToInt(argv->at(1), position);
@@ -412,14 +396,14 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		}
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	if (client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
 		return;
 	}
 
 	SavePosition *pos = nullptr;
-	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
+	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
 		pos = &clients_[ClientNum(ent)].alliesBackupPositions[position];
 	}
@@ -430,6 +414,25 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 
 	if (pos->isValid)
 	{
+		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
+		{
+			if (pos->stance == Crouch)
+			{
+				client->ps.eFlags &= ~EF_PRONE;
+				client->ps.pm_flags |= PMF_DUCKED;
+			}
+			else if (pos->stance == Prone)
+			{
+				client->ps.eFlags |= EF_PRONE;
+				SetClientViewAngle(ent, pos->vangles);
+			}
+			else
+			{
+				client->ps.eFlags &= ~EF_PRONE;
+				client->ps.pm_flags &= ~PMF_DUCKED;
+
+			}
+		}
 		TeleportPlayer(ent, pos);
 	}
 	else
@@ -592,6 +595,7 @@ void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos)
 	VectorCopy(pos->origin, backup.origin);
 	VectorCopy(pos->vangles, backup.vangles);
 	backup.isValid = pos->isValid;
+	backup.stance = pos->stance;
 	// Can never be spectator as this would not be called
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
 	{
@@ -646,18 +650,19 @@ void SaveSystem::Print(gentity_t *ent)
 
 void SaveSystem::TeleportPlayer(gentity_t* ent, SavePosition* pos)
 {
-	ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+	auto *client = ent->client;
+	client->ps.eFlags ^= EF_TELEPORT_BIT;
 	G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
 
-	VectorCopy(pos->origin, ent->client->ps.origin);
-	VectorClear(ent->client->ps.velocity);
+	VectorCopy(pos->origin, client->ps.origin);
+	VectorClear(client->ps.velocity);
 
-	if (ent->client->pers.loadViewAngles)
+	if (client->pers.loadViewAngles)
 	{
 		SetClientViewAngle(ent, pos->vangles);
 	}
 
-	ent->client->ps.pm_time = 1; // Crashland + instant load bug fix.
+	client->ps.pm_time = 1; // Crashland + instant load bug fix.
 }
 
 SaveSystem::SaveSystem(const Session *session) :

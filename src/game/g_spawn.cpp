@@ -10,6 +10,8 @@
 #include <unordered_map>
 
 #include "g_local.h"
+#include "etj_save.h"
+
 qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out, const char *file, int line)
 {
 	int i;
@@ -1084,11 +1086,10 @@ namespace ETJump{
 		G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
 	}
 	
-	std::unordered_map<std::string, int> allowedStrictValues {
-		{ "default", 0 },
-		{ "crouch", 1 << 0 },
-		{ "prone", 1 << 1 },
-		{ "move", 1 << 2 },
+	std::unordered_map<std::string, SaveSystem::SaveLoadRestrictions> allowedStrictValues {
+		{ "default", SaveSystem::SaveLoadRestrictions::Default },
+		{ "stance", SaveSystem::SaveLoadRestrictions::Stance },
+		{ "move", SaveSystem::SaveLoadRestrictions::Move },
 	};
  
 	static void initStrictSaveLoad()
@@ -1107,10 +1108,11 @@ namespace ETJump{
 			while (str >> token)
 			{
 				boost::algorithm::to_lower(token);
-				value |= allowedStrictValues[token]; // else 0
+				value |= static_cast<int>(allowedStrictValues[token]); // else 0
 			}
 		}
 		level.saveLoadRestrictions = value;
+		G_Printf("Save restrictions are %s.\n", value ? "enabled" : "disabled");
 	}
 }
 
