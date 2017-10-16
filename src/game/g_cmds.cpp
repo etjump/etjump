@@ -2600,7 +2600,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
-		CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator\n\"");
+		CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator.\n\"");
 		return;
 	}
 
@@ -2612,7 +2612,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	if (level.time - ent->client->lastVoteTime < 1000 * g_voteCooldown.integer)
 	{
-		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again\n\"",
+		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again.\"",
 			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000)));
 		return;
 	}
@@ -2950,6 +2950,7 @@ void Cmd_Vote_f(gentity_t *ent)
 				level.voteInfo.voteCanceled = qtrue;
 				level.voteInfo.voteNo       = level.numConnectedClients;
 				level.voteInfo.voteYes      = 0;
+				AP("cpm \"^7Vote canceled by voter.\n\"");
 				return;
 			}
 		}
