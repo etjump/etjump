@@ -3250,7 +3250,20 @@ void CheckVote(void)
 		resetVote();
 		return;
 	}
-	if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < 5000)
+
+	if (level.voteInfo.forcePass)
+	{
+		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
+		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
+		resetVote();
+		return;
+	}
+
+	auto minVoteDuration = vote_minVoteDuration.integer;
+	minVoteDuration = minVoteDuration > 29000 ? 29000 : minVoteDuration;
+	minVoteDuration = minVoteDuration < 1000 ? 1000 : minVoteDuration;
+	
+	if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < minVoteDuration)
 	{
 		return;
 	}
@@ -3258,10 +3271,6 @@ void CheckVote(void)
 	auto requiredPercentage = vote_percent.integer;
 	requiredPercentage = requiredPercentage > 99 ? 99 : requiredPercentage;
 	requiredPercentage = requiredPercentage < 1 ? 1 : requiredPercentage;
-
-	auto minVoteDuration = vote_minVoteDuration.integer;
-	minVoteDuration = minVoteDuration > 29000 ? 29000 : minVoteDuration;
-	minVoteDuration = minVoteDuration < 1000 ? 1000 : minVoteDuration;
 
 	auto numConnectedClients = level.numConnectedClients;
 

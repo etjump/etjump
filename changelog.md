@@ -71,6 +71,7 @@
 * added spawnflag __16__ `KNOCKBACK` to target_teleporter and trigger_teleport
   * applies knockback event for a short time after getting teleported
   * makes teleportation events smoother when destination is on ground level
+* fixed `vote_minVoteDuration` not working and votes always taking at least 5 seconds to pass
 
 
 # ETJump 2.2.0

@@ -1529,8 +1529,7 @@ bool Passvote(gentity_t *ent, Arguments argv)
 {
 	if (level.voteInfo.voteTime)
 	{
-		level.voteInfo.voteNo  = 0;
-		level.voteInfo.voteYes = level.numConnectedClients;
+		level.voteInfo.forcePass = qtrue;
 		ChatPrintAll("^3passvote:^7 vote has been passed.");
 	}
 	else
