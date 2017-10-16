@@ -3232,6 +3232,7 @@ int getNumPlayingClients()
 void resetVote()
 {
 	level.voteInfo.voteTime = 0;
+	level.voteInfo.forcePass = qfalse;
 	level.voteInfo.voteCanceled = qfalse;
 	trap_SetConfigstring(CS_VOTE_TIME, "");
 }
@@ -3245,15 +3246,14 @@ void CheckVote(void)
 {
 	if (level.voteInfo.voteCanceled)
 	{
-		AP(va("cpm \"^7Vote cancelled!\n\""));
-		G_Printf("Vote cancelled!\n\"");
+		G_LogPrintf("Vote cancelled: %s\n", level.voteInfo.voteString);
 		resetVote();
 		return;
 	}
 
 	if (level.voteInfo.forcePass)
 	{
-		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
+		G_LogPrintf("Vote passed: %s\n", level.voteInfo.voteString);
 		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
 		resetVote();
 		return;
