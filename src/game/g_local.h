@@ -1136,6 +1136,7 @@ typedef struct voteInfo_s
 	char voter_team;
 	int voter_cn;
 	qboolean voteCanceled;
+	qboolean forcePass;
 } voteInfo_t;
 
 typedef struct

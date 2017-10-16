@@ -408,9 +408,8 @@ bool Cancelvote(gentity_t *ent, Arguments argv)
 {
 	if (level.voteInfo.voteTime)
 	{
-		level.voteInfo.voteYes = 0;
-		level.voteInfo.voteNo  = level.numConnectedClients;
-		ChatPrintAll("^3cancelvote: ^7vote has been canceled");
+		level.voteInfo.voteCanceled = qtrue;
+		ChatPrintAll("^3cancelvote: ^7vote has been canceled.");
 	}
 	else
 	{
@@ -1529,8 +1528,7 @@ bool Passvote(gentity_t *ent, Arguments argv)
 {
 	if (level.voteInfo.voteTime)
 	{
-		level.voteInfo.voteNo  = 0;
-		level.voteInfo.voteYes = level.numConnectedClients;
+		level.voteInfo.forcePass = qtrue;
 		ChatPrintAll("^3passvote:^7 vote has been passed.");
 	}
 	else
