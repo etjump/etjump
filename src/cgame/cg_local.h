@@ -671,6 +671,8 @@ typedef struct weaponInfo_s
 	sfxHandle_t spindownSound;      //----(SA)	added // sound called if the above is running but player doesn't follow through and fire
 
 	sfxHandle_t switchSound;
+
+	char pickupModelPath[MAX_QPATH];
 } weaponInfo_t;
 
 

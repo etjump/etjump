@@ -7,6 +7,7 @@
 
 #include "cg_local.h"
 #include "../game/bg_classes.h"
+#include "boost/algorithm/string/erase.hpp"
 
 vec3_t ejectBrassCasingOrigin;
 
@@ -1449,6 +1450,7 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo)
 			}
 			else
 			{
+				strncpy(weaponInfo->pickupModelPath, filename, MAX_QPATH);
 				weaponInfo->weaponModel[W_PU_MODEL].model = trap_R_RegisterModel(filename);
 			}
 		}
@@ -1951,6 +1953,18 @@ void CG_RegisterWeapon(int weaponNum, qboolean force)
 	if (!CG_RegisterWeaponFromWeaponFile(va("weapons/%s", filename), weaponInfo))
 	{
 		CG_Printf(S_COLOR_RED "WARNING: failed to register media for weapon %i from %s\n", weaponNum, filename);
+	}
+
+	if (!weaponInfo->standModel)
+	{
+		if (weaponInfo->pickupModelPath[0] != '\0')
+		{
+			COM_StripExtension(weaponInfo->pickupModelPath, weaponInfo->pickupModelPath);
+			std::string path{ weaponInfo->pickupModelPath };
+			boost::erase_last(path, "_pickup");
+			path += "_stand.md3";
+			weaponInfo->standModel = trap_R_RegisterModel(path.c_str());
+		}
 	}
 }
 
