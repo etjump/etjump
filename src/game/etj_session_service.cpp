@@ -11,6 +11,7 @@
 #include "etj_printer.h"
 #include <boost/algorithm/string/replace.hpp>
 #include "etj_task.h"
+#include "etj_server_event_handler.h"
 
 std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands)
 {
@@ -64,12 +65,13 @@ const std::string ETJump::SessionService::INVALID_AUTH_ATTEMPT = "Invalid authen
 ETJump::SessionService::SessionService(
 	std::shared_ptr<UserService> userService, 
 	std::shared_ptr<SessionRepository> sessionRepository, 
-	std::shared_ptr<ETJump::Server::ClientCommandsHandler> clientCommandsHandler,
+	std::shared_ptr<Server::ClientCommandsHandler> clientCommandsHandler,
 	std::shared_ptr<LevelService> levelService,
+	std::shared_ptr<ServerEventHandler> serverEventHandler,
 	std::function<void(int clientNum, const char* reason, int timeout)> dropClient,
 	std::function<void(int clientNum, const char *text)> sendServerCommand
 )
-	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand), _clientCommandsHandler(clientCommandsHandler), _levelService(levelService)
+	: _userService(userService), _sessionRepository(sessionRepository), _log(Log("SessionService")), _dropClient(dropClient), _sendServerCommand(sendServerCommand), _clientCommandsHandler(clientCommandsHandler), _levelService(levelService), _serverEventHandler(serverEventHandler)
 {
 	for (int i = 0, len = _users.size(); i < len; ++i)
 	{
@@ -94,6 +96,11 @@ ETJump::SessionService::SessionService(
 		}
 
 		this->authenticate(clientNum, entity->client->pers.netname, ip, args);
+	});
+
+	_serverEventHandler->subscribeToRunFrame([&](int levelTime)
+	{
+		runFrame();
 	});
 }
 

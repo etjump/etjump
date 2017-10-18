@@ -270,7 +270,13 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* leastplayed
 	*/
-	_adminCommandsHandler->subscribe('a', createCommandDefinition("leastplayed", "leastplayed", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	static const auto mapCount = createOptionDefinition("count", "How many maps to display", CommandParser::OptionDefinition::Type::Integer, false);
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("leastplayed", "leastplayed", {
+		mapCount
+	}, {mapCount}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		auto count = getOptionalInteger(command, "count", 10);
+	});
 
 	/**
 	* levelinfo

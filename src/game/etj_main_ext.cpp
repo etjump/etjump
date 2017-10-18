@@ -7,7 +7,6 @@
 #include "etj_motd.h"
 #include "etj_timerun.h"
 #include "etj_map_statistics.h"
-#include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_session_service.h"
 #include "utilities.hpp"
@@ -26,18 +25,10 @@ void OnGameInit()
 	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
 	game.motd           = std::make_shared<Motd>();
 	game.timerun        = std::make_shared<Timerun>();
-	game.tokens         = std::make_shared<Tokens>();
 	game.mapStatistics->initialize(std::string(g_mapDatabase.string), level.rawmapname);
 	game.customMapVotes->Load();
 	game.motd->Initialize();
 	game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
-
-	if (g_tokensMode.integer)
-	{
-		// Utilities::WriteFile handles the correct path (etjump/...)
-		auto path = std::string(g_tokensPath.string) + "/" + std::string(level.rawmapname) + ".json";
-		game.tokens->loadTokens(path);
-	}
 }
 
 void OnGameShutdown()
@@ -47,17 +38,12 @@ void OnGameShutdown()
 	{
 		game.mapStatistics->saveChanges();
 	}
-	if (game.tokens)
-	{
-		game.tokens->reset();
-	}
 
 	game.saves = nullptr;
 	game.customMapVotes = nullptr;
 	game.motd = nullptr;
 	game.timerun = nullptr;
 	game.mapStatistics = nullptr;
-	game.tokens = nullptr;
 }
 
 /*

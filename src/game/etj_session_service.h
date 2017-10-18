@@ -11,6 +11,8 @@
 
 namespace ETJump
 {
+	class ServerEventHandler;
+
 	namespace Server {
 		class ClientCommandsHandler;
 	}
@@ -48,7 +50,15 @@ namespace ETJump
 			std::bitset<MAX_PERMISSIONS> permissions;
 		};
 
-		explicit SessionService(std::shared_ptr<UserService> userService, std::shared_ptr<SessionRepository> sessionRepository, std::shared_ptr<ETJump::Server::ClientCommandsHandler> clientCommandsHandler, std::shared_ptr<LevelService>, std::function<void(int clientNum, const char* reason, int timeout)> dropClient, std::function<void(int clientNum, const char *text)> sendServerCommand);
+		explicit SessionService(
+			std::shared_ptr<UserService> userService, 
+			std::shared_ptr<SessionRepository> sessionRepository, 
+			std::shared_ptr<Server::ClientCommandsHandler> clientCommandsHandler, 
+			std::shared_ptr<LevelService>, 
+			std::shared_ptr<ServerEventHandler> serverEventHandler, 
+			std::function<void(int clientNum, const char* reason, int timeout)> dropClient, 
+			std::function<void(int clientNum, const char *text)> sendServerCommand
+		);
 		~SessionService();
 
 		void connect(int clientNum, bool firstTime);
@@ -103,6 +113,7 @@ namespace ETJump
 		std::vector<std::unique_ptr<AbstractTask>> _tasks;
 		time_t _nextOnceASecondCheck;
 		std::vector<std::function<bool()>> _onceASecondTasks;
+		std::shared_ptr<ServerEventHandler> _serverEventHandler;
 	};
 }
 

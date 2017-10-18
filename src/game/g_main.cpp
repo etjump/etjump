@@ -21,6 +21,8 @@
 #include <boost/algorithm/string.hpp>
 #include "etj_admin_commands_registrar.h"
 #include "etj_utilities.h"
+#include "etj_map_statistics.h"
+#include "etj_server_event_handler.h"
 
 level_locals_t level;
 
@@ -42,6 +44,7 @@ typedef struct
 
 namespace ETJump
 {
+	std::shared_ptr<ServerEventHandler> serverEventHandler;
 	std::shared_ptr<DeathrunSystem> deathrunSystem;
 	std::shared_ptr<UserRepository> userRepository;
 	std::shared_ptr<UserService> userService;
@@ -51,6 +54,7 @@ namespace ETJump
 	std::shared_ptr<LevelService> levelService;
 	std::shared_ptr<AdminCommandsHandler> adminCommandsHandler;
 	std::shared_ptr<AdminCommandsRegistrar> adminCommandsRegistrar;
+	std::shared_ptr<MapStatistics> mapStatistics;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +63,7 @@ namespace ETJump
 
 static void initializeETJump(int levelTime, int randomSeed, int restart)
 {
+	ETJump::serverEventHandler = std::make_shared<ETJump::ServerEventHandler>();
 	const auto defaultDb = "etjump.db";
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
 	ETJump::userRepository = std::make_shared<ETJump::UserRepository>(Utilities::getPath(ETJump::getValue(g_database.string, defaultDb)), 5000);
@@ -75,7 +80,7 @@ static void initializeETJump(int levelTime, int randomSeed, int restart)
 	ETJump::clientCommandsHandler = std::make_shared<ETJump::Server::ClientCommandsHandler>();
 	ETJump::levelService = std::make_shared<ETJump::LevelService>(ETJump::getValue(g_levelConfig.string, "levels.cfg"));
 	ETJump::levelService->readConfig();
-	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, ETJump::levelService, trap_DropClient, trap_SendServerCommand);
+	ETJump::sessionService = std::make_shared<ETJump::SessionService>(ETJump::userService, ETJump::sessionRepository, ETJump::clientCommandsHandler, ETJump::levelService, ETJump::serverEventHandler, trap_DropClient, trap_SendServerCommand);
 	ETJump::sessionService->readSession(levelTime);
 	ETJump::adminCommandsHandler = std::make_shared<ETJump::AdminCommandsHandler>(ETJump::sessionService);
 	ETJump::adminCommandsRegistrar = std::make_shared<ETJump::AdminCommandsRegistrar>(ETJump::adminCommandsHandler, ETJump::levelService, ETJump::sessionService, ETJump::userService);
@@ -90,6 +95,7 @@ static void shutdownETJump()
 {
 	ETJump::sessionService->writeSession();
 
+	ETJump::serverEventHandler = nullptr;
 	ETJump::deathrunSystem = nullptr;
 	ETJump::userRepository = nullptr;
 	ETJump::userService = nullptr;
@@ -98,6 +104,7 @@ static void shutdownETJump()
 	ETJump::sessionService = nullptr;
 	ETJump::levelService = nullptr;
 	ETJump::adminCommandsHandler = nullptr;
+	ETJump::mapStatistics = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,7 +313,6 @@ vmCvar_t g_timerunsDatabase;
 vmCvar_t g_chatOptions;
 
 // tokens
-vmCvar_t g_tokensMode;
 vmCvar_t g_tokensPath;
 // end of tokens
 
@@ -550,11 +556,6 @@ cvarTable_t gameCvarTable[] =
 	// End of timeruns support
 
 	{ &g_chatOptions,               "g_chatOptions",               "1",                                                      CVAR_ARCHIVE },
-
-	// tokens
-	{ &g_tokensMode,                "g_tokensMode",                "1",                                                      CVAR_ARCHIVE | CVAR_LATCH },
-	{ &g_tokensPath,                "g_tokensPath",                "tokens",                                                 CVAR_ARCHIVE | CVAR_LATCH },
-	// end of tokens
 
 	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
 
@@ -2135,6 +2136,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 	OnGameInit();
 	ETJump_InitGame(levelTime, randomSeed, restart);
+	//ETJump::serverEventHandler->initGame(levelTime, randomSeed, restart);
 }
 
 
@@ -2186,6 +2188,7 @@ void G_ShutdownGame(int restart)
 
 	// write all the client session data so we can get it back
 	G_WriteSessionData(restart ? qtrue : qfalse);
+	ETJump::serverEventHandler->shutdownGame(restart);
 }
 
 
@@ -4090,6 +4093,7 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 #endif // SAVEGAME_SUPPORT
 	ETJump_RunFrame(levelTime);
 
+	ETJump::serverEventHandler->runFrame(levelTime);
 	ETJump::sessionService->runFrame();
 }
 
