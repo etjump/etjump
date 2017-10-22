@@ -521,15 +521,119 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* setlevel
 	*/
-	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	auto optionalLevelOption = createOptionDefinition("level", "level to set the player to", CommandParser::OptionDefinition::Type::Integer, false);
+	auto optionalIdOption = createOptionDefinition("id", "user id", CommandParser::OptionDefinition::Type::Integer, false);
+	_adminCommandsHandler->subscribe('s', createCommandDefinition("setlevel", "setlevel", { _optionalPlayerOption, optionalLevelOption, optionalIdOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
 	{
+		int id = 0;
+		bool idSpecified = false;
+		std::string player;
+		int level = 0;
+		bool levelSpecified = false;
+		if (hasOption(command, "id"))
+		{
+			id = command.options.at("id").integer;
+			idSpecified = true;
+		} 
+		if (hasOption(command, "player"))
+		{
+			player = command.options.at("player").text;
+		} 
+		if (hasOption(command, "level"))
+		{
+			level = command.options.at("level").integer;
+			levelSpecified = true;
+		}
+		if ((!idSpecified && player.length() == 0) || !levelSpecified)
+		{
+			// try to parse the command as 
+			// !setlevel <player> <level>
+			if (command.extraArgs.size() != 2)
+			{
+				printCommandChatInfoMessage(clientNum, commandText, "!setlevel <player> <level>");
+				return;
+			}
 
+			player = command.extraArgs[0];
+			try
+			{
+				level = std::stoi(command.extraArgs[1]);
+			} catch (const std::out_of_range&)
+			{
+				printCommandChatInfoMessage(clientNum, commandText, 
+					stringFormat("%s is out of range. Allowed level range is %d-%d", 
+						command.extraArgs[1], 
+						std::numeric_limits<int>::min(), 
+						std::numeric_limits<int>::max()));
+				return;
+			} catch (const std::invalid_argument&)
+			{
+				printCommandChatInfoMessage(clientNum, commandText,
+					stringFormat("%s is not a number", command.extraArgs[1]));
+				return;
+			}
+		}
+
+		auto targets = _sessionService->findUsersByName(player);
+		if (targets.size() == 0)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+			return;
+		}
+		if (targets.size() > 1)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
+			return;
+		}
+		if (!_sessionService->isCallerLevelEqualOrHigher(clientNum, level))
+		{
+			printCommandChatInfoMessage(clientNum, commandText, "you're not allowed to set level to a higher level than your own level.");
+			return;
+		}
+		if (_levelService->get(level) == nullptr)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, stringFormat("level %d does not exist", level));
+			return;
+		}
+		if (!idSpecified)
+		{
+			_sessionService->setLevelByClientNum(clientNum, targets[0], level);
+		} else
+		{
+			_sessionService->setLevelById(clientNum, id, level);
+		}
 	});
 
 	/**
 	* spectate
 	*/
-	_adminCommandsHandler->subscribe('a', createCommandDefinition("spectate", "spectate", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('a', createCommandDefinition("spectate", "spectate", { _optionalPlayerOption }, {_optionalPlayerOption}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {
+		if (!isPlayer(clientNum))
+		{
+			return;
+		}
+
+		if (command.options.find("player") == end(command.options))
+		{
+			if ((g_entities + clientNum)->client->sess.sessionTeam != TEAM_SPECTATOR)
+			{
+				SetTeam((g_entities + clientNum), "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
+			}
+			return;
+		}
+
+		auto targets = _sessionService->findUsersByName(command.options.find("player")->second.text);
+		if (targets.size() == 0)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, Error::NoConnectedClientsError);
+			return;
+		}
+		if (targets.size() > 1)
+		{
+			printCommandChatInfoMessage(clientNum, commandText, multipleMatchingNamesError(_sessionService->getNames(targets)));
+			return;
+		}
+	});
 
 	/**
 	* unban
@@ -571,6 +675,11 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	* userinfo
 	*/
 	_adminCommandsHandler->subscribe('A', createCommandDefinition("userinfo", "userinfo", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+}
+
+bool ETJump::AdminCommandsRegistrar::isPlayer(int clientNum)
+{
+	return clientNum >= 0 && clientNum < Constants::Common::MAX_CONNECTED_CLIENTS && (g_entities + clientNum)->client;
 }
 
 std::pair<std::string, ETJump::CommandParser::OptionDefinition> ETJump::AdminCommandsRegistrar::createOptionDefinition(const std::string& name, const std::string& description, CommandParser::OptionDefinition::Type type, bool required)
@@ -645,4 +754,9 @@ std::string ETJump::AdminCommandsRegistrar::multipleMatchingNamesError(const std
 	}
 
 	return buffer;
+}
+
+bool ETJump::AdminCommandsRegistrar::hasOption(const CommandParser::Command& command, const std::string& option)
+{
+	return command.options.find(option) != end(command.options);
 }

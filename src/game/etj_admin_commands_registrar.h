@@ -27,6 +27,8 @@ namespace ETJump
 		void registerAdminCommands();
 
 	private:
+		bool isPlayer(int clientNum);
+
 		std::shared_ptr<AdminCommandsHandler> _adminCommandsHandler;
 		std::shared_ptr<LevelService> _levelService;
 		std::shared_ptr<SessionService> _sessionService;
@@ -52,5 +54,6 @@ namespace ETJump
 		static long long getOptionalDuration(const ETJump::CommandParser::Command& command, const std::string& key, long long defaultValue = 0);
 		static void printCommandChatInfoMessage(int clientNum, const std::string& command, const std::string& message);
 		static std::string multipleMatchingNamesError(const std::vector<std::string>& names);
+		static bool hasOption(const CommandParser::Command& command, const std::string& option);
 	};
 }

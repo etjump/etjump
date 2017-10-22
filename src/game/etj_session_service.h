@@ -80,11 +80,16 @@ namespace ETJump
 		 */
 		void setLevelIfHasLevel(int clientNum, int level, int newLevel);
 		void updateUser(int updaterClientNum, int userId, const MutableUserFields& changes, int changedFields);
+		bool isConsole(int clientNum);
+		bool isCallerLevelEqualOrHigher(int clientNum, int targetLevel);
+		bool isCallerLevelHigher(int clientNum, int targetLevel);
 		bool isEqualOrHigherLevel(int clientNum, int target);
 		bool isHigherLevel(int clientNum, int target);
 		void mute(int target, long long duration);
 		bool unmute(int target);
 		void updateUserInfoValue(int target, const std::string& key, const std::string& value);
+		void setLevelByClientNum(int clientNum, int target, int level);
+		void setLevelById(int clientNum, int id, int level);
 		static std::string getName(int clientNum);
 		static std::vector<std::string> getNames(const std::vector<int>& clientNums);
 		std::vector<int> findUsersByName(const std::string& name);

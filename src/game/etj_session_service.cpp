@@ -529,13 +529,44 @@ void ETJump::SessionService::updateUser(int updaterClientNum, int userId, const 
 	_tasks.push_back(std::unique_ptr<Task<int>>(task));
 }
 
+bool ETJump::SessionService::isConsole(int clientNum)
+{
+	return clientNum == Constants::Common::CONSOLE_CLIENT_NUM;
+}
+
+bool ETJump::SessionService::isCallerLevelEqualOrHigher(int clientNum, int targetLevel)
+{
+	if (isConsole(clientNum))
+	{
+		return true;
+	}
+	return _users[clientNum].level >= targetLevel;
+}
+
+bool ETJump::SessionService::isCallerLevelHigher(int clientNum, int targetLevel)
+{
+	if (isConsole(clientNum))
+	{
+		return true;
+	}
+	return _users[clientNum].level > targetLevel;
+}
+
 bool ETJump::SessionService::isEqualOrHigherLevel(int clientNum, int target)
 {
+	if (isConsole(clientNum))
+	{
+		return true;
+	}
 	return _users[clientNum].level >= _users[target].level;
 }
 
 bool ETJump::SessionService::isHigherLevel(int clientNum, int target)
 {
+	if (isConsole(clientNum))
+	{
+		return true;
+	}
 	return _users[clientNum].level > _users[target].level;
 }
 
@@ -577,6 +608,45 @@ void ETJump::SessionService::updateUserInfoValue(int target, const std::string& 
 	trap_GetUserinfo(target, userinfo, sizeof(userinfo));
 	Info_SetValueForKey(userinfo, key.c_str(), value.c_str());
 	ClientUserinfoChanged(target);
+}
+
+void ETJump::SessionService::setLevelByClientNum(int clientNum, int target, int level)
+{
+	setLevelById(clientNum, _users[target].id, level);
+}
+
+void ETJump::SessionService::setLevelById(int clientNum, int id, int level)
+{
+	std::string playerName = "";
+	auto levelPtr = _levelService->get(level);
+	std::string levelName = levelPtr ? levelPtr->name : "<unnamed>";
+	for (auto i = 0; i < Constants::Common::MAX_CONNECTED_CLIENTS; ++i)
+	{
+		auto &u = _users[i];
+		if (u.id != id)
+		{
+			continue;
+		}
+
+		u.level = level;
+		_cachedUserData[i].permissions = parsePermissions(_levelService->get(u.level)->commands, u.commands);
+		playerName = (g_entities + i)->client->pers.netname;
+		break;
+	}
+
+	MutableUserFields changes{};
+	changes.level = level;	
+	auto task = new Task<int>(_userService->updateUser(id, changes, static_cast<int>(UserFields::Level)), [clientNum, id, level, playerName, levelName](int _)
+	{
+		if (playerName.length())
+		{
+			Printer::sendChatMessage(clientNum, stringFormat("^3setlevel: ^7%s^7 is now a level %d user. (%s^7)", playerName, level, levelName));
+		} else
+		{
+			Printer::sendChatMessage(clientNum, stringFormat("^3setlevel: ^7%d is now a level %d user. (%s^7)", id, level, levelName));
+		}
+	});
+	_tasks.push_back(std::unique_ptr<Task<int>>(task));
 }
 
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)

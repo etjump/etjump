@@ -7,6 +7,7 @@ namespace ETJump
 	{
 		namespace Common
 		{
+			const int CONSOLE_CLIENT_NUM = -1;
 			const int MAX_CONNECTED_CLIENTS = 64;
 		}
 

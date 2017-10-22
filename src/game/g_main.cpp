@@ -2177,7 +2177,6 @@ void G_ShutdownGame(int restart)
 
 	G_DebugCloseSkillLog();
 
-	shutdownETJump();
 	if (level.logFile)
 	{
 		G_LogPrintf("ShutdownGame:\n");
@@ -2189,6 +2188,7 @@ void G_ShutdownGame(int restart)
 	// write all the client session data so we can get it back
 	G_WriteSessionData(restart ? qtrue : qfalse);
 	ETJump::serverEventHandler->shutdownGame(restart);
+	shutdownETJump();
 }
 
 
