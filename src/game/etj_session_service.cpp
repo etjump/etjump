@@ -12,6 +12,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include "etj_task.h"
 #include "etj_server_event_handler.h"
+#include "etj_result_set_formatter.h"
+#include "etj_messages.h"
 
 std::bitset<ETJump::SessionService::CachedUserData::MAX_PERMISSIONS> parsePermissions(const std::string& levelCommands, const std::string& userCommands)
 {
@@ -647,6 +649,44 @@ void ETJump::SessionService::setLevelById(int clientNum, int id, int level)
 		}
 	});
 	_tasks.push_back(std::unique_ptr<Task<int>>(task));
+}
+
+void ETJump::SessionService::addAlias(int clientNum, const std::string& alias)
+{
+	if (std::find(begin(_users[clientNum].aliases), end(_users[clientNum].aliases), alias) == end(_users[clientNum].aliases))
+	{
+		_users[clientNum].aliases.push_back(alias);
+		_userService->addAlias(_users[clientNum].id, alias);
+	}
+}
+
+void ETJump::SessionService::listUsersByName(int clientNum, const std::string& name)
+{
+	auto task = new Task<std::vector<User>>(_userService->findUsersByName(name), [clientNum](std::vector<User> users)
+	{
+		Utilities::ResultSetFormatter rsf;
+		std::vector<Utilities::ResultSetFormatter::Row> rows;
+		int count = 0;
+		for (const auto & u : users)
+		{
+			Utilities::ResultSetFormatter::Row row;
+			row["User"] = stringFormat("^7%s ^7(%d)", u.name, u.id);
+			for (const auto & a : u.aliases)
+			{
+				row["Alias"] = a;
+				rows.push_back(row);
+				++count;
+			}
+		}
+		Printer::sendChatMessage(clientNum, Info::CheckConsoleForInfo);
+		const int maxDisplayedRows = 100;
+		Printer::sendConsoleMessage(clientNum, rsf.toString({ "User", "Alias" }, rows, std::min(count, maxDisplayedRows), 0));
+		if (count > maxDisplayedRows)
+		{
+			Printer::sendConsoleMessage(clientNum, stringFormat("%d more records...", count - maxDisplayedRows));
+		}
+	});
+	_tasks.push_back(std::unique_ptr<Task<std::vector<User>>>(task));
 }
 
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)

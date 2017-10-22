@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <numeric>
 #include <boost/algorithm/string/case_conv.hpp>
+#include "etj_level_service.h"
 
 Utilities::ResultSetFormatter::ResultSetFormatter()
 {
@@ -18,9 +19,13 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 		return "";
 	}
 	std::map<std::string, unsigned> maxColumnWidths;
+	// need a separate header widths map since color coding
+	// will cause the header to be misplaced ("missing characters" => width is smaller)
+	std::map<std::string, unsigned> headerWidths;
 	for (const auto & header : headers)
 	{
 		maxColumnWidths[header] = header.length();
+		headerWidths[header] = header.length();
 	}
 
 	const unsigned maxChars = 80;
@@ -38,9 +43,15 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 				{
 					maxColumnWidths[header] = maxChars;
 				}
+				headerWidths[header] = std::max(std::max(headerWidths[header], header.length()), ETJump::sanitize(iter->second).length());
+				if (headerWidths[header] > maxChars)
+				{
+					headerWidths[header] = maxChars;
+				}
 			} else
 			{
 				maxColumnWidths[header] = std::max(maxColumnWidths[header], std::to_string(rows.size()).size());
+				headerWidths[header] = std::max(headerWidths[header], std::to_string(rows.size()).size());
 			}
 		}
 	}
@@ -48,13 +59,13 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 	std::string buffer;
 	for (const auto & header : headers)
 	{
-		buffer += header + std::string(maxColumnWidths[header] - header.length(), ' ') + "  ";
+		buffer += header + std::string(headerWidths[header] - header.length(), ' ') + "  ";
 	}
 	buffer += "\n";
 
 	for (const auto & header : headers)
 	{
-		buffer += std::string(header.length(), '-') + std::string(maxColumnWidths[header] - header.length() + 2, ' ');
+		buffer += std::string(header.length(), '-') + std::string(headerWidths[header] - header.length() + 2, ' ');
 	}
 	buffer += "\n";
 

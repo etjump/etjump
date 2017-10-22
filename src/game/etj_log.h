@@ -24,7 +24,7 @@ namespace ETJump
 		void debug(const std::string& text) const;
 		void debugLn(const std::string& text) const;
 		template<typename T, typename... Targs>
-		void debugLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		void debugLn(const std::string& fmt, const T& value, const Targs&... Fargs) const
 		{
 			debugLn(stringFormat(fmt, value, Fargs...));
 		}
@@ -32,7 +32,7 @@ namespace ETJump
 		void info(const std::string& text) const;
 		void infoLn(const std::string& text) const;
 		template<typename T, typename... Targs>
-		void infoLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		void infoLn(const std::string& fmt, const T& value, const Targs&... Fargs) const
 		{
 			infoLn(stringFormat(fmt, value, Fargs...));
 		}
@@ -41,7 +41,7 @@ namespace ETJump
 		void warn(const std::string& text) const;
 		void warnLn(const std::string& text) const;
 		template<typename T, typename... Targs>
-		void warnLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		void warnLn(const std::string& fmt, const T& value, const Targs&... Fargs) const
 		{
 			warnLn(stringFormat(fmt, value, Fargs...));
 		}
@@ -49,7 +49,7 @@ namespace ETJump
 		void error(const std::string& text) const;
 		void errorLn(const std::string& text) const;
 		template<typename T, typename... Targs>
-		void errorLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		void errorLn(const std::string& fmt, const T& value, const Targs&... Fargs) const
 		{
 			errorLn(stringFormat(fmt, value, Fargs...));
 		}
@@ -57,7 +57,7 @@ namespace ETJump
 		void fatal(const std::string& text) const;
 		void fatalLn(const std::string& text) const;
 		template<typename T, typename... Targs>
-		void fatalLn(const std::string& fmt, const T& value, const Targs&... Fargs)
+		void fatalLn(const std::string& fmt, const T& value, const Targs&... Fargs) const
 		{
 			fatalLn(stringFormat(fmt, value, Fargs...));
 		}

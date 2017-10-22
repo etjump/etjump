@@ -115,8 +115,7 @@ void ETJump::UserRepository::UserRepository::insert(const std::string& guid, con
 		"); "
 	);
 
-	// TODO: remove color codes
-	auto cleanName = name;
+	auto cleanName = ETJump::sanitize(name);
 
 	insertAlias.bind(1, id);
 	insertAlias.bind(2, name);
@@ -257,7 +256,7 @@ void ETJump::UserRepository::addHardwareId(int64_t id, const std::string& hardwa
 		insertHardwareId.exec();
 	} catch (const SQLite::Exception& e)
 	{
-		_log.errorLn("adding a hardware id " + hardwareId + " for user " + std::to_string(id) + " failed: (" + std::to_string(e.getErrorCode()) + ") " + e.getErrorStr());
+		_log.errorLn("adding a hardware id %s for user %d failed: (%d) %s", hardwareId, id, e.getErrorCode(), e.getErrorStr());
 	}
 }
 
@@ -277,11 +276,11 @@ void ETJump::UserRepository::addAlias(int64_t id, const std::string& alias) cons
 
 		insertAlias.bind(1, id);
 		insertAlias.bind(2, alias);
-		insertAlias.bind(3, alias);
+		insertAlias.bind(3, ETJump::sanitize(alias));
 		insertAlias.exec();
 	} catch (const SQLite::Exception& e)
 	{
-		_log.errorLn("adding an alias " + alias + " for user " + std::to_string(id) + " failed: (" + std::to_string(e.getErrorCode()) + ") " + e.getErrorStr());
+		_log.errorLn("adding an alias %s for user %d failed: (%d) %s", alias, id, e.getErrorCode(), e.getErrorStr());
 	}
 	
 }
@@ -419,6 +418,98 @@ int ETJump::UserRepository::setLevelIfHasLevel(int level, int newLevel)
 		_log.errorLn("setting all users with level " + std::to_string(level) + " to level " + std::to_string(newLevel) + " failed: (" + std::to_string(e.getErrorCode()) + ") " + e.getErrorStr());
 	}
 	return 0;
+}
+
+std::vector<ETJump::User> ETJump::UserRepository::findByName(const std::string& name)
+{
+	std::vector<User> users;
+	if (name.length() == 0)
+	{
+		return users;
+	}
+	try
+	{
+		SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
+
+		SQLite::Statement queryStmt(db,
+			"SELECT "
+			"  alias, "
+			"  id, "
+			"  guid, "
+			"  level, "
+			"  users.created, "
+			"  modified, "
+			"  lastSeen, "
+			"  name, "
+			"  title, "
+			"  commands, "
+			"  greeting "
+			"FROM aliases "
+			"  INNER JOIN users ON aliases.userId = users.id "
+			"WHERE cleanAlias LIKE ? "
+			"ORDER BY id ASC, alias ASC; "
+		);
+
+		std::string withMatchSymbols = name;
+		if (name[0] != '%')
+		{
+			withMatchSymbols = "%" + withMatchSymbols;
+		}
+		if (name[name.length() - 1] != '%')
+		{
+			withMatchSymbols = withMatchSymbols + "%";
+		}
+
+		queryStmt.bind(1, withMatchSymbols);
+
+		auto current = User();
+		bool propertiesSet = false;
+		while (queryStmt.executeStep())
+		{
+			unsigned id = queryStmt.getColumn(1);
+			if (!propertiesSet || current.id != id)
+			{
+				if (propertiesSet)
+				{
+					users.push_back(current);
+					current = User();
+				}
+				const char *guid = queryStmt.getColumn(2);
+				int level = queryStmt.getColumn(3);
+				std::time_t created = queryStmt.getColumn(4);
+				std::time_t modified = queryStmt.getColumn(5);
+				std::time_t lastSeen = queryStmt.getColumn(6);
+				const char *name = queryStmt.getColumn(7);
+				const char *title = queryStmt.getColumn(8);
+				const char *commands = queryStmt.getColumn(9);
+				const char *greeting = queryStmt.getColumn(10);
+
+				current.id = id;
+				current.guid = guid;
+				current.level = level;
+				current.created = created;
+				current.modified = modified;
+				current.lastSeen = lastSeen;
+				current.name = name;
+				current.title = title ? title : "";
+				current.commands = commands ? commands : "";
+				current.greeting = greeting ? greeting : "";
+				propertiesSet = true;
+			}
+
+			const char *alias = queryStmt.getColumn(0);
+			current.aliases.push_back(alias);
+		}
+		if (current.id != User::NO_USER_ID && (users.size() == 0 || users.rbegin()->id != current.id))
+		{
+			users.push_back(current);
+		}
+	} catch (const SQLite::Exception& e)
+	{
+		_log.errorLn("finding users with name %s failed: (%d) %s", name, e.getErrorCode(), e.getErrorStr());
+	}
+	
+	return users;
 }
 
 void ETJump::UserRepository::addIpAddress(int64_t id, const std::string& ipAddress)

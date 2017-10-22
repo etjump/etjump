@@ -163,7 +163,12 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* finduser
 	*/
-	_adminCommandsHandler->subscribe('A', createCommandDefinition("finduser", "finduser", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("finduser", "finduser", {
+		_requiredPlayerOption
+	}, { _requiredPlayerOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		_sessionService->listUsersByName(clientNum, command.options.at("player").text);
+	});
 
 	/**
 	* finger

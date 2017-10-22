@@ -36,6 +36,8 @@ namespace ETJump
 		// thread safe
 		// returns the count of updated users
 		int setLevelIfHasLevel(int level, int newLevel);
+		// thread safe
+		std::vector<User> findByName(const std::string& name);
 	private:
 		std::string _databaseFile;
 		int _timeout;

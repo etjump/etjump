@@ -1596,6 +1596,7 @@ void ClientUserinfoChanged(int clientNum)
 			                       va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"",
 			                          oldname, client->pers.netname));
 
+			ETJump::sessionService->addAlias(clientNum, client->pers.netname);
 			G_NameChanged(ent);
 
 		}
