@@ -1,6 +1,6 @@
 # ETJump 2.3.0
 
-* hud/ui clean up: replaced blurry charset with sharp font
+* replaced hud/ui low resolution bitmap charset with hq font
 * fixed `etj_noActivateLean` not being persistent on respawn causing incorrect behaviour
 * added `etj_CGazColor1/2` cvars to set custom colors for `etj_drawCGAZ` __2__
 * added `freecam` and `noclip` support for demo playback (compatible with Camtrace3D)
@@ -12,13 +12,13 @@
   - `noise <sound file>` sets sound file to play when activated
   - `volume <0-255>` controls sound volume
 * fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crashed the game anymore 
-* fixed `target_speaker` spawnflag __8__ (ACTIVATOR) didn't want to play sound to the activator
+* fixed `target_speaker` spawnflag **8** (ACTIVATOR) didn't play sound to the activator
 * fixed setting `com_maxfps` in menu
 * added `etj_viewPlayerPortals` __2__ as an option to menu
 * added `etj_drawKeys` __2__ to show DeFRaG style keys
 * added `etj_OBX/Y` to move OB detector
-* added worldspawn key `nojumpdelay` to control no jump delay behavior on the map  
-  *note: use surfaceparm `SURF_MONSLICK_N` to enable/disable jumps delays*
+* added worldspawn key `nojumpdelay` to control no jump delay behavior on the map
+  *note: use `surfaceparm SURF_MONSLICK_N` to enable/disable jump delay*
 * added no jump delay surface detector + control cvars:
   * `etj_drawNoJumpDelay`
   * `etj_noJumpDelayX`
@@ -34,11 +34,7 @@
 * fixed no jump sounds while jumping on slopes
 * fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
 * added `incrementVar` command, works almost like `cycle` but also support floats
-* added worldspawn `strictsaveload` key to control save load behavior:
-  * strictsaveload 0 = regular save/load restrictions (default)
-  * strictsaveload 1|crouch = can't save/load when crouched
-  * strictsaveload 2|prone = can't save/load when prone
-  * strictsaveload 4|move = can't save when moving
+* added worldspawn `strictsaveload` key to control save load behavior
 * added command `setoffset x y z`: offsets player's position by given vector if noclip is available
 * reworked OB Watcher:
   * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`
