@@ -1114,6 +1114,19 @@ namespace ETJump{
 		level.saveLoadRestrictions = value;
 		G_Printf("Save restrictions are %s.\n", value ? "enabled" : "disabled");
 	}
+
+	static void initNoFallDamage()
+	{
+		auto value = 0;
+		G_SpawnInt("nofalldamage", "0", &value);
+		level.noFallDamage = value > 0;
+		level.noFallDamage
+			? shared.integer |= BG_LEVEL_NO_FALLDAMAGE
+			: shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+
+		trap_Cvar_Set("shared", va("%d", shared.integer));
+		G_Printf("No fall damage %s.\n", level.noFallDamage ? "enabled" : "disabled");
+	}
 }
 
 
@@ -1293,6 +1306,7 @@ void SP_worldspawn(void)
 	ETJump::initNoOverbounce();
 	ETJump::initNoJumpDelay();
 	ETJump::initStrictSaveLoad();
+	ETJump::initNoFallDamage();
 
 	level.mapcoordsValid = qfalse;
 	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&    // top left

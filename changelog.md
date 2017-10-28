@@ -69,6 +69,9 @@
   * makes teleportation events smoother when destination is on ground level
 * fixed `vote_minVoteDuration` not working and votes always taking at least 5 seconds to pass
 * added stand models for 100% accurate rifles, spawnflag __2__ now works on them
+* added `nofalldamage` worldspawn key to toggle functionality of cushion
+  * `nofalldamage` __0__ = fall damage enabled on all surfaces except on `surfaceparm nodamage` (default)
+  * `nofalldamage` __1__ = fall damage disabled on all surfaces except on `surfaceparm nodamage`
 
 
 # ETJump 2.2.0
