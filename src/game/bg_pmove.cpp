@@ -1907,6 +1907,73 @@ static int PM_FootstepForSurface(void)
 	return BG_FootstepForSurface(pml.groundTrace.surfaceFlags);
 }
 
+
+/*
+=============
+PM_CheckFallDamage
+
+Checks landing speed and applies fall damage + stepsounds
+=============
+*/
+static void PM_CheckFallDamage(const float delta)
+{
+	// create a local entity event to play the sound
+	if (pm->debugLevel)
+	{
+		Com_Printf("delta: %5.2f\n", delta);
+	}
+
+	if (delta > 77)
+	{
+		PM_AddEventExt(EV_FALL_NDIE, PM_FootstepForSurface());
+	}
+	else if (delta > 67)
+	{
+		PM_AddEventExt(EV_FALL_DMG_50, PM_FootstepForSurface());
+	}
+	else if (delta > 58)
+	{
+		// this is a pain grunt, so don't play it if dead
+		if (pm->ps->stats[STAT_HEALTH] > 0)
+		{
+			PM_AddEventExt(EV_FALL_DMG_25, PM_FootstepForSurface());
+		}
+	}
+	else if (delta > 48)
+	{
+		// this is a pain grunt, so don't play it if dead
+		if (pm->ps->stats[STAT_HEALTH] > 0)
+		{
+			PM_AddEventExt(EV_FALL_DMG_15, PM_FootstepForSurface());
+		}
+	}
+	else if (delta > 38.75)
+	{
+		// this is a pain grunt, so don't play it if dead
+		if (pm->ps->stats[STAT_HEALTH] > 0)
+		{
+			PM_AddEventExt(EV_FALL_DMG_10, PM_FootstepForSurface());
+		}
+	}
+	else if (delta > 7)
+	{
+		PM_AddEventExt(EV_FALL_SHORT, PM_FootstepForSurface());
+	}
+	// ETJump uphill jump sounds
+	else if (delta > 0)
+	{
+		PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+	}
+
+	// rain - when falling damage happens, velocity is cleared, but
+	// this needs to happen in pmove, not g_active!  (prediction will be
+	// wrong, otherwise.)
+	if (delta > 38.75)
+	{
+		VectorClear(pm->ps->velocity);
+	}
+}
+
 /*
 =================
 PM_CrashLand
@@ -1916,12 +1983,6 @@ Check for hard landings that generate sound events
 */
 static void PM_CrashLand(void)
 {
-	float delta;
-	float dist;
-	float vel, acc;
-	float t;
-	float a, b, c, den;
-
 	// Ridah, only play this if coming down hard
 	if (!pm->ps->legsTimer)
 	{
@@ -1932,22 +1993,22 @@ static void PM_CrashLand(void)
 	}
 
 	// calculate the exact velocity on landing
-	dist = pm->ps->origin[2] - pml.previous_origin[2];
-	vel  = pml.previous_velocity[2];
-	acc  = -pm->ps->gravity;
+	float dist = pm->ps->origin[2] - pml.previous_origin[2];
+	float vel  = pml.previous_velocity[2];
+	float acc = -pm->ps->gravity;
 
-	a = acc / 2;
-	b = vel;
-	c = -dist;
+	float a = acc / 2;
+	float b = vel;
+	float c = -dist;
 
-	den = b * b - 4 * a * c;
+	float den = b * b - 4 * a * c;
 	if (den < 0)
 	{
 		return;
 	}
-	t = (-b - sqrt(den)) / (2 * a);
+	float t = (-b - sqrt(den)) / (2 * a);
 
-	delta = vel + t * acc;
+	float delta = vel + t * acc;
 	delta = delta * delta * 0.0001;
 
 	// never take falling damage if completely underwater
@@ -1982,97 +2043,34 @@ static void PM_CrashLand(void)
 
 	//End PGM Test
 
-	// create a local entity event to play the sound
-
-	// SURF_NODAMAGE is used for bounce pads where you don't ever
-	// want to take damage or play a crunch sound
-	if (!(pml.groundTrace.surfaceFlags & SURF_NODAMAGE))
+	//Aciz: moved fall damage and stepsound handling into PM_CheckFallDamage
+	//to avoid very messy code when checking whether nofalldamage is enabled/disabled.	
+	if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
 	{
-		if (pm->debugLevel)
+		if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE)
 		{
-			Com_Printf("delta: %5.2f\n", delta);
+			PM_CheckFallDamage(delta);
 		}
-
-/* JPW NERVE removed from MP, breaks too many levels and skill as no-fall-damage indicator isn't obvious
-        // Rafael gameskill
-        if (bg_pmove_gameskill_integer == 1)
-        {
-            if (delta > 7)
-                delta = 8;
-        }
-        // done
-*/
-
-		if (delta > 77)
+		else
 		{
-			PM_AddEventExt(EV_FALL_NDIE, PM_FootstepForSurface());
+			PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
 		}
-		//else if (delta > 67)
-		//{
-		//	PM_AddEvent(EV_FALL_DMG_75);
-		//}
-		else if (delta > 67)
-		{
-			PM_AddEventExt(EV_FALL_DMG_50, PM_FootstepForSurface());
-		}
-		//else if (delta > 48)
-		//{
-		//	PM_AddEvent(EV_FALL_DMG_30);
-		//}
-		else if (delta > 58)
-		{
-			// this is a pain grunt, so don't play it if dead
-			if (pm->ps->stats[STAT_HEALTH] > 0)
-			{
-				PM_AddEventExt(EV_FALL_DMG_25, PM_FootstepForSurface());
-			}
-		}
-		else if (delta > 48)
-		{
-			// this is a pain grunt, so don't play it if dead
-			if (pm->ps->stats[STAT_HEALTH] > 0)
-			{
-				PM_AddEventExt(EV_FALL_DMG_15, PM_FootstepForSurface());
-			}
-		}
-		else if (delta > 38.75)
-		{
-			// this is a pain grunt, so don't play it if dead
-			if (pm->ps->stats[STAT_HEALTH] > 0)
-			{
-				PM_AddEventExt(EV_FALL_DMG_10, PM_FootstepForSurface());
-			}
-		}
-		else if (delta > 7)
-		{
-			PM_AddEventExt(EV_FALL_SHORT, PM_FootstepForSurface());
-		}
-		// ETJump uphill jump sounds
-		else if (delta > 0)
-		{
- 			PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
-		}
-
-		// Feen: Below is handled in g_active.c again.. CrashLand Fix
-		// Zero: Can't be handled on g_active. Breaks prediction. I didn't do anything
-		// to the code on g_active.c. I need to talk to you first but I uncommented this
-		// as it was rather annoying prediction failure. Rather hackish way to fix it
-		// but I don't really want to mess with the code before talking to you.
-		if (delta > 38.75)
-		{
-			VectorClear(pm->ps->velocity);
-		}
-
 	}
 	else
 	{
-		PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+		if (!(pml.groundTrace.surfaceFlags & SURF_NODAMAGE))
+		{
+			PM_CheckFallDamage(delta);
+		}
+		else
+		{
+			PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+		}
 	}
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;
 }
-
 
 
 /*

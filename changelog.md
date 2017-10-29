@@ -11,7 +11,7 @@
 * added new keys for `func_invisible_user` entity:
   - `noise <sound file>` sets sound file to play when activated
   - `volume <0-255>` controls sound volume
-* fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crashed the game anymore 
+* fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crash the game anymore 
 * fixed `target_speaker` spawnflag **8** (ACTIVATOR) didn't play sound to the activator
 * fixed setting `com_maxfps` in menu
 * added `etj_viewPlayerPortals` __2__ as an option to menu
@@ -69,6 +69,9 @@
   * makes teleportation events smoother when destination is on ground level
 * fixed `vote_minVoteDuration` not working and votes always taking at least 5 seconds to pass
 * added stand models for 100% accurate rifles, spawnflag __2__ now works on them
+* added `nofalldamage` worldspawn key to toggle functionality of cushion
+  * `nofalldamage` __0__ = fall damage enabled on all surfaces except on `surfaceparm nodamage` (default)
+  * `nofalldamage` __1__ = fall damage disabled on all surfaces except on `surfaceparm nodamage`
 
 
 # ETJump 2.2.0
