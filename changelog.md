@@ -72,7 +72,7 @@
 * added `nofalldamage` worldspawn key to toggle functionality of cushion
   * `nofalldamage` __0__ = fall damage enabled on all surfaces except on `surfaceparm nodamage` (default)
   * `nofalldamage` __1__ = fall damage disabled on all surfaces except on `surfaceparm nodamage`
-
+* added minimize button for game window (Windows only)
 
 # ETJump 2.2.0
 
