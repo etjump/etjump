@@ -1915,13 +1915,14 @@ PM_CheckFallDamage
 Checks landing speed and applies fall damage + stepsounds
 =============
 */
-static void PM_CheckFallDamage(float delta)
+static void PM_CheckFallDamage(const float delta)
 {
 	// create a local entity event to play the sound
 	if (pm->debugLevel)
 	{
 		Com_Printf("delta: %5.2f\n", delta);
 	}
+
 	if (delta > 77)
 	{
 		PM_AddEventExt(EV_FALL_NDIE, PM_FootstepForSurface());
@@ -1963,11 +1964,10 @@ static void PM_CheckFallDamage(float delta)
 	{
 		PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
 	}
-	// Feen: Below is handled in g_active.c again.. CrashLand Fix
-	// Zero: Can't be handled on g_active. Breaks prediction. I didn't do anything
-	// to the code on g_active.c. I need to talk to you first but I uncommented this
-	// as it was rather annoying prediction failure. Rather hackish way to fix it
-	// but I don't really want to mess with the code before talking to you.
+
+	// rain - when falling damage happens, velocity is cleared, but
+	// this needs to happen in pmove, not g_active!  (prediction will be
+	// wrong, otherwise.)
 	if (delta > 38.75)
 	{
 		VectorClear(pm->ps->velocity);
@@ -1983,12 +1983,6 @@ Check for hard landings that generate sound events
 */
 static void PM_CrashLand(void)
 {
-	float delta;
-	float dist;
-	float vel, acc;
-	float t;
-	float a, b, c, den;
-
 	// Ridah, only play this if coming down hard
 	if (!pm->ps->legsTimer)
 	{
@@ -1999,22 +1993,22 @@ static void PM_CrashLand(void)
 	}
 
 	// calculate the exact velocity on landing
-	dist = pm->ps->origin[2] - pml.previous_origin[2];
-	vel  = pml.previous_velocity[2];
-	acc  = -pm->ps->gravity;
+	float dist = pm->ps->origin[2] - pml.previous_origin[2];
+	float vel  = pml.previous_velocity[2];
+	float acc = -pm->ps->gravity;
 
-	a = acc / 2;
-	b = vel;
-	c = -dist;
+	float a = acc / 2;
+	float b = vel;
+	float c = -dist;
 
-	den = b * b - 4 * a * c;
+	float den = b * b - 4 * a * c;
 	if (den < 0)
 	{
 		return;
 	}
-	t = (-b - sqrt(den)) / (2 * a);
+	float t = (-b - sqrt(den)) / (2 * a);
 
-	delta = vel + t * acc;
+	float delta = vel + t * acc;
 	delta = delta * delta * 0.0001;
 
 	// never take falling damage if completely underwater
@@ -2050,10 +2044,10 @@ static void PM_CrashLand(void)
 	//End PGM Test
 
 	//Aciz: moved fall damage and stepsound handling into PM_CheckFallDamage
-	//to avoid very messy code when checking whether nofalldamage is enabled/disabled.
-	if (!(pm->shared & BG_LEVEL_NO_FALLDAMAGE))
+	//to avoid very messy code when checking whether nofalldamage is enabled/disabled.	
+	if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
 	{
-		if (!(pml.groundTrace.surfaceFlags & SURF_NODAMAGE))
+		if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE)
 		{
 			PM_CheckFallDamage(delta);
 		}
@@ -2062,10 +2056,9 @@ static void PM_CrashLand(void)
 			PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
 		}
 	}
-	
-	if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
+	else
 	{
-		if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE)
+		if (!(pml.groundTrace.surfaceFlags & SURF_NODAMAGE))
 		{
 			PM_CheckFallDamage(delta);
 		}
