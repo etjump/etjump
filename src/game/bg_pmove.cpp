@@ -2225,22 +2225,25 @@ static void PM_GroundTrace(void)
 	}
 
 	// check if getting thrown off the ground
-	if (pm->ps->velocity[2] > 0 && DotProduct(pm->ps->velocity, trace.plane.normal) > 10 && !(pm->ps->eFlags & EF_PRONE))
+	if (pm->ps->velocity[2] > 0 && DotProduct(pm->ps->velocity, trace.plane.normal) > 10)
 	{
 		if (pm->debugLevel)
 		{
 			Com_Printf("%i:kickoff\n", c_pmove);
 		}
 		// go into jump animation
-		if (pm->cmd.forwardmove >= 0)
+		if (!(pm->ps->eFlags & EF_PRONE))
 		{
-			BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_JUMP, qfalse, qfalse);
-			pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
-		}
-		else
-		{
-			BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_JUMPBK, qfalse, qfalse);
-			pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
+			if (pm->cmd.forwardmove >= 0)
+			{
+				BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_JUMP, qfalse, qfalse);
+				pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
+			}
+			else
+			{
+				BG_AnimScriptEvent(pm->ps, pm->character->animModelInfo, ANIM_ET_JUMPBK, qfalse, qfalse);
+				pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
+			}
 		}
 
 		pm->ps->groundEntityNum = ENTITYNUM_NONE;
