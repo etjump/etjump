@@ -438,6 +438,11 @@ void CG_DrawPMItems(void)
 	float        y         = 360;
 	char         *msg;
 
+	if (cg_numPopups.value <= 0)
+	{
+		return;
+	}
+
 	if (cg_drawSmallPopupIcons.integer)
 	{
 		size = PM_ICON_SIZE_SMALL;
