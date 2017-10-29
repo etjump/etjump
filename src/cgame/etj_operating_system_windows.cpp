@@ -5,6 +5,11 @@
 #include "etj_client_authentication.h"
 const char *G_SHA1(const char *str);
 
+ETJump::OperatingSystem::OperatingSystem()
+{
+	addMinimizeButton();
+}
+
 void ETJump::OperatingSystem::minimize()
 {
 	HWND wnd = GetForegroundWindow();
@@ -46,6 +51,16 @@ std::string ETJump::OperatingSystem::getHwid()
 	hardwareId += buffer;
 
 	return G_SHA1(hardwareId.c_str());
+}
+
+void ETJump::OperatingSystem::addMinimizeButton()
+{
+	const auto wnd = GetForegroundWindow();
+	if (wnd)
+	{
+		const auto style = GetWindowLongPtrA(wnd, GWL_STYLE);
+		SetWindowLongPtrA(wnd, GWL_STYLE, style | WS_MINIMIZEBOX);
+	}
 }
 
 #endif
