@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include "etj_client_authentication.h"
 const char *G_SHA1(const char *str);
+void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize);
 
 ETJump::OperatingSystem::OperatingSystem()
 {
@@ -55,11 +56,20 @@ std::string ETJump::OperatingSystem::getHwid()
 
 void ETJump::OperatingSystem::addMinimizeButton()
 {
-	const auto wnd = GetForegroundWindow();
-	if (wnd)
+	char buffer[64];
+	auto *WindowClassName = "Enemy Territory";
+	trap_Cvar_VariableStringBuffer("win_hinstance", buffer, sizeof buffer);
+	const auto etHandle = reinterpret_cast<HINSTANCE>(atol(buffer));
+	HWND wnd = nullptr;
+	while ((wnd = FindWindowEx(nullptr, wnd, WindowClassName, WindowClassName)))
 	{
-		const auto style = GetWindowLongPtrA(wnd, GWL_STYLE);
-		SetWindowLongPtrA(wnd, GWL_STYLE, style | WS_MINIMIZEBOX);
+		const auto hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWL_HINSTANCE));
+		if (etHandle == hInst)
+		{
+			const auto style = GetWindowLongPtr(wnd, GWL_STYLE);
+			SetWindowLongPtr(wnd, GWL_STYLE, style | WS_MINIMIZEBOX);
+			break;
+		}
 	}
 }
 
