@@ -438,7 +438,7 @@ void CG_DrawPMItems(void)
 	float        y         = 360;
 	char         *msg;
 
-	if (cg_numPopups.value <= 0)
+	if (cg_numPopups.integer <= 0)
 	{
 		return;
 	}
