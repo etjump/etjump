@@ -1626,7 +1626,7 @@ namespace ETJump
 		DrawString(x, y, 0.3f, 0.3f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
-	void DrawPicExt(float x, float y, float sizex, float sizey, qhandle_t hShader, vec4_t mainColor, bool enableShadows, vec4_t shadowColor)
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, vec4_t mainColor, bool enableShadows, vec4_t shadowColor)
 	{
 		if (enableShadows)
 		{

@@ -3899,6 +3899,7 @@ static void CG_DrawKeys(void)
 	playerState_t *ps;
 	float         x, y, size;
 	int           skew;
+	bool          drawShadow = etj_keysShadow.integer > 0;
 	vec4_t        shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 
 	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
@@ -3914,7 +3915,7 @@ static void CG_DrawKeys(void)
 	{
 		return;
 	}
-
+	
 	skew = 0;
 
 	ps = &cg.predictedPlayerState;
@@ -3929,11 +3930,11 @@ static void CG_DrawKeys(void)
 
 	if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.SprintPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.SprintPressedShader, cg.keysColor, drawShadow, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.SprintPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.SprintPressedShader, cg.keysColor, drawShadow, shadowColor);
 	}
 	else
 	{
@@ -3943,11 +3944,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.ForwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.ForwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.ForwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.ForwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -3957,11 +3958,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.JumpPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.JumpPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.JumpPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.JumpPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -3977,11 +3978,11 @@ static void CG_DrawKeys(void)
 
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.LeftPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.LeftPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.LeftPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.LeftPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -3991,11 +3992,11 @@ static void CG_DrawKeys(void)
 	x += 2 * size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.RightPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.RightPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.RightPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.RightPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4011,11 +4012,11 @@ static void CG_DrawKeys(void)
 	// prone (bottom left)
 	if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.PronePressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.PronePressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.PronePressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.PronePressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4025,11 +4026,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.BackwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.BackwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.BackwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.BackwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4039,11 +4040,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue == KeyTypes::Keyset1)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.CrouchPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys.CrouchPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.CrouchPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
+		ETJump::drawPic(x, y, size, size, cgs.media.keys2.CrouchPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
