@@ -767,6 +767,8 @@ typedef struct
 #define MAX_PROGRESSION_TRACKERS 50
 	int progression[MAX_PROGRESSION_TRACKERS];
 	int deathrunFlags;
+
+	float velocityScale;
 } clientSession_t;
 
 //

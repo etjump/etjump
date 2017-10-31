@@ -2243,11 +2243,13 @@ void SP_target_activate_if_velocity(gentity_t *self)
 
 void target_scale_velocity_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
-	int i = 0;
-	for (; i < 3; i++)
+	if (self->spawnflags & 1)
 	{
-		activator->client->ps.velocity[i] *= self->speed;
+		activator->client->sess.velocityScale = self->speed;
+		return;
 	}
+
+	VectorScale(activator->client->ps.velocity, self->speed, activator->client->ps.velocity);
 }
 
 void SP_target_scale_velocity(gentity_t *self)
