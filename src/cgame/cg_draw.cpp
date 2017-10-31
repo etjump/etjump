@@ -3822,9 +3822,7 @@ namespace ETJump {
 
 	static void drawNoSaveIcon(float x, float y)
 	{
-		trap_R_SetColor(SaveForbidColor);
-		CG_DrawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon);
-		trap_R_SetColor(nullptr);
+		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon, SaveForbidColor);
 	}
 }
 
