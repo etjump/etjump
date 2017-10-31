@@ -334,6 +334,7 @@ vmCvar_t cg_keysColor;
 vmCvar_t cg_keysX;
 vmCvar_t cg_keysY;
 vmCvar_t cg_keysSize;
+vmCvar_t etj_keysShadow;
 vmCvar_t cg_loadviewangles;
 
 // forty - speedometer
@@ -712,6 +713,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
 	{ &cg_keysX,                    "etj_keysX",                   "585",                    CVAR_ARCHIVE             },
 	{ &cg_keysY,                    "etj_keysY",                   "200",                    CVAR_ARCHIVE             },
+	{ &etj_keysShadow,              "etj_keysShadow",              "0",                      CVAR_ARCHIVE             },
 	{ &cg_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedXYonly,              "etj_speedXYonly",             "1",                      CVAR_ARCHIVE             },

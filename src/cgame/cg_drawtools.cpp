@@ -1625,4 +1625,17 @@ namespace ETJump
 		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
 		DrawString(x, y, 0.3f, 0.3f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
+
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, vec4_t mainColor, bool enableShadows, vec4_t shadowColor)
+	{
+		if (enableShadows)
+		{
+			trap_R_SetColor(shadowColor);
+			CG_DrawPic(x + 1, y + 1, sizex, sizey, hShader);
+		}
+
+		trap_R_SetColor(mainColor);
+		CG_DrawPic(x, y, sizex, sizey, hShader);
+		trap_R_SetColor(nullptr);
+	}
 }

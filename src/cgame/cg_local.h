@@ -2390,6 +2390,7 @@ extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
 extern vmCvar_t cg_keysX;
 extern vmCvar_t cg_keysY;
+extern vmCvar_t etj_keysShadow;
 extern vmCvar_t cg_keysColor;
 extern vmCvar_t cg_loadviewangles;
 // forty - speedometer
@@ -2662,6 +2663,7 @@ namespace ETJump
 	void DrawMiniString(int x, int y, const char *s, float alpha);
 	void DrawSmallString(int x, int y, const char *s, float alpha);
 	void DrawBigString(int x, int y, const char *s, float alpha);
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, vec4_t mainColor, bool enableShadows, vec4_t shadowColor);
 }
 
 

@@ -73,6 +73,7 @@
   * `nofalldamage` __0__ = fall damage enabled on all surfaces except on `surfaceparm nodamage` (default)
   * `nofalldamage` __1__ = fall damage disabled on all surfaces except on `surfaceparm nodamage`
 * added minimize button for game window (Windows only)
+* added `etj_keysShadow` to draw shadow for keysets
 
 # ETJump 2.2.0
 
