@@ -7,6 +7,14 @@
 
 #include "cg_local.h"
 #include "../game/bg_classes.h"
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include "boost/algorithm/string/erase.hpp"
 
 vec3_t ejectBrassCasingOrigin;
