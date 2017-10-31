@@ -2473,6 +2473,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		VectorCopy(client->sess.posBeforeInactivity, ent->r.currentOrigin);
 		client->sess.loadedPosBeforeInactivity = qtrue;
 	}
+
+	client->sess.velocityScale = 1;
 }
 
 void ClearPortals(gentity_t *ent)

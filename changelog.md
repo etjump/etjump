@@ -74,6 +74,10 @@
   * `nofalldamage` __1__ = fall damage disabled on all surfaces except on `surfaceparm nodamage`
 * added minimize button for game window (Windows only)
 * added `etj_keysShadow` to draw shadow for keysets
+* added ability to hide popups with `etj_numPopups` __0__
+* added spawnflag __1__ `persistent` to target_scale_velocity
+  * scales activators velocity permanently by amount of `scale`
+  * scaling can be reset with `/kill` or by triggering another `target_scale_velocity` with `scale` __1__
 
 # ETJump 2.2.0
 
