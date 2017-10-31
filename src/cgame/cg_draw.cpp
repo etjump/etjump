@@ -3893,11 +3893,14 @@ enum class KeyTypes
 	Keyset2,
 };
 
+
 static void CG_DrawKeys(void)
 {
 	playerState_t *ps;
 	float         x, y, size;
 	int           skew;
+	vec4_t        shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	vec4_t        mainColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
 
@@ -3927,23 +3930,11 @@ static void CG_DrawKeys(void)
 
 	if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.SprintPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.SprintPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.SprintPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.SprintPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.SprintPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.SprintPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -3953,23 +3944,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.ForwardPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.ForwardPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.ForwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.ForwardPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.ForwardPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.ForwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -3979,23 +3958,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.JumpPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.JumpPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.JumpPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.JumpPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.JumpPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.JumpPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4004,30 +3971,18 @@ static void CG_DrawKeys(void)
 
 	// second (middle) row
 	// left
-	x  = cg_keysX.value + skew;
+	x = cg_keysX.value + skew;
 	y += size;
 
 	ETJump_AdjustPosition(&x);
 
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.LeftPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.LeftPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.LeftPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.LeftPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.LeftPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.LeftPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4037,23 +3992,11 @@ static void CG_DrawKeys(void)
 	x += 2 * size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.RightPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.RightPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.RightPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.RightPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.RightPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.RightPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4061,7 +4004,7 @@ static void CG_DrawKeys(void)
 	}
 
 	// third (bottom) row
-	x  = cg_keysX.value;
+	x = cg_keysX.value;
 	y += size;
 
 	ETJump_AdjustPosition(&x);
@@ -4069,23 +4012,11 @@ static void CG_DrawKeys(void)
 	// prone (bottom left)
 	if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.PronePressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.PronePressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.PronePressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.PronePressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.PronePressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.PronePressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4095,23 +4026,11 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.BackwardPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.BackwardPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.BackwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.BackwardPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.BackwardPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.BackwardPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
@@ -4121,29 +4040,16 @@ static void CG_DrawKeys(void)
 	x += size;
 	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue == KeyTypes::Keyset1)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys.CrouchPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys.CrouchPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys.CrouchPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue >= KeyTypes::Keyset2)
 	{
-		if (etj_keysShadow.value > 0)
-		{
-			trap_R_SetColor(colorBlack);
-			CG_DrawPic(x + 1, y + 1, size, size, cgs.media.keys2.CrouchPressedShader);
-		}
-		trap_R_SetColor(cg.keysColor);
-		CG_DrawPic(x, y, size, size, cgs.media.keys2.CrouchPressedShader);
+		ETJump::DrawPicExt(x, y, size, size, cgs.media.keys2.CrouchPressedShader, cg.keysColor, etj_keysShadow.integer > 0, shadowColor);
 	}
 	else
 	{
 		CG_DrawPic(x, y, size, size, cgs.media.keys.CrouchNotPressedShader);
 	}
-
 }
 
 

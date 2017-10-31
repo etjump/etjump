@@ -2663,6 +2663,7 @@ namespace ETJump
 	void DrawMiniString(int x, int y, const char *s, float alpha);
 	void DrawSmallString(int x, int y, const char *s, float alpha);
 	void DrawBigString(int x, int y, const char *s, float alpha);
+	void DrawPicExt(float x, float y, float sizex, float sizey, qhandle_t hShader, vec4_t mainColor, bool enableShadows, vec4_t shadowColor);
 }
 
 
