@@ -3900,7 +3900,6 @@ static void CG_DrawKeys(void)
 	float         x, y, size;
 	int           skew;
 	vec4_t        shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
-	vec4_t        mainColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
 
