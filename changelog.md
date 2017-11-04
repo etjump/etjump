@@ -78,6 +78,7 @@
 * added spawnflag __1__ `persistent` to target_scale_velocity
   * scales activators velocity permanently by amount of `scale`
   * scaling can be reset with `/kill` or by triggering another `target_scale_velocity` with `scale` __1__
+* added `target_give` support
 
 # ETJump 2.2.0
 
