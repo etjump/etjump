@@ -99,7 +99,6 @@ void SaveSystem::Save(gentity_t *ent)
 			CPTo(ent, "You are not allowed to use save slots.");
 			return;
 		}
-
 	}
 
 	if (!client->sess.saveAllowed)
@@ -268,7 +267,7 @@ void SaveSystem::Load(gentity_t *ent)
 		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
 		return;
 	}
-	
+
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
@@ -412,7 +411,6 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
 		return;
 	}
-
 
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
