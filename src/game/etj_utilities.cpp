@@ -94,7 +94,11 @@ void Utilities::startRun(int clientNum)
 	}
 	// same thing for god mode
 	player->flags &= ~FL_GODMODE;
-	ResetSavedPositions(player);
+
+	if (!(player->client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE))
+	{
+		ResetSavedPositions(player);
+	}
 
 	auto disallowed = std::vector<int>{
 		WP_DYNAMITE,

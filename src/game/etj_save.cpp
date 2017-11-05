@@ -99,6 +99,7 @@ void SaveSystem::Save(gentity_t *ent)
 			CPTo(ent, "You are not allowed to use save slots.");
 			return;
 		}
+
 	}
 
 	if (!client->sess.saveAllowed)
@@ -110,6 +111,12 @@ void SaveSystem::Save(gentity_t *ent)
 	if (client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		CPTo(ent, "^7You can not ^3save^7 as a spectator.");
+		return;
+	}
+
+	if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+	{
+		CPTo(ent, "^3Save ^7is disabled during this timerun.");
 		return;
 	}
 
@@ -261,7 +268,7 @@ void SaveSystem::Load(gentity_t *ent)
 		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
 		return;
 	}
-
+	
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
@@ -292,6 +299,10 @@ void SaveSystem::Load(gentity_t *ent)
 				client->ps.pm_flags &= ~PMF_DUCKED;
 
 			}
+		}
+		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+		{
+			InterruptRun(ent);
 		}
 		TeleportPlayer(ent, pos);
 	}
@@ -402,6 +413,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		return;
 	}
 
+
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
@@ -432,6 +444,10 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 				client->ps.pm_flags &= ~PMF_DUCKED;
 
 			}
+		}
+		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+		{
+			InterruptRun(ent);
 		}
 		TeleportPlayer(ent, pos);
 	}

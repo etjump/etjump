@@ -2728,6 +2728,7 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 #define TIMERUN_DISABLE_BACKUPS                0x10
 #define TIMERUN_DISABLE_EXPLOSIVES_PICKUP      0x20
 #define TIMERUN_DISABLE_PORTALGUN_PICKUP       0x40
+#define TIMERUN_DISABLE_SAVE                   0x80
 
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);
