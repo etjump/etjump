@@ -909,6 +909,21 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 	}
 }
 
+
+/*
+===============
+Touch_Item_Give
+
+Called by target_give entity to make sure clients are always given items, regardless of conditions
+===============
+*/
+
+void Touch_Item_Give(gentity_t *ent, gentity_t *other, trace_t *trace)
+{
+	ent->active = qtrue;
+	Touch_Item(ent, other, trace);
+}
+
 /*
 ===============
 Touch_Item

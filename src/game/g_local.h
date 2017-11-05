@@ -1449,6 +1449,8 @@ void G_DropWeapon(gentity_t *ent, weapon_t weapon);
 // Touch_Item_Auto is bound by the rules of autoactivation (if cg_autoactivate is 0, only touch on "activate")
 void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace);
 
+void Touch_Item_Give(gentity_t *ent, gentity_t *other, trace_t *trace);	// Called by target_give
+
 void Prop_Break_Sound(gentity_t *ent);
 void Spawn_Shard(gentity_t *ent, gentity_t *inflictor, int quantity, int type);
 

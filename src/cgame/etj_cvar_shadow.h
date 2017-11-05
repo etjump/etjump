@@ -1,7 +1,15 @@
 #pragma once
+#include "cg_local.h"
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <string>
 #include <vector>
-#include "cg_local.h"
 
 namespace ETJump
 {
