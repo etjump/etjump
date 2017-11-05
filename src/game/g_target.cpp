@@ -2245,6 +2245,7 @@ void target_scale_velocity_use(gentity_t *self, gentity_t *other, gentity_t *act
 {
 	if (self->spawnflags & 1)
 	{
+		activator->scaleTime = level.time + (self->scaleTime * 1000);
 		activator->client->sess.velocityScale = self->speed;
 		return;
 	}
@@ -2255,6 +2256,7 @@ void target_scale_velocity_use(gentity_t *self, gentity_t *other, gentity_t *act
 void SP_target_scale_velocity(gentity_t *self)
 {
 	G_SpawnFloat("scale", "1", &self->speed);
+	G_SpawnFloat("time", "0", &self->scaleTime);
 
 	self->use = target_scale_velocity_use;
 }
