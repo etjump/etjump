@@ -1090,6 +1090,7 @@ namespace ETJump{
 		{ "default", SaveSystem::SaveLoadRestrictions::Default },
 		{ "stance", SaveSystem::SaveLoadRestrictions::Stance },
 		{ "move", SaveSystem::SaveLoadRestrictions::Move },
+		{ "dead", SaveSystem::SaveLoadRestrictions::Dead },
 	};
  
 	static void initStrictSaveLoad()
