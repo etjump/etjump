@@ -75,8 +75,10 @@
 * added minimize button for game window (Windows only)
 * added `etj_keysShadow` to draw shadow for keysets
 * added ability to hide popups with `etj_numPopups` __0__
-* added spawnflag __1__ `constant` and key `time` to target_scale_velocity
+* added spawnflag __1__ `CONSTANT` and key `time` to target_scale_velocity
   * scales activators speed permanently by amount of `scale` for duration of `time`
+* added `spawnflag` __128__ `NO_SAVE` for `target_startTimer`
+  * disables save during timerun, and when player loads, the run will be reset
 
 # ETJump 2.2.0
 
