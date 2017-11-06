@@ -80,6 +80,8 @@
 * added `spawnflag` __128__ `NO_SAVE` for `target_startTimer`
   * disables save during timerun, and when player loads, the run will be reset
 * added `target_give` support
+* disabled clients ability to rotate z-view
+* added z-rotation check when starting a timerun
 
 # ETJump 2.2.0
 
