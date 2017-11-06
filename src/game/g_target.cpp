@@ -2043,6 +2043,12 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		return;
 	}
 
+	if (activator->client->ps.viewangles[ROLL] != 0)
+	{
+		trap_SendServerCommand(ClientNum(activator), va("cp \"^3WARNING: ^7Timerun was not started. Z-rotation detected!"));
+		return;
+	}
+
 	activator->client->sess.runSpawnflags = self->spawnflags;
 
 	// disable timer if pmove is not fixed
