@@ -59,7 +59,7 @@ void SaveSystem::Save(gentity_t *ent)
 
 	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
-		CPTo(ent, "^3Save ^7is disabled for death run");
+		CPTo(ent, "^3Save ^7is disabled for this death run.");
 		return;
 	}
 
@@ -68,7 +68,7 @@ void SaveSystem::Save(gentity_t *ent)
 		// comparing to zero vector
 		if (!VectorCompare(client->ps.velocity, vec3_origin))
 		{
-			CPTo(ent, "^3Save ^7is disabled while moving.");
+			CPTo(ent, "^3Save ^7is disabled while moving on this map.");
 			return;
 		}
 	}
@@ -96,7 +96,7 @@ void SaveSystem::Save(gentity_t *ent)
 			client->sess.timerunActive &&
 			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
-			CPTo(ent, "You are not allowed to use save slots.");
+			CPTo(ent, "Save slots are disabled for this timerun.");
 			return;
 		}
 	}
@@ -115,7 +115,7 @@ void SaveSystem::Save(gentity_t *ent)
 
 	if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 	{
-		CPTo(ent, "^3Save ^7is disabled during this timerun.");
+		CPTo(ent, "^3Save ^7is disabled for this timerun.");
 		return;
 	}
 
@@ -231,7 +231,7 @@ void SaveSystem::Load(gentity_t *ent)
 
 	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 		{
-		CPTo(ent, "^3Load ^7is disabled for death run.");
+		CPTo(ent, "^3Load ^7is disabled for this death run.");
 		return;
 	}
 
@@ -257,7 +257,7 @@ void SaveSystem::Load(gentity_t *ent)
 			client->sess.timerunActive &&
 			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
-			CPTo(ent, "You are not allowed to use load slots.");
+			CPTo(ent, "Save slots are disabled for this timerun.");
 			return;
 		}
 	}
@@ -372,13 +372,13 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 	if (client->sess.timerunActive &&
 		client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 	{
-		CPTo(ent, "You are not allowed to use backup command.");
+		CPTo(ent, "Backup is disabled for this timerun.");
 		return;
 	}
 
 	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
-		CPTo(ent, "^3Backup ^7is disabled for death run");
+		CPTo(ent, "^3Backup ^7is disabled for this death run.");
 		return;
 	}
 
