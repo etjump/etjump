@@ -5797,7 +5797,8 @@ void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd, v
 	VectorCopy(ps->viewangles, oldViewAngles);
 
 	// circularly clamp the angles with deltas
-	for (i = 0 ; i < 3 ; i++)
+	//for (i = 0 ; i < 3 ; i++)		// Disable ROLL adjustment by client
+	for (i = 0; i < 2; i++)
 	{
 		temp = cmd->angles[i] + ps->delta_angles[i];
 		if (i == PITCH)
