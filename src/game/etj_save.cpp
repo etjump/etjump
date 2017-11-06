@@ -113,6 +113,12 @@ void SaveSystem::Save(gentity_t *ent)
 		return;
 	}
 
+	if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+	{
+		CPTo(ent, "^3Save ^7is disabled during this timerun.");
+		return;
+	}
+
 	trace_t trace;
 	trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins,
 	                  ent->r.maxs, client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
@@ -293,6 +299,10 @@ void SaveSystem::Load(gentity_t *ent)
 
 			}
 		}
+		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+		{
+			InterruptRun(ent);
+		}
 		TeleportPlayer(ent, pos);
 	}
 	else
@@ -432,6 +442,10 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 				client->ps.pm_flags &= ~PMF_DUCKED;
 
 			}
+		}
+		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+		{
+			InterruptRun(ent);
 		}
 		TeleportPlayer(ent, pos);
 	}

@@ -2013,6 +2013,7 @@ void SP_target_decay(gentity_t *self)
 //   16 disable use of save slots and backups
 //   32 disable explosive weapons pickup
 //   64 disable potralgun pickup
+//   128 disable save, reset when loading
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	float speed = VectorLength(activator->client->ps.velocity);
