@@ -64,7 +64,8 @@ public:
 	{
 		Default = 0,
 		Stance = 1 << 0,
-		Move = 1 << 1
+		Move = 1 << 1,
+		Dead = 1 << 2
 	};
 
 	// Saves current position

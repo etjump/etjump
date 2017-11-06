@@ -79,6 +79,7 @@
   * scales activators speed permanently by amount of `scale` for duration of `time`
 * added `spawnflag` __128__ `NO_SAVE` for `target_startTimer`
   * disables save during timerun, and when player loads, the run will be reset
+* added `target_give` support
 
 # ETJump 2.2.0
 

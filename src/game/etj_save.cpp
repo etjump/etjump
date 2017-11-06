@@ -73,10 +73,10 @@ void SaveSystem::Save(gentity_t *ent)
 		}
 	}
 
-	// if dead cant save, avoid abuse running through damage triggers
-	if (client->ps.pm_type == PM_DEAD)
+	// No saving while dead if it's disabled by map
+	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
-		CPTo(ent, "^3Save ^7is disabled while dead.");
+		CPTo(ent, "^3Save ^7is disabled while dead on this map.");
 		return;
 	}
 
@@ -235,9 +235,9 @@ void SaveSystem::Load(gentity_t *ent)
 		return;
 	}
 
-	if (client->ps.pm_type == PM_DEAD)
+	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
-		CPTo(ent, "^3Load ^7is disabled while dead.");
+		CPTo(ent, "^3Load ^7is disabled while dead on this map.");
 		return;
 	}
 
@@ -382,9 +382,9 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		return;
 	}
 
-	if (client->ps.pm_type == PM_DEAD)
+	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
-		CPTo(ent, "^3Backup ^7is disabled while dead.");
+		CPTo(ent, "^3Backup ^7is disabled while dead on this map.");
 		return;
 	}
 
