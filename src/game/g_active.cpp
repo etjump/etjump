@@ -1217,9 +1217,16 @@ void ClientThink_real(gentity_t *ent)
 	// set speed
 	client->ps.speed = G_SPEED;
 
-	if (client->sess.velocityScale)
+	if (client->sess.velocityScale != 1)
 	{
-		client->ps.speed *= client->sess.velocityScale;
+		if (ent->scaleTime > level.time)
+		{
+			client->ps.speed *= client->sess.velocityScale;
+		}
+		else
+		{
+			client->sess.velocityScale = 1;
+		}
 	}
 
 	if (client->pers.noclipScale < 1)

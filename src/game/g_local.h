@@ -564,6 +564,8 @@ struct gentity_s
 	char *tjlLineName;
 
 	int outSpeed;
+
+	float scaleTime;
 };
 
 // Ridah
