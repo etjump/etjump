@@ -82,6 +82,7 @@
 * added `target_give` support
 * disabled clients ability to rotate z-view
 * added z-rotation check when starting a timerun
+* fireteam and private messages are no longer logged
 
 # ETJump 2.2.0
 
