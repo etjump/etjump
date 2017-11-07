@@ -2047,7 +2047,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 		break;
 	case SAY_BUDDY:
 		localize = qtrue;
-		G_LogPrintf("saybuddy: %s: %s\n", ent->client->pers.netname, chatText);
+		// G_LogPrintf("saybuddy: %s: %s\n", ent->client->pers.netname, chatText);
 		loc = BG_GetLocationString(ent->r.currentOrigin);
 		Com_sprintf(name, sizeof(name), "[lof](%s%c%c) (%s): ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, loc);
 		color = COLOR_YELLOW;
@@ -4460,8 +4460,7 @@ void Cmd_PrivateMessage_f(gentity_t *ent)
 	}
 	if (ent)
 	{
-		G_LogPrintf("%s -> %s: %s",
-		            ent->client->pers.netname, other->client->pers.netname, msg);
+		// G_LogPrintf("%s -> %s: %s", ent->client->pers.netname, other->client->pers.netname, msg);
 	}
 	else
 	{
