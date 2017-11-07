@@ -525,7 +525,7 @@ cvarTable_t gameCvarTable[] =
 
 	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
 
-	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
+	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_ROM },
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
 
