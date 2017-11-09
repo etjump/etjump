@@ -274,13 +274,8 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	{
 		return;
 	}
-
-	if (self->noise_index)
-	{
-		G_AddEvent(self, EV_GENERAL_SOUND, self->noise_index);
-	}
 	
-	BG_TouchJumpPad(&other->client->ps, &self->s);
+	BG_TouchJumpPad(&other->client->ps, &self->s, &other->client->pmext, level.time);
 }
 
 
@@ -348,6 +343,7 @@ void SP_trigger_push(gentity_t *self)
 	// Noise key support
 	G_SpawnString("noise", "", &s);
 	self->noise_index = G_SoundIndex(s);
+	self->s.nextWeapon = self->noise_index;
 
 	self->s.eType = ET_PUSH_TRIGGER;
 	self->touch = trigger_push_touch;

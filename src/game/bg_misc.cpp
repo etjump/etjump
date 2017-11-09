@@ -6054,12 +6054,22 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB)
 BG_TouchJumpPad
 ================
 */
-void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
+void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad, pmoveExt_t *pmext, int now)
 {
 	// Disable for specs
 	if (ps->pm_type != PM_NORMAL)
 	{
 		return;
+	}
+
+	if (jumppad->nextWeapon)
+	{
+		// FIXME: delay not working
+		if (now - pmext->jumppadHit > 1000)
+		{
+			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->nextWeapon, ps);
+			pmext->jumppadHit = now;
+		}
 	}
 
 	// Launch player
