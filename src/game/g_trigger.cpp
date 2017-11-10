@@ -275,7 +275,7 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 	
-	BG_TouchJumpPad(&other->client->ps, &self->s, &other->client->pmext, level.time);
+	BG_TouchJumpPad(&other->client->ps, &self->s);
 }
 
 

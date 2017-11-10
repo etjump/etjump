@@ -6054,8 +6054,11 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB)
 BG_TouchJumpPad
 ================
 */
-void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad, pmoveExt_t *pmext, int now)
+void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
 {
+	float s;
+	vec3_t dir;
+
 	// Disable for specs
 	if (ps->pm_type != PM_NORMAL)
 	{
@@ -6064,11 +6067,12 @@ void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad, pmoveExt_t *pmex
 
 	if (jumppad->nextWeapon)
 	{
-		// FIXME: delay not working
-		if (now - pmext->jumppadHit > 1000)
+		VectorNormalize2(jumppad->origin2, dir);
+		s = DotProduct(ps->velocity, dir);
+		if (s < 500)
 		{
+			// don't play the event sound again if we are in a fat trigger
 			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->nextWeapon, ps);
-			pmext->jumppadHit = now;
 		}
 	}
 
