@@ -6056,10 +6056,24 @@ BG_TouchJumpPad
 */
 void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
 {
+	float s;
+	vec3_t dir;
+
 	// Disable for specs
 	if (ps->pm_type != PM_NORMAL)
 	{
 		return;
+	}
+
+	if (jumppad->nextWeapon)
+	{
+		VectorNormalize2(jumppad->origin2, dir);
+		s = DotProduct(ps->velocity, dir);
+		if (s < 500)
+		{
+			// don't play the event sound again if we are in a fat trigger
+			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->nextWeapon, ps);
+		}
 	}
 
 	// Launch player
