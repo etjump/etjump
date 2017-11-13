@@ -97,6 +97,7 @@ namespace ETJump
 	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
 	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
 	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
+	static bool isInitialized{ false };
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3659,6 +3660,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	InitGame();
 
+	ETJump::isInitialized = true;
+
 	CG_AutoExec_f();
 }
 
@@ -3683,26 +3686,29 @@ void CG_Shutdown(void)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ETJump shutdown
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if (ETJump::isInitialized)
+	{
+		////////////////////////////////////////////////////////////////
+		// TODO: move these to own client commands handler
+		////////////////////////////////////////////////////////////////
+		ETJump::consoleCommandsHandler->unsubcribe("min");
+		ETJump::consoleCommandsHandler->unsubcribe("minimize");
+		////////////////////////////////////////////////////////////////
 
-	////////////////////////////////////////////////////////////////
-	// TODO: move these to own client commands handler
-	////////////////////////////////////////////////////////////////
-	ETJump::consoleCommandsHandler->unsubcribe("min");
-	ETJump::consoleCommandsHandler->unsubcribe("minimize");
-	////////////////////////////////////////////////////////////////
+		ETJump::consoleCommandsHandler = nullptr;
+		ETJump::serverCommandsHandler = nullptr;
+		ETJump::operatingSystem = nullptr;
+		ETJump::authentication = nullptr;
+		ETJump::entityEventsHandler = nullptr;
+		ETJump::renderables.clear();
+		ETJump::cvarUpdateHandler = nullptr;
+		ETJump::cvarShadows.clear();
 
-	ETJump::consoleCommandsHandler = nullptr;
-	ETJump::serverCommandsHandler = nullptr;
-	ETJump::operatingSystem = nullptr;
-	ETJump::authentication = nullptr;
-	ETJump::entityEventsHandler = nullptr;
-	ETJump::renderables.clear();
-	ETJump::cvarUpdateHandler = nullptr;
-	ETJump::cvarShadows.clear();
-
-	// clear dynamic shaders in reverse order
-	ETJump::drawLeavesHandler = nullptr;
-	ETJump::consoleAlphaHandler = nullptr;
+		// clear dynamic shaders in reverse order
+		ETJump::drawLeavesHandler = nullptr;
+		ETJump::consoleAlphaHandler = nullptr;
+		ETJump::isInitialized = false;
+	}
 }
 
 // returns true if game is single player (or coop)
