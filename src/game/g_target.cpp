@@ -9,6 +9,7 @@
 #include "etj_deathrun_system.h"
 #include "g_local.h"
 #include "etj_utilities.h"
+#include "etj_save_system.h"
 
 //==========================================================
 
@@ -1748,7 +1749,7 @@ void target_savereset_use(gentity_t *self, gentity_t *other, gentity_t *activato
 
 	if (activator->client)
 	{
-		ResetSavedPositions(activator);
+		ETJump::saveSystem->resetSavedPositions(activator);
 		CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 	}
 }
@@ -1811,8 +1812,7 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
-	// TODO: need force save here
-	ForceSave(self, activator);
+	ETJump::saveSystem->forceSave(self, activator);
 	trap_SendServerCommand(activator - g_entities, g_savemsg.string);
 }
 
@@ -2361,7 +2361,7 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 		return;
 	}
 
-	ResetSavedPositions(activator);
+	ETJump::saveSystem->resetSavedPositions(activator);
 
 	activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::Active);
 

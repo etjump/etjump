@@ -2715,12 +2715,6 @@ const char *CustomMapTypeExists(const char *mapType);
 void ClientNameChanged(gentity_t *ent);
 void G_increaseCallvoteCount(const char *mapName);
 void G_increasePassedCount(const char *mapName);
-// g_save.cpp
-void ForceSave(gentity_t *location, gentity_t *ent);
-void SavePositionsToDatabase(gentity_t *ent);
-void LoadPositionsFromDatabase(gentity_t *ent);
-void InitSaveSystem();
-void ResetSavedPositions(gentity_t *ent);
 void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
@@ -2747,10 +2741,16 @@ const char *G_MatchOneMap(const char *arg);
 // ETJump global systems
 ///////////////////////////////////////////////////////////////////////////////
 
+class Session;
+class Database;
 namespace ETJump
 {
 	class DeathrunSystem;
 	extern std::shared_ptr<ETJump::DeathrunSystem> deathrunSystem;
+	class SaveSystem;
+	extern std::shared_ptr<ETJump::SaveSystem> saveSystem;
+	extern std::shared_ptr<Session> session;
+	extern std::shared_ptr<Database> database;
 }
 
 

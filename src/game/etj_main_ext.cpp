@@ -2,7 +2,7 @@
 #include "etj_game.h"
 #include "etj_session.h"
 #include "etj_commands.h"
-#include "etj_save.h"
+#include "etj_save_system.h"
 #include "etj_levels.h"
 #include "etj_database.h"
 #include "etj_custom_map_votes.h"
@@ -23,7 +23,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	if (firstTime)
 	{
-		game.session->Init(clientNum);
+		ETJump::session->Init(clientNum);
 
 		G_DPrintf("Requesting guid from %d\n", clientNum);
 
@@ -32,11 +32,11 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	}
 	else
 	{
-		game.session->ReadSessionData(clientNum);
-		game.timerun->clientConnect(clientNum, game.session->GetId(clientNum));
+		ETJump::session->ReadSessionData(clientNum);
+		game.timerun->clientConnect(clientNum, ETJump::session->GetId(clientNum));
 	}
 
-	if (game.session->IsIpBanned(clientNum))
+	if (ETJump::session->IsIpBanned(clientNum))
 	{
 		G_LogPrintf("Kicked banned client: %d\n", clientNum);
 		trap_DropClient(clientNum, "You are banned.", 0);
@@ -57,7 +57,7 @@ void OnClientDisconnect(gentity_t *ent)
 {
 	G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
 
-	game.session->OnClientDisconnect(ClientNum(ent));
+	ETJump::session->OnClientDisconnect(ClientNum(ent));
 }
 
 void WriteSessionData()
@@ -65,7 +65,7 @@ void WriteSessionData()
 	for (int i = 0; i < level.numConnectedClients; i++)
 	{
 		int clientNum = level.sortedClients[i];
-		game.session->WriteSessionData(clientNum);
+		ETJump::session->WriteSessionData(clientNum);
 	}
 }
 
@@ -87,10 +87,7 @@ void RunFrame(int levelTime)
 void OnGameInit()
 {
 	game.levels         = std::make_shared<Levels>();
-	game.database       = std::make_shared<Database>();
-	game.session        = std::make_shared<Session>(game.database.get());
 	game.commands       = std::make_shared<Commands>();
-	game.saves          = std::make_shared<SaveSystem>(game.session.get());
 	game.mapStatistics  = std::make_shared<MapStatistics>();
 	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
 	game.motd           = std::make_shared<Motd>();
@@ -111,9 +108,9 @@ void OnGameInit()
 
 	if (strlen(g_userConfig.string) > 0)
 	{
-		if (!game.database->InitDatabase(g_userConfig.string))
+		if (!ETJump::database->InitDatabase(g_userConfig.string))
 		{
-			G_LogPrintf("DATABASE ERROR: %s\n", game.database->GetMessage().c_str());
+			G_LogPrintf("DATABASE ERROR: %s\n", ETJump::database->GetMessage().c_str());
 		}
 		else
 		{
@@ -137,16 +134,13 @@ void OnGameInit()
 void OnGameShutdown()
 {
 	WriteSessionData();
-//    game.database->ExecuteQueuedOperations();
-	game.database->CloseDatabase();
+//    ETJump::database->ExecuteQueuedOperations();
+	ETJump::database->CloseDatabase();
 	game.mapStatistics->saveChanges();
 	game.tokens->reset();
 
 	game.levels = nullptr;
-	game.database = nullptr;
-	game.session = nullptr;
 	game.commands = nullptr;
-	game.saves = nullptr;
 	game.customMapVotes = nullptr;
 	game.motd = nullptr;
 	game.timerun = nullptr;
@@ -191,8 +185,8 @@ qboolean OnClientCommand(gentity_t *ent)
 
 	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
 	{
-		game.session->GuidReceived(ent);
-		game.timerun->clientConnect(ClientNum(ent), game.session->GetId(ent));
+		ETJump::session->GuidReceived(ent);
+		game.timerun->clientConnect(ClientNum(ent), ETJump::session->GetId(ent));
 		return qtrue;
 	}
 
@@ -313,7 +307,7 @@ const char *CustomMapTypeExists(const char *mapType)
 
 void ClientNameChanged(gentity_t *ent)
 {
-	game.session->NewName(ent);
+	ETJump::session->NewName(ent);
 }
 
 std::string GetTeamString(int clientNum)

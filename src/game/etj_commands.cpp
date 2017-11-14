@@ -3,7 +3,7 @@
 #include <boost/lexical_cast.hpp>
 #include "etj_commands.h"
 #include "etj_local.h"
-#include "etj_save.h"
+#include "etj_save_system.h"
 #include "etj_session.h"
 #include "etj_custom_map_votes.h"
 #include "etj_timerun.h"
@@ -52,19 +52,19 @@ namespace ClientCommands
 
 bool BackupLoad(gentity_t *ent, Arguments argv)
 {
-	game.saves->LoadBackupPosition(ent);
+	ETJump::saveSystem->loadBackupPosition(ent);
 	return true;
 }
 
 bool Load(gentity_t *ent, Arguments argv)
 {
-	game.saves->Load(ent);
+	ETJump::saveSystem->load(ent);
 	return true;
 }
 
 bool Save(gentity_t *ent, Arguments argv)
 {
-	game.saves->Save(ent);
+	ETJump::saveSystem->save(ent);
 	return true;
 }
 
@@ -148,20 +148,20 @@ bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target, bool equalIsHigher)
 
 	if (equalIsHigher)
 	{
-		return game.session->GetLevel(ent) <= game.session->GetLevel(target);
+		return ETJump::session->GetLevel(ent) <= ETJump::session->GetLevel(target);
 	}
 
-	return game.session->GetLevel(ent) < game.session->GetLevel(target);
+	return ETJump::session->GetLevel(ent) < ETJump::session->GetLevel(target);
 }
 
 bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher)
 {
 	if (equalIsHigher)
 	{
-		return game.session->GetLevel(ent) <= game.session->GetLevelById(id);
+		return ETJump::session->GetLevel(ent) <= ETJump::session->GetLevelById(id);
 	}
 
-	return game.session->GetLevel(ent) < game.session->GetLevelById(id);
+	return ETJump::session->GetLevel(ent) < ETJump::session->GetLevelById(id);
 }
 
 namespace AdminCommands
@@ -189,7 +189,7 @@ bool Admintest(gentity_t *ent, Arguments argv)
 		return true;
 	}
 
-	game.session->PrintAdmintest(ent);
+	ETJump::session->PrintAdmintest(ent);
 	return true;
 }
 
@@ -394,9 +394,9 @@ bool Ban(gentity_t *ent, Arguments argv)
 
 		}
 	}
-	if (!game.session->Ban(ent, player, expires, reason))
+	if (!ETJump::session->Ban(ent, player, expires, reason))
 	{
-		ChatPrintTo(ent, "^3ban: ^7" + game.session->GetMessage());
+		ChatPrintTo(ent, "^3ban: ^7" + ETJump::session->GetMessage());
 		return false;
 	}
 
@@ -439,7 +439,7 @@ bool DeleteLevel(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	int usersWithLevel = game.session->LevelDeleted(level);
+	int usersWithLevel = ETJump::session->LevelDeleted(level);
 
 	ChatPrintTo(ent, "^3deletelevel: ^7deleted level. Set " + std::to_string(usersWithLevel) + " users to level 0.");
 
@@ -668,7 +668,7 @@ bool EditLevel(gentity_t *ent, Arguments argv)
 	{
 		int num = level.sortedClients[i];
 
-		game.session->ParsePermissions(num);
+		ETJump::session->ParsePermissions(num);
 	}
 
 	ChatPrintTo(ent, va("^3editlevel: ^7updated level %d.", adminLevel));
@@ -691,7 +691,7 @@ bool EditUser(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	if (!game.database->UserExists(id))
+	if (!ETJump::database->UserExists(id))
 	{
 		ChatPrintTo(ent, "^3edituser: ^7user does not exist.");
 		return false;
@@ -773,7 +773,7 @@ bool EditUser(gentity_t *ent, Arguments argv)
 	boost::trim_right(title);
 
 	ChatPrintTo(ent, va("^3edituser: ^7updating user %d", id));
-	return game.database->UpdateUser(ent, id, commands, greeting, title, updated);
+	return ETJump::database->UpdateUser(ent, id, commands, greeting, title, updated);
 }
 
 bool FindUser(gentity_t *ent, Arguments argv)
@@ -784,7 +784,7 @@ bool FindUser(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	game.database->FindUser(ent, argv->at(1));
+	ETJump::database->FindUser(ent, argv->at(1));
 
 	return true;
 }
@@ -858,7 +858,7 @@ bool ListUserNames(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	game.database->ListUserNames(ent, id);
+	ETJump::database->ListUserNames(ent, id);
 	return true;
 }
 
@@ -885,7 +885,7 @@ bool Finger(gentity_t *ent, Arguments argv)
 	}
 
 
-	game.session->PrintFinger(ent, target);
+	ETJump::session->PrintFinger(ent, target);
 	return true;
 }
 
@@ -1089,7 +1089,7 @@ bool ListBans(gentity_t *ent, Arguments argv)
 
 	if (page < 1) page = 1;
 
-	game.database->ListBans(ent, page);
+	ETJump::database->ListBans(ent, page);
 
 	return true;
 }
@@ -1170,7 +1170,7 @@ bool ListUsers(gentity_t *ent, Arguments argv)
 		}
 	}
 
-	game.database->ListUsers(ent, page);
+	ETJump::database->ListUsers(ent, page);
 	return true;
 }
 
@@ -1202,12 +1202,12 @@ bool ListPlayers(gentity_t *ent, Arguments argv)
 		for (auto i = 0; i < level.numConnectedClients; i++)
 		{
 			auto clientNum = level.sortedClients[i];
-			auto id        = game.session->GetId(g_entities + clientNum);
+			auto id        = ETJump::session->GetId(g_entities + clientNum);
 
 			BufferPrint(ent, (boost::format("^7%-2d %-9d %-6d %-s\n")
 			                  % clientNum
 			                  % (id == -1 ? "-" : std::to_string(id))
-			                  % game.session->GetLevel(g_entities + clientNum)
+			                  % ETJump::session->GetLevel(g_entities + clientNum)
 			                  % (g_entities + clientNum)->client->pers.netname).str());
 		}
 
@@ -1596,7 +1596,7 @@ bool RemoveSaves(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	game.saves->ResetSavedPositions(target);
+	ETJump::saveSystem->resetSavedPositions(target);
 	ChatPrintTo(ent, va("^3system: ^7%s^7's saves were removed.", target->client->pers.netname));
 	ChatPrintTo(target, "^3system: ^7your saves were removed");
 	return true;
@@ -1668,7 +1668,7 @@ bool SetLevel(gentity_t *ent, Arguments argv)
 				return false;
 			}
 
-			if (level > game.session->GetLevel(ent))
+			if (level > ETJump::session->GetLevel(ent))
 			{
 				ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher than your own level.");
 				return false;
@@ -1681,9 +1681,9 @@ bool SetLevel(gentity_t *ent, Arguments argv)
 			return false;
 		}
 
-		if (!game.session->SetLevel(target, level))
+		if (!ETJump::session->SetLevel(target, level))
 		{
-			ChatPrintTo(ent, va("^3setlevel: ^7%s", game.session->GetMessage().c_str()));
+			ChatPrintTo(ent, va("^3setlevel: ^7%s", ETJump::session->GetMessage().c_str()));
 			return false;
 		}
 
@@ -1701,7 +1701,7 @@ bool SetLevel(gentity_t *ent, Arguments argv)
 			return false;
 		}
 
-		if (!game.session->UserExists(id))
+		if (!ETJump::session->UserExists(id))
 		{
 			ChatPrintTo(ent, "^3setlevel: ^7user with id " + argv->at(2) + " doesn't exist.");
 			return false;
@@ -1722,7 +1722,7 @@ bool SetLevel(gentity_t *ent, Arguments argv)
 				return false;
 			}
 
-			if (level > game.session->GetLevel(ent))
+			if (level > ETJump::session->GetLevel(ent))
 			{
 				ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher than your own level.");
 				return false;
@@ -1735,9 +1735,9 @@ bool SetLevel(gentity_t *ent, Arguments argv)
 			return false;
 		}
 
-		if (!game.session->SetLevel(id, level))
+		if (!ETJump::session->SetLevel(id, level))
 		{
-			ChatPrintTo(ent, va("^3setlevel: ^7%s", game.session->GetMessage().c_str()));
+			ChatPrintTo(ent, va("^3setlevel: ^7%s", ETJump::session->GetMessage().c_str()));
 			return false;
 		}
 
@@ -2066,9 +2066,9 @@ bool Unban(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	if (!game.database->Unban(ent, id))
+	if (!ETJump::database->Unban(ent, id))
 	{
-		ChatPrintTo(ent, "^3unban: ^7" + game.database->GetMessage());
+		ChatPrintTo(ent, "^3unban: ^7" + ETJump::database->GetMessage());
 		return false;
 	}
 
@@ -2129,7 +2129,7 @@ bool UserInfo(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	game.database->UserInfo(ent, id);
+	ETJump::database->UserInfo(ent, id);
 
 	return true;
 }
@@ -2246,7 +2246,7 @@ bool Commands::List(gentity_t *ent)
 	BeginBufferPrint();
 	ChatPrintTo(ent, "^3help: ^7check console for more information.");
 	int              i    = 1;
-	std::bitset<256> perm = game.session->Permissions(ent);
+	std::bitset<256> perm = ETJump::session->Permissions(ent);
 	for (; it != end; it++)
 	{
 		if (perm[it->second.second] == false)
@@ -2280,7 +2280,7 @@ bool Commands::AdminCommand(gentity_t *ent)
 	}
 	else
 	{
-		if (ent && !game.session->HasPermission(ent, '/'))
+		if (ent && !ETJump::session->HasPermission(ent, '/'))
 		{
 			return false;
 		}
@@ -2318,7 +2318,7 @@ bool Commands::AdminCommand(gentity_t *ent)
 		return false;
 	}
 	std::bitset<256> permissions =
-	    game.session->Permissions(ent);
+	    ETJump::session->Permissions(ent);
 	std::vector<ConstAdminCommandIterator> foundCommands;
 	while (it != adminCommands_.end() &&
 	       it->first.compare(0, command.length(), command) == 0)

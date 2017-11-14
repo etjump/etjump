@@ -154,7 +154,7 @@ file(GLOB QAGAME_SRC
 	"game/etj_progression_tracker.cpp"
 	"game/etj_progression_tracker_parser.cpp"
 	"game/etj_random_map_mode.cpp"
-	"game/etj_save.cpp"
+	"game/etj_save_system.cpp"
 	"game/etj_session.cpp"
 	"game/etj_sqlite_wrapper.cpp"
 	"game/etj_timerun.cpp"

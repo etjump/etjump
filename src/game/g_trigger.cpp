@@ -1,5 +1,12 @@
 #include "g_local.h"
+#include "etj_save_system.h"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 
 void InitTrigger(gentity_t *self)
 {
@@ -526,8 +533,7 @@ void trigger_savereset_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	self->timestamp = level.time + FRAMETIME;
 
-	// TODO: add savereset here
-	ResetSavedPositions(other);
+	ETJump::saveSystem->resetSavedPositions(other);
 
 	CPx(other - g_entities, "cp \"^7 Your saves were removed.\n\"");
 }
@@ -795,10 +801,10 @@ void heal_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	for (i = 0; i < clientcount; i++)
 	{
-		healvalue = min(touchClients[i]->client->ps.stats[STAT_MAX_HEALTH] - touchClients[i]->health, self->damage);
+		healvalue = std::min(touchClients[i]->client->ps.stats[STAT_MAX_HEALTH] - touchClients[i]->health, self->damage);
 		if (self->health != -9999)
 		{
-			healvalue = min(healvalue, self->health);
+			healvalue = std::min(healvalue, self->health);
 		}
 		if (healvalue <= 0)
 		{
@@ -1010,7 +1016,7 @@ void ammo_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	}
 	else
 	{
-		count = min(clientcount, self->health / (float)self->damage);
+		count = std::min((float)clientcount, self->health / (float)self->damage);
 	}
 
 	for (i = 0; i < count; i++)

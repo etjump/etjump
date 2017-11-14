@@ -6,6 +6,9 @@
 #undef max
 #endif
 #include "etj_deathrun_system.h"
+#include "etj_database.h"
+#include "etj_session.h"
+#include "etj_save_system.h"
 #include <memory>
 
 level_locals_t level;
@@ -29,6 +32,9 @@ typedef struct
 namespace ETJump
 {
 	std::shared_ptr<DeathrunSystem> deathrunSystem;
+	std::shared_ptr<SaveSystem> saveSystem;
+	std::shared_ptr<Database> database;
+	std::shared_ptr<Session> session;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +44,9 @@ namespace ETJump
 static void initializeETJump()
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
+	ETJump::database = std::make_shared<Database>();
+	ETJump::session = std::make_shared<Session>(ETJump::database);
+	ETJump::saveSystem = std::make_shared<ETJump::SaveSystem>(ETJump::session);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +56,7 @@ static void initializeETJump()
 static void shutdownETJump()
 {
 	ETJump::deathrunSystem = nullptr;
+	ETJump::saveSystem = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

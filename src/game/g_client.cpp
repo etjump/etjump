@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include "etj_save_system.h"
 #include "../../etjump/ui/menudef.h"
 
 // g_client.c -- client functions that don't happen every frame
@@ -1937,7 +1938,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		ent->client->sess.muted = qtrue;
 	}
 
-	ResetSavedPositions(ent);
+	ETJump::saveSystem->resetSavedPositions(ent);
 
 	return NULL;
 }
@@ -2021,7 +2022,7 @@ void ClientBegin(int clientNum)
 	// No surface determined yet.
 	ent->surfaceFlags = 0;
 
-	LoadPositionsFromDatabase(ent);
+	ETJump::saveSystem->loadPositionsFromDatabase(ent);
 	OnClientBegin(ent);
 	if (level.hasTimerun)
 	{
@@ -2647,7 +2648,7 @@ void ClientDisconnect(int clientNum)
 	G_verifyMatchState(i);
 	// OSP
 
-	SavePositionsToDatabase(ent);
+	ETJump::saveSystem->savePositionsToDatabase(ent);
 
 	ClearPortals(ent);
 }

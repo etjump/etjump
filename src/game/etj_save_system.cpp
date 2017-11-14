@@ -3,11 +3,11 @@
 using std::string;
 using std::vector;
 
-#include "etj_save.h"
+#include "etj_save_system.h"
 #include "utilities.hpp"
 #include "etj_session.h"
 
-SaveSystem::Client::Client()
+ETJump::SaveSystem::Client::Client()
 {
 	alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
 	axisBackupPositions   = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
@@ -28,7 +28,7 @@ SaveSystem::Client::Client()
 	}
 }
 
-SaveSystem::DisconnectedClient::DisconnectedClient()
+ETJump::SaveSystem::DisconnectedClient::DisconnectedClient()
 {
 	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
 	{
@@ -42,7 +42,7 @@ SaveSystem::DisconnectedClient::DisconnectedClient()
 std::string UserDatabase_Guid(gentity_t *ent);
 
 // Saves current position
-void SaveSystem::Save(gentity_t *ent)
+void ETJump::SaveSystem::save(gentity_t *ent)
 {
 	auto *client = ent->client;
 
@@ -181,14 +181,14 @@ void SaveSystem::Save(gentity_t *ent)
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
-		pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
+		pos = _clients[ClientNum(ent)].alliesSavedPositions + position;
 	}
 	else
 	{
-		pos = clients_[ClientNum(ent)].axisSavedPositions + position;
+		pos = _clients[ClientNum(ent)].axisSavedPositions + position;
 	}
 
-	SaveBackupPosition(ent, pos);
+	saveBackupPosition(ent, pos);
 
 	VectorCopy(client->ps.origin, pos->origin);
 	VectorCopy(client->ps.viewangles, pos->vangles);
@@ -208,7 +208,7 @@ void SaveSystem::Save(gentity_t *ent)
 }
 
 // Loads position
-void SaveSystem::Load(gentity_t *ent)
+void ETJump::SaveSystem::load(gentity_t *ent)
 {
 	auto *client = ent->client;
 
@@ -271,11 +271,11 @@ void SaveSystem::Load(gentity_t *ent)
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
-		pos = clients_[ClientNum(ent)].alliesSavedPositions + position;
+		pos = _clients[ClientNum(ent)].alliesSavedPositions + position;
 	}
 	else
 	{
-		pos = clients_[ClientNum(ent)].axisSavedPositions + position;
+		pos = _clients[ClientNum(ent)].axisSavedPositions + position;
 	}
 
 	if (pos->isValid)
@@ -303,7 +303,7 @@ void SaveSystem::Load(gentity_t *ent)
 		{
 			InterruptRun(ent);
 		}
-		TeleportPlayer(ent, pos);
+		teleportPlayer(ent, pos);
 	}
 	else
 	{
@@ -312,7 +312,7 @@ void SaveSystem::Load(gentity_t *ent)
 }
 
 // Saves position, does not check for anything. Used for target_save
-void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)
+void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent)
 {
 	SavePosition *pos = nullptr;
 	auto *client = ent->client;
@@ -324,18 +324,18 @@ void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)
 
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
-		pos = &clients_[ClientNum(ent)].alliesSavedPositions[0];
+		pos = &_clients[ClientNum(ent)].alliesSavedPositions[0];
 	}
 	else if (client->sess.sessionTeam == TEAM_AXIS)
 	{
-		pos = &clients_[ClientNum(ent)].axisSavedPositions[0];
+		pos = &_clients[ClientNum(ent)].axisSavedPositions[0];
 	}
 	else
 	{
 		return;
 	}
 
-	SaveBackupPosition(ent, pos);
+	saveBackupPosition(ent, pos);
 
 	VectorCopy(location->s.origin, pos->origin);
 	VectorCopy(location->s.angles, pos->vangles);
@@ -348,7 +348,7 @@ void SaveSystem::ForceSave(gentity_t *location, gentity_t *ent)
 }
 
 // Loads backup position
-void SaveSystem::LoadBackupPosition(gentity_t *ent)
+void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 {
 	auto *client = ent->client;
 
@@ -415,11 +415,11 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
-		pos = &clients_[ClientNum(ent)].alliesBackupPositions[position];
+		pos = &_clients[ClientNum(ent)].alliesBackupPositions[position];
 	}
 	else
 	{
-		pos = &clients_[ClientNum(ent)].axisBackupPositions[position];
+		pos = &_clients[ClientNum(ent)].axisBackupPositions[position];
 	}
 
 	if (pos->isValid)
@@ -447,7 +447,7 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 		{
 			InterruptRun(ent);
 		}
-		TeleportPlayer(ent, pos);
+		teleportPlayer(ent, pos);
 	}
 	else
 	{
@@ -455,36 +455,36 @@ void SaveSystem::LoadBackupPosition(gentity_t *ent)
 	}
 }
 
-void SaveSystem::Reset()
+void ETJump::SaveSystem::reset()
 {
 	for (int clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++)
 	{
 		int clientNum = level.sortedClients[clientIndex];
 		// TODO: reset saved positions here
-		ResetSavedPositions(g_entities + clientNum);
+		resetSavedPositions(g_entities + clientNum);
 	}
 
-	savedPositions.clear();
+	_savedPositions.clear();
 }
 
 // Used to reset positions on map change/restart
-void SaveSystem::ResetSavedPositions(gentity_t *ent)
+void ETJump::SaveSystem::resetSavedPositions(gentity_t *ent)
 {
 	for (int saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++)
 	{
-		clients_[ClientNum(ent)].alliesSavedPositions[saveIndex].isValid = false;
-		clients_[ClientNum(ent)].axisSavedPositions[saveIndex].isValid   = false;
+		_clients[ClientNum(ent)].alliesSavedPositions[saveIndex].isValid = false;
+		_clients[ClientNum(ent)].axisSavedPositions[saveIndex].isValid   = false;
 	}
 
 	for (int backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++)
 	{
-		clients_[ClientNum(ent)].alliesBackupPositions[backupIndex].isValid = false;
-		clients_[ClientNum(ent)].axisBackupPositions[backupIndex].isValid   = false;
+		_clients[ClientNum(ent)].alliesBackupPositions[backupIndex].isValid = false;
+		_clients[ClientNum(ent)].axisBackupPositions[backupIndex].isValid   = false;
 	}
 }
 
 // Called on client disconnect. Saves saves for future sessions
-void SaveSystem::SavePositionsToDatabase(gentity_t *ent)
+void ETJump::SaveSystem::savePositionsToDatabase(gentity_t *ent)
 {
 
 	if (!ent->client)
@@ -492,46 +492,46 @@ void SaveSystem::SavePositionsToDatabase(gentity_t *ent)
 		return;
 	}
 
-	string guid = session_->Guid(ent);
+	string guid = _session->Guid(ent);
 
 	DisconnectedClient client;
 
 	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
 	{
 		// Allied
-		VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].origin,
+		VectorCopy(_clients[ClientNum(ent)].alliesSavedPositions[i].origin,
 		           client.alliesSavedPositions[i].origin);
-		VectorCopy(clients_[ClientNum(ent)].alliesSavedPositions[i].vangles,
+		VectorCopy(_clients[ClientNum(ent)].alliesSavedPositions[i].vangles,
 		           client.alliesSavedPositions[i].vangles);
 		client.alliesSavedPositions[i].isValid =
-		    clients_[ClientNum(ent)].alliesSavedPositions[i].isValid;
+		    _clients[ClientNum(ent)].alliesSavedPositions[i].isValid;
 		// Axis
-		VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].origin,
+		VectorCopy(_clients[ClientNum(ent)].axisSavedPositions[i].origin,
 		           client.axisSavedPositions[i].origin);
-		VectorCopy(clients_[ClientNum(ent)].axisSavedPositions[i].vangles,
+		VectorCopy(_clients[ClientNum(ent)].axisSavedPositions[i].vangles,
 		           client.axisSavedPositions[i].vangles);
 		client.axisSavedPositions[i].isValid
-		    = clients_[ClientNum(ent)].axisSavedPositions[i].isValid;
+		    = _clients[ClientNum(ent)].axisSavedPositions[i].isValid;
 	}
 
 	client.progression                           = ent->client->sess.clientMapProgression;
 	ent->client->sess.loadPreviousSavedPositions = qfalse;
 
-	std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+	std::map<string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
 
-	if (it != savedPositions.end())
+	if (it != _savedPositions.end())
 	{
 		it->second = client;
 	}
 	else
 	{
-		savedPositions.insert(std::make_pair(guid, client));
+		_savedPositions.insert(std::make_pair(guid, client));
 	}
 
 }
 
 // Called on client connect. Loads saves from previous session
-void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent)
+void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 {
 
 	if (!ent->client)
@@ -544,11 +544,11 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent)
 		return;
 	}
 
-	string guid = session_->Guid(ent);
+	string guid = _session->Guid(ent);
 
-	std::map<string, DisconnectedClient>::iterator it = savedPositions.find(guid);
+	std::map<string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
 
-	if (it != savedPositions.end())
+	if (it != _savedPositions.end())
 	{
 
 		unsigned validPositionsCount = 0;
@@ -557,10 +557,10 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent)
 		{
 			// Allied
 			VectorCopy(it->second.alliesSavedPositions[i].origin,
-			           clients_[ClientNum(ent)].alliesSavedPositions[i].origin);
+			           _clients[ClientNum(ent)].alliesSavedPositions[i].origin);
 			VectorCopy(it->second.alliesSavedPositions[i].vangles,
-			           clients_[ClientNum(ent)].alliesSavedPositions[i].vangles);
-			clients_[ClientNum(ent)].alliesSavedPositions[i].isValid =
+			           _clients[ClientNum(ent)].alliesSavedPositions[i].vangles);
+			_clients[ClientNum(ent)].alliesSavedPositions[i].isValid =
 			    it->second.alliesSavedPositions[i].isValid;
 
 			if (it->second.alliesSavedPositions[i].isValid)
@@ -570,10 +570,10 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent)
 
 			// Axis
 			VectorCopy(it->second.axisSavedPositions[i].origin,
-			           clients_[ClientNum(ent)].axisSavedPositions[i].origin);
+			           _clients[ClientNum(ent)].axisSavedPositions[i].origin);
 			VectorCopy(it->second.axisSavedPositions[i].vangles,
-			           clients_[ClientNum(ent)].axisSavedPositions[i].vangles);
-			clients_[ClientNum(ent)].axisSavedPositions[i].isValid =
+			           _clients[ClientNum(ent)].axisSavedPositions[i].vangles);
+			_clients[ClientNum(ent)].axisSavedPositions[i].isValid =
 			    it->second.axisSavedPositions[i].isValid;
 
 			if (it->second.axisSavedPositions[i].isValid)
@@ -592,7 +592,7 @@ void SaveSystem::LoadPositionsFromDatabase(gentity_t *ent)
 }
 
 // Saves backup position
-void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos)
+void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 {
 
 	if (!ent->client)
@@ -613,56 +613,17 @@ void SaveSystem::SaveBackupPosition(gentity_t *ent, SavePosition *pos)
 	// Can never be spectator as this would not be called
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
 	{
-		clients_[ClientNum(ent)].alliesBackupPositions.push_front(backup);
+		_clients[ClientNum(ent)].alliesBackupPositions.push_front(backup);
 	}
 	else
 	{
-		clients_[ClientNum(ent)].axisBackupPositions.push_front(backup);
+		_clients[ClientNum(ent)].axisBackupPositions.push_front(backup);
 	}
 
 }
 
-void SaveSystem::Print(gentity_t *ent)
-{
-	std::map<string, DisconnectedClient>::const_iterator it = savedPositions.begin();
 
-	string toPrint = "Save database:\n";
-	while (it != savedPositions.end())
-	{
-
-		toPrint += it->first + NEWLINE;
-
-		int b0 = 0;
-		int b1 = 0;
-		int b2 = 0;
-
-		int r0 = 0;
-		int r1 = 0;
-		int r2 = 0;
-
-		for (int i = 0; i < 3; i++)
-		{
-
-			b0 = it->second.alliesSavedPositions[i].origin[0];
-			b1 = it->second.alliesSavedPositions[i].origin[1];
-			b2 = it->second.alliesSavedPositions[i].origin[2];
-
-			r0 = it->second.axisSavedPositions[i].origin[0];
-			r1 = it->second.axisSavedPositions[i].origin[1];
-			r2 = it->second.axisSavedPositions[i].origin[2];
-
-			toPrint +=
-				std::to_string(it->second.alliesSavedPositions[i].isValid) +
-				std::to_string(it->second.axisSavedPositions[i].isValid) +
-			    "B: " + ToString(b0, b1, b2) +
-			    "R: " + ToString(r0, r1, r2) + NEWLINE;
-		}
-		it++;
-	}
-	ConsolePrintTo(NULL, toPrint);
-}
-
-void SaveSystem::TeleportPlayer(gentity_t* ent, SavePosition* pos)
+void ETJump::SaveSystem::teleportPlayer(gentity_t* ent, SavePosition* pos)
 {
 	auto *client = ent->client;
 	client->ps.eFlags ^= EF_TELEPORT_BIT;
@@ -679,39 +640,14 @@ void SaveSystem::TeleportPlayer(gentity_t* ent, SavePosition* pos)
 	client->ps.pm_time = 1; // Crashland + instant load bug fix.
 }
 
-SaveSystem::SaveSystem(const Session *session) :
-	session_(session)
+ETJump::SaveSystem::SaveSystem(const std::shared_ptr<Session> session) :
+	_session(session)
 	//:guidInterface_(guidInterface)
 {
 
 }
 
-SaveSystem::~SaveSystem()
+ETJump::SaveSystem::~SaveSystem()
 {
 
-}
-
-void ForceSave(gentity_t *location, gentity_t *ent)
-{
-	game.saves->ForceSave(location, ent);
-}
-
-void ResetSavedPositions(gentity_t *ent)
-{
-	game.saves->ResetSavedPositions(ent);
-}
-
-void InitSaveSystem()
-{
-	game.saves->Reset();
-}
-
-void SavePositionsToDatabase(gentity_t *ent)
-{
-	game.saves->SavePositionsToDatabase(ent);
-}
-
-void LoadPositionsFromDatabase(gentity_t *ent)
-{
-	game.saves->LoadPositionsFromDatabase(ent);
 }

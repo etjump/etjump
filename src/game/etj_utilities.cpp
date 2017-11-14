@@ -3,6 +3,7 @@
 //
 
 #include "etj_utilities.h"
+#include "etj_save_system.h"
 #include <boost/algorithm/string.hpp>
 
 #include "g_local.h"
@@ -97,7 +98,7 @@ void Utilities::startRun(int clientNum)
 
 	if (!(player->client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE))
 	{
-		ResetSavedPositions(player);
+		ETJump::saveSystem->resetSavedPositions(player);
 	}
 
 	auto disallowed = std::vector<int>{

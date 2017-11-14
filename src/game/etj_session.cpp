@@ -3,7 +3,7 @@
 #include "etj_levels.h"
 #include <boost/algorithm/string.hpp>
 
-Session::Session(IAuthentication *database)
+Session::Session(std::shared_ptr<IAuthentication> database)
 	: database_(database)
 {
 	for (unsigned i = 0; i < MAX_CLIENTS; i++)

@@ -10,7 +10,7 @@
 #include <unordered_map>
 
 #include "g_local.h"
-#include "etj_save.h"
+#include "etj_save_system.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out, const char *file, int line)
 {

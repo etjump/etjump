@@ -14,7 +14,7 @@ class Session
 {
 public:
 	static const unsigned MAX_COMMANDS = 256;
-	Session(IAuthentication *database);
+	Session(std::shared_ptr<IAuthentication> database);
 	void ResetClient(int clientNum);
 
 	struct Client
@@ -56,7 +56,7 @@ public:
 	int LevelDeleted(int level);
 	std::vector<Session::Client *> FindUsersByLevel(int level);
 private:
-	IAuthentication *database_;
+	std::shared_ptr<IAuthentication> database_;
 
 	void UpdateLastSeen(int clientNum);
 	Client      clients_[MAX_CLIENTS];
