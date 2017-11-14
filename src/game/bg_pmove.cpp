@@ -21,6 +21,15 @@
 
 #define PM_IsSinglePlayerGame() (PM_GameType == GT_SINGLE_PLAYER || PM_GameType == GT_COOP)
 
+namespace ETJump
+{
+	static const int JUMP_DELAY_TIME = 850;
+	static const int PRONE_JUMP_DELAY_TIME = 650;
+	static bool hasJustStoodUp()
+	{
+		return -(pm->pmext->jumpTime + pm->pmext->proneTime) == PRONE_JUMP_DELAY_TIME;
+	}
+}
 
 // JPW NERVE -- stuck this here so it can be seen client & server side
 float Com_GetFlamethrowerRange(void)
@@ -836,8 +845,12 @@ static qboolean PM_CheckJump(void)
 
 	// rain - revert to using pmext for this since pmext is fixed now.
 	// fix for #166
-	if (pm->cmd.serverTime - pm->pmext->jumpTime < 850)
+	if (pm->cmd.serverTime - pm->pmext->jumpTime < ETJump::JUMP_DELAY_TIME)
 	{
+		if (ETJump::hasJustStoodUp())
+		{
+			return qfalse;
+		}
 		if (pm->shared & BG_LEVEL_NO_JUMPDELAY)
 		{
 			if (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
@@ -1072,8 +1085,8 @@ static qboolean PM_CheckProne(void)
 				}
 
 				// don't jump for a bit
-				pm->pmext->jumpTime = pm->cmd.serverTime - 650;
-				pm->ps->jumpTime    = pm->cmd.serverTime - 650;
+				pm->pmext->jumpTime = pm->cmd.serverTime - ETJump::PRONE_JUMP_DELAY_TIME;
+				pm->ps->jumpTime    = pm->cmd.serverTime - ETJump::PRONE_JUMP_DELAY_TIME;
 			}
 		}
 	}
@@ -1622,7 +1635,7 @@ static void PM_WalkMove(void)
 			PM_AirMove();
 		}
 
-		if (!(pm->cmd.serverTime - pm->pmext->jumpTime < 850))
+		if (!(pm->cmd.serverTime - pm->pmext->jumpTime < ETJump::JUMP_DELAY_TIME))
 		{
 
 			pm->pmext->sprintTime -= 2500;
