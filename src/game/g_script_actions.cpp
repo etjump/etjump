@@ -23,13 +23,10 @@ int G_RemoveNamedBot(char *name);
 
 qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 {
-	char     *pString, *token;
-	char     modelname[MAX_QPATH];
-	int      i;
+	char modelname[MAX_QPATH];
 	qboolean solid = qtrue;
-
-	pString = params;
-	token   = COM_ParseExt(&pString, qfalse);
+	char *pString = params;
+	char *token = COM_ParseExt(&pString, qfalse);
 	if (!token[0])
 	{
 		G_Error("G_Scripting: setmodelfrombrushmodel must have an targetname\n");
@@ -52,7 +49,22 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 		token = COM_ParseExt(&pString, qfalse);
 	}
 
-	for (i = 0; i < level.numBrushModels; i++)
+	if (modelname[0] == '*')
+	{
+		trap_SetBrushModel(ent, modelname);
+
+		if (!solid)
+		{
+			ent->s.eFlags |= EF_NONSOLID_BMODEL;
+			ent->clipmask = 0;
+			ent->r.contents = 0;
+			trap_LinkEntity(ent);
+		}
+
+		return qtrue;
+	}
+
+	for (auto i = 0; i < level.numBrushModels; i++)
 	{
 		if (!Q_stricmp(level.brushModelInfo[i].modelname, modelname))
 		{
@@ -60,8 +72,8 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 
 			if (!solid)
 			{
-				ent->s.eFlags  |= EF_NONSOLID_BMODEL;
-				ent->clipmask   = 0;
+				ent->s.eFlags |= EF_NONSOLID_BMODEL;
+				ent->clipmask = 0;
 				ent->r.contents = 0;
 
 				trap_LinkEntity(ent);
@@ -71,7 +83,7 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 		}
 	}
 
-	G_Error("G_Scripting: setmodelfrombrushmodel target not found %s\n", modelname);
+	G_Error("G_ScriptAction_SetModelFromBrushmodel: setmodelfrombrushmodel target not found %s\n", modelname);
 
 	return qtrue;
 }
@@ -4800,27 +4812,24 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params)
 
 /*
 ===================
-G_ScriptAction_Create (inspired by etpro_ScriptAction_SetValues)
-setup - made in a rush...
+G_ScriptAction_Create
+ETJump: ETPro mapscripting support
 ===================
 */
 
-void G_SpawnGEntityFromSpawnVars(void);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params)
 {
 	char *token;
-	char *p;
-	char key[MAX_TOKEN_CHARS];
+	char *p = params;
+	char key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
 
 	// reset and fill in the spawnVars info so that spawn functions can use
 	// them
 	level.numSpawnVars     = 0;
 	level.numSpawnVarChars = 0;
 
-	p = params;
-
 	// get each key/value pair
-	while (1)
+	while (true)
 	{
 		token = COM_ParseExt(&p, qfalse);
 		if (!token[0])
@@ -4828,25 +4837,35 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params)
 			break;
 		}
 
-		strcpy(key, token);
+		strncpy(key, token, MAX_TOKEN_CHARS);
 
 		token = COM_ParseExt(&p, qfalse);
 		if (!token[0])
 		{
-			G_Error("key \"%s\" has no value", key);
-			break;
+			G_Error("G_ScriptAction_Create: key \"%s\" has no value", key);
 		}
 
-		// add spawn var so that spawn functions can use them
+		strncpy(value, token, MAX_TOKEN_CHARS);
+
+		if (g_scriptDebug.integer)
+		{
+			G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n",
+				level.time, ent->scriptName, ent->scriptName, key, value);
+		}
+
 		if (level.numSpawnVars == MAX_SPAWN_VARS)
 		{
 			G_Error("G_ScriptAction_Create: MAX_SPAWN_VARS");
 		}
+
+		// add spawn var so that spawn functions can use them
 		level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(key);
 		level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(token);
 		level.numSpawnVars++;
 	}
-	G_SpawnGEntityFromSpawnVars();
+
+	auto create = G_SpawnGEntityFromSpawnVars();
+	trap_LinkEntity(create);
 
 	return qtrue;
 }

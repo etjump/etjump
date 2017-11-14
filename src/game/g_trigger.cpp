@@ -209,36 +209,10 @@ void SP_trigger_multiple(gentity_t *ent)
 	trap_LinkEntity(ent);
 }
 
+// ETJump: obsolete, use SP_trigger_multiple instead
 void SP_trigger_multiple_ext(gentity_t *ent)
 {
-	G_SpawnFloat("wait", "0.5", &ent->wait);
-	G_SpawnFloat("random", "0", &ent->random);
-	if (!G_SpawnVector("mins", "0 0 0", ent->r.mins))
-	{
-		G_Error("'trigger_multiple_ext' does not have mins\n");
-	}
-	if (!G_SpawnVector("maxs", "0 0 0", ent->r.maxs))
-	{
-		G_Error("'trigger_multiple_ext' does not have maxs\n");
-	}
-
-	if (ent->random >= ent->wait && ent->wait >= 0)
-	{
-		ent->random = ent->wait - (FRAMETIME * 0.001f);
-		G_Printf("trigger_multiple_ext has random >= wait\n");
-	}
-
-	ent->touch   = Touch_Multi;
-	ent->use     = Use_Multi;
-	ent->s.eType = ET_TRIGGER_MULTIPLE;
-
-	InitTrigger(ent);
-
-#ifdef VISIBLE_TRIGGERS
-	ent->r.svFlags &= ~SVF_NOCLIENT;
-#endif // VISIBLE_TRIGGERS
-
-	trap_LinkEntity(ent);
+	SP_trigger_multiple(ent);
 }
 
 /*

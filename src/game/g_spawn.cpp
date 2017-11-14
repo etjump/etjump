@@ -185,6 +185,17 @@ field_t fields[] =
 
 	{ "damageparent", FOFS(damageparent),   F_LSTRING   },
 
+	// ETJump: ETPro mapscripting support
+	{ "eflags", FOFS(s.eFlags), F_INT },
+	{ "svflags", FOFS(r.svFlags), F_INT },
+	{ "maxs", FOFS(r.maxs), F_VECTOR },
+	{ "mins", FOFS(r.mins), F_VECTOR },
+	{ "contents", FOFS(r.contents), F_INT },
+	{ "clipmask", FOFS(clipmask), F_INT },
+	{ "count2", FOFS(count2), F_INT },
+	{ "baseAngle", FOFS(s.apos.trBase), F_VECTOR },
+	{ "baseOrigin", FOFS(s.pos.trBase), F_VECTOR },
+
 	{ NULL }
 };
 
@@ -894,7 +905,7 @@ Spawn an entity and fill in all of the level fields from
 level.spawnVars[], then call the class specfic spawn function
 ===================
 */
-void G_SpawnGEntityFromSpawnVars(void)
+gentity_t *G_SpawnGEntityFromSpawnVars()
 {
 	int       i;
 	gentity_t *ent;
@@ -913,7 +924,7 @@ void G_SpawnGEntityFromSpawnVars(void)
 	if (i)
 	{
 		G_FreeEntity(ent);
-		return;
+		return nullptr;
 	}
 
 	// allowteams handling
@@ -956,6 +967,8 @@ void G_SpawnGEntityFromSpawnVars(void)
 
 	// RF, try and move it into the bot entities if possible
 	//	BotCheckBotGameEntity( ent );
+
+	return ent;
 }
 /*
 ====================

@@ -1397,6 +1397,7 @@ qboolean    G_SpawnVector2DExt(const char *key, const char *defaultString, float
 void        G_SpawnEntitiesFromString(void);
 char *G_NewString(const char *string);
 // Ridah
+gentity_t *G_SpawnGEntityFromSpawnVars();
 qboolean G_CallSpawn(gentity_t *ent);
 // done.
 char *G_AddSpawnVarToken(const char *string);
