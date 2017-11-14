@@ -1680,9 +1680,12 @@ void SpectatorClientEndFrame(gentity_t *ent)
 		if (do_respawn)
 		{
 			reinforce(ent);
-			// need to do this here as reinforce will override any value set in
-			// clientspawn (as it sets it twice and we only want to do it once)
-			ETJump::saveSystem->loadTeamQuickDeployPosition(ent, ent->client->sess.sessionTeam);
+			if (ent->client->pers.autoLoad == qtrue)
+			{
+				// need to do this here as reinforce will override any value set in
+				// clientspawn (as it sets it twice and we only want to do it once)
+				ETJump::saveSystem->loadTeamQuickDeployPosition(ent, ent->client->sess.sessionTeam);
+			}
 			return;
 		}
 
