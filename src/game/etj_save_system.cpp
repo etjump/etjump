@@ -629,7 +629,6 @@ void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent, team_t team
 	}
 
 	teleportPlayer(ent, pos);
-	VectorCopy(pos->origin, ent->r.currentOrigin);
 }
 
 // Saves backup position
