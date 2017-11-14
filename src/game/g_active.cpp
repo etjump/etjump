@@ -1683,7 +1683,9 @@ void SpectatorClientEndFrame(gentity_t *ent)
 			if (ent->client->pers.autoLoad == qtrue)
 			{
 				// need to do this here as reinforce will override any value set in
-				// clientspawn (as it sets it twice and we only want to do it once)
+				// clientspawn (ClientSpawn gets called twice and we only want to 
+				// call this once --> first call sets the origin, second call resets
+				// the origin (since we're no longer setting the origin as we already set it))
 				ETJump::saveSystem->loadTeamQuickDeployPosition(ent, ent->client->sess.sessionTeam);
 			}
 			return;
