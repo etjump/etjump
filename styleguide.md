@@ -19,7 +19,7 @@ if (isAValid()) {
 ```
 
 
-- Classes should be in a namespace. Use ETJump:: if more appropriate is not available. (e.g. DateTime:: for date utilities)
+- Everything new (ETJump related) should be in a namespace. Use ETJump:: if more appropriate is not available. (e.g. DateTime:: for date utilities)
 ```C++
 namespace ETJump {
   class Example {
