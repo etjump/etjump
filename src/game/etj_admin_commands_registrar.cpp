@@ -316,7 +316,22 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* listusers
 	*/
-	_adminCommandsHandler->subscribe('A', createCommandDefinition("listusers", "listusers", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	static const auto requiredPageOption = createOptionDefinition("page", "The page to be displayed", CommandParser::OptionDefinition::Type::Integer, true);
+	static const auto optionalRowsOption = createOptionDefinition("rows", "How many rows to display per page", CommandParser::OptionDefinition::Type::Integer, false);
+	_adminCommandsHandler->subscribe('A', createCommandDefinition("listusers", "listusers", {
+		requiredPageOption,
+		optionalRowsOption
+	}, { requiredPageOption, optionalRowsOption }), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+		const int DEFAULT_ROW_COUNT = 20;
+		const auto page = command.options.at("page").integer;
+		const auto rows = getOptionalInteger(command, "rows", DEFAULT_ROW_COUNT);
+
+		_userService->listUsers(page, rows, [clientNum, commandText]()
+		{
+			
+		});
+	});
 
 	/**
 	* map

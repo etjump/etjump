@@ -285,6 +285,7 @@
     <ClCompile Include="etj_session_repository.cpp" />
     <ClCompile Include="etj_session_service.cpp" />
     <ClCompile Include="etj_string_utilities.cpp" />
+    <ClCompile Include="etj_task_synchronizer.cpp" />
     <ClCompile Include="etj_time_utilities.cpp" />
     <ClCompile Include="etj_user_repository.cpp" />
     <ClCompile Include="etj_user_service.cpp" />
@@ -373,6 +374,7 @@
     <ClInclude Include="etj_session_service.h" />
     <ClInclude Include="etj_shared.h" />
     <ClInclude Include="etj_string_utilities.h" />
+    <ClInclude Include="etj_task_synchronizer.h" />
     <ClInclude Include="etj_time_utilities.h" />
     <ClInclude Include="etj_user.h" />
     <ClInclude Include="etj_user_repository.h" />
