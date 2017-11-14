@@ -190,12 +190,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	saveBackupPosition(ent, pos);
 
-	VectorCopy(client->ps.origin, pos->origin);
-	VectorCopy(client->ps.viewangles, pos->vangles);
-	pos->isValid = true;
-	pos->stance = client->ps.eFlags & EF_CROUCHING
-		? Crouch
-		: client->ps.eFlags & EF_PRONE ? Prone : Stand;
+	storePosition(client, pos);
 
 	if (position == 0)
 	{
@@ -470,17 +465,21 @@ void ETJump::SaveSystem::reset()
 // Used to reset positions on map change/restart
 void ETJump::SaveSystem::resetSavedPositions(gentity_t *ent)
 {
+	int clientNum = ClientNum(ent);
 	for (int saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++)
 	{
-		_clients[ClientNum(ent)].alliesSavedPositions[saveIndex].isValid = false;
-		_clients[ClientNum(ent)].axisSavedPositions[saveIndex].isValid   = false;
+		_clients[clientNum].alliesSavedPositions[saveIndex].isValid = false;
+		_clients[clientNum].axisSavedPositions[saveIndex].isValid   = false;
 	}
 
 	for (int backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++)
 	{
-		_clients[ClientNum(ent)].alliesBackupPositions[backupIndex].isValid = false;
-		_clients[ClientNum(ent)].axisBackupPositions[backupIndex].isValid   = false;
+		_clients[clientNum].alliesBackupPositions[backupIndex].isValid = false;
+		_clients[clientNum].axisBackupPositions[backupIndex].isValid   = false;
 	}
+
+	_clients[clientNum].quickDeployPositions[TEAM_ALLIES].isValid = false;
+	_clients[clientNum].quickDeployPositions[TEAM_AXIS].isValid = false;
 }
 
 // Called on client disconnect. Saves saves for future sessions
@@ -591,6 +590,48 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 	}
 }
 
+void ETJump::SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	if (team != TEAM_ALLIES && team != TEAM_AXIS)
+	{
+		return;
+	}
+
+	auto client = &_clients[ClientNum(ent)];
+	auto pos = &(client->quickDeployPositions[team]);
+
+	storePosition(ent->client, pos);
+}
+
+void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent, team_t team)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	if (team != TEAM_ALLIES && team != TEAM_AXIS)
+	{
+		return;
+	}
+
+	auto client = &_clients[ClientNum(ent)];
+	auto pos = &client->quickDeployPositions[team];
+
+	if (!pos->isValid)
+	{
+		return;
+	}
+
+	teleportPlayer(ent, pos);
+	VectorCopy(pos->origin, ent->r.currentOrigin);
+}
+
 // Saves backup position
 void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 {
@@ -622,6 +663,26 @@ void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 
 }
 
+void ETJump::SaveSystem::storePosition(gclient_s* client, SavePosition *pos)
+{
+	VectorCopy(client->ps.origin, pos->origin);
+	VectorCopy(client->ps.viewangles, pos->vangles);
+	pos->isValid = true;
+
+	if (client->ps.eFlags & EF_CROUCHING)
+	{
+		pos->stance = Crouch;
+	}
+	else if (client->ps.eFlags & EF_PRONE)
+	{
+		pos->stance = Prone;
+	}
+	else
+	{
+		pos->stance = Stand;
+	}
+}
+
 
 void ETJump::SaveSystem::teleportPlayer(gentity_t* ent, SavePosition* pos)
 {
@@ -629,7 +690,7 @@ void ETJump::SaveSystem::teleportPlayer(gentity_t* ent, SavePosition* pos)
 	client->ps.eFlags ^= EF_TELEPORT_BIT;
 	G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
 
-	VectorCopy(pos->origin, client->ps.origin);
+	G_SetOrigin(ent, pos->origin);
 	VectorClear(client->ps.velocity);
 
 	if (client->pers.loadViewAngles)

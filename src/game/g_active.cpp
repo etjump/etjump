@@ -1,5 +1,6 @@
 
 #include "g_local.h"
+#include "etj_save_system.h"
 
 /*
 ===============
@@ -1679,6 +1680,9 @@ void SpectatorClientEndFrame(gentity_t *ent)
 		if (do_respawn)
 		{
 			reinforce(ent);
+			// need to do this here as reinforce will override any value set in
+			// clientspawn (as it sets it twice and we only want to do it once)
+			ETJump::saveSystem->loadTeamQuickDeployPosition(ent, ent->client->sess.sessionTeam);
 			return;
 		}
 
