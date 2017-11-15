@@ -189,3 +189,5 @@ src/build/install.bat
 src/cgame/cgame.vcxproj.user
 src/cmake-build-debug
 src/enc_temp_folder
+*.unc-backup~
+*.md5~
