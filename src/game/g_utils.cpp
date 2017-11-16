@@ -9,14 +9,14 @@
 
 typedef struct
 {
-	char oldShader[MAX_QPATH];
-	char newShader[MAX_QPATH];
+	char  oldShader[MAX_QPATH];
+	char  newShader[MAX_QPATH];
 	float timeOffset;
 } shaderRemap_t;
 
 #define MAX_SHADER_REMAPS 128
 
-int           remapCount = 0;
+int remapCount = 0;
 shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
 
 void ETJump::initRemappedShaders()
@@ -51,8 +51,8 @@ void AddRemap(const char *oldShader, const char *newShader, float timeOffset)
 const char *BuildShaderStateConfig()
 {
 	static char buff[MAX_STRING_CHARS * 4];
-	char        out[(MAX_QPATH * 2) + 5];
-	int         i;
+	char out[(MAX_QPATH * 2) + 5];
+	int  i;
 
 	memset(buff, 0, MAX_STRING_CHARS);
 	for (i = 0; i < remapCount; i++)
@@ -192,7 +192,7 @@ NULL will be returned if the end of the list is reached.
 */
 gentity_t *G_Find(gentity_t *from, int fieldofs, const char *match)
 {
-	char      *s;
+	char *s;
 	gentity_t *max = &g_entities[level.num_entities];
 
 	if (!from)
@@ -233,7 +233,7 @@ G_FindByTargetname
 gentity_t *G_FindByTargetname(gentity_t *from, const char *match)
 {
 	gentity_t *max = &g_entities[level.num_entities];
-	int       hash = BG_StringHashValue(match);
+	int hash = BG_StringHashValue(match);
 
 	if (!from)
 	{
@@ -300,8 +300,8 @@ Selects a random entity from among the targets
 
 gentity_t *G_PickTarget(char *targetname)
 {
-	gentity_t *ent        = NULL;
-	int       num_choices = 0;
+	gentity_t *ent  = NULL;
+	int num_choices = 0;
 	gentity_t *choice[MAXCHOICES];
 
 	if (!targetname)
@@ -400,7 +400,7 @@ match (string)self.target and call their .use function
 void G_UseTargets(gentity_t *ent, gentity_t *activator)
 {
 	gentity_t *t;
-	int       hash;
+	int hash;
 
 	if (!ent)
 	{
@@ -412,7 +412,7 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator)
 		return;
 	}
 
-	t    = NULL;
+	t = NULL;
 	hash = BG_StringHashValue(ent->target);
 	while ((t = G_FindByTargetnameFast(t, ent->target, hash)) != NULL)
 	{
@@ -496,6 +496,7 @@ void G_UseTargetedEntities(gentity_t *ent, gentity_t *activator)
 {
 	int hash = 0;
 	gentity_t *t = NULL;
+
 	if (!ent)
 	{
 		return;
@@ -567,10 +568,10 @@ char *vtos(const vec3_t v)
 {
 	static int  index;
 	static char str[8][32];
-	char        *s;
+	char *s;
 
 	// use an array so that multiple vtos won't collide
-	s     = str[index];
+	s = str[index];
 	index = (index + 1) & 7;
 
 	Com_sprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
@@ -581,10 +582,10 @@ char *vtosf(const vec3_t v)
 {
 	static int  index;
 	static char str[8][64];
-	char        *s;
+	char *s;
 
 	// use an array so that multiple vtos won't collide
-	s     = str[index];
+	s = str[index];
 	index = (index + 1) & 7;
 
 	Com_sprintf(s, 64, "(%f %f %f)", v[0], v[1], v[2]);
@@ -605,9 +606,9 @@ instead of an orientation.
 */
 void G_SetMovedir(vec3_t angles, vec3_t movedir)
 {
-	static vec3_t VEC_UP       = { 0, -1, 0 };
-	static vec3_t MOVEDIR_UP   = { 0, 0, 1 };
-	static vec3_t VEC_DOWN     = { 0, -2, 0 };
+	static vec3_t VEC_UP = { 0, -1, 0 };
+	static vec3_t MOVEDIR_UP = { 0, 0, 1 };
+	static vec3_t VEC_DOWN = { 0, -2, 0 };
 	static vec3_t MOVEDIR_DOWN = { 0, 0, -1 };
 
 	if (VectorCompare(angles, VEC_UP))
@@ -629,7 +630,7 @@ void G_SetMovedir(vec3_t angles, vec3_t movedir)
 
 void G_InitGentity(gentity_t *e)
 {
-	e->inuse      = qtrue;
+	e->inuse = qtrue;
 	e->classname  = "noclass";
 	e->s.number   = e - g_entities;
 	e->r.ownerNum = ENTITYNUM_NONE;
@@ -663,7 +664,7 @@ angles and bad trails.
 */
 gentity_t *G_Spawn(void)
 {
-	int       i, force;
+	int i, force;
 	gentity_t *e;
 
 	e = NULL;   // shut up warning
@@ -710,7 +711,7 @@ gentity_t *G_Spawn(void)
 
 	// let the server system know that there are more entities
 	trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t),
-	                    &level.clients[0].ps, sizeof(level.clients[0]));
+		&level.clients[0].ps, sizeof(level.clients[0]));
 
 	G_InitGentity(e);
 	return e;
@@ -723,7 +724,7 @@ G_EntitiesFree
 */
 qboolean G_EntitiesFree(void)
 {
-	int       i;
+	int i;
 	gentity_t *e;
 
 	e = &g_entities[MAX_CLIENTS];
@@ -765,9 +766,9 @@ void G_FreeEntity(gentity_t *ed)
 	spawnCount = ed->spawnCount;
 
 	memset(ed, 0, sizeof(*ed));
-	ed->classname  = "freed";
-	ed->freetime   = level.time;
-	ed->inuse      = qfalse;
+	ed->classname = "freed";
+	ed->freetime  = level.time;
+	ed->inuse = qfalse;
 	ed->spawnCount = spawnCount;
 }
 
@@ -783,14 +784,14 @@ must be taken if the origin is right on a surface (snap towards start vector fir
 gentity_t *G_TempEntity(vec3_t origin, int event)
 {
 	gentity_t *e;
-	vec3_t    snapped;
+	vec3_t snapped;
 
-	e          = G_Spawn();
+	e = G_Spawn();
 	e->s.eType = static_cast<entityType_t>(ET_EVENTS + event);
 
-	e->classname      = "tempEntity";
-	e->eventTime      = level.time;
-	e->r.eventTime    = level.time;
+	e->classname = "tempEntity";
+	e->eventTime = level.time;
+	e->r.eventTime = level.time;
 	e->freeAfterEvent = qtrue;
 
 	VectorCopy(origin, snapped);
@@ -807,14 +808,14 @@ gentity_t *G_PopupMessage(popupMessageType_t type)
 {
 	gentity_t *e;
 
-	e                 = G_Spawn();
-	e->s.eType        = static_cast<entityType_t>(ET_EVENTS + EV_POPUPMESSAGE);
-	e->classname      = "messageent";
-	e->eventTime      = level.time;
-	e->r.eventTime    = level.time;
+	e = G_Spawn();
+	e->s.eType = static_cast<entityType_t>(ET_EVENTS + EV_POPUPMESSAGE);
+	e->classname = "messageent";
+	e->eventTime = level.time;
+	e->r.eventTime = level.time;
 	e->freeAfterEvent = qtrue;
-	e->r.svFlags      = SVF_BROADCAST;
-	e->s.effect1Time  = type;
+	e->r.svFlags = SVF_BROADCAST;
+	e->s.effect1Time = type;
 
 	// find cluster for PVS
 	trap_LinkEntity(e);
@@ -843,10 +844,10 @@ of ent.  Ent should be unlinked before calling this!
 */
 void G_KillBox(gentity_t *ent)
 {
-	int       i, num;
-	int       touch[MAX_GENTITIES];
+	int i, num;
+	int touch[MAX_GENTITIES];
 	gentity_t *hit;
-	vec3_t    mins, maxs;
+	vec3_t mins, maxs;
 
 	VectorAdd(ent->client->ps.origin, ent->r.mins, mins);
 	VectorAdd(ent->client->ps.origin, ent->r.maxs, maxs);
@@ -866,7 +867,7 @@ void G_KillBox(gentity_t *ent)
 
 		// nail it
 		G_Damage(hit, ent, ent, NULL, NULL,
-		         100000, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			100000, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 	}
 
 }
@@ -913,7 +914,7 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm)
 	if (ent->client)
 	{
 		// NERVE - SMF - commented in - externalEvents not being handled properly in Wolf right now
-		ent->client->ps.events[ent->client->ps.eventSequence & (MAX_EVENTS - 1)]     = event;
+		ent->client->ps.events[ent->client->ps.eventSequence & (MAX_EVENTS - 1)] = event;
 		ent->client->ps.eventParms[ent->client->ps.eventSequence & (MAX_EVENTS - 1)] = eventParm;
 		ent->client->ps.eventSequence++;
 		// -NERVE - SMF
@@ -929,7 +930,7 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm)
 	else
 	{
 		// NERVE - SMF - commented in - externalEvents not being handled properly in Wolf right now
-		ent->s.events[ent->s.eventSequence & (MAX_EVENTS - 1)]     = event;
+		ent->s.events[ent->s.eventSequence & (MAX_EVENTS - 1)] = event;
 		ent->s.eventParms[ent->s.eventSequence & (MAX_EVENTS - 1)] = eventParm;
 		ent->s.eventSequence++;
 		// -NERVE - SMF
@@ -941,7 +942,7 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm)
 //		ent->s.eventParm = eventParm;
 		// -NERVE - SMF
 	}
-	ent->eventTime   = level.time;
+	ent->eventTime = level.time;
 	ent->r.eventTime = level.time;
 }
 
@@ -957,7 +958,7 @@ void G_Sound(gentity_t *ent, int soundIndex)
 {
 	gentity_t *te;
 
-	te              = G_TempEntity(ent->r.currentOrigin, EV_GENERAL_SOUND);
+	te = G_TempEntity(ent->r.currentOrigin, EV_GENERAL_SOUND);
 	te->s.eventParm = soundIndex;
 }
 
@@ -969,6 +970,7 @@ G_AnimScriptSound
 void G_AnimScriptSound(int soundIndex, vec3_t org, int client)
 {
 	gentity_t *e;
+
 	e = &g_entities[client];
 	G_AddEvent(e, EV_GENERAL_SOUND, soundIndex);
 }
@@ -986,8 +988,8 @@ Sets the pos trajectory for a fixed position
 void G_SetOrigin(gentity_t *ent, vec3_t origin)
 {
 	VectorCopy(origin, ent->s.pos.trBase);
-	ent->s.pos.trType     = TR_STATIONARY;
-	ent->s.pos.trTime     = 0;
+	ent->s.pos.trType = TR_STATIONARY;
+	ent->s.pos.trTime = 0;
 	ent->s.pos.trDuration = 0;
 	VectorClear(ent->s.pos.trDelta);
 
@@ -1009,8 +1011,8 @@ void G_SetAngle(gentity_t *ent, vec3_t angle)
 {
 
 	VectorCopy(angle, ent->s.apos.trBase);
-	ent->s.apos.trType     = TR_STATIONARY;
-	ent->s.apos.trTime     = 0;
+	ent->s.apos.trType = TR_STATIONARY;
+	ent->s.apos.trTime = 0;
 	ent->s.apos.trDuration = 0;
 	VectorClear(ent->s.apos.trDelta);
 
@@ -1068,8 +1070,8 @@ void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles)
 		ent->client->ps.eFlags |= EF_TAGCONNECT;
 		ent->client->ps.eFlags &= ~EF_PRONE_MOVING;
 		ent->client->ps.eFlags &= ~EF_PRONE;
-		ent->s.eFlags          &= ~EF_PRONE_MOVING;
-		ent->s.eFlags          &= ~EF_PRONE;
+		ent->s.eFlags &= ~EF_PRONE_MOVING;
+		ent->s.eFlags &= ~EF_PRONE;
 
 	}
 
@@ -1078,9 +1080,9 @@ void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles)
 		// clear out the angles so it always starts out facing the tag direction
 		VectorClear(ent->s.angles);
 		VectorCopy(ent->s.angles, ent->s.apos.trBase);
-		ent->s.apos.trTime     = level.time;
+		ent->s.apos.trTime = level.time;
 		ent->s.apos.trDuration = 0;
-		ent->s.apos.trType     = TR_STATIONARY;
+		ent->s.apos.trType = TR_STATIONARY;
 		VectorClear(ent->s.apos.trDelta);
 		VectorClear(ent->r.currentAngles);
 	}
@@ -1148,7 +1150,7 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 	{
 	case STATE_DEFAULT:             if (ent->entstate == STATE_UNDERCONSTRUCTION)
 		{
-			ent->clipmask   = ent->realClipmask;
+			ent->clipmask = ent->realClipmask;
 			ent->r.contents = ent->realContents;
 			if (!ent->realNonSolidBModel)
 			{
@@ -1156,7 +1158,7 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 			}
 		}
 
-		ent->entstate   = STATE_DEFAULT;
+		ent->entstate = STATE_DEFAULT;
 		ent->s.powerups = STATE_DEFAULT;
 
 		if (ent->s.eType == ET_WOLF_OBJECTIVE)
@@ -1175,8 +1177,8 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 
 		// deal with any entities in the solid
 		{
-			int       listedEntities, e;
-			int       entityList[MAX_GENTITIES];
+			int listedEntities, e;
+			int entityList[MAX_GENTITIES];
 			gentity_t *check, *block;
 
 			listedEntities = trap_EntitiesInBox(ent->r.absmin, ent->r.absmax, entityList, MAX_GENTITIES);
@@ -1239,8 +1241,8 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 
 		break;
 	case STATE_UNDERCONSTRUCTION:   ent->entstate = STATE_UNDERCONSTRUCTION;
-		ent->s.powerups                           = STATE_UNDERCONSTRUCTION;
-		ent->realClipmask                         = ent->clipmask;
+		ent->s.powerups = STATE_UNDERCONSTRUCTION;
+		ent->realClipmask = ent->clipmask;
 		if (ent->s.eType != ET_CONSTRUCTIBLE)                               // don't make nonsolid as we want to make them partially solid for staged construction
 		{
 			ent->clipmask = 0;
@@ -1284,7 +1286,7 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 		break;
 	case STATE_INVISIBLE:           if (ent->entstate == STATE_UNDERCONSTRUCTION)
 		{
-			ent->clipmask   = ent->realClipmask;
+			ent->clipmask = ent->realClipmask;
 			ent->r.contents = ent->realContents;
 			if (!ent->realNonSolidBModel)
 			{
@@ -1292,7 +1294,7 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 			}
 		}
 
-		ent->entstate   = STATE_INVISIBLE;
+		ent->entstate = STATE_INVISIBLE;
 		ent->s.powerups = STATE_INVISIBLE;
 
 		if (!Q_stricmp(ent->classname, "misc_mg42"))
@@ -1329,10 +1331,10 @@ void G_SetEntState(gentity_t *ent, entState_t state)
 
 static qboolean G_LoadCampaignsFromFile(const char *filename)
 {
-	int        handle;
+	int handle;
 	pc_token_t token;
 	const char *s;
-	qboolean   mapFound = qfalse;
+	qboolean mapFound = qfalse;
 
 	handle = trap_PC_LoadSource(filename);
 
@@ -1490,7 +1492,7 @@ static qboolean G_LoadCampaignsFromFile(const char *filename)
 						if (g_campaigns[level.campaignCount].mapCount == g_currentCampaignMap.integer)
 						{
 							g_campaigns[level.campaignCount].current = g_campaigns[level.campaignCount].mapCount;
-							mapFound                                 = qtrue;
+							mapFound = qtrue;
 							//trap_Cvar_Set( "g_currentCampaignMap", va( "%i", g_campaigns[level.campaignCount].mapCount ) );
 						}
 
@@ -1542,15 +1544,15 @@ qboolean G_MapIsValidCampaignStartMap(void)
 
 void G_ParseCampaigns(void)
 {
-	int      numdirs;
-	char     filename[128];
-	char     dirlist[1024];
-	char     *dirptr;
-	int      i;
-	int      dirlen;
+	int  numdirs;
+	char filename[128];
+	char dirlist[1024];
+	char *dirptr;
+	int  i;
+	int  dirlen;
 	qboolean mapFound = qfalse;
 
-	level.campaignCount   = 0;
+	level.campaignCount = 0;
 	level.currentCampaign = -1;
 	memset(&g_campaigns, 0, sizeof(g_campaignInfo_t) * MAX_CAMPAIGNS);
 
@@ -1590,7 +1592,7 @@ void G_ParseCampaigns(void)
 				level.newCampaign = qtrue;
 
 				g_campaigns[level.campaignCount].current = 0;
-				level.currentCampaign                    = i;
+				level.currentCampaign = i;
 
 				break;
 			}
@@ -1688,7 +1690,7 @@ BotFindEntityForName
 gentity_t *BotFindEntityForName(char *name)
 {
 	gentity_t *trav;
-	int       i;
+	int i;
 
 	for (trav = g_entities, i = 0; i < level.maxclients; i++, trav++)
 	{
@@ -1715,7 +1717,7 @@ gentity_t *BotFindEntityForName(char *name)
 
 gentity_t *G_FindMissile(gentity_t *start, weapon_t weap)
 {
-	int       i    = start ? (start - g_entities) + 1 : 0;
+	int i = start ? (start - g_entities) + 1 : 0;
 	gentity_t *ent = &g_entities[i];
 
 	for ( ; i < level.num_entities; i++, ent++)
@@ -1825,6 +1827,7 @@ qboolean G_ConstructionIsDestroyable(gentity_t *ent)
 gentity_t *G_ConstructionForTeam(gentity_t *toi, team_t team)
 {
 	gentity_t *targ = toi->target_ent;
+
 	if (!targ || targ->s.eType != ET_CONSTRUCTIBLE)
 	{
 		return NULL;
@@ -1990,7 +1993,7 @@ int ClientNum(gentity_t *ent)
 const char *ClientIPAddr(gentity_t *ent)
 {
 	char userinfo[MAX_INFO_STRING] = "\0";
-	char *ip                       = NULL;
+	char *ip = NULL;
 
 	if (strlen(ent->client->sess.ip) == 0)
 	{
@@ -2002,9 +2005,10 @@ const char *ClientIPAddr(gentity_t *ent)
 	return ent->client->sess.ip;
 }
 
-gentity_t* ETJump::soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex)
+gentity_t *ETJump::soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex)
 {
 	gentity_t *te;
+
 	te = G_TempEntity(origin, eventType);
 	te->s.eventParm = soundIndex;
 	return te;

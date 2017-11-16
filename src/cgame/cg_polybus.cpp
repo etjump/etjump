@@ -5,7 +5,7 @@
 #define MAX_PB_BUFFERS  128
 
 polyBuffer_t cg_polyBuffers[MAX_PB_BUFFERS];
-qboolean     cg_polyBuffersInuse[MAX_PB_BUFFERS];
+qboolean cg_polyBuffersInuse[MAX_PB_BUFFERS];
 
 polyBuffer_t *CG_PB_FindFreePolyBuffer(qhandle_t shader, int numVerts, int numIndicies)
 {
@@ -34,7 +34,7 @@ polyBuffer_t *CG_PB_FindFreePolyBuffer(qhandle_t shader, int numVerts, int numIn
 			continue;
 		}
 
-		cg_polyBuffersInuse[i]   = qtrue;
+		cg_polyBuffersInuse[i] = qtrue;
 		cg_polyBuffers[i].shader = shader;
 
 		return &cg_polyBuffers[i];
@@ -45,10 +45,10 @@ polyBuffer_t *CG_PB_FindFreePolyBuffer(qhandle_t shader, int numVerts, int numIn
 	{
 		if (!cg_polyBuffersInuse[i])
 		{
-			cg_polyBuffersInuse[i]        = qtrue;
-			cg_polyBuffers[i].shader      = shader;
+			cg_polyBuffersInuse[i] = qtrue;
+			cg_polyBuffers[i].shader = shader;
 			cg_polyBuffers[i].numIndicies = 0;
-			cg_polyBuffers[i].numVerts    = 0;
+			cg_polyBuffers[i].numVerts = 0;
 
 			return &cg_polyBuffers[i];
 		}

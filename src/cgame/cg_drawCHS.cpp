@@ -24,29 +24,32 @@ static playerState_t *CG_CHS_GetPlayerState(void)
 static void CG_CHS_ViewTrace(trace_t *trace)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	vec3_t        start, end;
+	vec3_t start, end;
 
 	VectorCopy(cg.refdef.vieworg, start);
 	VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
 	CG_Trace(trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-	         CONTENTS_SOLID);
+		CONTENTS_SOLID);
 }
 
 static void CG_CHS_Speed(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", VectorLength(ps->velocity));
 }
 
 static void CG_CHS_Health(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%d", ps->stats[STAT_HEALTH]);
 }
 
 static void CG_CHS_Ammo(char *buf, int size)
 {
 	int ammo, clips, akimboammo;
+
 	CG_PlayerAmmoValue(&ammo, &clips, &akimboammo);
 	if (akimboammo >= 0)
 	{
@@ -65,15 +68,15 @@ static void CG_CHS_Ammo(char *buf, int size)
 static void CG_CHS_Distance_XY(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
 
 	CG_CHS_ViewTrace(&trace);
 
 	if (trace.fraction != 1.0)
 	{
 		Com_sprintf(buf, size, "%.0f",
-		            sqrt(SQR(trace.endpos[0] - ps->origin[0])
-		                 + SQR(trace.endpos[1] - ps->origin[1])));
+			sqrt(SQR(trace.endpos[0] - ps->origin[0])
+				+ SQR(trace.endpos[1] - ps->origin[1])));
 	}
 	else
 	{
@@ -84,7 +87,7 @@ static void CG_CHS_Distance_XY(char *buf, int size)
 static void CG_CHS_Distance_Z(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
 
 	CG_CHS_ViewTrace(&trace);
 
@@ -101,7 +104,7 @@ static void CG_CHS_Distance_Z(char *buf, int size)
 static void CG_CHS_Distance_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
 
 	CG_CHS_ViewTrace(&trace);
 
@@ -124,7 +127,7 @@ static void CG_CHS_Distance_ViewXYZ(char *buf, int size)
 	if (trace.fraction != 1.0)
 	{
 		Com_sprintf(buf, size, "%.0f",
-		            Distance(trace.endpos, cg.refdef.vieworg));
+			Distance(trace.endpos, cg.refdef.vieworg));
 	}
 	else
 	{
@@ -135,17 +138,17 @@ static void CG_CHS_Distance_ViewXYZ(char *buf, int size)
 static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
 
 	CG_CHS_ViewTrace(&trace);
 
 	if (trace.fraction != 1.0)
 	{
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
-		            sqrt(SQR(trace.endpos[0] - ps->origin[0])
-		                 + SQR(trace.endpos[1] - ps->origin[1])),
-		            trace.endpos[2] - ps->origin[2],
-		            Distance(trace.endpos, ps->origin));
+			sqrt(SQR(trace.endpos[0] - ps->origin[0])
+				+ SQR(trace.endpos[1] - ps->origin[1])),
+			trace.endpos[2] - ps->origin[2],
+			Distance(trace.endpos, ps->origin));
 	}
 	else
 	{
@@ -156,17 +159,17 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
 
 	CG_CHS_ViewTrace(&trace);
 
 	if (trace.fraction != 1.0)
 	{
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
-		            sqrt(SQR(trace.endpos[0] - ps->origin[0])
-		                 + SQR(trace.endpos[1] - ps->origin[1])),
-		            trace.endpos[2] - ps->origin[2],
-		            Distance(trace.endpos, cg.refdef.vieworg));
+			sqrt(SQR(trace.endpos[0] - ps->origin[0])
+				+ SQR(trace.endpos[1] - ps->origin[1])),
+			trace.endpos[2] - ps->origin[2],
+			Distance(trace.endpos, cg.refdef.vieworg));
 	}
 	else
 	{
@@ -183,9 +186,9 @@ static void CG_CHS_Look_XYZ(char *buf, int size)
 	if (trace.fraction != 1.0)
 	{
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
-		            trace.plane.dist * trace.plane.normal[0],
-		            trace.plane.dist * trace.plane.normal[1],
-		            trace.plane.dist * trace.plane.normal[2]);
+			trace.plane.dist * trace.plane.normal[0],
+			trace.plane.dist * trace.plane.normal[1],
+			trace.plane.dist * trace.plane.normal[2]);
 	}
 	else
 	{
@@ -196,98 +199,113 @@ static void CG_CHS_Look_XYZ(char *buf, int size)
 static void CG_CHS_Speed_X(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", ps->velocity[0]);
 }
 
 static void CG_CHS_Speed_Y(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", ps->velocity[1]);
 }
 
 static void CG_CHS_Speed_Z(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", ps->velocity[2]);
 }
 
 static void CG_CHS_Speed_XY(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f",
-	            sqrt(SQR(ps->velocity[0]) + SQR(ps->velocity[1])));
+		sqrt(SQR(ps->velocity[0]) + SQR(ps->velocity[1])));
 }
 
 static void CG_CHS_Speed_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", VectorLength(ps->velocity));
 }
 
 static void CG_CHS_Speed_Forward(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f",
-	            DotProduct(ps->velocity, cg.refdef.viewaxis[0]));
+		DotProduct(ps->velocity, cg.refdef.viewaxis[0]));
 }
 
 static void CG_CHS_Speed_Sideways(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f",
-	            DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+		DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
 }
 
 static void CG_CHS_Speed_Forward_Sideways(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f",
-	            DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
-	            DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+		DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
+		DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
 }
 
 static void CG_CHS_Speed_XY_Forward_Sideways(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            sqrt(SQR(ps->velocity[0]) + SQR(ps->velocity[1])),
-	            DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
-	            DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
+		sqrt(SQR(ps->velocity[0]) + SQR(ps->velocity[1])),
+		DotProduct(ps->velocity, cg.refdef.viewaxis[0]),
+		DotProduct(ps->velocity, cg.refdef.viewaxis[1]));
 }
 
 static void CG_CHS_Pitch(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.2f", ps->viewangles[PITCH]);
 }
 
 static void CG_CHS_Yaw(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.2f", ps->viewangles[YAW]);
 }
 
 static void CG_CHS_Roll(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.2f", ps->viewangles[ROLL]);
 }
 
 static void CG_CHS_Position_X(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", ps->origin[0]);
 }
 
 static void CG_CHS_Position_Y(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", ps->origin[1]);
 }
 
 static void CG_CHS_Position_Z(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f", ps->origin[2]);
 }
 
@@ -309,58 +327,65 @@ static void CG_CHS_ViewPosition_Z(char *buf, int size)
 static void CG_CHS_Pitch_Yaw(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.2f %.2f",
-	            ps->viewangles[PITCH], ps->viewangles[YAW]);
+		ps->viewangles[PITCH], ps->viewangles[YAW]);
 }
 
 static void CG_CHS_Player_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            ps->origin[0], ps->origin[1], ps->origin[2]);
+		ps->origin[0], ps->origin[1], ps->origin[2]);
 }
 
 static void CG_CHS_Player_XYZ_Pitch_Yaw(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f %.0f %.2f %.2f",
-	            ps->origin[0], ps->origin[1], ps->origin[2],
-	            ps->viewangles[PITCH], ps->viewangles[YAW]);
+		ps->origin[0], ps->origin[1], ps->origin[2],
+		ps->viewangles[PITCH], ps->viewangles[YAW]);
 }
 
 static void CG_CHS_ViewPosition_XYZ_Pitch_Yaw(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f %.0f %.2f %.2f",
-	            cg.refdef.vieworg[0], cg.refdef.vieworg[1], cg.refdef.vieworg[2],
-	            ps->viewangles[PITCH], ps->viewangles[YAW]);
+		cg.refdef.vieworg[0], cg.refdef.vieworg[1], cg.refdef.vieworg[2],
+		ps->viewangles[PITCH], ps->viewangles[YAW]);
 }
 
 static void CG_CHS_Position_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            ps->origin[0], ps->origin[1], ps->origin[2]);
+		ps->origin[0], ps->origin[1], ps->origin[2]);
 }
 
 static void CG_CHS_ViewPosition_XYZ(char *buf, int size)
 {
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            cg.refdef.vieworg[0], cg.refdef.vieworg[1], cg.refdef.vieworg[2]);
+		cg.refdef.vieworg[0], cg.refdef.vieworg[1], cg.refdef.vieworg[2]);
 }
 
 static void CG_CHS_Angles_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.2f %.2f %.2f",
-	            ps->viewangles[PITCH], ps->viewangles[YAW], ps->viewangles[ROLL]);
+		ps->viewangles[PITCH], ps->viewangles[YAW], ps->viewangles[ROLL]);
 }
 
 static void CG_CHS_Velocity_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            ps->velocity[0], ps->velocity[1], ps->velocity[2]);
+		ps->velocity[0], ps->velocity[1], ps->velocity[2]);
 }
 
 static void CG_CHS_LastJumpPosition_XYZ(char *buf, int size)
@@ -437,7 +462,7 @@ static stat_t stats[] =
 /*  48 */ { NULL                                               }, // empty
 /*  49 */ { NULL                                               }, // empty
 
-/*  50 */ {  CG_CHS_LastJumpPosition_XYZ, "Jump XYZ", "jump x y z" },
+/*  50 */ { CG_CHS_LastJumpPosition_XYZ, "Jump XYZ", "jump x y z"},
 
 
 	{ NULL                                               }
@@ -520,7 +545,7 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName, ali
 		break;
 	}
 	CG_Text_Paint_Ext(x - x_off, y + y_off, CHSCHAR_SIZEX, CHSCHAR_SIZEY,
-	                  colorWhite, buf, 0, 0, 0, &cgs.media.limboFont1);
+		colorWhite, buf, 0, 0, 0, &cgs.media.limboFont1);
 }
 
 void CG_DrawCHS(void)
@@ -567,6 +592,7 @@ void CG_DrawCHS(void)
 void CG_InfoCHS_f(void)
 {
 	int i;
+
 	for (i = 0; i < sizeof(stats) / sizeof(stats[0]); i++)
 	{
 		if (!stats[i].fun || !stats[i].desc)

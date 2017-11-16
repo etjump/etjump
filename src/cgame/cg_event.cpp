@@ -15,16 +15,16 @@ CG_Obituary
 */
 static void CG_Obituary(entityState_t *ent)
 {
-	int          mod;
-	int          target, attacker;
-	const char         *message;
-	const char         *message2;
-	char         targetName[32];
+	int mod;
+	int target, attacker;
+	const char *message;
+	const char *message2;
+	char targetName[32];
 	clientInfo_t *ci, *ca;    // JPW NERVE ca = attacker
 
-	target   = ent->otherEntityNum;
+	target = ent->otherEntityNum;
 	attacker = ent->otherEntityNum2;
-	mod      = ent->eventParm;
+	mod = ent->eventParm;
 
 	if (target < 0 || target >= MAX_CLIENTS)
 	{
@@ -35,7 +35,7 @@ static void CG_Obituary(entityState_t *ent)
 	if (attacker < 0 || attacker >= MAX_CLIENTS)
 	{
 		attacker = ENTITYNUM_WORLD;
-		ca       = NULL;
+		ca = NULL;
 	}
 	else
 	{
@@ -196,13 +196,13 @@ static void CG_ItemPickup(int itemNum)
 				if (!cg.weaponSelect)
 				{
 					cg.weaponSelectTime = cg.time;
-					cg.weaponSelect     = itemid;
+					cg.weaponSelect = itemid;
 				}
 				// 1 - always switch to new weap (Q3A default)
 				else if (cg_autoswitch.integer == 1)
 				{
 					cg.weaponSelectTime = cg.time;
-					cg.weaponSelect     = itemid;
+					cg.weaponSelect = itemid;
 				}
 				else
 				{
@@ -217,7 +217,7 @@ static void CG_ItemPickup(int itemNum)
 						if (!COM_BitCheck(cg.snap->ps.weapons, itemid))
 						{
 							cg.weaponSelectTime = cg.time;
-							cg.weaponSelect     = itemid;
+							cg.weaponSelect = itemid;
 						}
 					}   // end 2
 
@@ -233,7 +233,7 @@ static void CG_ItemPickup(int itemNum)
 								if (wpbank_pickup > wpbank_cur)
 								{
 									cg.weaponSelectTime = cg.time;
-									cg.weaponSelect     = itemid;
+									cg.weaponSelect = itemid;
 								}
 							}
 						}
@@ -259,8 +259,8 @@ Also called by playerstate transition
 typedef struct
 {
 	char *tag;
-	int refEntOfs;
-	int anim;
+	int  refEntOfs;
+	int  anim;
 } painAnimForTag_t;
 
 #define PEFOFS(x) ((int)&(((playerEntity_t *)0)->x))
@@ -292,10 +292,10 @@ void CG_PainEvent(centity_t *cent, int health, qboolean crouching)
 		snd = "*pain100_1.wav";
 	}
 	trap_S_StartSound(NULL, cent->currentState.number, CHAN_VOICE,
-	                  CG_CustomSound(cent->currentState.number, snd));
+		CG_CustomSound(cent->currentState.number, snd));
 
 	// save pain time for programitic twitch animation
-	cent->pe.painTime       = cg.time;
+	cent->pe.painTime = cg.time;
 	cent->pe.painDirection ^= 1;
 }
 
@@ -318,7 +318,7 @@ CG_Explode
 typedef struct fxSound_s
 {
 	int max;
-	qhandle_t sound[3];
+	qhandle_t  sound[3];
 	const char *soundfile[3];
 } fxSound_t;
 
@@ -394,13 +394,13 @@ void CG_Explode(centity_t *cent, vec3_t origin, vec3_t dir, qhandle_t shader)
 		sound = fxSounds[cent->currentState.frame].sound[sound];
 
 		CG_Explodef(origin,
-		            dir,
-		            cent->currentState.density,             // mass
-		            cent->currentState.frame,               // type
-		            sound,                                  // sound
-		            cent->currentState.weapon,              // forceLowGrav
-		            shader
-		            );
+			dir,
+			cent->currentState.density,                     // mass
+			cent->currentState.frame,                       // type
+			sound,                                          // sound
+			cent->currentState.weapon,                      // forceLowGrav
+			shader
+			);
 	}
 	else
 	{
@@ -416,13 +416,13 @@ void CG_Explode(centity_t *cent, vec3_t origin, vec3_t dir, qhandle_t shader)
 		}
 
 		CG_Explodef(origin,
-		            dir,
-		            cent->currentState.density,             // mass
-		            cent->currentState.frame,               // type
-		            sound,                                  // sound
-		            cent->currentState.weapon,              // forceLowGrav
-		            shader
-		            );
+			dir,
+			cent->currentState.density,                     // mass
+			cent->currentState.frame,                       // type
+			sound,                                          // sound
+			cent->currentState.weapon,                      // forceLowGrav
+			shader
+			);
 	}
 
 }
@@ -467,15 +467,15 @@ void CG_Rubble(centity_t *cent, vec3_t origin, vec3_t dir, qhandle_t shader)
 		sound = fxSounds[cent->currentState.frame].sound[sound];
 
 		CG_RubbleFx(origin,
-		            dir,
-		            cent->currentState.density,             // mass
-		            cent->currentState.frame,               // type
-		            sound,                                  // sound
-		            cent->currentState.weapon,              // forceLowGrav
-		            shader,
-		            cent->currentState.angles2[0],
-		            cent->currentState.angles2[1]
-		            );
+			dir,
+			cent->currentState.density,                     // mass
+			cent->currentState.frame,                       // type
+			sound,                                          // sound
+			cent->currentState.weapon,                      // forceLowGrav
+			shader,
+			cent->currentState.angles2[0],
+			cent->currentState.angles2[1]
+			);
 	}
 	else
 	{
@@ -491,15 +491,15 @@ void CG_Rubble(centity_t *cent, vec3_t origin, vec3_t dir, qhandle_t shader)
 		}
 
 		CG_RubbleFx(origin,
-		            dir,
-		            cent->currentState.density,             // mass
-		            cent->currentState.frame,               // type
-		            sound,                                  // sound
-		            cent->currentState.weapon,              // forceLowGrav
-		            shader,
-		            cent->currentState.angles2[0],
-		            cent->currentState.angles2[1]
-		            );
+			dir,
+			cent->currentState.density,                     // mass
+			cent->currentState.frame,                       // type
+			sound,                                          // sound
+			cent->currentState.weapon,                      // forceLowGrav
+			shader,
+			cent->currentState.angles2[0],
+			cent->currentState.angles2[1]
+			);
 	}
 }
 
@@ -511,13 +511,13 @@ CG_RubbleFx
 */
 void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t sound, int forceLowGrav, qhandle_t shader, float speedscale, float sizescale)
 {
-	int           i;
+	int i;
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           howmany, total, totalsounds;
-	int           pieces[6];    // how many of each piece
-	qhandle_t     modelshader = 0;
-	float         materialmul = 1;      // multiplier for different types
+	int howmany, total, totalsounds;
+	int pieces[6];              // how many of each piece
+	qhandle_t modelshader = 0;
+	float materialmul = 1;              // multiplier for different types
 
 	memset(&pieces, 0, sizeof(pieces));
 
@@ -558,7 +558,7 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 	}
 
 	totalsounds = 0;
-	total       = pieces[5] + pieces[4] + pieces[3] + pieces[2] + pieces[1] + pieces[0];
+	total = pieces[5] + pieces[4] + pieces[3] + pieces[2] + pieces[1] + pieces[0];
 
 	if (sound)
 	{
@@ -572,20 +572,20 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 
 	for (i = 0; i < POSSIBLE_PIECES; i++)
 	{
-		leBounceSoundType_t snd    = LEBS_NONE;
-		int                 hmodel = 0;
-		float               scale;
-		int                 endtime;
+		leBounceSoundType_t snd = LEBS_NONE;
+		int hmodel = 0;
+		float scale;
+		int endtime;
 		for (howmany = 0; howmany < pieces[i]; howmany++)
 		{
 
-			scale   = 1.0f;
+			scale = 1.0f;
 			endtime = 0;    // set endtime offset for faster/slower fadeouts
 
 			switch (type)
 			{
 			case 0: // "wood"
-				snd    = LEBS_WOOD;
+				snd = LEBS_WOOD;
 				hmodel = cgs.media.debWood[i];
 
 				if (i == 0)
@@ -683,7 +683,7 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 				break;
 
 			case 4: // "brick"
-				snd    = LEBS_ROCK;
+				snd = LEBS_ROCK;
 				hmodel = cgs.media.debBlock[i];
 				break;
 
@@ -748,7 +748,7 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 			le = CG_AllocLocalEntity();
 			re = &le->refEntity;
 
-			le->leType    = LE_FRAGMENT;
+			le->leType = LE_FRAGMENT;
 			le->startTime = cg.time;
 
 			le->endTime = (le->startTime + 5000 + random() * 5000) + endtime;
@@ -768,12 +768,12 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 			{   // Rafael added this because glass looks funky when it fades out
 				// TBD: need to look into this so that they fade out correctly
 				re->fadeStartTime = le->endTime;
-				re->fadeEndTime   = le->endTime;
+				re->fadeEndTime = le->endTime;
 			}
 			else
 			{
 				re->fadeStartTime = le->endTime - 4000;
-				re->fadeEndTime   = le->endTime;
+				re->fadeEndTime = le->endTime;
 			}
 
 			if (total > 5)
@@ -788,15 +788,15 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 				}
 			}
 
-			le->lifeRate   = 1.0 / (le->endTime - le->startTime);
-			le->leFlags    = LEF_TUMBLE;
+			le->lifeRate = 1.0 / (le->endTime - le->startTime);
+			le->leFlags  = LEF_TUMBLE;
 			le->leMarkType = LEMT_NONE;
 
 			VectorCopy(origin, re->origin);
 			AxisCopy(axisDefault, re->axis);
 
 			le->leBounceSoundType = snd;
-			re->hModel            = hmodel;
+			re->hModel = hmodel;
 
 			// inherit shader
 			if (modelshader)
@@ -827,7 +827,7 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 			{
 			case 6: // fabric
 				le->bounceFactor = 0.0;
-				materialmul      = 0.3;     // rotation speed
+				materialmul = 0.3;          // rotation speed
 				break;
 			default:
 				le->bounceFactor = 0.4;
@@ -836,8 +836,8 @@ void CG_RubbleFx(vec3_t origin, vec3_t dir, int mass, int type, sfxHandle_t soun
 
 
 			// rotation
-			le->angles.trType     = TR_LINEAR;
-			le->angles.trTime     = cg.time;
+			le->angles.trType = TR_LINEAR;
+			le->angles.trTime = cg.time;
 			le->angles.trBase[0]  = rand() & 31;
 			le->angles.trBase[1]  = rand() & 31;
 			le->angles.trBase[2]  = rand() & 31;
@@ -896,13 +896,13 @@ CG_Explodef
 */
 void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound, int forceLowGrav, qhandle_t shader)
 {
-	int           i;
+	int i;
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           howmany, total, totalsounds;
-	int           pieces[6];    // how many of each piece
-	qhandle_t     modelshader = 0;
-	float         materialmul = 1;      // multiplier for different types
+	int howmany, total, totalsounds;
+	int pieces[6];              // how many of each piece
+	qhandle_t modelshader = 0;
+	float materialmul = 1;              // multiplier for different types
 
 	memset(&pieces, 0, sizeof(pieces));
 
@@ -942,7 +942,7 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 		}
 	}
 
-	total       = pieces[5] + pieces[4] + pieces[3] + pieces[2] + pieces[1] + pieces[0];
+	total = pieces[5] + pieces[4] + pieces[3] + pieces[2] + pieces[1] + pieces[0];
 	totalsounds = 0;
 
 	if (sound)
@@ -957,20 +957,20 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 
 	for (i = 0; i < POSSIBLE_PIECES; i++)
 	{
-		leBounceSoundType_t snd    = LEBS_NONE;
-		int                 hmodel = 0;
-		float               scale;
-		int                 endtime;
+		leBounceSoundType_t snd = LEBS_NONE;
+		int hmodel = 0;
+		float scale;
+		int endtime;
 		for (howmany = 0; howmany < pieces[i]; howmany++)
 		{
 
-			scale   = 1.0f;
+			scale = 1.0f;
 			endtime = 0;    // set endtime offset for faster/slower fadeouts
 
 			switch (type)
 			{
 			case 0: // "wood"
-				snd    = LEBS_WOOD;
+				snd = LEBS_WOOD;
 				hmodel = cgs.media.debWood[i];
 
 				if (i == 0)
@@ -1068,7 +1068,7 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 				break;
 
 			case 4: // "brick"
-				snd    = LEBS_ROCK;
+				snd = LEBS_ROCK;
 				hmodel = cgs.media.debBlock[i];
 				break;
 
@@ -1133,7 +1133,7 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 			le = CG_AllocLocalEntity();
 			re = &le->refEntity;
 
-			le->leType    = LE_FRAGMENT;
+			le->leType = LE_FRAGMENT;
 			le->startTime = cg.time;
 
 			le->endTime = (le->startTime + 5000 + random() * 5000) + endtime;
@@ -1153,12 +1153,12 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 			{   // Rafael added this because glass looks funky when it fades out
 				// TBD: need to look into this so that they fade out correctly
 				re->fadeStartTime = le->endTime;
-				re->fadeEndTime   = le->endTime;
+				re->fadeEndTime = le->endTime;
 			}
 			else
 			{
 				re->fadeStartTime = le->endTime - 4000;
-				re->fadeEndTime   = le->endTime;
+				re->fadeEndTime = le->endTime;
 			}
 
 			if (total > 5)
@@ -1173,15 +1173,15 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 				}
 			}
 
-			le->lifeRate   = 1.0 / (le->endTime - le->startTime);
-			le->leFlags    = LEF_TUMBLE;
+			le->lifeRate = 1.0 / (le->endTime - le->startTime);
+			le->leFlags  = LEF_TUMBLE;
 			le->leMarkType = LEMT_NONE;
 
 			VectorCopy(origin, re->origin);
 			AxisCopy(axisDefault, re->axis);
 
 			le->leBounceSoundType = snd;
-			re->hModel            = hmodel;
+			re->hModel = hmodel;
 
 			// inherit shader
 			if (modelshader)
@@ -1212,7 +1212,7 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 			{
 			case 6: // fabric
 				le->bounceFactor = 0.0;
-				materialmul      = 0.3;     // rotation speed
+				materialmul = 0.3;          // rotation speed
 				break;
 			default:
 				le->bounceFactor = 0.4;
@@ -1221,8 +1221,8 @@ void CG_Explodef(vec3_t origin, vec3_t dir, int mass, int type, qhandle_t sound,
 
 
 			// rotation
-			le->angles.trType     = TR_LINEAR;
-			le->angles.trTime     = cg.time;
+			le->angles.trType = TR_LINEAR;
+			le->angles.trTime = cg.time;
 			le->angles.trBase[0]  = rand() & 31;
 			le->angles.trBase[1]  = rand() & 31;
 			le->angles.trBase[2]  = rand() & 31;
@@ -1308,7 +1308,7 @@ void CG_Effect(centity_t *cent, vec3_t origin, vec3_t dir)
 //	if(cent->currentState.eventParm & 4)	// smoke
 	if (cent->currentState.eventParm & 7)
 	{
-		int    i, j;
+		int i, j;
 		vec3_t sprVel, sprOrg;
 		// explosion sprite animation
 		VectorScale(dir, 16, sprVel);
@@ -1370,7 +1370,7 @@ void CG_Effect(centity_t *cent, vec3_t origin, vec3_t dir)
 			sh = trap_R_RegisterShader(va("textures/%s", s));   // FIXME: don't do this here.  only for testing
 
 		}
-		cent->currentState.eFlags      &= ~EF_INHERITSHADER; // don't try to inherit shader
+		cent->currentState.eFlags &= ~EF_INHERITSHADER;      // don't try to inherit shader
 		cent->currentState.dl_intensity = 0;        // no sound
 		CG_Explode(cent, origin, newdir, sh);
 	}
@@ -1381,18 +1381,18 @@ void CG_Effect(centity_t *cent, vec3_t origin, vec3_t dir)
 		le = CG_AllocLocalEntity();
 		re = &le->refEntity;
 
-		le->leType    = LE_FRAGMENT;
+		le->leType = LE_FRAGMENT;
 		le->startTime = cg.time;
-		le->endTime   = le->startTime + 5000 + random() * 3000;
+		le->endTime = le->startTime + 5000 + random() * 3000;
 //----(SA)	fading out
 		re->fadeStartTime = le->endTime - 4000;
-		re->fadeEndTime   = le->endTime;
+		re->fadeEndTime = le->endTime;
 //----(SA)	end
 
 		VectorCopy(origin, re->origin);
 		AxisCopy(axisDefault, re->axis);
 		//	re->hModel = hModel;
-		re->hModel     = cgs.media.gibIntestine;
+		re->hModel = cgs.media.gibIntestine;
 		le->pos.trType = TR_GRAVITY;
 		VectorCopy(origin, le->pos.trBase);
 
@@ -1405,17 +1405,17 @@ void CG_Effect(centity_t *cent, vec3_t origin, vec3_t dir)
 		le->bounceFactor = 0.3;
 
 		le->leBounceSoundType = LEBS_BLOOD;
-		le->leMarkType        = LEMT_BLOOD;
+		le->leMarkType = LEMT_BLOOD;
 	}
 
 
 	if (cent->currentState.eventParm & 64) // debris trails (the black strip that Ryan did)
 	{
 		CG_AddDebris(origin, dir,
-		             280,       // speed
-		             1400,      // duration
-		             // 15 + rand()%5 );	// count
-		             7 + rand() % 2);   // count
+			280,                // speed
+			1400,               // duration
+			// 15 + rand()%5 );	// count
+			7 + rand() % 2);            // count
 	}
 }
 
@@ -1438,14 +1438,14 @@ void CG_Shard(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           type;
-	int           howmany;
-	int           i;
-	int           rval;
+	int type;
+	int howmany;
+	int i;
+	int rval;
 
 	qboolean isflyingdebris = qfalse;
 
-	type    = cent->currentState.density;
+	type = cent->currentState.density;
 	howmany = cent->currentState.frame;
 
 	for (i = 0; i < howmany; i++)
@@ -1453,29 +1453,29 @@ void CG_Shard(centity_t *cent, vec3_t origin, vec3_t dir)
 		le = CG_AllocLocalEntity();
 		re = &le->refEntity;
 
-		le->leType    = LE_FRAGMENT;
+		le->leType = LE_FRAGMENT;
 		le->startTime = cg.time;
-		le->endTime   = le->startTime + 5000 + random() * 5000;
+		le->endTime = le->startTime + 5000 + random() * 5000;
 
 //----(SA)	fading out
 		re->fadeStartTime = le->endTime - 1000;
-		re->fadeEndTime   = le->endTime;
+		re->fadeEndTime = le->endTime;
 //----(SA)	end
 
 		if (type == 999)
 		{
-			le->startTime     = cg.time;
-			le->endTime       = le->startTime + 100;
+			le->startTime = cg.time;
+			le->endTime = le->startTime + 100;
 			re->fadeStartTime = le->endTime - 100;
-			re->fadeEndTime   = le->endTime;
-			type              = 1;
+			re->fadeEndTime = le->endTime;
+			type = 1;
 
 			isflyingdebris = qtrue;
 		}
 
 
-		le->lifeRate     = 1.0 / (le->endTime - le->startTime);
-		le->leFlags      = LEF_TUMBLE;
+		le->lifeRate = 1.0 / (le->endTime - le->startTime);
+		le->leFlags  = LEF_TUMBLE;
 		le->bounceFactor = 0.4;
 		// le->leBounceSoundType	= LEBS_WOOD;
 		le->leMarkType = LEMT_NONE;
@@ -1567,7 +1567,7 @@ void CG_Shard(centity_t *cent, vec3_t origin, vec3_t dir)
 		VectorCopy(origin, le->pos.trBase);
 		VectorNormalize(dir);
 		VectorScale(dir, 10 * howmany, le->pos.trDelta);
-		le->pos.trTime      = cg.time;
+		le->pos.trTime = cg.time;
 		le->pos.trDelta[0] += ((random() * 100) - 50);
 		le->pos.trDelta[1] += ((random() * 100) - 50);
 		if (type)
@@ -1580,8 +1580,8 @@ void CG_Shard(centity_t *cent, vec3_t origin, vec3_t dir)
 
 		}
 		// rotation
-		le->angles.trType     = TR_LINEAR;
-		le->angles.trTime     = cg.time;
+		le->angles.trType = TR_LINEAR;
+		le->angles.trTime = cg.time;
 		le->angles.trBase[0]  = rand() & 31;
 		le->angles.trBase[1]  = rand() & 31;
 		le->angles.trBase[2]  = rand() & 31;
@@ -1598,24 +1598,24 @@ void CG_ShardJunk(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           type;
+	int type;
 
 	type = cent->currentState.density;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
 
-	le->leType    = LE_FRAGMENT;
+	le->leType = LE_FRAGMENT;
 	le->startTime = cg.time;
-	le->endTime   = le->startTime + 5000 + random() * 5000;
+	le->endTime = le->startTime + 5000 + random() * 5000;
 
 	re->fadeStartTime = le->endTime - 1000;
-	re->fadeEndTime   = le->endTime;
+	re->fadeEndTime = le->endTime;
 
-	le->lifeRate     = 1.0 / (le->endTime - le->startTime);
-	le->leFlags      = LEF_TUMBLE;
+	le->lifeRate = 1.0 / (le->endTime - le->startTime);
+	le->leFlags  = LEF_TUMBLE;
 	le->bounceFactor = 0.4;
-	le->leMarkType   = LEMT_NONE;
+	le->leMarkType = LEMT_NONE;
 
 	VectorCopy(origin, re->origin);
 	AxisCopy(axisDefault, re->axis);
@@ -1627,7 +1627,7 @@ void CG_ShardJunk(centity_t *cent, vec3_t origin, vec3_t dir)
 	VectorCopy(origin, le->pos.trBase);
 	VectorNormalize(dir);
 	VectorScale(dir, 10 * 8, le->pos.trDelta);
-	le->pos.trTime      = cg.time;
+	le->pos.trTime = cg.time;
 	le->pos.trDelta[0] += ((random() * 100) - 50);
 	le->pos.trDelta[1] += ((random() * 100) - 50);
 
@@ -1651,26 +1651,26 @@ void CG_Debris(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           type;
+	int type;
 
 	type = cent->currentState.density;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
 
-	le->leType    = LE_FRAGMENT;
+	le->leType = LE_FRAGMENT;
 	le->startTime = cg.time;
-	le->endTime   = le->startTime + 5000 + random() * 5000;
+	le->endTime = le->startTime + 5000 + random() * 5000;
 
 	re->fadeStartTime = le->endTime - 1000;
-	re->fadeEndTime   = le->endTime;
+	re->fadeEndTime = le->endTime;
 
-	le->lifeRate     = 1.0 / (le->endTime - le->startTime);
-	le->leFlags      = LEF_TUMBLE | LEF_TUMBLE_SLOW;
+	le->lifeRate = 1.0 / (le->endTime - le->startTime);
+	le->leFlags  = LEF_TUMBLE | LEF_TUMBLE_SLOW;
 	le->bounceFactor = 0.4;
-	le->leMarkType   = LEMT_NONE;
-	le->breakCount   = 1;
-	le->sizeScale    = 0.5;
+	le->leMarkType = LEMT_NONE;
+	le->breakCount = 1;
+	le->sizeScale  = 0.5;
 
 	VectorCopy(origin, re->origin);
 	AxisCopy(axisDefault, re->axis);
@@ -1684,8 +1684,8 @@ void CG_Debris(centity_t *cent, vec3_t origin, vec3_t dir)
 	le->pos.trTime = cg.time;
 
 	// rotation
-	le->angles.trType    = TR_LINEAR;
-	le->angles.trTime    = cg.time;
+	le->angles.trType = TR_LINEAR;
+	le->angles.trTime = cg.time;
 	le->angles.trBase[2] = rand() & 31;
 
 	le->angles.trDelta[2] = (100 + (rand() & 500)) - 300;
@@ -1723,7 +1723,7 @@ void CG_MortarImpact(centity_t *cent, vec3_t origin, int sfx, qboolean dist)
 		if (cent->currentState.clientNum == cg.snap->ps.clientNum && cg.mortarImpactTime != -2)
 		{
 			VectorCopy(origin, cg.mortarImpactPos);
-			cg.mortarImpactTime     = cg.time;
+			cg.mortarImpactTime = cg.time;
 			cg.mortarImpactOutOfMap = qfalse;
 		}
 	}
@@ -1771,13 +1771,13 @@ void CG_MachineGunEjectBrassNew(centity_t *cent);
 #define DEBUGNAME(x) if (cg_debugEvents.integer) { CG_Printf(x "\n"); }
 void CG_EntityEvent(centity_t *cent, vec3_t position)
 {
-	entityState_t    *es;
-	int              event;
-	vec3_t           dir;
-	const char       *s;
-	int              clientNum;
-	clientInfo_t     *ci;
-	char             tempStr[MAX_QPATH];
+	entityState_t *es;
+	int event;
+	vec3_t dir;
+	const char *s;
+	int clientNum;
+	clientInfo_t *ci;
+	char tempStr[MAX_QPATH];
 	bg_playerclass_t *classInfo;
 	bg_character_t   *character;
 
@@ -1786,13 +1786,13 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	float  gdist;
 // jpw
 
-	static int footstepcnt       = 0;
+	static int footstepcnt = 0;
 	static int splashfootstepcnt = 0;
 
 	//Feen: PGM
 	qboolean portalDetected = qfalse;
 
-	es    = &cent->currentState;
+	es = &cent->currentState;
 	event = es->event & ~EV_EVENT_BITS;
 
 	if (cg_debugEvents.integer)
@@ -1811,7 +1811,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	{
 		clientNum = 0;
 	}
-	ci        = &cgs.clientinfo[clientNum];
+	ci = &cgs.clientinfo[clientNum];
 	classInfo = CG_PlayerClassForClientinfo(ci, cent);
 	character = CG_CharacterForClientinfo(ci, cent);
 
@@ -1864,7 +1864,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		{
 			// smooth landing z changes
 			cg.landChange = -8;
-			cg.landTime   = cg.time;
+			cg.landTime = cg.time;
 		}
 		break;
 
@@ -1897,7 +1897,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			{
 				// smooth landing z changes
 				cg.landChange = -16;
-				cg.landTime   = cg.time;
+				cg.landTime = cg.time;
 			}
 
 
@@ -1932,7 +1932,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			{
 				// smooth landing z changes
 				cg.landChange = -16;
-				cg.landTime   = cg.time;
+				cg.landTime = cg.time;
 			}
 
 
@@ -1967,7 +1967,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			{
 				// smooth landing z changes
 				cg.landChange = -24;
-				cg.landTime   = cg.time;
+				cg.landTime = cg.time;
 			}
 
 
@@ -2002,7 +2002,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			{
 				// smooth landing z changes
 				cg.landChange = -24;
-				cg.landTime   = cg.time;
+				cg.landTime = cg.time;
 			}
 
 
@@ -2064,8 +2064,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_STEP");
 		{
 			float oldStep;
-			int   delta;
-			int   step;
+			int delta;
+			int step;
 
 			if (clientNum != cg.predictedPlayerState.clientNum)
 			{
@@ -2093,7 +2093,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			}
 
 			// add this amount
-			step          = 4 * (event - EV_STEP_4 + 1);
+			step = 4 * (event - EV_STEP_4 + 1);
 			cg.stepChange = oldStep + step;
 			if (cg.stepChange > MAX_STEP_CHANGE)
 			{
@@ -2150,7 +2150,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_ITEM_PICKUP");
 		{
 			gitem_t *item;
-			int     index;
+			int index;
 
 			index = es->eventParm;      // player predicted
 
@@ -2194,7 +2194,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_GLOBAL_ITEM_PICKUP");
 		{
 			gitem_t *item;
-			int     index;
+			int index;
 
 			index = es->eventParm;      // player predicted
 
@@ -2232,7 +2232,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		if (es->number == cg.snap->ps.clientNum)
 		{
 			cg.predictedPlayerState.weapAnim = ((cg.predictedPlayerState.weapAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | PM_IdleAnimForWeapon(cg.snap->ps.weapon);
-			cent->overheatTime               = cg.time; // used to make the barrels smoke when overheated
+			cent->overheatTime = cg.time;               // used to make the barrels smoke when overheated
 		}
 
 		if (BG_PlayerMounted(es->eFlags))
@@ -2286,7 +2286,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 // jpw
 
 	case EV_NOAMMO:
-		if (!cg_weaponSound.integer) break;
+		if (!cg_weaponSound.integer)
+		{
+			break;
+		}
 	case EV_WEAPONSWITCHED:
 		DEBUGNAME("EV_NOAMMO");
 		if ((es->weapon != WP_GRENADE_LAUNCHER) &&
@@ -2304,22 +2307,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		}
 
 		if (es->number == cg.snap->ps.clientNum && (
-		        (cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable(cg.weaponSelect)) ||
-		        es->weapon == WP_MORTAR_SET ||
-		        es->weapon == WP_MOBILE_MG42_SET ||
-		        es->weapon == WP_GRENADE_LAUNCHER ||
-		        es->weapon == WP_GRENADE_PINEAPPLE ||
-		        es->weapon == WP_DYNAMITE ||
-		        es->weapon == WP_SMOKE_MARKER ||
-		        es->weapon == WP_PANZERFAUST ||
-		        es->weapon == WP_ARTY ||
-		        es->weapon == WP_LANDMINE ||
-		        es->weapon == WP_SATCHEL ||
-		        es->weapon == WP_SATCHEL_DET ||
-		        es->weapon == WP_TRIPMINE ||
-		        es->weapon == WP_SMOKE_BOMB ||
-		        es->weapon == WP_AMMO ||
-		        es->weapon == WP_MEDKIT))
+				(cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable(cg.weaponSelect)) ||
+				es->weapon == WP_MORTAR_SET ||
+				es->weapon == WP_MOBILE_MG42_SET ||
+				es->weapon == WP_GRENADE_LAUNCHER ||
+				es->weapon == WP_GRENADE_PINEAPPLE ||
+				es->weapon == WP_DYNAMITE ||
+				es->weapon == WP_SMOKE_MARKER ||
+				es->weapon == WP_PANZERFAUST ||
+				es->weapon == WP_ARTY ||
+				es->weapon == WP_LANDMINE ||
+				es->weapon == WP_SATCHEL ||
+				es->weapon == WP_SATCHEL_DET ||
+				es->weapon == WP_TRIPMINE ||
+				es->weapon == WP_SMOKE_BOMB ||
+				es->weapon == WP_AMMO ||
+				es->weapon == WP_MEDKIT))
 		{
 			CG_OutOfAmmoChange(event == EV_WEAPONSWITCHED ? qfalse : qtrue);
 		}
@@ -2691,7 +2694,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			if (cgs.demoCam.renderingFreeCam)
 			{
 				trap_S_StartLocalSound(CG_CustomSound(es->number, s), CHAN_AUTO);
-			} 
+			}
 			else
 			{
 				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_AUTO, CG_CustomSound(es->number, s));
@@ -2757,7 +2760,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_DEATH3:
 		DEBUGNAME("EV_DEATHx");
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE,
-		                  CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
+			CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
 		break;
 
 
@@ -2825,7 +2828,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	{
 		float pitch, yaw;
 		pitch = cent->currentState.angles[0];
-		yaw   = cent->currentState.angles[1];
+		yaw = cent->currentState.angles[1];
 		CG_RumbleEfx(pitch, yaw);
 	}
 	break;
@@ -2837,10 +2840,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_EMITTER:
 	{
 		localEntity_t *le;
-		le             = CG_AllocLocalEntity();
-		le->leType     = LE_EMITTER;
-		le->startTime  = cg.time;
-		le->endTime    = le->startTime + 20000;
+		le = CG_AllocLocalEntity();
+		le->leType = LE_EMITTER;
+		le->startTime = cg.time;
+		le->endTime = le->startTime + 20000;
 		le->pos.trType = TR_STATIONARY;
 		VectorCopy(cent->currentState.origin, le->pos.trBase);
 		VectorCopy(cent->currentState.origin2, le->angles.trBase);
@@ -2865,9 +2868,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	case EV_SPARKS_ELECTRIC:
 	case EV_SPARKS:
 	{
-		int    numsparks;
-		int    i;
-		int    duration;
+		int numsparks;
+		int i;
+		int duration;
 		float  x, y;
 		float  speed;
 		vec3_t source, dest;
@@ -2878,9 +2881,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		}
 		numsparks = rand() % cent->currentState.density;
 		duration  = cent->currentState.frame;
-		x         = cent->currentState.angles2[0];
-		y         = cent->currentState.angles2[1];
-		speed     = cent->currentState.angles2[2];
+		x = cent->currentState.angles2[0];
+		y = cent->currentState.angles2[1];
+		speed = cent->currentState.angles2[2];
 
 		if (!numsparks)
 		{
@@ -2917,7 +2920,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		//int	count;
 
 		numsparks = cent->currentState.density;
-		speed     = cent->currentState.angles2[2];
+		speed = cent->currentState.angles2[2];
 
 		CG_AddBulletParticles(cent->currentState.origin, cent->currentState.angles, speed, 800, numsparks, 1.0f);
 
@@ -3035,7 +3038,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 	case EV_POPUPMESSAGE:
 	{
-		const char *str   = CG_GetPMItemText(cent);
+		const char *str = CG_GetPMItemText(cent);
 		qhandle_t  shader = CG_GetPMItemIcon(cent);
 		if (str)
 		{
@@ -3394,7 +3397,7 @@ skipEvent:
 	{
 		event = cent->currentState.events[i & (MAX_EVENTS - 1)];
 
-		cent->currentState.event     = event;
+		cent->currentState.event = event;
 		cent->currentState.eventParm = cent->currentState.eventParms[i & (MAX_EVENTS - 1)];
 		CG_EntityEvent(cent, cent->lerpOrigin);
 	}

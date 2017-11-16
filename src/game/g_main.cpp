@@ -31,10 +31,10 @@ typedef struct
 
 namespace ETJump
 {
-	std::shared_ptr<DeathrunSystem> deathrunSystem;
-	std::shared_ptr<SaveSystem> saveSystem;
-	std::shared_ptr<Database> database;
-	std::shared_ptr<Session> session;
+std::shared_ptr<DeathrunSystem> deathrunSystem;
+std::shared_ptr<SaveSystem> saveSystem;
+std::shared_ptr<Database> database;
+std::shared_ptr<Session>  session;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ static void initializeETJump()
 {
 	ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
 	ETJump::database = std::make_shared<Database>();
-	ETJump::session = std::make_shared<Session>(ETJump::database);
+	ETJump::session  = std::make_shared<Session>(ETJump::database);
 	ETJump::saveSystem = std::make_shared<ETJump::SaveSystem>(ETJump::session);
 }
 
@@ -65,7 +65,7 @@ gentity_t g_entities[MAX_GENTITIES];
 gclient_t g_clients[MAX_CLIENTS];
 
 g_campaignInfo_t g_campaigns[MAX_CAMPAIGNS];
-int              saveGamePending;   // 0 = no, 1 = check, 2 = loading
+int saveGamePending;                // 0 = no, 1 = check, 2 = loading
 
 mapEntityData_Team_t mapEntityData[2];
 
@@ -501,7 +501,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_banner3,                   "g_banner3",                   "www.etjump.com",                                         CVAR_ARCHIVE },
 	{ &g_banner4,                   "g_banner4",                   "Developed by Zero, Feengur and Setup",                   CVAR_ARCHIVE },
 	{ &g_banner5,                   "g_banner5",                   "Thanks for choosing ETJump!",                            CVAR_ARCHIVE },
-	{&g_banners , "g_banners", "1", CVAR_ARCHIVE},
+	{ &g_banners,                   "g_banners",                   "1",                                                      CVAR_ARCHIVE },
 
 	//Feen: PGM
 	{ &g_portalDebug,               "g_portalDebug",               "0",                                                      CVAR_CHEAT | CVAR_ARCHIVE },
@@ -535,9 +535,9 @@ cvarTable_t gameCvarTable[] =
 
 	{ &g_customVoiceChat,           "g_customVoiceChat",           "1",                                                      CVAR_ARCHIVE },
 
-	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
-	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
-	{ &g_moverScale, "g_moverScale", "1.0", 0 },
+	{ &shared,                      "shared",                      "0",                                                      CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
+	{ &vote_minVoteDuration,        "vote_minVoteDuration",        "5000",                                                   CVAR_ARCHIVE },
+	{ &g_moverScale,                "g_moverScale",                "1.0",                                                    0 },
 
 };
 
@@ -623,7 +623,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 void QDECL G_Printf(const char *fmt, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, fmt);
 	Q_vsnprintf(text, sizeof(text), fmt, argptr);
@@ -637,7 +637,7 @@ void QDECL G_Printf(const char *fmt, ...);
 void QDECL G_DPrintf(const char *fmt, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	if (!g_developer.integer)
 	{
@@ -656,7 +656,7 @@ void QDECL G_DPrintf(const char *fmt, ...);
 void QDECL G_Error(const char *fmt, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, fmt);
 	Q_vsnprintf(text, sizeof(text), fmt, argptr);
@@ -798,16 +798,16 @@ qboolean G_EmplacedGunIsRepairable(gentity_t *ent, gentity_t *other)
 
 void G_CheckForCursorHints(gentity_t *ent)
 {
-	vec3_t        forward, right, up, offset, end;
-	trace_t       *tr;
-	float         dist;
-	float         chMaxDist = CH_MAX_DIST;
-	gentity_t     *checkEnt, *traceEnt = 0;
+	vec3_t forward, right, up, offset, end;
+	trace_t *tr;
+	float dist;
+	float chMaxDist = CH_MAX_DIST;
+	gentity_t *checkEnt, *traceEnt = 0;
 	playerState_t *ps;
-	int           hintType, hintDist, hintVal;
-	qboolean      zooming;  // indirectHit means the checkent was not the ent hit by the trace (checkEnt!=traceEnt)
-	int           trace_contents;       // DHM - Nerve
-	int           numOfIgnoredEnts = 0;
+	int hintType, hintDist, hintVal;
+	qboolean zooming;       // indirectHit means the checkent was not the ent hit by the trace (checkEnt!=traceEnt)
+	int trace_contents;                 // DHM - Nerve
+	int numOfIgnoredEnts = 0;
 
 	if (!ent->client)
 	{
@@ -864,7 +864,7 @@ void G_CheckForCursorHints(gentity_t *ent)
 		gentity_t *constructible = G_IsConstructible(ent->client->sess.sessionTeam, ent->client->touchingTOI);
 		if (constructible)
 		{
-			ps->serverCursorHint    = HINT_CONSTRUCTIBLE;
+			ps->serverCursorHint = HINT_CONSTRUCTIBLE;
 			ps->serverCursorHintVal = (int)constructible->s.angles2[0];
 			return;
 		}
@@ -874,7 +874,7 @@ void G_CheckForCursorHints(gentity_t *ent)
 	{
 		if (ent->client->landmineSpottedTime && level.time - ent->client->landmineSpottedTime < 500)
 		{
-			ps->serverCursorHint    = HINT_LANDMINE;
+			ps->serverCursorHint = HINT_LANDMINE;
 			ps->serverCursorHintVal = ent->client->landmineSpotted ? ent->client->landmineSpotted->count2 : 0;
 			return;
 		}
@@ -1324,7 +1324,7 @@ void G_CheckForCursorHints(gentity_t *ent)
 
 	if (dist <= Square(hintDist))
 	{
-		ps->serverCursorHint    = hintType;
+		ps->serverCursorHint = hintType;
 		ps->serverCursorHintVal = hintVal;
 	}
 
@@ -1334,7 +1334,7 @@ void G_SetTargetName(gentity_t *ent, char *targetname)
 {
 	if (targetname && *targetname)
 	{
-		ent->targetname     = targetname;
+		ent->targetname = targetname;
 		ent->targetnamehash = BG_StringHashValue(targetname);
 	}
 	else
@@ -1357,8 +1357,8 @@ All but the last will have the teamchain field set to the next one
 void G_FindTeams(void)
 {
 	gentity_t *e, *e2;
-	int       i, j;
-	int       c, c2;
+	int i, j;
+	int c, c2;
 
 	c  = 0;
 	c2 = 0;
@@ -1459,9 +1459,9 @@ G_RegisterCvars
 */
 void G_RegisterCvars(void)
 {
-	int         i;
+	int i;
 	cvarTable_t *cv;
-	qboolean    remapped = qfalse;
+	qboolean remapped = qfalse;
 
 	level.server_settings = 0;
 
@@ -1520,12 +1520,12 @@ G_UpdateCvars
 */
 void G_UpdateCvars(void)
 {
-	int         i;
+	int i;
 	cvarTable_t *cv;
-	qboolean    fToggles          = qfalse;
-	qboolean    fVoteFlags        = qfalse;
-	qboolean    remapped          = qfalse;
-	qboolean    chargetimechanged = qfalse;
+	qboolean fToggles = qfalse;
+	qboolean fVoteFlags = qfalse;
+	qboolean remapped = qfalse;
+	qboolean chargetimechanged = qfalse;
 
 	for (i = 0, cv = gameCvarTable ; i < gameCvarTableSize ; i++, cv++)
 	{
@@ -1556,31 +1556,31 @@ void G_UpdateCvars(void)
 				{
 					level.soldierChargeTime[0] = g_soldierChargeTime.integer * level.soldierChargeTimeModifier[0];
 					level.soldierChargeTime[1] = g_soldierChargeTime.integer * level.soldierChargeTimeModifier[1];
-					chargetimechanged          = qtrue;
+					chargetimechanged = qtrue;
 				}
 				else if (cv->vmCvar == &g_medicChargeTime)
 				{
 					level.medicChargeTime[0] = g_medicChargeTime.integer * level.medicChargeTimeModifier[0];
 					level.medicChargeTime[1] = g_medicChargeTime.integer * level.medicChargeTimeModifier[1];
-					chargetimechanged        = qtrue;
+					chargetimechanged = qtrue;
 				}
 				else if (cv->vmCvar == &g_engineerChargeTime)
 				{
 					level.engineerChargeTime[0] = g_engineerChargeTime.integer * level.engineerChargeTimeModifier[0];
 					level.engineerChargeTime[1] = g_engineerChargeTime.integer * level.engineerChargeTimeModifier[1];
-					chargetimechanged           = qtrue;
+					chargetimechanged = qtrue;
 				}
 				else if (cv->vmCvar == &g_LTChargeTime)
 				{
 					level.lieutenantChargeTime[0] = g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[0];
 					level.lieutenantChargeTime[1] = g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[1];
-					chargetimechanged             = qtrue;
+					chargetimechanged = qtrue;
 				}
 				else if (cv->vmCvar == &g_covertopsChargeTime)
 				{
 					level.covertopsChargeTime[0] = g_covertopsChargeTime.integer * level.covertopsChargeTimeModifier[0];
 					level.covertopsChargeTime[1] = g_covertopsChargeTime.integer * level.covertopsChargeTimeModifier[1];
-					chargetimechanged            = qtrue;
+					chargetimechanged = qtrue;
 				}
 				else if (cv->vmCvar == &match_readypercent)
 				{
@@ -1698,7 +1698,7 @@ void G_UpdateCvars(void)
 // Reset particular server variables back to defaults if a config is voted in.
 void G_wipeCvars(void)
 {
-	int         i;
+	int i;
 	cvarTable_t *pCvars;
 
 	for (i = 0, pCvars = gameCvarTable; i < gameCvarTableSize; i++, pCvars++)
@@ -1718,8 +1718,9 @@ void G_wipeCvars(void)
 
 void G_ExecMapSpecificConfig()
 {
-	int          len = 0;
-	fileHandle_t f   = 0;
+	int len = 0;
+	fileHandle_t f = 0;
+
 	len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
 	if (len <= 0)
 	{
@@ -1788,14 +1789,15 @@ G_InitGame
 */
 void G_InitGame(int levelTime, int randomSeed, int restart)
 {
-	int        i;
-	char       cs[MAX_INFO_STRING];
+	int  i;
+	char cs[MAX_INFO_STRING];
 	const char *Months[12] =
 	{
 		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 	qtime_t ct;
+
 	trap_RealTime(&ct);
 
 	G_Printf("\n\n------- Game Initialization -------\n");
@@ -1837,7 +1839,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	// set some level globals
 	i = level.server_settings;
 	{
-		qboolean   oldspawning = level.spawning;
+		qboolean oldspawning = level.spawning;
 		voteInfo_t votedata;
 
 		memcpy(&votedata, &level.voteInfo, sizeof(voteInfo_t));
@@ -1848,8 +1850,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 		level.spawning = oldspawning;
 	}
-	level.time            = levelTime;
-	level.startTime       = levelTime;
+	level.time = levelTime;
+	level.startTime = levelTime;
 	level.server_settings = i;
 
 	for (i = 0; i < level.numConnectedClients; i++)
@@ -1863,16 +1865,16 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 	level.warmupModificationCount = g_warmup.modificationCount;
 
-	level.soldierChargeTime[0]    = level.soldierChargeTime[1] = g_soldierChargeTime.integer;
-	level.medicChargeTime[0]      = level.medicChargeTime[1] = g_medicChargeTime.integer;
-	level.engineerChargeTime[0]   = level.engineerChargeTime[1] = g_engineerChargeTime.integer;
+	level.soldierChargeTime[0] = level.soldierChargeTime[1] = g_soldierChargeTime.integer;
+	level.medicChargeTime[0] = level.medicChargeTime[1] = g_medicChargeTime.integer;
+	level.engineerChargeTime[0] = level.engineerChargeTime[1] = g_engineerChargeTime.integer;
 	level.lieutenantChargeTime[0] = level.lieutenantChargeTime[1] = g_LTChargeTime.integer;
 
 	level.covertopsChargeTime[0] = level.covertopsChargeTime[1] = g_covertopsChargeTime.integer;
 
-	level.soldierChargeTimeModifier[0]    = level.soldierChargeTimeModifier[1] = 1.f;
-	level.medicChargeTimeModifier[0]      = level.medicChargeTimeModifier[1] = 1.f;
-	level.engineerChargeTimeModifier[0]   = level.engineerChargeTimeModifier[1] = 1.f;
+	level.soldierChargeTimeModifier[0] = level.soldierChargeTimeModifier[1] = 1.f;
+	level.medicChargeTimeModifier[0] = level.medicChargeTimeModifier[1] = 1.f;
+	level.engineerChargeTimeModifier[0] = level.engineerChargeTimeModifier[1] = 1.f;
 	level.lieutenantChargeTimeModifier[0] = level.lieutenantChargeTimeModifier[1] = 1.f;
 	level.covertopsChargeTimeModifier[0]  = level.covertopsChargeTimeModifier[1] = 1.f;
 
@@ -1991,7 +1993,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 	// let the server system know where the entites are
 	trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t),
-	                    &level.clients[0].ps, sizeof(level.clients[0]));
+		&level.clients[0].ps, sizeof(level.clients[0]));
 
 	// Reset the amount of timerun timers
 	level.timerunNamesCount = 0;
@@ -2118,10 +2120,10 @@ void G_ShutdownGame(int restart)
 
 	// Arnout: gametype latching
 	if  (
-	    ((g_gametype.integer == GT_WOLF || g_gametype.integer == GT_WOLF_CAMPAIGN) && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_GT_WOLF)) ||
-	    (g_gametype.integer == GT_WOLF_STOPWATCH && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_STOPWATCH)) ||
-	    (g_gametype.integer == GT_WOLF_LMS && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_LMS))
-	    )
+		((g_gametype.integer == GT_WOLF || g_gametype.integer == GT_WOLF_CAMPAIGN) && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_GT_WOLF)) ||
+		(g_gametype.integer == GT_WOLF_STOPWATCH && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_STOPWATCH)) ||
+		(g_gametype.integer == GT_WOLF_LMS && (g_entities[ENTITYNUM_WORLD].r.worldflags & NO_LMS))
+		)
 	{
 
 		if (!(g_entities[ENTITYNUM_WORLD].r.worldflags & NO_GT_WOLF))
@@ -2168,7 +2170,7 @@ void G_ShutdownGame(int restart)
 void QDECL Com_Error(int unused, const char *error, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, error);
 	Q_vsnprintf(text, sizeof(text), error, argptr);
@@ -2182,7 +2184,7 @@ void QDECL Com_Error(int level, const char *error, ...);
 void QDECL Com_Printf(const char *msg, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, msg);
 	Q_vsnprintf(text, sizeof(text), msg, argptr);
@@ -2301,16 +2303,16 @@ int QDECL SortRanks(const void *a, const void *b)
 void etpro_PlayerInfo(void)
 {
 	//128 bits
-	char      playerinfo[MAX_CLIENTS + 1];
+	char playerinfo[MAX_CLIENTS + 1];
 	gentity_t *e;
-	team_t    playerteam;
-	int       i;
-	int       lastclient;
+	team_t playerteam;
+	int i;
+	int lastclient;
 
 	memset(playerinfo, 0, sizeof(playerinfo));
 
 	lastclient = -1;
-	e          = &g_entities[0];
+	e = &g_entities[0];
 	for (i = 0; i < MAX_CLIENTS; i++, e++)
 	{
 		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED)
@@ -2360,14 +2362,14 @@ void CalculateRanks(void)
 //	int		rank;
 //	int		score;
 //	int		newScore;
-	char      teaminfo[TEAM_NUM_TEAMS][256]; // OSP
+	char teaminfo[TEAM_NUM_TEAMS][256];      // OSP
 	gclient_t *cl;
 
-	level.follow1                   = -1;
-	level.follow2                   = -1;
-	level.numConnectedClients       = 0;
-	level.numNonSpectatorClients    = 0;
-	level.numPlayingClients         = 0;
+	level.follow1 = -1;
+	level.follow2 = -1;
+	level.numConnectedClients = 0;
+	level.numNonSpectatorClients = 0;
+	level.numPlayingClients = 0;
 	level.voteInfo.numVotingClients = 0;        // don't count bots
 
 	level.numFinalDead[0] = 0;      // NERVE - SMF
@@ -2460,7 +2462,7 @@ void CalculateRanks(void)
 	}
 
 	qsort(level.sortedClients, level.numConnectedClients,
-	      sizeof(level.sortedClients[0]), SortRanks);
+		sizeof(level.sortedClients[0]), SortRanks);
 
 	// set the rank value for all clients that are connected and not spectators
 	// in team games, rank is just the order of the teams, 0=red, 1=blue, 2=tied
@@ -2569,13 +2571,13 @@ void MoveClientToIntermission(gentity_t *ent)
 	// memset( ent->client->ps.powerups, 0, sizeof(ent->client->ps.powerups) );
 
 	ent->client->ps.eFlags = 0;
-	ent->s.eFlags          = 0;
-	ent->s.eType           = ET_GENERAL;
-	ent->s.modelindex      = 0;
-	ent->s.loopSound       = 0;
-	ent->s.event           = 0;
-	ent->s.events[0]       = ent->s.events[1] = ent->s.events[2] = ent->s.events[3] = 0; // DHM - Nerve
-	ent->r.contents        = 0;
+	ent->s.eFlags = 0;
+	ent->s.eType  = ET_GENERAL;
+	ent->s.modelindex = 0;
+	ent->s.loopSound  = 0;
+	ent->s.event = 0;
+	ent->s.events[0] = ent->s.events[1] = ent->s.events[2] = ent->s.events[3] = 0;       // DHM - Nerve
+	ent->r.contents  = 0;
 }
 
 /*
@@ -2588,10 +2590,10 @@ This is also used for spectator spawns
 void FindIntermissionPoint(void)
 {
 	gentity_t *ent = NULL, *target;
-	vec3_t    dir;
-	char      cs[MAX_STRING_CHARS];         // DHM - Nerve
-	const char      *buf;                         // DHM - Nerve
-	int       winner;                       // DHM - Nerve
+	vec3_t dir;
+	char cs[MAX_STRING_CHARS];              // DHM - Nerve
+	const char *buf;                              // DHM - Nerve
+	int winner;                             // DHM - Nerve
 
 	// NERVE - SMF - if the match hasn't ended yet, and we're just a spectator
 	if (!level.intermissiontime)
@@ -2609,7 +2611,7 @@ void FindIntermissionPoint(void)
 	}
 
 	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
-	buf    = Info_ValueForKey(cs, "winner");
+	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
 
 	// Change from scripting value for winner (0==AXIS, 1==ALLIES) to spawnflag value
@@ -2666,7 +2668,7 @@ BeginIntermission
 */
 void BeginIntermission(void)
 {
-	int       i;
+	int i;
 	gentity_t *client;
 
 	if (g_gamestate.integer == GS_INTERMISSION)
@@ -2709,7 +2711,7 @@ or moved to a new level based on the "nextmap" cvar
 */
 void ExitLevel(void)
 {
-	int       i;
+	int i;
 	gclient_t *cl;
 
 	if (g_gametype.integer == GT_WOLF_CAMPAIGN)
@@ -2770,11 +2772,11 @@ void ExitLevel(void)
 	{
 		trap_SendConsoleCommand(EXEC_APPEND, "vstr nextmap\n");
 	}
-	level.changemap        = NULL;
+	level.changemap = NULL;
 	level.intermissiontime = 0;
 
 	// reset all the scores so we don't enter the intermission again
-	level.teamScores[TEAM_AXIS]   = 0;
+	level.teamScores[TEAM_AXIS] = 0;
 	level.teamScores[TEAM_ALLIES] = 0;
 	if (g_gametype.integer != GT_WOLF_CAMPAIGN)
 	{
@@ -2819,9 +2821,10 @@ Print to the logfile with a time stamp if it is open
 void QDECL G_LogPrintf(const char *fmt, ...)
 {
 	va_list argptr;
-	char    string[1024];
+	char string[1024];
 	qtime_t rt;
-	int     min, hour, sec, l;
+	int min, hour, sec, l;
+
 	trap_RealTime(&rt);
 
 	hour = rt.tm_hour;
@@ -2859,7 +2862,7 @@ Append information about this game to the log file
 */
 void LogExit(const char *string)
 {
-	int       i;
+	int i;
 	gclient_t *cl;
 
 	// NERVE - SMF - do not allow LogExit to be called in non-playing gamestate
@@ -2921,11 +2924,11 @@ wait 10 seconds before going on.
 void CheckIntermissionExit(void)
 {
 	static int fActions = 0;
-	qboolean   exit     = qtrue;
-	int        i;
+	qboolean exit = qtrue;
+	int i;
 	// rain - for #105
 	gclient_t *cl;
-	int       ready = 0, notReady = 0;
+	int ready = 0, notReady = 0;
 
 	// OSP - end-of-level auto-actions
 	//		  maybe make the weapon stats dump available to single player?
@@ -2969,7 +2972,7 @@ void CheckIntermissionExit(void)
 	if (level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer))
 	{
 		level.ref_allready = qfalse;
-		exit               = qtrue;
+		exit = qtrue;
 	}
 	else
 	{
@@ -3000,7 +3003,7 @@ qboolean ScoreIsTied(void)
 	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 
 	buf = Info_ValueForKey(cs, "winner");
-	a   = atoi(buf);
+	a = atoi(buf);
 
 	return a == -1 ? qtrue : qfalse;
 }
@@ -3228,6 +3231,7 @@ void CheckWolfMP()
 int getNumPlayingClients()
 {
 	auto numPlayingClients = 0;
+
 	for (auto i = 0, len = level.numConnectedClients; i < len; ++i)
 	{
 		auto clientNum = level.sortedClients[i];
@@ -3241,7 +3245,7 @@ int getNumPlayingClients()
 
 void resetVote()
 {
-	level.voteInfo.voteTime = 0;
+	level.voteInfo.voteTime  = 0;
 	level.voteInfo.forcePass = qfalse;
 	level.voteInfo.voteCanceled = qfalse;
 	trap_SetConfigstring(CS_VOTE_TIME, "");
@@ -3272,7 +3276,7 @@ void CheckVote(void)
 	auto minVoteDuration = vote_minVoteDuration.integer;
 	minVoteDuration = minVoteDuration > 29000 ? 29000 : minVoteDuration;
 	minVoteDuration = minVoteDuration < 1000 ? 1000 : minVoteDuration;
-	
+
 	if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < minVoteDuration)
 	{
 		return;
@@ -3293,22 +3297,25 @@ void CheckVote(void)
 		AP("cpm \"^7Vote canceled: voter switched teams.\n\"");
 		G_LogPrintf("Vote Failed: %s (voter %s switched teams)\n", level.voteInfo.voteString, voter->client->pers.netname);
 		level.voteInfo.voteYes = 0;
-		level.voteInfo.voteNo = level.numConnectedClients;
-	} else if (level.voteInfo.voteYes > requiredClients)
+		level.voteInfo.voteNo  = level.numConnectedClients;
+	}
+	else if (level.voteInfo.voteYes > requiredClients)
 	{
 		AP("cpm \"^5Vote passed!\n\"");
 		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 		level.voteInfo.voteTime = 0;
 		level.voteInfo.voteCanceled = qfalse;
 		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-	} else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients || level.time - level.voteInfo.voteTime >= VOTE_TIME)
+	}
+	else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients || level.time - level.voteInfo.voteTime >= VOTE_TIME)
 	{
 		AP(va("cpm \"^3Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
 		G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 		level.voteInfo.voteTime = 0;
 		level.voteInfo.voteCanceled = qfalse;
-		
-	} else
+
+	}
+	else
 	{
 		return;
 	}
@@ -3373,7 +3380,7 @@ extern void Bot_ScriptThink(void);
 
 static void G_CheckLoadGame(void)
 {
-	char      loading[4];
+	char loading[4];
 	gentity_t *ent = NULL; // TTimo: VC6 'may be used without having been init'
 	qboolean  ready;
 
@@ -3422,9 +3429,9 @@ static void G_CheckLoadGame(void)
 			G_LoadGame();
 
 			// RF, spawn a thinker that will enable rendering after the client has had time to process the entities and setup the display
-			ent            = G_Spawn();
+			ent = G_Spawn();
 			ent->nextthink = level.time + 200;
-			ent->think     = G_EnableRenderingThink;
+			ent->think = G_EnableRenderingThink;
 
 			// wait for the clients to return from faded screen
 			//trap_SetConfigstring( CS_SCREENFADE, va("0 %i 1500", level.time + 500) );
@@ -3542,9 +3549,10 @@ G_PositionEntityOnTag
 */
 qboolean G_PositionEntityOnTag(gentity_t *entity, gentity_t *parent, char *tagName)
 {
-	int           i;
+	int i;
 	orientation_t tag;
-	vec3_t        axis[3];
+	vec3_t axis[3];
+
 	AnglesToAxis(parent->r.currentAngles, axis);
 
 	VectorCopy(parent->r.currentOrigin, entity->r.currentOrigin);
@@ -3591,10 +3599,10 @@ qboolean G_PositionEntityOnTag(gentity_t *entity, gentity_t *parent, char *tagNa
 void G_TagLinkEntity(gentity_t *ent, int msec)
 {
 	gentity_t *parent = &g_entities[ent->s.torsoAnim];
-	vec3_t    move, amove;
+	vec3_t move, amove;
 	gentity_t *obstacle;
-	vec3_t    origin, angles;
-	vec3_t    v;
+	vec3_t origin, angles;
+	vec3_t v;
 
 	if (ent->linkTagTime >= level.time)
 	{
@@ -3607,7 +3615,7 @@ void G_TagLinkEntity(gentity_t *ent, int msec)
 	{
 		if (parent->s.pos.trType == TR_LINEAR_PATH)
 		{
-			int   pos;
+			int pos;
 			float frac;
 
 			if ((ent->backspline = BG_GetSplineData(parent->s.effect2Time, &ent->back)) == NULL)
@@ -3686,7 +3694,7 @@ void G_TagLinkEntity(gentity_t *ent, int msec)
 		{
 			VectorCopy(parent->backorigin, v);
 
-			ent->back       = parent->back;
+			ent->back = parent->back;
 			ent->backdelta  = parent->backdelta;
 			ent->backspline = parent->backspline;
 
@@ -3930,7 +3938,7 @@ void G_RunEntity(gentity_t *ent, int msec)
 	if ((ent->s.eType == ET_HEALER || ent->s.eType == ET_SUPPLIER) && ent->target_ent)
 	{
 		ent->target_ent->s.onFireStart = ent->health;
-		ent->target_ent->s.onFireEnd   = ent->count;
+		ent->target_ent->s.onFireEnd = ent->count;
 	}
 
 	G_RunThink(ent);
@@ -3952,6 +3960,7 @@ Advances the non-player objects in the world
 void G_RunFrame(int levelTime)
 {
 	int i, msec;
+
 //	int			pass = 0;
 
 	// if we are waiting for the level to restart, do nothing
@@ -3980,11 +3989,11 @@ void G_RunFrame(int levelTime)
 
 	level.framenum++;
 	level.previousTime = level.time;
-	level.time         = levelTime;
+	level.time = levelTime;
 
 	msec = level.time - level.previousTime;
 
-	level.axisBombCounter   -= msec;
+	level.axisBombCounter -= msec;
 	level.alliedBombCounter -= msec;
 
 	if (level.axisBombCounter < 0)
@@ -4000,7 +4009,7 @@ void G_RunFrame(int levelTime)
 	if (trap_Cvar_VariableIntegerValue("dbg_spam"))
 	{
 		trap_SetConfigstring(CS_VOTE_STRING, va(
-		                         "vvvvvvvvvvvvvvvvvvvwiubgfiwebxqbwigb3qir4gviqrbegiuertbgiuoeyvqrugyveru\
+				"vvvvvvvvvvvvvvvvvvvwiubgfiwebxqbwigb3qir4gviqrbegiuertbgiuoeyvqrugyveru\
 qogyjvuqeyrvguqoehvrguorevqguoveruygqueorvguoqeyrvguyervguverougvequryvg\
 uoerqvgouqevrguoerqvguoerqvguoyqevrguoyvreuogvqeuogiyvureoyvnguoeqvguoqe\
 rvguoeqrvuoeqvrguoyvqeruogverquogvqoeurvgouqervguerqvgqiertbgiqerubgipqe\
@@ -4010,7 +4019,7 @@ mgbqepigjbriqpirbgipvbiqpgvbpqiegvbiepqbgqiebgipqgjebiperqbgpiqebpireqbg\
 ipqbgipjqfebzipjgbqipqervbgiyreqvbgipqertvgbiprqbgipgbipertqjgbipubriuqi\
 pjgpifjbqzpiebgipuerqbgpibuergpijfebgqiepgbiupreqbgpqegjfebzpigu4ebrigpq\
 uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
-		                     );
+			);
 	}
 #endif
 

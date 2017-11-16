@@ -9,11 +9,11 @@
 
 /*static*/ pmove_t cg_pmove;
 
-static int       cg_numSolidEntities;
+static int cg_numSolidEntities;
 static centity_t *cg_solidEntities[MAX_ENTITIES_IN_SNAPSHOT];
-static int       cg_numSolidFTEntities;
+static int cg_numSolidFTEntities;
 static centity_t *cg_solidFTEntities[MAX_ENTITIES_IN_SNAPSHOT];
-static int       cg_numTriggerEntities;
+static int cg_numTriggerEntities;
 static centity_t *cg_triggerEntities[MAX_ENTITIES_IN_SNAPSHOT];
 
 /*
@@ -27,12 +27,12 @@ efficient collision detection
 */
 void CG_BuildSolidList(void)
 {
-	int           i;
-	centity_t     *cent;
-	snapshot_t    *snap;
+	int i;
+	centity_t *cent;
+	snapshot_t *snap;
 	entityState_t *ent;
 
-	cg_numSolidEntities   = 0;
+	cg_numSolidEntities = 0;
 	cg_numSolidFTEntities = 0;
 	cg_numTriggerEntities = 0;
 
@@ -125,13 +125,13 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
                                   const vec3_t maxs, const vec3_t end, int skipNumber, int mask,
                                   int capsule, qboolean tracePlayers, trace_t *tr)
 {
-	int           i, x, zd, zu;
-	trace_t       trace;
+	int i, x, zd, zu;
+	trace_t trace;
 	entityState_t *ent;
 	clipHandle_t  cmodel;
-	vec3_t        bmins, bmaxs;
-	vec3_t        origin, angles;
-	centity_t     *cent;
+	vec3_t bmins, bmaxs;
+	vec3_t origin, angles;
+	centity_t *cent;
 
 	for (i = 0 ; i < cg_numSolidEntities ; i++)
 	{
@@ -183,18 +183,18 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 		if (capsule)
 		{
 			trap_CM_TransformedCapsuleTrace(&trace, start, end,
-			                                mins, maxs, cmodel, mask, origin, angles);
+				mins, maxs, cmodel, mask, origin, angles);
 		}
 		else
 		{
 			trap_CM_TransformedBoxTrace(&trace, start, end,
-			                            mins, maxs, cmodel, mask, origin, angles);
+				mins, maxs, cmodel, mask, origin, angles);
 		}
 
 		if (trace.allsolid || trace.fraction < tr->fraction)
 		{
 			trace.entityNum = ent->number;
-			*tr             = trace;
+			*tr = trace;
 		}
 		else if (trace.startsolid)
 		{
@@ -209,13 +209,13 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 
 static void CG_ClipMoveToEntities_FT(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int skipNumber, int mask, int capsule, trace_t *tr)
 {
-	int           i, x, zd, zu;
-	trace_t       trace;
+	int i, x, zd, zu;
+	trace_t trace;
 	entityState_t *ent;
 	clipHandle_t  cmodel;
-	vec3_t        bmins, bmaxs;
-	vec3_t        origin, angles;
-	centity_t     *cent;
+	vec3_t bmins, bmaxs;
+	vec3_t origin, angles;
+	centity_t *cent;
 
 	for (i = 0 ; i < cg_numSolidFTEntities ; i++)
 	{
@@ -257,18 +257,18 @@ static void CG_ClipMoveToEntities_FT(const vec3_t start, const vec3_t mins, cons
 		if (capsule)
 		{
 			trap_CM_TransformedCapsuleTrace(&trace, start, end,
-			                                mins, maxs, cmodel, mask, origin, angles);
+				mins, maxs, cmodel, mask, origin, angles);
 		}
 		else
 		{
 			trap_CM_TransformedBoxTrace(&trace, start, end,
-			                            mins, maxs, cmodel, mask, origin, angles);
+				mins, maxs, cmodel, mask, origin, angles);
 		}
 
 		if (trace.allsolid || trace.fraction < tr->fraction)
 		{
 			trace.entityNum = ent->number;
-			*tr             = trace;
+			*tr = trace;
 		}
 		else if (trace.startsolid)
 		{
@@ -358,10 +358,11 @@ void CG_TraceCapsule_NoPlayers(trace_t *result, const vec3_t start, const vec3_t
 void CG_TraceCapsule_World(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int skipNumber, int mask)
 {
 	trace_t t;
+
 	trap_CM_CapsuleTrace(&t, start, end, mins, maxs, 0, mask);
 
 	t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
-	*result     = t;
+	*result = t;
 }
 /*
 ================
@@ -370,11 +371,11 @@ CG_PointContents
 */
 int     CG_PointContents(const vec3_t point, int passEntityNum)
 {
-	int           i;
+	int i;
 	entityState_t *ent;
-	centity_t     *cent;
-	clipHandle_t  cmodel;
-	int           contents;
+	centity_t *cent;
+	clipHandle_t cmodel;
+	int contents;
 
 	contents = trap_CM_PointContents(point, 0);
 
@@ -419,10 +420,10 @@ cg.snap->player_state and cg.nextFrame->player_state
 */
 static void CG_InterpolatePlayerState(qboolean grabAngles)
 {
-	float         f;
-	int           i;
+	float f;
+	int i;
 	playerState_t *out;
-	snapshot_t    *prev, *next;
+	snapshot_t *prev, *next;
 
 	out  = &cg.predictedPlayerState;
 	prev = cg.snap;
@@ -439,7 +440,7 @@ static void CG_InterpolatePlayerState(qboolean grabAngles)
 	if (grabAngles)
 	{
 		usercmd_t cmd;
-		int       cmdNum;
+		int cmdNum;
 
 		cmdNum = trap_GetCurrentCmdNumber();
 		trap_GetUserCmd(cmdNum, &cmd);
@@ -483,7 +484,7 @@ static void CG_InterpolatePlayerState(qboolean grabAngles)
 		if (!grabAngles)
 		{
 			out->viewangles[i] = LerpAngle(
-			    prev->ps.viewangles[i], next->ps.viewangles[i], f);
+				prev->ps.viewangles[i], next->ps.viewangles[i], f);
 		}
 		out->velocity[i] = prev->ps.velocity[i] +
 		                   f * (next->ps.velocity[i] - prev->ps.velocity[i]);
@@ -625,8 +626,8 @@ static void CG_TouchTriggerPrediction(void)
 //	trace_t			trace;
 	entityState_t *ent;
 	clipHandle_t  cmodel;
-	centity_t     *cent;
-	qboolean      spectator;
+	centity_t *cent;
+	qboolean  spectator;
 //	vec3_t			mins, maxs; // TTimo: unused
 	const char *cs;
 
@@ -669,7 +670,7 @@ static void CG_TouchTriggerPrediction(void)
 
 		if (ent->eType == ET_CONSTRUCTIBLE ||
 		    ent->eType == ET_OID_TRIGGER ||
-			ent->eType == ET_PUSH_TRIGGER
+		    ent->eType == ET_PUSH_TRIGGER
 #ifdef VISIBLE_TRIGGERS
 		    || ent->eType == ET_TRIGGER_MULTIPLE
 		    || ent->eType == ET_TRIGGER_FLAGONLY
@@ -701,7 +702,7 @@ static void CG_TouchTriggerPrediction(void)
 					// expand the bbox a bit
 					VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
 					VectorSet(maxs, maxs[0] + 48, maxs[1] + 48, maxs[2] + 48);
-				}	
+				}
 			}
 
 			VectorAdd(cg.predictedPlayerState.origin, cg_pmove.mins, pmins);
@@ -749,7 +750,7 @@ static void CG_TouchTriggerPrediction(void)
 qboolean CG_PredictionOk(playerState_t *ps1, playerState_t *ps2)
 {
 	vec3_t vec;
-	int    i;
+	int i;
 
 	if (ps2->pm_type != ps1->pm_type || ps2->pm_flags != ps1->pm_flags || ps2->pm_time != ps1->pm_time)
 	{
@@ -896,8 +897,8 @@ qboolean CG_PredictionOk(playerState_t *ps1, playerState_t *ps2)
 
 #define RESET_PREDICTION                        \
 	cg.lastPredictedCommand = 0;                \
-	cg.backupStateTail      = cg.backupStateTop;     \
-	useCommand              = current - CMD_BACKUP + 1;
+	cg.backupStateTail = cg.backupStateTop;     \
+	useCommand = current - CMD_BACKUP + 1;
 
 
 /*
@@ -939,13 +940,14 @@ pmoveExt_t oldpmext[CMD_BACKUP];
 
 void CG_PredictPlayerState(void)
 {
-	int           cmdNum, current;
+	int cmdNum, current;
 	playerState_t oldPlayerState;
-	qboolean      moved;
-	usercmd_t     oldestCmd;
-	usercmd_t     latestCmd;
-	vec3_t        deltaAngles;
-	pmoveExt_t    pmext;
+	qboolean  moved;
+	usercmd_t oldestCmd;
+	usercmd_t latestCmd;
+	vec3_t deltaAngles;
+	pmoveExt_t pmext;
+
 //	int useCommand = 0;
 
 	cg.hyperspace = qfalse; // will be set if touching a trigger_teleport
@@ -955,7 +957,7 @@ void CG_PredictPlayerState(void)
 	// other error condition
 	if (!cg.validPPS)
 	{
-		cg.validPPS             = qtrue;
+		cg.validPPS = qtrue;
 		cg.predictedPlayerState = cg.snap->ps;
 	}
 
@@ -973,7 +975,7 @@ void CG_PredictPlayerState(void)
 #endif // ALLOW_GSYNC
 	    )
 	{
-		cg_pmove.ps    = &cg.predictedPlayerState;
+		cg_pmove.ps = &cg.predictedPlayerState;
 		cg_pmove.pmext = &cg.pmext;
 
 		cg.pmext.airleft = (cg.waterundertime - cg.time);
@@ -987,8 +989,8 @@ void CG_PredictPlayerState(void)
 			VectorCopy(cg_entities[cg_pmove.ps->viewlocked_entNum].currentState.angles2, cg.pmext.centerangles);
 
 			cg.pmext.centerangles[PITCH] = AngleNormalize180(cg.pmext.centerangles[PITCH]);
-			cg.pmext.centerangles[YAW]   = AngleNormalize180(cg.pmext.centerangles[YAW]);
-			cg.pmext.centerangles[ROLL]  = AngleNormalize180(cg.pmext.centerangles[ROLL]);
+			cg.pmext.centerangles[YAW]  = AngleNormalize180(cg.pmext.centerangles[YAW]);
+			cg.pmext.centerangles[ROLL] = AngleNormalize180(cg.pmext.centerangles[ROLL]);
 		}
 
 		CG_InterpolatePlayerState(qtrue);
@@ -999,15 +1001,15 @@ void CG_PredictPlayerState(void)
 	{
 		centity_t *tank = &cg_entities[cg_entities[cg.snap->ps.clientNum].tagParent];
 
-		cg.pmext.centerangles[YAW]   = tank->lerpAngles[YAW];
+		cg.pmext.centerangles[YAW] = tank->lerpAngles[YAW];
 		cg.pmext.centerangles[PITCH] = tank->lerpAngles[PITCH];
 	}
 
 	// prepare for pmove
-	cg_pmove.ps        = &cg.predictedPlayerState;
-	cg_pmove.pmext     = &pmext; //&cg.pmext;
+	cg_pmove.ps = &cg.predictedPlayerState;
+	cg_pmove.pmext = &pmext;     //&cg.pmext;
 	cg_pmove.character = CG_CharacterForClientinfo(&cgs.clientinfo[cg.snap->ps.clientNum], &cg_entities[cg.snap->ps.clientNum]);
-	cg.pmext.airleft   = (cg.waterundertime - cg.time);
+	cg.pmext.airleft = (cg.waterundertime - cg.time);
 
 	// Arnout: are we using an mg42?
 	if (cg_pmove.ps->eFlags & EF_MG42_ACTIVE || cg_pmove.ps->eFlags & EF_AAGUN_ACTIVE)
@@ -1018,8 +1020,8 @@ void CG_PredictPlayerState(void)
 		VectorCopy(cg_entities[cg_pmove.ps->viewlocked_entNum].currentState.angles2, cg.pmext.centerangles);
 
 		cg.pmext.centerangles[PITCH] = AngleNormalize180(cg.pmext.centerangles[PITCH]);
-		cg.pmext.centerangles[YAW]   = AngleNormalize180(cg.pmext.centerangles[YAW]);
-		cg.pmext.centerangles[ROLL]  = AngleNormalize180(cg.pmext.centerangles[ROLL]);
+		cg.pmext.centerangles[YAW]  = AngleNormalize180(cg.pmext.centerangles[YAW]);
+		cg.pmext.centerangles[ROLL] = AngleNormalize180(cg.pmext.centerangles[ROLL]);
 	}
 	else if (cg_pmove.ps->eFlags & EF_MOUNTEDTANK)
 	{
@@ -1050,7 +1052,7 @@ void CG_PredictPlayerState(void)
 		// rain - fix the spectator can-move-partway-through-world weirdness
 		// bug by actually setting tracemask when spectating :x
 		cg_pmove.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-		cg_pmove.trace     = CG_TraceCapsule_World;
+		cg_pmove.trace = CG_TraceCapsule_World;
 	}
 	else
 	{
@@ -1102,13 +1104,13 @@ void CG_PredictPlayerState(void)
 	if (cg.nextSnap && !cg.nextFrameTeleport && !cg.thisFrameTeleport)
 	{
 		cg.predictedPlayerState = cg.nextSnap->ps;
-		cg.physicsTime          = cg.nextSnap->serverTime;
+		cg.physicsTime = cg.nextSnap->serverTime;
 	}
 	else
 	{
 #endif
 	cg.predictedPlayerState = cg.snap->ps;
-	cg.physicsTime          = cg.snap->serverTime;
+	cg.physicsTime = cg.snap->serverTime;
 //	}
 
 	if (pmove_msec.integer < 8)
@@ -1208,7 +1210,7 @@ void CG_PredictPlayerState(void)
 					}
 					if (cg_errorDecay.integer)
 					{
-						int   t;
+						int t;
 						float f;
 
 						t = cg.time - cg.predictedErrorTime;
@@ -1253,10 +1255,10 @@ void CG_PredictPlayerState(void)
 		// rain - only fill in the charge times if we're on a playing team
 		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS || cg.snap->ps.persistant[PERS_TEAM] == TEAM_ALLIES)
 		{
-			cg_pmove.ltChargeTime        = cg.ltChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-			cg_pmove.soldierChargeTime   = cg.soldierChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-			cg_pmove.engineerChargeTime  = cg.engineerChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
-			cg_pmove.medicChargeTime     = cg.medicChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
+			cg_pmove.ltChargeTime = cg.ltChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
+			cg_pmove.soldierChargeTime  = cg.soldierChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
+			cg_pmove.engineerChargeTime = cg.engineerChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
+			cg_pmove.medicChargeTime = cg.medicChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
 			cg_pmove.covertopsChargeTime = cg.covertopsChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
 		}
 
@@ -1328,12 +1330,12 @@ void CG_PredictPlayerState(void)
 
 		// move
 		cg.predictedPlayerState.origin[2] +=
-		    sin(M_PI * 8 * 13 + cg.cameraShakePhase) * x * 6.0f * cg.cameraShakeScale;
+			sin(M_PI * 8 * 13 + cg.cameraShakePhase) * x * 6.0f * cg.cameraShakeScale;
 
 		cg.predictedPlayerState.origin[1] +=
-		    sin(M_PI * 17 * x + cg.cameraShakePhase) * x * 6.0f * cg.cameraShakeScale;
+			sin(M_PI * 17 * x + cg.cameraShakePhase) * x * 6.0f * cg.cameraShakeScale;
 
 		cg.predictedPlayerState.origin[0] +=
-		    cos(M_PI * 7 * x + cg.cameraShakePhase) * x * 6.0f * cg.cameraShakeScale;
+			cos(M_PI * 7 * x + cg.cameraShakePhase) * x * 6.0f * cg.cameraShakeScale;
 	}
 }

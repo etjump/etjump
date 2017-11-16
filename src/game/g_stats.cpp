@@ -12,7 +12,7 @@ void G_LogDeath(gentity_t *ent, weapon_t weap)
 	ent->client->pers.playerStats.weaponStats[weap].killedby++;
 
 	trap_PbStat(ent - g_entities, "death",
-	            va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, weap)) ;
+		va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, weap)) ;
 }
 
 void G_LogKill(gentity_t *ent, weapon_t weap)
@@ -53,7 +53,7 @@ void G_LogKill(gentity_t *ent, weapon_t weap)
 	ent->client->pers.playerStats.weaponStats[weap].kills++;
 
 	trap_PbStat(ent - g_entities, "kill",
-	            va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, weap)) ;
+		va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, weap)) ;
 }
 
 void G_LogTeamKill(gentity_t *ent, weapon_t weap)
@@ -68,7 +68,7 @@ void G_LogTeamKill(gentity_t *ent, weapon_t weap)
 	ent->client->pers.playerStats.weaponStats[weap].teamkills++;
 
 	trap_PbStat(ent - g_entities, "tk",
-	            va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, weap)) ;
+		va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, weap)) ;
 }
 
 void G_LogRegionHit(gentity_t *ent, hitRegion_t hr)
@@ -80,7 +80,7 @@ void G_LogRegionHit(gentity_t *ent, hitRegion_t hr)
 	ent->client->pers.playerStats.hitRegions[hr]++;
 
 	trap_PbStat(ent - g_entities, "hr",
-	            va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, hr)) ;
+		va("%d %d %d", ent->client->sess.sessionTeam, ent->client->sess.playerType, hr)) ;
 }
 
 void G_PrintAccuracyLog(gentity_t *ent)
@@ -98,9 +98,9 @@ void G_PrintAccuracyLog(gentity_t *ent)
 		}
 
 		Q_strcat(buffer, 2048, va(" %i %i %i",
-		                          ent->client->pers.playerStats.weaponStats[i].kills,
-		                          ent->client->pers.playerStats.weaponStats[i].killedby,
-		                          ent->client->pers.playerStats.weaponStats[i].teamkills));
+				ent->client->pers.playerStats.weaponStats[i].kills,
+				ent->client->pers.playerStats.weaponStats[i].killedby,
+				ent->client->pers.playerStats.weaponStats[i].teamkills));
 	}
 
 	Q_strcat(buffer, 2048, va(" %i", ent->client->pers.playerStats.suicides));
@@ -213,7 +213,7 @@ static void G_UpgradeSkill(gentity_t *ent, skillType_t skill)
 
 void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points)
 {
-	int   oldskill;
+	int oldskill;
 	float oldskillpoints;
 
 	if (!ent->client)
@@ -237,7 +237,7 @@ void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points)
 		return; // Gordon: no xp in LMS
 	}
 
-	oldskillpoints                        = ent->client->sess.skillpoints[skill];
+	oldskillpoints = ent->client->sess.skillpoints[skill];
 	ent->client->sess.skillpoints[skill] -= points;
 
 	// see if player increased in skill
@@ -245,17 +245,17 @@ void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points)
 	G_SetPlayerSkill(ent->client, skill);
 	if (oldskill != ent->client->sess.skill[skill])
 	{
-		ent->client->sess.skill[skill]       = oldskill;
+		ent->client->sess.skill[skill] = oldskill;
 		ent->client->sess.skillpoints[skill] = skillLevels[oldskill];
 	}
 
 	G_Printf("%s just lost %f skill points for skill %s\n", ent->client->pers.netname, oldskillpoints - ent->client->sess.skillpoints[skill], skillNames[skill]);
 
 	trap_PbStat(ent - g_entities, "loseskill",
-	            va("%d %d %d %f", ent->client->sess.sessionTeam, ent->client->sess.playerType,
-	               skill, oldskillpoints - ent->client->sess.skillpoints[skill])) ;
+		va("%d %d %d %f", ent->client->sess.sessionTeam, ent->client->sess.playerType,
+			skill, oldskillpoints - ent->client->sess.skillpoints[skill])) ;
 
-	level.teamScores[ent->client->ps.persistant[PERS_TEAM]]        -= oldskillpoints - ent->client->sess.skillpoints[skill];
+	level.teamScores[ent->client->ps.persistant[PERS_TEAM]] -= oldskillpoints - ent->client->sess.skillpoints[skill];
 	level.teamXP[skill][ent->client->sess.sessionTeam - TEAM_AXIS] -= oldskillpoints - ent->client->sess.skillpoints[skill];
 }
 
@@ -293,8 +293,8 @@ void G_AddSkillPoints(gentity_t *ent, skillType_t skill, float points)
 //	G_Printf( "%s just got %f skill points for skill %s\n", ent->client->pers.netname, points, skillNames[skill] );
 
 	trap_PbStat(ent - g_entities, "addskill",
-	            va("%d %d %d %f", ent->client->sess.sessionTeam, ent->client->sess.playerType,
-	               skill, points)) ;
+		va("%d %d %d %f", ent->client->sess.sessionTeam, ent->client->sess.playerType,
+			skill, points)) ;
 
 	// see if player increased in skill
 	oldskill = ent->client->sess.skill[skill];
@@ -562,7 +562,7 @@ void G_DebugOpenSkillLog(void)
 {
 	vmCvar_t mapname;
 	qtime_t  ct;
-	char     *s;
+	char *s;
 
 	if (g_debugSkills.integer < 2)
 	{
@@ -574,9 +574,9 @@ void G_DebugOpenSkillLog(void)
 	trap_RealTime(&ct);
 
 	if (trap_FS_FOpenFile(va("skills-%d-%02d-%02d-%02d%02d%02d-%s.log",
-	                         1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
-	                         ct.tm_hour, ct.tm_min, ct.tm_sec,
-	                         mapname.string), &skillDebugLog, FS_APPEND_SYNC) < 0)
+				1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
+				ct.tm_hour, ct.tm_min, ct.tm_sec,
+				mapname.string), &skillDebugLog, FS_APPEND_SYNC) < 0)
 	{
 		return;
 	}
@@ -589,7 +589,7 @@ void G_DebugOpenSkillLog(void)
 void G_DebugCloseSkillLog(void)
 {
 	qtime_t ct;
-	char    *s;
+	char *s;
 
 	if (skillDebugLog == -1)
 	{
@@ -615,15 +615,15 @@ void G_DebugAddSkillLevel(gentity_t *ent, skillType_t skill)
 	}
 
 	trap_SendServerCommand(ent - g_entities, va("sdbg \"^%c(SK: %2i XP: %6.2f) %s: You raised your skill level to %i.\"\n",
-	                                            COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], ent->client->sess.skill[skill]));
+			COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], ent->client->sess.skill[skill]));
 
 	trap_RealTime(&ct);
 
 	if (g_debugSkills.integer >= 2 && skillDebugLog != -1)
 	{
 		char *s = va("%02d:%02d:%02d : ^%c(SK: %2i XP: %6.2f) %s: %s raised in skill level to %i.\n",
-		             ct.tm_hour, ct.tm_min, ct.tm_sec,
-		             COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], ent->client->pers.netname, ent->client->sess.skill[skill]);
+			ct.tm_hour, ct.tm_min, ct.tm_sec,
+			COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], ent->client->pers.netname, ent->client->sess.skill[skill]);
 		trap_FS_Write(s, strlen(s), skillDebugLog);
 	}
 }
@@ -638,15 +638,15 @@ void G_DebugAddSkillPoints(gentity_t *ent, skillType_t skill, float points, cons
 	}
 
 	trap_SendServerCommand(ent - g_entities, va("sdbg \"^%c(SK: %2i XP: %6.2f) %s: You gained %.2fXP, reason: %s.\"\n",
-	                                            COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], points, reason));
+			COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], points, reason));
 
 	trap_RealTime(&ct);
 
 	if (g_debugSkills.integer >= 2 && skillDebugLog != -1)
 	{
 		char *s = va("%02d:%02d:%02d : ^%c(SK: %2i XP: %6.2f) %s: %s gained %.2fXP, reason: %s.\n",
-		             ct.tm_hour, ct.tm_min, ct.tm_sec,
-		             COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], ent->client->pers.netname, points, reason);
+			ct.tm_hour, ct.tm_min, ct.tm_sec,
+			COLOR_RED + skill, ent->client->sess.skill[skill], ent->client->sess.skillpoints[skill], skillNames[skill], ent->client->pers.netname, points, reason);
 		trap_FS_Write(s, strlen(s), skillDebugLog);
 	}
 }
@@ -731,8 +731,8 @@ void G_DebugAddSkillPoints(gentity_t *ent, skillType_t skill, float points, cons
 
 void G_BuildEndgameStats(void)
 {
-	char      buffer[1024];
-	int       i;
+	char buffer[1024];
+	int  i;
 	gclient_t *best;
 
 	G_CalcClientAccuracies();

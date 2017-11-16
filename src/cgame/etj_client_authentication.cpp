@@ -9,11 +9,11 @@
 #include "../game/etj_shared.h"
 
 ETJump::ClientAuthentication::ClientAuthentication(
-	std::function<void(const std::string&)> sendClientCommand, 
+	std::function<void(const std::string&)> sendClientCommand,
 	std::function<void(const std::string&)> print,
 	std::function<std::string()> getHwid,
 	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler
-		)
+	)
 	: _sendClientCommand(sendClientCommand), _print(print), _getHwid(getHwid), _serverCommandsHandler(serverCommandsHandler), GUID_FILE("etguid.dat")
 {
 	_serverCommandsHandler->subscribe(Constants::Authentication::GUID_REQUEST, [&](const std::vector<std::string>& args)
@@ -31,6 +31,7 @@ void ETJump::ClientAuthentication::login()
 {
 	auto guid = getGuid();
 	auto result = saveGuid(guid);
+
 	if (!result.success)
 	{
 		_print("^1Error: " + result.message);
@@ -47,7 +48,8 @@ std::string ETJump::ClientAuthentication::getGuid()
 		File guidFile(GUID_FILE);
 		auto guid = guidFile.read();
 		return std::string(begin(guid), end(guid));
-	} catch (File::FileNotFoundException)
+	}
+	catch (File::FileNotFoundException)
 	{
 		return createGuid();
 	}
@@ -68,12 +70,14 @@ std::string ETJump::ClientAuthentication::createGuid() const
 ETJump::ClientAuthentication::OperationResult ETJump::ClientAuthentication::saveGuid(const std::string& guid) const
 {
 	File guidFile(GUID_FILE, File::Mode::Write);
+
 	try
 	{
 		guidFile.write(guid);
-		return{ true, "" };
-	} catch (File::WriteFailedException wfe)
+		return { true, "" };
+	}
+	catch (File::WriteFailedException wfe)
 	{
-		return{ false, std::string("saving guid failed: ") + wfe.what() + " Using temporary guid." };
+		return { false, std::string("saving guid failed: ") + wfe.what() + " Using temporary guid." };
 	}
 }

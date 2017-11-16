@@ -82,10 +82,10 @@ const int skillLevels[NUM_SKILL_LEVELS] =
 vec3_t playerlegsProneMins = { -13.5f, -13.5f, -24.f };
 vec3_t playerlegsProneMaxs = { 13.5f, 13.5f, -14.4f };
 
-int          numSplinePaths;
+int numSplinePaths;
 splinePath_t splinePaths[MAX_SPLINE_PATHS];
 
-int          numPathCorners;
+int numPathCorners;
 pathCorner_t pathCorners[MAX_PATH_CORNERS];
 
 // these defines are matched with the character torso animations
@@ -577,7 +577,7 @@ gitem_t bg_itemlist[] =
 		NULL,   // ammo icon
 		NULL,   // pickup
 		0,
-	IT_BAD,
+		IT_BAD,
 		0,
 		0,          // ammotype
 		0,          // cliptype
@@ -3006,7 +3006,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 
 	// Gordon: handle grenades first
 
-	i      = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS], skill);
+	i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS], skill);
 	weapon = BG_GrenadeTypeForTeam(static_cast<team_t>(teamNum));
 
 	clip = BG_FindClipForWeapon(static_cast<weapon_t>(weapon));
@@ -3075,7 +3075,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 						return qtrue;
 					}
 
-					ammoAdded          = qtrue;
+					ammoAdded = qtrue;
 					ps->ammoclip[clip] = maxammo;
 				}
 			}
@@ -3090,7 +3090,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfCl
 						return qtrue;
 					}
 
-					ammoAdded           = qtrue;
+					ammoAdded = qtrue;
 					ps->ammoclip[clip] += numOfClips;
 					if (ps->ammoclip[clip] >= maxammo)
 					{
@@ -3373,8 +3373,8 @@ qboolean    BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *p
 void BG_CalculateSpline_r(splinePath_t *spline, vec3_t out1, vec3_t out2, float tension)
 {
 	vec3_t points[18];
-	int    i;
-	int    count = spline->numControls + 2;
+	int i;
+	int count = spline->numControls + 2;
 	vec3_t dist;
 
 	VectorCopy(spline->point.origin, points[0]);
@@ -3411,7 +3411,7 @@ qboolean BG_TraverseSpline(float *deltaTime, splinePath_t **pSpline)
 	while ((*deltaTime) > 1)
 	{
 		(*deltaTime) -= 1;
-		dist          = (*pSpline)->length * (*deltaTime);
+		dist = (*pSpline)->length * (*deltaTime);
 
 		if (!(*pSpline)->next || !(*pSpline)->next->length)
 		{
@@ -3433,7 +3433,7 @@ qboolean BG_TraverseSpline(float *deltaTime, splinePath_t **pSpline)
 //			Com_Error( ERR_DROP, "Spline path end passed (%s)", (*pSpline)->point.name );
 		}
 
-		(*pSpline)   = (*pSpline)->prev;
+		(*pSpline) = (*pSpline)->prev;
 		(*deltaTime) = 1 - (dist / (*pSpline)->length);
 	}
 
@@ -3473,15 +3473,16 @@ qboolean BG_RaySphereIntersection(float radius, vec3_t origin, splineSegment_t *
 void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime, vec3_t result, qboolean backwards)
 {
 	qboolean first = qtrue;
-	float    t     = 0.f;
-	int      i     = floor((*deltaTime) * (MAX_SPLINE_SEGMENTS));
-	float    frac;
+	float t = 0.f;
+	int i = floor((*deltaTime) * (MAX_SPLINE_SEGMENTS));
+	float frac;
+
 //	int x = 0;
 //	splinePath_t* start = *pSpline;
 
 	if (i >= MAX_SPLINE_SEGMENTS)
 	{
-		i    = MAX_SPLINE_SEGMENTS - 1;
+		i = MAX_SPLINE_SEGMENTS - 1;
 		frac = 1.f;
 	}
 	else
@@ -3508,12 +3509,12 @@ void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime
 					{
 						if (t0 < frac && (t0 >= 0.f && t0 <= 1.f))
 						{
-							t     = t0;
+							t = t0;
 							found = qtrue;
 						}
 						else if (t1 < frac)
 						{
-							t     = t1;
+							t = t1;
 							found = qtrue;
 						}
 					}
@@ -3521,12 +3522,12 @@ void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime
 					{
 						if (t0 > frac && (t0 >= 0.f && t0 <= 1.f))
 						{
-							t     = t0;
+							t = t0;
 							found = qtrue;
 						}
 						else if (t1 > frac)
 						{
-							t     = t1;
+							t = t1;
 							found = qtrue;
 						}
 					}
@@ -3537,12 +3538,12 @@ void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime
 					{
 						if (t0 < t1 && (t0 >= 0.f && t0 <= 1.f))
 						{
-							t     = t0;
+							t = t0;
 							found = qtrue;
 						}
 						else
 						{
-							t     = t1;
+							t = t1;
 							found = qtrue;
 						}
 					}
@@ -3550,12 +3551,12 @@ void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime
 					{
 						if (t0 > t1 && (t0 >= 0.f && t0 <= 1.f))
 						{
-							t     = t0;
+							t = t0;
 							found = qtrue;
 						}
 						else
 						{
-							t     = t1;
+							t = t1;
 							found = qtrue;
 						}
 					}
@@ -3617,7 +3618,7 @@ void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime
 
 void BG_ComputeSegments(splinePath_t *pSpline)
 {
-	int    i;
+	int i;
 	float  granularity = 1 / ((float)(MAX_SPLINE_SEGMENTS));
 	vec3_t vec[4];
 
@@ -3650,9 +3651,9 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
 	vec3_t v;
 
 	splinePath_t *pSpline;
-	vec3_t       vec[2];
-	qboolean     backwards = qfalse;
-	float        deltaTime2;
+	vec3_t vec[2];
+	qboolean backwards = qfalse;
+	float deltaTime2;
 
 	switch (tr->trType)
 	{
@@ -3667,7 +3668,7 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
 		break;
 	case TR_SINE:
 		deltaTime = (atTime - tr->trTime) / (float) tr->trDuration;
-		phase     = sin(deltaTime * M_PI * 2);
+		phase = sin(deltaTime * M_PI * 2);
 		VectorMA(tr->trBase, phase, tr->trDelta, result);
 		break;
 //----(SA)	removed
@@ -3768,12 +3769,12 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
 		{
 			qboolean dampin  = qfalse;
 			qboolean dampout = qfalse;
-			float    base1;
+			float base1;
 
 			if (tr->trBase[0])
 			{
 //				int pos = 0;
-				vec3_t       result2;
+				vec3_t result2;
 				splinePath_t *pSp2 = pSpline;
 
 				deltaTime2 += tr->trBase[0] / pSpline->length;
@@ -3886,7 +3887,7 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
 
 		if (isAngle)
 		{
-			int   pos = floor(deltaTime * (MAX_SPLINE_SEGMENTS));
+			int pos = floor(deltaTime * (MAX_SPLINE_SEGMENTS));
 			float frac;
 
 			if (pos >= MAX_SPLINE_SEGMENTS)
@@ -3924,7 +3925,7 @@ void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qb
 		}
 		else
 		{
-			int   pos = floor(deltaTime * (MAX_SPLINE_SEGMENTS));
+			int pos = floor(deltaTime * (MAX_SPLINE_SEGMENTS));
 			float frac;
 
 			if (pos >= MAX_SPLINE_SEGMENTS)
@@ -3971,8 +3972,8 @@ void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, vec3_t resul
 		break;
 	case TR_SINE:
 		deltaTime = (atTime - tr->trTime) / (float) tr->trDuration;
-		phase     = cos(deltaTime * M_PI * 2);  // derivative of sin = cos
-		phase    *= 0.5;
+		phase  = cos(deltaTime * M_PI * 2);     // derivative of sin = cos
+		phase *= 0.5;
 		VectorScale(tr->trDelta, phase, result);
 		break;
 //----(SA)	removed
@@ -4011,7 +4012,7 @@ void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, vec3_t resul
 			return;
 		}
 		deltaTime = (atTime - tr->trTime) * 0.001;      // milliseconds to seconds
-		phase     = deltaTime / (float)tr->trDuration;
+		phase = deltaTime / (float)tr->trDuration;
 		VectorScale(tr->trDelta, deltaTime * deltaTime, result);
 		break;
 	case TR_DECCELERATE:    // trDelta is breaking force
@@ -4047,7 +4048,7 @@ void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out)
 {
 	vec3_t ndir, lnormal;
 	float  minDot = 0.3;
-	int    x      = 0;
+	int x = 0;
 
 	if (dir[0] < 0.001 && dir[1] < 0.001)
 	{
@@ -4256,7 +4257,7 @@ void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm, playerStat
 		}
 	}
 #endif
-	ps->events[ps->eventSequence & (MAX_EVENTS - 1)]     = newEvent;
+	ps->events[ps->eventSequence & (MAX_EVENTS - 1)] = newEvent;
 	ps->eventParms[ps->eventSequence & (MAX_EVENTS - 1)] = eventParm;
 	ps->eventSequence++;
 }
@@ -4265,13 +4266,13 @@ void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm, playerStat
 #define SETUP_MOUNTEDGUN_STATUS(ps)                           \
 	switch (ps->persistant[PERS_HWEAPON_USE]) {                \
 	case 1:                                                 \
-		ps->eFlags                    |= EF_MG42_ACTIVE;                       \
-		ps->eFlags                    &= ~EF_AAGUN_ACTIVE;                     \
+		ps->eFlags |= EF_MG42_ACTIVE;                       \
+		ps->eFlags &= ~EF_AAGUN_ACTIVE;                     \
 		ps->powerups[PW_OPS_DISGUISED] = 0;                 \
 		break;                                              \
 	case 2:                                                 \
-		ps->eFlags                    |= EF_AAGUN_ACTIVE;                      \
-		ps->eFlags                    &= ~EF_MG42_ACTIVE;                      \
+		ps->eFlags |= EF_AAGUN_ACTIVE;                      \
+		ps->eFlags &= ~EF_MG42_ACTIVE;                      \
 		ps->powerups[PW_OPS_DISGUISED] = 0;                 \
 		break;                                              \
 	default:                                                \
@@ -4361,7 +4362,7 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, qboolean s
 // from MP
 	if (ps->externalEvent)
 	{
-		s->event     = ps->externalEvent;
+		s->event = ps->externalEvent;
 		s->eventParm = ps->externalEventParm;
 	}
 	else if (ps->entityEventSequence < ps->eventSequence)
@@ -4372,8 +4373,8 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, qboolean s
 		{
 			ps->entityEventSequence = ps->eventSequence - MAX_EVENTS;
 		}
-		seq          = ps->entityEventSequence & (MAX_EVENTS - 1);
-		s->event     = ps->events[seq] | ((ps->entityEventSequence & 3) << 8);
+		seq = ps->entityEventSequence & (MAX_EVENTS - 1);
+		s->event = ps->events[seq] | ((ps->entityEventSequence & 3) << 8);
 		s->eventParm = ps->eventParms[seq];
 		ps->entityEventSequence++;
 	}
@@ -4383,13 +4384,13 @@ void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, qboolean s
 	// (possibly overwriting entityState_t events)
 	for (i = ps->oldEventSequence; i != ps->eventSequence; i++)
 	{
-		s->events[s->eventSequence & (MAX_EVENTS - 1)]     = ps->events[i & (MAX_EVENTS - 1)];
+		s->events[s->eventSequence & (MAX_EVENTS - 1)] = ps->events[i & (MAX_EVENTS - 1)];
 		s->eventParms[s->eventSequence & (MAX_EVENTS - 1)] = ps->eventParms[i & (MAX_EVENTS - 1)];
 		s->eventSequence++;
 	}
 	ps->oldEventSequence = ps->eventSequence;
 
-	s->weapon          = ps->weapon;
+	s->weapon = ps->weapon;
 	s->groundEntityNum = ps->groundEntityNum;
 
 	s->powerups = 0;
@@ -4455,9 +4456,9 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
 	}
 
 	s->angles2[YAW] = ps->movementDir;
-	s->legsAnim     = ps->legsAnim;
-	s->torsoAnim    = ps->torsoAnim;
-	s->clientNum    = ps->clientNum;    // ET_PLAYER looks here instead of at number
+	s->legsAnim  = ps->legsAnim;
+	s->torsoAnim = ps->torsoAnim;
+	s->clientNum = ps->clientNum;       // ET_PLAYER looks here instead of at number
 	                                    // so corpses can also reference the proper config
 
 	if (ps->eFlags & EF_MOUNTEDTANK)
@@ -4482,7 +4483,7 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
 
 	if (ps->externalEvent)
 	{
-		s->event     = ps->externalEvent;
+		s->event = ps->externalEvent;
 		s->eventParm = ps->externalEventParm;
 	}
 	else if (ps->entityEventSequence < ps->eventSequence)
@@ -4493,8 +4494,8 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
 		{
 			ps->entityEventSequence = ps->eventSequence - MAX_EVENTS;
 		}
-		seq          = ps->entityEventSequence & (MAX_EVENTS - 1);
-		s->event     = ps->events[seq] | ((ps->entityEventSequence & 3) << 8);
+		seq = ps->entityEventSequence & (MAX_EVENTS - 1);
+		s->event = ps->events[seq] | ((ps->entityEventSequence & 3) << 8);
 		s->eventParm = ps->eventParms[seq];
 		ps->entityEventSequence++;
 	}
@@ -4504,13 +4505,13 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
 	// (possibly overwriting entityState_t events)
 	for (i = ps->oldEventSequence; i != ps->eventSequence; i++)
 	{
-		s->events[s->eventSequence & (MAX_EVENTS - 1)]     = ps->events[i & (MAX_EVENTS - 1)];
+		s->events[s->eventSequence & (MAX_EVENTS - 1)] = ps->events[i & (MAX_EVENTS - 1)];
 		s->eventParms[s->eventSequence & (MAX_EVENTS - 1)] = ps->eventParms[i & (MAX_EVENTS - 1)];
 		s->eventSequence++;
 	}
 	ps->oldEventSequence = ps->eventSequence;
 
-	s->weapon          = ps->weapon;
+	s->weapon = ps->weapon;
 	s->groundEntityNum = ps->groundEntityNum;
 
 	s->powerups = 0;
@@ -4523,8 +4524,8 @@ void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
 	}
 
 	s->nextWeapon = ps->nextWeapon; // Ridah
-	s->teamNum    = ps->teamNum;
-	s->aiState    = ps->aiState;    // xkan, 1/10/2003
+	s->teamNum = ps->teamNum;
+	s->aiState = ps->aiState;       // xkan, 1/10/2003
 }
 
 // Gordon: some weapons are duplicated for code puposes.... just want to treat them as a single
@@ -4739,6 +4740,7 @@ splinePath_t *BG_Find_Spline(const char *match)
 splinePath_t *BG_AddSplinePath(const char *name, const char *target, vec3_t origin)
 {
 	splinePath_t *spline;
+
 	if (numSplinePaths >= MAX_SPLINE_PATHS)
 	{
 		Com_Error(ERR_DROP, "MAX SPLINES (%i) hit", MAX_SPLINE_PATHS);
@@ -4776,7 +4778,7 @@ float BG_SplineLength(splinePath_t *pSpline)
 {
 	float i;
 	float granularity = 0.01f;
-	float dist        = 0;
+	float dist = 0;
 //	float tension;
 	vec3_t vec[2];
 	vec3_t lastPoint = { 0, 0, 0 };
@@ -4810,7 +4812,7 @@ float BG_SplineLength(splinePath_t *pSpline)
 
 void BG_BuildSplinePaths()
 {
-	int          i, j;
+	int i, j;
 	pathCorner_t *pnt;
 	splinePath_t *spline, *st;
 
@@ -4868,7 +4870,7 @@ splinePath_t *BG_GetSplineData(int number, qboolean *backwards)
 	if (number < 0)
 	{
 		*backwards = qtrue;
-		number     = -number;
+		number = -number;
 	}
 	else
 	{
@@ -5017,6 +5019,7 @@ BG_TransposeMatrix
 void BG_TransposeMatrix(const vec3_t matrix[3], vec3_t transpose[3])
 {
 	int i, j;
+
 	for (i = 0; i < 3; i++)
 	{
 		for (j = 0; j < 3; j++)
@@ -5082,9 +5085,9 @@ PC_SourceWarning
 */
 void PC_SourceWarning(int handle, const char *format, ...)
 {
-	int         line;
-	char        filename[128];
-	va_list     argptr;
+	int  line;
+	char filename[128];
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -5092,7 +5095,7 @@ void PC_SourceWarning(int handle, const char *format, ...)
 	va_end(argptr);
 
 	filename[0] = '\0';
-	line        = 0;
+	line = 0;
 	trap_PC_SourceFileAndLine(handle, filename, &line);
 
 	Com_Printf(S_COLOR_YELLOW "WARNING: %s, line %d: %s\n", filename, line, string);
@@ -5105,9 +5108,9 @@ PC_SourceError
 */
 void PC_SourceError(int handle, const char *format, ...)
 {
-	int         line;
-	char        filename[128];
-	va_list     argptr;
+	int  line;
+	char filename[128];
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -5115,7 +5118,7 @@ void PC_SourceError(int handle, const char *format, ...)
 	va_end(argptr);
 
 	filename[0] = '\0';
-	line        = 0;
+	line = 0;
 	trap_PC_SourceFileAndLine(handle, filename, &line);
 
 #ifdef GAMEDLL
@@ -5133,7 +5136,7 @@ PC_Float_Parse
 qboolean PC_Float_Parse(int handle, float *f)
 {
 	pc_token_t token;
-	int        negative = qfalse;
+	int negative = qfalse;
 
 	if (!trap_PC_ReadToken(handle, &token))
 	{
@@ -5170,7 +5173,7 @@ PC_Color_Parse
 */
 qboolean PC_Color_Parse(int handle, vec4_t *c)
 {
-	int   i;
+	int i;
 	float f;
 
 	for (i = 0; i < 4; i++)
@@ -5191,7 +5194,7 @@ PC_Vec_Parse
 */
 qboolean PC_Vec_Parse(int handle, vec3_t *c)
 {
-	int   i;
+	int i;
 	float f;
 
 	for (i = 0; i < 3; i++)
@@ -5213,7 +5216,7 @@ PC_Int_Parse
 qboolean PC_Int_Parse(int handle, int *i)
 {
 	pc_token_t token;
-	int        negative = qfalse;
+	int negative = qfalse;
 
 	if (!trap_PC_ReadToken(handle, &token))
 	{
@@ -5233,7 +5236,7 @@ qboolean PC_Int_Parse(int handle, int *i)
 		return qfalse;
 	}
 	*i = token.intvalue;
-	
+
 	if (negative)
 	{
 		*i = -*i;
@@ -5251,6 +5254,7 @@ const char *PC_String_Parse(int handle)
 {
 	static char buf[MAX_TOKEN_CHARS];
 	pc_token_t  token;
+
 	if (!trap_PC_ReadToken(handle, &token))
 	{
 		return NULL;
@@ -5268,6 +5272,7 @@ PC_String_Parse
 qboolean PC_String_Parse(int handle, const char **out)
 {
 	pc_token_t token;
+
 	if (!trap_PC_ReadToken(handle, &token))
 	{
 		return qfalse;
@@ -5475,9 +5480,9 @@ int BG_drawStrlen(const char *str)
 // Returns size of printable string
 int BG_colorstrncpyz(char *in, char *out, int str_max, int out_max)
 {
-	int       str_len = 0; // current printable string size
-	int       out_len = 0; // current true string size
-	const int in_len  = strlen(in);
+	int str_len = 0;       // current printable string size
+	int out_len = 0;       // current true string size
+	const int in_len = strlen(in);
 
 	out_max--;
 	while (*in && out_len < out_max && str_len < str_max)
@@ -5507,8 +5512,8 @@ int BG_colorstrncpyz(char *in, char *out, int str_max, int out_max)
 
 int BG_strRelPos(char *in, int index)
 {
-	int        cPrintable = 0;
-	const char *ref       = in;
+	int cPrintable  = 0;
+	const char *ref = in;
 
 	while (*ref && cPrintable < index)
 	{
@@ -5530,7 +5535,7 @@ int BG_strRelPos(char *in, int index)
 // returns the length of the cleaned string
 int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF)
 {
-	const char *pInCopy     = pszIn;
+	const char *pInCopy = pszIn;
 	const char *pszOutStart = pszOut;
 
 	while (*pInCopy && (pszOut - pszOutStart < dwMaxLength - 1))
@@ -5723,7 +5728,7 @@ void BG_InitLocations(vec2_t world_mins, vec2_t world_maxs)
 char *BG_GetLocationString(vec_t *pos)
 {
 	static char coord[6];
-	int         x, y;
+	int x, y;
 
 	coord[0] = '\0';
 
@@ -5739,10 +5744,11 @@ char *BG_GetLocationString(vec_t *pos)
 		y = 0;
 	}
 
-	// if coords get pretty big, 
+	// if coords get pretty big,
 	// mostly because of getting out of mapcoords, and gridstep being calculated wrong
 	// just set them to 0 character
-	if (x > 26) {
+	if (x > 26)
+	{
 		x = -17;
 	}
 
@@ -6056,7 +6062,7 @@ BG_TouchJumpPad
 */
 void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
 {
-	float s;
+	float  s;
 	vec3_t dir;
 
 	// Disable for specs

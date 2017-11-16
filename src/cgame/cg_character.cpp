@@ -17,10 +17,10 @@ Read a configuration file containing gib models for use with this character
 */
 static qboolean CG_ParseGibModels(bg_playerclass_t *classInfo)
 {
-	char         *text_p;
-	int          len;
-	int          i;
-	char         *token;
+	char *text_p;
+	int  len;
+	int  i;
+	char *token;
 	fileHandle_t f;
 
 	memset(classInfo->gibModels, 0, sizeof(classInfo->gibModels));
@@ -65,11 +65,11 @@ CG_ParseHudHeadConfig
 */
 static qboolean CG_ParseHudHeadConfig(const char *filename, animation_t *hha)
 {
-	char         *text_p;
-	int          len;
-	int          i;
-	float        fps;
-	const char         *token;
+	char  *text_p;
+	int   len;
+	int   i;
+	float fps;
+	const char *token;
 	fileHandle_t f;
 
 	// load the file
@@ -119,7 +119,7 @@ static qboolean CG_ParseHudHeadConfig(const char *filename, animation_t *hha)
 			fps = 1;
 		}
 
-		hha[i].frameLerp   = 1000 / fps;
+		hha[i].frameLerp = 1000 / fps;
 		hha[i].initialLerp = 1000 / fps;
 
 		token = COM_Parse(&text_p);     // looping frames
@@ -155,14 +155,14 @@ CG_CalcMoveSpeeds
 */
 static void CG_CalcMoveSpeeds(bg_character_t *character)
 {
-	const char          *tags[2] = { "tag_footleft", "tag_footright" };
-	vec3_t        oldPos[2];
-	refEntity_t   refent;
-	animation_t   *anim;
-	int           i, j, k;
-	float         totalSpeed;
-	int           numSpeed;
-	int           lastLow, low;
+	const char *tags[2] = { "tag_footleft", "tag_footright" };
+	vec3_t oldPos[2];
+	refEntity_t refent;
+	animation_t *anim;
+	int i, j, k;
+	float totalSpeed;
+	int numSpeed;
+	int lastLow, low;
 	orientation_t o[2];
 
 	memset(&refent, 0, sizeof(refent));
@@ -179,15 +179,15 @@ static void CG_CalcMoveSpeeds(bg_character_t *character)
 		}
 
 		totalSpeed = 0;
-		lastLow    = -1;
-		numSpeed   = 0;
+		lastLow  = -1;
+		numSpeed = 0;
 
 		// for each frame
 		for (j = 0; j < anim->numFrames; j++)
 		{
 
-			refent.frame           = anim->firstFrame + j;
-			refent.oldframe        = refent.frame;
+			refent.frame = anim->firstFrame + j;
+			refent.oldframe = refent.frame;
 			refent.torsoFrameModel = refent.oldTorsoFrameModel = refent.frameModel = refent.oldframeModel = anim->mdxFile;
 
 			// for each foot
@@ -249,9 +249,9 @@ CG_ParseAnimationFiles
 */
 static qboolean CG_ParseAnimationFiles(bg_character_t *character, const char *animationGroup, const char *animationScript)
 {
-	char         filename[MAX_QPATH];
+	char filename[MAX_QPATH];
 	fileHandle_t f;
-	int          len;
+	int len;
 
 	// set the name of the animationGroup and animationScript in the animModelInfo structure
 	Q_strncpyz(character->animModelInfo->animationGroup, animationGroup, sizeof(character->animModelInfo->animationGroup));
@@ -295,7 +295,7 @@ CG_CheckForExistingAnimModelInfo
 */
 static qboolean CG_CheckForExistingAnimModelInfo(const char *animationGroup, const char *animationScript, animModelInfo_t **animModelInfo)
 {
-	int             i;
+	int i;
 	animModelInfo_t *trav, *firstFree = NULL;
 
 	for (i = 0, trav = cgs.animScriptData.modelInfo; i < MAX_ANIMSCRIPT_MODELS; i++, trav++)
@@ -356,7 +356,7 @@ static qboolean CG_RegisterAcc(const char *modelName, int *model, const char *sk
 typedef struct
 {
 	const char *type;
-	accType_t index;
+	accType_t  index;
 } acc_t;
 
 static acc_t cg_accessories[] =
@@ -389,10 +389,10 @@ CG_RegisterCharacter
 qboolean CG_RegisterCharacter(const char *characterFile, bg_character_t *character)
 {
 	bg_characterDef_t characterDef;
-	char              *filename;
-	char              buf[MAX_QPATH];
-	char              accessoryname[MAX_QPATH];
-	int               i;
+	char *filename;
+	char buf[MAX_QPATH];
+	char accessoryname[MAX_QPATH];
+	int  i;
 
 	memset(&characterDef, 0, sizeof(characterDef));
 
@@ -410,7 +410,7 @@ qboolean CG_RegisterCharacter(const char *characterFile, bg_character_t *charact
 
 	// Register Skin
 	COM_StripExtension(characterDef.mesh, buf);
-	filename        = va("%s_%s.skin", buf, characterDef.skin);
+	filename = va("%s_%s.skin", buf, characterDef.skin);
 	character->skin = trap_R_RegisterSkin(filename);
 	if (!character->skin)
 	{
@@ -453,7 +453,7 @@ qboolean CG_RegisterCharacter(const char *characterFile, bg_character_t *charact
 
 		// Register Undressed Corpse Skin
 		COM_StripExtension(characterDef.undressedCorpseModel, buf);
-		filename                       = va("%s_%s.skin", buf, characterDef.undressedCorpseSkin);
+		filename = va("%s_%s.skin", buf, characterDef.undressedCorpseSkin);
 		character->undressedCorpseSkin = trap_R_RegisterSkin(filename);
 		if (!character->undressedCorpseSkin)
 		{
@@ -582,7 +582,7 @@ void CG_RegisterPlayerClasses(void)
 {
 	bg_playerclass_t *classInfo;
 	bg_character_t   *character;
-	int              team, cls;
+	int team, cls;
 
 	for (team = TEAM_AXIS; team <= TEAM_ALLIES; team++)
 	{

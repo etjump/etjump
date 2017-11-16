@@ -52,7 +52,7 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 			{
 			case OptionDefinition::Type::Boolean:
 				throw std::runtime_error("Trying to add args for OptionDefinition::Type::Boolean.");
-				// Single token
+			// Single token
 			case OptionDefinition::Type::Token:
 			case OptionDefinition::Type::Integer:
 			case OptionDefinition::Type::Decimal:
@@ -63,9 +63,9 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition de
 				optionDefinition = end;
 				command.options[currentOption.name] = currentOption;
 				break;
-				// Multi token
+			// Multi token
 			case OptionDefinition::Type::MultiToken:
-				currentOption.name = optionDefinition->second.name;
+				currentOption.name  = optionDefinition->second.name;
 				currentOption.text += currentOption.text.length() > 0 ? " " + arg : arg;
 				break;
 			default:
@@ -125,4 +125,3 @@ bool ETJump::CommandParser::parseOption(const std::string& arg, std::string& opt
 	option = arg.substr(2);
 	return true;
 }
-

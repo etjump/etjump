@@ -19,7 +19,7 @@ Gives the activator all the items pointed to.
 void Use_Target_Give(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
 	gentity_t *t;
-	trace_t   trace;
+	trace_t trace;
 
 	if (!activator->client)
 	{
@@ -94,7 +94,7 @@ void Think_Target_Delay(gentity_t *ent)
 void Use_Target_Delay(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
 	ent->nextthink = level.time + (ent->wait + ent->random * crandom()) * 1000;
-	ent->think     = Think_Target_Delay;
+	ent->think = Think_Target_Delay;
 	ent->activator = activator;
 }
 
@@ -156,8 +156,9 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	// if no message to print, print whitespace
 	auto temp = ent->message ? ent->message : " ";
 	auto location = ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
-		? "cpm" : "cp";
+	                ? "cpm" : "cp";
 	char message[MAX_TOKEN_CHARS]{};
+
 	Q_strncpyz(message, temp, sizeof(message));
 	if (ent->client && ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts))
 	{
@@ -277,6 +278,7 @@ void SP_target_speaker(gentity_t *ent)
 {
 	char buffer[MAX_QPATH];
 	char *s;
+
 	G_SpawnFloat("wait", "0", &ent->wait);
 	G_SpawnFloat("random", "0", &ent->random);
 
@@ -303,9 +305,9 @@ void SP_target_speaker(gentity_t *ent)
 	ent->noise_index = G_SoundIndex(buffer);
 
 	// a repeating speaker can be done completely client side
-	ent->s.eType     = ET_SPEAKER;
+	ent->s.eType = ET_SPEAKER;
 	ent->s.eventParm = ent->noise_index;
-	ent->s.frame     = ent->wait * 10;
+	ent->s.frame = ent->wait * 10;
 	ent->s.clientNum = ent->random * 10;
 
 
@@ -327,7 +329,7 @@ void SP_target_speaker(gentity_t *ent)
 
 	if (ent->spawnflags & 16)
 	{
-		ent->think     = target_speaker_multiple;
+		ent->think = target_speaker_multiple;
 		ent->nextthink = level.time + 50;
 	}
 
@@ -383,8 +385,8 @@ void misc_beam_think(gentity_t *self)
 		if (self->enemy != self)
 		{
 			//VectorCopy ( self->enemy->s.origin, self->s.origin2 );
-			self->s.apos.trType     = self->enemy->s.pos.trType;
-			self->s.apos.trTime     = self->enemy->s.pos.trTime;
+			self->s.apos.trType = self->enemy->s.pos.trType;
+			self->s.apos.trTime = self->enemy->s.pos.trTime;
 			self->s.apos.trDuration = self->enemy->s.pos.trDuration;
 			VectorCopy(self->enemy->s.pos.trBase, self->s.apos.trBase);
 			VectorCopy(self->enemy->s.pos.trDelta, self->s.apos.trDelta);
@@ -398,8 +400,8 @@ void misc_beam_think(gentity_t *self)
 		}
 	}
 
-	self->s.pos.trType     = self->target_ent->s.pos.trType;
-	self->s.pos.trTime     = self->target_ent->s.pos.trTime;
+	self->s.pos.trType = self->target_ent->s.pos.trType;
+	self->s.pos.trTime = self->target_ent->s.pos.trTime;
 	self->s.pos.trDuration = self->target_ent->s.pos.trDuration;
 	VectorCopy(self->target_ent->s.pos.trBase, self->s.pos.trBase);
 	VectorCopy(self->target_ent->s.pos.trDelta, self->s.pos.trDelta);
@@ -483,8 +485,8 @@ void misc_beam_start(gentity_t *self)
 		self->enemy = self;
 	}
 
-	self->accuracy  = 0;
-	self->think     = misc_beam_think;
+	self->accuracy = 0;
+	self->think = misc_beam_think;
 	self->nextthink = level.time + FRAMETIME;
 }
 
@@ -508,8 +510,8 @@ void SP_misc_beam(gentity_t *self)
 	G_SpawnVector("color", "1 1 1", self->s.angles2);
 
 	// let everything else get spawned before we start firing
-	self->accuracy  = 0;
-	self->think     = misc_beam_start;
+	self->accuracy = 0;
+	self->think = misc_beam_start;
 	self->nextthink = level.time + FRAMETIME;
 }
 
@@ -542,7 +544,7 @@ void target_laser_think(gentity_t *self)
 	{
 		// hurt it if we can
 		G_Damage(&g_entities[tr.entityNum], self, self->activator, self->movedir,
-		         tr.endpos, self->damage, DAMAGE_NO_KNOCKBACK, MOD_TARGET_LASER);
+			tr.endpos, self->damage, DAMAGE_NO_KNOCKBACK, MOD_TARGET_LASER);
 	}
 
 	VectorCopy(tr.endpos, self->s.origin2);
@@ -599,7 +601,7 @@ void target_laser_start(gentity_t *self)
 		G_SetMovedir(self->s.angles, self->movedir);
 	}
 
-	self->use   = target_laser_use;
+	self->use = target_laser_use;
 	self->think = target_laser_think;
 
 	if (!self->damage)
@@ -626,22 +628,22 @@ void SP_target_laser(gentity_t *self)
 	self->s.angles2[2] = 1.f;
 
 	// let everything else get spawned before we start firing
-	self->think     = target_laser_start;
+	self->think = target_laser_start;
 	self->nextthink = level.time + FRAMETIME;
 }
 
 
-/* 
+/*
 target_teleporter
 =====================
 spawnflags:
-	0	Sets destination angles, but preserves player's velocity direction, 
-		so we move exactly same direction as before
-	1	Sets destination angles and resets velocity
-	2	Sets destination angles and converts velocity to match destination direction,
-		so we are now moving same way as our teleporter_dest angle is pointing at
-	4	Converts player's angles(yaw) and velocity to be relative to the new destination angles
-	8   Same as 4 but also preserves pitch
+    0	Sets destination angles, but preserves player's velocity direction,
+        so we move exactly same direction as before
+    1	Sets destination angles and resets velocity
+    2	Sets destination angles and converts velocity to match destination direction,
+        so we are now moving same way as our teleporter_dest angle is pointing at
+    4	Converts player's angles(yaw) and velocity to be relative to the new destination angles
+    8   Same as 4 but also preserves pitch
 */
 void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
@@ -654,7 +656,7 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	if (self->outSpeed > 0)
 	{
-		VectorNormalize(activator->client->ps.velocity);  // normalize velocity 
+		VectorNormalize(activator->client->ps.velocity);  // normalize velocity
 		VectorScale(activator->client->ps.velocity, self->outSpeed, activator->client->ps.velocity); // scale it up again
 	}
 
@@ -672,13 +674,13 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	if (self->spawnflags & 16)
 	{
-		activator->client->ps.pm_time = 160;        // hold time
+		activator->client->ps.pm_time   = 160;      // hold time
 		activator->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	}
 
 	if (self->spawnflags & 1)
 	{
-		// ETJump: we we need atleast minimal speed to make TeleportPlayerKeepAngles working with this 
+		// ETJump: we we need atleast minimal speed to make TeleportPlayerKeepAngles working with this
 		//         spawnflag, else it doesn't know which trigger side we enter
 		VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
 	}
@@ -905,7 +907,7 @@ void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer, meansO
 		trap_UnlinkEntity(targ);
 		targ->nextthink = level.time + FRAMETIME;
 
-		targ->use   = NULL;
+		targ->use = NULL;
 		targ->touch = NULL;
 		targ->think = G_FreeEntity;
 	}
@@ -1025,7 +1027,7 @@ color picker chooses color of fog
 */
 void SP_target_fog(gentity_t *ent)
 {
-	int   dist;
+	int dist;
 	float ftime;
 
 	ent->use = Use_target_fog;
@@ -1167,7 +1169,7 @@ void smoke_think(gentity_t *ent)
 		ent->s.dl_intensity--;
 		if (!ent->s.dl_intensity)
 		{
-			ent->think     = G_FreeEntity;
+			ent->think = G_FreeEntity;
 			ent->nextthink = level.time + FRAMETIME;
 		}
 	}
@@ -1190,9 +1192,9 @@ void smoke_toggle(gentity_t *ent, gentity_t *self, gentity_t *activator)
 void smoke_init(gentity_t *ent)
 {
 	gentity_t *target;
-	vec3_t    vec;
+	vec3_t vec;
 
-	ent->think     = smoke_think;
+	ent->think = smoke_think;
 	ent->nextthink = level.time + FRAMETIME;
 
 	if (ent->target)
@@ -1240,12 +1242,12 @@ void SP_target_smoke(gentity_t *ent)
 
 	ent->use = smoke_toggle;
 
-	ent->think     = smoke_init;
+	ent->think = smoke_init;
 	ent->nextthink = level.time + FRAMETIME;
 
 	G_SetOrigin(ent, ent->s.origin);
 	ent->r.svFlags = 0;
-	ent->s.eType   = ET_SMOKER;
+	ent->s.eType = ET_SMOKER;
 
 	if (ent->spawnflags & 2)
 	{
@@ -1361,8 +1363,8 @@ void SP_target_script_trigger(gentity_t *ent)
 {
 	G_SetOrigin(ent, ent->s.origin);
 	ent->r.svFlags = 0;
-	ent->s.eType   = ET_GENERAL;
-	ent->use       = target_script_trigger_use;
+	ent->s.eType = ET_GENERAL;
+	ent->use = target_script_trigger_use;
 }
 
 
@@ -1385,10 +1387,10 @@ int rumble_snd;
 void target_rumble_think(gentity_t *ent)
 {
 	gentity_t *tent;
-	float     ratio;
-	float     time, time2;
-	float     dapitch, dayaw;
-	qboolean  validrumble = qtrue;
+	float ratio;
+	float time, time2;
+	float dapitch, dayaw;
+	qboolean validrumble = qtrue;
 
 	if (!(ent->count))
 	{
@@ -1407,8 +1409,8 @@ void target_rumble_think(gentity_t *ent)
 	}
 
 	dapitch = ent->delay;
-	dayaw   = ent->random;
-	ratio   = 1.0f;
+	dayaw = ent->random;
+	ratio = 1.0f;
 
 	if (ent->start_size)
 	{
@@ -1461,15 +1463,15 @@ void target_rumble_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	if (ent->spawnflags & 1)
 	{
 		ent->spawnflags &= ~1;
-		ent->think       = target_rumble_think;
-		ent->count       = 0;
-		ent->nextthink   = level.time + 50;
+		ent->think = target_rumble_think;
+		ent->count = 0;
+		ent->nextthink = level.time + 50;
 	}
 	else
 	{
 		ent->spawnflags |= 1;
-		ent->think       = NULL;
-		ent->count       = 0;
+		ent->think = NULL;
+		ent->count = 0;
 	}
 }
 
@@ -1503,7 +1505,7 @@ void SP_target_rumble(gentity_t *self)
 	self->use = target_rumble_use;
 
 	G_SpawnString("pitch", "0", &pitch);
-	dapitch     = atof(pitch);
+	dapitch = atof(pitch);
 	self->delay = dapitch;
 	if (!(self->delay))
 	{
@@ -1511,7 +1513,7 @@ void SP_target_rumble(gentity_t *self)
 	}
 
 	G_SpawnString("yaw", "0", &yaw);
-	dayaw        = atof(yaw);
+	dayaw = atof(yaw);
 	self->random = dayaw;
 	if (!(self->random))
 	{
@@ -1724,7 +1726,7 @@ void target_fireonce_use(gentity_t *self, gentity_t *other, gentity_t *activator
 	{
 		G_UseEntity(ent, self, activator);
 	}
-	self->think     = G_FreeEntity;
+	self->think = G_FreeEntity;
 	self->nextthink = level.time + FRAMETIME;
 }
 
@@ -1863,6 +1865,7 @@ void SP_target_remove_portals(gentity_t *self)
 void G_ActivateTarget(gentity_t *self, gentity_t *activator)
 {
 	gentity_t *ent = NULL;
+
 	ent = G_PickTarget(self->target);
 	if (ent && ent->use)
 	{
@@ -1874,7 +1877,7 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 void target_ftrelay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	fireteamData_t *activatorsFt = NULL;
-	fireteamData_t *otherFt      = NULL;
+	fireteamData_t *otherFt = NULL;
 
 	if (!activator || !activator->client)
 	{
@@ -1979,11 +1982,11 @@ void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 		}
 
 		activator->client->sess.previousClientMapProgression
-		                                             = activator->client->sess.clientMapProgression;
+		    = activator->client->sess.clientMapProgression;
 		activator->client->sess.clientMapProgression = self->ident;
 
 		activator->client->sess.nextProgressionDecayEvent =
-		    level.time + self->decayTime;
+			level.time + self->decayTime;
 		activator->client->sess.decayProgression = qtrue;
 	}
 
@@ -2017,6 +2020,7 @@ void SP_target_decay(gentity_t *self)
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	float speed = VectorLength(activator->client->ps.velocity);
+
 	if (!activator)
 	{
 		return;
@@ -2053,7 +2057,7 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	// disable timer if pmove is not fixed
 	if (activator->client->sess.runSpawnflags == 0
-			|| activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
+	    || activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
 	{
 		if (activator->client->pers.pmoveFixed == qfalse)
 		{
@@ -2067,7 +2071,8 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 void SetTimerunIndex(gentity_t *self)
 {
 	char *name = NULL;
-	int  i     = 0;
+	int  i = 0;
+
 	G_SpawnString("name", "default", &name);
 
 	for (; i < level.timerunNamesCount; i++)
@@ -2088,7 +2093,7 @@ void SetTimerunIndex(gentity_t *self)
 			return;
 		}
 		Q_strncpyz(level.timerunNames[level.timerunNamesCount], name,
-		           sizeof(level.timerunNames[level.timerunNamesCount]));
+			sizeof(level.timerunNames[level.timerunNamesCount]));
 		self->runIndex = level.timerunNamesCount;
 		++level.timerunNamesCount;
 	}
@@ -2145,7 +2150,7 @@ void SP_target_endTimer(gentity_t *self)
 
 // target_displaytjl
 // # Keys
-// linenumber : indicate the line number. 
+// linenumber : indicate the line number.
 // or
 // linename : indicate the line string name.
 
@@ -2206,7 +2211,7 @@ void target_activate_if_velocity_use(gentity_t *self, gentity_t *other, gentity_
 {
 	float lowerLimit = self->velocityLowerLimit;
 	float upperLimit = self->velocityUpperLimit;
-	float velocity   = VectorLength(activator->client->ps.velocity);
+	float velocity = VectorLength(activator->client->ps.velocity);
 
 	if (self->spawnflags & 1)
 	{
@@ -2310,7 +2315,7 @@ void target_set_health_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	{
 		activator->health = self->count;
 		activator->client->pers.previousSetHealthTime = level.time;
-		activator->client->alreadyActivatedSetHealth = qtrue;
+		activator->client->alreadyActivatedSetHealth  = qtrue;
 	}
 }
 
@@ -2327,7 +2332,7 @@ void SP_target_set_health(gentity_t *self)
 	self->use = target_set_health_use;
 }
 
-ETJump::DeathrunSystem::PrintLocation parseLocation(const char* locationStr)
+ETJump::DeathrunSystem::PrintLocation parseLocation(const char *locationStr)
 {
 	if (!Q_stricmp(locationStr, "console"))
 	{
@@ -2397,7 +2402,7 @@ void SP_target_deathrun_start(gentity_t *self)
 {
 	self->use = target_deathrun_start_use;
 
-	char *s = nullptr; 
+	char *s = nullptr;
 	G_SpawnString("message", "[n] ^7started death run!", &s);
 	ETJump::deathrunSystem->addStartMessage(s);
 	G_SpawnString("endMessage", "[n] ^7died! Score: [s]", &s);
@@ -2458,10 +2463,11 @@ void SP_target_deathrun_checkpoint(gentity_t *self)
 	char *locationStr = nullptr;
 	char *message = nullptr;
 	char *sound = nullptr;
+
 	G_SpawnString("location", "left", &locationStr);
 	auto location = parseLocation(locationStr);
 	G_SpawnString("message", "", &message);
 	G_SpawnString("sound", "", &sound);
-	self->id = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
+	self->id  = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
 	self->use = target_deathrun_checkpoint_use;
 }

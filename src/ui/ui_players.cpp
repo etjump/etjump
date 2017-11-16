@@ -19,7 +19,7 @@
 #define COAST_TIME              1000
 
 
-static int   dp_realtime;
+static int dp_realtime;
 static float jumpHeight;
 
 
@@ -31,7 +31,7 @@ UI_PlayerInfo_SetWeapon
 static void UI_PlayerInfo_SetWeapon(playerInfo_t *pi, weapon_t weaponNum)
 {
 	gitem_t *item;
-	char    path[MAX_QPATH];
+	char path[MAX_QPATH];
 
 	pi->currentWeapon = weaponNum;
 tryagain:
@@ -308,7 +308,7 @@ UI_PositionEntityOnTag
 static void UI_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
                                    clipHandle_t parentModel, const char *tagName)
 {
-	int           i;
+	int i;
 	orientation_t lerped;
 
 	// lerp the tag
@@ -335,9 +335,9 @@ UI_PositionRotatedEntityOnTag
 static void UI_PositionRotatedEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
                                           clipHandle_t parentModel, const char *tagName)
 {
-	int           i;
+	int i;
 	orientation_t lerped;
-	vec3_t        tempAxis[3];
+	vec3_t tempAxis[3];
 
 	// lerp the tag
 	trap_CM_LerpTag(&lerped, parent, tagName, 0);
@@ -535,7 +535,7 @@ static void UI_SwingAngles(float destination, float swingTolerance, float clampT
 		move = uis.frametime * scale * speed;
 		if (move >= swing)
 		{
-			move      = swing;
+			move = swing;
 			*swinging = qfalse;
 		}
 		*angle = AngleMod(*angle + move);
@@ -545,7 +545,7 @@ static void UI_SwingAngles(float destination, float swingTolerance, float clampT
 		move = uis.frametime * scale * -speed;
 		if (move <= swing)
 		{
-			move      = swing;
+			move = swing;
 			*swinging = qfalse;
 		}
 		*angle = AngleMod(*angle + move);
@@ -641,13 +641,13 @@ static void UI_PlayerAngles(playerInfo_t *pi, vec3_t legs[3], vec3_t torso[3], v
 	    || (pi->torsoAnim & ~ANIM_TOGGLEBIT) != TORSO_STAND)
 	{
 		// if not standing still, always point all in the same direction
-		pi->torso.yawing   = qtrue; // always center
+		pi->torso.yawing = qtrue;   // always center
 		pi->torso.pitching = qtrue; // always center
-		pi->legs.yawing    = qtrue; // always center
+		pi->legs.yawing = qtrue;    // always center
 	}
 
 	// adjust legs for movement dir
-	adjust           = UI_MovedirAdjustment(pi);
+	adjust = UI_MovedirAdjustment(pi);
 	legsAngles[YAW]  = headAngles[YAW] + adjust;
 	torsoAngles[YAW] = headAngles[YAW] + 0.25 * adjust;
 
@@ -696,11 +696,11 @@ static void UI_PlayerFloatSprite(playerInfo_t *pi, vec3_t origin, qhandle_t shad
 
 	memset(&ent, 0, sizeof(ent));
 	VectorCopy(origin, ent.origin);
-	ent.origin[2]   += 48;
-	ent.reType       = RT_SPRITE;
+	ent.origin[2] += 48;
+	ent.reType = RT_SPRITE;
 	ent.customShader = shader;
-	ent.radius       = 10;
-	ent.renderfx     = 0;
+	ent.radius = 10;
+	ent.renderfx = 0;
 	trap_R_AddRefEntityToScene(&ent);
 }
 
@@ -712,10 +712,10 @@ UI_MachinegunSpinAngle
 */
 float   UI_MachinegunSpinAngle(playerInfo_t *pi)
 {
-	int   delta;
+	int delta;
 	float angle;
 	float speed;
-	int   torsoAnim;
+	int torsoAnim;
 
 	delta = dp_realtime - pi->barrelTime;
 	if (pi->barrelSpinning)
@@ -740,8 +740,8 @@ float   UI_MachinegunSpinAngle(playerInfo_t *pi)
 	}
 	if (pi->barrelSpinning == !(torsoAnim == TORSO_ATTACK))
 	{
-		pi->barrelTime     = dp_realtime;
-		pi->barrelAngle    = AngleMod(angle);
+		pi->barrelTime  = dp_realtime;
+		pi->barrelAngle = AngleMod(angle);
 		pi->barrelSpinning = (!!(torsoAnim == TORSO_ATTACK)) ? qtrue : qfalse;
 	}
 
@@ -776,7 +776,7 @@ UI_DrawPlayer
 */
 void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int time)
 {
-	refdef_t    refdef;
+	refdef_t refdef;
 	refEntity_t legs;
 	refEntity_t torso;
 	refEntity_t head;
@@ -786,14 +786,14 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 	refEntity_t helmet;
 //	refEntity_t		barrel;
 	refEntity_t flash;
-	vec3_t      origin;
-	int         renderfx;
-	vec3_t      mins = { -16, -16, -24 };
-	vec3_t      maxs = { 16, 16, 32 };
-	float       len;
-	float       xx;
-	vec4_t      hcolor      = { 1, 0, 0, 0.5 };
-	const char  *torso_anim = NULL, *legs_anim = NULL;
+	vec3_t origin;
+	int renderfx;
+	vec3_t mins = { -16, -16, -24 };
+	vec3_t maxs = { 16, 16, 32 };
+	float  len;
+	float  xx;
+	vec4_t hcolor = { 1, 0, 0, 0.5 };
+	const char *torso_anim = NULL, *legs_anim = NULL;
 
 	if (!pi->legsModel || !pi->torsoModel || !pi->headModel || !pi->animations[0].numFrames)
 	{
@@ -804,10 +804,10 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 
 	if (pi->pendingWeapon != -1 && dp_realtime > pi->weaponTimer)
 	{
-		pi->weapon        = pi->pendingWeapon;
-		pi->lastWeapon    = pi->pendingWeapon;
+		pi->weapon = pi->pendingWeapon;
+		pi->lastWeapon = pi->pendingWeapon;
 		pi->pendingWeapon = static_cast<weapon_t>(-1);
-		pi->weaponTimer   = 0;
+		pi->weaponTimer = 0;
 		if (pi->currentWeapon != pi->weapon)
 		{
 			trap_S_StartLocalSound(trap_S_RegisterSound("sound/weapons/change.wav", qfalse), CHAN_LOCAL);
@@ -827,18 +827,18 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 
 	AxisClear(refdef.viewaxis);
 
-	refdef.x      = x;
-	refdef.y      = y;
+	refdef.x = x;
+	refdef.y = y;
 	refdef.width  = w;
 	refdef.height = h;
 
-	refdef.fov_x  = (int)((float)refdef.width / 640.0f * 90.0f);
-	xx            = refdef.width / tan(refdef.fov_x / 360 * M_PI);
+	refdef.fov_x = (int)((float)refdef.width / 640.0f * 90.0f);
+	xx = refdef.width / tan(refdef.fov_x / 360 * M_PI);
 	refdef.fov_y  = atan2(refdef.height, xx);
 	refdef.fov_y *= (360 / M_PI);
 
 	// calculate distance so the player nearly fills the box
-	len       = 1.01 * (maxs[2] - mins[2]);                     // NERVE - SMF - changed from 0.7
+	len = 1.01 * (maxs[2] - mins[2]);                           // NERVE - SMF - changed from 0.7
 	origin[0] = len / tan(DEG2RAD(refdef.fov_x) * 0.5);
 	origin[1] = 0.5 * (mins[1] + maxs[1]);
 	origin[2] = -0.5 * (mins[2] + maxs[2]);
@@ -861,9 +861,9 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 	//
 	// add the body
 	//
-	legs.hModel     = pi->legsModel;
+	legs.hModel = pi->legsModel;
 	legs.customSkin = pi->legsSkin;
-	legs.renderfx   = renderfx;
+	legs.renderfx = renderfx;
 
 	VectorCopy(origin, legs.origin);
 	VectorCopy(origin, legs.lightingOrigin);
@@ -871,14 +871,14 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 
 	if (torso_anim)
 	{
-		legs.torsoFrame    = 0; //UI_GetAnimation( pi, torso_anim );
+		legs.torsoFrame = 0;    //UI_GetAnimation( pi, torso_anim );
 		legs.oldTorsoFrame = 0; //UI_GetAnimation( pi, torso_anim );
 	}
 	legs.torsoBacklerp = 0; //torso.backlerp;
 
 	if (legs_anim)
 	{
-		legs.frame    = UI_GetAnimation(pi, legs_anim);
+		legs.frame = UI_GetAnimation(pi, legs_anim);
 		legs.oldframe = UI_GetAnimation(pi, legs_anim);
 	}
 	legs.backlerp = 0;
@@ -953,7 +953,7 @@ void UI_DrawPlayer(float x, float y, float w, float h, playerInfo_t *pi, int tim
 			//%	trap_R_AddLightToScene( flash.origin, 200 + (rand()&31), pi->flashDlightColor[0],
 			//%		pi->flashDlightColor[1], pi->flashDlightColor[2], 0 );
 			trap_R_AddLightToScene(flash.origin, 256, 0.75 + 8.0 / (rand() & 31),
-			                       pi->flashDlightColor[0], pi->flashDlightColor[1], pi->flashDlightColor[2], 0, 0);
+				pi->flashDlightColor[0], pi->flashDlightColor[1], pi->flashDlightColor[2], 0, 0);
 		}
 	}
 
@@ -1053,11 +1053,11 @@ static long UI_StringHashValue(const char *fname)
 	char letter;
 
 	hash = 0;
-	i    = 0;
+	i = 0;
 	while (fname[i] != '\0')
 	{
 		letter = tolower(fname[i]);
-		hash  += (long)(letter) * (i + 119);
+		hash += (long)(letter) * (i + 119);
 		i++;
 	}
 	if (hash == -1)
@@ -1076,10 +1076,10 @@ AnimParseAnimConfig
 */
 static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *filename, const char *input)
 {
-	char            *text_p, *token;
-	animation_t     *animations;
+	char *text_p, *token;
+	animation_t *animations;
 	headAnimation_t *headAnims;
-	int             i, fps, skip = -1;
+	int i, fps, skip = -1;
 
 //	if (!weaponStringsInited) {
 //		BG_InitWeaponStrings();
@@ -1087,7 +1087,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *fil
 
 //	globalFilename = (char *)filename;
 
-	animations                   = animModelInfo->animations;
+	animations = animModelInfo->animations;
 	animModelInfo->numAnimations = 0;
 //	headAnims = animModelInfo->headAnims;
 
@@ -1096,9 +1096,9 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *fil
 
 	animModelInfo->footsteps = FOOTSTEP_NORMAL;
 	VectorClear(animModelInfo->headOffset);
-	animModelInfo->gender     = GENDER_MALE;
+	animModelInfo->gender = GENDER_MALE;
 	animModelInfo->isSkeletal = qfalse;
-	animModelInfo->version    = 0;
+	animModelInfo->version = 0;
 
 	// read optional parameters
 	while (1)
@@ -1267,7 +1267,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *fil
 		{
 			fps = 1;
 		}
-		animations[i].frameLerp   = 1000 / fps;
+		animations[i].frameLerp = 1000 / fps;
 		animations[i].initialLerp = 1000 / fps;
 
 		// movespeed
@@ -1303,7 +1303,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *fil
 		}
 		if (strstr(animations[i].name, "firing"))
 		{
-			animations[i].flags      |= ANIMFL_FIRINGANIM;
+			animations[i].flags |= ANIMFL_FIRINGANIM;
 			animations[i].initialLerp = 40;
 		}
 
@@ -1386,19 +1386,19 @@ UI_ParseAnimationFile
 */
 static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 {
-	char         *text_p, *prev;
-	int          len;
-	int          i;
-	char         *token;
-	float        fps;
-	int          skip;
-	char         text[20000];
+	char  *text_p, *prev;
+	int   len;
+	int   i;
+	char  *token;
+	float fps;
+	int   skip;
+	char  text[20000];
 	fileHandle_t f;
 
 	token = NULL;
-	i     = 0;
-	fps   = 0;
-	prev  = 0;
+	i = 0;
+	fps  = 0;
+	prev = 0;
 
 	memset(pi->animations, 0, sizeof(animation_t) * MAX_ANIMATIONS);
 
@@ -1419,7 +1419,7 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 
 	// parse the text
 	text_p = text;
-	skip   = 0; // quite the compiler warning
+	skip = 0;   // quite the compiler warning
 
 	// NERVE - SMF - new!!!!
 	AnimParseAnimConfig(pi, filename, text);
@@ -1524,12 +1524,12 @@ int WM_getWeaponIndex();
 
 qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 {
-	char       modelName[MAX_QPATH];
-	char       skinName[MAX_QPATH];
-	char       filename[MAX_QPATH];
-	char       *slash;
+	char modelName[MAX_QPATH];
+	char skinName[MAX_QPATH];
+	char filename[MAX_QPATH];
+	char *slash;
 	const char *backpack = NULL;
-	const char *helmet   = NULL;
+	const char *helmet = NULL;
 
 	pi->torsoModel = 0;
 	pi->headModel  = 0;
@@ -1562,19 +1562,19 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 	{
 		const char *team;
 		const char *playerClass;
-		int        var, teamval;
+		int var, teamval;
 
 		// DHM - Nerve :: Don't rely on cvar for team, use modelname instead
 		//teamval = trap_Cvar_VariableValue( "mp_team" );
 		if (!strcmp(modelSkinName, "multi"))
 		{
 			teamval = 1;
-			team    = "blue";
+			team = "blue";
 		}
 		else
 		{
 			teamval = 0;
-			team    = "red";
+			team = "red";
 		}
 
 		var = trap_Cvar_VariableValue("mp_playerType");
@@ -1586,12 +1586,12 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 			if (teamval == 1)
 			{
 				backpack = "acc/backpack/backpack_sol.md3";
-				helmet   = "acc/helmet_american/sol.md3";
+				helmet = "acc/helmet_american/sol.md3";
 			}
 			else
 			{
 				backpack = "acc/backpack/backpack_german_sol.md3";
-				helmet   = "acc/helmet_german/helmet_sol.md3";
+				helmet = "acc/helmet_german/helmet_sol.md3";
 			}
 		}
 		else if (var == 1)
@@ -1601,12 +1601,12 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 			if (teamval == 1)
 			{
 				backpack = "acc/backpack/backpack_med.md3";
-				helmet   = "acc/helmet_american/med.md3";
+				helmet = "acc/helmet_american/med.md3";
 			}
 			else
 			{
 				backpack = "acc/backpack/backpack_german_med.md3";
-				helmet   = "acc/helmet_german/helmet_med.md3";
+				helmet = "acc/helmet_german/helmet_med.md3";
 			}
 		}
 		else if (var == 2)
@@ -1616,12 +1616,12 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 			if (teamval == 1)
 			{
 				backpack = "acc/backpack/backpack_eng.md3";
-				helmet   = "acc/helmet_american/eng.md3";
+				helmet = "acc/helmet_american/eng.md3";
 			}
 			else
 			{
 				backpack = "acc/backpack/backpack_german_eng.md3";
-				helmet   = "acc/helmet_german/helmet_eng.md3";
+				helmet = "acc/helmet_german/helmet_eng.md3";
 			}
 		}
 		else if (var == 4)
@@ -1631,12 +1631,12 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 			if (teamval == 1)
 			{
 				backpack = "acc/backpack/backpack_cvops.md3";
-				helmet   = "acc/helmet_american/cvops.md3";
+				helmet = "acc/helmet_american/cvops.md3";
 			}
 			else
 			{
 				backpack = "acc/backpack/backpack_german_cvops.md3";
-				helmet   = "acc/helmet_german/helmet_cvops.md3";
+				helmet = "acc/helmet_german/helmet_cvops.md3";
 			}
 		}
 		else
@@ -1646,12 +1646,12 @@ qboolean UI_RegisterClientModelname(playerInfo_t *pi, const char *modelSkinName)
 			if (teamval == 1)
 			{
 				backpack = "acc/backpack/backpack_lieu.md3";
-				helmet   = "acc/helmet_american/lieu.md3";
+				helmet = "acc/helmet_american/lieu.md3";
 			}
 			else
 			{
 				backpack = "acc/backpack/backpack_german_lieu.md3";
-				helmet   = "acc/helmet_german/helmet_leiu.md3";
+				helmet = "acc/helmet_german/helmet_leiu.md3";
 			}
 		}
 
@@ -1741,11 +1741,11 @@ void UI_PlayerInfo_SetModel(playerInfo_t *pi, const char *model)
 //	pi->weapon = WP_MACHINEGUN;
 //	pi->weapon = WP_MP40;
 	pi->currentWeapon = pi->weapon;
-	pi->lastWeapon    = pi->weapon;
+	pi->lastWeapon = pi->weapon;
 	pi->pendingWeapon = static_cast<weapon_t>(-1);
-	pi->weaponTimer   = 0;
-	pi->chat          = qfalse;
-	pi->newModel      = qtrue;
+	pi->weaponTimer = 0;
+	pi->chat = qfalse;
+	pi->newModel = qtrue;
 	UI_PlayerInfo_SetWeapon(pi, pi->weapon);
 }
 
@@ -1757,7 +1757,7 @@ UI_PlayerInfo_SetInfo
 */
 void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t viewAngles, vec3_t moveAngles, weapon_t weaponNumber, qboolean chat)
 {
-	int      currentAnim;
+	int currentAnim;
 	weapon_t weaponNum;
 
 	pi->chat = chat;
@@ -1772,24 +1772,24 @@ void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t
 	{
 		pi->newModel = qfalse;
 
-		jumpHeight          = 0;
+		jumpHeight = 0;
 		pi->pendingLegsAnim = 0;
 		UI_ForceLegsAnim(pi, legsAnim);
 		pi->legs.yawAngle = viewAngles[YAW];
-		pi->legs.yawing   = qfalse;
+		pi->legs.yawing = qfalse;
 
 		pi->pendingTorsoAnim = 0;
 		UI_ForceTorsoAnim(pi, torsoAnim);
 		pi->torso.yawAngle = viewAngles[YAW];
-		pi->torso.yawing   = qfalse;
+		pi->torso.yawing = qfalse;
 
 		if (weaponNumber != -1)
 		{
-			pi->weapon        = weaponNumber;
+			pi->weapon = weaponNumber;
 			pi->currentWeapon = weaponNumber;
-			pi->lastWeapon    = weaponNumber;
+			pi->lastWeapon = weaponNumber;
 			pi->pendingWeapon = static_cast<weapon_t>(-1);
-			pi->weaponTimer   = 0;
+			pi->weaponTimer = 0;
 			UI_PlayerInfo_SetWeapon(pi, pi->weapon);
 		}
 
@@ -1800,12 +1800,12 @@ void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t
 	if (weaponNumber == -1)
 	{
 		pi->pendingWeapon = static_cast<weapon_t>(-1);
-		pi->weaponTimer   = 0;
+		pi->weaponTimer = 0;
 	}
 	else if (weaponNumber != WP_NONE)
 	{
 		pi->pendingWeapon = weaponNumber;
-		pi->weaponTimer   = dp_realtime + UI_TIMER_WEAPON_DELAY;
+		pi->weaponTimer = dp_realtime + UI_TIMER_WEAPON_DELAY;
 	}
 	weaponNum  = pi->lastWeapon;
 	pi->weapon = weaponNum;
@@ -1816,7 +1816,7 @@ void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t
 		pi->weapon = pi->currentWeapon = WP_NONE;
 		UI_PlayerInfo_SetWeapon(pi, pi->weapon);
 
-		jumpHeight          = 0;
+		jumpHeight = 0;
 		pi->pendingLegsAnim = 0;
 		UI_ForceLegsAnim(pi, legsAnim);
 
@@ -1834,7 +1834,7 @@ void UI_PlayerInfo_SetInfo(playerInfo_t *pi, int legsAnim, int torsoAnim, vec3_t
 	}
 	else if (legsAnim != currentAnim)
 	{
-		jumpHeight          = 0;
+		jumpHeight = 0;
 		pi->pendingLegsAnim = 0;
 		UI_ForceLegsAnim(pi, legsAnim);
 	}

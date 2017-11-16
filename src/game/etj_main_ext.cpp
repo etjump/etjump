@@ -86,13 +86,13 @@ void RunFrame(int levelTime)
 
 void OnGameInit()
 {
-	game.levels         = std::make_shared<Levels>();
-	game.commands       = std::make_shared<Commands>();
+	game.levels = std::make_shared<Levels>();
+	game.commands = std::make_shared<Commands>();
 	game.mapStatistics  = std::make_shared<MapStatistics>();
 	game.customMapVotes = std::make_shared<CustomMapVotes>(game.mapStatistics.get());
-	game.motd           = std::make_shared<Motd>();
-	game.timerun        = std::make_shared<Timerun>();
-	game.tokens         = std::make_shared<Tokens>();
+	game.motd = std::make_shared<Motd>();
+	game.timerun = std::make_shared<Timerun>();
+	game.tokens  = std::make_shared<Tokens>();
 
 	if (strlen(g_levelConfig.string))
 	{
@@ -152,7 +152,7 @@ qboolean OnConnectedClientCommand(gentity_t *ent)
 {
 	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
-	auto argv    = GetArgs();
+	auto argv = GetArgs();
 	auto command = (*argv)[0];
 	boost::to_lower(command);
 
@@ -179,7 +179,7 @@ qboolean OnClientCommand(gentity_t *ent)
 {
 	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
-	auto argv    = GetArgs();
+	auto argv = GetArgs();
 	auto command = (*argv)[0];
 	boost::to_lower(command);
 
@@ -202,7 +202,7 @@ qboolean OnConsoleCommand()
 {
 	G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
-	auto argv    = GetArgs();
+	auto argv = GetArgs();
 	auto command = (*argv)[0];
 	boost::to_lower(command);
 
@@ -239,9 +239,10 @@ const char *GetRandomMap()
 
 const char *G_MatchOneMap(const char *arg)
 {
-	auto                     currentMaps = game.mapStatistics->getCurrentMaps();
+	auto currentMaps = game.mapStatistics->getCurrentMaps();
+
 	std::vector<std::string> matchingMaps;
-	std::string              mapName = arg ? arg : "";
+	std::string mapName = arg ? arg : "";
 	boost::algorithm::to_lower(mapName);
 
 	for (auto & map : *(currentMaps))
@@ -289,6 +290,7 @@ const char *GetRandomMapByType(const char *customType)
 const char *CustomMapTypeExists(const char *mapType)
 {
 	static char buf[MAX_TOKEN_CHARS] = "\0";
+
 	if (!mapType)
 	{
 		G_Error("mapType is NULL.");
@@ -328,8 +330,9 @@ std::string GetTeamString(int clientNum)
 void LogServerState()
 {
 	time_t t;
+
 	time(&t);
-	std::string   state = "Server state at " + TimeStampToString(static_cast<int>(t)) + ":\n";
+	std::string state = "Server state at " + TimeStampToString(static_cast<int>(t)) + ":\n";
 	boost::format fmter("%1% %2% %3%");
 	for (int i = 0; i < level.numConnectedClients; i++)
 	{
@@ -383,9 +386,10 @@ bool allTokensCollected(gentity_t *ent)
 {
 	auto tokenCounts = game.tokens->getTokenCounts();
 
-	auto easyCount   = 0;
+	auto easyCount = 0;
 	auto mediumCount = 0;
-	auto hardCount   = 0;
+	auto hardCount = 0;
+
 	for (auto i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
 	{
 		if (ent->client->pers.collectedEasyTokens[i])

@@ -46,12 +46,12 @@ static void CG_ParseScore(team_t team)
 	{
 		i = cg.numScores;
 
-		cg.scores[i].client         = atoi(CG_Argv(offset + 0 + (j * 7)));
-		cg.scores[i].score          = atoi(CG_Argv(offset + 1 + (j * 7)));
-		cg.scores[i].ping           = atoi(CG_Argv(offset + 2 + (j * 7)));
-		cg.scores[i].time           = atoi(CG_Argv(offset + 3 + (j * 7)));
-		powerups                    = atoi(CG_Argv(offset + 4 + (j * 7)));
-		cg.scores[i].playerClass    = atoi(CG_Argv(offset + 5 + (j * 7)));
+		cg.scores[i].client = atoi(CG_Argv(offset + 0 + (j * 7)));
+		cg.scores[i].score  = atoi(CG_Argv(offset + 1 + (j * 7)));
+		cg.scores[i].ping = atoi(CG_Argv(offset + 2 + (j * 7)));
+		cg.scores[i].time = atoi(CG_Argv(offset + 3 + (j * 7)));
+		powerups = atoi(CG_Argv(offset + 4 + (j * 7)));
+		cg.scores[i].playerClass = atoi(CG_Argv(offset + 5 + (j * 7)));
 		cg.scores[i].followedClient = atoi(CG_Argv(offset + 6 + (j * 7)));
 
 		if (cg.scores[i].client < 0 || cg.scores[i].client >= MAX_CLIENTS)
@@ -59,7 +59,7 @@ static void CG_ParseScore(team_t team)
 			cg.scores[i].client = 0;
 		}
 
-		cgs.clientinfo[cg.scores[i].client].score    = cg.scores[i].score;
+		cgs.clientinfo[cg.scores[i].client].score = cg.scores[i].score;
 		cgs.clientinfo[cg.scores[i].client].powerups = powerups;
 
 		cg.scores[i].team = cgs.clientinfo[cg.scores[i].client].team;
@@ -89,8 +89,8 @@ static void CG_ParseTeamInfo(void)
 
 		cgs.clientinfo[client].location[0] = atoi(CG_Argv(i * NUMARGS + 3));
 		cgs.clientinfo[client].location[1] = atoi(CG_Argv(i * NUMARGS + 4));
-		cgs.clientinfo[client].health      = atoi(CG_Argv(i * NUMARGS + 5));
-		cgs.clientinfo[client].powerups    = atoi(CG_Argv(i * NUMARGS + 6));
+		cgs.clientinfo[client].health = atoi(CG_Argv(i * NUMARGS + 5));
+		cgs.clientinfo[client].powerups = atoi(CG_Argv(i * NUMARGS + 6));
 	}
 }
 
@@ -105,9 +105,9 @@ and whenever the server updates any serverinfo flagged cvars
 void CG_ParseServerinfo(void)
 {
 	const char *info;
-	const char       *mapname;
+	const char *mapname;
 
-	info                = CG_ConfigString(CS_SERVERINFO);
+	info = CG_ConfigString(CS_SERVERINFO);
 	cg_gameType.integer = cgs.gametype = (gametype_t)atoi(Info_ValueForKey(info, "g_gametype"));
 	cg_antilag.integer  = cgs.antilag = atoi(Info_ValueForKey(info, "g_antilag"));
 	if (!cgs.localServer)
@@ -119,7 +119,7 @@ void CG_ParseServerinfo(void)
 	}
 	cgs.timelimit  = atof(Info_ValueForKey(info, "timelimit"));
 	cgs.maxclients = atoi(Info_ValueForKey(info, "sv_maxclients"));
-	mapname        = Info_ValueForKey(info, "mapname");
+	mapname = Info_ValueForKey(info, "mapname");
 	Q_strncpyz(cgs.rawmapname, mapname, sizeof(cgs.rawmapname));
 	Com_sprintf(cgs.mapname, sizeof(cgs.mapname), "maps/%s.bsp", mapname);
 
@@ -147,7 +147,7 @@ CG_ParseWarmup
 static void CG_ParseWarmup(void)
 {
 	const char *info;
-	int        warmup;
+	int warmup;
 
 	info = CG_ConfigString(CS_WARMUP);
 
@@ -205,7 +205,7 @@ void CG_ParseOIDInfo(int num)
 {
 	const char *info;
 	const char *cs;
-	int        index = num - CS_OID_DATA;
+	int index = num - CS_OID_DATA;
 
 	info = CG_ConfigString(num);
 
@@ -290,15 +290,15 @@ NERVE - SMF
 */
 void CG_ParseWolfinfo(void)
 {
-	int        old_gs = cgs.gamestate;
+	int old_gs = cgs.gamestate;
 	const char *info;
 
 	info = CG_ConfigString(CS_WOLFINFO);
 
-	cgs.currentRound       = atoi(Info_ValueForKey(info, "g_currentRound"));
-	cgs.nextTimeLimit      = atof(Info_ValueForKey(info, "g_nextTimeLimit"));
-	cgs.gamestate          = (gamestate_t)atoi(Info_ValueForKey(info, "gamestate"));
-	cgs.currentCampaign    = Info_ValueForKey(info, "g_currentCampaign");
+	cgs.currentRound  = atoi(Info_ValueForKey(info, "g_currentRound"));
+	cgs.nextTimeLimit = atof(Info_ValueForKey(info, "g_nextTimeLimit"));
+	cgs.gamestate = (gamestate_t)atoi(Info_ValueForKey(info, "gamestate"));
+	cgs.currentCampaign = Info_ValueForKey(info, "g_currentCampaign");
 	cgs.currentCampaignMap = atoi(Info_ValueForKey(info, "g_currentCampaignMap"));
 
 	// OSP - Announce game in progress if we are really playing
@@ -329,11 +329,11 @@ void CG_ParseSpawns(void)
 {
 	const char *info;
 	const char *s;
-	int        i;
-	int        newteam;
+	int i;
+	int newteam;
 
 	info = CG_ConfigString(CS_MULTI_INFO);
-	s    = Info_ValueForKey(info, "numspawntargets");
+	s = Info_ValueForKey(info, "numspawntargets");
 
 	if (!s || !strlen(s))
 	{
@@ -389,12 +389,12 @@ void CG_ParseSpawns(void)
 		newteam = atoi(s);
 		if (cg.spawnTeams[i] != newteam)
 		{
-			cg.spawnTeams_old[i]        = cg.spawnTeams[i];
+			cg.spawnTeams_old[i] = cg.spawnTeams[i];
 			cg.spawnTeams_changeTime[i] = cg.time;
-			cg.spawnTeams[i]            = (team_t)newteam;
+			cg.spawnTeams[i] = (team_t)newteam;
 		}
 
-		s                       = Info_ValueForKey(info, "c");
+		s = Info_ValueForKey(info, "c");
 		cg.spawnPlayerCounts[i] = atoi(s);
 	}
 }
@@ -407,17 +407,17 @@ CG_ParseScreenFade
 static void CG_ParseScreenFade(void)
 {
 	char *info;
-	char       *token;
+	char *token;
 
 	info = (char *)CG_ConfigString(CS_SCREENFADE);
 
-	token         = COM_Parse(&info);
+	token = COM_Parse(&info);
 	cgs.fadeAlpha = atof(token);
 
-	token             = COM_Parse(&info);
+	token = COM_Parse(&info);
 	cgs.fadeStartTime = atoi(token);
-	token             = COM_Parse(&info);
-	cgs.fadeDuration  = atoi(token);
+	token = COM_Parse(&info);
+	cgs.fadeDuration = atoi(token);
 
 	if (cgs.fadeStartTime + cgs.fadeDuration < cg.time)
 	{
@@ -438,10 +438,10 @@ CG_ParseFog
 */
 static void CG_ParseFog(void)
 {
-	char *info;
-	char       *token;
-	float      ne, fa, r, g, b, density;
-	int        time;
+	char  *info;
+	char  *token;
+	float ne, fa, r, g, b, density;
+	int time;
 
 	info = (char *)CG_ConfigString(CS_FOGVARS);
 
@@ -467,10 +467,10 @@ static void CG_ParseFog(void)
 static void CG_ParseGlobalFog(void)
 {
 	char *info;
-	char       *token;
-	qboolean   restore;
-	float      r, g, b, depthForOpaque;
-	int        duration;
+	char *token;
+	qboolean restore;
+	float r, g, b, depthForOpaque;
+	int duration;
 
 	info = (char *)CG_ConfigString(CS_GLOBALFOGVARS);
 
@@ -503,7 +503,7 @@ void CG_ParseServerVersionInfo(const char *pszVersionInfo)
 // Parse reinforcement offsets
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString)
 {
-	const char   *tmp = pszReinfSeedString, *tmp2;
+	const char *tmp = pszReinfSeedString, *tmp2;
 	unsigned int i, j, dwDummy, dwOffset[TEAM_NUM_TEAMS];
 
 #define GETVAL(x, y) if ((tmp = strchr(tmp, ' ')) == NULL) { return; } x = atoi(++tmp) / y;
@@ -538,9 +538,9 @@ Called on load to set the initial values from configure strings
 */
 void CG_SetConfigValues(void)
 {
-	cgs.levelStartTime        = atoi(CG_ConfigString(CS_LEVEL_START_TIME));
+	cgs.levelStartTime = atoi(CG_ConfigString(CS_LEVEL_START_TIME));
 	cgs.intermissionStartTime = atoi(CG_ConfigString(CS_INTERMISSION_START_TIME));
-	cg.warmup                 = atoi(CG_ConfigString(CS_WARMUP));
+	cg.warmup = atoi(CG_ConfigString(CS_WARMUP));
 
 	// rain - set all of this crap in cgs - it won't be set if it doesn't
 	// change, otherwise.  consider:
@@ -551,7 +551,7 @@ void CG_SetConfigValues(void)
 
 	cgs.voteTime = atoi(CG_ConfigString(CS_VOTE_TIME));
 	cgs.voteYes  = atoi(CG_ConfigString(CS_VOTE_YES));
-	cgs.voteNo   = atoi(CG_ConfigString(CS_VOTE_NO));
+	cgs.voteNo = atoi(CG_ConfigString(CS_VOTE_NO));
 	Q_strncpyz(cgs.voteString, CG_ConfigString(CS_VOTE_STRING), sizeof(cgs.voteString));
 
 	cg.teamFirstBlood = atoi(CG_ConfigString(CS_FIRSTBLOOD));
@@ -572,11 +572,11 @@ CG_ShaderStateChanged
 */
 void CG_ShaderStateChanged(void)
 {
-	char       originalShader[MAX_QPATH];
-	char       newShader[MAX_QPATH];
-	char       timeOffset[16];
+	char originalShader[MAX_QPATH];
+	char newShader[MAX_QPATH];
+	char timeOffset[16];
 	const char *o;
-	const char       *n, *t;
+	const char *n, *t;
 
 	o = CG_ConfigString(CS_SHADERSTATE);
 	while (o && *o)
@@ -605,8 +605,8 @@ void CG_ShaderStateChanged(void)
 				timeOffset[o - t] = 0;
 				o++;
 				trap_R_RemapShader(cgs.gameShaderNames[atoi(originalShader)],
-				                   cgs.gameShaderNames[atoi(newShader)],
-				                   timeOffset);
+					cgs.gameShaderNames[atoi(newShader)],
+					timeOffset);
 			}
 		}
 		else
@@ -627,14 +627,14 @@ void CG_ChargeTimesChanged(void)
 
 	info = CG_ConfigString(CS_CHARGETIMES);
 
-	cg.soldierChargeTime[0]   = atoi(Info_ValueForKey(info, "axs_sld"));
-	cg.soldierChargeTime[1]   = atoi(Info_ValueForKey(info, "ald_sld"));
-	cg.medicChargeTime[0]     = atoi(Info_ValueForKey(info, "axs_mdc"));
-	cg.medicChargeTime[1]     = atoi(Info_ValueForKey(info, "ald_mdc"));
-	cg.engineerChargeTime[0]  = atoi(Info_ValueForKey(info, "axs_eng"));
-	cg.engineerChargeTime[1]  = atoi(Info_ValueForKey(info, "ald_eng"));
-	cg.ltChargeTime[0]        = atoi(Info_ValueForKey(info, "axs_lnt"));
-	cg.ltChargeTime[1]        = atoi(Info_ValueForKey(info, "ald_lnt"));
+	cg.soldierChargeTime[0] = atoi(Info_ValueForKey(info, "axs_sld"));
+	cg.soldierChargeTime[1] = atoi(Info_ValueForKey(info, "ald_sld"));
+	cg.medicChargeTime[0] = atoi(Info_ValueForKey(info, "axs_mdc"));
+	cg.medicChargeTime[1] = atoi(Info_ValueForKey(info, "ald_mdc"));
+	cg.engineerChargeTime[0] = atoi(Info_ValueForKey(info, "axs_eng"));
+	cg.engineerChargeTime[1] = atoi(Info_ValueForKey(info, "ald_eng"));
+	cg.ltChargeTime[0] = atoi(Info_ValueForKey(info, "axs_lnt"));
+	cg.ltChargeTime[1] = atoi(Info_ValueForKey(info, "ald_lnt"));
 	cg.covertopsChargeTime[0] = atoi(Info_ValueForKey(info, "axs_cvo"));
 	cg.covertopsChargeTime[1] = atoi(Info_ValueForKey(info, "ald_cvo"));
 }
@@ -648,7 +648,7 @@ CG_ConfigStringModified
 static void CG_ConfigStringModified(void)
 {
 	const char *str;
-	int        num;
+	int num;
 
 	num = atoi(CG_Argv(1));
 
@@ -714,17 +714,17 @@ static void CG_ConfigStringModified(void)
 	}
 	else if (num == CS_VOTE_TIME)
 	{
-		cgs.voteTime     = atoi(str);
+		cgs.voteTime = atoi(str);
 		cgs.voteModified = qtrue;
 	}
 	else if (num == CS_VOTE_YES)
 	{
-		cgs.voteYes      = atoi(str);
+		cgs.voteYes = atoi(str);
 		cgs.voteModified = qtrue;
 	}
 	else if (num == CS_VOTE_NO)
 	{
-		cgs.voteNo       = atoi(str);
+		cgs.voteNo = atoi(str);
 		cgs.voteModified = qtrue;
 	}
 	else if (num == CS_VOTE_STRING)
@@ -835,7 +835,7 @@ CG_AddToTeamChat
 */
 static void CG_AddToTeamChat(const char *str, int clientnum)
 {
-	int  len;
+	int len;
 	char *p, *ls;
 	int  lastcolor;
 	int  chatHeight;
@@ -881,19 +881,19 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 			cgs.teamChatMsgTeams[cgs.teamChatPos % chatHeight] = cgs.clientinfo[clientnum].team;
 
 			cgs.teamChatPos++;
-			p    = cgs.teamChatMsgs[cgs.teamChatPos % chatHeight];
-			*p   = 0;
+			p  = cgs.teamChatMsgs[cgs.teamChatPos % chatHeight];
+			*p = 0;
 			*p++ = Q_COLOR_ESCAPE;
 			*p++ = lastcolor;
 			len  = 0;
-			ls   = NULL;
+			ls = NULL;
 		}
 
 		if (Q_IsColorString(str))
 		{
-			*p++      = *str++;
+			*p++ = *str++;
 			lastcolor = *str;
-			*p++      = *str++;
+			*p++ = *str++;
 			continue;
 		}
 		if (*str == ' ')
@@ -923,7 +923,7 @@ CG_AddToNotify
 */
 void CG_AddToNotify(const char *str)
 {
-	int   len;
+	int len;
 	char  *p, *ls;
 	int   lastcolor;
 	int   chatHeight;
@@ -965,19 +965,19 @@ void CG_AddToNotify(const char *str)
 			cgs.notifyMsgTimes[cgs.notifyPos % chatHeight] = cg.time;
 
 			cgs.notifyPos++;
-			p    = cgs.notifyMsgs[cgs.notifyPos % chatHeight];
-			*p   = 0;
+			p  = cgs.notifyMsgs[cgs.notifyPos % chatHeight];
+			*p = 0;
 			*p++ = Q_COLOR_ESCAPE;
 			*p++ = lastcolor;
 			len  = 0;
-			ls   = NULL;
+			ls = NULL;
 		}
 
 		if (Q_IsColorString(str))
 		{
-			*p++      = *str++;
+			*p++ = *str++;
 			lastcolor = *str;
-			*p++      = *str++;
+			*p++ = *str++;
 			continue;
 		}
 		if (*str == ' ')
@@ -1043,14 +1043,14 @@ static void CG_MapRestart(void)
 	// (SA) clear zoom (so no warpies)
 	cg.zoomedBinoc = qfalse;
 	cg.zoomedScope = qfalse;
-	cg.zoomTime    = 0;
-	cg.zoomval     = 0;
+	cg.zoomTime = 0;
+	cg.zoomval  = 0;
 
-	cgs.complaintEndTime          = 0;
-	cgs.invitationEndTime         = 0;
-	cgs.applicationEndTime        = 0;
-	cgs.propositionEndTime        = 0;
-	cgs.autoFireteamEndTime       = 0;
+	cgs.complaintEndTime    = 0;
+	cgs.invitationEndTime   = 0;
+	cgs.applicationEndTime  = 0;
+	cgs.propositionEndTime  = 0;
+	cgs.autoFireteamEndTime = 0;
 	cgs.autoFireteamCreateEndTime = 0;
 
 	// reset fog to world fog (if present)
@@ -1061,12 +1061,12 @@ static void CG_MapRestart(void)
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
 
-	numSplinePaths     = 0;
-	numPathCorners     = 0;
+	numSplinePaths = 0;
+	numPathCorners = 0;
 	cg.numOIDtriggers2 = 0;
 
 	cgs.fadeStartTime = 0;
-	cgs.fadeAlpha     = 0;
+	cgs.fadeAlpha = 0;
 	trap_Cvar_Set("cg_letterbox", "0");
 
 	CG_ParseWolfinfo();
@@ -1097,11 +1097,11 @@ static void CG_MapRestart(void)
 	// done.
 
 	cg.intermissionStarted = qfalse;
-	cg.lightstylesInited   = qfalse;
-	cg.mapRestart          = qtrue;
-	cg.timelimitWarnings   = 0;
-	cgs.voteTime           = 0;
-	cgs.dumpStatsTime      = 0;
+	cg.lightstylesInited = qfalse;
+	cg.mapRestart = qtrue;
+	cg.timelimitWarnings = 0;
+	cgs.voteTime = 0;
+	cgs.dumpStatsTime = 0;
 
 	CG_StartMusic();
 
@@ -1118,9 +1118,9 @@ static void CG_MapRestart(void)
 // jpw
 
 	// we really should clear more parts of cg here and stop sounds
-	cg.v_dmg_time   = 0;
+	cg.v_dmg_time = 0;
 	cg.v_noFireTime = 0;
-	cg.v_fireTime   = 0;
+	cg.v_fireTime = 0;
 
 	cg.filtercams = atoi(CG_ConfigString(CS_FILTERCAMS)) ? qtrue : qfalse;
 
@@ -1156,7 +1156,7 @@ static void CG_MapRestart(void)
 typedef struct voiceChat_s
 {
 	char id[64];
-	int numSounds;
+	int  numSounds;
 	sfxHandle_t sounds[MAX_VOICESOUNDS];
 	char chats[MAX_VOICESOUNDS][MAX_CHATSIZE];
 	qhandle_t sprite[MAX_VOICESOUNDS];          // DHM - Nerve
@@ -1165,18 +1165,18 @@ typedef struct voiceChat_s
 typedef struct voiceChatList_s
 {
 	char name[64];
-	int gender;
-	int numVoiceChats;
+	int  gender;
+	int  numVoiceChats;
 	voiceChat_t voiceChats[MAX_VOICECHATS];
 } voiceChatList_t;
 
 typedef struct headModelVoiceChat_s
 {
 	char headmodel[64];
-	int voiceChatNum;
+	int  voiceChatNum;
 } headModelVoiceChat_t;
 
-voiceChatList_t      voiceChatLists[MAX_VOICEFILES];
+voiceChatList_t voiceChatLists[MAX_VOICEFILES];
 headModelVoiceChat_t headModelVoiceChat[MAX_HEADMODELS];
 
 /*
@@ -1186,14 +1186,14 @@ CG_ParseVoiceChats
 */
 int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int maxVoiceChats)
 {
-	int          len, i;
-	int          current = 0;
+	int len, i;
+	int current = 0;
 	fileHandle_t f;
-	char         buf[MAX_VOICEFILESIZE];
-	char         **p, *ptr;
-	char         *token;
-	voiceChat_t  *voiceChats;
-	qboolean     compress;
+	char buf[MAX_VOICEFILESIZE];
+	char **p, *ptr;
+	char *token;
+	voiceChat_t *voiceChats;
+	qboolean compress;
 
 	compress = qtrue;
 	if (cg_buildScript.integer)
@@ -1219,7 +1219,7 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 	trap_FS_FCloseFile(f);
 
 	ptr = buf;
-	p   = &ptr;
+	p = &ptr;
 
 	Com_sprintf(voiceChatList->name, sizeof(voiceChatList->name), "%s", filename);
 	voiceChats = voiceChatList->voiceChats;
@@ -1271,7 +1271,7 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 			return qfalse;
 		}
 		voiceChats[voiceChatList->numVoiceChats].numSounds = 0;
-		current                                            = voiceChats[voiceChatList->numVoiceChats].numSounds;
+		current = voiceChats[voiceChatList->numVoiceChats].numSounds;
 
 		while (1)
 		{
@@ -1285,7 +1285,7 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 				break;
 			}
 			voiceChats[voiceChatList->numVoiceChats].sounds[current] = trap_S_RegisterSound(token, compress);
-			token                                                    = COM_ParseExt(p, qtrue);
+			token = COM_ParseExt(p, qtrue);
 			if (!token || token[0] == 0)
 			{
 				return qtrue;
@@ -1336,7 +1336,7 @@ void CG_LoadVoiceChats(void)
 {
 	int size;
 
-	size                            = trap_MemoryRemaining();
+	size = trap_MemoryRemaining();
 	voiceChatLists[0].numVoiceChats = 0;
 	voiceChatLists[1].numVoiceChats = 0;
 
@@ -1353,11 +1353,11 @@ CG_HeadModelVoiceChats
 */
 int CG_HeadModelVoiceChats(char *filename)
 {
-	int          len, i;
+	int len, i;
 	fileHandle_t f;
-	char         buf[MAX_VOICEFILESIZE];
-	char         **p, *ptr;
-	char         *token;
+	char buf[MAX_VOICEFILESIZE];
+	char **p, *ptr;
+	char *token;
 
 	len = trap_FS_FOpenFile(filename, &f, FS_READ);
 	if (!f)
@@ -1377,7 +1377,7 @@ int CG_HeadModelVoiceChats(char *filename)
 	trap_FS_FCloseFile(f);
 
 	ptr = buf;
-	p   = &ptr;
+	p = &ptr;
 
 	token = COM_ParseExt(p, qtrue);
 	if (!token || token[0] == 0)
@@ -1412,22 +1412,27 @@ int CG_GetVoiceChat(voiceChatList_t *voiceChatList, vsayCmd_t *vsay, sfxHandle_t
 	{
 		if (!Q_stricmp(vsay->id, voiceChatList->voiceChats[i].id))
 		{
-			if (vsay->variant > 0) {
+			if (vsay->variant > 0)
+			{
 
-				if (vsay->variant >= voiceChatList->voiceChats[i].numSounds) {
+				if (vsay->variant >= voiceChatList->voiceChats[i].numSounds)
+				{
 					rnd = voiceChatList->voiceChats[i].numSounds - 1;
 				}
-				else {
+				else
+				{
 					rnd = vsay->variant - 1;
 				}
-				 
-			} else {
+
+			}
+			else
+			{
 				rnd = vsay->random * voiceChatList->voiceChats[i].numSounds;
 			}
-			
-			*snd    = voiceChatList->voiceChats[i].sounds[rnd];
+
+			*snd = voiceChatList->voiceChats[i].sounds[rnd];
 			*sprite = voiceChatList->voiceChats[i].sprite[rnd];
-			*chat   = voiceChatList->voiceChats[i].chats[rnd];
+			*chat = voiceChatList->voiceChats[i].chats[rnd];
 			return qtrue;
 		}
 	}
@@ -1458,7 +1463,7 @@ typedef struct bufferedVoiceChat_s
 	int clientNum;
 	sfxHandle_t snd;
 	qhandle_t sprite;
-	int voiceOnly;
+	int  voiceOnly;
 	char cmd[MAX_SAY_TEXT];
 	char message[MAX_SAY_TEXT];
 	vec3_t origin;          // NERVE - SMF
@@ -1540,7 +1545,7 @@ void CG_PlayBufferedVoiceChats(void)
 			CG_PlayVoiceChat(&voiceChatBuffer[cg.voiceChatBufferOut]);
 			//
 			cg.voiceChatBufferOut = (cg.voiceChatBufferOut + 1) % MAX_VOICECHATBUFFER;
-			cg.voiceChatTime      = cg.time + 1000;
+			cg.voiceChatTime = cg.time + 1000;
 		}
 	}
 }
@@ -1565,16 +1570,16 @@ CG_VoiceChatLocal
 */
 void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, vsayCmd_t *vsay, vec3_t origin)
 {
-	char                *chat;
-	voiceChatList_t     *voiceChatList;
-	clientInfo_t        *ci;
-	sfxHandle_t         snd;
-	qhandle_t           sprite;
+	char *chat;
+	voiceChatList_t *voiceChatList;
+	clientInfo_t *ci;
+	sfxHandle_t  snd;
+	qhandle_t sprite;
 	bufferedVoiceChat_t vchat;
-	const char          *loc = " "; // NERVE - SMF
-	const char          *msgColor = "^z";
-	const char          *msgTime = "";
-	qtime_t             t;
+	const char *loc = " ";          // NERVE - SMF
+	const char *msgColor = "^z";
+	const char *msgTime  = "";
+	qtime_t t;
 
 /*	// NERVE - SMF - don't do this in wolfMP
     // if we are going into the intermission, don't start any voices
@@ -1601,8 +1606,8 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 		if (mode == SAY_TEAM || !cg_teamChatsOnly.integer)
 		{
 			vchat.clientNum = clientNum;
-			vchat.snd       = snd;
-			vchat.sprite    = sprite;
+			vchat.snd = snd;
+			vchat.sprite = sprite;
 			vchat.voiceOnly = voiceOnly;
 			VectorCopy(origin, vchat.origin);       // NERVE - SMF
 			Q_strncpyz(vchat.cmd, vsay->id, sizeof(vchat.cmd));
@@ -1617,7 +1622,8 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 				}
 			}
 
-			if (vsay->custom[0] != '\0') {
+			if (vsay->custom[0] != '\0')
+			{
 				chat = vsay->custom;
 			}
 
@@ -1639,17 +1645,17 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 
 			if (mode == SAY_TEAM)
 			{
-				Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s)%c%c(%s): %c%c%s", 
+				Com_sprintf(vchat.message, sizeof(vchat.message), "%s(%s)%c%c(%s): %c%c%s",
 					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
 			else if (mode == SAY_BUDDY)
 			{
-				Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s>%c%c<%s>: %c%c%s", 
+				Com_sprintf(vchat.message, sizeof(vchat.message), "%s<%s>%c%c<%s>: %c%c%s",
 					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
 			else
 			{
-				Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s%c%c: %c%c%s", 
+				Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s%c%c: %c%c%s",
 					msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW, Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
 			}
 			CG_AddBufferedVoiceChat(&vchat);
@@ -1666,10 +1672,10 @@ ConcatArgs
 // wrong values.
 char *ConcatArgs(int start)
 {
-	int         i, c, tlen;
+	int i, c, tlen;
 	static char line[MAX_STRING_CHARS];
-	int         len;
-	char        arg[MAX_STRING_CHARS];
+	int  len;
+	char arg[MAX_STRING_CHARS];
 
 	len = 0;
 	// For some reason trap_Argc() returns argc + 1 on cgame
@@ -1703,17 +1709,17 @@ CG_VoiceChat
 */
 void CG_VoiceChat(int mode)
 {
-	auto       *cmd = "";
-	int        clientNum, color, variant = 5, rand = 6, custom = 7;
-	qboolean   voiceOnly;
-	vec3_t     origin;      // NERVE - SMF
-	vsayCmd_t  vsay;
+	auto *cmd = "";
+	int  clientNum, color, variant = 5, rand = 6, custom = 7;
+	qboolean voiceOnly;
+	vec3_t origin;          // NERVE - SMF
+	vsayCmd_t vsay;
 
 	memset(&vsay, 0, sizeof(vsay));
 
 	voiceOnly = atoi(CG_Argv(1)) ? qtrue : qfalse;
 	clientNum = atoi(CG_Argv(2));
-	color     = atoi(CG_Argv(3));
+	color = atoi(CG_Argv(3));
 
 	if (mode != SAY_ALL)
 	{
@@ -1781,13 +1787,13 @@ NERVE - SMF - localize string sent from server
 const char *CG_LocalizeServerCommand(const char *buf)
 {
 	static char token[MAX_TOKEN_CHARS];
-	char        temp[MAX_TOKEN_CHARS];
-	qboolean    togloc = qtrue;
-	const char  *s;
-	int         i, prev;
+	char temp[MAX_TOKEN_CHARS];
+	qboolean togloc = qtrue;
+	const char *s;
+	int i, prev;
 
 	memset(token, 0, sizeof(token));
-	s    = buf;
+	s = buf;
 	prev = 0;
 
 	for (i = 0; *s; i++, s++)
@@ -1819,8 +1825,8 @@ const char *CG_LocalizeServerCommand(const char *buf)
 				togloc = qfalse;
 			}
 
-			i   += 5;
-			s   += 5;
+			i += 5;
+			s += 5;
 			prev = i;
 		}
 	}
@@ -1865,9 +1871,9 @@ void CG_wstatsParse_cmd(void)
 		}
 		else
 		{
-			cg.statsWindow->effects  |= WFX_TEXTSIZING;
+			cg.statsWindow->effects |= WFX_TEXTSIZING;
 			cg.statsWindow->lineCount = 0;
-			cg.windowCurrent          = cg.statsWindow;
+			cg.windowCurrent = cg.statsWindow;
 			CG_parseWeaponStats_cmd(CG_printWindow);
 		}
 	}
@@ -1875,9 +1881,9 @@ void CG_wstatsParse_cmd(void)
 
 void CG_topshotsParse_cmd(qboolean doBest)
 {
-	int            iArg  = 1;
-	int            iWeap = atoi(CG_Argv(iArg++));
-	topshotStats_t *ts   = &cgs.topshots;
+	int iArg  = 1;
+	int iWeap = atoi(CG_Argv(iArg++));
+	topshotStats_t *ts = &cgs.topshots;
 
 	ts->cWeapons = 0;
 
@@ -1899,12 +1905,12 @@ void CG_topshotsParse_cmd(qboolean doBest)
 		{
 			BG_cleanName(cgs.clientinfo[cnum].name, name, 17, qfalse);
 			Q_strncpyz(ts->strWS[ts->cWeapons++],
-			           va("%-12s %5.1f %4d/%-4d %5d  %s",
-			              aWeaponInfo[iWeap - 1].pszName,
-			              acc, hits, atts,
-			              kills,
-			              name),
-			           sizeof(ts->strWS[0]));
+				va("%-12s %5.1f %4d/%-4d %5d  %s",
+					aWeaponInfo[iWeap - 1].pszName,
+					acc, hits, atts,
+					kills,
+					name),
+				sizeof(ts->strWS[0]));
 		}
 
 		iWeap = atoi(CG_Argv(iArg++));
@@ -1922,7 +1928,7 @@ void CG_ParsePortalPos(void)
 	int i;
 
 	cgs.ccCurrentCamObjective = atoi(CG_Argv(1));
-	cgs.ccPortalEnt           = atoi(CG_Argv(8));
+	cgs.ccPortalEnt = atoi(CG_Argv(8));
 
 	for (i = 0; i < 3; i++)
 	{
@@ -1941,18 +1947,18 @@ void CG_parseWeaponStatsGS_cmd(void)
 {
 	clientInfo_t *ci;
 	gameStats_t  *gs = &cgs.gamestats;
-	int          i, iArg = 1;
-	int          nClientID  = atoi(CG_Argv(iArg++));
-	int          nRounds    = atoi(CG_Argv(iArg++));
-	int          weaponMask = atoi(CG_Argv(iArg++));
-	int          skillMask, xp = 0;
+	int i, iArg = 1;
+	int nClientID = atoi(CG_Argv(iArg++));
+	int nRounds = atoi(CG_Argv(iArg++));
+	int weaponMask = atoi(CG_Argv(iArg++));
+	int skillMask, xp = 0;
 
 	gs->cWeapons  = 0;
 	gs->cSkills   = 0;
 	gs->fHasStats = qfalse;
 
 	gs->nClientID = nClientID;
-	gs->nRounds   = nRounds;
+	gs->nRounds = nRounds;
 
 	ci = &cgs.clientinfo[nClientID];
 
@@ -1967,18 +1973,18 @@ void CG_parseWeaponStatsGS_cmd(void)
 		{
 			if (weaponMask & (1 << i))
 			{
-				int nHits      = atoi(CG_Argv(iArg++));
-				int nShots     = atoi(CG_Argv(iArg++));
-				int nKills     = atoi(CG_Argv(iArg++));
-				int nDeaths    = atoi(CG_Argv(iArg++));
+				int nHits   = atoi(CG_Argv(iArg++));
+				int nShots  = atoi(CG_Argv(iArg++));
+				int nKills  = atoi(CG_Argv(iArg++));
+				int nDeaths = atoi(CG_Argv(iArg++));
 				int nHeadshots = atoi(CG_Argv(iArg++));
 
 				Q_strncpyz(strName, va("%-12s  ", aWeaponInfo[i].pszName), sizeof(strName));
 				if (nShots > 0 || nHits > 0)
 				{
 					Q_strcat(strName, sizeof(strName), va("%5.1f %4d/%-4d ",
-					                                      ((nShots == 0) ? 0.0 : (float)(nHits * 100.0 / (float)nShots)),
-					                                      nHits, nShots));
+							((nShots == 0) ? 0.0 : (float)(nHits * 100.0 / (float)nShots)),
+							nHits, nShots));
 				}
 				else
 				{
@@ -1986,8 +1992,8 @@ void CG_parseWeaponStatsGS_cmd(void)
 				}
 
 				Q_strncpyz(gs->strWS[gs->cWeapons++],
-				           va("%s%5d %6d%s", strName, nKills, nDeaths, ((aWeaponInfo[i].fHasHeadShots) ? va(" %9d", nHeadshots) : "")),
-				           sizeof(gs->strWS[0]));
+					va("%s%5d %6d%s", strName, nKills, nDeaths, ((aWeaponInfo[i].fHasHeadShots) ? va(" %9d", nHeadshots) : "")),
+					sizeof(gs->strWS[0]));
 
 				if (nShots > 0 || nHits > 0 || nKills > 0 || nDeaths)
 				{
@@ -2014,7 +2020,7 @@ void CG_parseWeaponStatsGS_cmd(void)
 		if (skillMask & (1 << i))
 		{
 			ci->skillpoints[i] = atoi(CG_Argv(iArg++));
-			xp                += ci->skillpoints[i];
+			xp += ci->skillpoints[i];
 		}
 	}
 
@@ -2055,16 +2061,16 @@ void CG_parseWeaponStatsGS_cmd(void)
 
 
 // Client-side stat presentation
-void CG_parseWeaponStats_cmd(void(txt_dump)(const char *))
+void CG_parseWeaponStats_cmd(void (txt_dump)(const char *))
 {
 	clientInfo_t *ci;
-	qboolean     fFull     = (txt_dump != CG_printWindow) ? qtrue : qfalse;
-	qboolean     fHasStats = qfalse;
-	char         strName[MAX_STRING_CHARS];
-	int          atts, deaths, dmg_given, dmg_rcvd, hits, kills, team_dmg, headshots;
+	qboolean fFull = (txt_dump != CG_printWindow) ? qtrue : qfalse;
+	qboolean fHasStats = qfalse;
+	char strName[MAX_STRING_CHARS];
+	int  atts, deaths, dmg_given, dmg_rcvd, hits, kills, team_dmg, headshots;
 	unsigned int i, iArg = 1;
-	unsigned int nClient      = atoi(CG_Argv(iArg++));
-	unsigned int nRounds      = atoi(CG_Argv(iArg++));
+	unsigned int nClient = atoi(CG_Argv(iArg++));
+	unsigned int nRounds = atoi(CG_Argv(iArg++));
 	unsigned int dwWeaponMask = atoi(CG_Argv(iArg++));
 	unsigned int dwSkillPointMask, xp = 0;
 
@@ -2097,10 +2103,10 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *))
 		{
 			if (dwWeaponMask & (1 << i))
 			{
-				hits      = atoi(CG_Argv(iArg++));
-				atts      = atoi(CG_Argv(iArg++));
-				kills     = atoi(CG_Argv(iArg++));
-				deaths    = atoi(CG_Argv(iArg++));
+				hits   = atoi(CG_Argv(iArg++));
+				atts   = atoi(CG_Argv(iArg++));
+				kills  = atoi(CG_Argv(iArg++));
+				deaths = atoi(CG_Argv(iArg++));
 				headshots = atoi(CG_Argv(iArg++));
 
 				Q_strncpyz(strName, va("^3%-9s: ", aWeaponInfo[i].pszName), sizeof(strName));
@@ -2108,8 +2114,8 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *))
 				{
 					fHasStats = qtrue;
 					Q_strcat(strName, sizeof(strName), va("^7%5.1f ^5%4d/%-4d ",
-					                                      ((atts == 0) ? 0.0 : (float)(hits * 100.0 / (float)atts)),
-					                                      hits, atts));
+							((atts == 0) ? 0.0 : (float)(hits * 100.0 / (float)atts)),
+							hits, atts));
 				}
 				else
 				{
@@ -2159,7 +2165,7 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *))
 		if (dwSkillPointMask & (1 << i))
 		{
 			ci->skillpoints[i] = atoi(CG_Argv(iArg++));
-			xp                += ci->skillpoints[i];
+			xp += ci->skillpoints[i];
 		}
 	}
 
@@ -2218,12 +2224,13 @@ void CG_parseWeaponStats_cmd(void(txt_dump)(const char *))
 	}
 }
 
-void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *))
+void CG_parseBestShotsStats_cmd(qboolean doTop, void (txt_dump)(const char *))
 {
-	int      iArg  = 1;
+	int iArg = 1;
 	qboolean fFull = (txt_dump != CG_printWindow) ? qtrue : qfalse;
 
 	int iWeap = atoi(CG_Argv(iArg++));
+
 	if (!iWeap)
 	{
 		txt_dump(va("^3No qualifying %sshot info available.\n", ((doTop) ? "top" : "bottom")));
@@ -2245,40 +2252,40 @@ void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *))
 
 	while (iWeap)
 	{
-		int   cnum   = atoi(CG_Argv(iArg++));
-		int   hits   = atoi(CG_Argv(iArg++));
-		int   atts   = atoi(CG_Argv(iArg++));
-		int   kills  = atoi(CG_Argv(iArg++));
-		int   deaths = atoi(CG_Argv(iArg++));
-		float acc    = (atts > 0) ? (float)(hits * 100) / (float)atts : 0.0;
+		int cnum   = atoi(CG_Argv(iArg++));
+		int hits   = atoi(CG_Argv(iArg++));
+		int atts   = atoi(CG_Argv(iArg++));
+		int kills  = atoi(CG_Argv(iArg++));
+		int deaths = atoi(CG_Argv(iArg++));
+		float acc  = (atts > 0) ? (float)(hits * 100) / (float)atts : 0.0;
 		char  name[32];
 
 		if (fFull)
 		{
 			BG_cleanName(cgs.clientinfo[cnum].name, name, 30, qfalse);
 			txt_dump(va("^3%s ^7%5.1f ^5%4d/%-4d ^2%5d ^1%6d ^7%s\n",
-			            aWeaponInfo[iWeap - 1].pszCode, acc, hits, atts, kills, deaths, name));
+					aWeaponInfo[iWeap - 1].pszCode, acc, hits, atts, kills, deaths, name));
 		}
 		else
 		{
 			BG_cleanName(cgs.clientinfo[cnum].name, name, 12, qfalse);
 			txt_dump(va("^3%s ^7%5.1f ^5%4d/%-4d ^2%3d ^1%3d ^7%s\n",
-			            aWeaponInfo[iWeap - 1].pszCode, acc, hits, atts, kills, deaths, name));
+					aWeaponInfo[iWeap - 1].pszCode, acc, hits, atts, kills, deaths, name));
 		}
 
 		iWeap = atoi(CG_Argv(iArg++));
 	}
 }
 
-void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *))
+void CG_parseTopShotsStats_cmd(qboolean doTop, void (txt_dump)(const char *))
 {
 	int i, iArg = 1;
 	int cClients = atoi(CG_Argv(iArg++));
-	int iWeap    = atoi(CG_Argv(iArg++));
+	int iWeap = atoi(CG_Argv(iArg++));
 	int wBestAcc = atoi(CG_Argv(iArg++));
 
 	txt_dump(va("Weapon accuracies for: ^3%s\n",
-	            (iWeap >= WS_KNIFE && iWeap < WS_MAX) ? aWeaponInfo[iWeap].pszName : "UNKNOWN"));
+			(iWeap >= WS_KNIFE && iWeap < WS_MAX) ? aWeaponInfo[iWeap].pszName : "UNKNOWN"));
 
 	txt_dump("\n^3  Acc Hits/Atts Kills Deaths\n");
 	txt_dump("----------------------------------------------------------\n");
@@ -2291,14 +2298,14 @@ void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *))
 
 	for (i = 0; i < cClients; i++)
 	{
-		int        cnum   = atoi(CG_Argv(iArg++));
-		int        hits   = atoi(CG_Argv(iArg++));
-		int        atts   = atoi(CG_Argv(iArg++));
-		int        kills  = atoi(CG_Argv(iArg++));
-		int        deaths = atoi(CG_Argv(iArg++));
-		float      acc    = (atts > 0) ? (float)(hits * 100) / (float)atts : 0.0;
+		int cnum   = atoi(CG_Argv(iArg++));
+		int hits   = atoi(CG_Argv(iArg++));
+		int atts   = atoi(CG_Argv(iArg++));
+		int kills  = atoi(CG_Argv(iArg++));
+		int deaths = atoi(CG_Argv(iArg++));
+		float acc  = (atts > 0) ? (float)(hits * 100) / (float)atts : 0.0;
 		const char *color = (((doTop) ? acc : ((float)wBestAcc) + 0.999) >= ((doTop) ? wBestAcc : acc)) ? "^3" : "^7";
-		char       name[32];
+		char name[32];
 
 		BG_cleanName(cgs.clientinfo[cnum].name, name, 30, qfalse);
 		txt_dump(va("%s%5.1f ^5%4d/%-4d ^2%5d ^1%6d %s%s\n", color, acc, hits, atts, kills, deaths, color, name));
@@ -2326,8 +2333,8 @@ void CG_scores_cmd(void)
 
 			trap_RealTime(&ct);
 			str = va("\nStats recorded: %02d:%02d:%02d (%02d %s %d)\n\n\n",
-			         ct.tm_hour, ct.tm_min, ct.tm_sec,
-			         ct.tm_mday, aMonths[ct.tm_mon], 1900 + ct.tm_year);
+				ct.tm_hour, ct.tm_min, ct.tm_sec,
+				ct.tm_mday, aMonths[ct.tm_mon], 1900 + ct.tm_year);
 
 			trap_FS_Write(str, strlen(str), cgs.dumpStatsFile);
 
@@ -2353,19 +2360,19 @@ void CG_printFile(const char *str)
 
 void CG_dumpStats(void)
 {
-	qtime_t    ct;
-	qboolean   fDoScores = qfalse;
-	const char *info     = CG_ConfigString(CS_SERVERINFO);
-	char       *s        = va("^3>>> %s: ^2%s\n\n", CG_TranslateString("Map"), Info_ValueForKey(info, "mapname"));
+	qtime_t  ct;
+	qboolean fDoScores = qfalse;
+	const char *info = CG_ConfigString(CS_SERVERINFO);
+	char *s = va("^3>>> %s: ^2%s\n\n", CG_TranslateString("Map"), Info_ValueForKey(info, "mapname"));
 
 	trap_RealTime(&ct);
 	// /me holds breath (using circular va() buffer)
 	if (cgs.dumpStatsFile == 0)
 	{
-		fDoScores             = qtrue;
+		fDoScores = qtrue;
 		cgs.dumpStatsFileName = va("stats/%d.%02d.%02d/%02d%02d%02d.txt",
-		                           1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
-		                           ct.tm_hour, ct.tm_min, ct.tm_sec);
+			1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
+			ct.tm_hour, ct.tm_min, ct.tm_sec);
 	}
 
 	if (cgs.dumpStatsFile != 0)
@@ -2412,8 +2419,8 @@ void CG_ForceTapOut_f(void);
 const char *CG_AddChatModifications(char *text, int clientNum)
 {
 	static char message[MAX_SAY_TEXT + 32] = "\0";
-	const char  *msgColor             = "^z";
-	qtime_t     t;
+	const char  *msgColor = "^z";
+	qtime_t t;
 
 	memset(message, 0, sizeof(message));
 	trap_RealTime(&t);
@@ -2452,6 +2459,7 @@ const char *CG_AddChatModifications(char *text, int clientNum)
 void CG_FixLinesEndingWithCaret(char *text, int size)
 {
 	int len = strlen(text);
+
 	if (text[len - 1] != '^')
 	{
 		return;
@@ -2466,8 +2474,8 @@ void CG_FixLinesEndingWithCaret(char *text, int size)
 static void CG_ServerCommand(void)
 {
 	const char *cmd;
-	char       text[MAX_SAY_TEXT];
-	qboolean   enc = qfalse; // used for enc_chat, enc_tchat
+	char text[MAX_SAY_TEXT];
+	qboolean enc = qfalse;   // used for enc_chat, enc_tchat
 
 	cmd = CG_Argv(0);
 
@@ -2505,7 +2513,7 @@ static void CG_ServerCommand(void)
 				continue;
 			}
 
-			cgs.playerStats.weaponStats[i].kills     = atoi(CG_Argv(start++));
+			cgs.playerStats.weaponStats[i].kills = atoi(CG_Argv(start++));
 			cgs.playerStats.weaponStats[i].killedby  = atoi(CG_Argv(start++));
 			cgs.playerStats.weaponStats[i].teamkills = atoi(CG_Argv(start++));
 		}
@@ -2522,7 +2530,7 @@ static void CG_ServerCommand(void)
 		for (i = 0; i < cgs.numOIDtriggers; i++)
 		{
 			cgs.playerStats.objectiveStats[i] = atoi(CG_Argv(start++));
-			cgs.teamobjectiveStats[i]         = atoi(CG_Argv(start++));
+			cgs.teamobjectiveStats[i] = atoi(CG_Argv(start++));
 		}
 
 		return;
@@ -2559,7 +2567,7 @@ static void CG_ServerCommand(void)
 	if (!Q_stricmp(cmd, "cp"))
 	{
 		// NERVE - SMF
-		int  args = trap_Argc();
+		int args = trap_Argc();
 		char *s;
 
 		if (args >= 3)
@@ -2885,7 +2893,7 @@ static void CG_ServerCommand(void)
 	if (!Q_stricmp(cmd, "aft"))
 	{
 		cgs.autoFireteamEndTime = cg.time + 20000;
-		cgs.autoFireteamNum     = atoi(CG_Argv(1));
+		cgs.autoFireteamNum = atoi(CG_Argv(1));
 
 		if (cgs.autoFireteamNum < -1)
 		{
@@ -2897,7 +2905,7 @@ static void CG_ServerCommand(void)
 	if (!Q_stricmp(cmd, "aftc"))
 	{
 		cgs.autoFireteamCreateEndTime = cg.time;
-		cgs.autoFireteamCreateNum     = atoi(CG_Argv(1));
+		cgs.autoFireteamCreateNum = atoi(CG_Argv(1));
 
 		if (cgs.autoFireteamCreateNum < -1)
 		{
@@ -2909,7 +2917,7 @@ static void CG_ServerCommand(void)
 	if (!Q_stricmp(cmd, "aftj"))
 	{
 		cgs.autoFireteamJoinEndTime = cg.time + 20000;
-		cgs.autoFireteamJoinNum     = atoi(CG_Argv(1));
+		cgs.autoFireteamJoinNum = atoi(CG_Argv(1));
 
 		if (cgs.autoFireteamJoinNum < -1)
 		{
@@ -3028,9 +3036,9 @@ static void CG_ServerCommand(void)
 
 	if (!Q_stricmp(cmd, "set_name"))
 	{
-		int         argc, totlen, i, len;
+		int argc, totlen, i, len;
 		static char line[MAX_STRING_CHARS];
-		char        arg[MAX_STRING_CHARS];;
+		char arg[MAX_STRING_CHARS];;
 		if (!CG_Argv(1))
 		{
 			return;

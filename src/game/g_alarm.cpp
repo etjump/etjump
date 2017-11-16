@@ -128,8 +128,8 @@ alarmbox_die
 void alarmbox_die(gentity_t *ent, gentity_t *inflictor, gentity_t *attacker, int damage, int mod)
 {
 	propExplosion(ent);
-	ent->s.frame    = 2;
-	ent->active     = qfalse;
+	ent->s.frame = 2;
+	ent->active  = qfalse;
 	ent->takedamage = qfalse;
 	alarmbox_updateparts(ent, qtrue);
 }
@@ -214,13 +214,13 @@ void SP_alarm_box(gentity_t *ent)
 		ent->s.frame = 0;
 	}
 
-	ent->active     = qtrue;
-	ent->s.eType    = ET_ALARMBOX;
+	ent->active  = qtrue;
+	ent->s.eType = ET_ALARMBOX;
 	ent->takedamage = qtrue;
-	ent->die        = alarmbox_die;
-	ent->use        = alarmbox_use;
-	ent->think      = alarmbox_finishspawning;
-	ent->nextthink  = level.time + FRAMETIME;
+	ent->die = alarmbox_die;
+	ent->use = alarmbox_use;
+	ent->think = alarmbox_finishspawning;
+	ent->nextthink = level.time + FRAMETIME;
 
 	trap_LinkEntity(ent);
 }

@@ -12,7 +12,7 @@ bool SQLiteWrapper::open(const std::string &database)
 	auto rc = sqlite3_open(database.c_str(), &_db);
 	if (rc != SQLITE_OK)
 	{
-		_message   = sqlite3_errmsg(_db);
+		_message = sqlite3_errmsg(_db);
 		_errorCode = rc;
 		return false;
 	}
@@ -20,7 +20,7 @@ bool SQLiteWrapper::open(const std::string &database)
 	rc = sqlite3_exec(_db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
 	if (rc != SQLITE_OK)
 	{
-		_message   = sqlite3_errmsg(_db);
+		_message = sqlite3_errmsg(_db);
 		_errorCode = rc;
 		return false;
 	}
@@ -41,7 +41,7 @@ bool SQLiteWrapper::prepare(const std::string &sql)
 	auto rc = sqlite3_prepare(_db, sql.c_str(), -1, &_stmt, NULL);
 	if (rc != SQLITE_OK)
 	{
-		_message   = sqlite3_errmsg(_db);
+		_message = sqlite3_errmsg(_db);
 		_errorCode = rc;
 		return false;
 	}
@@ -51,9 +51,10 @@ bool SQLiteWrapper::prepare(const std::string &sql)
 bool SQLiteWrapper::bindText(int index, const std::string &text)
 {
 	auto rc = sqlite3_bind_text(_stmt, index, text.c_str(), text.length(), SQLITE_STATIC);
+
 	if (rc != SQLITE_OK)
 	{
-		_message   = sqlite3_errmsg(_db);
+		_message = sqlite3_errmsg(_db);
 		_errorCode = rc;
 		return false;
 	}
@@ -63,9 +64,10 @@ bool SQLiteWrapper::bindText(int index, const std::string &text)
 bool SQLiteWrapper::bindInteger(int index, int number)
 {
 	auto rc = sqlite3_bind_int(_stmt, index, number);
+
 	if (rc != SQLITE_OK)
 	{
-		_message   = sqlite3_errmsg(_db);
+		_message = sqlite3_errmsg(_db);
 		_errorCode = rc;
 		return false;
 	}
@@ -83,7 +85,7 @@ bool SQLiteWrapper::execute()
 
 	if (rc != SQLITE_DONE)
 	{
-		_message   = sqlite3_errmsg(_db);
+		_message = sqlite3_errmsg(_db);
 		_errorCode = rc;
 		return false;
 	}
@@ -103,5 +105,6 @@ std::string SQLiteWrapper::errorMessage() const
 std::string SQLiteWrapper::getSQLiteErrorMessage()
 {
 	const char *msg = sqlite3_errmsg(_db);
+
 	return msg ? msg : "";
 }

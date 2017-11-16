@@ -13,34 +13,42 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 	*x *= cgs.screenXScale;
 	*y *= cgs.screenYScale;
 
-	if (w && h) {
+	if (w && h)
+	{
 		*w *= cgs.screenYScale;
 		*h *= cgs.screenYScale;
 	}
 
 }
 
-int ETJump_GetScreenWidth() {
+int ETJump_GetScreenWidth()
+{
 	int width = cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight;
+
 	return width > 640 ? width : 640;
 }
 
-void ETJump_AdjustPosition(float *x) {
+void ETJump_AdjustPosition(float *x)
+{
 	*x *= (SCREEN_WIDTH / 640.f);
 }
 
-void ETJump_EnableWidthScale(bool enable) {
-	if (enable) {
+void ETJump_EnableWidthScale(bool enable)
+{
+	if (enable)
+	{
 		cgs.screenXScale = cgs.glconfig.vidWidth / static_cast<float>(SCREEN_WIDTH);
 	}
-	else {
+	else
+	{
 		cgs.screenXScale = cgs.glconfig.vidWidth / 640.f;
 	}
 }
 
 void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step)
 {
-	for (auto i = 0; i < 4; i++) {
+	for (auto i = 0; i < 4; i++)
+	{
 		(*color)[i] = (*to)[i] * step + (*from)[i] * (1.f - step);
 	}
 }
@@ -114,7 +122,7 @@ flags:
 void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *endColor, const float *bgColor, float frac, int flags)
 {
 	vec4_t backgroundcolor = { 1, 1, 1, 0.25f }, colorAtPos; // colorAtPos is the lerped color if necessary
-	int    indent          = BAR_BORDERSIZE;
+	int indent = BAR_BORDERSIZE;
 
 	if (frac > 1)
 	{
@@ -140,10 +148,10 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 	{
 		// draw background at full size and shrink the remaining box to fit inside with a border.  (alternate border may be specified by a BAR_BGSPACING_xx)
 		CG_FillRect(x,
-		            y,
-		            w,
-		            h,
-		            backgroundcolor);
+			y,
+			w,
+			h,
+			backgroundcolor);
 
 		if (flags & BAR_BGSPACING_X0Y0)            // fill the whole box (no border)
 		{
@@ -151,8 +159,8 @@ void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *
 		else if (flags & BAR_BGSPACING_X0Y5)    // spacing created for weapon heat
 		{
 			indent *= 3;
-			y      += indent;
-			h      -= (2 * indent);
+			y += indent;
+			h -= (2 * indent);
 
 		}
 		else                                    // default spacing of 2 units on each side
@@ -222,7 +230,8 @@ CG_HorizontalPercentBar
 void CG_HorizontalPercentBar(float x, float y, float width, float height, float percent)
 {
 	vec4_t bgcolor = { 0.5f, 0.5f, 0.5f, 0.3f },
-	       color   = { 1.0f, 1.0f, 1.0f, 0.3f };
+	       color = { 1.0f, 1.0f, 1.0f, 0.3f };
+
 	CG_FilledBar(x, y, width, height, color, NULL, bgcolor, percent, BAR_BG | BAR_NOHUDALPHA);
 }
 
@@ -324,8 +333,8 @@ void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader)
 	if (width < 0)      // flip about vertical
 	{
 		width = -width;
-		s0    = 1;
-		s1    = 0;
+		s0 = 1;
+		s1 = 0;
 	}
 	else
 	{
@@ -336,8 +345,8 @@ void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader)
 	if (height < 0)     // flip about horizontal
 	{
 		height = -height;
-		t0     = 1;
-		t1     = 0;
+		t0 = 1;
+		t1 = 0;
 	}
 	else
 	{
@@ -382,14 +391,14 @@ void CG_DrawChar(int x, int y, int width, int height, int ch)
 		return;
 	}
 
-	auto font = &cgs.media.limboFont2;
-	auto glyph = &font->glyphs[ch];
+	auto font   = &cgs.media.limboFont2;
+	auto glyph  = &font->glyphs[ch];
 	auto scalex = height / 65.f * font->glyphScale;
 	auto scaley = height / 65.f * font->glyphScale;
 	auto adj = scaley * glyph->top + 2.f;
-	auto ax = x + 1;
-	auto ay = y + height;
-	
+	auto ax  = x + 1;
+	auto ay  = y + height;
+
 	CG_Text_PaintChar_Ext(ax, ay - adj, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
 }
 
@@ -402,7 +411,7 @@ Coordinates and size in 640*480 virtual screen size
 */
 void CG_DrawChar2(int x, int y, int width, int height, int ch)
 {
-	int   row, col;
+	int row, col;
 	float frow, fcol;
 	float size;
 	float ax, ay, aw, ah;
@@ -428,9 +437,9 @@ void CG_DrawChar2(int x, int y, int width, int height, int ch)
 	size = 0.0625;
 
 	trap_R_DrawStretchPic(ax, ay, aw, ah,
-	                      fcol, frow,
-	                      fcol + size, frow + size,
-	                      cgs.media.menucharsetShader);
+		fcol, frow,
+		fcol + size, frow + size,
+		cgs.media.menucharsetShader);
 }
 
 // JOSEPH 4-25-00
@@ -447,10 +456,10 @@ Coordinates are at 640 by 480 virtual resolution
 void CG_DrawStringExt(int x, int y, const char *string, const float *setColor,
                       qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars)
 {
-	vec4_t     color;
+	vec4_t color;
 	const char *s;
-	int        xx;
-	int        cnt;
+	int xx;
+	int cnt;
 
 	if (maxChars <= 0)
 	{
@@ -527,10 +536,10 @@ Coordinates are at 640 by 480 virtual resolution
 void CG_DrawStringExt_Shadow(int x, int y, const char *string, const float *setColor,
                              qboolean forceColor, int shadow, int charWidth, int charHeight, int maxChars)
 {
-	vec4_t     color;
+	vec4_t color;
 	const char *s;
-	int        xx;
-	int        cnt;
+	int xx;
+	int cnt;
 
 	if (maxChars <= 0)
 	{
@@ -611,10 +620,10 @@ Coordinates are at 640 by 480 virtual resolution
 void CG_DrawStringExt3(int x, int y, const char *string, const float *setColor,
                        qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars)
 {
-	vec4_t     color;
+	vec4_t color;
 	const char *s;
-	int        xx;
-	int        cnt;
+	int xx;
+	int cnt;
 
 	if (maxChars <= 0)
 	{
@@ -824,8 +833,8 @@ Returns character count, skiping color escape codes
 */
 int CG_DrawStrlen(const char *str)
 {
-	const char *s    = str;
-	int        count = 0;
+	const char *s = str;
+	int count = 0;
 
 	while (*s)
 	{
@@ -854,6 +863,7 @@ refresh window.
 static void CG_TileClearBox(int x, int y, int w, int h, qhandle_t hShader)
 {
 	float s1, t1, s2, t2;
+
 	s1 = x / 64.0;
 	t1 = y / 64.0;
 	s2 = (x + w) / 64.0;
@@ -884,10 +894,10 @@ void CG_TileClear(void)
 		return;     // full screen rendering
 	}
 
-	top    = cg.refdef.y;
+	top = cg.refdef.y;
 	bottom = top + cg.refdef.height - 1;
-	left   = cg.refdef.x;
-	right  = left + cg.refdef.width - 1;
+	left  = cg.refdef.x;
+	right = left + cg.refdef.width - 1;
 
 	// clear above view screen
 	CG_TileClearBox(0, 0, w, top, cgs.media.backTileShader);
@@ -912,7 +922,7 @@ CG_FadeColor
 float *CG_FadeColor(int startMsec, int totalMsec)
 {
 	static vec4_t color;
-	int           t;
+	int t;
 
 	if (startMsec == 0)
 	{
@@ -948,7 +958,7 @@ CG_FadeAlpha
 float CG_FadeAlpha(int startMsec, int totalMsec)
 {
 	float alpha = 0.0;
-	int   t;
+	int t;
 
 	if (startMsec == 0)
 	{
@@ -966,7 +976,8 @@ float CG_FadeAlpha(int startMsec, int totalMsec)
 	if (totalMsec - t < FADE_TIME)
 	{
 		alpha = (totalMsec - t) * 1.0 / FADE_TIME;
-	} else
+	}
+	else
 	{
 		alpha = 1.0;
 	}
@@ -981,9 +992,9 @@ CG_TeamColor
 */
 float *CG_TeamColor(int team)
 {
-	static vec4_t red       = { 1, 0.2, 0.2, 1 };
-	static vec4_t blue      = { 0.2, 0.2, 1, 1 };
-	static vec4_t other     = { 1, 1, 1, 1 };
+	static vec4_t red   = { 1, 0.2, 0.2, 1 };
+	static vec4_t blue  = { 0.2, 0.2, 1, 1 };
+	static vec4_t other = { 1, 1, 1, 1 };
 	static vec4_t spectator = { 0.7, 0.7, 0.7, 1 };
 
 	switch (team)
@@ -1258,16 +1269,16 @@ UI_DrawBannerString
 */
 static void UI_DrawBannerString2(int x, int y, const char *str, vec4_t color)
 {
-	const char    *s;
+	const char *s;
 	unsigned char ch;
-	float         ax;
-	float         ay;
-	float         aw;
-	float         ah;
-	float         frow;
-	float         fcol;
-	float         fwidth;
-	float         fheight;
+	float ax;
+	float ay;
+	float aw;
+	float ah;
+	float frow;
+	float fcol;
+	float fwidth;
+	float fheight;
 
 	// draw the colored text
 	trap_R_SetColor(color);
@@ -1285,13 +1296,13 @@ static void UI_DrawBannerString2(int x, int y, const char *str, vec4_t color)
 		}
 		else if (ch >= 'A' && ch <= 'Z')
 		{
-			ch     -= 'A';
-			fcol    = (float)propMapB[ch][0] / 256.0f;
-			frow    = (float)propMapB[ch][1] / 256.0f;
+			ch -= 'A';
+			fcol = (float)propMapB[ch][0] / 256.0f;
+			frow = (float)propMapB[ch][1] / 256.0f;
 			fwidth  = (float)propMapB[ch][2] / 256.0f;
 			fheight = (float)PROPB_HEIGHT / 256.0f;
-			aw      = (float)propMapB[ch][2] * cgs.screenXScale;
-			ah      = (float)PROPB_HEIGHT * cgs.screenYScale;
+			aw = (float)propMapB[ch][2] * cgs.screenXScale;
+			ah = (float)PROPB_HEIGHT * cgs.screenYScale;
 			trap_R_DrawStretchPic(ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, cgs.media.charsetPropB);
 			ax += (aw + (float)PROPB_GAP_WIDTH * cgs.screenXScale);
 		}
@@ -1304,12 +1315,12 @@ static void UI_DrawBannerString2(int x, int y, const char *str, vec4_t color)
 void UI_DrawBannerString(int x, int y, const char *str, int style, vec4_t color)
 {
 	const char *s;
-	int        ch;
-	int        width;
-	vec4_t     drawcolor;
+	int ch;
+	int width;
+	vec4_t drawcolor;
 
 	// find the width of the drawn text
-	s     = str;
+	s = str;
 	width = 0;
 	while (*s)
 	{
@@ -1355,15 +1366,15 @@ void UI_DrawBannerString(int x, int y, const char *str, int style, vec4_t color)
 int UI_ProportionalStringWidth(const char *str)
 {
 	const char *s;
-	int        ch;
-	int        charWidth;
-	int        width;
+	int ch;
+	int charWidth;
+	int width;
 
-	s     = str;
+	s = str;
 	width = 0;
 	while (*s)
 	{
-		ch        = *s & 127;
+		ch = *s & 127;
 		charWidth = propMap[ch][2];
 		if (charWidth != -1)
 		{
@@ -1379,16 +1390,16 @@ int UI_ProportionalStringWidth(const char *str)
 
 static void UI_DrawProportionalString2(int x, int y, const char *str, vec4_t color, float sizeScale, qhandle_t charset)
 {
-	const char    *s;
+	const char *s;
 	unsigned char ch;
-	float         ax;
-	float         ay;
-	float         aw;
-	float         ah;
-	float         frow;
-	float         fcol;
-	float         fwidth;
-	float         fheight;
+	float ax;
+	float ay;
+	float aw;
+	float ah;
+	float frow;
+	float fcol;
+	float fwidth;
+	float fheight;
 
 	// draw the colored text
 	trap_R_SetColor(color);
@@ -1406,12 +1417,12 @@ static void UI_DrawProportionalString2(int x, int y, const char *str, vec4_t col
 		}
 		else if (propMap[ch][2] != -1)
 		{
-			fcol    = (float)propMap[ch][0] / 256.0f;
-			frow    = (float)propMap[ch][1] / 256.0f;
+			fcol = (float)propMap[ch][0] / 256.0f;
+			frow = (float)propMap[ch][1] / 256.0f;
 			fwidth  = (float)propMap[ch][2] / 256.0f;
 			fheight = (float)PROP_HEIGHT / 256.0f;
-			aw      = (float)propMap[ch][2] * cgs.screenXScale * sizeScale;
-			ah      = (float)PROP_HEIGHT * cgs.screenYScale * sizeScale;
+			aw = (float)propMap[ch][2] * cgs.screenXScale * sizeScale;
+			ah = (float)PROP_HEIGHT * cgs.screenYScale * sizeScale;
 			trap_R_DrawStretchPic(ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset);
 		}
 		else
@@ -1454,8 +1465,8 @@ UI_DrawProportionalString
 void UI_DrawProportionalString(int x, int y, const char *str, int style, vec4_t color)
 {
 	vec4_t drawcolor;
-	int    width;
-	float  sizeScale;
+	int width;
+	float sizeScale;
 
 	sizeScale = UI_ProportionalSizeScale(style);
 
@@ -1463,12 +1474,12 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style, vec4_t 
 	{
 	case UI_CENTER:
 		width = UI_ProportionalStringWidth(str) * sizeScale;
-		x    -= width / 2;
+		x -= width / 2;
 		break;
 
 	case UI_RIGHT:
 		width = UI_ProportionalStringWidth(str) * sizeScale;
-		x    -= width;
+		x -= width;
 		break;
 
 	case UI_LEFT:
@@ -1520,7 +1531,7 @@ char *CG_TranslateString(const char *string)
 {
 	static char staticbuf[2][MAX_VA_STRING];
 	static int  bufcount = 0;
-	char        *buf;
+	char *buf;
 
 	// some code expects this to return a copy always, even
 	// if none is needed for translation, so always supply
@@ -1535,107 +1546,110 @@ char *CG_TranslateString(const char *string)
 
 namespace ETJump
 {
-	int DrawStringWidth(const char* text, float scalex)
+int DrawStringWidth(const char *text, float scalex)
+{
+	return CG_Text_Width_Ext(text, scalex, 0, &cgs.media.limboFont2);
+}
+
+void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style)
+{
+	int len, count;
+	vec4_t newColor;
+	glyphInfo_t *glyph;
+	fontInfo_t  *font = &cgs.media.limboFont2;
+	float adjust = 0.0;
+
+	scalex *= font->glyphScale;
+	scaley *= font->glyphScale;
+
+	if (text)
 	{
-		return CG_Text_Width_Ext(text, scalex, 0, &cgs.media.limboFont2);
-	}
-
-	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style)
-	{
-		int         len, count;
-		vec4_t      newColor;
-		glyphInfo_t *glyph;
-		fontInfo_t  *font = &cgs.media.limboFont2;
-		float       adjust = 0.0;
-
-		scalex *= font->glyphScale;
-		scaley *= font->glyphScale;
-
-		if (text)
+		const char *s = text;
+		trap_R_SetColor(color);
+		memcpy(&newColor[0], &color[0], sizeof(vec4_t));
+		len = strlen(text);
+		if (limit > 0 && len > limit)
 		{
-			const char *s = text;
-			trap_R_SetColor(color);
-			memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-			len = strlen(text);
-			if (limit > 0 && len > limit)
-			{
-				len = limit;
-			}
-			count = 0;
-			while (s && *s && count < len)
-			{
-				glyph = &font->glyphs[static_cast<unsigned char>(*s)];
-				if (Q_IsColorString(s))
-				{
-					if (!forceColor)
-					{
-						if (*(s + 1) == COLOR_NULL)
-						{
-							memcpy(newColor, color, sizeof(newColor));
-						}
-						else
-						{
-							memcpy(newColor, g_color_table[ColorIndex(*(s + 1))], sizeof(newColor));
-							newColor[3] = color[3];
-						}
-						trap_R_SetColor(newColor);
-					}
-					s += 2;
-				}
-				else
-				{
-					float yadj = scaley * glyph->top;
-					if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
-					{
-						int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
-						colorBlack[3] = newColor[3];
-						trap_R_SetColor(colorBlack);
-						CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs, y - yadj + ofs, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
-						colorBlack[3] = 1.0;
-						trap_R_SetColor(newColor);
-					}
-
-					CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex), y - yadj, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
-					x += (glyph->xSkip * scalex) + adjust;
-					s++;
-					count++;
-				}
-			}
-			trap_R_SetColor(nullptr);
+			len = limit;
 		}
-	}
-
-	void DrawMiniString(int x, int y, const char *s, float alpha)
-	{
-		vec4_t color;
-		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
-		DrawString(x, y, 0.20f, 0.22f, color, qfalse, s, 0, 0);
-	}
-
-	void DrawSmallString(int x, int y, const char *s, float alpha)
-	{
-		vec4_t color;
-		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
-		DrawString(x, y, 0.23f, 0.25f, color, qfalse, s, 0, 0);
-	}
-
-	void DrawBigString(int x, int y, const char *s, float alpha)
-	{
-		vec4_t color;
-		Vector4Set(color, 1.0, 1.0, 1.0, alpha);
-		DrawString(x, y, 0.3f, 0.3f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
-	}
-
-	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, bool enableShadows, const vec4_t shadowColor)
-	{
-		if (enableShadows)
+		count = 0;
+		while (s && *s && count < len)
 		{
-			trap_R_SetColor(shadowColor);
-			CG_DrawPic(x + 1, y + 1, sizex, sizey, hShader);
-		}
+			glyph = &font->glyphs[static_cast<unsigned char>(*s)];
+			if (Q_IsColorString(s))
+			{
+				if (!forceColor)
+				{
+					if (*(s + 1) == COLOR_NULL)
+					{
+						memcpy(newColor, color, sizeof(newColor));
+					}
+					else
+					{
+						memcpy(newColor, g_color_table[ColorIndex(*(s + 1))], sizeof(newColor));
+						newColor[3] = color[3];
+					}
+					trap_R_SetColor(newColor);
+				}
+				s += 2;
+			}
+			else
+			{
+				float yadj = scaley * glyph->top;
+				if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+				{
+					int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+					colorBlack[3] = newColor[3];
+					trap_R_SetColor(colorBlack);
+					CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs, y - yadj + ofs, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+					colorBlack[3] = 1.0;
+					trap_R_SetColor(newColor);
+				}
 
-		trap_R_SetColor(mainColor);
-		CG_DrawPic(x, y, sizex, sizey, hShader);
+				CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex), y - yadj, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+				x += (glyph->xSkip * scalex) + adjust;
+				s++;
+				count++;
+			}
+		}
 		trap_R_SetColor(nullptr);
 	}
+}
+
+void DrawMiniString(int x, int y, const char *s, float alpha)
+{
+	vec4_t color;
+
+	Vector4Set(color, 1.0, 1.0, 1.0, alpha);
+	DrawString(x, y, 0.20f, 0.22f, color, qfalse, s, 0, 0);
+}
+
+void DrawSmallString(int x, int y, const char *s, float alpha)
+{
+	vec4_t color;
+
+	Vector4Set(color, 1.0, 1.0, 1.0, alpha);
+	DrawString(x, y, 0.23f, 0.25f, color, qfalse, s, 0, 0);
+}
+
+void DrawBigString(int x, int y, const char *s, float alpha)
+{
+	vec4_t color;
+
+	Vector4Set(color, 1.0, 1.0, 1.0, alpha);
+	DrawString(x, y, 0.3f, 0.3f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
+}
+
+void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, bool enableShadows, const vec4_t shadowColor)
+{
+	if (enableShadows)
+	{
+		trap_R_SetColor(shadowColor);
+		CG_DrawPic(x + 1, y + 1, sizex, sizey, hShader);
+	}
+
+	trap_R_SetColor(mainColor);
+	CG_DrawPic(x, y, sizex, sizey, hShader);
+	trap_R_SetColor(nullptr);
+}
 }

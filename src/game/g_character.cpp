@@ -15,9 +15,9 @@ G_ParseAnimationFiles
 */
 static qboolean G_ParseAnimationFiles(bg_character_t *character, const char *animationGroup, const char *animationScript)
 {
-	char         filename[MAX_QPATH];
+	char filename[MAX_QPATH];
 	fileHandle_t f;
-	int          len;
+	int len;
 
 	// set the name of the animationGroup and animationScript in the animModelInfo structure
 	Q_strncpyz(character->animModelInfo->animationGroup, animationGroup, sizeof(character->animModelInfo->animationGroup));
@@ -58,7 +58,7 @@ G_CheckForExistingAnimModelInfo
 */
 static qboolean G_CheckForExistingAnimModelInfo(const char *animationGroup, const char *animationScript, animModelInfo_t **animModelInfo)
 {
-	int             i;
+	int i;
 	animModelInfo_t *trav, *firstFree = NULL;
 
 	for (i = 0, trav = level.animScriptData.modelInfo; i < MAX_ANIMSCRIPT_MODELS; i++, trav++)
@@ -132,7 +132,7 @@ void G_RegisterPlayerClasses(void)
 {
 	bg_playerclass_t *classInfo;
 	bg_character_t   *character;
-	int              team, cls;
+	int team, cls;
 
 	for (team = TEAM_AXIS; team <= TEAM_ALLIES; team++)
 	{
@@ -158,9 +158,9 @@ G_UpdateCharacter
 */
 void G_UpdateCharacter(gclient_t *client)
 {
-	char           infostring[MAX_INFO_STRING];
-	const char           *s;
-	int            characterIndex;
+	char infostring[MAX_INFO_STRING];
+	const char *s;
+	int characterIndex;
 	bg_character_t *character;
 
 	trap_GetUserinfo(client->ps.clientNum, infostring, sizeof(infostring));
@@ -193,7 +193,7 @@ void G_UpdateCharacter(gclient_t *client)
 				if (!G_RegisterCharacter(infostring, client->pers.character))
 				{
 					G_Printf(S_COLOR_YELLOW "WARNING: G_UpdateCharacter: failed to load character file '%s' for %s\n", infostring,
-					         client->pers.netname);
+						client->pers.netname);
 
 					goto set_default_character;
 				}
@@ -220,7 +220,7 @@ set_default_character:
 	if (client->pers.character != character)
 	{
 		client->pers.characterIndex = -1;
-		client->pers.character      = character;
+		client->pers.character = character;
 
 		client->ps.legsAnim   = 0;
 		client->ps.torsoAnim  = 0;

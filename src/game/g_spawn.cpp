@@ -39,27 +39,27 @@ qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out
 
 qboolean    G_SpawnFloatExt(const char *key, const char *defaultString, float *out, const char *file, int line)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = G_SpawnStringExt(key, defaultString, &s, file, line);
-	*out    = atof(s);
+	*out = atof(s);
 	return present;
 }
 
 qboolean    G_SpawnIntExt(const char *key, const char *defaultString, int *out, const char *file, int line)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = G_SpawnStringExt(key, defaultString, &s, file, line);
-	*out    = atoi(s);
+	*out = atoi(s);
 	return present;
 }
 
 qboolean    G_SpawnVectorExt(const char *key, const char *defaultString, float *out, const char *file, int line)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = G_SpawnStringExt(key, defaultString, &s, file, line);
@@ -69,7 +69,7 @@ qboolean    G_SpawnVectorExt(const char *key, const char *defaultString, float *
 
 qboolean    G_SpawnVector2DExt(const char *key, const char *defaultString, float *out, const char *file, int line)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = G_SpawnStringExt(key, defaultString, &s, file, line);
@@ -192,7 +192,7 @@ field_t fields[] =
 typedef struct
 {
 	const char *name;
-	void (*spawn)(gentity_t *ent);
+	void (*spawn)(gentity_t * ent);
 } spawn_t;
 
 void SP_info_player_start(gentity_t *ent);
@@ -708,16 +708,16 @@ spawn_t spawns[] =
 	{ "target_startTimer",           SP_target_startTimer           },
 	{ "target_stoptimer",            SP_target_endTimer             },
 	{ "target_stopTimer",            SP_target_endTimer             },
-	{"target_interrupt_timerun",	 SP_target_interrupt_timerun	},
+	{ "target_interrupt_timerun",    SP_target_interrupt_timerun    },
 	{ "target_activate_if_velocity", SP_target_activate_if_velocity },
 	{ "target_scale_velocity",       SP_target_scale_velocity       },
-	{ "trigger_tracker",			 SP_trigger_tracker				},
-	{ "target_tracker",				 SP_target_tracker				},
-	{"target_set_health", SP_target_set_health },
-	{"target_deathrun_start", SP_target_deathrun_start},
-	{"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},
-	{ "target_displaytjl",			 SP_target_tjldisplay			},
-	{ "target_cleartjl",			 SP_target_tjlclear				},
+	{ "trigger_tracker",             SP_trigger_tracker             },
+	{ "target_tracker",              SP_target_tracker              },
+	{ "target_set_health",           SP_target_set_health           },
+	{ "target_deathrun_start",       SP_target_deathrun_start       },
+	{ "target_deathrun_checkpoint",  SP_target_deathrun_checkpoint  },
+	{ "target_displaytjl",           SP_target_tjldisplay           },
+	{ "target_cleartjl",             SP_target_tjlclear             },
 	{ 0,                             0                              }
 };
 
@@ -840,9 +840,9 @@ in a gentity
 void G_ParseField(const char *key, const char *value, gentity_t *ent)
 {
 	field_t *f;
-	byte    *b;
-	float   v;
-	vec3_t  vec;
+	byte   *b;
+	float  v;
+	vec3_t vec;
 
 	for (f = fields ; f->name ; f++)
 	{
@@ -869,7 +869,7 @@ void G_ParseField(const char *key, const char *value, gentity_t *ent)
 				*(float *)(b + f->ofs) = atof(value);
 				break;
 			case F_ANGLEHACK:
-				v                          = atof(value);
+				v = atof(value);
 				((float *)(b + f->ofs))[0] = 0;
 				((float *)(b + f->ofs))[1] = v;
 				((float *)(b + f->ofs))[2] = 0;
@@ -896,9 +896,9 @@ level.spawnVars[], then call the class specfic spawn function
 */
 void G_SpawnGEntityFromSpawnVars(void)
 {
-	int       i;
+	int i;
 	gentity_t *ent;
-	char      *str;
+	char *str;
 
 	// get the next free entity
 	ent = G_Spawn();
@@ -964,7 +964,7 @@ G_AddSpawnVarToken
 */
 char *G_AddSpawnVarToken(const char *string)
 {
-	int  l;
+	int l;
 	char *dest;
 
 	l = strlen(string);
@@ -996,7 +996,7 @@ qboolean G_ParseSpawnVars(void)
 	char keyname[MAX_TOKEN_CHARS];
 	char com_token[MAX_TOKEN_CHARS];
 
-	level.numSpawnVars     = 0;
+	level.numSpawnVars = 0;
 	level.numSpawnVarChars = 0;
 
 	// parse the opening brace
@@ -1046,88 +1046,93 @@ qboolean G_ParseSpawnVars(void)
 	return qtrue;
 }
 
-namespace ETJump{
-	static void initNoOverbounce()
-	{
-		auto value = 0;
-		G_SpawnInt("nooverbounce", "0", &value);
-		level.noOverbounce = value > 0;
-		level.noOverbounce
-			? shared.integer |= BG_LEVEL_NO_OVERBOUNCE
-			: shared.integer &= ~BG_LEVEL_NO_OVERBOUNCE;
+namespace ETJump {
+static void initNoOverbounce()
+{
+	auto value = 0;
 
-		trap_Cvar_Set("shared", va("%d", shared.integer));
-		G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
+	G_SpawnInt("nooverbounce", "0", &value);
+	level.noOverbounce = value > 0;
+	level.noOverbounce
+	? shared.integer |= BG_LEVEL_NO_OVERBOUNCE
+	                    : shared.integer &= ~BG_LEVEL_NO_OVERBOUNCE;
+
+	trap_Cvar_Set("shared", va("%d", shared.integer));
+	G_Printf("No overbounce %s.\n", level.noOverbounce ? "enabled" : "disabled");
+}
+
+static void initNoJumpDelay()
+{
+	auto value = 0;
+
+	G_SpawnInt("nojumpdelay", "0", &value);
+	level.noJumpDelay = value > 0;
+	level.noJumpDelay
+	? shared.integer |= BG_LEVEL_NO_JUMPDELAY
+	                    : shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
+
+	trap_Cvar_Set("shared", va("%d", shared.integer));
+	G_Printf("No jump delay %s.\n", level.noJumpDelay ? "enabled" : "disabled");
+}
+
+static void initNoSave()
+{
+	auto value = 0;
+
+	G_SpawnInt("nosave", "0", &value);
+	level.noSave = value > 0 ? qtrue : qfalse;
+	level.noSave
+	? shared.integer |= BG_LEVEL_NO_SAVE
+	                    : shared.integer &= ~BG_LEVEL_NO_SAVE;
+
+	trap_Cvar_Set("shared", va("%d", shared.integer));
+	G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
+}
+
+std::unordered_map<std::string, SaveSystem::SaveLoadRestrictions> allowedStrictValues {
+	{ "default", SaveSystem::SaveLoadRestrictions::Default },
+	{ "stance", SaveSystem::SaveLoadRestrictions::Stance },
+	{ "move", SaveSystem::SaveLoadRestrictions::Move },
+	{ "dead", SaveSystem::SaveLoadRestrictions::Dead },
+};
+
+static void initStrictSaveLoad()
+{
+	char *buff = nullptr;
+
+	G_SpawnString("strictsaveload", "0", &buff);
+	std::istringstream str{ buff };
+	auto value = 0;
+	if (isdigit(buff[0]))
+	{
+		str >> value;
 	}
-
-	static void initNoJumpDelay()
+	else
 	{
-		auto value = 0;
-		G_SpawnInt("nojumpdelay", "0", &value);
-		level.noJumpDelay = value > 0;
-		level.noJumpDelay
-			? shared.integer |= BG_LEVEL_NO_JUMPDELAY
-			: shared.integer &= ~BG_LEVEL_NO_JUMPDELAY;
-
-		trap_Cvar_Set("shared", va("%d", shared.integer));
-		G_Printf("No jump delay %s.\n", level.noJumpDelay ? "enabled" : "disabled");
-	}
-
-	static void initNoSave()
-	{
-		auto value = 0;
-		G_SpawnInt("nosave", "0", &value);
-		level.noSave = value > 0 ? qtrue : qfalse;
-		level.noSave
-			? shared.integer |= BG_LEVEL_NO_SAVE
-			: shared.integer &= ~BG_LEVEL_NO_SAVE;
-
-		trap_Cvar_Set("shared", va("%d", shared.integer));
-		G_Printf("Save is %s.\n", level.noSave ? "disabled" : "enabled");
-	}
-	
-	std::unordered_map<std::string, SaveSystem::SaveLoadRestrictions> allowedStrictValues {
-		{ "default", SaveSystem::SaveLoadRestrictions::Default },
-		{ "stance", SaveSystem::SaveLoadRestrictions::Stance },
-		{ "move", SaveSystem::SaveLoadRestrictions::Move },
-		{ "dead", SaveSystem::SaveLoadRestrictions::Dead },
-	};
- 
-	static void initStrictSaveLoad()
-	{
-		char *buff = nullptr;
-		G_SpawnString("strictsaveload", "0", &buff);
-		std::istringstream str{ buff };
-		auto value = 0;
-		if (isdigit(buff[0]))
+		std::string token;
+		while (str >> token)
 		{
-			str >> value;
+			boost::algorithm::to_lower(token);
+			value |= static_cast<int>(allowedStrictValues[token]);     // else 0
 		}
-		else
-		{
-			std::string token;
-			while (str >> token)
-			{
-				boost::algorithm::to_lower(token);
-				value |= static_cast<int>(allowedStrictValues[token]); // else 0
-			}
-		}
-		level.saveLoadRestrictions = value;
-		G_Printf("Save restrictions are %s.\n", value ? "enabled" : "disabled");
 	}
+	level.saveLoadRestrictions = value;
+	G_Printf("Save restrictions are %s.\n", value ? "enabled" : "disabled");
+}
 
-	static void initNoFallDamage()
-	{
-		auto value = 0;
-		G_SpawnInt("nofalldamage", "0", &value);
-		level.noFallDamage = value > 0;
-		level.noFallDamage
-			? shared.integer |= BG_LEVEL_NO_FALLDAMAGE
-			: shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+static void initNoFallDamage()
+{
+	auto value = 0;
 
-		trap_Cvar_Set("shared", va("%d", shared.integer));
-		G_Printf("No fall damage %s.\n", level.noFallDamage ? "enabled" : "disabled");
-	}
+	G_SpawnInt("nofalldamage", "0", &value);
+	level.noFallDamage = value > 0;
+	level.noFallDamage
+	? shared.integer |= BG_LEVEL_NO_FALLDAMAGE
+	                    : shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+
+	trap_Cvar_Set("shared", va("%d", shared.integer));
+	G_Printf("No fall damage %s.\n", level.noFallDamage ? "enabled" : "disabled");
+}
 }
 
 
@@ -1250,7 +1255,7 @@ void SP_worldspawn(void)
 	G_SpawnString("noghost", "0", &s);
 	if (atoi(s))
 	{
-		char buf[32]      = "\0";
+		char buf[32] = "\0";
 		int  currentValue = g_ghostPlayers.integer;
 		currentValue |= 2;
 
@@ -1262,7 +1267,7 @@ void SP_worldspawn(void)
 	}
 	else
 	{
-		char buf[128]     = "\0";
+		char buf[128] = "\0";
 		int  currentValue = g_ghostPlayers.integer;
 		currentValue &= ~(2);
 
@@ -1321,7 +1326,7 @@ void SP_worldspawn(void)
 	trap_SetConfigstring(CS_MOTD, g_motd.string);       // message of the day
 
 	G_SpawnString("spawnflags", "0", &s);
-	g_entities[ENTITYNUM_WORLD].spawnflags   = atoi(s);
+	g_entities[ENTITYNUM_WORLD].spawnflags = atoi(s);
 	g_entities[ENTITYNUM_WORLD].r.worldflags = g_entities[ENTITYNUM_WORLD].spawnflags;
 
 	g_entities[ENTITYNUM_WORLD].s.number  = ENTITYNUM_WORLD;
@@ -1353,7 +1358,7 @@ void G_SpawnEntitiesFromString(void)
 {
 	// allow calls to G_Spawn*()
 	G_Printf("Enable spawning!\n");
-	level.spawning     = qtrue;
+	level.spawning = qtrue;
 	level.numSpawnVars = 0;
 
 	// the worldspawn is not an actual entity, but it still

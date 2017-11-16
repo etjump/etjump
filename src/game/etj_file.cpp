@@ -9,6 +9,7 @@
 ETJump::File::File(const std::string& path, Mode mode) : _path(path), _handle(INVALID_FILE_HANDLE), _mode(mode)
 {
 	fsMode_t fsMode;
+
 	switch (_mode)
 	{
 	case Mode::Read:
@@ -68,7 +69,7 @@ void ETJump::File::write(const std::string& data) const
 	if (bytesWritten != data.length())
 	{
 		throw WriteFailedException((boost::format("Write to file %s failed. Wrote %d out of %d bytes.")
-			% _path % bytesWritten % data.length()).str());
+			                        % _path % bytesWritten % data.length()).str());
 	}
 #else
 	trap_FS_Write(data.c_str(), data.length(), _handle);
@@ -80,8 +81,8 @@ std::vector<std::string> ETJump::File::fileList(const std::string& path, const s
 	std::vector<std::string> files;
 	char buffer[1 << 16] = "";
 	auto numDirs = trap_FS_GetFileList(path.c_str(), extension.c_str(), buffer, sizeof(buffer));
-	auto dirPtr = buffer;
-	auto dirLen = 0;
+	auto dirPtr  = buffer;
+	auto dirLen  = 0;
 
 	for (auto i = 0; i < numDirs; i++, dirPtr += dirLen + 1)
 	{
@@ -102,6 +103,7 @@ std::string ETJump::File::getPath(const std::string file)
 {
 	char game[MAX_CVAR_VALUE_STRING] = "";
 	char base[MAX_CVAR_VALUE_STRING] = "";
+
 	trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
 	trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
 

@@ -9,8 +9,8 @@
 
 #include "cg_local.h"
 
-static const char* EnumStrings[] = { "mapper", "loaded", "recorded" };
-const char* getTextForEnum(int enumVal)
+static const char *EnumStrings[] = { "mapper", "loaded", "recorded" };
+const char *getTextForEnum(int enumVal)
 {
 	return EnumStrings[enumVal];
 }
@@ -23,23 +23,31 @@ TrickjumpLines::TrickjumpLines() : _nextRecording(1), _nextAddTime(0), _currentR
 	this->_debugVerbose = false;
 
 	// Create a map of possible color for TJL.
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("white", { 255, 255, 255, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("black", { 0, 0, 0, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("red", { 255, 0, 0, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("green", { 0, 255, 0, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("blue", { 0, 0, 255, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("yellow", { 255, 255, 0, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("magenta", { 128, 0, 128, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("cyan", { 0, 128, 128, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("orange", { 128, 128, 0, 255 }));
-	colorMap.insert(std::pair<std::string, std::vector<unsigned char>>("speed", { 0, 0, 0, 0 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("white", { 255, 255, 255, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("black", { 0, 0, 0, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("red", { 255, 0, 0, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("green", { 0, 255, 0, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("blue", { 0, 0, 255, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("yellow", { 255, 255, 0, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("magenta", { 128, 0, 128, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("cyan", { 0, 128, 128, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("orange", { 128, 128, 0, 255 }));
+	colorMap.insert(std::pair<std::string, std::vector<unsigned char> >("speed", { 0, 0, 0, 0 }));
 }
 
-TrickjumpLines::~TrickjumpLines() {}
+TrickjumpLines::~TrickjumpLines()
+{
+}
 
 // Create simple function to return cvar.
-bool TrickjumpLines::isEnableLine() { return this->_enableLine; }
-bool TrickjumpLines::isEnableMarker() { return this->_enableMarker; }
+bool TrickjumpLines::isEnableLine()
+{
+	return this->_enableLine;
+}
+bool TrickjumpLines::isEnableMarker()
+{
+	return this->_enableMarker;
+}
 
 void TrickjumpLines::record(const char *name)
 {
@@ -75,7 +83,7 @@ void TrickjumpLines::record(const char *name)
 		}
 	}
 
-	route.width = LINE_WIDTH;
+	route.width  = LINE_WIDTH;
 	route.status = routeStatus::record;
 	if (isDebug())
 	{
@@ -130,7 +138,7 @@ void TrickjumpLines::addPosition(vec3_t pos)
 {
 	if (_recording)
 	{
-		// Check if player is currently in air	
+		// Check if player is currently in air
 		if ((cg.predictedPlayerState.stats[STAT_USERCMD_MOVE] & UMOVE_UP) && (_jumpRelease))
 		{
 			// Player press jump key.
@@ -166,7 +174,7 @@ void TrickjumpLines::addPosition(vec3_t pos)
 			vec[0] = pos[0];
 			vec[1] = pos[1];
 
-			// TODO: (XIS) make a cvar with this hardcoded. 
+			// TODO: (XIS) make a cvar with this hardcoded.
 			vec[2] = pos[2] - 24;
 
 			// Copy into Node struct.
@@ -181,7 +189,7 @@ void TrickjumpLines::addPosition(vec3_t pos)
 			// Add node to the current trail.
 			_currentTrail.push_back(cNode);
 
-			_nextAddTime = cg.time + 50; // 20 times a sec // FRAMETIME = 10 times a sec.		
+			_nextAddTime = cg.time + 50; // 20 times a sec // FRAMETIME = 10 times a sec.
 		}
 	}
 }
@@ -226,10 +234,14 @@ void TrickjumpLines::displayCurrentRoute(int x)
 		for (int j = 0; j < nbPoints; ++j)
 		{
 			if (cTrail[j].speed < minSpeed)
+			{
 				minSpeed = cTrail[j].speed;
+			}
 
 			if (cTrail[j].speed > maxSpeed)
+			{
 				maxSpeed = cTrail[j].speed;
+			}
 		}
 	}
 
@@ -239,7 +251,7 @@ void TrickjumpLines::displayCurrentRoute(int x)
 		std::vector<Node> cTrail = _routes[x].trails[i];
 		const int nbPoints = cTrail.size();
 
-		// Add the bezier curve of this trail.		
+		// Add the bezier curve of this trail.
 		if (isEnableLine())
 		{
 			//addTrickjumpRecursiveBezier(cTrail, _blue, _routes[x].width, 150);
@@ -308,8 +320,10 @@ void TrickjumpLines::displayCurrentRoute(int x)
 }
 
 // gcd_ui, use in Binomial coefficient function.
-unsigned long TrickjumpLines::gcd_ui(unsigned long x, unsigned long y) {
+unsigned long TrickjumpLines::gcd_ui(unsigned long x, unsigned long y)
+{
 	unsigned long t;
+
 	if (y < x)
 	{
 		t = x;
@@ -326,14 +340,27 @@ unsigned long TrickjumpLines::gcd_ui(unsigned long x, unsigned long y) {
 }
 
 // Compute the binomial coefficient base on k in n
-unsigned long TrickjumpLines::binomial(unsigned long n, unsigned long k) {
+unsigned long TrickjumpLines::binomial(unsigned long n, unsigned long k)
+{
 	unsigned long d, g, r = 1;
 
 	// Trivial case.
-	if (k == 0) return 1;
-	if (k == 1) return n;
-	if (k >= n) return (k == n);
-	if (k > n / 2) k = n - k;
+	if (k == 0)
+	{
+		return 1;
+	}
+	if (k == 1)
+	{
+		return n;
+	}
+	if (k >= n)
+	{
+		return (k == n);
+	}
+	if (k > n / 2)
+	{
+		k = n - k;
+	}
 
 	for (d = 1; d <= k; ++d)
 	{
@@ -342,7 +369,10 @@ unsigned long TrickjumpLines::binomial(unsigned long n, unsigned long k) {
 			unsigned long nr, dr;  /* reduced numerator / denominator */
 			g = gcd_ui(n, d);  nr = n / g;  dr = d / g;
 			g = gcd_ui(r, dr);  r = r / g;  dr = dr / g;
-			if (r >= ULONG_MAX / nr) return 0;  /* Unavoidable overflow */
+			if (r >= ULONG_MAX / nr)
+			{
+				return 0;                       /* Unavoidable overflow */
+			}
 			r *= nr;
 			r /= dr;
 			n--;
@@ -359,7 +389,7 @@ unsigned long TrickjumpLines::binomial(unsigned long n, unsigned long k) {
 // Draw all 4 vertices to make the quad (line) with the width and color define by user.
 void TrickjumpLines::draw4VertexLine(vec3_t start, vec3_t end, float width, vec4_c color)
 {
-	// Draw a small line between each start/end 
+	// Draw a small line between each start/end
 	polyVert_t verts[4];
 	vec3_t up, pDraw;
 	int cIdx = 0;
@@ -416,7 +446,7 @@ void TrickjumpLines::draw4VertexLine(vec3_t start, vec3_t end, float width, vec4
 
 void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width, vec4_c colorStart, vec4_c colorEnd)
 {
-	// Draw a small line between each start/end 
+	// Draw a small line between each start/end
 	polyVert_t verts[4];
 	vec3_t up, pDraw;
 	int cIdx = 0;
@@ -471,7 +501,7 @@ void TrickjumpLines::draw4VertexLine2Color(vec3_t start, vec3_t end, float width
 	return;
 }
 
-// Compute the bezier's curves base on recursive function (so N-degree). 
+// Compute the bezier's curves base on recursive function (so N-degree).
 // The function is able to draw the line between start and end point, plus any number of controls points between them.
 // Just by passing an array of vec3_t where points[0] = start and points[end] = end.
 // Color is an array of size 4, which contain, rgb-a color.
@@ -481,7 +511,7 @@ void TrickjumpLines::addTrickjumpRecursiveBezier(std::vector< Node > points, vec
 {
 	static int nextPrintTime = 0;
 	vec3_t zeros = { 0.0, 0.0, 0.0 };
-	const int n = points.size();
+	const int n  = points.size();
 
 	if (n < 2)
 	{
@@ -545,7 +575,7 @@ void TrickjumpLines::addTrickjumpRecursiveBezier(std::vector< Node > points, vec
 void TrickjumpLines::addTrickjumpLines(std::vector< Node > points, vec4_c color, float width)
 {
 	static int nextPrintTime = 0;
-	const int n = points.size();
+	const int  n = points.size();
 
 	if (n < 2)
 	{
@@ -572,7 +602,7 @@ void TrickjumpLines::addTrickjumpLines(std::vector< Node > points, vec4_c color,
 void TrickjumpLines::addTrickjumpLinesColor(std::vector< Node > points, float minSpeed, float maxSpeed, float width)
 {
 	static int nextPrintTime = 0;
-	const int n = points.size();
+	const int  n = points.size();
 
 	if (n < 2)
 	{
@@ -623,13 +653,17 @@ bool TrickjumpLines::loadedRoutes(const char *loadname)
 		{
 			CG_Printf("You request to load mapper TJL.\n");
 			if (route.status == routeStatus::map)
+			{
 				return true;
+			}
 		}
 		else
 		{
 			std::string tmp = loadname;
 			if (route.filename == tmp)
+			{
 				return true;
+			}
 		}
 	}
 
@@ -638,11 +672,11 @@ bool TrickjumpLines::loadedRoutes(const char *loadname)
 
 void TrickjumpLines::loadRoutes(const char *loadname)
 {
-	std::string map;
+	std::string  map;
 	fileHandle_t f = 0;
-	routeStatus loadStatus;
+	routeStatus  loadStatus;
 
-	//Check if already loaded 
+	//Check if already loaded
 	if (loadedRoutes(loadname))
 	{
 		CG_Printf("This file is already loaded : %s.\n", loadname);
@@ -673,12 +707,14 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 		return;
 	}
 
-	std::shared_ptr<char> buf(new char[len + 1], [](char *p) { delete[] p; });
+	std::shared_ptr<char> buf(new char[len + 1], [](char *p) {
+	                          delete[] p;
+		});
 	trap_FS_Read(buf.get(), len, f);
 	buf.get()[len] = 0;
 
-	std::string json(buf.get());
-	Json::Value root;
+	std::string  json(buf.get());
+	Json::Value  root;
 	Json::Reader reader;
 
 	if (!reader.parse(json, root))
@@ -698,8 +734,8 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 				loadRoute.filename = loadname;
 			}
 
-			loadRoute.name = root[i]["name"].asString();
-			loadRoute.width = root[i]["width"].asFloat();
+			loadRoute.name   = root[i]["name"].asString();
+			loadRoute.width  = root[i]["width"].asFloat();
 			loadRoute.status = loadStatus;
 
 			Json::Value colorValue = root[i]["color"];
@@ -708,7 +744,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 				loadRoute.color[j] = (unsigned char)std::atoi(colorValue[j].asString().c_str());
 			}
 
-			// Loop on each trail in a route (tjl) 
+			// Loop on each trail in a route (tjl)
 			Json::Value trailsValue = root[i]["trails"];
 			std::vector< std::vector< Node > > routeVec;
 			for (int j = 0; j < trailsValue.size(); ++j)
@@ -744,6 +780,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 {
 	// TODO (xis) : if file name already exist, overwrite?
 	fileHandle_t f = 0;
+
 	if (trap_FS_FOpenFile((std::string("tjllines/") + cgs.rawmapname + std::string("/") + savename + std::string(".tjl")).c_str(), &f, FS_READ) > 0)
 	{
 		CG_Printf("This file already exists, cannot save.\n");
@@ -765,7 +802,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 			{
 				jsonRoute["color"].append(std::to_string(route.color[i]));
 			}
-			jsonRoute["width"] = route.width;
+			jsonRoute["width"]  = route.width;
 			jsonRoute["trails"] = Json::arrayValue;
 			for (auto & trail : route.trails)
 			{
@@ -812,7 +849,7 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 	const float extx = maxs[0] - mins[0];
 	const float exty = maxs[1] - mins[1];
 	const float extz = maxs[2] - mins[2];
-	polyVert_t verts[4];
+	polyVert_t  verts[4];
 	vec3_t corners[8];
 
 	// set the polygon's texture coordinates
@@ -848,7 +885,8 @@ void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize
 	VectorAdd(corners[0], tmpx2, corners[0]);
 
 	const vec3_t tmpz = { 0.0, 0.0, -extz };
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 4; ++i)
+	{
 		VectorCopy(corners[i], corners[i + 4]);
 		VectorAdd(corners[i], tmpz, corners[i]);
 	}
@@ -917,7 +955,9 @@ void TrickjumpLines::displayNearestRoutes()
 {
 	// Check if their any route in the struct.
 	if (_routes.size() == 0)
+	{
 		return;
+	}
 
 	// Obtain player position
 	vec3_t p;
@@ -928,7 +968,9 @@ void TrickjumpLines::displayNearestRoutes()
 	// Sort the _routes with a lambda function that taking p (position of player) as search param
 	// Check if player is near by a start point of a route.
 	std::sort(begin(routeCopy), end(routeCopy),
-		[&](const Route& lhs, const Route& rhs) { return euclideanDist(p, lhs.trails[0][0].coor) < euclideanDist(p, rhs.trails[0][0].coor); });
+		[&](const Route& lhs, const Route& rhs) {
+		return euclideanDist(p, lhs.trails[0][0].coor) < euclideanDist(p, rhs.trails[0][0].coor);
+	});
 
 	Route nearestStart = routeCopy[0];
 
@@ -937,16 +979,16 @@ void TrickjumpLines::displayNearestRoutes()
 		[&](const Route& lhs, const Route& rhs) {
 
 		const int endLTrail = lhs.trails.size() - 1;
-		const int endLNode = lhs.trails[endLTrail].size() - 1;
+		const int endLNode  = lhs.trails[endLTrail].size() - 1;
 		const int endRTrail = rhs.trails.size() - 1;
-		const int endRNode = rhs.trails[endRTrail].size() - 1;
+		const int endRNode  = rhs.trails[endRTrail].size() - 1;
 
 		return euclideanDist(p, lhs.trails[endLTrail][endLNode].coor) < euclideanDist(p, rhs.trails[endRTrail][endRNode].coor);
 	});
 
 	Route nearestEnd = routeCopy[0];
 	const int endTrail = nearestEnd.trails.size() - 1;
-	const int endNode = nearestEnd.trails[endTrail].size() - 1;
+	const int endNode  = nearestEnd.trails[endTrail].size() - 1;
 
 	// Check if nearest start route is nearest compare to the nearest end route.
 	if (euclideanDist(p, nearestStart.trails[0][0].coor) < euclideanDist(p, nearestEnd.trails[endTrail][endNode].coor))
@@ -987,7 +1029,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		return;
 	}
 
-	const std::string tmp = oldName;
+	const std::string tmp  = oldName;
 	const std::string tmp2 = newName;
 
 	if (getRoutePositionByName(tmp2.c_str()) > -1)
@@ -996,7 +1038,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		return;
 	}
 
-	// Search in _routes	
+	// Search in _routes
 	const int z = getRoutePositionByName(tmp.c_str());
 	if (z > -1)
 	{
@@ -1043,7 +1085,7 @@ void TrickjumpLines::hsv2rgb(vec3_t& hsv, vec3_t& rgb)
 
 	// Compute simple parameter.
 	const float c = hsv[1] * hsv[2];
-	const int angleResult = hsv[0] / 60;
+	const int angleResult  = hsv[0] / 60;
 	const int moduloResult = angleResult % 2;
 	const int absResult = std::abs(moduloResult - 1);
 	const float x = c * (1 - absResult);
@@ -1051,6 +1093,7 @@ void TrickjumpLines::hsv2rgb(vec3_t& hsv, vec3_t& rgb)
 
 	// Associate color to rgb depending on the angle of the HSV.
 	float rPrime, gPrime, bPrime;
+
 	if (angleResult == 0)
 	{
 		rPrime = c;
@@ -1089,9 +1132,9 @@ void TrickjumpLines::hsv2rgb(vec3_t& hsv, vec3_t& rgb)
 	}
 
 	// Color are between 0-1, multiply by 255.0f to get color between 0-255.
-	rgb[0] = (rPrime + m)*255.0f;
-	rgb[1] = (gPrime + m)*255.0f;
-	rgb[2] = (bPrime + m)*255.0f;
+	rgb[0] = (rPrime + m) * 255.0f;
+	rgb[1] = (gPrime + m) * 255.0f;
+	rgb[2] = (bPrime + m) * 255.0f;
 }
 
 void TrickjumpLines::computeColorForNode(float max, float min, float speed, vec3_t& color)
@@ -1100,6 +1143,7 @@ void TrickjumpLines::computeColorForNode(float max, float min, float speed, vec3
 	const float norm = normalizeSpeed(max, min, speed);
 
 	vec3_t hsvColor;
+
 	// Compute associate HSV color with speed.
 	computeHSV(norm, hsvColor);
 
@@ -1113,6 +1157,7 @@ int TrickjumpLines::getRoutePositionByName(const char *name)
 {
 	// Default has been pass as route name.
 	const std::string tmp = name;
+
 	if (tmp == "default")
 	{
 		return 0;
@@ -1197,4 +1242,3 @@ void TrickjumpLines::toggleMarker(bool state)
 	setEnableMarker(state);
 	return;
 }
-

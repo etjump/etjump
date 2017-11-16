@@ -1,9 +1,9 @@
 #include "cg_local.h"
 
 static mapEntityData_t mapEntities[MAX_GENTITIES];
-static int             mapEntityCount = 0;
-static int             mapEntityTime  = 0;
-static qboolean        expanded       = qfalse;
+static int mapEntityCount = 0;
+static int mapEntityTime  = 0;
+static qboolean expanded  = qfalse;
 
 extern playerInfo_t pi;
 
@@ -143,7 +143,7 @@ void CG_AdjustAutomapZoom(int zoomIn)
 void CG_ParseMapEntity(int *mapEntityCount, int *offset, team_t team)
 {
 	mapEntityData_t *mEnt = &mapEntities[(*mapEntityCount)];
-	char            buffer[16];
+	char buffer[16];
 
 	trap_Argv((*offset)++, buffer, 16);
 	mEnt->type = atoi(buffer);
@@ -228,7 +228,7 @@ void CG_ParseMapEntityInfo(int axis_number, int allied_number)
 }
 
 static qboolean gridInitDone = qfalse;
-static vec2_t   gridStartCoord, gridStep;
+static vec2_t gridStartCoord, gridStep;
 
 static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scissor)
 {
@@ -305,8 +305,8 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 				float xc, yc;
 
 				line[0] = x + grid_x;
-				xc      = line[0] >= x + .5f * w ? line[0] - (x + .5f * w) : (x + .5f * w) - line[0];
-				yc      = SQRTFAST(Square(.5f * w) - Square(xc));
+				xc = line[0] >= x + .5f * w ? line[0] - (x + .5f * w) : (x + .5f * w) - line[0];
+				yc = SQRTFAST(Square(.5f * w) - Square(xc));
 				line[1] = y + (.5f * h) - yc;
 				line[2] = 1.f;
 				line[3] = 2 * yc;
@@ -339,8 +339,8 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 				float xc, yc;
 
 				line[1] = y + grid_y;
-				yc      = line[1] >= y + .5f * h ? line[1] - (y + .5f * h) : (y + .5f * h) - line[1];
-				xc      = SQRTFAST(Square(.5f * h) - Square(yc));
+				yc = line[1] >= y + .5f * h ? line[1] - (y + .5f * h) : (y + .5f * h) - line[1];
+				xc = SQRTFAST(Square(.5f * h) - Square(yc));
 				line[0] = x + (.5f * w) - xc;
 				line[2] = 2 * xc;
 				line[3] = 1.f;
@@ -440,16 +440,16 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 
 void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h, int mEntFilter, mapScissor_t *scissor, qboolean interactive, snapshot_t *snap, int icon_size)
 {
-	int              j = 1;
-	qhandle_t        pic;
-	clientInfo_t     *ci;
+	int j = 1;
+	qhandle_t pic;
+	clientInfo_t *ci;
 	bg_playerclass_t *classInfo;
-	centity_t        *cent;
-	const char       *name;
-	vec4_t           c_clr = { 1.f, 1.f, 1.f, 1.f };
-	vec2_t           icon_extends, icon_pos, string_pos = { 0, 0 };
-	int              customimage = 0;
-	oidInfo_t        *oidInfo    = NULL;
+	centity_t *cent;
+	const char *name;
+	vec4_t c_clr = { 1.f, 1.f, 1.f, 1.f };
+	vec2_t icon_extends, icon_pos, string_pos = { 0, 0 };
+	int customimage = 0;
+	oidInfo_t *oidInfo = NULL;
 
 	switch (mEnt->type)
 	{
@@ -552,8 +552,8 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 		}
 		else
 		{
-			icon_pos[0]   = x + mEnt->transformed[0] - icon_size;
-			icon_pos[1]   = y + mEnt->transformed[1] - icon_size;
+			icon_pos[0] = x + mEnt->transformed[0] - icon_size;
+			icon_pos[1] = y + mEnt->transformed[1] - icon_size;
 			string_pos[0] = x + mEnt->transformed[0];
 			string_pos[1] = y + mEnt->transformed[1] + icon_size;
 		}
@@ -882,7 +882,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 		else if (interactive && (mEnt->yaw & 0xFF) & (1 << cgs.ccSelectedObjective))
 		{
 			float scalesize;
-			int   time = cg.time % 1400;
+			int time = cg.time % 1400;
 
 			if (time <= 700)
 			{
@@ -1002,12 +1002,12 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
 void CG_DrawMap(float x, float y, float w, float h, int mEntFilter, mapScissor_t *scissor, qboolean interactive, float alpha, qboolean borderblend)
 {
-	int        i /*, j = 1*/;
+	int i /*, j = 1*/;
 	snapshot_t *snap;
 //	vec4_t c_clr = {1.f, 1.f, 1.f, 1.f};
 	mapEntityData_t *mEnt = &mapEntities[0];
-	int             icon_size;
-	int             exspawn;
+	int icon_size;
+	int exspawn;
 
 	expanded = qfalse;
 
@@ -1136,6 +1136,7 @@ void CG_DrawExpandedAutoMap(void)
 	float x, y, w, h;
 	float b_x, b_y, b_w, b_h;
 	float s1, t1, s2, t2;
+
 //	vec4_t colour = { 1.f, 1.f, 1.f, .5f };
 
 	x = SCREEN_WIDTH + 10.f;
@@ -1264,9 +1265,9 @@ void CG_DrawExpandedAutoMap(void)
 
 void CG_DrawAutoMap(void)
 {
-	float        x, y, w, h;
+	float x, y, w, h;
 	mapScissor_t mapScissor;
-	vec2_t       automapTransformed;
+	vec2_t automapTransformed;
 
 	memset(&mapScissor, 0, sizeof(mapScissor));
 
@@ -1395,10 +1396,10 @@ void CG_DrawAutoMap(void)
 
 int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw, mapScissor_t *scissor, int expand)
 {
-	int    i;
-	char   buffer[64];
+	int  i;
+	char buffer[64];
 	vec2_t point;
-	int    e = -1;
+	int e = -1;
 	vec2_t icon_extends;
 
 	team_t team = CG_LimboPanel_GetRealTeam();
@@ -1644,7 +1645,7 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw, mapSciss
 			//vec4_t colour = { .23f, 1.f, .23f, 1.f };
 			vec4_t colour = { 1.f, 1.f, 1.f, 1.f };
 			vec3_t point;
-			int    fadeTime = cg.time - (cg.artilleryRequestTime[i] + 25000);
+			int fadeTime = cg.time - (cg.artilleryRequestTime[i] + 25000);
 
 			if (fadeTime < 5000)
 			{
@@ -1719,10 +1720,10 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw, mapSciss
 
 mapEntityData_t *CG_ScanForCommandCentreEntity(void)
 {
-	vec_t           rangeSquared = Square(1000);
-	int             ent          = 0;
-	mapEntityData_t *mEnt        = &mapEntities[0];
-	int             i;
+	vec_t rangeSquared = Square(1000);
+	int ent = 0;
+	mapEntityData_t *mEnt = &mapEntities[0];
+	int i;
 
 	if (mapEntityCount <= 0)
 	{
@@ -1746,7 +1747,7 @@ mapEntityData_t *CG_ScanForCommandCentreEntity(void)
 		if (i == 0 || rngSquared < rangeSquared)
 		{
 			rangeSquared = rngSquared;
-			ent          = i;
+			ent = i;
 		}
 	}
 
@@ -1771,7 +1772,7 @@ typedef enum
 qboolean CG_PlayerSelected(void)
 {
 	snapshot_t *snap;
-	int        i;
+	int i;
 
 	if (cg.nextSnap && !cg.nextFrameTeleport && !cg.thisFrameTeleport)
 	{
@@ -1825,7 +1826,7 @@ qboolean CG_CommandCentreLayersClick(void)
 
 qboolean CG_CommandCentreSpawnPointClick(void)
 {
-	int    i;
+	int i;
 	vec2_t point;
 
 	if (cgs.ccFilter & CC_FILTER_SPAWNS)
@@ -1859,7 +1860,7 @@ qboolean CG_CommandCentreSpawnPointClick(void)
 		if (BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f, point[1] - FLAGSIZE_NORMAL * 0.5f, FLAGSIZE_NORMAL, FLAGSIZE_NORMAL, cgDC.cursorx, cgDC.cursory))
 		{
 			trap_SendConsoleCommand(va("setspawnpt %i\n", i));
-			cg.selectedSpawnPoint    = i;
+			cg.selectedSpawnPoint = i;
 			cgs.ccRequestedObjective = -1;
 			return qtrue;
 		}
@@ -1881,14 +1882,14 @@ void CG_CommandCentreClick(int key)
 	}
 }
 
-char      cg_highlightText[256];
+char cg_highlightText[256];
 rectDef_t cg_highlightTextRect;
 void CG_CommandMap_SetHighlightText(const char *text, float x, float y)
 {
 	Q_strncpyz(cg_highlightText, text, sizeof(cg_highlightText));
 	cg_highlightTextRect.x = x;
 	cg_highlightTextRect.y = y;
-	expanded               = qtrue;
+	expanded = qtrue;
 }
 
 void CG_CommandMap_DrawHighlightText(void)

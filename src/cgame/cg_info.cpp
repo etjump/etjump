@@ -313,7 +313,7 @@ void CG_DemoClick(int key, qboolean down)
 				cgs.demoCam.startLean = qtrue;
 			}
 
-			cgs.demoCam.renderingFreeCam = cgs.demoCam.renderingFreeCam? qfalse : qtrue;
+			cgs.demoCam.renderingFreeCam = cgs.demoCam.renderingFreeCam ? qfalse : qtrue;
 
 			if (cgs.demoCam.renderingFreeCam)
 			{
@@ -474,10 +474,10 @@ void CG_DemoClick(int key, qboolean down)
 
 
 
-vec4_t color_bg     = COLOR_BG_VIEW;
+vec4_t color_bg = COLOR_BG_VIEW;
 vec4_t color_border = COLOR_BORDER_VIEW;
-vec4_t color_hdr    = COLOR_HDR2;
-vec4_t color_name   = COLOR_TEXT;
+vec4_t color_hdr  = COLOR_HDR2;
+vec4_t color_name = COLOR_TEXT;
 
 #define VD_X    4
 #define VD_Y    78
@@ -495,32 +495,32 @@ qboolean CG_ViewingDraw()
 	}
 	else
 	{
-		int  w, wTag;
-		int  tSpacing  = 15;    // Should derive from CG_Text_Height_Ext
-		int  pID       = cg.mvCurrentMainview->mvInfo & MV_PID;
+		int w, wTag;
+		int tSpacing = 15;      // Should derive from CG_Text_Height_Ext
+		int pID = cg.mvCurrentMainview->mvInfo & MV_PID;
 		const char *viewInfo = "Viewing:";
 
 		wTag = CG_Text_Width_Ext(viewInfo, VD_SCALE_X_HDR, 0, FONT_HEADER);
-		w    = wTag + 3 + CG_Text_Width_Ext(cgs.clientinfo[pID].name, VD_SCALE_X_NAME, 0, FONT_TEXT);
+		w = wTag + 3 + CG_Text_Width_Ext(cgs.clientinfo[pID].name, VD_SCALE_X_NAME, 0, FONT_TEXT);
 
 		CG_DrawRect(VD_X - 2, VD_Y, w + 7, tSpacing + 4, 1, color_border);
 		CG_FillRect(VD_X - 2, VD_Y, w + 7, tSpacing + 4, color_bg);
 
 		CG_Text_Paint_Ext(VD_X, VD_Y + tSpacing,            // x, y
-		                  VD_SCALE_X_HDR, VD_SCALE_Y_HDR,   // scale_x, scale_y
-		                  color_hdr,
-		                  viewInfo,
-		                  0.0f, 0,
-		                  ITEM_TEXTSTYLE_SHADOWED,
-		                  FONT_HEADER);
+			VD_SCALE_X_HDR, VD_SCALE_Y_HDR,                 // scale_x, scale_y
+			color_hdr,
+			viewInfo,
+			0.0f, 0,
+			ITEM_TEXTSTYLE_SHADOWED,
+			FONT_HEADER);
 
 		CG_Text_Paint_Ext(VD_X + wTag + 5, VD_Y + tSpacing, // x, y
-		                  VD_SCALE_X_NAME, VD_SCALE_Y_NAME, // scale_x, scale_y
-		                  color_name,
-		                  cgs.clientinfo[pID].name,
-		                  0.0f, 0,
-		                  ITEM_TEXTSTYLE_SHADOWED,
-		                  FONT_TEXT);
+			VD_SCALE_X_NAME, VD_SCALE_Y_NAME,               // scale_x, scale_y
+			color_name,
+			cgs.clientinfo[pID].name,
+			0.0f, 0,
+			ITEM_TEXTSTYLE_SHADOWED,
+			FONT_TEXT);
 
 		return(qtrue);
 	}
@@ -541,36 +541,36 @@ void CG_GameStatsDraw()
 	}
 	else
 	{
-		int         i, x = GS_X + 4, y = GS_Y, h;
+		int i, x = GS_X + 4, y = GS_Y, h;
 		gameStats_t *gs = &cgs.gamestats;
 
-		vec4_t bgColor     = COLOR_BG;      // window
+		vec4_t bgColor = COLOR_BG;          // window
 		vec4_t borderColor = COLOR_BORDER;  // window
 
-		vec4_t bgColorTitle     = COLOR_BG_TITLE;       // titlebar
+		vec4_t bgColorTitle = COLOR_BG_TITLE;           // titlebar
 		vec4_t borderColorTitle = COLOR_BORDER_TITLE;   // titlebar
 
 		// Main header
-		int        hStyle  = ITEM_TEXTSTYLE_SHADOWED;
-		float      hScale  = 0.16f;
-		float      hScaleY = 0.21f;
-		fontInfo_t *hFont  = FONT_HEADER;
+		int hStyle = ITEM_TEXTSTYLE_SHADOWED;
+		float hScale  = 0.16f;
+		float hScaleY = 0.21f;
+		fontInfo_t *hFont = FONT_HEADER;
 
 		// Sub header
-		int        hStyle2  = 0;
-		float      hScale2  = 0.16f;
-		float      hScaleY2 = 0.20f;
-		fontInfo_t *hFont2  = FONT_SUBHEADER;
+		int hStyle2 = 0;
+		float hScale2  = 0.16f;
+		float hScaleY2 = 0.20f;
+		fontInfo_t *hFont2 = FONT_SUBHEADER;
 
 		vec4_t hdrColor = COLOR_HDR;        // text
 //		vec4_t hdrColor2	= COLOR_HDR2;	// text
 
 		// Text settings
-		int        tStyle   = ITEM_TEXTSTYLE_SHADOWED;
-		int        tSpacing = 9;        // Should derive from CG_Text_Height_Ext
-		float      tScale   = 0.19f;
-		fontInfo_t *tFont   = FONT_TEXT;
-		vec4_t     tColor   = COLOR_TEXT;   // text
+		int tStyle = ITEM_TEXTSTYLE_SHADOWED;
+		int tSpacing = 9;               // Should derive from CG_Text_Height_Ext
+		float tScale = 0.19f;
+		fontInfo_t *tFont = FONT_TEXT;
+		vec4_t tColor = COLOR_TEXT;         // text
 
 		float diff = cgs.gamestats.fadeTime - cg.time;
 
@@ -582,12 +582,12 @@ void CG_GameStatsDraw()
 		    tSpacing * ((gs->cWeapons > 0) ? gs->cWeapons : 1) +
 		    tSpacing * ((gs->fHasStats) ? 3 : 0) +
 		    ((cgs.gametype == GT_WOLF_LMS) ? 0 :
-		     (
-		         4 + 2 * tSpacing +                                 // Rank/XP
-		         1 + tSpacing +
-		         4 + 2 * tSpacing +                                 // Skill columns
-		         1 +                                                // Skillz
-		         tSpacing * ((gs->cSkills > 0) ? gs->cSkills : 1)
+			 (
+				 4 + 2 * tSpacing +                                 // Rank/XP
+				 1 + tSpacing +
+				 4 + 2 * tSpacing +                                 // Skill columns
+				 1 +                                                // Skillz
+				 tSpacing * ((gs->cSkills > 0) ? gs->cSkills : 1)
 		     )
 		    ) +
 		    2;
@@ -602,12 +602,12 @@ void CG_GameStatsDraw()
 				scale = 1.0f - scale;
 			}
 
-			bgColor[3]          *= scale;
-			bgColorTitle[3]     *= scale;
-			borderColor[3]      *= scale;
+			bgColor[3] *= scale;
+			bgColorTitle[3] *= scale;
+			borderColor[3]  *= scale;
 			borderColorTitle[3] *= scale;
-			hdrColor[3]         *= scale;
-			tColor[3]           *= scale;
+			hdrColor[3] *= scale;
+			tColor[3] *= scale;
 
 			y -= h * (1.0f - scale);
 
@@ -698,36 +698,36 @@ void CG_TopShotsDraw()
 	}
 	else
 	{
-		int            i, x = TS_X - TS_W, y = 480, h;
+		int i, x = TS_X - TS_W, y = 480, h;
 		topshotStats_t *ts = &cgs.topshots;
 
-		vec4_t bgColor     = COLOR_BG;          // window
+		vec4_t bgColor = COLOR_BG;              // window
 		vec4_t borderColor = COLOR_BORDER;      // window
 
-		vec4_t bgColorTitle     = COLOR_BG_TITLE;   // titlebar
+		vec4_t bgColorTitle = COLOR_BG_TITLE;       // titlebar
 		vec4_t borderColorTitle = COLOR_BORDER_TITLE;   // titlebar
 
 		// Main header
-		int        hStyle  = ITEM_TEXTSTYLE_SHADOWED;
-		float      hScale  = 0.16f;
-		float      hScaleY = 0.21f;
-		fontInfo_t *hFont  = FONT_HEADER;
+		int hStyle = ITEM_TEXTSTYLE_SHADOWED;
+		float hScale  = 0.16f;
+		float hScaleY = 0.21f;
+		fontInfo_t *hFont = FONT_HEADER;
 
 		// Sub header
-		int        hStyle2  = 0;
-		float      hScale2  = 0.16f;
-		float      hScaleY2 = 0.20f;
-		fontInfo_t *hFont2  = FONT_SUBHEADER;
+		int hStyle2 = 0;
+		float hScale2  = 0.16f;
+		float hScaleY2 = 0.20f;
+		fontInfo_t *hFont2 = FONT_SUBHEADER;
 
 		vec4_t hdrColor  = COLOR_HDR;       // text
 		vec4_t hdrColor2 = COLOR_HDR2;      // text
 
 		// Text settings
-		int        tStyle   = ITEM_TEXTSTYLE_SHADOWED;
-		int        tSpacing = 9;        // Should derive from CG_Text_Height_Ext
-		float      tScale   = 0.19f;
-		fontInfo_t *tFont   = FONT_TEXT;
-		vec4_t     tColor   = COLOR_TEXT;   // text
+		int tStyle = ITEM_TEXTSTYLE_SHADOWED;
+		int tSpacing = 9;               // Should derive from CG_Text_Height_Ext
+		float tScale = 0.19f;
+		fontInfo_t *tFont = FONT_TEXT;
+		vec4_t tColor = COLOR_TEXT;         // text
 
 		float diff = cgs.topshots.fadeTime - cg.time;
 
@@ -749,13 +749,13 @@ void CG_TopShotsDraw()
 				scale = 1.0f - scale;
 			}
 
-			bgColor[3]          *= scale;
-			bgColorTitle[3]     *= scale;
-			borderColor[3]      *= scale;
+			bgColor[3] *= scale;
+			bgColorTitle[3] *= scale;
+			borderColor[3]  *= scale;
 			borderColorTitle[3] *= scale;
-			hdrColor[3]         *= scale;
-			hdrColor2[3]        *= scale;
-			tColor[3]           *= scale;
+			hdrColor[3]  *= scale;
+			hdrColor2[3] *= scale;
+			tColor[3] *= scale;
 
 			y += (TS_Y - h) * scale;
 
@@ -853,7 +853,7 @@ void CG_DemoHelpDraw()
 			"^nLFT/RGHT  ^mChange angle",
 			"^nUP/DOWN   ^mMove in/out",
 			NULL,
-			va("^nKP_ENTER  ^mFreecam    ^m%s", cgs.demoCam.renderingFreeCam? "ON" : "OFF"),
+			va("^nKP_ENTER  ^mFreecam    ^m%s",cgs.demoCam.renderingFreeCam ? "ON" : "OFF"),
 		};
 
 		const char *mvhelp[] =
@@ -869,25 +869,25 @@ void CG_DemoHelpDraw()
 
 		int i, x, y = 480, w, h;
 
-		vec4_t bgColor     = COLOR_BG;              // window
+		vec4_t bgColor = COLOR_BG;                  // window
 		vec4_t borderColor = COLOR_BORDER;          // window
 
-		vec4_t bgColorTitle     = COLOR_BG_TITLE;       // titlebar
+		vec4_t bgColorTitle = COLOR_BG_TITLE;           // titlebar
 		vec4_t borderColorTitle = COLOR_BORDER_TITLE;   // titlebar
 
 		// Main header
-		int        hStyle    = ITEM_TEXTSTYLE_SHADOWED;
-		float      hScale    = 0.16f;
-		float      hScaleY   = 0.21f;
-		fontInfo_t *hFont    = FONT_HEADER;
-		vec4_t     hdrColor2 = COLOR_HDR2;  // text
+		int hStyle = ITEM_TEXTSTYLE_SHADOWED;
+		float hScale  = 0.16f;
+		float hScaleY = 0.21f;
+		fontInfo_t *hFont = FONT_HEADER;
+		vec4_t hdrColor2  = COLOR_HDR2;     // text
 
 		// Text settings
-		int        tStyle   = ITEM_TEXTSTYLE_SHADOWED;
-		int        tSpacing = 9;        // Should derive from CG_Text_Height_Ext
-		float      tScale   = 0.19f;
-		fontInfo_t *tFont   = FONT_TEXT;
-		vec4_t     tColor   = COLOR_TEXT;   // text
+		int tStyle = ITEM_TEXTSTYLE_SHADOWED;
+		int tSpacing = 9;               // Should derive from CG_Text_Height_Ext
+		float tScale = 0.19f;
+		fontInfo_t *tFont = FONT_TEXT;
+		vec4_t tColor = COLOR_TEXT;         // text
 
 		float diff = cg.fadeTime - trap_Milliseconds();
 
@@ -910,12 +910,12 @@ void CG_DemoHelpDraw()
 				scale = 1.0f - scale;
 			}
 
-			bgColor[3]          *= scale;
-			bgColorTitle[3]     *= scale;
-			borderColor[3]      *= scale;
+			bgColor[3] *= scale;
+			bgColorTitle[3] *= scale;
+			borderColor[3]  *= scale;
 			borderColorTitle[3] *= scale;
-			hdrColor2[3]        *= scale;
-			tColor[3]           *= scale;
+			hdrColor2[3] *= scale;
+			tColor[3] *= scale;
 
 			y += (DH_Y - h) * scale;
 
@@ -1037,25 +1037,25 @@ void CG_SpecHelpDraw()
 		char format[MAX_STRING_TOKENS], buf[MAX_STRING_TOKENS];
 		char *lines[16];
 
-		vec4_t bgColor     = COLOR_BG;              // window
+		vec4_t bgColor = COLOR_BG;                  // window
 		vec4_t borderColor = COLOR_BORDER;          // window
 
-		vec4_t bgColorTitle     = COLOR_BG_TITLE;       // titlebar
+		vec4_t bgColorTitle = COLOR_BG_TITLE;           // titlebar
 		vec4_t borderColorTitle = COLOR_BORDER_TITLE;   // titlebar
 
 		// Main header
-		int        hStyle    = ITEM_TEXTSTYLE_SHADOWED;
-		float      hScale    = 0.16f;
-		float      hScaleY   = 0.21f;
-		fontInfo_t *hFont    = FONT_HEADER;
-		vec4_t     hdrColor2 = COLOR_HDR2;  // text
+		int hStyle = ITEM_TEXTSTYLE_SHADOWED;
+		float hScale  = 0.16f;
+		float hScaleY = 0.21f;
+		fontInfo_t *hFont = FONT_HEADER;
+		vec4_t hdrColor2  = COLOR_HDR2;     // text
 
 		// Text settings
-		int        tStyle   = ITEM_TEXTSTYLE_SHADOWED;
-		int        tSpacing = 9;        // Should derive from CG_Text_Height_Ext
-		float      tScale   = 0.19f;
-		fontInfo_t *tFont   = FONT_TEXT;
-		vec4_t     tColor   = COLOR_TEXT;   // text
+		int tStyle = ITEM_TEXTSTYLE_SHADOWED;
+		int tSpacing = 9;               // Should derive from CG_Text_Height_Ext
+		float tScale = 0.19f;
+		fontInfo_t *tFont = FONT_TEXT;
+		vec4_t tColor = COLOR_TEXT;         // text
 
 		float diff = cg.fadeTime - trap_Milliseconds();
 
@@ -1080,7 +1080,7 @@ void CG_SpecHelpDraw()
 			if (help[i].cmd != NULL)
 			{
 				lines[i] = va(format, CG_getBindKeyName(help[i].cmd, buf, sizeof(buf)), help[i].info);
-				len      = CG_Text_Width_Ext(lines[i], tScale, 0, FONT_TEXT);
+				len = CG_Text_Width_Ext(lines[i], tScale, 0, FONT_TEXT);
 				if (len > maxlen)
 				{
 					maxlen = len;
@@ -1110,12 +1110,12 @@ void CG_SpecHelpDraw()
 				scale = 1.0f - scale;
 			}
 
-			bgColor[3]          *= scale;
-			bgColorTitle[3]     *= scale;
-			borderColor[3]      *= scale;
+			bgColor[3] *= scale;
+			bgColorTitle[3] *= scale;
+			borderColor[3]  *= scale;
 			borderColorTitle[3] *= scale;
-			hdrColor2[3]        *= scale;
-			tColor[3]           *= scale;
+			hdrColor2[3] *= scale;
+			tColor[3] *= scale;
 
 			x -= w * (1.0f - scale);
 

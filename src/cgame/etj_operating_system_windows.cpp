@@ -14,6 +14,7 @@ ETJump::OperatingSystem::OperatingSystem()
 void ETJump::OperatingSystem::minimize()
 {
 	HWND wnd = GetForegroundWindow();
+
 	if (wnd)
 	{
 		ShowWindow(wnd, SW_MINIMIZE);
@@ -23,8 +24,8 @@ void ETJump::OperatingSystem::minimize()
 std::string ETJump::OperatingSystem::getHwid()
 {
 	std::string hardwareId = "";
-	std::string rootDrive = "";
-	int   systemInfoSum = 0;
+	std::string rootDrive  = "";
+	int   systemInfoSum  = 0;
 	char  vsnc[MAX_PATH] = "\0";
 	DWORD vsn;
 
@@ -33,7 +34,7 @@ std::string ETJump::OperatingSystem::getHwid()
 
 	// Random data from processor
 	systemInfoSum = systemInfo.dwProcessorType +
-		systemInfo.wProcessorLevel + systemInfo.wProcessorArchitecture;
+	                systemInfo.wProcessorLevel + systemInfo.wProcessorArchitecture;
 
 	char buffer[MAX_PATH]{};
 	_itoa(systemInfoSum, buffer, 10);
@@ -58,6 +59,7 @@ void ETJump::OperatingSystem::addMinimizeButton()
 {
 	char buffer[64];
 	auto *WindowClassName = "Enemy Territory";
+
 	trap_Cvar_VariableStringBuffer("win_hinstance", buffer, sizeof buffer);
 	const auto etHandle = reinterpret_cast<HINSTANCE>(atol(buffer));
 	HWND wnd = nullptr;

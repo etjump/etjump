@@ -13,7 +13,7 @@ void Printer::LogPrint(std::string message)
 	while (message.length() > 1000)
 	{
 		partialMessage = message.substr(0, 1000);
-		message        = message.substr(1000);
+		message = message.substr(1000);
 		G_LogPrintf("%s", partialMessage.c_str());
 	}
 	if (message.length() > 0)
@@ -34,7 +34,7 @@ void Printer::SendConsoleMessage(int clientNum, std::string message)
 	while (message.length() > BYTES_PER_PACKET)
 	{
 		partialMessage = message.substr(0, BYTES_PER_PACKET);
-		message        = message.substr(BYTES_PER_PACKET);
+		message = message.substr(BYTES_PER_PACKET);
 		if (clientNum == CONSOLE_CLIENT_NUMBER)
 		{
 			G_Printf("%s", partialMessage.c_str());
@@ -75,7 +75,7 @@ void Printer::BroadcastConsoleMessage(std::string message)
 	while (message.length() > 1000)
 	{
 		partialMessage = message.substr(0, 1000);
-		message        = message.substr(1000);
+		message = message.substr(1000);
 
 		G_Printf("%s", partialMessage.c_str());
 		trap_SendServerCommand(-1, va("print \"%s\"", partialMessage.c_str()));

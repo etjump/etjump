@@ -25,10 +25,10 @@ void InitGame()
 	trap_SendClientCommand("timerun_status");
 
 	trickjumpLines = std::unique_ptr<TrickjumpLines>(new TrickjumpLines);
-	
+
 	// Check if load TJL on connection is enable
 	if (etj_tjlAlwaysLoadTJL.integer == 1)
-	{		
+	{
 		CG_Printf("All mapper Trickjump lines will be loaded due to your cvar : etj_tjlAlwaysLoadTJL. \n");
 		trickjumpLines->loadRoutes(nullptr);
 	}
@@ -65,9 +65,9 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	// timerun_start runStartTime{integer} runName{string}
 	if (command == "timerun_start")
 	{
-		auto        startTime      = atoi(CG_Argv(1));
-		std::string runName        = CG_Argv(2);
-		auto        previousRecord = atoi(CG_Argv(3));
+		auto startTime = atoi(CG_Argv(1));
+		std::string runName = CG_Argv(2);
+		auto previousRecord = atoi(CG_Argv(3));
 		timerun->startTimerun(runName, startTime, previousRecord);
 		return qtrue;
 	}
@@ -79,10 +79,10 @@ qboolean CG_ServerCommandExt(const char *cmd)
 			return qtrue;
 		}
 
-		auto        clientNum      = atoi(CG_Argv(1));
-		auto        runStartTime   = atoi(CG_Argv(2));
-		std::string runName        = CG_Argv(3);
-		auto        previousRecord = atoi(CG_Argv(4));
+		auto clientNum = atoi(CG_Argv(1));
+		auto runStartTime = atoi(CG_Argv(2));
+		std::string runName = CG_Argv(3);
+		auto previousRecord = atoi(CG_Argv(4));
 
 		timerun->startSpectatorTimerun(clientNum, runName, runStartTime, previousRecord);
 
@@ -108,9 +108,9 @@ qboolean CG_ServerCommandExt(const char *cmd)
 			return qtrue;
 		}
 
-		auto        clientNum      = atoi(CG_Argv(1));
-		auto        completionTime = atoi(CG_Argv(2));
-		std::string runName        = CG_Argv(3);
+		auto clientNum = atoi(CG_Argv(1));
+		auto completionTime = atoi(CG_Argv(2));
+		std::string runName = CG_Argv(3);
 
 		timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
 
@@ -118,18 +118,18 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	}
 	if (command == "record")
 	{
-		auto        clientNum      = atoi(CG_Argv(1));
-		std::string runName        = CG_Argv(2);
-		auto        completionTime = atoi(CG_Argv(3));
+		auto clientNum = atoi(CG_Argv(1));
+		std::string runName = CG_Argv(2);
+		auto completionTime = atoi(CG_Argv(3));
 
 		timerun->record(clientNum, runName, completionTime);
 		return qtrue;
 	}
 	if (command == "completion")
 	{
-		auto        clientNum      = atoi(CG_Argv(1));
-		std::string runName        = CG_Argv(2);
-		auto        completionTime = atoi(CG_Argv(3));
+		auto clientNum = atoi(CG_Argv(1));
+		std::string runName = CG_Argv(2);
+		auto completionTime = atoi(CG_Argv(3));
 
 		timerun->completion(clientNum, runName, completionTime);
 
@@ -220,7 +220,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 
 		if (argc > 2)
 		{
-			const std::string name = CG_Argv(1);
+			const std::string name  = CG_Argv(1);
 			const std::string name2 = CG_Argv(2);
 			trickjumpLines->renameRoute(name.c_str(), name2.c_str());
 		}
@@ -388,6 +388,7 @@ void CG_DrawActiveFrameExt()
 qboolean CG_displaybyname()
 {
 	const auto argc = trap_Argc();
+
 	if (argc > 1)
 	{
 		const auto name = CG_Argv(1);
@@ -403,10 +404,11 @@ qboolean CG_displaybyname()
 qboolean CG_displaybynumber()
 {
 	const auto argc = trap_Argc();
+
 	if (argc > 1)
 	{
 		const auto number = atoi(CG_Argv(1));
-		const auto total = trickjumpLines->countRoute();
+		const auto total  = trickjumpLines->countRoute();
 		if (number > -1 && number < total)
 		{
 			trickjumpLines->setCurrentRouteToRender(number);
