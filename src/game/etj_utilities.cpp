@@ -43,9 +43,10 @@ std::vector<int> Utilities::getSpectators(int clientNum)
 static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowed)
 {
 	auto current = cl->ps.weapon;
-	auto it      = std::find_if(disallowed.begin(), disallowed.end(), [&current](int w) {
+	auto it = std::find_if(disallowed.begin(), disallowed.end(), [&current](int w) {
 		return w == current;
 	});
+
 	if (it != disallowed.end())
 	{
 		if (cl->sess.sessionTeam == TEAM_AXIS)
@@ -150,10 +151,10 @@ static void FS_ReplaceSeparators(char *path)
 
 static char *BuildOSPath(const char *file)
 {
-	char        base[MAX_CVAR_VALUE_STRING] = "\0";
-	char        temp[MAX_OSPATH]            = "\0";
-	char        game[MAX_CVAR_VALUE_STRING] = "\0";
-	static char ospath[2][MAX_OSPATH]       = { "\0", "\0" };
+	char base[MAX_CVAR_VALUE_STRING] = "\0";
+	char temp[MAX_OSPATH] = "\0";
+	char game[MAX_CVAR_VALUE_STRING]  = "\0";
+	static char ospath[2][MAX_OSPATH] = { "\0", "\0" };
 	static int  toggle;
 
 	toggle ^= 1;            // flip-flop to allow two returns without clash
@@ -171,7 +172,8 @@ static char *BuildOSPath(const char *file)
 
 void Utilities::toConsole(gentity_t *ent, std::string message)
 {
-	const auto               BYTES_PER_PACKET = 998;
+	const auto BYTES_PER_PACKET = 998;
+
 	std::vector<std::string> packets;
 	while (message.length() > BYTES_PER_PACKET)
 	{
@@ -196,6 +198,7 @@ void Utilities::toConsole(gentity_t *ent, std::string message)
 void Utilities::RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons)
 {
 	auto *cl = (g_entities + clientNum)->client;
+
 	for (auto& weapon : weapons)
 	{
 		COM_BitClear(cl->ps.weapons, weapon);
@@ -204,9 +207,10 @@ void Utilities::RemovePlayerWeapons(int clientNum, const std::vector<int>& weapo
 
 std::string Utilities::timestampToString(int timestamp, const char *format, const char *start)
 {
-	char      buf[1024];
-	struct tm *lt       = NULL;
-	time_t    toConvert = timestamp;
+	char buf[1024];
+	struct tm *lt = NULL;
+	time_t toConvert = timestamp;
+
 	lt = localtime(&toConvert);
 	if (timestamp > 0)
 	{
@@ -223,6 +227,7 @@ std::string Utilities::timestampToString(int timestamp, const char *format, cons
 std::string Utilities::getPath(const std::string& name)
 {
 	auto osPath = UtilityHelperFunctions::BuildOSPath(name.c_str());
+
 	return osPath ? osPath : std::string();
 }
 
@@ -231,7 +236,7 @@ bool Utilities::anyonePlaying()
 	for (auto i = 0; i < level.numConnectedClients; i++)
 	{
 		auto clientNum = level.sortedClients[i];
-		auto target    = g_entities + clientNum;
+		auto target = g_entities + clientNum;
 
 		if (target->client->sess.sessionTeam != TEAM_SPECTATOR)
 		{
@@ -249,7 +254,8 @@ void Utilities::Log(const std::string& message)
 std::string Utilities::ReadFile(const std::string& filepath)
 {
 	fileHandle_t f;
-	auto         len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_READ);
+	auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_READ);
+
 	if (len == -1)
 	{
 		throw std::runtime_error("Could not open file for reading: " + filepath);
@@ -265,7 +271,8 @@ std::string Utilities::ReadFile(const std::string& filepath)
 void Utilities::WriteFile(const std::string& filepath, const std::string& content)
 {
 	fileHandle_t f;
-	auto         len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_WRITE);
+	auto len = trap_FS_FOpenFile(filepath.c_str(), &f, FS_WRITE);
+
 	if (len == -1)
 	{
 		throw std::runtime_error("Could not open file for writing: " + filepath);
@@ -299,7 +306,7 @@ std::vector<std::string> Utilities::getMaps()
 {
 	std::vector<std::string> maps;
 
-	int  i       = 0;
+	int  i = 0;
 	int  numDirs = 0;
 	int  dirLen  = 0;
 	char dirList[8196];

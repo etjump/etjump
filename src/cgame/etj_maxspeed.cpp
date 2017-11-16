@@ -3,8 +3,8 @@
 #include "cg_local.h"
 #include <string>
 
-ETJump::DisplayMaxSpeed::DisplayMaxSpeed(EntityEventsHandler* entityEventsHandler) :
-	_entityEventsHandler{ entityEventsHandler }
+ETJump::DisplayMaxSpeed::DisplayMaxSpeed(EntityEventsHandler *entityEventsHandler) :
+	_entityEventsHandler{entityEventsHandler}
 {
 	if (!entityEventsHandler)
 	{
@@ -16,8 +16,8 @@ ETJump::DisplayMaxSpeed::DisplayMaxSpeed(EntityEventsHandler* entityEventsHandle
 	{
 		if (cg.snap->ps.clientNum != cg.clientNum)
 		{
-			_maxSpeed = 0;
-			return;
+		    _maxSpeed = 0;
+		    return;
 		}
 
 		_displayMaxSpeed = _maxSpeed;
@@ -58,7 +58,7 @@ void ETJump::DisplayMaxSpeed::render() const
 
 	auto str = va("%0.f", _displayMaxSpeed);
 	auto w = CG_Text_Width_Ext(str, sizex, 0, &cgs.media.limboFont2) / 2;
-	
+
 	auto x = etj_maxSpeedX.value;
 	auto y = etj_maxSpeedY.value;
 
@@ -66,7 +66,8 @@ void ETJump::DisplayMaxSpeed::render() const
 
 	auto style = ITEM_TEXTSTYLE_NORMAL;
 
-	if (etj_speedShadow.integer) {
+	if (etj_speedShadow.integer)
+	{
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 

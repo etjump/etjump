@@ -57,7 +57,7 @@ static void  swapfunc(char *, char *, int, int);
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
 #define swapcode(TYPE, parmi, parmj, n) {       \
-		long          i   = (n) / sizeof(TYPE);           \
+		long i = (n) / sizeof(TYPE);           \
 		register TYPE *pi = (TYPE *) (parmi);       \
 		register TYPE *pj = (TYPE *) (parmj);       \
 		do {                        \
@@ -71,7 +71,7 @@ static void  swapfunc(char *, char *, int, int);
 	                               es % sizeof(long) ? 2 : es == sizeof(long) ? 0 : 1;
 
 static void
-swapfunc(a, b, n, swaptype)
+    swapfunc(a, b, n, swaptype)
 char *a, *b;
 int n, swaptype;
 {
@@ -85,7 +85,7 @@ int n, swaptype;
 
 #define swap(a, b)                  \
 	if (swaptype == 0) {                \
-		long t       = *(long *)(a);          \
+		long t = *(long *)(a);          \
 		*(long *)(a) = *(long *)(b);        \
 		*(long *)(b) = t;           \
 	} \
@@ -95,7 +95,7 @@ int n, swaptype;
 #define vecswap(a, b, n)    if ((n) > 0) swapfunc(a, b, n, swaptype)
 
 		static char *
-		med3(a, b, c, cmp)
+		    med3(a, b, c, cmp)
 		char *a, *b, *c;
 	}
 }
@@ -103,11 +103,11 @@ cmp_t *cmp;
 {
 	return cmp(a, b) < 0 ?
 	       (cmp(b, c) < 0 ? b : (cmp(a, c) < 0 ? c : a))
-		   : (cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c));
+	       : (cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c));
 }
 
 void
-qsort(a, n, es, cmp)
+    qsort(a, n, es, cmp)
 void *a;
 size_t n, es;
 cmp_t  *cmp;
@@ -143,7 +143,7 @@ loop:   SWAPINIT(a, es);
 	pa = pb = (char *)a + es;
 
 	pc = pd = (char *)a + (n - 1) * es;
-	for (;; )
+	for (;;)
 	{
 		while (pb <= pc && (r = cmp(pb, a)) <= 0)
 		{
@@ -171,8 +171,8 @@ loop:   SWAPINIT(a, es);
 		}
 		swap(pb, pc);
 		swap_cnt = 1;
-		pb      += es;
-		pc      -= es;
+		pb += es;
+		pc -= es;
 	}
 	if (swap_cnt == 0)    /* Switch to insertion sort */
 	{
@@ -591,7 +591,7 @@ double atan2(double y, double x)
 	float temp;
 	float dir;
 	float test;
-	int   i;
+	int i;
 
 	if (x < 0)
 	{
@@ -600,15 +600,15 @@ double atan2(double y, double x)
 			// quad 1
 			base = M_PI / 2;
 			temp = x;
-			x    = y;
-			y    = -temp;
+			x = y;
+			y = -temp;
 		}
 		else
 		{
 			// quad 2
 			base = M_PI;
-			x    = -x;
-			y    = -y;
+			x = -x;
+			y = -y;
 		}
 	}
 	else
@@ -618,8 +618,8 @@ double atan2(double y, double x)
 			// quad 3
 			base = 3 * M_PI / 2;
 			temp = x;
-			x    = -y;
-			y    = temp;
+			x = -y;
+			y = temp;
 		}
 	}
 
@@ -627,9 +627,9 @@ double atan2(double y, double x)
 	{
 		base += M_PI / 2;
 		temp  = x;
-		x     = y;
-		y     = temp;
-		dir   = -1;
+		x = y;
+		y = temp;
+		dir = -1;
 	}
 	else
 	{
@@ -681,7 +681,7 @@ double atof(const char *string)
 {
 	float sign;
 	float value;
-	int   c;
+	int c;
 
 
 	// skip whitespace
@@ -712,7 +712,7 @@ double atof(const char *string)
 
 	// read digits
 	value = 0;
-	c     = string[0];
+	c = string[0];
 	if (c != '.')
 	{
 		do
@@ -722,7 +722,7 @@ double atof(const char *string)
 			{
 				break;
 			}
-			c    -= '0';
+			c -= '0';
 			value = value * 10 + c;
 		}
 		while (1);
@@ -745,8 +745,8 @@ double atof(const char *string)
 			{
 				break;
 			}
-			c        -= '0';
-			value    += c * fraction;
+			c -= '0';
+			value += c * fraction;
 			fraction *= 0.1;
 		}
 		while (1);
@@ -761,9 +761,9 @@ double atof(const char *string)
 double _atof(const char **stringPtr)
 {
 	const char *string;
-	float      sign;
-	float      value;
-	int        c;
+	float sign;
+	float value;
+	int c;
 
 	string = *stringPtr;
 
@@ -805,7 +805,7 @@ double _atof(const char **stringPtr)
 			{
 				break;
 			}
-			c    -= '0';
+			c -= '0';
 			value = value * 10 + c;
 		}
 		while (1);
@@ -824,8 +824,8 @@ double _atof(const char **stringPtr)
 			{
 				break;
 			}
-			c        -= '0';
-			value    += c * fraction;
+			c -= '0';
+			value += c * fraction;
 			fraction *= 0.1;
 		}
 		while (1);
@@ -883,7 +883,7 @@ int atoi(const char *string)
 		{
 			break;
 		}
-		c    -= '0';
+		c -= '0';
 		value = value * 10 + c;
 	}
 	while (1);
@@ -896,9 +896,9 @@ int atoi(const char *string)
 
 int _atoi(const char **stringPtr)
 {
-	int        sign;
-	int        value;
-	int        c;
+	int sign;
+	int value;
+	int c;
 	const char *string;
 
 	string = *stringPtr;
@@ -938,7 +938,7 @@ int _atoi(const char **stringPtr)
 		{
 			break;
 		}
-		c    -= '0';
+		c -= '0';
 		value = value * 10 + c;
 	}
 	while (1);
@@ -986,7 +986,7 @@ void AddInt(char **buf_p, int val, int width, int flags)
 	int  signedVal;
 	char *buf;
 
-	digits    = 0;
+	digits = 0;
 	signedVal = val;
 	if (val < 0)
 	{
@@ -995,7 +995,7 @@ void AddInt(char **buf_p, int val, int width, int flags)
 	do
 	{
 		text[digits++] = '0' + val % 10;
-		val           /= 10;
+		val /= 10;
 	}
 	while (val);
 
@@ -1042,7 +1042,7 @@ void AddFloat(char **buf_p, float fval, int width, int prec)
 
 	// FIXME!!!! handle fractions
 
-	digits    = 0;
+	digits = 0;
 	signedVal = fval;
 	if (fval < 0)
 	{
@@ -1053,7 +1053,7 @@ void AddFloat(char **buf_p, float fval, int width, int prec)
 	do
 	{
 		text[digits++] = '0' + val % 10;
-		val           /= 10;
+		val /= 10;
 	}
 	while (val);
 
@@ -1081,7 +1081,7 @@ void AddFloat(char **buf_p, float fval, int width, int prec)
 
 void AddString(char **buf_p, char *string, int width, int prec)
 {
-	int  size;
+	int size;
 	char *buf;
 
 	buf = *buf_p;
@@ -1089,7 +1089,7 @@ void AddString(char **buf_p, char *string, int width, int prec)
 	if (string == NULL)
 	{
 		string = "(null)";
-		prec   = -1;
+		prec = -1;
 	}
 
 	if (prec >= 0)
@@ -1132,7 +1132,7 @@ parse and ignore formats we don't support.
 */
 int vsprintf(char *buffer, const char *fmt, va_list argptr)
 {
-	int  *arg;
+	int *arg;
 	char *buf_p;
 	char ch;
 	int  flags;
@@ -1142,7 +1142,7 @@ int vsprintf(char *buffer, const char *fmt, va_list argptr)
 	char sign;
 
 	buf_p = buffer;
-	arg   = (int *)argptr;
+	arg = (int *)argptr;
 
 	while (qtrue)
 	{
@@ -1246,7 +1246,7 @@ int sscanf(const char *buffer, const char *fmt, ...)
 	int **arg;
 	int count;
 
-	arg   = (int **)&fmt + 1;
+	arg = (int **)&fmt + 1;
 	count = 0;
 
 	while (*fmt)

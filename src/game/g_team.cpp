@@ -83,9 +83,9 @@ const char *TeamColorString(int team)
 // NULL for everyone
 void QDECL PrintMsg(gentity_t *ent, const char *fmt, ...)
 {
-	char    msg[1024];
+	char msg[1024];
 	va_list argptr;
-	char    *p;
+	char *p;
 
 	// NOTE: if buffer overflow, it's more likely to corrupt stack and crash than do a proper G_Error?
 	va_start(argptr, fmt);
@@ -163,14 +163,14 @@ order.
 */
 void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker)
 {
-	int       i;
+	int i;
 	gentity_t *ent;
-	int       flag_pw, enemy_flag_pw;
-	int       otherteam;
+	int flag_pw, enemy_flag_pw;
+	int otherteam;
 	gentity_t *flag, *carrier = NULL;
-	const char      *c;
-	vec3_t    v1, v2;
-	int       team;
+	const char *c;
+	vec3_t v1, v2;
+	int team;
 
 	// no bonus for fragging yourself
 	if (!targ->client || !attacker->client || targ == attacker)
@@ -178,7 +178,7 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 		return;
 	}
 
-	team      = targ->client->sess.sessionTeam;
+	team = targ->client->sess.sessionTeam;
 	otherteam = OtherTeam(targ->client->sess.sessionTeam);
 	if (otherteam < 0)
 	{
@@ -195,12 +195,12 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 	// same team, if the flag at base, check to he has the enemy flag
 	if (team == TEAM_AXIS)
 	{
-		flag_pw       = PW_REDFLAG;
+		flag_pw = PW_REDFLAG;
 		enemy_flag_pw = PW_BLUEFLAG;
 	}
 	else
 	{
-		flag_pw       = PW_BLUEFLAG;
+		flag_pw = PW_BLUEFLAG;
 		enemy_flag_pw = PW_REDFLAG;
 	}
 
@@ -472,10 +472,10 @@ void Team_ReturnFlagSound(gentity_t *ent, int team)
 		return;
 	}
 
-	pm                = G_PopupMessage(PM_OBJECTIVE);
+	pm = G_PopupMessage(PM_OBJECTIVE);
 	pm->s.effect3Time = G_StringIndex(ent->message);
 	pm->s.effect2Time = team;
-	pm->s.density     = 1; // 1 = returned
+	pm->s.density = 1;     // 1 = returned
 
 	/*te = G_TempEntity( ent->s.pos.trBase, EV_GLOBAL_SOUND );
 	te->s.eventParm = G_SoundIndex( team == TEAM_AXIS ?
@@ -487,6 +487,7 @@ void Team_ReturnFlagSound(gentity_t *ent, int team)
 void Team_ReturnFlag(gentity_t *ent)
 {
 	int team = ent->item->giTag == PW_REDFLAG ? TEAM_AXIS : TEAM_ALLIES;
+
 	Team_ReturnFlagSound(ent, team);
 	Team_ResetFlag(ent);
 	PrintMsg(NULL, "The %s flag has returned!\n", TeamName(team));
@@ -601,7 +602,7 @@ int Team_TouchEnemyFlag(gentity_t *ent, gentity_t *other, int team)
 //	te->r.svFlags |= SVF_BROADCAST;
 //	te->s.teamNum = cl->sess.sessionTeam;
 
-	tmp         = ent->parent;
+	tmp = ent->parent;
 	ent->parent = other;
 
 	if (cl->sess.sessionTeam == TEAM_AXIS)
@@ -609,7 +610,7 @@ int Team_TouchEnemyFlag(gentity_t *ent, gentity_t *other, int team)
 		gentity_t *pm = G_PopupMessage(PM_OBJECTIVE);
 		pm->s.effect3Time = G_StringIndex(ent->message);
 		pm->s.effect2Time = TEAM_AXIS;
-		pm->s.density     = 0; // 0 = stolen
+		pm->s.density = 0;     // 0 = stolen
 
 //		te->s.eventParm = G_SoundIndex( "sound/chat/axis/g-objective_taken.wav" );
 
@@ -626,7 +627,7 @@ int Team_TouchEnemyFlag(gentity_t *ent, gentity_t *other, int team)
 		gentity_t *pm = G_PopupMessage(PM_OBJECTIVE);
 		pm->s.effect3Time = G_StringIndex(ent->message);
 		pm->s.effect2Time = TEAM_ALLIES;
-		pm->s.density     = 0; // 0 = stolen
+		pm->s.density = 0;     // 0 = stolen
 
 //		te->s.eventParm = G_SoundIndex( "sound/chat/allies/a-objective_taken.wav" );
 
@@ -682,7 +683,7 @@ int Team_TouchEnemyFlag(gentity_t *ent, gentity_t *other, int team)
 
 int Pickup_Team(gentity_t *ent, gentity_t *other)
 {
-	int       team;
+	int team;
 	gclient_t *cl = other->client;
 
 	// START Mad Doc - TDF
@@ -705,17 +706,17 @@ int Pickup_Team(gentity_t *ent, gentity_t *other)
 		}
 
 		// JPW NERVE -- set flag model in carrying entity if multiplayer and flagmodel is set
-		other->message           = ent->message;
+		other->message = ent->message;
 		other->s.otherEntityNum2 = ent->s.modelindex2;
 		// jpw
 
 		return ((team == cl->sess.sessionTeam) ?
 		        Team_TouchOurFlag : Team_TouchEnemyFlag)
-		           (ent, other, team);
+			       (ent, other, team);
 	}
 	else
 	{
-		other->message           = ent->message;
+		other->message = ent->message;
 		other->s.otherEntityNum2 = ent->s.modelindex2;
 
 		// for single player, we want the allies to be able to pick up both flags
@@ -737,9 +738,10 @@ pick MP objective farthest from passed in vector, return table index
 */
 int FindFarthestObjectiveIndex(vec3_t source)
 {
-	int    i, j = 0;
+	int i, j = 0;
 	float  dist = 0, tdist;
 	vec3_t tmp;
+
 //	int	cs_obj = CS_MULTI_SPAWNTARGETS;
 //	char	cs[MAX_STRING_CHARS];
 //	char *objectivename;
@@ -751,7 +753,7 @@ int FindFarthestObjectiveIndex(vec3_t source)
 		if (tdist > dist)
 		{
 			dist = tdist;
-			j    = i;
+			j = i;
 		}
 	}
 
@@ -777,7 +779,7 @@ NERVE - SMF - pick MP objective closest to the passed in vector, return table in
 */
 int FindClosestObjectiveIndex(vec3_t source)
 {
-	int    i, j = 0;
+	int i, j = 0;
 	float  dist = 10E20, tdist;
 	vec3_t tmp;
 
@@ -788,7 +790,7 @@ int FindClosestObjectiveIndex(vec3_t source)
 		if (tdist < dist)
 		{
 			dist = tdist;
-			j    = i;
+			j = i;
 		}
 	}
 
@@ -812,7 +814,7 @@ gentity_t *SelectRandomTeamSpawnPoint(int teamstate, team_t team, int spawnObjec
 	int count, closest;
 	int i = 0;
 
-	const char  *classname;
+	const char *classname;
 	float shortest, tmp;
 
 	vec3_t target;
@@ -971,18 +973,18 @@ Format:
 
 void TeamplayInfoMessage(team_t team)
 {
-	char      entry[1024];
-	char      string[1400];
-	int       stringlength;
-	int       i, j;
+	char entry[1024];
+	char string[1400];
+	int  stringlength;
+	int  i, j;
 	gentity_t *player;
-	int       cnt;
-	int       h;
-	char      *bufferedData;
-	char      *tinfo;
+	int cnt;
+	int h;
+	char *bufferedData;
+	char *tinfo;
 
 	// send the latest information on all clients
-	string[0]    = 0;
+	string[0] = 0;
 	stringlength = 0;
 
 	for (i = 0, cnt = 0; i < level.numConnectedClients; i++)
@@ -1047,7 +1049,7 @@ void TeamplayInfoMessage(team_t team)
 
 void CheckTeamStatus(void)
 {
-	int       i;
+	int i;
 	gentity_t *ent;
 
 	if (level.time - level.lastTeamLocationTime > TEAM_LOCATION_UPDATE_TIME)
@@ -1284,7 +1286,7 @@ void objective_Register(gentity_t *self)
 			Info_SetValueForKey(cs, "z", va("%i", (int)self->s.origin[2]));
 		}
 		Info_SetValueForKey(cs, "t", va("%i", self->count2));
-		self->use   = team_wolf_objective_use;
+		self->use = team_wolf_objective_use;
 		self->count = cs_obj;
 		trap_SetConfigstring(cs_obj, cs);
 		VectorCopy(self->s.origin, level.spawntargets[numobjectives]);
@@ -1314,8 +1316,8 @@ void SP_team_WOLF_objective(gentity_t *ent)
 	Q_strncpyz(ent->message, desc, strlen(desc) + 1);
 
 	ent->nextthink = level.time + FRAMETIME;
-	ent->think     = objective_Register;
-	ent->s.eType   = ET_WOLF_OBJECTIVE;
+	ent->think = objective_Register;
+	ent->s.eType = ET_WOLF_OBJECTIVE;
 
 	if (ent->spawnflags & 1)
 	{
@@ -1417,8 +1419,8 @@ void checkpoint_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %i seconds!\n\"", time));
 	}
 
-	ent->count2    = level.time;
-	ent->think     = checkpoint_use_think;
+	ent->count2 = level.time;
+	ent->think  = checkpoint_use_think;
 	ent->nextthink = level.time + 2000;
 
 	// Gordon: reset player disguise on touching flag
@@ -1573,14 +1575,14 @@ void checkpoint_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	// Don't allow touch again until animation is finished
 	self->touch = NULL;
 
-	self->think     = checkpoint_think;
+	self->think = checkpoint_think;
 	self->nextthink = level.time + 1000;
 }
 
 // JPW NERVE -- if spawn flag is set, use this touch fn instead to turn on/off targeted spawnpoints
 void checkpoint_spawntouch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
-	gentity_t *ent      = NULL;
+	gentity_t *ent = NULL;
 	qboolean  playsound = qtrue;
 	qboolean  firsttime = qfalse;
 
@@ -1620,7 +1622,7 @@ void checkpoint_spawntouch(gentity_t *self, gentity_t *other, trace_t *trace)
 		else if (self->s.frame == WCP_ANIM_NOFLAG)
 		{
 			self->s.frame = WCP_ANIM_NOFLAG;
-			playsound     = qfalse;
+			playsound = qfalse;
 		}
 		else if (self->s.frame == WCP_ANIM_AMERICAN_RAISED && !(self->spawnflags & ALLIED_ONLY))
 		{
@@ -1644,7 +1646,7 @@ void checkpoint_spawntouch(gentity_t *self, gentity_t *other, trace_t *trace)
 		else if (self->s.frame == WCP_ANIM_NOFLAG)
 		{
 			self->s.frame = WCP_ANIM_NOFLAG;
-			playsound     = qfalse;
+			playsound = qfalse;
 		}
 		else if (self->s.frame == WCP_ANIM_AXIS_RAISED && !(self->spawnflags & AXIS_ONLY))
 		{
@@ -1690,7 +1692,7 @@ void checkpoint_spawntouch(gentity_t *self, gentity_t *other, trace_t *trace)
 	// Don't allow touch again until animation is finished
 	self->touch = NULL;
 
-	self->think     = checkpoint_think;
+	self->think = checkpoint_think;
 	self->nextthink = level.time + 1000;
 
 	// activate all targets
@@ -1777,7 +1779,7 @@ void SP_team_WOLF_checkpoint(gentity_t *ent)
 	G_SpawnString("noise", "sound/movers/doors/door6_open.wav", &capture_sound);
 	ent->soundPos1 = G_SoundIndex(capture_sound);
 
-	ent->clipmask   = CONTENTS_SOLID;
+	ent->clipmask = CONTENTS_SOLID;
 	ent->r.contents = CONTENTS_SOLID;
 
 	VectorSet(ent->r.mins, -8, -8, 0);
@@ -1858,17 +1860,17 @@ int Team_ClassForString(char *string)
 }
 
 // OSP
-const char      *aTeams[TEAM_NUM_TEAMS] = { "FFA", "^1Axis^7", "^4Allies^7", "Spectators" };
-team_info teamInfo[TEAM_NUM_TEAMS];
+const char *aTeams[TEAM_NUM_TEAMS] = { "FFA", "^1Axis^7", "^4Allies^7", "Spectators" };
+team_info  teamInfo[TEAM_NUM_TEAMS];
 
 
 // Resets a team's settings
 void G_teamReset(int team_num, qboolean fClearSpecLock)
 {
-	teamInfo[team_num].team_lock    = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING) ? qtrue : qfalse;
+	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING) ? qtrue : qfalse;
 	teamInfo[team_num].team_name[0] = 0;
-	teamInfo[team_num].team_score   = 0;
-	teamInfo[team_num].timeouts     = match_timeoutcount.integer;
+	teamInfo[team_num].team_score = 0;
+	teamInfo[team_num].timeouts = match_timeoutcount.integer;
 
 	if (fClearSpecLock)
 	{
@@ -1880,7 +1882,7 @@ void G_teamReset(int team_num, qboolean fClearSpecLock)
 // Swaps active players on teams
 void G_swapTeams(void)
 {
-	int       i;
+	int i;
 	gclient_t *cl;
 
 	for (i = TEAM_AXIS; i <= TEAM_ALLIES; i++)
@@ -2000,7 +2002,7 @@ int G_teamID(gentity_t *ent)
 // Determine if the "ready" player threshold has been reached.
 qboolean G_checkReady(void)
 {
-	int       i, ready = 0, notReady = match_minplayers.integer;
+	int i, ready = 0, notReady = match_minplayers.integer;
 	gclient_t *cl;
 
 
@@ -2040,7 +2042,7 @@ qboolean G_checkReady(void)
 	}
 
 	// Do we have enough "ready" players?
-	return(level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer)) ? qtrue : qfalse;
+	return (level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer)) ? qtrue : qfalse;
 }
 
 
@@ -2054,7 +2056,7 @@ qboolean G_readyMatchState(void)
 		level.ref_allready = qfalse;
 		if (g_doWarmup.integer > 0)
 		{
-			teamInfo[TEAM_AXIS].team_lock   = qtrue;
+			teamInfo[TEAM_AXIS].team_lock = qtrue;
 			teamInfo[TEAM_ALLIES].team_lock = qtrue;
 		}
 
@@ -2165,7 +2167,7 @@ qboolean G_teamJoinCheck(int team_num, gentity_t *ent)
 // Removes everyone's specinvite for a particular team.
 void G_removeSpecInvite(int team)
 {
-	int       i;
+	int i;
 	gentity_t *cl;
 
 	for (i = 0; i < level.numConnectedClients; i++)

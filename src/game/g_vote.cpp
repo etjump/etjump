@@ -17,10 +17,10 @@
 #define T_WCH   0x100
 
 
-static const char *ACTIVATED   = "ACTIVATED";
+static const char *ACTIVATED = "ACTIVATED";
 static const char *DEACTIVATED = "DEACTIVATED";
-static const char *ENABLED     = "ENABLED";
-static const char *DISABLED    = "DISABLED";
+static const char *ENABLED  = "ENABLED";
+static const char *DISABLED = "DISABLED";
 
 //
 // Update info:
@@ -31,7 +31,7 @@ typedef struct
 {
 	unsigned int dwGameTypes;
 	const char *pszVoteName;
-	int (*pVoteCommand)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2);
+	int (*pVoteCommand)(gentity_t * ent, unsigned int dwVoteIndex, char *arg, char *arg2);
 	const char *pszVoteMessage;
 	const char *pszVoteHelp;
 } vote_reference_t;
@@ -39,19 +39,19 @@ typedef struct
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] =
 {
-	{ 0x1ff, "map",           G_Map_v,           "Change map to",
+	{ 0x1ff, "map",        G_Map_v,        "Change map to",
 	  " <mapname>^7\n  Votes for a new map to be loaded" },
-	{ 0x1ff, "maprestart",    G_MapRestart_v,    "Map Restart",
+	{ 0x1ff, "maprestart", G_MapRestart_v, "Map Restart",
 	  "^7\n  Restarts the current map in progress" },
-	{ 0x1ff, "randommap",     G_RandomMap_v,     "Random Map",
+	{ 0x1ff, "randommap",  G_RandomMap_v,  "Random Map",
 	  " ^7\n Votes a new random map to be loaded" },
-	{ 0,     0,               NULL,              0 }
+	{ 0,     0,            NULL,           0 }
 };
 
 void G_cpmPrintf(gentity_t *ent, const char *fmt, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, fmt);
 	Q_vsnprintf(text, sizeof(text), fmt, argptr);
@@ -117,7 +117,7 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote)
 	}
 
 	num_cmds = rows;
-	rows     = num_cmds / HELP_COLUMNS;
+	rows = num_cmds / HELP_COLUMNS;
 
 	if (num_cmds % HELP_COLUMNS)
 	{
@@ -133,20 +133,20 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote)
 		if (i + rows * 3 + 1 <= num_cmds)
 		{
 			G_cpmPrintf(ent, "^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-			            aVoteInfo[vi[i + rows]].pszVoteName,
-			            aVoteInfo[vi[i + rows * 2]].pszVoteName,
-			            aVoteInfo[vi[i + rows * 3]].pszVoteName);
+				aVoteInfo[vi[i + rows]].pszVoteName,
+				aVoteInfo[vi[i + rows * 2]].pszVoteName,
+				aVoteInfo[vi[i + rows * 3]].pszVoteName);
 		}
 		else if (i + rows * 2 + 1 <= num_cmds)
 		{
 			G_cpmPrintf(ent, "^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-			            aVoteInfo[vi[i + rows]].pszVoteName,
-			            aVoteInfo[vi[i + rows * 2]].pszVoteName);
+				aVoteInfo[vi[i + rows]].pszVoteName,
+				aVoteInfo[vi[i + rows * 2]].pszVoteName);
 		}
 		else if (i + rows + 1 <= num_cmds)
 		{
 			G_cpmPrintf(ent, "^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-			            aVoteInfo[vi[i + rows]].pszVoteName);
+				aVoteInfo[vi[i + rows]].pszVoteName);
 		}
 		else
 		{
@@ -290,6 +290,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                   char *arg2)
 {
 	const char *map = NULL;
+
 	// We know that arg2 is a type that exists.
 	if (arg)
 	{
@@ -314,12 +315,12 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 		}
 
 		Q_strncpyz(level.voteInfo.vote_value,
-		           map, sizeof(level.voteInfo.vote_value));
+			map, sizeof(level.voteInfo.vote_value));
 	}
 	else
 	{
 		trap_SendConsoleCommand(EXEC_APPEND,
-		                        va("map %s\n", level.voteInfo.vote_value));
+			va("map %s\n", level.voteInfo.vote_value));
 	}
 
 	return G_OK;
@@ -401,4 +402,3 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 
 	return(G_OK);
 }
-

@@ -2,14 +2,14 @@
 // cg_syscalls.asm is included instead when building a qvm
 #include "cg_local.h"
 
-static int(QDECL * syscall)(int arg, ...) = (int(QDECL *)(int, ...)) - 1;
+static int (QDECL * syscall)(int arg, ...) = (int (QDECL *)(int, ...)) - 1;
 
 #if defined(__MACOS__)
 #ifndef __GNUC__
 #pragma export on
 #endif
 #endif
-extern "C" FN_PUBLIC void dllEntry(int(QDECL  * syscallptr)(int arg, ...))
+extern "C" FN_PUBLIC void dllEntry(int (QDECL *syscallptr)(int arg, ...))
 {
 	syscall = syscallptr;
 }
@@ -434,7 +434,7 @@ void    trap_R_AddPolysToScene(qhandle_t hShader, int numVerts, const polyVert_t
 void    trap_R_AddLightToScene(const vec3_t org, float radius, float intensity, float r, float g, float b, qhandle_t hShader, int flags)
 {
 	syscall(CG_R_ADDLIGHTTOSCENE, org, PASSFLOAT(radius), PASSFLOAT(intensity),
-	        PASSFLOAT(r), PASSFLOAT(g), PASSFLOAT(b), hShader, flags);
+		PASSFLOAT(r), PASSFLOAT(g), PASSFLOAT(b), hShader, flags);
 }
 
 //----(SA)
@@ -535,9 +535,9 @@ void        trap_GetGameState(gameState_t *gamestate)
 #define MAX_SNAPSHOT_MASK   (MAX_SNAPSHOT_BACKUP - 1)
 
 static snapshot_t snaps[MAX_SNAPSHOT_BACKUP];
-static int        curSnapshotNumber;
-int               snapshotDelayTime;
-static qboolean   skiponeget;
+static int curSnapshotNumber;
+int snapshotDelayTime;
+static qboolean skiponeget;
 #endif // FAKELAG
 #endif // _DEBUG
 
@@ -561,9 +561,9 @@ void        trap_GetCurrentSnapshotNumber(int *snapshotNumber, int *serverTime)
 		{
 			if (curSnapshotNumber < cg.latestSnapshotNum)
 			{
-				*snapshotNumber   = cg.latestSnapshotNum + 1;
+				*snapshotNumber = cg.latestSnapshotNum + 1;
 				curSnapshotNumber = cg.latestSnapshotNum + 2;   // skip one ahead and we're good to go on the next frame
-				skiponeget        = qtrue;
+				skiponeget = qtrue;
 			}
 			else
 			{
@@ -605,7 +605,7 @@ qboolean    trap_GetSnapshot(int snapshotNumber, snapshot_t *snapshot)
 			memcpy(&snaps[curSnapshotNumber & MAX_SNAPSHOT_MASK], snapshot, sizeof(snapshot_t));
 
 			// find a usercmd that is fakeLag msec behind
-			i            = curSnapshotNumber & MAX_SNAPSHOT_MASK;
+			i = curSnapshotNumber & MAX_SNAPSHOT_MASK;
 			realsnaptime = snaps[i].serverTime;
 			i--;
 			do
@@ -616,7 +616,7 @@ qboolean    trap_GetSnapshot(int snapshotNumber, snapshot_t *snapshot)
 				{
 					// found the right one
 					snapshotDelayTime = realsnaptime - thissnaptime;
-					snapshot          = &snaps[i & MAX_SNAPSHOT_MASK];
+					snapshot = &snaps[i & MAX_SNAPSHOT_MASK];
 					//*snapshotNumber = i & MAX_SNAPSHOT_MASK;
 					return qtrue;
 				}
@@ -627,7 +627,7 @@ qboolean    trap_GetSnapshot(int snapshotNumber, snapshot_t *snapshot)
 
 			// didn't find a proper one, just use the oldest one we have
 			snapshotDelayTime = realsnaptime - thissnaptime;
-			snapshot          = &snaps[(curSnapshotNumber - 1) & MAX_SNAPSHOT_MASK];
+			snapshot = &snaps[(curSnapshotNumber - 1) & MAX_SNAPSHOT_MASK];
 			//*snapshotNumber = (curSnapshotNumber - 1) & MAX_SNAPSHOT_MASK;
 			return qtrue;
 		}
@@ -865,7 +865,8 @@ sfxHandle_t trap_S_RegisterSound(const char *sample, qboolean compressed)
 {
 	sfxHandle_t snd;
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	snd = syscall(CG_S_REGISTERSOUND, sample, qfalse /* compressed */);
 	if (!*sample)
 	{
@@ -884,7 +885,8 @@ qhandle_t trap_R_RegisterModel(const char *name)
 {
 	qhandle_t handle;
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	handle = syscall(CG_R_REGISTERMODEL, name);
 	DEBUG_REGISTERPROFILE_EXEC("trap_R_RegisterModel", name)
 	trap_PumpEventLoop();
@@ -895,7 +897,8 @@ qhandle_t trap_R_RegisterSkin(const char *name)
 {
 	qhandle_t handle;
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	handle = syscall(CG_R_REGISTERSKIN, name);
 	DEBUG_REGISTERPROFILE_EXEC("trap_R_RegisterSkin", name)
 	trap_PumpEventLoop();
@@ -906,7 +909,8 @@ qhandle_t trap_R_RegisterShader(const char *name)
 {
 	qhandle_t handle;
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	handle = syscall(CG_R_REGISTERSHADER, name);
 	DEBUG_REGISTERPROFILE_EXEC("trap_R_RegisterShader", name)
 	trap_PumpEventLoop();
@@ -917,7 +921,8 @@ qhandle_t trap_R_RegisterShaderNoMip(const char *name)
 {
 	qhandle_t handle;
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	handle = syscall(CG_R_REGISTERSHADERNOMIP, name);
 	trap_PumpEventLoop();
 	DEBUG_REGISTERPROFILE_EXEC("trap_R_RegisterShaderNpMip", name);
@@ -927,7 +932,8 @@ qhandle_t trap_R_RegisterShaderNoMip(const char *name)
 void trap_R_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font)
 {
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	syscall(CG_R_REGISTERFONT, fontName, pointSize, font);
 	DEBUG_REGISTERPROFILE_EXEC("trap_R_RegisterFont", fontName)
 	trap_PumpEventLoop();
@@ -936,7 +942,8 @@ void trap_R_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font)
 void    trap_CM_LoadMap(const char *mapname)
 {
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	syscall(CG_CM_LOADMAP, mapname);
 	DEBUG_REGISTERPROFILE_EXEC("trap_CM_LoadMap", mapname)
 	trap_PumpEventLoop();
@@ -945,7 +952,8 @@ void    trap_CM_LoadMap(const char *mapname)
 void    trap_R_LoadWorldMap(const char *mapname)
 {
 	DEBUG_REGISTERPROFILE_INIT
-	CG_DrawInformation(qtrue);
+	    CG_DrawInformation(qtrue);
+
 	syscall(CG_R_LOADWORLDMAP, mapname);
 	DEBUG_REGISTERPROFILE_EXEC("trap_R_LoadWorldMap", mapname)
 	trap_PumpEventLoop();

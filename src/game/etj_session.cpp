@@ -30,7 +30,7 @@ void Session::Init(int clientNum)
 	clients_[clientNum].level = NULL;
 	clients_[clientNum].permissions.reset();
 
-	std::string            ip  = ValueForKey(clientNum, "ip");
+	std::string ip = ValueForKey(clientNum, "ip");
 	std::string::size_type pos = ip.find(":");
 	clients_[clientNum].ip = ip.substr(0, pos);
 
@@ -68,8 +68,8 @@ void Session::WriteSessionData(int clientNum)
 	G_DPrintf("DEBUG: Writing client %d etjump session data\n", clientNum);
 
 	const char *sessionData = va("%s %s",
-	                             clients_[clientNum].guid.c_str(),
-	                             clients_[clientNum].hwid.c_str());
+		clients_[clientNum].guid.c_str(),
+		clients_[clientNum].hwid.c_str());
 
 	trap_Cvar_Set(va("etjumpsession%i", clientNum), sessionData);
 }
@@ -109,17 +109,18 @@ void Session::ReadSessionData(int clientNum)
 
 bool Session::GuidReceived(gentity_t *ent)
 {
-	int  argc      = trap_Argc();
+	int  argc = trap_Argc();
 	int  clientNum = ClientNum(ent);
 	char guidBuf[MAX_TOKEN_CHARS];
 	char hwidBuf[MAX_TOKEN_CHARS];
 
 	// Client sends "AUTHENTICATE guid hwid
 	const int ARGC = 3;
+
 	if (argc != ARGC)
 	{
 		G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
-		            ent->client->pers.netname, ClientIPAddr(ent));
+			ent->client->pers.netname, ClientIPAddr(ent));
 		return false;
 	}
 
@@ -129,7 +130,7 @@ bool Session::GuidReceived(gentity_t *ent)
 	if (!ValidGuid(guidBuf) || !ValidGuid(hwidBuf))
 	{
 		G_LogPrintf("Possible guid/hwid spoof attempt by %s (%s).\n",
-		            ent->client->pers.netname, ClientIPAddr(ent));
+			ent->client->pers.netname, ClientIPAddr(ent));
 		return false;
 	}
 
@@ -137,15 +138,15 @@ bool Session::GuidReceived(gentity_t *ent)
 	clients_[clientNum].hwid = G_SHA1(hwidBuf);
 
 	G_DPrintf("GuidReceived: %d GUID: %s HWID: %s\n",
-	          clientNum, clients_[clientNum].guid.c_str(),
-	          clients_[clientNum].hwid.c_str());
+		clientNum, clients_[clientNum].guid.c_str(),
+		clients_[clientNum].hwid.c_str());
 
 	GetUserAndLevelData(clientNum);
 
 	if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid))
 	{
 		G_LogPrintf("Banned player %s tried to connect with guid %s and hardware id %s\n",
-		            (g_entities + clientNum)->client->pers.netname, clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
+			(g_entities + clientNum)->client->pers.netname, clients_[clientNum].guid.c_str(), clients_[clientNum].hwid.c_str());
 		CPMAll(va("Banned player %s ^7tried to connect.", ent->client->pers.netname));
 		trap_DropClient(clientNum, "You are banned.", 0);
 		return false;
@@ -159,6 +160,7 @@ bool Session::GuidReceived(gentity_t *ent)
 void Session::GetUserAndLevelData(int clientNum)
 {
 	gentity_t *ent = g_entities + clientNum;
+
 	if (!database_->UserExists(clients_[clientNum].guid))
 	{
 		if (!database_->AddUser(clients_[clientNum].guid, clients_[clientNum].hwid, std::string(ent->client->pers.netname)))
@@ -222,7 +224,7 @@ void Session::ParsePermissions(int clientNum)
 
 	const int STATE_ALLOW = 1;
 	const int STATE_DENY  = 2;
-	int       state       = STATE_ALLOW;
+	int state = STATE_ALLOW;
 	for (unsigned i = 0; i < commands.length(); i++)
 	{
 		char c = commands.at(i);
@@ -282,8 +284,8 @@ void Session::OnClientDisconnect(int clientNum)
 
 void Session::PrintGreeting(gentity_t *ent)
 {
-	int    clientNum = ClientNum(ent);
-	Client *cl       = &clients_[clientNum];
+	int clientNum = ClientNum(ent);
+	Client *cl = &clients_[clientNum];
 
 	// If user has own greeting, print it
 	if (cl->user->greeting.length() > 0)
@@ -387,6 +389,7 @@ int Session::GetId(int clientNum) const
 int Session::GetLevel(gentity_t *ent) const
 {
 	int num = ClientNum(ent);
+
 	if (ent && clients_[num].user)
 	{
 		return clients_[num].user->level;
@@ -402,8 +405,9 @@ bool Session::IsIpBanned(int clientNum)
 
 bool Session::Ban(gentity_t *ent, gentity_t *player, unsigned expires, std::string reason)
 {
-	int    clientNum = ClientNum(player);
+	int clientNum = ClientNum(player);
 	time_t t;
+
 	time(&t);
 
 	if (clients_[clientNum].guid.length() == 0)
@@ -412,13 +416,13 @@ bool Session::Ban(gentity_t *ent, gentity_t *player, unsigned expires, std::stri
 		return false;
 	}
 
-	std::string            ipport = ValueForKey(player, "ip");
-	std::string::size_type pos    = ipport.find(":");
-	std::string            ip     = ipport.substr(0, pos);
+	std::string ipport = ValueForKey(player, "ip");
+	std::string::size_type pos = ipport.find(":");
+	std::string ip = ipport.substr(0, pos);
 
 	return database_->BanUser(std::string(player->client->pers.netname), clients_[clientNum].guid,
-	                          clients_[clientNum].hwid, ip, std::string(ent ? ent->client->pers.netname : "Console"),
-	                          TimeStampToString(static_cast<unsigned>(t)), expires, reason);
+		clients_[clientNum].hwid, ip, std::string(ent ? ent->client->pers.netname : "Console"),
+		TimeStampToString(static_cast<unsigned>(t)), expires, reason);
 }
 
 void Session::PrintFinger(gentity_t *ent, gentity_t *target)
@@ -454,9 +458,9 @@ void Session::PrintAdmintest(gentity_t *ent)
 	if (ent && clients_[clientNum].user && clients_[clientNum].level)
 	{
 		std::string message = va("^3admintest: ^7%s^7 is a level %d user (%s^7).",
-		                         ent->client->pers.netname,
-		                         clients_[clientNum].user->level,
-		                         clients_[clientNum].user->title.length() > 0 ? clients_[clientNum].user->title.c_str() : clients_[clientNum].level->name.c_str());
+			ent->client->pers.netname,
+			clients_[clientNum].user->level,
+			clients_[clientNum].user->title.length() > 0 ? clients_[clientNum].user->title.c_str() : clients_[clientNum].level->name.c_str());
 
 		ChatPrintAll(message);
 	}
@@ -516,6 +520,7 @@ int Session::LevelDeleted(int adminLevel)
 void Session::NewName(gentity_t *ent)
 {
 	auto clientNum = ClientNum(ent);
+
 	if (!clients_[clientNum].user)
 	{
 		G_LogPrintf("Error: Couldn't store new user nick -- user is null.\n");

@@ -24,18 +24,18 @@ This is called at startup and for tournement restarts
 */
 void    CG_InitMarkPolys(void)
 {
-	int        i;
+	int i;
 	markPoly_t *trav, *lasttrav;
 
 	memset(cg_markPolys, 0, sizeof(cg_markPolys));
 
 	cg_activeMarkPolys.nextMark = &cg_activeMarkPolys;
 	cg_activeMarkPolys.prevMark = &cg_activeMarkPolys;
-	cg_freeMarkPolys            = cg_markPolys;
+	cg_freeMarkPolys = cg_markPolys;
 	for (i = 0, trav = cg_markPolys + 1, lasttrav = cg_markPolys ; i < MAX_MARK_POLYS - 1 ; i++, trav++)
 	{
 		lasttrav->nextMark = trav;
-		lasttrav           = trav;
+		lasttrav = trav;
 	}
 }
 
@@ -57,7 +57,7 @@ void CG_FreeMarkPoly(markPoly_t *le)
 	le->nextMark->prevMark = le->prevMark;
 
 	// the free list is only singly linked
-	le->nextMark     = cg_freeMarkPolys;
+	le->nextMark = cg_freeMarkPolys;
 	cg_freeMarkPolys = le;
 }
 
@@ -71,7 +71,7 @@ Will allways succeed, even if it requires freeing an old active mark
 markPoly_t *CG_AllocMark(int endTime)
 {
 	markPoly_t *le; //, *trav, *lastTrav;
-	int        time;
+	int time;
 
 	if (!cg_freeMarkPolys)
 	{
@@ -84,7 +84,7 @@ markPoly_t *CG_AllocMark(int endTime)
 		}
 	}
 
-	le               = cg_freeMarkPolys;
+	le = cg_freeMarkPolys;
 	cg_freeMarkPolys = cg_freeMarkPolys->nextMark;
 
 	memset(le, 0, sizeof(*le));
@@ -96,10 +96,10 @@ markPoly_t *CG_AllocMark(int endTime)
 	//}
 
 	// link into the active list
-	le->nextMark                          = cg_activeMarkPolys.nextMark;
-	le->prevMark                          = &cg_activeMarkPolys;
+	le->nextMark = cg_activeMarkPolys.nextMark;
+	le->prevMark = &cg_activeMarkPolys;
 	cg_activeMarkPolys.nextMark->prevMark = le;
-	cg_activeMarkPolys.nextMark           = le;
+	cg_activeMarkPolys.nextMark = le;
 	return le;
 }
 
@@ -128,10 +128,10 @@ if lifeTime < 0, then generate a temporary mark
 void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection, float radius, float orientation, float r, float g, float b, float a, int lifeTime)
 #ifdef YDNAR_DECAL_MARKS
 {
-	int    i;
+	int i;
 	vec3_t pushedOrigin, axis[3];
 	vec4_t color;
-	int    fadeTime;
+	int fadeTime;
 	vec3_t points[4];
 
 
@@ -194,16 +194,16 @@ void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection, float
 }
 #else
 {
-	vec3_t         axis[3];
-	float          texCoordScale;
-	vec3_t         originalPoints[4];
-	byte           colors[4];
-	int            i, j;
-	int            numFragments;
+	vec3_t axis[3];
+	float  texCoordScale;
+	vec3_t originalPoints[4];
+	byte colors[4];
+	int  i, j;
+	int  numFragments;
 	markFragment_t markFragments[MAX_MARK_FRAGMENTS], *mf;
-	vec5_t         markPoints[MAX_MARK_POINTS];     // Ridah, made it vec5_t so it includes S/T
-	vec3_t         projection;
-	int            multMaxFragments = 1;
+	vec5_t markPoints[MAX_MARK_POINTS];             // Ridah, made it vec5_t so it includes S/T
+	vec3_t projection;
+	int multMaxFragments = 1;
 
 	if (!cg_markTime.integer)
 	{
@@ -256,8 +256,8 @@ void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection, float
 	//VectorScale( dir, -20, projection );
 	VectorScale(dir, radius * 2, projection);
 	numFragments = trap_CM_MarkFragments((int)orientation, (void *)originalPoints,
-	                                     projection, MAX_MARK_POINTS, (float *)&markPoints[0],
-	                                     MAX_MARK_FRAGMENTS * multMaxFragments, markFragments);
+		projection, MAX_MARK_POINTS, (float *)&markPoints[0],
+		MAX_MARK_FRAGMENTS * multMaxFragments, markFragments);
 
 	colors[0] = red * 255;
 	colors[1] = green * 255;
@@ -269,7 +269,7 @@ void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection, float
 		polyVert_t *v;
 		polyVert_t verts[MAX_VERTS_ON_POLY];
 		markPoly_t *mark;
-		qboolean   hasST;
+		qboolean hasST;
 
 		// we have an upper limit on the complexity of polygons
 		// that we store persistantly
@@ -279,7 +279,7 @@ void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection, float
 		}
 		if (mf->numPoints < 0)
 		{
-			hasST          = qtrue;
+			hasST = qtrue;
 			mf->numPoints *= -1;
 		}
 		else
@@ -315,16 +315,16 @@ void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection, float
 		}
 
 		// otherwise save it persistantly
-		mark                = CG_AllocMark(cg.time + duration);
-		mark->time          = cg.time;
-		mark->alphaFade     = alphaFade;
-		mark->markShader    = markShader;
+		mark = CG_AllocMark(cg.time + duration);
+		mark->time = cg.time;
+		mark->alphaFade  = alphaFade;
+		mark->markShader = markShader;
 		mark->poly.numVerts = mf->numPoints;
-		mark->color[0]      = red;
-		mark->color[1]      = green;
-		mark->color[2]      = blue;
-		mark->color[3]      = alpha;
-		mark->duration      = duration;
+		mark->color[0] = red;
+		mark->color[1] = green;
+		mark->color[2] = blue;
+		mark->color[3] = alpha;
+		mark->duration = duration;
 		memcpy(mark->verts, verts, mf->numPoints * sizeof(verts[0]));
 	}
 }
@@ -340,10 +340,10 @@ CG_AddMarks
 
 void CG_AddMarks(void)
 {
-	int        j;
+	int j;
 	markPoly_t *mp, *next;
-	int        t;
-	int        fade;
+	int t;
+	int fade;
 
 	if (!cg_markTime.integer)
 	{

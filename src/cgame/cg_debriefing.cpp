@@ -1190,8 +1190,8 @@ panel_button_t charPanelEdit =
 void CG_Debriefing_ChatEdit_Draw(panel_button_t *button)
 {
 //	qboolean useCvar = button->data[0] ? qfalse : qtrue;
-	int        offset = -1;
-	char       buffer[256 + 1];
+	int  offset = -1;
+	char buffer[256 + 1];
 	const char *cs;
 
 	trap_Cvar_VariableStringBuffer(button->text, buffer, sizeof(buffer));
@@ -1244,8 +1244,8 @@ void CG_Debriefing_ChatEdit_Draw(panel_button_t *button)
 
 void CG_Debriefing_ChatBox_Draw(panel_button_t *button)
 {
-	int    w, h;
-	int    i, len;
+	int w, h;
+	int i, len;
 	vec4_t hcolor;
 	float  lineHeight = 9.f;
 
@@ -1334,9 +1334,9 @@ void CG_Debriefing_Startup(void)
 {
 	const char *s, *buf;
 
-	cgs.dbShowing                   = qtrue;
-	cgs.dbAccuraciesRecieved        = qfalse;
-	cgs.dbWeaponStatsRecieved       = qfalse;
+	cgs.dbShowing = qtrue;
+	cgs.dbAccuraciesRecieved  = qfalse;
+	cgs.dbWeaponStatsRecieved = qfalse;
 	cgs.dbPlayerKillsDeathsRecieved = qfalse;
 
 	cgs.dbLastRequestTime = 0;
@@ -1344,7 +1344,7 @@ void CG_Debriefing_Startup(void)
 
 	cgs.dbAwardsParsed = qfalse;
 
-	s   = CG_ConfigString(CS_MULTI_MAPWINNER);
+	s = CG_ConfigString(CS_MULTI_MAPWINNER);
 	buf = Info_ValueForKey(s, "winner");
 
 	trap_Cvar_Set("chattext", "");
@@ -1504,9 +1504,10 @@ int CG_Debriefing_GetNextWeaponStat(int pos)
 
 void CG_DebriefingPlayerWeaponStats_Draw(panel_button_t *button)
 {
-	int   i;
-	float y   = button->rect.y + 12;
-	int   pos = 0;
+	int i;
+	float y = button->rect.y + 12;
+	int pos = 0;
+
 //	float x;
 
 	if (!cgs.dbWeaponStatsRecieved)
@@ -1539,10 +1540,10 @@ const char *CG_Debriefing_TimeToString(float msec)
 {
 	int mins, seconds, tens;
 
-	seconds  = msec / 1000;
-	mins     = seconds / 60;
+	seconds = msec / 1000;
+	mins = seconds / 60;
 	seconds -= mins * 60;
-	tens     = seconds / 10;
+	tens = seconds / 10;
 	seconds -= tens * 10;
 
 	return va("%i:%i%i", mins, tens, seconds);
@@ -1551,16 +1552,16 @@ const char *CG_Debriefing_TimeToString(float msec)
 void CG_DebriefingTitle_Draw(panel_button_t *button)
 {
 	const char *s, *buf;
-	float      x, w;
+	float x, w;
 
 	if (cg_gameType.integer == GT_WOLF_STOPWATCH)
 	{
 		int defender, winner;
 
-		s        = CG_ConfigString(CS_MULTI_INFO);
+		s = CG_ConfigString(CS_MULTI_INFO);
 		defender = atoi(Info_ValueForKey(s, "defender"));
 
-		s      = CG_ConfigString(CS_MULTI_MAPWINNER);
+		s = CG_ConfigString(CS_MULTI_MAPWINNER);
 		winner = atoi(Info_ValueForKey(s, "winner"));
 
 		if (cgs.currentRound)
@@ -1598,7 +1599,7 @@ void CG_DebriefingTitle_Draw(panel_button_t *button)
 	else
 	{
 
-		s   = CG_ConfigString(CS_MULTI_MAPWINNER);
+		s = CG_ConfigString(CS_MULTI_MAPWINNER);
 		buf = Info_ValueForKey(s, "winner");
 
 		if (atoi(buf) == -1)
@@ -1644,7 +1645,7 @@ void CG_DebriefingXPHeader_Draw(panel_button_t *button)
 
 void CG_DebriefingPlayerList_Draw(panel_button_t *button)
 {
-	int   i, j;
+	int i, j;
 	float y = button->rect.y + 12;
 //	float x;
 	score_t *score = NULL;
@@ -1776,6 +1777,7 @@ const char *CG_Debriefing_RankNameForClientInfo(clientInfo_t *ci)
 void CG_Debriefing_ParseWeaponAccuracies(void)
 {
 	int i;
+
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
 		cgs.clientinfo[i].totalWeapAcc = atoi(CG_Argv(i + 1));
@@ -1786,6 +1788,7 @@ void CG_Debriefing_ParseWeaponAccuracies(void)
 void CG_Debriefing_ParsePlayerKillsDeaths(void)
 {
 	int i;
+
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
 		cgs.clientinfo[i].kills  = atoi(CG_Argv(i * 2 + 1));
@@ -1797,6 +1800,7 @@ void CG_Debriefing_ParsePlayerKillsDeaths(void)
 void CG_Debriefing_ParseWeaponStats(void)
 {
 	int i;
+
 	for (i = 0; i < WS_MAX; i++)
 	{
 		cgs.dbWeaponStats[i].numShots = atoi(CG_Argv((i * 3) + 1));
@@ -1915,8 +1919,8 @@ void CG_Debriefing_ScrollSetOffset(panel_button_t *button, int ofs)
 
 void CG_Debriefing_ScrollGetBarRect(panel_button_t *button, rectDef_t *r)
 {
-	int max    = CG_Debriefing_ScrollGetMax(button);
-	int cnt    = CG_Debriefing_ScrollGetCount(button);
+	int max = CG_Debriefing_ScrollGetMax(button);
+	int cnt = CG_Debriefing_ScrollGetCount(button);
 	int offset = CG_Debriefing_ScrollGetOffset(button);
 
 	if (cnt > max)
@@ -1937,8 +1941,8 @@ void CG_Debriefing_ScrollGetBarRect(panel_button_t *button, rectDef_t *r)
 
 void CG_Debriefing_ScrollCheckOffset(panel_button_t *button)
 {
-	int max    = CG_Debriefing_ScrollGetMax(button);
-	int cnt    = CG_Debriefing_ScrollGetCount(button);
+	int max = CG_Debriefing_ScrollGetMax(button);
+	int cnt = CG_Debriefing_ScrollGetCount(button);
 	int offset = CG_Debriefing_ScrollGetOffset(button);
 
 	int maxofs = max(0, cnt - max);
@@ -1964,7 +1968,7 @@ void CG_Debriefing_MouseEvent(int x, int y)
 		if (button && button->onDraw == CG_Debriefing_Scrollbar_Draw)
 		{
 			rectDef_t r;
-			int       count, cnt;
+			int count, cnt;
 
 			cnt = CG_Debriefing_ScrollGetCount(button);
 			CG_Debriefing_ScrollGetBarRect(button, &r);
@@ -2020,8 +2024,8 @@ void CG_Debriefing_MouseEvent(int x, int y)
 void CG_Debriefing_Scrollbar_Draw(panel_button_t *button)
 {
 	rectDef_t r;
-	vec4_t    clr1 = { 41 / 255.f, 51 / 255.f, 43 / 255.f, 204 / 255.f };
-	vec4_t    clr2 = { 0.f, 0.f, 0.f, 153 / 255.f };
+	vec4_t clr1 = { 41 / 255.f, 51 / 255.f, 43 / 255.f, 204 / 255.f };
+	vec4_t clr2 = { 0.f, 0.f, 0.f, 153 / 255.f };
 
 
 	CG_Debriefing_ScrollCheckOffset(button);
@@ -2100,8 +2104,8 @@ void CG_Debriefing_KeyEvent(int key, qboolean down)
 void CG_Debriefing_PlayerSkills_Draw(panel_button_t *button)
 {
 	clientInfo_t *ci = CG_Debriefing_GetSelectedClientInfo();
-	int          i;
-	float        x;
+	int i;
+	float x;
 
 	CG_Text_Paint_Ext(button->rect.x, button->rect.y - 2, button->font->scalex, button->font->scaley, button->font->colour, skillNames[button->data[0]], 0, 0, ITEM_TEXTSTYLE_SHADOWED, button->font->font);
 
@@ -2135,7 +2139,7 @@ void CG_Debriefing_PlayerSkills_Draw(panel_button_t *button)
 void CG_Debriefing_PlayerACC_Draw(panel_button_t *button)
 {
 	clientInfo_t *ci = CG_Debriefing_GetSelectedClientInfo();
-	float        w;
+	float w;
 
 	w = CG_Text_Width_Ext("ACC: ", button->font->scalex, 0, button->font->font);
 	CG_Text_Paint_Ext(button->rect.x - w, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, "ACC:", 0, 0, ITEM_TEXTSTYLE_SHADOWED, button->font->font);
@@ -2146,7 +2150,7 @@ void CG_Debriefing_PlayerACC_Draw(panel_button_t *button)
 void CG_Debriefing_PlayerXP_Draw(panel_button_t *button)
 {
 	clientInfo_t *ci = CG_Debriefing_GetSelectedClientInfo();
-	float        w;
+	float w;
 
 	w = CG_Text_Width_Ext("XP: ", button->font->scalex, 0, button->font->font);
 	CG_Text_Paint_Ext(button->rect.x - w, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, "XP:", 0, 0, ITEM_TEXTSTYLE_SHADOWED, button->font->font);
@@ -2158,8 +2162,8 @@ void CG_Debriefing_PlayerXP_Draw(panel_button_t *button)
 void CG_Debriefing_PlayerTime_Draw(panel_button_t *button)
 {
 	score_t *score = NULL;
-	int     i;
-	float   w;
+	int i;
+	float w;
 
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -2183,8 +2187,8 @@ void CG_Debriefing_PlayerTime_Draw(panel_button_t *button)
 void CG_Debriefing_PlayerMedals_Draw(panel_button_t *button)
 {
 	clientInfo_t *ci = CG_Debriefing_GetSelectedClientInfo();
-	float        w, x = button->rect.x;
-	int          i;
+	float w, x = button->rect.x;
+	int i;
 
 	w = CG_Text_Width_Ext("Medals: ", button->font->scalex, 0, button->font->font);
 	CG_Text_Paint_Ext(button->rect.x - w, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, "Medals:", 0, 0, ITEM_TEXTSTYLE_SHADOWED, button->font->font);
@@ -2204,7 +2208,7 @@ void CG_Debriefing_PlayerMedals_Draw(panel_button_t *button)
 void CG_Debriefing_PlayerRank_Draw(panel_button_t *button)
 {
 	clientInfo_t *ci = CG_Debriefing_GetSelectedClientInfo();
-	float        w;
+	float w;
 
 	w = CG_Text_Width_Ext("Rank: ", button->font->scalex, 0, button->font->font);
 	CG_Text_Paint_Ext(button->rect.x - w, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, "Rank:", 0, 0, ITEM_TEXTSTYLE_SHADOWED, button->font->font);
@@ -2247,7 +2251,7 @@ void CG_Debrieing_SetSelectedClient(int clientNum)
 
 	if (clientNum != cgs.dbSelectedClient)
 	{
-		cgs.dbSelectedClient      = clientNum;
+		cgs.dbSelectedClient = clientNum;
 		cgs.dbWeaponStatsRecieved = qfalse;
 	}
 }
@@ -2379,6 +2383,7 @@ void CG_Debriefing_NextButton_Draw(panel_button_t *button)
 void CG_Debriefing_ChatEditFinish(panel_button_t *button)
 {
 	char buffer[256];
+
 	trap_Cvar_VariableStringBuffer(button->text, buffer, 256);
 
 	switch (cgs.dbChatMode)
@@ -2438,9 +2443,9 @@ qboolean CG_TeamDebriefingMapList_KeyDown(panel_button_t *button, int key)
 void CG_TeamDebriefingOutcome_Draw(panel_button_t *button)
 {
 	const char *cs;
-	char       *s, *p;
-	char       buffer[1024];
-	float      y;
+	char  *s, *p;
+	char  buffer[1024];
+	float y;
 
 //	DC->fillRect( button->rect.x, button->rect.y, button->rect.w, button->rect.h, colorRed );
 
@@ -2494,7 +2499,7 @@ void CG_TeamDebriefingOutcome_Draw(panel_button_t *button)
 
 void CG_TeamDebriefingMapList_Draw(panel_button_t *button)
 {
-	int   i;
+	int i;
 	float y = button->rect.y + 12;
 
 //	CG_FillRect( button->rect.x, button->rect.y, button->rect.w, button->rect.h, colorRed );
@@ -2602,10 +2607,10 @@ void CG_PanelButtonsRender_Button(panel_button_t *button)
 
 void CG_PanelButtonsRender_Window_Ext(rectDef_t *r, const char *text, int align, int innerheight, float fontscale, int yofs)
 {
-	vec4_t clrBdr      = { 0.5f, 0.5f, 0.5f, 0.5f };
+	vec4_t clrBdr = { 0.5f, 0.5f, 0.5f, 0.5f };
 	vec4_t clrTitleBck = { 0.16f, 0.2f, 0.17f, 0.8f };
-	vec4_t clrBck      = { 0.0f, 0.0f, 0.0f, 0.8f };
-	vec4_t clrTxtBck   = { 0.6f, 0.6f, 0.6f, 1.0f };
+	vec4_t clrBck = { 0.0f, 0.0f, 0.0f, 0.8f };
+	vec4_t clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
 
 	CG_FillRect(r->x, r->y, r->w, r->h, clrBck);
 	CG_DrawRect_FixedBorder(r->x, r->y, r->w, r->h, 1, clrBdr);
@@ -2657,17 +2662,17 @@ const char *CG_Debreifing2_WinStringForTeam(team_t team)
 void CG_Debreifing2_MissionTitle_Draw(panel_button_t *button)
 {
 	const char *s;
-	float      x, w;
-	vec4_t     clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
+	float  x, w;
+	vec4_t clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
 
 	if (cg_gameType.integer == GT_WOLF_STOPWATCH)
 	{
 		int defender, winner;
 
-		s        = CG_ConfigString(CS_MULTI_INFO);
+		s = CG_ConfigString(CS_MULTI_INFO);
 		defender = atoi(Info_ValueForKey(s, "defender"));
 
-		s      = CG_ConfigString(CS_MULTI_MAPWINNER);
+		s = CG_ConfigString(CS_MULTI_MAPWINNER);
 		winner = atoi(Info_ValueForKey(s, "winner"));
 
 		if (cgs.currentRound)
@@ -2745,30 +2750,32 @@ const char *awardNames[NUM_ENDGAME_AWARDS] =
 void CG_Debreifing2_Awards_Parse(void)
 {
 	int i = 0;
-	char* cs = (char*)CG_ConfigString(CS_ENDGAME_STATS);
-	const char* token;
-	char* s;
-	int size, len;
+	char *cs = (char *)CG_ConfigString(CS_ENDGAME_STATS);
+	const char *token;
+	char *s;
+	int  size, len;
 	char buffer[sizeof(cgs.dbAwardNamesBuffer)];
 
 	Q_strncpyz(buffer, cs, sizeof(cgs.dbAwardNamesBuffer));
 	cs = buffer;
 
-	while ((s = strchr(cs, ';'))) {
+	while ((s = strchr(cs, ';')))
+	{
 		*s = '"';
 	}
 
 	s = cgs.dbAwardNamesBuffer;
 	size = sizeof(cgs.dbAwardNamesBuffer);
 
-	for (i = 0; i < NUM_ENDGAME_AWARDS; i++) {
+	for (i = 0; i < NUM_ENDGAME_AWARDS; i++)
+	{
 		token = COM_Parse(&cs);
 
 		Q_strncpyz(s, token, size);
 
 		cgs.dbAwardNames[i] = s;
 
-		len = strlen(token);
+		len   = strlen(token);
 		size -= len;
 		s += len + 1;
 
@@ -2782,8 +2789,8 @@ void CG_Debreifing2_Awards_Parse(void)
 
 void CG_Debreifing2_Awards_Draw(panel_button_t *button)
 {
-	int    i;
-	float  y         = button->rect.y + 1;
+	int i;
+	float  y = button->rect.y + 1;
 	vec4_t clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
 
 	if (!cgs.dbAwardsParsed)
@@ -2810,12 +2817,12 @@ void CG_Debreifing2_Awards_Draw(panel_button_t *button)
 void CG_Debreifing2_Maps_Draw(panel_button_t *button)
 {
 	vec4_t clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
-	vec4_t clrBck    = { 0.3f, 0.3f, 0.3f, 0.4f };
+	vec4_t clrBck = { 0.3f, 0.3f, 0.3f, 0.4f };
 
 	if (cg_gameType.integer == GT_WOLF_CAMPAIGN)
 	{
 		float y, w;
-		int   i;
+		int i;
 
 		if (!cgs.campaignInfoLoaded)
 		{
@@ -3027,7 +3034,7 @@ void CG_Debreifing2_Mission_Draw(panel_button_t *button)
 
 team_t CG_Debriefing_FindWinningTeamForMap(void)
 {
-	const char *s   = CG_ConfigString(CS_MULTI_MAPWINNER);
+	const char *s = CG_ConfigString(CS_MULTI_MAPWINNER);
 	const char *buf = Info_ValueForKey(s, "winner");
 
 	if (atoi(buf) == -1)
@@ -3101,7 +3108,7 @@ team_t CG_Debriefing_FindWinningTeamForPos(int pos)
 	}
 	else if (cg_gameType.integer == GT_WOLF || cg_gameType.integer == GT_WOLF_LMS)
 	{
-		const char *s   = CG_ConfigString(CS_MULTI_MAPWINNER);
+		const char *s = CG_ConfigString(CS_MULTI_MAPWINNER);
 		const char *buf = Info_ValueForKey(s, "winner");
 
 		if (atoi(buf) == -1)
@@ -3118,13 +3125,13 @@ team_t CG_Debriefing_FindWinningTeamForPos(int pos)
 	}
 	else if (cg_gameType.integer == GT_WOLF_STOPWATCH)
 	{
-		int        defender, winner;
+		int defender, winner;
 		const char *s;
 
-		s        = CG_ConfigString(CS_MULTI_INFO);
+		s = CG_ConfigString(CS_MULTI_INFO);
 		defender = atoi(Info_ValueForKey(s, "defender"));
 
-		s      = CG_ConfigString(CS_MULTI_MAPWINNER);
+		s = CG_ConfigString(CS_MULTI_MAPWINNER);
 		winner = atoi(Info_ValueForKey(s, "winner"));
 
 		if (!cgs.currentRound)
@@ -3208,7 +3215,7 @@ int skillPositions[SK_NUM_SKILLS + 1] =
 
 void CG_Debriefing2TeamSkillHeaders_Draw(panel_button_t *button)
 {
-	int    i, j;
+	int i, j;
 	vec4_t clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
 
 	if (cg_gameType.integer == GT_WOLF_LMS)
@@ -3220,7 +3227,7 @@ void CG_Debriefing2TeamSkillHeaders_Draw(panel_button_t *button)
 	{
 		for (i = 0; i <= SK_NUM_SKILLS; i++)
 		{
-			float      w;
+			float w;
 			const char *str;
 
 			if (j == 0)
@@ -3261,7 +3268,7 @@ void CG_Debriefing2TeamSkillXP_Draw(panel_button_t *button)
 	team_t winner = CG_Debriefing_FindOveralWinningTeam();
 	team_t team;
 	float  scale;
-	int    xp, i;
+	int xp, i;
 	vec4_t clrTxtBck = { 0.6f, 0.6f, 0.6f, 1.0f };
 
 	if (cg_gameType.integer == GT_WOLF_LMS)
@@ -3299,7 +3306,7 @@ void CG_Debriefing2TeamSkillXP_Draw(panel_button_t *button)
 
 	for (i = 0; i <= SK_NUM_SKILLS; i++)
 	{
-		float      w;
+		float w;
 		const char *str;
 
 		if (i == SK_NUM_SKILLS)

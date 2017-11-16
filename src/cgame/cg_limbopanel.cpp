@@ -391,7 +391,7 @@ panel_button_t playerXPCounter =
 	CG_LimboPanel_RenderCounter,
 	NULL,
 };
- 
+
 panel_button_t playerSkillCounter0 =
 {
 	NULL,
@@ -1066,6 +1066,7 @@ void CG_LimboPanel_BriefingButton_Draw(panel_button_t *button)
 void CG_LimboPanel_NameEditFinish(panel_button_t *button)
 {
 	char buffer[256];
+
 	trap_Cvar_VariableStringBuffer(button->text, buffer, 256);
 	trap_Cvar_Set("name", buffer);
 }
@@ -1130,9 +1131,9 @@ qboolean CG_LimboPanel_MinusButton_KeyDown(panel_button_t *button, int key)
 
 void CG_LimboPanel_SendSetupMsg(qboolean forceteam)
 {
-	weapon_t   weap1, weap2;
+	weapon_t weap1, weap2;
 	const char *str;
-	team_t     team;
+	team_t team;
 
 	if (forceteam)
 	{
@@ -1327,8 +1328,8 @@ qboolean CG_LimboPanel_ClassButton_KeyDown(panel_button_t *button, int key)
 void CG_LimboPanel_ClassBar_Draw(panel_button_t *button)
 {
 	const char *text = NULL;
-	char       buffer[64];
-	float      w;
+	char  buffer[64];
+	float w;
 
 	if (BG_CursorInRect(&medalPic0.rect))
 	{
@@ -1401,7 +1402,7 @@ void CG_LimboPanel_RenderClassButton(panel_button_t *button)
 	vec4_t clr2 = { 1.f, 1.f, 1.f, 0.75f };
 	vec4_t clr3 = { 1.f, 1.f, 1.f, 0.6f };
 
-	int   i;
+	int i;
 	float s0, t0, s1, t1;
 	float x, y, w, h;
 
@@ -1538,11 +1539,11 @@ qboolean CG_LimboPanel_ObjectiveText_KeyDown(panel_button_t *button, int key)
 void CG_LimboPanel_RenderObjectiveText(panel_button_t *button)
 {
 	const char *cs;
-	char       *s, *p;
+	char *s, *p;
 	const char *info;
-	float      y;
-	char       buffer[1024];
-	int        status = 0;
+	float y;
+	char  buffer[1024];
+	int status = 0;
 
 	if (cg_gameType.integer == GT_WOLF_LMS)
 	{
@@ -1569,13 +1570,13 @@ void CG_LimboPanel_RenderObjectiveText(panel_button_t *button)
 				if (CG_LimboPanel_GetTeam() == TEAM_AXIS)
 				{
 					//info = Info_ValueForKey( cs, "axis_desc" );
-					info   = cg.objDescription_Axis[cgs.ccSelectedObjective];
+					info = cg.objDescription_Axis[cgs.ccSelectedObjective];
 					status = atoi(Info_ValueForKey(cs, va("x%i", cgs.ccSelectedObjective + 1)));
 				}
 				else
 				{
 					//info = Info_ValueForKey( cs, "allied_desc" );
-					info   = cg.objDescription_Allied[cgs.ccSelectedObjective];
+					info = cg.objDescription_Allied[cgs.ccSelectedObjective];
 					status = atoi(Info_ValueForKey(cs, va("a%i", cgs.ccSelectedObjective + 1)));
 				}
 
@@ -1631,7 +1632,7 @@ void CG_LimboPanel_RenderObjectiveText(panel_button_t *button)
 	if (cg_gameType.integer != GT_WOLF_LMS && CG_LimboPanel_GetTeam() != TEAM_SPECTATOR)
 	{
 		const char *ofTxt;
-		float      w, x;
+		float w, x;
 
 		if (cgs.ccSelectedObjective == CG_LimboPanel_GetMaxObjectives())
 		{
@@ -1712,11 +1713,11 @@ void CG_LimboPanel_RenderLight(panel_button_t *button)
 
 void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_t *headcharacter, float yaw, float pitch, qboolean drawHat, hudHeadAnimNumber_t animation, qhandle_t painSkin, int rank, qboolean spectator)
 {
-	float       len;
-	vec3_t      origin;
-	vec3_t      mins, maxs, angles;
-	float       x, y, w, h;
-	refdef_t    refdef;
+	float  len;
+	vec3_t origin;
+	vec3_t mins, maxs, angles;
+	float  x, y, w, h;
+	refdef_t refdef;
 	refEntity_t head, hat, mrank;
 
 	if (!character)
@@ -1741,8 +1742,8 @@ void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_
 	refdef.fov_x = 8;
 	refdef.fov_y = 10;
 
-	refdef.x      = x;
-	refdef.y      = y;
+	refdef.x = x;
+	refdef.y = y;
 	refdef.width  = w;
 	refdef.height = h;
 
@@ -1758,19 +1759,19 @@ void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_
 
 	// calculate distance so the head nearly fills the box
 	// assume heads are taller than wide
-	len       = 3.5f * (maxs[2] - mins[2]);
+	len = 3.5f * (maxs[2] - mins[2]);
 	origin[0] = len / tan(20 / 2);   // 0.268;	// len / tan( fov/2 )
 
 	angles[PITCH] = pitch;
-	angles[YAW]   = yaw;
-	angles[ROLL]  = 0;
+	angles[YAW]  = yaw;
+	angles[ROLL] = 0;
 
 	memset(&head, 0, sizeof(head));
 	AnglesToAxis(angles, head.axis);
 	VectorCopy(origin, head.origin);
-	head.hModel     = headcharacter->hudhead;
+	head.hModel = headcharacter->hudhead;
 	head.customSkin = headcharacter->hudheadskin;
-	head.renderfx   = RF_NOSHADOW | RF_FORCENOLOD;      // no stencil shadows
+	head.renderfx = RF_NOSHADOW | RF_FORCENOLOD;        // no stencil shadows
 
 	// ydnar: light the model with the current lightgrid
 	//VectorCopy( cg.refdef.vieworg, head.lightingOrigin );
@@ -1784,9 +1785,9 @@ void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_
 	if (drawHat)
 	{
 		memset(&hat, 0, sizeof(hat));
-		hat.hModel     = character->accModels[ACC_HAT];
+		hat.hModel = character->accModels[ACC_HAT];
 		hat.customSkin = character->accSkins[ACC_HAT];
-		hat.renderfx   = RF_NOSHADOW | RF_FORCENOLOD;   // no stencil shadows
+		hat.renderfx = RF_NOSHADOW | RF_FORCENOLOD;     // no stencil shadows
 
 		// ydnar: light the model with the current lightgrid
 		//VectorCopy( cg.refdef.vieworg, hat.lightingOrigin );
@@ -1801,9 +1802,9 @@ void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_
 		{
 			memset(&mrank, 0, sizeof(mrank));
 
-			mrank.hModel       = character->accModels[ACC_RANK];
+			mrank.hModel = character->accModels[ACC_RANK];
 			mrank.customShader = rankicons[rank][1].shader;
-			mrank.renderfx     = RF_NOSHADOW | RF_FORCENOLOD;   // no stencil shadows
+			mrank.renderfx = RF_NOSHADOW | RF_FORCENOLOD;       // no stencil shadows
 
 			CG_PositionEntityOnTag(&mrank, &head, "tag_mouth", 0, NULL);
 		}
@@ -1833,7 +1834,7 @@ void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_
 	if (painSkin)
 	{
 		head.customShader = 0;
-		head.customSkin   = painSkin;
+		head.customSkin = painSkin;
 		trap_R_AddRefEntityToScene(&head);
 	}
 
@@ -1936,6 +1937,7 @@ void CG_LimboPanel_Filter_Draw(panel_button_t *button)
 void CG_LimboPanel_RenderSkillIcon(panel_button_t *button)
 {
 	qhandle_t shader;
+
 	if (cg_gameType.integer == GT_WOLF_LMS /*|| CG_LimboPanel_GetTeam() == TEAM_SPECTATOR*/)
 	{
 		return;
@@ -2013,7 +2015,7 @@ qboolean CG_LimboPanel_WeaponPanel_KeyDown(panel_button_t *button, int key)
 
 qboolean CG_LimboPanel_WeaponPanel_KeyUp(panel_button_t *button, int key)
 {
-	int       cnt, i;
+	int cnt, i;
 	rectDef_t rect;
 
 	if (CG_LimboPanel_GetTeam() == TEAM_SPECTATOR)
@@ -2069,11 +2071,11 @@ qboolean CG_LimboPanel_WeaponPanel_KeyUp(panel_button_t *button, int key)
 
 void CG_LimboPanel_WeaponPanel_DrawWeapon(rectDef_t *rect, weapon_t weap, qboolean highlight, const char *ofTxt, qboolean disabled)
 {
-	weaponType_t *wt    = WM_FindWeaponTypeForWeapon(weap);
-	qhandle_t    shader = cgs.media.limboWeaponCard;
-	int          width  = CG_Text_Width_Ext(ofTxt, 0.2f, 0, &cgs.media.limboFont2);
-	float        x      = rect->x + rect->w - width - 4;
-	vec4_t       clr;
+	weaponType_t *wt = WM_FindWeaponTypeForWeapon(weap);
+	qhandle_t shader = cgs.media.limboWeaponCard;
+	int width = CG_Text_Width_Ext(ofTxt, 0.2f, 0, &cgs.media.limboFont2);
+	float  x  = rect->x + rect->w - width - 4;
+	vec4_t clr;
 
 	if (!wt)
 	{
@@ -2177,7 +2179,7 @@ void CG_LimboPanel_Border_Draw(panel_button_t *button)
 void CG_LimboPanel_WeaponPanel(panel_button_t *button)
 {
 	weapon_t weap = CG_LimboPanel_GetSelectedWeapon();
-	int      cnt  = CG_LimboPanel_WeaponCount();
+	int cnt = CG_LimboPanel_WeaponCount();
 
 	if (cgs.ccSelectedWeapon2 >= CG_LimboPanel_WeaponCount_ForSlot(0))
 	{
@@ -2202,7 +2204,7 @@ void CG_LimboPanel_WeaponPanel(panel_button_t *button)
 
 	if (BG_PanelButtons_GetFocusButton() == button && cnt > 1)
 	{
-		int       i, x;
+		int i, x;
 		rectDef_t rect;
 		memcpy(&rect, &button->rect, sizeof(rect));
 
@@ -2366,6 +2368,7 @@ int CG_LimboPanel_RenderCounter_ValueForButton(panel_button_t *button)
 int CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button)
 {
 	float diff;
+
 	switch (button->data[0])
 	{
 	case 0:     // class counts
@@ -2557,16 +2560,17 @@ void CG_LimboPanelRenderText_SkillsText(panel_button_t *button)
 // Gordon: this function is mental, i love it :)
 void CG_LimboPanel_RenderCounter(panel_button_t *button)
 {
-	float     x, w;
-	float     count[MAX_ROLLERS];
-	int       i, j;
+	float x, w;
+	float count[MAX_ROLLERS];
+	int i, j;
 	qhandle_t shaderBack;
 	qhandle_t shaderRoll;
-	int       numimages;
+	int numimages;
 
 	float counter_rolltime = CG_LimboPanel_RenderCounter_RollTimeForButton(button);
-	int   num              = CG_LimboPanel_RenderCounter_NumRollers(button);
-	int   value            = CG_LimboPanel_RenderCounter_ValueForButton(button);
+	int num = CG_LimboPanel_RenderCounter_NumRollers(button);
+	int value = CG_LimboPanel_RenderCounter_ValueForButton(button);
+
 	if (num > MAX_ROLLERS)
 	{
 		num = MAX_ROLLERS;
@@ -2684,12 +2688,12 @@ void CG_LimboPanel_RenderCounter(panel_button_t *button)
 
 void CG_LimboPanel_Setup(void)
 {
-	panel_button_t   *button;
-	panel_button_t   **buttons = limboPanelButtons;
-	clientInfo_t     *ci       = &cgs.clientinfo[cg.clientNum];
+	panel_button_t *button;
+	panel_button_t **buttons = limboPanelButtons;
+	clientInfo_t   *ci = &cgs.clientinfo[cg.clientNum];
 	bg_playerclass_t *classinfo;
-	int              i;
-	char             buffer[256];
+	int  i;
+	char buffer[256];
 
 	cgs.limboLoadoutModified = qfalse;
 
@@ -2762,7 +2766,7 @@ void CG_LimboPanel_Setup(void)
 	cgs.ccRequestedObjective = cgs.ccSelectedObjective = CG_LimboPanel_GetMaxObjectives();
 	CG_LimboPanel_RequestObjective();
 
-	cgs.ccSelectedObjective    = CG_LimboPanel_GetMaxObjectives();
+	cgs.ccSelectedObjective = CG_LimboPanel_GetMaxObjectives();
 	cgs.ccSelectedWeaponNumber = 1;
 
 	classinfo = CG_LimboPanel_GetPlayerClass();
@@ -2783,7 +2787,8 @@ void CG_LimboPanel_Init(void)
 qboolean CG_LimboPanel_Draw(void)
 {
 	static panel_button_t *lastHighlight;
-	panel_button_t        *hilight;
+	panel_button_t *hilight;
+
 //	panel_button_t** buttons = limboPanelButtons;
 
 	hilight = BG_PanelButtonsGetHighlightButton(limboPanelButtons);
@@ -2839,6 +2844,7 @@ qboolean CG_LimboPanel_Draw(void)
 void CG_LimboPanel_KeyHandling(int key, qboolean down)
 {
 	int b1, b2;
+
 	if (BG_PanelButtonsKeyEvent(key, down, limboPanelButtons))
 	{
 		return;
@@ -3018,7 +3024,7 @@ int CG_LimboPanel_WeaponCount_ForSlot(int number)
 	if (number == 1)
 	{
 		bg_playerclass_t *classInfo = CG_LimboPanel_GetPlayerClass();
-		int              cnt        = 0, i;
+		int cnt = 0, i;
 
 		for (i = 0; i < MAX_WEAPS_PER_CLASS; i++)
 		{
@@ -3086,6 +3092,7 @@ int CG_LimboPanel_GetWeaponNumberForPos(int pos)
 weapon_t CG_LimboPanel_GetWeaponForNumber(int number, int slot, qboolean ignoreDisabled)
 {
 	bg_playerclass_t *classInfo;
+
 	if (CG_LimboPanel_GetTeam() == TEAM_SPECTATOR)
 	{
 		return WP_NONE;
@@ -3205,6 +3212,7 @@ int CG_LimboPanel_GetSelectedWeaponNum(void)
 void CG_LimboPanel_RequestWeaponStats(void)
 {
 	extWeaponStats_t weapStat = CG_LimboPanel_GetSelectedWeaponStat();
+
 	if (weapStat == WS_MAX)
 	{
 		// Bleh?
@@ -3226,7 +3234,7 @@ void CG_LimboPanel_RequestObjective(void)
 	{
 		trap_SendClientCommand(va("obj %i", -1));
 	}
-	cgs.ccRequestedObjective       = cgs.ccSelectedObjective;
+	cgs.ccRequestedObjective = cgs.ccSelectedObjective;
 	cgs.ccLastObjectiveRequestTime = cg.time;
 }
 

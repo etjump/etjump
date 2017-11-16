@@ -15,13 +15,14 @@ using std::vector;
 // Max client "print" length is 998
 // Max server "print" length is 1013
 
-const int MAX_CHAT_LEN         = 150;
+const int MAX_CHAT_LEN = 150;
 const int MAX_CLIENT_PRINT_LEN = 998;
 const int MAX_SERVER_PRINT_LEN = 1013;
 
 void ConsolePrintTo(gentity_t *target, boost::format fmt)
 {
-	int         maxLen  = MAX_CLIENT_PRINT_LEN;
+	int maxLen = MAX_CLIENT_PRINT_LEN;
+
 	std::string message = fmt.str();
 
 	if (!target)
@@ -62,6 +63,7 @@ void ConsolePrintTo(gentity_t *target, boost::format fmt)
 void LogPrint(boost::format fmt)
 {
 	string message = fmt.str();
+
 	while (message.length() > 0)
 	{
 		if (message.length() > MAX_SERVER_PRINT_LEN)
@@ -83,6 +85,7 @@ void LogPrint(boost::format fmt)
 void ConsolePrintTo(gentity_t *target, const string& msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
 	if (target)
 	{
@@ -97,6 +100,7 @@ void ConsolePrintTo(gentity_t *target, const string& msg)
 void C_ConsolePrintTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
 	if (target)
 	{
@@ -111,6 +115,7 @@ void C_ConsolePrintTo(gentity_t *target, const char *msg)
 void ConsolePrintAll(const string& msg, bool toConsole)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
 	trap_SendServerCommand(-1, toPrint);
 	if (toConsole)
@@ -122,6 +127,7 @@ void ConsolePrintAll(const string& msg, bool toConsole)
 void C_ConsolePrintAll(const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg);
 	trap_SendServerCommand(-1, toPrint);
 	G_Printf("%s\n", msg);
@@ -130,6 +136,7 @@ void C_ConsolePrintAll(const char *msg)
 void ChatPrintTo(gentity_t *target, const string& msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg.c_str());
 	if (target)
 	{
@@ -144,6 +151,7 @@ void ChatPrintTo(gentity_t *target, const string& msg)
 void C_ChatPrintTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
 	if (target)
 	{
@@ -158,6 +166,7 @@ void C_ChatPrintTo(gentity_t *target, const char *msg)
 void ChatPrintAll(const string& msg, bool toConsole)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg.c_str());
 	trap_SendServerCommand(-1, toPrint);
 	if (toConsole)
@@ -169,6 +178,7 @@ void ChatPrintAll(const string& msg, bool toConsole)
 void C_ChatPrintAll(const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "chat \"%s\"", msg);
 	trap_SendServerCommand(-1, toPrint);
 	G_Printf("%s\n", msg);
@@ -177,6 +187,7 @@ void C_ChatPrintAll(const char *msg)
 void CPTo(gentity_t *target, const string& msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg.c_str());
 	if (target)
 	{
@@ -191,6 +202,7 @@ void CPTo(gentity_t *target, const string& msg)
 void C_CPTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
 	if (target)
 	{
@@ -205,6 +217,7 @@ void C_CPTo(gentity_t *target, const char *msg)
 void CPAll(const string& msg, bool toConsole)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg.c_str());
 	trap_SendServerCommand(-1, toPrint);
 	if (toConsole)
@@ -216,6 +229,7 @@ void CPAll(const string& msg, bool toConsole)
 void C_CPAll(const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cp \"%s\n\"", msg);
 	trap_SendServerCommand(-1, toPrint);
 	G_Printf("%s\n", msg);
@@ -224,6 +238,7 @@ void C_CPAll(const char *msg)
 void CPMTo(gentity_t *target, const string& msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg.c_str());
 	if (target)
 	{
@@ -251,6 +266,7 @@ void CPMTo(gentity_t *target, boost::format fmt)
 void C_CPMTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
 	if (target)
 	{
@@ -265,6 +281,7 @@ void C_CPMTo(gentity_t *target, const char *msg)
 void CPMAll(const string& msg, bool toConsole)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg.c_str());
 	trap_SendServerCommand(-1, toPrint);
 	if (toConsole)
@@ -276,6 +293,7 @@ void CPMAll(const string& msg, bool toConsole)
 void C_CPMAll(const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "cpm \"%s\n\"", msg);
 	trap_SendServerCommand(-1, toPrint);
 	G_Printf("%s\n", msg);
@@ -284,6 +302,7 @@ void C_CPMAll(const char *msg)
 void BPTo(gentity_t *target, const string& msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg.c_str());
 	if (target)
 	{
@@ -303,6 +322,7 @@ void LogPrint(std::string message)
 void BPAll(const string& msg, bool toConsole)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg.c_str());
 	trap_SendServerCommand(-1, toPrint);
 
@@ -315,6 +335,7 @@ void BPAll(const string& msg, bool toConsole)
 void C_BPTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);
 	if (target)
 	{
@@ -329,6 +350,7 @@ void C_BPTo(gentity_t *target, const char *msg)
 void C_BPAll(const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
+
 	Com_sprintf(toPrint, sizeof(toPrint), "bp \"%s\n\"", msg);
 	trap_SendServerCommand(-1, toPrint);
 
@@ -352,13 +374,13 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine)
 		{
 			toPrint % (bigTextBuffer + NEWLINE);
 			trap_SendServerCommand(ClientNum(ent),
-			                       toPrint.str().c_str());
+				toPrint.str().c_str());
 		}
 		else
 		{
 			toPrint % bigTextBuffer;
 			trap_SendServerCommand(ClientNum(ent),
-			                       toPrint.str().c_str());
+				toPrint.str().c_str());
 		}
 	}
 	else
@@ -366,12 +388,12 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine)
 		if (insertNewLine)
 		{
 			G_Printf("%s\n",
-			         (bigTextBuffer).c_str());
+				(bigTextBuffer).c_str());
 		}
 		else
 		{
 			G_Printf("%s",
-			         bigTextBuffer.c_str());
+				bigTextBuffer.c_str());
 		}
 	}
 }
@@ -398,7 +420,7 @@ void BufferPrint(gentity_t *ent, const string& msg)
 		{
 			std::string toSend = std::string("print \"" + bigTextBuffer + "\"");
 			trap_SendServerCommand(ClientNum(ent),
-			                       toSend.c_str());
+				toSend.c_str());
 			bigTextBuffer.clear();
 		}
 		bigTextBuffer += msg;
@@ -415,8 +437,9 @@ void BufferPrint(gentity_t *ent, const string& msg)
 
 Arguments GetArgs()
 {
-	int                   argc = trap_Argc();
+	int argc = trap_Argc();
 	static vector<string> argv;
+
 	argv.clear();
 
 	for (int i = 0; i < argc; i++)
@@ -433,6 +456,7 @@ Arguments GetSayArgs(int start /*= 0*/)
 	int argc = Q_SayArgc();
 
 	static vector<string> argv;
+
 	argv.clear();
 
 	if (start >= argc)
@@ -504,7 +528,8 @@ std::string ToString(vec3_t toConvert)
 {
 	string vec3 = "(" + std::to_string(toConvert[0])
 	              + ", " + std::to_string(toConvert[1]) + ", " +
-		std::to_string(toConvert[2]) + ")";
+	              std::to_string(toConvert[2]) + ")";
+
 	return vec3;
 }
 
@@ -512,18 +537,19 @@ std::string ToString(vec_t x, vec_t y, vec_t z)
 {
 	string vec3 = "(" + std::to_string(x)
 	              + ", " + std::to_string(y) + ", " +
-		std::to_string(z) + ")";
+	              std::to_string(z) + ")";
+
 	return vec3;
 }
 
 gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filter)
 {
-	int       pids[MAX_CLIENTS];
+	int pids[MAX_CLIENTS];
 	gentity_t *player;
 
 	if (ClientNumbersFromString(name, pids) != 1)
 	{
-		if(!G_MatchOnePlayer(pids, err, size, filter))
+		if (!G_MatchOnePlayer(pids, err, size, filter))
 		{
 			return nullptr;
 		}
@@ -533,15 +559,15 @@ gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filte
 	return player;
 }
 
-gentity_t *PlayerGentityFromString( const std::string& name, std::string& err, team_t filter)
+gentity_t *PlayerGentityFromString(const std::string& name, std::string& err, team_t filter)
 {
-	char      errorMsg[MAX_TOKEN_CHARS] = "\0";
-	int       pids[MAX_CLIENTS];
+	char errorMsg[MAX_TOKEN_CHARS] = "\0";
+	int  pids[MAX_CLIENTS];
 	gentity_t *player;
 
 	if (ClientNumbersFromString(name.c_str(), pids) != 1)
 	{
-		if(!G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg), filter))
+		if (!G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg), filter))
 		{
 			err = errorMsg;
 			return nullptr;
@@ -594,10 +620,10 @@ static void FS_ReplaceSeparators(char *path)
 
 static char *BuildOSPath(const char *file)
 {
-	char        base[MAX_CVAR_VALUE_STRING] = "\0";
-	char        temp[MAX_OSPATH]            = "\0";
-	char        game[MAX_CVAR_VALUE_STRING] = "\0";
-	static char ospath[2][MAX_OSPATH]       = { "\0", "\0" };
+	char base[MAX_CVAR_VALUE_STRING] = "\0";
+	char temp[MAX_OSPATH] = "\0";
+	char game[MAX_CVAR_VALUE_STRING]  = "\0";
+	static char ospath[2][MAX_OSPATH] = { "\0", "\0" };
 	static int  toggle;
 
 	toggle ^= 1;        // flip-flop to allow two returns without clash
@@ -631,6 +657,7 @@ bool MapExists(const std::string& map)
 	string mapName = "maps/" + map + ".bsp";
 
 	fileHandle_t f = 0;
+
 	trap_FS_FOpenFile(mapName.c_str(), &f, FS_READ);
 	trap_FS_FCloseFile(f);
 
@@ -654,7 +681,7 @@ qboolean G_MapExists(const char *map)
 string ValueForKey(gentity_t *ent, const std::string& key)
 {
 	char userinfo[MAX_INFO_STRING] = "\0";
-	char *value                    = NULL;
+	char *value = NULL;
 
 	trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
 	value = Info_ValueForKey(userinfo, key.c_str());
@@ -669,7 +696,7 @@ string ValueForKey(gentity_t *ent, const std::string& key)
 string ValueForKey(int clientNum, const std::string& key)
 {
 	char userinfo[MAX_INFO_STRING] = "\0";
-	char *value                    = NULL;
+	char *value = NULL;
 
 	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 	value = Info_ValueForKey(userinfo, key.c_str());
@@ -683,9 +710,10 @@ string ValueForKey(int clientNum, const std::string& key)
 
 string TimeStampToString(int t)
 {
-	char      buf[MAX_TOKEN_CHARS];
-	struct tm *lt       = NULL;
-	time_t    toConvert = t;
+	char buf[MAX_TOKEN_CHARS];
+	struct tm *lt = NULL;
+	time_t toConvert = t;
+
 	lt = localtime(&toConvert);
 	if (t > 0)
 	{
@@ -703,11 +731,11 @@ string TimeStampToString(int t)
 std::string TimeStampDifferenceToString(int diff)
 {
 	const int MINUTE = 60;
-	const int HOUR   = 60 * MINUTE;
-	const int DAY    = 24 * HOUR;
-	const int WEEK   = 7 * DAY;
-	const int MONTH  = 30 * DAY;
-	const int YEAR   = 365 * DAY;
+	const int HOUR  = 60 * MINUTE;
+	const int DAY   = 24 * HOUR;
+	const int WEEK  = 7 * DAY;
+	const int MONTH = 30 * DAY;
+	const int YEAR  = 365 * DAY;
 
 	if (diff < HOUR)
 	{
@@ -739,6 +767,7 @@ std::string TimeStampDifferenceToString(int diff)
 bool ValidGuid(std::string guid)
 {
 	const unsigned GUID_SIZE = 40;
+
 	if (guid.size() != GUID_SIZE)
 	{
 		return false;
@@ -757,6 +786,7 @@ bool ValidGuid(std::string guid)
 const char *EscapeString(const char *in)
 {
 	string str = in;
+
 	boost::replace_all(str, "=", "\x19=");
 	static char out[MAX_TOKEN_CHARS] = "\0";
 	Q_strncpyz(out, str.c_str(), sizeof(out));
@@ -766,6 +796,7 @@ const char *EscapeString(const char *in)
 std::string SanitizeConstString(const std::string& s, bool toLower)
 {
 	char sanitized[MAX_TOKEN_CHARS];
+
 	SanitizeConstString(s.c_str(), sanitized, toLower ? qtrue : qfalse);
 	return sanitized;
 }
@@ -825,7 +856,7 @@ void BufferPrinter::Finish(bool insertNewLine)
 		if (insertNewLine)
 		{
 			G_Printf("%s\n",
-			         buffer_.c_str());
+				buffer_.c_str());
 		}
 		else
 		{
@@ -848,8 +879,9 @@ std::vector<std::string> getNames(const std::vector<int>& ids)
 
 std::vector<int> getMatchingIds(const std::string& name)
 {
-	int              pids[MAX_CLIENTS];
-	auto             found = ClientNumbersFromString(name.c_str(), pids);
+	int  pids[MAX_CLIENTS];
+	auto found = ClientNumbersFromString(name.c_str(), pids);
+
 	std::vector<int> pidsVector;
 	if (found)
 	{
@@ -863,7 +895,7 @@ std::vector<int> getMatchingIds(const std::string& name)
 
 std::string interpolateNametags(std::string input)
 {
-	std::string              interpolated;
+	std::string interpolated;
 	std::vector<std::string> split;
 
 	boost::algorithm::split(split, input, boost::is_any_of("@"));
@@ -873,7 +905,7 @@ std::string interpolateNametags(std::string input)
 		return input;
 	}
 
-	auto i   = 1;
+	auto i = 1;
 	auto len = 0;
 	for (len = split.size(); i < len; i += 2)
 	{
@@ -919,6 +951,7 @@ const char *findAndReplaceNametags(const char *text, const char *name)
 	static char buf[MAX_SAY_TEXT] = "\0";
 
 	auto str = std::string(text);
+
 	boost::replace_all(str, "[n]", name);
 
 	Q_strncpyz(buf, str.c_str(), sizeof(buf));

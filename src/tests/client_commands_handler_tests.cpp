@@ -7,11 +7,13 @@ using namespace ETJump;
 class ClientCommandsHandlerTests : public testing::Test
 {
 public:
-	void SetUp() override {
+	void SetUp() override
+	{
 		handler = std::unique_ptr<ClientCommandsHandler>(new ClientCommandsHandler(nullptr));
 	}
 
-	void TearDown() override {
+	void TearDown() override
+	{
 	}
 
 	std::unique_ptr<ClientCommandsHandler> handler;
@@ -20,7 +22,8 @@ public:
 TEST_F(ClientCommandsHandlerTests, SubscribeShouldCreateACallback)
 {
 	auto command = "command";
-	auto called = false;
+	auto called  = false;
+
 	handler->subscribe(command, [&called](const std::vector<std::string>& args)
 	{
 		called = true;
@@ -32,7 +35,8 @@ TEST_F(ClientCommandsHandlerTests, SubscribeShouldCreateACallback)
 TEST_F(ClientCommandsHandlerTests, UnsubcribeShouldRemoveCallback)
 {
 	auto command = "command";
-	auto called = false;
+	auto called  = false;
+
 	handler->subscribe(command, [&called](const std::vector<std::string>& args)
 	{
 		called = true;
@@ -47,7 +51,8 @@ TEST_F(ClientCommandsHandlerTests, UnsubcribeShouldRemoveCallback)
 TEST_F(ClientCommandsHandlerTests, DifferentCallbackShouldntBeCalled)
 {
 	auto command = "command";
-	auto called = false;
+	auto called  = false;
+
 	handler->subscribe(command, [&called](const std::vector<std::string>& args)
 	{
 		called = true;
@@ -59,7 +64,8 @@ TEST_F(ClientCommandsHandlerTests, DifferentCallbackShouldntBeCalled)
 TEST_F(ClientCommandsHandlerTests, HandlerShouldBeCaseInsensitive)
 {
 	auto command = "command";
-	auto called = false;
+	auto called  = false;
+
 	handler->subscribe(command, [&called](const std::vector<std::string>& args)
 	{
 		called = true;
@@ -71,7 +77,8 @@ TEST_F(ClientCommandsHandlerTests, HandlerShouldBeCaseInsensitive)
 TEST_F(ClientCommandsHandlerTests, SubscribeShouldBeCaseInsensitive)
 {
 	auto command = "ComMand";
-	auto called = false;
+	auto called  = false;
+
 	handler->subscribe(command, [&called](const std::vector<std::string>& args)
 	{
 		called = true;

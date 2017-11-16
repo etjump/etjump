@@ -33,7 +33,7 @@ bool CustomMapVotes::Load()
 	_currentMapsOnServer = _mapStats->getCurrentMaps();
 
 	customMapVotes_.clear();
-	std::string   path = GetPath(g_customMapVotesFile.string);
+	std::string path = GetPath(g_customMapVotesFile.string);
 	std::ifstream f(path.c_str());
 
 	if (!f)
@@ -58,9 +58,9 @@ bool CustomMapVotes::Load()
 		for (int i = 0; i < root.size(); i++)
 		{
 			customMapVotes_.push_back(MapType());
-			unsigned    curr = customMapVotes_.size() - 1;
+			unsigned curr = customMapVotes_.size() - 1;
 			Json::Value maps = root[i]["maps"];
-			customMapVotes_[curr].type         = root[i]["name"].asString();
+			customMapVotes_[curr].type = root[i]["name"].asString();
 			customMapVotes_[curr].callvoteText = root[i]["callvote_text"].asString();
 			for (int j = 0; j < maps.size(); j++)
 			{
@@ -106,7 +106,8 @@ std::string CustomMapVotes::ListTypes() const
 
 void CustomMapVotes::GenerateVotesFile()
 {
-	Arguments     argv = GetArgs();
+	Arguments argv = GetArgs();
+
 	std::ifstream in(GetPath(g_customMapVotesFile.string).c_str());
 	if (in.good())
 	{
@@ -129,9 +130,9 @@ void CustomMapVotes::GenerateVotesFile()
 	in.close();
 	Json::Value root = Json::arrayValue;
 	Json::Value vote;
-	vote["name"]          = "originals";
+	vote["name"] = "originals";
 	vote["callvote_text"] = "Original 6 Maps";
-	vote["maps"]          = Json::arrayValue;
+	vote["maps"] = Json::arrayValue;
 	vote["maps"].append("oasis");
 	vote["maps"].append("fueldump");
 	vote["maps"].append("radar");
@@ -139,15 +140,15 @@ void CustomMapVotes::GenerateVotesFile()
 	vote["maps"].append("railgun");
 	vote["maps"].append("battery");
 	root.append(vote);
-	vote["name"]          = "just_oasis";
+	vote["name"] = "just_oasis";
 	vote["callvote_text"] = "Just oasis";
-	vote["maps"]          = Json::arrayValue;
+	vote["maps"] = Json::arrayValue;
 	vote["maps"].append("oasis");
 	root.append(vote);
 
 	Json::StyledWriter writer;
-	std::string        output = writer.write(root);
-	std::ofstream      fOut(GetPath(g_customMapVotesFile.string).c_str());
+	std::string output = writer.write(root);
+	std::ofstream fOut(GetPath(g_customMapVotesFile.string).c_str());
 	if (!fOut)
 	{
 		G_Printf("Couldn't open file \"%s\" defined in g_customMapVotesFile.\n", g_customMapVotesFile.string);
@@ -162,6 +163,7 @@ void CustomMapVotes::GenerateVotesFile()
 const std::vector<std::string> *CustomMapVotes::ListInfo(const std::string& type)
 {
 	static std::vector<std::string> lines;
+
 	lines.clear();
 
 	for (unsigned i = 0; i < customMapVotes_.size(); i++)

@@ -36,8 +36,8 @@ Debugging command to print the current position
 static void CG_Viewpos_f(void)
 {
 	CG_Printf("(%i %i %i) : %i\n", (int)cg.refdef.vieworg[0],
-	          (int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2],
-	          (int)cg.refdefViewAngles[YAW]);
+		(int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2],
+		(int)cg.refdefViewAngles[YAW]);
 }
 
 void CG_LimboMenu_f(void)
@@ -176,7 +176,7 @@ void CG_ScoresUp_f(void)
 {
 	if (cg.showScores)
 	{
-		cg.showScores    = qfalse;
+		cg.showScores = qfalse;
 		cg.scoreFadeTime = cg.time;
 	}
 }
@@ -255,6 +255,7 @@ qboolean cameraInuse[MAX_CAMERAS];
 int CG_LoadCamera(const char *name)
 {
 	int i;
+
 	for (i = 1; i < MAX_CAMERAS; i++)      // start at '1' since '0' is always taken by the cutscene camera
 	{
 		if (!cameraInuse[i])
@@ -275,7 +276,7 @@ void CG_FreeCamera(int camNum)
 }
 
 // @TEST.  See if we can get an initial camera started at the first frame.
-char     g_initialCamera[256]      = "";
+char g_initialCamera[256] = "";
 qboolean g_initialCameraStartBlack = qfalse;
 
 /*
@@ -343,7 +344,7 @@ void CG_StartInitialCamera()
 		CG_StartCamera(g_initialCamera, g_initialCameraStartBlack);
 
 		// Clear it now so we don't get re-entrance problems
-		g_initialCamera[0]        = 0;
+		g_initialCamera[0] = 0;
 		g_initialCameraStartBlack = qfalse;
 
 	} // if (g_initialCamera[0] != 0)...
@@ -369,7 +370,7 @@ void CG_StopCamera(void)
 
 static void CG_Fade_f(void)
 {
-	int   r, g, b, a;
+	int r, g, b, a;
 	float duration;
 
 	if (trap_Argc() < 6)
@@ -465,7 +466,7 @@ static void CG_QuickFireteams_f(void)
 
 static void CG_FTSayPlayerClass_f(void)
 {
-	int        playerType;
+	int playerType;
 	const char *s;
 
 	playerType = cgs.clientinfo[cg.clientNum].cls;
@@ -505,7 +506,7 @@ static void CG_FTSayPlayerClass_f(void)
 
 static void CG_SayPlayerClass_f(void)
 {
-	int        playerType;
+	int playerType;
 	const char *s;
 
 	playerType = cgs.clientinfo[cg.clientNum].cls;
@@ -687,8 +688,8 @@ static void CG_SetWeaponCrosshair_f(void)
 
 static void CG_SelectBuddy_f(void)
 {
-	int          pos = atoi(CG_Argv(1));
-	int          i;
+	int pos = atoi(CG_Argv(1));
+	int i;
 	clientInfo_t *ci;
 
 	// Gordon:
@@ -1039,8 +1040,8 @@ static void CG_DumpSpeaker_f(void)
     CG_Printf( "Entity dumped to '%s' (%i %i %i).\n", sscrfilename,
                (int) cg.snap->ps.origin[0], (int) cg.snap->ps.origin[1], (int) cg.snap->ps.origin[2] );*/
 	bg_speaker_t speaker;
-	trace_t      tr;
-	vec3_t       end;
+	trace_t tr;
+	vec3_t  end;
 
 	if (!cg.editingSpeakers)
 	{
@@ -1107,7 +1108,7 @@ static void CG_CPM_f(void)
 void CG_StartTimer(void)
 {
 	CG_Printf("Timer started.\n");
-	cg.startTime   = cg.time;
+	cg.startTime = cg.time;
 	cg.activeTimer = qtrue;
 }
 
@@ -1115,7 +1116,7 @@ void CG_StopTimer(void)
 {
 	CG_Printf("Timer stopped.\n");
 	cg.activeTimer = qfalse;
-	cg.stopTime    = cg.time;
+	cg.stopTime = cg.time;
 }
 
 void CG_portalinfo_f(void)
@@ -1207,7 +1208,7 @@ void CG_Freecam_f(void)
 	}
 	else
 	{
-		cgs.demoCam.renderingFreeCam = cgs.demoCam.renderingFreeCam? qfalse : qtrue;
+		cgs.demoCam.renderingFreeCam = cgs.demoCam.renderingFreeCam ? qfalse : qtrue;
 	}
 
 	CG_Printf("freecam %s\n", cgs.demoCam.renderingFreeCam ? "ON" : "OFF");
@@ -1280,9 +1281,9 @@ void CG_FreecamSetPos_f(void)
 
 	if (n >= 7)
 	{
-		cgs.demoCam.camAngle[0] = etpro_float_Argv(4);
-		cgs.demoCam.camAngle[1] = etpro_float_Argv(5);
-		cgs.demoCam.camAngle[2] = etpro_float_Argv(6);
+		cgs.demoCam.camAngle[0]  = etpro_float_Argv(4);
+		cgs.demoCam.camAngle[1]  = etpro_float_Argv(5);
+		cgs.demoCam.camAngle[2]  = etpro_float_Argv(6);
 		cgs.demoCam.setCamAngles = qtrue;
 	}
 	else
@@ -1323,7 +1324,7 @@ void CG_NoClip_f(void)
 		}
 		else
 		{
-			cgs.demoCam.noclip = cgs.demoCam.noclip? qfalse : qtrue;
+			cgs.demoCam.noclip = cgs.demoCam.noclip ? qfalse : qtrue;
 		}
 		CG_Printf("noclip %s\n", cgs.demoCam.noclip ? "ON" : "OFF");
 	}
@@ -1336,39 +1337,47 @@ void CG_ModInformation_f()
 }
 
 // ETJump command to increment/decrement variable by specific float
-void CG_IncrementVar_f(void) 
+void CG_IncrementVar_f(void)
 {
 	static char cvarBuffer[32];
 	auto argc = trap_Argc();
-	if (argc < 4 || argc > 5) {
+
+	if (argc < 4 || argc > 5)
+	{
 		Com_Printf("usage: incrementVar <cvar> <start> <end> [<step>]\n");
 		return;
 	}
-	
+
 	trap_Cvar_VariableStringBuffer(CG_Argv(1), cvarBuffer, sizeof cvarBuffer);
 
 	auto start = atof(CG_Argv(2));
 	auto end = atof(CG_Argv(3));
 	auto value = atof(cvarBuffer);
-	auto step = 1.0;
+	auto step  = 1.0;
 
-	if (argc == 5) {
+	if (argc == 5)
+	{
 		step = abs(atof(CG_Argv(4)));
 	}
 
-	if (abs(end - start) < step) {
+	if (abs(end - start) < step)
+	{
 		step = 1.f;
 	}
 
-	if (end < start) {
+	if (end < start)
+	{
 		value -= step;
-		if (value < end) {
+		if (value < end)
+		{
 			value = start;
 		}
 	}
-	else {
+	else
+	{
 		value += step;
-		if (value > end) {
+		if (value > end)
+		{
 			value = start;
 		}
 	}
@@ -1386,128 +1395,128 @@ static consoleCommand_t commands[] =
 {
 //	{ "obj", CG_Obj_f },
 //	{ "setspawnpt", CG_Obj_f },
-	{ "testgun",             CG_TestGun_f            },
-	{ "testmodel",           CG_TestModel_f          },
-	{ "nextframe",           CG_TestModelNextFrame_f },
-	{ "prevframe",           CG_TestModelPrevFrame_f },
-	{ "nextskin",            CG_TestModelNextSkin_f  },
-	{ "prevskin",            CG_TestModelPrevSkin_f  },
-	{ "viewpos",             CG_Viewpos_f            },
-	{ "+scores",             CG_ScoresDown_f         },
-	{ "-scores",             CG_ScoresUp_f           },
-	{ "zoomin",              CG_ZoomIn_f             },
-	{ "zoomout",             CG_ZoomOut_f            },
-	{ "weaplastused",        CG_LastWeaponUsed_f     },
-	{ "weapnextinbank",      CG_NextWeaponInBank_f   },
-	{ "weapprevinbank",      CG_PrevWeaponInBank_f   },
-	{ "weapnext",            CG_NextWeapon_f         },
-	{ "weapprev",            CG_PrevWeapon_f         },
-	{ "weapalt",             CG_AltWeapon_f          },
-	{ "weapon",              CG_Weapon_f             },
-	{ "weaponbank",          CG_WeaponBank_f         },
-	{ "tell_target",         CG_TellTarget_f         },
-	{ "tell_attacker",       CG_TellAttacker_f       },
-	{ "tcmd",                CG_TargetCommand_f      },
-	{ "fade",                CG_Fade_f               }, // duffy
-	{ "loadhud",             CG_LoadHud_f            },
-	{ "loadweapons",         CG_LoadWeapons_f        },
+	{ "testgun",             CG_TestGun_f              },
+	{ "testmodel",           CG_TestModel_f            },
+	{ "nextframe",           CG_TestModelNextFrame_f   },
+	{ "prevframe",           CG_TestModelPrevFrame_f   },
+	{ "nextskin",            CG_TestModelNextSkin_f    },
+	{ "prevskin",            CG_TestModelPrevSkin_f    },
+	{ "viewpos",             CG_Viewpos_f              },
+	{ "+scores",             CG_ScoresDown_f           },
+	{ "-scores",             CG_ScoresUp_f             },
+	{ "zoomin",              CG_ZoomIn_f               },
+	{ "zoomout",             CG_ZoomOut_f              },
+	{ "weaplastused",        CG_LastWeaponUsed_f       },
+	{ "weapnextinbank",      CG_NextWeaponInBank_f     },
+	{ "weapprevinbank",      CG_PrevWeaponInBank_f     },
+	{ "weapnext",            CG_NextWeapon_f           },
+	{ "weapprev",            CG_PrevWeapon_f           },
+	{ "weapalt",             CG_AltWeapon_f            },
+	{ "weapon",              CG_Weapon_f               },
+	{ "weaponbank",          CG_WeaponBank_f           },
+	{ "tell_target",         CG_TellTarget_f           },
+	{ "tell_attacker",       CG_TellAttacker_f         },
+	{ "tcmd",                CG_TargetCommand_f        },
+	{ "fade",                CG_Fade_f                 }, // duffy
+	{ "loadhud",             CG_LoadHud_f              },
+	{ "loadweapons",         CG_LoadWeapons_f          },
 
-	{ "mp_QuickMessage",     CG_QuickMessage_f       },
-	{ "mp_fireteammsg",      CG_QuickFireteams_f     },
-	{ "mp_fireteamadmin",    CG_QuickFireteamAdmin_f },
-	{ "wm_sayPlayerClass",   CG_SayPlayerClass_f     },
-	{ "wm_ftsayPlayerClass", CG_FTSayPlayerClass_f   },
+	{ "mp_QuickMessage",     CG_QuickMessage_f         },
+	{ "mp_fireteammsg",      CG_QuickFireteams_f       },
+	{ "mp_fireteamadmin",    CG_QuickFireteamAdmin_f   },
+	{ "wm_sayPlayerClass",   CG_SayPlayerClass_f       },
+	{ "wm_ftsayPlayerClass", CG_FTSayPlayerClass_f     },
 
 
-	{ "VoiceChat",           CG_VoiceChat_f          },
-	{ "VoiceTeamChat",       CG_TeamVoiceChat_f      },
+	{ "VoiceChat",           CG_VoiceChat_f            },
+	{ "VoiceTeamChat",       CG_TeamVoiceChat_f        },
 
 	// ydnar: say, teamsay, etc
-	{ "messageMode",         CG_MessageMode_f        },
-	{ "messageMode2",        CG_MessageMode_f        },
-	{ "messageMode3",        CG_MessageMode_f        },
-	{ "messageSend",         CG_MessageSend_f        },
+	{ "messageMode",         CG_MessageMode_f          },
+	{ "messageMode2",        CG_MessageMode_f          },
+	{ "messageMode3",        CG_MessageMode_f          },
+	{ "messageSend",         CG_MessageSend_f          },
 
-	{ "SetWeaponCrosshair",  CG_SetWeaponCrosshair_f },
+	{ "SetWeaponCrosshair",  CG_SetWeaponCrosshair_f   },
 	// -NERVE - SMF
 
-	{ "VoiceFireTeamChat",   CG_BuddyVoiceChat_f     },
+	{ "VoiceFireTeamChat",   CG_BuddyVoiceChat_f       },
 
-	{ "openlimbomenu",       CG_LimboMenu_f          },
+	{ "openlimbomenu",       CG_LimboMenu_f            },
 
-	{ "+stats",              CG_StatsDown_f          },
-	{ "-stats",              CG_StatsUp_f            },
-	{ "+topshots",           CG_topshotsDown_f       },
-	{ "-topshots",           CG_topshotsUp_f         },
+	{ "+stats",              CG_StatsDown_f            },
+	{ "-stats",              CG_StatsUp_f              },
+	{ "+topshots",           CG_topshotsDown_f         },
+	{ "-topshots",           CG_topshotsUp_f           },
 
 	// OSP
-	{ "autoRecord",          CG_autoRecord_f         },
-	{ "autoScreenshot",      CG_autoScreenShot_f     },
-	{ "currentTime",         CG_currentTime_f        },
-	{ "keyoff",              CG_keyOff_f             },
-	{ "keyon",               CG_keyOn_f              },
+	{ "autoRecord",          CG_autoRecord_f           },
+	{ "autoScreenshot",      CG_autoScreenShot_f       },
+	{ "currentTime",         CG_currentTime_f          },
+	{ "keyoff",              CG_keyOff_f               },
+	{ "keyon",               CG_keyOn_f                },
 #ifdef MV_SUPPORT
-	{ "mvactivate",          CG_mvToggleAll_f        },
-	{ "mvdel",               CG_mvDelete_f           },
-	{ "mvhide",              CG_mvHideView_f         },
-	{ "mvnew",               CG_mvNew_f              },
-	{ "mvshow",              CG_mvShowView_f         },
-	{ "mvswap",              CG_mvSwapViews_f        },
-	{ "mvtoggle",            CG_mvToggleView_f       },
-	{ "spechelp",            CG_toggleSpecHelp_f     },
+	{ "mvactivate",          CG_mvToggleAll_f          },
+	{ "mvdel",               CG_mvDelete_f             },
+	{ "mvhide",              CG_mvHideView_f           },
+	{ "mvnew",               CG_mvNew_f                },
+	{ "mvshow",              CG_mvShowView_f           },
+	{ "mvswap",              CG_mvSwapViews_f          },
+	{ "mvtoggle",            CG_mvToggleView_f         },
+	{ "spechelp",            CG_toggleSpecHelp_f       },
 #endif
-	{ "statsdump",           CG_dumpStats_f          },
-	{ "+vstr",               CG_vstrDown_f           },
-	{ "-vstr",               CG_vstrUp_f             },
+	{ "statsdump",           CG_dumpStats_f            },
+	{ "+vstr",               CG_vstrDown_f             },
+	{ "-vstr",               CG_vstrUp_f               },
 	// OSP
 
-	{ "selectbuddy",         CG_SelectBuddy_f        },
+	{ "selectbuddy",         CG_SelectBuddy_f          },
 
-	{ "MapZoomIn",           CG_AutomapZoomIn_f      },
-	{ "MapZoomOut",          CG_AutomapZoomOut_f     },
-	{ "+mapexpand",          CG_AutomapExpandDown_f  },
-	{ "-mapexpand",          CG_AutomapExpandUp_f    },
+	{ "MapZoomIn",           CG_AutomapZoomIn_f        },
+	{ "MapZoomOut",          CG_AutomapZoomOut_f       },
+	{ "+mapexpand",          CG_AutomapExpandDown_f    },
+	{ "-mapexpand",          CG_AutomapExpandUp_f      },
 
-	{ "generateTracemap",    CG_GenerateTracemap     },
+	{ "generateTracemap",    CG_GenerateTracemap       },
 	// xkan, 11/27/2002, toggle automap on/off
-	{ "ToggleAutoMap",       CG_ToggleAutomap_f      },
+	{ "ToggleAutoMap",       CG_ToggleAutomap_f        },
 
-	{ "editSpeakers",        CG_EditSpeakers_f       },
-	{ "dumpSpeaker",         CG_DumpSpeaker_f        },
-	{ "modifySpeaker",       CG_ModifySpeaker_f      },
-	{ "undoSpeaker",         CG_UndoSpeaker_f        },
-	{ "cpm",                 CG_CPM_f                },
-	{ "forcetapout",         CG_ForceTapOut_f        },
-	{ "resetmaxspeed",       CG_ResetMaxSpeed_f      },
-	{ "startTimer",          CG_StartTimer           },
-	{ "stopTimer",           CG_StopTimer            },
-	{ "portal",              CG_portalinfo_f         },
-	{ "chs",                 CG_InfoCHS_f            },
-	{ "help",                CG_Manual_f             },
-	{ "man",                 CG_Manual_f             },
-	{ "manual",              CG_Manual_f             },
+	{ "editSpeakers",        CG_EditSpeakers_f         },
+	{ "dumpSpeaker",         CG_DumpSpeaker_f          },
+	{ "modifySpeaker",       CG_ModifySpeaker_f        },
+	{ "undoSpeaker",         CG_UndoSpeaker_f          },
+	{ "cpm",                 CG_CPM_f                  },
+	{ "forcetapout",         CG_ForceTapOut_f          },
+	{ "resetmaxspeed",       CG_ResetMaxSpeed_f        },
+	{ "startTimer",          CG_StartTimer             },
+	{ "stopTimer",           CG_StopTimer              },
+	{ "portal",              CG_portalinfo_f           },
+	{ "chs",                 CG_InfoCHS_f              },
+	{ "help",                CG_Manual_f               },
+	{ "man",                 CG_Manual_f               },
+	{ "manual",              CG_Manual_f               },
 
-	{ "+freecam_turnleft",   CG_FreecamTurnLeftDown_f },
-	{ "-freecam_turnleft",   CG_FreecamTurnLeftUp_f },
+	{ "+freecam_turnleft",   CG_FreecamTurnLeftDown_f  },
+	{ "-freecam_turnleft",   CG_FreecamTurnLeftUp_f    },
 	{ "+freecam_turnright",  CG_FreecamTurnRightDown_f },
-	{ "-freecam_turnright",  CG_FreecamTurnRightUp_f },
+	{ "-freecam_turnright",  CG_FreecamTurnRightUp_f   },
 
-	{ "+freecam_turnup",     CG_FreecamTurnUpDown_f },
-	{ "-freecam_turnup",     CG_FreecamTurnUpUp_f },
-	{ "+freecam_turndown",   CG_FreecamTurnDownDown_f },
-	{ "-freecam_turndown",   CG_FreecamTurnDownUp_f },
+	{ "+freecam_turnup",     CG_FreecamTurnUpDown_f    },
+	{ "-freecam_turnup",     CG_FreecamTurnUpUp_f      },
+	{ "+freecam_turndown",   CG_FreecamTurnDownDown_f  },
+	{ "-freecam_turndown",   CG_FreecamTurnDownUp_f    },
 
-	{ "+freecam_rollleft",   CG_FreecamRollLeftDown_f },
-	{ "-freecam_rollleft",   CG_FreecamRollLeftUp_f },
+	{ "+freecam_rollleft",   CG_FreecamRollLeftDown_f  },
+	{ "-freecam_rollleft",   CG_FreecamRollLeftUp_f    },
 	{ "+freecam_rollright",  CG_FreecamRollRightDown_f },
-	{ "-freecam_rollright",  CG_FreecamRollRightUp_f },
-	{ "freecam",             CG_Freecam_f },
-	{ "freecamsetpos",       CG_FreecamSetPos_f },
-	{ "freecamgetpos",       CG_FreecamGetPos_f },
-	{ "noclip",              CG_NoClip_f },
+	{ "-freecam_rollright",  CG_FreecamRollRightUp_f   },
+	{ "freecam",             CG_Freecam_f              },
+	{ "freecamsetpos",       CG_FreecamSetPos_f        },
+	{ "freecamgetpos",       CG_FreecamGetPos_f        },
+	{ "noclip",              CG_NoClip_f               },
 
-	{ "mod_information", CG_ModInformation_f },
-	{ "incrementVar", CG_IncrementVar_f },
+	{ "mod_information",     CG_ModInformation_f       },
+	{ "incrementVar",        CG_IncrementVar_f         },
 };
 
 
@@ -1522,7 +1531,7 @@ Cmd_Argc() / Cmd_Argv()
 qboolean CG_ConsoleCommand(void)
 {
 	const char *cmd;
-	int        i;
+	int i;
 
 	// Arnout - don't allow console commands until a snapshot is present
 	if (!cg.snap)
@@ -1695,7 +1704,7 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("tjl_listroute"); // Display in console all loaded route or recorded
 	trap_AddCommand("tjl_displaybyname"); // Render a route if name exist
 	trap_AddCommand("tjl_displaynearestroute"); // Render the nearest route to the player position
-	trap_AddCommand("tjl_renameroute"); // Rename a route in the vector 
+	trap_AddCommand("tjl_renameroute"); // Rename a route in the vector
 	trap_AddCommand("tjl_saveroute"); // Save route in a file
 	trap_AddCommand("tjl_loadroute"); // Load route from a file
 

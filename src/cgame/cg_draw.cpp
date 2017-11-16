@@ -27,10 +27,10 @@ void CG_Text_SetActiveFont(int font)
 
 int CG_Text_Width_Ext(const char *text, float scale, int limit, fontInfo_t *font)
 {
-	int         count, len;
+	int count, len;
 	glyphInfo_t *glyph;
 	const char  *s = text;
-	float       out, useScale = scale * font->glyphScale;
+	float out, useScale = scale * font->glyphScale;
 
 	out = 0;
 	if (text)
@@ -51,7 +51,7 @@ int CG_Text_Width_Ext(const char *text, float scale, int limit, fontInfo_t *font
 			else
 			{
 				glyph = &font->glyphs[(unsigned char)*s];
-				out  += glyph->xSkip;
+				out += glyph->xSkip;
 				s++;
 				count++;
 			}
@@ -70,14 +70,14 @@ int CG_Text_Width(const char *text, float scale, int limit)
 
 int CG_Text_Height_Ext(const char *text, float scale, int limit, fontInfo_t *font)
 {
-	int         len, count;
-	float       max;
+	int len, count;
+	float max;
 	glyphInfo_t *glyph;
-	float       useScale;
-	const char  *s = text;
+	float useScale;
+	const char *s = text;
 
 	useScale = scale * font->glyphScale;
-	max      = 0;
+	max = 0;
 	if (text)
 	{
 		len = strlen(text);
@@ -126,6 +126,7 @@ void CG_Text_PaintChar_Ext(float x, float y, float w, float h, float scalex, flo
 void CG_Text_PaintChar(float x, float y, float width, float height, float scale, float s, float t, float s2, float t2, qhandle_t hShader)
 {
 	float w, h;
+
 	w = width * scale;
 	h = height * scale;
 	CG_AdjustFrom640(&x, &y, &w, &h);
@@ -141,8 +142,8 @@ void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, vec
 
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color, const char *text, float adjust, int limit, int style, fontInfo_t *font)
 {
-	int         len, count;
-	vec4_t      newColor;
+	int len, count;
+	vec4_t newColor;
 	glyphInfo_t *glyph;
 
 	scalex *= font->glyphScale;
@@ -358,7 +359,7 @@ CG_Draw3DModel
 */
 void CG_Draw3DModel(float x, float y, float w, float h, qhandle_t model, qhandle_t skin, vec3_t origin, vec3_t angles)
 {
-	refdef_t    refdef;
+	refdef_t refdef;
 	refEntity_t ent;
 
 	CG_AdjustFrom640(&x, &y, &w, &h);
@@ -368,9 +369,9 @@ void CG_Draw3DModel(float x, float y, float w, float h, qhandle_t model, qhandle
 	memset(&ent, 0, sizeof(ent));
 	AnglesToAxis(angles, ent.axis);
 	VectorCopy(origin, ent.origin);
-	ent.hModel     = model;
+	ent.hModel = model;
 	ent.customSkin = skin;
-	ent.renderfx   = RF_NOSHADOW;   // no stencil shadows
+	ent.renderfx = RF_NOSHADOW;     // no stencil shadows
 
 	refdef.rdflags = RDF_NOWORLDMODEL;
 
@@ -379,8 +380,8 @@ void CG_Draw3DModel(float x, float y, float w, float h, qhandle_t model, qhandle
 	refdef.fov_x = 30;
 	refdef.fov_y = 30;
 
-	refdef.x      = x;
-	refdef.y      = y;
+	refdef.x = x;
+	refdef.y = y;
 	refdef.width  = w;
 	refdef.height = h;
 
@@ -399,9 +400,9 @@ CG_DrawKeyModel
 void CG_DrawKeyModel(int keynum, float x, float y, float w, float h, int fadetime)
 {
 	qhandle_t cm;
-	float     len;
-	vec3_t    origin, angles;
-	vec3_t    mins, maxs;
+	float  len;
+	vec3_t origin, angles;
+	vec3_t mins, maxs;
 
 	VectorClear(angles);
 
@@ -414,7 +415,7 @@ void CG_DrawKeyModel(int keynum, float x, float y, float w, float h, int fadetim
 	origin[1] = 0.5 * (mins[1] + maxs[1]);
 
 //	len = 0.5 * ( maxs[2] - mins[2] );
-	len       = 0.75 * (maxs[2] - mins[2]);
+	len = 0.75 * (maxs[2] - mins[2]);
 	origin[0] = len / 0.268;    // len / tan( fov/2 )
 
 	angles[YAW] = 30 * sin(cg.time / 2000.0);;
@@ -474,7 +475,7 @@ static float CG_DrawSnapshot(float y)
 	int  w;
 
 	s = va("time:%i snap:%i cmd:%i", cg.snap->serverTime,
-	       cg.latestSnapshotNum, cgs.serverCommandSequence);
+		cg.latestSnapshotNum, cgs.serverCommandSequence);
 	w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
 
 	CG_DrawBigString(UPPERRIGHT_X - w, y + 2, s, 1.0F);
@@ -501,18 +502,18 @@ CG_DrawSpeed, TJ
 // forty - originally from chruker's speedometer code
 static float CG_DrawSpeed(float y)
 {
-	char         *s;
-	int          w;
+	char *s;
+	int  w;
 	static vec_t highestSpeed, speed;
-	static int   lasttime;
-	int          thistime;
-	vec4_t       timerBackground = { 0.16f, 0.2f, 0.17f, 0.8f };
-	vec4_t       timerBorder     = { 0.5f, 0.5f, 0.5f, 0.5f };
-	vec4_t       tclr            = { 0.625f, 0.625f, 0.6f, 1.0f };
+	static int lasttime;
+	int thistime;
+	vec4_t timerBackground = { 0.16f, 0.2f, 0.17f, 0.8f };
+	vec4_t timerBorder = { 0.5f, 0.5f, 0.5f, 0.5f };
+	vec4_t tclr = { 0.625f, 0.625f, 0.6f, 1.0f };
 
 	if (cg.resetmaxspeed)
 	{
-		highestSpeed     = 0;
+		highestSpeed = 0;
 		cg.resetmaxspeed = qfalse;
 	}
 
@@ -596,16 +597,16 @@ static float CG_DrawSpeed(float y)
 
 static void CG_DrawSpeed2(void)
 {
-	char         status[128];
-	float        sizex, sizey;
-	float        x, y, w;
+	char  status[128];
+	float sizex, sizey;
+	float x, y, w;
 	static vec_t speed;
 	static vec_t topSpeed;
-	int          style = ITEM_TEXTSTYLE_NORMAL;
+	int style = ITEM_TEXTSTYLE_NORMAL;
 
 	if (cg.resetmaxspeed)
 	{
-		topSpeed         = 0;
+		topSpeed = 0;
 		cg.resetmaxspeed = qfalse;
 	}
 
@@ -614,7 +615,8 @@ static void CG_DrawSpeed2(void)
 		return;
 	}
 
-	if (etj_speedShadow.integer) {
+	if (etj_speedShadow.integer)
+	{
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
@@ -662,7 +664,7 @@ static void CG_DrawSpeed2(void)
 		auto tens = static_cast<int>(speed) / 10 % 10 * 10;
 		Com_sprintf(status, sizeof status, va("%02i", tens));
 	}
-		break;
+	break;
 	default:
 		Com_sprintf(status, sizeof(status), va("%.0f", speed));
 	}
@@ -679,12 +681,12 @@ static void CG_DrawSpeed2(void)
 
 float CG_DrawTime(float y)
 {
-	char    displayTime[12];
-	int     w;
+	char displayTime[12];
+	int  w;
 	qtime_t tm;
 	vec4_t  timerBackground = { 0.16f, 0.2f, 0.17f, 0.8f };
-	vec4_t  timerBorder     = { 0.5f, 0.5f, 0.5f, 0.5f };
-	vec4_t  tclr            = { 0.625f, 0.625f, 0.6f, 1.0f };
+	vec4_t  timerBorder = { 0.5f, 0.5f, 0.5f, 0.5f };
+	vec4_t  tclr = { 0.625f, 0.625f, 0.6f, 1.0f };
 
 	trap_RealTime(&tm);
 	displayTime[0] = '\0';
@@ -692,28 +694,28 @@ float CG_DrawTime(float y)
 	if (cg_drawClock.integer == 1)
 	{
 		Q_strcat(displayTime, sizeof(displayTime),
-		         va("%d:%02d", tm.tm_hour, tm.tm_min));
+			va("%d:%02d", tm.tm_hour, tm.tm_min));
 		Q_strcat(displayTime, sizeof(displayTime),
-		         va(":%02d", tm.tm_sec));
+			va(":%02d", tm.tm_sec));
 	}
 	else
 	{
 		Q_strcat(displayTime, sizeof(displayTime),
-		         va("%d:%02d",
-		            ((tm.tm_hour == 0 || tm.tm_hour == 12)
-		             ? 12 : tm.tm_hour % 12),
-		            tm.tm_min));
+			va("%d:%02d",
+				((tm.tm_hour == 0 || tm.tm_hour == 12)
+				 ? 12 : tm.tm_hour % 12),
+				tm.tm_min));
 		Q_strcat(displayTime, sizeof(displayTime),
-		         va(":%02d", tm.tm_sec));
+			va(":%02d", tm.tm_sec));
 		Q_strcat(displayTime, sizeof(displayTime),
-		         (tm.tm_hour < 12) ? " am" : " pm");
+			(tm.tm_hour < 12) ? " am" : " pm");
 	}
 	w = CG_Text_Width_Ext(displayTime, 0.19f, 0, &cgs.media.limboFont1);
 	CG_FillRect(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, timerBackground);
 	CG_DrawRect_FixedBorder(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1,
-	                        timerBorder);
+		timerBorder);
 	CG_Text_Paint_Ext(UPPERRIGHT_X - w, y + 11, 0.19f, 0.19f, tclr,
-	                  displayTime, 0, 0, 0, &cgs.media.limboFont1);
+		displayTime, 0, 0, 0, &cgs.media.limboFont1);
 	return y + 12 + 4;
 }
 
@@ -725,21 +727,21 @@ CG_DrawFPS
 #define FPS_FRAMES  4
 static float CG_DrawFPS(float y)
 {
-	char       *s;
-	int        w;
+	char *s;
+	int  w;
 	static int previousTimes[FPS_FRAMES];
 	static int index;
-	int        i, total;
-	int        fps;
+	int i, total;
+	int fps;
 	static int previous;
-	int        t, frameTime;
-	vec4_t     timerBackground = { 0.16f, 0.2f, 0.17f, 0.8f };
-	vec4_t     timerBorder     = { 0.5f, 0.5f, 0.5f, 0.5f };
-	vec4_t     tclr            = { 0.625f, 0.625f, 0.6f, 1.0f };
+	int t, frameTime;
+	vec4_t timerBackground = { 0.16f, 0.2f, 0.17f, 0.8f };
+	vec4_t timerBorder = { 0.5f, 0.5f, 0.5f, 0.5f };
+	vec4_t tclr = { 0.625f, 0.625f, 0.6f, 1.0f };
 
 	// don't use serverTime, because that will be drifting to
 	// correct for internet lag changes, timescales, timedemos, etc
-	t         = trap_Milliseconds();
+	t = trap_Milliseconds();
 	frameTime = t - previous;
 	previous  = t;
 
@@ -879,12 +881,12 @@ CG_DrawTeamInfo
 */
 static void CG_DrawTeamInfo(void)
 {
-	int       w, h;
-	int       i, len;
-	vec4_t    hcolor;
-	int       chatHeight;
-	float     alphapercent, chatbgalpha;
-	float     lineHeight = 9.f;
+	int w, h;
+	int i, len;
+	vec4_t hcolor;
+	int chatHeight;
+	float alphapercent, chatbgalpha;
+	float lineHeight = 9.f;
 	qhandle_t flag;
 
 	int chatWidth = 640 - CHATLOC_X - 100;
@@ -975,7 +977,8 @@ static void CG_DrawTeamInfo(void)
 			hcolor[3] = alphapercent;
 			trap_R_SetColor(hcolor);
 
-			if (etj_chatFlags.integer) {
+			if (etj_chatFlags.integer)
+			{
 
 				if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
 				{
@@ -994,7 +997,7 @@ static void CG_DrawTeamInfo(void)
 					CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
 						12, 8, flag);
 				}
-			
+
 			}
 
 			CG_Text_Paint_Ext(CHATLOC_TEXT_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
@@ -1043,14 +1046,14 @@ CG_DrawNotify
 
 static void CG_DrawNotify(void)
 {
-	int    w, h;
-	int    i, len;
+	int w, h;
+	int i, len;
 	vec4_t hcolor;
-	int    chatHeight;
-	float  alphapercent;
-	char   var[MAX_TOKEN_CHARS];
-	float  notifytime = 1.0f;
-	int    yLoc;
+	int chatHeight;
+	float alphapercent;
+	char  var[MAX_TOKEN_CHARS];
+	float notifytime = 1.0f;
+	int yLoc;
 
 	return;
 
@@ -1115,9 +1118,9 @@ static void CG_DrawNotify(void)
 			trap_R_SetColor(hcolor);
 
 			CG_DrawStringExt(NOTIFYLOC_X + TINYCHAR_WIDTH,
-			                 yLoc - (cgs.notifyPos - i) * TINYCHAR_HEIGHT,
-			                 cgs.notifyMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay);
+				yLoc - (cgs.notifyPos - i) * TINYCHAR_HEIGHT,
+				cgs.notifyMsgs[i % chatHeight], hcolor, qfalse, qfalse,
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay);
 		}
 	}
 }
@@ -1155,7 +1158,7 @@ void CG_AddLagometerFrameInfo(void)
 {
 	int offset;
 
-	offset                                                           = cg.time - cg.latestSnapshotTime;
+	offset = cg.time - cg.latestSnapshotTime;
 	lagometer.frameSamples[lagometer.frameCount & (LAG_SAMPLES - 1)] = offset;
 	lagometer.frameCount++;
 }
@@ -1182,7 +1185,7 @@ void CG_AddLagometerSnapshotInfo(snapshot_t *snap)
 
 	// add this snapshot's info
 	lagometer.snapshotSamples[lagometer.snapshotCount & (LAG_SAMPLES - 1)] = snap->ping;
-	lagometer.snapshotFlags[lagometer.snapshotCount & (LAG_SAMPLES - 1)]   = snap->snapFlags;
+	lagometer.snapshotFlags[lagometer.snapshotCount & (LAG_SAMPLES - 1)] = snap->snapFlags;
 	lagometer.snapshotCount++;
 }
 
@@ -1195,11 +1198,11 @@ Should we draw something differnet for long lag vs no packets?
 */
 static void CG_DrawDisconnect(void)
 {
-	float      x, y;
-	int        cmdNum;
-	usercmd_t  cmd;
+	float x, y;
+	int cmdNum;
+	usercmd_t cmd;
 	const char *s;
-	int        w;   // bk010215 - FIXME char message[1024];
+	int w;          // bk010215 - FIXME char message[1024];
 
 	if (etj_drawConnectionIssues.integer == 0)
 	{
@@ -1254,10 +1257,10 @@ CG_DrawLagometer
 */
 static void CG_DrawLagometer(void)
 {
-	int   a, x, y, i;
+	int a, x, y, i;
 	float v;
 	float ax, ay, aw, ah, mid, range;
-	int   color;
+	int color;
 	float vscale;
 
 	if (!cg_lagometer.integer || cgs.localServer)
@@ -1284,7 +1287,7 @@ static void CG_DrawLagometer(void)
 
 	color = -1;
 	range = ah / 3;
-	mid   = ay + range;
+	mid = ay + range;
 
 	vscale = range / MAX_LAGOMETER_RANGE;
 
@@ -1396,8 +1399,8 @@ for a few moments
 
 void CG_BannerPrint(const char *str)
 {
-	char     buff[MAX_STRING_CHARS];
-	int      i, len, textlen;
+	char buff[MAX_STRING_CHARS];
+	int  i, len, textlen;
 	qboolean neednewline = qfalse;
 
 	Q_strncpyz(cg.bannerPrint, str, sizeof(cg.bannerPrint));
@@ -1412,7 +1415,7 @@ void CG_BannerPrint(const char *str)
 		if (cg.bannerPrint[i] == '\\' && cg.bannerPrint[i + 1] == 'n')
 		{
 			Q_strncpyz(buff, &cg.bannerPrint[i + 2], sizeof(buff));
-			cg.bannerPrint[i]     = '\n';
+			cg.bannerPrint[i] = '\n';
 			cg.bannerPrint[i + 1] = 0;
 			Q_strcat(cg.bannerPrint, sizeof(cg.bannerPrint), buff);
 		}
@@ -1436,18 +1439,18 @@ void CG_BannerPrint(const char *str)
 		if (cg.bannerPrint[i] == ' ' && neednewline)
 		{
 			cg.bannerPrint[i] = '\n';
-			textlen           = 0;
-			neednewline       = qfalse;
+			textlen = 0;
+			neednewline = qfalse;
 		}
 
 		// if still to long just cut it at BP_LINEWIDTH
 		if (textlen % BP_LINEWIDTH == 0 && textlen > 0)
 		{
 			Q_strncpyz(buff, &cg.bannerPrint[i], sizeof(buff));
-			cg.bannerPrint[i]     = '\n';
+			cg.bannerPrint[i] = '\n';
 			cg.bannerPrint[i + 1] = 0;
 			Q_strcat(cg.bannerPrint, sizeof(cg.bannerPrint), buff);
-			textlen     = 0;
+			textlen = 0;
 			neednewline = qfalse;
 		}
 	}
@@ -1489,12 +1492,12 @@ void CG_BannerPrint(const char *str)
 
 static void CG_DrawBannerPrint(void)
 {
-	char  *start;
-	int   l;
-	int   x, y, w;
+	char *start;
+	int  l;
+	int  x, y, w;
 	float *color;
 	char  lastcolor = COLOR_WHITE;
-	int   charHeight;
+	int charHeight;
 
 	if (!cg.bannerPrintTime)
 	{
@@ -1512,9 +1515,9 @@ static void CG_DrawBannerPrint(void)
 
 	start = cg.bannerPrint;
 
-	y          = 0;
+	y = 0;
 	charHeight = CG_Text_Height_Ext("A", 0.25,
-	                                0, &cgs.media.limboFont1);
+		0, &cgs.media.limboFont1);
 
 
 	while (1)
@@ -1538,7 +1541,7 @@ static void CG_DrawBannerPrint(void)
 
 		//w = MINICHAR_WIDTH * CG_DrawStrlen( linebuffer );
 		w = CG_Text_Width_Ext(linebuffer, 0.25,
-		                      0, &cgs.media.limboFont1);
+			0, &cgs.media.limboFont1);
 
 		x = SCREEN_CENTER_X - w / 2;
 
@@ -1547,11 +1550,11 @@ static void CG_DrawBannerPrint(void)
 		//		qfalse, qtrue, MINICHAR_WIDTH, MINICHAR_HEIGHT, 0 );
 		y += charHeight * 1.5;
 		CG_Text_Paint_Ext(x, y,
-		                  0.25,
-		                  0.25,
-		                  color, va("^%c%s", colorchar, linebuffer),
-		                  0, 0, ITEM_TEXTSTYLE_SHADOWED,
-		                  &cgs.media.limboFont1);
+			0.25,
+			0.25,
+			color, va("^%c%s", colorchar, linebuffer),
+			0, 0, ITEM_TEXTSTYLE_SHADOWED,
+			&cgs.media.limboFont1);
 		//y += MINICHAR_HEIGHT;
 
 
@@ -1590,10 +1593,10 @@ for a few moments
 
 void CG_CenterPrint(const char *str, int y, int charWidth)
 {
-	char     *s;
-	int      i, len;                    // NERVE - SMF
+	char *s;
+	int  i, len;                        // NERVE - SMF
 	qboolean neednewline = qfalse;      // NERVE - SMF
-	int      priority    = 0;
+	int priority = 0;
 
 	// NERVE - SMF - don't draw if this print message is less important
 	if (cg.centerPrintTime && priority < cg.centerPrintPriority)
@@ -1617,18 +1620,18 @@ void CG_CenterPrint(const char *str, int y, int charWidth)
 		if (cg.centerPrint[i] == ' ' && neednewline)
 		{
 			cg.centerPrint[i] = '\n';
-			neednewline       = qfalse;
+			neednewline = qfalse;
 		}
 	}
 	// -NERVE - SMF
 
-	cg.centerPrintTime      = cg.time;
-	cg.centerPrintY         = y;
+	cg.centerPrintTime = cg.time;
+	cg.centerPrintY = y;
 	cg.centerPrintCharWidth = charWidth;
 
 	// count the number of lines for centering
 	cg.centerPrintLines = 1;
-	s                   = cg.centerPrint;
+	s = cg.centerPrint;
 	while (*s)
 	{
 		if (*s == '\n')
@@ -1650,8 +1653,8 @@ for a few moments
 */
 void CG_PriorityCenterPrint(const char *str, int y, int charWidth, int priority)
 {
-	char     *s;
-	int      i, len;                    // NERVE - SMF
+	char *s;
+	int  i, len;                        // NERVE - SMF
 	qboolean neednewline = qfalse;      // NERVE - SMF
 
 	// NERVE - SMF - don't draw if this print message is less important
@@ -1676,18 +1679,18 @@ void CG_PriorityCenterPrint(const char *str, int y, int charWidth, int priority)
 		if (cg.centerPrint[i] == ' ' && neednewline)
 		{
 			cg.centerPrint[i] = '\n';
-			neednewline       = qfalse;
+			neednewline = qfalse;
 		}
 	}
 	// -NERVE - SMF
 
-	cg.centerPrintTime      = cg.time + 2000;
-	cg.centerPrintY         = y;
+	cg.centerPrintTime = cg.time + 2000;
+	cg.centerPrintY = y;
 	cg.centerPrintCharWidth = charWidth;
 
 	// count the number of lines for centering
 	cg.centerPrintLines = 1;
-	s                   = cg.centerPrint;
+	s = cg.centerPrint;
 	while (*s)
 	{
 		if (*s == '\n')
@@ -1706,9 +1709,9 @@ CG_DrawCenterString
 */
 static void CG_DrawCenterString(void)
 {
-	char  *start;
-	int   l;
-	int   x, y, w;
+	char *start;
+	int  l;
+	int  x, y, w;
 	float *color;
 
 	if (!cg.centerPrintTime)
@@ -1719,7 +1722,7 @@ static void CG_DrawCenterString(void)
 	color = CG_FadeColor(cg.centerPrintTime, 1000 * cg_centertime.value);
 	if (!color)
 	{
-		cg.centerPrintTime     = 0;
+		cg.centerPrintTime = 0;
 		cg.centerPrintPriority = 0;
 		return;
 	}
@@ -1783,21 +1786,21 @@ CG_DrawWeapReticle
 */
 static void CG_DrawWeapReticle(void)
 {
-	vec4_t   color = { 0, 0, 0, 1 };
+	vec4_t color = { 0, 0, 0, 1 };
 	qboolean fg, garand, k43;
 
 	// DHM - Nerve :: So that we will draw reticle
 	if ((cg.snap->ps.pm_flags & PMF_FOLLOW) || cg.demoPlayback)
 	{
 		garand = (qboolean)(cg.snap->ps.weapon == WP_GARAND_SCOPE);
-		k43    = (qboolean)(cg.snap->ps.weapon == WP_K43_SCOPE);
-		fg     = (qboolean)(cg.snap->ps.weapon == WP_FG42SCOPE);
+		k43 = (qboolean)(cg.snap->ps.weapon == WP_K43_SCOPE);
+		fg  = (qboolean)(cg.snap->ps.weapon == WP_FG42SCOPE);
 	}
 	else
 	{
-		fg     = (qboolean)(cg.weaponSelect == WP_FG42SCOPE);
+		fg = (qboolean)(cg.weaponSelect == WP_FG42SCOPE);
 		garand = (qboolean)(cg.weaponSelect == WP_GARAND_SCOPE);
-		k43    = (qboolean)(cg.weaponSelect == WP_K43_SCOPE);
+		k43 = (qboolean)(cg.weaponSelect == WP_K43_SCOPE);
 	}
 
 	if (fg)
@@ -1876,16 +1879,16 @@ CG_DrawMortarReticle
 */
 static void CG_DrawMortarReticle(void)
 {
-	vec4_t color          = { 1.f, 1.f, 1.f, .5f };
-	vec4_t color_back     = { 0.f, 0.f, 0.f, .25f };
+	vec4_t color = { 1.f, 1.f, 1.f, .5f };
+	vec4_t color_back = { 0.f, 0.f, 0.f, .25f };
 	vec4_t color_extends  = { .77f, .73f, .1f, 1.f };
 	vec4_t color_lastfire = { .77f, .1f, .1f, 1.f };
 	//vec4_t	color_firerequest = { .23f, 1.f, .23f, 1.f };
-	vec4_t   color_firerequest = { 1.f, 1.f, 1.f, 1.f };
-	float    offset, localOffset;
-	int      i, min, majorOffset, val, printval, fadeTime;
-	char     *s;
-	float    angle, angleMin, angleMax;
+	vec4_t color_firerequest = { 1.f, 1.f, 1.f, 1.f };
+	float  offset, localOffset;
+	int i, min, majorOffset, val, printval, fadeTime;
+	char  *s;
+	float angle, angleMin, angleMax;
 	qboolean hasRightTarget, hasLeftTarget;
 
 	// Background
@@ -1906,8 +1909,8 @@ static void CG_DrawMortarReticle(void)
 	// that means left is cg.predictedPlayerState.viewangles[YAW] - .5f * 180
 	angle = 360 - AngleNormalize360(cg.predictedPlayerState.viewangles[YAW] - 90.f);
 
-	offset      = (5.f / 65536) * ((int)(angle * (65536 / 5.f)) & 65535);
-	min         = (int)(AngleNormalize360(angle - .5f * 180) / 15.f) * 15;
+	offset = (5.f / 65536) * ((int)(angle * (65536 / 5.f)) & 65535);
+	min = (int)(AngleNormalize360(angle - .5f * 180) / 15.f) * 15;
 	majorOffset = (int)(floor((int)floor(AngleNormalize360(angle - .5f * 180)) % 15) / 5.f);
 
 	for (val = i = 0; i < 36; i++)
@@ -2095,8 +2098,8 @@ static void CG_DrawMortarReticle(void)
 	// that means left is cg.predictedPlayerState.viewangles[PITCH] - .5f * 50
 	angle = AngleNormalize180(360 - (cg.predictedPlayerState.viewangles[PITCH] - 60));
 
-	offset      = (2.5f / 65536) * ((int)(angle * (65536 / 2.5f)) & 65535);
-	min         = floor((angle + .5f * 50) / 10.f) * 10;
+	offset = (2.5f / 65536) * ((int)(angle * (65536 / 2.5f)) & 65535);
+	min = floor((angle + .5f * 50) / 10.f) * 10;
 	majorOffset = (int)(floor((int)((angle + .5f * 50) * 10.f) % 100) / 25.f);
 
 	for (val = i = 0; i < 20; i++)
@@ -2225,6 +2228,7 @@ static void CG_DrawBinocReticle(void)
 {
 	// an alternative.  This gives nice sharp lines at the expense of a few extra polys
 	vec4_t color;
+
 	color[0] = color[1] = color[2] = 0;
 	color[3] = 1;
 
@@ -2256,11 +2260,11 @@ CG_DrawCrosshair
 */
 static void CG_DrawCrosshair(void)
 {
-	float     w, h;
+	float w, h;
 	qhandle_t hShader;
-	float     f;
-	float     x, y;
-	int       weapnum;          // DHM - Nerve
+	float f;
+	float x, y;
+	int weapnum;                // DHM - Nerve
 
 	if (cg.renderingThirdPerson)
 	{
@@ -2463,8 +2467,8 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient)
 {
 	trace_t trace;
 //	gentity_t	*traceEnt;
-	vec3_t    start, end;
-	float     dist;
+	vec3_t start, end;
+	float  dist;
 	centity_t *cent;
 
 	// We haven't hit a client yet
@@ -2496,8 +2500,8 @@ static float CG_ScanForCrosshairEntity(float *zChange, qboolean *hitClient)
 		    cg_entities[trace.entityNum].currentState.eType == ET_CONSTRUCTIBLE_MARKER)
 		{
 			// update the fade timer
-			cg.crosshairClientNum    = trace.entityNum;
-			cg.crosshairClientTime   = cg.time;
+			cg.crosshairClientNum  = trace.entityNum;
+			cg.crosshairClientTime = cg.time;
 			cg.identifyClientRequest = cg.crosshairClientNum;
 		}
 
@@ -2557,11 +2561,11 @@ CG_CheckForCursorHints
 */
 void CG_CheckForCursorHints(void)
 {
-	trace_t   trace;
-	vec3_t    start, end;
+	trace_t trace;
+	vec3_t  start, end;
 	centity_t *tracent;
-	vec3_t    pforward, eforward;
-	float     dist;
+	vec3_t pforward, eforward;
+	float  dist;
 
 
 	if (cg.renderingThirdPerson)
@@ -2662,14 +2666,14 @@ CG_DrawCrosshairNames
 */
 static void CG_DrawCrosshairNames(void)
 {
-	float      *color;
-	char       *name;
-	float      w;
+	float *color;
+	char  *name;
+	float w;
 	const char *s;
-	int        playerHealth = 0;
-	qboolean   drawStuff    = qfalse;
-	qboolean   isTank       = qfalse;
-	int        maxHealth    = 1;
+	int playerHealth = 0;
+	qboolean drawStuff = qfalse;
+	qboolean isTank = qfalse;
+	int maxHealth = 1;
 
 	// Distance to the entity under the crosshair
 	float dist;
@@ -2712,7 +2716,7 @@ static void CG_DrawCrosshairNames(void)
 			isTank = qtrue;
 
 			playerHealth = cg_entities[cg.crosshairClientNum].currentState.dl_intensity;
-			maxHealth    = 255;
+			maxHealth = 255;
 
 			s = Info_ValueForKey(CG_ConfigString(CS_SCRIPT_MOVER_NAMES), va("%i", cg.crosshairClientNum));
 			if (!*s)
@@ -2760,8 +2764,8 @@ static void CG_DrawCrosshairNames(void)
 		drawStuff = qtrue;
 
 		name = cgs.clientinfo[cg.crosshairClientNum].name;
-		s    = va("%s", name);
-		w    = ETJump::DrawStringWidth(s, 0.23f);
+		s = va("%s", name);
+		w = ETJump::DrawStringWidth(s, 0.23f);
 
 		ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
@@ -2789,6 +2793,7 @@ CG_DrawSpectator
 static void CG_DrawSpectator(void)
 {
 	const char *s;
+
 	if (cgs.demoCam.renderingFreeCam)
 	{
 		s = CG_TranslateString("FREECAM");
@@ -2808,7 +2813,7 @@ CG_DrawVote
 */
 static void CG_DrawVote(void)
 {
-	char  str1[32], str2[32];
+	char str1[32], str2[32];
 	vec4_t color{ 1, 1, 0, 1 };
 
 	const char *line_a = nullptr;
@@ -2887,10 +2892,13 @@ static void CG_DrawVote(void)
 		if (!(cg.snap->ps.eFlags & EF_VOTED))
 		{
 			line_a = va("VOTE(%i): %s", sec, cgs.voteString);
-			
-			if( cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES ) {
+
+			if (cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES)
+			{
 				line_b = va("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
-			} else {
+			}
+			else
+			{
 				line_b = va("YES(%s):%i, NO(%s):%i", str1, cgs.voteYes, str2, cgs.voteNo);
 			}
 		}
@@ -2904,7 +2912,8 @@ static void CG_DrawVote(void)
 			{
 				CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
 			}
-			else {
+			else
+			{
 				auto textWidth = ETJump::DrawStringWidth(va("Y:%i", cgs.voteYes), 0.23f);
 				CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1, color);
 			}
@@ -2932,7 +2941,7 @@ static void CG_DrawVote(void)
 
 	if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0)
 	{
-		switch (cgs.propositionClient) 
+		switch (cgs.propositionClient)
 		{
 		case -1:
 			line_a = CG_TranslateString("Your proposition has been submitted");
@@ -2968,18 +2977,20 @@ static void CG_DrawVote(void)
 		}
 	}
 
-	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) || 
-		(cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) || 
-		(cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
+	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) ||
+	    (cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) ||
+	    (cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
 	{
 		line_a = "Response Sent";
 	}
 
-	if (line_a) {
+	if (line_a)
+	{
 		ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a, 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
-	if (line_b) {
+	if (line_b)
+	{
 		ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b, 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
 }
@@ -3080,7 +3091,7 @@ CG_DrawSpectatorMessage
 static void CG_DrawSpectatorMessage(void)
 {
 	const char *str, *str2;
-	float      x, y;
+	float x, y;
 	static int lastconfigGet = 0;
 
 	if (cgs.demoCam.renderingFreeCam)
@@ -3134,7 +3145,7 @@ static void CG_DrawSpectatorMessage(void)
 float CG_CalculateReinfTime_Float(qboolean menu)
 {
 	team_t team;
-	int    dwDeployTime;
+	int dwDeployTime;
 
 	if (menu)
 	{
@@ -3172,10 +3183,10 @@ CG_DrawLimboMessage
 
 static void CG_DrawLimboMessage(void)
 {
-	float         color[4] = { 1, 1, 1, 1 };
-	const char    *str;
+	float color[4] = { 1, 1, 1, 1 };
+	const char *str;
 	playerState_t *ps = &cg.snap->ps;
-	int           y = 130;
+	int y = 130;
 
 	if (cgs.demoCam.renderingFreeCam)
 	{
@@ -3216,17 +3227,28 @@ All the cgaz huds
 =================
 */
 
-void GetColorFromString(vec4_t *output, char *colorString) {
+void GetColorFromString(vec4_t *output, char *colorString)
+{
 	const char *token;
-	for (auto i = 0; i < 4; i++) {
+
+	for (auto i = 0; i < 4; i++)
+	{
 		token = COM_Parse(&colorString);
-		if (*token == '\0') {
+		if (*token == '\0')
+		{
 			(*output)[i] = 1.f;
 		}
-		else {
+		else
+		{
 			float value = atof(token);
-			if (value > 1) value = 1.0;
-			else if (value < 0) value = 0.0;
+			if (value > 1)
+			{
+				value = 1.0;
+			}
+			else if (value < 0)
+			{
+				value = 0.0;
+			}
 			(*output)[i] = value;
 		}
 	}
@@ -3248,8 +3270,8 @@ static void DrawLine(float x1, float y1, float x2, float y2, vec4_t color)
 	float i;
 
 	trap_R_SetColor(color);
-	len   = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-	len   = sqrt(len);
+	len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+	len = sqrt(len);
 	stepx = (x2 - x1) / len;
 	stepy = (y2 - y1) / len;
 	for (i = 0; i < len; i++)
@@ -3265,20 +3287,20 @@ static void DrawLine(float x1, float y1, float x2, float y2, vec4_t color)
 
 static void CG_DrawCGazHUD(void)
 {
-	float         vel_angle; // absolute velocity angle
-	float         vel_relang; // relative velocity angle to viewangles[1]
-	vec3_t        vel;
-	vec_t         vel_size;
-	vec4_t        color;
-	float         accel, scale;
-	float         per_angle;
-	float         ang; // only for drawing
-	float         a;
-	float         y, h, w;
+	float  vel_angle;        // absolute velocity angle
+	float  vel_relang;        // relative velocity angle to viewangles[1]
+	vec3_t vel;
+	vec_t  vel_size;
+	vec4_t color;
+	float  accel, scale;
+	float  per_angle;
+	float  ang;        // only for drawing
+	float  a;
+	float  y, h, w;
 	playerState_t *ps;
-	int           right = 0, forward = 0;
-	int           scx = SCREEN_CENTER_X - 1, scy = SCREEN_CENTER_Y - 1;
-	vec4_t        color1, color2;
+	int right = 0, forward = 0;
+	int scx = SCREEN_CENTER_X - 1, scy = SCREEN_CENTER_Y - 1;
+	vec4_t color1, color2;
 
 	ps = &cg.predictedPlayerState;
 
@@ -3292,12 +3314,12 @@ static void CG_DrawCGazHUD(void)
 		return;
 	}
 
-	a        = cg_CGazAlpha.value;
-	a        = (a > 1.0f) ? 1.0f : (a < 0.0f) ? 0.0f : a;
+	a = cg_CGazAlpha.value;
+	a = (a > 1.0f) ? 1.0f : (a < 0.0f) ? 0.0f : a;
 	color[3] = a;
-	y        = cg_CGazY.integer > 0 ? cg_CGazY.integer % 480 : 0;
-	h        = cg_CGazHeight.integer > 0 ? cg_CGazHeight.integer : 0;
-	w        = cg_CGazWidth.integer > 0 ? cg_CGazWidth.integer : 0;
+	y = cg_CGazY.integer > 0 ? cg_CGazY.integer % 480 : 0;
+	h = cg_CGazHeight.integer > 0 ? cg_CGazHeight.integer : 0;
+	w = cg_CGazWidth.integer > 0 ? cg_CGazWidth.integer : 0;
 
 	VectorCopy(ps->velocity, vel);
 	// for a simplicity water, ladder etc. calculations are omitted
@@ -3317,7 +3339,7 @@ static void CG_DrawCGazHUD(void)
 			if (!(ps->pm_flags & PMF_TIME_KNOCKBACK))
 			{
 				control = speed < pm_stopspeed ? pm_stopspeed : speed;
-				drop   += control * pm_friction * pmove_msec.integer / 1000;
+				drop += control * pm_friction * pmove_msec.integer / 1000;
 			}
 			newspeed = speed - drop;
 			if (newspeed < 0)
@@ -3338,10 +3360,10 @@ static void CG_DrawCGazHUD(void)
 	}
 
 	vel_size = sqrt(vel[0] * vel[0] + vel[1] * vel[1]);
-	accel    = accel * ps->speed * pmove_msec.integer / 1000;
+	accel = accel * ps->speed * pmove_msec.integer / 1000;
 
 	// based on PM_CmdScale from bg_pmove.c
-	scale     = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps->sprintSpeedScale : ps->runSpeedScale;
+	scale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps->sprintSpeedScale : ps->runSpeedScale;
 	per_angle = (ps->speed - accel) / vel_size * scale;
 	if (per_angle < 1)
 	{
@@ -3392,7 +3414,7 @@ static void CG_DrawCGazHUD(void)
 		if (vel_relang > -90 && vel_relang < 90)
 		{
 			CG_FillRect(scx + w * vel_relang / 180, y,
-			            1, h, colorOrange);
+				1, h, colorOrange);
 		}
 
 		// left/right perfect strafe
@@ -3402,7 +3424,7 @@ static void CG_DrawCGazHUD(void)
 			if (ang > -90 && ang < 90)
 			{
 				CG_FillRect(scx + w * ang / 180, y,
-				            1, h, colorGreen);
+					1, h, colorGreen);
 			}
 		}
 		else
@@ -3411,7 +3433,7 @@ static void CG_DrawCGazHUD(void)
 			if (ang > -90 && ang < 90)
 			{
 				CG_FillRect(scx + w * ang / 180, y,
-				            1, h, colorGreen);
+					1, h, colorGreen);
 			}
 		}
 		return;
@@ -3423,7 +3445,8 @@ static void CG_DrawCGazHUD(void)
 		GetColorFromString(&color1, etj_CGazColor1.string);
 		GetColorFromString(&color2, etj_CGazColor2.string);
 
-		if (etj_stretchCgaz.integer) {
+		if (etj_stretchCgaz.integer)
+		{
 			ETJump_EnableWidthScale(false);
 			scx -= SCREEN_OFFSET_X;
 		}
@@ -3449,9 +3472,9 @@ static void CG_DrawCGazHUD(void)
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang - per_angle),
 			scy - vel_size * cos(vel_relang - per_angle), color1);
-		
+
 		ETJump_EnableWidthScale(true);
-		
+
 		return;
 
 	}
@@ -3484,13 +3507,13 @@ static void CG_DrawCGazHUD(void)
 			{
 				VectorCopy(colorGreen, color);
 				CG_FillRect(scx + w * ang / (2 * CGAZ3_ANG), y,
-				            -w * ang / (2 * CGAZ3_ANG), h, color);
+					-w * ang / (2 * CGAZ3_ANG), h, color);
 			}
 			else
 			{
 				VectorCopy(colorRed, color);
 				CG_FillRect(scx, y,
-				            w * ang / (2 * CGAZ3_ANG), h, color);
+					w * ang / (2 * CGAZ3_ANG), h, color);
 			}
 			return;
 		}
@@ -3503,13 +3526,13 @@ static void CG_DrawCGazHUD(void)
 			{
 				VectorCopy(colorGreen, color);
 				CG_FillRect(scx, y,
-				            w * ang / (2 * CGAZ3_ANG), h, color);
+					w * ang / (2 * CGAZ3_ANG), h, color);
 			}
 			else
 			{
 				VectorCopy(colorRed, color);
 				CG_FillRect(scx + w * ang / (2 * CGAZ3_ANG), y,
-				            -w * ang / (2 * CGAZ3_ANG), h, color);
+					-w * ang / (2 * CGAZ3_ANG), h, color);
 			}
 			return;
 		}
@@ -3570,7 +3593,7 @@ static qboolean CG_IsOverBounce(float vel, float initHeight,
 	float n1;
 	//float			n2;
 	float hn;
-	int   n;
+	int n;
 
 	a  = -psec * rintv / 2;
 	b  = psec * (vel - gravity * psec / 2 + rintv / 2);
@@ -3595,7 +3618,8 @@ static bool CG_SurfaceAllowsOverbounce(trace_t *trace)
 	if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE)
 	{
 		return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-	} else
+	}
+	else
 	{
 		return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
 	}
@@ -3610,16 +3634,16 @@ Fast OB detection.
 */
 static void CG_DrawOB(void)
 {
-	float         psec;
-	int           gravity;
-	vec3_t        snap;
-	float         rintv;
-	float         v0;
-	float         h0, t;
-	trace_t       trace;
-	vec3_t        start, end;
+	float psec;
+	int gravity;
+	vec3_t  snap;
+	float   rintv;
+	float   v0;
+	float   h0, t;
+	trace_t trace;
+	vec3_t  start, end;
 	playerState_t *ps;
-	float         x;
+	float x;
 
 	if (!cg_drawOB.integer || cg_thirdPerson.integer)
 	{
@@ -3636,10 +3660,10 @@ static void CG_DrawOB(void)
 		ps = &cg.predictedPlayerState;
 	}
 
-	psec    = pmove_msec.integer / 1000.0;
+	psec = pmove_msec.integer / 1000.0;
 	gravity = ps->gravity;
-	v0      = ps->velocity[2];
-	h0      = ps->origin[2] + ps->mins[2];
+	v0 = ps->velocity[2];
+	h0 = ps->origin[2] + ps->mins[2];
 	//CG_Printf("psec=%f, gravity=%d\n", psec, gravity);
 
 	VectorSet(snap, 0, 0, gravity * psec);
@@ -3659,7 +3683,7 @@ static void CG_DrawOB(void)
 		end[2] -= 131072;
 
 		CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-		         CONTENTS_SOLID);
+			CONTENTS_SOLID);
 
 		if (trace.fraction != 1.0 && trace.plane.type == 2)
 		{
@@ -3671,7 +3695,7 @@ static void CG_DrawOB(void)
 			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 			{
 				CG_DrawStringExt(x + 10, etj_OBY.integer, "B", colorWhite, qfalse, qtrue,
-				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
 		}
 	}
@@ -3681,7 +3705,7 @@ static void CG_DrawOB(void)
 	VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
 
 	CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-	         CONTENTS_SOLID);
+		CONTENTS_SOLID);
 
 	if (trace.fraction != 1.0 && trace.plane.type == 2)
 	{
@@ -3695,7 +3719,7 @@ static void CG_DrawOB(void)
 		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
@@ -3704,7 +3728,7 @@ static void CG_DrawOB(void)
 		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
@@ -3724,7 +3748,7 @@ static void CG_DrawOB(void)
 		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
@@ -3733,14 +3757,14 @@ static void CG_DrawOB(void)
 		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			b = qtrue;
 		}
 
 		if (b && CG_SurfaceAllowsOverbounce(&trace))
 		{
 			CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 		}
 	}
 }
@@ -3748,10 +3772,11 @@ static void CG_DrawOB(void)
 static void CG_DrawSlick(void)
 {
 	playerState_t *ps = NULL;
-	trace_t       trace;
-	vec3_t        start, end;
-	const float   minWalkNormal = 0.7;
-	float         x;
+	trace_t trace;
+	vec3_t  start, end;
+	const float minWalkNormal = 0.7;
+	float x;
+
 	if (!cg_drawSlick.integer)
 	{
 		return;
@@ -3787,9 +3812,10 @@ static void CG_DrawSlick(void)
 static void CG_DrawJumpDelay(void)
 {
 	trace_t trace;
-	vec3_t start, end;
+	vec3_t  start, end;
 	float x = etj_noJumpDelayX.integer;
 	float y = etj_noJumpDelayY.integer;
+
 	if (!etj_drawNoJumpDelay.integer)
 	{
 		return;
@@ -3800,9 +3826,11 @@ static void CG_DrawJumpDelay(void)
 	CG_Trace(&trace, start, nullptr, nullptr, end, cg.snap->ps.clientNum, CONTENTS_SOLID);
 	if (trace.surfaceFlags & SURF_NOJUMPDELAY)
 	{
-		if (shared.integer & BG_LEVEL_NO_JUMPDELAY) {
+		if (shared.integer & BG_LEVEL_NO_JUMPDELAY)
+		{
 			CG_DrawStringExt(x, y, "D", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-		} else
+		}
+		else
 		{
 			CG_DrawStringExt(x, y, "ND", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 		}
@@ -3810,29 +3838,29 @@ static void CG_DrawJumpDelay(void)
 }
 
 namespace ETJump {
-	const vec4_t SaveShadowColor{ 0.f, 0.f, 0.f, 0.8f };
-	const vec4_t SaveIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
-	const vec4_t SaveForbidColor{ 1.0f, 0.2f, 0.2f, 1.f };
-	const auto SaveIconSize = 20.f;
+const vec4_t SaveShadowColor{ 0.f, 0.f, 0.f, 0.8f };
+const vec4_t SaveIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
+const vec4_t SaveForbidColor{ 1.0f, 0.2f, 0.2f, 1.f };
+const auto SaveIconSize = 20.f;
 
-	static void drawSaveIcon(float x, float y)
-	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, true, SaveShadowColor);
-	}
+static void drawSaveIcon(float x, float y)
+{
+	drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, true, SaveShadowColor);
+}
 
-	static void drawNoSaveIcon(float x, float y)
-	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon, SaveForbidColor);
-	}
+static void drawNoSaveIcon(float x, float y)
+{
+	drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon, SaveForbidColor);
+}
 }
 
 static void CG_DrawSaveIndicator(void)
 {
 	trace_t trace;
-	
+
 	float x = etj_saveIndicatorX.integer;
 	float y = etj_saveIndicatorY.integer;
-	
+
 	if (!etj_drawSaveIndicator.integer)
 	{
 		return;
@@ -3847,30 +3875,39 @@ static void CG_DrawSaveIndicator(void)
 
 	auto ps = cg.snap->ps;
 	CG_TraceCapsule(&trace, ps.origin, ps.mins, ps.maxs, ps.origin, ps.clientNum, CONTENTS_NOSAVE);
-	
+
 	if (shared.integer & BG_LEVEL_NO_SAVE)
 	{
-		if (trace.fraction != 1.0) {
-			if (etj_drawSaveIndicator.integer != 2) {
+		if (trace.fraction != 1.0)
+		{
+			if (etj_drawSaveIndicator.integer != 2)
+			{
 				ETJump::drawSaveIcon(x, y);
 			}
 		}
-		else {
-			if (etj_drawSaveIndicator.integer != 3) {
+		else
+		{
+			if (etj_drawSaveIndicator.integer != 3)
+			{
 				ETJump::drawSaveIcon(x, y);
 				ETJump::drawNoSaveIcon(x, y);
 			}
 		}
-	} else
+	}
+	else
 	{
-		if (trace.fraction != 1.0) {
-			if (etj_drawSaveIndicator.integer != 2) {
+		if (trace.fraction != 1.0)
+		{
+			if (etj_drawSaveIndicator.integer != 2)
+			{
 				ETJump::drawSaveIcon(x, y);
 				ETJump::drawNoSaveIcon(x, y);
 			}
 		}
-		else {
-			if (etj_drawSaveIndicator.integer != 3) {
+		else
+		{
+			if (etj_drawSaveIndicator.integer != 3)
+			{
 				ETJump::drawSaveIcon(x, y);
 			}
 		}
@@ -3891,10 +3928,10 @@ enum class KeyTypes
 static void CG_DrawKeys(void)
 {
 	playerState_t *ps;
-	float         x, y, size;
-	int           skew;
-	bool          drawShadow = etj_keysShadow.integer > 0;
-	vec4_t        shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	float x, y, size;
+	int  skew;
+	bool drawShadow = etj_keysShadow.integer > 0;
+	vec4_t shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 
 	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
 
@@ -3909,7 +3946,7 @@ static void CG_DrawKeys(void)
 	{
 		return;
 	}
-	
+
 	skew = 0;
 
 	ps = &cg.predictedPlayerState;
@@ -3965,7 +4002,7 @@ static void CG_DrawKeys(void)
 
 	// second (middle) row
 	// left
-	x = cg_keysX.value + skew;
+	x  = cg_keysX.value + skew;
 	y += size;
 
 	ETJump_AdjustPosition(&x);
@@ -3998,7 +4035,7 @@ static void CG_DrawKeys(void)
 	}
 
 	// third (bottom) row
-	x = cg_keysX.value;
+	x  = cg_keysX.value;
 	y += size;
 
 	ETJump_AdjustPosition(&x);
@@ -4081,9 +4118,9 @@ CG_DrawWarmup
 */
 static void CG_DrawWarmup(void)
 {
-	int        w;
-	int        sec;
-	int        cw;
+	int w;
+	int sec;
+	int cw;
 	const char *s, *s1, *s2;
 
 	sec = cg.warmup;
@@ -4161,11 +4198,11 @@ static void CG_DrawWarmup(void)
 	if (cgs.gametype == GT_WOLF_STOPWATCH)
 	{
 		const char *cs;
-		int        defender;
+		int defender;
 
 		s = va("%s %i", CG_TranslateString("Stopwatch Round"), cgs.currentRound + 1);
 
-		cs       = CG_ConfigString(CS_MULTI_INFO);
+		cs = CG_ConfigString(CS_MULTI_INFO);
 		defender = atoi(Info_ValueForKey(cs, "defender"));
 
 		if (!defender)
@@ -4237,15 +4274,15 @@ static void CG_DrawWarmup(void)
 
 		w = CG_DrawStrlen(s);
 		CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 140, s, colorWhite,
-		                 qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 
 		w = CG_DrawStrlen(s1);
 		CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 160, s1, colorWhite,
-		                 qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 
 		w = CG_DrawStrlen(s2);
 		CG_DrawStringExt(SCREEN_CENTER_X - w * cw / 2, 180, s2, colorWhite,
-		                 qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 	}
 }
 
@@ -4259,9 +4296,9 @@ CG_DrawFlashFade
 static void CG_DrawFlashFade(void)
 {
 	static int lastTime;
-	int        elapsed, time;
-	vec4_t     col;
-	qboolean   fBlackout = (!CG_IsSinglePlayer() && int_ui_blackout.integer > 0) ? qtrue : qfalse;
+	int elapsed, time;
+	vec4_t col;
+	qboolean fBlackout = (!CG_IsSinglePlayer() && int_ui_blackout.integer > 0) ? qtrue : qfalse;
 
 	if (cgs.fadeStartTime + cgs.fadeDuration < cg.time)
 	{
@@ -4322,10 +4359,10 @@ static void CG_DrawFlashFade(void)
 		// OSP - Show who is speclocked
 		if (fBlackout)
 		{
-			int   i, nOffset = 90;
-			const char  *str, *format = "The %s team is speclocked!";
-			const char  *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIES", "???" };
-			float color[4]               = { 1, 1, 0, 1 };
+			int i, nOffset = 90;
+			const char *str, *format = "The %s team is speclocked!";
+			const char *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIES", "???" };
+			float color[4] = { 1, 1, 0, 1 };
 
 			for (i = TEAM_AXIS; i <= TEAM_ALLIES; i++)
 			{
@@ -4354,7 +4391,7 @@ static void CG_DrawFlashZoomTransition(void)
 {
 	vec4_t color;
 	float  frac;
-	int    fadeTime;
+	int fadeTime;
 
 	if (!cg.snap)
 	{
@@ -4530,8 +4567,8 @@ CG_DrawObjectiveInfo
 
 void CG_ObjectivePrint(const char *str, int charWidth)
 {
-	char     *s;
-	int      i, len;                    // NERVE - SMF
+	char *s;
+	int  i, len;                        // NERVE - SMF
 	qboolean neednewline = qfalse;      // NERVE - SMF
 
 	if (cg.centerPrintTime)
@@ -4556,18 +4593,18 @@ void CG_ObjectivePrint(const char *str, int charWidth)
 		if (cg.oidPrint[i] == ' ' && neednewline)
 		{
 			cg.oidPrint[i] = '\n';
-			neednewline    = qfalse;
+			neednewline = qfalse;
 		}
 	}
 	// -NERVE - SMF
 
-	cg.oidPrintTime      = cg.time;
-	cg.oidPrintY         = OID_TOP;
+	cg.oidPrintTime = cg.time;
+	cg.oidPrintY = OID_TOP;
 	cg.oidPrintCharWidth = charWidth;
 
 	// count the number of lines for oiding
 	cg.oidPrintLines = 1;
-	s                = cg.oidPrint;
+	s = cg.oidPrint;
 	while (*s)
 	{
 		if (*s == '\n')
@@ -4580,12 +4617,13 @@ void CG_ObjectivePrint(const char *str, int charWidth)
 
 static void CG_DrawObjectiveInfo(void)
 {
-	char   *start;
-	int    l;
-	int    x, y, w, h;
-	int    x1, y1, x2, y2;
+	char *start;
+	int  l;
+	int  x, y, w, h;
+	int  x1, y1, x2, y2;
 	float  *color;
 	vec4_t backColor;
+
 	backColor[0] = 0.2f;
 	backColor[1] = 0.2f;
 	backColor[2] = 0.2f;
@@ -4703,7 +4741,7 @@ static void CG_DrawObjectiveInfo(void)
 		x = SCREEN_CENTER_X - w / 2; // JPW NERVE
 
 		CG_DrawStringExt(x, y, linebuffer, color, qfalse, qtrue,
-		                 cg.oidPrintCharWidth, (int)(cg.oidPrintCharWidth * 1.5), 0);
+			cg.oidPrintCharWidth, (int)(cg.oidPrintCharWidth * 1.5), 0);
 
 		y += cg.oidPrintCharWidth * 1.5;
 
@@ -4747,7 +4785,7 @@ void CG_Fade(int r, int g, int b, int a, int time, int duration)
 
 	// incorporate this into the current fade scheme
 
-	cgs.fadeAlpha     = (float)a / 255.0f;
+	cgs.fadeAlpha = (float)a / 255.0f;
 	cgs.fadeStartTime = time;
 	cgs.fadeDuration  = duration;
 
@@ -4782,8 +4820,8 @@ CG_ScreenFade
 */
 static void CG_ScreenFade(void)
 {
-	int    msec;
-	int    i;
+	int msec;
+	int i;
 	float  t, invt;
 	vec4_t color;
 
@@ -4811,7 +4849,7 @@ static void CG_ScreenFade(void)
 	}
 	else
 	{
-		t    = ( float )msec * cg.fadeRate;
+		t = ( float )msec * cg.fadeRate;
 		invt = 1.0f - t;
 
 		for (i = 0; i < 4; i++)
@@ -4960,7 +4998,7 @@ else
 
 	}
 
-	len        = 1 - min(1.f, len / 2000.f);
+	len = 1 - min(1.f, len / 2000.f);
 	iconWidth  = 14 * len + 4;    // where did this calc. come from?
 	iconHeight = 14 * len + 4;
 
@@ -4998,7 +5036,7 @@ static void CG_DrawNewCompass(void)
 	snapshot_t *snap;
 	float angle;
 	int i;
-	static float lastangle  = 0;
+	static float lastangle = 0;
 	static float anglespeed = 0;
 	float diff;
 
@@ -5063,8 +5101,8 @@ static void CG_DrawNewCompass(void)
 
 	CG_DrawPic(basex + 4, basey + 4, basew - 8, baseh - 8, cgs.media.compassShader);
 
-	angle       = (cg.predictedPlayerState.viewangles[YAW] + 180.f) / 360.f - (0.125f);
-	diff        = AngleSubtract(angle * 360, lastangle * 360) / 360.f;
+	angle = (cg.predictedPlayerState.viewangles[YAW] + 180.f) / 360.f - (0.125f);
+	diff = AngleSubtract(angle * 360, lastangle * 360) / 360.f;
 	anglespeed /= 1.08f;
 	anglespeed += diff * 0.01f;
 	if (Q_fabs(anglespeed) < 0.00001f)
@@ -5334,7 +5372,7 @@ static void CG_DrawPlayerStatusHead(void)
 	hudHeadAnimNumber_t anim;
 	rectDef_t headRect = { 44, 480 - 92, 62, 80 };
 //	rectDef_t headHintRect =	{ 40, 480 - 22, 20, 20 };
-	bg_character_t *character     = CG_CharacterForPlayerstate(&cg.snap->ps);
+	bg_character_t *character = CG_CharacterForPlayerstate(&cg.snap->ps);
 	bg_character_t *headcharacter = BG_GetCharacter(cgs.clientinfo[cg.snap->ps.clientNum].team, cgs.clientinfo[cg.snap->ps.clientNum].cls);
 
 	qhandle_t painshader = 0;
@@ -5433,12 +5471,12 @@ static void CG_DrawPlayerHealthBar(rectDef_t *rect)
 
 static void CG_DrawStaminaBar(rectDef_t *rect)
 {
-	vec4_t bgcolour  = { 1.f, 1.f, 1.f, 0.3f };
-	vec4_t colour    = { 0.1f, 1.0f, 0.1f, 0.5f };
+	vec4_t bgcolour = { 1.f, 1.f, 1.f, 0.3f };
+	vec4_t colour = { 0.1f, 1.0f, 0.1f, 0.5f };
 	vec4_t colourlow = { 1.0f, 0.1f, 0.1f, 0.5f };
-	vec_t *color     = colour;
-	int flags        = 1 | 4 | 16 | 64;
-	float frac       = cg.pmext.sprintTime / (float)SPRINTTIME;
+	vec_t *color = colour;
+	int flags = 1 | 4 | 16 | 64;
+	float frac = cg.pmext.sprintTime / (float)SPRINTTIME;
 
 	if (cg.snap->ps.powerups[PW_ADRENALINE])
 	{
@@ -5529,7 +5567,7 @@ static void CG_DrawWeapRecharge(rectDef_t *rect)
 	if (fade)
 	{
 		bgcolor[3] *= 0.4f;
-		color[3]   *= 0.4;
+		color[3] *= 0.4;
 	}
 
 	CG_FilledBar(rect->x, rect->y + (rect->h * 0.1f), rect->w, rect->h * 0.84f, color, NULL, bgcolor, barFrac, flags);
@@ -5546,6 +5584,7 @@ static void CG_DrawPlayerStatus(void)
 	int weap;
 	playerState_t *ps;
 	rectDef_t rect;
+
 //	vec4_t			colorFaded = { 1.f, 1.f, 1.f, 0.3f };
 
 	ps = &cg.snap->ps;
@@ -5565,7 +5604,7 @@ static void CG_DrawPlayerStatus(void)
 		int ws = (cg.mvTotalClients > 0) ? cgs.clientinfo[cg.snap->ps.clientNum].weaponState : BG_simpleWeaponState(cg.snap->ps.weaponstate);
 		CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH) ? &colorWhite : (ws == WSTATE_FIRE) ? &colorRed : &colorYellow));
 	}
-	
+
 	if (cg_HUD_weaponIcon.integer)
 	{
 		// Draw ammo
@@ -5711,7 +5750,7 @@ static void CG_DrawPlayerStats(void)
 	if (cg_HUD_playerHealth.integer)
 	{
 		str = va("%i", cg.snap->ps.stats[STAT_HEALTH]);
-		w   = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
+		w = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X - 28 - w, 480 - 4, 0.25f, 0.25f, colorWhite, str, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X - 28 + 2, 480 - 4, 0.2f, 0.2f, colorWhite, "HP", 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 	}
@@ -5746,7 +5785,7 @@ static void CG_DrawPlayerStats(void)
 
 
 		str = va("%i", cg.snap->ps.stats[STAT_XP]);
-		w   = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
+		w = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X + 28 - w, 480 - 4, 0.25f, 0.25f, clr, str, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X + 28 + 2, 480 - 4, 0.2f, 0.2f, clr, "XP", 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 
@@ -5789,7 +5828,7 @@ void CG_StatsDebugAddText(const char *text)
 		}
 
 		Q_strncpyz(statsDebugStrings[statsDebugPos], text, 512);
-		statsDebugTime[statsDebugPos]      = cg.time;
+		statsDebugTime[statsDebugPos] = cg.time;
 		statsDebugTextWidth[statsDebugPos] = CG_Text_Width_Ext(text, .15f, 0, &cgs.media.limboFont2);
 
 		CG_Printf("%s\n", text);
@@ -5909,8 +5948,8 @@ void CG_DrawDemoRecording(void)
 void CG_DrawRouteDesign(void)
 {
 	const char *s = va("Designing a route");
-	int x         = SCREEN_CENTER_X, y = 30, w = 0;
-	float sizeX   = 0.1f * 3, sizeY = 0.1f * 3;
+	int x = SCREEN_CENTER_X, y = 30, w = 0;
+	float sizeX = 0.1f * 3, sizeY = 0.1f * 3;
 
 	if (cg.routeDesigner)
 	{
@@ -6142,7 +6181,7 @@ static void CG_Draw2D(void)
 	{
 		CG_Fireteams_Draw();
 	}
-	
+
 	if (!cgs.demoCam.renderingFreeCam)
 	{
 		ETJump_DrawDrawables();
@@ -6156,7 +6195,7 @@ static void CG_Draw2D(void)
 
 	// Info overlays
 	CG_DrawOverlays();
-	
+
 	if (!cgs.demoCam.renderingFreeCam)
 	{
 		// OSP - window updates
@@ -6175,24 +6214,27 @@ void CG_StartShakeCamera(float p, entityState_t *es)
 	auto attacker = static_cast<char>(es->clientNum);
 
 	//ETJump: never shake cam from explosions
-	if (etj_explosivesShake.integer == 0) {
+	if (etj_explosivesShake.integer == 0)
+	{
 		return;
 	}
 
 	//ETJump: shake cam only from other players explosives
-	if (etj_explosivesShake.integer == 1 && attacker == cg.clientNum) {
+	if (etj_explosivesShake.integer == 1 && attacker == cg.clientNum)
+	{
 		return;
 	}
 
 	//ETJump: shake cam only from own explosives
-	if (etj_explosivesShake.integer == 2 && attacker != cg.clientNum) {
+	if (etj_explosivesShake.integer == 2 && attacker != cg.clientNum)
+	{
 		return;
 	}
 
 	cg.cameraShakeScale = p;
 	cg.cameraShakeLength = 1000 * (p * p);
-	cg.cameraShakeTime   = cg.time + cg.cameraShakeLength;
-	cg.cameraShakePhase  = crandom() * M_PI; // start chain in random dir
+	cg.cameraShakeTime = cg.time + cg.cameraShakeLength;
+	cg.cameraShakePhase = crandom() * M_PI;  // start chain in random dir
 }
 
 void CG_ShakeCamera()
@@ -6211,19 +6253,19 @@ void CG_ShakeCamera()
 	// ydnar: move the camera
 	#if 0
 	// up/down
-	val                     = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
 	cg.refdefViewAngles[0] += val;
 
 	// left/right
-	val                     = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
 	cg.refdefViewAngles[1] += val;
 	#else
 	// move
-	val                   = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[2] += val;
-	val                   = sin(M_PI * 13 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 13 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[1] += val;
-	val                   = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
+	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[0] += val;
 	#endif
 
@@ -6239,7 +6281,7 @@ void CG_DrawMiscGamemodels(void)
 
 	memset(&ent, 0, sizeof(ent));
 
-	ent.reType            = RT_MODEL;
+	ent.reType = RT_MODEL;
 	ent.nonNormalizedAxes = qtrue;
 
 	// ydnar: static gamemodels don't project shadows
@@ -6319,12 +6361,12 @@ void SetFov(float fov)
 
 static void CG_ChangeFovBasedOnSpeed()
 {
-	float speed           = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
-	float speedDiff       = speed - movie_fovMinSpeed.value;
-	float additionalFov   = movie_fovMax.value - movie_fovMin.value;
+	float speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+	float speedDiff = speed - movie_fovMinSpeed.value;
+	float additionalFov = movie_fovMax.value - movie_fovMin.value;
 	float minMaxSpeedDiff = movie_fovMaxSpeed.value - movie_fovMinSpeed.value;
 	float currentSpeedFov = movie_fovMin.value;
-	static int fpsValue   = 0;
+	static int fpsValue = 0;
 
 	if (!movie_changeFovBasedOnSpeed.integer || !cg.demoPlayback || cgs.demoCam.renderingFreeCam)
 	{

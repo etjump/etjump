@@ -15,8 +15,8 @@ global pain sound events for all clients.
 void P_DamageFeedback(gentity_t *player)
 {
 	gclient_t *client;
-	float     count;
-	vec3_t    angles;
+	float  count;
+	vec3_t angles;
 
 	client = player->client;
 	if (client->ps.pm_type == PM_DEAD)
@@ -43,7 +43,7 @@ void P_DamageFeedback(gentity_t *player)
 	if (client->damage_fromWorld)
 	{
 		client->ps.damagePitch = 255;
-		client->ps.damageYaw   = 255;
+		client->ps.damageYaw = 255;
 
 		client->damage_fromWorld = qfalse;
 	}
@@ -51,7 +51,7 @@ void P_DamageFeedback(gentity_t *player)
 	{
 		vectoangles(client->damage_from, angles);
 		client->ps.damagePitch = angles[PITCH] / 360.0 * 256;
-		client->ps.damageYaw   = angles[YAW] / 360.0 * 256;
+		client->ps.damageYaw = angles[YAW] / 360.0 * 256;
 	}
 
 	// play an apropriate pain sound
@@ -68,7 +68,7 @@ void P_DamageFeedback(gentity_t *player)
 	//
 	// clear totals
 	//
-	client->damage_blood     = 0;
+	client->damage_blood = 0;
 	client->damage_knockback = 0;
 }
 
@@ -106,7 +106,7 @@ void P_WorldEffects(gentity_t *ent)
 			if (ent->client->ps.powerups[PW_BREATHER])   // take air from the breather now that we need it
 			{
 				ent->client->ps.powerups[PW_BREATHER] -= (level.time - ent->client->airOutTime);
-				ent->client->airOutTime                = level.time + (level.time - ent->client->airOutTime);
+				ent->client->airOutTime = level.time + (level.time - ent->client->airOutTime);
 			}
 			else
 			{
@@ -148,7 +148,7 @@ void P_WorldEffects(gentity_t *ent)
 	else
 	{
 		ent->client->airOutTime = level.time + 12000;
-		ent->damage             = 2;
+		ent->damage = 2;
 	}
 
 	//
@@ -162,7 +162,7 @@ void P_WorldEffects(gentity_t *ent)
 			if (ent->watertype & CONTENTS_LAVA)
 			{
 				G_Damage(ent, NULL, NULL, NULL, NULL,
-				         30 * waterlevel, 0, MOD_LAVA);
+					30 * waterlevel, 0, MOD_LAVA);
 			}
 
 		}
@@ -296,9 +296,9 @@ ClientImpacts
 */
 void ClientImpacts(gentity_t *ent, pmove_t *pm)
 {
-	int       i, j;
+	int i, j;
 	gentity_t *other;
-	trace_t   trace;
+	trace_t trace;
 
 	memset(&trace, 0, sizeof(trace));
 	for (i = 0 ; i < pm->numtouch ; i++)
@@ -336,11 +336,11 @@ Spectators will only interact with teleporters.
 */
 void    G_TouchTriggers(gentity_t *ent)
 {
-	int           i, num;
-	int           touch[MAX_GENTITIES];
-	gentity_t     *hit;
-	trace_t       trace;
-	vec3_t        mins, maxs;
+	int i, num;
+	int touch[MAX_GENTITIES];
+	gentity_t *hit;
+	trace_t trace;
+	vec3_t  mins, maxs;
 	static vec3_t range = { 40, 40, 52 };
 
 	if (!ent->client)
@@ -439,7 +439,7 @@ SpectatorThink
 */
 void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 {
-	pmove_t   pm;
+	pmove_t pm;
 	gclient_t *client;
 	gentity_t *crosshairEnt = NULL; // rain - #480
 
@@ -469,7 +469,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 	if (client->sess.spectatorState != SPECTATOR_FOLLOW)
 	{
 		client->ps.pm_type = PM_SPECTATOR;
-		client->ps.speed   = 800; // was: 400 // faster than normal
+		client->ps.speed = 800;   // was: 400 // faster than normal
 		if (client->ps.sprintExertTime)
 		{
 			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
@@ -488,14 +488,14 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 
 		// set up for pmove
 		memset(&pm, 0, sizeof(pm));
-		pm.ps            = &client->ps;
-		pm.pmext         = &client->pmext;
-		pm.character     = client->pers.character;
-		pm.cmd           = *ucmd;
-		pm.skill         = client->sess.skill;
-		pm.tracemask     = MASK_PLAYERSOLID & ~CONTENTS_BODY; // spectators can fly through bodies
-		pm.trace         = trap_TraceCapsuleNoEnts;
-		pm.pointcontents = trap_PointContents;
+		pm.ps = &client->ps;
+		pm.pmext = &client->pmext;
+		pm.character = client->pers.character;
+		pm.cmd = *ucmd;
+		pm.skill = client->sess.skill;
+		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;     // spectators can fly through bodies
+		pm.trace = trap_TraceCapsuleNoEnts;
+		pm.pointcontents  = trap_PointContents;
 		pm.noActivateLean = client->pers.noActivateLean;
 
 #ifdef SAVEGAME_SUPPORT
@@ -528,11 +528,11 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 
 
 	client->oldbuttons = client->buttons;
-	client->buttons    = ucmd->buttons;
+	client->buttons = ucmd->buttons;
 
 //----(SA)	added
 	client->oldwbuttons = client->wbuttons;
-	client->wbuttons    = ucmd->wbuttons;
+	client->wbuttons = ucmd->wbuttons;
 
 	// attack button cycles through spectators
 	if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK))
@@ -548,11 +548,11 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 		Cmd_SwapPlacesWithBot_f(ent, ent->client->sess.spectatorClient);
 	}
 	else if (
-	    (client->sess.sessionTeam == TEAM_SPECTATOR) &&   // don't let dead team players do free fly
-	    (client->sess.spectatorState == SPECTATOR_FOLLOW) &&
-	    (((client->buttons & BUTTON_ACTIVATE) &&
-	      !(client->oldbuttons & BUTTON_ACTIVATE)) || ucmd->upmove > 0) &&
-	    G_allowFollow(ent, TEAM_AXIS) && G_allowFollow(ent, TEAM_ALLIES))
+		(client->sess.sessionTeam == TEAM_SPECTATOR) &&   // don't let dead team players do free fly
+		(client->sess.spectatorState == SPECTATOR_FOLLOW) &&
+		(((client->buttons & BUTTON_ACTIVATE) &&
+		  !(client->oldbuttons & BUTTON_ACTIVATE)) || ucmd->upmove > 0) &&
+		G_allowFollow(ent, TEAM_AXIS) && G_allowFollow(ent, TEAM_ALLIES))
 	{
 		// code moved to StopFollowing
 		StopFollowing(ent);
@@ -576,7 +576,7 @@ qboolean ClientInactivityTimer(gclient_t *client)
 
 		// give everyone some time, so if the operator sets g_inactivity during
 		// gameplay, everyone isn't kicked
-		client->inactivityTime    = level.time + 60 * 1000;
+		client->inactivityTime = level.time + 60 * 1000;
 		client->inactivityWarning = qfalse;
 	}
 	else if (client->pers.cmd.forwardmove ||
@@ -586,15 +586,15 @@ qboolean ClientInactivityTimer(gclient_t *client)
 	         (client->pers.cmd.buttons & BUTTON_ATTACK) ||
 	         (client->pers.cmd.wbuttons & WBUTTON_LEANLEFT) ||
 	         (client->pers.cmd.wbuttons & WBUTTON_LEANRIGHT)
-			 // ETJump: we don't care about limbo players
+	         // ETJump: we don't care about limbo players
 	         /*|| client->ps.pm_type == PM_DEAD*/)
 	{
 
 		client->inactivityWarning = qfalse;
-		client->inactivityTime    = level.time + 1000 *
-		                            ((client->sess.sessionTeam != TEAM_SPECTATOR) ?
-		                             g_inactivity.integer :
-		                             g_spectatorInactivity.integer);
+		client->inactivityTime = level.time + 1000 *
+		                         ((client->sess.sessionTeam != TEAM_SPECTATOR) ?
+		                          g_inactivity.integer :
+		                          g_spectatorInactivity.integer);
 
 	}
 	else if (!client->pers.localClient)
@@ -602,7 +602,7 @@ qboolean ClientInactivityTimer(gclient_t *client)
 		if (level.time > client->inactivityTime && client->inactivityWarning)
 		{
 			client->inactivityWarning = qfalse;
-			client->inactivityTime    = level.time + 60 * 1000;
+			client->inactivityTime = level.time + 60 * 1000;
 
 			VectorCopy(client->ps.origin, client->sess.posBeforeInactivity);
 			client->sess.loadedPosBeforeInactivity = qfalse;
@@ -621,7 +621,7 @@ qboolean ClientInactivityTimer(gclient_t *client)
 			G_Printf("10s inactivity warning issued to: %s\n", client->pers.netname);
 
 			client->inactivityWarning = qtrue;
-			client->inactivityTime    = level.time + 10000; // Just for safety
+			client->inactivityTime = level.time + 10000;    // Just for safety
 		}
 	}
 	return qtrue;
@@ -638,7 +638,7 @@ void ClientTimerActions(gentity_t *ent, int msec)
 {
 	gclient_t *client;
 
-	client                = ent->client;
+	client = ent->client;
 	client->timeResidual += msec;
 
 	while (client->timeResidual >= 1000)
@@ -646,8 +646,8 @@ void ClientTimerActions(gentity_t *ent, int msec)
 		client->timeResidual -= 1000;
 
 		// regenerate if not deathrunning
-		if (client->sess.playerType == PC_MEDIC && 
-			!(client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoDamageRuns)))
+		if (client->sess.playerType == PC_MEDIC &&
+		    !(client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoDamageRuns)))
 		{
 			if (ent->health < client->ps.stats[STAT_MAX_HEALTH])
 			{
@@ -691,11 +691,11 @@ void ClientIntermissionThink(gclient_t *client)
 
 	// swap and latch button actions
 	client->oldbuttons = client->buttons;
-	client->buttons    = client->pers.cmd.buttons;
+	client->buttons = client->pers.cmd.buttons;
 
 //----(SA)	added
 	client->oldwbuttons = client->wbuttons;
-	client->wbuttons    = client->pers.cmd.wbuttons;
+	client->wbuttons = client->pers.cmd.wbuttons;
 }
 
 
@@ -709,13 +709,13 @@ but any server game effects are handled here
 */
 void ClientEvents(gentity_t *ent, int oldEventSequence)
 {
-	int       i;
-	int       event;
+	int i;
+	int event;
 	gclient_t *client;
-	int       damage;
+	int damage;
 
 	//Feen: PGM - CrashLand Fix
-	int      crashEvent  = 0;
+	int crashEvent = 0;
 	qboolean portalEvent = qfalse;
 
 
@@ -880,25 +880,25 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 			}
 			else if (crashEvent == EV_FALL_DMG_50)
 			{
-				damage                    = 50;
+				damage = 50;
 				ent->client->ps.pm_time   = 1000;
 				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else if (crashEvent == EV_FALL_DMG_25)
 			{
-				damage                    = 25;
+				damage = 25;
 				ent->client->ps.pm_time   = 250;
 				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else if (crashEvent == EV_FALL_DMG_15)
 			{
-				damage                    = 15;
+				damage = 15;
 				ent->client->ps.pm_time   = 1000;
 				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else if (crashEvent == EV_FALL_DMG_10)
 			{
-				damage                    = 10;
+				damage = 10;
 				ent->client->ps.pm_time   = 1000;
 				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
@@ -959,15 +959,15 @@ void SendPendingPredictableEvents(playerState_t *ps)
 // DHM - Nerve
 void WolfFindMedic(gentity_t *self)
 {
-	int       i, medic = -1;
+	int i, medic = -1;
 	gclient_t *cl;
-	vec3_t    start, end;
+	vec3_t start, end;
 //	vec3_t	temp;	// rain - unused
 	trace_t tr;
-	float   bestdist = 1024, dist;
+	float bestdist = 1024, dist;
 
-	self->client->ps.viewlocked_entNum    = 0;
-	self->client->ps.viewlocked           = 0;
+	self->client->ps.viewlocked_entNum = 0;
+	self->client->ps.viewlocked = 0;
 	self->client->ps.stats[STAT_DEAD_YAW] = 999;
 
 	VectorCopy(self->s.pos.trBase, start);
@@ -1036,7 +1036,7 @@ void WolfFindMedic(gentity_t *self)
 	if (medic >= 0)
 	{
 		self->client->ps.viewlocked_entNum = medic;
-		self->client->ps.viewlocked        = 7;
+		self->client->ps.viewlocked = 7;
 	}
 }
 
@@ -1046,8 +1046,8 @@ void CheckForEvents(gentity_t *ent)
 	    && ent->client->sess.nextProgressionDecayEvent < level.time)
 	{
 		ent->client->sess.previousClientMapProgression = ent->client->sess.clientMapProgression;
-		ent->client->sess.clientMapProgression         = ent->client->sess.upcomingClientMapProgression;
-		ent->client->sess.decayProgression             = qfalse;
+		ent->client->sess.clientMapProgression = ent->client->sess.upcomingClientMapProgression;
+		ent->client->sess.decayProgression = qfalse;
 
 	}
 }
@@ -1067,8 +1067,8 @@ once for each server frame, which makes for smooth demo recording.
 */
 void ClientThink_real(gentity_t *ent)
 {
-	int       msec, oldEventSequence;
-	pmove_t   pm;
+	int msec, oldEventSequence;
+	pmove_t pm;
 	usercmd_t *ucmd;
 	gclient_t *client = ent->client;
 
@@ -1081,7 +1081,7 @@ void ClientThink_real(gentity_t *ent)
 
 	if (ent->s.eFlags & EF_MOUNTEDTANK)
 	{
-		client->pmext.centerangles[YAW]   = ent->tagParent->r.currentAngles[YAW];
+		client->pmext.centerangles[YAW] = ent->tagParent->r.currentAngles[YAW];
 		client->pmext.centerangles[PITCH] = ent->tagParent->r.currentAngles[PITCH];
 	}
 
@@ -1176,12 +1176,12 @@ void ClientThink_real(gentity_t *ent)
 #else
 	    ) {
 #endif // SAVEGAME_SUPPORT
-		ucmd->buttons     = 0;
+		ucmd->buttons = 0;
 		ucmd->forwardmove = 0;
-		ucmd->rightmove   = 0;
-		ucmd->upmove      = 0;
-		ucmd->wbuttons    = 0;
-		ucmd->doubleTap   = 0;
+		ucmd->rightmove = 0;
+		ucmd->upmove = 0;
+		ucmd->wbuttons  = 0;
+		ucmd->doubleTap = 0;
 
 		// freeze player (RELOAD_FAILED still allowed to move/look)
 		if (level.match_pause != PAUSE_NONE)
@@ -1255,11 +1255,11 @@ void ClientThink_real(gentity_t *ent)
 
 	memset(&pm, 0, sizeof(pm));
 
-	pm.ps        = &client->ps;
-	pm.pmext     = &client->pmext;
+	pm.ps = &client->ps;
+	pm.pmext = &client->pmext;
 	pm.character = client->pers.character;
-	pm.cmd       = *ucmd;
-	pm.oldcmd    = client->pers.oldcmd;
+	pm.cmd = *ucmd;
+	pm.oldcmd = client->pers.oldcmd;
 	// MrE: always use capsule for AI and player
 	pm.trace = trap_TraceCapsule;
 
@@ -1291,8 +1291,8 @@ void ClientThink_real(gentity_t *ent)
 	//DHM - Nerve :: We've gone back to using normal bbox traces
 	//pm.trace = trap_Trace;
 	pm.pointcontents = trap_PointContents;
-	pm.debugLevel    = g_debugMove.integer;
-	pm.noFootsteps   = qfalse;
+	pm.debugLevel  = g_debugMove.integer;
+	pm.noFootsteps = qfalse;
 
 	pm.pmove_fixed = client->pers.pmoveFixed;
 	pm.pmove_msec  = pmove_msec.integer;
@@ -1304,11 +1304,11 @@ void ClientThink_real(gentity_t *ent)
 	VectorCopy(client->ps.origin, client->oldOrigin);
 
 	// NERVE - SMF
-	pm.gametype           = g_gametype.integer;
-	pm.ltChargeTime       = level.lieutenantChargeTime[client->sess.sessionTeam - 1];
+	pm.gametype = g_gametype.integer;
+	pm.ltChargeTime = level.lieutenantChargeTime[client->sess.sessionTeam - 1];
 	pm.soldierChargeTime  = level.soldierChargeTime[client->sess.sessionTeam - 1];
 	pm.engineerChargeTime = level.engineerChargeTime[client->sess.sessionTeam - 1];
-	pm.medicChargeTime    = level.medicChargeTime[client->sess.sessionTeam - 1];
+	pm.medicChargeTime = level.medicChargeTime[client->sess.sessionTeam - 1];
 	// -NERVE - SMF
 
 	pm.skill = client->sess.skill;
@@ -1344,7 +1344,7 @@ void ClientThink_real(gentity_t *ent)
 		}
 
 		client->pers.lastBattleSenseBonusTime = level.timeCurrent;
-		client->combatState                   = COMBATSTATE_COLD; // cool down again
+		client->combatState = COMBATSTATE_COLD;                   // cool down again
 	}
 
 	pm.leadership = qfalse;
@@ -1418,7 +1418,7 @@ void ClientThink_real(gentity_t *ent)
 	// save results of pmove
 	if (ent->client->ps.eventSequence != oldEventSequence)
 	{
-		ent->eventTime   = level.time;
+		ent->eventTime = level.time;
 		ent->r.eventTime = level.time;
 	}
 
@@ -1484,14 +1484,14 @@ void ClientThink_real(gentity_t *ent)
 	}
 
 	// swap and latch button actions
-	client->oldbuttons      = client->buttons;
-	client->buttons         = ucmd->buttons;
+	client->oldbuttons = client->buttons;
+	client->buttons = ucmd->buttons;
 	client->latched_buttons = client->buttons & ~client->oldbuttons;
 //	client->latched_buttons |= client->buttons & ~client->oldbuttons;	// FIXME:? (SA) MP method (causes problems for us.  activate 'sticks')
 
 	//----(SA)	added
-	client->oldwbuttons      = client->wbuttons;
-	client->wbuttons         = ucmd->wbuttons;
+	client->oldwbuttons = client->wbuttons;
+	client->wbuttons = ucmd->wbuttons;
 	client->latched_wbuttons = client->wbuttons & ~client->oldwbuttons;
 //	client->latched_wbuttons |= client->wbuttons & ~client->oldwbuttons;	// FIXME:? (SA) MP method
 
@@ -1518,7 +1518,7 @@ void ClientThink_real(gentity_t *ent)
 	}
 	else
 	{
-		ent->client->ps.identifyClient       = -1;
+		ent->client->ps.identifyClient = -1;
 		ent->client->ps.identifyClientHealth = 0;
 	}
 
@@ -1604,7 +1604,7 @@ void ClientThink(int clientNum)
 {
 	gentity_t *ent;
 
-	ent                      = g_entities + clientNum;
+	ent = g_entities + clientNum;
 	ent->client->pers.oldcmd = ent->client->pers.cmd;
 	trap_GetUsercmd(clientNum, &ent->client->pers.cmd);
 
@@ -1668,7 +1668,7 @@ void SpectatorClientEndFrame(gentity_t *ent)
 	// if we are doing a chase cam or a remote view, grab the latest info
 	if ((ent->client->sess.spectatorState == SPECTATOR_FOLLOW) || (ent->client->ps.pm_flags & PMF_LIMBO))
 	{
-		int       clientNum;
+		int clientNum;
 		gclient_t *cl;
 		qboolean  do_respawn = qfalse; // JPW NERVE
 
@@ -1683,7 +1683,7 @@ void SpectatorClientEndFrame(gentity_t *ent)
 			if (ent->client->pers.autoLoad == qtrue)
 			{
 				// need to do this here as reinforce will override any value set in
-				// clientspawn (ClientSpawn gets called twice and we only want to 
+				// clientspawn (ClientSpawn gets called twice and we only want to
 				// call this once --> first call sets the origin, second call resets
 				// the origin (since we're no longer setting the origin as we already set it))
 				ETJump::saveSystem->loadTeamQuickDeployPosition(ent, ent->client->sess.sessionTeam);
@@ -1719,24 +1719,24 @@ void SpectatorClientEndFrame(gentity_t *ent)
 
 					do_respawn = static_cast<qboolean>(ent->client->ps.pm_time);
 
-					ent->client->ps           = cl->ps;
+					ent->client->ps = cl->ps;
 					ent->client->ps.pm_flags |= PMF_FOLLOW;
 					ent->client->ps.pm_flags |= PMF_LIMBO;
 
-					ent->client->ps.pm_time                   = do_respawn;         // put pm_time back
-					ent->client->ps.persistant[PERS_SCORE]    = savedScore;         // put score back
+					ent->client->ps.pm_time = do_respawn;                           // put pm_time back
+					ent->client->ps.persistant[PERS_SCORE] = savedScore;            // put score back
 					ent->client->ps.powerups[PW_MVCLIENTLIST] = savedMVList;
 					ent->client->ps.stats[STAT_PLAYER_CLASS]  = savedClass;         // NERVE - SMF - put player class back
 				}
 				else
 				{
-					ent->client->ps           = cl->ps;
+					ent->client->ps = cl->ps;
 					ent->client->ps.pm_flags |= PMF_FOLLOW;
 				}
 
 				// DHM - Nerve :: carry flags over
 				ent->client->ps.eFlags = flags;
-				ent->client->ps.ping   = ping;
+				ent->client->ps.ping = ping;
 
 				return;
 			}
@@ -1773,9 +1773,9 @@ void SpectatorClientEndFrame(gentity_t *ent)
 
 qboolean StuckInClient(gentity_t *self)
 {
-	int       i;
-	vec3_t    hitmin, hitmax;
-	vec3_t    selfmin, selfmax;
+	int i;
+	vec3_t hitmin, hitmax;
+	vec3_t selfmin, selfmax;
 	gentity_t *hit;
 
 	for (i = 0; i < level.numConnectedClients; i++)
@@ -1858,10 +1858,10 @@ void WolfRevivePushEnt(gentity_t *self, gentity_t *other)
 // Arnout: completely revived for capsules
 void WolfReviveBbox(gentity_t *self)
 {
-	int       touch[MAX_GENTITIES];
-	int       num, i, touchnum = 0;
+	int touch[MAX_GENTITIES];
+	int num, i, touchnum = 0;
 	gentity_t *hit = NULL;   // TTimo: init
-	vec3_t    mins, maxs;
+	vec3_t mins, maxs;
 
 	hit = G_TestEntityPosition(self);
 
@@ -2001,20 +2001,20 @@ void ClientEndFrame(gentity_t *ent)
 	{
 		int time_delta = level.time - level.previousTime;
 
-		ent->client->airOutTime                        += time_delta;
-		ent->client->inactivityTime                    += time_delta;
-		ent->client->lastBurnTime                      += time_delta;
-		ent->client->pers.connectTime                  += time_delta;
-		ent->client->pers.enterTime                    += time_delta;
-		ent->client->pers.teamState.lastreturnedflag   += time_delta;
-		ent->client->pers.teamState.lasthurtcarrier    += time_delta;
+		ent->client->airOutTime += time_delta;
+		ent->client->inactivityTime += time_delta;
+		ent->client->lastBurnTime += time_delta;
+		ent->client->pers.connectTime += time_delta;
+		ent->client->pers.enterTime += time_delta;
+		ent->client->pers.teamState.lastreturnedflag += time_delta;
+		ent->client->pers.teamState.lasthurtcarrier  += time_delta;
 		ent->client->pers.teamState.lastfraggedcarrier += time_delta;
-		ent->client->ps.classWeaponTime                += time_delta;
+		ent->client->ps.classWeaponTime += time_delta;
 //			ent->client->respawnTime += time_delta;
 //			ent->client->sniperRifleFiredTime += time_delta;
 		ent->lastHintCheckTime  += time_delta;
 		ent->pain_debounce_time += time_delta;
-		ent->s.onFireEnd        += time_delta;
+		ent->s.onFireEnd += time_delta;
 	}
 
 	//

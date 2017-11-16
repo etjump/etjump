@@ -25,7 +25,7 @@ static void CG_ResetEntity(centity_t *cent)
 	// if the event had timed out, it would have been cleared
 	// RF, not needed for wolf
 	// DHM - Nerve :: Wolf is now using this.
-	cent->previousEvent         = 0;
+	cent->previousEvent = 0;
 	cent->previousEventSequence = cent->currentState.eventSequence;
 
 	cent->trailTime = cg.snap->serverTime;
@@ -44,7 +44,7 @@ static void CG_ResetEntity(centity_t *cent)
 
 	// rain - reset a bunch of extra stuff
 	cent->muzzleFlashTime = 0;
-	cent->overheatTime    = 0;
+	cent->overheatTime = 0;
 
 	cent->miscTime  = 0;
 	cent->soundTime = 0;
@@ -53,10 +53,10 @@ static void CG_ResetEntity(centity_t *cent)
 	VectorClear(cent->rawAngles);
 
 	cent->lastFuseSparkTime = 0;
-	cent->highlightTime     = 0;
-	cent->highlighted       = qfalse;
+	cent->highlightTime = 0;
+	cent->highlighted = qfalse;
 
-	cent->moving     = qfalse;
+	cent->moving = qfalse;
 	cent->akimboFire = qfalse;
 }
 
@@ -128,10 +128,10 @@ FIXME: Also called by map_restart?
 */
 void CG_SetInitialSnapshot(snapshot_t *snap)
 {
-	int           i;
-	centity_t     *cent;
+	int i;
+	centity_t *cent;
 	entityState_t *state;
-	char          buff[16];
+	char buff[16];
 
 	cg.snap = snap;
 
@@ -180,7 +180,7 @@ void CG_SetInitialSnapshot(snapshot_t *snap)
 	else
 	{
 		static char prevmap[64] = { 0 };
-		char        curmap[64];
+		char curmap[64];
 
 		trap_Cvar_VariableStringBuffer("mapname", curmap, 64);
 
@@ -238,9 +238,9 @@ The transition point from snap to nextSnap has passed
 */
 static void CG_TransitionSnapshot(void)
 {
-	centity_t  *cent;
+	centity_t *cent;
 	snapshot_t *oldFrame;
-	int        i, id;
+	int i, id;
 
 	if (!cg.snap)
 	{
@@ -267,8 +267,8 @@ static void CG_TransitionSnapshot(void)
 	// clear the currentValid flag for all entities in the existing snapshot
 	for (i = 0 ; i < cg.snap->numEntities ; i++)
 	{
-		cent                                  = &cg_entities[cg.snap->entities[i].number];
-		cent->currentValid                    = qfalse;
+		cent = &cg_entities[cg.snap->entities[i].number];
+		cent->currentValid = qfalse;
 		oldValid[cg.snap->entities[i].number] = qtrue;
 	}
 
@@ -360,9 +360,9 @@ A new snapshot has just been read in from the client system.
 */
 static void CG_SetNextSnap(snapshot_t *snap)
 {
-	int           num;
+	int num;
 	entityState_t *es;
-	centity_t     *cent;
+	centity_t *cent;
 
 	cg.nextSnap = snap;
 
@@ -372,7 +372,7 @@ static void CG_SetNextSnap(snapshot_t *snap)
 	// check for extrapolation errors
 	for (num = 0 ; num < snap->numEntities ; num++)
 	{
-		es   = &snap->entities[num];
+		es = &snap->entities[num];
 		cent = &cg_entities[es->number];
 
 		memcpy(&cent->nextState, es, sizeof(entityState_t));
@@ -430,13 +430,13 @@ valid snapshot.
 */
 static snapshot_t *CG_ReadNextSnapshot(void)
 {
-	qboolean   r;
+	qboolean r;
 	snapshot_t *dest;
 
 	if (cg.latestSnapshotNum > cgs.processedSnapshotNum + 1000)
 	{
 		CG_Printf("[skipnotify]WARNING: CG_ReadNextSnapshot: way out of range, %i > %i\n",
-		          cg.latestSnapshotNum, cgs.processedSnapshotNum);
+			cg.latestSnapshotNum, cgs.processedSnapshotNum);
 	}
 
 	while (cgs.processedSnapshotNum < cg.latestSnapshotNum)
@@ -469,14 +469,14 @@ static snapshot_t *CG_ReadNextSnapshot(void)
 			if (cg.snap && (dest->snapFlags ^ cg.snap->snapFlags) & SNAPFLAG_SERVERCOUNT)
 			{
 				cg.damageTime = 0;
-				cg.duckTime   = -1;
-				cg.landTime   = -1;
-				cg.stepTime   = -1;
+				cg.duckTime = -1;
+				cg.landTime = -1;
+				cg.stepTime = -1;
 #ifdef SAVEGAME_SUPPORT
 				// savegame: we should use this as our new base snapshot
 				if (CG_IsSinglePlayer())
 				{
-					int       i;
+					int i;
 					centity_t backupCent;
 					CG_SetInitialSnapshot(dest);
 					cg.nextFrameTeleport = qtrue;
@@ -491,14 +491,14 @@ static snapshot_t *CG_ReadNextSnapshot(void)
 						backupCent = cg_entities[i];
 						memset(&cg_entities[i], 0, sizeof(centity_t));
 						cg_entities[i].currentState = backupCent.currentState;
-						cg_entities[i].nextState    = backupCent.nextState;
+						cg_entities[i].nextState = backupCent.nextState;
 						cg_entities[i].currentValid = backupCent.currentValid;
 						cg_entities[i].interpolate  = backupCent.interpolate;
 					}
 					// reset the predicted cent
 					memset(&cg.predictedPlayerEntity, 0, sizeof(centity_t));
 					cg.predictedPlayerEntity.currentState = backupCent.currentState;
-					cg.predictedPlayerEntity.nextState    = backupCent.nextState;
+					cg.predictedPlayerEntity.nextState = backupCent.nextState;
 					cg.predictedPlayerEntity.currentValid = backupCent.currentValid;
 					cg.predictedPlayerEntity.interpolate  = backupCent.interpolate;
 
@@ -549,7 +549,7 @@ of an interpolating one)
 void CG_ProcessSnapshots(void)
 {
 	snapshot_t *snap;
-	int        n;
+	int n;
 
 	// see what the latest snapshot the client system has is
 	trap_GetCurrentSnapshotNumber(&n, &cg.latestSnapshotTime);
@@ -629,7 +629,7 @@ void CG_ProcessSnapshots(void)
 	if (cg.time < cg.snap->serverTime)
 	{
 		// this can happen right after a vid_restart
-		cg.time       = cg.snap->serverTime;
+		cg.time = cg.snap->serverTime;
 		cgDC.realTime = cg.time;
 	}
 	if (cg.nextSnap != NULL && cg.nextSnap->serverTime <= cg.time)

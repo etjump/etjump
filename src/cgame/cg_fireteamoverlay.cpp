@@ -17,7 +17,7 @@ static int sortedFireTeamClients[MAX_CLIENTS];
 int QDECL CG_SortFireTeam(const void *a, const void *b)
 {
 	clientInfo_t *ca, *cb;
-	int          cna, cnb;
+	int cna, cnb;
 
 	cna = *(int *)a;
 	cnb = *(int *)b;
@@ -88,10 +88,10 @@ void CG_SortClientFireteam()
 // Parses fireteam servercommand
 void CG_ParseFireteams()
 {
-	int        i, j;
-	const char       *s;
+	int i, j;
+	const char *s;
 	const char *p;
-	int        clnts[2];
+	int clnts[2];
 
 	qboolean onFireteam2;
 	qboolean isLeader2;
@@ -132,7 +132,7 @@ void CG_ParseFireteams()
 			cg.fireTeams[i].ident = j;
 		}
 
-		s                      = Info_ValueForKey(p, "l");
+		s = Info_ValueForKey(p, "l");
 		cg.fireTeams[i].leader = atoi(s);
 
 		s = Info_ValueForKey(p, "c");
@@ -145,7 +145,7 @@ void CG_ParseFireteams()
 		{
 			if (COM_BitCheck(clnts, j))
 			{
-				cg.fireTeams[i].joinOrder[j]   = qtrue;
+				cg.fireTeams[i].joinOrder[j] = qtrue;
 				cgs.clientinfo[j].fireteamData = &cg.fireTeams[i];
 //				CG_Printf("%s\n", cgs.clientinfo[j].name);
 			}
@@ -159,7 +159,7 @@ void CG_ParseFireteams()
 	CG_SortClientFireteam();
 
 	onFireteam2 = CG_IsOnFireteam(cg.clientNum) ? qtrue : qfalse;
-	isLeader2   = CG_IsFireTeamLeader(cg.clientNum) ? qtrue : qfalse;
+	isLeader2 = CG_IsFireTeamLeader(cg.clientNum) ? qtrue : qfalse;
 }
 
 // Fireteam that both specified clients are on, if they both are on the same team
@@ -235,7 +235,7 @@ fireteamData_t *CG_FireTeamForPosition(int pos, int max)
 // Client, not sorted by rank, on CLIENT'S fireteam
 clientInfo_t *CG_FireTeamPlayerForPosition(int pos, int max)
 {
-	int            i, cnt = 0;
+	int i, cnt = 0;
 	fireteamData_t *f = CG_IsOnFireteam(cg.clientNum);
 
 	if (!f)
@@ -266,7 +266,7 @@ clientInfo_t *CG_FireTeamPlayerForPosition(int pos, int max)
 // Client, sorted by rank, on CLIENT'S fireteam
 clientInfo_t *CG_SortedFireTeamPlayerForPosition(int pos, int max)
 {
-	int            i, cnt = 0;
+	int i, cnt = 0;
 	fireteamData_t *f = CG_IsOnFireteam(cg.clientNum);
 
 	if (!f)
@@ -299,19 +299,19 @@ clientInfo_t *CG_SortedFireTeamPlayerForPosition(int pos, int max)
 #define FT_BAR_HEIGHT 10.f
 void CG_DrawFireTeamOverlay(rectDef_t *rect)
 {
-	int            x = rect->x;
-	int            y = rect->y + 1; // +1, jitter it into place in 1024 :)
-	float          h;
-	clientInfo_t   *ci = NULL;
-	char           buffer[64];
+	int x = rect->x;
+	int y = rect->y + 1;            // +1, jitter it into place in 1024 :)
+	float h;
+	clientInfo_t *ci = NULL;
+	char buffer[64];
 	fireteamData_t *f = NULL;
-	int            i;
-	vec4_t         clr1        = { .16f, .2f, .17f, .8f };
-	vec4_t         clr2        = { 0.f, 0.f, 0.f, .2f };
-	vec4_t         clr3        = { 0.25f, 0.f, 0.f, 153 / 255.f };
-	vec4_t         tclr        = { 0.6f, 0.6f, 0.6f, 1.0f };
-	vec4_t         bgColor     = { 0.0f, 0.0f, 0.0f, 0.6f }; // window
-	vec4_t         borderColor = { 0.5f, 0.5f, 0.5f, 0.5f }; // window
+	int i;
+	vec4_t clr1 = { .16f, .2f, .17f, .8f };
+	vec4_t clr2 = { 0.f, 0.f, 0.f, .2f };
+	vec4_t clr3 = { 0.25f, 0.f, 0.f, 153 / 255.f };
+	vec4_t tclr = { 0.6f, 0.6f, 0.6f, 1.0f };
+	vec4_t bgColor = { 0.0f, 0.0f, 0.0f, 0.6f };             // window
+	vec4_t borderColor = { 0.5f, 0.5f, 0.5f, 0.5f };         // window
 
 	f = CG_IsOnFireteam(cg.clientNum);
 	if (!f)
@@ -559,7 +559,7 @@ const char *CG_FireteamGetBoxText()
 qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly)
 {
 	fireteamData_t *ft;
-	int            i;
+	int i;
 
 	ft = CG_IsOnFireteam(cg.clientNum);
 	if (!ft)
@@ -601,10 +601,10 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly)
 
 const char *CG_BuildSelectedFirteamString(void)
 {
-	char         buffer[256];
+	char buffer[256];
 	clientInfo_t *ci;
-	int          cnt = 0;
-	int          i;
+	int cnt = 0;
+	int i;
 
 	*buffer = '\0';
 	for (i = 0; i < 6; i++)

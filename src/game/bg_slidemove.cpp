@@ -22,22 +22,22 @@ Returns qtrue if the velocity was clipped in some way
 #define MAX_CLIP_PLANES 5
 qboolean    PM_SlideMove(qboolean gravity)
 {
-	int     bumpcount, numbumps, extrabumps;
-	vec3_t  dir;
-	float   d;
-	int     numplanes;
-	vec3_t  planes[MAX_CLIP_PLANES];
-	vec3_t  primal_velocity;
-	vec3_t  clipVelocity;
-	int     i, j, k;
+	int bumpcount, numbumps, extrabumps;
+	vec3_t dir;
+	float  d;
+	int numplanes;
+	vec3_t planes[MAX_CLIP_PLANES];
+	vec3_t primal_velocity;
+	vec3_t clipVelocity;
+	int i, j, k;
 	trace_t trace;
 	vec3_t  end;
-	float   time_left;
-	float   into;
-	vec3_t  endVelocity;
-	vec3_t  endClipVelocity;
+	float  time_left;
+	float  into;
+	vec3_t endVelocity;
+	vec3_t endClipVelocity;
 
-	numbumps   = 4;
+	numbumps = 4;
 	extrabumps = 0;
 
 	VectorCopy(pm->ps->velocity, primal_velocity);
@@ -45,14 +45,14 @@ qboolean    PM_SlideMove(qboolean gravity)
 	if (gravity)
 	{
 		VectorCopy(pm->ps->velocity, endVelocity);
-		endVelocity[2]     -= pm->ps->gravity * pml.frametime;
+		endVelocity[2] -= pm->ps->gravity * pml.frametime;
 		pm->ps->velocity[2] = (pm->ps->velocity[2] + endVelocity[2]) * 0.5;
 		primal_velocity[2]  = endVelocity[2];
 		if (pml.groundPlane)
 		{
 			// slide along the ground plane
 			PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
-			                pm->ps->velocity, OVERCLIP);
+				pm->ps->velocity, OVERCLIP);
 		}
 	}
 	else
@@ -88,11 +88,11 @@ qboolean    PM_SlideMove(qboolean gravity)
 		if (pm->debugLevel > 1)
 		{
 			Com_Printf("%i:%d %d (%f %f %f)\n",
-			           c_pmove, trace.allsolid, trace.startsolid,
-			           trace.endpos[0],
-			           trace.endpos[1],
-			           trace.endpos[2]
-			           );
+				c_pmove, trace.allsolid, trace.startsolid,
+				trace.endpos[0],
+				trace.endpos[1],
+				trace.endpos[2]
+				);
 		}
 
 		if (trace.allsolid)
@@ -291,19 +291,19 @@ void PM_StepSlideMove(qboolean gravity)
 		PM_TraceAll(&trace, pm->ps->origin, pm->ps->origin);
 		wassolid = trace.allsolid;
 
-		slidesucceed = (PM_SlideMove(gravity) == 0) ? qtrue : qfalse; 
+		slidesucceed = (PM_SlideMove(gravity) == 0) ? qtrue : qfalse;
 
 		PM_TraceAll(&trace, pm->ps->origin, pm->ps->origin);
 		if (trace.allsolid && !wassolid)
 		{
 			Com_Printf("%i:PM_SlideMove solidified! (%f %f %f) -> (%f %f %f)\n", c_pmove,
-			           start_o[0],
-			           start_o[1],
-			           start_o[2],
-			           pm->ps->origin[0],
-			           pm->ps->origin[1],
-			           pm->ps->origin[2]
-			           );
+				start_o[0],
+				start_o[1],
+				start_o[2],
+				pm->ps->origin[0],
+				pm->ps->origin[1],
+				pm->ps->origin[2]
+				);
 		}
 
 		if (slidesucceed)

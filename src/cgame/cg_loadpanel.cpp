@@ -3,8 +3,8 @@
 
 extern displayContextDef_t *DC;
 
-qboolean   bg_loadscreeninited = qfalse;
-qboolean   bg_loadscreeninteractive;
+qboolean bg_loadscreeninited = qfalse;
+qboolean bg_loadscreeninteractive;
 fontInfo_t bg_loadscreenfont1;
 fontInfo_t bg_loadscreenfont2;
 qhandle_t  bg_axispin;
@@ -241,7 +241,7 @@ const char *CG_LoadPanel_GameTypeName(gametype_t gt)
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 {
 	static qboolean inside = qfalse;
-	char            buffer[1024];
+	char buffer[1024];
 
 	bg_loadscreeninteractive = interactive;
 
@@ -264,10 +264,10 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 		DC->registerFont("ariblk", 27, &bg_loadscreenfont1);
 		DC->registerFont("courbd", 30, &bg_loadscreenfont2);
 
-		bg_axispin    = DC->registerShaderNoMip("gfx/loading/pin_axis");
+		bg_axispin = DC->registerShaderNoMip("gfx/loading/pin_axis");
 		bg_alliedpin  = DC->registerShaderNoMip("gfx/loading/pin_allied");
 		bg_neutralpin = DC->registerShaderNoMip("gfx/loading/pin_neutral");
-		bg_pin        = DC->registerShaderNoMip("gfx/loading/pin_shot");
+		bg_pin = DC->registerShaderNoMip("gfx/loading/pin_shot");
 
 
 		bg_filter_pb = DC->registerShaderNoMip("ui/assets/filter_pb");
@@ -300,9 +300,9 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 	if (*buffer)
 	{
 		const char *str;
-		qboolean   enabled = qfalse;
-		float      x, y;
-		int        i;
+		qboolean enabled = qfalse;
+		float x, y;
+		int i;
 //		vec4_t clr1 = { 41/255.f,	51/255.f,	43/255.f,	204/255.f };
 //		vec4_t clr2 = { 0.f,		0.f,		0.f,		225/255.f };
 		vec4_t clr3 = { 1.f, 1.f, 1.f, .6f };
@@ -315,7 +315,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 		y = 322;
 		CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.22f, 0.22f, clr3, ETJUMP_VERSION, 0, 0, 0, &bg_loadscreenfont1);
 
-		y   = 340;
+		y = 340;
 		str = Info_ValueForKey(buffer, "sv_hostname");
 		CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f, colorWhite, str && *str ? str : "ETHost", 0, 26, 0, &bg_loadscreenfont2);
 
@@ -388,7 +388,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 
 void CG_LoadPanel_RenderLoadingBar(panel_button_t *button)
 {
-	int   hunkused, hunkexpected;
+	int hunkused, hunkexpected;
 	float frac;
 
 	trap_GetHunkData(&hunkused, &hunkexpected);
@@ -429,7 +429,7 @@ void CG_LoadPanel_RenderCampaignTypeText(panel_button_t *button)
 void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button)
 {
 	const char *cs;
-	float      w;
+	float w;
 
 	//char buffer[1024];
 	//int gametype;
@@ -469,9 +469,9 @@ void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button)
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button)
 {
 	const char *cs;
-	char       *s, *p;
-	char       buffer[1024];
-	float      y;
+	char  *s, *p;
+	char  buffer[1024];
+	float y;
 
 	//int gametype;
 
@@ -599,8 +599,9 @@ void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float 
 
 void CG_LoadPanel_RenderCampaignPins(panel_button_t *button)
 {
-	int       i;
+	int i;
 	qhandle_t shader;
+
 	/*char buffer[1024];
 	char *s;
 	int gametype;

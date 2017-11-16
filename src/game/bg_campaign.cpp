@@ -19,9 +19,9 @@
 qboolean BG_LoadCampaignSave(const char *filename, cpsFile_t *file, const char *profile)
 {
 	fileHandle_t f;
-	long         hash;
-	char         *ch;
-	int          i, j;
+	long hash;
+	char *ch;
+	int  i, j;
 
 	memset(file, 0, sizeof(cpsFile_t));
 
@@ -80,9 +80,9 @@ qboolean BG_LoadCampaignSave(const char *filename, cpsFile_t *file, const char *
 qboolean BG_StoreCampaignSave(const char *filename, cpsFile_t *file, const char *profile)
 {
 	fileHandle_t f;
-	long         hash;
-	char         *ch;
-	int          i, j;
+	long hash;
+	char *ch;
+	int  i, j;
 
 	// open the file
 	if (trap_FS_FOpenFile(filename, &f, FS_WRITE) < 0)
@@ -91,7 +91,7 @@ qboolean BG_StoreCampaignSave(const char *filename, cpsFile_t *file, const char 
 	}
 
 	// write the header
-	file->header.ident   = CPS_IDENT;
+	file->header.ident = CPS_IDENT;
 	file->header.version = CPS_VERSION;
 
 	trap_FS_Write(&file->header.ident, sizeof(int), f);

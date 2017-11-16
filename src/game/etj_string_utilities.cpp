@@ -42,11 +42,14 @@ std::string ETJump::newGuid()
 unsigned int levenshteinDistance(const std::string& s1, const std::string& s2)
 {
 	const std::size_t len1 = s1.size(), len2 = s2.size();
-	std::vector<std::vector<unsigned int>> d(len1 + 1, std::vector<unsigned int>(len2 + 1));
+
+	std::vector<std::vector<unsigned int> > d(len1 + 1, std::vector<unsigned int>(len2 + 1));
 
 	d[0][0] = 0;
-	for (unsigned int i = 1; i <= len1; ++i) d[i][0] = i;
-	for (unsigned int i = 1; i <= len2; ++i) d[0][i] = i;
+	for (unsigned int i = 1; i <= len1; ++i)
+		d[i][0] = i;
+	for (unsigned int i = 1; i <= len2; ++i)
+		d[0][i] = i;
 
 	for (unsigned int i = 1; i <= len1; ++i)
 		for (unsigned int j = 1; j <= len2; ++j)
@@ -56,7 +59,7 @@ unsigned int levenshteinDistance(const std::string& s1, const std::string& s2)
 
 std::string ETJump::getBestMatch(const std::vector<std::string>& words, const std::string& current)
 {
-	std::vector<std::pair<std::string, int>> distances;
+	std::vector<std::pair<std::string, int> > distances;
 
 	for (const auto & word : words)
 	{
@@ -100,12 +103,13 @@ static void SanitizeConstString(const char *in, char *out, bool toLower)
 std::string ETJump::sanitize(const std::string& text, bool toLower)
 {
 	auto len = text.length();
+
 	std::vector<char> out(len + 1);
 	SanitizeConstString(text.c_str(), out.data(), toLower ? true : false);
 	return std::string(out.data());
 }
 
-std::string ETJump::getValue(const char* value, const std::string& defaultValue)
+std::string ETJump::getValue(const char *value, const std::string& defaultValue)
 {
 	return strlen(value) > 0 ? value : defaultValue;
 }
@@ -113,6 +117,6 @@ std::string ETJump::getValue(const char* value, const std::string& defaultValue)
 std::string ETJump::getValue(const std::string& value, const std::string& defaultValue)
 {
 	return value.length() > 0
-		? value
-		: defaultValue;
+	       ? value
+	       : defaultValue;
 }

@@ -20,7 +20,7 @@ typedef struct
 	const char *pszCommandName;
 	qboolean fAnytime;
 	qboolean fValue;
-	void (*pCommand)(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
+	void (*pCommand)(gentity_t * ent, unsigned int dwCommand, qboolean fValue);
 	const char *pszHelpInfo;
 } cmd_reference_t;
 
@@ -33,7 +33,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "autorecord",     qtrue,  qtrue,  NULL,                  ":^7 Creates a demo with a consistent naming scheme"                                         },
 	{ "autoscreenshot", qtrue,  qtrue,  NULL,                  ":^7 Creates a screenshot with a consistent naming scheme"                                   },
 	{ "bottomshots",    qtrue,  qfalse, G_weaponRankings_cmd,  ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all stats for a weapon" },
-	{ "callvote",       qtrue,  qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"                          },
+	{ "callvote",       qtrue,  qfalse, Cmd_CallVote_f,        " <params>:^7 Calls a vote"                                                                  },
 	{ "commands",       qtrue,  qtrue,  G_commands_cmd,        ":^7 Gives a list of OSP-specific commands"                                                  },
 	{ "currenttime",    qtrue,  qtrue,  NULL,                  ":^7 Displays current local time"                                                            },
 	{ "follow",         qtrue,  qtrue,  Cmd_Follow_f,          " <player_ID|allies|axis>:^7 Spectates a particular player or team"                          },
@@ -60,7 +60,7 @@ static const cmd_reference_t aCommandInfo[] =
 // OSP-specific Commands
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime)
 {
-	unsigned int          i, cCommands = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]);
+	unsigned int i, cCommands = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]);
 	const cmd_reference_t *pCR;
 
 	for (i = 0; i < cCommands; i++)
@@ -105,7 +105,7 @@ qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommandName)
 	if (ent->client->pers.cmd_debounce > level.time)
 	{
 		CP(va("print \"Wait another %.1fs to issue ^3%s\n\"", 1.0 * (float)(ent->client->pers.cmd_debounce - level.time) / 1000.0,
-		      pszCommandName));
+				pszCommandName));
 		return(qfalse);
 	}
 
@@ -153,15 +153,15 @@ void G_commands_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 		if (i + rows * 3 + 1 <= num_cmds)
 		{
 			CP(va("print \"^3%-17s%-17s%-17s%-17s\n\"", aCommandInfo[i].pszCommandName,
-			      aCommandInfo[i + rows].pszCommandName,
-			      aCommandInfo[i + rows * 2].pszCommandName,
-			      aCommandInfo[i + rows * 3].pszCommandName));
+					aCommandInfo[i + rows].pszCommandName,
+					aCommandInfo[i + rows * 2].pszCommandName,
+					aCommandInfo[i + rows * 3].pszCommandName));
 		}
 		else if (i + rows * 2 + 1 <= num_cmds)
 		{
 			CP(va("print \"^3%-17s%-17s%-17s\n\"", aCommandInfo[i].pszCommandName,
-			      aCommandInfo[i + rows].pszCommandName,
-			      aCommandInfo[i + rows * 2].pszCommandName));
+					aCommandInfo[i + rows].pszCommandName,
+					aCommandInfo[i + rows * 2].pszCommandName));
 		}
 		else if (i + rows + 1 <= num_cmds)
 		{
@@ -183,12 +183,12 @@ void G_commands_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 // Show client info
 void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 {
-	int       i, idnum, max_rate, cnt = 0, tteam;
-	int       user_rate, user_snaps;
+	int i, idnum, max_rate, cnt = 0, tteam;
+	int user_rate, user_snaps;
 	gclient_t *cl;
 	gentity_t *cl_ent;
-	char      n2[MAX_NETNAME], ready[16], ref[16], rate[256];
-	const char      *s = nullptr; 
+	char n2[MAX_NETNAME], ready[16], ref[16], rate[256];
+	const char *s = nullptr;
 	char userinfo[MAX_INFO_STRING];
 	const char *coach = nullptr, *tc = nullptr;
 
@@ -224,13 +224,13 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
-		idnum  = level.sortedClients[i];//level.sortedNames[i];
-		cl     = &level.clients[idnum];
+		idnum = level.sortedClients[i]; //level.sortedNames[i];
+		cl = &level.clients[idnum];
 		cl_ent = g_entities + idnum;
 
 		SanitizeString(cl->pers.netname, n2, qtrue);
-		n2[26]   = 0;
-		ref[0]   = 0;
+		n2[26] = 0;
+		ref[0] = 0;
 		ready[0] = 0;
 
 		// Rate info
@@ -245,9 +245,9 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 		else
 		{
 			trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
-			s          = Info_ValueForKey(userinfo, "rate");
-			user_rate  = (max_rate > 0 && atoi(s) > max_rate) ? max_rate : atoi(s);
-			s          = Info_ValueForKey(userinfo, "snaps");
+			s = Info_ValueForKey(userinfo, "rate");
+			user_rate = (max_rate > 0 && atoi(s) > max_rate) ? max_rate : atoi(s);
+			s = Info_ValueForKey(userinfo, "snaps");
 			user_snaps = atoi(s);
 
 			strcpy(rate, va("%5d%6d%9d%7d", cl->pers.clientTimeNudge, user_rate, cl->pers.clientMaxPackets, user_snaps));
@@ -426,9 +426,9 @@ void G_scores_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 // Sends an invitation to a player to spectate a team.
 void G_specinvite_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fLock)
 {
-	int       tteam, pid;
+	int tteam, pid;
 	gentity_t *player;
-	char      arg[MAX_TOKEN_CHARS];
+	char arg[MAX_TOKEN_CHARS];
 
 	if (team_nocontrols.integer)
 	{
@@ -499,7 +499,7 @@ void G_weaponStats_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fDump)
 // Shows all players' stats to the requesting client.
 void G_statsall_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fDump)
 {
-	int       i;
+	int i;
 	gentity_t *player;
 
 	for (i = 0; i < level.numConnectedClients; i++)
@@ -519,7 +519,7 @@ void G_statsall_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fDump)
 // Sets a player's team "ready" status.
 void G_teamready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state)
 {
-	int       i, tteam = G_teamID(ent);
+	int i, tteam = G_teamID(ent);
 	gclient_t *cl;
 
 	if (g_gamestate.integer == GS_PLAYING || g_gamestate.integer == GS_INTERMISSION)
@@ -597,7 +597,7 @@ const int cQualifyingShots[WS_MAX] =
 int QDECL SortStats(const void *a, const void *b)
 {
 	gclient_t *ca, *cb;
-	float     accA, accB;
+	float accA, accB;
 
 	ca = &level.clients[*(int *)a];
 	cb = &level.clients[*(int *)b];
@@ -644,10 +644,10 @@ int QDECL SortStats(const void *a, const void *b)
 // Shows the most accurate players for each weapon to the requesting client
 void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop, qboolean doWindow)
 {
-	int             i, iWeap, shots, wBestAcc, cClients, cPlaces;
-	int             aClients[MAX_CLIENTS];
-	float           acc;
-	char            z[MAX_STRING_CHARS];
+	int i, iWeap, shots, wBestAcc, cClients, cPlaces;
+	int aClients[MAX_CLIENTS];
+	float acc;
+	char  z[MAX_STRING_CHARS];
 	const gclient_t *cl;
 
 	z[0] = 0;
@@ -670,7 +670,7 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop, qboolean doWindow)
 			shots = cl->sess.aWeaponStats[iWeap].atts;
 			if (shots >= cQualifyingShots[iWeap])
 			{
-				acc                  = (float)((cl->sess.aWeaponStats[iWeap].hits) * 100.0) / (float)shots;
+				acc = (float)((cl->sess.aWeaponStats[iWeap].hits) * 100.0) / (float)shots;
 				aClients[cClients++] = level.sortedClients[i];
 				if (((doTop) ? acc : (float)wBestAcc) > ((doTop) ? wBestAcc : acc))
 				{
@@ -693,10 +693,10 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop, qboolean doWindow)
 			if (((doTop) ? acc : (float)wBestAcc + 0.999) >= ((doTop) ? wBestAcc : acc))
 			{
 				Q_strcat(z, sizeof(z), va(" %d %d %d %d %d %d", iWeap + 1, aClients[i],
-				                          cl->sess.aWeaponStats[iWeap].hits,
-				                          cl->sess.aWeaponStats[iWeap].atts,
-				                          cl->sess.aWeaponStats[iWeap].kills,
-				                          cl->sess.aWeaponStats[iWeap].deaths));
+						cl->sess.aWeaponStats[iWeap].hits,
+						cl->sess.aWeaponStats[iWeap].atts,
+						cl->sess.aWeaponStats[iWeap].kills,
+						cl->sess.aWeaponStats[iWeap].deaths));
 			}
 		}
 	}
@@ -709,8 +709,8 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop, qboolean doWindow)
 void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state)
 {
 	gclient_t *cl;
-	int       c = 0, i, shots, wBestAcc;
-	char      z[MAX_STRING_CHARS];
+	int  c = 0, i, shots, wBestAcc;
+	char z[MAX_STRING_CHARS];
 
 	if (trap_Argc() < 2)
 	{
@@ -767,10 +767,10 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state
 			c++;
 			wBestAcc = (((state) ? acc : wBestAcc) > ((state) ? wBestAcc : acc)) ? (int)acc : wBestAcc;
 			Q_strcat(z, sizeof(z), va(" %d %d %d %d %d", level.sortedStats[i],
-			                          cl->sess.aWeaponStats[iWeap].hits,
-			                          shots,
-			                          cl->sess.aWeaponStats[iWeap].kills,
-			                          cl->sess.aWeaponStats[iWeap].deaths));
+					cl->sess.aWeaponStats[iWeap].hits,
+					shots,
+					cl->sess.aWeaponStats[iWeap].kills,
+					cl->sess.aWeaponStats[iWeap].deaths));
 		}
 	}
 
@@ -782,9 +782,9 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state
  */
 static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean invite /* or uninvite */)
 {
-	int       clientNum;
+	int clientNum;
 	gentity_t *other;
-	char      arg[MAX_TOKEN_CHARS];
+	char arg[MAX_TOKEN_CHARS];
 
 
 	if (ClientIsFlooding(ent))
@@ -849,7 +849,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean in
  */
 static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock)
 {
-	int       i;
+	int i;
 	gentity_t *other;
 
 	if (ent->client->sess.specLocked == lock)

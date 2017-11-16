@@ -2,9 +2,9 @@
 #include "etj_overbounce_watcher.h"
 #include "cg_local.h"
 
-ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler* clientCommandsHandler) :
+ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler *clientCommandsHandler) :
 	_clientCommandsHandler{clientCommandsHandler},
-	_positions {},
+	_positions{},
 	_current{nullptr}
 {
 	if (!clientCommandsHandler)
@@ -16,35 +16,35 @@ ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler* clientComman
 	_positions.clear();
 
 	clientCommandsHandler->subscribe("ob_save", [&](const std::vector<std::string>& args)
-	                                 {
-		                                 Coordinate c;
-		                                 const auto ps = getPlayerState();
-		                                 for (auto i = 0; i < 3; ++i)
-		                                 {
-			                                 c[i] = ps->origin[i];
-		                                 }
-		                                 auto name = args.size() > 1 ? args[1] : "default";
-		                                 save(name, c);
-		                                 CG_Printf("Saved coordinate as \"%s\": (%f, %f, %f)\n", name.c_str(), c[0], c[1], c[2]);
-	                                 });
+	{
+		Coordinate c;
+		const auto ps = getPlayerState();
+		for (auto i = 0; i < 3; ++i)
+		{
+		    c[i] = ps->origin[i];
+		}
+		auto name = args.size() > 1 ? args[1] : "default";
+		save(name, c);
+		CG_Printf("Saved coordinate as \"%s\": (%f, %f, %f)\n", name.c_str(), c[0], c[1], c[2]);
+	});
 
 	clientCommandsHandler->subscribe("ob_load", [&](const std::vector<std::string>& args)
-	                                 {
-		                                 auto name = args.size() > 1 ? args[1] : "default";
-		                                 if (!load(name))
-		                                 {
-			                                 CG_Printf("^3Overbounce watcher: ^7%s has not been saved yet.\n", name.c_str());
-			                                 return;
-		                                 }
+	{
+		auto name = args.size() > 1 ? args[1] : "default";
+		if (!load(name))
+		{
+		    CG_Printf("^3Overbounce watcher: ^7%s has not been saved yet.\n", name.c_str());
+		    return;
+		}
 
-		                                 CG_Printf("Loaded coordinate \"%s\" (%f, %f, %f)\n", name.c_str(), (*_current)[0], (*_current)[1], (*_current)[2]);
-	                                 });
+		CG_Printf("Loaded coordinate \"%s\" (%f, %f, %f)\n", name.c_str(), (*_current)[0], (*_current)[1], (*_current)[2]);
+	});
 
 	clientCommandsHandler->subscribe("ob_reset", [&](const std::vector<std::string>& args)
-	                                 {
-		                                 reset();
-		                                 CG_Printf("Reset currently displayed overbounce watcher coordinates.\n");
-	                                 });
+	{
+		reset();
+		CG_Printf("Reset currently displayed overbounce watcher coordinates.\n");
+	});
 }
 
 ETJump::OverbounceWatcher::~OverbounceWatcher()
@@ -71,13 +71,13 @@ void ETJump::OverbounceWatcher::render() const
 	{
 		return;
 	}
-	
+
 	if (ps->pm_type == PM_NOCLIP)
 	{
 		return;
 	}
 
-	float psec = pmove_msec.integer / 1000.f;
+	float psec  = pmove_msec.integer / 1000.f;
 	int gravity = ps->gravity;
 	float velocity = ps->velocity[2];
 	float currentHeight = ps->origin[2] + ps->mins[2];
@@ -89,10 +89,10 @@ void ETJump::OverbounceWatcher::render() const
 	VectorSet(snap, 0, 0, gravity * psec);
 	trap_SnapVector(snap.data());
 	auto rintv = snap[2];
-	
+
 	finalHeight = (*_current)[2] + ps->mins[2];
 
-	sizex = sizey = 0.1f;
+	sizex  = sizey = 0.1f;
 	sizex *= etj_obWatcherSize.value;
 	sizey *= etj_obWatcherSize.value;
 
@@ -113,6 +113,7 @@ void ETJump::OverbounceWatcher::beforeRender()
 void ETJump::OverbounceWatcher::save(const std::string& name, Coordinate coordinate)
 {
 	auto pos = _positions.find(name);
+
 	if (pos != end(_positions))
 	{
 		_current = nullptr;
@@ -130,6 +131,7 @@ void ETJump::OverbounceWatcher::reset()
 bool ETJump::OverbounceWatcher::load(const std::string& name)
 {
 	auto pos = _positions.find(name);
+
 	if (pos == end(_positions))
 	{
 		return false;
@@ -149,13 +151,13 @@ std::vector<std::string> ETJump::OverbounceWatcher::list() const
 	return names;
 }
 
-const playerState_t* ETJump::OverbounceWatcher::getPlayerState()
+const playerState_t *ETJump::OverbounceWatcher::getPlayerState()
 {
 	return (cg.snap->ps.clientNum != cg.clientNum)
-		       // spectating
-		       ? &cg.snap->ps
-		       // playing
-		       : &cg.predictedPlayerState;
+	       // spectating
+	       ? &cg.snap->ps
+	       // playing
+	       : &cg.predictedPlayerState;
 }
 
 bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
@@ -167,12 +169,12 @@ bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
 	float hn;
 	int n;
 
-	a = -psec * rintv / 2;
-	b = psec * (vel - gravity * psec / 2 + rintv / 2);
-	c = currentHeight - finalHeight;
+	a  = -psec * rintv / 2;
+	b  = psec * (vel - gravity * psec / 2 + rintv / 2);
+	c  = currentHeight - finalHeight;
 	n1 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
 
-	n = floor(n1);
+	n  = floor(n1);
 	hn = currentHeight + psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
 
 	if (n && hn < finalHeight + 0.25 && hn > finalHeight)
@@ -182,7 +184,7 @@ bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
 	return false;
 }
 
-bool ETJump::OverbounceWatcher::surfaceAllowsOverbounce(trace_t* trace)
+bool ETJump::OverbounceWatcher::surfaceAllowsOverbounce(trace_t *trace)
 {
 	if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE)
 	{

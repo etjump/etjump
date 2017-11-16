@@ -31,27 +31,27 @@ qboolean CG_SpawnString(const char *key, const char *defaultString, char **out)
 
 qboolean CG_SpawnFloat(const char *key, const char *defaultString, float *out)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = CG_SpawnString(key, defaultString, &s);
-	*out    = atof(s);
+	*out = atof(s);
 	return present;
 }
 
 qboolean CG_SpawnInt(const char *key, const char *defaultString, int *out)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = CG_SpawnString(key, defaultString, &s);
-	*out    = atoi(s);
+	*out = atoi(s);
 	return present;
 }
 
 qboolean CG_SpawnVector(const char *key, const char *defaultString, float *out)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = CG_SpawnString(key, defaultString, &s);
@@ -61,7 +61,7 @@ qboolean CG_SpawnVector(const char *key, const char *defaultString, float *out)
 
 qboolean CG_SpawnVector2D(const char *key, const char *defaultString, float *out)
 {
-	char     *s;
+	char *s;
 	qboolean present;
 
 	present = CG_SpawnString(key, defaultString, &s);
@@ -81,10 +81,10 @@ char *vtos(const vec3_t v)
 {
 	static int  index;
 	static char str[8][32];
-	char        *s;
+	char *s;
 
 	// use an array so that multiple vtos won't collide
-	s     = str[index];
+	s = str[index];
 	index = (index + 1) & 7;
 
 	Com_sprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
@@ -94,7 +94,7 @@ char *vtos(const vec3_t v)
 
 void SP_path_corner_2(void)
 {
-	char   *targetname;
+	char *targetname;
 	vec3_t origin;
 
 	CG_SpawnString("targetname", "", &targetname);
@@ -117,12 +117,12 @@ void SP_path_corner_2(void)
 
 void SP_info_train_spline_main(void)
 {
-	char         *targetname;
-	char         *target;
-	char         *control;
-	vec3_t       origin;
-	int          i;
-	char         *end;
+	char *targetname;
+	char *target;
+	char *control;
+	vec3_t origin;
+	int i;
+	char *end;
 	splinePath_t *spline;
 
 	if (!CG_SpawnVector("origin", "0 0 0", origin))
@@ -205,7 +205,7 @@ void SP_misc_gamemodel(void)
 		}
 	}
 
-	gamemodel        = &cgs.miscGameModels[cg.numMiscGameModels++];
+	gamemodel = &cgs.miscGameModels[cg.numMiscGameModels++];
 	gamemodel->model = trap_R_RegisterModel(model);
 	AnglesToAxis(angles, gamemodel->axes);
 	for (i = 0; i < 3; i++)
@@ -276,7 +276,7 @@ cg.spawnVars[], then call the class specfic spawn function
 */
 void CG_ParseEntityFromSpawnVars(void)
 {
-	int  i;
+	int i;
 	char *classname;
 
 	// check for "notteam" / "notfree" flags
@@ -307,7 +307,7 @@ CG_AddSpawnVarToken
 */
 char *CG_AddSpawnVarToken(const char *string)
 {
-	int  l;
+	int l;
 	char *dest;
 
 	l = strlen(string);
@@ -339,7 +339,7 @@ qboolean CG_ParseSpawnVars(void)
 	char keyname[MAX_TOKEN_CHARS];
 	char com_token[MAX_TOKEN_CHARS];
 
-	cg.numSpawnVars     = 0;
+	cg.numSpawnVars = 0;
 	cg.numSpawnVarChars = 0;
 
 	// parse the opening brace
@@ -431,12 +431,12 @@ void SP_worldspawn(void)
 	CG_SpawnString("atmosphere", "", &s);
 	CG_EffectParse(s);
 
-	cg.fiveMinuteSound_g[0]                       = \
-	    cg.fiveMinuteSound_a[0]                   = \
-	        cg.twoMinuteSound_g[0]                = \
-	            cg.twoMinuteSound_a[0]            = \
-	                cg.thirtySecondSound_g[0]     = \
-	                    cg.thirtySecondSound_a[0] = '\0';
+	cg.fiveMinuteSound_g[0] = \
+		cg.fiveMinuteSound_a[0] = \
+			cg.twoMinuteSound_g[0] = \
+				cg.twoMinuteSound_a[0] = \
+					cg.thirtySecondSound_g[0] = \
+						cg.thirtySecondSound_a[0] = '\0';
 
 	CG_SpawnString("twoMinuteSound_axis", "axis_hq_5minutes", &s);
 	Q_strncpyz(cg.fiveMinuteSound_g, s, sizeof(cg.fiveMinuteSound_g));
@@ -548,8 +548,8 @@ Parses textual entity definitions out of an entstring and spawns gentities.
 void CG_ParseEntitiesFromString(void)
 {
 	// allow calls to CG_Spawn*()
-	cg.spawning          = qtrue;
-	cg.numSpawnVars      = 0;
+	cg.spawning = qtrue;
+	cg.numSpawnVars = 0;
 	cg.numMiscGameModels = 0;
 
 	// the worldspawn is not an actual entity, but it still

@@ -4,7 +4,7 @@
 #define MAX_SCRIPTSPEAKERS 256
 
 static bg_speaker_t scriptSpeakers[MAX_SCRIPTSPEAKERS];
-static int          numScriptSpeakers;
+static int numScriptSpeakers;
 
 void BG_ClearScriptSpeakerPool(void)
 {
@@ -59,9 +59,9 @@ qboolean BG_SS_StoreSpeaker(bg_speaker_t *speaker)
 
 static qboolean BG_SS_ParseError(int handle, const char *format, ...)
 {
-	int         line;
-	char        filename[128];
-	va_list     argptr;
+	int  line;
+	char filename[128];
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -69,7 +69,7 @@ static qboolean BG_SS_ParseError(int handle, const char *format, ...)
 	va_end(argptr);
 
 	filename[0] = '\0';
-	line        = 0;
+	line = 0;
 	trap_PC_SourceFileAndLine(handle, filename, &line);
 
 	Com_Printf(S_COLOR_RED "ERROR: %s, line %d: %s\n", filename, line, string);
@@ -81,7 +81,7 @@ static qboolean BG_SS_ParseError(int handle, const char *format, ...)
 
 static qboolean BG_SS_ParseSpeaker(int handle)
 {
-	pc_token_t   token;
+	pc_token_t token;
 	bg_speaker_t speaker;
 
 	memset(&speaker, 0, sizeof(speaker));
@@ -145,7 +145,7 @@ static qboolean BG_SS_ParseSpeaker(int handle)
 				}
 				else if (!Q_stricmp(token.string, "on"))
 				{
-					speaker.loop      = S_LT_LOOPED_ON;
+					speaker.loop = S_LT_LOOPED_ON;
 					speaker.activated = qtrue;
 				}
 				else if (!Q_stricmp(token.string, "off"))
@@ -245,7 +245,7 @@ static qboolean BG_SS_ParseSpeaker(int handle)
 qboolean BG_LoadSpeakerScript(const char *filename)
 {
 	pc_token_t token;
-	int        handle;
+	int handle;
 
 	handle = trap_PC_LoadSource(filename);
 

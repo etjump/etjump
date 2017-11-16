@@ -23,7 +23,7 @@ void Timerun::draw()
 {
 	/*if (player_drawRunTimer.integer == 0 || !cg.hasTimerun)
 	{
-		return;
+	    return;
 	}
 
 	auto startTime = _startTime;
@@ -31,21 +31,21 @@ void Timerun::draw()
 
 	if (_running)
 	{
-		millis = cg.time - startTime;
+	    millis = cg.time - startTime;
 	}
 	else
 	{
-		millis = _completionTime;
+	    millis = _completionTime;
 	}
 
 	vec4_t *color = &colorWhite;
 
 	if (_fastestTime > 0)
 	{
-		if (millis > _fastestTime)
-		{
-			color = &colorRed;
-		}
+	    if (millis > _fastestTime)
+	    {
+	        color = &colorRed;
+	    }
 	}
 
 	auto minutes = millis / 60000;
@@ -67,20 +67,20 @@ void Timerun::draw()
 
 void Timerun::startTimerun(const std::string &runName, int startTime, int previousRecord)
 {
-	_running                = true;
-	_startTime              = startTime;
-	_currentTimerun         = runName;
+	_running = true;
+	_startTime = startTime;
+	_currentTimerun = runName;
 	_runningPlayerClientNum = _clientNum;
 
 	auto playerTimes = _fastestTimes.find(_clientNum);
 	if (playerTimes == _fastestTimes.end())
 	{
 		_fastestTimes[_clientNum] = std::map<std::string, int>();
-		playerTimes               = _fastestTimes.find(_clientNum);
+		playerTimes = _fastestTimes.find(_clientNum);
 	}
 
 	playerTimes->second[runName] = previousRecord;
-	_fastestTime                 = previousRecord;
+	_fastestTime = previousRecord;
 }
 
 void Timerun::startSpectatorTimerun(int clientNum, const std::string &runName, int startTime, int previousRecord)
@@ -90,34 +90,34 @@ void Timerun::startSpectatorTimerun(int clientNum, const std::string &runName, i
 		return;
 	}
 
-	_running                = true;
-	_currentTimerun         = runName;
-	_startTime              = startTime;
+	_running = true;
+	_currentTimerun = runName;
+	_startTime = startTime;
 	_runningPlayerClientNum = clientNum;
 
 	auto playerTimes = _fastestTimes.find(clientNum);
 	if (playerTimes == _fastestTimes.end())
 	{
 		_fastestTimes[clientNum] = std::map<std::string, int>();
-		playerTimes              = _fastestTimes.find(clientNum);
+		playerTimes = _fastestTimes.find(clientNum);
 	}
 
 	playerTimes->second[runName] = previousRecord;
-	_fastestTime                 = previousRecord;
+	_fastestTime = previousRecord;
 }
 
 void Timerun::interrupt()
 {
-	_running                = false;
-	_currentTimerun         = "";
-	_startTime              = 0;
+	_running = false;
+	_currentTimerun = "";
+	_startTime = 0;
 	_runningPlayerClientNum = 0;
-	_fastestTime            = -1;
+	_fastestTime = -1;
 }
 
 void Timerun::stopTimerun(int completionTime)
 {
-	_running        = false;
+	_running = false;
 	_completionTime = completionTime;
 }
 
@@ -127,6 +127,7 @@ void Timerun::record(int clientNum, std::string runName, int completionTime)
 	int previousTime = NO_PREVIOUS_RECORD;
 
 	auto playerTimes = _fastestTimes.find(clientNum);
+
 	if (playerTimes != _fastestTimes.end())
 	{
 		auto previousTimeIter = playerTimes->second.find(runName);
@@ -151,23 +152,23 @@ void Timerun::record(int clientNum, std::string runName, int completionTime)
 	if (previousTime != NO_PREVIOUS_RECORD)
 	{
 		CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d! ^7(-^2%02d:%02d:%03d^7)")
-		                          % cgs.clientinfo[clientNum].name
-		                          % runName
-		                          % minutes
-		                          % seconds
-		                          % millis
-		                          % diffMinutes
-		                          % diffSeconds
-		                          % diffMillis).str().c_str(), cgs.media.voiceChatShader);
+			                      % cgs.clientinfo[clientNum].name
+			                      % runName
+			                      % minutes
+			                      % seconds
+			                      % millis
+			                      % diffMinutes
+			                      % diffSeconds
+			                      % diffMillis).str().c_str(), cgs.media.voiceChatShader);
 	}
 	else
 	{
 		CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed %s in %02d:%02d:%03d!")
-		                          % cgs.clientinfo[clientNum].name
-		                          % runName
-		                          % minutes
-		                          % seconds
-		                          % millis).str().c_str(), cgs.media.voiceChatShader);
+			                      % cgs.clientinfo[clientNum].name
+			                      % runName
+			                      % minutes
+			                      % seconds
+			                      % millis).str().c_str(), cgs.media.voiceChatShader);
 	}
 }
 
@@ -175,7 +176,8 @@ void Timerun::record(int clientNum, std::string runName, int completionTime)
 void Timerun::completion(int clientNum, std::string runName, int completionTime)
 {
 	int  previousRecord = NO_PREVIOUS_RECORD;
-	auto playerTimes    = _fastestTimes.find(clientNum);
+	auto playerTimes = _fastestTimes.find(clientNum);
+
 	if (playerTimes != _fastestTimes.end())
 	{
 		auto previousTimeIter = playerTimes->second.find(runName);
@@ -205,25 +207,25 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 			if (clientNum == _clientNum)
 			{
 				CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d:%03d (+^1%02d:%02d:%03d^7).")
-				                          % runName
-				                          % minutes
-				                          % seconds
-				                          % millis
-				                          % diffMinutes
-				                          % diffSeconds
-				                          % diffMillis).str().c_str(), cgs.media.voiceChatShader);
+					                      % runName
+					                      % minutes
+					                      % seconds
+					                      % millis
+					                      % diffMinutes
+					                      % diffSeconds
+					                      % diffMillis).str().c_str(), cgs.media.voiceChatShader);
 			}
 			else
 			{
 				CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d (+^1%02d:%02d:%03d^7).")
-				                          % cgs.clientinfo[clientNum].name
-				                          % runName
-				                          % minutes
-				                          % seconds
-				                          % millis
-				                          % diffMinutes
-				                          % diffSeconds
-				                          % diffMillis).str().c_str(), cgs.media.voiceChatShader);
+					                      % cgs.clientinfo[clientNum].name
+					                      % runName
+					                      % minutes
+					                      % seconds
+					                      % millis
+					                      % diffMinutes
+					                      % diffSeconds
+					                      % diffMillis).str().c_str(), cgs.media.voiceChatShader);
 			}
 		}
 		else
@@ -231,19 +233,19 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 			if (clientNum == _clientNum)
 			{
 				CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d:%03d.")
-				                          % runName
-				                          % minutes
-				                          % seconds
-				                          % millis).str().c_str(), cgs.media.voiceChatShader);
+					                      % runName
+					                      % minutes
+					                      % seconds
+					                      % millis).str().c_str(), cgs.media.voiceChatShader);
 			}
 			else
 			{
 				CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d.")
-				                          % cgs.clientinfo[clientNum].name
-				                          % runName
-				                          % minutes
-				                          % seconds
-				                          % millis).str().c_str(), cgs.media.voiceChatShader);
+					                      % cgs.clientinfo[clientNum].name
+					                      % runName
+					                      % minutes
+					                      % seconds
+					                      % millis).str().c_str(), cgs.media.voiceChatShader);
 			}
 		}
 	}
@@ -251,6 +253,6 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 
 void Timerun::stopSpectatorTimerun(int clientNum, int completionTime, const std::string& currentRun)
 {
-	_running        = false;
+	_running = false;
 	_completionTime = completionTime;
 }

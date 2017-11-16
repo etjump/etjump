@@ -16,7 +16,7 @@
 
 // for now, statically allocate them
 g_serverEntity_t g_serverEntities[MAX_SERVER_ENTITIES];
-int              numServerEntities;
+int numServerEntities;
 
 
 // clear out all the sp entities
@@ -80,7 +80,7 @@ g_serverEntity_t *CreateServerEntity(gentity_t *ent)
 		}
 
 		newEnt->spawnflags = ent->spawnflags;
-		newEnt->team       = ent->aiTeam;
+		newEnt->team = ent->aiTeam;
 		VectorCopy(ent->s.origin, newEnt->origin);
 		VectorCopy(ent->s.angles, newEnt->angles);
 		// DON'T set the number - that should have been set when it was spawned
@@ -104,7 +104,7 @@ void CreateMapServerEntities();
 //		So we want to give each entity the chance to set itself up after it has been created
 void InitialServerEntitySetup()
 {
-	int              i;
+	int i;
 	g_serverEntity_t *ent;
 
 	// TAT - create the server entities for the current map
@@ -127,7 +127,7 @@ void InitialServerEntitySetup()
 // Like G_Find, but for server entities
 g_serverEntity_t *FindServerEntity(g_serverEntity_t *from, int fieldofs, char *match)
 {
-	char             *s;
+	char *s;
 	g_serverEntity_t *max = &g_serverEntities[numServerEntities];
 
 	if (!from)

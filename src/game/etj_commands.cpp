@@ -23,28 +23,28 @@ namespace CommandFlags
 {
 const char BAN = 'b';
 // For everyone
-const char BASIC       = 'a';
-const char CANCELVOTE  = 'C';
-const char EBALL       = '8';
-const char EDIT        = 'A';
-const char FINGER      = 'f';
-const char HELP        = 'h';
-const char KICK        = 'k';
-const char LISTBANS    = 'L';
+const char BASIC = 'a';
+const char CANCELVOTE = 'C';
+const char EBALL  = '8';
+const char EDIT   = 'A';
+const char FINGER = 'f';
+const char HELP   = 'h';
+const char KICK   = 'k';
+const char LISTBANS = 'L';
 const char LISTPLAYERS = 'l';
-const char MAP         = 'M';
-const char MUTE        = 'm';
-const char NOCLIP      = 'N';
-const char NOGOTO      = 'K';
-const char PASSVOTE    = 'P';
-const char PUTTEAM     = 'p';
-const char READCONFIG  = 'G';
-const char RENAME      = 'R';
-const char RESTART     = 'r';
-const char TOKENS      = 'V';
-const char SAVESYSTEM  = 'T';
-const char SETLEVEL    = 's';
-const char MOVERSCALE  = 'v';
+const char MAP  = 'M';
+const char MUTE = 'm';
+const char NOCLIP = 'N';
+const char NOGOTO = 'K';
+const char PASSVOTE = 'P';
+const char PUTTEAM  = 'p';
+const char READCONFIG = 'G';
+const char RENAME  = 'R';
+const char RESTART = 'r';
+const char TOKENS  = 'V';
+const char SAVESYSTEM = 'T';
+const char SETLEVEL = 's';
+const char MOVERSCALE = 'v';
 }
 
 namespace ClientCommands
@@ -120,15 +120,15 @@ void PrintManual(gentity_t *ent, const std::string& command)
 	}
 	else
 	{
-		int i   = 0;
+		int i = 0;
 		int len = sizeof(commandManuals) / sizeof(commandManuals[0]);
 		for (i = 0; i < len; i++)
 		{
 			if (!Q_stricmp(commandManuals[i].cmd, command.c_str()))
 			{
 				G_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n",
-				         commandManuals[i].cmd, commandManuals[i].usage,
-				         commandManuals[i].description);
+					commandManuals[i].cmd, commandManuals[i].usage,
+					commandManuals[i].description);
 				return;
 			}
 		}
@@ -166,19 +166,19 @@ bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher)
 
 namespace AdminCommands
 {
-const int CMDS_OPEN     = 1;
+const int CMDS_OPEN = 1;
 const int GREETING_OPEN = 2;
-const int TITLE_OPEN    = 4;
+const int TITLE_OPEN = 4;
 
 namespace Updated
 {
-const unsigned NONE      = 0;
-const unsigned LEVEL     = 0x00001;
+const unsigned NONE  = 0;
+const unsigned LEVEL = 0x00001;
 const unsigned LAST_SEEN = 0x00002;
-const unsigned NAME      = 0x00004;
-const unsigned TITLE     = 0x00008;
-const unsigned COMMANDS  = 0x00010;
-const unsigned GREETING  = 0x00020;
+const unsigned NAME  = 0x00004;
+const unsigned TITLE = 0x00008;
+const unsigned COMMANDS = 0x00010;
+const unsigned GREETING = 0x00020;
 }
 
 bool Admintest(gentity_t *ent, Arguments argv)
@@ -203,7 +203,7 @@ bool AddLevel(gentity_t *ent, Arguments argv)
 	}
 	int open = 0;
 
-	int         level = 0;
+	int level = 0;
 	std::string commands;
 	std::string greeting;
 	std::string title;
@@ -313,7 +313,7 @@ bool Ball8(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	int       random   = rand() % 20;
+	int random = rand() % 20;
 	const int POSITIVE = 10;
 	const int NO_IDEA  = 15;
 	if (random < POSITIVE)
@@ -361,8 +361,8 @@ bool Ban(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	unsigned    expires = 0;
-	std::string reason  = "Banned by admin.";
+	unsigned expires = 0;
+	std::string reason = "Banned by admin.";
 
 	// !ban <name> <time> <reason>
 	if (argv->size() > 3)
@@ -473,25 +473,25 @@ bool EditCommands(gentity_t *ent, Arguments argv)
 
 	std::string currentPermissions = game.levels->GetLevel(level)->commands;
 
-	bool        add = true;
+	bool add = true;
 	std::string currentCommand;
-	std::string addCommands    = "+";
+	std::string addCommands = "+";
 	std::string deleteCommands = "-";
 	for (; it != end; it++)
 	{
 		if ((*it)[0] == '-')
 		{
-			add            = false;
+			add = false;
 			currentCommand = (*it).substr(1);
 		}
 		else if ((*it)[0] == '+')
 		{
-			add            = true;
+			add = true;
 			currentCommand = (*it).substr(1);
 		}
 		else
 		{
-			add            = true;
+			add = true;
 			currentCommand = (*it);
 		}
 		char flag = game.commands->FindCommandFlag(currentCommand);
@@ -572,9 +572,9 @@ bool EditLevel(gentity_t *ent, Arguments argv)
 	}
 
 	int updated = 0;
-	int open    = 0;
+	int open = 0;
 
-	int         adminLevel = 0;
+	int adminLevel = 0;
 	std::string commands;
 	std::string greeting;
 	std::string title;
@@ -593,17 +593,17 @@ bool EditLevel(gentity_t *ent, Arguments argv)
 		{
 			if (*it == "-cmds" && it + 1 != argv->end())
 			{
-				open     = CMDS_OPEN;
+				open = CMDS_OPEN;
 				updated |= CMDS_OPEN;
 			}
 			else if (*it == "-greeting" && it + 1 != argv->end())
 			{
-				open     = GREETING_OPEN;
+				open = GREETING_OPEN;
 				updated |= GREETING_OPEN;
 			}
 			else if (*it == "-title" && it + 1 != argv->end())
 			{
-				open     = TITLE_OPEN;
+				open = TITLE_OPEN;
 				updated |= TITLE_OPEN;
 			}
 			else if (*it == "-clear" && it + 1 != argv->end())
@@ -622,7 +622,7 @@ bool EditLevel(gentity_t *ent, Arguments argv)
 				}
 				else if (*nextIt == "title")
 				{
-					title    = "";
+					title = "";
 					updated |= TITLE_OPEN;
 				}
 				else
@@ -698,7 +698,7 @@ bool EditUser(gentity_t *ent, Arguments argv)
 	}
 
 	int updated = 0;
-	int open    = 0;
+	int open = 0;
 
 	std::string commands;
 	std::string greeting;
@@ -709,17 +709,17 @@ bool EditUser(gentity_t *ent, Arguments argv)
 	{
 		if (*it == "-cmds" && it + 1 != argv->end())
 		{
-			open     = CMDS_OPEN;
+			open = CMDS_OPEN;
 			updated |= Updated::COMMANDS;
 		}
 		else if (*it == "-greeting" && it + 1 != argv->end())
 		{
-			open     = GREETING_OPEN;
+			open = GREETING_OPEN;
 			updated |= Updated::GREETING;
 		}
 		else if (*it == "-title" && it + 1 != argv->end())
 		{
-			open     = TITLE_OPEN;
+			open = TITLE_OPEN;
 			updated |= Updated::TITLE;
 		}
 		else if (*it == "-clear" && it + 1 != argv->end())
@@ -737,7 +737,7 @@ bool EditUser(gentity_t *ent, Arguments argv)
 			}
 			else if (*nextIt == "title")
 			{
-				title    = "";
+				title = "";
 				updated |= Updated::TITLE;
 			}
 			else
@@ -810,7 +810,7 @@ bool FindMap(gentity_t *ent, Arguments argv)
 		}
 	}
 
-	auto                     maps = game.mapStatistics->getMaps();
+	auto maps = game.mapStatistics->getMaps();
 	std::vector<std::string> matching;
 	for (auto &map : maps)
 	{
@@ -820,15 +820,15 @@ bool FindMap(gentity_t *ent, Arguments argv)
 		}
 	}
 
-	auto        mapsOnCurrentRow = 0;
-	std::string buffer           = "^zFound " + std::to_string(matching.size()) + " maps:\n^7";
+	auto mapsOnCurrentRow = 0;
+	std::string buffer = "^zFound " + std::to_string(matching.size()) + " maps:\n^7";
 	for (auto& map : matching)
 	{
 		++mapsOnCurrentRow;
 		if (mapsOnCurrentRow > perRow)
 		{
 			mapsOnCurrentRow = 1;
-			buffer          += (boost::format("\n%-22s") % map).str();
+			buffer += (boost::format("\n%-22s") % map).str();
 		}
 		else
 		{
@@ -906,13 +906,14 @@ bool Help(gentity_t *ent, Arguments argv)
 bool Kick(gentity_t *ent, Arguments argv)
 {
 	const unsigned MIN_ARGS = 2;
+
 	if (argv->size() < MIN_ARGS)
 	{
 		PrintManual(ent, "kick");
 		return false;
 	}
 
-	std::string error   = "";
+	std::string error = "";
 	gentity_t   *target = PlayerGentityFromString(argv->at(1), error);
 	if (!target)
 	{
@@ -958,6 +959,7 @@ bool Kick(gentity_t *ent, Arguments argv)
 std::string playedTimeFmtString(int seconds)
 {
 	auto minutes = seconds / 60;
+
 	seconds -= minutes * 60;
 	auto hours = minutes / 60;
 	minutes -= hours * 60;
@@ -1012,6 +1014,7 @@ std::string playedTimeFmtString(int seconds)
 bool LeastPlayed(gentity_t *ent, Arguments argv)
 {
 	auto mapsToList = 10;
+
 	if (argv->size() == 2)
 	{
 		try
@@ -1031,9 +1034,9 @@ bool LeastPlayed(gentity_t *ent, Arguments argv)
 
 	auto leastPlayed = game.mapStatistics->getLeastPlayed();
 
-	auto        listedMaps = 0;
-	std::string buffer     = "^zLeast played maps are:\n"
-	                         "^gMap                    Played                         Last played       Times played\n";
+	auto listedMaps = 0;
+	std::string buffer = "^zLeast played maps are:\n"
+	                     "^gMap                    Played                         Last played       Times played\n";
 	auto green = false;
 	for (auto& map : leastPlayed)
 	{
@@ -1087,7 +1090,10 @@ bool ListBans(gentity_t *ent, Arguments argv)
 		}
 	}
 
-	if (page < 1) page = 1;
+	if (page < 1)
+	{
+		page = 1;
+	}
 
 	ETJump::database->ListBans(ent, page);
 
@@ -1132,16 +1138,16 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 		}
 	}
 
-	std::string buffer           = "^zListing all maps on server:\n^7";
-	auto        maps             = game.mapStatistics->getMaps();
-	auto        mapsOnCurrentRow = 0;
+	std::string buffer = "^zListing all maps on server:\n^7";
+	auto maps = game.mapStatistics->getMaps();
+	auto mapsOnCurrentRow = 0;
 	for (auto& map : maps)
 	{
 		++mapsOnCurrentRow;
 		if (mapsOnCurrentRow > perRow)
 		{
 			mapsOnCurrentRow = 1;
-			buffer          += (boost::format("\n%-22s") % map).str();
+			buffer += (boost::format("\n%-22s") % map).str();
 		}
 		else
 		{
@@ -1202,13 +1208,13 @@ bool ListPlayers(gentity_t *ent, Arguments argv)
 		for (auto i = 0; i < level.numConnectedClients; i++)
 		{
 			auto clientNum = level.sortedClients[i];
-			auto id        = ETJump::session->GetId(g_entities + clientNum);
+			auto id = ETJump::session->GetId(g_entities + clientNum);
 
 			BufferPrint(ent, (boost::format("^7%-2d %-9d %-6d %-s\n")
-			                  % clientNum
-			                  % (id == -1 ? "-" : std::to_string(id))
-			                  % ETJump::session->GetLevel(g_entities + clientNum)
-			                  % (g_entities + clientNum)->client->pers.netname).str());
+				              % clientNum
+				              % (id == -1 ? "-" : std::to_string(id))
+				              % ETJump::session->GetLevel(g_entities + clientNum)
+				              % (g_entities + clientNum)->client->pers.netname).str());
 		}
 
 		FinishBufferPrint(ent);
@@ -1237,7 +1243,7 @@ bool Map(gentity_t *ent, Arguments argv)
 
 bool MapInfo(gentity_t *ent, Arguments argv)
 {
-	auto mi         = game.mapStatistics->getMapInformation(argv->size() > 1 ? argv->at(1) : level.rawmapname);
+	auto mi = game.mapStatistics->getMapInformation(argv->size() > 1 ? argv->at(1) : level.rawmapname);
 	auto currentMap = game.mapStatistics->getCurrentMap();
 
 	if (mi == nullptr)
@@ -1285,6 +1291,7 @@ bool MapInfo(gentity_t *ent, Arguments argv)
 bool MostPlayed(gentity_t *ent, Arguments argv)
 {
 	auto mapsToList = 10;
+
 	if (argv->size() == 2)
 	{
 		try
@@ -1304,9 +1311,9 @@ bool MostPlayed(gentity_t *ent, Arguments argv)
 
 	auto mostPlayed = game.mapStatistics->getMostPlayed();
 
-	auto        listedMaps = 0;
-	std::string buffer     = "^zMost played maps are:\n"
-	                         "^gMap                    Played                         Last played       Times played\n";
+	auto listedMaps = 0;
+	std::string buffer = "^zMost played maps are:\n"
+	                     "^gMap                    Played                         Last played       Times played\n";
 	auto green = false;
 	for (auto& map : mostPlayed)
 	{
@@ -1332,7 +1339,7 @@ void MutePlayer(gentity_t *target)
 	target->client->sess.muted = qtrue;
 
 	char userinfo[MAX_INFO_STRING] = "\0";
-	char *ip                       = NULL;
+	char *ip = NULL;
 
 	trap_GetUserinfo(target - g_entities, userinfo, sizeof(userinfo));
 	ip = Info_ValueForKey(userinfo, "ip");
@@ -1619,7 +1626,7 @@ bool Rename(gentity_t *ent, Arguments argv)
 	}
 
 	char userinfo[MAX_INFO_STRING] = "\0";
-	int  cn                        = ClientNum(target);
+	int  cn = ClientNum(target);
 	trap_GetUserinfo(cn, userinfo, sizeof(userinfo));
 
 	const char *oldName = Info_ValueForKey(userinfo, "name");
@@ -1770,7 +1777,7 @@ bool Spectate(gentity_t *ent, Arguments argv)
 
 	std::string error;
 	//ETJump: match only players that are in game, filter out spectators
-	gentity_t   *target = PlayerGentityFromString(argv->at(1), error, TEAM_SPECTATOR);
+	gentity_t *target = PlayerGentityFromString(argv->at(1), error, TEAM_SPECTATOR);
 
 	if (!target)
 	{
@@ -1793,7 +1800,7 @@ bool Spectate(gentity_t *ent, Arguments argv)
 	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 	{
 		SetTeam(ent, "spectator", qfalse,
-		        static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
+			static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 	}
 
 	ent->client->sess.spectatorState  = SPECTATOR_FOLLOW;
@@ -2012,11 +2019,11 @@ bool Tokens(gentity_t *ent, Arguments argv)
 		{
 			ChatPrintTo(ent, "^3usage: ^7check console for more information");
 			Utilities::toConsole(ent,
-			                     "^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new token\n"
-			                     "^7!tokens move ^9| Moves nearest token to your location\n"
-			                     "^7!tokens delete ^9| Deletes nearest token to your location\n"
-			                     "^7!tokens delete <easy (e)|medium (m)|hard (h)> <1-6> ^9| Deletes specified token\n"
-			                     );
+				"^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new token\n"
+				"^7!tokens move ^9| Moves nearest token to your location\n"
+				"^7!tokens delete ^9| Deletes nearest token to your location\n"
+				"^7!tokens delete <easy (e)|medium (m)|hard (h)> <1-6> ^9| Deletes specified token\n"
+				);
 			return false;
 		}
 	}
@@ -2025,9 +2032,9 @@ bool Tokens(gentity_t *ent, Arguments argv)
 		if (argv->size() < 4)
 		{
 			Utilities::toConsole(ent,
-			                     "^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
-			                     "!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n"
-			                     );
+				"^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
+				"!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n"
+				);
 			return false;
 		}
 	}
@@ -2101,7 +2108,7 @@ bool Unmute(gentity_t *ent, Arguments argv)
 
 	target->client->sess.muted = qfalse;
 
-	char *ip                       = NULL;
+	char *ip = NULL;
 	char userinfo[MAX_INFO_STRING] = "\0";
 	trap_GetUserinfo(ClientNum(target), userinfo, sizeof(userinfo));
 	ip = Info_ValueForKey(userinfo, "ip");
@@ -2137,6 +2144,7 @@ bool UserInfo(gentity_t *ent, Arguments argv)
 bool MoverScale(gentity_t *ent, Arguments argv)
 {
 	auto moverScaleValue = g_moverScale.value;
+
 	if (argv->size() > 1)
 	{
 		if (!ToFloat(argv->at(1), moverScaleValue))
@@ -2168,39 +2176,39 @@ Commands::Commands()
 	//adminCommands_["addlevel"] = AdminCommand(AdminCommands::AddLevel, 'a');
 
 
-	adminCommands_["addlevel"]    = AdminCommandPair(AdminCommands::AddLevel, CommandFlags::EDIT);
-	adminCommands_["admintest"]   = AdminCommandPair(AdminCommands::Admintest, CommandFlags::BASIC);
-	adminCommands_["8ball"]       = AdminCommandPair(AdminCommands::Ball8, CommandFlags::BASIC);
-	adminCommands_["ban"]         = AdminCommandPair(AdminCommands::Ban, CommandFlags::BAN);
+	adminCommands_["addlevel"]  = AdminCommandPair(AdminCommands::AddLevel, CommandFlags::EDIT);
+	adminCommands_["admintest"] = AdminCommandPair(AdminCommands::Admintest, CommandFlags::BASIC);
+	adminCommands_["8ball"] = AdminCommandPair(AdminCommands::Ball8, CommandFlags::BASIC);
+	adminCommands_["ban"] = AdminCommandPair(AdminCommands::Ban, CommandFlags::BAN);
 	adminCommands_["cancelvote"]  = AdminCommandPair(AdminCommands::Cancelvote, CommandFlags::CANCELVOTE);
 	adminCommands_["deletelevel"] = AdminCommandPair(AdminCommands::DeleteLevel, CommandFlags::EDIT);
 	//adminCommands_["deleteuser"] = AdminCommandPair(AdminCommands::DeleteUser, CommandFlags::EDIT);
-	adminCommands_["editcommands"]  = AdminCommandPair(AdminCommands::EditCommands, CommandFlags::EDIT);
-	adminCommands_["editlevel"]     = AdminCommandPair(AdminCommands::EditLevel, CommandFlags::EDIT);
-	adminCommands_["edituser"]      = AdminCommandPair(AdminCommands::EditUser, CommandFlags::EDIT);
-	adminCommands_["finduser"]      = AdminCommandPair(AdminCommands::FindUser, CommandFlags::EDIT);
+	adminCommands_["editcommands"] = AdminCommandPair(AdminCommands::EditCommands, CommandFlags::EDIT);
+	adminCommands_["editlevel"] = AdminCommandPair(AdminCommands::EditLevel, CommandFlags::EDIT);
+	adminCommands_["edituser"]  = AdminCommandPair(AdminCommands::EditUser, CommandFlags::EDIT);
+	adminCommands_["finduser"]  = AdminCommandPair(AdminCommands::FindUser, CommandFlags::EDIT);
 	adminCommands_["listusernames"] = AdminCommandPair(AdminCommands::ListUserNames, CommandFlags::EDIT);
-	adminCommands_["finger"]        = AdminCommandPair(AdminCommands::Finger, CommandFlags::FINGER);
-	adminCommands_["findmap"]       = AdminCommandPair(AdminCommands::FindMap, CommandFlags::BASIC);
-	adminCommands_["help"]          = AdminCommandPair(AdminCommands::Help, CommandFlags::BASIC);
-	adminCommands_["kick"]          = AdminCommandPair(AdminCommands::Kick, CommandFlags::KICK);
-	adminCommands_["leastplayed"]   = AdminCommandPair(AdminCommands::LeastPlayed, CommandFlags::BASIC);
-	adminCommands_["levelinfo"]     = AdminCommandPair(AdminCommands::LevelInfo, CommandFlags::EDIT);
-	adminCommands_["listbans"]      = AdminCommandPair(AdminCommands::ListBans, CommandFlags::LISTBANS);
+	adminCommands_["finger"]  = AdminCommandPair(AdminCommands::Finger, CommandFlags::FINGER);
+	adminCommands_["findmap"] = AdminCommandPair(AdminCommands::FindMap, CommandFlags::BASIC);
+	adminCommands_["help"] = AdminCommandPair(AdminCommands::Help, CommandFlags::BASIC);
+	adminCommands_["kick"] = AdminCommandPair(AdminCommands::Kick, CommandFlags::KICK);
+	adminCommands_["leastplayed"] = AdminCommandPair(AdminCommands::LeastPlayed, CommandFlags::BASIC);
+	adminCommands_["levelinfo"] = AdminCommandPair(AdminCommands::LevelInfo, CommandFlags::EDIT);
+	adminCommands_["listbans"]  = AdminCommandPair(AdminCommands::ListBans, CommandFlags::LISTBANS);
 	//adminCommands_["listcmds"] = AdminCommandPair(AdminCommands::ListCommands, CommandFlags::BASIC);
-	adminCommands_["listflags"]   = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
-	adminCommands_["listmaps"]    = AdminCommandPair(AdminCommands::ListMaps, CommandFlags::BASIC);
+	adminCommands_["listflags"] = AdminCommandPair(AdminCommands::ListFlags, CommandFlags::EDIT);
+	adminCommands_["listmaps"]  = AdminCommandPair(AdminCommands::ListMaps, CommandFlags::BASIC);
 	adminCommands_["listplayers"] = AdminCommandPair(AdminCommands::ListPlayers, CommandFlags::LISTPLAYERS);
-	adminCommands_["listusers"]   = AdminCommandPair(AdminCommands::ListUsers, CommandFlags::EDIT);
-	adminCommands_["map"]         = AdminCommandPair(AdminCommands::Map, CommandFlags::MAP);
-	adminCommands_["mapinfo"]     = AdminCommandPair(AdminCommands::MapInfo, CommandFlags::BASIC);
-	adminCommands_["mostplayed"]  = AdminCommandPair(AdminCommands::MostPlayed, CommandFlags::BASIC);
-	adminCommands_["mute"]        = AdminCommandPair(AdminCommands::Mute, CommandFlags::MUTE);
-	adminCommands_["noclip"]      = AdminCommandPair(AdminCommands::Noclip, CommandFlags::NOCLIP);
-	adminCommands_["nogoto"]      = AdminCommandPair(AdminCommands::NoGoto, CommandFlags::NOGOTO);
-	adminCommands_["nosave"]      = AdminCommandPair(AdminCommands::NoSave, CommandFlags::SAVESYSTEM);
-	adminCommands_["passvote"]    = AdminCommandPair(AdminCommands::Passvote, CommandFlags::PASSVOTE);
-	adminCommands_["putteam"]     = AdminCommandPair(AdminCommands::Putteam, CommandFlags::PUTTEAM);
+	adminCommands_["listusers"] = AdminCommandPair(AdminCommands::ListUsers, CommandFlags::EDIT);
+	adminCommands_["map"] = AdminCommandPair(AdminCommands::Map, CommandFlags::MAP);
+	adminCommands_["mapinfo"] = AdminCommandPair(AdminCommands::MapInfo, CommandFlags::BASIC);
+	adminCommands_["mostplayed"] = AdminCommandPair(AdminCommands::MostPlayed, CommandFlags::BASIC);
+	adminCommands_["mute"] = AdminCommandPair(AdminCommands::Mute, CommandFlags::MUTE);
+	adminCommands_["noclip"] = AdminCommandPair(AdminCommands::Noclip, CommandFlags::NOCLIP);
+	adminCommands_["nogoto"] = AdminCommandPair(AdminCommands::NoGoto, CommandFlags::NOGOTO);
+	adminCommands_["nosave"] = AdminCommandPair(AdminCommands::NoSave, CommandFlags::SAVESYSTEM);
+	adminCommands_["passvote"] = AdminCommandPair(AdminCommands::Passvote, CommandFlags::PASSVOTE);
+	adminCommands_["putteam"]  = AdminCommandPair(AdminCommands::Putteam, CommandFlags::PUTTEAM);
 //    adminCommands_["readconfig"] = AdminCommandPair(AdminCommands::ReadConfig, CommandFlags::READCONFIG);
 	adminCommands_["rmsaves"]  = AdminCommandPair(AdminCommands::RemoveSaves, CommandFlags::SAVESYSTEM);
 	adminCommands_["rename"]   = AdminCommandPair(AdminCommands::Rename, CommandFlags::RENAME);
@@ -2208,19 +2216,19 @@ Commands::Commands()
 	adminCommands_["setlevel"] = AdminCommandPair(AdminCommands::SetLevel, CommandFlags::SETLEVEL);
 	adminCommands_["spectate"] = AdminCommandPair(AdminCommands::Spectate, CommandFlags::BASIC);
 	adminCommands_["tokens"]   = AdminCommandPair(AdminCommands::Tokens, CommandFlags::TOKENS);
-	adminCommands_["unban"]    = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
-	adminCommands_["unmute"]   = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
+	adminCommands_["unban"]  = AdminCommandPair(AdminCommands::Unban, CommandFlags::BAN);
+	adminCommands_["unmute"] = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
 	adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
 	adminCommands_["moverscale"] = AdminCommandPair(AdminCommands::MoverScale, CommandFlags::MOVERSCALE);
 
 	commands_["backup"] = ClientCommands::BackupLoad;
-	commands_["save"]   = ClientCommands::Save;
-	commands_["load"]   = ClientCommands::Load;
+	commands_["save"] = ClientCommands::Save;
+	commands_["load"] = ClientCommands::Load;
 //    commands_["race"] = ClientCommands::Race;
 	commands_["listinfo"] = ClientCommands::ListInfo;
 	commands_["records"]  = ClientCommands::Records;
-	commands_["times"]    = ClientCommands::Records;
-	commands_["ranks"]    = ClientCommands::Records;
+	commands_["times"] = ClientCommands::Records;
+	commands_["ranks"] = ClientCommands::Records;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, std::string commandStr)
@@ -2245,7 +2253,7 @@ bool Commands::List(gentity_t *ent)
 
 	BeginBufferPrint();
 	ChatPrintTo(ent, "^3help: ^7check console for more information.");
-	int              i    = 1;
+	int i = 1;
 	std::bitset<256> perm = ETJump::session->Permissions(ent);
 	for (; it != end; it++)
 	{
@@ -2270,8 +2278,8 @@ bool Commands::List(gentity_t *ent)
 bool Commands::AdminCommand(gentity_t *ent)
 {
 	std::string command = "",
-	            arg     = SayArgv(0);
-	int skip            = 0;
+	            arg = SayArgv(0);
+	int skip = 0;
 
 	if (arg == "say" || arg == "enc_say")
 	{
@@ -2318,7 +2326,7 @@ bool Commands::AdminCommand(gentity_t *ent)
 		return false;
 	}
 	std::bitset<256> permissions =
-	    ETJump::session->Permissions(ent);
+		ETJump::session->Permissions(ent);
 	std::vector<ConstAdminCommandIterator> foundCommands;
 	while (it != adminCommands_.end() &&
 	       it->first.compare(0, command.length(), command) == 0)
@@ -2387,6 +2395,7 @@ char Commands::FindCommandFlag(const std::string &command)
 {
 	AdminCommandsIterator it  = adminCommands_.begin();
 	AdminCommandsIterator end = adminCommands_.end();
+
 	while (it != end)
 	{
 		if ((*it).first == command)

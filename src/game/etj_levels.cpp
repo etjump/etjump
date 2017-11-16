@@ -5,8 +5,8 @@
 
 Levels::Level::Level(int level, std::string const& name, std::string const& greeting, std::string const& commands)
 {
-	this->level    = level;
-	this->name     = name;
+	this->level = level;
+	this->name  = name;
 	this->greeting = greeting;
 	this->commands = commands;
 }
@@ -23,6 +23,7 @@ Levels::~Levels()
 bool Levels::Add(int level, std::string const name, std::string const commands, std::string const greeting)
 {
 	auto it = FindConst(level);
+
 	if (it != levels_.end())
 	{
 		errorMessage = "level exists";
@@ -42,6 +43,7 @@ bool Levels::Add(int level, std::string const name, std::string const commands, 
 bool Levels::Delete(int level)
 {
 	auto it = Find(level);
+
 	if (it != levels_.end())
 	{
 		levels_.erase(it);
@@ -55,15 +57,16 @@ bool Levels::Delete(int level)
 bool Levels::Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated)
 {
 	auto it = FindConst(level);
+
 	if (it == levels_.end())
 	{
 		errorMessage = "level does not exist";
 		return false;
 	}
 
-	const auto CMDS_UPDATED     = 1;
+	const auto CMDS_UPDATED = 1;
 	const auto GREETING_UPDATED = 2;
-	const auto NAME_UPDATED     = 4;
+	const auto NAME_UPDATED = 4;
 
 	if (updated & CMDS_UPDATED)
 	{
@@ -94,19 +97,19 @@ bool Levels::CreateDefaultLevels()
 	levels_.clear();
 
 	auto tempLevel = std::make_shared<Level>(0, "Visitor",
-	                                         "Welcome Visitor [n]^7! Your last visit was on [t]!", "a");
+		"Welcome Visitor [n]^7! Your last visit was on [t]!", "a");
 	levels_.push_back(tempLevel);
 
 	tempLevel = std::make_shared<Level>(1, "Friend",
-	                                    "Welcome Friend [n]^7! Your last visit was [d] ago!", "a");
+		"Welcome Friend [n]^7! Your last visit was [d] ago!", "a");
 	levels_.push_back(tempLevel);
 
 	tempLevel = std::make_shared<Level>(2, "Moderator",
-	                                    "Welcome Moderator [n]^7!", "*-Asv");
+		"Welcome Moderator [n]^7!", "*-Asv");
 	levels_.push_back(tempLevel);
 
 	tempLevel = std::make_shared<Level>(3, "Administrator",
-	                                    "Welcome Administrator [n]^7!", "*");
+		"Welcome Administrator [n]^7!", "*");
 	levels_.push_back(tempLevel);
 
 	if (!WriteToConfig())
@@ -125,7 +128,8 @@ void WriteString(const char *toWrite, fileHandle_t& f)
 void WriteInt(int toWrite, fileHandle_t& f)
 {
 	const int BUFSIZE = 32;
-	char      buf[BUFSIZE];
+	char buf[BUFSIZE];
+
 	Com_sprintf(buf, sizeof(buf), "%d", toWrite);
 	trap_FS_Write(buf, strlen(buf), f);
 	trap_FS_Write("\n", 1, f);
@@ -139,6 +143,7 @@ bool Levels::SortByLevel(const std::shared_ptr<Level>& lhs, const std::shared_pt
 bool Levels::WriteToConfig()
 {
 	auto f = 0;
+
 	trap_FS_FOpenFile(g_levelConfig.string, &f, FS_WRITE);
 
 	sort(levels_.begin(), levels_.end(), SortByLevel);
@@ -167,6 +172,7 @@ Levels::Level const *Levels::GetLevel(int level)
 {
 	auto it  = levels_.begin();
 	auto end = levels_.end();
+
 	for (; it != end; ++it)
 	{
 		if (it->get()->level == level)
@@ -210,7 +216,7 @@ void Levels::PrintLevelInfo(gentity_t *ent, int level)
 		{
 			ChatPrintTo(ent, "^3levelinfo: ^7check console for more information.");
 			ConsolePrintTo(ent, va("^5Level: ^7%d\n^5Name: ^7%s\n^5Commands: ^7%s\n^5Greeting: ^7%s",
-			                       level, it->get()->name.c_str(), it->get()->commands.c_str(), it->get()->greeting.c_str()));
+					level, it->get()->name.c_str(), it->get()->commands.c_str(), it->get()->greeting.c_str()));
 			return;
 		}
 	}
@@ -258,6 +264,7 @@ std::string Levels::ErrorMessage() const
 Levels::ConstIter Levels::FindConst(int level)
 {
 	ConstIter it = levels_.begin();
+
 	for (; it != levels_.end(); ++it)
 	{
 		if (it->get()->level == level)
@@ -271,6 +278,7 @@ Levels::ConstIter Levels::FindConst(int level)
 Levels::Iter Levels::Find(int level)
 {
 	auto it = levels_.begin();
+
 	for (; it != levels_.end(); ++it)
 	{
 		if (it->get()->level == level)
@@ -292,7 +300,7 @@ void ReadInt(char **configFile, int& level)
 	else
 	{
 		G_LogPrintf("readconfig: missing = before \"%s\" on line %d.",
-		            token, COM_GetCurrentParseLine());
+			token, COM_GetCurrentParseLine());
 	}
 	level = atoi(token);
 }
@@ -308,7 +316,7 @@ void ReadString(char **configFile, std::string& str)
 	else
 	{
 		G_LogPrintf("readconfig: missing = before \"%s\" on line %d.",
-		            token, COM_GetCurrentParseLine());
+			token, COM_GetCurrentParseLine());
 	}
 	str.clear();
 	while (token[0])
@@ -323,8 +331,9 @@ void ReadString(char **configFile, std::string& str)
 
 bool Levels::ReadFromConfig()
 {
-	auto f   = 0;
+	auto f = 0;
 	auto len = trap_FS_FOpenFile(g_levelConfig.string, &f, FS_READ);
+
 	if (len < 0)
 	{
 		CreateDefaultLevels();
@@ -346,8 +355,8 @@ bool Levels::ReadFromConfig()
 	file[len] = 0;
 	trap_FS_FCloseFile(f);
 
-	char                   *token    = nullptr;
-	auto                   levelOpen = false;
+	char *token = nullptr;
+	auto levelOpen = false;
 	std::shared_ptr<Level> tempLevel;
 
 	levels_.clear();
@@ -385,7 +394,7 @@ bool Levels::ReadFromConfig()
 		else
 		{
 			G_LogPrintf("readconfig: parse error near %s on line %d",
-			            token, COM_GetCurrentParseLine());
+				token, COM_GetCurrentParseLine());
 		}
 
 		if (!Q_stricmp(token, "[level]"))

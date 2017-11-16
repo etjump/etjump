@@ -21,7 +21,7 @@ void G_loadMatchGame(void)
 {
 	unsigned int i, dwBlueOffset, dwRedOffset;
 	unsigned int aRandomValues[MAX_REINFSEEDS];
-	char         strReinfSeeds[MAX_STRING_CHARS];
+	char strReinfSeeds[MAX_STRING_CHARS];
 
 	G_Printf("Setting MOTD...\n");
 	trap_SetConfigstring(CS_CUSTMOTD + 0, server_motd0.string);
@@ -41,7 +41,7 @@ void G_loadMatchGame(void)
 	dwBlueOffset = rand() % MAX_REINFSEEDS;
 	dwRedOffset  = rand() % MAX_REINFSEEDS;
 	strcpy(strReinfSeeds, va("%d %d", (dwBlueOffset << REINF_BLUEDELT) + (rand() % (1 << REINF_BLUEDELT)),
-	                         (dwRedOffset << REINF_REDDELT)  + (rand() % (1 << REINF_REDDELT))));
+			(dwRedOffset << REINF_REDDELT)  + (rand() % (1 << REINF_REDDELT))));
 
 	for (i = 0; i < MAX_REINFSEEDS; i++)
 	{
@@ -76,15 +76,16 @@ void G_printFull(const char *str, gentity_t *ent)
 void G_globalSound(const char *sound)
 {
 	gentity_t *te = G_TempEntity(level.intermission_origin, EV_GLOBAL_SOUND);
+
 	te->s.eventParm = G_SoundIndex(sound);
-	te->r.svFlags  |= SVF_BROADCAST;
+	te->r.svFlags |= SVF_BROADCAST;
 }
 
 
 void G_delayPrint(gentity_t *dpent)
 {
-	int      think_next = 0;
-	qboolean fFree      = qtrue;
+	int think_next = 0;
+	qboolean fFree = qtrue;
 
 	switch (dpent->spawnflags)
 	{
@@ -98,7 +99,7 @@ void G_delayPrint(gentity_t *dpent)
 			{
 				AP(va("cp \"^3Match resuming in ^1%d^3 seconds!\n\"", cSeconds / 1000));
 				think_next = level.time + 15000;
-				fFree      = qfalse;
+				fFree = qfalse;
 			}
 			else
 			{
@@ -121,7 +122,7 @@ void G_delayPrint(gentity_t *dpent)
 			{
 				AP(va("cp \"^3Match resuming in ^1%d^3 seconds!\n\"", cSeconds / 1000));
 				think_next = level.time + 1000;
-				fFree      = qfalse;
+				fFree = qfalse;
 			}
 			else
 			{
@@ -165,18 +166,18 @@ void G_spawnPrintf(int print_type, int print_time, gentity_t *owner)
 {
 	gentity_t *ent = G_Spawn();
 
-	ent->classname  = pszDPInfo[print_type];
-	ent->clipmask   = 0;
-	ent->parent     = owner;
+	ent->classname = pszDPInfo[print_type];
+	ent->clipmask  = 0;
+	ent->parent = owner;
 	ent->r.svFlags |= SVF_NOCLIENT;
 	ent->s.eFlags  |= EF_NODRAW;
-	ent->s.eType    = ET_ITEM;
+	ent->s.eType = ET_ITEM;
 
 	ent->spawnflags = print_type;       // Tunnel in DP enum
 	ent->timestamp  = level.time;       // Time entity was created
 
 	ent->nextthink = print_time;
-	ent->think     = G_delayPrint;
+	ent->think = G_delayPrint;
 }
 
 
@@ -402,8 +403,8 @@ unsigned int G_weapStatIndex_MOD(int iWeaponMOD)
 char *G_createStats(gentity_t *refEnt)
 {
 	unsigned int i, dwWeaponMask = 0, dwSkillPointMask = 0;
-	char         strWeapInfo[MAX_STRING_CHARS]  = { 0 };
-	char         strSkillInfo[MAX_STRING_CHARS] = { 0 };
+	char strWeapInfo[MAX_STRING_CHARS]  = { 0 };
+	char strSkillInfo[MAX_STRING_CHARS] = { 0 };
 
 	if (!refEnt)
 	{
@@ -418,17 +419,17 @@ char *G_createStats(gentity_t *refEnt)
 		{
 			dwWeaponMask |= (1 << i);
 			Q_strcat(strWeapInfo, sizeof(strWeapInfo), va(" %d %d %d %d %d",
-			                                              refEnt->client->sess.aWeaponStats[i].hits, refEnt->client->sess.aWeaponStats[i].atts,
-			                                              refEnt->client->sess.aWeaponStats[i].kills, refEnt->client->sess.aWeaponStats[i].deaths,
-			                                              refEnt->client->sess.aWeaponStats[i].headshots));
+					refEnt->client->sess.aWeaponStats[i].hits, refEnt->client->sess.aWeaponStats[i].atts,
+					refEnt->client->sess.aWeaponStats[i].kills, refEnt->client->sess.aWeaponStats[i].deaths,
+					refEnt->client->sess.aWeaponStats[i].headshots));
 		}
 	}
 
 	// Additional info
 	Q_strcat(strWeapInfo, sizeof(strWeapInfo), va(" %d %d %d",
-	                                              refEnt->client->sess.damage_given,
-	                                              refEnt->client->sess.damage_received,
-	                                              refEnt->client->sess.team_damage));
+			refEnt->client->sess.damage_given,
+			refEnt->client->sess.damage_received,
+			refEnt->client->sess.team_damage));
 
 	// Add skillpoints as necessary
 	for (i = SK_BATTLE_SENSE; i < SK_NUM_SKILLS; i++)
@@ -441,12 +442,12 @@ char *G_createStats(gentity_t *refEnt)
 	}
 
 	return(va("%d %d %d%s %d%s", refEnt - g_entities,
-	          refEnt->client->sess.rounds,
-	          dwWeaponMask,
-	          strWeapInfo,
-	          dwSkillPointMask,
-	          strSkillInfo
-	          ));
+			   refEnt->client->sess.rounds,
+			   dwWeaponMask,
+			   strWeapInfo,
+			   dwSkillPointMask,
+			   strSkillInfo
+			   ));
 }
 
 
@@ -455,15 +456,15 @@ void G_deleteStats(int nClient)
 {
 	gclient_t *cl = &level.clients[nClient];
 
-	cl->sess.damage_given    = 0;
+	cl->sess.damage_given = 0;
 	cl->sess.damage_received = 0;
-	cl->sess.deaths          = 0;
-	cl->sess.game_points     = 0;
-	cl->sess.rounds          = 0;
-	cl->sess.kills           = 0;
-	cl->sess.suicides        = 0;
-	cl->sess.team_damage     = 0;
-	cl->sess.team_kills      = 0;
+	cl->sess.deaths = 0;
+	cl->sess.game_points = 0;
+	cl->sess.rounds = 0;
+	cl->sess.kills  = 0;
+	cl->sess.suicides = 0;
+	cl->sess.team_damage = 0;
+	cl->sess.team_kills  = 0;
 
 	memset(&cl->sess.aWeaponStats, 0, sizeof(cl->sess.aWeaponStats));
 	trap_Cvar_Set(va("wstats%i", nClient), va("%d", nClient));
@@ -474,8 +475,8 @@ void G_deleteStats(int nClient)
 //	---> The given string must be space delimited and contain only integers
 void G_parseStats(char *pszStatsInfo)
 {
-	gclient_t    *cl;
-	const char   *tmp = pszStatsInfo;
+	gclient_t *cl;
+	const char *tmp = pszStatsInfo;
 	unsigned int i, dwWeaponMask, dwClientID = atoi(pszStatsInfo);
 
 	if (dwClientID < 0 || dwClientID > MAX_CLIENTS)
@@ -511,11 +512,11 @@ void G_parseStats(char *pszStatsInfo)
 //	--> FIXME: put the pretty print on the client
 void G_printMatchInfo(gentity_t *ent)
 {
-	int       i, j, cnt, eff;
-	int       tot_kills, tot_deaths, tot_gp, tot_sui, tot_tk, tot_dg, tot_dr, tot_td;
+	int i, j, cnt, eff;
+	int tot_kills, tot_deaths, tot_gp, tot_sui, tot_tk, tot_dg, tot_dr, tot_td;
 	gclient_t *cl;
-	const char      *ref;
-	char      n2[MAX_STRING_CHARS];
+	const char *ref;
+	char n2[MAX_STRING_CHARS];
 
 
 	cnt = 0;
@@ -528,12 +529,12 @@ void G_printMatchInfo(gentity_t *ent)
 
 		tot_kills  = 0;
 		tot_deaths = 0;
-		tot_sui    = 0;
-		tot_tk     = 0;
-		tot_dg     = 0;
-		tot_dr     = 0;
-		tot_td     = 0;
-		tot_gp     = 0;
+		tot_sui = 0;
+		tot_tk  = 0;
+		tot_dg  = 0;
+		tot_dr  = 0;
+		tot_td  = 0;
+		tot_gp  = 0;
 
 		CP("sc \"\n^7TEAM   Player          Kll Dth Sui TK Eff  ^3GP^7    ^2DG    ^1DR   ^6TD  ^3Score\n"
 		   "^7---------------------------------------------------------------------\n\"");
@@ -550,15 +551,15 @@ void G_printMatchInfo(gentity_t *ent)
 			SanitizeString(cl->pers.netname, n2, qfalse);
 			n2[15] = 0;
 
-			ref         = "^7";
+			ref = "^7";
 			tot_kills  += cl->sess.kills;
 			tot_deaths += cl->sess.deaths;
-			tot_sui    += cl->sess.suicides;
-			tot_tk     += cl->sess.team_kills;
-			tot_dg     += cl->sess.damage_given;
-			tot_dr     += cl->sess.damage_received;
-			tot_td     += cl->sess.team_damage;
-			tot_gp     += cl->sess.game_points;
+			tot_sui += cl->sess.suicides;
+			tot_tk  += cl->sess.team_kills;
+			tot_dg  += cl->sess.damage_given;
+			tot_dr  += cl->sess.damage_received;
+			tot_td  += cl->sess.team_damage;
+			tot_gp  += cl->sess.game_points;
 
 			eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
 			if (eff < 0)
@@ -576,20 +577,20 @@ void G_printMatchInfo(gentity_t *ent)
 
 			cnt++;
 			CP(va("sc \"%-10s %s%-15s^3%4d%4d%4d%3d%s%4d^3%4d^2%6d^1%6d^6%5d^3%7d\n\"",
-			      aTeams[i],
-			      ref,
-			      n2,
-			      cl->sess.kills,
-			      cl->sess.deaths,
-			      cl->sess.suicides,
-			      cl->sess.team_kills,
-			      ref,
-			      eff,
-			      cl->sess.game_points - (cl->sess.kills * WOLF_FRAG_BONUS),
-			      cl->sess.damage_given,
-			      cl->sess.damage_received,
-			      cl->sess.team_damage,
-			      cl->ps.persistant[PERS_SCORE]));
+					aTeams[i],
+					ref,
+					n2,
+					cl->sess.kills,
+					cl->sess.deaths,
+					cl->sess.suicides,
+					cl->sess.team_kills,
+					ref,
+					eff,
+					cl->sess.game_points - (cl->sess.kills * WOLF_FRAG_BONUS),
+					cl->sess.damage_given,
+					cl->sess.damage_received,
+					cl->sess.team_damage,
+					cl->ps.persistant[PERS_SCORE]));
 		}
 
 		eff = (tot_kills + tot_deaths == 0) ? 0 : 100 * tot_kills / (tot_kills + tot_deaths);
@@ -599,19 +600,19 @@ void G_printMatchInfo(gentity_t *ent)
 		}
 
 		CP(va("sc \"^7---------------------------------------------------------------------\n"
-		      "%-10s ^5%-15s%4d%4d%4d%3d^5%4d^3%4d^2%6d^1%6d^6%5d^3%7d\n\"",
-		      aTeams[i],
-		      "Totals",
-		      tot_kills,
-		      tot_deaths,
-		      tot_sui,
-		      tot_tk,
-		      eff,
-		      tot_gp - (tot_kills * WOLF_FRAG_BONUS),
-		      tot_dg,
-		      tot_dr,
-		      tot_td,
-		      tot_gp));
+			  "%-10s ^5%-15s%4d%4d%4d%3d^5%4d^3%4d^2%6d^1%6d^6%5d^3%7d\n\"",
+				aTeams[i],
+				"Totals",
+				tot_kills,
+				tot_deaths,
+				tot_sui,
+				tot_tk,
+				eff,
+				tot_gp - (tot_kills * WOLF_FRAG_BONUS),
+				tot_dg,
+				tot_dr,
+				tot_td,
+				tot_gp));
 	}
 
 	CP(va("sc \"%s\n\n\" 0", ((!cnt) ? "^3\nNo scores to report." : "")));
@@ -621,7 +622,7 @@ void G_printMatchInfo(gentity_t *ent)
 // Dumps end-of-match info
 void G_matchInfoDump(unsigned int dwDumpType)
 {
-	int       i, ref;
+	int i, ref;
 	gentity_t *ent;
 	gclient_t *cl;
 
@@ -690,8 +691,8 @@ void G_matchInfoDump(unsigned int dwDumpType)
 				if (g_currentRound.integer == 1)     // We've already missed the switch
 				{
 					CP(va("print \">>> ^3Clock set to: %d:%02d\n\n\n\"",
-					      g_nextTimeLimit.integer,
-					      (int)(60.0 * (float)(g_nextTimeLimit.value - g_nextTimeLimit.integer))));
+							g_nextTimeLimit.integer,
+							(int)(60.0 * (float)(g_nextTimeLimit.value - g_nextTimeLimit.integer))));
 				}
 				else
 				{
@@ -699,16 +700,16 @@ void G_matchInfoDump(unsigned int dwDumpType)
 					if (val < g_timelimit.value)
 					{
 						CP(va("print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\n\n\"",
-						      (int)val,
-						      (int)(60.0 * (val - (int)val)),
-						      g_timelimit.integer,
-						      (int)(60.0 * (float)(g_timelimit.value - g_timelimit.integer))));
+								(int)val,
+								(int)(60.0 * (val - (int)val)),
+								g_timelimit.integer,
+								(int)(60.0 * (float)(g_timelimit.value - g_timelimit.integer))));
 					}
 					else
 					{
 						CP(va("print \">>> ^3Objective NOT reached in time (%d:%02d)\n\n\n\"",
-						      g_timelimit.integer,
-						      (int)(60.0 * (float)(g_timelimit.value - g_timelimit.integer))));
+								g_timelimit.integer,
+								(int)(60.0 * (float)(g_timelimit.value - g_timelimit.integer))));
 					}
 				}
 			}
@@ -732,8 +733,8 @@ int G_checkServerToggle(vmCvar_t *cv)
 		if (cv->integer > 0)
 		{
 			level.server_settings &= ~CV_SVS_WARMUPDMG;
-			nFlag                  = (cv->integer > 2) ? 2 : cv->integer;
-			nFlag                  = nFlag << 2;
+			nFlag = (cv->integer > 2) ? 2 : cv->integer;
+			nFlag = nFlag << 2;
 		}
 		else
 		{
@@ -785,7 +786,7 @@ int G_checkServerToggle(vmCvar_t *cv)
 // Sends a player's stats to the requesting client.
 void G_statsPrint(gentity_t *ent, int nType)
 {
-	int  pid;
+	int pid;
 	const char *cmd = (nType == 0) ? "ws" : ((nType == 1) ? "wws" : "gstats");    // Yes, not the cleanest
 	char arg[MAX_TOKEN_CHARS];
 

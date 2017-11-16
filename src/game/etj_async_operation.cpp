@@ -5,6 +5,7 @@
 void *AsyncOperation::StartThread(void *data)
 {
 	AsyncOperation *object = static_cast<AsyncOperation *>(data);
+
 	object->Execute();
 	delete object;
 	pthread_exit(NULL);
@@ -14,13 +15,14 @@ void *AsyncOperation::StartThread(void *data)
 bool AsyncOperation::OpenDatabase(std::string const& database)
 {
 	int rc = sqlite3_open(GetPath(database.c_str()).c_str(), &db_);
+
 	if (rc != SQLITE_OK)
 	{
 		errorMessage_ = sqlite3_errmsg(db_);
 		return false;
 	}
 	sqlite3_exec(db_, "PRAGMA journal_mode=WAL;",
-	             NULL, NULL, NULL);
+		NULL, NULL, NULL);
 
 	sqlite3_busy_timeout(db_, 5000);
 
@@ -30,6 +32,7 @@ bool AsyncOperation::OpenDatabase(std::string const& database)
 bool AsyncOperation::PrepareStatement(std::string const& statement)
 {
 	int rc = sqlite3_prepare_v2(db_, statement.c_str(), -1, &stmt_, 0);
+
 	if (rc != SQLITE_OK)
 	{
 		errorMessage_ = sqlite3_errmsg(db_);
@@ -41,6 +44,7 @@ bool AsyncOperation::PrepareStatement(std::string const& statement)
 bool AsyncOperation::BindInt(int index, int value)
 {
 	int rc = sqlite3_bind_int(stmt_, index, value);
+
 	if (rc != SQLITE_OK)
 	{
 		errorMessage_ = sqlite3_errmsg(db_);
@@ -57,25 +61,25 @@ sqlite3_stmt *AsyncOperation::GetStatement()
 void AsyncOperation::PrintOpenError(std::string const& operation)
 {
 	G_LogPrintf("ERROR: failed to open database on %s %s\n", operation.c_str(),
-	            GetMessage().c_str());
+		GetMessage().c_str());
 }
 
 void AsyncOperation::PrintPrepareError(std::string const& operation)
 {
 	G_LogPrintf("ERROR: failed to prepare %s statement. %s\n",
-	            operation.c_str(), GetMessage().c_str());
+		operation.c_str(), GetMessage().c_str());
 }
 
 void AsyncOperation::PrintBindError(std::string const& operation)
 {
 	G_LogPrintf("ERROR: failed to bind value to %s statement. %s\n",
-	            operation.c_str(), GetMessage().c_str());
+		operation.c_str(), GetMessage().c_str());
 }
 
 void AsyncOperation::PrintExecuteError(std::string const& operation)
 {
 	G_LogPrintf("ERROR: failed to execute %s. %s\n",
-	            operation.c_str(), GetMessage().c_str());
+		operation.c_str(), GetMessage().c_str());
 }
 
 std::string AsyncOperation::GetMessage() const
@@ -86,6 +90,7 @@ std::string AsyncOperation::GetMessage() const
 bool AsyncOperation::ExecuteStatement()
 {
 	int rc = sqlite3_step(stmt_);
+
 	if (rc != SQLITE_DONE)
 	{
 		errorMessage_ = sqlite3_errmsg(db_);
@@ -102,6 +107,7 @@ int AsyncOperation::GetParameterIndex(std::string const& param)
 bool AsyncOperation::BindString(int index, std::string const& value)
 {
 	int rc = sqlite3_bind_text(stmt_, index, value.c_str(), value.length(), SQLITE_STATIC);
+
 	if (rc != SQLITE_OK)
 	{
 		errorMessage_ = sqlite3_errmsg(db_);

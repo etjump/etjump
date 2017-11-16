@@ -8,6 +8,7 @@
 void ETJump::TimerunView::start()
 {
 	auto clientNum = atoi(CG_Argv(2));
+
 	_playersTimerunInformation[clientNum].startTime = atoi(CG_Argv(3));
 	_playersTimerunInformation[clientNum].runName = CG_Argv(4);
 	_playersTimerunInformation[clientNum].previousRecord = atoi(CG_Argv(5));
@@ -17,6 +18,7 @@ void ETJump::TimerunView::start()
 void ETJump::TimerunView::stop()
 {
 	auto clientNum = atoi(CG_Argv(2));
+
 	_playersTimerunInformation[clientNum].completionTime = atoi(CG_Argv(3));
 	_playersTimerunInformation[clientNum].running = false;
 	_playersTimerunInformation[clientNum].lastRunTimer = cg.time;
@@ -35,10 +37,11 @@ void ETJump::TimerunView::interrupt(PlayerTimerunInformation& playerTimerunInfor
 void ETJump::TimerunView::interrupt()
 {
 	auto clientNum = atoi(CG_Argv(2));
+
 	interrupt(_playersTimerunInformation[clientNum]);
 }
 
-const ETJump::PlayerTimerunInformation* ETJump::TimerunView::currentRun() const
+const ETJump::PlayerTimerunInformation *ETJump::TimerunView::currentRun() const
 {
 	return &_playersTimerunInformation[cg.snap->ps.clientNum];
 }
@@ -68,7 +71,7 @@ void ETJump::TimerunView::draw()
 	}
 
 	auto color = &colorWhite;
-	
+
 	vec4_t incolor;
 	vec4_t ryGreen = { 0.627f, 0.941f, 0.349f, 1.0f };
 	vec4_t ryRed = { 0.976f, 0.262f, 0.262f, 1.0f };
@@ -78,7 +81,8 @@ void ETJump::TimerunView::draw()
 	auto fadeOut = 2000; // 2s fade out
 	auto fadeStart = 5000; // 5s pause
 
-	if (etj_runTimerShadow.integer) {
+	if (etj_runTimerShadow.integer)
+	{
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
@@ -89,17 +93,19 @@ void ETJump::TimerunView::draw()
 			color = &ryRed;
 		}
 		// add timer color transition when player gets closer to his pb
-		else if ( millis + range >= run->previousRecord ) {
+		else if (millis + range >= run->previousRecord)
+		{
 			auto start = run->previousRecord - range;
-			auto step = (millis - start) / (float)(run->previousRecord - start);
-			
+			auto step  = (millis - start) / (float)(run->previousRecord - start);
+
 			ETJump_LerpColors(&colorWhite, &ryRed, &incolor, step / 2);
 			color = &incolor;
 		}
 	}
 
 	// set green color for pb time
-	if (!run->running && millis && (run->previousRecord > millis || run->previousRecord == -1)) {
+	if (!run->running && millis && (run->previousRecord > millis || run->previousRecord == -1))
+	{
 		color = &ryGreen;
 	}
 
@@ -110,9 +116,9 @@ void ETJump::TimerunView::draw()
 	millis -= seconds * 1000;
 
 	auto text = (boost::format("%02d:%02d:%03d")
-		% minutes
-		% seconds
-		% millis).str();
+	             % minutes
+	             % seconds
+	             % millis).str();
 
 	auto textWidth = CG_Text_Width_Ext(text.c_str(), 0.3, 0, &cgs.media.limboFont1) / 2;
 	auto x = player_runTimerX.value;
@@ -121,11 +127,13 @@ void ETJump::TimerunView::draw()
 	// timer fading/hiding routine
 	ETJump_AdjustPosition(&x);
 
-	if (!run->running && etj_runTimerAutoHide.integer) {
+	if (!run->running && etj_runTimerAutoHide.integer)
+	{
 		auto fstart = run->lastRunTimer + fadeStart;
 		auto fend = fstart + fadeOut;
 
-		if (fstart < cg.time && fend > cg.time) {
+		if (fstart < cg.time && fend > cg.time)
+		{
 
 			vec4_t toColor;
 			memcpy(&toColor, color, sizeof(toColor));
@@ -135,16 +143,18 @@ void ETJump::TimerunView::draw()
 
 			ETJump_LerpColors(color, &toColor, &incolor, step);
 			color = &incolor;
-		
+
 		}
-		else if(cg.time > fend) {
+		else if (cg.time > fend)
+		{
 			// dont draw timer once fading is done
 			return;
 		}
 
 	}
 
-	if (run->running) {
+	if (run->running)
+	{
 
 		if (run->previousRecord != -1 && ms > run->previousRecord)
 		{
@@ -159,29 +169,36 @@ int ETJump::TimerunView::getTransitionRange(int previousRunTime)
 {
 	auto range = 10000;
 
-	if (3 * 1000 > previousRunTime) {
+	if (3 * 1000 > previousRunTime)
+	{
 		range = 0;
-	} else if (10 * 1000 > previousRunTime) {
+	}
+	else if (10 * 1000 > previousRunTime)
+	{
 		range = 500; // just for a nice short transition effect, could be 0
 	}
-	else if (30 * 1000 > previousRunTime) {
+	else if (30 * 1000 > previousRunTime)
+	{
 		range = 2000;
 	}
-	else if (60 * 1000 > previousRunTime) {
+	else if (60 * 1000 > previousRunTime)
+	{
 		range = 3500;
 	}
-	else if (120 * 1000 > previousRunTime) {
+	else if (120 * 1000 > previousRunTime)
+	{
 		range = 5000;
 	}
 
 	return range;
 }
 
-void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, int timerTime, int record)
+void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char *text, int timerTime, int record)
 {
 	auto animationTime = 300;
-	
-	if (timerTime - record > animationTime) {
+
+	if (timerTime - record > animationTime)
+	{
 		return;
 	}
 
@@ -193,11 +210,11 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, i
 
 	ETJump_AdjustPosition(&x);
 
-	auto step = ((float)(timerTime - record) / animationTime);
+	auto step  = ((float)(timerTime - record) / animationTime);
 	auto scale = 0.3 + 0.25 * step;
 
 	auto originalTextHeight = CG_Text_Height_Ext(text, 0.3, 0, &cgs.media.limboFont1);
-	auto textWidth = CG_Text_Width_Ext(text, scale, 0, &cgs.media.limboFont1) / 2;
+	auto textWidth  = CG_Text_Width_Ext(text, scale, 0, &cgs.media.limboFont1) / 2;
 	auto textHeight = (CG_Text_Height_Ext(text, scale, 0, &cgs.media.limboFont1) - originalTextHeight) / 2;
 
 	memcpy(&toColor, color, sizeof(toColor));
@@ -223,13 +240,16 @@ bool ETJump::TimerunView::parseServerCommand()
 	if (!Q_stricmp(cmd, "start"))
 	{
 		start();
-	} else if (!Q_stricmp(cmd, "stop"))
+	}
+	else if (!Q_stricmp(cmd, "stop"))
 	{
 		stop();
-	}  else if (!Q_stricmp(cmd, "interrupt"))
+	}
+	else if (!Q_stricmp(cmd, "interrupt"))
 	{
 		interrupt();
-	} else
+	}
+	else
 	{
 		return false;
 	}
