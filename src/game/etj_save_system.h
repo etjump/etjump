@@ -54,7 +54,9 @@ namespace ETJump
 			SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
 			boost::circular_buffer<SavePosition> axisBackupPositions;
 
-			SavePosition quickDeployPositions[TEAM_ALLIES];
+			// contains a couple of extra positions for TEAM_SPEC and TEAM_FREE,
+			// but simplifies the accessing code
+			SavePosition quickDeployPositions[TEAM_NUM_TEAMS];
 		};
 
 		struct DisconnectedClient
