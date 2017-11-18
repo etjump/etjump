@@ -4799,7 +4799,14 @@ void SP_func_explosive(gentity_t *ent)
 
 	if (ent->spawnflags & EXPLOSIVE_START_INVIS)    // start invis
 	{
-		ent->use = func_explosive_spawn;
+		if (ent->s.eFlags & EF_FAKEBMODEL)
+		{
+			ent->use = func_explosive_use;
+		}
+		else
+		{
+			ent->use = func_explosive_spawn;
+		}
 		trap_UnlinkEntity(ent);
 	}
 	else if (ent->targetname)

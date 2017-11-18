@@ -154,7 +154,7 @@ static void CG_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
 		}
 		else
 		{
-			// see g_misc.c SP_func_fakebrush...
+			// ETJump: reusing origin2, anlges2 to store fakebrush bbox
 			if (ent->eFlags & EF_FAKEBMODEL)
 			{
 				VectorCopy(ent->origin2, bmins);
@@ -650,21 +650,23 @@ static void CG_TouchTriggerPrediction(void)
 
 		if (ent->eType == ET_ITEM && !spectator && (cg.predictedPlayerState.groundEntityNum == ENTITYNUM_WORLD))
 		{
-			CG_TouchItem(cent);
+			// CG_TouchItem(cent);
 			continue;
 		}
 
-		if (ent->solid != SOLID_BMODEL)
+		if (!(ent->eFlags & EF_FAKEBMODEL))
 		{
-			continue;
-		}
+			if (ent->solid != SOLID_BMODEL)
+			{
+				continue;
+			}
 
-		// Gordon: er, this lookup was wrong...
-		cmodel = cgs.inlineDrawModel[ent->modelindex];
-//		cmodel = trap_CM_InlineModel( ent->modelindex );
-		if (!cmodel)
-		{
-			continue;
+			cmodel = cgs.inlineDrawModel[ent->modelindex];
+
+			if (!cmodel)
+			{
+				continue;
+			}
 		}
 
 		if (ent->eType == ET_CONSTRUCTIBLE ||
@@ -684,7 +686,21 @@ static void CG_TouchTriggerPrediction(void)
 				continue;
 			}
 
-			trap_R_ModelBounds(cmodel, mins, maxs);
+			if (ent->solid != SOLID_BMODEL)
+			{
+				int x  = (ent->solid & 255);
+				int zd = ((ent->solid >> 8) & 255);
+				int zu = ((ent->solid >> 16) & 255) - 32;
+
+				mins[0] = mins[1] = -x;
+				mins[2] = -zd;
+				maxs[0] = maxs[1] = x;
+				maxs[2] = zu;
+			}
+			else
+			{
+				trap_R_ModelBounds(cmodel, mins, maxs);
+			}
 
 			VectorAdd(cent->lerpOrigin, mins, mins);
 			VectorAdd(cent->lerpOrigin, maxs, maxs);

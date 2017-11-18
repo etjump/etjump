@@ -3433,47 +3433,27 @@ void G_TempTraceIgnorePlayersAndBodies(void)
 	}
 }
 
-//QUAKED func_fakebrush (1 0 0) ?
 /*
-scriptName "bugfix1"
-classname "func_fakebrush"
-origin "1072 -1824 502"
-contents 1  // CONTENTS_SOLID
-mins "-180 -150 -10"
-maxs "180 150 10"
+	ETPro mapscript fakebrush allows the limited ability to spawn brush entities
+	create
+	{
+	   scriptName "bugfix1"
+	   classname "func_fakebrush"
+	   origin "3632 -4313 881"
+	   contents 65536  // CONTENTS_PLAYERCLIP
+	   mins "-40 -1 -20"
+	   maxs "40 1 10"
+	}
 */
 void SP_func_fakebrush(gentity_t *ent)
 {
-	// all this values should be already set in G_ParseField but make sure they
-	// were really found
-	if (!G_SpawnVector("origin", "1 0 0", ent->s.origin))
-	{
-		G_Error("'func_fakebrush' does not have an origin\n");
-	}
-	if (!G_SpawnInt("contents", "1", &ent->r.contents))
-	{
-		G_Error("'func_fakebrush' does not have contents\n");
-	}
-	if (!G_SpawnVector("mins", "0 0 0", ent->r.mins))
-	{
-		G_Error("'func_fakebrush' does not have mins\n");
-	}
-	if (!G_SpawnVector("maxs", "0 0 0", ent->r.maxs))
-	{
-		G_Error("'func_fakebrush' does not have maxs\n");
-	}
-
-	ent->clipmask = ent->r.contents;
-
 	G_SetOrigin(ent, ent->s.origin);
 	G_SetAngle(ent, ent->s.angles);
 
-	// rape origin2 and angles2 to save mins and maxs for client prediction
+	// ETJump: reusing origin2, anlges2 to store fakebrush bbox
 	VectorCopy(ent->r.mins, ent->s.origin2);
 	VectorCopy(ent->r.maxs, ent->s.angles2);
 	ent->s.eFlags |= EF_FAKEBMODEL;
-
-	ent->s.eType = ET_GENERAL;
 
 	trap_LinkEntity(ent);
 }
