@@ -77,7 +77,7 @@ void AddKillScore(gentity_t *ent, int score)
 
 	if (g_gametype.integer == GT_WOLF_LMS)
 	{
-		ent->client->ps.persistant[PERS_SCORE]                  += score;
+		ent->client->ps.persistant[PERS_SCORE] += score;
 		level.teamScores[ent->client->ps.persistant[PERS_TEAM]] += score;
 	}
 	ent->client->sess.game_points += score;
@@ -220,7 +220,7 @@ GibEntity
 void GibEntity(gentity_t *self, int killer)
 {
 	gentity_t *other = &g_entities[killer];
-	vec3_t    dir;
+	vec3_t dir;
 
 	VectorClear(dir);
 	if (other->inuse)
@@ -238,7 +238,7 @@ void GibEntity(gentity_t *self, int killer)
 
 	G_AddEvent(self, EV_GIB_PLAYER, DirToByte(dir));
 	self->takedamage = qfalse;
-	self->s.eType    = ET_INVISIBLE;
+	self->s.eType = ET_INVISIBLE;
 	self->r.contents = 0;
 }
 
@@ -354,15 +354,15 @@ player_die
 
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath)
 {
-	int       contents    = 0, i, killer = ENTITYNUM_WORLD;
-	const char      *killerName = "<world>";
-	qboolean  nogib       = qtrue;
-	gitem_t   *item       = NULL;
+	int contents = 0, i, killer = ENTITYNUM_WORLD;
+	const char *killerName = "<world>";
+	qboolean nogib = qtrue;
+	gitem_t  *item = NULL;
 	gentity_t *ent;
 	qboolean  killedintank = qfalse;
 
 	//float			timeLived;
-	weapon_t weap = BG_WeaponForMOD(meansOfDeath);
+	weapon_t weap  = BG_WeaponForMOD(meansOfDeath);
 
 //	G_Printf( "player_die\n" );
 
@@ -372,7 +372,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 		{
 			self->client->pers.playerStats.suicides++;
 			trap_PbStat(self - g_entities, "suicide",
-			            va("%d %d %d", self->client->sess.sessionTeam, self->client->sess.playerType, weap)) ;
+				va("%d %d %d", self->client->sess.sessionTeam, self->client->sess.playerType, weap)) ;
 		}
 	}
 	else if (OnSameTeam(self, attacker))
@@ -439,7 +439,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	}
 
 	{
-		mapEntityData_t      *mEnt;
+		mapEntityData_t *mEnt;
 		mapEntityData_Team_t *teamList = self->client->sess.sessionTeam == TEAM_AXIS ? &mapEntityData[1] : &mapEntityData[0];   // swapped, cause enemy team
 
 		mEnt = G_FindMapEntityDataSingleClient(teamList, NULL, self->s.number, -1);
@@ -483,13 +483,13 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 
 	if (attacker)
 	{
-		killer     = attacker->s.number;
+		killer = attacker->s.number;
 		killerName = (attacker->client) ? attacker->client->pers.netname : "<non-client>";
 	}
 
 	if (attacker == 0 || killer < 0 || killer >= MAX_CLIENTS)
 	{
-		killer     = ENTITYNUM_WORLD;
+		killer = ENTITYNUM_WORLD;
 		killerName = "<world>";
 	}
 
@@ -510,11 +510,11 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	}
 
 	// broadcast the death event to everyone
-	ent                    = G_TempEntity(self->r.currentOrigin, EV_OBITUARY);
-	ent->s.eventParm       = meansOfDeath;
+	ent = G_TempEntity(self->r.currentOrigin, EV_OBITUARY);
+	ent->s.eventParm = meansOfDeath;
 	ent->s.otherEntityNum  = self->s.number;
 	ent->s.otherEntityNum2 = killer;
-	ent->r.svFlags         = SVF_BROADCAST; // send to everyone
+	ent->r.svFlags = SVF_BROADCAST;         // send to everyone
 
 	self->enemy = attacker;
 
@@ -609,14 +609,14 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 
 	if (item)
 	{
-		vec3_t    launchvel = { 0, 0, 0 };
-		gentity_t *flag     = LaunchItem(item, self->r.currentOrigin, launchvel, self->s.number);
+		vec3_t launchvel = { 0, 0, 0 };
+		gentity_t *flag  = LaunchItem(item, self->r.currentOrigin, launchvel, self->s.number);
 
 		flag->s.modelindex2 = self->s.otherEntityNum2;// JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
-		flag->message       = self->message; // DHM - Nerve :: also restore item name
+		flag->message = self->message;       // DHM - Nerve :: also restore item name
 		// Clear out player's temp copies
 		self->s.otherEntityNum2 = 0;
-		self->message           = NULL;
+		self->message = NULL;
 	}
 
 	// send a fancy "MEDIC!" scream.  Sissies, ain' they?
@@ -666,7 +666,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	//VectorCopy( self->s.angles, self->client->ps.viewangles );
 
 //	trap_UnlinkEntity( self );
-	self->r.maxs[2]          = self->client->ps.crouchMaxZ; //%	0;			// ydnar: so bodies don't clip into world
+	self->r.maxs[2] = self->client->ps.crouchMaxZ;          //%	0;			// ydnar: so bodies don't clip into world
 	self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
 	trap_LinkEntity(self);
 
@@ -840,7 +840,7 @@ qboolean IsHeadShotWeapon(int mod)
 
 gentity_t *G_BuildHead(gentity_t *ent)
 {
-	gentity_t     *head;
+	gentity_t *head;
 	orientation_t orientation;           // DHM - Nerve
 
 	head = G_Spawn();
@@ -903,10 +903,10 @@ gentity_t *G_BuildHead(gentity_t *ent)
 	VectorCopy(head->s.angles, head->s.apos.trDelta);
 	VectorSet(head->r.mins, -6, -6, -2);   // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
 	VectorSet(head->r.maxs, 6, 6, 10);   // changed this z from 0 to 6
-	head->clipmask   = CONTENTS_SOLID;
+	head->clipmask = CONTENTS_SOLID;
 	head->r.contents = CONTENTS_SOLID;
-	head->parent     = ent;
-	head->s.eType    = ET_TEMPHEAD;
+	head->parent  = ent;
+	head->s.eType = ET_TEMPHEAD;
 
 	trap_LinkEntity(head);
 
@@ -916,7 +916,8 @@ gentity_t *G_BuildHead(gentity_t *ent)
 gentity_t *G_BuildLeg(gentity_t *ent)
 {
 	gentity_t *leg;
-	vec3_t    flatforward, org;
+	vec3_t flatforward, org;
+
 	//orientation_t or;			// DHM - Nerve
 
 	if (!(ent->client->ps.eFlags & EF_PRONE))
@@ -942,10 +943,10 @@ gentity_t *G_BuildLeg(gentity_t *ent)
 	VectorCopy(leg->s.angles, leg->s.apos.trDelta);
 	VectorCopy(playerlegsProneMins, leg->r.mins);
 	VectorCopy(playerlegsProneMaxs, leg->r.maxs);
-	leg->clipmask   = CONTENTS_SOLID;
+	leg->clipmask = CONTENTS_SOLID;
 	leg->r.contents = CONTENTS_SOLID;
-	leg->parent     = ent;
-	leg->s.eType    = ET_TEMPLEGS;
+	leg->parent  = ent;
+	leg->s.eType = ET_TEMPLEGS;
 
 	trap_LinkEntity(leg);
 
@@ -955,8 +956,8 @@ gentity_t *G_BuildLeg(gentity_t *ent)
 qboolean IsHeadShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod)
 {
 	gentity_t *head;
-	trace_t   tr;
-	vec3_t    start, end;
+	trace_t tr;
+	vec3_t  start, end;
 	gentity_t *traceEnt;
 
 	// not a player or critter so bail
@@ -987,7 +988,7 @@ qboolean IsHeadShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod)
 	if (g_debugBullets.integer >= 3)    // show hit player head bb
 	{
 		gentity_t *tent;
-		vec3_t    b1, b2;
+		vec3_t b1, b2;
 		VectorCopy(head->r.currentOrigin, b1);
 		VectorCopy(head->r.currentOrigin, b2);
 		VectorAdd(b1, head->r.mins, b1);
@@ -1024,8 +1025,8 @@ qboolean IsHeadShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod)
 
 qboolean IsLegShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod)
 {
-	float     height;
-	float     theight;
+	float height;
+	float theight;
 	gentity_t *leg;
 
 	if (!(targ->client))
@@ -1053,8 +1054,8 @@ qboolean IsLegShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod)
 	if (leg)
 	{
 		gentity_t *traceEnt;
-		vec3_t    start, end;
-		trace_t   tr;
+		vec3_t  start, end;
+		trace_t tr;
 
 		// trace another shot see if we hit the legs
 		VectorCopy(point, start);
@@ -1066,7 +1067,7 @@ qboolean IsLegShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod)
 		if (g_debugBullets.integer >= 3)    // show hit player head bb
 		{
 			gentity_t *tent;
-			vec3_t    b1, b2;
+			vec3_t b1, b2;
 			VectorCopy(leg->r.currentOrigin, b1);
 			VectorCopy(leg->r.currentOrigin, b2);
 			VectorAdd(b1, leg->r.mins, b1);
@@ -1171,11 +1172,11 @@ dflags		these flags are used to control how T_Damage works
 
 void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod)
 {
-	gclient_t   *client;
-	int         take;
-	int         knockback;
-	qboolean    headShot;
-	qboolean    wasAlive;
+	gclient_t *client;
+	int take;
+	int knockback;
+	qboolean headShot;
+	qboolean wasAlive;
 	hitRegion_t hr = HR_NUM_HITREGIONS;
 
 	if (!targ->takedamage)
@@ -1254,7 +1255,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 				auto targetCombatState = targ->client->combatState | (1 << COMBATSTATE_DAMAGERECEIVED);
 				auto attackerCombatState = attacker->client->combatState | (1 << COMBATSTATE_DAMAGEDEALT);
 
-				targ->client->combatState     = static_cast<combatstate_t>(targetCombatState);
+				targ->client->combatState = static_cast<combatstate_t>(targetCombatState);
 				attacker->client->combatState = static_cast<combatstate_t>(attackerCombatState);
 			}
 		}
@@ -1456,7 +1457,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 	// If player shoots a rocket and goes spec it kills other ppl
 	if (attacker->client && attacker->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
-		damage    = 0;
+		damage = 0;
 		knockback = 0;
 	}
 
@@ -1760,7 +1761,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 		{
 			client->ps.persistant[PERS_ATTACKER] = ENTITYNUM_WORLD;
 		}
-		client->damage_blood     += take;
+		client->damage_blood += take;
 		client->damage_knockback += knockback;
 
 		if (dir)
@@ -1782,7 +1783,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 	{
 		// set the last client who damaged the target
 		targ->client->lasthurt_client = attacker->s.number;
-		targ->client->lasthurt_mod    = mod;
+		targ->client->lasthurt_mod = mod;
 	}
 
 	// do the damage
@@ -1865,7 +1866,7 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t
 				}
 
 
-				targ->enemy     = attacker;
+				targ->enemy = attacker;
 				targ->deathType = static_cast<meansOfDeath_t>(mod);
 
 				// Ridah, mg42 doesn't have die func (FIXME)
@@ -1946,6 +1947,7 @@ explosions and melee attacks.
 void G_RailTrail(vec_t *start, vec_t *end)
 {
 	gentity_t *temp = G_TempEntity(start, EV_RAILTRAIL);
+
 	VectorCopy(end, temp->s.origin2);
 	temp->s.dmgFlags = 0;
 }
@@ -2119,20 +2121,20 @@ G_RadiusDamage
 */
 qboolean G_RadiusDamage(vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod)
 {
-	float     points, dist;
+	float points, dist;
 	gentity_t *ent;
-	int       entityList[MAX_GENTITIES];
-	int       numListedEntities;
-	vec3_t    mins, maxs;
-	vec3_t    v;
-	vec3_t    dir;
-	int       i, e;
-	qboolean  hitClient = qfalse;
-	float     boxradius;
-	vec3_t    dest;
-	trace_t   tr;
-	vec3_t    midpoint;
-	int       flags = DAMAGE_RADIUS;
+	int entityList[MAX_GENTITIES];
+	int numListedEntities;
+	vec3_t mins, maxs;
+	vec3_t v;
+	vec3_t dir;
+	int i, e;
+	qboolean hitClient = qfalse;
+	float   boxradius;
+	vec3_t  dest;
+	trace_t tr;
+	vec3_t  midpoint;
+	int flags = DAMAGE_RADIUS;
 
 	if (mod == MOD_SATCHEL || mod == MOD_LANDMINE)
 	{
@@ -2251,20 +2253,20 @@ mutation of G_RadiusDamage which lets us selectively damage only clients or only
 */
 qboolean etpro_RadiusDamage(vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod, qboolean clientsonly)
 {
-	float     points, dist;
+	float points, dist;
 	gentity_t *ent;
-	int       entityList[MAX_GENTITIES];
-	int       numListedEntities;
-	vec3_t    mins, maxs;
-	vec3_t    v;
-	vec3_t    dir;
-	int       i, e;
-	qboolean  hitClient = qfalse;
-	float     boxradius;
-	vec3_t    dest;
-	trace_t   tr;
-	vec3_t    midpoint;
-	int       flags = DAMAGE_RADIUS;
+	int entityList[MAX_GENTITIES];
+	int numListedEntities;
+	vec3_t mins, maxs;
+	vec3_t v;
+	vec3_t dir;
+	int i, e;
+	qboolean hitClient = qfalse;
+	float   boxradius;
+	vec3_t  dest;
+	trace_t tr;
+	vec3_t  midpoint;
+	int flags = DAMAGE_RADIUS;
 
 	if (mod == MOD_SATCHEL || mod == MOD_LANDMINE)
 	{

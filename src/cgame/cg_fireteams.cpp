@@ -21,7 +21,7 @@ panel_button_t fireteamTopBorder =
 {
 	NULL,
 	NULL,
-	{ 10,                     129,        204,       136 },
+	{ 10,                     129,               204,              136 },
 	{ 1,                      (int)(255 * .5f),  (int)(255 * .5f), (int)(255 * .5f), (int)(255 * .5f), 1, 0, 0},
 	NULL,                     /* font		*/
 	NULL,                     /* keyDown	*/
@@ -406,9 +406,9 @@ int CG_CountFireteamsByTeam(team_t t)
 
 void CG_DrawFireteamsByTeam(panel_button_t *button, team_t t)
 {
-	float      y = button->rect.y;
+	float y = button->rect.y;
 	const char *str;
-	int        i;
+	int i;
 
 	for (i = 0; i < MAX_FIRETEAMS; i++)
 	{
@@ -589,9 +589,9 @@ int CG_PlayerNFFromPos(int pos, int *pageofs)
 
 void CG_DrawPlayerSF(panel_button_t *button, int *pageofs)
 {
-	float      y = button->rect.y;
+	float y = button->rect.y;
 	const char *str;
-	int        i, x;
+	int i, x;
 
 	for (i = 0; i < MAX_FIRETEAM_USERS; i++)
 	{
@@ -650,9 +650,9 @@ void CG_DrawPlayerSF(panel_button_t *button, int *pageofs)
 
 void CG_DrawPlayerNF(panel_button_t *button, int *pageofs)
 {
-	float      y = button->rect.y;
+	float y = button->rect.y;
 	const char *str;
-	int        i, x;
+	int i, x;
 
 	for (i = 0; i < MAX_FIRETEAM_USERS; i++)
 	{
@@ -712,7 +712,7 @@ void CG_DrawPlayerNF(panel_button_t *button, int *pageofs)
 void CG_Fireteams_MenuText_Draw(panel_button_t *button)
 {
 	float y = button->rect.y;
-	int   i;
+	int i;
 
 	switch (cgs.ftMenuMode)
 	{
@@ -1059,7 +1059,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction)
 			}
 			else
 			{
-				int        i;
+				int i;
 				const char **strings = ftMenuStrings[cgs.ftMenuPos];
 
 				if (key >= 'a' || key <= 'z')
@@ -1152,9 +1152,9 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction)
 				}
 				else
 				{
-					cgs.ftMenuMode   = 2;
+					cgs.ftMenuMode = 2;
 					cgs.ftMenuModeEx = 0;
-					cgs.ftMenuPos    = i;
+					cgs.ftMenuPos = i;
 				}
 			}
 
@@ -1183,9 +1183,9 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction)
 					}
 					else
 					{
-						cgs.ftMenuMode   = 3;
+						cgs.ftMenuMode = 3;
 						cgs.ftMenuModeEx = 0;
-						cgs.ftMenuPos    = i;
+						cgs.ftMenuPos = i;
 					}
 				}
 
@@ -1222,9 +1222,9 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction)
 					}
 					else
 					{
-						cgs.ftMenuMode   = 4;
+						cgs.ftMenuMode = 4;
 						cgs.ftMenuModeEx = 0;
-						cgs.ftMenuPos    = i;
+						cgs.ftMenuPos = i;
 					}
 				}
 

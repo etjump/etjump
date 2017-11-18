@@ -63,7 +63,7 @@ int CG_TrimLeftPixels(char *instr, float scale, float w, int size)
 	for (i = 0, p = buffer; *p; p++, i++)
 	{
 		instr[i] = *p;
-		tw       = CG_Text_Width(instr, scale, 0);
+		tw = CG_Text_Width(instr, scale, 0);
 		if (tw >= w)
 		{
 			memset(instr, 0, size);
@@ -114,13 +114,13 @@ void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo
 			if (ls)
 			{
 				*ls = '\n';
-				s   = ls + 1;
+				s = ls + 1;
 			}
 			else
 			{
-				*c       = *(c - 1);
+				*c = *(c - 1);
 				*(c - 1) = '\n';
-				s        = c++;
+				s = c++;
 			}
 
 			ls = NULL;
@@ -171,13 +171,13 @@ void CG_FitTextToWidth2(char *instr, float scale, float w, int size)
 			if (ls)
 			{
 				*ls = '\n';
-				s   = ls + 1;
+				s = ls + 1;
 			}
 			else
 			{
-				*c       = *(c - 1);
+				*c = *(c - 1);
 				*(c - 1) = '\n';
-				s        = c++;
+				s = c++;
 			}
 
 			ls = NULL;
@@ -262,11 +262,11 @@ CG_DrawPlayerWeaponIcon
 */
 void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int align, vec4_t *refcolor)
 {
-	int       size;
-	int       realweap;             // DHM - Nerve
+	int size;
+	int realweap;                   // DHM - Nerve
 	qhandle_t icon;
-	float     scale, halfScale;
-	vec4_t    hcolor;
+	float  scale, halfScale;
+	vec4_t hcolor;
 
 	VectorCopy(*refcolor, hcolor);
 	hcolor[3] = 1.f;
@@ -339,7 +339,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int alig
 			}
 		}
 
-		scale     = (float)((cg.predictedPlayerState.grenadeTimeLeft) % 1000) / 100.0f;
+		scale = (float)((cg.predictedPlayerState.grenadeTimeLeft) % 1000) / 100.0f;
 		halfScale = scale * 0.5f;
 
 		cg.grenLastTime = cg.predictedPlayerState.grenadeTimeLeft;
@@ -406,9 +406,9 @@ CG_DrawCursorHints
 */
 void CG_DrawCursorhint(rectDef_t *rect)
 {
-	float     *color;
+	float *color;
 	qhandle_t icon, icon2 = 0;
-	float     scale, halfscale;
+	float scale, halfscale;
 	//qboolean	redbar = qfalse;
 	qboolean yellowbar = qfalse;
 
@@ -568,7 +568,7 @@ void CG_DrawCursorhint(rectDef_t *rect)
 
 	// Mad Doc - TDF
 	case HINT_LOCKPICK:
-		icon      = cgs.media.doorLockHintShader;       // TAT 1/30/2003 - use the locked door hint cursor
+		icon = cgs.media.doorLockHintShader;            // TAT 1/30/2003 - use the locked door hint cursor
 		yellowbar = qtrue;      // draw the status bar in yellow so it shows up better
 		break;
 
@@ -725,7 +725,7 @@ CG_DrawWeapHeat
 void CG_DrawWeapHeat(rectDef_t *rect, int align)
 {
 	vec4_t color = { 1, 0, 0, 0.2f }, color2 = { 1, 0, 0, 0.5f };
-	int    flags = 0;
+	int flags = 0;
 
 	if (!(cg.snap->ps.curWeapHeat))
 	{
@@ -818,7 +818,7 @@ void CG_MouseEvent(int x, int y)
 			int  mouse_x_pos = 0, mouse_y_pos = 0;
 
 			float sensitivity, m_pitch, m_yaw;
-			int   m_filter = 0;
+			int m_filter = 0;
 
 			if (etj_demo_lookat.integer != -1)
 			{
@@ -912,9 +912,9 @@ void CG_EventHandling(int type, qboolean fForced)
 	{
 	// OSP - Demo support
 	case CGAME_EVENT_DEMO:
-		cgs.fResize         = qfalse;
-		cgs.fSelect         = qfalse;
-		cgs.cursorUpdate    = cg.time + 10000;
+		cgs.fResize = qfalse;
+		cgs.fSelect = qfalse;
+		cgs.cursorUpdate = cg.time + 10000;
 		cgs.timescaleUpdate = cg.time + 4000;
 		CG_ScoresUp_f();
 		break;
@@ -994,8 +994,8 @@ void CG_EventHandling(int type, qboolean fForced)
 	}
 	else if (type == CGAME_EVENT_FIRETEAMMSG)
 	{
-		cgs.ftMenuPos       = -1;
-		cgs.ftMenuMode      = 0;
+		cgs.ftMenuPos  = -1;
+		cgs.ftMenuMode = 0;
 		cg.showFireteamMenu = qtrue;
 		trap_Cvar_Set("cl_bypassmouseinput", "1");
 		trap_Key_SetCatcher(KEYCATCH_CGAME);
@@ -1065,6 +1065,7 @@ void CG_KeyEvent(int key, qboolean down)
 int CG_ClientNumFromName(const char *p)
 {
 	int i;
+
 	for (i = 0; i < cgs.maxclients; i++)
 	{
 		if (cgs.clientinfo[i].infoValid && Q_stricmp(cgs.clientinfo[i].name, p) == 0)

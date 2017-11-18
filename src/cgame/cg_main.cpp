@@ -21,8 +21,8 @@
 
 displayContextDef_t cgDC;
 
-void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qboolean demoPlayback);
-void CG_Shutdown(void);
+void     CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qboolean demoPlayback);
+void     CG_Shutdown(void);
 qboolean CG_CheckExecKey(int key);
 extern itemDef_t *g_bindItem;
 extern qboolean  g_waitingForKey;
@@ -87,26 +87,26 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 
 namespace ETJump
 {
-	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-	std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
-	std::shared_ptr<ClientAuthentication> authentication;
-	std::shared_ptr<OperatingSystem> operatingSystem;
-	std::vector<std::unique_ptr<IRenderable>> renderables;
-	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
-	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
-	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
-	static bool isInitialized{ false };
+std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+std::shared_ptr<EntityEventsHandler>  entityEventsHandler;
+std::shared_ptr<ClientAuthentication> authentication;
+std::shared_ptr<OperatingSystem> operatingSystem;
+std::vector<std::unique_ptr<IRenderable> > renderables;
+std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+static std::vector<std::unique_ptr<CvarShadow> > cvarShadows;
+static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
+static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
+static bool isInitialized{ false };
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-cg_t         cg;
-cgs_t        cgs;
-centity_t    cg_entities[MAX_GENTITIES];
+cg_t  cg;
+cgs_t cgs;
+centity_t cg_entities[MAX_GENTITIES];
 weaponInfo_t cg_weapons[MAX_WEAPONS];
-itemInfo_t   cg_items[MAX_ITEMS];
+itemInfo_t cg_items[MAX_ITEMS];
 
 vmCvar_t cg_railTrailTime;
 vmCvar_t cg_centertime;
@@ -505,6 +505,7 @@ vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_drawLeaves;
 
 vmCvar_t etj_touchPickupWeapons;
+vmCvar_t etj_autoLoad;
 
 typedef struct
 {
@@ -517,345 +518,346 @@ typedef struct
 
 cvarTable_t cvarTable[] =
 {
-	{ &cg_ignore,                   "cg_ignore",                   "0",                      0                        }, // used for debugging
-	{ &cg_autoswitch,               "cg_autoswitch",               "2",                      CVAR_ARCHIVE             },
-	{ &cg_drawGun,                  "cg_drawGun",                  "1",                      CVAR_ARCHIVE             },
-	{ &cg_gun_frame,                "cg_gun_frame",                "0",                      CVAR_TEMP                },
-	{ &cg_cursorHints,              "cg_cursorHints",              "1",                      CVAR_ARCHIVE             },
-	{ &cg_zoomFov,                  "cg_zoomfov",                  "22.5",                   CVAR_ARCHIVE             },
-	{ &cg_zoomDefaultBinoc,         "cg_zoomDefaultBinoc",         "22.5",                   CVAR_ARCHIVE             },
-	{ &cg_zoomDefaultSniper,        "cg_zoomDefaultSniper",        "20",                     CVAR_ARCHIVE             }, // JPW NERVE changed per atvi req
-	{ &cg_zoomDefaultSnooper,       "cg_zoomDefaultSnooper",       "40",                     CVAR_ARCHIVE             }, // JPW NERVE made temp
-	{ &cg_zoomDefaultFG,            "cg_zoomDefaultFG",            "55",                     CVAR_ARCHIVE             }, //----(SA)	added // JPW NERVE made temp
-	{ &cg_zoomStepBinoc,            "cg_zoomStepBinoc",            "3",                      CVAR_ARCHIVE             },
-	{ &cg_zoomStepSniper,           "cg_zoomStepSniper",           "2",                      CVAR_ARCHIVE             },
-	{ &cg_zoomStepSnooper,          "cg_zoomStepSnooper",          "5",                      CVAR_ARCHIVE             },
-	{ &cg_zoomStepFG,               "cg_zoomStepFG",               "10",                     CVAR_ARCHIVE             }, //----(SA)	added
-	{ &cg_fov,                      "cg_fov",                      "90",                     CVAR_ARCHIVE             },
-	{ &cg_letterbox,                "cg_letterbox",                "0",                      CVAR_TEMP                }, //----(SA)	added
-	{ &cg_stereoSeparation,         "cg_stereoSeparation",         "0.4",                    CVAR_ARCHIVE             },
-	{ &cg_shadows,                  "cg_shadows",                  "1",                      CVAR_ARCHIVE             },
-	{ &cg_gibs,                     "cg_gibs",                     "1",                      CVAR_ARCHIVE             },
-	{ &cg_draw2D,                   "cg_draw2D",                   "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawSpreadScale,          "cg_drawSpreadScale",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawStatus,               "cg_drawStatus",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawFPS,                  "cg_drawFPS",                  "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawSnapshot,             "cg_drawSnapshot",             "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawCrosshair,            "cg_drawCrosshair",            "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawCrosshairNames,       "cg_drawCrosshairNames",       "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawCrosshairPickups,     "cg_drawCrosshairPickups",     "1",                      CVAR_ARCHIVE             },
-	{ &cg_useWeapsForZoom,          "cg_useWeapsForZoom",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_weaponCycleDelay,         "cg_weaponCycleDelay",         "150",                    CVAR_CHEAT               }, //----(SA)	added
-	{ &cg_cycleAllWeaps,            "cg_cycleAllWeaps",            "1",                      CVAR_ARCHIVE             },
-	{ &cg_crosshairSize,            "cg_crosshairSize",            "48",                     CVAR_ARCHIVE             },
-	{ &cg_crosshairHealth,          "cg_crosshairHealth",          "0",                      CVAR_ARCHIVE             },
-	{ &cg_crosshairX,               "cg_crosshairX",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_crosshairY,               "cg_crosshairY",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_brassTime,                "cg_brassTime",                "2500",                   CVAR_ARCHIVE             }, // JPW NERVE
-	{ &cg_markTime,                 "cg_marktime",                 "20000",                  CVAR_ARCHIVE             },
-	{ &cg_lagometer,                "cg_lagometer",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_railTrailTime,            "cg_railTrailTime",            "400",                    CVAR_ARCHIVE             },
-	{ &cg_gun_x,                    "cg_gunX",                     "0",                      CVAR_ARCHIVE             },
-	{ &cg_gun_y,                    "cg_gunY",                     "0",                      CVAR_ARCHIVE             },
-	{ &cg_gun_z,                    "cg_gunZ",                     "0",                      CVAR_ARCHIVE             },
-	{ &cg_centertime,               "cg_centertime",               "5",                      CVAR_CHEAT               }, // DHM - Nerve :: changed from 3 to 5
-	{ &cg_runpitch,                 "cg_runpitch",                 "0.002",                  CVAR_ARCHIVE             },
-	{ &cg_runroll,                  "cg_runroll",                  "0.005",                  CVAR_ARCHIVE             },
-	{ &cg_bobup,                    "cg_bobup",                    "0",                      CVAR_ARCHIVE             },
-	{ &cg_bobpitch,                 "cg_bobpitch",                 "0",                      CVAR_ARCHIVE             },
-	{ &cg_bobroll,                  "cg_bobroll",                  "0",                      CVAR_ARCHIVE             },
-	{ &cg_bobyaw,                   "cg_bobyaw",                   "0",                      CVAR_ARCHIVE             },
-	{ &cg_autoactivate,             "cg_autoactivate",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_swingSpeed,               "cg_swingSpeed",               "0.1",                    CVAR_CHEAT               }, // was 0.3 for Q3
-	{ &cg_bloodTime,                "cg_bloodTime",                "120",                    CVAR_ARCHIVE             },
-	{ &cg_skybox,                   "cg_skybox",                   "1",                      CVAR_CHEAT               },
-	{ &cg_message,                  "cg_message",                  "1",                      CVAR_TEMP                },
-	{ &cg_messageType,              "cg_messageType",              "1",                      CVAR_TEMP                },
-	{ &cg_messagePlayer,            "cg_messagePlayer",            "",                       CVAR_TEMP                },
-	{ &cg_messagePlayerName,        "cg_messagePlayerName",        "",                       CVAR_TEMP                },
-	{ &cg_animSpeed,                "cg_animspeed",                "1",                      CVAR_CHEAT               },
-	{ &cg_debugAnim,                "cg_debuganim",                "0",                      CVAR_CHEAT               },
-	{ &cg_debugPosition,            "cg_debugposition",            "0",                      CVAR_CHEAT               },
-	{ &cg_debugEvents,              "cg_debugevents",              "0",                      CVAR_CHEAT               },
-	{ &cg_errorDecay,               "cg_errordecay",               "100",                    0                        },
-	{ &cg_nopredict,                "cg_nopredict",                "0",                      CVAR_CHEAT               },
-	{ &cg_noPlayerAnims,            "cg_noplayeranims",            "0",                      CVAR_CHEAT               },
-	{ &cg_showmiss,                 "cg_showmiss",                 "0",                      0                        },
-	{ &cg_footsteps,                "cg_footsteps",                "1",                      CVAR_CHEAT               },
-	{ &cg_tracerChance,             "cg_tracerchance",             "0.4",                    CVAR_CHEAT               },
-	{ &cg_tracerWidth,              "cg_tracerwidth",              "0.8",                    CVAR_CHEAT               },
-	{ &cg_tracerSpeed,              "cg_tracerSpeed",              "4500",                   CVAR_CHEAT               },
-	{ &cg_tracerLength,             "cg_tracerlength",             "160",                    CVAR_CHEAT               },
-	{ &cg_thirdPersonRange,         "cg_thirdPersonRange",         "80",                     CVAR_CHEAT               }, // JPW NERVE per atvi req
-	{ &cg_thirdPersonAngle,         "cg_thirdPersonAngle",         "0",                      CVAR_CHEAT               },
-	{ &cg_thirdPerson,              "cg_thirdPerson",              "0",                      CVAR_CHEAT               }, // JPW NERVE per atvi req
-	{ &cg_teamChatTime,             "cg_teamChatTime",             "8000",                   CVAR_ARCHIVE             },
-	{ &cg_teamChatHeight,           "cg_teamChatHeight",           "8",                      CVAR_ARCHIVE             },
-	{ &cg_coronafardist,            "cg_coronafardist",            "1536",                   CVAR_ARCHIVE             },
-	{ &cg_coronas,                  "cg_coronas",                  "1",                      CVAR_ARCHIVE             },
-	{ &cg_predictItems,             "cg_predictItems",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_deferPlayers,             "cg_deferPlayers",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawTeamOverlay,          "cg_drawTeamOverlay",          "2",                      CVAR_ARCHIVE             },
-	{ &cg_stats,                    "cg_stats",                    "0",                      0                        },
-	{ &cg_blinktime,                "cg_blinktime",                "100",                    CVAR_ARCHIVE             }, //----(SA)	added
-	{ &cg_enableBreath,             "cg_enableBreath",             "1",                      CVAR_SERVERINFO          },
-	{ &cg_cameraOrbit,              "cg_cameraOrbit",              "0",                      CVAR_CHEAT               },
-	{ &cg_cameraOrbitDelay,         "cg_cameraOrbitDelay",         "50",                     CVAR_ARCHIVE             },
-	{ &cg_timescaleFadeEnd,         "cg_timescaleFadeEnd",         "1",                      0                        },
-	{ &cg_timescaleFadeSpeed,       "cg_timescaleFadeSpeed",       "0",                      0                        },
-	{ &cg_timescale,                "timescale",                   "1",                      0                        },
-	{ &cg_cameraMode,               "com_cameraMode",              "0",                      CVAR_CHEAT               },
-	{ &pmove_fixed,                 "pmove_fixed",                 "1",                      0                        },
-	{ &pmove_msec,                  "pmove_msec",                  "8",                      0                        },
-	{ &cg_noTaunt,                  "cg_noTaunt",                  "0",                      CVAR_ARCHIVE             }, // NERVE - SMF
-	{ &cg_voiceSpriteTime,          "cg_voiceSpriteTime",          "6000",                   CVAR_ARCHIVE             }, // DHM - Nerve
-	{ &cg_smallFont,                "ui_smallFont",                "0.25",                   CVAR_ARCHIVE             },
-	{ &cg_bigFont,                  "ui_bigFont",                  "0.4",                    CVAR_ARCHIVE             },
-	{ &cg_teamChatsOnly,            "cg_teamChatsOnly",            "0",                      CVAR_ARCHIVE             },
-	{ &cg_noVoiceChats,             "cg_noVoiceChats",             "0",                      CVAR_ARCHIVE             }, // NERVE - SMF
-	{ &cg_noVoiceText,              "cg_noVoiceText",              "0",                      CVAR_ARCHIVE             }, // NERVE - SMF
-	{ &cg_buildScript,              "com_buildScript",             "0",                      0                        }, // force loading of all possible data amd error on failures
-	{ &cg_paused,                   "cl_paused",                   "0",                      CVAR_ROM                 },
-	{ &cg_blood,                    "cg_showblood",                "1",                      CVAR_ARCHIVE             },
-	{ &cg_wolfparticles,            "cg_wolfparticles",            "1",                      CVAR_ARCHIVE             },
-	{ &cg_gameType,                 "g_gametype",                  "0",                      0                        }, // communicated by systeminfo
-	{ &cg_norender,                 "cg_norender",                 "0",                      0                        }, // only used during single player, to suppress rendering until the server is ready
-	{ &cg_bluelimbotime,            "",                            "30000",                  0                        }, // communicated by systeminfo
-	{ &cg_redlimbotime,             "",                            "30000",                  0                        }, // communicated by systeminfo
-	{ &cg_movespeed,                "g_movespeed",                 "76",                     0                        }, // actual movespeed of player
-	{ &cg_animState,                "cg_animState",                "0",                      CVAR_CHEAT               },
-	{ &cg_drawCompass,              "cg_drawCompass",              "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawNotifyText,           "cg_drawNotifyText",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_quickMessageAlt,          "cg_quickMessageAlt",          "0",                      CVAR_ARCHIVE             },
-	{ &cg_popupLimboMenu,           "cg_popupLimboMenu",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_descriptiveText,          "cg_descriptiveText",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_antilag,                  "g_antilag",                   "1",                      0                        },
-	{ &developer,                   "developer",                   "0",                      CVAR_CHEAT               },
-	{ &cf_wstats,                   "cf_wstats",                   "1.2",                    CVAR_ARCHIVE             },
-	{ &cf_wtopshots,                "cf_wtopshots",                "1.0",                    CVAR_ARCHIVE             },
-	{ &cg_autoAction,               "cg_autoAction",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_autoReload,               "cg_autoReload",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_bloodDamageBlend,         "cg_bloodDamageBlend",         "1.0",                    CVAR_ARCHIVE             },
-	{ &cg_bloodFlash,               "cg_bloodFlash",               "1.0",                    CVAR_ARCHIVE             },
-	{ &cg_complaintPopUp,           "cg_complaintPopUp",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_crosshairAlpha,           "cg_crosshairAlpha",           "1.0",                    CVAR_ARCHIVE             },
-	{ &cg_crosshairAlphaAlt,        "cg_crosshairAlphaAlt",        "1.0",                    CVAR_ARCHIVE             },
-	{ &cg_crosshairColor,           "cg_crosshairColor",           "White",                  CVAR_ARCHIVE             },
-	{ &cg_crosshairColorAlt,        "cg_crosshairColorAlt",        "White",                  CVAR_ARCHIVE             },
-	{ &cg_crosshairPulse,           "cg_crosshairPulse",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawReinforcementTime,    "cg_drawReinforcementTime",    "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawWeaponIconFlash,      "cg_drawWeaponIconFlash",      "0",                      CVAR_ARCHIVE             },
-	{ &cg_noAmmoAutoSwitch,         "cg_noAmmoAutoSwitch",         "1",                      CVAR_ARCHIVE             },
-	{ &cg_printObjectiveInfo,       "cg_printObjectiveInfo",       "1",                      CVAR_ARCHIVE             },
-	{ &cg_specHelp,                 "cg_specHelp",                 "1",                      CVAR_ARCHIVE             },
-	{ &cg_uinfo,                    "cg_uinfo",                    "0",                      CVAR_ROM | CVAR_USERINFO },
-	{ &cg_useScreenshotJPEG,        "cg_useScreenshotJPEG",        "1",                      CVAR_ARCHIVE             },
-	{ &demo_avifpsF1,               "demo_avifpsF1",               "0",                      CVAR_ARCHIVE             },
-	{ &demo_avifpsF2,               "demo_avifpsF2",               "10",                     CVAR_ARCHIVE             },
-	{ &demo_avifpsF3,               "demo_avifpsF3",               "15",                     CVAR_ARCHIVE             },
-	{ &demo_avifpsF4,               "demo_avifpsF4",               "20",                     CVAR_ARCHIVE             },
-	{ &demo_avifpsF5,               "demo_avifpsF5",               "24",                     CVAR_ARCHIVE             },
-	{ &demo_drawTimeScale,          "demo_drawTimeScale",          "1",                      CVAR_ARCHIVE             },
-	{ &demo_infoWindow,             "demo_infoWindow",             "1",                      CVAR_ARCHIVE             },
-	{ &int_cl_maxpackets,           "cl_maxpackets",               "30",                     CVAR_ARCHIVE             },
-	{ &int_cl_timenudge,            "cl_timenudge",                "0",                      CVAR_ARCHIVE             },
-	{ &int_m_pitch,                 "m_pitch",                     "0.022",                  CVAR_ARCHIVE             },
-	{ &int_sensitivity,             "sensitivity",                 "5",                      CVAR_ARCHIVE             },
-	{ &int_ui_blackout,             "ui_blackout",                 "0",                      CVAR_ROM                 },
-	{ &cg_atmosphericEffects,       "cg_atmosphericEffects",       "1",                      CVAR_ARCHIVE             },
+	{ &cg_ignore,                   "cg_ignore",                   "0",                      0                         }, // used for debugging
+	{ &cg_autoswitch,               "cg_autoswitch",               "2",                      CVAR_ARCHIVE              },
+	{ &cg_drawGun,                  "cg_drawGun",                  "1",                      CVAR_ARCHIVE              },
+	{ &cg_gun_frame,                "cg_gun_frame",                "0",                      CVAR_TEMP                 },
+	{ &cg_cursorHints,              "cg_cursorHints",              "1",                      CVAR_ARCHIVE              },
+	{ &cg_zoomFov,                  "cg_zoomfov",                  "22.5",                   CVAR_ARCHIVE              },
+	{ &cg_zoomDefaultBinoc,         "cg_zoomDefaultBinoc",         "22.5",                   CVAR_ARCHIVE              },
+	{ &cg_zoomDefaultSniper,        "cg_zoomDefaultSniper",        "20",                     CVAR_ARCHIVE              }, // JPW NERVE changed per atvi req
+	{ &cg_zoomDefaultSnooper,       "cg_zoomDefaultSnooper",       "40",                     CVAR_ARCHIVE              }, // JPW NERVE made temp
+	{ &cg_zoomDefaultFG,            "cg_zoomDefaultFG",            "55",                     CVAR_ARCHIVE              }, //----(SA)	added // JPW NERVE made temp
+	{ &cg_zoomStepBinoc,            "cg_zoomStepBinoc",            "3",                      CVAR_ARCHIVE              },
+	{ &cg_zoomStepSniper,           "cg_zoomStepSniper",           "2",                      CVAR_ARCHIVE              },
+	{ &cg_zoomStepSnooper,          "cg_zoomStepSnooper",          "5",                      CVAR_ARCHIVE              },
+	{ &cg_zoomStepFG,               "cg_zoomStepFG",               "10",                     CVAR_ARCHIVE              }, //----(SA)	added
+	{ &cg_fov,                      "cg_fov",                      "90",                     CVAR_ARCHIVE              },
+	{ &cg_letterbox,                "cg_letterbox",                "0",                      CVAR_TEMP                 }, //----(SA)	added
+	{ &cg_stereoSeparation,         "cg_stereoSeparation",         "0.4",                    CVAR_ARCHIVE              },
+	{ &cg_shadows,                  "cg_shadows",                  "1",                      CVAR_ARCHIVE              },
+	{ &cg_gibs,                     "cg_gibs",                     "1",                      CVAR_ARCHIVE              },
+	{ &cg_draw2D,                   "cg_draw2D",                   "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawSpreadScale,          "cg_drawSpreadScale",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawStatus,               "cg_drawStatus",               "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawFPS,                  "cg_drawFPS",                  "0",                      CVAR_ARCHIVE              },
+	{ &cg_drawSnapshot,             "cg_drawSnapshot",             "0",                      CVAR_ARCHIVE              },
+	{ &cg_drawCrosshair,            "cg_drawCrosshair",            "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawCrosshairNames,       "cg_drawCrosshairNames",       "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawCrosshairPickups,     "cg_drawCrosshairPickups",     "1",                      CVAR_ARCHIVE              },
+	{ &cg_useWeapsForZoom,          "cg_useWeapsForZoom",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_weaponCycleDelay,         "cg_weaponCycleDelay",         "150",                    CVAR_CHEAT                }, //----(SA)	added
+	{ &cg_cycleAllWeaps,            "cg_cycleAllWeaps",            "1",                      CVAR_ARCHIVE              },
+	{ &cg_crosshairSize,            "cg_crosshairSize",            "48",                     CVAR_ARCHIVE              },
+	{ &cg_crosshairHealth,          "cg_crosshairHealth",          "0",                      CVAR_ARCHIVE              },
+	{ &cg_crosshairX,               "cg_crosshairX",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_crosshairY,               "cg_crosshairY",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_brassTime,                "cg_brassTime",                "2500",                   CVAR_ARCHIVE              }, // JPW NERVE
+	{ &cg_markTime,                 "cg_marktime",                 "20000",                  CVAR_ARCHIVE              },
+	{ &cg_lagometer,                "cg_lagometer",                "0",                      CVAR_ARCHIVE              },
+	{ &cg_railTrailTime,            "cg_railTrailTime",            "400",                    CVAR_ARCHIVE              },
+	{ &cg_gun_x,                    "cg_gunX",                     "0",                      CVAR_ARCHIVE              },
+	{ &cg_gun_y,                    "cg_gunY",                     "0",                      CVAR_ARCHIVE              },
+	{ &cg_gun_z,                    "cg_gunZ",                     "0",                      CVAR_ARCHIVE              },
+	{ &cg_centertime,               "cg_centertime",               "5",                      CVAR_CHEAT                }, // DHM - Nerve :: changed from 3 to 5
+	{ &cg_runpitch,                 "cg_runpitch",                 "0.002",                  CVAR_ARCHIVE              },
+	{ &cg_runroll,                  "cg_runroll",                  "0.005",                  CVAR_ARCHIVE              },
+	{ &cg_bobup,                    "cg_bobup",                    "0",                      CVAR_ARCHIVE              },
+	{ &cg_bobpitch,                 "cg_bobpitch",                 "0",                      CVAR_ARCHIVE              },
+	{ &cg_bobroll,                  "cg_bobroll",                  "0",                      CVAR_ARCHIVE              },
+	{ &cg_bobyaw,                   "cg_bobyaw",                   "0",                      CVAR_ARCHIVE              },
+	{ &cg_autoactivate,             "cg_autoactivate",             "1",                      CVAR_ARCHIVE              },
+	{ &cg_swingSpeed,               "cg_swingSpeed",               "0.1",                    CVAR_CHEAT                }, // was 0.3 for Q3
+	{ &cg_bloodTime,                "cg_bloodTime",                "120",                    CVAR_ARCHIVE              },
+	{ &cg_skybox,                   "cg_skybox",                   "1",                      CVAR_CHEAT                },
+	{ &cg_message,                  "cg_message",                  "1",                      CVAR_TEMP                 },
+	{ &cg_messageType,              "cg_messageType",              "1",                      CVAR_TEMP                 },
+	{ &cg_messagePlayer,            "cg_messagePlayer",            "",                       CVAR_TEMP                 },
+	{ &cg_messagePlayerName,        "cg_messagePlayerName",        "",                       CVAR_TEMP                 },
+	{ &cg_animSpeed,                "cg_animspeed",                "1",                      CVAR_CHEAT                },
+	{ &cg_debugAnim,                "cg_debuganim",                "0",                      CVAR_CHEAT                },
+	{ &cg_debugPosition,            "cg_debugposition",            "0",                      CVAR_CHEAT                },
+	{ &cg_debugEvents,              "cg_debugevents",              "0",                      CVAR_CHEAT                },
+	{ &cg_errorDecay,               "cg_errordecay",               "100",                    0                         },
+	{ &cg_nopredict,                "cg_nopredict",                "0",                      CVAR_CHEAT                },
+	{ &cg_noPlayerAnims,            "cg_noplayeranims",            "0",                      CVAR_CHEAT                },
+	{ &cg_showmiss,                 "cg_showmiss",                 "0",                      0                         },
+	{ &cg_footsteps,                "cg_footsteps",                "1",                      CVAR_CHEAT                },
+	{ &cg_tracerChance,             "cg_tracerchance",             "0.4",                    CVAR_CHEAT                },
+	{ &cg_tracerWidth,              "cg_tracerwidth",              "0.8",                    CVAR_CHEAT                },
+	{ &cg_tracerSpeed,              "cg_tracerSpeed",              "4500",                   CVAR_CHEAT                },
+	{ &cg_tracerLength,             "cg_tracerlength",             "160",                    CVAR_CHEAT                },
+	{ &cg_thirdPersonRange,         "cg_thirdPersonRange",         "80",                     CVAR_CHEAT                }, // JPW NERVE per atvi req
+	{ &cg_thirdPersonAngle,         "cg_thirdPersonAngle",         "0",                      CVAR_CHEAT                },
+	{ &cg_thirdPerson,              "cg_thirdPerson",              "0",                      CVAR_CHEAT                }, // JPW NERVE per atvi req
+	{ &cg_teamChatTime,             "cg_teamChatTime",             "8000",                   CVAR_ARCHIVE              },
+	{ &cg_teamChatHeight,           "cg_teamChatHeight",           "8",                      CVAR_ARCHIVE              },
+	{ &cg_coronafardist,            "cg_coronafardist",            "1536",                   CVAR_ARCHIVE              },
+	{ &cg_coronas,                  "cg_coronas",                  "1",                      CVAR_ARCHIVE              },
+	{ &cg_predictItems,             "cg_predictItems",             "1",                      CVAR_ARCHIVE              },
+	{ &cg_deferPlayers,             "cg_deferPlayers",             "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawTeamOverlay,          "cg_drawTeamOverlay",          "2",                      CVAR_ARCHIVE              },
+	{ &cg_stats,                    "cg_stats",                    "0",                      0                         },
+	{ &cg_blinktime,                "cg_blinktime",                "100",                    CVAR_ARCHIVE              }, //----(SA)	added
+	{ &cg_enableBreath,             "cg_enableBreath",             "1",                      CVAR_SERVERINFO           },
+	{ &cg_cameraOrbit,              "cg_cameraOrbit",              "0",                      CVAR_CHEAT                },
+	{ &cg_cameraOrbitDelay,         "cg_cameraOrbitDelay",         "50",                     CVAR_ARCHIVE              },
+	{ &cg_timescaleFadeEnd,         "cg_timescaleFadeEnd",         "1",                      0                         },
+	{ &cg_timescaleFadeSpeed,       "cg_timescaleFadeSpeed",       "0",                      0                         },
+	{ &cg_timescale,                "timescale",                   "1",                      0                         },
+	{ &cg_cameraMode,               "com_cameraMode",              "0",                      CVAR_CHEAT                },
+	{ &pmove_fixed,                 "pmove_fixed",                 "1",                      0                         },
+	{ &pmove_msec,                  "pmove_msec",                  "8",                      0                         },
+	{ &cg_noTaunt,                  "cg_noTaunt",                  "0",                      CVAR_ARCHIVE              }, // NERVE - SMF
+	{ &cg_voiceSpriteTime,          "cg_voiceSpriteTime",          "6000",                   CVAR_ARCHIVE              }, // DHM - Nerve
+	{ &cg_smallFont,                "ui_smallFont",                "0.25",                   CVAR_ARCHIVE              },
+	{ &cg_bigFont,                  "ui_bigFont",                  "0.4",                    CVAR_ARCHIVE              },
+	{ &cg_teamChatsOnly,            "cg_teamChatsOnly",            "0",                      CVAR_ARCHIVE              },
+	{ &cg_noVoiceChats,             "cg_noVoiceChats",             "0",                      CVAR_ARCHIVE              }, // NERVE - SMF
+	{ &cg_noVoiceText,              "cg_noVoiceText",              "0",                      CVAR_ARCHIVE              }, // NERVE - SMF
+	{ &cg_buildScript,              "com_buildScript",             "0",                      0                         }, // force loading of all possible data amd error on failures
+	{ &cg_paused,                   "cl_paused",                   "0",                      CVAR_ROM                  },
+	{ &cg_blood,                    "cg_showblood",                "1",                      CVAR_ARCHIVE              },
+	{ &cg_wolfparticles,            "cg_wolfparticles",            "1",                      CVAR_ARCHIVE              },
+	{ &cg_gameType,                 "g_gametype",                  "0",                      0                         }, // communicated by systeminfo
+	{ &cg_norender,                 "cg_norender",                 "0",                      0                         }, // only used during single player, to suppress rendering until the server is ready
+	{ &cg_bluelimbotime,            "",                            "30000",                  0                         }, // communicated by systeminfo
+	{ &cg_redlimbotime,             "",                            "30000",                  0                         }, // communicated by systeminfo
+	{ &cg_movespeed,                "g_movespeed",                 "76",                     0                         }, // actual movespeed of player
+	{ &cg_animState,                "cg_animState",                "0",                      CVAR_CHEAT                },
+	{ &cg_drawCompass,              "cg_drawCompass",              "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawNotifyText,           "cg_drawNotifyText",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_quickMessageAlt,          "cg_quickMessageAlt",          "0",                      CVAR_ARCHIVE              },
+	{ &cg_popupLimboMenu,           "cg_popupLimboMenu",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_descriptiveText,          "cg_descriptiveText",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_antilag,                  "g_antilag",                   "1",                      0                         },
+	{ &developer,                   "developer",                   "0",                      CVAR_CHEAT                },
+	{ &cf_wstats,                   "cf_wstats",                   "1.2",                    CVAR_ARCHIVE              },
+	{ &cf_wtopshots,                "cf_wtopshots",                "1.0",                    CVAR_ARCHIVE              },
+	{ &cg_autoAction,               "cg_autoAction",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_autoReload,               "cg_autoReload",               "1",                      CVAR_ARCHIVE              },
+	{ &cg_bloodDamageBlend,         "cg_bloodDamageBlend",         "1.0",                    CVAR_ARCHIVE              },
+	{ &cg_bloodFlash,               "cg_bloodFlash",               "1.0",                    CVAR_ARCHIVE              },
+	{ &cg_complaintPopUp,           "cg_complaintPopUp",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_crosshairAlpha,           "cg_crosshairAlpha",           "1.0",                    CVAR_ARCHIVE              },
+	{ &cg_crosshairAlphaAlt,        "cg_crosshairAlphaAlt",        "1.0",                    CVAR_ARCHIVE              },
+	{ &cg_crosshairColor,           "cg_crosshairColor",           "White",                  CVAR_ARCHIVE              },
+	{ &cg_crosshairColorAlt,        "cg_crosshairColorAlt",        "White",                  CVAR_ARCHIVE              },
+	{ &cg_crosshairPulse,           "cg_crosshairPulse",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawReinforcementTime,    "cg_drawReinforcementTime",    "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawWeaponIconFlash,      "cg_drawWeaponIconFlash",      "0",                      CVAR_ARCHIVE              },
+	{ &cg_noAmmoAutoSwitch,         "cg_noAmmoAutoSwitch",         "1",                      CVAR_ARCHIVE              },
+	{ &cg_printObjectiveInfo,       "cg_printObjectiveInfo",       "1",                      CVAR_ARCHIVE              },
+	{ &cg_specHelp,                 "cg_specHelp",                 "1",                      CVAR_ARCHIVE              },
+	{ &cg_uinfo,                    "cg_uinfo",                    "0",                      CVAR_ROM | CVAR_USERINFO  },
+	{ &cg_useScreenshotJPEG,        "cg_useScreenshotJPEG",        "1",                      CVAR_ARCHIVE              },
+	{ &demo_avifpsF1,               "demo_avifpsF1",               "0",                      CVAR_ARCHIVE              },
+	{ &demo_avifpsF2,               "demo_avifpsF2",               "10",                     CVAR_ARCHIVE              },
+	{ &demo_avifpsF3,               "demo_avifpsF3",               "15",                     CVAR_ARCHIVE              },
+	{ &demo_avifpsF4,               "demo_avifpsF4",               "20",                     CVAR_ARCHIVE              },
+	{ &demo_avifpsF5,               "demo_avifpsF5",               "24",                     CVAR_ARCHIVE              },
+	{ &demo_drawTimeScale,          "demo_drawTimeScale",          "1",                      CVAR_ARCHIVE              },
+	{ &demo_infoWindow,             "demo_infoWindow",             "1",                      CVAR_ARCHIVE              },
+	{ &int_cl_maxpackets,           "cl_maxpackets",               "30",                     CVAR_ARCHIVE              },
+	{ &int_cl_timenudge,            "cl_timenudge",                "0",                      CVAR_ARCHIVE              },
+	{ &int_m_pitch,                 "m_pitch",                     "0.022",                  CVAR_ARCHIVE              },
+	{ &int_sensitivity,             "sensitivity",                 "5",                      CVAR_ARCHIVE              },
+	{ &int_ui_blackout,             "ui_blackout",                 "0",                      CVAR_ROM                  },
+	{ &cg_atmosphericEffects,       "cg_atmosphericEffects",       "1",                      CVAR_ARCHIVE              },
 
-	{ &cg_rconPassword,             "auth_rconPassword",           "",                       CVAR_TEMP                },
-	{ &cg_refereePassword,          "auth_refereePassword",        "",                       CVAR_TEMP                },
+	{ &cg_rconPassword,             "auth_rconPassword",           "",                       CVAR_TEMP                 },
+	{ &cg_refereePassword,          "auth_refereePassword",        "",                       CVAR_TEMP                 },
 
-	{ &cg_drawRoundTimer,           "cg_drawRoundTimer",           "1",                      CVAR_ARCHIVE             },
+	{ &cg_drawRoundTimer,           "cg_drawRoundTimer",           "1",                      CVAR_ARCHIVE              },
 	// Gordon: optimization cvars: 18/12/02 enabled by default now
-	{ &cg_fastSolids,               "cg_fastSolids",               "1",                      CVAR_ARCHIVE             },
+	{ &cg_fastSolids,               "cg_fastSolids",               "1",                      CVAR_ARCHIVE              },
 
-	{ &cg_instanttapout,            "cg_instanttapout",            "0",                      CVAR_ARCHIVE             },
-	{ &cg_debugSkills,              "cg_debugSkills",              "0",                      0                        },
-	{ NULL,                         "cg_etVersion",                "",                       CVAR_USERINFO | CVAR_ROM },
-	{ &cg_drawFireteamOverlay,      "cg_drawFireteamOverlay",      "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawSmallPopupIcons,      "cg_drawSmallPopupIcons",      "0",                      CVAR_ARCHIVE             },
+	{ &cg_instanttapout,            "cg_instanttapout",            "0",                      CVAR_ARCHIVE              },
+	{ &cg_debugSkills,              "cg_debugSkills",              "0",                      0                         },
+	{ NULL,                         "cg_etVersion",                "",                       CVAR_USERINFO | CVAR_ROM  },
+	{ &cg_drawFireteamOverlay,      "cg_drawFireteamOverlay",      "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawSmallPopupIcons,      "cg_drawSmallPopupIcons",      "0",                      CVAR_ARCHIVE              },
 
 	//bani - demo recording cvars
-	{ &cl_demorecording,            "cl_demorecording",            "0",                      CVAR_ROM                 },
-	{ &cl_demofilename,             "cl_demofilename",             "",                       CVAR_ROM                 },
-	{ &cl_demooffset,               "cl_demooffset",               "0",                      CVAR_ROM                 },
+	{ &cl_demorecording,            "cl_demorecording",            "0",                      CVAR_ROM                  },
+	{ &cl_demofilename,             "cl_demofilename",             "",                       CVAR_ROM                  },
+	{ &cl_demooffset,               "cl_demooffset",               "0",                      CVAR_ROM                  },
 	//bani - wav recording cvars
-	{ &cl_waverecording,            "cl_waverecording",            "0",                      CVAR_ROM                 },
-	{ &cl_wavefilename,             "cl_wavefilename",             "",                       CVAR_ROM                 },
-	{ &cl_waveoffset,               "cl_waveoffset",               "0",                      CVAR_ROM                 },
-	{ &cg_recording_statusline,     "cg_recording_statusline",     "9",                      CVAR_ARCHIVE             },
+	{ &cl_waverecording,            "cl_waverecording",            "0",                      CVAR_ROM                  },
+	{ &cl_wavefilename,             "cl_wavefilename",             "",                       CVAR_ROM                  },
+	{ &cl_waveoffset,               "cl_waveoffset",               "0",                      CVAR_ROM                  },
+	{ &cg_recording_statusline,     "cg_recording_statusline",     "9",                      CVAR_ARCHIVE              },
 
-	{ &cg_ghostPlayers,             "",                            "0",                      0                        },
-	{ &cg_hide,                     "etj_hide",                    "1",                      CVAR_ARCHIVE             },
-	{ &cg_hideDistance,             "etj_hideDistance",            "128",                    CVAR_ARCHIVE             },
-	{ &cg_hideMe,                   "etj_hideMe",                  "0",                      CVAR_ARCHIVE             },
-	{ &cg_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE             },
-	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
-	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
+	{ &cg_ghostPlayers,             "",                            "0",                      0                         },
+	{ &cg_hide,                     "etj_hide",                    "1",                      CVAR_ARCHIVE              },
+	{ &cg_hideDistance,             "etj_hideDistance",            "128",                    CVAR_ARCHIVE              },
+	{ &cg_hideMe,                   "etj_hideMe",                  "0",                      CVAR_ARCHIVE              },
+	{ &cg_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE              },
+	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE              },
+	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE              },
 
-	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
-	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
-	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE },
-	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
-	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
-	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
-	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
-	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
-	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE              },
+	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE              },
+	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE              },
+	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE              },
+	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE              },
+	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE              },
+	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE              },
+	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE              },
+	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE              },
+	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE              },
 
-	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
-	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawKeys,                 "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
-	{ &cg_keysColor,                "etj_keysColor",               "White",                  CVAR_ARCHIVE             },
-	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
-	{ &cg_keysX,                    "etj_keysX",                   "585",                    CVAR_ARCHIVE             },
-	{ &cg_keysY,                    "etj_keysY",                   "200",                    CVAR_ARCHIVE             },
-	{ &etj_keysShadow,              "etj_keysShadow",              "0",                      CVAR_ARCHIVE             },
-	{ &cg_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_speedXYonly,              "etj_speedXYonly",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_speedinterval,            "etj_speedinterval",           "100",                    CVAR_ARCHIVE             },
-	{ &cg_speedunit,                "etj_speedunit",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
-	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
-	{ &cg_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE             },
-	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE             },
-	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
-	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
-	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
-	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
-	{ &etj_drawMaxSpeed,            "etj_drawMaxSpeed",            "0",                      CVAR_ARCHIVE             },
-	{ &etj_maxSpeedX,               "etj_maxSpeedX",               "320",                    CVAR_ARCHIVE             },
-	{ &etj_maxSpeedY,               "etj_maxSpeedY",               "320",                    CVAR_ARCHIVE             },
-	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE             },
+	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE              },
+	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawKeys,                 "etj_drawKeys",                "1",                      CVAR_ARCHIVE              },
+	{ &cg_keysColor,                "etj_keysColor",               "White",                  CVAR_ARCHIVE              },
+	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE              },
+	{ &cg_keysX,                    "etj_keysX",                   "585",                    CVAR_ARCHIVE              },
+	{ &cg_keysY,                    "etj_keysY",                   "200",                    CVAR_ARCHIVE              },
+	{ &etj_keysShadow,              "etj_keysShadow",              "0",                      CVAR_ARCHIVE              },
+	{ &cg_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE              },
+	{ &cg_speedXYonly,              "etj_speedXYonly",             "1",                      CVAR_ARCHIVE              },
+	{ &cg_speedinterval,            "etj_speedinterval",           "100",                    CVAR_ARCHIVE              },
+	{ &cg_speedunit,                "etj_speedunit",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE              },
+	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE              },
+	{ &cg_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE              },
+	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE              },
+	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE              },
+	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE              },
+	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE              },
+	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE              },
+	{ &etj_drawMaxSpeed,            "etj_drawMaxSpeed",            "0",                      CVAR_ARCHIVE              },
+	{ &etj_maxSpeedX,               "etj_maxSpeedX",               "320",                    CVAR_ARCHIVE              },
+	{ &etj_maxSpeedY,               "etj_maxSpeedY",               "320",                    CVAR_ARCHIVE              },
+	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE              },
 
-	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
-	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
-	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },
-	{ &cg_numPopups,                "etj_numPopups",               "5",                      CVAR_ARCHIVE             },
-	{ &etj_popupGrouped,            "etj_popupGrouped",            "1",                      CVAR_ARCHIVE             },
-	{ &cg_viewPlayerPortals,        "etj_viewPlayerPortals",       "1",                      CVAR_ARCHIVE             }, //Feen: PGM - View other player portals
-	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
-	{ &etj_chatFlags,				"etj_chatFlags",			   "1",                      CVAR_ARCHIVE             },
+	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE              },
+	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE              },
+	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE              },
+	{ &cg_numPopups,                "etj_numPopups",               "5",                      CVAR_ARCHIVE              },
+	{ &etj_popupGrouped,            "etj_popupGrouped",            "1",                      CVAR_ARCHIVE              },
+	{ &cg_viewPlayerPortals,        "etj_viewPlayerPortals",       "1",                      CVAR_ARCHIVE              }, //Feen: PGM - View other player portals
+	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE              },
+	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE              },
+	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE              },
+	{ &etj_chatFlags,               "etj_chatFlags",               "1",                      CVAR_ARCHIVE              },
 
 	// crosshair stats
-	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info1,                "etj_CHS1Info1",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info2,                "etj_CHS1Info2",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info3,                "etj_CHS1Info3",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info4,                "etj_CHS1Info4",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info5,                "etj_CHS1Info5",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info6,                "etj_CHS1Info6",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info7,                "etj_CHS1Info7",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info8,                "etj_CHS1Info8",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawCHS2,                 "etj_drawCHS2",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info1,                "etj_CHS2Info1",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info2,                "etj_CHS2Info2",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info3,                "etj_CHS2Info3",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info4,                "etj_CHS2Info4",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info5,                "etj_CHS2Info5",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info6,                "etj_CHS2Info6",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info7,                "etj_CHS2Info7",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info8,                "etj_CHS2Info8",               "0",                      CVAR_ARCHIVE             },
+	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info1,                "etj_CHS1Info1",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info2,                "etj_CHS1Info2",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info3,                "etj_CHS1Info3",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info4,                "etj_CHS1Info4",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info5,                "etj_CHS1Info5",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info6,                "etj_CHS1Info6",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info7,                "etj_CHS1Info7",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS1Info8,                "etj_CHS1Info8",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_drawCHS2,                 "etj_drawCHS2",                "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info1,                "etj_CHS2Info1",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info2,                "etj_CHS2Info2",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info3,                "etj_CHS2Info3",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info4,                "etj_CHS2Info4",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info5,                "etj_CHS2Info5",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info6,                "etj_CHS2Info6",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info7,                "etj_CHS2Info7",               "0",                      CVAR_ARCHIVE              },
+	{ &cg_CHS2Info8,                "etj_CHS2Info8",               "0",                      CVAR_ARCHIVE              },
 
-	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_fatigueBar,           "etj_HUD_fatigueBar",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_healthBar,            "etj_HUD_healthBar",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_playerHead,           "etj_HUD_playerHead",          "0",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
-	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_slickX,                   "etj_slickX",                  "315",                    CVAR_ARCHIVE             },
-	{ &cg_slickY,                   "etj_slickY",                  "220",                    CVAR_ARCHIVE             },
-	{ &cg_altScoreboard,            "etj_altScoreboard",           "2",                      CVAR_ARCHIVE             },
-	{ &player_drawSpectatorInfo,    "etj_drawSpectatorInfo",       "0",                      CVAR_ARCHIVE             },
-	{ &player_spectatorInfoX,       "etj_spectatorInfoX",          "320",                    CVAR_ARCHIVE             },
-	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
-	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
-	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
-	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
-	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
-	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
+	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_fatigueBar,           "etj_HUD_fatigueBar",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_healthBar,            "etj_HUD_healthBar",           "1",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_playerHead,           "etj_HUD_playerHead",          "0",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE              },
+	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE              },
+	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE              },
+	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE              },
+	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE              },
+	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE              },
+	{ &cg_slickX,                   "etj_slickX",                  "315",                    CVAR_ARCHIVE              },
+	{ &cg_slickY,                   "etj_slickY",                  "220",                    CVAR_ARCHIVE              },
+	{ &cg_altScoreboard,            "etj_altScoreboard",           "2",                      CVAR_ARCHIVE              },
+	{ &player_drawSpectatorInfo,    "etj_drawSpectatorInfo",       "0",                      CVAR_ARCHIVE              },
+	{ &player_spectatorInfoX,       "etj_spectatorInfoX",          "320",                    CVAR_ARCHIVE              },
+	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE              },
+	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE              },
+	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE              },
+	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE              },
+	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE              },
+	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE              },
 
-	{ &player_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE             },
+	{ &player_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE              },
 
-	{ &movie_changeFovBasedOnSpeed, "movie_changeFovBasedOnSpeed", "0",                      CVAR_ARCHIVE             },
-	{ &movie_fovMinSpeed,           "movie_fovMinSpeed",           "400",                    CVAR_ARCHIVE             },
-	{ &movie_fovMaxSpeed,           "movie_fovMaxSpeed",           "1200",                   CVAR_ARCHIVE             },
-	{ &movie_fovMin,                "movie_fovMin",                "90",                     CVAR_ARCHIVE             },
-	{ &movie_fovMax,                "movie_fovMax",                "140",                    CVAR_ARCHIVE             },
-	{ &movie_fovIncreasePerFrame,   "movie_fovIncreasePerFrame",   "1",                      CVAR_ARCHIVE             },
-	{ &etj_drawConnectionIssues,    "etj_drawConnectionIssues",    "1",                      CVAR_ARCHIVE             },
+	{ &movie_changeFovBasedOnSpeed, "movie_changeFovBasedOnSpeed", "0",                      CVAR_ARCHIVE              },
+	{ &movie_fovMinSpeed,           "movie_fovMinSpeed",           "400",                    CVAR_ARCHIVE              },
+	{ &movie_fovMaxSpeed,           "movie_fovMaxSpeed",           "1200",                   CVAR_ARCHIVE              },
+	{ &movie_fovMin,                "movie_fovMin",                "90",                     CVAR_ARCHIVE              },
+	{ &movie_fovMax,                "movie_fovMax",                "140",                    CVAR_ARCHIVE              },
+	{ &movie_fovIncreasePerFrame,   "movie_fovIncreasePerFrame",   "1",                      CVAR_ARCHIVE              },
+	{ &etj_drawConnectionIssues,    "etj_drawConnectionIssues",    "1",                      CVAR_ARCHIVE              },
 	// Chat highlight
-	{ &etj_highlight,               "etj_highlight",               "1",                      CVAR_ARCHIVE             },
-	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE             },
-	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE             },
-	{&etj_drawTokens,               "etj_drawTokens",               "1",                     CVAR_ARCHIVE             },
+	{ &etj_highlight,               "etj_highlight",               "1",                      CVAR_ARCHIVE              },
+	{ &etj_highlightText,           "etj_highlightText",           "^3> ^z",                 CVAR_ARCHIVE              },
+	{ &etj_highlightSound,          "etj_highlightSound",          "sound/world/beeper.wav", CVAR_ARCHIVE              },
+	{ &etj_drawTokens,              "etj_drawTokens",              "1",                      CVAR_ARCHIVE              },
 
-	{ &etj_tjlEnableLine,			"etj_tjlEnableLine",			"0",					 CVAR_ARCHIVE			  },
-	{ &etj_tjlEnableMarker,			"etj_tjlEnableMarker",			"0",					 CVAR_ARCHIVE			  },
-	{ &etj_tjlLineColor,			"etj_tjlLineColor",				"green",				 CVAR_ARCHIVE			  },
-	{ &etj_tjlMarkerColor,			"etj_tjlMarkerColor",			"green",				 CVAR_ARCHIVE			  },
-	{ &etj_tjlMarkerEndColor,		"etj_tjlMarkerEndColor",		"red",					 CVAR_ARCHIVE			  },
-	{ &etj_tjlNearestInterval,		"etj_tjlNearestInterval",		"0",					 CVAR_ARCHIVE			  },
-	{ &etj_tjlAlwaysLoadTJL,		"etj_tjlAlwaysLoadTJL",			"1",					 CVAR_ARCHIVE			  },
+	{ &etj_tjlEnableLine,           "etj_tjlEnableLine",           "0",                      CVAR_ARCHIVE              },
+	{ &etj_tjlEnableMarker,         "etj_tjlEnableMarker",         "0",                      CVAR_ARCHIVE              },
+	{ &etj_tjlLineColor,            "etj_tjlLineColor",            "green",                  CVAR_ARCHIVE              },
+	{ &etj_tjlMarkerColor,          "etj_tjlMarkerColor",          "green",                  CVAR_ARCHIVE              },
+	{ &etj_tjlMarkerEndColor,       "etj_tjlMarkerEndColor",       "red",                    CVAR_ARCHIVE              },
+	{ &etj_tjlNearestInterval,      "etj_tjlNearestInterval",      "0",                      CVAR_ARCHIVE              },
+	{ &etj_tjlAlwaysLoadTJL,        "etj_tjlAlwaysLoadTJL",        "1",                      CVAR_ARCHIVE              },
 
 
-	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
-	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersAlt,          "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE             },
-	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
-	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
-	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
-	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
-	{ &shared, "shared", "0", CVAR_ROM },
-	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
-	{ &etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
-	{ &etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
-	{ &etj_obWatcherSize , "etj_obWatcherSize", "3", CVAR_ARCHIVE },
-	{ &etj_obWatcherColor , "etj_obWatcherColor", "White", CVAR_ARCHIVE },
-	{ &etj_demo_yawturnspeed, "etj_demo_yawturnspeed", "140", CVAR_ARCHIVE },
-	{ &etj_demo_pitchturnspeed, "etj_demo_pitchturnspeed", "140", CVAR_ARCHIVE },
-	{ &etj_demo_rollspeed, "etj_demo_rollspeed", "140", CVAR_ARCHIVE },
-	{ &etj_demo_freecamspeed, "etj_demo_freecamspeed", "800", CVAR_ARCHIVE },
-	{ &etj_demo_lookat, "b_demo_lookat", "-1", CVAR_CHEAT },
-	{ &etj_predefineddemokeys, "etj_predefineddemokeys", "1", CVAR_CHEAT | CVAR_ARCHIVE },
-	{ &etj_drawNoJumpDelay, "etj_drawNoJumpDelay", "1", CVAR_ARCHIVE },
-	{ &etj_noJumpDelayX, "etj_noJumpDelayX", "290", CVAR_ARCHIVE },
-	{ &etj_noJumpDelayY, "etj_noJumpDelayY", "220", CVAR_ARCHIVE },
-	{ &etj_drawSaveIndicator, "etj_drawSaveIndicator", "3", CVAR_ARCHIVE },
-	{ &etj_saveIndicatorX, "etj_saveIndicatorX", "525", CVAR_ARCHIVE },
-	{ &etj_saveIndicatorY, "etj_saveIndicatorY", "450", CVAR_ARCHIVE },
-	{ &etj_drawFoliage, "etj_drawFoliage", "1", CVAR_ARCHIVE },
-	{ &etj_showTris, "etj_showTris", "0", CVAR_ARCHIVE },
-	{ &etj_wolfFog, "etj_wolfFog", "1", CVAR_ARCHIVE },
-	{ &etj_zFar, "etj_zFar", "0", CVAR_ARCHIVE },
-	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
-	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
-	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
-	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
-	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
-	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
+	{ &etj_enableTimeruns,          "etj_enableTimeruns",          "1",                      CVAR_ARCHIVE              },
+	{ &etj_ghostPlayersOpacity,     "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE              },
+	{ &etj_ghostPlayersColor,       "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE              },
+	{ &etj_ghostPlayersFadeRange,   "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE              },
+	{ &etj_ghostPlayersAlt,         "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE              },
+	{ &etj_explosivesShake,         "etj_explosivesShake",         "3",                      CVAR_ARCHIVE              },
+	{ &etj_realFov,                 "etj_realFov",                 "0",                      CVAR_ARCHIVE              },
+	{ &etj_stretchCgaz,             "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE              },
+	{ &etj_noActivateLean,          "etj_noActivateLean",          "0",                      CVAR_ARCHIVE              },
+	{ &shared,                      "shared",                      "0",                      CVAR_ROM                  },
+	{ &etj_drawObWatcher,           "etj_drawObWatcher",           "1",                      CVAR_ARCHIVE              },
+	{ &etj_obWatcherX,              "etj_obWatcherX",              "100",                    CVAR_ARCHIVE              },
+	{ &etj_obWatcherY,              "etj_obWatcherY",              "100",                    CVAR_ARCHIVE              },
+	{ &etj_obWatcherSize,           "etj_obWatcherSize",           "3",                      CVAR_ARCHIVE              },
+	{ &etj_obWatcherColor,          "etj_obWatcherColor",          "White",                  CVAR_ARCHIVE              },
+	{ &etj_demo_yawturnspeed,       "etj_demo_yawturnspeed",       "140",                    CVAR_ARCHIVE              },
+	{ &etj_demo_pitchturnspeed,     "etj_demo_pitchturnspeed",     "140",                    CVAR_ARCHIVE              },
+	{ &etj_demo_rollspeed,          "etj_demo_rollspeed",          "140",                    CVAR_ARCHIVE              },
+	{ &etj_demo_freecamspeed,       "etj_demo_freecamspeed",       "800",                    CVAR_ARCHIVE              },
+	{ &etj_demo_lookat,             "b_demo_lookat",               "-1",                     CVAR_CHEAT                },
+	{ &etj_predefineddemokeys,      "etj_predefineddemokeys",      "1",                      CVAR_CHEAT | CVAR_ARCHIVE },
+	{ &etj_drawNoJumpDelay,         "etj_drawNoJumpDelay",         "1",                      CVAR_ARCHIVE              },
+	{ &etj_noJumpDelayX,            "etj_noJumpDelayX",            "290",                    CVAR_ARCHIVE              },
+	{ &etj_noJumpDelayY,            "etj_noJumpDelayY",            "220",                    CVAR_ARCHIVE              },
+	{ &etj_drawSaveIndicator,       "etj_drawSaveIndicator",       "3",                      CVAR_ARCHIVE              },
+	{ &etj_saveIndicatorX,          "etj_saveIndicatorX",          "525",                    CVAR_ARCHIVE              },
+	{ &etj_saveIndicatorY,          "etj_saveIndicatorY",          "450",                    CVAR_ARCHIVE              },
+	{ &etj_drawFoliage,             "etj_drawFoliage",             "1",                      CVAR_ARCHIVE              },
+	{ &etj_showTris,                "etj_showTris",                "0",                      CVAR_ARCHIVE              },
+	{ &etj_wolfFog,                 "etj_wolfFog",                 "1",                      CVAR_ARCHIVE              },
+	{ &etj_zFar,                    "etj_zFar",                    "0",                      CVAR_ARCHIVE              },
+	{ &etj_viewlog,                 "etj_viewlog",                 "1",                      CVAR_ARCHIVE              },
+	{ &etj_offsetFactor,            "etj_offsetFactor",            "-1",                     CVAR_ARCHIVE              },
+	{ &etj_offsetUnits,             "etj_offsetUnits",             "-2",                     CVAR_ARCHIVE              },
+	{ &etj_consoleAlpha,            "etj_consoleAlpha",            "1",                      CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_drawLeaves,              "etj_drawLeaves",              "1",                      CVAR_ARCHIVE              },
+	{ &etj_touchPickupWeapons,      "etj_touchPickupWeapons",      "0",                      CVAR_ARCHIVE              },
+	{ &etj_autoLoad,                "etj_autoLoad",                "1",                      CVAR_ARCHIVE              }
 
 };
 
 
-int      cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
-qboolean cvarsLoaded   = qfalse;
+int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
+qboolean cvarsLoaded = qfalse;
 void CG_setClientFlags(void);
 
 
@@ -866,9 +868,9 @@ CG_RegisterCvars
 */
 void CG_RegisterCvars(void)
 {
-	int         i;
+	int i;
 	cvarTable_t *cv;
-	char        var[MAX_TOKEN_CHARS];
+	char var[MAX_TOKEN_CHARS];
 
 	trap_Cvar_Set("cg_letterbox", "0");             // force this for people who might have it in their
 
@@ -892,8 +894,8 @@ void CG_RegisterCvars(void)
 	ETJump::cvarUpdateHandler = std::make_shared<ETJump::CvarUpdateHandler>();
 
 	// shadow cvars mapping to real cvars, forces locked values change
-	std::vector<std::pair<vmCvar_t*, std::string>> cvars {
-		{ &etj_drawFoliage, "r_drawfoliage"},
+	std::vector<std::pair<vmCvar_t *, std::string> > cvars {
+		{ &etj_drawFoliage, "r_drawfoliage" },
 		{ &etj_showTris, "r_showtris" },
 		{ &etj_wolfFog, "r_wolffog" },
 		{ &etj_zFar, "r_zfar" },
@@ -906,7 +908,7 @@ void CG_RegisterCvars(void)
 	{
 		ETJump::cvarShadows.push_back(
 			std::unique_ptr<ETJump::CvarShadow>(new ETJump::CvarShadow{ shadow.first, shadow.second })
-		);
+			);
 	}
 
 	// see if we are also running the server on this machine
@@ -944,8 +946,8 @@ CG_UpdateCvars
 */
 void CG_UpdateCvars(void)
 {
-	int         i;
-	qboolean    fSetFlags = qfalse;
+	int i;
+	qboolean fSetFlags = qfalse;
 	cvarTable_t *cv;
 
 	if (!cvarsLoaded)
@@ -964,15 +966,15 @@ void CG_UpdateCvars(void)
 
 				// Check if we need to update any client flags to be sent to the server
 				if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
-					cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-					cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
-					cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
-					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
-					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
-					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
-					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
-					cv->vmCvar == &etj_touchPickupWeapons
+				    cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
+				    cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
+				    cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
+				    cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
+				    cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
+				    cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
+				    cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
+				    cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
+				    cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad
 				    )
 				{
 					fSetFlags = qtrue;
@@ -1069,32 +1071,33 @@ void CG_setClientFlags(void)
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
 	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f %d",
-	                             // Client Flags
-	                             (
-	                                 ((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
-	                                 ((cg_autoAction.integer & AA_STATSDUMP) ? CGF_STATSDUMP : 0) |
-	                                 ((cg_autoactivate.integer > 0) ? CGF_AUTOACTIVATE : 0) |
-	                                 ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
-	                                 ((cg_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
-	                                 ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
-	                                 ((cg_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
-	                                 ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
-	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
-	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
-									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
-									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
-									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0)
-	                                 // Add more in here, as needed
-	                             ),
+			// Client Flags
+			(
+				((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
+				((cg_autoAction.integer & AA_STATSDUMP) ? CGF_STATSDUMP : 0) |
+				((cg_autoactivate.integer > 0) ? CGF_AUTOACTIVATE : 0) |
+				((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
+				((cg_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
+				((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
+				((cg_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
+				((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
+				  cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
+				((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
+				((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
+				((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
+				((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
+				((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0)
+				// Add more in here, as needed
+			),
 
-	                             // Timenudge
-	                             int_cl_timenudge.integer,
-	                             // MaxPackets
-	                             int_cl_maxpackets.integer,
-	                             com_maxfps.integer,
-	                             cg_noclipScale.value,
-	                             etj_touchPickupWeapons.integer
-	                             ));
+			// Timenudge
+			int_cl_timenudge.integer,
+			// MaxPackets
+			int_cl_maxpackets.integer,
+			com_maxfps.integer,
+			cg_noclipScale.value,
+			etj_touchPickupWeapons.integer
+			));
 
 }
 
@@ -1121,7 +1124,7 @@ int CG_LastAttacker(void)
 void QDECL CG_Printf(const char *msg, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, msg);
 	Q_vsnprintf(text, sizeof(text), msg, argptr);
@@ -1150,7 +1153,7 @@ void QDECL CG_Printf(const char *msg, ...)
 void QDECL CG_Error(const char *msg, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, msg);
 	Q_vsnprintf(text, sizeof(text), msg, argptr);
@@ -1165,7 +1168,7 @@ void QDECL CG_Error(const char *msg, ...)
 void QDECL Com_Error(int level, const char *error, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, error);
 	Q_vsnprintf(text, sizeof(text), error, argptr);
@@ -1177,7 +1180,7 @@ void QDECL Com_Error(int level, const char *error, ...)
 void QDECL Com_Printf(const char *msg, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, msg);
 	Q_vsnprintf(text, sizeof(text), msg, argptr);
@@ -1254,21 +1257,22 @@ char *CG_generateFilename(void)
 	//	int index = (cg.snap == NULL || (cg.snap->ps.pm_flags & PMF_LIMBO)) ? cg.clientNum : cg.snap->ps.clientNum;
 	//	char strCleanName[64];
 	const char *pszServerInfo = CG_ConfigString(CS_SERVERINFO);
+
 	//	const char *pszPlayerInfo = CG_ConfigString(CS_PLAYERS + index);
 
 	trap_RealTime(&ct);
 	//	CG_nameCleanFilename(Info_ValueForKey(pszPlayerInfo, "n"), strCleanName, sizeof(strCleanName));
 	return(va("%d-%02d-%02d-%02d%02d%02d-%s%s",
-	          1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
-	          ct.tm_hour, ct.tm_min, ct.tm_sec,
-	          Info_ValueForKey(pszServerInfo, "mapname"),
-	          (cg.mvTotalClients < 1) ? "" : "-MVD"));
+			   1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
+			   ct.tm_hour, ct.tm_min, ct.tm_sec,
+			   Info_ValueForKey(pszServerInfo, "mapname"),
+			   (cg.mvTotalClients < 1) ? "" : "-MVD"));
 }
 
 int CG_findClientNum(char *s)
 {
-	int      id;
-	char     s2[64], n2[64];
+	int  id;
+	char s2[64], n2[64];
 	qboolean fIsNumber = qtrue;
 
 	// See if its a number or string
@@ -1319,7 +1323,7 @@ void CG_printConsoleString(const char *str)
 void CG_LoadObjectiveData(void)
 {
 	pc_token_t token, token2;
-	int        handle;
+	int handle;
 
 	if (cg_gameType.integer == GT_WOLF_LMS)
 	{
@@ -1429,10 +1433,10 @@ void CG_LoadObjectiveData(void)
 //========================================================================
 void CG_SetupDlightstyles(void)
 {
-	int       i, j;
-	char      *str;
-	char      *token;
-	int       entnum;
+	int i, j;
+	char *str;
+	char *token;
+	int  entnum;
 	centity_t *cent;
 
 	cg.lightstylesInited = qtrue;
@@ -1447,23 +1451,23 @@ void CG_SetupDlightstyles(void)
 
 		token  = COM_Parse(&str);           // ent num
 		entnum = atoi(token);
-		cent   = &cg_entities[entnum];
+		cent = &cg_entities[entnum];
 
 		token = COM_Parse(&str);            // stylestring
 		Q_strncpyz(cent->dl_stylestring, token, strlen(token));
 
-		token             = COM_Parse(&str); // offset
-		cent->dl_frame    = atoi(token);
+		token = COM_Parse(&str);             // offset
+		cent->dl_frame = atoi(token);
 		cent->dl_oldframe = cent->dl_frame - 1;
 		if (cent->dl_oldframe < 0)
 		{
 			cent->dl_oldframe = strlen(cent->dl_stylestring);
 		}
 
-		token          = COM_Parse(&str);   // sound id
+		token = COM_Parse(&str);            // sound id
 		cent->dl_sound = atoi(token);
 
-		token          = COM_Parse(&str);   // attenuation
+		token = COM_Parse(&str);            // attenuation
 		cent->dl_atten = atoi(token);
 
 		for (j = 0; j < strlen(cent->dl_stylestring); j++)
@@ -1483,7 +1487,7 @@ void CG_SetupDlightstyles(void)
 		}
 
 		cent->dl_backlerp = 0.0;
-		cent->dl_time     = cg.time;
+		cent->dl_time = cg.time;
 	}
 
 }
@@ -1500,9 +1504,9 @@ The server says this item is used on this level
 static void CG_RegisterItemSounds(int itemNum)
 {
 	gitem_t *item;
-	char    data[MAX_QPATH];
-	const char    *s, *start;
-	int     len;
+	char data[MAX_QPATH];
+	const char *s, *start;
+	int len;
 
 	item = &bg_itemlist[itemNum];
 
@@ -1530,7 +1534,7 @@ static void CG_RegisterItemSounds(int itemNum)
 		if (len >= MAX_QPATH || len < 5)
 		{
 			CG_Error("PrecacheItem: %s has bad precache string",
-			         item->classname);
+				item->classname);
 			return;
 		}
 		memcpy(data, start, len);
@@ -1557,9 +1561,9 @@ called during a precache command
 */
 static void CG_RegisterSounds(void)
 {
-	int          i;
-	char         name[MAX_QPATH];
-	const char   *soundName;
+	int  i;
+	char name[MAX_QPATH];
+	const char *soundName;
 	bg_speaker_t *speaker;
 
 	// NERVE - SMF - voice commands
@@ -1580,35 +1584,35 @@ static void CG_RegisterSounds(void)
 		speaker->noise = trap_S_RegisterSound(speaker->filename, qfalse);
 	}
 
-	cgs.media.noAmmoSound      = trap_S_RegisterSound("sound/weapons/misc/fire_dry.wav", qfalse);
+	cgs.media.noAmmoSound = trap_S_RegisterSound("sound/weapons/misc/fire_dry.wav", qfalse);
 	cgs.media.noFireUnderwater = trap_S_RegisterSound("sound/weapons/misc/fire_water.wav", qfalse);
-	cgs.media.selectSound      = trap_S_RegisterSound("sound/weapons/misc/change.wav", qfalse);
-	cgs.media.landHurt         = trap_S_RegisterSound("sound/player/land_hurt.wav", qfalse);
-	cgs.media.gibSound         = trap_S_RegisterSound("sound/player/gib.wav", qfalse);
-	cgs.media.dynamitebounce1  = trap_S_RegisterSound("sound/weapons/dynamite/dynamite_bounce.wav", qfalse);
-	cgs.media.satchelbounce1   = trap_S_RegisterSound("sound/weapons/satchel/satchel_bounce.wav", qfalse);
-	cgs.media.landminebounce1  = trap_S_RegisterSound("sound/weapons/landmine/mine_bounce.wav", qfalse);
+	cgs.media.selectSound = trap_S_RegisterSound("sound/weapons/misc/change.wav", qfalse);
+	cgs.media.landHurt = trap_S_RegisterSound("sound/player/land_hurt.wav", qfalse);
+	cgs.media.gibSound = trap_S_RegisterSound("sound/player/gib.wav", qfalse);
+	cgs.media.dynamitebounce1 = trap_S_RegisterSound("sound/weapons/dynamite/dynamite_bounce.wav", qfalse);
+	cgs.media.satchelbounce1  = trap_S_RegisterSound("sound/weapons/satchel/satchel_bounce.wav", qfalse);
+	cgs.media.landminebounce1 = trap_S_RegisterSound("sound/weapons/landmine/mine_bounce.wav", qfalse);
 
-	cgs.media.watrInSound     = trap_S_RegisterSound("sound/player/water_in.wav", qfalse);
-	cgs.media.watrOutSound    = trap_S_RegisterSound("sound/player/water_out.wav", qfalse);
-	cgs.media.watrUnSound     = trap_S_RegisterSound("sound/player/water_un.wav", qfalse);
-	cgs.media.watrGaspSound   = trap_S_RegisterSound("sound/player/gasp.wav", qfalse);
+	cgs.media.watrInSound   = trap_S_RegisterSound("sound/player/water_in.wav", qfalse);
+	cgs.media.watrOutSound  = trap_S_RegisterSound("sound/player/water_out.wav", qfalse);
+	cgs.media.watrUnSound   = trap_S_RegisterSound("sound/player/water_un.wav", qfalse);
+	cgs.media.watrGaspSound = trap_S_RegisterSound("sound/player/gasp.wav", qfalse);
 	cgs.media.underWaterSound = trap_S_RegisterSound("sound/player/underwater.wav", qfalse);
 
 	for (i = 0; i < 2; i++)
 	{
-		cgs.media.grenadebounce[FOOTSTEP_NORMAL][i]         = \
-		    cgs.media.grenadebounce[FOOTSTEP_GRAVEL][i]     = \
-		        cgs.media.grenadebounce[FOOTSTEP_SPLASH][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_hard%i.wav", i + 1), qfalse);
+		cgs.media.grenadebounce[FOOTSTEP_NORMAL][i] = \
+			cgs.media.grenadebounce[FOOTSTEP_GRAVEL][i] = \
+				cgs.media.grenadebounce[FOOTSTEP_SPLASH][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_hard%i.wav", i + 1), qfalse);
 
-		cgs.media.grenadebounce[FOOTSTEP_METAL][i]    = \
-		    cgs.media.grenadebounce[FOOTSTEP_ROOF][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_metal%i.wav", i + 1), qfalse);
+		cgs.media.grenadebounce[FOOTSTEP_METAL][i] = \
+			cgs.media.grenadebounce[FOOTSTEP_ROOF][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_metal%i.wav", i + 1), qfalse);
 
 		cgs.media.grenadebounce[FOOTSTEP_WOOD][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_wood%i.wav", i + 1), qfalse);
 
-		cgs.media.grenadebounce[FOOTSTEP_GRASS][i]          = \
-		    cgs.media.grenadebounce[FOOTSTEP_SNOW][i]       = \
-		        cgs.media.grenadebounce[FOOTSTEP_CARPET][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_soft%i.wav", i + 1), qfalse);
+		cgs.media.grenadebounce[FOOTSTEP_GRASS][i] = \
+			cgs.media.grenadebounce[FOOTSTEP_SNOW][i] = \
+				cgs.media.grenadebounce[FOOTSTEP_CARPET][i] = trap_S_RegisterSound(va("sound/weapons/grenade/bounce_soft%i.wav", i + 1), qfalse);
 
 	}
 
@@ -1690,11 +1694,11 @@ static void CG_RegisterSounds(void)
 	// OSP
 	*/
 
-	cgs.media.flameSound         = trap_S_RegisterSound("sound/weapons/flamethrower/flame_burn.wav", qfalse);
-	cgs.media.flameBlowSound     = trap_S_RegisterSound("sound/weapons/flamethrower/flame_pilot.wav", qfalse);
-	cgs.media.flameStartSound    = trap_S_RegisterSound("sound/weapons/flamethrower/flame_up.wav", qfalse);
-	cgs.media.flameStreamSound   = trap_S_RegisterSound("sound/weapons/flamethrower/flame_fire.wav", qfalse);
-	cgs.media.flameCrackSound    = 0;          // -trap_S_RegisterSound( "sound/world/firecrack1.wav", qfalse );
+	cgs.media.flameSound = trap_S_RegisterSound("sound/weapons/flamethrower/flame_burn.wav", qfalse);
+	cgs.media.flameBlowSound   = trap_S_RegisterSound("sound/weapons/flamethrower/flame_pilot.wav", qfalse);
+	cgs.media.flameStartSound  = trap_S_RegisterSound("sound/weapons/flamethrower/flame_up.wav", qfalse);
+	cgs.media.flameStreamSound = trap_S_RegisterSound("sound/weapons/flamethrower/flame_fire.wav", qfalse);
+	cgs.media.flameCrackSound  = 0;            // -trap_S_RegisterSound( "sound/world/firecrack1.wav", qfalse );
 	cgs.media.grenadePulseSound4 = trap_S_RegisterSound("sound/weapons/grenade/gren_timer4.wav", qfalse);
 	cgs.media.grenadePulseSound3 = trap_S_RegisterSound("sound/weapons/grenade/gren_timer3.wav", qfalse);
 	cgs.media.grenadePulseSound2 = trap_S_RegisterSound("sound/weapons/grenade/gren_timer2.wav", qfalse);
@@ -1703,34 +1707,34 @@ static void CG_RegisterSounds(void)
 
 	cgs.media.boneBounceSound = trap_S_RegisterSound("sound/world/boardbreak.wav", qfalse);                 // TODO: need a real sound for this
 
-	cgs.media.sfx_rockexp     = trap_S_RegisterSound("sound/weapons/rocket/rocket_expl.wav", qfalse);
+	cgs.media.sfx_rockexp = trap_S_RegisterSound("sound/weapons/rocket/rocket_expl.wav", qfalse);
 	cgs.media.sfx_rockexpDist = trap_S_RegisterSound("sound/weapons/rocket/rocket_expl_far.wav", qfalse);
 
 	cgs.media.sfx_artilleryExp[0] = trap_S_RegisterSound("sound/weapons/artillery/artillery_expl_1.wav", qfalse);
 	cgs.media.sfx_artilleryExp[1] = trap_S_RegisterSound("sound/weapons/artillery/artillery_expl_2.wav", qfalse);
 	cgs.media.sfx_artilleryExp[2] = trap_S_RegisterSound("sound/weapons/artillery/artillery_expl_3.wav", qfalse);
-	cgs.media.sfx_artilleryDist   = trap_S_RegisterSound("sound/weapons/artillery/artillery_expl_far.wav", qfalse);
+	cgs.media.sfx_artilleryDist = trap_S_RegisterSound("sound/weapons/artillery/artillery_expl_far.wav", qfalse);
 
 	cgs.media.sfx_airstrikeExp[0] = trap_S_RegisterSound("sound/weapons/airstrike/airstrike_expl_1.wav", qfalse);
 	cgs.media.sfx_airstrikeExp[1] = trap_S_RegisterSound("sound/weapons/airstrike/airstrike_expl_2.wav", qfalse);
 	cgs.media.sfx_airstrikeExp[2] = trap_S_RegisterSound("sound/weapons/airstrike/airstrike_expl_3.wav", qfalse);
-	cgs.media.sfx_airstrikeDist   = trap_S_RegisterSound("sound/weapons/airstrike/airstrike_expl_far.wav", qfalse);
+	cgs.media.sfx_airstrikeDist = trap_S_RegisterSound("sound/weapons/airstrike/airstrike_expl_far.wav", qfalse);
 
-	cgs.media.sfx_dynamiteexp     = trap_S_RegisterSound("sound/weapons/dynamite/dynamite_expl.wav", qfalse);
+	cgs.media.sfx_dynamiteexp = trap_S_RegisterSound("sound/weapons/dynamite/dynamite_expl.wav", qfalse);
 	cgs.media.sfx_dynamiteexpDist = trap_S_RegisterSound("sound/weapons/dynamite/dynamite_expl_far.wav", qfalse);
 
-	cgs.media.sfx_satchelexp      = trap_S_RegisterSound("sound/weapons/satchel/satchel_expl.wav", qfalse);
-	cgs.media.sfx_satchelexpDist  = trap_S_RegisterSound("sound/weapons/satchel/satchel_expl_far.wav", qfalse);
-	cgs.media.sfx_landmineexp     = trap_S_RegisterSound("sound/weapons/landmine/mine_expl.wav", qfalse);
+	cgs.media.sfx_satchelexp = trap_S_RegisterSound("sound/weapons/satchel/satchel_expl.wav", qfalse);
+	cgs.media.sfx_satchelexpDist = trap_S_RegisterSound("sound/weapons/satchel/satchel_expl_far.wav", qfalse);
+	cgs.media.sfx_landmineexp = trap_S_RegisterSound("sound/weapons/landmine/mine_expl.wav", qfalse);
 	cgs.media.sfx_landmineexpDist = trap_S_RegisterSound("sound/weapons/landmine/mine_expl_far.wav", qfalse);
-	cgs.media.sfx_mortarexp[0]    = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl1.wav", qfalse);
-	cgs.media.sfx_mortarexp[1]    = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl2.wav", qfalse);
-	cgs.media.sfx_mortarexp[2]    = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl3.wav", qfalse);
-	cgs.media.sfx_mortarexp[3]    = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl.wav", qfalse);
-	cgs.media.sfx_mortarexpDist   = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl_far.wav", qfalse);
-	cgs.media.sfx_grenexp         = trap_S_RegisterSound("sound/weapons/grenade/gren_expl.wav", qfalse);
-	cgs.media.sfx_grenexpDist     = trap_S_RegisterSound("sound/weapons/grenade/gren_expl_far.wav", qfalse);
-	cgs.media.sfx_rockexpWater    = trap_S_RegisterSound("sound/weapons/grenade/gren_expl_water.wav", qfalse);
+	cgs.media.sfx_mortarexp[0]  = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl1.wav", qfalse);
+	cgs.media.sfx_mortarexp[1]  = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl2.wav", qfalse);
+	cgs.media.sfx_mortarexp[2]  = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl3.wav", qfalse);
+	cgs.media.sfx_mortarexp[3]  = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl.wav", qfalse);
+	cgs.media.sfx_mortarexpDist = trap_S_RegisterSound("sound/weapons/mortar/mortar_expl_far.wav", qfalse);
+	cgs.media.sfx_grenexp = trap_S_RegisterSound("sound/weapons/grenade/gren_expl.wav", qfalse);
+	cgs.media.sfx_grenexpDist  = trap_S_RegisterSound("sound/weapons/grenade/gren_expl_far.wav", qfalse);
+	cgs.media.sfx_rockexpWater = trap_S_RegisterSound("sound/weapons/grenade/gren_expl_water.wav", qfalse);
 
 
 	for (i = 0; i < 3; i++)
@@ -1740,7 +1744,7 @@ static void CG_RegisterSounds(void)
 		cgs.media.sfx_brassSound[BRASSSOUND_SOFT][i]  = trap_S_RegisterSound(va("sound/weapons/misc/shell_soft%i.wav", i + 1), qfalse);
 		cgs.media.sfx_brassSound[BRASSSOUND_STONE][i] = trap_S_RegisterSound(va("sound/weapons/misc/shell_stone%i.wav", i + 1), qfalse);
 		cgs.media.sfx_brassSound[BRASSSOUND_WOOD][i]  = trap_S_RegisterSound(va("sound/weapons/misc/shell_wood%i.wav", i + 1), qfalse);
-		cgs.media.sfx_rubbleBounce[i]                 = trap_S_RegisterSound(va("sound/world/debris%i.wav", i + 1), qfalse);
+		cgs.media.sfx_rubbleBounce[i] = trap_S_RegisterSound(va("sound/world/debris%i.wav", i + 1), qfalse);
 	}
 	cgs.media.sfx_knifehit[0] = trap_S_RegisterSound("sound/weapons/knife/knife_hit1.wav", qfalse);
 	cgs.media.sfx_knifehit[1] = trap_S_RegisterSound("sound/weapons/knife/knife_hit2.wav", qfalse);
@@ -1758,7 +1762,7 @@ static void CG_RegisterSounds(void)
 		cgs.media.sfx_bullet_waterhit[i] = trap_S_RegisterSound(va("sound/weapons/impact/water%i.wav", i + 1), qfalse);
 	}
 
-	cgs.media.uniformPickup     = trap_S_RegisterSound("sound/misc/body_pickup.wav", qfalse);
+	cgs.media.uniformPickup = trap_S_RegisterSound("sound/misc/body_pickup.wav", qfalse);
 	cgs.media.buildDecayedSound = trap_S_RegisterSound("sound/world/build_abort.wav", qfalse);
 
 	cgs.media.sndLimboSelect = trap_S_RegisterSound("sound/menu/select.wav", qfalse);
@@ -1799,12 +1803,12 @@ This function may execute for a couple of minutes with a slow disk.
 
 qboolean CG_RegisterClientSkin(bg_playerclass_t *classInfo);
 qboolean CG_RegisterClientModelname(bg_playerclass_t *classInfo);
-void WM_RegisterWeaponTypeShaders();
+void     WM_RegisterWeaponTypeShaders();
 
 static void CG_RegisterGraphics(void)
 {
-	char        name[1024];
-	int         i;
+	char name[1024];
+	int  i;
 	static const char *sb_nums[11] =
 	{
 		"gfx/2d/numbers/zero_32b",
@@ -1850,7 +1854,7 @@ static void CG_RegisterGraphics(void)
 	//replaces a fueldump texture with a dynamically generated one.
 #ifdef TEST_API_DYNAMICSHADER
 	trap_R_LoadDynamicShader("my_terrain1_2",
-	                         "my_terrain1_2\n\
+		"my_terrain1_2\n\
                   {\n\
                   qer_editorimage textures/stone/mxsnow3.tga\n\
                   q3map_baseshader textures/fueldump/terrain_base\n\
@@ -1877,14 +1881,14 @@ static void CG_RegisterGraphics(void)
 	}
 
 	cgs.media.fleshSmokePuffShader = trap_R_RegisterShader("fleshimpactsmokepuff");         // JPW NERVE
-	cgs.media.nerveTestShader      = trap_R_RegisterShader("jpwtest1");
-	cgs.media.idTestShader         = trap_R_RegisterShader("jpwtest2");
-	cgs.media.hud1Shader           = trap_R_RegisterShader("jpwhud1");
-	cgs.media.hud2Shader           = trap_R_RegisterShader("jpwhud2");
-	cgs.media.hud3Shader           = trap_R_RegisterShader("jpwhud3");
-	cgs.media.hud4Shader           = trap_R_RegisterShader("jpwhud4");
-	cgs.media.hud5Shader           = trap_R_RegisterShader("jpwhud5");
-	cgs.media.smokePuffShader      = trap_R_RegisterShader("smokePuff");
+	cgs.media.nerveTestShader = trap_R_RegisterShader("jpwtest1");
+	cgs.media.idTestShader = trap_R_RegisterShader("jpwtest2");
+	cgs.media.hud1Shader = trap_R_RegisterShader("jpwhud1");
+	cgs.media.hud2Shader = trap_R_RegisterShader("jpwhud2");
+	cgs.media.hud3Shader = trap_R_RegisterShader("jpwhud3");
+	cgs.media.hud4Shader = trap_R_RegisterShader("jpwhud4");
+	cgs.media.hud5Shader = trap_R_RegisterShader("jpwhud5");
+	cgs.media.smokePuffShader = trap_R_RegisterShader("smokePuff");
 
 	// RF, blood cloud
 	cgs.media.bloodCloudShader = trap_R_RegisterShader("bloodCloud");
@@ -1894,11 +1898,11 @@ static void CG_RegisterGraphics(void)
 
 	// Rafael - cannon
 	cgs.media.smokePuffShaderdirty = trap_R_RegisterShader("smokePuffdirty");
-	cgs.media.smokePuffShaderb1    = trap_R_RegisterShader("smokePuffblack1");
-	cgs.media.smokePuffShaderb2    = trap_R_RegisterShader("smokePuffblack2");
-	cgs.media.smokePuffShaderb3    = trap_R_RegisterShader("smokePuffblack3");
-	cgs.media.smokePuffShaderb4    = trap_R_RegisterShader("smokePuffblack4");
-	cgs.media.smokePuffShaderb5    = trap_R_RegisterShader("smokePuffblack5");
+	cgs.media.smokePuffShaderb1 = trap_R_RegisterShader("smokePuffblack1");
+	cgs.media.smokePuffShaderb2 = trap_R_RegisterShader("smokePuffblack2");
+	cgs.media.smokePuffShaderb3 = trap_R_RegisterShader("smokePuffblack3");
+	cgs.media.smokePuffShaderb4 = trap_R_RegisterShader("smokePuffblack4");
+	cgs.media.smokePuffShaderb5 = trap_R_RegisterShader("smokePuffblack5");
 	// done
 
 	// Rafael - bleedanim
@@ -1915,45 +1919,45 @@ static void CG_RegisterGraphics(void)
 
 	cgs.media.smokePuffRageProShader = trap_R_RegisterShader("smokePuffRagePro");
 	cgs.media.shotgunSmokePuffShader = trap_R_RegisterShader("shotgunSmokePuff");
-	cgs.media.bloodTrailShader       = trap_R_RegisterShader("bloodTrail");
-	cgs.media.lagometerShader        = trap_R_RegisterShader("lagometer");
-	cgs.media.reticleShaderSimple    = trap_R_RegisterShader("gfx/misc/reticlesimple");
-	cgs.media.binocShaderSimple      = trap_R_RegisterShader("gfx/misc/binocsimple");
-	cgs.media.snowShader             = trap_R_RegisterShader("snow_tri");
-	cgs.media.oilParticle            = trap_R_RegisterShader("oilParticle");
-	cgs.media.oilSlick               = trap_R_RegisterShader("oilSlick");
-	cgs.media.waterBubbleShader      = trap_R_RegisterShader("waterBubble");
-	cgs.media.tracerShader           = trap_R_RegisterShader("gfx/misc/tracer");
-	cgs.media.usableHintShader       = trap_R_RegisterShader("gfx/2d/usableHint");
-	cgs.media.notUsableHintShader    = trap_R_RegisterShader("gfx/2d/notUsableHint");
-	cgs.media.doorHintShader         = trap_R_RegisterShader("gfx/2d/doorHint");
-	cgs.media.doorRotateHintShader   = trap_R_RegisterShader("gfx/2d/doorRotateHint");
+	cgs.media.bloodTrailShader = trap_R_RegisterShader("bloodTrail");
+	cgs.media.lagometerShader  = trap_R_RegisterShader("lagometer");
+	cgs.media.reticleShaderSimple = trap_R_RegisterShader("gfx/misc/reticlesimple");
+	cgs.media.binocShaderSimple = trap_R_RegisterShader("gfx/misc/binocsimple");
+	cgs.media.snowShader  = trap_R_RegisterShader("snow_tri");
+	cgs.media.oilParticle = trap_R_RegisterShader("oilParticle");
+	cgs.media.oilSlick = trap_R_RegisterShader("oilSlick");
+	cgs.media.waterBubbleShader = trap_R_RegisterShader("waterBubble");
+	cgs.media.tracerShader = trap_R_RegisterShader("gfx/misc/tracer");
+	cgs.media.usableHintShader = trap_R_RegisterShader("gfx/2d/usableHint");
+	cgs.media.notUsableHintShader = trap_R_RegisterShader("gfx/2d/notUsableHint");
+	cgs.media.doorHintShader = trap_R_RegisterShader("gfx/2d/doorHint");
+	cgs.media.doorRotateHintShader = trap_R_RegisterShader("gfx/2d/doorRotateHint");
 
 	// Arnout: these were never used in default wolf
-	cgs.media.doorLockHintShader       = trap_R_RegisterShader("gfx/2d/lockedhint");
+	cgs.media.doorLockHintShader = trap_R_RegisterShader("gfx/2d/lockedhint");
 	cgs.media.doorRotateLockHintShader = trap_R_RegisterShader("gfx/2d/lockedhint");
-	cgs.media.mg42HintShader           = trap_R_RegisterShader("gfx/2d/mg42Hint");
-	cgs.media.breakableHintShader      = trap_R_RegisterShader("gfx/2d/breakableHint");
-	cgs.media.chairHintShader          = trap_R_RegisterShader("gfx/2d/chairHint");
-	cgs.media.alarmHintShader          = trap_R_RegisterShader("gfx/2d/alarmHint");
-	cgs.media.healthHintShader         = trap_R_RegisterShader("gfx/2d/healthHint");
-	cgs.media.treasureHintShader       = trap_R_RegisterShader("gfx/2d/treasureHint");
-	cgs.media.knifeHintShader          = trap_R_RegisterShader("gfx/2d/knifeHint");
-	cgs.media.ladderHintShader         = trap_R_RegisterShader("gfx/2d/ladderHint");
-	cgs.media.buttonHintShader         = trap_R_RegisterShader("gfx/2d/buttonHint");
-	cgs.media.waterHintShader          = trap_R_RegisterShader("gfx/2d/waterHint");
-	cgs.media.cautionHintShader        = trap_R_RegisterShader("gfx/2d/cautionHint");
-	cgs.media.dangerHintShader         = trap_R_RegisterShader("gfx/2d/dangerHint");
-	cgs.media.secretHintShader         = trap_R_RegisterShader("gfx/2d/secretHint");
-	cgs.media.qeustionHintShader       = trap_R_RegisterShader("gfx/2d/questionHint");
-	cgs.media.exclamationHintShader    = trap_R_RegisterShader("gfx/2d/exclamationHint");
-	cgs.media.clipboardHintShader      = trap_R_RegisterShader("gfx/2d/clipboardHint");
-	cgs.media.weaponHintShader         = trap_R_RegisterShader("gfx/2d/weaponHint");
-	cgs.media.ammoHintShader           = trap_R_RegisterShader("gfx/2d/ammoHint");
-	cgs.media.armorHintShader          = trap_R_RegisterShader("gfx/2d/armorHint");
-	cgs.media.powerupHintShader        = trap_R_RegisterShader("gfx/2d/powerupHint");
-	cgs.media.holdableHintShader       = trap_R_RegisterShader("gfx/2d/holdableHint");
-	cgs.media.inventoryHintShader      = trap_R_RegisterShader("gfx/2d/inventoryHint");
+	cgs.media.mg42HintShader = trap_R_RegisterShader("gfx/2d/mg42Hint");
+	cgs.media.breakableHintShader = trap_R_RegisterShader("gfx/2d/breakableHint");
+	cgs.media.chairHintShader  = trap_R_RegisterShader("gfx/2d/chairHint");
+	cgs.media.alarmHintShader  = trap_R_RegisterShader("gfx/2d/alarmHint");
+	cgs.media.healthHintShader = trap_R_RegisterShader("gfx/2d/healthHint");
+	cgs.media.treasureHintShader = trap_R_RegisterShader("gfx/2d/treasureHint");
+	cgs.media.knifeHintShader    = trap_R_RegisterShader("gfx/2d/knifeHint");
+	cgs.media.ladderHintShader   = trap_R_RegisterShader("gfx/2d/ladderHint");
+	cgs.media.buttonHintShader   = trap_R_RegisterShader("gfx/2d/buttonHint");
+	cgs.media.waterHintShader    = trap_R_RegisterShader("gfx/2d/waterHint");
+	cgs.media.cautionHintShader  = trap_R_RegisterShader("gfx/2d/cautionHint");
+	cgs.media.dangerHintShader   = trap_R_RegisterShader("gfx/2d/dangerHint");
+	cgs.media.secretHintShader   = trap_R_RegisterShader("gfx/2d/secretHint");
+	cgs.media.qeustionHintShader = trap_R_RegisterShader("gfx/2d/questionHint");
+	cgs.media.exclamationHintShader = trap_R_RegisterShader("gfx/2d/exclamationHint");
+	cgs.media.clipboardHintShader = trap_R_RegisterShader("gfx/2d/clipboardHint");
+	cgs.media.weaponHintShader = trap_R_RegisterShader("gfx/2d/weaponHint");
+	cgs.media.ammoHintShader  = trap_R_RegisterShader("gfx/2d/ammoHint");
+	cgs.media.armorHintShader = trap_R_RegisterShader("gfx/2d/armorHint");
+	cgs.media.powerupHintShader   = trap_R_RegisterShader("gfx/2d/powerupHint");
+	cgs.media.holdableHintShader  = trap_R_RegisterShader("gfx/2d/holdableHint");
+	cgs.media.inventoryHintShader = trap_R_RegisterShader("gfx/2d/inventoryHint");
 
 	cgs.media.friendShader = trap_R_RegisterShaderNoMip("gfx/2d/friendlycross.tga");
 
@@ -1963,18 +1967,18 @@ static void CG_RegisterGraphics(void)
 	//	cgs.media.hintPlrEnemyShader	= trap_R_RegisterShader( "gfx/2d/hintPlrEnemy" );
 	//	cgs.media.hintPlrUnknownShader	= trap_R_RegisterShader( "gfx/2d/hintPlrUnknown" );
 
-	cgs.media.buildHintShader    = trap_R_RegisterShader("gfx/2d/buildHint");                   // DHM - Nerve
-	cgs.media.disarmHintShader   = trap_R_RegisterShader("gfx/2d/disarmHint");                  // DHM - Nerve
-	cgs.media.reviveHintShader   = trap_R_RegisterShader("gfx/2d/reviveHint");                  // DHM - Nerve
+	cgs.media.buildHintShader  = trap_R_RegisterShader("gfx/2d/buildHint");                     // DHM - Nerve
+	cgs.media.disarmHintShader = trap_R_RegisterShader("gfx/2d/disarmHint");                    // DHM - Nerve
+	cgs.media.reviveHintShader = trap_R_RegisterShader("gfx/2d/reviveHint");                    // DHM - Nerve
 	cgs.media.dynamiteHintShader = trap_R_RegisterShader("gfx/2d/dynamiteHint");                // DHM - Nerve
 
-	cgs.media.tankHintShader          = trap_R_RegisterShaderNoMip("gfx/2d/tankHint");
+	cgs.media.tankHintShader = trap_R_RegisterShaderNoMip("gfx/2d/tankHint");
 	cgs.media.satchelchargeHintShader = trap_R_RegisterShaderNoMip("gfx/2d/satchelchargeHint"),
-	cgs.media.landmineHintShader      = trap_R_RegisterShaderNoMip("gfx/2d/landmineHint");
-	cgs.media.uniformHintShader       = trap_R_RegisterShaderNoMip("gfx/2d/uniformHint");
-	cgs.media.waypointAttackShader    = trap_R_RegisterShaderNoMip("sprites/waypoint_attack");
-	cgs.media.waypointDefendShader    = trap_R_RegisterShaderNoMip("sprites/waypoint_defend");
-	cgs.media.waypointRegroupShader   = trap_R_RegisterShaderNoMip("sprites/waypoint_regroup");
+	cgs.media.landmineHintShader = trap_R_RegisterShaderNoMip("gfx/2d/landmineHint");
+	cgs.media.uniformHintShader  = trap_R_RegisterShaderNoMip("gfx/2d/uniformHint");
+	cgs.media.waypointAttackShader  = trap_R_RegisterShaderNoMip("sprites/waypoint_attack");
+	cgs.media.waypointDefendShader  = trap_R_RegisterShaderNoMip("sprites/waypoint_defend");
+	cgs.media.waypointRegroupShader = trap_R_RegisterShaderNoMip("sprites/waypoint_regroup");
 	// TAT - load up the bot shader as well
 	//	cgs.media.waypointBotShader		= trap_R_RegisterShaderNoMip( "sprites/botorder" );
 	//	cgs.media.waypointBotQueuedShader=trap_R_RegisterShaderNoMip( "sprites/botqueuedorder" );
@@ -1986,26 +1990,26 @@ static void CG_RegisterGraphics(void)
 	{
 		for (i = 0; i < cgs.ccLayers; i++)
 		{
-			cgs.media.commandCentreMapShader[i]      = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc.tga", cgs.rawmapname, i));
+			cgs.media.commandCentreMapShader[i] = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc.tga", cgs.rawmapname, i));
 			cgs.media.commandCentreMapShaderTrans[i] = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc_trans", cgs.rawmapname, i));
 			cgs.media.commandCentreAutomapShader[i]  = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc_automap", cgs.rawmapname, i));
 		}
 	}
 	else
 	{
-		cgs.media.commandCentreMapShader[0]      = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc.tga", cgs.rawmapname));
+		cgs.media.commandCentreMapShader[0] = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc.tga", cgs.rawmapname));
 		cgs.media.commandCentreMapShaderTrans[0] = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc_trans", cgs.rawmapname));
 		cgs.media.commandCentreAutomapShader[0]  = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc_automap", cgs.rawmapname));
 	}
-	cgs.media.commandCentreAutomapMaskShader    = trap_R_RegisterShaderNoMip("levelshots/automap_mask");
+	cgs.media.commandCentreAutomapMaskShader = trap_R_RegisterShaderNoMip("levelshots/automap_mask");
 	cgs.media.commandCentreAutomapBorderShader  = trap_R_RegisterShaderNoMip("ui/assets2/maptrim_long");
 	cgs.media.commandCentreAutomapBorder2Shader = trap_R_RegisterShaderNoMip("ui/assets2/maptrim_long2");
 	cgs.media.commandCentreAutomapCornerShader  = trap_R_RegisterShaderNoMip("ui/assets2/maptrim_edge.tga");
-	cgs.media.commandCentreAxisMineShader       = trap_R_RegisterShaderNoMip("sprites/landmine_axis");
-	cgs.media.commandCentreAlliedMineShader     = trap_R_RegisterShaderNoMip("sprites/landmine_allied");
-	cgs.media.commandCentreSpawnShader[0]       = trap_R_RegisterShaderNoMip("gfx/limbo/cm_flagaxis");
-	cgs.media.commandCentreSpawnShader[1]       = trap_R_RegisterShaderNoMip("gfx/limbo/cm_flagallied");
-	cgs.media.compassConstructShader            = trap_R_RegisterShaderNoMip("sprites/construct.tga");
+	cgs.media.commandCentreAxisMineShader = trap_R_RegisterShaderNoMip("sprites/landmine_axis");
+	cgs.media.commandCentreAlliedMineShader = trap_R_RegisterShaderNoMip("sprites/landmine_allied");
+	cgs.media.commandCentreSpawnShader[0] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_flagaxis");
+	cgs.media.commandCentreSpawnShader[1] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_flagallied");
+	cgs.media.compassConstructShader = trap_R_RegisterShaderNoMip("sprites/construct.tga");
 
 	// Mad Doc - TDF
 	//cgs.media.ingameAutomapBackground = trap_R_RegisterShaderNoMip("ui/assets2/ingame/mapbackground");
@@ -2014,15 +2018,15 @@ static void CG_RegisterGraphics(void)
 	//cgs.media.hudBorderVert2 = trap_R_RegisterShaderNoMip( "ui/assets2/border_vert2.tga" );
 
 	cgs.media.compassDestroyShader = trap_R_RegisterShaderNoMip("sprites/destroy.tga");
-	cgs.media.slashShader          = trap_R_RegisterShaderNoMip("gfx/2d/numbers/slash");
-	cgs.media.compass2Shader       = trap_R_RegisterShaderNoMip("gfx/2d/compass2.tga");
-	cgs.media.compassShader        = trap_R_RegisterShaderNoMip("gfx/2d/compass.tga");
-	cgs.media.buddyShader          = trap_R_RegisterShaderNoMip("sprites/buddy.tga");
+	cgs.media.slashShader = trap_R_RegisterShaderNoMip("gfx/2d/numbers/slash");
+	cgs.media.compass2Shader = trap_R_RegisterShaderNoMip("gfx/2d/compass2.tga");
+	cgs.media.compassShader  = trap_R_RegisterShaderNoMip("gfx/2d/compass.tga");
+	cgs.media.buddyShader = trap_R_RegisterShaderNoMip("sprites/buddy.tga");
 
 	for (i = 0 ; i < NUM_CROSSHAIRS ; i++)
 	{
 		cgs.media.crosshairShader[i] = trap_R_RegisterShader(va("gfx/2d/crosshair%c", 'a' + i));
-		cg.crosshairShaderAlt[i]     = trap_R_RegisterShader(va("gfx/2d/crosshair%c_alt", 'a' + i));
+		cg.crosshairShaderAlt[i] = trap_R_RegisterShader(va("gfx/2d/crosshair%c_alt", 'a' + i));
 	}
 
 	for (i = 0 ; i < SK_NUM_SKILLS ; i++)
@@ -2031,7 +2035,7 @@ static void CG_RegisterGraphics(void)
 	}
 
 	cgs.media.backTileShader = trap_R_RegisterShader("gfx/2d/backtile");
-	cgs.media.noammoShader   = trap_R_RegisterShader("icons/noammo");
+	cgs.media.noammoShader = trap_R_RegisterShader("icons/noammo");
 
 	cgs.media.teamStatusBar = trap_R_RegisterShader("gfx/2d/colorbar.tga");
 
@@ -2040,7 +2044,7 @@ static void CG_RegisterGraphics(void)
 	cgs.media.hudSprintBar = trap_R_RegisterShader("sprintbar");
 
 	cgs.media.hudAlliedHelmet = trap_R_RegisterShader("AlliedHelmet");
-	cgs.media.hudAxisHelmet   = trap_R_RegisterShader("AxisHelmet");
+	cgs.media.hudAxisHelmet = trap_R_RegisterShader("AxisHelmet");
 
 	CG_LoadingString(" - models");
 
@@ -2078,13 +2082,13 @@ static void CG_RegisterGraphics(void)
 
 	cgs.media.spawnInvincibleShader = trap_R_RegisterShader("sprites/shield");
 	cgs.media.scoreEliminatedShader = trap_R_RegisterShader("sprites/skull");
-	cgs.media.medicReviveShader     = trap_R_RegisterShader("sprites/medic_revive");
+	cgs.media.medicReviveShader = trap_R_RegisterShader("sprites/medic_revive");
 
 	//cgs.media.vehicleShader = trap_R_RegisterShader( "sprites/vehicle" );
 	cgs.media.destroyShader = trap_R_RegisterShader("sprites/destroy");
 
 	cgs.media.voiceChatShader = trap_R_RegisterShader("sprites/voiceChat");
-	cgs.media.balloonShader   = trap_R_RegisterShader("sprites/balloon3");
+	cgs.media.balloonShader = trap_R_RegisterShader("sprites/balloon3");
 
 	cgs.media.objectiveShader = trap_R_RegisterShader("sprites/objective");
 
@@ -2099,18 +2103,18 @@ static void CG_RegisterGraphics(void)
 
 	// Ridah, spark particles
 	cgs.media.sparkParticleShader = trap_R_RegisterShader("sparkParticle");
-	cgs.media.smokeTrailShader    = trap_R_RegisterShader("smokeTrail");
+	cgs.media.smokeTrailShader = trap_R_RegisterShader("smokeTrail");
 	//cgs.media.lightningBoltShader = trap_R_RegisterShader( "lightningBolt" );
-	cgs.media.flamethrowerFireStream    = trap_R_RegisterShader("flamethrowerFireStream");
-	cgs.media.flamethrowerBlueStream    = trap_R_RegisterShader("flamethrowerBlueStream");
-	cgs.media.onFireShader2             = trap_R_RegisterShader("entityOnFire1");
-	cgs.media.onFireShader              = trap_R_RegisterShader("entityOnFire2");
-	cgs.media.viewFadeBlack             = trap_R_RegisterShader("viewFadeBlack");
-	cgs.media.sparkFlareShader          = trap_R_RegisterShader("sparkFlareParticle");
-	cgs.media.spotLightShader           = trap_R_RegisterShader("spotLight");
-	cgs.media.spotLightBeamShader       = trap_R_RegisterShader("lightBeam");
+	cgs.media.flamethrowerFireStream = trap_R_RegisterShader("flamethrowerFireStream");
+	cgs.media.flamethrowerBlueStream = trap_R_RegisterShader("flamethrowerBlueStream");
+	cgs.media.onFireShader2 = trap_R_RegisterShader("entityOnFire1");
+	cgs.media.onFireShader  = trap_R_RegisterShader("entityOnFire2");
+	cgs.media.viewFadeBlack = trap_R_RegisterShader("viewFadeBlack");
+	cgs.media.sparkFlareShader = trap_R_RegisterShader("sparkFlareParticle");
+	cgs.media.spotLightShader  = trap_R_RegisterShader("spotLight");
+	cgs.media.spotLightBeamShader = trap_R_RegisterShader("lightBeam");
 	cgs.media.bulletParticleTrailShader = trap_R_RegisterShader("bulletParticleTrail");
-	cgs.media.smokeParticleShader       = trap_R_RegisterShader("smokeParticle");
+	cgs.media.smokeParticleShader = trap_R_RegisterShader("smokeParticle");
 
 	// DHM - Nerve :: bullet hitting dirt
 	cgs.media.dirtParticle1Shader = trap_R_RegisterShader("dirt_splash");
@@ -2121,7 +2125,7 @@ static void CG_RegisterGraphics(void)
 	//cgs.media.genericConstructionShaderBrush =	trap_R_RegisterShader( "textures/sfx/construction" );
 	//cgs.media.genericConstructionShaderModel =	trap_R_RegisterShader( "textures/sfx/construction_model" );
 	cgs.media.alliedUniformShader = trap_R_RegisterShader("sprites/uniform_allied");
-	cgs.media.axisUniformShader   = trap_R_RegisterShader("sprites/uniform_axis");
+	cgs.media.axisUniformShader = trap_R_RegisterShader("sprites/uniform_axis");
 
 	// used in:
 	// command map
@@ -2159,31 +2163,31 @@ static void CG_RegisterGraphics(void)
 	cgs.media.ccStamps[1] = trap_R_RegisterShaderNoMip("ui/assets2/stamp_failed");
 
 	//cgs.media.ccArrow =					trap_R_RegisterShaderNoMip( "ui/assets2/arrow_up" );
-	cgs.media.ccPlayerHighlight    = trap_R_RegisterShaderNoMip("ui/assets/mp_player_highlight.tga");
-	cgs.media.ccConstructIcon[0]   = trap_R_RegisterShaderNoMip("gfx/limbo/cm_constaxis");
-	cgs.media.ccConstructIcon[1]   = trap_R_RegisterShaderNoMip("gfx/limbo/cm_constallied");
+	cgs.media.ccPlayerHighlight  = trap_R_RegisterShaderNoMip("ui/assets/mp_player_highlight.tga");
+	cgs.media.ccConstructIcon[0] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_constaxis");
+	cgs.media.ccConstructIcon[1] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_constallied");
 	cgs.media.ccDestructIcon[0][0] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_axisgren");
 	cgs.media.ccDestructIcon[0][1] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_alliedgren");
 	cgs.media.ccDestructIcon[1][0] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_satchel");
 	cgs.media.ccDestructIcon[1][1] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_satchel");
 	cgs.media.ccDestructIcon[2][0] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_dynamite");
 	cgs.media.ccDestructIcon[2][1] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_dynamite");
-	cgs.media.ccTankIcon           = trap_R_RegisterShaderNoMip("gfx/limbo/cm_churchill");
+	cgs.media.ccTankIcon = trap_R_RegisterShaderNoMip("gfx/limbo/cm_churchill");
 
 	cgs.media.ccCmdPost[0] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_bo_axis");
 	cgs.media.ccCmdPost[1] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_bo_allied");
 
-	cgs.media.ccMortarHit         = trap_R_RegisterShaderNoMip("gfx/limbo/mort_hit");
-	cgs.media.ccMortarTarget      = trap_R_RegisterShaderNoMip("gfx/limbo/mort_target");
+	cgs.media.ccMortarHit = trap_R_RegisterShaderNoMip("gfx/limbo/mort_hit");
+	cgs.media.ccMortarTarget = trap_R_RegisterShaderNoMip("gfx/limbo/mort_target");
 	cgs.media.ccMortarTargetArrow = trap_R_RegisterShaderNoMip("gfx/limbo/mort_targetarrow");
 
 
-	cgs.media.skillPics[SK_BATTLE_SENSE]                             = trap_R_RegisterShaderNoMip("gfx/limbo/ic_battlesense");
-	cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION]              = trap_R_RegisterShaderNoMip("gfx/limbo/ic_engineer");
-	cgs.media.skillPics[SK_FIRST_AID]                                = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
-	cgs.media.skillPics[SK_SIGNALS]                                  = trap_R_RegisterShaderNoMip("gfx/limbo/ic_fieldops");
-	cgs.media.skillPics[SK_LIGHT_WEAPONS]                            = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lightweap");
-	cgs.media.skillPics[SK_HEAVY_WEAPONS]                            = trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
+	cgs.media.skillPics[SK_BATTLE_SENSE] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_battlesense");
+	cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_engineer");
+	cgs.media.skillPics[SK_FIRST_AID] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
+	cgs.media.skillPics[SK_SIGNALS] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_fieldops");
+	cgs.media.skillPics[SK_LIGHT_WEAPONS] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lightweap");
+	cgs.media.skillPics[SK_HEAVY_WEAPONS] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
 	cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_covertops");
 
 	/*cgs.media.SPTeamOverlayBotOrders[BOT_ACTION_MOVETOLOC] =	trap_R_RegisterShaderNoMip( "ui/assets2/ingame/bot_action_default" );
@@ -2228,11 +2232,11 @@ static void CG_RegisterGraphics(void)
 	cgs.media.waypointMarker = trap_R_RegisterModel("models/multiplayer/flagpole/flag_waypoint.md3");
 
 	cgs.media.railCoreShader = trap_R_RegisterShaderNoMip("railCore");              // (SA) for debugging server traces
-	cgs.media.ropeShader     = trap_R_RegisterShader("textures/props/cable_m01");
+	cgs.media.ropeShader = trap_R_RegisterShader("textures/props/cable_m01");
 
 	cgs.media.thirdPersonBinocModel = trap_R_RegisterModel("models/multiplayer/binocs/binocs.md3");                         // NERVE - SMF
-	cgs.media.flamebarrel           = trap_R_RegisterModel("models/furniture/barrel/barrel_a.md3");
-	cgs.media.mg42muzzleflash       = trap_R_RegisterModel("models/weapons2/machinegun/mg42_flash.md3");
+	cgs.media.flamebarrel = trap_R_RegisterModel("models/furniture/barrel/barrel_a.md3");
+	cgs.media.mg42muzzleflash = trap_R_RegisterModel("models/weapons2/machinegun/mg42_flash.md3");
 
 	// Rafael shards
 	cgs.media.shardGlass1 = trap_R_RegisterModel("models/shards/glass1.md3");
@@ -2283,11 +2287,11 @@ static void CG_RegisterGraphics(void)
 	cgs.media.grenadeExplosionShader = trap_R_RegisterShader("grenadeExplosion");
 	cgs.media.rocketExplosionShader  = trap_R_RegisterShader("rocketExplosion");
 
-	cgs.media.hWeaponSnd     = trap_S_RegisterSound("sound/weapons/mg42/mg42_fire.wav", qfalse);
+	cgs.media.hWeaponSnd = trap_S_RegisterSound("sound/weapons/mg42/mg42_fire.wav", qfalse);
 	cgs.media.hWeaponEchoSnd = trap_S_RegisterSound("sound/weapons/mg42/mg42_far.wav", qfalse);
 	cgs.media.hWeaponHeatSnd = trap_S_RegisterSound("sound/weapons/mg42/mg42_heat.wav", qfalse);
 
-	cgs.media.hWeaponSnd_2     = trap_S_RegisterSound("sound/weapons/browning/browning_fire.wav", qfalse);
+	cgs.media.hWeaponSnd_2 = trap_S_RegisterSound("sound/weapons/browning/browning_fire.wav", qfalse);
 	cgs.media.hWeaponEchoSnd_2 = trap_S_RegisterSound("sound/weapons/browning/browning_far.wav", qfalse);
 	cgs.media.hWeaponHeatSnd_2 = trap_S_RegisterSound("sound/weapons/browning/browning_heat.wav", qfalse);
 
@@ -2296,11 +2300,11 @@ static void CG_RegisterGraphics(void)
 	cgs.media.minePrimedSound = trap_S_RegisterSound("sound/weapons/landmine/mine_on.wav", qfalse);
 
 	// wall marks
-	cgs.media.bulletMarkShader   = trap_R_RegisterShaderNoMip("gfx/damage/bullet_mrk");
-	cgs.media.burnMarkShader     = trap_R_RegisterShaderNoMip("gfx/damage/burn_med_mrk");
-	cgs.media.shadowFootShader   = trap_R_RegisterShaderNoMip("markShadowFoot");
-	cgs.media.shadowTorsoShader  = trap_R_RegisterShaderNoMip("markShadowTorso");
-	cgs.media.wakeMarkShader     = trap_R_RegisterShaderNoMip("wake");
+	cgs.media.bulletMarkShader = trap_R_RegisterShaderNoMip("gfx/damage/bullet_mrk");
+	cgs.media.burnMarkShader = trap_R_RegisterShaderNoMip("gfx/damage/burn_med_mrk");
+	cgs.media.shadowFootShader  = trap_R_RegisterShaderNoMip("markShadowFoot");
+	cgs.media.shadowTorsoShader = trap_R_RegisterShaderNoMip("markShadowTorso");
+	cgs.media.wakeMarkShader = trap_R_RegisterShaderNoMip("wake");
 	cgs.media.wakeMarkShaderAnim = trap_R_RegisterShaderNoMip("wakeAnim");            // (SA)
 
 	//----(SA)	added
@@ -2332,9 +2336,9 @@ static void CG_RegisterGraphics(void)
 
 	for (i = 1 ; i < cgs.numInlineModels ; i++)
 	{
-		char   name[10];
+		char name[10];
 		vec3_t mins, maxs;
-		int    j;
+		int j;
 
 		Com_sprintf(name, sizeof(name), "*%i", i);
 		cgs.inlineDrawModel[i] = trap_R_RegisterModel(name);
@@ -2422,11 +2426,11 @@ static void CG_RegisterGraphics(void)
 	// mounted gun on tank models
 	cgs.media.hMountedMG42Base = trap_R_RegisterModel("models/mapobjects/tanks_sd/mg42nestbase.md3");
 	cgs.media.hMountedMG42Nest = trap_R_RegisterModel("models/mapobjects/tanks_sd/mg42nest.md3");
-	cgs.media.hMountedMG42     = trap_R_RegisterModel("models/mapobjects/tanks_sd/mg42.md3");
+	cgs.media.hMountedMG42 = trap_R_RegisterModel("models/mapobjects/tanks_sd/mg42.md3");
 	cgs.media.hMountedBrowning = trap_R_RegisterModel("models/multiplayer/browning/thirdperson.md3");
 
 	// FIXME: temp models
-	cgs.media.hMountedFPMG42     = trap_R_RegisterModel("models/multiplayer/mg42/v_mg42.md3");
+	cgs.media.hMountedFPMG42 = trap_R_RegisterModel("models/multiplayer/mg42/v_mg42.md3");
 	cgs.media.hMountedFPBrowning = trap_R_RegisterModel("models/multiplayer/browning/tankmounted.md3");
 
 	// medic icon for commandmap
@@ -2440,15 +2444,15 @@ static void CG_RegisterGraphics(void)
 
 	cgs.media.limboNumber_roll = trap_R_RegisterShaderNoMip("gfx/limbo/number_roll");
 	cgs.media.limboNumber_back = trap_R_RegisterShaderNoMip("gfx/limbo/number_back");
-	cgs.media.limboStar_roll   = trap_R_RegisterShaderNoMip("gfx/limbo/skill_roll");
-	cgs.media.limboStar_back   = trap_R_RegisterShaderNoMip("gfx/limbo/skill_back");
-	cgs.media.limboLight_on    = trap_R_RegisterShaderNoMip("gfx/limbo/redlight_on");
-	cgs.media.limboLight_on2   = trap_R_RegisterShaderNoMip("gfx/limbo/redlight_on02");
-	cgs.media.limboLight_off   = trap_R_RegisterShaderNoMip("gfx/limbo/redlight_off");
+	cgs.media.limboStar_roll = trap_R_RegisterShaderNoMip("gfx/limbo/skill_roll");
+	cgs.media.limboStar_back = trap_R_RegisterShaderNoMip("gfx/limbo/skill_back");
+	cgs.media.limboLight_on  = trap_R_RegisterShaderNoMip("gfx/limbo/redlight_on");
+	cgs.media.limboLight_on2 = trap_R_RegisterShaderNoMip("gfx/limbo/redlight_on02");
+	cgs.media.limboLight_off = trap_R_RegisterShaderNoMip("gfx/limbo/redlight_off");
 
 	cgs.media.limboWeaponNumber_off = trap_R_RegisterShaderNoMip("gfx/limbo/but_weap_off");
 	cgs.media.limboWeaponNumber_on  = trap_R_RegisterShaderNoMip("gfx/limbo/but_weap_on");
-	cgs.media.limboWeaponCard       = trap_R_RegisterShaderNoMip("gfx/limbo/weap_card");
+	cgs.media.limboWeaponCard = trap_R_RegisterShaderNoMip("gfx/limbo/weap_card");
 
 	cgs.media.limboWeaponCardSurroundH = trap_R_RegisterShaderNoMip("gfx/limbo/butsur_hor");
 	cgs.media.limboWeaponCardSurroundV = trap_R_RegisterShaderNoMip("gfx/limbo/butsur_vert");
@@ -2460,30 +2464,30 @@ static void CG_RegisterGraphics(void)
 	cgs.media.limboClassButtons[PC_SOLDIER]   = trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
 	cgs.media.limboClassButtons[PC_COVERTOPS] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_covertops");
 	cgs.media.limboClassButtons[PC_FIELDOPS]  = trap_R_RegisterShaderNoMip("gfx/limbo/ic_fieldops");
-	cgs.media.limboClassButtons[PC_MEDIC]     = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
-	cgs.media.limboSkillsBS                   = trap_R_RegisterShaderNoMip("gfx/limbo/ic_battlesense");
-	cgs.media.limboSkillsLW                   = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lightweap");
+	cgs.media.limboClassButtons[PC_MEDIC] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
+	cgs.media.limboSkillsBS = trap_R_RegisterShaderNoMip("gfx/limbo/ic_battlesense");
+	cgs.media.limboSkillsLW = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lightweap");
 	//cgs.media.limboClassButtonBack =			trap_R_RegisterShaderNoMip( "gfx/limbo/but_class"		);
 
-	cgs.media.limboClassButton2Back_on         = trap_R_RegisterShaderNoMip("gfx/limbo/skill_back_on");
-	cgs.media.limboClassButton2Back_off        = trap_R_RegisterShaderNoMip("gfx/limbo/skill_back_off");
-	cgs.media.limboClassButton2Wedge_off       = trap_R_RegisterShaderNoMip("gfx/limbo/skill_4pieces_off");
-	cgs.media.limboClassButton2Wedge_on        = trap_R_RegisterShaderNoMip("gfx/limbo/skill_4pieces_on");
+	cgs.media.limboClassButton2Back_on   = trap_R_RegisterShaderNoMip("gfx/limbo/skill_back_on");
+	cgs.media.limboClassButton2Back_off  = trap_R_RegisterShaderNoMip("gfx/limbo/skill_back_off");
+	cgs.media.limboClassButton2Wedge_off = trap_R_RegisterShaderNoMip("gfx/limbo/skill_4pieces_off");
+	cgs.media.limboClassButton2Wedge_on  = trap_R_RegisterShaderNoMip("gfx/limbo/skill_4pieces_on");
 	cgs.media.limboClassButtons2[PC_ENGINEER]  = trap_R_RegisterShaderNoMip("gfx/limbo/skill_engineer");
 	cgs.media.limboClassButtons2[PC_SOLDIER]   = trap_R_RegisterShaderNoMip("gfx/limbo/skill_soldier");
 	cgs.media.limboClassButtons2[PC_COVERTOPS] = trap_R_RegisterShaderNoMip("gfx/limbo/skill_covops");
 	cgs.media.limboClassButtons2[PC_FIELDOPS]  = trap_R_RegisterShaderNoMip("gfx/limbo/skill_fieldops");
-	cgs.media.limboClassButtons2[PC_MEDIC]     = trap_R_RegisterShaderNoMip("gfx/limbo/skill_medic");
+	cgs.media.limboClassButtons2[PC_MEDIC] = trap_R_RegisterShaderNoMip("gfx/limbo/skill_medic");
 
 
 	cgs.media.limboTeamButtonBack_on  = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_on");
 	cgs.media.limboTeamButtonBack_off = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_off");
-	cgs.media.limboTeamButtonAllies   = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_allied");
-	cgs.media.limboTeamButtonAxis     = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_axis");
-	cgs.media.limboTeamButtonSpec     = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_spec");
+	cgs.media.limboTeamButtonAllies = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_allied");
+	cgs.media.limboTeamButtonAxis = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_axis");
+	cgs.media.limboTeamButtonSpec = trap_R_RegisterShaderNoMip("gfx/limbo/but_team_spec");
 
 
-	cgs.media.limboBlendThingy       = trap_R_RegisterShaderNoMip("gfx/limbo/cc_blend");
+	cgs.media.limboBlendThingy = trap_R_RegisterShaderNoMip("gfx/limbo/cc_blend");
 	cgs.media.limboWeaponBlendThingy = trap_R_RegisterShaderNoMip("gfx/limbo/weap_blend");
 
 	//cgs.media.limboCursor_on =					trap_R_RegisterShaderNoMip( "gfx/limbo/et_cursor_on"	);
@@ -2495,8 +2499,8 @@ static void CG_RegisterGraphics(void)
 	cgs.media.hudSprintIcon = trap_R_RegisterShaderNoMip("gfx/hud/ic_stamina");
 	cgs.media.hudHealthIcon = trap_R_RegisterShaderNoMip("gfx/hud/ic_health");
 
-	cgs.media.limboWeaponCard1     = trap_R_RegisterShaderNoMip("gfx/limbo/weaponcard01");
-	cgs.media.limboWeaponCard2     = trap_R_RegisterShaderNoMip("gfx/limbo/weaponcard02");
+	cgs.media.limboWeaponCard1 = trap_R_RegisterShaderNoMip("gfx/limbo/weaponcard01");
+	cgs.media.limboWeaponCard2 = trap_R_RegisterShaderNoMip("gfx/limbo/weaponcard02");
 	cgs.media.limboWeaponCardArrow = trap_R_RegisterShaderNoMip("gfx/limbo/weap_dnarrow.tga");
 
 
@@ -2506,12 +2510,12 @@ static void CG_RegisterGraphics(void)
 
 	cgs.media.limboClassBar = trap_R_RegisterShaderNoMip("gfx/limbo/lightup_bar");
 
-	cgs.media.limboBriefingButtonOn      = trap_R_RegisterShaderNoMip("gfx/limbo/but_play_on");
-	cgs.media.limboBriefingButtonOff     = trap_R_RegisterShaderNoMip("gfx/limbo/but_play_off");
+	cgs.media.limboBriefingButtonOn  = trap_R_RegisterShaderNoMip("gfx/limbo/but_play_on");
+	cgs.media.limboBriefingButtonOff = trap_R_RegisterShaderNoMip("gfx/limbo/but_play_off");
 	cgs.media.limboBriefingButtonStopOn  = trap_R_RegisterShaderNoMip("gfx/limbo/but_stop_on");
 	cgs.media.limboBriefingButtonStopOff = trap_R_RegisterShaderNoMip("gfx/limbo/but_stop_off");
 
-	cgs.media.limboSpectator      = trap_R_RegisterShaderNoMip("gfx/limbo/spectator");
+	cgs.media.limboSpectator = trap_R_RegisterShaderNoMip("gfx/limbo/spectator");
 	cgs.media.limboRadioBroadcast = trap_R_RegisterShaderNoMip("ui/assets/radio_tower");
 
 	cgs.media.cursorIcon = trap_R_RegisterShaderNoMip("ui/assets/3_cursor3");
@@ -2523,8 +2527,8 @@ static void CG_RegisterGraphics(void)
 
 	cgs.media.browningIcon = trap_R_RegisterShaderNoMip("icons/iconw_browning_1_select");
 
-	cgs.media.axisFlag       = trap_R_RegisterShaderNoMip("gfx/limbo/flag_axis");
-	cgs.media.alliedFlag     = trap_R_RegisterShaderNoMip("gfx/limbo/flag_allied");
+	cgs.media.axisFlag = trap_R_RegisterShaderNoMip("gfx/limbo/flag_axis");
+	cgs.media.alliedFlag = trap_R_RegisterShaderNoMip("gfx/limbo/flag_allied");
 	cgs.media.disconnectIcon = trap_R_RegisterShaderNoMip("gfx/2d/net");
 
 	for (i = 0; i < 6; i++)
@@ -2532,7 +2536,7 @@ static void CG_RegisterGraphics(void)
 		cgs.media.fireteamicons[i] = trap_R_RegisterShaderNoMip(va("gfx/hud/fireteam/fireteam%i", i + 1));
 	}
 
-    // Keyset 1 (original)
+	// Keyset 1 (original)
 	cgs.media.keys.ForwardPressedShader
 	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_forward_pressed");
 	cgs.media.keys.ForwardNotPressedShader
@@ -2569,21 +2573,21 @@ static void CG_RegisterGraphics(void)
 	// Aciz: Keyset 2 (DeFRaG style keys)
 	// No need for another blank key, so only visible keys
 	cgs.media.keys2.ForwardPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_forward_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_forward_pressed");
 	cgs.media.keys2.BackwardPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_backward_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_backward_pressed");
 	cgs.media.keys2.RightPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_right_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_right_pressed");
 	cgs.media.keys2.LeftPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_left_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_left_pressed");
 	cgs.media.keys2.JumpPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_jump_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_jump_pressed");
 	cgs.media.keys2.CrouchPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_crouch_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_crouch_pressed");
 	cgs.media.keys2.SprintPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_sprint_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_sprint_pressed");
 	cgs.media.keys2.PronePressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_prone_pressed");
+	    = trap_R_RegisterShaderNoMip("gfx/keyset2/key_prone_pressed");
 
 	//Feen: CGaz - Register Shader
 	cgs.media.CGazArrow = trap_R_RegisterShaderNoMip("gfx/2d/cgaz_arrow");
@@ -2697,7 +2701,7 @@ void CG_QueueMusic(void)
 #if 0   //DAJ unused
 char *CG_GetMenuBuffer(const char *filename)
 {
-	int          len;
+	int len;
 	fileHandle_t f;
 	static char  buf[MAX_MENUFILE];
 
@@ -2894,7 +2898,7 @@ qboolean CG_Asset_Parse(int handle)
 void CG_ParseMenu(const char *menuFile)
 {
 	pc_token_t token;
-	int        handle;
+	int handle;
 
 	handle = trap_PC_LoadSource(menuFile);
 	if (!handle)
@@ -2985,9 +2989,9 @@ qboolean CG_Load_Menu(char **p)
 
 void CG_LoadMenus(char *menuFile)
 {
-	char         *token;
-	char         *p;
-	int          len, start;
+	char *token;
+	char *p;
+	int  len, start;
 	fileHandle_t f;
 	static char  buf[MAX_MENUDEFFILE];
 
@@ -3072,6 +3076,7 @@ static qboolean CG_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, 
 static int CG_FeederCount(float feederID)
 {
 	int i, count;
+
 	count = 0;
 	if (feederID == FEEDER_REDTEAM_LIST)
 	{
@@ -3130,10 +3135,10 @@ static clientInfo_t *CG_InfoFromScoreIndex(int index, int team, int *scoreIndex)
 
 static const char *CG_FeederItemText(float feederID, int index, int column, qhandle_t *handle, int *numhandles)
 {
-	int          scoreIndex = 0;
-	clientInfo_t *info      = NULL;
-	int          team       = -1;
-	score_t      *sp        = NULL;
+	int scoreIndex = 0;
+	clientInfo_t *info = NULL;
+	int team = -1;
+	score_t *sp = NULL;
 
 	*handle = -1;
 
@@ -3147,7 +3152,7 @@ static const char *CG_FeederItemText(float feederID, int index, int column, qhan
 	}
 
 	info = CG_InfoFromScoreIndex(index, team, &scoreIndex);
-	sp   = &cg.scores[scoreIndex];
+	sp = &cg.scores[scoreIndex];
 
 	if (info && info->infoValid)
 	{
@@ -3186,6 +3191,7 @@ static void CG_FeederSelection(float feederID, int index)
 {
 	int i, count;
 	int team = (feederID == FEEDER_REDTEAM_LIST) ? TEAM_AXIS : TEAM_ALLIES;
+
 	count = 0;
 	for (i = 0; i < cg.numScores; i++)
 	{
@@ -3203,6 +3209,7 @@ static void CG_FeederSelection(float feederID, int index)
 float CG_Cvar_Get(const char *cvar)
 {
 	char buff[128];
+
 	memset(buff, 0, sizeof(buff));
 	trap_Cvar_VariableStringBuffer(cvar, buff, sizeof(buff));
 	return atof(buff);
@@ -3215,11 +3222,6 @@ void CG_Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const 
 
 static int CG_OwnerDrawWidth(int ownerDraw, float scale)
 {
-	switch (ownerDraw)
-	{
-	default:
-		break;
-	}
 	return 0;
 }
 
@@ -3256,67 +3258,67 @@ CG_LoadHudMenu();
 void CG_LoadHudMenu()
 {
 	cgDC.registerShaderNoMip = &trap_R_RegisterShaderNoMip;
-	cgDC.setColor            = &trap_R_SetColor;
-	cgDC.drawHandlePic       = &CG_DrawPic;
-	cgDC.drawStretchPic      = &trap_R_DrawStretchPic;
-	cgDC.drawText            = &CG_Text_Paint;
-	cgDC.drawTextExt         = &CG_Text_Paint_Ext;
-	cgDC.textWidth           = &CG_Text_Width;
-	cgDC.textWidthExt        = &CG_Text_Width_Ext;
-	cgDC.textHeight          = &CG_Text_Height;
-	cgDC.textHeightExt       = &CG_Text_Height_Ext;
-	cgDC.textFont            = &CG_Text_SetActiveFont;
-	cgDC.registerModel       = &trap_R_RegisterModel;
-	cgDC.modelBounds         = &trap_R_ModelBounds;
-	cgDC.fillRect            = &CG_FillRect;
-	cgDC.drawRect            = &CG_DrawRect;
-	cgDC.drawSides           = &CG_DrawSides;
-	cgDC.drawTopBottom       = &CG_DrawTopBottom;
-	cgDC.clearScene          = &trap_R_ClearScene;
+	cgDC.setColor = &trap_R_SetColor;
+	cgDC.drawHandlePic  = &CG_DrawPic;
+	cgDC.drawStretchPic = &trap_R_DrawStretchPic;
+	cgDC.drawText = &CG_Text_Paint;
+	cgDC.drawTextExt = &CG_Text_Paint_Ext;
+	cgDC.textWidth = &CG_Text_Width;
+	cgDC.textWidthExt = &CG_Text_Width_Ext;
+	cgDC.textHeight = &CG_Text_Height;
+	cgDC.textHeightExt = &CG_Text_Height_Ext;
+	cgDC.textFont = &CG_Text_SetActiveFont;
+	cgDC.registerModel = &trap_R_RegisterModel;
+	cgDC.modelBounds = &trap_R_ModelBounds;
+	cgDC.fillRect  = &CG_FillRect;
+	cgDC.drawRect  = &CG_DrawRect;
+	cgDC.drawSides = &CG_DrawSides;
+	cgDC.drawTopBottom = &CG_DrawTopBottom;
+	cgDC.clearScene = &trap_R_ClearScene;
 	cgDC.addRefEntityToScene = &trap_R_AddRefEntityToScene;
-	cgDC.renderScene         = &trap_R_RenderScene;
-	cgDC.registerFont        = &trap_R_RegisterFont;
-	cgDC.ownerDrawItem       = &CG_OwnerDraw;
-	cgDC.getValue            = &CG_GetValue;
-	cgDC.ownerDrawVisible    = &CG_OwnerDrawVisible;
-	cgDC.runScript           = &CG_RunMenuScript;
-	cgDC.getTeamColor        = &CG_GetTeamColor;
-	cgDC.setCVar             = trap_Cvar_Set;
-	cgDC.getCVarString       = trap_Cvar_VariableStringBuffer;
-	cgDC.getCVarValue        = CG_Cvar_Get;
+	cgDC.renderScene   = &trap_R_RenderScene;
+	cgDC.registerFont  = &trap_R_RegisterFont;
+	cgDC.ownerDrawItem = &CG_OwnerDraw;
+	cgDC.getValue = &CG_GetValue;
+	cgDC.ownerDrawVisible = &CG_OwnerDrawVisible;
+	cgDC.runScript = &CG_RunMenuScript;
+	cgDC.getTeamColor = &CG_GetTeamColor;
+	cgDC.setCVar = trap_Cvar_Set;
+	cgDC.getCVarString = trap_Cvar_VariableStringBuffer;
+	cgDC.getCVarValue  = CG_Cvar_Get;
 	// wtf?
-	cgDC.drawTextWithCursor  = reinterpret_cast<void(*)(float, float, float, vec_t[], vec_t[], const char *, int, char, int, int)>(&CG_Text_PaintWithCursor);
-	cgDC.setOverstrikeMode   = &trap_Key_SetOverstrikeMode;
-	cgDC.getOverstrikeMode   = &trap_Key_GetOverstrikeMode;
-	cgDC.startLocalSound     = &trap_S_StartLocalSound;
-	cgDC.ownerDrawHandleKey  = &CG_OwnerDrawHandleKey;
-	cgDC.feederCount         = &CG_FeederCount;
-	cgDC.feederItemImage     = &CG_FeederItemImage;
-	cgDC.feederItemText      = &CG_FeederItemText;
-	cgDC.feederSelection     = &CG_FeederSelection;
-	cgDC.setBinding          = &trap_Key_SetBinding;                // NERVE - SMF
-	cgDC.getBindingBuf       = &trap_Key_GetBindingBuf;             // NERVE - SMF
-	cgDC.getKeysForBinding   = &trap_Key_KeysForBinding;
-	cgDC.keynumToStringBuf   = &trap_Key_KeynumToStringBuf;         // NERVE - SMF
-	cgDC.translateString     = &CG_TranslateString;                 // NERVE - SMF
+	cgDC.drawTextWithCursor = reinterpret_cast<void (*)(float, float, float, vec_t[], vec_t[], const char *, int, char, int, int)>(&CG_Text_PaintWithCursor);
+	cgDC.setOverstrikeMode  = &trap_Key_SetOverstrikeMode;
+	cgDC.getOverstrikeMode  = &trap_Key_GetOverstrikeMode;
+	cgDC.startLocalSound = &trap_S_StartLocalSound;
+	cgDC.ownerDrawHandleKey = &CG_OwnerDrawHandleKey;
+	cgDC.feederCount = &CG_FeederCount;
+	cgDC.feederItemImage = &CG_FeederItemImage;
+	cgDC.feederItemText  = &CG_FeederItemText;
+	cgDC.feederSelection = &CG_FeederSelection;
+	cgDC.setBinding = &trap_Key_SetBinding;                         // NERVE - SMF
+	cgDC.getBindingBuf = &trap_Key_GetBindingBuf;                   // NERVE - SMF
+	cgDC.getKeysForBinding = &trap_Key_KeysForBinding;
+	cgDC.keynumToStringBuf = &trap_Key_KeynumToStringBuf;           // NERVE - SMF
+	cgDC.translateString = &CG_TranslateString;                     // NERVE - SMF
 	//cgDC.executeText = &trap_Cmd_ExecuteText;
-	cgDC.Error          = &Com_Error;
-	cgDC.Print          = &Com_Printf;
+	cgDC.Error = &Com_Error;
+	cgDC.Print = &Com_Printf;
 	cgDC.ownerDrawWidth = &CG_OwnerDrawWidth;
 	//cgDC.Pause = &CG_Pause;
-	cgDC.registerSound          = &trap_S_RegisterSound;
-	cgDC.startBackgroundTrack   = &trap_S_StartBackgroundTrack;
-	cgDC.stopBackgroundTrack    = &trap_S_StopBackgroundTrack;
-	cgDC.playCinematic          = &CG_PlayCinematic;
-	cgDC.stopCinematic          = &CG_StopCinematic;
-	cgDC.drawCinematic          = &CG_DrawCinematic;
-	cgDC.runCinematicFrame      = &CG_RunCinematicFrame;
+	cgDC.registerSound = &trap_S_RegisterSound;
+	cgDC.startBackgroundTrack = &trap_S_StartBackgroundTrack;
+	cgDC.stopBackgroundTrack  = &trap_S_StopBackgroundTrack;
+	cgDC.playCinematic = &CG_PlayCinematic;
+	cgDC.stopCinematic = &CG_StopCinematic;
+	cgDC.drawCinematic = &CG_DrawCinematic;
+	cgDC.runCinematicFrame = &CG_RunCinematicFrame;
 	cgDC.descriptionForCampaign = &CG_DescriptionForCampaign;
-	cgDC.nameForCampaign        = &CG_NameForCampaign;
-	cgDC.add2dPolys             = &trap_R_Add2dPolys;
-	cgDC.updateScreen           = &trap_UpdateScreen;
-	cgDC.getHunkData            = &trap_GetHunkData;
-	cgDC.getConfigString        = &CG_ConfigStringCopy;
+	cgDC.nameForCampaign = &CG_NameForCampaign;
+	cgDC.add2dPolys = &trap_R_Add2dPolys;
+	cgDC.updateScreen = &trap_UpdateScreen;
+	cgDC.getHunkData  = &trap_GetHunkData;
+	cgDC.getConfigString = &CG_ConfigStringCopy;
 
 	cgDC.xscale = cgs.screenXScale;
 	cgDC.yscale = cgs.screenYScale;
@@ -3332,23 +3334,23 @@ void CG_LoadHudMenu()
 
 void CG_AssetCache()
 {
-	cgDC.Assets.gradientBar         = trap_R_RegisterShaderNoMip(ASSET_GRADIENTBAR);
-	cgDC.Assets.fxBasePic           = trap_R_RegisterShaderNoMip(ART_FX_BASE);
-	cgDC.Assets.fxPic[0]            = trap_R_RegisterShaderNoMip(ART_FX_RED);
-	cgDC.Assets.fxPic[1]            = trap_R_RegisterShaderNoMip(ART_FX_YELLOW);
-	cgDC.Assets.fxPic[2]            = trap_R_RegisterShaderNoMip(ART_FX_GREEN);
-	cgDC.Assets.fxPic[3]            = trap_R_RegisterShaderNoMip(ART_FX_TEAL);
-	cgDC.Assets.fxPic[4]            = trap_R_RegisterShaderNoMip(ART_FX_BLUE);
-	cgDC.Assets.fxPic[5]            = trap_R_RegisterShaderNoMip(ART_FX_CYAN);
-	cgDC.Assets.fxPic[6]            = trap_R_RegisterShaderNoMip(ART_FX_WHITE);
-	cgDC.Assets.scrollBar           = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR);
-	cgDC.Assets.scrollBarArrowDown  = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWDOWN);
-	cgDC.Assets.scrollBarArrowUp    = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWUP);
+	cgDC.Assets.gradientBar = trap_R_RegisterShaderNoMip(ASSET_GRADIENTBAR);
+	cgDC.Assets.fxBasePic = trap_R_RegisterShaderNoMip(ART_FX_BASE);
+	cgDC.Assets.fxPic[0]  = trap_R_RegisterShaderNoMip(ART_FX_RED);
+	cgDC.Assets.fxPic[1]  = trap_R_RegisterShaderNoMip(ART_FX_YELLOW);
+	cgDC.Assets.fxPic[2]  = trap_R_RegisterShaderNoMip(ART_FX_GREEN);
+	cgDC.Assets.fxPic[3]  = trap_R_RegisterShaderNoMip(ART_FX_TEAL);
+	cgDC.Assets.fxPic[4]  = trap_R_RegisterShaderNoMip(ART_FX_BLUE);
+	cgDC.Assets.fxPic[5]  = trap_R_RegisterShaderNoMip(ART_FX_CYAN);
+	cgDC.Assets.fxPic[6]  = trap_R_RegisterShaderNoMip(ART_FX_WHITE);
+	cgDC.Assets.scrollBar = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR);
+	cgDC.Assets.scrollBarArrowDown = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWDOWN);
+	cgDC.Assets.scrollBarArrowUp = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWUP);
 	cgDC.Assets.scrollBarArrowLeft  = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWLEFT);
 	cgDC.Assets.scrollBarArrowRight = trap_R_RegisterShaderNoMip(ASSET_SCROLLBAR_ARROWRIGHT);
-	cgDC.Assets.scrollBarThumb      = trap_R_RegisterShaderNoMip(ASSET_SCROLL_THUMB);
-	cgDC.Assets.sliderBar           = trap_R_RegisterShaderNoMip(ASSET_SLIDER_BAR);
-	cgDC.Assets.sliderThumb         = trap_R_RegisterShaderNoMip(ASSET_SLIDER_THUMB);
+	cgDC.Assets.scrollBarThumb = trap_R_RegisterShaderNoMip(ASSET_SCROLL_THUMB);
+	cgDC.Assets.sliderBar = trap_R_RegisterShaderNoMip(ASSET_SLIDER_BAR);
+	cgDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip(ASSET_SLIDER_THUMB);
 }
 
 
@@ -3375,6 +3377,7 @@ Will perform callbacks to make the loading info screen update.
 void CG_AutoExec_f()
 {
 	char buffer[MAX_QPATH] = "cmd exec \"autoexec_";
+
 	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
 	Q_strcat(buffer, sizeof(buffer), "\"");
 	trap_SendConsoleCommand(buffer);
@@ -3383,7 +3386,8 @@ void CG_AutoExec_f()
 void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qboolean demoPlayback)
 {
 	const char *s;
-	int        i;
+	int i;
+
 #ifdef _DEBUG
 	DEBUG_INITPROFILE_INIT
 #endif // _DEBUG
@@ -3391,7 +3395,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	//	int startat = trap_Milliseconds();
 
 	// clear everything
-	memset( &cgs, 0, sizeof(cgs));
+	memset(&cgs, 0, sizeof(cgs));
 	memset(&cg, 0, sizeof(cg));
 	memset(cg_entities, 0, sizeof(cg_entities));
 	memset(cg_weapons, 0, sizeof(cg_weapons));
@@ -3433,10 +3437,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// JOSEPH 4-17-00
 	cgs.media.menucharsetShader = trap_R_RegisterShader("gfx/2d/hudchars");
 	// END JOSEPH
-	cgs.media.whiteShader     = trap_R_RegisterShader("white");
-	cgs.media.charsetProp     = trap_R_RegisterShaderNoMip("menu/art/font1_prop.tga");
+	cgs.media.whiteShader = trap_R_RegisterShader("white");
+	cgs.media.charsetProp = trap_R_RegisterShaderNoMip("menu/art/font1_prop.tga");
 	cgs.media.charsetPropGlow = trap_R_RegisterShaderNoMip("menu/art/font1_prop_glo.tga");
-	cgs.media.charsetPropB    = trap_R_RegisterShaderNoMip("menu/art/font2_prop.tga");
+	cgs.media.charsetPropB = trap_R_RegisterShaderNoMip("menu/art/font2_prop.tga");
 
 	CG_RegisterCvars();
 
@@ -3477,10 +3481,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	}
 	trap_Cvar_Set("cg_etVersion", GAME_VERSION_DATED);              // So server can check
 
-	s                  = CG_ConfigString(CS_LEVEL_START_TIME);
+	s = CG_ConfigString(CS_LEVEL_START_TIME);
 	cgs.levelStartTime = atoi(s);
 
-	s                         = CG_ConfigString(CS_INTERMISSION_START_TIME);
+	s = CG_ConfigString(CS_INTERMISSION_START_TIME);
 	cgs.intermissionStartTime = atoi(s);
 
 	cg.lastScoreTime = 0;
@@ -3606,11 +3610,11 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// to subcribe to commands.
 	// Generally all modules should get these as constructor params but they're still being used in the C code
 	// => make sure they're created first
-	ETJump::serverCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
+	ETJump::serverCommandsHandler  = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
 	ETJump::consoleCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(trap_AddCommand);
 	ETJump::entityEventsHandler = std::make_shared<ETJump::EntityEventsHandler>();
 	ETJump::operatingSystem = std::make_shared<ETJump::OperatingSystem>();
-	ETJump::authentication = std::make_shared<ETJump::ClientAuthentication>([](const std::string& command)
+	ETJump::authentication  = std::make_shared<ETJump::ClientAuthentication>([](const std::string& command)
 	{
 		trap_SendClientCommand(command.c_str());
 	}, [](const std::string& message)
@@ -3618,15 +3622,15 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 		CG_Printf(message.c_str());
 	}, bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
 		ETJump::serverCommandsHandler
-	);
+		);
 
 	////////////////////////////////////////////////////////////////
 	// TODO: move these to own client commands handler
 	////////////////////////////////////////////////////////////////
 	auto minimize = [](const std::vector<std::string>&args)
-	{
-		ETJump::operatingSystem->minimize();
-	};
+					{
+						ETJump::operatingSystem->minimize();
+					};
 	ETJump::consoleCommandsHandler->subscribe("min", minimize);
 	ETJump::consoleCommandsHandler->subscribe("minimize", minimize);
 	////////////////////////////////////////////////////////////////
@@ -3696,9 +3700,9 @@ void CG_Shutdown(void)
 		////////////////////////////////////////////////////////////////
 
 		ETJump::consoleCommandsHandler = nullptr;
-		ETJump::serverCommandsHandler = nullptr;
+		ETJump::serverCommandsHandler  = nullptr;
 		ETJump::operatingSystem = nullptr;
-		ETJump::authentication = nullptr;
+		ETJump::authentication  = nullptr;
 		ETJump::entityEventsHandler = nullptr;
 		ETJump::renderables.clear();
 		ETJump::cvarUpdateHandler = nullptr;
@@ -3754,9 +3758,9 @@ void CG_EncodeQP(const char *in, char *out, int maxlen)
 				break;
 			}
 			*out++ = '=';
-			t      = *((byte *) in) / 16;
+			t = *((byte *) in) / 16;
 			*out++ = t <= 9 ? t + '0' : t - 10 + 'A';
-			t      = *((byte *) in) % 16;
+			t = *((byte *) in) % 16;
 			*out++ = t <= 9 ? t + '0' : t - 10 + 'A';
 			in++;
 		}

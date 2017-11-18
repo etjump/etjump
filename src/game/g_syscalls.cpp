@@ -5,14 +5,14 @@
 // this file is only included when building a dll
 // g_syscalls.asm is included instead when building a qvm
 
-static int(QDECL * syscall)(int arg, ...) = (int(QDECL *)(int, ...)) - 1;
+static int (QDECL * syscall)(int arg, ...) = (int (QDECL *)(int, ...)) - 1;
 
 #if defined(__MACOS__)
 #ifndef __GNUC__
 #pragma export on
 #endif
 #endif
-extern "C" FN_PUBLIC void dllEntry(int(QDECL * syscallptr)(int arg, ...))
+extern "C" FN_PUBLIC void dllEntry(int (QDECL *syscallptr)(int arg, ...))
 {
 	syscall = syscallptr;
 }
@@ -25,6 +25,7 @@ extern "C" FN_PUBLIC void dllEntry(int(QDECL * syscallptr)(int arg, ...))
 int PASSFLOAT(float x)
 {
 	float floatTemp;
+
 	floatTemp = x;
 	return *(int *)&floatTemp;
 }
@@ -272,7 +273,7 @@ sfxHandle_t trap_RegisterSound(const char *sample, qboolean compressed)
 #define MAX_USERCMD_MASK    (MAX_USERCMD_BACKUP - 1)
 
 static usercmd_t cmds[MAX_CLIENTS][MAX_USERCMD_BACKUP];
-static int       cmdNumber[MAX_CLIENTS];
+static int cmdNumber[MAX_CLIENTS];
 #endif // FAKELAG
 #endif // DEBUG
 
@@ -302,7 +303,7 @@ void trap_GetUsercmd(int clientNum, usercmd_t *cmd)
 			memcpy(&cmds[clientNum][cmdNumber[clientNum] & MAX_USERCMD_MASK], cmd, sizeof(usercmd_t));
 
 			// find a usercmd that is fakeLag msec behind
-			i           = cmdNumber[clientNum] & MAX_USERCMD_MASK;
+			i = cmdNumber[clientNum] & MAX_USERCMD_MASK;
 			realcmdtime = cmds[clientNum][i].serverTime;
 			i--;
 			do
@@ -473,6 +474,7 @@ void trap_AAS_PresenceTypeBoundingBox(int presencetype, vec3_t mins, vec3_t maxs
 float trap_AAS_Time(void)
 {
 	int temp;
+
 	temp = syscall(BOTLIB_AAS_TIME);
 	return (*(float *)&temp);
 }
@@ -596,19 +598,19 @@ int trap_AAS_AvoidDangerArea(vec3_t srcpos, int srcarea, vec3_t dangerpos, int d
 
 int trap_AAS_Retreat
 (
-    // Locations of the danger spots (AAS area numbers)
-    int *dangerSpots,
-    // The number of danger spots
-    int dangerSpotCount,
-    vec3_t srcpos,
-    int srcarea,
-    vec3_t dangerpos,
-    int dangerarea,
-    // Min range from startpos
-    float range,
-    // Min range from danger
-    float dangerRange,
-    int travelflags
+	// Locations of the danger spots (AAS area numbers)
+	int *dangerSpots,
+	// The number of danger spots
+	int dangerSpotCount,
+	vec3_t srcpos,
+	int srcarea,
+	vec3_t dangerpos,
+	int dangerarea,
+	// Min range from startpos
+	float range,
+	// Min range from danger
+	float dangerRange,
+	int travelflags
 )
 {
 	return syscall(BOTLIB_AAS_RETREAT, dangerSpots, dangerSpotCount, srcpos, srcarea, dangerpos, dangerarea, PASSFLOAT(range), PASSFLOAT(dangerRange), travelflags);
@@ -788,6 +790,7 @@ void trap_BotFreeCharacter(int character)
 float trap_Characteristic_Float(int character, int index)
 {
 	int temp;
+
 	temp = syscall(BOTLIB_AI_CHARACTERISTIC_FLOAT, character, index);
 	return (*(float *)&temp);
 }
@@ -795,6 +798,7 @@ float trap_Characteristic_Float(int character, int index)
 float trap_Characteristic_BFloat(int character, int index, float min, float max)
 {
 	int temp;
+
 	temp = syscall(BOTLIB_AI_CHARACTERISTIC_BFLOAT, character, index, PASSFLOAT(min), PASSFLOAT(max));
 	return (*(float *)&temp);
 }
@@ -1009,6 +1013,7 @@ int trap_BotGetMapLocationGoal(char *name, void /* struct bot_goal_s */ *goal)
 float trap_BotAvoidGoalTime(int goalstate, int number)
 {
 	int temp;
+
 	temp = syscall(BOTLIB_AI_AVOID_GOAL_TIME, goalstate, number);
 	return (*(float *)&temp);
 }

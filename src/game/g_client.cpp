@@ -20,7 +20,7 @@ If the start position is targeting an entity, the players camera will start out 
 */
 void SP_info_player_deathmatch(gentity_t *ent)
 {
-	int    i;
+	int i;
 	vec3_t dir;
 
 	G_SpawnInt("nobots", "0", &i);
@@ -93,10 +93,10 @@ SpotWouldTelefrag
 */
 qboolean SpotWouldTelefrag(gentity_t *spot)
 {
-	int       i, num;
-	int       touch[MAX_GENTITIES];
+	int i, num;
+	int touch[MAX_GENTITIES];
 	gentity_t *hit;
-	vec3_t    mins, maxs;
+	vec3_t mins, maxs;
 
 	VectorAdd(spot->r.currentOrigin, playerMins, mins);
 	VectorAdd(spot->r.currentOrigin, playerMaxs, maxs);
@@ -126,13 +126,13 @@ Find the spot that we DON'T want to use
 gentity_t *SelectNearestDeathmatchSpawnPoint(vec3_t from)
 {
 	gentity_t *spot;
-	vec3_t    delta;
-	float     dist, nearestDist;
+	vec3_t delta;
+	float  dist, nearestDist;
 	gentity_t *nearestSpot;
 
 	nearestDist = 999999;
 	nearestSpot = NULL;
-	spot        = NULL;
+	spot = NULL;
 
 	while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) != NULL)
 	{
@@ -161,8 +161,8 @@ go to a random point that doesn't telefrag
 gentity_t *SelectRandomDeathmatchSpawnPoint(void)
 {
 	gentity_t *spot;
-	int       count;
-	int       selection;
+	int count;
+	int selection;
 	gentity_t *spots[MAX_SPAWN_POINTS];
 
 	count = 0;
@@ -287,15 +287,15 @@ InitBodyQue
 */
 void InitBodyQue(void)
 {
-	int       i;
+	int i;
 	gentity_t *ent;
 
 	level.bodyQueIndex = 0;
 	for (i = 0; i < BODY_QUEUE_SIZE ; i++)
 	{
-		ent              = G_Spawn();
-		ent->classname   = "bodyque";
-		ent->neverFree   = qtrue;
+		ent = G_Spawn();
+		ent->classname = "bodyque";
+		ent->neverFree = qtrue;
 		level.bodyQue[i] = ent;
 	}
 }
@@ -323,10 +323,10 @@ After sitting around for five seconds, fall into the ground and dissapear
 void BodySink2(gentity_t *ent)
 {
 	ent->physicsObject = qfalse;
-	ent->nextthink     = level.time + BODY_TIME(BODY_TEAM(ent)) + 1500;
-	ent->think         = BodyUnlink;
-	ent->s.pos.trType  = TR_LINEAR;
-	ent->s.pos.trTime  = level.time;
+	ent->nextthink = level.time + BODY_TIME(BODY_TEAM(ent)) + 1500;
+	ent->think = BodyUnlink;
+	ent->s.pos.trType = TR_LINEAR;
+	ent->s.pos.trTime = level.time;
 	VectorCopy(ent->r.currentOrigin, ent->s.pos.trBase);
 	VectorSet(ent->s.pos.trDelta, 0, 0, -8);
 }
@@ -369,7 +369,7 @@ just like the existing corpse to leave behind.
 void CopyToBodyQue(gentity_t *ent)
 {
 	gentity_t *body;
-	int       contents, i;
+	int contents, i;
 
 	trap_UnlinkEntity(ent);
 
@@ -381,13 +381,13 @@ void CopyToBodyQue(gentity_t *ent)
 	}
 
 	// grab a body que and cycle to the next one
-	body               = level.bodyQue[level.bodyQueIndex];
+	body = level.bodyQue[level.bodyQueIndex];
 	level.bodyQueIndex = (level.bodyQueIndex + 1) % BODY_QUEUE_SIZE;
 
 	// Gordon: um, what on earth was this here for?
 //	trap_UnlinkEntity (body);
 
-	body->s        = ent->s;
+	body->s = ent->s;
 	body->s.eFlags = EF_DEAD;       // clear EF_TALK, etc
 
 	if (ent->client->ps.eFlags & EF_HEADSHOT)
@@ -395,12 +395,12 @@ void CopyToBodyQue(gentity_t *ent)
 		body->s.eFlags |= EF_HEADSHOT;          // make sure the dead body draws no head (if killed that way)
 	}
 
-	body->s.eType       = ET_CORPSE;
-	body->classname     = "corpse";
-	body->s.powerups    = 0; // clear powerups
-	body->s.loopSound   = 0; // clear lava burning
-	body->s.number      = body - g_entities;
-	body->timestamp     = level.time;
+	body->s.eType = ET_CORPSE;
+	body->classname   = "corpse";
+	body->s.powerups  = 0;   // clear powerups
+	body->s.loopSound = 0;   // clear lava burning
+	body->s.number  = body - g_entities;
+	body->timestamp = level.time;
 	body->physicsObject = qtrue;
 	body->physicsBounce = 0;        // don't bounce
 	if (body->s.groundEntityNum == ENTITYNUM_NONE)
@@ -455,10 +455,10 @@ void CopyToBodyQue(gentity_t *ent)
 	body->r.contents = CONTENTS_CORPSE;
 	body->r.ownerNum = ent->r.ownerNum;
 
-	BODY_TEAM(body)      = ent->client->sess.sessionTeam;
-	BODY_CLASS(body)     = ent->client->sess.playerType;
+	BODY_TEAM(body)  = ent->client->sess.sessionTeam;
+	BODY_CLASS(body) = ent->client->sess.playerType;
 	BODY_CHARACTER(body) = ent->client->pers.characterIndex;
-	BODY_VALUE(body)     = 0;
+	BODY_VALUE(body) = 0;
 
 	body->s.time2 = 0;
 
@@ -503,7 +503,7 @@ void SetClientViewAngle(gentity_t *ent, vec3_t angle)
 	{
 		int cmdAngle;
 
-		cmdAngle                        = ANGLE2SHORT(angle[i]);
+		cmdAngle = ANGLE2SHORT(angle[i]);
 		ent->client->ps.delta_angles[i] = cmdAngle - ent->client->pers.cmd.angles[i];
 	}
 	VectorCopy(angle, ent->s.angles);
@@ -514,7 +514,7 @@ void SetClientViewAnglePitch(gentity_t *ent, vec_t angle)
 {
 	int cmdAngle;
 
-	cmdAngle                            = ANGLE2SHORT(angle);
+	cmdAngle = ANGLE2SHORT(angle);
 	ent->client->ps.delta_angles[PITCH] = cmdAngle - ent->client->pers.cmd.angles[PITCH];
 
 	ent->s.angles[PITCH] = 0;
@@ -560,13 +560,13 @@ void limbo(gentity_t *ent, qboolean makeCorpse)
 		}
 
 		// DHM - Nerve :: reset these values
-		ent->client->ps.viewlocked        = 0;
+		ent->client->ps.viewlocked = 0;
 		ent->client->ps.viewlocked_entNum = 0;
 
-		ent->r.maxs[2]           = 0;
+		ent->r.maxs[2] = 0;
 		ent->r.currentOrigin[2] += 8;
-		contents                 = trap_PointContents(ent->r.currentOrigin, -1); // drop stuff
-		ent->s.weapon            = ent->client->limboDropWeapon; // stored in player_die()
+		contents = trap_PointContents(ent->r.currentOrigin, -1);                 // drop stuff
+		ent->s.weapon = ent->client->limboDropWeapon;            // stored in player_die()
 		if (makeCorpse && !(contents & CONTENTS_NODROP))
 		{
 			TossClientItems(ent);
@@ -618,9 +618,9 @@ reinforce
 */
 void reinforce(gentity_t *ent)
 {
-	int       p;// numDeployable=0, finished=0; // TTimo unused
+	int p;      // numDeployable=0, finished=0; // TTimo unused
 	gclient_t *rclient;
-	char      userinfo[MAX_INFO_STRING];
+	char userinfo[MAX_INFO_STRING];
 	const char *respawnStr = "";
 
 	if (ent->r.svFlags & SVF_BOT)
@@ -702,7 +702,7 @@ team_t PickTeam(int ignoreClientNum)
 	int counts[TEAM_NUM_TEAMS] = { 0, 0, 0 };
 
 	counts[TEAM_ALLIES] = TeamCount(ignoreClientNum, TEAM_ALLIES);
-	counts[TEAM_AXIS]   = TeamCount(ignoreClientNum, TEAM_AXIS);
+	counts[TEAM_AXIS] = TeamCount(ignoreClientNum, TEAM_AXIS);
 
 	if (counts[TEAM_ALLIES] > counts[TEAM_AXIS])
 	{
@@ -813,7 +813,7 @@ qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int amm
 {
 	COM_BitSet(client->ps.weapons, weapon);
 	client->ps.ammoclip[BG_FindClipForWeapon(weapon)] = ammoclip;
-	client->ps.ammo[BG_FindAmmoForWeapon(weapon)]     = ammo;
+	client->ps.ammo[BG_FindAmmoForWeapon(weapon)] = ammo;
 	if (setcurrent)
 	{
 		client->ps.weapon = weapon;
@@ -1391,11 +1391,11 @@ static void ClientCleanName(const char *in, char *out, int outSize)
 	//save room for trailing null byte
 	outSize--;
 
-	len          = 0;
+	len = 0;
 	colorlessLen = 0;
-	p            = out;
-	*p           = 0;
-	spaces       = 0;
+	p  = out;
+	*p = 0;
+	spaces = 0;
 
 	while (1)
 	{
@@ -1511,7 +1511,7 @@ void G_NameChanged(gentity_t *ent)
 	else
 	{
 		C_CPMTo(ent, va("^3WARNING: ^7You have %d name changes left",
-		                (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+				(g_nameChangeLimit.integer - client->sess.nameChangeCount)));
 	}
 
 	client->sess.nameChangeCount++;
@@ -1525,10 +1525,10 @@ void G_StartPlayerAppropriateSound(gentity_t *ent, char *soundType)
 const char *GetParsedIP(const char *ipadd)
 {
 	// code by Dan Pop, http://bytes.com/forum/thread212174.html
-	unsigned      b1, b2, b3, b4, port = 0;
+	unsigned b1, b2, b3, b4, port = 0;
 	unsigned char c;
-	int           rc;
-	static char   ipge[20];
+	int rc;
+	static char ipge[20];
 
 	if (!Q_strncmp(ipadd, "localhost", strlen("localhost")))
 	{
@@ -1566,15 +1566,15 @@ if desired.
 void ClientUserinfoChanged(int clientNum)
 {
 	gentity_t *ent;
-	const char      *s;
-	char      oldname[MAX_STRING_CHARS];
-	char      userinfo[MAX_INFO_STRING];
+	const char *s;
+	char oldname[MAX_STRING_CHARS];
+	char userinfo[MAX_INFO_STRING];
 	gclient_t *client;
-	int       i;
-	char      skillStr[16] = "";
-	char      medalStr[16] = "";
+	int  i;
+	char skillStr[16] = "";
+	char medalStr[16] = "";
 
-	ent    = g_entities + clientNum;
+	ent = g_entities + clientNum;
 	client = ent->client;
 
 	client->ps.clientNum = clientNum;
@@ -1606,25 +1606,25 @@ void ClientUserinfoChanged(int clientNum)
 
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
 	sscanf(s, "%i %i %i %i %f %i",
-	       &client->pers.clientFlags,
-	       &client->pers.clientTimeNudge,
-	       &client->pers.clientMaxPackets,
-	       &client->pers.maxFPS,
-	       &client->pers.noclipScale,
-	       &client->pers.touchPickupWeapons);
+		&client->pers.clientFlags,
+		&client->pers.clientTimeNudge,
+		&client->pers.clientMaxPackets,
+		&client->pers.maxFPS,
+		&client->pers.noclipScale,
+		&client->pers.touchPickupWeapons);
 
-	client->pers.autoActivate      = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
+	client->pers.autoActivate = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
 	client->pers.predictItemPickup = ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0) ? qtrue : qfalse;
 
 	if (client->pers.clientFlags & CGF_AUTORELOAD)
 	{
 		client->pers.bAutoReloadAux = qtrue;
-		client->pmext.bAutoReload   = qtrue;
+		client->pmext.bAutoReload = qtrue;
 	}
 	else
 	{
 		client->pers.bAutoReloadAux = qfalse;
-		client->pmext.bAutoReload   = qfalse;
+		client->pmext.bAutoReload = qfalse;
 	}
 
 	if (client->pers.nofatigue && !(client->pers.clientFlags & CGF_NOFATIGUE))
@@ -1632,13 +1632,14 @@ void ClientUserinfoChanged(int clientNum)
 		client->ps.powerups[PW_ADRENALINE] = 0;
 	}
 
-	client->pers.nofatigue      = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
-	client->pers.pmoveFixed     = (client->pers.clientFlags & CGF_PMOVEFIXED) != 0 ? qtrue : qfalse;
-	client->pers.cgaz           = (client->pers.clientFlags & CGF_CGAZ) != 0 ? qtrue : qfalse;
+	client->pers.nofatigue  = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
+	client->pers.pmoveFixed = (client->pers.clientFlags & CGF_PMOVEFIXED) != 0 ? qtrue : qfalse;
+	client->pers.cgaz = (client->pers.clientFlags & CGF_CGAZ) != 0 ? qtrue : qfalse;
 	client->pers.loadViewAngles = (client->pers.clientFlags & CGF_LOADVIEWANGLES) != 0 ? qtrue : qfalse;
-	client->pers.hideMe         = (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
+	client->pers.hideMe = (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
 	client->pers.enableTimeruns = (client->pers.clientFlags & CGF_ENABLE_TIMERUNS) != 0 ? qtrue : qfalse;
 	client->pers.noActivateLean = (client->pers.clientFlags & CGF_NOACTIVATELEAN) != 0 ? qtrue : qfalse;
+	client->pers.autoLoad = (client->pers.clientFlags & CGF_AUTO_LOAD) != 0 ? qtrue : qfalse;
 
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));
@@ -1653,8 +1654,8 @@ void ClientUserinfoChanged(int clientNum)
 			ClientNameChanged(ent);
 
 			trap_SendServerCommand(-1,
-			                       va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"",
-			                          oldname, client->pers.netname));
+				va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"",
+					oldname, client->pers.netname));
 
 			G_NameChanged(ent);
 
@@ -1678,23 +1679,23 @@ void ClientUserinfoChanged(int clientNum)
 	// print scoreboards, display models, and play custom sounds
 
 	s = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i",
-	       client->pers.netname,
-	       client->sess.sessionTeam,
-	       client->sess.playerType,
-	       client->sess.rank,
-	       medalStr,
-	       skillStr,
-	       client->disguiseNetname,
-	       client->disguiseRank,
-	       client->sess.playerWeapon,
-	       client->sess.latchPlayerWeapon,
-	       client->sess.latchPlayerWeapon2,
-	       client->sess.muted ? 1 : 0,
-	       client->pers.pmoveFixed ? 1 : 0,
-	       client->pers.maxFPS < 999 && client->pers.maxFPS > 0 ? client->pers.maxFPS : 0,
-	       client->pers.cgaz > 0 ? client->pers.cgaz : 0,
-	       client->pers.hideMe > 0 ? client->pers.hideMe : 0
-	       );
+		client->pers.netname,
+		client->sess.sessionTeam,
+		client->sess.playerType,
+		client->sess.rank,
+		medalStr,
+		skillStr,
+		client->disguiseNetname,
+		client->disguiseRank,
+		client->sess.playerWeapon,
+		client->sess.latchPlayerWeapon,
+		client->sess.latchPlayerWeapon2,
+		client->sess.muted ? 1 : 0,
+		client->pers.pmoveFixed ? 1 : 0,
+		client->pers.maxFPS < 999 && client->pers.maxFPS > 0 ? client->pers.maxFPS : 0,
+		client->pers.cgaz > 0 ? client->pers.cgaz : 0,
+		client->pers.hideMe > 0 ? client->pers.hideMe : 0
+		);
 
 	trap_GetConfigstring(CS_PLAYERS + clientNum, oldname, sizeof(oldname));
 
@@ -1708,7 +1709,7 @@ void ClientUserinfoChanged(int clientNum)
 	if (client->pers.pmoveFixed == qfalse)
 	{
 		if (client->sess.runSpawnflags == 0
-			|| client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
+		    || client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL)
 		{
 			InterruptRun(ent);
 		}
@@ -1741,18 +1742,19 @@ restarts.
 */
 const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 {
-	const char      *value;
+	const char *value;
 	const char *temp = NULL;
-	gclient_t *client;
-	char      userinfo[MAX_INFO_STRING];
+	gclient_t  *client;
+	char userinfo[MAX_INFO_STRING];
 	gentity_t *ent;
-	int       connPerIP                  = 1, i = 0;
-	int       clientNum2                 = -1;
-	char      ip[20]                     = "\0", ip2[20] = "\0";
-	char      userinfo2[MAX_INFO_STRING] = "\0";
+	int  connPerIP = 1, i = 0;
+	int  clientNum2 = -1;
+	char ip[20] = "\0", ip2[20] = "\0";
+	char userinfo2[MAX_INFO_STRING] = "\0";
+
 #ifdef USEXPSTORAGE
 	ipXPStorage_t *xpBackup;
-	int           i;
+	int i;
 #endif // USEXPSTORAGE
 
 	ent = &g_entities[clientNum];
@@ -1812,7 +1814,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	if (connPerIP > g_maxConnsPerIP.integer)
 	{
 		G_LogPrintf("Possible DoS attack. Rejecting client from %s "
-		            "(%d connections already)\n", ip, g_maxConnsPerIP.integer);
+			        "(%d connections already)\n", ip, g_maxConnsPerIP.integer);
 		return "Too many connections from your ip.";
 	}
 
@@ -1845,11 +1847,11 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 
 	// they can connect
 	ent->client = level.clients + clientNum;
-	client      = ent->client;
+	client = ent->client;
 
 	memset(client, 0, sizeof(*client));
 
-	client->pers.connected   = CON_CONNECTING;
+	client->pers.connected = CON_CONNECTING;
 	client->pers.connectTime = level.time;          // DHM - Nerve
 
 	if (firstTime)
@@ -1857,14 +1859,14 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		client->pers.initialSpawn = qtrue;              // DHM - Nerve
 		client->sess.gotoAllowed  = qtrue;
 		client->sess.saveAllowed  = qtrue; //qfalse	//Feen: Why was this set to false?
-		client->last8BallTime     = 0;
-		client->lastVoteTime      = 0;
-		client->cheatDetected     = qfalse;
+		client->last8BallTime = 0;
+		client->lastVoteTime  = 0;
+		client->cheatDetected = qfalse;
 		// Client has loaded position after inactivity putspec
 		// -> don't do anything anymore
 		client->sess.loadedPosBeforeInactivity = qtrue;
-		client->sess.motdPrinted               = qfalse;
-		client->sess.timerunActive             = qfalse;
+		client->sess.motdPrinted = qfalse;
+		client->sess.timerunActive = qfalse;
 	}
 	else
 	{
@@ -1885,7 +1887,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	if (firstTime)
 	{
 		G_InitSessionData(client, userinfo);
-		client->pers.enterTime            = level.time;
+		client->pers.enterTime = level.time;
 		client->ps.persistant[PERS_SCORE] = 0;
 	}
 	else
@@ -1898,7 +1900,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	if (firstTime)
 	{
 		// force into spectator
-		client->sess.sessionTeam     = TEAM_SPECTATOR;
+		client->sess.sessionTeam = TEAM_SPECTATOR;
 		client->sess.spectatorState  = SPECTATOR_FREE;
 		client->sess.spectatorClient = 0;
 
@@ -1919,14 +1921,14 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		trap_SendServerCommand(-1, va("cpm \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname));
 	}
 
-	client->sess.noGoto          = qtrue;
-	client->sess.noCall          = qtrue;
+	client->sess.noGoto = qtrue;
+	client->sess.noCall = qtrue;
 	client->sess.nameChangeCount = 0;
 	// Zero: target_set_ident id.
-	client->sess.clientMapProgression   = 0;
-	ent->client->sess.muted             = qfalse;
+	client->sess.clientMapProgression = 0;
+	ent->client->sess.muted = qfalse;
 	ent->client->pers.race.isRouteMaker = qfalse;
-	client->sess.portalTeam             = 0;
+	client->sess.portalTeam = 0;
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
@@ -1954,11 +1956,11 @@ and on transition between teams, but doesn't happen on respawns
 */
 void ClientBegin(int clientNum)
 {
-	int       i = 0;
+	int i = 0;
 	gentity_t *ent;
 	gclient_t *client;
-	int       flags;
-	int       spawn_count;          // DHM - Nerve
+	int flags;
+	int spawn_count;                // DHM - Nerve
 
 	ent = g_entities + clientNum;
 
@@ -1974,7 +1976,7 @@ void ClientBegin(int clientNum)
 	ent->pain   = 0;
 	ent->client = client;
 
-	client->pers.connected       = CON_CONNECTED;
+	client->pers.connected = CON_CONNECTED;
 	client->pers.teamState.state = TEAM_BEGIN;
 
 	// save eflags around this, because changing teams will
@@ -1984,9 +1986,9 @@ void ClientBegin(int clientNum)
 	// world to the new position
 	// DHM - Nerve :: Also save PERS_SPAWN_COUNT, so that CG_Respawn happens
 	spawn_count = client->ps.persistant[PERS_SPAWN_COUNT];
-	flags       = client->ps.eFlags;
+	flags = client->ps.eFlags;
 	memset(&client->ps, 0, sizeof(client->ps));
-	client->ps.eFlags                       = flags;
+	client->ps.eFlags = flags;
 	client->ps.persistant[PERS_SPAWN_COUNT] = spawn_count;
 
 	// locate ent at a spawn point
@@ -1998,10 +2000,10 @@ void ClientBegin(int clientNum)
 /*	  if( (client->sess.sessionTeam != TEAM_SPECTATOR && (level.time - client->pers.connectTime) > 60000) ||
         ( g_gamestate.integer == GS_PLAYING && ( client->sess.sessionTeam == TEAM_AXIS || client->sess.sessionTeam == TEAM_ALLIES ) &&
          g_gametype.integer == GT_WOLF_LMS && ( level.numTeamClients[0] > 0 || level.numTeamClients[1] > 0 ) ) ) {*/
-		ent->health     = 0;
+		ent->health = 0;
 		ent->r.contents = CONTENTS_CORPSE;
 
-		client->ps.pm_type            = PM_DEAD;
+		client->ps.pm_type = PM_DEAD;
 		client->ps.stats[STAT_HEALTH] = 0;
 
 		limbo(ent, qfalse);
@@ -2034,9 +2036,9 @@ void ClientBegin(int clientNum)
 	}
 	for (i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
 	{
-		ent->client->pers.collectedEasyTokens[i]   = qfalse;
+		ent->client->pers.collectedEasyTokens[i] = qfalse;
 		ent->client->pers.collectedMediumTokens[i] = qfalse;
-		ent->client->pers.collectedHardTokens[i]   = qfalse;
+		ent->client->pers.collectedHardTokens[i] = qfalse;
 	}
 	ent->client->pers.tokenCollectionStartTime = level.time;
 
@@ -2047,12 +2049,15 @@ void ClientBegin(int clientNum)
 	}
 
 	ent->client->pers.previousSetHealthTime = 0;
+
+
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)
 {
-	char      *pStr, *token;
+	char *pStr, *token;
 	gentity_t *spawnPoint = NULL, *trav;
+
 #define MAX_SPAWNPOINTFROMLIST_POINTS   16
 	int valid[MAX_SPAWNPOINTFROMLIST_POINTS];
 	int numValid;
@@ -2111,26 +2116,27 @@ Initializes all non-persistant parts of playerState
 */
 void ClientSpawn(gentity_t *ent, qboolean revived)
 {
-	int                index;
-	vec3_t             spawn_origin, spawn_angles;
-	gclient_t          *client;
-	int                i;
+	int index;
+	vec3_t spawn_origin, spawn_angles;
+	gclient_t *client;
+	int i;
 	clientPersistant_t saved;
-	clientSession_t    savedSess;
-	int                persistant[MAX_PERSISTANT];
-	gentity_t          *spawnPoint;
-	int                flags;
-	int                savedPing;
-	int                savedTeam;
-	int                savedSlotNumber;
+	clientSession_t savedSess;
+	int persistant[MAX_PERSISTANT];
+	gentity_t *spawnPoint;
+	int flags;
+	int savedPing;
+	int savedTeam;
+	int savedSlotNumber;
+
 	index  = ent - g_entities;
 	client = ent->client;
 
 	G_UpdateSpawnCounts();
 
-	client->pers.lastSpawnTime            = level.time;
+	client->pers.lastSpawnTime = level.time;
 	client->pers.lastBattleSenseBonusTime = level.timeCurrent;
-	client->pers.lastHQMineReportTime     = level.timeCurrent;
+	client->pers.lastHQMineReportTime = level.timeCurrent;
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -2187,7 +2193,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 
 	ent->s.eFlags &= ~EF_MOUNTEDTANK;
 
-	saved     = client->pers;
+	saved = client->pers;
 	savedSess = client->sess;
 	savedPing = client->ps.ping;
 	savedTeam = client->ps.teamNum;
@@ -2208,9 +2214,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		client->maxlivescalced = set;
 	}
 
-	client->pers       = saved;
-	client->sess       = savedSess;
-	client->ps.ping    = savedPing;
+	client->pers = saved;
+	client->sess = savedSess;
+	client->ps.ping = savedPing;
 	client->ps.teamNum = savedTeam;
 	// START	xkan, 8/27/2002
 	client->botSlotNumber = savedSlotNumber;
@@ -2227,21 +2233,21 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	{
 		client->ps.persistant[PERS_REVIVE_COUNT]++;
 	}
-	client->ps.persistant[PERS_TEAM]        = client->sess.sessionTeam;
+	client->ps.persistant[PERS_TEAM] = client->sess.sessionTeam;
 	client->ps.persistant[PERS_HWEAPON_USE] = 0;
 
 	client->airOutTime = level.time + 12000;
 
 	// clear entity values
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
-	client->ps.eFlags                 = flags;
+	client->ps.eFlags = flags;
 	// MrE: use capsules for AI and player
 	//client->ps.eFlags |= EF_CAPSULE;
 
 	ent->s.groundEntityNum = ENTITYNUM_NONE;
-	ent->client            = &level.clients[index];
-	ent->takedamage        = qtrue;
-	ent->inuse             = qtrue;
+	ent->client = &level.clients[index];
+	ent->takedamage = qtrue;
+	ent->inuse = qtrue;
 	if (ent->r.svFlags & SVF_BOT)
 	{
 		ent->classname = "bot";
@@ -2267,10 +2273,10 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		ent->props_frame_state = -1;
 	}
 
-	ent->die        = player_die;
+	ent->die = player_die;
 	ent->waterlevel = 0;
 	ent->watertype  = 0;
-	ent->flags      = 0;
+	ent->flags = 0;
 
 	VectorCopy(playerMins, ent->r.mins);
 	VectorCopy(playerMaxs, ent->r.maxs);
@@ -2281,17 +2287,17 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 
 	client->ps.crouchViewHeight = CROUCH_VIEWHEIGHT;
 	client->ps.standViewHeight  = DEFAULT_VIEWHEIGHT;
-	client->ps.deadViewHeight   = DEAD_VIEWHEIGHT;
+	client->ps.deadViewHeight = DEAD_VIEWHEIGHT;
 
 	client->ps.crouchMaxZ = client->ps.maxs[2] - (client->ps.standViewHeight - client->ps.crouchViewHeight);
 
-	client->ps.runSpeedScale    = 0.8;
+	client->ps.runSpeedScale = 0.8;
 	client->ps.sprintSpeedScale = 1.1;
 	client->ps.crouchSpeedScale = 0.25;
-	client->ps.weaponstate      = WEAPON_READY;
+	client->ps.weaponstate = WEAPON_READY;
 
 	// Rafael
-	client->pmext.sprintTime   = SPRINTTIME;
+	client->pmext.sprintTime = SPRINTTIME;
 	client->ps.sprintExertTime = 0;
 
 	client->ps.friction = 1.0;
@@ -2326,20 +2332,20 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		{
 			bg_playerclass_t *classInfo = BG_PlayerClassForPlayerState(&ent->client->ps);
 			client->sess.latchPlayerWeapon = classInfo->classWeapons[0];
-			update                         = qtrue;
+			update = qtrue;
 		}
 
 		if (client->sess.playerWeapon != client->sess.latchPlayerWeapon)
 		{
 			client->sess.playerWeapon = client->sess.latchPlayerWeapon;
-			update                    = qtrue;
+			update = qtrue;
 		}
 
 		if (G_IsWeaponDisabled(ent, static_cast<weapon_t>(client->sess.playerWeapon)))
 		{
 			bg_playerclass_t *classInfo = BG_PlayerClassForPlayerState(&ent->client->ps);
 			client->sess.playerWeapon = classInfo->classWeapons[0];
-			update                    = qtrue;
+			update = qtrue;
 		}
 
 		client->sess.playerWeapon2 = client->sess.latchPlayerWeapon2;
@@ -2398,7 +2404,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		//bani - #245 - we try to orient them in the freelook direction when revived
 		vec3_t newangle;
 
-		newangle[YAW]   = SHORT2ANGLE(ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW]);
+		newangle[YAW] = SHORT2ANGLE(ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW]);
 		newangle[PITCH] = 0;
 		newangle[ROLL]  = 0;
 
@@ -2411,7 +2417,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		trap_LinkEntity(ent);
 	}
 
-	client->respawnTime      = level.timeCurrent;
+	client->respawnTime = level.timeCurrent;
 	client->inactivityTime   = level.time + g_inactivity.integer * 1000;
 	client->latched_buttons  = 0;
 	client->latched_wbuttons = 0;   //----(SA)	added
@@ -2434,7 +2440,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 
 	// run a client frame to drop exactly to the floor,
 	// initialize animations and other things
-	client->ps.commandTime           = level.time - 100;
+	client->ps.commandTime = level.time - 100;
 	ent->client->pers.cmd.serverTime = level.time;
 	ClientThink(ent - g_entities);
 
@@ -2511,8 +2517,8 @@ void ClientDisconnect(int clientNum)
 	gentity_t *ent;
 	gentity_t *flag = NULL;
 	gitem_t   *item = NULL;
-	vec3_t    launchvel;
-	int       i;
+	vec3_t launchvel;
+	int i;
 
 	ent = g_entities + clientNum;
 	if (!ent->client)
@@ -2550,7 +2556,7 @@ void ClientDisconnect(int clientNum)
 
 	// remove ourself from teamlists
 	{
-		mapEntityData_t      *mEnt;
+		mapEntityData_t *mEnt;
 		mapEntityData_Team_t *teamList;
 
 		for (i = 0; i < 2; i++)
@@ -2614,12 +2620,12 @@ void ClientDisconnect(int clientNum)
 			launchvel[1] = 0;    //crandom()*20;
 			launchvel[2] = 0;    //10+random()*10;
 
-			flag                = LaunchItem(item, ent->r.currentOrigin, launchvel, ent - g_entities);
+			flag = LaunchItem(item, ent->r.currentOrigin, launchvel, ent - g_entities);
 			flag->s.modelindex2 = ent->s.otherEntityNum2;    // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
-			flag->message       = ent->message; // DHM - Nerve :: also restore item name
+			flag->message = ent->message;       // DHM - Nerve :: also restore item name
 			// Clear out player's temp copies
 			ent->s.otherEntityNum2 = 0;
-			ent->message           = NULL;
+			ent->message = NULL;
 		}
 
 		// OSP - Log stats too
@@ -2629,15 +2635,15 @@ void ClientDisconnect(int clientNum)
 	G_LogPrintf("ClientDisconnect: %i\n", clientNum);
 
 	trap_UnlinkEntity(ent);
-	ent->s.modelindex                     = 0;
-	ent->inuse                            = qfalse;
-	ent->classname                        = "disconnected";
-	ent->client->pers.connected           = CON_DISCONNECTED;
+	ent->s.modelindex = 0;
+	ent->inuse = qfalse;
+	ent->classname = "disconnected";
+	ent->client->pers.connected = CON_DISCONNECTED;
 	ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
-	i                                     = ent->client->sess.sessionTeam;
-	ent->client->sess.sessionTeam         = TEAM_FREE;
-	ent->active                           = qfalse;
-	ent->client->sess.muted               = qfalse;
+	i = ent->client->sess.sessionTeam;
+	ent->client->sess.sessionTeam = TEAM_FREE;
+	ent->active = qfalse;
+	ent->client->sess.muted = qfalse;
 
 	trap_SetConfigstring(CS_PLAYERS + clientNum, "");
 
@@ -2657,8 +2663,8 @@ void ClientDisconnect(int clientNum)
 // so we don't have to keep tracing.
 void ClientStoreSurfaceFlags
 (
-    int clientNum,
-    int surfaceFlags
+	int clientNum,
+	int surfaceFlags
 )
 {
 	// Store the surface flags

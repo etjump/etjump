@@ -88,6 +88,7 @@ void COM_StripExtension(const char *in, char *out)
 void COM_StripFilename(char *in, char *out)
 {
 	char *end;
+
 	Q_strncpyz(out, in, strlen(in) + 1);
 	end  = COM_SkipPath(out);
 	*end = 0;
@@ -198,10 +199,10 @@ void COM_BitClear(int array[], int bitNum)
 
 // can't just use function pointers, or dll linkage can
 // mess up when qcommon is included in multiple places
-static short  (*_BigShort) (short l) = NULL;
-static short  (*_LittleShort) (short l) = NULL;
-static int    (*_BigLong) (int l) = NULL;
-static int    (*_LittleLong) (int l) = NULL;
+static short (*_BigShort) (short l) = NULL;
+static short (*_LittleShort) (short l) = NULL;
+static int (*_BigLong) (int l) = NULL;
+static int (*_LittleLong) (int l) = NULL;
 static qint64 (*_BigLong64) (qint64 l) = NULL;
 static qint64 (*_LittleLong64) (qint64 l) = NULL;
 static float  (*_BigFloat) (float l) = NULL;
@@ -299,11 +300,11 @@ float FloatSwap(float f)
 	union
 	{
 		float f;
-		byte b[4];
+		byte  b[4];
 	} dat1, dat2;
 
 
-	dat1.f    = f;
+	dat1.f = f;
 	dat2.b[0] = dat1.b[3];
 	dat2.b[1] = dat1.b[2];
 	dat2.b[2] = dat1.b[1];
@@ -328,25 +329,25 @@ void Swap_Init(void)
 // set the byte swapping variables in a portable manner
 	if (*(short *)swaptest == 1)
 	{
-		_BigShort     = ShortSwap;
-		_LittleShort  = ShortNoSwap;
-		_BigLong      = LongSwap;
-		_LittleLong   = LongNoSwap;
-		_BigLong64    = Long64Swap;
+		_BigShort = ShortSwap;
+		_LittleShort = ShortNoSwap;
+		_BigLong = LongSwap;
+		_LittleLong = LongNoSwap;
+		_BigLong64  = Long64Swap;
 		_LittleLong64 = Long64NoSwap;
-		_BigFloat     = FloatSwap;
-		_LittleFloat  = FloatNoSwap;
+		_BigFloat = FloatSwap;
+		_LittleFloat = FloatNoSwap;
 	}
 	else
 	{
-		_BigShort     = ShortNoSwap;
-		_LittleShort  = ShortSwap;
-		_BigLong      = LongNoSwap;
-		_LittleLong   = LongSwap;
-		_BigLong64    = Long64NoSwap;
+		_BigShort = ShortNoSwap;
+		_LittleShort = ShortSwap;
+		_BigLong = LongNoSwap;
+		_LittleLong = LongSwap;
+		_BigLong64  = Long64NoSwap;
 		_LittleLong64 = Long64Swap;
-		_BigFloat     = FloatNoSwap;
-		_LittleFloat  = FloatSwap;
+		_BigFloat = FloatNoSwap;
+		_LittleFloat = FloatSwap;
 	}
 
 }
@@ -364,7 +365,7 @@ static char com_token[MAX_TOKEN_CHARS];
 static char com_parsename[MAX_TOKEN_CHARS];
 static int  com_lines;
 
-static int  backup_lines;
+static int backup_lines;
 static char *backup_text;
 
 void COM_BeginParseSession(const char *name)
@@ -382,7 +383,7 @@ void COM_BackupParseSession(char **data_p)
 void COM_RestoreParseSession(char **data_p)
 {
 	com_lines = backup_lines;
-	*data_p   = backup_text;
+	*data_p = backup_text;
 }
 
 void COM_SetCurrentParseLine(int line)
@@ -402,7 +403,7 @@ char *COM_Parse(char **data_p)
 
 void COM_ParseError(const char *format, ...)
 {
-	va_list     argptr;
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -414,7 +415,7 @@ void COM_ParseError(const char *format, ...)
 
 void COM_ParseWarning(char *format, ...)
 {
-	va_list     argptr;
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -459,8 +460,8 @@ static char *SkipWhitespace(char *data, qboolean *hasNewLines)
 
 int COM_Compress(char *data_p)
 {
-	char     *datai, *datao;
-	int      c, size;
+	char *datai, *datao;
+	int  c, size;
 	qboolean ws = qfalse;
 
 	size  = 0;
@@ -521,12 +522,12 @@ int COM_Compress(char *data_p)
 
 char *COM_ParseExt(char **data_p, qboolean allowLineBreaks)
 {
-	int      c           = 0, len;
+	int c = 0, len;
 	qboolean hasNewLines = qfalse;
-	char     *data;
+	char *data;
 
-	data         = *data_p;
-	len          = 0;
+	data = *data_p;
+	len  = 0;
 	com_token[0] = 0;
 
 	// make sure incoming data is valid
@@ -613,7 +614,7 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks)
 					if (!c)
 					{
 						com_token[len] = 0;
-						*data_p        = ( char * ) data;
+						*data_p = ( char * ) data;
 						break;
 					}
 					if ((c == '\\' && *(data) == '\"'))
@@ -637,7 +638,7 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks)
 			if (c == '\"' || !c)
 			{
 				com_token[len] = 0;
-				*data_p        = ( char * ) data;
+				*data_p = ( char * ) data;
 				return com_token;
 			}
 			if (len < MAX_TOKEN_CHARS)
@@ -833,8 +834,8 @@ Com_ParseInfos
 int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING])
 {
 	const char *token;
-	int        count;
-	char       key[MAX_TOKEN_CHARS];
+	int  count;
+	char key[MAX_TOKEN_CHARS];
 
 	count = 0;
 
@@ -1114,7 +1115,7 @@ void Q_strcat(char *dest, int size, const char *src)
 
 int Q_PrintStrlen(const char *string)
 {
-	int        len;
+	int len;
 	const char *p;
 
 	if (!string)
@@ -1123,7 +1124,7 @@ int Q_PrintStrlen(const char *string)
 	}
 
 	len = 0;
-	p   = string;
+	p = string;
 	while (*p)
 	{
 		if (Q_IsColorString(p))
@@ -1211,7 +1212,7 @@ char *Q_CleanDirName(char *dirname)
 
 void QDECL Com_sprintf(char *dest, int size, const char *fmt, ...)
 {
-	int     ret;
+	int ret;
 	va_list argptr;
 
 	va_start(argptr, fmt);
@@ -1238,12 +1239,13 @@ previous strings
 char *QDECL va(const char *format, ...)
 {
 	va_list argptr;
+
 	#define MAX_VA_STRING   32000
 	static char temp_buffer[MAX_VA_STRING];
 	static char string[MAX_VA_STRING];      // in case va is called by nested functions
 	static int  index = 0;
-	char        *buf;
-	int         len;
+	char *buf;
+	int  len;
 
 
 	va_start(argptr, format);
@@ -1280,13 +1282,13 @@ for making temporary vectors for function calls
 */
 float *tv(float x, float y, float z)
 {
-	static int    index;
+	static int index;
 	static vec3_t vecs[8];
-	float         *v;
+	float *v;
 
 	// use an array so that multiple tempvectors won't collide
 	// for a while
-	v     = vecs[index];
+	v = vecs[index];
 	index = (index + 1) & 7;
 
 	v[0] = x;
@@ -1315,11 +1317,11 @@ FIXME: overflow check?
 */
 char *Info_ValueForKey(const char *s, const char *key)
 {
-	char        pkey[BIG_INFO_KEY];
+	char pkey[BIG_INFO_KEY];
 	static char value[2][BIG_INFO_VALUE];   // use two buffers so compares
 	                                        // work without stomping on each other
 	static int valueindex = 0;
-	char       *o;
+	char *o;
 
 	if (!s || !key)
 	{
@@ -1390,7 +1392,7 @@ Used to itterate through all the key/value pairs in an info string
 */
 void Info_NextPair(const char **head, char *key, char *value)
 {
-	char       *o;
+	char *o;
 	const char *s;
 
 	s = *head;
@@ -1399,7 +1401,7 @@ void Info_NextPair(const char **head, char *key, char *value)
 	{
 		s++;
 	}
-	key[0]   = 0;
+	key[0] = 0;
 	value[0] = 0;
 
 	o = key;
@@ -1407,7 +1409,7 @@ void Info_NextPair(const char **head, char *key, char *value)
 	{
 		if (!*s)
 		{
-			*o    = 0;
+			*o = 0;
 			*head = s;
 			return;
 		}
@@ -1642,11 +1644,11 @@ void Info_SetValueForKey(char *s, const char *key, const char *value)
 char *Q_StrReplace(char *haystack, char *needle, char *newp)
 {
 	static char final[MAX_STRING_CHARS] = { "" };
-	char        dest[MAX_STRING_CHARS]  = { "" };
-	char        newString[MAX_STRING_CHARS]   = { "" };
-	char        *destp;
-	int         needle_len = 0;
-	int         new_len    = 0;
+	char dest[MAX_STRING_CHARS] = { "" };
+	char newString[MAX_STRING_CHARS] = { "" };
+	char *destp;
+	int  needle_len = 0;
+	int  new_len = 0;
 
 	if (!*haystack)
 	{
@@ -1662,22 +1664,22 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 		Q_strncpyz(newString, newp, sizeof(newString));
 	}
 
-	dest[0]    = '\0';
+	dest[0] = '\0';
 	needle_len = strlen(needle);
-	new_len    = strlen(newString);
-	destp      = &dest[0];
+	new_len = strlen(newString);
+	destp = &dest[0];
 	while (*haystack)
 	{
 		if (!Q_stricmpn(haystack, needle, needle_len))
 		{
 			Q_strcat(dest, sizeof(dest), newString);
 			haystack += needle_len;
-			destp    += new_len;
+			destp += new_len;
 			continue;
 		}
 		if (MAX_STRING_CHARS > (strlen(dest) + 1))
 		{
-			*destp   = *haystack;
+			*destp = *haystack;
 			*++destp = '\0';
 		}
 		haystack++;

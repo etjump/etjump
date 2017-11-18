@@ -193,10 +193,10 @@ g_script_stack_action_t gScriptActions[] =
 	{ "setdebuglevel",                  G_ScriptAction_SetDebugLevel                 },
 	{ "setposition",                    G_ScriptAction_SetPosition                   },
 	{ "setautospawn",                   G_ScriptAction_SetAutoSpawn                  },
-	{ "setplayerautospawn", G_ScriptAction_SetPlayerAutoSpawn },
-	{ "setplayerspawn", G_ScriptAction_SetPlayerSpawn },
-	{ "damageplayer", G_ScriptAction_DamagePlayer },
-	{ "killplayer", G_ScriptAction_KillPlayer },
+	{ "setplayerautospawn",             G_ScriptAction_SetPlayerAutoSpawn            },
+	{ "setplayerspawn",                 G_ScriptAction_SetPlayerSpawn                },
+	{ "damageplayer",                   G_ScriptAction_DamagePlayer                  },
+	{ "killplayer",                     G_ScriptAction_KillPlayer                    },
 
 	{ "create",                         G_ScriptAction_Create                        },
 
@@ -285,10 +285,10 @@ qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, const char *eve
 
 	// get the cast name
 	pString = (char *)eventParm;
-	token   = COM_ParseExt(&pString, qfalse);
-	int1    = atoi(token);
-	token   = COM_ParseExt(&pString, qfalse);
-	int2    = atoi(token);
+	token = COM_ParseExt(&pString, qfalse);
+	int1  = atoi(token);
+	token = COM_ParseExt(&pString, qfalse);
+	int2  = atoi(token);
 
 	eInt = atoi(event->params);
 
@@ -355,11 +355,11 @@ G_Script_ScriptLoad
 */
 void G_Script_ScriptLoad(void)
 {
-	char         filename[MAX_QPATH];
-	vmCvar_t     mapname;
-	fileHandle_t f     = -1;
-	int          len   = -1;
-	qboolean     found = qfalse;
+	char filename[MAX_QPATH];
+	vmCvar_t mapname;
+	fileHandle_t f = -1;
+	int len = -1;
+	qboolean found = qfalse;
 
 	trap_Cvar_Register(&g_scriptDebug, "g_scriptDebug", "0", 0);
 
@@ -378,8 +378,8 @@ void G_Script_ScriptLoad(void)
 	{
 		G_Printf("^7Loading custom mapscript.\n");
 		Q_strncpyz(filename,
-		           g_mapScriptDir.string,
-		           sizeof(filename));
+			g_mapScriptDir.string,
+			sizeof(filename));
 		Q_strcat(filename, sizeof(filename), "/");
 		Q_strcat(filename, sizeof(filename), mapname.string);
 		Q_strcat(filename, sizeof(filename), ".script");
@@ -436,7 +436,7 @@ G_Script_ParseSpawnbot
 void G_Script_ParseSpawnbot(char **ppScript, char params[], int paramsize)
 {
 	qboolean parsingCharacter = qfalse;
-	char     *token;
+	char *token;
 
 	token = COM_ParseExt(ppScript, qfalse);
 	while (token[0])
@@ -503,22 +503,22 @@ G_Script_ScriptParse
 */
 void G_Script_ScriptParse(gentity_t *ent)
 {
-	char             *pScript;
-	char             *token;
-	qboolean         wantName;
-	qboolean         inScript;
-	int              eventNum;
+	char *pScript;
+	char *token;
+	qboolean wantName;
+	qboolean inScript;
+	int eventNum;
 	g_script_event_t events[G_MAX_SCRIPT_STACK_ITEMS];
-	int              numEventItems;
+	int numEventItems;
 	g_script_event_t *curEvent;
 	// DHM - Nerve :: Some of our multiplayer script commands have longer parameters
 	//char		params[MAX_QPATH];
 	char params[MAX_INFO_STRING];
 	// dhm - end
 	g_script_stack_action_t *action;
-	int                     i;
-	int                     bracketLevel;
-	qboolean                buildScript;
+	int i;
+	int bracketLevel;
+	qboolean buildScript;
 
 	if (!ent->scriptName)
 	{
@@ -591,7 +591,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 			}
 			if (!Q_stricmp(ent->scriptName, token))
 			{
-				inScript      = qtrue;
+				inScript = qtrue;
 				numEventItems = 0;
 			}
 			wantName = qfalse;
@@ -610,7 +610,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 				G_Error("G_Script_ScriptParse(), Error (line %d): G_MAX_SCRIPT_STACK_ITEMS reached (%d)\n", COM_GetCurrentParseLine(), G_MAX_SCRIPT_STACK_ITEMS);
 			}
 
-			curEvent           = &events[numEventItems];
+			curEvent = &events[numEventItems];
 			curEvent->eventNum = eventNum;
 			memset(params, 0, sizeof(params));
 
@@ -714,10 +714,10 @@ void G_Script_ScriptParse(gentity_t *ent)
 								G_ModelIndex(token);
 							}
 							else if (buildScript && (
-							             !Q_stricmp(action->actionString, "mu_start") ||
-							             !Q_stricmp(action->actionString, "mu_play") ||
-							             !Q_stricmp(action->actionString, "mu_queue") ||
-							             !Q_stricmp(action->actionString, "startcam"))
+										 !Q_stricmp(action->actionString, "mu_start") ||
+										 !Q_stricmp(action->actionString, "mu_play") ||
+										 !Q_stricmp(action->actionString, "mu_queue") ||
+										 !Q_stricmp(action->actionString, "startcam"))
 							         )
 							{
 								if (strlen(token))   // we know there's a [0], but don't know if it's '0'
@@ -814,11 +814,11 @@ void G_Script_ScriptChange(gentity_t *ent, int newScriptNum)
 	memcpy(&scriptStatusBackup, &ent->scriptStatus, sizeof(g_script_status_t));
 
 	// set the new script to this cast, and reset script status
-	ent->scriptStatus.scriptEventIndex      = newScriptNum;
-	ent->scriptStatus.scriptStackHead       = 0;
+	ent->scriptStatus.scriptEventIndex = newScriptNum;
+	ent->scriptStatus.scriptStackHead  = 0;
 	ent->scriptStatus.scriptStackChangeTime = level.time;
-	ent->scriptStatus.scriptId              = scriptStatusBackup.scriptId + 1;
-	ent->scriptStatus.scriptFlags          |= SCFL_FIRST_CALL;
+	ent->scriptStatus.scriptId = scriptStatusBackup.scriptId + 1;
+	ent->scriptStatus.scriptFlags |= SCFL_FIRST_CALL;
 
 	// try and run the script, if it doesn't finish, then abort the current script (discard backup)
 	if (G_Script_ScriptRun(ent)
@@ -888,7 +888,7 @@ int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr, const char *par
 	for (i = 0; i < ent->numScriptEvents; i++)
 	{
 		if (ent->scriptEvents[i].eventNum == eventNum)
-		{	
+		{
 			if ((!ent->scriptEvents[i].params) || (!gScriptEvents[eventNum].eventMatch || gScriptEvents[eventNum].eventMatch(&ent->scriptEvents[i], params)))
 			{
 				return i;
@@ -926,7 +926,7 @@ G_Script_ScriptRun
 qboolean G_Script_ScriptRun(gentity_t *ent)
 {
 	g_script_stack_t *stack;
-	int              oldScriptId;
+	int oldScriptId;
 
 	if (!ent->scriptEvents)
 	{
@@ -1007,8 +1007,8 @@ qboolean G_Script_ScriptRun(gentity_t *ent)
 
 void mountedmg42_fire(gentity_t *other)
 {
-	vec3_t    forward, right, up;
-	vec3_t    muzzle;
+	vec3_t forward, right, up;
+	vec3_t muzzle;
 	gentity_t *self;
 
 	self = other->tankLink;
@@ -1135,13 +1135,13 @@ void script_mover_spawn(gentity_t *ent)
 
 	if (ent->spawnflags & 2)
 	{
-		ent->clipmask   = CONTENTS_SOLID;
+		ent->clipmask = CONTENTS_SOLID;
 		ent->r.contents = CONTENTS_SOLID;
 	}
 	else
 	{
-		ent->s.eFlags  |= EF_NONSOLID_BMODEL;
-		ent->clipmask   = 0;
+		ent->s.eFlags |= EF_NONSOLID_BMODEL;
+		ent->clipmask  = 0;
 		ent->r.contents = 0;
 	}
 
@@ -1149,7 +1149,7 @@ void script_mover_spawn(gentity_t *ent)
 
 	// now start thinking process which controls AAS interaction
 	script_mover_set_blocking(ent);
-	ent->think     = script_mover_aas_blocking;
+	ent->think = script_mover_aas_blocking;
 	ent->nextthink = level.time + 200;
 }
 
@@ -1159,7 +1159,7 @@ void script_mover_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	{
 		if (ent->count)
 		{
-			ent->health         = ent->count;
+			ent->health = ent->count;
 			ent->s.dl_intensity = ent->health;
 
 			G_Script_ScriptEvent(ent, "rebirth", "");
@@ -1214,11 +1214,11 @@ void SP_script_mover(gentity_t *ent)
 
 	float  scale[3] = { 1, 1, 1 };
 	vec3_t scalevec;
-	char   tagname[MAX_QPATH];
-	char   *modelname;
-	char   *tagent;
-	char   cs[MAX_INFO_STRING];
-	char   *s;
+	char tagname[MAX_QPATH];
+	char *modelname;
+	char *tagent;
+	char cs[MAX_INFO_STRING];
+	char *s;
 
 	if (!ent->model)
 	{
@@ -1240,7 +1240,7 @@ void SP_script_mover(gentity_t *ent)
 	trap_SetBrushModel(ent, ent->model);
 
 	InitMover(ent);
-	ent->reached        = NULL;
+	ent->reached = NULL;
 	ent->s.animMovetype = 0;
 
 	ent->s.density = 0;
@@ -1290,7 +1290,7 @@ void SP_script_mover(gentity_t *ent)
 	if (ent->health)
 	{
 		ent->takedamage = qtrue;
-		ent->count      = ent->health;
+		ent->count = ent->health;
 
 		// client needs to know about it as well
 		ent->s.effect1Time  = ent->count;
@@ -1359,7 +1359,7 @@ void SP_script_mover(gentity_t *ent)
 		ent->s.powerups = -1;
 	}
 
-	ent->think     = script_mover_spawn;
+	ent->think = script_mover_spawn;
 	ent->nextthink = level.time + FRAMETIME;
 }
 
@@ -1369,13 +1369,13 @@ void script_model_med_spawn(gentity_t *ent)
 {
 	if (ent->spawnflags & 2)
 	{
-		ent->clipmask   = CONTENTS_SOLID;
+		ent->clipmask = CONTENTS_SOLID;
 		ent->r.contents = CONTENTS_SOLID;
 	}
 	ent->s.eType = ET_GENERAL;
 
 	ent->s.modelindex = G_ModelIndex(ent->model);
-	ent->s.frame      = 0;
+	ent->s.frame = 0;
 
 	VectorCopy(ent->s.origin, ent->s.pos.trBase);
 	ent->s.pos.trType = TR_STATIONARY;
@@ -1406,9 +1406,9 @@ void SP_script_model_med(gentity_t *ent)
 		G_Error("script_model_med must have a \"scriptname\"\n");
 	}
 
-	ent->s.eType           = ET_GENERAL;
-	ent->s.apos.trType     = TR_STATIONARY;
-	ent->s.apos.trTime     = 0;
+	ent->s.eType = ET_GENERAL;
+	ent->s.apos.trType = TR_STATIONARY;
+	ent->s.apos.trTime = 0;
 	ent->s.apos.trDuration = 0;
 	VectorCopy(ent->s.angles, ent->s.apos.trBase);
 	VectorClear(ent->s.apos.trDelta);
@@ -1439,9 +1439,9 @@ void SP_script_camera(gentity_t *ent)
 		G_Error("%s must have a \"scriptname\"\n", ent->classname);
 	}
 
-	ent->s.eType           = ET_CAMERA;
-	ent->s.apos.trType     = TR_STATIONARY;
-	ent->s.apos.trTime     = 0;
+	ent->s.eType = ET_CAMERA;
+	ent->s.apos.trType = TR_STATIONARY;
+	ent->s.apos.trTime = 0;
 	ent->s.apos.trDuration = 0;
 	VectorCopy(ent->s.angles, ent->s.apos.trBase);
 	VectorClear(ent->s.apos.trDelta);
@@ -1465,7 +1465,7 @@ void SP_script_multiplayer(gentity_t *ent)
 	ent->scriptName = "game_manager";
 
 	// Gordon: broadcasting this to clients now, should be cheaper in bandwidth for sending landmine info
-	ent->s.eType   = ET_GAMEMANAGER;
+	ent->s.eType = ET_GAMEMANAGER;
 	ent->r.svFlags = SVF_BROADCAST;
 
 	if (level.gameManager)
@@ -1473,11 +1473,11 @@ void SP_script_multiplayer(gentity_t *ent)
 		// Gordon: ok, making this an error now
 		G_Error("^1ERROR: multiple script_multiplayers found^7\n");
 	}
-	level.gameManager                    = ent;
+	level.gameManager = ent;
 	level.gameManager->s.otherEntityNum  = MAX_TEAM_LANDMINES;  // axis landmine count
 	level.gameManager->s.otherEntityNum2 = MAX_TEAM_LANDMINES;  // allies landmine count
-	level.gameManager->s.modelindex      = qfalse; // axis HQ doesn't exist
-	level.gameManager->s.modelindex2     = qfalse; // allied HQ doesn't exist
+	level.gameManager->s.modelindex  = qfalse;     // axis HQ doesn't exist
+	level.gameManager->s.modelindex2 = qfalse;     // allied HQ doesn't exist
 
 	trap_LinkEntity(ent);
 }

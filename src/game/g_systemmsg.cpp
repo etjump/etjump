@@ -33,8 +33,8 @@ int G_GetSysMessageNumber(const char *sysMsg)
 void G_SendSystemMessage(sysMsg_t message, int team)
 {
 	gentity_t *other;
-	int       *time;
-	int       j;
+	int *time;
+	int j;
 
 	time = team == TEAM_AXIS ? &level.lastSystemMsgTime[0] : &level.lastSystemMsgTime[1];
 

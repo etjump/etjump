@@ -17,9 +17,9 @@
 typedef struct tracemap_s
 {
 	qboolean loaded;
-	float sky[TRACEMAP_SIZE][TRACEMAP_SIZE];
-	float skyground[TRACEMAP_SIZE][TRACEMAP_SIZE];
-	float ground[TRACEMAP_SIZE][TRACEMAP_SIZE];
+	float  sky[TRACEMAP_SIZE][TRACEMAP_SIZE];
+	float  skyground[TRACEMAP_SIZE][TRACEMAP_SIZE];
+	float  ground[TRACEMAP_SIZE][TRACEMAP_SIZE];
 	vec2_t world_mins, world_maxs;
 	int groundfloor, groundceil;
 } tracemap_t;
@@ -33,19 +33,19 @@ void etpro_FinalizeTracemapClamp(int *x, int *y);
 #ifdef CGAMEDLL
 void CG_GenerateTracemap(void)
 {
-	trace_t      tr;
-	vec3_t       start, end;
-	int          i, j;
-	float        x_step, y_step;
-	int          topdownmin, topdownmax;
-	int          skygroundmin, skygroundmax;
-	int          min, max;
-	float        scalefactor;
+	trace_t tr;
+	vec3_t  start, end;
+	int i, j;
+	float x_step, y_step;
+	int topdownmin, topdownmax;
+	int skygroundmin, skygroundmax;
+	int min, max;
+	float scalefactor;
 	fileHandle_t f;
-	byte         data;
-	static int   lastDraw   = 0;
-	static int   tracecount = 0;
-	int          ms;
+	byte data;
+	static int lastDraw = 0;
+	static int tracecount = 0;
+	int ms;
 
 	if (!developer.integer)
 	{
@@ -85,7 +85,7 @@ void CG_GenerateTracemap(void)
 		{
 			start[1] = end[1] = cg.mapcoordsMins[1] + j * y_step;
 			start[2] = MAX_WORLD_HEIGHT;
-			end[2]   = MIN_WORLD_HEIGHT;
+			end[2] = MIN_WORLD_HEIGHT;
 
 			// Find the ceiling
 			CG_Trace(&tr, start, NULL, NULL, end, ENTITYNUM_NONE, MASK_SOLID | MASK_WATER);
@@ -164,7 +164,7 @@ void CG_GenerateTracemap(void)
 			start[1] = end[1] = cg.mapcoordsMins[1] + j * y_step;
 			//start[2] = MIN_WORLD_HEIGHT;
 			start[2] = tracemap.ground[j][i];
-			end[2]   = MAX_WORLD_HEIGHT;
+			end[2] = MAX_WORLD_HEIGHT;
 
 			if (start[2] == MIN_WORLD_HEIGHT)
 			{
@@ -272,7 +272,7 @@ void CG_GenerateTracemap(void)
 		{
 			start[1] = end[1] = cg.mapcoordsMins[1] + j * y_step;
 			start[2] = MAX_WORLD_HEIGHT;
-			end[2]   = MIN_WORLD_HEIGHT;
+			end[2] = MIN_WORLD_HEIGHT;
 
 			if (tracemap.sky[j][i] == MAX_WORLD_HEIGHT && tracemap.ground[j][i] != MIN_WORLD_HEIGHT)
 			{
@@ -501,18 +501,19 @@ void CG_GenerateTracemap(void)
 
 qboolean BG_LoadTraceMap(char *rawmapname, vec2_t world_mins, vec2_t world_maxs)
 {
-	int          i, j;
+	int i, j;
 	fileHandle_t f;
-	byte         data, datablock[TRACEMAP_SIZE][4];
-	int          sky_min, sky_max;
-	int          ground_min, ground_max;
-	int          skyground_min, skyground_max;
-	float        scalefactor;
+	byte  data, datablock[TRACEMAP_SIZE][4];
+	int   sky_min, sky_max;
+	int   ground_min, ground_max;
+	int   skyground_min, skyground_max;
+	float scalefactor;
+
 	//int startTime = trap_Milliseconds();
 
-	ground_min    = ground_max = MIN_WORLD_HEIGHT;
+	ground_min = ground_max = MIN_WORLD_HEIGHT;
 	skyground_min = skyground_max = MAX_WORLD_HEIGHT;
-	sky_min       = sky_max = MAX_WORLD_HEIGHT;
+	sky_min = sky_max = MAX_WORLD_HEIGHT;
 
 	if (trap_FS_FOpenFile(va("maps/%s_tracemap.tga", Q_strlwr(rawmapname)), &f, FS_READ) >= 0)
 	{
@@ -533,16 +534,16 @@ qboolean BG_LoadTraceMap(char *rawmapname, vec2_t world_mins, vec2_t world_maxs)
 					// abuse first six pixels for our extended data
 					switch (j)
 					{
-					case 0: ground_min    = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
-					case 1: ground_max    = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
+					case 0: ground_min = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
+					case 1: ground_max = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
 					case 2: skyground_min = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
 					case 3: skyground_max = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
-					case 4: sky_min       = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
-					case 5: sky_max       = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
+					case 4: sky_min = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
+					case 5: sky_max = datablock[j][0] | (datablock[j][1] << 8) | (datablock[j][2] << 16) | (datablock[j][3] << 24); break;
 					}
-					tracemap.sky[TRACEMAP_SIZE - 1 - i][j]       = MAX_WORLD_HEIGHT;
+					tracemap.sky[TRACEMAP_SIZE - 1 - i][j] = MAX_WORLD_HEIGHT;
 					tracemap.skyground[TRACEMAP_SIZE - 1 - i][j] = MAX_WORLD_HEIGHT;
-					tracemap.ground[TRACEMAP_SIZE - 1 - i][j]    = MIN_WORLD_HEIGHT;
+					tracemap.ground[TRACEMAP_SIZE - 1 - i][j] = MIN_WORLD_HEIGHT;
 					continue;
 				}
 
@@ -568,7 +569,7 @@ qboolean BG_LoadTraceMap(char *rawmapname, vec2_t world_mins, vec2_t world_maxs)
 				{
 					// just in case
 					tracemap.skyground[TRACEMAP_SIZE - 1 - i][j] = MAX_WORLD_HEIGHT;
-					tracemap.ground[TRACEMAP_SIZE - 1 - i][j]    = MIN_WORLD_HEIGHT;
+					tracemap.ground[TRACEMAP_SIZE - 1 - i][j] = MIN_WORLD_HEIGHT;
 				}
 			}
 
@@ -740,8 +741,9 @@ static void BG_ClampPointToTracemapExtends(vec3_t point, vec2_t out)
 
 float BG_GetSkyHeightAtPoint(vec3_t pos)
 {
-	int    i, j;
+	int i, j;
 	vec2_t point;
+
 //	int msec = trap_Milliseconds();
 
 //	n_getskytime++;
@@ -767,8 +769,9 @@ float BG_GetSkyHeightAtPoint(vec3_t pos)
 
 float BG_GetSkyGroundHeightAtPoint(vec3_t pos)
 {
-	int    i, j;
+	int i, j;
 	vec2_t point;
+
 //	int msec = trap_Milliseconds();
 
 //	n_getgroundtime++;
@@ -794,8 +797,9 @@ float BG_GetSkyGroundHeightAtPoint(vec3_t pos)
 
 float BG_GetGroundHeightAtPoint(vec3_t pos)
 {
-	int    i, j;
+	int i, j;
 	vec2_t point;
+
 //	int msec = trap_Milliseconds();
 
 //	n_getgroundtime++;

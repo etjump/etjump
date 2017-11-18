@@ -10,9 +10,9 @@ bg_character_t axisClassCharacters[NUM_PLAYER_CLASSES];
 
 static qboolean BG_PCF_ParseError(int handle, const char *format, ...)
 {
-	int         line;
-	char        filename[128];
-	va_list     argptr;
+	int  line;
+	char filename[128];
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -20,7 +20,7 @@ static qboolean BG_PCF_ParseError(int handle, const char *format, ...)
 	va_end(argptr);
 
 	filename[0] = '\0';
-	line        = 0;
+	line = 0;
 	trap_PC_SourceFileAndLine(handle, filename, &line);
 
 	Com_Printf(S_COLOR_RED "ERROR: %s, line %d: %s\n", filename, line, string);
@@ -33,7 +33,7 @@ static qboolean BG_PCF_ParseError(int handle, const char *format, ...)
 qboolean BG_ParseCharacterFile(const char *filename, bg_characterDef_t *characterDef)
 {
 	pc_token_t token;
-	int        handle;
+	int handle;
 
 	handle = trap_PC_LoadSource(filename);
 
@@ -168,7 +168,7 @@ bg_character_t *BG_GetCharacterForPlayerstate(playerState_t *ps)
 //
 
 bg_character_t bg_characterPool[MAX_CHARACTERS];
-qboolean       bg_characterPoolInuse[MAX_CHARACTERS];
+qboolean bg_characterPoolInuse[MAX_CHARACTERS];
 
 void BG_ClearCharacterPool(void)
 {

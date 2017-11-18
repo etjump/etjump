@@ -17,10 +17,11 @@ std::string ETJump::OperatingSystem::getHwid()
 {
 	struct ifreq  ifr;
 	struct ifconf ifc;
-	char          buf[1024];
-	int           success = 0;
+	char buf[1024];
+	int  success = 0;
 
 	int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+
 	if (sock == -1)
 	{                 /* handle error*/
 	}
@@ -32,7 +33,7 @@ std::string ETJump::OperatingSystem::getHwid()
 	{                                           /* handle error */
 	}
 
-	struct ifreq              *it = ifc.ifc_req;
+	struct ifreq *it = ifc.ifc_req;
 	const struct ifreq *const end = it + (ifc.ifc_len / sizeof(struct ifreq));
 
 	for (; it != end; ++it)
@@ -61,11 +62,11 @@ std::string ETJump::OperatingSystem::getHwid()
 		memcpy(mac_address, ifr.ifr_hwaddr.sa_data, 6);
 		boost::format fmt("%02X:%02X:%02X:%02X:%02X:%02X");
 		fmt % mac_address[0]
-			% mac_address[1]
-			% mac_address[2]
-			% mac_address[3]
-			% mac_address[4]
-			% mac_address[5];
+		% mac_address[1]
+		% mac_address[2]
+		% mac_address[3]
+		% mac_address[4]
+		% mac_address[5];
 		return G_SHA1(fmt.str().c_str());
 	}
 	else

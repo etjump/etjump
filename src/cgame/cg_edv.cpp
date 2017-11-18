@@ -125,10 +125,10 @@ extern void CG_TraceCapsule_World(trace_t *result, const vec3_t start, const vec
 void CG_EDV_RunInput(void)
 {
 	playerState_t edv_ps;
-	pmoveExt_t    edv_pmext;
-	static int    lasttime = 0;
-	int           i, delta;
-	vec_t         frametime;
+	pmoveExt_t edv_pmext;
+	static int lasttime = 0;
+	int i, delta;
+	vec_t frametime;
 
 	static vec3_t mins = { -6, -6, -6 };
 	static vec3_t maxs = { 6, 6, 6 };
@@ -160,17 +160,19 @@ void CG_EDV_RunInput(void)
 	{
 		//		CG_Printf( "%d %d %d\n", edv_rightmove, edv_forwardmove, edv_upmove );
 		// I still don't like this
-		cg_pmove.cmd.forwardmove = (cgs.demoCam.move & 0x01) ? 127 : 0;
+		cg_pmove.cmd.forwardmove  = (cgs.demoCam.move & 0x01) ? 127 : 0;
 		cg_pmove.cmd.forwardmove += (cgs.demoCam.move & 0x02) ? -127 : 0;
-		cg_pmove.cmd.rightmove = (cgs.demoCam.move & 0x04) ? 127 : 0;
+		cg_pmove.cmd.rightmove  = (cgs.demoCam.move & 0x04) ? 127 : 0;
 		cg_pmove.cmd.rightmove += (cgs.demoCam.move & 0x08) ? -127 : 0;
-		cg_pmove.cmd.upmove = (cgs.demoCam.move & 0x10) ? 127 : 0;
+		cg_pmove.cmd.upmove  = (cgs.demoCam.move & 0x10) ? 127 : 0;
 		cg_pmove.cmd.upmove += (cgs.demoCam.move & 0x20) ? -127 : 0;
 		// additional buttons
-		if (cgs.demoCam.move & 0x40) {
+		if (cgs.demoCam.move & 0x40)
+		{
 			cg_pmove.cmd.buttons |= BUTTON_SPRINT;
 		}
-		else {
+		else
+		{
 			cg_pmove.cmd.buttons &= ~BUTTON_SPRINT;
 		}
 	}
@@ -180,8 +182,8 @@ void CG_EDV_RunInput(void)
 	cg.refdefViewAngles[YAW] += (cgs.demoCam.turn & 0x02) ? -etj_demo_yawturnspeed.value * frametime : 0;
 	cg.refdefViewAngles[PITCH] += (cgs.demoCam.turn & 0x04) ? etj_demo_pitchturnspeed.value * frametime : 0;
 	cg.refdefViewAngles[PITCH] += (cgs.demoCam.turn & 0x08) ? -etj_demo_pitchturnspeed.value * frametime : 0;
-	cg.refdefViewAngles[ROLL] += (cgs.demoCam.turn & 0x10) ? etj_demo_rollspeed.value * frametime : 0;
-	cg.refdefViewAngles[ROLL] += (cgs.demoCam.turn & 0x20) ? -etj_demo_rollspeed.value * frametime : 0;
+	cg.refdefViewAngles[ROLL]  += (cgs.demoCam.turn & 0x10) ? etj_demo_rollspeed.value * frametime : 0;
+	cg.refdefViewAngles[ROLL]  += (cgs.demoCam.turn & 0x20) ? -etj_demo_rollspeed.value * frametime : 0;
 
 	/* zinx - Use current viewangles instead of the command angles;
 	looking is handled elsewhere (where, i do not know) */
@@ -192,7 +194,7 @@ void CG_EDV_RunInput(void)
 
 	cg_pmove.cmd.buttons &= ~BUTTON_TALK; // zinx - FIXME: Why is the engine talking?
 
-										  /* Create a playerState for cam movement */
+	/* Create a playerState for cam movement */
 	memset(&edv_ps, 0, sizeof(edv_ps));
 	edv_ps.commandTime = cgs.demoCam.commandTime;
 	if (cgs.demoCam.noclip)
@@ -204,7 +206,7 @@ void CG_EDV_RunInput(void)
 		edv_ps.pm_type = PM_SPECTATOR;
 	}
 	edv_ps.pm_flags = 0;
-	edv_ps.gravity = 0;
+	edv_ps.gravity  = 0;
 	edv_ps.friction = 5.0f;
 	edv_ps.groundEntityNum = ENTITYNUM_NONE;
 	edv_ps.clientNum = cg.predictedPlayerState.clientNum;
@@ -227,7 +229,7 @@ void CG_EDV_RunInput(void)
 
 	/* Create pmext for cam movement */
 	memset(&edv_pmext, 0, sizeof(edv_pmext));
-	edv_pmext.sprintTime = SPRINTTIME;
+	edv_pmext.sprintTime  = SPRINTTIME;
 	edv_pmext.noclipScale = cg_noclipScale.value;
 
 	/* Fill in pmove stuff */

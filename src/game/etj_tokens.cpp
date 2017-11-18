@@ -39,11 +39,12 @@ std::string toString(Tokens::Difficulty difficulty)
 
 Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 {
-	auto  idx             = 0;
-	auto  tokenNum        = 0;
-	Token *token          = nullptr;
-	auto  difficulty      = Easy;
+	auto idx = 0;
+	auto tokenNum = 0;
+	Token *token  = nullptr;
+	auto  difficulty = Easy;
 	float nearestDistance = 1 << 20;
+
 	for (auto&t : _easyTokens)
 	{
 		if (t.isActive)
@@ -52,9 +53,9 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 			if (newDistance < nearestDistance)
 			{
 				nearestDistance = newDistance;
-				token           = &t;
-				tokenNum        = idx + 1;
-				difficulty      = Easy;
+				token = &t;
+				tokenNum = idx + 1;
+				difficulty = Easy;
 			}
 		}
 		++idx;
@@ -69,9 +70,9 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 			if (newDistance < nearestDistance)
 			{
 				nearestDistance = newDistance;
-				token           = &t;
-				tokenNum        = idx + 1;
-				difficulty      = Medium;
+				token = &t;
+				tokenNum = idx + 1;
+				difficulty = Medium;
 			}
 		}
 		++idx;
@@ -86,9 +87,9 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 			if (newDistance < nearestDistance)
 			{
 				nearestDistance = newDistance;
-				token           = &t;
-				tokenNum        = idx + 1;
-				difficulty      = Hard;
+				token = &t;
+				tokenNum = idx + 1;
+				difficulty = Hard;
 			}
 		}
 		++idx;
@@ -101,6 +102,7 @@ Tokens::NearestToken Tokens::findNearestToken(std::array<float, 3> coordinates)
 std::pair<bool, std::string> Tokens::deleteToken(Difficulty difficulty, int index)
 {
 	Token *token = nullptr;
+
 	switch (difficulty)
 	{
 	case Easy:
@@ -180,7 +182,7 @@ std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::arr
 	}
 
 	Token *nextFreeToken = nullptr;
-	auto  idx            = 0;
+	auto  idx = 0;
 	for (auto & token : *tokens)
 	{
 		if (!token.isActive)
@@ -196,10 +198,10 @@ std::pair<bool, std::string> Tokens::createToken(Difficulty difficulty, std::arr
 		return std::make_pair(false, "no free tokens left for the difficulty.");
 	}
 
-	nextFreeToken->isActive    = true;
-	nextFreeToken->name        = "";
+	nextFreeToken->isActive = true;
+	nextFreeToken->name = "";
 	nextFreeToken->coordinates = coordinates;
-	nextFreeToken->data->idx   = idx;
+	nextFreeToken->data->idx = idx;
 
 	createEntity(*nextFreeToken, difficulty);
 
@@ -237,9 +239,9 @@ bool Tokens::loadTokens(const std::string& filepath)
 
 	try
 	{
-		auto easyTokens   = root["easyTokens"];
+		auto easyTokens = root["easyTokens"];
 		auto mediumTokens = root["mediumTokens"];
-		auto hardTokens   = root["hardTokens"];
+		auto hardTokens = root["hardTokens"];
 
 		auto idx = 0;
 		for (auto&easyToken:easyTokens)
@@ -282,7 +284,7 @@ bool Tokens::loadTokens(const std::string& filepath)
 bool allTokensCollected(gentity_t *ent);
 void Tokens::createEntity(Token& token, Difficulty difficulty)
 {
-	token.entity                   = G_Spawn();
+	token.entity = G_Spawn();
 	token.entity->tokenInformation = token.data.get();
 	Q_strncpyz(token.data->name, token.name.c_str(), sizeof(token.data->name));
 	token.data->difficulty = difficulty;
@@ -291,15 +293,15 @@ void Tokens::createEntity(Token& token, Difficulty difficulty)
 	{
 	case Easy:
 		token.entity->classname = "token_easy";
-		token.entity->s.eType   = ET_TOKEN_EASY;
+		token.entity->s.eType = ET_TOKEN_EASY;
 		break;
 	case Medium:
 		token.entity->classname = "token_medium";
-		token.entity->s.eType   = ET_TOKEN_MEDIUM;
+		token.entity->s.eType = ET_TOKEN_MEDIUM;
 		break;
 	case Hard:
 		token.entity->classname = "token_hard";
-		token.entity->s.eType   = ET_TOKEN_HARD;
+		token.entity->s.eType = ET_TOKEN_HARD;
 		break;
 	}
 
@@ -308,6 +310,7 @@ void Tokens::createEntity(Token& token, Difficulty difficulty)
 							  vec3_t mins  = { 0, 0, 0 };
 							  vec3_t maxs  = { 0, 0, 0 };
 							  vec3_t range = { 16, 16, 16 };
+
 							  VectorSubtract(self->r.currentOrigin, range, mins);
 							  VectorAdd(self->r.currentOrigin, range, maxs);
 
@@ -448,9 +451,9 @@ void Tokens::createEntities()
 bool Tokens::saveTokens(const std::string& filepath)
 {
 	Json::Value root;
-	root["easyTokens"]   = Json::arrayValue;
+	root["easyTokens"] = Json::arrayValue;
 	root["mediumTokens"] = Json::arrayValue;
-	root["hardTokens"]   = Json::arrayValue;
+	root["hardTokens"] = Json::arrayValue;
 	for (auto&token:_easyTokens)
 	{
 		if (token.isActive)
@@ -476,7 +479,7 @@ bool Tokens::saveTokens(const std::string& filepath)
 	}
 
 	Json::StyledWriter writer;
-	auto               output = writer.write(root);
+	auto output = writer.write(root);
 	try
 	{
 		Utilities::WriteFile(filepath, output);
@@ -501,8 +504,8 @@ void Tokens::Token::fromJson(const Json::Value& json)
 	coordinates[0] = json["coordinates"][0].asFloat();
 	coordinates[1] = json["coordinates"][1].asFloat();
 	coordinates[2] = json["coordinates"][2].asFloat();
-	name           = json["name"].asString();
-	isActive       = true;
+	name = json["name"].asString();
+	isActive = true;
 }
 
 Tokens::Token::Token() : name(""), isActive(false), entity(nullptr), data(std::unique_ptr<TokenInformation>(new TokenInformation))

@@ -31,8 +31,8 @@
 
 int Pickup_Powerup(gentity_t *ent, gentity_t *other)
 {
-	int       quantity;
-	int       i;
+	int quantity;
+	int i;
 	gclient_t *client;
 
 	if (!other->client->ps.powerups[ent->item->giTag])
@@ -271,10 +271,10 @@ int Pickup_Holdable(gentity_t *ent, gentity_t *other)
 // extracted from Fill_Clip: add the specified ammount of ammo into the clip
 // returns whether ammo was added to the clip
 int AddToClip(
-    playerState_t *ps,          // which player
-    int weapon,                 // weapon to add ammo for
-    int ammomove,               // ammount to add. 0 means fill the clip if possible
-    int outOfReserve)           // is the amount to be added out of reserve
+	playerState_t *ps,          // which player
+	int weapon,                 // weapon to add ammo for
+	int ammomove,               // ammount to add. 0 means fill the clip if possible
+	int outOfReserve)           // is the amount to be added out of reserve
 {
 	int inclip, maxclip;
 	int ammoweap = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
@@ -442,7 +442,7 @@ qboolean AddMagicAmmo(gentity_t *receiver, int numOfClips)
 
 weapon_t G_GetPrimaryWeaponForClient(gclient_t *client)
 {
-	int              i;
+	int i;
 	bg_playerclass_t *classInfo;
 
 	if (client->sess.sessionTeam != TEAM_ALLIES && client->sess.sessionTeam != TEAM_AXIS)
@@ -495,7 +495,7 @@ weapon_t G_GetPrimaryWeaponForClient(gclient_t *client)
 
 void G_DropWeapon(gentity_t *ent, weapon_t weapon)
 {
-	vec3_t    angles, velocity, org, offset, mins, maxs;
+	vec3_t angles, velocity, org, offset, mins, maxs;
 	gclient_t *client = ent->client;
 	gentity_t *ent2;
 	gitem_t   *item;
@@ -634,7 +634,7 @@ qboolean G_CanPickupWeapon(weapon_t weapon, gentity_t *ent)
 
 int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 {
-	int      quantity;
+	int quantity;
 	qboolean alreadyHave = qfalse;
 
 	// JPW NERVE -- magic ammo for any two-handed weapon
@@ -747,7 +747,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 				}
 
 				other->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = 0;
-				other->client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ent->item->giTag))]     = 0;
+				other->client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ent->item->giTag))] = 0;
 
 				if (ent->item->giTag == WP_MORTAR)
 				{
@@ -786,6 +786,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 int Pickup_Health(gentity_t *ent, gentity_t *other)
 {
 	int max;
+
 //	int			quantity = 0;
 
 	// if medic isn't giving ammo to self or another medic or the enemy, give him some props
@@ -833,8 +834,8 @@ void RespawnItem(gentity_t *ent)
 	if (ent->team)
 	{
 		gentity_t *master;
-		int       count;
-		int       choice;
+		int count;
+		int choice;
 
 		if (!ent->teammaster)
 		{
@@ -853,7 +854,7 @@ void RespawnItem(gentity_t *ent)
 
 	ent->r.contents = CONTENTS_TRIGGER;
 	//ent->s.eFlags &= ~EF_NODRAW;
-	ent->flags     &= ~FL_NODRAW;
+	ent->flags &= ~FL_NODRAW;
 	ent->r.svFlags &= ~SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 
@@ -954,7 +955,7 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 	{
 		return;     // dead people can't pickup
 	}
-	
+
 	// the same pickup rules are used for client side and server side
 	if (!BG_CanItemBeGrabbed(&ent->s, &other->client->ps, other->client->sess.skill, other->client->sess.sessionTeam))
 	{
@@ -962,9 +963,9 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 	}
 
 	// ETJump: disable explosives pickup
-	if (BG_WeaponIsExplosive(ent->item->giTag) && 
-		other->client->sess.timerunActive &&
-		(other->client->sess.runSpawnflags & TIMERUN_DISABLE_EXPLOSIVES_PICKUP))
+	if (BG_WeaponIsExplosive(ent->item->giTag) &&
+	    other->client->sess.timerunActive &&
+	    (other->client->sess.runSpawnflags & TIMERUN_DISABLE_EXPLOSIVES_PICKUP))
 	{
 		return;
 	}
@@ -1027,7 +1028,7 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 	{
 		gentity_t *te = G_TempEntity(ent->s.pos.trBase, EV_GLOBAL_ITEM_PICKUP);
 		te->s.eventParm = ent->s.modelindex;
-		te->r.svFlags  |= SVF_BROADCAST;
+		te->r.svFlags |= SVF_BROADCAST;
 	}
 
 //	G_LogPrintf( "Firing item targets\n" );
@@ -1045,7 +1046,7 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 	// draw anything.  This allows respawnable items
 	// to be placed on movers.
 	ent->r.svFlags |= SVF_NOCLIENT;
-	ent->flags     |= FL_NODRAW;
+	ent->flags |= FL_NODRAW;
 	ent->r.contents = 0;
 
 	// ZOID
@@ -1055,12 +1056,12 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 	if (respawn <= 0)
 	{
 		ent->nextthink = 0;
-		ent->think     = 0;
+		ent->think = 0;
 	}
 	else
 	{
 		ent->nextthink = level.time + respawn * 1000;
-		ent->think     = RespawnItem;
+		ent->think = RespawnItem;
 	}
 	trap_LinkEntity(ent);
 }
@@ -1078,18 +1079,18 @@ Spawns an item and tosses it forward
 gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNum)
 {
 	gentity_t *dropped;
-	trace_t   tr;
-	vec3_t    vec, temp;
-	int       i;
+	trace_t tr;
+	vec3_t  vec, temp;
+	int i;
 
 	dropped = G_Spawn();
 
-	dropped->s.eType           = ET_ITEM;
-	dropped->s.modelindex      = item - bg_itemlist; // store item number in modelindex
+	dropped->s.eType = ET_ITEM;
+	dropped->s.modelindex = item - bg_itemlist;      // store item number in modelindex
 	dropped->s.otherEntityNum2 = 1; // DHM - Nerve :: this is taking modelindex2's place for a dropped item
 
 	dropped->classname = item->classname;
-	dropped->item      = item;
+	dropped->item = item;
 	VectorSet(dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, 0);              //----(SA)	so items sit on the ground
 	VectorSet(dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS);  //----(SA)	so items sit on the ground
 	dropped->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
@@ -1124,8 +1125,8 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNu
 
 	// ydnar: set yaw to parent angles
 	temp[PITCH] = 0;
-	temp[YAW]   = g_entities[ownerNum].s.apos.trBase[YAW];
-	temp[ROLL]  = 0;
+	temp[YAW]  = g_entities[ownerNum].s.apos.trBase[YAW];
+	temp[ROLL] = 0;
 	G_SetAngle(dropped, temp);
 
 	dropped->s.eFlags |= EF_BOUNCE_HALF;
@@ -1135,9 +1136,9 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNu
 		gentity_t *flag = &g_entities[g_entities[ownerNum].client->flagParent];
 
 		dropped->s.otherEntityNum = g_entities[ownerNum].client->flagParent;    // store the entitynum of our original flag spawner
-		dropped->s.density        = 1;
-		dropped->think            = Team_DroppedFlagThink;
-		dropped->nextthink        = level.time + 30000;
+		dropped->s.density = 1;
+		dropped->think = Team_DroppedFlagThink;
+		dropped->nextthink = level.time + 30000;
 
 		if (level.gameManager)
 		{
@@ -1175,7 +1176,7 @@ gentity_t *Drop_Item(gentity_t *ent, gitem_t *item, float angle, qboolean novelo
 	vec3_t angles;
 
 	VectorCopy(ent->s.apos.trBase, angles);
-	angles[YAW]  += angle;
+	angles[YAW] += angle;
 	angles[PITCH] = 0;  // always forward
 
 	if (novelocity)
@@ -1237,9 +1238,9 @@ void FinishSpawningItem(gentity_t *ent)
 		maxs[2] /= 2;
 	}
 
-	ent->r.contents   = CONTENTS_TRIGGER | CONTENTS_ITEM;
-	ent->touch        = Touch_Item_Auto;
-	ent->s.eType      = ET_ITEM;
+	ent->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
+	ent->touch = Touch_Item_Auto;
+	ent->s.eType = ET_ITEM;
 	ent->s.modelindex = ent->item - bg_itemlist;        // store item number in modelindex
 
 	ent->entityOwner = ENTITYNUM_WORLD;            // Store "world" as owner for etj_touchPickupWeapons 1
@@ -1362,7 +1363,7 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item)
 	// some movers spawn on the second frame, so delay item
 	// spawns until the third frame so they can ride trains
 	ent->nextthink = level.time + FRAMETIME * 2;
-	ent->think     = FinishSpawningItem;
+	ent->think = FinishSpawningItem;
 
 	if (G_SpawnString("noise", 0, &noise))
 	{
@@ -1398,7 +1399,7 @@ void G_BounceItem(gentity_t *ent, trace_t *trace)
 {
 	vec3_t velocity;
 	float  dot;
-	int    hitTime;
+	int hitTime;
 
 	// reflect the velocity on the trace plane
 	hitTime = level.previousTime + (level.time - level.previousTime) * trace->fraction;
@@ -1433,10 +1434,10 @@ G_RunItemProp
 void G_RunItemProp(gentity_t *ent, vec3_t origin)
 {
 	gentity_t *traceEnt;
-	trace_t   trace;
+	trace_t trace;
 	gentity_t *owner;
-	vec3_t    start;
-	vec3_t    end;
+	vec3_t start;
+	vec3_t end;
 
 	owner = &g_entities[ent->r.ownerNum];
 
@@ -1447,7 +1448,7 @@ void G_RunItemProp(gentity_t *ent, vec3_t origin)
 	end[2] += 1;
 
 	trap_Trace(&trace, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
-	           ent->r.ownerNum, MASK_SHOT);
+		ent->r.ownerNum, MASK_SHOT);
 
 	traceEnt = &g_entities[trace.entityNum];
 
@@ -1485,8 +1486,8 @@ void G_RunItem(gentity_t *ent)
 {
 	vec3_t  origin;
 	trace_t tr;
-	int     contents;
-	int     mask;
+	int contents;
+	int mask;
 
 	// if groundentity has been set to -1, it may have been pushed off an edge
 	if (ent->s.groundEntityNum == -1)
@@ -1524,7 +1525,7 @@ void G_RunItem(gentity_t *ent)
 		mask = MASK_SOLID;
 	}
 	trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-	           ent->r.ownerNum, mask);
+		ent->r.ownerNum, mask);
 
 	if (ent->isProp && ent->takedamage)
 	{

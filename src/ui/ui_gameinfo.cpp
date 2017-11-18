@@ -12,7 +12,7 @@
 //
 
 
-int         ui_numBots;
+int ui_numBots;
 static char *ui_botInfos[MAX_BOTS];
 
 static int ui_numArenas;
@@ -115,7 +115,7 @@ static void UI_LoadArenasFromFile(char *filename)
 
     ui_numArenas += UI_ParseInfos( buf, MAX_ARENAS - ui_numArenas, &ui_arenaInfos[ui_numArenas], MAX_ARENAS );*/
 
-	int        handle;
+	int handle;
 	pc_token_t token;
 
 	handle = trap_PC_LoadSource(filename);
@@ -307,9 +307,10 @@ void UI_LoadArenas(void)
 	char *dirptr;
 	int  i /*, n*/;
 	int  dirlen;
+
 	//char		*type, *str;
 
-	ui_numArenas    = 0;
+	ui_numArenas = 0;
 	uiInfo.mapCount = 0;
 
 /*	NERVE - SMF - commented out
@@ -587,7 +588,7 @@ static void UI_LinkCampaignsToArenas( void ) {
 
 static void UI_LoadCampaignsFromFile(const char *filename)
 {
-	int        handle, i;
+	int handle, i;
 	pc_token_t token;
 
 	handle = trap_PC_LoadSource(filename);
@@ -623,7 +624,7 @@ static void UI_LoadCampaignsFromFile(const char *filename)
 			}
 
 			uiInfo.campaignList[uiInfo.campaignCount].campaignCinematic = -1;
-			uiInfo.campaignList[uiInfo.campaignCount].campaignShot      = -1;
+			uiInfo.campaignList[uiInfo.campaignCount].campaignShot = -1;
 
 			uiInfo.campaignCount++;
 
@@ -804,7 +805,7 @@ static void UI_LoadCampaignsFromFile(const char *filename)
 
 const char *UI_DescriptionForCampaign(void)
 {
-	int  i = 0, j = 0;
+	int i = 0, j = 0;
 	char *mapname;
 	char info[MAX_INFO_STRING];
 
@@ -828,7 +829,7 @@ const char *UI_DescriptionForCampaign(void)
 
 const char *UI_NameForCampaign(void)
 {
-	int  i = 0, j = 0;
+	int i = 0, j = 0;
 	char *mapname;
 	char info[MAX_INFO_STRING];
 
@@ -941,7 +942,7 @@ void UI_LoadCampaigns(void)
 		}
 
 		uiInfo.campaignList[j].order = uiInfo.campaignList[i].order + 1;
-		i                            = j;
+		i = j;
 	}
 
 	// Load the campaign save
@@ -960,8 +961,8 @@ void UI_LoadCampaigns(void)
 		{
 			if (hash == uiInfo.campaignStatus.campaigns[j].shortnameHash)
 			{
-				uiInfo.campaignList[i].unlocked    = qtrue;
-				uiInfo.campaignList[i].progress    = uiInfo.campaignStatus.campaigns[j].progress;
+				uiInfo.campaignList[i].unlocked = qtrue;
+				uiInfo.campaignList[i].progress = uiInfo.campaignStatus.campaigns[j].progress;
 				uiInfo.campaignList[i].cpsCampaign = &uiInfo.campaignStatus.campaigns[j];
 			}
 		}

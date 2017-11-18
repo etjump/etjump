@@ -110,7 +110,7 @@ static void G_ReAdjustSingleClientPosition(gentity_t *ent)
 
 void G_AdjustClientPositions(gentity_t *ent, int time, qboolean forward)
 {
-	int       i;
+	int i;
 	gentity_t *list;
 
 	for (i = 0; i < level.numConnectedClients; i++, list++)
@@ -169,7 +169,7 @@ void G_ResetMarkers(gentity_t *ent)
 
 void G_AttachBodyParts(gentity_t *ent)
 {
-	int       i;
+	int i;
 	gentity_t *list;
 
 	for (i = 0; i < level.numConnectedClients; i++, list++)
@@ -198,7 +198,7 @@ void G_AttachBodyParts(gentity_t *ent)
 
 void G_DettachBodyParts()
 {
-	int       i;
+	int i;
 	gentity_t *list;
 
 	for (i = 0; i < level.numConnectedClients; i++, list++)
@@ -240,7 +240,7 @@ int G_SwitchBodyPartEntity(gentity_t *ent)
 // Run a trace with players in historical positions.
 void G_HistoricalTrace(gentity_t *ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask)
 {
-	int    res;
+	int res;
 	vec3_t dir;
 
 	if (!g_antilag.integer || !ent->client)
@@ -252,7 +252,7 @@ void G_HistoricalTrace(gentity_t *ent, trace_t *results, const vec3_t start, con
 		res = G_SwitchBodyPartEntity(&g_entities[results->entityNum]);
 		POSITION_READJUST
 
-		G_DettachBodyParts();
+		    G_DettachBodyParts();
 		return;
 	}
 
@@ -265,7 +265,7 @@ void G_HistoricalTrace(gentity_t *ent, trace_t *results, const vec3_t start, con
 	res = G_SwitchBodyPartEntity(&g_entities[results->entityNum]);
 	POSITION_READJUST
 
-	G_DettachBodyParts();
+	    G_DettachBodyParts();
 
 	G_AdjustClientPositions(ent, 0, qfalse);
 }
@@ -283,7 +283,7 @@ void G_HistoricalTraceEnd(gentity_t *ent)
 //bani - Run a trace without fixups (historical fixups will be done externally)
 void G_Trace(gentity_t *ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask)
 {
-	int    res;
+	int res;
 	vec3_t dir;
 	gentity_t *resEnt;
 
@@ -294,7 +294,8 @@ void G_Trace(gentity_t *ent, trace_t *results, const vec3_t start, const vec3_t 
 	resEnt = &g_entities[results->entityNum];
 
 	// skip head
-	while (resEnt->s.eType == ET_TEMPHEAD) {
+	while (resEnt->s.eType == ET_TEMPHEAD)
+	{
 		trap_Trace(results, results->endpos, mins, maxs, end, results->entityNum, contentmask);
 		resEnt = &g_entities[results->entityNum];
 	}
@@ -302,5 +303,5 @@ void G_Trace(gentity_t *ent, trace_t *results, const vec3_t start, const vec3_t 
 	res = G_SwitchBodyPartEntity(resEnt);
 	POSITION_READJUST
 
-	G_DettachBodyParts();
+	    G_DettachBodyParts();
 }

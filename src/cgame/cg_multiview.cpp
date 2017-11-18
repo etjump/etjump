@@ -168,18 +168,18 @@ void CG_mvCreate(int pID)
 	}
 
 	// Window specific
-	w->id     = WID_NONE;
-	w->x      = (cg.mv_cnt == 0) ? 0 : 30 + (12 * pID);
-	w->y      = (cg.mv_cnt == 0) ? 0 : 300 + (5 * pID);
-	w->w      = (cg.mv_cnt == 0) ? 640 : 128;
-	w->h      = (cg.mv_cnt == 0) ? 480 : 96;
+	w->id = WID_NONE;
+	w->x  = (cg.mv_cnt == 0) ? 0 : 30 + (12 * pID);
+	w->y  = (cg.mv_cnt == 0) ? 0 : 300 + (5 * pID);
+	w->w  = (cg.mv_cnt == 0) ? 640 : 128;
+	w->h  = (cg.mv_cnt == 0) ? 480 : 96;
 	w->mvInfo = (pID & MV_PID) | MV_SELECTED;
 	w->state  = (cg.mv_cnt == 0) ? WSTATE_COMPLETE : WSTATE_START;
 
 	if (cg.mv_cnt == 0)
 	{
 		cg.mvCurrentMainview = w;
-		cg.mvCurrentActive   = cg.mvCurrentMainview;
+		cg.mvCurrentActive = cg.mvCurrentMainview;
 
 		if (cg_specHelp.integer > 0 && !cg.demoPlayback)
 		{
@@ -201,15 +201,15 @@ void CG_mvFree(int pID)
 	{
 		// Free it in mvDraw()
 		w->targetTime = 100;
-		w->time       = trap_Milliseconds();
-		w->state      = WSTATE_SHUTDOWN;
+		w->time  = trap_Milliseconds();
+		w->state = WSTATE_SHUTDOWN;
 	}
 }
 
 cg_window_t *CG_mvClientLocate(int pID)
 {
-	int                i;
-	cg_window_t        *w;
+	int i;
+	cg_window_t *w;
 	cg_windowHandler_t *wh = &cg.winHandler;
 
 	for (i = 0; i < wh->numActiveWindows; i++)
@@ -230,7 +230,7 @@ void CG_mvMainviewSwap(cg_window_t *av)
 	int swap_pID = (cg.mvCurrentMainview->mvInfo & MV_PID);
 
 	cg.mvCurrentMainview->mvInfo = (cg.mvCurrentMainview->mvInfo & ~MV_PID) | (av->mvInfo & MV_PID);
-	av->mvInfo                   = (av->mvInfo & ~MV_PID) | swap_pID;
+	av->mvInfo = (av->mvInfo & ~MV_PID) | swap_pID;
 
 	CG_mvOverlayUpdate();
 }
@@ -275,8 +275,8 @@ void CG_mvProcessClientList(void)
 // Give handle to the current selected MV window
 cg_window_t *CG_mvCurrent(void)
 {
-	int                i;
-	cg_window_t        *w;
+	int i;
+	cg_window_t *w;
 	cg_windowHandler_t *wh = &cg.winHandler;
 
 	for (i = 0; i < wh->numActiveWindows; i++)
@@ -294,8 +294,8 @@ cg_window_t *CG_mvCurrent(void)
 // Give handle to any MV window that isnt the mainview
 cg_window_t *CG_mvFindNonMainview(void)
 {
-	int                i;
-	cg_window_t        *w;
+	int i;
+	cg_window_t *w;
 	cg_windowHandler_t *wh = &cg.winHandler;
 
 	// First, find a non-windowed client
@@ -343,27 +343,27 @@ void CG_mvUpdateClientInfo(int pID)
 
 	if (pID >= 0 && pID < MAX_MVCLIENTS && (cg.mvClientList & (1 << pID)))
 	{
-		int           weap = cg_entities[pID].currentState.weapon;
-		int           id   = MAX_WEAPONS - 1 - (pID * 2);
-		clientInfo_t  *ci  = &cgs.clientinfo[pID];
-		playerState_t *ps  = &cg.snap->ps;
+		int weap = cg_entities[pID].currentState.weapon;
+		int id = MAX_WEAPONS - 1 - (pID * 2);
+		clientInfo_t *ci  = &cgs.clientinfo[pID];
+		playerState_t *ps = &cg.snap->ps;
 
-		ci->health   = (ps->ammo[id])       & 0xFF;
+		ci->health = (ps->ammo[id])       & 0xFF;
 		ci->hintTime = (ps->ammo[id] >> 8)  & 0x0F;
 		ci->weapHeat = (ps->ammo[id] >> 12) & 0x0F;
 
-		ci->ammo        = (ps->ammo[id - 1])       & 0x3FF;
+		ci->ammo = (ps->ammo[id - 1])       & 0x3FF;
 		ci->weaponState = (ps->ammo[id - 1] >> 11) & 0x03;
-		ci->fCrewgun    = ((ps->ammo[id - 1] >> 13) & 0x01) ? qtrue : qfalse;
-		ci->cursorHint  = (ps->ammo[id - 1] >> 14) & 0x03;
+		ci->fCrewgun = ((ps->ammo[id - 1] >> 13) & 0x01) ? qtrue : qfalse;
+		ci->cursorHint = (ps->ammo[id - 1] >> 14) & 0x03;
 
-		ci->ammoclip   = (ps->ammoclip[id - 1])       & 0x1FF;
+		ci->ammoclip = (ps->ammoclip[id - 1])       & 0x1FF;
 		ci->chargeTime = (ps->ammoclip[id - 1] >> 9)  & 0x0F;
 		ci->sprintTime = (ps->ammoclip[id - 1] >> 13) & 0x07;
 
-		ci->weapHeat   = (int)(100.0f * (float)ci->weapHeat / 15.0f);
+		ci->weapHeat = (int)(100.0f * (float)ci->weapHeat / 15.0f);
 		ci->chargeTime = (ci->chargeTime == 0) ? -1 : (int)(100.0f * (float)(ci->chargeTime - 1) / 15.0f);
-		ci->hintTime   = (ci->hintTime == 0)   ? -1 : (int)(100.0f * (float)(ci->hintTime - 1) / 15.0f);
+		ci->hintTime = (ci->hintTime == 0)   ? -1 : (int)(100.0f * (float)(ci->hintTime - 1) / 15.0f);
 		ci->sprintTime = (ci->sprintTime == 0) ? -1 : (int)(100.0f * (float)(ci->sprintTime - 1) / 7.0f);
 
 		if (ci->health == 0)
@@ -399,19 +399,19 @@ void CG_mvUpdateClientInfo(int pID)
 //
 void CG_mvTransitionPlayerState(playerState_t *ps)
 {
-	int          x, mult, pID = (cg.mvCurrentMainview->mvInfo & MV_PID);
-	centity_t    *cent = &cg_entities[pID];
-	clientInfo_t *ci   = &cgs.clientinfo[pID];
+	int x, mult, pID = (cg.mvCurrentMainview->mvInfo & MV_PID);
+	centity_t *cent  = &cg_entities[pID];
+	clientInfo_t *ci = &cgs.clientinfo[pID];
 
 	cg.predictedPlayerEntity.currentState = cent->currentState;
-	ps->clientNum                         = pID;
-	ps->weapon                            = cent->currentState.weapon;
-	cg.weaponSelect                       = ps->weapon;
+	ps->clientNum = pID;
+	ps->weapon = cent->currentState.weapon;
+	cg.weaponSelect = ps->weapon;
 
-	cent->currentState.eType       = ET_PLAYER;
-	ps->eFlags                     = cent->currentState.eFlags;
+	cent->currentState.eType = ET_PLAYER;
+	ps->eFlags = cent->currentState.eFlags;
 	cg.predictedPlayerState.eFlags = cent->currentState.eFlags;
-	cg.zoomedBinoc                 = ((cent->currentState.eFlags & EF_ZOOMING) != 0 && ci->health > 0) ? qtrue : qfalse;
+	cg.zoomedBinoc = ((cent->currentState.eFlags & EF_ZOOMING) != 0 && ci->health > 0) ? qtrue : qfalse;
 
 	x = cent->currentState.teamNum;
 	if (x == PC_MEDIC)
@@ -435,23 +435,23 @@ void CG_mvTransitionPlayerState(playerState_t *ps)
 		mult = cg.soldierChargeTime[ci->team - 1];
 	}
 
-	ps->curWeapHeat     = (int)((float)ci->weapHeat * 255.0f / 100.0f);
+	ps->curWeapHeat = (int)((float)ci->weapHeat * 255.0f / 100.0f);
 	ps->classWeaponTime = (ci->chargeTime < 0) ? -1 : cg.time - (int)((float)(mult * ci->chargeTime) / 100.0f);
 
 	// FIXME: moved to pmext
 //	ps->sprintTime = (ci->sprintTime < 0) ? 20000 : (int)((float)ci->sprintTime / 100.0f * 20000.0f);
 
 	ps->serverCursorHintVal = (ci->hintTime < 0) ? 0 : ci->hintTime * 255 / 100;
-	ps->serverCursorHint    = BG_simpleHintsExpand(ci->cursorHint, ((x == 2) ? ci->hintTime : -1));
+	ps->serverCursorHint = BG_simpleHintsExpand(ci->cursorHint, ((x == 2) ? ci->hintTime : -1));
 
-	ps->stats[STAT_HEALTH]       = ci->health;
+	ps->stats[STAT_HEALTH] = ci->health;
 	ps->stats[STAT_PLAYER_CLASS] = x;
 
 	// Grenade ticks
 	ps->grenadeTimeLeft = ci->grenadeTimeLeft;
 
 	// Safe as we've already pull data before clobbering
-	ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ps->weapon))]     = ci->ammo;
+	ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ps->weapon))] = ci->ammo;
 	ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ps->weapon))] = ci->ammoclip;
 
 	ps->persistant[PERS_SCORE] = ci->score;
@@ -468,12 +468,12 @@ void CG_OffsetThirdPersonView(void);
 //
 void CG_mvDraw(cg_window_t *sw)
 {
-	int       pID = (sw->mvInfo & MV_PID);
-	int       x, base_pID = cg.snap->ps.clientNum;
-	refdef_t  refdef;
-	float     rd_x, rd_y, rd_w, rd_h;
-	float     b_x, b_y, b_w, b_h;
-	float     s     = 1.0f;
+	int pID = (sw->mvInfo & MV_PID);
+	int x, base_pID = cg.snap->ps.clientNum;
+	refdef_t refdef;
+	float rd_x, rd_y, rd_w, rd_h;
+	float b_x, b_y, b_w, b_h;
+	float s = 1.0f;
 	centity_t *cent = &cg_entities[pID];
 
 
@@ -497,7 +497,7 @@ void CG_mvDraw(cg_window_t *sw)
 		{
 			if (tmp < sw->targetTime)
 			{
-				s     = (float)tmp / (float)sw->targetTime;
+				s = (float)tmp / (float)sw->targetTime;
 				rd_x += rd_w * 0.5f * (1.0f - s);
 				rd_y += rd_h * 0.5f * (1.0f - s);
 				rd_w *= s;
@@ -512,10 +512,10 @@ void CG_mvDraw(cg_window_t *sw)
 		{
 			if (tmp < sw->targetTime)
 			{
-				s     = (float)tmp / (float)sw->targetTime;
+				s = (float)tmp / (float)sw->targetTime;
 				rd_x += rd_w * 0.5f * s;
 				rd_y += rd_h * 0.5f * s;
-				s     = 1.0f - s;
+				s = 1.0f - s;
 				rd_w *= s;
 				rd_h *= s;
 				if (sw == cg.mvCurrentMainview)
@@ -533,8 +533,8 @@ void CG_mvDraw(cg_window_t *sw)
 					if (cg.mvTotalClients > 0)
 					{
 						cg.mvCurrentMainview->targetTime = 100;
-						cg.mvCurrentMainview->time       = trap_Milliseconds();
-						cg.mvCurrentMainview->state      = WSTATE_START;
+						cg.mvCurrentMainview->time  = trap_Milliseconds();
+						cg.mvCurrentMainview->state = WSTATE_START;
 					}
 
 					// If we swap with a window, hang around so we can delete the window
@@ -551,7 +551,7 @@ void CG_mvDraw(cg_window_t *sw)
 				// go ahead and shut down the mainview window *sniff*
 				if (--cg.mv_cnt <= 0)
 				{
-					cg.mv_cnt            = 0;
+					cg.mv_cnt = 0;
 					cg.mvCurrentMainview = NULL;
 
 					if (cg.spechelpWindow == SHOW_ON)
@@ -573,23 +573,23 @@ void CG_mvDraw(cg_window_t *sw)
 
 	CG_AdjustFrom640(&rd_x, &rd_y, &rd_w, &rd_h);
 
-	refdef.x      = rd_x;
-	refdef.y      = rd_y;
+	refdef.x = rd_x;
+	refdef.y = rd_y;
 	refdef.width  = rd_w;
 	refdef.height = rd_h;
 
 	refdef.fov_x = (cgs.clientinfo[pID].health > 0 &&
-	                (/*cent->currentState.weapon == WP_SNIPERRIFLE ||*/ // ARNOUT: this needs updating?
-	                    (cent->currentState.eFlags & EF_ZOOMING))) ?
+					(/*cent->currentState.weapon == WP_SNIPERRIFLE ||*/ // ARNOUT: this needs updating?
+						(cent->currentState.eFlags & EF_ZOOMING))) ?
 	               cg_zoomDefaultSniper.value :
 	               (cgs.clientinfo[pID].fCrewgun) ?
 	               55 : cg_fov.integer;
 
-	x            = refdef.width / tan(refdef.fov_x / 360 * M_PI);
+	x = refdef.width / tan(refdef.fov_x / 360 * M_PI);
 	refdef.fov_y = atan2(refdef.height, x) * 360 / M_PI;
 
 	refdef.rdflags = cg.refdef.rdflags;
-	refdef.time    = cg.time;
+	refdef.time = cg.time;
 
 	AnglesToAxis(cent->lerpAngles, refdef.viewaxis);
 	VectorCopy(cent->lerpOrigin, refdef.vieworg);
@@ -609,7 +609,7 @@ void CG_mvDraw(cg_window_t *sw)
 	else
 	{
 		cg.renderingThirdPerson = qfalse;
-		refdef.vieworg[2]      += (cent->currentState.eFlags & EF_CROUCHING) ? CROUCH_VIEWHEIGHT : DEFAULT_VIEWHEIGHT;
+		refdef.vieworg[2] += (cent->currentState.eFlags & EF_CROUCHING) ? CROUCH_VIEWHEIGHT : DEFAULT_VIEWHEIGHT;
 	}
 
 	CG_SetupFrustum();
@@ -637,8 +637,8 @@ void CG_mvDraw(cg_window_t *sw)
 			trap_S_Respatialize(cg.clientNum, refdef.vieworg, refdef.viewaxis, qfalse);
 		}
 
-		cg.snap->ps.clientNum   = base_pID;
-		cg.refdef_current       = &cg.refdef;
+		cg.snap->ps.clientNum = base_pID;
+		cg.refdef_current = &cg.refdef;
 		cg.renderingThirdPerson = qfalse;
 		return;
 	}
@@ -673,13 +673,13 @@ void CG_mvDraw(cg_window_t *sw)
 //
 void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, float s, int wState, qboolean fSelected)
 {
-	int          x;
-	rectDef_t    rect;
-	float        fw              = 8.0f, fh = 8.0f;
-	centity_t    *cent           = &cg_entities[pID];
-	clientInfo_t *ci             = &cgs.clientinfo[pID];
-	const char   *p_class        = "?";
-	vec4_t       *noSelectBorder = &colorDkGrey;
+	int x;
+	rectDef_t rect;
+	float fw = 8.0f, fh = 8.0f;
+	centity_t *cent = &cg_entities[pID];
+	clientInfo_t *ci = &cgs.clientinfo[pID];
+	const char   *p_class = "?";
+	vec4_t *noSelectBorder = &colorDkGrey;
 
 
 	// Overlays for zoomed views
@@ -721,28 +721,28 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, flo
 	CG_DrawStringExt(b_x + 1, b_y + b_h - (fh + 2), va("%s^7%d", CG_TranslateString(p_class), ci->health), colorWhite, qfalse, qtrue, fw, fh, 0);
 
 	p_class = va("%d^1/^7%d", ci->ammoclip, ci->ammo);
-	x       = CG_DrawStrlen(p_class);
+	x = CG_DrawStrlen(p_class);
 	CG_DrawStringExt(b_x + b_w - (x * fw + 1), b_y + b_h - (fh + 2), p_class, colorWhite, qfalse, qtrue, fw, fh, 0);
 
 
 	// Weapon icon
-	rect.x                                  = b_x + b_w - (50 + 1);
-	rect.y                                  = b_y + b_h - (25 + fh + 1 + 2);
-	rect.w                                  = 50;
-	rect.h                                  = 25;
+	rect.x = b_x + b_w - (50 + 1);
+	rect.y = b_y + b_h - (25 + fh + 1 + 2);
+	rect.w = 50;
+	rect.h = 25;
 	cg.predictedPlayerState.grenadeTimeLeft = 0;
-	cg.predictedPlayerState.weapon          = cent->currentState.weapon;
+	cg.predictedPlayerState.weapon = cent->currentState.weapon;
 	CG_DrawPlayerWeaponIcon(&rect, (ci->weaponState > WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT,
-	                        ((ci->weaponState == WSTATE_SWITCH) ? &colorWhite :
-	                         (ci->weaponState == WSTATE_FIRE) ? &colorRed :
-	                         &colorYellow));
+		((ci->weaponState == WSTATE_SWITCH) ? &colorWhite :
+		 (ci->weaponState == WSTATE_FIRE) ? &colorRed :
+		 &colorYellow));
 
 	// Sprint charge info
 	if (ci->sprintTime >= 0)
 	{
 		p_class = va("^2S^7%d%%", ci->sprintTime);
 		rect.y -= (fh + 1);
-		x       = CG_DrawStrlen(p_class);
+		x = CG_DrawStrlen(p_class);
 		CG_DrawStringExt(b_x + b_w - (x * fw + 1), rect.y, p_class, colorWhite, qfalse, qtrue, fw, fh, 0);
 	}
 
@@ -751,7 +751,7 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, flo
 	{
 		p_class = va("^1C^7%d%%", ci->chargeTime);
 		rect.y -= (fh + 1);
-		x       = CG_DrawStrlen(p_class);
+		x = CG_DrawStrlen(p_class);
 		CG_DrawStringExt(b_x + b_w - (x * fw + 1), rect.y, p_class, colorWhite, qfalse, qtrue, fw, fh, 0);
 	}
 
@@ -760,14 +760,14 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, flo
 	{
 		p_class = va("^3W:^7%d%%", ci->hintTime);
 		rect.y -= (fh + 1);
-		x       = CG_DrawStrlen(p_class);
+		x = CG_DrawStrlen(p_class);
 		CG_DrawStringExt(b_x + (b_w - (x * (fw - 1))) / 2, b_y + b_h - (fh + 2), p_class, colorWhite, qfalse, qtrue, fw - 1, fh - 1, 0);
 	}
 
 	// Finally, the window border
 	if (fSelected && wState == WSTATE_COMPLETE)
 	{
-		int    t = trap_Milliseconds() & 0x07FF; // 2047
+		int t = trap_Milliseconds() & 0x07FF;    // 2047
 		float  scale;
 		vec4_t borderColor;
 
@@ -785,7 +785,7 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, flo
 		}
 		else
 		{
-			scale         -= 1.0;
+			scale -= 1.0;
 			borderColor[0] = (borderColor[0] + scale > 1.0) ? 1.0 : borderColor[0] + scale;
 			borderColor[1] = (borderColor[1] + scale > 1.0) ? 1.0 : borderColor[1] + scale;
 			borderColor[2] = (borderColor[2] + scale > 1.0) ? 1.0 : borderColor[2] + scale;
@@ -822,24 +822,24 @@ void CG_mvOverlayClientUpdate(int pID, int index)
 {
 	cg_window_t *w;
 
-	cg.mvOverlay[index].pID     = pID;
+	cg.mvOverlay[index].pID = pID;
 	cg.mvOverlay[index].classID = cg_entities[pID].currentState.teamNum;
-	w                           = CG_mvClientLocate(pID);
-	cg.mvOverlay[index].w       = w;
+	w = CG_mvClientLocate(pID);
+	cg.mvOverlay[index].w = w;
 	if (w != NULL)
 	{
 		strcpy(cg.mvOverlay[index].info, va("%s%s%2d",
-		                                    strClassHighlights[cg.mvOverlay[index].classID * 2],
-		                                    (w == cg.mvCurrentMainview) ? "*" : "",
-		                                    pID)
-		       );
+				strClassHighlights[cg.mvOverlay[index].classID * 2],
+				(w == cg.mvCurrentMainview) ? "*" : "",
+				pID)
+			);
 	}
 	else
 	{
 		strcpy(cg.mvOverlay[index].info, va("%s%2d",
-		                                    strClassHighlights[(cg.mvOverlay[index].classID * 2) + 1],
-		                                    pID)
-		       );
+				strClassHighlights[(cg.mvOverlay[index].classID * 2) + 1],
+				pID)
+			);
 	}
 
 	cg.mvOverlay[index].width = CG_DrawStrlen(cg.mvOverlay[index].info) * MVINFO_TEXTSIZE;
@@ -878,7 +878,7 @@ qboolean CG_mvMergedClientLocate(int pID)
 // Display available client info
 void CG_mvOverlayDisplay(void)
 {
-	int         j, i, x, y, pID;
+	int j, i, x, y, pID;
 	cg_mvinfo_t *o;
 
 
@@ -894,7 +894,7 @@ void CG_mvOverlayDisplay(void)
 		cg.mvTotalTeam[j] = 0;
 		for (i = 0; i < cg.mvTotalClients; i++)
 		{
-			o   = &cg.mvOverlay[i];
+			o = &cg.mvOverlay[i];
 			pID = o->pID;
 
 			if (cgs.clientinfo[pID].team != j)
@@ -933,17 +933,17 @@ void CG_mvOverlayDisplay(void)
 
 					CG_FillRect(x - 1 - w - 6, y + 1, w + 2, MVINFO_TEXTSIZE - 1 + 2, colorMdGrey);
 					CG_DrawStringExt(x - w - 6, y + 1,
-					                 cgs.clientinfo[pID].name,
-					                 colorYellow, qtrue, qtrue,
-					                 MVINFO_TEXTSIZE - 1,
-					                 MVINFO_TEXTSIZE - 1, 0);
+						cgs.clientinfo[pID].name,
+						colorYellow, qtrue, qtrue,
+						MVINFO_TEXTSIZE - 1,
+						MVINFO_TEXTSIZE - 1, 0);
 				}
 			}
 
 			CG_DrawStringExt(x, y, o->info,
-			                 colorWhite, qfalse, qtrue,
-			                 MVINFO_TEXTSIZE,
-			                 MVINFO_TEXTSIZE, 0);
+				colorWhite, qfalse, qtrue,
+				MVINFO_TEXTSIZE,
+				MVINFO_TEXTSIZE, 0);
 		}
 	}
 }

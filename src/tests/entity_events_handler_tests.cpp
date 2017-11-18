@@ -9,13 +9,15 @@ centity_t ent1;
 class EntityEventsHandlerTests : public testing::Test
 {
 public:
-	void SetUp() override {
+	void SetUp() override
+	{
 		ent1.currentState.number = 1;
 
 		handler = EntityEventsHandler();
 	}
 
-	void TearDown() override {
+	void TearDown() override
+	{
 	}
 
 	EntityEventsHandler handler;
@@ -98,13 +100,13 @@ TEST_F(EntityEventsHandlerTests, SubscribeShouldBeCaseInsensitive)
 TEST_F(EntityEventsHandlerTests, SubscribeShouldPassCorrectEntityInCallback)
 {
 	auto command = "event";
-	auto called = false;
+	auto called  = false;
 
 	handler.subscribe(command, [&called](centity_t *cent)
 	{
 		if (cent->currentState.number == ent1.currentState.number)
 		{
-			called = true;
+		    called = true;
 		}
 	});
 

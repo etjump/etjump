@@ -56,9 +56,9 @@ static animation_t * BG_RAG_FindFreeAnimation(const char *mdxFileName, const cha
 
 static qboolean BG_RAG_ParseError(int handle, const char *format, ...)
 {
-	int         line;
-	char        filename[128];
-	va_list     argptr;
+	int  line;
+	char filename[128];
+	va_list argptr;
 	static char string[4096];
 
 	va_start(argptr, format);
@@ -66,7 +66,7 @@ static qboolean BG_RAG_ParseError(int handle, const char *format, ...)
 	va_end(argptr);
 
 	filename[0] = '\0';
-	line        = 0;
+	line = 0;
 	trap_PC_SourceFileAndLine(handle, filename, &line);
 
 	Com_Printf(S_COLOR_RED "ERROR: %s, line %d: %s\n", filename, line, string);
@@ -107,7 +107,7 @@ static qboolean BG_RAG_ParseAnimation(int handle, animation_t *animation)
 		i = 1;
 	}
 
-	animation->frameLerp   = 1000 / (float)i;
+	animation->frameLerp = 1000 / (float)i;
 	animation->initialLerp = 1000 / (float)i;
 
 	if (!PC_Int_Parse(handle, &animation->moveSpeed))
@@ -146,7 +146,7 @@ static qboolean BG_RAG_ParseAnimation(int handle, animation_t *animation)
 
 	if (strstr(animation->name, "firing"))
 	{
-		animation->flags      |= ANIMFL_FIRINGANIM;
+		animation->flags |= ANIMFL_FIRINGANIM;
 		animation->initialLerp = 40;
 	}
 
@@ -160,6 +160,7 @@ extern qhandle_t trap_R_RegisterModel(const char *name);
 static qboolean BG_RAG_ParseAnimFile(int handle, animModelInfo_t *animModelInfo)
 {
 	pc_token_t token;
+
 #ifdef CGAMEDLL
 	qhandle_t mdxFile;
 #else
@@ -230,14 +231,14 @@ static qboolean BG_RAG_ParseAnimFile(int handle, animModelInfo_t *animModelInfo)
 qboolean BG_R_RegisterAnimationGroup(const char *filename, animModelInfo_t *animModelInfo)
 {
 	pc_token_t token;
-	int        handle;
+	int handle;
 
 	animModelInfo->numAnimations = 0;
-	animModelInfo->footsteps     = FOOTSTEP_NORMAL;
-	animModelInfo->gender        = GENDER_MALE;
-	animModelInfo->isSkeletal    = qtrue;
-	animModelInfo->version       = 3;
-	animModelInfo->numHeadAnims  = 0;
+	animModelInfo->footsteps = FOOTSTEP_NORMAL;
+	animModelInfo->gender = GENDER_MALE;
+	animModelInfo->isSkeletal = qtrue;
+	animModelInfo->version = 3;
+	animModelInfo->numHeadAnims = 0;
 
 	handle = trap_PC_LoadSource(filename);
 

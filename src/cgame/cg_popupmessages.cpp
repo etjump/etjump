@@ -12,7 +12,7 @@ struct pmStackItem_s
 {
 	popupMessageType_t type;
 	qboolean inuse;
-	int time;
+	int  time;
 	char message[128];
 	qhandle_t shader;
 	int repeats;
@@ -24,16 +24,16 @@ struct pmStackItemBig_s
 {
 	popupMessageBigType_t type;
 	qboolean inuse;
-	int time;
+	int  time;
 	char message[128];
 	qhandle_t shader;
 
 	pmListItemBig_t *next;
 };
 
-pmListItem_t    cg_pmStack[NUM_PM_STACK_ITEMS];
-pmListItem_t    *cg_pmOldList;
-pmListItem_t    *cg_pmWaitingList;
+pmListItem_t cg_pmStack[NUM_PM_STACK_ITEMS];
+pmListItem_t *cg_pmOldList;
+pmListItem_t *cg_pmWaitingList;
 pmListItemBig_t *cg_pmWaitingListBig;
 
 pmListItemBig_t cg_pmStackBig[NUM_PM_STACK_ITEMS_BIG];
@@ -57,20 +57,20 @@ void CG_PMItemBigSound(pmListItemBig_t *item);
 
 void CG_InitPMGraphics(void)
 {
-	cgs.media.pmImages[PM_DYNAMITE]     = trap_R_RegisterShaderNoMip("gfx/limbo/cm_dynamite");
+	cgs.media.pmImages[PM_DYNAMITE] = trap_R_RegisterShaderNoMip("gfx/limbo/cm_dynamite");
 	cgs.media.pmImages[PM_CONSTRUCTION] = trap_R_RegisterShaderNoMip("sprites/voiceChat");
-	cgs.media.pmImages[PM_MINES]        = trap_R_RegisterShaderNoMip("sprites/voiceChat");
-	cgs.media.pmImages[PM_DEATH]        = trap_R_RegisterShaderNoMip("gfx/hud/pm_death");
-	cgs.media.pmImages[PM_MESSAGE]      = trap_R_RegisterShaderNoMip("sprites/voiceChat");
-	cgs.media.pmImages[PM_OBJECTIVE]    = trap_R_RegisterShaderNoMip("sprites/objective");
-	cgs.media.pmImages[PM_DESTRUCTION]  = trap_R_RegisterShaderNoMip("sprites/voiceChat");
-	cgs.media.pmImages[PM_TEAM]         = trap_R_RegisterShaderNoMip("sprites/voiceChat");
+	cgs.media.pmImages[PM_MINES] = trap_R_RegisterShaderNoMip("sprites/voiceChat");
+	cgs.media.pmImages[PM_DEATH] = trap_R_RegisterShaderNoMip("gfx/hud/pm_death");
+	cgs.media.pmImages[PM_MESSAGE] = trap_R_RegisterShaderNoMip("sprites/voiceChat");
+	cgs.media.pmImages[PM_OBJECTIVE] = trap_R_RegisterShaderNoMip("sprites/objective");
+	cgs.media.pmImages[PM_DESTRUCTION] = trap_R_RegisterShaderNoMip("sprites/voiceChat");
+	cgs.media.pmImages[PM_TEAM] = trap_R_RegisterShaderNoMip("sprites/voiceChat");
 
 	cgs.media.pmImageAlliesConstruct = trap_R_RegisterShaderNoMip("gfx/hud/pm_constallied");
-	cgs.media.pmImageAxisConstruct   = trap_R_RegisterShaderNoMip("gfx/hud/pm_constaxis");
-	cgs.media.pmImageAlliesMine      = trap_R_RegisterShaderNoMip("gfx/hud/pm_mineallied");
-	cgs.media.pmImageAxisMine        = trap_R_RegisterShaderNoMip("gfx/hud/pm_mineaxis");
-	cgs.media.hintKey                = trap_R_RegisterShaderNoMip("gfx/hud/keyboardkey_old");
+	cgs.media.pmImageAxisConstruct = trap_R_RegisterShaderNoMip("gfx/hud/pm_constaxis");
+	cgs.media.pmImageAlliesMine = trap_R_RegisterShaderNoMip("gfx/hud/pm_mineallied");
+	cgs.media.pmImageAxisMine = trap_R_RegisterShaderNoMip("gfx/hud/pm_mineaxis");
+	cgs.media.hintKey = trap_R_RegisterShaderNoMip("gfx/hud/keyboardkey_old");
 }
 
 void CG_InitPM(void)
@@ -78,8 +78,8 @@ void CG_InitPM(void)
 	memset(&cg_pmStack, 0, sizeof(cg_pmStack));
 	memset(&cg_pmStackBig, 0, sizeof(cg_pmStackBig));
 
-	cg_pmOldList        = NULL;
-	cg_pmWaitingList    = NULL;
+	cg_pmOldList = NULL;
+	cg_pmWaitingList = NULL;
 	cg_pmWaitingListBig = NULL;
 }
 
@@ -114,13 +114,13 @@ int CG_TimeForBigPopup(popupMessageBigType_t type)
 void CG_AddToListFront(pmListItem_t **list, pmListItem_t *item)
 {
 	item->next = *list;
-	*list      = item;
+	*list = item;
 }
 
 void CG_UpdatePMLists(void)
 {
-	pmListItem_t    *listItem;
-	pmListItem_t    *lastItem;
+	pmListItem_t *listItem;
+	pmListItem_t *lastItem;
 	pmListItemBig_t *listItem2;
 
 	listItem = cg_pmWaitingList;
@@ -132,7 +132,7 @@ void CG_UpdatePMLists(void)
 			if (listItem->next)
 			{
 				// there's another item waiting to come on, so move to old list
-				cg_pmWaitingList       = listItem->next;
+				cg_pmWaitingList = listItem->next;
 				cg_pmWaitingList->time = cg.time; // set time we popped up at
 
 				CG_AddToListFront(&cg_pmOldList, listItem);
@@ -144,7 +144,7 @@ void CG_UpdatePMLists(void)
 					// we're gone completely
 					cg_pmWaitingList = NULL;
 					listItem->inuse  = qfalse;
-					listItem->next   = NULL;
+					listItem->next = NULL;
 				}
 				else
 				{
@@ -198,7 +198,7 @@ void CG_UpdatePMLists(void)
 			if (listItem2->next)
 			{
 				// there's another item waiting to come on, so kill us and shove the next one to the front
-				cg_pmWaitingListBig       = listItem2->next;
+				cg_pmWaitingListBig = listItem2->next;
 				cg_pmWaitingListBig->time = cg.time; // set time we popped up at
 
 				CG_PMItemBigSound(cg_pmWaitingListBig);
@@ -212,8 +212,8 @@ void CG_UpdatePMLists(void)
 				{
 					// we're gone completely
 					cg_pmWaitingListBig = NULL;
-					listItem2->inuse    = qfalse;
-					listItem2->next     = NULL;
+					listItem2->inuse = qfalse;
+					listItem2->next  = NULL;
 				}
 				else
 				{
@@ -227,6 +227,7 @@ void CG_UpdatePMLists(void)
 pmListItemBig_t *CG_FindFreePMItem2(void)
 {
 	int i = 0;
+
 	for ( ; i < NUM_PM_STACK_ITEMS_BIG; i++)
 	{
 		if (!cg_pmStackBig[i].inuse)
@@ -244,6 +245,7 @@ pmListItem_t *CG_FindFreePMItem(void)
 	pmListItem_t *lastItem;
 
 	int i = 0;
+
 	for ( ; i < NUM_PM_STACK_ITEMS; i++)
 	{
 		if (!cg_pmStack[i].inuse)
@@ -285,7 +287,7 @@ pmListItem_t *CG_FindFreePMItem(void)
 void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader)
 {
 	pmListItem_t *listItem;
-	char         *end;
+	char *end;
 
 	if (!message || !*message)
 	{
@@ -314,9 +316,10 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 	}
 
 	listItem->repeats = 1;
-	
+
 	// don't add repeats into stack, but count them
-	if (etj_popupGrouped.integer && cg_pmWaitingList && !Q_stricmp(message, cg_pmWaitingList->message)) {
+	if (etj_popupGrouped.integer && cg_pmWaitingList && !Q_stricmp(message, cg_pmWaitingList->message))
+	{
 		cg_pmWaitingList->time = cg.time;
 		cg_pmWaitingList->repeats++;
 		return;
@@ -351,7 +354,7 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 	if (!cg_pmWaitingList)
 	{
 		cg_pmWaitingList = listItem;
-		listItem->time   = cg.time;
+		listItem->time = cg.time;
 	}
 	else
 	{
@@ -388,6 +391,7 @@ void CG_PMItemBigSound(pmListItemBig_t *item)
 void CG_AddPMItemBig(popupMessageBigType_t type, const char *message, qhandle_t shader)
 {
 	pmListItemBig_t *listItem = CG_FindFreePMItem2();
+
 	if (!listItem)
 	{
 		return;
@@ -410,7 +414,7 @@ void CG_AddPMItemBig(popupMessageBigType_t type, const char *message, qhandle_t 
 	if (!cg_pmWaitingListBig)
 	{
 		cg_pmWaitingListBig = listItem;
-		listItem->time      = cg.time;
+		listItem->time = cg.time;
 
 		CG_PMItemBigSound(listItem);
 	}
@@ -430,13 +434,13 @@ void CG_AddPMItemBig(popupMessageBigType_t type, const char *message, qhandle_t 
 #define PM_ICON_SIZE_SMALL 12
 void CG_DrawPMItems(void)
 {
-	vec4_t       colour     = { 0.f, 0.f, 0.f, 1.f };
-	vec4_t       colourText = { 1.f, 1.f, 1.f, 1.f };
-	float        t;
-	int          i, size;
+	vec4_t colour = { 0.f, 0.f, 0.f, 1.f };
+	vec4_t colourText = { 1.f, 1.f, 1.f, 1.f };
+	float  t;
+	int i, size;
 	pmListItem_t *listItem = cg_pmOldList;
-	float        y         = 360;
-	char         *msg;
+	float y = 360;
+	char  *msg;
 
 	if (cg_numPopups.integer <= 0)
 	{
@@ -460,11 +464,13 @@ void CG_DrawPMItems(void)
 	}
 
 	// show repeats counter
-	if (cg_pmWaitingList->repeats > 1) {
+	if (cg_pmWaitingList->repeats > 1)
+	{
 		msg = va("%s (x%d)", cg_pmWaitingList->message, cg_pmWaitingList->repeats);
 	}
-	else {
-		msg = (char*)&cg_pmWaitingList->message;
+	else
+	{
+		msg = (char *)&cg_pmWaitingList->message;
 	}
 
 	t = cg_pmWaitingList->time + CG_TimeForPopup(cg_pmWaitingList->type) + cg_popupStayTime.integer;
@@ -492,11 +498,13 @@ void CG_DrawPMItems(void)
 			colourText[3] = colour[3] = 1.f;
 		}
 
-		if (listItem->repeats > 1) {
+		if (listItem->repeats > 1)
+		{
 			msg = va("%s (x%d)", listItem->message, listItem->repeats);
 		}
-		else {
-			msg = (char*)&listItem->message;
+		else
+		{
+			msg = (char *)&listItem->message;
 		}
 
 		trap_R_SetColor(colourText);
@@ -508,7 +516,7 @@ void CG_DrawPMItems(void)
 
 void CG_DrawPMItemsBig(void)
 {
-	vec4_t colour     = { 0.f, 0.f, 0.f, 1.f };
+	vec4_t colour = { 0.f, 0.f, 0.f, 1.f };
 	vec4_t colourText = { 1.f, 1.f, 1.f, 1.f };
 	float  t;
 	float  y = 270;

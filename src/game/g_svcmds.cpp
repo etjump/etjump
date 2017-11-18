@@ -58,7 +58,7 @@ typedef struct ipXPStorageList_s
 typedef struct ipFilterList_s
 {
 	ipFilter_t ipFilters[MAX_IPFILTERS];
-	int numIPFilters;
+	int  numIPFilters;
 	char cvarIPList[32];
 } ipFilterList_t;
 
@@ -110,8 +110,8 @@ qboolean StringToFilter(const char *s, ipFilter_t *f)
 			num[j++] = *s++;
 		}
 		num[j] = 0;
-		b[i]   = atoi(num);
-		m[i]   = 255;
+		b[i] = atoi(num);
+		m[i] = 255;
 
 		if (!*s)
 		{
@@ -120,7 +120,7 @@ qboolean StringToFilter(const char *s, ipFilter_t *f)
 		s++;
 	}
 
-	f->mask    = *(unsigned *)m;
+	f->mask = *(unsigned *)m;
 	f->compare = *(unsigned *)b;
 
 	return qtrue;
@@ -149,7 +149,7 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList)
 
 		*(unsigned *)b = ipFilterList->ipFilters[i].compare;
 		*(unsigned *)m = ipFilterList->ipFilters[i].mask;
-		*ip            = 0;
+		*ip = 0;
 		for (j = 0; j < 4 ; j++)
 		{
 			if (m[j] != 255)
@@ -184,10 +184,10 @@ G_FindIpData
 
 ipXPStorage_t *G_FindIpData(ipXPStorageList_t *ipXPStorageList, char *from)
 {
-	int      i;
+	int i;
 	unsigned in;
-	byte     m[4];
-	char     *p;
+	byte m[4];
+	char *p;
 
 	i = 0;
 	p = from;
@@ -231,10 +231,10 @@ G_FilterPacket
 */
 qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from)
 {
-	int      i;
+	int i;
 	unsigned in;
-	byte     m[4];
-	const char     *p;
+	byte m[4];
+	const char *p;
 
 	i = 0;
 	p = from;
@@ -371,8 +371,8 @@ Svcmd_RemoveIP_f
 void Svcmd_RemoveIP_f(void)
 {
 	ipFilter_t f;
-	int        i;
-	char       str[MAX_TOKEN_CHARS];
+	int  i;
+	char str[MAX_TOKEN_CHARS];
 
 	if (trap_Argc() < 2)
 	{
@@ -410,7 +410,7 @@ Svcmd_EntityList_f
 */
 void    Svcmd_EntityList_f(void)
 {
-	int       e;
+	int e;
 	gentity_t *check;
 
 	check = g_entities + 1;
@@ -484,12 +484,12 @@ void    Svcmd_EntityList_f(void)
 int refClientNumFromString(char *s)
 {
 	gclient_t *cl;
-	int       idnum;
-	char      s2[MAX_STRING_CHARS];
-	char      n2[MAX_STRING_CHARS];
-	qboolean  fIsNumber      = qtrue;
-	int       partialMatchs  = 0;
-	int       partialMatchId = -1;
+	int  idnum;
+	char s2[MAX_STRING_CHARS];
+	char n2[MAX_STRING_CHARS];
+	qboolean fIsNumber = qtrue;
+	int partialMatchs  = 0;
+	int partialMatchId = -1;
 
 	// See if its a number or string
 	for (idnum = 0; idnum < strlen(s) && s[idnum] != 0; idnum++)
@@ -565,8 +565,8 @@ int refClientNumFromString(char *s)
 gclient_t *ClientForString(const char *s)
 {
 	gclient_t *cl;
-	int       i;
-	int       idnum;
+	int i;
+	int idnum;
 
 	// check for a name match
 	for (i = 0 ; i < level.maxclients ; i++)
@@ -671,9 +671,9 @@ G_GetPlayerByName
 gclient_t *G_GetPlayerByName(char *name)
 {
 
-	int       i;
+	int i;
 	gclient_t *cl;
-	char      cleanName[64];
+	char cleanName[64];
 
 	// make sure server is running
 	if (!G_Is_SV_Running())
@@ -723,7 +723,7 @@ forceteam <player> <team>
 void Svcmd_ForceTeam_f(void)
 {
 	gclient_t *cl;
-	char      str[MAX_TOKEN_CHARS];
+	char str[MAX_TOKEN_CHARS];
 
 	// find the player
 	trap_Argv(1, str, sizeof(str));
@@ -766,7 +766,7 @@ extern int FindClientByName(char *name);
 
 void Svcmd_RevivePlayer(char *name)
 {
-	int       clientNum;
+	int clientNum;
 	gentity_t *player;
 
 
@@ -837,6 +837,7 @@ static void Svcmd_KickNum_f(void)
 void G_AddIpMute(char *ip)
 {
 	int i = 0;
+
 	for (i = 0; i < MAX_IP_MUTES; i++)
 	{
 		if (!level.ipMutes[i].inuse)
@@ -857,7 +858,8 @@ void G_AddIpMute(char *ip)
 qboolean G_isIPMuted(const char *originalIp)
 {
 	char ip[32] = "\0";
-	int i = 0; 
+	int  i = 0;
+
 	Q_strncpyz(ip, originalIp, sizeof(ip));
 
 	// Must remove port from ip
@@ -889,6 +891,7 @@ qboolean G_isIPMuted(const char *originalIp)
 void G_RemoveIPMute(char *ip)
 {
 	int i = 0;
+
 	for (i = 0; i < MAX_IP_MUTES; i++)
 	{
 		if (!level.ipMutes[i].inuse)
@@ -909,6 +912,7 @@ void G_RemoveIPMute(char *ip)
 void G_ClearIPMutes()
 {
 	int i;
+
 	for (i = 0; i < MAX_IP_MUTES; i++)
 		level.ipMutes[i].inuse = qfalse;
 }
@@ -916,10 +920,11 @@ void G_ClearIPMutes()
 void AC_ListCheaters()
 {
 	int i = 0;
+
 	for (; i < level.numConnectedClients; i++)
 	{
-		int       clientNum = level.sortedClients[i];
-		gentity_t *target   = g_entities + clientNum;
+		int clientNum = level.sortedClients[i];
+		gentity_t *target = g_entities + clientNum;
 
 		if (target->client->cheatDetected)
 		{
@@ -932,6 +937,7 @@ void AC_ListCheaters()
 void G_ListIPMutes()
 {
 	int i;
+
 	G_Printf("IP Mutes:\n");
 	for (i = 0; i < MAX_IP_MUTES; i++)
 	{

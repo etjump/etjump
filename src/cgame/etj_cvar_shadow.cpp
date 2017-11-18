@@ -3,16 +3,18 @@
 
 using namespace ETJump;
 
-CvarShadow::CvarShadow(const vmCvar_t *shadow, std::string target): _shadow(shadow), _target(target)
-{	
+CvarShadow::CvarShadow(const vmCvar_t *shadow, std::string target) : _shadow(shadow), _target(target)
+{
 	forceCvarSet(shadow);
-;	cvarUpdateHandler->subscribe(_shadow, [&](const vmCvar_t *cvar)
+	;   cvarUpdateHandler->subscribe(_shadow, [&](const vmCvar_t *cvar)
 	{
 		forceCvarSet(cvar);
 	});
 };
 
-CvarShadow::~CvarShadow() {}
+CvarShadow::~CvarShadow()
+{
+}
 
 void CvarShadow::forceCvarSet(const vmCvar_t *cvar) const
 {

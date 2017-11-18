@@ -15,6 +15,7 @@ bool ETJump::EntityEventsHandler::check(const std::string &eventName, centity_t 
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(eventName);
 	auto match = _callbacks.find(lowercaseCommand);
+
 	if (match != end(_callbacks))
 	{
 		for (auto callback : match->second)
@@ -29,13 +30,15 @@ bool ETJump::EntityEventsHandler::check(const std::string &eventName, centity_t 
 bool ETJump::EntityEventsHandler::check(int event, centity_t *cent)
 {
 	auto eventName = (boost::format{ "__event__%d" } % event).str();
+
 	return check(eventName, cent);
 }
 
 
-bool ETJump::EntityEventsHandler::subscribe(const std::string& eventName, std::function<void(centity_t* cent)> callback)
+bool ETJump::EntityEventsHandler::subscribe(const std::string& eventName, std::function<void(centity_t *cent)> callback)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(eventName);
+
 	_callbacks[lowercaseCommand].push_back(callback);
 	return true;
 }
@@ -43,6 +46,7 @@ bool ETJump::EntityEventsHandler::subscribe(const std::string& eventName, std::f
 bool ETJump::EntityEventsHandler::subscribe(int event, std::function<void(centity_t *cent)> callback)
 {
 	auto eventName = (boost::format { "__event__%d" } % event).str();
+
 	return subscribe(eventName, callback);
 }
 
@@ -51,6 +55,7 @@ bool ETJump::EntityEventsHandler::unsubcribe(const std::string &eventName)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(eventName);
 	auto callback = _callbacks.find(lowercaseCommand);
+
 	if (callback != end(_callbacks))
 	{
 		return false;
@@ -63,6 +68,6 @@ bool ETJump::EntityEventsHandler::unsubcribe(const std::string &eventName)
 bool ETJump::EntityEventsHandler::unsubcribe(int event)
 {
 	auto eventName = (boost::format { "__event__%d" } % event).str();
+
 	return unsubcribe(eventName);
 }
-

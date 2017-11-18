@@ -18,9 +18,9 @@ G_BounceMissile
 */
 void G_BounceMissile(gentity_t *ent, trace_t *trace)
 {
-	vec3_t    velocity, relativeDelta;
-	float     dot;
-	int       hitTime;
+	vec3_t velocity, relativeDelta;
+	float  dot;
+	int hitTime;
 	gentity_t *ground;
 
 //	if(ent->s.weapon == WP_GPG40 || ent->s.weapon == WP_M7) {
@@ -146,8 +146,8 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage)
 {
 	gentity_t *other;
 	gentity_t *temp;
-	vec3_t    velocity;
-	int       event = 0, param = 0, otherentnum = 0;
+	vec3_t velocity;
+	int event = 0, param = 0, otherentnum = 0;
 
 	other = &g_entities[trace->entityNum];
 
@@ -226,8 +226,8 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage)
 
 	if (other->takedamage && other->client)
 	{
-		event       = EV_MISSILE_HIT;
-		param       = DirToByte(trace->plane.normal);
+		event = EV_MISSILE_HIT;
+		param = DirToByte(trace->plane.normal);
 		otherentnum = other->s.number;
 //		G_AddEvent( ent, EV_MISSILE_HIT, DirToByte( trace->plane.normal ) );
 //		ent->s.otherEntityNum = other->s.number;
@@ -261,11 +261,11 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage)
 
 //	G_SetOrigin( ent, trace->endpos );
 
-	temp                   = G_TempEntity(trace->endpos, event);
+	temp = G_TempEntity(trace->endpos, event);
 	temp->s.otherEntityNum = otherentnum;
 //	temp->r.svFlags |= SVF_BROADCAST;
 	temp->s.eventParm = param;
-	temp->s.weapon    = ent->s.weapon;
+	temp->s.weapon = ent->s.weapon;
 	temp->s.clientNum = ent->r.ownerNum;
 
 	if (ent->s.weapon == WP_MORTAR_SET)
@@ -320,8 +320,8 @@ void M_think(gentity_t *ent)
 		tent->s.origin[2] += 16;
 	}
 
-	tent->s.time    = 3000;
-	tent->s.time2   = 100;
+	tent->s.time  = 3000;
+	tent->s.time2 = 100;
 	tent->s.density = 0;
 	if (ent->s.density == 1)
 	{
@@ -350,7 +350,7 @@ void G_ExplodeMissile(gentity_t *ent)
 {
 	vec3_t dir;
 	vec3_t origin;
-	int    etype;
+	int etype;
 
 
 	if (ent->s.weapon == WP_SMOKE_MARKER && ent->active)
@@ -365,7 +365,7 @@ void G_ExplodeMissile(gentity_t *ent)
 		}
 	}
 
-	etype        = ent->s.eType;
+	etype = ent->s.eType;
 	ent->s.eType = ET_GENERAL;
 
 	// splash damage
@@ -450,8 +450,8 @@ void G_ExplodeMissile(gentity_t *ent)
 		}
 		else if (ent->s.weapon == WP_DYNAMITE && (ent->etpro_misc_1 & 1))        // do some scoring
 		{   // check if dynamite is in trigger_objective_info field
-			vec3_t    mins, maxs;
-			int       i, num, touch[MAX_GENTITIES];
+			vec3_t mins, maxs;
+			int i, num, touch[MAX_GENTITIES];
 			gentity_t *hit;
 
 			ent->free = NULL; // Gordon: no defused tidy up if we exploded
@@ -501,7 +501,7 @@ void G_ExplodeMissile(gentity_t *ent)
 					}
 
 					G_UseTargets(hit, ent);
-					hit->think     = G_FreeEntity;
+					hit->think = G_FreeEntity;
 					hit->nextthink = level.time + FRAMETIME;
 				}
 			}
@@ -517,8 +517,8 @@ void G_ExplodeMissile(gentity_t *ent)
 
 			gentity_t *tent = G_TempEntity(ent->r.currentOrigin, EV_SHAKE);
 			tent->s.onFireStart = ent->splashDamage * 4;
-			tent->r.svFlags    |= SVF_BROADCAST;
-			
+			tent->r.svFlags |= SVF_BROADCAST;
+
 			//ETJump: map entities don't have attacker id so we send -1
 			tent->s.clientNum = (ent->parent) ? ent->parent->client->ps.clientNum : -1; //ETJump: send attacker's id
 		}
@@ -537,8 +537,8 @@ void G_MissileDie(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, in
 		return;
 	}
 	self->takedamage = qfalse;
-	self->think      = G_ExplodeMissile;
-	self->nextthink  = level.time + 10;
+	self->think = G_ExplodeMissile;
+	self->nextthink = level.time + 10;
 }
 
 /*
@@ -664,7 +664,7 @@ void G_RunMissile(gentity_t *ent)
 {
 	vec3_t  origin;
 	trace_t tr;
-	int     impactDamage;
+	int impactDamage;
 
 	if (ent->s.weapon == WP_LANDMINE || ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_SATCHEL)
 	{
@@ -711,10 +711,10 @@ void G_RunMissile(gentity_t *ent)
 			{
 				gentity_t *tent;
 
-				tent              = G_TempEntity(ent->r.currentOrigin, EV_MORTAR_MISS);
+				tent = G_TempEntity(ent->r.currentOrigin, EV_MORTAR_MISS);
 				tent->s.clientNum = ent->r.ownerNum;
-				tent->r.svFlags  |= SVF_BROADCAST;
-				tent->s.density   = 1;  // angular
+				tent->r.svFlags |= SVF_BROADCAST;
+				tent->s.density  = 1;   // angular
 
 				G_FreeEntity(ent);
 				return;
@@ -727,10 +727,10 @@ void G_RunMissile(gentity_t *ent)
 				{
 					gentity_t *tent;
 
-					tent              = G_TempEntity(ent->r.currentOrigin, EV_MORTAR_MISS);
+					tent = G_TempEntity(ent->r.currentOrigin, EV_MORTAR_MISS);
 					tent->s.clientNum = ent->r.ownerNum;
-					tent->r.svFlags  |= SVF_BROADCAST;
-					tent->s.density   = 0;  // direct
+					tent->r.svFlags |= SVF_BROADCAST;
+					tent->s.density  = 0;   // direct
 
 					G_FreeEntity(ent);
 					return;
@@ -789,7 +789,7 @@ void G_RunMissile(gentity_t *ent)
 			VectorMA(origin, 8, impactpos, impactpos);
 
 			trap_Trace(&mortar_tr, origin, ent->r.mins, ent->r.maxs, impactpos,
-			           ent->r.ownerNum, ent->clipmask);
+				ent->r.ownerNum, ent->clipmask);
 
 			if (mortar_tr.fraction != 1)
 			{
@@ -797,11 +797,11 @@ void G_RunMissile(gentity_t *ent)
 
 				impactpos[2] = BG_GetGroundHeightAtPoint(impactpos);
 
-				tent              = G_TempEntity(impactpos, EV_MORTAR_IMPACT);
+				tent = G_TempEntity(impactpos, EV_MORTAR_IMPACT);
 				tent->s.clientNum = ent->r.ownerNum;
-				tent->r.svFlags  |= SVF_BROADCAST;
+				tent->r.svFlags |= SVF_BROADCAST;
 
-				ent->count2     = 2;
+				ent->count2 = 2;
 				ent->s.legsAnim = 1;
 
 
@@ -885,7 +885,7 @@ void G_RunMissile(gentity_t *ent)
 		{
 			gentity_t *tent = G_TempEntity(ent->r.currentOrigin, EV_SHAKE);
 			tent->s.onFireStart = ent->splashDamage * 4;
-			tent->r.svFlags    |= SVF_BROADCAST;
+			tent->r.svFlags |= SVF_BROADCAST;
 			return;     // exploded
 		}
 	}
@@ -908,7 +908,7 @@ void G_PredictBounceMissile(gentity_t *ent, trajectory_t *pos, trace_t *trace, i
 {
 	vec3_t velocity, origin;
 	float  dot;
-	int    hitTime;
+	int hitTime;
 
 	BG_EvaluateTrajectory(pos, time, origin, qfalse, ent->s.effect2Time);
 
@@ -952,12 +952,12 @@ G_PredictMissile
 */
 int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos, qboolean allowBounce)
 {
-	vec3_t       origin;
-	trace_t      tr;
-	int          time;
+	vec3_t  origin;
+	trace_t tr;
+	int time;
 	trajectory_t pos;
-	vec3_t       org;
-	gentity_t    backupEnt;
+	vec3_t org;
+	gentity_t backupEnt;
 
 	pos = ent->s.pos;
 	BG_EvaluateTrajectory(&pos, level.time, org, qfalse, ent->s.effect2Time);
@@ -973,7 +973,7 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos, qboolean allow
 		// trace a line from the previous position to the current position,
 		// ignoring interactions with the missile owner
 		trap_Trace(&tr, org, ent->r.mins, ent->r.maxs, origin,
-		           ent->r.ownerNum, ent->clipmask);
+			ent->r.ownerNum, ent->clipmask);
 
 		VectorCopy(tr.endpos, org);
 
@@ -1049,7 +1049,7 @@ int G_PredictMissile(gentity_t *ent, int duration, vec3_t endPos, qboolean allow
 
 void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit)
 {
-	int     i;
+	int i;
 	float   radius, dist;
 	vec3_t  point, v;
 	trace_t tr;
@@ -1165,12 +1165,12 @@ void G_BurnTarget(gentity_t *self, gentity_t *body, qboolean directhit)
 void G_FlameDamage(gentity_t *self, gentity_t *ignoreent)
 {
 	gentity_t *body;
-	int       entityList[MAX_GENTITIES];
-	int       i, e, numListedEntities;
-	float     radius, boxradius;
-	vec3_t    mins, maxs;
+	int entityList[MAX_GENTITIES];
+	int i, e, numListedEntities;
+	float  radius, boxradius;
+	vec3_t mins, maxs;
 
-	radius    = self->speed;
+	radius = self->speed;
 	boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement
 
 	for (i = 0 ; i < 3 ; i++)
@@ -1196,10 +1196,10 @@ void G_FlameDamage(gentity_t *self, gentity_t *ignoreent)
 
 void G_RunFlamechunk(gentity_t *ent)
 {
-	vec3_t    vel, add;
-	vec3_t    neworg;
-	trace_t   tr;
-	float     speed, dot;
+	vec3_t  vel, add;
+	vec3_t  neworg;
+	trace_t tr;
+	float speed, dot;
 	gentity_t *ignoreent = NULL;
 
 	// TAT 11/12/2002
@@ -1271,9 +1271,9 @@ void G_RunFlamechunk(gentity_t *ent)
 	if (g_debugBullets.integer > 3)
 	{
 		gentity_t *bboxEnt;
-		float     size = ent->speed / 2;
-		vec3_t    b1, b2;
-		vec3_t    temp;
+		float  size = ent->speed / 2;
+		vec3_t b1, b2;
+		vec3_t temp;
 		VectorSet(temp, -size, -size, -size);
 		VectorCopy(ent->r.currentOrigin, b1);
 		VectorCopy(ent->r.currentOrigin, b2);
@@ -1325,22 +1325,22 @@ gentity_t *fire_flamechunk(gentity_t *self, vec3_t start, vec3_t dir)
 	self->count2 = 1;
 	VectorNormalize(dir);
 
-	bolt            = G_Spawn();
+	bolt = G_Spawn();
 	bolt->classname = "flamechunk";
 
-	bolt->timestamp      = level.time;
+	bolt->timestamp = level.time;
 	bolt->flameQuotaTime = level.time + 50;
-	bolt->s.eType        = ET_FLAMETHROWER_CHUNK;
-	bolt->r.svFlags      = SVF_NOCLIENT;
-	bolt->s.weapon       = self->s.weapon;
-	bolt->r.ownerNum     = self->s.number;
-	bolt->parent         = self;
-	bolt->methodOfDeath  = MOD_FLAMETHROWER;
-	bolt->clipmask       = MASK_MISSILESHOT;
-	bolt->count2         = 0; // how often it bounced off of something
+	bolt->s.eType = ET_FLAMETHROWER_CHUNK;
+	bolt->r.svFlags  = SVF_NOCLIENT;
+	bolt->s.weapon   = self->s.weapon;
+	bolt->r.ownerNum = self->s.number;
+	bolt->parent = self;
+	bolt->methodOfDeath = MOD_FLAMETHROWER;
+	bolt->clipmask = MASK_MISSILESHOT;
+	bolt->count2 = 0;         // how often it bounced off of something
 
-	bolt->s.pos.trType     = TR_DECCELERATE;
-	bolt->s.pos.trTime     = level.time - MISSILE_PRESTEP_TIME; // move a bit on the very first frame
+	bolt->s.pos.trType = TR_DECCELERATE;
+	bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;     // move a bit on the very first frame
 	bolt->s.pos.trDuration = 800;
 
 	// 'speed' will be the current size radius of the chunk
@@ -1365,27 +1365,27 @@ int G_GetWeaponDamage(int weapon);   // JPW NERVE
 void DynaSink(gentity_t *self)
 {
 
-	self->clipmask   = 0;
+	self->clipmask = 0;
 	self->r.contents = 0;
 
 	if (self->timestamp < level.time)
 	{
-		self->think     = G_FreeEntity;
+		self->think = G_FreeEntity;
 		self->nextthink = level.time + FRAMETIME;
 		return;
 	}
 
 	self->s.pos.trBase[2] -= 0.5f;
-	self->nextthink        = level.time + 50;
+	self->nextthink = level.time + 50;
 }
 
 void DynaFree(gentity_t *self)
 {
 	// Gordon - see if the dynamite was planted near a constructable object that would have been destroyed
-	int       entityList[MAX_GENTITIES];
-	int       numListedEntities;
-	int       e;
-	vec3_t    org;
+	int entityList[MAX_GENTITIES];
+	int numListedEntities;
+	int e;
+	vec3_t org;
 	gentity_t *hit;
 
 	self->free = NULL;
@@ -1436,7 +1436,7 @@ G_FadeItems
 void G_FadeItems(gentity_t *ent, int modType)
 {
 	gentity_t *e;
-	int       i;
+	int i;
 
 	e = &g_entities[MAX_CLIENTS];
 	for (i = MAX_CLIENTS ; i < level.num_entities ; i++, e++)
@@ -1461,7 +1461,7 @@ void G_FadeItems(gentity_t *ent, int modType)
 			continue;
 		}
 
-		e->parent     = NULL;
+		e->parent = NULL;
 		e->r.ownerNum = ENTITYNUM_NONE;
 
 		G_FreeEntity(e);
@@ -1471,8 +1471,8 @@ void G_FadeItems(gentity_t *ent, int modType)
 int G_CountTeamLandmines(team_t team)
 {
 	gentity_t *e;
-	int       i;
-	int       cnt = 0;
+	int i;
+	int cnt = 0;
 
 	e = &g_entities[MAX_CLIENTS];
 	for (i = MAX_CLIENTS ; i < level.num_entities ; i++, e++)
@@ -1504,8 +1504,8 @@ int G_CountTeamLandmines(team_t team)
 qboolean G_SweepForLandmines(vec3_t origin, float radius, int team)
 {
 	gentity_t *e;
-	int       i;
-	vec3_t    dist;
+	int i;
+	vec3_t dist;
 
 	radius *= radius;
 
@@ -1545,7 +1545,7 @@ qboolean G_SweepForLandmines(vec3_t origin, float radius, int team)
 gentity_t *G_FindSatchel(gentity_t *ent)
 {
 	gentity_t *e;
-	int       i;
+	int i;
 
 	e = &g_entities[MAX_CLIENTS];
 	for (i = MAX_CLIENTS ; i < level.num_entities ; i++, e++)
@@ -1585,7 +1585,7 @@ G_FindDroppedItem
 qboolean G_HasDroppedItem(gentity_t *ent, int modType)
 {
 	gentity_t *e;
-	int       i;
+	int i;
 
 	e = &g_entities[MAX_CLIENTS];
 	for (i = MAX_CLIENTS ; i < level.num_entities ; i++, e++)
@@ -1635,9 +1635,9 @@ G_ExplodeSatchels
 qboolean G_ExplodeSatchels(gentity_t *ent)
 {
 	gentity_t *e;
-	vec3_t    dist;
-	int       i;
-	qboolean  blown = qfalse;
+	vec3_t dist;
+	int i;
+	qboolean blown = qfalse;
 
 	e = &g_entities[MAX_CLIENTS];
 	for (i = MAX_CLIENTS ; i < level.num_entities; i++, e++)
@@ -1683,8 +1683,8 @@ G_ExplodeSatchelsExt
 qboolean G_ExplodeSatchelsExt(gentity_t *ent)
 {
 	gentity_t *e;
-	int       i;
-	qboolean  blown = qfalse;
+	int i;
+	qboolean blown = qfalse;
 
 	e = &g_entities[MAX_CLIENTS];
 	for (i = MAX_CLIENTS; i < level.num_entities; i++, e++)
@@ -1739,9 +1739,9 @@ void G_FreeSatchel(gentity_t *ent)
 		return;
 	}
 
-	other->client->ps.ammo[WP_SATCHEL_DET]     = 0;
+	other->client->ps.ammo[WP_SATCHEL_DET] = 0;
 	other->client->ps.ammoclip[WP_SATCHEL_DET] = 0;
-	other->client->ps.ammoclip[WP_SATCHEL]     = 1;
+	other->client->ps.ammoclip[WP_SATCHEL] = 1;
 	if (other->client->ps.weapon == WP_SATCHEL_DET)
 	{
 		G_AddEvent(other, EV_NOAMMO, 0);
@@ -1759,8 +1759,8 @@ void LandMineTrigger(gentity_t *self)
 {
 	self->r.contents = CONTENTS_CORPSE;
 	trap_LinkEntity(self);
-	self->nextthink  = level.time + FRAMETIME;
-	self->think      = LandminePostThink;
+	self->nextthink = level.time + FRAMETIME;
+	self->think = LandminePostThink;
 	self->s.teamNum += 8;
 	// rain - communicate trigger time to client
 	self->s.time = level.time;
@@ -1769,7 +1769,7 @@ void LandMineTrigger(gentity_t *self)
 void LandMinePostTrigger(gentity_t *self)
 {
 	self->nextthink = level.time + 300;
-	self->think     = G_ExplodeMissile;
+	self->think = G_ExplodeMissile;
 }
 
 
@@ -1781,8 +1781,8 @@ G_TripMineThink
 
 void G_TripMineThink(gentity_t *ent)
 {
-	trace_t   trace;
-	vec3_t    start, end;
+	trace_t trace;
+	vec3_t  start, end;
 	gentity_t *traceEnt;
 
 	VectorMA(ent->r.currentOrigin, 2, ent->s.origin2, start);
@@ -1821,7 +1821,7 @@ G_TripMinePrime
 
 void G_TripMinePrime(gentity_t *ent)
 {
-	ent->think     = G_TripMineThink;
+	ent->think = G_TripMineThink;
 	ent->nextthink = level.time + 500;
 }
 
@@ -1857,11 +1857,11 @@ qboolean sEntWillTriggerMine(gentity_t *ent, gentity_t *mine)
 // Gordon: Landmine waits for 2 seconds then primes, which sets think to checking for "enemies"
 void G_LandmineThink(gentity_t *self)
 {
-	int       entityList[MAX_GENTITIES];
-	int       i, cnt;
-	vec3_t    range = { LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST };
-	vec3_t    mins, maxs;
-	qboolean  trigger = qfalse;
+	int entityList[MAX_GENTITIES];
+	int i, cnt;
+	vec3_t range = { LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST };
+	vec3_t mins, maxs;
+	qboolean trigger = qfalse;
 	gentity_t *ent;
 
 	self->nextthink = level.time + FRAMETIME;
@@ -1901,11 +1901,11 @@ void G_LandmineThink(gentity_t *self)
 
 void LandminePostThink(gentity_t *self)
 {
-	int       entityList[MAX_GENTITIES];
-	int       i, cnt;
-	vec3_t    range = { LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST };
-	vec3_t    mins, maxs;
-	qboolean  trigger = qfalse;
+	int entityList[MAX_GENTITIES];
+	int i, cnt;
+	vec3_t range = { LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST, LANDMINE_TRIGGER_DIST };
+	vec3_t mins, maxs;
+	qboolean trigger = qfalse;
 	gentity_t *ent;
 
 	self->nextthink = level.time + FRAMETIME;
@@ -1947,14 +1947,14 @@ G_LandminePrime
 void G_LandminePrime(gentity_t *self)
 {
 	self->nextthink = level.time + FRAMETIME;
-	self->think     = G_LandmineThink;
+	self->think = G_LandmineThink;
 }
 
 qboolean G_LandmineSnapshotCallback(int entityNum, int clientNum)
 {
-	gentity_t *ent   = &g_entities[entityNum];
+	gentity_t *ent = &g_entities[entityNum];
 	gentity_t *clEnt = &g_entities[clientNum];
-	team_t    team;
+	team_t team;
 
 	if (clEnt->client->sess.skill[SK_BATTLE_SENSE] >= 4)
 	{
@@ -2016,32 +2016,32 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir, int grenadeWP
 
 	if (grenadeWPID == WP_DYNAMITE)
 	{
-		noExplode       = qtrue;
+		noExplode = qtrue;
 		bolt->nextthink = level.time + 15000;
-		bolt->think     = DynaSink;
+		bolt->think = DynaSink;
 		bolt->timestamp = level.time + 16500;
-		bolt->free      = DynaFree;
+		bolt->free = DynaFree;
 	}
 
 	if (grenadeWPID == WP_LANDMINE)
 	{
-		noExplode       = qtrue;
+		noExplode = qtrue;
 		bolt->nextthink = level.time + 15000;
-		bolt->think     = DynaSink;
+		bolt->think = DynaSink;
 		bolt->timestamp = level.time + 16500;
 	}
 
 	if (grenadeWPID == WP_SATCHEL)
 	{
-		noExplode         = qtrue;
-		bolt->nextthink   = 0;
+		noExplode = qtrue;
+		bolt->nextthink = 0;
 		bolt->s.clientNum = self->s.clientNum;
-		bolt->free        = G_FreeSatchel;
+		bolt->free = G_FreeSatchel;
 	}
 
 	if (grenadeWPID == WP_MORTAR_SET)       // only on impact
 	{
-		noExplode       = qtrue;
+		noExplode = qtrue;
 		bolt->nextthink = 0;
 	}
 
@@ -2056,36 +2056,36 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir, int grenadeWP
 		bolt->think = G_ExplodeMissile;
 	}
 
-	bolt->s.eType    = ET_MISSILE;
+	bolt->s.eType = ET_MISSILE;
 	bolt->r.svFlags  = SVF_BROADCAST;
 	bolt->s.weapon   = grenadeWPID;
 	bolt->r.ownerNum = self->s.number;
-	bolt->parent     = self;
-	bolt->s.teamNum  = self->client->sess.sessionTeam;
+	bolt->parent = self;
+	bolt->s.teamNum = self->client->sess.sessionTeam;
 
 // JPW NERVE -- commented out bolt->damage and bolt->splashdamage, override with G_GetWeaponDamage()
 // so it works with different netgame balance.  didn't uncomment bolt->damage on dynamite 'cause its so *special*
-	bolt->damage       = G_GetWeaponDamage(grenadeWPID); // overridden for dynamite
+	bolt->damage = G_GetWeaponDamage(grenadeWPID);       // overridden for dynamite
 	bolt->splashDamage = G_GetWeaponDamage(grenadeWPID);
 // jpw
 
 	switch (grenadeWPID)
 	{
 	case WP_GPG40:
-		bolt->classname           = "gpg40_grenade";
-		bolt->splashRadius        = 300;
-		bolt->methodOfDeath       = MOD_GPG40;
+		bolt->classname = "gpg40_grenade";
+		bolt->splashRadius  = 300;
+		bolt->methodOfDeath = MOD_GPG40;
 		bolt->splashMethodOfDeath = MOD_GPG40;
-		bolt->s.eFlags            = /*0;*/ EF_BOUNCE_HALF | EF_BOUNCE;
-		bolt->nextthink           = level.time + 4000;
+		bolt->s.eFlags  = /*0;*/ EF_BOUNCE_HALF | EF_BOUNCE;
+		bolt->nextthink = level.time + 4000;
 		break;
 	case WP_M7:
-		bolt->classname           = "m7_grenade";
-		bolt->splashRadius        = 300;
-		bolt->methodOfDeath       = MOD_M7;
+		bolt->classname = "m7_grenade";
+		bolt->splashRadius  = 300;
+		bolt->methodOfDeath = MOD_M7;
 		bolt->splashMethodOfDeath = MOD_M7;
-		bolt->s.eFlags            = /*0;*/ EF_BOUNCE_HALF | EF_BOUNCE;
-		bolt->nextthink           = level.time + 4000;
+		bolt->s.eFlags  = /*0;*/ EF_BOUNCE_HALF | EF_BOUNCE;
+		bolt->nextthink = level.time + 4000;
 		break;
 	case WP_SMOKE_BOMB:
 		// xkan 11/25/2002, fixed typo, classname used to be "somke_bomb"
@@ -2095,47 +2095,47 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir, int grenadeWP
 		bolt->methodOfDeath = MOD_SMOKEBOMB;
 		break;
 	case WP_GRENADE_LAUNCHER:
-		bolt->classname           = "grenade";
-		bolt->splashRadius        = 300;
-		bolt->methodOfDeath       = MOD_GRENADE_LAUNCHER;
+		bolt->classname = "grenade";
+		bolt->splashRadius  = 300;
+		bolt->methodOfDeath = MOD_GRENADE_LAUNCHER;
 		bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
-		bolt->s.eFlags            = EF_BOUNCE_HALF | EF_BOUNCE;
+		bolt->s.eFlags = EF_BOUNCE_HALF | EF_BOUNCE;
 		break;
 	case WP_GRENADE_PINEAPPLE:
-		bolt->classname           = "grenade";
-		bolt->splashRadius        = 300;
-		bolt->methodOfDeath       = MOD_GRENADE_LAUNCHER;
+		bolt->classname = "grenade";
+		bolt->splashRadius  = 300;
+		bolt->methodOfDeath = MOD_GRENADE_LAUNCHER;
 		bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
-		bolt->s.eFlags            = EF_BOUNCE_HALF | EF_BOUNCE;
+		bolt->s.eFlags = EF_BOUNCE_HALF | EF_BOUNCE;
 		break;
 // JPW NERVE
 	case WP_SMOKE_MARKER:
 		bolt->classname = "grenade";
 		bolt->s.eFlags  = EF_BOUNCE_HALF | EF_BOUNCE;
 		// rain - properly set MOD
-		bolt->methodOfDeath       = MOD_SMOKEGRENADE;
+		bolt->methodOfDeath = MOD_SMOKEGRENADE;
 		bolt->splashMethodOfDeath = MOD_SMOKEGRENADE;
 		break;
 // jpw
 	case WP_MORTAR_SET:
-		bolt->classname           = "mortar_grenade";
-		bolt->splashRadius        = 800;
-		bolt->methodOfDeath       = MOD_MORTAR;
+		bolt->classname = "mortar_grenade";
+		bolt->splashRadius  = 800;
+		bolt->methodOfDeath = MOD_MORTAR;
 		bolt->splashMethodOfDeath = MOD_MORTAR;
-		bolt->s.eFlags            = 0;
+		bolt->s.eFlags = 0;
 		break;
 	case WP_LANDMINE:
-		bolt->accuracy            = 0;
-		bolt->s.teamNum           = self->client->sess.sessionTeam + 4;
-		bolt->classname           = "landmine";
-		bolt->damage              = 0;
-		bolt->splashRadius        = 225;        // was: 400
-		bolt->methodOfDeath       = MOD_LANDMINE;
+		bolt->accuracy  = 0;
+		bolt->s.teamNum = self->client->sess.sessionTeam + 4;
+		bolt->classname = "landmine";
+		bolt->damage = 0;
+		bolt->splashRadius  = 225;              // was: 400
+		bolt->methodOfDeath = MOD_LANDMINE;
 		bolt->splashMethodOfDeath = MOD_LANDMINE;
-		bolt->s.eFlags            = (EF_BOUNCE | EF_BOUNCE_HALF);
-		bolt->health              = 5;
-		bolt->takedamage          = qtrue;
-		bolt->r.contents          = CONTENTS_CORPSE;        // (player can walk through)
+		bolt->s.eFlags = (EF_BOUNCE | EF_BOUNCE_HALF);
+		bolt->health = 5;
+		bolt->takedamage = qtrue;
+		bolt->r.contents = CONTENTS_CORPSE;                 // (player can walk through)
 
 		bolt->r.snapshotCallback = qtrue;
 
@@ -2145,16 +2145,16 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir, int grenadeWP
 		VectorCopy(bolt->r.maxs, bolt->r.absmax);
 		break;
 	case WP_SATCHEL:
-		bolt->accuracy            = 0;
-		bolt->classname           = "satchel_charge";
-		bolt->damage              = 0;
-		bolt->splashRadius        = 300;
-		bolt->methodOfDeath       = MOD_SATCHEL;
+		bolt->accuracy  = 0;
+		bolt->classname = "satchel_charge";
+		bolt->damage = 0;
+		bolt->splashRadius  = 300;
+		bolt->methodOfDeath = MOD_SATCHEL;
 		bolt->splashMethodOfDeath = MOD_SATCHEL;
-		bolt->s.eFlags            = (EF_BOUNCE | EF_BOUNCE_HALF);
-		bolt->health              = 5;
-		bolt->takedamage          = qfalse;
-		bolt->r.contents          = CONTENTS_CORPSE;        // (player can walk through)
+		bolt->s.eFlags = (EF_BOUNCE | EF_BOUNCE_HALF);
+		bolt->health = 5;
+		bolt->takedamage = qfalse;
+		bolt->r.contents = CONTENTS_CORPSE;                 // (player can walk through)
 
 		VectorSet(bolt->r.mins, -12, -12, 0);
 		VectorCopy(bolt->r.mins, bolt->r.absmin);
@@ -2168,15 +2168,15 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir, int grenadeWP
 		// differentiate non-armed dynamite with non-pulsing dlight
 		bolt->s.teamNum = self->client->sess.sessionTeam + 4;
 		bolt->classname = "dynamite";
-		bolt->damage    = 0;
+		bolt->damage = 0;
 //			bolt->splashDamage			= 300;
-		bolt->splashRadius        = 400;
-		bolt->methodOfDeath       = MOD_DYNAMITE;
+		bolt->splashRadius  = 400;
+		bolt->methodOfDeath = MOD_DYNAMITE;
 		bolt->splashMethodOfDeath = MOD_DYNAMITE;
-		bolt->s.eFlags            = (EF_BOUNCE | EF_BOUNCE_HALF);
+		bolt->s.eFlags = (EF_BOUNCE | EF_BOUNCE_HALF);
 
 		// dynamite is shootable
-		bolt->health     = 5;
+		bolt->health = 5;
 		bolt->takedamage = qfalse;
 
 		bolt->r.contents = CONTENTS_CORPSE;                 // (player can walk through)
@@ -2236,10 +2236,10 @@ gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir)
 
 	VectorNormalize(dir);
 
-	bolt            = G_Spawn();
+	bolt = G_Spawn();
 	bolt->classname = "rocket";
 	bolt->nextthink = level.time + 20000;   // push it out a little
-	bolt->think     = G_ExplodeMissile;
+	bolt->think = G_ExplodeMissile;
 	bolt->accuracy  = 4;
 	bolt->s.eType   = ET_MISSILE;
 	bolt->r.svFlags = SVF_BROADCAST;
@@ -2247,20 +2247,22 @@ gentity_t *fire_rocket(gentity_t *self, vec3_t start, vec3_t dir)
 	//DHM - Nerve :: Use the correct weapon in multiplayer
 	bolt->s.weapon = self->s.weapon;
 
-	bolt->r.ownerNum          = self->s.number;
-	bolt->parent              = self;
-	bolt->damage              = G_GetWeaponDamage(WP_PANZERFAUST); // JPW NERVE
-	bolt->splashDamage        = G_GetWeaponDamage(WP_PANZERFAUST); // JPW NERVE
-	bolt->splashRadius        = 300; //G_GetWeaponDamage(WP_PANZERFAUST);	// Arnout : hardcoded bleh hack
-	bolt->methodOfDeath       = MOD_PANZERFAUST;
+	bolt->r.ownerNum = self->s.number;
+	bolt->parent = self;
+	bolt->damage = G_GetWeaponDamage(WP_PANZERFAUST);              // JPW NERVE
+	bolt->splashDamage  = G_GetWeaponDamage(WP_PANZERFAUST);       // JPW NERVE
+	bolt->splashRadius  = 300;       //G_GetWeaponDamage(WP_PANZERFAUST);	// Arnout : hardcoded bleh hack
+	bolt->methodOfDeath = MOD_PANZERFAUST;
 	bolt->splashMethodOfDeath = MOD_PANZERFAUST;
 
 	// player shoots & never hits
-	if (self->client) {
+	if (self->client)
+	{
 		bolt->clipmask = CONTENTS_SOLID | CONTENTS_MISSILECLIP;
 	}
 	// map shoots & hits
-	else {
+	else
+	{
 		bolt->clipmask = MASK_MISSILESHOT;
 	}
 
@@ -2299,20 +2301,20 @@ gentity_t *fire_flamebarrel(gentity_t *self, vec3_t start, vec3_t dir)
 	// Gordon: for explosion type
 	bolt->accuracy = 3;
 
-	bolt->classname    = "flamebarrel";
-	bolt->nextthink    = level.time + 3000;
-	bolt->think        = G_ExplodeMissile;
-	bolt->s.eType      = ET_FLAMEBARREL;
-	bolt->s.eFlags     = EF_BOUNCE_HALF;
-	bolt->r.svFlags    = SVF_BLANK;
-	bolt->s.weapon     = WP_PANZERFAUST;
-	bolt->r.ownerNum   = self->s.number;
-	bolt->parent       = self;
-	bolt->damage       = 100;
+	bolt->classname = "flamebarrel";
+	bolt->nextthink = level.time + 3000;
+	bolt->think = G_ExplodeMissile;
+	bolt->s.eType    = ET_FLAMEBARREL;
+	bolt->s.eFlags   = EF_BOUNCE_HALF;
+	bolt->r.svFlags  = SVF_BLANK;
+	bolt->s.weapon   = WP_PANZERFAUST;
+	bolt->r.ownerNum = self->s.number;
+	bolt->parent = self;
+	bolt->damage = 100;
 	bolt->splashDamage = 20;
 	bolt->splashRadius = 60;
 
-	bolt->methodOfDeath       = MOD_ROCKET;
+	bolt->methodOfDeath = MOD_ROCKET;
 	bolt->splashMethodOfDeath = MOD_ROCKET;
 
 	bolt->clipmask = MASK_MISSILESHOT;
@@ -2337,13 +2339,14 @@ fire_lead
 void fire_lead(gentity_t *self, vec3_t start, vec3_t dir, int damage)
 {
 
-	trace_t   tr;
-	vec3_t    end;
+	trace_t tr;
+	vec3_t  end;
 	gentity_t *tent;
 	gentity_t *traceEnt;
-	vec3_t    forward, right, up;
-	vec3_t    angles;
-	float     r, u;
+	vec3_t forward, right, up;
+	vec3_t angles;
+	float  r, u;
+
 //	qboolean anti_tank_enable = qfalse;
 
 	r = crandom() * self->random;
@@ -2370,7 +2373,7 @@ void fire_lead(gentity_t *self, vec3_t start, vec3_t dir, int damage)
 	// send bullet impact
 	if (traceEnt->takedamage && traceEnt->client)
 	{
-		tent              = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
+		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
 		tent->s.eventParm = traceEnt->s.number;
 	}
 	else
@@ -2393,7 +2396,7 @@ void fire_lead(gentity_t *self, vec3_t start, vec3_t dir, int damage)
 	if (traceEnt->takedamage)
 	{
 		G_Damage(traceEnt, self, self, forward, tr.endpos,
-		         damage, 0, MOD_MACHINEGUN);
+			damage, 0, MOD_MACHINEGUN);
 	}
 }
 
@@ -2410,7 +2413,7 @@ qboolean visible(gentity_t *self, gentity_t *other)
 {
 //	vec3_t		spot1;
 //	vec3_t		spot2;
-	trace_t   tr;
+	trace_t tr;
 	gentity_t *traceEnt;
 
 	trap_Trace(&tr, self->r.currentOrigin, NULL, NULL, other->r.currentOrigin, self->s.number, MASK_SHOT);
@@ -2443,32 +2446,32 @@ gentity_t *fire_mortar(gentity_t *self, vec3_t start, vec3_t dir)
 	if (self->spawnflags)
 	{
 		gentity_t *tent;
-		tent            = G_TempEntity(self->s.pos.trBase, EV_MORTAREFX);
+		tent = G_TempEntity(self->s.pos.trBase, EV_MORTAREFX);
 		tent->s.density = self->spawnflags; // send smoke and muzzle flash flags
 		VectorCopy(self->s.pos.trBase, tent->s.origin);
 		VectorCopy(self->s.apos.trBase, tent->s.angles);
 	}
 
-	bolt            = G_Spawn();
+	bolt = G_Spawn();
 	bolt->classname = "mortar";
 	bolt->nextthink = level.time + 20000;   // push it out a little
-	bolt->think     = G_ExplodeMissile;
+	bolt->think = G_ExplodeMissile;
 
 	// Gordon: for explosion type
 	bolt->accuracy = 4;
 
 	bolt->s.eType = ET_MISSILE;
 
-	bolt->r.svFlags           = SVF_BROADCAST; // broadcast sound.  not multiplayer friendly, but for mortars it should be okay
-	bolt->s.weapon            = WP_MAPMORTAR;
-	bolt->r.ownerNum          = self->s.number;
-	bolt->parent              = self;
-	bolt->damage              = G_GetWeaponDamage(WP_MAPMORTAR); // JPW NERVE
-	bolt->splashDamage        = G_GetWeaponDamage(WP_MAPMORTAR); // JPW NERVE
-	bolt->splashRadius        = 120;
-	bolt->methodOfDeath       = MOD_MAPMORTAR;
+	bolt->r.svFlags  = SVF_BROADCAST;          // broadcast sound.  not multiplayer friendly, but for mortars it should be okay
+	bolt->s.weapon   = WP_MAPMORTAR;
+	bolt->r.ownerNum = self->s.number;
+	bolt->parent = self;
+	bolt->damage = G_GetWeaponDamage(WP_MAPMORTAR);              // JPW NERVE
+	bolt->splashDamage  = G_GetWeaponDamage(WP_MAPMORTAR);       // JPW NERVE
+	bolt->splashRadius  = 120;
+	bolt->methodOfDeath = MOD_MAPMORTAR;
 	bolt->splashMethodOfDeath = MOD_MAPMORTAR_SPLASH;
-	bolt->clipmask            = MASK_MISSILESHOT;
+	bolt->clipmask = MASK_MISSILESHOT;
 
 	bolt->s.pos.trType = TR_GRAVITY;
 	bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;     // move a bit on the very first frame

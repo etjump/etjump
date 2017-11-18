@@ -1,7 +1,7 @@
 #include "ui_local.h"
 #include "ui_shared.h"
 
-qboolean   bg_loadscreeninited = qfalse;
+qboolean bg_loadscreeninited = qfalse;
 fontInfo_t bg_loadscreenfont1;
 fontInfo_t bg_loadscreenfont2;
 
@@ -187,15 +187,15 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack
 #define STARTANGLE 40
 void UI_LoadPanel_RenderPercentageMeter(panel_button_t *button)
 {
-	float      hunkfrac;
-	float      w, h;
-	vec2_t     org;
+	float  hunkfrac;
+	float  w, h;
+	vec2_t org;
 	polyVert_t verts[4];
 
 	org[0] = button->rect.x;
 	org[1] = button->rect.y;
-	w      = button->rect.w;
-	h      = button->rect.h;
+	w = button->rect.w;
+	h = button->rect.h;
 
 	hunkfrac = 0.f;
 	AdjustFrom640(&org[0], &org[1], &w, &h);
@@ -230,41 +230,41 @@ void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h, vec_t an
 
 	MiniAngleToAxis(angle, axes);
 
-	verts[0].xyz[0]      = org[0] - (w * 0.5f) * axes[0][0];
-	verts[0].xyz[1]      = org[1] - (w * 0.5f) * axes[0][1];
-	verts[0].xyz[2]      = 0;
-	verts[0].st[0]       = 0;
-	verts[0].st[1]       = 1;
+	verts[0].xyz[0] = org[0] - (w * 0.5f) * axes[0][0];
+	verts[0].xyz[1] = org[1] - (w * 0.5f) * axes[0][1];
+	verts[0].xyz[2] = 0;
+	verts[0].st[0]  = 0;
+	verts[0].st[1]  = 1;
 	verts[0].modulate[0] = 255;
 	verts[0].modulate[1] = 255;
 	verts[0].modulate[2] = 255;
 	verts[0].modulate[3] = 255;
 
-	verts[1].xyz[0]      = verts[0].xyz[0] + w * axes[0][0];
-	verts[1].xyz[1]      = verts[0].xyz[1] + w * axes[0][1];
-	verts[1].xyz[2]      = 0;
-	verts[1].st[0]       = 1;
-	verts[1].st[1]       = 1;
+	verts[1].xyz[0] = verts[0].xyz[0] + w * axes[0][0];
+	verts[1].xyz[1] = verts[0].xyz[1] + w * axes[0][1];
+	verts[1].xyz[2] = 0;
+	verts[1].st[0]  = 1;
+	verts[1].st[1]  = 1;
 	verts[1].modulate[0] = 255;
 	verts[1].modulate[1] = 255;
 	verts[1].modulate[2] = 255;
 	verts[1].modulate[3] = 255;
 
-	verts[2].xyz[0]      = verts[1].xyz[0] + h * axes[1][0];
-	verts[2].xyz[1]      = verts[1].xyz[1] + h * axes[1][1];
-	verts[2].xyz[2]      = 0;
-	verts[2].st[0]       = 1;
-	verts[2].st[1]       = 0;
+	verts[2].xyz[0] = verts[1].xyz[0] + h * axes[1][0];
+	verts[2].xyz[1] = verts[1].xyz[1] + h * axes[1][1];
+	verts[2].xyz[2] = 0;
+	verts[2].st[0]  = 1;
+	verts[2].st[1]  = 0;
 	verts[2].modulate[0] = 255;
 	verts[2].modulate[1] = 255;
 	verts[2].modulate[2] = 255;
 	verts[2].modulate[3] = 255;
 
-	verts[3].xyz[0]      = verts[2].xyz[0] - w * axes[0][0];
-	verts[3].xyz[1]      = verts[2].xyz[1] - w * axes[0][1];
-	verts[3].xyz[2]      = 0;
-	verts[3].st[0]       = 0;
-	verts[3].st[1]       = 0;
+	verts[3].xyz[0] = verts[2].xyz[0] - w * axes[0][0];
+	verts[3].xyz[1] = verts[2].xyz[1] - w * axes[0][1];
+	verts[3].xyz[2] = 0;
+	verts[3].st[0]  = 0;
+	verts[3].st[1]  = 0;
 	verts[3].modulate[0] = 255;
 	verts[3].modulate[1] = 255;
 	verts[3].modulate[2] = 255;
@@ -274,7 +274,7 @@ void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h, vec_t an
 void UI_LoadPanel_RenderHeaderText(panel_button_t *button)
 {
 	uiClientState_t cstate;
-	char            downloadName[MAX_INFO_VALUE];
+	char downloadName[MAX_INFO_VALUE];
 
 	trap_GetClientState(&cstate);
 
@@ -295,18 +295,18 @@ void UI_LoadPanel_RenderHeaderText(panel_button_t *button)
 #define ESTIMATES 80
 const char *UI_DownloadInfo(const char *downloadName)
 {
-	static char dlText[]                = "Downloading:";
-	static char etaText[]               = "Estimated time left:";
-	static char xferText[]              = "Transfer rate:";
+	static char dlText[]   = "Downloading:";
+	static char etaText[]  = "Estimated time left:";
+	static char xferText[] = "Transfer rate:";
 	static int  tleEstimates[ESTIMATES] = { 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
 		                                    60,  60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
 		                                    60,  60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
 		                                    60,  60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60 };
 	static int  tleIndex = 0;
 
-	char       dlSizeBuf[64], totalSizeBuf[64], xferRateBuf[64], dlTimeBuf[64];
-	int        downloadSize, downloadCount, downloadTime;
-	int        xferRate;
+	char dlSizeBuf[64], totalSizeBuf[64], xferRateBuf[64], dlTimeBuf[64];
+	int  downloadSize, downloadCount, downloadTime;
+	int  xferRate;
 	const char *s, *ds;
 
 	downloadSize  = trap_Cvar_VariableValue("cl_downloadSize");
@@ -328,9 +328,9 @@ const char *UI_DownloadInfo(const char *downloadName)
 	if (downloadCount < 4096 || !downloadTime)
 	{
 		s = va("%s\n %s\n%s\n\n%s\n estimating...\n\n%s\n\n%s copied", dlText, ds, totalSizeBuf,
-		       etaText,
-		       xferText,
-		       dlSizeBuf);
+			etaText,
+			xferText,
+			dlSizeBuf);
 		return s;
 	}
 	else
@@ -348,7 +348,7 @@ const char *UI_DownloadInfo(const char *downloadName)
 		// Extrapolate estimated completion time
 		if (downloadSize && xferRate)
 		{
-			int n        = downloadSize / xferRate; // estimated time for entire d/l in secs
+			int n = downloadSize / xferRate;        // estimated time for entire d/l in secs
 			int timeleft = 0, i;
 
 			// We do it in K (/1024) because we'd overflow around 4MB
@@ -374,25 +374,25 @@ const char *UI_DownloadInfo(const char *downloadName)
 		if (xferRate)
 		{
 			s = va("%s\n %s\n%s\n\n%s\n %s\n\n%s\n %s/sec\n\n%s copied", dlText, ds, totalSizeBuf,
-			       etaText, dlTimeBuf,
-			       xferText, xferRateBuf,
-			       dlSizeBuf);
+				etaText, dlTimeBuf,
+				xferText, xferRateBuf,
+				dlSizeBuf);
 		}
 		else
 		{
 			if (downloadSize)
 			{
 				s = va("%s\n %s\n%s\n\n%s\n estimating...\n\n%s\n\n%s copied", dlText, ds, totalSizeBuf,
-				       etaText,
-				       xferText,
-				       dlSizeBuf);
+					etaText,
+					xferText,
+					dlSizeBuf);
 			}
 			else
 			{
 				s = va("%s\n %s\n\n%s\n estimating...\n\n%s\n\n%s copied", dlText, ds,
-				       etaText,
-				       xferText,
-				       dlSizeBuf);
+					etaText,
+					xferText,
+					dlSizeBuf);
 			}
 		}
 
@@ -404,14 +404,14 @@ const char *UI_DownloadInfo(const char *downloadName)
 
 void UI_LoadPanel_RenderLoadingText(panel_button_t *button)
 {
-	uiClientState_t    cstate;
-	char               downloadName[MAX_INFO_VALUE];
-	char               buff[2560];
+	uiClientState_t cstate;
+	char downloadName[MAX_INFO_VALUE];
+	char buff[2560];
 	static connstate_t lastConnState;
-	static char        lastLoadingText[MAX_INFO_VALUE];
-	char               *p;
+	static char lastLoadingText[MAX_INFO_VALUE];
+	char *p;
 	const char *s = "";
-	float              y;
+	float y;
 
 	trap_GetClientState(&cstate);
 

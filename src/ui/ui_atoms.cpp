@@ -8,7 +8,7 @@
 #include "ui_local.h"
 
 uiStatic_t uis;
-qboolean   m_entersound;            // after a frame, so caching won't disrupt the sound
+qboolean m_entersound;              // after a frame, so caching won't disrupt the sound
 
 // these are here so the functions in q_shared.c can link
 #ifndef UI_HARD_LINKED
@@ -19,8 +19,8 @@ qboolean   m_entersound;            // after a frame, so caching won't disrupt t
 void QDECL Com_DPrintf(const char *fmt, ...)
 {
 	va_list argptr;
-	char    msg[MAXPRINTMSG];
-	int     developer;
+	char msg[MAXPRINTMSG];
+	int  developer;
 
 	developer = trap_Cvar_VariableValue("developer");
 	if (!developer)
@@ -39,7 +39,7 @@ void QDECL Com_DPrintf(const char *fmt, ...)
 void QDECL Com_Error(int level, const char *error, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, error);
 	Q_vsnprintf(text, sizeof(text), error, argptr);
@@ -51,7 +51,7 @@ void QDECL Com_Error(int level, const char *error, ...)
 void QDECL Com_Printf(const char *msg, ...)
 {
 	va_list argptr;
-	char    text[1024];
+	char text[1024];
 
 	va_start(argptr, msg);
 	Q_vsnprintf(text, sizeof(text), msg, argptr);
@@ -156,7 +156,7 @@ UI_ConsoleCommand
 */
 qboolean UI_ConsoleCommand(int realTime)
 {
-	char            *cmd;
+	char *cmd;
 	uiClientState_t cstate;
 
 	uiInfo.uiDC.frameTime = realTime - uiInfo.uiDC.realTime;
@@ -292,6 +292,7 @@ void UI_AdjustFrom640(float *x, float *y, float *w, float *h)
 int ETJump_GetScreenWidth()
 {
 	int width = uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight;
+
 	return width > 640 ? width : 640;
 }
 

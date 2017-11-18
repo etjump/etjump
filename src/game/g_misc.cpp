@@ -36,7 +36,7 @@ void SP_info_null(gentity_t *self)
 		G_FreeEntity(self);
 	}
 
-	self->think     = G_FreeEntity;
+	self->think = G_FreeEntity;
 	self->nextthink = level.time + (FRAMETIME * 2);
 }
 
@@ -90,7 +90,7 @@ TELEPORTERS
 =================================================================================
 */
 
-// ETJump: teleports player in specific origin with specific angles, 
+// ETJump: teleports player in specific origin with specific angles,
 //         preserves players velocity(direction)
 void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles)
 {
@@ -142,11 +142,12 @@ void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles)
 	}
 }
 
-// ETJump: teleports player in specific origin with specific angles, 
+// ETJump: teleports player in specific origin with specific angles,
 //         converts velocity to match angles direction
 void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles)
 {
 	vec_t speed = VectorLength(player->client->ps.velocity);
+
 	AngleVectors(angles, player->client->ps.velocity, NULL, NULL);
 
 	VectorCopy(origin, player->client->ps.origin);
@@ -168,18 +169,18 @@ void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles)
 	}
 }
 
-// ETJump: teleports player in specific origin, converts angles(yaw) and velocity 
+// ETJump: teleports player in specific origin, converts angles(yaw) and velocity
 //         to be relative to the new destination angles
 //         created for clank's map
 void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles)
 {
-	vec3_t   newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
-	vec3_t   triggerOrigin, tempActivator, tempOrigin;
-	vec3_t   normalizedVelocity, veloAngles;
-	vec3_t   sPlane[6];
-	vec_t    minDistYZ, minDistXZ, minDistXY;
-	vec_t    speed, length;
-	auto     negDir = qfalse;
+	vec3_t newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
+	vec3_t triggerOrigin, tempActivator, tempOrigin;
+	vec3_t normalizedVelocity, veloAngles;
+	vec3_t sPlane[6];
+	vec_t  minDistYZ, minDistXZ, minDistXY;
+	vec_t  speed, length;
+	auto negDir = qfalse;
 
 	// normalized velocity is the directionvector for calculating the intersectionpoints
 	VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
@@ -324,17 +325,17 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_
 	TeleportPlayer(player, newOrigin, newViewAngles);
 }
 
-// ETJump: teleports player in specific origin, converts angles(yaw, pitch) and velocity 
+// ETJump: teleports player in specific origin, converts angles(yaw, pitch) and velocity
 //         to be relative to the new destination angles
 void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles)
 {
-	vec3_t   newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
-	vec3_t   triggerOrigin, tempActivator, tempOrigin;
-	vec3_t   normalizedVelocity, veloAngles;
-	vec3_t   sPlane[6];
-	vec_t    minDistYZ, minDistXZ, minDistXY;
-	vec_t    speed, length;
-	auto     negDir = qfalse;
+	vec3_t newOrigin, newViewAngles, newVelocity, offset = { 0, 0, 0 };
+	vec3_t triggerOrigin, tempActivator, tempOrigin;
+	vec3_t normalizedVelocity, veloAngles;
+	vec3_t sPlane[6];
+	vec_t  minDistYZ, minDistXZ, minDistXY;
+	vec_t  speed, length;
+	auto negDir = qfalse;
 
 	// normalized velocity is the directionvector for calculating the intersectionpoints
 	VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
@@ -561,8 +562,8 @@ void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles)
 		vec3_t t_viewAngles;
 
 		t_viewAngles[PITCH] = player->client->ps.viewangles[PITCH];
-		t_viewAngles[YAW]   = angles[YAW];
-		t_viewAngles[ROLL]  = angles[ROLL];
+		t_viewAngles[YAW]  = angles[YAW];
+		t_viewAngles[ROLL] = angles[ROLL];
 
 		SetClientViewAngle(player, t_viewAngles);
 
@@ -599,7 +600,7 @@ void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	// ETJump: disable portalgun pickup
 	if (other->client->sess.timerunActive &&
-		(other->client->sess.runSpawnflags & TIMERUN_DISABLE_PORTALGUN_PICKUP))
+	    (other->client->sess.runSpawnflags & TIMERUN_DISABLE_PORTALGUN_PICKUP))
 	{
 		return;
 	}
@@ -623,7 +624,7 @@ void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	COM_BitSet(other->client->ps.weapons, WP_PORTAL_GUN);
 
 	other->client->ps.ammoclip[BG_FindClipForWeapon(WP_PORTAL_GUN)] = 0;
-	other->client->ps.ammo[BG_FindAmmoForWeapon(WP_PORTAL_GUN)]     = 1;
+	other->client->ps.ammo[BG_FindAmmoForWeapon(WP_PORTAL_GUN)] = 1;
 
 	other->client->ps.weapon = WP_PORTAL_GUN;
 
@@ -656,12 +657,12 @@ void SP_weapon_portalgun(gentity_t *ent)
 
 	//ent = G_Spawn();
 
-	ent->s.eType           = ET_ITEM;
-	ent->s.modelindex      = item - bg_itemlist; // store item number in modelindex
+	ent->s.eType = ET_ITEM;
+	ent->s.modelindex = item - bg_itemlist;      // store item number in modelindex
 	ent->s.otherEntityNum2 = 1; // DHM - Nerve :: this is taking modelindex2's place for a dropped item
 
 	ent->classname = item->classname;
-	ent->item      = item;
+	ent->item = item;
 	VectorSet(ent->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, 0);              //----(SA)	so items sit on the ground
 	VectorSet(ent->r.maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS);  //----(SA)	so items sit on the ground
 	ent->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
@@ -670,7 +671,7 @@ void SP_weapon_portalgun(gentity_t *ent)
 
 	ent->touch = weapon_portalgun_touch;
 
-	ent->think     = weapon_portal_think;
+	ent->think = weapon_portal_think;
 	ent->nextthink = level.time + 100;
 
 	if (ent->spawnflags & 2)        // spin
@@ -751,7 +752,7 @@ void grabber_think_hit(gentity_t *ent)
 	G_AddEvent(ent, EV_GENERAL_SOUND, ent->sound2to1);  // sound2to1 is the 'pain' sound
 
 	ent->nextthink = level.time + (attackDurations[(ent->s.frame) - 2] - attackHittimes[(ent->s.frame) - 2]);
-	ent->think     = grabber_think_idle;
+	ent->think = grabber_think_idle;
 }
 
 
@@ -772,14 +773,14 @@ void grabber_die(gentity_t *ent, gentity_t *inflictor, gentity_t *attacker, int 
 	GibEntity(ent, 0);      // use temporarily to show 'death' of entity
 
 //	trap_UnlinkEntity(ent->enemy);
-	ent->enemy->think     = G_FreeEntity;
+	ent->enemy->think = G_FreeEntity;
 	ent->enemy->nextthink = level.time + FRAMETIME;
 //	G_FreeEntity(ent->enemy);
 
 	G_UseTargets(ent, attacker);
 
 //	trap_UnlinkEntity(ent);
-	ent->think     = G_FreeEntity;
+	ent->think = G_FreeEntity;
 	ent->nextthink = level.time + FRAMETIME;
 //	G_FreeEntity(ent);
 }
@@ -798,7 +799,7 @@ void grabber_attack(gentity_t *ent)
 	ent->s.frame = (rand() % 3) + 2;    // randomly choose an attack sequence
 
 	ent->nextthink = level.time + attackHittimes[(ent->s.frame) - 2];
-	ent->think     = grabber_think_hit;
+	ent->think = grabber_think_hit;
 }
 
 /*
@@ -858,19 +859,19 @@ void grabber_wake(gentity_t *ent)
 
 	// parent entity: show model/play anim/take damage
 	{
-		parent->clipmask   = CONTENTS_SOLID;
+		parent->clipmask = CONTENTS_SOLID;
 		parent->r.contents = CONTENTS_SOLID;
 		parent->takedamage = qtrue;
-		parent->active     = qtrue;
-		parent->die        = grabber_die;
-		parent->pain       = grabber_pain;
+		parent->active = qtrue;
+		parent->die  = grabber_die;
+		parent->pain = grabber_pain;
 		trap_LinkEntity(parent);
 
 		ent->s.frame = 5;           // starting position
 
 		// go back to an idle if not attacking immediately
 		parent->nextthink = level.time + FRAMETIME;
-		parent->think     = grabber_think_idle;
+		parent->think = grabber_think_idle;
 	}
 
 	G_AddEvent(ent, EV_GENERAL_SOUND, ent->soundPos1);  // soundPos1 is the 'wake' sound
@@ -945,7 +946,7 @@ first frame
 */
 void SP_misc_grabber_trap(gentity_t *ent)
 {
-	int       adist, bdist, range;
+	int adist, bdist, range;
 	gentity_t *trig;
 
 	// TODO: change from 'trap' to something else.  'trap' is a misnomer.  it's actually used for other stuff too
@@ -953,9 +954,9 @@ void SP_misc_grabber_trap(gentity_t *ent)
 
 	// TODO: make these user assignable?
 	ent->s.modelindex = G_ModelIndex("models/misc/grabber/grabber.md3");
-	ent->soundPos1    = G_SoundIndex("models/misc/grabber/grabber_wake.wav");
-	ent->sound1to2    = G_SoundIndex("models/misc/grabber/grabber_attack.wav");
-	ent->sound2to1    = G_SoundIndex("models/misc/grabber/grabber_pain.wav");
+	ent->soundPos1 = G_SoundIndex("models/misc/grabber/grabber_wake.wav");
+	ent->sound1to2 = G_SoundIndex("models/misc/grabber/grabber_attack.wav");
+	ent->sound2to1 = G_SoundIndex("models/misc/grabber/grabber_pain.wav");
 
 	G_SetOrigin(ent, ent->s.origin);
 	VectorCopy(ent->s.angles, ent->s.apos.trBase);
@@ -1002,10 +1003,10 @@ void SP_misc_grabber_trap(gentity_t *ent)
 		VectorAdd(trig->r.maxs, tv(trig->count, trig->count, trig->count), trig->r.maxs);
 	}
 
-	trig->parent     = ent;
+	trig->parent = ent;
 	trig->r.contents = CONTENTS_TRIGGER;
 	trig->r.svFlags  = SVF_NOCLIENT;
-	trig->touch      = grabber_wake_touch;
+	trig->touch = grabber_wake_touch;
 	trap_LinkEntity(trig);
 
 }
@@ -1037,8 +1038,8 @@ void spotlight_finish_spawning(gentity_t *ent)
 		trap_LinkEntity(ent);
 	}
 
-	ent->use       = use_spotlight;
-	ent->think     = 0;
+	ent->use = use_spotlight;
+	ent->think = 0;
 	ent->nextthink = 0;
 }
 
@@ -1056,7 +1057,7 @@ void SP_misc_spotlight(gentity_t *ent)
 
 	ent->s.eType = ET_EF_SPOTLIGHT;
 
-	ent->think     = spotlight_finish_spawning;
+	ent->think = spotlight_finish_spawning;
 	ent->nextthink = level.time + 100;
 
 	if (ent->model)
@@ -1114,10 +1115,10 @@ void SP_misc_gamemodel(gentity_t *ent)
 {
 	vec_t  scale;
 	vec3_t vScale;
-	int    trunksize, trunkheight;
-	char   tagname[MAX_QPATH];
-	char   *dummy;
-	int    num_frames, start_frame, fps;
+	int  trunksize, trunkheight;
+	char tagname[MAX_QPATH];
+	char *dummy;
+	int  num_frames, start_frame, fps;
 
 	// Gordon: static gamemodels client side only now :D so server can just wave bye-bye
 	if (!ent->scriptName && !ent->targetname && !ent->spawnflags)
@@ -1126,7 +1127,7 @@ void SP_misc_gamemodel(gentity_t *ent)
 		return;
 	}
 
-	ent->s.eType      = ET_GAMEMODEL;
+	ent->s.eType = ET_GAMEMODEL;
 	ent->s.modelindex = G_ModelIndex(ent->model);
 
 	ent->s.modelindex2 = G_SkinIndex(ent->aiSkin);
@@ -1144,12 +1145,12 @@ void SP_misc_gamemodel(gentity_t *ent)
 		}
 
 		ent->s.torsoAnim = num_frames;
-		ent->s.frame     = rand() % ent->s.torsoAnim;
+		ent->s.frame = rand() % ent->s.torsoAnim;
 		ent->s.loopSound = 0; // non-frozen
 
 		// Gordon: added start offset, fps, and direction
 		ent->s.legsAnim = start_frame + 1;
-		ent->s.weapon   = 1000.f / fps;
+		ent->s.weapon = 1000.f / fps;
 		// xkan, 11/08/2002 - continue loop animation as long as s.teamNum == 0
 		ent->s.teamNum = 0;
 	}
@@ -1184,7 +1185,7 @@ void SP_misc_gamemodel(gentity_t *ent)
 	{
 		float rad;
 
-		ent->clipmask   = CONTENTS_SOLID;
+		ent->clipmask = CONTENTS_SOLID;
 		ent->r.contents = CONTENTS_SOLID;
 
 		ent->r.svFlags |= SVF_CAPSULE;
@@ -1247,7 +1248,7 @@ void SP_misc_vis_dummy(gentity_t *ent)
 	G_SetOrigin(ent, ent->s.origin);
 	trap_LinkEntity(ent);
 
-	ent->think     = locateMaster;
+	ent->think = locateMaster;
 	ent->nextthink = level.time + 1000;
 
 }
@@ -1293,7 +1294,7 @@ void SP_misc_light_surface(gentity_t *ent)
 
 void locateCamera(gentity_t *ent)
 {
-	vec3_t    dir;
+	vec3_t dir;
 	gentity_t *target;
 	gentity_t *owner;
 
@@ -1347,7 +1348,7 @@ void SP_misc_portal_surface(gentity_t *ent)
 	trap_LinkEntity(ent);
 
 	ent->r.svFlags = SVF_PORTAL;
-	ent->s.eType   = ET_PORTAL;
+	ent->s.eType = ET_PORTAL;
 
 	if (!ent->target)
 	{
@@ -1355,7 +1356,7 @@ void SP_misc_portal_surface(gentity_t *ent)
 	}
 	else
 	{
-		ent->think     = locateCamera;
+		ent->think = locateCamera;
 		ent->nextthink = level.time + 100;
 	}
 }
@@ -1450,14 +1451,14 @@ void Use_Shooter(gentity_t *ent, gentity_t *other, gentity_t *activator)
 
 static void InitShooter_Finish(gentity_t *ent)
 {
-	ent->enemy     = G_PickTarget(ent->target);
-	ent->think     = 0;
+	ent->enemy = G_PickTarget(ent->target);
+	ent->think = 0;
 	ent->nextthink = 0;
 }
 
 void InitShooter(gentity_t *ent, int weapon)
 {
-	ent->use      = Use_Shooter;
+	ent->use = Use_Shooter;
 	ent->s.weapon = weapon;
 
 	G_SetMovedir(ent->s.angles, ent->movedir);
@@ -1472,7 +1473,7 @@ void InitShooter(gentity_t *ent, int weapon)
 	// target might be a moving object, so we can't set movedir for it
 	if (ent->target)
 	{
-		ent->think     = InitShooter_Finish;
+		ent->think = InitShooter_Finish;
 		ent->nextthink = level.time + 500;
 	}
 	trap_LinkEntity(ent);
@@ -1680,7 +1681,7 @@ void shutoff_dlight(gentity_t *ent)
 	}
 
 	trap_UnlinkEntity(ent);
-	ent->think     = 0;
+	ent->think = 0;
 	ent->nextthink = 0;
 }
 
@@ -1703,7 +1704,7 @@ void use_dlight(gentity_t *ent, gentity_t *other, gentity_t *activator)
 
 		if (ent->spawnflags & 4)     // ONETIME
 		{
-			ent->think     = shutoff_dlight;
+			ent->think = shutoff_dlight;
 			ent->nextthink = level.time + (strlen(ent->dl_stylestring)  * 100) - 100;
 		}
 	}
@@ -1741,8 +1742,8 @@ void SP_dlight(gentity_t *ent)
 	}
 	else if (style)
 	{
-		style               = max(1, style);                    // clamp to predefined range
-		style               = min(19, style);
+		style = max(1, style);                                  // clamp to predefined range
+		style = min(19, style);
 		ent->dl_stylestring = predef_lightstyles[style - 1];    // these are input as 1-20
 	}
 	else
@@ -1797,15 +1798,15 @@ void SP_dlight(gentity_t *ent)
 void flakPuff(vec3_t origin)
 {
 	gentity_t *tent;
-	vec3_t    point;
+	vec3_t point;
 
 	VectorCopy(origin, point);
 	tent = G_TempEntity(point, EV_SMOKE);
 	VectorCopy(point, tent->s.origin);
 	VectorSet(tent->s.origin2, 0, 0, 32);
-	tent->s.time       = 500;
-	tent->s.time2      = 250;
-	tent->s.density    = 0;
+	tent->s.time  = 500;
+	tent->s.time2 = 250;
+	tent->s.density = 0;
 	tent->s.angles2[0] = 24;
 	tent->s.angles2[1] = 32;
 	tent->s.angles2[2] = 10;
@@ -1818,18 +1819,18 @@ Fire_Lead
 */
 void Fire_Lead_Ext(gentity_t *ent, gentity_t *activator, float spread, int damage, vec3_t muzzle, vec3_t forward, vec3_t right, vec3_t up, int mod)
 {
-	trace_t   tr;
-	vec3_t    end;
-	float     r;
-	float     u;
+	trace_t tr;
+	vec3_t  end;
+	float r;
+	float u;
 	gentity_t *tent;
 	gentity_t *traceEnt;
-	int       seed = rand() & 255;
+	int seed = rand() & 255;
 
 	r = Q_crandom(&seed) * spread;
 	u = Q_crandom(&seed) * spread;
 
-	ent->s.eFlags       |= EF_MG42_ACTIVE;
+	ent->s.eFlags |= EF_MG42_ACTIVE;
 	activator->s.eFlags |= EF_MG42_ACTIVE;
 
 	VectorMA(muzzle, 8192, forward, end);
@@ -1851,10 +1852,10 @@ void Fire_Lead_Ext(gentity_t *ent, gentity_t *activator, float spread, int damag
 	if (tr.surfaceFlags & SURF_NOIMPACT)
 	{
 
-		tent                    = G_TempEntity(tr.endpos, EV_MG42BULLET_HIT_WALL);
+		tent = G_TempEntity(tr.endpos, EV_MG42BULLET_HIT_WALL);
 		tent->s.otherEntityNum  = ent->s.number;
 		tent->s.otherEntityNum2 = activator->s.number;
-		ent->s.effect1Time      = seed;
+		ent->s.effect1Time = seed;
 
 		return;
 	}
@@ -1867,11 +1868,11 @@ void Fire_Lead_Ext(gentity_t *ent, gentity_t *activator, float spread, int damag
 	// send bullet impact
 	if (traceEnt->takedamage && traceEnt->client)
 	{
-		tent                    = G_TempEntity(tr.endpos, EV_MG42BULLET_HIT_FLESH);
-		tent->s.eventParm       = traceEnt->s.number;
+		tent = G_TempEntity(tr.endpos, EV_MG42BULLET_HIT_FLESH);
+		tent->s.eventParm = traceEnt->s.number;
 		tent->s.otherEntityNum  = ent->s.number;
 		tent->s.otherEntityNum2 = activator->s.number;  // (SA) store the user id, so the client can position the tracer
-		tent->s.effect1Time     = seed;
+		tent->s.effect1Time = seed;
 	}
 	else
 	{
@@ -1891,10 +1892,10 @@ void Fire_Lead_Ext(gentity_t *ent, gentity_t *activator, float spread, int damag
 		VectorMA(forward, -2 * dot, tr.plane.normal, reflect);
 		VectorNormalize(reflect);
 
-		tent->s.eventParm       = DirToByte(reflect);
+		tent->s.eventParm = DirToByte(reflect);
 		tent->s.otherEntityNum  = ent->s.number;
 		tent->s.otherEntityNum2 = activator->s.number;  // (SA) store the user id, so the client can position the tracer
-		tent->s.effect1Time     = seed;
+		tent->s.effect1Time = seed;
 	}
 
 	if (traceEnt->takedamage)
@@ -1935,7 +1936,7 @@ void clamp_playerbehindgun(gentity_t *self, gentity_t *other, vec3_t dang)
 
 	// DHM - Nerve :: Zero out velocity
 	other->client->ps.velocity[0] = other->client->ps.velocity[1] = 0.f;
-	other->s.pos.trDelta[0]       = other->s.pos.trDelta[1] = 0.f;
+	other->s.pos.trDelta[0] = other->s.pos.trDelta[1] = 0.f;
 
 	trap_LinkEntity(other);
 }
@@ -1995,12 +1996,12 @@ void aagun_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 
 	if (owner && owner->client)
 	{
-		ent->r.ownerNum       = ent->s.number;
+		ent->r.ownerNum = ent->s.number;
 		ent->s.otherEntityNum = ent->s.number;
 
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		owner->client->ps.viewlocked                   = 0;
-		owner->active                                  = qfalse;
+		owner->client->ps.viewlocked = 0;
+		owner->active = qfalse;
 	}
 
 	trap_LinkEntity(ent);
@@ -2028,7 +2029,7 @@ void aagun_track(gentity_t *self, gentity_t *other)
 			self->s.apos.trDelta[i] = AngleNormalize180(self->s.apos.trDelta[i]);
 		}
 		VectorScale(self->s.apos.trDelta, 1000 / 50, self->s.apos.trDelta);
-		self->s.apos.trTime     = level.time;
+		self->s.apos.trTime = level.time;
 		self->s.apos.trDuration = 50;
 
 		SnapVector(self->s.apos.trDelta);
@@ -2037,9 +2038,9 @@ void aagun_track(gentity_t *self, gentity_t *other)
 
 void aagun_think(gentity_t *self)
 {
-	vec3_t    vec;
+	vec3_t vec;
 	gentity_t *owner;
-	int       i;
+	int i;
 
 	if (g_gamestate.integer == GS_INTERMISSION)
 	{
@@ -2061,13 +2062,13 @@ void aagun_think(gentity_t *self)
 	if (owner->client)
 	{
 		vec3_t dang;
-		int    j;
+		int j;
 
 		VectorSubtract(self->r.currentOrigin, owner->r.currentOrigin, vec);
 
 		if (VectorLengthSquared(vec) < SQR(96) && owner->active && owner->health > 0)
 		{
-			self->active                                   = qtrue;
+			self->active = qtrue;
 			owner->client->ps.persistant[PERS_HWEAPON_USE] = 2;
 			aagun_track(self, owner);
 			self->nextthink = level.time + 50;
@@ -2079,7 +2080,7 @@ void aagun_think(gentity_t *self)
 			}
 
 			// now tell the client to lock the view in the direction of the gun
-			owner->client->ps.viewlocked        = 3;
+			owner->client->ps.viewlocked = 3;
 			owner->client->ps.viewlocked_entNum = self->s.number;
 
 			clamp_playerbehindgun(self, owner, dang);
@@ -2092,11 +2093,11 @@ void aagun_think(gentity_t *self)
 	if (owner->client)
 	{
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		owner->client->ps.viewlocked                   = 0; // let them look around
-		owner->active                                  = qfalse;
+		owner->client->ps.viewlocked = 0;                   // let them look around
+		owner->active = qfalse;
 	}
 
-	self->r.ownerNum       = self->s.number;
+	self->r.ownerNum = self->s.number;
 	self->s.otherEntityNum = self->s.number;
 
 	if (self->timestamp > level.time)
@@ -2110,7 +2111,7 @@ void aagun_think(gentity_t *self)
 			self->s.apos.trDelta[i] = AngleNormalize180(self->s.apos.trDelta[i]);
 		}
 		VectorScale(self->s.apos.trDelta, 1000 / 50, self->s.apos.trDelta);
-		self->s.apos.trTime     = level.time;
+		self->s.apos.trTime = level.time;
 		self->s.apos.trDuration = 50;
 	}
 	self->nextthink = level.time + 50;
@@ -2126,20 +2127,20 @@ void aagun_stopusing(gentity_t *self)
 
 	if (owner && owner->client)
 	{
-		owner->client->ps.eFlags                      &= ~EF_AAGUN_ACTIVE;
+		owner->client->ps.eFlags &= ~EF_AAGUN_ACTIVE;
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		owner->client->ps.viewlocked                   = 0;
-		owner->active                                  = qfalse;
+		owner->client->ps.viewlocked = 0;
+		owner->active = qfalse;
 
 		self->r.ownerNum = self->s.number;
-		self->active     = qfalse;
+		self->active = qfalse;
 	}
 }
 
 void aagun_fire(gentity_t *other)
 {
-	vec3_t    forward, right, up;
-	vec3_t    muzzle;
+	vec3_t forward, right, up;
+	vec3_t muzzle;
 	gentity_t *self = &g_entities[other->client->ps.viewlocked_entNum];
 
 	AngleVectors(other->client->ps.viewangles, forward, right, up);
@@ -2180,10 +2181,10 @@ void aagun_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 void aagun_spawn(gentity_t *gun)
 {
-	gun->clipmask      = CONTENTS_SOLID;
-	gun->r.contents    = CONTENTS_SOLID;
-	gun->s.eType       = ET_AAGUN;
-	gun->s.dmgFlags    = HINT_MG42;
+	gun->clipmask = CONTENTS_SOLID;
+	gun->r.contents = CONTENTS_SOLID;
+	gun->s.eType = ET_AAGUN;
+	gun->s.dmgFlags = HINT_MG42;
 	gun->s.modelindex  = G_ModelIndex("models/mapobjects/weapons/flak_a.md3");
 	gun->s.modelindex2 = 0;    // Gordon: which barrel should fire next
 
@@ -2194,23 +2195,23 @@ void aagun_spawn(gentity_t *gun)
 	VectorSet(gun->r.mins, -48, -48, -24);
 	VectorSet(gun->r.maxs, 48, 48, 56);
 
-	gun->s.apos.trTime     = 0;
+	gun->s.apos.trTime = 0;
 	gun->s.apos.trDuration = 0;
-	gun->s.apos.trType     = TR_LINEAR_STOP;
+	gun->s.apos.trType = TR_LINEAR_STOP;
 
 	VectorCopy(gun->s.angles, gun->s.angles2);  // initial angles
 
 	gun->touch = aagun_touch;
 	gun->think = aagun_think;
-	gun->use   = aagun_use;
-	gun->die   = aagun_die;
+	gun->use = aagun_use;
+	gun->die = aagun_die;
 
-	gun->nextthink    = level.time + FRAMETIME;
-	gun->timestamp    = level.time + 1000;
-	gun->s.number     = gun - g_entities;
+	gun->nextthink = level.time + FRAMETIME;
+	gun->timestamp = level.time + 1000;
+	gun->s.number  = gun - g_entities;
 	gun->s.origin2[0] = gun->harc;
 	gun->s.origin2[1] = gun->varc;
-	gun->takedamage   = qfalse;
+	gun->takedamage = qfalse;
 
 	trap_LinkEntity(gun);
 }
@@ -2234,7 +2235,7 @@ void SP_aagun(gentity_t *self)
 void mg42_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
 	vec3_t dang;
-	int    i;
+	int i;
 
 	if (!self->active)
 	{
@@ -2247,7 +2248,7 @@ void mg42_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 			dang[i] = SHORT2ANGLE(other->client->pers.cmd.angles[i]);
 
 		// now tell the client to lock the view in the direction of the gun
-		other->client->ps.viewlocked        = 3;
+		other->client->ps.viewlocked = 3;
 		other->client->ps.viewlocked_entNum = self->s.number;
 
 		//if (self->s.frame)
@@ -2263,8 +2264,8 @@ void mg42_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 void mg42_fire(gentity_t *other)
 {
 	gentity_t *self;
-	vec3_t    forward, right, up;
-	vec3_t    muzzle;
+	vec3_t forward, right, up;
+	vec3_t muzzle;
 
 	self = &g_entities[other->client->ps.viewlocked_entNum];
 
@@ -2309,7 +2310,7 @@ void mg42_track(gentity_t *self, gentity_t *other)
 			self->s.apos.trDelta[i] = AngleNormalize180(self->s.apos.trDelta[i]);
 		}
 		VectorScale(self->s.apos.trDelta, 1000 / 50, self->s.apos.trDelta);
-		self->s.apos.trTime     = level.time;
+		self->s.apos.trTime = level.time;
 		self->s.apos.trDuration = 50;
 
 		SnapVector(self->s.apos.trDelta);
@@ -2318,11 +2319,11 @@ void mg42_track(gentity_t *self, gentity_t *other)
 
 void mg42_think(gentity_t *self)
 {
-	vec3_t    vec;
+	vec3_t vec;
 	gentity_t *owner;
-	int       i;
-	float     len;
-	float     usedist;
+	int i;
+	float len;
+	float usedist;
 
 	if (g_gamestate.integer == GS_INTERMISSION)
 	{
@@ -2364,7 +2365,7 @@ void mg42_think(gentity_t *self)
 	}
 	else if (self->flameQuotaTime < level.time && (self->s.eFlags & EF_OVERHEATING) == EF_OVERHEATING)
 	{
-		self->s.eFlags      &= ~EF_OVERHEATING;
+		self->s.eFlags &= ~EF_OVERHEATING;
 		self->flameQuotaTime = 0;
 	}
 
@@ -2380,7 +2381,7 @@ void mg42_think(gentity_t *self)
 			// ATVI Wolfenstein Misc #433
 			owner->client->ps.pm_flags &= ~PMF_DUCKED;
 
-			self->active                                   = qtrue;
+			self->active = qtrue;
 			owner->client->ps.persistant[PERS_HWEAPON_USE] = 1;
 			mg42_track(self, owner);
 			self->nextthink = level.time + 50;
@@ -2399,8 +2400,8 @@ void mg42_think(gentity_t *self)
 	if (owner->client)
 	{
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		owner->client->ps.viewlocked                   = 0; // let them look around
-		owner->active                                  = qfalse;
+		owner->client->ps.viewlocked = 0;                   // let them look around
+		owner->active = qfalse;
 		//owner->client->ps.gunfx = 0;
 
 		// need this here for players that get killed while on the MG42
@@ -2427,7 +2428,7 @@ void mg42_think(gentity_t *self)
 		}
 	}
 
-	self->r.ownerNum       = self->s.number;
+	self->r.ownerNum = self->s.number;
 	self->s.otherEntityNum = self->s.number;
 
 	if (self->timestamp > level.time)
@@ -2441,7 +2442,7 @@ void mg42_think(gentity_t *self)
 			self->s.apos.trDelta[i] = AngleNormalize180(self->s.apos.trDelta[i]);
 		}
 		VectorScale(self->s.apos.trDelta, 1000 / 50, self->s.apos.trDelta);
-		self->s.apos.trTime     = level.time;
+		self->s.apos.trTime = level.time;
 		self->s.apos.trDuration = 50;
 	}
 	self->nextthink = level.time + 50;
@@ -2458,16 +2459,16 @@ void mg42_stopusing(gentity_t *self)
 
 	if (owner && owner->client)
 	{
-		owner->client->ps.eFlags                      &= ~EF_MG42_ACTIVE; // DHM - Nerve :: unset flag
+		owner->client->ps.eFlags &= ~EF_MG42_ACTIVE;                      // DHM - Nerve :: unset flag
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		self->r.ownerNum                               = self->s.number;
-		owner->client->ps.viewlocked                   = 0; // let them look around
-		owner->active                                  = qfalse;
+		self->r.ownerNum = self->s.number;
+		owner->client->ps.viewlocked = 0;                   // let them look around
+		owner->active = qfalse;
 		//owner->client->ps.gunfx = 0;
 
 		//owner->client->ps.weapHeat[WP_DUMMY_MG42] = 0;
-		self->mg42weapHeat           = owner->client->ps.weapHeat[WP_DUMMY_MG42];
-		self->backupWeaponTime       = owner->client->ps.weaponTime;
+		self->mg42weapHeat = owner->client->ps.weapHeat[WP_DUMMY_MG42];
+		self->backupWeaponTime = owner->client->ps.weaponTime;
 		owner->client->ps.weaponTime = owner->backupWeaponTime;
 
 		self->active = qfalse;
@@ -2481,7 +2482,7 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int da
 {
 	gentity_t *gun;
 	gentity_t *owner;
-	trace_t   tr;
+	trace_t tr;
 
 	// DHM - Nerve :: self->chain not set if no tripod
 	if (self->chain)
@@ -2499,11 +2500,11 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int da
 
 	if (gun && self->health <= 0)
 	{
-		gun->s.frame    = 2;
+		gun->s.frame = 2;
 		gun->takedamage = qfalse;
 
 		// DHM - Nerve :: health is used in repairing later
-		gun->health   = 0;
+		gun->health = 0;
 		gun->s.eFlags = EF_SMOKING;         // Make it smoke on client side
 		self->health  = 0;
 	}
@@ -2523,15 +2524,15 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int da
 		owner->client->ps.eFlags &= ~EF_MG42_ACTIVE;            // DHM - Nerve :: unset flag
 
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		owner->active                                  = qfalse;
+		owner->active = qfalse;
 
-		self->r.ownerNum             = self->s.number;
-		self->s.otherEntityNum       = self->s.number;
+		self->r.ownerNum = self->s.number;
+		self->s.otherEntityNum = self->s.number;
 		owner->client->ps.viewlocked = 0;   // let them look around
 
 		//owner->client->ps.gunfx = 0;
 
-		gun->mg42weapHeat     = 0;
+		gun->mg42weapHeat = 0;
 		gun->backupWeaponTime = 0;
 
 		owner->client->ps.weaponTime = owner->backupWeaponTime;
@@ -2553,14 +2554,14 @@ void mg42_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	if (owner && owner->client)
 	{
 		owner->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-		ent->r.ownerNum                                = ent->s.number;
-		ent->s.otherEntityNum                          = ent->s.number;
-		owner->client->ps.viewlocked                   = 0; // let them look around
-		owner->active                                  = qfalse;
+		ent->r.ownerNum = ent->s.number;
+		ent->s.otherEntityNum = ent->s.number;
+		owner->client->ps.viewlocked = 0;                   // let them look around
+		owner->active = qfalse;
 		//owner->client->ps.gunfx = 0;
 		other->client->ps.weapHeat[WP_DUMMY_MG42] = ent->mg42weapHeat;
-		ent->backupWeaponTime                     = owner->client->ps.weaponTime;
-		owner->backupWeaponTime                   = owner->client->ps.weaponTime;
+		ent->backupWeaponTime = owner->client->ps.weaponTime;
+		owner->backupWeaponTime = owner->client->ps.weaponTime;
 	}
 
 	// G_Printf ("mg42 called use function\n");
@@ -2571,23 +2572,23 @@ void mg42_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 void mg42_spawn(gentity_t *ent)
 {
 	gentity_t *base, *gun;
-	vec3_t    offset;
+	vec3_t offset;
 
 	// Xian -- If in knifeonly mode, prevent MG42's from spawning
 	if (g_knifeonly.integer != 1)
 	{
 		// Need to spawn the base even when no tripod cause the gun itself isn't solid
-		base            = G_Spawn();
+		base = G_Spawn();
 		base->classname = "misc_mg42base";  // Arnout - ease tracking
 
 		if (!(ent->spawnflags & 2))   // no tripod
 		{
-			base->clipmask   = CONTENTS_SOLID;
+			base->clipmask = CONTENTS_SOLID;
 			base->r.contents = CONTENTS_SOLID;
 			base->r.svFlags  = 0;
-			base->s.eType    = ET_GENERAL;
+			base->s.eType = ET_GENERAL;
 			base->takedamage = qtrue;
-			base->die        = mg42_die;
+			base->die = mg42_die;
 
 			// Arnout: move track and targetname over to these entities for construction system
 			base->track = ent->track;
@@ -2605,15 +2606,15 @@ void mg42_spawn(gentity_t *ent)
 		VectorCopy(ent->s.origin, offset);
 		offset[2] -= 24;
 		G_SetOrigin(base, offset);
-		base->s.apos.trType     = TR_STATIONARY;
-		base->s.apos.trTime     = 0;
+		base->s.apos.trType = TR_STATIONARY;
+		base->s.apos.trTime = 0;
 		base->s.apos.trDuration = 0;
-		base->s.dmgFlags        = HINT_MG42; // identify this for cursorhints
+		base->s.dmgFlags = HINT_MG42;        // identify this for cursorhints
 		VectorCopy(ent->s.angles, base->s.angles);
 		VectorCopy(base->s.angles, base->s.apos.trBase);
 		VectorCopy(base->s.angles, base->s.apos.trDelta);
-		base->health    = ent->health;
-		base->target    = ent->target; //----(SA)	added so mounting mg42 can trigger targets
+		base->health = ent->health;
+		base->target = ent->target;    //----(SA)	added so mounting mg42 can trigger targets
 		base->sound3to2 = -1;
 		trap_LinkEntity(base);
 
@@ -2621,15 +2622,15 @@ void mg42_spawn(gentity_t *ent)
 		G_SetEntState(base, ent->entstate);
 
 		// Spawn the barrel
-		gun               = G_Spawn();
-		gun->classname    = "misc_mg42";
-		gun->clipmask     = CONTENTS_SOLID;
-		gun->r.contents   = CONTENTS_TRIGGER;
-		gun->r.svFlags    = 0;
-		gun->s.eType      = ET_MG42_BARREL;
-		gun->health       = base->health;     // JPW NERVE
+		gun = G_Spawn();
+		gun->classname  = "misc_mg42";
+		gun->clipmask   = CONTENTS_SOLID;
+		gun->r.contents = CONTENTS_TRIGGER;
+		gun->r.svFlags  = 0;
+		gun->s.eType = ET_MG42_BARREL;
+		gun->health  = base->health;          // JPW NERVE
 		gun->s.modelindex = G_ModelIndex("models/multiplayer/mg42/mg42.md3");
-		gun->sound3to2    = -1;
+		gun->sound3to2 = -1;
 
 		VectorSet(offset, ent->s.origin[0], ent->s.origin[1], ent->s.origin[2] + 24);
 		G_SetOrigin(gun, offset);
@@ -2637,9 +2638,9 @@ void mg42_spawn(gentity_t *ent)
 		VectorSet(gun->r.mins, -24, -24, -8);
 		VectorSet(gun->r.maxs, 24, 24, 48);
 
-		gun->s.apos.trTime     = 0;
+		gun->s.apos.trTime = 0;
 		gun->s.apos.trDuration = 0;
-		gun->s.apos.trType     = TR_LINEAR_STOP;
+		gun->s.apos.trType = TR_LINEAR_STOP;
 
 		VectorCopy(ent->s.angles, gun->s.angles);
 		VectorCopy(gun->s.angles, gun->s.apos.trBase);
@@ -2650,21 +2651,21 @@ void mg42_spawn(gentity_t *ent)
 
 		gun->touch = mg42_touch;
 		gun->think = mg42_think;
-		gun->use   = mg42_use;
-		gun->die   = mg42_die;
+		gun->use = mg42_use;
+		gun->die = mg42_die;
 
-		gun->nextthink    = level.time + FRAMETIME;
-		gun->timestamp    = level.time + 1000;
-		gun->s.number     = gun - g_entities;
-		gun->harc         = ent->harc;
-		gun->varc         = ent->varc;
+		gun->nextthink = level.time + FRAMETIME;
+		gun->timestamp = level.time + 1000;
+		gun->s.number  = gun - g_entities;
+		gun->harc = ent->harc;
+		gun->varc = ent->varc;
 		gun->s.origin2[0] = ent->harc;
 		gun->s.origin2[1] = ent->varc;
-		gun->takedamage   = qtrue;
+		gun->takedamage = qtrue;
 		G_SetTargetName(gun, ent->targetname);
-		gun->damage     = ent->damage;
-		gun->accuracy   = ent->accuracy;
-		gun->target     = ent->target;
+		gun->damage = ent->damage;
+		gun->accuracy = ent->accuracy;
+		gun->target = ent->target;
 		gun->spawnflags = ent->spawnflags;
 
 		// Gordon: storing heat now
@@ -2680,7 +2681,7 @@ void mg42_spawn(gentity_t *ent)
 		if (!(ent->spawnflags & 2))   // no tripod
 		{
 			gun->mg42BaseEnt = base->s.number;
-			base->chain      = gun;
+			base->chain = gun;
 		}
 		else
 		{
@@ -2732,7 +2733,7 @@ void SP_mg42(gentity_t *self)
 		self->health = MG42_MULTIPLAYER_HEALTH;
 	}
 
-	self->think     = mg42_spawn;
+	self->think = mg42_spawn;
 	self->nextthink = level.time + FRAMETIME;
 
 	if (G_SpawnString("damage", "0", &damage))
@@ -2830,32 +2831,32 @@ void Flak_Animate(gentity_t *ent)
 void flak_spawn(gentity_t *ent)
 {
 	gentity_t *gun;
-	vec3_t    offset;
+	vec3_t offset;
 
-	gun               = G_Spawn();
-	gun->classname    = "misc_flak";
-	gun->clipmask     = CONTENTS_SOLID;
-	gun->r.contents   = CONTENTS_TRIGGER;
-	gun->r.svFlags    = 0;
-	gun->s.eType      = ET_GENERAL;
-	gun->touch        = mg42_touch;
+	gun = G_Spawn();
+	gun->classname  = "misc_flak";
+	gun->clipmask   = CONTENTS_SOLID;
+	gun->r.contents = CONTENTS_TRIGGER;
+	gun->r.svFlags  = 0;
+	gun->s.eType = ET_GENERAL;
+	gun->touch = mg42_touch;
 	gun->s.modelindex = G_ModelIndex("models/mapobjects/weapons/flak_a.md3");
 	VectorCopy(ent->s.origin, offset);
 	G_SetOrigin(gun, offset);
 	VectorSet(gun->r.mins, -24, -24, -8);
 	VectorSet(gun->r.maxs, 24, 24, 48);
-	gun->s.apos.trTime     = 0;
+	gun->s.apos.trTime = 0;
 	gun->s.apos.trDuration = 0;
 	VectorCopy(ent->s.angles, gun->s.angles);
 	VectorCopy(gun->s.angles, gun->s.apos.trBase);
 	VectorCopy(gun->s.angles, gun->s.apos.trDelta);
-	gun->think         = mg42_think;
-	gun->nextthink     = level.time + FRAMETIME;
-	gun->s.number      = gun - g_entities;
-	gun->harc          = ent->harc;
-	gun->varc          = ent->varc;
+	gun->think = mg42_think;
+	gun->nextthink = level.time + FRAMETIME;
+	gun->s.number  = gun - g_entities;
+	gun->harc = ent->harc;
+	gun->varc = ent->varc;
 	gun->s.apos.trType = TR_LINEAR_STOP;    // interpolate the angles
-	gun->takedamage    = qtrue;
+	gun->takedamage = qtrue;
 	G_SetTargetName(gun, ent->targetname);
 	gun->mg42BaseEnt = ent->s.number;
 
@@ -2890,7 +2891,7 @@ void SP_misc_flak(gentity_t *self)
 		self->health = 100;
 	}
 
-	self->think     = flak_spawn;
+	self->think = flak_spawn;
 	self->nextthink = level.time + FRAMETIME;
 }
 
@@ -2906,7 +2907,7 @@ spawnitem
 void misc_spawner_think(gentity_t *ent)
 {
 
-	gitem_t   *item;
+	gitem_t *item;
 	gentity_t *drop = NULL;
 
 	item = BG_FindItem(ent->spawnitem);
@@ -2924,7 +2925,7 @@ void misc_spawner_think(gentity_t *ent)
 void misc_spawner_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
 
-	ent->think     = misc_spawner_think;
+	ent->think = misc_spawner_think;
 	ent->nextthink = level.time + FRAMETIME;
 
 //	VectorCopy (other->r.currentOrigin, ent->r.currentOrigin);
@@ -3170,28 +3171,28 @@ void misc_firetrails_think(gentity_t *ent)
 	}
 
 	// left fire trail
-	left               = G_Spawn();
-	left->classname    = "left_firetrail";
-	left->r.contents   = 0;
-	left->s.eType      = ET_RAMJET;
+	left = G_Spawn();
+	left->classname  = "left_firetrail";
+	left->r.contents = 0;
+	left->s.eType = ET_RAMJET;
 	left->s.modelindex = G_ModelIndex("models/ammo/rocket/rocket.md3");
-	left->tagParent    = airplane;
+	left->tagParent = airplane;
 	Q_strncpyz(left->tagName, "tag_engine1", MAX_QPATH);
-	left->use                  = firetrail_use;
+	left->use = firetrail_use;
 	left->AIScript_AlertEntity = firetrail_die;
 	G_SetTargetName(left, ent->targetname);
 	G_ProcessTagConnect(left, qtrue);
 	trap_LinkEntity(left);
 
 	// right fire trail
-	right               = G_Spawn();
-	right->classname    = "right_firetrail";
-	right->r.contents   = 0;
-	right->s.eType      = ET_RAMJET;
+	right = G_Spawn();
+	right->classname  = "right_firetrail";
+	right->r.contents = 0;
+	right->s.eType = ET_RAMJET;
 	right->s.modelindex = G_ModelIndex("models/ammo/rocket/rocket.md3");
-	right->tagParent    = airplane;
+	right->tagParent = airplane;
 	Q_strncpyz(right->tagName, "tag_engine2", MAX_QPATH);
-	right->use                  = firetrail_use;
+	right->use = firetrail_use;
 	right->AIScript_AlertEntity = firetrail_die;
 	G_SetTargetName(right, ent->targetname);
 	G_ProcessTagConnect(right, qtrue);
@@ -3201,7 +3202,7 @@ void misc_firetrails_think(gentity_t *ent)
 
 void SP_misc_firetrails(gentity_t *ent)
 {
-	ent->think     = misc_firetrails_think;
+	ent->think = misc_firetrails_think;
 	ent->nextthink = level.time + 100;
 
 }
@@ -3259,7 +3260,7 @@ void SP_misc_constructiblemarker(gentity_t *ent)
 	VectorCopy(ent->s.origin, ent->s.pos.trBase);
 	VectorCopy(ent->s.origin, ent->r.currentOrigin);
 
-	ent->think     = constructiblemarker_setup;
+	ent->think = constructiblemarker_setup;
 	ent->nextthink = level.time + FRAMETIME;
 }
 
@@ -3303,35 +3304,35 @@ void landmine_setup(gentity_t *ent)
 
 	G_SetOrigin(ent, tr.endpos);
 	ent->s.pos.trDelta[2] = 1.f;
-	ent->s.time           = ent->s.angles[1] + 90;
+	ent->s.time = ent->s.angles[1] + 90;
 
 	// all fine
-	ent->s.eType    = ET_MISSILE;
+	ent->s.eType = ET_MISSILE;
 	ent->r.svFlags  = SVF_BROADCAST;
 	ent->s.weapon   = WP_LANDMINE;
 	ent->r.ownerNum = ENTITYNUM_WORLD;
 
-	ent->damage       = G_GetWeaponDamage(WP_LANDMINE);   // overridden for dynamite
+	ent->damage = G_GetWeaponDamage(WP_LANDMINE);         // overridden for dynamite
 	ent->splashDamage = G_GetWeaponDamage(WP_LANDMINE);
 
-	ent->accuracy            = 0;
-	ent->classname           = "landmine";
-	ent->damage              = 0;
-	ent->splashRadius        = 225; // was: 400
-	ent->methodOfDeath       = MOD_LANDMINE;
+	ent->accuracy  = 0;
+	ent->classname = "landmine";
+	ent->damage = 0;
+	ent->splashRadius  = 225;       // was: 400
+	ent->methodOfDeath = MOD_LANDMINE;
 	ent->splashMethodOfDeath = MOD_LANDMINE;
-	ent->s.eFlags            = (EF_BOUNCE | EF_BOUNCE_HALF);
-	ent->health              = 5;
-	ent->takedamage          = qtrue;
-	ent->r.contents          = CONTENTS_CORPSE; // (player can walk through)
+	ent->s.eFlags = (EF_BOUNCE | EF_BOUNCE_HALF);
+	ent->health = 5;
+	ent->takedamage = qtrue;
+	ent->r.contents = CONTENTS_CORPSE;          // (player can walk through)
 
 	ent->splashRadius = G_GetWeaponDamage(WP_LANDMINE);
 
-	ent->health        = 0;
+	ent->health = 0;
 	ent->s.modelindex2 = 0;
 
 	ent->nextthink = level.time + FRAMETIME;
-	ent->think     = G_LandmineThink;
+	ent->think = G_LandmineThink;
 
 	// RF, record the time for AI
 	ent->awaitingHelpTime = level.time;
@@ -3366,7 +3367,7 @@ void SP_misc_landmine(gentity_t *ent)
 	}
 
 	ent->nextthink = level.time + FRAMETIME * 5;
-	ent->think     = landmine_setup;
+	ent->think = landmine_setup;
 }
 
 /*QUAKED misc_commandmap_marker (0 0.85 .85) (-16 -16 0) (16 16 16) ONLY_AXIS ONLY_ALLIED ISOBJECTIVE ISHEALTHAMMOCABINET ISCOMMANDPOST
@@ -3415,7 +3416,7 @@ void G_TempTraceIgnoreEntity(gentity_t *ent)
 	}
 
 	level.tempTraceIgnoreEnts[ent - g_entities] = qtrue;
-	ent->r.linked                               = qfalse;
+	ent->r.linked = qfalse;
 }
 
 void G_TempTraceIgnorePlayersAndBodies(void)

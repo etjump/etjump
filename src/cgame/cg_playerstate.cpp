@@ -100,15 +100,15 @@ CG_DamageFeedback
 */
 void CG_DamageFeedback(int yawByte, int pitchByte, int damage)
 {
-	float        left, front, up;
-	float        kick;
-	int          health;
-	float        scale;
-	vec3_t       dir;
-	vec3_t       angles;
-	float        dist;
-	float        yaw, pitch;
-	int          slot;
+	float left, front, up;
+	float kick;
+	int health;
+	float  scale;
+	vec3_t dir;
+	vec3_t angles;
+	float  dist;
+	float  yaw, pitch;
+	int slot;
 	viewDamage_t *vd;
 
 	// show the attacking player's head and name in corner
@@ -154,8 +154,8 @@ void CG_DamageFeedback(int yawByte, int pitchByte, int damage)
 	// if yaw and pitch are both 255, make the damage always centered (falling, etc)
 	if (yawByte == 255 && pitchByte == 255)
 	{
-		vd->damageX    = 0;
-		vd->damageY    = 0;
+		vd->damageX = 0;
+		vd->damageY = 0;
 		cg.v_dmg_roll  = 0;
 		cg.v_dmg_pitch = -kick;
 	}
@@ -163,23 +163,23 @@ void CG_DamageFeedback(int yawByte, int pitchByte, int damage)
 	{
 		// positional
 		pitch = pitchByte / 255.0 * 360;
-		yaw   = yawByte / 255.0 * 360;
+		yaw = yawByte / 255.0 * 360;
 
 		angles[PITCH] = pitch;
-		angles[YAW]   = yaw;
-		angles[ROLL]  = 0;
+		angles[YAW]  = yaw;
+		angles[ROLL] = 0;
 
 		AngleVectors(angles, dir, NULL, NULL);
 		VectorSubtract(vec3_origin, dir, dir);
 
 		front = DotProduct(dir, cg.refdef.viewaxis[0]);
 		left  = DotProduct(dir, cg.refdef.viewaxis[1]);
-		up    = DotProduct(dir, cg.refdef.viewaxis[2]);
+		up = DotProduct(dir, cg.refdef.viewaxis[2]);
 
 		dir[0] = front;
 		dir[1] = left;
 		dir[2] = 0;
-		dist   = VectorLength(dir);
+		dist = VectorLength(dir);
 		if (dist < 0.1)
 		{
 			dist = 0.1;
@@ -221,12 +221,12 @@ void CG_DamageFeedback(int yawByte, int pitchByte, int damage)
 	{
 		kick = 10;
 	}
-	vd->damageValue    = kick;
-	cg.v_dmg_time      = cg.time + DAMAGE_TIME;
-	vd->damageTime     = cg.snap->serverTime;
+	vd->damageValue = kick;
+	cg.v_dmg_time  = cg.time + DAMAGE_TIME;
+	vd->damageTime = cg.snap->serverTime;
 	vd->damageDuration = kick * 50 * (1 + 2 * (!vd->damageX && !vd->damageY));
-	cg.damageTime      = cg.snap->serverTime;
-	cg.damageIndex     = slot;
+	cg.damageTime  = cg.snap->serverTime;
+	cg.damageIndex = slot;
 }
 
 
@@ -247,7 +247,7 @@ void CG_Respawn(qboolean revived)
 	cg.thisFrameTeleport = qtrue;
 
 	// need to reset client-side weapon animations
-	cg.predictedPlayerState.weapAnim    = ((cg.predictedPlayerState.weapAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | PM_IdleAnimForWeapon(cg.snap->ps.weapon);    // reset weapon animations
+	cg.predictedPlayerState.weapAnim = ((cg.predictedPlayerState.weapAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | PM_IdleAnimForWeapon(cg.snap->ps.weapon);       // reset weapon animations
 	cg.predictedPlayerState.weaponstate = WEAPON_READY; // hmm, set this?  what to?
 
 	// display weapons available
@@ -263,8 +263,8 @@ void CG_Respawn(qboolean revived)
 	// DHM - Nerve :: Clear even more things on respawn
 	cg.zoomedBinoc = qfalse;
 	cg.zoomedScope = qfalse;
-	cg.zoomTime    = 0;
-	cg.zoomval     = 0;
+	cg.zoomTime = 0;
+	cg.zoomval  = 0;
 
 	trap_SendConsoleCommand("-zoom\n");
 	cg.binocZoomTime = 0;
@@ -304,9 +304,10 @@ CG_CheckPlayerstateEvents
 */
 void CG_CheckPlayerstateEvents_wolf(playerState_t *ps, playerState_t *ops)
 {
-	int       i;
-	int       event;
+	int i;
+	int event;
 	centity_t *cent;
+
 /*
     if ( ps->externalEvent && ps->externalEvent != ops->externalEvent ) {
         cent = &cg_entities[ ps->clientNum ];
@@ -324,7 +325,7 @@ void CG_CheckPlayerstateEvents_wolf(playerState_t *ps, playerState_t *ops)
 		{
 			event = ps->events[i & (MAX_EVENTS - 1)];
 
-			cent->currentState.event     = event;
+			cent->currentState.event = event;
 			cent->currentState.eventParm = ps->eventParms[i & (MAX_EVENTS - 1)];
 			CG_EntityEvent(cent, cent->lerpOrigin);
 		}
@@ -333,14 +334,14 @@ void CG_CheckPlayerstateEvents_wolf(playerState_t *ps, playerState_t *ops)
 
 void CG_CheckPlayerstateEvents(playerState_t *ps, playerState_t *ops)
 {
-	int       i;
-	int       event;
+	int i;
+	int event;
 	centity_t *cent;
 
 	if (ps->externalEvent && ps->externalEvent != ops->externalEvent)
 	{
-		cent                         = &cg_entities[ps->clientNum];
-		cent->currentState.event     = ps->externalEvent;
+		cent = &cg_entities[ps->clientNum];
+		cent->currentState.event = ps->externalEvent;
 		cent->currentState.eventParm = ps->externalEventParm;
 		CG_EntityEvent(cent, cent->lerpOrigin);
 	}
@@ -356,8 +357,8 @@ void CG_CheckPlayerstateEvents(playerState_t *ps, playerState_t *ops)
 		    || (i > ops->eventSequence - MAX_EVENTS && ps->events[i & (MAX_EVENTS - 1)] != ops->events[i & (MAX_EVENTS - 1)]))
 		{
 
-			event                        = ps->events[i & (MAX_EVENTS - 1)];
-			cent->currentState.event     = event;
+			event = ps->events[i & (MAX_EVENTS - 1)];
+			cent->currentState.event = event;
 			cent->currentState.eventParm = ps->eventParms[i & (MAX_EVENTS - 1)];
 			CG_EntityEvent(cent, cent->lerpOrigin);
 
@@ -375,8 +376,8 @@ CG_CheckChangedPredictableEvents
 */
 void CG_CheckChangedPredictableEvents(playerState_t *ps)
 {
-	int       i;
-	int       event;
+	int i;
+	int event;
 	centity_t *cent;
 
 	cent = &cg.predictedPlayerEntity;
@@ -394,8 +395,8 @@ void CG_CheckChangedPredictableEvents(playerState_t *ps)
 			if (ps->events[i & (MAX_EVENTS - 1)] != cg.predictableEvents[i & (MAX_PREDICTED_EVENTS - 1)])
 			{
 
-				event                        = ps->events[i & (MAX_EVENTS - 1)];
-				cent->currentState.event     = event;
+				event = ps->events[i & (MAX_EVENTS - 1)];
+				cent->currentState.event = event;
 				cent->currentState.eventParm = ps->eventParms[i & (MAX_EVENTS - 1)];
 				CG_EntityEvent(cent, cent->lerpOrigin);
 
@@ -535,7 +536,7 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 			cg.thisFrameTeleport = qtrue;
 
 			// clear voicechat
-			cg.predictedPlayerEntity.voiceChatSpriteTime   = 0; // CHECKME: should we do this here?
+			cg.predictedPlayerEntity.voiceChatSpriteTime = 0;   // CHECKME: should we do this here?
 			cg_entities[ps->clientNum].voiceChatSpriteTime = 0;
 
 			*ops = *ps;
@@ -550,7 +551,7 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 		cg.thisFrameTeleport = qtrue;
 
 		// clear voicechat
-		cg.predictedPlayerEntity.voiceChatSpriteTime   = 0;
+		cg.predictedPlayerEntity.voiceChatSpriteTime = 0;
 		cg_entities[ps->clientNum].voiceChatSpriteTime = 0;
 
 		// make sure we don't get any unwanted transition effects
@@ -566,7 +567,7 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 	if (ps->eFlags & EF_FIRING)
 	{
 		cg.lastFiredWeaponTime = 0;
-		cg.weaponFireTime     += cg.frametime;
+		cg.weaponFireTime += cg.frametime;
 	}
 	else
 	{
@@ -643,6 +644,6 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 	if (ps->viewheight != ops->viewheight)
 	{
 		cg.duckChange = ps->viewheight - ops->viewheight;
-		cg.duckTime   = cg.time;
+		cg.duckTime = cg.time;
 	}
 }

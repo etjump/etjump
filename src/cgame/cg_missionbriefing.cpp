@@ -12,7 +12,7 @@ const char *CG_NameForCampaign(void)
 
 qboolean CG_FindCampaignInFile(char *filename, const char *campaignShortName, cg_campaignInfo_t *info)
 {
-	int        handle;
+	int handle;
 	pc_token_t token;
 //	char* dummy;
 	qboolean campaignFound = qfalse;
@@ -178,10 +178,10 @@ qboolean CG_FindCampaignInFile(char *filename, const char *campaignShortName, cg
 
 qboolean CG_FindArenaInfo(char *filename, char *mapname, arenaInfo_t *info)
 {
-	int        handle;
+	int handle;
 	pc_token_t token;
 	const char *dummy;
-	qboolean   found = qfalse;
+	qboolean found = qfalse;
 
 	handle = trap_PC_LoadSource(filename);
 
@@ -409,11 +409,11 @@ void CG_LocateCampaign(void)
 
     cgs.campaignInfoLoaded = qtrue;*/
 
-	int      numdirs;
-	char     filename[MAX_QPATH];
-	char     dirlist[1024];
-	char     *dirptr;
-	int      i, dirlen;
+	int  numdirs;
+	char filename[MAX_QPATH];
+	char dirlist[1024];
+	char *dirptr;
+	int  i, dirlen;
 	qboolean found = qfalse;
 
 	// get all campaigns from .campaign files
@@ -442,7 +442,7 @@ void CG_LocateCampaign(void)
 		// Gordon: horrible hack, but i dont plan to parse EVERY .arena to get a map briefing...
 		if ( /*!CG_FindArenaInfo( "scripts/wolfmp.arena", cgs.campaignData.mapnames[i], &cgs.campaignData.arenas[i] ) &&
 		    !CG_FindArenaInfo( "scripts/wolfxp.arena", cgs.campaignData.mapnames[i], &cgs.campaignData.arenas[i] ) &&*/
-		    !CG_FindArenaInfo(filename, cgs.campaignData.mapnames[i], &cgs.campaignData.arenas[i]))
+			!CG_FindArenaInfo(filename, cgs.campaignData.mapnames[i], &cgs.campaignData.arenas[i]))
 		{
 			return;
 		}
@@ -459,7 +459,7 @@ void CG_LocateArena(void)
 
 	if ( /*!CG_FindArenaInfo( "scripts/wolfmp.arena", cgs.rawmapname, &cgs.arenaData ) &&
 	    !CG_FindArenaInfo( "scripts/wolfxp.arena", cgs.rawmapname, &cgs.arenaData ) &&*/
-	    !CG_FindArenaInfo(filename, cgs.rawmapname, &cgs.arenaData))
+		!CG_FindArenaInfo(filename, cgs.rawmapname, &cgs.arenaData))
 	{
 		return;
 	}

@@ -3,14 +3,14 @@
 // this file is only included when building a dll
 // syscalls.asm is included instead when building a qvm
 
-static int(QDECL * syscall)(int arg, ...) = (int(QDECL *)(int, ...)) - 1;
+static int (QDECL * syscall)(int arg, ...) = (int (QDECL *)(int, ...)) - 1;
 
 #if defined(__MACOS__)
 #ifndef __GNUC__
 #pragma export on
 #endif
 #endif
-extern "C" FN_PUBLIC void dllEntry(int(QDECL * syscallptr)(int arg, ...))
+extern "C" FN_PUBLIC void dllEntry(int (QDECL *syscallptr)(int arg, ...))
 {
 	syscall = syscallptr;
 }
@@ -23,6 +23,7 @@ extern "C" FN_PUBLIC void dllEntry(int(QDECL * syscallptr)(int arg, ...))
 int PASSFLOAT(float x)
 {
 	float floatTemp;
+
 	floatTemp = x;
 	return *(int *)&floatTemp;
 }
@@ -60,6 +61,7 @@ void trap_Cvar_Set(const char *var_name, const char *value)
 float trap_Cvar_VariableValue(const char *var_name)
 {
 	int temp;
+
 	temp = syscall(UI_CVAR_VARIABLEVALUE, var_name);
 	return (*(float *)&temp);
 }
@@ -186,7 +188,7 @@ void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts, const polyVert_t *ve
 void    trap_R_AddLightToScene(const vec3_t org, float radius, float intensity, float r, float g, float b, qhandle_t hShader, int flags)
 {
 	syscall(UI_R_ADDLIGHTTOSCENE, org, PASSFLOAT(radius), PASSFLOAT(intensity),
-	        PASSFLOAT(r), PASSFLOAT(g), PASSFLOAT(b), hShader, flags);
+		PASSFLOAT(r), PASSFLOAT(g), PASSFLOAT(b), hShader, flags);
 }
 
 void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b, float scale, int id, qboolean visible)
@@ -242,6 +244,7 @@ void trap_S_StartLocalSound(sfxHandle_t sfx, int channelNum)
 sfxHandle_t trap_S_RegisterSound(const char *sample, qboolean compressed)
 {
 	int i = syscall(UI_S_REGISTERSOUND, sample, qfalse /* compressed */);
+
 #ifdef DEBUG
 	if (i == 0)
 	{
@@ -584,7 +587,7 @@ char *trap_TranslateString(const char *string)
 {
 	static char staticbuf[2][MAX_VA_STRING];
 	static int  bufcount = 0;
-	char        *buf;
+	char *buf;
 
 	buf = staticbuf[bufcount++ % 2];
 

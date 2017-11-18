@@ -9,7 +9,7 @@
 extern pmove_t cg_pmove;        // cg_predict.c
 
 
-vec4_t colorClear = { 0.0f, 0.0f, 0.0f, 0.0f };     // Transparent
+vec4_t colorClear  = { 0.0f, 0.0f, 0.0f, 0.0f };    // Transparent
 vec4_t colorBrown1 = { 0.3f, 0.2f, 0.1f, 0.9f };    // Brown
 vec4_t colorGreen1 = { 0.21f, 0.3f, 0.0f, 0.9f };   // Greenish (darker)
 vec4_t colorGreen2 = { 0.305f, 0.475f, 0.305f, 0.48f }; // Slightly off from default fill
@@ -27,7 +27,7 @@ void CG_createStatsWindow(void)
 	}
 
 	// Window specific
-	sw->id         = WID_STATS;
+	sw->id = WID_STATS;
 	sw->fontScaleX = cf_wstats.value * 0.2f;
 	sw->fontScaleY = cf_wstats.value * 0.2f;
 //	sw->x = (cg.snap->ps.pm_type == PM_INTERMISSION) ?  10 : 160;
@@ -48,11 +48,11 @@ void CG_createTopShotsWindow(void)
 	}
 
 	// Window specific
-	sw->id            = WID_TOPSHOTS;
-	sw->fontScaleX    = cf_wtopshots.value * 0.2f;
-	sw->fontScaleY    = cf_wtopshots.value * 0.2f;
-	sw->x             = (cg.snap->ps.pm_type == PM_INTERMISSION) ? -10 : -20;
-	sw->y             = (cg.snap->ps.pm_type == PM_INTERMISSION) ? -20 : -60; // Align from bottom minus offset and height
+	sw->id = WID_TOPSHOTS;
+	sw->fontScaleX = cf_wtopshots.value * 0.2f;
+	sw->fontScaleY = cf_wtopshots.value * 0.2f;
+	sw->x = (cg.snap->ps.pm_type == PM_INTERMISSION) ? -10 : -20;
+	sw->y = (cg.snap->ps.pm_type == PM_INTERMISSION) ? -20 : -60;             // Align from bottom minus offset and height
 	sw->flashMidpoint = sw->flashPeriod * 0.8f;
 	memcpy(&sw->colorBackground2, &colorGreen2, sizeof(vec4_t));
 }
@@ -64,7 +64,7 @@ void CG_createMOTDWindow(void)
 
 	if (str != NULL && *str != 0)
 	{
-		int         i;
+		int i;
 		cg_window_t *sw = CG_windowAlloc(WFX_TEXTSIZING | WFX_FADEIN, 500);
 
 		cg.motdWindow = sw;
@@ -74,11 +74,11 @@ void CG_createMOTDWindow(void)
 		}
 
 		// Window specific
-		sw->id            = WID_MOTD;
-		sw->fontScaleX    = 1.0f;
-		sw->fontScaleY    = 1.0f;
-		sw->x             = 10;
-		sw->y             = -36;
+		sw->id = WID_MOTD;
+		sw->fontScaleX = 1.0f;
+		sw->fontScaleY = 1.0f;
+		sw->x = 10;
+		sw->y = -36;
 		sw->flashMidpoint = sw->flashPeriod * 0.8f;
 		memcpy(&sw->colorBackground2, &colorGreen2, sizeof(vec4_t));
 
@@ -309,10 +309,10 @@ void CG_windowInit(void)
 		cg.winHandler.window[i].inuse = qfalse;
 	}
 
-	cg.msgWstatsWindow    = NULL;
+	cg.msgWstatsWindow = NULL;
 	cg.msgWtopshotsWindow = NULL;
-	cg.statsWindow        = NULL;
-	cg.topshotsWindow     = NULL;
+	cg.statsWindow = NULL;
+	cg.topshotsWindow = NULL;
 }
 
 
@@ -320,21 +320,21 @@ void CG_windowInit(void)
 void CG_windowReset(cg_window_t *w, int fx, int startupLength)
 {
 	vec4_t colorGeneralBorder = { 0.5f, 0.35f, 0.25f, 0.5f };
-	vec4_t colorGeneralFill   = { 0.3f, 0.45f, 0.3f, 0.5f };
+	vec4_t colorGeneralFill = { 0.3f, 0.45f, 0.3f, 0.5f };
 
-	w->effects       = fx;
-	w->fontScaleX    = 0.25;
-	w->fontScaleY    = 0.25;
-	w->flashPeriod   = 1000;
+	w->effects = fx;
+	w->fontScaleX  = 0.25;
+	w->fontScaleY  = 0.25;
+	w->flashPeriod = 1000;
 	w->flashMidpoint = w->flashPeriod / 2;
-	w->id            = WID_NONE;
-	w->inuse         = qtrue;
-	w->lineCount     = 0;
-	w->state         = (fx >= WFX_FADEIN) ? WSTATE_START : WSTATE_COMPLETE;
-	w->targetTime    = (startupLength > 0) ? startupLength : 0;
-	w->time          = trap_Milliseconds();
-	w->x             = 0;
-	w->y             = 0;
+	w->id = WID_NONE;
+	w->inuse = qtrue;
+	w->lineCount = 0;
+	w->state = (fx >= WFX_FADEIN) ? WSTATE_START : WSTATE_COMPLETE;
+	w->targetTime = (startupLength > 0) ? startupLength : 0;
+	w->time = trap_Milliseconds();
+	w->x = 0;
+	w->y = 0;
 
 	memcpy(&w->colorBorder, &colorGeneralBorder, sizeof(vec4_t));
 	memcpy(&w->colorBackground, &colorGeneralFill, sizeof(vec4_t));
@@ -343,8 +343,8 @@ void CG_windowReset(cg_window_t *w, int fx, int startupLength)
 // Reserve a window
 cg_window_t *CG_windowAlloc(int fx, int startupLength)
 {
-	int                i;
-	cg_window_t        *w;
+	int i;
+	cg_window_t *w;
 	cg_windowHandler_t *wh = &cg.winHandler;
 
 	if (wh->numActiveWindows == MAX_WINDOW_COUNT)
@@ -371,7 +371,7 @@ cg_window_t *CG_windowAlloc(int fx, int startupLength)
 // Free up a window reservation
 void CG_windowFree(cg_window_t *w)
 {
-	int                i, j;
+	int i, j;
 	cg_windowHandler_t *wh = &cg.winHandler;
 
 	if (w == NULL)
@@ -398,7 +398,7 @@ void CG_windowFree(cg_window_t *w)
 				}
 			}
 
-			w->id    = WID_NONE;
+			w->id = WID_NONE;
 			w->inuse = qfalse;
 			w->state = WSTATE_OFF;
 
@@ -414,8 +414,8 @@ void CG_windowFree(cg_window_t *w)
 
 void CG_windowCleanup(void)
 {
-	int                i;
-	cg_window_t        *w;
+	int i;
+	cg_window_t *w;
 	cg_windowHandler_t *wh = &cg.winHandler;
 
 	for (i = 0; i < wh->numActiveWindows; i++)
@@ -437,8 +437,8 @@ void CG_demoAviFPSDraw(void)
 	if (cg.demoPlayback && fKeyDown && cgs.aviDemoRate >= 0)
 	{
 		CG_DrawStringExt(42, 425,
-		                 ((cgs.aviDemoRate > 0) ? va("^3Record AVI @ ^7%d^2fps", cgs.aviDemoRate) : "^1Stop AVI Recording"),
-		                 colorWhite, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT - 2, 0);
+			((cgs.aviDemoRate > 0) ? va("^3Record AVI @ ^7%d^2fps", cgs.aviDemoRate) : "^1Stop AVI Recording"),
+			colorWhite, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT - 2, 0);
 	}
 }
 
@@ -460,9 +460,9 @@ void CG_demoTimescaleDraw(void)
 // Main window-drawing handler
 void CG_windowDraw(void)
 {
-	int         h, x, y, i, j, milli, t_offset, tmp;
+	int h, x, y, i, j, milli, t_offset, tmp;
 	cg_window_t *w;
-	qboolean    fCleanup = qfalse;
+	qboolean fCleanup = qfalse;
 	// Gordon: FIXME, the limbomenu var no longer exists
 	qboolean fAllowMV = (cg.snap != NULL && cg.snap->ps.pm_type != PM_INTERMISSION /*&& !cg.limboMenu*/) ? qtrue : qfalse;
 	vec4_t   *bg;
@@ -515,10 +515,10 @@ void CG_windowDraw(void)
 
 		bg = ((w->effects & WFX_FLASH) && (milli % w->flashPeriod) > w->flashMidpoint) ? &w->colorBackground2 : &w->colorBackground;
 
-		h            = w->h;
-		x            = w->x;
-		y            = w->y;
-		t_offset     = milli - w->time;
+		h = w->h;
+		x = w->x;
+		y = w->y;
+		t_offset = milli - w->time;
 		textColor[3] = 1.0f;
 		memcpy(&borderColor, w->colorBorder, sizeof(vec4_t));
 		memcpy(&bgColor, bg, sizeof(vec4_t));
@@ -577,13 +577,13 @@ void CG_windowDraw(void)
 				else
 				{
 					textColor[3] = 0.0f;
-					w->state     = WSTATE_OFF;
+					w->state = WSTATE_OFF;
 				}
 			}
 		}
 
 		borderColor[3] *= textColor[3];
-		bgColor[3]     *= textColor[3];
+		bgColor[3] *= textColor[3];
 
 		CG_FillRect(x, y, w->w, h, bgColor);
 		CG_DrawRect(x, y, w->w, h, 1, borderColor);
@@ -597,7 +597,7 @@ void CG_windowDraw(void)
 			{
 //				CG_Text_Paint(x, y + h, w->fontScale, textColor, (char*)w->lineText[j], 0.0f, 0, 0);
 				CG_Text_Paint_Ext(x, y + h, w->fontScaleX, w->fontScaleY, textColor,
-				                  (char *)w->lineText[j], 0.0f, 0, 0, &cgs.media.limboFont2);
+					(char *)w->lineText[j], 0.0f, 0, 0, &cgs.media.limboFont2);
 			}
 
 			h -= (w->lineHeight[j] + 3);
@@ -605,7 +605,7 @@ void CG_windowDraw(void)
 			if (!(w->effects & WFX_TRUETYPE))
 			{
 				CG_DrawStringExt2(x, y + h, (char *)w->lineText[j], textColor,
-				                  qfalse, qtrue, w->fontWidth, w->fontHeight, 0);
+					qfalse, qtrue, w->fontWidth, w->fontHeight, 0);
 			}
 		}
 	}
@@ -702,8 +702,8 @@ void CG_windowNormalizeOnText(cg_window_t *w)
 
 void CG_printWindow(const char *str)
 {
-	int         pos = 0, pos2 = 0;
-	char        buf[MAX_STRING_CHARS];
+	int  pos = 0, pos2 = 0;
+	char buf[MAX_STRING_CHARS];
 	cg_window_t *w = cg.windowCurrent;
 
 	if (w == NULL)
@@ -817,7 +817,7 @@ void CG_removeStrings(cg_window_t *w)
 
 			if (ref == (char *)&cg.aStringPool[j].str)
 			{
-				w->lineText[i]            = NULL;
+				w->lineText[i] = NULL;
 				cg.aStringPool[j].fActive = qfalse;
 				cg.aStringPool[j].str[0]  = 0;
 
@@ -837,13 +837,13 @@ void CG_removeStrings(cg_window_t *w)
 // Mouse overlay for controlling multiview windows
 void CG_cursorUpdate(void)
 {
-	int                i, j, x;
-	float              nx, ny;
-	int                nSelectedWindow = -1;
-	cg_window_t        *w;
-	cg_windowHandler_t *wh    = &cg.winHandler;
-	qboolean           fFound = qfalse, fUpdateOverlay = qfalse;
-	qboolean           fSelect, fResize;
+	int i, j, x;
+	float nx, ny;
+	int nSelectedWindow = -1;
+	cg_window_t *w;
+	cg_windowHandler_t *wh = &cg.winHandler;
+	qboolean fFound = qfalse, fUpdateOverlay = qfalse;
+	qboolean fSelect, fResize;
 
 
 	// Get cursor current position (when connected to a server)
@@ -866,14 +866,14 @@ void CG_cursorUpdate(void)
 		fResize = ((cg_pmove.cmd.buttons & BUTTON_SPRINT) != 0) ? qtrue : qfalse;
 
 		cgs.cursorUpdate = cg.time + 5000;
-		cgs.cursorX      = nx;
-		cgs.cursorY      = ny;
+		cgs.cursorX = nx;
+		cgs.cursorY = ny;
 	}
 	else
 	{
 		// Already updated in the keycatcher
-		nx      = cgs.cursorX;
-		ny      = cgs.cursorY;
+		nx = cgs.cursorX;
+		ny = cgs.cursorY;
 		fSelect = cgs.fSelect;
 		fResize = cgs.fResize;
 	}
@@ -896,14 +896,14 @@ void CG_cursorUpdate(void)
 			// If the current window is selected, and the button is down, then allow the update
 			// to occur, as quick mouse movements can move it past the window borders
 			if (!fFound &&
-			    (
-			        ((w->mvInfo & MV_SELECTED) && fSelect) ||
-			        (!fSelect && nx >= w->x && nx < w->x + w->w && ny >= w->y && ny < w->y + w->h)
+				(
+					((w->mvInfo & MV_SELECTED) && fSelect) ||
+					(!fSelect && nx >= w->x && nx < w->x + w->w && ny >= w->y && ny < w->y + w->h)
 			    ))
 			{
 				if (!(w->mvInfo & MV_SELECTED))
 				{
-					w->mvInfo      |= MV_SELECTED;
+					w->mvInfo |= MV_SELECTED;
 					nSelectedWindow = i;
 				}
 
@@ -967,7 +967,7 @@ void CG_cursorUpdate(void)
 					w->m_y = ny;
 				}
 
-				fFound             = qtrue;
+				fFound = qtrue;
 				cg.mvCurrentActive = w;
 
 				// Reset mouse info for window if it loses focuse
@@ -975,9 +975,9 @@ void CG_cursorUpdate(void)
 			else if (w->mvInfo & MV_SELECTED)
 			{
 				fUpdateOverlay = qtrue;
-				w->m_x         = -1.0f;
-				w->m_y         = -1.0f;
-				w->mvInfo     &= ~MV_SELECTED;
+				w->m_x = -1.0f;
+				w->m_y = -1.0f;
+				w->mvInfo &= ~MV_SELECTED;
 
 				if (fFound)
 				{
@@ -1062,7 +1062,7 @@ void CG_cursorUpdate(void)
 				}
 			}
 			vOffset += (cg.mvTotalTeam[i] + 2) * (MVINFO_TEXTSIZE + 1);
-			ny      += vOffset;
+			ny += vOffset;
 		}
 	}
 
@@ -1071,7 +1071,7 @@ void CG_cursorUpdate(void)
 	if (nSelectedWindow >= 0)
 	{
 		fUpdateOverlay = qtrue;
-		x              = wh->activeWindows[nSelectedWindow];
+		x = wh->activeWindows[nSelectedWindow];
 
 		for (j = nSelectedWindow; j < wh->numActiveWindows - 1; j++)
 		{

@@ -46,6 +46,7 @@ std::string User_s::GetLastSeenString() const
 std::string User_s::GetLastVisitString() const
 {
 	time_t t;
+
 	time(&t);
 	unsigned now = static_cast<unsigned>(t);
 

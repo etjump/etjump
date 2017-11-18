@@ -10,12 +10,12 @@ using std::vector;
 ETJump::SaveSystem::Client::Client()
 {
 	alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
-	axisBackupPositions   = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
+	axisBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
 
 	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
 	{
 		alliesSavedPositions[i].isValid = false;
-		axisSavedPositions[i].isValid   = false;
+		axisSavedPositions[i].isValid = false;
 	}
 
 	for (int i = 0; i < MAX_BACKUP_POSITIONS; i++)
@@ -33,8 +33,8 @@ ETJump::SaveSystem::DisconnectedClient::DisconnectedClient()
 	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
 	{
 		alliesSavedPositions[i].isValid = false;
-		axisSavedPositions[i].isValid   = false;
-		progression                     = 0;
+		axisSavedPositions[i].isValid = false;
+		progression = 0;
 	}
 }
 
@@ -93,8 +93,8 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 		}
 
 		if (position > 0 &&
-			client->sess.timerunActive &&
-			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+		    client->sess.timerunActive &&
+		    client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
 			CPTo(ent, "Save slots are disabled for this timerun.");
 			return;
@@ -121,7 +121,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	trace_t trace;
 	trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins,
-	                  ent->r.maxs, client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
+		ent->r.maxs, client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
 
 	if (level.noSave)
 	{
@@ -190,12 +190,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	saveBackupPosition(ent, pos);
 
-	VectorCopy(client->ps.origin, pos->origin);
-	VectorCopy(client->ps.viewangles, pos->vangles);
-	pos->isValid = true;
-	pos->stance = client->ps.eFlags & EF_CROUCHING
-		? Crouch
-		: client->ps.eFlags & EF_PRONE ? Prone : Stand;
+	storePosition(client, pos);
 
 	if (position == 0)
 	{
@@ -230,7 +225,7 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 	}
 
 	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
-		{
+	{
 		CPTo(ent, "^3Load ^7is disabled for this death run.");
 		return;
 	}
@@ -254,8 +249,8 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 		}
 
 		if (position > 0 &&
-			client->sess.timerunActive &&
-			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+		    client->sess.timerunActive &&
+		    client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
 			CPTo(ent, "Save slots are disabled for this timerun.");
 			return;
@@ -340,9 +335,9 @@ void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent)
 	VectorCopy(location->s.origin, pos->origin);
 	VectorCopy(location->s.angles, pos->vangles);
 	pos->isValid = true;
-	pos->stance = client->ps.eFlags & EF_CROUCHING
-		? Crouch
-		: client->ps.eFlags & EF_PRONE ? Prone : Stand;
+	pos->stance  = client->ps.eFlags & EF_CROUCHING
+	               ? Crouch
+	               : client->ps.eFlags & EF_PRONE ? Prone : Stand;
 
 	trap_SendServerCommand(ent - g_entities, g_savemsg.string);
 }
@@ -370,7 +365,7 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 	}
 
 	if (client->sess.timerunActive &&
-		client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+	    client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 	{
 		CPTo(ent, "Backup is disabled for this timerun.");
 		return;
@@ -470,17 +465,22 @@ void ETJump::SaveSystem::reset()
 // Used to reset positions on map change/restart
 void ETJump::SaveSystem::resetSavedPositions(gentity_t *ent)
 {
+	int clientNum = ClientNum(ent);
+
 	for (int saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++)
 	{
-		_clients[ClientNum(ent)].alliesSavedPositions[saveIndex].isValid = false;
-		_clients[ClientNum(ent)].axisSavedPositions[saveIndex].isValid   = false;
+		_clients[clientNum].alliesSavedPositions[saveIndex].isValid = false;
+		_clients[clientNum].axisSavedPositions[saveIndex].isValid = false;
 	}
 
 	for (int backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++)
 	{
-		_clients[ClientNum(ent)].alliesBackupPositions[backupIndex].isValid = false;
-		_clients[ClientNum(ent)].axisBackupPositions[backupIndex].isValid   = false;
+		_clients[clientNum].alliesBackupPositions[backupIndex].isValid = false;
+		_clients[clientNum].axisBackupPositions[backupIndex].isValid = false;
 	}
+
+	_clients[clientNum].quickDeployPositions[TEAM_ALLIES].isValid = false;
+	_clients[clientNum].quickDeployPositions[TEAM_AXIS].isValid = false;
 }
 
 // Called on client disconnect. Saves saves for future sessions
@@ -500,21 +500,21 @@ void ETJump::SaveSystem::savePositionsToDatabase(gentity_t *ent)
 	{
 		// Allied
 		VectorCopy(_clients[ClientNum(ent)].alliesSavedPositions[i].origin,
-		           client.alliesSavedPositions[i].origin);
+			client.alliesSavedPositions[i].origin);
 		VectorCopy(_clients[ClientNum(ent)].alliesSavedPositions[i].vangles,
-		           client.alliesSavedPositions[i].vangles);
+			client.alliesSavedPositions[i].vangles);
 		client.alliesSavedPositions[i].isValid =
-		    _clients[ClientNum(ent)].alliesSavedPositions[i].isValid;
+			_clients[ClientNum(ent)].alliesSavedPositions[i].isValid;
 		// Axis
 		VectorCopy(_clients[ClientNum(ent)].axisSavedPositions[i].origin,
-		           client.axisSavedPositions[i].origin);
+			client.axisSavedPositions[i].origin);
 		VectorCopy(_clients[ClientNum(ent)].axisSavedPositions[i].vangles,
-		           client.axisSavedPositions[i].vangles);
+			client.axisSavedPositions[i].vangles);
 		client.axisSavedPositions[i].isValid
 		    = _clients[ClientNum(ent)].axisSavedPositions[i].isValid;
 	}
 
-	client.progression                           = ent->client->sess.clientMapProgression;
+	client.progression = ent->client->sess.clientMapProgression;
 	ent->client->sess.loadPreviousSavedPositions = qfalse;
 
 	std::map<string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
@@ -557,11 +557,11 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 		{
 			// Allied
 			VectorCopy(it->second.alliesSavedPositions[i].origin,
-			           _clients[ClientNum(ent)].alliesSavedPositions[i].origin);
+				_clients[ClientNum(ent)].alliesSavedPositions[i].origin);
 			VectorCopy(it->second.alliesSavedPositions[i].vangles,
-			           _clients[ClientNum(ent)].alliesSavedPositions[i].vangles);
+				_clients[ClientNum(ent)].alliesSavedPositions[i].vangles);
 			_clients[ClientNum(ent)].alliesSavedPositions[i].isValid =
-			    it->second.alliesSavedPositions[i].isValid;
+				it->second.alliesSavedPositions[i].isValid;
 
 			if (it->second.alliesSavedPositions[i].isValid)
 			{
@@ -570,11 +570,11 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 
 			// Axis
 			VectorCopy(it->second.axisSavedPositions[i].origin,
-			           _clients[ClientNum(ent)].axisSavedPositions[i].origin);
+				_clients[ClientNum(ent)].axisSavedPositions[i].origin);
 			VectorCopy(it->second.axisSavedPositions[i].vangles,
-			           _clients[ClientNum(ent)].axisSavedPositions[i].vangles);
+				_clients[ClientNum(ent)].axisSavedPositions[i].vangles);
 			_clients[ClientNum(ent)].axisSavedPositions[i].isValid =
-			    it->second.axisSavedPositions[i].isValid;
+				it->second.axisSavedPositions[i].isValid;
 
 			if (it->second.axisSavedPositions[i].isValid)
 			{
@@ -583,12 +583,53 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 		}
 
 		ent->client->sess.loadPreviousSavedPositions = qfalse;
-		ent->client->sess.clientMapProgression       = it->second.progression;
+		ent->client->sess.clientMapProgression = it->second.progression;
 		if (validPositionsCount)
 		{
 			ChatPrintTo(ent, "^<ETJump: ^7loaded saved positions from previous session.");
 		}
 	}
+}
+
+void ETJump::SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	if (team != TEAM_ALLIES && team != TEAM_AXIS)
+	{
+		return;
+	}
+
+	auto client = &_clients[ClientNum(ent)];
+	auto pos = &(client->quickDeployPositions[team]);
+
+	storePosition(ent->client, pos);
+}
+
+void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent, team_t team)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	if (team != TEAM_ALLIES && team != TEAM_AXIS)
+	{
+		return;
+	}
+
+	auto client = &_clients[ClientNum(ent)];
+	auto pos = &client->quickDeployPositions[team];
+
+	if (!pos->isValid)
+	{
+		return;
+	}
+
+	teleportPlayer(ent, pos);
 }
 
 // Saves backup position
@@ -601,7 +642,8 @@ void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 	}
 
 	if (ent->client->sess.timerunActive &&
-		ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS) {
+	    ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
+	{
 		return;
 	}
 
@@ -609,7 +651,7 @@ void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 	VectorCopy(pos->origin, backup.origin);
 	VectorCopy(pos->vangles, backup.vangles);
 	backup.isValid = pos->isValid;
-	backup.stance = pos->stance;
+	backup.stance  = pos->stance;
 	// Can never be spectator as this would not be called
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
 	{
@@ -622,14 +664,35 @@ void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 
 }
 
+void ETJump::SaveSystem::storePosition(gclient_s *client, SavePosition *pos)
+{
+	VectorCopy(client->ps.origin, pos->origin);
+	VectorCopy(client->ps.viewangles, pos->vangles);
+	pos->isValid = true;
 
-void ETJump::SaveSystem::teleportPlayer(gentity_t* ent, SavePosition* pos)
+	if (client->ps.eFlags & EF_CROUCHING)
+	{
+		pos->stance = Crouch;
+	}
+	else if (client->ps.eFlags & EF_PRONE)
+	{
+		pos->stance = Prone;
+	}
+	else
+	{
+		pos->stance = Stand;
+	}
+}
+
+
+void ETJump::SaveSystem::teleportPlayer(gentity_t *ent, SavePosition *pos)
 {
 	auto *client = ent->client;
+
 	client->ps.eFlags ^= EF_TELEPORT_BIT;
 	G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
 
-	VectorCopy(pos->origin, client->ps.origin);
+	G_SetOrigin(ent, pos->origin);
 	VectorClear(client->ps.velocity);
 
 	if (client->pers.loadViewAngles)

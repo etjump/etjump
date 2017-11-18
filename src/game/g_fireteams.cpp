@@ -199,7 +199,7 @@ qboolean G_IsFireteamLeader(int entityNum, fireteamData_t **teamNum)
 int G_FindFreeFireteamIdent(team_t team)
 {
 	qboolean freeIdent[MAX_FIRETEAMS];
-	int      i;
+	int i;
 
 	memset(freeIdent, qtrue, sizeof(freeIdent));
 
@@ -229,8 +229,8 @@ int G_FindFreeFireteamIdent(team_t team)
 void G_RegisterFireteam(/*const char* name,*/ int entityNum)
 {
 	fireteamData_t *ft;
-	gentity_t      *leader;
-	int            count, ident;
+	gentity_t *leader;
+	int count, ident;
 
 	if (entityNum < 0 || entityNum >= MAX_CLIENTS)
 	{
@@ -273,8 +273,8 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum)
 	ft->inuse = qtrue;
 	memset(ft->joinOrder, -1, sizeof(level.fireTeams[0].joinOrder));
 	ft->joinOrder[0] = leader - g_entities;
-	ft->ident        = ident;
-	ft->saveLimit    = 0;
+	ft->ident = ident;
+	ft->saveLimit = 0;
 	ft->teamJumpMode = qfalse;
 
 	if (g_autoFireteams.integer)
@@ -297,7 +297,7 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum)
 void G_AddClientToFireteam(int entityNum, int leaderNum)
 {
 	fireteamData_t *ft;
-	int            i;
+	int i;
 
 	if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client)
 	{
@@ -347,7 +347,7 @@ void G_AddClientToFireteam(int entityNum, int leaderNum)
 void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print)
 {
 	fireteamData_t *ft;
-	int            i, j;
+	int i, j;
 
 	if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client)
 	{
@@ -426,7 +426,7 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print)
 			}
 			else
 			{
-				ent                         = g_entities + ft->joinOrder[i];
+				ent = g_entities + ft->joinOrder[i];
 				ent->client->sess.saveLimit = ft->saveLimit;
 			}
 		}
@@ -569,7 +569,7 @@ void G_KickFireTeamPlayer(int entityNum, int otherEntityNum)
 // The only way a client should ever apply to join a team
 void G_ApplyToFireTeam(int entityNum, int fireteamNum)
 {
-	gentity_t      *leader;
+	gentity_t *leader;
 	fireteamData_t *ft;
 
 	if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client)
@@ -611,7 +611,7 @@ void G_ApplyToFireTeam(int entityNum, int fireteamNum)
 void G_ProposeFireTeamPlayer(int entityNum, int otherEntityNum)
 {
 	fireteamData_t *ft;
-	gentity_t      *leader;
+	gentity_t *leader;
 
 	if (entityNum == otherEntityNum)
 	{
@@ -724,11 +724,11 @@ fireteamData_t *G_FindFreePublicFireteam(team_t team)
 
 void G_TeamJumpMode(int clientNum)
 {
-	int            i                    = 0;
-	char           buf[MAX_TOKEN_CHARS] = "\0";
-	char           arg[MAX_TOKEN_CHARS] = "\0";
-	fireteamData_t *ft                  = NULL;
-	qboolean       printChanges         = qtrue;
+	int  i = 0;
+	char buf[MAX_TOKEN_CHARS] = "\0";
+	char arg[MAX_TOKEN_CHARS] = "\0";
+	fireteamData_t *ft = NULL;
+	qboolean printChanges = qtrue;
 
 	if (!G_IsOnFireteam(clientNum, &ft))
 	{
@@ -774,7 +774,7 @@ void G_TeamJumpMode(int clientNum)
 
 	for (i = 0; i < level.numConnectedClients; i++)
 	{
-		int            cnum = level.sortedClients[i];
+		int cnum = level.sortedClients[i];
 		fireteamData_t *ft2 = NULL;
 
 		if (!G_IsOnFireteam(cnum, &ft2))
@@ -799,6 +799,7 @@ void G_TeamJumpMode(int clientNum)
 void G_FireteamRace(int clientNum)
 {
 	fireteamData_t *ft;
+
 	if (!G_IsOnFireteam(clientNum, &ft))
 	{
 		G_ClientPrintAndReturn(clientNum, "You are not on a fireteam");
@@ -825,9 +826,9 @@ void G_FireteamRace(int clientNum)
 
 void G_SetFireTeamRules(int clientNum)
 {
-	int            i;
-	char           arg1[MAX_TOKEN_CHARS];
-	char           val[MAX_TOKEN_CHARS];
+	int  i;
+	char arg1[MAX_TOKEN_CHARS];
+	char val[MAX_TOKEN_CHARS];
 	fireteamData_t *ft;
 
 	if (!G_IsOnFireteam(clientNum, &ft))
@@ -867,7 +868,7 @@ void G_SetFireTeamRules(int clientNum)
 				}
 				else
 				{
-					ent                         = g_entities + ft->joinOrder[i];
+					ent = g_entities + ft->joinOrder[i];
 					ent->client->sess.saveLimit = ft->saveLimit;
 				}
 			}
@@ -897,7 +898,7 @@ void G_SetFireTeamRules(int clientNum)
 			}
 			else
 			{
-				ent                         = g_entities + ft->joinOrder[i];
+				ent = g_entities + ft->joinOrder[i];
 				ent->client->sess.saveLimit = ft->saveLimit;
 			}
 		}

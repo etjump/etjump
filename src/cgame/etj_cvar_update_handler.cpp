@@ -6,11 +6,14 @@ ETJump::CvarUpdateHandler::CvarUpdateHandler()
 	callbacks.clear();
 }
 
-ETJump::CvarUpdateHandler::~CvarUpdateHandler() {}
+ETJump::CvarUpdateHandler::~CvarUpdateHandler()
+{
+}
 
 bool ETJump::CvarUpdateHandler::check(const vmCvar_t *cvar)
 {
 	auto match = callbacks.find(cvar->handle);
+
 	if (match != end(callbacks))
 	{
 		for (auto callback : match->second)
@@ -32,6 +35,7 @@ bool ETJump::CvarUpdateHandler::subscribe(const vmCvar_t *target, std::function<
 bool ETJump::CvarUpdateHandler::unsubscribe(const vmCvar_t *target)
 {
 	auto callback = callbacks.find(target->handle);
+
 	if (callback != end(callbacks))
 	{
 		return false;
@@ -39,6 +43,3 @@ bool ETJump::CvarUpdateHandler::unsubscribe(const vmCvar_t *target)
 	callbacks.erase(callback);
 	return true;
 }
-
-
-

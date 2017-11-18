@@ -2,7 +2,7 @@
 #include <algorithm>
 
 
-ETJump::DeathrunSystem::DeathrunSystem(): _defaultLocation(PrintLocation::Left)
+ETJump::DeathrunSystem::DeathrunSystem() : _defaultLocation(PrintLocation::Left)
 {
 }
 
@@ -76,8 +76,9 @@ bool ETJump::DeathrunSystem::hitCheckpoint(int checkpointId, int clientNum)
 int ETJump::DeathrunSystem::hitEnd(int clientNum)
 {
 	auto score = getScore(clientNum);
+
 	_runStatuses[clientNum].active = false;
-	
+
 	// cannot be a range for loop as vector<bool> is special
 	for (int i = 0, len = _runStatuses[clientNum].checkpointStatuses.size(); i < len; ++i)
 	{
@@ -118,6 +119,7 @@ ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation()
 ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation(int checkpointId)
 {
 	auto location = _defaultLocation;
+
 	if (_checkpointData[checkpointId].location != PrintLocation::Unspecified)
 	{
 		location = _checkpointData[checkpointId].location;

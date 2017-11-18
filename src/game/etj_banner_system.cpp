@@ -9,19 +9,19 @@ static const char *LocationText[] = {
 	"Left"
 };
 
-ETJump::BannerSystem::BannerSystem(Options options): _bannerIdx(0)
+ETJump::BannerSystem::BannerSystem(Options options) : _bannerIdx(0)
 {
 	_options = options;
-	subcribeToRunFrame([=](int levelTime)
+	subcribeToRunFrame([ = ](int levelTime)
 	{
 		check(levelTime);
 	});
 	Printer::LogPrintln(
 		(boost::format("Initialized banner system\n"
-		"- %d banners\n"
-		"- %ds interval\n"
-		"- %s location"
-	) % _options.messages.size() % (_options.interval / 1000) % LocationText[_options.location]).str());
+			           "- %d banners\n"
+			           "- %ds interval\n"
+			           "- %s location"
+			 ) % _options.messages.size() % (_options.interval / 1000) % LocationText[_options.location]).str());
 }
 
 void ETJump::BannerSystem::check(int levelTime)
@@ -35,19 +35,19 @@ void ETJump::BannerSystem::check(int levelTime)
 
 	switch (_options.location)
 	{
-	case Center: 
+	case Center:
 		Printer::BroadcastCenterMessage(message);
 		break;
-	case Top: 
+	case Top:
 		Printer::BroadcastTopBannerMessage(message);
 		break;
-	case Chat: 
+	case Chat:
 		Printer::BroadcastChatMessage(message);
 		break;
-	case Left: 
+	case Left:
 		Printer::BroadcastLeftBannerMessage(message);
 		break;
-	default: 
+	default:
 		Printer::BroadcastTopBannerMessage(message);
 		break;
 	}

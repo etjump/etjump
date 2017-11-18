@@ -5,6 +5,7 @@
 std::string ETJump::ConsoleVariables::getCvarString(const std::string& name)
 {
 	char buffer[MAX_CVAR_VALUE_STRING];
+
 	trap_Cvar_VariableStringBuffer(name.c_str(), buffer, sizeof(buffer));
 	return buffer;
 }

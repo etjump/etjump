@@ -19,7 +19,7 @@ void Motd::Initialize()
 		return;
 	}
 
-	std::string   filePath = GetPath(g_motdFile.string);
+	std::string filePath = GetPath(g_motdFile.string);
 	std::ifstream f(filePath.c_str());
 
 	if (!f)
@@ -43,7 +43,7 @@ void Motd::Initialize()
 	try
 	{
 		chatMessage_ = root["chat_message"].asString();
-		motd_        = root["console_message"].asString();
+		motd_ = root["console_message"].asString();
 	}
 	catch (...)
 	{
@@ -66,7 +66,8 @@ void Motd::PrintMotd(gentity_t *ent)
 
 void Motd::GenerateMotdFile()
 {
-	Arguments     argv = GetArgs();
+	Arguments argv = GetArgs();
+
 	std::ifstream in(GetPath(g_motdFile.string).c_str());
 	if (in.good())
 	{
@@ -87,11 +88,11 @@ void Motd::GenerateMotdFile()
 	}
 
 	Json::Value root;
-	root["chat_message"]    = "This is the chat message.";
+	root["chat_message"] = "This is the chat message.";
 	root["console_message"] = "This is the console message.";
 	Json::StyledWriter writer;
-	std::string        output = writer.write(root);
-	std::ofstream      fOut(GetPath(g_motdFile.string).c_str());
+	std::string output = writer.write(root);
+	std::ofstream fOut(GetPath(g_motdFile.string).c_str());
 	if (!fOut)
 	{
 		G_Printf("Couldn't open file \"%s\" defined in g_motdFile.\n", g_motdFile.string);
