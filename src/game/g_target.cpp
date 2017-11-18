@@ -2061,6 +2061,12 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		}
 	}
 
+	if (g_debugTimeruns.integer)
+	{
+		StartTimerDebug(level.timerunNames[self->runIndex], activator);
+		return;
+	}
+	
 	StartTimer(level.timerunNames[self->runIndex], activator);
 }
 
@@ -2124,6 +2130,12 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 
 	if (activator->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
+		return;
+	}
+
+	if (activator->client->sess.timerunActiveDebug)
+	{
+		StopTimerDebug(level.timerunNames[self->runIndex], activator);
 		return;
 	}
 

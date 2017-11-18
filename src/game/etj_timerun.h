@@ -34,7 +34,7 @@ public:
 	 */
 	struct Player
 	{
-		Player(int userId) : racing(false),
+		Player(int userId) : racing(false), racingDebug(false),
 			userId(userId),
 			name(""),
 			currentRunName(""),
@@ -45,6 +45,7 @@ public:
 		}
 		int userId;
 		bool racing;
+		bool racingDebug;
 		std::string name;
 		std::string currentRunName;
 		int runStartTime;
@@ -78,6 +79,15 @@ public:
 	void startTimer(const std::string& runName, int clientNum, const std::string& currentName, int raceStartTime);
 
 	/**
+	* Called when player starts a timerun with debugging enabled.
+	* Sets the player status to racingDebug if it's not racingDebug already.
+	* @param runName The run name player is trying to start
+	* @param clientNum The player client number that started the run
+	* @param runStartTime The time when racing was started
+	*/
+	void startTimerDebug(const std::string& runName, int clientNum, int raceStartTime);
+
+	/**
 	 * Notifies the client and client's spectators about a run that just started
 	 * @param clientNum The player who started the run
 	 */
@@ -97,6 +107,16 @@ public:
 	 * @param commandTime client's ps.commandTime (used to get the completion time)
 	 */
 	void stopTimer(int clientNum, int commandTime, std::string runName);
+
+	/**
+	* When a player touches the stop timer and debugging is enabled, this function is called.
+	* If player status is racingDebug and the end point matches the start point,
+	* run is interrupted, record not saved and client notified that debugging is enabled.
+	* Else ignored.
+	* @param clientNum Player's client number
+	* @param commandTime client's ps.commandTime (used to get the completion time)
+	*/
+	void stopTimerDebug(int clientNum, int commandTime, std::string runName);
 
 	/**
 	 * Interrupts the player's current run.
