@@ -83,6 +83,7 @@
 * disabled clients ability to rotate z-view
 * added z-rotation check when starting a timerun
 * fireteam and private messages are no longer logged
+* demo sorting in replays menu is now case insensitive
 
 # ETJump 2.2.0
 
