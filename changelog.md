@@ -84,6 +84,7 @@
 * added z-rotation check when starting a timerun
 * fireteam and private messages are no longer logged
 * added `etj_autoLoad`. When player goes to spectate, current position is saved. When player joins back to team, the position is automatically loaded.
+* demo sorting in replays menu is now case insensitive
 
 # ETJump 2.2.0
 
