@@ -1639,6 +1639,7 @@ void ClientUserinfoChanged(int clientNum)
 	client->pers.hideMe         = (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
 	client->pers.enableTimeruns = (client->pers.clientFlags & CGF_ENABLE_TIMERUNS) != 0 ? qtrue : qfalse;
 	client->pers.noActivateLean = (client->pers.clientFlags & CGF_NOACTIVATELEAN) != 0 ? qtrue : qfalse;
+	client->pers.autoLoad		= (client->pers.clientFlags & CGF_AUTO_LOAD) != 0 ? qtrue : qfalse;
 
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));
@@ -2047,6 +2048,8 @@ void ClientBegin(int clientNum)
 	}
 
 	ent->client->pers.previousSetHealthTime = 0;
+
+	
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)
