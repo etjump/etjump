@@ -14,6 +14,7 @@
 #include "utilities.hpp"
 #include "etj_printer.h"
 #include "etj_operation_result.h"
+#include "etj_save_system.h"
 
 
 void BotDebug(int clientNum);
@@ -1262,12 +1263,16 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1, wea
 		return qfalse;
 	}
 
+	if (team == TEAM_SPECTATOR) {
+		ETJump::saveSystem->storeTeamQuickDeployPosition(ent, oldTeam);
+	}
+
 	// DHM - Nerve
 	// OSP
 	if (team != TEAM_SPECTATOR)
 	{
 		client->pers.initialSpawn = qfalse;
-	}
+	} 
 
 	if (oldTeam != TEAM_SPECTATOR)
 	{
@@ -4942,25 +4947,6 @@ void ClientCommand(int clientNum)
 
 	if (OnConnectedClientCommand(ent))
 	{
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "rsf"))
-	{
-		auto printer = BufferPrinter(ent);
-		printer.Print("\n");
-		printer.Print(fmt->toString({ "Index", "Value1", "C", "Value2", "TestValue", "idx" }, { { { "Index", "ab" },{ "Value2", "27.2712" },{ "TestValue", "foobar1" } },{ { "Index", "123123123123" },{ "TestValue", "foobar2" } },{ { "Index", "52352352" },{ "TestValue", "foobar3" },{ "C", "Hello, world. This is a fairly long piece of stringHello, world. This is a fairly long piece of stringHello, world. This is a fairly long piece of string" } } }, 3, 0));
-		printer.Print("\n");
-		printer.Print(fmt->toString({ "Index", "Value1", "A", "Value2", "TestValue", "i", "idx", "Index" }, { { { "Index", "def" },{ "TestValue", "foobar1" } },{ { "Index", "5225552325" },{ "TestValue", "foobar2" } },{ { "Index", "523525225" },{ "TestValue", "foobar3" },{ "A", "Hello, world. This is a fairly long piece of string" } } }, 2, 1));
-		printer.Print("\n");
-		printer.Finish(false);
-		return;
-	}
-
-	if (!Q_stricmp(cmd, "test"))
-	{
-		ConsolePrintTo(ent, "    a");
-		ConsolePrintTo(ent, "\ta");
 		return;
 	}
 
