@@ -330,18 +330,19 @@ typedef struct
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 // Client flags for server processing
-#define CGF_AUTORELOAD      0x01
-#define CGF_STATSDUMP       0x02
-#define CGF_AUTOACTIVATE    0x04
-#define CGF_PREDICTITEMS    0x08
-#define CGF_NOFATIGUE       0x10
-#define CGF_PMOVEFIXED      0x20
-#define CGF_CGAZ            0x40
-#define CGF_LOADVIEWANGLES  0x80
-#define CGF_CHEATCVARSON    0x100
-#define CGF_HIDEME          0x200
-#define CGF_ENABLE_TIMERUNS 0x400
-#define CGF_NOACTIVATELEAN  0x800
+#define CGF_AUTORELOAD		0x01
+#define CGF_STATSDUMP		0x02
+#define CGF_AUTOACTIVATE	0x04
+#define CGF_PREDICTITEMS	0x08
+#define CGF_NOFATIGUE		0x10
+#define CGF_PMOVEFIXED		0x20
+#define CGF_CGAZ			0x40
+#define CGF_LOADVIEWANGLES	0x80
+#define CGF_CHEATCVARSON	0x100
+#define CGF_HIDEME			0x200
+#define CGF_ENABLE_TIMERUNS	0x400
+#define CGF_NOACTIVATELEAN	0x800
+#define CGF_AUTO_LOAD		0x1000
 
 #define MAX_MOTDLINES   6
 

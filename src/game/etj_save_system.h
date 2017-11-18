@@ -37,6 +37,7 @@ namespace ETJump
 
 		struct SavePosition
 		{
+			SavePosition() : isValid(false), origin{ 0,0,0 }, vangles{ 0,0,0 }, stance(SaveStance::Stand) {}
 			bool isValid;
 			vec3_t origin;
 			vec3_t vangles;
@@ -53,7 +54,9 @@ namespace ETJump
 			SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
 			boost::circular_buffer<SavePosition> axisBackupPositions;
 
-
+			// contains a couple of extra positions for TEAM_SPEC and TEAM_FREE,
+			// but simplifies the accessing code
+			SavePosition quickDeployPositions[TEAM_NUM_TEAMS];
 		};
 
 		struct DisconnectedClient
@@ -101,9 +104,15 @@ namespace ETJump
 		// Loads positions from db on dc
 		void loadPositionsFromDatabase(gentity_t *ent);
 
+		void storeTeamQuickDeployPosition(gentity_t *ent, team_t team);
+		void loadTeamQuickDeployPosition(gentity_t *ent, team_t team);
+
 	private:
 		// Saves backup position
 		void saveBackupPosition(gentity_t *ent, SavePosition *pos);
+
+		// copies player positional info to target position
+		void storePosition(gclient_s* client, SavePosition *pos);
 
 		// Teleports player to the saved position
 		static void teleportPlayer(gentity_t* ent, SavePosition* pos);
