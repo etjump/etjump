@@ -85,6 +85,7 @@
 * fireteam and private messages are no longer logged
 * added `etj_autoLoad`. When player goes to spectate, current position is saved. When player joins back to team, the position is automatically loaded.
 * demo sorting in replays menu is now case insensitive
+* adjusted `etj_slickX` default value so it doesn't overlap with OB detector
 
 # ETJump 2.2.0
 

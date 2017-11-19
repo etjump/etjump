@@ -778,7 +778,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_slickX,                   "etj_slickX",                  "315",                    CVAR_ARCHIVE             },
+	{ &cg_slickX,                   "etj_slickX",                  "304",                    CVAR_ARCHIVE             },
 	{ &cg_slickY,                   "etj_slickY",                  "220",                    CVAR_ARCHIVE             },
 	{ &cg_altScoreboard,            "etj_altScoreboard",           "2",                      CVAR_ARCHIVE             },
 	{ &player_drawSpectatorInfo,    "etj_drawSpectatorInfo",       "0",                      CVAR_ARCHIVE             },

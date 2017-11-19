@@ -51,7 +51,7 @@ menuDef {
 	SUBWINDOW(8, 296, (SUBWINDOW_WIDTH), 64, "TRICKJUMP UTILITIES")
 		MULTI(8, 312, (SUBWINDOW_WIDTH) - 4, 10, "Overbounce detector: ", .2, 8, "etj_drawOB", cvarFloatList { "On" 1 "Advanced" 2 "Off" 0 }, "Displays overbounce detector")
 		YESNO(8, 324, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector: ", .2, 8, "etj_drawSlick", "Displays slick detector")
-		SLIDER(8, 336, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector X: :", .2, 8, "etj_slickX" 315 0 600, "Set the horizontal position of the slick detector")
+		SLIDER(8, 336, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector X: :", .2, 8, "etj_slickX" 304 0 600, "Set the horizontal position of the slick detector")
 		SLIDER(8, 348, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector Y: :", .2, 8, "etj_slickY" 220 0 500, "Set the vertical position of the slick detector")
 
 
