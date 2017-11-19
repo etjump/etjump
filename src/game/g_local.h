@@ -1773,6 +1773,11 @@ void Cmd_Activate2_f(gentity_t *ent);
 qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt);
 void G_LeaveTank(gentity_t *ent, qboolean position);
 
+namespace ETJump
+{
+	void longRangeActivate(gentity_t *ent);
+}
+
 // g_script.c
 void G_Script_ScriptParse(gentity_t *ent);
 qboolean G_Script_ScriptRun(gentity_t *ent);

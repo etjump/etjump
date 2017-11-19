@@ -529,10 +529,12 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 
 	client->oldbuttons = client->buttons;
 	client->buttons    = ucmd->buttons;
+	client->latched_buttons = client->buttons & ~client->oldbuttons;
 
 //----(SA)	added
 	client->oldwbuttons = client->wbuttons;
 	client->wbuttons    = ucmd->wbuttons;
+	client->latched_wbuttons = client->wbuttons & ~client->oldwbuttons;
 
 	// attack button cycles through spectators
 	if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK))
