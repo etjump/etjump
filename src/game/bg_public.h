@@ -2599,6 +2599,8 @@ const int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
 const int BG_LEVEL_NO_SAVE = 1 << 2;
 // Fall damage is disabled
 const int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
+// Fall damage is disabled (force)
+const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
 
 #endif // __BG_PUBLIC_H__
 
