@@ -4825,16 +4825,12 @@ int cstring_cmp(const void *a, const void *b)
 	comparison function */
 }
 
-#ifdef __linux__
-#define stricmp strcasecmp
-#endif
-
 /* case insensitive qsort C-string comparison function */
 int cstring_icmp(const void *a, const void *b)
 {
 	const char **ia = (const char **)a;
 	const char **ib = (const char **)b;
-	return stricmp(*ia, *ib);
+	return Q_stricmp(*ia, *ib);
 }
 
 static void UI_SortDemos()
