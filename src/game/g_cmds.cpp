@@ -1107,7 +1107,7 @@ void Cmd_Noclip_f(gentity_t *ent)
 
 	if (!result.success)
 	{
-		Printer::SendCenterMessage(clientNum, (boost::format(result.message) % "noclip").str());
+		Printer::SendCenterMessage(clientNum, (boost::format(result.message) % "Noclip").str());
 		return;
 	}
 

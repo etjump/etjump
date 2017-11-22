@@ -3824,6 +3824,16 @@ namespace ETJump {
 	{
 		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon, SaveForbidColor);
 	}
+
+	static playerState_t& getValidPlayerState()
+	{
+		// spectating
+		if (cg.snap->ps.clientNum != cg.clientNum)
+		{
+			return cg.snap->ps;
+		}
+		return cg.predictedPlayerState;
+	}
 }
 
 static void CG_DrawSaveIndicator(void)
@@ -3837,15 +3847,18 @@ static void CG_DrawSaveIndicator(void)
 	{
 		return;
 	}
+
+	const auto ps = ETJump::getValidPlayerState();
+	const auto ci = &cgs.clientinfo[ps.clientNum];
+
 	// no indicator for idle specs
-	if (cg.snap->ps.pm_type & PM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
+	if (ci->team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
 	{
 		return;
 	}
 
 	ETJump_AdjustPosition(&x);
 
-	auto ps = cg.snap->ps;
 	CG_TraceCapsule(&trace, ps.origin, ps.mins, ps.maxs, ps.origin, ps.clientNum, CONTENTS_NOSAVE);
 	
 	if (shared.integer & BG_LEVEL_NO_SAVE)
