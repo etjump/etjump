@@ -891,8 +891,6 @@ void CG_RegisterCvars(void)
 		}
 	}
 
-	ETJump::cvarUpdateHandler = std::make_shared<ETJump::CvarUpdateHandler>();
-
 	// shadow cvars mapping to real cvars, forces locked values change
 	std::vector<std::pair<vmCvar_t*, std::string>> cvars {
 		{ &etj_drawFoliage, "r_drawfoliage"},
@@ -3399,6 +3397,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	memset(cg_entities, 0, sizeof(cg_entities));
 	memset(cg_weapons, 0, sizeof(cg_weapons));
 	memset(cg_items, 0, sizeof(cg_items));
+
+	ETJump::cvarUpdateHandler = std::make_shared<ETJump::CvarUpdateHandler>();
 
 	cgs.initing = qtrue;
 
