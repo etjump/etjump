@@ -1010,7 +1010,7 @@ namespace ETJump
 			return{ false, "Cannot use %s while death run is active." };
 		}
 
-		if (!g_developer.integer || g_dedicated.integer > 0 || (ent && ent->client->sess.sessionTeam != TEAM_SPECTATOR))
+		if (!g_cheats.integer || g_dedicated.integer > 0)
 		{
 			if (level.noNoclip)
 			{
