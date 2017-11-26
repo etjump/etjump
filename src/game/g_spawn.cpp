@@ -1119,11 +1119,22 @@ namespace ETJump{
 	static void initNoFallDamage()
 	{
 		auto value = 0;
+
 		G_SpawnInt("nofalldamage", "0", &value);
 		level.noFallDamage = value > 0;
-		level.noFallDamage
-			? shared.integer |= BG_LEVEL_NO_FALLDAMAGE
-			: shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+
+		// reset flags
+		shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+		shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE_FORCE;
+
+		if (value == 1)
+		{
+			shared.integer |= BG_LEVEL_NO_FALLDAMAGE;
+		}
+		else if (value == 2)
+		{
+			shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE;
+		}
 
 		trap_Cvar_Set("shared", va("%d", shared.integer));
 		G_Printf("No fall damage %s.\n", level.noFallDamage ? "enabled" : "disabled");

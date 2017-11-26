@@ -69,9 +69,10 @@
   * makes teleportation events smoother when destination is on ground level
 * fixed `vote_minVoteDuration` not working and votes always taking at least 5 seconds to pass
 * added stand models for 100% accurate rifles, spawnflag __2__ now works on them
-* added `nofalldamage` worldspawn key to toggle functionality of cushion
+* added `nofalldamage` worldspawn key to control fall damage behavior
   * `nofalldamage` __0__ = fall damage enabled on all surfaces except on `surfaceparm nodamage` (default)
   * `nofalldamage` __1__ = fall damage disabled on all surfaces except on `surfaceparm nodamage`
+  * `nofalldamage` __2__ = fall damage disabled on all surfaces
 * added minimize button for game window (Windows only)
 * added `etj_keysShadow` to draw shadow for keysets
 * added ability to hide popups with `etj_numPopups` __0__
@@ -86,6 +87,7 @@
 * added `etj_autoLoad`. When player goes to spectate, current position is saved. When player joins back to team, the position is automatically loaded.
 * demo sorting in replays menu is now case insensitive
 * adjusted `etj_slickX` default value so it doesn't overlap with OB detector
+* added spawnflag __2048__ to `trigger_multiple`, activates for every client touching the trigger, with per-client wait times
 
 # ETJump 2.2.0
 

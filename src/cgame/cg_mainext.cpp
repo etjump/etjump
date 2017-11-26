@@ -29,7 +29,7 @@ void InitGame()
 	// Check if load TJL on connection is enable
 	if (etj_tjlAlwaysLoadTJL.integer == 1)
 	{		
-		CG_Printf("All mapper Trickjump lines will be loaded due to your cvar : etj_tjlAlwaysLoadTJL. \n");
+		//CG_Printf("All mapper Trickjump lines will be loaded due to your cvar : etj_tjlAlwaysLoadTJL. \n");
 		trickjumpLines->loadRoutes(nullptr);
 	}
 
