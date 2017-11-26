@@ -104,6 +104,7 @@ file(GLOB CGAME_SRC
 	"cgame/etj_drawable.cpp"
 	"cgame/etj_timerun_view.cpp"
 	"game/etj_string_utilities.cpp"
+	"game/etj_file.cpp"
 	"game/bg_animation.cpp"
 	"game/bg_animgroup.cpp"
 	"game/bg_character.cpp"
