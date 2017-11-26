@@ -117,6 +117,7 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params) ;
 //bani
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
+qboolean G_ScriptAction_Delete(gentity_t *ent, char *params);
 
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] =
@@ -199,6 +200,7 @@ g_script_stack_action_t gScriptActions[] =
 	{ "killplayer", G_ScriptAction_KillPlayer },
 
 	{ "create",                         G_ScriptAction_Create                        },
+	{ "delete", G_ScriptAction_Delete },
 
 	// Gordon: going for longest silly script command ever here :) (sets a model for a brush to one stolen from a func_brushmodel
 	{ "setmodelfrombrushmodel",         G_ScriptAction_SetModelFromBrushmodel        },
@@ -655,7 +657,10 @@ void G_Script_ScriptParse(gentity_t *ent)
 
 				// Ikkyo - Parse for {}'s if this is a set command
 				// parse for {}'s if this is a set or create command
-				if (!Q_stricmp(action->actionString, "set") || !Q_stricmp(action->actionString, "create"))
+				if (
+					!Q_stricmp(action->actionString, "set") || 
+					!Q_stricmp(action->actionString, "create") || 
+					!Q_stricmp(action->actionString, "delete"))
 				{
 					token = COM_Parse(&pScript);
 					if (token[0] != '{')
