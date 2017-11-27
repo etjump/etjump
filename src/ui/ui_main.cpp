@@ -425,6 +425,11 @@ int Text_Width(const char *text, float scale, int limit)
 	return Text_Width_Ext(text, scale, limit, font);
 }
 
+fontInfo_t* GetActiveFont()
+{
+	return &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
+}
+
 int Multiline_Text_Width(const char *text, float scale, int limit)
 {
 	int         count, len;
@@ -9255,8 +9260,7 @@ void _UI_Init(qboolean inGameLoad)
 	uiInfo.uiDC.updateScreen           = &trap_UpdateScreen;
 	uiInfo.uiDC.getHunkData            = &trap_GetHunkData;
 	uiInfo.uiDC.getConfigString        = &trap_GetConfigString;
-
-
+	uiInfo.uiDC.getActiveFont          = &GetActiveFont;
 
 	Init_Display(&uiInfo.uiDC);
 

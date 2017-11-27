@@ -464,7 +464,7 @@ typedef struct
 	void (*updateScreen)(void);
 	void (*getHunkData)(int *hunkused, int *hunkexpected);
 	int (*getConfigString)(int index, char *buff, int buffsize);
-
+	fontInfo_t* (*getActiveFont)(void);
 
 	float yscale;
 	float xscale;
