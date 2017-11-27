@@ -568,6 +568,9 @@ struct gentity_s
 	float scaleTime;
 
 	int entityOwner;	// Owner data for etj_touchPickupWeapons
+
+	char *targetShaderName;
+	char *targetShaderNewName;
 };
 
 // Ridah
