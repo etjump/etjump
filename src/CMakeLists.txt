@@ -57,7 +57,6 @@ file(GLOB CGAME_SRC
 	"cgame/etj_client_commands_handler.cpp"
 	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_client_authentication.cpp"
-	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_cvar_shadow.cpp"
 	"cgame/etj_cvar_update_handler.cpp"
 	"cgame/etj_draw_leaves_handler.cpp"
