@@ -1680,7 +1680,7 @@ void SpectatorClientEndFrame(gentity_t *ent)
 		if (do_respawn)
 		{
 			reinforce(ent);
-			if (ent->client->pers.autoLoad == qtrue)
+			if (ent->client->pers.autoLoad == qtrue && level.time > (ent->client->sess.lastKillTime + FRAMETIME))
 			{
 				// need to do this here as reinforce will override any value set in
 				// clientspawn (ClientSpawn gets called twice and we only want to 
