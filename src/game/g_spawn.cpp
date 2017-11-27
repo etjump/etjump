@@ -185,6 +185,9 @@ field_t fields[] =
 
 	{ "damageparent", FOFS(damageparent),   F_LSTRING   },
 
+	{ "targetShaderName", FOFS(targetShaderName), F_LSTRING },
+	{ "targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING },
+
 	{ NULL }
 };
 
