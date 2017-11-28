@@ -3317,6 +3317,12 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt)
 	vec3_t   forward;       //, offset, end;
 	//trace_t		tr;
 
+	// specs can't use
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	{
+		return qfalse;
+	}
+
 	// Arnout: invisible entities can't be used
 
 	if (traceEnt->entstate == STATE_INVISIBLE || traceEnt->entstate == STATE_UNDERCONSTRUCTION)
