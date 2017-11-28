@@ -4546,7 +4546,7 @@ void Cmd_Class_f(gentity_t *ent)
 {
 	auto args = GetArgs();
 	auto clientNum = ClientNum(ent);
-	if (args->size() < 3)
+	if (args->size() < 2)
 	{
 		Printer::SendConsoleMessage(clientNum, 
 			"^3Usage:\n"
@@ -4574,7 +4574,7 @@ void Cmd_Class_f(gentity_t *ent)
 	}
 
 	auto playerClass = ETJump::getPlayerClassType((*args)[1]);
-	auto w1 = std::max(std::min(std::stoi((*args)[2]), MAX_WEAPS_PER_CLASS), 1);
+	auto w1 = args->size() == 2 ? 1 : std::max(std::min(std::stoi((*args)[2]), MAX_WEAPS_PER_CLASS), 1);
 
 	auto classList = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, playerClass);
 	auto primaryWeapon = classList->classWeapons[w1 - 1];
