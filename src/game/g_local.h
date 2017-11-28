@@ -1087,6 +1087,8 @@ struct gclient_s
 
 	// Whether the client already activated a trigger or not
 	qboolean alreadyActivatedTrigger;
+	// Time when client activated trigger
+	int activationTime;
 
 	// Whether the client already activated target_set_health
 	qboolean alreadyActivatedSetHealth;

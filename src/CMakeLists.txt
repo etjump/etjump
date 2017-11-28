@@ -55,10 +55,12 @@ file(GLOB CGAME_SRC
 	"cgame/cg_ents.cpp"
 	"cgame/cg_edv.cpp"
 	"cgame/etj_client_commands_handler.cpp"
+	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_client_authentication.cpp"
 	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_cvar_shadow.cpp"
 	"cgame/etj_cvar_update_handler.cpp"
+	"cgame/etj_draw_leaves_handler.cpp"
 	"cgame/etj_entity_events_handler.cpp"
 	"cgame/etj_maxspeed.cpp"
 	"cgame/etj_operating_system_linux.cpp"
@@ -102,6 +104,7 @@ file(GLOB CGAME_SRC
 	"cgame/etj_drawable.cpp"
 	"cgame/etj_timerun_view.cpp"
 	"game/etj_string_utilities.cpp"
+	"game/etj_file.cpp"
 	"game/bg_animation.cpp"
 	"game/bg_animgroup.cpp"
 	"game/bg_character.cpp"
@@ -117,6 +120,7 @@ file(GLOB CGAME_SRC
 	"sha-1/bg_sha.cpp"
 	"sha-1/sha1.c"
 	"ui/ui_shared.cpp"
+	"json/jsoncpp.cpp"
 )
 
 file(GLOB QAGAME_SRC
