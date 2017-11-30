@@ -87,7 +87,7 @@
 * added `etj_autoLoad`. When player goes to spectate, current position is saved. When player joins back to team, the position is automatically loaded.
 * demo sorting in replays menu is now case insensitive
 * adjusted `etj_slickX` default value so it doesn't overlap with OB detector
-* added `tracker_not_eq` key for `target/trigger_tracker`
+* added spawnflag __2048__ to `trigger_multiple`, activates for every client touching the trigger, with per-client wait times
 
 # ETJump 2.2.0
 

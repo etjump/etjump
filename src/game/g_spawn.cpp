@@ -185,6 +185,9 @@ field_t fields[] =
 
 	{ "damageparent", FOFS(damageparent),   F_LSTRING   },
 
+	{ "targetShaderName", FOFS(targetShaderName), F_LSTRING },
+	{ "targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING },
+
 	{ NULL }
 };
 
@@ -1122,17 +1125,18 @@ namespace ETJump{
 
 		G_SpawnInt("nofalldamage", "0", &value);
 		level.noFallDamage = value > 0;
-		if (value <= 1)
+
+		// reset flags
+		shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+		shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE_FORCE;
+
+		if (value == 1)
 		{
-			level.noFallDamage
-				? shared.integer |= BG_LEVEL_NO_FALLDAMAGE
-				: shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE;
+			shared.integer |= BG_LEVEL_NO_FALLDAMAGE;
 		}
-		else
+		else if (value == 2)
 		{
-			level.noFallDamage
-				? shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE
-				: shared.integer &= ~BG_LEVEL_NO_FALLDAMAGE_FORCE;
+			shared.integer |= BG_LEVEL_NO_FALLDAMAGE_FORCE;
 		}
 
 		trap_Cvar_Set("shared", va("%d", shared.integer));

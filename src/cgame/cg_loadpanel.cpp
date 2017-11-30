@@ -564,30 +564,23 @@ qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key)
 
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize, float backheight)
 {
-	float  x, y, w, h;
 	vec4_t colourFadedBlack = { 0.f, 0.f, 0.f, 0.4f };
-	auto textWidth = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
+	const auto textWidth = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
 
-	w = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
-	if (px + 30 + w > 440)
+	if (px + 30 + textWidth > 440)
 	{
-		DC->fillRect(SCREEN_OFFSET_X + px - w - 28 + 2, py - (backheight / 2.f) + 2, 28 + w, backheight, colourFadedBlack);
-		DC->fillRect(SCREEN_OFFSET_X + px - w - 28, py - (backheight / 2.f), 28 + w, backheight, colorBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px - textWidth - 28 + 2, py - (backheight / 2.f) + 2, 28 + textWidth, backheight, colourFadedBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px - textWidth - 28, py - (backheight / 2.f), 28 + textWidth, backheight, colorBlack);
 	}
 	else
 	{
-		DC->fillRect(SCREEN_OFFSET_X + px + 2, py - (backheight / 2.f) + 2, 28 + w, backheight, colourFadedBlack);
-		DC->fillRect(SCREEN_OFFSET_X + px, py - (backheight / 2.f), 28 + w, backheight, colorBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px + 2, py - (backheight / 2.f) + 2, 28 + textWidth, backheight, colourFadedBlack);
+		DC->fillRect(SCREEN_OFFSET_X + px, py - (backheight / 2.f), 28 + textWidth, backheight, colorBlack);
 	}
 
-	x = px - pinsize;
-	y = py - pinsize;
-	w = pinsize * 2.f;
-	h = pinsize * 2.f;
+	DC->drawHandlePic(SCREEN_OFFSET_X + px - pinsize, py - pinsize, pinsize * 2.f, pinsize * 2.f, shader);
 
-	DC->drawHandlePic(SCREEN_OFFSET_X + x, y, w, h, shader);
-
-	if (px + 30 + w > 440)
+	if (px + 30 + textWidth > 440)
 	{
 		DC->drawTextExt(SCREEN_OFFSET_X + px - 20 - textWidth, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
 	}

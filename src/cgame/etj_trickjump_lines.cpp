@@ -653,7 +653,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	{
 		map = (std::string("tjllines/mapper/") + cgs.rawmapname + std::string(".tjl"));
 		loadStatus = routeStatus::map;
-		CG_Printf("Will load mapper TJL for map : %s.\n", cgs.rawmapname);
+		//CG_Printf("Will load mapper TJL for map : %s.\n", cgs.rawmapname);
 	}
 	else if (loadname != nullptr)
 	{
@@ -662,14 +662,14 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 
 		if (trap_FS_FOpenFile(map.c_str(), &f, FS_READ) > 0)
 		{
-			CG_Printf("Will load local TJL file : %s.\n", loadname);
+			//CG_Printf("Will load local TJL file : %s.\n", loadname);
 		}
 	}
 
 	const int len = trap_FS_FOpenFile(map.c_str(), &f, FS_READ);
 	if (len <= 0)
 	{
-		CG_Printf("File not found : %s.\n", map.c_str());
+		//CG_Printf("File not found : %s.\n", map.c_str());
 		return;
 	}
 
@@ -1178,7 +1178,7 @@ void TrickjumpLines::toggleRoutes(bool state)
 	}
 	else
 	{
-		CG_Printf("Trickjump line are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableLine for futur session. \n");
+		//CG_Printf("Trickjump line are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableLine for futur session. \n");
 	}
 	setEnableLine(state);
 	return;
@@ -1192,7 +1192,7 @@ void TrickjumpLines::toggleMarker(bool state)
 	}
 	else
 	{
-		CG_Printf("Trickjump marker are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableMarker for futur session. \n");
+		//CG_Printf("Trickjump marker are now disable. This is only toggle for the current session. Change cvar : etj_tjlEnableMarker for futur session. \n");
 	}
 	setEnableMarker(state);
 	return;
