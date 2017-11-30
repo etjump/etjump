@@ -7,6 +7,7 @@
 #include "etj_client_authentication.h"
 #include "../game/etj_file.h"
 #include "../game/etj_shared.h"
+#include "../game/etj_string_utilities.h"
 
 ETJump::ClientAuthentication::ClientAuthentication(
 	std::function<void(const std::string&)> sendClientCommand, 
@@ -36,7 +37,7 @@ void ETJump::ClientAuthentication::login()
 		_print("^1Error: " + result.message);
 	}
 	auto hwid = getHwid();
-	auto authenticate = (boost::format("%s %s %s") % Constants::Authentication::AUTHENTICATE % guid % hwid).str();
+	auto authenticate = (boost::format("%s %s %s") % Constants::Authentication::AUTHENTICATE % ETJump::hash(guid) % hwid).str();
 	_sendClientCommand(authenticate);
 }
 
