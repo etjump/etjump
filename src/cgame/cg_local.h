@@ -1247,6 +1247,8 @@ typedef struct
 
 	// ETJump: hold last jump position for chs
 	vec3_t etjLastJumpPos;
+
+	int pronePressTime;		// No prone print delay: when client last pressed prone
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -1826,7 +1828,8 @@ typedef struct
 	// alternative ghost players visualisation
 	qhandle_t ghostPlayersAltColorShader;
 	qhandle_t saveIcon;
-	qhandle_t noSaveIcon;
+	qhandle_t proneIcon;
+	qhandle_t forbidIcon;
 
 } cgMedia_t;
 
@@ -2544,6 +2547,10 @@ extern vmCvar_t etj_noJumpDelayY;
 extern vmCvar_t etj_drawSaveIndicator;
 extern vmCvar_t etj_saveIndicatorX;
 extern vmCvar_t etj_saveIndicatorY;
+
+extern vmCvar_t etj_drawProneIndicator;
+extern vmCvar_t etj_proneIndicatorX;
+extern vmCvar_t etj_proneIndicatorY;
 
 extern vmCvar_t etj_viewlog;
 extern vmCvar_t etj_drawFoliage;
