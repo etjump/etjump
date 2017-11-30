@@ -4528,7 +4528,7 @@ qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other)
 
 namespace ETJump
 {
-	static int getPlayerClassType(const std::string string)
+	static int getPlayerClassId(const std::string string)
 	{
 		switch (string[0])
 		{
@@ -4540,47 +4540,122 @@ namespace ETJump
 		default: return PC_SOLDIER;
 		}
 	}
+
+	static char getPlayerClassSymbol(const int num)
+	{
+		switch (num)
+		{
+		case PC_MEDIC: return 'm';
+		case PC_ENGINEER: return 'e';
+		case PC_FIELDOPS: return 'f';
+		case PC_COVERTOPS: return 'c';
+		case PC_SOLDIER:
+		default: return 's';
+		}
+	}
+
+	static const char* getPlayerTeamName(const int teamNum)
+	{
+		switch (teamNum)
+		{
+		case TEAM_AXIS: return "Axis";
+		case TEAM_ALLIES: return "Allied";
+		default: return "unknown";
+		}
+	}
+
+	struct classLoadout
+	{
+		const int classId;
+		const int weaponSlot;
+		const char *description;
+	};
+
+	classLoadout availableLoadouts[] {
+		{ PC_MEDIC, 1, "Medic with SMG"},
+		{ PC_MEDIC, 2, "Medic with Rifle" },
+		{ PC_MEDIC, 3, "Medic with Sniper Rifle" },
+		{ PC_ENGINEER, 1, "Engineer with SMG" },
+		{ PC_ENGINEER, 2, "Engineer with Rifle" },
+		{ PC_ENGINEER, 3, "Engineer with Sniper Rifle" },
+		{ PC_FIELDOPS, 1, "Field ops with SMG" },
+		{ PC_FIELDOPS, 2, "Field ops with Rifle" },
+		{ PC_FIELDOPS, 3, "Field ops with Sniper Rifle" },
+		{ PC_COVERTOPS, 1, "Covert ops with Sten" },
+		{ PC_COVERTOPS, 2, "Covert ops with FG42" },
+		{ PC_COVERTOPS, 3, "Covert ops with Sniper Rifle" },
+		{ PC_COVERTOPS, 4, "Covert ops with Rifle" },
+		{ PC_SOLDIER, 1, "Soldier with SMG" },
+		{ PC_SOLDIER, 2, "Soldier with MG42" },
+		{ PC_SOLDIER, 3, "Soldier with Flamethrower" },
+		{ PC_SOLDIER, 4, "Soldier with Panzerfaust" },
+		{ PC_SOLDIER, 5, "Soldier with Mortar" },
+		{ PC_SOLDIER, 6, "Soldier with Rifle" },
+		{ PC_SOLDIER, 7, "Soldier with Sniper Rifle" },
+	};
 }
 
 void Cmd_Class_f(gentity_t *ent)
 {
-	auto args = GetArgs();
-	auto clientNum = ClientNum(ent);
-	if (args->size() < 3)
+	const auto args = GetArgs();
+	const auto clientNum = ClientNum(ent);
+	const int DEFAULT_WEAPON_SLOT = 1; // weapon argument default value
+
+	// not enough arguments were specified, generate usage text
+	if (args->size() < 2)
 	{
-		Printer::SendConsoleMessage(clientNum, 
-			"^3Usage:\n"
-			"^7Medic with SMG                /class m 1\n"
-			"^7Medic with Rifle              /class m 2\n"
-			"^7Medic with Sniper Rifle       /class m 3\n"
-			"^7Engineer with SMG             /class e 1\n"
-			"^7Engineer with Rifle           /class e 2\n"
-			"^7Engineer with Sniper Rifle    /class e 3\n"
-			"^7Field ops with SMG            /class f 1\n"
-			"^7Field ops with Rifle          /class f 2\n"
-			"^7Field ops with Sniper Rifle   /class f 3\n"
-			"^7Covert ops with Sten          /class c 1\n"
-			"^7Covert ops with FG42          /class c 2\n"
-			"^7Covert ops with Sniper Rifle  /class c 3\n"
-			"^7Covert ops with Rifle         /class c 4\n"
-			"^7Soldier with SMG              /class s 1\n"
-			"^7Soldier with MG42             /class s 2\n"
-			"^7Soldier with Flamethrower     /class s 3\n"
-			"^7Soldier with Panzerfaust      /class s 4\n"
-			"^7Soldier with Mortar           /class s 5\n"
-			"^7Soldier with Rifle            /class s 6\n"
-			"^7Soldier with Sniper Rifle     /class s 7\n");
+		std::string usageText { "^3Usage:\n" };
+
+		for (auto loadout : ETJump::availableLoadouts)
+		{
+			usageText += (
+				boost::format("  ^7%-30s ^9/class %s %i\n") 
+					% loadout.description
+					% ETJump::getPlayerClassSymbol(loadout.classId)
+					% loadout.weaponSlot
+			).str();
+		}
+
+		Printer::SendConsoleMessage(clientNum, usageText);
 		return;
 	}
 
-	auto playerClass = ETJump::getPlayerClassType((*args)[1]);
-	auto w1 = std::max(std::min(std::stoi((*args)[2]), MAX_WEAPS_PER_CLASS), 1);
+	// get class id
+	const auto classId = ETJump::getPlayerClassId((*args)[1]);
 
-	auto classList = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, playerClass);
-	auto primaryWeapon = classList->classWeapons[w1 - 1];
-	auto secondaryWeapon = static_cast<weapon_t>(ent->client->sess.latchPlayerWeapon2);
+	// get weapon slot
+	int weaponSlot = DEFAULT_WEAPON_SLOT;
+	if (args->size() > 2)
+	{
+		weaponSlot = std::max(std::min(std::stoi((*args)[2]), MAX_WEAPS_PER_CLASS), DEFAULT_WEAPON_SLOT);
+	}
+	// out of bounds check - if no weapon is set in specified slot
+	const auto classInfo = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, classId);
+	if (classInfo->classWeapons[weaponSlot - 1] == WP_NONE)
+	{
+		weaponSlot = DEFAULT_WEAPON_SLOT;
+	}
 
-	ent->client->sess.latchPlayerType = playerClass;
+	// fetch weapons 
+	const auto primaryWeapon = classInfo->classWeapons[weaponSlot - 1];
+	const auto secondaryWeapon = static_cast<weapon_t>(ent->client->sess.latchPlayerWeapon2);
+
+	// display center print message
+	for (auto loadout : ETJump::availableLoadouts)
+	{
+		if (loadout.classId == classId && loadout.weaponSlot == weaponSlot)
+		{
+			Printer::SendCenterMessage(clientNum, (
+				boost::format("You will spawn as an %s %s")
+				% ETJump::getPlayerTeamName(ent->client->sess.sessionTeam)
+				% loadout.description
+			).str());
+			break;
+		}
+	}
+
+	// set loadout
+	ent->client->sess.latchPlayerType = classId;
 	G_SetClientWeapons(ent, primaryWeapon, secondaryWeapon, qtrue);
 }
 
