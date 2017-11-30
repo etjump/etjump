@@ -54,6 +54,7 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys)
 	auto progressionTracker = ProgressionTracker();
 
 	updateTracker(parseKey(keys.equal), progressionTracker.equal);
+	updateTracker(parseKey(keys.notEqual), progressionTracker.notEqual);
 	updateTracker(parseKey(keys.greaterThan), progressionTracker.greaterThan);
 	updateTracker(parseKey(keys.lessThan), progressionTracker.lessThan);
 	updateTracker(parseKey(keys.set), progressionTracker.set);
@@ -102,6 +103,7 @@ void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activato
 
 
 		if ((tracker.equal[idx] != ProgressionTrackerValueNotSet && tracker.equal[idx] != clientTracker) ||
+			(tracker.notEqual[idx] != ProgressionTrackerValueNotSet && tracker.notEqual[idx] == clientTracker) ||
 			(tracker.lessThan[idx] != ProgressionTrackerValueNotSet && tracker.lessThan[idx] <= clientTracker) ||
 			(tracker.greaterThan[idx] != ProgressionTrackerValueNotSet && tracker.greaterThan[idx] >= clientTracker))
 		{
@@ -158,6 +160,7 @@ void SP_target_tracker(gentity_t *self)
 	ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
 
 	G_SpawnString("tracker_eq", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.equal);
+	G_SpawnString("tracker_not_eq", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.notEqual);
 	G_SpawnString("tracker_gt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.greaterThan);
 	G_SpawnString("tracker_lt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.lessThan);
 	G_SpawnString("tracker_set", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.set);
@@ -185,6 +188,7 @@ void SP_trigger_tracker(gentity_t *self)
 	ETJump::ProgressionTrackers::ProgressionTrackerKeys keys;
 
 	G_SpawnString("tracker_eq", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.equal);
+	G_SpawnString("tracker_not_eq", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.notEqual);
 	G_SpawnString("tracker_gt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.greaterThan);
 	G_SpawnString("tracker_lt", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.lessThan);
 	G_SpawnString("tracker_set", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.set);

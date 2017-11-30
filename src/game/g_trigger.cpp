@@ -30,6 +30,24 @@ void multi_wait(gentity_t *ent)
 	ent->nextthink = 0;
 }
 
+// Activates for multiple clients
+void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator)
+{
+	int triggerWait = (ent->wait + ent->random * crandom()) * 1000;
+
+	if (activator->client->activationTime + triggerWait > level.time)
+	{
+		return;
+	}
+
+	ent->activator = activator;
+
+	G_Script_ScriptEvent(ent, "activate", NULL);
+
+	G_UseTargets(ent, ent->activator);
+	activator->client->activationTime = level.time;
+}
+
 // activator is always a client
 void parallel_multi_trigger(gentity_t *ent, gentity_t *activator)
 {
@@ -170,6 +188,12 @@ void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace)
 	if (self->spawnflags & 512)
 	{
 		parallel_multi_trigger(self, other);
+		return;
+	}
+
+	if (self->spawnflags & 2048)
+	{
+		multiactivator_multi_trigger(self, other);
 		return;
 	}
 	// END Mad Doc - TDF

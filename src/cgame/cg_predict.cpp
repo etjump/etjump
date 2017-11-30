@@ -1088,6 +1088,20 @@ void CG_PredictPlayerState(void)
 
 	// rain - fill in the current cmd with the latest prediction from
 	// cg.pmext (#166)
+
+	if (cg_noclipScale.value < 0.1)
+	{
+		cg.pmext.noclipScale = 0.1;
+	}
+	else if (cg_noclipScale.value > 20)
+	{
+		cg.pmext.noclipScale = 20;
+	}
+	else
+	{
+		cg.pmext.noclipScale = cg_noclipScale.value;
+	}
+
 	memcpy(&oldpmext[current & CMD_MASK], &cg.pmext, sizeof(pmoveExt_t));
 
 	// if we don't have the commands right after the snapshot, we

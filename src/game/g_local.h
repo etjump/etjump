@@ -568,6 +568,9 @@ struct gentity_s
 	float scaleTime;
 
 	int entityOwner;	// Owner data for etj_touchPickupWeapons
+
+	char *targetShaderName;
+	char *targetShaderNewName;
 };
 
 // Ridah
@@ -830,6 +833,7 @@ typedef struct
 	qboolean cgaz;
 	qboolean loadViewAngles;
 	qboolean noActivateLean;
+	qboolean autoLoad;
 
 	unsigned int maxFPS;
 	char netname[MAX_NETNAME];
@@ -1085,6 +1089,8 @@ struct gclient_s
 
 	// Whether the client already activated a trigger or not
 	qboolean alreadyActivatedTrigger;
+	// Time when client activated trigger
+	int activationTime;
 
 	// Whether the client already activated target_set_health
 	qboolean alreadyActivatedSetHealth;

@@ -2057,8 +2057,12 @@ static void PM_CrashLand(void)
 	//End PGM Test
 
 	//Aciz: moved fall damage and stepsound handling into PM_CheckFallDamage
-	//to avoid very messy code when checking whether nofalldamage is enabled/disabled.	
-	if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
+	//to avoid very messy code when checking whether nofalldamage is enabled/disabled.
+	if (pm->shared & BG_LEVEL_NO_FALLDAMAGE_FORCE)
+	{
+		PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+	}
+	else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
 	{
 		if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE)
 		{
