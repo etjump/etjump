@@ -927,19 +927,6 @@ void CG_RegisterCvars(void)
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
 
-	if (cg_noclipScale.value < 1)
-	{
-		cg.pmext.noclipScale = 1;
-	}
-	else if (cg_noclipScale.value > 20)
-	{
-		cg.pmext.noclipScale = 20;
-	}
-	else
-	{
-		cg.pmext.noclipScale = cg_noclipScale.value;
-	}
-
 	cvarsLoaded = qtrue;
 }
 
@@ -1034,23 +1021,6 @@ void CG_UpdateCvars(void)
 					else if (cg_errorDecay.value > 500.0)
 					{
 						trap_Cvar_Set("cg_errorDecay", "500");
-					}
-				}
-
-				// This has to be if, not elseif...
-				if (cv->vmCvar == &cg_noclipScale)
-				{
-					if (cg_noclipScale.value < 1)
-					{
-						cg.pmext.noclipScale = 1;
-					}
-					else if (cg_noclipScale.value > 20)
-					{
-						cg.pmext.noclipScale = 20;
-					}
-					else
-					{
-						cg.pmext.noclipScale = cg_noclipScale.value;
 					}
 				}
 

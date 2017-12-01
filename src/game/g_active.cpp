@@ -470,6 +470,20 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 	{
 		client->ps.pm_type = PM_SPECTATOR;
 		client->ps.speed   = 800; // was: 400 // faster than normal
+
+		if (client->pers.noclipScale < 0.1)
+		{
+			client->pmext.noclipScale = 0.1;
+		}
+		else if (client->pers.noclipScale > 20)
+		{
+			client->pmext.noclipScale = 20;
+		}
+		else
+		{
+			client->pmext.noclipScale = client->pers.noclipScale;
+		}
+
 		if (client->ps.sprintExertTime)
 		{
 			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
@@ -1230,9 +1244,9 @@ void ClientThink_real(gentity_t *ent)
 		}
 	}
 
-	if (client->pers.noclipScale < 1)
+	if (client->pers.noclipScale < 0.1)
 	{
-		client->pmext.noclipScale = 1;
+		client->pmext.noclipScale = 0.1;
 	}
 	else if (client->pers.noclipScale > 20)
 	{
