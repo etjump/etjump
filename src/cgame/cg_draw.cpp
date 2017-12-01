@@ -3866,9 +3866,13 @@ namespace ETJump
 static void CG_DrawSaveIndicator(void)
 {
 	trace_t trace;
+	playerState_t *ps = ETJump::getValidPlayerState();
 
 	float x = etj_saveIndicatorX.integer;
 	float y = etj_saveIndicatorY.integer;
+
+	const auto ci = &cgs.clientinfo[ps->clientNum];
+
 
 	if (!etj_drawSaveIndicator.integer)
 	{
@@ -3876,14 +3880,13 @@ static void CG_DrawSaveIndicator(void)
 	}
 
 	// no indicator for idle specs
-	if (cg.snap->ps.pm_type & PM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
+	if (ci->team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
 	{
 		return;
 	}
 
 	ETJump_AdjustPosition(&x);
 
-	playerState_t *ps = ETJump::getValidPlayerState();
 	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOSAVE);
 
 	// always diplay icon
@@ -3934,9 +3937,12 @@ static void CG_DrawSaveIndicator(void)
 static void CG_DrawProneIndicator(void)
 {
 	trace_t trace;
+	playerState_t *ps = ETJump::getValidPlayerState();
 
 	float x = etj_proneIndicatorX.integer;
 	float y = etj_proneIndicatorY.integer;
+
+	const auto ci = &cgs.clientinfo[ps->clientNum];
 
 	if (!etj_drawProneIndicator.integer)
 	{
@@ -3944,14 +3950,13 @@ static void CG_DrawProneIndicator(void)
 	}
 
 	// no indicator for idle specs
-	if (cg.snap->ps.pm_type & PM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
+	if (ci->team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
 	{
 		return;
 	}
 
 	ETJump_AdjustPosition(&x);
 
-	playerState_t *ps = ETJump::getValidPlayerState();
 	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOPRONE);
 
 	// always diplay icon
