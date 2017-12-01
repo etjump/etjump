@@ -1147,7 +1147,7 @@ namespace ETJump{
 	{
 		auto value = 0;
 		G_SpawnInt("noprone", "0", &value);
-		level.noProne = value > 0 ? qtrue : qfalse;
+		level.noProne = value > 0 ? true : false;
 		level.noProne
 			? shared.integer |= BG_LEVEL_NO_PRONE
 			: shared.integer &= ~BG_LEVEL_NO_PRONE;
