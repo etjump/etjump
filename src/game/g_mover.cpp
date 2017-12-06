@@ -1864,9 +1864,12 @@ void InitMover(gentity_t *ent)
 {
 	vec3_t move;
 	float distance;
+
+	/*
 	float light;
 	vec3_t color;
 	qboolean lightSet, colorSet;
+	*/
 
 	// if the "model2" key is set, use a seperate model
 	// for drawing, but clip against the brushes
@@ -1875,6 +1878,7 @@ void InitMover(gentity_t *ent)
 		ent->s.modelindex2 = G_ModelIndex(ent->model2);
 	}
 
+	/* FIXME: causes crashes
 	// if the "color" or "light" keys are set, setup constantLight
 	lightSet = G_SpawnFloat("light", "100", &light);
 	colorSet = G_SpawnVector("color", "1 1 1", color);
@@ -1908,6 +1912,7 @@ void InitMover(gentity_t *ent)
 
 		ent->s.constantLight = r | (g << 8) | (b << 16) | (i << 24);
 	}
+	*/
 
 	// JOSEPH 1-26-00
 	if (!Q_stricmp(ent->classname, "func_secret"))
