@@ -1216,7 +1216,6 @@ typedef struct
 	qboolean activeTimer;
 
 	qboolean resetmaxspeed;
-	qboolean routeDesigner;
 
 	char ipAddr[128];
 	int lastScoreTime;

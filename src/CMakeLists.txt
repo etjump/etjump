@@ -144,6 +144,7 @@ file(GLOB QAGAME_SRC
 	"game/etj_custom_map_votes.cpp"
 	"game/etj_database.cpp"
 	"game/etj_deathrun_system.cpp"
+	"game/etj_entity_utilities.cpp"
 	"game/etj_file.cpp"
 	"game/etj_result_set_formatter.cpp"
 	"game/etj_game.cpp"
