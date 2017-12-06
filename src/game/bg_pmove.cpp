@@ -893,6 +893,7 @@ static qboolean PM_CheckJump(void)
 	pml.groundPlane   = qfalse;         // jumping away
 	pml.walking       = qfalse;
 	pm->ps->pm_flags |= PMF_JUMP_HELD;
+	pm->pmext->isJumpLand = true;
 
 	pm->ps->groundEntityNum = ENTITYNUM_NONE;
 	pm->ps->velocity[2]     = JUMP_VELOCITY;
@@ -1926,16 +1927,11 @@ static int PM_FootstepForSurface(void)
 PM_CheckFallDamage
 
 Checks landing speed and applies fall damage + stepsounds
+Creates a local entity event to play the sound
 =============
 */
 static void PM_CheckFallDamage(const float delta)
 {
-	// create a local entity event to play the sound
-	if (pm->debugLevel)
-	{
-		Com_Printf("delta: %5.2f\n", delta);
-	}
-
 	if (delta > 77)
 	{
 		PM_AddEventExt(EV_FALL_NDIE, PM_FootstepForSurface());
@@ -1972,10 +1968,10 @@ static void PM_CheckFallDamage(const float delta)
 	{
 		PM_AddEventExt(EV_FALL_SHORT, PM_FootstepForSurface());
 	}
-	// ETJump uphill jump sounds
-	else if (delta > 0)
+	// ETJump uphill step sounds
+	else
 	{
-		PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+		PM_AddEventExt(EV_UPHILLSTEP, PM_FootstepForSurface());
 	}
 
 	// rain - when falling damage happens, velocity is cleared, but
@@ -2040,7 +2036,12 @@ static void PM_CrashLand(void)
 		delta *= 0.5;
 	}
 
-	if (delta < 1 && (pm->cmd.serverTime - pm->pmext->jumpTime > 2000))
+	if (pm->debugLevel)
+	{
+		Com_Printf("delta: %5.2f\n", delta);
+	}
+
+	if (delta < 1 && !pm->pmext->isJumpLand)
 	{
 		return;
 	}
@@ -2087,6 +2088,7 @@ static void PM_CrashLand(void)
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;
+	pm->pmext->isJumpLand = false;
 }
 
 
