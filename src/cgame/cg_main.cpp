@@ -3622,7 +3622,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// OSP
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
-	cg.routeDesigner  = qfalse;
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;

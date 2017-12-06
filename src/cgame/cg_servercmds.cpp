@@ -2996,30 +2996,6 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
-	if (!Q_stricmp(cmd, "route_designer"))
-	{
-		int  argc = trap_Argc();
-		char arg[MAX_TOKEN_CHARS];
-
-		if (argc != 2)
-		{
-			return;
-		}
-
-		trap_Argv(1, arg, sizeof(arg));
-
-		if (!Q_stricmp(arg, "1"))
-		{
-			cg.routeDesigner = qtrue;
-		}
-		else
-		{
-			cg.routeDesigner = qfalse;
-		}
-
-		return;
-	}
-
 	if (!Q_stricmp(cmd, "manual"))
 	{
 		CG_Manual_f();

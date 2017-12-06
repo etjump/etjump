@@ -15,6 +15,7 @@
 #include "etj_printer.h"
 #include "etj_operation_result.h"
 #include "etj_save_system.h"
+#include "etj_entity_utilities.h"
 
 
 void BotDebug(int clientNum);
@@ -3316,6 +3317,12 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt)
 	vec3_t   forward;       //, offset, end;
 	//trace_t		tr;
 
+	// specs can't use
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	{
+		return qfalse;
+	}
+
 	// Arnout: invisible entities can't be used
 
 	if (traceEnt->entstate == STATE_INVISIBLE || traceEnt->entstate == STATE_UNDERCONSTRUCTION)
@@ -3637,6 +3644,11 @@ tryagain:
 		trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_MISSILECLIP | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
 		goto tryagain;
 	}
+
+	if (!found)
+	{
+		ETJump::longRangeActivate(ent);
+	}
 }
 
 
@@ -3683,6 +3695,44 @@ tryagain:
 		pass2 = qtrue;
 		trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
 		goto tryagain;
+	}
+}
+
+namespace ETJump
+{
+	
+	void longRangeActivate(gentity_t *ent)
+	{
+		trace_t   tr;
+		vec3_t    end;
+		gentity_t *traceEnt;
+		vec3_t    forward, right, up, offset;
+		const auto MAX_DISTANCE = 1 << 16;
+		AngleVectors(ent->client->ps.viewangles, forward, right, up);
+		VectorCopy(ent->client->ps.origin, offset);
+		offset[2] += ent->client->ps.viewheight;
+		VectorMA(offset, MAX_DISTANCE, forward, end);
+
+		trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number, CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_MISSILECLIP | CONTENTS_BODY | CONTENTS_CORPSE);
+
+		if (tr.surfaceFlags & SURF_NOIMPACT || tr.entityNum == ENTITYNUM_WORLD)
+		{
+			return;
+		}
+
+		traceEnt = &g_entities[tr.entityNum];
+
+		if (ETJump::isPlayer(traceEnt) && G_AllowFollow(ent, traceEnt))
+		{
+			if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+			{
+				SetTeam(ent, "spectator", qfalse,
+					static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
+			}
+
+			ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+			ent->client->sess.spectatorClient = ClientNum(traceEnt);
+		}
 	}
 }
 
