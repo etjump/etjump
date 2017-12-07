@@ -992,6 +992,19 @@ void Cmd_Notarget_f(gentity_t *ent)
 	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", msg));
 }
 
+void Cmd_InterruptRun_f(gentity_t *ent)
+{
+	if (ent->client->sess.timerunActive)
+	{
+		InterruptRun(ent);
+		Com_Printf("Timerun interrupted.\n");
+	}
+	else
+	{
+		Com_Printf("No timerun currently active.\n");
+	}
+}
+
 namespace ETJump
 {
 	OperationResult canNoclip(gentity_t *ent)
@@ -4857,6 +4870,7 @@ static command_t noIntermissionCommands[] =
 	//{ "savereset",          qfalse, Cmd_SaveReset_f },
 	{ "timerun_status",  qfalse, Cmd_timerunStatus_f   },
 	{ "setoffset", qtrue, ETJump::setPlayerOffset },
+	{ "interruptRun", qtrue, Cmd_InterruptRun_f },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
