@@ -2041,7 +2041,7 @@ static void PM_CrashLand(void)
 		Com_Printf("delta: %5.2f\n", delta);
 	}
 
-	if (delta < 1 && !pm->pmext->isJumpLand)
+	if (!delta || (delta < 1 && !pm->pmext->isJumpLand))
 	{
 		return;
 	}
