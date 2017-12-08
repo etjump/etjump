@@ -506,9 +506,9 @@ vmCvar_t etj_offsetUnits;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_drawLeaves;
-
 vmCvar_t etj_touchPickupWeapons;
 vmCvar_t etj_autoLoad;
+vmCvar_t etj_uphillSteps;
 vmCvar_t etj_quickFollow;
 
 typedef struct
@@ -860,7 +860,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawProneIndicator, "etj_drawProneIndicator", "3", CVAR_ARCHIVE },
 	{ &etj_proneIndicatorX, "etj_proneIndicatorX", "500", CVAR_ARCHIVE },
 	{ &etj_proneIndicatorY, "etj_proneIndicatorY", "450", CVAR_ARCHIVE },
-
+	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
+	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
 };
 
 

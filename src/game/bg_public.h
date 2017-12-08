@@ -551,6 +551,7 @@ typedef struct
 
 	qboolean releasedFire;
 	float noclipScale;
+	bool isJumpLand;
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
 
@@ -1144,6 +1145,7 @@ typedef enum
 	EV_MEDIC_CALL,
 	EV_PORTAL_TELEPORT,
 	EV_LOAD_TELEPORT,
+	EV_UPHILLSTEP,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 
