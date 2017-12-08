@@ -506,6 +506,7 @@ vmCvar_t etj_drawLeaves;
 
 vmCvar_t etj_touchPickupWeapons;
 vmCvar_t etj_autoLoad;
+vmCvar_t etj_quickFollow;
 
 typedef struct
 {
@@ -851,7 +852,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
-	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE }
+	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE },
+	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE }
 
 };
 
@@ -959,7 +961,8 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
 					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
-					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad
+					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad ||
+					cv->vmCvar == &etj_quickFollow
 				    )
 				{
 					fSetFlags = qtrue;
@@ -1054,7 +1057,8 @@ void CG_setClientFlags(void)
 									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
 									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
 									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
-									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0)
+									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
+									 ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0)
 	                                 // Add more in here, as needed
 	                             ),
 
