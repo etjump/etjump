@@ -343,6 +343,7 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 #define CGF_ENABLE_TIMERUNS	0x400
 #define CGF_NOACTIVATELEAN	0x800
 #define CGF_AUTO_LOAD		0x1000
+#define CGF_QUICK_FOLLOW	0x2000
 
 #define MAX_MOTDLINES   6
 
