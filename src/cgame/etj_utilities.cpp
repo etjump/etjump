@@ -114,7 +114,7 @@ static void normalizeColorIfRequired(vec4_t &v)
 		}
 	}
 
-	// handle alpha sperately
+	// handle alpha separately
 	if (v[3] > 1.0)
 	{
 		v[3] /= 255.f;
