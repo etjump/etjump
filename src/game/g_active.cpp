@@ -470,6 +470,20 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 	{
 		client->ps.pm_type = PM_SPECTATOR;
 		client->ps.speed   = 800; // was: 400 // faster than normal
+
+		if (client->pers.noclipScale < 0.1)
+		{
+			client->pmext.noclipScale = 0.1;
+		}
+		else if (client->pers.noclipScale > 20)
+		{
+			client->pmext.noclipScale = 20;
+		}
+		else
+		{
+			client->pmext.noclipScale = client->pers.noclipScale;
+		}
+
 		if (client->ps.sprintExertTime)
 		{
 			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
@@ -529,10 +543,12 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 
 	client->oldbuttons = client->buttons;
 	client->buttons    = ucmd->buttons;
+	client->latched_buttons = client->buttons & ~client->oldbuttons;
 
 //----(SA)	added
 	client->oldwbuttons = client->wbuttons;
 	client->wbuttons    = ucmd->wbuttons;
+	client->latched_wbuttons = client->wbuttons & ~client->oldwbuttons;
 
 	// attack button cycles through spectators
 	if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK))
@@ -1230,9 +1246,9 @@ void ClientThink_real(gentity_t *ent)
 		}
 	}
 
-	if (client->pers.noclipScale < 1)
+	if (client->pers.noclipScale < 0.1)
 	{
-		client->pmext.noclipScale = 1;
+		client->pmext.noclipScale = 0.1;
 	}
 	else if (client->pers.noclipScale > 20)
 	{
@@ -1680,7 +1696,7 @@ void SpectatorClientEndFrame(gentity_t *ent)
 		if (do_respawn)
 		{
 			reinforce(ent);
-			if (ent->client->pers.autoLoad == qtrue)
+			if (ent->client->pers.autoLoad == qtrue && level.time > (ent->client->sess.lastKillTime + FRAMETIME))
 			{
 				// need to do this here as reinforce will override any value set in
 				// clientspawn (ClientSpawn gets called twice and we only want to 

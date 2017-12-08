@@ -252,6 +252,9 @@
     <ClCompile Include="etj_save_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_entity_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -395,6 +398,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_save_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_entity_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,7 @@ namespace ETJump
 		struct ProgressionTrackerKeys
 		{
 			char *equal;
+			char *notEqual;
 			char *greaterThan;
 			char *lessThan;
 			char *set;
@@ -27,6 +28,7 @@ namespace ETJump
 			ProgressionTracker()
 			{
 				for (auto & v : equal) v = -1;
+				for (auto & v : notEqual) v = -1;
 				for (auto & v : greaterThan) v = -1;
 				for (auto & v : lessThan) v = -1;
 				for (auto & v : set) v = -1;
@@ -35,6 +37,7 @@ namespace ETJump
 				for (auto & v : incrementIf) v = 0;
 			}
 			int equal[MaxProgressionTrackers];
+			int notEqual[MaxProgressionTrackers];
 			int greaterThan[MaxProgressionTrackers];
 			int lessThan[MaxProgressionTrackers];
 			int set[MaxProgressionTrackers];

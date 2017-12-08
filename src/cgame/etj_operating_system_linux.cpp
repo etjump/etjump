@@ -1,4 +1,4 @@
-#if defined __linux__
+#ifdef __linux__
 
 #include "etj_operating_system.h"
 #include <sys/ioctl.h>
@@ -8,6 +8,10 @@
 #include <boost/format.hpp>
 
 const char *G_SHA1(const char *str);
+
+ETJump::OperatingSystem::OperatingSystem()
+{
+}
 
 void ETJump::OperatingSystem::minimize()
 {

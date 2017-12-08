@@ -3824,6 +3824,16 @@ namespace ETJump {
 	{
 		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon, SaveForbidColor);
 	}
+
+	static playerState_t& getValidPlayerState()
+	{
+		// spectating
+		if (cg.snap->ps.clientNum != cg.clientNum)
+		{
+			return cg.snap->ps;
+		}
+		return cg.predictedPlayerState;
+	}
 }
 
 static void CG_DrawSaveIndicator(void)
@@ -3837,15 +3847,18 @@ static void CG_DrawSaveIndicator(void)
 	{
 		return;
 	}
+
+	const auto ps = ETJump::getValidPlayerState();
+	const auto ci = &cgs.clientinfo[ps.clientNum];
+
 	// no indicator for idle specs
-	if (cg.snap->ps.pm_type & PM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
+	if (ci->team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
 	{
 		return;
 	}
 
 	ETJump_AdjustPosition(&x);
 
-	auto ps = cg.snap->ps;
 	CG_TraceCapsule(&trace, ps.origin, ps.mins, ps.maxs, ps.origin, ps.clientNum, CONTENTS_NOSAVE);
 	
 	if (shared.integer & BG_LEVEL_NO_SAVE)
@@ -5906,19 +5919,6 @@ void CG_DrawDemoRecording(void)
 	CG_Text_Paint_Ext(5, cg_recording_statusline.integer, 0.2f, 0.2f, colorWhite, status, 0, 0, 0, &cgs.media.limboFont2);
 }
 
-void CG_DrawRouteDesign(void)
-{
-	const char *s = va("Designing a route");
-	int x         = SCREEN_CENTER_X, y = 30, w = 0;
-	float sizeX   = 0.1f * 3, sizeY = 0.1f * 3;
-
-	if (cg.routeDesigner)
-	{
-		w = CG_Text_Width_Ext(s, 0.1f, 0, &cgs.media.limboFont1);
-		CG_Text_Paint_Ext(x - w, y, sizeX, sizeY, colorWhite, s, 0, 0, 0, &cgs.media.limboFont1);
-	}
-}
-
 void CG_DrawSpectatorInfo(void)
 {
 	int i = 0;
@@ -6116,7 +6116,6 @@ static void CG_Draw2D(void)
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
 			CG_DrawSpeed2();
-			CG_DrawRouteDesign();
 			CG_DrawKeys();
 		}
 

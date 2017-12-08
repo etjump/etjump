@@ -503,9 +503,10 @@ vmCvar_t etj_offsetUnits;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_drawLeaves;
-
 vmCvar_t etj_touchPickupWeapons;
 vmCvar_t etj_autoLoad;
+vmCvar_t etj_uphillSteps;
+vmCvar_t etj_quickFollow;
 
 typedef struct
 {
@@ -852,6 +853,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
 	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE },
+	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
+	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
 };
 
 
@@ -920,19 +923,6 @@ void CG_RegisterCvars(void)
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
 
-	if (cg_noclipScale.value < 1)
-	{
-		cg.pmext.noclipScale = 1;
-	}
-	else if (cg_noclipScale.value > 20)
-	{
-		cg.pmext.noclipScale = 20;
-	}
-	else
-	{
-		cg.pmext.noclipScale = cg_noclipScale.value;
-	}
-
 	cvarsLoaded = qtrue;
 }
 
@@ -971,7 +961,8 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
 					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
-					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad
+					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad ||
+					cv->vmCvar == &etj_quickFollow
 				    )
 				{
 					fSetFlags = qtrue;
@@ -1030,23 +1021,6 @@ void CG_UpdateCvars(void)
 					}
 				}
 
-				// This has to be if, not elseif...
-				if (cv->vmCvar == &cg_noclipScale)
-				{
-					if (cg_noclipScale.value < 1)
-					{
-						cg.pmext.noclipScale = 1;
-					}
-					else if (cg_noclipScale.value > 20)
-					{
-						cg.pmext.noclipScale = 20;
-					}
-					else
-					{
-						cg.pmext.noclipScale = cg_noclipScale.value;
-					}
-				}
-
 				ETJump::cvarUpdateHandler->check(cv->vmCvar);
 			}
 		}
@@ -1083,7 +1057,8 @@ void CG_setClientFlags(void)
 									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
 									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
 									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
-									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0)
+									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
+									 ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0)
 	                                 // Add more in here, as needed
 	                             ),
 
@@ -3651,7 +3626,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// OSP
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
-	cg.routeDesigner  = qfalse;
 	trap_Cvar_VariableStringBuffer("com_errorDiagnoseIP", cg.ipAddr, sizeof(cg.ipAddr));
 
 	cg.hasTimerun = qfalse;
