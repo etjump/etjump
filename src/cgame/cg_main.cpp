@@ -431,6 +431,7 @@ vmCvar_t player_runTimerX;
 vmCvar_t player_runTimerY;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
+vmCvar_t etj_runTimerInactiveColor;
 
 vmCvar_t player_drawMessageTime;
 
@@ -789,6 +790,7 @@ cvarTable_t cvarTable[] =
 	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
+	{ &etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey", CVAR_ARCHIVE },
 
 	{ &player_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE             },
 

@@ -2484,6 +2484,7 @@ extern vmCvar_t player_runTimerX;
 extern vmCvar_t player_runTimerY;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
+extern vmCvar_t etj_runTimerInactiveColor;
 
 extern vmCvar_t player_drawMessageTime;
 

@@ -20,13 +20,8 @@ namespace ETJump
 	class TimerunView : Drawable
 	{
 	public:
-		TimerunView() : Drawable()
-		{
-			for (auto& info : _playersTimerunInformation)
-			{
-				interrupt(info);
-			}
-		}
+		TimerunView();
+		~TimerunView();
 		static const int MaxClients = 64;
 		// whenever server sends any command that starts with 
 		// `timerun` this will be called
@@ -57,5 +52,6 @@ namespace ETJump
 	private:
 		std::array<PlayerTimerunInformation, MaxClients> _playersTimerunInformation;
 		PlayerTimerunInformation _ownTimerunInformation;
+		vec4_t inactiveTimerColor;
 	};
 }
