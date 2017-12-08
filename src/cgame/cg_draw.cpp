@@ -6058,19 +6058,6 @@ void CG_DrawDemoRecording(void)
 	CG_Text_Paint_Ext(5, cg_recording_statusline.integer, 0.2f, 0.2f, colorWhite, status, 0, 0, 0, &cgs.media.limboFont2);
 }
 
-void CG_DrawRouteDesign(void)
-{
-	const char *s = va("Designing a route");
-	int x         = SCREEN_CENTER_X, y = 30, w = 0;
-	float sizeX   = 0.1f * 3, sizeY = 0.1f * 3;
-
-	if (cg.routeDesigner)
-	{
-		w = CG_Text_Width_Ext(s, 0.1f, 0, &cgs.media.limboFont1);
-		CG_Text_Paint_Ext(x - w, y, sizeX, sizeY, colorWhite, s, 0, 0, 0, &cgs.media.limboFont1);
-	}
-}
-
 void CG_DrawSpectatorInfo(void)
 {
 	int i = 0;
@@ -6268,7 +6255,6 @@ static void CG_Draw2D(void)
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
 			CG_DrawSpeed2();
-			CG_DrawRouteDesign();
 			CG_DrawKeys();
 			CG_DrawProneIndicator();
 			CG_DrawPronePrint();
