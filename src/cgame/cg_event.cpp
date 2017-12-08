@@ -1820,6 +1820,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	//
 	// movement generated events
 	//
+	case EV_UPHILLSTEP:
+		if (!etj_uphillSteps.integer)
+		{
+			break;
+		}
 	case EV_FOOTSTEP:
 		DEBUGNAME("EV_FOOTSTEP");
 		if (es->eventParm != FOOTSTEP_TOTAL)

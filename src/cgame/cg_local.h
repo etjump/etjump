@@ -2554,9 +2554,9 @@ extern vmCvar_t etj_offsetUnits;
 
 extern vmCvar_t etj_consoleAlpha;
 extern vmCvar_t etj_drawLeaves;
-
 extern vmCvar_t etj_touchPickupWeapons;
 extern vmCvar_t etj_autoLoad;
+extern vmCvar_t etj_uphillSteps;
 
 //
 // cg_main.c

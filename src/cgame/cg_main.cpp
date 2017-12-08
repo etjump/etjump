@@ -503,9 +503,9 @@ vmCvar_t etj_offsetUnits;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_drawLeaves;
-
 vmCvar_t etj_touchPickupWeapons;
 vmCvar_t etj_autoLoad;
+vmCvar_t etj_uphillSteps;
 vmCvar_t etj_quickFollow;
 
 typedef struct
@@ -853,8 +853,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
 	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE },
-	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE }
-
+	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
+	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
 };
 
 
