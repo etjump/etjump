@@ -1091,6 +1091,21 @@ namespace ETJump
 		VectorClear(ent->client->ps.velocity);
 		TeleportPlayer(ent, origin, angles);
 	}
+
+	void interruptRun(gentity_t *ent)
+	{
+		auto clientNum = ClientNum(ent);
+
+		if (ent->client->sess.timerunActive)
+		{
+			InterruptRun(ent);
+			Printer::SendConsoleMessage(clientNum, "Timerun interrupted.\n");
+		}
+		else
+		{
+			Printer::SendConsoleMessage(clientNum, "No timerun currently active.\n");
+		}
+	}
 }
 
 /*
@@ -4857,6 +4872,7 @@ static command_t noIntermissionCommands[] =
 	//{ "savereset",          qfalse, Cmd_SaveReset_f },
 	{ "timerun_status",  qfalse, Cmd_timerunStatus_f   },
 	{ "setoffset", qtrue, ETJump::setPlayerOffset },
+	{ "interruptRun", qtrue, ETJump::interruptRun },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
