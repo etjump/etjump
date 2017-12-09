@@ -206,6 +206,18 @@ void CG_Text_Paint(float x, float y, float scale, vec4_t color, const char *text
 	CG_Text_Paint_Ext(x, y, scale, scale, color, text, adjust, limit, style, font);
 }
 
+namespace ETJump
+{
+	static playerState_t* getValidPlayerState()
+	{
+		return (cg.snap->ps.clientNum != cg.clientNum)
+			// spectating
+			? &cg.snap->ps
+			// playing
+			: &cg.predictedPlayerState;
+	}
+}
+
 // NERVE - SMF - added back in
 int CG_DrawFieldWidth(int x, int y, int width, int value, int charWidth, int charHeight)
 {
@@ -3809,47 +3821,63 @@ static void CG_DrawJumpDelay(void)
 	}
 }
 
-namespace ETJump {
-	const vec4_t SaveShadowColor{ 0.f, 0.f, 0.f, 0.8f };
+namespace ETJump
+{
 	const vec4_t SaveIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
-	const vec4_t SaveForbidColor{ 1.0f, 0.2f, 0.2f, 1.f };
+	const vec4_t SaveShadowColor{ 0.f, 0.f, 0.f, 0.8f };
 	const auto SaveIconSize = 20.f;
+
+	const vec4_t ProneIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
+	const vec4_t ProneShadowColor{ 0.f, 0.f, 0.f, 0.8f };
+	const auto ProneIconSize = 20.f;
+
+	const vec4_t ForbidIconColor{ 1.0f, 0.2f, 0.2f, 1.f };
+	const auto ForbidIconSize = 20.f;
 
 	static void drawSaveIcon(float x, float y)
 	{
 		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, true, SaveShadowColor);
 	}
 
-	static void drawNoSaveIcon(float x, float y)
+	static void drawProneIcon(float x, float y)
 	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.noSaveIcon, SaveForbidColor);
+		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor, true, ProneShadowColor);
 	}
 
-	static playerState_t& getValidPlayerState()
+	static void printNoProne(void)
 	{
-		// spectating
-		if (cg.snap->ps.clientNum != cg.clientNum)
+		playerState_t *ps = ETJump::getValidPlayerState();
+		if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE)
 		{
-			return cg.snap->ps;
+			if (cg.time > cg.pronePressTime)
+			{
+				CG_CenterPrint("You cannot prone inside this area.", SCREEN_HEIGHT - 88, SMALLCHAR_WIDTH);
+				cg.pronePressTime = cg.time + 1000;
+			}
 		}
-		return cg.predictedPlayerState;
+	}
+
+	static void drawForbidIcon(float x, float y)
+	{
+		drawPic(x, y, ForbidIconSize, ForbidIconSize, cgs.media.forbidIcon, ForbidIconColor);
 	}
 }
 
 static void CG_DrawSaveIndicator(void)
 {
 	trace_t trace;
-	
+	playerState_t *ps = ETJump::getValidPlayerState();
+
 	float x = etj_saveIndicatorX.integer;
 	float y = etj_saveIndicatorY.integer;
-	
+
+	const auto ci = &cgs.clientinfo[ps->clientNum];
+
+
 	if (!etj_drawSaveIndicator.integer)
 	{
 		return;
 	}
-
-	const auto ps = ETJump::getValidPlayerState();
-	const auto ci = &cgs.clientinfo[ps.clientNum];
 
 	// no indicator for idle specs
 	if (ci->team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
@@ -3859,35 +3887,146 @@ static void CG_DrawSaveIndicator(void)
 
 	ETJump_AdjustPosition(&x);
 
-	CG_TraceCapsule(&trace, ps.origin, ps.mins, ps.maxs, ps.origin, ps.clientNum, CONTENTS_NOSAVE);
-	
-	if (shared.integer & BG_LEVEL_NO_SAVE)
+	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOSAVE);
+
+	// always diplay icon
+	if (etj_drawSaveIndicator.integer == 1)
 	{
-		if (trace.fraction != 1.0) {
-			if (etj_drawSaveIndicator.integer != 2) {
-				ETJump::drawSaveIcon(x, y);
-			}
+		ETJump::drawSaveIcon(x, y);
+		// level no save AND not in the volume
+		if ((shared.integer & BG_LEVEL_NO_SAVE) && trace.fraction == 1.0)
+		{
+			ETJump::drawForbidIcon(x, y);
 		}
-		else {
-			if (etj_drawSaveIndicator.integer != 3) {
-				ETJump::drawSaveIcon(x, y);
-				ETJump::drawNoSaveIcon(x, y);
-			}
+		// level save AND in the volume
+		else if (!(shared.integer & BG_LEVEL_NO_SAVE) && trace.fraction != 1.0)
+		{
+			ETJump::drawForbidIcon(x, y);
 		}
-	} else
+	}
+	// display icon only outside of volume
+	else if (etj_drawSaveIndicator.integer == 2)
 	{
-		if (trace.fraction != 1.0) {
-			if (etj_drawSaveIndicator.integer != 2) {
-				ETJump::drawSaveIcon(x, y);
-				ETJump::drawNoSaveIcon(x, y);
-			}
-		}
-		else {
-			if (etj_drawSaveIndicator.integer != 3) {
-				ETJump::drawSaveIcon(x, y);
+		// outside of the volume
+		if (trace.fraction == 1.0)
+		{
+			ETJump::drawSaveIcon(x, y);
+			// level no save
+			if (shared.integer & BG_LEVEL_NO_SAVE)
+			{
+				ETJump::drawForbidIcon(x, y);
 			}
 		}
 	}
+	// only show when inside of a volume
+	else if (etj_drawSaveIndicator.integer == 3)
+	{
+		// inside of the volume
+		if (trace.fraction != 1.0)
+		{
+			ETJump::drawSaveIcon(x, y);
+			// level save
+			if (!(shared.integer & BG_LEVEL_NO_SAVE))
+			{
+				ETJump::drawForbidIcon(x, y);
+			}
+		}
+	}
+}
+
+static void CG_DrawProneIndicator(void)
+{
+	trace_t trace;
+	playerState_t *ps = ETJump::getValidPlayerState();
+
+	float x = etj_proneIndicatorX.integer;
+	float y = etj_proneIndicatorY.integer;
+
+	const auto ci = &cgs.clientinfo[ps->clientNum];
+
+	if (!etj_drawProneIndicator.integer)
+	{
+		return;
+	}
+
+	// no indicator for idle specs
+	if (ci->team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
+	{
+		return;
+	}
+
+	ETJump_AdjustPosition(&x);
+
+	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOPRONE);
+
+	// always diplay icon
+	if (etj_drawProneIndicator.integer == 1)
+	{
+		ETJump::drawProneIcon(x, y);
+		// level no prone AND not in the volume
+		if ((shared.integer & BG_LEVEL_NO_PRONE) && trace.fraction == 1.0)
+		{
+			ETJump::drawForbidIcon(x, y);
+		}
+		// level prone AND in the volume
+		else if (!(shared.integer & BG_LEVEL_NO_PRONE) && trace.fraction != 1.0)
+		{
+			ETJump::drawForbidIcon(x, y);
+		}
+	}
+	// display icon only outside of volume
+	else if (etj_drawProneIndicator.integer == 2)
+	{
+		// outside of the volume
+		if (trace.fraction == 1.0)
+		{
+			ETJump::drawProneIcon(x, y);
+			// level no prone
+			if (shared.integer & BG_LEVEL_NO_PRONE)
+			{
+				ETJump::drawForbidIcon(x, y);
+			}
+		}
+	}
+	// only show when inside of a volume
+	else if (etj_drawProneIndicator.integer == 3)
+	{
+		// inside of the volume
+		if (trace.fraction != 1.0)
+		{
+			ETJump::drawProneIcon(x, y);
+			// level prone
+			if (!(shared.integer & BG_LEVEL_NO_PRONE))
+			{
+				ETJump::drawForbidIcon(x, y);
+			}
+		}
+	}
+}
+
+static void CG_DrawPronePrint(void)
+{
+	trace_t trace;
+
+	playerState_t *ps = ETJump::getValidPlayerState();
+	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOPRONE);
+
+	if (shared.integer & BG_LEVEL_NO_PRONE)
+	{
+		if (trace.fraction != 1.0f)
+		{
+			return;
+		}
+	}
+	else
+	{
+		if (trace.fraction == 1.0f)
+		{
+			return;
+		}
+	}
+
+	ETJump::printNoProne();
 }
 
 
@@ -6117,6 +6256,8 @@ static void CG_Draw2D(void)
 			CG_DrawSaveIndicator();
 			CG_DrawSpeed2();
 			CG_DrawKeys();
+			CG_DrawProneIndicator();
+			CG_DrawPronePrint();
 		}
 
 		CG_DrawCHS();

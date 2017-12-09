@@ -1142,6 +1142,19 @@ namespace ETJump{
 		trap_Cvar_Set("shared", va("%d", shared.integer));
 		G_Printf("No fall damage %s.\n", level.noFallDamage ? "enabled" : "disabled");
 	}
+
+	static void initNoProne()
+	{
+		auto value = 0;
+		G_SpawnInt("noprone", "0", &value);
+		level.noProne = value > 0 ? true : false;
+		level.noProne
+			? shared.integer |= BG_LEVEL_NO_PRONE
+			: shared.integer &= ~BG_LEVEL_NO_PRONE;
+
+		trap_Cvar_Set("shared", va("%d", shared.integer));
+		G_Printf("Prone is %s.\n", level.noProne ? "disabled" : "enabled");
+	}
 }
 
 
@@ -1322,6 +1335,7 @@ void SP_worldspawn(void)
 	ETJump::initNoJumpDelay();
 	ETJump::initStrictSaveLoad();
 	ETJump::initNoFallDamage();
+	ETJump::initNoProne();
 
 	level.mapcoordsValid = qfalse;
 	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&    // top left

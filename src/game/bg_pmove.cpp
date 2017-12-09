@@ -976,6 +976,28 @@ static qboolean PM_CheckProne(void)
 {
 	//Com_Printf( "%i: PM_CheckProne (%i)\n", pm->cmd.serverTime, pm->pmext->proneGroundTime );
 
+	trace_t trace;
+	pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin, pm->ps->clientNum, CONTENTS_NOPRONE);
+
+	if (pm->shared & BG_LEVEL_NO_PRONE)
+	{
+		if (trace.fraction == 1.0f)
+		{
+			pm->ps->eFlags &= ~EF_PRONE;
+			pm->ps->eFlags &= ~EF_PRONE_MOVING;
+			return qfalse;
+		}
+	}
+	else
+	{
+		if (trace.fraction != 1.0f)
+		{
+			pm->ps->eFlags &= ~EF_PRONE;
+			pm->ps->eFlags &= ~EF_PRONE_MOVING;
+			return qfalse;
+		}
+	}
+
 	if (!(pm->ps->eFlags & EF_PRONE))
 	{
 		// needs to be on the ground

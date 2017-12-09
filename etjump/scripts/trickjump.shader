@@ -254,7 +254,7 @@ gfx/keyset2/key_prone_pressed
 }
 
 ////////////////
-// Save Icons
+// Save Icon
 ////////////////
 
 gfx/2d/save_on
@@ -268,7 +268,26 @@ gfx/2d/save_on
 	}
 }
 
-gfx/2d/save_off
+////////////////
+// Prone Icon
+////////////////
+
+gfx/2d/prone_on
+{
+	noPicMip
+	noMipMaps
+	{
+		map gfx/2d/proneicon.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+////////////////
+// Forbid Icon
+////////////////
+
+gfx/2d/icon_off
 {
 	noPicMip
 	noMipMaps

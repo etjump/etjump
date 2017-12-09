@@ -492,6 +492,9 @@ vmCvar_t etj_noJumpDelayY;
 vmCvar_t etj_drawSaveIndicator;
 vmCvar_t etj_saveIndicatorX;
 vmCvar_t etj_saveIndicatorY;
+vmCvar_t etj_drawProneIndicator;
+vmCvar_t etj_proneIndicatorX;
+vmCvar_t etj_proneIndicatorY;
 
 vmCvar_t etj_viewlog;
 vmCvar_t etj_drawFoliage;
@@ -853,6 +856,10 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
 	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE },
+	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
+	{ &etj_drawProneIndicator, "etj_drawProneIndicator", "3", CVAR_ARCHIVE },
+	{ &etj_proneIndicatorX, "etj_proneIndicatorX", "500", CVAR_ARCHIVE },
+	{ &etj_proneIndicatorY, "etj_proneIndicatorY", "450", CVAR_ARCHIVE },
 	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
 	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
 };
@@ -2570,7 +2577,8 @@ static void CG_RegisterGraphics(void)
 
 	cgs.media.ghostPlayersAltColorShader = trap_R_RegisterShader("etjump/ghost_player_alt");
 	cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");
-	cgs.media.noSaveIcon = trap_R_RegisterShader("gfx/2d/save_off");
+	cgs.media.proneIcon = trap_R_RegisterShader("gfx/2d/prone_on");
+	cgs.media.forbidIcon = trap_R_RegisterShader("gfx/2d/icon_off");
 
 
 	CG_LoadingString(" - game media done");

@@ -2604,6 +2604,8 @@ const int BG_LEVEL_NO_SAVE = 1 << 2;
 const int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
 // Fall damage is disabled (force)
 const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
+// Prone is disabled
+const int BG_LEVEL_NO_PRONE = 1 << 5;
 
 #endif // __BG_PUBLIC_H__
 

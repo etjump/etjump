@@ -25,7 +25,8 @@
 #define CONTENTS_TELEPORTER         0x00040000  //NOT USED EITHER....
 #define CONTENTS_NOPORTAL           0x00080000  // Feen: PGM - Contents formerly known as CONTENTS_JUMPPAD - Used for 'emancipation grid'
 #define CONTENTS_NOSAVE             0x00100000  // CONTENTS_NOSAVE
-#define CONTENTS_NOSAVERESET        0x00200000	
+#define CONTENTS_DONOTENTER         0x00200000	// Aciz: renamed back to original, was renamed to CONTENTS_NOSAVERESET but never used anywhere.
+const int CONTENTS_NOPRONE =        0x00200000;
 #define CONTENTS_DONOTENTER_LARGE   0x00400000  
 #define CONTENTS_ORIGIN             0x01000000  // removed before bsping an entity
 #define CONTENTS_BODY               0x02000000  // should never be on a brush, only in game
