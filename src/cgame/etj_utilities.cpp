@@ -52,10 +52,11 @@ static std::unordered_map<std::string, vec4_t*> validColorNames =
 	{ "mdorange", &colorMdOrange },
 	{ "mdblue",   &colorMdBlue },
 	{ "gray",     &colorMdGrey },
+	{ "grey",     &colorMdGrey },
 	{ "ltgrey",   &colorLtGrey },
 	{ "mdgrey",   &colorMdGrey },
 	{ "dkgrey",   &colorDkGrey },
-	{ "black",    &colorBlack }
+	{ "black",    &colorBlack },
 };
 
 static void parseNamedColorString(const std::string &token, vec4_t &color)
