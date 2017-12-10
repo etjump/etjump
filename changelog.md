@@ -31,7 +31,8 @@
     * __3__ only show when inside of a save zone
   * `etj_saveIndicatorX`
   * `etj_saveIndicatorY`
-* fixed no jump sounds while jumping on slopes
+* fixed footsteps not playing at low landing speeds
+  * to revert back to old, broken behavior, toggle `etj_uphillSteps`
 * fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
 * added `incrementVar` command, works almost like `cycle` but also support floats
 * added worldspawn `strictsaveload` key to control save load behavior
@@ -88,6 +89,25 @@
 * demo sorting in replays menu is now case insensitive
 * adjusted `etj_slickX` default value so it doesn't overlap with OB detector
 * added spawnflag __2048__ to `trigger_multiple`, activates for every client touching the trigger, with per-client wait times
+* noclipping is now always allowed on non-dedicated servers running `devmap`
+* fixed noclipping as spectator
+* added support for triggerable shaders
+  * any entity that supports `target` key can have `targetShaderName` and `targetShaderNewName` keys
+  * when entity fires its target(s), it will remap `targetShaderName` to `targetShaderNewName`
+  * more info: http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html
+* added ability to spectate players by aiming at them and pressing `+activate`. Can be toggled with `etj_quickFollow`
+* added `noprone` worldspawn key to enable/disable proning
+  * `noprone` __0__: players can only prone outside of `surfaceparm donotenter` (default)
+  * `noprone` __1__: players can only prone inside of `Surfaceparm donotenter`
+* added noprone indicator + control cvars:
+  * `etj_drawProneIndicator`:
+    * __0__ never show icon
+    * __1__ always show icon
+    * __2__ only show when outside of a prone zone
+    * __3__ only show when inside of a prone zone
+  * `etj_ProneIndicatorX`
+  * `etj_ProneIndicatorY`
+* added `interruptRun` client command to stop an ongoing timerun
 
 # ETJump 2.2.0
 
