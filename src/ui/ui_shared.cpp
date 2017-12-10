@@ -4652,17 +4652,33 @@ void Item_TextColor(itemDef_t *item, vec4_t *newColor)
 	}
 }
 
+static float GetCharWidth(const char *symbol, float scale, fontInfo_t *font)
+{
+	float out = 0;
+	glyphInfo_t *glyph;
+
+	if (symbol)
+	{
+		glyph = &font->glyphs[*symbol];
+		out = glyph->xSkip;
+	}
+	return out * scale * font->glyphScale;
+}
+
 void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean hasCursor)
 {
 	const char *p, *newLinePtr;
 	char       buff[1024], cursor;
-	int        width, height, len, textWidth, newLine, newLineWidth, cursorPos, startLine, previousLine;
+	int        width, height, len, newLine, newLineWidth, cursorPos, startLine, previousLine;
 	qboolean   hasWhitespace;
 	float      y;
 	vec4_t     color, cursorColor;
 	int        linesCount = 0;
+	float      ryLineWidth = 0;
+	fontInfo_t *font = DC->getActiveFont();
+	float      lineWidth = 0;
+	float      tWidth = 0;
 
-	textWidth = 0;
 	newLinePtr = NULL;
 
 	Item_TextColor(item, &color);
@@ -4693,21 +4709,23 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 
 	while (p)
 	{
-		textWidth = DC->textWidth(buff, item->textscale, 0);
 		if (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\0')
 		{
 			newLine = len;
 			newLinePtr = p + 1;
-			newLineWidth = textWidth;
+			newLineWidth = lineWidth;
 			hasWhitespace = qtrue;
-		}
-		else if (!hasWhitespace && textWidth > item->window.rect.w)
+		} else
 		{
-			newLine = len;
-			newLinePtr = p;
-			newLineWidth = textWidth;
+			if (!hasWhitespace && lineWidth > item->window.rect.w)
+			{
+				newLine = len;
+				newLinePtr = p;
+				newLineWidth = lineWidth;
+			}
 		}
-		if ((newLine && textWidth > item->window.rect.w) || *p == '\n' || *p == '\0')
+
+		if ((newLine && lineWidth > item->window.rect.w) || *p == '\n' || *p == '\0')
 		{
 			if (len)
 			{
@@ -4799,8 +4817,11 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 			newLine = 0;
 			newLineWidth = 0;
 			hasWhitespace = qfalse;
+			lineWidth = 0;
+
 			continue;
 		}
+		lineWidth += GetCharWidth(p, item->textscale, font);
 		buff[len++] = *p++;
 
 		if (buff[len - 1] == 13)
