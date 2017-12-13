@@ -54,8 +54,19 @@ ETJump::OverbounceWatcher::~OverbounceWatcher()
 	_clientCommandsHandler->unsubcribe("ob_reset");
 }
 
+const playerState_t* ETJump::OverbounceWatcher::getPlayerState()
+{
+	return (cg.snap->ps.clientNum != cg.clientNum)
+		// spectating
+		? &cg.snap->ps
+		// playing
+		: &cg.predictedPlayerState;
+}
+
 void ETJump::OverbounceWatcher::render() const
 {
+	auto ps = getPlayerState();
+
 	if (!etj_drawObWatcher.integer)
 	{
 		return;
@@ -66,7 +77,6 @@ void ETJump::OverbounceWatcher::render() const
 		return;
 	}
 
-	auto ps = &cg.predictedPlayerState;
 	if (ps->groundEntityNum != ENTITYNUM_NONE)
 	{
 		return;
@@ -147,15 +157,6 @@ std::vector<std::string> ETJump::OverbounceWatcher::list() const
 		names.push_back(i.first);
 	}
 	return names;
-}
-
-const playerState_t* ETJump::OverbounceWatcher::getPlayerState()
-{
-	return (cg.snap->ps.clientNum != cg.clientNum)
-		       // spectating
-		       ? &cg.snap->ps
-		       // playing
-		       : &cg.predictedPlayerState;
 }
 
 bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
