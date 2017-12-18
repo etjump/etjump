@@ -275,24 +275,20 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 
 	if (pos->isValid)
 	{
-		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
+		if (pos->stance == Crouch)
 		{
-			if (pos->stance == Crouch)
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags |= PMF_DUCKED;
-			}
-			else if (pos->stance == Prone)
-			{
-				client->ps.eFlags |= EF_PRONE;
-				SetClientViewAngle(ent, pos->vangles);
-			}
-			else
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags &= ~PMF_DUCKED;
-
-			}
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags |= PMF_DUCKED;
+		}
+		else if (pos->stance == Prone)
+		{
+			client->ps.eFlags |= EF_PRONE;
+			SetClientViewAngle(ent, pos->vangles);
+		}
+		else
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags &= ~PMF_DUCKED;
 		}
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
@@ -419,24 +415,20 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 
 	if (pos->isValid)
 	{
-		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
+		if (pos->stance == Crouch)
 		{
-			if (pos->stance == Crouch)
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags |= PMF_DUCKED;
-			}
-			else if (pos->stance == Prone)
-			{
-				client->ps.eFlags |= EF_PRONE;
-				SetClientViewAngle(ent, pos->vangles);
-			}
-			else
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags &= ~PMF_DUCKED;
-
-			}
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags |= PMF_DUCKED;
+		}
+		else if (pos->stance == Prone)
+		{
+			client->ps.eFlags |= EF_PRONE;
+			SetClientViewAngle(ent, pos->vangles);
+		}
+		else
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags &= ~PMF_DUCKED;
 		}
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{

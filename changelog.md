@@ -35,7 +35,11 @@
   * to revert back to old, broken behavior, toggle `etj_uphillSteps`
 * fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
 * added `incrementVar` command, works almost like `cycle` but also support floats
-* added worldspawn `strictsaveload` key to control save load behavior
+* added `strictsaveload` worldspawn key to control save/load behavior
+  * bitmask value
+  * __1__/__move__ = cannot save while moving
+  * __2__/__dead__ = cannot save/load while dead
+  * when using strings, seperate values with | (eg. "move | dead")
 * added command `setoffset x y z`: offsets player's position by given vector if noclip is available
 * reworked OB Watcher:
   * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`
@@ -98,16 +102,17 @@
 * added ability to spectate players by aiming at them and pressing `+activate`. Can be toggled with `etj_quickFollow`
 * added `noprone` worldspawn key to enable/disable proning
   * `noprone` __0__: players can only prone outside of `surfaceparm donotenter` (default)
-  * `noprone` __1__: players can only prone inside of `Surfaceparm donotenter`
+  * `noprone` __1__: players can only prone inside of `surfaceparm donotenter`
 * added noprone indicator + control cvars:
   * `etj_drawProneIndicator`:
     * __0__ never show icon
     * __1__ always show icon
     * __2__ only show when outside of a prone zone
     * __3__ only show when inside of a prone zone
-  * `etj_ProneIndicatorX`
-  * `etj_ProneIndicatorY`
+  * `etj_proneIndicatorX`
+  * `etj_proneIndicatorY`
 * added `interruptRun` client command to stop an ongoing timerun
+* players now load onto same stance (stand/crouch/prone) as they saved in. Loading to prone additionally forces same viewangles as when saving.
 
 # ETJump 2.2.0
 
