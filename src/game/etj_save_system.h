@@ -75,9 +75,8 @@ namespace ETJump
 		enum class SaveLoadRestrictions
 		{
 			Default = 0,
-			//Stance = 1 << 0,
-			Move = 1 << 1,
-			Dead = 1 << 2
+			Move = 1 << 0,
+			Dead = 1 << 1,
 		};
 
 		// Saves current position

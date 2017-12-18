@@ -37,11 +37,9 @@
 * added `incrementVar` command, works almost like `cycle` but also support floats
 * added `strictsaveload` worldspawn key to control save/load behavior
   * bitmask value
-  * __1__ = unused for now
-  * __2__/__move__ = cannot save while moving
-  * __4__/__dead__ = cannot save/load while dead
+  * __1__/__move__ = cannot save while moving
+  * __2__/__dead__ = cannot save/load while dead
   * when using strings, seperate values with | (eg. "move | dead")
-  * these values are subject to change for stable 2.3.0 release
 * added command `setoffset x y z`: offsets player's position by given vector if noclip is available
 * reworked OB Watcher:
   * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`

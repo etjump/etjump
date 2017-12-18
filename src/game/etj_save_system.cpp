@@ -275,10 +275,6 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 
 	if (pos->isValid)
 	{
-		/* Forcing stance loading on by default for now (2.3.0 RC3)
-		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
-		{
-		*/
 		if (pos->stance == Crouch)
 		{
 			client->ps.eFlags &= ~EF_PRONE;
@@ -419,10 +415,6 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 
 	if (pos->isValid)
 	{
-		/* Forcing stance loading on by default for now (2.3.0 RC3)
-		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
-		{
-		*/
 		if (pos->stance == Crouch)
 		{
 			client->ps.eFlags &= ~EF_PRONE;
