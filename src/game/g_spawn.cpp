@@ -1091,7 +1091,7 @@ namespace ETJump{
 	
 	std::unordered_map<std::string, SaveSystem::SaveLoadRestrictions> allowedStrictValues {
 		{ "default", SaveSystem::SaveLoadRestrictions::Default },
-		{ "stance", SaveSystem::SaveLoadRestrictions::Stance },
+		//{ "stance", SaveSystem::SaveLoadRestrictions::Stance },
 		{ "move", SaveSystem::SaveLoadRestrictions::Move },
 		{ "dead", SaveSystem::SaveLoadRestrictions::Dead },
 	};

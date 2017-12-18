@@ -275,24 +275,24 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 
 	if (pos->isValid)
 	{
+		/* Forcing stance loading on by default for now (2.3.0 RC3)
 		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
 		{
-			if (pos->stance == Crouch)
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags |= PMF_DUCKED;
-			}
-			else if (pos->stance == Prone)
-			{
-				client->ps.eFlags |= EF_PRONE;
-				SetClientViewAngle(ent, pos->vangles);
-			}
-			else
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags &= ~PMF_DUCKED;
-
-			}
+		*/
+		if (pos->stance == Crouch)
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags |= PMF_DUCKED;
+		}
+		else if (pos->stance == Prone)
+		{
+			client->ps.eFlags |= EF_PRONE;
+			SetClientViewAngle(ent, pos->vangles);
+		}
+		else
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags &= ~PMF_DUCKED;
 		}
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
@@ -419,24 +419,24 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 
 	if (pos->isValid)
 	{
+		/* Forcing stance loading on by default for now (2.3.0 RC3)
 		if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Stance))
 		{
-			if (pos->stance == Crouch)
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags |= PMF_DUCKED;
-			}
-			else if (pos->stance == Prone)
-			{
-				client->ps.eFlags |= EF_PRONE;
-				SetClientViewAngle(ent, pos->vangles);
-			}
-			else
-			{
-				client->ps.eFlags &= ~EF_PRONE;
-				client->ps.pm_flags &= ~PMF_DUCKED;
-
-			}
+		*/
+		if (pos->stance == Crouch)
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags |= PMF_DUCKED;
+		}
+		else if (pos->stance == Prone)
+		{
+			client->ps.eFlags |= EF_PRONE;
+			SetClientViewAngle(ent, pos->vangles);
+		}
+		else
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.pm_flags &= ~PMF_DUCKED;
 		}
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
