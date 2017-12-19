@@ -48,6 +48,15 @@
     <ClCompile Include="..\game\etj_deathrun_system.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\cgame\etj_utilities.cpp">
+      <Filter>Source Files\cgame</Filter>
+    </ClCompile>
+    <ClCompile Include="color_string_parser_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\q_math.cpp">
+      <Filter>Source Files\cgame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vector_compare.h">

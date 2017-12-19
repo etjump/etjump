@@ -1,9 +1,25 @@
 #include <string>
 #include <boost/format.hpp>
-
 #include "cg_local.h"
-
 #include "etj_timerun_view.h"
+#include "etj_utilities.h"
+#include "etj_cvar_update_handler.h"
+
+ETJump::TimerunView::TimerunView() : Drawable()
+{
+	for (auto& info : _playersTimerunInformation)
+	{
+		interrupt(info);
+	}
+
+	parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
+	cvarUpdateHandler->subscribe(&etj_runTimerInactiveColor, [&](const vmCvar_t *cvar)
+	{
+		parseColorString(cvar->string, inactiveTimerColor);
+	});
+}
+
+ETJump::TimerunView::~TimerunView() {}
 
 void ETJump::TimerunView::start()
 {
@@ -53,6 +69,7 @@ void ETJump::TimerunView::draw()
 	auto run = currentRun();
 	auto startTime = run->startTime;
 	auto millis = 0;
+	auto color = &colorWhite;
 
 	if (run->running)
 	{
@@ -65,9 +82,8 @@ void ETJump::TimerunView::draw()
 		{
 			millis = 0;
 		}
+		color = &inactiveTimerColor;
 	}
-
-	auto color = &colorWhite;
 	
 	vec4_t incolor;
 	vec4_t ryGreen = { 0.627f, 0.941f, 0.349f, 1.0f };
