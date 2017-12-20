@@ -1279,7 +1279,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1, wea
 		return qfalse;
 	}
 
-	if (team == TEAM_SPECTATOR) {
+	if (oldTeam != TEAM_SPECTATOR) {
 		ETJump::saveSystem->storeTeamQuickDeployPosition(ent, oldTeam);
 	}
 
