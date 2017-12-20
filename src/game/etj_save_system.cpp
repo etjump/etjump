@@ -598,18 +598,36 @@ void ETJump::SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t tea
 	auto pos = &(client->quickDeployPositions[team]);
 
 	storePosition(ent->client, pos);
-}
+} 
 
 void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent, team_t team)
 {
+	auto validPosition = getValidTeamQuickDeployPosition(ent, team);
+	if (validPosition)
+	{
+		teleportPlayer(ent, validPosition);
+	}
+}
+
+void ETJump::SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team)
+{
+	auto validPosition = getValidTeamQuickDeployPosition(ent, team);
+	if (validPosition)
+	{
+		teleportPlayer(ent, validPosition);
+		validPosition->isValid = false;
+	}
+}
+
+ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamQuickDeployPosition(gentity_t *ent, team_t team) {
 	if (!ent || !ent->client)
 	{
-		return;
+		return nullptr;
 	}
 
 	if (team != TEAM_ALLIES && team != TEAM_AXIS)
 	{
-		return;
+		return nullptr;
 	}
 
 	auto client = &_clients[ClientNum(ent)];
@@ -617,10 +635,10 @@ void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent, team_t team
 
 	if (!pos->isValid)
 	{
-		return;
+		return nullptr;
 	}
 
-	teleportPlayer(ent, pos);
+	return pos;
 }
 
 // Saves backup position
