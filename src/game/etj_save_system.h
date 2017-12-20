@@ -105,6 +105,7 @@ namespace ETJump
 
 		void storeTeamQuickDeployPosition(gentity_t *ent, team_t team);
 		void loadTeamQuickDeployPosition(gentity_t *ent, team_t team);
+		void loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team);
 
 	private:
 		// Saves backup position
@@ -115,6 +116,8 @@ namespace ETJump
 
 		// Teleports player to the saved position
 		static void teleportPlayer(gentity_t* ent, SavePosition* pos);
+
+		SavePosition* getValidTeamQuickDeployPosition(gentity_t *ent, team_t team);
 
 		// All clients' save related data
 		Client _clients[MAX_CLIENTS];
