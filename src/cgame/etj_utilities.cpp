@@ -130,7 +130,7 @@ const std::string hashdRegex{ "^#[a-fA-F0-9]+" }; // #ff0000
 void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 {	
 	Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
-	auto token{ boost::algorithm::trim_copy(colorString) };
+	std::string token{ boost::algorithm::trim_copy(colorString) };
 
 	if (std::regex_match(token, std::regex(alphaRegex)))
 	{
