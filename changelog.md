@@ -89,7 +89,7 @@
 * disabled clients ability to rotate z-view
 * added z-rotation check when starting a timerun
 * fireteam and private messages are no longer logged
-* added `etj_autoLoad`. When player goes to spectate, current position is saved. When player joins back to team, the position is automatically loaded.
+* added `etj_autoLoad`. When player joins back to team, the last saved position is automatically loaded.
 * demo sorting in replays menu is now case insensitive
 * adjusted `etj_slickX` default value so it doesn't overlap with OB detector
 * added spawnflag __2048__ to `trigger_multiple`, activates for every client touching the trigger, with per-client wait times
