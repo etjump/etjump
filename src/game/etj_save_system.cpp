@@ -364,7 +364,7 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 
 		if (slot < 1 || slot > MAX_SAVED_POSITIONS)
 		{
-			CPTo(ent, "^7Invalid position.");
+			CPTo(ent, "^7Invalid backup slot.");
 			return;
 		}
 
