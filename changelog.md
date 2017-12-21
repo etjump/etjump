@@ -113,6 +113,12 @@
   * `etj_proneIndicatorY`
 * added `interruptRun` client command to stop an ongoing timerun
 * players now load onto same stance (stand/crouch/prone) as they saved in. Loading to prone additionally forces same viewangles as when saving.
+* added `etj_runtimerInactiveColor` to set run timer color when timerun is not active
+  * this cvar takes value in multiple different color format. Supported formats are:
+    * string (white, black, green etc.)
+    * normalized RGBA (eg. 1.0 0.5 0.75 0.33)
+    * true RGBA (eg. 255 128 191 62). If any value is > 1, true RGBA is used instead of normalized
+    * hex color (eg. #ff80bf, 0xff80bf)
 
 # ETJump 2.2.0
 
