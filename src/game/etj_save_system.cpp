@@ -237,18 +237,18 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 	}
 
 	auto argv = GetArgs();
-	auto position = 0;
+	auto slot = 0;
 	if (argv->size() > 1)
 	{
-		ToInt((*argv)[1], position);
+		ToInt((*argv)[1], slot);
 
-		if (position < 0 || position >= MAX_SAVED_POSITIONS)
+		if (slot < 0 || slot >= MAX_SAVED_POSITIONS)
 		{
-			CPTo(ent, "^7Invalid position.");
+			CPTo(ent, "^7Invalid save slot.");
 			return;
 		}
 
-		if (position > 0 &&
+		if (slot > 0 &&
 			client->sess.timerunActive &&
 			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
@@ -263,40 +263,15 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 		return;
 	}
 
-	SavePosition *pos = nullptr;
-	if (client->sess.sessionTeam == TEAM_ALLIES)
+	auto validSave = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
+	if (validSave)
 	{
-		pos = _clients[ClientNum(ent)].alliesSavedPositions + position;
-	}
-	else
-	{
-		pos = _clients[ClientNum(ent)].axisSavedPositions + position;
-	}
-
-	if (pos->isValid)
-	{
-		if (pos->stance == Crouch)
-		{
-			client->ps.eFlags &= ~EF_PRONE;
-			client->ps.eFlags &= ~EF_PRONE_MOVING;
-			client->ps.pm_flags |= PMF_DUCKED;
-		}
-		else if (pos->stance == Prone)
-		{
-			client->ps.eFlags |= EF_PRONE;
-			SetClientViewAngle(ent, pos->vangles);
-		}
-		else
-		{
-			client->ps.eFlags &= ~EF_PRONE;
-			client->ps.eFlags &= ~EF_PRONE_MOVING;
-			client->ps.pm_flags &= ~PMF_DUCKED;
-		}
+		restoreStanceFromSave(ent, validSave);
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
 			InterruptRun(ent);
 		}
-		teleportPlayer(ent, pos);
+		teleportPlayer(ent, validSave);
 	}
 	else
 	{
@@ -382,20 +357,20 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 	}
 
 	auto argv = GetArgs();
-	auto position = 0;
+	auto slot = 0;
 	if (argv->size() > 1)
 	{
-		ToInt(argv->at(1), position);
+		ToInt(argv->at(1), slot);
 
-		if (position < 1 || position > MAX_SAVED_POSITIONS)
+		if (slot < 1 || slot > MAX_SAVED_POSITIONS)
 		{
-			CPTo(ent, "^7Invalid position.");
+			CPTo(ent, "^7Invalid backup slot.");
 			return;
 		}
 
-		if (position > 0)
+		if (slot > 0)
 		{
-			position--;
+			slot--;
 		}
 	}
 
@@ -408,32 +383,16 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 	SavePosition *pos = nullptr;
 	if (client->sess.sessionTeam == TEAM_ALLIES)
 	{
-		pos = &_clients[ClientNum(ent)].alliesBackupPositions[position];
+		pos = &_clients[ClientNum(ent)].alliesBackupPositions[slot];
 	}
 	else
 	{
-		pos = &_clients[ClientNum(ent)].axisBackupPositions[position];
+		pos = &_clients[ClientNum(ent)].axisBackupPositions[slot];
 	}
 
 	if (pos->isValid)
 	{
-		if (pos->stance == Crouch)
-		{
-			client->ps.eFlags &= ~EF_PRONE;
-			client->ps.eFlags &= ~EF_PRONE_MOVING;
-			client->ps.pm_flags |= PMF_DUCKED;
-		}
-		else if (pos->stance == Prone)
-		{
-			client->ps.eFlags |= EF_PRONE;
-			SetClientViewAngle(ent, pos->vangles);
-		}
-		else
-		{
-			client->ps.eFlags &= ~EF_PRONE;
-			client->ps.eFlags &= ~EF_PRONE_MOVING;
-			client->ps.pm_flags &= ~PMF_DUCKED;
-		}
+		restoreStanceFromSave(ent, pos);
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
 			InterruptRun(ent);
@@ -588,42 +547,69 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 
 void ETJump::SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team)
 {
-	if (!ent || !ent->client)
+	auto lastValidSave = getValidTeamSaveForSlot(ent, team, 0);
+	if (lastValidSave)
 	{
-		return;
+		auto client = &_clients[ClientNum(ent)];
+		auto autoSave = &(client->quickDeployPositions[team]);
+		*autoSave = *lastValidSave;
 	}
-
-	if (team != TEAM_ALLIES && team != TEAM_AXIS)
-	{
-		return;
-	}
-
-	auto client = &_clients[ClientNum(ent)];
-	auto pos = &(client->quickDeployPositions[team]);
-
-	storePosition(ent->client, pos);
 } 
 
 void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent, team_t team)
 {
-	auto validPosition = getValidTeamQuickDeployPosition(ent, team);
-	if (validPosition)
+	auto validSave = getValidTeamQuickDeploySave(ent, team);
+	if (validSave)
 	{
-		teleportPlayer(ent, validPosition);
+		restoreStanceFromSave(ent, validSave);
+		teleportPlayer(ent, validSave);
 	}
 }
 
 void ETJump::SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team)
 {
-	auto validPosition = getValidTeamQuickDeployPosition(ent, team);
-	if (validPosition)
+	auto validSave = getValidTeamQuickDeploySave(ent, team);
+	if (validSave)
 	{
-		teleportPlayer(ent, validPosition);
-		validPosition->isValid = false;
+		restoreStanceFromSave(ent, validSave);
+		teleportPlayer(ent, validSave);
+		validSave->isValid = false;
 	}
 }
 
-ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamQuickDeployPosition(gentity_t *ent, team_t team) {
+ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamSaveForSlot(gentity_t *ent, team_t team, int slot)
+{
+	if (!ent || !ent->client)
+	{
+		return nullptr;
+	}
+
+	if (team != TEAM_ALLIES && team != TEAM_AXIS)
+	{
+		return nullptr;
+	}
+
+	auto client = &_clients[ClientNum(ent)];
+	SavePosition *pos = nullptr;
+	if (team == TEAM_ALLIES)
+	{
+		pos = &client->alliesSavedPositions[slot];
+	}
+	else
+	{
+		pos = &client->axisSavedPositions[slot];
+	}
+
+	if (!pos->isValid)
+	{
+		return nullptr;
+	}
+
+	return pos;
+}
+
+ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team)
+{
 	if (!ent || !ent->client)
 	{
 		return nullptr;
@@ -643,6 +629,33 @@ ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamQuickDeployPos
 	}
 
 	return pos;
+}
+
+void ETJump::SaveSystem::restoreStanceFromSave(gentity_t *ent, SavePosition *pos)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	auto client = ent->client;
+	if (pos->stance == Crouch)
+	{
+		client->ps.eFlags &= ~EF_PRONE;
+		client->ps.eFlags &= ~EF_PRONE_MOVING;
+		client->ps.pm_flags |= PMF_DUCKED;
+	}
+	else if (pos->stance == Prone)
+	{
+		client->ps.eFlags |= EF_PRONE;
+		SetClientViewAngle(ent, pos->vangles);
+	}
+	else
+	{
+		client->ps.eFlags &= ~EF_PRONE;
+		client->ps.eFlags &= ~EF_PRONE_MOVING;
+		client->ps.pm_flags &= ~PMF_DUCKED;
+	}
 }
 
 // Saves backup position

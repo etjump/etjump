@@ -117,7 +117,11 @@ namespace ETJump
 		// Teleports player to the saved position
 		static void teleportPlayer(gentity_t* ent, SavePosition* pos);
 
-		SavePosition* getValidTeamQuickDeployPosition(gentity_t *ent, team_t team);
+		SavePosition* getValidTeamQuickDeploySave(gentity_t *ent, team_t team);
+
+		void restoreStanceFromSave(gentity_t *ent, SavePosition *pos);
+
+		SavePosition* getValidTeamSaveForSlot(gentity_t *ent, team_t team, int slot);
 
 		// All clients' save related data
 		Client _clients[MAX_CLIENTS];
