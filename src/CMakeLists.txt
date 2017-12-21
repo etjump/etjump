@@ -9,8 +9,8 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 
 # Set the used compiler
-set(CMAKE_C_COMPILER gcc-4.8)
-set(CMAKE_CXX_COMPILER g++-4.8)
+set(CMAKE_C_COMPILER gcc-4.9)
+set(CMAKE_CXX_COMPILER g++-4.9)
 
 set(ARCH "i386")
 
