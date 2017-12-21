@@ -119,6 +119,7 @@
     * normalized RGBA (eg. 1.0 0.5 0.75 0.33)
     * true RGBA (eg. 255 128 191 62). If any value is > 1, true RGBA is used instead of normalized
     * hex color (eg. #ff80bf, 0xff80bf)
+* added `tracker_not_eq` key to target/trigger_tracker
 
 # ETJump 2.2.0
 
