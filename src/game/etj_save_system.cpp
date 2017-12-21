@@ -638,20 +638,23 @@ void ETJump::SaveSystem::restoreStanceFromSave(gentity_t *ent, SavePosition *pos
 		return;
 	}
 
+	auto client = ent->client;
 	if (pos->stance == Crouch)
 	{
-		ent->client->ps.eFlags &= ~EF_PRONE;
-		ent->client->ps.pm_flags |= PMF_DUCKED;
+		client->ps.eFlags &= ~EF_PRONE;
+		client->ps.eFlags &= ~EF_PRONE_MOVING;
+		client->ps.pm_flags |= PMF_DUCKED;
 	}
 	else if (pos->stance == Prone)
 	{
-		ent->client->ps.eFlags |= EF_PRONE;
+		client->ps.eFlags |= EF_PRONE;
 		SetClientViewAngle(ent, pos->vangles);
 	}
 	else
 	{
-		ent->client->ps.eFlags &= ~EF_PRONE;
-		ent->client->ps.pm_flags &= ~PMF_DUCKED;
+		client->ps.eFlags &= ~EF_PRONE;
+		client->ps.eFlags &= ~EF_PRONE_MOVING;
+		client->ps.pm_flags &= ~PMF_DUCKED;
 	}
 }
 
