@@ -116,7 +116,7 @@ void PrintManual(gentity_t *ent, const std::string& command)
 	if (ent)
 	{
 		ChatPrintTo(ent, va("^3%s: ^7check console for more information.", command.c_str()));
-		trap_SendServerCommand(ent->client->ps.clientNum, va("manual %s", command.c_str()));
+		trap_SendServerCommand(ClientNum(ent), va("manual %s", command.c_str()));
 	}
 	else
 	{
