@@ -61,12 +61,14 @@ const ETJump::PlayerTimerunInformation* ETJump::TimerunView::currentRun() const
 
 void ETJump::TimerunView::draw()
 {
-	if (player_drawRunTimer.integer == 0 || !cg.hasTimerun)
+	auto run = currentRun();
+
+	auto hasTimerun = (cg.demoPlayback && run->running) || cg.hasTimerun;
+	if (player_drawRunTimer.integer == 0 || !hasTimerun)
 	{
 		return;
 	}
 
-	auto run = currentRun();
 	auto startTime = run->startTime;
 	auto millis = 0;
 	auto color = &colorWhite;
