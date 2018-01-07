@@ -2559,6 +2559,9 @@ extern vmCvar_t etj_wolfFog;
 extern vmCvar_t etj_zFar;
 extern vmCvar_t etj_offsetFactor;
 extern vmCvar_t etj_offsetUnits;
+extern vmCvar_t etj_speeds;
+extern vmCvar_t etj_lightmap;
+extern vmCvar_t etj_drawNotify;
 
 extern vmCvar_t etj_consoleAlpha;
 extern vmCvar_t etj_drawLeaves;

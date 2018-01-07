@@ -504,6 +504,9 @@ vmCvar_t etj_wolfFog;
 vmCvar_t etj_zFar;
 vmCvar_t etj_offsetFactor;
 vmCvar_t etj_offsetUnits;
+vmCvar_t etj_speeds;
+vmCvar_t etj_lightmap;
+vmCvar_t etj_drawNotify;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_drawLeaves;
@@ -854,6 +857,9 @@ cvarTable_t cvarTable[] =
 	{ &etj_viewlog, "etj_viewlog", "1", CVAR_ARCHIVE },
 	{ &etj_offsetFactor, "etj_offsetFactor", "-1", CVAR_ARCHIVE },
 	{ &etj_offsetUnits, "etj_offsetUnits", "-2", CVAR_ARCHIVE },
+	{ &etj_speeds, "etj_speeds", "0", CVAR_ARCHIVE },
+	{ &etj_lightmap, "etj_lightmap", "0", CVAR_ARCHIVE },
+	{ &etj_drawNotify, "etj_drawNotify", "0", CVAR_ARCHIVE },
 	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
@@ -910,7 +916,10 @@ void CG_RegisterCvars(void)
 		{ &etj_zFar, "r_zfar" },
 		{ &etj_viewlog, "viewlog" },
 		{ &etj_offsetFactor, "r_offsetFactor" },
-		{ &etj_offsetUnits, "r_offsetUnits" }
+		{ &etj_offsetUnits, "r_offsetUnits" },
+		{ &etj_speeds, "r_speeds" },
+		{ &etj_lightmap, "r_lightmap" },
+		{ &etj_drawNotify, "con_drawNotify" },
 	};
 
 	for (auto &shadow : cvars)
