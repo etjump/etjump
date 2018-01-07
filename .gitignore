@@ -9,6 +9,7 @@
 *.suo
 *.opendb
 *.VC.db
+*.vs
 
 #################
 ## Eclipse
