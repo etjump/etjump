@@ -55,6 +55,9 @@
   * `etj_viewLog` -> `viewlog` (reimplemented)
   * `etj_offsetFactor` -> `r_offsetFactor`
   * `etj_offsetUnits` -> `r_offsetUnits`
+  * `etj_speeds` -> `r_speeds`
+  * `etj_lightmap` -> `r_lightmap`
+  * `etj_drawNotify` -> `con_drawNotify` (note that `con_notifyTime` is not cheat protected by default)
 * fixed remapped shaders were remaining from previous maps
 * added trigger_push support for client predicted push events
 * added `etj_touchPickupWeapons` to pickup weapons by touching them:
