@@ -358,6 +358,7 @@
     <ClInclude Include="etj_deathrun_system.h" />
     <ClInclude Include="etj_messages.h" />
     <ClInclude Include="etj_file.h" />
+    <ClInclude Include="etj_numeric_utilities.h" />
     <ClInclude Include="etj_server_event_handler.h" />
     <ClInclude Include="etj_task.h" />
     <ClInclude Include="etj_level.h" />

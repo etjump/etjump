@@ -26,6 +26,14 @@ std::future<std::vector<ETJump::User>> ETJump::UserService::findUsersByName(cons
 	});
 }
 
+std::future<std::vector<ETJump::User>> ETJump::UserService::listUsers(int page, int rows)
+{
+    return std::async(std::launch::async, [=]()
+    {
+        return _userRepository->listUsers(page, rows);
+    });
+}
+
 std::future<ETJump::User> ETJump::UserService::getUser(const std::string& guid)
 {
 	return std::async(std::launch::async, [=]()

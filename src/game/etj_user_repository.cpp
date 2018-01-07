@@ -3,6 +3,7 @@
 #include <SQLiteCpp/Transaction.h>
 #include <boost/algorithm/string/join.hpp>
 #include "etj_log.h"
+#include "etj_numeric_utilities.h"
 
 
 ETJump::UserRepository::UserRepository::UserRepository(const std::string& databaseFile, int timeout)
@@ -510,6 +511,82 @@ std::vector<ETJump::User> ETJump::UserRepository::findByName(const std::string& 
 	}
 	
 	return users;
+}
+
+std::vector<ETJump::User> ETJump::UserRepository::listUsers(int page, int rows)
+{
+    try
+    {
+        SQLite::Database db(_databaseFile, SQLite::OPEN_READWRITE, _timeout);
+        SQLite::Statement countStatement(db,
+            "SELECT"
+            "  COUNT(*)"
+            "FROM users"
+        );
+
+        long count = 0;
+        if (countStatement.executeStep())
+        {
+            count = countStatement.getColumn(0);
+        }
+        page = Numeric::clamp(page, 0, std::floor(count / rows));
+        rows = Numeric::clamp(rows, 0, count);
+
+        SQLite::Statement queryStatement(db,
+            "SELECT "
+            "  id, "
+            "  guid, "
+            "  level, "
+            "  created, "
+            "  modified, "
+            "  lastSeen, "
+            "  name, "
+            "  title, "
+            "  commands, "
+            "  greeting "
+            "FROM users "
+            "ORDER BY id "
+            "  ASC "
+            "LIMIT ? OFFSET ? ");
+
+        queryStatement.bind(1, rows);
+        queryStatement.bind(2, page * rows);
+
+        std::vector<User> users;
+        while (queryStatement.executeStep())
+        {
+            int column = 0;
+            const int id = queryStatement.getColumn(column++);
+            const char *guid = queryStatement.getColumn(column++);
+            const int level = queryStatement.getColumn(column++);
+            const long created = queryStatement.getColumn(column++);
+            const long modified = queryStatement.getColumn(column++);
+            const long lastSeen = queryStatement.getColumn(column++);
+            const char *name = queryStatement.getColumn(column++);
+            const char *title = queryStatement.getColumn(column++);
+            const char *commands = queryStatement.getColumn(column++);
+            const char *greeting = queryStatement.getColumn(column++);
+            User user;
+            user.id = id;
+            user.guid = guid;
+            user.level = level;
+            user.created = created;
+            user.modified = modified;
+            user.lastSeen = lastSeen;
+            user.name = name;
+            user.title = title ? title : "";
+            user.commands = commands ? commands : "";
+            user.greeting = greeting ? greeting : "";
+            users.push_back(user);
+        }
+
+        return users;
+    }
+    catch (const SQLite::Exception& e)
+    {
+        _log.errorLn("Listing users failed. Page: %d, rows: %d, reason: (%d) %s", page, rows, e.getErrorCode(), e.getErrorStr());
+        return std::vector<User>();
+    }
 }
 
 void ETJump::UserRepository::addIpAddress(int64_t id, const std::string& ipAddress)

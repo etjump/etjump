@@ -10,6 +10,7 @@
 *.opendb
 *.VC.db
 *.vs
+*.TMP
 
 #################
 ## Eclipse

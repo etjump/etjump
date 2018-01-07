@@ -460,5 +460,8 @@
     <ClInclude Include="etj_task_synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_numeric_utilities.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

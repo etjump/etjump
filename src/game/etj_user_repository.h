@@ -38,6 +38,7 @@ namespace ETJump
 		int setLevelIfHasLevel(int level, int newLevel);
 		// thread safe
 		std::vector<User> findByName(const std::string& name);
+	    std::vector<User> listUsers(int page, int rows);
 	private:
 		std::string _databaseFile;
 		int _timeout;

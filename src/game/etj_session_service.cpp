@@ -689,6 +689,28 @@ void ETJump::SessionService::listUsersByName(int clientNum, const std::string& n
 	_tasks.push_back(std::unique_ptr<Task<std::vector<User>>>(task));
 }
 
+void ETJump::SessionService::listUsers(int clientNum, const int page, const int rows)
+{
+    const auto task = new Task<std::vector<User>>(_userService->listUsers(page, rows), [clientNum](std::vector<User> users)
+    {
+        Utilities::ResultSetFormatter rsf;
+        std::vector<Utilities::ResultSetFormatter::Row> rows;
+        auto count = 0;
+        for (const auto & u : users)
+        {
+            Utilities::ResultSetFormatter::Row row;
+            row["ID"] = std::to_string(u.id);
+            row["Level"] = std::to_string(u.level);
+            row["Last seen"] = ETJump::Duration::fromNow(u.lastSeen);
+            row["Name"] = u.name + "^7";
+            rows.push_back(row);
+        }
+        Printer::sendChatMessage(clientNum, Info::CheckConsoleForInfo);
+        Printer::sendConsoleMessage(clientNum, rsf.toString({ "ID", "Level", "Last seen", "Name" }, rows, users.size(), 0));
+    });
+    _tasks.push_back(std::unique_ptr<Task<std::vector<User>>>(task));
+}
+
 std::vector<int> ETJump::SessionService::findUsersByName(const std::string& partial)
 {
 	try

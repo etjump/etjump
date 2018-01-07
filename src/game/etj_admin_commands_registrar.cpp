@@ -51,7 +51,10 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 	/**
 	* ban
 	*/
-	_adminCommandsHandler->subscribe('b', createCommandDefinition("ban", "ban", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command) {});
+	_adminCommandsHandler->subscribe('b', createCommandDefinition("ban", "ban", {}), [&](int clientNum, const std::string& commandText, const ETJump::CommandParser::Command& command)
+	{
+	    
+	});
 
 	/**
 	* cancelvote
@@ -327,10 +330,7 @@ void ETJump::AdminCommandsRegistrar::registerAdminCommands()
 		const auto page = command.options.at("page").integer;
 		const auto rows = getOptionalInteger(command, "rows", DEFAULT_ROW_COUNT);
 
-		_userService->listUsers(page, rows, [clientNum, commandText]()
-		{
-			
-		});
+        _sessionService->listUsers(clientNum, page, rows);
 	});
 
 	/**

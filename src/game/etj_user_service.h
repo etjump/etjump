@@ -22,6 +22,7 @@ namespace ETJump
 		std::future<void> updateLastSeen(int64_t id, time_t lastSeen);
 		std::future<int> setLevelIfHasLevel(int level, int newLevel);
 		std::future<std::vector<User>> findUsersByName(const std::string& name);
+        std::future<std::vector<User>> listUsers(int page, int rows);
 	private:
 		std::shared_ptr<UserRepository> _userRepository;
 	};

@@ -92,7 +92,8 @@ namespace ETJump
 		void setLevelById(int clientNum, int id, int level);
 		void addAlias(int clientNum, const std::string& alias);
 		void listUsersByName(int clientNum, const std::string& name);
-		static std::string getName(int clientNum);
+	    void listUsers(int clientNum, const int page, const int rows);
+	    static std::string getName(int clientNum);
 		static std::vector<std::string> getNames(const std::vector<int>& clientNums);
 		std::vector<int> findUsersByName(const std::string& name);
 		void dropClient(int clientNum, const std::string& reason, int seconds = 180);
