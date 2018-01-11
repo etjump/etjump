@@ -3851,7 +3851,7 @@ namespace ETJump
 		{
 			if (cg.time > cg.pronePressTime)
 			{
-				CG_CenterPrint("You cannot prone inside this area.", SCREEN_HEIGHT - 88, SMALLCHAR_WIDTH);
+				CG_CenterPrint("^7You cannot ^3prone ^7inside this area.", SCREEN_HEIGHT - 88, SMALLCHAR_WIDTH);
 				cg.pronePressTime = cg.time + 1000;
 			}
 		}
@@ -4007,8 +4007,13 @@ static void CG_DrawProneIndicator(void)
 static void CG_DrawPronePrint(void)
 {
 	trace_t trace;
-
 	playerState_t *ps = ETJump::getValidPlayerState();
+
+	if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
+	{
+		return;
+	}
+
 	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOPRONE);
 
 	if (shared.integer & BG_LEVEL_NO_PRONE)
