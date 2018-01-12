@@ -2647,7 +2647,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	if (level.time - ent->client->lastVoteTime < 1000 * g_voteCooldown.integer)
 	{
-		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again.\"",
+		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again.\n\"",
 			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000)));
 		return;
 	}
