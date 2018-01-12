@@ -992,30 +992,39 @@ void Cmd_Notarget_f(gentity_t *ent)
 	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", msg));
 }
 
+void capitalizeWithColor(std::string &str)
+{
+	if (str.length() > 0)
+	{
+		unsigned char index = str[0] == '^' ? 2 : 0;
+		str[index] = toupper(str[index]);
+	}
+}
+
 namespace ETJump
 {
 	OperationResult canNoclip(gentity_t *ent)
 	{
 		if (!ent || !ent->client)
 		{
-			return{ false, "Non-player entities cannot use %s." };
+			return{ false, "^7Non-player entities cannot use ^3%s^7.\n" };
 		}
 
 		if (ent->client->sess.timerunActive == qtrue)
 		{
-			return{ false, "Cannot use %s while timer is running." };
+			return{ false, "^7Cannot use ^3%s ^7while timer is running.\n" };
 		}
 
 		if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
 		{
-			return{ false, "Cannot use %s while death run is active." };
+			return{ false, "^7Cannot use ^3%s ^7while death run is active.\n" };
 		}
 
 		if (!g_cheats.integer || g_dedicated.integer > 0)
 		{
 			if (level.noNoclip)
 			{
-				return{ false, "%s has been disabled on this map." };
+				return{ false, "^3%s ^7has been disabled on this map.\n" };
 			}
 
 			if (ent->client->pers.noclipCount == 0 &&
@@ -1023,7 +1032,7 @@ namespace ETJump
 			{
 				if (!g_noclip.integer && !CheatsOk(ent))
 				{
-					return{ false, "You can no longer use %s." };
+					return{ false, "^7You can no longer use ^3%s^7.\n" };
 				}
 			}
 		}
@@ -1041,7 +1050,7 @@ namespace ETJump
 		if (ent->client->pers.noclipCount > 0)
 		{
 			--ent->client->pers.noclipCount;
-			Printer::SendCenterMessage(ClientNum(ent), (boost::format("^7You may use %s ^2%d^7 more times.") % action % ent->client->pers.noclipCount).str());
+			Printer::SendCenterMessage(ClientNum(ent), (boost::format("^7You may use ^3%s ^2%d^7 more times.\n") % action % ent->client->pers.noclipCount).str());
 		}
 	}
 
@@ -1051,11 +1060,20 @@ namespace ETJump
 	{
 		static char buffer[64];
 		auto clientNum = ClientNum(ent);
+
+		if (trap_Argc() != 4)
+		{
+			Printer::SendConsoleMessage(clientNum, "^3Usage: ^7setoffset x y z\nChanges your position into the direction of X Y Z vector.\n");
+			return;
+		}
+
 		auto result = canNoclip(ent);
 
 		if (!result.success)
 		{
-			Printer::SendConsoleMessage(clientNum, (boost::format(result.message) % "setoffset").str());
+			std::string str = (boost::format(result.message) % "setoffset").str();
+			capitalizeWithColor(str);
+			Printer::SendConsoleMessage(clientNum, str);
 			return;
 		}
 
@@ -1064,12 +1082,6 @@ namespace ETJump
 		VectorCopy(ent->client->ps.origin, origin);
 		VectorCopy(ent->client->ps.viewangles, angles);
 	
-		if (trap_Argc() != 4)
-		{
-			Printer::SendConsoleMessage(clientNum,"^3usage: ^7setoffset x y z\nchanges your position into the direction of X Y Z vector\n");
-			return;
-		}
-
 		decreaseNoclipCount(ent, "setoffset");
 
 		for (auto i = 0; i < 3; i++)
@@ -1123,7 +1135,9 @@ void Cmd_Noclip_f(gentity_t *ent)
 
 	if (!result.success)
 	{
-		Printer::SendCenterMessage(clientNum, (boost::format(result.message) % "Noclip").str());
+		std::string str = (boost::format(result.message) % "noclip").str();
+		capitalizeWithColor(str);
+		Printer::SendCenterMessage(clientNum, str);
 		return;
 	}
 
