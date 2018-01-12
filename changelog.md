@@ -124,6 +124,7 @@
     * hex color (eg. #ff80bf, 0xff80bf)
 * added `tracker_not_eq` key to target/trigger_tracker
 * fixed runtimer is not displayed in demo playback
+* fixed capitalization in noclip prints + colored it yellow
 
 # ETJump 2.2.0
 
