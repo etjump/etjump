@@ -156,6 +156,29 @@ void Timerun::startTimer(const std::string &runName, int clientNum, const std::s
 	Utilities::startRun(clientNum);
 }
 
+void Timerun::startTimerDebug(const std::string &runName, int clientNum, int raceStartTime)
+{
+	auto player = _players[clientNum].get();
+
+	if (player == nullptr)
+	{
+		return;
+	}
+
+	if (player->racingDebug)
+	{
+		return;
+	}
+
+	player->racingDebug = true;
+	player->runStartTime = raceStartTime;
+	player->completionTime = 0;
+	player->currentRunName = runName;
+	startNotify(clientNum);
+
+	Utilities::startRunDebug(clientNum);
+}
+
 void Timerun::connectNotify(int clientNum)
 {
 	for (int idx = 0; idx < 64; ++idx)
@@ -218,6 +241,7 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		checkRecord(player, clientNum);
 
 		player->racing = false;
+		player->racingDebug = false;	// Failsafe in case g_debugTimeruns is toggled mid-run
 
 		Printer::SendCommand(clientNum, (boost::format("timerun_stop %d %s")
 		                                 % millis
@@ -229,6 +253,29 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		                                  % player->currentRunName).str());
 
 		Printer::SendCommandToAll((boost::format("timerun stop %d %d %s") % clientNum % millis % player->currentRunName).str());
+
+		player->currentRunName = "";
+		Utilities::stopRun(clientNum);
+	}
+}
+
+void Timerun::stopTimerDebug(int clientNum, int commandTime, std::string runName)
+{
+	Player *player = _players[clientNum].get();
+
+	if (player == nullptr)
+	{
+		return;
+	}
+
+	if (player->racingDebug && player->currentRunName == runName)
+	{
+		player->racingDebug = false;
+		player->racing = false;		// Failsafe in case g_debugTimeruns is toggled mid-run
+
+		Printer::SendCommand(clientNum, "timerun_interrupt");
+		Printer::SendCommand(clientNum, "timerun interrupt");
+		Printer::SendChatMessage(clientNum, "Record not saved, debugging enabled!");
 
 		player->currentRunName = "";
 		Utilities::stopRun(clientNum);
@@ -361,6 +408,7 @@ void Timerun::interrupt(int clientNum)
 	}
 
 	player->racing         = false;
+	player->racingDebug    = false;
 	player->currentRunName = "";
 
 	Utilities::stopRun(clientNum);

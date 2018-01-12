@@ -755,15 +755,21 @@ void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 	if (activator && activator->client)
 	{
 		// spawnflags 8: only fires targets if the activating player is currently timerunning
-		if (self->spawnflags & 8 && !activator->client->sess.timerunActive)
+		if (self->spawnflags & 8)
 		{
-			return;
+			if (!activator->client->sess.timerunActive && !activator->client->sess.timerunActiveDebug)
+			{
+				return;
+			}
 		}
 
 		// spawnflags 16: only fires targets if the activating player is currently NOT timerunning
-		if (self->spawnflags & 16 && activator->client->sess.timerunActive)
+		if (self->spawnflags & 16)
 		{
-			return;
+			if (activator->client->sess.timerunActive || activator->client->sess.timerunActiveDebug)
+			{
+				return;
+			}
 		}
 	}
 
@@ -2061,6 +2067,12 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		}
 	}
 
+	if (g_debugTimeruns.integer)
+	{
+		StartTimerDebug(level.timerunNames[self->runIndex], activator);
+		return;
+	}
+	
 	StartTimer(level.timerunNames[self->runIndex], activator);
 }
 
@@ -2124,6 +2136,12 @@ void target_endTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator
 
 	if (activator->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
+		return;
+	}
+
+	if (activator->client->sess.timerunActiveDebug)
+	{
+		StopTimerDebug(level.timerunNames[self->runIndex], activator);
 		return;
 	}
 

@@ -768,6 +768,7 @@ typedef struct
 	int runSpawnflags;
 
 	qboolean timerunActive;
+	qboolean timerunActiveDebug;
 	qboolean receivedTimerunStates;
 
 	// new implementation of progression
@@ -2032,6 +2033,7 @@ extern vmCvar_t g_customVoiceChat;
 
 extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
+extern vmCvar_t g_debugTimeruns;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);
@@ -2742,7 +2744,9 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 #define TIMERUN_DISABLE_SAVE                   0x80
 
 void StartTimer(const char *runName, gentity_t *ent);
+void StartTimerDebug(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);
+void StopTimerDebug(const char *runName, gentity_t *ent);
 void TimerunConnectNotify(gentity_t *ent);
 
 void InterruptRun(gentity_t *ent);

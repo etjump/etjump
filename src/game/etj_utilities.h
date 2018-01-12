@@ -24,6 +24,13 @@ public:
 	static void startRun(int clientNum);
 
 	/**
+	* Starts timerun without restrictions, for debugging purposes.
+	* @param clientNum the client
+	* TODO: Should create a Game-object that handles these
+	*/
+	static void startRunDebug(int clientNum);
+
+	/**
 	 * Enables all cheats for player.
 	 * @param clientNum the player
 	 */

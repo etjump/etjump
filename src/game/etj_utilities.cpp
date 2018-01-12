@@ -126,11 +126,19 @@ void Utilities::startRun(int clientNum)
 	ClearPortals(player);
 }
 
+void Utilities::startRunDebug(int clientNum)
+{
+	gentity_t *player = g_entities + clientNum;
+
+	player->client->sess.timerunActiveDebug = qtrue;
+}
+
 void Utilities::stopRun(int clientNum)
 {
 	gentity_t *player = g_entities + clientNum;
 
 	player->client->sess.timerunActive = qfalse;
+	player->client->sess.timerunActiveDebug = qfalse;
 }
 
 namespace UtilityHelperFunctions

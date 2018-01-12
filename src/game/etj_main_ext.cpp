@@ -351,9 +351,17 @@ void StartTimer(const char *runName, gentity_t *ent)
 {
 	game.timerun->startTimer(runName, ClientNum(ent), ent->client->pers.netname, ent->client->ps.commandTime);
 }
+void StartTimerDebug(const char *runName, gentity_t *ent)
+{
+	game.timerun->startTimerDebug(runName, ClientNum(ent), ent->client->ps.commandTime);
+}
 void StopTimer(const char *runName, gentity_t *ent)
 {
 	game.timerun->stopTimer(ClientNum(ent), ent->client->ps.commandTime, runName);
+}
+void StopTimerDebug(const char *runName, gentity_t *ent)
+{
+	game.timerun->stopTimerDebug(ClientNum(ent), ent->client->ps.commandTime, runName);
 }
 void TimerunConnectNotify(gentity_t *ent)
 {
