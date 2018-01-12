@@ -884,6 +884,12 @@ static void CG_DrawUpperRight(void)
 #define CHATLOC_Y 478
 #define CHATLOC_TEXT_X (CHATLOC_X + 0.25f * TINYCHAR_WIDTH)
 
+// Calculate chat background width based on etj_chatWidth value
+float calcBackgroundWidth(int maxChars, float fontScale, fontInfo_t *font)
+{
+	return maxChars * fontScale * font->glyphScale * font->glyphs[0].xSkip;
+}
+
 /*
 =================
 CG_DrawTeamInfo
@@ -899,7 +905,7 @@ static void CG_DrawTeamInfo(void)
 	float     lineHeight = 9.f;
 	qhandle_t flag;
 
-	int chatWidth = 640 - CHATLOC_X - 100;
+	int chatWidth = calcBackgroundWidth(etj_chatWidth.integer, 0.2f, &cgs.media.limboFont2) + 5;
 
 	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
 	{

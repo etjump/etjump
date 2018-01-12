@@ -839,8 +839,8 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 	char *p, *ls;
 	int  lastcolor;
 	int  chatHeight;
-	int  chatWidth = TEAMCHAT_WIDTH - 8;
-
+	int  chatWidth;
+	
 	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
 	{
 		chatHeight = cg_teamChatHeight.integer;
@@ -848,6 +848,20 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 	else
 	{
 		chatHeight = TEAMCHAT_HEIGHT;
+	}
+
+	if (etj_chatWidth.integer < 1)
+	{
+		etj_chatWidth.integer = 1;
+	}
+
+	if (etj_chatWidth.integer < (TEAMCHAT_WIDTH - 8))
+	{
+		chatWidth = etj_chatWidth.integer;
+	}
+	else
+	{
+		chatWidth = TEAMCHAT_WIDTH - 8;
 	}
 
 	if (chatHeight <= 0 || cg_teamChatTime.integer <= 0)
