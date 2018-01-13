@@ -128,6 +128,7 @@
 * added `etj_chatLineWidth` to control chat width
   * value indicates characters before line break
   * valid range is 1-200
+* increased chat max height to 53
 
 # ETJump 2.2.0
 
