@@ -57,7 +57,7 @@
 #define TEXT_ICON_SPACE     4
 
 #define TEAMCHAT_WIDTH      200
-#define TEAMCHAT_HEIGHT     14
+#define TEAMCHAT_HEIGHT     53
 
 #define NOTIFY_WIDTH        80
 #define NOTIFY_HEIGHT       5
