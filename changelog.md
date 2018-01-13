@@ -125,9 +125,9 @@
 * added `tracker_not_eq` key to target/trigger_tracker
 * fixed runtimer is not displayed in demo playback
 * fixed capitalization in noclip prints + colored it yellow
-* added `etj_chatWidth` to control chat width
+* added `etj_chatLineWidth` to control chat width
   * value indicates characters before line break
-  * valid range is 1-140
+  * valid range is 1-200
 
 # ETJump 2.2.0
 

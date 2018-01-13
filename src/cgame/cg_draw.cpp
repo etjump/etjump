@@ -900,21 +900,12 @@ static void CG_DrawTeamInfo(void)
 	int       w, h;
 	int       i, len;
 	vec4_t    hcolor;
-	int       chatHeight;
 	float     alphapercent, chatbgalpha;
 	float     lineHeight = 9.f;
 	qhandle_t flag;
-
-	int chatWidth = calcBackgroundWidth(etj_chatWidth.integer, 0.2f, &cgs.media.limboFont2) + 5;
-
-	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
-	{
-		chatHeight = cg_teamChatHeight.integer;
-	}
-	else
-	{
-		chatHeight = TEAMCHAT_HEIGHT;
-	}
+	int maxLineLength = min(max(etj_chatLineWidth.integer, 1), TEAMCHAT_WIDTH);
+	int chatWidth = calcBackgroundWidth(maxLineLength, 0.2f, &cgs.media.limboFont2) + 5;
+	int chatHeight = min(max(cg_teamChatHeight.integer, 0), TEAMCHAT_HEIGHT);
 
 	if (chatHeight <= 0)
 	{

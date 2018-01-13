@@ -6,6 +6,7 @@
 #include "cg_mainext.h"
 #include <vector>
 #include "etj_client_commands_handler.h"
+#include <algorithm>
 
 #define SCOREPARSE_COUNT    9
 
@@ -835,34 +836,11 @@ CG_AddToTeamChat
 */
 static void CG_AddToTeamChat(const char *str, int clientnum)
 {
-	int  len;
+	int len;
 	char *p, *ls;
-	int  lastcolor;
-	int  chatHeight;
-	int  chatWidth;
-	
-	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
-	{
-		chatHeight = cg_teamChatHeight.integer;
-	}
-	else
-	{
-		chatHeight = TEAMCHAT_HEIGHT;
-	}
-
-	if (etj_chatWidth.integer < 1)
-	{
-		etj_chatWidth.integer = 1;
-	}
-
-	if (etj_chatWidth.integer < (TEAMCHAT_WIDTH - 8))
-	{
-		chatWidth = etj_chatWidth.integer;
-	}
-	else
-	{
-		chatWidth = TEAMCHAT_WIDTH - 8;
-	}
+	int lastcolor;
+	int chatHeight = std::min(std::max(cg_teamChatHeight.integer, 0), TEAMCHAT_HEIGHT);
+	int chatWidth = std::min(std::max(etj_chatLineWidth.integer, 1), TEAMCHAT_WIDTH);
 
 	if (chatHeight <= 0 || cg_teamChatTime.integer <= 0)
 	{
