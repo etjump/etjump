@@ -936,6 +936,14 @@ static void CG_DrawTeamInfo(void)
 
 		for (i = cgs.teamChatPos - 1; i >= cgs.teamLastChatPos; i--)
 		{
+			auto linePosX = CHATLOC_TEXT_X + cg_chatPosX.value;
+			auto linePosY = CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1;
+
+			if (linePosY <= 0 || linePosY >= 480 + lineHeight)
+			{
+				continue;
+			}
+
 			alphapercent = 1.0f - (cg.time - cgs.teamChatMsgTimes[i % chatHeight]) / (float)(cg_teamChatTime.integer);
 			if (alphapercent > 1.0f)
 			{
@@ -1006,7 +1014,7 @@ static void CG_DrawTeamInfo(void)
 			
 			}
 
-			CG_Text_Paint_Ext(CHATLOC_TEXT_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(linePosX, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
 		}
 	}
 }
