@@ -884,6 +884,12 @@ static void CG_DrawUpperRight(void)
 #define CHATLOC_Y 478
 #define CHATLOC_TEXT_X (CHATLOC_X + 0.25f * TINYCHAR_WIDTH)
 
+// Calculate chat background width based on etj_chatWidth value
+float calcBackgroundWidth(int maxChars, float fontScale, fontInfo_t *font)
+{
+	return maxChars * fontScale * font->glyphScale * font->glyphs[0].xSkip;
+}
+
 /*
 =================
 CG_DrawTeamInfo
@@ -894,21 +900,12 @@ static void CG_DrawTeamInfo(void)
 	int       w, h;
 	int       i, len;
 	vec4_t    hcolor;
-	int       chatHeight;
 	float     alphapercent, chatbgalpha;
 	float     lineHeight = 9.f;
 	qhandle_t flag;
-
-	int chatWidth = 640 - CHATLOC_X - 100;
-
-	if (cg_teamChatHeight.integer < TEAMCHAT_HEIGHT)
-	{
-		chatHeight = cg_teamChatHeight.integer;
-	}
-	else
-	{
-		chatHeight = TEAMCHAT_HEIGHT;
-	}
+	int maxLineLength = min(max(etj_chatLineWidth.integer, 1), TEAMCHAT_WIDTH);
+	int chatWidth = calcBackgroundWidth(maxLineLength, 0.2f, &cgs.media.limboFont2) + 5;
+	int chatHeight = min(max(cg_teamChatHeight.integer, 0), TEAMCHAT_HEIGHT);
 
 	if (chatHeight <= 0)
 	{
@@ -939,6 +936,14 @@ static void CG_DrawTeamInfo(void)
 
 		for (i = cgs.teamChatPos - 1; i >= cgs.teamLastChatPos; i--)
 		{
+			auto linePosX = CHATLOC_TEXT_X + cg_chatPosX.value;
+			auto linePosY = CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1;
+
+			if (linePosY <= 0 || linePosY >= 480 + lineHeight)
+			{
+				continue;
+			}
+
 			alphapercent = 1.0f - (cg.time - cgs.teamChatMsgTimes[i % chatHeight]) / (float)(cg_teamChatTime.integer);
 			if (alphapercent > 1.0f)
 			{
@@ -1009,7 +1014,7 @@ static void CG_DrawTeamInfo(void)
 			
 			}
 
-			CG_Text_Paint_Ext(CHATLOC_TEXT_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(linePosX, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
 		}
 	}
 }
