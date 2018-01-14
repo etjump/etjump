@@ -56,8 +56,8 @@
 #define CHAR_HEIGHT         48
 #define TEXT_ICON_SPACE     4
 
-#define TEAMCHAT_WIDTH      70
-#define TEAMCHAT_HEIGHT     14
+#define TEAMCHAT_WIDTH      200
+#define TEAMCHAT_HEIGHT     64
 
 #define NOTIFY_WIDTH        80
 #define NOTIFY_HEIGHT       5
@@ -2568,6 +2568,7 @@ extern vmCvar_t etj_drawLeaves;
 extern vmCvar_t etj_touchPickupWeapons;
 extern vmCvar_t etj_autoLoad;
 extern vmCvar_t etj_uphillSteps;
+extern vmCvar_t etj_chatLineWidth;
 
 //
 // cg_main.c
