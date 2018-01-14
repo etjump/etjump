@@ -6,7 +6,7 @@
 #include "cg_mainext.h"
 #include <vector>
 #include "etj_client_commands_handler.h"
-#include <algorithm>
+#include "../game/etj_numeric_utilities.h"
 
 #define SCOREPARSE_COUNT    9
 
@@ -839,8 +839,8 @@ static void CG_AddToTeamChat(const char *str, int clientnum)
 	int len;
 	char *p, *ls;
 	int lastcolor;
-	int chatHeight = std::min(std::max(cg_teamChatHeight.integer, 0), TEAMCHAT_HEIGHT);
-	int chatWidth = std::min(std::max(etj_chatLineWidth.integer, 1), TEAMCHAT_WIDTH);
+	int chatHeight = Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+	int chatWidth = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
 
 	if (chatHeight <= 0 || cg_teamChatTime.integer <= 0)
 	{
