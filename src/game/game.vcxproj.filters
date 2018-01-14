@@ -403,5 +403,8 @@
     <ClInclude Include="etj_entity_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="etj_numeric_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

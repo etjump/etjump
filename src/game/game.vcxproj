@@ -347,6 +347,7 @@
     <ClInclude Include="etj_deathrun_system.h" />
     <ClInclude Include="etj_entity_utilities.h" />
     <ClInclude Include="etj_file.h" />
+    <ClInclude Include="etj_numeric_utilities.h" />
     <ClInclude Include="etj_operation_result.h" />
     <ClInclude Include="etj_progression_tracker.h" />
     <ClInclude Include="etj_progression_tracker_parser.h" />
