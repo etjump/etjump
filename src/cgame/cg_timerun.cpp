@@ -83,7 +83,9 @@ void Timerun::record(int clientNum, std::string runName, int completionTime)
 		}
 	}
 	std::string message = createCompletionMessage(cgs.clientinfo[clientNum], runName, completionTime, previousTime);
-	printMessage(message, cgs.media.voiceChatShader);
+	int shader = previousTime == NO_PREVIOUS_RECORD ?
+		cgs.media.stopwatchIcon : cgs.media.stopwatchIconGreen;
+	printMessage(message, shader);
 }
 
 
@@ -104,7 +106,7 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 	if (clientNum == cg.snap->ps.clientNum)
 	{
 		std::string message = createCompletionMessage(cgs.clientinfo[clientNum], runName, completionTime, previousRecord);
-		printMessage(message, cgs.media.voiceChatShader);
+		printMessage(message, cgs.media.stopwatchIconRed);
 	}
 }
 

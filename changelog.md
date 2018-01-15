@@ -131,6 +131,7 @@
 * increased chat max height to 64 lines
 * fixed an issue with difference calculations in timerun prints
 * reformatted timerun timer format to `MM:SS.xxx`
+* added a new icon for timerun popup prints
 
 # ETJump 2.2.0
 
