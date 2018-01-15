@@ -2592,6 +2592,9 @@ static void CG_RegisterGraphics(void)
 	cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");
 	cgs.media.proneIcon = trap_R_RegisterShader("gfx/2d/prone_on");
 	cgs.media.forbidIcon = trap_R_RegisterShader("gfx/2d/icon_off");
+	cgs.media.stopwatchIcon = trap_R_RegisterShader("gfx/2d/stopwatch");
+	cgs.media.stopwatchIconGreen = trap_R_RegisterShader("gfx/2d/stopwatch_green");
+	cgs.media.stopwatchIconRed = trap_R_RegisterShader("gfx/2d/stopwatch_red");
 
 
 	CG_LoadingString(" - game media done");

@@ -1829,6 +1829,9 @@ typedef struct
 	qhandle_t saveIcon;
 	qhandle_t proneIcon;
 	qhandle_t forbidIcon;
+	qhandle_t stopwatchIcon;
+	qhandle_t stopwatchIconGreen;
+	qhandle_t stopwatchIconRed;
 
 } cgMedia_t;
 
