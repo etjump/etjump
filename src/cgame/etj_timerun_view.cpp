@@ -127,7 +127,7 @@ void ETJump::TimerunView::draw()
 	auto seconds = millis / 1000;
 	millis -= seconds * 1000;
 
-	auto text = (boost::format("%02d:%02d:%03d")
+	auto text = (boost::format("%02d:%02d.%03d")
 		% minutes
 		% seconds
 		% millis).str();

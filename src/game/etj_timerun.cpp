@@ -26,7 +26,7 @@ std::string millisToString(int millis)
 	seconds = millis / 1000;
 	millis -= seconds * 1000;
 
-	s = (boost::format("%02d:%02d:%03d") % minutes % seconds % millis).str();
+	s = (boost::format("%02d:%02d.%03d") % minutes % seconds % millis).str();
 
 	return s;
 }
