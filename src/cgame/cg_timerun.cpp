@@ -144,30 +144,55 @@ void Timerun::record(int clientNum, std::string runName, int completionTime)
 
 	auto diffMillis  = abs(completionTime - previousTime);
 	auto diffMinutes = diffMillis / 60000;
-	diffMillis -= minutes * 60000;
+	diffMillis -= diffMinutes * 60000;
 	auto diffSeconds = diffMillis / 1000;
 	diffMillis -= diffSeconds * 1000;
 
 	if (previousTime != NO_PREVIOUS_RECORD)
 	{
-		CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d! ^7(-^2%02d:%02d:%03d^7)")
-		                          % cgs.clientinfo[clientNum].name
-		                          % runName
-		                          % minutes
-		                          % seconds
-		                          % millis
-		                          % diffMinutes
-		                          % diffSeconds
-		                          % diffMillis).str().c_str(), cgs.media.voiceChatShader);
+		if (clientNum == _clientNum)
+		{
+			CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d.%03d! (-^2%02d:%02d.%03d^7)")
+				                      % runName
+				                      % minutes
+				                      % seconds
+				                      % millis
+				                      % diffMinutes
+				                      % diffSeconds
+				                      % diffMillis).str().c_str(), cgs.media.voiceChatShader);
+		}
+		else
+		{
+			CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d.%03d! (-^2%02d:%02d.%03d^7)")
+				                      % cgs.clientinfo[clientNum].name
+				                      % runName
+				                      % minutes
+				                      % seconds
+				                      % millis
+				                      % diffMinutes
+				                      % diffSeconds
+				                      % diffMillis).str().c_str(), cgs.media.voiceChatShader);
+		}
 	}
 	else
 	{
-		CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed %s in %02d:%02d:%03d!")
-		                          % cgs.clientinfo[clientNum].name
-		                          % runName
-		                          % minutes
-		                          % seconds
-		                          % millis).str().c_str(), cgs.media.voiceChatShader);
+		if (clientNum == _clientNum)
+		{
+			CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d.%03d!")
+				                      % runName
+				                      % minutes
+				                      % seconds
+				                      % millis).str().c_str(), cgs.media.voiceChatShader);
+		}
+		else
+		{
+			CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d.%03d!")
+				                      % cgs.clientinfo[clientNum].name
+				                      % runName
+				                      % minutes
+				                      % seconds
+				                      % millis).str().c_str(), cgs.media.voiceChatShader);
+		}
 	}
 }
 
@@ -198,13 +223,13 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 		{
 			auto diffMillis  = abs(completionTime - previousRecord);
 			auto diffMinutes = diffMillis / 60000;
-			diffMillis -= minutes * 60000;
+			diffMillis -= diffMinutes * 60000;
 			auto diffSeconds = diffMillis / 1000;
 			diffMillis -= diffSeconds * 1000;
 
 			if (clientNum == _clientNum)
 			{
-				CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d:%03d (+^1%02d:%02d:%03d^7).")
+				CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d.%03d. (+^1%02d:%02d.%03d^7)")
 				                          % runName
 				                          % minutes
 				                          % seconds
@@ -215,7 +240,7 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 			}
 			else
 			{
-				CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d (+^1%02d:%02d:%03d^7).")
+				CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d.%03d. (+^1%02d:%02d.%03d^7)")
 				                          % cgs.clientinfo[clientNum].name
 				                          % runName
 				                          % minutes
@@ -230,7 +255,7 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 		{
 			if (clientNum == _clientNum)
 			{
-				CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d:%03d.")
+				CG_AddPMItem(PM_MESSAGE, (boost::format("^7You completed ^7%s ^7in %02d:%02d.%03d!")
 				                          % runName
 				                          % minutes
 				                          % seconds
@@ -238,7 +263,7 @@ void Timerun::completion(int clientNum, std::string runName, int completionTime)
 			}
 			else
 			{
-				CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d:%03d.")
+				CG_AddPMItem(PM_MESSAGE, (boost::format("^7%s ^7completed ^7%s ^7in %02d:%02d.%03d!")
 				                          % cgs.clientinfo[clientNum].name
 				                          % runName
 				                          % minutes

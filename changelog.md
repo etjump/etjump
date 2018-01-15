@@ -129,6 +129,8 @@
   * value indicates characters before line break
   * valid range is 1-200
 * increased chat max height to 64 lines
+* fixed an issue with difference calculations in timerun prints
+* reformatted timerun timer format to `MM:SS.xxx`
 
 # ETJump 2.2.0
 
