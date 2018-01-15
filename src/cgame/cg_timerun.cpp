@@ -149,7 +149,7 @@ std::string Timerun::createCompletionMessage(clientInfo_t& player, std::string& 
 	}
 
 	std::string message = ETJump::stringFormat(
-		"^7%s completed ^7%s ^7in %s%c %s", who, runName, timeFinished, postfix, timeDifference
+		"^7%s ^7completed %s ^7in %s%c %s", who, runName, timeFinished, postfix, timeDifference
 	);
 
 	return message;
