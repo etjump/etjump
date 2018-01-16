@@ -1,4 +1,4 @@
-#include "etj_progression_tracker_parser.hpp"
+#include "etj_progression_tracker_parser.h"
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -42,11 +42,11 @@ namespace ETJump
 			{
 				result.value = stoi(indexValuePair[0]);
 			}
-			catch (const std::invalid_argument& e)
+			catch (const std::invalid_argument&)
 			{
 				_errors.push_back((boost::format("value \"%s\" is not an integer") % indexValuePair[0]).str());
 			}
-			catch (const std::out_of_range& e)
+			catch (const std::out_of_range&)
 			{
 				_errors.push_back((boost::format("value \"%s\" is out of range") % indexValuePair[0]).str());
 			}
@@ -57,11 +57,11 @@ namespace ETJump
 			{
 				result.index = stoi(indexValuePair[0]) - 1;
 			}
-			catch (const std::invalid_argument& e)
+			catch (const std::invalid_argument&)
 			{
 				_errors.push_back((boost::format("index \"%s\" is not an integer") % indexValuePair[0]).str());
 			}
-			catch (const std::out_of_range& e)
+			catch (const std::out_of_range&)
 			{
 				_errors.push_back((boost::format("index \"%s\" is out of range") % indexValuePair[0]).str());
 			}
@@ -75,11 +75,11 @@ namespace ETJump
 			{
 				result.value = stoi(indexValuePair[1]);
 			}
-			catch (const std::invalid_argument& e)
+			catch (const std::invalid_argument&)
 			{
 				_errors.push_back((boost::format("value \"%s\" is not an integer") % indexValuePair[1]).str());
 			}
-			catch (const std::out_of_range& e)
+			catch (const std::out_of_range&)
 			{
 				_errors.push_back((boost::format("value \"%s\" is out of range") % indexValuePair[1]).str());
 			}

@@ -1,25 +1,27 @@
 //
 // Created by Jussi on 14.5.2015.
 //
+#pragma once
 
-#ifndef ETJUMP_TIMERUN_H
-#define ETJUMP_TIMERUN_H
+#include "cg_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 
 #include <map>
 #include <string>
-#include "etj_drawable.hpp"
+#include "etj_drawable.h"
 
-class Timerun : Drawable {
+class Timerun {
 public:
 	static const int NO_PREVIOUS_RECORD = -1;
 	/**
 	 * @param clientNum The user's client number
 	 */
 	Timerun(int clientNum);
-	/**
-	 * Draws the timer
-	 */
-	void draw();
 
 	/**
 	 * Starts a time run for self. This is only called
@@ -76,7 +78,7 @@ private:
 	/**
 	 * Fastest time by _runningPlayerClientNum in _currentTimerun
 	 */
-	int _fastestTime;
+	int _fastestTime{ -1 };
 
 	/**
 	 * Own clientNum
@@ -86,7 +88,7 @@ private:
 	/**
 	 * Running player's clientNum. Can be either _clientNum or someone elses cnum
 	 */
-	int _runningPlayerClientNum;
+	int _runningPlayerClientNum{ 0 };
 
 	/**
 	 * Fastest times for each player on each run
@@ -97,23 +99,41 @@ private:
 	 * Whether we're currently on a timerun or not. Applies
 	 * to both spectator & actual running
 	 */
-	bool _running;
+	bool _running{ false };
 
 	/**
 	 * The name of the current timerun we're doing
 	 */
-	std::string _currentTimerun;
+	std::string _currentTimerun{ "" };
 
 	/**
 	 * The timestamp when user started the current run
 	 */
-	int _startTime;
+	int _startTime{ 0 };
 
 	/**
 	 * The time it took user to complete previous run
 	 */
-	int _completionTime;
+	int _completionTime{ 0 };
+
+	struct Time
+	{
+		enum class Duration
+		{
+			Millisecond = 1,
+			Second = 1000,
+			Minute = 60 * 1000,
+			Hour = 60 * 60 * 1000
+		};
+		int hours;
+		int minutes;
+		int seconds;
+		int ms;
+		int timestamp;
+	};
+
+	Time createTimeFromTimestamp(int timestamp);
+	std::string createCompletionMessage(clientInfo_t& player, std::string& runName, int completionTime, int previousTime);
+	std::string createTimeString(Time &time);
+	void printMessage(std::string &message, int shaderIcon);
 };
-
-
-#endif //ETJUMP_TIMERUN_H

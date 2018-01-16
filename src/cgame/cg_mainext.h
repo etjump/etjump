@@ -3,6 +3,13 @@
 
 #include "cg_local.h"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 /**
 * Initializes the CPP side of client
 */
@@ -15,6 +22,10 @@ void InitGame();
 * @return qboolean Whether a match was found or not
 */
 qboolean CG_ServerCommandExt(const char *cmd);
+qboolean CG_ConsoleCommandExt(const char *cmd);
+void CG_DrawActiveFrameExt();
 
+qboolean CG_displaybyname();
+qboolean CG_displaybynumber();
 
 #endif

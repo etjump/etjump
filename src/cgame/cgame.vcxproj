@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -39,7 +43,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -67,15 +74,15 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
     <TargetName>cgame_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
     <TargetName>cgame_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
-    <IncludePath>D:\boost_1_57_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
     <TargetName>cgame_mp_x86</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,13 +129,14 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>$(SolutionDir)build\install.bat</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CGAMEDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CGAMEDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -148,12 +156,13 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>$(ProjectDir)cgame.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\Debug/cgame_mp_x86.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(ProjectDir)Debug\cgame_mp_x86.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(ProjectDir)Debug\cgame_mp_x86.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <BaseAddress>0x30000000</BaseAddress>
-      <ImportLibrary>.\Debug/cgame_mp_x86.lib</ImportLibrary>
+      <ImportLibrary>$(ProjectDir)Debug\cgame_mp_x86.lib</ImportLibrary>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -216,73 +225,84 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\game\bg_animation.c" />
-    <ClCompile Include="..\game\bg_animgroup.c" />
-    <ClCompile Include="..\game\bg_campaign.c" />
-    <ClCompile Include="..\game\bg_character.c" />
-    <ClCompile Include="..\game\bg_classes.c" />
-    <ClCompile Include="..\game\bg_lib.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_misc.c" />
-    <ClCompile Include="..\game\bg_pmove.c" />
-    <ClCompile Include="..\game\bg_slidemove.c" />
-    <ClCompile Include="..\game\bg_sscript.c" />
-    <ClCompile Include="..\game\bg_stats.c" />
-    <ClCompile Include="..\game\bg_tracemap.c" />
-    <ClCompile Include="..\sha-1\bg_sha.c" />
+    <ClCompile Include="..\game\bg_animation.cpp" />
+    <ClCompile Include="..\game\bg_animgroup.cpp" />
+    <ClCompile Include="..\game\bg_campaign.cpp" />
+    <ClCompile Include="..\game\bg_character.cpp" />
+    <ClCompile Include="..\game\bg_classes.cpp" />
+    <ClCompile Include="..\game\bg_misc.cpp" />
+    <ClCompile Include="..\game\bg_pmove.cpp" />
+    <ClCompile Include="..\game\bg_slidemove.cpp" />
+    <ClCompile Include="..\game\bg_sscript.cpp" />
+    <ClCompile Include="..\game\bg_stats.cpp" />
+    <ClCompile Include="..\game\bg_tracemap.cpp" />
+    <ClCompile Include="..\game\etj_file.cpp" />
+    <ClCompile Include="..\game\etj_string_utilities.cpp" />
+    <ClCompile Include="..\game\q_math.cpp" />
+    <ClCompile Include="..\game\q_shared.cpp" />
+    <ClCompile Include="..\json\jsoncpp.cpp" />
+    <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
-    <ClCompile Include="cg_manual.c" />
-    <ClCompile Include="cg_atmospheric.c" />
-    <ClCompile Include="cg_character.c" />
-    <ClCompile Include="cg_commandmap.c" />
-    <ClCompile Include="cg_consolecmds.c" />
-    <ClCompile Include="cg_debriefing.c" />
-    <ClCompile Include="cg_draw.c" />
-    <ClCompile Include="cg_drawCHS.c" />
-    <ClCompile Include="cg_drawtools.c" />
-    <ClCompile Include="cg_effects.c" />
-    <ClCompile Include="cg_ents.c" />
-    <ClCompile Include="cg_event.c" />
-    <ClCompile Include="cg_fireteamoverlay.c" />
-    <ClCompile Include="cg_fireteams.c" />
-    <ClCompile Include="cg_flamethrower.c" />
-    <ClCompile Include="cg_identification.cpp" />
-    <ClCompile Include="cg_info.c" />
-    <ClCompile Include="cg_limbopanel.c" />
-    <ClCompile Include="cg_loadpanel.c" />
-    <ClCompile Include="cg_localents.c" />
-    <ClCompile Include="cg_main.c" />
-    <ClCompile Include="cg_marks.c" />
-    <ClCompile Include="cg_missionbriefing.c" />
-    <ClCompile Include="cg_multiview.c" />
-    <ClCompile Include="cg_newDraw.c" />
-    <ClCompile Include="cg_particles.c" />
-    <ClCompile Include="cg_players.c" />
-    <ClCompile Include="cg_playerstate.c" />
-    <ClCompile Include="cg_polybus.c" />
-    <ClCompile Include="cg_popupmessages.c" />
-    <ClCompile Include="cg_predict.c" />
-    <ClCompile Include="cg_scoreboard.c" />
-    <ClCompile Include="cg_servercmds.c" />
-    <ClCompile Include="cg_snapshot.c" />
-    <ClCompile Include="cg_sound.c" />
-    <ClCompile Include="cg_spawn.c" />
-    <ClCompile Include="cg_statsranksmedals.c" />
-    <ClCompile Include="cg_syscalls.c" />
-    <ClCompile Include="cg_trails.c" />
-    <ClCompile Include="cg_view.c" />
-    <ClCompile Include="cg_weapons.c" />
-    <ClCompile Include="cg_window.c" />
-    <ClCompile Include="..\game\q_math.c" />
-    <ClCompile Include="..\game\q_shared.c" />
-    <ClCompile Include="..\ui\ui_shared.c" />
+    <ClCompile Include="cg_edv.cpp" />
+    <ClCompile Include="cg_manual.cpp" />
+    <ClCompile Include="cg_atmospheric.cpp" />
+    <ClCompile Include="cg_character.cpp" />
+    <ClCompile Include="cg_commandmap.cpp" />
+    <ClCompile Include="cg_consolecmds.cpp" />
+    <ClCompile Include="cg_debriefing.cpp" />
+    <ClCompile Include="cg_draw.cpp" />
+    <ClCompile Include="cg_drawCHS.cpp" />
+    <ClCompile Include="cg_drawtools.cpp" />
+    <ClCompile Include="cg_effects.cpp" />
+    <ClCompile Include="cg_ents.cpp" />
+    <ClCompile Include="cg_event.cpp" />
+    <ClCompile Include="cg_fireteamoverlay.cpp" />
+    <ClCompile Include="cg_fireteams.cpp" />
+    <ClCompile Include="cg_flamethrower.cpp" />
+    <ClCompile Include="cg_info.cpp" />
+    <ClCompile Include="cg_limbopanel.cpp" />
+    <ClCompile Include="cg_loadpanel.cpp" />
+    <ClCompile Include="cg_localents.cpp" />
+    <ClCompile Include="cg_main.cpp" />
+    <ClCompile Include="cg_marks.cpp" />
+    <ClCompile Include="cg_missionbriefing.cpp" />
+    <ClCompile Include="cg_multiview.cpp" />
+    <ClCompile Include="cg_newDraw.cpp" />
+    <ClCompile Include="cg_particles.cpp" />
+    <ClCompile Include="cg_players.cpp" />
+    <ClCompile Include="cg_playerstate.cpp" />
+    <ClCompile Include="cg_polybus.cpp" />
+    <ClCompile Include="cg_popupmessages.cpp" />
+    <ClCompile Include="cg_predict.cpp" />
+    <ClCompile Include="cg_scoreboard.cpp" />
+    <ClCompile Include="cg_servercmds.cpp" />
+    <ClCompile Include="cg_snapshot.cpp" />
+    <ClCompile Include="cg_sound.cpp" />
+    <ClCompile Include="cg_spawn.cpp" />
+    <ClCompile Include="cg_statsranksmedals.cpp" />
+    <ClCompile Include="cg_syscalls.cpp" />
+    <ClCompile Include="cg_trails.cpp" />
+    <ClCompile Include="cg_view.cpp" />
+    <ClCompile Include="cg_weapons.cpp" />
+    <ClCompile Include="cg_window.cpp" />
+    <ClCompile Include="..\ui\ui_shared.cpp" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="etj_client_authentication.cpp" />
+    <ClCompile Include="etj_client_commands_handler.cpp" />
+    <ClCompile Include="etj_console_alpha.cpp" />
+    <ClCompile Include="etj_cvar_shadow.cpp" />
+    <ClCompile Include="etj_cvar_update_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
+    <ClCompile Include="etj_entity_events_handler.cpp" />
+    <ClCompile Include="etj_draw_leaves_handler.cpp" />
+    <ClCompile Include="etj_maxspeed.cpp" />
+    <ClCompile Include="etj_operating_system_linux.cpp" />
+    <ClCompile Include="etj_operating_system_windows.cpp" />
+    <ClCompile Include="etj_overbounce_watcher.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
+    <ClCompile Include="etj_trickjump_lines.cpp" />
+    <ClCompile Include="etj_utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\etjump\ui\menudef.h" />
@@ -290,18 +310,36 @@
     <ClInclude Include="..\game\bg_classes.h" />
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
+    <ClInclude Include="..\game\etj_shared.h" />
+    <ClInclude Include="..\game\etj_string_utilities.h" />
+    <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="cg_mainext.h" />
+    <ClInclude Include="cg_print_syscalls.h" />
     <ClInclude Include="cg_public.h" />
     <ClInclude Include="..\ui\keycodes.h" />
     <ClInclude Include="..\..\main\ui\menudef.h" />
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
-    <ClInclude Include="cg_sha1.h" />
     <ClInclude Include="cg_timerun.h" />
-    <ClInclude Include="etj_drawable.hpp" />
-    <ClInclude Include="etj_timerun_view.hpp" />
+    <ClInclude Include="etj_client_authentication.h" />
+    <ClInclude Include="etj_client_commands_handler.h" />
+    <ClInclude Include="etj_console_alpha.h" />
+    <ClInclude Include="etj_cvar_shadow.h" />
+    <ClInclude Include="etj_cvar_update_handler.h" />
+    <ClInclude Include="etj_entity_events_handler.h" />
+    <ClInclude Include="etj_draw_leaves_handler.h" />
+    <ClInclude Include="etj_irenderable.h" />
+    <ClInclude Include="etj_maxspeed.h" />
+    <ClInclude Include="etj_operating_system.h" />
+    <ClInclude Include="etj_overbounce_watcher.h" />
+    <ClInclude Include="etj_client_utilities.h" />
+    <ClInclude Include="etj_drawable.h" />
+    <ClInclude Include="etj_rotation_matrix.hpp" />
+    <ClInclude Include="etj_timerun_view.h" />
+    <ClInclude Include="etj_trickjump_lines.hpp" />
+    <ClInclude Include="etj_utilities.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>
@@ -334,8 +372,6 @@
     <None Include="..\..\etjump\ui\ingame_vote_map.menu" />
     <None Include="..\..\etjump\ui\ingame_vote_misc.menu" />
     <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu" />
-    <None Include="..\..\etjump\ui\ingame_vote_players.menu" />
-    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu" />
     <None Include="..\..\etjump\ui\main.menu" />
     <None Include="..\..\etjump\ui\menus.txt" />
     <None Include="..\..\etjump\ui\mods.menu" />
@@ -379,9 +415,6 @@
     <None Include="..\..\etjump\ui\wm_quickmessage.menu" />
     <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu" />
     <None Include="cgame.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="authentication.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

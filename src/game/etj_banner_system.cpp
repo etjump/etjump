@@ -1,6 +1,6 @@
-#include "etj_banner_system.hpp"
-#include "etj_common.hpp"
-#include "printer.hpp"
+#include "etj_banner_system.h"
+#include "etj_common.h"
+#include "etj_printer.h"
 
 static const char *LocationText[] = {
 	"Center",
@@ -39,13 +39,13 @@ void ETJump::BannerSystem::check(int levelTime)
 		Printer::BroadcastCenterMessage(message);
 		break;
 	case Top: 
-		Printer::BroadcastLeftBannerMessage(message);
+		Printer::BroadcastTopBannerMessage(message);
 		break;
 	case Chat: 
 		Printer::BroadcastChatMessage(message);
 		break;
 	case Left: 
-		Printer::BroadcastTopBannerMessage(message);
+		Printer::BroadcastLeftBannerMessage(message);
 		break;
 	default: 
 		Printer::BroadcastTopBannerMessage(message);

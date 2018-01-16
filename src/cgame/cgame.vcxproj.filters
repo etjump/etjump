@@ -17,181 +17,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\game\bg_animation.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_animgroup.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_campaign.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_character.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_classes.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_lib.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_misc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_pmove.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_slidemove.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_sscript.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_stats.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_tracemap.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_atmospheric.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_character.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_commandmap.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_consolecmds.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_debriefing.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_draw.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_drawtools.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_effects.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_ents.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_event.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_fireteamoverlay.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_fireteams.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_flamethrower.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_info.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_limbopanel.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_loadpanel.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_localents.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_marks.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_missionbriefing.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_multiview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_newDraw.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_particles.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_players.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_playerstate.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_polybus.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_popupmessages.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_predict.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_scoreboard.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_servercmds.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_snapshot.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_sound.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_spawn.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_statsranksmedals.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_syscalls.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_trails.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_view.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_weapons.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_window.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\q_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ui\ui_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\sha-1\sha1.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sha-1\bg_sha.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_drawCHS.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_identification.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cg_manual.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cg_mainext.cpp">
@@ -204,6 +30,225 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="etj_drawable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_animgroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_campaign.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_classes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_misc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_pmove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_slidemove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_sscript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_tracemap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\q_math.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\q_shared.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_atmospheric.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_commandmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_consolecmds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_debriefing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_drawCHS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_drawtools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_effects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_ents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_fireteamoverlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_fireteams.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_flamethrower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_limbopanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_loadpanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_localents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_manual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_marks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_missionbriefing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_multiview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_newDraw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_players.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_playerstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_polybus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_popupmessages.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_predict.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_scoreboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_servercmds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_snapshot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_spawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_statsranksmedals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_syscalls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_trails.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_weapons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\ui_shared.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sha-1\bg_sha.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_client_commands_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_overbounce_watcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_maxspeed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_entity_events_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_trickjump_lines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\json\jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_edv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_client_authentication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_operating_system_linux.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_operating_system_windows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_cvar_shadow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_cvar_update_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_string_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_console_alpha.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_draw_leaves_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -241,9 +286,6 @@
     <ClInclude Include="..\ui\ui_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cg_sha1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -259,10 +301,67 @@
     <ClInclude Include="cg_timerun.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_timerun_view.hpp">
+    <ClInclude Include="etj_drawable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_drawable.hpp">
+    <ClInclude Include="etj_timerun_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_commands_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_overbounce_watcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_print_syscalls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_irenderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_maxspeed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_entity_events_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_trickjump_lines.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_rotation_matrix.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\json\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_client_authentication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_operating_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\etj_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cvar_shadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cvar_update_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\etj_string_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_console_alpha.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_draw_leaves_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -335,12 +434,6 @@
       <Filter>Menu files</Filter>
     </None>
     <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu">
-      <Filter>Menu files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\ingame_vote_players.menu">
-      <Filter>Menu files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu">
       <Filter>Menu files</Filter>
     </None>
     <None Include="..\..\etjump\ui\main.menu">
@@ -484,10 +577,5 @@
     <None Include="..\..\etjump\ui\etjump_settings2.menu">
       <Filter>Menu files\ETJump</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="authentication.txt">
-      <Filter>Source Files</Filter>
-    </Text>
   </ItemGroup>
 </Project>

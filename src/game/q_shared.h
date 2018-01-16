@@ -83,7 +83,7 @@
 #else
 
 #include <assert.h>
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -95,6 +95,8 @@
 #include <float.h>
 
 #endif
+
+#include "etj_public.h"
 
 #ifdef _WIN32
 
@@ -301,7 +303,8 @@ typedef int clipHandle_t;
 // with very long names
 #define MAX_NAME_LENGTH     36      // max length of a client name
 
-#define MAX_SAY_TEXT        150
+#define MAX_SAY_TEXT        265
+#define MAX_CHAT_TEXT       MAX_SAY_TEXT - 64
 
 #define MAX_BINARY_MESSAGE  32768   // max length of binary message
 
@@ -448,8 +451,18 @@ extern vec3_t bytedirs[NUMVERTEXNORMALS];
 
 // all drawing is done to a 640*480 virtual screen size
 // and will be automatically scaled to the real resolution
-#define SCREEN_WIDTH        640
+
+#if defined(GAMEDLL)
+	#define SCREEN_WIDTH       640
+#else
+	#define SCREEN_WIDTH       ETJump_GetScreenWidth()
+#endif
+
 #define SCREEN_HEIGHT       480
+
+#define SCREEN_OFFSET_X     (SCREEN_WIDTH - 640) / 2.f
+#define SCREEN_CENTER_X      SCREEN_WIDTH / 2.f
+#define SCREEN_CENTER_Y      SCREEN_HEIGHT / 2.f
 
 #define TINYCHAR_WIDTH      (SMALLCHAR_WIDTH)
 #define TINYCHAR_HEIGHT     (SMALLCHAR_HEIGHT)
@@ -747,8 +760,8 @@ int     COM_GetCurrentParseLine(void);
 char *COM_Parse(char **data_p);
 char *COM_ParseExt(char **data_p, qboolean allowLineBreak);
 int     COM_Compress(char *data_p);
-void    COM_ParseError(char *format, ...);
-void    COM_ParseWarning(char *format, ...);
+void    COM_ParseError(const char *format, ...);
+void    COM_ParseWarning(const char *format, ...);
 int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING]);
 
 qboolean COM_BitCheck(const int array[], int bitNum);
@@ -779,7 +792,7 @@ typedef struct pc_token_s
 
 // data is an in/out parm, returns a parsed out token
 
-void    COM_MatchToken(char **buf_p, char *match);
+void    COM_MatchToken(char **buf_p, const char *match);
 
 void SkipBracedSection(char **program);
 void SkipBracedSection_Depth(char **program, int depth);  // start at given depth if already

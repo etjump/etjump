@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -29,7 +33,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -39,6 +43,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -60,26 +67,26 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Debug\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">$(ProjectDir)Debug\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)build\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)pthread;D:\boost_1_57_0;$(SolutionDir)sqlite;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <TargetName>qagame_mp_x86</TargetName>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;D:\boost_1_57_0;$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
     <TargetName>qagame_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
-    <IncludePath>$(SolutionDir)sqlite;D:\boost_1_57_0;$(SolutionDir)pthread;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)sqlite;$(BOOST_ROOT);$(SolutionDir)pthread;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)pthread;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets />
     <TargetName>qagame_mp_x86</TargetName>
@@ -87,7 +94,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GAMEDLL;HAVE_STRUCT_TIMESPEC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GAMEDLL;HAVE_STRUCT_TIMESPEC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -108,12 +115,13 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>$(ProjectDir)game.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\Debug/qagame_mp_x86.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(ProjectDir)Debug\qagame_mp_x86.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(ProjectDir)Debug\qagame_mp_x86.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <BaseAddress>0x20000000</BaseAddress>
-      <ImportLibrary>.\Debug/qagame_mp_x86.lib</ImportLibrary>
+      <ImportLibrary>$(ProjectDir)Debug\qagame_mp_x86.lib</ImportLibrary>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -230,89 +238,90 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>$(SolutionDir)build\install.bat</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\json\jsoncpp.cpp" />
-    <ClCompile Include="..\sha-1\bg_sha.c" />
+    <ClCompile Include="..\sha-1\bg_sha.cpp" />
     <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
-    <ClCompile Include="async_operation.cpp" />
-    <ClCompile Include="bg_animation.c" />
-    <ClCompile Include="bg_animgroup.c" />
-    <ClCompile Include="bg_campaign.c" />
-    <ClCompile Include="bg_character.c" />
-    <ClCompile Include="bg_classes.c" />
-    <ClCompile Include="bg_lib.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="bg_misc.c" />
-    <ClCompile Include="bg_pmove.c" />
-    <ClCompile Include="bg_slidemove.c" />
-    <ClCompile Include="bg_sscript.c" />
-    <ClCompile Include="bg_stats.c" />
-    <ClCompile Include="bg_tracemap.c" />
-    <ClCompile Include="commands.cpp" />
-    <ClCompile Include="custom_map_votes.cpp" />
+    <ClCompile Include="etj_command_parser.cpp" />
+    <ClCompile Include="etj_async_operation.cpp" />
+    <ClCompile Include="bg_animation.cpp" />
+    <ClCompile Include="bg_animgroup.cpp" />
+    <ClCompile Include="bg_campaign.cpp" />
+    <ClCompile Include="bg_character.cpp" />
+    <ClCompile Include="bg_classes.cpp" />
+    <ClCompile Include="bg_misc.cpp" />
+    <ClCompile Include="bg_pmove.cpp" />
+    <ClCompile Include="bg_slidemove.cpp" />
+    <ClCompile Include="bg_sscript.cpp" />
+    <ClCompile Include="bg_stats.cpp" />
+    <ClCompile Include="bg_tracemap.cpp" />
+    <ClCompile Include="etj_commands.cpp" />
+    <ClCompile Include="etj_command_system.cpp" />
+    <ClCompile Include="etj_custom_map_votes.cpp" />
     <ClCompile Include="etj_banner_system.cpp" />
     <ClCompile Include="etj_command_variables.cpp" />
     <ClCompile Include="etj_database.cpp" />
+    <ClCompile Include="etj_deathrun_system.cpp" />
+    <ClCompile Include="etj_entity_utilities.cpp" />
+    <ClCompile Include="etj_file.cpp" />
     <ClCompile Include="etj_main.cpp" />
     <ClCompile Include="etj_progression_tracker.cpp" />
     <ClCompile Include="etj_progression_tracker_parser.cpp" />
-    <ClCompile Include="g_active.c" />
-    <ClCompile Include="g_alarm.c" />
-    <ClCompile Include="g_antilag.c" />
-    <ClCompile Include="g_buddy_list.c" />
-    <ClCompile Include="g_character.c" />
-    <ClCompile Include="g_client.c" />
-    <ClCompile Include="g_cmds.c" />
-    <ClCompile Include="g_cmds_ext.c" />
-    <ClCompile Include="g_combat.c" />
-    <ClCompile Include="g_fireteams.c" />
-    <ClCompile Include="g_items.c" />
-    <ClCompile Include="g_main.c" />
-    <ClCompile Include="g_match.c" />
-    <ClCompile Include="g_mem.c" />
-    <ClCompile Include="g_misc.c" />
-    <ClCompile Include="g_missile.c" />
-    <ClCompile Include="g_mover.c" />
-    <ClCompile Include="g_props.c" />
-    <ClCompile Include="g_referee.c" />
-    <ClCompile Include="save.cpp" />
-    <ClCompile Include="g_script.c" />
-    <ClCompile Include="g_script_actions.c" />
-    <ClCompile Include="g_session.c" />
-    <ClCompile Include="g_spawn.c" />
-    <ClCompile Include="g_stats.c" />
-    <ClCompile Include="g_sv_entities.c" />
-    <ClCompile Include="g_svcmds.c" />
-    <ClCompile Include="g_syscalls.c" />
-    <ClCompile Include="g_systemmsg.c" />
-    <ClCompile Include="g_target.c" />
-    <ClCompile Include="g_team.c" />
-    <ClCompile Include="g_teammapdata.c" />
-    <ClCompile Include="g_trigger.c" />
+    <ClCompile Include="etj_result_set_formatter.cpp" />
+    <ClCompile Include="etj_string_utilities.cpp" />
+    <ClCompile Include="g_active.cpp" />
+    <ClCompile Include="g_alarm.cpp" />
+    <ClCompile Include="g_antilag.cpp" />
+    <ClCompile Include="g_buddy_list.cpp" />
+    <ClCompile Include="g_character.cpp" />
+    <ClCompile Include="g_client.cpp" />
+    <ClCompile Include="g_cmds.cpp" />
+    <ClCompile Include="g_cmds_ext.cpp" />
+    <ClCompile Include="g_combat.cpp" />
+    <ClCompile Include="g_fireteams.cpp" />
+    <ClCompile Include="g_items.cpp" />
+    <ClCompile Include="g_main.cpp" />
+    <ClCompile Include="g_match.cpp" />
+    <ClCompile Include="g_mem.cpp" />
+    <ClCompile Include="g_misc.cpp" />
+    <ClCompile Include="g_missile.cpp" />
+    <ClCompile Include="g_mover.cpp" />
+    <ClCompile Include="g_props.cpp" />
+    <ClCompile Include="etj_save_system.cpp" />
+    <ClCompile Include="g_script.cpp" />
+    <ClCompile Include="g_script_actions.cpp" />
+    <ClCompile Include="g_session.cpp" />
+    <ClCompile Include="g_spawn.cpp" />
+    <ClCompile Include="g_stats.cpp" />
+    <ClCompile Include="g_sv_entities.cpp" />
+    <ClCompile Include="g_svcmds.cpp" />
+    <ClCompile Include="g_syscalls.cpp" />
+    <ClCompile Include="g_systemmsg.cpp" />
+    <ClCompile Include="g_target.cpp" />
+    <ClCompile Include="g_team.cpp" />
+    <ClCompile Include="g_teammapdata.cpp" />
+    <ClCompile Include="g_trigger.cpp" />
     <ClCompile Include="g_utilities.cpp" />
-    <ClCompile Include="g_utils.c" />
-    <ClCompile Include="g_vote.c" />
-    <ClCompile Include="g_weapon.c" />
-    <ClCompile Include="levels.cpp" />
-    <ClCompile Include="main_ext.cpp" />
-    <ClCompile Include="map_statistics.cpp" />
-    <ClCompile Include="motd.cpp" />
-    <ClCompile Include="printer.cpp" />
-    <ClCompile Include="q_math.c" />
-    <ClCompile Include="q_shared.c" />
-    <ClCompile Include="random_map_mode.cpp" />
-    <ClCompile Include="session.cpp" />
-    <ClCompile Include="sqlite_wrapper.cpp" />
-    <ClCompile Include="timerun.cpp" />
-    <ClCompile Include="tokens.cpp" />
-    <ClCompile Include="user.cpp" />
+    <ClCompile Include="g_utils.cpp" />
+    <ClCompile Include="g_vote.cpp" />
+    <ClCompile Include="g_weapon.cpp" />
+    <ClCompile Include="etj_levels.cpp" />
+    <ClCompile Include="etj_main_ext.cpp" />
+    <ClCompile Include="etj_map_statistics.cpp" />
+    <ClCompile Include="etj_motd.cpp" />
+    <ClCompile Include="etj_printer.cpp" />
+    <ClCompile Include="q_math.cpp" />
+    <ClCompile Include="q_shared.cpp" />
+    <ClCompile Include="etj_session.cpp" />
+    <ClCompile Include="etj_sqlite_wrapper.cpp" />
+    <ClCompile Include="etj_timerun.cpp" />
+    <ClCompile Include="etj_tokens.cpp" />
+    <ClCompile Include="etj_user.cpp" />
     <ClCompile Include="etj_utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -323,41 +332,50 @@
     <ClInclude Include="..\json\json.h" />
     <ClInclude Include="..\sha-1\sha1.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
-    <ClInclude Include="async_operation.hpp" />
+    <ClInclude Include="etj_command_parser.h" />
+    <ClInclude Include="etj_async_operation.h" />
     <ClInclude Include="bg_classes.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
-    <ClInclude Include="commands.hpp" />
-    <ClInclude Include="custom_map_votes.hpp" />
-    <ClInclude Include="etj_banner_system.hpp" />
-    <ClInclude Include="etj_command_variables.hpp" />
-    <ClInclude Include="etj_common.hpp" />
-    <ClInclude Include="etj_database.hpp" />
-    <ClInclude Include="etj_progression_tracker.hpp" />
-    <ClInclude Include="etj_progression_tracker_parser.hpp" />
-    <ClInclude Include="game.hpp" />
+    <ClInclude Include="etj_commands.h" />
+    <ClInclude Include="etj_command_system.h" />
+    <ClInclude Include="etj_custom_map_votes.h" />
+    <ClInclude Include="etj_banner_system.h" />
+    <ClInclude Include="etj_console_variables.h" />
+    <ClInclude Include="etj_common.h" />
+    <ClInclude Include="etj_database.h" />
+    <ClInclude Include="etj_deathrun_system.h" />
+    <ClInclude Include="etj_entity_utilities.h" />
+    <ClInclude Include="etj_file.h" />
+    <ClInclude Include="etj_numeric_utilities.h" />
+    <ClInclude Include="etj_operation_result.h" />
+    <ClInclude Include="etj_progression_tracker.h" />
+    <ClInclude Include="etj_progression_tracker_parser.h" />
+    <ClInclude Include="etj_game.h" />
+    <ClInclude Include="etj_public.h" />
+    <ClInclude Include="etj_result_set_formatter.h" />
+    <ClInclude Include="etj_shared.h" />
+    <ClInclude Include="etj_string_utilities.h" />
     <ClInclude Include="g_local.h" />
-    <ClInclude Include="g_local.hpp" />
+    <ClInclude Include="etj_local.h" />
     <ClInclude Include="g_public.h" />
-    <ClInclude Include="printer.hpp" />
-    <ClInclude Include="save.hpp" />
-    <ClInclude Include="timerun.hpp" />
-    <ClInclude Include="tokens.hpp" />
-    <ClInclude Include="user.hpp" />
+    <ClInclude Include="etj_printer.h" />
+    <ClInclude Include="etj_save_system.h" />
+    <ClInclude Include="etj_timerun.h" />
+    <ClInclude Include="etj_tokens.h" />
+    <ClInclude Include="etj_user.h" />
     <ClInclude Include="utilities.hpp" />
     <ClInclude Include="g_team.h" />
-    <ClInclude Include="iauthentication.hpp" />
-    <ClInclude Include="levels.hpp" />
-    <ClInclude Include="load_race.hpp" />
-    <ClInclude Include="map_statistics.hpp" />
-    <ClInclude Include="motd.hpp" />
+    <ClInclude Include="etj_iauthentication.h" />
+    <ClInclude Include="etj_levels.h" />
+    <ClInclude Include="etj_map_statistics.h" />
+    <ClInclude Include="etj_motd.h" />
     <ClInclude Include="q_shared.h" />
-    <ClInclude Include="random_map_mode.hpp" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="session.hpp" />
-    <ClInclude Include="sqlite_wrapper.hpp" />
+    <ClInclude Include="etj_session.h" />
+    <ClInclude Include="etj_sqlite_wrapper.h" />
     <ClInclude Include="surfaceflags.h" />
-    <ClInclude Include="etj_utilities.hpp" />
+    <ClInclude Include="etj_utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

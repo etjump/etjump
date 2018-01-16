@@ -12,6 +12,9 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+#include <memory>
+#include <vector>
+
 #include "../game/q_shared.h"
 #include "tr_types.h"
 #include "../game/bg_public.h"
@@ -53,8 +56,8 @@
 #define CHAR_HEIGHT         48
 #define TEXT_ICON_SPACE     4
 
-#define TEAMCHAT_WIDTH      70
-#define TEAMCHAT_HEIGHT     8
+#define TEAMCHAT_WIDTH      200
+#define TEAMCHAT_HEIGHT     64
 
 #define NOTIFY_WIDTH        80
 #define NOTIFY_HEIGHT       5
@@ -555,8 +558,6 @@ typedef struct clientInfo_s
 	int secondaryweapon;
 	int latchedweapon;
 
-	int refStatus;
-
 	bg_character_t *character;
 
 	// Gordon: caching fireteam pointer here, better than trying to work it out all the time
@@ -587,9 +588,6 @@ typedef struct clientInfo_s
 	int weaponState;
 	int weaponState_last;
 	int hideMe;
-	qboolean personalTimerActive;
-	int personalStartTime;
-	int personalStopTime;
 } clientInfo_t;
 
 typedef enum
@@ -673,6 +671,8 @@ typedef struct weaponInfo_s
 	sfxHandle_t spindownSound;      //----(SA)	added // sound called if the above is running but player doesn't follow through and fire
 
 	sfxHandle_t switchSound;
+
+	char pickupModelPath[MAX_QPATH];
 } weaponInfo_t;
 
 
@@ -1130,8 +1130,7 @@ typedef struct
 	vec4_t xhairColorAlt;
 	vec4_t speedColor;
 	vec4_t keysColor;
-	vec4_t personalTimerColor;
-	vec4_t runTimerColor;
+	vec4_t obWatcherColor;
 
 	// Arnout: allow overriding of countdown sounds
 	char fiveMinuteSound_g[MAX_QPATH];
@@ -1217,11 +1216,6 @@ typedef struct
 	qboolean activeTimer;
 
 	qboolean resetmaxspeed;
-	qboolean routeDesigner;
-
-	qboolean freeCam;
-	vec3_t freeCamPos;
-	vec3_t freeCamAngles;
 
 	char ipAddr[128];
 	int lastScoreTime;
@@ -1246,6 +1240,14 @@ typedef struct
 
 	float currentFovValue;
 	qboolean hasTimerun;
+
+	// ETJump: player transparency
+	float currentTransparencyValue;
+
+	// ETJump: hold last jump position for chs
+	vec3_t etjLastJumpPos;
+
+	int pronePressTime;		// No prone print delay: when client last pressed prone
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -1814,6 +1816,7 @@ typedef struct
 
 	qhandle_t fireteamicons[6];
 	keys_set_t keys;
+	keys_set_t keys2;
 
 	//Feen: PGM - Portal Shaders //NOTE - Maybe add shaders for other player portals as well....
 	qhandle_t portal_blueShader;       //Portal 1
@@ -1821,6 +1824,14 @@ typedef struct
 
 	//Feen: CGaz Shader
 	qhandle_t CGazArrow;
+	// alternative ghost players visualisation
+	qhandle_t ghostPlayersAltColorShader;
+	qhandle_t saveIcon;
+	qhandle_t proneIcon;
+	qhandle_t forbidIcon;
+	qhandle_t stopwatchIcon;
+	qhandle_t stopwatchIconGreen;
+	qhandle_t stopwatchIconRed;
 
 } cgMedia_t;
 
@@ -1903,6 +1914,23 @@ typedef struct oidInfo_s
 
 #define NUM_ENDGAME_AWARDS 14
 
+typedef struct demoCam_s
+{
+	qboolean renderingFreeCam;
+	qboolean setCamAngles;   //are we overriding angles via freecamSetPos
+
+	vec3_t camAngle; // stores the angle of our cam
+	vec3_t camOrigin; // stores the origin of our cam
+	vec3_t velocity;
+
+	qboolean startLean;
+	qboolean noclip;
+
+	int commandTime;
+
+	int move;
+	int turn;
+} demoCam_t;
 
 // The client game static (cgs) structure hold everything
 // loaded or calculated from the gamestate.  It will NOT
@@ -1937,6 +1965,7 @@ typedef struct
 	int voteNo;
 	qboolean voteModified;                  // beep whenever changed
 	char voteString[MAX_STRING_TOKENS];
+	bool votedYes;
 
 	int teamVoteTime[2];
 	int teamVoteYes[2];
@@ -1978,7 +2007,7 @@ typedef struct
 
 	int cursorX;
 	int cursorY;
-	qboolean eventHandling;
+	int eventHandling;
 	qboolean mouseCaptured;
 	qboolean sizingHud;
 	void *capturedItem;
@@ -2000,7 +2029,7 @@ typedef struct
 	float nextTimeLimit;
 	int minclients;
 	gamestate_t gamestate;
-	char *currentCampaign;
+	const char *currentCampaign;
 	int currentCampaignMap;
 
 	int complaintClient;        // DHM - Nerve
@@ -2125,6 +2154,8 @@ typedef struct
 	oidInfo_t oidInfo[MAX_OID_TRIGGERS];
 
 	qboolean initing;
+
+	demoCam_t demoCam;
 } cgs_t;
 
 //==============================================================================
@@ -2273,7 +2304,6 @@ extern vmCvar_t cg_antilag;
 extern vmCvar_t developer;
 
 // OSP
-extern vmCvar_t authLevel;
 extern vmCvar_t cf_wstats;
 extern vmCvar_t cf_wtopshots;
 //extern vmCvar_t			cg_announcer;
@@ -2347,19 +2377,25 @@ extern vmCvar_t cg_hideMe;
 extern vmCvar_t cg_nofatigue;
 extern vmCvar_t com_maxfps;
 extern vmCvar_t com_hunkmegs;
+
 extern vmCvar_t cg_drawCGaz;
 extern vmCvar_t cg_CGazY;
 extern vmCvar_t cg_CGazHeight;
 extern vmCvar_t cg_CGazWidth;
+extern vmCvar_t etj_CGazColor1;
+extern vmCvar_t etj_CGazColor2;
 extern vmCvar_t cg_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
+
 extern vmCvar_t cg_drawOB;
-extern vmCvar_t cg_drawspeedX;
-extern vmCvar_t cg_drawspeedY;
+// Aciz: movable drawOB
+extern vmCvar_t etj_OBX;
+extern vmCvar_t etj_OBY;
 extern vmCvar_t cg_drawKeys;
 extern vmCvar_t cg_keysSize;
 extern vmCvar_t cg_keysX;
 extern vmCvar_t cg_keysY;
+extern vmCvar_t etj_keysShadow;
 extern vmCvar_t cg_keysColor;
 extern vmCvar_t cg_loadviewangles;
 // forty - speedometer
@@ -2371,7 +2407,6 @@ extern pmove_t  cg_pmove;
 // Cheat cvars
 extern vmCvar_t cl_yawspeed;
 extern vmCvar_t cl_freelook;
-extern vmCvar_t cg_viewlog;
 extern vmCvar_t cg_drawClock;
 extern vmCvar_t cg_drawSpeed2;
 extern vmCvar_t cg_speedX;
@@ -2381,18 +2416,17 @@ extern vmCvar_t cg_speedSizeY;
 extern vmCvar_t cg_speedColor;
 extern vmCvar_t cg_speedAlpha;
 extern vmCvar_t etj_speedShadow;
-extern vmCvar_t cg_drawPersonalTimer;
-extern vmCvar_t cg_personalTimerColor;
-extern vmCvar_t cg_personalTimerAlpha;
-extern vmCvar_t cg_personalTimerX;
-extern vmCvar_t cg_personalTimerY;
+extern vmCvar_t etj_drawMaxSpeed;
+extern vmCvar_t etj_maxSpeedX;
+extern vmCvar_t etj_maxSpeedY;
+extern vmCvar_t etj_maxSpeedDuration;
+
 extern vmCvar_t cg_adminpassword;
 extern vmCvar_t cg_username;
 extern vmCvar_t cg_popupTime;
 extern vmCvar_t cg_popupStayTime;
 extern vmCvar_t cg_popupFadeTime;
 extern vmCvar_t cg_numPopups;
-
 extern vmCvar_t etj_HUD_popup;
 extern vmCvar_t etj_popupGrouped;
 extern vmCvar_t etj_popupShadow;
@@ -2455,7 +2489,7 @@ extern vmCvar_t etj_fireteamPosY;
 extern vmCvar_t etj_fireteamAlpha;
 
 #define CONLOG_BANNERPRINT 1
-extern vmCvar_t cg_logConsole;
+extern vmCvar_t etj_logBanner;
 extern vmCvar_t cg_weaponSound;
 
 extern vmCvar_t cg_noclipScale;
@@ -2473,7 +2507,9 @@ extern vmCvar_t player_spectatorInfoY;
 extern vmCvar_t player_drawRunTimer;
 extern vmCvar_t player_runTimerX;
 extern vmCvar_t player_runTimerY;
-extern vmCvar_t player_runTimerColor;
+extern vmCvar_t etj_runTimerShadow;
+extern vmCvar_t etj_runTimerAutoHide;
+extern vmCvar_t etj_runTimerInactiveColor;
 
 extern vmCvar_t player_drawMessageTime;
 
@@ -2490,8 +2526,72 @@ extern vmCvar_t etj_highlight;
 extern vmCvar_t etj_highlightText;
 extern vmCvar_t etj_highlightSound;
 
-extern vmCvar_t	etj_drawTokens;
-extern vmCvar_t	etj_enableTimeruns;
+extern vmCvar_t etj_drawTokens;
+extern vmCvar_t etj_enableTimeruns;
+
+extern vmCvar_t etj_tjlEnableLine;
+extern vmCvar_t etj_tjlEnableMarker;
+extern vmCvar_t etj_tjlLineColor;
+extern vmCvar_t etj_tjlMarkerColor;
+extern vmCvar_t etj_tjlMarkerEndColor;
+extern vmCvar_t etj_tjlNearestInterval;
+extern vmCvar_t etj_tjlAlwaysLoadTJL;
+
+extern vmCvar_t etj_ghostPlayersOpacity;
+extern vmCvar_t etj_ghostPlayersColor;
+extern vmCvar_t etj_ghostPlayersFadeRange;
+extern vmCvar_t etj_ghostPlayersAlt;
+
+extern vmCvar_t etj_explosivesShake;
+extern vmCvar_t etj_realFov;
+extern vmCvar_t etj_stretchCgaz;
+extern vmCvar_t etj_noActivateLean;
+
+extern vmCvar_t shared;
+
+extern vmCvar_t etj_drawObWatcher;
+extern vmCvar_t etj_obWatcherX;
+extern vmCvar_t etj_obWatcherY;
+extern vmCvar_t etj_obWatcherSize;
+extern vmCvar_t etj_obWatcherColor;
+
+extern vmCvar_t etj_demo_yawturnspeed;
+extern vmCvar_t etj_demo_pitchturnspeed;
+extern vmCvar_t etj_demo_rollspeed;
+extern vmCvar_t etj_demo_lookat;
+extern vmCvar_t etj_demo_freecamspeed;
+extern vmCvar_t etj_predefineddemokeys;
+
+extern vmCvar_t etj_drawNoJumpDelay;
+extern vmCvar_t etj_noJumpDelayX;
+extern vmCvar_t etj_noJumpDelayY;
+
+extern vmCvar_t etj_drawSaveIndicator;
+extern vmCvar_t etj_saveIndicatorX;
+extern vmCvar_t etj_saveIndicatorY;
+
+extern vmCvar_t etj_drawProneIndicator;
+extern vmCvar_t etj_proneIndicatorX;
+extern vmCvar_t etj_proneIndicatorY;
+
+extern vmCvar_t etj_viewlog;
+extern vmCvar_t etj_drawFoliage;
+extern vmCvar_t etj_showTris;
+extern vmCvar_t etj_wolfFog;
+extern vmCvar_t etj_zFar;
+extern vmCvar_t etj_offsetFactor;
+extern vmCvar_t etj_offsetUnits;
+extern vmCvar_t etj_speeds;
+extern vmCvar_t etj_lightmap;
+extern vmCvar_t etj_drawNotify;
+
+extern vmCvar_t etj_consoleAlpha;
+extern vmCvar_t etj_drawLeaves;
+extern vmCvar_t etj_touchPickupWeapons;
+extern vmCvar_t etj_autoLoad;
+extern vmCvar_t etj_uphillSteps;
+extern vmCvar_t etj_chatLineWidth;
+
 //
 // cg_main.c
 //
@@ -2503,7 +2603,7 @@ float CG_Cvar_Get(const char *cvar);
 
 char *CG_generateFilename(void);
 int CG_findClientNum(char *s);
-void CG_printConsoleString(char *str);
+void CG_printConsoleString(const char *str);
 
 void CG_LoadObjectiveData(void);
 
@@ -2523,7 +2623,7 @@ void CG_MouseEvent(int x, int y);
 void CG_EventHandling(int type, qboolean fForced);
 
 qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation);
-qboolean CG_GetWeaponTag(int clientNum, char *tagname, orientation_t *orientation);
+qboolean CG_GetWeaponTag(int clientNum, const char *tagname, orientation_t *orientation);
 
 void CG_EncodeQP(const char *in, char *out, int maxlen);
 void CG_DecodeQP(char *line);
@@ -2590,7 +2690,19 @@ void CG_DrawBigStringColor2(int x, int y, const char *s, vec4_t color);
 // END JOSEPH
 int CG_DrawStrlen(const char *str);
 
+namespace ETJump
+{
+	int DrawStringWidth(const char* text, float scalex);
+	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style);
+	void DrawMiniString(int x, int y, const char *s, float alpha);
+	void DrawSmallString(int x, int y, const char *s, float alpha);
+	void DrawBigString(int x, int y, const char *s, float alpha);
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, bool enableShadows = false, const vec4_t shadowColor = nullptr);
+}
+
+
 float *CG_FadeColor(int startMsec, int totalMsec);
+float CG_FadeAlpha(int startMsec, int totalMsec);
 float *CG_TeamColor(int team);
 void CG_TileClear(void);
 void CG_ColorForHealth(vec4_t hcolor);
@@ -2666,8 +2778,9 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team, entit
 void CG_NewClientInfo(int clientNum);
 sfxHandle_t CG_CustomSound(int clientNum, const char *soundName);
 void CG_ParseTeamXPs(int n);
-
-
+// etjump transparency stuff
+void ETJump_SetEntityAutoTransparency(refEntity_t *ent);
+void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, float alpha);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -2682,7 +2795,11 @@ void CG_Trace(trace_t *result, const vec3_t start, const vec3_t mins, const vec3
 void CG_FTTrace(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int skipNumber, int mask);
 void CG_PredictPlayerState(void);
 //void CG_LoadDeferredPlayers( void );
+void CG_TraceCapsule(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int skipNumber, int mask);
 
+void CG_RunBindingBuf(int key, qboolean down, char *buf);
+void CG_RunBinding(int key, qboolean down);
+void CG_EDV_RunInput(void);
 
 //
 // cg_events.c
@@ -2791,7 +2908,7 @@ void    CG_ParticleDust(centity_t *cent, vec3_t origin, vec3_t dir);
 void    CG_ParticleMisc(qhandle_t pshader, vec3_t origin, int size, int duration, float alpha);
 
 // Ridah
-void CG_ParticleExplosion(char *animStr, vec3_t origin, vec3_t vel, int duration, int sizeStart, int sizeEnd, qboolean dlight);
+void CG_ParticleExplosion(const char *animStr, vec3_t origin, vec3_t vel, int duration, int sizeStart, int sizeEnd, qboolean dlight);
 
 // Rafael snow pvs check
 void    CG_SnowLink(centity_t *cent, qboolean particleOn);
@@ -2864,7 +2981,7 @@ void    CG_AddLocalEntities(void);
 //
 // cg_effects.c
 //
-int CG_GetOriginForTag(centity_t * cent, refEntity_t * parent, char *tagName, int startIndex, vec3_t org, vec3_t axis[3]);
+int CG_GetOriginForTag(centity_t * cent, refEntity_t * parent, const char *tagName, int startIndex, vec3_t org, vec3_t axis[3]);
 localEntity_t *CG_SmokePuff(const vec3_t p,
                             const vec3_t vel,
                             float radius,
@@ -3028,6 +3145,22 @@ void CG_Info_f(void);
 
 void CG_Manual_f(void);
 
+void CG_FreecamTurnLeftDown_f(void);
+void CG_FreecamTurnLeftUp_f(void);
+void CG_FreecamTurnRightDown_f(void);
+void CG_FreecamTurnRightUp_f(void);
+void CG_FreecamTurnUpDown_f(void);
+void CG_FreecamTurnUpUp_f(void);
+void CG_FreecamTurnDownDown_f(void);
+void CG_FreecamTurnDownUp_f(void);
+void CG_FreecamRollLeftDown_f(void);
+void CG_FreecamRollLeftUp_f(void);
+void CG_FreecamRollRightDown_f(void);
+void CG_FreecamRollRightUp_f(void);
+void CG_Freecam_f(void);
+void CG_FreecamSetPos_f(void);
+void CG_FreecamGetPos_f(void);
+
 //
 // cg_servercmds.c
 //
@@ -3046,9 +3179,9 @@ void CG_AddToNotify(const char *str);
 const char *CG_LocalizeServerCommand(const char *buf);
 void CG_wstatsParse_cmd(void);
 void CG_wtopshotsParse_cmd(qboolean doBest);
-void CG_parseWeaponStats_cmd(void(txt_dump)(char *));
-void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(char *));
-void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(char *));
+void CG_parseWeaponStats_cmd(void(txt_dump)(const char *));
+void CG_parseBestShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
+void CG_parseTopShotsStats_cmd(qboolean doTop, void(txt_dump)(const char *));
 void CG_scores_cmd(void);
 
 //
@@ -3073,16 +3206,13 @@ void CG_AddAtmosphericEffects();
 
 void trap_PumpEventLoop(void);
 
-// print message on the local console
-void        trap_Print(const char *fmt);
-
-// abort the game
-void        trap_Error(const char *fmt);
-
 // milliseconds should only be used for performance tuning, never
 // for anything game related.  Get time from the CG_DrawActiveFrame parameter
 int         trap_Milliseconds(void);
 int         trap_RealTime(qtime_t *qtime);
+
+// ETJump: refactored print related syscalls to own file
+#include "cg_print_syscalls.h"
 
 // console variable interaction
 void        trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);
@@ -3490,7 +3620,7 @@ void CG_mvZoomBinoc(float x, float y, float w, float h);
 void CG_mvZoomSniper(float x, float y, float w, float h);
 
 // cg_window.c
-qboolean CG_addString(cg_window_t *w, char *buf);
+qboolean CG_addString(cg_window_t *w, const char *buf);
 //void CG_createDemoHelpWindow(void);
 //void CG_createSpecHelpWindow(void);
 void CG_createStatsWindow(void);
@@ -3500,7 +3630,7 @@ void CG_createWtopshotsMsgWindow(void);
 void CG_createMOTDWindow(void);
 void CG_cursorUpdate(void);
 void CG_initStrings(void);
-void CG_printWindow(char *str);
+void CG_printWindow(const char *str);
 void CG_removeStrings(cg_window_t *w);
 cg_window_t *CG_windowAlloc(int fx, int startupLength);
 void CG_windowDraw(void);
@@ -3628,7 +3758,7 @@ void CG_CommandMap_SetHighlightText(const char *text, float x, float y);
 void CG_CommandMap_DrawHighlightText(void);
 qboolean CG_CommandCentreSpawnPointClick(void);
 
-#define LIMBO_3D_X  287 //%	280
+#define LIMBO_3D_X  287 + SCREEN_OFFSET_X //% 280
 #define LIMBO_3D_Y  382
 #define LIMBO_3D_W  128
 #define LIMBO_3D_H  96  //%	94
@@ -3731,7 +3861,6 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button);
 void CG_LoadPanel_KeyHandling(int key, qboolean down);
 qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key);
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh);
-void CG_DrawMapDetails();
 
 qboolean CG_Debriefing2_Maps_KeyDown(panel_button_t *button, int key);
 void CG_Debriefing2TeamSkillHeaders_Draw(panel_button_t *button);
@@ -3767,17 +3896,7 @@ void CG_DrawCHS(void);
 void CG_InfoCHS_f(void);
 
 void CG_BannerPrint(const char *str);
-void CG_Minimize_f(void);
-
-//
-// cg_identification.cpp
-//
-
-void SendGuid();
-
-
-
-char *G_SHA1(const char *str);
+const char *G_SHA1(const char *str);
 
 //
 // drawable.cpp
@@ -3785,4 +3904,33 @@ char *G_SHA1(const char *str);
 void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
+void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
+void ETJump_AdjustPosition(float *x);
+int ETJump_GetScreenWidth();
+void ETJump_EnableWidthScale(bool enable);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Global ETJump objects
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace ETJump
+{
+	class ClientCommandsHandler;
+	class EntityEventsHandler;
+	class IRenderable;
+	class CvarUpdateHandler;
+
+	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
+	extern std::vector<std::unique_ptr<IRenderable>> renderables;
+	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+qboolean CG_ConsoleCommandExt(const char *cmd);
+void CG_DrawActiveFrameExt();
+
 #endif // CG_LOCAL_H
+

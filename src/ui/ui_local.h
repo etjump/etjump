@@ -787,7 +787,7 @@ typedef struct
 typedef struct
 {
 	char address[MAX_ADDRESSLENGTH];
-	char *lines[MAX_SERVERSTATUS_LINES][4];
+	const char *lines[MAX_SERVERSTATUS_LINES][4];
 	char text[MAX_SERVERSTATUS_TEXT];
 	char pings[MAX_CLIENTS * 3];
 	int numLines;
@@ -835,7 +835,6 @@ typedef struct
 	qboolean teamLeader;
 	char playerNames[MAX_CLIENTS][MAX_NAME_LENGTH * 2];
 	qboolean playerMuted[MAX_CLIENTS];
-	int playerRefereeStatus[MAX_CLIENTS];
 	char teamNames[MAX_CLIENTS][MAX_NAME_LENGTH];
 	int teamClientNums[MAX_CLIENTS];
 
@@ -924,6 +923,10 @@ typedef struct
 	qhandle_t teamBalanceFilter;
 
 	qhandle_t campaignMap;
+
+	fontInfo_t loadscreenfont1;
+	fontInfo_t loadscreenfont2;
+
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;
@@ -1198,4 +1201,6 @@ void UI_InitGameinfo(void);
 const char *UI_DescriptionForCampaign(void);
 const char *UI_NameForCampaign(void);
 
+int ETJump_GetScreenWidth();
+void ETJump_DrawMapDetails();
 #endif

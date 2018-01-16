@@ -2,8 +2,8 @@
 
 #define WINDOW_X		16
 #define WINDOW_Y		16
-#define WINDOW_WIDTH	608
-#define WINDOW_HEIGHT	448
+#define WINDOW_WIDTH	200
+#define WINDOW_HEIGHT	130
 #define GROUP_NAME		"groupETJumpControls"
 
 #include "ui/menumacros.h"
@@ -21,4 +21,14 @@ menuDef {
 	}
 
 	WINDOW( "CONTROLS", 94 )
+
+	#define SUBWINDOW_WIDTH WINDOW_WIDTH-12
+
+	SUBWINDOW( 6, 32, (SUBWINDOW_WIDTH), 90, "BINDS" )
+
+	BIND( 8, 48, (SUBWINDOW_WIDTH)-4, 10, "Save:", .2, 8, save, "To save your position." )
+	BIND( 8, 60, (SUBWINDOW_WIDTH)-4, 10, "Load:", .2, 8, load, "To load your position." )
+	BIND( 8, 72, (SUBWINDOW_WIDTH)-4, 10, "No goto:", .2, 8, nogoto, "To enable/disable goto." )
+	BIND( 8, 84, (SUBWINDOW_WIDTH)-4, 10, "No call:", .2, 8, nocall, "To enable/disable call." )
+	BIND( 8, 96, (SUBWINDOW_WIDTH)-4, 10, "Second portal:", .2, 8, "+attack2", "" )
 }

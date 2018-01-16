@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tests|Win32">
+      <Configuration>Tests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName>
@@ -42,7 +46,10 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -71,12 +78,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>ui_mp_x86</TargetName>
+    <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">
     <TargetName>ui_mp_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>ui_mp_x86</TargetName>
+    <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -124,7 +133,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;UI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;UI_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
@@ -145,11 +154,12 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>$(ProjectDir)ui.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>../Debug/ui.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(ProjectDir)Debug\ui.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(ProjectDir)Debug\ui_mp_x86.map</MapFileName>
       <BaseAddress>0x40000000</BaseAddress>
-      <ImportLibrary>.\Debug/ui_mp_x86.lib</ImportLibrary>
+      <ImportLibrary>$(ProjectDir)Debug\ui_mp_x86.lib</ImportLibrary>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -206,94 +216,89 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\game\bg_campaign.c" />
-    <ClCompile Include="..\game\bg_classes.c" />
-    <ClCompile Include="..\game\bg_lib.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugProgressioTracker|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\game\bg_misc.c" />
-    <ClCompile Include="..\game\q_math.c" />
-    <ClCompile Include="..\game\q_shared.c" />
-    <ClCompile Include="ui_atoms.c" />
-    <ClCompile Include="ui_gameinfo.c" />
-    <ClCompile Include="ui_loadpanel.c" />
-    <ClCompile Include="ui_main.c" />
-    <ClCompile Include="ui_players.c" />
-    <ClCompile Include="ui_shared.c" />
-    <ClCompile Include="ui_syscalls.c" />
-    <ClCompile Include="ui_util.c" />
+    <ClCompile Include="..\game\bg_campaign.cpp" />
+    <ClCompile Include="..\game\bg_classes.cpp" />
+    <ClCompile Include="..\game\bg_misc.cpp" />
+    <ClCompile Include="..\game\q_math.cpp" />
+    <ClCompile Include="..\game\q_shared.cpp" />
+    <ClCompile Include="ui_atoms.cpp" />
+    <ClCompile Include="ui_gameinfo.cpp" />
+    <ClCompile Include="ui_loadpanel.cpp" />
+    <ClCompile Include="ui_main.cpp" />
+    <ClCompile Include="ui_players.cpp" />
+    <ClCompile Include="ui_shared.cpp" />
+    <ClCompile Include="ui_syscalls.cpp" />
+    <ClCompile Include="ui_util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\trickjump\ui\credits_activision.menu" />
-    <None Include="..\..\trickjump\ui\credits_additional.menu" />
-    <None Include="..\..\trickjump\ui\credits_et260.menu" />
-    <None Include="..\..\trickjump\ui\credits_idsoftware.menu" />
-    <None Include="..\..\trickjump\ui\credits_quit.menu" />
-    <None Include="..\..\trickjump\ui\credits_splashdamage.menu" />
-    <None Include="..\..\trickjump\ui\global.menu" />
-    <None Include="..\..\trickjump\ui\hostgame.menu" />
-    <None Include="..\..\trickjump\ui\hostgame_advanced.menu" />
-    <None Include="..\..\trickjump\ui\hostgame_advanced_default.menu" />
-    <None Include="..\..\trickjump\ui\hostgame_dedicated_warning.menu" />
-    <None Include="..\..\trickjump\ui\ingame_disconnect.menu" />
-    <None Include="..\..\trickjump\ui\ingame_main.menu" />
-    <None Include="..\..\trickjump\ui\ingame_messagemode.menu" />
-    <None Include="..\..\trickjump\ui\ingame_serverinfo.menu" />
-    <None Include="..\..\trickjump\ui\ingame_tapout.menu" />
-    <None Include="..\..\trickjump\ui\ingame_tapoutlms.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote_disabled.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote_map.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote_misc.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote_misc_refrcon.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote_players.menu" />
-    <None Include="..\..\trickjump\ui\ingame_vote_players_warn.menu" />
-    <None Include="..\..\trickjump\ui\main.menu" />
-    <None Include="..\..\trickjump\ui\menus.txt" />
-    <None Include="..\..\trickjump\ui\mods.menu" />
-    <None Include="..\..\trickjump\ui\options.menu" />
-    <None Include="..\..\trickjump\ui\options_controls.menu" />
-    <None Include="..\..\trickjump\ui\options_controls_default.menu" />
-    <None Include="..\..\trickjump\ui\options_customise_game.menu" />
-    <None Include="..\..\trickjump\ui\options_customise_hud.menu" />
-    <None Include="..\..\trickjump\ui\options_system.menu" />
-    <None Include="..\..\trickjump\ui\options_system_gamma.menu" />
-    <None Include="..\..\trickjump\ui\playonline.menu" />
-    <None Include="..\..\trickjump\ui\playonline_connecttoip.menu" />
-    <None Include="..\..\trickjump\ui\playonline_disablepb.menu" />
-    <None Include="..\..\trickjump\ui\playonline_enablepb.menu" />
-    <None Include="..\..\trickjump\ui\playonline_serverinfo.menu" />
-    <None Include="..\..\trickjump\ui\popup_autoupdate.menu" />
-    <None Include="..\..\trickjump\ui\popup_errormessage.menu" />
-    <None Include="..\..\trickjump\ui\popup_errormessage_pb.menu" />
-    <None Include="..\..\trickjump\ui\popup_hostgameerrormessage.menu" />
-    <None Include="..\..\trickjump\ui\popup_password.menu" />
-    <None Include="..\..\trickjump\ui\popup_serverredirect.menu" />
-    <None Include="..\..\trickjump\ui\profile.menu" />
-    <None Include="..\..\trickjump\ui\profile_create.menu" />
-    <None Include="..\..\trickjump\ui\profile_create_error.menu" />
-    <None Include="..\..\trickjump\ui\profile_create_initial.menu" />
-    <None Include="..\..\trickjump\ui\profile_delete.menu" />
-    <None Include="..\..\trickjump\ui\profile_delete_error.menu" />
-    <None Include="..\..\trickjump\ui\profile_rename.menu" />
-    <None Include="..\..\trickjump\ui\quit.menu" />
-    <None Include="..\..\trickjump\ui\rec_restart.menu" />
-    <None Include="..\..\trickjump\ui\trickjump_options.menu" />
-    <None Include="..\..\trickjump\ui\vid_confirm.menu" />
-    <None Include="..\..\trickjump\ui\vid_restart.menu" />
-    <None Include="..\..\trickjump\ui\viewreplay.menu" />
-    <None Include="..\..\trickjump\ui\viewreplay_delete.menu" />
-    <None Include="..\..\trickjump\ui\wm_ftquickmessage.menu" />
-    <None Include="..\..\trickjump\ui\wm_ftquickmessageAlt.menu" />
-    <None Include="..\..\trickjump\ui\wm_quickmessage.menu" />
-    <None Include="..\..\trickjump\ui\wm_quickmessageAlt.menu" />
+    <None Include="..\..\etjump\ui\credits_activision.menu" />
+    <None Include="..\..\etjump\ui\credits_additional.menu" />
+    <None Include="..\..\etjump\ui\credits_et260.menu" />
+    <None Include="..\..\etjump\ui\credits_idsoftware.menu" />
+    <None Include="..\..\etjump\ui\credits_quit.menu" />
+    <None Include="..\..\etjump\ui\credits_splashdamage.menu" />
+    <None Include="..\..\etjump\ui\global.menu" />
+    <None Include="..\..\etjump\ui\hostgame.menu" />
+    <None Include="..\..\etjump\ui\hostgame_advanced.menu" />
+    <None Include="..\..\etjump\ui\hostgame_advanced_default.menu" />
+    <None Include="..\..\etjump\ui\hostgame_dedicated_warning.menu" />
+    <None Include="..\..\etjump\ui\ingame_disconnect.menu" />
+    <None Include="..\..\etjump\ui\ingame_main.menu" />
+    <None Include="..\..\etjump\ui\ingame_messagemode.menu" />
+    <None Include="..\..\etjump\ui\ingame_serverinfo.menu" />
+    <None Include="..\..\etjump\ui\ingame_tapout.menu" />
+    <None Include="..\..\etjump\ui\ingame_tapoutlms.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_disabled.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_map.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_misc.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_players.menu" />
+    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu" />
+    <None Include="..\..\etjump\ui\main.menu" />
+    <None Include="..\..\etjump\ui\menus.txt" />
+    <None Include="..\..\etjump\ui\mods.menu" />
+    <None Include="..\..\etjump\ui\options.menu" />
+    <None Include="..\..\etjump\ui\options_controls.menu" />
+    <None Include="..\..\etjump\ui\options_controls_default.menu" />
+    <None Include="..\..\etjump\ui\options_customise_game.menu" />
+    <None Include="..\..\etjump\ui\options_customise_hud.menu" />
+    <None Include="..\..\etjump\ui\options_system.menu" />
+    <None Include="..\..\etjump\ui\options_system_gamma.menu" />
+    <None Include="..\..\etjump\ui\playonline.menu" />
+    <None Include="..\..\etjump\ui\playonline_connecttoip.menu" />
+    <None Include="..\..\etjump\ui\playonline_disablepb.menu" />
+    <None Include="..\..\etjump\ui\playonline_enablepb.menu" />
+    <None Include="..\..\etjump\ui\playonline_serverinfo.menu" />
+    <None Include="..\..\etjump\ui\popup_autoupdate.menu" />
+    <None Include="..\..\etjump\ui\popup_errormessage.menu" />
+    <None Include="..\..\etjump\ui\popup_errormessage_pb.menu" />
+    <None Include="..\..\etjump\ui\popup_hostgameerrormessage.menu" />
+    <None Include="..\..\etjump\ui\popup_password.menu" />
+    <None Include="..\..\etjump\ui\popup_serverredirect.menu" />
+    <None Include="..\..\etjump\ui\profile.menu" />
+    <None Include="..\..\etjump\ui\profile_create.menu" />
+    <None Include="..\..\etjump\ui\profile_create_error.menu" />
+    <None Include="..\..\etjump\ui\profile_create_initial.menu" />
+    <None Include="..\..\etjump\ui\profile_delete.menu" />
+    <None Include="..\..\etjump\ui\profile_delete_error.menu" />
+    <None Include="..\..\etjump\ui\profile_rename.menu" />
+    <None Include="..\..\etjump\ui\quit.menu" />
+    <None Include="..\..\etjump\ui\rec_restart.menu" />
+    <None Include="..\..\etjump\ui\trickjump_options.menu" />
+    <None Include="..\..\etjump\ui\vid_confirm.menu" />
+    <None Include="..\..\etjump\ui\vid_restart.menu" />
+    <None Include="..\..\etjump\ui\viewreplay.menu" />
+    <None Include="..\..\etjump\ui\viewreplay_delete.menu" />
+    <None Include="..\..\etjump\ui\wm_ftquickmessage.menu" />
+    <None Include="..\..\etjump\ui\wm_ftquickmessageAlt.menu" />
+    <None Include="..\..\etjump\ui\wm_quickmessage.menu" />
+    <None Include="..\..\etjump\ui\wm_quickmessageAlt.menu" />
     <None Include="ui.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\trickjump\ui\menudef.h" />
-    <ClInclude Include="..\..\trickjump\ui\menumacros.h" />
+    <ClInclude Include="..\..\etjump\ui\menudef.h" />
+    <ClInclude Include="..\..\etjump\ui\menumacros.h" />
     <ClInclude Include="..\game\bg_classes.h" />
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="keycodes.h" />

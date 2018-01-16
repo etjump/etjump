@@ -294,6 +294,15 @@ typedef struct itemDef_s
 
 	struct itemDef_s *toolTipData;  // OSP - Tag an item to this item for auto-help popups
 
+	qboolean cvarLength;
+	qboolean multiline;
+
+	int cursorDir; //cursor vertical direction 1 down, -1 up
+	vec4_t cursorColor;
+
+	const char *hOffset;
+	const char *yOffset;
+
 } itemDef_t;
 
 typedef struct
@@ -412,7 +421,7 @@ typedef struct
 	void (*getCVarString)(const char *cvar, char *buffer, int bufsize);
 	float (*getCVarValue)(const char *cvar);
 	void (*setCVar)(const char *cvar, const char *value);
-	void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int limit, int style);
+	void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text, int cursorPos, char cursor, int limit, int style);
 	void (*setOverstrikeMode)(qboolean b);
 	qboolean (*getOverstrikeMode)();
 	void (*startLocalSound)(sfxHandle_t sfx, int channelNum);
@@ -455,7 +464,7 @@ typedef struct
 	void (*updateScreen)(void);
 	void (*getHunkData)(int *hunkused, int *hunkexpected);
 	int (*getConfigString)(int index, char *buff, int buffsize);
-
+	fontInfo_t* (*getActiveFont)(void);
 
 	float yscale;
 	float xscale;
@@ -493,8 +502,8 @@ qboolean Int_Parse(char **p, int *i);
 qboolean Rect_Parse(char **p, rectDef_t *r);
 qboolean String_Parse(char **p, const char **out);
 qboolean Script_Parse(char **p, const char **out);
-void PC_SourceError(int handle, char *format, ...);
-void PC_SourceWarning(int handle, char *format, ...);
+void PC_SourceError(int handle, const char *format, ...);
+void PC_SourceWarning(int handle, const char *format, ...);
 qboolean PC_Float_Parse(int handle, float *f);
 qboolean PC_Color_Parse(int handle, vec4_t *c);
 qboolean PC_Int_Parse(int handle, int *i);
@@ -539,7 +548,7 @@ void        Controls_GetConfig(void);
 void        Controls_SetConfig(qboolean restart);
 void        Controls_SetDefaults(qboolean lefthanded);
 
-int         trap_PC_AddGlobalDefine(char *define);
+int         trap_PC_AddGlobalDefine(const char *define);
 int         trap_PC_RemoveAllGlobalDefines(void);
 int         trap_PC_LoadSource(const char *filename);
 int         trap_PC_FreeSource(int handle);

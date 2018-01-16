@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "utilities.hpp"
-#include "g_local.hpp"
+#include "etj_local.h"
 
 using std::string;
 using std::vector;
@@ -453,20 +453,6 @@ Arguments GetSayArgs(int start /*= 0*/)
  * Conversions
  */
 
-qboolean StringToInt(const char *toConvert, int *value)
-{
-	try
-	{
-		static int result = boost::lexical_cast<int>(toConvert);
-
-		*value = result;
-	}
-	catch (/* boost::bad_lexical_cast& e */ ...)
-	{
-		return qfalse;
-	}
-	return qtrue;
-}
 
 bool ToInt(const string& toConvert, int& value)
 {
@@ -514,49 +500,40 @@ bool ToFloat(const std::string& toConvert, float& value)
 	return true;
 }
 
-std::string ToString(int value)
-{
-	return boost::lexical_cast<std::string>(value);
-}
-
-std::string LongToString(long value)
-{
-	return boost::lexical_cast<std::string>(value);
-}
-
 std::string ToString(vec3_t toConvert)
 {
-	string vec3 = "(" + ToString(toConvert[0])
-	              + ", " + ToString(toConvert[1]) + ", " +
-	              ToString(toConvert[2]) + ")";
+	string vec3 = "(" + std::to_string(toConvert[0])
+	              + ", " + std::to_string(toConvert[1]) + ", " +
+		std::to_string(toConvert[2]) + ")";
 	return vec3;
 }
 
 std::string ToString(vec_t x, vec_t y, vec_t z)
 {
-	string vec3 = "(" + ToString(x)
-	              + ", " + ToString(y) + ", " +
-	              ToString(z) + ")";
+	string vec3 = "(" + std::to_string(x)
+	              + ", " + std::to_string(y) + ", " +
+		std::to_string(z) + ")";
 	return vec3;
 }
 
-gentity_t *PlayerGentityFromString(char *name, char *err, int size)
+gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filter)
 {
 	int       pids[MAX_CLIENTS];
 	gentity_t *player;
 
 	if (ClientNumbersFromString(name, pids) != 1)
 	{
-		G_MatchOnePlayer(pids, err, size);
-		return NULL;
+		if(!G_MatchOnePlayer(pids, err, size, filter))
+		{
+			return nullptr;
+		}
 	}
 
 	player = g_entities + pids[0];
 	return player;
 }
 
-gentity_t *PlayerGentityFromString
-    (const std::string& name, std::string& err)
+gentity_t *PlayerGentityFromString( const std::string& name, std::string& err, team_t filter)
 {
 	char      errorMsg[MAX_TOKEN_CHARS] = "\0";
 	int       pids[MAX_CLIENTS];
@@ -564,9 +541,11 @@ gentity_t *PlayerGentityFromString
 
 	if (ClientNumbersFromString(name.c_str(), pids) != 1)
 	{
-		G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg));
-		err = errorMsg;
-		return NULL;
+		if(!G_MatchOnePlayer(pids, errorMsg, sizeof(errorMsg), filter))
+		{
+			err = errorMsg;
+			return nullptr;
+		}
 	}
 
 	player = g_entities + pids[0];
@@ -732,27 +711,27 @@ std::string TimeStampDifferenceToString(int diff)
 
 	if (diff < HOUR)
 	{
-		return ToString(diff / MINUTE) + " minutes";
+		return std::to_string(diff / MINUTE) + " minutes";
 	}
 	else if (diff < DAY)
 	{
-		return ToString(diff / HOUR) + " hours";
+		return std::to_string(diff / HOUR) + " hours";
 	}
 	else if (diff < WEEK)
 	{
-		return ToString(diff / DAY) + " days";
+		return std::to_string(diff / DAY) + " days";
 	}
 	else if (diff >= WEEK && diff < MONTH)
 	{
-		return ToString(diff / WEEK) + " weeks";
+		return std::to_string(diff / WEEK) + " weeks";
 	}
 	else if (diff >= MONTH && diff < YEAR)
 	{
-		return ToString(diff / MONTH) + " months";
+		return std::to_string(diff / MONTH) + " months";
 	}
 	else if (diff >= YEAR)
 	{
-		return ToString(diff / YEAR) + " years";
+		return std::to_string(diff / YEAR) + " years";
 	}
 	return "";
 }

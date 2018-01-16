@@ -3,7 +3,7 @@ REM This script installs etjump to the test mod directory
 
 REM -----------------CONFIGURATION------------------------
 
-set PATH_TO_ET_ROOT="D:\Modding\ET\"
+set PATH_TO_ET_ROOT=%ETROOT%
 set PATH_TO_7ZIP="C:\Program Files\7-Zip\7z.exe"
 set MODNAME="etjump"
 set BATCH_PATH=%~dp0

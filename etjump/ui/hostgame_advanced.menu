@@ -50,7 +50,6 @@ menuDef {
 	NUMERICFIELD( 8, 142, (SUBWINDOW_WIDTH)-4, 10, "Minimum Players:", .2, 8, "match_minplayers", 2, "Specifies the minimum number of players required before a match can start" )
 	NUMERICFIELD( 8, 154, (SUBWINDOW_WIDTH)-4, 10, "Ready percentage:", .2, 8, "match_readypercent", 3, "Specifies the minimum percentage of players that must hit their ready key before a match can start" )
 	YESNO( 8, 166, (SUBWINDOW_WIDTH)-4, 10, "Allow Late Joins:", .2, 8, "match_latejoin", "Whether a player can join a team once a match has started" )
-	YESNO( 8, 178, (SUBWINDOW_WIDTH)-4, 10, "Mute Spectators:", .2, 8, "match_mutespecs", "Whether spectators are muted" )
 	MULTI( 8, 190, (SUBWINDOW_WIDTH)-4, 10, "Warmup Damage:", .2, 8, "match_warmupDamage", cvarFloatList { "Nobody" 0 "Enemies Only" 1 "Everyone" 2 }, "Whether you can damage players during the match's warmup period" )
 	NUMERICFIELD( 8, 202, (SUBWINDOW_WIDTH)-4, 10, "Max Players Per Team:", .2, 8, "team_maxplayers", 2, "Specifies the maximum number of players per team" )
 	YESNO( 8, 214, (SUBWINDOW_WIDTH)-4, 10, "Disable Team Controls:", .2, 8, "team_nocontrols", "Whether players can issue team commands (lock team/spectators, readyteam, etc.)" )

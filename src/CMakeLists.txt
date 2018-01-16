@@ -3,202 +3,226 @@ cmake_minimum_required(VERSION 2.8.1)
 cmake_policy(SET CMP0015 NEW)
 
 # Release
-SET(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Release)
 
 # Store compiled binaries to folder
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 
 # Set the used compiler
-SET(CMAKE_C_COMPILER gcc-4.6)
-SET(CMAKE_CXX_COMPILER g++-4.6)
+set(CMAKE_C_COMPILER gcc-4.9)
+set(CMAKE_CXX_COMPILER g++-4.9)
 
-SET(ARCH "i386")
+set(ARCH "i386")
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-IF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
 	# This has to be set to compile with -ffast-math
 	# Doesn't matter in ETJumps case as we don't store fps
 	add_definitions(-DSQLITE_OMIT_FLOATING_POINT)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-ENDIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+endif(${CMAKE_BUILD_TYPE} MATCHES "Release")
 
-SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
-SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/game)
-SET(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/game)
+set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
-FILE(GLOB CGAME_SRC
-	"cgame/cg_atmospheric.c"
-	"cgame/cg_character.c"
-	"cgame/cg_commandmap.c"
-	"cgame/cg_consolecmds.c"
-	"cgame/cg_debriefing.c"
-	"cgame/cg_draw.c"
-	"cgame/cg_drawCHS.c"
-	"cgame/cg_drawtools.c"
-	"cgame/cg_effects.c"
-	"cgame/cg_ents.c"
-	"cgame/cg_event.c"
-	"cgame/cg_fireteamoverlay.c"
-	"cgame/cg_fireteams.c"
-	"cgame/cg_flamethrower.c"
-	"cgame/cg_info.c"
-	"cgame/cg_limbopanel.c"
-	"cgame/cg_loadpanel.c"
-	"cgame/cg_localents.c"
-	"cgame/cg_main.c"
-	"cgame/cg_mainext.cpp"
-	"cgame/cg_marks.c"
-	"cgame/cg_missionbriefing.c"
-	"cgame/cg_multiview.c"
-	"cgame/cg_newDraw.c"
-	"cgame/cg_particles.c"
-	"cgame/cg_players.c"
-	"cgame/cg_playerstate.c"
-	"cgame/cg_polybus.c"
-	"cgame/cg_popupmessages.c"
-	"cgame/cg_predict.c"
-	"cgame/cg_scoreboard.c"
-	"cgame/cg_servercmds.c"
-	"cgame/cg_snapshot.c"
-	"cgame/cg_sound.c"
-	"cgame/cg_spawn.c"
-	"cgame/cg_statsranksmedals.c"
-	"cgame/cg_syscalls.c"
-	"cgame/cg_timerun.cpp"
-	"cgame/cg_trails.c"
-	"cgame/cg_view.c"
-	"cgame/cg_weapons.c"
-	"cgame/cg_window.c"
-	"cgame/cg_manual.c"
-	"sha-1/bg_sha.c"
-	"sha-1/sha1.c"
+file(GLOB CGAME_SRC
+	"cgame/cg_atmospheric.cpp"
+	"cgame/cg_character.cpp"
+	"cgame/cg_commandmap.cpp"
+	"cgame/cg_consolecmds.cpp"
+	"cgame/cg_debriefing.cpp"
+	"cgame/cg_draw.cpp"
+	"cgame/cg_drawCHS.cpp"
+	"cgame/cg_drawtools.cpp"
+	"cgame/cg_effects.cpp"
+	"cgame/cg_ents.cpp"
+	"cgame/cg_edv.cpp"
+	"cgame/etj_client_commands_handler.cpp"
+	"cgame/etj_console_alpha.cpp"
+	"cgame/etj_client_authentication.cpp"
+	"cgame/etj_cvar_shadow.cpp"
+	"cgame/etj_cvar_update_handler.cpp"
+	"cgame/etj_draw_leaves_handler.cpp"
+	"cgame/etj_entity_events_handler.cpp"
+	"cgame/etj_maxspeed.cpp"
+	"cgame/etj_operating_system_linux.cpp"
+	"cgame/etj_overbounce_watcher.cpp"
+	"cgame/etj_trickjump_lines.cpp"
+	"cgame/etj_utilities.cpp"
+	"cgame/cg_event.cpp"
+	"cgame/cg_fireteamoverlay.cpp"
+	"cgame/cg_fireteams.cpp"
+	"cgame/cg_flamethrower.cpp"
 	"cgame/cg_identification.cpp"
-	"game/bg_animation.c"
-	"game/bg_animgroup.c"
-	"game/bg_character.c"
-	"game/bg_classes.c"
-	"game/bg_misc.c"
-	"game/bg_pmove.c"
-	"game/bg_slidemove.c"
-	"game/bg_sscript.c"
-	"game/bg_stats.c"
-	"game/bg_tracemap.c"
-	"game/q_math.c"
-	"game/q_shared.c"
-	"ui/ui_shared.c"
+	"cgame/cg_info.cpp"
+	"cgame/cg_limbopanel.cpp"
+	"cgame/cg_loadpanel.cpp"
+	"cgame/cg_localents.cpp"
+	"cgame/cg_main.cpp"
+	"cgame/cg_mainext.cpp"
+	"cgame/cg_manual.cpp"
+	"cgame/cg_marks.cpp"
+	"cgame/cg_missionbriefing.cpp"
+	"cgame/cg_multiview.cpp"
+	"cgame/cg_newDraw.cpp"
+	"cgame/cg_particles.cpp"
+	"cgame/cg_players.cpp"
+	"cgame/cg_playerstate.cpp"
+	"cgame/cg_polybus.cpp"
+	"cgame/cg_popupmessages.cpp"
+	"cgame/cg_predict.cpp"
+	"cgame/cg_scoreboard.cpp"
+	"cgame/cg_servercmds.cpp"
+	"cgame/cg_snapshot.cpp"
+	"cgame/cg_sound.cpp"
+	"cgame/cg_spawn.cpp"
+	"cgame/cg_statsranksmedals.cpp"
+	"cgame/cg_syscalls.cpp"
+	"cgame/cg_timerun.cpp"
+	"cgame/cg_trails.cpp"
+	"cgame/cg_view.cpp"
+	"cgame/cg_weapons.cpp"
+	"cgame/cg_window.cpp"
 	"cgame/etj_drawable.cpp"
-  "cgame/etj_timerun_view.cpp"
-)
-
-FILE(GLOB QAGAME_SRC
-	"game/async_operation.cpp"
-	"game/bg_animation.c"
-	"game/bg_animgroup.c"
-	"game/bg_campaign.c"
-	"game/bg_character.c"
-	"game/bg_classes.c"
-	"game/bg_misc.c"
-	"game/bg_pmove.c"
-	"game/bg_slidemove.c"
-	"game/bg_sscript.c"
-	"game/bg_stats.c"
-	"game/bg_tracemap.c"
-	"game/commands.cpp"
-	"game/custom_map_votes.cpp"
-	"game/etj_database.cpp"
-	"game/g_active.c"
-	"game/g_alarm.c"
-	"game/g_antilag.c"
-	"game/g_buddy_list.c"
-	"game/g_character.c"
-	"game/g_client.c"
-	"game/g_cmds.c"
-	"game/g_cmds_ext.c"
-	"game/g_combat.c"
-	"game/g_fireteams.c"
-	"game/g_items.c"
-	"game/g_main.c"
-	"game/g_match.c"
-	"game/g_mem.c"
-	"game/g_misc.c"
-	"game/g_missile.c"
-	"game/g_mover.c"
-	"game/g_props.c"
-	"game/g_referee.c"
-	"game/g_script.c"
-	"game/g_script_actions.c"
-	"game/g_session.c"
-	"game/g_spawn.c"
-	"game/g_stats.c"
-	"game/g_sv_entities.c"
-	"game/g_svcmds.c"
-	"game/g_syscalls.c"
-	"game/g_systemmsg.c"
-	"game/g_target.c"
-	"game/g_team.c"
-	"game/g_teammapdata.c"
-	"game/g_trigger.c"
-	"game/g_utilities.cpp"
-	"game/g_utils.c"
-	"game/g_vote.c"
-	"game/g_weapon.c"
-	"game/game.cpp"
-	"game/levels.cpp"
-	"game/main_ext.cpp"
-	"game/map_statistics.cpp"
-	"game/motd.cpp"
-	"game/operation_queue.cpp"
-	"game/printer.cpp"
-	"game/q_math.c"
-	"game/q_shared.c"
-	"game/random_map_mode.cpp"
-	"game/save.cpp"
-	"game/session.cpp"
-	"game/sqlite_wrapper.cpp"
-	"game/tokens.cpp"
-	"game/timerun.cpp"
-	"game/user.cpp"
-	"game/etj_utilities.cpp"
-  "game/etj_progression_tracker.cpp"
-  "game/etj_progression_tracker_parser.cpp"
-  "game/etj_banner_system.cpp"
-  "game/etj_command_variables.cpp"
-  "game/etj_common.hpp"
-  "game/etj_main.cpp"
-	"json/jsoncpp.cpp"
-	"sha-1/bg_sha.c"
+	"cgame/etj_timerun_view.cpp"
+	"game/etj_string_utilities.cpp"
+	"game/etj_file.cpp"
+	"game/bg_animation.cpp"
+	"game/bg_animgroup.cpp"
+	"game/bg_character.cpp"
+	"game/bg_classes.cpp"
+	"game/bg_misc.cpp"
+	"game/bg_pmove.cpp"
+	"game/bg_slidemove.cpp"
+	"game/bg_sscript.cpp"
+	"game/bg_stats.cpp"
+	"game/bg_tracemap.cpp"
+	"game/q_math.cpp"
+	"game/q_shared.cpp"
+	"sha-1/bg_sha.cpp"
 	"sha-1/sha1.c"
-	"sqlite/sqlite3.c"
+	"ui/ui_shared.cpp"
+	"json/jsoncpp.cpp"
 )
 
-FILE(GLOB UI_SRC
-	"ui/ui_atoms.c"
-	"ui/ui_gameinfo.c"
-	"ui/ui_loadpanel.c"
-	"ui/ui_main.c"
-	"ui/ui_players.c"
-	"ui/ui_shared.c"
-	"ui/ui_syscalls.c"
-	"ui/ui_util.c"
-	"game/bg_campaign.c"
-	"game/bg_classes.c"
-	"game/bg_misc.c"
-	"game/q_math.c"
-	"game/q_shared.c"
+file(GLOB QAGAME_SRC
+	"game/bg_animation.cpp"
+	"game/bg_animgroup.cpp"
+	"game/bg_campaign.cpp"
+	"game/bg_character.cpp"
+	"game/bg_classes.cpp"
+	"game/bg_misc.cpp"
+	"game/bg_pmove.cpp"
+	"game/bg_slidemove.cpp"
+	"game/bg_sscript.cpp"
+	"game/bg_stats.cpp"
+	"game/bg_tracemap.cpp"
+	"game/etj_async_operation.cpp"
+	"game/etj_banner_system.cpp"
+	"game/etj_command_variables.cpp"
+	"game/etj_command_parser.cpp"
+	"game/etj_command_system.cpp"
+	"game/etj_commands.cpp"
+	"game/etj_common.h"
+	"game/etj_custom_map_votes.cpp"
+	"game/etj_database.cpp"
+	"game/etj_deathrun_system.cpp"
+	"game/etj_entity_utilities.cpp"
+	"game/etj_file.cpp"
+	"game/etj_result_set_formatter.cpp"
+	"game/etj_game.cpp"
+	"game/etj_levels.cpp"
+	"game/etj_main.cpp"
+	"game/etj_main_ext.cpp"
+	"game/etj_map_statistics.cpp"
+	"game/etj_motd.cpp"
+	"game/etj_operation_queue.cpp"
+	"game/etj_printer.cpp"
+	"game/etj_progression_tracker.cpp"
+	"game/etj_progression_tracker_parser.cpp"
+	"game/etj_random_map_mode.cpp"
+	"game/etj_save_system.cpp"
+	"game/etj_session.cpp"
+	"game/etj_sqlite_wrapper.cpp"
+	"game/etj_timerun.cpp"
+	"game/etj_tokens.cpp"
+	"game/etj_user.cpp"
+	"game/etj_utilities.cpp"
+	"game/etj_string_utilities.cpp"
+	"game/g_active.cpp"
+	"game/g_alarm.cpp"
+	"game/g_antilag.cpp"
+	"game/g_buddy_list.cpp"
+	"game/g_character.cpp"
+	"game/g_client.cpp"
+	"game/g_cmds.cpp"
+	"game/g_cmds_ext.cpp"
+	"game/g_combat.cpp"
+	"game/g_fireteams.cpp"
+	"game/g_items.cpp"
+	"game/g_main.cpp"
+	"game/g_match.cpp"
+	"game/g_mem.cpp"
+	"game/g_misc.cpp"
+	"game/g_missile.cpp"
+	"game/g_mover.cpp"
+	"game/g_props.cpp"
+	"game/g_script.cpp"
+	"game/g_script_actions.cpp"
+	"game/g_session.cpp"
+	"game/g_spawn.cpp"
+	"game/g_stats.cpp"
+	"game/g_sv_entities.cpp"
+	"game/g_svcmds.cpp"
+	"game/g_syscalls.cpp"
+	"game/g_systemmsg.cpp"
+	"game/g_target.cpp"
+	"game/g_team.cpp"
+	"game/g_teammapdata.cpp"
+	"game/g_trigger.cpp"
+	"game/g_utilities.cpp"
+	"game/g_utils.cpp"
+	"game/g_vote.cpp"
+	"game/g_weapon.cpp"
+	"game/q_math.cpp"
+	"game/q_shared.cpp"
+	"json/jsoncpp.cpp"
+	"sqlite/sqlite3.c"
+	"sha-1/bg_sha.cpp"
+	"sha-1/sha1.c"
+)
+
+file(GLOB UI_SRC
+	"game/bg_campaign.cpp"
+	"game/bg_classes.cpp"
+	"game/bg_misc.cpp"
+	"game/q_math.cpp"
+	"game/q_shared.cpp"
+	"ui/ui_atoms.cpp"
+	"ui/ui_gameinfo.cpp"
+	"ui/ui_loadpanel.cpp"
+	"ui/ui_main.cpp"
+	"ui/ui_players.cpp"
+	"ui/ui_shared.cpp"
+	"ui/ui_syscalls.cpp"
+	"ui/ui_util.cpp"
 )
 
 # cgame library building

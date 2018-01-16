@@ -11,9 +11,21 @@
 #ifndef __BG_PUBLIC_H__
 #define __BG_PUBLIC_H__
 
+#include <boost/preprocessor/facilities/is_empty.hpp>
+
 #define GAME_VERSION    "etjump"
 
-#define MOD_VERSION     "2.1.0 Alpha"
+#if DEBUG
+#define MOD_VERSION "dev " __DATE__ " " __TIME__
+#else
+#if !defined(MOD_VERSION) || BOOST_PP_IS_EMPTY(MOD_VERSION) 
+#define MOD_VERSION "2.3.0"
+#endif
+#endif
+
+//#define MOD_VERSION     "2.2.0"
+#define ETJUMP_VERSION ("ETJump " MOD_VERSION)
+#define ETJUMP_WEB      "www.etjump.com"
 
 #define BUILD_TIME __DATE__ " " __TIME__
 
@@ -318,17 +330,20 @@ typedef struct
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 // Client flags for server processing
-#define CGF_AUTORELOAD      0x01
-#define CGF_STATSDUMP       0x02
-#define CGF_AUTOACTIVATE    0x04
-#define CGF_PREDICTITEMS    0x08
-#define CGF_NOFATIGUE       0x10
-#define CGF_PMOVEFIXED      0x20
-#define CGF_CGAZ            0x40
-#define CGF_LOADVIEWANGLES  0x80
-#define CGF_CHEATCVARSON    0x100
-#define CGF_HIDEME          0x200
-#define CGF_ENABLE_TIMERUNS 0x400
+#define CGF_AUTORELOAD		0x01
+#define CGF_STATSDUMP		0x02
+#define CGF_AUTOACTIVATE	0x04
+#define CGF_PREDICTITEMS	0x08
+#define CGF_NOFATIGUE		0x10
+#define CGF_PMOVEFIXED		0x20
+#define CGF_CGAZ			0x40
+#define CGF_LOADVIEWANGLES	0x80
+#define CGF_CHEATCVARSON	0x100
+#define CGF_HIDEME			0x200
+#define CGF_ENABLE_TIMERUNS	0x400
+#define CGF_NOACTIVATELEAN	0x800
+#define CGF_AUTO_LOAD		0x1000
+#define CGF_QUICK_FOLLOW	0x2000
 
 #define MAX_MOTDLINES   6
 
@@ -536,7 +551,7 @@ typedef struct
 
 	qboolean releasedFire;
 	float noclipScale;
-
+	bool isJumpLand;
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
 
@@ -589,6 +604,11 @@ typedef struct
 	// for fixed msec Pmove
 	int pmove_fixed;
 	int pmove_msec;
+
+	// ETJump: shared values between client & server
+	int shared;
+	// ETJump: enable/disable strafe + activate = lean
+	qboolean noActivateLean;
 
 	qboolean walking;
 	trace_t groundTrace;
@@ -713,6 +733,7 @@ typedef enum
 #define EF_BOUNCE_HALF      0x08000000      // for missiles
 #define EF_MOVER_STOP       0x10000000      // will push otherwise	// (SA) moved down to make space for one more client flag
 #define EF_MOVER_BLOCKED    0x20000000      // mover was blocked dont lerp on the client // xkan, moved down to make space for client flag
+#define EF_BOBBING          EF_SPARE0       // controls bobbing for pickup items (using existed one because eFlags are transmited as 24 bit)
 
 #define BG_PlayerMounted(eFlags) ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) || (eFlags & EF_AAGUN_ACTIVE))
 
@@ -1044,6 +1065,7 @@ typedef enum
 	EV_GRENADE_BOUNCE,      // eventParm will be the soundindex
 	EV_GENERAL_SOUND,
 	EV_GENERAL_SOUND_VOLUME,
+	EV_GENERAL_CLIENT_SOUND_VOLUME, // ETJump: play sound from the specific entity to the client
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
 	EV_GLOBAL_TEAM_SOUND,   // no attenuation, team only
@@ -1121,8 +1143,9 @@ typedef enum
 	EV_ARTYMESSAGE,
 	EV_AIRSTRIKEMESSAGE,
 	EV_MEDIC_CALL,
-	EV_PORTAL2_FIRE, //Feen: PGM - Portal Gun Events - NOTE: EV_PORTAL1_FIRE event is covered by EV_FIRE_WEAPON event...
 	EV_PORTAL_TELEPORT,
+	EV_LOAD_TELEPORT,
+	EV_UPHILLSTEP,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 
@@ -1288,8 +1311,8 @@ typedef enum
 } animNumber_t;
 
 // text represenation for scripting
-extern char *animStrings[];     // defined in bg_misc.c
-extern char *animStringsOld[];      // defined in bg_misc.c
+extern const char *animStrings[];     // defined in bg_misc.c
+extern const char *animStringsOld[];      // defined in bg_misc.c
 
 
 typedef enum
@@ -1566,13 +1589,13 @@ typedef enum
 // JOSEPH 4-17-00
 typedef struct gitem_s
 {
-	char *classname;        // spawning name
-	char *pickup_sound;
-	char *world_model[MAX_ITEM_MODELS];
+	const char *classname;        // spawning name
+	const char *pickup_sound;
+	const char *world_model[MAX_ITEM_MODELS];
 
-	char *icon;
-	char *ammoicon;
-	char *pickup_name;          // for printing on pickup
+	const char *icon;
+	const char *ammoicon;
+	const char *pickup_name;          // for printing on pickup
 
 	int quantity;               // for ammo how much, or duration of powerup (value not necessary for ammo/health.  that value set in gameskillnumber[] below)
 	itemType_t giType;          // IT_* flags
@@ -1582,8 +1605,8 @@ typedef struct gitem_s
 	int giAmmoIndex;            // type of weapon ammo this uses.  (ex. WP_MP40 and WP_LUGER share 9mm ammo, so they both have WP_LUGER for giAmmoIndex)
 	int giClipIndex;            // which clip this weapon uses.  this allows the sniper rifle to use the same clip as the garand, etc.
 
-	char *precaches;            // string of all models and images this item will use
-	char *sounds;               // string of all sounds this item will use
+	const char *precaches;            // string of all models and images this item will use
+	const char *sounds;               // string of all sounds this item will use
 
 //	int			gameskillnumber[5];
 } gitem_t;
@@ -1613,6 +1636,7 @@ int BG_AkimboSidearm(int weaponNum);
 qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon);
 
 qboolean    BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps, int *skill, int teamNum);
+qboolean    BG_WeaponIsExplosive(int weap);
 
 
 // content masks
@@ -1697,7 +1721,7 @@ void    BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out);
 
 void    BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm, playerState_t *ps);
 
-//void	BG_TouchJumpPad( playerState_t *ps, entityState_t *jumppad );
+void	BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad);	// Aciz: uncommented for trigger_push
 
 void    BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, qboolean snap);
 void    BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s, int time, qboolean snap);
@@ -1882,7 +1906,7 @@ typedef enum
 
 typedef struct
 {
-	char *string;
+	const char *string;
 	int hash;
 } animStringItem_t;
 
@@ -2273,15 +2297,15 @@ void BG_RotatePoint(vec3_t point, const vec3_t matrix[3]);
 void BG_TransposeMatrix(const vec3_t matrix[3], vec3_t transpose[3]);
 void BG_CreateRotationMatrix(const vec3_t angles, vec3_t matrix[3]);
 
-int trap_PC_AddGlobalDefine(char *define);
+int trap_PC_AddGlobalDefine(const char *define);
 int trap_PC_LoadSource(const char *filename);
 int trap_PC_FreeSource(int handle);
 int trap_PC_ReadToken(int handle, pc_token_t *pc_token);
 int trap_PC_SourceFileAndLine(int handle, char *filename, int *line);
 int trap_PC_UnReadToken(int handle);
 
-void PC_SourceError(int handle, char *format, ...);
-void PC_SourceWarning(int handle, char *format, ...);
+void PC_SourceError(int handle, const char *format, ...);
+void PC_SourceWarning(int handle, const char *format, ...);
 
 #ifdef GAMEDLL
 const char *PC_String_Parse(int handle);
@@ -2346,9 +2370,9 @@ int BG_strRelPos(char *in, int index);
 int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF);
 
 // Crosshair support
-void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
+void BG_setCrosshair(char *colString, float *col, float alpha, const char *cvarName);
 // color support
-void BG_setColor(char *colString, vec4_t col, float alpha, char *cvarName);
+void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName);
 
 // Voting
 #define VOTING_DISABLED     ((1 << numVotesAvailable) - 1)
@@ -2508,7 +2532,6 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB);
  * Admin system HWID & GUID transfer protocol consts
  */
 #define HWID_REQUEST "HWIDREQUEST"
-#define GUID_REQUEST "GUIDREQUEST"
 
 struct Manual
 {
@@ -2563,4 +2586,26 @@ static const struct Manual commandManuals[] = {
 	{ "userinfo",     "!userinfo -id [id]",                                                                                                                                                             "Prints user info."                                                                  }
 };
 
-#endif
+typedef struct
+{
+	char id[32]; // voice chat id
+	char custom[128]; // voice chat custom text
+	int variant; // voice chat variation 
+	float random; // recieve random from the server
+} vsayCmd_t;
+
+// Overbounce is disabled on current map
+const int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
+// jump delay is disabled
+const int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
+// Save is disabled
+const int BG_LEVEL_NO_SAVE = 1 << 2;
+// Fall damage is disabled
+const int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
+// Fall damage is disabled (force)
+const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
+// Prone is disabled
+const int BG_LEVEL_NO_PRONE = 1 << 5;
+
+#endif // __BG_PUBLIC_H__
+
