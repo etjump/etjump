@@ -453,7 +453,7 @@ void CG_DrawPMItems(void)
 		return;
 	}
 
-	if (etj_popupShadow.integer) {
+	if (etj_popupShadow.integer > 0) {
 		textStyle = ITEM_TEXTSTYLE_SHADOWED;
 	}
 

@@ -506,7 +506,7 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName, ali
 	char *colorString = etj_CHSColor.string;
 	char *colorToken;
 
-	if (etj_CHSShadow.integer) {
+	if (etj_CHSShadow.integer > 0) {
 		textStyle = ITEM_TEXTSTYLE_SHADOWED;
 	}
 

@@ -96,7 +96,7 @@ void ETJump::TimerunView::draw()
 	auto fadeOut = 2000; // 2s fade out
 	auto fadeStart = 5000; // 5s pause
 
-	if (etj_runTimerShadow.integer) {
+	if (etj_runTimerShadow.integer > 0) {
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 

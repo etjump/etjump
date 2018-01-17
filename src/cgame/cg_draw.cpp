@@ -640,7 +640,7 @@ static void CG_DrawSpeed2(void)
 		return;
 	}
 
-	if (etj_speedShadow.integer) {
+	if (etj_speedShadow.integer > 0) {
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
@@ -923,7 +923,7 @@ static void CG_DrawTeamInfo(void)
 	int textStyle = ITEM_TEXTSTYLE_NORMAL;
 	float textAlpha = etj_chatAlpha.value;
 
-	if (etj_chatShadow.integer) {
+	if (etj_chatShadow.integer > 0) {
 		textStyle = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
@@ -4168,7 +4168,7 @@ namespace ETJump
 		{
 			if (shader)
 			{
-				drawPic(x, y, keySize, keySize, shader, cg.keysColor, shadowColor);
+				drawPic(x, y, keySize, keySize, shader, cg.keysColor, drawShadow ? shadowColor : nullptr);
 			}
 		});
 	}
