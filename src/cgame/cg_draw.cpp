@@ -3,8 +3,21 @@
 
 #include "cg_local.h"
 #include "../game/q_shared.h"
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include "etj_irenderable.h"
 #include "../game/etj_numeric_utilities.h"
+#include <functional>
+#include <array>
+#include <vector>
+#include <map>
+#include <string>
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -1027,7 +1040,7 @@ static void CG_DrawTeamInfo(void)
 
 			}
 
-			CG_Text_Paint_Ext(linePosx, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(linePosX, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
 		}
 	}
 }
@@ -3854,12 +3867,12 @@ namespace ETJump
 
 	static void drawSaveIcon(float x, float y)
 	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, true, SaveShadowColor);
+		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, SaveShadowColor);
 	}
 
 	static void drawProneIcon(float x, float y)
 	{
-		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor, true, ProneShadowColor);
+		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor, ProneShadowColor);
 	}
 
 	static void printNoProne(void)
@@ -4052,175 +4065,114 @@ static void CG_DrawPronePrint(void)
 	ETJump::printNoProne();
 }
 
-
-// Define keysets
-
-enum class KeyTypes
+namespace ETJump
 {
-	Hidden,
-	Keyset1,
-	Keyset2,
-};
+	// the field order of KeyNames enumerator should match the keys_set_t structure
+	enum KeyNames
+	{
+		Forward,
+		Backward,
+		Right,
+		Left,
+		Jump,
+		Crouch,
+		Sprint,
+		Prone
+	};
 
+	struct KeyMapping
+	{
+		int statIndex;
+		int keyBit;
+		int keyOffset;
+	};
 
-static void CG_DrawKeys(void)
-{
-	playerState_t *ps;
-	float         x, y, size;
-	int           skew;
-	bool          drawShadow = etj_keysShadow.integer > 0;
-	vec4_t        shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	static std::map<KeyNames, KeyMapping> keySetMapping {
+		{ Forward, { STAT_USERCMD_MOVE, UMOVE_FORWARD, Forward } },
+		{ Backward, { STAT_USERCMD_MOVE, UMOVE_BACKWARD, Backward } },
+		{ Right, { STAT_USERCMD_MOVE, UMOVE_RIGHT, Right } },
+		{ Left, { STAT_USERCMD_MOVE, UMOVE_LEFT, Left } },
+		{ Jump, { STAT_USERCMD_MOVE, UMOVE_UP, Jump } },
+		{ Crouch, { STAT_USERCMD_MOVE, UMOVE_DOWN, Crouch } },
+		{ Sprint, { STAT_USERCMD_BUTTONS, BUTTON_SPRINT << 8, Sprint } },
+		{ Prone, { STAT_USERCMD_BUTTONS, WBUTTON_PRONE, Prone } }
+	};
 
-	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
+	static std::vector<int> getKeySetShaders(keys_set_t *keyShaders, std::vector<KeyMapping *> &buttons)
+	{
+		auto ps = getValidPlayerState();
+		auto startOffset = reinterpret_cast<qhandle_t *>(keyShaders);
+		std::vector<int> keySetShaders;
 
-	if (drawKeysValue <= KeyTypes::Hidden)
-	{
-		return;
-	}
+		for (auto &button : buttons) {
+			if (button == nullptr) {
+				keySetShaders.push_back(0);
+				continue;
+			}
+			auto shader = startOffset + button->keyOffset * 2;
+			if (ps->stats[button->statIndex] & button->keyBit) {
+				keySetShaders.push_back(*shader);
+			}
+			else {
+				keySetShaders.push_back(*(shader + 1));
+			}
+		}
 
-	// some checks
-	if (cg_keysSize.value < 0 || cg_keysX.value < 0 || cg_keysY.value < 0
-	    || cg_keysX.value > 640.f || cg_keysY.value > SCREEN_HEIGHT)
-	{
-		return;
-	}
-	
-	skew = 0;
-
-	ps = &cg.predictedPlayerState;
-
-	size = cg_keysSize.value / 3;
-	// first (upper) row
-	// sprint (upper left)
-	x = cg_keysX.value + 2 * skew;
-	y = cg_keysY.value;
-
-	ETJump_AdjustPosition(&x);
-
-	if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.SprintPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.SprintPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.SprintNotPressedShader);
-	}
-	// forward
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.ForwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.ForwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.ForwardNotPressedShader);
-	}
-	// jump (upper right)
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.JumpPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.JumpPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.JumpNotPressedShader);
+		return keySetShaders;
 	}
 
-	// second (middle) row
-	// left
-	x = cg_keysX.value + skew;
-	y += size;
-
-	ETJump_AdjustPosition(&x);
-
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue == KeyTypes::Keyset1)
+	typedef std::function<void(float, float, int)> DrawFunc;
+	template <int Rows, int Cols>
+	static void drawGrid(vec2_t &origin, float cellSize, std::vector<int> &items, DrawFunc draw)
 	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.LeftPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.LeftPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.LeftNotPressedShader);
-	}
-	// right
-	x += 2 * size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.RightPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.RightPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.RightNotPressedShader);
+		for (auto i = 0; i < Rows * Cols; i++)
+		{
+			float xOffset = origin[0] + cellSize * (i % Cols);
+			float yOffset = origin[1] + cellSize * static_cast<int>(i / Cols);
+			draw(xOffset, yOffset, items[i]);
+		}
 	}
 
-	// third (bottom) row
-	x = cg_keysX.value;
-	y += size;
+	static std::vector<keys_set_t*> availableKeySets {
+		&cgs.media.keys,
+		&cgs.media.keys2,
+		// add new here
+	};
 
-	ETJump_AdjustPosition(&x);
+	static std::vector<KeyMapping *> keyLayout {
+		&keySetMapping[Sprint], &keySetMapping[Forward],  &keySetMapping[Jump],
+		&keySetMapping[Left],   nullptr,                  &keySetMapping[Right],
+		&keySetMapping[Prone],  &keySetMapping[Backward], &keySetMapping[Crouch]
+	};
 
-	// prone (bottom left)
-	if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue == KeyTypes::Keyset1)
+	static void drawKeySet()
 	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.PronePressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.PronePressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.ProneNotPressedShader);
-	}
-	// backward
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.BackwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.BackwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.BackwardNotPressedShader);
-	}
-	// crouch (bottom right)
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.CrouchPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.CrouchPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.CrouchNotPressedShader);
+		if (cg_drawKeys.integer <= 0 || cg_keysSize.value <= 0)
+		{
+			return;
+		}
+
+		float keySize = cg_keysSize.value / 3;
+		float centerOffset = keySize * 3 / 2;
+		vec2_t origin{
+			ETJump_AdjustPosition(Numeric::clamp(cg_keysX.value, 0.f, 640.f)) - centerOffset,
+			Numeric::clamp(cg_keysY.value, 0.f, 480.f) - centerOffset
+		};
+
+		auto keySetIndex = Numeric::clamp(cg_drawKeys.integer, 1, availableKeySets.size()) - 1;
+		auto keySetShaders = getKeySetShaders(availableKeySets[keySetIndex], keyLayout);
+
+		bool drawShadow = etj_keysShadow.integer > 0;
+		vec4_t shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+		drawGrid<3, 3>(origin, keySize, keySetShaders, [&](float x, float y, int shader)
+		{
+			if (shader)
+			{
+				drawPic(x, y, keySize, keySize, shader, cg.keysColor, shadowColor);
+			}
+		});
 	}
 }
-
 
 /*
 =================
@@ -5083,7 +5035,7 @@ void CG_DrawCompassIcon(float x, float y, float w, float h, vec3_t origin, vec3_
 	x = x + (cos(angle) * w);
 	y = y + (sin(angle) * w);
 
-	len = 1 - min(1.f, len / 2000.f);
+	len = 1 - std::min(1.f, len / 2000.f);
 
 
 	CG_DrawPic(x - (14 * len + 4) / 2, y - (14 * len + 4) / 2, 14 * len + 8, 14 * len + 8, shader);
@@ -6278,7 +6230,7 @@ static void CG_Draw2D(void)
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
 			CG_DrawSpeed2();
-			CG_DrawKeys();
+			ETJump::drawKeySet();
 			CG_DrawProneIndicator();
 			CG_DrawPronePrint();
 		}

@@ -299,7 +299,7 @@ clientInfo_t *CG_SortedFireTeamPlayerForPosition(int pos, int max)
 #define FT_BAR_HEIGHT 10.f
 void CG_DrawFireTeamOverlay(rectDef_t *rect)
 {
-	int            x = rect->x + etj_fireteamPosX.integer;
+	int            x = rect->x;
 	int            y = rect->y + 1 + etj_fireteamPosY.integer; // +1, jitter it into place in 1024 :)
 	float          h;
 	clientInfo_t   *ci = NULL;
@@ -314,6 +314,9 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect)
 	vec4_t         borderColor = { 0.5f, 0.5f, 0.5f, 0.5f }; // window
 
 	float fireteamAlpha = etj_fireteamAlpha.value;
+	float fireteamOffsetX = ETJump_AdjustPosition(etj_fireteamPosX.value);
+	
+	x += fireteamOffsetX;
 
 	// ft alpha
 	if (fireteamAlpha > 1.0) {
@@ -368,7 +371,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect)
 	for (i = 0; i < 15; i++)
 	{
 		y += FT_BAR_HEIGHT + FT_BAR_YSPACING;
-		x = rect->x + 2 + etj_fireteamPosX.integer;
+		x = rect->x + 2 + fireteamOffsetX;
 
 		ci = CG_SortedFireTeamPlayerForPosition(i, 15);
 		if (!ci)
@@ -440,7 +443,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect)
 
 			s = va("^3(%s)", BG_GetLocationString(loc));
 
-			x = rect->x + (204 - 4 - CG_Text_Width_Ext(s, .2f, 0, &cgs.media.limboFont2)) + etj_fireteamPosX.integer;
+			x = rect->x + (204 - 4 - CG_Text_Width_Ext(s, .2f, 0, &cgs.media.limboFont2)) + fireteamOffsetX;
 
 			CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, va("^3(%s)", BG_GetLocationString(loc)), 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
 		}

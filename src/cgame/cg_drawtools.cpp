@@ -29,6 +29,10 @@ void ETJump_AdjustPosition(float *x) {
 	*x *= (SCREEN_WIDTH / 640.f);
 }
 
+float ETJump_AdjustPosition(float x) {
+	return x * (SCREEN_WIDTH / 640.f);
+}
+
 void ETJump_EnableWidthScale(bool enable) {
 	if (enable) {
 		cgs.screenXScale = cgs.glconfig.vidWidth / static_cast<float>(SCREEN_WIDTH);
@@ -1626,9 +1630,9 @@ namespace ETJump
 		DrawString(x, y, 0.3f, 0.3f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
-	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, bool enableShadows, const vec4_t shadowColor)
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, const vec4_t shadowColor)
 	{
-		if (enableShadows)
+		if (shadowColor)
 		{
 			trap_R_SetColor(shadowColor);
 			CG_DrawPic(x + 1, y + 1, sizex, sizey, hShader);

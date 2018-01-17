@@ -436,11 +436,13 @@ void CG_DrawPMItems(void)
 	int          i, size;
 	pmListItem_t *listItem = cg_pmOldList;
 	float        y         = 360 + etj_popupPosY.integer;
-	int			 x         = 4 + etj_popupPosX.integer;
 	int          x_off     = 0;
 	char         *msg;
 	float        textAlpha = etj_popupAlpha.value;
 	int          textStyle = ITEM_TEXTSTYLE_NORMAL;
+	float popupOffsetX = ETJump_AdjustPosition(etj_popupPosX.value);
+
+	int x = 4 + popupOffsetX;
 
 	if (!etj_HUD_popup.integer) {
 		return;
@@ -497,7 +499,7 @@ void CG_DrawPMItems(void)
 
 	if (etj_HUD_popup.integer > 1) {
 		x_off = CG_Text_Width_Ext(msg, 0.2f, 0, &cgs.media.limboFont2) + size + 4;
-		x = SCREEN_WIDTH - size - 4 + etj_popupPosX.integer;
+		x = SCREEN_WIDTH - size - 4 + popupOffsetX;
 	}
 
 	trap_R_SetColor(colourText);

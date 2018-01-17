@@ -559,7 +559,7 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName, ali
 void CG_DrawCHS(void)
 {
 	int x, y;
-	int CHS2Align = ALIGN_LEFT;
+	align_t CHS2Align = ALIGN_LEFT;
 
 	// CHS1
 	if (cg_drawCHS1.integer)
@@ -585,13 +585,13 @@ void CG_DrawCHS(void)
 	// CHS2
 	if (cg_drawCHS2.integer)
 	{
-
-		x = 30 + etj_CHS2PosX.integer;
-		y = (SCREEN_HEIGHT / 2) + 40 + etj_CHS2PosY.integer;
+		float chs2OffsetX = ETJump_AdjustPosition(etj_CHS2PosX.value);
+		x = 30 + chs2OffsetX;
+		y = (SCREEN_HEIGHT / 2) + 40 + etj_CHS2PosY.value;
 
 		if (cg_drawCHS2.integer > 1) {
 			CHS2Align = ALIGN_RIGHT;
-			x = SCREEN_WIDTH - 30 + etj_CHS2PosX.integer;
+			x = SCREEN_WIDTH - 30 + chs2OffsetX;
 		}
 
 		CG_CHS_DrawSingleInfo(x, y +  0, cg_CHS2Info1.integer, qtrue, CHS2Align);
