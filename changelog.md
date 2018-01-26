@@ -132,6 +132,7 @@
 * fixed an issue with difference calculations in timerun prints
 * reformatted timerun timer format to `MM:SS.xxx`
 * added a new icon for timerun popup prints
+* added `etj_enableOB` to enable/disable overbounces client side
 
 # ETJump 2.2.0
 

@@ -344,6 +344,7 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 #define CGF_NOACTIVATELEAN	0x800
 #define CGF_AUTO_LOAD		0x1000
 #define CGF_QUICK_FOLLOW	0x2000
+#define CGF_ENABLE_OB		0x4000
 
 #define MAX_MOTDLINES   6
 
@@ -609,6 +610,9 @@ typedef struct
 	int shared;
 	// ETJump: enable/disable strafe + activate = lean
 	qboolean noActivateLean;
+
+	//ETJump: client side OB toggle
+	qboolean enableOB;
 
 	qboolean walking;
 	trace_t groundTrace;

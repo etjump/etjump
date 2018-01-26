@@ -1277,6 +1277,9 @@ void CG_PredictPlayerState(void)
 		// ETJump: client side no activate lean
 		cg_pmove.noActivateLean = etj_noActivateLean.integer ? qtrue : qfalse;
 
+		// ETJump: client side OB toggle
+		cg_pmove.enableOB = etj_enableOB.integer ? qtrue : qfalse;
+
 #ifdef SAVEGAME_SUPPORT
 		if (CG_IsSinglePlayer() && cg_reloading.integer)
 		{
