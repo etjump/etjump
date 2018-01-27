@@ -67,7 +67,7 @@ void ETJump::OverbounceWatcher::render() const
 {
 	auto ps = getPlayerState();
 
-	if (!etj_drawObWatcher.integer)
+	if (!etj_drawObWatcher.integer || etj_disableOB.integer)
 	{
 		return;
 	}

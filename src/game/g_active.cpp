@@ -511,6 +511,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 		pm.trace         = trap_TraceCapsuleNoEnts;
 		pm.pointcontents = trap_PointContents;
 		pm.noActivateLean = client->pers.noActivateLean;
+		pm.disableOB = client->pers.disableOB;
 
 #ifdef SAVEGAME_SUPPORT
 		if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer)
@@ -1314,6 +1315,7 @@ void ClientThink_real(gentity_t *ent)
 	pm.pmove_msec  = pmove_msec.integer;
 	pm.shared = shared.integer;
 	pm.noActivateLean = client->pers.noActivateLean;
+	pm.disableOB = client->pers.disableOB;
 
 	pm.noWeapClips = qfalse;
 
