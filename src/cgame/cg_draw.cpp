@@ -3639,7 +3639,7 @@ static void CG_DrawOB(void)
 	playerState_t *ps;
 	float         x;
 
-	if (!cg_drawOB.integer || cg_thirdPerson.integer || !etj_enableOB.integer)
+	if (!cg_drawOB.integer || cg_thirdPerson.integer || etj_disableOB.integer)
 	{
 		return;
 	}

@@ -2222,6 +2222,23 @@ static void PM_GroundTraceMissed(void)
 
 /*
 =============
+PM_DisableFlatOB
+
+Disables overbounces on flat ground
+=============
+*/
+static void PM_DisableFlatOB(trace_t trace)
+{
+	pm->ps->velocity[2] = 0;
+	if (trace.plane.type == 2 && pm->waterlevel < 2)
+	{
+		auto offset = pm->ps->origin[2] - trace.endpos[2];
+		pm->ps->origin[2] -= offset;
+	}
+}
+
+/*
+=============
 PM_GroundTrace
 =============
 */
@@ -2332,7 +2349,7 @@ static void PM_GroundTrace(void)
 		PM_CrashLand();
 
 		// Disable overbounce?
-		if (!pm->enableOB)
+		if (pm->disableOB)
 		{
 			PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
 		}
@@ -2363,16 +2380,11 @@ static void PM_GroundTrace(void)
 	pm->ps->groundEntityNum = trace.entityNum;
 
 	// Disable overbounce?
-	if (!pm->enableOB)
+	if (pm->disableOB)
 	{
 		if (trace.plane.normal[2] == 1)
 		{
-			pm->ps->velocity[2] = 0;
-			if (trace.plane.type == 2 && pm->waterlevel < 2)
-			{
-				auto offset = pm->ps->origin[2] - trace.endpos[2];
-				pm->ps->origin[2] -= offset;
-			}
+			PM_DisableFlatOB(trace);
 		}
 	}
 
@@ -2380,23 +2392,13 @@ static void PM_GroundTrace(void)
 	{
 		if (trace.plane.normal[2] == 1 && !((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 		{
-			pm->ps->velocity[2] = 0;
-			if (trace.plane.type == 2 && pm->waterlevel < 2)
-			{
-				auto offset = pm->ps->origin[2] - trace.endpos[2];
-				pm->ps->origin[2] -= offset;
-			}
+			PM_DisableFlatOB(trace);
 		}
 	} else
 	{
 		if (trace.plane.normal[2] == 1 && ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 		{
-			pm->ps->velocity[2] = 0;
-			if (trace.plane.type == 2 && pm->waterlevel < 2)
-			{
-				auto offset = pm->ps->origin[2] - trace.endpos[2];
-				pm->ps->origin[2] -= offset;
-			}
+			PM_DisableFlatOB(trace);
 		}
 	}
 	
