@@ -515,6 +515,7 @@ vmCvar_t etj_autoLoad;
 vmCvar_t etj_uphillSteps;
 vmCvar_t etj_quickFollow;
 vmCvar_t etj_chatLineWidth;
+vmCvar_t etj_loopedSounds;
 
 typedef struct
 {
@@ -870,14 +871,32 @@ cvarTable_t cvarTable[] =
 	{ &etj_proneIndicatorX, "etj_proneIndicatorX", "615", CVAR_ARCHIVE },
 	{ &etj_proneIndicatorY, "etj_proneIndicatorY", "338", CVAR_ARCHIVE },
 	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
-	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
 	{ &etj_chatLineWidth, "etj_chatLineWidth", "62", CVAR_ARCHIVE },
+	{ &etj_loopedSounds, "etj_loopedSounds", "1", CVAR_ARCHIVE },
 };
 
 
 int      cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
 qboolean cvarsLoaded   = qfalse;
 void CG_setClientFlags(void);
+
+namespace ETJump
+{
+	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime)
+	{
+		if (etj_loopedSounds.integer > 0)
+		{
+			trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
+		}
+	}
+	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime)
+	{
+		if (etj_loopedSounds.integer > 0)
+		{
+			trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
+		}
+	}
+}
 
 
 /*

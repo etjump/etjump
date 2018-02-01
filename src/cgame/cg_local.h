@@ -3906,6 +3906,8 @@ namespace ETJump
 	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
+	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
