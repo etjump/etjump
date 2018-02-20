@@ -654,6 +654,10 @@ void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activat
 
 	if (self->outSpeed > 0)
 	{
+		if (VectorCompare(activator->client->ps.velocity, vec3_origin)) // If we don't have any velocity when teleporting, theres nothing to scale from, so let's add some
+		{
+			VectorSet(activator->client->ps.velocity, 0.01, 0.01, 0.0);
+		}
 		VectorNormalize(activator->client->ps.velocity);  // normalize velocity 
 		VectorScale(activator->client->ps.velocity, self->outSpeed, activator->client->ps.velocity); // scale it up again
 	}
