@@ -465,6 +465,10 @@ void trigger_teleporter_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	if (self->outSpeed > 0)
 	{
+		if (VectorCompare(other->client->ps.velocity, vec3_origin)) // If we don't have any velocity when teleporting, theres nothing to scale from, so let's add some
+		{
+			VectorSet(other->client->ps.velocity, 0.01, 0.01, 0.0);
+		}
 		VectorNormalize(other->client->ps.velocity);  // normalize velocity 
 		VectorScale(other->client->ps.velocity, self->outSpeed, other->client->ps.velocity); // scale it up again
 	}
