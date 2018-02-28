@@ -462,6 +462,12 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 			return;
 		}
 
+		// Don't draw icon for hidden players
+		if (ETJump::hideMeCheck(ci->clientNum))
+		{
+			return;
+		}
+
 		if (ci->team == TEAM_AXIS)
 		{
 			if (mEntFilter & CC_FILTER_AXIS)

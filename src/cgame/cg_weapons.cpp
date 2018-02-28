@@ -7044,6 +7044,11 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, i
 
 	cent = &cg_entities[fleshEntityNum];
 
+	if (ETJump::hideMeCheck(sourceEntityNum))
+	{
+		return;
+	}
+
 	// JPW NERVE -- don't ever shoot if we're binoced in
 	if (cg_entities[sourceEntityNum].currentState.eFlags & EF_ZOOMING)
 	{

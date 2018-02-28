@@ -369,12 +369,26 @@ static void CG_SetNextSnap(snapshot_t *snap)
 	BG_PlayerStateToEntityState(&snap->ps, &cg_entities[snap->ps.clientNum].nextState, qfalse);
 	cg_entities[cg.snap->ps.clientNum].interpolate = qtrue;
 
+	clientInfo_t *ci = nullptr;
+
 	// check for extrapolation errors
 	for (num = 0 ; num < snap->numEntities ; num++)
 	{
-		es   = &snap->entities[num];
-		cent = &cg_entities[es->number];
+		es = &snap->entities[num];
 
+		/* If player is hidden, make entity invalid to prevent
+		   various cgame events from revealing position.
+		   FIXME: when player takes off hideme, events fire */
+		if (es->number < MAX_CLIENTS)
+		{
+			ci = &cgs.clientinfo[es->number];
+			if (ci->hideMe)
+			{
+				continue;
+			}
+		}
+
+		cent = &cg_entities[es->number];
 		memcpy(&cent->nextState, es, sizeof(entityState_t));
 		//cent->nextState = *es;
 

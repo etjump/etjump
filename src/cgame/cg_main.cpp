@@ -896,6 +896,20 @@ namespace ETJump
 			trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
 		}
 	}
+
+	// General purpose etj_hideMe check for cgame events
+	bool hideMeCheck(int entityNum)
+	{
+		auto ci = &cgs.clientinfo[entityNum];
+		bool isHiddenPlayer = ci->hideMe && entityNum != cg.clientNum;
+		if (entityNum < MAX_CLIENTS)
+		{
+			if (isHiddenPlayer)
+			{
+				return true;
+			}
+		}
+	}
 }
 
 
