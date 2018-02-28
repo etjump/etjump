@@ -375,20 +375,21 @@ static void CG_SetNextSnap(snapshot_t *snap)
 	for (num = 0 ; num < snap->numEntities ; num++)
 	{
 		es = &snap->entities[num];
+		cent = &cg_entities[es->number];
 
 		/* If player is hidden, make entity invalid to prevent
-		   various cgame events from revealing position.
-		   FIXME: when player takes off hideme, events fire */
+		   various cgame events from revealing position. */
 		if (es->number < MAX_CLIENTS)
 		{
-			ci = &cgs.clientinfo[es->number];
-			if (ci->hideMe)
+			
+			if (ETJump::hideMeCheck(es->number))
 			{
+				cent->nextState.eventSequence = es->eventSequence;
 				continue;
 			}
 		}
 
-		cent = &cg_entities[es->number];
+		
 		memcpy(&cent->nextState, es, sizeof(entityState_t));
 		//cent->nextState = *es;
 
