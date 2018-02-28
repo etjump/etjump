@@ -369,8 +369,6 @@ static void CG_SetNextSnap(snapshot_t *snap)
 	BG_PlayerStateToEntityState(&snap->ps, &cg_entities[snap->ps.clientNum].nextState, qfalse);
 	cg_entities[cg.snap->ps.clientNum].interpolate = qtrue;
 
-	clientInfo_t *ci = nullptr;
-
 	// check for extrapolation errors
 	for (num = 0 ; num < snap->numEntities ; num++)
 	{
