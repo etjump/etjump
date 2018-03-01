@@ -2113,7 +2113,7 @@ void CG_Player(centity_t *cent)
 			return;
 		}
 
-		if (ci->hideMe)
+		if (!cg.demoPlayback && ci->hideMe)
 		{
 			return;
 		}
