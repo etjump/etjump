@@ -6065,17 +6065,62 @@ void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
 		return;
 	}
 
-	if (jumppad->nextWeapon)
+	if (jumppad->constantLight & 0xffff)
 	{
 		VectorNormalize2(jumppad->origin2, dir);
 		s = DotProduct(ps->velocity, dir);
 		if (s < 500)
 		{
 			// don't play the event sound again if we are in a fat trigger
-			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->nextWeapon, ps);
+			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->constantLight & 0xffff, ps);
 		}
 	}
 
 	// Launch player
 	VectorCopy(jumppad->origin2, ps->velocity);
+}
+
+/*
+================
+BG_TouchVelocityJumpPad
+Adds the speed of jumppad to players
+current speed rather than setting it.
+================
+*/
+void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad)
+{
+	float s;
+	vec3_t dir;
+	vec3_t playerVelocity;
+
+	// Disable for specs
+	if (ps->pm_type != PM_NORMAL)
+	{
+		return;
+	}
+
+	if (jumppad->constantLight & 0xffff)
+	{
+		VectorNormalize2(jumppad->origin2, dir);
+		s = DotProduct(ps->velocity, dir);
+		if (s < 500)
+		{
+			// don't play the event sound again if we are in a fat trigger
+			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->constantLight & 0xffff, ps);
+		}
+	}
+
+	// Launch player
+	VectorCopy(jumppad->origin2, dir);
+	VectorNormalizeFast(dir);
+
+	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
+	int jumppadSpeed = jumppad->constantLight >> 16;
+
+	VectorScale(dir, playerSpeed, playerVelocity);
+	VectorMA(playerVelocity, jumppadSpeed, dir, playerVelocity);
+
+	playerVelocity[2] = jumppad->origin2[2];
+
+	VectorCopy(playerVelocity, ps->velocity);
 }

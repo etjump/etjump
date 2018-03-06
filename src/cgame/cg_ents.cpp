@@ -2965,6 +2965,7 @@ static void CG_ProcessEntity(centity_t *cent)
 	case ET_CAMERA:
 	case ET_INVISIBLE:
 	case ET_PUSH_TRIGGER:
+	case ET_VELOCITY_PUSH_TRIGGER:
 	case ET_TELEPORT_TRIGGER:
 	case ET_OID_TRIGGER:
 	case ET_AI_EFFECT:
