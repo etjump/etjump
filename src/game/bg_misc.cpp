@@ -6051,6 +6051,26 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB)
 
 /*
 ================
+BG_CalculatePushVelocity
+Calculate final speed for velocity pushers
+================
+*/
+void BG_CalculatePushVelocity(playerState_t *ps, vec3_t origin, float speed, vec3_t outVelocity)
+{
+	vec3_t dir;
+	VectorCopy(origin, dir);
+	VectorNormalizeFast(dir);
+
+	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
+
+	VectorScale(dir, playerSpeed, outVelocity);
+	VectorMA(outVelocity, speed, dir, outVelocity);
+
+	outVelocity[2] = origin[2];
+}
+
+/*
+================
 BG_TouchJumpPad
 ================
 */
@@ -6065,17 +6085,53 @@ void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
 		return;
 	}
 
-	if (jumppad->nextWeapon)
+	if (jumppad->constantLight & 0xffff)
 	{
 		VectorNormalize2(jumppad->origin2, dir);
 		s = DotProduct(ps->velocity, dir);
 		if (s < 500)
 		{
 			// don't play the event sound again if we are in a fat trigger
-			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->nextWeapon, ps);
+			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->constantLight & 0xffff, ps);
 		}
 	}
 
 	// Launch player
 	VectorCopy(jumppad->origin2, ps->velocity);
+}
+
+/*
+================
+BG_TouchVelocityJumpPad
+Adds the speed of jumppad to players
+current speed rather than setting it.
+================
+*/
+void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad)
+{
+	float s;
+	vec3_t dir;
+	vec3_t outVelocity;
+
+	// Disable for specs
+	if (ps->pm_type != PM_NORMAL)
+	{
+		return;
+	}
+
+	if (jumppad->constantLight & 0xffff)
+	{
+		VectorNormalize2(jumppad->origin2, dir);
+		s = DotProduct(ps->velocity, dir);
+		if (s < 500)
+		{
+			// don't play the event sound again if we are in a fat trigger
+			BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, jumppad->constantLight & 0xffff, ps);
+		}
+	}
+
+	// Launch player
+	BG_CalculatePushVelocity(ps, jumppad->origin2, jumppad->constantLight >> 16, outVelocity);
+
+	VectorCopy(outVelocity, ps->velocity);
 }

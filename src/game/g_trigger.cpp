@@ -306,7 +306,15 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 	
-	BG_TouchJumpPad(&other->client->ps, &self->s);
+	switch (self->s.eType)
+	{
+	case ET_PUSH_TRIGGER:
+		BG_TouchJumpPad(&other->client->ps, &self->s);
+		break;
+	case ET_VELOCITY_PUSH_TRIGGER:
+		BG_TouchVelocityJumpPad(&other->client->ps, &self->s);
+		break;
+	}
 }
 
 
@@ -365,6 +373,17 @@ This will be client side predicted, unlike target_push
 void SP_trigger_push(gentity_t *self)
 {
 	char *s;
+	int speedInt;
+
+	if (!self->speed)
+	{
+		self->speed = 1000;
+	}
+	G_SetMovedir(self->s.angles, self->s.origin2);
+	VectorScale(self->s.origin2, self->speed, self->s.origin2);
+
+	speedInt = static_cast<int>(self->speed);
+	self->s.constantLight |= speedInt << 16;
 
 	InitTrigger(self);
 
@@ -374,18 +393,30 @@ void SP_trigger_push(gentity_t *self)
 	// Noise key support
 	G_SpawnString("noise", "", &s);
 	self->noise_index = G_SoundIndex(s);
-	self->s.nextWeapon = self->noise_index;
+	self->s.constantLight |= self->noise_index & 0xffff;
 
-	self->s.eType = ET_PUSH_TRIGGER;
+	if (self->target)
+	{
+		self->think = AimAtTarget;
+		self->nextthink = level.time + FRAMETIME;
+	}
+	if (self->spawnflags & 2)
+	{
+		self->s.eType = ET_VELOCITY_PUSH_TRIGGER;
+	}
+	else
+	{
+		self->s.eType = ET_PUSH_TRIGGER;
+	}
+
 	self->touch = trigger_push_touch;
-	self->think = AimAtTarget;
-	self->nextthink = level.time + FRAMETIME;
 	trap_LinkEntity(self);
 }
 
-
 void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
+	vec3_t outVelocity;
+
 	if (!activator->client)
 	{
 		return;
@@ -396,7 +427,15 @@ void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
-	VectorCopy(self->s.origin2, activator->client->ps.velocity);
+	if (self->spawnflags & 2)
+	{
+		BG_CalculatePushVelocity(&activator->client->ps, self->s.origin2, self->speed, outVelocity);
+		VectorCopy(outVelocity, activator->client->ps.velocity);
+	}
+	else
+	{
+		VectorCopy(self->s.origin2, activator->client->ps.velocity);
+	}
 
 	// play fly sound every 1.5 seconds
 	if (activator->fly_sound_debounce_time < level.time)
