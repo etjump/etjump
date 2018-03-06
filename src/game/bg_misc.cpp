@@ -6051,6 +6051,38 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB)
 
 /*
 ================
+BG_CalculatePushVelocity
+Calculate final speed for velocity pushers
+================
+*/
+void BG_CalculatePushVelocity(playerState_t *ps, vec3_t origin, float speed, vec3_t outVelocity)
+{
+	vec3_t dir;
+	VectorCopy(origin, dir);
+	VectorNormalizeFast(dir);
+	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
+	VectorScale(dir, playerSpeed, outVelocity);
+	VectorMA(outVelocity, speed, dir, outVelocity);
+	outVelocity[2] = origin[2];
+
+	/*
+	vec3_t dir;
+
+	VectorCopy(origin, dir);
+	VectorNormalizeFast(dir);
+
+	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
+	int jumppadSpeed = jumppad->constantLight >> 16;
+
+	VectorScale(dir, playerSpeed, *playerVelocity);
+	VectorMA(*playerVelocity, jumppadSpeed, dir, *playerVelocity);
+
+	*playerVelocity[2] = jumppad->origin2[2];
+	*/
+}
+
+/*
+================
 BG_TouchJumpPad
 ================
 */
@@ -6091,7 +6123,7 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad)
 {
 	float s;
 	vec3_t dir;
-	vec3_t playerVelocity;
+	vec3_t outVelocity;
 
 	// Disable for specs
 	if (ps->pm_type != PM_NORMAL)
@@ -6111,16 +6143,7 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad)
 	}
 
 	// Launch player
-	VectorCopy(jumppad->origin2, dir);
-	VectorNormalizeFast(dir);
+	BG_CalculatePushVelocity(ps, jumppad->origin2, jumppad->constantLight >> 16, outVelocity);
 
-	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
-	int jumppadSpeed = jumppad->constantLight >> 16;
-
-	VectorScale(dir, playerSpeed, playerVelocity);
-	VectorMA(playerVelocity, jumppadSpeed, dir, playerVelocity);
-
-	playerVelocity[2] = jumppad->origin2[2];
-
-	VectorCopy(playerVelocity, ps->velocity);
+	VectorCopy(outVelocity, ps->velocity);
 }

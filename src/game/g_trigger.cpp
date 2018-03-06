@@ -306,18 +306,15 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 	
-	BG_TouchJumpPad(&other->client->ps, &self->s);
-}
-
-void trigger_velocity_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
-{
-	// Only activate for players
-	if (!other->client)
+	switch (self->s.eType)
 	{
-		return;
+	case ET_PUSH_TRIGGER:
+		BG_TouchJumpPad(&other->client->ps, &self->s);
+		break;
+	case ET_VELOCITY_PUSH_TRIGGER:
+		BG_TouchVelocityJumpPad(&other->client->ps, &self->s);
+		break;
 	}
-
-	BG_TouchVelocityJumpPad(&other->client->ps, &self->s);
 }
 
 
@@ -406,43 +403,19 @@ void SP_trigger_push(gentity_t *self)
 	if (self->spawnflags & 2)
 	{
 		self->s.eType = ET_VELOCITY_PUSH_TRIGGER;
-		self->touch = trigger_velocity_push_touch;
 	}
 	else
 	{
 		self->s.eType = ET_PUSH_TRIGGER;
-		self->touch = trigger_push_touch;
 	}
 
+	self->touch = trigger_push_touch;
 	trap_LinkEntity(self);
 }
 
-
 void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
-	if (!activator->client)
-	{
-		return;
-	}
-
-	if (activator->client->ps.pm_type != PM_NORMAL)
-	{
-		return;
-	}
-
-	VectorCopy(self->s.origin2, activator->client->ps.velocity);
-
-	// play fly sound every 1.5 seconds
-	if (activator->fly_sound_debounce_time < level.time)
-	{
-		activator->fly_sound_debounce_time = level.time + 1500;
-		G_Sound(activator, self->noise_index);
-	}
-}
-
-void Use_target_velocity_push(gentity_t *self, gentity_t *other, gentity_t *activator)
-{
-	vec3_t dir, playerVelocity;
+	vec3_t outVelocity;
 
 	if (!activator->client)
 	{
@@ -454,17 +427,15 @@ void Use_target_velocity_push(gentity_t *self, gentity_t *other, gentity_t *acti
 		return;
 	}
 
-	VectorCopy(self->s.origin2, dir);
-	VectorNormalizeFast(dir);
-
-	float playerSpeed = sqrt(pow(activator->client->ps.velocity[0], 2) + pow(activator->client->ps.velocity[1], 2));
-
-	VectorScale(dir, playerSpeed, playerVelocity);
-	VectorMA(playerVelocity, self->speed, dir, playerVelocity);
-
-	playerVelocity[2] = self->s.origin2[2];
-
-	VectorCopy(playerVelocity, activator->client->ps.velocity);
+	if (self->spawnflags & 2)
+	{
+		BG_CalculatePushVelocity(&activator->client->ps, self->s.origin2, self->speed, outVelocity);
+		VectorCopy(outVelocity, activator->client->ps.velocity);
+	}
+	else
+	{
+		VectorCopy(self->s.origin2, activator->client->ps.velocity);
+	}
 
 	// play fly sound every 1.5 seconds
 	if (activator->fly_sound_debounce_time < level.time)
@@ -503,14 +474,7 @@ void SP_target_push(gentity_t *self)
 		self->think     = AimAtTarget;
 		self->nextthink = level.time + FRAMETIME;
 	}
-	if (self->spawnflags & 2)
-	{
-		self->use = Use_target_velocity_push;
-	}
-	else
-	{
-		self->use = Use_target_push;
-	}
+	self->use = Use_target_push;
 }
 
 /*
