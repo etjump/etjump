@@ -6060,25 +6060,13 @@ void BG_CalculatePushVelocity(playerState_t *ps, vec3_t origin, float speed, vec
 	vec3_t dir;
 	VectorCopy(origin, dir);
 	VectorNormalizeFast(dir);
+
 	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
+
 	VectorScale(dir, playerSpeed, outVelocity);
 	VectorMA(outVelocity, speed, dir, outVelocity);
+
 	outVelocity[2] = origin[2];
-
-	/*
-	vec3_t dir;
-
-	VectorCopy(origin, dir);
-	VectorNormalizeFast(dir);
-
-	float playerSpeed = sqrt(pow(ps->velocity[0], 2) + pow(ps->velocity[1], 2));
-	int jumppadSpeed = jumppad->constantLight >> 16;
-
-	VectorScale(dir, playerSpeed, *playerVelocity);
-	VectorMA(*playerVelocity, jumppadSpeed, dir, *playerVelocity);
-
-	*playerVelocity[2] = jumppad->origin2[2];
-	*/
 }
 
 /*
