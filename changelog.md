@@ -133,6 +133,17 @@
 * reformatted timerun timer format to `MM:SS.xxx`
 * added a new icon for timerun popup prints
 * added `etj_loopedSounds` to toggle playback of looped sounds in maps
+* improvements to `etj_hideMe`:
+  * footsteps, gun firing, pickup, reload and impact sounds are now silent
+  * command map/compass doesn't draw icon anymore
+  * bullet tracers, brass and wallmarks are hidden
+  * demos recorded while hidden now show yourself on freecam/3rd person
+    * does NOT draw other players on demo who were also hidden
+* fixed `etj_weaponSound` not affecting flamethrower
+* added spawnflag __2__ `ADD_XY` to `target/trigger_push`
+  * adds the XY velocity from the pusher to your current velocity, rather than setting it
+  * when this is set, `speed` key affects the pusher even when its targeting `target_position`
+
 
 # ETJump 2.2.0
 
