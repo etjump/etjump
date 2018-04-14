@@ -1088,12 +1088,6 @@ static void CG_UndoSpeaker_f(void)
 	}
 }
 
-static void CG_ResetMaxSpeed_f(void)
-{
-	cg.resetmaxspeed = qtrue;
-}
-
-
 void CG_ForceTapOut_f(void)
 {
 	trap_SendClientCommand("forcetapout");
@@ -1478,7 +1472,6 @@ static consoleCommand_t commands[] =
 	{ "undoSpeaker",         CG_UndoSpeaker_f        },
 	{ "cpm",                 CG_CPM_f                },
 	{ "forcetapout",         CG_ForceTapOut_f        },
-	{ "resetmaxspeed",       CG_ResetMaxSpeed_f      },
 	{ "startTimer",          CG_StartTimer           },
 	{ "stopTimer",           CG_StopTimer            },
 	{ "portal",              CG_portalinfo_f         },

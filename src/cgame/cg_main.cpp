@@ -18,6 +18,8 @@
 #include "etj_cvar_shadow.h"
 #include "etj_console_alpha.h"
 #include "etj_draw_leaves_handler.h"
+#include "etj_utilities.h"
+#include "etj_speed_drawable.h"
 
 displayContextDef_t cgDC;
 
@@ -939,10 +941,8 @@ void CG_RegisterCvars(void)
 	CG_setClientFlags();
 	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
-
 	cvarsLoaded = qtrue;
 }
 
@@ -994,10 +994,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)
 				{
 					BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-				}
-				else if (cv->vmCvar == &cg_speedColor || cv->vmCvar == &cg_speedAlpha)
-				{
-					BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 				}
 				else if (cv->vmCvar == &cg_keysColor)
 				{
@@ -3637,6 +3633,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::OverbounceWatcher(ETJump::consoleCommandsHandler.get())));
 	// Display max speed from previous load session
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
