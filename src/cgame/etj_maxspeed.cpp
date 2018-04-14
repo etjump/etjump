@@ -2,6 +2,8 @@
 #include "etj_maxspeed.h"
 #include "cg_local.h"
 #include <string>
+#include "etj_utilities.h"
+#include "etj_cvar_update_handler.h"
 
 ETJump::DisplayMaxSpeed::DisplayMaxSpeed(EntityEventsHandler* entityEventsHandler) :
 	_entityEventsHandler{ entityEventsHandler }
@@ -24,11 +26,27 @@ ETJump::DisplayMaxSpeed::DisplayMaxSpeed(EntityEventsHandler* entityEventsHandle
 		_maxSpeed = 0;
 		_animationStartTime = cg.time;
 	});
+
+	parseColor(cg_speedColor.string, _color);
+	cvarUpdateHandler->subscribe(&cg_speedColor, [&](const vmCvar_t *cvar)
+	{
+		parseColor(cg_speedColor.string, _color);
+	});
+	cvarUpdateHandler->subscribe(&cg_speedAlpha, [&](const vmCvar_t *cvar)
+	{
+		parseColor(cg_speedColor.string, _color);
+	});
 }
 
 ETJump::DisplayMaxSpeed::~DisplayMaxSpeed()
 {
 	_entityEventsHandler->unsubcribe(EV_LOAD_TELEPORT);
+}
+
+void ETJump::DisplayMaxSpeed::parseColor(const std::string& color, vec4_t& out)
+{
+	parseColorString(color, out);
+	out[3] *= cg_speedAlpha.value;
 }
 
 void ETJump::DisplayMaxSpeed::beforeRender()
@@ -50,7 +68,8 @@ void ETJump::DisplayMaxSpeed::render() const
 
 	vec4_t color;
 	auto fade = CG_FadeAlpha(_animationStartTime, etj_maxSpeedDuration.integer);
-	Vector4Set(color, cg.speedColor[0], cg.speedColor[1], cg.speedColor[2], fade);
+	Vector4Copy(_color, color);
+	color[3] *= fade;
 
 	auto sizex = 0.1f, sizey = 0.1f;
 	sizex *= cg_speedSizeX.integer;
