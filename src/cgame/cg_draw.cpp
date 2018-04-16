@@ -616,89 +616,6 @@ static float CG_DrawSpeed(float y)
 	return y + 12 + 4;
 }
 
-static void CG_DrawSpeed2(void)
-{
-	char         status[128];
-	float        sizex, sizey;
-	float        x, y, w;
-	static vec_t speed;
-	static vec_t topSpeed;
-	int          style = ITEM_TEXTSTYLE_NORMAL;
-
-	if (cg.resetmaxspeed)
-	{
-		topSpeed         = 0;
-		cg.resetmaxspeed = qfalse;
-	}
-
-	if (!cg_drawSpeed2.integer)
-	{
-		return;
-	}
-
-	if (etj_speedShadow.integer > 0) {
-		style = ITEM_TEXTSTYLE_SHADOWED;
-	}
-
-	speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
-
-	if (speed > topSpeed)
-	{
-		topSpeed = speed;
-	}
-
-	sizex  = sizey = 0.1f;
-	sizex *= cg_speedSizeX.integer;
-	sizey *= cg_speedSizeY.integer;
-
-	x = cg_speedX.integer;
-	y = cg_speedY.integer;
-
-	ETJump_AdjustPosition(&x);
-
-	switch (cg_drawSpeed2.integer)
-	{
-	case 2:
-		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
-		break;
-	case 3:
-		Com_sprintf(status, sizeof(status), va("%.0f ^z%.0f", speed, topSpeed));
-		break;
-	case 4:
-		Com_sprintf(status, sizeof(status), va("%.0f (%.0f)", speed, topSpeed));
-		break;
-	case 5:
-		Com_sprintf(status, sizeof(status), va("%.0f ^z(%.0f)", speed, topSpeed));
-		break;
-	case 6:
-		Com_sprintf(status, sizeof(status), va("%.0f ^z[%.0f]", speed, topSpeed));
-		break;
-	case 7:
-		Com_sprintf(status, sizeof(status), va("%.0f | %.0f", speed, topSpeed));
-		break;
-	case 8:
-		Com_sprintf(status, sizeof(status), va("Speed: %.0f", speed));
-		break;
-	case 9:
-	{
-		auto tens = static_cast<int>(speed) / 10 % 10 * 10;
-		Com_sprintf(status, sizeof status, va("%02i", tens));
-	}
-		break;
-	default:
-		Com_sprintf(status, sizeof(status), va("%.0f", speed));
-	}
-
-	w = CG_Text_Width_Ext(status, sizex, 0, &cgs.media.limboFont2) / 2;
-	if (cg_drawSpeed2.integer == 8)
-	{
-		w = 0;
-	}
-
-	CG_Text_Paint_Ext(x - w, y, sizex, sizey, cg.speedColor, status, 0, 0, style, &cgs.media.limboFont1);
-}
-
-
 float CG_DrawTime(float y)
 {
 	char    displayTime[12];
@@ -6115,7 +6032,7 @@ static void CG_Draw2D(void)
 			CG_DrawSlick();
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
-			CG_DrawSpeed2();
+			CG_DrawKeys();
 			CG_DrawProneIndicator();
 			CG_DrawPronePrint();
 		}

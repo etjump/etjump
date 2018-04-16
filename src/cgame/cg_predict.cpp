@@ -60,6 +60,7 @@ void CG_BuildSolidList(void)
 
 		if (ent->eType == ET_ITEM ||
 		    ent->eType == ET_PUSH_TRIGGER ||
+			ent->eType == ET_VELOCITY_PUSH_TRIGGER ||
 		    ent->eType == ET_TELEPORT_TRIGGER ||
 		    ent->eType == ET_CONCUSSIVE_TRIGGER ||
 		    ent->eType == ET_OID_TRIGGER
@@ -669,7 +670,8 @@ static void CG_TouchTriggerPrediction(void)
 
 		if (ent->eType == ET_CONSTRUCTIBLE ||
 		    ent->eType == ET_OID_TRIGGER ||
-			ent->eType == ET_PUSH_TRIGGER
+			ent->eType == ET_PUSH_TRIGGER ||
+			ent->eType == ET_VELOCITY_PUSH_TRIGGER
 #ifdef VISIBLE_TRIGGERS
 		    || ent->eType == ET_TRIGGER_MULTIPLE
 		    || ent->eType == ET_TRIGGER_FLAGONLY
@@ -696,7 +698,7 @@ static void CG_TouchTriggerPrediction(void)
 			else
 #endif // VISIBLE_TRIGGERS
 			{
-				if (ent->eType != ET_PUSH_TRIGGER)
+				if (ent->eType != ET_PUSH_TRIGGER && ent->eType != ET_VELOCITY_PUSH_TRIGGER)
 				{
 					// expand the bbox a bit
 					VectorSet(mins, mins[0] - 48, mins[1] - 48, mins[2] - 48);
@@ -734,6 +736,11 @@ static void CG_TouchTriggerPrediction(void)
 			if (ent->eType == ET_PUSH_TRIGGER)
 			{
 				BG_TouchJumpPad(&cg.predictedPlayerState, ent);
+			}
+
+			if (ent->eType == ET_VELOCITY_PUSH_TRIGGER)
+			{
+				BG_TouchVelocityJumpPad(&cg.predictedPlayerState, ent);
 			}
 
 			continue;

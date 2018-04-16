@@ -372,9 +372,22 @@ static void CG_SetNextSnap(snapshot_t *snap)
 	// check for extrapolation errors
 	for (num = 0 ; num < snap->numEntities ; num++)
 	{
-		es   = &snap->entities[num];
+		es = &snap->entities[num];
 		cent = &cg_entities[es->number];
 
+		/* If player is hidden, make entity invalid to prevent
+		   various cgame events from revealing position. */
+		if (es->number < MAX_CLIENTS)
+		{
+			
+			if (ETJump::hideMeCheck(es->number))
+			{
+				cent->nextState.eventSequence = es->eventSequence;
+				continue;
+			}
+		}
+
+		
 		memcpy(&cent->nextState, es, sizeof(entityState_t));
 		//cent->nextState = *es;
 

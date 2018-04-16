@@ -19,6 +19,8 @@
 #include "etj_console_alpha.h"
 #include "etj_draw_leaves_handler.h"
 #include "etj_keyset_system.h"
+#include "etj_utilities.h"
+#include "etj_speed_drawable.h
 
 displayContextDef_t cgDC;
 
@@ -535,6 +537,7 @@ vmCvar_t etj_autoLoad;
 vmCvar_t etj_uphillSteps;
 vmCvar_t etj_quickFollow;
 vmCvar_t etj_chatLineWidth;
+vmCvar_t etj_loopedSounds;
 
 typedef struct
 {
@@ -911,14 +914,46 @@ cvarTable_t cvarTable[] =
 	{ &etj_proneIndicatorX, "etj_proneIndicatorX", "615", CVAR_ARCHIVE },
 	{ &etj_proneIndicatorY, "etj_proneIndicatorY", "338", CVAR_ARCHIVE },
 	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
-	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
 	{ &etj_chatLineWidth, "etj_chatLineWidth", "62", CVAR_ARCHIVE },
+	{ &etj_loopedSounds, "etj_loopedSounds", "1", CVAR_ARCHIVE },
 };
 
 
 int      cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
 qboolean cvarsLoaded   = qfalse;
 void CG_setClientFlags(void);
+
+namespace ETJump
+{
+	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime)
+	{
+		if (etj_loopedSounds.integer > 0)
+		{
+			trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
+		}
+	}
+	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime)
+	{
+		if (etj_loopedSounds.integer > 0)
+		{
+			trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
+		}
+	}
+
+	// General purpose etj_hideMe check for cgame events
+	bool hideMeCheck(int entityNum)
+	{
+		auto ci = &cgs.clientinfo[entityNum];
+		bool isHiddenPlayer = ci->hideMe && entityNum != cg.clientNum;
+		if (entityNum < MAX_CLIENTS)
+		{
+			if (isHiddenPlayer)
+			{
+				return true;
+			}
+		}
+	}
+}
 
 
 /*
@@ -980,9 +1015,7 @@ void CG_RegisterCvars(void)
 	CG_setClientFlags();
 	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
-
 	cvarsLoaded = qtrue;
 }
 
@@ -1034,10 +1067,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)
 				{
 					BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-				}
-				else if (cv->vmCvar == &cg_speedColor || cv->vmCvar == &cg_speedAlpha)
-				{
-					BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
 				}
 				else if (cv->vmCvar == &etj_obWatcherColor)
 				{
@@ -3639,6 +3668,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::OverbounceWatcher(ETJump::consoleCommandsHandler.get())));
 	// Display max speed from previous load session
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();

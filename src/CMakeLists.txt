@@ -68,6 +68,7 @@ file(GLOB CGAME_SRC
 	"cgame/etj_maxspeed.cpp"
 	"cgame/etj_operating_system_linux.cpp"
 	"cgame/etj_overbounce_watcher.cpp"
+	"cgame/etj_speed_drawable.cpp"
 	"cgame/etj_trickjump_lines.cpp"
 	"cgame/etj_utilities.cpp"
 	"cgame/cg_event.cpp"

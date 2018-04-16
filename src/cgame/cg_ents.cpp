@@ -246,16 +246,16 @@ static void CG_EntityEffects(centity_t *cent)
 
 			if (cent->currentState.dmgFlags)    // range is set
 			{
-				trap_S_AddRealLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], cent->currentState.dmgFlags, volume, cent->soundTime);
+				ETJump::addRealLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], cent->currentState.dmgFlags, volume, cent->soundTime);
 			}
 			else
 			{
-				trap_S_AddRealLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], 1250, volume, cent->soundTime);
+				ETJump::addRealLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], 1250, volume, cent->soundTime);
 			}
 		}
 		else if (cent->currentState.eType == ET_MOVER)
 		{
-			trap_S_AddLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], cent->currentState.onFireStart, cent->soundTime);
+			ETJump::addLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], cent->currentState.onFireStart, cent->soundTime);
 		}
 		else if (cent->currentState.solid == SOLID_BMODEL)
 		{
@@ -264,11 +264,11 @@ static void CG_EntityEffects(centity_t *cent)
 
 			v = cgs.inlineModelMidpoints[cent->currentState.modelindex];
 			VectorAdd(cent->lerpOrigin, v, origin);
-			trap_S_AddLoopingSound(origin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], cent->currentState.onFireStart, cent->soundTime);
+			ETJump::addLoopingSound(origin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], cent->currentState.onFireStart, cent->soundTime);
 		}
 		else
 		{
-			trap_S_AddLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], 255, cent->soundTime);
+			ETJump::addLoopingSound(cent->lerpOrigin, vec3_origin, cgs.gameSounds[cent->currentState.loopSound], 255, cent->soundTime);
 		}
 	}
 	else if (cent->soundTime)
@@ -2965,6 +2965,7 @@ static void CG_ProcessEntity(centity_t *cent)
 	case ET_CAMERA:
 	case ET_INVISIBLE:
 	case ET_PUSH_TRIGGER:
+	case ET_VELOCITY_PUSH_TRIGGER:
 	case ET_TELEPORT_TRIGGER:
 	case ET_OID_TRIGGER:
 	case ET_AI_EFFECT:

@@ -1386,6 +1386,12 @@ void CG_UpdateFlamethrowerSounds(void)
 	flameChunk_t *f, *trav; // , *lastSoundFlameChunk=NULL; // TTimo: unused
 	#define MIN_BLOW_VOLUME     30
 
+	// Mute sounds if weapon sounds are disabled
+	if (cg_weaponSound.integer <= 0)
+	{
+		return;
+	}
+
 	// draw each of the headFlameChunk's
 	f = headFlameChunks;
 	while (f)

@@ -2363,7 +2363,7 @@ static void CG_PlayScriptSpeaker(bg_speaker_t *speaker, qboolean global)
 		{
 			speaker->soundTime = trap_S_GetCurrentSoundTime();
 		}
-		trap_S_AddRealLoopingSound(speaker->origin, vec3_origin, speaker->noise, speaker->range, speaker->volume, speaker->soundTime);
+		ETJump::addRealLoopingSound(speaker->origin, vec3_origin, speaker->noise, speaker->range, speaker->volume, speaker->soundTime);
 		break;
 	}
 }
