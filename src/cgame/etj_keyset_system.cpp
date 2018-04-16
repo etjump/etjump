@@ -4,8 +4,6 @@
 #include "etj_keyset_keybind_drawer.h"
 #include "../game/etj_string_utilities.h"
 
-extern 	std::vector<std::unique_ptr<ETJump::IRenderable>> ETJump::renderables;
-
 ETJump::KeySetSystem::KeySetSystem(const vmCvar_t &controlCvar) : keySetMasterDrawer(controlCvar) {}
 
 ETJump::KeySetSystem::~KeySetSystem(){}

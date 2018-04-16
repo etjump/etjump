@@ -13,6 +13,7 @@
 
 #include "etj_irenderable.h"
 #include "../game/etj_numeric_utilities.h"
+#include <algorithm>
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
