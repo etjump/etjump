@@ -47,6 +47,14 @@ TEST_F(ColorStringParsingTests, parseColorString_ShouldParseWrongNamedColorStrin
 	ASSERT_TRUE(Vector4Compare(outColor, colorBlack));
 }
 
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParseUppserCasedNamedColorString)
+{
+	const std::string colorString{ "YELLOW" };
+	vec4_t outColor;
+	parseColorString(colorString, outColor);
+	ASSERT_TRUE(Vector4Compare(outColor, colorYellow));
+}
+
 TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBUpperCasedHexColorString)
 {
 	const std::string colorString{ "0XAABBCC" };

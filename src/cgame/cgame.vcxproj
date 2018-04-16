@@ -291,11 +291,15 @@
     <ClCompile Include="etj_client_authentication.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_console_alpha.cpp" />
+    <ClCompile Include="etj_cvar_master_drawer.cpp" />
     <ClCompile Include="etj_cvar_shadow.cpp" />
     <ClCompile Include="etj_cvar_update_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
+    <ClCompile Include="etj_keyset_drawer.cpp" />
+    <ClCompile Include="etj_keyset_keybind_drawer.cpp" />
     <ClCompile Include="etj_entity_events_handler.cpp" />
     <ClCompile Include="etj_draw_leaves_handler.cpp" />
+    <ClCompile Include="etj_keyset_system.cpp" />
     <ClCompile Include="etj_maxspeed.cpp" />
     <ClCompile Include="etj_operating_system_linux.cpp" />
     <ClCompile Include="etj_operating_system_windows.cpp" />
@@ -328,9 +332,12 @@
     <ClInclude Include="etj_console_alpha.h" />
     <ClInclude Include="etj_cvar_shadow.h" />
     <ClInclude Include="etj_cvar_update_handler.h" />
+    <ClInclude Include="etj_keyset_drawer.h" />
+    <ClInclude Include="etj_cvar_master_drawer.h" />
     <ClInclude Include="etj_entity_events_handler.h" />
     <ClInclude Include="etj_draw_leaves_handler.h" />
     <ClInclude Include="etj_irenderable.h" />
+    <ClInclude Include="etj_keyset_system.h" />
     <ClInclude Include="etj_maxspeed.h" />
     <ClInclude Include="etj_operating_system.h" />
     <ClInclude Include="etj_overbounce_watcher.h" />
@@ -340,6 +347,7 @@
     <ClInclude Include="etj_timerun_view.h" />
     <ClInclude Include="etj_trickjump_lines.hpp" />
     <ClInclude Include="etj_utilities.h" />
+    <ClInclude Include="etj_keyset_keybind_drawer.h" />
     <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
   </ItemGroup>

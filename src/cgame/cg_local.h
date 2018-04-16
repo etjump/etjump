@@ -1815,8 +1815,6 @@ typedef struct
 	qhandle_t disconnectIcon;
 
 	qhandle_t fireteamicons[6];
-	keys_set_t keys;
-	keys_set_t keys2;
 
 	//Feen: PGM - Portal Shaders //NOTE - Maybe add shaders for other player portals as well....
 	qhandle_t portal_blueShader;       //Portal 1
@@ -2391,12 +2389,12 @@ extern vmCvar_t cg_drawOB;
 // Aciz: movable drawOB
 extern vmCvar_t etj_OBX;
 extern vmCvar_t etj_OBY;
-extern vmCvar_t cg_drawKeys;
-extern vmCvar_t cg_keysSize;
-extern vmCvar_t cg_keysX;
-extern vmCvar_t cg_keysY;
+extern vmCvar_t etj_drawKeys;
+extern vmCvar_t etj_keysSize;
+extern vmCvar_t etj_keysX;
+extern vmCvar_t etj_keysY;
 extern vmCvar_t etj_keysShadow;
-extern vmCvar_t cg_keysColor;
+extern vmCvar_t etj_keysColor;
 extern vmCvar_t cg_loadviewangles;
 // forty - speedometer
 extern vmCvar_t cg_drawspeed;
@@ -2693,7 +2691,8 @@ int CG_DrawStrlen(const char *str);
 namespace ETJump
 {
 	int DrawStringWidth(const char* text, float scalex);
-	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style);
+	int DrawStringHeight(const char* text, float scalex);
+	void DrawString(float x, float y, float scalex, float scaley, const vec4_t color, qboolean forceColor, const char *text, int limit, int style);
 	void DrawMiniString(int x, int y, const char *s, float alpha);
 	void DrawSmallString(int x, int y, const char *s, float alpha);
 	void DrawBigString(int x, int y, const char *s, float alpha);

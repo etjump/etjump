@@ -18,6 +18,7 @@
 #include "etj_cvar_shadow.h"
 #include "etj_console_alpha.h"
 #include "etj_draw_leaves_handler.h"
+#include "etj_keyset_system.h"
 
 displayContextDef_t cgDC;
 
@@ -330,11 +331,11 @@ vmCvar_t cg_drawOB;
 //Aciz: movable drawOB
 vmCvar_t etj_OBX;
 vmCvar_t etj_OBY;
-vmCvar_t cg_drawKeys;
-vmCvar_t cg_keysColor;
-vmCvar_t cg_keysX;
-vmCvar_t cg_keysY;
-vmCvar_t cg_keysSize;
+vmCvar_t etj_drawKeys;
+vmCvar_t etj_keysColor;
+vmCvar_t etj_keysX;
+vmCvar_t etj_keysY;
+vmCvar_t etj_keysSize;
 vmCvar_t etj_keysShadow;
 vmCvar_t cg_loadviewangles;
 
@@ -738,11 +739,11 @@ cvarTable_t cvarTable[] =
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawKeys,                 "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
-	{ &cg_keysColor,                "etj_keysColor",               "White",                  CVAR_ARCHIVE             },
-	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
-	{ &cg_keysX,                    "etj_keysX",                   "610",                    CVAR_ARCHIVE             },
-	{ &cg_keysY,                    "etj_keysY",                   "220",                    CVAR_ARCHIVE             },
+	{ &etj_drawKeys,                "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
+	{ &etj_keysColor,               "etj_keysColor",               "white",                  CVAR_ARCHIVE             },
+	{ &etj_keysSize,                "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
+	{ &etj_keysX,                   "etj_keysX",                   "610",                    CVAR_ARCHIVE             },
+	{ &etj_keysY,                   "etj_keysY",                   "220",                    CVAR_ARCHIVE             },
 	{ &etj_keysShadow,              "etj_keysShadow",              "0",                      CVAR_ARCHIVE             },
 	{ &cg_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE             },
@@ -980,7 +981,6 @@ void CG_RegisterCvars(void)
 	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 	BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
-	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
 
 	cvarsLoaded = qtrue;
@@ -1038,10 +1038,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_speedColor || cv->vmCvar == &cg_speedAlpha)
 				{
 					BG_setColor(cg_speedColor.string, cg.speedColor, cg_speedAlpha.value, "cg_speedColor");
-				}
-				else if (cv->vmCvar == &cg_keysColor)
-				{
-					BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 				}
 				else if (cv->vmCvar == &etj_obWatcherColor)
 				{
@@ -2567,62 +2563,8 @@ static void CG_RegisterGraphics(void)
 		cgs.media.fireteamicons[i] = trap_R_RegisterShaderNoMip(va("gfx/hud/fireteam/fireteam%i", i + 1));
 	}
 
-    // Keyset 1 (original)
-	cgs.media.keys.ForwardPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_forward_pressed");
-	cgs.media.keys.ForwardNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_forward_not_pressed");
-	cgs.media.keys.BackwardPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_backward_pressed");
-	cgs.media.keys.BackwardNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_backward_not_pressed");
-	cgs.media.keys.RightPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_right_pressed");
-	cgs.media.keys.RightNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_right_not_pressed");
-	cgs.media.keys.LeftPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_left_pressed");
-	cgs.media.keys.LeftNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_left_not_pressed");
-	cgs.media.keys.JumpPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_jump_pressed");
-	cgs.media.keys.JumpNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_jump_not_pressed");
-	cgs.media.keys.CrouchPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_crouch_pressed");
-	cgs.media.keys.CrouchNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_crouch_not_pressed");
-	cgs.media.keys.SprintPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_sprint_pressed");
-	cgs.media.keys.SprintNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_sprint_not_pressed");
-	cgs.media.keys.PronePressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_prone_pressed");
-	cgs.media.keys.ProneNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_prone_not_pressed");
-
-	// Aciz: Keyset 2 (DeFRaG style keys)
-	// No need for another blank key, so only visible keys
-	cgs.media.keys2.ForwardPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_forward_pressed");
-	cgs.media.keys2.BackwardPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_backward_pressed");
-	cgs.media.keys2.RightPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_right_pressed");
-	cgs.media.keys2.LeftPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_left_pressed");
-	cgs.media.keys2.JumpPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_jump_pressed");
-	cgs.media.keys2.CrouchPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_crouch_pressed");
-	cgs.media.keys2.SprintPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_sprint_pressed");
-	cgs.media.keys2.PronePressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_prone_pressed");
-
 	//Feen: CGaz - Register Shader
 	cgs.media.CGazArrow = trap_R_RegisterShaderNoMip("gfx/2d/cgaz_arrow");
-
 
 	//Feen: PGM - Register shaders...
 	cgs.media.portal_blueShader = trap_R_RegisterShader("gfx/misc/portal_blueShader");                //trap_R_RegisterShader( "gfx/misc/electricity_portal2" );
@@ -3396,6 +3338,26 @@ void CG_ClearTrails(void);
 extern qboolean initparticles;
 void CG_ClearParticles(void);
 
+namespace ETJump
+{
+	void initDrawKeys(KeySetSystem *keySetSystem)
+	{
+		// key set themes
+		const char* keySetNames[]{
+			"keyset", // Keyset 1 (original)
+			"keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
+			"keyset3",
+			"keyset4",
+			// + add more
+		};
+		for (const auto &keySetName : keySetNames)
+		{
+			keySetSystem->addSet(keySetName);
+		}
+		keySetSystem->addKeyBindSet("keyset5");
+	}
+}
+
 /*
 =================
 CG_Init
@@ -3680,6 +3642,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
+	auto keySetSystem = new ETJump::KeySetSystem(etj_drawKeys);
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
+	ETJump::initDrawKeys(keySetSystem);
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");

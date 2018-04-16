@@ -13,11 +13,6 @@
 
 #include "etj_irenderable.h"
 #include "../game/etj_numeric_utilities.h"
-#include <functional>
-#include <array>
-#include <vector>
-#include <map>
-#include <string>
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -4065,115 +4060,6 @@ static void CG_DrawPronePrint(void)
 	ETJump::printNoProne();
 }
 
-namespace ETJump
-{
-	// the field order of KeyNames enumerator should match the keys_set_t structure
-	enum KeyNames
-	{
-		Forward,
-		Backward,
-		Right,
-		Left,
-		Jump,
-		Crouch,
-		Sprint,
-		Prone
-	};
-
-	struct KeyMapping
-	{
-		int statIndex;
-		int keyBit;
-		int keyOffset;
-	};
-
-	static std::map<KeyNames, KeyMapping> keySetMapping {
-		{ Forward, { STAT_USERCMD_MOVE, UMOVE_FORWARD, Forward } },
-		{ Backward, { STAT_USERCMD_MOVE, UMOVE_BACKWARD, Backward } },
-		{ Right, { STAT_USERCMD_MOVE, UMOVE_RIGHT, Right } },
-		{ Left, { STAT_USERCMD_MOVE, UMOVE_LEFT, Left } },
-		{ Jump, { STAT_USERCMD_MOVE, UMOVE_UP, Jump } },
-		{ Crouch, { STAT_USERCMD_MOVE, UMOVE_DOWN, Crouch } },
-		{ Sprint, { STAT_USERCMD_BUTTONS, BUTTON_SPRINT << 8, Sprint } },
-		{ Prone, { STAT_USERCMD_BUTTONS, WBUTTON_PRONE, Prone } }
-	};
-
-	static std::vector<int> getKeySetShaders(keys_set_t *keyShaders, std::vector<KeyMapping *> &buttons)
-	{
-		auto ps = getValidPlayerState();
-		auto startOffset = reinterpret_cast<qhandle_t *>(keyShaders);
-		std::vector<int> keySetShaders;
-
-		for (auto &button : buttons) {
-			if (button == nullptr) {
-				keySetShaders.push_back(0);
-				continue;
-			}
-			auto shader = startOffset + button->keyOffset * 2;
-			if (ps->stats[button->statIndex] & button->keyBit) {
-				keySetShaders.push_back(*shader);
-			}
-			else {
-				keySetShaders.push_back(*(shader + 1));
-			}
-		}
-
-		return keySetShaders;
-	}
-
-	typedef std::function<void(float, float, int)> DrawFunc;
-	template <int Rows, int Cols>
-	static void drawGrid(vec2_t &origin, float cellSize, std::vector<int> &items, DrawFunc draw)
-	{
-		for (auto i = 0; i < Rows * Cols; i++)
-		{
-			float xOffset = origin[0] + cellSize * (i % Cols);
-			float yOffset = origin[1] + cellSize * static_cast<int>(i / Cols);
-			draw(xOffset, yOffset, items[i]);
-		}
-	}
-
-	static std::vector<keys_set_t*> availableKeySets {
-		&cgs.media.keys,
-		&cgs.media.keys2,
-		// add new here
-	};
-
-	static std::vector<KeyMapping *> keyLayout {
-		&keySetMapping[Sprint], &keySetMapping[Forward],  &keySetMapping[Jump],
-		&keySetMapping[Left],   nullptr,                  &keySetMapping[Right],
-		&keySetMapping[Prone],  &keySetMapping[Backward], &keySetMapping[Crouch]
-	};
-
-	static void drawKeySet()
-	{
-		if (cg_drawKeys.integer <= 0 || cg_keysSize.value <= 0)
-		{
-			return;
-		}
-
-		float keySize = cg_keysSize.value / 3;
-		float centerOffset = keySize * 3 / 2;
-		vec2_t origin{
-			ETJump_AdjustPosition(Numeric::clamp(cg_keysX.value, 0.f, 640.f)) - centerOffset,
-			Numeric::clamp(cg_keysY.value, 0.f, 480.f) - centerOffset
-		};
-
-		auto keySetIndex = Numeric::clamp(cg_drawKeys.integer, 1, availableKeySets.size()) - 1;
-		auto keySetShaders = getKeySetShaders(availableKeySets[keySetIndex], keyLayout);
-
-		bool drawShadow = etj_keysShadow.integer > 0;
-		vec4_t shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
-		drawGrid<3, 3>(origin, keySize, keySetShaders, [&](float x, float y, int shader)
-		{
-			if (shader)
-			{
-				drawPic(x, y, keySize, keySize, shader, cg.keysColor, drawShadow ? shadowColor : nullptr);
-			}
-		});
-	}
-}
-
 /*
 =================
 CG_DrawFollow
@@ -6084,7 +5970,6 @@ CG_Draw2D
 static void CG_Draw2D(void)
 {
 	CG_ScreenFade();
-
 	// Arnout: no 2d when in esc menu
 	// FIXME: do allow for quickchat (bleh)
 	// Gordon: Removing for now
@@ -6230,7 +6115,6 @@ static void CG_Draw2D(void)
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
 			CG_DrawSpeed2();
-			ETJump::drawKeySet();
 			CG_DrawProneIndicator();
 			CG_DrawPronePrint();
 		}

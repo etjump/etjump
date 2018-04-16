@@ -441,6 +441,7 @@ void CG_DrawPMItems(void)
 	float        textAlpha = etj_popupAlpha.value;
 	int          textStyle = ITEM_TEXTSTYLE_NORMAL;
 	float popupOffsetX = ETJump_AdjustPosition(etj_popupPosX.value);
+	float iconOffsetY = 0;
 
 	int x = 4 + popupOffsetX;
 
@@ -467,7 +468,7 @@ void CG_DrawPMItems(void)
 	if (cg_drawSmallPopupIcons.integer)
 	{
 		size = PM_ICON_SIZE_SMALL;
-
+		iconOffsetY = 2;
 		y += 4;
 	}
 	else
@@ -503,7 +504,7 @@ void CG_DrawPMItems(void)
 	}
 
 	trap_R_SetColor(colourText);
-	CG_DrawPic(x, y, size, size, cg_pmWaitingList->shader);
+	CG_DrawPic(x, y + iconOffsetY, size, size, cg_pmWaitingList->shader);
 	trap_R_SetColor(NULL);
 
 	CG_Text_Paint_Ext(x + size + 2 - x_off, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
@@ -534,7 +535,7 @@ void CG_DrawPMItems(void)
 		}
 		
 		trap_R_SetColor(colourText);
-		CG_DrawPic(x, y, size, size, listItem->shader);
+		CG_DrawPic(x, y + iconOffsetY, size, size, listItem->shader);
 		trap_R_SetColor(NULL);
 		CG_Text_Paint_Ext(x + size + 2 - x_off, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
 	}

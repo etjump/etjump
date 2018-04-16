@@ -1544,7 +1544,12 @@ namespace ETJump
 		return CG_Text_Width_Ext(text, scalex, 0, &cgs.media.limboFont2);
 	}
 
-	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style)
+	int DrawStringHeight(const char* text, float scalex)
+	{
+		return CG_Text_Height_Ext(text, scalex, 0, &cgs.media.limboFont2);
+	}
+
+	void DrawString(float x, float y, float scalex, float scaley, const vec4_t color, qboolean forceColor, const char *text, int limit, int style)
 	{
 		int         len, count;
 		vec4_t      newColor;
