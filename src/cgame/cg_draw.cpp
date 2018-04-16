@@ -6032,7 +6032,6 @@ static void CG_Draw2D(void)
 			CG_DrawSlick();
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
-			CG_DrawKeys();
 			CG_DrawProneIndicator();
 			CG_DrawPronePrint();
 		}

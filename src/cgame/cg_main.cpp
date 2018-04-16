@@ -20,7 +20,7 @@
 #include "etj_draw_leaves_handler.h"
 #include "etj_keyset_system.h"
 #include "etj_utilities.h"
-#include "etj_speed_drawable.h
+#include "etj_speed_drawable.h"
 
 displayContextDef_t cgDC;
 
