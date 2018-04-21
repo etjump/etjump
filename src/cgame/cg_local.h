@@ -2693,8 +2693,9 @@ void UI_DrawProportionalString(int x, int y, const char *str, int style, vec4_t 
 
 // new hud stuff
 void CG_DrawRect(float x, float y, float width, float height, float size, const float *color);
-void CG_DrawRect_FixedBorder(float x, float y, float width, float height, int border, const float *color);
+void CG_DrawRect_FixedBorder(float x, float y, float width, float height, int border, const vec4_t color);
 void CG_DrawSides(float x, float y, float w, float h, float size);
+void CG_DrawSides_NoScale(float x, float y, float w, float h, float size);
 void CG_DrawTopBottom(float x, float y, float w, float h, float size);
 void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size);
 

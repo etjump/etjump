@@ -273,6 +273,31 @@
 		}																\
 	}
 
+#define NAMEDBUTTON_DISABLED( NAMEDBUTTON_NAME, NAMEDBUTTON_X, NAMEDBUTTON_Y, NAMEDBUTTON_W, NAMEDBUTTON_H, NAMEDBUTTON_TEXT, NAMEDBUTTON_TEXT_SCALE, NAMEDBUTTON_TEXT_ALIGN_Y )					\
+	itemDef {															\
+		name		NAMEDBUTTON_NAME									\
+		group		GROUP_NAME											\
+		rect		$evalfloat(NAMEDBUTTON_X) $evalfloat(NAMEDBUTTON_Y) $evalfloat(NAMEDBUTTON_W) $evalfloat(NAMEDBUTTON_H)					\
+		type		ITEM_TYPE_BUTTON									\
+		text		NAMEDBUTTON_TEXT									\
+		textfont	UI_FONT_COURBD_30									\
+		textscale	NAMEDBUTTON_TEXT_SCALE								\
+		textalign	ITEM_ALIGN_CENTER									\
+		textalignx	$evalfloat(0.5*(NAMEDBUTTON_W))						\
+		textaligny	NAMEDBUTTON_TEXT_ALIGN_Y							\
+		style		WINDOW_STYLE_FILLED									\
+		backcolor	.3 .3 .3 .4											\
+		forecolor	.6 .6 .6 1											\
+		border		WINDOW_BORDER_FULL									\
+		bordercolor	.1 .1 .1 .5											\
+		visible		1													\
+		mouseEnter {}													\
+		mouseExit {}													\
+		action{															\
+			play "sound/menu/cancel.wav";								\
+		}																\
+	}
+
 #define NAMEDBUTTONEXT( NAMEDBUTTONEXT_NAME, NAMEDBUTTONEXT_X, NAMEDBUTTONEXT_Y, NAMEDBUTTONEXT_W, NAMEDBUTTONEXT_H, NAMEDBUTTONEXT_TEXT, NAMEDBUTTONEXT_TEXT_SCALE, NAMEDBUTTONEXT_TEXT_ALIGN_Y, NAMEDBUTTONEXT_ACTION, NAMEDBUTTONEXT_EXT )					\
 	itemDef {															\
 		name		NAMEDBUTTONEXT_NAME									\
@@ -372,7 +397,7 @@
 		visible		1													\
 		decoration														\
 	}																	\
-																		\    
+																		\   
 	itemDef {															\
 		name			"nf"##NUMERICFIELD_TEXT							\
       	group			GROUP_NAME										\

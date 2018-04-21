@@ -31,6 +31,10 @@
 #define NEW_ANIMS
 #define MAX_TEAMNAME    32
 
+#define MOD_VERSION_DATA_CHECK(x) (x && x >= 272 && x < 3000)
+#define MOD_CHECK_LEGACY(islegacy, versionNum, outputValue) outputValue = (islegacy == qtrue ? qtrue : qfalse); \
+	if (outputValue && MOD_VERSION_DATA_CHECK(versionNum)) { outputValue = versionNum; }
+
 #if defined _WIN32 && !defined __GNUC__
 
 #pragma warning(disable : 4018)     // signed/unsigned mismatch

@@ -32,11 +32,12 @@ xcopy %ADDITIONAL_MOD_FILES%scripts %BATCH_PATH%scripts\ /s /e /y >nul
 xcopy %ADDITIONAL_MOD_FILES%sound %BATCH_PATH%sound\ /s /e /y >nul
 xcopy %ADDITIONAL_MOD_FILES%ui %BATCH_PATH%ui\ /s /e /y >nul
 xcopy %ADDITIONAL_MOD_FILES%weapons %BATCH_PATH%weapons\ /s /e /y >nul
+xcopy %ADDITIONAL_MOD_FILES%description.txt %BATCH_PATH%description.txt /y >nul
 
 REM Now that the files are there, all we need to do is 
 REM create the pk3
 
-%PATH_TO_7ZIP% u -tzip etjump.zip animations gfx icons models scripts sound ui weapons cgame.mp.i386.so ui.mp.i386.so cgame_mp_x86.dll ui_mp_x86.dll -r >nul
+%PATH_TO_7ZIP% u -tzip etjump.zip animations gfx icons models scripts sound ui weapons cgame.mp.i386.so ui.mp.i386.so cgame_mp_x86.dll ui_mp_x86.dll description.txt -r >nul
 
 rename etjump.zip unversioned_etjump.pk3
 
