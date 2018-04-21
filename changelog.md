@@ -143,7 +143,27 @@
 * added spawnflag __2__ `ADD_XY` to `target/trigger_push`
   * adds the XY velocity from the pusher to your current velocity, rather than setting it
   * when this is set, `speed` key affects the pusher even when its targeting `target_position`
-
+* added etjump menu support for fullscreen ui
+* added warning message about serverlist exploit to playonline window
+* added etjump servers filter in playonline window
+* added whitespace trim for the server names
+* disabled automatic serverlist load on playonline window open
+* added `etj_chatShadow` cvar to enable chat text shadows
+* added `etj_chatAlpha` cvar to set chat transparency
+* added `etj_drawCHS2 2` to align chs2 text to the right side of screen
+* added `etj_CHS2PosX`, `etj_CHS2PosY` cvars to control chs2 position
+* added `etj_CHSShadow` cvar to enable text shadow for CHS
+* added `etj_CHSAlpha` cvar to set CHS alpha
+* added `etj_CHSColor` cvar to change CHS color
+* added `etj_HUD_fireteam` cvar to enable/disable fireteam hud
+* added `etj_fireteamPosX`, `etj_fireteamPosY` cvar to position fireteam hud
+* added `etj_fireteamAlpha` cvar to set fireteam hud alpha
+* added `etj_popupShadow` cvar to set text shadows for popup messages
+* added `etj_popupAlpha` cvar to set popup message alpha
+* added `etj_HUD_popup` cvar to enable/disable popup message hud, value `2` aligns popup to the right side of screen
+* added `etj_popupPosX`, `etj_popupPosY` cvars to position popup message hud
+* made keyset to be drawn from the center of the defined origin (using `etj_keysX`, `etj_keysY`)
+* added 3 new keyset themes, you can switch these using `etj_drawKeys` cvar
 
 # ETJump 2.2.0
 
