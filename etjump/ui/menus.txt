@@ -71,17 +71,11 @@
 	loadMenu { "ui/ingame_tapout.menu" }
 	loadMenu { "ui/ingame_tapoutlms.menu" }
 
-	// Trickjump mod
-	loadMenu { "ui/trickjump.menu" }
-	loadMenu { "ui/trickjump_info.menu" }
-	loadMenu { "ui/trickjump_view.menu" }
-	loadMenu { "ui/trickjump_settings.menu" }
-	loadMenu { "ui/ingame_map_details.menu" }
-
 	// ETJump
 	loadMenu { "ui/etjump.menu" }
 	loadMenu { "ui/etjump_settings.menu" }
 	loadMenu { "ui/etjump_settings2.menu" }
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
+	loadMenu { "ui/ingame_map_details.menu" }
 }

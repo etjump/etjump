@@ -3236,7 +3236,7 @@ float CG_Cvar_Get(const char *cvar)
 	return atof(buff);
 }
 
-void CG_Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const char *text, int cursorPos, char cursor, int limit, int style)
+void CG_Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text, int cursorPos, char cursor, int limit, int style)
 {
 	CG_Text_Paint(x, y, scale, color, text, 0, limit, style);
 }
@@ -3298,8 +3298,11 @@ void CG_LoadHudMenu()
 	cgDC.modelBounds         = &trap_R_ModelBounds;
 	cgDC.fillRect            = &CG_FillRect;
 	cgDC.drawRect            = &CG_DrawRect;
+	cgDC.drawRectFixed       = &CG_DrawRect_FixedBorder;
 	cgDC.drawSides           = &CG_DrawSides;
 	cgDC.drawTopBottom       = &CG_DrawTopBottom;
+	cgDC.drawSidesNoScale    = &CG_DrawSides_NoScale;
+	cgDC.drawTopBottomNoScale = &CG_DrawTopBottom_NoScale;
 	cgDC.clearScene          = &trap_R_ClearScene;
 	cgDC.addRefEntityToScene = &trap_R_AddRefEntityToScene;
 	cgDC.renderScene         = &trap_R_RenderScene;
@@ -3312,8 +3315,7 @@ void CG_LoadHudMenu()
 	cgDC.setCVar             = trap_Cvar_Set;
 	cgDC.getCVarString       = trap_Cvar_VariableStringBuffer;
 	cgDC.getCVarValue        = CG_Cvar_Get;
-	// wtf?
-	cgDC.drawTextWithCursor  = reinterpret_cast<void(*)(float, float, float, vec_t[], vec_t[], const char *, int, char, int, int)>(&CG_Text_PaintWithCursor);
+	cgDC.drawTextWithCursor  = &CG_Text_PaintWithCursor;
 	cgDC.setOverstrikeMode   = &trap_Key_SetOverstrikeMode;
 	cgDC.getOverstrikeMode   = &trap_Key_GetOverstrikeMode;
 	cgDC.startLocalSound     = &trap_S_StartLocalSound;

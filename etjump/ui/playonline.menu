@@ -51,6 +51,14 @@ menuDef {
 			( "setitemcolor grpColumns backcolor 0 0 0 0 ; setitemcolor grpTabs backcolor .1 .1 .1 .3 ; setitemcolor grpTabs forecolor .6 .6 .6 1 ; setitemcolor pingColumn backcolor .35 .35 .35 .2 ; setitemcolor pingColumnTab backcolor .35 .35 .35 .2 ; setitemcolor pingColumnTab forecolor .9 .9 .9 1" )
 			( "clearFocus" )
 
+		conditionalScript ui_enableRefreshButton 0
+			( "hide refreshWarning" )
+#ifdef LEGACY
+			( "hide refreshWarning" )
+#else
+			( "show refreshWarning" )
+#endif
+
 		clearCvar ui_filterdescription
 	}
 
@@ -186,6 +194,18 @@ menuDef {
 	}
 	TRICHECKBOXACTIONMULTI( 8+.5*((FILTERS_WIDTH)-6)+2+2+12, 128, .5*((FILTERS_WIDTH)-6)-14, 10, .2, 8, "ui_browserShowTeamBalanced", cvarFloatList { "Filter Disabled" 0 "Only show..." 1 "Don't show..." 2 }, uiScript RefreshFilter ; setcvar ui_filterdescription "Filter affecting Servers with Force Team Balance", "Includes or excludes servers that enforce balanced teams, from the server list" )
 
+	/*itemDef {
+		name		"filtericonETJump"
+		rect		10 140 10 10
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/filter_antilag"
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}*/
+	TRICHECKBOXACTIONMULTI( 10+12, 140, .5*((FILTERS_WIDTH)-6)-14, 10, .2, 8, "ui_browserShowETJump", cvarFloatList { "ETJump: Unfiltered" 0 "ETJump: Only show" 1 "ETJump: Don't show" 2 }, uiScript RefreshFilter ; setcvar ui_filterdescription "Filter affecting ETJump Servers", "Includes or excludes servers running ETJump" )
+
+	/*
 	itemDef {
 		name			"descriptionFilters"
 		group			GROUP_NAME
@@ -205,6 +225,7 @@ menuDef {
 		visible			1
 		decoration
 	}
+	*/
 
 	SUBWINDOW( 6+(FILTERS_WIDTH)+4, 32, ((SUBWINDOW_WIDTH)-(FILTERS_WIDTH)-4), 126, "PREVIEW" )
 	itemDef {
@@ -615,6 +636,99 @@ menuDef {
 		}
 	}
 
+	#define WARNING_W 320
+	#define WARNING_H 100
+	#define WARNING_Y 196 + (COLUMN_HEIGHT * 0.5) - (WARNING_H * 0.5)
+	#define WARNING_X 160
+	#define WARNING_I 32
+
+	// Background
+	itemDef {
+		name			"refreshWarningBackground"
+		group			refreshWarning
+		rect			12 196 $evalfloat(SUBWINDOW_WIDTH-12) $evalfloat(COLUMN_HEIGHT-1)
+		forecolor		1 1 1 1
+		style		    WINDOW_STYLE_FILLED
+		backcolor	    0.95 0.25 0.25 .2
+		visible		    1
+		decoration
+	}
+
+	// Text
+	itemDef {
+		name			"refreshWarningText"
+		group			refreshWarning
+		rect			0 $evalfloat(WARNING_Y + 40) WARNING_W $evalfloat(WARNING_H - 40)
+		textfont		UI_FONT_COURBD_21
+		// textstyle		ITEM_TEXTSTYLE_SHADOWED
+		textscale		.2
+		textalignx		WARNING_W
+		textaligny	    5
+		textalign ITEM_ALIGN_CENTER
+		lineheight 10
+		forecolor		1 1 1 1
+		text		    "WARNING! WHILST THE SERVER LIST REFRESH, YOU MIGHT BE AUTOMATICALLY " 
+						"CONNECTED TO ONE OF THE SERVERS. IF SO, CONSIDER NOT TO USE THE SERVER BROWSER.\n"
+						"USE ONLINE TRACKERS OR DOWNLOAD ETL: www.etlegacy.com INSTEAD!"
+		visible		1
+		autowrapped
+	}
+
+	// Icon
+	itemDef {
+		name		"refreshWarningIcon"
+		group		refreshWarning
+		rect		$evalfloat(WARNING_W - WARNING_I * 0.5) $evalfloat(WARNING_Y) WARNING_I WARNING_I
+		style		WINDOW_STYLE_SHADER
+		background	"gfx/2d/warning"
+		visible		1
+		decoration
+	}
+
+	// Border
+	itemDef {
+		name		"refreshWarningBorder"
+		group		refreshWarning
+		rect		$evalfloat(WARNING_X - 10) $evalfloat(WARNING_Y - 10) $evalfloat(WARNING_W + 20) $evalfloat(WARNING_H + 20)
+		border		WINDOW_BORDER_FULL
+		borderfixed 1
+		bordercolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+
+	// Checkbox
+	itemDef {															
+		name			"refreshWarningCheckbox"				
+      	group			refreshWarning										
+      	rect			$evalfloat(WARNING_X + WARNING_W * 0.5 - 50) $evalfloat( WARNING_Y + WARNING_H - 6) 100 10	
+		type			ITEM_TYPE_CHECKBOX
+		text			"I understand"				
+		textfont		UI_FONT_COURBD_21
+		textscale		0.2
+		textalign		ITEM_ALIGN_CENTER
+		textalignx		40
+		textaligny		8
+		forecolor		1 1 1 1
+		cvar			"ui_enableRefreshButton"
+		visible			1
+		tooltip			"Hides the warning message and unlocks the refresh button."
+
+		mouseEnter {
+			setitemcolor refreshWarningCheckbox forecolor 0.98 0.96 0.85 1 ;
+		}	
+
+		mouseExit {
+			setitemcolor refreshWarningCheckbox forecolor 1 1 1 1 ;
+		}
+
+		action {
+			play "sound/menu/filter.wav" ;
+			close playonline ; open playonline
+		}
+    }
+
 	// Status bar
 
 /*	itemDef {
@@ -664,6 +778,43 @@ menuDef {
 	BUTTON( 6+6+(.33*((SUBWINDOW_WIDTH)-24))+6+(.34*((SUBWINDOW_WIDTH)-24))+6, 102+316-20, .33*((SUBWINDOW_WIDTH)-24), 14, "^1SERVER INFO", .24, 11, clearFocus ; open playonline_serverinfo )*/
 	
 	BUTTON( 12, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "REFRESH LIST", .24, 11, uiScript RefreshServers )
+
+	// Refresh Button Blocker
+	itemDef {
+		name			"refreshWarningBlocker"
+		type			ITEM_TYPE_BUTTON
+		group			refreshWarning
+		rect			12 $evalfloat(102+316-20) $evalfloat(.25*((SUBWINDOW_WIDTH)-30)) 14
+		forecolor		1 1 1 1
+		style		    WINDOW_STYLE_FILLED
+		backcolor	    0.95 0.25 0.25 .2
+		visible		    1
+
+		mouseEnter {}
+		mouseExit {}
+		action {
+			play "sound/menu/cancel.wav" ;
+		}
+	}
+
+	// Filter Blocker
+	itemDef {
+		name			"refreshWarningFilterBlocker"
+		type			ITEM_TYPE_BUTTON
+		group			refreshWarning
+		rect			6 64 $evalfloat(FILTERS_WIDTH) 94
+		forecolor		1 1 1 1
+		style		    WINDOW_STYLE_FILLED
+		backcolor	    0.95 0.25 0.25 .2
+		visible		    1
+
+		mouseEnter {}
+		mouseExit {}
+		action {
+			play "sound/menu/cancel.wav" ;
+		}
+	}
+
 	BUTTON( 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "CONNECT TO IP", .24, 11, clearFocus ; open playonline_connecttoip )
 	BUTTON( 6+6+(.25*((SUBWINDOW_WIDTH)-30))+6+(.25*((SUBWINDOW_WIDTH)-30))+6, 102+316-20, .25*((SUBWINDOW_WIDTH)-30), 14, "SERVER INFO", .24, 11, clearFocus ; open playonline_serverinfo )
 	
