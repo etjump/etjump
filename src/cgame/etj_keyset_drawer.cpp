@@ -1,0 +1,174 @@
+#include "etj_keyset_drawer.h"
+#include "etj_utilities.h"
+#include "etj_cvar_update_handler.h"
+#include "../game/etj_numeric_utilities.h"
+
+ETJump::KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders): keyShaders(keyShaders)
+{
+	initAttrs();
+	initListeners();
+}
+
+void ETJump::KeySetDrawer::initListeners()
+{
+	cvarUpdateHandler->subscribe(&etj_keysColor, [&](const vmCvar_t *cvar)
+	{
+		updateKeysColor(etj_keysColor.string);
+	});
+	cvarUpdateHandler->subscribe(&etj_keysSize, [&](const vmCvar_t *cvar)
+	{
+		updateKeysSize(etj_keysSize.integer);
+	});
+	cvarUpdateHandler->subscribe(&etj_keysX, [&](const vmCvar_t *cvar)
+	{
+		updateKeysOrigin(etj_keysX.value, etj_keysY.value);
+	});
+	cvarUpdateHandler->subscribe(&etj_keysY, [&](const vmCvar_t *cvar)
+	{
+		updateKeysOrigin(etj_keysX.value, etj_keysY.value);
+	});
+	cvarUpdateHandler->subscribe(&etj_keysShadow, [&](const vmCvar_t *cvar)
+	{
+		updateKeysShadow(etj_keysShadow.integer > 0);
+	});
+}
+
+void ETJump::KeySetDrawer::initAttrs()
+{
+	updateKeysColor(etj_keysColor.string);
+	updateKeysSize(etj_keysSize.value);
+	updateKeysOrigin(etj_keysX.value, etj_keysY.value);
+	updateKeysShadow(etj_keysShadow.integer > 0);
+	vec4_t shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	updateKeysShadowColor(shadowColor);
+}
+
+void ETJump::KeySetDrawer::updateKeysColor(const char* str)
+{
+	parseColorString(str, attrs.color);
+}
+
+void ETJump::KeySetDrawer::updateKeysSize(float size)
+{
+	attrs.size = Numeric::clamp(size, 0, 256);
+}
+
+void ETJump::KeySetDrawer::updateKeysOrigin(float x, float y)
+{
+	attrs.origin.x = ETJump_AdjustPosition(Numeric::clamp(x, 0.f, 640.f));
+	attrs.origin.y = Numeric::clamp(y, 0.f, 480.f);
+}
+
+void ETJump::KeySetDrawer::updateKeysShadow(bool shouldDrawShadow)
+{
+	attrs.shouldDrawShadow = shouldDrawShadow;
+}
+
+void ETJump::KeySetDrawer::updateKeysShadowColor(const vec4_t shadowColor)
+{
+	Vector4Copy(shadowColor, attrs.shadowColor);
+}
+
+void ETJump::KeySetDrawer::render() const
+{
+	if (attrs.size <= 0)
+	{
+		return;
+	}
+
+	for (auto i = 0; i < keyShaders.size(); i++)
+	{
+		const auto &shader = keyShaders[i];
+		if (isKeyPressed(shader.key))
+		{
+			drawPressShader(shader.press, i);
+		}
+		else
+		{
+			drawReleaseShader(shader.release, i);
+		}
+	}
+}
+
+void ETJump::KeySetDrawer::drawPressShader(qhandle_t shader, int position) const
+{
+	drawShader(shader, position);
+}
+
+void ETJump::KeySetDrawer::drawReleaseShader(qhandle_t shader, int position) const
+{
+	drawShader(shader, position);
+}
+
+void ETJump::KeySetDrawer::drawShader(qhandle_t shader, int position) const
+{
+	if (!shader)
+	{
+		return;
+	}
+	auto size = attrs.size / 3;
+	auto centerOffset = attrs.size / 2;
+	auto pos = calcGridPosition<3>(size, position);
+	auto x = attrs.origin.x + pos.x - centerOffset;
+	auto y = attrs.origin.y + pos.y - centerOffset;
+	auto color = attrs.color;
+	auto shadowColor = attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
+	drawPic(x, y, size, size, shader, color, shadowColor);
+}
+
+int ETJump::KeySetDrawer::isKeyPressed(KeyNames key)
+{
+	const auto ps = getValidPlayerState();
+	switch (key)
+	{
+	case KeyNames::Forward: return ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD;
+	case KeyNames::Backward: return ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD;
+	case KeyNames::Right: return ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT;
+	case KeyNames::Left: return ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT;
+	case KeyNames::Jump: return ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP;
+	case KeyNames::Crouch: return ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN;
+	case KeyNames::Sprint: return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_SPRINT << 8;
+	case KeyNames::Prone: return ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE;
+	case KeyNames::LeanRight: return ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_LEANRIGHT;
+	case KeyNames::LeanLeft: return ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_LEANLEFT;
+	case KeyNames::Walk: return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8;
+	case KeyNames::Talk: return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_TALK << 8;
+	case KeyNames::Activate: return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_ACTIVATE << 8;
+	case KeyNames::Attack: return ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_ATTACK << 8;
+	case KeyNames::Attack2: return ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_ATTACK2;
+	case KeyNames::Reload: return ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_RELOAD;
+	case KeyNames::Zoom: return ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_ZOOM;
+	default: return false;
+	}
+}
+
+std::string ETJump::KeySetDrawer::keyNameToString(KeyNames keyName)
+{
+	switch (keyName)
+	{
+	case KeyNames::Forward: return "forward";
+	case KeyNames::Backward: return "backward";
+	case KeyNames::Right: return "right";
+	case KeyNames::Left: return "left";
+	case KeyNames::Jump: return "jump";
+	case KeyNames::Crouch: return "crouch";
+	case KeyNames::Sprint: return "sprint";
+	case KeyNames::Prone: return "prone";
+	case KeyNames::LeanRight: return "learnright";
+	case KeyNames::LeanLeft: return "leanleft";
+	case KeyNames::Walk: return "walk";
+	case KeyNames::Talk: return "talk";
+	case KeyNames::Activate: return "activate";
+	case KeyNames::Attack: return "attack";
+	case KeyNames::Attack2: return "attack2";
+	case KeyNames::Reload: return "reload";
+	case KeyNames::Zoom: return "zoom";
+	default: return "";
+	}
+}
+
+
+playerState_t* ETJump::KeySetDrawer::getValidPlayerState()
+{
+	return (cg.snap->ps.clientNum != cg.clientNum) ? &cg.snap->ps : &cg.predictedPlayerState;
+}

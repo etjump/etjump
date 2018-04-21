@@ -1815,8 +1815,6 @@ typedef struct
 	qhandle_t disconnectIcon;
 
 	qhandle_t fireteamicons[6];
-	keys_set_t keys;
-	keys_set_t keys2;
 
 	//Feen: PGM - Portal Shaders //NOTE - Maybe add shaders for other player portals as well....
 	qhandle_t portal_blueShader;       //Portal 1
@@ -2391,12 +2389,12 @@ extern vmCvar_t cg_drawOB;
 // Aciz: movable drawOB
 extern vmCvar_t etj_OBX;
 extern vmCvar_t etj_OBY;
-extern vmCvar_t cg_drawKeys;
-extern vmCvar_t cg_keysSize;
-extern vmCvar_t cg_keysX;
-extern vmCvar_t cg_keysY;
+extern vmCvar_t etj_drawKeys;
+extern vmCvar_t etj_keysSize;
+extern vmCvar_t etj_keysX;
+extern vmCvar_t etj_keysY;
 extern vmCvar_t etj_keysShadow;
-extern vmCvar_t cg_keysColor;
+extern vmCvar_t etj_keysColor;
 extern vmCvar_t cg_loadviewangles;
 // forty - speedometer
 extern vmCvar_t cg_drawspeed;
@@ -2427,7 +2425,12 @@ extern vmCvar_t cg_popupTime;
 extern vmCvar_t cg_popupStayTime;
 extern vmCvar_t cg_popupFadeTime;
 extern vmCvar_t cg_numPopups;
+extern vmCvar_t etj_HUD_popup;
 extern vmCvar_t etj_popupGrouped;
+extern vmCvar_t etj_popupShadow;
+extern vmCvar_t etj_popupAlpha;
+extern vmCvar_t etj_popupPosX;
+extern vmCvar_t etj_popupPosY;
 
 //Feen: PGM client cvars
 extern vmCvar_t cg_viewPlayerPortals;         //Enable/Disable viewing other player portals
@@ -2438,6 +2441,8 @@ extern vmCvar_t cg_chatPosX;
 extern vmCvar_t cg_chatPosY;
 extern vmCvar_t cg_chatBackgroundAlpha;
 extern vmCvar_t etj_chatFlags;
+extern vmCvar_t etj_chatShadow;
+extern vmCvar_t etj_chatAlpha;
 
 // crosshair stats
 extern vmCvar_t cg_drawCHS1;
@@ -2458,6 +2463,13 @@ extern vmCvar_t cg_CHS2Info5;
 extern vmCvar_t cg_CHS2Info6;
 extern vmCvar_t cg_CHS2Info7;
 extern vmCvar_t cg_CHS2Info8;
+// chs2 position
+extern vmCvar_t etj_CHS2PosX;
+extern vmCvar_t etj_CHS2PosY;
+// common CHS things
+extern vmCvar_t etj_CHSShadow;
+extern vmCvar_t etj_CHSAlpha;
+extern vmCvar_t etj_CHSColor;
 
 extern vmCvar_t cg_itemPickupText;
 
@@ -2468,6 +2480,11 @@ extern vmCvar_t cg_HUD_playerHead;
 extern vmCvar_t cg_HUD_playerHealth;
 extern vmCvar_t cg_HUD_weaponIcon;
 extern vmCvar_t cg_HUD_xpInfo;
+extern vmCvar_t etj_HUD_fireteam;
+
+extern vmCvar_t etj_fireteamPosX;
+extern vmCvar_t etj_fireteamPosY;
+extern vmCvar_t etj_fireteamAlpha;
 
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t etj_logBanner;
@@ -2674,11 +2691,12 @@ int CG_DrawStrlen(const char *str);
 namespace ETJump
 {
 	int DrawStringWidth(const char* text, float scalex);
-	void DrawString(float x, float y, float scalex, float scaley, vec4_t color, qboolean forceColor, const char *text, int limit, int style);
+	int DrawStringHeight(const char* text, float scalex);
+	void DrawString(float x, float y, float scalex, float scaley, const vec4_t color, qboolean forceColor, const char *text, int limit, int style);
 	void DrawMiniString(int x, int y, const char *s, float alpha);
 	void DrawSmallString(int x, int y, const char *s, float alpha);
 	void DrawBigString(int x, int y, const char *s, float alpha);
-	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, bool enableShadows = false, const vec4_t shadowColor = nullptr);
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, const vec4_t shadowColor = nullptr);
 }
 
 
@@ -3888,6 +3906,7 @@ void ETJump_ClearDrawables();
 
 void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
 void ETJump_AdjustPosition(float *x);
+float ETJump_AdjustPosition(float x);
 int ETJump_GetScreenWidth();
 void ETJump_EnableWidthScale(bool enable);
 

@@ -251,6 +251,18 @@
     <ClCompile Include="etj_draw_leaves_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_cvar_master_drawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_keyset_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_keyset_drawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_keyset_keybind_drawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="etj_speed_drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -365,6 +377,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_draw_leaves_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cvar_master_drawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_keyset_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_keyset_drawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_keyset_keybind_drawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_speed_drawable.h">

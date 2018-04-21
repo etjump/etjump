@@ -122,15 +122,15 @@ static void normalizeColorIfRequired(vec4_t &v)
 	}
 }
 
-const std::string alphaRegex{ "^[a-zA-Z]+" }; // white, black, etc
+const std::string alphaRegex{ "^[a-z]+" }; // white, black, etc
 const std::string digitRegex{ "^([-+]?[0-9]*\\.?[0-9]+\\s*)+" }; // 255 0 0, 1.0 0 0
-const std::string hexedRegex{ "^0[xX][a-fA-F0-9]+" }; // 0xff0000
-const std::string hashdRegex{ "^#[a-fA-F0-9]+" }; // #ff0000
+const std::string hexedRegex{ "^0[x][a-f0-9]+" }; // 0xff0000
+const std::string hashdRegex{ "^#[a-f0-9]+" }; // #ff0000
 
 void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 {	
 	Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
-	std::string token{ boost::algorithm::trim_copy(colorString) };
+	std::string token{ boost::algorithm::to_lower_copy(boost::algorithm::trim_copy(colorString)) };
 
 	if (std::regex_match(token, std::regex(alphaRegex)))
 	{

@@ -85,7 +85,7 @@ void ETJump::DisplayMaxSpeed::render() const
 
 	auto style = ITEM_TEXTSTYLE_NORMAL;
 
-	if (etj_speedShadow.integer) {
+	if (etj_speedShadow.integer > 0) {
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 

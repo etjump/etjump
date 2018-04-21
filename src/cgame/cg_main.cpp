@@ -18,6 +18,7 @@
 #include "etj_cvar_shadow.h"
 #include "etj_console_alpha.h"
 #include "etj_draw_leaves_handler.h"
+#include "etj_keyset_system.h"
 #include "etj_utilities.h"
 #include "etj_speed_drawable.h"
 
@@ -332,11 +333,11 @@ vmCvar_t cg_drawOB;
 //Aciz: movable drawOB
 vmCvar_t etj_OBX;
 vmCvar_t etj_OBY;
-vmCvar_t cg_drawKeys;
-vmCvar_t cg_keysColor;
-vmCvar_t cg_keysX;
-vmCvar_t cg_keysY;
-vmCvar_t cg_keysSize;
+vmCvar_t etj_drawKeys;
+vmCvar_t etj_keysColor;
+vmCvar_t etj_keysX;
+vmCvar_t etj_keysY;
+vmCvar_t etj_keysSize;
 vmCvar_t etj_keysShadow;
 vmCvar_t cg_loadviewangles;
 
@@ -373,8 +374,13 @@ vmCvar_t cg_popupTime;
 vmCvar_t cg_popupStayTime;
 vmCvar_t cg_popupFadeTime;
 vmCvar_t cg_numPopups;
-vmCvar_t etj_popupGrouped;
 
+vmCvar_t etj_HUD_popup;
+vmCvar_t etj_popupGrouped;
+vmCvar_t etj_popupShadow;
+vmCvar_t etj_popupAlpha;
+vmCvar_t etj_popupPosX;
+vmCvar_t etj_popupPosY;
 
 //Feen: PGM client cvars
 vmCvar_t cg_viewPlayerPortals;            //Enable/Disable viewing other player portals
@@ -383,6 +389,8 @@ vmCvar_t cg_chatPosX;
 vmCvar_t cg_chatPosY;
 vmCvar_t cg_chatBackgroundAlpha;
 vmCvar_t etj_chatFlags;
+vmCvar_t etj_chatShadow;
+vmCvar_t etj_chatAlpha;
 
 // crosshair stats
 vmCvar_t cg_drawCHS1;
@@ -403,6 +411,13 @@ vmCvar_t cg_CHS2Info5;
 vmCvar_t cg_CHS2Info6;
 vmCvar_t cg_CHS2Info7;
 vmCvar_t cg_CHS2Info8;
+// chs2 position
+vmCvar_t etj_CHS2PosX;
+vmCvar_t etj_CHS2PosY;
+// common CHS things
+vmCvar_t etj_CHSShadow;
+vmCvar_t etj_CHSAlpha;
+vmCvar_t etj_CHSColor;
 
 vmCvar_t cg_itemPickupText;
 
@@ -413,6 +428,11 @@ vmCvar_t cg_HUD_playerHead;
 vmCvar_t cg_HUD_playerHealth;
 vmCvar_t cg_HUD_weaponIcon;
 vmCvar_t cg_HUD_xpInfo;
+vmCvar_t etj_HUD_fireteam;
+
+vmCvar_t etj_fireteamPosX;
+vmCvar_t etj_fireteamPosY;
+vmCvar_t etj_fireteamAlpha;
 
 vmCvar_t etj_logBanner;
 vmCvar_t cg_weaponSound;
@@ -722,11 +742,11 @@ cvarTable_t cvarTable[] =
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawKeys,                 "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
-	{ &cg_keysColor,                "etj_keysColor",               "White",                  CVAR_ARCHIVE             },
-	{ &cg_keysSize,                 "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
-	{ &cg_keysX,                    "etj_keysX",                   "585",                    CVAR_ARCHIVE             },
-	{ &cg_keysY,                    "etj_keysY",                   "200",                    CVAR_ARCHIVE             },
+	{ &etj_drawKeys,                "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
+	{ &etj_keysColor,               "etj_keysColor",               "white",                  CVAR_ARCHIVE             },
+	{ &etj_keysSize,                "etj_keysSize",                "48",                     CVAR_ARCHIVE             },
+	{ &etj_keysX,                   "etj_keysX",                   "610",                    CVAR_ARCHIVE             },
+	{ &etj_keysY,                   "etj_keysY",                   "220",                    CVAR_ARCHIVE             },
 	{ &etj_keysShadow,              "etj_keysShadow",              "0",                      CVAR_ARCHIVE             },
 	{ &cg_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE             },
@@ -751,12 +771,22 @@ cvarTable_t cvarTable[] =
 	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
 	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },
 	{ &cg_numPopups,                "etj_numPopups",               "5",                      CVAR_ARCHIVE             },
+	
+	{ &etj_HUD_popup,               "etj_HUD_popup",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_popupGrouped,            "etj_popupGrouped",            "1",                      CVAR_ARCHIVE             },
+	{ &etj_popupShadow,             "etj_popupShadow",             "0",                      CVAR_ARCHIVE             },
+	{ &etj_popupAlpha,              "etj_popupAlpha",              "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_popupPosX,               "etj_popupPosX",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_popupPosY,               "etj_popupPosY",               "0",                      CVAR_ARCHIVE             },
+
+	
 	{ &cg_viewPlayerPortals,        "etj_viewPlayerPortals",       "1",                      CVAR_ARCHIVE             }, //Feen: PGM - View other player portals
 	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
-	{ &etj_chatFlags,				"etj_chatFlags",			   "1",                      CVAR_ARCHIVE             },
+	{ &etj_chatFlags,               "etj_chatFlags",               "1",                      CVAR_ARCHIVE             },
+	{ &etj_chatShadow,              "etj_chatShadow",              "0",                      CVAR_ARCHIVE             },
+	{ &etj_chatAlpha,               "etj_chatAlpha",               "1.0",                    CVAR_ARCHIVE             },
 
 	// crosshair stats
 	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
@@ -777,6 +807,11 @@ cvarTable_t cvarTable[] =
 	{ &cg_CHS2Info6,                "etj_CHS2Info6",               "0",                      CVAR_ARCHIVE             },
 	{ &cg_CHS2Info7,                "etj_CHS2Info7",               "0",                      CVAR_ARCHIVE             },
 	{ &cg_CHS2Info8,                "etj_CHS2Info8",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2PosX,                "etj_CHS2PosX",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2PosY,                "etj_CHS2PosY",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHSShadow,               "etj_CHSShadow",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHSAlpha,                "etj_CHSAlpha",                "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_CHSColor,                "etj_CHSColor",                "1.0 1.0 1.0",            CVAR_ARCHIVE             },
 
 	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },
@@ -786,6 +821,12 @@ cvarTable_t cvarTable[] =
 	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_fireteam,            "etj_HUD_fireteam",            "1",                      CVAR_ARCHIVE             },
+	// fireteam
+	{ &etj_fireteamPosX,            "etj_fireteamPosX",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_fireteamPosY,            "etj_fireteamPosY",            "0",                      CVAR_ARCHIVE             },
+	{ &etj_fireteamAlpha,           "etj_fireteamAlpha",           "1",                      CVAR_ARCHIVE             },
+	
 	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
@@ -974,7 +1015,6 @@ void CG_RegisterCvars(void)
 	CG_setClientFlags();
 	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-	BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 	BG_setColor(etj_obWatcherColor.string, cg.obWatcherColor, 1, "etj_obWatcherColor");
 	cvarsLoaded = qtrue;
 }
@@ -1027,10 +1067,6 @@ void CG_UpdateCvars(void)
 				else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)
 				{
 					BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-				}
-				else if (cv->vmCvar == &cg_keysColor)
-				{
-					BG_setColor(cg_keysColor.string, cg.keysColor, 1, "cg_keysColor");
 				}
 				else if (cv->vmCvar == &etj_obWatcherColor)
 				{
@@ -2556,62 +2592,8 @@ static void CG_RegisterGraphics(void)
 		cgs.media.fireteamicons[i] = trap_R_RegisterShaderNoMip(va("gfx/hud/fireteam/fireteam%i", i + 1));
 	}
 
-    // Keyset 1 (original)
-	cgs.media.keys.ForwardPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_forward_pressed");
-	cgs.media.keys.ForwardNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_forward_not_pressed");
-	cgs.media.keys.BackwardPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_backward_pressed");
-	cgs.media.keys.BackwardNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_backward_not_pressed");
-	cgs.media.keys.RightPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_right_pressed");
-	cgs.media.keys.RightNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_right_not_pressed");
-	cgs.media.keys.LeftPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_left_pressed");
-	cgs.media.keys.LeftNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_left_not_pressed");
-	cgs.media.keys.JumpPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_jump_pressed");
-	cgs.media.keys.JumpNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_jump_not_pressed");
-	cgs.media.keys.CrouchPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_crouch_pressed");
-	cgs.media.keys.CrouchNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_crouch_not_pressed");
-	cgs.media.keys.SprintPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_sprint_pressed");
-	cgs.media.keys.SprintNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_sprint_not_pressed");
-	cgs.media.keys.PronePressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_prone_pressed");
-	cgs.media.keys.ProneNotPressedShader
-	    = trap_R_RegisterShaderNoMip("gfx/keyset/key_prone_not_pressed");
-
-	// Aciz: Keyset 2 (DeFRaG style keys)
-	// No need for another blank key, so only visible keys
-	cgs.media.keys2.ForwardPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_forward_pressed");
-	cgs.media.keys2.BackwardPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_backward_pressed");
-	cgs.media.keys2.RightPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_right_pressed");
-	cgs.media.keys2.LeftPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_left_pressed");
-	cgs.media.keys2.JumpPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_jump_pressed");
-	cgs.media.keys2.CrouchPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_crouch_pressed");
-	cgs.media.keys2.SprintPressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_sprint_pressed");
-	cgs.media.keys2.PronePressedShader
-		= trap_R_RegisterShaderNoMip("gfx/keyset2/key_prone_pressed");
-
 	//Feen: CGaz - Register Shader
 	cgs.media.CGazArrow = trap_R_RegisterShaderNoMip("gfx/2d/cgaz_arrow");
-
 
 	//Feen: PGM - Register shaders...
 	cgs.media.portal_blueShader = trap_R_RegisterShader("gfx/misc/portal_blueShader");                //trap_R_RegisterShader( "gfx/misc/electricity_portal2" );
@@ -3387,6 +3369,26 @@ void CG_ClearTrails(void);
 extern qboolean initparticles;
 void CG_ClearParticles(void);
 
+namespace ETJump
+{
+	void initDrawKeys(KeySetSystem *keySetSystem)
+	{
+		// key set themes
+		const char* keySetNames[]{
+			"keyset", // Keyset 1 (original)
+			"keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
+			"keyset3",
+			"keyset4",
+			// + add more
+		};
+		for (const auto &keySetName : keySetNames)
+		{
+			keySetSystem->addSet(keySetName);
+		}
+		keySetSystem->addKeyBindSet("keyset5");
+	}
+}
+
 /*
 =================
 CG_Init
@@ -3672,6 +3674,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
+	auto keySetSystem = new ETJump::KeySetSystem(etj_drawKeys);
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
+	ETJump::initDrawKeys(keySetSystem);
 
 	CG_Printf("--------------------------------------------------------------------------------\n");
 	CG_Printf("ETJump initialized.");

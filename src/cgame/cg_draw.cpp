@@ -3,8 +3,17 @@
 
 #include "cg_local.h"
 #include "../game/q_shared.h"
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include "etj_irenderable.h"
 #include "../game/etj_numeric_utilities.h"
+#include <algorithm>
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -749,7 +758,7 @@ static void CG_DrawUpperRight(void)
 
 	y = 20 + 100 + 32;
 
-	if (CG_IsOnFireteam(cg.clientNum))
+	if (etj_HUD_fireteam.integer && CG_IsOnFireteam(cg.clientNum))
 	{
 		rectDef_t rect = { 10, 10, 100, 100 };
 		CG_DrawFireTeamOverlay(&rect);
@@ -824,7 +833,19 @@ static void CG_DrawTeamInfo(void)
 	int maxLineLength = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
 	int chatWidth = calcBackgroundWidth(maxLineLength, 0.2f, &cgs.media.limboFont2) + 5;
 	int chatHeight = Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+	int textStyle = ITEM_TEXTSTYLE_NORMAL;
+	float textAlpha = etj_chatAlpha.value;
 
+	if (etj_chatShadow.integer > 0) {
+		textStyle = ITEM_TEXTSTYLE_SHADOWED;
+	}
+
+	if (textAlpha > 1.0) {
+		textAlpha = 1.0;
+	}
+	else if (textAlpha < 0.0) {
+		textAlpha = 0.0;
+	}
 	if (chatHeight <= 0)
 	{
 		return; // disabled
@@ -907,11 +928,11 @@ static void CG_DrawTeamInfo(void)
 			CG_DrawPic(CHATLOC_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i) * lineHeight, chatWidth, lineHeight, cgs.media.teamStatusBar);
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
-			hcolor[3] = alphapercent;
+			hcolor[3] = alphapercent * textAlpha;
 			trap_R_SetColor(hcolor);
 
 			if (etj_chatFlags.integer) {
-
+				
 				if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
 				{
 					flag = cgs.media.axisFlag;
@@ -929,10 +950,10 @@ static void CG_DrawTeamInfo(void)
 					CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
 						12, 8, flag);
 				}
-			
+
 			}
 
-			CG_Text_Paint_Ext(linePosX, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, 0, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(linePosX, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
 		}
 	}
 }
@@ -3759,12 +3780,12 @@ namespace ETJump
 
 	static void drawSaveIcon(float x, float y)
 	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, true, SaveShadowColor);
+		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, SaveShadowColor);
 	}
 
 	static void drawProneIcon(float x, float y)
 	{
-		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor, true, ProneShadowColor);
+		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor, ProneShadowColor);
 	}
 
 	static void printNoProne(void)
@@ -3956,176 +3977,6 @@ static void CG_DrawPronePrint(void)
 
 	ETJump::printNoProne();
 }
-
-
-// Define keysets
-
-enum class KeyTypes
-{
-	Hidden,
-	Keyset1,
-	Keyset2,
-};
-
-
-static void CG_DrawKeys(void)
-{
-	playerState_t *ps;
-	float         x, y, size;
-	int           skew;
-	bool          drawShadow = etj_keysShadow.integer > 0;
-	vec4_t        shadowColor{ 0.0f, 0.0f, 0.0f, 1.0f };
-
-	KeyTypes drawKeysValue = static_cast<KeyTypes>(cg_drawKeys.integer);
-
-	if (drawKeysValue <= KeyTypes::Hidden)
-	{
-		return;
-	}
-
-	// some checks
-	if (cg_keysSize.value < 0 || cg_keysX.value < 0 || cg_keysY.value < 0
-	    || cg_keysX.value > 640.f || cg_keysY.value > SCREEN_HEIGHT)
-	{
-		return;
-	}
-	
-	skew = 0;
-
-	ps = &cg.predictedPlayerState;
-
-	size = cg_keysSize.value / 3;
-	// first (upper) row
-	// sprint (upper left)
-	x = cg_keysX.value + 2 * skew;
-	y = cg_keysY.value;
-
-	ETJump_AdjustPosition(&x);
-
-	if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.SprintPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.SprintPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.SprintNotPressedShader);
-	}
-	// forward
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.ForwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.ForwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.ForwardNotPressedShader);
-	}
-	// jump (upper right)
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.JumpPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.JumpPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.JumpNotPressedShader);
-	}
-
-	// second (middle) row
-	// left
-	x = cg_keysX.value + skew;
-	y += size;
-
-	ETJump_AdjustPosition(&x);
-
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.LeftPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.LeftPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.LeftNotPressedShader);
-	}
-	// right
-	x += 2 * size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.RightPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.RightPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.RightNotPressedShader);
-	}
-
-	// third (bottom) row
-	x = cg_keysX.value;
-	y += size;
-
-	ETJump_AdjustPosition(&x);
-
-	// prone (bottom left)
-	if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.PronePressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.PronePressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.ProneNotPressedShader);
-	}
-	// backward
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.BackwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.BackwardPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.BackwardNotPressedShader);
-	}
-	// crouch (bottom right)
-	x += size;
-	if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue == KeyTypes::Keyset1)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys.CrouchPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else if (ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN && drawKeysValue >= KeyTypes::Keyset2)
-	{
-		ETJump::drawPic(x, y, size, size, cgs.media.keys2.CrouchPressedShader, cg.keysColor, drawShadow, shadowColor);
-	}
-	else
-	{
-		CG_DrawPic(x, y, size, size, cgs.media.keys.CrouchNotPressedShader);
-	}
-}
-
 
 /*
 =================
@@ -4988,7 +4839,7 @@ void CG_DrawCompassIcon(float x, float y, float w, float h, vec3_t origin, vec3_
 	x = x + (cos(angle) * w);
 	y = y + (sin(angle) * w);
 
-	len = 1 - min(1.f, len / 2000.f);
+	len = 1 - std::min(1.f, len / 2000.f);
 
 
 	CG_DrawPic(x - (14 * len + 4) / 2, y - (14 * len + 4) / 2, 14 * len + 8, 14 * len + 8, shader);
@@ -6037,7 +5888,6 @@ CG_Draw2D
 static void CG_Draw2D(void)
 {
 	CG_ScreenFade();
-
 	// Arnout: no 2d when in esc menu
 	// FIXME: do allow for quickchat (bleh)
 	// Gordon: Removing for now
@@ -6089,8 +5939,6 @@ static void CG_Draw2D(void)
 			CG_DrawCrosshair();
 			CG_DrawCrosshairNames();
 
-			// NERVE - SMF - we need to do this for spectators as well
-			CG_DrawTeamInfo();
 		}
 		else
 		{
@@ -6107,16 +5955,12 @@ static void CG_Draw2D(void)
 //				CG_DrawPickupItem();
 			}
 
-			CG_DrawTeamInfo();
-
 			if (cg_drawStatus.integer)
 			{
 				Menu_PaintAll();
 				CG_DrawTimedMenus();
 			}
 		}
-
-		CG_DrawVote();
 
 	}
 
@@ -6154,6 +5998,12 @@ static void CG_Draw2D(void)
 			CG_DrawStatsDebug();
 		}
 
+		if (!cg.cameraMode) {
+			CG_DrawTeamInfo();
+			CG_DrawVote();
+			CG_DrawLagometer();
+		}
+
 		if (!cg_paused.integer)
 		{
 			CG_DrawUpperRight();
@@ -6182,7 +6032,6 @@ static void CG_Draw2D(void)
 			CG_DrawSlick();
 			CG_DrawJumpDelay();
 			CG_DrawSaveIndicator();
-			CG_DrawKeys();
 			CG_DrawProneIndicator();
 			CG_DrawPronePrint();
 		}
