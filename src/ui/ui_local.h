@@ -92,6 +92,8 @@ extern vmCvar_t ui_browserShowPunkBuster;
 extern vmCvar_t ui_browserShowAntilag;
 extern vmCvar_t ui_browserShowWeaponsRestricted;
 extern vmCvar_t ui_browserShowTeamBalanced;
+extern vmCvar_t ui_browserShowETJump;
+extern vmCvar_t ui_enableRefreshButton;
 
 extern vmCvar_t ui_serverStatusTimeOut;
 extern vmCvar_t ui_limboOptions;
@@ -927,6 +929,7 @@ typedef struct
 	fontInfo_t loadscreenfont1;
 	fontInfo_t loadscreenfont2;
 
+	int legacyClient;
 } uiInfo_t;
 
 extern uiInfo_t uiInfo;

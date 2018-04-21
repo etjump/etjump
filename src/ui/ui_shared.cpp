@@ -90,8 +90,8 @@ void Tooltip_Initialize(itemDef_t *item)
 
 void Tooltip_ComputePosition(itemDef_t *item)
 {
-	Rectangle *itemRect = &item->window.rectClient;
-	Rectangle *tipRect  = &item->toolTipData->window.rectClient;
+	rectDef_t *itemRect = &item->window.rectClient;
+	rectDef_t *tipRect  = &item->toolTipData->window.rectClient;
 
 	DC->textFont(item->toolTipData->font);
 
@@ -693,25 +693,53 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp, float fadeCycle)
 				color[0] = color[1] = .5;
 			}
 			color[3] = 1;
-			DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize, color);
+			if (w->borderFixedSize)
+			{
+				DC->drawRectFixed(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize, color);
+			}
+			else
+			{
+				DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize, color);
+			}
 		}
 		else
 		{
-			DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize, w->borderColor);
+			if (w->borderFixedSize)
+			{
+				DC->drawRectFixed(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize, w->borderColor);
+			}
+			else
+			{
+				DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize, w->borderColor);
+			}
 		}
 	}
 	else if (w->border == WINDOW_BORDER_HORZ)
 	{
 		// top/bottom
 		DC->setColor(w->borderColor);
-		DC->drawTopBottom(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
+		if (w->borderFixedSize)
+		{
+			DC->drawTopBottomNoScale(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
+		}
+		else
+		{
+			DC->drawTopBottom(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
+		}
 		DC->setColor(NULL);
 	}
 	else if (w->border == WINDOW_BORDER_VERT)
 	{
 		// left right
 		DC->setColor(w->borderColor);
-		DC->drawSides(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
+		if (w->borderFixedSize)
+		{
+			DC->drawSidesNoScale(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
+		}
+		else
+		{
+			DC->drawSides(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
+		}
 		DC->setColor(NULL);
 	}
 	else if (w->border == WINDOW_BORDER_KCGRADIENT)
@@ -4678,11 +4706,21 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 	fontInfo_t *font = DC->getActiveFont();
 	float      lineWidth = 0;
 	float      tWidth = 0;
+	int lineHeight = 0;
 
 	newLinePtr = NULL;
 
 	Item_TextColor(item, &color);
 	Item_SetTextExtents(item, &width, &height, textPtr);
+
+	if (item->lineHeight > 0)
+	{
+		lineHeight = item->lineHeight;
+	}
+	else
+	{
+		lineHeight = height + 5;
+	}
 
 	if (hasCursor) {
 
@@ -4808,8 +4846,7 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 
 				break;
 			}
-			
-			y += height + 5;
+			y += lineHeight;
 			p = newLinePtr;
 			previousLine = startLine;
 			startLine += hasWhitespace ? newLine + 1 : newLine;			
@@ -4821,7 +4858,15 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 
 			continue;
 		}
-		lineWidth += GetCharWidth(p, item->textscale, font);
+
+		if (Q_IsColorString(p))
+		{
+			buff[len++] = *p++;
+		} else
+		{
+			lineWidth += GetCharWidth(p, item->textscale, font);
+		}
+
 		buff[len++] = *p++;
 
 		if (buff[len - 1] == 13)
@@ -6724,7 +6769,7 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y)
 	int      i, pass;
 	qboolean focusSet = qfalse;
 
-	itemDef_t *overItem;
+	itemDef_t *overItem = nullptr;
 
 	if (menu == NULL)
 	{
@@ -6751,6 +6796,7 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y)
 
 		}
 		//Item_MouseMove(itemCapture, x, y);
+
 		return;
 	}
 
@@ -6799,26 +6845,17 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y)
 			{
 				if (pass == 1)
 				{
-					overItem = menu->items[i];
-					if (overItem->type == ITEM_TYPE_TEXT && overItem->text)
+					if (menu->items[i]->type == ITEM_TYPE_TEXT &&  menu->items[i]->text)
 					{
-						if (!Rect_ContainsPoint(Item_CorrectedTextRect(overItem), x, y))
+						if (!Rect_ContainsPoint(Item_CorrectedTextRect(menu->items[i]), x, y))
 						{
 							continue;
 						}
 					}
 					// if we are over an item
-					if (IsVisible(overItem->window.flags))
+					if (IsVisible(menu->items[i]->window.flags))
 					{
-						// different one
-						Item_MouseEnter(overItem, x, y);
-						// Item_SetMouseOver(overItem, qtrue);
-
-						// if item is not a decoration see if it can take focus
-						if (!focusSet)
-						{
-							focusSet = Item_SetFocus(overItem, x, y);
-						}
+						overItem = menu->items[i];
 					}
 				}
 			}
@@ -6828,6 +6865,13 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y)
 				Item_SetMouseOver(menu->items[i], qfalse);
 			}
 		}
+	}
+
+	if (overItem)
+	{
+		Item_MouseEnter(overItem, x, y);
+		// if item is not a decoration see if it can take focus
+		Item_SetFocus(overItem, x, y);
 	}
 }
 
@@ -7504,6 +7548,15 @@ qboolean ItemParse_bordersize(itemDef_t *item, int handle)
 	return qtrue;
 }
 
+qboolean ItemParse_borderfixed(itemDef_t *item, int handle)
+{
+	if (!PC_Int_Parse(handle, &item->window.borderFixedSize))
+	{
+		return qfalse;
+	}
+	return qtrue;
+}
+
 qboolean ItemParse_visible(itemDef_t *item, int handle)
 {
 	int i = 0;
@@ -7577,6 +7630,15 @@ qboolean ItemParse_textscale(itemDef_t *item, int handle)
 qboolean ItemParse_textstyle(itemDef_t *item, int handle)
 {
 	if (!PC_Int_Parse(handle, &item->textStyle))
+	{
+		return qfalse;
+	}
+	return qtrue;
+}
+
+qboolean ItemParse_lineHeight(itemDef_t *item, int handle)
+{
+	if (!PC_Float_Parse(handle, &item->lineHeight))
 	{
 		return qfalse;
 	}
@@ -8253,6 +8315,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "border",            ItemParse_border,            NULL },
 	{ "bordercolor",       ItemParse_bordercolor,       NULL },
 	{ "bordersize",        ItemParse_bordersize,        NULL },
+	{ "borderfixed",       ItemParse_borderfixed,       NULL },
 	{ "cinematic",         ItemParse_cinematic,         NULL },
 	{ "columns",           ItemParse_columns,           NULL },
 	{ "contextmenu",       ItemParse_contextMenu,       NULL },
@@ -8319,6 +8382,7 @@ keywordHash_t itemParseKeywords[] =
 	{ "textfont",          ItemParse_textfont,          NULL }, // (SA)
 	{ "textscale",         ItemParse_textscale,         NULL },
 	{ "textstyle",         ItemParse_textstyle,         NULL },
+	{ "lineheight",        ItemParse_lineHeight,        NULL },
 	{ "tooltip",           ItemParse_tooltip,           NULL },
 	{ "tooltipalignx",     ItemParse_tooltipalignx,     NULL },
 	{ "tooltipaligny",     ItemParse_tooltipaligny,     NULL },

@@ -238,7 +238,7 @@ vmCvar_t ui_teamArenaFirstRun;
 
 extern itemDef_t *g_bindItem;
 
-void _UI_Init(qboolean);
+void _UI_Init(int legacyClient, int clientVersion);
 void _UI_Shutdown(void);
 void _UI_KeyEvent(int key, qboolean down);
 void _UI_MouseEvent(int dx, int dy);
@@ -253,7 +253,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 		return UI_API_VERSION;
 
 	case UI_INIT:
-		_UI_Init(arg0 ? qtrue : qfalse);
+		_UI_Init(arg1, arg2);
 		return 0;
 
 	case UI_SHUTDOWN:
@@ -360,6 +360,21 @@ void _UI_DrawTopBottom(float x, float y, float w, float h, float size)
 	trap_R_DrawStretchPic(x, y, w, size, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
 	trap_R_DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
 }
+
+void _UI_DrawSides_NoScale(float x, float y, float w, float h, float size)
+{
+	UI_AdjustFrom640(&x, &y, &w, &h);
+	trap_R_DrawStretchPic(x, y, size, h, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
+	trap_R_DrawStretchPic(x + w - size, y, size, h, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
+}
+
+void _UI_DrawTopBottom_NoScale(float x, float y, float w, float h, float size)
+{
+	UI_AdjustFrom640(&x, &y, &w, &h);
+	trap_R_DrawStretchPic(x, y, w, size, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
+	trap_R_DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
+}
+
 /*
 ================
 UI_DrawRect
@@ -377,6 +392,16 @@ void _UI_DrawRect(float x, float y, float width, float height, float size, const
 	trap_R_SetColor(NULL);
 }
 
+
+void _UI_DrawRect_DrawRect_FixedBorder(float x, float y, float width, float height, int size, const float *color)
+{
+	trap_R_SetColor(color);
+
+	_UI_DrawSides_NoScale(x, y, width, height, size);
+	_UI_DrawTopBottom_NoScale(x, y, width, height, size);
+
+	trap_R_SetColor(NULL);
+}
 
 
 // NERVE - SMF
@@ -1517,6 +1542,11 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 	if (cstate.connState <= CA_DISCONNECTED)
 	{
 		trap_PC_AddGlobalDefine("FUI");
+	}
+
+	if (uiInfo.legacyClient)
+	{
+		trap_PC_AddGlobalDefine("LEGACY");
 	}
 
 	handle = trap_PC_LoadSource(menuFile);
@@ -7142,13 +7172,15 @@ static void UI_BuildServerDisplayList(qboolean force)
 				}
 			}
 
-			/*trap_Cvar_Update( &ui_serverFilterType );
-			if (ui_serverFilterType.integer > 0) {
-			    if (Q_stricmp(Info_ValueForKey(info, "game"), serverFilters[ui_serverFilterType.integer].basedir) != 0) {
-			        trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
-			        continue;
-			    }
-			}*/
+			trap_Cvar_Update( &ui_browserShowETJump);
+			if (ui_browserShowETJump.integer > 0) {
+				bool isETJump = Q_stricmpn(Info_ValueForKey(info, "game"), "etjump", 6) == 0;
+				if ((isETJump && ui_browserShowETJump.integer == 2) ||
+					(!isETJump && ui_browserShowETJump.integer == 1)) {
+					trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
+					continue;
+				}
+			}
 
 			// make sure we never add a favorite server twice
 			if (ui_netSource.integer == AS_FAVORITES)
@@ -7863,6 +7895,13 @@ static const char *UI_FileText(char *fileName)
 //----(SA)	end
 
 
+static char *trimLeadingWiteSpace(char *str)
+{
+	while (isspace((unsigned char)*str)) str++;
+
+	return str;
+}
+
 const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *handles, int *numhandles)
 {
 	static char info[MAX_STRING_CHARS];
@@ -7955,7 +7994,7 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 					}
 					else
 					{
-						return Info_ValueForKey(info, "hostname");
+						return trimLeadingWiteSpace(Info_ValueForKey(info, "hostname"));
 					}
 				}
 			case SORT_MAP:
@@ -9155,7 +9194,7 @@ static void UI_BuildQ3Model_List( void )
 UI_Init
 =================
 */
-void _UI_Init(qboolean inGameLoad)
+void _UI_Init(int legacyClient, int clientVersion)
 {
 	int start, x;
 
@@ -9187,6 +9226,7 @@ void _UI_Init(qboolean inGameLoad)
 		uiInfo.uiDC.bias = 0;
 	}
 
+	MOD_CHECK_LEGACY(legacyClient, clientVersion, uiInfo.legacyClient);
 
 	//UI_Load();
 	uiInfo.uiDC.registerShaderNoMip  = &trap_R_RegisterShaderNoMip;
@@ -9206,8 +9246,11 @@ void _UI_Init(qboolean inGameLoad)
 	uiInfo.uiDC.modelBounds          = &trap_R_ModelBounds;
 	uiInfo.uiDC.fillRect             = &UI_FillRect;
 	uiInfo.uiDC.drawRect             = &_UI_DrawRect;
+	uiInfo.uiDC.drawRectFixed        = &_UI_DrawRect_DrawRect_FixedBorder;
 	uiInfo.uiDC.drawSides            = &_UI_DrawSides;
 	uiInfo.uiDC.drawTopBottom        = &_UI_DrawTopBottom;
+	uiInfo.uiDC.drawSidesNoScale     = &_UI_DrawSides_NoScale;
+	uiInfo.uiDC.drawTopBottomNoScale = &_UI_DrawTopBottom_NoScale;
 	uiInfo.uiDC.clearScene           = &trap_R_ClearScene;
 	uiInfo.uiDC.drawSides            = &_UI_DrawSides;
 	uiInfo.uiDC.addRefEntityToScene  = &trap_R_AddRefEntityToScene;
@@ -10085,6 +10128,8 @@ vmCvar_t ui_browserShowPunkBuster;              // DHM - Nerve
 vmCvar_t ui_browserShowAntilag;     // TTimo
 vmCvar_t ui_browserShowWeaponsRestricted;
 vmCvar_t ui_browserShowTeamBalanced;
+vmCvar_t ui_browserShowETJump;
+vmCvar_t ui_enableRefreshButton;
 
 vmCvar_t ui_serverStatusTimeOut;
 
@@ -10240,6 +10285,8 @@ cvarTable_t cvarTable[] =
 	{ &ui_browserShowAntilag,           "ui_browserShowAntilag",           "0",                          CVAR_ARCHIVE                   },
 	{ &ui_browserShowWeaponsRestricted, "ui_browserShowWeaponsRestricted", "0",                          CVAR_ARCHIVE                   },
 	{ &ui_browserShowTeamBalanced,      "ui_browserShowTeamBalanced",      "0",                          CVAR_ARCHIVE                   },
+	{ &ui_browserShowETJump, "ui_browserShowETJump", "0", CVAR_ARCHIVE },
+	{ &ui_enableRefreshButton, "ui_enableRefreshButton", "0", CVAR_ARCHIVE },
 
 	{ &ui_serverStatusTimeOut,          "ui_serverStatusTimeOut",          "7000",                       CVAR_ARCHIVE                   },
 

@@ -285,7 +285,7 @@ void CG_DrawRect(float x, float y, float width, float height, float size, const 
 	trap_R_SetColor(NULL);
 }
 
-void CG_DrawRect_FixedBorder(float x, float y, float width, float height, int border, const float *color)
+void CG_DrawRect_FixedBorder(float x, float y, float width, float height, int border, const vec4_t color)
 {
 	trap_R_SetColor(color);
 

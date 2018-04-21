@@ -110,13 +110,11 @@ typedef struct rectDef_s
 	float h;    // height;
 } rectDef_t;
 
-typedef rectDef_t Rectangle;
-
 // FIXME: do something to separate text vs window stuff
 typedef struct
 {
-	Rectangle rect;                 // client coord rectangle
-	Rectangle rectClient;           // screen coord rectangle
+	rectDef_t rect;                 // client coord rectangle
+	rectDef_t rectClient;           // screen coord rectangle
 	const char *name;               //
 	const char *model;              //
 	const char *group;              // if it belongs to a group
@@ -127,9 +125,10 @@ typedef struct
 	int ownerDraw;                  // ownerDraw style
 	int ownerDrawFlags;             // show flags for ownerdraw items
 	float borderSize;               //
+	int borderFixedSize;
 	int flags;                      // visible, focus, mouseover, cursor
-	Rectangle rectEffects;          // for various effects
-	Rectangle rectEffects2;         // for various effects
+	rectDef_t rectEffects;          // for various effects
+	rectDef_t rectEffects2;         // for various effects
 	int offsetTime;                 // time based value for various effects
 	int nextTime;                   // time next effect should cycle
 	vec4_t foreColor;               // text color
@@ -243,7 +242,7 @@ typedef struct modelDef_s
 typedef struct itemDef_s
 {
 	Window window;                  // common positional, border, style, layout info
-	Rectangle textRect;             // rectangle the text ( if any ) consumes
+	rectDef_t textRect;             // rectangle the text ( if any ) consumes
 	int type;                       // text, button, radiobutton, checkbox, textfield, listbox, combo
 	int alignment;                  // left center right
 	int textalignment;              // ( optional ) alignment for text within rect based on text width
@@ -252,6 +251,7 @@ typedef struct itemDef_s
 	float textscale;                // scale percentage from 72pts
 	int font;                       // (SA)
 	int textStyle;                  // ( optional ) style, normal and shadowed are it for now
+	float lineHeight;
 	const char *text;   // display text
 	void *parent;                   // menu owner
 	qhandle_t asset;                // handle to asset
@@ -407,8 +407,11 @@ typedef struct
 	void (*modelBounds)(qhandle_t model, vec3_t min, vec3_t max);
 	void (*fillRect)(float x, float y, float w, float h, const vec4_t color);
 	void (*drawRect)(float x, float y, float w, float h, float size, const vec4_t color);
+	void(*drawRectFixed)(float x, float y, float w, float h, int size, const vec4_t color);
 	void (*drawSides)(float x, float y, float w, float h, float size);
 	void (*drawTopBottom)(float x, float y, float w, float h, float size);
+	void(*drawSidesNoScale)(float x, float y, float w, float h, float size);
+	void(*drawTopBottomNoScale)(float x, float y, float w, float h, float size);
 	void (*clearScene)();
 	void (*addRefEntityToScene)(const refEntity_t *re);
 	void (*renderScene)(const refdef_t *fd);

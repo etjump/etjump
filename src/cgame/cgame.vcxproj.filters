@@ -556,18 +556,6 @@
     <None Include="..\..\etjump\ui\rec_restart.menu">
       <Filter>Menu files</Filter>
     </None>
-    <None Include="..\..\etjump\ui\trickjump.menu">
-      <Filter>Menu files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\trickjump_info.menu">
-      <Filter>Menu files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\trickjump_settings.menu">
-      <Filter>Menu files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\trickjump_view.menu">
-      <Filter>Menu files</Filter>
-    </None>
     <None Include="..\..\etjump\ui\vid_confirm.menu">
       <Filter>Menu files</Filter>
     </None>

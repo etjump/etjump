@@ -412,10 +412,6 @@
     <None Include="..\..\etjump\ui\profile_rename.menu" />
     <None Include="..\..\etjump\ui\quit.menu" />
     <None Include="..\..\etjump\ui\rec_restart.menu" />
-    <None Include="..\..\etjump\ui\trickjump.menu" />
-    <None Include="..\..\etjump\ui\trickjump_info.menu" />
-    <None Include="..\..\etjump\ui\trickjump_settings.menu" />
-    <None Include="..\..\etjump\ui\trickjump_view.menu" />
     <None Include="..\..\etjump\ui\vid_confirm.menu" />
     <None Include="..\..\etjump\ui\vid_restart.menu" />
     <None Include="..\..\etjump\ui\viewreplay.menu" />
