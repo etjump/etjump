@@ -55,10 +55,10 @@ bool Levels::Delete(int level)
 bool Levels::Edit(int level, std::string const& name, std::string const& commands, std::string const& greeting, int updated)
 {
 	auto it = FindConst(level);
-	if (it == levels_.end())
-	{
+    if (it == levels_.end())
+    {
         return Add(level, name, commands, greeting);
-	}
+    }
 
 	const auto CMDS_UPDATED     = 1;
 	const auto GREETING_UPDATED = 2;
