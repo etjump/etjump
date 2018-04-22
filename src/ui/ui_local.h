@@ -7,6 +7,9 @@
 #include "keycodes.h"
 #include "../game/bg_public.h"
 #include "ui_shared.h"
+#include <vector>
+#include <stack>
+#include "../game/etj_string_utilities.h"
 
 extern vmCvar_t ui_ffa_fraglimit;
 extern vmCvar_t ui_ffa_timelimit;
@@ -801,6 +804,23 @@ typedef struct
 	const char *modDescr;
 } modInfo_t;
 
+enum class FileSystemObjectType
+{
+    Item,
+    Folder
+};
+
+struct FileSystemObjectInfo
+{
+    FileSystemObjectInfo(): type(FileSystemObjectType::Item), name("")
+    {
+        
+    };
+    FileSystemObjectType type;
+    std::string name;
+	std::string displayName;
+};
+
 typedef struct
 {
 	displayContextDef_t uiDC;
@@ -861,8 +881,10 @@ typedef struct
 	int modCount;
 	int modIndex;
 
-	const char *demoList[MAX_DEMOS];
-	int demoCount;
+	std::deque<std::string> currentDemoPath;
+	std::vector<FileSystemObjectInfo> demoObjects;
+	//const char *demoList[MAX_DEMOS];
+	//int demoCount;
 	int demoIndex;
 
 	const char *movieList[MAX_MOVIES];

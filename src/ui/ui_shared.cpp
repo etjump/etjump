@@ -1793,7 +1793,7 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort, char **args)
 			}
 			else if (!Q_stricmp(cvar, "ValidReplaySelected"))
 			{
-				if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoCount)
+				if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoObjects.size())
 				{
 					Item_RunScript(item, bAbort, script1);
 				}
