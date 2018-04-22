@@ -154,6 +154,7 @@
 
 
 #define PATH_SEP '\\'
+#define PATH_SEP_STRING "\\"
 
 #endif
 
@@ -166,6 +167,7 @@
 #define CPUSTRING   "MacOS_X"
 
 #define PATH_SEP    '/'
+#define PATH_SEP_STRING "/"
 
 // Vanilla PPC code, but since PPC has a reciprocal square root estimate instruction,
 // runs *much* faster than calling sqrt(). We'll use two Newton-Raphson
@@ -217,6 +219,7 @@ static inline float idSqrt(float x)
 
 #define CPUSTRING   "MacOS-PPC"
 
+#define PATH_SEP_STRING "/"
 #define PATH_SEP '/'
 
 void Sys_PumpEvents(void);
@@ -239,6 +242,7 @@ void Sys_PumpEvents(void);
 #define CPUSTRING   "linux-other"
 #endif
 
+#define PATH_SEP_STRING "/"
 #define PATH_SEP '/'
 
 #endif
