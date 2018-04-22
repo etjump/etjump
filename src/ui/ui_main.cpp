@@ -11,6 +11,9 @@ USER INTERFACE MAIN
 */
 
 #include "ui_local.h"
+#include <memory>
+#include <boost/algorithm/string.hpp>
+#include "../game/etj_string_utilities.h"
 
 // NERVE - SMF
 #define AXIS_TEAM       0
@@ -4868,11 +4871,6 @@ int cstring_icmp(const void *a, const void *b)
 	return Q_stricmp(*ia, *ib);
 }
 
-static void UI_SortDemos()
-{
-	qsort(uiInfo.demoList, uiInfo.demoCount, sizeof(char *), cstring_icmp);
-}
-
 /*
 ===============
 UI_LoadDemos
@@ -4880,39 +4878,70 @@ UI_LoadDemos
 */
 static void UI_LoadDemos()
 {
-	char demolist[30000];
-	char demoExt[32];
-	char *demoname;
-	int  i, len;
+    if (uiInfo.currentDemoPath.empty())
+    {
+		uiInfo.currentDemoPath.push_back("demos");
+    }
+	std::string path = boost::algorithm::join(uiInfo.currentDemoPath, std::string(PATH_SEP_STRING));
+	const auto bufferSize = 200000;
+    auto dirList = std::unique_ptr<char[]>(new char[bufferSize]);
+    auto demoList = std::unique_ptr<char[]>(new char[bufferSize]);
 
-	Com_sprintf(demoExt, sizeof(demoExt), "dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+    auto demoExt = ETJump::stringFormat("dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+	
+	auto numDirectories = trap_FS_GetFileList(path.c_str(), "/", dirList.get(), bufferSize);
+	auto numFiles = trap_FS_GetFileList(path.c_str(), demoExt.c_str(), demoList.get(), bufferSize);
 
-	uiInfo.demoCount = trap_FS_GetFileList("demos", demoExt, demolist, sizeof(demolist));
+	std::vector<FileSystemObjectInfo> directories;
+	char *dirPtr = dirList.get();
+    for (auto i = 0; i < numDirectories; ++i)
+    {
+		FileSystemObjectInfo objectInfo;
+		objectInfo.type = FileSystemObjectType::Folder;
+		objectInfo.name = std::string(dirPtr);
+		objectInfo.displayName = objectInfo.name + "/";
+        if (objectInfo.name != "." && objectInfo.name != "..")
+        {
+			directories.push_back(objectInfo);
+        }
+		dirPtr += objectInfo.name.length() + 1;
+    }
 
-	Com_sprintf(demoExt, sizeof(demoExt), ".dm_%d", (int)trap_Cvar_VariableValue("protocol"));
+	std::vector<FileSystemObjectInfo> files;
+	auto namePtr = demoList.get();
+    for (auto i = 0; i < numFiles; ++i)
+    {
+		FileSystemObjectInfo objectInfo;
+		objectInfo.type = FileSystemObjectType::Item;
+		objectInfo.name = std::string(namePtr);
+		files.push_back(objectInfo);
+		namePtr += objectInfo.name.length() + 1;
+    }
 
-	if (uiInfo.demoCount)
-	{
-		if (uiInfo.demoCount > MAX_DEMOS)
-		{
-			uiInfo.demoCount = MAX_DEMOS;
-		}
-		demoname = demolist;
-		for (i = 0; i < uiInfo.demoCount; i++)
-		{
-			len = strlen(demoname);
-			if (!Q_stricmp(demoname +  len - strlen(demoExt), demoExt))
-			{
-				demoname[len - strlen(demoExt)] = '\0';
-			}
-//			Q_strupr(demoname);
-			uiInfo.demoList[i] = String_Alloc(demoname);
-			demoname          += len + 1;
-		}
+	uiInfo.demoObjects = std::vector<FileSystemObjectInfo>();
+    const auto comparer = [](const FileSystemObjectInfo& lhs, const FileSystemObjectInfo& rhs)
+    {
+		return lhs.name < rhs.name;
+	};
+	std::sort(std::begin(directories), std::end(directories), comparer);
+	std::sort(std::begin(files), std::end(files), comparer);
+    if (uiInfo.currentDemoPath.size() > 1)
+    {
+		FileSystemObjectInfo back;
+		back.type = FileSystemObjectType::Folder;
+		back.name = ".";
+		back.displayName = ".";
+		FileSystemObjectInfo beginning;
+		beginning.type = FileSystemObjectType::Folder;
+		beginning.name = "..";
+		beginning.displayName = "..";
 
-		UI_SortDemos();
-	}
+		uiInfo.demoObjects.push_back(beginning);
+		uiInfo.demoObjects.push_back(back);
+    }
 
+	std::copy(std::begin(directories), std::end(directories), std::back_inserter(uiInfo.demoObjects));
+	std::copy(std::begin(files), std::end(files), std::back_inserter(uiInfo.demoObjects));
 }
 
 
@@ -5412,18 +5441,42 @@ void UI_RunMenuScript(char **args)
 		}
 		if (Q_stricmp(name, "RunDemo") == 0)
 		{
-			if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoCount)
-			{
-				trap_Cmd_ExecuteText(EXEC_APPEND, va("demo \"%s\"\n", uiInfo.demoList[uiInfo.demoIndex]));
-			}
+            if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoObjects.size())
+            {
+				auto selected = uiInfo.demoObjects[uiInfo.demoIndex];
+                if (selected.type == FileSystemObjectType::Folder)
+                {
+                    if (selected.name == ".")
+                    {
+						uiInfo.currentDemoPath.pop_back();
+                    } else if (selected.name == "..")
+                    {
+						uiInfo.currentDemoPath.clear();
+						uiInfo.currentDemoPath.push_back("demos");
+                    } else
+                    {
+						uiInfo.currentDemoPath.push_back(selected.name);
+                    }
+					UI_LoadDemos();
+                }  else
+                {
+                    // pop front because demo command automatically appends demos/ to the beginning of 
+                    // the path
+					auto front = uiInfo.currentDemoPath.front();
+					uiInfo.currentDemoPath.pop_front();
+					auto demoPath = (boost::algorithm::join(uiInfo.currentDemoPath, "/") + "/" + uiInfo.demoObjects[uiInfo.demoIndex].name);
+					uiInfo.currentDemoPath.push_front(front);
+					trap_Cmd_ExecuteText(EXEC_APPEND, va("demo \"%s\"\n", demoPath.c_str()));
+                }
+            }
 			return;
 		}
 		if (Q_stricmp(name, "deleteDemo") == 0)
 		{
-			if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoCount)
+			/*if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoCount)
 			{
 				trap_FS_Delete(va("demos/%s.dm_%d", uiInfo.demoList[uiInfo.demoIndex], (int)trap_Cvar_VariableValue("protocol")));
-			}
+			}*/
 			return;
 		}
 		if (Q_stricmp(name, "closeJoin") == 0)
@@ -7767,10 +7820,10 @@ static int UI_FeederCount(float feederID)
 	{
 		return uiInfo.modCount;
 	}
-	else if (feederID == FEEDER_DEMOS)
-	{
-		return uiInfo.demoCount;
-	}
+    else if (feederID == FEEDER_DEMOS)
+    {
+        return uiInfo.demoObjects.size();
+    }
 	return 0;
 }
 
@@ -8213,9 +8266,16 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 	}
 	else if (feederID == FEEDER_DEMOS)
 	{
-		if (index >= 0 && index < uiInfo.demoCount)
+		if (index >= 0 && index < uiInfo.demoObjects.size())
 		{
-			return uiInfo.demoList[index];
+			const auto object = &uiInfo.demoObjects[index];
+            switch (object->type)
+            {
+			case FileSystemObjectType::Folder:
+				return object->displayName.c_str();
+			case FileSystemObjectType::Item:
+				return object->name.c_str();
+            }
 		}
 	}
 	else if (feederID == FEEDER_PROFILES)
