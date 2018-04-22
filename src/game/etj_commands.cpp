@@ -740,10 +740,7 @@ bool EditUser(gentity_t *ent, Arguments argv)
 				title    = "";
 				updated |= Updated::TITLE;
 			}
-			else
-			{
-				it++;
-			}
+			it++;
 		}
 		else
 		{
