@@ -814,11 +814,10 @@ struct FileSystemObjectInfo
 {
     FileSystemObjectInfo(): type(FileSystemObjectType::Item), name("")
     {
-        
     };
     FileSystemObjectType type;
     std::string name;
-	std::string displayName;
+    std::string displayName;
 };
 
 typedef struct
