@@ -502,12 +502,12 @@ int Session::LevelDeleted(int adminLevel)
 {
 	int usersReseted = database_->ResetUsersWithLevel(adminLevel);
 
-	for (int i = 0; i < level.numConnectedClients; i++)
-	{
+    for (int i = 0; i < level.numConnectedClients; i++)
+    {
         int clientNum = level.sortedClients[i];
         clients_[clientNum].level = game.levels->GetLevel(clients_[clientNum].user->level);
         ParsePermissions(clientNum);
-	}
+    }
 	return usersReseted;
 }
 
