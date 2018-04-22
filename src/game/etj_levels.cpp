@@ -57,8 +57,7 @@ bool Levels::Edit(int level, std::string const& name, std::string const& command
 	auto it = FindConst(level);
 	if (it == levels_.end())
 	{
-		errorMessage = "level does not exist";
-		return false;
+        return Add(level, name, commands, greeting);
 	}
 
 	const auto CMDS_UPDATED     = 1;
