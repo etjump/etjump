@@ -540,6 +540,8 @@ vmCvar_t etj_uphillSteps;
 vmCvar_t etj_quickFollow;
 vmCvar_t etj_chatLineWidth;
 vmCvar_t etj_loopedSounds;
+vmCvar_t etj_onRunStart;
+vmCvar_t etj_onRunEnd;
 
 typedef struct
 {
@@ -920,6 +922,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE },
 	{ &etj_chatLineWidth, "etj_chatLineWidth", "62", CVAR_ARCHIVE },
 	{ &etj_loopedSounds, "etj_loopedSounds", "1", CVAR_ARCHIVE },
+	{ &etj_onRunStart, "etj_onRunStart", "", CVAR_ARCHIVE },
+	{ &etj_onRunEnd, "etj_onRunEnd", "", CVAR_ARCHIVE },
 };
 
 

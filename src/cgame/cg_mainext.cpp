@@ -6,7 +6,6 @@
 #include <string>
 #include <memory>
 
-
 static std::unique_ptr<Timerun> timerun;
 static std::unique_ptr<ETJump::TimerunView> timerunView;
 
@@ -52,6 +51,24 @@ void InitGame()
 	}
 }
 
+namespace ETJump
+{
+	void execCmdOnRunStart()
+	{
+		if (etj_onRunStart.string[0])
+		{
+			trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
+		}
+	}
+	void execCmdOnRunEnd()
+	{
+		if (etj_onRunEnd.string[0])
+		{
+			trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
+		}
+	}
+}
+
 /**
  * Extended CG_ServerCommand function. Checks whether server
  * sent command matches to any defined here. If no match is found
@@ -69,6 +86,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		std::string runName        = CG_Argv(2);
 		auto        previousRecord = atoi(CG_Argv(3));
 		timerun->startTimerun(runName, startTime, previousRecord);
+		ETJump::execCmdOnRunStart();
 		return qtrue;
 	}
 	// timerun_start_spec clientNum{integer} runStartTime{integer} runName{string}
@@ -91,6 +109,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	if (command == "timerun_interrupt")
 	{
 		timerun->interrupt();
+		ETJump::execCmdOnRunEnd();
 		return qtrue;
 	}
 	// timerun_stop completionTime{integer}
@@ -98,6 +117,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	{
 		auto completionTime = atoi(CG_Argv(1));
 		timerun->stopTimerun(completionTime);
+		ETJump::execCmdOnRunEnd();
 		return qtrue;
 	}
 	// timerun_stop_spec clientNum{integer} completionTime{integer} runName{string}

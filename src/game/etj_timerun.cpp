@@ -355,7 +355,7 @@ void Timerun::interrupt(int clientNum)
 {
 	Player *player = _players[clientNum].get();
 
-	if (player == nullptr)
+	if (player == nullptr || !player->racing)
 	{
 		return;
 	}
