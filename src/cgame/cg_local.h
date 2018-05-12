@@ -2584,6 +2584,8 @@ extern vmCvar_t etj_lightmap;
 extern vmCvar_t etj_drawNotify;
 
 extern vmCvar_t etj_consoleAlpha;
+extern vmCvar_t etj_consoleColor;
+extern vmCvar_t etj_consoleShader;
 extern vmCvar_t etj_drawLeaves;
 extern vmCvar_t etj_touchPickupWeapons;
 extern vmCvar_t etj_autoLoad;

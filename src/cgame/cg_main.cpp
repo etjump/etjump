@@ -531,6 +531,8 @@ vmCvar_t etj_lightmap;
 vmCvar_t etj_drawNotify;
 
 vmCvar_t etj_consoleAlpha;
+vmCvar_t etj_consoleColor;
+vmCvar_t etj_consoleShader;
 vmCvar_t etj_drawLeaves;
 vmCvar_t etj_touchPickupWeapons;
 vmCvar_t etj_autoLoad;
@@ -906,6 +908,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_lightmap, "etj_lightmap", "0", CVAR_ARCHIVE },
 	{ &etj_drawNotify, "etj_drawNotify", "0", CVAR_ARCHIVE },
 	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_consoleColor, "etj_consoleColor", "0.0 0.0 0.0", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_consoleShader, "etj_consoleShader", "1", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
 	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE },
