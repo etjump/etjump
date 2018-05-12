@@ -78,7 +78,7 @@ static void UI_StopServerRefresh(void);
 static void UI_DoServerRefresh(void);
 static void UI_FeederSelection(float feederID, int index);
 qboolean UI_FeederSelectionClick(itemDef_t *item);
-static void UI_BuildServerDisplayList(qboolean force);
+static void UI_BuildServerDisplayList(int force);
 static void UI_BuildServerStatus(qboolean force);
 static void UI_BuildFindPlayerList(qboolean force);
 static int QDECL UI_ServersQsortCompare(const void *arg1, const void *arg2);
@@ -6968,7 +6968,7 @@ static void UI_BinaryServerInsertion(int num)
 UI_BuildServerDisplayList
 ==================
 */
-static void UI_BuildServerDisplayList(qboolean force)
+static void UI_BuildServerDisplayList(int force)
 {
 	int  i, count, clients, maxClients, ping, game, len, visible, friendlyFire, maxlives, punkbuster, antilag, password, weaponrestricted, balancedteams;
 	char info[MAX_STRING_CHARS];
@@ -7042,7 +7042,7 @@ static void UI_BuildServerDisplayList(qboolean force)
 		visible = qtrue;
 		// get the ping for this server
 		ping = trap_LAN_GetServerPing(ui_netSource.integer, i);
-		if (ping > /*=*/ 0 || ui_netSource.integer == AS_FAVORITES)
+		if (ping > 0 || ui_netSource.integer == AS_FAVORITES)
 		{
 
 			trap_LAN_GetServerInfo(ui_netSource.integer, i, info, MAX_STRING_CHARS);
@@ -9482,7 +9482,6 @@ void UI_LoadNonIngame()
 	uiInfo.inGameLoad = qfalse;
 }
 
-
 //----(SA)	added
 static uiMenuCommand_t menutype = UIMENU_NONE;
 
@@ -9493,6 +9492,44 @@ uiMenuCommand_t _UI_GetActiveMenu(void)
 //----(SA)	end
 
 #define MISSING_FILES_MSG "The following packs are missing:"
+
+/*
+ *	We handle here illegal redirects, that happen upon serverlist loading
+ *	due to incorrect response recieve for a getstatus request.
+ */
+namespace ETJump
+{
+	void markAllServersVisible()
+	{
+		int count = trap_LAN_GetServerCount(ui_netSource.integer);
+		for (int i = 0; i < count; i++)
+		{
+			trap_LAN_MarkServerVisible(ui_netSource.integer, i, qtrue);
+		}
+	}
+
+	void keepServerListUpdating()
+	{
+		uiInfo.serverStatus.refreshActive = qtrue;
+		uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 1000;
+	}
+
+	void openPlayOnlineMenu()
+	{
+		Menus_CloseByName("main"); // opened by main_opener after ui reload
+		Menus_ActivateByName("playonline", qtrue);
+		char *str = "clearError"; // clears com_errorMessage
+		UI_RunMenuScript(&str);
+	}
+
+	void handleIllegalRedirect()
+	{
+		Com_Printf("^1ETJump: illegal redirect was detected, reacting...\n");
+		markAllServersVisible();
+		keepServerListUpdating();
+		openPlayOnlineMenu();
+	}
+}
 
 void _UI_SetActiveMenu(uiMenuCommand_t menu)
 {
@@ -9544,6 +9581,7 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu)
 			if ((*buf) && (Q_stricmp(buf, ";")))
 			{
 				trap_Cvar_Set("ui_connecting", "0");
+
 				if (!Q_stricmpn(buf, "Invalid password", 16))
 				{
 					trap_Cvar_Set("com_errorMessage", trap_TranslateString(buf));           // NERVE - SMF
@@ -9551,6 +9589,13 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu)
 				}
 				else if (strlen(buf) > 5 && !Q_stricmpn(buf, "ET://", 5))          // fretn
 				{
+					// legal redirects contain source ip in this variable
+					if (!UI_Cvar_VariableString("com_errorDiagnoseIP")[0])
+					{
+						ETJump::handleIllegalRedirect();
+						return;
+					}
+
 					Q_strncpyz(buf, buf + 5, sizeof(buf));
 					Com_Printf("Server is full, redirect to: %s\n", buf);
 					switch (ui_autoredirect.integer)
@@ -10129,7 +10174,6 @@ vmCvar_t ui_browserShowAntilag;     // TTimo
 vmCvar_t ui_browserShowWeaponsRestricted;
 vmCvar_t ui_browserShowTeamBalanced;
 vmCvar_t ui_browserShowETJump;
-vmCvar_t ui_enableRefreshButton;
 
 vmCvar_t ui_serverStatusTimeOut;
 
@@ -10286,7 +10330,6 @@ cvarTable_t cvarTable[] =
 	{ &ui_browserShowWeaponsRestricted, "ui_browserShowWeaponsRestricted", "0",                          CVAR_ARCHIVE                   },
 	{ &ui_browserShowTeamBalanced,      "ui_browserShowTeamBalanced",      "0",                          CVAR_ARCHIVE                   },
 	{ &ui_browserShowETJump, "ui_browserShowETJump", "0", CVAR_ARCHIVE },
-	{ &ui_enableRefreshButton, "ui_enableRefreshButton", "0", CVAR_ARCHIVE },
 
 	{ &ui_serverStatusTimeOut,          "ui_serverStatusTimeOut",          "7000",                       CVAR_ARCHIVE                   },
 
@@ -10575,7 +10618,7 @@ static void UI_DoServerRefresh(void)
 	else if (!wait)
 	{
 		// get the last servers in the list
-		UI_BuildServerDisplayList(qfalse);
+		UI_BuildServerDisplayList(2);
 		// stop the refresh
 		UI_StopServerRefresh();
 	}
