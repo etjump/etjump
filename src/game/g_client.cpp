@@ -1478,6 +1478,12 @@ static void ClientCleanName(const char *in, char *out, int outSize)
 			break;
 		}
 
+		// get rid of 0x80+ and '%' chars
+		if (static_cast<byte>(ch) > 127 || ch == '%')
+		{
+			ch = '.';
+		}
+
 		*out++ = ch;
 		colorlessLen++;
 		len++;
@@ -1645,6 +1651,7 @@ void ClientUserinfoChanged(int clientNum)
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));
 	s = Info_ValueForKey(userinfo, "name");
+
 	ClientCleanName(s, client->pers.netname, sizeof(client->pers.netname));
 
 	if (client->pers.connected == CON_CONNECTED)
@@ -1858,7 +1865,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	{
 		client->pers.initialSpawn = qtrue;              // DHM - Nerve
 		client->sess.gotoAllowed  = qtrue;
-		client->sess.saveAllowed  = qtrue; //qfalse	//Feen: Why was this set to false?
+		client->sess.saveAllowed  = qtrue;
 		client->last8BallTime     = 0;
 		client->lastVoteTime      = 0;
 		client->cheatDetected     = qfalse;
