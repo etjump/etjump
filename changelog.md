@@ -164,6 +164,10 @@
 * added `etj_popupPosX`, `etj_popupPosY` cvars to position popup message hud
 * made keyset to be drawn from the center of the defined origin (using `etj_keysX`, `etj_keysY`)
 * added 3 new keyset themes, you can switch these using `etj_drawKeys` cvar
+* fixed illegal redirect upon serverlist loading
+* added directories support in `replays` menu
+* added `etj_consoleShader` cvar to enable/disable textured background
+* added `etj_consoleColor` cvar to change console's background color if `etj_consoleShader` is disabled
 
 # ETJump 2.2.0
 
