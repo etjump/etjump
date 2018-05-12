@@ -423,6 +423,12 @@ void    G_TouchTriggers(gentity_t *ent)
 		if (hit->touch)
 		{
 			hit->touch(hit, ent, &trace);
+			// update mins/maxs after portal trigger
+			if (hit->surfaceFlags == SURF_PORTALGATE)
+			{
+				VectorAdd(ent->client->ps.origin, ent->r.mins, mins);
+				VectorAdd(ent->client->ps.origin, ent->r.maxs, maxs);
+			}
 		}
 
 		if ((ent->r.svFlags & SVF_BOT) && (ent->touch))

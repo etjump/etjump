@@ -4008,17 +4008,12 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	tent->s.otherEntityNum2 = ent->s.number;
 	//END - Rail
 
-
-
-
 	portal            = G_Spawn();
 	portal->classname = "portal_gate";
-
 
 	//Assign ent to player as well as the portal type..
 	if (PortalNumber == 1)
 	{
-
 		portal->s.eType = ET_PORTAL_BLUE; //Portal 1
 
 		portal->linkedPortal = ent->portalRed;
@@ -4029,11 +4024,9 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 		//Assign to client
 		ent->portalBlue = portal;
-
 	}
 	else
 	{
-
 		portal->s.eType = ET_PORTAL_RED; //Portal 2
 
 		portal->linkedPortal = ent->portalBlue;
@@ -4044,10 +4037,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 		//Assign to client
 		ent->portalRed = portal;
-
 	}
-
-
 
 	//Set origin (obviously)
 	G_SetOrigin(portal, t_endpos);
@@ -4068,9 +4058,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 		VectorSet(portal->r.mins, -P_DEPTH, -P_WIDTH, -P_HEIGHT);  //(P_DEPTH, P_WIDTH, P_HEIGHT)
 		VectorSet(portal->r.maxs, P_DEPTH, P_WIDTH, P_HEIGHT);
-
-
-
 	}
 	else if (t_portalAngles[PITCH] == -0)  //Vertical Portals (On walls)
 	{
@@ -4091,8 +4078,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 			VectorSet(portal->r.maxs, P_DEPTH, P_HEIGHT, P_WIDTH);
 
 		}
-
-
 	}
 	else   //Slanted (not quite vertical) portals get the largest bbox...
 	{
@@ -4101,8 +4086,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 		VectorSet(portal->r.mins, -P_DEPTH, -P_WIDTH, -P_HEIGHT);  //(P_DEPTH, P_WIDTH, P_HEIGHT)
 		VectorSet(portal->r.maxs, P_DEPTH, P_WIDTH, P_HEIGHT);
-
-
 	}
 
 	//end new bbox code
@@ -4140,10 +4123,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	vectoangles(tr.plane.normal, portal->s.angles); //NOTE: RE-Enable angles...
 	vectoangles(tr.plane.normal, portal->r.currentAngles);
 
-
 	trap_LinkEntity(portal);
-
-
 }
 
 
