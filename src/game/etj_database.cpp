@@ -772,7 +772,9 @@ bool Database::LoadBans()
 	int          rc    = 0;
 	sqlite3_stmt *stmt = NULL;
 
-	if (!PrepareStatement("SELECT id, name, guid, hwid, ip, banned_by, ban_date, expires, reason FROM bans;", &stmt))
+    // keep bans but ignore expired ones
+    void ClearExpiredBans();
+	if (!PrepareStatement("SELECT id, name, guid, hwid, ip, banned_by, ban_date, expires, reason FROM bans WHERE expires = 0 OR expires > STRFTIME('%s','now');", &stmt))
 	{
 		return false;
 	}

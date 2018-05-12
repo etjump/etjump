@@ -365,7 +365,7 @@ bool Ban(gentity_t *ent, Arguments argv)
 	std::string reason  = "Banned by admin.";
 
 	// !ban <name> <time> <reason>
-	if (argv->size() > 3)
+	if (argv->size() >= 3)
 	{
 		if (!ToUnsigned(argv->at(2), expires))
 		{
@@ -740,10 +740,7 @@ bool EditUser(gentity_t *ent, Arguments argv)
 				title    = "";
 				updated |= Updated::TITLE;
 			}
-			else
-			{
-				it++;
-			}
+			it++;
 		}
 		else
 		{
