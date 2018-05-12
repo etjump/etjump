@@ -339,7 +339,7 @@ int trap_LAN_GetLocalServerCount(void)
 
 void trap_LAN_GetLocalServerAddressString(int n, char *buf, int buflen)
 {
-	syscall(UI_LAN_GETLOCALSERVERADDRESSSTRING, n, buf, buflen);
+	syscall(UI_LAN_GETSERVERADDRESSSTRING, AS_LOCAL, n, buf, buflen);
 }
 
 int trap_LAN_GetGlobalServerCount(void)
@@ -349,7 +349,7 @@ int trap_LAN_GetGlobalServerCount(void)
 
 void trap_LAN_GetGlobalServerAddressString(int n, char *buf, int buflen)
 {
-	syscall(UI_LAN_GETGLOBALSERVERADDRESSSTRING, n, buf, buflen);
+	syscall(UI_LAN_GETSERVERADDRESSSTRING, AS_GLOBAL, n, buf, buflen);
 }
 
 int trap_LAN_GetPingQueueCount(void)
