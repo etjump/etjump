@@ -168,6 +168,9 @@
 * added directories support in `replays` menu
 * added `etj_consoleShader` cvar to enable/disable textured background
 * added `etj_consoleColor` cvar to change console's background color if `etj_consoleShader` is disabled
+* fixed random mouse moves bug caused by malicious commands
+* fixed portalgun bug, where player was able to teleport and start timerun simultaneously
+* added `etj_onRunStart`, `etj_onRunEnd` cvars which can hold sequence of commands to be executed when run events occur
 
 # ETJump 2.2.0
 
