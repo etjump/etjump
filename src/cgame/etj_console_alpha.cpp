@@ -9,9 +9,27 @@ using namespace ETJump;
 
 ConsoleAlphaHandler::ConsoleAlphaHandler()
 {
+	auto shader = createBackground();
+	trap_R_LoadDynamicShader(shaderName, shader.c_str());
+	// once shader is registered, any changes to dynamic shader will have no effect
+	trap_R_RegisterShader(shaderName);
+	trap_R_RemapShader("console-16bit", shaderName, "0");
+}
+
+std::string ConsoleAlphaHandler::createBackground()
+{
+	if (etj_consoleShader.integer > 0)
+	{
+		return createTexturedBackground();
+	}
+	return createSolidBackground();
+}
+
+std::string ConsoleAlphaHandler::createTexturedBackground()
+{
 	auto alphaGen = (boost::format("alphaGen const %f") % etj_consoleAlpha.value).str();
-	auto shader = composeShader(
-		shaderName, 
+	return composeShader(
+		shaderName,
 		{ "nopicmip" },
 		{
 			{
@@ -40,10 +58,27 @@ ConsoleAlphaHandler::ConsoleAlphaHandler()
 			}
 		}
 	);
-	trap_R_LoadDynamicShader(shaderName, shader.c_str());
-	// once shader is registered, any changes to dynamic shader will have no effect
-	trap_R_RegisterShader(shaderName);
-	trap_R_RemapShader("console-16bit", shaderName, "0");
+}
+
+std::string ConsoleAlphaHandler::createSolidBackground()
+{
+	vec4_t bg;
+	parseColorString(etj_consoleColor.string, bg);
+	auto alphaGen = (boost::format("alphaGen const %f") % etj_consoleAlpha.value).str();
+	auto colorGen = (boost::format("rgbGen const ( %f %f %f )") % bg[0] % bg[1] % bg[2]).str();
+
+	return composeShader(
+		shaderName,
+		{ "nopicmip" },
+		{
+			{
+				"map $whiteimage",
+				"blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+				alphaGen.c_str(),
+				colorGen.c_str(),
+			}	
+		}
+	);
 }
 
 ConsoleAlphaHandler::~ConsoleAlphaHandler()
