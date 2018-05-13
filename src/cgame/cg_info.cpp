@@ -123,9 +123,6 @@ void CG_ShowHelp_Off(int *status)
 // Demo playback key catcher support
 void CG_DemoClick(int key, qboolean down)
 {
-
-	char buf[MAX_TOKEN_CHARS];
-
 	int milli = trap_Milliseconds();
 
 	// Avoid active console keypress issues
@@ -459,8 +456,8 @@ void CG_DemoClick(int key, qboolean down)
 //
 #define COLOR_BG            { 0.0f, 0.0f, 0.0f, 0.6f }
 #define COLOR_BORDER        { 0.5f, 0.5f, 0.5f, 0.5f }
-#define COLOR_BG_TITLE      { 0.16, 0.2f, 0.17f, 0.8f }
-#define COLOR_BG_VIEW       { 0.16, 0.2f, 0.17f, 0.8f }
+#define COLOR_BG_TITLE      { 0.16f, 0.2f, 0.17f, 0.8f }
+#define COLOR_BG_VIEW       { 0.16f, 0.2f, 0.17f, 0.8f }
 #define COLOR_BORDER_TITLE  { 0.1f, 0.1f, 0.1f, 0.2f }
 #define COLOR_BORDER_VIEW   { 0.2f, 0.2f, 0.2f, 0.4f }
 #define COLOR_HDR           { 0.6f, 0.6f, 0.6f, 1.0f }

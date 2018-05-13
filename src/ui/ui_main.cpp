@@ -904,7 +904,7 @@ void Text_AutoWrap_Paint(float x, float y, int width, int height, float scale, v
 void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text, int cursorPos, char cursor, int limit, int style)
 {
 	int         len, count;
-	vec4_t      newColor, newCursorColor;
+	vec4_t      newColor;
 	glyphInfo_t *glyph, *glyph2;
 	float       yadj;
 	float       useScale;
@@ -9584,8 +9584,9 @@ namespace ETJump
 	{
 		Menus_CloseByName("main"); // opened by main_opener after ui reload
 		Menus_ActivateByName("playonline", qtrue);
-		char *str = "clearError"; // clears com_errorMessage
-		UI_RunMenuScript(&str);
+		char str[]{ "clearError" }; // clears com_errorMessage
+		char *strp = str;
+		UI_RunMenuScript(&strp);
 	}
 
 	void handleIllegalRedirect()

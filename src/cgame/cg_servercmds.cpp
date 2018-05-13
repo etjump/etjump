@@ -1181,7 +1181,7 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 	int          len, i;
 	int          current = 0;
 	fileHandle_t f;
-	char         buf[MAX_VOICEFILESIZE];
+	auto buf = std::unique_ptr<char[]>(new char[MAX_VOICEFILESIZE]);
 	char         **p, *ptr;
 	char         *token;
 	voiceChat_t  *voiceChats;
@@ -1206,11 +1206,11 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 		return qfalse;
 	}
 
-	trap_FS_Read(buf, len, f);
+	trap_FS_Read(buf.get(), len, f);
 	buf[len] = 0;
 	trap_FS_FCloseFile(f);
 
-	ptr = buf;
+	ptr = buf.get();
 	p   = &ptr;
 
 	Com_sprintf(voiceChatList->name, sizeof(voiceChatList->name), "%s", filename);
@@ -1347,7 +1347,7 @@ int CG_HeadModelVoiceChats(char *filename)
 {
 	int          len, i;
 	fileHandle_t f;
-	char         buf[MAX_VOICEFILESIZE];
+	auto         buf = std::unique_ptr<char[]>(new char[MAX_VOICEFILESIZE]);
 	char         **p, *ptr;
 	char         *token;
 
@@ -1364,11 +1364,11 @@ int CG_HeadModelVoiceChats(char *filename)
 		return -1;
 	}
 
-	trap_FS_Read(buf, len, f);
+	trap_FS_Read(buf.get(), len, f);
 	buf[len] = 0;
 	trap_FS_FCloseFile(f);
 
-	ptr = buf;
+	ptr = buf.get();
 	p   = &ptr;
 
 	token = COM_ParseExt(p, qtrue);

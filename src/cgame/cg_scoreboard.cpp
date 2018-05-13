@@ -656,7 +656,7 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 	auto   boldFont = &cgs.media.limboFont1;
 	int    textWidth, tempy;
 	const  char* text;
-	vec4_t borderColor = { 0.0f, 0.0f, 0.0f, 0.6 * fade };
+	vec4_t borderColor = { 0.0f, 0.0f, 0.0f, 0.6f * fade };
 	vec4_t borderColor2 = { 0.0f, 0.0f, 0.0f, fade };
 	vec4_t currentClrUiBar, currentClrUiBack;
 	Vector4Copy(clrUiBack, currentClrUiBack);

@@ -1558,7 +1558,7 @@ static void CG_SpotlightEfx(centity_t *cent)
 {
 	vec3_t targetpos, normalized_direction, direction;
 	float  dist, fov = 90;
-	vec4_t color        = { 1, 1, 1, .1 };
+	vec4_t color        = { 1.f, 1.f, 1.f, .1f };
 	int    splinetarget = 0;
 	char   *cs;
 
@@ -2864,7 +2864,6 @@ static vec4_t clrOrange = { 128, 128, 0, 255 };
 static void CG_TokenMarker(centity_t *cent, int difficulty)
 {
 	static int nextPrintTime = 0;
-	int        i, k;
 	float      quadSize = 16;
 	vec3_t     point;
 	vec3_t     mins = { -quadSize, -quadSize, 0 };
@@ -2882,6 +2881,7 @@ static void CG_TokenMarker(centity_t *cent, int difficulty)
 
 	switch (difficulty)
 	{
+	default:
 	case TOKEN_DIFFICULTY_EASY:
 		Vector4Copy(clrGreen, color);
 		break;
@@ -2908,11 +2908,11 @@ static void CG_TokenMarker(centity_t *cent, int difficulty)
 	verts[3].st[0] = 1;
 	verts[3].st[1] = 0;
 
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		for (k = 0; k < 4; k++)
+		for (int k = 0; k < 4; k++)
 		{
-			verts[i].modulate[k] = (unsigned char)color[k];
+			verts[i].modulate[k] = static_cast<unsigned char>(color[k]);
 		}
 	}
 
@@ -2931,7 +2931,7 @@ static void CG_TokenMarker(centity_t *cent, int difficulty)
 	VectorAdd(corners[0], tmpx2, corners[0]);
 
 	vec3_t tmpz = { 0.0, 0.0, -extz };
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		VectorCopy(corners[i], corners[i + 4]);
 		VectorAdd(corners[i], tmpz, corners[i]);

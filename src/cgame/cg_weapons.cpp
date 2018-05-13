@@ -976,14 +976,15 @@ CG_ParseWeaponConfig
 ======================
 */
 static qboolean CG_ParseWeaponConfig(const char *filename, weaponInfo_t *wi)
-{
+{	
 	char         *text_p, *prev;
 	int          len;
 	int          i;
 	float        fps;
 	char         *token;
 	qboolean     newfmt = qfalse;   //----(SA)
-	char         text[20000];
+	const int CONFIG_BUFFER_SIZE = 20000;
+	auto text = std::unique_ptr<char[]>(new char[CONFIG_BUFFER_SIZE]);
 	fileHandle_t f;
 
 	// load the file
@@ -993,18 +994,18 @@ static qboolean CG_ParseWeaponConfig(const char *filename, weaponInfo_t *wi)
 		return qfalse;
 	}
 
-	if (len >= sizeof(text) - 1)
+	if (len >= CONFIG_BUFFER_SIZE - 1)
 	{
 		CG_Printf("File %s too long\n", filename);
 		return qfalse;
 	}
 
-	trap_FS_Read(text, len, f);
+	trap_FS_Read(text.get(), len, f);
 	text[len] = 0;
 	trap_FS_FCloseFile(f);
 
 	// parse the text
-	text_p = text;
+	text_p = text.get();
 
 	// read optional parameters
 	while (1)

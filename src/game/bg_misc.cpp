@@ -6028,22 +6028,22 @@ void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB)
 {
 
 
-	vec4_t *temp_RGB = NULL;
+	vec4_t temp_RGB;
 
-	RGBtoHSL(in_RGB, temp_RGB);
+	RGBtoHSL(in_RGB, &temp_RGB);
 
 	//Now temp_RGB is HSL, add 180deg to H
 
-	*temp_RGB[0] += 0.5f; // 180/360 (deg)
+	temp_RGB[0] += 0.5f; // 180/360 (deg)
 
 	//Keep it within range...
-	if (*temp_RGB[0] > 1.0f)
+	if (temp_RGB[0] > 1.0f)
 	{
-		*temp_RGB[0] -= 1.0f;
+		temp_RGB[0] -= 1.0f;
 	}
 
 	//Change it back
-	HSLtoRGB(*temp_RGB, out_RGB);
+	HSLtoRGB(temp_RGB, out_RGB);
 
 	return;
 
