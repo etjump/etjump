@@ -1,6 +1,7 @@
 // ui_players.c
 
 #include "ui_local.h"
+#include <memory>
 
 
 #define UI_TIMER_GESTURE        2300
@@ -1392,7 +1393,7 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 	char         *token;
 	float        fps;
 	int          skip;
-	char         text[20000];
+	auto  text = std::unique_ptr<char[]>(new char[20000]);
 	fileHandle_t f;
 
 	token = NULL;
@@ -1413,16 +1414,16 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 		Com_Printf("File %s too long\n", filename);
 		return qfalse;
 	}
-	trap_FS_Read(text, len, f);
+	trap_FS_Read(text.get(), len, f);
 	text[len] = 0;
 	trap_FS_FCloseFile(f);
 
 	// parse the text
-	text_p = text;
+	text_p = text.get();
 	skip   = 0; // quite the compiler warning
 
 	// NERVE - SMF - new!!!!
-	AnimParseAnimConfig(pi, filename, text);
+	AnimParseAnimConfig(pi, filename, text.get());
 	return qtrue;
 
 	// -NERVE - SMF - This does not work with wolf's new animation system

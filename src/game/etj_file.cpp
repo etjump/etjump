@@ -78,9 +78,9 @@ void ETJump::File::write(const std::string& data) const
 std::vector<std::string> ETJump::File::fileList(const std::string& path, const std::string& extension)
 {
 	std::vector<std::string> files;
-	char buffer[1 << 16] = "";
-	auto numDirs = trap_FS_GetFileList(path.c_str(), extension.c_str(), buffer, sizeof(buffer));
-	auto dirPtr = buffer;
+	auto buffer = std::unique_ptr<char[]>(new char[1 << 16]);
+	auto numDirs = trap_FS_GetFileList(path.c_str(), extension.c_str(), buffer.get(), sizeof(buffer));
+	auto dirPtr = buffer.get();
 	auto dirLen = 0;
 
 	for (auto i = 0; i < numDirs; i++, dirPtr += dirLen + 1)

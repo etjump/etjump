@@ -117,13 +117,14 @@ int PM_IdleAnimForWeapon(int weapon)
 
 int PM_AltSwitchFromForWeapon(int weapon)
 {
-	switch (weapon)
+	/*switch (weapon)
 	{
-//		case WP_MEDIC_SYRINGE:
-//			return WEAP_DROP;
+	case WP_MEDIC_SYRINGE:
+		return WEAP_DROP;
 	default:
 		return WEAP_ALTSWITCHFROM;
-	}
+	}*/
+	return WEAP_ALTSWITCHFROM;
 }
 
 int PM_AltSwitchToForWeapon(int weapon)

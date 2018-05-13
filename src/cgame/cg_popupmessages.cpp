@@ -95,20 +95,12 @@ cg_popupFadeTime & cg_popupStayTime
 
 int CG_TimeForPopup(popupMessageType_t type)
 {
-	switch (type)
-	{
-	default:
-		return cg_popupTime.integer;
-	}
+	return cg_popupTime.integer;
 }
 
 int CG_TimeForBigPopup(popupMessageBigType_t type)
 {
-	switch (type)
-	{
-	default:
-		return 2500;
-	}
+	return 2500;
 }
 
 void CG_AddToListFront(pmListItem_t **list, pmListItem_t *item)

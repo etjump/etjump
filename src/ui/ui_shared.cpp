@@ -597,7 +597,7 @@ void Fade(int *flags, float *f, float clamp, int *nextTime, int offsetTime, qboo
 void Window_Paint(Window *w, float fadeAmount, float fadeClamp, float fadeCycle)
 {
 	//float bordersize = 0;
-	vec4_t    color;
+	vec4_t    color{ 1.f, 1.f, 1.f, 1.f };
 	rectDef_t fillRect = w->rect;
 
 	if (debugMode)

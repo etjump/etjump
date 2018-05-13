@@ -2800,7 +2800,7 @@ qboolean CG_LimboPanel_Draw(void)
 	}
 
 	// side frames to block view
-	vec4_t sideColor = { 0.145, 0.172, 0.145, 1 };
+	vec4_t sideColor = { 0.145f, 0.172f, 0.145f, 1.f };
 	CG_FillRect(0, 0, SCREEN_OFFSET_X, 480, sideColor);
 	CG_FillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, sideColor);
 

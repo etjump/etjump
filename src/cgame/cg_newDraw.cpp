@@ -648,11 +648,6 @@ void CG_DrawCursorhint(rectDef_t *rect)
 
 float CG_GetValue(int ownerDraw, int type)
 {
-	switch (ownerDraw)
-	{
-	default:
-		break;
-	}
 	return -1;
 }
 
@@ -764,12 +759,6 @@ void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y
 	rect.y = y;
 	rect.w = w;
 	rect.h = h;
-
-	switch (ownerDraw)
-	{
-	default:
-		break;
-	}
 }
 
 int old_mouse_x_pos = 0, old_mouse_y_pos = 0;

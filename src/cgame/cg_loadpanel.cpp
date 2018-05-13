@@ -286,7 +286,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 	}
 
 	// black background for wide screens
-	vec4_t sideColor = { 0.145, 0.172, 0.145, 1 };
+	vec4_t sideColor = { 0.145f, 0.172f, 0.145f, 1.f };
 	DC->fillRect(0, 0, SCREEN_WIDTH, 480, sideColor);
 
 	BG_PanelButtonsRender(loadpanelButtons);

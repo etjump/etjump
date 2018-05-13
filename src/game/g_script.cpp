@@ -508,7 +508,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 	qboolean         wantName;
 	qboolean         inScript;
 	int              eventNum;
-	g_script_event_t events[G_MAX_SCRIPT_STACK_ITEMS];
+	auto events = std::unique_ptr<g_script_event_t[]>(new g_script_event_t[G_MAX_SCRIPT_STACK_ITEMS]);
 	int              numEventItems;
 	g_script_event_t *curEvent;
 	// DHM - Nerve :: Some of our multiplayer script commands have longer parameters
@@ -538,7 +538,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 	bracketLevel  = 0;
 	numEventItems = 0;
 
-	memset(events, 0, sizeof(events));
+	memset(events.get(), 0, sizeof(g_script_event_t) * G_MAX_SCRIPT_STACK_ITEMS);
 
 	while (1)
 	{
@@ -794,7 +794,7 @@ void G_Script_ScriptParse(gentity_t *ent)
 	if (numEventItems > 0)
 	{
 		ent->scriptEvents = static_cast<g_script_event_t *>(G_Alloc(sizeof(g_script_event_t) * numEventItems));
-		memcpy(ent->scriptEvents, events, sizeof(g_script_event_t) * numEventItems);
+		memcpy(ent->scriptEvents, events.get(), sizeof(g_script_event_t) * numEventItems);
 		ent->numScriptEvents = numEventItems;
 	}
 }

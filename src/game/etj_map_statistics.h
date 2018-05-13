@@ -16,7 +16,7 @@ public:
 		{
 
 		}
-		long id;
+		long long id;
 		std::string name;
 		int secondsPlayed;
 		int callvoted;

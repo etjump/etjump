@@ -960,6 +960,7 @@ namespace ETJump
 				return true;
 			}
 		}
+		return false;
 	}
 }
 
@@ -3233,11 +3234,6 @@ void CG_Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t
 
 static int CG_OwnerDrawWidth(int ownerDraw, float scale)
 {
-	switch (ownerDraw)
-	{
-	default:
-		break;
-	}
 	return 0;
 }
 

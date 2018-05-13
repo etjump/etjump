@@ -1610,10 +1610,10 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane, float opaci
 	vec4_t       projection    = { 0, 0, -1, 64 };
 	shadowPart_t shadowParts[] =
 	{
-		{ "tag_footleft",  10, 4,  1.0, 0 },
-		{ "tag_footright", 10, 4,  1.0, 0 },
-		{ "tag_torso",     18, 96, 0.8, 0 },
-		{ NULL,            0 }
+		{ "tag_footleft",  10.f, 4.f,  1.0f, 0 },
+		{ "tag_footright", 10.f, 4.f,  1.0f, 0 },
+		{ "tag_torso",     18.f, 96.f, 0.8f, 0 },
+		{ nullptr,            0 }
 	};
 
 	shadowParts[0].shader = cgs.media.shadowFootShader;     //DAJ pulled out of initliization
