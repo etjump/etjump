@@ -1131,6 +1131,7 @@ void ClientThink_real(gentity_t *ent)
 	}
 
 	msec = ucmd->serverTime - client->ps.commandTime;
+
 	// following others may result in bad times, but we still want
 	// to check for follow toggles
 	if (msec < 1 && client->sess.spectatorState != SPECTATOR_FOLLOW)
@@ -1588,12 +1589,6 @@ void ClientThink_real(gentity_t *ent)
 		}
 	}
 
-	// perform once-a-second actions
-	if (level.match_pause == PAUSE_NONE)
-	{
-		ClientTimerActions(ent, msec);
-	}
-
 	CheckForEvents(ent);
 
 	if (g_blockCheatCvars.integer)
@@ -1667,6 +1662,8 @@ void G_RunClient(gentity_t *ent)
 			trap_UnlinkEntity(ent);
 		}
 	}
+
+
 
 #ifdef ALLOW_GSYNC
 	if (!g_synchronousClients.integer)
@@ -2037,6 +2034,12 @@ void ClientEndFrame(gentity_t *ent)
 		ent->lastHintCheckTime  += time_delta;
 		ent->pain_debounce_time += time_delta;
 		ent->s.onFireEnd        += time_delta;
+	}
+
+	// perform once-a-second actions
+	if (level.match_pause == PAUSE_NONE)
+	{
+		ClientTimerActions(ent, level.time - level.previousTime);
 	}
 
 	//
