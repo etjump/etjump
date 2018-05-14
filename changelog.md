@@ -171,6 +171,7 @@
 * fixed random mouse moves bug caused by malicious commands
 * fixed portalgun bug, where player was able to teleport and start timerun simultaneously
 * added `etj_onRunStart`, `etj_onRunEnd` cvars which can hold sequence of commands to be executed when run events occur
+* fixed health regeneration was slower for `pmove_fixed` players
 
 # ETJump 2.2.0
 
