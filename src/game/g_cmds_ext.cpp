@@ -865,7 +865,6 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock
 	if (!ent->client->sess.specLocked)
 	{
 		CP("cpm \"You are now unlocked from spectators!\n\"");
-		ClientUserinfoChanged(ent->client->ps.clientNum);
 		return;
 	}
 
