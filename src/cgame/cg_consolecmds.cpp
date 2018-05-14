@@ -158,10 +158,13 @@ void CG_ScoresDown_f(void)
 		if (!cg.showScores)
 		{
 			cg.showScores = qtrue;
-			if (!cg.demoPlayback && cg.mvTotalClients < 1)
+
+			// ETJump: we are not resetting numScores here, so we could use cached data, 
+			// until we get fresh one
+			/*if (!cg.demoPlayback && cg.mvTotalClients < 1)
 			{
 				cg.numScores = 0;
-			}
+			}*/
 		}
 	}
 	else

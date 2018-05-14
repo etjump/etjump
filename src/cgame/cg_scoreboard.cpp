@@ -124,18 +124,8 @@ void CG_DrawPlayers(float x, float y, float fade)
 
 	for (i = 0; i < cg.numScores; i++)
 	{
-		if (cgs.clientinfo[cg.scores[i].client].team != TEAM_ALLIES)
-		{
-			continue;
-		}
-
-		CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
-		tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
-	}
-
-	for (i = 0; i < cg.numScores; i++)
-	{
-		if (cgs.clientinfo[cg.scores[i].client].team != TEAM_AXIS)
+		team_t team = cgs.clientinfo[cg.scores[i].client].team;
+		if ( team != TEAM_ALLIES && team != TEAM_AXIS)
 		{
 			continue;
 		}
@@ -318,18 +308,8 @@ void CG_DrawPlayers2(float x, float y, float fade)
 
 	for (i = 0; i < cg.numScores; i++)
 	{
-		if (cgs.clientinfo[cg.scores[i].client].team != TEAM_ALLIES)
-		{
-			continue;
-		}
-
-		CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
-		tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
-	}
-
-	for (i = 0; i < cg.numScores; i++)
-	{
-		if (cgs.clientinfo[cg.scores[i].client].team != TEAM_AXIS)
+		team_t team = cgs.clientinfo[cg.scores[i].client].team;
+		if (team != TEAM_ALLIES && team != TEAM_AXIS)
 		{
 			continue;
 		}
@@ -490,7 +470,7 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor, fontInfo_t *
 
 	// Draw server name & IP address (left side)
 	std::string hostName = ETJump::stringFormat("^7%s", Info_ValueForKey(configString, "sv_hostname"));
-	std::string ipAddress = ETJump::stringFormat("^7%s", cg.ipAddr);
+	std::string ipAddress = ETJump::stringFormat("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
 	float leftTextX = headerTextX;
 	float leftTextY = headerTextY;
 
@@ -580,9 +560,7 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 
 void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font)
 {
-	clientInfo_t *ci = cgs.clientinfo;
 	float playerCenterY = y + 8;
-	int i, j;
 
 	// Draw info text for player list
 
@@ -614,9 +592,10 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor, fontInfo
 	CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.12f, 0.12f, textColor, pingHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Get number of players and draw names + fill boxes
-	for (i = 0, j = 0; i < cg.numScores; i++)
+	for (int i = 0, j = 0; i < cg.numScores; i++)
 	{
-		if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR)
+		team_t team = cgs.clientinfo[cg.scores[i].client].team;
+		if (team != TEAM_AXIS && team != TEAM_ALLIES)
 		{
 			continue;
 		}
@@ -672,7 +651,6 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 
 void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font)
 {
-	clientInfo_t *ci = cgs.clientinfo;
 	float playerCenterY = y + 8;
 	int i, j;
 
@@ -710,7 +688,6 @@ void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor, fontI
 
 void CG_DrawAltScoreboard3(float fade)
 {
-	clientInfo_t *ci = cgs.clientinfo;
 	fontInfo_t *font = &cgs.media.limboFont1;
 	vec4_t textColor = { 1.0f, 1.0f, 1.0f, 0 };
 	textColor[3] = fade;
@@ -734,13 +711,18 @@ void CG_DrawAltScoreboard3(float fade)
 	// Add each client to either playerCount or spectatorCount for size adjustments
 	for (i = 0; i < cg.numScores; i++)
 	{
-		if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR)
+		team_t team = cgs.clientinfo[cg.scores[i].client].team;
+		switch (team)
 		{
+		case TEAM_SPECTATOR:
 			spectatorCount++;
-		}
-		else
-		{
+			break;
+		case TEAM_ALLIES:
+		case TEAM_AXIS:
 			playerCount++;
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -1193,7 +1175,7 @@ qboolean CG_DrawScoreboard(void)
 	}
 
 	auto x = SCREEN_OFFSET_X + 20;
-	auto y = 10, scy = 0, width = INFO::TOTAL_WIDTH * 2 + 40;
+	auto y = 10;
 
 	y = WM_DrawObjectives(x, y, INFO::TOTAL_WIDTH * 2 + 40, fade);
 	WM_TeamScoreboard(x, y + 5, TEAM_AXIS, fade, INFO::MAX_LINES);
