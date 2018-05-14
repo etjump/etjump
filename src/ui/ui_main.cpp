@@ -4899,7 +4899,7 @@ static void UI_LoadDemos()
         FileSystemObjectInfo objectInfo;
         objectInfo.type = FileSystemObjectType::Folder;
         objectInfo.name = std::string(dirPtr);
-        objectInfo.displayName = objectInfo.name + "/";
+        objectInfo.displayName = "^7" + objectInfo.name + "/";
         if (objectInfo.name != "." && objectInfo.name != "..")
         {
             directories.push_back(objectInfo);
