@@ -1205,22 +1205,48 @@ void Cmd_Kill_f(gentity_t *ent)
 void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team, spectatorState_t *sState, int *specClient)
 {
 	*sState = SPECTATOR_NOT;
-	if (!Q_stricmp(teamstr, "follow1"))
+	if (!Q_stricmp(teamstr, "follow1")) // follow player 1 as a spectator (we do require at least 1 playing client)
 	{
 		*team   = TEAM_SPECTATOR;
-		*sState = SPECTATOR_FOLLOW;
+
+		if (TeamCount(clientNum, TEAM_AXIS) + TeamCount(clientNum, TEAM_ALLIES) > 0)
+		{
+			*sState = SPECTATOR_FOLLOW;
+		}
+		else
+		{
+			*sState = SPECTATOR_FREE;
+		}
+
 		if (specClient)
 		{
 			*specClient = -1;
 		}
 	}
-	else if (!Q_stricmp(teamstr, "follow2"))
+	else if (!Q_stricmp(teamstr, "follow2")) // follow player 2 as a spectator (we do require at least 2 playing clients)
 	{
-		*team   = TEAM_SPECTATOR;
-		*sState = SPECTATOR_FOLLOW;
+		int specClientNum = -2;
+		int playerCount = TeamCount(clientNum, TEAM_AXIS) + TeamCount(clientNum, TEAM_ALLIES);
+
+		*team = TEAM_SPECTATOR;
+		if (playerCount > 1)
+		{
+			*sState = SPECTATOR_FOLLOW;
+		}
+		// if there is no 2nd player to follow, follow the first one
+		else if (playerCount > 0)
+		{
+			*sState = SPECTATOR_FOLLOW;
+			specClientNum = -1;
+		}
+		else
+		{
+			*sState = SPECTATOR_FREE;
+		}
+
 		if (specClient)
 		{
-			*specClient = -2;
+			*specClient = specClientNum;
 		}
 	}
 	else if (!Q_stricmp(teamstr, "spectator") || !Q_stricmp(teamstr, "s"))
@@ -1670,12 +1696,6 @@ void Cmd_Team_f(gentity_t *ent)
 	if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS)
 	{
 		ent->client->sess.latchPlayerType = PC_SOLDIER;
-	}
-
-	// Let's not do this as SetTeam crashes the game otherwise.
-	if (!Q_stricmp(s, "follow2") || !Q_stricmp(s, "follow1"))
-	{
-		return;
 	}
 
 	if (!SetTeam(ent, s, qfalse, w, w2, qtrue))
