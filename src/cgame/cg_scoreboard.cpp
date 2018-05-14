@@ -549,16 +549,16 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 	CG_Text_Paint_Ext(x, y, 0.12f, 0.12f, textColor, ci->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Draw FPS
-	std::string maxFPS = ETJump::stringFormat("%3i", ci->maxFPS);
+	std::string maxFPS = ETJump::stringFormat("%i", ci->maxFPS);
 	CG_Text_Paint_Centred_Ext(fpsCenterX, y, 0.12f, 0.12f, textColor, maxFPS, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Draw client info
-	std::string clientInfoPmove = ETJump::stringFormat("%1s", ci->pmoveFixed ? "^2P" : "");
-	std::string clientInfoCGaz = ETJump::stringFormat("%1s", ci->CGaz ? "^8C" : "");
-	std::string clientInfoHideMe = ETJump::stringFormat("%1s", ci->hideMe ? "^bH" : "");
-	std::string clientInfoSpecLock = ETJump::stringFormat("%1s", ci->specLocked ? "^9S" : "");
-	std::string clientInfoTimerun = ETJump::stringFormat("%1s", ci->timerunActive ? "^3T" : "");
-	std::string clientInfoTeam = ETJump::stringFormat("%1s", ci->team == TEAM_ALLIES ? "^4B" : "^1R");
+	const char *clientInfoPmove = ci->pmoveFixed ? "^2P" : "";
+	const char *clientInfoCGaz = ci->CGaz ? "^8C" : "";
+	const char *clientInfoHideMe = ci->hideMe ? "^bH" : "";
+	const char *clientInfoSpecLock = ci->specLocked ? "^9S" : "";
+	const char *clientInfoTimerun = ci->timerunActive ? "^3T" : "";
+	const char *clientInfoTeam = ci->team == TEAM_ALLIES ? "^4B" : "^1R";
 
 	CG_Text_Paint_Centred_Ext(infoX + 5, y, 0.12f, 0.12f, textColor, clientInfoPmove, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 	CG_Text_Paint_Centred_Ext(infoX + 12, y, 0.12f, 0.12f, textColor, clientInfoCGaz, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
@@ -568,7 +568,7 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 	CG_Text_Paint_Centred_Ext(infoX + 40, y, 0.12f, 0.12f, textColor, clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Draw client ping
-	std::string ping = ETJump::stringFormat("%4i", score->ping);
+	std::string ping = ETJump::stringFormat("%i", score->ping);
 	CG_Text_Paint_Centred_Ext(pingCenterX, y, 0.12f, 0.12f, textColor, ping, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
 
@@ -636,7 +636,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	std::string connecting = "^3CONNECTING";
 	std::string spectator = "^3SPECTATOR";
 	std::string following = "^3>";
-	std::string ping = ETJump::stringFormat("%4i", score->ping);
+	std::string ping = ETJump::stringFormat("%i", score->ping);
 	float playerX = ALT_SCOREBOARD_3_PLAYER_X;
 	float rightTextX = SCREEN_WIDTH - playerX;
 	float connectingTextOffsetX = CG_Text_Width_Ext(connecting, 0.12f, 0, font);
