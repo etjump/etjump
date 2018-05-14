@@ -1679,7 +1679,7 @@ void ClientUserinfoChanged(int clientNum)
 	// send over a subset of the userinfo keys so other clients can
 	// print scoreboards, display models, and play custom sounds
 
-	s = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i",
+	s = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i\\sl\\%i\\tr\\%i\\",
 	       client->pers.netname,
 	       client->sess.sessionTeam,
 	       client->sess.playerType,
@@ -1695,7 +1695,9 @@ void ClientUserinfoChanged(int clientNum)
 	       client->pers.pmoveFixed ? 1 : 0,
 	       client->pers.maxFPS < 999 && client->pers.maxFPS > 0 ? client->pers.maxFPS : 0,
 	       client->pers.cgaz > 0 ? client->pers.cgaz : 0,
-	       client->pers.hideMe > 0 ? client->pers.hideMe : 0
+	       client->pers.hideMe > 0 ? client->pers.hideMe : 0,
+		   client->sess.specLocked ? 1 : 0,
+		   client->sess.timerunActive ? 1 : 0
 	       );
 
 	trap_GetConfigstring(CS_PLAYERS + clientNum, oldname, sizeof(oldname));

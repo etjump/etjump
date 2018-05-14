@@ -86,6 +86,7 @@ void Utilities::startRun(int clientNum)
 	gentity_t *player = g_entities + clientNum;
 
 	player->client->sess.timerunActive = qtrue;
+	ClientUserinfoChanged(clientNum);
 
 	// also disable the noclip if it's active
 	if (player->client->noclip)
@@ -131,6 +132,7 @@ void Utilities::stopRun(int clientNum)
 	gentity_t *player = g_entities + clientNum;
 
 	player->client->sess.timerunActive = qfalse;
+	ClientUserinfoChanged(clientNum);
 }
 
 namespace UtilityHelperFunctions

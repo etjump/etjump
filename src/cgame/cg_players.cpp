@@ -244,6 +244,12 @@ void CG_NewClientInfo(int clientNum)
 	v              = Info_ValueForKey(configstring, "h");
 	newInfo.hideMe = atoi(v);
 
+	v              = Info_ValueForKey(configstring, "sl");
+	newInfo.specLocked = atoi(v) > 0 ? qtrue : qfalse;
+
+	v              = Info_ValueForKey(configstring, "tr");
+	newInfo.timerunActive = atoi(v) > 0 ? qtrue : qfalse;
+
 	// Gordon: detect rank/skill changes client side
 	if (clientNum == cg.clientNum)
 	{
