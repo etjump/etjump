@@ -1,5 +1,11 @@
 // cg_scoreboard -- draw the scoreboard on top of the game screen
 #include "cg_local.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include "../game/etj_string_utilities.h"
 
 #define SCOREBOARD_WIDTH    (31 * BIGCHAR_WIDTH)

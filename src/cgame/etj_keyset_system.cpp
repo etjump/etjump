@@ -25,6 +25,10 @@ void ETJump::KeySetSystem::beforeRender()
 
 void ETJump::KeySetSystem::render() const
 {
+	if (canSkipDraw())
+	{
+		return;
+	}
 	keySetMasterDrawer.render();
 }
 
@@ -88,4 +92,9 @@ qhandle_t ETJump::KeySetSystem::registerShaderNoMip(const std::string& shaderPat
 		return 0;
 	}
 	return trap_R_RegisterShaderNoMip(shaderPath.c_str());
+}
+
+bool ETJump::KeySetSystem::canSkipDraw() const
+{
+	return cg.showScores;
 }

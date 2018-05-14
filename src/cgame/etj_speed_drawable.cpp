@@ -62,7 +62,7 @@ void ETJump::DisplaySpeed::checkShadow()
 
 void ETJump::DisplaySpeed::render() const
 {
-	if (!cg_drawSpeed2.integer)
+	if (canSkipDraw())
 	{
 		return;
 	}
@@ -105,4 +105,9 @@ std::string ETJump::DisplaySpeed::getStatus() const
 	case 9: return stringFormat("%02i", static_cast<int>(speed) / 10 % 10 * 10);
 	default: return stringFormat("%.0f", speed);
 	}
+}
+
+bool ETJump::DisplaySpeed::canSkipDraw() const
+{
+	return !cg_drawSpeed2.integer || cg.showScores;
 }

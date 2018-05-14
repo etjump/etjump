@@ -15,6 +15,7 @@ namespace ETJump
 		void checkShadow();
 		void startListeners();
 		std::string getStatus() const;
+		bool canSkipDraw() const;
 	public:
 		DisplaySpeed();
 		~DisplaySpeed();

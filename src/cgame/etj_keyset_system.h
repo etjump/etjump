@@ -30,6 +30,7 @@ namespace ETJump
 		qhandle_t registerKeySetShader(const std::string &keySetName, const std::string &keyName);
 		std::string createKeyPressSetShaderPath(const std::string &keySetName, const std::string &keyName);
 		qhandle_t registerShaderNoMip(const std::string &shaderName);
+		bool canSkipDraw() const;
 
 	public:
 		KeySetSystem(const vmCvar_t &cvar);

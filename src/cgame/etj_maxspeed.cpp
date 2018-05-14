@@ -61,7 +61,7 @@ void ETJump::DisplayMaxSpeed::beforeRender()
 
 void ETJump::DisplayMaxSpeed::render() const
 {
-	if (!etj_drawMaxSpeed.integer)
+	if (canSkipDraw())
 	{
 		return;
 	}
@@ -90,4 +90,9 @@ void ETJump::DisplayMaxSpeed::render() const
 	}
 
 	CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, str, 0, 0, style, &cgs.media.limboFont1);
+}
+
+bool ETJump::DisplayMaxSpeed::canSkipDraw() const
+{
+	return !etj_drawMaxSpeed.integer || cg.showScores;
 }
