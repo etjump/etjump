@@ -61,6 +61,11 @@ const ETJump::PlayerTimerunInformation* ETJump::TimerunView::currentRun() const
 
 void ETJump::TimerunView::draw()
 {
+	if (canSkipDraw())
+	{
+		return;
+	}
+
 	auto run = currentRun();
 
 	auto hasTimerun = (cg.demoPlayback && run->running) || cg.hasTimerun;
@@ -253,4 +258,9 @@ bool ETJump::TimerunView::parseServerCommand()
 	}
 
 	return true;
+}
+
+bool ETJump::TimerunView::canSkipDraw() const
+{
+	return cg.showScores;
 }

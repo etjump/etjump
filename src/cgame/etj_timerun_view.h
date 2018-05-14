@@ -53,5 +53,7 @@ namespace ETJump
 		std::array<PlayerTimerunInformation, MaxClients> _playersTimerunInformation;
 		PlayerTimerunInformation _ownTimerunInformation;
 		vec4_t inactiveTimerColor;
+
+		bool canSkipDraw() const;
 	};
 }

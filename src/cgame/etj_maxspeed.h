@@ -16,6 +16,7 @@ namespace ETJump
 		EntityEventsHandler *_entityEventsHandler;
 
 		static void parseColor(const std::string &color, vec4_t &out);
+		bool canSkipDraw() const;
 	public:
 		explicit DisplayMaxSpeed(EntityEventsHandler *entityEventsHandler);
 		~DisplayMaxSpeed();
