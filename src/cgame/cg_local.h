@@ -588,6 +588,8 @@ typedef struct clientInfo_s
 	int weaponState;
 	int weaponState_last;
 	int hideMe;
+	qboolean specLocked;
+	qboolean timerunActive;
 } clientInfo_t;
 
 typedef enum
@@ -2746,12 +2748,16 @@ void CG_CheckForCursorHints(void);
 void CG_DrawTeamBackground(int x, int y, int w, int h, float alpha, int team);
 void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y, int ownerDraw, int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader, int textStyle);
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color, const char *text, float adjust, int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color, const std::string &text, float adjust, int limit, int style, fontInfo_t *font);
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, vec4_t color, const char *text, float adjust, int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, vec4_t color, const std::string &text, float adjust, int limit, int style, fontInfo_t *font);
 void CG_Text_Paint(float x, float y, float scale, vec4_t color, const char *text, float adjust, int limit, int style);
 void CG_Text_SetActiveFont(int font);
 int CG_Text_Width_Ext(const char *text, float scale, int limit, fontInfo_t *font);
+int CG_Text_Width_Ext(const std::string &text, float scale, int limit, fontInfo_t *font);
 int CG_Text_Width(const char *text, float scale, int limit);
 int CG_Text_Height_Ext(const char *text, float scale, int limit, fontInfo_t *font);
+int CG_Text_Height_Ext(const std::string &text, float scale, int limit, fontInfo_t *font);
 int CG_Text_Height(const char *text, float scale, int limit);
 float CG_GetValue(int ownerDraw, int type); // 'type' is relative or absolute (fractional-'0.5' or absolute- '50' health)
 qboolean CG_OwnerDrawVisible(int flags);

@@ -71,6 +71,11 @@ int CG_Text_Width_Ext(const char *text, float scale, int limit, fontInfo_t *font
 	return out * useScale;
 }
 
+int CG_Text_Width_Ext(const std::string &text, float scale, int limit, fontInfo_t *font)
+{
+	return CG_Text_Width_Ext(text.c_str(), scale, limit, font);
+}
+
 int CG_Text_Width(const char *text, float scale, int limit)
 {
 	fontInfo_t *font = &cgDC.Assets.fonts[activeFont];
@@ -118,6 +123,11 @@ int CG_Text_Height_Ext(const char *text, float scale, int limit, fontInfo_t *fon
 	return max * useScale;
 }
 
+int CG_Text_Height_Ext(const std::string &text, float scale, int limit, fontInfo_t *font)
+{
+	return CG_Text_Height_Ext(text.c_str(), scale, limit, font);
+}
+
 int CG_Text_Height(const char *text, float scale, int limit)
 {
 	fontInfo_t *font = &cgDC.Assets.fonts[activeFont];
@@ -143,6 +153,13 @@ void CG_Text_PaintChar(float x, float y, float width, float height, float scale,
 }
 
 void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, vec4_t color, const char *text, float adjust, int limit, int style, fontInfo_t *font)
+{
+	x -= CG_Text_Width_Ext(text, scalex, limit, font) * 0.5f;
+
+	CG_Text_Paint_Ext(x, y, scalex, scaley, color, text, adjust, limit, style, font);
+}
+
+void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, vec4_t color, const std::string &text, float adjust, int limit, int style, fontInfo_t *font)
 {
 	x -= CG_Text_Width_Ext(text, scalex, limit, font) * 0.5f;
 
@@ -207,6 +224,11 @@ void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t colo
 		}
 		trap_R_SetColor(NULL);
 	}
+}
+
+void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color, const std::string &text, float adjust, int limit, int style, fontInfo_t *font)
+{
+    CG_Text_Paint_Ext(x, y, scalex, scaley, color, text.c_str(), adjust, limit, style, font);
 }
 
 void CG_Text_Paint(float x, float y, float scale, vec4_t color, const char *text, float adjust, int limit, int style)

@@ -1558,6 +1558,62 @@ const char *GetParsedIP(const char *ipadd)
 	return ipge;
 }
 
+namespace ETJump
+{
+	bool UpdateClientConfigString(gentity_t &gent)
+	{
+		if (!gent.client)
+		{
+			return false;
+		}
+
+		char skillStr[16] = "";
+		char medalStr[16] = "";
+		char oldcs[MAX_STRING_CHARS];
+
+		for (int i = 0; i < SK_NUM_SKILLS; i++)
+		{
+			Q_strcat(skillStr, sizeof(skillStr), va("%i", gent.client->sess.skill[i]));
+			Q_strcat(medalStr, sizeof(medalStr), va("%i", gent.client->sess.medals[i]));
+			// FIXME: Gordon: wont this break if medals > 9 arnout? JK: Medal count is tied to skill count :() Gordon: er, it's based on >> skill per map, so for a huuuuuuge campaign it could break...
+		}
+
+		// send over a subset of the userinfo keys so other clients can
+		// print scoreboards, display models, and play custom sounds
+		auto newcs = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i\\sl\\%i\\tr\\%i\\",
+			gent.client->pers.netname,
+			gent.client->sess.sessionTeam,
+			gent.client->sess.playerType,
+			gent.client->sess.rank,
+			medalStr,
+			skillStr,
+			gent.client->disguiseNetname,
+			gent.client->disguiseRank,
+			gent.client->sess.playerWeapon,
+			gent.client->sess.latchPlayerWeapon,
+			gent.client->sess.latchPlayerWeapon2,
+			gent.client->sess.muted ? 1 : 0,
+			gent.client->pers.pmoveFixed ? 1 : 0,
+			gent.client->pers.maxFPS < 999 && gent.client->pers.maxFPS > 0 ? gent.client->pers.maxFPS : 0,
+			gent.client->pers.cgaz > 0 ? gent.client->pers.cgaz : 0,
+			gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
+			gent.client->sess.specLocked ? 1 : 0,
+			gent.client->sess.timerunActive ? 1 : 0
+		);
+
+		trap_GetConfigstring(CS_PLAYERS + gent.client->ps.clientNum, oldcs, sizeof(oldcs));
+
+		if (Q_stricmp(oldcs, newcs) == 0)
+		{
+			return false;
+		}
+
+		trap_SetConfigstring(CS_PLAYERS + gent.client->ps.clientNum, newcs);
+
+		return true;
+	}
+}
+
 /*
 ===========
 ClientUserInfoChanged
@@ -1607,8 +1663,6 @@ void ClientUserinfoChanged(int clientNum)
 	}
 
 	// TODO: Check for hardware info spoofing
-
-
 
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
 	sscanf(s, "%i %i %i %i %f %i",
@@ -1670,11 +1724,9 @@ void ClientUserinfoChanged(int clientNum)
 		}
 	}
 
-	for (i = 0; i < SK_NUM_SKILLS; i++)
+	if (!ETJump::UpdateClientConfigString(*ent))
 	{
-		Q_strcat(skillStr, sizeof(skillStr), va("%i", client->sess.skill[i]));
-		Q_strcat(medalStr, sizeof(medalStr), va("%i", client->sess.medals[i]));
-		// FIXME: Gordon: wont this break if medals > 9 arnout? JK: Medal count is tied to skill count :() Gordon: er, it's based on >> skill per map, so for a huuuuuuge campaign it could break...
+		return;
 	}
 
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
@@ -1683,36 +1735,6 @@ void ClientUserinfoChanged(int clientNum)
 	client->ps.stats[STAT_PLAYER_CLASS] = client->sess.playerType;
 	// Gordon: Not needed any more as it's in clientinfo?
 
-	// send over a subset of the userinfo keys so other clients can
-	// print scoreboards, display models, and play custom sounds
-
-	s = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i",
-	       client->pers.netname,
-	       client->sess.sessionTeam,
-	       client->sess.playerType,
-	       client->sess.rank,
-	       medalStr,
-	       skillStr,
-	       client->disguiseNetname,
-	       client->disguiseRank,
-	       client->sess.playerWeapon,
-	       client->sess.latchPlayerWeapon,
-	       client->sess.latchPlayerWeapon2,
-	       client->sess.muted ? 1 : 0,
-	       client->pers.pmoveFixed ? 1 : 0,
-	       client->pers.maxFPS < 999 && client->pers.maxFPS > 0 ? client->pers.maxFPS : 0,
-	       client->pers.cgaz > 0 ? client->pers.cgaz : 0,
-	       client->pers.hideMe > 0 ? client->pers.hideMe : 0
-	       );
-
-	trap_GetConfigstring(CS_PLAYERS + clientNum, oldname, sizeof(oldname));
-
-	trap_SetConfigstring(CS_PLAYERS + clientNum, s);
-
-	if (!Q_stricmp(oldname, s))
-	{
-		return;
-	}
 
 	if (client->pers.pmoveFixed == qfalse)
 	{

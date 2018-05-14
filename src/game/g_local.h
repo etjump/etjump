@@ -1728,6 +1728,10 @@ void ClientUserinfoChanged(int clientNum);
 void ClientDisconnect(int clientNum);
 void ClientBegin(int clientNum);
 void ClientCommand(int clientNum);
+namespace ETJump
+{
+	bool UpdateClientConfigString(gentity_t &gent);
+}
 
 //
 // g_active.c
