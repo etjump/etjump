@@ -199,9 +199,10 @@ void CG_DrawHeader2(float x, float y, float fade)
 	textColor[3] = fade;
 
 	// Draw the server hostname
+	std::string ipAddress = ETJump::stringFormat("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
 	header = va(CG_TranslateString(va("^7%s", Info_ValueForKey(configString, "sv_hostname"))));
 	CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
-	CG_Text_Paint_Ext(tempX + 1, tempY + 10, 0.15f, 0.15f, textColor, va("^7%s", cg.ipAddr), 0, 0, 0, font);
+	CG_Text_Paint_Ext(tempX + 1, tempY + 10, 0.15f, 0.15f, textColor, ipAddress, 0, 0, 0, font);
 
 
 	// Draw the current map name
@@ -452,10 +453,10 @@ Alt scoreboard 3
 
 #define ALT_SCOREBOARD_3_DIVIDER				14
 
-#define ALT_SCOREBOARD_3_PLAYER_WIDTH			205
-#define ALT_SCOREBOARD_3_FPS_WIDTH				20
+#define ALT_SCOREBOARD_3_PLAYER_WIDTH			199
+#define ALT_SCOREBOARD_3_FPS_WIDTH				23
 #define ALT_SCOREBOARD_3_INFO_WIDTH				45
-#define ALT_SCOREBOARD_3_PING_WIDTH				20
+#define ALT_SCOREBOARD_3_PING_WIDTH				23
 
 #define ALT_SCOREBOARD_3_PLAYER_X				SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2 + 5;
 #define ALT_SCOREBOARD_3_FPS_X					ALT_SCOREBOARD_3_PLAYER_X + ALT_SCOREBOARD_3_PLAYER_WIDTH
@@ -490,7 +491,7 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor, fontInfo_t *
 	CG_Text_Paint_Ext(rightTextX - modVersionOffsetX, rightTextY + 10, 0.12f, 0.12f, textColor, modVersion, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
 
-void CG_DrawScoreboardRows3(float x, float y, int j, float fade)
+void CG_DrawScoreboardRows3(float x, float y, int j, score_t *score, float fade)
 {
 	vec4_t currentCompactUiBack;
 	vec4_t currentCompactUiBackLight;
@@ -502,6 +503,13 @@ void CG_DrawScoreboardRows3(float x, float y, int j, float fade)
 	currentCompactUiBack[3] *= fade;
 	currentCompactUiBackLight[3] *= fade;
 	currentCompactUiBorder[3] *= fade;
+
+	// Highlight yourself or followed client
+	if (score->client == cg.snap->ps.clientNum)
+	{
+		Vector4Set(currentCompactUiBack, 0.5f, 0.5f, 0.2f, fade * 0.33);
+		Vector4Set(currentCompactUiBackLight, 0.5f, 0.5f, 0.2f, fade * 0.33);
+	}
 
 	/* Draw light or dark fill depending on player number.
 	This drawing needs to be done here instead of CG_DrawAltScoreboard3,
@@ -600,7 +608,7 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor, fontInfo
 			continue;
 		}
 		
-		CG_DrawScoreboardRows3(x, y, j++, fade);
+		CG_DrawScoreboardRows3(x, y, j++, &cg.scores[i], fade);
 		y += ALT_SCOREBOARD_3_ROW_HEIGHT;
 
 		CG_AddPlayerToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT, fpsCenterX, infoX, pingCenterX, &cg.scores[i], textColor, font);
@@ -621,11 +629,13 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	std::string connecting = "^3CONNECTING";
 	std::string spectator = "^3SPECTATOR";
 	std::string following = "^3>";
+	std::string followedClient = cgs.clientinfo[score->followedClient].name;
 	std::string ping = ETJump::stringFormat("%i", score->ping);
 	float playerX = ALT_SCOREBOARD_3_PLAYER_X;
 	float rightTextX = SCREEN_WIDTH - playerX;
 	float connectingTextOffsetX = CG_Text_Width_Ext(connecting, 0.12f, 0, font);
 	float spectatorTextOffsetX = CG_Text_Width_Ext(spectator, 0.12f, 0, font);
+	float followedClientTextOffsetX = CG_Text_Width_Ext(followedClient, 0.12f, 0, font);
 
 	// Draw player
 	CG_Text_Paint_Ext(playerX, y, 0.12f, 0.12f, textColor, ci->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
@@ -642,7 +652,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	else
 	{
 		CG_Text_Paint_Ext(SCREEN_CENTER_X, y, 0.12f, 0.12f, textColor, following, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-		CG_Text_Paint_Ext(SCREEN_CENTER_X + 7, y, 0.12f, 0.12f, textColor, cgs.clientinfo[score->followedClient].name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+		CG_Text_Paint_Ext(rightTextX - followedClientTextOffsetX - 25, y, 0.12f, 0.12f, textColor, followedClient, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 	}
 
 	// Draw ping
@@ -677,7 +687,7 @@ void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor, fontI
 			continue;
 		}
 		
-		CG_DrawScoreboardRows3(x, y, j++, fade);
+		CG_DrawScoreboardRows3(x, y, j++, &cg.scores[i], fade);
 		y += ALT_SCOREBOARD_3_ROW_HEIGHT;
 
 		CG_AddSpectatorToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT, pingCenterX, &cg.scores[i], textColor, font);

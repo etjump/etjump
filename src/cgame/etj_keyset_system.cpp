@@ -96,5 +96,5 @@ qhandle_t ETJump::KeySetSystem::registerShaderNoMip(const std::string& shaderPat
 
 bool ETJump::KeySetSystem::canSkipDraw() const
 {
-	return cg.showScores;
+	return cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
 }
