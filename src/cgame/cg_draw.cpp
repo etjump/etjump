@@ -2757,6 +2757,12 @@ CG_DrawSpectator
 static void CG_DrawSpectator(void)
 {
 	const char *s;
+
+	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+	{
+		return;
+	}
+
 	if (cgs.demoCam.renderingFreeCam)
 	{
 		s = CG_TranslateString("FREECAM");

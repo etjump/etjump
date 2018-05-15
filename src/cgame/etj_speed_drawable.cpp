@@ -109,5 +109,5 @@ std::string ETJump::DisplaySpeed::getStatus() const
 
 bool ETJump::DisplaySpeed::canSkipDraw() const
 {
-	return !cg_drawSpeed2.integer || cg.showScores;
+	return !cg_drawSpeed2.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
 }

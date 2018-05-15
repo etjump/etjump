@@ -262,5 +262,5 @@ bool ETJump::TimerunView::parseServerCommand()
 
 bool ETJump::TimerunView::canSkipDraw() const
 {
-	return cg.showScores;
+	return cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
 }
