@@ -1248,8 +1248,8 @@ static void CG_DrawLagometer(void)
 	//
 	// draw the graph
 	//
-	x = SCREEN_WIDTH - 48;
-	y = 480 - 200;
+	x = SCREEN_WIDTH - 48 + ETJump_AdjustPosition(etj_lagometerX.value);
+	y = 480 - 200 + etj_lagometerY.integer;
 
 	trap_R_SetColor(NULL);
 	CG_DrawPic(x, y, 48, 48, cgs.media.lagometerShader);

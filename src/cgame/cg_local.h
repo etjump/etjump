@@ -2595,6 +2595,8 @@ extern vmCvar_t etj_uphillSteps;
 extern vmCvar_t etj_chatLineWidth;
 extern vmCvar_t etj_onRunStart;
 extern vmCvar_t etj_onRunEnd;
+extern vmCvar_t etj_lagometerX;
+extern vmCvar_t etj_lagometerY;
 
 //
 // cg_main.c
