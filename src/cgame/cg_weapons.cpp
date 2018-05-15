@@ -7341,7 +7341,10 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, i
 
 				// ydnar: better bullet marks
 				VectorSubtract(vec3_origin, dir, dir);
-				CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
+				if (trace.entityNum > MAX_CLIENTS && cg_ghostPlayers.integer > 0)
+				{
+					CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
+				}
 
 				//CG_RailTrail2( NULL, start, trace.endpos );
 			}
