@@ -304,6 +304,7 @@
     <ClCompile Include="etj_operating_system_linux.cpp" />
     <ClCompile Include="etj_operating_system_windows.cpp" />
     <ClCompile Include="etj_overbounce_watcher.cpp" />
+    <ClCompile Include="etj_quick_follow_drawable.cpp" />
     <ClCompile Include="etj_speed_drawable.cpp" />
     <ClCompile Include="etj_timerun_view.cpp" />
     <ClCompile Include="etj_trickjump_lines.cpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="etj_overbounce_watcher.h" />
     <ClInclude Include="etj_client_utilities.h" />
     <ClInclude Include="etj_drawable.h" />
+    <ClInclude Include="etj_quick_follow_drawable.h" />
     <ClInclude Include="etj_rotation_matrix.hpp" />
     <ClInclude Include="etj_speed_drawable.h" />
     <ClInclude Include="etj_timerun_view.h" />

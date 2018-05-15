@@ -21,6 +21,7 @@
 #include "etj_keyset_system.h"
 #include "etj_utilities.h"
 #include "etj_speed_drawable.h"
+#include "etj_quick_follow_drawable.h"
 
 displayContextDef_t cgDC;
 
@@ -3679,6 +3680,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// Display max speed from previous load session
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::QuickFollowDrawer()));
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();

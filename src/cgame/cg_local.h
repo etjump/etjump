@@ -2592,6 +2592,7 @@ extern vmCvar_t etj_drawLeaves;
 extern vmCvar_t etj_touchPickupWeapons;
 extern vmCvar_t etj_autoLoad;
 extern vmCvar_t etj_uphillSteps;
+extern vmCvar_t etj_quickFollow;
 extern vmCvar_t etj_chatLineWidth;
 extern vmCvar_t etj_onRunStart;
 extern vmCvar_t etj_onRunEnd;
