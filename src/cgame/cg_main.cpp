@@ -542,6 +542,8 @@ vmCvar_t etj_chatLineWidth;
 vmCvar_t etj_loopedSounds;
 vmCvar_t etj_onRunStart;
 vmCvar_t etj_onRunEnd;
+vmCvar_t etj_lagometerX;
+vmCvar_t etj_lagometerY;
 
 typedef struct
 {
@@ -924,6 +926,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_loopedSounds, "etj_loopedSounds", "1", CVAR_ARCHIVE },
 	{ &etj_onRunStart, "etj_onRunStart", "", CVAR_ARCHIVE },
 	{ &etj_onRunEnd, "etj_onRunEnd", "", CVAR_ARCHIVE },
+	{ &etj_lagometerX, "etj_lagometerX", "0", CVAR_ARCHIVE },
+	{ &etj_lagometerY, "etj_lagometerY", "0", CVAR_ARCHIVE },
 };
 
 
