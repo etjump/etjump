@@ -2666,6 +2666,11 @@ static void CG_DrawCrosshairNames(void)
 	{
 		return;
 	}
+	
+	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+    	{
+        	return;
+    	}
 
 	qboolean hitClient = qfalse;
 	// Distance to the entity under the crosshair
