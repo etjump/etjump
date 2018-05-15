@@ -2631,6 +2631,28 @@ void CG_CheckForCursorHints(void)
 	}
 }
 
+static void CG_DrawMoverHealthBar(float frac, vec4_t color)
+{
+	vec4_t bgcolor;
+	vec4_t c;
+	float barFrac = Numeric::clamp(frac, 0, 1.0);
+
+	c[0] = 1.0f;
+	c[1] = c[2] = barFrac;
+	c[3] = (0 + barFrac * 0.5) * color[3];
+
+	Vector4Set(bgcolor, 1.f, 1.f, 1.f, .25f * color[3]);
+	CG_FilledBar(320 - 110 / 2, 190, 110, 10, c, nullptr, bgcolor, barFrac, 16);
+}
+
+static void CG_DrawPlyerName(vec4_t color)
+{
+	const char *s = va("%s", cgs.clientinfo[cg.crosshairClientNum].name);
+	float w = ETJump::DrawStringWidth(s, 0.23f);
+
+	ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
+	trap_R_SetColor(nullptr);
+}
 
 
 /*
@@ -2640,42 +2662,29 @@ CG_DrawCrosshairNames
 */
 static void CG_DrawCrosshairNames(void)
 {
-	float      *color;
-	char       *name;
-	float      w;
-	const char *s;
-	int        playerHealth = 0;
-	qboolean   drawStuff    = qfalse;
-	qboolean   isTank       = qfalse;
-	int        maxHealth    = 1;
-
-	// Distance to the entity under the crosshair
-	float dist;
-	float zChange;
+	if (cg.renderingThirdPerson || cg_drawCrosshair.integer < 0)
+	{
+		return;
+	}
 
 	qboolean hitClient = qfalse;
-
-	if (cg_drawCrosshair.integer < 0)
-	{
-		return;
-	}
-
+	// Distance to the entity under the crosshair
 	// scan the known entities to see if the crosshair is sighted on one
-	dist = CG_ScanForCrosshairEntity(&zChange, &hitClient);
-
-	if (cg.renderingThirdPerson)
-	{
-		return;
-	}
+	float zChange = 0;
+	float dist = CG_ScanForCrosshairEntity(&zChange, &hitClient);
 
 	// draw the name of the player being looked at
-	color = CG_FadeColor(cg.crosshairClientTime, 1000);
+	float *color = CG_FadeColor(cg.crosshairClientTime, 1000);
 
 	if (!color)
 	{
-		trap_R_SetColor(NULL);
+		trap_R_SetColor(nullptr);
 		return;
 	}
+
+	float playerHealth = 0.f;
+	float maxHealth = 1.f;
+	bool isMover = false;
 
 	// NERVE - SMF
 	if (cg.crosshairClientNum > MAX_CLIENTS)
@@ -2687,72 +2696,53 @@ static void CG_DrawCrosshairNames(void)
 
 		if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_MOVER && cg_entities[cg.crosshairClientNum].currentState.effect1Time)
 		{
-			isTank = qtrue;
+			isMover = qtrue;
 
 			playerHealth = cg_entities[cg.crosshairClientNum].currentState.dl_intensity;
-			maxHealth    = 255;
+			maxHealth    = 255.f;
 
-			s = Info_ValueForKey(CG_ConfigString(CS_SCRIPT_MOVER_NAMES), va("%i", cg.crosshairClientNum));
+			const char *s = Info_ValueForKey(CG_ConfigString(CS_SCRIPT_MOVER_NAMES), va("%i", cg.crosshairClientNum));
 			if (!*s)
 			{
 				return;
 			}
 
-			w = ETJump::DrawStringWidth(s, 0.23f);
+			float w = ETJump::DrawStringWidth(s, 0.23f);
 			ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 		}
 		else if (cg_entities[cg.crosshairClientNum].currentState.eType == ET_CONSTRUCTIBLE_MARKER)
 		{
-			s = Info_ValueForKey(CG_ConfigString(CS_CONSTRUCTION_NAMES), va("%i", cg.crosshairClientNum));
+			const char *s = Info_ValueForKey(CG_ConfigString(CS_CONSTRUCTION_NAMES), va("%i", cg.crosshairClientNum));
 			if (*s)
 			{
-				w = ETJump::DrawStringWidth(s, 0.23f);
+				float w = ETJump::DrawStringWidth(s, 0.23f);
 				ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 			}
 			return;
 		}
 
-		if (!isTank)
+		if (!isMover)
 		{
 			return;
 		}
 	}
 
-	if (!cg_drawCrosshairNames.integer)
+	if (isMover)
 	{
-		return;
+		CG_DrawMoverHealthBar(playerHealth / maxHealth, color);
 	}
-
-	if (!isTank && ((cg_hide.integer == 1 && dist < cg_hideDistance.integer) || cg_hide.integer == 2))
+	else 
 	{
-		return;
-	}
+		if ((cg_hide.integer == 1 && dist < cg_hideDistance.integer) || cg_hide.integer == 2)
+		{
+			return;
+		}
+		if (!cg_drawCrosshairNames.integer || cgs.clientinfo[cg.crosshairClientNum].hideMe)
+		{
+			return;
+		}
 
-	if (cgs.clientinfo[cg.crosshairClientNum].hideMe)
-	{
-		return;
-	}
-
-	if (!isTank)
-	{
-		drawStuff = qtrue;
-
-		name = cgs.clientinfo[cg.crosshairClientNum].name;
-		s    = va("%s", name);
-		w    = ETJump::DrawStringWidth(s, 0.23f);
-
-		ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
-	}
-
-	// -NERVE - SMF
-	if (isTank)
-	{
-		return;
-	}
-
-	if (drawStuff)
-	{
-		trap_R_SetColor(NULL);
+		CG_DrawPlyerName(color);
 	}
 }
 
