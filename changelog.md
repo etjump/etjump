@@ -173,6 +173,8 @@
 * added `etj_onRunStart`, `etj_onRunEnd` cvars which can hold sequence of commands to be executed when run events occur
 * fixed health regeneration was slower for `pmove_fixed` players
 * added `etj_altScoreboard 3`
+* added `etj_lagometerX`, `etj_lagometerY` cvars to offset lagometer in x/y directions respectively
+* added `[F] to follow` hint under the player name, can be toggled off along with the quick follow feature using `etj_quickfollow` cvar
 
 # ETJump 2.2.0
 
