@@ -290,6 +290,7 @@ vmCvar_t shared;
 // minimum time to wait before vote result will be checked
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
+vmCvar_t g_debugTrackers;
 
 cvarTable_t gameCvarTable[] =
 {
@@ -538,6 +539,7 @@ cvarTable_t gameCvarTable[] =
 	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
+	{ &g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE },
 
 };
 

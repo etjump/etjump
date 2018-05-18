@@ -49,6 +49,13 @@ public:
 	static void SendChatMessage(int clientNum, const std::string& message);
 
 	/**
+	* Prints to left print. If client num is -1 sends to console
+	* @param clientNum The client to send the message to
+	* @param message The message to be sent
+	*/
+	static void SendLeftMessage(int clientNum, const std::string& message);
+
+	/**
 	 * Sends a chat message to everyone in server and to server console.
 	 * @param message The message to be sent
 	 */

@@ -69,6 +69,18 @@ void Printer::SendChatMessage(int clientNum, const std::string &message)
 	}
 }
 
+void Printer::SendLeftMessage(int clientNum, const std::string &message)
+{
+	if (clientNum == CONSOLE_CLIENT_NUMBER)
+	{
+		G_Printf("%s", message.c_str());
+	}
+	else
+	{
+		trap_SendServerCommand(clientNum, va("cpm \"%s\"", message.c_str()));
+	}
+}
+
 void Printer::BroadcastConsoleMessage(std::string message)
 {
 	std::string partialMessage;
