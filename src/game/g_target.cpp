@@ -10,6 +10,8 @@
 #include "g_local.h"
 #include "etj_utilities.h"
 #include "etj_save_system.h"
+#include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 //==========================================================
 
@@ -2020,7 +2022,9 @@ void SP_target_decay(gentity_t *self)
 //   128 disable save, reset when loading
 void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
+	auto clientNum = ClientNum(activator);
 	float speed = VectorLength(activator->client->ps.velocity);
+
 	if (!activator)
 	{
 		return;
@@ -2041,15 +2045,27 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		return;
 	}
 
+	if (activator->client->sess.timerunActive)
+	{
+		return;
+	}
+
+	if (activator->client->noclip || activator->flags == FL_GODMODE)
+	{
+		Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
+		return;
+	}
+
 	if (speed > self->velocityUpperLimit)
 	{
-		trap_SendServerCommand(ClientNum(activator), va("cp \"^3WARNING: ^7Timerun was not started. Too high starting speed (%.2f > %.2f)\n\"", speed, self->velocityUpperLimit));
+		std::string speedMsg = ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too high starting speed (%.2f > %.2f)\n", speed, self->velocityUpperLimit);
+		Printer::SendCenterMessage(clientNum, speedMsg);
 		return;
 	}
 
 	if (activator->client->ps.viewangles[ROLL] != 0)
 	{
-		trap_SendServerCommand(ClientNum(activator), va("cp \"^3WARNING: ^7Timerun was not started. Z-rotation detected!"));
+		Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. Z-rotation detected!");
 		return;
 	}
 

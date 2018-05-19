@@ -88,15 +88,6 @@ void Utilities::startRun(int clientNum)
 	player->client->sess.timerunActive = qtrue;
 	ETJump::UpdateClientConfigString(*player);
 
-	// also disable the noclip if it's active
-	if (player->client->noclip)
-	{
-		player->client->noclip = qfalse;
-		VectorClear(player->client->ps.velocity);
-	}
-	// same thing for god mode
-	player->flags &= ~FL_GODMODE;
-
 	if (!(player->client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE))
 	{
 		ETJump::saveSystem->resetSavedPositions(player);

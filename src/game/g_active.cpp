@@ -1,6 +1,7 @@
 
 #include "g_local.h"
 #include "etj_save_system.h"
+#include "etj_printer.h"
 
 /*
 ===============
@@ -1269,6 +1270,14 @@ void ClientThink_real(gentity_t *ent)
 	if (client->speedScale)                 // Goalitem speed scale
 	{
 		client->ps.speed *= (client->speedScale * 0.01);
+	}
+
+	// Stop lagging through triggers in timeruns
+	if (client->sess.timerunActive && client->ps.ping > 400)
+	{
+		Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun stopped. High ping detected!");
+		InterruptRun(ent);
+		client->sess.timerunActive = qfalse;
 	}
 
 	// set up for pmove
