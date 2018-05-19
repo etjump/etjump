@@ -12,14 +12,41 @@ static std::unique_ptr<ETJump::TimerunView> timerunView;
 static std::unique_ptr<TrickjumpLines> trickjumpLines;
 static int nextNearest = 0;
 
+namespace ETJump
+{
+	void initTimer()
+	{
+		if (timerun)
+		{
+			timerun = nullptr;
+			timerunView = nullptr;
+		}
+		timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
+		timerunView = std::unique_ptr<TimerunView>(new TimerunView());
+	}
+	void execCmdOnRunStart()
+	{
+		if (etj_onRunStart.string[0])
+		{
+			trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
+		}
+	}
+	void execCmdOnRunEnd()
+	{
+		if (etj_onRunEnd.string[0])
+		{
+			trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
+		}
+	}
+}
+
 /**
  * Initializes the CPP side of client
  */
 void InitGame()
 {
 	ETJump_ClearDrawables();
-	timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
-	timerunView = std::unique_ptr<ETJump::TimerunView>(new ETJump::TimerunView());
+	ETJump::initTimer();
 	// restores timerun after vid_restart (if required)
 	trap_SendClientCommand("timerun_status");
 
@@ -48,24 +75,6 @@ void InitGame()
 	else
 	{
 		trickjumpLines->toggleMarker(false);
-	}
-}
-
-namespace ETJump
-{
-	void execCmdOnRunStart()
-	{
-		if (etj_onRunStart.string[0])
-		{
-			trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
-		}
-	}
-	void execCmdOnRunEnd()
-	{
-		if (etj_onRunEnd.string[0])
-		{
-			trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
-		}
 	}
 }
 
