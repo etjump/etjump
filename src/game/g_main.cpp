@@ -539,7 +539,7 @@ cvarTable_t gameCvarTable[] =
 	{ &shared, "shared", "0", CVAR_SERVERINFO | CVAR_SYSTEMINFO | CVAR_ROM },
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
-	{ &g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE },
+	{ &g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH },
 
 };
 

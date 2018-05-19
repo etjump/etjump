@@ -14,6 +14,7 @@
 #include "etj_sqlite_wrapper.h"
 #include "etj_printer.h"
 #include "etj_utilities.h"
+#include "g_local.h"
 
 std::string millisToString(int millis)
 {
@@ -210,8 +211,16 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		return;
 	}
 
+
 	if (player->racing && player->currentRunName == runName)
 	{
+		if (g_debugTrackers.integer)
+		{
+			Printer::SendLeftMessage(clientNum, "^7Record not saved, tracker debugging enabled!\n");
+			Timerun::interrupt(clientNum);
+			return;
+		}
+
 		auto millis = commandTime - player->runStartTime;
 
 		player->completionTime = millis;
