@@ -1703,4 +1703,6 @@ void CG_InitConsoleCommands(void)
 
 	trap_AddCommand("setoffset"); // autocompletion
 	trap_AddCommand("interruptRun");
+	trap_AddCommand("tracker_print");
+	trap_AddCommand("tracker_set");
 }

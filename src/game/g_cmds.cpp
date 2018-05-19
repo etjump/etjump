@@ -8,6 +8,7 @@
 #endif
 
 #include <vector>
+#include <regex>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include "etj_result_set_formatter.h"
@@ -16,6 +17,7 @@
 #include "etj_operation_result.h"
 #include "etj_save_system.h"
 #include "etj_entity_utilities.h"
+#include "etj_string_utilities.h"
 
 
 void BotDebug(int clientNum);
@@ -1116,6 +1118,154 @@ namespace ETJump
 		else
 		{
 			Printer::SendConsoleMessage(clientNum, "No timerun currently active.\n");
+		}
+	}
+
+	bool checkTrackerIndex(int clientNum, int idx, char *buffer)
+	{
+		if (idx < 1 || idx > MAX_PROGRESSION_TRACKERS || !(std::regex_match(buffer, std::regex("^\\d+"))))
+		{
+			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Invalid index specified. Valid range is ^31-50^7.\n");
+			return false;
+		}
+
+		return true;
+	}
+
+	bool checkTrackerValue(int clientNum, char *value)
+	{
+		if (!std::regex_match(value, std::regex("^[+-]?\\d+")))
+		{
+			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Specified value is not an integer.\n");
+			return false;
+		}
+
+		return true;
+	}
+
+	void printTracker(gentity_t *ent)
+	{
+		std::string printTrackerMsg;
+		auto clientNum = ClientNum(ent);
+		static char buffer[16];
+		int i;
+
+		if (g_debugTrackers.integer <= 0)
+		{
+			return;
+		}
+
+		if (trap_Argc() < 2)
+		{
+			printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", 1, ent->client->sess.progression[0]);
+			Printer::SendConsoleMessage(clientNum, printTrackerMsg);
+			return;
+		}
+
+		trap_Argv(1, buffer, sizeof buffer);
+
+		if (!Q_stricmp("all", buffer))
+		{
+			for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++)
+			{
+				printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", i + 1, ent->client->sess.progression[i]);
+				Printer::SendConsoleMessage(clientNum, printTrackerMsg);
+			}
+		}
+		else
+		{
+			int numArgs = trap_Argc();
+
+			for (i = 1; i < numArgs; i++)
+			{
+				trap_Argv(i, buffer, sizeof buffer);
+				int idx = atoi(buffer);
+
+				if (checkTrackerIndex(clientNum, idx, buffer))
+				{
+					printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx, ent->client->sess.progression[idx - 1]);
+					Printer::SendConsoleMessage(clientNum, printTrackerMsg);
+				}				
+			}
+		}
+	}
+
+	void setTracker(gentity_t *ent)
+	{
+		std::string setTrackerMsg;
+		auto clientNum = ClientNum(ent);
+		static char bufferIndex[16];
+		static char bufferValue[16];
+		int i, value;
+
+		if (g_debugTrackers.integer <= 0)
+		{
+			return;
+		}
+
+		if (trap_Argc() < 2 || trap_Argc() > 3)
+		{
+			Printer::SendConsoleMessage(clientNum, "^3Usage: ^7tracker_set <index|all> <value>\nSets your tracker value on specified index to N. If index isn't specified, defaults to index 1.\n");
+			return;
+		}
+
+		trap_Argv(1, bufferIndex, sizeof bufferIndex);
+		int idx = atoi(bufferIndex);
+
+		if (!Q_stricmp("all", bufferIndex))
+		{
+			if (trap_Argc() == 2)
+			{
+				Printer::SendConsoleMessage(clientNum, "^3Error: ^7value not specified.\n");
+				return;
+			}
+
+			trap_Argv(2, bufferValue, sizeof bufferValue);
+			value = atoi(bufferValue);
+
+			if (checkTrackerValue(clientNum, bufferValue))
+			{
+				for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++)
+				{
+					ent->client->sess.progression[i] = value;
+				}
+
+				setTrackerMsg = stringFormat("^7Set tracker value on all indices to ^2%i^7.\n", value);
+				Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+			}
+		}
+
+		else
+		{
+			if (trap_Argc() == 2)
+			{
+				if (checkTrackerIndex(clientNum, idx, bufferIndex))
+				{
+					ent->client->sess.progression[0] = idx;	// No index specified, use it for value on index 1
+					setTrackerMsg = stringFormat("^7Tracker set - index: ^31 ^7value: ^2%i\n", idx);
+					Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+					return;
+				}
+			}
+
+			if (trap_Argc() == 3)
+			{
+				trap_Argv(2, bufferValue, sizeof bufferValue);
+
+				if (!checkTrackerIndex(clientNum, idx, bufferIndex))
+				{
+					checkTrackerValue(clientNum, bufferValue);	// Still checking value for more accurate feedback to user
+					return;
+				}
+
+				if (checkTrackerValue(clientNum, bufferValue))
+				{
+					value = atoi(bufferValue);
+					ent->client->sess.progression[idx - 1] = value;
+					setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i ^7value: ^2%i\n", idx, value);
+					Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+				}
+			}
 		}
 	}
 }
@@ -4921,6 +5071,8 @@ static command_t noIntermissionCommands[] =
 	{ "timerun_status",  qfalse, Cmd_timerunStatus_f   },
 	{ "setoffset", qtrue, ETJump::setPlayerOffset },
 	{ "interruptRun", qtrue, ETJump::interruptRun },
+	{ "tracker_print", qtrue, ETJump::printTracker },
+	{ "tracker_set", qtrue, ETJump::setTracker },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)

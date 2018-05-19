@@ -5,6 +5,8 @@
 #include "g_local.h"
 
 #include "etj_progression_tracker.h"
+#include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 const char *ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET = "-1";
 
@@ -74,6 +76,9 @@ namespace ETJump
 
 void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activator, const ProgressionTracker& tracker)
 {
+	int values[MaxProgressionTrackers];
+	memcpy(values, activator->client->sess.progression, sizeof(values));
+
 	auto idx = 0;
 	for (auto & v : tracker.set)
 	{
@@ -128,6 +133,20 @@ void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activato
 				activator->client->sess.progression[idx] += tracker.incrementIf[idx];
 			}
 		}
+
+		auto clientNum = ClientNum(activator);
+		
+		if (g_debugTrackers.integer > 0)
+		{
+			for (int i = 0; i < MaxProgressionTrackers; i++)
+			{
+				if (values[i] != activator->client->sess.progression[i])
+				{
+					std::string trackerChangeMsg = stringFormat("^7Tracker change - index: ^3%i ^7value: ^2%i ^7from: ^9%i^7\n", i + 1, activator->client->sess.progression[i], values[i]);
+					Printer::SendLeftMessage(clientNum, trackerChangeMsg);
+				}
+			}
+		}		
 	}
 }
 
