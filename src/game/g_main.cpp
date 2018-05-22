@@ -291,6 +291,7 @@ vmCvar_t shared;
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
 vmCvar_t g_debugTrackers;
+vmCvar_t g_debugTimeruns;
 
 cvarTable_t gameCvarTable[] =
 {
@@ -540,6 +541,7 @@ cvarTable_t gameCvarTable[] =
 	{ &vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE },
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
 	{ &g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH },
+	{ &g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH },
 
 };
 

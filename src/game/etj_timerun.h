@@ -128,6 +128,13 @@ public:
 	}
 private:
 	/**
+	* Checks if debugging is enabled to determine if record
+	* should be saved
+	* @param clientNum The client slot number of the player
+	*/
+	bool isDebugging(int clientNum);
+
+	/**
 	 * Updates users current record. If user has no record, record will
 	 * be inserted
 	 * @param The player who's record we're checking

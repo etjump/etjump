@@ -2050,23 +2050,27 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 		return;
 	}
 
-	if (activator->client->noclip || activator->flags == FL_GODMODE)
+	// We don't need any of these checks if we are debugging
+	if (!(Utilities::isDebugging()))
 	{
-		Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
-		return;
-	}
+		if (activator->client->noclip || activator->flags == FL_GODMODE)
+		{
+			Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
+			return;
+		}
 
-	if (speed > self->velocityUpperLimit)
-	{
-		std::string speedMsg = ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too high starting speed (%.2f > %.2f)\n", speed, self->velocityUpperLimit);
-		Printer::SendCenterMessage(clientNum, speedMsg);
-		return;
-	}
+		if (speed > self->velocityUpperLimit)
+		{
+			std::string speedMsg = ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too high starting speed (%.2f > %.2f)\n", speed, self->velocityUpperLimit);
+			Printer::SendCenterMessage(clientNum, speedMsg);
+			return;
+		}
 
-	if (activator->client->ps.viewangles[ROLL] != 0)
-	{
-		Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. Z-rotation detected!");
-		return;
+		if (activator->client->ps.viewangles[ROLL] != 0)
+		{
+			Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. Z-rotation detected!");
+			return;
+		}
 	}
 
 	activator->client->sess.runSpawnflags = self->spawnflags;
