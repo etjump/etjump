@@ -17,7 +17,7 @@ namespace ETJump
 		int lastRunTimer;
 	};
 
-	class TimerunView : Drawable
+	class TimerunView : public Drawable
 	{
 	public:
 		TimerunView();

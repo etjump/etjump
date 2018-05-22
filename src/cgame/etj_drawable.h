@@ -13,6 +13,9 @@ public:
 	{
 	};
 
+	
+	void removeFromDrawables();
+
 	virtual void draw() = 0;
 
 	static void addDrawable(Drawable *drawable);
