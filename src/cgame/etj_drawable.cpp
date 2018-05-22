@@ -1,7 +1,17 @@
 #include <vector>
+#include <algorithm>
 #include "etj_drawable.h"
 
 static std::vector<Drawable *> _drawables;
+
+void Drawable::removeFromDrawables()
+{
+	auto it = std::find(_drawables.begin(), _drawables.end(), this);
+	if ( it != _drawables.end())
+	{
+		_drawables.erase(it);
+	}
+}
 
 void Drawable::addDrawable(Drawable *drawable)
 {

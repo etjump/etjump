@@ -18,6 +18,7 @@ namespace ETJump
 	{
 		if (timerun)
 		{
+			timerunView->removeFromDrawables();
 			timerun = nullptr;
 			timerunView = nullptr;
 		}
