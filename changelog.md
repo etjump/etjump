@@ -175,6 +175,21 @@
 * added `etj_altScoreboard 3`
 * added `etj_lagometerX`, `etj_lagometerY` cvars to offset lagometer in x/y directions respectively
 * added `[F] to follow` hint under the player name, can be toggled off along with the quick follow feature using `etj_quickfollow` cvar
+* added `g_debugTrackers` to toggle tracker debugging
+  * `tracker_print \<index1|all> \<index2> \<index3>...` prints specified tracker index/indices. If index is not specified, defaults to index 1.
+  * `tracker_set <index|all> \<value>` sets tracker to specified value in specified index. If index is not specified, defaults to index 1.
+  * commands only work when `g_debugTrackers` is set to __1__
+  * timerun records are not saved when tracker debugging is enabled
+* added `g_debugTimeruns` to toggle timerun debugging
+  * run start checks are disabled (noclip, speed etc.) 
+  * cheats are enabled (noclip, god)
+  * no weapons are removed
+  * portals are not cleared
+  * timerun records are not saved when debugging is enabled
+* timeruns no longer start if player is noclipping/has godmode enabled
+* prints about disallowed timerun start conditions no longer appear if player is already running
+* added high ping checks when timerun is active to prevent lagging through triggers
+* fixed timerun view not resetting on map restarts
 
 # ETJump 2.2.0
 
