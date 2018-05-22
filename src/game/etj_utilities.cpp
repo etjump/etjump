@@ -93,6 +93,12 @@ void Utilities::startRun(int clientNum)
 		ETJump::saveSystem->resetSavedPositions(player);
 	}
 
+	// If we are debugging, just exit here
+	if (Utilities::isDebugging())
+	{
+		return;
+	}
+
 	auto disallowed = std::vector<int>{
 		WP_DYNAMITE,
 		WP_GRENADE_LAUNCHER,
@@ -316,4 +322,19 @@ std::vector<std::string> Utilities::getMaps()
 	}
 
 	return std::move(maps);
+}
+
+bool Utilities::isDebugging()
+{
+	if (g_debugTimeruns.integer > 0)
+	{
+		return true;
+	}
+	
+	if (g_debugTrackers.integer > 0)
+	{
+		return true;
+	}
+
+	return false;
 }

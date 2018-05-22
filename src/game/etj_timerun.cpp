@@ -14,6 +14,7 @@
 #include "etj_sqlite_wrapper.h"
 #include "etj_printer.h"
 #include "etj_utilities.h"
+#include "etj_string_utilities.h"
 #include "g_local.h"
 
 std::string millisToString(int millis)
@@ -202,6 +203,37 @@ void Timerun::startNotify(int clientNum)
 	Printer::SendCommandToAll((boost::format("timerun start %d %d %s %d") % clientNum % player->runStartTime % player->currentRunName % fastestCompletionTime).str());
 }
 
+bool Timerun::isDebugging(int clientNum)
+{
+	std::vector<std::string> debuggers;
+
+	if (g_debugTimeruns.integer > 0)
+	{
+		debuggers.push_back("Timerun");
+	}
+
+	if (g_debugTrackers.integer > 0)
+	{
+		debuggers.push_back("Tracker");
+	}
+
+	if (debuggers.size())
+	{
+		Printer::SendLeftMessage(clientNum, "Record not saved:\n");
+
+		for (auto &debugger : debuggers)
+		{
+			std::string fmt = ETJump::stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
+			Printer::SendLeftMessage(clientNum, fmt);
+		}
+
+		return true;
+	}
+
+	return false;
+
+}
+
 void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 {
 	Player *player = _players[clientNum].get();
@@ -214,17 +246,13 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 
 	if (player->racing && player->currentRunName == runName)
 	{
-		if (g_debugTrackers.integer)
-		{
-			Printer::SendLeftMessage(clientNum, "^7Record not saved, tracker debugging enabled!\n");
-			Timerun::interrupt(clientNum);
-			return;
-		}
-
 		auto millis = commandTime - player->runStartTime;
-
 		player->completionTime = millis;
-		checkRecord(player, clientNum);
+
+		if (!isDebugging(clientNum))
+		{
+			checkRecord(player, clientNum);
+		}
 
 		player->racing = false;
 
