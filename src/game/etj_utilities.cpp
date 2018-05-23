@@ -94,7 +94,7 @@ void Utilities::startRun(int clientNum)
 	}
 
 	// If we are debugging, just exit here
-	if (Utilities::isDebugging())
+	if (g_debugTimeruns.integer > 0)
 	{
 		return;
 	}
@@ -322,19 +322,4 @@ std::vector<std::string> Utilities::getMaps()
 	}
 
 	return std::move(maps);
-}
-
-bool Utilities::isDebugging()
-{
-	if (g_debugTimeruns.integer > 0)
-	{
-		return true;
-	}
-	
-	if (g_debugTrackers.integer > 0)
-	{
-		return true;
-	}
-
-	return false;
 }
