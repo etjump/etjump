@@ -2051,7 +2051,7 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	}
 
 	// We don't need any of these checks if we are debugging
-	if (!(Utilities::isDebugging()))
+	if (g_debugTimeruns.integer <= 0)
 	{
 		if (activator->client->noclip || activator->flags == FL_GODMODE)
 		{

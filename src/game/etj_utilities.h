@@ -85,11 +85,6 @@ namespace Utilities {
 	void toConsole(gentity_t *ent, std::string message);
 
 	void RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons);
-
-	/**
-	* Check if debugging cvars are enabled for timeruns
-	*/
-	bool isDebugging();
 };
 
 

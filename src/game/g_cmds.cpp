@@ -18,7 +18,6 @@
 #include "etj_save_system.h"
 #include "etj_entity_utilities.h"
 #include "etj_string_utilities.h"
-#include "etj_utilities.h"
 
 
 void BotDebug(int clientNum);
@@ -826,7 +825,7 @@ void Cmd_God_f(gentity_t *ent)
 	char     *name;
 	qboolean godAll = qfalse;
 
-	if (ent->client->sess.timerunActive && !(Utilities::isDebugging()))
+	if (ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0)
 	{
 		CP("cp \"You cannot use cheats while timerun is active.\n\"");
 		return;
@@ -1013,7 +1012,7 @@ namespace ETJump
 			return{ false, "^7Non-player entities cannot use ^3%s^7.\n" };
 		}
 
-		if (ent->client->sess.timerunActive && !(Utilities::isDebugging()))
+		if (ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0)
 		{
 			return{ false, "^7Cannot use ^3%s ^7while timer is running.\n" };
 		}
