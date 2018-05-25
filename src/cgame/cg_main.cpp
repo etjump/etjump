@@ -832,7 +832,7 @@ cvarTable_t cvarTable[] =
 	// fireteam
 	{ &etj_fireteamPosX,            "etj_fireteamPosX",            "0",                      CVAR_ARCHIVE             },
 	{ &etj_fireteamPosY,            "etj_fireteamPosY",            "0",                      CVAR_ARCHIVE             },
-	{ &etj_fireteamAlpha,           "etj_fireteamAlpha",           "1",                      CVAR_ARCHIVE             },
+	{ &etj_fireteamAlpha,           "etj_fireteamAlpha",           "1.0",                    CVAR_ARCHIVE             },
 	
 	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
@@ -912,7 +912,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_speeds, "etj_speeds", "0", CVAR_ARCHIVE },
 	{ &etj_lightmap, "etj_lightmap", "0", CVAR_ARCHIVE },
 	{ &etj_drawNotify, "etj_drawNotify", "0", CVAR_ARCHIVE },
-	{ &etj_consoleAlpha, "etj_consoleAlpha", "1", CVAR_LATCH | CVAR_ARCHIVE },
+	{ &etj_consoleAlpha, "etj_consoleAlpha", "1.0", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_consoleColor, "etj_consoleColor", "0.0 0.0 0.0", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_consoleShader, "etj_consoleShader", "1", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
