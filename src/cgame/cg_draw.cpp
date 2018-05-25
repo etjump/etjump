@@ -2642,7 +2642,7 @@ static void CG_DrawMoverHealthBar(float frac, vec4_t color)
 	c[3] = (0 + barFrac * 0.5) * color[3];
 
 	Vector4Set(bgcolor, 1.f, 1.f, 1.f, .25f * color[3]);
-	CG_FilledBar(320 - 110 / 2, 190, 110, 10, c, nullptr, bgcolor, barFrac, 16);
+	CG_FilledBar(SCREEN_CENTER_X - 110 / 2, 190, 110, 10, c, nullptr, bgcolor, barFrac, 16);
 }
 
 static void CG_DrawPlyerName(vec4_t color)
