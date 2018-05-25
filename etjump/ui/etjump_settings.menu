@@ -44,15 +44,15 @@ menuDef {
 		YESNO(8, 228, (SUBWINDOW_WIDTH) - 4, 10, "Display pressed keys: ", .2, 8, "etj_drawKeys", "Toggles whether to display pressed keys")
 		MULTI(8, 240, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys color: ", .2, 8, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black"; }, "Set the color for the pressed keys display" )
 		MULTI(8, 252, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys size: ", .2, 8, "etj_keysSize", cvarFloatList { "Small" 32 "Normal" 48 "Large" 70 }, "Sets how big the pressed keys display will be")
-		SLIDER(8, 264, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys X: :", .2, 8, "etj_keysX" 585 0 600, "")
-		SLIDER(8, 276, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys Y: :", .2, 8, "etj_keysY" 200 0 500, "")
+		SLIDER(8, 264, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys X: ", .2, 8, "etj_keysX" 585 0 600, "")
+		SLIDER(8, 276, (SUBWINDOW_WIDTH) - 4, 10, "Pressed keys Y: ", .2, 8, "etj_keysY" 200 0 500, "")
 
 
 	SUBWINDOW(8, 296, (SUBWINDOW_WIDTH), 64, "TRICKJUMP UTILITIES")
 		MULTI(8, 312, (SUBWINDOW_WIDTH) - 4, 10, "Overbounce detector: ", .2, 8, "etj_drawOB", cvarFloatList { "On" 1 "Advanced" 2 "Off" 0 }, "Displays overbounce detector")
 		YESNO(8, 324, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector: ", .2, 8, "etj_drawSlick", "Displays slick detector")
-		SLIDER(8, 336, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector X: :", .2, 8, "etj_slickX" 304 0 600, "Set the horizontal position of the slick detector")
-		SLIDER(8, 348, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector Y: :", .2, 8, "etj_slickY" 220 0 500, "Set the vertical position of the slick detector")
+		SLIDER(8, 336, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector X: ", .2, 8, "etj_slickX" 304 0 600, "Set the horizontal position of the slick detector")
+		SLIDER(8, 348, (SUBWINDOW_WIDTH) - 4, 10, "Slick detector Y: ", .2, 8, "etj_slickY" 220 0 500, "Set the vertical position of the slick detector")
 
 
 	SUBWINDOW(8, 368, (SUBWINDOW_WIDTH), 40, "SCOREBOARD")
@@ -62,10 +62,10 @@ menuDef {
 
 	SUBWINDOW(6 + (SUBWINDOW_WIDTH) + 8, 32, (SUBWINDOW_WIDTH), 76, "CGAZ")
 		MULTI(6 + (SUBWINDOW_WIDTH) + 8, 48, (SUBWINDOW_WIDTH) - 4, 10, "Display CGaz: ", .2, 8, "etj_drawCGaz", cvarFloatList { "Off" 0 "CGaz 1" 1 "CGaz 2" 2 "CGaz 3" 3 "CGaz 4" 4 }, "Enables CGaz strafe helper")
-		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 60, (SUBWINDOW_WIDTH) - 4, 10, "CGaz Y position: :", .2, 8, "etj_CGazY" 260 0 500, "Sets the Y position of some CGaz meters")
-		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 72, (SUBWINDOW_WIDTH) - 4, 10, "CGaz height: :", .2, 8, "etj_CGazHeight" 20 0 200, "Sets the height of some CGaz meters")
-		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 84, (SUBWINDOW_WIDTH) - 4, 10, "CGaz width: :", .2, 8, "etj_CGazWidth" 300 0 600, "Sets the width of some CGaz meters")
-		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 96, (SUBWINDOW_WIDTH) - 4, 10, "CGaz alpha: :", .2, 8, "etj_CGazAlpha" 0.15 0 1, "Sets the transparency of some CGaz meters")
+		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 60, (SUBWINDOW_WIDTH) - 4, 10, "CGaz Y position: ", .2, 8, "etj_CGazY" 260 0 500, "Sets the Y position of some CGaz meters")
+		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 72, (SUBWINDOW_WIDTH) - 4, 10, "CGaz height: ", .2, 8, "etj_CGazHeight" 20 0 200, "Sets the height of some CGaz meters")
+		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 84, (SUBWINDOW_WIDTH) - 4, 10, "CGaz width: ", .2, 8, "etj_CGazWidth" 300 0 600, "Sets the width of some CGaz meters")
+		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 96, (SUBWINDOW_WIDTH) - 4, 10, "CGaz alpha: ", .2, 8, "etj_CGazAlpha" 0.15 0 1, "Sets the transparency of some CGaz meters")
 
 
 	SUBWINDOW(6 + (SUBWINDOW_WIDTH) + 8, 116, (SUBWINDOW_WIDTH), 76, "POPUPS")
@@ -83,8 +83,8 @@ menuDef {
 	SUBWINDOW(6 + (SUBWINDOW_WIDTH) + 8, 236, (SUBWINDOW_WIDTH), 76, "TIMERUNS")
 		YESNO(6 + (SUBWINDOW_WIDTH) + 8, 252, (SUBWINDOW_WIDTH) - 4, 10, "Timeruns: ", .2, 8, "etj_enableTimeruns", "Toggles timeruns")
 		YESNO(6 + (SUBWINDOW_WIDTH) + 8, 264, (SUBWINDOW_WIDTH) - 4, 10, "Timerun timer: ", .2, 8, "etj_drawRunTimer", "Toggles run timer")
-		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 276, (SUBWINDOW_WIDTH) - 4, 10, "Timer X: :", .2, 8, "etj_runTimerX" 280 0 600, "Sets the horizontal position of run timer")
-		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 288, (SUBWINDOW_WIDTH) - 4, 10, "Timer Y: :", .2, 8, "etj_runTimerY" 380 0 500, "Sets the vertical position of run timer")
+		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 276, (SUBWINDOW_WIDTH) - 4, 10, "Timer X: ", .2, 8, "etj_runTimerX" 280 0 600, "Sets the horizontal position of run timer")
+		SLIDER(6 + (SUBWINDOW_WIDTH) + 8, 288, (SUBWINDOW_WIDTH) - 4, 10, "Timer Y: ", .2, 8, "etj_runTimerY" 380 0 500, "Sets the vertical position of run timer")
 		MULTI(6 + (SUBWINDOW_WIDTH) + 8, 300, (SUBWINDOW_WIDTH) - 4, 10, "Timer color: ", .2, 8, "etj_runTimerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black"; }, "Sets the color of the run timer" )
 
 
