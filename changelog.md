@@ -190,6 +190,7 @@
 * prints about disallowed timerun start conditions no longer appear if player is already running
 * added high ping checks when timerun is active to prevent lagging through triggers
 * fixed timerun view not resetting on map restarts
+* removed `etj_speedSizeX/Y` and replaced them with `etj_speedSize`
 
 # ETJump 2.2.0
 
