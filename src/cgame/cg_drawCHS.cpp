@@ -3,6 +3,8 @@
  */
 
 #include "cg_local.h"
+#include "etj_utilities.h"
+#include "../game/etj_numeric_utilities.h"
 
 // TODO make font size configurable via cvars, see CG_DrawSpeed2()
 #define CHSCHAR_SIZEX   0.2
@@ -503,31 +505,15 @@ static void CG_CHS_DrawSingleInfo(int x, int y, int stat, qboolean drawName, ali
 	int textStyle = ITEM_TEXTSTYLE_NORMAL;
 	float textAlpha = etj_CHSAlpha.value;
 	vec4_t CHSColor = { 1.f, 1.f, 1.f, 1.f };
-	char *colorString = etj_CHSColor.string;
-	char *colorToken;
 
-	if (etj_CHSShadow.integer > 0) {
+	if (etj_CHSShadow.integer > 0)
+	{
 		textStyle = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
-	for (int i = 0; i < 3; i++) {
-		colorToken = COM_Parse(&colorString);
-		if (colorToken) {
-			CHSColor[i] = atof(colorToken);
-		}
-		else {
-			CHSColor[i] = 1.f;
-		}
-	}
+	ETJump::parseColorString(etj_CHSColor.string, CHSColor);
 
-	if (textAlpha > 1.0) {
-		textAlpha = 1.0;
-	}
-	else if (textAlpha < 0.0) {
-		textAlpha = 0.0;
-	}
-
-	CHSColor[3] = textAlpha;
+	CHSColor[3] = Numeric::clamp(textAlpha, 0.0f, 1.0f);
 	// end alpha, shadow and color stuff
 
 	if (drawName)

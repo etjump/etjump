@@ -12,6 +12,7 @@
 #endif
 
 #include "etj_irenderable.h"
+#include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include <algorithm>
 
@@ -3195,22 +3196,6 @@ All the cgaz huds
 =================
 */
 
-void GetColorFromString(vec4_t *output, char *colorString) {
-	const char *token;
-	for (auto i = 0; i < 4; i++) {
-		token = COM_Parse(&colorString);
-		if (*token == '\0') {
-			(*output)[i] = 1.f;
-		}
-		else {
-			float value = atof(token);
-			if (value > 1) value = 1.0;
-			else if (value < 0) value = 0.0;
-			(*output)[i] = value;
-		}
-	}
-}
-
 // Dzikie
 static void PutPixel(float x, float y)
 {
@@ -3399,8 +3384,8 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
-		GetColorFromString(&color1, etj_CGazColor1.string);
-		GetColorFromString(&color2, etj_CGazColor2.string);
+		ETJump::parseColorString(etj_CGazColor1.string, color1);
+		ETJump::parseColorString(etj_CGazColor2.string, color2);
 
 		if (etj_stretchCgaz.integer) {
 			ETJump_EnableWidthScale(false);

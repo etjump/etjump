@@ -6,6 +6,7 @@
 */
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 #include "../game/bg_classes.h"
 #include "../game/bg_classes.h"
 
@@ -3479,17 +3480,14 @@ void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, 
 }
 
 // sets color and transparency values based on cvars for entity
-void ETJump_SetEntityAutoTransparency(refEntity_t *ent) {
-	vec3_t ghostColor = { 1.0, 1.0, 1.0 };
-	// use single shader for all entities
-	if (etj_ghostPlayersAlt.integer > 0) {
-		// don't allow colors to affect default skins/shaders
-		auto ghostString = etj_ghostPlayersColor.string;
-		const char *ghostToken;
-		for (auto i = 0; i < 3; i++) {
-			ghostToken = COM_Parse(&ghostString);
-			ghostColor[i] = ghostToken ? atof(ghostToken) : 1.f;
-		}
+void ETJump_SetEntityAutoTransparency(refEntity_t *ent)
+{
+	vec4_t ghostColor = { 1.0, 1.0, 1.0, 1.0 };
+
+	// don't allow colors to affect default skins/shaders
+	if (etj_ghostPlayersAlt.integer > 0)
+	{
+		ETJump::parseColorString(etj_ghostPlayersColor.string, ghostColor);
 		ent->customShader = cgs.media.ghostPlayersAltColorShader;
 	}
 	ETJump_SetEntityRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);

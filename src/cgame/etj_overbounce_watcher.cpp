@@ -1,5 +1,7 @@
 #include "etj_client_commands_handler.h"
 #include "etj_overbounce_watcher.h"
+#include "etj_cvar_update_handler.h"
+#include "etj_utilities.h"
 #include "cg_local.h"
 
 ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler* clientCommandsHandler) :
@@ -45,6 +47,13 @@ ETJump::OverbounceWatcher::OverbounceWatcher(ClientCommandsHandler* clientComman
 		                                 reset();
 		                                 CG_Printf("Reset currently displayed overbounce watcher coordinates.\n");
 	                                 });
+
+	cvarUpdateHandler->subscribe(&etj_obWatcherColor, [&](const vmCvar_t *cvar)
+	{
+		parseColorString(etj_obWatcherColor.string, _color);
+	});
+
+	parseColorString(etj_obWatcherColor.string, _color);
 }
 
 ETJump::OverbounceWatcher::~OverbounceWatcher()
@@ -107,12 +116,12 @@ void ETJump::OverbounceWatcher::render() const
 	sizey *= etj_obWatcherSize.value;
 
 	ETJump_AdjustPosition(&x);
-
+	
 	// determine if we are going to get OB on our saved surface and draw OB watcher accordingly
 	// TODO: Add nooverbounce check. Not critical since OB watcher is probably mostly used in original maps.
 	if (isOverbounce(velocity, currentHeight, finalHeight, rintv, psec, gravity))
 	{
-		ETJump::DrawString(x, etj_obWatcherY.integer, sizex, sizey, cg.obWatcherColor, qfalse, "OB", 0, ITEM_TEXTSTYLE_SHADOWED);
+		ETJump::DrawString(x, etj_obWatcherY.integer, sizex, sizey, _color, qfalse, "OB", 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 }
 
