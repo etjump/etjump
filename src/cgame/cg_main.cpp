@@ -358,8 +358,7 @@ vmCvar_t cg_drawClock;
 vmCvar_t cg_drawSpeed2;
 vmCvar_t cg_speedX;
 vmCvar_t cg_speedY;
-vmCvar_t cg_speedSizeX;
-vmCvar_t cg_speedSizeY;
+vmCvar_t etj_speedSize;
 vmCvar_t cg_speedColor;
 vmCvar_t cg_speedAlpha;
 vmCvar_t etj_speedShadow;
@@ -764,8 +763,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
 	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
 	{ &cg_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE             },
-	{ &cg_speedSizeX,               "etj_speedSizeX",              "3",                      CVAR_ARCHIVE             },
-	{ &cg_speedSizeY,               "etj_speedSizeY",              "3",                      CVAR_ARCHIVE             },
+	{ &etj_speedSize,               "etj_speedSize",               "3",                      CVAR_ARCHIVE             },
 	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
 	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
