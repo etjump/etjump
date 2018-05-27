@@ -3196,22 +3196,6 @@ All the cgaz huds
 =================
 */
 
-void GetColorFromString(vec4_t *output, char *colorString) {
-	const char *token;
-	for (auto i = 0; i < 4; i++) {
-		token = COM_Parse(&colorString);
-		if (*token == '\0') {
-			(*output)[i] = 1.f;
-		}
-		else {
-			float value = atof(token);
-			if (value > 1) value = 1.0;
-			else if (value < 0) value = 0.0;
-			(*output)[i] = value;
-		}
-	}
-}
-
 // Dzikie
 static void PutPixel(float x, float y)
 {
