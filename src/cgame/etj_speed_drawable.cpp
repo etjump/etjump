@@ -67,14 +67,13 @@ void ETJump::DisplaySpeed::render() const
 		return;
 	}
 
-	float sizex = 0.1f * cg_speedSizeX.integer;
-	float sizey = 0.1f * cg_speedSizeY.integer;
+	float size = 0.1f * etj_speedSize.integer;
 	float x = cg_speedX.integer;
 	float y = cg_speedY.integer;
 	ETJump_AdjustPosition(&x);
 
 	auto status = getStatus();
-	float w = CG_Text_Width_Ext(status.c_str(), sizex, 0, &cgs.media.limboFont2) / 2;
+	float w = CG_Text_Width_Ext(status.c_str(), size, 0, &cgs.media.limboFont2) / 2;
 	if (cg_drawSpeed2.integer == 8)
 	{
 		w = 0;
@@ -86,7 +85,7 @@ void ETJump::DisplaySpeed::render() const
 	vec4_t color;
 	Vector4Copy(_color, color);
 
-	CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status.c_str(), 0, 0, style, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(x - w, y, size, size, color, status.c_str(), 0, 0, style, &cgs.media.limboFont1);
 }
 
 std::string ETJump::DisplaySpeed::getStatus() const

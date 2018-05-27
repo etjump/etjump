@@ -71,12 +71,11 @@ void ETJump::DisplayMaxSpeed::render() const
 	Vector4Copy(_color, color);
 	color[3] *= fade;
 
-	auto sizex = 0.1f, sizey = 0.1f;
-	sizex *= cg_speedSizeX.integer;
-	sizey *= cg_speedSizeY.integer;
+	auto size = 0.1f;
+	size *= etj_speedSize.integer;
 
 	auto str = va("%0.f", _displayMaxSpeed);
-	auto w = CG_Text_Width_Ext(str, sizex, 0, &cgs.media.limboFont2) / 2;
+	auto w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2) / 2;
 	
 	auto x = etj_maxSpeedX.value;
 	auto y = etj_maxSpeedY.value;
@@ -89,7 +88,7 @@ void ETJump::DisplayMaxSpeed::render() const
 		style = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
-	CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, str, 0, 0, style, &cgs.media.limboFont1);
+	CG_Text_Paint_Ext(x - w, y, size, size, color, str, 0, 0, style, &cgs.media.limboFont1);
 }
 
 bool ETJump::DisplayMaxSpeed::canSkipDraw() const
