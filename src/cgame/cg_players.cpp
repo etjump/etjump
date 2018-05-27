@@ -3490,6 +3490,5 @@ void ETJump_SetEntityAutoTransparency(refEntity_t *ent)
 		ETJump::parseColorString(etj_ghostPlayersColor.string, ghostColor);
 		ent->customShader = cgs.media.ghostPlayersAltColorShader;
 	}
-	// use single shader for all entities
 	ETJump_SetEntityRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
 }
