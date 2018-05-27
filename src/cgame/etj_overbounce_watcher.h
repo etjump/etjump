@@ -22,6 +22,9 @@ namespace ETJump
 
 		void render() const override;
 		void beforeRender() override;
+
+		vec4_t _color;
+
 	private:
 		ClientCommandsHandler *_clientCommandsHandler;
 

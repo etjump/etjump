@@ -12,6 +12,7 @@
 #endif
 
 #include "etj_irenderable.h"
+#include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include <algorithm>
 
@@ -3399,8 +3400,8 @@ static void CG_DrawCGazHUD(void)
 	// Dzikie Weze's 2D-CGaz
 	if (cg_drawCGaz.integer == 2)
 	{
-		GetColorFromString(&color1, etj_CGazColor1.string);
-		GetColorFromString(&color2, etj_CGazColor2.string);
+		ETJump::parseColorString(etj_CGazColor1.string, color1);
+		ETJump::parseColorString(etj_CGazColor2.string, color2);
 
 		if (etj_stretchCgaz.integer) {
 			ETJump_EnableWidthScale(false);
