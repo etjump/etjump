@@ -5125,6 +5125,23 @@ void PC_SourceError(int handle, const char *format, ...)
 #endif
 }
 
+namespace ETJump
+{
+	bool PC_hasFloat(int handle)
+	{
+		pc_token_t token;
+		if (trap_PC_ReadToken(handle, &token))
+		{
+			trap_PC_UnReadToken(handle);
+			if (token.type == TT_NUMBER)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 /*
 =================
 PC_Float_Parse
