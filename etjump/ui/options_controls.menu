@@ -57,8 +57,8 @@ menuDef {
 //	YESNO( 8, 226, (SUBWINDOW_WIDTH)-4, 10, "Smooth Mouse:", .2, 8, "m_filter" )
 	CHECKBOXALIGNXACTION( 8, 214, .5*((SUBWINDOW_WIDTH)-6), 10, "Invert Mouse:", .2, 24, 8, "ui_mousePitch", uiScript update ui_mousePitch, "Inverts mouse pitch" )
 	CHECKBOXALIGNX( 8+(.5*((SUBWINDOW_WIDTH)-6))+2, 214, .5*((SUBWINDOW_WIDTH)-6), 10, "Smooth Mouse:", .2, 24, 8, "m_filter", "Smooths out the mouse using interpolation" )
-	SLIDER( 8, 226, (SUBWINDOW_WIDTH)-4, 10, "Mouse Sensitivity:", .2, 8, "sensitivity" 5 1 30, "Use the slider to increase or decrease mouse sensitivity" )
 	CVARFLOATLABEL( 8, 226, (SUBWINDOW_WIDTH)-4, 10, "sensitivity", .2, ITEM_ALIGN_RIGHT, $evalfloat((SUBWINDOW_WIDTH)-4), 8 )
+	SLIDER( 8, 226, (SUBWINDOW_WIDTH)-4, 10, "Mouse Sensitivity:", .2, 8, "sensitivity" 5 1 30, "Use the slider to increase or decrease mouse sensitivity" )
 
 // Chat //
 
