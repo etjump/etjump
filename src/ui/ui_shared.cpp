@@ -3840,6 +3840,13 @@ static void Scroll_Slider_ThumbFunc(void *p)
 	value /= SLIDER_WIDTH;
 	value *= (editDef->maxVal - editDef->minVal);
 	value += editDef->minVal;
+
+	if (editDef->step > 0)
+	{
+		// snap to nearest value
+		value = round(value / editDef->step) * editDef->step;
+	}
+
 	DC->setCVar(si->item->cvar, va("%f", value));
 }
 
@@ -7991,6 +7998,10 @@ qboolean ItemParse_cvarFloat(itemDef_t *item, int handle)
 	    PC_Float_Parse(handle, &editPtr->minVal) &&
 	    PC_Float_Parse(handle, &editPtr->maxVal))
 	{
+		if (ETJump::PC_hasFloat(handle))
+		{
+			PC_Float_Parse(handle, &editPtr->step);
+		}
 		return qtrue;
 	}
 	return qfalse;
