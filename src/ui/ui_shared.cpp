@@ -65,7 +65,7 @@ static qboolean Menu_OverActiveItem(menuDef_t *menu, float x, float y);
 #ifdef CGAME
 #define MEM_POOL_SIZE  128 * 1024
 #else
-#define MEM_POOL_SIZE  1536 * 1024  // Arnout: was 1024
+#define MEM_POOL_SIZE  1792 * 1024
 #endif
 
 static char memoryPool[MEM_POOL_SIZE];
