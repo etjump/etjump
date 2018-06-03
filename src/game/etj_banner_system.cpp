@@ -31,6 +31,11 @@ void ETJump::BannerSystem::check(int levelTime)
 		return;
 	}
 
+	if (_options.messages.size() == 0)
+	{
+		return;
+	}
+
 	auto message = _options.messages[_bannerIdx];
 
 	switch (_options.location)
