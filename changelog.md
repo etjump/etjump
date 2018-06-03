@@ -191,6 +191,8 @@
 * added high ping checks when timerun is active to prevent lagging through triggers
 * fixed timerun view not resetting on map restarts
 * removed `etj_speedSizeX/Y` and replaced them with `etj_speedSize`
+* added almost all etjump client cvars in the settings menu
+* fixed bug, where making `g_banner1-5` cvars empty would cause the server crash on map load
 
 # ETJump 2.2.0
 
