@@ -1,0 +1,111 @@
+#include "ui/menudef.h"
+#define WINDOW_X 16
+#define WINDOW_Y 16
+#define WINDOW_WIDTH 608
+#define WINDOW_HEIGHT 448
+#define GROUP_NAME "group_etjump_settings_1"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+menuDef {
+    name "etjump_settings_1"
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    onESC {
+        close etjump_settings_1; open etjump
+    }
+
+    WINDOW("SETTINGS", 94)
+
+    SUBWINDOW(8, 32, 292, 232, "GENERAL")
+        YESNO(16, 52, 276, 8, "pmove_fixed:", 0.2, 8, "pmove_fixed", "Enable fixed 125 FPS player movement\npmove_fixed")
+        MULTI(16, 64, 276, 8, "Max FPS:", 0.2, 8, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 "250" 250 "333" 333 }, "Sets the FPS limit\ncom_maxfps")
+        MULTI(16, 76, 276, 8, "Memory limit:", 0.2, 8, "com_hunkmegs", cvarFloatList { "56" 56 "64" 64 "128" 128 "256" 256 "512" 512 }, "How much memory ET can use (restart required)\ncom_hunkmegs")
+        MULTI(16, 88, 276, 8, "Rendering primitives:", 0.2, 8, "r_primitives", cvarFloatList { "Auto" 0 "1" 1 "2" 2 }, "Sets rendering primitives mode\nr_primitives")
+        YESNO(16, 100, 276, 8, "No fatigue:", 0.2, 8, "etj_nofatigue", "Enable unlimited sprint\netj_nofatigue")
+        YESNO(16, 112, 276, 8, "Load view angles:", 0.2, 8, "etj_loadviewangles", "Load view angles when loading position\netj_loadviewangles")
+        YESNO(16, 124, 276, 8, "Auto load:", 0.2, 8, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
+        YESNO(16, 136, 276, 8, "Real FOV:", 0.2, 8, "etj_realFov", "Take aspect ratio into account when calculating FOV\netj_realFov")
+        YESNO(16, 148, 276, 8, "No +activate lean:", 0.2, 8, "etj_noActivateLean", "Disable leaning when +activate is held\netj_noActivateLean")
+        YESNO(16, 160, 276, 8, "Quick follow:", 0.2, 8, "etj_quickFollow", "Spectate other players by aiming and pressing +activate\netj_quickFollow")
+        CVARFLOATLABEL(16, 172, 276, 8, "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 172, 276, 8, "Noclip scale:", 0.2, 8, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
+        MULTI(16, 184, 276, 8, "Auto weapon pickup:", 0.2, 8, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "Yes" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
+        MULTI(16, 196, 276, 8, "Draw player portals:", 0.2, 8, "etj_viewPlayerPortals", cvarFloatList { "No" 0 "Yes" 1 "Only when spectating" 2 }, "Draw other players' portals\netj_viewPlayerPortals")
+        MULTI(16, 208, 276, 8, "Explosion shake:", 0.2, 8, "etj_explosivesShake", cvarFloatList { "No" 0 "From others" 1 "From own" 2 "Yes" 3 }, "Shake screen from explosions\netj_explosivesShake")
+        YESNO(16, 220, 276, 8, "Item pickup text:", 0.2, 8, "etj_itemPickupText", "Notify on item pickups\netj_itemPickupText")
+        YESNO(16, 232, 276, 8, "Draw tokens:", 0.2, 8, "etj_drawTokens", "Draw collectible tokens\netj_drawTokens")
+        YESNO(16, 244, 276, 8, "Log banners:", 0.2, 8, "etj_logBanner", "Log banners in console\netj_logBanner")
+
+    SUBWINDOW(8, 272, 292, 148, "POPUPS")
+        MULTI(16, 292, 276, 8, "Draw popups:", 0.2, 8, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
+        CVARINTLABEL(16, 304, 276, 8, "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 304, 276, 8, "Number of popups:", 0.2, 8, etj_numPopups 5 0 16 1, "How many popup messages to display\netj_numPopups")
+        CVARFLOATLABEL(16, 316, 276, 8, "etj_popupAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 316, 276, 8, "Popup alpha:", 0.2, 8, etj_popupAlpha 1 0 1 0.05, "Sets transparency of popup messages\netj_popupAlpha")
+        CVARINTLABEL(16, 328, 276, 8, "etj_popupPosX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 328, 276, 8, "Popup X:", 0.2, 8, etj_popupPosX 0 0 640 10, "Sets X offset for popup messages\netj_popupPosX")
+        CVARINTLABEL(16, 340, 276, 8, "etj_popupPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 340, 276, 8, "Popup Y:", 0.2, 8, etj_popupPosY 0 0 480 10, "Sets Y offset for popup messages\netj_popupPosY")
+        YESNO(16, 352, 276, 8, "Popup shadow:", 0.2, 8, "etj_popupShadow", "Draw shadow on popup messages\netj_popupShadow")
+        CVARINTLABEL(16, 364, 276, 8, "etj_popupTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 364, 276, 8, "Popup refresh time:", 0.2, 8, etj_popupTime 1000 0 5000 250, "Time in milliseconds before new popup message is drawn after previous one\netj_popupTime")
+        CVARINTLABEL(16, 376, 276, 8, "etj_popupStayTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 376, 276, 8, "Popup stay time:", 0.2, 8, etj_popupStayTime 2000 0 30000 250, "How long in milliseconds popup messages stay on screen\netj_popupStayTime")
+        CVARINTLABEL(16, 388, 276, 8, "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 388, 276, 8, "Popup fade time:", 0.2, 8, etj_popupFadeTime 2500 0 10000 250, "Duration of fade animation on popup messages\netj_popupFadeTime")
+        YESNO(16, 400, 276, 8, "Group popups:", 0.2, 8, "etj_popupGrouped", "Group identical popups to one message\netj_popupGrouped")
+
+    SUBWINDOW(308, 32, 292, 268, "INDICATORS")
+        MULTI(316, 52, 276, 8, "Overbounce detector:", 0.2, 8, "etj_drawOB", cvarFloatList { "No" 0 "Yes" 1 "Advanced" 2 }, "Draw overbounce detector\netj_drawOB")
+        CVARINTLABEL(316, 64, 276, 8, "etj_OBX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 64, 276, 8, "OB detector X:", 0.2, 8, etj_OBX 320 0 640 10, "Sets X position of overbounce detector\netj_OBX")
+        CVARINTLABEL(316, 76, 276, 8, "etj_OBY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 76, 276, 8, "OB detector Y:", 0.2, 8, etj_OBY 320 0 480 10, "Sets Y position of overbounce detector\netj_OBY")
+        YESNO(316, 88, 276, 8, "Slick detector:", 0.2, 8, "etj_drawSlick", "Draw slick detector\netj_drawSlick")
+        CVARINTLABEL(316, 100, 276, 8, "etj_slickX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 100, 276, 8, "Slick detector X:", 0.2, 8, etj_slickX 304 0 640 10, "Sets X position of slick detector\netj_slickX")
+        MULTI(316, 112, 276, 8, "Save area indicator:", 0.2, 8, "etj_drawSaveIndicator", cvarFloatList { "No" 0 "Yes" 1 "Outside of volume" 2 "Inside of volume" 3 }, "Draw indicator for no save areas\netj_drawSaveIndicator")
+        CVARINTLABEL(316, 124, 276, 8, "etj_slickY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 124, 276, 8, "Slick detector Y:", 0.2, 8, etj_slickY 220 0 480 10, "Sets Y position of slick detector\netj_slickY")
+        CVARINTLABEL(316, 136, 276, 8, "etj_saveIndicatorX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 136, 276, 8, "Save indicator X:", 0.2, 8, etj_saveIndicatorX 615 0 640 10, "Sets X position of save area indicator\netj_saveIndicatorX")
+        CVARINTLABEL(316, 148, 276, 8, "etj_saveIndicatorY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 148, 276, 8, "Save indicator Y:", 0.2, 8, etj_saveIndicatorY 363 0 480 10, "Sets Y position of save area indicator\netj_saveIndicatorY")
+        MULTI(316, 160, 276, 8, "Prone area indicator:", 0.2, 8, "etj_drawProneIndicator", cvarFloatList { "No" 0 "Yes" 1 "Outside of volume" 2 "Inside of volume" 3 }, "Draw indicator for no prone areas\netj_drawProneIndicator")
+        CVARINTLABEL(316, 172, 276, 8, "etj_proneIndicatorX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 172, 276, 8, "Prone indicator X:", 0.2, 8, etj_proneIndicatorX 615 0 640 10, "Sets X position of prone area indicator\netj_proneIndicatorX")
+        CVARINTLABEL(316, 184, 276, 8, "etj_proneIndicatorY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 184, 276, 8, "Prone indicator Y:", 0.2, 8, etj_proneIndicatorY 338 0 480 10, "Sets Y position of prone area indicator\netj_proneIndicatorY")
+        YESNO(316, 196, 276, 8, "NJD detector:", 0.2, 8, "etj_drawNoJumpDelay", "Draw no jump delay surface detector\netj_drawNoJumpDelay")
+        CVARINTLABEL(316, 208, 276, 8, "etj_noJumpDelayX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 208, 276, 8, "NJD position X:", 0.2, 8, etj_noJumpDelayX 290 0 640 10, "Sets X position of no jump delay indicator\netj_noJumpDelayX")
+        CVARINTLABEL(316, 220, 276, 8, "etj_noJumpDelayY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 220, 276, 8, "NJD position Y:", 0.2, 8, etj_noJumpDelayY 220 0 480 10, "Sets Y position of no jump delay indicator\netj_noJumpDelayY")
+        YESNO(316, 232, 276, 8, "Overbounce watcher:", 0.2, 8, "etj_drawObWatcher", "Draw overbounce watcher\netj_drawObWatcher")
+        CVARINTLABEL(316, 244, 276, 8, "etj_obWatcherX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 244, 276, 8, "OB watcher X:", 0.2, 8, etj_obWatcherX 100 0 640 10, "Sets X position of overbounce watcher\netj_obWatcherX")
+        CVARINTLABEL(316, 256, 276, 8, "etj_obWatcherY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 256, 276, 8, "OB watcher Y:", 0.2, 8, etj_obWatcherY 100 0 480 10, "Sets Y position of overbounce watcher\netj_obWatcherY")
+        MULTI(316, 268, 276, 8, "OB watcher size:", 0.2, 8, "etj_obWatcherSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of overbounce watcher\netj_obWatcherSize")
+        MULTI(316, 280, 276, 8, "OB watcher color:", 0.2, 8, "etj_obWatcherColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of overbounce watcher\netj_obWatcherColor")
+        
+    SUBWINDOW(308, 308, 292, 112, "PLAYERS")
+        YESNO(316, 328, 276, 8, "Hide players:", 0.2, 8, "etj_hide", "Hides other players when they are too close\netj_hide")
+        CVARINTLABEL(316, 340, 276, 8, "etj_hideDistance", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 340, 276, 8, "Hide distance:", 0.2, 8, etj_hideDistance 128 0 1000 10, "Distance at which other players are hidden\netj_hideDistance")
+        CVARINTLABEL(316, 352, 276, 8, "etj_ghostPlayersFadeRange", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 352, 276, 8, "Hide fade range:", 0.2, 8, etj_ghostPlayersFadeRange 200 0 1000 20, "Additional fade range before other players are hidden\netj_ghostPlayersFadeRange")
+        YESNO(316, 364, 276, 8, "Hide self:", 0.2, 8, "etj_hideMe", "Hide yourself from other players\netj_hideMe")
+        CVARFLOATLABEL(316, 376, 276, 8, "etj_ghostPlayersOpacity", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 376, 276, 8, "Player opacity:", 0.2, 8, etj_ghostPlayersOpacity 1 0 1 0.05, "Sets transparency of other players\netj_ghostPlayersOpacity")
+        YESNO(316, 388, 276, 8, "Alt. player shader:", 0.2, 8, "etj_ghostPlayersAlt", "Draw other players as solid color\netj_ghostPlayersAlt")
+        MULTI(316, 400, 276, 8, "Player shader color:", 0.2, 8, "etj_ghostPlayersColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of alternative player shader\netj_ghostPlayersColor")
+        BUTTON(8, 424, 112, 18, "Back", 0.3, 14, close etjump_settings_1; open etjump)
+        BUTTONACTIVE(128, 424, 112, 18, "Tab 1", 0.3, 14, close etjump_settings_1; open etjump_settings_1)
+        BUTTON(248, 424, 112, 18, "Tab 2", 0.3, 14, close etjump_settings_1; open etjump_settings_2)
+        BUTTON(368, 424, 112, 18, "Tab 3", 0.3, 14, close etjump_settings_1; open etjump_settings_3)
+        BUTTON(488, 424, 112, 18, "Tab 4", 0.3, 14, close etjump_settings_1; open etjump_settings_4)
+}

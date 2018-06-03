@@ -1,0 +1,83 @@
+#include "ui/menudef.h"
+#define WINDOW_X 16
+#define WINDOW_Y 16
+#define WINDOW_WIDTH 608
+#define WINDOW_HEIGHT 448
+#define GROUP_NAME "group_etjump_settings_4"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+menuDef {
+    name "etjump_settings_4"
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    onESC {
+        close etjump_settings_4; open etjump
+    }
+
+    WINDOW("SETTINGS", 94)
+
+    SUBWINDOW(8, 32, 292, 76, "FIRETEAM")
+        YESNO(16, 52, 276, 8, "Fireteam:", 0.2, 8, "etj_HUD_fireteam", "Draw fireteam on HUD\netj_HUD_fireteam")
+        CVARFLOATLABEL(16, 64, 276, 8, "etj_fireteamAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 64, 276, 8, "Fireteam alpha:", 0.2, 8, etj_fireteamAlpha 1 0 1 0.05, "Sets transparency of fireteam\netj_fireteamAlpha")
+        CVARINTLABEL(16, 76, 276, 8, "etj_fireteamPosX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 76, 276, 8, "Fireteam X:", 0.2, 8, etj_fireteamPosX 0 0 640 10, "Sets X offset for fireteam\netj_fireteamPosX")
+        CVARINTLABEL(16, 88, 276, 8, "etj_fireteamPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 88, 276, 8, "Fireteam Y:", 0.2, 8, etj_fireteamPosY 0 0 480 10, "Sets Y offset for fireteam\netj_fireteamPosY")
+
+    SUBWINDOW(8, 116, 292, 76, "GUN")
+        YESNO(16, 136, 276, 8, "Gun:", 0.2, 8, "cg_drawGun", "Draw gun\ncg_drawGun")
+        CVARINTLABEL(16, 148, 276, 8, "cg_gunX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 148, 276, 8, "Gun X:", 0.2, 8, cg_gunX 0 -50 50 1, "Sets X position of gun\ncg_gunx")
+        CVARINTLABEL(16, 160, 276, 8, "cg_gunY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 160, 276, 8, "Gun Y:", 0.2, 8, cg_gunY 0 -50 50 1, "Sets Y position of gun\ncg_guny")
+        CVARINTLABEL(16, 172, 276, 8, "cg_gunZ", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 172, 276, 8, "Gun Z:", 0.2, 8, cg_gunZ 0 -50 50 1, "Sets Z position of gun\ncg_gunz")
+
+    SUBWINDOW(8, 200, 292, 76, "SPEED1")
+        MULTI(16, 220, 276, 8, "Speed meter 1:", 0.2, 8, "etj_drawspeed", cvarFloatList { "No" 0 "Yes" 1 "Show max" 2 }, "Draw original speed meter on right side of screen\netj_drawspeed")
+        CVARINTLABEL(16, 232, 276, 8, "etj_speedinterval", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 232, 276, 8, "Speed refresh rate:", 0.2, 8, etj_speedinterval 100 0 2000 10, "How often in milliseconds to update original speed meter\netj_speedInterval")
+        MULTI(16, 244, 276, 8, "Speed meter unit:", 0.2, 8, "etj_speedunit", cvarFloatList { "UPS" 0 "MPH" 1 "KPH" 2 }, "Speed measurement unit of original speed meter\netj_speedunit")
+        YESNO(16, 256, 276, 8, "Vertical speed:", 0.2, 8, "etj_speedXYonly", "Add vertical speed to original speed meter\netj_speedXYonly")
+
+    SUBWINDOW(8, 284, 292, 76, "MAX SPEED")
+        YESNO(16, 304, 276, 8, "Draw max speed:", 0.2, 8, "etj_drawMaxSpeed", "Draw max speed after previous load session\netj_drawMaxSpeed")
+        CVARINTLABEL(16, 316, 276, 8, "etj_maxSpeedX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 316, 276, 8, "Max speed X:", 0.2, 8, etj_maxSpeedX 320 0 640 10, "Sets X position of max speed\netj_maxSpeedX")
+        CVARINTLABEL(16, 328, 276, 8, "etj_maxSpeedY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(16, 328, 276, 8, "Max speed Y:", 0.2, 8, etj_maxSpeedY 320 0 480 10, "Sets Y position of max speed\netj_maxSpeedY")
+        MULTI(16, 340, 276, 8, "Max speed duration:", 0.2, 8, "etj_maxSpeedDuration", cvarFloatList { "0s" 0 "1s" 1000 "2s" 2000 "5s" 5000 "10s" 10000 "30s" 30000 }, "How long in milliseconds to display max speed\netj_maxSpeedDuration")
+
+    SUBWINDOW(308, 32, 292, 64, "SPECTATOR")
+        YESNO(316, 52, 276, 8, "Spectator list:", 0.2, 8, "etj_drawSpectatorInfo", "Draw a list of people spectating you\netj_drawSpectatorInfo")
+        CVARINTLABEL(316, 64, 276, 8, "etj_spectatorInfoX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 64, 276, 8, "Spec list X:", 0.2, 8, etj_spectatorInfoX 320 0 640 10, "Sets X position of spectator list\netj_spectatorInfoX")
+        CVARINTLABEL(316, 76, 276, 8, "etj_spectatorInfoY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 76, 276, 8, "Spec list Y:", 0.2, 8, etj_spectatorInfoY 40 0 480 10, "Sets Y position of spectator list\netj_spectatorInfoY")
+
+    SUBWINDOW(308, 104, 292, 64, "SOUNDS")
+        YESNO(316, 124, 276, 8, "Weapon sounds:", 0.2, 8, "etj_weaponSound", "Enable weapon sounds\netj_weaponSounds")
+        YESNO(316, 136, 276, 8, "Looped sounds:", 0.2, 8, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
+        YESNO(316, 148, 276, 8, "Uphill step sounds:", 0.2, 8, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
+
+    SUBWINDOW(308, 176, 292, 64, "CONSOLE")
+        CVARFLOATLABEL(316, 196, 276, 8, "etj_consoleAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 196, 276, 8, "Console alpha:", 0.2, 8, etj_consoleAlpha 1 0 1 0.05, "Sets transparency of console (vid_restart required)\netj_consoleAlpha")
+        YESNO(316, 208, 276, 8, "Console shader:", 0.2, 8, "etj_consoleShader", "Draw console background shader (vid_restart required)\netj_consoleShader")
+        MULTI(316, 220, 276, 8, "Console color:", 0.2, 8, "etj_consoleColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets console color when console shader is disabled (vid_restart required)\netj_consoleColor")
+
+    SUBWINDOW(308, 248, 292, 64, "CHS")
+        CVARFLOATLABEL(316, 268, 276, 8, "etj_CHSAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER(316, 268, 276, 8, "CHS alpha:", 0.2, 8, etj_CHSAlpha 1 0 1 0.05, "Sets transparency of CHS\netj_CHSAlpha")
+        MULTI(316, 280, 276, 8, "CHS color:", 0.2, 8, "etj_CHSColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of CHS\netj_CHSColor")
+        YESNO(316, 292, 276, 8, "CHS shadow:", 0.2, 8, "etj_CHSShadow", "Draw shadow on CHS\netj_CHSShadow")
+        BUTTON(8, 424, 112, 18, "Back", 0.3, 14, close etjump_settings_4; open etjump)
+        BUTTON(128, 424, 112, 18, "Tab 1", 0.3, 14, close etjump_settings_4; open etjump_settings_1)
+        BUTTON(248, 424, 112, 18, "Tab 2", 0.3, 14, close etjump_settings_4; open etjump_settings_2)
+        BUTTON(368, 424, 112, 18, "Tab 3", 0.3, 14, close etjump_settings_4; open etjump_settings_3)
+        BUTTONACTIVE(488, 424, 112, 18, "Tab 4", 0.3, 14, close etjump_settings_4; open etjump_settings_4)
+}
