@@ -116,7 +116,7 @@
       <MapFileName>.\Release/ui_mp_x86.map</MapFileName>
       <BaseAddress>0x40000000</BaseAddress>
       <ImportLibrary>.\Release/ui_mp_x86.lib</ImportLibrary>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
