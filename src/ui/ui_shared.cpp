@@ -4731,11 +4731,11 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 
 	if (hasCursor) {
 
-		if (item->cursorColor) {
-			memcpy(cursorColor, &item->cursorColor, sizeof(vec4_t));
+		if (Q_IsNoneColor(item->cursorColor)) {
+			memcpy(cursorColor, &color, sizeof(vec4_t));
 		}
 		else {
-			memcpy(cursorColor, &color, sizeof(vec4_t));
+			memcpy(cursorColor, &item->cursorColor, sizeof(vec4_t));
 		}
 
 	}
@@ -5154,11 +5154,11 @@ void Item_TextField_Paint(itemDef_t *item)
 		memcpy(&newColor, &item->window.foreColor, sizeof(vec4_t));
 	}
 
-	if (item->cursorColor) {
-		memcpy(&cursorColor, &item->cursorColor, sizeof(vec4_t));
+	if (Q_IsNoneColor(item->cursorColor)) {
+		memcpy(&cursorColor, &item->window.foreColor, sizeof(vec4_t));
 	}
 	else {
-		memcpy(&cursorColor, &item->window.foreColor, sizeof(vec4_t));
+		memcpy(&cursorColor, &item->cursorColor, sizeof(vec4_t));
 	}
 
 	// NOTE: offset from the editfield prefix (like "Say: " in limbo menu)
