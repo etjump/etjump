@@ -50,7 +50,7 @@ menuDef {
         SLIDER(16, 316, 276, 8, "Max speed X:", 0.2, 8, etj_maxSpeedX 320 0 640 10, "Sets X position of max speed\netj_maxSpeedX")
         CVARINTLABEL(16, 328, 276, 8, "etj_maxSpeedY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER(16, 328, 276, 8, "Max speed Y:", 0.2, 8, etj_maxSpeedY 320 0 480 10, "Sets Y position of max speed\netj_maxSpeedY")
-		CVARINTLABEL(16, 340, 276, 8, "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        CVARINTLABEL(16, 340, 276, 8, "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER(16, 340, 276, 8, "Max speed duration:", 0.2, 8, etj_maxSpeedDuration 2000 0 15000 250, "How long in milliseconds to display max speed\netj_maxSpeedDuration")
 
     SUBWINDOW(308, 32, 292, 64, "SPECTATOR")
