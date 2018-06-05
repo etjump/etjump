@@ -2045,8 +2045,8 @@ void ClientEndFrame(gentity_t *ent)
 		ent->s.onFireEnd        += time_delta;
 	}
 
-	// perform once-a-second actions
-	if (level.match_pause == PAUSE_NONE)
+	// perform once-a-second actions unless dead
+	if (level.match_pause == PAUSE_NONE && !(ent->client->ps.eFlags & EF_DEAD))
 	{
 		ClientTimerActions(ent, level.time - level.previousTime);
 	}
