@@ -117,11 +117,6 @@
 * added `interruptRun` client command to stop an ongoing timerun
 * players now load onto same stance (stand/crouch/prone) as they saved in. Loading to prone additionally forces same viewangles as when saving.
 * added `etj_runtimerInactiveColor` to set run timer color when timerun is not active
-  * this cvar takes value in multiple different color format. Supported formats are:
-    * string (white, black, green etc.)
-    * normalized RGBA (eg. 1.0 0.5 0.75 0.33)
-    * true RGBA (eg. 255 128 191 62). If any value is > 1, true RGBA is used instead of normalized
-    * hex color (eg. #ff80bf, 0xff80bf)
 * added `tracker_not_eq` key to target/trigger_tracker
 * fixed runtimer is not displayed in demo playback
 * fixed capitalization in noclip prints + colored it yellow
@@ -193,6 +188,13 @@
 * removed `etj_speedSizeX/Y` and replaced them with `etj_speedSize`
 * added almost all etjump client cvars in the settings menu
 * fixed bug, where making `g_banner1-5` cvars empty would cause the server crash on map load
+* fixed cursor not showing up in menu text fields
+* added new color parsing system for ETJump cvars that expect color values
+  * all ETJump cvars expecting color values now support multiple color formats:
+    * string (white, black, green etc.)
+    * normalized RGB(A) (eg. 1.0 0.5 0.75 0.33)
+    * true RGB(A) (eg. 255 128 191 62). If any value is > 1, true RGBA is used instead of normalized
+    * hex color (eg. #ff80bf, 0xff80bf)
 
 # ETJump 2.2.0
 
