@@ -195,6 +195,10 @@
     * normalized RGB(A) (eg. 1.0 0.5 0.75 0.33)
     * true RGB(A) (eg. 255 128 191 62). If any value is > 1, true RGBA is used instead of normalized
     * hex color (eg. #ff80bf, 0xff80bf)
+* fixed `time` option on `!ban` not working
+* fixed an issue where using `!deletelevel` to remove your current admin level and using admin commands afterwards would crash server
+* fixed `!editlevel` not creating a new level if the level you are trying to edit does not exist
+* fixed `!edituser` printing redundant output when using `-clear` option
 
 # ETJump 2.2.0
 
