@@ -1736,6 +1736,13 @@ void SpectatorClientEndFrame(gentity_t *ent)
 			cl = &level.clients[clientNum];
 			if (cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR)
 			{
+				if (!G_DesiredFollow(ent, g_entities + clientNum))
+				{
+					ent->client->sess.spectatorState = SPECTATOR_FREE;
+					ClientBegin(ent->client - level.clients);
+					return;
+				}
+
 				int flags = (cl->ps.eFlags & ~(EF_VOTED)) | (ent->client->ps.eFlags & (EF_VOTED));
 				int ping  = ent->client->ps.ping;
 
