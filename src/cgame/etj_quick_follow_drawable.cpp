@@ -29,7 +29,7 @@ void ETJump::QuickFollowDrawer::render() const
 
 bool ETJump::QuickFollowDrawer::canSkipDraw() const
 {
-	if (etj_quickFollow.integer  < 1 || cg.crosshairClientNum > MAX_CLIENTS)
+	if (etj_quickFollow.integer < 2 || cg.crosshairClientNum > MAX_CLIENTS)
 	{
 		return true;
 	}
