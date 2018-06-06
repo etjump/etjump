@@ -1557,8 +1557,6 @@ bool Putteam(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	target->client->sess.lastTeamSwitch = level.time;
-
 	const weapon_t w = static_cast<weapon_t>(-1);
 	SetTeam(target, argv->at(2).c_str(), qfalse, w, w, qtrue);
 

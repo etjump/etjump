@@ -1536,6 +1536,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1, wea
 	client->sess.spectatorState  = specState;
 	client->sess.spectatorClient = specClient;
 	client->pers.ready           = qfalse;
+	client->sess.lastTeamSwitch = level.time;
 
 	// (l)users will spam spec messages... honest!
 	if (team != oldTeam)
@@ -1851,10 +1852,6 @@ void Cmd_Team_f(gentity_t *ent)
 	if (!SetTeam(ent, s, qfalse, w, w2, qtrue))
 	{
 		G_SetClientWeapons(ent, w, w2, qtrue);
-	}
-	else
-	{
-		ent->client->sess.lastTeamSwitch = level.time;
 	}
 
 	if (ent->client->sess.runSpawnflags == 0 ||

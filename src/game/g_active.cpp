@@ -577,8 +577,11 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 	      !(client->oldbuttons & BUTTON_ACTIVATE)) || ucmd->upmove > 0) &&
 	    G_allowFollow(ent, TEAM_AXIS) && G_allowFollow(ent, TEAM_ALLIES))
 	{
-		// code moved to StopFollowing
-		StopFollowing(ent);
+		if (level.time - client->sess.lastTeamSwitch > SPECFREE_COOLDOWN)
+		{
+			// code moved to StopFollowing
+			StopFollowing(ent);
+		}
 	}
 
 }
