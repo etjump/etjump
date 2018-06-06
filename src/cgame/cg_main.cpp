@@ -916,7 +916,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawLeaves, "etj_drawLeaves", "1", CVAR_ARCHIVE },
 	{ &etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE },
 	{ &etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE },
-	{ &etj_quickFollow, "etj_quickFollow", "1", CVAR_ARCHIVE },
+	{ &etj_quickFollow, "etj_quickFollow", "2", CVAR_ARCHIVE },
 	{ &etj_drawProneIndicator, "etj_drawProneIndicator", "3", CVAR_ARCHIVE },
 	{ &etj_proneIndicatorX, "etj_proneIndicatorX", "615", CVAR_ARCHIVE },
 	{ &etj_proneIndicatorY, "etj_proneIndicatorY", "338", CVAR_ARCHIVE },

@@ -29,7 +29,7 @@ menuDef {
         YESNO(16, 124, 276, 8, "Auto load:", 0.2, 8, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
         YESNO(16, 136, 276, 8, "Real FOV:", 0.2, 8, "etj_realFov", "Take aspect ratio into account when calculating FOV\netj_realFov")
         YESNO(16, 148, 276, 8, "No +activate lean:", 0.2, 8, "etj_noActivateLean", "Disable leaning when +activate is held\netj_noActivateLean")
-        YESNO(16, 160, 276, 8, "Quick follow:", 0.2, 8, "etj_quickFollow", "Spectate other players by aiming and pressing +activate\netj_quickFollow")
+        MULTI(16, 160, 276, 8, "Quick follow:", 0.2, 8, "etj_quickFollow", cvarFloatList { "No" 0 "Yes" 1 "Yes + draw hint" 2 }, "Spectate other players by aiming and pressing +activate\netj_quickFollow")
         CVARFLOATLABEL(16, 172, 276, 8, "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER(16, 172, 276, 8, "Noclip scale:", 0.2, 8, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
         MULTI(16, 184, 276, 8, "Auto weapon pickup:", 0.2, 8, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "All" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
