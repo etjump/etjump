@@ -128,6 +128,10 @@ typedef enum
 #define G_SPEED     320
 
 #define CHAT_OPTIONS_INTERPOLATE_NAME_TAGS 0x000001
+// ETJump: defines window that stops players from freeing themselves from following
+// right after the team change. Fixes issue when quick follow is used, and +activate
+// is handled for both following and freeing on adjacent frames
+#define SPECFREE_COOLDOWN 200
 
 //============================================================================
 
