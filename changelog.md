@@ -13,9 +13,6 @@
   - `volume <0-255>` controls sound volume
 * fixed `func_static` spawnflag __2__ (PAIN), direct activation of entities don't crash the game anymore 
 * fixed `target_speaker` spawnflag **8** (ACTIVATOR) didn't play sound to the activator
-* fixed setting `com_maxfps` in menu
-* added `etj_viewPlayerPortals` __2__ as an option to menu
-* added `etj_drawKeys` __2__ to show DeFRaG style keys
 * added `etj_OBX/Y` to move OB detector
 * added worldspawn key `nojumpdelay` to control no jump delay behavior on the map
   *note: use `surfaceparm SURF_MONSLICK_N` to enable/disable jump delay*
@@ -33,7 +30,7 @@
   * `etj_saveIndicatorY`
 * fixed footsteps not playing at low landing speeds
   * to revert back to old, broken behavior, toggle `etj_uphillSteps`
-* fixed `etj_weaponsound` __0__ doesn't mute no ammo sound
+* fixed `etj_weaponsound` __0__ not muting no ammo or flamethrower sound
 * added `incrementVar` command, works almost like `cycle` but also support floats
 * added `strictsaveload` worldspawn key to control save/load behavior
   * bitmask value
@@ -41,6 +38,7 @@
   * __2__/__dead__ = cannot save/load while dead
   * when using strings, seperate values with | (eg. "move | dead")
 * added command `setoffset x y z`: offsets player's position by given vector if noclip is available
+  * maximum offset value is __4096__
 * reworked OB Watcher:
   * OB watcher tracks your movement in air and tells if you are going to get OB on the surface you have saved with `ob_save`
   * `etj_obWatcherSize` to set the size
@@ -103,6 +101,7 @@
   * when entity fires its target(s), it will remap `targetShaderName` to `targetShaderNewName`
   * more info: http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html
 * added ability to spectate players by aiming at them and pressing `+activate`. Can be toggled with `etj_quickFollow`
+  * value __2__ will also show a hint about spectating when aiming at players
 * added `noprone` worldspawn key to enable/disable proning
   * `noprone` __0__: players can only prone outside of `surfaceparm donotenter` (default)
   * `noprone` __1__: players can only prone inside of `surfaceparm donotenter`
@@ -134,7 +133,6 @@
   * bullet tracers, brass and wallmarks are hidden
   * demos recorded while hidden now show yourself on freecam/3rd person
     * does NOT draw other players on demo who were also hidden
-* fixed `etj_weaponSound` not affecting flamethrower
 * added spawnflag __2__ `ADD_XY` to `target/trigger_push`
   * adds the XY velocity from the pusher to your current velocity, rather than setting it
   * when this is set, `speed` key affects the pusher even when its targeting `target_position`
@@ -158,7 +156,11 @@
 * added `etj_HUD_popup` cvar to enable/disable popup message hud, value `2` aligns popup to the right side of screen
 * added `etj_popupPosX`, `etj_popupPosY` cvars to position popup message hud
 * made keyset to be drawn from the center of the defined origin (using `etj_keysX`, `etj_keysY`)
-* added 3 new keyset themes, you can switch these using `etj_drawKeys` cvar
+* added 4 new keyset themes
+  * __2__ DeFRaG default
+  * __3__ ETJump 2
+  * __4__ ETJump 3
+  * __5__ ETJump 4
 * fixed illegal redirect upon serverlist loading
 * added directories support in `replays` menu
 * added `etj_consoleShader` cvar to enable/disable textured background
@@ -169,7 +171,6 @@
 * fixed health regeneration was slower for `pmove_fixed` players
 * added `etj_altScoreboard 3`
 * added `etj_lagometerX`, `etj_lagometerY` cvars to offset lagometer in x/y directions respectively
-* added `[F] to follow` hint under the player name, can be toggled off along with the quick follow feature using `etj_quickfollow` cvar
 * added `g_debugTrackers` to toggle tracker debugging
   * `tracker_print <index1|all> <index2> <index3>...` prints specified tracker index/indices. If index is not specified, defaults to index 1.
   * `tracker_set <index|all> <value>` sets tracker to specified value in specified index. If index is not specified, defaults to index 1.
@@ -195,7 +196,7 @@
     * normalized RGB(A) (eg. 1.0 0.5 0.75 0.33)
     * true RGB(A) (eg. 255 128 191 62). If any value is > 1, true RGBA is used instead of normalized
     * hex color (eg. #ff80bf, 0xff80bf)
-* fixed `time` option on `!ban` not working
+* fixed `time` option on `!ban` not working and corrected wrong time value in manual
 * fixed an issue where using `!deletelevel` to remove your current admin level and using admin commands afterwards would crash server
 * fixed `!editlevel` not creating a new level if the level you are trying to edit does not exist
 * fixed `!edituser` printing redundant output when using `-clear` option
