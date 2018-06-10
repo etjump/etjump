@@ -26,7 +26,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
 	# This has to be set to compile with -ffast-math
-	# Doesn't matter in ETJumps case as we don't store fps
+	# Makes sqlite to use std isNan function instead of own implementation
 	add_definitions(-DSQLITE_HAVE_ISNAN)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
