@@ -27,7 +27,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
 	# This has to be set to compile with -ffast-math
 	# Doesn't matter in ETJumps case as we don't store fps
-	add_definitions(-DSQLITE_OMIT_FLOATING_POINT)
+	add_definitions(-DSQLITE_HAVE_ISNAN)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
