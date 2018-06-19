@@ -1,3 +1,11 @@
+# ETJump 2.4.0
+
+* fixed connection interrupted icon not moving with lagometer
+* added ETPro's extended `cg_drawweaponIconFlash` __2__
+  * white - ready
+  * yellow - reload/switch
+  * red - shooting
+
 # ETJump 2.3.0
 
 * replaced hud/ui low resolution bitmap charset with hq font
