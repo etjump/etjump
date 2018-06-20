@@ -14,6 +14,7 @@
 #include "etj_irenderable.h"
 #include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
+#include "../game/etj_string_utilities.h"
 #include <algorithm>
 
 #define STATUSBARHEIGHT 452
@@ -3059,7 +3060,8 @@ CG_DrawSpectatorMessage
 */
 static void CG_DrawSpectatorMessage(void)
 {
-	const char *str, *str2;
+	std::string str;
+	const char *str2;
 	float      x, y;
 	static int lastconfigGet = 0;
 
@@ -3074,6 +3076,11 @@ static void CG_DrawSpectatorMessage(void)
 	}
 
 	if (!(cg.snap->ps.pm_flags & PMF_LIMBO || cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR))
+	{
+		return;
+	}
+
+	if (trap_Key_GetCatcher() & KEYCATCH_UI)
 	{
 		return;
 	}
@@ -3095,12 +3102,12 @@ static void CG_DrawSpectatorMessage(void)
 	{
 		str2 = "ESCAPE";
 	}
-	str = va(CG_TranslateString("Press %s to open Limbo Menu"), str2);
-	ETJump::DrawString(8, 154 + 12, 0.23f, 0.25f, colorWhite, qtrue, str, 0, ITEM_TEXTSTYLE_SHADOWED);
+	str = ETJump::stringFormat("Press %s to open Limbo Menu", str2);
+	ETJump::DrawString(8, 154 + 12, 0.23f, 0.25f, colorWhite, qtrue, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
 
 	str2 = BindingFromName("+attack");
-	str  = va(CG_TranslateString("Press %s to follow next player"), str2);
-	ETJump::DrawString(8, 172 + 12, 0.23f, 0.25f, colorWhite, qtrue, str, 0, ITEM_TEXTSTYLE_SHADOWED);
+	str  = ETJump::stringFormat("Press %s to follow next player", str2);
+	ETJump::DrawString(8, 172 + 12, 0.23f, 0.25f, colorWhite, qtrue, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
 
 #ifdef MV_SUPPORT
 	str2 = BindingFromName("mvactivate");
@@ -3153,7 +3160,7 @@ CG_DrawLimboMessage
 static void CG_DrawLimboMessage(void)
 {
 	float         color[4] = { 1, 1, 1, 1 };
-	const char    *str;
+	std::string   str;
 	playerState_t *ps = &cg.snap->ps;
 	int           y = 130;
 
@@ -3172,20 +3179,25 @@ static void CG_DrawLimboMessage(void)
 		return;
 	}
 
+	if (trap_Key_GetCatcher() & KEYCATCH_UI)
+	{
+		return;
+	}
+
 	if (cg_descriptiveText.integer)
 	{
-		str = CG_TranslateString("You are wounded and waiting for a medic.");
-		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str, 0, 0);
+		str = "You are wounded and waiting for a medic.";
+		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
 		y += 18;
 
-		str = CG_TranslateString("Press JUMP to go into reinforcement queue.");
-		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str, 0, 0);
+		str = "Press JUMP to go into reinforcement queue.";
+		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
 		y += 18;
 	}
 
 	// JPW NERVE
-	str = va(CG_TranslateString("Reinforcements deploy in %d seconds."), CG_CalculateReinfTime(qfalse));
-	ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str, 0, 0);
+	str = ETJump::stringFormat("Reinforcements deploy in %d seconds.", CG_CalculateReinfTime(qfalse));
+	ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
 }
 // -NERVE - SMF
 
@@ -4004,10 +4016,15 @@ static qboolean CG_DrawFollow(void)
 		return(qfalse);
 	}
 
+	if (trap_Key_GetCatcher() & KEYCATCH_UI)
+	{
+		return qfalse;
+	}
+
 	if (cg.snap->ps.clientNum != cg.clientNum)
 	{
-		const char *str = va("^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
-		ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite, qfalse, str, 0, ITEM_TEXTSTYLE_SHADOWED);
+		std::string str = ETJump::stringFormat("^7Following %s^7", cgs.clientinfo[cg.snap->ps.clientNum].name);
+		ETJump::DrawString(INFOTEXT_STARTX, 118 + 12, 0.23f, 0.25f, colorWhite, qfalse, str.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
 	return(qtrue);
