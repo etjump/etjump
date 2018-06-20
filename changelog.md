@@ -5,6 +5,8 @@
   * white - ready
   * yellow - reload/switch
   * red - shooting
+* spectator messages (`cg_descriptiveText`) are now hidden when in-game menu is up to improve readability
+* unlocked `cg_centertime`
 
 # ETJump 2.3.0
 
