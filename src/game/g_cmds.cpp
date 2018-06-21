@@ -2888,9 +2888,11 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	}
 
-	if (trap_Argc() > 1 &&
-	    (i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK)   //  --OSP
+	if (G_voteCmdCheck(ent, arg1, arg2) != G_OK)
 	{
+		auto msg = ETJump::stringFormat("\n^3>>> Unknown vote command: ^7%s %s\n", arg1, arg2);
+		Printer::SendConsoleMessage(ent - g_entities, msg);
+		G_voteHelp(ent, qtrue);
 		return;
 	}
 
