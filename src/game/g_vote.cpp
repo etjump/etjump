@@ -387,7 +387,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2)
 		}
 		
 		const char *mapTypeDesc = CustomMapTypeExists(arg2);
-		strcpy_s(arg2, MAX_STRING_TOKENS, mapTypeDesc ? mapTypeDesc : "");
+		strcpy(arg2, mapTypeDesc ? mapTypeDesc : "");
 		Q_strncpyz(level.voteInfo.vote_value, map.c_str(), sizeof(level.voteInfo.vote_value));
 	}
 	else
@@ -427,7 +427,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 			return G_INVALID;
 		}
 		
-		strcpy_s(arg2, MAX_STRING_TOKENS, map.c_str());
+		strcpy(arg2, map.c_str());
 		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
 		G_increaseCallvoteCount(arg2);
 
