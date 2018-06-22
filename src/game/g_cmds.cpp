@@ -2874,54 +2874,17 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 		return;
 	}
 
-	if (!Q_stricmp(arg1, "randommap"))
+	if ((i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK)
 	{
-		if (trap_Argc() == 3)
+		if (i == G_NOTFOUND)
 		{
-			customMapType = CustomMapTypeExists(arg2);
-			if (!customMapType)
+			if (arg1[0])
 			{
-				G_cpmPrintf(ent, "^7Map type %s does not exists.", arg2);
-				return;
+				std::string errorMessage = ETJump::stringFormat("\n^3Unknown vote command: ^7%s %s\n", arg1, arg2);
+				Printer::SendConsoleMessage(ent - g_entities, errorMessage);
 			}
+			G_voteHelp(ent, qtrue);
 		}
-	}
-
-	if (!Q_stricmp(arg1, "map"))
-	{
-		const char   *map = NULL;
-
-		if (arg2[0] == '\0' || trap_Argc() == 1)
-		{
-			CP("print \"^3callvote: ^7No map specified.\n\"");
-			return;
-		}
-
-		map = G_MatchOneMap(arg2);
-		if (!map)
-		{
-			CP(va("print \"^3callvote: ^7could not find a single map matching %s.\n\"", arg2));
-			return;
-		}
-		Q_strncpyz(arg2, map, sizeof(arg2));
-
-		if (!Q_stricmp(arg2, level.rawmapname))
-		{
-			CP(va("print \"^3callvote: ^7%s is the current map.\n\"", level.rawmapname));
-			return;
-		}
-
-		if (strstr(Q_strlwr(g_blockedMaps.string), Q_strlwr(arg2)) != NULL)
-		{
-			CP(va("print \"Voting for %s is not allowed.\n\"", arg2));
-			return;
-		}
-
-	}
-
-	if (trap_Argc() > 1 &&
-	    (i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK)   //  --OSP
-	{
 		return;
 	}
 
@@ -2934,18 +2897,13 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	level.voteInfo.voteYes = 1;
 	trap_SendServerCommand(ent - g_entities, "voted yes");
 
-	if (customMapType)
-	{
-		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, customMapType));
-		AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
-		G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, customMapType);
-	}
-	else
-	{
-		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, level.voteInfo.voteString));
-		AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
-		G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
-	}
+	std::string calledVoteString = ETJump::stringFormat("%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
+	Printer::BroadcastConsoleMessage(calledVoteString);
+
+	calledVoteString = ETJump::stringFormat("%s\n^7 called a vote.", ent->client->pers.netname);
+	Printer::BroadcastCenterMessage(calledVoteString);
+
+	G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
 
 	G_globalSound("sound/misc/vote.wav");
 
@@ -2966,19 +2924,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
 	trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
-
-	if (!customMapType)
-	{
-		trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
-	}
-	else
-	{
-		trap_SetConfigstring(CS_VOTE_STRING, customMapType);
-	}
-
+	trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
 	trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
-
-	return;
 }
 
 /*

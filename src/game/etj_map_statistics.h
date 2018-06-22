@@ -28,6 +28,7 @@ public:
 	};
 
 	const char *randomMap() const;
+	bool isValidMap(const MapInformation *mapInfo) const;
 
 	bool createDatabase();
 	bool loadMaps();
