@@ -3254,15 +3254,19 @@ int getNumValidVoters()
 {
 	auto numValidPlayers = getNumPlayingClients();
 	auto numVotedSpecs = 0;
-	for (auto i = 0, len = level.numConnectedClients; i < len; ++i)
+	if (g_spectatorVote.integer > 0)
 	{
-		auto clientNum = level.sortedClients[i];
-		auto player = g_entities + clientNum;
-		if (player->client->sess.sessionTeam == TEAM_SPECTATOR && player->client->ps.eFlags & EF_VOTED)
+		for (auto i = 0, len = level.numConnectedClients; i < len; ++i)
 		{
-			++numVotedSpecs;
+			auto clientNum = level.sortedClients[i];
+			auto player = g_entities + clientNum;
+			if (player->client->sess.sessionTeam == TEAM_SPECTATOR && player->client->ps.eFlags & EF_VOTED)
+			{
+				++numVotedSpecs;
+			}
 		}
 	}
+
 	return numValidPlayers + numVotedSpecs;
 }
 
@@ -3311,7 +3315,7 @@ void CheckVote(void)
 
 	auto numConnectedClients = level.numConnectedClients;
 
-	auto validVotingClients = g_spectatorVote.integer > 0 ? getNumValidVoters() : getNumPlayingClients();
+	auto validVotingClients = getNumValidVoters();
 	auto requiredClients = validVotingClients / 100.0f * requiredPercentage;
 
 	auto voter = g_entities + level.voteInfo.voter_cn;
