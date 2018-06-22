@@ -2777,6 +2777,77 @@ void Cmd_Where_f(gentity_t *ent)
 
 /*
 ==================
+getSecondsString
+Returns "second" or "seconds"
+==================
+*/
+const char *getSecondsString(int time)
+{
+	return (time / 1000 == 1) ? "second" : "seconds";
+}
+
+/*
+==================
+checkVoteConditions
+Checks if a vote can be called
+==================
+*/
+bool checkVoteConditions(gentity_t *ent, int clientNum)
+{
+	std::string voteError;
+
+	if (voteFlags.integer == VOTING_DISABLED)	// Setting g_enableVote 0 sets this flag as well
+	{
+		Printer::SendLeftMessage(clientNum, "Voting is not enabled on this server.\n");
+		return false;
+	}
+	if (ent && ent->client->sess.muted && g_mute.integer & 2)
+	{
+		Printer::SendLeftMessage(clientNum, "^3callvote: ^7not allowed to call a vote while muted.\n");
+		return false;
+	}
+	if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR && !(g_spectatorVote.integer >= 2))
+	{
+		Printer::SendLeftMessage(clientNum, "^3callvote: ^7you are not allowed to call a vote as a spectator.\n");
+		return false;
+	}
+	if (level.voteInfo.voteTime)
+	{
+		Printer::SendLeftMessage(clientNum, "A vote is already in progress.\n");
+		return false;
+	}
+	if (level.intermissiontime)
+	{
+		Printer::SendLeftMessage(clientNum, "Cannot callvote during intermission.\n");
+		return false;
+	}
+	if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer)
+	{
+		voteError = ETJump::stringFormat("You have already called the maximum number of votes (%d).\n", vote_limit.integer);
+		Printer::SendLeftMessage(clientNum, voteError);
+		return false;
+	}
+
+	if (level.time - level.startTime < g_disableVoteAfterMapChange.integer)
+	{
+		int remainingTime = g_disableVoteAfterMapChange.integer - (level.time - level.startTime);
+		voteError = ETJump::stringFormat("You must wait for %d more %s to vote after a map change.\n", remainingTime / 1000, getSecondsString(remainingTime));
+		Printer::SendLeftMessage(clientNum, voteError);
+		return false;
+	}
+	if (level.time - ent->client->lastVoteTime < g_voteCooldown.integer * 1000)
+	{
+		int voteCooldown = (g_voteCooldown.integer * 1000) - (level.time - ent->client->lastVoteTime);
+		voteError = ETJump::stringFormat("^3callvote:^7 you must wait %d more %s to vote again.\n", voteCooldown / 1000, getSecondsString(voteCooldown));
+		Printer::SendChatMessage(clientNum, voteError);
+		return false;
+	}
+
+	return true;
+}
+
+/*
+==================
 Cmd_CallVote_f
 ==================
 */
@@ -2786,50 +2857,10 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	char       arg1[MAX_STRING_TOKENS];
 	char       arg2[MAX_STRING_TOKENS];
 	const char *customMapType = NULL;
+	int clientNum = ent - g_entities;
 
-	if (level.voteInfo.voteTime)
+	if (!checkVoteConditions(ent, clientNum))
 	{
-		CP("cpm \"A vote is already in progress.\n\"");
-		return;
-	}
-	if (level.intermissiontime)
-	{
-		CP("cpm \"Cannot callvote during intermission.\n\"");
-		return;
-	}
-	if (voteFlags.integer == VOTING_DISABLED)
-	{
-		CP("cpm \"Voting not enabled on this server.\n\"");
-		return;
-	}
-	if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer)
-	{
-		CP(va("cpm \"You have already called the maximum number of votes (%d).\n\"", vote_limit.integer));
-		return;
-	}
-
-	if (level.time - level.startTime < g_disableVoteAfterMapChange.integer)
-	{
-		CP(va("cpm \"Vote is disabled for %d seconds after a map change.\n\"", g_disableVoteAfterMapChange.integer / 1000));
-		return;
-	}
-
-	if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR)
-	{
-		CP("print \"^3callvote: ^7you are not allowed to call a vote as a spectator.\n\"");
-		return;
-	}
-
-	if (ent && ent->client->sess.muted && g_mute.integer & 2)
-	{
-		CP("print \"^3callvote: ^7not allowed to call a vote while muted.\n\"");
-		return;
-	}
-
-	if (level.time - ent->client->lastVoteTime < 1000 * g_voteCooldown.integer)
-	{
-		CP(va("chat \"^3callvote:^7 you must wait %d more seconds to vote again.\n\"",
-			g_voteCooldown.integer - ((level.time - ent->client->lastVoteTime) / 1000)));
 		return;
 	}
 
@@ -2894,7 +2925,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 		return;
 	}
 
-	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
+	auto voteStringFormat = arg2[0] ? "%s %s" : "%s";
+	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), voteStringFormat, arg1, arg2);
 
 	// Zero: NOTE! if we call a randommap vote with a custom map type
 	// it only changes the clientside info text, not everything.
@@ -3166,7 +3198,7 @@ void Cmd_Vote_f(gentity_t *ent)
 				level.voteInfo.voteCanceled = qtrue;
 				level.voteInfo.voteNo       = level.numConnectedClients;
 				level.voteInfo.voteYes      = 0;
-				AP("cpm \"^7Vote canceled by voter.\n\"");
+				Printer::BroadcastLeftMessage("^7Vote canceled by caller.");
 				return;
 			}
 		}

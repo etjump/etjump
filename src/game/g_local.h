@@ -1946,6 +1946,7 @@ extern vmCvar_t team_nocontrols;
 //
 extern vmCvar_t vote_allow_map;
 extern vmCvar_t vote_allow_matchreset;
+extern vmCvar_t vote_allow_randommap;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
 extern vmCvar_t z_serverflags;
@@ -2042,6 +2043,8 @@ extern vmCvar_t shared;
 extern vmCvar_t g_moverScale;
 extern vmCvar_t g_debugTrackers;
 extern vmCvar_t g_debugTimeruns;
+extern vmCvar_t g_spectatorVote;
+extern vmCvar_t g_enableVote;
 
 void    trap_Printf(const char *fmt);
 void    trap_Error(const char *fmt);

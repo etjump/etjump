@@ -2597,6 +2597,7 @@ extern vmCvar_t etj_onRunStart;
 extern vmCvar_t etj_onRunEnd;
 extern vmCvar_t etj_lagometerX;
 extern vmCvar_t etj_lagometerY;
+extern vmCvar_t etj_spectatorVote;
 
 //
 // cg_main.c

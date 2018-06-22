@@ -544,6 +544,7 @@ vmCvar_t etj_onRunStart;
 vmCvar_t etj_onRunEnd;
 vmCvar_t etj_lagometerX;
 vmCvar_t etj_lagometerY;
+vmCvar_t etj_spectatorVote;
 
 typedef struct
 {
@@ -927,6 +928,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_onRunEnd, "etj_onRunEnd", "", CVAR_ARCHIVE },
 	{ &etj_lagometerX, "etj_lagometerX", "0", CVAR_ARCHIVE },
 	{ &etj_lagometerY, "etj_lagometerY", "0", CVAR_ARCHIVE },
+	{ &etj_spectatorVote, "", "0", 0 },
 };
 
 

@@ -60,11 +60,7 @@
 	loadMenu { "ui/ingame_main.menu" }
 	loadMenu { "ui/ingame_vote.menu" }
 	loadMenu { "ui/ingame_vote_disabled.menu" }
-	loadMenu { "ui/ingame_vote_misc.menu" }
-	loadMenu { "ui/ingame_vote_misc_refrcon.menu" }
 	loadMenu { "ui/ingame_vote_map.menu" }
-	loadMenu { "ui/ingame_vote_players.menu" }
-	loadMenu { "ui/ingame_vote_players_warn.menu" }
 	loadMenu { "ui/ingame_serverinfo.menu" }
 	loadMenu { "ui/ingame_disconnect.menu" }
 	loadMenu { "ui/ingame_messagemode.menu" }

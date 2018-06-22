@@ -62,6 +62,12 @@ public:
 	static void BroadcastChatMessage(const std::string& message);
 
 	/**
+	* Sends a popup message to everyone in server and to server console.
+	* @param message The message to be sent
+	*/
+	static void BroadcastLeftMessage(const std::string& message);
+
+	/**
 	 * Sends a banner message to the client.
 	 * @param clientNum the client slot number to send the message to
 	 * @param message The message to be sent

@@ -9,6 +9,8 @@
 #include "etj_database.h"
 #include "etj_session.h"
 #include "etj_save_system.h"
+#include "etj_printer.h"
+#include "etj_string_utilities.h"
 #include <memory>
 
 level_locals_t level;
@@ -166,6 +168,7 @@ vmCvar_t server_motd4;
 vmCvar_t server_motd5;
 vmCvar_t vote_allow_map;
 vmCvar_t vote_allow_matchreset;
+vmCvar_t vote_allow_randommap;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t z_serverflags;
@@ -292,6 +295,8 @@ vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
 vmCvar_t g_debugTrackers;
 vmCvar_t g_debugTimeruns;
+vmCvar_t g_spectatorVote;
+vmCvar_t g_enableVote;
 
 cvarTable_t gameCvarTable[] =
 {
@@ -421,6 +426,7 @@ cvarTable_t gameCvarTable[] =
 	{ &team_nocontrols,             "team_nocontrols",             "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_allow_map,              "vote_allow_map",              "1",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_allow_matchreset,       "vote_allow_matchreset",       "1",                                                      0,                                               0, qfalse, qfalse},
+	{ &vote_allow_randommap,        "vote_allow_randommap",        "1",                                                      0,                                               0, qfalse, qfalse },
 	{ &vote_limit,                  "vote_limit",                  "5",                                                      0,                                               0, qfalse, qfalse},
 	{ &vote_percent,                "vote_percent",                "50",                                                     0,                                               0, qfalse, qfalse},
 
@@ -542,6 +548,8 @@ cvarTable_t gameCvarTable[] =
 	{ &g_moverScale, "g_moverScale", "1.0", 0 },
 	{ &g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH },
+	{ &g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO },
+	{ &g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE },
 
 };
 
@@ -1650,7 +1658,9 @@ void G_UpdateCvars(void)
 				else if (!G_IsSinglePlayerGame())
 				{
 					if (cv->vmCvar == &vote_allow_map ||
-					    cv->vmCvar == &vote_allow_matchreset)
+					    cv->vmCvar == &vote_allow_matchreset ||
+						cv->vmCvar == &vote_allow_randommap ||
+						cv->vmCvar == &g_enableVote)
 					{
 						fVoteFlags = qtrue;
 					}
@@ -1659,9 +1669,6 @@ void G_UpdateCvars(void)
 						fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
 					}
 				}
-
-
-
 			}
 		}
 	}
@@ -3243,6 +3250,22 @@ int getNumPlayingClients()
 	return numPlayingClients;
 }
 
+int getNumValidVoters()
+{
+	auto numValidPlayers = getNumPlayingClients();
+	auto numVotedSpecs = 0;
+	for (auto i = 0, len = level.numConnectedClients; i < len; ++i)
+	{
+		auto clientNum = level.sortedClients[i];
+		auto player = g_entities + clientNum;
+		if (player->client->sess.sessionTeam == TEAM_SPECTATOR && player->client->ps.eFlags & EF_VOTED)
+		{
+			++numVotedSpecs;
+		}
+	}
+	return numValidPlayers + numVotedSpecs;
+}
+
 void resetVote()
 {
 	level.voteInfo.voteTime = 0;
@@ -3288,31 +3311,35 @@ void CheckVote(void)
 
 	auto numConnectedClients = level.numConnectedClients;
 
-	auto numPlayingClients = getNumPlayingClients();
-	auto requiredClients = numPlayingClients / 100.0f * requiredPercentage;
+	auto validVotingClients = g_spectatorVote.integer > 0 ? getNumValidVoters() : getNumPlayingClients();
+	auto requiredClients = validVotingClients / 100.0f * requiredPercentage;
 
 	auto voter = g_entities + level.voteInfo.voter_cn;
 	if (level.voteInfo.voter_team != voter->client->sess.sessionTeam)
 	{
-		AP("cpm \"^7Vote canceled: voter switched teams.\n\"");
-		G_LogPrintf("Vote Failed: %s (voter %s switched teams)\n", level.voteInfo.voteString, voter->client->pers.netname);
+		Printer::BroadcastLeftMessage("^7Vote canceled: caller switched team.");
+		G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n", level.voteInfo.voteString, voter->client->pers.netname);
 		level.voteInfo.voteYes = 0;
 		level.voteInfo.voteNo = level.numConnectedClients;
-	} else if (level.voteInfo.voteYes > requiredClients)
+	}
+	else if (level.voteInfo.voteYes > requiredClients)
 	{
-		AP("cpm \"^5Vote passed!\n\"");
+		Printer::BroadcastLeftMessage("^5Vote passed!");
 		G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 		level.voteInfo.voteTime = 0;
 		level.voteInfo.voteCanceled = qfalse;
 		level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-	} else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients || level.time - level.voteInfo.voteTime >= VOTE_TIME)
+	}
+	else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients || level.time - level.voteInfo.voteTime >= VOTE_TIME)
 	{
-		AP(va("cpm \"^3Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString));
+		std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
+		Printer::BroadcastLeftMessage(voteFailedMsg);
 		G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 		level.voteInfo.voteTime = 0;
 		level.voteInfo.voteCanceled = qfalse;
 		
-	} else
+	}
+	else
 	{
 		return;
 	}

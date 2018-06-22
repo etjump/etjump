@@ -2792,8 +2792,8 @@ static void CG_DrawVote(void)
 	char  str1[32], str2[32];
 	vec4_t color{ 1, 1, 0, 1 };
 
-	const char *line_a = nullptr;
-	const char *line_b = nullptr;
+	std::string line_a;
+	std::string line_b;
 	auto x_a = 8;
 	auto x_b = 8;
 
@@ -2802,26 +2802,26 @@ static void CG_DrawVote(void)
 
 	if (cgs.applicationEndTime > cg.time && cgs.applicationClient >= 0)
 	{
-		line_a = va(CG_TranslateString("Accept %s's application to join your fireteam?"), cgs.clientinfo[cgs.applicationClient].name);
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+		line_a = ETJump::stringFormat("Accept %s's application to join your fireteam?", cgs.clientinfo[cgs.applicationClient].name);
+		line_b = ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
 	}
 
 	if (cgs.propositionEndTime > cg.time && cgs.propositionClient >= 0)
 	{
-		line_a = va(CG_TranslateString("Accept %s's proposition to invite %s to join your fireteam?"), cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+		line_a = ETJump::stringFormat("Accept %s's proposition to invite %s to join your fireteam?", cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
+		line_b = ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
 	}
 
 	if (cgs.invitationEndTime > cg.time && cgs.invitationClient >= 0)
 	{
-		line_a = va(CG_TranslateString("Accept %s's invitation to join their fireteam?"), cgs.clientinfo[cgs.invitationClient].name);
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+		line_a = ETJump::stringFormat("Accept %s's invitation to join their fireteam?", cgs.clientinfo[cgs.invitationClient].name);
+		line_b = ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
 	}
 
 	if (cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -1)
 	{
-		line_a = va(CG_TranslateString("Make Fireteam private?"));
-		line_b = va(CG_TranslateString("Press '%s' for YES, or '%s' for No"), str1, str2);
+		line_a = "Make Fireteam private?";
+		line_b = ETJump::stringFormat("Press '%s' for YES, or '%s' for No", str1, str2);
 	}
 
 	if (cgs.voteTime)
@@ -2867,26 +2867,31 @@ static void CG_DrawVote(void)
 
 		if (!(cg.snap->ps.eFlags & EF_VOTED))
 		{
-			line_a = va("VOTE(%i): %s", sec, cgs.voteString);
+			line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
 			
-			if( cgs.clientinfo[cg.clientNum].team != TEAM_AXIS && cgs.clientinfo[cg.clientNum].team != TEAM_ALLIES ) {
-				line_b = va("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
-			} else {
-				line_b = va("YES(%s):%i, NO(%s):%i", str1, cgs.voteYes, str2, cgs.voteNo);
+			if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR && etj_spectatorVote.integer <= 0)
+			{
+				line_b = ETJump::stringFormat("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
+			}
+			else
+			{
+				line_b = ETJump::stringFormat("YES(%s):%i, NO(%s):%i", str1, cgs.voteYes, str2, cgs.voteNo);
 			}
 		}
 		else
 		{
-			line_a = va("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
-			line_b = va("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
+			line_a = ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+			line_b = ETJump::stringFormat("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
 			x_b = 13;
 
 			if (cgs.votedYes)
 			{
 				CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
 			}
-			else {
-				auto textWidth = ETJump::DrawStringWidth(va("Y:%i", cgs.voteYes), 0.23f);
+			else
+			{
+				std::string yesVotes = ETJump::stringFormat("Y:%i", cgs.voteYes);
+				auto textWidth = ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f);
 				CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1, color);
 			}
 		}
@@ -2897,16 +2902,16 @@ static void CG_DrawVote(void)
 		switch (cgs.applicationClient)
 		{
 		case -1:
-			line_a = CG_TranslateString("Your application has been submitted");
+			line_a = "Your application has been submitted";
 			break;
 		case -2:
-			line_a = CG_TranslateString("Your application failed");
+			line_a = "Your application failed";
 			break;
 		case -3:
-			line_a = CG_TranslateString("Your application has been approved");
+			line_a = "Your application has been approved";
 			break;
 		case -4:
-			line_a = CG_TranslateString("Your application reply has been sent");
+			line_a = "Your application reply has been sent";
 			break;
 		}
 	}
@@ -2916,16 +2921,16 @@ static void CG_DrawVote(void)
 		switch (cgs.propositionClient) 
 		{
 		case -1:
-			line_a = CG_TranslateString("Your proposition has been submitted");
+			line_a = "Your proposition has been submitted";
 			break;
 		case -2:
-			line_a = CG_TranslateString("Your proposition was rejected");
+			line_a = "Your proposition was rejected";
 			break;
 		case -3:
-			line_a = CG_TranslateString("Your proposition was accepted");
+			line_a = "Your proposition was accepted";
 			break;
 		case -4:
-			line_a = CG_TranslateString("Your proposition reply has been sent");
+			line_a = "Your proposition reply has been sent";
 			break;
 		}
 	}
@@ -2935,16 +2940,16 @@ static void CG_DrawVote(void)
 		switch (cgs.invitationClient)
 		{
 		case -1:
-			line_a = CG_TranslateString("Your invitation has been submitted");
+			line_a = "Your invitation has been submitted";
 			break;
 		case -2:
-			line_a = CG_TranslateString("Your invitation was rejected");
+			line_a = "Your invitation was rejected";
 			break;
 		case -3:
-			line_a = CG_TranslateString("Your invitation was accepted");
+			line_a = "Your invitation was accepted";
 			break;
 		case -4:
-			line_a = CG_TranslateString("Your invitation reply has been sent");
+			line_a = "Your invitation reply has been sent";
 			break;
 		}
 	}
@@ -2956,12 +2961,14 @@ static void CG_DrawVote(void)
 		line_a = "Response Sent";
 	}
 
-	if (line_a) {
-		ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a, 80, ITEM_TEXTSTYLE_SHADOWED);
+	if (line_a.c_str())
+	{
+		ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a.c_str(), 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
-	if (line_b) {
-		ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b, 80, ITEM_TEXTSTYLE_SHADOWED);
+	if (line_b.c_str())
+	{
+		ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b.c_str(), 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
 }
 

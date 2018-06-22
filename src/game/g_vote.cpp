@@ -167,14 +167,20 @@ void G_voteFlags(void)
 {
 	int i, flags = 0;
 
-	for (i = 0; i < numVotesAvailable; i++)
+	if (g_enableVote.integer <= 0)
 	{
-		if (trap_Cvar_VariableIntegerValue(voteToggles[i].pszCvar) == 0)
+		flags |= VOTING_DISABLED;
+	}
+	else
+	{
+		for (i = 0; i < numVotesAvailable; i++)
 		{
-			flags |= voteToggles[i].flag;
+			if (trap_Cvar_VariableIntegerValue(voteToggles[i].pszCvar) == 0)
+			{
+				flags |= voteToggles[i].flag;
+			}
 		}
 	}
-
 	if (flags != voteFlags.integer)
 	{
 		trap_Cvar_Set("voteFlags", va("%d", flags));
@@ -206,7 +212,7 @@ qboolean G_voteDescription(gentity_t *ent, int cmd)
 // Localize disable message info.
 void G_voteDisableMessage(gentity_t *ent, const char *cmd)
 {
-	G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled", cmd);
+	G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled.", cmd);
 }
 
 
@@ -290,6 +296,13 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                   char *arg2)
 {
 	const char *map = NULL;
+
+	if (!vote_allow_randommap.integer && ent)
+	{
+		G_voteDisableMessage(ent, arg);
+		return G_INVALID;
+	}
+
 	// We know that arg2 is a type that exists.
 	if (arg)
 	{
@@ -378,6 +391,12 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 // *** Map Restart ***
 int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 {
+	if (!vote_allow_matchreset.integer && ent)
+	{
+		G_voteDisableMessage(ent, arg);
+		return G_INVALID;
+	}
+
 	// Vote request (vote is being initiated)
 	if (arg)
 	{
