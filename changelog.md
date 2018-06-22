@@ -7,6 +7,19 @@
   * red - shooting
 * spectator messages (`cg_descriptiveText`) are now hidden when in-game menu is up to improve readability
 * unlocked `cg_centertime`
+* vote system improvements and fixes
+  * fixed calling `callvote` without arguments not printing callvote help
+  * `callvote randommap` now correctly respects `g_blockedMaps`
+  * added `g_enableVote` to toggle voting
+  * removed unused `vote_allow_` cvars
+    * added `vote_allow_randommap` to control random map voting
+  * voting can now be correctly disabled by setting all `vote_allow_` cvars to 0
+  * added `g_spectatorVote` to control spectator voting
+    * __1__ spectators can cast votes
+	* __2__ spectators can also call votes
+	* only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
+  * removed in-game vote -> misc menu and replaced it with map restart & random map buttons
+  * various string formatting and spelling fixes
 
 # ETJump 2.3.0
 
