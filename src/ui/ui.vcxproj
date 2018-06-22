@@ -237,6 +237,13 @@
     <None Include="..\..\etjump\ui\credits_idsoftware.menu" />
     <None Include="..\..\etjump\ui\credits_quit.menu" />
     <None Include="..\..\etjump\ui\credits_splashdamage.menu" />
+    <None Include="..\..\etjump\ui\etjump.menu" />
+    <None Include="..\..\etjump\ui\etjump_controls.menu" />
+    <None Include="..\..\etjump\ui\etjump_credits.menu" />
+    <None Include="..\..\etjump\ui\etjump_settings_1.menu" />
+    <None Include="..\..\etjump\ui\etjump_settings_2.menu" />
+    <None Include="..\..\etjump\ui\etjump_settings_3.menu" />
+    <None Include="..\..\etjump\ui\etjump_settings_4.menu" />
     <None Include="..\..\etjump\ui\global.menu" />
     <None Include="..\..\etjump\ui\hostgame.menu" />
     <None Include="..\..\etjump\ui\hostgame_advanced.menu" />
@@ -244,6 +251,7 @@
     <None Include="..\..\etjump\ui\hostgame_dedicated_warning.menu" />
     <None Include="..\..\etjump\ui\ingame_disconnect.menu" />
     <None Include="..\..\etjump\ui\ingame_main.menu" />
+    <None Include="..\..\etjump\ui\ingame_map_details.menu" />
     <None Include="..\..\etjump\ui\ingame_messagemode.menu" />
     <None Include="..\..\etjump\ui\ingame_serverinfo.menu" />
     <None Include="..\..\etjump\ui\ingame_tapout.menu" />
@@ -281,7 +289,6 @@
     <None Include="..\..\etjump\ui\profile_rename.menu" />
     <None Include="..\..\etjump\ui\quit.menu" />
     <None Include="..\..\etjump\ui\rec_restart.menu" />
-    <None Include="..\..\etjump\ui\trickjump_options.menu" />
     <None Include="..\..\etjump\ui\vid_confirm.menu" />
     <None Include="..\..\etjump\ui\vid_restart.menu" />
     <None Include="..\..\etjump\ui\viewreplay.menu" />

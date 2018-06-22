@@ -17,6 +17,9 @@
       <UniqueIdentifier>{44e0a0c6-cb45-4de0-adb5-195d9abb6cdd}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Menu Files\ETJump">
+      <UniqueIdentifier>{106782cc-9109-4017-9d55-719487735f72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\game\bg_campaign.cpp">
@@ -237,7 +240,28 @@
     <None Include="..\..\etjump\ui\wm_quickmessage.menu">
       <Filter>Menu Files</Filter>
     </None>
-    <None Include="..\..\etjump\ui\trickjump_options.menu">
+    <None Include="..\..\etjump\ui\etjump.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_controls.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_credits.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_settings_1.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_settings_2.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_settings_3.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\etjump_settings_4.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
+    <None Include="..\..\etjump\ui\ingame_map_details.menu">
       <Filter>Menu Files</Filter>
     </None>
   </ItemGroup>
