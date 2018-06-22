@@ -3,6 +3,8 @@
 //
 #include "g_local.h"
 #include "../../etjump/ui/menudef.h"    // For vote options
+#include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 
 
@@ -182,7 +184,7 @@ void G_voteFlags(void)
 }
 
 // Prints specific callvote command help description.
-qboolean G_voteDescription(gentity_t *ent, int cmd)
+qboolean G_voteDescription(gentity_t *ent, int cmd, bool argCountCheck = true)
 {
 	char arg[MAX_TOKEN_CHARS];
 
@@ -192,7 +194,7 @@ qboolean G_voteDescription(gentity_t *ent, int cmd)
 	}
 
 	trap_Argv(2, arg, sizeof(arg));
-	if (!Q_stricmp(arg, "?") || trap_Argc() == 2)
+	if (!Q_stricmp(arg, "?") || (argCountCheck && trap_Argc() == 2))
 	{
 		trap_Argv(1, arg, sizeof(arg));
 		G_cpmPrintf(ent, "\nUsage: ^3\\vote %s%s\n", arg, aVoteInfo[cmd].pszVoteHelp);
@@ -220,7 +222,7 @@ void G_playersMessage(gentity_t *ent)
 // Localize current parameter setting.
 void G_voteCurrentSetting(gentity_t *ent, const char *cmd, const char *setting)
 {
-	G_cpmPrintf(ent, "^2%s^7 is currently ^3%s\n", cmd, setting);
+	G_cpmPrintf(ent, "^2%s^7 is currently ^3%s", cmd, setting);
 }
 
 
@@ -275,9 +277,76 @@ void G_voteSetVoteString(const char *desc)
 	trap_SendConsoleCommand(EXEC_APPEND, va("%s\n", level.voteInfo.voteString));
 }
 
+namespace ETJump
+{
+	static bool matchMap(const char *arg, std::string &map)
+	{
+		if (arg[0] == '\0')
+		{
+			map = "^3callvote: ^7No map specified.\n";
+			return false;
+		}
 
+		auto match = G_MatchOneMap(arg);
+		if (!match)
+		{
+			map = stringFormat("^3callvote: ^7could not find a single map matching %s.\n", arg);
+			return false;
+		}
 
+		map = match;
 
+		if (map == level.rawmapname)
+		{
+			map = stringFormat("^3callvote: ^7%s is the current map.\n", level.rawmapname);
+			return false;
+		}
+
+		if (strstr(Q_strlwr(g_blockedMaps.string), map.c_str()) != nullptr)
+		{
+			map = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n", map);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool matchRandomMap(const char *arg, std::string &map)
+	{
+		bool isCustomMapType = strlen(arg) > 0;
+
+		if (isCustomMapType)
+		{
+			auto customMapType = CustomMapTypeExists(arg);
+			if (!customMapType)
+			{
+				map = stringFormat("^3randommap: ^7Map type %s does not exist\n.", arg);
+				return false;
+			}
+
+			map = GetRandomMapByType(arg);
+		}
+		else
+		{
+			map = GetRandomMap();
+		}
+
+		if (map.empty())
+		{
+			if (isCustomMapType)
+			{
+				map = "^3randommap: ^7no map is available on the requested map list.\n";
+			} 
+			else
+			{
+				map = "^3randommap: ^7no map is available.\n";
+			}
+			return false;
+		}
+
+		return true;
+	}
+}
 
 
 ////////////////////////////////////////////////////////
@@ -286,49 +355,41 @@ void G_voteSetVoteString(const char *desc)
 //
 ////////////////////////////////////////////////////////
 
-int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
-                  char *arg2)
+int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2)
 {
-	const char *map = NULL;
-	// We know that arg2 is a type that exists.
 	if (arg)
 	{
-		if (strlen(arg2) > 0)
-		{
-			map = GetRandomMapByType(arg2);
+		char serverinfo[MAX_INFO_STRING];
+		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
-			if (strlen(map) == 0)
-			{
-				C_ChatPrintTo(ent, "^3randommap: ^7no maps on the requested map list.");
-				return G_INVALID;
-			}
-			else if (!G_MapExists(map))
-			{
-				C_ChatPrintTo(ent, va("^1ERROR: ^7map %s is not on the server. Please update customvotes.json.", map));
-				return G_INVALID;
-			}
-		}
-		else
+		if (G_voteDescription(ent, dwVoteIndex, false))
 		{
-			map = GetRandomMap();
+			return G_INVALID;
 		}
 
-		Q_strncpyz(level.voteInfo.vote_value,
-		           map, sizeof(level.voteInfo.vote_value));
+		std::string map;
+		if (!ETJump::matchRandomMap(arg2, map))
+		{
+			Printer::SendConsoleMessage(ent - g_entities, map);
+			return G_INVALID;
+		}
+		
+		const char *mapTypeDesc = CustomMapTypeExists(arg2);
+		strcpy_s(arg2, MAX_STRING_TOKENS, mapTypeDesc ? mapTypeDesc : "");
+		Q_strncpyz(level.voteInfo.vote_value, map.c_str(), sizeof(level.voteInfo.vote_value));
 	}
 	else
 	{
-		trap_SendConsoleCommand(EXEC_APPEND,
-		                        va("map %s\n", level.voteInfo.vote_value));
+		trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", level.voteInfo.vote_value));
 	}
 
 	return G_OK;
 }
 
-
 // *** Map - simpleton: we dont verify map is allowed/exists ***
 int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 {
+	int clientNum = ent - g_entities;
 	// Vote request (vote is being initiated)
 	if (arg)
 	{
@@ -346,9 +407,16 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
 			return(G_INVALID);
 		}
-
+		
+		std::string map;
+		if (!ETJump::matchMap(arg2, map))
+		{
+			Printer::SendConsoleMessage(clientNum, map);
+			return G_INVALID;
+		}
+		
+		strcpy_s(arg2, MAX_STRING_TOKENS, map.c_str());
 		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
-
 		G_increaseCallvoteCount(arg2);
 
 		// Vote action (vote has passed)
@@ -381,15 +449,10 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	// Vote request (vote is being initiated)
 	if (arg)
 	{
-		if (trap_Argc() > 2)
+		if (G_voteDescription(ent, dwVoteIndex))
 		{
-			if (!Q_stricmp(arg2, "?"))
-			{
-				G_cpmPrintf(ent, "Usage: ^3\\callvote %s%s\n", arg, aVoteInfo[dwVoteIndex].pszVoteHelp);
-				return(G_INVALID);
-			}
+			return(G_INVALID);
 		}
-
 		// Vote action (vote has passed)
 	}
 	else
