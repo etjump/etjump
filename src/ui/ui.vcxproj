@@ -251,10 +251,6 @@
     <None Include="..\..\etjump\ui\ingame_vote.menu" />
     <None Include="..\..\etjump\ui\ingame_vote_disabled.menu" />
     <None Include="..\..\etjump\ui\ingame_vote_map.menu" />
-    <None Include="..\..\etjump\ui\ingame_vote_misc.menu" />
-    <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu" />
-    <None Include="..\..\etjump\ui\ingame_vote_players.menu" />
-    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu" />
     <None Include="..\..\etjump\ui\main.menu" />
     <None Include="..\..\etjump\ui\menus.txt" />
     <None Include="..\..\etjump\ui\mods.menu" />

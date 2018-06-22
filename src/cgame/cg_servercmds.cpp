@@ -130,9 +130,9 @@ void CG_ParseServerinfo(void)
 	trap_Cvar_Set("g_bluelimbotime", Info_ValueForKey(info, "g_bluelimbotime"));
 	cg_bluelimbotime.integer = atoi(Info_ValueForKey(info, "g_bluelimbotime"));
 
-	// Trickjump: Get value for g_ghostPlayers
 	cg_ghostPlayers.integer = atoi(Info_ValueForKey(info, "g_ghostPlayers"));
 
+	etj_spectatorVote.integer = atoi(Info_ValueForKey(info, "g_spectatorVote"));
 
 	cgs.minclients = atoi(Info_ValueForKey(info, "g_minGameClients"));          // NERVE - SMF -- OSP: overloaded for ready counts
 

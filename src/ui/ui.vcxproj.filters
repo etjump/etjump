@@ -126,18 +126,6 @@
     <None Include="..\..\etjump\ui\ingame_vote_map.menu">
       <Filter>Menu Files</Filter>
     </None>
-    <None Include="..\..\etjump\ui\ingame_vote_misc.menu">
-      <Filter>Menu Files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\ingame_vote_misc_refrcon.menu">
-      <Filter>Menu Files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\ingame_vote_players.menu">
-      <Filter>Menu Files</Filter>
-    </None>
-    <None Include="..\..\etjump\ui\ingame_vote_players_warn.menu">
-      <Filter>Menu Files</Filter>
-    </None>
     <None Include="..\..\etjump\ui\main.menu">
       <Filter>Menu Files</Filter>
     </None>

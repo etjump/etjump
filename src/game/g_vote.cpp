@@ -169,14 +169,20 @@ void G_voteFlags(void)
 {
 	int i, flags = 0;
 
-	for (i = 0; i < numVotesAvailable; i++)
+	if (g_enableVote.integer <= 0)
 	{
-		if (trap_Cvar_VariableIntegerValue(voteToggles[i].pszCvar) == 0)
+		flags |= VOTING_DISABLED;
+	}
+	else
+	{
+		for (i = 0; i < numVotesAvailable; i++)
 		{
-			flags |= voteToggles[i].flag;
+			if (trap_Cvar_VariableIntegerValue(voteToggles[i].pszCvar) == 0)
+			{
+				flags |= voteToggles[i].flag;
+			}
 		}
 	}
-
 	if (flags != voteFlags.integer)
 	{
 		trap_Cvar_Set("voteFlags", va("%d", flags));
@@ -208,7 +214,7 @@ qboolean G_voteDescription(gentity_t *ent, int cmd, bool argCountCheck = true)
 // Localize disable message info.
 void G_voteDisableMessage(gentity_t *ent, const char *cmd)
 {
-	G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled", cmd);
+	G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting has been disabled.", cmd);
 }
 
 
@@ -290,7 +296,7 @@ namespace ETJump
 		auto match = G_MatchOneMap(arg);
 		if (!match)
 		{
-			map = stringFormat("^3callvote: ^7could not find a single map matching %s.\n", arg);
+			map = stringFormat("^3callvote: ^7found multiple maps matching ^3%s^7.\n", arg);
 			return false;
 		}
 
@@ -362,6 +368,12 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2)
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
+		if (vote_allow_randommap.integer <= 0)
+		{
+			G_voteDisableMessage(ent, arg);
+			return G_INVALID;
+		}
+
 		if (G_voteDescription(ent, dwVoteIndex, false))
 		{
 			return G_INVALID;
@@ -396,7 +408,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
-		if (!vote_allow_map.integer && ent)
+		if (vote_allow_map.integer <= 0 && ent)
 		{
 			G_voteDisableMessage(ent, arg);
 			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
@@ -449,7 +461,13 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	// Vote request (vote is being initiated)
 	if (arg)
 	{
-		if (G_voteDescription(ent, dwVoteIndex))
+		if (vote_allow_matchreset.integer <= 0)
+		{
+			G_voteDisableMessage(ent, arg);
+			return G_INVALID;
+		}
+
+		if (G_voteDescription(ent, dwVoteIndex, false))
 		{
 			return(G_INVALID);
 		}
