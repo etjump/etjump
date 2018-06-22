@@ -4,7 +4,7 @@
 #include "etj_utilities.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-
+#include "g_local.h"
 
 
 MapStatistics::MapStatistics() : _previousLevelTime(0), _currentMillisecondsPlayed(0), _currentMillisecondsOnServer(0), _currentMap(nullptr)
@@ -432,27 +432,50 @@ bool MapStatistics::createDatabase()
 
 const char *MapStatistics::randomMap() const
 {
-	static char map[256]        = "\0";
-	if (_maps.size() == 1)
-	{
-		strcpy(map, _maps[0].name.c_str());
-	}
-	else
-	{
-		std::random_device                 rd;
-		std::mt19937                       re(rd());
-		std::uniform_int_distribution<int> ui(0, _maps.size() - 1);
+	static char mapName[256];
+	const int MAX_TRIES = 15;
+	std::random_device                 rd;
+	std::mt19937                       re(rd());
+	std::uniform_int_distribution<int> ui(0, _maps.size() - 1);
 
-		auto mapIdx = ui(re);
-		while (&_maps[mapIdx] == _currentMap || !_maps[mapIdx].isOnServer)
+	mapName[0] = 0;
+
+	int mapIdx = -1;
+	// try to select a valid random map
+	for (int tries = 0; tries < MAX_TRIES; tries++)
+	{
+		int testIdx = ui(re);
+		if (isValidMap(&_maps[testIdx]))
 		{
-			mapIdx = ui(re);
+			mapIdx = testIdx;
 		}
-
-		strcpy(map, _maps[mapIdx].name.c_str());
+	}
+	// fallback, iterate map list and select first valid map
+	if (mapIdx < 0)
+	{
+		for (int i = 0; i < _maps.size(); i++)
+		{
+			if (isValidMap(&_maps[i]))
+			{
+				mapIdx = i;
+				break;
+			}
+		}
 	}
 
-	return map;
+	if (mapIdx >= 0)
+	{
+		strcpy(mapName, _maps[mapIdx].name.c_str());
+	}
+
+	return mapName;
+}
+
+bool MapStatistics::isValidMap(const MapInformation* mapInfo) const
+{
+	return	mapInfo != _currentMap &&
+			mapInfo->isOnServer && 
+			strstr(Q_strlwr(g_blockedMaps.string), mapInfo->name.c_str()) == nullptr;
 }
 
 MapStatistics::~MapStatistics()

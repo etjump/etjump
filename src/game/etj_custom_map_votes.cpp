@@ -211,14 +211,41 @@ std::string const CustomMapVotes::RandomMap(std::string const& type)
 {
 	for (unsigned i = 0; i < customMapVotes_.size(); i++)
 	{
-		if (customMapVotes_[i].type == type)
+		auto &customMapVote = customMapVotes_[i];
+		if (customMapVote.type == type && customMapVote.mapsOnServer.size() > 0)
 		{
-			if (customMapVotes_[i].mapsOnServer.size() == 0)
+			const int MAX_TRIES = 15;
+			std::random_device                 rd;
+			std::mt19937                       re(rd());
+			std::uniform_int_distribution<int> ui(0, customMapVote.mapsOnServer.size() - 1);
+
+			// try to select a valid random map
+			for (int tries = 0; tries < MAX_TRIES; tries++)
 			{
-				return "";
+				int testIdx = ui(re);
+				if (isValidMap(customMapVote.mapsOnServer[testIdx]))
+				{
+					return customMapVote.mapsOnServer[testIdx];
+				}
 			}
-			return customMapVotes_[i].mapsOnServer[rand() % customMapVotes_[i].mapsOnServer.size()];
+			// fallback, iterate map list and select first valid map
+			for (int i = 0; i < customMapVote.mapsOnServer.size(); i++)
+			{
+				if (isValidMap(customMapVote.mapsOnServer[i]))
+				{
+					return customMapVote.mapsOnServer[i];
+				}
+			}
+
+			return "";
 		}
 	}
 	return "";
+}
+
+bool CustomMapVotes::isValidMap(const std::string &mapName)
+{
+	return	G_MapExists(mapName.c_str()) && 
+			mapName != level.rawmapname &&
+			strstr(Q_strlwr(g_blockedMaps.string), mapName.c_str()) == nullptr;
 }
