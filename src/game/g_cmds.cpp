@@ -2865,9 +2865,12 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	level.voteInfo.voteYes = 1;
 	trap_SendServerCommand(ent - g_entities, "voted yes");
 
-	Printer::BroadcastConsoleMessage(
-		ETJump::stringFormat("%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString));
-	Printer::BroadcastCenterMessage(ETJump::stringFormat("%s\n^7 called a vote.", ent->client->pers.netname));
+	std::string calledVoteString = ETJump::stringFormat("%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
+	Printer::BroadcastConsoleMessage(calledVoteString);
+
+	calledVoteString = ETJump::stringFormat("%s\n^7 called a vote.", ent->client->pers.netname);
+	Printer::BroadcastCenterMessage(calledVoteString);
+
 	G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
 
 	G_globalSound("sound/misc/vote.wav");
