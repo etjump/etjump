@@ -368,6 +368,12 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2)
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
+		if (vote_allow_randommap.integer <= 0)
+		{
+			G_voteDisableMessage(ent, arg);
+			return G_INVALID;
+		}
+
 		if (G_voteDescription(ent, dwVoteIndex, false))
 		{
 			return G_INVALID;
@@ -402,7 +408,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
-		if (!vote_allow_map.integer && ent)
+		if (vote_allow_map.integer <= 0 && ent)
 		{
 			G_voteDisableMessage(ent, arg);
 			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
@@ -455,6 +461,12 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	// Vote request (vote is being initiated)
 	if (arg)
 	{
+		if (vote_allow_matchreset.integer <= 0)
+		{
+			G_voteDisableMessage(ent, arg);
+			return G_INVALID;
+		}
+
 		if (G_voteDescription(ent, dwVoteIndex, false))
 		{
 			return(G_INVALID);

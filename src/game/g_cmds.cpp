@@ -2900,7 +2900,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	std::string calledVoteString = ETJump::stringFormat("%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
 	Printer::BroadcastConsoleMessage(calledVoteString);
 
-	calledVoteString = ETJump::stringFormat("%s\n^7 called a vote.", ent->client->pers.netname);
+	calledVoteString = ETJump::stringFormat("%s^7 called a vote.", ent->client->pers.netname);
 	Printer::BroadcastCenterMessage(calledVoteString);
 
 	G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);

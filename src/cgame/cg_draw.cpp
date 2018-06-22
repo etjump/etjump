@@ -2961,12 +2961,12 @@ static void CG_DrawVote(void)
 		line_a = "Response Sent";
 	}
 
-	if (line_a.c_str())
+	if (!line_a.empty())
 	{
 		ETJump::DrawString(x_a, 212, 0.23f, 0.25f, color, qtrue, line_a.c_str(), 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
 
-	if (line_b.c_str())
+	if (!line_b.empty())
 	{
 		ETJump::DrawString(x_b, 226, 0.23f, 0.25f, color, qtrue, line_b.c_str(), 80, ITEM_TEXTSTYLE_SHADOWED);
 	}
