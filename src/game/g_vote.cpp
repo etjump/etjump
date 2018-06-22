@@ -296,7 +296,7 @@ namespace ETJump
 		auto match = G_MatchOneMap(arg);
 		if (!match)
 		{
-			map = stringFormat("^3callvote: ^7could not find a single map matching %s.\n", arg);
+			map = stringFormat("^3callvote: ^7found multiple maps matching ^3%s^7.\n", arg);
 			return false;
 		}
 
@@ -455,7 +455,7 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	// Vote request (vote is being initiated)
 	if (arg)
 	{
-		if (G_voteDescription(ent, dwVoteIndex))
+		if (G_voteDescription(ent, dwVoteIndex, false))
 		{
 			return(G_INVALID);
 		}

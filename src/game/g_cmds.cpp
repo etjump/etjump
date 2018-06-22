@@ -3206,7 +3206,8 @@ void Cmd_Vote_f(gentity_t *ent)
 		return;
 	}
 	
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && !(g_spectatorVote.integer >= 1))
+	{
 	    trap_SendServerCommand( ent-g_entities, "print \"Not allowed to vote as spectator.\n\"" );
 	    return;
 	}
