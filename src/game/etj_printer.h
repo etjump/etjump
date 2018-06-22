@@ -5,6 +5,13 @@
 #ifndef ETJUMP_PRINTER_H
 #define ETJUMP_PRINTER_H
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <string>
 #include <vector>
 #include <boost/format.hpp>

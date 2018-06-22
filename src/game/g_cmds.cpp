@@ -2856,7 +2856,6 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	int        i;
 	char       arg1[MAX_STRING_TOKENS];
 	char       arg2[MAX_STRING_TOKENS];
-	const char *customMapType = NULL;
 	int clientNum = ent - g_entities;
 
 	if (!checkVoteConditions(ent, clientNum))
