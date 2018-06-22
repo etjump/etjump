@@ -2867,7 +2867,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 
 	Printer::BroadcastConsoleMessage(
 		ETJump::stringFormat("%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString));
-	Printer::BroadcastCenterMessage(ETJump::stringFormat("%s\n^7 called a vote.\n", ent->client->pers.netname));
+	Printer::BroadcastCenterMessage(ETJump::stringFormat("%s\n^7 called a vote.", ent->client->pers.netname));
 	G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
 
 	G_globalSound("sound/misc/vote.wav");
