@@ -102,7 +102,7 @@
       <AssemblerListingLocation>$(ProjectDir)Debug\</AssemblerListingLocation>
       <ObjectFileName>$(ProjectDir)Debug\</ObjectFileName>
       <ProgramDataBaseFileName>$(ProjectDir)Debug\</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
