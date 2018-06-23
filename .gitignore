@@ -192,3 +192,4 @@ src/enc_temp_folder
 *.db-shm
 *.db-wal
 *.TMP
+src/.vs/Trickjump.sqlite

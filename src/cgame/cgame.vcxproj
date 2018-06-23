@@ -291,6 +291,7 @@
     <ClCompile Include="..\ui\ui_shared.cpp" />
     <ClCompile Include="cg_mainext.cpp" />
     <ClCompile Include="cg_timerun.cpp" />
+    <ClCompile Include="etj_awaited_command_handler.cpp" />
     <ClCompile Include="etj_client_authentication.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_console_alpha.cpp" />
@@ -331,6 +332,7 @@
     <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="cg_timerun.h" />
+    <ClInclude Include="etj_awaited_command_handler.h" />
     <ClInclude Include="etj_client_authentication.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_console_alpha.h" />
