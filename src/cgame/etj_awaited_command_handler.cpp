@@ -66,13 +66,13 @@ void ETJump::AwaitedCommandHandler::awaitCommand(const std::vector<std::string>&
 {
     if (args.size() < 2)
     {
-        message("usage: await <number of frames> <command> | <another command> | ...");
+        message("^3Usage: ^7await <number of frames> <command> | <another command> | ...\nSchedules a set of commands to be executed later without interrupting other user actions.");
         return;
     }
 
     auto waitedFramesStr = args[0];
     int waitedFrames = 0;
-    std::string outOfRangeError = stringFormat("first parameter (number of frames) must be between 1 and %s", std::numeric_limits<int>::max());
+    std::string outOfRangeError = stringFormat("^3Error: ^7First parameter (number of frames) must be between ^31 ^7and ^3%s^7.", std::numeric_limits<int>::max());
     try
     {
         waitedFrames = std::stoi(waitedFramesStr);
@@ -82,7 +82,7 @@ void ETJump::AwaitedCommandHandler::awaitCommand(const std::vector<std::string>&
         return;
     } catch (const std::invalid_argument&)
     {
-        message("first parameter (number of frames) must be a valid integer");
+        message("^3Error: ^7First parameter (number of frames) must be a valid integer.");
         return;
     }
 
@@ -97,6 +97,8 @@ void ETJump::AwaitedCommandHandler::awaitCommand(const std::vector<std::string>&
     command->requiredFrameCount = waitedFrames;
     command->commands = InlineCommandParser().parse(std::vector<std::string>(args.begin() + 1, args.end()));
 
-    message(stringFormat("Executing %d commands in %d frames", command->commands.size(), command->requiredFrameCount));
+	auto numCommandsString = command->commands.size() == 1 ? "command" : "commands";
+	auto numFramesString = command->requiredFrameCount == 1 ? "frame" : "frames";
+    message(stringFormat("Executing ^3%d ^7%s after ^3%d ^7%s.", command->commands.size(), numCommandsString, command->requiredFrameCount, numFramesString));
     _awaitedCommands.push_back(std::move(command));
 }
