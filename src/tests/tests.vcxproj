@@ -87,7 +87,7 @@
     <LibraryPath>$(GOOGLE_TEST_ROOT)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(GOOGLE_TEST_ROOT)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(GOOGLE_TEST_ROOT)\include;$(BOOST_ROOT);$(IncludePath)</IncludePath>
     <LibraryPath>$(GOOGLE_TEST_ROOT)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
@@ -155,15 +155,19 @@
   <ItemGroup>
     <ClCompile Include="..\cgame\etj_client_commands_handler.cpp" />
     <ClCompile Include="..\cgame\etj_entity_events_handler.cpp" />
+    <ClCompile Include="..\cgame\etj_inline_command_parser.cpp" />
     <ClCompile Include="..\cgame\etj_utilities.cpp" />
     <ClCompile Include="..\game\etj_command_parser.cpp" />
     <ClCompile Include="..\game\etj_deathrun_system.cpp" />
+    <ClCompile Include="..\game\etj_string_utilities.cpp" />
     <ClCompile Include="..\game\q_math.cpp" />
+    <ClCompile Include="..\sha-1\sha1.c" />
     <ClCompile Include="client_commands_handler_tests.cpp" />
     <ClCompile Include="command_parser_tests.cpp" />
     <ClCompile Include="deathrun_system_tests.cpp" />
     <ClCompile Include="entity_events_handler_tests.cpp" />
     <ClCompile Include="color_string_parser_tests.cpp" />
+    <ClCompile Include="inline_command_parser_tests.cpp" />
     <ClCompile Include="tests_main.cpp" />
   </ItemGroup>
   <ItemGroup>

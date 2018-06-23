@@ -263,6 +263,7 @@
     <ClCompile Include="etj_quick_follow_drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_inline_command_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -386,6 +387,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_quick_follow_drawable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_inline_command_parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

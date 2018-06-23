@@ -85,6 +85,9 @@
     <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
     <TargetName>cgame_mp_x86</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
+    <IncludePath>$(BOOST_ROOT);$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
@@ -295,6 +298,7 @@
     <ClCompile Include="etj_cvar_shadow.cpp" />
     <ClCompile Include="etj_cvar_update_handler.cpp" />
     <ClCompile Include="etj_drawable.cpp" />
+    <ClCompile Include="etj_inline_command_parser.cpp" />
     <ClCompile Include="etj_keyset_drawer.cpp" />
     <ClCompile Include="etj_keyset_keybind_drawer.cpp" />
     <ClCompile Include="etj_entity_events_handler.cpp" />
@@ -332,6 +336,7 @@
     <ClInclude Include="etj_console_alpha.h" />
     <ClInclude Include="etj_cvar_shadow.h" />
     <ClInclude Include="etj_cvar_update_handler.h" />
+    <ClInclude Include="etj_inline_command_parser.h" />
     <ClInclude Include="etj_keyset_drawer.h" />
     <ClInclude Include="etj_cvar_master_drawer.h" />
     <ClInclude Include="etj_entity_events_handler.h" />

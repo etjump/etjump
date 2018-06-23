@@ -30,4 +30,8 @@ namespace ETJump
 	{
 		return stringFormat(boost::format(fmt) % value, Fargs...);
 	}
+
+    std::string trimStart(std::string input);
+    std::string trimEnd(std::string input);
+    std::string trim(const std::string& input);
 }

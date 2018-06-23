@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "etj_client_commands_handler.h"
+#include "etj_inline_command_parser.h"
 
 void CG_TargetCommand_f(void)
 {
@@ -1373,6 +1374,26 @@ void CG_IncrementVar_f(void)
 	trap_Cvar_Set(CG_Argv(1), va("%f", value));
 }
 
+static void CG_AsyncWait_f(void)
+{
+    int argc = trap_Argc();
+    std::vector<std::string> args;
+    char buf[MAX_TOKEN_CHARS];
+    for (int i = 1; i < argc; ++i)
+    {
+        trap_Argv(i, buf, sizeof(buf));
+        args.push_back(buf);
+    }
+
+    ETJump::InlineCommandParser parser;
+    auto commands = parser.parse(args);
+
+    for (const auto& command : commands)
+    {
+        trap_SendConsoleCommand((command + "\n").c_str());
+    }
+}
+
 typedef struct
 {
 	const char *cmd;
@@ -1504,6 +1525,7 @@ static consoleCommand_t commands[] =
 
 	{ "mod_information", CG_ModInformation_f },
 	{ "incrementVar", CG_IncrementVar_f },
+    { "await", CG_AsyncWait_f }
 };
 
 

@@ -1,4 +1,5 @@
 #include "etj_string_utilities.h"
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/algorithm/string.hpp>
@@ -115,4 +116,31 @@ std::string ETJump::getValue(const std::string& value, const std::string& defaul
 	return value.length() > 0
 		? value
 		: defaultValue;
+}
+
+std::string ETJump::trimStart(std::string input)
+{
+    auto locale = std::locale("");
+
+    input.erase(input.begin(), std::find_if(input.begin(), input.end(), [&](int ch) {
+        return !std::isspace(ch, locale);
+    }));
+
+    return input;
+}
+
+std::string ETJump::trimEnd(std::string input)
+{
+    auto locale = std::locale("");
+  
+    input.erase(std::find_if(input.rbegin(), input.rend(), [&](int ch) {
+        return !std::isspace(ch, locale);
+    }).base(), input.end());
+
+    return input;
+}
+
+std::string ETJump::trim(const std::string& input)
+{
+    return trimEnd(trimStart(input));
 }
