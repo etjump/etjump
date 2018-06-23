@@ -20,6 +20,7 @@
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/ui_shared.h"
+#include "etj_awaited_command_handler.h"
 
 #define MAX_LOCATIONS       256
 #define POWERUP_BLINKS      5
@@ -3937,6 +3938,7 @@ namespace ETJump
 	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
+	extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);

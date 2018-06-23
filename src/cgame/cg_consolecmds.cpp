@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "etj_client_commands_handler.h"
+#include "etj_inline_command_parser.h"
 
 void CG_TargetCommand_f(void)
 {

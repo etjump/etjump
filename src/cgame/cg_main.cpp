@@ -22,6 +22,7 @@
 #include "etj_utilities.h"
 #include "etj_speed_drawable.h"
 #include "etj_quick_follow_drawable.h"
+#include "etj_awaited_command_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -102,6 +103,7 @@ namespace ETJump
 	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
 	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
 	static bool isInitialized{ false };
+    std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3657,6 +3659,14 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	}, bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
 		ETJump::serverCommandsHandler
 	);
+    ETJump::awaitedCommandHandler = std::make_shared<ETJump::AwaitedCommandHandler>(
+        ETJump::consoleCommandsHandler,
+        trap_SendConsoleCommand,
+        [](const char *text)
+        {
+            Com_Printf(text);
+        }
+    );
 
 	////////////////////////////////////////////////////////////////
 	// TODO: move these to own client commands handler
