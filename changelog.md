@@ -20,6 +20,10 @@
 	* only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
   * removed in-game vote -> misc menu and replaced it with map restart & random map buttons
   * various string formatting and spelling fixes
+* added `await` command. Works similar to `wait` except doesn't interrupt other user actions
+  * syntax: `await <frames> <command1> | <command2> | <command3>...`
+* added new color parsing support for crosshair
+* fixed a bug in color parser which interpreted hex colors with `00` as single channeled color
 
 # ETJump 2.3.0
 
