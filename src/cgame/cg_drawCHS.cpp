@@ -371,6 +371,21 @@ static void CG_CHS_LastJumpPosition_XYZ(char *buf, int size)
 	Com_sprintf(buf, size, "%.0f %.0f %.0f", cg.etjLastJumpPos[0], cg.etjLastJumpPos[1], cg.etjLastJumpPos[2]);
 }
 
+static void CG_CHS_PlaneAngleZ(char *buf, int size)
+{
+	trace_t trace;
+
+	CG_CHS_ViewTrace(&trace);
+
+	float vec_x = trace.plane.normal[0];
+	float vec_y = trace.plane.normal[1];
+	float vec_z = trace.plane.normal[2];
+	
+	float angle_z = atan2(sqrt(pow(vec_x, 2) + pow(vec_y, 2)), vec_z) * 180 / M_PI;
+
+	Com_sprintf(buf, size, "%.2f", angle_z);
+}
+
 typedef struct
 {
 	void (*fun)(char *, int);
@@ -439,7 +454,11 @@ static stat_t stats[] =
 /*  48 */ { NULL                                               }, // empty
 /*  49 */ { NULL                                               }, // empty
 
-/*  50 */ {  CG_CHS_LastJumpPosition_XYZ, "Jump XYZ", "jump x y z" },
+/*  50 */ { CG_CHS_LastJumpPosition_XYZ, "Jump XYZ", "jump x y z" },
+/*  51 */ { NULL }, // Reserved for possible Plane Angle X
+/*  52 */ { NULL }, // Reserved for possible Plane Angle Y
+/*  53 */ { CG_CHS_PlaneAngleZ, "Plane Angle Z", "plane angle z" },
+/*  54 */ { NULL }, // Reserved for possible Plane Angle XYZ
 
 
 	{ NULL                                               }
