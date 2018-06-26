@@ -216,6 +216,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\cgame\etj_utilities.cpp" />
     <ClCompile Include="..\game\bg_campaign.cpp" />
     <ClCompile Include="..\game\bg_classes.cpp" />
     <ClCompile Include="..\game\bg_misc.cpp" />

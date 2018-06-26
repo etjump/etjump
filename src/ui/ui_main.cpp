@@ -14,6 +14,8 @@ USER INTERFACE MAIN
 #include <memory>
 #include <boost/algorithm/string.hpp>
 #include "../game/etj_string_utilities.h"
+#include "../cgame/etj_utilities.h"
+#include "../game/etj_numeric_utilities.h"
 
 // NERVE - SMF
 #define AXIS_TEAM       0
@@ -3304,6 +3306,9 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 {
 	float size = cg_crosshairSize.integer;
 
+	// Make sure currentCrosshair is updated if crosshair is changed via console
+	uiInfo.currentCrosshair = ui_drawCrosshair.integer;
+
 	if (uiInfo.currentCrosshair < 0 || uiInfo.currentCrosshair >= NUM_CROSSHAIRS)
 	{
 		uiInfo.currentCrosshair = 0;
@@ -3311,9 +3316,20 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 
 	size = (rect->w / 96.0f) * ((size > 96.0f) ? 96.0f : ((size < 24.0f) ? 24.0f : size));
 
-	trap_R_SetColor(uiInfo.xhairColor);
+	vec4_t crosshairColor = { 1.0, 1.0, 1.0, 1.0 };
+	float crosshairColorAlpha = cg_crosshairAlpha.value;
+
+	ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+	crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+	trap_R_SetColor(crosshairColor);
 	UI_DrawHandlePic(rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size, size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
-	trap_R_SetColor(uiInfo.xhairColorAlt);
+
+	vec4_t crosshairColorAlt = { 1.0, 1.0, 1.0, 1.0 };
+	float crosshairColorAlphaAlt = cg_crosshairAlphaAlt.value;
+
+	ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+	crosshairColorAlt[3] = Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+	trap_R_SetColor(crosshairColorAlt);
 	UI_DrawHandlePic(rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size, size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
 
 	trap_R_SetColor(NULL);
@@ -10558,8 +10574,6 @@ void UI_RegisterCvars(void)
 
 	// OSP - Always force this to 0 on init
 	trap_Cvar_Set("ui_blackout", "0");
-	BG_setCrosshair(cg_crosshairColor.string, uiInfo.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
-	BG_setCrosshair(cg_crosshairColorAlt.string, uiInfo.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 }
 
 /*
@@ -10580,17 +10594,6 @@ void UI_UpdateCvars(void)
 			if (cv->modificationCount != cv->vmCvar->modificationCount)
 			{
 				cv->modificationCount = cv->vmCvar->modificationCount;
-
-				// OSP
-				if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha)
-				{
-					BG_setCrosshair(cg_crosshairColor.string, uiInfo.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
-				}
-
-				if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)
-				{
-					BG_setCrosshair(cg_crosshairColorAlt.string, uiInfo.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-				}
 			}
 		}
 	}
