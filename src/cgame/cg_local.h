@@ -1129,8 +1129,6 @@ typedef struct
 	cg_window_t *topshotsWindow;
 	cg_window_t *windowCurrent;                 // Current window to update.. a bit of a hack :p
 	cg_windowHandler_t winHandler;
-	vec4_t xhairColor;
-	vec4_t xhairColorAlt;
 	vec4_t speedColor;
 	vec4_t keysColor;
 	vec4_t obWatcherColor;

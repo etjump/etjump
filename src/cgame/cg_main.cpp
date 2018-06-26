@@ -1029,8 +1029,6 @@ void CG_RegisterCvars(void)
 
 	// Gordon: um, here, why?
 	CG_setClientFlags();
-	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
-	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 	cvarsLoaded = qtrue;
 }
 
@@ -1074,14 +1072,6 @@ void CG_UpdateCvars(void)
 				    )
 				{
 					fSetFlags = qtrue;
-				}
-				else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha)
-				{
-					BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
-				}
-				else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)
-				{
-					BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 				}
 				else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string)
 				{

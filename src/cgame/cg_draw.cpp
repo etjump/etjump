@@ -2356,7 +2356,12 @@ static void CG_DrawCrosshair(void)
 	}
 	else
 	{
-		trap_R_SetColor(cg.xhairColor);
+		vec4_t crosshairColor = { 1.0, 1.0, 1.0, 1.0 };
+		float crosshairAlpha = cg_crosshairAlpha.value;
+
+		ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+		crosshairColor[3] = Numeric::clamp(crosshairAlpha, 0.0f, 1.0f);
+		trap_R_SetColor(crosshairColor);
 	}
 
 	w = h = cg_crosshairSize.value;
@@ -2383,7 +2388,12 @@ static void CG_DrawCrosshair(void)
 
 		if (cg_crosshairHealth.integer == 0)
 		{
-			trap_R_SetColor(cg.xhairColorAlt);
+			vec4_t crosshairColorAlt = { 1.0, 1.0, 1.0, 1.0 };
+			float crosshairAlphaAlt = cg_crosshairAlphaAlt.value;
+
+			ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+			crosshairColorAlt[3] = Numeric::clamp(crosshairAlphaAlt, 0.0f, 1.0f);
+			trap_R_SetColor(crosshairColorAlt);
 		}
 
 		trap_R_DrawStretchPic(x + 0.5 * (cg.refdef_current->width - w), y + 0.5 * (cg.refdef_current->height - h), w, h, 0, 0, 1, 1, cg.crosshairShaderAlt[cg_drawCrosshair.integer % NUM_CROSSHAIRS]);

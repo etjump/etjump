@@ -941,9 +941,6 @@ typedef struct
 	const char *glInfoLines[GLINFO_LINES];
 	int numGlInfoLines;
 
-	vec4_t xhairColor;
-	vec4_t xhairColorAlt;
-
 	qhandle_t passwordFilter;
 	qhandle_t friendlyFireFilter;
 	qhandle_t maxLivesFilter;

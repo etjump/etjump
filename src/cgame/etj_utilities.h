@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "cg_local.h"
+#include "../game/q_shared.h"
 
 #ifdef min
 #undef min

@@ -5632,46 +5632,6 @@ void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName)
 	trap_Cvar_Set(cvarName, "White");
 }
 
-void BG_setCrosshair(char *colString, float *col, float alpha, const char *cvarName)
-{
-	char *s = colString;
-
-	col[0] = 1.0f;
-	col[1] = 1.0f;
-	col[2] = 1.0f;
-	col[3] = (alpha > 1.0f) ? 1.0f : (alpha < 0.0f) ? 0.0f : alpha;
-
-	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X'))
-	{
-		s += 2;
-		//parse rrggbb
-		if (Q_IsHexColorString(s))
-		{
-			col[0] = ((float)(gethex(*(s)) * 16 + gethex(*(s + 1)))) / 255.00;
-			col[1] = ((float)(gethex(*(s + 2)) * 16 + gethex(*(s + 3)))) / 255.00;
-			col[2] = ((float)(gethex(*(s + 4)) * 16 + gethex(*(s + 5)))) / 255.00;
-			return;
-		}
-	}
-	else
-	{
-		int i = 0;
-		while (OSP_Colortable[i].colorname != NULL)
-		{
-			if (Q_stricmp(s, OSP_Colortable[i].colorname) == 0)
-			{
-				col[0] = (*OSP_Colortable[i].color)[0];
-				col[1] = (*OSP_Colortable[i].color)[1];
-				col[2] = (*OSP_Colortable[i].color)[2];
-				return;
-			}
-			i++;
-		}
-	}
-
-	trap_Cvar_Set(cvarName, "White");
-}
-
 qboolean BG_isLightWeaponSupportingFastReload(int weapon)
 {
 	if (weapon == WP_LUGER ||
