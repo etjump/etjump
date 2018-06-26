@@ -90,7 +90,7 @@ static void parseRGBAValuedColorString(const std::string colorString, vec4_t &co
 static void parseHexValuedColorString(const std::string &token, vec4_t &color)
 {
 	auto colorValue = std::stoll(token, nullptr, 16);
-	auto channelCount = (colorValue >> 24 ? 1 : 0) + (colorValue >> 16 ? 1 : 0) + (colorValue >> 8 ? 1 : 0) + 1;
+	auto channelCount = ((token.size() - 1) >> 1) + 1;
 	auto maxShift = 8 * channelCount;
 	for (auto i = 0; i < channelCount; i++)
 	{

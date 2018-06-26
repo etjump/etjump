@@ -308,3 +308,30 @@ TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_MaliciousColorStrin
 	parseColorString(colorString, outColor);
 	ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
+
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_GreenHexValue)
+{
+	const std::string colorString{ "0x00ff00" };
+	vec4_t expectedColor{ 0.0, 1.f, 0.0, 1.0f };
+	vec4_t outColor;
+	parseColorString(colorString, outColor);
+	ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
+}
+
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_BlueHexValue)
+{
+	const std::string colorString{ "0x0000ff" };
+	vec4_t expectedColor{ 0.0, 0.f, 1.0, 1.0f };
+	vec4_t outColor;
+	parseColorString(colorString, outColor);
+	ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
+}
+
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_EmptyHexValue)
+{
+	const std::string colorString{ "0x" };
+	vec4_t expectedColor{ 0.0, 0.f, 0.0, 1.0f };
+	vec4_t outColor;
+	parseColorString(colorString, outColor);
+	ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
+}
