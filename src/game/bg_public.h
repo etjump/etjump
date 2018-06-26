@@ -2371,8 +2371,6 @@ int BG_drawStrlen(const char *str);
 int BG_strRelPos(char *in, int index);
 int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF);
 
-// Crosshair support
-void BG_setCrosshair(char *colString, float *col, float alpha, const char *cvarName);
 // color support
 void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName);
 
