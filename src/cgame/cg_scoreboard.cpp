@@ -528,9 +528,9 @@ void CG_DrawScoreboardRows3(float x, float y, int j, score_t *score, float fade)
 }
 
 
-void CG_DrawPlayerHeader3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font)
+void CG_DrawPlayerHeader3(float x, float y, int playerCount, float fade, vec4_t textColor, fontInfo_t *font)
 {
-	std::string playerHeader = "^7Players";
+	std::string playerHeader = ETJump::stringFormat("^7Players (%d)", playerCount);
 
 	CG_Text_Paint_Centred_Ext(x, y + 9, 0.15f, 0.15f, textColor, playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
@@ -616,9 +616,9 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor, fontInfo
 	}
 }
 
-void CG_DrawSpectatorHeader3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font)
+void CG_DrawSpectatorHeader3(float x, float y, int spectatorCount, float fade, vec4_t textColor, fontInfo_t *font)
 {
-	std::string playerHeader = "^7Spectators";
+	std::string playerHeader = ETJump::stringFormat("^7Spectators (%d)", spectatorCount);
 
 	CG_Text_Paint_Centred_Ext(x, y + 9, 0.15f, 0.15f, textColor, playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
@@ -748,7 +748,7 @@ void CG_DrawAltScoreboard3(float fade)
 	float playerHeaderX = SCREEN_CENTER_X;
 	float playerHeaderY = headerY + ALT_SCOREBOARD_3_HEADER_HEIGHT;
 
-	CG_DrawPlayerHeader3(playerHeaderX, playerHeaderY, fade, textColor, font);
+	CG_DrawPlayerHeader3(playerHeaderX, playerHeaderY, playerCount, fade, textColor, font);
 
 	// Draw player list
 	float playerListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2;
@@ -766,7 +766,7 @@ void CG_DrawAltScoreboard3(float fade)
 	float spectatorHeaderX = SCREEN_CENTER_X;
 	float spectatorHeaderY = playerListY + playerListHeight;
 
-	CG_DrawSpectatorHeader3(spectatorHeaderX, spectatorHeaderY, fade, textColor, font);
+	CG_DrawSpectatorHeader3(spectatorHeaderX, spectatorHeaderY, spectatorCount, fade, textColor, font);
 
 	// Draw spectator list
 	float spectatorListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2;
