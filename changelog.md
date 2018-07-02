@@ -24,6 +24,8 @@
   * syntax: `await <frames> <command1> | <command2> | <command3>...`
 * added new color parsing support for crosshair
 * fixed a bug in color parser which interpreted hex colors with `00` as single channeled color
+* fixed an old etmain bug where changing crosshair via console would not instantly update crosshair preview in menu
+* added playercounts to altscoreboard 3 headers
 
 # ETJump 2.3.0
 
