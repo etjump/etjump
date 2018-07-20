@@ -25,9 +25,10 @@ namespace ETJump
 {
 	static const int JUMP_DELAY_TIME = 850;
 	static const int PRONE_JUMP_DELAY_TIME = 650;
+	static const int PRONE_DELAY_TIME = 750;
 	static bool hasJustStoodUp()
 	{
-		return -(pm->pmext->jumpTime + pm->pmext->proneTime) == PRONE_JUMP_DELAY_TIME;
+		return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
 	}
 }
 
@@ -1038,9 +1039,8 @@ static qboolean PM_CheckProne(void)
 		//if( pm->ps->weaponstate == WEAPON_FROMPRONE ) {
 		//	return qfalse;
 		//}
-
 		if (((pm->ps->pm_flags & PMF_DUCKED && pm->cmd.doubleTap == DT_FORWARD) ||
-		     (pm->cmd.wbuttons & WBUTTON_PRONE)) && pm->cmd.serverTime - -pm->pmext->proneTime > 750)
+		     (pm->cmd.wbuttons & WBUTTON_PRONE)) && pm->cmd.serverTime - pm->pmext->proneTime > ETJump::PRONE_DELAY_TIME)
 		{
 			trace_t trace;
 
@@ -1075,7 +1075,7 @@ static qboolean PM_CheckProne(void)
 		    pm->ps->eFlags & EF_MOUNTEDTANK ||
 // zinx - what was the reason for this, anyway? removing fixes bug 424
 //			pm->cmd.serverTime - pm->pmext->proneGroundTime > 450 ||
-		    ((pm->cmd.doubleTap == DT_BACK || pm->cmd.upmove > 10 || pm->cmd.wbuttons & WBUTTON_PRONE) && pm->cmd.serverTime - pm->pmext->proneTime > 750))
+		    ((pm->cmd.doubleTap == DT_BACK || pm->cmd.upmove > 10 || pm->cmd.wbuttons & WBUTTON_PRONE) && pm->cmd.serverTime - pm->pmext->proneTime > ETJump::PRONE_DELAY_TIME))
 		{
 			trace_t trace;
 
@@ -1101,7 +1101,7 @@ static qboolean PM_CheckProne(void)
 				// stop prone
 				pm->ps->eFlags      &= ~EF_PRONE;
 				pm->ps->eFlags      &= ~EF_PRONE_MOVING;
-				pm->pmext->proneTime = -pm->cmd.serverTime; // timestamp 'stop prone'
+				pm->pmext->proneTime = pm->cmd.serverTime; // timestamp 'stop prone'
 
 				if (pm->ps->weapon == WP_MOBILE_MG42_SET)
 				{
