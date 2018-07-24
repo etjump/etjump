@@ -5,6 +5,7 @@
 *
 */
 
+#include <cstring>
 
 #include "cg_local.h"
 #include "cg_mainext.h"
@@ -3701,6 +3702,16 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	cgs.demoCam.noclip = qfalse;
 
 	InitGame();
+
+	if (cg.demoPlayback)
+	{
+		// Marks the right 2.3.0 version to perform the entity type adjustement hack
+		char* pakBaseName = strchr(Info_ValueForKey(CG_ConfigString(CS_SYSTEMINFO), "sv_referencedPakNames"), '/') + 1;
+		if (!Q_strncmp(pakBaseName, "etjump-2_3_0-RC4 ", 17) || !Q_strncmp(pakBaseName, "etjump-2_3_0 ", 13))
+		{
+			cg.requiresEntityTypeAdjustment = true;
+		}
+	}	
 
 	ETJump::isInitialized = true;
 
