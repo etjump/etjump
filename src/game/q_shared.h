@@ -1498,7 +1498,6 @@ typedef enum
 	ET_PORTAL,
 	ET_SPEAKER,
 	ET_PUSH_TRIGGER,
-	ET_VELOCITY_PUSH_TRIGGER,
 	ET_TELEPORT_TRIGGER,
 	ET_INVISIBLE,
 	ET_CONCUSSIVE_TRIGGER,  // JPW NERVE trigger for concussive dust particles
@@ -1582,7 +1581,9 @@ typedef enum
 
 	ET_WOLF_OBJECTIVE,
 
-	ET_EVENTS               // any of the EV_* events can be added freestanding
+	ET_VELOCITY_PUSH_TRIGGER, // ETJump
+
+	ET_EVENTS,              // any of the EV_* events can be added freestanding
 	                        // by setting eType to ET_EVENTS + eventNum
 	                        // this avoids having to set eFlags and eventNum
 } entityType_t;

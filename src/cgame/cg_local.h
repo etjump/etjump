@@ -1249,6 +1249,8 @@ typedef struct
 	vec3_t etjLastJumpPos;
 
 	int pronePressTime;		// No prone print delay: when client last pressed prone
+
+	bool requiresEntityTypeAdjustment; // ETJump 2.3.0 specific hack
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
