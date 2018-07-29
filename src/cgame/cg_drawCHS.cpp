@@ -23,7 +23,7 @@ static playerState_t *CG_CHS_GetPlayerState(void)
 	}
 }
 
-static void CG_CHS_ViewTrace(trace_t *trace)
+static void CG_CHS_ViewTrace(trace_t *trace, int traceContents)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	vec3_t        start, end;
@@ -31,7 +31,7 @@ static void CG_CHS_ViewTrace(trace_t *trace)
 	VectorCopy(cg.refdef.vieworg, start);
 	VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
 	CG_Trace(trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-	         CONTENTS_SOLID);
+	         traceContents);
 }
 
 static void CG_CHS_Speed(char *buf, int size)
@@ -69,7 +69,9 @@ static void CG_CHS_Distance_XY(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t       trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -88,7 +90,9 @@ static void CG_CHS_Distance_Z(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t       trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -105,7 +109,9 @@ static void CG_CHS_Distance_XYZ(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t       trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_12);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -121,7 +127,9 @@ static void CG_CHS_Distance_ViewXYZ(char *buf, int size)
 {
 	trace_t trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -139,7 +147,9 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t       trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -160,7 +170,9 @@ static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t       trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -180,7 +192,9 @@ static void CG_CHS_Look_XYZ(char *buf, int size)
 {
 	trace_t trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_16);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	if (trace.fraction != 1.0)
 	{
@@ -375,7 +389,9 @@ static void CG_CHS_PlaneAngleZ(char *buf, int size)
 {
 	trace_t trace;
 
-	CG_CHS_ViewTrace(&trace);
+	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_53);
+
+	CG_CHS_ViewTrace(&trace, traceContents);
 
 	float vec_x = trace.plane.normal[0];
 	float vec_y = trace.plane.normal[1];

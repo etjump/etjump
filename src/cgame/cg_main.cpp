@@ -547,6 +547,7 @@ vmCvar_t etj_onRunEnd;
 vmCvar_t etj_lagometerX;
 vmCvar_t etj_lagometerY;
 vmCvar_t etj_spectatorVote;
+vmCvar_t etj_extraTrace;
 
 typedef struct
 {
@@ -740,7 +741,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
-	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE },
+	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE             },
 	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
 	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
 	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
@@ -931,6 +932,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_lagometerX, "etj_lagometerX", "0", CVAR_ARCHIVE },
 	{ &etj_lagometerY, "etj_lagometerY", "0", CVAR_ARCHIVE },
 	{ &etj_spectatorVote, "", "0", 0 },
+	{ &etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE },
 };
 
 
@@ -968,6 +970,17 @@ namespace ETJump
 			}
 		}
 		return false;
+	}
+
+	// Get correct trace contents depending on etj_extraTrace value
+	int checkExtraTrace(int value)
+	{
+		if (etj_extraTrace.integer & 1 << value)
+		{
+			return CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+		}
+
+		return CONTENTS_SOLID;
 	}
 }
 

@@ -3942,6 +3942,18 @@ namespace ETJump
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
 	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 	bool hideMeCheck(int entityNum);
+	int checkExtraTrace(int value);
+
+	enum extraTraceOptions {
+		OB_DETECTOR,
+		SLICK_DETECTOR,
+		NJD_DETECTOR,
+		CHS_10_11,
+		CHS_12,
+		CHS_13_15,
+		CHS_16,
+		CHS_53,
+	};
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
