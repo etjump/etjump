@@ -3611,7 +3611,6 @@ static void CG_DrawOB(void)
 	float         h0, t;
 	trace_t       trace;
 	vec3_t        start, end;
-	playerState_t *ps;
 	float         x;
 
 	if (!cg_drawOB.integer || cg_thirdPerson.integer)
@@ -3619,15 +3618,9 @@ static void CG_DrawOB(void)
 		return;
 	}
 
-	if (cg.snap->ps.clientNum != cg.clientNum)
-	{
-		ps = &cg.snap->ps;
-	}
-	else
-	{
-		// use predictedPlayerState if not spectating
-		ps = &cg.predictedPlayerState;
-	}
+	int traceContents = ETJump::checkExtraTrace(ETJump::OB_DETECTOR);
+
+	playerState_t *ps = ETJump::getValidPlayerState();
 
 	psec    = pmove_msec.integer / 1000.0;
 	gravity = ps->gravity;
@@ -3652,7 +3645,7 @@ static void CG_DrawOB(void)
 		end[2] -= 131072;
 
 		CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-		         CONTENTS_SOLID);
+		         traceContents);
 
 		if (trace.fraction != 1.0 && trace.plane.type == 2)
 		{
@@ -3674,7 +3667,7 @@ static void CG_DrawOB(void)
 	VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
 
 	CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-	         CONTENTS_SOLID);
+	         traceContents);
 
 	if (trace.fraction != 1.0 && trace.plane.type == 2)
 	{
@@ -3740,25 +3733,19 @@ static void CG_DrawOB(void)
 
 static void CG_DrawSlick(void)
 {
-	playerState_t *ps = NULL;
 	trace_t       trace;
 	vec3_t        start, end;
 	const float   minWalkNormal = 0.7;
 	float         x;
+
 	if (!cg_drawSlick.integer)
 	{
 		return;
 	}
 
-	if (cg.snap->ps.clientNum != cg.clientNum)
-	{
-		ps = &cg.snap->ps;
-	}
-	else
-	{
-		// use predictedPlayerState if not spectating
-		ps = &cg.predictedPlayerState;
-	}
+	int traceContents = ETJump::checkExtraTrace(ETJump::SLICK_DETECTOR);
+
+	playerState_t *ps = ETJump::getValidPlayerState();
 
 	x = cg_slickX.value;
 
@@ -3767,7 +3754,7 @@ static void CG_DrawSlick(void)
 	VectorCopy(cg.refdef.vieworg, start);
 	VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
 
-	CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, CONTENTS_SOLID);
+	CG_Trace(&trace, start, NULL, NULL, end, ps->clientNum, traceContents);
 
 	if ((trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK) ||
 	    (trace.plane.normal[2] > 0 && trace.plane.normal[2] < minWalkNormal))
@@ -3783,19 +3770,29 @@ static void CG_DrawJumpDelay(void)
 	vec3_t start, end;
 	float x = etj_noJumpDelayX.integer;
 	float y = etj_noJumpDelayY.integer;
+
 	if (!etj_drawNoJumpDelay.integer)
 	{
 		return;
 	}
+
+	int traceContents = ETJump::checkExtraTrace(ETJump::NJD_DETECTOR);
+
+	playerState_t *ps = ETJump::getValidPlayerState();
+
 	ETJump_AdjustPosition(&x);
 	VectorCopy(cg.refdef.vieworg, start);
 	VectorMA(start, 8192, cg.refdef.viewaxis[0], end);
-	CG_Trace(&trace, start, nullptr, nullptr, end, cg.snap->ps.clientNum, CONTENTS_SOLID);
+
+	CG_Trace(&trace, start, nullptr, nullptr, end, ps->clientNum, traceContents);
+
 	if (trace.surfaceFlags & SURF_NOJUMPDELAY)
 	{
-		if (shared.integer & BG_LEVEL_NO_JUMPDELAY) {
+		if (shared.integer & BG_LEVEL_NO_JUMPDELAY)
+		{
 			CG_DrawStringExt(x, y, "D", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-		} else
+		}
+		else
 		{
 			CG_DrawStringExt(x, y, "ND", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 		}

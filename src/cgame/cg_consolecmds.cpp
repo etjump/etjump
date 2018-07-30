@@ -11,6 +11,7 @@
 #include <vector>
 #include "etj_client_commands_handler.h"
 #include "etj_inline_command_parser.h"
+#include "../game/etj_string_utilities.h"
 
 void CG_TargetCommand_f(void)
 {
@@ -1374,6 +1375,37 @@ void CG_IncrementVar_f(void)
 	trap_Cvar_Set(CG_Argv(1), va("%f", value));
 }
 
+struct extraTraceListOptions
+{
+	const int bitmaskValue;
+	const char *description;
+};
+
+extraTraceListOptions extraTraceList[]
+{
+	{ 1 << ETJump::OB_DETECTOR, "OB detector" },
+	{ 1 << ETJump::SLICK_DETECTOR, "Slick detector" },
+	{ 1 << ETJump::NJD_DETECTOR, "No jump delay detector" },
+	{ 1 << ETJump::CHS_10_11, "CHS 10-11" },
+	{ 1 << ETJump::CHS_12, "CHS 12" },
+	{ 1 << ETJump::CHS_13_15, "CHS 13-15" },
+	{ 1 << ETJump::CHS_16, "CHS 16" },
+	{ 1 << ETJump::CHS_53, "CHS 53" },
+};
+
+void CG_ExtraTrace_f(void)
+{
+	std::string listPrint{ "Bitmask values for ^3etj_extraTrace^7:\n" };
+
+	for (auto traceList : extraTraceList)
+	{
+		std::string listValues = ETJump::stringFormat("  ^3%d ^7= %s\n", traceList.bitmaskValue, traceList.description);
+		listPrint += (listValues);
+	}
+
+	CG_Printf(listPrint.c_str());
+}
+
 typedef struct
 {
 	const char *cmd;
@@ -1505,6 +1537,7 @@ static consoleCommand_t commands[] =
 
 	{ "mod_information", CG_ModInformation_f },
 	{ "incrementVar", CG_IncrementVar_f },
+	{ "extraTrace", CG_ExtraTrace_f },
 };
 
 
