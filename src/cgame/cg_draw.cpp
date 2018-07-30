@@ -142,6 +142,17 @@ void CG_Text_PaintChar_Ext(float x, float y, float w, float h, float scalex, flo
 	w *= scalex;
 	h *= scaley;
 	CG_AdjustFrom640(&x, &y, &w, &h);
+
+	if (w < 1)
+	{
+		w = 1;
+	}
+
+	if (h < 1)
+	{
+		h = 1;
+	}
+
 	trap_R_DrawStretchPic(x, y, w, h, s, t, s2, t2, hShader);
 }
 
