@@ -26,6 +26,20 @@
 * fixed a bug in color parser which interpreted hex colors with `00` as single channeled color
 * fixed an old etmain bug where changing crosshair via console would not instantly update crosshair preview in menu
 * added playercounts to altscoreboard 3 headers
+* fixed a bug where players were unable to go to/get up from prone when server reached > 1.07b ms uptime
+* fixed a bug that caused demos recorded in ETJump 2.3.0 RC3 and earlier to crash
+* added CHS 53 to display Z angle of a plane
+* added `etj_extraTrace` cvar to toggle tracing of playerclips on various detectors
+  * takes bitmask value
+  * __1__ = OB detector
+  * __2__ = slick detector
+  * __4__ = no jump delay detector
+  * __8__ = CHS 10-11
+  * __16__ = CHS 12
+  * __32__ = CHS 13-15
+  * __64__ = CHS 16
+  * __128__ = CHS 53
+  * the list above can be checked in game with `extraTrace` console command
 
 # ETJump 2.3.0
 
