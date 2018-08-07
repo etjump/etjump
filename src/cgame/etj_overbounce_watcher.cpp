@@ -185,6 +185,11 @@ bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
 	n = floor(n1);
 	hn = currentHeight + psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
 
+	if (finalHeight > currentHeight && vel < 0)
+	{
+		return false;
+	}
+
 	if (n && hn < finalHeight + 0.25 && hn > finalHeight)
 	{
 		return true;
