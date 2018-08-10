@@ -40,6 +40,11 @@
   * __64__ = CHS 16
   * __128__ = CHS 53
   * the list above can be checked in game with `extraTrace` console command
+* character strings now always draw at least 1px high/wide characters even if scaled to very low size
+* added spawnflag __1__ `SILENT` to `target_savereset` to omit the print it makes
+* OB watcher no longer shows OBs if you are below your saved Z coordinate and have negative Z velocity
+* `func_static` with `PAIN` spawnflag no longer sends activator data by default as it caused doors to not open
+  * spawnflag __8__ `SEND_ACTIVATOR` can be used to send activator data to allow it to activate entities that require it
 
 # ETJump 2.3.0
 
