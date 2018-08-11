@@ -766,7 +766,12 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 
 	CalculateRanks();
 
-	if (killedintank /*Gordon: automatically go to limbo from tank*/)
+	if (self->client->sess.timerunActive)
+	{
+		limbo(self, qfalse);
+	}
+
+	else if (killedintank /*Gordon: automatically go to limbo from tank*/)
 	{
 		limbo(self, qfalse);   // but no corpse
 	}
