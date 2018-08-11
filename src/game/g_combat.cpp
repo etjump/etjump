@@ -771,11 +771,11 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 		limbo(self, qfalse);
 	}
 
-	if (killedintank /*Gordon: automatically go to limbo from tank*/)
+	else if (killedintank /*Gordon: automatically go to limbo from tank*/)
 	{
 		limbo(self, qfalse);   // but no corpse
 	}
-	else if ((meansOfDeath == MOD_SUICIDE && g_gamestate.integer == GS_PLAYING) && !(self->client->sess.timerunActive))
+	else if ((meansOfDeath == MOD_SUICIDE && g_gamestate.integer == GS_PLAYING))
 	{
 		limbo(self, qtrue);
 	}
