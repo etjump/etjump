@@ -3439,13 +3439,13 @@ static void CG_DrawCGazHUD(void)
 			scx + right, scy - forward, color2);
 
 		vel_size /= 5;
-		DrawLine(scx, scy,
-			scx + vel_size * sin(vel_relang),
-			scy - vel_size * cos(vel_relang), color1);
 		if (vel_size > SCREEN_HEIGHT / 2)
 		{
 			vel_size = SCREEN_HEIGHT / 2;
 		}
+		DrawLine(scx, scy,
+			scx + vel_size * sin(vel_relang),
+			scy - vel_size * cos(vel_relang), color1);
 		vel_size /= 2;
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang + per_angle),
