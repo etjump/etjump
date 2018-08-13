@@ -1610,6 +1610,7 @@ void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles);
 void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles);
 void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles);
 void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t origin, vec3_t angles);
+void DirectTeleport(gentity_t *player, vec3_t origin, vec3_t angles);
 void PortalTeleport(gentity_t *player, vec3_t origin, vec3_t angles);   //Feen: PGM
 void mg42_fire(gentity_t *other);
 void mg42_stopusing(gentity_t *self);
