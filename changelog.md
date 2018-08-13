@@ -45,6 +45,9 @@
 * OB watcher no longer shows OBs if you are below your saved Z coordinate and have negative Z velocity
 * `func_static` with `PAIN` spawnflag no longer sends activator data by default as it caused doors to not open
   * spawnflag __8__ `SEND_ACTIVATOR` can be used to send activator data to allow it to activate entities that require it
+* players who die during timeruns are now put into limbo instantly without leaving a corpse or gun to the floor
+* fixed a crash when player reached over 83884088ups while CGaz 2 was enabled
+* fixed `setoffset` always adding 1 unit to Z origin
 
 # ETJump 2.3.0
 
