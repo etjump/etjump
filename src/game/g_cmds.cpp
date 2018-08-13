@@ -1103,7 +1103,7 @@ namespace ETJump
 
 		// reset speed
 		VectorClear(ent->client->ps.velocity);
-		TeleportPlayer(ent, origin, angles);
+		DirectTeleport(ent, origin, angles);
 	}
 
 	void interruptRun(gentity_t *ent)
