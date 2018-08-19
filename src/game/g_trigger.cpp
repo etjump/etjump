@@ -307,7 +307,7 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	}
 
 	// Avoid multiple activations while player travels through the trigger towards target
-	if (other->client->pushTriggerActivationTime + 100 > level.time)
+	if (other->client->pushTriggerActivationTime + FRAMETIME > level.time)
 	{
 		return;
 	}
@@ -422,32 +422,6 @@ void SP_trigger_push(gentity_t *self)
 	trap_LinkEntity(self);
 }
 
-void GetPushVelocity(gentity_t *activator, gentity_t *self, vec3_t outVelocity)
-{
-	VectorCopy(activator->client->ps.velocity, outVelocity);
-
-	// ADD_XY
-	if (self->spawnflags & 2)
-	{
-		outVelocity[0] += self->s.origin2[0];
-		outVelocity[1] += self->s.origin2[1];
-		outVelocity[2] = self->s.origin2[2];
-	}
-
-	// ADD_Z
-	if (self->spawnflags & 4)
-	{
-		outVelocity[0] = self->s.origin2[0];
-		outVelocity[1] = self->s.origin2[1];
-		outVelocity[2] += self->s.origin2[2];
-	}
-
-	if ((self->spawnflags & 2) && (self->spawnflags & 4))
-	{
-		VectorAdd(self->s.origin2, activator->client->ps.velocity, outVelocity);
-	}
-}
-
 void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	vec3_t outVelocity;
@@ -464,7 +438,7 @@ void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator)
 
 	if (self->spawnflags & 2 || self->spawnflags & 4)
 	{
-		GetPushVelocity(activator, self, outVelocity);
+		BG_GetPushVelocity(&activator->client->ps, self->s.origin2, self->spawnflags, outVelocity);
 		VectorCopy(outVelocity, activator->client->ps.velocity);
 	}
 	else

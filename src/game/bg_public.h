@@ -1723,7 +1723,7 @@ void    BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm, playerS
 
 void	BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad);	// Aciz: uncommented for trigger_push
 void	BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad);
-void	BG_CalculatePushVelocity(playerState_t *ps, vec3_t origin, float speed, vec3_t outVelocity);
+void	BG_GetPushVelocity(playerState_t *ps, vec3_t origin, int spawnflags, vec3_t outVelocity);
 
 void    BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, qboolean snap);
 void    BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s, int time, qboolean snap);

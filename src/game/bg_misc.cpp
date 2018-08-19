@@ -6047,6 +6047,38 @@ void BG_TouchJumpPad(playerState_t *ps, entityState_t *jumppad)
 
 /*
 ================
+BG_GetPushVelocity
+Calculate push velocity for additive pushers
+================
+*/
+void BG_GetPushVelocity(playerState_t *ps, vec3_t origin2, int spawnflags, vec3_t outVelocity)
+{
+	VectorCopy(ps->velocity, outVelocity);
+
+	// ADD_XY
+	if (spawnflags & 2)
+	{
+		outVelocity[0] += origin2[0];
+		outVelocity[1] += origin2[1];
+		outVelocity[2] = origin2[2];
+	}
+
+	// ADD_Z
+	if (spawnflags & 4)
+	{
+		outVelocity[0] = origin2[0];
+		outVelocity[1] = origin2[1];
+		outVelocity[2] += origin2[2];
+	}
+
+	if ((spawnflags & 2) && (spawnflags & 4))
+	{
+		VectorAdd(origin2, ps->velocity, outVelocity);
+	}
+}
+
+/*
+================
 BG_TouchVelocityJumpPad
 Additive pusher, adding horizontal and/or vertical speed
 to players current speed rather than setting it.
@@ -6077,28 +6109,6 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad)
 
 	// Launch player
 	int spawnflags = (jumppad->constantLight >> 8) & 0xff;
-	VectorCopy(ps->velocity, outVelocity);
-
-	// ADD_XY
-	if (spawnflags & 2)
-	{
-		outVelocity[0] += jumppad->origin2[0];
-		outVelocity[1] += jumppad->origin2[1];
-		outVelocity[2] = jumppad->origin2[2];
-	}
-
-	// ADD_Z
-	if (spawnflags & 4)
-	{
-		outVelocity[0] = jumppad->origin2[0];
-		outVelocity[1] = jumppad->origin2[1];
-		outVelocity[2] += jumppad->origin2[2];
-	}
-
-	if ((spawnflags & 2) && (spawnflags & 4))
-	{
-		VectorAdd(jumppad->origin2, ps->velocity, outVelocity);
-	}
-
+	BG_GetPushVelocity(ps, jumppad->origin2, spawnflags, outVelocity);
 	VectorCopy(outVelocity, ps->velocity);
 }
