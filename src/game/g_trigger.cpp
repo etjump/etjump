@@ -35,7 +35,7 @@ void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator)
 {
 	int triggerWait = (ent->wait + ent->random * crandom()) * 1000;
 
-	if (activator->client->activationTime + triggerWait > level.time)
+	if (activator->client->multiTriggerActivationTime + triggerWait > level.time)
 	{
 		return;
 	}
@@ -45,7 +45,7 @@ void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator)
 	G_Script_ScriptEvent(ent, "activate", NULL);
 
 	G_UseTargets(ent, ent->activator);
-	activator->client->activationTime = level.time;
+	activator->client->multiTriggerActivationTime = level.time;
 }
 
 // activator is always a client
@@ -305,6 +305,14 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	{
 		return;
 	}
+
+	// Avoid multiple activations while player travels through the trigger towards target
+	if (other->client->pushTriggerActivationTime + FRAMETIME > level.time)
+	{
+		return;
+	}
+
+	other->client->pushTriggerActivationTime = level.time;
 	
 	switch (self->s.eType)
 	{
@@ -393,14 +401,14 @@ void SP_trigger_push(gentity_t *self)
 	// Noise key support
 	G_SpawnString("noise", "", &s);
 	self->noise_index = G_SoundIndex(s);
-	self->s.constantLight |= self->noise_index & 0xffff;
+	self->s.constantLight |= self->noise_index & 0xff;
 
 	if (self->target)
 	{
 		self->think = AimAtTarget;
 		self->nextthink = level.time + FRAMETIME;
 	}
-	if (self->spawnflags & 2)
+	if (self->spawnflags & 2 || self->spawnflags & 4)
 	{
 		self->s.eType = ET_VELOCITY_PUSH_TRIGGER;
 	}
@@ -409,6 +417,7 @@ void SP_trigger_push(gentity_t *self)
 		self->s.eType = ET_PUSH_TRIGGER;
 	}
 
+	self->s.constantLight |= (self->spawnflags << 8) & 0xffff;
 	self->touch = trigger_push_touch;
 	trap_LinkEntity(self);
 }
@@ -427,9 +436,9 @@ void Use_target_push(gentity_t *self, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
-	if (self->spawnflags & 2)
+	if (self->spawnflags & 2 || self->spawnflags & 4)
 	{
-		BG_CalculatePushVelocity(&activator->client->ps, self->s.origin2, self->speed, outVelocity);
+		BG_GetPushVelocity(&activator->client->ps, self->s.origin2, self->spawnflags, outVelocity);
 		VectorCopy(outVelocity, activator->client->ps.velocity);
 	}
 	else
