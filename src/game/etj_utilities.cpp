@@ -107,6 +107,7 @@ void Utilities::startRun(int clientNum)
 		WP_SATCHEL_DET,
 		WP_SATCHEL,
 		WP_MORTAR,
+		WP_MORTAR_SET,
 		WP_GPG40,
 		WP_LANDMINE,
 		WP_FLAMETHROWER,
