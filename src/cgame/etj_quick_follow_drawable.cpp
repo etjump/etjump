@@ -37,5 +37,9 @@ bool ETJump::QuickFollowDrawer::canSkipDraw() const
 	{
 		return true;
 	}
+	if (cgs.clientinfo[cg.crosshairClientNum].hideMe)
+	{
+		return true;
+	}
 	return false;
 }
