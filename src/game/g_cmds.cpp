@@ -3911,7 +3911,7 @@ namespace ETJump
 
 		traceEnt = &g_entities[tr.entityNum];
 
-		if (ETJump::isPlayer(traceEnt) && G_AllowFollow(ent, traceEnt) && ent->client->pers.quickFollow)
+		if (ETJump::isPlayer(traceEnt) && G_AllowFollow(ent, traceEnt) && ent->client->pers.quickFollow && !(traceEnt->client->pers.hideMe))
 		{
 			if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 			{
