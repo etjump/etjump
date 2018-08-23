@@ -3889,6 +3889,29 @@ tryagain:
 
 namespace ETJump
 {
+	bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt)
+	{
+		if (!ETJump::isPlayer(traceEnt))
+		{
+			return false;
+		}
+		if (!G_AllowFollow(ent, traceEnt))
+		{
+			auto clientNum = ClientNum(ent);
+			std::string specLockMsg = ETJump::stringFormat("%s is speclocked.", traceEnt->client->pers.netname);
+			Printer::SendLeftMessage(clientNum, specLockMsg);
+			return false;
+		}
+		if (!ent->client->pers.quickFollow)
+		{
+			return false;
+		}
+		if (traceEnt->client->pers.hideMe)
+		{
+			return false;
+		}
+		return true;
+	}
 	
 	void longRangeActivate(gentity_t *ent)
 	{
@@ -3911,7 +3934,7 @@ namespace ETJump
 
 		traceEnt = &g_entities[tr.entityNum];
 
-		if (ETJump::isPlayer(traceEnt) && G_AllowFollow(ent, traceEnt) && ent->client->pers.quickFollow && !(traceEnt->client->pers.hideMe))
+		if (ETJump::allowQuickFollow(ent, traceEnt))
 		{
 			if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 			{

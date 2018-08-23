@@ -21,7 +21,7 @@ void ETJump::QuickFollowDrawer::render() const
 	}
 
 	auto binding = BindingFromName("+activate");
-	auto hintText = cgs.clientinfo[cg.crosshairClientNum].specLocked ? "^9Speclocked" : stringFormat("^9[%s] to follow", binding);
+	auto hintText = stringFormat("^9[%s] to follow", binding);
 	float w = DrawStringWidth(cgs.clientinfo[cg.crosshairClientNum].name, 0.23f);
 	auto offx = SCREEN_CENTER_X - w / 2;
 	DrawString(offx, 182 + 10, 0.16f, 0.16f, color, qfalse, hintText.c_str(), 0, ITEM_TEXTSTYLE_SHADOWED);
