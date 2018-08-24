@@ -784,17 +784,17 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state
  */
 static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean invite /* or uninvite */)
 {
-	int       self, targetClient;
+	int       selfClient, targetClient;
 	gentity_t *other;
 	char      arg[MAX_TOKEN_CHARS];
 	std::string selfMsg, otherMsg;
 
-	self = ent - g_entities;
+	selfClient = ent - g_entities;
 
 	if (ClientIsFlooding(ent))
 	{
 		selfMsg = "^1Spam Protection:^7 Specinvite ignored\n";
-		Printer::SendConsoleMessage(self, selfMsg);
+		Printer::SendConsoleMessage(selfClient, selfMsg);
 		return;
 	}
 
@@ -811,7 +811,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean in
 	if (other == ent)
 	{
 		selfMsg = ETJump::stringFormat("You can not spec%sinvite yourself!\n", invite ? "" : "un");
-		Printer::SendConsoleMessage(self, selfMsg);
+		Printer::SendConsoleMessage(selfClient, selfMsg);
 		return;
 	}
 
@@ -820,13 +820,13 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean in
 		if (COM_BitCheck(ent->client->sess.specInvitedClients, targetClient))
 		{
 			selfMsg = ETJump::stringFormat("%s^7 is already specinvited.\n", other->client->pers.netname);
-			Printer::SendConsoleMessage(self, selfMsg);
+			Printer::SendConsoleMessage(selfClient, selfMsg);
 			return;
 		}
 		COM_BitSet(ent->client->sess.specInvitedClients, targetClient);
 
 		selfMsg = ETJump::stringFormat("%s^7 has been sent a spectator invitation.\n", other->client->pers.netname);
-		Printer::SendConsoleMessage(self, selfMsg);
+		Printer::SendConsoleMessage(selfClient, selfMsg);
 		otherMsg = ETJump::stringFormat("You have been invited to spectate %s^7.\n", ent->client->pers.netname);
 		Printer::SendLeftMessage(targetClient, otherMsg);
 	}
@@ -835,20 +835,20 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean in
 		if (!COM_BitCheck(ent->client->sess.specInvitedClients, targetClient))
 		{
 			selfMsg = ETJump::stringFormat("%s^7 is not specinvited.\n", other->client->pers.netname);
-			Printer::SendConsoleMessage(self, selfMsg);
+			Printer::SendConsoleMessage(selfClient, selfMsg);
 			return;
 		}
 
 		COM_BitClear(ent->client->sess.specInvitedClients, targetClient);
 		if (other->client->sess.spectatorState == SPECTATOR_FOLLOW
-		    && other->client->sess.spectatorClient == self
+		    && other->client->sess.spectatorClient == selfClient
 		    && !G_AllowFollow(other, ent))
 		{
 			StopFollowing(other);
 		}
 
 		selfMsg = ETJump::stringFormat("%s^7 was removed from invited spectators.\n", other->client->pers.netname);
-		Printer::SendConsoleMessage(self, selfMsg);
+		Printer::SendConsoleMessage(selfClient, selfMsg);
 		otherMsg = ETJump::stringFormat("^7You are no longer invited to spectate %s^7.\n", ent->client->pers.netname);
 		Printer::SendLeftMessage(targetClient, otherMsg);
 	}
