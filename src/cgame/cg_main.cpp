@@ -3642,9 +3642,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// ETJump initialization
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	CG_Printf("--------------------------------------------------------------------------------\n");
-	CG_Printf("ETJump initialization started.");
-	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("---------------------------------------------------\n");
+	CG_Printf("ETJump initialization started.\n");
+	CG_Printf("Loading modules... ");
 
 	// NOTE: client server commands handlers must be created before other modules as other modules use them
 	// to subcribe to commands.
@@ -3697,9 +3697,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
 	ETJump::initDrawKeys(keySetSystem);
 
-	CG_Printf("--------------------------------------------------------------------------------\n");
-	CG_Printf("ETJump initialized.");
-	CG_Printf("--------------------------------------------------------------------------------\n");
+	CG_Printf("done\n");
+	CG_Printf("ETJump initialized.\n");
+	CG_Printf("---------------------------------------------------\n");
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
