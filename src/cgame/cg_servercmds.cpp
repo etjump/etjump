@@ -3079,16 +3079,15 @@ static void CG_ServerCommand(void)
 		trap_Argv(i, buf, sizeof(buf));
 		arguments.push_back(buf);
 	}
-	if (ETJump::serverCommandsHandler->check(cmd, arguments))
-	{
-		return;
-	}
+
+	bool found = ETJump::serverCommandsHandler->check(cmd, arguments);
 
 	if (CG_ServerCommandExt(cmd))
 	{
 		return;
 	}
 
+	if (found) return;
 
 	CG_Printf("Unknown client game command: %s\n", cmd);
 }
