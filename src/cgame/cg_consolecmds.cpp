@@ -1589,12 +1589,15 @@ qboolean CG_ConsoleCommand(void)
 		trap_Argv(i, buf, sizeof(buf));
 		arguments.push_back(buf);
 	}
-	if (ETJump::consoleCommandsHandler->check(command, arguments))
+	
+	bool found = ETJump::consoleCommandsHandler->check(command, arguments);
+
+	if (CG_ConsoleCommandExt(cmd))
 	{
 		return qtrue;
 	}
 
-	return CG_ConsoleCommandExt(cmd);
+	return found ? qtrue : qfalse;
 }
 
 
