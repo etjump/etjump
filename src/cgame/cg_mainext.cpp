@@ -2,6 +2,7 @@
 #include "cg_mainext.h"
 #include "cg_timerun.h"
 #include "etj_timerun_view.h"
+#include "etj_autodemo.h"
 
 #include <string>
 #include <memory>
@@ -37,6 +38,13 @@ namespace ETJump
 		if (etj_onRunEnd.string[0])
 		{
 			trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
+		}
+	}
+	void onPlayerRespawn(qboolean revived)
+	{
+		if (etj_autoDemo.integer > 0 && !revived)
+		{
+			ETJump::autoDemoRecorder->checkRespawn();
 		}
 	}
 }

@@ -2600,6 +2600,12 @@ extern vmCvar_t etj_lagometerX;
 extern vmCvar_t etj_lagometerY;
 extern vmCvar_t etj_spectatorVote;
 
+// Autodemo
+extern vmCvar_t etj_autoDemo;
+extern vmCvar_t etj_ad_savePBsOnly;
+extern vmCvar_t etj_ad_stopDelay;
+extern vmCvar_t etj_ad_targetPath;
+
 //
 // cg_main.c
 //
@@ -3934,6 +3940,7 @@ namespace ETJump
 	class EntityEventsHandler;
 	class IRenderable;
 	class CvarUpdateHandler;
+	class AutoDemoRecorder;
 
 	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -3941,10 +3948,12 @@ namespace ETJump
 	extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+	extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
 	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 	bool hideMeCheck(int entityNum);
 	int checkExtraTrace(int value);
+	void onPlayerRespawn(qboolean revived);
 
 	enum extraTraceOptions {
 		OB_DETECTOR,
