@@ -2,6 +2,7 @@
 #include "etj_entity_events_handler.h"
 #include "etj_client_commands_handler.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_numeric_utilities.h"
 
 #define AUTODEMO_MAX_TEMP_DEMOS 20
 #define AUTODEMO_START_DELAY 500
@@ -118,7 +119,8 @@ void ETJump::AutoDemoRecorder::prepareStop()
 	CG_AddPMItem(PM_MESSAGE, "^7Stopping demo...\n", cgs.media.voiceChatShader);
 	stopIsIssued = true;
 
-	demoStopTime = manualStop ? cg.time : cg.time + etj_ad_stopDelay.integer;
+	demoStopDelay = Numeric::clamp(etj_ad_stopDelay.integer, 0, 10000);
+	demoStopTime = manualStop ? cg.time : cg.time + demoStopDelay;
 	demoSaveDelay();
 }
 
@@ -137,6 +139,10 @@ void ETJump::AutoDemoRecorder::demoSaveDelay()
 		{
 			saveDemo();
 			manualStop = false;
+			keepDemo = false;
+			isTimerunStop = false;
+			stopIsIssued = false;
+			recordingRestarted = false;
 			return;
 		}
 	}
@@ -158,6 +164,10 @@ void ETJump::AutoDemoRecorder::demoSaveDelay()
 		if (cg.time > demoStopTime + AUTODEMO_STOP_DELAY)
 		{
 			saveDemo();
+			keepDemo = false;
+			isTimerunStop = false;
+			stopIsIssued = false;
+			recordingRestarted = false;
 		}
 	}
 }
@@ -218,11 +228,6 @@ void ETJump::AutoDemoRecorder::saveDemo()
 
 	CG_Printf("^7Demo saved to %s\n", name.c_str());
 	CG_AddPMItem(PM_MESSAGE, "^7Demo saved!\n", cgs.media.voiceChatShader);
-	
-	keepDemo = false;
-	isTimerunStop = false;
-	stopIsIssued = false;
-	recordingRestarted = false;
 }
 
 void ETJump::AutoDemoRecorder::generateFileName()

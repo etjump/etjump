@@ -12,7 +12,7 @@ namespace ETJump
 		bool recordingRestarted{ false };
 		bool manualStop{ false };
 		int currentDemoNum{ 1 };
-		int demoStartTime, demoStopTime;
+		int demoStartTime, demoStopTime, demoStopDelay;
 		int millis, seconds, minutes;
 		std::string runTime, runTimeFormatted;
 		std::string currentRealTime;
