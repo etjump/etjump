@@ -42,7 +42,7 @@ void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator)
 
 	ent->activator = activator;
 
-	G_Script_ScriptEvent(ent, "activate", NULL);
+	G_Script_ScriptEvent(ent, "activate", activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
 	G_UseTargets(ent, ent->activator);
 	activator->client->multiTriggerActivationTime = level.time;
@@ -59,7 +59,7 @@ void parallel_multi_trigger(gentity_t *ent, gentity_t *activator)
 
 	ent->activator = activator;
 
-	G_Script_ScriptEvent(ent, "activate", NULL);
+	G_Script_ScriptEvent(ent, "activate", activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
 	G_UseTargets(ent, ent->activator);
 	activator->client->alreadyActivatedTrigger = qtrue;
@@ -72,12 +72,12 @@ void multi_trigger(gentity_t *ent, gentity_t *activator)
 {
 	ent->activator = activator;
 
-	G_Script_ScriptEvent(ent, "activate", NULL);
-
 	if (ent->nextthink)
 	{
 		return;     // can't retrigger until the wait is over
 	}
+
+	G_Script_ScriptEvent(ent, "activate", activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
 	G_UseTargets(ent, ent->activator);
 
