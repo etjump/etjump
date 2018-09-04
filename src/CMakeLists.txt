@@ -54,6 +54,7 @@ file(GLOB CGAME_SRC
 	"cgame/cg_effects.cpp"
 	"cgame/cg_ents.cpp"
 	"cgame/cg_edv.cpp"
+	"cgame/etj_autodemo.cpp"
 	"cgame/etj_client_commands_handler.cpp"
 	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_client_authentication.cpp"
