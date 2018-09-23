@@ -536,6 +536,12 @@ void SP_worldspawn(void)
 	{
 		cgs.media.thirtySecondSound_a = -1;
 	}
+
+	for (int i = 0; i < MAX_RENDER_STRINGS; i++)
+	{
+		CG_SpawnString(va("text%i", i), "", &s);
+		Q_strncpyz(cg.deformText[i], s, sizeof(cg.deformText[0]));
+	}
 }
 
 /*

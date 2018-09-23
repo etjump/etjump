@@ -6436,6 +6436,11 @@ void CG_DrawActive(stereoFrame_t stereoView)
 
 	if (!(cg.limboEndCinematicTime > cg.time && cg.showGameView))
 	{
+		for (int i = 0; i < MAX_RENDER_STRINGS; i++)
+		{
+			Q_strncpyz(cg.refdef_current->text[i], cg.deformText[i], sizeof(cg.refdef_current->text[0]));
+		}
+
 		trap_R_RenderScene(cg.refdef_current);
 	}
 
