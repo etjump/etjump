@@ -59,6 +59,11 @@
 * fixed mover tagging bug
 * added `g_moverScale` cvar and `!moverScale` command to control mover speed (eg. tank)  
   *note: use flag `v` to control command access*
+* added additional scripting player specific commands, expects activator to be player:  
+  * `setplayerspawn "objective description"`
+  * `setplayerautospawn "objective description"`
+  * `damageplayer N`, inflicts __N__ hp damage to the activator
+  * `killplayer`
 * added new keys for `func_invisible_user` entity:
   - `noise <sound file>` sets sound file to play when activated
   - `volume <0-255>` controls sound volume
