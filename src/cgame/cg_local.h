@@ -3941,6 +3941,8 @@ namespace ETJump
 	class IRenderable;
 	class CvarUpdateHandler;
 	class AutoDemoRecorder;
+	class EventLoop;
+	class PlayerEventsHandler;
 
 	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -3949,11 +3951,14 @@ namespace ETJump
 	extern std::vector<std::unique_ptr<IRenderable>> renderables;
 	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
 	extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
+	extern std::shared_ptr<EventLoop> eventLoop;
+	extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
 	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 	bool hideMeCheck(int entityNum);
 	int checkExtraTrace(int value);
 	void onPlayerRespawn(qboolean revived);
+	void runFrameEnd();
 
 	enum extraTraceOptions {
 		OB_DETECTOR,

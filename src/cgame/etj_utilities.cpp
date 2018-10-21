@@ -3,6 +3,13 @@
 #include <unordered_map>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include "etj_event_loop.h"
+#include <memory>
+
+namespace ETJump
+{
+	extern std::shared_ptr<EventLoop> eventLoop;
+}
 
 std::string ETJump::composeShader(const char *name, ShaderStage general, ShaderStages stages)
 {
@@ -151,4 +158,39 @@ void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 	}
 
 	normalizeColorIfRequired(color);
+}
+
+int ETJump::setTimeout(std::function<void()> fun, int delay)
+{
+	return eventLoop->schedule(fun, delay);
+}
+
+bool ETJump::clearTimeout(int handle)
+{
+	return eventLoop->unschedule(handle);
+}
+
+int ETJump::setInterval(std::function<void()> fun, int delay)
+{
+	return eventLoop->schedulePersistent(fun, delay);
+}
+
+bool ETJump::clearInterval(int handle)
+{
+	return eventLoop->unschedule(handle);
+}
+
+int ETJump::setImmediate(std::function<void()> fun)
+{
+	return eventLoop->schedule(fun, 0, TaskPriorities::Immediate);
+}
+
+bool ETJump::clearImmediate(int handle)
+{
+	return eventLoop->unschedule(handle);
+}
+
+void ETJump::executeTimeout(int handle)
+{
+	eventLoop->execute(handle);
 }

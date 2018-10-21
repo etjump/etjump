@@ -58,20 +58,30 @@ std::vector<char> ETJump::File::read(int bytes)
 
 void ETJump::File::write(const std::string& data) const
 {
+	write(data.c_str(), data.length());
+}
+
+void ETJump::File::write(const std::vector<char>& data) const
+{
+	write(data.data(), data.size());
+}
+
+void ETJump::File::write(const char* data, int len) const
+{
 	if (_mode == Mode::Read)
 	{
 		throw std::logic_error("Cannot write to a file when mode is Mode::Read.");
 	}
 
-#ifdef GAME
-	auto bytesWritten = trap_FS_Write(data.c_str(), data.length(), _handle);
-	if (bytesWritten != data.length())
+#ifdef GAMEDLL
+	auto bytesWritten = trap_FS_Write(data, len, _handle);
+	if (bytesWritten != len)
 	{
 		throw WriteFailedException((boost::format("Write to file %s failed. Wrote %d out of %d bytes.")
-			% _path % bytesWritten % data.length()).str());
+			% _path % bytesWritten % len).str());
 	}
 #else
-	trap_FS_Write(data.c_str(), data.length(), _handle);
+	trap_FS_Write(data, len, _handle);
 #endif
 }
 

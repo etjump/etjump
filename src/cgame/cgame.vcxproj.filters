@@ -269,7 +269,22 @@
     <ClCompile Include="etj_awaited_command_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="etj_autodemo.cpp">
+    <ClCompile Include="..\game\etj_filesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_event_loop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_autodemo_recorder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_demo_recorder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\etj_time_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_player_events_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -403,7 +418,16 @@
     <ClInclude Include="etj_awaited_command_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="etj_autodemo.h">
+    <ClInclude Include="etj_event_loop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_autodemo_recorder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_demo_recorder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_player_events_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

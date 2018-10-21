@@ -24,7 +24,9 @@
 #include "etj_speed_drawable.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_awaited_command_handler.h"
-#include "etj_autodemo.h"
+#include "etj_event_loop.h"
+#include "etj_autodemo_recorder.h"
+#include "etj_player_events_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -107,6 +109,8 @@ namespace ETJump
 	static bool isInitialized{ false };
 	std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
 	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
+	std::shared_ptr<EventLoop> eventLoop;
+	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3684,6 +3688,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
             Com_Printf(text);
         }
     );
+	ETJump::playerEventsHandler = std::make_shared<ETJump::PlayerEventsHandler>();
+	ETJump::eventLoop = std::make_shared<ETJump::EventLoop>();
 
 	////////////////////////////////////////////////////////////////
 	// TODO: move these to own client commands handler
@@ -3787,6 +3793,10 @@ void CG_Shutdown(void)
 		// clear dynamic shaders in reverse order
 		ETJump::drawLeavesHandler = nullptr;
 		ETJump::consoleAlphaHandler = nullptr;
+		ETJump::eventLoop->shutdown();
+		ETJump::eventLoop = nullptr;
+		ETJump::playerEventsHandler = nullptr;
+
 		ETJump::isInitialized = false;
 	}
 }

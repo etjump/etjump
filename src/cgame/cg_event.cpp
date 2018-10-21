@@ -3,6 +3,7 @@
 #include "cg_local.h"
 #include "etj_entity_events_handler.h"
 #include <algorithm>
+#include "etj_player_events_handler.h"
 
 extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
@@ -3171,7 +3172,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		break;
 
 	case EV_LOAD_TELEPORT:
+		// should refactor users to playereventshandler
 		ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
+		ETJump::playerEventsHandler->check("load", {});
 		break;
 	default:
 		DEBUGNAME("UNKNOWN");

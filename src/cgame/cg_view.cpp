@@ -1,7 +1,6 @@
 // cg_view.c -- setup all the parameters (position, angle, etc)
 // for a 3D rendering
 #include "cg_local.h"
-#include "etj_autodemo.h"
 
 //========================
 extern pmove_t cg_pmove;
@@ -2372,8 +2371,5 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 	// let the client system know what our weapon, holdable item and zoom settings are
 	trap_SetUserCmdValue(cg.weaponSelect, cg.showGameView ? 0x01 : 0x00, cg.zoomSensitivity, cg.identifyClientRequest);
 
-    ETJump::awaitedCommandHandler->runFrame();
-
-	// Autodemo: delay demo saving
-	ETJump::autoDemoRecorder->demoSaveDelay();
+	ETJump::runFrameEnd();
 }
