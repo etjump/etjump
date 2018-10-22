@@ -42,8 +42,6 @@ namespace ETJump
 		std::string createDemoTempPath(const std::string &name);
 		std::string createTimeString();
 		std::string formatRunTime(int millis);
-		void cancelDelayedDemoSave();
-		void checkTimerunDemoStop();
-		void forceDelayedDemoSave();
+		void maybeCancelDelayedSave();
 	};
 }

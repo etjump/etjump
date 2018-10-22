@@ -2602,7 +2602,7 @@ extern vmCvar_t etj_spectatorVote;
 
 // Autodemo
 extern vmCvar_t etj_autoDemo;
-extern vmCvar_t etj_ad_savePBsOnly;
+extern vmCvar_t etj_ad_savePBOnly;
 extern vmCvar_t etj_ad_stopDelay;
 extern vmCvar_t etj_ad_targetPath;
 

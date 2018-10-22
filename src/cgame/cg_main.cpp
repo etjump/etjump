@@ -558,7 +558,7 @@ vmCvar_t etj_extraTrace;
 
 // Autodemo
 vmCvar_t etj_autoDemo;
-vmCvar_t etj_ad_savePBsOnly;
+vmCvar_t etj_ad_savePBOnly;
 vmCvar_t etj_ad_stopDelay;
 vmCvar_t etj_ad_targetPath;
 
@@ -948,7 +948,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE },
 	// Autodemo
 	{ &etj_autoDemo, "etj_autoDemo", "1", CVAR_ARCHIVE },
-	{ &etj_ad_savePBsOnly, "etj_ad_savePBsOnly", "0", CVAR_ARCHIVE },
+	{ &etj_ad_savePBOnly, "etj_ad_savePBOnly", "0", CVAR_ARCHIVE },
 	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
 	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
 };

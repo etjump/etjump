@@ -49,28 +49,19 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder()
 
 	playerEventsHandler->subscribe("load", [&](const std::vector<std::string>& args)
 	{
-		if (etj_autoDemo.integer > 1) tryRestart();
+		if (etj_autoDemo.integer > 0) tryRestart();
 	});
 
 	playerEventsHandler->subscribe("respawn", [&](const std::vector<std::string>& args)
 	{
 		auto revive = atoi(args[0].c_str());
 		if (revive) return;
-		if (etj_autoDemo.integer > 1) tryRestart();
-		// cut the recording if not in timerun
-		if (etj_autoDemo.integer == 1) checkTimerunDemoStop();		
-	});
-
-	playerEventsHandler->subscribe("timerun:start", [&](const std::vector<std::string>& args)
-	{
-		if (etj_autoDemo.integer != 1) return;
-		forceDelayedDemoSave(); // if required
-		tryRestart();
+		if (etj_autoDemo.integer > 0) tryRestart();		
 	});
 
 	playerEventsHandler->subscribe("timerun:completion", [&](const std::vector<std::string>& args)
 	{
-		if (etj_autoDemo.integer > 0 && etj_ad_savePBsOnly.integer <= 0)
+		if (etj_autoDemo.integer > 0 && etj_ad_savePBOnly.integer <= 0)
 		{
 			trySaveTimerunDemo(args[0], args[1]);
 		}
@@ -94,6 +85,8 @@ ETJump::AutoDemoRecorder::~AutoDemoRecorder() {}
 
 void ETJump::AutoDemoRecorder::tryRestart()
 {
+	// start autodemo for timerun maps only
+	if (etj_autoDemo.integer == 1 && !cg.hasTimerun) return;
 	// timeout
 	if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time) return;
 	// dont attempt to restart if in timerun mode
@@ -128,15 +121,14 @@ void ETJump::AutoDemoRecorder::saveTimerunDemo(const std::string &src, const std
 
 void ETJump::AutoDemoRecorder::saveDemo(const std::string &src, const std::string &dst)
 {
-	cancelDelayedDemoSave(); // if any
+	maybeCancelDelayedSave();
 	setTimeout([src, dst]{ FileSystem::safeCopy(src, dst); }, DEMO_SAVE_DELAY);
 }
 
 void ETJump::AutoDemoRecorder::saveDemoWithRestart(const std::string &src, const std::string &dst)
 {
 	saveDemo(src, dst);
-	if (etj_autoDemo.integer > 1) restart();
-	else _demo.stop(); // don't auto restart if etj_autoDemo is set to timerun mode
+	restart();
 }
 
 std::string ETJump::AutoDemoRecorder::createDemoPath(std::string name)
@@ -178,25 +170,11 @@ std::string ETJump::AutoDemoRecorder::formatRunTime(int millis)
 	return stringFormat("%02d.%02d.%03d", clock.min, clock.sec, clock.ms);
 }
 
-void ETJump::AutoDemoRecorder::cancelDelayedDemoSave()
+void ETJump::AutoDemoRecorder::maybeCancelDelayedSave()
 {
 	if (_delayedTimerId)
 	{
 		clearTimeout(_delayedTimerId);
 		_delayedTimerId = 0;
 	}
-}
-
-void ETJump::AutoDemoRecorder::checkTimerunDemoStop()
-{
-	if (!cgs.clientinfo[cg.clientNum].timerunActive && !_delayedTimerId) {
-		_demo.stop();
-	}
-}
-
-void ETJump::AutoDemoRecorder::forceDelayedDemoSave()
-{
-	if (!_delayedTimerId) return;
-	executeTimeout(_delayedTimerId);
-	cancelDelayedDemoSave();
 }
