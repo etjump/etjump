@@ -2591,7 +2591,7 @@ static const struct Manual commandManuals[] = {
 		{ "unban",        "!unban [ban ID]",                                                                                                                                                                "Unbans a player based on ban ID"                                                    },
 		{ "unmute",       "!unmute [target]",                                                                                                                                                               "Unmutes target player."                                                             },
 		{ "userinfo",     "!userinfo [id]",                                                                                                                                                                 "Prints user info."                                                                  },
-		{ "ad_save",      "ad_save [(optional) name]", "Saves currently ongoing autodemo temp file manually with given name." },
+		{ "ad_save",      "/ad_save [(optional) name]", "Saves currently ongoing autodemo temp file manually with given name." },
 };
 
 typedef struct

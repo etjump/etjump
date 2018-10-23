@@ -110,6 +110,7 @@ void ETJump::AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName, co
 	if (!_demo.isRecording()) return;
 	auto src = createDemoTempPath(_demoNames.current());
 	auto dst = createTimerunDemoPath(runName, runTime);
+	CG_AddPMItem(PM_MESSAGE, "^7Stopping demo...\n", cgs.media.voiceChatShader);
 	saveTimerunDemo(src, dst);
 }
 
@@ -128,6 +129,8 @@ void ETJump::AutoDemoRecorder::saveDemo(const std::string &src, const std::strin
 void ETJump::AutoDemoRecorder::saveDemoWithRestart(const std::string &src, const std::string &dst)
 {
 	saveDemo(src, dst);
+	CG_AddPMItem(PM_MESSAGE, "^7Demo saved!\n", cgs.media.voiceChatShader);
+	CG_Printf("^7Demo saved to %s\n", dst.c_str());
 	restart();
 }
 
@@ -137,7 +140,7 @@ std::string ETJump::AutoDemoRecorder::createDemoPath(std::string name)
 		FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
 		FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
 		cgs.rawmapname,
-		name,
+		FileSystem::Path::sanitize(name),
 		createTimeString());
 }
 
@@ -147,7 +150,7 @@ std::string ETJump::AutoDemoRecorder::createTimerunDemoPath(const std::string& r
 		FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
 		FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
 		cgs.rawmapname,
-		runName,
+		FileSystem::Path::sanitize(runName),
 		formatRunTime(atoi(runTime.c_str())),
 		createTimeString());
 }

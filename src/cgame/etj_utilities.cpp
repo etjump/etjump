@@ -160,6 +160,8 @@ void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 	normalizeColorIfRequired(color);
 }
 
+#ifdef CGAMEDLL
+
 int ETJump::setTimeout(std::function<void()> fun, int delay)
 {
 	return eventLoop->schedule(fun, delay);
@@ -194,3 +196,6 @@ void ETJump::executeTimeout(int handle)
 {
 	eventLoop->execute(handle);
 }
+
+#endif
+
