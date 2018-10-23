@@ -15,10 +15,11 @@ namespace ETJump
 {
 	class AutoDemoRecorder
 	{
-		struct TempNameGenerator
+		class TempNameGenerator
 		{
 			std::queue<std::string> names;
 			int nameCounter{ 0 };
+		public:
 			std::string pop();
 			std::string next();
 			std::string current();

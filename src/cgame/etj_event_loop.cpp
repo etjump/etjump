@@ -10,20 +10,20 @@ using std::remove_if;
 
 void ETJump::EventLoop::run()
 {
-	_processEvents();
-	_cleanUpEvents();
+	processEvents();
+	cleanUpEvents();
 }
 
 int ETJump::EventLoop::schedule(function<void()> fn, int delay, TaskPriorities priority)
 {
-	Task task{ fn, ++eventCounter, delay, _getNow() + delay, false, false };
-	return _scheduleEvent(task, priority);
+	Task task{ fn, ++eventCounter, delay, getNow() + delay, false, false };
+	return scheduleEvent(task, priority);
 }
 
 int ETJump::EventLoop::schedulePersistent(function<void()> fn, int delay, TaskPriorities priority)
 {
-	Task task{ fn, ++eventCounter, delay, _getNow() + delay, true, false };
-	return _scheduleEvent(task, priority);
+	Task task{ fn, ++eventCounter, delay, getNow() + delay, true, false };
+	return scheduleEvent(task, priority);
 }
 
 bool ETJump::EventLoop::unschedule(int taskId)
@@ -39,7 +39,7 @@ bool ETJump::EventLoop::unschedule(int taskId)
 	//}
 	//return false;
 
-	Task *task = _findTask(taskId);
+	Task *task = findTask(taskId);
 	if (task) {
 		task->deprecated = true; // let event processing handle removal
 		return true;
@@ -49,7 +49,7 @@ bool ETJump::EventLoop::unschedule(int taskId)
 
 void ETJump::EventLoop::shutdown()
 {
-	_removeEventsIf([&](Task const &task) {
+	removeEventsIf([&](Task const &task) {
 		if (!task.deprecated) task.fn();
 		return true;
 	});
@@ -65,14 +65,14 @@ int ETJump::EventLoop::pendingEventsCount()
 	return ordinaryTasks.empty() + importantTasks.size();
 }
 
-void ETJump::EventLoop::_processEvents()
+void ETJump::EventLoop::processEvents()
 {
 	if (!importantTasks.size() && !ordinaryTasks.size()) return;
 
-	auto now = _getNow();
+	auto now = getNow();
 	vector<Task*> queue;
 	isExecutingEvents = true;
-	_iterateEvents([&](Task &task) { if (!task.deprecated && now >= task.end) queue.push_back(&task); });
+	iterateEvents([&](Task &task) { if (!task.deprecated && now >= task.end) queue.push_back(&task); });
 
 	for (auto *task : queue)
 	{
@@ -83,24 +83,24 @@ void ETJump::EventLoop::_processEvents()
 	isExecutingEvents = false;
 }
 
-int ETJump::EventLoop::_scheduleEvent(const Task &task, TaskPriorities priority)
+int ETJump::EventLoop::scheduleEvent(const Task &task, TaskPriorities priority)
 {
 	if (priority == TaskPriorities::Default) ordinaryTasks.push_back(task);
 	else if (priority == TaskPriorities::Immediate) importantTasks.push_back(task);
 	return eventCounter;
 }
 
-void ETJump::EventLoop::_iterateEvents(function<void(Task &task)> fn)
+void ETJump::EventLoop::iterateEvents(function<void(Task &task)> fn)
 {
 	for (auto *storage : { &importantTasks, &ordinaryTasks }) {
 		for_each(storage->begin(), storage->end(), [&](Task &task) { fn(task); });
 	}
 }
 
-void ETJump::EventLoop::_cleanUpEvents()
+void ETJump::EventLoop::cleanUpEvents()
 {
-	auto now = _getNow();
-	_removeEventsIf([&](Task &task)
+	auto now = getNow();
+	removeEventsIf([&](Task &task)
 	{
 		if (task.deprecated) return true;
 		if (!task.persistent && now >= task.end) return true;
@@ -108,7 +108,7 @@ void ETJump::EventLoop::_cleanUpEvents()
 	});
 }
 
-void ETJump::EventLoop::_removeEventsIf(function<bool(Task& task)> fn)
+void ETJump::EventLoop::removeEventsIf(function<bool(Task& task)> fn)
 {
 	for (auto *storage : { &importantTasks, &ordinaryTasks }) {
 		auto removeIter = remove_if(storage->begin(), storage->end(), [&](Task &task) { return fn(task); });
@@ -116,7 +116,7 @@ void ETJump::EventLoop::_removeEventsIf(function<bool(Task& task)> fn)
 	}
 }
 
-ETJump::EventLoop::Task* ETJump::EventLoop::_findTask(int taskId)
+ETJump::EventLoop::Task* ETJump::EventLoop::findTask(int taskId)
 {
 	auto predicate = [&taskId](const Task &task) { return task.id == taskId; };
 	for (auto *storage : { &ordinaryTasks, &importantTasks }) {
@@ -126,15 +126,15 @@ ETJump::EventLoop::Task* ETJump::EventLoop::_findTask(int taskId)
 	return nullptr;
 }
 
-int64_t ETJump::EventLoop::_getNow()
+int64_t ETJump::EventLoop::getNow()
 {
 	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
 void ETJump::EventLoop::execute(int taskId)
 {
-	auto now = _getNow();
-	Task *target = _findTask(taskId);
+	auto now = getNow();
+	Task *target = findTask(taskId);
 	if (target)
 	{
 		target->end = 0;

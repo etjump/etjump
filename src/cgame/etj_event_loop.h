@@ -49,12 +49,12 @@ namespace ETJump
 		int pendingEventsCount();
 		void execute(int taskId); // nasty little helper to execute non persistent tasks beforehand
 	private:
-		void _processEvents();
-		int _scheduleEvent(const Task &task, TaskPriorities priority);
-		void _cleanUpEvents();
-		void _iterateEvents(function<void(Task &task)> fn);
-		void _removeEventsIf(function<bool(Task &task)> fn);
-		Task* _findTask(int taskId);
-		int64_t _getNow();
+		void processEvents();
+		int scheduleEvent(const Task &task, TaskPriorities priority);
+		void cleanUpEvents();
+		void iterateEvents(function<void(Task &task)> fn);
+		void removeEventsIf(function<bool(Task &task)> fn);
+		Task* findTask(int taskId);
+		int64_t getNow();
 	};
 }
