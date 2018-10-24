@@ -1,4 +1,12 @@
 #pragma once
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -54,6 +62,8 @@ namespace ETJump
 		// throws std::logic_error if mode is Read
 		// throws WriteFailedException if written bytes count != data bytes count
 		void write(const std::string& data) const;
+		void write(const std::vector<char>& data) const;
+		void write(const char* data, int len) const;
 
 		// lists files in a dir with extension
 		static std::vector<std::string> fileList(const std::string& path, const std::string& extension);

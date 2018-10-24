@@ -1,4 +1,12 @@
 #pragma once
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include <boost/format.hpp>
 #include <string>
 #include <vector>

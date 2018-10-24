@@ -24,6 +24,9 @@
 #include "etj_speed_drawable.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_awaited_command_handler.h"
+#include "etj_event_loop.h"
+#include "etj_autodemo_recorder.h"
+#include "etj_player_events_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -104,7 +107,10 @@ namespace ETJump
 	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
 	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
 	static bool isInitialized{ false };
-    std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
+	std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
+	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
+	std::shared_ptr<EventLoop> eventLoop;
+	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -550,6 +556,12 @@ vmCvar_t etj_lagometerY;
 vmCvar_t etj_spectatorVote;
 vmCvar_t etj_extraTrace;
 
+// Autodemo
+vmCvar_t etj_autoDemo;
+vmCvar_t etj_ad_savePBOnly;
+vmCvar_t etj_ad_stopDelay;
+vmCvar_t etj_ad_targetPath;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -934,6 +946,11 @@ cvarTable_t cvarTable[] =
 	{ &etj_lagometerY, "etj_lagometerY", "0", CVAR_ARCHIVE },
 	{ &etj_spectatorVote, "", "0", 0 },
 	{ &etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE },
+	// Autodemo
+	{ &etj_autoDemo, "etj_autoDemo", "1", CVAR_ARCHIVE },
+	{ &etj_ad_savePBOnly, "etj_ad_savePBOnly", "0", CVAR_ARCHIVE },
+	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
+	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
 };
 
 
@@ -3671,6 +3688,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
             Com_Printf(text);
         }
     );
+	ETJump::playerEventsHandler = std::make_shared<ETJump::PlayerEventsHandler>();
+	ETJump::eventLoop = std::make_shared<ETJump::EventLoop>();
 
 	////////////////////////////////////////////////////////////////
 	// TODO: move these to own client commands handler
@@ -3696,6 +3715,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	auto keySetSystem = new ETJump::KeySetSystem(etj_drawKeys);
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
 	ETJump::initDrawKeys(keySetSystem);
+	ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
 
 	CG_Printf("done\n");
 	CG_Printf("ETJump initialized.\n");
@@ -3773,6 +3793,10 @@ void CG_Shutdown(void)
 		// clear dynamic shaders in reverse order
 		ETJump::drawLeavesHandler = nullptr;
 		ETJump::consoleAlphaHandler = nullptr;
+		ETJump::eventLoop->shutdown();
+		ETJump::eventLoop = nullptr;
+		ETJump::playerEventsHandler = nullptr;
+
 		ETJump::isInitialized = false;
 	}
 }

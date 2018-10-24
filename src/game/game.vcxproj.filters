@@ -255,6 +255,12 @@
     <ClCompile Include="etj_entity_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_filesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="etj_time_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
@@ -404,6 +410,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_numeric_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_filesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_time_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,9 @@
 #include "cg_mainext.h"
 #include "cg_timerun.h"
 #include "etj_timerun_view.h"
+#include "etj_event_loop.h"
+#include "etj_awaited_command_handler.h"
+#include "etj_player_events_handler.h"
 
 #include <string>
 #include <memory>
@@ -38,6 +41,10 @@ namespace ETJump
 		{
 			trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
 		}
+	}
+	void onPlayerRespawn(qboolean revived)
+	{
+		playerEventsHandler->check("respawn", { revived ? "1" : "0" });
 	}
 }
 
@@ -97,6 +104,8 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		auto        previousRecord = atoi(CG_Argv(3));
 		timerun->startTimerun(runName, startTime, previousRecord);
 		ETJump::execCmdOnRunStart();
+		// run name, completion time, previous record
+		ETJump::playerEventsHandler->check("timerun:start", {runName, CG_Argv(1), CG_Argv(3) });
 		return qtrue;
 	}
 	// timerun_start_spec clientNum{integer} runStartTime{integer} runName{string}
@@ -126,8 +135,11 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	if (command == "timerun_stop")
 	{
 		auto completionTime = atoi(CG_Argv(1));
+
 		timerun->stopTimerun(completionTime);
 		ETJump::execCmdOnRunEnd();
+		// run name, completion time
+		ETJump::playerEventsHandler->check("timerun:stop", { CG_Argv(2), CG_Argv(1) });
 		return qtrue;
 	}
 	// timerun_stop_spec clientNum{integer} completionTime{integer} runName{string}
@@ -153,6 +165,13 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		auto        completionTime = atoi(CG_Argv(3));
 
 		timerun->record(clientNum, runName, completionTime);
+		
+		if (clientNum == cg.clientNum)
+		{
+			// run name, completion time
+			ETJump::playerEventsHandler->check("timerun:record", { CG_Argv(2), CG_Argv(3) });
+		}
+
 		return qtrue;
 	}
 	if (command == "completion")
@@ -162,6 +181,12 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		auto        completionTime = atoi(CG_Argv(3));
 
 		timerun->completion(clientNum, runName, completionTime);
+
+		if (clientNum == cg.clientNum)
+		{
+			// run name, completion time
+			ETJump::playerEventsHandler->check("timerun:completion", { CG_Argv(2), CG_Argv(3) });
+		}
 
 		return qtrue;
 	}
@@ -412,6 +437,15 @@ void CG_DrawActiveFrameExt()
 				}
 			}
 		}
+	}
+}
+
+namespace ETJump
+{
+	void runFrameEnd()
+	{
+		awaitedCommandHandler->runFrame();
+		eventLoop->run();
 	}
 }
 
