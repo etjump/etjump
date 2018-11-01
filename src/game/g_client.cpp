@@ -1601,14 +1601,14 @@ namespace ETJump
 			gent.client->sess.timerunActive ? 1 : 0
 		);
 
-		trap_GetConfigstring(CS_PLAYERS + gent.client->ps.clientNum, oldcs, sizeof(oldcs));
+		trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
 		if (Q_stricmp(oldcs, newcs) == 0)
 		{
 			return false;
 		}
 
-		trap_SetConfigstring(CS_PLAYERS + gent.client->ps.clientNum, newcs);
+		trap_SetConfigstring(CS_PLAYERS + ClientNum(&gent), newcs);
 
 		return true;
 	}
