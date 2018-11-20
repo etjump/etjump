@@ -4889,7 +4889,14 @@ void Cmd_Class_f(gentity_t *ent)
 	int weaponSlot = DEFAULT_WEAPON_SLOT;
 	if (args->size() > 2)
 	{
-		weaponSlot = std::max(std::min(std::stoi((*args)[2]), MAX_WEAPS_PER_CLASS), DEFAULT_WEAPON_SLOT);
+		try
+		{
+			int parsedValue = std::stoi((*args)[2]);
+			weaponSlot = std::max(std::min(parsedValue, MAX_WEAPS_PER_CLASS), DEFAULT_WEAPON_SLOT);
+		}
+		// suppress error and use DEFAULT_WEAPON_SLOT
+		catch (const std::invalid_argument& err) {}
+		catch (const std::out_of_range& err) {}
 	}
 	// out of bounds check - if no weapon is set in specified slot
 	const auto classInfo = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, classId);
