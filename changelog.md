@@ -48,7 +48,7 @@
 * players who die during timeruns are now put into limbo instantly without leaving a corpse or gun to the floor
 * fixed a crash when player reached over 83884088ups while CGaz 2 was enabled
 * fixed `setoffset` always adding 1 unit to Z origin
-* added shader `deformVertex` text directive support
+* added shader `deformVertexes` text directive support
 * added autodemo support to start recording whenever player loads (unless timerun is active) or spawns
   * `etj_autoDemo 0/1/2` - Enables autodemo for time run maps only (`1`) or for any type of map (`2`).
   * `etj_ad_savePBsOnly 0/1` - Save only PBs (`1`) or all demos (`0`) when timerun finishes. Default `0`.
