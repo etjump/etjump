@@ -15,6 +15,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
+#include <stdint.h>
 
 //==================================================================
 
@@ -1820,7 +1821,7 @@ extern gentity_t        g_entities[];   //DAJ was explicit set to MAX_ENTITIES
 extern g_campaignInfo_t g_campaigns[];
 extern int              saveGamePending;
 
-#define FOFS(x) ((int)&(((gentity_t *)0)->x))
+#define FOFS(x) ((intptr_t)&(((gentity_t *)0)->x))
 
 extern vmCvar_t g_gametype;
 

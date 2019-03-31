@@ -33,14 +33,19 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 			auto iter = row.find(header);
 			if (iter != end(row))
 			{
-				maxColumnWidths[header] = std::max(std::max(maxColumnWidths[header], header.length()), iter->second.length());
+                maxColumnWidths[header] = std::max(
+                            std::max(maxColumnWidths[header],
+                                static_cast<unsigned int>(header.length())),
+                                    static_cast<unsigned int>(iter->second.length()));
 				if (maxColumnWidths[header] > maxChars)
 				{
 					maxColumnWidths[header] = maxChars;
 				}
 			} else
 			{
-				maxColumnWidths[header] = std::max(maxColumnWidths[header], std::to_string(rows.size()).size());
+                maxColumnWidths[header] = std::max(
+                            maxColumnWidths[header],
+                                static_cast<unsigned int>(std::to_string(rows.size()).size()));
 			}
 		}
 	}
@@ -81,7 +86,8 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 				auto lwrCase = boost::to_lower_copy(header);
 				if (lwrCase == "index" || lwrCase == "idx" || lwrCase == "i")
 				{
-					maxColumnWidths[header] = std::max(maxColumnWidths[header], header.length());
+                    maxColumnWidths[header] = std::max(
+                                maxColumnWidths[header], static_cast<unsigned int>(header.length()));
 					auto extraChars = maxColumnWidths[header];
 					auto index = std::to_string(current + 1);
 					buffer += index + std::string(maxColumnWidths[header] - index.length() + 2, ' ');
