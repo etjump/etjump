@@ -65,7 +65,7 @@ static qboolean Menu_OverActiveItem(menuDef_t *menu, float x, float y);
 #ifdef CGAME
 #define MEM_POOL_SIZE  128 * 1024
 #else
-#define MEM_POOL_SIZE  1792 * 1024
+#define MEM_POOL_SIZE  2048 * 1024
 #endif
 
 static char memoryPool[MEM_POOL_SIZE];
@@ -173,7 +173,7 @@ UI_InitMemory
 void UI_InitMemory(void)
 {
 	allocPoint  = 0;
-	outOfMemory = qfalse;
+    outOfMemory = qfalse;
 }
 
 qboolean UI_OutOfMemory()
@@ -5175,7 +5175,7 @@ void Item_TextField_Paint(itemDef_t *item)
 	do
 	{
 		field_offset++;
-		if (buff + editPtr->paintOffset + field_offset == '\0')
+        if (*(buff + editPtr->paintOffset + field_offset) == '\0')
 		{
 			break; // keep it safe
 		}
@@ -9413,7 +9413,7 @@ void BG_PanelButton_RenderEdit(panel_button_t *button)
 		do
 		{
 			offset++;
-			if (buffer + offset  == '\0')
+            if (*(buffer + offset) == '\0')
 			{
 				break;
 			}
@@ -9445,7 +9445,7 @@ void BG_PanelButton_RenderEdit(panel_button_t *button)
 		do
 		{
 			offset++;
-			if (s + offset  == '\0')
+            if (*(s + offset) == '\0')
 			{
 				break;
 			}

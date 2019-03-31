@@ -1,5 +1,5 @@
 project(etjump)
-cmake_minimum_required(VERSION 2.8.1)
+cmake_minimum_required(VERSION 3.2)
 cmake_policy(SET CMP0015 NEW)
 
 # Release
@@ -8,35 +8,43 @@ set(CMAKE_BUILD_TYPE Release)
 # Store compiled binaries to folder
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 
+option(USE_GCC4 "Uses GCC4" ON)
+option(BUILD_I386 "Builds i386 binaries" ON)
+
 # Set the used compiler
-set(CMAKE_C_COMPILER gcc-4.9)
-set(CMAKE_CXX_COMPILER g++-4.9)
+if(USE_GCC4)
+    set(CMAKE_C_COMPILER gcc-4.9)
+    set(CMAKE_CXX_COMPILER g++-4.9)
+else()
+    set(CMAKE_C_COMPILER gcc)
+    set(CMAKE_CXX_COMPILER g++)
+endif()
 
-set(ARCH "i386")
+if(BUILD_I386)
+    set(ARCH "i386")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+else()
+    set(ARCH "x86_64")
+endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -fmessage-length=0 -std=c99")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++ -std=c++11")
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
 	# This has to be set to compile with -ffast-math
 	# Makes sqlite to use std isNan function instead of own implementation
 	add_definitions(-DSQLITE_HAVE_ISNAN)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif(${CMAKE_BUILD_TYPE} MATCHES "Release")
+endif()
 
 set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
 set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/game)
@@ -55,6 +63,7 @@ file(GLOB CGAME_SRC
 	"cgame/cg_ents.cpp"
 	"cgame/cg_edv.cpp"
 	"cgame/etj_autodemo_recorder.cpp"
+        "cgame/etj_awaited_command_handler.cpp"
 	"cgame/etj_client_commands_handler.cpp"
 	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_client_authentication.cpp"
@@ -64,6 +73,7 @@ file(GLOB CGAME_SRC
 	"cgame/etj_demo_recorder.cpp"
 	"cgame/etj_draw_leaves_handler.cpp"
 	"cgame/etj_event_loop.cpp"
+        "cgame/etj_inline_command_parser.cpp"
 	"cgame/etj_keyset_drawer.cpp"
 	"cgame/etj_keyset_keybind_drawer.cpp"
 	"cgame/etj_keyset_system.cpp"
@@ -224,6 +234,7 @@ file(GLOB QAGAME_SRC
 )
 
 file(GLOB UI_SRC
+        "cgame/etj_utilities.cpp"
 	"game/bg_campaign.cpp"
 	"game/bg_classes.cpp"
 	"game/bg_misc.cpp"

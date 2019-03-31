@@ -596,7 +596,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 		G_ShutdownGame(arg0);
 		return 0;
 	case GAME_CLIENT_CONNECT:
-		return (int)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
+        return (intptr_t)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
 	case GAME_CLIENT_THINK:
 		ClientThink(arg0);
 		return 0;
