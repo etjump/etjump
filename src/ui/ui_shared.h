@@ -473,6 +473,9 @@ typedef struct
 	float yscale;
 	float xscale;
 	float bias;
+    int screenWidth;
+    int screenHeight;
+
 	int realTime;
 	int frameTime;
 	int cursorx;
@@ -634,5 +637,13 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo
 
 void AdjustFrom640(float *x, float *y, float *w, float *h);
 void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h, vec_t angle);
+
+extern displayContextDef_t *DC;
+
+#define SCREEN_WIDTH         DC->screenWidth
+#define SCREEN_HEIGHT        DC->screenHeight
+#define SCREEN_OFFSET_X     (SCREEN_WIDTH - 640) / 2.f
+#define SCREEN_CENTER_X      SCREEN_WIDTH / 2.f
+#define SCREEN_CENTER_Y      SCREEN_HEIGHT / 2.f
 
 #endif

@@ -1097,8 +1097,8 @@ _UI_Refresh
 void UI_DrawCenteredPic(qhandle_t image, int w, int h)
 {
 	int x, y;
-	x = (SCREEN_WIDTH - w) / 2;
-	y = (SCREEN_HEIGHT - h) / 2;
+    x = (SCREEN_WIDTH - w) / 2;
+    y = (SCREEN_HEIGHT - h) / 2;
 	UI_DrawHandlePic(x, y, w, h, image);
 }
 
@@ -1151,7 +1151,7 @@ void _UI_Refresh(int realtime)
 	// OSP - blackout if speclocked
 	if (ui_blackout.integer > 0)
 	{
-		UI_FillRect(-10, -10, SCREEN_WIDTH + 10, 490, colorBlack);
+        UI_FillRect(-10, -10, SCREEN_WIDTH + 10, 490, colorBlack);
 	}
 
 	if (Menu_Count() > 0)
@@ -9294,8 +9294,12 @@ void _UI_Init(int legacyClient, int clientVersion)
 	UI_ParseGLConfig();
 
 	// for 640x480 virtualized screen
+    int width = uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight;
+    uiInfo.uiDC.screenWidth = width > 640 ? width : 640;
+    uiInfo.uiDC.screenHeight = 480;
+
 	uiInfo.uiDC.yscale = uiInfo.uiDC.glconfig.vidHeight / 480.0;
-	uiInfo.uiDC.xscale = uiInfo.uiDC.glconfig.vidWidth / (float)SCREEN_WIDTH;
+    uiInfo.uiDC.xscale = uiInfo.uiDC.glconfig.vidWidth / (float)uiInfo.uiDC.screenWidth;
 
 	if (uiInfo.uiDC.glconfig.vidWidth * 480 > uiInfo.uiDC.glconfig.vidHeight * 640)
 	{
@@ -9528,9 +9532,9 @@ void _UI_MouseEvent(int dx, int dy)
 	{
 		uiInfo.uiDC.cursorx = 0;
 	}
-	else if (uiInfo.uiDC.cursorx > SCREEN_WIDTH)
+    else if (uiInfo.uiDC.cursorx > SCREEN_WIDTH)
 	{
-		uiInfo.uiDC.cursorx = SCREEN_WIDTH;
+        uiInfo.uiDC.cursorx = SCREEN_WIDTH;
 	}
 
 	uiInfo.uiDC.cursory += dy;
@@ -9538,9 +9542,9 @@ void _UI_MouseEvent(int dx, int dy)
 	{
 		uiInfo.uiDC.cursory = 0;
 	}
-	else if (uiInfo.uiDC.cursory > SCREEN_HEIGHT)
+    else if (uiInfo.uiDC.cursory > SCREEN_HEIGHT)
 	{
-		uiInfo.uiDC.cursory = SCREEN_HEIGHT;
+        uiInfo.uiDC.cursory = SCREEN_HEIGHT;
 	}
 
 	if (Menu_Count() > 0)

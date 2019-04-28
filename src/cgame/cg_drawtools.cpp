@@ -20,22 +20,17 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 
 }
 
-int ETJump_GetScreenWidth() {
-	int width = cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight;
-	return width > 640 ? width : 640;
-}
-
 void ETJump_AdjustPosition(float *x) {
-	*x *= (SCREEN_WIDTH / 640.f);
+    *x *= (SCREEN_WIDTH / 640.f);
 }
 
 float ETJump_AdjustPosition(float x) {
-	return x * (SCREEN_WIDTH / 640.f);
+    return x * (SCREEN_WIDTH / 640.f);
 }
 
 void ETJump_EnableWidthScale(bool enable) {
 	if (enable) {
-		cgs.screenXScale = cgs.glconfig.vidWidth / static_cast<float>(SCREEN_WIDTH);
+        cgs.screenXScale = cgs.glconfig.vidWidth / static_cast<float>(SCREEN_WIDTH);
 	}
 	else {
 		cgs.screenXScale = cgs.glconfig.vidWidth / 640.f;
