@@ -959,7 +959,6 @@ typedef struct
 
 extern uiInfo_t uiInfo;
 
-
 extern void         UI_Init(void);
 extern void         UI_Shutdown(void);
 extern void         UI_KeyEvent(int key);
@@ -1229,6 +1228,5 @@ void UI_InitGameinfo(void);
 const char *UI_DescriptionForCampaign(void);
 const char *UI_NameForCampaign(void);
 
-int ETJump_GetScreenWidth();
 void ETJump_DrawMapDetails();
 #endif
