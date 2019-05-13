@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include "cg_local.h"
 #include "etj_event_loop.h"
 
 using std::find_if;
@@ -128,7 +129,7 @@ ETJump::EventLoop::Task* ETJump::EventLoop::findTask(int taskId)
 
 int64_t ETJump::EventLoop::getNow()
 {
-	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    return static_cast<int64_t>(cg.time);
 }
 
 void ETJump::EventLoop::execute(int taskId)
