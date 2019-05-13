@@ -3359,7 +3359,7 @@ void CG_LoadHudMenu()
 
 	cgDC.xscale = cgs.screenXScale;
 	cgDC.yscale = cgs.screenYScale;
-    int width = static_cast<int>(cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight);
+    int width = static_cast<int>(cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight + 0.5f);
     cgDC.screenWidth = width > 640 ? width : 640;
     cgDC.screenHeight = 480;
 
@@ -3477,7 +3477,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	// get the rendering configuration from the client system
 	trap_GetGlconfig(&cgs.glconfig);
-    int width = static_cast<int>(cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight);
+    int width = static_cast<int>(cgs.glconfig.vidWidth * 480.0f / cgs.glconfig.vidHeight + 0.5f);
     width = width > 640 ? width : 640;
     cgs.screenXScale = cgs.glconfig.vidWidth / static_cast<float>(width);
     cgs.screenYScale = cgs.glconfig.vidHeight / 480.0f;

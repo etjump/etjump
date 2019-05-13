@@ -9294,7 +9294,7 @@ void _UI_Init(int legacyClient, int clientVersion)
 	UI_ParseGLConfig();
 
 	// for 640x480 virtualized screen
-    int width = uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight;
+    int width = static_cast<int>(uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight + 0.5f);
     uiInfo.uiDC.screenWidth = width > 640 ? width : 640;
     uiInfo.uiDC.screenHeight = 480;
 
