@@ -18,3 +18,8 @@ void CvarShadow::forceCvarSet(const vmCvar_t *cvar) const
 {
 	trap_Cvar_Set(_target.c_str(), cvar->string);
 }
+
+void CvarShadow::forceCvarSet() const
+{
+    trap_Cvar_Set(_target.c_str(), _shadow->string);
+}

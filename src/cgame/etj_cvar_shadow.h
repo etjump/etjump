@@ -21,5 +21,6 @@ namespace ETJump
 		CvarShadow(const vmCvar_t *shadow, std::string target);
 		~CvarShadow();
 		void forceCvarSet(const vmCvar_t *cvar) const;
+        void forceCvarSet() const;
 	};
 }

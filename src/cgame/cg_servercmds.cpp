@@ -7,11 +7,15 @@
 #include <vector>
 #include "etj_client_commands_handler.h"
 #include "../game/etj_numeric_utilities.h"
+#include "etj_cvar_shadow.h"
 
 #define SCOREPARSE_COUNT    9
 
 void CG_LimboMenu_f();
 
+namespace ETJump {
+    extern std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
+}
 
 /*
 =================
@@ -1133,6 +1137,12 @@ static void CG_MapRestart(void)
 	CG_ParseTagConnects();
 
 	trap_Cvar_Set("cg_thirdPerson", "0");
+
+    // force original cvars to match the shadow values
+    for (auto &cvarShadow : ETJump::cvarShadows)
+    {
+        cvarShadow.get()->forceCvarSet();
+    }
 
 	ETJump::initTimer();
 }
