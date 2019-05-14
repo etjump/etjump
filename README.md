@@ -2,6 +2,8 @@
 
 ETJump is a Wolfenstein: Enemy Territory trickjump modification.
  
+https://dev.azure.com/etjump/etjump/_apis/build/status/etjump-CI?branchName=master
+ 
 ## Required environment variables
 * `ETROOT` Path to the ET installation directory.
 * `GOOGLE_TEST_ROOT` Path to the Google Test framework installation directory.
