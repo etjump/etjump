@@ -10,6 +10,7 @@ USER INTERFACE MAIN
 =======================================================================
 */
 
+#include <cmath>
 #include "ui_local.h"
 #include <memory>
 #include <boost/algorithm/string.hpp>
@@ -9294,7 +9295,7 @@ void _UI_Init(int legacyClient, int clientVersion)
 	UI_ParseGLConfig();
 
 	// for 640x480 virtualized screen
-    int width = uiInfo.uiDC.glconfig.vidWidth * 480.0f / uiInfo.uiDC.glconfig.vidHeight;
+    int width = static_cast<int>(ceil(uiInfo.uiDC.glconfig.vidWidth * 480.0 / uiInfo.uiDC.glconfig.vidHeight));
     uiInfo.uiDC.screenWidth = width > 640 ? width : 640;
     uiInfo.uiDC.screenHeight = 480;
 
