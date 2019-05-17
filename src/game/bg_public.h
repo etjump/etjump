@@ -19,7 +19,7 @@
 #define MOD_VERSION "dev " __DATE__ " " __TIME__
 #else
 #if !defined(MOD_VERSION) || BOOST_PP_IS_EMPTY(MOD_VERSION) 
-#define MOD_VERSION "#{MOD_VERSION}"
+#define MOD_VERSION "#{MOD_VERSION}#"
 #endif
 #endif
 
