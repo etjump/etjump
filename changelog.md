@@ -55,6 +55,8 @@
   * `etj_ad_targetPath <path>` - Folder inside demos folder where autodemo saves demos. Default `autodemo` (saves in demos/autodemo).
   * `ad_save <demoname>` - Save currently active demo manually. Format: `playername_map_demoname[DD-MM-YYYY-HHMMSS]`.
   * `/man ad_save` prints usage description.
+* fixed unlocked cvars resetting on map changes/restarts
+* fixed rounding errors with virtual screen on widescreen resolutions
 
 # ETJump 2.3.0
 
