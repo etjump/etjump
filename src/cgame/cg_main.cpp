@@ -104,7 +104,7 @@ namespace ETJump
 	std::shared_ptr<OperatingSystem> operatingSystem;
 	std::vector<std::unique_ptr<IRenderable>> renderables;
 	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-	static std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
+    std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
 	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
 	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
 	static bool isInitialized{ false };

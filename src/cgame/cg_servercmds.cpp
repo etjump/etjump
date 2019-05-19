@@ -7,11 +7,15 @@
 #include <vector>
 #include "etj_client_commands_handler.h"
 #include "../game/etj_numeric_utilities.h"
+#include "etj_cvar_shadow.h"
 
 #define SCOREPARSE_COUNT    9
 
 void CG_LimboMenu_f();
 
+namespace ETJump {
+    extern std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
+}
 
 /*
 =================
@@ -825,6 +829,14 @@ static void CG_ConfigStringModified(void)
 	else if (num >= CS_OID_DATA && num < CS_OID_DATA + MAX_OID_TRIGGERS)
 	{
 		CG_ParseOIDInfo(num);
+	}
+	else if (num == CS_SYSTEMINFO)
+	{
+		// force original cvars to match the shadow values
+		for (auto &cvarShadow : ETJump::cvarShadows)
+		{
+			cvarShadow.get()->forceCvarSet();
+		}
 	}
 }
 
