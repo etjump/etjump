@@ -830,6 +830,14 @@ static void CG_ConfigStringModified(void)
 	{
 		CG_ParseOIDInfo(num);
 	}
+	else if (num == CS_SYSTEMINFO)
+	{
+		// force original cvars to match the shadow values
+		for (auto &cvarShadow : ETJump::cvarShadows)
+		{
+			cvarShadow.get()->forceCvarSet();
+		}
+	}
 }
 
 /*
@@ -1137,12 +1145,6 @@ static void CG_MapRestart(void)
 	CG_ParseTagConnects();
 
 	trap_Cvar_Set("cg_thirdPerson", "0");
-
-    // force original cvars to match the shadow values
-    for (auto &cvarShadow : ETJump::cvarShadows)
-    {
-        cvarShadow.get()->forceCvarSet();
-    }
 
 	ETJump::initTimer();
 }
