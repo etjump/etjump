@@ -293,14 +293,39 @@ namespace ETJump
 			return false;
 		}
 
-		auto match = G_MatchOneMap(arg);
-		if (!match)
+        auto matches = G_MatchAllMaps(arg);
+
+        if (matches.size() == 0)
 		{
-			map = stringFormat("^3callvote: ^7found multiple maps matching ^3%s^7.\n", arg);
+            map = stringFormat("^3callvote: ^7no map matching ^3%s^7.\n", arg);
 			return false;
 		}
 
-		map = match;
+        if (matches.size() > 1)
+        {
+            map = stringFormat("^3callvote: ^7found multiple maps matching ^3%s^7.\n", arg);
+            auto perRow = 3;
+            auto mapsOnCurrentRow = 0;
+            for (auto& match : matches)
+            {
+                ++mapsOnCurrentRow;
+                if (mapsOnCurrentRow > perRow)
+                {
+                    mapsOnCurrentRow = 1;
+                    map += (boost::format("\n%-22s") % match).str();
+                }
+                else
+                {
+                    map += (boost::format("%-22s") % match).str();
+                }
+            }
+
+            map += "\n";
+
+            return false;
+        }
+
+        map = matches[0];
 
 		if (map == level.rawmapname)
 		{

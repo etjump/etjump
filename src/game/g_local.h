@@ -12,6 +12,7 @@
 #include <climits>
 #include <memory>
 #include <string>
+#include <vector>
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
@@ -2767,6 +2768,7 @@ void InterruptRun(gentity_t *ent);
 
 void RunFrame(int levelTime);
 const char *G_MatchOneMap(const char *arg);
+std::vector<std::string> G_MatchAllMaps(const char *arg);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ETJump global systems

@@ -272,6 +272,24 @@ const char *G_MatchOneMap(const char *arg)
 	return NULL;
 }
 
+std::vector<std::string> G_MatchAllMaps(const char *arg)
+{
+    auto                     currentMaps = game.mapStatistics->getCurrentMaps();
+    std::vector<std::string> matchingMaps;
+    std::string              mapName = arg ? arg : "";
+    boost::algorithm::to_lower(mapName);
+
+    for (auto & map : *(currentMaps))
+    {
+        if (map.find(mapName) != std::string::npos)
+        {
+            matchingMaps.push_back(map);
+        }
+    }
+
+    return matchingMaps;
+}
+
 const char *GetRandomMapByType(const char *customType)
 {
 	static char buf[MAX_TOKEN_CHARS] = "\0";
