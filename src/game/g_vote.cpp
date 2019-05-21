@@ -297,7 +297,7 @@ namespace ETJump
 
         if (matches.size() == 0)
 		{
-            map = stringFormat("^3callvote: ^7no map matching ^3%s^7.\n", arg);
+            map = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", arg);
 			return false;
 		}
 
