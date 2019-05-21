@@ -305,6 +305,8 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 		listItem->shader = cgs.media.pmImages[type];
 	}
 
+	trap_Print(va("%s\n", message));
+
 	listItem->repeats = 1;
 	
 	// don't add repeats into stack, but count them
@@ -325,8 +327,6 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 	{
 		listItem->message[strlen(listItem->message) - 1] = 0;
 	}
-
-	trap_Print(va("%s\n", listItem->message));
 
 	// rain - added parens
 	for (end = strchr(listItem->message, '\n'); end; end = strchr(listItem->message, '\n'))
