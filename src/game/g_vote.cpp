@@ -303,7 +303,7 @@ namespace ETJump
 
         if (matches.size() > 1)
         {
-            map = stringFormat("^3callvote: ^7found multiple maps matching ^3%s^7.\n", arg);
+            map = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matches.size(), arg);
             auto perRow = 3;
             auto mapsOnCurrentRow = 0;
             for (auto& match : matches)
