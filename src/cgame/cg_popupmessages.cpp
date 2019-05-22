@@ -303,7 +303,7 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 	else
 	{
 		listItem->shader = cgs.media.pmImages[type];
-	}	
+	}
 
 	listItem->repeats = 1;
 	
