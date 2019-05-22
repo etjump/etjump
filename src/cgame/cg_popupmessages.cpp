@@ -308,9 +308,15 @@ void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader
 	listItem->repeats = 1;
 	
 	// don't add repeats into stack, but count them
-	if (etj_popupGrouped.integer && cg_pmWaitingList && !Q_stricmp(message, cg_pmWaitingList->message)) {
+	if (etj_popupGrouped.integer && cg_pmWaitingList && !Q_stricmp(message, cg_pmWaitingList->message))
+	{
 		cg_pmWaitingList->time = cg.time;
 		cg_pmWaitingList->repeats++;
+		// Print duplicates in console unless etj_popupGrouped is 2
+		if (etj_popupGrouped.integer < 2)
+		{
+			trap_Print(va("%s\n", message));
+		}
 		return;
 	}
 
