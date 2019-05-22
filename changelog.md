@@ -20,6 +20,7 @@
 	* only spectators who cast votes are count towards `vote_percent` to prevent votes never passing on servers with multiple afk spectators
   * removed in-game vote -> misc menu and replaced it with map restart & random map buttons
   * various string formatting and spelling fixes
+  * `callvote map` now lists matched maps if more than one match was found
 * added `await` command. Works similar to `wait` except doesn't interrupt other user actions
   * syntax: `await <frames> <command1> | <command2> | <command3>...`
 * added new color parsing support for crosshair
@@ -57,6 +58,9 @@
   * `/man ad_save` prints usage description.
 * fixed unlocked cvars resetting on map changes/restarts
 * fixed rounding errors with virtual screen on widescreen resolutions
+* extended `etj_popupGrouped`
+  * __1__ = group popups, print duplicates in console
+  * __2__ = group popups and console prints
 
 # ETJump 2.3.0
 
