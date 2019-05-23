@@ -56,7 +56,7 @@ menuDef {
         SLIDER(16, 376, 276, 8, "Popup stay time:", 0.2, 8, etj_popupStayTime 2000 0 30000 250, "How long in milliseconds popup messages stay on screen\netj_popupStayTime")
         CVARINTLABEL(16, 388, 276, 8, "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER(16, 388, 276, 8, "Popup fade time:", 0.2, 8, etj_popupFadeTime 2500 0 10000 250, "Duration of fade animation in milliseconds on popup messages\netj_popupFadeTime")
-        YESNO(16, 400, 276, 8, "Group popups:", 0.2, 8, "etj_popupGrouped", "Group identical popups to one message\netj_popupGrouped")
+        MULTI(16, 400, 276, 8, "Group popups:", 0.2, 8, "etj_popupGrouped", cvarFloatList { "No" 0 "Popups" 1 "Popups + console" 2 }, "Group identical popups to one message\netj_popupGrouped")
 
     SUBWINDOW(308, 32, 292, 268, "INDICATORS")
         MULTI(316, 52, 276, 8, "Overbounce detector:", 0.2, 8, "etj_drawOB", cvarFloatList { "No" 0 "Yes" 1 "Advanced" 2 }, "Draw overbounce detector\netj_drawOB")
