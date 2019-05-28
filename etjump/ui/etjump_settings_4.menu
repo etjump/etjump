@@ -62,7 +62,7 @@ menuDef {
         YESNO				(316, SUBW_AUTODEMO_Y + 32, 276, 8, "Save PBs Only:", 0.2, 8, "etj_ad_savePBOnly", "Save personal best runs only\netj_ad_savePBOnly")
         CVARINTLABEL		(316, SUBW_AUTODEMO_Y + 44, 276, 8, "etj_ad_stopDelay", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_AUTODEMO_Y + 44, 276, 8, "Demo stop delay:", 0.2, 8, etj_ad_stopDelay 2000 0 10000 100, "Delay in milliseconds to stop recording on timerun finish\netj_ad_stopDelay")
-        EDITFIELD			(316, SUBW_AUTODEMO_Y + 56, 276, 10, "Autodemo path:", 0.2, 8, "etj_ad_targetPath", 128, 32, "Path to store autodemo demos in (demos/...\netj_ad_targetPath")
+        EDITFIELD			(316, SUBW_AUTODEMO_Y + 56, 276, 10, "Autodemo path:", 0.2, 8, "etj_ad_targetPath", 128, 32, "Path to store autodemo demos in (demos/...)\netj_ad_targetPath")
 
     SUBWINDOW(308, 116, 292, 160, "UNLOCKED")
         YESNO				(316, SUBW_UNLOCKED_Y + 20, 276, 8, "View log:", 0.2, 8, "etj_viewlog", "View external console window (ALT + TAB when enabling)\netj_viewlog (viewlog)")
