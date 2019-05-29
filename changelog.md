@@ -61,6 +61,7 @@
 * extended `etj_popupGrouped`
   * __1__ = group popups, print duplicates in console
   * __2__ = group popups and console prints
+* reorganized settings menu
 
 # ETJump 2.3.0
 
