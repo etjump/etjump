@@ -294,7 +294,7 @@ std::string diffToString(int selfTime, int otherTime)
 	auto ams = std::abs(diff);
 	auto diffComponents = ETJump::toClock(ams);
 
-	std::string diffSign;
+	const char* diffSign;
 	if (diff > 0)
 	{
 		diffSign = "^\\+";
