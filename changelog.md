@@ -51,7 +51,7 @@
 * added shader `deformVertexes` text directive support
 * added autodemo support to start recording whenever player loads (unless timerun is active) or spawns
   * `etj_autoDemo 0/1/2` - Enables autodemo for time run maps only (`1`) or for any type of map (`2`).
-  * `etj_ad_savePBsOnly 0/1` - Save only PBs (`1`) or all demos (`0`) when timerun finishes. Default `0`.
+  * `etj_ad_savePBOnly 0/1` - Save only PBs (`1`) or all demos (`0`) when timerun finishes. Default `0`.
   * `etj_ad_stopDelay <ms>` - Delay demo stop after timerun finishes. Default `2000`. Valid range `0-10000`.
   * `etj_ad_targetPath <path>` - Folder inside demos folder where autodemo saves demos. Default `autodemo` (saves in demos/autodemo).
   * `ad_save <demoname>` - Save currently active demo manually. Format: `playername_map_demoname[DD-MM-YYYY-HHMMSS]`.
@@ -62,6 +62,7 @@
   * __1__ = group popups, print duplicates in console
   * __2__ = group popups and console prints
 * reorganized settings menu
+* `ranks <runname>` command now shows time differences relative to your time
 
 # ETJump 2.3.0
 

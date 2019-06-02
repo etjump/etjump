@@ -15,6 +15,7 @@
 #include "etj_printer.h"
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
+#include "etj_time_utilities.h"
 #include "g_local.h"
 
 std::string millisToString(int millis)
@@ -287,6 +288,31 @@ std::string rankToString(int rank)
 	}
 }
 
+std::string diffToString(int selfTime, int otherTime)
+{
+	auto diff = otherTime - selfTime;
+	auto ams = std::abs(diff);
+	auto diffComponents = ETJump::toClock(ams);
+
+	std::string diffSign;
+	if (diff > 0)
+	{
+		diffSign = "^\\+";
+	}
+	else if (diff < 0)
+	{
+		diffSign = "^j-";
+	}
+	else
+	{
+		diffSign = "^z+";
+	}
+
+	auto diffFormated = ETJump::stringFormat("%s%02i:%02i.%03i", diffSign, diffComponents.min, diffComponents.sec, diffComponents.ms);
+
+	return diffFormated;
+}
+
 void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 {
 	auto lowercaseName = runName;
@@ -306,7 +332,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 	if (run == nullptr)
 	{
 		Printer::SendConsoleMessage(clientNum,
-			"^3error: ^7no records found by name: " + runName);
+			"^3error: ^7no records found by name: " + runName + "\n");
 		return;
 	}
 	
@@ -320,7 +346,19 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 
 	auto rank = 1;
 	buffer += " ^2Run: ^7" + run->first + "\n\n";
-	buffer += "^g Rank   Time        Player\n";
+	buffer += "^g Rank  Time       Difference     Player\n";
+
+	// Get clients own time first for difference calculations
+	int selfTime = 0;
+	for (auto& record : run->second)
+	{
+		if (record->userId == self->userId)
+		{
+			selfTime = record->time;
+			foundSelf = true;
+			break;
+		}
+	}
 
 	for (auto&record:run->second)
 	{
@@ -328,12 +366,12 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 		{
 			if (record->userId == self->userId)
 			{
-				buffer   += (boost::format("^7 %5s   ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
-				foundSelf = true;
+				buffer   += (boost::format("^7%5s    ^7%s                 ^7%s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
 			}
 			else
 			{
-				buffer += (boost::format("^7 %5s   ^7 %s   %s\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+				auto diff = foundSelf ? diffToString(selfTime, record->time) : "          "; // Just print bunch of whitespace as difference if client has no record
+				buffer += (boost::format("^7%5s    ^7%s  ^9%s     ^7%s\n") % rankToString(rank) % millisToString(record->time) % diff % record->playerName).str();
 			}
 		}
 		else
@@ -345,7 +383,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string& runName)
 
 			if (record->userId == self->userId)
 			{
-				buffer   += (boost::format("^7 %4s    ^7 %s   %s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
+				buffer   += (boost::format("^7%4s     ^7%s     ^7%s ^7(^1You^7)\n") % rankToString(rank) % millisToString(record->time) % record->playerName).str();
 				foundSelf = true;
 			}
 		}
