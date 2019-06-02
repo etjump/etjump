@@ -3686,6 +3686,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	}, bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
 		ETJump::serverCommandsHandler
 	);
+	ETJump::playerEventsHandler = std::make_shared<ETJump::PlayerEventsHandler>();
     ETJump::awaitedCommandHandler = std::make_shared<ETJump::AwaitedCommandHandler>(
         ETJump::consoleCommandsHandler,
         trap_SendConsoleCommand,
@@ -3694,7 +3695,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
             Com_Printf(text);
         }
     );
-	ETJump::playerEventsHandler = std::make_shared<ETJump::PlayerEventsHandler>();
 	ETJump::eventLoop = std::make_shared<ETJump::EventLoop>();
 
 	////////////////////////////////////////////////////////////////
