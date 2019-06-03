@@ -1,7 +1,17 @@
+#include "cg_local.h"
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 #include "etj_awaited_command_handler.h"
 #include "etj_client_commands_handler.h"
 #include "../game/etj_string_utilities.h"
 #include "etj_inline_command_parser.h"
+#include "etj_player_events_handler.h"
 
 
 ETJump::AwaitedCommandHandler::AwaitedCommandHandler(
@@ -16,8 +26,22 @@ ETJump::AwaitedCommandHandler::AwaitedCommandHandler(
     _awaitedCommands.clear();
     _consoleCommandsHandler->subscribe("await", [this](const std::vector<std::string>& args)
     {
+		if(cgs.clientinfo->timerunActive)
+		{
+			message("^3Error: ^7cannot use ^3await ^7during timeruns.");
+			return;
+		}
         this->awaitCommand(args);
     });
+
+	playerEventsHandler->subscribe("timerun:start", [&](const std::vector<std::string>& args)
+	{
+		if (_awaitedCommands.size())
+		{
+			CG_AddPMItem(PM_MESSAGE, "^7Timerun started, ^3await ^7queue cleared.", cgs.media.stopwatchIcon);
+			_awaitedCommands.clear();
+		}
+	});
 }
 
 ETJump::AwaitedCommandHandler::~AwaitedCommandHandler()

@@ -23,6 +23,7 @@
   * `callvote map` now lists matched maps if more than one match was found
 * added `await` command. Works similar to `wait` except doesn't interrupt other user actions
   * syntax: `await <frames> <command1> | <command2> | <command3>...`
+  * `await` is not available during timeruns, and command queue is cleared on timerun starts
 * added new color parsing support for crosshair
 * fixed a bug in color parser which interpreted hex colors with `00` as single channeled color
 * fixed an old etmain bug where changing crosshair via console would not instantly update crosshair preview in menu
