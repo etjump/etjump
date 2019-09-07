@@ -1,8 +1,6 @@
 # ETJump
 
 ETJump is a Wolfenstein: Enemy Territory trickjump modification.
-
-[![Build Status](https://dev.azure.com/etjump/etjump/_apis/build/status/etjump-CI?branchName=master)](https://dev.azure.com/etjump/etjump/_build/latest?definitionId=1&branchName=master)
  
 ## Required environment variables
 * `ETROOT` Path to the ET installation directory.
