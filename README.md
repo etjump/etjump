@@ -1,20 +1,22 @@
 # ETJump
 
-ETJump is a Wolfenstein: Enemy Territory trickjump modification.
- 
+ETJump is a Wolfenstein: Enemy Territory trickjump modification.  
+* You can find latest release under the [releases](https://github.com/etjump/etjump/releases) tab.  
+* Documentation is hosted on http://etjump.readthedocs.io/en/latest/.  
+* Join our [discord](https://discord.gg/AcyWMqR) server.
+
+# Compiling 
+ETJump is compiled on Windows on MSVC toolset `v140`.  
+Visual C++ Redistributable for Visual Studio 2015 has to be installed in order to run the binaries on 
+Windows. Redistributable can be downloaded from `https://www.microsoft.com/en-us/download/details.aspx?id=48145`.  
+Linux binaries are compiled on Ubuntu 14.04. 
+
 ## Required environment variables
 * `ETROOT` Path to the ET installation directory.
 * `GOOGLE_TEST_ROOT` Path to the Google Test framework installation directory.
 * `BOOST_ROOT`  Path to the Boost library installation directory.
 
-## Compiling 
-
-ETJump is compiled on Windows on MSVC toolset v140. Visual C++ Redistributable 
-for Visual Studio 2015 has to be installed in order to run the binaries on 
-Windows. Redistributable can be downloaded from 
-`https://www.microsoft.com/en-us/download/details.aspx?id=48145`. Linux binaries 
-are compiled on Ubuntu 14.04. 
-
+## Dependencies
 ETJump currently depends on 3 libraries that must be installed before ETJump can 
 be compiled: SQLite3, Boost and Google Test. 
 
@@ -36,8 +38,8 @@ ETJump requires 7zip `http://www.7-zip.org/` for the installation script.
 
 Visual Studio project has a post-build event that will execute the 
 build/install.bat to create the pk3 using 7zip.exe. Built pk3 will then be 
-copied to $(ETROOT)/etjump directory. Starting the Debug mode will execute 
-$(ETROOT)/et.exe and attach to it. 
+copied to `$(ETROOT)/etjump` directory. Starting the Debug mode will execute 
+`$(ETROOT)/et.exe` and attach to it. 
 
 ## Unit testing
 
