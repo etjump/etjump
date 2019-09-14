@@ -5,6 +5,8 @@ ETJump is a Wolfenstein: Enemy Territory trickjump modification.
 * Documentation is hosted on http://etjump.readthedocs.io/en/latest/.  
 * Join our [discord](https://discord.gg/AcyWMqR) server.
 
+[![Build Status](https://dev.azure.com/etjump/etjump/_apis/build/status/etjump-CI?branchName=master)](https://dev.azure.com/etjump/etjump/_build/latest?definitionId=1&branchName=master)
+
 # Compiling 
 ETJump is compiled on Windows on MSVC toolset `v140`.  
 Visual C++ Redistributable for Visual Studio 2015 has to be installed in order to run the binaries on 
