@@ -7,6 +7,7 @@
 #undef max
 #endif
 
+#include <string>
 #include <functional>
 #include <map>
 #include <vector>
