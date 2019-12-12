@@ -2429,7 +2429,7 @@ const char *CG_AddChatModifications(char *text, int clientNum)
 	trap_RealTime(&t);
 	if (etj_highlight.integer && cg.clientNum != clientNum)
 	{
-		if (strstr(text + strlen(cgs.clientinfo[cg.clientNum].name), cgs.clientinfo[cg.clientNum].name) != NULL)
+		if (strstr(text + strlen(cgs.clientinfo[clientNum].name), cgs.clientinfo[cg.clientNum].name) != NULL)
 		{
 			Q_strcat(message, sizeof(message), etj_highlightText.string);
 			Q_strcat(message, sizeof(message), "^7");
