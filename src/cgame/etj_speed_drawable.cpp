@@ -5,6 +5,9 @@
 #include <string>
 #include "../game/etj_string_utilities.h"
 
+constexpr int   ACCEL_COLOR_SMOOTHING_TIME = 250;
+constexpr float ACCEL_FOR_SOLID_COLOR      = 100;
+
 ETJump::DisplaySpeed::DisplaySpeed()
 {
 	parseColor(cg_speedColor.string, _color);
@@ -47,6 +50,17 @@ void ETJump::DisplaySpeed::beforeRender()
 {
 	auto speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
 	_maxSpeed = speed > _maxSpeed ? speed : _maxSpeed;
+
+	if (etj_speedColorUsesAccel.integer)
+	{
+		_storedSpeeds.push_back({ cg.time, speed });
+	
+		popOldStoredSpeeds();
+	}
+	else if (!_storedSpeeds.empty())
+	{
+		_storedSpeeds.clear();
+	}
 }
 
 void ETJump::DisplaySpeed::resetMaxSpeed()
@@ -83,7 +97,27 @@ void ETJump::DisplaySpeed::render() const
 	
 	// fix me
 	vec4_t color;
-	Vector4Copy(_color, color);
+
+	if (!etj_speedColorUsesAccel.integer)
+	{
+		Vector4Copy(_color, color);
+	}
+	else
+	{
+		float accel = calcAvgAccel();
+		float *accelColor = colorGreen;
+
+		if (accel < 0)
+		{
+			accelColor = colorRed;
+			accel = -accel;
+		}
+
+		float frac = accel / ACCEL_FOR_SOLID_COLOR;
+		frac = std::min(frac, 1.f);
+		
+		LerpColor(colorWhite, accelColor, color, frac);
+	}
 
 	CG_Text_Paint_Ext(x - w, y, size, size, color, status.c_str(), 0, 0, style, &cgs.media.limboFont1);
 }
@@ -109,4 +143,43 @@ std::string ETJump::DisplaySpeed::getStatus() const
 bool ETJump::DisplaySpeed::canSkipDraw() const
 {
 	return !cg_drawSpeed2.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
+}
+
+void ETJump::DisplaySpeed::popOldStoredSpeeds()
+{
+	do
+	{
+		auto& front = _storedSpeeds.front();
+
+		if (cg.time - front.time > ACCEL_COLOR_SMOOTHING_TIME)
+		{	// too old
+			_storedSpeeds.pop_front();
+			continue;
+		}
+		else if (cg.time < front.time)
+		{	// we went back in time!
+			_storedSpeeds.pop_front();
+			continue;
+		}
+	} while (false);
+}
+
+float ETJump::DisplaySpeed::calcAvgAccel() const
+{
+	if (_storedSpeeds.size() < 2) 
+	{	// need 2 speed points to compute acceleration
+		return 0;
+	}
+
+	float totalSpeedDelta = 0;
+	auto iter = _storedSpeeds.begin();
+	for (auto prevIter = iter++; iter != _storedSpeeds.end(); prevIter = iter++)
+	{
+		totalSpeedDelta += iter->speed - prevIter->speed;
+	}
+
+	float timeDeltaMs = _storedSpeeds.back().time - _storedSpeeds.front().time;
+	float accel = totalSpeedDelta / (timeDeltaMs / 1000.f);
+	
+	return accel;
 }

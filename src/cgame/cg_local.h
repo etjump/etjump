@@ -2423,6 +2423,7 @@ extern vmCvar_t etj_drawMaxSpeed;
 extern vmCvar_t etj_maxSpeedX;
 extern vmCvar_t etj_maxSpeedY;
 extern vmCvar_t etj_maxSpeedDuration;
+extern vmCvar_t etj_speedColorUsesAccel;
 
 extern vmCvar_t cg_adminpassword;
 extern vmCvar_t cg_username;

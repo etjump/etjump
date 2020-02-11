@@ -376,6 +376,7 @@ vmCvar_t etj_drawMaxSpeed;
 vmCvar_t etj_maxSpeedX;
 vmCvar_t etj_maxSpeedY;
 vmCvar_t etj_maxSpeedDuration;
+vmCvar_t etj_speedColorUsesAccel;
 
 vmCvar_t cg_adminpassword;
 vmCvar_t cg_username;
@@ -789,6 +790,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_maxSpeedX,               "etj_maxSpeedX",               "320",                    CVAR_ARCHIVE             },
 	{ &etj_maxSpeedY,               "etj_maxSpeedY",               "320",                    CVAR_ARCHIVE             },
 	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE             },
+	{ &etj_speedColorUsesAccel,     "etj_speedColorUsesAccel",     "0",                      CVAR_ARCHIVE             },
 
 	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
 	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
