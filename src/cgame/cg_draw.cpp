@@ -1219,8 +1219,8 @@ static void CG_DrawDisconnect(void)
 
 	// also add text in center of screen
 	s = CG_TranslateString("Connection Interrupted");   // bk 010215 - FIXME
-	w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
-	CG_DrawBigString(SCREEN_CENTER_X - w / 2, 100, s, 1.0F);
+	w = ETJump::DrawStringWidth(s, 0.3f);
+	ETJump::DrawBigString(SCREEN_CENTER_X - w / 2, 100, s, 1.0F);
 
 	// blink the icon
 	if ((cg.time >> 9) & 1)
