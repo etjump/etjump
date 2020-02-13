@@ -64,6 +64,8 @@
   * __2__ = group popups and console prints
 * reorganized settings menu
 * `ranks <runname>` command now shows time differences relative to your time
+* added `etj_speedColorUsesAccel` to color `etj_drawSpeed2` based on accel/decel
+* fixed Connection Interrupted message font & scaling to match updated HQ font
 
 # ETJump 2.3.0
 
