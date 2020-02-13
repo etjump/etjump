@@ -4,8 +4,8 @@
 #define WINDOW_WIDTH 608
 #define WINDOW_HEIGHT 448
 #define SUBW_SPEED1_Y 32
-#define SUBW_SPEED2_Y 112
-#define SUBW_MAX_SPEED_Y 228
+#define SUBW_SPEED2_Y 108
+#define SUBW_MAX_SPEED_Y 232
 #define SUBW_TIMER_Y 308
 #define SUBW_INDICATORS_Y 32
 #define SUBW_FIRETEAM_Y 320
@@ -25,14 +25,14 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 76, "SPEED1")
+    SUBWINDOW(8, 32, 292, 72, "SPEED1")
         MULTI				(16, SUBW_SPEED1_Y + 20, 276, 8, "Speed meter 1:", 0.2, 8, "etj_drawspeed", cvarFloatList { "No" 0 "Yes" 1 "Show max" 2 }, "Draw original speed meter on right side of screen\netj_drawspeed")
         CVARINTLABEL		(16, SUBW_SPEED1_Y + 32, 276, 8, "etj_speedinterval", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SPEED1_Y + 32, 276, 8, "Speed refresh rate:", 0.2, 8, etj_speedinterval 100 0 2000 50, "How often in milliseconds to update original speed meter\netj_speedInterval")
         MULTI				(16, SUBW_SPEED1_Y + 44, 276, 8, "Speed meter unit:", 0.2, 8, "etj_speedunit", cvarFloatList { "UPS" 0 "MPH" 1 "KPH" 2 }, "Speed measurement unit of original speed meter\netj_speedunit")
         YESNO				(16, SUBW_SPEED1_Y + 56, 276, 8, "XY speed only:", 0.2, 8, "etj_speedXYonly", "Ignore vertical speed on original speed meter\netj_speedXYonly")
 
-    SUBWINDOW(8, 112, 292, 112, "SPEED2")
+    SUBWINDOW(8, 108, 292, 120, "SPEED2")
         MULTI				(16, SUBW_SPEED2_Y + 20, 276, 8, "Speed meter 2:", 0.2, 8, "etj_drawSpeed2", cvarFloatList { "No" 0 "Yes" 1 "Speed + max" 2 "Speed ^zmax" 3 "Speed (max)" 4 "Speed ^z(max)" 5 "Speed ^z[max]" 6 "Speed | max" 7 "Speed: speed" 8 "Tens only" 9 }, "Draw ETJump speed meter\netj_drawSpeed2")
         CVARFLOATLABEL		(16, SUBW_SPEED2_Y + 32, 276, 8, "etj_speedAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SPEED2_Y + 32, 276, 8, "Speed meter alpha:", 0.2, 8, etj_speedAlpha 1 0 1 0.05, "Sets transparency of ETJump speed meter\netj_speedAlpha")
@@ -42,9 +42,10 @@ menuDef {
         SLIDER				(16, SUBW_SPEED2_Y + 56, 276, 8, "Speed meter Y:", 0.2, 8, etj_speedY 340 0 480 10, "Sets Y position of ETJump speed meter\netj_speedY")
         MULTI				(16, SUBW_SPEED2_Y + 68, 276, 8, "Speed meter size:", 0.2, 8, "etj_speedSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of ETJump speed meter\netj_speedSize")
         MULTI				(16, SUBW_SPEED2_Y + 80, 276, 8, "Speed meter color:", 0.2, 8, "etj_speedColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of ETJump speed meter\netj_speedColor")
-        YESNO				(16, SUBW_SPEED2_Y + 92, 276, 8, "Speed meter shadow:", 0.2, 8, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
+        YESNO				(16, SUBW_SPEED2_Y + 92, 276, 8, "Accel-based color:", 0.2, 8, "etj_speedColorUsesAccel", "Color ETJump speed meter based on accel/decel\netj_speedColorUsesAccel")
+        YESNO				(16, SUBW_SPEED2_Y + 104, 276, 8, "Speed meter shadow:", 0.2, 8, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
 
-    SUBWINDOW(8, 228, 292, 76, "MAX SPEED")
+    SUBWINDOW(8, 232, 292, 72, "MAX SPEED")
         YESNO				(16, SUBW_MAX_SPEED_Y + 20, 276, 8, "Draw max speed:", 0.2, 8, "etj_drawMaxSpeed", "Draw max speed after previous load session\netj_drawMaxSpeed")
         CVARINTLABEL		(16, SUBW_MAX_SPEED_Y + 32, 276, 8, "etj_maxSpeedX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_MAX_SPEED_Y + 32, 276, 8, "Max speed X:", 0.2, 8, etj_maxSpeedX 320 0 640 10, "Sets X position of max speed\netj_maxSpeedX")
@@ -53,7 +54,7 @@ menuDef {
         CVARINTLABEL		(16, SUBW_MAX_SPEED_Y + 56, 276, 8, "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_MAX_SPEED_Y + 56, 276, 8, "Max speed duration:", 0.2, 8, etj_maxSpeedDuration 2000 0 15000 250, "How long in milliseconds to display max speed\netj_maxSpeedDuration")
 
-    SUBWINDOW(8, 308, 292, 112, "TIMER")
+    SUBWINDOW(8, 308, 292, 108, "TIMER")
         YESNO				(16, SUBW_TIMER_Y + 20, 276, 8, "Enable timeruns:", 0.2, 8, "etj_enableTimeruns", "Enable timeruns\netj_enableTimeruns")
         YESNO				(16, SUBW_TIMER_Y + 32, 276, 8, "Draw runtimer:", 0.2, 8, "etj_drawRunTimer", "Draw timerun timer\netj_drawRunTimer")
         CVARINTLABEL		(16, SUBW_TIMER_Y + 44, 276, 8, "etj_runTimerX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
