@@ -135,20 +135,20 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote)
 		if (i + rows * 3 + 1 <= num_cmds)
 		{
 			G_cpmPrintf(ent, "^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-			            aVoteInfo[vi[i + rows]].pszVoteName,
-			            aVoteInfo[vi[i + rows * 2]].pszVoteName,
-			            aVoteInfo[vi[i + rows * 3]].pszVoteName);
+						aVoteInfo[vi[i + rows]].pszVoteName,
+						aVoteInfo[vi[i + rows * 2]].pszVoteName,
+						aVoteInfo[vi[i + rows * 3]].pszVoteName);
 		}
 		else if (i + rows * 2 + 1 <= num_cmds)
 		{
 			G_cpmPrintf(ent, "^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-			            aVoteInfo[vi[i + rows]].pszVoteName,
-			            aVoteInfo[vi[i + rows * 2]].pszVoteName);
+						aVoteInfo[vi[i + rows]].pszVoteName,
+						aVoteInfo[vi[i + rows * 2]].pszVoteName);
 		}
 		else if (i + rows + 1 <= num_cmds)
 		{
 			G_cpmPrintf(ent, "^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-			            aVoteInfo[vi[i + rows]].pszVoteName);
+						aVoteInfo[vi[i + rows]].pszVoteName);
 		}
 		else
 		{
@@ -293,39 +293,39 @@ namespace ETJump
 			return false;
 		}
 
-        auto matches = G_MatchAllMaps(arg);
+		auto matches = G_MatchAllMaps(arg);
 
-        if (matches.size() == 0)
+		if (matches.size() == 0)
 		{
-            map = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", arg);
+				map = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", arg);
 			return false;
 		}
 
-        if (matches.size() > 1)
-        {
-            map = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matches.size(), arg);
-            auto perRow = 3;
-            auto mapsOnCurrentRow = 0;
-            for (auto& match : matches)
-            {
-                ++mapsOnCurrentRow;
-                if (mapsOnCurrentRow > perRow)
-                {
-                    mapsOnCurrentRow = 1;
-                    map += (boost::format("\n%-22s") % match).str();
-                }
-                else
-                {
-                    map += (boost::format("%-22s") % match).str();
-                }
-            }
+		map = matches[0];
 
-            map += "\n";
+		if (matches.size() > 1 && map != arg)
+		{
+			map = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matches.size(), arg);
+			auto perRow = 3;
+			auto mapsOnCurrentRow = 0;
+			for (auto& match : matches)
+			{
+				++mapsOnCurrentRow;
+				if (mapsOnCurrentRow > perRow)
+				{
+					mapsOnCurrentRow = 1;
+					map += (boost::format("\n%-22s") % match).str();
+				}
+				else
+				{
+					map += (boost::format("%-22s") % match).str();
+				}
+			}
 
-            return false;
-        }
+			map += "\n";
 
-        map = matches[0];
+			return false;
+		}
 
 		if (map == level.rawmapname)
 		{
