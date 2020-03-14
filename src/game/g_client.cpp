@@ -993,7 +993,7 @@ void SetWolfSpawnWeapons(gclient_t *client)
 			else if (pc == PC_MEDIC)
 			{
 				AddWeaponToPlayer(client, WP_MEDIC_SYRINGE, GetAmmoTableData(WP_MEDIC_SYRINGE)->defaultStartingAmmo, GetAmmoTableData(WP_MEDIC_SYRINGE)->defaultStartingClip, qfalse);
-				if (client->sess.skill[SK_FIRST_AID] >= 4)
+				if (client->sess.skill[SK_FIRST_AID] >= 0)
 				{
 					AddWeaponToPlayer(client, WP_MEDIC_ADRENALINE, GetAmmoTableData(WP_MEDIC_ADRENALINE)->defaultStartingAmmo, GetAmmoTableData(WP_MEDIC_ADRENALINE)->defaultStartingClip, qfalse);
 				}

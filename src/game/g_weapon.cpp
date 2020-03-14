@@ -631,11 +631,13 @@ void Weapon_Syringe(gentity_t *ent)
 		}
 	}
 
+	/* Aciz: Syringe doesn't use ammo, so let's not add it back in case of misses
 	// DHM - Nerve :: If the medicine wasn't used, give back the ammo
 	if (!usedSyringe)
 	{
 		ent->client->ps.ammoclip[BG_FindClipForWeapon(WP_MEDIC_SYRINGE)] += 1;
 	}
+	*/
 }
 // jpw
 
