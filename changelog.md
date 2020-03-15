@@ -66,6 +66,8 @@
 * `ranks <runname>` command now shows time differences relative to your time
 * added `etj_speedColorUsesAccel` to color `etj_drawSpeed2` based on accel/decel
 * fixed Connection Interrupted message font & scaling to match updated HQ font
+* added adrenaline syringe for medics
+* fixed a bug where firing a syringe would give you syringe ammo
 
 # ETJump 2.3.0
 
