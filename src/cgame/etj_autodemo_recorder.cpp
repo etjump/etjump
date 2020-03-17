@@ -45,7 +45,7 @@ int ETJump::AutoDemoRecorder::TempNameGenerator::size()
 
 ETJump::AutoDemoRecorder::AutoDemoRecorder()
 {
-	if (cg.demoPlayback) return;
+	if (cg.demoPlayback || cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) return;
 
 	playerEventsHandler->subscribe("load", [&](const std::vector<std::string>& args)
 	{
@@ -87,6 +87,8 @@ void ETJump::AutoDemoRecorder::tryRestart()
 {
 	// start autodemo for timerun maps only
 	if (etj_autoDemo.integer == 1 && !cg.hasTimerun) return;
+	// don't start autodemo if timeruns are disabled unless autodemo is enabled for all maps
+	if (etj_autoDemo.integer < 2 && !etj_enableTimeruns.integer) return;
 	// timeout
 	if (_demo.getStartTime() + DEMO_START_TIMEOUT >= cg.time) return;
 	// dont attempt to restart if in timerun mode
