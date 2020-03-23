@@ -68,6 +68,7 @@
 * fixed Connection Interrupted message font & scaling to match updated HQ font
 * added adrenaline syringe for medics
 * fixed a bug where firing a syringe would give you syringe ammo
+* updated nosave, noprone, & timerun icons to better match original HUD icons
 
 # ETJump 2.3.0
 
