@@ -762,21 +762,6 @@ gfx/2d/prone_on
 }
 
 ////////////////
-// Forbid Icon
-////////////////
-
-gfx/2d/icon_off
-{
-	noPicMip
-	noMipMaps
-	{
-		map gfx/2d/forbidicon.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		rgbGen vertex
-	}
-}
-
-////////////////
 // Stopwatch Icon
 ////////////////
 

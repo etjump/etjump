@@ -3812,25 +3812,22 @@ static void CG_DrawJumpDelay(void)
 
 namespace ETJump
 {
-	const vec4_t SaveIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
-	const vec4_t SaveShadowColor{ 0.f, 0.f, 0.f, 0.8f };
+	const vec4_t SaveIconColor{ 0.88f, 0.88f, 0.88f, 1.f };
 	const auto SaveIconSize = 20.f;
 
-	const vec4_t ProneIconColor{ 0.4f, 0.4f, 0.4f, 1.f };
-	const vec4_t ProneShadowColor{ 0.f, 0.f, 0.f, 0.8f };
+	const vec4_t ProneIconColor{ 0.88f, 0.88f, 0.88f, 1.f };
 	const auto ProneIconSize = 20.f;
 
-	const vec4_t ForbidIconColor{ 1.0f, 0.2f, 0.2f, 1.f };
 	const auto ForbidIconSize = 20.f;
 
 	static void drawSaveIcon(float x, float y)
 	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor, SaveShadowColor);
+		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor);
 	}
 
 	static void drawProneIcon(float x, float y)
 	{
-		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor, ProneShadowColor);
+		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor);
 	}
 
 	static void printNoProne(void)
@@ -3848,7 +3845,7 @@ namespace ETJump
 
 	static void drawForbidIcon(float x, float y)
 	{
-		drawPic(x, y, ForbidIconSize, ForbidIconSize, cgs.media.forbidIcon, ForbidIconColor);
+		drawPic(x, y, ForbidIconSize, ForbidIconSize, cgs.media.friendShader);
 	}
 }
 
