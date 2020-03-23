@@ -1638,7 +1638,11 @@ namespace ETJump
 			CG_DrawPic(x + 1, y + 1, sizex, sizey, hShader);
 		}
 
-		trap_R_SetColor(mainColor);
+		if (mainColor)
+		{
+			trap_R_SetColor(mainColor);
+		}
+
 		CG_DrawPic(x, y, sizex, sizey, hShader);
 		trap_R_SetColor(nullptr);
 	}

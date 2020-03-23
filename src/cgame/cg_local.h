@@ -2716,7 +2716,7 @@ namespace ETJump
 	void DrawMiniString(int x, int y, const char *s, float alpha);
 	void DrawSmallString(int x, int y, const char *s, float alpha);
 	void DrawBigString(int x, int y, const char *s, float alpha);
-	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor, const vec4_t shadowColor = nullptr);
+	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor = nullptr, const vec4_t shadowColor = nullptr);
 }
 
 
