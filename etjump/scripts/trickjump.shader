@@ -797,3 +797,14 @@ gfx/2d/stopwatch_red
 		rgbGen vertex
 	}
 }
+
+gfx/2d/colorbar
+{
+	nomipmaps
+	nopicmip
+	{
+		clampMap gfx/2d/colorbar.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
