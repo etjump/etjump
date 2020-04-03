@@ -859,14 +859,17 @@ CG_DrawTeamInfo
 */
 static void CG_DrawTeamInfo(void)
 {
-	int       w, h;
-	int       i, len;
-	vec4_t    hcolor;
-	float     alphapercent, chatbgalpha;
-	float     lineHeight = 9.f;
+	int w, h;
+	int i, len;
+	vec4_t hcolor;
+	float alphapercent, chatbgalpha;
+	float chatScale = Numeric::clamp(etj_chatScale.value, 0, 5);
+	float fontSize = 0.2f;
+	float fontSizeScaled = chatScale * fontSize;
+	float lineHeight = 9.0f * chatScale;
 	qhandle_t flag;
 	int maxLineLength = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
-	int chatWidth = calcBackgroundWidth(maxLineLength, 0.2f, &cgs.media.limboFont2) + 5;
+	int chatWidth = calcBackgroundWidth(maxLineLength, fontSizeScaled, &cgs.media.limboFont2) + 5;
 	int chatHeight = Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
 	int textStyle = ITEM_TEXTSTYLE_NORMAL;
 	float textAlpha = etj_chatAlpha.value;
@@ -899,7 +902,7 @@ static void CG_DrawTeamInfo(void)
 
 		for (i = cgs.teamLastChatPos; i < cgs.teamChatPos; i++)
 		{
-			len = CG_Text_Width_Ext(cgs.teamChatMsgs[i % chatHeight], 0.2f, 0, &cgs.media.limboFont2);
+			len = CG_Text_Width_Ext(cgs.teamChatMsgs[i % chatHeight], fontSizeScaled, 0, &cgs.media.limboFont2);
 			if (len > w)
 			{
 				w = len;
@@ -982,13 +985,16 @@ static void CG_DrawTeamInfo(void)
 				}
 				if (flag)
 				{
-					CG_DrawPic(CHATLOC_TEXT_X + cg_chatPosX.value - 14, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 8,
-						12, 8, flag);
+					float flagScaleX = 12.0f * chatScale;
+					float flagScaleY = 9.0f * chatScale;
+					float flagPosX = (CHATLOC_TEXT_X + cg_chatPosX.value) - (13 * chatScale);
+					float flagPosY = (CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight) - (9 * chatScale);
+					CG_DrawPic(flagPosX, flagPosY, flagScaleX, flagScaleY, flag);
 				}
 
 			}
 
-			CG_Text_Paint_Ext(linePosX, linePosY, 0.2f, 0.2f, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(linePosX, linePosY - 1, fontSizeScaled, fontSizeScaled, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
 		}
 	}
 }
