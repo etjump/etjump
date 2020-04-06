@@ -69,6 +69,8 @@
 * added adrenaline syringe for medics
 * fixed a bug where firing a syringe would give you syringe ammo
 * updated nosave, noprone, & timerun icons to better match original HUD icons
+* fixed chat background drawing a solid line on the right side
+* added `etj_chatScale` cvar to control chat size
 
 # ETJump 2.3.0
 
