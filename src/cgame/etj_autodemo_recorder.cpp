@@ -45,7 +45,7 @@ int ETJump::AutoDemoRecorder::TempNameGenerator::size()
 
 ETJump::AutoDemoRecorder::AutoDemoRecorder()
 {
-	if (cg.demoPlayback || cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) return;
+	if (cg.demoPlayback) return;
 
 	playerEventsHandler->subscribe("load", [&](const std::vector<std::string>& args)
 	{
@@ -75,6 +75,11 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder()
 	consoleCommandsHandler->subscribe("ad_save", [&](const std::vector<std::string>& args)
 	{
 		if (etj_autoDemo.integer <= 0) return;
+		if (!cl_demorecording.integer)
+		{
+			CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n", cgs.media.voiceChatShader);
+			return;
+		}
 		auto src = createDemoTempPath(_demoNames.current());
 		auto dst = createDemoPath(args.size() ? args[0] : "demo");
 		saveDemoWithRestart(src, dst);
@@ -85,6 +90,8 @@ ETJump::AutoDemoRecorder::~AutoDemoRecorder() {}
 
 void ETJump::AutoDemoRecorder::tryRestart()
 {
+	// no autodemo for specs
+	if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) return;
 	// start autodemo for timerun maps only
 	if (etj_autoDemo.integer == 1 && !cg.hasTimerun) return;
 	// don't start autodemo if timeruns are disabled unless autodemo is enabled for all maps
