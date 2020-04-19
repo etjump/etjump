@@ -4,6 +4,7 @@
 
 #include "etj_printer.h"
 #include <boost/format.hpp>
+#include "etj_string_utilities.h"
 
 #include "g_local.h"
 
@@ -29,30 +30,16 @@ void Printer::LogPrintln(const std::string &message)
 
 void Printer::SendConsoleMessage(int clientNum, std::string message)
 {
-	std::string partialMessage;
-	const auto  BYTES_PER_PACKET = 998;
-	while (message.length() > BYTES_PER_PACKET)
+	auto splits = ETJump::splitString(message, '\n', BYTES_PER_PACKET);
+	for (auto &split : splits) 
 	{
-		partialMessage = message.substr(0, BYTES_PER_PACKET);
-		message        = message.substr(BYTES_PER_PACKET);
-		if (clientNum == CONSOLE_CLIENT_NUMBER)
+		if (clientNum == CONSOLE_CLIENT_NUMBER) 
 		{
-			G_Printf("%s", partialMessage.c_str());
+			G_Printf("%s", split.c_str());
 		}
 		else
 		{
-			trap_SendServerCommand(clientNum, va("print \"%s\"", partialMessage.c_str()));
-		}
-	}
-	if (message.length() > 0)
-	{
-		if (clientNum == CONSOLE_CLIENT_NUMBER)
-		{
-			G_Printf("%s", partialMessage.c_str());
-		}
-		else
-		{
-			trap_SendServerCommand(clientNum, va("print \"%s\"", message.c_str()));
+			trap_SendServerCommand(clientNum, va("print \"%s\"", split.c_str()));
 		}
 	}
 }
@@ -83,20 +70,11 @@ void Printer::SendLeftMessage(int clientNum, const std::string &message)
 
 void Printer::BroadcastConsoleMessage(std::string message)
 {
-	std::string partialMessage;
-	while (message.length() > 1000)
+	auto splits = ETJump::splitString(message, '\n', BYTES_PER_PACKET);
+	for (auto &split : splits) 
 	{
-		partialMessage = message.substr(0, 1000);
-		message        = message.substr(1000);
-
-		G_Printf("%s", partialMessage.c_str());
-		trap_SendServerCommand(-1, va("print \"%s\"", partialMessage.c_str()));
-	}
-
-	if (message.length() > 0)
-	{
-		G_Printf("%s", message.c_str());
-		trap_SendServerCommand(-1, va("print \"%s\"", message.c_str()));
+		trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
+		G_Printf("%s", split.c_str());
 	}
 }
 
