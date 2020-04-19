@@ -35,11 +35,11 @@ void Printer::SendConsoleMessage(int clientNum, std::string message)
 	{
 		if (clientNum == CONSOLE_CLIENT_NUMBER) 
 		{
-			trap_SendServerCommand(clientNum, va("print \"%s\"", split.c_str()));
+			G_Printf("%s", split.c_str());
 		}
 		else
 		{
-			G_Printf("%s", split.c_str());
+			trap_SendServerCommand(clientNum, va("print \"%s\"", split.c_str()));
 		}
 	}
 }
