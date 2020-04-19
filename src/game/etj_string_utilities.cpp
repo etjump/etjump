@@ -171,13 +171,14 @@ std::vector<std::string> ETJump::splitString(std::string &input, char separator,
 			}
 			break;
 		}
+		pos += 1;
 		/* no new separators were found */
-		if ((pos + 1) == lastPos)
+		if (pos == lastPos)
 		{
 			break;
 		}
 		output.push_back(input.substr(lastPos, pos - lastPos));
-		lastPos = pos + 1;
+		lastPos = pos;
 	}
 	/* add last bit if any */
 	if (lastPos < input.size())
