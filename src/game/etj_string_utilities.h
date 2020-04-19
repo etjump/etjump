@@ -42,4 +42,6 @@ namespace ETJump
     std::string trimStart(std::string input);
     std::string trimEnd(std::string input);
     std::string trim(const std::string& input);
+
+    std::vector<std::string> splitString(std::string &input, char separator, size_t maxLength);
 }

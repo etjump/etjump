@@ -144,3 +144,45 @@ std::string ETJump::trim(const std::string& input)
 {
     return trimEnd(trimStart(input));
 }
+
+std::vector<std::string> ETJump::splitString(std::string &input, char separator, size_t maxLength)
+{
+	std::vector<std::string> output;
+	size_t lastPos = 0;
+
+	if (input.size() <= maxLength)
+	{
+		output.push_back(input);
+		return output;
+	}
+
+	while (true) 
+	{
+		auto pos = input.rfind(separator, lastPos + maxLength);
+		/* separator not found */
+		if (pos == std::string::npos)
+		{
+			/* split by length; */
+			size_t numSplits = input.size() / maxLength;
+			for (size_t i = 1; i <= numSplits; ++i)
+			{
+				output.push_back(input.substr(lastPos, maxLength));
+				lastPos = (maxLength * i);
+			}
+			break;
+		}
+		/* no new separators were found */
+		if ((pos + 1) == lastPos)
+		{
+			break;
+		}
+		output.push_back(input.substr(lastPos, pos - lastPos));
+		lastPos = pos + 1;
+	}
+	/* add last bit if any */
+	if (lastPos < input.size())
+	{
+		output.push_back(input.substr(lastPos));
+	}
+	return output;
+}
