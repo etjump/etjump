@@ -2,10 +2,6 @@ project(etjump)
 cmake_minimum_required(VERSION 3.2)
 cmake_policy(SET CMP0015 NEW)
 
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Release)
-endif()
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
@@ -21,8 +17,9 @@ else()
 	set(ARCH "x86_64")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -fmessage-length=0 -std=c99")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++ -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -fmessage-length=0 -std=c99 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
@@ -124,16 +121,14 @@ file(GLOB CGAME_SRC
 	"src/game/bg_classes.cpp"
 	"src/game/bg_misc.cpp"
 	"src/game/bg_pmove.cpp"
+	"src/game/bg_sha.cpp"
 	"src/game/bg_slidemove.cpp"
 	"src/game/bg_sscript.cpp"
 	"src/game/bg_stats.cpp"
 	"src/game/bg_tracemap.cpp"
 	"src/game/q_math.cpp"
 	"src/game/q_shared.cpp"
-	"src/sha-1/bg_sha.cpp"
-	"src/sha-1/sha1.c"
 	"src/ui/ui_shared.cpp"
-	"src/json/jsoncpp.cpp"
 )
 
 file(GLOB QAGAME_SRC
@@ -143,6 +138,7 @@ file(GLOB QAGAME_SRC
 	"src/game/bg_character.cpp"
 	"src/game/bg_classes.cpp"
 	"src/game/bg_misc.cpp"
+	"src/game/bg_sha.cpp"
 	"src/game/bg_pmove.cpp"
 	"src/game/bg_slidemove.cpp"
 	"src/game/bg_sscript.cpp"
@@ -219,10 +215,6 @@ file(GLOB QAGAME_SRC
 	"src/game/g_weapon.cpp"
 	"src/game/q_math.cpp"
 	"src/game/q_shared.cpp"
-	"src/json/jsoncpp.cpp"
-	"src/sqlite/sqlite3.c"
-	"src/sha-1/bg_sha.cpp"
-	"src/sha-1/sha1.c"
 )
 
 file(GLOB UI_SRC
@@ -242,14 +234,19 @@ file(GLOB UI_SRC
 	"src/ui/ui_util.cpp"
 )
 
-# cgame library building
-add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
-set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
+add_subdirectory(deps/json)
+add_subdirectory(deps/sha-1)
 
-add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC})
-set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
-target_link_libraries(qagame.mp.${ARCH} pthread)
+add_library(cgame SHARED ${CGAME_SRC})
+target_compile_definitions(cgame PRIVATE CGAMEDLL)
+set_target_properties(cgame PROPERTIES OUTPUT_NAME cgame.mp.${ARCH} PREFIX "")
+target_link_libraries(cgame PRIVATE libjson libsha1)
 
-# ui library building
-add_library (ui.mp.${ARCH} SHARED ${UI_SRC})
-set_target_properties(ui.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "UIDLL" PREFIX "")
+add_library(game SHARED ${QAGAME_SRC})
+target_compile_definitions(game PRIVATE GAMEDLL)
+set_target_properties(game PROPERTIES OUTPUT_NAME qagame.mp.${ARCH} PREFIX "")
+target_link_libraries(game PRIVATE pthread libjson libsha1 sqlite3)
+
+add_library(ui SHARED ${UI_SRC})
+target_compile_definitions(ui PRIVATE UIDLL)
+set_target_properties(ui PROPERTIES OUTPUT_NAME ui.mp.${ARCH} PREFIX "")
