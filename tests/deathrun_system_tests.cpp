@@ -1,4 +1,4 @@
-#include "../game/etj_deathrun_system.h"
+#include "../src/game/etj_deathrun_system.h"
 #include <gtest/gtest.h>
 
 using namespace ETJump;

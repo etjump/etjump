@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../cgame/etj_inline_command_parser.h"
+#include "../src/cgame/etj_inline_command_parser.h"
 
 using namespace ETJump;
 

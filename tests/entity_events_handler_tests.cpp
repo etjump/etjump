@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "../cgame/etj_entity_events_handler.h"
-#include "../cgame/cg_local.h"
+#include "../src/cgame/etj_entity_events_handler.h"
+#include "../src/cgame/cg_local.h"
 
 using namespace ETJump;
 

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../cgame/etj_utilities.h"
+#include "../src/cgame/etj_utilities.h"
 #include <string>
 
 using namespace ETJump;

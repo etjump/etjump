@@ -5,10 +5,6 @@ cmake_policy(SET CMP0015 NEW)
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-
 option(BUILD_I386 "Builds i386 binaries" ON)
 
 if(BUILD_I386)
@@ -254,3 +250,14 @@ add_library(ui SHARED ${UI_SRC})
 target_compile_definitions(ui PRIVATE UIDLL)
 set_target_properties(ui PROPERTIES OUTPUT_NAME ui.mp.${ARCH} PREFIX "")
 target_link_libraries(ui PRIVATE Boost::headers)
+
+enable_testing()
+find_package(GTest REQUIRED)
+include(GoogleTest)
+gtest_add_tests(TARGET tests SOURCES 
+				tests/client_commands_handler_tests.cpp
+				tests/color_string_parser_tests.cpp
+				tests/command_parser_tests.cpp
+				tests/deathrun_system_tests.cpp
+				tests/entity_events_handler_tests.cpp
+				tests/inline_command_parser_tests.cpp)

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <memory>
-#include "../cgame/etj_client_commands_handler.h"
+#include "../src/cgame/etj_client_commands_handler.h"
 
 using namespace ETJump;
 

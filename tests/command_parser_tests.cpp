@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../game/etj_command_parser.h"
+#include "../src/game/etj_command_parser.h"
 #include "vector_compare.h"
 
 using namespace ETJump;
