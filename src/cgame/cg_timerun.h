@@ -1,6 +1,3 @@
-//
-// Created by Jussi on 14.5.2015.
-//
 #pragma once
 
 #include "cg_local.h"

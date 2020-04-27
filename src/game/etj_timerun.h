@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 5.4.2015.
-//
-
 #ifndef ETJUMP_TIMERUN_H
 #define ETJUMP_TIMERUN_H
 

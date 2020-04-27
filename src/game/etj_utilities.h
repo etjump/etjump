@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 7.4.2015.
-//
-
 #ifndef ETJUMP_UTILITIES_H
 #define ETJUMP_UTILITIES_H
 

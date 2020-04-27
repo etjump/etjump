@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 7.4.2015.
-//
-
 #include "etj_utilities.h"
 #include "etj_save_system.h"
 #include <boost/algorithm/string.hpp>

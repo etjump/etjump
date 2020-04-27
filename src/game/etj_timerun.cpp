@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 5.4.2015.
-//
-
 #include <sqlite3.h>
 #include <boost/format.hpp>
 #include <ctime>

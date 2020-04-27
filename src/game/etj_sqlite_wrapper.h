@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 4.4.2015.
-//
-
 #ifndef ETJUMP_SQLITEWRAPPER_H
 #define ETJUMP_SQLITEWRAPPER_H
 

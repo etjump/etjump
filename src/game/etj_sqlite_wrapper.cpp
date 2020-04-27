@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 4.4.2015.
-//
-
 #include <string>
 #include "etj_sqlite_wrapper.h"
 #include <cassert>

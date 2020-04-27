@@ -1,7 +1,3 @@
-//
-// Created by Jussi on 14.5.2015.
-//
-
 #include "cg_timerun.h"
 #include <string>
 #include <boost/format.hpp>

@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-//
-// Created by Jussi on 5.4.2015.
-//
-
 #include "etj_printer.h"
 #include <boost/format.hpp>
 #include "etj_string_utilities.h"
