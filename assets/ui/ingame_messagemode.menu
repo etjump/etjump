@@ -1,0 +1,244 @@
+#include "ui/menudef.h"
+
+// Defines //
+
+#define WINDOW_X		0
+#define WINDOW_Y		0
+#define WINDOW_WIDTH	640
+#define WINDOW_HEIGHT	480
+#define GROUP_NAME		"grpMessageMode"
+
+// Macros //
+
+#include "ui/menumacros.h"
+		
+// Ingame MessageMode Menu //
+	
+menuDef
+{
+	name		"ingame_messagemode"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+	// popup
+	// modal
+	
+	onOpen
+	{
+		closeAllOtherMenus ;
+		setEditFocus "inChatMessageText"	// note this depends on the macro + item name
+	}
+	
+	onESC
+	{
+		close ingame_messagemode ;
+	}
+	
+	onEnter
+	{
+		close ingame_messagemode ;
+		exec messageSend ;
+	}
+	
+// Subwindows //
+
+#define SUBWINDOW_WIDTH		320
+#define SUBWINDOW_HEIGHT	80
+#define SUBWINDOW_X			.5*(WINDOW_WIDTH-SUBWINDOW_WIDTH)
+#define SUBWINDOW_Y			320	// .5*(WINDOW_HEIGHT-SUBWINDOW_HEIGHT)	
+	
+    // subwindow black
+	itemDef {																									
+		name		"subwindowblackSEND MESSAGE"														
+		group		GROUP_NAME																					
+		rect		$evalfloat(SUBWINDOW_X) $evalfloat(SUBWINDOW_Y) $evalfloat(SUBWINDOW_WIDTH) $evalfloat(SUBWINDOW_HEIGHT)	
+		style		WINDOW_STYLE_FILLED																			
+		backcolor	0 0 0 .85																					
+		border		WINDOW_BORDER_FULL																			
+		bordercolor	.5 .5 .5 .5																					
+		visible		1																							
+		decoration
+		hOffset     "ui_mtOffset"																			
+	}																											
+																												
+	itemDef {																									
+		name		"subwindowblacktitleSEND MESSAGE"															
+		group		GROUP_NAME																					
+		rect		$evalfloat((SUBWINDOW_X)+2) $evalfloat((SUBWINDOW_Y)+2) $evalfloat((SUBWINDOW_WIDTH)-4) 12
+		text		"SEND MESSAGE"																			
+		textfont	UI_FONT_ARIBLK_16																			
+		textscale	.19																							
+		textalignx	3																							
+		textaligny	10																							
+		style		WINDOW_STYLE_FILLED																			
+		backcolor	.16 .2 .17 .8																				
+		forecolor	.6 .6 .6 1																					
+		visible		1																							
+		decoration																								
+	}
+	// end subwindow black
+
+	// editor's background
+	itemDef {
+		name		"efleftbackSay:"
+		group		GROUP_NAME
+		rect		$evalfloat((SUBWINDOW_X+8)) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-16) $evalfloat(20)
+		style		WINDOW_STYLE_FILLED
+		backcolor	.5 .5 .5 .2
+		visible		1
+		decoration
+		hOffset     "ui_mtOffset"
+	}
+	
+ 	// multiline texteditor
+	itemDef {
+		name			"inChatMessageText"
+      	group			GROUP_NAME
+      	rect			$evalfloat(SUBWINDOW_X+10) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-28) 20
+		type			ITEM_TYPE_EDITFIELD
+		textfont		UI_FONT_COURBD_21
+		textstyle		ITEM_TEXTSTYLE_SHADOWED
+		textscale		.2
+		textaligny		8
+		forecolor		.6 .6 .6 1
+		cursorColor     0.7 0.7 0.7 1
+		cvar			"cg_messageText"
+		maxChars		200
+		maxPaintChars	200
+		visible			1
+		tooltip			"Enter text here - press ESCAPE twice to cancel"
+		hOffset         "ui_mtOffset"
+		multiline
+		onEsc { close ingame_messagemode }
+    }
+	
+	// multi "send to:"
+	itemDef {															
+		name			"multileftTo:"								
+      	group			GROUP_NAME										
+		rect			$evalfloat(SUBWINDOW_X+8) $evalfloat(SUBWINDOW_Y+44) $evalfloat((SUBWINDOW_WIDTH)-12) $evalfloat(10)	
+		type			ITEM_TYPE_MULTI									
+		text			"To:"										
+		textfont		UI_FONT_COURBD_21								
+		textstyle		ITEM_TEXTSTYLE_SHADOWED							
+		textscale		.2								
+		textaligny		8								
+		forecolor		.6 .6 .6 1										
+		cvar			"cg_messageType"										
+		cvarFloatList   { "All" 1 "Team" 2 "Fireteam" 3 }													
+		visible			1												
+		tooltip			"Select the desitnation for your text (all, team or fire-team)"
+		yOffset         "ui_mtOffset"					
+																		
+		mouseEnter {													
+			setitemcolor "multileftTo:" forecolor .9 .9 .9 1 ;		
+		}																
+																		
+		mouseExit {														
+			setitemcolor "multileftTo:" forecolor .6 .6 .6 1 ;		
+		}																
+																		
+		action {														
+			play "sound/menu/filter.wav" ;								
+		}																
+    }
+
+	// measure text length of the specific cvar 
+	itemDef {
+		name			"measureText"
+		text            "chars left: "
+      	group			GROUP_NAME
+		rect			$evalfloat(SUBWINDOW_X+SUBWINDOW_WIDTH-8) $evalfloat(SUBWINDOW_Y+44) 0 0
+		type			ITEM_TYPE_TEXT
+		textfont		UI_FONT_COURBD_21
+		textstyle		ITEM_TEXTSTYLE_SHADOWED
+		textscale		0.2
+		textalign		ITEM_ALIGN_RIGHT
+		textalignx		0
+		textaligny		8
+		forecolor		.6 .6 .6 1
+		cvar			"cg_messageText"
+		cvarLength
+		visible			1
+		decoration
+        yOffset        "ui_mtOffset"
+    }
+	
+	// cancel
+	itemDef {															
+		name		"bttnCANCEL"									
+		group		GROUP_NAME											
+		rect		$evalfloat(SUBWINDOW_X+6) $evalfloat(SUBWINDOW_Y+SUBWINDOW_HEIGHT-24) $evalfloat(.5*(SUBWINDOW_WIDTH-18)) $evalfloat(18)					
+		type		ITEM_TYPE_BUTTON									
+		text		"CANCEL"											
+		textfont	UI_FONT_COURBD_30									
+		textscale	.3									
+		textalign	ITEM_ALIGN_CENTER									
+		textalignx	$evalfloat(0.5*(.5*(SUBWINDOW_WIDTH-18)))							
+		textaligny	14									
+		style		WINDOW_STYLE_FILLED									
+		backcolor	.3 .3 .3 .4											
+		forecolor	.6 .6 .6 1											
+		border		WINDOW_BORDER_FULL									
+		bordercolor	.1 .1 .1 .5											
+		visible		1													
+		yOffset     "ui_mtOffset"
+
+		mouseEnter {													
+			setitemcolor "bttnCANCEL" forecolor .9 .9 .9 1 ;		
+			setitemcolor "bttnCANCEL" backcolor .5 .5 .5 .4		
+		}																
+																		
+		mouseExit {														
+			setitemcolor "bttnCANCEL" forecolor .6 .6 .6 1 ;		
+			setitemcolor "bttnCANCEL" backcolor .3 .3 .3 .4		
+		}																
+																		
+		action {														
+			setitemcolor "bttnCANCEL" forecolor .6 .6 .6 1 ;		
+			setitemcolor "bttnCANCEL" backcolor .3 .3 .3 .4 ;	
+			play "sound/menu/select.wav" ;								
+			close ingame_messagemode ;												
+		}																
+	}
+
+	// send
+	itemDef {															
+		name		"bttnSEND"									
+		group		GROUP_NAME											
+		rect		$evalfloat(SUBWINDOW_X+6+.5*(SUBWINDOW_WIDTH-18)+6) $evalfloat(SUBWINDOW_Y+SUBWINDOW_HEIGHT-24) $evalfloat(.5*(SUBWINDOW_WIDTH-18)) $evalfloat(18)	
+		type		ITEM_TYPE_BUTTON									
+		text		"SEND"											
+		textfont	UI_FONT_COURBD_30									
+		textscale	.3									
+		textalign	ITEM_ALIGN_CENTER									
+		textalignx	$evalfloat(0.5*(.5*(SUBWINDOW_WIDTH-18)))							
+		textaligny	14									
+		style		WINDOW_STYLE_FILLED									
+		backcolor	.3 .3 .3 .4											
+		forecolor	.6 .6 .6 1											
+		border		WINDOW_BORDER_FULL									
+		bordercolor	.1 .1 .1 .5											
+		visible		1
+		yOffset    "ui_mtOffset"													
+																		
+		mouseEnter {													
+			setitemcolor "bttnSEND" forecolor .9 .9 .9 1 ;		
+			setitemcolor "bttnSEND" backcolor .5 .5 .5 .4		
+		}																
+																		
+		mouseExit {														
+			setitemcolor "bttnSEND" forecolor .6 .6 .6 1 ;		
+			setitemcolor "bttnSEND" backcolor .3 .3 .3 .4		
+		}																
+																		
+		action {														
+			setitemcolor "bttnSEND" forecolor .6 .6 .6 1 ;		
+			setitemcolor "bttnSEND" backcolor .3 .3 .3 .4 ;	
+			play "sound/menu/select.wav" ;								
+			close ingame_messagemode ; 
+			exec messageSend ;												
+		}																
+	}
+}
