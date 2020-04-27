@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "etj_trickjump_lines.hpp"
+#include "etj_trickjump_lines.h"
 #include "../json/json.h"
 #include "etj_client_utilities.h"
 #include <sstream>

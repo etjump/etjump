@@ -1,4 +1,4 @@
-#include "etj_trickjump_lines.hpp"
+#include "etj_trickjump_lines.h"
 #include "cg_mainext.h"
 #include "cg_timerun.h"
 #include "etj_timerun_view.h"
