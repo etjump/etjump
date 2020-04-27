@@ -1,6 +1,5 @@
 #include "g_local.h"
 #include "etj_save_system.h"
-#include "../../etjump/ui/menudef.h"
 
 // g_client.c -- client functions that don't happen every frame
 
