@@ -39,7 +39,7 @@ std::vector<std::string> ETJump::InlineCommandParser::parse(const std::vector<st
 
     std::string currentCommand;
     bool lastWasSeparator = false;
-    for (auto arg : args)
+    for (const auto &arg : args)
     {
         if (isSeparator(arg))
         {
@@ -49,7 +49,8 @@ std::vector<std::string> ETJump::InlineCommandParser::parse(const std::vector<st
                 commands.push_back(currentCommand);
                 currentCommand = "";
             }
-        } else
+        } 
+        else
         {
             currentCommand += "\"" + arg + "\"";
         }

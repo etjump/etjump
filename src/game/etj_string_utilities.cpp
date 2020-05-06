@@ -144,29 +144,23 @@ std::string ETJump::getValue(const std::string& value, const std::string& defaul
 
 std::string ETJump::trimStart(std::string input)
 {
-    auto locale = std::locale("");
-
-    input.erase(input.begin(), std::find_if(input.begin(), input.end(), [&](int ch) {
-        return !std::isspace(ch, locale);
-    }));
-
-    return input;
+	input.erase(input.begin(), std::find_if(input.begin(), input.end(), [](int ch) {
+		return !std::isspace(ch);
+	}));
+	return input;
 }
 
 std::string ETJump::trimEnd(std::string input)
 {
-    auto locale = std::locale("");
-  
-    input.erase(std::find_if(input.rbegin(), input.rend(), [&](int ch) {
-        return !std::isspace(ch, locale);
-    }).base(), input.end());
-
-    return input;
+	input.erase(std::find_if(input.rbegin(), input.rend(), [](int ch) {
+		return !std::isspace(ch);
+	}).base(), input.end());
+	return input;
 }
 
 std::string ETJump::trim(const std::string& input)
 {
-    return trimEnd(trimStart(input));
+	return trimEnd(trimStart(input));
 }
 
 std::vector<std::string> ETJump::splitString(std::string &input, char separator, size_t maxLength)
