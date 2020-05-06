@@ -1,9 +1,6 @@
-project(etjump)
-cmake_minimum_required(VERSION 3.2)
-cmake_policy(SET CMP0015 NEW)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
-find_package(SQLite3 REQUIRED)
-find_package(Boost REQUIRED)
+project(etjump VERSION 2.3)
 
 option(BUILD_I386 "Builds i386 binaries" ON)
 
@@ -233,6 +230,10 @@ file(GLOB UI_SRC
 	"src/ui/ui_util.cpp"
 )
 
+find_package(SQLite3 REQUIRED)
+find_package(Boost REQUIRED)
+find_package(GTest REQUIRED)
+
 add_subdirectory(deps/json)
 add_subdirectory(deps/sha-1)
 
@@ -252,7 +253,6 @@ set_target_properties(ui PROPERTIES OUTPUT_NAME ui.mp.${ARCH} PREFIX "")
 target_link_libraries(ui PRIVATE Boost::headers)
 
 enable_testing()
-find_package(GTest REQUIRED)
 include(GoogleTest)
 gtest_add_tests(TARGET tests SOURCES 
 				tests/client_commands_handler_tests.cpp
