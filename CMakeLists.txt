@@ -269,10 +269,10 @@ add_executable(tests_all
 			   tests/command_parser_tests.cpp
 			   tests/deathrun_system_tests.cpp
 			   tests/entity_events_handler_tests.cpp
-			   tests/inline_command_parser_tests.cpp)
+			   tests/inline_command_parser_tests.cpp
+			   tests/string_utilities_tests.cpp)
 target_link_libraries(tests_all GTest::gtest_main libsha1)
 target_compile_options(tests_all 
 					   PRIVATE 
-					   		$<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)
+							$<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)
 gtest_discover_tests(tests_all)
-
