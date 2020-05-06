@@ -240,17 +240,17 @@ add_subdirectory(deps/sha-1)
 add_library(cgame SHARED ${CGAME_SRC})
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
 set_target_properties(cgame PROPERTIES OUTPUT_NAME cgame.mp.${ARCH} PREFIX "")
-target_link_libraries(cgame PRIVATE libjson libsha1 Boost::headers)
+target_link_libraries(cgame PRIVATE libjson libsha1 Boost::boost)
 
 add_library(game SHARED ${QAGAME_SRC})
 target_compile_definitions(game PRIVATE GAMEDLL)
 set_target_properties(game PROPERTIES OUTPUT_NAME qagame.mp.${ARCH} PREFIX "")
-target_link_libraries(game PRIVATE pthread libjson libsha1 SQLite::SQLite3 Boost::headers)
+target_link_libraries(game PRIVATE pthread libjson libsha1 SQLite::SQLite3 Boost::boost)
 
 add_library(ui SHARED ${UI_SRC})
 target_compile_definitions(ui PRIVATE UIDLL)
 set_target_properties(ui PROPERTIES OUTPUT_NAME ui.mp.${ARCH} PREFIX "")
-target_link_libraries(ui PRIVATE Boost::headers)
+target_link_libraries(ui PRIVATE Boost::boost)
 
 enable_testing()
 
