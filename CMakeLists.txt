@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-
-project(etjump VERSION 2.3)
+project(etjump VERSION 2.3 LANGUAGES C CXX)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 option(BUILD_I386 "Builds i386 binaries" ON)
 
