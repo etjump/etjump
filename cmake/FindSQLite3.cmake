@@ -33,6 +33,6 @@ if(NOT SQLite3_POPULATED)
 						   PRIVATE 
 								$<$<CXX_COMPILER_ID:MSVC>:/W0> 
 								$<$<CXX_COMPILER_ID:GNU,Clang>:-w>)
-	target_compile_definitions(sqlite_sqlite3 PUBLIC SQLITE_THREADSAFE=0 SQLITE_OMIT_LOAD_EXTENSION)
+	target_compile_definitions(sqlite_sqlite3 PUBLIC SQLITE_THREADSAFE=0 SQLITE_OMIT_LOAD_EXTENSION SQLITE_HAVE_ISNAN)
 	add_library(SQLite::SQLite3 ALIAS sqlite_sqlite3)
 endif()

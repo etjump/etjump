@@ -15,5 +15,5 @@ add_library(ui SHARED
 	"../game/etj_utilities.cpp"
 )
 target_compile_definitions(ui PRIVATE UIDLL)
-set_target_properties(ui PROPERTIES OUTPUT_NAME ui.mp.${ARCH} PREFIX "")
-target_link_libraries(ui PRIVATE Boost::boost)
+set_target_properties(ui PROPERTIES OUTPUT_NAME ui.mp.$<IF:$<STREQUAL:${TARGET_ARCH},x86>,i386,x86_64> PREFIX "")
+target_link_libraries(ui PRIVATE cxx_compiler_opts Boost::boost)

@@ -3,34 +3,19 @@ project(etjump VERSION 2.3 LANGUAGES C CXX)
 enable_testing()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-option(BUILD_I386 "Builds i386 binaries" ON)
+include(CompilerOptions)
 
-if(BUILD_I386)
-	set(ARCH "i386")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
+option(FORCE_X86 "Build 32bit binaries" OFF)
+
+if(FORCE_X86)
+	set(TARGET_ARCH x86)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
 else()
-	set(ARCH "x86_64")
+	set(TARGET_ARCH x64)
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -fmessage-length=0 -std=c99 -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-	add_definitions(-DNDEBUG)
-	# This has to be set to compile with -ffast-math
-	# Makes sqlite to use std isNan function instead of own implementation
-	add_definitions(-DSQLITE_HAVE_ISNAN)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif()
+create_compiler_opts(cxx_compiler_opts ARCH ${TARGET_ARCH} WARN 3)
+create_compiler_opts(cxx_compiler_opts_w0 ARCH ${TARGET_ARCH} WARN 0)
 
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED)
@@ -38,6 +23,10 @@ find_package(GTest REQUIRED)
 
 add_subdirectory(deps/json)
 add_subdirectory(deps/sha-1)
+
+target_link_libraries(libjson PRIVATE cxx_compiler_opts_w0)
+target_link_libraries(libsha1 PRIVATE cxx_compiler_opts_w0)
+target_link_libraries(sqlite_sqlite3 PRIVATE cxx_compiler_opts_w0)
 
 add_subdirectory(src/cgame)
 add_subdirectory(src/game)

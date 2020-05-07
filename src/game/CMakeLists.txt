@@ -80,5 +80,5 @@ add_library(game SHARED
 	"etj_utilities.cpp"
 )
 target_compile_definitions(game PRIVATE GAMEDLL)
-set_target_properties(game PROPERTIES OUTPUT_NAME qagame.mp.${ARCH} PREFIX "")
-target_link_libraries(game PRIVATE libjson libsha1 SQLite::SQLite3 Boost::boost)
+set_target_properties(game PROPERTIES OUTPUT_NAME qagame.mp.$<IF:$<STREQUAL:${TARGET_ARCH},x86>,i386,x86_64> PREFIX "")
+target_link_libraries(game PRIVATE cxx_compiler_opts libjson libsha1 pthread SQLite::SQLite3 Boost::boost)

@@ -2,7 +2,7 @@ find_library(__GTEST_EXISTS gtest)
 
 # find library is installed system wide, load it
 # else fetch it manualy
-if (__GTEST_EXISTS)
+if (FALSE)
 	if (GTest_FIND_REQUIRED)
 		set(__GTest_FIND_REQUIRED "REQUIRED")
 	endif()

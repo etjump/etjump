@@ -16,6 +16,6 @@ add_executable(tests_all
 	"inline_command_parser_tests.cpp"
 	"string_utilities_tests.cpp"
 )
-target_link_libraries(tests_all GTest::gtest_main libsha1)
+target_link_libraries(tests_all PRIVATE GTest::gtest_main libsha1 cxx_compiler_opts)
 target_compile_options(tests_all PRIVATE $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)
 gtest_discover_tests(tests_all)
