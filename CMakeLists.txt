@@ -5,17 +5,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(CompilerOptions)
 
-option(FORCE_X86 "Build 32bit binaries" OFF)
-
-if(FORCE_X86)
-	set(TARGET_ARCH x86)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-else()
-	set(TARGET_ARCH x64)
-endif()
-
-create_compiler_opts(cxx_compiler_opts ARCH ${TARGET_ARCH} WARN 3)
-create_compiler_opts(cxx_compiler_opts_w0 ARCH ${TARGET_ARCH} WARN 0)
+create_compiler_opts(cxx_compiler_opts WARN 3)
+create_compiler_opts(cxx_compiler_opts_w0 WARN 0)
 
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED)

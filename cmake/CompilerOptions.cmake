@@ -1,17 +1,11 @@
 function(create_compiler_opts target)
 	set(WARN_LEVEL 3)
-	set(ARCH_TYPE x64)
 
 	# parse named arguments
 	set(options "")
-	set(args ARCH WARN)
+	set(args WARN)
 	set(list_args "")
 	cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${args}" "${list_args}")
-		
-	# todo validate
-	if (arg_ARCH)
-		set(ARCH_TYPE ${arg_ARCH})	
-	endif()
 
 	# todo validate
 	if (NOT ${arg_WARN} STREQUAL "")
@@ -20,9 +14,6 @@ function(create_compiler_opts target)
 
 	# GCC flags
 	set(GCC_LINK_FLAGS
-		$<IF:$<STREQUAL:${ARCH_TYPE},x86>,
-			-m32 -mfpmath=sse,
-			-m64>
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
 			-O3                # max optimization
@@ -32,9 +23,6 @@ function(create_compiler_opts target)
 		-pipe
 		-fPIC
 		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall>
-		$<IF:$<STREQUAL:${ARCH_TYPE},x86>,
-			-m32 -mfpmath=sse,
-			-m64>
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
 			-O3                # max optimization 
@@ -46,9 +34,6 @@ function(create_compiler_opts target)
 
 	# MSVC flags
 	set(MSVC_LINK_FLAGS 
-		$<IF:$<STREQUAL:${ARCH_TYPE},x86>,
-			/MACHINE:X86,
-			/MACHINE:X64>
 		$<$<CONFIG:Release>:
 			/LTCG>) # perform link time optimizations
 
@@ -59,9 +44,6 @@ function(create_compiler_opts target)
 		/EHsc                  # standard C++ exception handling
 		/MP                    # build with Multiple Processes
 		$<IF:$<STREQUAL:${WARN_LEVEL},0>,/W0,/W${WARN_LEVEL}>
-		$<IF:$<STREQUAL:${ARCH_TYPE},x86>,
-			/MACHINE:X86,
-			/MACHINE:X64>
 		$<$<CONFIG:Release>:
 			/MT                # use static runtime
 			/O2                # max optimizations
