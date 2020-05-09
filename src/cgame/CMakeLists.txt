@@ -89,5 +89,5 @@ add_library(cgame SHARED
 	"../ui/ui_shared.cpp"
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
-set_target_properties(cgame PROPERTIES OUTPUT_NAME cgame.mp.$<IF:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},x86>,i386,x86_64> PREFIX "")
 target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 Boost::boost)
+set_target_lib_suffix(cgame)

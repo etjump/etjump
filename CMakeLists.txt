@@ -4,6 +4,7 @@ enable_testing()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(CompilerOptions)
+include(TargetLibSuffix)
 
 create_compiler_opts(cxx_compiler_opts WARN 3)
 create_compiler_opts(cxx_compiler_opts_w0 WARN 0)

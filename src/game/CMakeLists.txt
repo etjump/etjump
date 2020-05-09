@@ -1,4 +1,4 @@
-add_library(game SHARED 
+add_library(qagame SHARED 
 	"bg_animation.cpp"
 	"bg_animgroup.cpp"
 	"bg_campaign.cpp"
@@ -79,6 +79,6 @@ add_library(game SHARED
 	"etj_user.cpp"
 	"etj_utilities.cpp"
 )
-target_compile_definitions(game PRIVATE GAMEDLL)
-set_target_properties(game PROPERTIES OUTPUT_NAME qagame.mp.$<IF:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},x86>,i386,x86_64> PREFIX "")
-target_link_libraries(game PRIVATE cxx_compiler_opts libjson libsha1 pthread SQLite::SQLite3 Boost::boost)
+target_compile_definitions(qagame PRIVATE GAMEDLL)
+target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 pthread SQLite::SQLite3 Boost::boost)
+set_target_lib_suffix(qagame)
