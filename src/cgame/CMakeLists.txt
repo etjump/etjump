@@ -90,4 +90,5 @@ add_library(cgame SHARED
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
 target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 Boost::boost)
+set_target_properties(cgame PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR}")
 set_target_lib_suffix(cgame)

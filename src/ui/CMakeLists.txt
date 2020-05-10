@@ -16,4 +16,5 @@ add_library(ui SHARED
 )
 target_compile_definitions(ui PRIVATE UIDLL)
 target_link_libraries(ui PRIVATE cxx_compiler_opts Boost::boost)
+set_target_properties(ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR}")
 set_target_lib_suffix(ui)
