@@ -10,8 +10,9 @@ include(VersionDescription)
 
 get_version_description(GAME_VERSION)
 
-set(BASE_DIR "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
-file(MAKE_DIRECTORY "${BASE_DIR}")
+set(BASE_DIR "${CMAKE_PROJECT_NAME}")
+set(BASE_DIR_PATH "${CMAKE_BINARY_DIR}/${BASE_DIR}")
+file(MAKE_DIRECTORY "${BASE_DIR_PATH}")
 
 create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE GAME_NAME="${CMAKE_PROJECT_NAME}" GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}" GAME_VERSION="${GAME_VERSION}")
 create_compiler_opts(cxx_compiler_opts_w0 WARN 0)
