@@ -1040,7 +1040,7 @@ qboolean    ConsoleCommand(void)
 
 	if (!Q_stricmp(cmd, "mod_information"))
 	{
-		G_LogPrintf("%s %s\n", GAME_VERSION " " MOD_VERSION, BUILD_TIME);
+		G_LogPrintf("%s %s %s\n", GAME_NAME, GAME_VERSION_DATED, __TIME__);
 		return qtrue;
 	}
 

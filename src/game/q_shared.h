@@ -138,20 +138,11 @@
 #define QDECL   __cdecl
 
 // buildstring will be incorporated into the version string
-#ifdef NDEBUG
-#ifdef _M_IX86
-#define CPUSTRING   "win-x86"
-#elif defined _M_ALPHA
-#define CPUSTRING   "win-AXP"
-#endif
+#ifdef _WIN64
+#define CPUSTRING   "win-x64"
 #else
-#ifdef _M_IX86
-#define CPUSTRING   "win-x86-debug"
-#elif defined _M_ALPHA
-#define CPUSTRING   "win-AXP-debug"
+#define CPUSTRING   "win-x86"
 #endif
-#endif
-
 
 #define PATH_SEP '\\'
 #define PATH_SEP_STRING "\\"
@@ -236,8 +227,12 @@ void Sys_PumpEvents(void);
 
 #ifdef __i386__
 #define CPUSTRING   "linux-i386"
+#elif defined __x86_64__
+#define CPUSTRING   "linux-x86_64"
 #elif defined __axp__
 #define CPUSTRING   "linux-alpha"
+#elif defined ARM
+#define CPUSTRING   "linux-arm"
 #else
 #define CPUSTRING   "linux-other"
 #endif

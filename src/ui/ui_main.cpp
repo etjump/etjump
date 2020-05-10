@@ -9283,6 +9283,8 @@ void _UI_Init(int legacyClient, int clientVersion)
 
 	//uiInfo.inGameLoad = inGameLoad;
 
+	Com_Printf(S_COLOR_LTGREY "Initializing " GAME_NAME " ui " S_COLOR_GREEN GAME_VERSION "\n");
+
 	UI_RegisterCvars();
 	UI_InitMemory();
 	trap_PC_RemoveAllGlobalDefines();

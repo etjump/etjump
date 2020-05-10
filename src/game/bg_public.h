@@ -11,29 +11,29 @@
 #ifndef __BG_PUBLIC_H__
 #define __BG_PUBLIC_H__
 
-#include <boost/preprocessor/facilities/is_empty.hpp>
-
-#define GAME_VERSION    "etjump"
-
-#if DEBUG
-#define MOD_VERSION "dev " __DATE__ " " __TIME__
-#else
-#if !defined(MOD_VERSION) || BOOST_PP_IS_EMPTY(MOD_VERSION) 
-#define MOD_VERSION "#{MOD_VERSION}#"
-#endif
-#endif
-
-//#define MOD_VERSION     "2.2.0"
-#define ETJUMP_VERSION ("ETJump " MOD_VERSION)
-#define ETJUMP_WEB      "www.etjump.com"
-
 #define BUILD_TIME __DATE__ " " __TIME__
 
-#if defined(_DEBUG)
-	#define GAME_VERSION_DATED          GAME_VERSION
-#else
-	#define GAME_VERSION_DATED          (GAME_VERSION ", " Q3_VERSION)
+#include <boost/preprocessor/facilities/is_empty.hpp>
+
+#if !defined(GAME_NAME) || BOOST_PP_IS_EMPTY(GAME_NAME)
+	#define GAME_NAME "etjump"
 #endif
+
+#if !defined(GAME_URL) || BOOST_PP_IS_EMPTY(GAME_URL)
+	#define GAME_URL "etjump.com"
+#endif
+
+#if !defined(GAME_VERSION) || BOOST_PP_IS_EMPTY(GAME_VERSION)
+	#define GAME_VERSION "2.3.0"
+#endif
+
+#if defined(_DEBUG)
+	#define GAME_VERSION_DATED  GAME_VERSION " " CPUSTRING " " __DATE__ " DEBUG"
+#else
+	#define GAME_VERSION_DATED  GAME_VERSION " " CPUSTRING " " __DATE__
+#endif
+
+#define GAME_TAG (GAME_NAME " " GAME_VERSION)
 
 //bani
 #ifdef __GNUC__

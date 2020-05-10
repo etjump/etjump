@@ -4,7 +4,7 @@ function(create_compiler_opts target)
 	# parse named arguments
 	set(options "")
 	set(args WARN)
-	set(list_args "")
+	set(list_args DEFINE)
 	cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${args}" "${list_args}")
 
 	# todo validate
@@ -68,6 +68,7 @@ function(create_compiler_opts target)
 			_CRT_SECURE_NO_DEPRECATE 
 			_CRT_SECURE_NO_WARNINGS 
 			_CRT_NONSTDC_NO_WARNING
-			_SCL_SECURE_NO_WARNINGS>)
+			_SCL_SECURE_NO_WARNINGS>
+		${arg_DEFINE})
 	target_compile_features(${target} INTERFACE cxx_std_11)
 endfunction()

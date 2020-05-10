@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(etjump VERSION 2.3.0 LANGUAGES C CXX)
+project(etjump VERSION 2.3.0 HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
 enable_testing()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -8,10 +8,12 @@ include(CompilerOptions)
 include(TargetLibSuffix)
 include(VersionDescription)
 
+get_version_description(GAME_VERSION)
+
 set(BASE_DIR "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
 file(MAKE_DIRECTORY "${BASE_DIR}")
 
-create_compiler_opts(cxx_compiler_opts WARN 3)
+create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE GAME_NAME="${CMAKE_PROJECT_NAME}" GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}" GAME_VERSION="${GAME_VERSION}")
 create_compiler_opts(cxx_compiler_opts_w0 WARN 0)
 
 find_package(SQLite3 REQUIRED)

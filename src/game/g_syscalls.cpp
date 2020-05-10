@@ -137,8 +137,8 @@ void trap_SendServerCommand(int clientNum, const char *text)
 	// client engine upon receipt, so ignore them
 	if (len > 1022)
 	{
-		G_LogPrintf("%s: trap_SendServerCommand( %d, ... ) length exceeds 1022.\n", MOD_VERSION, clientNum);
-		G_LogPrintf("%s: text [%s]\n", MOD_VERSION, text);
+		G_LogPrintf("%s: trap_SendServerCommand( %d, ... ) length exceeds 1022.\n", GAME_VERSION, clientNum);
+		G_LogPrintf("%s: text [%s]\n", GAME_VERSION, text);
 		return;
 	}
 
