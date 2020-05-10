@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(CompilerOptions)
 include(TargetLibSuffix)
+include(VersionDescription)
 
 set(BASE_DIR "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
 file(MAKE_DIRECTORY "${BASE_DIR}")
