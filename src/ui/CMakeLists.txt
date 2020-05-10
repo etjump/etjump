@@ -12,7 +12,7 @@ add_library(ui SHARED
 	"../game/bg_misc.cpp"
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
-	"../game/etj_utilities.cpp"
+	"../cgame/etj_utilities.cpp"
 )
 target_compile_definitions(ui PRIVATE UIDLL)
 target_link_libraries(ui PRIVATE cxx_compiler_opts Boost::boost)
