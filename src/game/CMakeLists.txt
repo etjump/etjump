@@ -81,5 +81,5 @@ add_library(qagame SHARED
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
 target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 pthread SQLite::SQLite3 Boost::boost)
-set_target_properties(qagame PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR}")
+set_target_properties(qagame PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}")
 set_target_lib_suffix(qagame)
