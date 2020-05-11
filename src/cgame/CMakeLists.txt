@@ -1,4 +1,4 @@
-add_library(cgame SHARED 
+add_library(cgame MODULE 
 	"cg_atmospheric.cpp"
 	"cg_character.cpp"
 	"cg_commandmap.cpp"
@@ -62,6 +62,7 @@ add_library(cgame SHARED
 	"etj_keyset_system.cpp"
 	"etj_maxspeed.cpp"
 	"etj_operating_system_linux.cpp"
+	"etj_operating_system_windows.cpp"
 	"etj_overbounce_watcher.cpp"
 	"etj_player_events_handler.cpp"
 	"etj_quick_follow_drawable.cpp"

@@ -1,4 +1,4 @@
-add_library(qagame SHARED 
+add_library(qagame MODULE 
 	"bg_animation.cpp"
 	"bg_animgroup.cpp"
 	"bg_campaign.cpp"

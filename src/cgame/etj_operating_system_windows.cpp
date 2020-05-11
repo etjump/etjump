@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-#include "etj_operating_system.h"
 #ifdef WIN32
 
 #include <Windows.h>
+#include "etj_operating_system.h"
 #include "etj_client_authentication.h"
+
 const char *G_SHA1(const char *str);
 void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize);
 
@@ -87,7 +88,7 @@ void ETJump::OperatingSystem::addMinimizeButton()
 	HWND wnd = nullptr;
 	while ((wnd = FindWindowEx(nullptr, wnd, WindowClassName, WindowClassName)))
 	{
-		const auto hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWL_HINSTANCE));
+		const auto hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
 		if (etHandle == hInst)
 		{
 			const auto style = GetWindowLongPtr(wnd, GWL_STYLE);

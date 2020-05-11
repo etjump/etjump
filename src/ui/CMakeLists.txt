@@ -1,4 +1,4 @@
-add_library(ui SHARED 
+add_library(ui MODULE 
 	"ui_atoms.cpp"
 	"ui_gameinfo.cpp"
 	"ui_loadpanel.cpp"
