@@ -285,57 +285,63 @@ void G_voteSetVoteString(const char *desc)
 
 namespace ETJump
 {
-	static bool matchMap(const char *arg, std::string &map)
+	static bool matchMap(const char *voteArg, std::string &resultedMap)
 	{
-		if (arg[0] == '\0')
+		if (voteArg[0] == '\0')
 		{
-			map = "^3callvote: ^7No map specified.\n";
+			resultedMap = "^3callvote: ^7No map specified.\n";
 			return false;
 		}
 
-		auto matches = G_MatchAllMaps(arg);
+		auto matchedMaps = G_MatchAllMaps(voteArg);
 
-		if (matches.size() == 0)
+		if (matchedMaps.size() == 0)
 		{
-				map = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", arg);
+			resultedMap = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", voteArg);
 			return false;
 		}
 
-		map = matches[0];
-
-		if (matches.size() > 1 && map != arg)
+		// Check if called map is an exact match to a map on the server
+		for (auto& map : matchedMaps)
 		{
-			map = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matches.size(), arg);
+			if (!Q_stricmp(map.c_str(), voteArg))
+			{
+				resultedMap = map;
+				break;
+			}
+		}
+
+		if (matchedMaps.size() > 1 && resultedMap.empty())
+		{
+			resultedMap = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matchedMaps.size(), voteArg);
 			auto perRow = 3;
 			auto mapsOnCurrentRow = 0;
-			for (auto& match : matches)
+			for (auto& map : matchedMaps)
 			{
 				++mapsOnCurrentRow;
 				if (mapsOnCurrentRow > perRow)
 				{
 					mapsOnCurrentRow = 1;
-					map += (boost::format("\n%-22s") % match).str();
+					resultedMap += (boost::format("\n%-22s") % map).str();
 				}
 				else
 				{
-					map += (boost::format("%-22s") % match).str();
+					resultedMap += (boost::format("%-22s") % map).str();
 				}
 			}
-
-			map += "\n";
-
+			resultedMap += "\n";
 			return false;
 		}
 
-		if (map == level.rawmapname)
+		if (resultedMap == level.rawmapname)
 		{
-			map = stringFormat("^3callvote: ^7%s is the current map.\n", level.rawmapname);
+			resultedMap = stringFormat("^3callvote: ^7%s is the current map.\n", level.rawmapname);
 			return false;
 		}
 
-		if (strstr(Q_strlwr(g_blockedMaps.string), map.c_str()) != nullptr)
+		if (strstr(Q_strlwr(g_blockedMaps.string), resultedMap.c_str()) != nullptr)
 		{
-			map = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n", map);
+			resultedMap = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n", resultedMap);
 			return false;
 		}
 
