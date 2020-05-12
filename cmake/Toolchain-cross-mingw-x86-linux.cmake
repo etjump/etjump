@@ -17,3 +17,4 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static" CACHE STRING "executable linker flags" FORCE)
+SET(CMAKE_MODULE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static" CACHE STRING "executable linker flags" FORCE)
