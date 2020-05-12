@@ -293,22 +293,30 @@ namespace ETJump
 			return false;
 		}
 
-		auto matches = G_MatchAllMaps(arg);
+		auto matchedMap = G_MatchAllMaps(arg);
 
-		if (matches.size() == 0)
+		if (matchedMap.size() == 0)
 		{
-				map = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", arg);
+			map = stringFormat("^3callvote: ^7no maps found matching ^3%s^7.\n", arg);
 			return false;
 		}
 
-		map = matches[0];
-
-		if (matches.size() > 1 && map != arg)
+		// Check if called map is an exact match to a map on the server
+		for (auto& votedMap : matchedMap)
 		{
-			map = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matches.size(), arg);
+			if (!Q_stricmp(votedMap.c_str(), arg))
+			{
+				map = votedMap;
+				break;
+			}
+		}
+
+		if (matchedMap.size() > 1 && map.empty())
+		{
+			map = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matchedMap.size(), arg);
 			auto perRow = 3;
 			auto mapsOnCurrentRow = 0;
-			for (auto& match : matches)
+			for (auto& match : matchedMap)
 			{
 				++mapsOnCurrentRow;
 				if (mapsOnCurrentRow > perRow)
