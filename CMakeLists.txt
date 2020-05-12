@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(etjump VERSION 2.3.0 HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
-enable_testing()
+
+option(BUILD_TESTS "Enable tests building (ON by default)" ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -31,5 +32,10 @@ target_link_libraries(sqlite_sqlite3 PRIVATE cxx_compiler_opts_w0)
 add_subdirectory(src/cgame)
 add_subdirectory(src/game)
 add_subdirectory(src/ui)
-add_subdirectory(tests)
 add_subdirectory(assets)
+
+if (BUILD_TESTS)
+	message(STATUS "Enabling tests building -- done")
+	enable_testing()
+	add_subdirectory(tests)
+endif()
