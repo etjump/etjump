@@ -24,7 +24,7 @@
 
 #ifdef WIN32
 
-#include <Windows.h>
+#include <windows.h>
 #include "etj_operating_system.h"
 #include "etj_client_authentication.h"
 
