@@ -18,4 +18,4 @@ add_executable(tests_all
 )
 target_link_libraries(tests_all PRIVATE GTest::gtest_main libsha1 cxx_compiler_opts Boost::boost)
 target_compile_options(tests_all PRIVATE $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)
-gtest_discover_tests(tests_all)
+gtest_add_tests(TARGET tests_all)
