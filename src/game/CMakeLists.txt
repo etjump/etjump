@@ -6,7 +6,7 @@ add_library(qagame MODULE
 	"bg_classes.cpp"
 	"bg_misc.cpp"
 	"bg_pmove.cpp"
-	"bg_sha.cpp"
+	"bg_sha1.cpp"
 	"bg_slidemove.cpp"
 	"bg_sscript.cpp"
 	"bg_stats.cpp"
