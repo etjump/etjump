@@ -13,3 +13,6 @@ find_program(CMAKE_RC_COMPILER NAMES ${COMPILER_PREFIX}-windres)
 set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}-windres)
 find_program(CMAKE_AR NAMES ${COMPILER_PREFIX}-gcc-ar)
 set(CMAKE_AR ${COMPILER_PREFIX}-gcc-ar)
+
+SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static" CACHE STRING "executable linker flags" FORCE)
+SET(CMAKE_MODULE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static" CACHE STRING "executable linker flags" FORCE)
