@@ -1,51 +1,46 @@
 # ETJump
 
-ETJump is a Wolfenstein: Enemy Territory trickjump modification.  
-* You can find latest release under the [releases](https://github.com/etjump/etjump/releases) tab.  
-* Documentation is hosted on http://etjump.readthedocs.io/en/latest/.  
-* Join our [discord](https://discord.gg/AcyWMqR) server.
+This is source code repository for [ETJump](http://etjump.com/), a [Wolfenstein: Enemy Territory](https://en.wikipedia.org/wiki/Wolfenstein:_Enemy_Territory) trickjump modification. 
 
-[![Build Status](https://dev.azure.com/etjump/etjump/_apis/build/status/etjump-CI?branchName=master)](https://dev.azure.com/etjump/etjump/_build/latest?definitionId=1&branchName=master)
+---
 
-# Compiling 
-ETJump is compiled on Windows on MSVC toolset `v140`.  
-Visual C++ Redistributable for Visual Studio 2015 has to be installed in order to run the binaries on 
-Windows. Redistributable can be downloaded from `https://www.microsoft.com/en-us/download/details.aspx?id=48145`.  
-Linux binaries are compiled on Ubuntu 14.04. 
+* Binaries https://github.com/etjump/etjump/releases  
+* Discord https://discord.gg/AcyWMqR
+* Documentation http://etjump.readthedocs.io/en/latest/  
+* Mapping https://github.com/etjump/mapping
+* Website https://etjump.com
 
-## Required environment variables
-* `ETROOT` Path to the ET installation directory.
-* `GOOGLE_TEST_ROOT` Path to the Google Test framework installation directory.
-* `BOOST_ROOT`  Path to the Boost library installation directory.
+---
 
-## Dependencies
-ETJump currently depends on 3 libraries that must be installed before ETJump can 
-be compiled: SQLite3, Boost and Google Test. 
+* [Compiling Guide](../master/docs/compiling.md)
+* [Development Guide](../master/docs/developing.md)
+* [Testing Guide](../master/docs/testing.md)
 
-* SQLite3 can be installed on Ubuntu by running the command `sudo apt-get 
-install libsqlite3-dev`. On Windows it works out of the box. Once we clean up 
-the CMakeLists.txt, it should work out of the box on Ubuntu as well. 
-* Boost version 1.60.0 can be downloaded from 
-`http://www.boost.org/users/history/version_1_60_0.html`. Only header files are 
-used. `BOOST_ROOT` environment variable should point to the Boost directory 
-(e.g. `/Path/To/Boost/boost_1_60_0`). 
-* Google Test can be downloaded from `https://github.com/google/googletest`. It 
-must be compiled and the `gtest.lib` library must be moved to the 
-googletest-release-*.*.*/lib directory. `GOOGLE_TEST_ROOT` environment variable 
-should point to the googletest-release directory. 
+# License
 
-## Building pk3 and debugging on Windows
+Majority of the code is licensed under the original ET SDK EULA.  
+ETJump modules are licensed under the MIT. 
 
-ETJump requires 7zip `http://www.7-zip.org/` for the installation script.
+```
+MIT License
 
-Visual Studio project has a post-build event that will execute the 
-build/install.bat to create the pk3 using 7zip.exe. Built pk3 will then be 
-copied to `$(ETROOT)/etjump` directory. Starting the Debug mode will execute 
-`$(ETROOT)/et.exe` and attach to it. 
+Copyright (c) 2020 ETJump team <haapanen.jussi@gmail.com>
 
-## Unit testing
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-ETJump uses Google Test framework for unit testing. Some newer parts of the mod 
-have unit tests. New features should have unit tests. More info on 
-how to write and run tests can be found at 
-`https://github.com/google/googletest`. 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
