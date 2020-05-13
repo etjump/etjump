@@ -331,6 +331,10 @@ namespace ETJump
 			}
 			resultedMap += "\n";
 			return false;
+		} 
+		else if (resultedMap.empty()) 
+		{
+			resultedMap = matchedMaps[0];
 		}
 
 		if (resultedMap == level.rawmapname)
