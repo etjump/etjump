@@ -22,6 +22,7 @@ function(create_compiler_opts target)
 	set(GCC_CXX_FLAGS
 		-pipe
 		-fPIC
+		-fvisibility=hidden
 		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall>
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
