@@ -494,11 +494,11 @@ vmCvar_t etj_tjlNearestInterval;
 vmCvar_t etj_tjlAlwaysLoadTJL;
 
 vmCvar_t etj_enableTimeruns;
-// Ghost player transparency stuff
-vmCvar_t etj_ghostPlayersOpacity;
-vmCvar_t etj_ghostPlayersColor;
-vmCvar_t etj_ghostPlayersFadeRange;
-vmCvar_t etj_ghostPlayersAlt;
+
+vmCvar_t etj_playerOpacity;
+vmCvar_t etj_simplePlayerColor;
+vmCvar_t etj_hideFadeRange;
+vmCvar_t etj_drawSimplePlayers;
 
 vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
@@ -896,10 +896,10 @@ cvarTable_t cvarTable[] =
 
 
 	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
-	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersAlt,          "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE             },
+	{ &etj_playerOpacity,      "etj_playerOpacity",     "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_simplePlayerColor,        "etj_simplePlayerColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
+	{ &etj_hideFadeRange,    "etj_hideFadeRange",   "200",                    CVAR_ARCHIVE             },
+	{ &etj_drawSimplePlayers,          "etj_drawSimplePlayers",         "0",                      CVAR_ARCHIVE             },
 	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },

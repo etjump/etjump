@@ -2541,10 +2541,10 @@ extern vmCvar_t etj_tjlMarkerEndColor;
 extern vmCvar_t etj_tjlNearestInterval;
 extern vmCvar_t etj_tjlAlwaysLoadTJL;
 
-extern vmCvar_t etj_ghostPlayersOpacity;
-extern vmCvar_t etj_ghostPlayersColor;
-extern vmCvar_t etj_ghostPlayersFadeRange;
-extern vmCvar_t etj_ghostPlayersAlt;
+extern vmCvar_t etj_playerOpacity;
+extern vmCvar_t etj_simplePlayerColor;
+extern vmCvar_t etj_hideFadeRange;
+extern vmCvar_t etj_drawSimplePlayers;
 
 extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;

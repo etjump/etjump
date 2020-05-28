@@ -2061,11 +2061,13 @@ void CG_Player(centity_t *cent)
 	float          hilightIntensity = 0.f;
 	
 	// re-set the value for each new entity
-	if (etj_ghostPlayersOpacity.value > 1.0) {
+	if (etj_playerOpacity.value > 1.0)
+	{
 		cg.currentTransparencyValue = 1.0;
 	}
-	else {
-		cg.currentTransparencyValue = etj_ghostPlayersOpacity.value;
+	else
+	{
+		cg.currentTransparencyValue = etj_playerOpacity.value;
 	}
 
 	cgsnap = &cg_entities[cg.snap->ps.clientNum];
@@ -2101,7 +2103,7 @@ void CG_Player(centity_t *cent)
 	{
 
 		vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
-		int transZone = cg_hideDistance.integer + etj_ghostPlayersFadeRange.integer;
+		int transZone = cg_hideDistance.integer + etj_hideFadeRange.integer;
 
 		// Hide players at close range
 		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < cg_hideDistance.integer)
@@ -2111,8 +2113,8 @@ void CG_Player(centity_t *cent)
 
 		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < transZone) {
 
-			float diff = (transZone - playerDist) / etj_ghostPlayersFadeRange.integer;
-			cg.currentTransparencyValue = etj_ghostPlayersOpacity.value - (etj_ghostPlayersOpacity.value * diff);
+			float diff = (transZone - playerDist) / etj_hideFadeRange.integer;
+			cg.currentTransparencyValue = etj_playerOpacity.value - (etj_playerOpacity.value * diff);
 
 		}
 
@@ -3482,13 +3484,13 @@ void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, 
 // sets color and transparency values based on cvars for entity
 void ETJump_SetEntityAutoTransparency(refEntity_t *ent)
 {
-	vec4_t ghostColor = { 1.0, 1.0, 1.0, 1.0 };
+	vec4_t simplePlayerColor = { 1.0, 1.0, 1.0, 1.0 };
 
 	// don't allow colors to affect default skins/shaders
-	if (etj_ghostPlayersAlt.integer > 0)
+	if (etj_drawSimplePlayers.integer > 0)
 	{
-		ETJump::parseColorString(etj_ghostPlayersColor.string, ghostColor);
+		ETJump::parseColorString(etj_simplePlayerColor.string, simplePlayerColor);
 		ent->customShader = cgs.media.ghostPlayersAltColorShader;
 	}
-	ETJump_SetEntityRGBA(ent, ghostColor[0], ghostColor[1], ghostColor[2], cg.currentTransparencyValue);
+	ETJump_SetEntityRGBA(ent, simplePlayerColor[0], simplePlayerColor[1], simplePlayerColor[2], cg.currentTransparencyValue);
 }
