@@ -885,8 +885,8 @@ models/players/hud/eye03
 	}
 }
 
-// alternative ghost players representation through single shader
-etjump/ghost_player_alt 
+// alternative simple players representation through single shader
+etjump/simple_player
 {
     cull none
     {

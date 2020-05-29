@@ -3484,13 +3484,13 @@ void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, 
 // sets color and transparency values based on cvars for entity
 void ETJump_SetEntityAutoTransparency(refEntity_t *ent)
 {
-	vec4_t simplePlayerColor = { 1.0, 1.0, 1.0, 1.0 };
+	vec4_t simplePlayersColor = { 1.0, 1.0, 1.0, 1.0 };
 
 	// don't allow colors to affect default skins/shaders
 	if (etj_drawSimplePlayers.integer > 0)
 	{
-		ETJump::parseColorString(etj_simplePlayerColor.string, simplePlayerColor);
-		ent->customShader = cgs.media.ghostPlayersAltColorShader;
+		ETJump::parseColorString(etj_simplePlayersColor.string, simplePlayersColor);
+		ent->customShader = cgs.media.simplePlayersShader;
 	}
-	ETJump_SetEntityRGBA(ent, simplePlayerColor[0], simplePlayerColor[1], simplePlayerColor[2], cg.currentTransparencyValue);
+	ETJump_SetEntityRGBA(ent, simplePlayersColor[0], simplePlayersColor[1], simplePlayersColor[2], cg.currentTransparencyValue);
 }
