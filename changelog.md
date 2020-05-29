@@ -72,6 +72,11 @@
 * fixed chat background drawing a solid line on the right side
 * added `etj_chatScale` cvar to control chat size
 * fixed color coding breaking on long console prints (such as `/ranks runname`) by making splits at previous newline when message length is > 998 chars
+* renamed confusingly named "ghostPlayers" cvars
+  * `etj_ghostPlayersAlt` -> `etj_drawSimplePlayers`
+  * `etj_ghostPlayersColor` -> `etj_simplePlayerColor`
+  * `etj_ghostPlayerOpacity` -> `etj_playerOpacity`
+  * `etj_ghostPlayerFadeRange` -> `etj_hideFadeRange`
 
 # ETJump 2.3.0
 
