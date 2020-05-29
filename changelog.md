@@ -74,7 +74,7 @@
 * fixed color coding breaking on long console prints (such as `/ranks runname`) by making splits at previous newline when message length is > 998 chars
 * renamed confusingly named "ghostPlayers" cvars
   * `etj_ghostPlayersAlt` -> `etj_drawSimplePlayers`
-  * `etj_ghostPlayersColor` -> `etj_simplePlayerColor`
+  * `etj_ghostPlayersColor` -> `etj_simplePlayersColor`
   * `etj_ghostPlayerOpacity` -> `etj_playerOpacity`
   * `etj_ghostPlayerFadeRange` -> `etj_hideFadeRange`
 
