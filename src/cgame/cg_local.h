@@ -1828,8 +1828,8 @@ typedef struct
 
 	//Feen: CGaz Shader
 	qhandle_t CGazArrow;
-	// alternative ghost players visualisation
-	qhandle_t ghostPlayersAltColorShader;
+
+	qhandle_t simplePlayersShader;
 	qhandle_t saveIcon;
 	qhandle_t proneIcon;
 	qhandle_t forbidIcon;
@@ -2541,10 +2541,10 @@ extern vmCvar_t etj_tjlMarkerEndColor;
 extern vmCvar_t etj_tjlNearestInterval;
 extern vmCvar_t etj_tjlAlwaysLoadTJL;
 
-extern vmCvar_t etj_ghostPlayersOpacity;
-extern vmCvar_t etj_ghostPlayersColor;
-extern vmCvar_t etj_ghostPlayersFadeRange;
-extern vmCvar_t etj_ghostPlayersAlt;
+extern vmCvar_t etj_playerOpacity;
+extern vmCvar_t etj_simplePlayersColor;
+extern vmCvar_t etj_hideFadeRange;
+extern vmCvar_t etj_drawSimplePlayers;
 
 extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
