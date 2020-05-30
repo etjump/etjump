@@ -1121,9 +1121,9 @@ namespace ETJump
 		}
 	}
 
-	bool checkTrackerIndex(int clientNum, int idx, char *buffer)
+	bool checkTrackerIndex(int clientNum, int idx, char *buffer, bool noIndex)
 	{
-		if (idx < 1 || idx > MAX_PROGRESSION_TRACKERS || !(std::regex_match(buffer, std::regex("^\\d+"))))
+		if (((idx < 1 || idx > MAX_PROGRESSION_TRACKERS) && !noIndex) || !(std::regex_match(buffer, std::regex("^-*\\d+"))))
 		{
 			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Invalid index specified. Valid range is ^31-50^7.\n");
 			return false;
@@ -1181,7 +1181,7 @@ namespace ETJump
 				trap_Argv(i, buffer, sizeof buffer);
 				int idx = atoi(buffer);
 
-				if (checkTrackerIndex(clientNum, idx, buffer))
+				if (checkTrackerIndex(clientNum, idx, buffer, false))
 				{
 					printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx, ent->client->sess.progression[idx - 1]);
 					Printer::SendConsoleMessage(clientNum, printTrackerMsg);
@@ -1197,6 +1197,7 @@ namespace ETJump
 		static char bufferIndex[16];
 		static char bufferValue[16];
 		int i, value;
+		bool noIndex = false;
 
 		if (g_debugTrackers.integer <= 0)
 		{
@@ -1239,7 +1240,8 @@ namespace ETJump
 		{
 			if (trap_Argc() == 2)
 			{
-				if (checkTrackerIndex(clientNum, idx, bufferIndex))
+				noIndex = true;
+				if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex))
 				{
 					ent->client->sess.progression[0] = idx;	// No index specified, use it for value on index 1
 					setTrackerMsg = stringFormat("^7Tracker set - index: ^31 ^7value: ^2%i\n", idx);
@@ -1251,8 +1253,9 @@ namespace ETJump
 			if (trap_Argc() == 3)
 			{
 				trap_Argv(2, bufferValue, sizeof bufferValue);
+				noIndex = false;
 
-				if (!checkTrackerIndex(clientNum, idx, bufferIndex))
+				if (!checkTrackerIndex(clientNum, idx, bufferIndex, noIndex))
 				{
 					checkTrackerValue(clientNum, bufferValue);	// Still checking value for more accurate feedback to user
 					return;
