@@ -77,6 +77,7 @@
   * `etj_ghostPlayersColor` -> `etj_simplePlayersColor`
   * `etj_ghostPlayerOpacity` -> `etj_playerOpacity`
   * `etj_ghostPlayerFadeRange` -> `etj_hideFadeRange`
+* added feedback prints to tracker debugger commands when trying to use them while debugging is disabled
 
 # ETJump 2.3.0
 
