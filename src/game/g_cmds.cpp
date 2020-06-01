@@ -1152,6 +1152,7 @@ namespace ETJump
 
 		if (g_debugTrackers.integer <= 0)
 		{
+			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
 			return;
 		}
 
@@ -1199,14 +1200,16 @@ namespace ETJump
 		int i, value;
 		bool noIndex = false;
 
-		if (g_debugTrackers.integer <= 0)
-		{
-			return;
-		}
-
+		// Check this first before g_debugTrackers so help can be printed even when debugging isn't enabled.
 		if (trap_Argc() < 2 || trap_Argc() > 3)
 		{
 			Printer::SendConsoleMessage(clientNum, "^3Usage: ^7tracker_set <index|all> <value>\nSets your tracker value on specified index to N. If index isn't specified, defaults to index 1.\n");
+			return;
+		}
+
+		if (g_debugTrackers.integer <= 0)
+		{
+			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
 			return;
 		}
 
