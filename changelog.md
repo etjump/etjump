@@ -77,7 +77,11 @@
   * `etj_ghostPlayersColor` -> `etj_simplePlayersColor`
   * `etj_ghostPlayerOpacity` -> `etj_playerOpacity`
   * `etj_ghostPlayerFadeRange` -> `etj_hideFadeRange`
-* added feedback prints to tracker debugger commands when trying to use them while debugging is disabled
+* tracker debugger fixes
+  * added feedback prints when trying to use `tracker_set` or `tracker_print` while `g_debugTrackers` is __0__
+  * fixed not being able to set negative tracker values
+  * fixed not being able to set tracker value outside of 1-50 when omitting index (setting value to index 1)
+* implemented proper prone noclipping
 
 # ETJump 2.3.0
 
