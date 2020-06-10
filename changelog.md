@@ -82,6 +82,7 @@
   * fixed not being able to set negative tracker values
   * fixed not being able to set tracker value outside of 1-50 when omitting index (setting value to index 1)
 * implemented proper prone noclipping
+* added `/clearsaves` command to remove your own saves
 
 # ETJump 2.3.0
 
