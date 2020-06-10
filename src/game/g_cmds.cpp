@@ -1274,6 +1274,13 @@ namespace ETJump
 			}
 		}
 	}
+
+	void clearSaves(gentity_t *ent)
+	{
+		auto clientNum = ClientNum(ent);
+		saveSystem->resetSavedPositions(ent);
+		Printer::SendCenterMessage(clientNum, "^7Your saves were removed.\n");
+	}
 }
 
 /*
@@ -5085,6 +5092,7 @@ static command_t noIntermissionCommands[] =
 	{ "interruptRun", qtrue, ETJump::interruptRun },
 	{ "tracker_print", qtrue, ETJump::printTracker },
 	{ "tracker_set", qtrue, ETJump::setTracker },
+	{ "clearsaves", qtrue, ETJump::clearSaves },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
