@@ -1,9 +1,13 @@
-project(etjump)
 cmake_minimum_required(VERSION 3.2)
 cmake_policy(SET CMP0015 NEW)
 
+project(etjump LANGUAGES C CXX)
+
 # Release
-set(CMAKE_BUILD_TYPE Release)
+if (NOT CMAKE_BUILD_TYPE)
+	message(WARNING "Build type is not set, forcing \"Release\"")
+	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+endif()
 
 # Store compiled binaries to folder
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
@@ -13,37 +17,44 @@ option(BUILD_I386 "Builds i386 binaries" ON)
 
 # Set the used compiler
 if(USE_GCC4)
-    set(CMAKE_C_COMPILER gcc-4.9)
-    set(CMAKE_CXX_COMPILER g++-4.9)
+	set(CMAKE_C_COMPILER gcc-4.9)
+	set(CMAKE_CXX_COMPILER g++-4.9)
 else()
-    set(CMAKE_C_COMPILER gcc)
-    set(CMAKE_CXX_COMPILER g++)
+	set(CMAKE_C_COMPILER gcc)
+	set(CMAKE_CXX_COMPILER g++)
 endif()
 
 if(BUILD_I386)
-    set(ARCH "i386")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=i686")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+	set(ARCH "i386")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -march=i686")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -march=i686")
 else()
-    set(ARCH "x86_64")
+	set(ARCH "x86_64")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -fmessage-length=0 -std=c99")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++ -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wall -lstdc++ -std=c++11")
+
+set(cxx_default_flags_release
+	-O3
+	-flto
+	-fPIC 
+	-ffast-math 
+	-fomit-frame-pointer 
+	-fschedule-insns2 
+	-fno-strict-aliasing 
+	-fvisibility=hidden
+)
+string(REPLACE ";" " " cxx_default_flags_release "${cxx_default_flags_release}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${cxx_default_flags_release}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${cxx_default_flags_release}")
+set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} -O3 -flto -s")
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DNDEBUG)
 	# This has to be set to compile with -ffast-math
 	# Makes sqlite to use std isNan function instead of own implementation
 	add_definitions(-DSQLITE_HAVE_ISNAN)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -finline-functions")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fschedule-insns2")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
 endif()
 
 set(CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cgame)
@@ -63,7 +74,7 @@ file(GLOB CGAME_SRC
 	"cgame/cg_ents.cpp"
 	"cgame/cg_edv.cpp"
 	"cgame/etj_autodemo_recorder.cpp"
-        "cgame/etj_awaited_command_handler.cpp"
+	"cgame/etj_awaited_command_handler.cpp"
 	"cgame/etj_client_commands_handler.cpp"
 	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_client_authentication.cpp"
@@ -73,7 +84,7 @@ file(GLOB CGAME_SRC
 	"cgame/etj_demo_recorder.cpp"
 	"cgame/etj_draw_leaves_handler.cpp"
 	"cgame/etj_event_loop.cpp"
-        "cgame/etj_inline_command_parser.cpp"
+	"cgame/etj_inline_command_parser.cpp"
 	"cgame/etj_keyset_drawer.cpp"
 	"cgame/etj_keyset_keybind_drawer.cpp"
 	"cgame/etj_keyset_system.cpp"
@@ -234,7 +245,7 @@ file(GLOB QAGAME_SRC
 )
 
 file(GLOB UI_SRC
-        "cgame/etj_utilities.cpp"
+	"cgame/etj_utilities.cpp"
 	"game/bg_campaign.cpp"
 	"game/bg_classes.cpp"
 	"game/bg_misc.cpp"
@@ -251,13 +262,13 @@ file(GLOB UI_SRC
 )
 
 # cgame library building
-add_library (cgame.mp.${ARCH} SHARED ${CGAME_SRC})
+add_library (cgame.mp.${ARCH} MODULE ${CGAME_SRC})
 set_target_properties(cgame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL" PREFIX "")
 
-add_library (qagame.mp.${ARCH} SHARED ${QAGAME_SRC})
+add_library (qagame.mp.${ARCH} MODULE ${QAGAME_SRC})
 set_target_properties(qagame.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "GAMEDLL" PREFIX "")
 target_link_libraries(qagame.mp.${ARCH} pthread)
 
 # ui library building
-add_library (ui.mp.${ARCH} SHARED ${UI_SRC})
+add_library (ui.mp.${ARCH} MODULE ${UI_SRC})
 set_target_properties(ui.mp.${ARCH} PROPERTIES COMPILE_DEFINITIONS "UIDLL" PREFIX "")
