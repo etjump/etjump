@@ -5,6 +5,7 @@
  *
 */
 
+#include <algorithm>
 
 #include "g_local.h"
 
@@ -195,7 +196,7 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_
 	{
 		VectorMA(player->client->ps.origin, (trigger->r.mins[0] - player->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[0]);
 		VectorMA(player->client->ps.origin, (trigger->r.maxs[0] - player->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[3]);
-		minDistYZ = min(VectorDistance(player->client->ps.origin, sPlane[0]), VectorDistance(player->client->ps.origin, sPlane[3]));
+		minDistYZ = std::min(VectorDistance(player->client->ps.origin, sPlane[0]), VectorDistance(player->client->ps.origin, sPlane[3]));
 	}
 	else
 	{
@@ -205,7 +206,7 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_
 	{
 		VectorMA(player->client->ps.origin, (trigger->r.mins[1] - player->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[1]);
 		VectorMA(player->client->ps.origin, (trigger->r.maxs[1] - player->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[4]);
-		minDistXZ = min(VectorDistance(player->client->ps.origin, sPlane[1]), VectorDistance(player->client->ps.origin, sPlane[4]));
+		minDistXZ = std::min(VectorDistance(player->client->ps.origin, sPlane[1]), VectorDistance(player->client->ps.origin, sPlane[4]));
 	}
 	else
 	{
@@ -215,7 +216,7 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger, vec3_
 	{
 		VectorMA(player->client->ps.origin, (trigger->r.mins[2] - player->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[2]);
 		VectorMA(player->client->ps.origin, (trigger->r.maxs[2] - player->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[5]);
-		minDistXY = min(VectorDistance(player->client->ps.origin, sPlane[2]), VectorDistance(player->client->ps.origin, sPlane[5]));
+		minDistXY = std::min(VectorDistance(player->client->ps.origin, sPlane[2]), VectorDistance(player->client->ps.origin, sPlane[5]));
 	}
 	else
 	{
@@ -350,7 +351,7 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t orig
 	{
 		VectorMA(player->client->ps.origin, (trigger->r.mins[0] - player->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[0]);
 		VectorMA(player->client->ps.origin, (trigger->r.maxs[0] - player->client->ps.origin[0]) / normalizedVelocity[0], normalizedVelocity, sPlane[3]);
-		minDistYZ = min(VectorDistance(player->client->ps.origin, sPlane[0]), VectorDistance(player->client->ps.origin, sPlane[3]));
+		minDistYZ = std::min(VectorDistance(player->client->ps.origin, sPlane[0]), VectorDistance(player->client->ps.origin, sPlane[3]));
 	}
 	else
 	{
@@ -360,7 +361,7 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t orig
 	{
 		VectorMA(player->client->ps.origin, (trigger->r.mins[1] - player->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[1]);
 		VectorMA(player->client->ps.origin, (trigger->r.maxs[1] - player->client->ps.origin[1]) / normalizedVelocity[1], normalizedVelocity, sPlane[4]);
-		minDistXZ = min(VectorDistance(player->client->ps.origin, sPlane[1]), VectorDistance(player->client->ps.origin, sPlane[4]));
+		minDistXZ = std::min(VectorDistance(player->client->ps.origin, sPlane[1]), VectorDistance(player->client->ps.origin, sPlane[4]));
 	}
 	else
 	{
@@ -370,7 +371,7 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger, vec3_t orig
 	{
 		VectorMA(player->client->ps.origin, (trigger->r.mins[2] - player->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[2]);
 		VectorMA(player->client->ps.origin, (trigger->r.maxs[2] - player->client->ps.origin[2]) / normalizedVelocity[2], normalizedVelocity, sPlane[5]);
-		minDistXY = min(VectorDistance(player->client->ps.origin, sPlane[2]), VectorDistance(player->client->ps.origin, sPlane[5]));
+		minDistXY = std::min(VectorDistance(player->client->ps.origin, sPlane[2]), VectorDistance(player->client->ps.origin, sPlane[5]));
 	}
 	else
 	{
@@ -1766,8 +1767,8 @@ void SP_dlight(gentity_t *ent)
 	}
 	else if (style)
 	{
-		style               = max(1, style);                    // clamp to predefined range
-		style               = min(19, style);
+		style               = std::min(1, style);                    // clamp to predefined range
+		style               = std::min(19, style);
 		ent->dl_stylestring = predef_lightstyles[style - 1];    // these are input as 1-20
 	}
 	else

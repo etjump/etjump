@@ -1,17 +1,12 @@
+#include <memory>
+
 #include "g_local.h"
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
 #include "etj_deathrun_system.h"
 #include "etj_database.h"
 #include "etj_session.h"
 #include "etj_save_system.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
-#include <memory>
 
 level_locals_t level;
 

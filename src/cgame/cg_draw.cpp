@@ -1,21 +1,14 @@
 // cg_draw.c -- draw all of the graphical elements during
 // active (after loading) gameplay
 
+#include <algorithm>
+
 #include "cg_local.h"
 #include "../game/q_shared.h"
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #include "etj_irenderable.h"
 #include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
-#include <algorithm>
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -4944,7 +4937,7 @@ else
 
 	}
 
-	len        = 1 - min(1.f, len / 2000.f);
+	len        = 1 - std::min(1.f, len / 2000.f);
 	iconWidth  = 14 * len + 4;    // where did this calc. come from?
 	iconHeight = 14 * len + 4;
 

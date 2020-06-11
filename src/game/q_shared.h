@@ -275,12 +275,6 @@ typedef int clipHandle_t;
 #define MAX_QINT            0x7fffffff
 #define MIN_QINT            (-MAX_QINT - 1)
 
-// TTimo gcc: was missing, added from Q3 source
-#ifndef max
-#define max(x, y) (((x) > (y)) ? (x) : (y))
-#define min(x, y) (((x) < (y)) ? (x) : (y))
-#endif
-
 // angle indexes
 #define PITCH               0       // up / down
 #define YAW                 1       // left / right

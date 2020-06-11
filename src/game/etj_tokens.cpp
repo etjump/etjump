@@ -1,14 +1,6 @@
 #include "etj_tokens.h"
 #include "../json/json.h"
 #include "g_local.h"
-
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
-
 #include "etj_utilities.h"
 
 
