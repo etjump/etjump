@@ -12,6 +12,7 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+
 #include <memory>
 #include <vector>
 
