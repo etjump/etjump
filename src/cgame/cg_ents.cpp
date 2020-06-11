@@ -5,6 +5,7 @@
  *
 */
 
+#include <algorithm>
 
 #include "cg_local.h"
 
@@ -186,8 +187,8 @@ void CG_AddLightstyle(centity_t *cent)
 	lightval = min(1000.0f, lightval);
 	#else
 	lightval *= 0.071429;
-	lightval  = max(0.0f, lightval);
-	lightval  = min(20.0f, lightval);
+	lightval  = std::max(0.0f, lightval);
+	lightval  = std::min(20.0f, lightval);
 	#endif
 
 	cl = cent->currentState.constantLight;

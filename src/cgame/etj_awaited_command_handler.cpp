@@ -1,12 +1,5 @@
 #include "cg_local.h"
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #include "etj_awaited_command_handler.h"
 #include "etj_client_commands_handler.h"
 #include "../game/etj_string_utilities.h"

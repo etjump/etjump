@@ -8,13 +8,6 @@
 
 #include "cg_local.h"
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #include <string>
 #include <vector>
 #include "etj_client_commands_handler.h"
