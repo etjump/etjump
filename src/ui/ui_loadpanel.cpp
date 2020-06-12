@@ -1,5 +1,11 @@
+#include <vector>
+
 #include "ui_local.h"
 #include "ui_shared.h"
+
+#include "../cgame/etj_utilities.h"
+
+extern displayContextDef_t *DC;
 
 qboolean   bg_loadscreeninited = qfalse;
 fontInfo_t bg_loadscreenfont1;
@@ -131,6 +137,8 @@ panel_button_t *loadpanelButtons[] =
 	NULL,
 };
 
+std::vector<panel_button_t> loadpanelButtonsLayout;
+
 /*
 ================
 CG_DrawConnectScreen
@@ -159,7 +167,17 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack
 		trap_R_RegisterFont("ariblk", 27, &bg_loadscreenfont1);
 		trap_R_RegisterFont("courbd", 30, &bg_loadscreenfont2);
 
-		BG_PanelButtonsSetup(loadpanelButtons);
+		loadpanelButtonsLayout.clear();
+
+		for (auto panelBtnPtr : loadpanelButtons)
+		{
+			if (panelBtnPtr) 
+			{
+				loadpanelButtonsLayout.push_back(*panelBtnPtr);
+			}
+		}
+
+		BG_PanelButtonsSetupWide(loadpanelButtonsLayout);
 
 		bg_loadscreeninited = qtrue;
 	}
@@ -169,7 +187,7 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack
 	uiInfo.uiDC.fillRect(0, 0, SCREEN_OFFSET_X, 480, sideColor);
 	uiInfo.uiDC.fillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, sideColor);
 
-	BG_PanelButtonsRender(loadpanelButtons);
+	BG_PanelButtonsRender(loadpanelButtonsLayout);
 
 	if (forcerefresh)
 	{

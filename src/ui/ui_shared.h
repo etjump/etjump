@@ -1,6 +1,7 @@
 #ifndef __UI_SHARED_H
 #define __UI_SHARED_H
 
+#include <vector>
 
 #include "../game/q_shared.h"
 #include "../cgame/tr_types.h"
@@ -620,13 +621,14 @@ struct panel_button_s
 
 void BG_PanelButton_RenderEdit(panel_button_t *button);
 qboolean BG_PanelButton_EditClick(panel_button_t *button, int key);
-qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, panel_button_t **buttons);
-void BG_PanelButtonsSetup(panel_button_t **buttons);
-void BG_PanelButtonsRender(panel_button_t **buttons);
+qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, std::vector<panel_button_t> &buttons);
+void BG_PanelButtonsSetup(std::vector<panel_button_t> &buttons);
+void BG_PanelButtonsSetupWide(std::vector<panel_button_t> &buttons);
+void BG_PanelButtonsRender(std::vector<panel_button_t> &buttons);
 void BG_PanelButtonsRender_Text(panel_button_t *button);
 void BG_PanelButtonsRender_TextExt(panel_button_t *button, const char *text);
 void BG_PanelButtonsRender_Img(panel_button_t *button);
-panel_button_t *BG_PanelButtonsGetHighlightButton(panel_button_t **buttons);
+panel_button_t *BG_PanelButtonsGetHighlightButton(std::vector<panel_button_t> &buttons);
 void BG_PanelButtons_SetFocusButton(panel_button_t *button);
 panel_button_t *BG_PanelButtons_GetFocusButton(void);
 
@@ -637,8 +639,6 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo
 
 void AdjustFrom640(float *x, float *y, float *w, float *h);
 void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h, vec_t angle);
-
-extern displayContextDef_t *DC;
 
 #define SCREEN_WIDTH         DC->screenWidth
 #define SCREEN_HEIGHT        DC->screenHeight

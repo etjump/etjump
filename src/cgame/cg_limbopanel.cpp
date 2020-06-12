@@ -1,4 +1,7 @@
+#include <vector>
+
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 #define SOUNDEVENT(sound) trap_S_StartLocalSound(sound, CHAN_LOCAL_SOUND)
 
@@ -1017,6 +1020,8 @@ panel_button_t *limboPanelButtons[] =
 
 	NULL,
 };
+
+std::vector<panel_button_t> limboPanelButtonsLayout;
 
 qboolean CG_LimboPanel_BriefingButton_KeyDown(panel_button_t *button, int key)
 {
@@ -2685,7 +2690,6 @@ void CG_LimboPanel_RenderCounter(panel_button_t *button)
 void CG_LimboPanel_Setup(void)
 {
 	panel_button_t   *button;
-	panel_button_t   **buttons = limboPanelButtons;
 	clientInfo_t     *ci       = &cgs.clientinfo[cg.clientNum];
 	bg_playerclass_t *classinfo;
 	int              i;
@@ -2706,9 +2710,9 @@ void CG_LimboPanel_Setup(void)
 		cgs.ccSelectedLayer = CG_CurLayerForZ((int)cg.predictedPlayerEntity.lerpOrigin[2]);
 	}
 
-	for ( ; *buttons; buttons++)
+	for (auto &buttonRef : limboPanelButtonsLayout)
 	{
-		button = (*buttons);
+		button = &buttonRef;
 
 		if (button->onDraw == CG_LimboPanel_RenderCounter)
 		{
@@ -2777,7 +2781,18 @@ void CG_LimboPanel_Setup(void)
 
 void CG_LimboPanel_Init(void)
 {
-	BG_PanelButtonsSetup(limboPanelButtons);
+	limboPanelButtonsLayout.reserve(ETJump::nelem(limboPanelButtons) * sizeof(panel_button_t));
+	limboPanelButtonsLayout.clear();
+
+	for (auto panelBtnPtr : limboPanelButtons)
+	{
+		if (panelBtnPtr) 
+		{
+			limboPanelButtonsLayout.push_back(*panelBtnPtr);
+		}
+	}
+
+	BG_PanelButtonsSetupWide(limboPanelButtonsLayout);
 }
 
 qboolean CG_LimboPanel_Draw(void)
@@ -2786,7 +2801,7 @@ qboolean CG_LimboPanel_Draw(void)
 	panel_button_t        *hilight;
 //	panel_button_t** buttons = limboPanelButtons;
 
-	hilight = BG_PanelButtonsGetHighlightButton(limboPanelButtons);
+	hilight = BG_PanelButtonsGetHighlightButton(limboPanelButtonsLayout);
 	if (hilight && hilight != lastHighlight)
 	{
 		lastHighlight = hilight;
@@ -2804,7 +2819,7 @@ qboolean CG_LimboPanel_Draw(void)
 	CG_FillRect(0, 0, SCREEN_OFFSET_X, 480, sideColor);
 	CG_FillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, sideColor);
 
-	BG_PanelButtonsRender(limboPanelButtons);
+	BG_PanelButtonsRender(limboPanelButtonsLayout);
 
 	trap_R_SetColor(NULL);
 	CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
@@ -2839,7 +2854,7 @@ qboolean CG_LimboPanel_Draw(void)
 void CG_LimboPanel_KeyHandling(int key, qboolean down)
 {
 	int b1, b2;
-	if (BG_PanelButtonsKeyEvent(key, down, limboPanelButtons))
+	if (BG_PanelButtonsKeyEvent(key, down, limboPanelButtonsLayout))
 	{
 		return;
 	}

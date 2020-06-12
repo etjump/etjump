@@ -1,6 +1,8 @@
 //
 // string allocation/managment
 
+#include <vector>
+
 #include "ui_shared.h"
 #include "ui_local.h"   // For CS settings/retrieval
 
@@ -9627,15 +9629,15 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key)
 	return qtrue;
 }
 
-qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, panel_button_t **buttons)
+qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, std::vector<panel_button_t> &buttons)
 {
 	panel_button_t *button;
 
 	if (BG_PanelButtons_GetFocusButton())
 	{
-		for ( ; *buttons; buttons++)
+		for (auto &buttonRef : buttons)
 		{
-			button = (*buttons);
+			button = &buttonRef;
 
 			if (button == BG_PanelButtons_GetFocusButton())
 			{
@@ -9673,9 +9675,9 @@ qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, panel_button_t **button
 
 	if (down)
 	{
-		for ( ; *buttons; buttons++)
+		for (auto &buttonRef : buttons)
 		{
-			button = (*buttons);
+			button = &buttonRef;
 
 			if (button->onKeyDown)
 			{
@@ -9691,9 +9693,9 @@ qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, panel_button_t **button
 	}
 	else
 	{
-		for ( ; *buttons; buttons++)
+		for (auto &buttonRef : buttons)
 		{
-			button = (*buttons);
+			button = &buttonRef;
 
 			if (button->onKeyUp && BG_CursorInRect(&button->rect))
 			{
@@ -9708,50 +9710,49 @@ qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, panel_button_t **button
 	return qfalse;
 }
 
-void BG_PanelButtonsSetup(panel_button_t **buttons)
+void BG_PanelButtonsSetup(std::vector<panel_button_t> &buttons)
 {
-	panel_button_t *button;
-
-	for ( ; *buttons; buttons++)
+	for (auto &button : buttons)
 	{
-		button = (*buttons);
-		button->rect.x += SCREEN_OFFSET_X;
-
-		if (button->shaderNormal)
+		if (button.shaderNormal)
 		{
-			button->hShaderNormal = trap_R_RegisterShaderNoMip(button->shaderNormal);
+			button.hShaderNormal = trap_R_RegisterShaderNoMip(button.shaderNormal);
 		}
 	}
 }
 
-panel_button_t *BG_PanelButtonsGetHighlightButton(panel_button_t **buttons)
+void BG_PanelButtonsSetupWide(std::vector<panel_button_t> &buttons)
 {
-	panel_button_t *button;
-
-	for ( ; *buttons; buttons++)
+	for (auto &button : buttons)
 	{
-		button = (*buttons);
-
-		if (button->onKeyDown && BG_CursorInRect(&button->rect))
+		button.rect.x += SCREEN_OFFSET_X;
+		if (button.shaderNormal)
 		{
-			return button;
+			button.hShaderNormal = trap_R_RegisterShaderNoMip(button.shaderNormal);
+		}
+	}
+}
+
+panel_button_t *BG_PanelButtonsGetHighlightButton(std::vector<panel_button_t> &buttons)
+{
+	for (auto &button : buttons)
+	{
+		if (button.onKeyDown && BG_CursorInRect(&button.rect))
+		{
+			return &button;
 		}
 	}
 
 	return NULL;
 }
 
-void BG_PanelButtonsRender(panel_button_t **buttons)
+void BG_PanelButtonsRender(std::vector<panel_button_t> &buttons)
 {
-	panel_button_t *button;
-
-	for ( ; *buttons; buttons++)
+	for (auto &button : buttons)
 	{
-		button = (*buttons);
-
-		if (button->onDraw)
+		if (button.onDraw)
 		{
-			button->onDraw(button);
+			button.onDraw(&button);
 		}
 	}
 }

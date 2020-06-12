@@ -1,10 +1,11 @@
-#include "etj_utilities.h"
 #include <regex>
 #include <unordered_map>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
-#include "etj_event_loop.h"
 #include <memory>
+#include <boost/algorithm/string.hpp>
+
+#include "etj_utilities.h"
+#include "etj_event_loop.h"
 
 namespace ETJump
 {

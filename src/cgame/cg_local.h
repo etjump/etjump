@@ -3983,5 +3983,7 @@ namespace ETJump
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();
 
+extern displayContextDef_t *DC;
+
 #endif // CG_LOCAL_H
 
