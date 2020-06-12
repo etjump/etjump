@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
@@ -209,6 +211,8 @@ panel_button_t *loadpanelButtons[] =
 	NULL,
 };
 
+std::vector<panel_button_t> loadpanelButtonsLayout;
+
 /*
 ================
 CG_DrawConnectScreen
@@ -280,7 +284,17 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 
 		bg_mappic = 0;
 
-		BG_PanelButtonsSetup(loadpanelButtons);
+		loadpanelButtonsLayout.clear();
+
+		for (auto panelBtnPtr : loadpanelButtons)
+		{
+			if (panelBtnPtr) 
+			{
+				loadpanelButtonsLayout.push_back(*panelBtnPtr);
+			}
+		}
+
+		BG_PanelButtonsSetupWide(loadpanelButtonsLayout);
 
 		bg_loadscreeninited = qtrue;
 	}
@@ -289,7 +303,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 	vec4_t sideColor = { 0.145f, 0.172f, 0.145f, 1.f };
 	DC->fillRect(0, 0, SCREEN_WIDTH, 480, sideColor);
 
-	BG_PanelButtonsRender(loadpanelButtons);
+	BG_PanelButtonsRender(loadpanelButtonsLayout);
 
 	if (interactive)
 	{
@@ -544,7 +558,7 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button)
 
 void CG_LoadPanel_KeyHandling(int key, qboolean down)
 {
-	if (BG_PanelButtonsKeyEvent(key, down, loadpanelButtons))
+	if (BG_PanelButtonsKeyEvent(key, down, loadpanelButtonsLayout))
 	{
 		return;
 	}

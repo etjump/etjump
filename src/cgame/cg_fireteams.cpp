@@ -1,3 +1,4 @@
+#include <vector>
 
 #include "cg_local.h"
 
@@ -91,6 +92,8 @@ panel_button_t *fireteamButtons[] =
 
 	NULL
 };
+
+std::vector<panel_button_t> fireteamButtonsLayout;
 
 const char *ftMenuRootStrings[] =
 {
@@ -910,7 +913,17 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button)
 
 void CG_Fireteams_Setup(void)
 {
-	BG_PanelButtonsSetup(fireteamButtons);
+	fireteamButtonsLayout.clear();
+
+	for (auto btnptr : fireteamButtons)
+	{
+		if (btnptr) 
+		{
+			fireteamButtonsLayout.push_back(*btnptr);
+		}
+	}
+
+	BG_PanelButtonsSetup(fireteamButtonsLayout);
 }
 
 void CG_Fireteams_KeyHandling(int key, qboolean down)
@@ -923,7 +936,7 @@ void CG_Fireteams_KeyHandling(int key, qboolean down)
 
 void CG_Fireteams_Draw(void)
 {
-	BG_PanelButtonsRender(fireteamButtons);
+	BG_PanelButtonsRender(fireteamButtonsLayout);
 }
 
 void CG_QuickFireteamMessage_f(void);
