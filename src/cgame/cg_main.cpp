@@ -3457,6 +3457,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	//	int startat = trap_Milliseconds();
 
+
 	// clear everything
 	memset( &cgs, 0, sizeof(cgs));
 	memset(&cg, 0, sizeof(cg));
@@ -3474,6 +3475,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	}
 
 	CG_InitStatsDebug();
+
 
 	cgs.ccZoomFactor = 1.f;
 
@@ -3499,12 +3501,17 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	cgs.ccRequestedObjective  = -1;
 	cgs.ccCurrentCamObjective = -2;
 
+	// moved this up so it's initialized for the loading screen
+	CG_LoadHudMenu();
+	CG_LoadPanel_Init();
+	CG_AssetCache();
+
 	// load a few needed things before we do any screen updates
 	cgs.media.charsetShader = trap_R_RegisterShader("gfx/2d/hudchars");               //trap_R_RegisterShader( "gfx/2d/bigchars" );
 	// JOSEPH 4-17-00
 	cgs.media.menucharsetShader = trap_R_RegisterShader("gfx/2d/hudchars");
 	// END JOSEPH
-	cgs.media.whiteShader     = trap_R_RegisterShader("white");
+	cgs.media.whiteShader     = trap_R_RegisterShaderNoMip("white");
 	cgs.media.charsetProp     = trap_R_RegisterShaderNoMip("menu/art/font1_prop.tga");
 	cgs.media.charsetPropGlow = trap_R_RegisterShaderNoMip("menu/art/font1_prop_glo.tga");
 	cgs.media.charsetPropB    = trap_R_RegisterShaderNoMip("menu/art/font2_prop.tga");
@@ -3512,10 +3519,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	CG_RegisterCvars();
 
 	CG_InitConsoleCommands();
-
-	// Gordon: moved this up so it's initialized for the loading screen
-	CG_LoadHudMenu();              // load new hud stuff
-	CG_AssetCache();
 
 	// get the gamestate from the client system
 	trap_GetGameState(&cgs.gameState);
@@ -3809,6 +3812,8 @@ void CG_Shutdown(void)
 
 		ETJump::isInitialized = false;
 	}
+
+	Shutdown_Display();
 }
 
 // returns true if game is single player (or coop)
