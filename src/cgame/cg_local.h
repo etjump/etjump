@@ -3877,6 +3877,7 @@ void CG_TeamDebriefingTeamSkillXP_Draw(panel_button_t *button);
 
 const char *CG_PickupItemText(int item);
 
+void CG_LoadPanel_Init();
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize, float backheight);
 void CG_LoadPanel_RenderCampaignPins(panel_button_t *button);
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button);

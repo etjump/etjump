@@ -1191,6 +1191,7 @@ _UI_Shutdown
 void _UI_Shutdown(void)
 {
 	trap_LAN_SaveCachedServers();
+	Shutdown_Display();
 }
 
 char *defaultMenu = NULL;
@@ -9418,6 +9419,8 @@ void _UI_Init(int legacyClient, int clientVersion)
 	uiInfo.teamCount      = 0;
 	uiInfo.characterCount = 0;
 	uiInfo.aliasCount     = 0;
+
+	UI_LoadPanel_Init();
 
 	UI_ParseGameInfo("gameinfo.txt");
 

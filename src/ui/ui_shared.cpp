@@ -534,6 +534,11 @@ void Init_Display(displayContextDef_t *dc)
 	DC = dc;
 }
 
+void Shutdown_Display()
+{
+	DC = NULL;
+}
+
 
 
 // type and style painting

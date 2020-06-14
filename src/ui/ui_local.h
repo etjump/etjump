@@ -463,6 +463,7 @@ extern void UI_CDKeyMenu_f(void);
 //
 // ui_loadpanel.c
 //
+void UI_LoadPanel_Init();
 extern void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack);
 
 //

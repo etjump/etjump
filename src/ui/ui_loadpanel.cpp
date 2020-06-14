@@ -7,7 +7,6 @@
 
 extern displayContextDef_t *DC;
 
-qboolean   bg_loadscreeninited = qfalse;
 fontInfo_t bg_loadscreenfont1;
 fontInfo_t bg_loadscreenfont2;
 
@@ -139,6 +138,24 @@ panel_button_t *loadpanelButtons[] =
 
 std::vector<panel_button_t> loadpanelButtonsLayout;
 
+void UI_LoadPanel_Init()
+{
+	trap_R_RegisterFont("ariblk", 27, &bg_loadscreenfont1);
+	trap_R_RegisterFont("courbd", 30, &bg_loadscreenfont2);
+
+	loadpanelButtonsLayout.clear();
+
+	for (auto panelBtnPtr : loadpanelButtons)
+	{
+		if (panelBtnPtr) 
+		{
+			loadpanelButtonsLayout.push_back(*panelBtnPtr);
+		}
+	}
+
+	BG_PanelButtonsSetupWide(loadpanelButtonsLayout);
+}
+
 /*
 ================
 CG_DrawConnectScreen
@@ -161,26 +178,6 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack
 	connect_ownerdraw = ownerdraw;
 
 	inside = qtrue;
-
-	if (!bg_loadscreeninited)
-	{
-		trap_R_RegisterFont("ariblk", 27, &bg_loadscreenfont1);
-		trap_R_RegisterFont("courbd", 30, &bg_loadscreenfont2);
-
-		loadpanelButtonsLayout.clear();
-
-		for (auto panelBtnPtr : loadpanelButtons)
-		{
-			if (panelBtnPtr) 
-			{
-				loadpanelButtonsLayout.push_back(*panelBtnPtr);
-			}
-		}
-
-		BG_PanelButtonsSetupWide(loadpanelButtonsLayout);
-
-		bg_loadscreeninited = qtrue;
-	}
 
 	// side frames to block view
 	vec4_t sideColor = { 0.145f, 0.172f, 0.145f, 1.f };
