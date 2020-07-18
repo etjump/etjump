@@ -3569,6 +3569,10 @@ static qboolean CG_IsOverBounce(float vel, float initHeight,
                                 float finalHeight, float rintv,
                                 float psec, int gravity)
 {
+	if (etj_forceOb.integer != 0) {
+		return qtrue;
+	}
+
 	float a, b, c;
 	float n1;
 	//float			n2;

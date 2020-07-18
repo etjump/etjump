@@ -172,6 +172,10 @@ bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
                                              float finalHeight, float rintv,
                                              float psec, int gravity)
 {
+	if (etj_forceOb.integer != 0) {
+		return qtrue;
+	}
+
 	float a, b, c;
 	float n1;
 	float hn;
@@ -199,12 +203,8 @@ bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
 
 bool ETJump::OverbounceWatcher::surfaceAllowsOverbounce(trace_t* trace)
 {
-	if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE)
-	{
-		return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-	}
-	else
-	{
-		return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-	}
+	auto worldspawnKey = (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE) != 0;
+	auto surfaceParm = (trace->surfaceFlags & SURF_OVERBOUNCE) != 0;
+
+	return worldspawnKey == surfaceParm;
 }
