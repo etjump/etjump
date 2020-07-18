@@ -958,7 +958,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
 	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
 	{ &etj_chatScale, "etj_chatScale", "1.0", CVAR_ARCHIVE },
-	{ &etj_forceOb, "etj_forceOb", "0", CVAR_ARCHIVE },
+	{ &etj_forceOb, "etj_forceOb", "0", CVAR_CHEAT },
 };
 
 
