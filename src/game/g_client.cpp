@@ -1665,13 +1665,14 @@ void ClientUserinfoChanged(int clientNum)
 	// TODO: Check for hardware info spoofing
 
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
-	sscanf(s, "%i %i %i %i %f %i",
+	sscanf(s, "%i %i %i %i %f %i %i",
 	       &client->pers.clientFlags,
 	       &client->pers.clientTimeNudge,
 	       &client->pers.clientMaxPackets,
 	       &client->pers.maxFPS,
 	       &client->pers.noclipScale,
-	       &client->pers.touchPickupWeapons);
+	       &client->pers.touchPickupWeapons,
+		   &client->pers.forceOverbounce);
 
 	client->pers.autoActivate      = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
 	client->pers.predictItemPickup = ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0) ? qtrue : qfalse;

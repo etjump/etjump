@@ -1801,6 +1801,13 @@ static void PM_WalkMove(void)
 	}
 //----(SA)	end
 
+	// With a real overbounce, PM_WalkMove is called while client still has their Z speed.
+	// Simulate this by using cached Z velocity.
+	if (pm->pmext->forceObZVelocity != 0) {
+		pm->ps->velocity[2] += pm->pmext->forceObZVelocity;
+		pm->pmext->forceObZVelocity = 0;
+	}
+
 	vel = VectorLength(pm->ps->velocity);
 
 	// slide along the ground plane
@@ -2086,20 +2093,23 @@ static void PM_CrashLand(void)
 	{
 		PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
 	}
-	else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
-	{
-		if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE)
-		{
-			PM_CheckFallDamage(delta);
-		}
-		else
-		{
-			PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
-		}
-	}
 	else
 	{
-		if (!(pml.groundTrace.surfaceFlags & SURF_NODAMAGE))
+		bool worldspawnNoDamage = pm->shared & BG_LEVEL_NO_FALLDAMAGE != 0;
+		bool surfaceNoDamage = pml.groundTrace.surfaceFlags & SURF_NODAMAGE != 0;
+		bool falldamageEnabled = worldspawnNoDamage == surfaceNoDamage;
+
+		// Don't force OB if about to take fall damage (obviously)
+		if ((!falldamageEnabled || delta <= 38.75) && pm->pmext->forceObEnabled) {
+			auto offset = pm->ps->origin[2] - pml.groundTrace.endpos[2];
+
+			// Check if we need to force OB or not: natural OB always results in offsets slightly over 0.0
+			if (offset == 0) {
+				pm->pmext->forceObZVelocity = pml.previous_velocity[2];
+			}
+		}
+
+		if (falldamageEnabled)
 		{
 			PM_CheckFallDamage(delta);
 		}

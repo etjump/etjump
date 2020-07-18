@@ -1088,6 +1088,8 @@ void CG_PredictPlayerState(void)
 		cg.pmext.noclipScale = cg_noclipScale.value;
 	}
 
+	cg.pmext.forceObEnabled = etj_forceOb.integer != 0;
+
 	memcpy(&oldpmext[current & CMD_MASK], &cg.pmext, sizeof(pmoveExt_t));
 
 	// if we don't have the commands right after the snapshot, we

@@ -448,6 +448,7 @@ vmCvar_t etj_fireteamAlpha;
 vmCvar_t etj_logBanner;
 vmCvar_t cg_weaponSound;
 vmCvar_t cg_noclipScale;
+vmCvar_t etj_forceOb;
 
 vmCvar_t cg_drawSlick;
 vmCvar_t cg_slickX;
@@ -957,6 +958,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
 	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
 	{ &etj_chatScale, "etj_chatScale", "1.0", CVAR_ARCHIVE },
+	{ &etj_forceOb, "etj_forceOb", "0", CVAR_ARCHIVE },
 };
 
 
@@ -1105,7 +1107,7 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
 					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
 					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad ||
-					cv->vmCvar == &etj_quickFollow
+					cv->vmCvar == &etj_quickFollow || cv->vmCvar == &etj_forceOb
 				    )
 				{
 					fSetFlags = qtrue;
@@ -1164,7 +1166,7 @@ void CG_setClientFlags(void)
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f %d",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %f %d %d",
 	                             // Client Flags
 	                             (
 	                                 ((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -1191,7 +1193,8 @@ void CG_setClientFlags(void)
 	                             int_cl_maxpackets.integer,
 	                             com_maxfps.integer,
 	                             cg_noclipScale.value,
-	                             etj_touchPickupWeapons.integer
+	                             etj_touchPickupWeapons.integer,
+								 etj_forceOb.integer
 	                             ));
 
 }

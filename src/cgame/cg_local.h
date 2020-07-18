@@ -2497,6 +2497,7 @@ extern vmCvar_t etj_fireteamAlpha;
 extern vmCvar_t etj_logBanner;
 extern vmCvar_t cg_weaponSound;
 
+extern vmCvar_t etj_forceOb;
 extern vmCvar_t cg_noclipScale;
 extern vmCvar_t cg_drawSlick;
 extern vmCvar_t cg_slickX;
