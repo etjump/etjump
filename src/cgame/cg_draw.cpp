@@ -3434,26 +3434,36 @@ static void CG_DrawCGazHUD(void)
 		vel_relang = DEG2RAD(vel_relang);
 		per_angle  = DEG2RAD(per_angle);
 
-		DrawLine(scx, scy,
-			scx + right, scy - forward, color2);
+		DrawLine(scx, scy, scx + right, scy - forward, color2);
+
+		// When under speed*scale velocity, most accel happens when you move straight
+		// towards your current velocity, so skip drawing the "wings" on the sides
+		auto drawSides = vel_size > (ps->speed * scale);
 
 		vel_size /= 5;
 		if (vel_size > SCREEN_HEIGHT / 2)
 		{
 			vel_size = SCREEN_HEIGHT / 2;
 		}
+
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang),
 			scy - vel_size * cos(vel_relang), color1);
-		vel_size /= 2;
-		DrawLine(scx, scy,
-			scx + vel_size * sin(vel_relang + per_angle),
-			scy - vel_size * cos(vel_relang + per_angle), color1);
-		DrawLine(scx, scy,
-			scx + vel_size * sin(vel_relang - per_angle),
-			scy - vel_size * cos(vel_relang - per_angle), color1);
+
+		if (drawSides)
+		{
+			vel_size /= 2;
+			DrawLine(scx, scy,
+				scx + vel_size * sin(vel_relang + per_angle),
+				scy - vel_size * cos(vel_relang + per_angle), color1);
+			DrawLine(scx, scy,
+				scx + vel_size * sin(vel_relang - per_angle),
+				scy - vel_size * cos(vel_relang - per_angle), color1);
+		}
 		
-		ETJump_EnableWidthScale(true);
+		if (etj_stretchCgaz.integer) {
+			ETJump_EnableWidthScale(true);
+		}
 		
 		return;
 
