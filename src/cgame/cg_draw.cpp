@@ -3238,10 +3238,7 @@ All the cgaz huds
 // Dzikie
 static void PutPixel(float x, float y)
 {
-	if (x > 0 && x < SCREEN_WIDTH && y > 0 && y < SCREEN_HEIGHT)
-	{
-		CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
-	}
+	CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
 }
 
 // Dzikie
@@ -3250,17 +3247,32 @@ static void DrawLine(float x1, float y1, float x2, float y2, vec4_t color)
 	float len, stepx, stepy;
 	float i;
 
-	trap_R_SetColor(color);
-	len   = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-	len   = sqrt(len);
-	stepx = (x2 - x1) / len;
-	stepy = (y2 - y1) / len;
-	for (i = 0; i < len; i++)
-	{
-		PutPixel(x1, y1);
-		x1 += stepx;
-		y1 += stepy;
+	if (x1 == x2 && y1 == y2) {
+		return;
 	}
+
+	trap_R_SetColor(color);
+
+	// Use a single DrawPic for horizontal or vertical lines
+	if (x1 == x2) {
+		CG_DrawPic(x1, y1 < y2 ? y1 : y2, 1, abs(y1 - y2), cgs.media.whiteShader);
+	}
+	else if (y1 == y2) {
+		CG_DrawPic(x1 < x2 ? x1 : x2, y1, abs(x1 - x2), 1, cgs.media.whiteShader);
+	}
+	else {
+		len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+		len = sqrt(len);
+		stepx = (x2 - x1) / len;
+		stepy = (y2 - y1) / len;
+		for (i = 0; i < len; i++)
+		{
+			PutPixel(x1, y1);
+			x1 += stepx;
+			y1 += stepy;
+		}
+	}
+
 	trap_R_SetColor(NULL);
 }
 
