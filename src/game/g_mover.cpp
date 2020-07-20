@@ -5058,11 +5058,23 @@ void use_invisible_user(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
-	vec3_t noiseOrigin = {
-		(ent->r.absmax[0] + ent->r.absmin[0]) / 2,
-		(ent->r.absmax[1] + ent->r.absmin[1]) / 2,
-		(ent->r.absmax[2] + ent->r.absmin[2]) / 2
-	};
+	vec3_t noiseOrigin;
+
+	if (!VectorCompare(ent->r.currentOrigin, vec3_origin))
+	{
+		VectorCopy(ent->r.currentOrigin, noiseOrigin);
+	}
+	else
+	{
+		vec3_t bmodelCenter =
+		{
+			(ent->r.absmax[0] + ent->r.absmin[0]) / 2,
+			(ent->r.absmax[1] + ent->r.absmin[1]) / 2,
+			(ent->r.absmax[2] + ent->r.absmin[2]) / 2
+		};
+
+		VectorCopy(bmodelCenter, noiseOrigin);
+	}
 
 	if (other->client && ent->spawnflags & 1)
 	{
