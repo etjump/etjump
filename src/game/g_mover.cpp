@@ -5058,12 +5058,30 @@ void use_invisible_user(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		return;
 	}
 
+	vec3_t noiseOrigin;
+
+	if (!VectorCompare(ent->r.currentOrigin, vec3_origin))
+	{
+		VectorCopy(ent->r.currentOrigin, noiseOrigin);
+	}
+	else
+	{
+		vec3_t bmodelCenter =
+		{
+			(ent->r.absmax[0] + ent->r.absmin[0]) / 2,
+			(ent->r.absmax[1] + ent->r.absmin[1]) / 2,
+			(ent->r.absmax[2] + ent->r.absmin[2]) / 2
+		};
+
+		VectorCopy(bmodelCenter, noiseOrigin);
+	}
+
 	if (other->client && ent->spawnflags & 1)
 	{
 		//----(SA)	play 'off' sound
 		//----(SA)	I think this is where this goes.  Raf, let me know if it's wrong.  I need someone to tell me what a test map is for this (I'll ask Dan tomorrow)
 		// not usable by player.  turned off.
-		auto te = ETJump::soundEvent(ent->r.currentOrigin, EV_GENERAL_SOUND_VOLUME, ent->soundPos1);
+		auto te = ETJump::soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, ent->soundPos1);
 		te->s.onFireStart = ent->s.onFireStart;
 		return;
 	}
@@ -5073,7 +5091,7 @@ void use_invisible_user(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		G_Script_ScriptEvent(ent, "activate", other->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 		if (ent->noise_index)
 		{
-			auto te = ETJump::soundEvent(ent->r.currentOrigin, EV_GENERAL_SOUND_VOLUME, ent->noise_index);
+			auto te = ETJump::soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, ent->noise_index);
 			te->s.onFireStart = ent->s.onFireStart;
 		}
 	}
