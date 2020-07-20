@@ -3238,10 +3238,7 @@ All the cgaz huds
 // Dzikie
 static void PutPixel(float x, float y)
 {
-	if (x > 0 && x < SCREEN_WIDTH && y > 0 && y < SCREEN_HEIGHT)
-	{
-		CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
-	}
+	CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
 }
 
 // Dzikie
@@ -3250,17 +3247,32 @@ static void DrawLine(float x1, float y1, float x2, float y2, vec4_t color)
 	float len, stepx, stepy;
 	float i;
 
-	trap_R_SetColor(color);
-	len   = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-	len   = sqrt(len);
-	stepx = (x2 - x1) / len;
-	stepy = (y2 - y1) / len;
-	for (i = 0; i < len; i++)
-	{
-		PutPixel(x1, y1);
-		x1 += stepx;
-		y1 += stepy;
+	if (x1 == x2 && y1 == y2) {
+		return;
 	}
+
+	trap_R_SetColor(color);
+
+	// Use a single DrawPic for horizontal or vertical lines
+	if (x1 == x2) {
+		CG_DrawPic(x1, y1 < y2 ? y1 : y2, 1, abs(y1 - y2), cgs.media.whiteShader);
+	}
+	else if (y1 == y2) {
+		CG_DrawPic(x1 < x2 ? x1 : x2, y1, abs(x1 - x2), 1, cgs.media.whiteShader);
+	}
+	else {
+		len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+		len = sqrt(len);
+		stepx = (x2 - x1) / len;
+		stepy = (y2 - y1) / len;
+		for (i = 0; i < len; i++)
+		{
+			PutPixel(x1, y1);
+			x1 += stepx;
+			y1 += stepy;
+		}
+	}
+
 	trap_R_SetColor(NULL);
 }
 
@@ -3434,26 +3446,36 @@ static void CG_DrawCGazHUD(void)
 		vel_relang = DEG2RAD(vel_relang);
 		per_angle  = DEG2RAD(per_angle);
 
-		DrawLine(scx, scy,
-			scx + right, scy - forward, color2);
+		DrawLine(scx, scy, scx + right, scy - forward, color2);
+
+		// When under speed*scale velocity, most accel happens when you move straight
+		// towards your current velocity, so skip drawing the "wings" on the sides
+		auto drawSides = vel_size > (ps->speed * scale);
 
 		vel_size /= 5;
 		if (vel_size > SCREEN_HEIGHT / 2)
 		{
 			vel_size = SCREEN_HEIGHT / 2;
 		}
+
 		DrawLine(scx, scy,
 			scx + vel_size * sin(vel_relang),
 			scy - vel_size * cos(vel_relang), color1);
-		vel_size /= 2;
-		DrawLine(scx, scy,
-			scx + vel_size * sin(vel_relang + per_angle),
-			scy - vel_size * cos(vel_relang + per_angle), color1);
-		DrawLine(scx, scy,
-			scx + vel_size * sin(vel_relang - per_angle),
-			scy - vel_size * cos(vel_relang - per_angle), color1);
+
+		if (drawSides)
+		{
+			vel_size /= 2;
+			DrawLine(scx, scy,
+				scx + vel_size * sin(vel_relang + per_angle),
+				scy - vel_size * cos(vel_relang + per_angle), color1);
+			DrawLine(scx, scy,
+				scx + vel_size * sin(vel_relang - per_angle),
+				scy - vel_size * cos(vel_relang - per_angle), color1);
+		}
 		
-		ETJump_EnableWidthScale(true);
+		if (etj_stretchCgaz.integer) {
+			ETJump_EnableWidthScale(true);
+		}
 		
 		return;
 
