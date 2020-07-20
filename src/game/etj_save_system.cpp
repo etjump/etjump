@@ -725,6 +725,7 @@ void ETJump::SaveSystem::teleportPlayer(gentity_t* ent, SavePosition* pos)
 	}
 
 	client->ps.pm_time = 1; // Crashland + instant load bug fix.
+	client->pmext.forceObZVelocity = 0;
 }
 
 ETJump::SaveSystem::SaveSystem(const std::shared_ptr<Session> session) :

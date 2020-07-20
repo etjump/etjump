@@ -1803,10 +1803,11 @@ static void PM_WalkMove(void)
 
 	// With a real overbounce, PM_WalkMove is called while client still has their Z speed.
 	// Simulate this by using cached Z velocity.
-	if (pm->pmext->forceObZVelocity != 0) {
+	if (pm->pmext->forceObEnabled && pm->pmext->forceObZVelocity != 0) {
 		pm->ps->velocity[2] += pm->pmext->forceObZVelocity;
-		pm->pmext->forceObZVelocity = 0;
 	}
+	
+	pm->pmext->forceObZVelocity = 0;
 
 	vel = VectorLength(pm->ps->velocity);
 

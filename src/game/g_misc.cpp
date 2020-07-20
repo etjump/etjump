@@ -113,6 +113,8 @@ void TeleportPlayer(gentity_t *player, vec3_t origin, vec3_t angles)
 	VectorCopy(origin, player->client->ps.origin);
 	player->client->ps.origin[2] += 1;
 
+	player->client->pmext.forceObZVelocity = 0;
+
 	// spit the player out
 /*	AngleVectors( angles, player->client->ps.velocity, NULL, NULL );
     VectorScale( player->client->ps.velocity, 400, player->client->ps.velocity );
