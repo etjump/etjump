@@ -915,14 +915,7 @@ static void CG_DrawTeamInfo(void)
 			}
 
 			alphapercent = 1.0f - (cg.time - cgs.teamChatMsgTimes[i % chatHeight]) / (float)(cg_teamChatTime.integer);
-			if (alphapercent > 1.0f)
-			{
-				alphapercent = 1.0f;
-			}
-			else if (alphapercent < 0.f)
-			{
-				alphapercent = 0.f;
-			}
+			alphapercent = Numeric::clamp(alphapercent, 0.0f, 1.0f);
 
 			if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS)
 			{
@@ -943,15 +936,7 @@ static void CG_DrawTeamInfo(void)
 				hcolor[2] = 0;
 			}
 
-			chatbgalpha = cg_chatBackgroundAlpha.value;
-			if (chatbgalpha > 1.0f)
-			{
-				chatbgalpha = 1.0f;
-			}
-			else if (chatbgalpha < 0)
-			{
-				chatbgalpha = 0;
-			}
+			chatbgalpha = Numeric::clamp(cg_chatBackgroundAlpha.value, 0.0f, 1.0f);
 
 			hcolor[3] = chatbgalpha * alphapercent;
 
@@ -987,7 +972,7 @@ static void CG_DrawTeamInfo(void)
 
 			}
 
-			CG_Text_Paint_Ext(linePosX, linePosY - 1, fontSizeScaled, fontSizeScaled, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
+			CG_Text_Paint_Ext(linePosX, linePosY - 0.5, fontSizeScaled, fontSizeScaled, hcolor, cgs.teamChatMsgs[i % chatHeight], 0, 0, textStyle, &cgs.media.limboFont2);
 		}
 	}
 }
@@ -1086,19 +1071,7 @@ static void CG_DrawNotify(void)
 		for (i = cgs.notifyPos - 1; i >= cgs.notifyLastPos; i--)
 		{
 			alphapercent = 1.0f - ((cg.time - cgs.notifyMsgTimes[i % chatHeight]) / notifytime);
-			if (alphapercent > 0.5f)
-			{
-				alphapercent = 1.0f;
-			}
-			else
-			{
-				alphapercent *= 2;
-			}
-
-			if (alphapercent < 0.f)
-			{
-				alphapercent = 0.f;
-			}
+			Numeric::clamp(alphapercent, 0.0f, 1.0f);
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = alphapercent;
