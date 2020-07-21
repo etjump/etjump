@@ -83,6 +83,10 @@
   * fixed not being able to set tracker value outside of 1-50 when omitting index (setting value to index 1)
 * implemented proper prone noclipping
 * added `/clearsaves` command to remove your own saves
+* fixed limbo menu/fireteam menu shifting to right randomly
+* fixed incorrect shaders displaying during loading screen
+* `etj_drawCGaz` __2__ no longer shows the side "wings" when movement speed is < 352ups
+* fixed `func_invisible_user` playing sounds at world origin (0 0 0)
 
 # ETJump 2.3.0
 
