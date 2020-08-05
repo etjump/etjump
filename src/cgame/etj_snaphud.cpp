@@ -33,7 +33,7 @@ namespace ETJump
 		scale = PM_CalcScale(ps);
 
 		// check whether snapSpeed needs to be updated
-		speed = ps->speed * scale;
+		speed = cg.snap->ps.speed * scale;
 		if (speed != snapSpeed)
 		{
 			UpdateSnapHUDSettings(speed);
