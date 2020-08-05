@@ -429,6 +429,7 @@ vmCvar_t etj_CHS2PosY;
 vmCvar_t etj_CHSShadow;
 vmCvar_t etj_CHSAlpha;
 vmCvar_t etj_CHSColor;
+vmCvar_t etj_CHS_useFeet;
 
 vmCvar_t cg_itemPickupText;
 
@@ -839,6 +840,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_CHSShadow,               "etj_CHSShadow",               "0",                      CVAR_ARCHIVE             },
 	{ &etj_CHSAlpha,                "etj_CHSAlpha",                "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_CHSColor,                "etj_CHSColor",                "1.0 1.0 1.0",            CVAR_ARCHIVE             },
+	{ &etj_CHS_useFeet,             "etj_CHS_useFeet",             "0",                      CVAR_ARCHIVE             },
 
 	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },
