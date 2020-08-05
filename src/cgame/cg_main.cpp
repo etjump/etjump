@@ -567,6 +567,13 @@ vmCvar_t etj_ad_targetPath;
 
 vmCvar_t etj_chatScale;
 
+// Snaphud
+vmCvar_t etj_drawSnapHUD;
+vmCvar_t etj_snapHUDOffsetY;
+vmCvar_t etj_snapHUDHeight;
+vmCvar_t etj_snapHUDColor1;
+vmCvar_t etj_snapHUDColor2;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -959,6 +966,12 @@ cvarTable_t cvarTable[] =
 	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
 	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
 	{ &etj_chatScale, "etj_chatScale", "1.0", CVAR_ARCHIVE },
+	// Snaphud
+	{ &etj_drawSnapHUD, "etj_drawSnapHUD", "0", CVAR_ARCHIVE },
+	{ &etj_snapHUDOffsetY, "etj_snapHUDOffsetY", "0", CVAR_ARCHIVE },
+	{ &etj_snapHUDHeight, "etj_snapHUDHeight", "10", CVAR_ARCHIVE },
+	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.02 0.1 0.02 0.4", CVAR_ARCHIVE },
+	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
 };
 
 

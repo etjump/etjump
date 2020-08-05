@@ -2614,6 +2614,13 @@ extern vmCvar_t etj_ad_targetPath;
 
 extern vmCvar_t etj_chatScale;
 
+// Snaphud
+extern vmCvar_t etj_drawSnapHUD;
+extern vmCvar_t etj_snapHUDOffsetY;
+extern vmCvar_t etj_snapHUDHeight;
+extern vmCvar_t etj_snapHUDColor1;
+extern vmCvar_t etj_snapHUDColor2;
+
 //
 // cg_main.c
 //
@@ -3968,6 +3975,7 @@ namespace ETJump
 	void onPlayerRespawn(qboolean revived);
 	void runFrameEnd();
 	void DrawCGazHUD();
+	void DrawSnapHUD();
 
 	enum extraTraceOptions {
 		OB_DETECTOR,

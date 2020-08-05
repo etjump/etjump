@@ -5719,6 +5719,7 @@ static void CG_Draw2D(void)
 			CG_DrawNewCompass();
 			CG_DrawFollow();
 			ETJump::DrawCGazHUD();
+			ETJump::DrawSnapHUD();
 			CG_DrawOB();
 			CG_DrawSlick();
 			CG_DrawJumpDelay();
