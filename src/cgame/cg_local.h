@@ -2477,6 +2477,7 @@ extern vmCvar_t etj_CHS2PosY;
 extern vmCvar_t etj_CHSShadow;
 extern vmCvar_t etj_CHSAlpha;
 extern vmCvar_t etj_CHSColor;
+extern vmCvar_t etj_CHS_useFeet;
 
 extern vmCvar_t cg_itemPickupText;
 
