@@ -110,6 +110,7 @@ static void CG_CHS_Distance_XYZ(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t trace;
 	vec3_t origin;
+	vec3_t originOffset{ 0, 0, 24 };
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_12);
 
@@ -120,7 +121,7 @@ static void CG_CHS_Distance_XYZ(char *buf, int size)
 	{
 		if (etj_CHS_useFeet.integer)
 		{
-			_VectorSubtract(origin, vec3_t{ 0, 0, 24 }, origin);
+			_VectorSubtract(origin, originOffset, origin);
 		}
 		Com_sprintf(buf, size, "%.0f", Distance(trace.endpos, origin));
 	}
@@ -154,6 +155,7 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t trace;
 	vec3_t origin;
+	vec3_t originOffset{ 0, 0, 24 };
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
 
@@ -164,7 +166,7 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 	{
 		if (etj_CHS_useFeet.integer)
 		{
-			_VectorSubtract(origin, vec3_t{ 0, 0, 24 }, origin);
+			_VectorSubtract(origin, originOffset, origin);
 		}
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
 		            sqrt(SQR(trace.endpos[0] - origin[0])
@@ -183,6 +185,7 @@ static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size)
 	playerState_t *ps = CG_CHS_GetPlayerState();
 	trace_t trace;
 	vec3_t origin;
+	vec3_t originOffset{ 0, 0, 24 };
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
 
@@ -193,7 +196,7 @@ static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size)
 	{
 		if (etj_CHS_useFeet.integer)
 		{
-			_VectorSubtract(origin, vec3_t{ 0, 0, 24 }, origin);
+			_VectorSubtract(origin, originOffset, origin);
 		}
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
 		            sqrt(SQR(trace.endpos[0] - origin[0])
