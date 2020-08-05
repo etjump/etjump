@@ -295,6 +295,7 @@
     <ClCompile Include="cg_timerun.cpp" />
     <ClCompile Include="etj_autodemo_recorder.cpp" />
     <ClCompile Include="etj_awaited_command_handler.cpp" />
+    <ClCompile Include="etj_cgaz.cpp" />
     <ClCompile Include="etj_client_authentication.cpp" />
     <ClCompile Include="etj_client_commands_handler.cpp" />
     <ClCompile Include="etj_console_alpha.cpp" />
@@ -340,6 +341,7 @@
     <ClInclude Include="cg_timerun.h" />
     <ClInclude Include="etj_autodemo_recorder.h" />
     <ClInclude Include="etj_awaited_command_handler.h" />
+    <ClInclude Include="etj_cgaz.h" />
     <ClInclude Include="etj_client_authentication.h" />
     <ClInclude Include="etj_client_commands_handler.h" />
     <ClInclude Include="etj_console_alpha.h" />
