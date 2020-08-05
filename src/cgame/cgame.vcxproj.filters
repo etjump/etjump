@@ -287,6 +287,9 @@
     <ClCompile Include="etj_player_events_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="etj_cgaz.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_classes.h">
@@ -428,6 +431,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="etj_player_events_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="etj_cgaz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

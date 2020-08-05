@@ -75,6 +75,7 @@ file(GLOB CGAME_SRC
 	"cgame/cg_edv.cpp"
 	"cgame/etj_autodemo_recorder.cpp"
 	"cgame/etj_awaited_command_handler.cpp"
+	"cgame/etj_cgaz.cpp"
 	"cgame/etj_client_commands_handler.cpp"
 	"cgame/etj_console_alpha.cpp"
 	"cgame/etj_client_authentication.cpp"

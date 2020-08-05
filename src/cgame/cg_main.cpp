@@ -332,13 +332,13 @@ vmCvar_t cg_nofatigue;
 vmCvar_t com_maxfps;
 vmCvar_t com_hunkmegs;
 
-vmCvar_t cg_drawCGaz;
-vmCvar_t cg_CGazY;
-vmCvar_t cg_CGazHeight;
-vmCvar_t cg_CGazWidth;
+vmCvar_t etj_drawCGaz;
+vmCvar_t etj_CGazY;
+vmCvar_t etj_CGazHeight;
+vmCvar_t etj_CGazWidth;
 vmCvar_t etj_CGazColor1;
 vmCvar_t etj_CGazColor2;
-vmCvar_t cg_CGazAlpha;
+vmCvar_t etj_CGazAlpha;
 
 vmCvar_t cg_drawOB;
 //Aciz: movable drawOB
@@ -755,16 +755,16 @@ cvarTable_t cvarTable[] =
 	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
 	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
 
-	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
 	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE             },
-	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
-	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
-	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
+	{ &etj_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
+	{ &etj_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
+	{ &etj_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
 	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
 	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
-	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	{ &etj_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
@@ -1099,7 +1099,7 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
 					cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
 					cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
+					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &etj_drawCGaz ||
 					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
 					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
@@ -1173,7 +1173,7 @@ void CG_setClientFlags(void)
 	                                 ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
 	                                 ((cg_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
 	                                 ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
-	                                 ((cg_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
+	                                 ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
 	                                 ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
 	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
 	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
