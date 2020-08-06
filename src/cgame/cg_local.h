@@ -2614,6 +2614,13 @@ extern vmCvar_t etj_ad_targetPath;
 
 extern vmCvar_t etj_chatScale;
 
+// Snaphud
+extern vmCvar_t etj_drawSnapHUD;
+extern vmCvar_t etj_snapHUDOffsetY;
+extern vmCvar_t etj_snapHUDHeight;
+extern vmCvar_t etj_snapHUDColor1;
+extern vmCvar_t etj_snapHUDColor2;
+
 //
 // cg_main.c
 //
@@ -2679,6 +2686,7 @@ void CG_Letterbox(float xsize, float ysize, qboolean center);
 //
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
 void CG_FillRect(float x, float y, float width, float height, const float *color);
+void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, const float* color);
 void CG_HorizontalPercentBar(float x, float y, float width, float height, float percent);
 void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader);
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);
@@ -3968,6 +3976,7 @@ namespace ETJump
 	void onPlayerRespawn(qboolean revived);
 	void runFrameEnd();
 	void DrawCGazHUD();
+	void DrawSnapHUD();
 
 	enum extraTraceOptions {
 		OB_DETECTOR,

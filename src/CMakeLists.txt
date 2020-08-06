@@ -95,6 +95,7 @@ file(GLOB CGAME_SRC
 	"cgame/etj_overbounce_watcher.cpp"
 	"cgame/etj_player_events_handler.cpp"
 	"cgame/etj_quick_follow_drawable.cpp"
+	"cgame/etj_snaphud.cpp"
 	"cgame/etj_speed_drawable.cpp"
 	"cgame/etj_trickjump_lines.cpp"
 	"cgame/etj_utilities.cpp"
