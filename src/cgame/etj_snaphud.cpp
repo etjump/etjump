@@ -90,20 +90,6 @@ namespace ETJump
 		snapZones[snapCount] = snapZones[0] + 90;
 	}
 
-	void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, const float* color)
-	{
-		float x, width, fovscale;
-
-		fovscale = tan(DEG2RAD(cg.refdef.fov_x / 2));
-		x = SCREEN_WIDTH / 2 + tan(DEG2RAD(viewangle + start)) / fovscale * SCREEN_WIDTH / 2;
-		width = fabs(SCREEN_WIDTH * (tan(DEG2RAD(viewangle + end)) - tan(DEG2RAD(viewangle + start))) / (fovscale * 2)) + 1;
-
-		trap_R_SetColor(color);
-		CG_AdjustFrom640(&x, &y, &width, &height);
-		trap_R_DrawStretchPic(x, y, width, height, 0, 0, 0, 0, cgs.media.whiteShader);
-		trap_R_SetColor(NULL);
-	}
-
 	// FIXME: share this with cgaz
 	static float PM_CalcScale(playerState_t* ps)
 	{
