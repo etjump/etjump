@@ -11,7 +11,7 @@ list(APPEND PK_ASSETS "description.txt")
 
 add_custom_target(mod_pk3
 	COMMAND ${CMAKE_COMMAND} 
-		-DINPUT="${PK_ASSETS};cgame*.*;ui*.*"
+		-DINPUT="${PK_ASSETS};cgame*.so;cgame*.dll;ui*.so;ui*.dll"
 		-DOUTPUT="${PK_PATH}"
 		-P ${CMAKE_SOURCE_DIR}/cmake/AssetsPackager.cmake
 	WORKING_DIRECTORY ${BASE_DIR_PATH}

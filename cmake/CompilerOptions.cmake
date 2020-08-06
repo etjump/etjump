@@ -56,7 +56,7 @@ function(create_compiler_opts target)
 			/Ob0               # no inlining
 			/Od                # no optimizations
 			/Zi                # generate complete debug information
-			/Md                # link against dynamic runtime 
+			/MDd               # link against dynamic runtime 
 			/RTC1>)            # run-time checking
 
 	add_library(${target} INTERFACE)

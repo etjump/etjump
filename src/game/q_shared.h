@@ -579,15 +579,17 @@ float Q_rsqrt(float f);         // reciprocal square root
 
 #define SQRTFAST(x) (1.0f / Q_rsqrt(x))
 
-// fast float to int conversion
-#if id386 && !((defined __linux__ || defined __FreeBSD__ || defined __GNUC__) && (defined __i386__))     // rb010123
-long myftol(float f);
-#elif defined(__MACOS__)
-#define myftol(x) (long)(x)
+static inline long Q_ftol(float f)
+{
+#if defined(id386_sse) && defined(_MSC_VER)
+	static int tmp;
+	__asm fld f
+	__asm fistp tmp
+	__asm mov eax, tmp
 #else
-extern long int lrintf(float x);
-#define myftol(x) lrintf(x)
+	return (long)f;
 #endif
+}
 
 signed char ClampChar(int i);
 signed short ClampShort(int i);

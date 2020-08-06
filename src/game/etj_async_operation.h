@@ -25,11 +25,6 @@
 #ifndef ASYNC_OPERATION_HH
 #define ASYNC_OPERATION_HH
 
-#ifdef _WIN32
-#define PTW32_STATIC_LIB
-#endif
-
-#include <pthread.h>
 #include <sqlite3.h>
 #include <string>
 #include "etj_local.h"
@@ -75,8 +70,6 @@ protected:
 	sqlite3_stmt *GetStatement();
 
 private:
-	pthread_t thread_;
-
 	// This is the actual operation
 	virtual void Execute() = 0;
 

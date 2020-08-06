@@ -23,7 +23,7 @@
  */
 
 #include "etj_async_operation.h"
-#include <pthread.h>
+#include <thread>
 #include "utilities.hpp"
 
 void *AsyncOperation::StartThread(void *data)
@@ -31,7 +31,6 @@ void *AsyncOperation::StartThread(void *data)
 	AsyncOperation *object = static_cast<AsyncOperation *>(data);
 	object->Execute();
 	delete object;
-	pthread_exit(NULL);
 	return NULL;
 }
 
@@ -136,6 +135,6 @@ bool AsyncOperation::BindString(int index, std::string const& value)
 
 void AsyncOperation::RunAndDeleteObject()
 {
-	pthread_create(&thread_, NULL, &AsyncOperation::StartThread, this);
-	pthread_detach(thread_);
+	auto taskRunner = std::thread{ AsyncOperation::StartThread, this };
+	taskRunner.detach();
 }
