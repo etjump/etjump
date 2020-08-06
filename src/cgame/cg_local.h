@@ -2163,6 +2163,28 @@ typedef struct
 	demoCam_t demoCam;
 } cgs_t;
 
+// CGaz 5
+struct state_t
+{
+	float v_squared;
+	float vf_squared;
+	float a_squared;
+
+	float v;
+	float vf;
+	float a;
+
+	float wishspeed;
+};
+
+struct range_t
+{
+	float x1;
+	float x2;
+	bool split;
+};
+// End CGaz 5
+
 //==============================================================================
 
 extern cgs_t        cgs;
@@ -2391,6 +2413,10 @@ extern vmCvar_t etj_CGazColor1;
 extern vmCvar_t etj_CGazColor2;
 extern vmCvar_t etj_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
+extern vmCvar_t etj_CGaz5Color1;
+extern vmCvar_t etj_CGaz5Color2;
+extern vmCvar_t etj_CGaz5Color3;
+extern vmCvar_t etj_CGaz5Color4;
 
 extern vmCvar_t cg_drawOB;
 // Aciz: movable drawOB
@@ -2687,8 +2713,11 @@ void CG_Letterbox(float xsize, float ysize, qboolean center);
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
 void CG_FillRect(float x, float y, float width, float height, const float *color);
 void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, const float* color);
+void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, vec4_t const color); // CGaz 5
 void PutPixel(float x, float y);
 void DrawLine(float x1, float y1, float x2, float y2, vec4_t color);
+float AngleToScreenX(float angle);
+range_t AnglesToRange(float start, float end, float yaw);
 void CG_HorizontalPercentBar(float x, float y, float width, float height, float percent);
 void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader);
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);

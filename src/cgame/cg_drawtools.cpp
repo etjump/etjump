@@ -97,6 +97,74 @@ void CG_FillAngleYaw(float start, float end, float viewangle, float y, float hei
 
 /*
 ==============
+CG_FillAngleYaw_Ext
+==============
+*/
+void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, vec4_t const color)
+{
+	range_t const range = AnglesToRange(start, end, yaw);
+	if (!range.split)
+	{
+		CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
+	}
+	else
+	{
+		CG_FillRect(0, y, range.x1, h, color);
+		CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+	}
+}
+
+/*
+==============
+AngleToScreenX
+==============
+*/
+float AngleToScreenX (float angle)
+{
+	float const half_fov_x = DEG2RAD(cg.refdef.fov_x) / 2;
+	if (angle >= half_fov_x)
+	{
+		return 0;
+	}
+	if (angle <= -half_fov_x)
+	{
+		return SCREEN_WIDTH;
+	}
+
+	return SCREEN_WIDTH / 2 * (1 - tanf(angle) / tanf(half_fov_x));
+}
+
+/*
+==============
+AnglesToRange
+==============
+*/
+range_t AnglesToRange(float start, float end, float yaw)
+{
+	if (fabsf(end - start) > 2 * (float)M_PI)
+	{
+		range_t const ret = { 0, SCREEN_WIDTH, false };
+		return ret;
+	}
+
+	bool split = end > start;
+	start = AngleNormalizePI(start - yaw);
+	end = AngleNormalizePI(end - yaw);
+
+	if (end > start)
+	{
+		split = !split;
+		float const tmp = start;
+		start = end;
+		end = tmp;
+	}
+
+	range_t const ret = { AngleToScreenX(start), AngleToScreenX(end), split };
+	return ret;
+}
+
+/*
+==============
 PutPixel
 Used by CGaz 2
 ==============
