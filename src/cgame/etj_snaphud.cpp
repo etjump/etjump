@@ -23,6 +23,27 @@ namespace ETJump
 		return scale;
 	}
 
+	static usercmd_t getUsercmd(playerState_t const& pm_ps, int8_t ucmdScale)
+	{
+		usercmd_t cmd;
+		if (!cg.demoPlayback && !(pm_ps.pm_flags & PMF_FOLLOW))
+		{
+			int cmdNum = trap_GetCurrentCmdNumber();
+			trap_GetUserCmd(cmdNum, &cmd);
+		}
+		else
+		{
+			cmd.forwardmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
+				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD));
+			cmd.rightmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
+				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT));
+			cmd.upmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
+				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN));
+		}
+		// printf("%d %d %d\n", cmd.forwardmove, cmd.rightmove, cmd.upmove);
+		return cmd;
+	}
+
 	static void UpdateSnapHUDSettings(float speed)
 	{
 		float step;
@@ -52,8 +73,6 @@ namespace ETJump
 		vec4_t color[2];
 		int colorID = 0;
 		playerState_t* ps;
-		usercmd_t cmd;
-		int cmdNum;
 
 		ps = &cg.predictedPlayerState;
 
@@ -81,8 +100,8 @@ namespace ETJump
 		// or if no keys are pressed
 		yaw = cg.predictedPlayerState.viewangles[YAW];
 
-		cmdNum = trap_GetCurrentCmdNumber();
-		trap_GetUserCmd(cmdNum, &cmd);
+		int8_t const ucmdScale = 127;
+		usercmd_t cmd = getUsercmd(*ps, ucmdScale);
 
 		if (cmd.forwardmove != 0 && cmd.rightmove != 0)
 		{
