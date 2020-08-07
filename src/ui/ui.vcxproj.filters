@@ -264,6 +264,9 @@
     <None Include="..\..\etjump\ui\etjump_settings_4.menu">
       <Filter>Menu Files\ETJump</Filter>
     </None>
+    <None Include="..\..\etjump\ui\etjump_settings_5.menu">
+      <Filter>Menu Files\ETJump</Filter>
+    </None>
     <None Include="..\..\etjump\ui\ingame_map_details.menu">
       <Filter>Menu Files</Filter>
     </None>

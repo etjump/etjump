@@ -73,6 +73,7 @@
 	loadMenu { "ui/etjump_settings_2.menu" }
 	loadMenu { "ui/etjump_settings_3.menu" }
 	loadMenu { "ui/etjump_settings_4.menu" }
+	loadMenu { "ui/etjump_settings_5.menu" }
 	loadMenu { "ui/etjump_controls.menu" }
 	loadMenu { "ui/etjump_credits.menu" }
 	loadMenu { "ui/ingame_map_details.menu" }
