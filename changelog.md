@@ -87,6 +87,17 @@
 * fixed incorrect shaders displaying during loading screen
 * `etj_drawCGaz` __2__ no longer shows the side "wings" when movement speed is < 352ups
 * fixed `func_invisible_user` playing sounds at world origin (0 0 0)
+* fixed incorrect math with `target/trigger_push` spawnflag __2__
+  * added spawnflag __4__ `ADD_Z` to `target/trigger_push`
+* added `etj_CHS_useFeet` to toggle shifting Z origin to feet level on positional calculations
+* added velocity snapping HUD
+  * `etj_drawSnapHUD` - Toggle velocity snapping HUD
+  * `etj_snapHUDOffsetY` - Y offset for snaphud position
+  * `etj_snapHUDHeight` - height of the snaphud
+  * `etj_snapHUDColor1` - 1st RGBA color of snapzones
+  * `etj_snapHUDColor2` - 2nd RGBA color of snapzones
+* added `etj_drawCGaz` __5__ - equivalent of DeFRaG's `df_hud_cgaz` __13__
+  * `etj_CGaz5Color1-4` to set colors of no accel zone, min angle, accel zone and max angle, respectively
 
 # ETJump 2.3.0
 
