@@ -6,6 +6,74 @@ namespace ETJump
 {
 	constexpr int CGAZ3_ANG{ 20 };
 
+	static float update_d_min(state_t const& state)
+	{
+		float const num_squared =
+			state.wishspeed * state.wishspeed - state.v_squared + state.vf_squared;
+		assert(num_squared >= 0);
+		float const num = sqrtf(num_squared);
+		return num >= state.vf ? 0 : acosf(num / state.vf);
+	}
+
+	static float update_d_opt(state_t const& state)
+	{
+		float const num = state.wishspeed - state.a;
+		return num >= state.vf ? 0 : acosf(num / state.vf);
+	}
+
+	static float update_d_max_cos(state_t const& state, float d_opt)
+	{
+		float const num = state.v - state.vf;
+		float       d_max_cos = num >= state.a ? 0 : acosf(num / state.a);
+		if (d_max_cos < d_opt)
+		{
+			d_max_cos = d_opt;
+		}
+		return d_max_cos;
+	}
+
+	static float update_d_max(state_t const& state, float d_max_cos)
+	{
+		float const num = state.v_squared - state.vf_squared - state.a_squared;
+		float const den = 2 * state.a * state.vf;
+		if (num >= den)
+		{
+			return 0;
+		}
+		else if (-num >= den)
+		{
+			return (float)M_PI;
+		}
+		float d_max = acosf(num / den);
+		if (d_max < d_max_cos)
+		{
+			assert(state.a == 0);
+			d_max = d_max_cos;
+		}
+		return d_max;
+	}
+
+	static usercmd_t getUsercmd(playerState_t const& pm_ps, int8_t ucmdScale)
+	{
+		usercmd_t cmd;
+		if (!cg.demoPlayback && !(pm_ps.pm_flags & PMF_FOLLOW))
+		{
+			int cmdNum = trap_GetCurrentCmdNumber();
+			trap_GetUserCmd(cmdNum, &cmd);
+		}
+		else
+		{
+			cmd.forwardmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
+				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD));
+			cmd.rightmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
+				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT));
+			cmd.upmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
+				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN));
+		}
+		// printf("%d %d %d\n", cmd.forwardmove, cmd.rightmove, cmd.upmove);
+		return cmd;
+	}
+
 	static void PM_CalcFriction(playerState_t* ps, vec3_t& vel, float& accel)
 	{
 		VectorCopy(ps->velocity, vel);
@@ -50,6 +118,31 @@ namespace ETJump
 		// based on PM_CmdScale from bg_pmove.c
 		float scale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps->sprintSpeedScale : ps->runSpeedScale;
 		return scale;
+	}
+
+	static float PM_CalcScaleAlt(playerState_t const& pm_ps, usercmd_t const& cmd)
+	{
+		int32_t max = abs(cmd.forwardmove);
+		if (abs(cmd.rightmove) > max)
+		{
+			max = abs(cmd.rightmove);
+		}
+		if (!max)
+		{
+			return 0;
+		}
+
+		float const total = sqrtf(cmd.forwardmove * cmd.forwardmove + cmd.rightmove * cmd.rightmove);
+		float const scale = (float)pm_ps.speed * max / (127.f * total);
+
+		if (pm_ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50)
+		{
+			return scale * pm_ps.sprintSpeedScale;
+		}
+		else
+		{
+			return scale * pm_ps.runSpeedScale;
+		}
 	}
 
 	void DrawCGazHUD(void)
@@ -173,8 +266,8 @@ namespace ETJump
 		if (etj_drawCGaz.integer == 2)
 		{
 
-			ETJump::parseColorString(etj_CGazColor1.string, color1);
-			ETJump::parseColorString(etj_CGazColor2.string, color2);
+			parseColorString(etj_CGazColor1.string, color1);
+			parseColorString(etj_CGazColor2.string, color2);
 
 			if (etj_stretchCgaz.integer)
 			{
@@ -319,6 +412,114 @@ namespace ETJump
 				return;
 			}
 			return;
+		}
+
+		// DeFRaG CGaz
+		// FIXME: doesn't work on 5:4 resolution
+		if (etj_drawCGaz.integer == 5)
+		{
+			if (VectorLengthSquared2(ps->velocity) == 0)
+			{
+				return;
+			}
+
+			int8_t const ucmdScale = 127;
+			usercmd_t cmd = getUsercmd(*ps, ucmdScale);
+
+			// Use default key combination when no user input
+			if (!cmd.forwardmove && !cmd.rightmove)
+			{
+				cmd.forwardmove = ucmdScale;
+			}
+
+			// save old velocity for crashlanding
+			vec3_t previous_velocity;
+			VectorCopy(ps->velocity, previous_velocity);
+
+			vec3_t forward;
+			vec3_t right;
+			vec3_t up;
+			AngleVectors(ps->viewangles, forward, right, up);
+
+			//
+			PM_CalcFriction(ps, vel, accel);
+
+			float const scale = PM_CalcScaleAlt(*ps, cmd);
+
+			// project moves down to flat plane
+			forward[2] = 0;
+			right[2] = 0;
+			VectorNormalize(forward);
+			VectorNormalize(right);
+
+			vec2_t wishvel;
+			for (uint8_t i = 0; i < 2; ++i)
+			{
+				wishvel[i] = cmd.forwardmove * forward[i] + cmd.rightmove * right[i];
+			}
+
+			float const wishspeed = scale * VectorLength2(wishvel);
+			// printf("wishspeed: %.6f\n", wishspeed);
+
+			state_t state;
+			state.v_squared = VectorLengthSquared2(previous_velocity);
+			state.vf_squared = VectorLengthSquared2(ps->velocity);
+			state.v_squared = state.vf_squared;
+
+			state.wishspeed = wishspeed;
+			state.a = accel * state.wishspeed * pmove_msec.integer / 1000.f;
+			state.a_squared = state.a * state.a;
+			state.v = sqrtf(state.v_squared);
+			state.vf = sqrtf(state.vf_squared);
+
+			float const d_min = update_d_min(state);
+			float const d_opt = update_d_opt(state);
+			float const d_max_cos = update_d_max_cos(state, d_opt);
+			float const d_max = update_d_max(state, d_max_cos);
+			// if (d_min > d_opt || d_opt > d_max_cos || d_max_cos > d_max)
+			// {
+			// 	printf("%.6f <= %.6f <= %.6f <= %.6f\n", d_min, d_opt, d_max_cos, d_max);
+			// 	printf("vf: %.6f, a: %.6f, wishspeed: %.6f, frametime: %.6f", state.vf, state.a, state.wishspeed, pmove_msec.integer / 1000.f);
+			// }
+
+			float const d_vel = atan2f(ps->velocity[1], ps->velocity[0]);
+
+			float const yaw = atan2f(wishvel[1], wishvel[0]) - d_vel;
+
+			// No accel zone
+			{
+				vec4_t color;
+				parseColorString(etj_CGaz5Color1.string, color);
+				color[3] = a;
+				CG_FillAngleYaw_Ext(-d_min, +d_min, yaw, y, h, color);
+			}
+
+			// Min angle
+			{
+				vec4_t color;
+				parseColorString(etj_CGaz5Color2.string, color);
+				color[3] = a;
+				CG_FillAngleYaw_Ext(+d_min, +d_opt, yaw, y, h, color);
+				CG_FillAngleYaw_Ext(-d_opt, -d_min, yaw, y, h, color);
+			}
+
+			// Accel zone
+			{
+				vec4_t color;
+				parseColorString(etj_CGaz5Color3.string, color);
+				color[3] = a;
+				CG_FillAngleYaw_Ext(+d_opt, +d_max_cos, yaw, y, h, color);
+				CG_FillAngleYaw_Ext(-d_max_cos, -d_opt, yaw, y, h, color);
+			}
+
+			// Max angle
+			{
+				vec4_t color;
+				parseColorString(etj_CGaz5Color4.string, color);
+				color[3] = a;
+				CG_FillAngleYaw_Ext(+d_max_cos, +d_max, yaw, y, h, color);
+				CG_FillAngleYaw_Ext(-d_max, -d_max_cos, yaw, y, h, color);
+			}
 		}
 	}
 }

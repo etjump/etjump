@@ -339,6 +339,10 @@ vmCvar_t etj_CGazWidth;
 vmCvar_t etj_CGazColor1;
 vmCvar_t etj_CGazColor2;
 vmCvar_t etj_CGazAlpha;
+vmCvar_t etj_CGaz5Color1;
+vmCvar_t etj_CGaz5Color2;
+vmCvar_t etj_CGaz5Color3;
+vmCvar_t etj_CGaz5Color4;
 
 vmCvar_t cg_drawOB;
 //Aciz: movable drawOB
@@ -773,6 +777,10 @@ cvarTable_t cvarTable[] =
 	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
 	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
 	{ &etj_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	{ &etj_CGaz5Color1,              "etj_CGaz5Color1",              "0.75 0.75 0.75 1.0",    CVAR_ARCHIVE },
+	{ &etj_CGaz5Color2,              "etj_CGaz5Color2",              "0.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
+	{ &etj_CGaz5Color3,              "etj_CGaz5Color3",              "0.0 0.2 0.0 1.0",       CVAR_ARCHIVE },
+	{ &etj_CGaz5Color4,              "etj_CGaz5Color4",              "1.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },

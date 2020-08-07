@@ -702,6 +702,17 @@ float AngleMod(float a)
 
 /*
 =================
+AngleNormalizePi
+=================
+*/
+float AngleNormalizePI(float angle)
+{
+	angle = fmodf(angle + (float)M_PI, 2 * (float)M_PI);
+	return angle < 0 ? angle + (float)M_PI : angle - (float)M_PI;
+}
+
+/*
+=================
 AngleNormalize2Pi
 
 returns angle normalized to the range [0 <= angle < 2*M_PI]
@@ -1366,6 +1377,16 @@ vec_t VectorLength(const vec3_t v)
 vec_t VectorLengthSquared(const vec3_t v)
 {
 	return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+vec_t VectorLength2(vec2_t const v)
+{
+	return (vec_t)sqrtf(v[0] * v[0] + v[1] * v[1]);
+}
+
+vec_t VectorLengthSquared2(vec2_t const v)
+{
+	return (v[0] * v[0] + v[1] * v[1]);
 }
 
 vec_t Distance(const vec3_t p1, const vec3_t p2)
