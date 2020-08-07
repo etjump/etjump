@@ -92,9 +92,10 @@ menuDef {
         MULTI				(316, SUBW_SCOREBOARD_Y + 20, 276, 8, "Custom scoreboard:", 0.2, 8, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
         YESNO				(316, SUBW_SCOREBOARD_Y + 32, 276, 8, "Draw CGaz users:", 0.2, 8, "etj_drawCGazUsers", "Draw CGaz users on default scoreboard\netj_drawCGazUsers")
 
-        BUTTON				(8, 424, 112, 18, "BACK", 0.3, 14, close etjump_settings_1; open etjump)
-        BUTTONACTIVE		(128, 424, 112, 18, "TAB 1", 0.3, 14, close etjump_settings_1; open etjump_settings_1)
-        BUTTON				(248, 424, 112, 18, "TAB 2", 0.3, 14, close etjump_settings_1; open etjump_settings_2)
-        BUTTON				(368, 424, 112, 18, "TAB 3", 0.3, 14, close etjump_settings_1; open etjump_settings_3)
-        BUTTON				(488, 424, 112, 18, "TAB 4", 0.3, 14, close etjump_settings_1; open etjump_settings_4)
+        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_1; open etjump)
+        BUTTONACTIVE		(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_1; open etjump_settings_1)
+        BUTTON				(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_1; open etjump_settings_2)
+        BUTTON				(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_1; open etjump_settings_3)
+        BUTTON				(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_1; open etjump_settings_4)
+        BUTTON      		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_1; open etjump_settings_5)
 }

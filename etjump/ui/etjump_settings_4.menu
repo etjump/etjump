@@ -94,9 +94,10 @@ menuDef {
         CVARINTLABEL		(316, SUBW_DEMO_Y + 80, 276, 8, "movie_fovMaxSpeed", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_DEMO_Y + 80, 276, 8, "Max FOV speed:", 0.2, 8, movie_fovMaxSpeed 1200 500 2500 10, "Speed required to reach maximum FOV\nmovie_fovMaxSpeed")
 
-        BUTTON				(8, 424, 112, 18, "BACK", 0.3, 14, close etjump_settings_4; open etjump)
-        BUTTON				(128, 424, 112, 18, "TAB 1", 0.3, 14, close etjump_settings_4; open etjump_settings_1)
-        BUTTON				(248, 424, 112, 18, "TAB 2", 0.3, 14, close etjump_settings_4; open etjump_settings_2)
-        BUTTON				(368, 424, 112, 18, "TAB 3", 0.3, 14, close etjump_settings_4; open etjump_settings_3)
-        BUTTONACTIVE		(488, 424, 112, 18, "TAB 4", 0.3, 14, close etjump_settings_4; open etjump_settings_4)
+        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_4; open etjump)
+        BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_4; open etjump_settings_1)
+        BUTTON				(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_4; open etjump_settings_2)
+        BUTTON				(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_4; open etjump_settings_3)
+        BUTTONACTIVE		(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_4; open etjump_settings_4)
+        BUTTON      		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_4; open etjump_settings_5)
 }
