@@ -1,3 +1,5 @@
+include(GoogleTest)
+
 add_executable(tests_all 
 	"../src/cgame/etj_client_commands_handler.cpp"
 	"../src/cgame/etj_entity_events_handler.cpp"
@@ -16,6 +18,6 @@ add_executable(tests_all
 	"inline_command_parser_tests.cpp"
 	"string_utilities_tests.cpp"
 )
-target_link_libraries(tests_all PRIVATE GTest::gtest_main libsha1 cxx_compiler_opts Boost::boost)
+target_link_libraries(tests_all PRIVATE gtest_main libsha1 cxx_compiler_opts)
 target_compile_options(tests_all PRIVATE $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)
 gtest_add_tests(TARGET tests_all)
