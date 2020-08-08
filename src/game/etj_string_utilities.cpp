@@ -24,6 +24,8 @@
 
 #include "etj_string_utilities.h"
 #include <algorithm>
+#include <cctype>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/algorithm/string.hpp>
