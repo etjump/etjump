@@ -3045,7 +3045,7 @@ static void CG_ServerCommand(void)
 
 
 
-		trap_SendConsoleCommand(va("set name %s\n", line));
+		trap_Cvar_Set("name", line);
 		return;
 	}
 
