@@ -81,11 +81,11 @@ void CG_FillRectGradient(float x, float y, float width, float height, const floa
 CG_FillAngleYaw
 ==============
 */
-void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, const float* color)
+void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, float fov, const float* color)
 {
 	float x, width, fovscale;
 
-	fovscale = tan(DEG2RAD(cg.refdef.fov_x / 2));
+	fovscale = tan(DEG2RAD(fov / 2));
 	x = SCREEN_WIDTH / 2 + tan(DEG2RAD(viewangle + start)) / fovscale * SCREEN_WIDTH / 2;
 	width = fabs(SCREEN_WIDTH * (tan(DEG2RAD(viewangle + end)) - tan(DEG2RAD(viewangle + start))) / (fovscale * 2)) + 1;
 
@@ -100,9 +100,9 @@ void CG_FillAngleYaw(float start, float end, float viewangle, float y, float hei
 CG_FillAngleYaw_Ext
 ==============
 */
-void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, vec4_t const color)
+void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, float fov, vec4_t const color)
 {
-	range_t const range = AnglesToRange(start, end, yaw);
+	range_t const range = AnglesToRange(start, end, yaw, fov);
 	if (!range.split)
 	{
 		CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
@@ -119,9 +119,9 @@ void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, ve
 AngleToScreenX
 ==============
 */
-float AngleToScreenX (float angle)
+float AngleToScreenX (float angle, float fov)
 {
-	float const half_fov_x = DEG2RAD(cg.refdef.fov_x) / 2;
+	float const half_fov_x = DEG2RAD(fov) / 2;
 	if (angle >= half_fov_x)
 	{
 		return 0;
@@ -139,7 +139,7 @@ float AngleToScreenX (float angle)
 AnglesToRange
 ==============
 */
-range_t AnglesToRange(float start, float end, float yaw)
+range_t AnglesToRange(float start, float end, float yaw, float fov)
 {
 	if (fabsf(end - start) > 2 * (float)M_PI)
 	{
@@ -159,7 +159,7 @@ range_t AnglesToRange(float start, float end, float yaw)
 		end = tmp;
 	}
 
-	range_t const ret = { AngleToScreenX(start), AngleToScreenX(end), split };
+	range_t const ret = { AngleToScreenX(start, fov), AngleToScreenX(end, fov), split };
 	return ret;
 }
 

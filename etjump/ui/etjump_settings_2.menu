@@ -7,7 +7,7 @@
 #define SUBW_GUN_Y 224
 #define SUBW_KEYS_Y 308
 #define SUBW_CGAZ_Y 32
-#define SUBW_POPUPS_Y 212
+#define SUBW_POPUPS_Y 224
 #define GROUP_NAME "group_etjump_settings_2"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
@@ -61,7 +61,7 @@ menuDef {
         MULTI				(16, SUBW_KEYS_Y + 68, 276, 8, "Keys color:", 0.2, 8, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of pressed keys\netj_keysColor")
         YESNO				(16, SUBW_KEYS_Y + 80, 276, 8, "Keys shadow:", 0.2, 8, "etj_keysShadow", "Draw shadow on pressed keys\netj_keysShadow")
 
-    SUBWINDOW(308, 32, 292, 172, "CGAZ")
+    SUBWINDOW(308, 32, 292, 184, "CGAZ")
         MULTI				(316, SUBW_CGAZ_Y + 20, 276, 8, "CGaz:", 0.2, 8, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 "CGaz 3" 3 "CGaz 4" 4 "CGaz 5" 5 }, "Draw CGaz HUD\netj_drawCGaz")
         CVARFLOATLABEL		(316, SUBW_CGAZ_Y + 32, 276, 8, "etj_CGazAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_CGAZ_Y + 32, 276, 8, "CGaz alpha:", 0.2, 8, etj_CGazAlpha 1 0 1 0.05, "Sets transparency of CGaz (excl. CGaz 2)\netj_CGazAlpha")
@@ -77,9 +77,11 @@ menuDef {
         SLIDER				(316, SUBW_CGAZ_Y + 128, 276, 8, "CGaz height:", 0.2, 8, etj_CGazHeight 20 1 100 1, "Sets height of CGaz (excl. CGaz 2)\netj_CGazHeight")
         CVARINTLABEL		(316, SUBW_CGAZ_Y + 140, 276, 8, "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_CGAZ_Y + 140, 276, 8, "CGaz Y position:", 0.2, 8, etj_CGazY 260 0 480 10, "Sets Y position of CGaz (excl. CGaz 2)\netj_CGazY")
-        YESNO				(316, SUBW_CGAZ_Y + 152, 276, 8, "Stretch CGaz:", 0.2, 8, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
+        CVARINTLABEL		(316, SUBW_CGAZ_Y + 152, 276, 8, "etj_CGaz5Fov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_CGAZ_Y + 152, 276, 8, "CGaz 5 FOV:", 0.2, 8, etj_CGaz5Fov 0 0 180 5, "Sets FOV of CGaz 5, 0 to use your current FOV\netj_CGaz5Fov")
+        YESNO				(316, SUBW_CGAZ_Y + 164, 276, 8, "Stretch CGaz:", 0.2, 8, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
 
-    SUBWINDOW(308, 212, 292, 148, "POPUPS")
+    SUBWINDOW(308, 224, 292, 148, "POPUPS")
         MULTI				(316, SUBW_POPUPS_Y + 20, 276, 8, "Draw popups:", 0.2, 8, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
         CVARINTLABEL		(316, SUBW_POPUPS_Y + 32, 276, 8, "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_POPUPS_Y + 32, 276, 8, "Number of popups:", 0.2, 8, etj_numPopups 5 1 16 1, "How many popup messages to display\netj_numPopups")

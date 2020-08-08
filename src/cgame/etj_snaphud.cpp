@@ -1,5 +1,6 @@
 #include "etj_snaphud.h"
 #include "etj_utilities.h"
+#include "../game/etj_numeric_utilities.h"
 
 // Snaphud implementation based on iodfe
 
@@ -70,6 +71,7 @@ namespace ETJump
 		float speed;
 		float y, h;
 		float yaw;
+		float fov;
 		vec4_t color[2];
 		int colorID = 0;
 		playerState_t* ps;
@@ -116,13 +118,22 @@ namespace ETJump
 		h = etj_snapHUDHeight.value;
 		y = 240 + etj_snapHUDOffsetY.value;
 
+		if (!etj_snapHUDFov.value)
+		{
+			fov = cg.refdef.fov_x;
+		}
+		else
+		{
+			fov = Numeric::clamp(etj_snapHUDFov.value, 1, 180);
+		}
+
 		parseColorString(etj_snapHUDColor1.string, color[0]);
 		parseColorString(etj_snapHUDColor2.string, color[1]);
 
 		for (int i = 0; i < snapCount; i++)
 		{
-			CG_FillAngleYaw(snapZones[i], snapZones[i + 1], yaw, y, h, color[colorID]);
-			CG_FillAngleYaw(snapZones[i] + 90, snapZones[i + 1] + 90, yaw, y, h, color[colorID]);
+			CG_FillAngleYaw(snapZones[i], snapZones[i + 1], yaw, y, h, fov, color[colorID]);
+			CG_FillAngleYaw(snapZones[i] + 90, snapZones[i + 1] + 90, yaw, y, h, fov, color[colorID]);
 			colorID ^= 1;
 		}
 	}
