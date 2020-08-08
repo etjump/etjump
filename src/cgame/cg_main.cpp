@@ -981,7 +981,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawSnapHUD, "etj_drawSnapHUD", "0", CVAR_ARCHIVE },
 	{ &etj_snapHUDOffsetY, "etj_snapHUDOffsetY", "0", CVAR_ARCHIVE },
 	{ &etj_snapHUDHeight, "etj_snapHUDHeight", "10", CVAR_ARCHIVE },
-	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.02 0.1 0.02 0.4", CVAR_ARCHIVE },
+	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.0 1.0 1.0 0.75", CVAR_ARCHIVE },
 	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
 	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
 };
