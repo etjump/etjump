@@ -5627,20 +5627,12 @@ static void CG_Draw2D(void)
 		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || cgs.demoCam.renderingFreeCam)
 		{
 			CG_DrawSpectator();
-			CG_DrawCrosshair();
-			CG_DrawCrosshairNames();
-
 		}
 		else
 		{
 			// don't draw any status if dead
 			if (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW))
 			{
-
-				CG_DrawCrosshair();
-
-				CG_DrawCrosshairNames();
-
 				CG_DrawNoShootIcon();
 
 //				CG_DrawPickupItem();
@@ -5720,6 +5712,11 @@ static void CG_Draw2D(void)
 			CG_DrawFollow();
 			ETJump::DrawCGazHUD();
 			ETJump::DrawSnapHUD();
+			if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
+			{
+				CG_DrawCrosshair();
+				CG_DrawCrosshairNames();
+			}
 			CG_DrawOB();
 			CG_DrawSlick();
 			CG_DrawJumpDelay();
