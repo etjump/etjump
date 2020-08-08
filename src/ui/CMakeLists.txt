@@ -16,5 +16,8 @@ add_library(ui MODULE
 )
 target_compile_definitions(ui PRIVATE UIDLL)
 target_link_libraries(ui PRIVATE cxx_compiler_opts libboost)
-set_target_properties(ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}")
+set_target_properties(ui PROPERTIES 
+  	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
+	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
+	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
 set_target_lib_suffix(ui)
