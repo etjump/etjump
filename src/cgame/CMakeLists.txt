@@ -90,6 +90,6 @@ add_library(cgame MODULE
 	"../ui/ui_shared.cpp"
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
-target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 Boost::boost)
+target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libboost)
 set_target_properties(cgame PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}")
 set_target_lib_suffix(cgame)

@@ -15,6 +15,6 @@ add_library(ui MODULE
 	"../cgame/etj_utilities.cpp"
 )
 target_compile_definitions(ui PRIVATE UIDLL)
-target_link_libraries(ui PRIVATE cxx_compiler_opts Boost::boost)
+target_link_libraries(ui PRIVATE cxx_compiler_opts libboost)
 set_target_properties(ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}")
 set_target_lib_suffix(ui)
