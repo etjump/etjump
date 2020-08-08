@@ -343,6 +343,7 @@ vmCvar_t etj_CGaz5Color1;
 vmCvar_t etj_CGaz5Color2;
 vmCvar_t etj_CGaz5Color3;
 vmCvar_t etj_CGaz5Color4;
+vmCvar_t etj_CGaz5Fov;
 
 vmCvar_t cg_drawOB;
 //Aciz: movable drawOB
@@ -577,6 +578,7 @@ vmCvar_t etj_snapHUDOffsetY;
 vmCvar_t etj_snapHUDHeight;
 vmCvar_t etj_snapHUDColor1;
 vmCvar_t etj_snapHUDColor2;
+vmCvar_t etj_snapHUDFov;
 
 typedef struct
 {
@@ -781,6 +783,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_CGaz5Color2,              "etj_CGaz5Color2",              "0.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
 	{ &etj_CGaz5Color3,              "etj_CGaz5Color3",              "0.0 0.2 0.0 1.0",       CVAR_ARCHIVE },
 	{ &etj_CGaz5Color4,              "etj_CGaz5Color4",              "1.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
+	{ &etj_CGaz5Fov,              "etj_CGaz5Fov",              "0",       CVAR_ARCHIVE },
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
@@ -980,6 +983,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_snapHUDHeight, "etj_snapHUDHeight", "10", CVAR_ARCHIVE },
 	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.02 0.1 0.02 0.4", CVAR_ARCHIVE },
 	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
+	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
 };
 
 
