@@ -972,7 +972,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_spectatorVote, "", "0", 0 },
 	{ &etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE },
 	// Autodemo
-	{ &etj_autoDemo, "etj_autoDemo", "1", CVAR_ARCHIVE },
+	{ &etj_autoDemo, "etj_autoDemo", "0", CVAR_ARCHIVE },
 	{ &etj_ad_savePBOnly, "etj_ad_savePBOnly", "0", CVAR_ARCHIVE },
 	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
 	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
