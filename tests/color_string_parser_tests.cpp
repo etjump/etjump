@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include "../src/cgame/etj_utilities.h"
 #include <string>
+#include <algorithm>
+
+#define EPSILON 1.19209290E-07F
 
 using namespace ETJump;
 
@@ -15,11 +18,14 @@ public:
 
 	static bool Vector4Compare(const vec4_t &v1, const vec4_t &v2)
 	{
-		if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2] || v1[3] != v2[3])
+		if (std::abs(v1[0] - v2[0]) < EPSILON || 
+		    std::abs(v1[1] - v2[1]) < EPSILON || 
+		    std::abs(v1[2] - v2[2]) < EPSILON || 
+		    std::abs(v1[3] - v2[3]) < EPSILON)
 		{
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 };
 
