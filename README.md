@@ -14,7 +14,9 @@ This is source code repository for [ETJump](http://etjump.com/), a [Wolfenstein:
 
 * [Compiling Guide](../master/docs/compiling.md)
 * [Development Guide](../master/docs/developing.md)
-* [Testing Guide](../master/docs/testing.md)
+* [Mod Forking Guide](../master/docs/forking.md)
+* [Code Testing Guide](../master/docs/testing.md)
+* [Code Style Guide](../master/docs/styleguide.md)
 
 # License
 
