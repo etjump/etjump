@@ -100,7 +100,7 @@ This option gives best control over the solution and provides familiar usage exp
 In `Solution Explorer` (File list):
 1. Select `Package/mod_pk3` project.
 2. Open context menu and click on `Build` entry.
-    * `pk3` file will be created in `builds/etjump` directory.
+    * `pk3` file will be created in `build/etjump` directory.
 3. Similarly you can create zipped etjump release by building `mod_release` project.
     * `zip` release will be created in `build` directory.
 
@@ -122,7 +122,7 @@ This is simple, and easy use option, but not as much versatile as `sln` solution
 8. Let it fully __initialize__ (output window should log `CMake generation finished.`).
 9. In the `Build` menu select `Build All`.
     * Alternatively click on `Switch View` in `Solution Explorer`, switch to `CMake Targets View` and compile modules (`cgame`, `qagame`, `ui`) separately using context menu (requires `Visual Studio 2019` and later).
-10. You will find compiled binaries in `builds/etjump` directory. 
+10. You will find compiled binaries in `build/etjump` directory. 
 
 ##### Create mod pk3
 
@@ -133,7 +133,7 @@ In `Solution Explorer` (File list):
 2. Switch to `CMake Targets View`.
 3. Select `Package/mod_pk3` entry.
 4. Draw context menu and press `Build`.
-5. You will find `pk3` file in `builds/etjump` directory.
+5. You will find `pk3` file in `build/etjump` directory.
 7. Similarly you can zip `pk3` and `qagame` module using `Package/mod_release` target.
 
 ###### Visual Studio 2017
@@ -202,4 +202,4 @@ Having all necessary packages installed (`gcc`, `gcc-multilib` and `mingw-w64`),
     $ mkdir build && cd build
     $ sh ../scripts/build-release.sh -mingw
     ```
-* On success, you can find zip file in `builds/etjump` directory.
+* On success, you can find zip file in `build/etjump` directory.

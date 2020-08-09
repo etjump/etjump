@@ -122,3 +122,10 @@ _TODO_
 #### cmake based project
 
 _TODO_
+
+### Adding new files to solution (`sln`)
+
+1. Create file in the module directory (`cgame`, `game`, `ui`).
+2. Add file name in the modules specific `CMakeLists.txt`.
+3. Either reopen `Visual Studio` or build `CMake/ZERO_CHECK` project to make new file to appear in the `Solution View`. 
+
