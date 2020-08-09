@@ -116,7 +116,7 @@ _TODO_
 3. Select `Debugging` tab.
 4. For `Command` field select `etl.exe`.
 5. For `Working Directory` field select `etl.exe` root directory.
-6. For `Command Arguments` set `+set fs_homepath $(OutDir)\.. +set fs_game etjump +set sv_pure 0` 
+6. For `Command Arguments` set `+set fs_homepath $(SolutionDir) +set fs_game etjump +set sv_pure 0`
 7. Press the green play button to launch the game in debugging mode.
 
 #### cmake based project
