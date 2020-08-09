@@ -1,3 +1,5 @@
+file(GLOB CGAME_HEADERS "*.h" "*.hpp")
+
 add_library(cgame MODULE 
 	"cg_atmospheric.cpp"
 	"cg_character.cpp"
@@ -88,6 +90,7 @@ add_library(cgame MODULE
 	"../game/etj_string_utilities.cpp"
 	"../game/etj_time_utilities.cpp"
 	"../ui/ui_shared.cpp"
+	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
 target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libboost)

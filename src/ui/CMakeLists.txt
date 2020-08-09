@@ -1,3 +1,5 @@
+file(GLOB UI_HEADERS "*.h" "*.hpp")
+
 add_library(ui MODULE 
 	"ui_atoms.cpp"
 	"ui_gameinfo.cpp"
@@ -13,6 +15,7 @@ add_library(ui MODULE
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
 	"../cgame/etj_utilities.cpp"
+	${UI_HEADERS}
 )
 target_compile_definitions(ui PRIVATE UIDLL)
 target_link_libraries(ui PRIVATE cxx_compiler_opts libboost)

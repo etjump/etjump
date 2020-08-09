@@ -1,3 +1,5 @@
+file(GLOB GAME_HEADERS "*.h" "*.hpp")
+
 add_library(qagame MODULE 
 	"bg_animation.cpp"
 	"bg_animgroup.cpp"
@@ -78,6 +80,7 @@ add_library(qagame MODULE
 	"etj_tokens.cpp"
 	"etj_user.cpp"
 	"etj_utilities.cpp"
+	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
 target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libboost)
