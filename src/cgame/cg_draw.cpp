@@ -4944,7 +4944,7 @@ else
 
 	}
 
-	len        = 1 - min(1.f, len / 2000.f);
+	len        = 1 - std::min(1.f, len / 2000.f);
 	iconWidth  = 14 * len + 4;    // where did this calc. come from?
 	iconHeight = 14 * len + 4;
 

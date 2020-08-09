@@ -5,6 +5,7 @@
  *
 */
 
+#include <algorithm>
 
 #include "q_shared.h"
 #include "bg_public.h"
@@ -5860,11 +5861,11 @@ void RGBtoHSL(const vec4_t rgb, vec4_t *hsl)
 	*hsl[3] = rgb[3]; //Alpha is not changing...
 
 
-	rgb_min = min(R, G);
-	rgb_min = min(rgb_min, B);
+	rgb_min = std::min(R, G);
+	rgb_min = std::min(rgb_min, B);
 
-	rgb_max = max(R, G);
-	rgb_max = max(rgb_max, B);
+	rgb_max = std::max(R, G);
+	rgb_max = std::max(rgb_max, B);
 
 	del_max = rgb_max - rgb_min;
 
