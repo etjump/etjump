@@ -34,8 +34,8 @@ weaponDef
 		
 		//ejectBrassFunc	""									// supports "MachineGunEjectBrass" and "PanzerFaustEjectBrass"
 		
-		modModel 0			"models/weapons2/tesla/tesla_barrel.mdc"
-		modModel 1			"models/weapons2/tesla/tesla_barrel2.mdc"
+		//modModel 0			"models/weapons2/tesla/tesla_barrel.mdc"
+		//modModel 1			"models/weapons2/tesla/tesla_barrel2.mdc"
 		
 		firstPerson {
 			model			"models/weapons2/tesla/v_tesla.mdc"
