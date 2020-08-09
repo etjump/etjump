@@ -88,7 +88,8 @@ This option gives best control over the solution and provides familiar usage exp
     # or cmake .. -G "Visual Studio 15 2017" -A Win32
     ```
 2. Open up generated `sln` solution (located in `build` directory) in `Visual Studio`. 
-3. Alternatively build directly from the command line:
+3. Use `Build` > `Build Solution` option to start compilation process.
+4. Alternatively build directly from the command line:
     ```sh
     $ cmake --build . --config Release
     # or "cmake --build . --config Debug" to compile debuggable builds
