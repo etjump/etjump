@@ -94,10 +94,16 @@
   * `etj_drawSnapHUD` - Toggle velocity snapping HUD
   * `etj_snapHUDOffsetY` - Y offset for snaphud position
   * `etj_snapHUDHeight` - height of the snaphud
+  * `etj_snapHUDFov` - FOV of the snaphud, valid range is __1-180__, __0__ = use current FOV
   * `etj_snapHUDColor1` - 1st RGBA color of snapzones
   * `etj_snapHUDColor2` - 2nd RGBA color of snapzones
 * added `etj_drawCGaz` __5__ - equivalent of DeFRaG's `df_hud_cgaz` __13__
   * `etj_CGaz5Color1-4` to set colors of no accel zone, min angle, accel zone and max angle, respectively
+  * `etj_CGaz5Fov` to set FOV, valid range is __1-180__, __0__ = use current FOV
+* fixed `!rename` passing other client commands to renamed player
+* adjusted rendering order of crosshair & crosshairnames
+  * crosshair no longer draws when scoreboard is up
+* silenced warnings about missing portalgun models
 
 # ETJump 2.3.0
 
