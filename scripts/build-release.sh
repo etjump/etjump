@@ -23,7 +23,6 @@ parse_cmdline()
 build_linux()
 {
 	# build x86
-	rm CMakeCache.txt
 	cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=OFF $EXTRA_ARGS -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-x86-linux.cmake
 	cmake --build . --parallel
 	# build x86_64
