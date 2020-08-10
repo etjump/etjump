@@ -7,14 +7,6 @@
 
 #include "cg_local.h"
 #include "../game/bg_classes.h"
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #include "boost/algorithm/string/erase.hpp"
 
 vec3_t ejectBrassCasingOrigin;
@@ -2372,48 +2364,53 @@ static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles)
 		scale = cg.xyspeed;
 	}
 
-	// gun angles from bobbing
-
-	angles[ROLL]  += scale        * cg.bobfracsin * 0.005;
-	angles[YAW]   += scale        * cg.bobfracsin * 0.01;
-	angles[PITCH] += cg.xyspeed   * cg.bobfracsin * 0.005;
-
-	// drop the weapon when landing
-	delta = cg.time - cg.landTime;
-	if (delta < LAND_DEFLECT_TIME)
+	// Allow disabling gun sway
+	if (etj_gunSway.integer)
 	{
-		origin[2] += cg.landChange * 0.25 * delta / LAND_DEFLECT_TIME;
-	}
-	else if (delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME)
-	{
-		origin[2] += cg.landChange * 0.25 *
-		             (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME;
-	}
+		// gun angles from bobbing
+
+		angles[ROLL]  += scale        * cg.bobfracsin * 0.005;
+		angles[YAW]   += scale        * cg.bobfracsin * 0.01;
+		angles[PITCH] += cg.xyspeed   * cg.bobfracsin * 0.005;
+
+
+		// drop the weapon when landing
+		delta = cg.time - cg.landTime;
+		if (delta < LAND_DEFLECT_TIME)
+		{
+			origin[2] += cg.landChange * 0.25 * delta / LAND_DEFLECT_TIME;
+		}
+		else if (delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME)
+		{
+			origin[2] += cg.landChange * 0.25 *
+				(LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME;
+		}
 
 #if 0
-	// drop the weapon when stair climbing
-	delta = cg.time - cg.stepTime;
-	if (delta < STEP_TIME / 2)
-	{
-		origin[2] -= cg.stepChange * 0.25 * delta / (STEP_TIME / 2);
-	}
-	else if (delta < STEP_TIME)
-	{
-		origin[2] -= cg.stepChange * 0.25 * (STEP_TIME - delta) / (STEP_TIME / 2);
-	}
+		// drop the weapon when stair climbing
+		delta = cg.time - cg.stepTime;
+		if (delta < STEP_TIME / 2)
+		{
+			origin[2] -= cg.stepChange * 0.25 * delta / (STEP_TIME / 2);
+		}
+		else if (delta < STEP_TIME)
+		{
+			origin[2] -= cg.stepChange * 0.25 * (STEP_TIME - delta) / (STEP_TIME / 2);
+		}
 #endif
 
-	// idle drift
-	if ((!(cg.predictedPlayerState.eFlags & EF_MOUNTEDTANK)) && (cg.predictedPlayerState.weapon != WP_MORTAR_SET) && (cg.predictedPlayerState.weapon != WP_MOBILE_MG42_SET))
-	{
-		//----(SA) adjustment for MAX KAUFMAN
-		//	scale = cg.xyspeed + 40;
-		scale = 80;
-		//----(SA)	end
-		fracsin        = sin(cg.time * 0.001);
-		angles[ROLL]  += scale * fracsin * 0.01;
-		angles[YAW]   += scale * fracsin * 0.01;
-		angles[PITCH] += scale * fracsin * 0.01;
+		// idle drift
+		if ((!(cg.predictedPlayerState.eFlags & EF_MOUNTEDTANK)) && (cg.predictedPlayerState.weapon != WP_MORTAR_SET) && (cg.predictedPlayerState.weapon != WP_MOBILE_MG42_SET))
+		{
+			//----(SA) adjustment for MAX KAUFMAN
+			//	scale = cg.xyspeed + 40;
+			scale = 80;
+			//----(SA)	end
+			fracsin = sin(cg.time * 0.001);
+			angles[ROLL] += scale * fracsin * 0.01;
+			angles[YAW] += scale * fracsin * 0.01;
+			angles[PITCH] += scale * fracsin * 0.01;
+		}
 	}
 
 	// RF, subtract the kickAngles

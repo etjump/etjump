@@ -1,4 +1,5 @@
 // Ridah, cg_sound.c - parsing and use of sound script files
+#include <vector>
 
 #include "cg_local.h"
 
@@ -1060,6 +1061,7 @@ static panel_button_t *speakerInfoButtons[] =
 	NULL
 };
 
+std::vector<panel_button_t> speakerInfoButtonsLayout;
 
 void CG_SpeakerEditor_RenderEdit(panel_button_t *button)
 {
@@ -2001,6 +2003,8 @@ static panel_button_t *speakerEditorButtons[] =
 	NULL
 };
 
+std::vector<panel_button_t> speakerEditorButtonsLayout;
+
 void CG_SpeakerEditorDraw(void)
 {
 	if (!cg.editingSpeakers)
@@ -2091,14 +2095,14 @@ void CG_SpeakerEditorDraw(void)
 		if (editSpeaker)
 		{
 			// render interface
-			BG_PanelButtonsRender(speakerInfoButtons);
+			BG_PanelButtonsRender(speakerInfoButtonsLayout);
 		}
 
 	}
 	else
 	{
 		// render interface
-		BG_PanelButtonsRender(speakerEditorButtons);
+		BG_PanelButtonsRender(speakerEditorButtonsLayout);
 
 		// render cursor
 		trap_R_SetColor(NULL);
@@ -2108,7 +2112,7 @@ void CG_SpeakerEditorDraw(void)
 
 void CG_SpeakerEditor_KeyHandling(int key, qboolean down)
 {
-	if (!BG_PanelButtonsKeyEvent(key, down, speakerEditorButtons))
+	if (!BG_PanelButtonsKeyEvent(key, down, speakerEditorButtonsLayout))
 	{
 		switch (key)
 		{
@@ -2237,8 +2241,27 @@ void CG_ActivateEditSoundMode(void)
 		speakerShader          = trap_R_RegisterShader("gfx/misc/speaker");
 		speakerShaderGrayScale = trap_R_RegisterShader("gfx/misc/speaker_gs");
 
-		BG_PanelButtonsSetup(speakerInfoButtons);
-		BG_PanelButtonsSetup(speakerEditorButtons);
+		speakerInfoButtonsLayout.clear();
+		speakerEditorButtonsLayout.clear();
+
+		for (auto btnptr : speakerInfoButtons)
+		{
+			if (btnptr) 
+			{
+				speakerInfoButtonsLayout.push_back(*btnptr);
+			}
+		}
+
+		for (auto btnptr : speakerEditorButtons)
+		{
+			if (btnptr) 
+			{
+				speakerEditorButtonsLayout.push_back(*btnptr);
+			}
+		}
+
+		BG_PanelButtonsSetup(speakerInfoButtonsLayout);
+		BG_PanelButtonsSetup(speakerEditorButtonsLayout);
 	}
 }
 

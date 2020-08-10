@@ -12,6 +12,7 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
+
 #include <memory>
 #include <vector>
 
@@ -1828,8 +1829,8 @@ typedef struct
 
 	//Feen: CGaz Shader
 	qhandle_t CGazArrow;
-	// alternative ghost players visualisation
-	qhandle_t ghostPlayersAltColorShader;
+
+	qhandle_t simplePlayersShader;
 	qhandle_t saveIcon;
 	qhandle_t proneIcon;
 	qhandle_t forbidIcon;
@@ -2162,6 +2163,28 @@ typedef struct
 	demoCam_t demoCam;
 } cgs_t;
 
+// CGaz 5
+struct state_t
+{
+	float v_squared;
+	float vf_squared;
+	float a_squared;
+
+	float v;
+	float vf;
+	float a;
+
+	float wishspeed;
+};
+
+struct range_t
+{
+	float x1;
+	float x2;
+	bool split;
+};
+// End CGaz 5
+
 //==============================================================================
 
 extern cgs_t        cgs;
@@ -2382,14 +2405,19 @@ extern vmCvar_t cg_nofatigue;
 extern vmCvar_t com_maxfps;
 extern vmCvar_t com_hunkmegs;
 
-extern vmCvar_t cg_drawCGaz;
-extern vmCvar_t cg_CGazY;
-extern vmCvar_t cg_CGazHeight;
-extern vmCvar_t cg_CGazWidth;
+extern vmCvar_t etj_drawCGaz;
+extern vmCvar_t etj_CGazY;
+extern vmCvar_t etj_CGazHeight;
+extern vmCvar_t etj_CGazWidth;
 extern vmCvar_t etj_CGazColor1;
 extern vmCvar_t etj_CGazColor2;
-extern vmCvar_t cg_CGazAlpha;
+extern vmCvar_t etj_CGazAlpha;
 extern vmCvar_t cg_drawCGazUsers;
+extern vmCvar_t etj_CGaz5Color1;
+extern vmCvar_t etj_CGaz5Color2;
+extern vmCvar_t etj_CGaz5Color3;
+extern vmCvar_t etj_CGaz5Color4;
+extern vmCvar_t etj_CGaz5Fov;
 
 extern vmCvar_t cg_drawOB;
 // Aciz: movable drawOB
@@ -2476,6 +2504,7 @@ extern vmCvar_t etj_CHS2PosY;
 extern vmCvar_t etj_CHSShadow;
 extern vmCvar_t etj_CHSAlpha;
 extern vmCvar_t etj_CHSColor;
+extern vmCvar_t etj_CHS_useFeet;
 
 extern vmCvar_t cg_itemPickupText;
 
@@ -2541,10 +2570,10 @@ extern vmCvar_t etj_tjlMarkerEndColor;
 extern vmCvar_t etj_tjlNearestInterval;
 extern vmCvar_t etj_tjlAlwaysLoadTJL;
 
-extern vmCvar_t etj_ghostPlayersOpacity;
-extern vmCvar_t etj_ghostPlayersColor;
-extern vmCvar_t etj_ghostPlayersFadeRange;
-extern vmCvar_t etj_ghostPlayersAlt;
+extern vmCvar_t etj_playerOpacity;
+extern vmCvar_t etj_simplePlayersColor;
+extern vmCvar_t etj_hideFadeRange;
+extern vmCvar_t etj_drawSimplePlayers;
 
 extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
@@ -2612,6 +2641,16 @@ extern vmCvar_t etj_ad_targetPath;
 
 extern vmCvar_t etj_chatScale;
 
+// Snaphud
+extern vmCvar_t etj_drawSnapHUD;
+extern vmCvar_t etj_snapHUDOffsetY;
+extern vmCvar_t etj_snapHUDHeight;
+extern vmCvar_t etj_snapHUDColor1;
+extern vmCvar_t etj_snapHUDColor2;
+extern vmCvar_t etj_snapHUDFov;
+
+extern vmCvar_t etj_gunSway;
+
 //
 // cg_main.c
 //
@@ -2677,6 +2716,12 @@ void CG_Letterbox(float xsize, float ysize, qboolean center);
 //
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
 void CG_FillRect(float x, float y, float width, float height, const float *color);
+void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, float fov, const float* color);
+void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, float fov, vec4_t const color); // CGaz 5
+void PutPixel(float x, float y);
+void DrawLine(float x1, float y1, float x2, float y2, vec4_t color);
+float AngleToScreenX(float angle, float fov);
+range_t AnglesToRange(float start, float end, float yaw, float fov);
 void CG_HorizontalPercentBar(float x, float y, float width, float height, float percent);
 void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader);
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);
@@ -3876,6 +3921,7 @@ void CG_TeamDebriefingTeamSkillXP_Draw(panel_button_t *button);
 
 const char *CG_PickupItemText(int item);
 
+void CG_LoadPanel_Init();
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize, float backheight);
 void CG_LoadPanel_RenderCampaignPins(panel_button_t *button);
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button);
@@ -3964,6 +4010,8 @@ namespace ETJump
 	int checkExtraTrace(int value);
 	void onPlayerRespawn(qboolean revived);
 	void runFrameEnd();
+	void DrawCGazHUD();
+	void DrawSnapHUD();
 
 	enum extraTraceOptions {
 		OB_DETECTOR,
@@ -3981,6 +4029,8 @@ namespace ETJump
 
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();
+
+extern displayContextDef_t *DC;
 
 #endif // CG_LOCAL_H
 

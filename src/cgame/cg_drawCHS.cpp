@@ -88,15 +88,16 @@ static void CG_CHS_Distance_XY(char *buf, int size)
 static void CG_CHS_Distance_Z(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_10_11);
 
 	CG_CHS_ViewTrace(&trace, traceContents);
+	int offset = etj_CHS_useFeet.integer ? 24 : 0;	
 
 	if (trace.fraction != 1.0)
 	{
-		Com_sprintf(buf, size, "%.0f", trace.endpos[2] - ps->origin[2]);
+		Com_sprintf(buf, size, "%.0f", trace.endpos[2] - (ps->origin[2] - offset));
 	}
 	else
 	{
@@ -107,15 +108,22 @@ static void CG_CHS_Distance_Z(char *buf, int size)
 static void CG_CHS_Distance_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
+	vec3_t origin;
+	vec3_t originOffset{ 0, 0, 24 };
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_12);
 
 	CG_CHS_ViewTrace(&trace, traceContents);
 
+	VectorCopy(ps->origin, origin);
 	if (trace.fraction != 1.0)
 	{
-		Com_sprintf(buf, size, "%.0f", Distance(trace.endpos, ps->origin));
+		if (etj_CHS_useFeet.integer)
+		{
+			_VectorSubtract(origin, originOffset, origin);
+		}
+		Com_sprintf(buf, size, "%.0f", Distance(trace.endpos, origin));
 	}
 	else
 	{
@@ -145,19 +153,26 @@ static void CG_CHS_Distance_ViewXYZ(char *buf, int size)
 static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
+	vec3_t origin;
+	vec3_t originOffset{ 0, 0, 24 };
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
 
 	CG_CHS_ViewTrace(&trace, traceContents);
 
+	VectorCopy(ps->origin, origin);
 	if (trace.fraction != 1.0)
 	{
+		if (etj_CHS_useFeet.integer)
+		{
+			_VectorSubtract(origin, originOffset, origin);
+		}
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
-		            sqrt(SQR(trace.endpos[0] - ps->origin[0])
-		                 + SQR(trace.endpos[1] - ps->origin[1])),
-		            trace.endpos[2] - ps->origin[2],
-		            Distance(trace.endpos, ps->origin));
+		            sqrt(SQR(trace.endpos[0] - origin[0])
+		                 + SQR(trace.endpos[1] - origin[1])),
+		            trace.endpos[2] - origin[2],
+		            Distance(trace.endpos, origin));
 	}
 	else
 	{
@@ -168,18 +183,25 @@ static void CG_CHS_Distance_XY_Z_XYZ(char *buf, int size)
 static void CG_CHS_Distance_XY_Z_ViewXYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	trace_t       trace;
+	trace_t trace;
+	vec3_t origin;
+	vec3_t originOffset{ 0, 0, 24 };
 
 	int traceContents = ETJump::checkExtraTrace(ETJump::CHS_13_15);
 
 	CG_CHS_ViewTrace(&trace, traceContents);
 
+	VectorCopy(ps->origin, origin);
 	if (trace.fraction != 1.0)
 	{
+		if (etj_CHS_useFeet.integer)
+		{
+			_VectorSubtract(origin, originOffset, origin);
+		}
 		Com_sprintf(buf, size, "%.0f %.0f %.0f",
-		            sqrt(SQR(trace.endpos[0] - ps->origin[0])
-		                 + SQR(trace.endpos[1] - ps->origin[1])),
-		            trace.endpos[2] - ps->origin[2],
+		            sqrt(SQR(trace.endpos[0] - origin[0])
+		                 + SQR(trace.endpos[1] - origin[1])),
+		            trace.endpos[2] - origin[2],
 		            Distance(trace.endpos, cg.refdef.vieworg));
 	}
 	else
@@ -304,7 +326,8 @@ static void CG_CHS_Position_Y(char *buf, int size)
 static void CG_CHS_Position_Z(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
-	Com_sprintf(buf, size, "%.0f", ps->origin[2]);
+	int offset = etj_CHS_useFeet.integer ? 24 : 0;
+	Com_sprintf(buf, size, "%.0f", (ps->origin[2] - offset));
 }
 
 static void CG_CHS_ViewPosition_X(char *buf, int size)
@@ -332,15 +355,17 @@ static void CG_CHS_Pitch_Yaw(char *buf, int size)
 static void CG_CHS_Player_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+	int offset = etj_CHS_useFeet.integer ? 24 : 0;
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            ps->origin[0], ps->origin[1], ps->origin[2]);
+	            ps->origin[0], ps->origin[1], (ps->origin[2] - offset));
 }
 
 static void CG_CHS_Player_XYZ_Pitch_Yaw(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+	int offset = etj_CHS_useFeet.integer ? 24 : 0;
 	Com_sprintf(buf, size, "%.0f %.0f %.0f %.2f %.2f",
-	            ps->origin[0], ps->origin[1], ps->origin[2],
+	            ps->origin[0], ps->origin[1], (ps->origin[2] - offset),
 	            ps->viewangles[PITCH], ps->viewangles[YAW]);
 }
 
@@ -355,8 +380,9 @@ static void CG_CHS_ViewPosition_XYZ_Pitch_Yaw(char *buf, int size)
 static void CG_CHS_Position_XYZ(char *buf, int size)
 {
 	playerState_t *ps = CG_CHS_GetPlayerState();
+	int offset = etj_CHS_useFeet.integer ? 24 : 0;
 	Com_sprintf(buf, size, "%.0f %.0f %.0f",
-	            ps->origin[0], ps->origin[1], ps->origin[2]);
+	            ps->origin[0], ps->origin[1], (ps->origin[2] - offset));
 }
 
 static void CG_CHS_ViewPosition_XYZ(char *buf, int size)
@@ -381,8 +407,8 @@ static void CG_CHS_Velocity_XYZ(char *buf, int size)
 
 static void CG_CHS_LastJumpPosition_XYZ(char *buf, int size)
 {
-
-	Com_sprintf(buf, size, "%.0f %.0f %.0f", cg.etjLastJumpPos[0], cg.etjLastJumpPos[1], cg.etjLastJumpPos[2]);
+	int offset = etj_CHS_useFeet.integer ? 24 : 0;
+	Com_sprintf(buf, size, "%.0f %.0f %.0f", cg.etjLastJumpPos[0], cg.etjLastJumpPos[1], (cg.etjLastJumpPos[2] - offset));
 }
 
 static void CG_CHS_PlaneAngleZ(char *buf, int size)

@@ -1,12 +1,4 @@
 #include "g_local.h"
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #include <vector>
 #include <regex>
 #include <boost/algorithm/string/split.hpp>
@@ -1121,9 +1113,9 @@ namespace ETJump
 		}
 	}
 
-	bool checkTrackerIndex(int clientNum, int idx, char *buffer)
+	bool checkTrackerIndex(int clientNum, int idx, char *buffer, bool noIndex)
 	{
-		if (idx < 1 || idx > MAX_PROGRESSION_TRACKERS || !(std::regex_match(buffer, std::regex("^\\d+"))))
+		if (((idx < 1 || idx > MAX_PROGRESSION_TRACKERS) && !noIndex) || !(std::regex_match(buffer, std::regex("^-*\\d+"))))
 		{
 			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Invalid index specified. Valid range is ^31-50^7.\n");
 			return false;
@@ -1152,6 +1144,7 @@ namespace ETJump
 
 		if (g_debugTrackers.integer <= 0)
 		{
+			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
 			return;
 		}
 
@@ -1181,7 +1174,7 @@ namespace ETJump
 				trap_Argv(i, buffer, sizeof buffer);
 				int idx = atoi(buffer);
 
-				if (checkTrackerIndex(clientNum, idx, buffer))
+				if (checkTrackerIndex(clientNum, idx, buffer, false))
 				{
 					printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx, ent->client->sess.progression[idx - 1]);
 					Printer::SendConsoleMessage(clientNum, printTrackerMsg);
@@ -1197,15 +1190,18 @@ namespace ETJump
 		static char bufferIndex[16];
 		static char bufferValue[16];
 		int i, value;
+		bool noIndex = false;
 
-		if (g_debugTrackers.integer <= 0)
-		{
-			return;
-		}
-
+		// Check this first before g_debugTrackers so help can be printed even when debugging isn't enabled.
 		if (trap_Argc() < 2 || trap_Argc() > 3)
 		{
 			Printer::SendConsoleMessage(clientNum, "^3Usage: ^7tracker_set <index|all> <value>\nSets your tracker value on specified index to N. If index isn't specified, defaults to index 1.\n");
+			return;
+		}
+
+		if (g_debugTrackers.integer <= 0)
+		{
+			Printer::SendConsoleMessage(clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
 			return;
 		}
 
@@ -1239,7 +1235,8 @@ namespace ETJump
 		{
 			if (trap_Argc() == 2)
 			{
-				if (checkTrackerIndex(clientNum, idx, bufferIndex))
+				noIndex = true;
+				if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex))
 				{
 					ent->client->sess.progression[0] = idx;	// No index specified, use it for value on index 1
 					setTrackerMsg = stringFormat("^7Tracker set - index: ^31 ^7value: ^2%i\n", idx);
@@ -1251,8 +1248,9 @@ namespace ETJump
 			if (trap_Argc() == 3)
 			{
 				trap_Argv(2, bufferValue, sizeof bufferValue);
+				noIndex = false;
 
-				if (!checkTrackerIndex(clientNum, idx, bufferIndex))
+				if (!checkTrackerIndex(clientNum, idx, bufferIndex, noIndex))
 				{
 					checkTrackerValue(clientNum, bufferValue);	// Still checking value for more accurate feedback to user
 					return;
@@ -1267,6 +1265,13 @@ namespace ETJump
 				}
 			}
 		}
+	}
+
+	void clearSaves(gentity_t *ent)
+	{
+		auto clientNum = ClientNum(ent);
+		saveSystem->resetSavedPositions(ent);
+		Printer::SendCenterMessage(clientNum, "^7Your saves were removed.\n");
 	}
 }
 
@@ -5079,6 +5084,7 @@ static command_t noIntermissionCommands[] =
 	{ "interruptRun", qtrue, ETJump::interruptRun },
 	{ "tracker_print", qtrue, ETJump::printTracker },
 	{ "tracker_set", qtrue, ETJump::setTracker },
+	{ "clearsaves", qtrue, ETJump::clearSaves },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)

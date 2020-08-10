@@ -659,6 +659,8 @@ qboolean PointInBounds(const vec3_t v, const vec3_t mins, const vec3_t maxs);
 int VectorCompare(const vec3_t v1, const vec3_t v2);
 vec_t VectorLength(const vec3_t v);
 vec_t VectorLengthSquared(const vec3_t v);
+vec_t VectorLength2(vec2_t const v);
+vec_t VectorLengthSquared2(vec2_t const v);
 vec_t Distance(const vec3_t p1, const vec3_t p2);
 vec_t DistanceSquared(const vec3_t p1, const vec3_t p2);
 void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross);
@@ -701,6 +703,7 @@ void    LerpPosition(vec3_t start, vec3_t end, float frac, vec3_t out);
 float   AngleSubtract(float a1, float a2);
 void    AnglesSubtract(vec3_t v1, vec3_t v2, vec3_t v3);
 
+float AngleNormalizePI(float angle);
 float AngleNormalize2Pi(float angle);
 float AngleNormalize360(float angle);
 float AngleNormalize180(float angle);
