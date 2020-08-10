@@ -1,6 +1,5 @@
 #!/bin/sh
 
-CORES=$(grep -c ^processor /proc/cpuinfo)
 BUILD_TYPE=Release
 BUILD_MINGW=0
 EXTRA_ARGS=""
@@ -26,11 +25,11 @@ build_linux()
 	# build x86
 	rm CMakeCache.txt
 	cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=OFF $EXTRA_ARGS -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-x86-linux.cmake
-	make --no-print-directory -j$CORES
+	cmake --build . --parallel
 	# build x86_64
 	rm CMakeCache.txt
 	cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=OFF $EXTRA_ARGS
-	make --no-print-directory -j$CORES
+	cmake --build . --parallel
 }
 
 build_mingw()
@@ -38,11 +37,11 @@ build_mingw()
 	# build x86
 	rm CMakeCache.txt
 	cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=OFF $EXTRA_ARGS -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-mingw-x86-linux.cmake
-	make --no-print-directory -j$CORES
+	cmake --build . --parallel
 	# build x86_64
 	rm CMakeCache.txt
 	cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=OFF $EXTRA_ARGS -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-mingw-x86_64-linux.cmake
-	make --no-print-directory -j$CORES
+	cmake --build . --parallel
 }
 
 parse_cmdline $@
