@@ -2649,6 +2649,8 @@ extern vmCvar_t etj_snapHUDColor1;
 extern vmCvar_t etj_snapHUDColor2;
 extern vmCvar_t etj_snapHUDFov;
 
+extern vmCvar_t etj_gunSway;
+
 //
 // cg_main.c
 //

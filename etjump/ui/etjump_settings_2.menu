@@ -5,7 +5,7 @@
 #define WINDOW_HEIGHT 448
 #define SUBW_HUD_Y 32
 #define SUBW_GUN_Y 224
-#define SUBW_KEYS_Y 308
+#define SUBW_KEYS_Y 320
 #define SUBW_CGAZ_Y 32
 #define SUBW_POPUPS_Y 224
 #define GROUP_NAME "group_etjump_settings_2"
@@ -41,7 +41,7 @@ menuDef {
         CVARINTLABEL		(16, SUBW_HUD_Y + 164, 276, 8, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_HUD_Y + 164, 276, 8, "Lagometer Y:", 0.2, 8, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
 
-    SUBWINDOW(8, 224, 292, 76, "GUN")
+    SUBWINDOW(8, 224, 292, 88, "GUN")
         YESNO				(16, SUBW_GUN_Y + 20, 276, 8, "Gun:", 0.2, 8, "cg_drawGun", "Draw gun\ncg_drawGun")
         CVARFLOATLABEL		(16, SUBW_GUN_Y + 32, 276, 8, "cg_gunX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_GUN_Y + 32, 276, 8, "Gun X:", 0.2, 8, cg_gunX 0 -30 30 0.5, "Sets X position of gun\ncg_gunx")
@@ -49,8 +49,9 @@ menuDef {
         SLIDER				(16, SUBW_GUN_Y + 44, 276, 8, "Gun Y:", 0.2, 8, cg_gunY 0 -30 30 0.5, "Sets Y position of gun\ncg_guny")
         CVARFLOATLABEL		(16, SUBW_GUN_Y + 56, 276, 8, "cg_gunZ", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_GUN_Y + 56, 276, 8, "Gun Z:", 0.2, 8, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
+        YESNO				(16, SUBW_GUN_Y + 68, 276, 8, "Gun sway:", 0.2, 8, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
 
-    SUBWINDOW(8, 308, 292, 100, "KEYS")
+    SUBWINDOW(8, 320, 292, 100, "KEYS")
         MULTI				(16, SUBW_KEYS_Y + 20, 276, 8, "Pressed keys:", 0.2, 8, "etj_drawKeys", cvarFloatList { "No" 0 "ETJump 1" 1 "DeFRaG default" 2 "ETJump 2" 3 "ETJump 3" 4 "ETJump 4" 5 }, "Draw pressed keys\netj_drawKeys")
         CVARINTLABEL		(16, SUBW_KEYS_Y + 32, 276, 8, "etj_keysX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_KEYS_Y + 32, 276, 8, "Keys X:", 0.2, 8, etj_keysX 610 0 640 10, "Sets X position of pressed keys\netj_keysX")
