@@ -1,13 +1,6 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 void InitTrigger(gentity_t *self)
 {
 	if (!VectorCompare(self->s.angles, vec3_origin))

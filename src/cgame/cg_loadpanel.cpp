@@ -1,12 +1,15 @@
+#include <vector>
+
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
 extern displayContextDef_t *DC;
 
-qboolean   bg_loadscreeninited = qfalse;
+qboolean   bg_loadscreeninited;
 qboolean   bg_loadscreeninteractive;
 fontInfo_t bg_loadscreenfont1;
 fontInfo_t bg_loadscreenfont2;
+qhandle_t  bg_loadscreenbg;
 qhandle_t  bg_axispin;
 qhandle_t  bg_alliedpin;
 qhandle_t  bg_neutralpin;
@@ -209,6 +212,8 @@ panel_button_t *loadpanelButtons[] =
 	NULL,
 };
 
+std::vector<panel_button_t> loadpanelButtonsLayout;
+
 /*
 ================
 CG_DrawConnectScreen
@@ -238,6 +243,47 @@ const char *CG_LoadPanel_GameTypeName(gametype_t gt)
 	return "Invalid";
 }
 
+void CG_LoadPanel_Init()
+{
+	bg_mappic = 0;
+	bg_loadscreeninited = qfalse;
+	trap_Cvar_Set("ui_connecting", "0");
+
+	DC->registerFont("ariblk", 27, &bg_loadscreenfont1);
+	DC->registerFont("courbd", 30, &bg_loadscreenfont2);
+
+	bg_loadscreenbg = DC->registerShaderNoMip("white");
+
+	bg_axispin    = DC->registerShaderNoMip("gfx/loading/pin_axis");
+	bg_alliedpin  = DC->registerShaderNoMip("gfx/loading/pin_allied");
+	bg_neutralpin = DC->registerShaderNoMip("gfx/loading/pin_neutral");
+	bg_pin        = DC->registerShaderNoMip("gfx/loading/pin_shot");
+
+
+	bg_filter_pb = DC->registerShaderNoMip("ui/assets/filter_pb");
+	bg_filter_ff = DC->registerShaderNoMip("ui/assets/filter_ff");
+	bg_filter_hw = DC->registerShaderNoMip("ui/assets/filter_weap");
+	bg_filter_lv = DC->registerShaderNoMip("ui/assets/filter_lives");
+	bg_filter_al = DC->registerShaderNoMip("ui/assets/filter_antilag");
+	bg_filter_bt = DC->registerShaderNoMip("ui/assets/filter_balance");
+
+	loadpanelButtonsLayout.clear();
+
+	for (auto panelBtnPtr : loadpanelButtons)
+	{
+		if (panelBtnPtr) 
+		{
+			loadpanelButtonsLayout.push_back(*panelBtnPtr);
+		}
+	}
+
+	BG_PanelButtonsSetupWide(loadpanelButtonsLayout);
+
+	bg_loadscreeninited = qtrue;
+
+	CG_DrawConnectScreen(qfalse, qtrue);
+}
+
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 {
 	static qboolean inside = qfalse;
@@ -250,46 +296,19 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh)
 		return;
 	}
 
-	if (inside)
+	if (inside || !bg_loadscreeninited)
 	{
 		return;
 	}
 
 	inside = qtrue;
 
-	if (!bg_loadscreeninited)
-	{
-		trap_Cvar_Set("ui_connecting", "0");
-
-		DC->registerFont("ariblk", 27, &bg_loadscreenfont1);
-		DC->registerFont("courbd", 30, &bg_loadscreenfont2);
-
-		bg_axispin    = DC->registerShaderNoMip("gfx/loading/pin_axis");
-		bg_alliedpin  = DC->registerShaderNoMip("gfx/loading/pin_allied");
-		bg_neutralpin = DC->registerShaderNoMip("gfx/loading/pin_neutral");
-		bg_pin        = DC->registerShaderNoMip("gfx/loading/pin_shot");
-
-
-		bg_filter_pb = DC->registerShaderNoMip("ui/assets/filter_pb");
-		bg_filter_ff = DC->registerShaderNoMip("ui/assets/filter_ff");
-		bg_filter_hw = DC->registerShaderNoMip("ui/assets/filter_weap");
-		bg_filter_lv = DC->registerShaderNoMip("ui/assets/filter_lives");
-		bg_filter_al = DC->registerShaderNoMip("ui/assets/filter_antilag");
-		bg_filter_bt = DC->registerShaderNoMip("ui/assets/filter_balance");
-
-
-		bg_mappic = 0;
-
-		BG_PanelButtonsSetup(loadpanelButtons);
-
-		bg_loadscreeninited = qtrue;
-	}
-
-	// black background for wide screens
 	vec4_t sideColor = { 0.145f, 0.172f, 0.145f, 1.f };
-	DC->fillRect(0, 0, SCREEN_WIDTH, 480, sideColor);
+	DC->setColor(sideColor);
+	DC->drawHandlePic(0, 0, SCREEN_WIDTH, 480, bg_loadscreenbg);
+	DC->setColor(NULL);
 
-	BG_PanelButtonsRender(loadpanelButtons);
+	BG_PanelButtonsRender(loadpanelButtonsLayout);
 
 	if (interactive)
 	{
@@ -544,7 +563,7 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button)
 
 void CG_LoadPanel_KeyHandling(int key, qboolean down)
 {
-	if (BG_PanelButtonsKeyEvent(key, down, loadpanelButtons))
+	if (BG_PanelButtonsKeyEvent(key, down, loadpanelButtonsLayout))
 	{
 		return;
 	}

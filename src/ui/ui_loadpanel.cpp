@@ -1,7 +1,12 @@
+#include <vector>
+
 #include "ui_local.h"
 #include "ui_shared.h"
 
-qboolean   bg_loadscreeninited = qfalse;
+#include "../cgame/etj_utilities.h"
+
+extern displayContextDef_t *DC;
+
 fontInfo_t bg_loadscreenfont1;
 fontInfo_t bg_loadscreenfont2;
 
@@ -131,6 +136,26 @@ panel_button_t *loadpanelButtons[] =
 	NULL,
 };
 
+std::vector<panel_button_t> loadpanelButtonsLayout;
+
+void UI_LoadPanel_Init()
+{
+	trap_R_RegisterFont("ariblk", 27, &bg_loadscreenfont1);
+	trap_R_RegisterFont("courbd", 30, &bg_loadscreenfont2);
+
+	loadpanelButtonsLayout.clear();
+
+	for (auto panelBtnPtr : loadpanelButtons)
+	{
+		if (panelBtnPtr) 
+		{
+			loadpanelButtonsLayout.push_back(*panelBtnPtr);
+		}
+	}
+
+	BG_PanelButtonsSetupWide(loadpanelButtonsLayout);
+}
+
 /*
 ================
 CG_DrawConnectScreen
@@ -154,22 +179,12 @@ void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack
 
 	inside = qtrue;
 
-	if (!bg_loadscreeninited)
-	{
-		trap_R_RegisterFont("ariblk", 27, &bg_loadscreenfont1);
-		trap_R_RegisterFont("courbd", 30, &bg_loadscreenfont2);
-
-		BG_PanelButtonsSetup(loadpanelButtons);
-
-		bg_loadscreeninited = qtrue;
-	}
-
 	// side frames to block view
 	vec4_t sideColor = { 0.145f, 0.172f, 0.145f, 1.f };
 	uiInfo.uiDC.fillRect(0, 0, SCREEN_OFFSET_X, 480, sideColor);
 	uiInfo.uiDC.fillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, sideColor);
 
-	BG_PanelButtonsRender(loadpanelButtons);
+	BG_PanelButtonsRender(loadpanelButtonsLayout);
 
 	if (forcerefresh)
 	{

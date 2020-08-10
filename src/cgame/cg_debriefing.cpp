@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <vector>
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 team_t CG_Debriefing_FindWinningTeam(void);
 team_t CG_Debriefing_FindOveralWinningTeam(void);
@@ -747,6 +749,7 @@ panel_button_t *debriefPanelButtons[] =
 	NULL
 };
 
+std::vector<panel_button_t> debriefPanelButtonsLayout;
 
 panel_button_t teamDebriefOutcome =
 {
@@ -1047,11 +1050,7 @@ panel_button_t *teamDebriefPanelButtons[] =
 	NULL
 };
 
-
-
-
-
-
+std::vector<panel_button_t> teamDebriefPanelButtonsLayout;
 
 
 
@@ -1325,11 +1324,35 @@ panel_button_t *chatPanelButtons[] =
 	NULL
 };
 
+std::vector<panel_button_t> chatPanelButtonsLayout;
+
+void CG_DebriefingPanel_Setup(std::vector<panel_button_t> &layout, panel_button_t **buttons)
+{
+	panel_button_t *button;
+	for (; *buttons; buttons++)
+	{
+		button = (*buttons);
+		if (button) 
+		{
+			layout.push_back(*button);
+		}
+	}
+}
+
 void CG_ChatPanel_Setup(void)
 {
-	BG_PanelButtonsSetup(chatPanelButtons);
-	BG_PanelButtonsSetup(teamDebriefPanelButtons);
-	BG_PanelButtonsSetup(debriefPanelButtons);
+	debriefPanelButtonsLayout.reserve(ETJump::nelem(debriefPanelButtons) * sizeof(panel_button_t));
+	debriefPanelButtonsLayout.clear();
+	chatPanelButtonsLayout.clear();
+	teamDebriefPanelButtonsLayout.clear();
+
+	CG_DebriefingPanel_Setup(debriefPanelButtonsLayout, debriefPanelButtons);
+	CG_DebriefingPanel_Setup(chatPanelButtonsLayout, chatPanelButtons);
+	CG_DebriefingPanel_Setup(teamDebriefPanelButtonsLayout, teamDebriefPanelButtons);
+
+	BG_PanelButtonsSetupWide(chatPanelButtonsLayout);
+	BG_PanelButtonsSetupWide(teamDebriefPanelButtonsLayout);
+	BG_PanelButtonsSetupWide(debriefPanelButtonsLayout);
 }
 
 void CG_Debriefing_Startup(void)
@@ -1431,8 +1454,8 @@ qboolean CG_Debriefing_Draw(void)
 	switch (cgs.dbMode)
 	{
 	case 1:
-		BG_PanelButtonsRender(teamDebriefPanelButtons);
-		BG_PanelButtonsRender(chatPanelButtons);
+		BG_PanelButtonsRender(teamDebriefPanelButtonsLayout);
+		BG_PanelButtonsRender(chatPanelButtonsLayout);
 
 		CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
 
@@ -1440,7 +1463,7 @@ qboolean CG_Debriefing_Draw(void)
 	case 0:
 		CG_DrawScoreboard();
 
-		BG_PanelButtonsRender(chatPanelButtons);
+		BG_PanelButtonsRender(chatPanelButtonsLayout);
 
 		CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
 		break;
@@ -1452,9 +1475,9 @@ qboolean CG_Debriefing_Draw(void)
 
 		qsort(cgs.dbSortedClients, MAX_CLIENTS, sizeof(int), CG_SortPlayersByXP);
 
-		BG_PanelButtonsRender(debriefPanelButtons);
+		BG_PanelButtonsRender(debriefPanelButtonsLayout);
 
-		BG_PanelButtonsRender(chatPanelButtons);
+		BG_PanelButtonsRender(chatPanelButtonsLayout);
 
 		CG_DrawPic(cgDC.cursorx, cgDC.cursory, 32, 32, cgs.media.cursorIcon);
 		break;
@@ -2071,7 +2094,7 @@ void CG_Debriefing_KeyEvent(int key, qboolean down)
 	switch (cgs.dbMode)
 	{
 	case 1:
-		if (BG_PanelButtonsKeyEvent(key, down, teamDebriefPanelButtons))
+		if (BG_PanelButtonsKeyEvent(key, down, teamDebriefPanelButtonsLayout))
 		{
 			return;
 		}
@@ -2079,14 +2102,14 @@ void CG_Debriefing_KeyEvent(int key, qboolean down)
 	case 0:
 		break;
 	case 2:
-		if (BG_PanelButtonsKeyEvent(key, down, debriefPanelButtons))
+		if (BG_PanelButtonsKeyEvent(key, down, debriefPanelButtonsLayout))
 		{
 			return;
 		}
 		break;
 	}
 
-	if (BG_PanelButtonsKeyEvent(key, down, chatPanelButtons))
+	if (BG_PanelButtonsKeyEvent(key, down, chatPanelButtonsLayout))
 	{
 		return;
 	}

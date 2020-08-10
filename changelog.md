@@ -72,6 +72,38 @@
 * fixed chat background drawing a solid line on the right side
 * added `etj_chatScale` cvar to control chat size
 * fixed color coding breaking on long console prints (such as `/ranks runname`) by making splits at previous newline when message length is > 998 chars
+* renamed confusingly named "ghostPlayers" cvars
+  * `etj_ghostPlayersAlt` -> `etj_drawSimplePlayers`
+  * `etj_ghostPlayersColor` -> `etj_simplePlayersColor`
+  * `etj_ghostPlayerOpacity` -> `etj_playerOpacity`
+  * `etj_ghostPlayerFadeRange` -> `etj_hideFadeRange`
+* tracker debugger fixes
+  * added feedback prints when trying to use `tracker_set` or `tracker_print` while `g_debugTrackers` is __0__
+  * fixed not being able to set negative tracker values
+  * fixed not being able to set tracker value outside of 1-50 when omitting index (setting value to index 1)
+* implemented proper prone noclipping
+* added `/clearsaves` command to remove your own saves
+* fixed limbo menu/fireteam menu shifting to right randomly
+* fixed incorrect shaders displaying during loading screen
+* `etj_drawCGaz` __2__ no longer shows the side "wings" when movement speed is < 352ups
+* fixed `func_invisible_user` playing sounds at world origin (0 0 0)
+* fixed incorrect math with `target/trigger_push` spawnflag __2__
+  * added spawnflag __4__ `ADD_Z` to `target/trigger_push`
+* added `etj_CHS_useFeet` to toggle shifting Z origin to feet level on positional calculations
+* added velocity snapping HUD
+  * `etj_drawSnapHUD` - Toggle velocity snapping HUD
+  * `etj_snapHUDOffsetY` - Y offset for snaphud position
+  * `etj_snapHUDHeight` - height of the snaphud
+  * `etj_snapHUDFov` - FOV of the snaphud, valid range is __1-180__, __0__ = use current FOV
+  * `etj_snapHUDColor1` - 1st RGBA color of snapzones
+  * `etj_snapHUDColor2` - 2nd RGBA color of snapzones
+* added `etj_drawCGaz` __5__ - equivalent of DeFRaG's `df_hud_cgaz` __13__
+  * `etj_CGaz5Color1-4` to set colors of no accel zone, min angle, accel zone and max angle, respectively
+  * `etj_CGaz5Fov` to set FOV, valid range is __1-180__, __0__ = use current FOV
+* fixed `!rename` passing other client commands to renamed player
+* adjusted rendering order of crosshair & crosshairnames
+  * crosshair no longer draws when scoreboard is up
+* silenced warnings about missing portalgun models
 
 # ETJump 2.3.0
 

@@ -332,13 +332,18 @@ vmCvar_t cg_nofatigue;
 vmCvar_t com_maxfps;
 vmCvar_t com_hunkmegs;
 
-vmCvar_t cg_drawCGaz;
-vmCvar_t cg_CGazY;
-vmCvar_t cg_CGazHeight;
-vmCvar_t cg_CGazWidth;
+vmCvar_t etj_drawCGaz;
+vmCvar_t etj_CGazY;
+vmCvar_t etj_CGazHeight;
+vmCvar_t etj_CGazWidth;
 vmCvar_t etj_CGazColor1;
 vmCvar_t etj_CGazColor2;
-vmCvar_t cg_CGazAlpha;
+vmCvar_t etj_CGazAlpha;
+vmCvar_t etj_CGaz5Color1;
+vmCvar_t etj_CGaz5Color2;
+vmCvar_t etj_CGaz5Color3;
+vmCvar_t etj_CGaz5Color4;
+vmCvar_t etj_CGaz5Fov;
 
 vmCvar_t cg_drawOB;
 //Aciz: movable drawOB
@@ -429,6 +434,7 @@ vmCvar_t etj_CHS2PosY;
 vmCvar_t etj_CHSShadow;
 vmCvar_t etj_CHSAlpha;
 vmCvar_t etj_CHSColor;
+vmCvar_t etj_CHS_useFeet;
 
 vmCvar_t cg_itemPickupText;
 
@@ -494,11 +500,11 @@ vmCvar_t etj_tjlNearestInterval;
 vmCvar_t etj_tjlAlwaysLoadTJL;
 
 vmCvar_t etj_enableTimeruns;
-// Ghost player transparency stuff
-vmCvar_t etj_ghostPlayersOpacity;
-vmCvar_t etj_ghostPlayersColor;
-vmCvar_t etj_ghostPlayersFadeRange;
-vmCvar_t etj_ghostPlayersAlt;
+
+vmCvar_t etj_playerOpacity;
+vmCvar_t etj_simplePlayersColor;
+vmCvar_t etj_hideFadeRange;
+vmCvar_t etj_drawSimplePlayers;
 
 vmCvar_t etj_explosivesShake;
 vmCvar_t etj_realFov;
@@ -565,6 +571,16 @@ vmCvar_t etj_ad_stopDelay;
 vmCvar_t etj_ad_targetPath;
 
 vmCvar_t etj_chatScale;
+
+// Snaphud
+vmCvar_t etj_drawSnapHUD;
+vmCvar_t etj_snapHUDOffsetY;
+vmCvar_t etj_snapHUDHeight;
+vmCvar_t etj_snapHUDColor1;
+vmCvar_t etj_snapHUDColor2;
+vmCvar_t etj_snapHUDFov;
+
+vmCvar_t etj_gunSway;
 
 typedef struct
 {
@@ -755,16 +771,21 @@ cvarTable_t cvarTable[] =
 	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
 	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
 
-	{ &cg_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
 	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
 	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE             },
-	{ &cg_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
-	{ &cg_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
-	{ &cg_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
+	{ &etj_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
+	{ &etj_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
+	{ &etj_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
 	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
 	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
-	{ &cg_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	{ &etj_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
+	{ &etj_CGaz5Color1,              "etj_CGaz5Color1",              "0.75 0.75 0.75 1.0",    CVAR_ARCHIVE },
+	{ &etj_CGaz5Color2,              "etj_CGaz5Color2",              "0.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
+	{ &etj_CGaz5Color3,              "etj_CGaz5Color3",              "0.0 0.2 0.0 1.0",       CVAR_ARCHIVE },
+	{ &etj_CGaz5Color4,              "etj_CGaz5Color4",              "1.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
+	{ &etj_CGaz5Fov,              "etj_CGaz5Fov",              "0",       CVAR_ARCHIVE },
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
@@ -839,6 +860,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_CHSShadow,               "etj_CHSShadow",               "0",                      CVAR_ARCHIVE             },
 	{ &etj_CHSAlpha,                "etj_CHSAlpha",                "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_CHSColor,                "etj_CHSColor",                "1.0 1.0 1.0",            CVAR_ARCHIVE             },
+	{ &etj_CHS_useFeet,             "etj_CHS_useFeet",             "0",                      CVAR_ARCHIVE             },
 
 	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
 	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },
@@ -896,10 +918,10 @@ cvarTable_t cvarTable[] =
 
 
 	{&etj_enableTimeruns, "etj_enableTimeruns", "1", CVAR_ARCHIVE},
-	{ &etj_ghostPlayersOpacity,      "etj_ghostPlayersOpacity",     "1.0",                    CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersColor,        "etj_ghostPlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersFadeRange,    "etj_ghostPlayersFadeRange",   "200",                    CVAR_ARCHIVE             },
-	{ &etj_ghostPlayersAlt,          "etj_ghostPlayersAlt",         "0",                      CVAR_ARCHIVE             },
+	{ &etj_playerOpacity,      "etj_playerOpacity",     "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_simplePlayersColor,        "etj_simplePlayersColor",       "1.0 1.0 1.0",            CVAR_ARCHIVE             },
+	{ &etj_hideFadeRange,    "etj_hideFadeRange",   "200",                    CVAR_ARCHIVE             },
+	{ &etj_drawSimplePlayers,          "etj_drawSimplePlayers",         "0",                      CVAR_ARCHIVE             },
 	{ &etj_explosivesShake,          "etj_explosivesShake",         "3",                      CVAR_ARCHIVE             },
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
@@ -952,11 +974,19 @@ cvarTable_t cvarTable[] =
 	{ &etj_spectatorVote, "", "0", 0 },
 	{ &etj_extraTrace, "etj_extraTrace", "0", CVAR_ARCHIVE },
 	// Autodemo
-	{ &etj_autoDemo, "etj_autoDemo", "1", CVAR_ARCHIVE },
+	{ &etj_autoDemo, "etj_autoDemo", "0", CVAR_ARCHIVE },
 	{ &etj_ad_savePBOnly, "etj_ad_savePBOnly", "0", CVAR_ARCHIVE },
 	{ &etj_ad_stopDelay, "etj_ad_stopDelay", "2000", CVAR_ARCHIVE },
 	{ &etj_ad_targetPath, "etj_ad_targetPath", "autodemo", CVAR_ARCHIVE },
 	{ &etj_chatScale, "etj_chatScale", "1.0", CVAR_ARCHIVE },
+	// Snaphud
+	{ &etj_drawSnapHUD, "etj_drawSnapHUD", "0", CVAR_ARCHIVE },
+	{ &etj_snapHUDOffsetY, "etj_snapHUDOffsetY", "0", CVAR_ARCHIVE },
+	{ &etj_snapHUDHeight, "etj_snapHUDHeight", "10", CVAR_ARCHIVE },
+	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.0 1.0 1.0 0.75", CVAR_ARCHIVE },
+	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
+	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
+	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
 };
 
 
@@ -1099,7 +1129,7 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
 					cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
 					cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &cg_drawCGaz ||
+					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &etj_drawCGaz ||
 					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
 					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
@@ -1173,7 +1203,7 @@ void CG_setClientFlags(void)
 	                                 ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
 	                                 ((cg_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
 	                                 ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
-	                                 ((cg_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
+	                                 ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
 	                                 ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
 	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
 	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
@@ -2637,7 +2667,7 @@ static void CG_RegisterGraphics(void)
 	cgs.media.portal_blueShader = trap_R_RegisterShader("gfx/misc/portal_blueShader");                //trap_R_RegisterShader( "gfx/misc/electricity_portal2" );
 	cgs.media.portal_redShader  = trap_R_RegisterShader("gfx/misc/portal_redShader");                //Change to red later...
 
-	cgs.media.ghostPlayersAltColorShader = trap_R_RegisterShader("etjump/ghost_player_alt");
+	cgs.media.simplePlayersShader = trap_R_RegisterShader("etjump/simple_player");
 	cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");
 	cgs.media.proneIcon = trap_R_RegisterShader("gfx/2d/prone_on");
 	cgs.media.stopwatchIcon = trap_R_RegisterShader("gfx/2d/stopwatch");
@@ -3501,12 +3531,17 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	cgs.ccRequestedObjective  = -1;
 	cgs.ccCurrentCamObjective = -2;
 
+	// moved this up so it's initialized for the loading screen
+	CG_LoadHudMenu();
+	CG_LoadPanel_Init();
+	CG_AssetCache();
+
 	// load a few needed things before we do any screen updates
 	cgs.media.charsetShader = trap_R_RegisterShader("gfx/2d/hudchars");               //trap_R_RegisterShader( "gfx/2d/bigchars" );
 	// JOSEPH 4-17-00
 	cgs.media.menucharsetShader = trap_R_RegisterShader("gfx/2d/hudchars");
 	// END JOSEPH
-	cgs.media.whiteShader     = trap_R_RegisterShader("white");
+	cgs.media.whiteShader     = trap_R_RegisterShaderNoMip("white");
 	cgs.media.charsetProp     = trap_R_RegisterShaderNoMip("menu/art/font1_prop.tga");
 	cgs.media.charsetPropGlow = trap_R_RegisterShaderNoMip("menu/art/font1_prop_glo.tga");
 	cgs.media.charsetPropB    = trap_R_RegisterShaderNoMip("menu/art/font2_prop.tga");
@@ -3514,10 +3549,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	CG_RegisterCvars();
 
 	CG_InitConsoleCommands();
-
-	// Gordon: moved this up so it's initialized for the loading screen
-	CG_LoadHudMenu();              // load new hud stuff
-	CG_AssetCache();
 
 	// get the gamestate from the client system
 	trap_GetGameState(&cgs.gameState);
@@ -3811,6 +3842,8 @@ void CG_Shutdown(void)
 
 		ETJump::isInitialized = false;
 	}
+
+	Shutdown_Display();
 }
 
 // returns true if game is single player (or coop)

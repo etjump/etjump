@@ -76,6 +76,149 @@ void CG_FillRectGradient(float x, float y, float width, float height, const floa
 	trap_R_SetColor(NULL);
 }
 
+/*
+==============
+CG_FillAngleYaw
+==============
+*/
+void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, float fov, const float* color)
+{
+	float x, width, fovscale;
+
+	fovscale = tan(DEG2RAD(fov / 2));
+	x = SCREEN_WIDTH / 2 + tan(DEG2RAD(viewangle + start)) / fovscale * SCREEN_WIDTH / 2;
+	width = fabs(SCREEN_WIDTH * (tan(DEG2RAD(viewangle + end)) - tan(DEG2RAD(viewangle + start))) / (fovscale * 2)) + 1;
+
+	trap_R_SetColor(color);
+	CG_AdjustFrom640(&x, &y, &width, &height);
+	trap_R_DrawStretchPic(x, y, width, height, 0, 0, 0, 0, cgs.media.whiteShader);
+	trap_R_SetColor(NULL);
+}
+
+/*
+==============
+CG_FillAngleYaw_Ext
+==============
+*/
+void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, float fov, vec4_t const color)
+{
+	range_t const range = AnglesToRange(start, end, yaw, fov);
+	if (!range.split)
+	{
+		CG_FillRect(range.x1, y, range.x2 - range.x1, h, color);
+	}
+	else
+	{
+		CG_FillRect(0, y, range.x1, h, color);
+		CG_FillRect(range.x2, y, SCREEN_WIDTH - range.x2, h, color);
+	}
+}
+
+/*
+==============
+AngleToScreenX
+==============
+*/
+float AngleToScreenX (float angle, float fov)
+{
+	float const half_fov_x = DEG2RAD(fov) / 2;
+	if (angle >= half_fov_x)
+	{
+		return 0;
+	}
+	if (angle <= -half_fov_x)
+	{
+		return SCREEN_WIDTH;
+	}
+
+	return SCREEN_WIDTH / 2 * (1 - tanf(angle) / tanf(half_fov_x));
+}
+
+/*
+==============
+AnglesToRange
+==============
+*/
+range_t AnglesToRange(float start, float end, float yaw, float fov)
+{
+	if (fabsf(end - start) > 2 * (float)M_PI)
+	{
+		range_t const ret = { 0, SCREEN_WIDTH, false };
+		return ret;
+	}
+
+	bool split = end > start;
+	start = AngleNormalizePI(start - yaw);
+	end = AngleNormalizePI(end - yaw);
+
+	if (end > start)
+	{
+		split = !split;
+		float const tmp = start;
+		start = end;
+		end = tmp;
+	}
+
+	range_t const ret = { AngleToScreenX(start, fov), AngleToScreenX(end, fov), split };
+	return ret;
+}
+
+/*
+==============
+PutPixel
+Used by CGaz 2
+==============
+*/
+// Dzikie
+void PutPixel(float x, float y)
+{
+	CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
+}
+
+/*
+==============
+DrawLine
+Used by CGaz 2
+==============
+*/
+// Dzikie
+void DrawLine(float x1, float y1, float x2, float y2, vec4_t color)
+{
+	float len, stepx, stepy;
+	float i;
+
+	if (x1 == x2 && y1 == y2)
+	{
+		return;
+	}
+
+	trap_R_SetColor(color);
+
+	// Use a single DrawPic for horizontal or vertical lines
+	if (x1 == x2)
+	{
+		CG_DrawPic(x1, y1 < y2 ? y1 : y2, 1, abs(y1 - y2), cgs.media.whiteShader);
+	}
+	else if (y1 == y2)
+	{
+		CG_DrawPic(x1 < x2 ? x1 : x2, y1, abs(x1 - x2), 1, cgs.media.whiteShader);
+	}
+	else
+	{
+		len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+		len = sqrt(len);
+		stepx = (x2 - x1) / len;
+		stepy = (y2 - y1) / len;
+		for (i = 0; i < len; i++)
+		{
+			PutPixel(x1, y1);
+			x1 += stepx;
+			y1 += stepy;
+		}
+	}
+
+	trap_R_SetColor(NULL);
+}
 
 /*
 ==============

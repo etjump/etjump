@@ -1,0 +1,48 @@
+#include "ui/menudef.h"
+#define WINDOW_X 16
+#define WINDOW_Y 16
+#define WINDOW_WIDTH 608
+#define WINDOW_HEIGHT 448
+#define SUBW_SNAPHUD_Y 32
+#define SUBW_SPECTATOR_Y 140
+#define GROUP_NAME "group_etjump_settings_5"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+menuDef {
+    name "etjump_settings_5"
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    onESC {
+        close etjump_settings_5; open etjump
+    }
+
+    WINDOW("SETTINGS", 94)
+
+    SUBWINDOW(8, 32, 292, 100, "SNAPHUD")
+        YESNO				(16, SUBW_SNAPHUD_Y + 20, 276, 8, "Velocity Snapping HUD:", 0.2, 8, "etj_drawSnapHUD", "Draw velocity snapping HUD\netj_drawSnapHUD")
+        CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 32, 276, 8, "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_SNAPHUD_Y + 32, 276, 8, "Snaphud Y:", 0.2, 8, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
+        CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 44, 276, 8, "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_SNAPHUD_Y + 44, 276, 8, "Snaphud Height:", 0.2, 8, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
+        CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 56, 276, 8, "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_SNAPHUD_Y + 56, 276, 8, "Snaphud FOV:", 0.2, 8, etj_snapHUDFov 0 0 180 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
+        MULTI				(16, SUBW_SNAPHUD_Y + 68, 276, 8, "Snaphud color 1:", 0.2, 8, "etj_snapHUDColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of snaphud\netj_snapHUDColor1")      
+        MULTI				(16, SUBW_SNAPHUD_Y + 80, 276, 8, "Snaphud color 2:", 0.2, 8, "etj_snapHUDColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of snaphud\netj_snapHUDColor2")
+
+    SUBWINDOW(8, 140, 292, 64, "SPECTATOR")
+        YESNO				(16, SUBW_SPECTATOR_Y + 20, 276, 8, "Spectator list:", 0.2, 8, "etj_drawSpectatorInfo", "Draw a list of people spectating you\netj_drawSpectatorInfo")
+        CVARINTLABEL		(16, SUBW_SPECTATOR_Y + 32, 276, 8, "etj_spectatorInfoX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_SPECTATOR_Y + 32, 276, 8, "Spec list X:", 0.2, 8, etj_spectatorInfoX 320 0 640 10, "Sets X position of spectator list\netj_spectatorInfoX")
+        CVARINTLABEL		(16, SUBW_SPECTATOR_Y + 44, 276, 8, "etj_spectatorInfoY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_SPECTATOR_Y + 44, 276, 8, "Spec list Y:", 0.2, 8, etj_spectatorInfoY 40 0 480 10, "Sets Y position of spectator list\netj_spectatorInfoY")
+
+        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_5; open etjump)
+        BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_5; open etjump_settings_1)
+        BUTTON				(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_5; open etjump_settings_2)
+        BUTTON				(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_5; open etjump_settings_3)
+        BUTTON      		(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_5; open etjump_settings_4)
+        BUTTONACTIVE		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_5; open etjump_settings_5)
+}

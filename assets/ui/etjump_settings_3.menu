@@ -109,9 +109,10 @@ menuDef {
         CVARINTLABEL		(316, SUBW_FIRETEAM_Y + 56, 276, 8, "etj_fireteamPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_FIRETEAM_Y + 56, 276, 8, "Fireteam Y:", 0.2, 8, etj_fireteamPosY 0 -480 480 10, "Sets Y offset for fireteam\netj_fireteamPosY")
         
-        BUTTON				(8, 424, 112, 18, "BACK", 0.3, 14, close etjump_settings_3; open etjump)
-        BUTTON				(128, 424, 112, 18, "TAB 1", 0.3, 14, close etjump_settings_3; open etjump_settings_1)
-        BUTTON				(248, 424, 112, 18, "TAB 2", 0.3, 14, close etjump_settings_3; open etjump_settings_2)
-        BUTTONACTIVE		(368, 424, 112, 18, "TAB 3", 0.3, 14, close etjump_settings_3; open etjump_settings_3)
-        BUTTON				(488, 424, 112, 18, "TAB 4", 0.3, 14, close etjump_settings_3; open etjump_settings_4)
+        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_3; open etjump)
+        BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_3; open etjump_settings_1)
+        BUTTON				(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_3; open etjump_settings_2)
+        BUTTONACTIVE		(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_3; open etjump_settings_3)
+        BUTTON				(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_3; open etjump_settings_4)
+        BUTTON      		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_3; open etjump_settings_5)
 }

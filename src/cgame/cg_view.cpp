@@ -1952,6 +1952,12 @@ void CG_DrawSkyBoxPortal(qboolean fLocalView)
 			fov_x = 55;
 		}
 
+		// Account for realfov when drawing skybox
+		if (etj_realFov.integer)
+		{
+			fov_x = atan(tan(fov_x * M_PI / 360.0f) * 0.75f * (float)cgs.glconfig.vidWidth / (float)cgs.glconfig.vidHeight) * 360.0f / M_PI;
+		}
+
 		x     = rd.width / tan(fov_x / 360 * M_PI);
 		fov_y = atan2(rd.height, x);
 		fov_y = fov_y * 360 / M_PI;

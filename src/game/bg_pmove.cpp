@@ -1873,7 +1873,7 @@ static void PM_NoclipMove(void)
 	float  wishspeed;
 	float  scale;
 
-	pm->ps->viewheight = DEFAULT_VIEWHEIGHT;
+	pm->ps->viewheight = pm->ps->eFlags & EF_PRONE ? PRONE_VIEWHEIGHT : DEFAULT_VIEWHEIGHT;
 
 	// friction
 
@@ -6195,7 +6195,7 @@ void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd, v
 			// rain - bugfix - use supplied trace - pm may not be set
 			PM_TraceLegs(&traceres, &pmext->proneLegsOffset, ps->origin, ps->origin, NULL, ps->viewangles, pm->trace, ps->clientNum, tracemask);
 
-			if (traceres.allsolid /* && trace.entityNum >= MAX_CLIENTS */)
+			if (traceres.allsolid && ps->pm_type != PM_NOCLIP /* && trace.entityNum >= MAX_CLIENTS */)
 			{
 				// starting in a solid, no space
 				ps->viewangles[YAW]   = oldYaw;
