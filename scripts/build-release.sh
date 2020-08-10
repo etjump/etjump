@@ -45,7 +45,7 @@ build_mingw()
 
 parse_cmdline $@
 build_linux
-if [ $BUILD_MINGW == 1 ]; then
+if [ "$BUILD_MINGW" = "1" ]; then
 	build_mingw
 fi
 
