@@ -580,6 +580,8 @@ vmCvar_t etj_snapHUDColor1;
 vmCvar_t etj_snapHUDColor2;
 vmCvar_t etj_snapHUDFov;
 
+vmCvar_t etj_gunSway;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -984,6 +986,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.0 1.0 1.0 0.75", CVAR_ARCHIVE },
 	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
 	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
+	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
 };
 
 
