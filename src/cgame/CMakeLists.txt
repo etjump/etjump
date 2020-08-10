@@ -99,3 +99,9 @@ set_target_properties(cgame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
 set_target_lib_suffix(cgame)
+
+set_target_properties(cgame PROPERTIES 
+    VS_DEBUGGER_COMMAND "$(ETROOT)\\ET.exe"
+	VS_DEBUGGER_COMMAND_ARGUMENTS "+set fs_basepath \"$(SolutionDir)\" +set fs_homepath . +set fs_game ${CMAKE_PROJECT_NAME} +set sv_pure 0"
+	VS_DEBUGGER_WORKING_DIRECTORY "$(ETROOT)")
+	

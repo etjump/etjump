@@ -100,26 +100,38 @@ _TODO_
 
 ### Running
 
-* CLI:
-    ```sh
-    # playtest the binaries using et or etl directly from the build directory
-    $ C:\\Games\\ETLegacy\\etl.exe +set fs_basepath C:\\Games\\ETLegacy\\ +set fs_homepath . +set fs_game etjump +set sv_pure 0
-    ```
-* Alternatively setup debugger and run the game directly from `Visual Studio`.
+You can test run banaries using terminal:
+```sh
+# playtest the binaries using ETLegacy directly from the build directory
+$ C:\\Games\\ETLegacy\\etl.exe +set fs_basepath C:\\Games\\ETLegacy\\ +set fs_homepath . +set fs_game etjump +set sv_pure 0
+# or for VET
+$  C:\\Games\\WolfET\\ET.exe +set fs_basepath . +set fs_homepath "C:\\[Games]\\ETMAP\\" +set fs_game etjump +set sv_pure 0
+```
+Or set up debugger (instructions are below) and run the game directly from `Visual Studio`.
 
 ### Debugging
 
 #### sln based project
 
-1. Select `cgame` project and make it `Startup project` using context menu.
-2. Open up `cgame` project properties using context menu.
-3. Select `Debugging` tab.
-4. For `Command` field select `etl.exe`.
-5. For `Working Directory` field select `etl.exe` root directory.
-6. For `Command Arguments` set `+set fs_homepath $(SolutionDir) +set fs_game etjump +set sv_pure 0`
-7. Press the green play button to launch the game in debugging mode.
+* __Option 1.__  
+    Edit debugger settings and specify ET/ETLegacy executable and working directory manually.
+    1. Open up `cgame` project properties using context menu.
+    2. Select `Debugging` tab.
+    3. For `Command` field browse game executable (eg. `C:\Games\ETLegacy\etl.exe`).
+    4. For `Working Directory` field browse game installation directory (eg. `C:\Games\ETLegacy`).
+* __Option 2.__   
+    Set `ETROOT` environmental variable to point to ET/ETLegacy installation (eg. `C:\Games\ETLegacy`).
 
-#### cmake based project
+You can then press the green play button to launch the game in debugging mode.
+
+##### Disable console window
+
+1. Open up `cgame` project properties using context menu.
+2. Select `Linker` tab.
+3. Select `System` category.
+4. Set `SubSystem` to `Not Set`.
+
+#### CMake based project
 
 _TODO_
 
@@ -128,4 +140,3 @@ _TODO_
 1. Create file in the module directory (`cgame`, `game`, `ui`).
 2. Add file name in the modules specific `CMakeLists.txt`.
 3. Either reopen `Visual Studio` or build `CMake/ZERO_CHECK` project to make new file to appear in the `Solution View`. 
-

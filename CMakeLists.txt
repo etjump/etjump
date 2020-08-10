@@ -46,6 +46,9 @@ add_subdirectory(assets)
 set_target_properties(mod_pk3 mod_release 
                       PROPERTIES FOLDER ${PACKING_TARGETS_FOLDER})
 
+# set cgame as startup projec in Visual Studio
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT cgame)
+
 if (BUILD_TESTS)
 	message(STATUS "Enabling tests building -- done")
 	enable_testing()
