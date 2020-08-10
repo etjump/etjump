@@ -19,7 +19,7 @@ add_custom_target(mod_pk3
 	COMMENT "Packing ${PK_NAME}.pk3"
 )
 
-set(RELEASE_NAME "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}")
+set(RELEASE_NAME "${CMAKE_PROJECT_NAME}-${GAME_VERSION}")
 set(RELEASE_PATH "${CMAKE_BINARY_DIR}/${RELEASE_NAME}.zip")
 add_custom_target(mod_release
 	COMMAND ${CMAKE_COMMAND} 
