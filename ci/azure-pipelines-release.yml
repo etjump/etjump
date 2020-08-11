@@ -23,5 +23,6 @@ jobs:
       sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
       sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
       mkdir build && cd build
-      sh ../scripts/build-release.sh -mingw
+      sudo chmod +x ../scripts/build-release.sh
+      ../scripts/build-release.sh -mingw
     displayName: 'Build release'

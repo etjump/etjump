@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# throw error on any command fail
+set -e
+
 BUILD_TYPE=Release
 BUILD_MINGW=0
 EXTRA_ARGS=""
