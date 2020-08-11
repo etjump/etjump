@@ -1,8 +1,8 @@
-# ETJump CI
-# Compiles binaries and runs tests
+# ETJump Release Pipeline
+# Builds Windows and Linux binaries using gcc
 
-trigger:
-- master
+trigger: none
+pr: none
 
 jobs:
 
@@ -26,3 +26,15 @@ jobs:
       sudo chmod +x ../scripts/build-release.sh
       ../scripts/build-release.sh -mingw
     displayName: 'Build release'
+
+  - task: CopyFiles@2
+    displayName: 'Copy artifact'
+    inputs:
+      contents: 'build/*.zip'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact'
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: ReleaseArchive
