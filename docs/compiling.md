@@ -5,13 +5,13 @@ Compiling the source code is a straightforward process. Below you will find inst
 ## Prerequisites
 
 To compile etjump source code, you only need a few things:
-* [Git](https://git-scm.com/) to fetch the repository. 
+* [Git](https://git-scm.com/) or [Git Desktop](https://desktop.github.com/) to fetch the repository. 
 * [CMake](https://cmake.org/) to generate build files.
 * [Visual Studio](https://visualstudio.microsoft.com/vs/community/) or `gcc` to compile the code.
 
 ## Building 
 
-ETJump currently can be built only on `windows` and `linux` platforms. Supported build types are `Release` and `Debug`.
+ETJump currently can be built only on `Windows` and `Linux` platforms. Supported build types are `Release` and `Debug`.
 
 ### Linux
 
@@ -80,6 +80,8 @@ There are multiple options available:
 
 This option gives best control over the solution and provides familiar usage experience. It is hence __recommended__ option for the mod [development and debugging](developing.md). 
 
+##### CLI
+
 1. Generate project files: 
     ```sh
     $ git clone https://github.com/etjump/etjump.git && cd etjump
@@ -94,6 +96,29 @@ This option gives best control over the solution and provides familiar usage exp
     $ cmake --build . --config Release
     # or "cmake --build . --config Debug" to compile debuggable builds
     ```
+
+##### CMake GUI
+
+1. Fetch etjump project either using `Git Desktop` or `git cli`:
+    ```sh
+    cd Documents/Git
+    $ git clone https://github.com/etjump/etjump.git
+    # as a result you will have etjump directory containing source files
+    ```
+2. Open up `CMake GUI`.
+3. For the `Where is the source code` select __etjump__ source directory.
+4. For the `Where to build` create `build` directory within the __etjump__ source directory and select it.
+5. Press `Configure` button.
+6. For the `Specify generator` select the `Visual Studio` version you have installed (eg. `Visual Studio 2019`).
+7. For the `Optional platform` select `Win32`.
+8. Press okay and let it to configure.
+9. Press `Generate` button.
+10. Press `Open Project` button to open project in the `Visual Studio`.    
+
+You can close cmake now.
+* Press `Build > Build Solution` to start the compilation.
+* You will find files in the `build/etjump` directory.
+* Checkout the [Development and Debugging](developing.md) for more information on how to run and debug etjump.
 
 ##### Create mod pk3
 
