@@ -2,7 +2,6 @@
 // -------------------------------------------
 //
 #include "g_local.h"
-#include "../../etjump/ui/menudef.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
 

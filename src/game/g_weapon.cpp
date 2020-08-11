@@ -2624,7 +2624,6 @@ qboolean G_AvailableAirstrikes(gentity_t *ent)
 void G_AddAirstrikeToCounters(gentity_t *ent)
 {
 	int max = std::min(6, static_cast<int>(2 * (ceil(G_TeamCount(ent, (weapon_t)-1) * 0.1f * 10 * 0.01f))));
-
 	if (ent->client->sess.sessionTeam == TEAM_AXIS)
 	{
 		level.axisBombCounter += ((60 * 1000) / (float)max);

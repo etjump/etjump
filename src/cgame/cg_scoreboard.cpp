@@ -475,7 +475,7 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor, fontInfo_t *
 	// Map name and mod version (right side)
 
 	std::string mapName = ETJump::stringFormat("^7%s", cgs.rawmapname);
-	std::string modVersion = ETJump::stringFormat("^7%s", ETJUMP_VERSION);
+	std::string modVersion = ETJump::stringFormat("^7%s", GAME_TAG);
 	float rightTextX = SCREEN_WIDTH - leftTextX;
 	float rightTextY = headerTextY;
 	float mapNameOffsetX = CG_Text_Width_Ext(mapName, 0.15f, 0, font);
@@ -820,7 +820,7 @@ int WM_DrawObjectives(int x, int y, int width, float fade)
 	CG_DrawRect_FixedBorder(x, y, width, height, 1, currentClrUiBorder);
 
 	// ETJump: ETJump version
-	s = ETJUMP_VERSION;
+	s = GAME_TAG;
 	CG_Text_Paint_Ext(
 		x + 5,
 		y + 17,
@@ -835,7 +835,7 @@ int WM_DrawObjectives(int x, int y, int width, float fade)
 		0.25f, 0.25f, color2, s, 0, 0, 0, font);
 	
 	// ETJump: ETJump website link
-	s = ETJUMP_WEB;
+	s = GAME_URL;
 	textWidth = CG_Text_Width_Ext(s, 0.25f, 0, font);
 	CG_Text_Paint_Ext(
 		x + width - 5 - textWidth, 

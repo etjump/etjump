@@ -7,7 +7,7 @@
 #include "../cgame/tr_types.h"
 #include "keycodes.h"
 
-#include "../../etjump/ui/menudef.h"
+#include "../../assets/ui/menudef.h"
 
 #define MAX_MENUNAME 32
 #define MAX_ITEMTEXT 64

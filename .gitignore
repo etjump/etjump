@@ -54,8 +54,6 @@ local.properties
 *.sln.docstates
 
 # Build results
-[Dd]ebug/
-[Rr]elease/
 *_i.c
 *_p.c
 *.ilk
@@ -176,20 +174,10 @@ pip-log.txt
 
 scons.signatures.dblite
 
-
-src/site.conf
-# Cmake build stuff
-src/cmake
-
-# Built binaries
-src/build
-src/.idea/*
-src/.idea
-src/build/install.bat
-src/cgame/cgame.vcxproj.user
-src/cmake-build-debug
-src/enc_temp_folder
 *.db-shm
 *.db-wal
 *.TMP
-src/.vs/Trickjump.sqlite
+
+.vs
+.idea
+out

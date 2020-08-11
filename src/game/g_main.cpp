@@ -299,7 +299,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_cheats,                    "sv_cheats",                   "",                                                       0,                                               qfalse },
 
 	// noset vars
-	{ NULL,                         "gamename",                    GAME_VERSION,                                             CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
+	{ NULL,                         "gamename",                    GAME_NAME,                                                CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
 	{ NULL,                         "gamedate",                    __DATE__,                                                 CVAR_ROM,                                        0, qfalse},
 	{ &g_restarted,                 "g_restarted",                 "0",                                                      CVAR_ROM,                                        0, qfalse},
 	{ NULL,                         "sv_mapname",                  "",                                                       CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
@@ -453,7 +453,7 @@ cvarTable_t gameCvarTable[] =
 #endif // SAVEGAME_SUPPORT
 
 	// points to the URL for mod information, should not be modified by server admin
-	{ &mod_url,                     "mod_url",                     "http://etjump.com",                                      CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
+	{ &mod_url,                     "mod_url",                     GAME_URL,                                                 CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
 	// configured by the server admin, points to the web pages for the server
 	{ &url,                         "URL",                         "",                                                       CVAR_SERVERINFO | CVAR_ARCHIVE,                  0, qfalse},
 
@@ -514,7 +514,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_mute,                      "g_mute",                      "0",                                                      CVAR_ARCHIVE },
 	{ &g_goto,                      "g_goto",                      "1",                                                      CVAR_ARCHIVE },
 	{ &g_voteCooldown,              "g_voteCooldown",              "15",                                                     CVAR_ARCHIVE },
-	{ &mod_version,                 "mod_version",                 MOD_VERSION,                                              CVAR_SERVERINFO },
+	{ &mod_version,                 "mod_version",                 GAME_VERSION,                                             CVAR_SERVERINFO },
 
 	{ &g_lastVisitedMessage,        "g_lastVisitedMessage",        "^2Welcome back! Your last visit was on [t].",            CVAR_ARCHIVE },
 	{ &g_mapDatabase,               "g_mapDatabase",               "maps.dat",                                               CVAR_ARCHIVE },
@@ -1802,10 +1802,13 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 	qtime_t ct;
+	
+	Com_Printf(S_COLOR_LTGREY "Initializing " GAME_NAME " game " S_COLOR_GREEN GAME_VERSION "\n");
+
 	trap_RealTime(&ct);
 
 	G_Printf("\n\n------- Game Initialization -------\n");
-	G_Printf("gamename: %s %s\n", GAME_VERSION, MOD_VERSION);
+	G_Printf("gamename: %s %s\n", GAME_NAME, GAME_VERSION);
 	G_Printf("gamedate: %s\n", __DATE__ " " __TIME__);
 	if (g_gametype.integer != GT_WOLF)
 	{
@@ -1815,7 +1818,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	G_Printf("Gametype forced to 2.\n");
 	trap_Cvar_Set("sv_floodprotect", "0");
 
-	trap_Cvar_Set("mod_version", MOD_VERSION);
+	trap_Cvar_Set("mod_version", GAME_VERSION);
 	// reset moverscale on each map load
 	trap_Cvar_Set("g_moverScale", "1.0");
 
@@ -1953,7 +1956,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		{
 			G_LogPrintf("------------------------------------------------------------\n");
 			G_LogPrintf("InitGame: %s\n", cs);
-			G_LogPrintf("%s %s %s %s\n", GAME_VERSION, MOD_VERSION, __DATE__, __TIME__);
+			G_LogPrintf("%s %s %s %s\n", GAME_NAME, GAME_VERSION, __DATE__, __TIME__);
 		}
 	}
 	else

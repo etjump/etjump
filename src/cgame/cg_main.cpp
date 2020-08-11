@@ -3487,6 +3487,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	//	int startat = trap_Milliseconds();
 
+	Com_Printf(S_COLOR_LTGREY "Initializing " GAME_NAME " cgame " S_COLOR_GREEN GAME_VERSION "\n");
 
 	// clear everything
 	memset( &cgs, 0, sizeof(cgs));
@@ -3505,7 +3506,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	}
 
 	CG_InitStatsDebug();
-
 
 	cgs.ccZoomFactor = 1.f;
 
@@ -3575,9 +3575,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	// check version
 	s = CG_ConfigString(CS_GAME_VERSION);
-	if (strcmp(s, GAME_VERSION))
+	if (strcmp(s, GAME_NAME))
 	{
-		CG_Error("Client/Server game mismatch: '%s/%s'", GAME_VERSION, s);
+		CG_Error("Client/Server game mismatch: '%s/%s'", GAME_NAME, s);
 	}
 	trap_Cvar_Set("cg_etVersion", GAME_VERSION_DATED);              // So server can check
 

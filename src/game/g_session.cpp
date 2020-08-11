@@ -1,5 +1,4 @@
 #include "g_local.h"
-#include "../../etjump/ui/menudef.h"
 
 
 /*

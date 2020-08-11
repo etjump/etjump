@@ -4749,7 +4749,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params)
 
 		if (g_scriptDebug.integer)
 		{
-			G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time, ent->scriptName, MOD_VERSION, ent->scriptName, key, value);
+			G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time, ent->scriptName, GAME_VERSION, ent->scriptName, key, value);
 		}
 
 		if (!Q_stricmp(key, "classname"))

@@ -5294,7 +5294,7 @@ void ClientCommand(int clientNum)
 
 	if (!Q_stricmp(cmd, "mod_information"))
 	{
-		C_ConsolePrintTo(ent, va("%s %s", GAME_VERSION " " MOD_VERSION, BUILD_TIME));
+		C_ConsolePrintTo(ent, va("%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__));
 		return;
 	}
 

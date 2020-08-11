@@ -2,7 +2,7 @@
 // -------------------------
 //
 #include "g_local.h"
-#include "../../etjump/ui/menudef.h"
+#include "../../assets/ui/menudef.h"
 
 
 void G_initMatch(void)
