@@ -2085,6 +2085,7 @@ void target_startTimer_use(gentity_t *self, gentity_t *other, gentity_t *activat
 	{
 		if (activator->client->pers.pmoveFixed == qfalse)
 		{
+			Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not started. pmove_fixed is set to 0!");
 			return;
 		}
 	}

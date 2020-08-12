@@ -106,6 +106,7 @@
 * silenced warnings about missing portalgun models
 * fixed client's missiles and mines are now removed on timerun start
 * changed `etj_altScoreboard` to default to standard scoreboard
+* added center print on timerun start if `pmove_fixed` is not enabled
 
 # ETJump 2.3.0
 
