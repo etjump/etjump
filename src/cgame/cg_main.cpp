@@ -882,7 +882,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
 	{ &cg_slickX,                   "etj_slickX",                  "304",                    CVAR_ARCHIVE             },
 	{ &cg_slickY,                   "etj_slickY",                  "220",                    CVAR_ARCHIVE             },
-	{ &cg_altScoreboard,            "etj_altScoreboard",           "2",                      CVAR_ARCHIVE             },
+	{ &cg_altScoreboard,            "etj_altScoreboard",           "0",                      CVAR_ARCHIVE             },
 	{ &player_drawSpectatorInfo,    "etj_drawSpectatorInfo",       "0",                      CVAR_ARCHIVE             },
 	{ &player_spectatorInfoX,       "etj_spectatorInfoX",          "320",                    CVAR_ARCHIVE             },
 	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
