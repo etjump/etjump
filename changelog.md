@@ -104,6 +104,8 @@
 * adjusted rendering order of crosshair & crosshairnames
   * crosshair no longer draws when scoreboard is up
 * silenced warnings about missing portalgun models
+* fixed client's missiles and mines are now removed on timerun start
+* changed `etj_altScoreboard` to default to standard scoreboard
 
 # ETJump 2.3.0
 
