@@ -101,6 +101,23 @@ static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowe
 	}
 }
 
+static void RemovePlayerProjectiles(int clientNum)
+{
+	// Iterate entitylist and remove all projectiles
+	// that belong to the activator
+	for (int i = MAX_CLIENTS; i < level.num_entities; i++)
+	{
+		auto ent = g_entities + i;
+		if (ent->s.eType == ET_MISSILE)
+		{
+			if (ent->parent && ent->parent->s.number == clientNum)
+			{
+				G_FreeEntity(ent);
+			}
+		}
+	}
+}
+
 void Utilities::startRun(int clientNum)
 {
 	gentity_t *player = g_entities + clientNum;
@@ -135,6 +152,7 @@ void Utilities::startRun(int clientNum)
 		WP_PORTAL_GUN
 	};
 	RemovePlayerWeapons(clientNum, disallowed);
+	RemovePlayerProjectiles(clientNum);
 	SelectCorrectWeapon(player->client, disallowed);
 
 //	// Disable any weapons except kife
