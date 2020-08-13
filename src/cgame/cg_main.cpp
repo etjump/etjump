@@ -1135,7 +1135,7 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
 					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
 					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad ||
-					cv->vmCvar == &etj_quickFollow
+					cv->vmCvar == &etj_quickFollow || cv->vmCvar == &etj_drawSnapHUD
 				    )
 				{
 					fSetFlags = qtrue;
@@ -1211,7 +1211,8 @@ void CG_setClientFlags(void)
 									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
 									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
 									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
-									 ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0)
+									 ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
+									 ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0)
 	                                 // Add more in here, as needed
 	                             ),
 

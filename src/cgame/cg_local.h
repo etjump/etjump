@@ -593,6 +593,7 @@ typedef struct clientInfo_s
 	int hideMe;
 	qboolean specLocked;
 	qboolean timerunActive;
+	bool snaphud;
 } clientInfo_t;
 
 typedef enum
