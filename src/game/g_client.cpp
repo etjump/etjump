@@ -1579,7 +1579,7 @@ namespace ETJump
 
 		// send over a subset of the userinfo keys so other clients can
 		// print scoreboards, display models, and play custom sounds
-		auto newcs = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i\\sl\\%i\\tr\\%i\\",
+		auto newcs = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i\\sl\\%i\\tr\\%i\\vs\\%i",
 			gent.client->pers.netname,
 			gent.client->sess.sessionTeam,
 			gent.client->sess.playerType,
@@ -1597,7 +1597,8 @@ namespace ETJump
 			gent.client->pers.cgaz > 0 ? gent.client->pers.cgaz : 0,
 			gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
 			gent.client->sess.specLocked ? 1 : 0,
-			gent.client->sess.timerunActive ? 1 : 0
+			gent.client->sess.timerunActive ? 1 : 0,
+			gent.client->pers.snaphud ? 1 : 0
 		);
 
 		trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
@@ -1700,6 +1701,7 @@ void ClientUserinfoChanged(int clientNum)
 	client->pers.noActivateLean = (client->pers.clientFlags & CGF_NOACTIVATELEAN) != 0 ? qtrue : qfalse;
 	client->pers.autoLoad = (client->pers.clientFlags & CGF_AUTO_LOAD) != 0 ? qtrue : qfalse;
 	client->pers.quickFollow = (client->pers.clientFlags & CGF_QUICK_FOLLOW) != 0 ? qtrue : qfalse;
+	client->pers.snaphud = (client->pers.clientFlags & CGF_SNAPHUD) != 0 ? qtrue : qfalse;
 
 	// set name
 	Q_strncpyz(oldname, client->pers.netname, sizeof(oldname));

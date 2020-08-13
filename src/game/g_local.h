@@ -841,6 +841,7 @@ typedef struct
 	qboolean noActivateLean;
 	qboolean autoLoad;
 	qboolean quickFollow;
+	bool snaphud;
 
 	unsigned int maxFPS;
 	char netname[MAX_NETNAME];

@@ -447,9 +447,9 @@ Alt scoreboard 3
 
 #define ALT_SCOREBOARD_3_DIVIDER				14
 
-#define ALT_SCOREBOARD_3_PLAYER_WIDTH			199
+#define ALT_SCOREBOARD_3_PLAYER_WIDTH			192
 #define ALT_SCOREBOARD_3_FPS_WIDTH				23
-#define ALT_SCOREBOARD_3_INFO_WIDTH				45
+#define ALT_SCOREBOARD_3_INFO_WIDTH				52
 #define ALT_SCOREBOARD_3_PING_WIDTH				23
 
 #define ALT_SCOREBOARD_3_PLAYER_X				SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2 + 5;
@@ -543,6 +543,7 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 	// Draw client info
 	const char *clientInfoPmove = ci->pmoveFixed ? "^2P" : "";
 	const char *clientInfoCGaz = ci->CGaz ? "^8C" : "";
+	const char* clientInfoSnapHUD = ci->snaphud ? "^5V" : "";
 	const char *clientInfoHideMe = ci->hideMe ? "^bH" : "";
 	const char *clientInfoSpecLock = ci->specLocked ? "^9S" : "";
 	const char *clientInfoTimerun = ci->timerunActive ? "^3T" : "";
@@ -550,10 +551,11 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 
 	CG_Text_Paint_Centred_Ext(infoX + 5, y, 0.12f, 0.12f, textColor, clientInfoPmove, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 	CG_Text_Paint_Centred_Ext(infoX + 12, y, 0.12f, 0.12f, textColor, clientInfoCGaz, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 19, y, 0.12f, 0.12f, textColor, clientInfoHideMe, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 26, y, 0.12f, 0.12f, textColor, clientInfoSpecLock, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 33, y, 0.12f, 0.12f, textColor, clientInfoTimerun, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 40, y, 0.12f, 0.12f, textColor, clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 19, y, 0.12f, 0.12f, textColor, clientInfoSnapHUD, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 26, y, 0.12f, 0.12f, textColor, clientInfoHideMe, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 33, y, 0.12f, 0.12f, textColor, clientInfoSpecLock, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 40, y, 0.12f, 0.12f, textColor, clientInfoTimerun, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 47, y, 0.12f, 0.12f, textColor, clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Draw client ping
 	std::string ping = ETJump::stringFormat("%i", score->ping);
