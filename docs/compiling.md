@@ -72,7 +72,7 @@ _TODO: work out the steps_
 ### Windows
 
 There are multiple options available:
-* Generete the `sln` project files (native `Visual Studio` experience). `RECOMMENDED`
+* Generate the `sln` project files (native `Visual Studio` experience). `RECOMMENDED`
 * Load cmake project in [Visual Studio](https://visualstudio.microsoft.com/vs/community/) (`Visual Studio 2017` or later).
 * Compiling using `mingw-w64` toolchain (using `gcc` on windows).
 
