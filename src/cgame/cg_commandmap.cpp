@@ -240,6 +240,12 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 	vec2_t dist;
 	vec4_t gridColour;
 
+	// sanity check
+	if (!cg.mapcoordsValid)
+	{
+		return;
+	}
+
 	dist[0] = cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0];
 	dist[1] = cg.mapcoordsMaxs[1] - cg.mapcoordsMins[1];
 
