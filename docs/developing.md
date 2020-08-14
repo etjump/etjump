@@ -2,11 +2,11 @@
 
 This section provides a helping guide on how to develop and debug ETJump.
 
-ETJump is developed using `C++`, although most of the code base is written in `C`. Essentially, you can work with code in any prefered editor, it is however recommended to use [Visual Studio](https://visualstudio.microsoft.com/vs/community/). It is assumed you know how to compile the code, else check out the [compilation guide](compiling.md). It is also assumed you know your way around `C` and/or `C++` languages. If not, it is recommended to read [C beginners tutorial](https://www.tutorialspoint.com/cprogramming/index.htm) and [C++ tutorial](https://www.learncpp.com/). The codebase is fairly straightforward and simple, so basic `C` knowledge would be sufficient to develop the mod.
+ETJump is developed using `C++`, although most of the code base is written in `C`. Essentially, you can work with code in any preferred editor, it is however recommended to use [Visual Studio](https://visualstudio.microsoft.com/vs/community/). It is assumed you know how to compile the code, else check out the [compilation guide](compiling.md). It is also assumed you know your way around `C` and/or `C++` languages. If not, it is recommended to read [C beginners tutorial](https://www.tutorialspoint.com/cprogramming/index.htm) and [C++ tutorial](https://www.learncpp.com/). The codebase is fairly straightforward and simple, so basic `C` knowledge would be sufficient to develop the mod.
 
 For running tests check [testing guide](testing.md)
 
-ETJump build system is based on [CMake](https://cmake.org/). While it's not really necessary to be an expert in this field, it would be desirable atleast to get through basics of [cmake](https://cmake.org/cmake/help/latest/guide/tutorial/index.html). 
+ETJump build system is based on [CMake](https://cmake.org/). While it's not really necessary to be an expert in this field, it would be desirable at least to get through basics of [cmake](https://cmake.org/cmake/help/latest/guide/tutorial/index.html). 
 
 For any questions, ETJump has own [discord](https://discord.gg/AcyWMqR) server, make sure to join it, if you haven't yet. ETJump documentation can be found [here](http://etjump.readthedocs.io/en/latest/). 
 
@@ -100,7 +100,7 @@ _TODO_
 
 ### Running
 
-You can test run banaries using terminal:
+You can test run binaries using terminal:
 ```sh
 # playtest the binaries using ETLegacy directly from the build directory
 $ C:\\Games\\ETLegacy\\etl.exe +set fs_basepath C:\\Games\\ETLegacy\\ +set fs_homepath . +set fs_game etjump +set sv_pure 0

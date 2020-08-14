@@ -137,7 +137,7 @@ This is simple, and easy use option, but not as much versatile as `sln` solution
 2. Clone the repository
     ```sh
     $ git clone https://github.com/etjump/etjump.git 
-    # as a resutlt you will have etjump directory containing source files
+    # as a result you will have etjump directory containing source files
     ```
 3. Open up `Visual Studio`.
 4. If `Start Window` is opened, press `Continue without code`.

@@ -1,6 +1,6 @@
 # Code style guide
 
-_This documentaion is under development._
+_This documentation is under development._
 
 - No multi level ternary operations e.g:
 
