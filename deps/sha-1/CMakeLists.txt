@@ -1,3 +1,2 @@
-add_library(libsha1 STATIC sha1.c)
-set_target_properties(libsha1 PROPERTIES OUTPUT_NAME "sha1")
+add_library(libsha1 OBJECT sha1.c)
 target_include_directories(libsha1 SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
