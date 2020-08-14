@@ -1,3 +1,2 @@
-add_library(libjson STATIC jsoncpp.cpp)
-set_target_properties(libjson PROPERTIES OUTPUT_NAME "json")
+add_library(libjson OBJECT jsoncpp.cpp)
 target_include_directories(libjson SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -1,5 +1,4 @@
-add_library(libsqlite STATIC sqlite3.c)
-set_target_properties(libsqlite PROPERTIES OUTPUT_NAME "sqlite3")
+add_library(libsqlite OBJECT sqlite3.c)
 target_include_directories(libsqlite 
     SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(libsqlite 
