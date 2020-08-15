@@ -227,7 +227,6 @@ void CG_ParseMapEntityInfo(int axis_number, int allied_number)
 	CG_TransformAutomapEntity();
 }
 
-static qboolean gridInitDone = qfalse;
 static vec2_t   gridStartCoord, gridStep;
 
 static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scissor)
@@ -249,7 +248,7 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 	dist[0] = cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0];
 	dist[1] = cg.mapcoordsMaxs[1] - cg.mapcoordsMins[1];
 
-	if (!gridInitDone)
+	if (!cg.gridInitDone)
 	{
 		gridStep[0] = 1200.f;
 		gridStep[1] = 1200.f;
@@ -263,7 +262,7 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 		gridStartCoord[0] = .5f * ((((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]) - ((int)((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]))) * gridStep[0]);
 		gridStartCoord[1] = .5f * ((((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]) - ((int)((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]))) * gridStep[1]);
 
-		gridInitDone = qtrue;
+		cg.gridInitDone = qtrue;
 	}
 
 	if (scissor)
