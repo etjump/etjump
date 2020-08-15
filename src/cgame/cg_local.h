@@ -1256,6 +1256,7 @@ typedef struct
 	bool requiresEntityTypeAdjustment; // ETJump 2.3.0 specific hack
 
 	char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
+	qboolean gridInitDone;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
