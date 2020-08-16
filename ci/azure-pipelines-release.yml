@@ -1,40 +1,116 @@
-# ETJump Release Pipeline
-# Builds Windows and Linux binaries using gcc
+# ETJump Release Pipeline II
+# Builds Windows and Linux binaries
 
 trigger: none
 pr: none
+
+variables:
+  buildDir: build
 
 jobs:
 
 - job: build_linux
 
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: 'ubuntu-16.04'
 
   steps:
   - script: |
       sudo apt-get update
-      sudo apt-get install gcc gcc-multilib g++-multilib mingw-w64
-    displayName: 'Install Linux deps'
+      sudo apt-get install gcc-multilib g++-multilib
+    displayName: 'Install linux deps'
 
   - script: |
-      sudo update-alternatives --set i686-w64-mingw32-gcc /usr/bin/i686-w64-mingw32-gcc-posix
-      sudo update-alternatives --set i686-w64-mingw32-g++ /usr/bin/i686-w64-mingw32-g++-posix
-      sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
-      sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
-      mkdir build && cd build
-      sudo chmod +x ../scripts/build-release.sh
-      ../scripts/build-release.sh -mingw
-    displayName: 'Build release'
+      mkdir $(buildDir) && cd $(buildDir)
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+      cmake --build . --parallel
+    displayName: 'Build linux x86_64'
+
+  - script: |
+      cd $(buildDir) && rm CMakeCache.txt
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-x86-linux.cmake
+      cmake --build . --parallel
+    displayName: 'Build linux x86'
+
+  - task: CopyFiles@2
+    inputs:
+      contents: '*.so'
+      sourceFolder: '$(buildDir)/etjump'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    displayName: 'Copy binaries'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: etjump
+    displayName: 'Publish binaries'
+
+- job: build_windows
+
+  pool:
+    vmImage: 'vs2017-win2016'
+
+  steps:
+  - script: |
+      mkdir $(buildDir)
+      cd $(buildDir)
+      cmake .. -A x64 -DBUILD_TESTS=OFF
+      cmake --build . --config Release --parallel
+    displayName: 'Build windows x86_64'
+
+  - script: |
+      cd $(buildDir)
+      del /f CMakeCache.txt
+      cmake .. -A Win32 -DBUILD_TESTS=OFF
+      cmake --build . --config Release --parallel
+    displayName: 'Build windows x86'
+
+  - task: CopyFiles@2
+    inputs:
+      contents: '*.dll'
+      sourceFolder: '$(buildDir)/etjump'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    displayName: 'Copy binaries'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: etjump
+    displayName: 'Publish binaries'
+    
+- job: pack_files
+  dependsOn: 
+  - build_linux
+  - build_windows
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      buildType: 'current'
+      downloadType: 'single'
+      artifactName: 'etjump'
+      downloadPath: '$(System.DefaultWorkingDirectory)/$(buildDir)'
+    displayName: 'Fetch binaries'
+
+  - script: |
+      cd $(buildDir)
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+      make mod_release
+    displayName: 'Pack release zip'
 
   - task: CopyFiles@2
     displayName: 'Copy artifact'
     inputs:
-      contents: 'build/*.zip'
+      contents: '*.zip'
+      sourceFolder: $(buildDir)
       targetFolder: $(Build.ArtifactStagingDirectory)
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact'
     inputs:
       pathToPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: ReleaseArchive
+      artifactName: etjump
