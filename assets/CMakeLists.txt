@@ -15,7 +15,7 @@ add_custom_target(mod_pk3
 		-DOUTPUT="${PK_PATH}"
 		-P ${CMAKE_SOURCE_DIR}/cmake/AssetsPackager.cmake
 	WORKING_DIRECTORY ${BASE_DIR_PATH}
-	DEPENDS cgame ui
+	# DEPENDS cgame ui
 	COMMENT "Packing ${PK_NAME}.pk3"
 )
 
@@ -27,6 +27,7 @@ add_custom_target(mod_release
 		-DOUTPUT="${RELEASE_PATH}"
 		-P ${CMAKE_SOURCE_DIR}/cmake/AssetsPackager.cmake
 	WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-	DEPENDS qagame mod_pk3
+	# DEPENDS qagame mod_pk3
+	DEPENDS mod_pk3
 	COMMENT "Packing ${RELEASE_NAME}.zip"
 )
