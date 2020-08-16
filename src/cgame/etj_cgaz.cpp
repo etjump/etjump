@@ -265,6 +265,10 @@ namespace ETJump
 		// Dzikie Weze's 2D-CGaz
 		if (etj_drawCGaz.integer == 2)
 		{
+			if (VectorLengthSquared2(ps->velocity) == 0)
+			{
+				return;
+			}
 
 			parseColorString(etj_CGazColor1.string, color1);
 			parseColorString(etj_CGazColor2.string, color2);
