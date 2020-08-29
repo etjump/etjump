@@ -1757,7 +1757,7 @@ void target_savereset_use(gentity_t *self, gentity_t *other, gentity_t *activato
 	{
 		ETJump::saveSystem->resetSavedPositions(activator);
 
-		if (!self->spawnflags & 1)
+		if (!(self->spawnflags & 1))
 		{
 			CPx(activator - g_entities, "cp \"^7 Your saves were removed.\n\"");
 		}
