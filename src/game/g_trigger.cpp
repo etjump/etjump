@@ -604,7 +604,10 @@ void trigger_savereset_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 
 	ETJump::saveSystem->resetSavedPositions(other);
 
-	CPx(other - g_entities, "cp \"^7 Your saves were removed.\n\"");
+	if (!(self->spawnflags & 1))
+	{
+		CPx(other - g_entities, "cp \"^7 Your saves were removed.\n\"");
+	}
 }
 
 void savereset_think(gentity_t *ent)
