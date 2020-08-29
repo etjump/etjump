@@ -108,6 +108,7 @@
 * changed `etj_altScoreboard` to default to standard scoreboard
 * added center print on timerun start if `pmove_fixed` is not enabled
 * added `etj_gunSway` to toggle gun idle/movement sway and landing bobbing
+* removed unused `etj_drawCGazUsers` cvar
 
 # ETJump 2.3.0
 
