@@ -366,7 +366,6 @@ vmCvar_t cg_speedunit;
 // Cheat cvars
 vmCvar_t cl_yawspeed;
 vmCvar_t cl_freelook;
-vmCvar_t cg_drawCGazUsers;
 
 vmCvar_t cg_drawClock;
 
@@ -789,7 +788,6 @@ cvarTable_t cvarTable[] =
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawCGazUsers,            "etj_drawCGazUsers",           "1",                      CVAR_ARCHIVE             },
 	{ &etj_drawKeys,                "etj_drawKeys",                "1",                      CVAR_ARCHIVE             },
 	{ &etj_keysColor,               "etj_keysColor",               "white",                  CVAR_ARCHIVE             },
 	{ &etj_keysSize,                "etj_keysSize",                "48",                     CVAR_ARCHIVE             },

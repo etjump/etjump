@@ -2414,7 +2414,6 @@ extern vmCvar_t etj_CGazWidth;
 extern vmCvar_t etj_CGazColor1;
 extern vmCvar_t etj_CGazColor2;
 extern vmCvar_t etj_CGazAlpha;
-extern vmCvar_t cg_drawCGazUsers;
 extern vmCvar_t etj_CGaz5Color1;
 extern vmCvar_t etj_CGaz5Color2;
 extern vmCvar_t etj_CGaz5Color3;
