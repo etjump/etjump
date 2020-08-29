@@ -30,7 +30,7 @@ menuDef {
         SLIDER				(16, SUBW_CHS_Y + 20, 276, 8, "CHS alpha:", 0.2, 8, etj_CHSAlpha 1 0 1 0.05, "Sets transparency of CHS\netj_CHSAlpha")
         MULTI				(16, SUBW_CHS_Y + 32, 276, 8, "CHS color:", 0.2, 8, "etj_CHSColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of CHS\netj_CHSColor")
         YESNO				(16, SUBW_CHS_Y + 44, 276, 8, "CHS shadow:", 0.2, 8, "etj_CHSShadow", "Draw shadow on CHS\netj_CHSShadow")
-        YESNO				(16, SUBW_CHS_Y + 56, 276, 8, "Use feet as Z:", 0.2, 8, "etj_CHS_useFeet", "Use feet as Z origin point in positional calculations\netj_CHS_useFeet")
+        YESNO				(16, SUBW_CHS_Y + 56, 276, 8, "Use feet as Z:", 0.2, 8, "etj_CHSUseFeet", "Use feet as Z origin point in positional calculations\netj_CHSUseFeet")
 
     SUBWINDOW(8, 116, 292, 136, "CHS1")
         YESNO				(16, SUBW_CHS1_Y + 20, 276, 8, "CHS 1:", 0.2, 8, "etj_drawCHS1", "Draw crosshair stats 1\netj_drawCHS1")
