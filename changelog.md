@@ -89,7 +89,7 @@
 * fixed `func_invisible_user` playing sounds at world origin (0 0 0)
 * fixed incorrect math with `target/trigger_push` spawnflag __2__
   * added spawnflag __4__ `ADD_Z` to `target/trigger_push`
-* added `etj_CHS_useFeet` to toggle shifting Z origin to feet level on positional calculations
+* added `etj_CHSUseFeet` to toggle shifting Z origin to feet level on positional calculations
 * added velocity snapping HUD
   * `etj_drawSnapHUD` - Toggle velocity snapping HUD
   * `etj_snapHUDOffsetY` - Y offset for snaphud position
