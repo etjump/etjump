@@ -43,7 +43,7 @@
   * __128__ = CHS 53
   * the list above can be checked in game with `extraTrace` console command
 * character strings now always draw at least 1px high/wide characters even if scaled to very low size
-* added spawnflag __1__ `SILENT` to `target_savereset` to omit the print it makes
+* added spawnflag __1__ `SILENT` to `target/trigger_savereset` to omit the print it makes
 * OB watcher no longer shows OBs if you are below your saved Z coordinate and have negative Z velocity
 * fixed `func_static` not opening doors when spawnflag __2__ was used
 * players who die during timeruns are now put into limbo instantly without leaving a corpse or gun to the floor
