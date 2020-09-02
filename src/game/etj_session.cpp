@@ -165,6 +165,7 @@ bool Session::GuidReceived(gentity_t *ent)
 	          clients_[clientNum].hwid.c_str());
 
 	GetUserAndLevelData(clientNum);
+	G_LogPrintf("GetUserAndLevelData: %d", clientNum);
 
 	if (database_->IsBanned(clients_[clientNum].guid, clients_[clientNum].hwid))
 	{
@@ -174,8 +175,10 @@ bool Session::GuidReceived(gentity_t *ent)
 		trap_DropClient(clientNum, "You are banned.", 0);
 		return false;
 	}
+	G_LogPrintf("Ban check success: %d", clientNum);
 
 	ClientNameChanged(ent);
+	G_LogPrintf("ClientNameChanged: %d", clientNum);
 
 	return true;
 }
@@ -235,7 +238,9 @@ void Session::GetUserAndLevelData(int clientNum)
 		G_Error("Client doesn't have db::user.\n");
 	}
 
+	G_LogPrintf("Running ParsePermissions: %d", clientNum);
 	ParsePermissions(clientNum);
+	G_LogPrintf("ParsePermissions success: %d", clientNum);
 }
 
 void Session::ParsePermissions(int clientNum)

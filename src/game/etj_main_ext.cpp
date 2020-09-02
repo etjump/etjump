@@ -210,7 +210,9 @@ qboolean OnClientCommand(gentity_t *ent)
 	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
 	{
 		ETJump::session->GuidReceived(ent);
+		G_LogPrintf("GuidReceived: %d", ClientNum(ent));
 		game.timerun->clientConnect(ClientNum(ent), ETJump::session->GetId(ent));
+		G_LogPrintf("timerun->clientConnect: %d", ClientNum(ent));
 		return qtrue;
 	}
 

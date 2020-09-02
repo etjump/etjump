@@ -2050,15 +2050,12 @@ void ClientBegin(int clientNum)
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
-	G_LogPrintf("CalculateRanks: %i\n", clientNum);
 
 	// No surface determined yet.
 	ent->surfaceFlags = 0;
 
 	ETJump::saveSystem->loadPositionsFromDatabase(ent);
-	G_LogPrintf("saveSystem->loadPositionsFromDatabase: %i\n", clientNum);
 	OnClientBegin(ent);
-	G_LogPrintf("OnClientBegin: %i\n", clientNum);
 	if (level.hasTimerun)
 	{
 		trap_SendServerCommand(clientNum, "hasTimerun 1");
@@ -2067,26 +2064,21 @@ void ClientBegin(int clientNum)
 	{
 		trap_SendServerCommand(clientNum, "hasTimerun 0");
 	}
-	G_LogPrintf("hasTimerun info sent: %i\n", clientNum);
 	for (i = 0; i < MAX_TOKENS_PER_DIFFICULTY; ++i)
 	{
 		ent->client->pers.collectedEasyTokens[i]   = qfalse;
 		ent->client->pers.collectedMediumTokens[i] = qfalse;
 		ent->client->pers.collectedHardTokens[i]   = qfalse;
 	}
-	G_LogPrintf("Token info updated: %i\n", clientNum);
 	ent->client->pers.tokenCollectionStartTime = level.time;
-	G_LogPrintf("Token collection start time set: %i\n", clientNum);
 
 	if (!ent->client->sess.receivedTimerunStates)
 	{
 		TimerunConnectNotify(ent);
 		ent->client->sess.receivedTimerunStates = qtrue;
-		G_LogPrintf("Timerun states received: %i\n", clientNum);
 	}
 
 	ent->client->pers.previousSetHealthTime = 0;
-	G_LogPrintf("Previous set health time reset: %i\n", clientNum);
 
 	
 }
