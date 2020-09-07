@@ -110,6 +110,7 @@
 * added `etj_gunSway` to toggle gun idle/movement sway and landing bobbing
 * removed unused `etj_drawCGazUsers` cvar
 * fixed duplicate popup indicator getting colored based on the popup
+* fixed skyportal drawing incorrectly on widescreen aspect when `etj_realFov` was used
 
 # ETJump 2.3.0
 
