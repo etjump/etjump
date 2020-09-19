@@ -14,7 +14,7 @@ void CG_AdjustFrom640(float *x, float *y, float *w, float *h)
 	*y *= cgs.screenYScale;
 
 	if (w && h) {
-		*w *= cgs.screenYScale;
+		*w *= cgs.screenXScale;
 		*h *= cgs.screenYScale;
 	}
 
