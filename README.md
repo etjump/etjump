@@ -4,6 +4,8 @@
 
 This is source code repository for [ETJump](http://etjump.com/), a [Wolfenstein: Enemy Territory](https://en.wikipedia.org/wiki/Wolfenstein:_Enemy_Territory) trickjump modification. 
 
+All changes and new features are listed in the [changelog](../master/changelog.md).
+
 ---
 
 * Binaries https://github.com/etjump/etjump/releases  
