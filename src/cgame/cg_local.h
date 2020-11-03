@@ -2454,8 +2454,6 @@ extern vmCvar_t etj_maxSpeedY;
 extern vmCvar_t etj_maxSpeedDuration;
 extern vmCvar_t etj_speedColorUsesAccel;
 
-extern vmCvar_t cg_adminpassword;
-extern vmCvar_t cg_username;
 extern vmCvar_t etj_popupTime;
 extern vmCvar_t etj_popupStayTime;
 extern vmCvar_t etj_popupFadeTime;
