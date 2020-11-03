@@ -1387,7 +1387,7 @@ void CG_UpdateFlamethrowerSounds(void)
 	#define MIN_BLOW_VOLUME     30
 
 	// Mute sounds if weapon sounds are disabled
-	if (cg_weaponSound.integer <= 0)
+	if (etj_weaponSound.integer <= 0)
 	{
 		return;
 	}

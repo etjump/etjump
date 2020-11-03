@@ -228,7 +228,7 @@ void CG_EDV_RunInput(void)
 	/* Create pmext for cam movement */
 	memset(&edv_pmext, 0, sizeof(edv_pmext));
 	edv_pmext.sprintTime = SPRINTTIME;
-	edv_pmext.noclipScale = cg_noclipScale.value;
+	edv_pmext.noclipScale = etj_noclipScale.value;
 
 	/* Fill in pmove stuff */
 	cg_pmove.ps = &edv_ps;

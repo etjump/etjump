@@ -1075,17 +1075,17 @@ void CG_PredictPlayerState(void)
 	// rain - fill in the current cmd with the latest prediction from
 	// cg.pmext (#166)
 
-	if (cg_noclipScale.value < 0.1)
+	if (etj_noclipScale.value < 0.1)
 	{
 		cg.pmext.noclipScale = 0.1;
 	}
-	else if (cg_noclipScale.value > 20)
+	else if (etj_noclipScale.value > 20)
 	{
 		cg.pmext.noclipScale = 20;
 	}
 	else
 	{
-		cg.pmext.noclipScale = cg_noclipScale.value;
+		cg.pmext.noclipScale = etj_noclipScale.value;
 	}
 
 	memcpy(&oldpmext[current & CMD_MASK], &cg.pmext, sizeof(pmoveExt_t));

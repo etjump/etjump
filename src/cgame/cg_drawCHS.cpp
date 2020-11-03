@@ -609,7 +609,7 @@ void CG_DrawCHS(void)
 	align_t CHS2Align = ALIGN_LEFT;
 
 	// CHS1
-	if (cg_drawCHS1.integer)
+	if (etj_drawCHS1.integer)
 	{
 		x = (SCREEN_WIDTH / 2) - 1;
 		y = (SCREEN_HEIGHT / 2) - 1;
@@ -619,36 +619,36 @@ void CG_DrawCHS(void)
 		 *   6     4
 		 *      5
 		 */
-		CG_CHS_DrawSingleInfo(x, y - 20, cg_CHS1Info1.integer, qfalse, ALIGN_CENTER);
-		CG_CHS_DrawSingleInfo(x + 10, y - 10, cg_CHS1Info2.integer, qfalse, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x + 20, y, cg_CHS1Info3.integer, qfalse, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x + 10, y + 10, cg_CHS1Info4.integer, qfalse, ALIGN_LEFT);
-		CG_CHS_DrawSingleInfo(x, y + 20, cg_CHS1Info5.integer, qfalse, ALIGN_CENTER);
-		CG_CHS_DrawSingleInfo(x - 10, y + 10, cg_CHS1Info6.integer, qfalse, ALIGN_RIGHT);
-		CG_CHS_DrawSingleInfo(x - 20, y, cg_CHS1Info7.integer, qfalse, ALIGN_RIGHT);
-		CG_CHS_DrawSingleInfo(x - 10, y - 10, cg_CHS1Info8.integer, qfalse, ALIGN_RIGHT);
+		CG_CHS_DrawSingleInfo(x, y - 20, etj_CHS1Info1.integer, qfalse, ALIGN_CENTER);
+		CG_CHS_DrawSingleInfo(x + 10, y - 10, etj_CHS1Info2.integer, qfalse, ALIGN_LEFT);
+		CG_CHS_DrawSingleInfo(x + 20, y, etj_CHS1Info3.integer, qfalse, ALIGN_LEFT);
+		CG_CHS_DrawSingleInfo(x + 10, y + 10, etj_CHS1Info4.integer, qfalse, ALIGN_LEFT);
+		CG_CHS_DrawSingleInfo(x, y + 20, etj_CHS1Info5.integer, qfalse, ALIGN_CENTER);
+		CG_CHS_DrawSingleInfo(x - 10, y + 10, etj_CHS1Info6.integer, qfalse, ALIGN_RIGHT);
+		CG_CHS_DrawSingleInfo(x - 20, y, etj_CHS1Info7.integer, qfalse, ALIGN_RIGHT);
+		CG_CHS_DrawSingleInfo(x - 10, y - 10, etj_CHS1Info8.integer, qfalse, ALIGN_RIGHT);
 	}
 
 	// CHS2
-	if (cg_drawCHS2.integer)
+	if (etj_drawCHS2.integer)
 	{
 		float chs2OffsetX = ETJump_AdjustPosition(etj_CHS2PosX.value);
 		x = 30 + chs2OffsetX;
 		y = (SCREEN_HEIGHT / 2) + 40 + etj_CHS2PosY.value;
 
-		if (cg_drawCHS2.integer > 1) {
+		if (etj_drawCHS2.integer > 1) {
 			CHS2Align = ALIGN_RIGHT;
 			x = SCREEN_WIDTH - 30 + chs2OffsetX;
 		}
 
-		CG_CHS_DrawSingleInfo(x, y +  0, cg_CHS2Info1.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 10, cg_CHS2Info2.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 20, cg_CHS2Info3.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 30, cg_CHS2Info4.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 40, cg_CHS2Info5.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 50, cg_CHS2Info6.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 60, cg_CHS2Info7.integer, qtrue, CHS2Align);
-		CG_CHS_DrawSingleInfo(x, y + 70, cg_CHS2Info8.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y +  0, etj_CHS2Info1.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 10, etj_CHS2Info2.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 20, etj_CHS2Info3.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 30, etj_CHS2Info4.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 40, etj_CHS2Info5.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 50, etj_CHS2Info6.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 60, etj_CHS2Info7.integer, qtrue, CHS2Align);
+		CG_CHS_DrawSingleInfo(x, y + 70, etj_CHS2Info8.integer, qtrue, CHS2Align);
 	}
 }
 

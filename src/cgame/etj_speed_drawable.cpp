@@ -34,7 +34,7 @@ constexpr float ACCEL_FOR_SOLID_COLOR      = 100;
 
 ETJump::DisplaySpeed::DisplaySpeed()
 {
-	parseColor(cg_speedColor.string, _color);
+	parseColor(etj_speedColor.string, _color);
 	checkShadow();
 	startListeners();
 }
@@ -44,19 +44,19 @@ ETJump::DisplaySpeed::~DisplaySpeed() {}
 void ETJump::DisplaySpeed::parseColor(const std::string& color, vec4_t& out)
 {
 	parseColorString(color, out);
-	out[3] *= cg_speedAlpha.value;
+	out[3] *= etj_speedAlpha.value;
 }
 
 void ETJump::DisplaySpeed::startListeners()
 {
-	cvarUpdateHandler->subscribe(&cg_speedColor, [&](const vmCvar_t *cvar)
+	cvarUpdateHandler->subscribe(&etj_speedColor, [&](const vmCvar_t *cvar)
 	{
-		parseColor(cg_speedColor.string, _color);
+		parseColor(etj_speedColor.string, _color);
 	});
 
-	cvarUpdateHandler->subscribe(&cg_speedAlpha, [&](const vmCvar_t *cvar)
+	cvarUpdateHandler->subscribe(&etj_speedAlpha, [&](const vmCvar_t *cvar)
 	{
-		parseColor(cg_speedColor.string, _color);
+		parseColor(etj_speedColor.string, _color);
 	});
 
 	cvarUpdateHandler->subscribe(&etj_speedShadow, [&](const vmCvar_t *cvar)
@@ -106,13 +106,13 @@ void ETJump::DisplaySpeed::render() const
 	}
 
 	float size = 0.1f * etj_speedSize.integer;
-	float x = cg_speedX.integer;
-	float y = cg_speedY.integer;
+	float x = etj_speedX.integer;
+	float y = etj_speedY.integer;
 	ETJump_AdjustPosition(&x);
 
 	auto status = getStatus();
 	float w = CG_Text_Width_Ext(status.c_str(), size, 0, &cgs.media.limboFont2) / 2;
-	if (cg_drawSpeed2.integer == 8)
+	if (etj_drawSpeed2.integer == 8)
 	{
 		w = 0;
 	}
@@ -149,7 +149,7 @@ void ETJump::DisplaySpeed::render() const
 std::string ETJump::DisplaySpeed::getStatus() const
 {
 	float speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
-	switch (cg_drawSpeed2.integer)
+	switch (etj_drawSpeed2.integer)
 	{
 	case 2: return stringFormat("%.0f %.0f", speed, _maxSpeed);
 	case 3: return stringFormat("%.0f ^z%.0f", speed, _maxSpeed);
@@ -166,7 +166,7 @@ std::string ETJump::DisplaySpeed::getStatus() const
 
 bool ETJump::DisplaySpeed::canSkipDraw() const
 {
-	return !cg_drawSpeed2.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
+	return !etj_drawSpeed2.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
 }
 
 void ETJump::DisplaySpeed::popOldStoredSpeeds()

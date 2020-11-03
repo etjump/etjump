@@ -2400,10 +2400,10 @@ extern vmCvar_t cl_waveoffset;
 extern vmCvar_t cg_recording_statusline;
 
 extern vmCvar_t cg_ghostPlayers;
-extern vmCvar_t cg_hide;
-extern vmCvar_t cg_hideDistance;
-extern vmCvar_t cg_hideMe;
-extern vmCvar_t cg_nofatigue;
+extern vmCvar_t etj_hide;
+extern vmCvar_t etj_hideDistance;
+extern vmCvar_t etj_hideMe;
+extern vmCvar_t etj_nofatigue;
 extern vmCvar_t com_maxfps;
 extern vmCvar_t com_hunkmegs;
 
@@ -2420,7 +2420,7 @@ extern vmCvar_t etj_CGaz5Color3;
 extern vmCvar_t etj_CGaz5Color4;
 extern vmCvar_t etj_CGaz5Fov;
 
-extern vmCvar_t cg_drawOB;
+extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
 extern vmCvar_t etj_OBX;
 extern vmCvar_t etj_OBY;
@@ -2430,23 +2430,23 @@ extern vmCvar_t etj_keysX;
 extern vmCvar_t etj_keysY;
 extern vmCvar_t etj_keysShadow;
 extern vmCvar_t etj_keysColor;
-extern vmCvar_t cg_loadviewangles;
+extern vmCvar_t etj_loadviewangles;
 // forty - speedometer
-extern vmCvar_t cg_drawspeed;
-extern vmCvar_t cg_speedinterval;
-extern vmCvar_t cg_speedXYonly;
-extern vmCvar_t cg_speedunit;
+extern vmCvar_t etj_drawspeed;
+extern vmCvar_t etj_speedinterval;
+extern vmCvar_t etj_speedXYonly;
+extern vmCvar_t etj_speedunit;
 extern pmove_t  cg_pmove;
 // Cheat cvars
 extern vmCvar_t cl_yawspeed;
 extern vmCvar_t cl_freelook;
-extern vmCvar_t cg_drawClock;
-extern vmCvar_t cg_drawSpeed2;
-extern vmCvar_t cg_speedX;
-extern vmCvar_t cg_speedY;
+extern vmCvar_t etj_drawClock;
+extern vmCvar_t etj_drawSpeed2;
+extern vmCvar_t etj_speedX;
+extern vmCvar_t etj_speedY;
 extern vmCvar_t etj_speedSize;
-extern vmCvar_t cg_speedColor;
-extern vmCvar_t cg_speedAlpha;
+extern vmCvar_t etj_speedColor;
+extern vmCvar_t etj_speedAlpha;
 extern vmCvar_t etj_speedShadow;
 extern vmCvar_t etj_drawMaxSpeed;
 extern vmCvar_t etj_maxSpeedX;
@@ -2456,10 +2456,10 @@ extern vmCvar_t etj_speedColorUsesAccel;
 
 extern vmCvar_t cg_adminpassword;
 extern vmCvar_t cg_username;
-extern vmCvar_t cg_popupTime;
-extern vmCvar_t cg_popupStayTime;
-extern vmCvar_t cg_popupFadeTime;
-extern vmCvar_t cg_numPopups;
+extern vmCvar_t etj_popupTime;
+extern vmCvar_t etj_popupStayTime;
+extern vmCvar_t etj_popupFadeTime;
+extern vmCvar_t etj_numPopups;
 extern vmCvar_t etj_HUD_popup;
 extern vmCvar_t etj_popupGrouped;
 extern vmCvar_t etj_popupShadow;
@@ -2468,36 +2468,36 @@ extern vmCvar_t etj_popupPosX;
 extern vmCvar_t etj_popupPosY;
 
 //Feen: PGM client cvars
-extern vmCvar_t cg_viewPlayerPortals;         //Enable/Disable viewing other player portals
+extern vmCvar_t etj_viewPlayerPortals;         //Enable/Disable viewing other player portals
 //TODO: May add cvars to allow players to override portal colors
-//		when cg_viewPlayerPortals is set to 0 (disabled)
+//		when etj_viewPlayerPortals is set to 0 (disabled)
 
-extern vmCvar_t cg_chatPosX;
-extern vmCvar_t cg_chatPosY;
-extern vmCvar_t cg_chatBackgroundAlpha;
+extern vmCvar_t etj_chatPosX;
+extern vmCvar_t etj_chatPosY;
+extern vmCvar_t etj_chatBackgroundAlpha;
 extern vmCvar_t etj_chatFlags;
 extern vmCvar_t etj_chatShadow;
 extern vmCvar_t etj_chatAlpha;
 
 // crosshair stats
-extern vmCvar_t cg_drawCHS1;
-extern vmCvar_t cg_CHS1Info1;
-extern vmCvar_t cg_CHS1Info2;
-extern vmCvar_t cg_CHS1Info3;
-extern vmCvar_t cg_CHS1Info4;
-extern vmCvar_t cg_CHS1Info5;
-extern vmCvar_t cg_CHS1Info6;
-extern vmCvar_t cg_CHS1Info7;
-extern vmCvar_t cg_CHS1Info8;
-extern vmCvar_t cg_drawCHS2;
-extern vmCvar_t cg_CHS2Info1;
-extern vmCvar_t cg_CHS2Info2;
-extern vmCvar_t cg_CHS2Info3;
-extern vmCvar_t cg_CHS2Info4;
-extern vmCvar_t cg_CHS2Info5;
-extern vmCvar_t cg_CHS2Info6;
-extern vmCvar_t cg_CHS2Info7;
-extern vmCvar_t cg_CHS2Info8;
+extern vmCvar_t etj_drawCHS1;
+extern vmCvar_t etj_CHS1Info1;
+extern vmCvar_t etj_CHS1Info2;
+extern vmCvar_t etj_CHS1Info3;
+extern vmCvar_t etj_CHS1Info4;
+extern vmCvar_t etj_CHS1Info5;
+extern vmCvar_t etj_CHS1Info6;
+extern vmCvar_t etj_CHS1Info7;
+extern vmCvar_t etj_CHS1Info8;
+extern vmCvar_t etj_drawCHS2;
+extern vmCvar_t etj_CHS2Info1;
+extern vmCvar_t etj_CHS2Info2;
+extern vmCvar_t etj_CHS2Info3;
+extern vmCvar_t etj_CHS2Info4;
+extern vmCvar_t etj_CHS2Info5;
+extern vmCvar_t etj_CHS2Info6;
+extern vmCvar_t etj_CHS2Info7;
+extern vmCvar_t etj_CHS2Info8;
 // chs2 position
 extern vmCvar_t etj_CHS2PosX;
 extern vmCvar_t etj_CHS2PosY;
@@ -2507,15 +2507,15 @@ extern vmCvar_t etj_CHSAlpha;
 extern vmCvar_t etj_CHSColor;
 extern vmCvar_t etj_CHSUseFeet;
 
-extern vmCvar_t cg_itemPickupText;
+extern vmCvar_t etj_itemPickupText;
 
-extern vmCvar_t cg_HUD_chargeBar;
-extern vmCvar_t cg_HUD_fatigueBar;
-extern vmCvar_t cg_HUD_healthBar;
-extern vmCvar_t cg_HUD_playerHead;
-extern vmCvar_t cg_HUD_playerHealth;
-extern vmCvar_t cg_HUD_weaponIcon;
-extern vmCvar_t cg_HUD_xpInfo;
+extern vmCvar_t etj_HUD_chargeBar;
+extern vmCvar_t etj_HUD_fatigueBar;
+extern vmCvar_t etj_HUD_healthBar;
+extern vmCvar_t etj_HUD_playerHead;
+extern vmCvar_t etj_HUD_playerHealth;
+extern vmCvar_t etj_HUD_weaponIcon;
+extern vmCvar_t etj_HUD_xpInfo;
 extern vmCvar_t etj_HUD_fireteam;
 
 extern vmCvar_t etj_fireteamPosX;
@@ -2524,28 +2524,28 @@ extern vmCvar_t etj_fireteamAlpha;
 
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t etj_logBanner;
-extern vmCvar_t cg_weaponSound;
+extern vmCvar_t etj_weaponSound;
 
-extern vmCvar_t cg_noclipScale;
-extern vmCvar_t cg_drawSlick;
-extern vmCvar_t cg_slickX;
-extern vmCvar_t cg_slickY;
+extern vmCvar_t etj_noclipScale;
+extern vmCvar_t etj_drawSlick;
+extern vmCvar_t etj_slickX;
+extern vmCvar_t etj_slickY;
 
 // Alternative scoreboard
-extern vmCvar_t cg_altScoreboard;
+extern vmCvar_t etj_altScoreboard;
 
-extern vmCvar_t player_drawSpectatorInfo;
-extern vmCvar_t player_spectatorInfoX;
-extern vmCvar_t player_spectatorInfoY;
+extern vmCvar_t etj_drawSpectatorInfo;
+extern vmCvar_t etj_spectatorInfoX;
+extern vmCvar_t etj_spectatorInfoY;
 
-extern vmCvar_t player_drawRunTimer;
-extern vmCvar_t player_runTimerX;
-extern vmCvar_t player_runTimerY;
+extern vmCvar_t etj_drawRunTimer;
+extern vmCvar_t etj_runTimerX;
+extern vmCvar_t etj_runTimerY;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 extern vmCvar_t etj_runTimerInactiveColor;
 
-extern vmCvar_t player_drawMessageTime;
+extern vmCvar_t etj_drawMessageTime;
 
 extern vmCvar_t movie_changeFovBasedOnSpeed;
 extern vmCvar_t movie_fovMinSpeed;

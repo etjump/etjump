@@ -1162,19 +1162,19 @@ qboolean CG_DrawScoreboard(void)
 		fade = fadeColor[3];
 	}
 
-	if (cg_altScoreboard.integer == 1)
+	if (etj_altScoreboard.integer == 1)
 	{
 		CG_DrawAltScoreboard(fade);
 		return qtrue;
 	}
 	
-	if (cg_altScoreboard.integer == 2)
+	if (etj_altScoreboard.integer == 2)
 	{
 		CG_DrawAltScoreboard2(fade);
 		return qtrue;
 	}
 
-	if (cg_altScoreboard.integer == 3)
+	if (etj_altScoreboard.integer == 3)
 	{
 		CG_DrawAltScoreboard3(fade);
 		return qtrue;

@@ -5736,8 +5736,8 @@ void CG_FireWeapon(centity_t *cent)
         firesound = &cg_weapons[ WP_MEDKIT ].flashSound[0];
     }*/
 
-	// Zero: don't play sound if cg_weaponSound is set to 0
-	if (!(cent->currentState.eFlags & EF_ZOOMING) && cg_weaponSound.integer)   // JPW NERVE -- don't play sounds or eject brass if zoomed in
+	// Zero: don't play sound if etj_weaponSound is set to 0
+	if (!(cent->currentState.eFlags & EF_ZOOMING) && etj_weaponSound.integer)   // JPW NERVE -- don't play sounds or eject brass if zoomed in
 	{   // play a sound
 		for (c = 0 ; c < 4 ; c++)
 		{

@@ -325,10 +325,10 @@ vmCvar_t cl_wavefilename;
 vmCvar_t cl_waveoffset;
 vmCvar_t cg_recording_statusline;
 vmCvar_t cg_ghostPlayers;
-vmCvar_t cg_hide;
-vmCvar_t cg_hideDistance;
-vmCvar_t cg_hideMe;
-vmCvar_t cg_nofatigue;
+vmCvar_t etj_hide;
+vmCvar_t etj_hideDistance;
+vmCvar_t etj_hideMe;
+vmCvar_t etj_nofatigue;
 vmCvar_t com_maxfps;
 vmCvar_t com_hunkmegs;
 
@@ -345,7 +345,7 @@ vmCvar_t etj_CGaz5Color3;
 vmCvar_t etj_CGaz5Color4;
 vmCvar_t etj_CGaz5Fov;
 
-vmCvar_t cg_drawOB;
+vmCvar_t etj_drawOB;
 //Aciz: movable drawOB
 vmCvar_t etj_OBX;
 vmCvar_t etj_OBY;
@@ -355,26 +355,26 @@ vmCvar_t etj_keysX;
 vmCvar_t etj_keysY;
 vmCvar_t etj_keysSize;
 vmCvar_t etj_keysShadow;
-vmCvar_t cg_loadviewangles;
+vmCvar_t etj_loadviewangles;
 
 // forty - speedometer
-vmCvar_t cg_drawspeed;
-vmCvar_t cg_speedinterval;
-vmCvar_t cg_speedXYonly;
-vmCvar_t cg_speedunit;
+vmCvar_t etj_drawspeed;
+vmCvar_t etj_speedinterval;
+vmCvar_t etj_speedXYonly;
+vmCvar_t etj_speedunit;
 
 // Cheat cvars
 vmCvar_t cl_yawspeed;
 vmCvar_t cl_freelook;
 
-vmCvar_t cg_drawClock;
+vmCvar_t etj_drawClock;
 
-vmCvar_t cg_drawSpeed2;
-vmCvar_t cg_speedX;
-vmCvar_t cg_speedY;
+vmCvar_t etj_drawSpeed2;
+vmCvar_t etj_speedX;
+vmCvar_t etj_speedY;
 vmCvar_t etj_speedSize;
-vmCvar_t cg_speedColor;
-vmCvar_t cg_speedAlpha;
+vmCvar_t etj_speedColor;
+vmCvar_t etj_speedAlpha;
 vmCvar_t etj_speedShadow;
 vmCvar_t etj_drawMaxSpeed;
 vmCvar_t etj_maxSpeedX;
@@ -385,10 +385,10 @@ vmCvar_t etj_speedColorUsesAccel;
 vmCvar_t cg_adminpassword;
 vmCvar_t cg_username;
 
-vmCvar_t cg_popupTime;
-vmCvar_t cg_popupStayTime;
-vmCvar_t cg_popupFadeTime;
-vmCvar_t cg_numPopups;
+vmCvar_t etj_popupTime;
+vmCvar_t etj_popupStayTime;
+vmCvar_t etj_popupFadeTime;
+vmCvar_t etj_numPopups;
 
 vmCvar_t etj_HUD_popup;
 vmCvar_t etj_popupGrouped;
@@ -398,34 +398,34 @@ vmCvar_t etj_popupPosX;
 vmCvar_t etj_popupPosY;
 
 //Feen: PGM client cvars
-vmCvar_t cg_viewPlayerPortals;            //Enable/Disable viewing other player portals
+vmCvar_t etj_viewPlayerPortals;            //Enable/Disable viewing other player portals
 
-vmCvar_t cg_chatPosX;
-vmCvar_t cg_chatPosY;
-vmCvar_t cg_chatBackgroundAlpha;
+vmCvar_t etj_chatPosX;
+vmCvar_t etj_chatPosY;
+vmCvar_t etj_chatBackgroundAlpha;
 vmCvar_t etj_chatFlags;
 vmCvar_t etj_chatShadow;
 vmCvar_t etj_chatAlpha;
 
 // crosshair stats
-vmCvar_t cg_drawCHS1;
-vmCvar_t cg_CHS1Info1;
-vmCvar_t cg_CHS1Info2;
-vmCvar_t cg_CHS1Info3;
-vmCvar_t cg_CHS1Info4;
-vmCvar_t cg_CHS1Info5;
-vmCvar_t cg_CHS1Info6;
-vmCvar_t cg_CHS1Info7;
-vmCvar_t cg_CHS1Info8;
-vmCvar_t cg_drawCHS2;
-vmCvar_t cg_CHS2Info1;
-vmCvar_t cg_CHS2Info2;
-vmCvar_t cg_CHS2Info3;
-vmCvar_t cg_CHS2Info4;
-vmCvar_t cg_CHS2Info5;
-vmCvar_t cg_CHS2Info6;
-vmCvar_t cg_CHS2Info7;
-vmCvar_t cg_CHS2Info8;
+vmCvar_t etj_drawCHS1;
+vmCvar_t etj_CHS1Info1;
+vmCvar_t etj_CHS1Info2;
+vmCvar_t etj_CHS1Info3;
+vmCvar_t etj_CHS1Info4;
+vmCvar_t etj_CHS1Info5;
+vmCvar_t etj_CHS1Info6;
+vmCvar_t etj_CHS1Info7;
+vmCvar_t etj_CHS1Info8;
+vmCvar_t etj_drawCHS2;
+vmCvar_t etj_CHS2Info1;
+vmCvar_t etj_CHS2Info2;
+vmCvar_t etj_CHS2Info3;
+vmCvar_t etj_CHS2Info4;
+vmCvar_t etj_CHS2Info5;
+vmCvar_t etj_CHS2Info6;
+vmCvar_t etj_CHS2Info7;
+vmCvar_t etj_CHS2Info8;
 // chs2 position
 vmCvar_t etj_CHS2PosX;
 vmCvar_t etj_CHS2PosY;
@@ -435,15 +435,15 @@ vmCvar_t etj_CHSAlpha;
 vmCvar_t etj_CHSColor;
 vmCvar_t etj_CHSUseFeet;
 
-vmCvar_t cg_itemPickupText;
+vmCvar_t etj_itemPickupText;
 
-vmCvar_t cg_HUD_chargeBar;
-vmCvar_t cg_HUD_fatigueBar;
-vmCvar_t cg_HUD_healthBar;
-vmCvar_t cg_HUD_playerHead;
-vmCvar_t cg_HUD_playerHealth;
-vmCvar_t cg_HUD_weaponIcon;
-vmCvar_t cg_HUD_xpInfo;
+vmCvar_t etj_HUD_chargeBar;
+vmCvar_t etj_HUD_fatigueBar;
+vmCvar_t etj_HUD_healthBar;
+vmCvar_t etj_HUD_playerHead;
+vmCvar_t etj_HUD_playerHealth;
+vmCvar_t etj_HUD_weaponIcon;
+vmCvar_t etj_HUD_xpInfo;
 vmCvar_t etj_HUD_fireteam;
 
 vmCvar_t etj_fireteamPosX;
@@ -451,27 +451,27 @@ vmCvar_t etj_fireteamPosY;
 vmCvar_t etj_fireteamAlpha;
 
 vmCvar_t etj_logBanner;
-vmCvar_t cg_weaponSound;
-vmCvar_t cg_noclipScale;
+vmCvar_t etj_weaponSound;
+vmCvar_t etj_noclipScale;
 
-vmCvar_t cg_drawSlick;
-vmCvar_t cg_slickX;
-vmCvar_t cg_slickY;
+vmCvar_t etj_drawSlick;
+vmCvar_t etj_slickX;
+vmCvar_t etj_slickY;
 
-vmCvar_t cg_altScoreboard;
+vmCvar_t etj_altScoreboard;
 
-vmCvar_t player_drawSpectatorInfo;
-vmCvar_t player_spectatorInfoX;
-vmCvar_t player_spectatorInfoY;
+vmCvar_t etj_drawSpectatorInfo;
+vmCvar_t etj_spectatorInfoX;
+vmCvar_t etj_spectatorInfoY;
 
-vmCvar_t player_drawRunTimer;
-vmCvar_t player_runTimerX;
-vmCvar_t player_runTimerY;
+vmCvar_t etj_drawRunTimer;
+vmCvar_t etj_runTimerX;
+vmCvar_t etj_runTimerY;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 vmCvar_t etj_runTimerInactiveColor;
 
-vmCvar_t player_drawMessageTime;
+vmCvar_t etj_drawMessageTime;
 
 vmCvar_t movie_changeFovBasedOnSpeed;
 vmCvar_t movie_fovMinSpeed;
@@ -763,15 +763,15 @@ cvarTable_t cvarTable[] =
 	{ &cg_recording_statusline,     "cg_recording_statusline",     "9",                      CVAR_ARCHIVE             },
 
 	{ &cg_ghostPlayers,             "",                            "0",                      0                        },
-	{ &cg_hide,                     "etj_hide",                    "1",                      CVAR_ARCHIVE             },
-	{ &cg_hideDistance,             "etj_hideDistance",            "128",                    CVAR_ARCHIVE             },
-	{ &cg_hideMe,                   "etj_hideMe",                  "0",                      CVAR_ARCHIVE             },
-	{ &cg_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE             },
+	{ &etj_hide,                     "etj_hide",                    "1",                      CVAR_ARCHIVE             },
+	{ &etj_hideDistance,             "etj_hideDistance",            "128",                    CVAR_ARCHIVE             },
+	{ &etj_hideMe,                   "etj_hideMe",                  "0",                      CVAR_ARCHIVE             },
+	{ &etj_nofatigue,                "etj_nofatigue",               "1",                      CVAR_ARCHIVE             },
 	{ &com_maxfps,                  "com_maxfps",                  "76",                     CVAR_ARCHIVE             },
 	{ &com_hunkmegs,                "com_hunkmegs",                "128",                    CVAR_ARCHIVE             },
 
 	{ &etj_drawCGaz,                 "etj_drawCGaz",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
 	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE             },
 	{ &etj_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
@@ -794,18 +794,18 @@ cvarTable_t cvarTable[] =
 	{ &etj_keysX,                   "etj_keysX",                   "610",                    CVAR_ARCHIVE             },
 	{ &etj_keysY,                   "etj_keysY",                   "220",                    CVAR_ARCHIVE             },
 	{ &etj_keysShadow,              "etj_keysShadow",              "0",                      CVAR_ARCHIVE             },
-	{ &cg_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_speedXYonly,              "etj_speedXYonly",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_speedinterval,            "etj_speedinterval",           "100",                    CVAR_ARCHIVE             },
-	{ &cg_speedunit,                "etj_speedunit",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
-	{ &cg_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
-	{ &cg_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE             },
+	{ &etj_loadviewangles,           "etj_loadviewangles",          "1",                      CVAR_ARCHIVE             },
+	{ &etj_drawspeed,                "etj_drawspeed",               "1",                      CVAR_ARCHIVE             },
+	{ &etj_speedXYonly,              "etj_speedXYonly",             "1",                      CVAR_ARCHIVE             },
+	{ &etj_speedinterval,            "etj_speedinterval",           "100",                    CVAR_ARCHIVE             },
+	{ &etj_speedunit,                "etj_speedunit",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawClock,                "etj_drawClock",               "1",                      CVAR_ARCHIVE             },
+	{ &etj_drawSpeed2,               "etj_drawSpeed2",              "1",                      CVAR_ARCHIVE             },
+	{ &etj_speedX,                   "etj_speedX",                  "320",                    CVAR_ARCHIVE             },
+	{ &etj_speedY,                   "etj_speedY",                  "340",                    CVAR_ARCHIVE             },
 	{ &etj_speedSize,               "etj_speedSize",               "3",                      CVAR_ARCHIVE             },
-	{ &cg_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
-	{ &cg_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
+	{ &etj_speedColor,               "etj_speedColor",              "White",                  CVAR_ARCHIVE             },
+	{ &etj_speedAlpha,               "etj_speedAlpha",              "1.0",                    CVAR_ARCHIVE             },
 	{ &etj_speedShadow,             "etj_speedShadow",             "0",                      CVAR_ARCHIVE             },
 	{ &etj_drawMaxSpeed,            "etj_drawMaxSpeed",            "0",                      CVAR_ARCHIVE             },
 	{ &etj_maxSpeedX,               "etj_maxSpeedX",               "320",                    CVAR_ARCHIVE             },
@@ -813,10 +813,10 @@ cvarTable_t cvarTable[] =
 	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE             },
 	{ &etj_speedColorUsesAccel,     "etj_speedColorUsesAccel",     "0",                      CVAR_ARCHIVE             },
 
-	{ &cg_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
-	{ &cg_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
-	{ &cg_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },
-	{ &cg_numPopups,                "etj_numPopups",               "5",                      CVAR_ARCHIVE             },
+	{ &etj_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
+	{ &etj_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },
+	{ &etj_popupFadeTime,            "etj_popupFadeTime",           "2500",                   CVAR_ARCHIVE             },
+	{ &etj_numPopups,                "etj_numPopups",               "5",                      CVAR_ARCHIVE             },
 	
 	{ &etj_HUD_popup,               "etj_HUD_popup",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_popupGrouped,            "etj_popupGrouped",            "1",                      CVAR_ARCHIVE             },
@@ -826,33 +826,33 @@ cvarTable_t cvarTable[] =
 	{ &etj_popupPosY,               "etj_popupPosY",               "0",                      CVAR_ARCHIVE             },
 
 	
-	{ &cg_viewPlayerPortals,        "etj_viewPlayerPortals",       "1",                      CVAR_ARCHIVE             }, //Feen: PGM - View other player portals
-	{ &cg_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
+	{ &etj_viewPlayerPortals,        "etj_viewPlayerPortals",       "1",                      CVAR_ARCHIVE             }, //Feen: PGM - View other player portals
+	{ &etj_chatPosX,                 "etj_chatPosX",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_chatPosY,                 "etj_chatPosY",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_chatBackgroundAlpha,      "etj_chatBackgroundAlpha",     "0.33",                   CVAR_ARCHIVE             },
 	{ &etj_chatFlags,               "etj_chatFlags",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_chatShadow,              "etj_chatShadow",              "0",                      CVAR_ARCHIVE             },
 	{ &etj_chatAlpha,               "etj_chatAlpha",               "1.0",                    CVAR_ARCHIVE             },
 
 	// crosshair stats
-	{ &cg_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info1,                "etj_CHS1Info1",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info2,                "etj_CHS1Info2",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info3,                "etj_CHS1Info3",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info4,                "etj_CHS1Info4",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info5,                "etj_CHS1Info5",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info6,                "etj_CHS1Info6",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info7,                "etj_CHS1Info7",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS1Info8,                "etj_CHS1Info8",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_drawCHS2,                 "etj_drawCHS2",                "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info1,                "etj_CHS2Info1",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info2,                "etj_CHS2Info2",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info3,                "etj_CHS2Info3",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info4,                "etj_CHS2Info4",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info5,                "etj_CHS2Info5",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info6,                "etj_CHS2Info6",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info7,                "etj_CHS2Info7",               "0",                      CVAR_ARCHIVE             },
-	{ &cg_CHS2Info8,                "etj_CHS2Info8",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawCHS1,                 "etj_drawCHS1",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info1,                "etj_CHS1Info1",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info2,                "etj_CHS1Info2",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info3,                "etj_CHS1Info3",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info4,                "etj_CHS1Info4",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info5,                "etj_CHS1Info5",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info6,                "etj_CHS1Info6",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info7,                "etj_CHS1Info7",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS1Info8,                "etj_CHS1Info8",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawCHS2,                 "etj_drawCHS2",                "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info1,                "etj_CHS2Info1",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info2,                "etj_CHS2Info2",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info3,                "etj_CHS2Info3",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info4,                "etj_CHS2Info4",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info5,                "etj_CHS2Info5",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info6,                "etj_CHS2Info6",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info7,                "etj_CHS2Info7",               "0",                      CVAR_ARCHIVE             },
+	{ &etj_CHS2Info8,                "etj_CHS2Info8",               "0",                      CVAR_ARCHIVE             },
 	{ &etj_CHS2PosX,                "etj_CHS2PosX",                "0",                      CVAR_ARCHIVE             },
 	{ &etj_CHS2PosY,                "etj_CHS2PosY",                "0",                      CVAR_ARCHIVE             },
 	{ &etj_CHSShadow,               "etj_CHSShadow",               "0",                      CVAR_ARCHIVE             },
@@ -860,14 +860,14 @@ cvarTable_t cvarTable[] =
 	{ &etj_CHSColor,                "etj_CHSColor",                "1.0 1.0 1.0",            CVAR_ARCHIVE             },
 	{ &etj_CHSUseFeet,              "etj_CHSUseFeet",              "0",                      CVAR_ARCHIVE             },
 
-	{ &cg_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_fatigueBar,           "etj_HUD_fatigueBar",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_healthBar,            "etj_HUD_healthBar",           "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_playerHead,           "etj_HUD_playerHead",          "0",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
-	{ &cg_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
+	{ &etj_itemPickupText,           "etj_itemPickupText",          "1",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_chargeBar,            "etj_HUD_chargeBar",           "1",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_fatigueBar,           "etj_HUD_fatigueBar",          "1",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_healthBar,            "etj_HUD_healthBar",           "1",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_playerHead,           "etj_HUD_playerHead",          "0",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_playerHealth,         "etj_HUD_playerHealth",        "0",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_weaponIcon,           "etj_HUD_weaponIcon",          "1",                      CVAR_ARCHIVE             },
+	{ &etj_HUD_xpInfo,               "etj_HUD_xpInfo",              "0",                      CVAR_ARCHIVE             },
 	{ &etj_HUD_fireteam,            "etj_HUD_fireteam",            "1",                      CVAR_ARCHIVE             },
 	// fireteam
 	{ &etj_fireteamPosX,            "etj_fireteamPosX",            "0",                      CVAR_ARCHIVE             },
@@ -875,23 +875,23 @@ cvarTable_t cvarTable[] =
 	{ &etj_fireteamAlpha,           "etj_fireteamAlpha",           "1.0",                    CVAR_ARCHIVE             },
 	
 	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
-	{ &cg_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
-	{ &cg_slickX,                   "etj_slickX",                  "304",                    CVAR_ARCHIVE             },
-	{ &cg_slickY,                   "etj_slickY",                  "220",                    CVAR_ARCHIVE             },
-	{ &cg_altScoreboard,            "etj_altScoreboard",           "0",                      CVAR_ARCHIVE             },
-	{ &player_drawSpectatorInfo,    "etj_drawSpectatorInfo",       "0",                      CVAR_ARCHIVE             },
-	{ &player_spectatorInfoX,       "etj_spectatorInfoX",          "320",                    CVAR_ARCHIVE             },
-	{ &player_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
-	{ &player_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
-	{ &player_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
-	{ &player_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
+	{ &etj_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
+	{ &etj_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
+	{ &etj_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
+	{ &etj_slickX,                   "etj_slickX",                  "304",                    CVAR_ARCHIVE             },
+	{ &etj_slickY,                   "etj_slickY",                  "220",                    CVAR_ARCHIVE             },
+	{ &etj_altScoreboard,            "etj_altScoreboard",           "0",                      CVAR_ARCHIVE             },
+	{ &etj_drawSpectatorInfo,    "etj_drawSpectatorInfo",       "0",                      CVAR_ARCHIVE             },
+	{ &etj_spectatorInfoX,       "etj_spectatorInfoX",          "320",                    CVAR_ARCHIVE             },
+	{ &etj_spectatorInfoY,       "etj_spectatorInfoY",          "40",                     CVAR_ARCHIVE             },
+	{ &etj_drawRunTimer,         "etj_drawRunTimer",            "1",                      CVAR_ARCHIVE             },
+	{ &etj_runTimerX,            "etj_runTimerX",               "320",                    CVAR_ARCHIVE             },
+	{ &etj_runTimerY,            "etj_runTimerY",               "360",                    CVAR_ARCHIVE             },
 	{ &etj_runTimerShadow,          "etj_runTimerShadow",          "0",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerAutoHide,        "etj_runTimerAutoHide",        "1",                      CVAR_ARCHIVE             },
 	{ &etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey", CVAR_ARCHIVE },
 
-	{ &player_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE             },
+	{ &etj_drawMessageTime,      "etj_drawMessageTime",         "2",                      CVAR_ARCHIVE             },
 
 	{ &movie_changeFovBasedOnSpeed, "movie_changeFovBasedOnSpeed", "0",                      CVAR_ARCHIVE             },
 	{ &movie_fovMinSpeed,           "movie_fovMinSpeed",           "400",                    CVAR_ARCHIVE             },
@@ -1127,10 +1127,10 @@ void CG_UpdateCvars(void)
 					cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
 					cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
 					cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-					cv->vmCvar == &cg_nofatigue || cv->vmCvar == &etj_drawCGaz ||
+					cv->vmCvar == &etj_nofatigue || cv->vmCvar == &etj_drawCGaz ||
 					cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
-					cv->vmCvar == &int_m_pitch || cv->vmCvar == &cg_loadviewangles ||
-					cv->vmCvar == &cg_hideMe || cv->vmCvar == &cg_noclipScale ||
+					cv->vmCvar == &int_m_pitch || cv->vmCvar == &etj_loadviewangles ||
+					cv->vmCvar == &etj_hideMe || cv->vmCvar == &etj_noclipScale ||
 					cv->vmCvar == &etj_enableTimeruns || cv->vmCvar == &etj_noActivateLean ||
 					cv->vmCvar == &etj_touchPickupWeapons || cv->vmCvar == &etj_autoLoad ||
 					cv->vmCvar == &etj_quickFollow || cv->vmCvar == &etj_drawSnapHUD
@@ -1199,13 +1199,13 @@ void CG_setClientFlags(void)
 	                                 ((cg_autoAction.integer & AA_STATSDUMP) ? CGF_STATSDUMP : 0) |
 	                                 ((cg_autoactivate.integer > 0) ? CGF_AUTOACTIVATE : 0) |
 	                                 ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
-	                                 ((cg_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
+	                                 ((etj_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
 	                                 ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
 	                                 ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
 	                                 ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
 	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
-	                                 ((cg_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
-									 ((cg_hideMe.integer > 0) ? CGF_HIDEME : 0) |
+	                                 ((etj_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
+									 ((etj_hideMe.integer > 0) ? CGF_HIDEME : 0) |
 									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
 									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
 									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
@@ -1219,7 +1219,7 @@ void CG_setClientFlags(void)
 	                             // MaxPackets
 	                             int_cl_maxpackets.integer,
 	                             com_maxfps.integer,
-	                             cg_noclipScale.value,
+	                             etj_noclipScale.value,
 	                             etj_touchPickupWeapons.integer
 	                             ));
 

@@ -1631,13 +1631,13 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color, v
 				chat = vsay->custom;
 			}
 
-			if (player_drawMessageTime.integer)
+			if (etj_drawMessageTime.integer)
 			{
 				if (cg.clientNum == clientNum)
 				{
 					msgColor = "^g";
 				}
-				if (player_drawMessageTime.integer == 2)
+				if (etj_drawMessageTime.integer == 2)
 				{
 					msgTime = va("%s[%02d:%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min, t.tm_sec);
 				}
@@ -2438,13 +2438,13 @@ const char *CG_AddChatModifications(char *text, int clientNum)
 		}
 	}
 
-	if (player_drawMessageTime.integer)
+	if (etj_drawMessageTime.integer)
 	{
 		if (cg.clientNum == clientNum)
 		{
 			msgColor = "^g";
 		}
-		if (player_drawMessageTime.integer == 2)
+		if (etj_drawMessageTime.integer == 2)
 		{
 			Q_strcat(message, sizeof(message), va("%s[%02d:%02d:%02d]^7 ", msgColor, t.tm_hour, t.tm_min, t.tm_sec));
 		}

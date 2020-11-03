@@ -568,10 +568,10 @@ static float CG_DrawSpeed(float y)
 
 	thistime = trap_Milliseconds();
 
-	if (thistime > (lasttime + cg_speedinterval.integer))
+	if (thistime > (lasttime + etj_speedinterval.integer))
 	{
 
-		if (cg_speedXYonly.integer)
+		if (etj_speedXYonly.integer)
 		{
 			speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
 		}
@@ -590,12 +590,12 @@ static float CG_DrawSpeed(float y)
 
 	}
 
-	switch (cg_drawspeed.integer)
+	switch (etj_drawspeed.integer)
 	{
 	default:
 	case 1:
 		// kw: swapped 1 and 2 to match etpro's b_speedunit
-		switch (cg_speedunit.integer)
+		switch (etj_speedunit.integer)
 		{
 		default:
 		case 0:
@@ -614,7 +614,7 @@ static float CG_DrawSpeed(float y)
 		break;
 
 	case 2:
-		switch (cg_speedunit.integer)
+		switch (etj_speedunit.integer)
 		{
 		default:
 		case 0:
@@ -656,7 +656,7 @@ float CG_DrawTime(float y)
 	trap_RealTime(&tm);
 	displayTime[0] = '\0';
 
-	if (cg_drawClock.integer == 1)
+	if (etj_drawClock.integer == 1)
 	{
 		Q_strcat(displayTime, sizeof(displayTime),
 		         va("%d:%02d", tm.tm_hour, tm.tm_min));
@@ -806,7 +806,7 @@ static void CG_DrawUpperRight(void)
 	    y = CG_DrawTimer( y );
 	}*/
 
-	if (cg_drawClock.integer)
+	if (etj_drawClock.integer)
 	{
 		y = CG_DrawTime(y);
 	}
@@ -816,7 +816,7 @@ static void CG_DrawUpperRight(void)
 		y = CG_DrawFPS(y);
 	}
 
-	if (cg_drawspeed.integer)
+	if (etj_drawspeed.integer)
 	{
 		y = CG_DrawSpeed(y);
 	}
@@ -906,8 +906,8 @@ static void CG_DrawTeamInfo(void)
 
 		for (i = cgs.teamChatPos - 1; i >= cgs.teamLastChatPos; i--)
 		{
-			auto linePosX = CHATLOC_TEXT_X + cg_chatPosX.value;
-			auto linePosY = CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1;
+			auto linePosX = CHATLOC_TEXT_X + etj_chatPosX.value;
+			auto linePosY = CHATLOC_Y + etj_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight - 1;
 
 			if (linePosY <= 0 || linePosY >= 480 + lineHeight)
 			{
@@ -936,12 +936,12 @@ static void CG_DrawTeamInfo(void)
 				hcolor[2] = 0;
 			}
 
-			chatbgalpha = Numeric::clamp(cg_chatBackgroundAlpha.value, 0.0f, 1.0f);
+			chatbgalpha = Numeric::clamp(etj_chatBackgroundAlpha.value, 0.0f, 1.0f);
 
 			hcolor[3] = chatbgalpha * alphapercent;
 
 			trap_R_SetColor(hcolor);
-			CG_DrawPic(CHATLOC_X + cg_chatPosX.value, CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i) * lineHeight, chatWidth, lineHeight, cgs.media.teamStatusBar);
+			CG_DrawPic(CHATLOC_X + etj_chatPosX.value, CHATLOC_Y + etj_chatPosY.value - (cgs.teamChatPos - i) * lineHeight, chatWidth, lineHeight, cgs.media.teamStatusBar);
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = alphapercent * textAlpha;
@@ -965,8 +965,8 @@ static void CG_DrawTeamInfo(void)
 				{
 					float flagScaleX = 12.0f * chatScale;
 					float flagScaleY = 9.0f * chatScale;
-					float flagPosX = (CHATLOC_TEXT_X + cg_chatPosX.value) - (13 * chatScale);
-					float flagPosY = (CHATLOC_Y + cg_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight) - (9 * chatScale);
+					float flagPosX = (CHATLOC_TEXT_X + etj_chatPosX.value) - (13 * chatScale);
+					float flagPosY = (CHATLOC_Y + etj_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight) - (9 * chatScale);
 					CG_DrawPic(flagPosX, flagPosY, flagScaleX, flagScaleY, flag);
 				}
 
@@ -2733,7 +2733,7 @@ static void CG_DrawCrosshairNames(void)
 	}
 	else 
 	{
-		if ((cg_hide.integer == 1 && dist < cg_hideDistance.integer) || cg_hide.integer == 2)
+		if ((etj_hide.integer == 1 && dist < etj_hideDistance.integer) || etj_hide.integer == 2)
 		{
 			return;
 		}
@@ -3260,7 +3260,7 @@ static void CG_DrawOB(void)
 	vec3_t        start, end;
 	float         x;
 
-	if (!cg_drawOB.integer || cg_thirdPerson.integer)
+	if (!etj_drawOB.integer || cg_thirdPerson.integer)
 	{
 		return;
 	}
@@ -3343,7 +3343,7 @@ static void CG_DrawOB(void)
 
 		// don't predict sticky ob if there is an ob already or if the sticky
 		// ob detection isn't requested
-		if (b || cg_drawOB.integer != 2)
+		if (b || etj_drawOB.integer != 2)
 		{
 			return;
 		}
@@ -3385,7 +3385,7 @@ static void CG_DrawSlick(void)
 	const float   minWalkNormal = 0.7;
 	float         x;
 
-	if (!cg_drawSlick.integer)
+	if (!etj_drawSlick.integer)
 	{
 		return;
 	}
@@ -3394,7 +3394,7 @@ static void CG_DrawSlick(void)
 
 	playerState_t *ps = ETJump::getValidPlayerState();
 
-	x = cg_slickX.value;
+	x = etj_slickX.value;
 
 	ETJump_AdjustPosition(&x);
 
@@ -3406,7 +3406,7 @@ static void CG_DrawSlick(void)
 	if ((trace.fraction != 1.0 && trace.surfaceFlags & SURF_SLICK) ||
 	    (trace.plane.normal[2] > 0 && trace.plane.normal[2] < minWalkNormal))
 	{
-		CG_DrawStringExt(x, cg_slickY.integer, "S", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		CG_DrawStringExt(x, etj_slickY.integer, "S", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 	}
 }
 
@@ -5188,7 +5188,7 @@ static void CG_DrawPlayerStatus(void)
 		}
 	}
 	
-	if (cg_HUD_weaponIcon.integer)
+	if (etj_HUD_weaponIcon.integer)
 	{
 		// Draw ammo
 		weap = CG_PlayerAmmoValue(&value, &value2, &value3);
@@ -5214,7 +5214,7 @@ static void CG_DrawPlayerStatus(void)
 
 
 // ==
-	if (cg_HUD_healthBar.integer)
+	if (etj_HUD_healthBar.integer)
 	{
 		rect.x = 24;
 		rect.y = 480 - 92;
@@ -5225,7 +5225,7 @@ static void CG_DrawPlayerStatus(void)
 // ==
 
 // ==
-	if (cg_HUD_fatigueBar.integer)
+	if (etj_HUD_fatigueBar.integer)
 	{
 		rect.x = 4;
 		rect.y = 480 - 92;
@@ -5236,7 +5236,7 @@ static void CG_DrawPlayerStatus(void)
 // ==
 
 // ==
-	if (cg_HUD_chargeBar.integer)
+	if (etj_HUD_chargeBar.integer)
 	{
 		rect.x = SCREEN_WIDTH - 16;
 		rect.y = 480 - 92;
@@ -5330,7 +5330,7 @@ static void CG_DrawPlayerStats(void)
 	float w;
 	vec_t *clr;
 
-	if (cg_HUD_playerHealth.integer)
+	if (etj_HUD_playerHealth.integer)
 	{
 		str = va("%i", cg.snap->ps.stats[STAT_HEALTH]);
 		w   = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
@@ -5346,7 +5346,7 @@ static void CG_DrawPlayerStats(void)
 	ps = &cg.snap->ps;
 	ci = &cgs.clientinfo[ps->clientNum];
 
-	if (cg_HUD_xpInfo.integer)
+	if (etj_HUD_xpInfo.integer)
 	{
 
 		for (i = 0; i < 3; i++)
@@ -5531,9 +5531,9 @@ void CG_DrawDemoRecording(void)
 void CG_DrawSpectatorInfo(void)
 {
 	int i = 0;
-	int y = player_spectatorInfoY.integer;
+	int y = etj_spectatorInfoY.integer;
 
-	if (player_drawSpectatorInfo.integer == 0)
+	if (etj_drawSpectatorInfo.integer == 0)
 	{
 		return;
 	}
@@ -5561,7 +5561,7 @@ void CG_DrawSpectatorInfo(void)
 		{
 			if (cg.scores[i].followedClient == cg.snap->ps.clientNum)
 			{
-				float x = player_spectatorInfoX.integer;
+				float x = etj_spectatorInfoX.integer;
 				ETJump_AdjustPosition(&x);
 				// spectating me
 				ETJump::DrawSmallString(x, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
@@ -5656,7 +5656,7 @@ static void CG_Draw2D(void)
 
 			if (cg.snap->ps.stats[STAT_HEALTH] > 0)
 			{
-				if (cg_HUD_playerHead.integer)
+				if (etj_HUD_playerHead.integer)
 				{
 					CG_DrawPlayerStatusHead();
 				}
