@@ -382,9 +382,6 @@ vmCvar_t etj_maxSpeedY;
 vmCvar_t etj_maxSpeedDuration;
 vmCvar_t etj_speedColorUsesAccel;
 
-vmCvar_t cg_adminpassword;
-vmCvar_t cg_username;
-
 vmCvar_t etj_popupTime;
 vmCvar_t etj_popupStayTime;
 vmCvar_t etj_popupFadeTime;
