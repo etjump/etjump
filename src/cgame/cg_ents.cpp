@@ -2621,7 +2621,7 @@ static void CG_PortalGate(centity_t *cent)
 
 
 	//Check if player wants to see other player portals
-	if (!cg_viewPlayerPortals.integer)
+	if (!etj_viewPlayerPortals.integer)
 	{
 		//We don't want to see other player portals
 		//so let's only render our portal...
@@ -2632,8 +2632,8 @@ static void CG_PortalGate(centity_t *cent)
 		}
 	}
 
-	// if cg_viewPlayerPortals is 2, only show others portals when we're speccing
-	if (cg_viewPlayerPortals.integer == 2)
+	// if etj_viewPlayerPortals is 2, only show others portals when we're speccing
+	if (etj_viewPlayerPortals.integer == 2)
 	{
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
 		{

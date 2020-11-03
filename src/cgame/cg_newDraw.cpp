@@ -350,7 +350,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int alig
 	}
 
 
-	if (cg_HUD_weaponIcon.integer && icon)
+	if (etj_HUD_weaponIcon.integer && icon)
 	{
 		float x, y, w, h;
 

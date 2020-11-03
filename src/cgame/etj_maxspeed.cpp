@@ -51,14 +51,14 @@ ETJump::DisplayMaxSpeed::DisplayMaxSpeed(EntityEventsHandler* entityEventsHandle
 		_animationStartTime = cg.time;
 	});
 
-	parseColor(cg_speedColor.string, _color);
-	cvarUpdateHandler->subscribe(&cg_speedColor, [&](const vmCvar_t *cvar)
+	parseColor(etj_speedColor.string, _color);
+	cvarUpdateHandler->subscribe(&etj_speedColor, [&](const vmCvar_t *cvar)
 	{
-		parseColor(cg_speedColor.string, _color);
+		parseColor(etj_speedColor.string, _color);
 	});
-	cvarUpdateHandler->subscribe(&cg_speedAlpha, [&](const vmCvar_t *cvar)
+	cvarUpdateHandler->subscribe(&etj_speedAlpha, [&](const vmCvar_t *cvar)
 	{
-		parseColor(cg_speedColor.string, _color);
+		parseColor(etj_speedColor.string, _color);
 	});
 }
 
@@ -70,7 +70,7 @@ ETJump::DisplayMaxSpeed::~DisplayMaxSpeed()
 void ETJump::DisplayMaxSpeed::parseColor(const std::string& color, vec4_t& out)
 {
 	parseColorString(color, out);
-	out[3] *= cg_speedAlpha.value;
+	out[3] *= etj_speedAlpha.value;
 }
 
 void ETJump::DisplayMaxSpeed::beforeRender()

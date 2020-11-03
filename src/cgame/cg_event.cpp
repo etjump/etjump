@@ -168,7 +168,7 @@ static void CG_ItemPickup(int itemNum)
 	int wpbank_cur, wpbank_pickup;
 
 	itemid = bg_itemlist[itemNum].giTag;
-	if (cg_itemPickupText.integer)
+	if (etj_itemPickupText.integer)
 	{
 		CG_AddPMItem(PM_MESSAGE, va("Picked up %s", CG_PickupItemText(itemNum)), cgs.media.pmImages[PM_MESSAGE]);
 	}
@@ -2168,7 +2168,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 			if (event == EV_ITEM_PICKUP) // not quiet
 			{
-				if (cg_itemPickupText.integer)
+				if (etj_itemPickupText.integer)
 				{
 					// powerups and team items will have a separate global sound, this one
 					// will be played at prediction time
@@ -2292,7 +2292,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 // jpw
 
 	case EV_NOAMMO:
-		if (!cg_weaponSound.integer) break;
+		if (!etj_weaponSound.integer) break;
 	case EV_WEAPONSWITCHED:
 		DEBUGNAME("EV_NOAMMO");
 		if ((es->weapon != WP_GRENADE_LAUNCHER) &&

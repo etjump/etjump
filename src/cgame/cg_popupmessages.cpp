@@ -84,8 +84,8 @@ void CG_InitPM(void)
 }
 
 /*
-Replaced these with cg_popupTime,
-cg_popupFadeTime & cg_popupStayTime
+Replaced these with etj_popupTime,
+etj_popupFadeTime & etj_popupStayTime
 #define PM_FADETIME 2500
 #define PM_WAITTIME 2000
 */
@@ -95,7 +95,7 @@ cg_popupFadeTime & cg_popupStayTime
 
 int CG_TimeForPopup(popupMessageType_t type)
 {
-	return cg_popupTime.integer;
+	return etj_popupTime.integer;
 }
 
 int CG_TimeForBigPopup(popupMessageBigType_t type)
@@ -131,7 +131,7 @@ void CG_UpdatePMLists(void)
 			}
 			else
 			{
-				if (cg.time > t + cg_popupStayTime.integer + cg_popupFadeTime.integer)
+				if (cg.time > t + etj_popupStayTime.integer + etj_popupFadeTime.integer)
 				{
 					// we're gone completely
 					cg_pmWaitingList = NULL;
@@ -150,7 +150,7 @@ void CG_UpdatePMLists(void)
 	lastItem = NULL;
 	while (listItem)
 	{
-		int t = (CG_TimeForPopup(listItem->type) + listItem->time + cg_popupStayTime.integer + cg_popupFadeTime.integer);
+		int t = (CG_TimeForPopup(listItem->type) + listItem->time + etj_popupStayTime.integer + etj_popupFadeTime.integer);
 		if (cg.time > t)
 		{
 			// nuke this, and everything below it (though there shouldn't BE anything below us anyway)
@@ -200,7 +200,7 @@ void CG_UpdatePMLists(void)
 			}
 			else
 			{
-				if (cg.time > t + cg_popupStayTime.integer + cg_popupFadeTime.integer)
+				if (cg.time > t + etj_popupStayTime.integer + etj_popupFadeTime.integer)
 				{
 					// we're gone completely
 					cg_pmWaitingListBig = NULL;
@@ -447,7 +447,7 @@ void CG_DrawPMItems(void)
 		return;
 	}
 
-	if (cg_numPopups.integer <= 0)
+	if (etj_numPopups.integer <= 0)
 	{
 		return;
 	}
@@ -487,10 +487,10 @@ void CG_DrawPMItems(void)
 		msg = (char*)&cg_pmWaitingList->message;
 	}
 
-	t = cg_pmWaitingList->time + CG_TimeForPopup(cg_pmWaitingList->type) + cg_popupStayTime.integer;
+	t = cg_pmWaitingList->time + CG_TimeForPopup(cg_pmWaitingList->type) + etj_popupStayTime.integer;
 	if (cg.time > t)
 	{
-		colourText[3] = colour[3] = (1 - ((cg.time - t) / (float)cg_popupFadeTime.integer)) * textAlpha;
+		colourText[3] = colour[3] = (1 - ((cg.time - t) / (float)etj_popupFadeTime.integer)) * textAlpha;
 	}
 	else {
 		colourText[3] = colour[3] = textAlpha;
@@ -507,14 +507,14 @@ void CG_DrawPMItems(void)
 
 	CG_Text_Paint_Ext(x + size + 2 - x_off, y + 12, 0.2f, 0.2f, colourText, msg, 0, 0, textStyle, &cgs.media.limboFont2);
 
-	for (i = 0; i < cg_numPopups.integer - 1 && listItem; i++, listItem = listItem->next)
+	for (i = 0; i < etj_numPopups.integer - 1 && listItem; i++, listItem = listItem->next)
 	{
 		y -= size + 2;
 
-		t = listItem->time + CG_TimeForPopup(listItem->type) + cg_popupStayTime.integer;
+		t = listItem->time + CG_TimeForPopup(listItem->type) + etj_popupStayTime.integer;
 		if (cg.time > t)
 		{
-			colourText[3] = colour[3] = (1 - ((cg.time - t) / (float)cg_popupFadeTime.integer)) * textAlpha;
+			colourText[3] = colour[3] = (1 - ((cg.time - t) / (float)etj_popupFadeTime.integer)) * textAlpha;
 		}
 		else
 		{

@@ -2106,22 +2106,22 @@ void CG_Player(centity_t *cent)
 	{
 
 		vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
-		int transZone = cg_hideDistance.integer + etj_hideFadeRange.integer;
+		int transZone = etj_hideDistance.integer + etj_hideFadeRange.integer;
 
 		// Hide players at close range
-		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < cg_hideDistance.integer)
+		if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < etj_hideDistance.integer)
 		{
 			return;
 		}
 
-		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < transZone) {
+		if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < transZone) {
 
 			float diff = (transZone - playerDist) / etj_hideFadeRange.integer;
 			cg.currentTransparencyValue = etj_playerOpacity.value - (etj_playerOpacity.value * diff);
 
 		}
 
-		if (cg_hide.integer && ci->clientNum != cg.snap->ps.clientNum && cg.currentTransparencyValue <= 0) {
+		if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum && cg.currentTransparencyValue <= 0) {
 			return;
 		}
 

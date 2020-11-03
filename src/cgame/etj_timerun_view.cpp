@@ -93,7 +93,7 @@ void ETJump::TimerunView::draw()
 	auto run = currentRun();
 
 	auto hasTimerun = (cg.demoPlayback && run->running) || cg.hasTimerun;
-	if (player_drawRunTimer.integer == 0 || !hasTimerun)
+	if (etj_drawRunTimer.integer == 0 || !hasTimerun)
 	{
 		return;
 	}
@@ -162,8 +162,8 @@ void ETJump::TimerunView::draw()
 		% millis).str();
 
 	auto textWidth = CG_Text_Width_Ext(text.c_str(), 0.3, 0, &cgs.media.limboFont1) / 2;
-	auto x = player_runTimerX.value;
-	auto y = player_runTimerY.integer;
+	auto x = etj_runTimerX.value;
+	auto y = etj_runTimerY.integer;
 
 	// timer fading/hiding routine
 	ETJump_AdjustPosition(&x);
@@ -235,8 +235,8 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char* text, i
 	vec4_t toColor;
 	vec4_t incolor;
 
-	auto x = player_runTimerX.value;
-	auto y = player_runTimerY.value;
+	auto x = etj_runTimerX.value;
+	auto y = etj_runTimerY.value;
 
 	ETJump_AdjustPosition(&x);
 
