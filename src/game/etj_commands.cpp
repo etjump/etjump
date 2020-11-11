@@ -2285,6 +2285,13 @@ bool Commands::List(gentity_t *ent)
 		i++;
 	}
 
+	// Add a newline if last row is incomplete
+	if (i % 3 != 1)
+	{
+		BufferPrint(ent, "\n");
+	}
+
+	// Let client know if they have access to silent commands
 	if (ent && ETJump::session->HasPermission(ent, '/'))
 	{
 		BufferPrint(ent, "\n^7Use admin commands silently with ^3/!command");
