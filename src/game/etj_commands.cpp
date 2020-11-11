@@ -45,6 +45,9 @@ typedef std::map< std::string, std::pair<boost::function<bool (gentity_t *ent, A
 
 namespace CommandFlags
 {
+// Silent command execution via '/' flag
+// Not listed here because it's not a command in itself
+
 const char BAN = 'b';
 // For everyone
 const char BASIC       = 'a';
@@ -2282,6 +2285,18 @@ bool Commands::List(gentity_t *ent)
 		i++;
 	}
 
+	// Add a newline if last row is incomplete
+	if (i % 3 != 1)
+	{
+		BufferPrint(ent, "\n");
+	}
+
+	// Let client know if they have access to silent commands
+	if (ent && ETJump::session->HasPermission(ent, '/'))
+	{
+		BufferPrint(ent, "\n^7Use admin commands silently with ^3/!command");
+	}
+
 	FinishBufferPrint(ent, true);
 	return true;
 }
@@ -2398,6 +2413,9 @@ void Commands::ListCommandFlags(gentity_t *ent)
 	{
 		BufferPrint(ent, (fmt % it->second.second % it->first).str());
 	}
+
+	// Just manually print this since it's not an actual command
+	BufferPrint(ent, "/ [silent commands]\n");
 
 	FinishBufferPrint(ent);
 }
