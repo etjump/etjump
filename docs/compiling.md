@@ -2,6 +2,14 @@
 
 Compiling the source code is a straightforward process. Below you will find instructions for each supported environment.
 
+* __[Linux](#linux)__
+    * [Makefiles](#option-1-makefiles) (Recommended)
+    * [QtCreator](#option-2-qtcreator)
+* __[Windows](#windows)__
+    * [Visual Studio solution](#option-1-generate-visual-studio-sln-project-files) (Recommended)
+    * [Visual Studio CMake project](#option-2-open-cmake-project-in-visual-studio)
+    * [mingw-w64](#option-3-use-mingw-w64-toolchain)
+
 ## Prerequisites
 
 To compile etjump source code, you only need a few things:
@@ -19,7 +27,7 @@ There are multiple options available:
 * Compile project using `Makefiles`.
 * Use `QtCreator` IDE.
 
-### Option 1. Makefiles
+#### Option 1. Makefiles
 
 * Generate __x86_64__ Makefiles:
     ```sh
@@ -42,7 +50,7 @@ There are multiple options available:
     ```
 * You can find binaries in `build/etjump`.
 
-#### Create mod pk3
+##### Create mod pk3
 
 * Run `make mod_pk3` to create mod pk3
     * `pk3` file will be created in `build/etjump` directory
