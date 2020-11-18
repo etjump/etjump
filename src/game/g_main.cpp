@@ -3314,7 +3314,7 @@ void CheckVote(void)
 	auto numConnectedClients = level.numConnectedClients;
 
 	auto validVotingClients = getNumValidVoters();
-	auto requiredClients = validVotingClients / 100.0f * requiredPercentage;
+	int requiredClients = validVotingClients * requiredPercentage / 100;
 
 	auto voter = g_entities + level.voteInfo.voter_cn;
 	if (level.voteInfo.voter_team != voter->client->sess.sessionTeam)
