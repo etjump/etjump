@@ -1,3 +1,13 @@
+# ETJump 2.5.0
+
+* added silent command flag `/` to `!listflags` [#557](https://github.com/etjump/etjump/pull/557)
+  * `!help` will print a note if you have permission to execute silent comands
+* fixed unintended vote logic behavior where 50/50 split votes would pass instead of fail with `vote_percent 50` [#560](https://github.com/etjump/etjump/pull/560)
+* added `etj_speedAlign` to control speed meter alignment [#561](https://github.com/etjump/etjump/pull/561)
+  * __0__ center (default)
+  * __1__ left align
+  * __2__ right align
+
 # ETJump 2.4.0
 
 * fixed connection interrupted icon not moving with lagometer
