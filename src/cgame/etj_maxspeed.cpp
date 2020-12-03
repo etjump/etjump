@@ -99,7 +99,19 @@ void ETJump::DisplayMaxSpeed::render() const
 	size *= etj_speedSize.integer;
 
 	auto str = va("%0.f", _displayMaxSpeed);
-	auto w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2) / 2;
+	float w;
+	switch (etj_speedAlign.integer)
+	{
+	case 1:			// left align
+		w = 0;
+		break;
+	case 2:			// right align
+		w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2);
+		break;
+	default:		// center align
+		w = CG_Text_Width_Ext(str, size, 0, &cgs.media.limboFont2) / 2;
+		break;
+	}
 	
 	auto x = etj_maxSpeedX.value;
 	auto y = etj_maxSpeedY.value;

@@ -2453,6 +2453,7 @@ extern vmCvar_t etj_maxSpeedX;
 extern vmCvar_t etj_maxSpeedY;
 extern vmCvar_t etj_maxSpeedDuration;
 extern vmCvar_t etj_speedColorUsesAccel;
+extern vmCvar_t etj_speedAlign;
 
 extern vmCvar_t etj_popupTime;
 extern vmCvar_t etj_popupStayTime;

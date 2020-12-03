@@ -5,10 +5,10 @@
 #define WINDOW_HEIGHT 448
 #define SUBW_SPEED1_Y 32
 #define SUBW_SPEED2_Y 108
-#define SUBW_MAX_SPEED_Y 232
-#define SUBW_TIMER_Y 308
-#define SUBW_INDICATORS_Y 32
+#define SUBW_MAX_SPEED_Y 244
 #define SUBW_FIRETEAM_Y 320
+#define SUBW_INDICATORS_Y 32
+#define SUBW_TIMER_Y 312
 #define GROUP_NAME "group_etjump_settings_3"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
@@ -32,7 +32,7 @@ menuDef {
         MULTI				(16, SUBW_SPEED1_Y + 44, 276, 8, "Speed meter unit:", 0.2, 8, "etj_speedunit", cvarFloatList { "UPS" 0 "MPH" 1 "KPH" 2 }, "Speed measurement unit of original speed meter\netj_speedunit")
         YESNO				(16, SUBW_SPEED1_Y + 56, 276, 8, "XY speed only:", 0.2, 8, "etj_speedXYonly", "Ignore vertical speed on original speed meter\netj_speedXYonly")
 
-    SUBWINDOW(8, 108, 292, 120, "SPEED2")
+    SUBWINDOW(8, 108, 292, 132, "SPEED2")
         MULTI				(16, SUBW_SPEED2_Y + 20, 276, 8, "Speed meter 2:", 0.2, 8, "etj_drawSpeed2", cvarFloatList { "No" 0 "Yes" 1 "Speed + max" 2 "Speed ^zmax" 3 "Speed (max)" 4 "Speed ^z(max)" 5 "Speed ^z[max]" 6 "Speed | max" 7 "Speed: speed" 8 "Tens only" 9 }, "Draw ETJump speed meter\netj_drawSpeed2")
         CVARFLOATLABEL		(16, SUBW_SPEED2_Y + 32, 276, 8, "etj_speedAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SPEED2_Y + 32, 276, 8, "Speed meter alpha:", 0.2, 8, etj_speedAlpha 1 0 1 0.05, "Sets transparency of ETJump speed meter\netj_speedAlpha")
@@ -44,8 +44,9 @@ menuDef {
         MULTI				(16, SUBW_SPEED2_Y + 80, 276, 8, "Speed meter color:", 0.2, 8, "etj_speedColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of ETJump speed meter\netj_speedColor")
         YESNO				(16, SUBW_SPEED2_Y + 92, 276, 8, "Accel-based color:", 0.2, 8, "etj_speedColorUsesAccel", "Color ETJump speed meter based on accel/decel\netj_speedColorUsesAccel")
         YESNO				(16, SUBW_SPEED2_Y + 104, 276, 8, "Speed meter shadow:", 0.2, 8, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
+        MULTI				(16, SUBW_SPEED2_Y + 116, 276, 8, "Speed meter align:", 0.2, 8, "etj_speedAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of ETJump speed meter\netj_speedAlign")
 
-    SUBWINDOW(8, 232, 292, 72, "MAX SPEED")
+    SUBWINDOW(8, 244, 292, 72, "MAX SPEED")
         YESNO				(16, SUBW_MAX_SPEED_Y + 20, 276, 8, "Draw max speed:", 0.2, 8, "etj_drawMaxSpeed", "Draw max speed after previous load session\netj_drawMaxSpeed")
         CVARINTLABEL		(16, SUBW_MAX_SPEED_Y + 32, 276, 8, "etj_maxSpeedX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_MAX_SPEED_Y + 32, 276, 8, "Max speed X:", 0.2, 8, etj_maxSpeedX 320 0 640 10, "Sets X position of max speed\netj_maxSpeedX")
@@ -54,18 +55,16 @@ menuDef {
         CVARINTLABEL		(16, SUBW_MAX_SPEED_Y + 56, 276, 8, "etj_maxSpeedDuration", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_MAX_SPEED_Y + 56, 276, 8, "Max speed duration:", 0.2, 8, etj_maxSpeedDuration 2000 0 15000 250, "How long in milliseconds to display max speed\netj_maxSpeedDuration")
 
-    SUBWINDOW(8, 308, 292, 108, "TIMER")
-        YESNO				(16, SUBW_TIMER_Y + 20, 276, 8, "Enable timeruns:", 0.2, 8, "etj_enableTimeruns", "Enable timeruns\netj_enableTimeruns")
-        YESNO				(16, SUBW_TIMER_Y + 32, 276, 8, "Draw runtimer:", 0.2, 8, "etj_drawRunTimer", "Draw timerun timer\netj_drawRunTimer")
-        CVARINTLABEL		(16, SUBW_TIMER_Y + 44, 276, 8, "etj_runTimerX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_TIMER_Y + 44, 276, 8, "Runtimer X:", 0.2, 8, etj_runTimerX 320 0 640 10, "Sets X position of timerun timer\netj_runTimerX")
-        CVARINTLABEL		(16, SUBW_TIMER_Y + 56, 276, 8, "etj_runTimerY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_TIMER_Y + 56, 276, 8, "Runtimer Y:", 0.2, 8, etj_runTimerY 360 0 480 10, "Sets Y position of timerun timer\netj_runTimerY")
-        MULTI				(16, SUBW_TIMER_Y + 68, 276, 8, "Runtimer inact. color:", 0.2, 8, "etj_runTimerInactiveColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of timerun timer when not running\netj_runTimerInactiveColor")
-        YESNO				(16, SUBW_TIMER_Y + 80, 276, 8, "Runtimer shadow:", 0.2, 8, "etj_runTimerShadow", "Draw shadow on timerun timer\netj_runTimerShadow")
-        YESNO				(16, SUBW_TIMER_Y + 92, 276, 8, "Auto hide timer:", 0.2, 8, "etj_runTimerAutoHide", "Automatically hide timerun timer if not running\netj_runTimerAutoHide")
+    SUBWINDOW(8, 320, 292, 72, "FIRETEAM")
+        YESNO				(16, SUBW_FIRETEAM_Y + 20, 276, 8, "Fireteam:", 0.2, 8, "etj_HUD_fireteam", "Draw fireteam on HUD\netj_HUD_fireteam")
+        CVARFLOATLABEL		(16, SUBW_FIRETEAM_Y + 32, 276, 8, "etj_fireteamAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_FIRETEAM_Y + 32, 276, 8, "Fireteam alpha:", 0.2, 8, etj_fireteamAlpha 1 0 1 0.05, "Sets transparency of fireteam\netj_fireteamAlpha")
+        CVARINTLABEL		(16, SUBW_FIRETEAM_Y + 44, 276, 8, "etj_fireteamPosX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_FIRETEAM_Y + 44, 276, 8, "Fireteam X:", 0.2, 8, etj_fireteamPosX 0 -640 640 10, "Sets X offset for fireteam\netj_fireteamPosX")
+        CVARINTLABEL		(16, SUBW_FIRETEAM_Y + 56, 276, 8, "etj_fireteamPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(16, SUBW_FIRETEAM_Y + 56, 276, 8, "Fireteam Y:", 0.2, 8, etj_fireteamPosY 0 -480 480 10, "Sets Y offset for fireteam\netj_fireteamPosY")
 
-    SUBWINDOW(308, 32, 292, 280, "INDICATORS")
+    SUBWINDOW(308, 32, 292, 276, "INDICATORS")
         MULTI				(316, SUBW_INDICATORS_Y + 20, 276, 8, "Overbounce detector:", 0.2, 8, "etj_drawOB", cvarFloatList { "No" 0 "Yes" 1 "Advanced" 2 }, "Draw overbounce detector\netj_drawOB")
         CVARINTLABEL		(316, SUBW_INDICATORS_Y + 32, 276, 8, "etj_OBX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_INDICATORS_Y + 32, 276, 8, "OB detector X:", 0.2, 8, etj_OBX 320 0 640 10, "Sets X position of overbounce detector\netj_OBX")
@@ -100,14 +99,16 @@ menuDef {
         MULTI				(316, SUBW_INDICATORS_Y + 248, 276, 8, "OB watcher color:", 0.2, 8, "etj_obWatcherColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of overbounce watcher\netj_obWatcherColor")
 		EDITFIELD			(316, SUBW_INDICATORS_Y + 260, 276, 10, "Extra trace:", 0.2, 8, "etj_extraTrace", 128, 32, "Trace playerclips for various indicators (bitmask)\netj_extraTrace (see /extraTrace command)")
 
-    SUBWINDOW(308, 320, 292, 76, "FIRETEAM")
-        YESNO				(316, SUBW_FIRETEAM_Y + 20, 276, 8, "Fireteam:", 0.2, 8, "etj_HUD_fireteam", "Draw fireteam on HUD\netj_HUD_fireteam")
-        CVARFLOATLABEL		(316, SUBW_FIRETEAM_Y + 32, 276, 8, "etj_fireteamAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_FIRETEAM_Y + 32, 276, 8, "Fireteam alpha:", 0.2, 8, etj_fireteamAlpha 1 0 1 0.05, "Sets transparency of fireteam\netj_fireteamAlpha")
-        CVARINTLABEL		(316, SUBW_FIRETEAM_Y + 44, 276, 8, "etj_fireteamPosX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_FIRETEAM_Y + 44, 276, 8, "Fireteam X:", 0.2, 8, etj_fireteamPosX 0 -640 640 10, "Sets X offset for fireteam\netj_fireteamPosX")
-        CVARINTLABEL		(316, SUBW_FIRETEAM_Y + 56, 276, 8, "etj_fireteamPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_FIRETEAM_Y + 56, 276, 8, "Fireteam Y:", 0.2, 8, etj_fireteamPosY 0 -480 480 10, "Sets Y offset for fireteam\netj_fireteamPosY")
+    SUBWINDOW(308, 312, 292, 108, "TIMER")
+        YESNO				(316, SUBW_TIMER_Y + 20, 276, 8, "Enable timeruns:", 0.2, 8, "etj_enableTimeruns", "Enable timeruns\netj_enableTimeruns")
+        YESNO				(316, SUBW_TIMER_Y + 32, 276, 8, "Draw runtimer:", 0.2, 8, "etj_drawRunTimer", "Draw timerun timer\netj_drawRunTimer")
+        CVARINTLABEL		(316, SUBW_TIMER_Y + 44, 276, 8, "etj_runTimerX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_TIMER_Y + 44, 276, 8, "Runtimer X:", 0.2, 8, etj_runTimerX 320 0 640 10, "Sets X position of timerun timer\netj_runTimerX")
+        CVARINTLABEL		(316, SUBW_TIMER_Y + 56, 276, 8, "etj_runTimerY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_TIMER_Y + 56, 276, 8, "Runtimer Y:", 0.2, 8, etj_runTimerY 360 0 480 10, "Sets Y position of timerun timer\netj_runTimerY")
+        MULTI				(316, SUBW_TIMER_Y + 68, 276, 8, "Runtimer inact. color:", 0.2, 8, "etj_runTimerInactiveColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of timerun timer when not running\netj_runTimerInactiveColor")
+        YESNO				(316, SUBW_TIMER_Y + 80, 276, 8, "Runtimer shadow:", 0.2, 8, "etj_runTimerShadow", "Draw shadow on timerun timer\netj_runTimerShadow")
+        YESNO				(316, SUBW_TIMER_Y + 92, 276, 8, "Auto hide timer:", 0.2, 8, "etj_runTimerAutoHide", "Automatically hide timerun timer if not running\netj_runTimerAutoHide")
         
         BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_3; open etjump)
         BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_3; open etjump_settings_1)
