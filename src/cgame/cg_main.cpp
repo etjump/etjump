@@ -381,6 +381,7 @@ vmCvar_t etj_maxSpeedX;
 vmCvar_t etj_maxSpeedY;
 vmCvar_t etj_maxSpeedDuration;
 vmCvar_t etj_speedColorUsesAccel;
+vmCvar_t etj_speedAlign;
 
 vmCvar_t etj_popupTime;
 vmCvar_t etj_popupStayTime;
@@ -809,6 +810,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_maxSpeedY,               "etj_maxSpeedY",               "320",                    CVAR_ARCHIVE             },
 	{ &etj_maxSpeedDuration,        "etj_maxSpeedDuration",        "2000",                   CVAR_ARCHIVE             },
 	{ &etj_speedColorUsesAccel,     "etj_speedColorUsesAccel",     "0",                      CVAR_ARCHIVE             },
+	{ &etj_speedAlign,              "etj_speedAlign",              "0",                      CVAR_ARCHIVE             },
 
 	{ &etj_popupTime,                "etj_popupTime",               "1000",                   CVAR_ARCHIVE             },
 	{ &etj_popupStayTime,            "etj_popupStayTime",           "2000",                   CVAR_ARCHIVE             },

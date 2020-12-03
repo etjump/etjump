@@ -111,7 +111,21 @@ void ETJump::DisplaySpeed::render() const
 	ETJump_AdjustPosition(&x);
 
 	auto status = getStatus();
-	float w = CG_Text_Width_Ext(status.c_str(), size, 0, &cgs.media.limboFont2) / 2;
+
+	float w;
+	switch (etj_speedAlign.integer)
+	{
+	case 1:			// left align
+		w = 0;
+		break;
+	case 2:			// right align
+		w = CG_Text_Width_Ext(status.c_str(), size, 0, &cgs.media.limboFont2);
+		break;
+	default:		// center align
+		w = CG_Text_Width_Ext(status.c_str(), size, 0, &cgs.media.limboFont2) / 2;
+		break;
+	}
+
 	if (etj_drawSpeed2.integer == 8)
 	{
 		w = 0;
