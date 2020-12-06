@@ -9778,48 +9778,48 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu)
 
 		// NERVE - SMF
 		case UIMENU_WM_QUICKMESSAGE:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorx = 640;
+			uiInfo.uiDC.cursory = 480;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_quickmessage");
 			return;
 
 		case UIMENU_WM_QUICKMESSAGEALT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorx = 640;
+			uiInfo.uiDC.cursory = 480;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_quickmessageAlt");
 			return;
 
 		case UIMENU_WM_FTQUICKMESSAGE:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorx = 640;
+			uiInfo.uiDC.cursory = 480;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_ftquickmessage");
 			return;
 
 		case UIMENU_WM_FTQUICKMESSAGEALT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorx = 640;
+			uiInfo.uiDC.cursory = 480;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("wm_ftquickmessageAlt");
 			return;
 
 		case UIMENU_WM_TAPOUT:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorx = 640;
+			uiInfo.uiDC.cursory = 480;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("tapoutmsg");
 			return;
 
 		case UIMENU_WM_TAPOUT_LMS:
-			uiInfo.uiDC.cursorx = 639;
-			uiInfo.uiDC.cursory = 479;
+			uiInfo.uiDC.cursorx = 640;
+			uiInfo.uiDC.cursory = 480;
 			trap_Key_SetCatcher(KEYCATCH_UI);
 			Menus_CloseAll();
 			Menus_OpenByName("tapoutmsglms");
