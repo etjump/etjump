@@ -1018,11 +1018,11 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 
 		if (team == TEAM_AXIS)
 		{
-			text = va("%s (%d %s)", CG_TranslateString("AXIS"), cg.teamPlayers[team], CG_TranslateString("PLAYERS"));
+			text = va("%s (%d %s)", CG_TranslateString("AXIS"), cg.teamPlayers[team], cg.teamPlayers[team] == 1 ? CG_TranslateString("PLAYER") : CG_TranslateString("PLAYERS"));
 		}
 		else
 		{
-			text = va("%s (%d %s)", CG_TranslateString("ALLIES"), cg.teamPlayers[team], CG_TranslateString("PLAYERS"));
+			text = va("%s (%d %s)", CG_TranslateString("ALLIES"), cg.teamPlayers[team], cg.teamPlayers[team] == 1 ? CG_TranslateString("PLAYER") : CG_TranslateString("PLAYERS"));
 		}
 
 		textWidth = CG_Text_Width_Ext(text, 0.22f, 0, boldFont);
