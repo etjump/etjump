@@ -8,6 +8,7 @@
   * __1__ left align
   * __2__ right align
 * fixed default scoreboard header playercount spelling when team has only one player [#565](https://github.com/etjump/etjump/pull/565)
+* added timerun status indicator to scoreboard [#566](https://github.com/etjump/etjump/pull/566)
 
 # ETJump 2.4.0
 
