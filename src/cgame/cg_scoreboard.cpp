@@ -896,6 +896,11 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 			{
 			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS]);
 			}
+
+			if (ci->timerunActive) 
+			{
+				CG_DrawPic(x + 4 + 12 + 2, y + 2, 12, 12, cgs.media.stopwatchIcon);
+			}
 		}
 
 		if (ci->team == TEAM_SPECTATOR)
@@ -940,7 +945,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 		else
 		{
 			ETJump::DrawString(
-				x + 4 + 12 + 2,
+				x + 4 + 12 + 2 + (12 + 2) * ci->timerunActive,
 				y + 12,
 				0.23f, 0.25f, hcolor, qfalse, ci->name, 18, 0);
 			x += INFO::PLAYER_WIDTH;
