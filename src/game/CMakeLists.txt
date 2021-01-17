@@ -62,6 +62,7 @@ add_library(qagame MODULE
 	"etj_entity_utilities.cpp"
 	"etj_file.cpp"
 	"etj_filesystem.cpp"
+	"etj_inactivity_timer.cpp"
 	"etj_levels.cpp"
 	"etj_main.cpp"
 	"etj_main_ext.cpp"

@@ -594,6 +594,7 @@ typedef struct clientInfo_s
 	qboolean specLocked;
 	qboolean timerunActive;
 	bool snaphud;
+	bool clientIsInactive;
 } clientInfo_t;
 
 typedef enum
@@ -1839,6 +1840,7 @@ typedef struct
 	qhandle_t stopwatchIcon;
 	qhandle_t stopwatchIconGreen;
 	qhandle_t stopwatchIconRed;
+	qhandle_t idleIcon;
 
 } cgMedia_t;
 
@@ -2650,6 +2652,7 @@ extern vmCvar_t etj_snapHUDColor2;
 extern vmCvar_t etj_snapHUDFov;
 
 extern vmCvar_t etj_gunSway;
+extern vmCvar_t etj_drawScoreboardInactivity;
 
 //
 // cg_main.c

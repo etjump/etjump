@@ -578,6 +578,7 @@ vmCvar_t etj_snapHUDColor2;
 vmCvar_t etj_snapHUDFov;
 
 vmCvar_t etj_gunSway;
+vmCvar_t etj_drawScoreboardInactivity;
 
 typedef struct
 {
@@ -984,6 +985,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
 	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
 	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
+	{ &etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1", CVAR_ARCHIVE },
 };
 
 
@@ -2671,6 +2673,7 @@ static void CG_RegisterGraphics(void)
 	cgs.media.stopwatchIcon = trap_R_RegisterShader("gfx/2d/stopwatch");
 	cgs.media.stopwatchIconGreen = trap_R_RegisterShader("gfx/2d/stopwatch_green");
 	cgs.media.stopwatchIconRed = trap_R_RegisterShader("gfx/2d/stopwatch_red");
+	cgs.media.idleIcon = trap_R_RegisterShader("gfx/2d/idle");
 
 
 	CG_LoadingString(" - game media done");

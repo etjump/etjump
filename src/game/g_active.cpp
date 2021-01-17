@@ -2,6 +2,7 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_printer.h"
+#include "etj_inactivity_timer.h"
 
 /*
 ===============
@@ -1173,6 +1174,8 @@ void ClientThink_real(gentity_t *ent)
 	{
 		return;
 	}
+
+	ETJump::InactivityTimer::checkClientInactivity(ent);
 
 	if (!(ent->r.svFlags & SVF_BOT) && level.time - client->pers.lastCCPulseTime > 2000)
 	{
