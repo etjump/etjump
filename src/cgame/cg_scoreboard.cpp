@@ -50,10 +50,26 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t co
 	clientInfo_t *ci = &cgs.clientinfo[score->client];
 	vec4_t textColor;
 	float tempX = x;
+	float offsetX = 0.0f;
+	int nameMaxWidth = 12;
 	Vector4Copy(color, textColor);
 	textColor[3] *= fade;
 
-	CG_DrawStringExt(tempX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 12);
+	// draw indicators
+	if (ci->timerunActive)
+	{
+		CG_DrawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon);
+		offsetX += 8 + 2;
+		nameMaxWidth -= 1;
+	}
+	if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive)
+	{
+		CG_DrawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon);
+		offsetX += 8 + 2;
+		nameMaxWidth -= 1;
+	}
+
+	CG_DrawStringExt(tempX + offsetX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, nameMaxWidth);
 	tempX += ALT_SCOREBOARD_PLAYER_WIDTH;
 
 	if (ci->team == TEAM_SPECTATOR)
@@ -254,6 +270,8 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t 
 	clientInfo_t *ci = &cgs.clientinfo[score->client];
 	vec4_t textColor;
 	float tempX = x;
+	float offsetX = 0.0f;
+	int nameMaxWidth = 22;
 	Vector4Copy(color, textColor);
 	textColor[3] *= fade;
 
@@ -262,7 +280,21 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t 
 		tempX += 2;
 	}
 
-	CG_DrawStringExt(tempX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, 22);
+	// draw indicators
+	if (ci->timerunActive)
+	{
+		CG_DrawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon);
+		offsetX += 8 + 2;
+		nameMaxWidth -= 2;
+	}
+	if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive)
+	{
+		CG_DrawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon);
+		offsetX += 8 + 2;
+		nameMaxWidth -= 2;
+	}
+
+	CG_DrawStringExt(tempX + offsetX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT, nameMaxWidth);
 	tempX += THIRD_SCOREBOARD_PLAYER_WIDTH - 2;
 
 	if (ci->team == TEAM_SPECTATOR)
@@ -533,6 +565,13 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 {
 	clientInfo_t *ci = &cgs.clientinfo[score->client];
 
+	// Draw indicator if player is idle
+	if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive)
+	{
+		CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
+		x += 10;
+	}
+
 	// Draw player
 	CG_Text_Paint_Ext(x, y, 0.12f, 0.12f, textColor, ci->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
@@ -632,6 +671,13 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	float connectingTextOffsetX = CG_Text_Width_Ext(connecting, 0.12f, 0, font);
 	float spectatorTextOffsetX = CG_Text_Width_Ext(spectator, 0.12f, 0, font);
 	float followedClientTextOffsetX = CG_Text_Width_Ext(followedClient, 0.12f, 0, font);
+
+	// Draw indicator if player is idle
+	if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive)
+	{
+		CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
+		playerX += 10;
+	}
 
 	// Draw player
 	CG_Text_Paint_Ext(playerX, y, 0.12f, 0.12f, textColor, ci->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
@@ -868,11 +914,14 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 	{
 		const char *s;
 		int textWidth;
+		float offsetX = 0.0f;
+		int nameMaxWidth = 18;
 		// DHM - Nerve
 		Vector4Set(hcolor, 1, 1, 1, fade);
 		
 		// draw class icons
-		if (ci->team != TEAM_SPECTATOR) {
+		if (ci->team != TEAM_SPECTATOR)
+		{
 			int playerType;
 			playerType = ci->cls;
 
@@ -897,18 +946,29 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 			CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS]);
 			}
 
-			if (ci->timerunActive) 
-			{
-				CG_DrawPic(x + 4 + 12 + 2, y + 2, 12, 12, cgs.media.stopwatchIcon);
-			}
+			offsetX = 12 + 2;
+		}
+
+		// draw indicators
+		if (ci->timerunActive)
+		{
+			CG_DrawPic(x + 4 + offsetX, y + 2, 12, 12, cgs.media.stopwatchIcon);
+			offsetX += 12 + 2;
+			nameMaxWidth -= 2;
+		}
+		if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive)
+		{
+			CG_DrawPic(x + 4 + offsetX, y + 2, 11, 11, cgs.media.idleIcon);
+			offsetX += 11 + 2;
+			nameMaxWidth -= 2;
 		}
 
 		if (ci->team == TEAM_SPECTATOR)
 		{
 			ETJump::DrawString(
-				x + 4,
+				x + 4 + offsetX,
 				y + 12,
-				0.23f, 0.25f, hcolor, qfalse, ci->name, 18, 0);
+				0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
 			x += INFO::PLAYER_WIDTH;
 
 			if (score->ping == -1)
@@ -945,9 +1005,9 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 		else
 		{
 			ETJump::DrawString(
-				x + 4 + 12 + 2 + (12 + 2) * ci->timerunActive,
+				x + 4 + offsetX,
 				y + 12,
-				0.23f, 0.25f, hcolor, qfalse, ci->name, 18, 0);
+				0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
 			x += INFO::PLAYER_WIDTH;
 
 			s = va("%i", ci->maxFPS);

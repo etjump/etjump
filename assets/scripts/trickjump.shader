@@ -808,3 +808,18 @@ gfx/2d/colorbar
 		rgbGen vertex
 	}
 }
+
+////////////////
+// Idle Icon
+////////////////
+
+gfx/2d/idle
+{
+	noPicMip
+	noMipMaps
+	{
+		map gfx/2d/idle.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}

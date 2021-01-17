@@ -782,6 +782,7 @@ typedef struct
 	int deathrunFlags;
 
 	float velocityScale;
+	bool clientIsInactive;
 } clientSession_t;
 
 //
@@ -1009,6 +1010,7 @@ struct gclient_s
 	// timers
 	int respawnTime;                // can respawn when time > this, force after g_forcerespwan
 	int inactivityTime;             // kick players when time > this
+	int realInactivityTime;			// real inactivity time of client, independent of inactivity cvars
 	qboolean inactivityWarning;     // qtrue if the five seoond warning has been given
 	int rewardTime;                 // clear the EF_AWARD_IMPRESSIVE, etc when time > this
 

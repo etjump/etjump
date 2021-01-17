@@ -654,6 +654,35 @@ qboolean ClientInactivityTimer(gclient_t *client)
 }
 
 /*
+=================
+ClientInactivityTimerReal
+
+Real inactivity of a client
+No input for 3 minutes = inactive
+=================
+*/
+void ClientInactivityTimerReal(gclient_t *client)
+{	
+	gentity_t* ent;
+	ent = g_entities + (client - level.clients);
+
+	if (client->pers.cmd.buttons & BUTTON_ANY)
+	{
+		client->realInactivityTime = level.time + 1000 * 180;
+		client->sess.clientIsInactive = false;
+		ETJump::UpdateClientConfigString(*ent);
+	}
+	else if(level.time > client->realInactivityTime)
+	{
+		client->realInactivityTime = level.time + 60 * 1000;
+		client->sess.clientIsInactive = true;
+		ETJump::UpdateClientConfigString(*ent);
+	}
+}
+
+
+
+/*
 ==================
 ClientTimerActions
 
@@ -1173,6 +1202,8 @@ void ClientThink_real(gentity_t *ent)
 	{
 		return;
 	}
+
+	ClientInactivityTimerReal(client);
 
 	if (!(ent->r.svFlags & SVF_BOT) && level.time - client->pers.lastCCPulseTime > 2000)
 	{

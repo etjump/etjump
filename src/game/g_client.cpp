@@ -1579,7 +1579,7 @@ namespace ETJump
 
 		// send over a subset of the userinfo keys so other clients can
 		// print scoreboards, display models, and play custom sounds
-		auto newcs = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i\\sl\\%i\\tr\\%i\\vs\\%i",
+		auto newcs = va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%i\\sl\\%i\\tr\\%i\\vs\\%i\\i\\%i",
 			gent.client->pers.netname,
 			gent.client->sess.sessionTeam,
 			gent.client->sess.playerType,
@@ -1598,7 +1598,8 @@ namespace ETJump
 			gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
 			gent.client->sess.specLocked ? 1 : 0,
 			gent.client->sess.timerunActive ? 1 : 0,
-			gent.client->pers.snaphud ? 1 : 0
+			gent.client->pers.snaphud ? 1 : 0,
+			gent.client->sess.clientIsInactive ? 1 : 0
 		);
 
 		trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
@@ -2447,6 +2448,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 
 	client->respawnTime      = level.timeCurrent;
 	client->inactivityTime   = level.time + g_inactivity.integer * 1000;
+	client->realInactivityTime = level.time + 180 * 1000;
 	client->latched_buttons  = 0;
 	client->latched_wbuttons = 0;   //----(SA)	added
 
