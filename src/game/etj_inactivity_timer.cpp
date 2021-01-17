@@ -2,8 +2,6 @@
 
 namespace ETJump
 {
-	constexpr int clientInactivityTimer = 180; // in seconds
-
 	void InactivityTimer::checkClientInactivity(gentity_t* ent)
 	{
 		if (ent->client->pers.cmd.buttons & BUTTON_ANY)

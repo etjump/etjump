@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "etj_save_system.h"
+#include "etj_inactivity_timer.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -2448,7 +2449,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 
 	client->respawnTime      = level.timeCurrent;
 	client->inactivityTime   = level.time + g_inactivity.integer * 1000;
-	client->realInactivityTime = level.time + 180 * 1000;
+	client->realInactivityTime = level.time + ETJump::clientInactivityTimer * 1000;
 	client->latched_buttons  = 0;
 	client->latched_wbuttons = 0;   //----(SA)	added
 

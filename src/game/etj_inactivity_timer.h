@@ -4,6 +4,8 @@
 
 namespace ETJump
 {
+	constexpr int clientInactivityTimer = 180; // in seconds
+
 	class InactivityTimer
 	{
 	public:
