@@ -90,7 +90,7 @@ menuDef {
 
     SUBWINDOW(308, 356, 292, 52, "SCOREBOARD")
         MULTI				(316, SUBW_SCOREBOARD_Y + 20, 276, 8, "Custom scoreboard:", 0.2, 8, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
-        YESNO				(316, SUBW_SCOREBOARD_Y + 32, 276, 8, "Draw CGaz users:", 0.2, 8, "etj_drawCGazUsers", "Draw CGaz users on default scoreboard\netj_drawCGazUsers")
+        YESNO				(316, SUBW_SCOREBOARD_Y + 32, 276, 8, "Draw idle indicator:", 0.2, 8, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
 
         BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_1; open etjump)
         BUTTONACTIVE		(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_1; open etjump_settings_1)
