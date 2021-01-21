@@ -449,7 +449,7 @@ vmCvar_t etj_fireteamPosY;
 vmCvar_t etj_fireteamAlpha;
 
 vmCvar_t etj_logBanner;
-vmCvar_t etj_weaponSound;
+vmCvar_t etj_weaponVolume;
 vmCvar_t etj_noclipScale;
 
 vmCvar_t etj_drawSlick;
@@ -875,7 +875,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_fireteamAlpha,           "etj_fireteamAlpha",           "1.0",                    CVAR_ARCHIVE             },
 	
 	{ &etj_logBanner,               "etj_logBanner",               "1",                      CVAR_ARCHIVE             },
-	{ &etj_weaponSound,              "etj_weaponSound",             "1",                      CVAR_ARCHIVE             },
+	{ &etj_weaponVolume,              "etj_weaponVolume",             "1.0",                      CVAR_ARCHIVE             },
 	{ &etj_noclipScale,              "etj_noclipScale",             "1",                      CVAR_ARCHIVE             },
 	{ &etj_drawSlick,                "etj_drawSlick",               "1",                      CVAR_ARCHIVE             },
 	{ &etj_slickX,                   "etj_slickX",                  "304",                    CVAR_ARCHIVE             },

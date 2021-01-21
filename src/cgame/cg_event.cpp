@@ -2292,7 +2292,6 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 // jpw
 
 	case EV_NOAMMO:
-		if (!etj_weaponSound.integer) break;
 	case EV_WEAPONSWITCHED:
 		DEBUGNAME("EV_NOAMMO");
 		if ((es->weapon != WP_GRENADE_LAUNCHER) &&
@@ -2306,7 +2305,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		    (es->weapon != WP_AMMO) &&
 		    (es->weapon != WP_MEDKIT)) //Feen: PGM
 		{
-			trap_S_StartSound(NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound);
+			trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound, DEFAULT_VOLUME * etj_weaponVolume.value);
 		}
 
 		if (es->number == cg.snap->ps.clientNum && (

@@ -5736,8 +5736,7 @@ void CG_FireWeapon(centity_t *cent)
         firesound = &cg_weapons[ WP_MEDKIT ].flashSound[0];
     }*/
 
-	// Zero: don't play sound if etj_weaponSound is set to 0
-	if (!(cent->currentState.eFlags & EF_ZOOMING) && etj_weaponSound.integer)   // JPW NERVE -- don't play sounds or eject brass if zoomed in
+	if (!(cent->currentState.eFlags & EF_ZOOMING))   // JPW NERVE -- don't play sounds or eject brass if zoomed in
 	{   // play a sound
 		for (c = 0 ; c < 4 ; c++)
 		{
@@ -5751,7 +5750,7 @@ void CG_FireWeapon(centity_t *cent)
 			c = rand() % c;
 			if (firesound[c])
 			{
-				trap_S_StartSound(NULL, ent->number, CHAN_WEAPON, firesound[c]);
+				trap_S_StartSoundVControl(NULL, ent->number, CHAN_WEAPON, firesound[c], DEFAULT_VOLUME * etj_weaponVolume.value);
 
 				if (fireEchosound && fireEchosound[c])   // check for echo
 				{
@@ -5767,7 +5766,7 @@ void CG_FireWeapon(centity_t *cent)
 					if (gdist > 512 && gdist < 4096)     // temp dist.  TODO: use numbers that are weapon specific
 					{   // use gorg as the new sound origin
 						VectorMA(cg.refdef_current->vieworg, 64, norm, gorg);   // sound-on-a-stick
-						trap_S_StartSoundEx(gorg, ent->number, CHAN_WEAPON, fireEchosound[c], SND_NOCUT);
+						trap_S_StartSoundExVControl(gorg, ent->number, CHAN_WEAPON, fireEchosound[c], SND_NOCUT, DEFAULT_VOLUME * etj_weaponVolume.value);
 					}
 				}
 			}
