@@ -95,6 +95,12 @@ bool Save(gentity_t *ent, Arguments argv)
 	return true;
 }
 
+bool Unload(gentity_t *ent, Arguments argv)
+{
+	ETJump::saveSystem->unload(ent);
+	return true;
+}
+
 bool ListInfo(gentity_t *ent, Arguments argv)
 {
 	if (argv->size() != 2)
@@ -2238,6 +2244,7 @@ Commands::Commands()
 	commands_["backup"] = ClientCommands::BackupLoad;
 	commands_["save"]   = ClientCommands::Save;
 	commands_["load"]   = ClientCommands::Load;
+	commands_["unload"] = ClientCommands::Unload;
 //    commands_["race"] = ClientCommands::Race;
 	commands_["listinfo"] = ClientCommands::ListInfo;
 	commands_["records"]  = ClientCommands::Records;

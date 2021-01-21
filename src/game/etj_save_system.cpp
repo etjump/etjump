@@ -50,6 +50,9 @@ ETJump::SaveSystem::Client::Client()
 		axisBackupPositions.push_back(SavePosition());
 		axisBackupPositions[i].isValid = false;
 	}
+
+	alliesLastLoadPosition.isValid = false;
+	axisLastLoadPosition.isValid = false;
 }
 
 ETJump::SaveSystem::DisconnectedClient::DisconnectedClient()
@@ -60,6 +63,9 @@ ETJump::SaveSystem::DisconnectedClient::DisconnectedClient()
 		axisSavedPositions[i].isValid   = false;
 		progression                     = 0;
 	}
+
+	alliesLastLoadPosition.isValid = false;
+	axisLastLoadPosition.isValid = false;
 }
 
 // Zero: required for saving saves to db
@@ -290,6 +296,7 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 	auto validSave = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
 	if (validSave)
 	{
+		saveLastLoadPos(ent); // store position for unload command
 		restoreStanceFromSave(ent, validSave);
 		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
@@ -429,6 +436,114 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 	}
 }
 
+// Undo last load command and teleport to last position client loaded from
+// Position validation is done here
+void ETJump::SaveSystem::unload(gentity_t* ent)
+{
+	auto* client = ent->client;
+
+	if (!client)
+	{
+		return;
+	}
+
+	if (!g_save.integer)
+	{
+		CPTo(ent, "^3Unload ^7is not enabled.");
+		return;
+	}
+
+	if (!client->sess.saveAllowed)
+	{
+		CPTo(ent, "^7You are not allowed to ^3unload ^7a position.");
+		return;
+	}
+
+	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	{
+		CPTo(ent, "^3unload ^7is disabled for this death run.");
+		return;
+	}
+
+	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
+	{
+		CPTo(ent, "^3unload ^7is disabled while dead on this map.");
+		return;
+	}
+
+	if (client->sess.sessionTeam == TEAM_SPECTATOR)
+	{
+		CPTo(ent, "^7You can not ^3unload ^7as a spectator.");
+		return;
+	}
+
+	if (client->sess.timerunActive)
+	{
+		CPTo(ent, "^3unload ^7is not available during timeruns.");
+		return;
+	}
+
+	auto validPos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
+	
+	if (validPos)
+	{
+		// check for nosave areas only if we have valid pos
+		trace_t trace;
+		trap_TraceCapsule(&trace, validPos->origin, ent->r.mins,
+			ent->r.maxs, validPos->origin, ent->s.number, CONTENTS_NOSAVE);
+
+		if (level.noSave)
+		{
+			if (!trace.fraction != 1.0f)
+			{
+				CPTo(ent, "^7You can not ^3unload ^7to this area.");
+				return;
+			}
+		}
+		else
+		{
+			if (trace.fraction != 1.0f)
+			{
+				CPTo(ent, "^7You can not ^3unload ^7to this area.");
+				return;
+			}
+		}
+
+		restoreStanceFromSave(ent, validPos);
+		teleportPlayer(ent, validPos);
+	}
+	else
+	{
+		CPTo(ent, "^7Use ^3load ^7first.");
+	}
+
+}
+
+// Saves position client loaded from. Executed on every successful load command,
+// position validation is done later. This is to prevent unexpected behavior
+// where the last load position is not a valid position, and client is
+// teleported to a position that was valid before that.
+void ETJump::SaveSystem::saveLastLoadPos(gentity_t* ent)
+{
+	SavePosition* pos = nullptr;
+	auto *client = ent->client;
+
+	if (client->sess.sessionTeam == TEAM_ALLIES)
+	{
+		pos = &_clients[ClientNum(ent)].alliesLastLoadPosition;
+	}
+	else if (client->sess.sessionTeam == TEAM_AXIS)
+	{
+		pos = &_clients[ClientNum(ent)].axisLastLoadPosition;
+	}
+	else
+	{
+		return;
+	}
+
+	storePosition(client, pos);
+}
+
 void ETJump::SaveSystem::reset()
 {
 	for (int clientIndex = 0; clientIndex < level.numConnectedClients; clientIndex++)
@@ -459,6 +574,9 @@ void ETJump::SaveSystem::resetSavedPositions(gentity_t *ent)
 
 	_clients[clientNum].quickDeployPositions[TEAM_ALLIES].isValid = false;
 	_clients[clientNum].quickDeployPositions[TEAM_AXIS].isValid = false;
+
+	_clients[clientNum].alliesLastLoadPosition.isValid = false;
+	_clients[clientNum].axisLastLoadPosition.isValid = false;
 }
 
 // Called on client disconnect. Saves saves for future sessions
@@ -622,6 +740,37 @@ ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamSaveForSlot(ge
 	else
 	{
 		pos = &client->axisSavedPositions[slot];
+	}
+
+	if (!pos->isValid)
+	{
+		return nullptr;
+	}
+
+	return pos;
+}
+
+ETJump::SaveSystem::SavePosition* ETJump::SaveSystem::getValidTeamUnloadPos(gentity_t* ent, team_t team)
+{
+	if (!ent || !ent->client)
+	{
+		return nullptr;
+	}
+
+	if (team != TEAM_ALLIES && team != TEAM_AXIS)
+	{
+		return nullptr;
+	}
+
+	auto client = &_clients[ClientNum(ent)];
+	SavePosition* pos = nullptr;
+	if (team == TEAM_ALLIES)
+	{
+		pos = &client->alliesLastLoadPosition;
+	}
+	else
+	{
+		pos = &client->axisLastLoadPosition;
 	}
 
 	if (!pos->isValid)

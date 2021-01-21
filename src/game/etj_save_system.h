@@ -74,9 +74,11 @@ namespace ETJump
 
 			SavePosition alliesSavedPositions[MAX_SAVED_POSITIONS];
 			boost::circular_buffer<SavePosition> alliesBackupPositions;
+			SavePosition alliesLastLoadPosition;
 
 			SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
 			boost::circular_buffer<SavePosition> axisBackupPositions;
+			SavePosition axisLastLoadPosition;
 
 			// contains a couple of extra positions for TEAM_SPEC and TEAM_FREE,
 			// but simplifies the accessing code
@@ -91,6 +93,11 @@ namespace ETJump
 			SavePosition alliesSavedPositions[MAX_SAVED_POSITIONS];
 			// Axis saved positions at the time of disconnect
 			SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
+
+			// Last load positions
+			SavePosition axisLastLoadPosition;
+			SavePosition alliesLastLoadPosition;
+
 
 			// So called "map ident"
 			int progression;
@@ -114,6 +121,12 @@ namespace ETJump
 
 		// Loads backup position
 		void loadBackupPosition(gentity_t *ent);
+
+		// UnLoad - revert last "load" command
+		void unload(gentity_t* ent);
+
+		// Saves last position client loaded from
+		void saveLastLoadPos(gentity_t* ent);
 
 		// resets all clients positions
 		void reset();
@@ -146,6 +159,8 @@ namespace ETJump
 		void restoreStanceFromSave(gentity_t *ent, SavePosition *pos);
 
 		SavePosition* getValidTeamSaveForSlot(gentity_t *ent, team_t team, int slot);
+		
+		SavePosition* getValidTeamUnloadPos(gentity_t* ent, team_t team);
 
 		// All clients' save related data
 		Client _clients[MAX_CLIENTS];
