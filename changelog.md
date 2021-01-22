@@ -10,6 +10,11 @@
 * fixed default scoreboard header playercount spelling when team has only one player [#565](https://github.com/etjump/etjump/pull/565)
 * added timerun status indicator to scoreboard [#566](https://github.com/etjump/etjump/pull/566), [#568](https://github.com/etjump/etjump/pull/568)
 * added idle indicator to scoreboard [#568](https://github.com/etjump/etjump/pull/568)
+* added `unload` command to revert last `load` command [#569](https://github.com/etjump/etjump/pull/569)
+  * cannot be used during timeruns
+  * cannot be used to teleport to an area where you cannot use `save`
+  * only __1__ unload slot, overwritten on every successful `load` command
+* replaced `etj_weaponSound` with `etj_weaponVolume` to allow adjusting volume of weapon sounds [#570](https://github.com/etjump/etjump/pull/570)
 
 # ETJump 2.4.0
 
