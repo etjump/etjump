@@ -84,7 +84,8 @@ menuDef {
         MULTI				(316, SUBW_CONSOLE_Y + 44, 276, 8, "Console color:", 0.2, 8, "etj_consoleColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets console color when console shader is disabled (vid_restart required)\netj_consoleColor")
 
     SUBWINDOW(308, 284, 292, 64, "SOUNDS")
-        YESNO				(316, SUBW_SOUNDS_Y + 20, 276, 8, "Weapon sounds:", 0.2, 8, "etj_weaponSound", "Enable weapon sounds\netj_weaponSounds")
+        CVARFLOATLABEL		(316, SUBW_SOUNDS_Y + 20, 276, 8, "etj_weaponVolume", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER      		(316, SUBW_SOUNDS_Y + 20, 276, 8, "Weapon sound volume:", 0.2, 8, etj_weaponVolume 1 0 5 0.1, "Scale weapon sound volume\netj_weaponVolume")
         YESNO				(316, SUBW_SOUNDS_Y + 32, 276, 8, "Looped sounds:", 0.2, 8, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
         YESNO				(316, SUBW_SOUNDS_Y + 44, 276, 8, "Uphill step sounds:", 0.2, 8, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
 

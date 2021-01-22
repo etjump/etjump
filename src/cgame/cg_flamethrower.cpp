@@ -1386,12 +1386,6 @@ void CG_UpdateFlamethrowerSounds(void)
 	flameChunk_t *f, *trav; // , *lastSoundFlameChunk=NULL; // TTimo: unused
 	#define MIN_BLOW_VOLUME     30
 
-	// Mute sounds if weapon sounds are disabled
-	if (etj_weaponSound.integer <= 0)
-	{
-		return;
-	}
-
 	// draw each of the headFlameChunk's
 	f = headFlameChunks;
 	while (f)
@@ -1402,16 +1396,16 @@ void CG_UpdateFlamethrowerSounds(void)
 			// blow/ignition sound
 			if (centFlameStatus[f->ownerCent].blowVolume * 255.0 > MIN_BLOW_VOLUME)
 			{
-				trap_S_AddLoopingSound(f->org, vec3_origin, cgs.media.flameBlowSound, (int)(255.0 * centFlameStatus[f->ownerCent].blowVolume), 0); // JPW NERVE
+				trap_S_AddLoopingSound(f->org, vec3_origin, cgs.media.flameBlowSound, (int)(255.0 * centFlameStatus[f->ownerCent].blowVolume) * etj_weaponVolume.value, 0); // JPW NERVE
 			}
 			else
 			{
-				trap_S_AddLoopingSound(f->org, vec3_origin, cgs.media.flameBlowSound, MIN_BLOW_VOLUME, 0);   // JPW NERVE
+				trap_S_AddLoopingSound(f->org, vec3_origin, cgs.media.flameBlowSound, MIN_BLOW_VOLUME * etj_weaponVolume.value, 0);   // JPW NERVE
 			}
 
 			if (centFlameStatus[f->ownerCent].streamVolume)
 			{
-				trap_S_AddLoopingSound(f->org, vec3_origin, cgs.media.flameStreamSound, (int)(255.0 * centFlameStatus[f->ownerCent].streamVolume), 0);     // JPW NERVE
+				trap_S_AddLoopingSound(f->org, vec3_origin, cgs.media.flameStreamSound, (int)(255.0 * centFlameStatus[f->ownerCent].streamVolume) * etj_weaponVolume.value, 0);     // JPW NERVE
 			}
 
 			centFlameInfo[f->ownerCent].lastSoundUpdate = cg.time;
@@ -1423,7 +1417,7 @@ void CG_UpdateFlamethrowerSounds(void)
 			// update the sound volume
 			if (trav->blueLife + 100 < (cg.time - trav->timeStart))
 			{
-				trap_S_AddLoopingSound(trav->org, vec3_origin, cgs.media.flameSound, (int)(255.0 * (0.2 * (trav->size / FLAME_MAX_SIZE))), 0);
+				trap_S_AddLoopingSound(trav->org, vec3_origin, cgs.media.flameSound, (int)(255.0 * (0.2 * (trav->size / FLAME_MAX_SIZE))) * etj_weaponVolume.value, 0);
 			}
 		}
 

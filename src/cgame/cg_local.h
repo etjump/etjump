@@ -2525,7 +2525,7 @@ extern vmCvar_t etj_fireteamAlpha;
 
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t etj_logBanner;
-extern vmCvar_t etj_weaponSound;
+extern vmCvar_t etj_weaponVolume;
 
 extern vmCvar_t etj_noclipScale;
 extern vmCvar_t etj_drawSlick;
@@ -3362,6 +3362,7 @@ void        trap_R_ClearDecals(void);
 
 // normal sounds will have their volume dynamically changed as their entity
 // moves and the listener moves
+constexpr int DEFAULT_VOLUME = 127;
 void        trap_S_StartSound(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx);
 void        trap_S_StartSoundVControl(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int volume);
 void        trap_S_StartSoundEx(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int flags);
