@@ -116,16 +116,13 @@ Timerun::Time Timerun::createTimeFromTimestamp(int timestamp)
 {
 	int millis = timestamp;
 
-	int hours = millis / static_cast<int>(Time::Duration::Hour);
-	millis -= hours * static_cast<int>(Time::Duration::Hour);
-
 	int minutes = millis / static_cast<int>(Time::Duration::Minute);
 	millis -= minutes * static_cast<int>(Time::Duration::Minute);
 
 	int seconds = millis / static_cast<int>(Time::Duration::Second);
 	millis -= seconds * static_cast<int>(Time::Duration::Second);
 
-	return{ hours, minutes, seconds, millis, timestamp };
+	return{ minutes, seconds, millis, timestamp };
 }
 
 std::string Timerun::createCompletionMessage(clientInfo_t& player, std::string& runName, int completionTime, int previousTime)
