@@ -23,15 +23,16 @@
 
 namespace ETJump
 {
-	static const int ALLSOLID_GIB_TIME = 300;
 	static const int JUMP_DELAY_TIME = 850;
 	static const int PRONE_JUMP_DELAY_TIME = 650;
 	static const int PRONE_DELAY_TIME = 750;
+
+	static const int ALLSOLID_GIB_TIME = 250;
+
 	static bool hasJustStoodUp()
 	{
 		return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
 	}
-
 
 	static void setPlayerPhaseMask()
 	{
@@ -49,6 +50,10 @@ namespace ETJump
 
 	static void gibStuckPlayer()
 	{
+		if (!(pm->shared & BG_LEVEL_PHASE_GIBSOLID))
+		{
+			return;
+		}
 		if (pm->ps->stats[STAT_HEALTH] <= 0)
 		{
 			return;
@@ -64,24 +69,18 @@ namespace ETJump
 
 		trace_t trace;
 
-		if (pm->ps->eFlags & EF_PHASE_A) {
-			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, CONTENTS_PHASE_A);
+		auto checkTrace = [trace](int contentFlag) mutable
+		{
+			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, contentFlag);
+			return !!trace.allsolid;
+		};
 
-			if (trace.allsolid) {
-				Com_Printf("Stuck in ^2phase A\n");
-				BG_AddPredictableEventToPlayerstate(EV_FALL_NDIE, 0, pm->ps);
-				pm->pmext->stuckTime = 0;
-				return;
-			}
-		}
-		if (pm->ps->eFlags & EF_PHASE_B) {
-			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, CONTENTS_PHASE_B);
-
-			if (trace.allsolid) {
-				Com_Printf("Stuck in ^5phase B\n");
-				BG_AddPredictableEventToPlayerstate(EV_FALL_NDIE, 0, pm->ps);
-				pm->pmext->stuckTime = 0;
-			}
+		if (((pm->ps->eFlags & EF_PHASE_A) && checkTrace(CONTENTS_PHASE_A)) ||
+			((pm->ps->eFlags & EF_PHASE_B) && checkTrace(CONTENTS_PHASE_B)))
+		{
+			// hack: use FALL_DIE event because its easy. EV_GIB_PLAYER doesn't actually deal damage
+			BG_AddPredictableEventToPlayerstate(EV_FALL_NDIE, 0, pm->ps);
+			pm->pmext->stuckTime = 0;
 		}
 	}
 }

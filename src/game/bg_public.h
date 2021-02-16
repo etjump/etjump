@@ -2620,6 +2620,8 @@ const int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
 const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
 // Prone is disabled
 const int BG_LEVEL_NO_PRONE = 1 << 5;
+// gib players stuck in phase brush
+const int BG_LEVEL_PHASE_GIBSOLID = 1 << 6;
 
 #endif // __BG_PUBLIC_H__
 

@@ -1159,16 +1159,19 @@ namespace ETJump{
 
 	static void initPhasing()
 	{
-		auto value = 0;
-		G_SpawnInt("phasing", "0", &value);
+		auto phaseFlags = 0;
+		G_SpawnInt("phasing", "0", &phaseFlags);
 
-		level.phaseOptions = value;
+		level.phaseOptions = phaseFlags;
+
+		SETBITIF(shared.integer, BG_LEVEL_PHASE_GIBSOLID, phaseFlags & PHASEOPT_GIBALLSOLID);
+		trap_Cvar_Set("shared", va("%d", shared.integer));
 
 		G_Printf(
 			"Phasing is %s on death and %s on load/goto. Players are %s when stuck inside.\n",
-			(value & PHASEOPT_RESETONDEATH) ? "reset" : "preserved",
-			(value & PHASEOPT_RESETONLOAD) ? "reset" : "preserved",
-			(value & PHASEOPT_GIBALLSOLID) ? "gibbed" : "not gibbed");
+			(phaseFlags & PHASEOPT_RESETONDEATH) ? "reset" : "preserved",
+			(phaseFlags & PHASEOPT_RESETONLOAD) ? "reset" : "preserved",
+			(phaseFlags & PHASEOPT_GIBALLSOLID) ? "gibbed" : "not gibbed");
 	}
 }
 
