@@ -2310,21 +2310,24 @@ void SP_target_interrupt_timerun(gentity_t *self)
 	self->use = target_interrupt_timerun;
 }
 
-const int TARGETPHASE_A_ON  = 1 << 0;
+const int TARGETPHASE_A_ON = 1 << 0;
 const int TARGETPHASE_A_OFF = 1 << 1;
 const int TARGETPHASE_A_TGL = 1 << 2;
-const int TARGETPHASE_B_ON  = 1 << 3;
+const int TARGETPHASE_B_ON = 1 << 3;
 const int TARGETPHASE_B_OFF = 1 << 4;
 const int TARGETPHASE_B_TGL = 1 << 5;
 void use_target_phase(gentity_t* ent, gentity_t* other, gentity_t* activator) {
-	if (!activator || !activator->client)
+	if (!activator ||
+		!activator->client ||
+		activator->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
 		return;
 	}
 
 	if (!ent->count)
 	{
-		Com_Printf("^1Error: nonfunctional target_phase\n");
+		auto clientNum = ClientNum(activator);
+		Printer::SendConsoleMessage(clientNum, "^1Error: Nonfunctional target_phase defined");
 		return;
 	}
 
@@ -2397,7 +2400,7 @@ void SP_target_phase(gentity_t* self)
 		}
 		else
 		{
-			Com_Printf("^3Invalid phase B setting, defaulting to none: ^3%s\n", phaseb);
+			Com_Printf("^3Invalid phase B setting, defaulting to none: %s\n", phaseb);
 		}
 	}
 
@@ -2407,7 +2410,7 @@ void SP_target_phase(gentity_t* self)
 	}
 	else
 	{
-		Com_Printf("^1Error: Nonfunctional target_phase defined");
+		Com_Printf("^1Error: Nonfunctional target_phase defined\n");
 	}
 
 	// TODO: activate this entity's targets
