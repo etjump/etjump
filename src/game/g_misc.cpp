@@ -645,15 +645,8 @@ void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 	}
 
-	//Add the gun...
-	COM_BitSet(other->client->ps.weapons, WP_PORTAL_GUN);
-
-	other->client->ps.ammoclip[BG_FindClipForWeapon(WP_PORTAL_GUN)] = 0;
-	other->client->ps.ammo[BG_FindAmmoForWeapon(WP_PORTAL_GUN)]     = 1;
-
-	other->client->ps.weapon = WP_PORTAL_GUN;
-
-
+	// Forcing pickup through same function as target_give uses
+	Touch_Item_Give(self, other, trace);
 }
 
 //Just to fix a bug...

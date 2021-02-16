@@ -694,6 +694,13 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other)
 			return 0;
 		}
 
+		// if we're touching portalgun, don't mess around with weapon switching/dropping
+		if (ent->item->giTag == WP_PORTAL_GUN)
+		{
+			COM_BitSet(other->client->ps.weapons, ent->item->giTag);
+			return -1;
+		}
+
 		// See if we can pick it up
 		if (G_CanPickupWeapon(static_cast<weapon_t>(ent->item->giTag), other))
 		{
@@ -914,7 +921,7 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace)
 ===============
 Touch_Item_Give
 
-Called by target_give entity to make sure clients are always given items, regardless of conditions
+Called by target_give entity and weapon_portalgun_touch to make sure clients are always given items, regardless of conditions
 ===============
 */
 
@@ -1044,9 +1051,13 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace)
 	// picked up items still stay around, they just don't
 	// draw anything.  This allows respawnable items
 	// to be placed on movers.
-	ent->r.svFlags |= SVF_NOCLIENT;
-	ent->flags     |= FL_NODRAW;
-	ent->r.contents = 0;
+	// ETJump: portalgun never disappears
+	if (ent->item->giTag != WP_PORTAL_GUN)
+	{
+		ent->r.svFlags |= SVF_NOCLIENT;
+		ent->flags |= FL_NODRAW;
+		ent->r.contents = 0;
+	}
 
 	// ZOID
 	// A negative respawn times means to never respawn this item (but don't
