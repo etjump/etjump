@@ -568,6 +568,9 @@ extern vec3_t axisDefault[3];
 
 #define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
 
+// sets bitfield f's bit b on or off depending on condition c
+#define SETBIT(f, b, c) if (c) { f |= b; } else { f &= ~b; }
+
 float Q_fabs(float f);
 float Q_rsqrt(float f);         // reciprocal square root
 

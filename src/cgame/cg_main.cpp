@@ -1010,6 +1010,20 @@ namespace ETJump
 		}
 	}
 
+	void setPhaseMask(pmove_t* pm)
+	{
+		// phase brushes always nonsolid for specs
+		if (pm->ps->pm_type == PM_SPECTATOR)
+		{
+			SETBIT(pm->tracemask, CONTENTS_PHASE_A, 0);
+			SETBIT(pm->tracemask, CONTENTS_PHASE_B, 0);
+			return;
+		}
+
+		SETBIT(pm->tracemask, CONTENTS_PHASE_A, pm->ps->eFlags & EF_PHASE_A);
+		SETBIT(pm->tracemask, CONTENTS_PHASE_B, pm->ps->eFlags & EF_PHASE_B);
+	}
+
 	// General purpose etj_hideMe check for cgame events
 	bool hideMeCheck(int entityNum)
 	{

@@ -1800,6 +1800,7 @@ void G_LeaveTank(gentity_t *ent, qboolean position);
 namespace ETJump
 {
 	void longRangeActivate(gentity_t *ent);
+	void setPhaseMask(pmove_t *pm);
 }
 
 // g_script.c

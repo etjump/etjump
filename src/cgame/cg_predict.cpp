@@ -445,17 +445,18 @@ static void CG_InterpolatePlayerState(qboolean grabAngles)
 		cmdNum = trap_GetCurrentCmdNumber();
 		trap_GetUserCmd(cmdNum, &cmd);
 
-		// rain - added tracemask
-		if (cg_ghostPlayers.integer == 1)
-		{
-			PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID & ~CONTENTS_BODY);
+		int mask = cg_ghostPlayers.integer == 1
+			? MASK_PLAYERSOLID & ~CONTENTS_BODY
+			: MASK_PLAYERSOLID;
+
+		if (out->eFlags == EF_PHASE_A) {
+			mask |= CONTENTS_PHASE_A;
 		}
-		else
-		{
-			PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, MASK_PLAYERSOLID);
+		if (out->eFlags == EF_PHASE_B) {
+			mask |= CONTENTS_PHASE_B;
 		}
 
-
+		PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, mask);
 	}
 
 	// if the next frame is a teleport, we can't lerp to it
@@ -1058,6 +1059,8 @@ void CG_PredictPlayerState(void)
 	{
 		cg_pmove.tracemask = MASK_PLAYERSOLID;
 	}
+	
+	ETJump::setPhaseMask(&cg_pmove);
 
 	if ((cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR) || (cg.snap->ps.pm_flags & PMF_LIMBO))     // JPW NERVE limbo
 	{

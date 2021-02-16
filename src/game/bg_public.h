@@ -695,6 +695,7 @@ typedef enum
 #define EF_DEAD             0x00000001      // don't draw a foe marker over players with EF_DEAD
 #define EF_NONSOLID_BMODEL  0x00000002      // bmodel is visible, but not solid
 #define EF_FORCE_END_FRAME  EF_NONSOLID_BMODEL  // force client to end of current animation (after loading a savegame)
+#define EF_PHASE_A          EF_NONSOLID_BMODEL // etjump: hijacked
 #define EF_TELEPORT_BIT     0x00000004      // toggled every time the origin abruptly changes
 #define EF_READY            0x00000008      // player is ready
 
@@ -718,6 +719,7 @@ typedef enum
 #define EF_MOUNTEDTANK      EF_TAGCONNECT   // Gordon: duplicated for clarity
 
 #define EF_FAKEBMODEL       0x00010000      // Gordon: freed
+#define EF_PHASE_B          EF_FAKEBMODEL   // etjump: hijacked
 #define EF_PATH_LINK        0x00020000      // Gordon: linking trains together
 #define EF_ZOOMING          0x00040000      // client is zooming
 #define EF_PRONE            0x00080000      // player is prone
