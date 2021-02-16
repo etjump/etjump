@@ -2304,8 +2304,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 		ent->clipmask = MASK_PLAYERSOLID;
 	}
 
-	SETBIT(ent->clipmask, CONTENTS_PHASE_B, ent->client->ps.eFlags & EF_PHASE_A);
-	SETBIT(ent->clipmask, CONTENTS_PHASE_B, ent->client->ps.eFlags & EF_PHASE_B);
+	SETBITIF(ent->clipmask, CONTENTS_PHASE_B, ent->client->ps.eFlags & EF_PHASE_A);
+	SETBITIF(ent->clipmask, CONTENTS_PHASE_B, ent->client->ps.eFlags & EF_PHASE_B);
 
 	// DHM - Nerve :: Init to -1 on first spawn;
 	if (!revived)
