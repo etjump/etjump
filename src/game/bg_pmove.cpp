@@ -23,6 +23,7 @@
 
 namespace ETJump
 {
+	static const int ALLSOLID_GIB_TIME = 300;
 	static const int JUMP_DELAY_TIME = 850;
 	static const int PRONE_JUMP_DELAY_TIME = 650;
 	static const int PRONE_DELAY_TIME = 750;
@@ -44,6 +45,44 @@ namespace ETJump
 
 		SETBIT(pm->tracemask, CONTENTS_PHASE_A, pm->ps->eFlags & EF_PHASE_A);
 		SETBIT(pm->tracemask, CONTENTS_PHASE_B, pm->ps->eFlags & EF_PHASE_B);
+	}
+
+	static void gibStuckPlayer()
+	{
+		if (pm->ps->stats[STAT_HEALTH] <= 0)
+		{
+			return;
+		}
+		if (!pm->pmext->stuckTime)
+		{
+			return;
+		}
+		if ((pm->cmd.serverTime - pm->pmext->stuckTime) < ALLSOLID_GIB_TIME)
+		{
+			return;
+		}
+
+		trace_t trace;
+
+		if (pm->ps->eFlags & EF_PHASE_A) {
+			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, CONTENTS_PHASE_A);
+
+			if (trace.allsolid) {
+				Com_Printf("Stuck in ^2phase A\n");
+				BG_AddPredictableEventToPlayerstate(EV_FALL_NDIE, 0, pm->ps);
+				pm->pmext->stuckTime = 0;
+				return;
+			}
+		}
+		if (pm->ps->eFlags & EF_PHASE_B) {
+			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, CONTENTS_PHASE_B);
+
+			if (trace.allsolid) {
+				Com_Printf("Stuck in ^5phase B\n");
+				BG_AddPredictableEventToPlayerstate(EV_FALL_NDIE, 0, pm->ps);
+				pm->pmext->stuckTime = 0;
+			}
+		}
 	}
 }
 
@@ -2171,6 +2210,13 @@ static int PM_CorrectAllSolid(trace_t *trace)
 		}
 	}
 
+	if (!pm->pmext->stuckTime)
+	{
+		pm->pmext->stuckTime = pm->cmd.serverTime;
+	}
+
+	ETJump::gibStuckPlayer();
+
 	pm->ps->groundEntityNum = ENTITYNUM_NONE;
 	pml.groundPlane         = qfalse;
 	pml.walking             = qfalse;
@@ -2271,6 +2317,8 @@ static void PM_GroundTrace(void)
 			return;
 		}
 	}
+
+	pm->pmext->stuckTime = 0;
 
 	// if the trace didn't hit anything, we are in free fall
 	if (trace.fraction == 1.0)
