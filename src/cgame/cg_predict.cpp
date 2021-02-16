@@ -738,8 +738,7 @@ static void CG_TouchTriggerPrediction(void)
 			{
 				BG_TouchJumpPad(&cg.predictedPlayerState, ent);
 			}
-
-			if (ent->eType == ET_VELOCITY_PUSH_TRIGGER)
+			else if (ent->eType == ET_VELOCITY_PUSH_TRIGGER)
 			{
 				BG_TouchVelocityJumpPad(&cg.predictedPlayerState, ent);
 			}

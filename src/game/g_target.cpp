@@ -2310,6 +2310,110 @@ void SP_target_interrupt_timerun(gentity_t *self)
 	self->use = target_interrupt_timerun;
 }
 
+const int TARGETPHASE_A_ON  = 1 << 0;
+const int TARGETPHASE_A_OFF = 1 << 1;
+const int TARGETPHASE_A_TGL = 1 << 2;
+const int TARGETPHASE_B_ON  = 1 << 3;
+const int TARGETPHASE_B_OFF = 1 << 4;
+const int TARGETPHASE_B_TGL = 1 << 5;
+void use_target_phase(gentity_t* ent, gentity_t* other, gentity_t* activator) {
+	if (!activator || !activator->client)
+	{
+		return;
+	}
+
+	if (!ent->count)
+	{
+		Com_Printf("^1Error: nonfunctional target_phase\n");
+		return;
+	}
+
+	if (ent->count & TARGETPHASE_A_ON)
+	{
+		activator->client->ps.eFlags |= EF_PHASE_A;
+	}
+	else if (ent->count & TARGETPHASE_A_OFF)
+	{
+		activator->client->ps.eFlags &= ~EF_PHASE_A;
+	}
+	else if (ent->count & TARGETPHASE_A_TGL)
+	{
+		activator->client->ps.eFlags ^= EF_PHASE_A;
+	}
+
+	if (ent->count & TARGETPHASE_B_ON)
+	{
+		activator->client->ps.eFlags |= EF_PHASE_B;
+	}
+	else if (ent->count & TARGETPHASE_B_OFF)
+	{
+		activator->client->ps.eFlags &= ~EF_PHASE_B;
+	}
+	else if (ent->count & TARGETPHASE_B_TGL)
+	{
+		activator->client->ps.eFlags ^= EF_PHASE_B;
+	}
+}
+
+void SP_target_phase(gentity_t* self)
+{
+	int flags = 0;
+
+	char* phasea = NULL;
+	if (G_SpawnString("phasea", "", &phasea))
+	{
+		if (!Q_stricmp(phasea, "on"))
+		{
+			flags |= TARGETPHASE_A_ON;
+		}
+		else if (!Q_stricmp(phasea, "off"))
+		{
+			flags |= TARGETPHASE_A_OFF;
+		}
+		else if (!Q_stricmp(phasea, "toggle"))
+		{
+			flags |= TARGETPHASE_A_TGL;
+		}
+		else
+		{
+			Com_Printf("^3Invalid phase A setting, defaulting to none: %s\n", phasea);
+		}
+	}
+
+	char* phaseb = NULL;
+	if (G_SpawnString("phaseb", "", &phaseb))
+	{
+		if (!Q_stricmp(phaseb, "on"))
+		{
+			flags |= TARGETPHASE_B_ON;
+		}
+		else if (!Q_stricmp(phaseb, "off"))
+		{
+			flags |= TARGETPHASE_B_OFF;
+		}
+		else if (!Q_stricmp(phaseb, "toggle"))
+		{
+			flags |= TARGETPHASE_B_TGL;
+		}
+		else
+		{
+			Com_Printf("^3Invalid phase B setting, defaulting to none: ^3%s\n", phaseb);
+		}
+	}
+
+	if (flags)
+	{
+		self->count = flags;
+	}
+	else
+	{
+		Com_Printf("^1Error: Nonfunctional target_phase defined");
+	}
+
+	// TODO: activate this entity's targets
+	self->use = use_target_phase;
+}
+
 // target_set_health
 // Sets the health of the target to the specified value.
 // spawnflags

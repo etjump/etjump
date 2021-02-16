@@ -411,6 +411,15 @@ void InterruptRun(gentity_t *ent)
 	game.timerun->interrupt(ClientNum(ent));
 }
 
+void PhaseDisplaced(gentity_t* ent)
+{
+	if (ent->client && (level.phaseOptions & PHASEOPT_RESETONLOAD))
+	{
+		ent->client->ps.eFlags &= ~EF_PHASE_A;
+		ent->client->ps.eFlags &= ~EF_PHASE_B;
+	}
+}
+
 void G_increaseCallvoteCount(const char *mapName)
 {
 	game.mapStatistics->increaseCallvoteCount(mapName);

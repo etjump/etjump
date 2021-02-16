@@ -471,6 +471,7 @@ void SP_trigger_tracker(gentity_t *self);
 void SP_target_set_health(gentity_t *self);
 void SP_target_deathrun_start(gentity_t *self);
 void SP_target_deathrun_checkpoint(gentity_t *self);
+void SP_target_phase(gentity_t* self);
 
 // TJL trigger
 void SP_target_tjlclear(gentity_t *self);
@@ -719,6 +720,7 @@ spawn_t spawns[] =
 	{"target_set_health", SP_target_set_health },
 	{"target_deathrun_start", SP_target_deathrun_start},
 	{"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},
+	{"target_phasing", SP_target_phase},
 	{ "target_displaytjl",			 SP_target_tjldisplay			},
 	{ "target_cleartjl",			 SP_target_tjlclear				},
 	{ 0,                             0                              }
@@ -1154,6 +1156,20 @@ namespace ETJump{
 		trap_Cvar_Set("shared", va("%d", shared.integer));
 		G_Printf("Prone is %s.\n", level.noProne ? "disabled" : "enabled");
 	}
+
+	static void initPhasing()
+	{
+		auto value = 0;
+		G_SpawnInt("phasing", "0", &value);
+
+		level.phaseOptions = value;
+
+		G_Printf(
+			"Phasing is %s on death and %s on load/goto. Players are %s when stuck inside.\n",
+			(value & PHASEOPT_RESETONDEATH) ? "reset" : "preserved",
+			(value & PHASEOPT_RESETONLOAD) ? "reset" : "preserved",
+			(value & PHASEOPT_GIBALLSOLID) ? "gibbed" : "not gibbed");
+	}
 }
 
 
@@ -1335,6 +1351,7 @@ void SP_worldspawn(void)
 	ETJump::initStrictSaveLoad();
 	ETJump::initNoFallDamage();
 	ETJump::initNoProne();
+	ETJump::initPhasing();
 
 	level.mapcoordsValid = qfalse;
 	if (G_SpawnVector2D("mapcoordsmins", "-128 128", level.mapcoordsMins) &&    // top left

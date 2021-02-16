@@ -2221,6 +2221,13 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	flags |= (client->ps.eFlags & EF_VOTED);
 	// clear everything but the persistant data
 
+	// preserve phases on spawn unless specified in map
+	if (!(level.phaseOptions & PHASEOPT_RESETONDEATH))
+	{
+		flags |= (ent->client->ps.eFlags & EF_PHASE_A);
+		flags |= (ent->client->ps.eFlags & EF_PHASE_B);
+	}
+
 	ent->s.eFlags &= ~EF_MOUNTEDTANK;
 
 	saved     = client->pers;

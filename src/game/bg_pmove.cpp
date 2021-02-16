@@ -1009,10 +1009,10 @@ static qboolean PM_CheckProne(void)
 	{
 		if (trace.fraction != 1.0f)
 		{
-			pm->ps->eFlags &= ~EF_PRONE;
-			pm->ps->eFlags &= ~EF_PRONE_MOVING;
-			return qfalse;
-		}
+		pm->ps->eFlags &= ~EF_PRONE;
+		pm->ps->eFlags &= ~EF_PRONE_MOVING;
+		return qfalse;
+	}
 	}
 
 	if (!(pm->ps->eFlags & EF_PRONE))

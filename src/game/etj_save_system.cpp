@@ -254,6 +254,12 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 		return;
 	}
 
+	if (client->sess.sessionTeam == TEAM_SPECTATOR)
+	{
+		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
+		return;
+	}
+
 	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 		{
 		CPTo(ent, "^3Load ^7is disabled for this death run.");
@@ -287,12 +293,6 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 		}
 	}
 
-	if (client->sess.sessionTeam == TEAM_SPECTATOR)
-	{
-		CPTo(ent, "^7You can not ^3load ^7as a spectator.");
-		return;
-	}
-
 	auto validSave = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
 	if (validSave)
 	{
@@ -302,6 +302,7 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 		{
 			InterruptRun(ent);
 		}
+		PhaseDisplaced(ent);
 		teleportPlayer(ent, validSave);
 	}
 	else
@@ -428,6 +429,7 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 		{
 			InterruptRun(ent);
 		}
+		PhaseDisplaced(ent);
 		teleportPlayer(ent, pos);
 	}
 	else

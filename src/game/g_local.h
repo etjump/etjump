@@ -1370,6 +1370,11 @@ typedef struct
 	bool noFallDamage;
 	bool noProne;
 
+	int phaseOptions;
+#define PHASEOPT_RESETONDEATH 1
+#define PHASEOPT_RESETONLOAD 2
+#define PHASEOPT_GIBALLSOLID 4
+
 	int portalEnabled;         //Feen: PGM - Enabled/Disabled by map key
 	qboolean portalSurfaces;
 
@@ -2769,6 +2774,9 @@ void StopTimer(const char *runName, gentity_t *ent);
 void TimerunConnectNotify(gentity_t *ent);
 
 void InterruptRun(gentity_t *ent);
+
+// resets phasing on load/goto if worldspawn flag is set
+void PhaseDisplaced(gentity_t* ent);
 
 void RunFrame(int levelTime);
 const char *G_MatchOneMap(const char *arg);

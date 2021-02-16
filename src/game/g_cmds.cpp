@@ -4588,6 +4588,7 @@ void Cmd_Goto_f(gentity_t *ent)
 		return;
 	}
 
+	PhaseDisplaced(ent);
 	VectorCopy(other->client->ps.origin, ent->client->ps.origin);
 	VectorClear(ent->client->ps.velocity);
 	trap_SendServerCommand(ClientNum(ent), va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));
