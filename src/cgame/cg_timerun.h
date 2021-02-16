@@ -119,10 +119,8 @@ private:
 		{
 			Millisecond = 1,
 			Second = 1000,
-			Minute = 60 * 1000,
-			Hour = 60 * 60 * 1000
+			Minute = 60 * 1000
 		};
-		int hours;
 		int minutes;
 		int seconds;
 		int ms;
