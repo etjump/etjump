@@ -28,6 +28,7 @@
 #include "etj_event_loop.h"
 #include "etj_autodemo_recorder.h"
 #include "etj_player_events_handler.h"
+#include "etj_phasing.h"
 
 displayContextDef_t cgDC;
 
@@ -112,6 +113,7 @@ namespace ETJump
 	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	std::shared_ptr<EventLoop> eventLoop;
 	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+	std::shared_ptr<PhaseRemapper> phaseRemapper;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3774,6 +3776,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
 	ETJump::initDrawKeys(keySetSystem);
 	ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+	ETJump::phaseRemapper = std::make_shared<ETJump::PhaseRemapper>();
 
 	CG_Printf("done\n");
 	CG_Printf("ETJump initialized.\n");

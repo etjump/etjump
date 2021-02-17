@@ -447,6 +447,11 @@ namespace ETJump
 		awaitedCommandHandler->runFrame();
 		eventLoop->run();
 	}
+
+	void phaseRemap(int eFlags)
+	{
+		phaseRemapper->update(eFlags);
+	}
 }
 
 qboolean CG_displaybyname()

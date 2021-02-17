@@ -5,6 +5,7 @@
 */
 
 #include "cg_local.h"
+#include "etj_phasing.h"
 
 qboolean CG_SpawnString(const char *key, const char *defaultString, char **out)
 {
@@ -542,6 +543,8 @@ void SP_worldspawn(void)
 		CG_SpawnString(va("text%i", i), "", &s);
 		Q_strncpyz(cg.deformText[i], s, sizeof(cg.deformText[0]));
 	}
+
+	ETJump::PhaseRemapper::initialize();
 }
 
 /*
