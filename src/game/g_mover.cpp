@@ -3817,10 +3817,22 @@ void Use_Static(gentity_t *ent, gentity_t *other, gentity_t *activator)
 void Static_Pain(gentity_t *ent, gentity_t *attacker, int damage, vec3_t point)
 {
 	vec3_t temp;
+	float nextActivation;
+
+	if (ent->spawnflags & 8)
+	{
+		// override default delay
+		nextActivation = ent->wait + (ent->delay < FRAMETIME ? FRAMETIME : ent->delay);
+	}
+	else
+	{
+		// default behavior
+		nextActivation = ent->wait + ent->delay + rand() % 1000 + 500;
+	}
 
 	if (ent->spawnflags & 4)
 	{
-		if (level.time > ent->wait + ent->delay + rand() % 1000 + 500)
+		if (level.time > nextActivation)
 		{
 			ent->wait = level.time;
 		}
@@ -3844,7 +3856,7 @@ void Static_Pain(gentity_t *ent, gentity_t *attacker, int damage, vec3_t point)
 		return;
 	}
 
-	if (level.time > ent->wait + ent->delay + rand() % 1000 + 500)
+	if (level.time > nextActivation)
 	{
 		G_UseTargets(ent, attacker);
 		ent->wait = level.time;
