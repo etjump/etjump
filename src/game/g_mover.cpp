@@ -3051,7 +3051,13 @@ void SP_func_button(gentity_t *ent)
 	vec3_t size;
 	float  lip;
 
-	ent->sound1to2 = G_SoundIndex("sound/movers/switches/butn2.wav");
+	char* noise;
+	G_SpawnString("noise", "sound/movers/switches/butn2.wav", &noise);
+
+	if (Q_stricmp(noise, "nosound"))
+	{
+		ent->sound1to2 = G_SoundIndex(noise);
+	}
 
 	if (!ent->speed)
 	{
