@@ -74,6 +74,7 @@ add_library(cgame MODULE
 	"etj_timerun_view.cpp"
 	"etj_trickjump_lines.cpp"
 	"etj_utilities.cpp"
+	"etj_phasing.cpp"
 	"../game/bg_animation.cpp"
 	"../game/bg_animgroup.cpp"
 	"../game/bg_character.cpp"

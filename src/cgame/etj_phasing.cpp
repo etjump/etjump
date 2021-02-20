@@ -61,6 +61,7 @@ void ETJump::PhaseRemapper::initialize()
 
 void ETJump::PhaseRemapper::update(int eFlags)
 {
+	// do remaps only if there are any, and active state changed from last check
 	if (!_anyRemaps)
 	{
 		return;
@@ -70,9 +71,7 @@ void ETJump::PhaseRemapper::update(int eFlags)
 
 	if (_isActiveA != a)
 	{
-		_isActiveA = a;
-
-		if (a)
+		if (_isActiveA = a)
 		{
 			// remap
 			for (auto& shader : _remapsA)
@@ -94,9 +93,7 @@ void ETJump::PhaseRemapper::update(int eFlags)
 
 	if (_isActiveB != b)
 	{
-		_isActiveB = b;
-
-		if (b)
+		if (_isActiveB = b)
 		{
 			// remap
 			for (auto& shader : _remapsB)

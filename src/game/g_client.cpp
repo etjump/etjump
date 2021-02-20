@@ -2224,8 +2224,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	// preserve phases on spawn unless specified in map
 	if (!(level.phaseOptions & PHASEOPT_RESETONDEATH))
 	{
-		flags |= (ent->client->ps.eFlags & EF_PHASE_A);
-		flags |= (ent->client->ps.eFlags & EF_PHASE_B);
+		flags |= (ent->client->ps.eFlags & (EF_PHASE_A | EF_PHASE_B));
 	}
 
 	ent->s.eFlags &= ~EF_MOUNTEDTANK;

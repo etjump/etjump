@@ -449,12 +449,7 @@ static void CG_InterpolatePlayerState(qboolean grabAngles)
 			? MASK_PLAYERSOLID & ~CONTENTS_BODY
 			: MASK_PLAYERSOLID;
 
-		if (out->eFlags == EF_PHASE_A) {
-			mask |= CONTENTS_PHASE_A;
-		}
-		if (out->eFlags == EF_PHASE_B) {
-			mask |= CONTENTS_PHASE_B;
-		}
+		mask |= (out->eFlags & (EF_PHASE_A | EF_PHASE_B));
 
 		PM_UpdateViewAngles(out, &cg.pmext, &cmd, CG_Trace, mask);
 	}

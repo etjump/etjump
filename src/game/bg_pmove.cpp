@@ -50,25 +50,17 @@ namespace ETJump
 
 	static void gibStuckPlayer()
 	{
-		if (!(pm->shared & BG_LEVEL_PHASE_GIBSOLID))
-		{
-			return;
-		}
-		if (pm->ps->stats[STAT_HEALTH] <= 0)
-		{
-			return;
-		}
-		if (!pm->pmext->stuckTime)
-		{
-			return;
-		}
-		if ((pm->cmd.serverTime - pm->pmext->stuckTime) < ALLSOLID_GIB_TIME)
+		if (!(pm->shared & BG_LEVEL_PHASE_GIBSOLID) ||
+			pm->ps->stats[STAT_HEALTH] <= 0 ||
+			!pm->pmext->stuckTime ||
+			(pm->cmd.serverTime - pm->pmext->stuckTime) < ALLSOLID_GIB_TIME)
 		{
 			return;
 		}
 
 		trace_t trace;
 
+		// checks if allsolid is true even when checking only single content flag
 		auto checkTrace = [trace](int contentFlag) mutable
 		{
 			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, contentFlag);
