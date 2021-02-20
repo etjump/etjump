@@ -15,6 +15,17 @@
   * cannot be used to teleport to an area where you cannot use `save`
   * only __1__ unload slot, overwritten on every successful `load` command
 * replaced `etj_weaponSound` with `etj_weaponVolume` to allow adjusting volume of weapon sounds [#570](https://github.com/etjump/etjump/pull/570)
+* fixed timerun finish prints looping back to `00` if run takes more than 1 hour [#567](https://github.com/etjump/etjump/pull/576)
+* fixed issues/inconsistencies with portalgun pickup [#577](https://github.com/etjump/etjump/pull/577)
+  * fixed weapon switch animation occuring when pickup up portalgun
+  * added missing `Picked up a portalgun` print
+  * added missing pickup sound
+* reintroduced Quake 3 constantLight support [#579](https://github.com/etjump/etjump/pull/579)
+  * use `light <value>` and `color <R G B>` to make brush entites emit light
+* added `noise` key to `func_button` to allow using custom sounds [#580](https://github.com/etjump/etjump/pull/580)
+  * use `nosound` as `noise` key to disable sound completely
+* added `spawnflags` __8__ to `func_static` to allow disabling random __500-1500ms__ delay between activations [#582](https://github.com/etjump/etjump/pull/582)
+  * minimum delay between activations when using this spawnflag is __100ms__
 
 # ETJump 2.4.0
 
