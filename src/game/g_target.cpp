@@ -2356,6 +2356,11 @@ void use_target_phase(gentity_t* ent, gentity_t* other, gentity_t* activator) {
 	{
 		activator->client->ps.eFlags ^= EF_PHASE_B;
 	}
+
+	if (ent->target)
+	{
+		G_UseTargets(ent, ent->activator);
+	}
 }
 
 void SP_target_phase(gentity_t* self)
@@ -2413,7 +2418,6 @@ void SP_target_phase(gentity_t* self)
 		Com_Printf("^1Error: Nonfunctional target_phase defined\n");
 	}
 
-	// TODO: activate this entity's targets
 	self->use = use_target_phase;
 }
 

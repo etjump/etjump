@@ -720,7 +720,7 @@ spawn_t spawns[] =
 	{"target_set_health", SP_target_set_health },
 	{"target_deathrun_start", SP_target_deathrun_start},
 	{"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},
-	{"target_phasing", SP_target_phase},
+	{ "target_phase", SP_target_phase },
 	{ "target_displaytjl",			 SP_target_tjldisplay			},
 	{ "target_cleartjl",			 SP_target_tjlclear				},
 	{ 0,                             0                              }
