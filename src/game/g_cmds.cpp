@@ -1808,6 +1808,58 @@ void G_SetClientWeapons(gentity_t *ent, weapon_t w1, weapon_t w2, qboolean updat
 	}
 }
 
+/*
+=================
+G_GetDefaultWeaponForClass
+Returns default weapons for class
+=================
+*/
+int G_GetDefaultWeaponForClass(gentity_t* ent, char* s, int weapon, bool primary, bool updateclient)
+{
+	// sessionTeam isn't set when this is called, so compare against team string
+	if (!Q_stricmp(s, "red") || !Q_stricmp(s, "r") || !Q_stricmp(s, "axis"))
+	{
+		switch (ent->client->sess.latchPlayerType)
+		{
+		case PC_SOLDIER:
+		case PC_MEDIC:
+		case PC_ENGINEER:
+		case PC_FIELDOPS:
+			weapon = primary ? WP_MP40 :  WP_LUGER;			
+			break;
+		case PC_COVERTOPS:
+			weapon = primary ?  WP_STEN : WP_SILENCER;
+			break;
+		default:
+			break;
+		}
+	}
+	if (!Q_stricmp(s, "blue") || !Q_stricmp(s, "b") || !Q_stricmp(s, "allies"))
+	{
+		switch (ent->client->sess.latchPlayerType)
+		{
+		case PC_SOLDIER:
+		case PC_MEDIC:
+		case PC_ENGINEER:
+		case PC_FIELDOPS:
+			weapon = primary ? WP_THOMPSON : WP_COLT;
+			break;
+		case PC_COVERTOPS:
+			weapon = primary ? WP_STEN : WP_SILENCED_COLT;
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (updateclient)
+	{
+		ClientUserinfoChanged(ent - g_entities);
+	}
+
+	return weapon;
+}
+
 
 /*
 =================
@@ -1852,6 +1904,16 @@ void Cmd_Team_f(gentity_t *ent)
 	if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS)
 	{
 		ent->client->sess.latchPlayerType = PC_SOLDIER;
+	}
+
+	// if weapons are not specified, set default weapons for class
+	if (!w)
+	{
+		w = static_cast<weapon_t>(G_GetDefaultWeaponForClass(ent, s, w, true, true));
+	}
+	if (!w2)
+	{
+		w2 = static_cast<weapon_t>(G_GetDefaultWeaponForClass(ent, s, w2, false, true));
 	}
 
 	if (!SetTeam(ent, s, qfalse, w, w2, qtrue))
