@@ -1814,8 +1814,9 @@ G_GetDefaultWeaponForClass
 Returns default weapons for class
 =================
 */
-int G_GetDefaultWeaponForClass(gentity_t* ent, char* s, int weapon, bool primary, bool updateclient)
+weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char* s, bool primary)
 {
+	weapon_t weapon;
 	// sessionTeam isn't set when this is called, so compare against team string
 	if (!Q_stricmp(s, "red") || !Q_stricmp(s, "r") || !Q_stricmp(s, "axis"))
 	{
@@ -1850,11 +1851,6 @@ int G_GetDefaultWeaponForClass(gentity_t* ent, char* s, int weapon, bool primary
 		default:
 			break;
 		}
-	}
-
-	if (updateclient)
-	{
-		ClientUserinfoChanged(ent - g_entities);
 	}
 
 	return weapon;
@@ -1909,11 +1905,11 @@ void Cmd_Team_f(gentity_t *ent)
 	// if weapons are not specified, set default weapons for class
 	if (!w)
 	{
-		w = static_cast<weapon_t>(G_GetDefaultWeaponForClass(ent, s, w, true, true));
+		w = G_GetDefaultWeaponForClass(ent, s, true);
 	}
 	if (!w2)
 	{
-		w2 = static_cast<weapon_t>(G_GetDefaultWeaponForClass(ent, s, w2, false, true));
+		w2 = G_GetDefaultWeaponForClass(ent, s, false);
 	}
 
 	if (!SetTeam(ent, s, qfalse, w, w2, qtrue))
