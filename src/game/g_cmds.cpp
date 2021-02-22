@@ -1826,7 +1826,7 @@ weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char* s, bool primary)
 		case PC_MEDIC:
 		case PC_ENGINEER:
 		case PC_FIELDOPS:
-			weapon = primary ? WP_MP40 :  WP_LUGER;			
+			weapon = primary ? WP_MP40 : WP_LUGER;			
 			break;
 		case PC_COVERTOPS:
 			weapon = primary ?  WP_STEN : WP_SILENCER;
@@ -1835,7 +1835,7 @@ weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char* s, bool primary)
 			break;
 		}
 	}
-	if (!Q_stricmp(s, "blue") || !Q_stricmp(s, "b") || !Q_stricmp(s, "allies"))
+	else if (!Q_stricmp(s, "blue") || !Q_stricmp(s, "b") || !Q_stricmp(s, "allies"))
 	{
 		switch (ent->client->sess.latchPlayerType)
 		{
@@ -1851,6 +1851,10 @@ weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char* s, bool primary)
 		default:
 			break;
 		}
+	}
+	else
+	{
+		weapon = WP_NONE;
 	}
 
 	return weapon;
