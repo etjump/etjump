@@ -1430,6 +1430,7 @@ void StopFollowing(gentity_t *ent);
 void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team, spectatorState_t *sState, int *specClient);
 qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1, weapon_t w2, qboolean setweapons);
 void G_SetClientWeapons(gentity_t *ent, weapon_t w1, weapon_t w2, qboolean updateclient);
+weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char *s, bool primary);
 void Cmd_FollowCycle_f(gentity_t *ent, int dir);
 void Cmd_Kill_f(gentity_t *ent);
 void Cmd_SwapPlacesWithBot_f(gentity_t *ent, int botNum);
