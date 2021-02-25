@@ -2653,6 +2653,7 @@ extern vmCvar_t etj_snapHUDFov;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
+extern vmCvar_t etj_demo_drawBanners;
 
 //
 // cg_main.c

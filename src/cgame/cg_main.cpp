@@ -579,6 +579,7 @@ vmCvar_t etj_snapHUDFov;
 
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
+vmCvar_t etj_demo_drawBanners;
 
 typedef struct
 {
@@ -986,6 +987,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
 	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
 	{ &etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1", CVAR_ARCHIVE },
+	{ &etj_demo_drawBanners, "etj_demo_drawBanners", "1", CVAR_ARCHIVE },
 };
 
 
