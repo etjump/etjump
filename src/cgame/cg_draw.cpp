@@ -1464,6 +1464,11 @@ static void CG_DrawBannerPrint(void)
 		return;
 	}
 
+	if (cg.demoPlayback && !etj_demo_drawBanners.integer)
+	{
+		return;
+	}
+
 	color = CG_FadeColor(cg.bannerPrintTime, BP_TIME);
 	if (!color)
 	{
