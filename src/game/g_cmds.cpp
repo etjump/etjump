@@ -1882,7 +1882,6 @@ void Cmd_Team_f(gentity_t *ent)
 
 	if (ClientIsFlooding(ent))
 	{
-		CP("print \"^1Spam protection: ^7command team ignored.\n\"");
 		return;
 	}
 
