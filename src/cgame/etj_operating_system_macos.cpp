@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020 ETJump team <zero@etjump.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,13 +22,38 @@
  * SOFTWARE.
  */
 
-#pragma once
+#ifdef __APPLE__
 
-#if defined(__linux__) || defined(__APPLE__)
-#define FN_PUBLIC __attribute__((visibility("default")))
-#elif defined(_WIN32)
-// https://msdn.microsoft.com/en-us/library/wf2w9f6x.aspx
-#define FN_PUBLIC __declspec(dllexport)
-#else
-#error "Unsupported compiler"
+#include "etj_operating_system.h"
+
+#include <IOKit/IOKitLib.h>
+
+const char *G_SHA1(const char *str);
+
+ETJump::OperatingSystem::OperatingSystem()
+= default;
+
+void ETJump::OperatingSystem::minimize()
+{
+	// NOPE
+}
+
+std::string ETJump::OperatingSystem::getHwid()
+{
+	char buf[512];
+	io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
+	auto uuidCf = (CFStringRef) IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey),
+																kCFAllocatorDefault, 0);
+	IOObjectRelease(ioRegistryRoot);
+	CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
+	CFRelease(uuidCf);
+
+	return G_SHA1(buf);
+}
+
+void ETJump::OperatingSystem::addMinimizeButton()
+{
+	// NOPE!
+}
+
 #endif

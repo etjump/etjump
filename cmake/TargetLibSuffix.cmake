@@ -45,5 +45,10 @@ function(set_target_lib_suffix target)
 		set(LIB_NAME "${target}")
 	endif() 
 
-	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${LIB_NAME}${LIB_SUFFIX}${LIB_ARCH}" PREFIX "")
+	# Would be better do just do it above, but I was lazy..
+	if(APPLE)
+		set_target_properties(${target} PROPERTIES OUTPUT_NAME "${LIB_NAME}_mac" PREFIX "" SUFFIX "")
+	else()
+		set_target_properties(${target} PROPERTIES OUTPUT_NAME "${LIB_NAME}${LIB_SUFFIX}${LIB_ARCH}" PREFIX "")
+	endif()
 endfunction()

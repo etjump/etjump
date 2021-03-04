@@ -18,6 +18,6 @@ add_executable(tests
 	"inline_command_parser_tests.cpp"
 	"string_utilities_tests.cpp"
 )
-target_link_libraries(tests PRIVATE gtest_main libsha1 libboost cxx_compiler_opts)
+target_link_libraries(tests PRIVATE gtest_main libsha1 ${Boost_LIBRARIES} cxx_compiler_opts)
 target_compile_options(tests PRIVATE $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)
 gtest_add_tests(TARGET tests)

@@ -143,7 +143,7 @@ range_t AnglesToRange(float start, float end, float yaw, float fov)
 {
 	if (fabsf(end - start) > 2 * (float)M_PI)
 	{
-		range_t const ret = { 0, SCREEN_WIDTH, false };
+		range_t const ret = { 0, float(SCREEN_WIDTH), false };
 		return ret;
 	}
 

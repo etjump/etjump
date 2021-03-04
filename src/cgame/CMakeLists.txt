@@ -66,6 +66,7 @@ add_library(cgame MODULE
 	"etj_maxspeed.cpp"
 	"etj_operating_system_linux.cpp"
 	"etj_operating_system_windows.cpp"
+	"etj_operating_system_macos.cpp"
 	"etj_overbounce_watcher.cpp"
 	"etj_player_events_handler.cpp"
 	"etj_quick_follow_drawable.cpp"
@@ -95,7 +96,15 @@ add_library(cgame MODULE
 	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
-target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libboost)
+target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 ${Boost_LIBRARIES})
+
+if(APPLE)
+	# These are just for generating the hardware id
+	find_library(IOKIT_FRAMEWORK IOKit REQUIRED)
+	find_library(COREF_FRAMEWORK CoreFoundation REQUIRED)
+	target_link_libraries(cgame PRIVATE ${IOKIT_FRAMEWORK} ${COREF_FRAMEWORK})
+endif()
+
 set_target_properties(cgame PROPERTIES 
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
@@ -106,4 +115,7 @@ set_target_properties(cgame PROPERTIES
     VS_DEBUGGER_COMMAND "$(ETROOT)\\ET.exe"
 	VS_DEBUGGER_COMMAND_ARGUMENTS "+set fs_basepath \"$(SolutionDir)\" +set fs_homepath . +set fs_game ${CMAKE_PROJECT_NAME} +set sv_pure 0"
 	VS_DEBUGGER_WORKING_DIRECTORY "$(ETROOT)")
-	
+
+if(APPLE)
+	set_target_properties(cgame PROPERTIES OSX_ARCHITECTURES ${MACOS_COMPILE_PLATFORMS})
+endif()

@@ -18,9 +18,13 @@ add_library(ui MODULE
 	${UI_HEADERS}
 )
 target_compile_definitions(ui PRIVATE UIDLL)
-target_link_libraries(ui PRIVATE cxx_compiler_opts libboost)
+target_link_libraries(ui PRIVATE cxx_compiler_opts ${Boost_LIBRARIES})
 set_target_properties(ui PROPERTIES 
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
 set_target_lib_suffix(ui)
+
+if(APPLE)
+	set_target_properties(ui PROPERTIES OSX_ARCHITECTURES ${MACOS_COMPILE_PLATFORMS})
+endif()
