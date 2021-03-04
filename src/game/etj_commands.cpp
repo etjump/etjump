@@ -1182,6 +1182,8 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 
 	buffer += "\n";
 
+	buffer += (boost::format("\n^zFound ^3%d ^zmaps on the server.\n") % static_cast<int>(maps.size())).str();
+
 	Utilities::toConsole(ent, buffer);
 
 	return true;
