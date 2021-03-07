@@ -868,12 +868,9 @@ void SetWolfSpawnWeapons(gclient_t *client)
 	// Zero: CTF: if CTF give no other weapons than knife
 	if (g_weapons.integer)
 	{
-		if (pc != PC_FIELDOPS)
+		if (AddWeaponToPlayer(client, WP_BINOCULARS, 1, 0, qfalse))
 		{
-			if (AddWeaponToPlayer(client, WP_BINOCULARS, 1, 0, qfalse))
-			{
-				client->ps.stats[STAT_KEYS] |= (1 << INV_BINOCS);
-			}
+			client->ps.stats[STAT_KEYS] |= (1 << INV_BINOCS);
 		}
 		// Engineer gets dynamite
 		if (pc == PC_ENGINEER)

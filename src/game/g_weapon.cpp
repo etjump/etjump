@@ -4923,7 +4923,8 @@ void FireWeapon(gentity_t *ent)
 		aimSpreadScale = 1.0;
 	}
 
-	if ((ent->client->ps.eFlags & EF_ZOOMING) && (ent->client->ps.stats[STAT_KEYS] & (1 << INV_BINOCS)))
+	// ETJump: only allow calling artillery if cheats are enabled
+	if ((ent->client->ps.eFlags & EF_ZOOMING) && (ent->client->ps.stats[STAT_KEYS] & (1 << INV_BINOCS)) && g_cheats.integer)
 	{
 		if (ent->client->sess.playerType == PC_FIELDOPS)
 		{
