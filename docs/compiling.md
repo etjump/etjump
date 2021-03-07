@@ -9,6 +9,10 @@ Compiling the source code is a straightforward process. Below you will find inst
     * [Visual Studio solution](#option-1-generate-visual-studio-sln-project-files) (Recommended)
     * [Visual Studio CMake project](#option-2-open-cmake-project-in-visual-studio)
     * [mingw-w64](#option-3-use-mingw-w64-toolchain)
+    * [Cross-compiling windows binaries on linux using mingw-w64](#cross-compiling-windows-binaries-using-mingw-w64-on-linux)
+* __[macOS](#macos)__
+    * [Makefiles](#option-1-makefiles-and-apple-clang)
+    * [Cross-compiling macOS binaries on linux using darling](#option-2-cross-compiling-macOS-binaries-on-linux-using-darling)
 
 ## Prerequisites
 
@@ -83,6 +87,7 @@ There are multiple options available:
 * Generate the `sln` project files (native `Visual Studio` experience). `RECOMMENDED`
 * Load cmake project in [Visual Studio](https://visualstudio.microsoft.com/vs/community/) (`Visual Studio 2017` or later).
 * Compiling using `mingw-w64` toolchain (using `gcc` on windows).
+* Cross-compiling windows binaries on linux using `mingw-w64` toolchain.
 
 #### Option 1. Generate Visual Studio `sln` project files:
 
@@ -197,7 +202,7 @@ _One can also use `mingw-w64` on linux to cross-compile windows binaries (next s
     # or use "mingw32-make mod_release" to create release zip
     ```
 
-### Cross-compiling windows binaries using `mingw-w64` on linux
+#### Option 4. Cross-compiling windows binaries on linux using `mingw-w64` 
 
 As prerequisites you would first need to install `mingw-w64` and all its dependencies on your system using package manager.
 
@@ -220,6 +225,53 @@ $ cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-
 # -j4 = use 4 threads
 $ make -j4
 ```
+
+### macOS
+
+#### Option 1. Makefiles and apple clang
+
+* Install `clang` and all necessary gnu tools:
+    ```sh
+    xcode-select --install
+    ```
+
+* Install brew (this should also install `clang` if missing):
+    ```sh
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
+
+* Install `cmake` and `git`:
+    ```sh
+    brew install cmake git
+    ```
+
+* Generate __x86_64__ Makefiles:
+    ```sh
+    $ git clone https://github.com/etjump/etjump.git && cd etjump
+    $ mkdir build && cd build
+    $ cmake .. -DCMAKE_BUILD_TYPE=Release
+    # or "-DCMAKE_BUILD_TYPE=Debug" to compile debug binaries 
+    ```
+
+* Compile:
+    ```sh
+    # -j4 = use 4 threads
+    $ make -j4
+    ```
+* You can find binaries in `build/etjump`.
+
+##### Create mod pk3
+
+* Run `make mod_pk3` to create mod pk3
+    * `pk3` file will be created in `build/etjump` directory
+* Run `make mod_release` to create zip release
+    * `zip` release will be created in `build` directory
+
+#### Option 2. Cross-compiling macOS binaries on linux using `darling`
+
+* Build darling from the source code followig the [instructions](https://docs.darlinghq.org/build-instructions.html) for the platform.
+* Launch the [darling shell](https://docs.darlinghq.org/darling-shell.html).
+* Run the commands from the previous chapter (Option 1).
 
 ## Building complete release package on linux with cross compile option (windows binaries)
 

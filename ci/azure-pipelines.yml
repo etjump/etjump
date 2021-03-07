@@ -64,3 +64,20 @@ jobs:
       cd build
       ctest -C Release
     displayName: 'Test Windows x86'
+
+- job: build_macos
+
+  pool:
+    vmImage: 'macOS-10.15'
+
+  steps:
+  - script: |
+      mkdir build && cd build
+      cmake .. -DCMAKE_BUILD_TYPE=Release
+      cmake --build . --parallel
+    displayName: 'macOS x86_64'
+
+  - script: |
+      cd build
+      ctest
+    displayName: 'Test macOS x86_64'
