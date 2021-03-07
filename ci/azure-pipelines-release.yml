@@ -1,5 +1,5 @@
 # ETJump Release Pipeline II
-# Builds Windows and Linux binaries
+# Builds native Windows, Linux and macOS binaries
 
 trigger: none
 pr: none
@@ -64,10 +64,34 @@ jobs:
       cmake .. -A Win32 -DBUILD_TESTS=OFF
       cmake --build . --config Release --parallel
     displayName: 'Build windows x86'
-
   - task: CopyFiles@2
     inputs:
       contents: '*.dll'
+      sourceFolder: '$(buildDir)/etjump'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    displayName: 'Copy binaries'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: etjump
+    displayName: 'Publish binaries'
+
+- job: build_macos
+
+  pool:
+    vmImage: 'macOS-10.15'
+
+  steps:
+
+  - script: |
+      mkdir $(buildDir) && cd $(buildDir)
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+      cmake --build . --parallel
+    displayName: 'Build macOS x86_64'
+  - task: CopyFiles@2
+    inputs:
+      contents: '*_mac'
       sourceFolder: '$(buildDir)/etjump'
       targetFolder: $(Build.ArtifactStagingDirectory)
     displayName: 'Copy binaries'
@@ -82,6 +106,7 @@ jobs:
   dependsOn: 
   - build_linux
   - build_windows
+  - build_macos
 
   pool:
     vmImage: 'ubuntu-16.04'

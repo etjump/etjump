@@ -23,4 +23,4 @@ set_target_properties(ui PROPERTIES
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
-set_target_lib_suffix(ui)
+set_target_platform_details(ui)

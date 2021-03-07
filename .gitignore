@@ -181,3 +181,5 @@ scons.signatures.dblite
 .vs
 .idea
 out
+cmake-build*/
+

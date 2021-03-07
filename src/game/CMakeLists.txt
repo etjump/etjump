@@ -90,4 +90,4 @@ set_target_properties(qagame PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
-set_target_lib_suffix(qagame)
+set_target_platform_details(qagame)

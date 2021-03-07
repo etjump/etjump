@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__)
 #define FN_PUBLIC __attribute__((visibility("default")))
 #elif defined(_WIN32)
 // https://msdn.microsoft.com/en-us/library/wf2w9f6x.aspx
