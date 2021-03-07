@@ -97,14 +97,7 @@ add_library(cgame MODULE
 	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
-target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 ${Boost_LIBRARIES})
-
-if(APPLE)
-	# These are just for generating the hardware id
-	find_library(IOKIT_FRAMEWORK IOKit REQUIRED)
-	find_library(COREF_FRAMEWORK CoreFoundation REQUIRED)
-	target_link_libraries(cgame PRIVATE ${IOKIT_FRAMEWORK} ${COREF_FRAMEWORK})
-endif()
+target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libboost)
 
 set_target_properties(cgame PROPERTIES 
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

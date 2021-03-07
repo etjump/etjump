@@ -84,7 +84,7 @@ add_library(qagame MODULE
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
-target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite ${Boost_LIBRARIES})
+target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libboost)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES 
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

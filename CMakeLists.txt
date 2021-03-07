@@ -24,32 +24,11 @@ file(MAKE_DIRECTORY "${BASE_DIR_PATH}")
 create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE GAME_NAME="${CMAKE_PROJECT_NAME}" GAME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}" GAME_VERSION="${GAME_VERSION}")
 create_compiler_opts(cxx_compiler_opts_w0 WARN 0)
 
-if(APPLE)
-	# Must specify a target, otherwise it will require the OS version used at compile time.
-	if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-		set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14")
-	endif()
-
-	# For the build to succeed in arm the libs need to be fixed as well.
-	# set(MACOS_COMPILE_PLATFORMS "x86_64;arm64")
-	set(MACOS_COMPILE_PLATFORMS "x86_64")
-endif()
-
 add_subdirectory(deps/json)
 add_subdirectory(deps/sha-1)
 add_subdirectory(deps/sqlite)
 add_subdirectory(deps/gtest)
-
-if(APPLE)
-	find_package(Boost)
-	if(Boost_FOUND)
-		include_directories(${Boost_INCLUDE_DIRS})
-	else()
-		message(FATAL "Could not find boost from system libraries. Fix the included deboost or install boost libs with brew")
-	endif()
-else()
-	add_subdirectory(deps/deboost)
-endif()
+add_subdirectory(deps/deboost)
 
 target_link_libraries(libjson PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsha1 PRIVATE cxx_compiler_opts_w0)
