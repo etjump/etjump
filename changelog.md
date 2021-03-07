@@ -26,6 +26,11 @@
   * use `nosound` as `noise` key to disable sound completely
 * added `spawnflags` __8__ to `func_static` to allow disabling random __500-1500ms__ delay between activations [#582](https://github.com/etjump/etjump/pull/582)
   * minimum delay between activations when using this spawnflag is __100ms__
+* added `etj_demo_drawBanners` to hide banners during demo playback [#587](https://github.com/etjump/etjump/pull/587)
+* `!listmaps` now displays total number of maps on server [#588](https://github.com/etjump/etjump/pull/588)
+* fixed duplicate spam protection print with `team` command [#591](https://github.com/etjump/etjump/pull/591)
+* added back binoculars to field ops [#593](https://github.com/etjump/etjump/pull/593)
+  * calling artillery is only possible when cheats are enabled
 
 # ETJump 2.4.0
 
