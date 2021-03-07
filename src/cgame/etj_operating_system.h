@@ -33,6 +33,5 @@ namespace ETJump
 		OperatingSystem();
 		void minimize();
 		std::string getHwid();
-		void addMinimizeButton();
 	};
 }

@@ -30,30 +30,22 @@
 
 const char *G_SHA1(const char *str);
 
-ETJump::OperatingSystem::OperatingSystem()
-= default;
+ETJump::OperatingSystem::OperatingSystem() = default;
 
 void ETJump::OperatingSystem::minimize()
 {
-	// NOPE
 }
 
 std::string ETJump::OperatingSystem::getHwid()
 {
 	char buf[512];
 	io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
-	auto uuidCf = (CFStringRef) IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey),
-																kCFAllocatorDefault, 0);
+	auto uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
 	IOObjectRelease(ioRegistryRoot);
 	CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
 	CFRelease(uuidCf);
 
 	return G_SHA1(buf);
-}
-
-void ETJump::OperatingSystem::addMinimizeButton()
-{
-	// NOPE!
 }
 
 #endif

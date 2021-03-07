@@ -52,7 +52,6 @@ std::string ETJump::OperatingSystem::getHwid()
 	if (sock == -1)
 	{                 /* handle error*/
 	}
-	;
 
 	ifc.ifc_len = sizeof(buf);
 	ifc.ifc_buf = buf;

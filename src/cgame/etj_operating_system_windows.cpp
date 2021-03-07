@@ -31,6 +31,25 @@
 const char *G_SHA1(const char *str);
 void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize);
 
+static void addMinimizeButton()
+{
+	char buffer[64];
+	auto *WindowClassName = "Enemy Territory";
+	trap_Cvar_VariableStringBuffer("win_hinstance", buffer, sizeof buffer);
+	const auto etHandle = reinterpret_cast<HINSTANCE>(atol(buffer));
+	HWND wnd = nullptr;
+	while ((wnd = FindWindowEx(nullptr, wnd, WindowClassName, WindowClassName)))
+	{
+		const auto hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
+		if (etHandle == hInst)
+		{
+			const auto style = GetWindowLongPtr(wnd, GWL_STYLE);
+			SetWindowLongPtr(wnd, GWL_STYLE, style | WS_MINIMIZEBOX);
+			break;
+		}
+	}
+}
+
 ETJump::OperatingSystem::OperatingSystem()
 {
 	addMinimizeButton();
@@ -77,25 +96,6 @@ std::string ETJump::OperatingSystem::getHwid()
 	hardwareId += buffer;
 
 	return G_SHA1(hardwareId.c_str());
-}
-
-void ETJump::OperatingSystem::addMinimizeButton()
-{
-	char buffer[64];
-	auto *WindowClassName = "Enemy Territory";
-	trap_Cvar_VariableStringBuffer("win_hinstance", buffer, sizeof buffer);
-	const auto etHandle = reinterpret_cast<HINSTANCE>(atol(buffer));
-	HWND wnd = nullptr;
-	while ((wnd = FindWindowEx(nullptr, wnd, WindowClassName, WindowClassName)))
-	{
-		const auto hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
-		if (etHandle == hInst)
-		{
-			const auto style = GetWindowLongPtr(wnd, GWL_STYLE);
-			SetWindowLongPtr(wnd, GWL_STYLE, style | WS_MINIMIZEBOX);
-			break;
-		}
-	}
 }
 
 #endif

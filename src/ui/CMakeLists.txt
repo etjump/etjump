@@ -23,8 +23,4 @@ set_target_properties(ui PROPERTIES
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
-set_target_lib_suffix(ui)
-
-if(APPLE)
-	set_target_properties(ui PROPERTIES OSX_ARCHITECTURES ${MACOS_COMPILE_PLATFORMS})
-endif()
+set_target_platform_details(ui)

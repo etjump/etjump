@@ -65,6 +65,7 @@ add_library(cgame MODULE
 	"etj_keyset_system.cpp"
 	"etj_maxspeed.cpp"
 	"etj_operating_system_linux.cpp"
+	"etj_operating_system_macos.cpp"
 	"etj_operating_system_windows.cpp"
 	"etj_operating_system_macos.cpp"
 	"etj_overbounce_watcher.cpp"
@@ -109,7 +110,7 @@ set_target_properties(cgame PROPERTIES
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
-set_target_lib_suffix(cgame)
+set_target_platform_details(cgame)
 
 set_target_properties(cgame PROPERTIES 
     VS_DEBUGGER_COMMAND "$(ETROOT)\\ET.exe"
@@ -117,5 +118,8 @@ set_target_properties(cgame PROPERTIES
 	VS_DEBUGGER_WORKING_DIRECTORY "$(ETROOT)")
 
 if(APPLE)
-	set_target_properties(cgame PROPERTIES OSX_ARCHITECTURES ${MACOS_COMPILE_PLATFORMS})
+	# These are just for generating the hardware id
+	find_library(IOKIT_FRAMEWORK IOKit REQUIRED)
+	find_library(COREF_FRAMEWORK CoreFoundation REQUIRED)
+	target_link_libraries(cgame PRIVATE ${IOKIT_FRAMEWORK} ${COREF_FRAMEWORK})
 endif()
