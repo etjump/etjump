@@ -86,7 +86,7 @@ jobs:
 
   - script: |
       mkdir $(buildDir) && cd $(buildDir)
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET="10.10"
       cmake --build . --parallel
     displayName: 'Build macOS x86_64'
   - task: CopyFiles@2

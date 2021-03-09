@@ -9,7 +9,7 @@ Compiling the source code is a straightforward process. Below you will find inst
     * [Visual Studio solution](#option-1-generate-visual-studio-sln-project-files) (Recommended)
     * [Visual Studio CMake project](#option-2-open-cmake-project-in-visual-studio)
     * [mingw-w64](#option-3-use-mingw-w64-toolchain)
-    * [Cross-compiling windows binaries on linux using mingw-w64](#cross-compiling-windows-binaries-using-mingw-w64-on-linux)
+    * [Cross-compiling windows binaries on linux using mingw-w64](#option-4-cross-compiling-windows-binaries-using-mingw-w64-on-linux)
 * __[macOS](#macos)__
     * [Makefiles](#option-1-makefiles-and-apple-clang)
     * [Cross-compiling macOS binaries on linux using darling](#option-2-cross-compiling-macOS-binaries-on-linux-using-darling)
