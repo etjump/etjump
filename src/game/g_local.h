@@ -783,6 +783,10 @@ typedef struct
 
 	float velocityScale;
 	bool clientIsInactive;
+
+	int weaponsOnSpawn[MAX_WEAPONS / (sizeof(int) * 8)];		// state of ps.weapons on spawn
+	int ammoOnSpawn[MAX_WEAPONS];								// total amount of ammo on spawn
+	int ammoclipOnSpawn[MAX_WEAPONS];							// ammo in clip on spawn
 } clientSession_t;
 
 //
@@ -1666,6 +1670,7 @@ void SetWolfSpawnWeapons(gclient_t *client);
 void limbo(gentity_t *ent, qboolean makeCorpse);   // JPW NERVE
 void reinforce(gentity_t *ent); // JPW NERVE
 qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int ammoclip, qboolean setcurrent);
+void ResetPlayerAmmo(gclient_t* client, gentity_t *ent);
 void ClearPortals(gentity_t *ent);
 //
 // g_character.c

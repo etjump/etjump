@@ -826,6 +826,114 @@ qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int amm
 }
 
 /*
+=================================
+ResetPlayerAmmo
+Resets players ammo to default
+=================================
+*/
+void ResetPlayerAmmo(gclient_t *client, gentity_t *ent)
+{
+	auto ammoMultiplier = 0;
+	auto nadeCount = 0;
+
+	// set default ammo multiplier for thompson/mp40/sten
+	// and grenade count per class, as these do not follow ammotable data
+	// ammo from skill bonuses is handled in AddWeaponToPlayer
+	switch (client->sess.playerType)
+	{
+	case PC_SOLDIER:
+		ammoMultiplier = 2;
+		nadeCount = 4;
+		break;
+	case PC_COVERTOPS:
+		ammoMultiplier = 2;
+		nadeCount = 2;
+		break;
+	case PC_MEDIC:
+		ammoMultiplier = 0;
+		nadeCount = 1;
+		break;
+	case PC_ENGINEER:
+		ammoMultiplier = 1;
+		nadeCount = 4;
+		break;
+	case PC_FIELDOPS:
+		ammoMultiplier = 1;
+		nadeCount = 1;
+		break;
+	default:
+		break;
+	}
+
+	G_FadeItems(ent, MOD_SATCHEL);
+
+	// grenades are cleared from ps.weapons when they run out of ammo so they are handled seperately
+	// dynamite, pliers, satchel & satchel detonator have 0 ammo in ammotable so they must be given manually
+	for (auto i = 0; i < WP_NUM_WEAPONS; i++)
+	{
+		if (COM_BitCheck(client->ps.weapons, i))
+		{
+			if (i == WP_GRENADE_LAUNCHER || i == WP_GRENADE_PINEAPPLE)
+			{
+				continue;
+			}
+			if (client->sess.timerunActive && BG_WeaponDisallowedInTimeruns(i))
+			{
+				continue;
+			}
+			if ((i == WP_DYNAMITE || i == WP_PLIERS) && level.noExplosives != 2)
+			{
+				AddWeaponToPlayer(client, static_cast<weapon_t>(i), 0, 1, qfalse);
+				continue;
+			}
+			if (i == WP_SATCHEL && !level.noExplosives)
+			{
+				AddWeaponToPlayer(client, WP_SATCHEL, 0, 1, qfalse);
+				AddWeaponToPlayer(client, WP_SATCHEL_DET, 0, 0, qfalse);
+				continue;
+			}
+			if (BG_WeaponIsExplosive(i) && level.noExplosives)
+			{
+				continue;
+			}
+			if (i == WP_MP40 || i == WP_THOMPSON || i == WP_STEN)
+			{
+				AddWeaponToPlayer(client, static_cast<weapon_t>(i), GetAmmoTableData(i)->defaultStartingAmmo * ammoMultiplier, GetAmmoTableData(i)->defaultStartingClip, qfalse);
+			}
+			else if (BG_IsAkimboWeapon(i))
+			{
+				client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(i)))] = GetAmmoTableData(i)->defaultStartingClip;
+				AddWeaponToPlayer(client, static_cast<weapon_t>(i), GetAmmoTableData(i)->defaultStartingAmmo, GetAmmoTableData(i)->defaultStartingClip, qfalse);
+			}
+			else
+			{
+				AddWeaponToPlayer(client, static_cast<weapon_t>(i), GetAmmoTableData(i)->defaultStartingAmmo, GetAmmoTableData(i)->defaultStartingClip, qfalse);
+			}
+		}
+	}
+
+	// no nades if explosives are disabled or timerun is active
+	if (!level.noExplosives && !client->sess.timerunActive)
+	{
+		weapon_t nadeType;
+		switch (client->sess.sessionTeam)
+		{
+		case TEAM_AXIS:
+			nadeType = WP_GRENADE_LAUNCHER;
+			break;
+		case TEAM_ALLIES:
+			nadeType = WP_GRENADE_PINEAPPLE;
+			break;
+		default:
+			nadeType = WP_NONE;
+			break;
+		}
+
+		AddWeaponToPlayer(client, nadeType, 0, nadeCount, qfalse);
+	}
+}
+
+/*
 ===========
 SetWolfSpawnWeapons
 ===========
@@ -2389,6 +2497,13 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	G_UpdateCharacter(client);
 
 	SetWolfSpawnWeapons(client);
+	if (!revived)
+	{
+		// store weapon & ammo data on spawn so it can be restored easily
+		memcpy(client->sess.weaponsOnSpawn, client->ps.weapons, sizeof(client->ps.weapons));
+		memcpy(client->sess.ammoOnSpawn, client->ps.ammo, sizeof(client->ps.ammo));
+		memcpy(client->sess.ammoclipOnSpawn, client->ps.ammoclip, sizeof(client->ps.ammoclip));
+	}
 
 	// START	Mad Doctor I changes, 8/17/2002
 

@@ -197,18 +197,18 @@ ammotable_t ammoTableMP[WP_NUM_WEAPONS] =
 	{ 48,  1, 8,   48, 8,   2700, DELAY_PISTOL, 200,  0,    0,   MOD_AKIMBO_LUGER         },                                        // WP_AKIMBO_LUGER			// 38
 	{ 999, 0, 999, 0,  0,   0,    50,           200,  0,    0,   MOD_PORTAL_GUN           },                                        // WP_PORTAL_GUN			// 39 //Feen: Portal Gun Mod
 
-	{ 4,   1, 1,   4,  1,   3000, DELAY_LOW,    400,  0,    0,   MOD_GPG40                },                                        // WP_GPG40					// 39 //Feen: + 1 from this point on
+	{ 4,   1, 1,   4,  1,   3000, DELAY_LOW,    400,  0,    0,   MOD_GPG40                },                                        // WP_GPG40					// 40
 
-	{ 4,   1, 1,   4,  1,   3000, DELAY_LOW,    400,  0,    0,   MOD_M7                   },                                        // WP_M7					// 40
-	{ 24,  1, 8,   24, 8,   1500, DELAY_PISTOL, 400,  0,    0,   MOD_SILENCED_COLT        },                                        // WP_SILENCED_COLT			// 41
-	{ 24,  1, 8,   16, 8,   1500, 0,            400,  0,    0,   MOD_GARAND_SCOPE         },                                        // WP_GARAND_SCOPE			// 42		GARAND
-	{ 30,  1, 10,  20, 10,  2500, 0,            400,  0,    0,   MOD_K43_SCOPE            },                                        // WP_K43_SCOPE				// 43		K43
-	{ 60,  1, 20,  40, 20,  2000, DELAY_LOW,    400,  0,    0,   MOD_FG42SCOPE            },                                        // WP_FG42SCOPE				// 44
-	{ 16,  1, 1,   12, 0,   0,    750,          1400, 0,    0,   MOD_MORTAR               },                                        // WP_MORTAR_SET			// 45
-	{ 10,  0, 1,   0,  1,   1500, 50,           1000, 0,    0,   MOD_SYRINGE              },                                        // WP_MEDIC_ADRENALINE		// 46
-	{ 48,  1, 8,   48, 8,   2700, DELAY_PISTOL, 200,  0,    0,   MOD_AKIMBO_SILENCEDCOLT  },                                        // WP_AKIMBO_SILENCEDCOLT	// 47
-	{ 48,  1, 8,   48, 8,   2700, DELAY_PISTOL, 200,  0,    0,   MOD_AKIMBO_SILENCEDLUGER },                                        // WP_AKIMBO_SILENCEDLUGER	// 48
-	{ 450, 1, 150, 0,  150, 3000, DELAY_LOW,    66,   1500, 300, MOD_MOBILE_MG42          },                                        // WP_MOBILE_MG42_SET		// 49
+	{ 4,   1, 1,   4,  1,   3000, DELAY_LOW,    400,  0,    0,   MOD_M7                   },                                        // WP_M7					// 41
+	{ 24,  1, 8,   24, 8,   1500, DELAY_PISTOL, 400,  0,    0,   MOD_SILENCED_COLT        },                                        // WP_SILENCED_COLT			// 42
+	{ 24,  1, 8,   16, 8,   1500, 0,            400,  0,    0,   MOD_GARAND_SCOPE         },                                        // WP_GARAND_SCOPE			// 43		GARAND
+	{ 30,  1, 10,  20, 10,  2500, 0,            400,  0,    0,   MOD_K43_SCOPE            },                                        // WP_K43_SCOPE				// 44		K43
+	{ 60,  1, 20,  40, 20,  2000, DELAY_LOW,    400,  0,    0,   MOD_FG42SCOPE            },                                        // WP_FG42SCOPE				// 45
+	{ 16,  1, 1,   12, 0,   0,    750,          1400, 0,    0,   MOD_MORTAR               },                                        // WP_MORTAR_SET			// 44
+	{ 10,  0, 1,   0,  1,   1500, 50,           1000, 0,    0,   MOD_SYRINGE              },                                        // WP_MEDIC_ADRENALINE		// 47
+	{ 48,  1, 8,   48, 8,   2700, DELAY_PISTOL, 200,  0,    0,   MOD_AKIMBO_SILENCEDCOLT  },                                        // WP_AKIMBO_SILENCEDCOLT	// 48
+	{ 48,  1, 8,   48, 8,   2700, DELAY_PISTOL, 200,  0,    0,   MOD_AKIMBO_SILENCEDLUGER },                                        // WP_AKIMBO_SILENCEDLUGER	// 49
+	{ 450, 1, 150, 0,  150, 3000, DELAY_LOW,    66,   1500, 300, MOD_MOBILE_MG42          },                                        // WP_MOBILE_MG42_SET		// 50
 };
 
 //----(SA)	moved in here so both games can get to it
@@ -2915,6 +2915,29 @@ qboolean BG_WeaponIsExplosive(int weap)
 		return qtrue;
 	default:
 		return qfalse;
+	}
+}
+
+bool BG_WeaponDisallowedInTimeruns(int weap)
+{
+	switch (weap)
+	{
+	case WP_DYNAMITE:
+	case WP_GRENADE_LAUNCHER:
+	case WP_GRENADE_PINEAPPLE:
+	case WP_M7:
+	case WP_SATCHEL_DET:
+	case WP_SATCHEL:
+	case WP_MORTAR:
+	case WP_MORTAR_SET:
+	case WP_GPG40:
+	case WP_LANDMINE:
+	case WP_FLAMETHROWER:
+	case WP_PANZERFAUST:
+	case WP_PORTAL_GUN:
+		return true;
+	default:
+		return false;
 	}
 }
 
