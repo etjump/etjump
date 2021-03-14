@@ -476,6 +476,8 @@ void SP_target_deathrun_checkpoint(gentity_t *self);
 void SP_target_tjlclear(gentity_t *self);
 void SP_target_tjldisplay(gentity_t *self);
 
+void SP_target_init(gentity_t* self);
+
 spawn_t spawns[] =
 {
 	// info entities don't do anything at all, but provide positional
@@ -721,6 +723,7 @@ spawn_t spawns[] =
 	{"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},
 	{ "target_displaytjl",			 SP_target_tjldisplay			},
 	{ "target_cleartjl",			 SP_target_tjlclear				},
+	{ "target_init",			 SP_target_init				},
 	{ 0,                             0                              }
 };
 

@@ -886,20 +886,20 @@ typedef enum
 
 // Gordon: ONLY secondaries below this mark, as they are checked >= WP_GPG40 && < WP_NUM_WEAPONS
 
-	WP_GPG40,               // 39 //Feen: + 1 from this point on....
+	WP_GPG40,               // 40
 
-	WP_M7,                  // 40
-	WP_SILENCED_COLT,       // 41
-	WP_GARAND_SCOPE,        // 42
-	WP_K43_SCOPE,           // 43
-	WP_FG42SCOPE,           // 44
-	WP_MORTAR_SET,          // 45
-	WP_MEDIC_ADRENALINE,    // 46
-	WP_AKIMBO_SILENCEDCOLT, // 47
-	WP_AKIMBO_SILENCEDLUGER,// 48
-	WP_MOBILE_MG42_SET,     // 49
+	WP_M7,                  // 41
+	WP_SILENCED_COLT,       // 43
+	WP_GARAND_SCOPE,        // 43
+	WP_K43_SCOPE,           // 44
+	WP_FG42SCOPE,           // 45
+	WP_MORTAR_SET,          // 46
+	WP_MEDIC_ADRENALINE,    // 47
+	WP_AKIMBO_SILENCEDCOLT, // 48
+	WP_AKIMBO_SILENCEDLUGER,// 49
+	WP_MOBILE_MG42_SET,     // 50
 
-	WP_NUM_WEAPONS          // WolfMP: 32 WolfXP: 50
+	WP_NUM_WEAPONS          // WolfMP: 32 WolfXP: 51
 	                        // NOTE: this cannot be larger than 64 for AI/player weapons!
 } weapon_t;
 
@@ -1638,6 +1638,7 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon);
 
 qboolean    BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps, int *skill, int teamNum);
 qboolean    BG_WeaponIsExplosive(int weap);
+bool BG_WeaponDisallowedInTimeruns(int weap);
 
 
 // content masks
