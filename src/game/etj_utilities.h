@@ -104,7 +104,7 @@ namespace Utilities {
 	 */
 	void toConsole(gentity_t *ent, std::string message);
 
-	void RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons);
+	void RemovePlayerWeapons(int clientNum);
 };
 
 

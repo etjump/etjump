@@ -2941,6 +2941,15 @@ bool BG_WeaponDisallowedInTimeruns(int weap)
 	}
 }
 
+bool BG_WeaponHasAmmo(playerState_t *ps, int weap)
+{
+	if (ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(weap))] || ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weap))])
+	{
+		return true;
+	}
+	return false;
+}
+
 /*
 ============
 BG_PlayerTouchesItem
