@@ -60,44 +60,24 @@ std::vector<int> Utilities::getSpectators(int clientNum)
 	return std::move(spectators);
 }
 
-static void SelectCorrectWeapon(gclient_t *cl, const std::vector<int>& disallowed)
+static void SelectCorrectWeapon(gclient_t *cl)
 {
-	auto current = cl->ps.weapon;
-	auto it      = std::find_if(disallowed.begin(), disallowed.end(), [&current](int w) {
-		return w == current;
-	});
-	if (it != disallowed.end())
+	auto primary = cl->sess.playerWeapon;
+	auto secondary = cl->sess.playerWeapon2;
+
+	// we have already removed disallowed weapons at this point,
+	// so we only need to check if we have the weapon & ammo for it
+	if (COM_BitCheck(cl->ps.weapons, primary) && BG_WeaponHasAmmo(&cl->ps, primary))
 	{
-		if (cl->sess.sessionTeam == TEAM_AXIS)
-		{
-			if (COM_BitCheck(cl->ps.weapons, WP_MP40))
-			{
-				cl->ps.weapon = WP_MP40;
-			}
-			else if (COM_BitCheck(cl->ps.weapons, WP_KAR98))
-			{
-				cl->ps.weapon = WP_KAR98;
-			}
-			else
-			{
-				cl->ps.weapon = WP_LUGER;
-			}
-		}
-		else
-		{
-			if (COM_BitCheck(cl->ps.weapons, WP_THOMPSON))
-			{
-				cl->ps.weapon = WP_THOMPSON;
-			}
-			else if (COM_BitCheck(cl->ps.weapons, WP_CARBINE))
-			{
-				cl->ps.weapon = WP_CARBINE;
-			}
-			else
-			{
-				cl->ps.weapon = WP_COLT;
-			}
-		}
+		cl->ps.weapon = primary;
+	}
+	else if (COM_BitCheck(cl->ps.weapons, secondary) && BG_WeaponHasAmmo(&cl->ps, secondary))
+	{
+		cl->ps.weapon = secondary;
+	}
+	else
+	{
+		cl->ps.weapon = WP_KNIFE;
 	}
 }
 
@@ -136,24 +116,9 @@ void Utilities::startRun(int clientNum)
 		return;
 	}
 
-	auto disallowed = std::vector<int>{
-		WP_DYNAMITE,
-		WP_GRENADE_LAUNCHER,
-		WP_GRENADE_PINEAPPLE,
-		WP_M7,
-		WP_SATCHEL_DET,
-		WP_SATCHEL,
-		WP_MORTAR,
-		WP_MORTAR_SET,
-		WP_GPG40,
-		WP_LANDMINE,
-		WP_FLAMETHROWER,
-		WP_PANZERFAUST,
-		WP_PORTAL_GUN
-	};
-	RemovePlayerWeapons(clientNum, disallowed);
+	RemovePlayerWeapons(clientNum);
 	RemovePlayerProjectiles(clientNum);
-	SelectCorrectWeapon(player->client, disallowed);
+	SelectCorrectWeapon(player->client);
 
 //	// Disable any weapons except kife
 //	player->client->ps.weapons[0] = 0;
@@ -231,12 +196,15 @@ void Utilities::toConsole(gentity_t *ent, std::string message)
 	}
 }
 
-void Utilities::RemovePlayerWeapons(int clientNum, const std::vector<int>& weapons)
+void Utilities::RemovePlayerWeapons(int clientNum)
 {
 	auto *cl = (g_entities + clientNum)->client;
-	for (auto& weapon : weapons)
+	for (auto i = 0; i < WP_NUM_WEAPONS; i++) 
 	{
-		COM_BitClear(cl->ps.weapons, weapon);
+		if (BG_WeaponDisallowedInTimeruns(i))
+		{
+			COM_BitClear(cl->ps.weapons, i);
+		}
 	}
 }
 

@@ -2566,13 +2566,11 @@ void target_init_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 		// if we have ammo: primary > seconday > knife
 		if (activator->client->ps.weapon == WP_PORTAL_GUN)
 		{
-			if (activator->client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(activator->client->sess.playerWeapon))] ||
-				activator->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(activator->client->sess.playerWeapon))])
+			if (BG_WeaponHasAmmo(&activator->client->ps, activator->client->sess.playerWeapon))
 			{
 				activator->client->ps.weapon = activator->client->sess.playerWeapon;
 			}
-			else if (activator->client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(activator->client->sess.playerWeapon2))] ||
-				activator->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(activator->client->sess.playerWeapon2))])
+			else if (BG_WeaponHasAmmo(&activator->client->ps, activator->client->sess.playerWeapon2))
 			{
 				activator->client->ps.weapon = activator->client->sess.playerWeapon2;
 			}

@@ -1639,6 +1639,7 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon);
 qboolean    BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps, int *skill, int teamNum);
 qboolean    BG_WeaponIsExplosive(int weap);
 bool BG_WeaponDisallowedInTimeruns(int weap);
+bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
 
 
 // content masks
