@@ -3810,10 +3810,6 @@ void CG_Shutdown(void)
 	// like closing files or archiving session data
 
 	CG_EventHandling(CGAME_EVENT_NONE, qtrue);
-	if (cg.demoPlayback)
-	{
-		trap_Cvar_Set("timescale", "1");
-	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ETJump shutdown
