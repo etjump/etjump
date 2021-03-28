@@ -3355,30 +3355,36 @@ static void CG_DrawOB(void)
 
 		// sticky ob
 		b   = qfalse;
-		h0 += 0.25;
-		//CG_Printf("h0=%f, t=%f\n", h0, t);
 
-		// sticky fall ob
-		if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
+		// don't display stickies on the same height we're currently at
+		// since obviously it's possible and it's just distracting
+		if (h0 != t)
 		{
-			CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-			b = qtrue;
-		}
+			h0 += 0.25;
+			//CG_Printf("h0=%f, t=%f\n", h0, t);
 
-		// sticky jump ob
-		if (ps->groundEntityNum != ENTITYNUM_NONE
-		    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-			b = qtrue;
-		}
+			// sticky fall ob
+			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
+			{
+				CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
+					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				b = qtrue;
+			}
 
-		if (b && CG_SurfaceAllowsOverbounce(&trace))
-		{
-			CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse, qtrue,
-			                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+			// sticky jump ob
+			if (ps->groundEntityNum != ENTITYNUM_NONE
+				&& CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
+			{
+				CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
+					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				b = qtrue;
+			}
+
+			if (b && CG_SurfaceAllowsOverbounce(&trace))
+			{
+				CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse, qtrue,
+					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+			}
 		}
 	}
 }
