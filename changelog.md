@@ -31,6 +31,13 @@
 * fixed duplicate spam protection print with `team` command [#591](https://github.com/etjump/etjump/pull/591)
 * added back binoculars to field ops [#593](https://github.com/etjump/etjump/pull/593)
   * calling artillery is only possible when cheats are enabled
+* added initial support for macOS (10.10 and up) [#590](https://github.com/etjump/etjump/pull/590), [#595](https://github.com/etjump/etjump/pull/595)
+  * very untested and possibly broken - feedback appreciated
+  * no M1 mac support
+* added `target_init` entity - initalizes player to a freshly spawned state [#596](https://github.com/etjump/etjump/pull/596)
+* fixed weapon swapping on timerun start not handling covert ops weapons properly [#598](https://github.com/etjump/etjump/pull/598)
+* timescale is no longer reset on demo playback when subsystems are restarted (eg. calling `vid_restart`) [#599](https://github.com/etjump/etjump/pull/599)
+* `etj_drawOB 2` no longer shows stickies that are on the same height as you are currently [#600](https://github.com/etjump/etjump/pull/600)
 
 # ETJump 2.4.0
 
