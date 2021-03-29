@@ -88,6 +88,11 @@ namespace ETJump
 			return;
 		}
 
+		if (cg.zoomedBinoc || cg.zoomedScope)
+		{
+			return;
+		}
+
 		// get correct speed scaling
 		scale = PM_CalcScale(ps);
 
