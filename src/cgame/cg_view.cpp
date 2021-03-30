@@ -592,6 +592,11 @@ static void CG_ZoomSway(void)
 		return;
 	}
 
+	if (cg.zoomedBinoc)
+	{
+		return;
+	}
+
 	spreadfrac = (float)cg.snap->ps.aimSpreadScale / 255.0;
 
 	phase                       = cg.time / 1000.0 * ZOOM_PITCH_FREQUENCY * M_PI * 2;

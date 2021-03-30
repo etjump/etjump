@@ -172,6 +172,11 @@ namespace ETJump
 			return;
 		}
 
+		if (cg.zoomedBinoc || cg.zoomedScope)
+		{
+			return;
+		}
+
 		a = Numeric::clamp(etj_CGazAlpha.value, 0.0f, 1.0f);
 		color[3] = a;
 		y = etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0;

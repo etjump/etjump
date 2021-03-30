@@ -2236,7 +2236,7 @@ static void CG_DrawCrosshair(void)
 	}
 
 	// using binoculars
-	if (cg.zoomedBinoc)
+	if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)
 	{
 		CG_DrawBinocReticle();
 		return;
@@ -2258,7 +2258,7 @@ static void CG_DrawCrosshair(void)
 
 	// weapons that get no reticle
 	case WP_NONE:       // no weapon, no crosshair
-		if (cg.zoomedBinoc)
+		if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)
 		{
 			CG_DrawBinocReticle();
 		}
@@ -3982,6 +3982,12 @@ static void CG_DrawFlashZoomTransition(void)
 	int    fadeTime;
 
 	if (!cg.snap)
+	{
+		return;
+	}
+
+	// ETJump: no transition for spectator zoom
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
 	{
 		return;
 	}
