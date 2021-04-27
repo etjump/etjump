@@ -1279,11 +1279,20 @@ void ClientThink_real(gentity_t *ent)
 	}
 
 	// Stop lagging through triggers in timeruns
-	if (client->sess.timerunActive && client->ps.ping > 400)
+	if (client->sess.timerunActive)
 	{
-		Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun stopped. High ping detected!");
-		InterruptRun(ent);
-		client->sess.timerunActive = qfalse;
+		if (client->ps.ping > 400)
+		{
+			Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun stopped due to high ping!");
+			InterruptRun(ent);
+			client->sess.timerunActive = qfalse;
+		}
+		if (client->pers.maxFPS < 25)
+		{
+			Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun stopped due to low FPS!");
+			InterruptRun(ent);
+			client->sess.timerunActive = qfalse;
+		}
 	}
 
 	// set up for pmove
