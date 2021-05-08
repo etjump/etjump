@@ -1,7 +1,7 @@
 # ETJump Release Pipeline II
 # Builds native Windows, Linux and macOS binaries
 
-trigger: none
+trigger: master
 pr: none
 
 variables:
