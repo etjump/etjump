@@ -38,6 +38,10 @@
 * fixed weapon swapping on timerun start not handling covert ops weapons properly [#598](https://github.com/etjump/etjump/pull/598)
 * timescale is no longer reset on demo playback when subsystems are restarted (eg. calling `vid_restart`) [#599](https://github.com/etjump/etjump/pull/599)
 * `etj_drawOB 2` no longer shows stickies that are on the same height as you are currently [#600](https://github.com/etjump/etjump/pull/600)
+* removed sway from binoculars & added binocular-like zoom for spectators [#601](https://github.com/etjump/etjump/pull/601)
+  * cgaz and snaphud no longer draw when zooming in with binoculars or scoped weapons
+* timeruns will now interrupt if client sets `com_maxfps < 25` to prevent trigger abuse [#602](https://github.com/etjump/etjump/pull/602)
+* added CHS info __55__ to display last jump speed [#603](https://github.com/etjump/etjump/pull/603)
 
 # ETJump 2.4.0
 
