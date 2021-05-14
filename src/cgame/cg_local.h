@@ -1258,6 +1258,8 @@ typedef struct
 
 	char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 	qboolean gridInitDone;
+
+	float lastJumpSpeed;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21

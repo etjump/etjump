@@ -428,6 +428,11 @@ static void CG_CHS_PlaneAngleZ(char *buf, int size)
 	Com_sprintf(buf, size, "%.2f", angle_z);
 }
 
+static void CG_CHS_LastJumpSpeed(char* buf, int size)
+{
+	Com_sprintf(buf, size, "%.0f", cg.lastJumpSpeed);
+}
+
 typedef struct
 {
 	void (*fun)(char *, int);
@@ -501,6 +506,7 @@ static stat_t stats[] =
 /*  52 */ { NULL }, // Reserved for possible Plane Angle Y
 /*  53 */ { CG_CHS_PlaneAngleZ, "Plane Angle Z", "plane angle z" },
 /*  54 */ { NULL }, // Reserved for possible Plane Angle XYZ
+/*  55 */ { CG_CHS_LastJumpSpeed, "Last Jump Speed", "last jump speed" },
 
 
 	{ NULL                                               }
