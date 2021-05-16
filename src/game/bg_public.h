@@ -680,7 +680,8 @@ typedef enum
 	// these were added for single player awards tracking
 
 	PERS_REVIVE_COUNT,
-	PERS_BLEH_2,
+	//PERS_BLEH_2,
+	PERS_JUMP_SPEED,                // ETJump: last jump speed
 	PERS_BLEH_3,
 	PERS_BLEH_4,
 
