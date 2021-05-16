@@ -912,6 +912,9 @@ static qboolean PM_CheckJump(void)
 		pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
 	}
 
+	// store horizontal speed for CHS 55
+	pm->ps->stats[STAT_JUMP_SPEED] = sqrt(pm->ps->velocity[0] * pm->ps->velocity[0] + pm->ps->velocity[1] * pm->ps->velocity[1]);
+
 	return qtrue;
 }
 

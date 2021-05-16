@@ -430,7 +430,8 @@ static void CG_CHS_PlaneAngleZ(char *buf, int size)
 
 static void CG_CHS_LastJumpSpeed(char* buf, int size)
 {
-	Com_sprintf(buf, size, "%.0f", cg.lastJumpSpeed);
+	playerState_t* ps = CG_CHS_GetPlayerState();
+	Com_sprintf(buf, size, "%d", ps->stats[STAT_JUMP_SPEED]);
 }
 
 typedef struct
