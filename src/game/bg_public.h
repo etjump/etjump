@@ -662,9 +662,7 @@ typedef enum
 	// setup - keys pressed (high byte contains buttons, low byte contains wbuttons)
 	STAT_USERCMD_BUTTONS,
 	// setup - keys pressed (see UMOVE_* for flags)
-	STAT_USERCMD_MOVE,
-	// ETJump: last jump speed
-	STAT_JUMP_SPEED
+	STAT_USERCMD_MOVE
 } statIndex_t;
 
 // player_state->persistant[] indexes
@@ -682,7 +680,8 @@ typedef enum
 	// these were added for single player awards tracking
 
 	PERS_REVIVE_COUNT,
-	PERS_BLEH_2,
+	//PERS_BLEH_2,
+	PERS_JUMP_SPEED,                // ETJump: last jump speed
 	PERS_BLEH_3,
 	PERS_BLEH_4,
 
