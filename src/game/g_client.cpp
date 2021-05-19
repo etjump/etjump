@@ -2187,7 +2187,8 @@ void ClientBegin(int clientNum)
 
 	ent->client->pers.previousSetHealthTime = 0;
 
-	
+	// clear out last jump speed
+	client->ps.persistant[PERS_JUMP_SPEED] = 0;
 }
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin, vec3_t spawn_angles)
@@ -2625,8 +2626,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	}
 
 	client->sess.velocityScale = 1;
-	// clear out last jump speed when client spawns
-	client->ps.persistant[PERS_JUMP_SPEED] = 0;
 }
 
 void ClearPortals(gentity_t *ent)
