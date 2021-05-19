@@ -133,17 +133,17 @@ namespace ETJump
 		lastDeletedSpeed = 0;
 	}
 
-	void AdjustColors(int jumpnum, vec4_t* color)
+	void AdjustColors(int jumpNum, vec4_t* color)
 	{
 		auto alpha = (*color)[3];
 		vec4_t fasterColor = { 0.0, 1.0, 0.0, alpha };
 		vec4_t slowerColor = { 1.0, 0.0, 0.0, alpha };
-		auto currentJumpSpeed = jumpSpeedHistory[jumpnum];
+		auto currentJumpSpeed = jumpSpeedHistory[jumpNum];
 
 		// when checking for the first jump speed, we need to make sure
 		// we don't do comparison of (first jump - 1). Instead, compare against
 		// previously deleted jump speed, but only if the history is full
-		if (jumpnum == 0)
+		if (jumpNum == 0)
 		{
 			if (jumpSpeedHistory.size() == MAX_JUMPS && jumpSpeedDeleted)
 			{
@@ -172,7 +172,7 @@ namespace ETJump
 		}
 		else
 		{
-			auto previousJumpSpeed = jumpSpeedHistory[jumpnum - 1];
+			auto previousJumpSpeed = jumpSpeedHistory[jumpNum - 1];
 			// faster than previous jump
 			if (currentJumpSpeed > previousJumpSpeed)
 			{

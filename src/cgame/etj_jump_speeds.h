@@ -39,6 +39,6 @@ namespace ETJump
 	void UpdateJumpSpeeds();
 	void QueueJumpSpeedsReset();
 	void ResetJumpSpeeds();
-	void AdjustColors(int currentJumpNum, vec4_t* color);
+	void AdjustColors(int jumpNum, vec4_t* color);
 	static playerState_t* getValidPlayerState();
 }
