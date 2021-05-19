@@ -2625,6 +2625,8 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	}
 
 	client->sess.velocityScale = 1;
+	// clear out last jump speed when client spawns
+	client->ps.persistant[PERS_JUMP_SPEED] = 0;
 }
 
 void ClearPortals(gentity_t *ent)

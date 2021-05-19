@@ -2113,6 +2113,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_JUMP");
 		VectorCopy(cent->lerpOrigin, cg.etjLastJumpPos);
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, "*jump1.wav"));
+		ETJump::UpdateJumpSpeeds();
 		break;
 	case EV_TAUNT:
 		DEBUGNAME("EV_TAUNT");
@@ -2763,6 +2764,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_DEATHx");
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE,
 		                  CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
+		ETJump::QueueJumpSpeedsReset();
 		break;
 
 
@@ -2789,6 +2791,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		trap_S_StartSound(es->pos.trBase, -1, CHAN_AUTO, cgs.media.gibSound);
 		ByteToDir(es->eventParm, dir);
 		CG_GibPlayer(cent, cent->lerpOrigin, dir);
+		ETJump::QueueJumpSpeedsReset();
 		break;
 
 	case EV_STOPLOOPINGSOUND:
@@ -3172,8 +3175,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 	case EV_LOAD_TELEPORT:
 		// should refactor users to playereventshandler
+		DEBUGNAME("EV_LOAD_TELEPORT");
 		ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
 		ETJump::playerEventsHandler->check("load", {});
+		ETJump::QueueJumpSpeedsReset();
 		break;
 	default:
 		DEBUGNAME("UNKNOWN");
