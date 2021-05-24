@@ -2663,6 +2663,8 @@ extern vmCvar_t etj_jumpSpeedsColor;
 extern vmCvar_t etj_jumpSpeedsShadow;
 extern vmCvar_t etj_jumpSpeedsStyle;
 extern vmCvar_t etj_jumpSpeedsShowDiff;
+extern vmCvar_t etj_jumpSpeedsFasterColor;
+extern vmCvar_t etj_jumpSpeedsSlowerColor;
 
 //
 // cg_main.c

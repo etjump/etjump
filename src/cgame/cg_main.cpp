@@ -589,6 +589,8 @@ vmCvar_t etj_jumpSpeedsColor;
 vmCvar_t etj_jumpSpeedsShadow;
 vmCvar_t etj_jumpSpeedsStyle;
 vmCvar_t etj_jumpSpeedsShowDiff;
+vmCvar_t etj_jumpSpeedsFasterColor;
+vmCvar_t etj_jumpSpeedsSlowerColor;
 
 typedef struct
 {
@@ -1005,6 +1007,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_jumpSpeedsShadow, "etj_jumpSpeedsShadow", "1", CVAR_ARCHIVE },
 	{ &etj_jumpSpeedsStyle, "etj_jumpSpeedsStyle", "0", CVAR_ARCHIVE },
 	{ &etj_jumpSpeedsShowDiff, "etj_jumpSpeedsShowDiff", "0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsFasterColor, "etj_jumpSpeedsFasterColor", "0.0 1.0 0.0 1.0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsSlowerColor, "etj_jumpSpeedsSlowerColor", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE },
 };
 
 

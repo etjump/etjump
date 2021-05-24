@@ -36,7 +36,7 @@ namespace ETJump
 		float x2 = 6 + 30 + etj_jumpSpeedsX.value;
 		float y1 = 240 + etj_jumpSpeedsY.value;
 		float y2 = 240 + 12 +etj_jumpSpeedsY.value;
-		bool drawShadow = etj_jumpSpeedsShadow.integer;
+		auto textStyle = etj_jumpSpeedsShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 		vec4_t color;
 		bool vertical = !etj_jumpSpeedsStyle.integer;
 
@@ -59,7 +59,7 @@ namespace ETJump
 		x1 = ETJump_AdjustPosition(x1);
 		x2 = ETJump_AdjustPosition(x2);
 		parseColorString(etj_jumpSpeedsColor.string, color);
-		DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, "Jump Speeds:", 0, drawShadow ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL);
+		DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, "Jump Speeds:", 0, textStyle);
 
 		// adjust x or y depending on style chosen
 		vertical ? y1 += 12 : x1 = DrawStringWidth("Jump Speeds: ", 0.2f) + 5;
@@ -76,20 +76,20 @@ namespace ETJump
 				// first column
 				if (i < 5)
 				{
-					DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, drawShadow ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL);
+					DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, textStyle);
 					y1 += 12;
 				}
 				// second column
 				else
 				{
-					DrawString(x2, y2, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, drawShadow ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL);
+					DrawString(x2, y2, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, textStyle);
 					y2 += 12;
 				}
 			}
 			// horizontal list
 			else
 			{
-				DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, drawShadow ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL);
+				DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, textStyle);
 				x1 += 30;
 			}
 		}
@@ -101,7 +101,7 @@ namespace ETJump
 		// queue reset if last update was on different team
 		if (team != ps->persistant[PERS_TEAM])
 		{
-			resetQueued = true;
+			QueueJumpSpeedsReset();
 		}
 		// if reset is queued, do that before we start storing new jump speeds
 		if (resetQueued)
@@ -135,14 +135,17 @@ namespace ETJump
 
 	void AdjustColors(int jumpNum, vec4_t* color)
 	{
-		auto alpha = (*color)[3];
-		vec4_t fasterColor = { 0.0, 1.0, 0.0, alpha };
-		vec4_t slowerColor = { 1.0, 0.0, 0.0, alpha };
+		// equal/first jump color comes from etj_jumpSpeedsColor
+		vec4_t fasterColor;
+		vec4_t slowerColor;
+		parseColorString(etj_jumpSpeedsFasterColor.string, fasterColor);
+		parseColorString(etj_jumpSpeedsSlowerColor.string, slowerColor);
 		auto currentJumpSpeed = jumpSpeedHistory[jumpNum];
 
 		// when checking for the first jump speed, we need to make sure
 		// we don't do comparison of (first jump - 1). Instead, compare against
 		// previously deleted jump speed, but only if the history is full
+		// and we start deleting jump speeds (11th jump)
 		if (jumpNum == 0)
 		{
 			if (jumpSpeedHistory.size() == MAX_JUMPS && jumpSpeedDeleted)
@@ -157,17 +160,11 @@ namespace ETJump
 				{
 					Vector4Copy(slowerColor, *color);
 				}
-				// equal speed
-				else
-				{
-					Vector4Set(*color, 1.0, 1.0, 1.0, alpha);
-				}
 			}
-			// history not full, first jump should be white
+			// history not full
 			else
 			{
 				jumpSpeedDeleted = false;
-				Vector4Set(*color, 1.0, 1.0, 1.0, alpha);
 			}
 		}
 		else
@@ -182,11 +179,6 @@ namespace ETJump
 			else if (previousJumpSpeed > currentJumpSpeed)
 			{
 				Vector4Copy(slowerColor, *color);
-			}
-			// equal speed
-			else
-			{
-				Vector4Set(*color, 1.0, 1.0, 1.0, alpha);
 			}
 		}
 	}
