@@ -581,6 +581,17 @@ vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
 vmCvar_t etj_demo_drawBanners;
 
+// Jump speed history
+vmCvar_t etj_drawJumpSpeeds;
+vmCvar_t etj_jumpSpeedsX;
+vmCvar_t etj_jumpSpeedsY;
+vmCvar_t etj_jumpSpeedsColor;
+vmCvar_t etj_jumpSpeedsShadow;
+vmCvar_t etj_jumpSpeedsStyle;
+vmCvar_t etj_jumpSpeedsShowDiff;
+vmCvar_t etj_jumpSpeedsFasterColor;
+vmCvar_t etj_jumpSpeedsSlowerColor;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -988,6 +999,16 @@ cvarTable_t cvarTable[] =
 	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
 	{ &etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1", CVAR_ARCHIVE },
 	{ &etj_demo_drawBanners, "etj_demo_drawBanners", "1", CVAR_ARCHIVE },
+	// Jump speed history
+	{ &etj_drawJumpSpeeds, "etj_drawJumpSpeeds", "0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsX, "etj_jumpSpeedsX", "0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsY, "etj_jumpSpeedsY", "0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsColor, "etj_jumpSpeedsColor", "1.0 1.0 1.0 1.0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsShadow, "etj_jumpSpeedsShadow", "1", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsStyle, "etj_jumpSpeedsStyle", "0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsShowDiff, "etj_jumpSpeedsShowDiff", "0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsFasterColor, "etj_jumpSpeedsFasterColor", "0.0 1.0 0.0 1.0", CVAR_ARCHIVE },
+	{ &etj_jumpSpeedsSlowerColor, "etj_jumpSpeedsSlowerColor", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE },
 };
 
 
@@ -3736,6 +3757,9 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
         }
     );
 	ETJump::eventLoop = std::make_shared<ETJump::EventLoop>();
+
+	// reset jump speed history
+	ETJump::ResetJumpSpeeds();
 
 	////////////////////////////////////////////////////////////////
 	// TODO: move these to own client commands handler

@@ -5727,6 +5727,7 @@ static void CG_Draw2D(void)
 			CG_DrawLagometer();
 			CG_DrawNewCompass();
 			CG_DrawFollow();
+			ETJump::DrawJumpSpeeds();
 			ETJump::DrawCGazHUD();
 			ETJump::DrawSnapHUD();
 			if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))

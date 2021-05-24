@@ -60,6 +60,7 @@ add_library(cgame MODULE
 	"etj_entity_events_handler.cpp"
 	"etj_event_loop.cpp"
 	"etj_inline_command_parser.cpp"
+	"etj_jump_speeds.cpp"
 	"etj_keyset_drawer.cpp"
 	"etj_keyset_keybind_drawer.cpp"
 	"etj_keyset_system.cpp"

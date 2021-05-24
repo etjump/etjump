@@ -2655,6 +2655,17 @@ extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
 extern vmCvar_t etj_demo_drawBanners;
 
+// Jump speed history
+extern vmCvar_t etj_drawJumpSpeeds;
+extern vmCvar_t etj_jumpSpeedsX;
+extern vmCvar_t etj_jumpSpeedsY;
+extern vmCvar_t etj_jumpSpeedsColor;
+extern vmCvar_t etj_jumpSpeedsShadow;
+extern vmCvar_t etj_jumpSpeedsStyle;
+extern vmCvar_t etj_jumpSpeedsShowDiff;
+extern vmCvar_t etj_jumpSpeedsFasterColor;
+extern vmCvar_t etj_jumpSpeedsSlowerColor;
+
 //
 // cg_main.c
 //
@@ -4017,6 +4028,10 @@ namespace ETJump
 	void runFrameEnd();
 	void DrawCGazHUD();
 	void DrawSnapHUD();
+	void DrawJumpSpeeds();
+	void UpdateJumpSpeeds();
+	void QueueJumpSpeedsReset();
+	void ResetJumpSpeeds();
 
 	enum extraTraceOptions {
 		OB_DETECTOR,
