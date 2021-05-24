@@ -2113,7 +2113,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_JUMP");
 		VectorCopy(cent->lerpOrigin, cg.etjLastJumpPos);
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, "*jump1.wav"));
-		ETJump::UpdateJumpSpeeds();
+		if (clientNum == cg.predictedPlayerState.clientNum)
+		{
+			ETJump::UpdateJumpSpeeds();
+		}
 		break;
 	case EV_TAUNT:
 		DEBUGNAME("EV_TAUNT");
