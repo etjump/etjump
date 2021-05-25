@@ -240,12 +240,12 @@ bool Timerun::isDebugging(int clientNum)
 
 	if (debuggers.size())
 	{
-		Printer::SendLeftMessage(clientNum, "Record not saved:\n");
+		Printer::SendPopupMessage(clientNum, "Record not saved:\n");
 
 		for (auto &debugger : debuggers)
 		{
 			std::string fmt = ETJump::stringFormat("- ^3%s ^7debugging enabled.\n", debugger);
-			Printer::SendLeftMessage(clientNum, fmt);
+			Printer::SendPopupMessage(clientNum, fmt);
 		}
 
 		return true;

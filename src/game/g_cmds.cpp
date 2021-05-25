@@ -2864,33 +2864,33 @@ bool checkVoteConditions(gentity_t *ent, int clientNum)
 
 	if (voteFlags.integer == VOTING_DISABLED)	// Setting g_enableVote 0 sets this flag as well
 	{
-		Printer::SendLeftMessage(clientNum, "Voting is not enabled on this server.\n");
+		Printer::SendPopupMessage(clientNum, "Voting is not enabled on this server.\n");
 		return false;
 	}
 	if (ent && ent->client->sess.muted && g_mute.integer & 2)
 	{
-		Printer::SendLeftMessage(clientNum, "^3callvote: ^7not allowed to call a vote while muted.\n");
+		Printer::SendPopupMessage(clientNum, "^3callvote: ^7not allowed to call a vote while muted.\n");
 		return false;
 	}
 	if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR && !(g_spectatorVote.integer >= 2))
 	{
-		Printer::SendLeftMessage(clientNum, "^3callvote: ^7you are not allowed to call a vote as a spectator.\n");
+		Printer::SendPopupMessage(clientNum, "^3callvote: ^7you are not allowed to call a vote as a spectator.\n");
 		return false;
 	}
 	if (level.voteInfo.voteTime)
 	{
-		Printer::SendLeftMessage(clientNum, "A vote is already in progress.\n");
+		Printer::SendPopupMessage(clientNum, "A vote is already in progress.\n");
 		return false;
 	}
 	if (level.intermissiontime)
 	{
-		Printer::SendLeftMessage(clientNum, "Cannot callvote during intermission.\n");
+		Printer::SendPopupMessage(clientNum, "Cannot callvote during intermission.\n");
 		return false;
 	}
 	if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer)
 	{
 		voteError = ETJump::stringFormat("You have already called the maximum number of votes (%d).\n", vote_limit.integer);
-		Printer::SendLeftMessage(clientNum, voteError);
+		Printer::SendPopupMessage(clientNum, voteError);
 		return false;
 	}
 
@@ -2898,7 +2898,7 @@ bool checkVoteConditions(gentity_t *ent, int clientNum)
 	{
 		int remainingTime = g_disableVoteAfterMapChange.integer - (level.time - level.startTime);
 		voteError = ETJump::stringFormat("You must wait for %d more %s to vote after a map change.\n", remainingTime / 1000, getSecondsString(remainingTime));
-		Printer::SendLeftMessage(clientNum, voteError);
+		Printer::SendPopupMessage(clientNum, voteError);
 		return false;
 	}
 	if (level.time - ent->client->lastVoteTime < g_voteCooldown.integer * 1000)
@@ -3210,7 +3210,7 @@ void Cmd_Vote_f(gentity_t *ent)
 				level.voteInfo.voteCanceled = qtrue;
 				level.voteInfo.voteNo       = level.numConnectedClients;
 				level.voteInfo.voteYes      = 0;
-				Printer::BroadcastLeftMessage("^7Vote canceled by caller.");
+				Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
 				return;
 			}
 		}
@@ -3965,7 +3965,7 @@ namespace ETJump
 		{
 			auto clientNum = ClientNum(ent);
 			std::string specLockMsg = ETJump::stringFormat("%s is speclocked.", traceEnt->client->pers.netname);
-			Printer::SendLeftMessage(clientNum, specLockMsg);
+			Printer::SendPopupMessage(clientNum, specLockMsg);
 			return false;
 		}
 		if (!ent->client->pers.quickFollow)
