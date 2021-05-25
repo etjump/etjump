@@ -2767,7 +2767,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_DEATHx");
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE,
 		                  CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
-		ETJump::QueueJumpSpeedsReset();
+		if (clientNum == cg.predictedPlayerState.clientNum)
+		{
+			ETJump::QueueJumpSpeedsReset();
+		}
 		break;
 
 
@@ -2794,7 +2797,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		trap_S_StartSound(es->pos.trBase, -1, CHAN_AUTO, cgs.media.gibSound);
 		ByteToDir(es->eventParm, dir);
 		CG_GibPlayer(cent, cent->lerpOrigin, dir);
-		ETJump::QueueJumpSpeedsReset();
+		if (clientNum == cg.predictedPlayerState.clientNum)
+		{
+			ETJump::QueueJumpSpeedsReset();
+		}
 		break;
 
 	case EV_STOPLOOPINGSOUND:
