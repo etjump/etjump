@@ -827,7 +827,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean in
 		selfMsg = ETJump::stringFormat("%s^7 has been sent a spectator invitation.\n", other->client->pers.netname);
 		Printer::SendConsoleMessage(selfClient, selfMsg);
 		otherMsg = ETJump::stringFormat("You have been invited to spectate %s^7.\n", ent->client->pers.netname);
-		Printer::SendLeftMessage(targetClient, otherMsg);
+		Printer::SendPopupMessage(targetClient, otherMsg);
 	}
 	else
 	{
@@ -849,7 +849,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean in
 		selfMsg = ETJump::stringFormat("%s^7 was removed from invited spectators.\n", other->client->pers.netname);
 		Printer::SendConsoleMessage(selfClient, selfMsg);
 		otherMsg = ETJump::stringFormat("^7You are no longer invited to spectate %s^7.\n", ent->client->pers.netname);
-		Printer::SendLeftMessage(targetClient, otherMsg);
+		Printer::SendPopupMessage(targetClient, otherMsg);
 	}
 }
 

@@ -76,7 +76,7 @@ void Printer::SendChatMessage(int clientNum, const std::string &message)
 	}
 }
 
-void Printer::SendLeftMessage(int clientNum, const std::string &message)
+void Printer::SendPopupMessage(int clientNum, const std::string &message)
 {
 	if (clientNum == CONSOLE_CLIENT_NUMBER)
 	{
@@ -104,7 +104,7 @@ void Printer::BroadcastChatMessage(const std::string &message)
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadcastLeftMessage(const std::string &message)
+void Printer::BroadcastPopupMessage(const std::string &message)
 {
 	trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
 	G_Printf("%s\n", message.c_str());
