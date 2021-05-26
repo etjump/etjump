@@ -3198,11 +3198,11 @@ static void CG_DrawLimboMessage(void)
 		str = "Press JUMP to go into reinforcement queue.";
 		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
 		y += 18;
-	}
 
-	// JPW NERVE
-	str = ETJump::stringFormat("Reinforcements deploy in %d seconds.", CG_CalculateReinfTime(qfalse));
-	ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
+		// JPW NERVE
+		str = ETJump::stringFormat("Reinforcements deploy in %d seconds.", CG_CalculateReinfTime(qfalse));
+		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
+	}
 }
 // -NERVE - SMF
 
