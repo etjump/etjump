@@ -1148,6 +1148,7 @@ typedef enum
 	EV_PORTAL_TELEPORT,
 	EV_LOAD_TELEPORT,
 	EV_UPHILLSTEP,
+	EV_SAVE,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 

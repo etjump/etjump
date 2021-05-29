@@ -222,6 +222,8 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	storePosition(client, pos);
 
+	G_AddEvent(ent, EV_SAVE, 0);
+
 	if (position == 0)
 	{
 		CP(va("cp \"%s\n\"", g_savemsg.string));
