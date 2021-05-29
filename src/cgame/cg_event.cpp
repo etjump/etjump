@@ -3189,6 +3189,13 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		ETJump::playerEventsHandler->check("load", {});
 		ETJump::QueueJumpSpeedsReset();
 		break;
+	case EV_SAVE:
+		DEBUGNAME("EV_SAVE");
+		if (clientNum == cg.predictedPlayerState.clientNum)
+		{
+			ETJump::QueueJumpSpeedsReset();
+		}
+		break;
 	default:
 		DEBUGNAME("UNKNOWN");
 		break;
