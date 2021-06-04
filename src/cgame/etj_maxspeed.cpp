@@ -96,7 +96,7 @@ void ETJump::DisplayMaxSpeed::render() const
 	color[3] *= fade;
 
 	auto size = 0.1f;
-	size *= etj_speedSize.integer;
+	size *= etj_speedSize.value;
 
 	auto str = va("%0.f", _displayMaxSpeed);
 	float w;
