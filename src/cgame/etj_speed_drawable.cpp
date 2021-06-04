@@ -105,7 +105,7 @@ void ETJump::DisplaySpeed::render() const
 		return;
 	}
 
-	float size = 0.1f * etj_speedSize.integer;
+	float size = 0.1f * etj_speedSize.value;
 	float x = etj_speedX.integer;
 	float y = etj_speedY.integer;
 	ETJump_AdjustPosition(&x);
