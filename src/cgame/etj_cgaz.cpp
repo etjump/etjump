@@ -509,7 +509,6 @@ namespace ETJump
 			{
 				vec4_t color;
 				parseColorString(etj_CGaz5Color1.string, color);
-				color[3] = a;
 				CG_FillAngleYaw_Ext(-d_min, +d_min, yaw, y, h, fov, color);
 			}
 
@@ -517,7 +516,6 @@ namespace ETJump
 			{
 				vec4_t color;
 				parseColorString(etj_CGaz5Color2.string, color);
-				color[3] = a;
 				CG_FillAngleYaw_Ext(+d_min, +d_opt, yaw, y, h, fov, color);
 				CG_FillAngleYaw_Ext(-d_opt, -d_min, yaw, y, h, fov, color);
 			}
@@ -526,7 +524,6 @@ namespace ETJump
 			{
 				vec4_t color;
 				parseColorString(etj_CGaz5Color3.string, color);
-				color[3] = a;
 				CG_FillAngleYaw_Ext(+d_opt, +d_max_cos, yaw, y, h, fov, color);
 				CG_FillAngleYaw_Ext(-d_max_cos, -d_opt, yaw, y, h, fov, color);
 			}
@@ -535,7 +532,6 @@ namespace ETJump
 			{
 				vec4_t color;
 				parseColorString(etj_CGaz5Color4.string, color);
-				color[3] = a;
 				CG_FillAngleYaw_Ext(+d_max_cos, +d_max, yaw, y, h, fov, color);
 				CG_FillAngleYaw_Ext(-d_max, -d_max_cos, yaw, y, h, fov, color);
 			}
