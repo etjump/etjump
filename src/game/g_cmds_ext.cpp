@@ -860,10 +860,20 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock
 {
 	int       i;
 	gentity_t *other;
+	auto client = ClientNum(ent);
+	std::string msg;
+
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+	{
+		msg = ETJump::stringFormat("^7You cannot use ^3spec%slock ^7while spectating!\n", lock ? "" : "un");
+		Printer::SendConsoleMessage(client, msg);
+		return;
+	}
 
 	if (ent->client->sess.specLocked == lock)
 	{
-		CP(va("print \"You are already %slocked from spectators!\n\"", lock ? "" : "un"));
+		msg = ETJump::stringFormat("You are already %slocked from spectators!\n", lock ? "" : "un");
+		Printer::SendConsoleMessage(client, msg);
 		return;
 	}
 
@@ -873,13 +883,13 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock
 	// unlocked
 	if (!ent->client->sess.specLocked)
 	{
-		CP("cpm \"You are now unlocked from spectators!\n\"");
+		Printer::SendPopupMessage(client, "You are now unlocked from spectators!\n");
 		return;
 	}
 
 	// locked
-	CP("cpm \"You are now locked from spectators!\n\"");
-	CP("cpm \"Use ^3specinvite^7 to invite people to spectate.\n\"");
+	Printer::SendPopupMessage(client, "You are now locked from spectators!\n");
+	Printer::SendPopupMessage(client, "Use ^3specinvite ^7to invite people to spectate.\n");
 
 	// update following players
 	for (i = 0; i < level.numConnectedClients; i++)
@@ -906,16 +916,19 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock
 static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand, qboolean notUsed)
 {
 	int i;
+	auto client = ClientNum(ent);
+	std::string msg;
 
 	// print zza warning
 	if (!ent->client->sess.specLocked)
 	{
-		CP("print \"You are not speclocked.\n\"");
+		Printer::SendConsoleMessage(client, "You are not speclocked.\n");
 	}
 
 	for (i = 0; i < level.numConnectedClients; i++)
 		if (COM_BitCheck(ent->client->sess.specInvitedClients, level.sortedClients[i]))
 		{
-			CP(va("print \"%s ^7is specinvited.\n\"", level.clients[level.sortedClients[i]].pers.netname));
+			msg = ETJump::stringFormat("%s ^7is specinvited.\n", level.clients[level.sortedClients[i]].pers.netname);
+			Printer::SendConsoleMessage(client, msg);
 		}
 }
