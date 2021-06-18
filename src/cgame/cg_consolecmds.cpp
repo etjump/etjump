@@ -1661,6 +1661,7 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("specuninvite");
 	trap_AddCommand("speclock");
 	trap_AddCommand("specunlock");
+	trap_AddCommand("speclist");
 	trap_AddCommand("statsall");
 	trap_AddCommand("statsdump");
 	trap_AddCommand("timein");
