@@ -4624,6 +4624,13 @@ func_explosive_use
 void func_explosive_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	G_Script_ScriptEvent(self, "death", "");   // JPW NERVE used to trigger script stuff for MP
+	
+	// make the parent (trigger) die too
+	if (self->parent && Q_stricmp(self->scriptName, self->parent->scriptName))
+	{
+		G_Script_ScriptEvent(self->parent, "death", "");
+	}
+
 	func_explosive_explode(self, self, other, self->damage, 0);
 }
 
@@ -4843,12 +4850,23 @@ void SP_func_explosive(gentity_t *ent)
 	char *type;
 	char *cursorhint;
 
-	trap_SetBrushModel(ent, ent->model);
+	if (ent->model)
+	{
+		trap_SetBrushModel(ent, ent->model);
+	}
+
 	InitExplosive(ent);
 
 	if (ent->spawnflags & EXPLOSIVE_START_INVIS)    // start invis
 	{
-		ent->use = func_explosive_spawn;
+		if (ent->s.eFlags & EF_FAKEBMODEL)
+		{
+			ent->use = func_explosive_use;
+		}
+		else
+		{
+			ent->use = func_explosive_spawn;
+		}
 		trap_UnlinkEntity(ent);
 	}
 	else if (ent->targetname)

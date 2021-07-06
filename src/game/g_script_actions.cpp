@@ -9,6 +9,15 @@
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
+#include "etj_string_utilities.h"
+
 /*
 Contains the code to handle the various commands available with an event script.
 
@@ -23,13 +32,10 @@ int G_RemoveNamedBot(char *name);
 
 qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 {
-	char     *pString, *token;
-	char     modelname[MAX_QPATH];
-	int      i;
+	char modelname[MAX_QPATH];
 	qboolean solid = qtrue;
-
-	pString = params;
-	token   = COM_ParseExt(&pString, qfalse);
+	char *pString = params;
+	char *token = COM_ParseExt(&pString, qfalse);
 	if (!token[0])
 	{
 		G_Error("G_Scripting: setmodelfrombrushmodel must have an targetname\n");
@@ -52,7 +58,22 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 		token = COM_ParseExt(&pString, qfalse);
 	}
 
-	for (i = 0; i < level.numBrushModels; i++)
+	if (modelname[0] == '*')
+	{
+		trap_SetBrushModel(ent, modelname);
+
+		if (!solid)
+		{
+			ent->s.eFlags |= EF_NONSOLID_BMODEL;
+			ent->clipmask = 0;
+			ent->r.contents = 0;
+			trap_LinkEntity(ent);
+		}
+
+		return qtrue;
+	}
+
+	for (auto i = 0; i < level.numBrushModels; i++)
 	{
 		if (!Q_stricmp(level.brushModelInfo[i].modelname, modelname))
 		{
@@ -60,8 +81,8 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 
 			if (!solid)
 			{
-				ent->s.eFlags  |= EF_NONSOLID_BMODEL;
-				ent->clipmask   = 0;
+				ent->s.eFlags |= EF_NONSOLID_BMODEL;
+				ent->clipmask = 0;
 				ent->r.contents = 0;
 
 				trap_LinkEntity(ent);
@@ -71,7 +92,7 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params)
 		}
 	}
 
-	G_Error("G_Scripting: setmodelfrombrushmodel target not found %s\n", modelname);
+	G_Error("G_ScriptAction_SetModelFromBrushmodel: setmodelfrombrushmodel target not found %s\n", modelname);
 
 	return qtrue;
 }
@@ -4800,29 +4821,114 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params)
 
 /*
 ===================
-G_ScriptAction_Create (inspired by etpro_ScriptAction_SetValues)
-setup - made in a rush...
+G_ScriptAction_Create
+ETJump: ETPro mapscripting support
 ===================
 */
 
-void G_SpawnGEntityFromSpawnVars(void);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params)
 {
 	char *token;
-	char *p;
-	char key[MAX_TOKEN_CHARS];
+	char *p = params;
+	char key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
 
 	// reset and fill in the spawnVars info so that spawn functions can use
 	// them
 	level.numSpawnVars     = 0;
 	level.numSpawnVarChars = 0;
 
-	p = params;
-
 	// get each key/value pair
-	while (1)
+	while (true)
 	{
 		token = COM_ParseExt(&p, qfalse);
+		if (!token[0])
+		{
+			break;
+		}
+
+		strncpy(key, token, MAX_TOKEN_CHARS);
+
+		token = COM_ParseExt(&p, qfalse);
+		if (!token[0])
+		{
+			G_Error("G_ScriptAction_Create: key \"%s\" has no value", key);
+		}
+
+		strncpy(value, token, MAX_TOKEN_CHARS);
+
+		if (g_scriptDebug.integer)
+		{
+			G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n",
+				level.time, ent->scriptName, ent->scriptName, key, value);
+		}
+
+		if (level.numSpawnVars == MAX_SPAWN_VARS)
+		{
+			G_Error("G_ScriptAction_Create: MAX_SPAWN_VARS");
+		}
+
+		// add spawn var so that spawn functions can use them
+		level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(key);
+		level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(token);
+		level.numSpawnVars++;
+	}
+
+	auto create = G_SpawnGEntityFromSpawnVars();
+	trap_LinkEntity(create);
+
+	return qtrue;
+}
+
+extern field_t fields[];
+
+/*
+=============
+G_ScriptAction_Delete
+Delete entities that match all the criteria provided in "params"
+
+// remove radar main door
+delete 
+{
+	classname trigger_objective_info
+	scriptname maindoor1_trig
+}
+delete 
+{
+	classname func_explosive
+	scriptname maindoor1
+}
+
+=============
+*/
+qboolean G_ScriptAction_Delete(gentity_t *ent, char *params)
+{
+	gentity_t *found = NULL;
+	char      *token;
+	char      *p = params;
+	char      key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
+	int       i;
+	int       pass[MAX_GENTITIES];      // number of matching criteria for each entity
+	int       count = 0;            // number of key/value pairs in params
+	int       deleted = 0;            // number of deleted entities
+	qboolean  terminate = qfalse;
+	int       valueInt;
+	float     valueFloat;
+	vec3_t    valueVector;
+
+	// params can contain more than 1 key/value pair,
+	// We must check if the entity equals all of these pairs
+	// before we delete it..
+	for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
+	{
+		pass[i] = 0;
+	}
+
+	while (!terminate)
+	{
+		// strip key/value from the params..
+		token = COM_ParseExt(&p, qfalse);
+
+		// are there tokes in the params?..
 		if (!token[0])
 		{
 			break;
@@ -4833,20 +4939,112 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params)
 		token = COM_ParseExt(&p, qfalse);
 		if (!token[0])
 		{
-			G_Error("key \"%s\" has no value", key);
+			ETJump::devPrintf(ETJump::stringFormat("^3WARNING: G_ScriptAction_Delete(): key \"%s\" has no value\n", key));
+			continue;
+		}
+
+		strcpy(value, token);
+
+		// does the field exist?..
+		for (i = 0; fields[i].name; ++i)
+			if (!Q_stricmp(fields[i].name, key))
+			{
+				break;
+			}
+		if (!fields[i].name)
+		{
+			ETJump::devPrintf(ETJump::stringFormat("^3WARNING: G_ScriptAction_Delete(): non-existing key \"%s\"\n", key));
+			continue;
+		}
+
+		// we have a key/value pair to search for..
+		count++;
+
+		// start searching from the first entity..
+		found = NULL;
+
+		// check key's datatype..
+		switch (fields[i].type)
+		{
+		case F_INT:
+			valueInt = atoi(value);
+			// find all entities with the given key/value..
+			while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != NULL)
+			{
+				pass[found->s.number]++;
+			}
+			break;
+
+		case F_FLOAT:
+			valueFloat = (float)atof(value);
+			while ((found = G_FindFloat(found, fields[i].ofs, valueFloat)) != NULL)
+			{
+				pass[found->s.number]++;
+			}
+			break;
+
+		case F_LSTRING:
+		case F_GSTRING:
+			while ((found = G_Find(found, fields[i].ofs, value)) != NULL)
+			{
+				pass[found->s.number]++;
+			}
+			break;
+
+		case F_VECTOR:
+			sscanf(value, "%f %f %f", &valueVector[0], &valueVector[1], &valueVector[2]);
+			while ((found = G_FindVector(found, fields[i].ofs, valueVector)) != NULL)
+			{
+				pass[found->s.number]++;
+			}
+			break;
+
+		case F_ANGLEHACK:
+			valueVector[0] = 0;
+			valueVector[1] = (float)atof(value);
+			valueVector[2] = 0;
+			while ((found = G_FindVector(found, fields[i].ofs, valueVector)) != NULL)
+			{
+				pass[found->s.number]++;
+			}
+			break;
+
+		case F_ENTITY:
+		case F_ITEM:
+		case F_CLIENT:
+		case F_IGNORE:
+		default:
+			// It's certain the test will fail now, so just abort..
+			ETJump::devPrintf(ETJump::stringFormat("^3WARNING: G_ScriptAction_Delete(): invalid key \"%s\"\n", key));
+			terminate = qtrue;
 			break;
 		}
-
-		// add spawn var so that spawn functions can use them
-		if (level.numSpawnVars == MAX_SPAWN_VARS)
-		{
-			G_Error("G_ScriptAction_Create: MAX_SPAWN_VARS");
-		}
-		level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(key);
-		level.spawnVars[level.numSpawnVars][1] = G_AddSpawnVarToken(token);
-		level.numSpawnVars++;
 	}
-	G_SpawnGEntityFromSpawnVars();
 
-	return qtrue;
+	// did we find any key/value pairs in the params at all?..
+	if (count == 0)
+	{
+		return qfalse;
+	}
+
+	// now delete the entities that passed all tests..
+	for (i = MAX_GENTITIES - 1; i >= MAX_CLIENTS; i--)
+		if (pass[i] == count)
+		{
+			deleted++;
+			ETJump::devPrintf(ETJump::stringFormat(
+				"^2G_ScriptAction_Delete(): \"%s\" entity %i removed (%s)\n", g_entities[i].classname, i, params));
+			G_FreeEntity(&g_entities[i]);
+		}
+
+	// did we actually delete any entity?..
+	if (deleted > 0)
+	{
+		return qtrue;
+	}
+	else
+	{
+		ETJump::devPrintf(ETJump::stringFormat("^3WARNING: G_ScriptAction_Delete(): no entities found (%s)\n", params));
+	}
+	return qfalse;
 }

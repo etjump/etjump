@@ -32,6 +32,14 @@ namespace ETJump
 	std::shared_ptr<SaveSystem> saveSystem;
 	std::shared_ptr<Database> database;
 	std::shared_ptr<Session> session;
+
+	void devPrintf(const std::string &text)
+	{
+		if (g_cheats.integer)
+		{
+			trap_Printf(text.c_str());
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -673,7 +681,6 @@ void QDECL G_Error(const char *fmt, ...)
 }
 //bani
 void QDECL G_Error(const char *fmt, ...);
-
 
 #define CH_KNIFE_DIST       48  // from g_weapon.c
 #define CH_LADDER_DIST      100
