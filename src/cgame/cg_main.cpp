@@ -28,6 +28,7 @@
 #include "etj_event_loop.h"
 #include "etj_autodemo_recorder.h"
 #include "etj_player_events_handler.h"
+#include "etj_phasing.h"
 
 displayContextDef_t cgDC;
 
@@ -112,6 +113,7 @@ namespace ETJump
 	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	std::shared_ptr<EventLoop> eventLoop;
 	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+	std::shared_ptr<PhaseRemapper> phaseRemapper;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1031,6 +1033,20 @@ namespace ETJump
 		{
 			trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
 		}
+	}
+
+	void setPhaseMask(pmove_t* pm)
+	{
+		// phase brushes always nonsolid for specs
+		if (pm->ps->pm_type == PM_SPECTATOR)
+		{
+			SETBITIF(pm->tracemask, CONTENTS_PHASE_A, 0);
+			SETBITIF(pm->tracemask, CONTENTS_PHASE_B, 0);
+			return;
+		}
+
+		SETBITIF(pm->tracemask, CONTENTS_PHASE_A, pm->ps->eFlags & EF_PHASE_A);
+		SETBITIF(pm->tracemask, CONTENTS_PHASE_B, pm->ps->eFlags & EF_PHASE_B);
 	}
 
 	// General purpose etj_hideMe check for cgame events
@@ -3786,6 +3802,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
 	ETJump::initDrawKeys(keySetSystem);
 	ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+	ETJump::phaseRemapper = std::make_shared<ETJump::PhaseRemapper>();
 
 	CG_Printf("done\n");
 	CG_Printf("ETJump initialized.\n");

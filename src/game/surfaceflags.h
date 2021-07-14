@@ -10,6 +10,41 @@
 
 // these definitions also need to be in q_shared.h!
 
+// CONTENTS_SOLID              0x00000001 - vanilla
+//                             0x00000002 - unknown
+// CONTENTS_LIGHTGRID          0x00000004 - compiler
+// CONTENTS_LAVA               0x00000008 - vanilla
+// CONTENTS_SLIME              0x00000010 - vanilla
+// CONTENTS_WATER              0x00000020 - vanilla
+// CONTENTS_FOG                0x00000040 - vanilla
+// CONTENTS_MISSILECLIP        0x00000080 - vanilla
+// CONTENTS_ITEM               0x00000100 - vanilla
+//                             0x00000200 - unknown
+//                             0x00000400 - unknown
+//                             0x00000800 - unknown
+//                             0x00001000 - unknown
+//                             0x00002000 - unknown
+// CONTENTS_MOVER              0x00004000 - vanilla
+// CONTENTS_AREAPORTAL         0x00008000 - vanilla
+// CONTENTS_PLAYERCLIP         0x00010000 - vanilla
+// CONTENTS_MONSTERCLIP        0x00020000 - etjump: phase brush b
+// CONTENTS_TELEPORTER         0x00040000 - UNUSED (not recognized by q3map2)
+// CONTENTS_NOPORTAL           0x00080000 - etjump: portalgun
+// CONTENTS_NOSAVE             0x00100000 - etjump: nosave
+// CONTENTS_DONOTENTER         0x00200000 - etjump: noprone
+// CONTENTS_DONOTENTER_LARGE   0x00400000 - etjump: phase brush a
+//                             0x00800000 - unknown
+// CONTENTS_ORIGIN             0x01000000 - compiler
+// CONTENTS_BODY               0x02000000 - vanilla
+// CONTENTS_CORPSE             0x04000000 - vanilla
+// CONTENTS_DETAIL             0x08000000 - compiler
+// CONTENTS_STRUCTURAL         0x10000000 - compiler
+// CONTENTS_TRANSLUCENT        0x20000000 - compiler
+// CONTENTS_TRIGGER            0x40000000 - vanilla
+// CONTENTS_NODROP             0x80000000 - vanilla
+
+// unknown and compiler contents could probably be used if they are applied during for brush entities.
+
 #define CONTENTS_SOLID              0x00000001
 #define CONTENTS_LIGHTGRID          0x00000004
 #define CONTENTS_LAVA               0x00000008
@@ -22,12 +57,14 @@
 #define CONTENTS_AREAPORTAL         0x00008000
 #define CONTENTS_PLAYERCLIP         0x00010000
 #define CONTENTS_MONSTERCLIP        0x00020000
+const int CONTENTS_PHASE_B =        0x00020000;
 #define CONTENTS_TELEPORTER         0x00040000  //NOT USED EITHER....
 #define CONTENTS_NOPORTAL           0x00080000  // Feen: PGM - Contents formerly known as CONTENTS_JUMPPAD - Used for 'emancipation grid'
 #define CONTENTS_NOSAVE             0x00100000  // CONTENTS_NOSAVE
 #define CONTENTS_DONOTENTER         0x00200000	// Aciz: renamed back to original, was renamed to CONTENTS_NOSAVERESET but never used anywhere.
 const int CONTENTS_NOPRONE =        0x00200000;
 #define CONTENTS_DONOTENTER_LARGE   0x00400000  
+const int CONTENTS_PHASE_A =        0x00400000;
 #define CONTENTS_ORIGIN             0x01000000  // removed before bsping an entity
 #define CONTENTS_BODY               0x02000000  // should never be on a brush, only in game
 #define CONTENTS_CORPSE             0x04000000
@@ -72,7 +109,7 @@ const int CONTENTS_NOPRONE =        0x00200000;
 #define SURF_MONSLICK_S			0x40000000
 */
 
-//Feen: New ETJump Surfaces...
+//Feen: New ETJump Surfaces...   200000000
 #define SURF_PORTALGATE         0x08000000  //Feen: I hereby declare these's SURF's in the name of ETJump!
 #define SURF_MONSLICK_N         0x10000000  //ETJump: SURF_NOJUMPDELAY
 #define SURF_MONSLICK_E         0x20000000  //Zero: I hereby declare this SURF as a portalable/unportalable surface (depends on level.portalSurfaces)

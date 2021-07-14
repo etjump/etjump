@@ -689,6 +689,8 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation, ce
 	// Ridah, make sure the animation speed is updated when possible
 	anim = lf->animation;
 
+#if 0 
+	// etjump: flag never set for players
 	// check for forcing last frame
 	if (cent->currentState.eFlags & EF_FORCE_END_FRAME
 	    // xkan, 12/27/2002 - In SP, corpse also stays at the last frame (of the death animation)
@@ -701,6 +703,7 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation, ce
 		lf->backlerp      = 0;
 		return;
 	}
+#endif
 
 	if (anim->moveSpeed && lf->oldFrameSnapshotTime)
 	{

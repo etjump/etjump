@@ -26,9 +26,54 @@ namespace ETJump
 	static const int JUMP_DELAY_TIME = 850;
 	static const int PRONE_JUMP_DELAY_TIME = 650;
 	static const int PRONE_DELAY_TIME = 750;
+
+	static const int ALLSOLID_GIB_TIME = 250;
+
 	static bool hasJustStoodUp()
 	{
 		return pm->pmext->proneTime - pm->pmext->jumpTime == PRONE_JUMP_DELAY_TIME;
+	}
+
+	static void setPlayerPhaseMask()
+	{
+		// phase brushes always nonsolid for specs
+		if (pm->ps->pm_type == PM_SPECTATOR)
+		{
+			SETBITIF(pm->tracemask, CONTENTS_PHASE_A, 0);
+			SETBITIF(pm->tracemask, CONTENTS_PHASE_B, 0);
+			return;
+		}
+
+		SETBITIF(pm->tracemask, CONTENTS_PHASE_A, pm->ps->eFlags & EF_PHASE_A);
+		SETBITIF(pm->tracemask, CONTENTS_PHASE_B, pm->ps->eFlags & EF_PHASE_B);
+	}
+
+	static void gibStuckPlayer()
+	{
+		if (!(pm->shared & BG_LEVEL_PHASE_GIBSOLID) ||
+			pm->ps->stats[STAT_HEALTH] <= 0 ||
+			!pm->pmext->stuckTime ||
+			(pm->cmd.serverTime - pm->pmext->stuckTime) < ALLSOLID_GIB_TIME)
+		{
+			return;
+		}
+
+		trace_t trace;
+
+		// checks if allsolid is true even when checking only single content flag
+		auto checkTrace = [trace](int contentFlag) mutable
+		{
+			pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, contentFlag);
+			return !!trace.allsolid;
+		};
+
+		if (((pm->ps->eFlags & EF_PHASE_A) && checkTrace(CONTENTS_PHASE_A)) ||
+			((pm->ps->eFlags & EF_PHASE_B) && checkTrace(CONTENTS_PHASE_B)))
+		{
+			// hack: use FALL_DIE event because its easy. EV_GIB_PLAYER doesn't actually deal damage
+			BG_AddPredictableEventToPlayerstate(EV_FALL_NDIE, 0, pm->ps);
+			pm->pmext->stuckTime = 0;
+		}
 	}
 }
 
@@ -997,10 +1042,10 @@ static qboolean PM_CheckProne(void)
 	{
 		if (trace.fraction != 1.0f)
 		{
-			pm->ps->eFlags &= ~EF_PRONE;
-			pm->ps->eFlags &= ~EF_PRONE_MOVING;
-			return qfalse;
-		}
+		pm->ps->eFlags &= ~EF_PRONE;
+		pm->ps->eFlags &= ~EF_PRONE_MOVING;
+		return qfalse;
+	}
 	}
 
 	if (!(pm->ps->eFlags & EF_PRONE))
@@ -2159,6 +2204,13 @@ static int PM_CorrectAllSolid(trace_t *trace)
 		}
 	}
 
+	if (!pm->pmext->stuckTime)
+	{
+		pm->pmext->stuckTime = pm->cmd.serverTime;
+	}
+
+	ETJump::gibStuckPlayer();
+
 	pm->ps->groundEntityNum = ENTITYNUM_NONE;
 	pml.groundPlane         = qfalse;
 	pml.walking             = qfalse;
@@ -2259,6 +2311,8 @@ static void PM_GroundTrace(void)
 			return;
 		}
 	}
+
+	pm->pmext->stuckTime = 0;
 
 	// if the trace didn't hit anything, we are in free fall
 	if (trace.fraction == 1.0)
@@ -6608,6 +6662,8 @@ void PmoveSingle(pmove_t *pmove)
 		pm->tracemask  &= ~CONTENTS_BODY;   // corpses can fly through bodies
 		pm->ps->eFlags &= ~EF_ZOOMING;
 	}
+
+	ETJump::setPlayerPhaseMask();
 
 	// ETJump: no activate lean
 	if (pm->noActivateLean)

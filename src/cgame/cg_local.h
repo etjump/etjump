@@ -22,6 +22,7 @@
 #include "cg_public.h"
 #include "../ui/ui_shared.h"
 #include "etj_awaited_command_handler.h"
+#include "etj_phasing.h"
 
 #define MAX_LOCATIONS       256
 #define POWERUP_BLINKS      5
@@ -4020,12 +4021,15 @@ namespace ETJump
 	extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	extern std::shared_ptr<EventLoop> eventLoop;
 	extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+	extern std::shared_ptr<PhaseRemapper> phaseRemapper;
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
 	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 	bool hideMeCheck(int entityNum);
 	int checkExtraTrace(int value);
+	void setPhaseMask(pmove_t* pm);
 	void onPlayerRespawn(qboolean revived);
 	void runFrameEnd();
+	void phaseRemap(int eFlags);
 	void DrawCGazHUD();
 	void DrawSnapHUD();
 	void DrawJumpSpeeds();

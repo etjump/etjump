@@ -2284,6 +2284,8 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoP
 			DEBUGTIME
 
 			CG_DrawActiveFrameExt();
+
+			ETJump::phaseRemap(cg.snap->ps.eFlags);
 		}
 
 		// Rafael mg42

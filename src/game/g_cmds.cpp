@@ -4015,6 +4015,20 @@ namespace ETJump
 			ent->client->sess.spectatorClient = ClientNum(traceEnt);
 		}
 	}
+
+	void setPhaseMask(pmove_t* pm)
+	{
+		// phase brushes always nonsolid for specs
+		if (pm->ps->pm_type == PM_SPECTATOR)
+		{
+			SETBITIF(pm->tracemask, CONTENTS_PHASE_A, 0);
+			SETBITIF(pm->tracemask, CONTENTS_PHASE_B, 0);
+			return;
+		}
+
+		SETBITIF(pm->tracemask, CONTENTS_PHASE_A, pm->ps->eFlags & EF_PHASE_A);
+		SETBITIF(pm->tracemask, CONTENTS_PHASE_B, pm->ps->eFlags & EF_PHASE_B);
+	}
 }
 
 /*
@@ -4638,6 +4652,7 @@ void Cmd_Goto_f(gentity_t *ent)
 		return;
 	}
 
+	PhaseDisplaced(ent);
 	VectorCopy(other->client->ps.origin, ent->client->ps.origin);
 	VectorClear(ent->client->ps.velocity);
 	trap_SendServerCommand(ClientNum(ent), va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));

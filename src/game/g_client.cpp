@@ -2327,6 +2327,12 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	flags |= (client->ps.eFlags & EF_VOTED);
 	// clear everything but the persistant data
 
+	// preserve phases on spawn unless specified in map
+	if (!(level.phaseOptions & PHASEOPT_RESETONDEATH))
+	{
+		flags |= (ent->client->ps.eFlags & (EF_PHASE_A | EF_PHASE_B));
+	}
+
 	ent->s.eFlags &= ~EF_MOUNTEDTANK;
 
 	saved     = client->pers;
@@ -2402,6 +2408,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived)
 	{
 		ent->clipmask = MASK_PLAYERSOLID;
 	}
+
+	SETBITIF(ent->clipmask, CONTENTS_PHASE_B, ent->client->ps.eFlags & EF_PHASE_A);
+	SETBITIF(ent->clipmask, CONTENTS_PHASE_B, ent->client->ps.eFlags & EF_PHASE_B);
 
 	// DHM - Nerve :: Init to -1 on first spawn;
 	if (!revived)

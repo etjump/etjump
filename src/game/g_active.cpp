@@ -1335,6 +1335,8 @@ void ClientThink_real(gentity_t *ent)
 		}
 	}
 
+	ETJump::setPhaseMask(&pm);
+
 	//DHM - Nerve :: We've gone back to using normal bbox traces
 	//pm.trace = trap_Trace;
 	pm.pointcontents = trap_PointContents;
