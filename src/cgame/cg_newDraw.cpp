@@ -748,6 +748,7 @@ CG_OwnerDraw
 */
 void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y, int ownerDraw, int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader, int textStyle)
 {
+	/*
 	rectDef_t rect;
 
 	if (cg_drawStatus.integer == 0)
@@ -758,7 +759,7 @@ void CG_OwnerDraw(float x, float y, float w, float h, float text_x, float text_y
 	rect.x = x;
 	rect.y = y;
 	rect.w = w;
-	rect.h = h;
+	rect.h = h;*/
 }
 
 int old_mouse_x_pos = 0, old_mouse_y_pos = 0;

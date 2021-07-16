@@ -2381,7 +2381,7 @@ int CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button)
 		return 1000.f;
 
 	case 6:     // stats
-		diff = Q_fabs(button->data[3] - CG_LimboPanel_RenderCounter_ValueForButton(button));
+		diff = std::abs(button->data[3] - CG_LimboPanel_RenderCounter_ValueForButton(button));
 		if (diff < 5)
 		{
 			return 200.f / diff;
@@ -2691,7 +2691,7 @@ void CG_LimboPanel_Setup(void)
 {
 	panel_button_t   *button;
 	clientInfo_t     *ci       = &cgs.clientinfo[cg.clientNum];
-	bg_playerclass_t *classinfo;
+	// bg_playerclass_t *classinfo;
 	int              i;
 	char             buffer[256];
 
@@ -2769,7 +2769,7 @@ void CG_LimboPanel_Setup(void)
 	cgs.ccSelectedObjective    = CG_LimboPanel_GetMaxObjectives();
 	cgs.ccSelectedWeaponNumber = 1;
 
-	classinfo = CG_LimboPanel_GetPlayerClass();
+	// classinfo = CG_LimboPanel_GetPlayerClass();
 	if (CG_LimboPanel_WeaponIsDisabled(cgs.ccSelectedWeapon))
 	{
 		// set weapon to default if disabled

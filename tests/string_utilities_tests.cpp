@@ -53,7 +53,7 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnSeparator
     	"Lorem ipsum \ndolor sit amet, \n", "consectetur \nadipisicing elit. \n", "Tenetur, fuga!" };
 	auto splits = splitString(input, '\n', 40);
    	EXPECT_EQ(splits.size(), expectedSplits.size());
-   	for (int i = 0; i < splits.size(); i++) 
+   	for (int i = 0; i < static_cast<int>(splits.size()); i++) 
 	{
 	    EXPECT_EQ(splits[i], expectedSplits[i]);
 	}
@@ -66,7 +66,7 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnMaxWidthE
 		"Lorem ipsum dolor sit amet, consectetur ", "adipisicing elit. Tenetur, fuga!"};
 	auto splits = splitString(input, '\n', 40);
    	EXPECT_EQ(splits.size(), expectedSplits.size());
-   	for (int i = 0; i < splits.size(); i++) 
+   	for (int i = 0; i < static_cast<int>(splits.size()); i++) 
 	{
 	    EXPECT_EQ(splits[i], expectedSplits[i]);
 	}

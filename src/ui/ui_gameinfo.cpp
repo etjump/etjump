@@ -13,7 +13,7 @@
 
 
 int         ui_numBots;
-static char *ui_botInfos[MAX_BOTS];
+// static char *ui_botInfos[MAX_BOTS];
 
 static int ui_numArenas;
 //static char		*ui_arenaInfos[MAX_ARENAS];

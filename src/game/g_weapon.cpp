@@ -578,7 +578,7 @@ void Weapon_Syringe(gentity_t *ent)
 {
 	vec3_t    end;
 	trace_t   tr;
-	qboolean  usedSyringe = qfalse;         // DHM - Nerve
+	// qboolean  usedSyringe = qfalse;         // DHM - Nerve
 	gentity_t *traceEnt;
 
 	AngleVectors(ent->client->ps.viewangles, forward, right, up);
@@ -603,7 +603,8 @@ void Weapon_Syringe(gentity_t *ent)
 			if ((traceEnt->client->ps.pm_type == PM_DEAD) && (traceEnt->client->sess.sessionTeam == ent->client->sess.sessionTeam))
 			{
 				// Mad Doc - TDF moved all the revive stuff into its own function
-				usedSyringe = ReviveEntity(ent, traceEnt);
+				// usedSyringe = 
+				ReviveEntity(ent, traceEnt);
 
 				// OSP - syringe "hit"
 				if (g_gamestate.integer == GS_PLAYING)

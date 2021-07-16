@@ -57,7 +57,7 @@ std::vector<int> Utilities::getSpectators(int clientNum)
 		}
 	}
 
-	return std::move(spectators);
+	return spectators;
 }
 
 static void SelectCorrectWeapon(gclient_t *cl)
@@ -328,5 +328,5 @@ std::vector<std::string> Utilities::getMaps()
 		maps.push_back(buf);
 	}
 
-	return std::move(maps);
+	return maps;
 }

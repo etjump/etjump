@@ -77,7 +77,7 @@ extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int a
 		CG_EventHandling(arg0, qtrue);
 		return 0;
 	case CG_GET_TAG:
-		return CG_GetTag(arg0, (char *)arg1, (orientation_t *)arg2);
+		return CG_GetTag(arg0, reinterpret_cast<char *>(arg1), reinterpret_cast<orientation_t *>(arg2));
 	case CG_CHECKEXECKEY:
 		return CG_CheckExecKey(arg0);
 	case CG_WANTSBINDKEYS:
@@ -1423,7 +1423,7 @@ int CG_findClientNum(char *s)
 	qboolean fIsNumber = qtrue;
 
 	// See if its a number or string
-	for (id = 0; id < strlen(s) && s[id] != 0; id++)
+	for (id = 0; id < static_cast<int>(strlen(s)) && s[id] != 0; id++)
 	{
 		if (s[id] < '0' || s[id] > '9')
 		{
@@ -1617,7 +1617,7 @@ void CG_SetupDlightstyles(void)
 		token          = COM_Parse(&str);   // attenuation
 		cent->dl_atten = atoi(token);
 
-		for (j = 0; j < strlen(cent->dl_stylestring); j++)
+		for (j = 0; j < static_cast<int>(strlen(cent->dl_stylestring)); j++)
 		{
 
 			cent->dl_stylestring[j] += cent->dl_atten;              // adjust character for attenuation/amplification

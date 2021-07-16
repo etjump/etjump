@@ -79,14 +79,14 @@ bool CustomMapVotes::Load()
 
 	try
 	{
-		for (int i = 0; i < root.size(); i++)
+		for (int i = 0; i < static_cast<int>(root.size()); i++)
 		{
 			customMapVotes_.push_back(MapType());
 			unsigned    curr = customMapVotes_.size() - 1;
 			Json::Value maps = root[i]["maps"];
 			customMapVotes_[curr].type         = root[i]["name"].asString();
 			customMapVotes_[curr].callvoteText = root[i]["callvote_text"].asString();
-			for (int j = 0; j < maps.size(); j++)
+			for (int j = 0; j < static_cast<int>(maps.size()); j++)
 			{
 				auto mapName = maps[j].asString();
 				if (std::binary_search(_currentMapsOnServer->begin(), _currentMapsOnServer->end(), mapName))
@@ -253,7 +253,7 @@ std::string const CustomMapVotes::RandomMap(std::string const& type)
 				}
 			}
 			// fallback, iterate map list and select first valid map
-			for (int i = 0; i < customMapVote.mapsOnServer.size(); i++)
+			for (int i = 0; i < static_cast<int>(customMapVote.mapsOnServer.size()); i++)
 			{
 				if (isValidMap(customMapVote.mapsOnServer[i]))
 				{

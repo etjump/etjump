@@ -101,7 +101,7 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 		{
 			break;
 		}
-		auto charsBefore = 0;
+		// auto charsBefore = 0;
 		for (const auto & header : headers)
 		{
 			const auto iter = row.find(header);
@@ -112,7 +112,7 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 				{
                     maxColumnWidths[header] = std::max(
                                 maxColumnWidths[header], static_cast<unsigned int>(header.length()));
-					auto extraChars = maxColumnWidths[header];
+					// auto extraChars = maxColumnWidths[header];
 					auto index = std::to_string(current + 1);
 					buffer += index + std::string(maxColumnWidths[header] - index.length() + 2, ' ');
 				} else

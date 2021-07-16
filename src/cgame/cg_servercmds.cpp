@@ -509,7 +509,7 @@ void CG_ParseServerVersionInfo(const char *pszVersionInfo)
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString)
 {
 	const char   *tmp = pszReinfSeedString, *tmp2;
-	unsigned int i, j, dwDummy, dwOffset[TEAM_NUM_TEAMS];
+	unsigned int i, j, /*dwDummy,*/ dwOffset[TEAM_NUM_TEAMS];
 
 #define GETVAL(x, y) if ((tmp = strchr(tmp, ' ')) == NULL) { return; } x = atoi(++tmp) / y;
 
@@ -528,7 +528,7 @@ void CG_ParseReinforcementTimes(const char *pszReinfSeedString)
 				cgs.aReinfOffset[i] *= 1000;
 				break;
 			}
-			GETVAL(dwDummy, 1);
+			// GETVAL(dwDummy, 1);
 		}
 	}
 }

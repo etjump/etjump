@@ -16,16 +16,16 @@ CG_Obituary
 */
 static void CG_Obituary(entityState_t *ent)
 {
-	int          mod;
+	// int          mod;
 	int          target, attacker;
-	const char         *message;
-	const char         *message2;
+	// const char         *message;
+	// const char         *message2;
 	char         targetName[32];
-	clientInfo_t *ci, *ca;    // JPW NERVE ca = attacker
+	clientInfo_t *ci /*, *ca*/;    // JPW NERVE ca = attacker
 
 	target   = ent->otherEntityNum;
 	attacker = ent->otherEntityNum2;
-	mod      = ent->eventParm;
+	// mod      = ent->eventParm;
 
 	if (target < 0 || target >= MAX_CLIENTS)
 	{
@@ -36,17 +36,17 @@ static void CG_Obituary(entityState_t *ent)
 	if (attacker < 0 || attacker >= MAX_CLIENTS)
 	{
 		attacker = ENTITYNUM_WORLD;
-		ca       = NULL;
+		// ca       = NULL;
 	}
 	else
 	{
-		ca = &cgs.clientinfo[attacker];
+		// ca = &cgs.clientinfo[attacker];
 	}
 
 	Q_strncpyz(targetName, ci->name, sizeof(targetName) - 2);
 	strcat(targetName, S_COLOR_WHITE);
 
-	message2 = "";
+	/*message2 = "";
 
 	// check for single client messages
 	switch (mod)
@@ -146,7 +146,7 @@ static void CG_Obituary(entityState_t *ent)
 			message = "killed himself";
 			break;
 		}
-	}
+	}*/
 }
 
 //==========================================================================
@@ -1286,14 +1286,14 @@ void CG_Effect(centity_t *cent, vec3_t origin, vec3_t dir)
 	localEntity_t *le;
 	refEntity_t   *re;
 //	int				howmany;
-	int mass;
+	// int mass;
 //	int				large, small;
 	vec4_t projection, color;
 
 
 	VectorSet(dir, 0, 0, 1);    // straight up.
 
-	mass = cent->currentState.density;
+	// mass = cent->currentState.density;
 
 //		1 large per 100, 1 small per 24
 //	large	= (int)(mass / 100);
@@ -1599,9 +1599,9 @@ void CG_ShardJunk(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           type;
+	// int           type;
 
-	type = cent->currentState.density;
+	// type = cent->currentState.density;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
@@ -1652,9 +1652,9 @@ void CG_Debris(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	int           type;
+	// int           type;
 
-	type = cent->currentState.density;
+	// type = cent->currentState.density;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
@@ -1791,7 +1791,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 	static int splashfootstepcnt = 0;
 
 	//Feen: PGM
-	qboolean portalDetected = qfalse;
+	// qboolean portalDetected = qfalse;
 
 	es    = &cent->currentState;
 	event = es->event & ~EV_EVENT_BITS;
@@ -3179,7 +3179,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 	case EV_PORTAL_TELEPORT:
 		DEBUGNAME("EV_PORTAL_TELEPORT");
-		portalDetected = qtrue; //Used below.....
+		// portalDetected = qtrue; //Used below.....
 		break;
 
 	case EV_LOAD_TELEPORT:

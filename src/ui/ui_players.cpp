@@ -577,11 +577,11 @@ static float UI_MovedirAdjustment(playerInfo_t *pi)
 
 	VectorSubtract(pi->viewAngles, pi->moveAngles, relativeAngles);
 	AngleVectors(relativeAngles, moveVector, NULL, NULL);
-	if (Q_fabs(moveVector[0]) < 0.01)
+	if (std::abs(moveVector[0]) < 0.01)
 	{
 		moveVector[0] = 0.0;
 	}
-	if (Q_fabs(moveVector[1]) < 0.01)
+	if (std::abs(moveVector[1]) < 0.01)
 	{
 		moveVector[1] = 0.0;
 	}
@@ -1387,19 +1387,19 @@ UI_ParseAnimationFile
 */
 static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 {
-	char         *text_p, *prev;
+	// char         *text_p, *prev;
 	int          len;
-	int          i;
+	/*int          i;
 	char         *token;
 	float        fps;
-	int          skip;
+	int          skip;*/
 	auto  text = std::unique_ptr<char[]>(new char[20000]);
 	fileHandle_t f;
 
-	token = NULL;
+	/*token = NULL;
 	i     = 0;
 	fps   = 0;
-	prev  = 0;
+	prev  = 0;*/
 
 	memset(pi->animations, 0, sizeof(animation_t) * MAX_ANIMATIONS);
 
@@ -1409,7 +1409,7 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 	{
 		return qfalse;
 	}
-	if (len >= (sizeof(text) - 1))
+	if (len >= (static_cast<int>(sizeof(text)) - 1))
 	{
 		Com_Printf("File %s too long\n", filename);
 		return qfalse;
@@ -1419,8 +1419,8 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
 	trap_FS_FCloseFile(f);
 
 	// parse the text
-	text_p = text.get();
-	skip   = 0; // quite the compiler warning
+	// text_p = text.get();
+	// skip   = 0; // quite the compiler warning
 
 	// NERVE - SMF - new!!!!
 	AnimParseAnimConfig(pi, filename, text.get());

@@ -491,7 +491,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 	{
 		const char *obit;
 
-		if (meansOfDeath < 0 || meansOfDeath >= sizeof(modNames) / sizeof(modNames[0]))
+		if (meansOfDeath < 0 || meansOfDeath >= static_cast<int>(sizeof(modNames) / sizeof(modNames[0])))
 		{
 			obit = "<bad obituary>";
 		}

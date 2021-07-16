@@ -945,7 +945,7 @@ void CG_DemoHelpDraw()
 
 
 		// Control info
-		for (i = 0; i < sizeof(help) / sizeof(char *); i++)
+		for (i = 0; i < static_cast<int>(sizeof(help) / sizeof(char *)); i++)
 		{
 			y += tSpacing;
 			if (help[i] != NULL)
@@ -956,7 +956,7 @@ void CG_DemoHelpDraw()
 
 		if (cg.mvTotalClients > 1)
 		{
-			for (i = 0; i < sizeof(mvhelp) / sizeof(char *); i++)
+			for (i = 0; i < static_cast<int>(sizeof(mvhelp) / sizeof(char *)); i++)
 			{
 				y += tSpacing;
 				if (mvhelp[i] != NULL)
@@ -1059,7 +1059,7 @@ void CG_SpecHelpDraw()
 
 		// FIXME: Should compute all this stuff beforehand
 		// Compute required width
-		for (i = 0; i < sizeof(help) / sizeof(helpType_t); i++)
+		for (i = 0; i < static_cast<int>(sizeof(help) / sizeof(helpType_t)); i++)
 		{
 			if (help[i].cmd != NULL)
 			{
@@ -1072,7 +1072,7 @@ void CG_SpecHelpDraw()
 		}
 
 		Q_strncpyz(format, va("^2%%%ds ^N%%s", maxlen), sizeof(format));
-		for (i = 0, maxlen = 0; i < sizeof(help) / sizeof(helpType_t); i++)
+		for (i = 0, maxlen = 0; i < static_cast<int>(sizeof(help) / sizeof(helpType_t)); i++)
 		{
 			if (help[i].cmd != NULL)
 			{
@@ -1141,7 +1141,7 @@ void CG_SpecHelpDraw()
 
 
 		// Control info
-		for (i = 0; i < sizeof(help) / sizeof(helpType_t); i++)
+		for (i = 0; i < static_cast<int>(sizeof(help) / sizeof(helpType_t)); i++)
 		{
 			y += tSpacing;
 			if (lines[i] != NULL)

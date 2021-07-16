@@ -492,7 +492,7 @@ int refClientNumFromString(char *s)
 	int       partialMatchId = -1;
 
 	// See if its a number or string
-	for (idnum = 0; idnum < strlen(s) && s[idnum] != 0; idnum++)
+	for (idnum = 0; idnum < static_cast<int>(strlen(s)) && s[idnum] != 0; idnum++)
 	{
 		if (s[idnum] < '0' || s[idnum] > '9')
 		{
@@ -861,7 +861,7 @@ qboolean G_isIPMuted(const char *originalIp)
 	Q_strncpyz(ip, originalIp, sizeof(ip));
 
 	// Must remove port from ip
-	for (i = 0; i < strlen(ip); i++)
+	for (i = 0; i < static_cast<int>(strlen(ip)); i++)
 	{
 		if (ip[i] == ':')
 		{

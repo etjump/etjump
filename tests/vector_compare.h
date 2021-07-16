@@ -4,7 +4,7 @@
 template <typename T>
 bool vectorsAreEqual(const std::vector<T> lhs, int skip, const std::vector<T> rhs)
 {
-	if (lhs.size() <= skip)
+	if (static_cast<int>(lhs.size()) <= skip)
 	{
 		return false;
 	}
@@ -14,7 +14,7 @@ bool vectorsAreEqual(const std::vector<T> lhs, int skip, const std::vector<T> rh
 		return false;
 	}
 
-	for (auto i = skip, j = 0; i < lhs.size(); ++i, ++j)
+	for (auto i = skip, j = 0; i < static_cast<int>(lhs.size()); ++i, ++j)
 	{
 		if (lhs[i] != rhs[j])
 		{

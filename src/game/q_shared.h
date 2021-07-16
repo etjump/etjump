@@ -528,10 +528,11 @@ extern vec3_t axisDefault[3];
 
 #define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
 
-float Q_fabs(float f);
-float Q_rsqrt(float f);         // reciprocal square root
+// these functions aren't contemporary anymore.. sorry carmack
+// float Q_fabs(float f);
+// float Q_rsqrt(float f);         // reciprocal square root
 
-#define SQRTFAST(x) (1.0f / Q_rsqrt(x))
+// #define SQRTFAST(x) (1.0f / Q_rsqrt(x))
 
 static inline long Q_ftol(float f)
 {

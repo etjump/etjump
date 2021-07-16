@@ -63,8 +63,8 @@ public:
 		{
 
 		}
-		int userId;
 		bool racing;
+		int userId;
 		std::string name;
 		std::string currentRunName;
 		int runStartTime;

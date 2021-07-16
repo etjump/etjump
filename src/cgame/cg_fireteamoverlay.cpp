@@ -93,8 +93,8 @@ void CG_ParseFireteams()
 	const char *p;
 	int        clnts[2];
 
-	qboolean onFireteam2;
-	qboolean isLeader2;
+	// qboolean onFireteam2;
+	// qboolean isLeader2;
 
 //	qboolean onFireteam =	CG_IsOnFireteam( cg.clientNum ) ? qtrue : qfalse;
 //	qboolean isLeader =		CG_IsFireTeamLeader( cg.clientNum ) ? qtrue : qfalse;
@@ -158,8 +158,8 @@ void CG_ParseFireteams()
 
 	CG_SortClientFireteam();
 
-	onFireteam2 = CG_IsOnFireteam(cg.clientNum) ? qtrue : qfalse;
-	isLeader2   = CG_IsFireTeamLeader(cg.clientNum) ? qtrue : qfalse;
+	// onFireteam2 = CG_IsOnFireteam(cg.clientNum) ? qtrue : qfalse;
+	// isLeader2   = CG_IsFireTeamLeader(cg.clientNum) ? qtrue : qfalse;
 }
 
 // Fireteam that both specified clients are on, if they both are on the same team
