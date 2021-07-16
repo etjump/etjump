@@ -3437,15 +3437,20 @@ const char *Item_Multi_Setting(itemDef_t *item)
 				}
 			}
 		}
+		if (multiPtr->count == 0)
+		{
+			return "None Defined";
+		}
 	}
+	
+	// ignore cvarListUndefined as it's almost never used and easily forgotten
+	/*
 	if (multiPtr->undefinedStr)
 	{
 		return multiPtr->undefinedStr;
-	}
-	else
-	{
-		return((multiPtr->count == 0) ? "None Defined" : "Custom");
-	}
+	}*/
+
+	return "Custom";
 }
 
 qboolean Item_Multi_HandleKey(itemDef_t *item, int key)
