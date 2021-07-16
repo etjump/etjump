@@ -2340,9 +2340,12 @@ static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles)
 		}
 
 		// reverse the roll on the weapon so it stays relatively level
-		angles[ROLL] -= cg.predictedPlayerState.leanf / (myfrac * 2.0f);
-		AngleVectors(angles, NULL, right, up);
-		VectorMA(origin, angles[ROLL], right, origin);
+		if (cg.predictedPlayerState.viewangles[ROLL] == 0)
+		{
+			angles[ROLL] -= cg.predictedPlayerState.leanf / (myfrac * 2.0f);
+			AngleVectors(angles, NULL, right, up);
+			VectorMA(origin, angles[ROLL], right, origin);
+		}
 
 		// pitch the gun down a bit to show that firing is not allowed when leaning
 		angles[PITCH] += (abs(cg.predictedPlayerState.leanf) / 2.0f);
