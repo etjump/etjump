@@ -50,7 +50,7 @@ std::vector<const MapStatistics::MapInformation *> MapStatistics::getMostPlayed(
 		return lhs->secondsPlayed > rhs->secondsPlayed;
 	});
 
-	return std::move(mostPlayed);
+	return mostPlayed;
 }
 
 std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed()
@@ -66,7 +66,7 @@ std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed
 		return lhs->secondsPlayed < rhs->secondsPlayed;
 	});
 
-	return std::move(mostPlayed);
+	return mostPlayed;
 }
 
 const std::vector<std::string> *MapStatistics::getCurrentMaps()
@@ -86,7 +86,7 @@ std::vector<std::string> MapStatistics::getMaps()
 		}
 	}
 
-	return std::move(maps);
+	return maps;
 }
 
 const MapStatistics::MapInformation *MapStatistics::getMapInformation(const std::string& mapName)
@@ -477,7 +477,7 @@ const char *MapStatistics::randomMap() const
 	// fallback, iterate map list and select first valid map
 	if (mapIdx < 0)
 	{
-		for (int i = 0; i < _maps.size(); i++)
+		for (int i = 0; i < static_cast<int>(_maps.size()); i++)
 		{
 			if (isValidMap(&_maps[i]))
 			{

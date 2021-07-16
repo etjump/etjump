@@ -333,7 +333,7 @@ void CG_Bleed(vec3_t origin, int entityNum)
 {
 #define BLOOD_SPURT_COUNT   4
 	int       i, j;
-	centity_t *cent;
+	// centity_t *cent;
 
 	if (!cg_blood.integer)
 	{
@@ -348,7 +348,7 @@ void CG_Bleed(vec3_t origin, int entityNum)
 	}
 #endif // SAVEGAME_SUPPORT
 
-	cent = &cg_entities[entityNum];
+	// cent = &cg_entities[entityNum];
 
 	// Ridah, blood spurts
 	if (entityNum != cg.snap->ps.clientNum)
@@ -497,8 +497,8 @@ void CG_LoseHat(centity_t *cent, vec3_t dir)
 	clientInfo_t *ci;
 	int          clientNum;
 //	int				i, count, tagIndex, gibIndex;
-	int            tagIndex;
-	vec3_t         origin, velocity;
+	// int            tagIndex;
+	vec3_t         origin = { 0, 0, 0 }, velocity;
 	bg_character_t *character;
 
 	clientNum = cent->currentState.clientNum;
@@ -515,7 +515,7 @@ void CG_LoseHat(centity_t *cent, vec3_t dir)
 		return;
 	}
 
-	tagIndex = CG_GetOriginForTag(cent, &cent->pe.headRefEnt, "tag_mouth", 0, origin, NULL);
+	// tagIndex = CG_GetOriginForTag(cent, &cent->pe.headRefEnt, "tag_mouth", 0, origin, NULL);
 
 	velocity[0] = dir[0] * (0.75 + random()) * GIB_VELOCITY;
 	velocity[1] = dir[1] * (0.75 + random()) * GIB_VELOCITY;
@@ -995,7 +995,7 @@ void CG_Spotlight(centity_t *cent, float *color, vec3_t realstart, vec3_t lightD
 	vec3_t      endCenter;
 	polyVert_t  coreverts[4];
 	trace_t     tr;
-	float       alpha;
+	// float       alpha;
 	float       radius = 0.0; // TTimo might be used uninitialized
 	float       coreEndRadius;
 	qboolean    capStart = qtrue;
@@ -1258,7 +1258,7 @@ void CG_Spotlight(centity_t *cent, float *color, vec3_t realstart, vec3_t lightD
 		{
 			VectorMA(startvec, hitDist, conevec, endvec);
 
-			alpha  = 0.3f;
+			// alpha  = 0.3f;
 			radius = coreEndRadius * (hitDist / beamLen);
 
 			//%	VectorNegate( lightDir, proj );

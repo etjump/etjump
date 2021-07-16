@@ -1740,8 +1740,8 @@ void ClientUserinfoChanged(int clientNum)
 	char      userinfo[MAX_INFO_STRING];
 	gclient_t *client;
 	int       i;
-	char      skillStr[16] = "";
-	char      medalStr[16] = "";
+	// char      skillStr[16] = "";
+	// char      medalStr[16] = "";
 
 	ent    = g_entities + clientNum;
 	client = ent->client;

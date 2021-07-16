@@ -79,7 +79,7 @@ static qboolean CG_ParseHudHeadConfig(const char *filename, animation_t *hha)
 		return qfalse;
 	}
 
-	if (len >= sizeof(bigTextBuffer) - 1)
+	if (len >= static_cast<int>(sizeof(bigTextBuffer)) - 1)
 	{
 		CG_Printf("File %s too long\n", filename);
 		return qfalse;
@@ -162,7 +162,7 @@ static void CG_CalcMoveSpeeds(bg_character_t *character)
 	int           i, j, k;
 	float         totalSpeed;
 	int           numSpeed;
-	int           lastLow, low;
+	int           /*lastLow,*/ low;
 	orientation_t o[2];
 
 	memset(&refent, 0, sizeof(refent));
@@ -179,7 +179,7 @@ static void CG_CalcMoveSpeeds(bg_character_t *character)
 		}
 
 		totalSpeed = 0;
-		lastLow    = -1;
+		// lastLow    = -1;
 		numSpeed   = 0;
 
 		// for each frame
@@ -232,7 +232,7 @@ static void CG_CalcMoveSpeeds(bg_character_t *character)
 			{
 				VectorCopy(o[k].origin, oldPos[k]);
 			}
-			lastLow = low;
+			// lastLow = low;
 		}
 
 		// record the speed
@@ -268,7 +268,7 @@ static qboolean CG_ParseAnimationFiles(bg_character_t *character, const char *an
 	{
 		return qfalse;
 	}
-	if (len >= sizeof(bigTextBuffer) - 1)
+	if (len >= static_cast<int>(sizeof(bigTextBuffer)) - 1)
 	{
 		CG_Printf("File %s is too long\n", filename);
 		return qfalse;
@@ -323,7 +323,7 @@ static qboolean CG_CheckForExistingAnimModelInfo(const char *animationGroup, con
 	{
 		*animModelInfo = firstFree;
 		// clear the structure out ready for use
-		memset(*animModelInfo, 0, sizeof(*animModelInfo));
+		memset(*animModelInfo, 0, sizeof(animModelInfo_t));
 	}
 
 	// qfalse signifies that we need to parse the information from the script files

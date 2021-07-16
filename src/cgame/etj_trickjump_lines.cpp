@@ -234,7 +234,7 @@ void TrickjumpLines::stopRecord()
 
 void TrickjumpLines::displayCurrentRoute(int x)
 {
-	static int nextRotationTime = 0;
+	// static int nextRotationTime = 0;
 
 	// Loop on every trail into the route.
 	const int nbTrails = _routes[x].trails.size();
@@ -315,7 +315,7 @@ void TrickjumpLines::displayCurrentRoute(int x)
 				addJumpIndicator(start, colorEndMarker, 10.0);
 			}
 			// Check if it is the last curve of the route.
-			else if (i == _routes[x].trails.size() - 1)
+			else if (i == static_cast<int>(_routes[x].trails.size()) - 1)
 			{
 				addJumpIndicator(start, colorMarker, 10.0);
 				addJumpIndicator(end, colorEndMarker, 10.0);
@@ -714,7 +714,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 	try
 	{
 		// Loop on each route (tjl)
-		for (int i = 0; i < root.size(); ++i)
+		for (int i = 0; i < static_cast<int>(root.size()); ++i)
 		{
 			Route loadRoute;
 			if (loadname != nullptr)
@@ -727,7 +727,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 			loadRoute.status = loadStatus;
 
 			Json::Value colorValue = root[i]["color"];
-			for (int j = 0; j < colorValue.size(); ++j)
+			for (int j = 0; j < static_cast<int>(colorValue.size()); ++j)
 			{
 				loadRoute.color[j] = (unsigned char)std::atoi(colorValue[j].asString().c_str());
 			}
@@ -735,15 +735,15 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 			// Loop on each trail in a route (tjl) 
 			Json::Value trailsValue = root[i]["trails"];
 			std::vector< std::vector< Node > > routeVec;
-			for (int j = 0; j < trailsValue.size(); ++j)
+			for (int j = 0; j < static_cast<int>(trailsValue.size()); ++j)
 			{
 				// Loop on each node in a trail.
 				std::vector< Node > trailVec;
-				for (int k = 0; k < trailsValue[j].size(); ++k)
+				for (int k = 0; k < static_cast<int>(trailsValue[j].size()); ++k)
 				{
 					Node loadNode;
 					Json::Value coorValue = trailsValue[j][k]["coordinates"];
-					for (int l = 0; l < coorValue.size(); ++l)
+					for (int l = 0; l < static_cast<int>(coorValue.size()); ++l)
 					{
 						loadNode.coor[l] = std::atof(coorValue[l].asString().c_str());
 					}
@@ -827,7 +827,7 @@ void TrickjumpLines::saveRoutes(const char *savename)
 // This is a top face with sparkParticleShader
 void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize)
 {
-	static int nextPrintTime = 0;
+	// static int nextPrintTime = 0;
 
 	const vec3_t mins = { -quadSize, -quadSize, 0.0 };
 	const vec3_t maxs = { quadSize, quadSize, 0.0 };
@@ -1005,7 +1005,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		return;
 	}
 
-	if (newName == "default")
+	if (strcmp(newName, "default"))
 	{
 		CG_Printf("You cannot rename a route 'default'. This name is protected for map entities trigger. \n");
 		return;
@@ -1049,7 +1049,7 @@ float TrickjumpLines::normalizeSpeed(float max, float min, float speed)
 void TrickjumpLines::computeHSV(float speed, vec3_t& hsv)
 {
 	// Source from : http://stackoverflow.com/questions/9507947/mapping-colors-to-an-interval
-	const float hmin = 0;
+	// const float hmin = 0;
 	const float hmax = 300; // This need to be hardcoded (0 to 300 mean red=0 to blue=300),
 
 	// Simple x^1.35 * maxDegree to have a nice mapping function between ups and color.
@@ -1143,7 +1143,7 @@ int TrickjumpLines::getRoutePositionByName(const char *name)
 	}
 
 	// Search in _routes.
-	for (int z = 0; z < _routes.size(); ++z)
+	for (int z = 0; z < static_cast<int>(_routes.size()); ++z)
 	{
 		if (_routes[z].status == routeStatus::map)
 		{
@@ -1221,4 +1221,3 @@ void TrickjumpLines::toggleMarker(bool state)
 	setEnableMarker(state);
 	return;
 }
-

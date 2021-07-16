@@ -1800,7 +1800,7 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort, char **args)
 			}
 			else if (!Q_stricmp(cvar, "ValidReplaySelected"))
 			{
-				if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoObjects.size())
+				if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size()))
 				{
 					Item_RunScript(item, bAbort, script1);
 				}
@@ -2732,12 +2732,12 @@ int Item_Slider_OverSlider(itemDef_t *item, float x, float y)
 int Item_ListBox_OverLB(itemDef_t *item, float x, float y)
 {
 	rectDef_t    r;
-	listBoxDef_t *listPtr;
+	// listBoxDef_t *listPtr;
 	int          thumbstart;
-	int          count;
+	// int          count;
 
-	count   = DC->feederCount(item->special);
-	listPtr = (listBoxDef_t *)item->typeData;
+	// count   = DC->feederCount(item->special);
+	// listPtr = (listBoxDef_t *)item->typeData;
 	if (item->window.flags & WINDOW_HORIZONTAL)
 	{
 		// check if on left arrow
@@ -4706,7 +4706,7 @@ static float GetCharWidth(const char *symbol, float scale, fontInfo_t *font)
 
 	if (symbol)
 	{
-		glyph = &font->glyphs[*symbol];
+		glyph = &font->glyphs[static_cast<std::size_t>(*symbol)];
 		out = glyph->xSkip;
 	}
 	return out * scale * font->glyphScale;
@@ -4721,10 +4721,10 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr, qboolean ha
 	float      y;
 	vec4_t     color, cursorColor;
 	int        linesCount = 0;
-	float      ryLineWidth = 0;
+	// float      ryLineWidth = 0;
 	fontInfo_t *font = DC->getActiveFont();
 	float      lineWidth = 0;
-	float      tWidth = 0;
+	// float      tWidth = 0;
 	int lineHeight = 0;
 
 	newLinePtr = NULL;
@@ -5114,7 +5114,7 @@ void Item_Text_Paint(itemDef_t *item)
 void Item_TextMultiline_Paint(itemDef_t *item) {
 		
 	char           buff[1024];
-	editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
+	// editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
 	
 	if (!item->cvar)
 	{
@@ -5698,10 +5698,10 @@ char *BindingFromName(const char *cvar)
 void Item_Slider_Paint(itemDef_t *item)
 {
 	vec4_t    newColor, lowLight;
-	float     x, y, value;
+	float     x, y /*, value*/ ;
 	menuDef_t *parent = (menuDef_t *)item->parent;
 
-	value = (item->cvar) ? DC->getCVarValue(item->cvar) : 0;
+	// value = (item->cvar) ? DC->getCVarValue(item->cvar) : 0;
 
 	if (item->window.flags & WINDOW_HASFOCUS && item->window.flags & WINDOW_FOCUSPULSE)
 	{
@@ -6280,14 +6280,14 @@ void Item_ListBox_Paint(itemDef_t *item)
 
 void Item_OwnerDraw_Paint(itemDef_t *item)
 {
-	menuDef_t *parent;
+	// menuDef_t *parent;
 
 	if (item == NULL)
 	{
 		return;
 	}
 
-	parent = (menuDef_t *)item->parent;
+	// parent = (menuDef_t *)item->parent;
 
 	if (DC->ownerDrawItem)
 	{
@@ -6786,7 +6786,7 @@ void Item_Init(itemDef_t *item)
 void Menu_HandleMouseMove(menuDef_t *menu, float x, float y)
 {
 	int      i, pass;
-	qboolean focusSet = qfalse;
+	// qboolean focusSet = qfalse;
 
 	itemDef_t *overItem = nullptr;
 
@@ -7062,7 +7062,7 @@ typedef struct keywordHash_s
 
 int KeywordHash_Key(const char *keyword)
 {
-	int register hash, i;
+	int hash, i;
 
 	hash = 0;
 	for (i = 0; keyword[i] != '\0'; i++)
@@ -7202,9 +7202,9 @@ qboolean ItemParse_yOffset(itemDef_t *item, int handle)
 qboolean ItemParse_asset_model(itemDef_t *item, int handle)
 {
 	const char *temp = NULL;
-	modelDef_t *modelPtr;
+	// modelDef_t *modelPtr;
 	Item_ValidateTypeData(item);
-	modelPtr = (modelDef_t *)item->typeData;
+	// modelPtr = (modelDef_t *)item->typeData;
 
 	if (!PC_String_Parse(handle, &temp))
 	{
@@ -9913,7 +9913,7 @@ void UI_PrintMapDetailsBriefing()
 	int x = 276;
 	int y = 16;
 	int w = 252;
-	int h = 360;
+	// int h = 360;
 
 	int lineCount = 0;
 
@@ -9984,7 +9984,7 @@ void ETJump_DrawMapDetails()
 	int x = 276;
 	int y = 16;
 	int w = 252;
-	int h = 360;
+	// int h = 360;
 
 	char isUIopen_str[MAX_CVAR_VALUE_STRING];
 	char mapName[128] = "\0";

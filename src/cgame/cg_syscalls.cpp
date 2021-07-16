@@ -27,7 +27,11 @@ extern "C" FN_PUBLIC void dllEntry(int(QDECL  * syscallptr)(int arg, ...))
 }*/
 
 
-#define PASSFLOAT(x) (*(int *)&x)
+// #define PASSFLOAT(x) (*(int *)&x)
+
+inline constexpr int PASSFLOAT(const float &f) noexcept {
+  return *reinterpret_cast<const int *>(&f);
+}
 
 void trap_PumpEventLoop(void)
 {

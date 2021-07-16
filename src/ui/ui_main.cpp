@@ -3319,7 +3319,7 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 	size = (rect->w / 96.0f) * ((size > 96.0f) ? 96.0f : ((size < 24.0f) ? 24.0f : size));
 
 	vec4_t crosshairColor = { 1.0, 1.0, 1.0, 1.0 };
-	float crosshairColorAlpha = cg_crosshairAlpha.value;
+	// float crosshairColorAlpha = cg_crosshairAlpha.value;
 
 	ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
 	crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
@@ -3327,7 +3327,7 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 	UI_DrawHandlePic(rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size, size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
 
 	vec4_t crosshairColorAlt = { 1.0, 1.0, 1.0, 1.0 };
-	float crosshairColorAlphaAlt = cg_crosshairAlphaAlt.value;
+	// float crosshairColorAlphaAlt = cg_crosshairAlphaAlt.value;
 
 	ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
 	crosshairColorAlt[3] = Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
@@ -5199,7 +5199,7 @@ void UI_RunMenuScript(char **args)
 
 		if (Q_stricmp(name, "StartServer") == 0)
 		{
-			float skill;
+			// float skill;
 			int   pb_sv, pb_cl;
 
 			// DHM - Nerve
@@ -5233,7 +5233,7 @@ void UI_RunMenuScript(char **args)
 				trap_Cmd_ExecuteText(EXEC_APPEND, va("wait ; wait ; map %s\n", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
 			}
 
-			skill = trap_Cvar_VariableValue("g_spSkill");
+			// skill = trap_Cvar_VariableValue("g_spSkill");
 
 			// NERVE - SMF - set user cvars here
 			// set timelimit
@@ -5459,7 +5459,7 @@ void UI_RunMenuScript(char **args)
 		}
 	    if (Q_stricmp(name, "RunDemo") == 0)
 	    {
-	        if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoObjects.size())
+	        if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size()))
 	        {
 	            auto selected = uiInfo.demoObjects[uiInfo.demoIndex];
 	            if (selected.type == FileSystemObjectType::Folder)
@@ -5495,7 +5495,7 @@ void UI_RunMenuScript(char **args)
 	    }
 	    if (Q_stricmp(name, "deleteDemo") == 0)
 	    {
-	        if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < uiInfo.demoObjects.size())
+	        if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size()))
 	        {
 	            auto demoPath = (boost::algorithm::join(uiInfo.currentDemoPath, "/") + "/" + uiInfo.demoObjects[uiInfo.
 	                demoIndex].name);
@@ -7899,8 +7899,8 @@ static const char *UI_SelectedMap(qboolean singlePlayer, int index, int *actual)
 
 static const char *UI_SelectedCampaign(int index, int *actual)
 {
-	int i, c;
-	c       = 0;
+	int i /*, c*/;
+	// c       = 0;
 	*actual = 0;
 	for (i = 0; i < uiInfo.campaignCount; i++)
 	{
@@ -8290,7 +8290,7 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 	}
 	else if (feederID == FEEDER_DEMOS)
 	{
-		if (index >= 0 && index < uiInfo.demoObjects.size())
+		if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size()))
 		{
 			const auto object = &uiInfo.demoObjects[index];
             switch (object->type)
@@ -8440,10 +8440,10 @@ void UI_FeederSelection(float feederID, int index)
 	}
 	else if (feederID == FEEDER_MAPS || feederID == FEEDER_ALLMAPS)
 	{
-		int actual, map;
+		int actual /*, map*/;
 		int game;
 
-		map  = (feederID == FEEDER_ALLMAPS) ? ui_currentNetMap.integer : ui_currentMap.integer;
+		// map  = (feederID == FEEDER_ALLMAPS) ? ui_currentNetMap.integer : ui_currentMap.integer;
 		game = feederID == FEEDER_MAPS ? uiInfo.gameTypes[ui_gameType.integer].gtEnum : ui_netGameType.integer;
 		/*if( game == GT_WOLF_CAMPAIGN ) {
 		    if (uiInfo.campaignList[map].campaignCinematic >= 0) {
@@ -9280,7 +9280,7 @@ UI_Init
 */
 void _UI_Init(int legacyClient, int clientVersion)
 {
-	int start, x;
+	int /*start,*/ x;
 
 	//uiInfo.inGameLoad = inGameLoad;
 
@@ -9416,7 +9416,7 @@ void _UI_Init(int legacyClient, int clientVersion)
 	trap_R_RegisterFont("ariblk", 27, &uiInfo.loadscreenfont1);
 	trap_R_RegisterFont("courbd", 30, &uiInfo.loadscreenfont2);
 
-	start = trap_Milliseconds();
+	// start = trap_Milliseconds();
 
 	uiInfo.teamCount      = 0;
 	uiInfo.characterCount = 0;
@@ -9437,7 +9437,7 @@ void _UI_Init(int legacyClient, int clientVersion)
 	// rain - bounds check array index, although I'm pretty sure this
 	// stuff isn't used anymore...
 	x = (int)trap_Cvar_VariableValue("color") - 1;
-	if (x < 0 || x >= sizeof(gamecodetoui) / sizeof(gamecodetoui[0]))
+	if (x < 0 || x >= static_cast<int>(sizeof(gamecodetoui) / sizeof(gamecodetoui[0])))
 	{
 		x = 0;
 	}

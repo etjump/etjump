@@ -622,11 +622,11 @@ int QDECL SortStats(const void *a, const void *b)
 		return(-1);
 	}
 
-	if ((ca->sess.aWeaponStats[iWeap].atts) < cQualifyingShots[iWeap])
+	if (static_cast<int>(ca->sess.aWeaponStats[iWeap].atts) < cQualifyingShots[iWeap])
 	{
 		return(1);
 	}
-	if ((cb->sess.aWeaponStats[iWeap].atts) < cQualifyingShots[iWeap])
+	if (static_cast<int>(cb->sess.aWeaponStats[iWeap].atts) < cQualifyingShots[iWeap])
 	{
 		return(-1);
 	}

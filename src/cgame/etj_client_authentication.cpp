@@ -72,7 +72,7 @@ std::string ETJump::ClientAuthentication::getGuid()
 		File guidFile(GUID_FILE);
 		auto guid = guidFile.read();
 		return std::string(begin(guid), end(guid));
-	} catch (File::FileNotFoundException)
+	} catch (const File::FileNotFoundException&)
 	{
 		return createGuid();
 	}
@@ -97,7 +97,7 @@ ETJump::ClientAuthentication::OperationResult ETJump::ClientAuthentication::save
 	{
 		guidFile.write(guid);
 		return{ true, "" };
-	} catch (File::WriteFailedException wfe)
+	} catch (const File::WriteFailedException& wfe)
 	{
 		return{ false, std::string("saving guid failed: ") + wfe.what() + " Using temporary guid." };
 	}

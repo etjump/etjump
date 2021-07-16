@@ -559,7 +559,7 @@ may include ANIM_TOGGLEBIT
 void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf, int newAnimation)
 {
 	animation_t *anim, *oldanim;
-	int         transitionMin = -1, oldAnimTime, oldAnimNum;
+	int         transitionMin = -1, /*oldAnimTime,*/ oldAnimNum;
 	qboolean    firstAnim     = qfalse;
 
 	bg_character_t *character = CG_CharacterForClientinfo(ci, cent);
@@ -569,7 +569,7 @@ void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci, lerpFrame_t
 		return;
 	}
 
-	oldAnimTime = lf->animationTime;
+	// oldAnimTime = lf->animationTime;
 	oldanim     = lf->animation;
 	oldAnimNum  = lf->animationNumber;
 
@@ -1204,7 +1204,7 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3], ve
 	vec3_t         velocity;
 	float          speed;
 	float          clampTolerance;
-	int            legsSet, torsoSet;
+	int            legsSet /*, torsoSet*/;
 	clientInfo_t   *ci;
 	bg_character_t *character;
 
@@ -1218,7 +1218,7 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3], ve
 	}
 
 	legsSet  = cent->currentState.legsAnim & ~ANIM_TOGGLEBIT;
-	torsoSet = cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT;
+	// torsoSet = cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT;
 
 	VectorCopy(cent->lerpAngles, headAngles);
 	headAngles[YAW] = AngleMod(headAngles[YAW]);
@@ -2954,7 +2954,7 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi, i
 	refEntity_t body{};
 	refEntity_t head{};
 	refEntity_t gun{};
-	refEntity_t barrel{};
+	// refEntity_t barrel{};
 	refEntity_t acc{};
 	vec3_t      origin;
 	int         renderfx;

@@ -31,7 +31,7 @@ void ConsolePrintTo(gentity_t *target, boost::format fmt)
 
 	while (message.length() > 0)
 	{
-		if (message.length() > maxLen)
+		if (static_cast<int>(message.length()) > maxLen)
 		{
 			string toPrint = message.substr(0, maxLen);
 			message = message.substr(maxLen + 1);
@@ -843,7 +843,7 @@ std::vector<std::string> getNames(const std::vector<int>& ids)
 		names.push_back((g_entities + id)->client->pers.netname);
 	}
 
-	return std::move(names);
+	return names;
 }
 
 std::vector<int> getMatchingIds(const std::string& name)
@@ -858,7 +858,7 @@ std::vector<int> getMatchingIds(const std::string& name)
 			pidsVector.push_back(pids[i]);
 		}
 	}
-	return std::move(pidsVector);
+	return pidsVector;
 }
 
 std::string interpolateNametags(std::string input)
@@ -901,7 +901,7 @@ std::string interpolateNametags(std::string input)
 		interpolated += split[len - 1];
 	}
 
-	return std::move(interpolated);
+	return interpolated;
 }
 
 const char *interpolateNametags(const char *text)

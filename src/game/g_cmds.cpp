@@ -307,7 +307,7 @@ int ClientNumberFromString(gentity_t *to, char *s)
 	int       partialMatchId = -1;
 
 	// See if its a number or string
-	for (idnum = 0; idnum < strlen(s) && s[idnum] != 0; idnum++)
+	for (idnum = 0; idnum < static_cast<int>(strlen(s)) && s[idnum] != 0; idnum++)
 	{
 		if (s[idnum] < '0' || s[idnum] > '9')
 		{
@@ -480,7 +480,7 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter)
 				            "\n%2i - %s^7",
 				            *p,
 				            cl->pers.netname);
-				if (strlen(err) + strlen(line) > len)
+				if (static_cast<int>(strlen(err) + strlen(line)) > len)
 				{
 					break;
 				}
@@ -1819,7 +1819,7 @@ Returns default weapons for class
 */
 weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char* s, bool primary)
 {
-	weapon_t weapon;
+	weapon_t weapon = WP_NONE;
 	// sessionTeam isn't set when this is called, so compare against team string
 	if (!Q_stricmp(s, "red") || !Q_stricmp(s, "r") || !Q_stricmp(s, "axis"))
 	{
@@ -1854,10 +1854,6 @@ weapon_t G_GetDefaultWeaponForClass(gentity_t* ent, char* s, bool primary)
 		default:
 			break;
 		}
-	}
-	else
-	{
-		weapon = WP_NONE;
 	}
 
 	return weapon;
@@ -2356,7 +2352,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *
 
 	// if chat message is too long, e.g. being send from console
 	// cut it and put ellipsis at the end
-	if (strnlen(chatText, 256) > len) {
+	if (static_cast<int>(strnlen(chatText, 256)) > len) {
 		text[len - 2] = '.';
 		text[len - 3] = '.';
 		text[len - 4] = '.';
@@ -5319,7 +5315,7 @@ void ClientCommand(int clientNum)
 
 
 	// regular anytime commands
-	for (i = 0 ; i < sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0]) ; i++)
+	for (i = 0 ; i < static_cast<int>(sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0])) ; i++)
 	{
 		if (!Q_stricmp(cmd, anyTimeCommands[i].cmd))
 		{
@@ -5366,7 +5362,7 @@ void ClientCommand(int clientNum)
 	}
 
 	// regular no intermission commands
-	for (i = 0 ; i < sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0]) ; i++)
+	for (i = 0 ; i < static_cast<int>(sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0])) ; i++)
 	{
 		if (!Q_stricmp(cmd, noIntermissionCommands[i].cmd))
 		{

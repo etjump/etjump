@@ -516,7 +516,7 @@ char *BG_CopyStringIntoBuffer(const char *string, char *buffer, int bufSize, int
 	char *pch;
 
 	// check for overloaded buffer
-	if (*offset + strlen(string) + 1 >= bufSize)
+	if (*offset + static_cast<int>(strlen(string)) + 1 >= bufSize)
 	{
 		BG_AnimParseError("BG_CopyStringIntoBuffer: out of buffer space");
 	}
@@ -821,7 +821,7 @@ static void BG_ParseCommands(char **input, animScriptItem_t *scriptItem, animMod
 				BG_AnimParseError("BG_ParseCommands: exceeded maximum number of animations (%i)", MAX_ANIMSCRIPT_ANIMCOMMANDS);
 			}
 			command = &scriptItem->commands[scriptItem->numCommands++];
-			memset(command, 0, sizeof(command));
+			memset(command, 0, sizeof(animScriptCommand_t));
 		}
 
 		command->bodyPart[partIndex] = BG_IndexForString(token, animBodyPartsStr, qtrue);
@@ -1844,7 +1844,7 @@ int BG_GetConditionValue(int client, int condition, qboolean checkConversion)
 			// we may need to convert to a value
 			//if (!value)
 			//	return 0;
-			for (i = 0; i < 8 * sizeof(globalScriptData->clientConditions[0][0]); i++)
+			for (i = 0; i < 8 * static_cast<int>(sizeof(globalScriptData->clientConditions[0][0])); i++)
 			{
 				if (COM_BitCheck(globalScriptData->clientConditions[client][condition], i))
 				{
