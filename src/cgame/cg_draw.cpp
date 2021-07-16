@@ -5208,8 +5208,10 @@ static void CG_DrawPlayerStatus(void)
 	if (etj_HUD_weaponIcon.integer)
 	{
 		// Draw ammo
-		// weap = CG_PlayerAmmoValue(&value, &value2, &value3);
 		value = value2 = value3 = 0;
+		// weap = 
+		CG_PlayerAmmoValue(&value, &value2, &value3);
+		
 		if (value3 >= 0)
 		{
 			Com_sprintf(buffer, sizeof(buffer), "%i|%i/%i", value3, value, value2);
