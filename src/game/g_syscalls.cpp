@@ -29,11 +29,11 @@ extern "C" FN_PUBLIC void dllEntry(int(QDECL * syscallptr)(int arg, ...))
 	return *(int *)&floatTemp;
 }*/
 
-inline constexpr int PASSFLOAT(const float &f) noexcept {
+inline int PASSFLOAT(const float &f) noexcept {
   return *reinterpret_cast<const int *>(&f);
 }
 
-inline constexpr float PASSINT(const int &f) noexcept {
+inline float PASSINT(const int &f) noexcept {
   return *reinterpret_cast<const float *>(&f);
 }
 
