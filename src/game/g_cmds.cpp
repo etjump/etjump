@@ -3344,7 +3344,7 @@ void Cmd_SetViewpos_f(gentity_t *ent)
 		angles[i] = atof(buffer);
 	}
 
-	TeleportPlayer(ent, origin, angles);
+	DirectTeleport(ent, origin, angles);
 }
 
 /*
