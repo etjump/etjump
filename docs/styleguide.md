@@ -61,3 +61,5 @@ _This documentation is under development._
         };
     };
     ```
+
+- Unused code should be completely removed instead of commented out.
