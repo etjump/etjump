@@ -30,6 +30,7 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <cstring>
 
 #include "cg_local.h"
 
@@ -234,8 +235,6 @@ void TrickjumpLines::stopRecord()
 
 void TrickjumpLines::displayCurrentRoute(int x)
 {
-	// static int nextRotationTime = 0;
-
 	// Loop on every trail into the route.
 	const int nbTrails = _routes[x].trails.size();
 
@@ -827,8 +826,6 @@ void TrickjumpLines::saveRoutes(const char *savename)
 // This is a top face with sparkParticleShader
 void TrickjumpLines::addJumpIndicator(vec3_t point, vec4_c color, float quadSize)
 {
-	// static int nextPrintTime = 0;
-
 	const vec3_t mins = { -quadSize, -quadSize, 0.0 };
 	const vec3_t maxs = { quadSize, quadSize, 0.0 };
 
@@ -1005,7 +1002,7 @@ void TrickjumpLines::renameRoute(const char *oldName, const char *newName)
 		return;
 	}
 
-	if (strcmp(newName, "default"))
+	if (std::strcmp(newName, "default") == 0)
 	{
 		CG_Printf("You cannot rename a route 'default'. This name is protected for map entities trigger. \n");
 		return;
@@ -1049,7 +1046,6 @@ float TrickjumpLines::normalizeSpeed(float max, float min, float speed)
 void TrickjumpLines::computeHSV(float speed, vec3_t& hsv)
 {
 	// Source from : http://stackoverflow.com/questions/9507947/mapping-colors-to-an-interval
-	// const float hmin = 0;
 	const float hmax = 300; // This need to be hardcoded (0 to 300 mean red=0 to blue=300),
 
 	// Simple x^1.35 * maxDegree to have a nice mapping function between ups and color.

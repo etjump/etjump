@@ -158,7 +158,6 @@ int64_t ETJump::EventLoop::getNow()
 
 void ETJump::EventLoop::execute(int taskId)
 {
-	// auto now = getNow();
 	Task *target = findTask(taskId);
 	if (target)
 	{

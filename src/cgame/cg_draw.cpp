@@ -261,7 +261,6 @@ int CG_DrawFieldWidth(int x, int y, int width, int value, int charWidth, int cha
 {
 	char num[16], *ptr;
 	int  l;
-	// int  frame;
 	int  totalwidth = 0;
 
 	if (width < 1)
@@ -305,15 +304,6 @@ int CG_DrawFieldWidth(int x, int y, int width, int value, int charWidth, int cha
 	ptr = num;
 	while (*ptr && l)
 	{
-		/*if (*ptr == '-')
-		{
-			frame = STAT_MINUS;
-		}
-		else
-		{
-			frame = *ptr - '0';
-		}*/
-
 		totalwidth += charWidth;
 		ptr++;
 		l--;
@@ -852,7 +842,7 @@ CG_DrawTeamInfo
 */
 static void CG_DrawTeamInfo(void)
 {
-	int w /*, h*/;
+	int w;
 	int i, len;
 	vec4_t hcolor;
 	float alphapercent, chatbgalpha;
@@ -888,8 +878,6 @@ static void CG_DrawTeamInfo(void)
 		{
 			cgs.teamLastChatPos++;
 		}
-
-		// h = (cgs.teamChatPos - cgs.teamLastChatPos) * lineHeight;
 
 		w = 0;
 
@@ -1018,7 +1006,7 @@ CG_DrawNotify
 
 static void CG_DrawNotify(void)
 {
-	int    w /*, h*/;
+	int    w;
 	int    i, len;
 	vec4_t hcolor;
 	int    chatHeight;
@@ -1047,8 +1035,6 @@ static void CG_DrawNotify(void)
 		{
 			cgs.notifyLastPos++;
 		}
-
-		// h = (cgs.notifyPos - cgs.notifyLastPos) * TINYCHAR_HEIGHT;
 
 		w = 0;
 
@@ -3067,7 +3053,7 @@ static void CG_DrawSpectatorMessage(void)
 {
 	std::string str;
 	const char *str2;
-	float      /*x,*/ y;
+	float      y;
 	static int lastconfigGet = 0;
 
 	if (cgs.demoCam.renderingFreeCam)
@@ -3097,7 +3083,6 @@ static void CG_DrawSpectatorMessage(void)
 		lastconfigGet = cg.time;
 	}
 
-	// x = (cg.snap->ps.pm_flags & PMF_LIMBO) ? 170 : 80;
 	y = 408;
 
 	y -= 2 * TINYCHAR_HEIGHT;
@@ -4213,7 +4198,7 @@ static void CG_DrawObjectiveInfo(void)
 {
 	char   *start;
 	int    l;
-	int    x, y, w /*, h*/;
+	int    x, y, w;
 	int    x1, y1, x2, y2;
 	float  *color;
 	vec4_t backColor;
@@ -4291,8 +4276,6 @@ static void CG_DrawObjectiveInfo(void)
 
 	x2 = x2 + 4;
 	y2 = y - cg.oidPrintCharWidth * 1.5 + 4;
-
-	// h = y2 - y1; // JPW NERVE
 
 	VectorCopy(color, backColor);
 	backColor[3] = 0.5 * color[3];
@@ -5174,12 +5157,8 @@ static void CG_DrawPlayerStatus(void)
 {
 	int value, value2, value3;
 	char buffer[32];
-	// int weap;
-	// playerState_t *ps;
 	rectDef_t rect;
 //	vec4_t			colorFaded = { 1.f, 1.f, 1.f, 0.3f };
-
-	// ps = &cg.snap->ps;
 
 	// Draw weapon icon and overheat bar
 	rect.x = SCREEN_WIDTH - 82;
@@ -5209,7 +5188,6 @@ static void CG_DrawPlayerStatus(void)
 	{
 		// Draw ammo
 		value = value2 = value3 = 0;
-		// weap = 
 		CG_PlayerAmmoValue(&value, &value2, &value3);
 		
 		if (value3 >= 0)
@@ -5950,7 +5928,6 @@ static void CG_ChangeFovBasedOnSpeed()
 	float additionalFov   = movie_fovMax.value - movie_fovMin.value;
 	float minMaxSpeedDiff = movie_fovMaxSpeed.value - movie_fovMinSpeed.value;
 	float currentSpeedFov = movie_fovMin.value;
-	// static int fpsValue   = 0;
 
 	if (!movie_changeFovBasedOnSpeed.integer || !cg.demoPlayback || cgs.demoCam.renderingFreeCam)
 	{

@@ -576,17 +576,14 @@ bool EditCommands(gentity_t *ent, Arguments argv)
 		deleteCommands = temp;
 	}
 
-	// bool editedPermissions = false;
 	// always has + in it
 	if (addCommands.length() > 1)
 	{
-		// editedPermissions   = true;
 		currentPermissions += addCommands;
 	}
 	// always has - in it
 	if (deleteCommands.length() > 1)
 	{
-		// editedPermissions   = true;
 		currentPermissions += deleteCommands;
 	}
 	game.levels->Edit(level, "", currentPermissions, "", 1);

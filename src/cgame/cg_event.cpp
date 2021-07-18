@@ -9,148 +9,6 @@ extern void CG_StartShakeCamera(float param, entityState_t *es);
 extern void CG_Tracer(vec3_t source, vec3_t dest, int sparks);
 //==========================================================================
 
-/*
-=============
-CG_Obituary
-=============
-*/
-static void CG_Obituary(entityState_t *ent)
-{
-	// int          mod;
-	int          target, attacker;
-	// const char         *message;
-	// const char         *message2;
-	char         targetName[32];
-	clientInfo_t *ci /*, *ca*/;    // JPW NERVE ca = attacker
-
-	target   = ent->otherEntityNum;
-	attacker = ent->otherEntityNum2;
-	// mod      = ent->eventParm;
-
-	if (target < 0 || target >= MAX_CLIENTS)
-	{
-		CG_Error("CG_Obituary: target out of range");
-	}
-	ci = &cgs.clientinfo[target];
-
-	if (attacker < 0 || attacker >= MAX_CLIENTS)
-	{
-		attacker = ENTITYNUM_WORLD;
-		// ca       = NULL;
-	}
-	else
-	{
-		// ca = &cgs.clientinfo[attacker];
-	}
-
-	Q_strncpyz(targetName, ci->name, sizeof(targetName) - 2);
-	strcat(targetName, S_COLOR_WHITE);
-
-	/*message2 = "";
-
-	// check for single client messages
-	switch (mod)
-	{
-	case MOD_SUICIDE:
-		message = "committed suicide";
-		break;
-	case MOD_FALLING:
-		message = "fell to his death";
-		break;
-	case MOD_CRUSH:
-		message = "was crushed";
-		break;
-	case MOD_WATER:
-		message = "drowned";
-		break;
-	case MOD_SLIME:
-		message = "died by toxic materials";
-		break;
-	case MOD_TRIGGER_HURT:
-	case MOD_TELEFRAG: // rain - added TELEFRAG and TARGET_LASER, just in case
-	case MOD_TARGET_LASER:
-		message = "was killed";
-		break;
-	case MOD_CRUSH_CONSTRUCTIONDEATH_NOATTACKER:
-		message = "got buried under a pile of rubble";
-		break;
-	case MOD_LAVA: // rain
-		message = "was incinerated";
-		break;
-	default:
-		message = NULL;
-		break;
-	}
-
-	if (attacker == target)
-	{
-		switch (mod)
-		{
-		case MOD_DYNAMITE:
-			message = "dynamited himself to pieces";
-			break;
-		case MOD_GRENADE_LAUNCHER:
-		case MOD_GRENADE_PINEAPPLE: // rain - added PINEAPPLE
-			message = "dove on his own grenade";
-			break;
-		case MOD_PANZERFAUST:
-			message = "vaporized himself";
-			break;
-		case MOD_FLAMETHROWER: // rain
-			message = "played with fire";
-			break;
-		case MOD_AIRSTRIKE:
-			message = "obliterated himself";
-			break;
-		case MOD_ARTY:
-			message = "fired-for-effect on himself";
-			break;
-		case MOD_EXPLOSIVE:
-			message = "died in his own explosion";
-			break;
-		// rain - everything from this point on is sorted by MOD, didn't
-		// resort existing messages to avoid differences between pre
-		// and post-patch code (for source patching)
-		case MOD_GPG40:
-		case MOD_M7: // rain
-			//bani - more amusing, less wordy
-			message = "ate his own rifle grenade";
-			break;
-		case MOD_LANDMINE: // rain
-			//bani - slightly more amusing
-			message = "failed to spot his own landmine";
-			break;
-		case MOD_SATCHEL: // rain
-			message = "embraced his own satchel explosion";
-			break;
-		case MOD_TRIPMINE: // rain - dormant code
-			message = "forgot where his tripmine was";
-			break;
-		case MOD_CRUSH_CONSTRUCTION: // rain
-			message = "engineered himself into oblivion";
-			break;
-		case MOD_CRUSH_CONSTRUCTIONDEATH: // rain
-			message = "buried himself alive";
-			break;
-		case MOD_MORTAR: // rain
-			message = "never saw his own mortar round coming";
-			break;
-		case MOD_SMOKEGRENADE: // rain
-			// bani - more amusing
-			message = "danced on his airstrike marker";
-			break;
-		// no obituary message if changing teams
-		case MOD_SWITCHTEAM:
-			return;
-		default:
-			message = "killed himself";
-			break;
-		}
-	}*/
-}
-
-//==========================================================================
-
 // from cg_weapons.c
 extern int CG_WeaponIndex(int weapnum, int *bank, int *cycle);
 
@@ -1286,14 +1144,11 @@ void CG_Effect(centity_t *cent, vec3_t origin, vec3_t dir)
 	localEntity_t *le;
 	refEntity_t   *re;
 //	int				howmany;
-	// int mass;
 //	int				large, small;
 	vec4_t projection, color;
 
 
 	VectorSet(dir, 0, 0, 1);    // straight up.
-
-	// mass = cent->currentState.density;
 
 //		1 large per 100, 1 small per 24
 //	large	= (int)(mass / 100);
@@ -1599,9 +1454,6 @@ void CG_ShardJunk(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	// int           type;
-
-	// type = cent->currentState.density;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
@@ -1652,9 +1504,6 @@ void CG_Debris(centity_t *cent, vec3_t origin, vec3_t dir)
 {
 	localEntity_t *le;
 	refEntity_t   *re;
-	// int           type;
-
-	// type = cent->currentState.density;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
@@ -2776,7 +2625,6 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 	case EV_OBITUARY:
 		DEBUGNAME("EV_OBITUARY");
-		CG_Obituary(es);
 		break;
 
 	// JPW NERVE -- swiped from SP/Sherman

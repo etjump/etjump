@@ -30,8 +30,6 @@ namespace ETJump
 	void DrawJumpSpeeds()
 	{
 		playerState_t* ps = getValidPlayerState();
-		// float offX = 0.0f;
-		// float offY = 0.0f;
 		float x1 = 6 + etj_jumpSpeedsX.value;
 		float x2 = 6 + 30 + etj_jumpSpeedsX.value;
 		float y1 = 240 + etj_jumpSpeedsY.value;

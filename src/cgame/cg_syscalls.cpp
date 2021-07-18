@@ -19,16 +19,6 @@ extern "C" FN_PUBLIC void dllEntry(int(QDECL  * syscallptr)(int arg, ...))
 #endif
 #endif
 
-
-/*int PASSFLOAT( float x ) {
-    float	floatTemp;
-    floatTemp = x;
-    return *(int *)&floatTemp;
-}*/
-
-
-// #define PASSFLOAT(x) (*(int *)&x)
-
 inline int PASSFLOAT(const float &f) noexcept {
   return *reinterpret_cast<const int *>(&f);
 }

@@ -281,7 +281,6 @@ CG_SoundParseSounds
 static void CG_SoundParseSounds(char *filename, char *buffer)
 {
 	char          *token, **text;
-	// int           s;
 	long          hash;
 	soundScript_t sound =
 	{
@@ -299,7 +298,6 @@ static void CG_SoundParseSounds(char *filename, char *buffer)
 	soundScriptSound_t *scriptSound = NULL;
 	qboolean           inSound, wantSoundName;
 
-	// s             = 0;
 	inSound       = qfalse;
 	wantSoundName = qtrue;
 	text          = &buffer;

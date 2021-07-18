@@ -3319,7 +3319,6 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 	size = (rect->w / 96.0f) * ((size > 96.0f) ? 96.0f : ((size < 24.0f) ? 24.0f : size));
 
 	vec4_t crosshairColor = { 1.0, 1.0, 1.0, 1.0 };
-	// float crosshairColorAlpha = cg_crosshairAlpha.value;
 
 	ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
 	crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
@@ -3327,7 +3326,6 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color)
 	UI_DrawHandlePic(rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size, size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
 
 	vec4_t crosshairColorAlt = { 1.0, 1.0, 1.0, 1.0 };
-	// float crosshairColorAlphaAlt = cg_crosshairAlphaAlt.value;
 
 	ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
 	crosshairColorAlt[3] = Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
@@ -5199,7 +5197,6 @@ void UI_RunMenuScript(char **args)
 
 		if (Q_stricmp(name, "StartServer") == 0)
 		{
-			// float skill;
 			int   pb_sv, pb_cl;
 
 			// DHM - Nerve
@@ -5232,8 +5229,6 @@ void UI_RunMenuScript(char **args)
 			{
 				trap_Cmd_ExecuteText(EXEC_APPEND, va("wait ; wait ; map %s\n", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
 			}
-
-			// skill = trap_Cvar_VariableValue("g_spSkill");
 
 			// NERVE - SMF - set user cvars here
 			// set timelimit
@@ -7899,8 +7894,7 @@ static const char *UI_SelectedMap(qboolean singlePlayer, int index, int *actual)
 
 static const char *UI_SelectedCampaign(int index, int *actual)
 {
-	int i /*, c*/;
-	// c       = 0;
+	int i;
 	*actual = 0;
 	for (i = 0; i < uiInfo.campaignCount; i++)
 	{
@@ -9280,7 +9274,7 @@ UI_Init
 */
 void _UI_Init(int legacyClient, int clientVersion)
 {
-	int /*start,*/ x;
+	int x;
 
 	//uiInfo.inGameLoad = inGameLoad;
 
@@ -9415,8 +9409,6 @@ void _UI_Init(int legacyClient, int clientVersion)
 
 	trap_R_RegisterFont("ariblk", 27, &uiInfo.loadscreenfont1);
 	trap_R_RegisterFont("courbd", 30, &uiInfo.loadscreenfont2);
-
-	// start = trap_Milliseconds();
 
 	uiInfo.teamCount      = 0;
 	uiInfo.characterCount = 0;
