@@ -5725,7 +5725,6 @@ static void CG_Draw2D(void)
 		if (!cgs.demoCam.renderingFreeCam)
 		{
 			CG_DrawLagometer();
-			CG_DrawNewCompass();
 			CG_DrawFollow();
 			ETJump::DrawJumpSpeeds();
 			ETJump::DrawCGazHUD();
@@ -5790,6 +5789,11 @@ static void CG_Draw2D(void)
 	}
 
 	CG_DrawDemoRecording();
+
+	if (!CG_DrawScoreboard() && !cgs.demoCam.renderingFreeCam)
+	{
+		CG_DrawNewCompass();
+	}
 }
 
 // NERVE - SMF
