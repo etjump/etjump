@@ -23,6 +23,7 @@ function(create_compiler_opts target)
 		-pipe
 		-fPIC
 		-fvisibility=hidden
+		-fdiagnostics-color=always
 		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall>
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
