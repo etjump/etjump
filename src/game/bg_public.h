@@ -612,6 +612,7 @@ typedef struct
 	qboolean noActivateLean;
 
 	qboolean walking;
+	qboolean groundPlane;
 	trace_t groundTrace;
 
 	// callbacks to test the world

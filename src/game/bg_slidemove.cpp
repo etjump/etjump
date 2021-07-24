@@ -48,10 +48,10 @@ qboolean    PM_SlideMove(qboolean gravity)
 		endVelocity[2]     -= pm->ps->gravity * pml.frametime;
 		pm->ps->velocity[2] = (pm->ps->velocity[2] + endVelocity[2]) * 0.5;
 		primal_velocity[2]  = endVelocity[2];
-		if (pml.groundPlane)
+		if (pm->groundPlane)
 		{
 			// slide along the ground plane
-			PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
+			PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
 			                pm->ps->velocity, OVERCLIP);
 		}
 	}
@@ -63,10 +63,10 @@ qboolean    PM_SlideMove(qboolean gravity)
 	time_left = pml.frametime;
 
 	// never turn against the ground plane
-	if (pml.groundPlane)
+	if (pm->groundPlane)
 	{
 		numplanes = 1;
-		VectorCopy(pml.groundTrace.plane.normal, planes[0]);
+		VectorCopy(pm->groundTrace.plane.normal, planes[0]);
 	}
 	else
 	{

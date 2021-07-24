@@ -488,7 +488,7 @@ static void PM_Friction(void)
 	vel = pm->ps->velocity;
 
 	VectorCopy(vel, vec);
-	if (pml.walking)
+	if (pm->walking)
 	{
 		vec[2] = 0; // ignore slope movement
 	}
@@ -515,7 +515,7 @@ static void PM_Friction(void)
 	// apply ground friction
 	if (pm->waterlevel <= 1)
 	{
-		if (pml.walking && !(pml.groundTrace.surfaceFlags & SURF_SLICK))
+		if (pm->walking && !(pm->groundTrace.surfaceFlags & SURF_SLICK))
 		{
 			// if getting knocked back, no friction
 			if (!(pm->ps->pm_flags & PMF_TIME_KNOCKBACK))
@@ -855,13 +855,13 @@ static qboolean PM_CheckJump(void)
 		}
 		if (pm->shared & BG_LEVEL_NO_JUMPDELAY)
 		{
-			if (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
+			if (pm->groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
 			{
 				return qfalse;
 			}
 		} else
 		{
- 			if (!(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY))
+ 			if (!(pm->groundTrace.surfaceFlags & SURF_NOJUMPDELAY))
 			{
 				return qfalse;
 			}
@@ -892,8 +892,8 @@ static qboolean PM_CheckJump(void)
 		return qfalse;
 	}
 
-	pml.groundPlane   = qfalse;         // jumping away
-	pml.walking       = qfalse;
+	pm->groundPlane   = qfalse;         // jumping away
+	pm->walking       = qfalse;
 	pm->ps->pm_flags |= PMF_JUMP_HELD;
 	pm->pmext->isJumpLand = true;
 
@@ -1006,7 +1006,7 @@ static qboolean PM_CheckProne(void)
 	if (!(pm->ps->eFlags & EF_PRONE))
 	{
 		// needs to be on the ground
-//		if( !pml.walking ) {
+//		if( !pm->walking ) {
 //			return qfalse;
 //		}
 
@@ -1207,8 +1207,8 @@ static qboolean PM_CheckDodge(void)
     //	return qfalse;
     //}
 
-    pml.groundPlane = qfalse;		// jumping away
-    pml.walking = qfalse;
+    pm->groundPlane = qfalse;		// jumping away
+    pm->walking = qfalse;
     //pm->ps->pm_flags |= PMF_JUMP_HELD;
 
     pm->ps->groundEntityNum = ENTITYNUM_NONE;
@@ -1343,11 +1343,11 @@ static void PM_WaterMove(void)
 
 
 	// make sure we can go up slopes easily under water
-	if (pml.groundPlane && DotProduct(pm->ps->velocity, pml.groundTrace.plane.normal) < 0)
+	if (pm->groundPlane && DotProduct(pm->ps->velocity, pm->groundTrace.plane.normal) < 0)
 	{
 		vel = VectorLength(pm->ps->velocity);
 		// slide along the ground plane
-		PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
+		PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
 		                pm->ps->velocity, OVERCLIP);
 
 		VectorNormalize(pm->ps->velocity);
@@ -1588,9 +1588,9 @@ static void PM_AirMove(void)
 	// we may have a ground plane that is very steep, even
 	// though we don't have a groundentity
 	// slide along the steep plane
-	if (pml.groundPlane)
+	if (pm->groundPlane)
 	{
-		PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
+		PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal,
 		                pm->ps->velocity, OVERCLIP);
 	}
 
@@ -1643,7 +1643,7 @@ static void PM_WalkMove(void)
     int gametype = g_gametype.integer;
 #endif*/
 
-	if (pm->waterlevel > 2 && DotProduct(pml.forward, pml.groundTrace.plane.normal) > 0)
+	if (pm->waterlevel > 2 && DotProduct(pml.forward, pm->groundTrace.plane.normal) > 0)
 	{
 		// begin swimming
 		PM_WaterMove();
@@ -1710,8 +1710,8 @@ static void PM_WalkMove(void)
 	pml.right[2]   = 0;
 
 	// project the forward and right directions onto the ground plane
-	PM_ClipVelocity(pml.forward, pml.groundTrace.plane.normal, pml.forward, OVERCLIP);
-	PM_ClipVelocity(pml.right, pml.groundTrace.plane.normal, pml.right, OVERCLIP);
+	PM_ClipVelocity(pml.forward, pm->groundTrace.plane.normal, pml.forward, OVERCLIP);
+	PM_ClipVelocity(pml.right, pm->groundTrace.plane.normal, pml.right, OVERCLIP);
 	//
 	VectorNormalize(pml.forward);
 	VectorNormalize(pml.right);
@@ -1768,7 +1768,7 @@ static void PM_WalkMove(void)
 
 	// when a player gets hit, they temporarily lose
 	// full control, which allows them to be moved a bit
-	if ((pml.groundTrace.surfaceFlags & SURF_SLICK) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK)
+	if ((pm->groundTrace.surfaceFlags & SURF_SLICK) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK)
 	{
 		accelerate = pm_airaccelerate;
 	}
@@ -1782,7 +1782,7 @@ static void PM_WalkMove(void)
 	//Com_Printf("velocity = %1.1f %1.1f %1.1f\n", pm->ps->velocity[0], pm->ps->velocity[1], pm->ps->velocity[2]);
 	//Com_Printf("velocity1 = %1.1f\n", VectorLength(pm->ps->velocity));
 
-	if ((pml.groundTrace.surfaceFlags & SURF_SLICK) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK)
+	if ((pm->groundTrace.surfaceFlags & SURF_SLICK) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK)
 	{
 		pm->ps->velocity[2] -= pm->ps->gravity * pml.frametime;
 	}
@@ -1794,7 +1794,7 @@ static void PM_WalkMove(void)
 
 //----(SA)	added
 	// show breath when standing on 'snow' surfaces
-	if (pml.groundTrace.surfaceFlags & SURF_SNOW)
+	if (pm->groundTrace.surfaceFlags & SURF_SNOW)
 	{
 		pm->ps->eFlags |= EF_BREATH;
 	}
@@ -1807,7 +1807,7 @@ static void PM_WalkMove(void)
 	vel = VectorLength(pm->ps->velocity);
 
 	// slide along the ground plane
-	PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+	PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
 
 	// don't do anything if standing still
 	if (!pm->ps->velocity[0] && !pm->ps->velocity[1])
@@ -1840,7 +1840,7 @@ static void PM_DeadMove(void)
 {
 	float forward;
 
-	if (!pml.walking)
+	if (!pm->walking)
 	{
 		return;
 	}
@@ -1940,11 +1940,11 @@ static int PM_FootstepForSurface(void)
 #ifdef GAMEDLL
 	// In just the GAME DLL, we want to store the groundtrace surface stuff,
 	// so we don't have to keep tracing.
-	ClientStoreSurfaceFlags(pm->ps->clientNum, pml.groundTrace.surfaceFlags);
+	ClientStoreSurfaceFlags(pm->ps->clientNum, pm->groundTrace.surfaceFlags);
 
 #endif // GAMEDLL
 
-	return BG_FootstepForSurface(pml.groundTrace.surfaceFlags);
+	return BG_FootstepForSurface(pm->groundTrace.surfaceFlags);
 }
 
 
@@ -2091,7 +2091,7 @@ static void PM_CrashLand(void)
 	}
 	else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE)
 	{
-		if (pml.groundTrace.surfaceFlags & SURF_NODAMAGE)
+		if (pm->groundTrace.surfaceFlags & SURF_NODAMAGE)
 		{
 			PM_CheckFallDamage(delta);
 		}
@@ -2102,7 +2102,7 @@ static void PM_CrashLand(void)
 	}
 	else
 	{
-		if (!(pml.groundTrace.surfaceFlags & SURF_NODAMAGE))
+		if (!(pm->groundTrace.surfaceFlags & SURF_NODAMAGE))
 		{
 			PM_CheckFallDamage(delta);
 		}
@@ -2152,7 +2152,7 @@ static int PM_CorrectAllSolid(trace_t *trace)
 					point[2] = pm->ps->origin[2] - 0.25;
 
 					PM_TraceAll(trace, pm->ps->origin, point);
-					pml.groundTrace = *trace;
+					pm->groundTrace = *trace;
 					return qtrue;
 				}
 			}
@@ -2160,8 +2160,8 @@ static int PM_CorrectAllSolid(trace_t *trace)
 	}
 
 	pm->ps->groundEntityNum = ENTITYNUM_NONE;
-	pml.groundPlane         = qfalse;
-	pml.walking             = qfalse;
+	pm->groundPlane         = qfalse;
+	pm->walking             = qfalse;
 
 	return qfalse;
 }
@@ -2216,8 +2216,8 @@ static void PM_GroundTraceMissed(void)
 		pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
 	} // if (pm->ps->groundEntityNum != -1)...
-	pml.groundPlane = qfalse;
-	pml.walking     = qfalse;
+	pm->groundPlane = qfalse;
+	pm->walking     = qfalse;
 
 	//Feen: PGM Test
 	//PM_CheckPortal();
@@ -2249,7 +2249,7 @@ static void PM_GroundTrace(void)
 	}
 
 	PM_TraceAllLegs(&trace, &pm->pmext->proneLegsOffset, pm->ps->origin, point);
-	pml.groundTrace = trace;
+	pm->groundTrace = trace;
 
 	// do something corrective if the trace starts in a solid...
 	if (trace.allsolid && !(pm->ps->eFlags & EF_MOUNTEDTANK))
@@ -2264,8 +2264,8 @@ static void PM_GroundTrace(void)
 	if (trace.fraction == 1.0)
 	{
 		PM_GroundTraceMissed();
-		pml.groundPlane = qfalse;
-		pml.walking     = qfalse;
+		pm->groundPlane = qfalse;
+		pm->walking     = qfalse;
 		return;
 	}
 
@@ -2292,8 +2292,8 @@ static void PM_GroundTrace(void)
 		}
 
 		pm->ps->groundEntityNum = ENTITYNUM_NONE;
-		pml.groundPlane         = qfalse;
-		pml.walking             = qfalse;
+		pm->groundPlane         = qfalse;
+		pm->walking             = qfalse;
 		return;
 	}
 
@@ -2307,13 +2307,13 @@ static void PM_GroundTrace(void)
 		// FIXME: if they can't slide down the slope, let them
 		// walk (sharp crevices)
 		pm->ps->groundEntityNum = ENTITYNUM_NONE;
-		pml.groundPlane         = qtrue;
-		pml.walking             = qfalse;
+		pm->groundPlane         = qtrue;
+		pm->walking             = qfalse;
 		return;
 	}
 
-	pml.groundPlane = qtrue;
-	pml.walking     = qtrue;
+	pm->groundPlane = qtrue;
+	pm->walking     = qtrue;
 
 	// hitting solid ground will end a waterjump
 	if (pm->ps->pm_flags & PMF_TIME_WATERJUMP)
@@ -2341,13 +2341,13 @@ static void PM_GroundTrace(void)
 		{
 			if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 			{
-				PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+				PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
 			}
 		} else
 		{
 			if (((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 			{
-				PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+				PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
 			}
 		}
 
@@ -5146,7 +5146,7 @@ static void PM_Weapon(void)
 		return;
 	}
 
-	if (!(pm->ps->eFlags & EF_PRONE) && (pml.groundTrace.surfaceFlags & SURF_SLICK))
+	if (!(pm->ps->eFlags & EF_PRONE) && (pm->groundTrace.surfaceFlags & SURF_SLICK))
 	{
 		float fwdmove_knockback = 0.f;
 
@@ -6245,7 +6245,7 @@ void PM_CheckLadderMove(void)
 	//if (pm->ps->pm_flags & PM_DEAD)
 	//	return;
 
-	if (pml.walking)
+	if (pm->walking)
 	{
 		tracedist = 1.0;
 	}
@@ -6273,8 +6273,8 @@ void PM_CheckLadderMove(void)
 	if (pm->ps->stats[STAT_HEALTH] <= 0)
 	{
 		pm->ps->groundEntityNum = ENTITYNUM_NONE;
-		pml.groundPlane         = qfalse;
-		pml.walking             = qfalse;
+		pm->groundPlane         = qfalse;
+		pm->walking             = qfalse;
 		return;
 	}
 
@@ -6317,7 +6317,7 @@ void PM_CheckLadderMove(void)
 		VectorCopy(trace.plane.normal, laddervec);
 	}
 
-	if (pml.ladder && !pml.walking && (trace.fraction * tracedist > 1.0))
+	if (pml.ladder && !pm->walking && (trace.fraction * tracedist > 1.0))
 	{
 		vec3_t mins;
 		// if we are only just on the ladder, don't do this yet, or it may throw us back off the ladder
@@ -6345,7 +6345,7 @@ void PM_CheckLadderMove(void)
 	// create some up/down velocity if touching ladder
 	if (pml.ladder)
 	{
-		if (pml.walking)
+		if (pm->walking)
 		{
 			// we are currently on the ground, only go up and prevent X/Y if we are pushing forwards
 			if (pm->cmd.forwardmove <= 0)
@@ -6782,6 +6782,11 @@ void PmoveSingle(pmove_t *pmove)
 	// clear all pmove local vars
 	memset(&pml, 0, sizeof(pml));
 
+	// these were in pml previously, make sure they are cleared too
+	pmove->walking = qfalse;
+	pmove->groundPlane = qfalse;
+	memset(&pmove->groundTrace, 0, sizeof(pmove->groundTrace));
+
 	// determine the time
 	pml.msec = pmove->cmd.serverTime - pm->ps->commandTime;
 	if (pml.msec < 1)
@@ -6899,7 +6904,7 @@ void PmoveSingle(pmove_t *pmove)
 			pm->ps->velocity[2] = (pm->ps->velocity[2] + endVelocity[2]) * 0.5;
 			if (pml.groundPlane)
 			{
-				PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
+				PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
 			}
 		}
 
@@ -6927,7 +6932,7 @@ void PmoveSingle(pmove_t *pmove)
 	// set groundentity
 	PM_GroundTrace();
 
-	/*if( pm->ps->eFlags & EF_PRONE && !pml.walking ) {
+	/*if( pm->ps->eFlags & EF_PRONE && !pm->walking ) {
 	// this is the one we were using
 	    // can't be prone in midair
 	    pm->ps->eFlags &= ~EF_PRONE;
@@ -6990,7 +6995,7 @@ void PmoveSingle(pmove_t *pmove)
 		// swimming
 		PM_WaterMove();
 	}
-	else if (pml.walking && !(pm->ps->eFlags & EF_MOUNTEDTANK))
+	else if (pm->walking && !(pm->ps->eFlags & EF_MOUNTEDTANK))
 	{
 		// walking on ground
 		PM_WalkMove();
@@ -7011,7 +7016,7 @@ void PmoveSingle(pmove_t *pmove)
 	}
 
 
-	/*if( pm->ps->eFlags & EF_PRONE && !pml.walking ) {
+	/*if( pm->ps->eFlags & EF_PRONE && !pm->walking ) {
 	    // can't be prone in midair
 	    pm->ps->eFlags &= ~EF_PRONE;
 	    pm->ps->eFlags &= ~EF_PRONE_MOVING;
@@ -7142,9 +7147,9 @@ int Pmove(pmove_t *pmove)
 	//PM_CheckStuck();
 
 
-	if ((pm->ps->stats[STAT_HEALTH] <= 0 || pm->ps->pm_type == PM_DEAD) && pml.groundTrace.surfaceFlags & SURF_MONSTERSLICK)
+	if ((pm->ps->stats[STAT_HEALTH] <= 0 || pm->ps->pm_type == PM_DEAD) && pm->groundTrace.surfaceFlags & SURF_MONSTERSLICK)
 	{
-		return (pml.groundTrace.surfaceFlags);
+		return (pm->groundTrace.surfaceFlags);
 	}
 	else
 	{
