@@ -62,7 +62,7 @@ namespace ETJump
 		DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, "Jump Speeds:", 0, textStyle);
 
 		// adjust x or y depending on style chosen
-		vertical ? y1 += 12 : x1 = DrawStringWidth("Jump Speeds: ", 0.2f) + 5;
+		vertical ? y1 += 12 : x1 += DrawStringWidth("Jump Speeds: ", 0.2f) + 5;
 
 		for (auto i = 0; i < jumpSpeedHistory.size(); i++)
 		{
