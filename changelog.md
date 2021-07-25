@@ -42,6 +42,23 @@
   * cgaz and snaphud no longer draw when zooming in with binoculars or scoped weapons
 * timeruns will now interrupt if client sets `com_maxfps < 25` to prevent trigger abuse [#602](https://github.com/etjump/etjump/pull/602)
 * added CHS info __55__ to display last jump speed [#603](https://github.com/etjump/etjump/pull/603)
+* added `etj_drawJumpSpeeds` to display last 10 jump speeds [#608](https://github.com/etjump/etjump/pull/608)
+  * `etj_drawJumpSpeeds` - toggle on/off (default `0`)
+  * `etj_jumpSpeedsX/Y` - X/Y offset (default `0/0`)
+  * `etj_jumpSpeedsColor` - RGBA color (default `1.0 1.0 1.0 1.0`)
+  * `etj_jumpSpeedsShadow` - toggle shadow (default `1`)
+  * `etj_jumpSpeedsStyle` - __0__ = vertical, __1__ = horizontal (default `0`)
+  * `etj_jumpSpeedsShowDiff` - color jumps speeds based on if it was faster/slower than previous jump (default `0`)
+  * `etj_jumpSpeedsFasterColor` - RGBA color for faster speeds (default `0.0 1.0 0.0 1.0`)
+  * `etj_jumpSpeedsSlowerColor` - RGBA color for slower speeds (default `1.0 0.0 0.0 1.0`)
+* reinforcement timer is now hidden when `cg_descriptiveText` is set to __0__ [#612](https://github.com/etjump/etjump/pull/612)
+* `etj_CGazAlpha` no longer affects CGaz 5 [#618](https://github.com/etjump/etjump/pull/618)
+* spectators can no longer use `spec(un)lock` [#619](https://github.com/etjump/etjump/pull/619)
+* added missing `speclist` client command for autocompletion [#619](https://github.com/etjump/etjump/pull/619)
+* fixed a case where certain NJD pad combinations allowed to bypass jump delay on standard surfaces [#622](https://github.com/etjump/etjump/pull/622)
+* fixed gun position when leaning with non-zero roll angles [625](https://github.com/etjump/etjump/pull/625)
+* fixed color cvars displaying incorrectly in menus on 64-bit clients [#626](https://github.com/etjump/etjump/pull/626), [#629](https://github.com/etjump/etjump/pull/629)
+* fixed CGaz showing incorrect angles on ground strafing [#635](https://github.com/etjump/etjump/pull/635)
 
 # ETJump 2.4.0
 
