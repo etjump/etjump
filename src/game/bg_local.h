@@ -25,10 +25,6 @@ typedef struct
 
 	int msec;
 
-	qboolean walking;
-	qboolean groundPlane;
-	trace_t groundTrace;
-
 	float impactSpeed;
 
 	vec3_t previous_origin;
