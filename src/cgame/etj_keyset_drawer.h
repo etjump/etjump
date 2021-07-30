@@ -105,7 +105,6 @@ namespace ETJump
 		virtual void drawReleaseShader(qhandle_t shader, int position) const;
 
 		static int isKeyPressed(KeyNames key);
-		static playerState_t* getValidPlayerState();
 
 		template <int Cols>
 		static Point2d calcGridPosition(float cellSize, int cellIndex)

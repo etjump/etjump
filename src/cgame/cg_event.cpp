@@ -2770,6 +2770,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		if (clientNum == cg.predictedPlayerState.clientNum)
 		{
 			ETJump::QueueJumpSpeedsReset();
+			trap_SendConsoleCommand("resetStrafeQuality\n");
 		}
 		break;
 
@@ -2800,6 +2801,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		if (clientNum == cg.predictedPlayerState.clientNum)
 		{
 			ETJump::QueueJumpSpeedsReset();
+			trap_SendConsoleCommand("resetStrafeQuality\n");
 		}
 		break;
 
@@ -3188,12 +3190,14 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
 		ETJump::playerEventsHandler->check("load", {});
 		ETJump::QueueJumpSpeedsReset();
+		trap_SendConsoleCommand("resetStrafeQuality\n");
 		break;
 	case EV_SAVE:
 		DEBUGNAME("EV_SAVE");
 		if (clientNum == cg.predictedPlayerState.clientNum)
 		{
 			ETJump::QueueJumpSpeedsReset();
+			trap_SendConsoleCommand("resetStrafeQuality\n");
 		}
 		break;
 	default:

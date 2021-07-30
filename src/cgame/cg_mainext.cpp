@@ -447,6 +447,15 @@ namespace ETJump
 		awaitedCommandHandler->runFrame();
 		eventLoop->run();
 	}
+
+	playerState_t *getValidPlayerState()
+	{
+		return (cg.snap->ps.clientNum != cg.clientNum)
+			// spectating
+			? &cg.snap->ps
+			// playing
+			: &cg.predictedPlayerState;
+	}
 }
 
 qboolean CG_displaybyname()

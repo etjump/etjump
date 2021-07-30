@@ -244,18 +244,6 @@ void CG_Text_Paint(float x, float y, float scale, vec4_t color, const char *text
 	CG_Text_Paint_Ext(x, y, scale, scale, color, text, adjust, limit, style, font);
 }
 
-namespace ETJump
-{
-	static playerState_t* getValidPlayerState()
-	{
-		return (cg.snap->ps.clientNum != cg.clientNum)
-			// spectating
-			? &cg.snap->ps
-			// playing
-			: &cg.predictedPlayerState;
-	}
-}
-
 // NERVE - SMF - added back in
 int CG_DrawFieldWidth(int x, int y, int width, int value, int charWidth, int charHeight)
 {

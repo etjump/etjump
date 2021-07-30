@@ -190,9 +190,3 @@ std::string ETJump::KeySetDrawer::keyNameToString(KeyNames keyName)
 	default: return "";
 	}
 }
-
-
-playerState_t* ETJump::KeySetDrawer::getValidPlayerState()
-{
-	return (cg.snap->ps.clientNum != cg.clientNum) ? &cg.snap->ps : &cg.predictedPlayerState;
-}
