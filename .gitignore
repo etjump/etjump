@@ -190,4 +190,4 @@ scons.signatures.dblite
 .idea
 out
 cmake-build*/
-
+checks.json
