@@ -14,10 +14,8 @@ function(create_compiler_opts target)
 
 	# GCC flags
 	set(GCC_LINK_FLAGS
-		$<$<CONFIG:Debug>:
-			-Wl,--no-undefined>
+		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
 		$<$<CONFIG:Release>:
-			-Wl,--no-undefined
 			-flto              # link time optimizations
 			-O3                # max optimization
 			-s>)               # strip symbols
