@@ -1563,7 +1563,7 @@ qboolean CG_ConsoleCommand(void)
 
 	cmd = CG_Argv(0);
 
-	for (i = 0 ; i < sizeof(commands) / sizeof(commands[0]) ; i++)
+	for (i = 0 ; i < static_cast<int>(sizeof(commands) / sizeof(commands[0])) ; i++)
 	{
 		if (!Q_stricmp(cmd, commands[i].cmd))
 		{
@@ -1606,7 +1606,7 @@ void CG_InitConsoleCommands(void)
 {
 	int i;
 
-	for (i = 0 ; i < sizeof(commands) / sizeof(commands[0]) ; i++)
+	for (i = 0 ; i < static_cast<int>(sizeof(commands) / sizeof(commands[0])) ; i++)
 	{
 		trap_AddCommand(commands[i].cmd);
 	}

@@ -38,12 +38,10 @@ std::vector<std::string> ETJump::InlineCommandParser::parse(const std::vector<st
     std::vector<std::string> commands;
 
     std::string currentCommand;
-    bool lastWasSeparator = false;
     for (const auto &arg : args)
     {
         if (isSeparator(arg))
         {
-            lastWasSeparator = true;
             if (currentCommand.length() > 0)
             {
                 commands.push_back(currentCommand);

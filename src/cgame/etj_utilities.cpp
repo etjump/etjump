@@ -124,7 +124,7 @@ static void parseHexValuedColorString(const std::string &token, vec4_t &color)
 	auto colorValue = std::stoll(token, nullptr, 16);
 	auto channelCount = ((token.size() - 1) >> 1) + 1;
 	auto maxShift = 8 * channelCount;
-	for (auto i = 0; i < channelCount; i++)
+	for (unsigned long i = 0; i < channelCount; i++)
 	{
 		color[i] = (colorValue >> (maxShift - 8 * (i + 1))) & 0xff;
 	}
@@ -223,4 +223,3 @@ void ETJump::executeTimeout(int handle)
 }
 
 #endif
-

@@ -72,7 +72,7 @@ void ETJump::DisplaySpeed::startListeners()
 
 void ETJump::DisplaySpeed::beforeRender()
 {
-	auto speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+	auto speed = std::sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
 	_maxSpeed = speed > _maxSpeed ? speed : _maxSpeed;
 
 	if (etj_speedColorUsesAccel.integer)

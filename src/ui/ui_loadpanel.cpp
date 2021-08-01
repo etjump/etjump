@@ -422,8 +422,6 @@ void UI_LoadPanel_RenderLoadingText(panel_button_t *button)
 	uiClientState_t    cstate;
 	char               downloadName[MAX_INFO_VALUE];
 	char               buff[2560];
-	static connstate_t lastConnState;
-	static char        lastLoadingText[MAX_INFO_VALUE];
 	char               *p;
 	const char *s = "";
 	float              y;
@@ -435,12 +433,6 @@ void UI_LoadPanel_RenderLoadingText(panel_button_t *button)
 	//Com_sprintf( buff, sizeof(buff), "%s^*", cstate.servername, Info_ValueForKey( cstate.updateInfoString, "motd" ) );
 
 	trap_Cvar_VariableStringBuffer("cl_downloadName", downloadName, sizeof(downloadName));
-
-	if (lastConnState > cstate.connState)
-	{
-		lastLoadingText[0] = '\0';
-	}
-	lastConnState = cstate.connState;
 
 	if (!connect_ownerdraw)
 	{

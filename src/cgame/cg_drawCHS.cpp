@@ -524,7 +524,7 @@ static void CG_CHS_GetName(char *buf, int size, int statNum)
 	// always terminate the buffer
 	buf[0] = '\0';
 
-	if (statNum < 0 || statNum >= sizeof(stats) / sizeof(stats[0])
+	if (statNum < 0 || statNum >= static_cast<int>(sizeof(stats) / sizeof(stats[0]))
 	    || !stats[statNum].fun || !stats[statNum].name)
 	{
 		return;
@@ -545,7 +545,7 @@ static void CG_CHS_GetValue(char *buf, int size, int statNum)
 	// always terminate the buffer
 	buf[0] = '\0';
 
-	if (statNum < 0 || statNum >= sizeof(stats) / sizeof(stats[0])
+	if (statNum < 0 || statNum >= static_cast<int>(sizeof(stats) / sizeof(stats[0]))
 	    || !stats[statNum].fun)
 	{
 		return;
@@ -662,7 +662,7 @@ void CG_DrawCHS(void)
 void CG_InfoCHS_f(void)
 {
 	int i;
-	for (i = 0; i < sizeof(stats) / sizeof(stats[0]); i++)
+	for (i = 0; i < static_cast<int>(sizeof(stats) / sizeof(stats[0])); i++)
 	{
 		if (!stats[i].fun || !stats[i].desc)
 		{

@@ -155,7 +155,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	if (level.noSave)
 	{
-		if (!trace.fraction != 1.0f)
+		if ((!trace.fraction) != 1.0f)
 		{
 			CPTo(ent, "^7You can not ^3save ^7inside this area.");
 			return;
@@ -496,7 +496,7 @@ void ETJump::SaveSystem::unload(gentity_t* ent)
 
 		if (level.noSave)
 		{
-			if (!trace.fraction != 1.0f)
+			if ((!trace.fraction) != 1.0f)
 			{
 				CPTo(ent, "^7You can not ^3unload ^7to this area.");
 				return;

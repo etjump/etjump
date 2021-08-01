@@ -315,6 +315,8 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	case ET_VELOCITY_PUSH_TRIGGER:
 		BG_TouchVelocityJumpPad(&other->client->ps, &self->s);
 		break;
+	default:
+		break;
 	}
 }
 

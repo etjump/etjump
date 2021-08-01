@@ -30,8 +30,6 @@ namespace ETJump
 	void DrawJumpSpeeds()
 	{
 		playerState_t* ps = getValidPlayerState();
-		float offX = 0.0f;
-		float offY = 0.0f;
 		float x1 = 6 + etj_jumpSpeedsX.value;
 		float x2 = 6 + 30 + etj_jumpSpeedsX.value;
 		float y1 = 240 + etj_jumpSpeedsY.value;
@@ -64,7 +62,7 @@ namespace ETJump
 		// adjust x or y depending on style chosen
 		vertical ? y1 += 12 : x1 += DrawStringWidth("Jump Speeds: ", 0.2f) + 5;
 
-		for (auto i = 0; i < jumpSpeedHistory.size(); i++)
+		for (auto i = 0; i < static_cast<int>(jumpSpeedHistory.size()); i++)
 		{
 			auto jumpSpeed = std::to_string(jumpSpeedHistory.at(i));
 			if (etj_jumpSpeedsShowDiff.integer)

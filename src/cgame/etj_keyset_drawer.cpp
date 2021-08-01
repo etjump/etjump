@@ -100,7 +100,7 @@ void ETJump::KeySetDrawer::render() const
 		return;
 	}
 
-	for (auto i = 0; i < keyShaders.size(); i++)
+	for (auto i = 0; i < static_cast<int>(keyShaders.size()); i++)
 	{
 		const auto &shader = keyShaders[i];
 		if (isKeyPressed(shader.key))

@@ -281,7 +281,6 @@ CG_SoundParseSounds
 static void CG_SoundParseSounds(char *filename, char *buffer)
 {
 	char          *token, **text;
-	int           s;
 	long          hash;
 	soundScript_t sound =
 	{
@@ -299,7 +298,6 @@ static void CG_SoundParseSounds(char *filename, char *buffer)
 	soundScriptSound_t *scriptSound = NULL;
 	qboolean           inSound, wantSoundName;
 
-	s             = 0;
 	inSound       = qfalse;
 	wantSoundName = qtrue;
 	text          = &buffer;
@@ -490,7 +488,7 @@ static void CG_SoundLoadSoundFiles(void)
 		CG_Printf(S_COLOR_RED "WARNING: no sound files found (filelist.txt not found in sound/scripts)\n");
 		return;
 	}
-	if (len > sizeof(bigTextBuffer))
+	if (len > static_cast<int>(sizeof(bigTextBuffer)))
 	{
 		CG_Error("%s is too big, make it smaller (max = %i bytes)\n", filename, sizeof(bigTextBuffer));
 	}
@@ -534,7 +532,7 @@ static void CG_SoundLoadSoundFiles(void)
 			}
 			continue;
 		}
-		if (len > sizeof(bigTextBuffer))
+		if (len > static_cast<int>(sizeof(bigTextBuffer)))
 		{
 			CG_Error("%s is too big, make it smaller (max = %i bytes)\n", filename, sizeof(bigTextBuffer));
 		}

@@ -54,7 +54,7 @@ bool ETJump::FileSystem::remove(const std::string &path)
 	return success == 1;
 #elif GAMEDLL
 	// hacky fallback
-	int success = trap_FS_Rename(path.c_str(), "");
+	trap_FS_Rename(path.c_str(), "");
 	return true;
 #endif
 }

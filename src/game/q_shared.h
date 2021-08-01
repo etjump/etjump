@@ -524,27 +524,6 @@ struct cplane_s;
 extern vec3_t vec3_origin;
 extern vec3_t axisDefault[3];
 
-#define nanmask (255 << 23)
-
-#define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
-
-float Q_fabs(float f);
-float Q_rsqrt(float f);         // reciprocal square root
-
-#define SQRTFAST(x) (1.0f / Q_rsqrt(x))
-
-static inline long Q_ftol(float f)
-{
-#if defined(id386_sse) && defined(_MSC_VER)
-	static int tmp;
-	__asm fld f
-	__asm fistp tmp
-	__asm mov eax, tmp
-#else
-	return (long)f;
-#endif
-}
-
 signed char ClampChar(int i);
 signed short ClampShort(int i);
 

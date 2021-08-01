@@ -592,34 +592,6 @@ void VectorRotate(vec3_t in, vec3_t matrix[3], vec3_t out)
 //============================================================================
 
 /*
-** float q_rsqrt( float number )
-*/
-float Q_rsqrt(float number)
-{
-	long        i;
-	float       x2, y;
-	const float threehalfs = 1.5F;
-
-	x2 = number * 0.5F;
-	y  = number;
-	i  = *( long * ) &y;                        // evil floating point bit level hacking
-	i  = 0x5f3759df - (i >> 1);                 // what the fuck?
-	y  = *( float * ) &i;
-	y  = y * (threehalfs - (x2 * y * y));       // 1st iteration
-//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
-
-	return y;
-}
-
-float Q_fabs(float f)
-{
-	int tmp = (*(int *)&f) & 0x7FFFFFFF;
-	return *(float *)&tmp;
-}
-
-//============================================================
-
-/*
 ===============
 LerpAngle
 
@@ -1166,8 +1138,8 @@ float RadiusFromBounds(const vec3_t mins, const vec3_t maxs)
 
 	for (i = 0 ; i < 3 ; i++)
 	{
-		a         = Q_fabs(mins[i]);
-		b         = Q_fabs(maxs[i]);
+		a         = std::abs(mins[i]);
+		b         = std::abs(maxs[i]);
 		corner[i] = a > b ? a : b;
 	}
 
@@ -1281,7 +1253,7 @@ void VectorNormalizeFast(vec3_t v)
 {
 	float ilength;
 
-	ilength = Q_rsqrt(DotProduct(v, v));
+	ilength = 1.0f / std::sqrt(DotProduct(v, v));
 
 	v[0] *= ilength;
 	v[1] *= ilength;
@@ -1517,10 +1489,10 @@ void PerpendicularVector(vec3_t dst, const vec3_t src)
 	*/
 	for (pos = 0, i = 0; i < 3; i++)
 	{
-		if (Q_fabs(src[i]) < minelem)
+		if (std::abs(src[i]) < minelem)
 		{
 			pos     = i;
-			minelem = Q_fabs(src[i]);
+			minelem = std::abs(src[i]);
 		}
 	}
 	tempvec[0]   = tempvec[1] = tempvec[2] = 0.0F;
@@ -1599,7 +1571,7 @@ void ProjectPointOntoVectorBounded(vec3_t point, vec3_t vStart, vec3_t vEnd, vec
 		}
 	if (j < 3)
 	{
-		if (Q_fabs(vProj[j] - vStart[j]) < Q_fabs(vProj[j] - vEnd[j]))
+		if (std::abs(vProj[j] - vStart[j]) < std::abs(vProj[j] - vEnd[j]))
 		{
 			VectorCopy(vStart, vProj);
 		}
@@ -1629,7 +1601,7 @@ float DistanceFromLineSquared(vec3_t p, vec3_t lp1, vec3_t lp2)
 		}
 	if (j < 3)
 	{
-		if (Q_fabs(proj[j] - lp1[j]) < Q_fabs(proj[j] - lp2[j]))
+		if (std::abs(proj[j] - lp1[j]) < std::abs(proj[j] - lp2[j]))
 		{
 			VectorSubtract(p, lp1, t);
 		}

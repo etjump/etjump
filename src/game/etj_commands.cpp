@@ -576,17 +576,14 @@ bool EditCommands(gentity_t *ent, Arguments argv)
 		deleteCommands = temp;
 	}
 
-	bool editedPermissions = false;
 	// always has + in it
 	if (addCommands.length() > 1)
 	{
-		editedPermissions   = true;
 		currentPermissions += addCommands;
 	}
 	// always has - in it
 	if (deleteCommands.length() > 1)
 	{
-		editedPermissions   = true;
 		currentPermissions += deleteCommands;
 	}
 	game.levels->Edit(level, "", currentPermissions, "", 1);
@@ -1048,12 +1045,12 @@ bool LeastPlayed(gentity_t *ent, Arguments argv)
 		{
 			mapsToList = std::stoi((*argv)[1]);
 		}
-		catch (std::invalid_argument)
+		catch (const std::invalid_argument&)
 		{
 			ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
 			return false;
 		}
-		catch (std::out_of_range)
+		catch (const std::out_of_range&)
 		{
 			mapsToList = 10;
 		}
@@ -1140,12 +1137,12 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 		{
 			perRow = std::stoi(argv->at(1), 0, 10);
 		}
-		catch (std::invalid_argument)
+		catch (const std::invalid_argument&)
 		{
 			ChatPrintTo(ent, (boost::format("^3listmaps: ^7%s^7 is not a number") % argv->at(1)).str());
 			return false;
 		}
-		catch (std::out_of_range)
+		catch (const std::out_of_range&)
 		{
 			perRow = 10;
 		}
@@ -1323,12 +1320,12 @@ bool MostPlayed(gentity_t *ent, Arguments argv)
 		{
 			mapsToList = std::stoi((*argv)[1]);
 		}
-		catch (std::invalid_argument)
+		catch (const std::invalid_argument&)
 		{
 			ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
 			return false;
 		}
-		catch (std::out_of_range)
+		catch (const std::out_of_range&)
 		{
 			mapsToList = 1000;
 		}
@@ -1863,12 +1860,12 @@ bool createToken(gentity_t *ent, Arguments argv)
 			coordinates[1] = std::stof((*argv)[4]);
 			coordinates[2] = std::stof((*argv)[5]);
 		}
-		catch (std::invalid_argument)
+		catch (const std::invalid_argument&)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7coordinates are not numbers.");
 			return false;
 		}
-		catch (std::out_of_range)
+		catch (const std::out_of_range&)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7coordinates are out of range.");
 			return false;
@@ -1995,12 +1992,12 @@ bool deleteToken(gentity_t *ent, Arguments argv)
 		{
 			num = std::stoi((*argv)[3]);
 		}
-		catch (std::invalid_argument)
+		catch (const std::invalid_argument&)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7" + (*argv)[3] + " is not a number.");
 			return false;
 		}
-		catch (std::out_of_range)
+		catch (const std::out_of_range&)
 		{
 			ChatPrintTo(ent, "^3tokens: ^7" + (*argv)[3] + " is out of range (too large).");
 			return false;

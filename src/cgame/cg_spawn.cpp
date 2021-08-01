@@ -288,7 +288,7 @@ void CG_ParseEntityFromSpawnVars(void)
 
 	if (CG_SpawnString("classname", "", &classname))
 	{
-		for (i = 0; i < NUMSPAWNS; i++)
+		for (i = 0; i < static_cast<int>(NUMSPAWNS); i++)
 		{
 			if (!Q_stricmp(spawns[i].name, classname))
 			{
