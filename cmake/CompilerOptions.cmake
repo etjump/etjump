@@ -14,7 +14,10 @@ function(create_compiler_opts target)
 
 	# GCC flags
 	set(GCC_LINK_FLAGS
+		$<$<CONFIG:Debug>:
+			-Wl,--no-undefined>
 		$<$<CONFIG:Release>:
+			-Wl,--no-undefined
 			-flto              # link time optimizations
 			-O3                # max optimization
 			-s>)               # strip symbols
@@ -25,6 +28,7 @@ function(create_compiler_opts target)
 		-fvisibility=hidden
 		-fdiagnostics-color=always
 		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall>
+		-Wno-comment
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
 			-O3                # max optimization 
@@ -65,6 +69,7 @@ function(create_compiler_opts target)
 	target_link_options(${target} INTERFACE $<IF:$<CXX_COMPILER_ID:MSVC>,${MSVC_LINK_FLAGS},${GCC_LINK_FLAGS}>)
 	target_compile_definitions(${target} INTERFACE 
 		$<$<CONFIG:Release>:NDEBUG>
+		$<$<CONFIG:Debug>:_DEBUG>
 		$<$<CXX_COMPILER_ID:MSVC>:
 			WIN32_LEAN_AND_MEAN 
 			_CRT_SECURE_NO_DEPRECATE 
