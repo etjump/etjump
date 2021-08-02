@@ -409,14 +409,14 @@ void UI_LoadArenas(void)
 
         str = Info_ValueForKey( ui_arenaInfos[n], "mapposition_x" );
         if ( *str ) {
-            uiInfo.mapList[uiInfo.mapCount].mappos[0] = atof(str);
+            uiInfo.mapList[uiInfo.mapCount].mappos[0] = Q_atof(str);
         } else {
             uiInfo.mapList[uiInfo.mapCount].mappos[0] = 0.f;
         }
 
         str = Info_ValueForKey( ui_arenaInfos[n], "mapposition_y" );
         if ( *str ) {
-            uiInfo.mapList[uiInfo.mapCount].mappos[1] = atof(str);
+            uiInfo.mapList[uiInfo.mapCount].mappos[1] = Q_atof(str);
         } else {
             uiInfo.mapList[uiInfo.mapCount].mappos[1] = 0.f;
         }

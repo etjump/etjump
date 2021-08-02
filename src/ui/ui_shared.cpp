@@ -358,7 +358,7 @@ qboolean Float_Parse(char **p, float *f)
 	token = COM_ParseExt(p, qfalse);
 	if (token && token[0] != 0)
 	{
-		*f = atof(token);
+		*f = Q_atof(token);
 		return qtrue;
 	}
 	else
@@ -5023,7 +5023,7 @@ void Item_Text_Paint(itemDef_t *item)
 				}
 				else if (item->window.flags & WINDOW_TEXTASFLOAT)
 				{
-					char *s = va("%.2f", atof(text));
+					char *s = va("%.2f", Q_atof(text));
 					Q_strncpyz(text, s, sizeof(text));
 					item->textRect.w = 0;   // force recalculation
 				}

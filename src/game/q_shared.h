@@ -97,6 +97,7 @@
 #include <limits.h>
 #include <sys/stat.h> // rain
 #include <float.h>
+#include <cstdlib>
 
 #endif
 
@@ -610,7 +611,7 @@ void VectorInverse(vec3_t v);
 void Vector4Scale(const vec4_t in, vec_t scale, vec4_t out);
 void VectorRotate(vec3_t in, vec3_t matrix[3], vec3_t out);
 int Q_log2(int val);
-
+float Q_atof(const char *str);
 float Q_acos(float c);
 
 int     Q_rand(int *seed);
@@ -894,7 +895,7 @@ typedef struct cvar_s
 	int flags;
 	qboolean modified;              // set each time the cvar is changed
 	int modificationCount;          // incremented each time the cvar is changed
-	float value;                    // atof( string )
+	float value;                    // Q_atof( string )
 	int integer;                    // atoi( string )
 	struct cvar_s *next;
 	struct cvar_s *hashNext;

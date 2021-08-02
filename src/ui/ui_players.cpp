@@ -1135,7 +1135,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *fil
 				{
 					break;
 				}
-				animModelInfo->headOffset[i] = atof(token);
+				animModelInfo->headOffset[i] = Q_atof(token);
 			}
 			continue;
 		}
@@ -1263,7 +1263,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo, const char *fil
 		{
 //			BG_AnimParseError( "end of file without ENDANIMS: line %i" );
 		}
-		fps = atof(token);
+		fps = Q_atof(token);
 		if (fps == 0)
 		{
 			fps = 1;
@@ -1498,7 +1498,7 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi)
         if ( !token ) {
             break;
         }
-        fps = atof( token );
+        fps = Q_atof( token );
         if ( fps == 0 ) {
             fps = 1;
         }

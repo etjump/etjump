@@ -2761,7 +2761,7 @@ void SP_mg42(gentity_t *self)
 
 	G_SpawnString("accuracy", "1.0", &accuracy);
 
-	self->accuracy = atof(accuracy);
+	self->accuracy = Q_atof(accuracy);
 
 	if (!self->accuracy)
 	{
