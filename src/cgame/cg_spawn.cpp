@@ -35,7 +35,7 @@ qboolean CG_SpawnFloat(const char *key, const char *defaultString, float *out)
 	qboolean present;
 
 	present = CG_SpawnString(key, defaultString, &s);
-	*out    = atof(s);
+	*out    = Q_atof(s);
 	return present;
 }
 

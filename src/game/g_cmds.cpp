@@ -1081,7 +1081,7 @@ namespace ETJump
 		for (auto i = 0; i < 3; i++)
 		{
 			trap_Argv(i + 1, buffer, sizeof buffer);
-			float value = atof(buffer);
+			float value = Q_atof(buffer);
 			if (value > MaxAxisOffset)
 			{
 				value = MaxAxisOffset;
@@ -3335,9 +3335,9 @@ void Cmd_SetViewpos_f(gentity_t *ent)
 	for (i = 0 ; i < 3 ; i++)
 	{
 		trap_Argv(i + 1, buffer, sizeof(buffer));
-		origin[i] = atof(buffer);
+		origin[i] = Q_atof(buffer);
 		trap_Argv(i + 4, buffer, sizeof(buffer));
-		angles[i] = atof(buffer);
+		angles[i] = AngleNormalize180(Q_atof(buffer));
 	}
 
 	DirectTeleport(ent, origin, angles);
@@ -3440,7 +3440,7 @@ void Cmd_SetCameraOrigin_f(gentity_t *ent)
 	for (i = 0 ; i < 3 ; i++)
 	{
 		trap_Argv(i + 1, buffer, sizeof(buffer));
-		origin[i] = atof(buffer);
+		origin[i] = Q_atof(buffer);
 	}
 
 	if (ent->client->cameraPortal)

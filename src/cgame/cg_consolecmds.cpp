@@ -383,12 +383,12 @@ static void CG_Fade_f(void)
 		return;
 	}
 
-	r = atof(CG_Argv(1));
-	g = atof(CG_Argv(2));
-	b = atof(CG_Argv(3));
-	a = atof(CG_Argv(4));
+	r = Q_atof(CG_Argv(1));
+	g = Q_atof(CG_Argv(2));
+	b = Q_atof(CG_Argv(3));
+	a = Q_atof(CG_Argv(4));
 
-	duration = atof(CG_Argv(5)) * 1000;
+	duration = Q_atof(CG_Argv(5)) * 1000;
 
 	CG_Fade(r, g, b, a, cg.time, duration);
 }
@@ -1249,7 +1249,7 @@ float etpro_float_Argv(int argnum)
 	char buffer[MAX_TOKEN_CHARS];
 
 	trap_Argv(argnum, buffer, sizeof(buffer));
-	return atof(buffer);
+	return Q_atof(buffer);
 }
 
 void CG_FreecamSetPos_f(void)
@@ -1347,13 +1347,13 @@ void CG_IncrementVar_f(void)
 	
 	trap_Cvar_VariableStringBuffer(CG_Argv(1), cvarBuffer, sizeof cvarBuffer);
 
-	auto start = atof(CG_Argv(2));
-	auto end = atof(CG_Argv(3));
-	auto value = atof(cvarBuffer);
+	auto start = Q_atof(CG_Argv(2));
+	auto end = Q_atof(CG_Argv(3));
+	auto value = Q_atof(cvarBuffer);
 	auto step = 1.0;
 
 	if (argc == 5) {
-		step = abs(atof(CG_Argv(4)));
+		step = abs(Q_atof(CG_Argv(4)));
 	}
 
 	if (abs(end - start) < step) {

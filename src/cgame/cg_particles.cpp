@@ -1708,13 +1708,13 @@ int CG_NewParticleArea(int num)
 	for (i = 0; i < 3; i++)
 	{
 		token     = COM_Parse(&str);
-		origin[i] = atof(token);
+		origin[i] = Q_atof(token);
 	}
 
 	for (i = 0; i < 3; i++)
 	{
 		token      = COM_Parse(&str);
-		origin2[i] = atof(token);
+		origin2[i] = Q_atof(token);
 	}
 
 	token        = COM_Parse(&str);

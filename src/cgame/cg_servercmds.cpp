@@ -122,7 +122,7 @@ void CG_ParseServerinfo(void)
 		trap_Cvar_Update(&cg_antilag);
 		trap_Cvar_Update(&cg_gameType);
 	}
-	cgs.timelimit  = atof(Info_ValueForKey(info, "timelimit"));
+	cgs.timelimit  = Q_atof(Info_ValueForKey(info, "timelimit"));
 	cgs.maxclients = atoi(Info_ValueForKey(info, "sv_maxclients"));
 	mapname        = Info_ValueForKey(info, "mapname");
 	Q_strncpyz(cgs.rawmapname, mapname, sizeof(cgs.rawmapname));
@@ -301,7 +301,7 @@ void CG_ParseWolfinfo(void)
 	info = CG_ConfigString(CS_WOLFINFO);
 
 	cgs.currentRound       = atoi(Info_ValueForKey(info, "g_currentRound"));
-	cgs.nextTimeLimit      = atof(Info_ValueForKey(info, "g_nextTimeLimit"));
+	cgs.nextTimeLimit      = Q_atof(Info_ValueForKey(info, "g_nextTimeLimit"));
 	cgs.gamestate          = (gamestate_t)atoi(Info_ValueForKey(info, "gamestate"));
 	cgs.currentCampaign    = Info_ValueForKey(info, "g_currentCampaign");
 	cgs.currentCampaignMap = atoi(Info_ValueForKey(info, "g_currentCampaignMap"));
@@ -368,14 +368,14 @@ void CG_ParseSpawns(void)
 		{
 			return;
 		}
-		cg.spawnCoordsUntransformed[i][0] = cg.spawnCoords[i][0] = atof(s);
+		cg.spawnCoordsUntransformed[i][0] = cg.spawnCoords[i][0] = Q_atof(s);
 
 		s = Info_ValueForKey(info, "y");
 		if (!s || !strlen(s))
 		{
 			return;
 		}
-		cg.spawnCoordsUntransformed[i][1] = cg.spawnCoords[i][1] = atof(s);
+		cg.spawnCoordsUntransformed[i][1] = cg.spawnCoords[i][1] = Q_atof(s);
 
 		if (cgs.ccLayers)
 		{
@@ -384,7 +384,7 @@ void CG_ParseSpawns(void)
 			{
 				return;
 			}
-			cg.spawnCoordsUntransformed[i][2] = cg.spawnCoords[i][2] = atof(s);
+			cg.spawnCoordsUntransformed[i][2] = cg.spawnCoords[i][2] = Q_atof(s);
 		}
 
 		CG_TransformToCommandMapCoord(&cg.spawnCoords[i][0], &cg.spawnCoords[i][1]);
@@ -417,7 +417,7 @@ static void CG_ParseScreenFade(void)
 	info = (char *)CG_ConfigString(CS_SCREENFADE);
 
 	token         = COM_Parse(&info);
-	cgs.fadeAlpha = atof(token);
+	cgs.fadeAlpha = Q_atof(token);
 
 	token             = COM_Parse(&info);
 	cgs.fadeStartTime = atoi(token);
@@ -450,12 +450,12 @@ static void CG_ParseFog(void)
 
 	info = (char *)CG_ConfigString(CS_FOGVARS);
 
-	token = COM_Parse(&info);    ne = atof(token);
-	token = COM_Parse(&info);    fa = atof(token);
-	token = COM_Parse(&info);    density = atof(token);
-	token = COM_Parse(&info);    r = atof(token);
-	token = COM_Parse(&info);    g = atof(token);
-	token = COM_Parse(&info);    b = atof(token);
+	token = COM_Parse(&info);    ne = Q_atof(token);
+	token = COM_Parse(&info);    fa = Q_atof(token);
+	token = COM_Parse(&info);    density = Q_atof(token);
+	token = COM_Parse(&info);    r = Q_atof(token);
+	token = COM_Parse(&info);    g = Q_atof(token);
+	token = COM_Parse(&info);    b = Q_atof(token);
 	token = COM_Parse(&info);    time = atoi(token);
 
 	if (fa)      // far of '0' from a target_fog means "return to map fog"
@@ -488,10 +488,10 @@ static void CG_ParseGlobalFog(void)
 	}
 	else
 	{
-		token = COM_Parse(&info);    r = atof(token);
-		token = COM_Parse(&info);    g = atof(token);
-		token = COM_Parse(&info);    b = atof(token);
-		token = COM_Parse(&info);    depthForOpaque = atof(token);
+		token = COM_Parse(&info);    r = Q_atof(token);
+		token = COM_Parse(&info);    g = Q_atof(token);
+		token = COM_Parse(&info);    b = Q_atof(token);
+		token = COM_Parse(&info);    depthForOpaque = Q_atof(token);
 
 		trap_R_SetGlobalFog(qfalse, duration, r, g, b, depthForOpaque);
 	}
@@ -934,7 +934,7 @@ void CG_AddToNotify(const char *str)
 	char  var[MAX_TOKEN_CHARS];
 
 	trap_Cvar_VariableStringBuffer("con_notifytime", var, sizeof(var));
-	notifytime = atof(var) * 1000;
+	notifytime = Q_atof(var) * 1000;
 
 	chatHeight = NOTIFY_HEIGHT;
 
@@ -1738,7 +1738,7 @@ void CG_VoiceChat(int mode)
 
 	vsay.variant = atoi(CG_Argv(variant));
 	trap_Argv(4, vsay.id, sizeof(vsay.id));
-	vsay.random = atof(CG_Argv(rand));
+	vsay.random = Q_atof(CG_Argv(rand));
 	trap_Argv(custom, vsay.custom, sizeof(vsay.custom));
 
 	if (cg_noTaunt.integer != 0)
@@ -2985,13 +2985,13 @@ static void CG_ServerCommand(void)
 	}
 	if (!Q_stricmp(cmd, "mu_fade"))
 	{
-		trap_S_FadeBackgroundTrack(atof(CG_Argv(1)), atoi(CG_Argv(2)), 0);
+		trap_S_FadeBackgroundTrack(Q_atof(CG_Argv(1)), atoi(CG_Argv(2)), 0);
 		return;
 	}
 
 	if (!Q_stricmp(cmd, "snd_fade"))
 	{
-		trap_S_FadeAllSound(atof(CG_Argv(1)), atoi(CG_Argv(2)), atoi(CG_Argv(3)) ? qtrue : qfalse);
+		trap_S_FadeAllSound(Q_atof(CG_Argv(1)), atoi(CG_Argv(2)), atoi(CG_Argv(3)) ? qtrue : qfalse);
 		return;
 	}
 

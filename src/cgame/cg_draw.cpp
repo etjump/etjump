@@ -1020,7 +1020,7 @@ static void CG_DrawNotify(void)
 	yLoc = NOTIFYLOC_Y;
 
 	trap_Cvar_VariableStringBuffer("con_notifytime", var, sizeof(var));
-	notifytime = atof(var) * 1000;
+	notifytime = Q_atof(var) * 1000;
 
 	if (notifytime <= 100.f)
 	{

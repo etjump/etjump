@@ -744,7 +744,7 @@ void TrickjumpLines::loadRoutes(const char *loadname)
 					Json::Value coorValue = trailsValue[j][k]["coordinates"];
 					for (int l = 0; l < static_cast<int>(coorValue.size()); ++l)
 					{
-						loadNode.coor[l] = std::atof(coorValue[l].asString().c_str());
+						loadNode.coor[l] = Q_atof(coorValue[l].asString().c_str());
 					}
 					loadNode.speed = trailsValue[j][k]["speed"].asFloat();
 					trailVec.push_back(loadNode); // Add node to trail.

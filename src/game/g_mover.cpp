@@ -5973,7 +5973,7 @@ void SP_func_constructible(gentity_t *ent)
 	}
 
 	/*G_SpawnString ("score", "0", &s);
-	ent->accuracy = atof (s);
+	ent->accuracy = Q_atof (s);
 
 	G_SpawnInt( "health", "100", &health ); // default low enough to get killed by dynamite
 	ent->sound1to2 = ent->health = health;*/

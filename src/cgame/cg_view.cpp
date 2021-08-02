@@ -64,7 +64,7 @@ void CG_TestModel_f(void)
 
 	if (trap_Argc() == 3)
 	{
-		cg.testModelEntity.backlerp = atof(CG_Argv(2));
+		cg.testModelEntity.backlerp = Q_atof(CG_Argv(2));
 		cg.testModelEntity.frame    = 1;
 		cg.testModelEntity.oldframe = 0;
 	}
@@ -501,7 +501,7 @@ void CG_KickAngles(void)
 	// NERVE - SMF - only change cg_recoilPitch cvar when we need to
 	trap_Cvar_VariableStringBuffer("cg_recoilPitch", buf, sizeof(buf));
 
-	if (atof(buf) != cg.recoilPitchAngle)
+	if (Q_atof(buf) != cg.recoilPitchAngle)
 	{
 		// encode the kick angles into a 24bit number, for sending to the client exe
 		trap_Cvar_Set("cg_recoilPitch", va("%f", cg.recoilPitchAngle));
@@ -1678,13 +1678,13 @@ void CG_ParseSkyBox(void)
 	}
 
 	token               = CG_MustParse(&cstr, "CG_ParseSkyBox: error parsing skybox configstring\n");
-	cg.skyboxViewOrg[0] = atof(token);
+	cg.skyboxViewOrg[0] = Q_atof(token);
 
 	token               = CG_MustParse(&cstr, "CG_ParseSkyBox: error parsing skybox configstring\n");
-	cg.skyboxViewOrg[1] = atof(token);
+	cg.skyboxViewOrg[1] = Q_atof(token);
 
 	token               = CG_MustParse(&cstr, "CG_ParseSkyBox: error parsing skybox configstring\n");
-	cg.skyboxViewOrg[2] = atof(token);
+	cg.skyboxViewOrg[2] = Q_atof(token);
 
 	token            = CG_MustParse(&cstr, "CG_ParseSkyBox: error parsing skybox configstring\n");
 	cg.skyboxViewFov = atoi(token);
@@ -1699,13 +1699,13 @@ void CG_ParseSkyBox(void)
 	if (atoi(token))     // this camera has fog
 	{
 		token       = CG_MustParse(&cstr, "CG_DrawSkyBoxPortal: error parsing skybox configstring.  No fog[0]\n");
-		fogColor[0] = atof(token);
+		fogColor[0] = Q_atof(token);
 
 		token       = CG_MustParse(&cstr, "CG_DrawSkyBoxPortal: error parsing skybox configstring.  No fog[1]\n");
-		fogColor[1] = atof(token);
+		fogColor[1] = Q_atof(token);
 
 		token       = CG_MustParse(&cstr, "CG_DrawSkyBoxPortal: error parsing skybox configstring.  No fog[2]\n");
-		fogColor[2] = atof(token);
+		fogColor[2] = Q_atof(token);
 
 		token    = COM_ParseExt(&cstr, qfalse);
 		fogStart = atoi(token);

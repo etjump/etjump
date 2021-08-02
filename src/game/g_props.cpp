@@ -3549,7 +3549,7 @@ void SP_props_decoration(gentity_t *ent)
 		}
 
 		G_SpawnString("high", "0", &high);
-		height = atof(high);
+		height = Q_atof(high);
 
 		if (!height)
 		{
@@ -3557,7 +3557,7 @@ void SP_props_decoration(gentity_t *ent)
 		}
 
 		G_SpawnString("wide", "0", &wide);
-		width = atof(wide);
+		width = Q_atof(wide);
 
 		if (!width)
 		{
@@ -3577,7 +3577,7 @@ void SP_props_decoration(gentity_t *ent)
 		ent->s.eType    = ET_MOVER;
 
 		G_SpawnString("frames", "0", &frames);
-		num_frames = atof(frames);
+		num_frames = Q_atof(frames);
 
 		ent->count2 = num_frames;
 
@@ -3592,7 +3592,7 @@ void SP_props_decoration(gentity_t *ent)
 	else if (!(ent->health) && ent->spawnflags & 4)
 	{
 		G_SpawnString("frames", "0", &frames);
-		num_frames = atof(frames);
+		num_frames = Q_atof(frames);
 
 		ent->count2 = num_frames;
 		ent->use    = Use_props_decoration;
@@ -3722,7 +3722,7 @@ void SP_skyportal(gentity_t *ent)
 	float fov_x;
 
 	G_SpawnString("fov", "90", &fov);
-	fov_x = atof(fov);
+	fov_x = Q_atof(fov);
 
 //----(SA)	modified
 	isfog += G_SpawnVector("fogcolor", "0 0 0", fogv);
@@ -3979,14 +3979,14 @@ void SP_props_statue(gentity_t *ent)
 	}
 
 	G_SpawnString("high", "0", &high);
-	height = atof(high);
+	height = Q_atof(high);
 	if (!height)
 	{
 		height = 4;
 	}
 
 	G_SpawnString("wide", "0", &wide);
-	width = atof(wide);
+	width = Q_atof(wide);
 
 	if (!width)
 	{
@@ -4006,7 +4006,7 @@ void SP_props_statue(gentity_t *ent)
 	ent->s.eType    = ET_MOVER;
 
 	G_SpawnString("frames", "0", &frames);
-	num_frames = atof(frames);
+	num_frames = Q_atof(frames);
 
 	ent->count2 = num_frames;
 
@@ -4549,7 +4549,7 @@ void SP_props_flamethrower(gentity_t *ent)
 
 
 	G_SpawnString("size", "0", &size);
-	dsize = atof(size);
+	dsize = Q_atof(size);
 	if (!dsize)
 	{
 		dsize = 1;
