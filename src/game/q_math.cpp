@@ -1398,7 +1398,7 @@ int Q_log2(int val)
 
 float Q_atof(const char *str)
 {
-	const float f = std::atof(str);
+	const float f = atof(str);
 	return (std::isfinite(f) ? f : 0);
 }
 
