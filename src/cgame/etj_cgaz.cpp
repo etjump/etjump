@@ -545,7 +545,7 @@ namespace ETJump
 		// looking to the left with +forward only and looking to the right with +back only
 
 		// get player speed
-		const float speed = std::sqrt(ps.velocity[0] * ps.velocity[0] + ps.velocity[1] * ps.velocity[1]);
+		const float speed = VectorLength2(ps.velocity);
 
 		// get sprint scale
 		const float scale = PM_CalcScale(ps);
@@ -609,7 +609,7 @@ namespace ETJump
 	float getOptAngle(const playerState_t& ps)
 	{
 		// get player speed
-		const float speed = std::sqrt(ps.velocity[0] * ps.velocity[0] + ps.velocity[1] * ps.velocity[1]);
+		const float speed = VectorLength2(ps.velocity);
 
 		// get sprint scale
 		const float scale = PM_CalcScale(ps);
@@ -661,6 +661,6 @@ namespace ETJump
 		}
 
 		// return minimum angle for which you still gain the highest accel
-		return opt;
+		return AngleNormalize180(opt);
 	}
 }

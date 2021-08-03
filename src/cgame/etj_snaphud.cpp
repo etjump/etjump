@@ -128,7 +128,8 @@ namespace ETJump
 		const bool forwards = strafingForwards(ps);
 
 		// determine whether strafing to the right ("moving mouse rightwards")
-		const bool rightStrafe = (forwards && cmd.rightmove > 0) || (!forwards && (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
+		const bool rightStrafe = (forwards && cmd.rightmove > 0) || (!forwards && (cmd.rightmove < 0
+			|| (cmd.forwardmove != 0 && cmd.rightmove == 0)));
 
 		// get opt angle
 		float opt = getOptAngle(ps);

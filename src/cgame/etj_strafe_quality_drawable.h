@@ -36,6 +36,9 @@ namespace ETJump {
 		int _team{ 0 };
 		mutable vec4_t _color;
 
+		// default absolute hud position
+		static constexpr float _x = 100;
+		static constexpr float _y = 100;
 		// amount of digits to show on hud
 		static constexpr std::size_t _digits = 4;
 

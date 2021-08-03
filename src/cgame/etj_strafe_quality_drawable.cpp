@@ -98,8 +98,7 @@ namespace ETJump {
 		++_totalFrames;
 
 		// check whether user input is good
-		const float speed = std::sqrt(ps.velocity[0] * ps.velocity[0] +
-			ps.velocity[1] * ps.velocity[1]);
+		const float speed = VectorLength2(ps.velocity);
 		const float scale = PM_CalcScale(ps);
 		if (speed < ps.speed * scale)
 		{
@@ -152,8 +151,8 @@ namespace ETJump {
 		}
 
 		// get coordinates and size
-		float       x    = etj_strafeQualityX.value;
-		float       y    = etj_strafeQualityY.value;
+		float       x    = _x + etj_strafeQualityX.value;
+		float       y    = _y + etj_strafeQualityY.value;
 		const float size = 0.1f * etj_strafeQualitySize.value;
 		ETJump_AdjustPosition(&x);
 

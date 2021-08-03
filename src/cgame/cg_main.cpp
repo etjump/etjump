@@ -1020,9 +1020,9 @@ cvarTable_t cvarTable[] =
 	{ &etj_jumpSpeedsFasterColor, "etj_jumpSpeedsFasterColor", "0.0 1.0 0.0 1.0", CVAR_ARCHIVE },
 	{ &etj_jumpSpeedsSlowerColor, "etj_jumpSpeedsSlowerColor", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE },
 	// Strafe quality
-	{ &etj_drawStrafeQuality, "etj_drawStrafeQuality", "1", CVAR_ARCHIVE },
-	{ &etj_strafeQualityX, "etj_strafeQualityX", "100", CVAR_ARCHIVE },
-	{ &etj_strafeQualityY, "etj_strafeQualityY", "100", CVAR_ARCHIVE },
+	{ &etj_drawStrafeQuality, "etj_drawStrafeQuality", "0", CVAR_ARCHIVE },
+	{ &etj_strafeQualityX, "etj_strafeQualityX", "0", CVAR_ARCHIVE },
+	{ &etj_strafeQualityY, "etj_strafeQualityY", "0", CVAR_ARCHIVE },
 	{ &etj_strafeQualityColor, "etj_strafeQualityColor", "1.0 1.0 1.0 1.0", CVAR_ARCHIVE },
 	{ &etj_strafeQualityShadow, "etj_strafeQualityShadow", "1", CVAR_ARCHIVE },
 	{ &etj_strafeQualitySize, "etj_strafeQualitySize", "3", CVAR_ARCHIVE },
