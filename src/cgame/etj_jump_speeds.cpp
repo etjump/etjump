@@ -180,13 +180,4 @@ namespace ETJump
 			}
 		}
 	}
-
-	static playerState_t* getValidPlayerState()
-	{
-		return (cg.snap->ps.clientNum != cg.clientNum)
-			// spectating
-			? &cg.snap->ps
-			// playing
-			: &cg.predictedPlayerState;
-	}
 }

@@ -6,6 +6,7 @@
 #define SUBW_SNAPHUD_Y 32
 #define SUBW_SPECTATOR_Y 140
 #define SUBW_JUMPSPEEDS_Y 212
+#define SUBW_STRAFEQUALITY_Y 32
 #define GROUP_NAME "group_etjump_settings_5"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
@@ -52,6 +53,17 @@ menuDef {
         YESNO				(16, SUBW_JUMPSPEEDS_Y + 92, 276, 8, "Show difference:", 0.2, 8, "etj_jumpSpeedsShowDiff", "Colorize speed if it's faster/slower than previous\netj_jumpSpeedsShowDiff")
         MULTI				(16, SUBW_JUMPSPEEDS_Y + 104, 276, 8, "Faster color:", 0.2, 8, "etj_jumpSpeedsFasterColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of faster jumps\netj_jumpSpeedsFasterColor")
         MULTI				(16, SUBW_JUMPSPEEDS_Y + 116, 276, 8, "Slower color:", 0.2, 8, "etj_jumpSpeedsSlowerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
+
+    SUBWINDOW(308, 32, 292, 112, "STRAFE QUALITY")
+        YESNO				(316, SUBW_STRAFEQUALITY_Y + 20, 276, 8, "Strafe quality:", 0.2, 8, "etj_drawStrafeQuality", "Draw strafe quality\netj_drawStrafeQuality")
+        CVARINTLABEL		(316, SUBW_STRAFEQUALITY_Y + 32, 276, 8, "etj_strafeQualityX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_STRAFEQUALITY_Y + 32, 276, 8, "Strafe quality X:", 0.2, 8, etj_strafeQualityX 0 -100 540 5, "Sets X offset of strafe quality\netj_strafeQualityX")
+        CVARINTLABEL		(316, SUBW_STRAFEQUALITY_Y + 44, 276, 8, "etj_strafeQualityY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_STRAFEQUALITY_Y + 44, 276, 8, "Strafe quality Y:", 0.2, 8, etj_strafeQualityY 0 -100 380 5, "Sets Y offset of strafe quality\netj_strafeQualityY")
+        MULTI				(316, SUBW_STRAFEQUALITY_Y + 56, 276, 8, "Strafe quality color:", 0.2, 8, "etj_strafeQualityColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of strafe quality\netj_strafeQualityColor")
+        YESNO				(316, SUBW_STRAFEQUALITY_Y + 68, 276, 8, "Strafe quality shadow:", 0.2, 8, "etj_strafeQualityShadow", "Draw shadow on strafe quality\netj_strafeQualityShadow")
+        MULTI				(316, SUBW_STRAFEQUALITY_Y + 80, 276, 8, "Strafe quality size:", 0.2, 8, "etj_strafeQualitySize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of strafe quality\netj_strafeQualitySize")
+        MULTI				(316, SUBW_STRAFEQUALITY_Y + 92, 276, 8, "Strafe quality style:", 0.2, 8, "etj_strafeQualityStyle", cvarFloatList { "Full" 0 "Percent" 1 "Number" 2 }, "Strafe quality style\netj_strafeQualityStyle")
 
         BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_5; open etjump)
         BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_5; open etjump_settings_1)

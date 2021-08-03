@@ -23,6 +23,7 @@
 #include "etj_keyset_system.h"
 #include "etj_utilities.h"
 #include "etj_speed_drawable.h"
+#include "etj_strafe_quality_drawable.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_awaited_command_handler.h"
 #include "etj_event_loop.h"
@@ -592,6 +593,15 @@ vmCvar_t etj_jumpSpeedsShowDiff;
 vmCvar_t etj_jumpSpeedsFasterColor;
 vmCvar_t etj_jumpSpeedsSlowerColor;
 
+// Strafe quality
+vmCvar_t etj_drawStrafeQuality;
+vmCvar_t etj_strafeQualityX;
+vmCvar_t etj_strafeQualityY;
+vmCvar_t etj_strafeQualityColor;
+vmCvar_t etj_strafeQualityShadow;
+vmCvar_t etj_strafeQualitySize;
+vmCvar_t etj_strafeQualityStyle;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -1009,6 +1019,14 @@ cvarTable_t cvarTable[] =
 	{ &etj_jumpSpeedsShowDiff, "etj_jumpSpeedsShowDiff", "0", CVAR_ARCHIVE },
 	{ &etj_jumpSpeedsFasterColor, "etj_jumpSpeedsFasterColor", "0.0 1.0 0.0 1.0", CVAR_ARCHIVE },
 	{ &etj_jumpSpeedsSlowerColor, "etj_jumpSpeedsSlowerColor", "1.0 0.0 0.0 1.0", CVAR_ARCHIVE },
+	// Strafe quality
+	{ &etj_drawStrafeQuality, "etj_drawStrafeQuality", "0", CVAR_ARCHIVE },
+	{ &etj_strafeQualityX, "etj_strafeQualityX", "0", CVAR_ARCHIVE },
+	{ &etj_strafeQualityY, "etj_strafeQualityY", "0", CVAR_ARCHIVE },
+	{ &etj_strafeQualityColor, "etj_strafeQualityColor", "1.0 1.0 1.0 1.0", CVAR_ARCHIVE },
+	{ &etj_strafeQualityShadow, "etj_strafeQualityShadow", "1", CVAR_ARCHIVE },
+	{ &etj_strafeQualitySize, "etj_strafeQualitySize", "3", CVAR_ARCHIVE },
+	{ &etj_strafeQualityStyle, "etj_strafeQualityStyle", "0", CVAR_ARCHIVE },
 };
 
 
@@ -3777,6 +3795,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	// Display max speed from previous load session
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::StrafeQuality()));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::QuickFollowDrawer()));
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();

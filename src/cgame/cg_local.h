@@ -2666,6 +2666,15 @@ extern vmCvar_t etj_jumpSpeedsShowDiff;
 extern vmCvar_t etj_jumpSpeedsFasterColor;
 extern vmCvar_t etj_jumpSpeedsSlowerColor;
 
+// Strafe quality
+extern vmCvar_t etj_drawStrafeQuality;
+extern vmCvar_t etj_strafeQualityX;
+extern vmCvar_t etj_strafeQualityY;
+extern vmCvar_t etj_strafeQualityColor;
+extern vmCvar_t etj_strafeQualityShadow;
+extern vmCvar_t etj_strafeQualitySize;
+extern vmCvar_t etj_strafeQualityStyle;
+
 //
 // cg_main.c
 //
@@ -4031,6 +4040,7 @@ namespace ETJump
 	void UpdateJumpSpeeds();
 	void QueueJumpSpeedsReset();
 	void ResetJumpSpeeds();
+	playerState_t *getValidPlayerState();
 
 	enum extraTraceOptions {
 		OB_DETECTOR,

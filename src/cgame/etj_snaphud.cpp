@@ -1,48 +1,20 @@
 #include "etj_snaphud.h"
 #include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
+#include "etj_cgaz.h"
 
 // Snaphud implementation based on iodfe
 
 namespace ETJump
 {
 	constexpr int SNAPHUD_MAXZONES{ 128 };
-	float snapSpeed;
-	float snapZones[SNAPHUD_MAXZONES];
-	int snapCount;
+	float         snapSpeed;
+	float         snapZones[SNAPHUD_MAXZONES];
+	int           snapCount;
 
-	static int QDECL sortSnapZones(const void* a, const void* b)
+	static int QDECL sortSnapZones(const void *a, const void *b)
 	{
-		return *(float*)a - *(float*)b;
-	}
-
-	// FIXME: share this with cgaz
-	static float PM_CalcScale(playerState_t* ps)
-	{
-		// based on PM_CmdScale from bg_pmove.c
-		float scale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps->sprintSpeedScale : ps->runSpeedScale;
-		return scale;
-	}
-
-	static usercmd_t getUsercmd(playerState_t const& pm_ps, int8_t ucmdScale)
-	{
-		usercmd_t cmd;
-		if (!cg.demoPlayback && !(pm_ps.pm_flags & PMF_FOLLOW))
-		{
-			int cmdNum = trap_GetCurrentCmdNumber();
-			trap_GetUserCmd(cmdNum, &cmd);
-		}
-		else
-		{
-			cmd.forwardmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
-				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD));
-			cmd.rightmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
-				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT));
-			cmd.upmove = ucmdScale * (!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
-				!!(pm_ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN));
-		}
-		// printf("%d %d %d\n", cmd.forwardmove, cmd.rightmove, cmd.upmove);
-		return cmd;
+		return *(float *)a - *(float *)b;
 	}
 
 	static void UpdateSnapHUDSettings(float speed)
@@ -50,7 +22,7 @@ namespace ETJump
 		float step;
 
 		snapSpeed = speed;
-		speed /= 125;
+		speed    /= 125;
 		snapCount = 0;
 
 		for (step = floor(speed + 0.5) - 0.5; step > 0 && snapCount < SNAPHUD_MAXZONES - 2; step--)
@@ -67,14 +39,14 @@ namespace ETJump
 
 	void DrawSnapHUD(void)
 	{
-		float scale;
-		float speed;
-		float y, h;
-		float yaw;
-		float fov;
-		vec4_t color[2];
-		int colorID = 0;
-		playerState_t* ps;
+		float         scale;
+		float         speed;
+		float         y, h;
+		float         yaw;
+		float         fov;
+		vec4_t        color[2];
+		int           colorID = 0;
+		playerState_t *ps;
 
 		ps = &cg.predictedPlayerState;
 
@@ -94,7 +66,7 @@ namespace ETJump
 		}
 
 		// get correct speed scaling
-		scale = PM_CalcScale(ps);
+		scale = PM_CalcScale(*ps);
 
 		// check whether snapSpeed needs to be updated
 		speed = cg.snap->ps.speed * scale;
@@ -108,7 +80,7 @@ namespace ETJump
 		yaw = cg.predictedPlayerState.viewangles[YAW];
 
 		int8_t const ucmdScale = 127;
-		usercmd_t cmd = getUsercmd(*ps, ucmdScale);
+		usercmd_t    cmd       = getUsercmd(*ps, ucmdScale);
 
 		if (cmd.forwardmove != 0 && cmd.rightmove != 0)
 		{
@@ -141,5 +113,90 @@ namespace ETJump
 			CG_FillAngleYaw(snapZones[i] + 90, snapZones[i + 1] + 90, yaw, y, h, fov, color[colorID]);
 			colorID ^= 1;
 		}
+	}
+
+	bool inMainAccelZone(const playerState_t& ps)
+	{
+		// get player yaw
+		float yaw = ps.viewangles[YAW];
+
+		// get usercmd
+		constexpr int8_t ucmdScale = 127;
+		const usercmd_t  cmd       = getUsercmd(ps, ucmdScale);
+
+		// determine whether strafestyle is "forwards"
+		const bool forwards = strafingForwards(ps);
+
+		// determine whether strafing to the right ("moving mouse rightwards")
+		const bool rightStrafe = (forwards && cmd.rightmove > 0) || (!forwards && (cmd.rightmove < 0
+			|| (cmd.forwardmove != 0 && cmd.rightmove == 0)));
+
+		// get opt angle
+		float opt = getOptAngle(ps);
+
+		// update snapzones even if snaphud not drawn
+		const float speed = cg.snap->ps.speed * PM_CalcScale(ps);
+		if (speed != snapSpeed)
+		{
+			UpdateSnapHUDSettings(speed);
+		}
+
+		// necessary 45 degrees shift to match snapzones
+		if ((cmd.forwardmove != 0 && cmd.rightmove != 0) || (cmd.forwardmove == 0 && cmd.rightmove == 0))
+		{
+			yaw += 45;
+			opt += 45;
+		}
+
+		// snapzones only cover (a bit more than) one fourth of all viewangles, therefore crop yaw and opt to [0,90)
+		yaw = std::fmod(AngleNormalize360(yaw), 90);
+		opt = std::fmod(AngleNormalize360(opt), 90);
+
+		// get snapzone index which corresponds to the *next* snapzone
+		int i = 0;
+		// linear search is good enough here as snapCount is always relatively small
+		while (i < snapCount && opt >= snapZones[i])
+		{
+			++i;
+		}
+
+		// adjust snapzone index for rightStrafe
+		if (rightStrafe)
+		{
+			i = (i == 0 ? snapCount : i - 1);
+		}
+
+		// get the snapzone
+		const float& snap = snapZones[i];
+		// snap now contains the yaw value corresponding to the start of the next snapzone,
+		// or equivalently the end of the current snapzone
+
+		// return true if yaw is between opt angle and end of the current snapzone
+		// also account for jumps at the boundary (e.g. 100 and 10 both have to be valid)
+		if (rightStrafe)
+		{
+			if (yaw < opt && yaw > snap)
+			{
+				return true;
+			}
+			// this is awkward because can not check for yaw >= 0 since that is always true
+			if (snap > 90 && (yaw > 90 - std::fmod(snap, 90) || yaw < opt))
+			{
+				return true;
+			}
+		}
+		else
+		{
+			if (yaw > opt && yaw < snap)
+			{
+				return true;
+			}
+			if (snap > 90 && yaw < std::fmod(snap, 90))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

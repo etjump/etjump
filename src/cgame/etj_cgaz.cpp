@@ -23,7 +23,7 @@ namespace ETJump
 
 	static float update_d_max_cos(state_t const& state, float d_opt)
 	{
-		float const num = state.v - state.vf;
+		float const num       = state.v - state.vf;
 		float       d_max_cos = num >= state.a ? 0 : acosf(num / state.a);
 		if (d_max_cos < d_opt)
 		{
@@ -53,7 +53,7 @@ namespace ETJump
 		return d_max;
 	}
 
-	static usercmd_t getUsercmd(playerState_t const& pm_ps, int8_t ucmdScale)
+	usercmd_t getUsercmd(const playerState_t& pm_ps, int8_t ucmdScale)
 	{
 		usercmd_t cmd;
 		if (!cg.demoPlayback && !(pm_ps.pm_flags & PMF_FOLLOW))
@@ -74,9 +74,9 @@ namespace ETJump
 		return cmd;
 	}
 
-	static void PM_CalcFriction(playerState_t* ps, vec3_t& vel, float& accel)
+	void PM_CalcFriction(const playerState_t& ps, vec3_t& vel, float& accel)
 	{
-		VectorCopy(ps->velocity, vel);
+		VectorCopy(ps.velocity, vel);
 		// for a simplicity water, ladder etc. calculations are omitted
 		// only air, ground and ice movement is important
 		if (cg_pmove.walking && !(cg_pmove.groundTrace.surfaceFlags & SURF_SLICK))
@@ -90,10 +90,10 @@ namespace ETJump
 				drop = 0;
 
 				// if getting knocked back, no friction
-				if (!(ps->pm_flags & PMF_TIME_KNOCKBACK))
+				if (!(ps.pm_flags & PMF_TIME_KNOCKBACK))
 				{
 					control = speed < pm_stopspeed ? pm_stopspeed : speed;
-					drop += control * pm_friction * pmove_msec.integer / 1000;
+					drop   += control * pm_friction * pmove_msec.integer / 1000;
 				}
 				newspeed = speed - drop;
 				if (newspeed < 0)
@@ -113,14 +113,14 @@ namespace ETJump
 		}
 	}
 
-	static float PM_CalcScale(playerState_t* ps)
+	float PM_CalcScale(const playerState_t& ps)
 	{
 		// based on PM_CmdScale from bg_pmove.c
-		float scale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps->sprintSpeedScale : ps->runSpeedScale;
+		float scale = ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps.sprintSpeedScale : ps.runSpeedScale;
 		return scale;
 	}
 
-	static float PM_CalcScaleAlt(playerState_t const& pm_ps, usercmd_t const& cmd)
+	float PM_CalcScaleAlt(const playerState_t& pm_ps, usercmd_t const& cmd)
 	{
 		int32_t max = abs(cmd.forwardmove);
 		if (abs(cmd.rightmove) > max)
@@ -147,15 +147,15 @@ namespace ETJump
 
 	void DrawCGazHUD(void)
 	{
-		float         vel_angle; // absolute velocity angle
-		float         vel_relang; // relative velocity angle to viewangles[1]
+		float         vel_angle;     // absolute velocity angle
+		float         vel_relang;     // relative velocity angle to viewangles[1]
 		vec_t         vel_size;
 		vec4_t        color;
 		float         per_angle;
-		float         ang; // only for drawing
+		float         ang;     // only for drawing
 		float         a;
 		float         y, h, w;
-		playerState_t* ps;
+		playerState_t *ps;
 		int           right = 0, forward = 0;
 		int           scx = SCREEN_CENTER_X - 1, scy = SCREEN_CENTER_Y - 1;
 		vec4_t        color1, color2;
@@ -177,20 +177,20 @@ namespace ETJump
 			return;
 		}
 
-		a = Numeric::clamp(etj_CGazAlpha.value, 0.0f, 1.0f);
+		a        = Numeric::clamp(etj_CGazAlpha.value, 0.0f, 1.0f);
 		color[3] = a;
-		y = etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0;
-		h = etj_CGazHeight.integer > 0 ? etj_CGazHeight.integer : 0;
-		w = etj_CGazWidth.integer > 0 ? etj_CGazWidth.integer : 0;
+		y        = etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0;
+		h        = etj_CGazHeight.integer > 0 ? etj_CGazHeight.integer : 0;
+		w        = etj_CGazWidth.integer > 0 ? etj_CGazWidth.integer : 0;
 
 		vec3_t vel;
 		float  accel;
-		PM_CalcFriction(ps, vel, accel);
+		PM_CalcFriction(*ps, vel, accel);
 
 		vel_size = sqrt(vel[0] * vel[0] + vel[1] * vel[1]);
-		accel = accel * ps->speed * pmove_msec.integer / 1000;
+		accel    = accel * ps->speed * pmove_msec.integer / 1000;
 
-		float scale = PM_CalcScale(ps);
+		float scale = PM_CalcScale(*ps);
 
 		per_angle = (ps->speed - accel) / vel_size * scale;
 		if (per_angle < 1)
@@ -201,7 +201,7 @@ namespace ETJump
 		{
 			per_angle = ps->viewangles[YAW];
 		}
-		vel_angle = AngleNormalize180(RAD2DEG(atan2(vel[1], vel[0])));
+		vel_angle  = AngleNormalize180(RAD2DEG(atan2(vel[1], vel[0])));
 		vel_relang = AngleNormalize180(ps->viewangles[YAW] - vel_angle);
 
 		// parse usercmd
@@ -285,7 +285,7 @@ namespace ETJump
 			}
 
 			vel_relang = DEG2RAD(vel_relang);
-			per_angle = DEG2RAD(per_angle);
+			per_angle  = DEG2RAD(per_angle);
 
 			DrawLine(scx, scy, scx + right, scy - forward, color2);
 
@@ -433,7 +433,7 @@ namespace ETJump
 			}
 
 			int8_t const ucmdScale = 127;
-			usercmd_t cmd = getUsercmd(*ps, ucmdScale);
+			usercmd_t    cmd       = getUsercmd(*ps, ucmdScale);
 
 			// Use default key combination when no user input
 			if (!cmd.forwardmove && !cmd.rightmove)
@@ -451,13 +451,13 @@ namespace ETJump
 			AngleVectors(ps->viewangles, forward, right, up);
 
 			//
-			PM_CalcFriction(ps, vel, accel);
+			PM_CalcFriction(*ps, vel, accel);
 
 			float const scale = PM_CalcScaleAlt(*ps, cmd);
 
 			// project moves down to flat plane
 			forward[2] = 0;
-			right[2] = 0;
+			right[2]   = 0;
 			VectorNormalize(forward);
 			VectorNormalize(right);
 
@@ -471,20 +471,20 @@ namespace ETJump
 			// printf("wishspeed: %.6f\n", wishspeed);
 
 			state_t state;
-			state.v_squared = VectorLengthSquared2(previous_velocity);
+			state.v_squared  = VectorLengthSquared2(previous_velocity);
 			state.vf_squared = VectorLengthSquared2(ps->velocity);
-			state.v_squared = state.vf_squared;
+			state.v_squared  = state.vf_squared;
 
 			state.wishspeed = wishspeed;
-			state.a = accel * state.wishspeed * pmove_msec.integer / 1000.f;
+			state.a         = accel * state.wishspeed * pmove_msec.integer / 1000.f;
 			state.a_squared = state.a * state.a;
-			state.v = sqrtf(state.v_squared);
-			state.vf = sqrtf(state.vf_squared);
+			state.v         = sqrtf(state.v_squared);
+			state.vf        = sqrtf(state.vf_squared);
 
-			float const d_min = update_d_min(state);
-			float const d_opt = update_d_opt(state);
+			float const d_min     = update_d_min(state);
+			float const d_opt     = update_d_opt(state);
 			float const d_max_cos = update_d_max_cos(state, d_opt);
-			float const d_max = update_d_max(state, d_max_cos);
+			float const d_max     = update_d_max(state, d_max_cos);
 			// if (d_min > d_opt || d_opt > d_max_cos || d_max_cos > d_max)
 			// {
 			// 	printf("%.6f <= %.6f <= %.6f <= %.6f\n", d_min, d_opt, d_max_cos, d_max);
@@ -495,7 +495,7 @@ namespace ETJump
 
 			float const yaw = atan2f(wishvel[1], wishvel[0]) - d_vel;
 
-			float fov; 
+			float fov;
 			if (!etj_CGaz5Fov.value)
 			{
 				fov = cg.refdef.fov_x;
@@ -536,5 +536,131 @@ namespace ETJump
 				CG_FillAngleYaw_Ext(-d_max, -d_max_cos, yaw, y, h, fov, color);
 			}
 		}
+	}
+
+	bool strafingForwards(const playerState_t& ps)
+	{
+		// "forwards" means player viewangles naturally match keys pressed, i.e. looking
+		// ahead with +forward and looking backwards with +back, except for nobeat:
+		// looking to the left with +forward only and looking to the right with +back only
+
+		// get player speed
+		const float speed = VectorLength2(ps.velocity);
+
+		// get sprint scale
+		const float scale = PM_CalcScale(ps);
+
+		// get usercmd
+		constexpr int8_t ucmdScale = 127;
+		const usercmd_t  cmd       = getUsercmd(ps, ucmdScale);
+
+		// not strafing if speed lower than ground speed or no user input
+		if (speed < ps.speed * scale || (cmd.forwardmove == 0 && cmd.rightmove == 0))
+		{
+			return false;
+		}
+
+		// get wishvel
+		vec3_t forward, right, up;
+		AngleVectors(ps.viewangles, forward, right, up);
+		forward[2] = right[2] = 0;
+		VectorNormalize(forward);
+		VectorNormalize(right);
+		vec2_t wishvel;
+		for (uint8_t i = 0; i < 2; ++i)
+		{
+			wishvel[i] = cmd.forwardmove * forward[i] + cmd.rightmove * right[i];
+		}
+
+		// get angle between wishvel and player velocity
+		const float wishvelAngle = RAD2DEG(std::atan2(wishvel[1], wishvel[0]));
+		const float velAngle     = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
+		const float diffAngle    = AngleDelta(wishvelAngle, velAngle);
+
+		// return true if diffAngle matches notion of "forwards"
+		if (cmd.rightmove < 0)
+		{
+			// fullbeat / halfbeat / invert (holding +moveleft)
+			if (diffAngle >= 0)
+			{
+				return true;
+			}
+		}
+		else if (cmd.rightmove > 0)
+		{
+			// fullbeat / halfbeat / invert (holding +moveright)
+			if (diffAngle < 0)
+			{
+				return true;
+			}
+		}
+		else if (cmd.forwardmove != 0)
+		{
+			// nobeat
+			if (diffAngle >= 0)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	float getOptAngle(const playerState_t& ps)
+	{
+		// get player speed
+		const float speed = VectorLength2(ps.velocity);
+
+		// get sprint scale
+		const float scale = PM_CalcScale(ps);
+
+		// get usercmd
+		constexpr int8_t ucmdScale = 127;
+		const usercmd_t  cmd       = getUsercmd(ps, ucmdScale);
+
+		// no meaningful value if speed lower than ground speed or no user input
+		if (speed < ps.speed * scale || (cmd.forwardmove == 0 && cmd.rightmove == 0))
+		{
+			return 0;
+		}
+
+		// get player yaw
+		const float& yaw = ps.viewangles[YAW];
+
+		// determine whether strafing "forwards"
+		const bool forwards = strafingForwards(ps);
+
+		// get accel defined by physics
+		const float accel = ps.speed / 1000.0f * pmove_msec.integer;
+
+		// get variables associated with optimal angle
+		const float velAngle   = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
+		const float accelAngle = RAD2DEG(std::atan2(-cmd.rightmove, cmd.forwardmove));
+		float       perAngle   = RAD2DEG(std::acos((ps.speed - accel) / speed * scale));
+		if (!forwards)
+		{
+			perAngle *= -1;
+		}
+
+		// shift yaw to optimal angle for all strafe styles
+		float opt = yaw;
+		if (cmd.rightmove < 0)
+		{
+			// fullbeat / halfbeat / invert (holding +moveleft)
+			opt -= AngleDelta(yaw + accelAngle, velAngle + perAngle);
+		}
+		else if (cmd.rightmove > 0)
+		{
+			// fullbeat / halfbeat / invert (holding +moveright)
+			opt -= AngleDelta(yaw + accelAngle, velAngle - perAngle);
+		}
+		else if (cmd.forwardmove != 0)
+		{
+			// nobeat
+			opt = velAngle + perAngle;
+		}
+
+		// return minimum angle for which you still gain the highest accel
+		return AngleNormalize180(opt);
 	}
 }
