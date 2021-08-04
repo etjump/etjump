@@ -33,8 +33,8 @@ function(create_compiler_opts target)
 			-ffast-math>       # fast floating point math
 		$<$<CONFIG:Debug>:
 			-Og                # supress optimizations
-			-g                 # generate debug info
-			-ggdb>)            # generate ggdb friendly debug info
+			-g3                # generate debug info
+			-ggdb3>)           # generate gdb friendly debug info
 
 	# MSVC flags
 	set(MSVC_LINK_FLAGS 
