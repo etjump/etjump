@@ -2549,6 +2549,7 @@ void CG_Player(centity_t *cent)
 				{
 					continue;
 				}
+				// fall through
 			case ACC_MOUTH2:            // hat2
 			case ACC_MOUTH3:            // hat3
 

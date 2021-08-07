@@ -3196,6 +3196,7 @@ qboolean BG_CanUseWeapon(int classNum, int teamNum, weapon_t weapon)
 		{
 			return (teamNum == TEAM_ALLIES) ? qtrue : qfalse;
 		}
+		break;
 	case PC_FIELDOPS:
 		// TAT 1/11/2003 - in SP, field op can only use handgun, check after switch below
 		if (isSinglePlayer && teamNum == TEAM_ALLIES)
@@ -5439,16 +5440,19 @@ int BG_simpleHintsCollapse(int hint, int val)
 		{
 			return(0);
 		}
+		break;
 	case HINT_BUILD:
 		if (val > 0)
 		{
 			return(1);
 		}
+		break;
 	case HINT_BREAKABLE:
 		if (val == 0)
 		{
 			return(1);
 		}
+		break;
 	case HINT_DOOR_ROTATING:
 	case HINT_BUTTON:
 	case HINT_MG42:
@@ -5456,11 +5460,15 @@ int BG_simpleHintsCollapse(int hint, int val)
 		{
 			return(2);
 		}
+		break;
 	case HINT_BREAKABLE_DYNAMITE:
 		if (val == 0)
 		{
 			return(3);
 		}
+		break;
+	default:
+		break;
 	}
 
 	return(0);
