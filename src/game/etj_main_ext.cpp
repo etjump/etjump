@@ -160,8 +160,15 @@ void OnGameShutdown()
 	WriteSessionData();
 //    ETJump::database->ExecuteQueuedOperations();
 	ETJump::database->CloseDatabase();
-	game.mapStatistics->saveChanges();
-	game.tokens->reset();
+	// these may be null, e.g. when G_Alloc fails
+	if (game.mapStatistics != nullptr)
+	{
+		game.mapStatistics->saveChanges();
+	}
+	if (game.tokens != nullptr)
+	{
+		game.tokens->reset();
+	}
 
 	game.levels = nullptr;
 	game.commands = nullptr;
