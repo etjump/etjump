@@ -136,7 +136,22 @@ std::string Timerun::createCompletionMessage(clientInfo_t& player, std::string& 
 	if (previousTime != NO_PREVIOUS_RECORD)
 	{
 		Time diff = createTimeFromTimestamp(abs(previousTime - completionTime));
-		std::string timeDir = (previousTime > completionTime) ?  "-^2" : "+^1";
+		std::string timeDir;
+		if (previousTime > completionTime)
+		{
+			// faster
+			timeDir = "-^2";
+		}
+		else if (previousTime < completionTime)
+		{
+			// slower
+			timeDir = "+^1";
+		}
+		else
+		{
+			// tied
+			timeDir = "+^7";
+		}
 		timeDifference = ETJump::stringFormat("^7(%s%s^7)", timeDir, createTimeString(diff));
 		postfix = (previousTime > completionTime) ? '!' : '.';
 	}
