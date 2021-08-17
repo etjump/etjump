@@ -3512,10 +3512,20 @@ Will perform callbacks to make the loading info screen update.
 // if it exists.
 void CG_AutoExec_f()
 {
-	char buffer[MAX_QPATH] = "cmd exec \"autoexec_";
-	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
-	Q_strcat(buffer, sizeof(buffer), "\"");
-	trap_SendConsoleCommand(buffer);
+	int len;
+	fileHandle_t f;
+	std::string str = cgs.rawmapname;
+
+	str = "autoexec_" + str + ".cfg";
+	len = trap_FS_FOpenFile(str.c_str(), &f, FS_READ);
+	if (len <= 0)
+	{
+		// no autoexec_mapname.cfg file found
+		return;
+	}
+
+	str = "exec \"" + str + "\"\n";
+	trap_SendConsoleCommand(str.c_str());
 }
 
 void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qboolean demoPlayback)
