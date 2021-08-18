@@ -1260,7 +1260,7 @@ bool Map(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	trap_SendConsoleCommand(EXEC_APPEND, va("map %s", argv->at(1).c_str()));
+	trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", argv->at(1).c_str()));
 	return true;
 }
 
