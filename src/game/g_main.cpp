@@ -1729,11 +1729,11 @@ void G_ExecMapSpecificConfig()
 	len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
 	if (len <= 0)
 	{
-		trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg");
+		trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
 	}
 	else
 	{
-		trap_SendConsoleCommand(EXEC_APPEND, va("exec autoexec_%s.cfg", level.rawmapname));
+		trap_SendConsoleCommand(EXEC_APPEND, va("exec autoexec_%s.cfg\n", level.rawmapname));
 	}
 }
 

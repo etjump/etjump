@@ -1182,11 +1182,11 @@ void CG_UpdateCvars(void)
 				}
 				else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string)
 				{
-					trap_SendConsoleCommand(va("rconAuth %s", cg_rconPassword.string));
+					trap_SendConsoleCommand(va("rconAuth %s\n", cg_rconPassword.string));
 				}
 				else if (cv->vmCvar == &cg_refereePassword && *cg_refereePassword.string)
 				{
-					trap_SendConsoleCommand(va("ref %s", cg_refereePassword.string));
+					trap_SendConsoleCommand(va("ref %s\n", cg_refereePassword.string));
 				}
 				else if (cv->vmCvar == &demo_infoWindow)
 				{
