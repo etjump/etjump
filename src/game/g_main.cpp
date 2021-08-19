@@ -1724,16 +1724,22 @@ void G_wipeCvars(void)
 
 void G_ExecMapSpecificConfig()
 {
-	int          len = 0;
-	fileHandle_t f   = 0;
+	int len;
+	fileHandle_t f;
+
 	len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
-	if (len <= 0)
+	if (len > 0)
 	{
-		trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
-	}
-	else
-	{
+		// autoexec_mapname.cfg file found
 		trap_SendConsoleCommand(EXEC_APPEND, va("exec autoexec_%s.cfg\n", level.rawmapname));
+		return;
+	}
+
+	len = trap_FS_FOpenFile("autoexec_default.cfg", &f, FS_READ);
+	if (len > 0)
+	{
+		// autoexec_default.cfg file found
+		trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
 	}
 }
 
