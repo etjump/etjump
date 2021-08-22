@@ -25,8 +25,9 @@ function(create_compiler_opts target)
 		-fPIC
 		-fvisibility=hidden
 		-fdiagnostics-color=always
-		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall>
-		-Wno-comment
+		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall -Wextra -Wpedantic>
+		-Wno-unused-parameter
+		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
 			-O3                # max optimization 

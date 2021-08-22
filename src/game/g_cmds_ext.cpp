@@ -51,7 +51,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "speclist",       qtrue,  qtrue,  Cmd_SpecList_f,        ":^7Lists specinvited players"                                                               },
 	{ "statsall",       qtrue,  qfalse, G_statsall_cmd,        ":^7 Shows weapon accuracy stats for all players"                                            },
 	{ "statsdump",      qtrue,  qtrue,  NULL,                  ":^7 Shows player stats + match info saved locally to a file"                                },
-	{ "team",           qtrue,  qtrue,  (void (*)(gentity_t *, unsigned int, qboolean))Cmd_Team_f, " <b|r|s|none>:^7 Joins a team (b = allies, r = axis, s = spectator)"},
+	{ "team",           qtrue,  qtrue,  Cmd_Team2_f, " <b|r|s|none>:^7 Joins a team (b = allies, r = axis, s = spectator)"},
 	{ "topshots",       qtrue,  qtrue,  G_weaponRankings_cmd,  ":^7 Shows BEST player for each weapon. Add ^3<weapon_ID>^7 to show all stats for a weapon"  },
 	{ "unready",        qtrue,  qfalse, G_ready_cmd,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
 	{ "weaponstats",    qtrue,  qfalse, G_weaponStats_cmd,     " [player_ID]:^7 Shows weapon accuracy stats for a player"                                   },

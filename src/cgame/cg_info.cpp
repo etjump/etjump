@@ -182,6 +182,7 @@ void CG_DemoClick(int key, qboolean down)
 			CG_RunBinding(key, down);
 			return;
 		}
+		// fall through
 	case K_CTRL:
 	case K_MOUSE4:
 		cgs.fResize = down;
@@ -295,6 +296,7 @@ void CG_DemoClick(int key, qboolean down)
 			CG_RunBinding(key, down);
 			return;
 		}
+		// fall through
 	case K_ESCAPE:
 		if (!down)
 		{
@@ -362,6 +364,7 @@ void CG_DemoClick(int key, qboolean down)
 			}
 			return;
 		}       // Roll over into timescale changes
+		// fall through
 	case K_KP_LEFTARROW:
 		if (!down && cg_timescale.value > 0.1f)
 		{
@@ -385,6 +388,7 @@ void CG_DemoClick(int key, qboolean down)
 			}
 			return;
 		}       // Roll over into timescale changes
+		// fall through
 	case K_KP_RIGHTARROW:
 		if (!down)
 		{

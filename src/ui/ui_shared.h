@@ -523,7 +523,7 @@ qboolean PC_Char_Parse(int handle, char *out);              // NERVE - SMF
 namespace ETJump
 {
 	bool PC_hasFloat(int handle);
-};
+}
 int Menu_Count();
 menuDef_t *Menu_Get(int handle);
 void Menu_New(int handle);

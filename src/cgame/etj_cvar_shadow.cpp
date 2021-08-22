@@ -34,7 +34,7 @@ CvarShadow::CvarShadow(const vmCvar_t *shadow, std::string target): _shadow(shad
 	{
 		forceCvarSet(cvar);
 	});
-};
+}
 
 CvarShadow::~CvarShadow() {}
 

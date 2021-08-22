@@ -1675,6 +1675,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		{
 			break;
 		}
+		// fall through
 	case EV_FOOTSTEP:
 		DEBUGNAME("EV_FOOTSTEP");
 		if (es->eventParm != FOOTSTEP_TOTAL)
@@ -2476,6 +2477,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		{
 			break;
 		}
+		// fall through
 	case EV_GENERAL_SOUND_VOLUME:
 	{
 		int sound  = es->eventParm;
@@ -2515,6 +2517,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		{
 			break;
 		}
+		// fall through
 	case EV_GLOBAL_SOUND:   // play from the player's head so it never diminishes
 		DEBUGNAME("EV_GLOBAL_SOUND");
 		// Ridah, check for a sound script

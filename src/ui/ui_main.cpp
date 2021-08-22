@@ -8089,16 +8089,8 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 							return uiInfo.gameTypes[i].gameTypeShort;
 						}
 					}
-
-					if (i == uiInfo.numGameTypes)
-					{
-						return "???";
-					}
 				}
-				else
-				{
-					return "???";
-				}
+				return "???";
 			case SORT_PING:
 				//if (ping < 0) {
 				if (ping <= 0)

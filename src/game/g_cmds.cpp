@@ -1926,6 +1926,12 @@ void Cmd_Team_f(gentity_t *ent)
 	}
 }
 
+// wrapper for Cmd_Team_f
+void Cmd_Team2_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
+{
+	Cmd_Team_f(ent);
+}
+
 void Cmd_ResetSetup_f(gentity_t *ent)
 {
 	qboolean changed = qfalse;

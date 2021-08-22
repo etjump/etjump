@@ -1770,7 +1770,7 @@ void ClientUserinfoChanged(int clientNum)
 	// TODO: Check for hardware info spoofing
 
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
-	sscanf(s, "%i %i %i %i %f %i",
+	sscanf(s, "%u %u %u %u %f %i",
 	       &client->pers.clientFlags,
 	       &client->pers.clientTimeNudge,
 	       &client->pers.clientMaxPackets,
