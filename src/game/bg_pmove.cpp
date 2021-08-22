@@ -735,14 +735,6 @@ static float PM_CmdScaleAlt(usercmd_t* cmd)
 	float total;
 	float scale;
 
-#ifdef CGAMEDLL
-	int gametype = cg_gameType.integer;
-	int movespeed = cg_movespeed.integer;
-#elif GAMEDLL
-	int gametype = g_gametype.integer;
-	int movespeed = g_movespeed.integer;
-#endif
-
 	max = abs(cmd->forwardmove);
 	if (abs(cmd->rightmove) > max)
 	{
