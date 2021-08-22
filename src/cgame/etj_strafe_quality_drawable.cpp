@@ -28,8 +28,10 @@
 #include "etj_utilities.h"
 #include "etj_snaphud.h"
 #include "etj_cgaz.h"
+#include "etj_pmove_utils.h"
 
-namespace ETJump {
+namespace ETJump
+{
 	StrafeQuality::StrafeQuality()
 	{
 		parseColor();
@@ -65,11 +67,16 @@ namespace ETJump {
 	void StrafeQuality::beforeRender()
 	{
 		// get player state
-		const playerState_t &ps = *getValidPlayerState();
+		const playerState_t& ps = *getValidPlayerState();
 
 		// get usercmd
-		constexpr int8_t ucmdScale = 127;
-		const usercmd_t  cmd       = getUsercmd(ps, ucmdScale);
+		// cmdScale is only checked here to be 0 or !0
+		// so we can just use CMDSCALE_DEFAULT
+		const int8_t ucmdScale     = CMDSCALE_DEFAULT;
+		const usercmd_t  cmd       = PmoveUtils::getUserCmd(ps, ucmdScale);
+		
+		// get correct pmove
+		pm = PmoveUtils::getPmove(cmd);
 
 		// update team
 		if (_team != ps.persistant[PERS_TEAM])
@@ -89,7 +96,7 @@ namespace ETJump {
 
 		// don't count frames if not in air and not on ice
 		if (ps.groundEntityNum != ENTITYNUM_NONE &&
-				!(cg_pmove.groundTrace.surfaceFlags & SURF_SLICK))
+				!(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK))
 		{
 			return;
 		}
@@ -99,8 +106,7 @@ namespace ETJump {
 
 		// check whether user input is good
 		const float speed = VectorLength2(ps.velocity);
-		const float scale = PM_CalcScale(ps);
-		if (speed < ps.speed * scale)
+		if (speed < pm->pmext->wishspeed)
 		{
 			// possibly good frame under ground speed if speed increased
 			// note that without speed increased you could go forward in a
@@ -123,7 +129,7 @@ namespace ETJump {
 		else
 		{
 			// good frame above ground speed if no upmove and in main accel zone
-			if (cmd.upmove == 0 && inMainAccelZone(ps))
+			if (cmd.upmove == 0 && Snaphud::inMainAccelZone(ps, pm))
 			{
 				++_goodFrames;
 			}

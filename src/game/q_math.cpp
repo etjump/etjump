@@ -715,6 +715,18 @@ float AngleNormalize180(float angle)
 	return angle;
 }
 
+/*
+================
+AngleNormalize65536
+
+Returns shortangle normalized to the range [0 <= shortangle < 65536]
+================
+*/
+int AngleNormalize65536(int angle)
+{
+	return angle & 65535;
+}
+
 
 /*
 =================

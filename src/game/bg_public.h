@@ -553,6 +553,24 @@ typedef struct
 	qboolean releasedFire;
 	float noclipScale;
 	bool isJumpLand;
+
+	// ETJump: exported values from pmove_t & pml_t for cgame drawing
+	int tracemask;
+	qboolean walking;
+	qboolean groundPlane;
+	trace_t groundTrace;
+	int waterlevel;
+	vec3_t mins, maxs;
+
+	vec3_t previous_velocity;
+	vec3_t forward, right, up;
+	float frametime;
+	qboolean ladder;
+
+	float wishspeed;
+	float wishspeedAlt;		// wishspeed without upmove component
+	float accel;
+	vec3_t wishvel;
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
 
@@ -624,6 +642,10 @@ typedef struct
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles(playerState_t * ps, pmoveExt_t * pmext, usercmd_t * cmd, void(trace)(trace_t * results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask), int tracemask);
 int Pmove(pmove_t *pmove);
+void PmoveSingle(pmove_t* pmove);
+
+constexpr int CMDSCALE_DEFAULT = 127;
+constexpr int CMDSCALE_WALK = 64;
 
 //===================================================================================
 

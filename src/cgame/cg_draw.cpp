@@ -5696,13 +5696,6 @@ static void CG_Draw2D(void)
 			CG_DrawLagometer();
 			CG_DrawFollow();
 			ETJump::DrawJumpSpeeds();
-			ETJump::DrawCGazHUD();
-			ETJump::DrawSnapHUD();
-			if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
-			{
-				CG_DrawCrosshair();
-				CG_DrawCrosshairNames();
-			}
 			CG_DrawOB();
 			CG_DrawSlick();
 			CG_DrawJumpDelay();
@@ -5743,6 +5736,12 @@ static void CG_Draw2D(void)
 			r->beforeRender();
 			r->render();
 		}
+	}
+
+	if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
+	{
+		CG_DrawCrosshair();
+		CG_DrawCrosshairNames();
 	}
 
 	// Info overlays

@@ -4,10 +4,10 @@
 #define WINDOW_WIDTH 608
 #define WINDOW_HEIGHT 448
 #define SUBW_HUD_Y 32
-#define SUBW_GUN_Y 224
-#define SUBW_KEYS_Y 320
+#define SUBW_GUN_Y 232
+#define SUBW_KEYS_Y 324
 #define SUBW_CGAZ_Y 32
-#define SUBW_POPUPS_Y 224
+#define SUBW_POPUPS_Y 208
 #define GROUP_NAME "group_etjump_settings_2"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
@@ -24,7 +24,7 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 184, "HUD")
+    SUBWINDOW(8, 32, 292, 190, "HUD")
         YESNO				(16, SUBW_HUD_Y + 20, 276, 8, "FPS:", 0.2, 8, "cg_drawFPS", "Draw FPS\ncg_drawFPS")
         MULTI				(16, SUBW_HUD_Y + 32, 276, 8, "Clock:", 0.2, 8, "etj_drawClock", cvarFloatList { "No" 0 "24h" 1 "12h" 2 }, "Draw local clock\netj_drawClock")
         YESNO				(16, SUBW_HUD_Y + 44, 276, 8, "Connection issues:", 0.2, 8, "etj_drawConnectionIssues", "Draw connection interrupted message with high ping\netj_drawConnectionIssues")
@@ -40,8 +40,9 @@ menuDef {
         SLIDER				(16, SUBW_HUD_Y + 152, 276, 8, "Lagometer X:", 0.2, 8, etj_lagometerX 0 -640 640 10, "Sets X offset for lagometer\netj_lagometerX")
         CVARINTLABEL		(16, SUBW_HUD_Y + 164, 276, 8, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_HUD_Y + 164, 276, 8, "Lagometer Y:", 0.2, 8, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
+        MULTI				(16, SUBW_HUD_Y + 176, 276, 8, "Projection:", 0.2, 8, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
 
-    SUBWINDOW(8, 224, 292, 88, "GUN")
+    SUBWINDOW(8, 232, 292, 82, "GUN")
         YESNO				(16, SUBW_GUN_Y + 20, 276, 8, "Gun:", 0.2, 8, "cg_drawGun", "Draw gun\ncg_drawGun")
         CVARFLOATLABEL		(16, SUBW_GUN_Y + 32, 276, 8, "cg_gunX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_GUN_Y + 32, 276, 8, "Gun X:", 0.2, 8, cg_gunX 0 -30 30 0.5, "Sets X position of gun\ncg_gunx")
@@ -51,7 +52,7 @@ menuDef {
         SLIDER				(16, SUBW_GUN_Y + 56, 276, 8, "Gun Z:", 0.2, 8, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
         YESNO				(16, SUBW_GUN_Y + 68, 276, 8, "Gun sway:", 0.2, 8, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
 
-    SUBWINDOW(8, 320, 292, 100, "KEYS")
+    SUBWINDOW(8, 324, 292, 94, "KEYS")
         MULTI				(16, SUBW_KEYS_Y + 20, 276, 8, "Pressed keys:", 0.2, 8, "etj_drawKeys", cvarFloatList { "No" 0 "ETJump 1" 1 "DeFRaG default" 2 "ETJump 2" 3 "ETJump 3" 4 "ETJump 4" 5 }, "Draw pressed keys\netj_drawKeys")
         CVARINTLABEL		(16, SUBW_KEYS_Y + 32, 276, 8, "etj_keysX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_KEYS_Y + 32, 276, 8, "Keys X:", 0.2, 8, etj_keysX 610 0 640 10, "Sets X position of pressed keys\netj_keysX")
@@ -62,27 +63,24 @@ menuDef {
         MULTI				(16, SUBW_KEYS_Y + 68, 276, 8, "Keys color:", 0.2, 8, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of pressed keys\netj_keysColor")
         YESNO				(16, SUBW_KEYS_Y + 80, 276, 8, "Keys shadow:", 0.2, 8, "etj_keysShadow", "Draw shadow on pressed keys\netj_keysShadow")
 
-    SUBWINDOW(308, 32, 292, 184, "CGAZ")
-        MULTI				(316, SUBW_CGAZ_Y + 20, 276, 8, "CGaz:", 0.2, 8, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 "CGaz 3" 3 "CGaz 4" 4 "CGaz 5" 5 }, "Draw CGaz HUD\netj_drawCGaz")
-        CVARFLOATLABEL		(316, SUBW_CGAZ_Y + 32, 276, 8, "etj_CGazAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 32, 276, 8, "CGaz alpha:", 0.2, 8, etj_CGazAlpha 1 0 1 0.05, "Sets transparency of CGaz (excl. CGaz 2)\netj_CGazAlpha")
-        MULTI				(316, SUBW_CGAZ_Y + 44, 276, 8, "CGaz 2 color 1:", 0.2, 8, "etj_CGazColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of CGaz 2\netj_CGazColor1")
-        MULTI				(316, SUBW_CGAZ_Y + 56, 276, 8, "CGaz 2 color 2:", 0.2, 8, "etj_CGazColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of CGaz 2\netj_CGazColor2")
-        MULTI				(316, SUBW_CGAZ_Y + 68, 276, 8, "CGaz 5 color 1:", 0.2, 8, "etj_CGaz5Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets no accel zone color of CGaz 5\netj_CGaz5Color1")
-        MULTI				(316, SUBW_CGAZ_Y + 80, 276, 8, "CGaz 5 color 2:", 0.2, 8, "etj_CGaz5Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets min angle color of CGaz 5\netj_CGaz5Color2")
-        MULTI				(316, SUBW_CGAZ_Y + 92, 276, 8, "CGaz 5 color 3:", 0.2, 8, "etj_CGaz5Color3", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets accel zone color of CGaz 5\netj_CGaz5Color3")
-        MULTI				(316, SUBW_CGAZ_Y + 104, 276, 8, "CGaz 5 color 4:", 0.2, 8, "etj_CGaz5Color4", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets max angle color of CGaz 5\netj_CGaz5Color4")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 116, 276, 8, "etj_CGazWidth", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 116, 276, 8, "CGaz width:", 0.2, 8, etj_CGazWidth 300 1 640 10, "Sets width of CGaz (excl. CGaz 2 & 5)\netj_CGazWidth")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 128, 276, 8, "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 128, 276, 8, "CGaz height:", 0.2, 8, etj_CGazHeight 20 1 100 1, "Sets height of CGaz (excl. CGaz 2)\netj_CGazHeight")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 140, 276, 8, "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 140, 276, 8, "CGaz Y position:", 0.2, 8, etj_CGazY 260 0 480 10, "Sets Y position of CGaz (excl. CGaz 2)\netj_CGazY")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 152, 276, 8, "etj_CGaz5Fov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 152, 276, 8, "CGaz 5 FOV:", 0.2, 8, etj_CGaz5Fov 0 0 180 5, "Sets FOV of CGaz 5, 0 to use your current FOV\netj_CGaz5Fov")
-        YESNO				(316, SUBW_CGAZ_Y + 164, 276, 8, "Stretch CGaz:", 0.2, 8, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
+    SUBWINDOW(308, 32, 292, 166, "CGAZ")
+        MULTI				(316, SUBW_CGAZ_Y + 20, 276, 8, "CGaz:", 0.2, 8, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 }, "Draw CGaz HUD\netj_drawCGaz")
+        MULTI				(316, SUBW_CGAZ_Y + 32, 276, 8, "CGaz 1 color 1:", 0.2, 8, "etj_CGaz1Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
+        MULTI				(316, SUBW_CGAZ_Y + 44, 276, 8, "CGaz 1 color 2:", 0.2, 8, "etj_CGaz1Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
+        MULTI				(316, SUBW_CGAZ_Y + 56, 276, 8, "CGaz 1 color 3:", 0.2, 8, "etj_CGaz1Color3", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets accel zone color of CGaz 1\netj_CGaz1Color3")
+        MULTI				(316, SUBW_CGAZ_Y + 68, 276, 8, "CGaz 1 color 4:", 0.2, 8, "etj_CGaz1Color4", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets max angle color of CGaz 1\netj_CGaz1Color4")
+        MULTI				(316, SUBW_CGAZ_Y + 80, 276, 8, "CGaz 2 color 1:", 0.2, 8, "etj_CGaz2Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of CGaz 2\netj_CGaz2Color1")
+        MULTI				(316, SUBW_CGAZ_Y + 92, 276, 8, "CGaz 2 color 2:", 0.2, 8, "etj_CGaz2Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of CGaz 2\netj_CGaz2Color2")
+        CVARINTLABEL		(316, SUBW_CGAZ_Y + 104, 276, 8, "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_CGAZ_Y + 104, 276, 8, "CGaz height:", 0.2, 8, etj_CGazHeight 20 1 100 1, "Sets height of CGaz 1\netj_CGazHeight")
+        CVARINTLABEL		(316, SUBW_CGAZ_Y + 116, 276, 8, "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_CGAZ_Y + 116, 276, 8, "CGaz Y position:", 0.2, 8, etj_CGazY 260 0 480 10, "Sets Y position of CGaz 1\netj_CGazY")
+        CVARINTLABEL		(316, SUBW_CGAZ_Y + 128, 276, 8, "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
+        SLIDER				(316, SUBW_CGAZ_Y + 128, 276, 8, "CGaz FOV:", 0.2, 8, etj_CGazFov 0 0 179 5, "Sets FOV of CGaz 1, 0 to use your current FOV\netj_CGazFov")
+        YESNO				(316, SUBW_CGAZ_Y + 140, 276, 8, "Stretch CGaz:", 0.2, 8, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
+        MULTI				(316, SUBW_CGAZ_Y + 152, 276, 8, "CGaz trueness:", 0.2, 8, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 }, "Sets trueness of CGaz\netj_CGazTrueness")
 
-    SUBWINDOW(308, 224, 292, 148, "POPUPS")
+    SUBWINDOW(308, 208, 292, 140, "POPUPS")
         MULTI				(316, SUBW_POPUPS_Y + 20, 276, 8, "Draw popups:", 0.2, 8, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
         CVARINTLABEL		(316, SUBW_POPUPS_Y + 32, 276, 8, "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_POPUPS_Y + 32, 276, 8, "Number of popups:", 0.2, 8, etj_numPopups 5 1 16 1, "How many popup messages to display\netj_numPopups")

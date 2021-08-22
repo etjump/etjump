@@ -722,6 +722,65 @@ static float PM_CmdScale(usercmd_t *cmd)
 	return scale;
 }
 
+/*
+============
+PM_CmdScaleAlt
+
+PM_CmdScale without upmove
+============
+*/
+static float PM_CmdScaleAlt(usercmd_t* cmd)
+{
+	int   max;
+	float total;
+	float scale;
+
+#ifdef CGAMEDLL
+	int gametype = cg_gameType.integer;
+	int movespeed = cg_movespeed.integer;
+#elif GAMEDLL
+	int gametype = g_gametype.integer;
+	int movespeed = g_movespeed.integer;
+#endif
+
+	max = abs(cmd->forwardmove);
+	if (abs(cmd->rightmove) > max)
+	{
+		max = abs(cmd->rightmove);
+	}
+	if (!max)
+	{
+		return 0;
+	}
+
+	total = sqrt(cmd->forwardmove * cmd->forwardmove + cmd->rightmove * cmd->rightmove);
+	scale = (float)pm->ps->speed * max / (127.0 * total);
+
+	if (pm->cmd.buttons & BUTTON_SPRINT && pm->pmext->sprintTime > 50)
+	{
+		scale *= pm->ps->sprintSpeedScale;
+	}
+	else
+	{
+		scale *= pm->ps->runSpeedScale;
+	}
+
+	if (pm->ps->pm_type == PM_NOCLIP)
+	{
+		scale *= 3;
+	}
+
+	if (pm->ps->weapon == WP_FLAMETHROWER)   // trying some different balance for the FT
+	{
+		if (pm->cmd.buttons & BUTTON_ATTACK)
+		{
+			scale *= 0.7;
+		}
+	}
+
+	return scale;
+}
+
 
 /*
 ================
@@ -913,7 +972,7 @@ static qboolean PM_CheckJump(void)
 	}
 
 	// store horizontal speed for CHS 55
-	pm->ps->persistant[PERS_JUMP_SPEED] = sqrt(pm->ps->velocity[0] * pm->ps->velocity[0] + pm->ps->velocity[1] * pm->ps->velocity[1]);
+	pm->ps->persistant[PERS_JUMP_SPEED] = VectorLength2(pm->ps->velocity);
 
 	return qtrue;
 }
@@ -1540,8 +1599,8 @@ static void PM_AirMove(void)
 	vec3_t    wishvel;
 	float     fmove, smove;
 	vec3_t    wishdir;
-	float     wishspeed;
-	float     scale;
+	float     wishspeed, wishspeedAlt;
+	float     scale, scaleAlt;
 	usercmd_t cmd;
 
 	PM_Friction();
@@ -1558,8 +1617,9 @@ static void PM_AirMove(void)
 	}
 	else
 	{
-		cmd   = pm->cmd;
-		scale = PM_CmdScale(&cmd);
+		cmd      = pm->cmd;
+		scale    = PM_CmdScale(&cmd);
+		scaleAlt = PM_CmdScaleAlt(&cmd);
 
 		// Ridah, moved this down, so we use the actual movement direction
 		// set the movementDir so clients can rotate the legs for strafing
@@ -1581,6 +1641,13 @@ static void PM_AirMove(void)
 	VectorCopy(wishvel, wishdir);
 	wishspeed  = VectorNormalize(wishdir);
 	wishspeed *= scale;
+	wishspeedAlt = scaleAlt * VectorLength2(wishvel);
+
+	// ETJump: store wishspeed and accel in pmext
+	pm->pmext->wishspeed = wishspeed;
+	pm->pmext->wishspeedAlt = wishspeedAlt;
+	pm->pmext->accel = pm_airaccelerate;
+	VectorCopy(wishvel, pm->pmext->wishvel);
 
 	// not on ground, so little effect on velocity
 	PM_Accelerate(wishdir, wishspeed, pm_airaccelerate);
@@ -1630,8 +1697,8 @@ static void PM_WalkMove(void)
 	vec3_t    wishvel;
 	float     fmove, smove;
 	vec3_t    wishdir;
-	float     wishspeed;
-	float     scale;
+	float     wishspeed, wishspeedAlt;
+	float     scale, scaleAlt;
 	usercmd_t cmd;
 	float     accelerate;
 	float     vel;
@@ -1698,8 +1765,9 @@ static void PM_WalkMove(void)
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.rightmove;
 
-	cmd   = pm->cmd;
-	scale = PM_CmdScale(&cmd);
+	cmd      = pm->cmd;
+	scale    = PM_CmdScale(&cmd);
+	scaleAlt = PM_CmdScaleAlt(&cmd);
 
 // Ridah, moved this down, so we use the actual movement direction
 	// set the movementDir so clients can rotate the legs for strafing
@@ -1726,13 +1794,19 @@ static void PM_WalkMove(void)
 	VectorCopy(wishvel, wishdir);
 	wishspeed  = VectorNormalize(wishdir);
 	wishspeed *= scale;
-
+	wishspeedAlt = scaleAlt * VectorLength2(wishvel);
+	
 	// clamp the speed lower if prone
 	if (pm->ps->eFlags & EF_PRONE)
 	{
 		if (wishspeed > pm->ps->speed * pm_proneSpeedScale)
 		{
 			wishspeed = pm->ps->speed * pm_proneSpeedScale;
+		}
+
+		if (wishspeedAlt > pm->ps->speed * pm_proneSpeedScale)
+		{
+			wishspeedAlt = pm->ps->speed * pm_proneSpeedScale;
 		}
 	}
 	else if (pm->ps->pm_flags & PMF_DUCKED)       // clamp the speed lower if ducking
@@ -1742,6 +1816,11 @@ static void PM_WalkMove(void)
 		if (wishspeed > pm->ps->speed * pm->ps->crouchSpeedScale)
 		{
 			wishspeed = pm->ps->speed * pm->ps->crouchSpeedScale;
+		}
+
+		if (wishspeedAlt > pm->ps->speed * pm->ps->crouchSpeedScale)
+		{
+			wishspeedAlt = pm->ps->speed * pm->ps->crouchSpeedScale;
 		}
 	}
 
@@ -1764,6 +1843,11 @@ static void PM_WalkMove(void)
 		{
 			wishspeed = pm->ps->speed * waterScale;
 		}
+
+		if (wishspeedAlt > pm->ps->speed * waterScale)
+		{
+			wishspeedAlt = pm->ps->speed * waterScale;
+		}
 	}
 
 	// when a player gets hit, they temporarily lose
@@ -1776,6 +1860,12 @@ static void PM_WalkMove(void)
 	{
 		accelerate = pm_accelerate;
 	}
+
+	// ETJump: store values in pmext
+	pm->pmext->wishspeed = wishspeed;
+	pm->pmext->wishspeedAlt = wishspeedAlt;
+	pm->pmext->accel = accelerate;
+	VectorCopy(wishvel, pm->pmext->wishvel);
 
 	PM_Accelerate(wishdir, wishspeed, accelerate);
 
@@ -2264,8 +2354,6 @@ static void PM_GroundTrace(void)
 	if (trace.fraction == 1.0)
 	{
 		PM_GroundTraceMissed();
-		pm->groundPlane = qfalse;
-		pm->walking     = qfalse;
 		return;
 	}
 
@@ -2336,14 +2424,14 @@ static void PM_GroundTrace(void)
 		PM_CrashLand();
 
 		// Disable overbounce?
-		// This breaks skim ramps when OB is disabled... Is it really required?
 		if (pm->shared & BG_LEVEL_NO_OVERBOUNCE)
 		{
 			if (!((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 			{
 				PM_ClipVelocity(pm->ps->velocity, pm->groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
 			}
-		} else
+		}
+		else
 		{
 			if (((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 			{
@@ -2374,7 +2462,8 @@ static void PM_GroundTrace(void)
 				pm->ps->origin[2] -= offset;
 			}
 		}
-	} else
+	}
+	else
 	{
 		if (trace.plane.normal[2] == 1 && ((trace.surfaceFlags & SURF_OVERBOUNCE) != 0))
 		{
@@ -6578,6 +6667,24 @@ int AC_SetSpeed();
 
 #endif
 
+static void PM_StorePmoveValues(void)
+{
+	pm->pmext->tracemask = pm->tracemask;
+	pm->pmext->walking = pm->walking;
+	pm->pmext->groundPlane = pm->groundPlane;
+	pm->pmext->groundTrace = pm->groundTrace;
+	pm->pmext->waterlevel = pm->waterlevel;
+	VectorCopy(pm->mins, pm->pmext->mins);
+	VectorCopy(pm->maxs, pm->pmext->maxs);
+
+	VectorCopy(pml.previous_velocity, pm->pmext->previous_velocity);
+	VectorCopy(pml.forward, pm->pmext->forward);
+	VectorCopy(pml.right, pm->pmext->right);
+	VectorCopy(pml.up, pm->pmext->up);
+	pm->pmext->frametime = pm->pmove_msec / 1000.0f;		// this is set in Pmove, not PmoveSingle
+	pm->pmext->ladder = pml.ladder;
+}
+
 /*
 ================
 PmoveSingle
@@ -7047,6 +7154,9 @@ void PmoveSingle(pmove_t *pmove)
 	// snap some parts of playerstate to save network bandwidth
 	trap_SnapVector(pm->ps->velocity);
 //	SnapVector( pm->ps->velocity );
+
+	// store values to pmext for easy access on cgame
+	PM_StorePmoveValues();
 }
 
 
