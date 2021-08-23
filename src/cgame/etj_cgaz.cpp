@@ -236,9 +236,9 @@ namespace ETJump
 			}
 			DrawLine(scx, scy, scx + cmd.rightmove, scy - cmd.forwardmove, color2);
 
-			// When under speed*scale velocity, most accel happens when you move straight
+			// When under wishspeed velocity, most accel happens when you move straight
 			// towards your current velocity, so skip drawing the "wings" on the sides
-			auto drawSides = state.vf > ps->speed * ps->sprintSpeedScale;
+			auto drawSides = state.vf > state.wishspeed;
 
 			auto velSize = state.vf;
 			velSize /= 5;
@@ -293,7 +293,7 @@ namespace ETJump
 		}
 
 		// get wishvel
-		vec2_t wishvel;
+		vec3_t wishvel;
 		PmoveUtils::PM_UpdateWishvel(wishvel, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, ps);
 
 		// get angle between wishvel and player velocity
