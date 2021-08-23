@@ -15,7 +15,6 @@ using std::vector;
 // Max client "print" length is 998
 // Max server "print" length is 1013
 
-const int MAX_CHAT_LEN         = 150;
 const int MAX_CLIENT_PRINT_LEN = 998;
 const int MAX_SERVER_PRINT_LEN = 1013;
 
@@ -382,15 +381,12 @@ void BufferPrint(gentity_t *ent, const string& msg)
 	{
 		char cleanMsg[MAX_TOKEN_CHARS];
 		SanitizeConstString(msg.c_str(), cleanMsg, qfalse);
-		if (cleanMsg)
+		if (strlen(cleanMsg) + bigTextBuffer.length() > 239)
 		{
-			if (strlen(cleanMsg) + bigTextBuffer.length() > 239)
-			{
-				G_Printf("%s", bigTextBuffer.c_str());
-				bigTextBuffer.clear();
-			}
-			bigTextBuffer += msg;
+			G_Printf("%s", bigTextBuffer.c_str());
+			bigTextBuffer.clear();
 		}
+		bigTextBuffer += msg;
 	}
 	else
 	{

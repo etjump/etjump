@@ -52,10 +52,10 @@ const char BAN = 'b';
 // For everyone
 const char BASIC       = 'a';
 const char CANCELVOTE  = 'C';
-const char EBALL       = '8';
+// const char EBALL       = '8';
 const char EDIT        = 'A';
 const char FINGER      = 'f';
-const char HELP        = 'h';
+// const char HELP        = 'h';
 const char KICK        = 'k';
 const char LISTBANS    = 'L';
 const char LISTPLAYERS = 'l';
@@ -65,7 +65,7 @@ const char NOCLIP      = 'N';
 const char NOGOTO      = 'K';
 const char PASSVOTE    = 'P';
 const char PUTTEAM     = 'p';
-const char READCONFIG  = 'G';
+// const char READCONFIG  = 'G';
 const char RENAME      = 'R';
 const char RESTART     = 'r';
 const char TOKENS      = 'V';
@@ -205,10 +205,12 @@ const int TITLE_OPEN    = 4;
 
 namespace Updated
 {
+/* 
 const unsigned NONE      = 0;
 const unsigned LEVEL     = 0x00001;
 const unsigned LAST_SEEN = 0x00002;
 const unsigned NAME      = 0x00004;
+*/
 const unsigned TITLE     = 0x00008;
 const unsigned COMMANDS  = 0x00010;
 const unsigned GREETING  = 0x00020;

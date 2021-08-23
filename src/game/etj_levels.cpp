@@ -262,7 +262,7 @@ void Levels::PrintLevels()
 
 	for (; it != levels_.end(); ++it)
 	{
-		level += it->get()->level + "\n" +
+		level += std::to_string(it->get()->level) + "\n" +
 		         it->get()->name + "\n" +
 		         it->get()->commands + "\n" +
 		         it->get()->greeting + "\n";

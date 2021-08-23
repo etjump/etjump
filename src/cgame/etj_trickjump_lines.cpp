@@ -31,6 +31,7 @@
 #include <map>
 #include <algorithm>
 #include <cstring>
+#include <limits>
 
 #include "cg_local.h"
 
@@ -239,7 +240,7 @@ void TrickjumpLines::displayCurrentRoute(int x)
 	const int nbTrails = _routes[x].trails.size();
 
 	// Get min and max speed of the current jump.
-	float minSpeed = 9999999999999;
+	float minSpeed = std::numeric_limits<float>::max();
 	float maxSpeed = 0;
 
 	for (auto i = 0; i < nbTrails; ++i)

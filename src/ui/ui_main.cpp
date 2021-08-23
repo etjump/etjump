@@ -130,17 +130,6 @@ typedef struct
 	int items;
 } playerType_t;
 
-static playerType_t playerTypes[] =
-{
-	{ "player_window_soldier",    PT_KNIFE | PT_PISTOL | PT_RIFLE | PT_GRENADES     },
-	{ "player_window_medic",      PT_KNIFE | PT_PISTOL | PT_MEDKIT                  },
-	{ "player_window_engineer",   PT_KNIFE | PT_PISTOL | PT_LIGHTONLY | PT_GRENADES },
-	{ "player_window_lieutenant", PT_KNIFE | PT_PISTOL | PT_RIFLE | PT_EXPLOSIVES   },
-	{ "player_window_covertops",  PT_KNIFE | PT_PISTOL | PT_GRENADES                }
-};
-
-int numPlayerTypes = sizeof(playerTypes) / sizeof(playerTypes[0]);
-
 /*typedef struct {
     int			weapindex;
 
