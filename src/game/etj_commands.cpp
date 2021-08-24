@@ -1254,13 +1254,22 @@ bool Map(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	if (!MapExists(argv->at(1)))
+	std::string requestedMap = argv->at(1);
+	boost::to_lower(requestedMap);
+
+	if (!MapExists(requestedMap))
 	{
-		ChatPrintTo(ent, "^3map: ^7map " + argv->at(1) + " does not exist.");
+		ChatPrintTo(ent, "^3map: ^7map " + requestedMap + " is not on the server.");
 		return false;
 	}
 
-	trap_SendConsoleCommand(EXEC_APPEND, va("map %s", argv->at(1).c_str()));
+	if (strstr(Q_strlwr(g_blockedMaps.string), requestedMap.c_str()) != nullptr)
+	{
+		ChatPrintTo(ent, "^3map: ^7map " + requestedMap + " is blocked.");
+		return false;
+	}
+
+	trap_SendConsoleCommand(EXEC_APPEND, va("map %s", requestedMap.c_str()));
 	return true;
 }
 

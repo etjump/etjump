@@ -80,7 +80,7 @@ std::vector<std::string> MapStatistics::getMaps()
 
 	for (auto& map: _maps)
 	{
-		if (map.isOnServer)
+		if (map.isOnServer && strstr(Q_strlwr(g_blockedMaps.string), map.name.c_str()) == nullptr)
 		{
 			maps.push_back(map.name);
 		}
