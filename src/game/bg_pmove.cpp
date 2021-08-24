@@ -3153,6 +3153,7 @@ void PM_BeginWeaponChange(int oldweapon, int newweapon, qboolean reload)        
 			CrossProduct(axis[0], axis[2], axis[1]);
 			AxisToAngles(axis, pm->pmext->mountedWeaponAngles);
 		}
+		break;
 	case WP_MOBILE_MG42_SET:
 		if (newweapon == weapAlts[oldweapon])
 		{

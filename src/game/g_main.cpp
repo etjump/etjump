@@ -293,6 +293,16 @@ vmCvar_t g_debugTimeruns;
 vmCvar_t g_spectatorVote;
 vmCvar_t g_enableVote;
 
+// ETLegacy server browser integration 
+// os support - this SERVERINFO cvar specifies supported client operating systems on server
+vmCvar_t g_oss; //   0 - vanilla/unknown/ET:L auto setup
+                //   1 - Windows
+                //   2 - Linux
+                //   4 - Linux 64
+                //   8 - Mac OS X
+                //  16 - Android
+                //  32 - Raspberry Pi
+
 cvarTable_t gameCvarTable[] =
 {
 	// don't override the cheat state set by the system
@@ -545,7 +555,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO },
 	{ &g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE },
-
+	{ &g_oss, "g_oss", "15", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qfalse },
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1724,16 +1734,22 @@ void G_wipeCvars(void)
 
 void G_ExecMapSpecificConfig()
 {
-	int          len = 0;
-	fileHandle_t f   = 0;
+	int len;
+	fileHandle_t f;
+
 	len = trap_FS_FOpenFile(va("autoexec_%s.cfg", level.rawmapname), &f, FS_READ);
-	if (len <= 0)
+	if (len > 0)
 	{
-		trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg");
+		// autoexec_mapname.cfg file found
+		trap_SendConsoleCommand(EXEC_APPEND, va("exec autoexec_%s.cfg\n", level.rawmapname));
+		return;
 	}
-	else
+
+	len = trap_FS_FOpenFile("autoexec_default.cfg", &f, FS_READ);
+	if (len > 0)
 	{
-		trap_SendConsoleCommand(EXEC_APPEND, va("exec autoexec_%s.cfg", level.rawmapname));
+		// autoexec_default.cfg file found
+		trap_SendConsoleCommand(EXEC_APPEND, "exec autoexec_default.cfg\n");
 	}
 }
 
