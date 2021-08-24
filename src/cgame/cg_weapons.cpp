@@ -229,6 +229,7 @@ void CG_MachineGunEjectBrass(centity_t *cent)
 		case WP_CARBINE:
 		case WP_K43:
 			re->hModel = cgs.media.machinegunBrassModel;
+			// fall through
 		case WP_MP40:
 		case WP_THOMPSON:
 		case WP_STEN:

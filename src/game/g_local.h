@@ -1723,6 +1723,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded);
 void Cmd_Team_f(gentity_t *ent);
+void Cmd_Team2_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_SetWeapons_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 void Cmd_SetClass_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue);
 
@@ -2701,7 +2702,6 @@ qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime);
 const char *G_SHA1(const char *string);
 char *Q_SayConcatArgs(int start);
 void DecolorString(char *in, char *out);
-char *Q_StrReplace(char *haystack, char *needle, char *newp);
 int Q_SayArgc();
 qboolean Q_SayArgv(int n, char *buffer, int bufferLength);
 

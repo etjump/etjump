@@ -105,7 +105,7 @@ namespace Utilities {
 	void toConsole(gentity_t *ent, std::string message);
 
 	void RemovePlayerWeapons(int clientNum);
-};
+}
 
 
 #endif //ETJUMP_UTILITIES_H

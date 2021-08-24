@@ -54,4 +54,4 @@ namespace ETJump
 			static std::string sanitizeFolder(std::string path);
 		};
 	};
-};
+}

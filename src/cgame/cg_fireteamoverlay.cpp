@@ -92,6 +92,7 @@ void CG_ParseFireteams()
 	const char       *s;
 	const char *p;
 	int        clnts[2];
+	unsigned int tmp;
 
 	// qboolean onFireteam2;
 	// qboolean isLeader2;
@@ -137,9 +138,11 @@ void CG_ParseFireteams()
 
 		s = Info_ValueForKey(p, "c");
 		Q_strncpyz(hexbuffer + 2, s, 9);
-		sscanf(hexbuffer, "%x", &clnts[1]);
+		sscanf(hexbuffer, "%x", &tmp);
+		clnts[1] = static_cast<int>(tmp);
 		Q_strncpyz(hexbuffer + 2, s + 8, 9);
-		sscanf(hexbuffer, "%x", &clnts[0]);
+		sscanf(hexbuffer, "%x", &tmp);
+		clnts[0] = static_cast<int>(tmp);
 
 		for (j = 0; j < MAX_CLIENTS; j++)
 		{

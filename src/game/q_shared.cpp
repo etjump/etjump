@@ -976,6 +976,10 @@ Safe strncpy that ensures a trailing zero
 */
 void Q_strncpyz(char *dest, const char *src, int destsize)
 {
+	if (!dest)
+	{
+		Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest");
+	}
 	if (!src)
 	{
 		Com_Error(ERR_FATAL, "Q_strncpyz: NULL src");
@@ -985,9 +989,7 @@ void Q_strncpyz(char *dest, const char *src, int destsize)
 		Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1");
 	}
 
-	// replace strncpy with memcpy to silence gcc warning about potentially missing termination string
-	// strncpy(dest, src, destsize - 1);
-	memcpy(dest, src, destsize - 1);
+	strncpy(dest, src, destsize - 1);
 	dest[destsize - 1] = 0;
 }
 
@@ -1622,56 +1624,4 @@ void Info_SetValueForKey(char *s, const char *key, const char *value)
 	}
 
 	strcat(s, newi);
-}
-
-//====================================================================
-
-
-char *Q_StrReplace(char *haystack, char *needle, char *newp)
-{
-	static char final[MAX_STRING_CHARS] = { "" };
-	char        dest[MAX_STRING_CHARS]  = { "" };
-	char        newString[MAX_STRING_CHARS]   = { "" };
-	char        *destp;
-	int         needle_len = 0;
-	int         new_len    = 0;
-
-	if (!*haystack)
-	{
-		return final;
-	}
-	if (!*needle)
-	{
-		Q_strncpyz(final, haystack, sizeof(final));
-		return final;
-	}
-	if (*newp)
-	{
-		Q_strncpyz(newString, newp, sizeof(newString));
-	}
-
-	dest[0]    = '\0';
-	needle_len = strlen(needle);
-	new_len    = strlen(newString);
-	destp      = &dest[0];
-	while (*haystack)
-	{
-		if (!Q_stricmpn(haystack, needle, needle_len))
-		{
-			Q_strcat(dest, sizeof(dest), newString);
-			haystack += needle_len;
-			destp    += new_len;
-			continue;
-		}
-		if (MAX_STRING_CHARS > (strlen(dest) + 1))
-		{
-			*destp   = *haystack;
-			*++destp = '\0';
-		}
-		haystack++;
-	}
-	// tjw: don't work with final return value in case haystack
-	//      was pointing at it.
-	Q_strncpyz(final, dest, sizeof(final));
-	return final;
 }

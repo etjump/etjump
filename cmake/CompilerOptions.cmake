@@ -25,16 +25,17 @@ function(create_compiler_opts target)
 		-fPIC
 		-fvisibility=hidden
 		-fdiagnostics-color=always
-		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall>
-		-Wno-comment
+		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall -Wextra -Wpedantic>
+		-Wno-unused-parameter
+		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
 			-O3                # max optimization 
 			-ffast-math>       # fast floating point math
 		$<$<CONFIG:Debug>:
 			-Og                # supress optimizations
-			-g                 # generate debug info
-			-ggdb>)            # generate ggdb friendly debug info
+			-g3                # generate debug info
+			-ggdb3>)           # generate gdb friendly debug info
 
 	# MSVC flags
 	set(MSVC_LINK_FLAGS 
