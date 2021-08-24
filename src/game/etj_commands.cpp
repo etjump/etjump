@@ -1269,7 +1269,7 @@ bool Map(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	trap_SendConsoleCommand(EXEC_APPEND, va("map %s", requestedMap.c_str()));
+	trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", requestedMap.c_str()));
 	return true;
 }
 
