@@ -240,7 +240,7 @@ void _UI_MouseEvent(int dx, int dy);
 void _UI_Refresh(int realtime);
 qboolean _UI_IsFullscreen(void);
 
-extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11)
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1, intptr_t arg2, intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6)
 {
 	switch (command)
 	{

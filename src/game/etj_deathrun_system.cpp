@@ -128,10 +128,10 @@ bool ETJump::DeathrunSystem::alreadyReached(int checkpointId, int clientNum)
 
 int ETJump::DeathrunSystem::getScore(int clientNum)
 {
-	return std::count_if(begin(_runStatuses[clientNum].checkpointStatuses), end(_runStatuses[clientNum].checkpointStatuses), [](bool b)
+	return static_cast<int>(std::count_if(begin(_runStatuses[clientNum].checkpointStatuses), end(_runStatuses[clientNum].checkpointStatuses), [](bool b)
 	{
 		return b;
-	});
+	}));
 }
 
 ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation() const

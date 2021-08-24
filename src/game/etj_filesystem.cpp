@@ -72,15 +72,15 @@ bool ETJump::FileSystem::safeCopy(const std::string &src, const std::string &dst
 	{
 		copy(src, dst);
 	}
-	catch (File::FileNotFoundException &err)
+	catch (const File::FileNotFoundException&)
 	{
 		return false;
 	}
-	catch (File::WriteFailedException &err)
+	catch (const File::WriteFailedException&)
 	{
 		return false;
 	}
-	catch (std::logic_error &err)
+	catch (const std::logic_error&)
 	{
 		return false;
 	}
