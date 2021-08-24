@@ -325,6 +325,11 @@ std::vector<std::string> Utilities::getMaps()
 		Q_strncpyz(buf, dirPtr, sizeof(buf));
 		boost::to_lower(buf);
 
+		if (strstr(Q_strlwr(g_blockedMaps.string), buf) != nullptr)
+		{
+			continue;
+		}
+
 		maps.push_back(buf);
 	}
 
