@@ -1259,13 +1259,13 @@ bool Map(gentity_t *ent, Arguments argv)
 
 	if (!MapExists(requestedMap))
 	{
-		ChatPrintTo(ent, "^3map: ^7map " + requestedMap + " is not on the server.");
+		ChatPrintTo(ent, "^3map: ^7" + requestedMap + " is not on the server.");
 		return false;
 	}
 
 	if (strstr(Q_strlwr(g_blockedMaps.string), requestedMap.c_str()) != nullptr)
 	{
-		ChatPrintTo(ent, "^3map: ^7map " + requestedMap + " is blocked.");
+		ChatPrintTo(ent, "^3map: ^7" + requestedMap + " cannot be played on this server.");
 		return false;
 	}
 
