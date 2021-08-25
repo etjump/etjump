@@ -1263,7 +1263,9 @@ bool Map(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	if (strstr(Q_strlwr(g_blockedMaps.string), requestedMap.c_str()) != nullptr)
+	MapStatistics mapStats;
+
+	if (strstr(mapStats.getBlockedMapsStr().c_str(), requestedMap.c_str()) != nullptr)
 	{
 		ChatPrintTo(ent, "^3map: ^7" + requestedMap + " cannot be played on this server.");
 		return false;

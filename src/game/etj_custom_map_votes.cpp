@@ -269,7 +269,9 @@ std::string const CustomMapVotes::RandomMap(std::string const& type)
 
 bool CustomMapVotes::isValidMap(const std::string &mapName)
 {
+	MapStatistics mapStats;
+
 	return	G_MapExists(mapName.c_str()) && 
 			mapName != level.rawmapname &&
-			strstr(Q_strlwr(g_blockedMaps.string), mapName.c_str()) == nullptr;
+			strstr(mapStats.getBlockedMapsStr().c_str(), mapName.c_str()) == nullptr;
 }

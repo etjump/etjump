@@ -4,6 +4,7 @@
 #include "g_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+#include "etj_map_statistics.h"
 
 
 
@@ -342,7 +343,9 @@ namespace ETJump
 			return false;
 		}
 
-		if (strstr(Q_strlwr(g_blockedMaps.string), resultedMap.c_str()) != nullptr)
+		MapStatistics mapStats;
+
+		if (strstr(mapStats.getBlockedMapsStr().c_str(), resultedMap.c_str()) != nullptr)
 		{
 			resultedMap = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n", resultedMap);
 			return false;

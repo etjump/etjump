@@ -25,6 +25,7 @@
 #include "etj_utilities.h"
 #include "etj_save_system.h"
 #include <boost/algorithm/string.hpp>
+#include "etj_map_statistics.h"
 
 #include "g_local.h"
 
@@ -304,6 +305,7 @@ void Utilities::Error(const std::string& error)
 std::vector<std::string> Utilities::getMaps()
 {
 	std::vector<std::string> maps;
+	MapStatistics mapStats;
 
 	int  i       = 0;
 	int  numDirs = 0;
@@ -325,7 +327,7 @@ std::vector<std::string> Utilities::getMaps()
 		Q_strncpyz(buf, dirPtr, sizeof(buf));
 		boost::to_lower(buf);
 
-		if (strstr(Q_strlwr(g_blockedMaps.string), buf) != nullptr)
+		if (strstr(mapStats.getBlockedMapsStr().c_str(), buf) != nullptr)
 		{
 			continue;
 		}
