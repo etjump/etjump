@@ -378,6 +378,10 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print)
 				}
 				ft->joinOrder[MAX_CLIENTS - 1] = -1;
 
+				// invalidate "Make fireteam private?" prompt response in case we joined
+				// a fireteam and left without responding
+				g_entities[entityNum].client->pers.autofireteamEndTime = level.time;
+
 				break;
 			}
 		}
