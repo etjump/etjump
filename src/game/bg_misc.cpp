@@ -5579,7 +5579,7 @@ int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboo
 	const char *pInCopy     = pszIn;
 	const char *pszOutStart = pszOut;
 
-	while (*pInCopy && (pszOut - pszOutStart < dwMaxLength - 1))
+	while (*pInCopy && (static_cast<unsigned int>(pszOut - pszOutStart) < dwMaxLength - 1))
 	{
 		if (*pInCopy == '^')
 		{
