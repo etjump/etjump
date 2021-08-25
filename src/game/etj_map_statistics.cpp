@@ -80,7 +80,7 @@ std::vector<std::string> MapStatistics::getMaps()
 
 	for (auto& map: _maps)
 	{
-		if (map.isOnServer && strstr(Q_strlwr(g_blockedMaps.string), map.name.c_str()) == nullptr)
+		if (map.isOnServer && strstr(getBlockedMapsStr().c_str(), map.name.c_str()) == nullptr)
 		{
 			maps.push_back(map.name);
 		}
@@ -495,11 +495,18 @@ const char *MapStatistics::randomMap() const
 	return mapName;
 }
 
+std::string MapStatistics::getBlockedMapsStr() const
+{
+	std::string blockedMapsStr = g_blockedMaps.string;
+	boost::to_lower(blockedMapsStr);
+	return blockedMapsStr;
+}
+
 bool MapStatistics::isValidMap(const MapInformation* mapInfo) const
 {
 	return	mapInfo != _currentMap &&
 			mapInfo->isOnServer && 
-			strstr(Q_strlwr(g_blockedMaps.string), mapInfo->name.c_str()) == nullptr;
+			strstr(getBlockedMapsStr().c_str(), mapInfo->name.c_str()) == nullptr;
 }
 
 MapStatistics::~MapStatistics()
