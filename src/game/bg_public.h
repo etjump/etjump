@@ -567,6 +567,8 @@ typedef struct
 	float frametime;
 	qboolean ladder;
 
+	vec3_t velocity;		// we need to store this before PM_Accelerate scales it back
+							// to preserve the true effect friction has on ground speed
 	float wishspeed;
 	float wishspeedAlt;		// wishspeed without upmove component
 	float accel;

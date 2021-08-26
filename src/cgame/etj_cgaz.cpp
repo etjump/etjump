@@ -58,14 +58,13 @@ namespace ETJump
 	{
 		state.gSquared = GetSlickGravity();
 		state.vSquared = VectorLengthSquared2(pm->pmext->previous_velocity);
-		state.vfSquared = VectorLengthSquared2(ps->velocity);
+		state.vfSquared = VectorLengthSquared2(pm->pmext->velocity);
 		state.wishspeed = wishspeed;
 		state.a = accel * state.wishspeed * pm->pmext->frametime;
 		state.aSquared = pow(state.a, 2);
 		// show true ground zones?
-		// FIXME doesn't work and messes up drawing
-		//if (!(etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_GROUND)) ||
-		//	state.vSquared - state.vfSquared >= 2 * state.a * state.wishspeed - state.aSquared)
+		if (!(etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_GROUND)) ||
+			state.vSquared - state.vfSquared >= 2 * state.a * state.wishspeed - state.aSquared)
 		{
 			state.vSquared = state.vfSquared;
 		}
@@ -78,7 +77,7 @@ namespace ETJump
 		drawMaxCos = UpdateDrawMaxCos(&state, drawOpt);
 		drawMax = UpdateDrawMax(&state, drawMaxCos);
 
-		drawVel = atan2f(ps->velocity[1], ps->velocity[0]);
+		drawVel = atan2f(pm->pmext->velocity[1], pm->pmext->velocity[0]);
 	}
 
 	float CGaz::UpdateDrawMin(state_t const* state)

@@ -484,6 +484,18 @@ static void PM_Friction(void)
 	float  *vel;
 	float  speed, newspeed, control;
 	float  drop;
+	float  frametime;
+
+	frametime = pml.frametime;
+
+	// following spectators and demo playback get different pml.frametime to clients
+	// so we need to make sure this gets corrected for drawing things
+#ifdef CGAMEDLL
+	if (pm->ps->pm_flags & PMF_FOLLOW || cg.demoPlayback)
+	{
+		frametime = pm->pmext->frametime;
+	}
+#endif // CGAMEDLL
 
 	vel = pm->ps->velocity;
 
@@ -509,7 +521,7 @@ static void PM_Friction(void)
 	if (pm->cmd.serverTime - pm->pmext->dodgeTime < 350 &&
 	    pm->cmd.serverTime - pm->pmext->dodgeTime > 250)
 	{
-		drop += speed * 20 * pml.frametime;
+		drop += speed * 20 * frametime;
 	}
 
 	// apply ground friction
@@ -521,7 +533,7 @@ static void PM_Friction(void)
 			if (!(pm->ps->pm_flags & PMF_TIME_KNOCKBACK))
 			{
 				control = speed < pm_stopspeed ? pm_stopspeed : speed;
-				drop   += control * pm_friction * pml.frametime;
+				drop   += control * pm_friction * frametime;
 			}
 		}
 	}
@@ -531,23 +543,23 @@ static void PM_Friction(void)
 	{
 		if (pm->watertype == CONTENTS_SLIME)    //----(SA)	slag
 		{
-			drop += speed * pm_slagfriction * pm->waterlevel * pml.frametime;
+			drop += speed * pm_slagfriction * pm->waterlevel * frametime;
 		}
 		else
 		{
-			drop += speed * pm_waterfriction * pm->waterlevel * pml.frametime;
+			drop += speed * pm_waterfriction * pm->waterlevel * frametime;
 		}
 	}
 
 	if (pm->ps->pm_type == PM_SPECTATOR)
 	{
-		drop += speed * pm_spectatorfriction * pml.frametime;
+		drop += speed * pm_spectatorfriction * frametime;
 	}
 
 	// apply ladder strafe friction
 	if (pml.ladder)
 	{
-		drop += speed * pm_ladderfriction * pml.frametime;
+		drop += speed * pm_ladderfriction * frametime;
 	}
 
 	// scale the velocity
@@ -1640,6 +1652,7 @@ static void PM_AirMove(void)
 	pm->pmext->wishspeedAlt = wishspeedAlt;
 	pm->pmext->accel = pm_airaccelerate;
 	VectorCopy(wishvel, pm->pmext->wishvel);
+	VectorCopy(pm->ps->velocity, pm->pmext->velocity);
 
 	// not on ground, so little effect on velocity
 	PM_Accelerate(wishdir, wishspeed, pm_airaccelerate);
@@ -1858,6 +1871,7 @@ static void PM_WalkMove(void)
 	pm->pmext->wishspeedAlt = wishspeedAlt;
 	pm->pmext->accel = accelerate;
 	VectorCopy(wishvel, pm->pmext->wishvel);
+	VectorCopy(pm->ps->velocity, pm->pmext->velocity);
 
 	PM_Accelerate(wishdir, wishspeed, accelerate);
 
@@ -6673,7 +6687,7 @@ static void PM_StorePmoveValues(void)
 	VectorCopy(pml.forward, pm->pmext->forward);
 	VectorCopy(pml.right, pm->pmext->right);
 	VectorCopy(pml.up, pm->pmext->up);
-	pm->pmext->frametime = pm->pmove_msec / 1000.0f;		// this is set in Pmove, not PmoveSingle
+	pm->pmext->frametime = pm->pmove_msec / 1000.0f;		// pml.frametime is different for spectators
 	pm->pmext->ladder = pml.ladder;
 }
 

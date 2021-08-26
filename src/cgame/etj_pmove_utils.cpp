@@ -73,7 +73,7 @@ namespace ETJump
 			return &cg_pmove;
 		}
 
-		playerState_t temp_ps = cg.snap->ps;
+		playerState_t temp_ps = cg.predictedPlayerState;
 		pmove.ps = &temp_ps;
 		pmove.pmext = &pmext;
 		pmove.character = CG_CharacterForClientinfo(&cgs.clientinfo[cg.snap->ps.clientNum], &cg_entities[cg.snap->ps.clientNum]);

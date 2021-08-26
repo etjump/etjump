@@ -813,7 +813,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_CGaz1Color3,              "etj_CGaz1Color3",              "0.0 0.2 0.0 0.75",       CVAR_ARCHIVE },
 	{ &etj_CGaz1Color4,              "etj_CGaz1Color4",              "1.0 1.0 0.0 0.75",       CVAR_ARCHIVE },
 	{ &etj_CGazFov,              "etj_CGazFov",              "0",       CVAR_ARCHIVE },
-	{ &etj_CGazTrueness,              "etj_CGazTrueness",              "0",       CVAR_ARCHIVE },
+	{ &etj_CGazTrueness,              "etj_CGazTrueness",              "2",       CVAR_ARCHIVE },
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
