@@ -78,7 +78,7 @@ menuDef {
         CVARINTLABEL		(316, SUBW_CGAZ_Y + 128, 276, 8, "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(316, SUBW_CGAZ_Y + 128, 276, 8, "CGaz FOV:", 0.2, 8, etj_CGazFov 0 0 179 5, "Sets FOV of CGaz 1, 0 to use your current FOV\netj_CGazFov")
         YESNO				(316, SUBW_CGAZ_Y + 140, 276, 8, "Stretch CGaz:", 0.2, 8, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
-        MULTI				(316, SUBW_CGAZ_Y + 152, 276, 8, "CGaz trueness:", 0.2, 8, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 }, "Sets trueness of CGaz\netj_CGazTrueness")
+        MULTI				(316, SUBW_CGAZ_Y + 152, 276, 8, "CGaz trueness:", 0.2, 8, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of CGaz\netj_CGazTrueness")
 
     SUBWINDOW(308, 208, 292, 140, "POPUPS")
         MULTI				(316, SUBW_POPUPS_Y + 20, 276, 8, "Draw popups:", 0.2, 8, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
