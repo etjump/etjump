@@ -3893,7 +3893,6 @@ void CG_Shutdown(void)
 		ETJump::serverCommandsHandler = nullptr;
 		ETJump::operatingSystem = nullptr;
 		ETJump::authentication = nullptr;
-		ETJump::entityEventsHandler = nullptr;
 		ETJump::renderables.clear();
 		ETJump::cvarUpdateHandler = nullptr;
 		ETJump::cvarShadows.clear();
@@ -3904,6 +3903,7 @@ void CG_Shutdown(void)
 		ETJump::eventLoop->shutdown();
 		ETJump::eventLoop = nullptr;
 		ETJump::playerEventsHandler = nullptr;
+		ETJump::entityEventsHandler = nullptr;
 
 		ETJump::isInitialized = false;
 	}
