@@ -95,7 +95,13 @@ namespace ETJump
 
 	void UpdateJumpSpeeds()
 	{
-		playerState_t* ps = getValidPlayerState();
+		// events are processed at playerstate transition before interpolation runs,
+		// so we can't rely on predictedPlayerState on demos because it still contains
+		// previous playerstate at the time EV_JUMP event is processed
+		playerState_t* ps = (cg.snap->ps.clientNum == cg.clientNum && !cg.demoPlayback)
+			? &cg.predictedPlayerState
+			: &cg.snap->ps;
+
 		// queue reset if last update was on different team
 		if (team != ps->persistant[PERS_TEAM])
 		{
