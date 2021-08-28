@@ -81,26 +81,7 @@ void CG_FillRectGradient(float x, float y, float width, float height, const floa
 CG_FillAngleYaw
 ==============
 */
-void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, float fov, const float* color)
-{
-	float x, width, fovscale;
-
-	fovscale = tan(DEG2RAD(fov / 2));
-	x = SCREEN_WIDTH / 2 + tan(DEG2RAD(viewangle + start)) / fovscale * SCREEN_WIDTH / 2;
-	width = fabs(SCREEN_WIDTH * (tan(DEG2RAD(viewangle + end)) - tan(DEG2RAD(viewangle + start))) / (fovscale * 2)) + 1;
-
-	trap_R_SetColor(color);
-	CG_AdjustFrom640(&x, &y, &width, &height);
-	trap_R_DrawStretchPic(x, y, width, height, 0, 0, 0, 0, cgs.media.whiteShader);
-	trap_R_SetColor(NULL);
-}
-
-/*
-==============
-CG_FillAngleYaw_Ext
-==============
-*/
-void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, float fov, vec4_t const color)
+void CG_FillAngleYaw(float start, float end, float yaw, float y, float h, float fov, vec4_t const color)
 {
 	range_t const range = AnglesToRange(start, end, yaw, fov);
 	if (!range.split)
@@ -116,10 +97,10 @@ void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, fl
 
 /*
 ==============
-AngleToScreenX
+ProjectionX
 ==============
 */
-float AngleToScreenX (float angle, float fov)
+float ProjectionX(float angle, float fov)
 {
 	float const half_fov_x = DEG2RAD(fov) / 2;
 	if (angle >= half_fov_x)
@@ -131,7 +112,21 @@ float AngleToScreenX (float angle, float fov)
 		return SCREEN_WIDTH;
 	}
 
-	return SCREEN_WIDTH / 2 * (1 - tanf(angle) / tanf(half_fov_x));
+	switch (etj_projection.integer)
+	{
+	case 0: // rectilinear projection, breaks with fov >= 180
+		return SCREEN_WIDTH / 2 * (1 - tanf(angle) / tanf(half_fov_x));
+		break;
+	case 1: // cylindrical projection, breaks with fov > 360
+		return SCREEN_WIDTH / 2 * (1 - angle / half_fov_x);
+		break;
+	case 2: // panini projection, breaks with fov >= 360
+		return SCREEN_WIDTH / 2 * (1 - tanf(angle / 2) / tanf(half_fov_x / 2));
+		break;
+	default:
+		return 0;
+		break;
+	}	
 }
 
 /*
@@ -159,7 +154,7 @@ range_t AnglesToRange(float start, float end, float yaw, float fov)
 		end = tmp;
 	}
 
-	range_t const ret = { AngleToScreenX(start, fov), AngleToScreenX(end, fov), split };
+	range_t const ret = { ProjectionX(start, fov), ProjectionX(end, fov), split };
 	return ret;
 }
 

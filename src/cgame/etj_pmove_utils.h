@@ -24,46 +24,26 @@
 
 #pragma once
 
-#include "etj_irenderable.h"
 #include "cg_local.h"
 
 namespace ETJump
 {
-	class Snaphud : public IRenderable
+	class PmoveUtils
 	{
 	public:
-		void render() const override;
-		void beforeRender() override;
-		static bool inMainAccelZone(const playerState_t& ps, pmove_t* pm);
+		// returns real userCmd for players and a faked
+		// one for spectators/demo playback
+		static usercmd_t getUserCmd(const playerState_t& ps, int8_t uCmdScale);
 
-	private:
-		bool canSkipDraw() const;
-		void InitSnaphud(int8_t uCmdScale, usercmd_t cmd);
-		void UpdateSnapState(void);
+		// returns cg_pmove for players or runs PmoveSingle again
+		// for spectators/demo playback to get correct values for pmext
+		static pmove_t* getPmove(usercmd_t cmd);
 
-		enum class SnapTrueness
-		{
-			SNAP_JUMPCROUCH = 1,
-			SNAP_GROUND = 2
-		};
+		// returns either sprintSpeedScale or runSpeedScale
+		static float PM_SprintScale(const playerState_t* ps);
 
-		struct snaphud_t
-		{
-			float a;
-			unsigned char maxAccel;
-			std::vector<unsigned short>zones;
-			std::vector<unsigned char>xAccel;
-			std::vector<unsigned char>yAccel;
-			std::vector<float>absAccel;
-			float minAbsAccel;
-			float maxAbsAccel;
-		};
-		
-		snaphud_t snap;
-
-		int yaw;
-
-		playerState_t* ps = &cg.predictedPlayerState;
-		pmove_t* pm;
+		// updates XY wishvel based on cmdScale and angle vectors
+		// Z vector is taken as input for AngleVectors
+		static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps);
 	};
 }

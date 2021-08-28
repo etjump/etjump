@@ -29,6 +29,9 @@
 #include "etj_event_loop.h"
 #include "etj_autodemo_recorder.h"
 #include "etj_player_events_handler.h"
+#include "etj_cgaz.h"
+#include "etj_snaphud.h"
+#include "etj_pmove_utils.h"
 
 displayContextDef_t cgDC;
 
@@ -113,6 +116,7 @@ namespace ETJump
 	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	std::shared_ptr<EventLoop> eventLoop;
 	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+	std::shared_ptr<PmoveUtils> pmoveUtils;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,15 +340,14 @@ vmCvar_t com_hunkmegs;
 vmCvar_t etj_drawCGaz;
 vmCvar_t etj_CGazY;
 vmCvar_t etj_CGazHeight;
-vmCvar_t etj_CGazWidth;
-vmCvar_t etj_CGazColor1;
-vmCvar_t etj_CGazColor2;
-vmCvar_t etj_CGazAlpha;
-vmCvar_t etj_CGaz5Color1;
-vmCvar_t etj_CGaz5Color2;
-vmCvar_t etj_CGaz5Color3;
-vmCvar_t etj_CGaz5Color4;
-vmCvar_t etj_CGaz5Fov;
+vmCvar_t etj_CGaz2Color1;
+vmCvar_t etj_CGaz2Color2;
+vmCvar_t etj_CGaz1Color1;
+vmCvar_t etj_CGaz1Color2;
+vmCvar_t etj_CGaz1Color3;
+vmCvar_t etj_CGaz1Color4;
+vmCvar_t etj_CGazFov;
+vmCvar_t etj_CGazTrueness;
 
 vmCvar_t etj_drawOB;
 //Aciz: movable drawOB
@@ -576,7 +579,11 @@ vmCvar_t etj_snapHUDOffsetY;
 vmCvar_t etj_snapHUDHeight;
 vmCvar_t etj_snapHUDColor1;
 vmCvar_t etj_snapHUDColor2;
+vmCvar_t etj_snapHUDHLColor1;
+vmCvar_t etj_snapHUDHLColor2;
 vmCvar_t etj_snapHUDFov;
+vmCvar_t etj_snapHUDHLActive;
+vmCvar_t etj_snapHUDTrueness;
 
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
@@ -601,6 +608,8 @@ vmCvar_t etj_strafeQualityColor;
 vmCvar_t etj_strafeQualityShadow;
 vmCvar_t etj_strafeQualitySize;
 vmCvar_t etj_strafeQualityStyle;
+
+vmCvar_t etj_projection;
 
 typedef struct
 {
@@ -795,17 +804,16 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawOB,                   "etj_drawOB",                  "0",                      CVAR_ARCHIVE             },
 	{ &etj_OBX,                     "etj_OBX",                     "320",                    CVAR_ARCHIVE             },
 	{ &etj_OBY,                     "etj_OBY",                     "220",                    CVAR_ARCHIVE             },
-	{ &etj_CGazY,                    "etj_CGazY",                   "260",                    CVAR_ARCHIVE             },
+	{ &etj_CGazY,                    "etj_CGazY",                   "240",                    CVAR_ARCHIVE             },
 	{ &etj_CGazHeight,               "etj_CGazHeight",              "20",                     CVAR_ARCHIVE             },
-	{ &etj_CGazWidth,                "etj_CGazWidth",               "300",                    CVAR_ARCHIVE             },
-	{ &etj_CGazColor1,              "etj_CGazColor1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
-	{ &etj_CGazColor2,              "etj_CGazColor2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
-	{ &etj_CGazAlpha,                "etj_CGazAlpha",               "0.15",                   CVAR_ARCHIVE             },
-	{ &etj_CGaz5Color1,              "etj_CGaz5Color1",              "0.75 0.75 0.75 1.0",    CVAR_ARCHIVE },
-	{ &etj_CGaz5Color2,              "etj_CGaz5Color2",              "0.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
-	{ &etj_CGaz5Color3,              "etj_CGaz5Color3",              "0.0 0.2 0.0 1.0",       CVAR_ARCHIVE },
-	{ &etj_CGaz5Color4,              "etj_CGaz5Color4",              "1.0 1.0 0.0 1.0",       CVAR_ARCHIVE },
-	{ &etj_CGaz5Fov,              "etj_CGaz5Fov",              "0",       CVAR_ARCHIVE },
+	{ &etj_CGaz2Color1,              "etj_CGaz2Color1",              "1.0 0.0 0.0 1.0",        CVAR_ARCHIVE             },
+	{ &etj_CGaz2Color2,              "etj_CGaz2Color2",              "0.0 1.0 1.0 1.0",        CVAR_ARCHIVE             },
+	{ &etj_CGaz1Color1,              "etj_CGaz1Color1",              "0.75 0.75 0.75 0.75",    CVAR_ARCHIVE },
+	{ &etj_CGaz1Color2,              "etj_CGaz1Color2",              "0.0 1.0 0.0 0.75",       CVAR_ARCHIVE },
+	{ &etj_CGaz1Color3,              "etj_CGaz1Color3",              "0.0 0.2 0.0 0.75",       CVAR_ARCHIVE },
+	{ &etj_CGaz1Color4,              "etj_CGaz1Color4",              "1.0 1.0 0.0 0.75",       CVAR_ARCHIVE },
+	{ &etj_CGazFov,              "etj_CGazFov",              "0",       CVAR_ARCHIVE },
+	{ &etj_CGazTrueness,              "etj_CGazTrueness",              "2",       CVAR_ARCHIVE },
 
 	{ &cl_yawspeed,                 "cl_yawspeed",                 "0",                      CVAR_ARCHIVE             },
 	{ &cl_freelook,                 "cl_freelook",                 "1",                      CVAR_ARCHIVE             },
@@ -1005,7 +1013,11 @@ cvarTable_t cvarTable[] =
 	{ &etj_snapHUDHeight, "etj_snapHUDHeight", "10", CVAR_ARCHIVE },
 	{ &etj_snapHUDColor1, "etj_snapHUDColor1", "0.0 1.0 1.0 0.75", CVAR_ARCHIVE },
 	{ &etj_snapHUDColor2, "etj_snapHUDColor2", "0.05 0.05 0.05 0.1", CVAR_ARCHIVE },
+	{ &etj_snapHUDHLColor1, "etj_snapHUDHLColor1", "1.0 0.5 1.0 0.75", CVAR_ARCHIVE },
+	{ &etj_snapHUDHLColor2, "etj_snapHUDHLColor2", "1.0 0.5 1.0 0.1", CVAR_ARCHIVE },
 	{ &etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE },
+	{ &etj_snapHUDHLActive, "etj_snapHUDHLActive", "0", CVAR_ARCHIVE },
+	{ &etj_snapHUDTrueness, "etj_snapHUDTrueness", "0", CVAR_ARCHIVE },
 	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
 	{ &etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1", CVAR_ARCHIVE },
 	{ &etj_demo_drawBanners, "etj_demo_drawBanners", "1", CVAR_ARCHIVE },
@@ -1027,6 +1039,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_strafeQualityShadow, "etj_strafeQualityShadow", "1", CVAR_ARCHIVE },
 	{ &etj_strafeQualitySize, "etj_strafeQualitySize", "3", CVAR_ARCHIVE },
 	{ &etj_strafeQualityStyle, "etj_strafeQualityStyle", "0", CVAR_ARCHIVE },
+
+	{ &etj_projection, "etj_projection", "0", CVAR_ARCHIVE },
 };
 
 
@@ -2701,9 +2715,6 @@ static void CG_RegisterGraphics(void)
 		cgs.media.fireteamicons[i] = trap_R_RegisterShaderNoMip(va("gfx/hud/fireteam/fireteam%i", i + 1));
 	}
 
-	//Feen: CGaz - Register Shader
-	cgs.media.CGazArrow = trap_R_RegisterShaderNoMip("gfx/2d/cgaz_arrow");
-
 	//Feen: PGM - Register shaders...
 	cgs.media.portal_blueShader = trap_R_RegisterShader("gfx/misc/portal_blueShader");                //trap_R_RegisterShader( "gfx/misc/electricity_portal2" );
 	cgs.media.portal_redShader  = trap_R_RegisterShader("gfx/misc/portal_redShader");                //Change to red later...
@@ -3807,6 +3818,8 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::StrafeQuality()));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::QuickFollowDrawer()));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::CGaz()));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::Snaphud()));
 
 	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
@@ -3814,6 +3827,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
 	ETJump::initDrawKeys(keySetSystem);
 	ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+	ETJump::pmoveUtils = std::make_shared<ETJump::PmoveUtils>();
 
 	CG_Printf("done\n");
 	CG_Printf("ETJump initialized.\n");

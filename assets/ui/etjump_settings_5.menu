@@ -4,8 +4,8 @@
 #define WINDOW_WIDTH 608
 #define WINDOW_HEIGHT 448
 #define SUBW_SNAPHUD_Y 32
-#define SUBW_SPECTATOR_Y 140
-#define SUBW_JUMPSPEEDS_Y 212
+#define SUBW_SPECTATOR_Y 184
+#define SUBW_JUMPSPEEDS_Y 252
 #define SUBW_STRAFEQUALITY_Y 32
 #define GROUP_NAME "group_etjump_settings_5"
 #include "ui/menumacros.h"
@@ -23,25 +23,29 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 100, "SNAPHUD")
+    SUBWINDOW(8, 32, 292, 148, "SNAPHUD")
         YESNO				(16, SUBW_SNAPHUD_Y + 20, 276, 8, "Velocity Snapping HUD:", 0.2, 8, "etj_drawSnapHUD", "Draw velocity snapping HUD\netj_drawSnapHUD")
         CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 32, 276, 8, "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SNAPHUD_Y + 32, 276, 8, "Snaphud Y:", 0.2, 8, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
         CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 44, 276, 8, "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SNAPHUD_Y + 44, 276, 8, "Snaphud Height:", 0.2, 8, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
         CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 56, 276, 8, "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_SNAPHUD_Y + 56, 276, 8, "Snaphud FOV:", 0.2, 8, etj_snapHUDFov 0 0 180 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
-        MULTI				(16, SUBW_SNAPHUD_Y + 68, 276, 8, "Snaphud color 1:", 0.2, 8, "etj_snapHUDColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of snaphud\netj_snapHUDColor1")
-        MULTI				(16, SUBW_SNAPHUD_Y + 80, 276, 8, "Snaphud color 2:", 0.2, 8, "etj_snapHUDColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of snaphud\netj_snapHUDColor2")
+        SLIDER				(16, SUBW_SNAPHUD_Y + 56, 276, 8, "Snaphud FOV:", 0.2, 8, etj_snapHUDFov 0 0 179 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
+        YESNO				(16, SUBW_SNAPHUD_Y + 68, 276, 8, "Highlight active zone:", 0.2, 8, "etj_snapHUDHLActive", "Highlight active snaphud zone HUD\netj_snapHUDHLActive")
+        MULTI				(16, SUBW_SNAPHUD_Y + 80, 276, 8, "Snaphud trueness:", 0.2, 8, "etj_snapHUDTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of snaphud\netj_snapHUDTrueness")
+        MULTI				(16, SUBW_SNAPHUD_Y + 92, 276, 8, "Snaphud color 1:", 0.2, 8, "etj_snapHUDColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of snaphud\netj_snapHUDColor1")
+        MULTI				(16, SUBW_SNAPHUD_Y + 104, 276, 8, "Snaphud color 2:", 0.2, 8, "etj_snapHUDColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of snaphud\netj_snapHUDColor2")
+        MULTI				(16, SUBW_SNAPHUD_Y + 116, 276, 8, "Highlight color 1:", 0.2, 8, "etj_snapHUDHLColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active primary snapzone\netj_snapHUDHLColor1")
+        MULTI				(16, SUBW_SNAPHUD_Y + 128, 276, 8, "Highlight color 2:", 0.2, 8, "etj_snapHUDHLColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active secondary snapzone\netj_snapHUDHLColor2")
 
-    SUBWINDOW(8, 140, 292, 64, "SPECTATOR")
+    SUBWINDOW(8, 184, 292, 64, "SPECTATOR")
         YESNO				(16, SUBW_SPECTATOR_Y + 20, 276, 8, "Spectator list:", 0.2, 8, "etj_drawSpectatorInfo", "Draw a list of people spectating you\netj_drawSpectatorInfo")
         CVARINTLABEL		(16, SUBW_SPECTATOR_Y + 32, 276, 8, "etj_spectatorInfoX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SPECTATOR_Y + 32, 276, 8, "Spec list X:", 0.2, 8, etj_spectatorInfoX 320 0 640 10, "Sets X position of spectator list\netj_spectatorInfoX")
         CVARINTLABEL		(16, SUBW_SPECTATOR_Y + 44, 276, 8, "etj_spectatorInfoY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_SPECTATOR_Y + 44, 276, 8, "Spec list Y:", 0.2, 8, etj_spectatorInfoY 40 0 480 10, "Sets Y position of spectator list\netj_spectatorInfoY")
 
-    SUBWINDOW(8, 212, 292, 136, "JUMP SPEEDS")
+    SUBWINDOW(8, 252, 292, 136, "JUMP SPEEDS")
         YESNO				(16, SUBW_JUMPSPEEDS_Y + 20, 276, 8, "Jump speeds:", 0.2, 8, "etj_drawJumpSpeeds", "Draw jump speed list\netj_drawJumpSpeeds")
         CVARINTLABEL		(16, SUBW_JUMPSPEEDS_Y + 32, 276, 8, "etj_jumpSpeedsX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_JUMPSPEEDS_Y + 32, 276, 8, "Jump speeds X:", 0.2, 8, etj_jumpSpeedsX 0 -6 634 10, "Sets X offset of jump speed list\netj_jumpSpeedsX")

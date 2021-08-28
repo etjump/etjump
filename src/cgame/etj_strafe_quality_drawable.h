@@ -46,6 +46,8 @@ namespace ETJump {
 		void parseColor();
 		void resetStrafeQuality();
 
+		pmove_t* pm;
+
 	public:
 		StrafeQuality();
 		void beforeRender() override;

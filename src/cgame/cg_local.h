@@ -1830,9 +1830,6 @@ typedef struct
 	qhandle_t portal_blueShader;       //Portal 1
 	qhandle_t portal_redShader;        //Portal 2
 
-	//Feen: CGaz Shader
-	qhandle_t CGazArrow;
-
 	qhandle_t simplePlayersShader;
 	qhandle_t saveIcon;
 	qhandle_t proneIcon;
@@ -2168,19 +2165,6 @@ typedef struct
 } cgs_t;
 
 // CGaz 5
-struct state_t
-{
-	float v_squared;
-	float vf_squared;
-	float a_squared;
-
-	float v;
-	float vf;
-	float a;
-
-	float wishspeed;
-};
-
 struct range_t
 {
 	float x1;
@@ -2412,15 +2396,14 @@ extern vmCvar_t com_hunkmegs;
 extern vmCvar_t etj_drawCGaz;
 extern vmCvar_t etj_CGazY;
 extern vmCvar_t etj_CGazHeight;
-extern vmCvar_t etj_CGazWidth;
-extern vmCvar_t etj_CGazColor1;
-extern vmCvar_t etj_CGazColor2;
-extern vmCvar_t etj_CGazAlpha;
-extern vmCvar_t etj_CGaz5Color1;
-extern vmCvar_t etj_CGaz5Color2;
-extern vmCvar_t etj_CGaz5Color3;
-extern vmCvar_t etj_CGaz5Color4;
-extern vmCvar_t etj_CGaz5Fov;
+extern vmCvar_t etj_CGaz2Color1;
+extern vmCvar_t etj_CGaz2Color2;
+extern vmCvar_t etj_CGaz1Color1;
+extern vmCvar_t etj_CGaz1Color2;
+extern vmCvar_t etj_CGaz1Color3;
+extern vmCvar_t etj_CGaz1Color4;
+extern vmCvar_t etj_CGazFov;
+extern vmCvar_t etj_CGazTrueness;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -2649,7 +2632,11 @@ extern vmCvar_t etj_snapHUDOffsetY;
 extern vmCvar_t etj_snapHUDHeight;
 extern vmCvar_t etj_snapHUDColor1;
 extern vmCvar_t etj_snapHUDColor2;
+extern vmCvar_t etj_snapHUDHLColor1;
+extern vmCvar_t etj_snapHUDHLColor2;
 extern vmCvar_t etj_snapHUDFov;
+extern vmCvar_t etj_snapHUDHLActive;
+extern vmCvar_t etj_snapHUDTrueness;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
@@ -2674,6 +2661,8 @@ extern vmCvar_t etj_strafeQualityColor;
 extern vmCvar_t etj_strafeQualityShadow;
 extern vmCvar_t etj_strafeQualitySize;
 extern vmCvar_t etj_strafeQualityStyle;
+
+extern vmCvar_t etj_projection;
 
 //
 // cg_main.c
@@ -2740,8 +2729,7 @@ void CG_Letterbox(float xsize, float ysize, qboolean center);
 //
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
 void CG_FillRect(float x, float y, float width, float height, const float *color);
-void CG_FillAngleYaw(float start, float end, float viewangle, float y, float height, float fov, const float* color);
-void CG_FillAngleYaw_Ext(float start, float end, float yaw, float y, float h, float fov, vec4_t const color); // CGaz 5
+void CG_FillAngleYaw(float start, float end, float yaw, float y, float h, float fov, vec4_t const color);
 void PutPixel(float x, float y);
 void DrawLine(float x1, float y1, float x2, float y2, vec4_t color);
 float AngleToScreenX(float angle, float fov);
@@ -4018,6 +4006,7 @@ namespace ETJump
 	class AutoDemoRecorder;
 	class EventLoop;
 	class PlayerEventsHandler;
+	class PmoveUtils;
 
 	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4028,14 +4017,13 @@ namespace ETJump
 	extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	extern std::shared_ptr<EventLoop> eventLoop;
 	extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+	extern std::shared_ptr<PmoveUtils> pmoveUtils;
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
 	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 	bool hideMeCheck(int entityNum);
 	int checkExtraTrace(int value);
 	void onPlayerRespawn(qboolean revived);
 	void runFrameEnd();
-	void DrawCGazHUD();
-	void DrawSnapHUD();
 	void DrawJumpSpeeds();
 	void UpdateJumpSpeeds();
 	void QueueJumpSpeedsReset();
