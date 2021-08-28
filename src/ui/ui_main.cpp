@@ -130,17 +130,6 @@ typedef struct
 	int items;
 } playerType_t;
 
-static playerType_t playerTypes[] =
-{
-	{ "player_window_soldier",    PT_KNIFE | PT_PISTOL | PT_RIFLE | PT_GRENADES     },
-	{ "player_window_medic",      PT_KNIFE | PT_PISTOL | PT_MEDKIT                  },
-	{ "player_window_engineer",   PT_KNIFE | PT_PISTOL | PT_LIGHTONLY | PT_GRENADES },
-	{ "player_window_lieutenant", PT_KNIFE | PT_PISTOL | PT_RIFLE | PT_EXPLOSIVES   },
-	{ "player_window_covertops",  PT_KNIFE | PT_PISTOL | PT_GRENADES                }
-};
-
-int numPlayerTypes = sizeof(playerTypes) / sizeof(playerTypes[0]);
-
 /*typedef struct {
     int			weapindex;
 
@@ -251,7 +240,7 @@ void _UI_MouseEvent(int dx, int dy);
 void _UI_Refresh(int realtime);
 qboolean _UI_IsFullscreen(void);
 
-extern "C" FN_PUBLIC int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11)
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1, intptr_t arg2, intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6)
 {
 	switch (command)
 	{

@@ -1076,8 +1076,8 @@ void CG_AddFlameToScene(flameChunk_t *fHead)
 			while (fNext && !droppedTrail)
 			{
 				if ((Distance(f->org, fNext->org) < ((0.1 + 0.9 * f->lifeFrac) * f->size * 0.35))
-				    &&  (fabs(f->size - fNext->size) < (40.0))
-				    &&  (fabs(f->timeStart - fNext->timeStart) < 100)
+				    &&  (std::abs(f->size - fNext->size) < 40.0)
+				    &&  (std::abs(f->timeStart - fNext->timeStart) < 100)
 				    &&  (DotProduct(f->velDir, fNext->velDir) > 0.99)
 				    )
 				{

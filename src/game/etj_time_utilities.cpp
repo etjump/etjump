@@ -42,14 +42,14 @@ ETJump::Clock ETJump::getCurrentClock()
 
 ETJump::Clock ETJump::toClock(long long timestamp)
 {
-	int hours = timestamp / 6000;
-	int minutes = timestamp / 60000;
+	auto hours = timestamp / 6000;
+	auto minutes = timestamp / 60000;
 	timestamp -= minutes * 60000;
-	int seconds = timestamp / 1000;
+	auto seconds = timestamp / 1000;
 	timestamp -= seconds * 1000;
-	int millis = timestamp;
+	auto millis = timestamp;
 
-	return{ hours, minutes, seconds, millis };
+	return{ static_cast<int>(hours), static_cast<int>(minutes), static_cast<int>(seconds), static_cast<int>(millis) };
 }
 
 ETJump::Date ETJump::getCurrentDate()

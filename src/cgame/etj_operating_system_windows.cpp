@@ -36,7 +36,7 @@ static void addMinimizeButton()
 	char buffer[64];
 	auto *WindowClassName = "Enemy Territory";
 	trap_Cvar_VariableStringBuffer("win_hinstance", buffer, sizeof buffer);
-	const auto etHandle = reinterpret_cast<HINSTANCE>(atol(buffer));
+	const auto etHandle = reinterpret_cast<HINSTANCE>(atoll(buffer));
 	HWND wnd = nullptr;
 	while ((wnd = FindWindowEx(nullptr, wnd, WindowClassName, WindowClassName)))
 	{

@@ -150,7 +150,6 @@ private:
 	bool _recording;	
 	bool _enableLine;
 	bool _enableMarker;
-	bool _existingTJL;
 	bool _jumpRelease;
 	bool _debugVerbose;
 
@@ -161,10 +160,6 @@ private:
 	int _nextAddTime;
 	int _currentRouteToRender;
 	RotationMatrix _currentRotation;
-
-	vec4_c lineColor;
-	vec4_c markerColor;
-	vec4_c markerEndColor;
 
 	// Private inline function.
 	float euclideanDist(const vec3_t a, const vec3_t b)

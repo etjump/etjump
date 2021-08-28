@@ -1113,7 +1113,7 @@ void script_mover_spawn(gentity_t *ent)
 {
 	if (ent->spawnflags & 128)
 	{
-		if (!ent->tagBuffer)
+		if (ent->tagBuffer[0] == '\0')
 		{
 			ent->nextTrain = ent;
 		}

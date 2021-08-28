@@ -863,7 +863,7 @@ typeef enum
 // NOTE: we can only use up to 15 in the client-server stream
 // SA NOTE: should be 31 now (I added 1 bit in msg.c)
 // RF NOTE: if this changes, please update etmain\botfiles\inv.h
-typedef enum
+enum weapon_t : char
 {
 	WP_NONE,                // 0
 	WP_KNIFE,               // 1
@@ -927,7 +927,7 @@ typedef enum
 
 	WP_NUM_WEAPONS          // WolfMP: 32 WolfXP: 51
 	                        // NOTE: this cannot be larger than 64 for AI/player weapons!
-} weapon_t;
+};
 
 // JPW NERVE moved from cg_weapons (now used in g_active) for drop command, actual array in bg_misc.c
 extern int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP];
@@ -1445,7 +1445,7 @@ typedef struct headAnimation_s
 #define ANIM_TOGGLEBIT      (1 << (ANIM_BITS - 1))
 
 // Gordon: renamed these to team_axis/allies, it really was awful....
-typedef enum
+enum team_t : char
 {
 	TEAM_FREE,
 	TEAM_AXIS,
@@ -1453,7 +1453,7 @@ typedef enum
 	TEAM_SPECTATOR,
 
 	TEAM_NUM_TEAMS
-} team_t;
+};
 
 // Time between location updates
 #define TEAM_LOCATION_UPDATE_TIME       1000
@@ -2647,4 +2647,3 @@ const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
 const int BG_LEVEL_NO_PRONE = 1 << 5;
 
 #endif // __BG_PUBLIC_H__
-

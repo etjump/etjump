@@ -2476,11 +2476,6 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboo
 		cmd   = "vchat";
 	}
 
-	if (voiceonly == 2)
-	{
-		voiceonly = qfalse;
-	}
-
 	if (mode == SAY_TEAM || mode == SAY_BUDDY)
 	{
 		CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd, voiceonly, ent - g_entities, color, vsay->id, static_cast<int>(ent->s.pos.trBase[0]), static_cast<int>(ent->s.pos.trBase[1]), static_cast<int>(ent->s.pos.trBase[2]), vsay->variant, vsay->random, vsay->custom));
@@ -4964,8 +4959,8 @@ void Cmd_Class_f(gentity_t *ent)
 			weaponSlot = std::max(std::min(parsedValue, MAX_WEAPS_PER_CLASS), DEFAULT_WEAPON_SLOT);
 		}
 		// suppress error and use DEFAULT_WEAPON_SLOT
-		catch (const std::invalid_argument& err) {}
-		catch (const std::out_of_range& err) {}
+		catch (const std::invalid_argument&) {}
+		catch (const std::out_of_range&) {}
 	}
 	// out of bounds check - if no weapon is set in specified slot
 	const auto classInfo = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, classId);
