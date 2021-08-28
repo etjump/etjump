@@ -1618,6 +1618,7 @@ static void PM_AirMove(void)
 		pml.forward[2] = fmove = 0;
 		smove          = pm->pmext->dtmove == DT_MOVELEFT ? -2070 : 2070;
 		scale          = 1.f;
+		scaleAlt       = 1.f;
 	}
 	else
 	{
