@@ -56,9 +56,55 @@
 * spectators can no longer use `spec(un)lock` [#619](https://github.com/etjump/etjump/pull/619)
 * added missing `speclist` client command for autocompletion [#619](https://github.com/etjump/etjump/pull/619)
 * fixed a case where certain NJD pad combinations allowed to bypass jump delay on standard surfaces [#622](https://github.com/etjump/etjump/pull/622)
-* fixed gun position when leaning with non-zero roll angles [625](https://github.com/etjump/etjump/pull/625)
+* fixed gun position when leaning with non-zero roll angles [#625](https://github.com/etjump/etjump/pull/625)
 * fixed color cvars displaying incorrectly in menus on 64-bit clients [#626](https://github.com/etjump/etjump/pull/626), [#629](https://github.com/etjump/etjump/pull/629)
 * fixed CGaz showing incorrect angles on ground strafing [#635](https://github.com/etjump/etjump/pull/635)
+* fixed client ID 0 sounds being played from too far on OpenAL sound backend [#644](https://github.com/etjump/etjump/pull/644)
+* added strafe quality meter to display percentage of pmove frames spent on optimal accel zone[#641](https://github.com/etjump/etjump/pull/641)
+  * `etj_drawStrafeQuality` - toggle on/off (default `0`)
+  * `etj_strafeQualityX/Y` - X/Y offset (default `0/0`)
+  * `etj_strafeQualityColor`- RGBA color (default `1.0 1.0 1.0 1.0`)
+  * `etj_strafeQualityShadow` - toggle shadow (default `1`)
+  * `etj_strafeQualitySize`- text size (default `3`)
+  * `etj_strafeQualityStyle` - display style, __0__ = label + percentage, __1__ = percentage, __2__ = value only
+* compass is now always drawn on top of HUD [#630](https://github.com/etjump/etjump/pull/630)
+* increased `G_Alloc` memory pool size to avoid crashes on some maps on 64-bit clients/servers [#654](https://github.com/etjump/etjump/pull/654)
+* tied timeruns records are now displayed in white rather than red [#658](https://github.com/etjump/etjump/pull/658)
+* fixed potential segfault with mapstatistics and tokens on shutdown [#653](https://github.com/etjump/etjump/pull/653)
+* added `g_oss` server cvar to improve integration with ETLegacy server browser [#665](https://github.com/etjump/etjump/pull/665)
+* fixed "Make fireteam private?" prompt staying on screen after already disbanding fireteam [#670](https://github.com/etjump/etjump/pull/670)
+* fixed `!listmaps` and `!map` commands ignoring `g_blockedMaps` [#669](https://github.com/etjump/etjump/pull/669)
+* improved `etj_altScoreboard 3` [#673](https://github.com/etjump/etjump/pull/673)
+  * fixed hostname and mapname overlapping - full map name is now always drawn at the expense of truncating hostname
+  * made the scoreboard overall a bit bigger
+* changed and added several features to CGaz and snaphud [#666](https://github.com/etjump/etjump/pull/666)
+  * added `etj_projection` to set projection type of CGaz 1 and snaphud
+    * __0__ = rectilinear projection (default, current)
+    * __1__ = cylindrical projection
+    * __2__ = panini projection
+  * CGaz changes
+    * removed all CGaz HUDs except 2 & 5
+      * CGaz 5 is now CGaz 1
+    * removed unused `etj_CGazWidth` and `etj_CGazAlpha` cvars
+    * renamed following cvars
+      * `etj_CGazColor1` -> `etj_CGaz2Color1`
+      * `etj_CGazColor2` -> `etj_CGaz2Color2`
+      * `etj_CGaz5Color1` -> `etj_CGaz1Color1`
+      * `etj_CGaz5Color2` -> `etj_CGaz1Color2`
+      * `etj_CGaz5Color3` -> `etj_CGaz1Color3`
+      * `etj_CGaz5Color4` -> `etj_CGaz1Color4`
+      * `etj_CGaz5Fov` -> `etj_CGazFov`
+     * added `etj_CGazTrueness` - bitmask value for trueness of CGaz (default __2__)
+       * __1__ = show upmove influence
+       * __2__ = show true groundzones (CGaz 1 only)
+      * `etj_CGaz1Color1-4` default alpha values changed from __1.0__ to __0.75__
+      * `etj_CGazY` default value changed from __260__ to __240__
+  * snaphud changes
+    * added `etj_snapHUDHLActive` - highlight active snapzone (default off)
+      * `etj_snapHUDHLColor1/2` to set colors
+    * added `etj_snapHUDTrueness` - bitmask value for trueness of snaphud (default __0__)
+      * __1__ = show upmove influence
+      * __2__ = show true groundzones
 
 # ETJump 2.4.0
 
