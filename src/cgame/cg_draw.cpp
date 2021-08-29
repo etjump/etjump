@@ -5747,7 +5747,7 @@ static void CG_Draw2D(void)
 		}
 	}
 
-	if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
+	if (!cg.cameraMode && !CG_DrawScoreboard() && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
 	{
 		CG_DrawCrosshair();
 		CG_DrawCrosshairNames();
