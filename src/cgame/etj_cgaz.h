@@ -69,7 +69,7 @@ namespace ETJump
 		float yaw;
 
 		bool canSkipDraw() const;
-		void UpdateCGaz1(int8_t uCmdScale, usercmd_t cmd);
+		void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
 		void UpdateCGaz2(void);
 		float GetSlickGravity();
 		void UpdateDraw(float wishspeed, float accel);

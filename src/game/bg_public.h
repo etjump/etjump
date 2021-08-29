@@ -567,12 +567,12 @@ typedef struct
 	float frametime;
 	qboolean ladder;
 
-	vec3_t velocity;		// we need to store this before PM_Accelerate scales it back
-							// to preserve the true effect friction has on ground speed
-	float wishspeed;
-	float wishspeedAlt;		// wishspeed without upmove component
+	vec3_t velocity;        // we need to store this before PM_Accelerate scales it back
+	                        // to preserve the true effect friction has on ground speed
+
+	float scale;
+	float scaleAlt;         // cmdScale without upmove component
 	float accel;
-	vec3_t wishvel;
 } pmoveExt_t;   // data used both in client and server - store it here
                 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
 

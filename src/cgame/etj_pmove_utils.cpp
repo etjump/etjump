@@ -23,6 +23,7 @@
  */
 
 #include "etj_pmove_utils.h"
+#include "../game/bg_local.h"
 
 // etj_pmove_utils.cpp - helper functions for pmove related calculations
 
@@ -92,6 +93,55 @@ namespace ETJump
 		// based on PM_CmdScale from bg_pmove.c
 		float scale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_SPRINT << 8) && cg.pmext.sprintTime > 50 ? ps->sprintSpeedScale : ps->runSpeedScale;
 		return scale;
+	}
+
+	float PmoveUtils::PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps, pmove_t *pm)
+	{
+		PM_UpdateWishvel(wishvel, cmd, forward, right, up, ps);
+
+		float wishspeed = scale * VectorLength2(wishvel);
+
+		// if walking, account for prone, crouch and water
+		if (pm->pmext->walking)
+		{
+			// clamp the speed lower if prone
+			if (pm->ps->eFlags & EF_PRONE)
+			{
+				if (wishspeed > pm->ps->speed * pm_proneSpeedScale)
+				{
+					wishspeed = pm->ps->speed * pm_proneSpeedScale;
+				}
+			}
+			// clamp the speed lower if ducking
+			else if (pm->ps->pm_flags & PMF_DUCKED)
+			{
+				if (wishspeed > pm->ps->speed * pm->ps->crouchSpeedScale)
+				{
+					wishspeed = pm->ps->speed * pm->ps->crouchSpeedScale;
+				}
+			}
+
+			// clamp the speed lower if wading or walking on the bottom
+			if (pm->pmext->waterlevel)
+			{
+				float waterScale = pm->pmext->waterlevel / 3.0f;
+				if (pm->watertype == CONTENTS_SLIME)
+				{
+					waterScale = 1.0 - (1.0 - pm_slagSwimScale) * waterScale;
+				}
+				else
+				{
+					waterScale = 1.0 - (1.0 - pm_waterSwimScale) * waterScale;
+				}
+
+				if (wishspeed > pm->ps->speed * waterScale)
+				{
+					wishspeed = pm->ps->speed * waterScale;
+				}
+			}
+		}
+
+		return wishspeed;
 	}
 
 	void PmoveUtils::PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps)

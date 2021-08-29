@@ -42,7 +42,11 @@ namespace ETJump
 		// returns either sprintSpeedScale or runSpeedScale
 		static float PM_SprintScale(const playerState_t* ps);
 
+		// calculates wishspeed projected onto flat ground plane
+		static float PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps, pmove_t *pm);
+
 		// updates XY wishvel based on cmdScale and angle vectors
+		// projects velocity down to a flat ground plane
 		// Z vector is taken as input for AngleVectors
 		static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps);
 	};
