@@ -425,6 +425,11 @@ namespace ETJump
 			return true;
 		}
 
+		if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+		{
+			return true;
+		}
+
 		if (cg.zoomedBinoc || cg.zoomedScope)
 		{
 			return true;
