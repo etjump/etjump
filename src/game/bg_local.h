@@ -53,6 +53,8 @@ extern float pm_waterWadeScale;
 extern float pm_slagSwimScale;
 extern float pm_slagWadeScale;
 
+extern float pm_proneSpeedScale;
+
 extern float pm_accelerate;
 extern float pm_airaccelerate;
 extern float pm_wateraccelerate;

@@ -34,17 +34,11 @@
 
 namespace ETJump
 {
-	void Snaphud::InitSnaphud(int8_t uCmdScale, usercmd_t cmd)
+	void Snaphud::InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd)
 	{
-		vec3_t wishvel;
-		VectorCopy(pm->pmext->wishvel, wishvel);
-		// PmoveSingle can return 0 as wishspeed, in which case nothing is drawn
-		// but we always want to draw snaphud, so set wishspeed to "default" speed
-		// and keys to default key combination if no user input
+		// set default key combination if no user input
 		if (!cmd.forwardmove && !cmd.rightmove)
 		{
-			pm->pmext->wishspeed = ps->speed * ps->sprintSpeedScale;
-			pm->pmext->wishspeedAlt = ps->speed * ps->sprintSpeedScale;
 			cmd.forwardmove = uCmdScale;
 			cmd.rightmove = uCmdScale;
 
@@ -61,7 +55,7 @@ namespace ETJump
 	{
 		snap.maxAccel = (unsigned char)(snap.a + 0.5f);
 		unsigned char xnyAccel = (unsigned char)(snap.a / sqrtf(2.0f) + 0.5f); // xAccel and yAccel at 45deg
-                                                                               // ^       ^  ^
+		                                                                      // ^       ^  ^
 
 		// find the last shortangle in each snapzone which is smaller than 45deg (= 8192) using
 		//  /asin -> increasing angles
@@ -80,18 +74,18 @@ namespace ETJump
 		}
 
 		// merge 2 sorted arrays in the lowerhalf
-		unsigned char bi = snap.maxAccel;						// begin i
-		unsigned char ei = snap.maxAccel + xnyAccel;			// end i
-		unsigned char bj = snap.maxAccel + xnyAccel;			// begin j
-		unsigned char ej = snap.maxAccel + snap.maxAccel;		// end j
+		unsigned char bi = snap.maxAccel;                       // begin i
+		unsigned char ei = snap.maxAccel + xnyAccel;            // end i
+		unsigned char bj = snap.maxAccel + xnyAccel;            // begin j
+		unsigned char ej = snap.maxAccel + snap.maxAccel;       // end j
 		unsigned char i = bi;
 		unsigned char j = bj;
 		unsigned char k = 0;
 		unsigned char xAccel_ = snap.maxAccel - (j - bj);
 		unsigned char yAccel_ = i - bi;
 		float absAccel_;
-		snap.minAbsAccel = (float)(2 * snap.maxAccel);		// upperbound > sqrt(2).s.maxAccel
-		snap.maxAbsAccel = 0;								// lowerbound
+		snap.minAbsAccel = (float)(2 * snap.maxAccel);      // upperbound > sqrt(2).s.maxAccel
+		snap.maxAbsAccel = 0;                               // lowerbound
 		while (i < ei && j < ej)
 		{
 			absAccel_ = sqrtf((float)(xAccel_ * xAccel_ + yAccel_ * yAccel_));
@@ -207,17 +201,28 @@ namespace ETJump
 		// get correct pmove state
 		pm = PmoveUtils::getPmove(cmd);
 
-		InitSnaphud(uCmdScale, cmd);
+		// show upmove influence?
+		float scale = etj_snapHUDTrueness.integer & static_cast<int>(SnapTrueness::SNAP_JUMPCROUCH)
+			? pm->pmext->scale
+			: pm->pmext->scaleAlt;
+
+		// calculate wishspeed
+		vec3_t wishvel;
+		float wishspeed = PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, *ps, pm);
+
+		// set default wishspeed for drawing if no user input
+		if (!cmd.forwardmove && !cmd.rightmove)
+		{
+			wishspeed = ps->speed * ps->sprintSpeedScale;
+		}
+
+		InitSnaphud(wishvel, uCmdScale, cmd);
 
 		// show true groundzones?
 		float accel = (etj_snapHUDTrueness.integer & static_cast<int>(SnapTrueness::SNAP_GROUND))
 			? pm->pmext->accel : pm_airaccelerate;
 
-		// show upmove influence?
-		float speed = (etj_snapHUDTrueness.integer & static_cast<int>(SnapTrueness::SNAP_JUMPCROUCH))
-			? pm->pmext->wishspeed : pm->pmext->wishspeedAlt;
-
-		float a = accel * speed * pm->pmext->frametime;
+		float a = accel * wishspeed * pm->pmext->frametime;
 		if (a != snap.a)
 		{
 			snap.a = a;

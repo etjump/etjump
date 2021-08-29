@@ -106,7 +106,9 @@ namespace ETJump
 
 		// check whether user input is good
 		const float speed = VectorLength2(ps.velocity);
-		if (speed < pm->pmext->wishspeed)
+		vec3_t wishvel;
+		const float wishspeed = PmoveUtils::PM_GetWishspeed(wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, ps, pm);
+		if (speed < wishspeed)
 		{
 			// possibly good frame under ground speed if speed increased
 			// note that without speed increased you could go forward in a

@@ -32,10 +32,8 @@
 
 namespace ETJump
 {
-	void CGaz::UpdateCGaz1(int8_t uCmdScale, usercmd_t cmd)
+	void CGaz::UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd)
 	{
-		vec3_t wishvel;
-		VectorCopy(pm->pmext->wishvel, wishvel);
 		// set default key combination if no user input
 		if (!cmd.forwardmove && !cmd.rightmove)
 		{
@@ -144,22 +142,25 @@ namespace ETJump
 		// get correct pmove state
 		pm = PmoveUtils::getPmove(cmd);
 
+		// show upmove influence?
+		float scale = etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_JUMPCROUCH)
+			? pm->pmext->scale
+			: pm->pmext->scaleAlt;
+
+		vec3_t wishvel;
+		float wishspeed = PmoveUtils::PM_GetWishspeed(wishvel, scale, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, *ps, pm);
+
 		// set default wishspeed for drawing if no user input
 		if (!cmd.forwardmove && !cmd.rightmove)
 		{
-			pm->pmext->wishspeed = ps->speed * ps->sprintSpeedScale;
-			pm->pmext->wishspeedAlt = ps->speed * ps->sprintSpeedScale;
+			wishspeed = ps->speed * ps->sprintSpeedScale;
 		}
-
-		// show upmove influence?
-		const float wishspeed = etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_JUMPCROUCH)
-			? pm->pmext->wishspeed : pm->pmext->wishspeedAlt;
 
 		switch (etj_drawCGaz.integer)
 		{
 		case 1:
 			UpdateDraw(wishspeed, pm->pmext->accel);
-			UpdateCGaz1(uCmdScale, cmd);
+			UpdateCGaz1(wishvel, uCmdScale, cmd);
 			break;
 		case 2:
 			UpdateDraw(wishspeed, pm->pmext->accel);

@@ -1603,7 +1603,7 @@ static void PM_AirMove(void)
 	vec3_t    wishvel;
 	float     fmove, smove;
 	vec3_t    wishdir;
-	float     wishspeed, wishspeedAlt;
+	float     wishspeed;
 	float     scale, scaleAlt;
 	usercmd_t cmd;
 
@@ -1646,13 +1646,11 @@ static void PM_AirMove(void)
 	VectorCopy(wishvel, wishdir);
 	wishspeed  = VectorNormalize(wishdir);
 	wishspeed *= scale;
-	wishspeedAlt = scaleAlt * VectorLength2(wishvel);
 
 	// ETJump: store wishspeed and accel in pmext
-	pm->pmext->wishspeed = wishspeed;
-	pm->pmext->wishspeedAlt = wishspeedAlt;
+	pm->pmext->scale = scale;
+	pm->pmext->scaleAlt = scaleAlt;
 	pm->pmext->accel = pm_airaccelerate;
-	VectorCopy(wishvel, pm->pmext->wishvel);
 	VectorCopy(pm->ps->velocity, pm->pmext->velocity);
 
 	// not on ground, so little effect on velocity
@@ -1703,7 +1701,7 @@ static void PM_WalkMove(void)
 	vec3_t    wishvel;
 	float     fmove, smove;
 	vec3_t    wishdir;
-	float     wishspeed, wishspeedAlt;
+	float     wishspeed;
 	float     scale, scaleAlt;
 	usercmd_t cmd;
 	float     accelerate;
@@ -1775,6 +1773,10 @@ static void PM_WalkMove(void)
 	scale    = PM_CmdScale(&cmd);
 	scaleAlt = PM_CmdScaleAlt(&cmd);
 
+	// ETJump: store values in pmext
+	pm->pmext->scale = scale;
+	pm->pmext->scaleAlt = scaleAlt;
+
 // Ridah, moved this down, so we use the actual movement direction
 	// set the movementDir so clients can rotate the legs for strafing
 //	PM_SetMovementDir();
@@ -1800,7 +1802,6 @@ static void PM_WalkMove(void)
 	VectorCopy(wishvel, wishdir);
 	wishspeed  = VectorNormalize(wishdir);
 	wishspeed *= scale;
-	wishspeedAlt = scaleAlt * VectorLength2(wishvel);
 	
 	// clamp the speed lower if prone
 	if (pm->ps->eFlags & EF_PRONE)
@@ -1808,11 +1809,6 @@ static void PM_WalkMove(void)
 		if (wishspeed > pm->ps->speed * pm_proneSpeedScale)
 		{
 			wishspeed = pm->ps->speed * pm_proneSpeedScale;
-		}
-
-		if (wishspeedAlt > pm->ps->speed * pm_proneSpeedScale)
-		{
-			wishspeedAlt = pm->ps->speed * pm_proneSpeedScale;
 		}
 	}
 	else if (pm->ps->pm_flags & PMF_DUCKED)       // clamp the speed lower if ducking
@@ -1822,11 +1818,6 @@ static void PM_WalkMove(void)
 		if (wishspeed > pm->ps->speed * pm->ps->crouchSpeedScale)
 		{
 			wishspeed = pm->ps->speed * pm->ps->crouchSpeedScale;
-		}
-
-		if (wishspeedAlt > pm->ps->speed * pm->ps->crouchSpeedScale)
-		{
-			wishspeedAlt = pm->ps->speed * pm->ps->crouchSpeedScale;
 		}
 	}
 
@@ -1849,11 +1840,6 @@ static void PM_WalkMove(void)
 		{
 			wishspeed = pm->ps->speed * waterScale;
 		}
-
-		if (wishspeedAlt > pm->ps->speed * waterScale)
-		{
-			wishspeedAlt = pm->ps->speed * waterScale;
-		}
 	}
 
 	// when a player gets hit, they temporarily lose
@@ -1868,10 +1854,7 @@ static void PM_WalkMove(void)
 	}
 
 	// ETJump: store values in pmext
-	pm->pmext->wishspeed = wishspeed;
-	pm->pmext->wishspeedAlt = wishspeedAlt;
 	pm->pmext->accel = accelerate;
-	VectorCopy(wishvel, pm->pmext->wishvel);
 	VectorCopy(pm->ps->velocity, pm->pmext->velocity);
 
 	PM_Accelerate(wishdir, wishspeed, accelerate);
