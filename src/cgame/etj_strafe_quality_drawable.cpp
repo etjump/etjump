@@ -93,7 +93,7 @@ namespace ETJump
 		// to last update time, using commandTime for clients for 100% accuracy
 		// and cg.time for spectators/demos as an approximation
 		// note: this will be wrong for clients running < 125FPS... oh well
-		const uint32_t frameTime = (pm->ps->pm_flags & PMF_FOLLOW || cg.demoPlayback)
+		const auto frameTime = (pm->ps->pm_flags & PMF_FOLLOW || cg.demoPlayback)
 			? cg.time
 			: pm->ps->commandTime;
 

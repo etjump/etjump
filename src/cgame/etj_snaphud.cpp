@@ -343,7 +343,7 @@ namespace ETJump
 
 		// get number of snapzones
 		auto snapCount = 0;
-		for (auto j = 0; j < s.snap.zones.size(); j++)
+		for (unsigned short j = 0; j < s.snap.zones.size(); j++)
 		{
 			if (s.snap.zones[j] == 0)
 			{
