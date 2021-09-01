@@ -47,7 +47,7 @@ namespace ETJump {
 		void parseColor();
 		void resetStrafeQuality();
 		bool canSkipDraw() const;
-		bool canSkipUpdate(usercmd_t cmd, uint32_t frameTime);
+		bool canSkipUpdate(usercmd_t cmd, int frameTime);
 
 		pmove_t* pm;
 

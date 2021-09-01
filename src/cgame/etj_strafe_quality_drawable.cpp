@@ -195,7 +195,7 @@ namespace ETJump
 			&cgs.media.limboFont1);
 	}
 
-	bool StrafeQuality::canSkipUpdate(usercmd_t cmd, uint32_t frameTime)
+	bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime)
 	{
 		// only count this frame if it's relevant to pmove
 		// this makes sure that if clients FPS > 125
