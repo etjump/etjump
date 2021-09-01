@@ -10449,7 +10449,7 @@ cvarTable_t cvarTable[] =
 	{ NULL,                             "cg_crosshairColorAlt",            "White",                      CVAR_ARCHIVE                   },
 	{ NULL,                             "cg_coronafardist",                "1536",                       CVAR_ARCHIVE                   },
 	{ NULL,                             "cg_wolfparticles",                "1",                          CVAR_ARCHIVE                   },
-	{ NULL,                             "g_password",                      "none",                       CVAR_USERINFO                  },
+	{ NULL,                             "g_password",                      "none",                       CVAR_TEMP                      },
 	{ NULL,                             "g_antilag",                       "1",                          CVAR_SERVERINFO | CVAR_ARCHIVE },
 	{ NULL,                             "g_warmup",                        "60",                         CVAR_ARCHIVE                   },
 	{ NULL,                             "g_lms_roundlimit",                "3",                          CVAR_ARCHIVE                   },
