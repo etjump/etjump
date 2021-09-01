@@ -31,6 +31,7 @@ namespace ETJump {
 		double _totalFrames{ 0 };
 		double _goodFrames{ 0 };
 		double _strafeQuality{ 0 };
+		int _lastUpdateTime{ 0 };
 
 		float _oldSpeed{ 0 };
 		int _team{ 0 };
@@ -45,6 +46,8 @@ namespace ETJump {
 		void startListeners();
 		void parseColor();
 		void resetStrafeQuality();
+		bool canSkipDraw() const;
+		bool canSkipUpdate(usercmd_t cmd, uint32_t frameTime);
 
 		pmove_t* pm;
 
