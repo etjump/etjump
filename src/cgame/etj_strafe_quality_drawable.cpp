@@ -67,7 +67,7 @@ namespace ETJump
 	void StrafeQuality::beforeRender()
 	{
 		// get player state
-		const playerState_t& ps = *getValidPlayerState();
+		const playerState_t& ps = cg.predictedPlayerState;
 
 		// get usercmd
 		// cmdScale is only checked here to be 0 or !0
@@ -88,20 +88,22 @@ namespace ETJump
 			resetStrafeQuality();
 		}
 
-		// don't count frames if not strafing
-		if (cmd.forwardmove == 0 && cmd.rightmove == 0)
-		{
-			return;
-		}
+		// check if current frame should count towards strafe quality
+		// we check for framerate dependency here by comparing current time
+		// to last update time, using commandTime for clients for 100% accuracy
+		// and cg.time for spectators/demos as an approximation
+		// note: this will be wrong for clients running < 125FPS... oh well
+		const auto frameTime = (pm->ps->pm_flags & PMF_FOLLOW || cg.demoPlayback)
+			? cg.time
+			: pm->ps->commandTime;
 
-		// don't count frames if not in air and not on ice
-		if (ps.groundEntityNum != ENTITYNUM_NONE &&
-				!(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK))
+		if (canSkipUpdate(cmd, frameTime))
 		{
 			return;
 		}
 
 		// count this frame towards strafe quality
+		_lastUpdateTime = frameTime;
 		++_totalFrames;
 
 		// check whether user input is good
@@ -152,8 +154,7 @@ namespace ETJump
 	void StrafeQuality::render() const
 	{
 		// check whether to skip render
-		if (!etj_drawStrafeQuality.integer || cg.showScores ||
-				cg.scoreFadeTime + FADE_TIME > cg.time || _team == TEAM_SPECTATOR)
+		if (canSkipDraw())
 		{
 			return;
 		}
@@ -192,5 +193,61 @@ namespace ETJump
 		// draw quality on screen
 		CG_Text_Paint_Ext(x, y, size, size, _color, str, 0, 0, textStyle,
 			&cgs.media.limboFont1);
+	}
+
+	bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime)
+	{
+		// only count this frame if it's relevant to pmove
+		// this makes sure that if clients FPS > 125
+		// we only count frames at pmove_msec intervals
+		if (_lastUpdateTime + pm->pmove_msec > frameTime)
+		{
+			return true;
+		}
+
+		// not strafing
+		if (cmd.forwardmove == 0 && cmd.rightmove == 0)
+		{
+			return true;
+		}
+
+		// don't update if not in air or on ice
+		if (pm->ps->groundEntityNum != ENTITYNUM_NONE && !(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK))
+		{
+			return true;
+		}
+
+		if (pm->ps->pm_type == PM_NOCLIP)
+		{
+			return true;
+		}
+
+		// no updates underwater or on ladders
+		if (pm->pmext->waterlevel > 1 || pm->pmext->ladder)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool StrafeQuality::canSkipDraw() const
+	{
+		if (!etj_drawStrafeQuality.integer)
+		{
+			return true;
+		}
+
+		if (_team == TEAM_SPECTATOR)
+		{
+			return true;
+		}
+
+		if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+		{
+			return true;
+		}
+
+		return false;
 	}
 } // namespace ETJump

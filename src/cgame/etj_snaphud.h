@@ -39,6 +39,7 @@ namespace ETJump
 	private:
 		bool canSkipDraw() const;
 		void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
+		void UpdateMaxSnapZones(void);
 		void UpdateSnapState(void);
 
 		enum class SnapTrueness

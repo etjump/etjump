@@ -193,6 +193,20 @@ namespace ETJump
 		snap.zones[2 * snap.maxAccel] = snap.zones[0] + 16384;
 	}
 
+	void Snaphud::UpdateMaxSnapZones(void)
+	{
+		// calculate max number of snapzones in 1 quadrant
+		// this needs to be dynamically calculated because
+		// ps->speed can be modified by target_scale_velocity
+		// on default settings, the number of zones is 57
+		const int MAX_SNAPHUD_ZONES_Q1 = round(ps->speed * ps->sprintSpeedScale / (1000.0f / pmove_msec.integer) * pm_accelerate) * 2 + 1;
+
+		snap.zones.resize(MAX_SNAPHUD_ZONES_Q1);
+		snap.xAccel.resize(MAX_SNAPHUD_ZONES_Q1);
+		snap.yAccel.resize(MAX_SNAPHUD_ZONES_Q1);
+		snap.absAccel.resize(MAX_SNAPHUD_ZONES_Q1);
+	}
+
 	void Snaphud::beforeRender()
 	{
 		const int8_t uCmdScale = ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8) ? CMDSCALE_WALK : CMDSCALE_DEFAULT;
@@ -226,17 +240,7 @@ namespace ETJump
 		if (a != snap.a)
 		{
 			snap.a = a;
-			// calculate max number of snapzones in 1 quadrant
-			// this needs to be dynamically calculated here because
-			// ps->speed can be modified by target_scale_velocity
-			// on default settings, the number of zones is 57
-			const int MAX_SNAPHUD_ZONES_Q1 = round(ps->speed * ps->sprintSpeedScale / ( 1000.0f / pmove_msec.integer) * pm_accelerate) * 2 + 1;
-
-			snap.zones.resize(MAX_SNAPHUD_ZONES_Q1);
-			snap.xAccel.resize(MAX_SNAPHUD_ZONES_Q1);
-			snap.yAccel.resize(MAX_SNAPHUD_ZONES_Q1);
-			snap.absAccel.resize(MAX_SNAPHUD_ZONES_Q1);
-
+			UpdateMaxSnapZones();
 			UpdateSnapState();
 		}
 	}
@@ -295,40 +299,10 @@ namespace ETJump
 		}
 	}
 
-	// TODO: this should be removed
-	constexpr int SNAPHUD_MAXZONES{ 128 };
-	float         snapSpeed;
-	float         snapZones[SNAPHUD_MAXZONES];
-	int           snapCount;
-
-	static int QDECL sortSnapZones(const void *a, const void *b)
-	{
-		return *(float *)a - *(float *)b;
-	}
-
-	static void UpdateSnapHUDSettings(float speed)
-	{
-		float step;
-
-		snapSpeed = speed;
-		speed    /= 125;
-		snapCount = 0;
-
-		for (step = floor(speed + 0.5) - 0.5; step > 0 && snapCount < SNAPHUD_MAXZONES - 2; step--)
-		{
-			snapZones[snapCount] = RAD2DEG(acos(step / speed));
-			snapCount++;
-			snapZones[snapCount] = RAD2DEG(asin(step / speed));
-			snapCount++;
-		}
-
-		qsort(snapZones, snapCount, sizeof(snapZones[0]), sortSnapZones);
-		snapZones[snapCount] = snapZones[0] + 90;
-	}
-
-	// TODO: this should be refactored to use the new snaphud code
 	bool Snaphud::inMainAccelZone(const playerState_t& ps, pmove_t* pm)
 	{
+		static Snaphud s;
+
 		// get player yaw
 		float yaw = ps.viewangles[YAW];
 
@@ -346,12 +320,14 @@ namespace ETJump
 		// get opt angle
 		float opt = CGaz::getOptAngle(ps, pm);
 
-		// update snapzones even if snaphud not drawn
+		// update snapzones even if snaphud is not drawn
 		const float scale = PmoveUtils::PM_SprintScale(&ps);
-		const float speed = cg.snap->ps.speed * scale;
-		if (speed != snapSpeed)
+		const float speed = cg.snap->ps.speed * scale * pm->pmext->frametime;
+		if (speed != s.snap.a)
 		{
-			UpdateSnapHUDSettings(speed);
+			s.snap.a = speed;
+			s.UpdateMaxSnapZones();
+			s.UpdateSnapState();
 		}
 
 		// necessary 45 degrees shift to match snapzones
@@ -365,10 +341,21 @@ namespace ETJump
 		yaw = std::fmod(AngleNormalize360(yaw), 90);
 		opt = std::fmod(AngleNormalize360(opt), 90);
 
+		// get number of snapzones
+		auto snapCount = 0;
+		for (unsigned short j = 0; j < s.snap.zones.size(); j++)
+		{
+			if (s.snap.zones[j] == 0)
+			{
+				break;
+			}
+			snapCount = j;
+		}
+
 		// get snapzone index which corresponds to the *next* snapzone
-		int i = 0;
 		// linear search is good enough here as snapCount is always relatively small
-		while (i < snapCount && opt >= snapZones[i])
+		int i = 0;
+		while (i < snapCount && opt >= SHORT2DEG(s.snap.zones[i]))
 		{
 			++i;
 		}
@@ -380,7 +367,7 @@ namespace ETJump
 		}
 
 		// get the snapzone
-		const float& snap = snapZones[i];
+		const float& snap = SHORT2DEG(s.snap.zones[i]);
 		// snap now contains the yaw value corresponding to the start of the next snapzone,
 		// or equivalently the end of the current snapzone
 

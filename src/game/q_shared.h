@@ -521,6 +521,7 @@ extern vec4_t g_color_table[32];
 #define RAD2DEG(a) (((a) * 180.0f) / M_PI)
 #define RAD2SHORT(a) ((a) * (32768.f / (float)M_PI))
 #define SHORT2RAD(a) ((a) * ((float)M_PI / 32768.f))
+#define SHORT2DEG(a) (((a) / 32768.f) * 180.0f)
 
 struct cplane_s;
 
