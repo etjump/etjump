@@ -362,7 +362,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_log,                       "g_log",                       "",                                                       CVAR_ARCHIVE,                                    0, qfalse},
 	{ &g_logSync,                   "g_logSync",                   "0",                                                      CVAR_ARCHIVE,                                    0, qfalse},
 
-	{ &g_password,                  "g_password",                  "none",                                                   CVAR_USERINFO,                                   0, qfalse},
+	{ &g_password,                  "g_password",                  "none",                                                   CVAR_TEMP,                                       0, qfalse},
 	{ &sv_privatepassword,          "sv_privatepassword",          "",                                                       CVAR_TEMP,                                       0, qfalse},
 	{ &g_banIPs,                    "g_banIPs",                    "",                                                       CVAR_ARCHIVE,                                    0, qfalse},
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
