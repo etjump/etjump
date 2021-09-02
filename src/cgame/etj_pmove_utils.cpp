@@ -36,7 +36,7 @@ namespace ETJump
 	{
 		usercmd_t cmd;
 
-		if (!cg.demoPlayback && !(ps.pm_flags & PMF_FOLLOW))
+		if (!cg.demoPlayback && !(cg.snap->ps.pm_flags & PMF_FOLLOW))
 		{
 			int32_t const cmdNum = trap_GetCurrentCmdNumber();
 			trap_GetUserCmd(cmdNum, &cmd);
