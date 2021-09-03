@@ -193,18 +193,18 @@ namespace ETJump
 		snap.zones[2 * snap.maxAccel] = snap.zones[0] + 16384;
 	}
 
-	void Snaphud::UpdateMaxSnapZones(float wishspeed)
+	void Snaphud::UpdateMaxSnapZones(float wishspeed, pmove_t *pm)
 	{
 		// calculate max number of snapzones in 1 quadrant
 		// this needs to be dynamically calculated because
 		// ps->speed can be modified by target_scale_velocity
-		// on default settings, the number of zones is 57
-		const int MAX_SNAPHUD_ZONES_Q1 = round(wishspeed / (1000.0f / pmove_msec.integer) * pm_accelerate) * 2 + 1;
+		// default: 57 on ground, 7 in air (352 wishspeed)
+		const int maxSnaphudZonesQ1 = round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) * 2 + 1;
 
-		snap.zones.resize(MAX_SNAPHUD_ZONES_Q1);
-		snap.xAccel.resize(MAX_SNAPHUD_ZONES_Q1);
-		snap.yAccel.resize(MAX_SNAPHUD_ZONES_Q1);
-		snap.absAccel.resize(MAX_SNAPHUD_ZONES_Q1);
+		snap.zones.resize(maxSnaphudZonesQ1);
+		snap.xAccel.resize(maxSnaphudZonesQ1);
+		snap.yAccel.resize(maxSnaphudZonesQ1);
+		snap.absAccel.resize(maxSnaphudZonesQ1);
 	}
 
 	void Snaphud::beforeRender()
@@ -237,10 +237,18 @@ namespace ETJump
 			? pm->pmext->accel : pm_airaccelerate;
 
 		float a = accel * wishspeed * pm->pmext->frametime;
+
+		// clamp the max value to match max scaling of target_scale_velocity
+		if (a > 85)
+		{
+			a = 85;
+		}
+
 		if (a != snap.a)
 		{
+			CG_Printf("a: %.6f\n", a);
 			snap.a = a;
-			UpdateMaxSnapZones(wishspeed);
+			UpdateMaxSnapZones(wishspeed, pm);
 			UpdateSnapState();
 		}
 	}
@@ -323,11 +331,17 @@ namespace ETJump
 		// update snapzones even if snaphud is not drawn
 		vec3_t wishvel;
 		const float wishspeed = PmoveUtils::PM_GetWishspeed(wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, ps, pm);
-		const float speed = wishspeed * pm->pmext->frametime;
+		float speed = wishspeed * pm->pmext->frametime;
+
+		// clamp the max value to match max scaling of target_scale_velocity
+		if (speed > 85)
+		{
+			speed = 85;
+		}
 		if (speed != s.snap.a)
 		{
 			s.snap.a = speed;
-			s.UpdateMaxSnapZones(wishspeed);
+			s.UpdateMaxSnapZones(wishspeed, pm);
 			s.UpdateSnapState();
 		}
 
@@ -343,15 +357,7 @@ namespace ETJump
 		opt = std::fmod(AngleNormalize360(opt), 90);
 
 		// get number of snapzones
-		auto snapCount = 0;
-		for (unsigned short j = 0; j < s.snap.zones.size(); j++)
-		{
-			if (s.snap.zones[j] == 0)
-			{
-				break;
-			}
-			snapCount = j;
-		}
+		auto snapCount = s.snap.zones.size() - 1;
 
 		// get snapzone index which corresponds to the *next* snapzone
 		// linear search is good enough here as snapCount is always relatively small
