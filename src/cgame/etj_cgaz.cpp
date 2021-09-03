@@ -400,7 +400,7 @@ namespace ETJump
 			return true;
 		}
 
-		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR || ps->pm_type == PM_NOCLIP)
 		{
 			return true;
 		}
