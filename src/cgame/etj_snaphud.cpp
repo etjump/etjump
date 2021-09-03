@@ -246,7 +246,6 @@ namespace ETJump
 
 		if (a != snap.a)
 		{
-			CG_Printf("a: %.6f\n", a);
 			snap.a = a;
 			UpdateMaxSnapZones(wishspeed, pm);
 			UpdateSnapState();
