@@ -361,7 +361,7 @@ namespace ETJump
 
 		// get snapzone index which corresponds to the *next* snapzone
 		// linear search is good enough here as snapCount is always relatively small
-		int i = 0;
+		unsigned int i = 0;
 		while (i < snapCount && opt >= SHORT2DEG(s.snap.zones[i]))
 		{
 			++i;
