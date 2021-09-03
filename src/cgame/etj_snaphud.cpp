@@ -55,7 +55,7 @@ namespace ETJump
 	{
 		snap.maxAccel = (unsigned char)(snap.a + 0.5f);
 		unsigned char xnyAccel = (unsigned char)(snap.a / sqrtf(2.0f) + 0.5f); // xAccel and yAccel at 45deg
-		                                                                      // ^       ^  ^
+		                                                                       // ^       ^  ^
 
 		// find the last shortangle in each snapzone which is smaller than 45deg (= 8192) using
 		//  /asin -> increasing angles
@@ -193,13 +193,13 @@ namespace ETJump
 		snap.zones[2 * snap.maxAccel] = snap.zones[0] + 16384;
 	}
 
-	void Snaphud::UpdateMaxSnapZones(void)
+	void Snaphud::UpdateMaxSnapZones(float wishspeed)
 	{
 		// calculate max number of snapzones in 1 quadrant
 		// this needs to be dynamically calculated because
 		// ps->speed can be modified by target_scale_velocity
 		// on default settings, the number of zones is 57
-		const int MAX_SNAPHUD_ZONES_Q1 = round(ps->speed * ps->sprintSpeedScale / (1000.0f / pmove_msec.integer) * pm_accelerate) * 2 + 1;
+		const int MAX_SNAPHUD_ZONES_Q1 = round(wishspeed / (1000.0f / pmove_msec.integer) * pm_accelerate) * 2 + 1;
 
 		snap.zones.resize(MAX_SNAPHUD_ZONES_Q1);
 		snap.xAccel.resize(MAX_SNAPHUD_ZONES_Q1);
@@ -240,7 +240,7 @@ namespace ETJump
 		if (a != snap.a)
 		{
 			snap.a = a;
-			UpdateMaxSnapZones();
+			UpdateMaxSnapZones(wishspeed);
 			UpdateSnapState();
 		}
 	}
@@ -321,12 +321,13 @@ namespace ETJump
 		float opt = CGaz::getOptAngle(ps, pm);
 
 		// update snapzones even if snaphud is not drawn
-		const float scale = PmoveUtils::PM_SprintScale(&ps);
-		const float speed = cg.snap->ps.speed * scale * pm->pmext->frametime;
+		vec3_t wishvel;
+		const float wishspeed = PmoveUtils::PM_GetWishspeed(wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, ps, pm);
+		const float speed = wishspeed * pm->pmext->frametime;
 		if (speed != s.snap.a)
 		{
 			s.snap.a = speed;
-			s.UpdateMaxSnapZones();
+			s.UpdateMaxSnapZones(wishspeed);
 			s.UpdateSnapState();
 		}
 
@@ -407,7 +408,7 @@ namespace ETJump
 			return true;
 		}
 
-		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR || ps->pm_type == PM_NOCLIP)
 		{
 			return true;
 		}

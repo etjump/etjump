@@ -1647,7 +1647,7 @@ static void PM_AirMove(void)
 	wishspeed  = VectorNormalize(wishdir);
 	wishspeed *= scale;
 
-	// ETJump: store wishspeed and accel in pmext
+	// ETJump: store values in pmext
 	pm->pmext->scale = scale;
 	pm->pmext->scaleAlt = scaleAlt;
 	pm->pmext->accel = pm_airaccelerate;
@@ -1773,10 +1773,6 @@ static void PM_WalkMove(void)
 	scale    = PM_CmdScale(&cmd);
 	scaleAlt = PM_CmdScaleAlt(&cmd);
 
-	// ETJump: store values in pmext
-	pm->pmext->scale = scale;
-	pm->pmext->scaleAlt = scaleAlt;
-
 // Ridah, moved this down, so we use the actual movement direction
 	// set the movementDir so clients can rotate the legs for strafing
 //	PM_SetMovementDir();
@@ -1854,6 +1850,8 @@ static void PM_WalkMove(void)
 	}
 
 	// ETJump: store values in pmext
+	pm->pmext->scale = scale;
+	pm->pmext->scaleAlt = scaleAlt;
 	pm->pmext->accel = accelerate;
 	VectorCopy(pm->ps->velocity, pm->pmext->velocity);
 
