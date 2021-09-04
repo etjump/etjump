@@ -60,7 +60,7 @@
 * fixed color cvars displaying incorrectly in menus on 64-bit clients [#626](https://github.com/etjump/etjump/pull/626), [#629](https://github.com/etjump/etjump/pull/629)
 * fixed CGaz showing incorrect angles on ground strafing [#635](https://github.com/etjump/etjump/pull/635)
 * fixed client ID 0 sounds being played from too far on OpenAL sound backend [#644](https://github.com/etjump/etjump/pull/644)
-* added strafe quality meter to display percentage of pmove frames spent on optimal accel zone[#641](https://github.com/etjump/etjump/pull/641)
+* added strafe quality meter to display percentage of pmove frames spent on optimal accel zone [#641](https://github.com/etjump/etjump/pull/641)
   * `etj_drawStrafeQuality` - toggle on/off (default `0`)
   * `etj_strafeQualityX/Y` - X/Y offset (default `0/0`)
   * `etj_strafeQualityColor`- RGBA color (default `1.0 1.0 1.0 1.0`)
@@ -77,7 +77,9 @@
 * improved `etj_altScoreboard 3` [#673](https://github.com/etjump/etjump/pull/673)
   * fixed hostname and mapname overlapping - full map name is now always drawn at the expense of truncating hostname
   * made the scoreboard overall a bit bigger
-* changed and added several features to CGaz and snaphud [#666](https://github.com/etjump/etjump/pull/666)
+* changed and added several features to CGaz and snaphud [#666](https://github.com/etjump/etjump/pull/666) [#686](https://github.com/etjump/etjump/pull/686)
+  * CGaz/snaphud are no longer drawn on ladders or underwater
+  * CGaz/snaphud are no longer drawn while noclipping
   * added `etj_projection` to set projection type of CGaz 1 and snaphud
     * __0__ = rectilinear projection (default, current)
     * __1__ = cylindrical projection
@@ -105,6 +107,8 @@
     * added `etj_snapHUDTrueness` - bitmask value for trueness of snaphud (default __0__)
       * __1__ = show upmove influence
       * __2__ = show true groundzones
+* `g_password` is no longer stored in `ClientUserinfo` [#682](https://github.com/etjump/etjump/pull/682)
+* clamped `target_scale_velocity` `BASE` scaling to __0.25__ - __3.0__ [#687](https://github.com/etjump/etjump/pull/687)
 
 # ETJump 2.4.0
 
