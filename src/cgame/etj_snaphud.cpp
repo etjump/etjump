@@ -344,6 +344,13 @@ namespace ETJump
 			s.UpdateSnapState();
 		}
 
+		// early out if we have no snapzones yet, this can happen for a brief moment
+		// when swapping teams since we're transitioning from cg.snap->ps to cg.predictedPlayerstate
+		if (s.snap.zones.size() == 0)
+		{
+			return false;
+		}
+
 		// necessary 45 degrees shift to match snapzones
 		if ((cmd.forwardmove != 0 && cmd.rightmove != 0) || (cmd.forwardmove == 0 && cmd.rightmove == 0))
 		{
