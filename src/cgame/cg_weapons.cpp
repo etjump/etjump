@@ -2658,7 +2658,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent)
 		}
 		else if (weapon->readySound)
 		{
-			trap_S_AddLoopingSound(cent->lerpOrigin, vec3_origin, weapon->readySound, 255, 0);
+			trap_S_AddLoopingSound(cent->lerpOrigin, vec3_origin, weapon->readySound, 255 * etj_weaponVolume.value, 0);
 		}
 	}
 
@@ -3965,7 +3965,7 @@ void CG_PlaySwitchSound(int lastweap, int newweap)
 		return;
 	}
 
-	trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, switchsound);
+	trap_S_StartSoundVControl(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, switchsound, DEFAULT_VOLUME * etj_weaponVolume.value);
 }
 
 /*
@@ -5594,11 +5594,11 @@ void CG_FireWeapon(centity_t *cent)
 	{
 		if (cg_entities[cg_entities[cg_entities[cent->currentState.number].tagParent].tankparent].currentState.density & 8)      // should we use a browning?
 		{
-			trap_S_StartSound(NULL, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponSnd_2);
+			trap_S_StartSoundVControl(NULL, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponSnd_2, DEFAULT_VOLUME * etj_weaponVolume.value);
 		}
 		else
 		{
-			trap_S_StartSound(NULL, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponSnd);
+			trap_S_StartSoundVControl(NULL, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponSnd, DEFAULT_VOLUME * etj_weaponVolume.value);
 		}
 		cent->muzzleFlashTime = cg.time;
 		return;
@@ -5613,7 +5613,7 @@ void CG_FireWeapon(centity_t *cent)
 		}
 		else
 		{
-			trap_S_StartSound(NULL, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponSnd);
+			trap_S_StartSoundVControl(NULL, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponSnd, DEFAULT_VOLUME * etj_weaponVolume.value);
 		}
 
 		if (cg_brassTime.integer > 0)

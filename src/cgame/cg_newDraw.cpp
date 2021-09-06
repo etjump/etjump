@@ -314,7 +314,7 @@ void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int alig
 		{
 			if (((cg.grenLastTime) % 1000) > ((cg.predictedPlayerState.grenadeTimeLeft) % 1000))
 			{
-				trap_S_StartLocalSound(cgs.media.grenadePulseSound4, CHAN_LOCAL_SOUND);
+				trap_S_StartLocalSoundVControl(cgs.media.grenadePulseSound4, CHAN_LOCAL_SOUND, DEFAULT_VOLUME * etj_weaponVolume.value);
 			}
 		}
 		else

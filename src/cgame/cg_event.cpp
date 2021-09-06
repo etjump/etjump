@@ -2097,29 +2097,29 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 		if (BG_PlayerMounted(es->eFlags))
 		{
-			trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.hWeaponHeatSnd, 255);
+			trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.hWeaponHeatSnd, 255 * etj_weaponVolume.value);
 		}
 		else if (es->eFlags & EF_MOUNTEDTANK)
 		{
 			if (cg_entities[cg_entities[cg_entities[es->number].tagParent].tankparent].currentState.density & 8)
 			{
-				trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.hWeaponHeatSnd_2, 255);
+				trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.hWeaponHeatSnd_2, 255 * etj_weaponVolume.value);
 			}
 			else
 			{
-				trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.hWeaponHeatSnd, 255);
+				trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.hWeaponHeatSnd, 255 * etj_weaponVolume.value);
 			}
 		}
 		else if (cg_weapons[es->weapon].overheatSound)
 		{
-			trap_S_StartSound(NULL, es->number, CHAN_AUTO, cg_weapons[es->weapon].overheatSound);
+			trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cg_weapons[es->weapon].overheatSound, DEFAULT_VOLUME * etj_weaponVolume.value);
 		}
 		break;
 
 // JPW NERVE
 	case EV_SPINUP:
 		DEBUGNAME("EV_SPINUP");
-		trap_S_StartSound(NULL, es->number, CHAN_AUTO, cg_weapons[es->weapon].spinupSound);
+		trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cg_weapons[es->weapon].spinupSound, DEFAULT_VOLUME * etj_weaponVolume.value);
 		break;
 // jpw
 	case EV_EMPTYCLIP:
@@ -2130,11 +2130,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_FILL_CLIP");
 		if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] >= 2 && BG_isLightWeaponSupportingFastReload(es->weapon) && cg_weapons[es->weapon].reloadFastSound)
 		{
-			trap_S_StartSound(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFastSound);
+			trap_S_StartSoundVControl(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFastSound, DEFAULT_VOLUME* etj_weaponVolume.value);
 		}
 		else if (cg_weapons[es->weapon].reloadSound)
 		{
-			trap_S_StartSound(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound);   // JPW NERVE following sherman's SP fix, should allow killing reload sound when player dies
+			trap_S_StartSoundVControl(NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound, DEFAULT_VOLUME * etj_weaponVolume.value);  // JPW NERVE following sherman's SP fix, should allow killing reload sound when player dies
 		}
 		break;
 
@@ -2185,12 +2185,12 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		break;
 	case EV_CHANGE_WEAPON:
 		DEBUGNAME("EV_CHANGE_WEAPON");
-		trap_S_StartSound(NULL, es->number, CHAN_AUTO, cgs.media.selectSound);
+		trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.selectSound, DEFAULT_VOLUME * etj_weaponVolume.value);
 		break;
 	case EV_CHANGE_WEAPON_2:
 		DEBUGNAME("EV_CHANGE_WEAPON");
 
-		trap_S_StartSound(NULL, es->number, CHAN_AUTO, cgs.media.selectSound);
+		trap_S_StartSoundVControl(NULL, es->number, CHAN_AUTO, cgs.media.selectSound, DEFAULT_VOLUME * etj_weaponVolume.value);
 
 		if (es->number == cg.snap->ps.clientNum)
 		{
@@ -2231,11 +2231,11 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			VectorMA(cg.refdef_current->vieworg, 64, norm, gorg);
 			if (cg_entities[cg_entities[cg_entities[cent->currentState.number].tagParent].tankparent].currentState.density & 8)      // should we use a browning?
 			{
-				trap_S_StartSoundEx(gorg, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponEchoSnd_2, SND_NOCUT);
+				trap_S_StartSoundExVControl(gorg, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponEchoSnd_2, SND_NOCUT, DEFAULT_VOLUME * etj_weaponVolume.value);
 			}
 			else
 			{
-				trap_S_StartSoundEx(gorg, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponEchoSnd, SND_NOCUT);
+				trap_S_StartSoundExVControl(gorg, cent->currentState.number, CHAN_WEAPON, cgs.media.hWeaponEchoSnd, SND_NOCUT, DEFAULT_VOLUME * etj_weaponVolume.value);
 			}
 		}
 		DEBUGNAME("EV_FIRE_WEAPON_MG42");

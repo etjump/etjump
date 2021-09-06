@@ -275,6 +275,11 @@ void    trap_S_StartLocalSound(sfxHandle_t sfx, int channelNum)
 	syscall(CG_S_STARTLOCALSOUND, sfx, channelNum, 127 /* Gordon: default volume always for the moment*/);
 }
 
+void    trap_S_StartLocalSoundVControl(sfxHandle_t sfx, int channelNum, int volume)
+{
+	syscall(CG_S_STARTLOCALSOUND, sfx, channelNum, volume);
+}
+
 void    trap_S_ClearLoopingSounds(void)
 {
 	syscall(CG_S_CLEARLOOPINGSOUNDS);

@@ -3381,6 +3381,7 @@ int         trap_S_GetCurrentSoundTime(void);   // ydnar
 
 // a local sound is always played full volume
 void        trap_S_StartLocalSound(sfxHandle_t sfx, int channelNum);
+void        trap_S_StartLocalSoundVControl(sfxHandle_t sfx, int channelNum, int volume);
 void        trap_S_ClearLoopingSounds(void);
 void        trap_S_ClearSounds(qboolean killmusic);
 void        trap_S_AddLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
