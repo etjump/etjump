@@ -2022,18 +2022,15 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 
 			if (event == EV_ITEM_PICKUP) // not quiet
 			{
-				if (etj_itemPickupText.integer)
+				// powerups and team items will have a separate global sound, this one
+				// will be played at prediction time
+				if (item->giType == IT_TEAM)
 				{
-					// powerups and team items will have a separate global sound, this one
-					// will be played at prediction time
-					if (item->giType == IT_TEAM)
-					{
-						trap_S_StartSound(NULL, es->number, CHAN_AUTO, trap_S_RegisterSound("sound/misc/w_pkup.wav", qfalse));
-					}
-					else
-					{
-						trap_S_StartSound(NULL, es->number, CHAN_AUTO, trap_S_RegisterSound(item->pickup_sound, qfalse));
-					}
+					trap_S_StartSound(NULL, es->number, CHAN_AUTO, trap_S_RegisterSound("sound/misc/w_pkup.wav", qfalse));
+				}
+				else
+				{
+					trap_S_StartSound(NULL, es->number, CHAN_AUTO, trap_S_RegisterSound(item->pickup_sound, qfalse));
 				}
 			}
 
