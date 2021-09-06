@@ -296,6 +296,70 @@ bool Tokens::loadTokens(const std::string& filepath)
 
 
 bool allTokensCollected(gentity_t *ent);
+static void entThink(gentity_t *ent)
+{
+	vec3_t mins = { 0, 0, 0 };
+	vec3_t maxs = { 0, 0, 0 };
+	vec3_t range = { 16, 16, 16 };
+	VectorSubtract(ent->r.currentOrigin, range, mins);
+	VectorAdd(ent->r.currentOrigin, range, maxs);
+
+	int entityList[MAX_GENTITIES];
+	auto count = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
+	for (auto i = 0; i < count; ++i)
+	{
+		auto ent = &g_entities[entityList[i]];
+
+		if (!ent->client)
+		{
+			continue;
+		}
+
+		const char *difficulty = NULL;
+		qboolean *collected = NULL;
+		switch (ent->tokenInformation->difficulty)
+		{
+		case Tokens::Difficulty::Easy:
+			difficulty = "^2easy";
+			collected	= &ent->client->pers.collectedEasyTokens[ent->tokenInformation->idx];
+			break;
+		case Tokens::Difficulty::Medium:
+			difficulty = "^3medium";
+			collected	= &ent->client->pers.collectedMediumTokens[ent->tokenInformation->idx];
+			break;
+		case Tokens::Difficulty::Hard:
+			difficulty = "^1hard";
+			collected	= &ent->client->pers.collectedHardTokens[ent->tokenInformation->idx];
+			break;
+		default:
+			G_Error("Visited unknown difficulty.");
+		}
+
+		if (*collected)
+		{
+			continue;
+		}
+
+		*collected = qtrue;
+		C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, ent->tokenInformation->idx + 1));
+
+		if (allTokensCollected(ent))
+		{
+			auto millis = level.time - ent->client->pers.tokenCollectionStartTime;
+			int	minutes, seconds;
+			minutes = millis / 60000;
+			millis -= minutes * 60000;
+			seconds = millis / 1000;
+			millis -= seconds * 1000;
+
+			C_CPMAll(va("%s ^7collected all tokens in %02d:%02d:%03d", ent->client->pers.netname, minutes, seconds, millis));
+		}
+	}
+
+	ent->nextthink = level.time + FRAMETIME;
+}
+
+
 void Tokens::createEntity(Token& token, Difficulty difficulty)
 {
 	token.entity                   = G_Spawn();
@@ -319,68 +383,7 @@ void Tokens::createEntity(Token& token, Difficulty difficulty)
 		break;
 	}
 
-	token.entity->think = [](gentity_t *self)
-						  {
-							  vec3_t mins  = { 0, 0, 0 };
-							  vec3_t maxs  = { 0, 0, 0 };
-							  vec3_t range = { 16, 16, 16 };
-							  VectorSubtract(self->r.currentOrigin, range, mins);
-							  VectorAdd(self->r.currentOrigin, range, maxs);
-
-							  int  entityList[MAX_GENTITIES];
-							  auto count = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
-							  for (auto i = 0; i < count; ++i)
-							  {
-								  auto ent = &g_entities[entityList[i]];
-
-								  if (!ent->client)
-								  {
-									  continue;
-								  }
-
-								  const char *difficulty = NULL;
-								  qboolean   *collected  = NULL;
-								  switch (self->tokenInformation->difficulty)
-								  {
-								  case Easy:
-									  difficulty = "^2easy";
-									  collected  = &ent->client->pers.collectedEasyTokens[self->tokenInformation->idx];
-									  break;
-								  case Medium:
-									  difficulty = "^3medium";
-									  collected  = &ent->client->pers.collectedMediumTokens[self->tokenInformation->idx];
-									  break;
-								  case Hard:
-									  difficulty = "^1hard";
-									  collected  = &ent->client->pers.collectedHardTokens[self->tokenInformation->idx];
-									  break;
-								  default:
-									  G_Error("Visited unknown difficulty.");
-								  }
-
-								  if (*collected)
-								  {
-									  continue;
-								  }
-
-								  *collected = qtrue;
-								  C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, self->tokenInformation->idx + 1));
-
-								  if (allTokensCollected(ent))
-								  {
-									  auto millis = level.time - ent->client->pers.tokenCollectionStartTime;
-									  int  minutes, seconds;
-									  minutes = millis / 60000;
-									  millis -= minutes * 60000;
-									  seconds = millis / 1000;
-									  millis -= seconds * 1000;
-
-									  C_CPMAll(va("%s ^7collected all tokens in %02d:%02d:%03d", ent->client->pers.netname, minutes, seconds, millis));
-								  }
-							  }
-
-							  self->nextthink = level.time + FRAMETIME;
-						  };
+	token.entity->think = entThink;
 
 	token.entity->nextthink = level.time + FRAMETIME;
 	G_SetOrigin(token.entity, token.coordinates.data());
