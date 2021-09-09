@@ -23,13 +23,13 @@ jobs:
 
   - script: |
       mkdir $(buildDir) && cd $(buildDir)
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+      cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=OFF
       cmake --build . --parallel
     displayName: 'Build linux x86_64'
 
   - script: |
       cd $(buildDir) && rm CMakeCache.txt
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-x86-linux.cmake
+      cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-cross-x86-linux.cmake
       cmake --build . --parallel
     displayName: 'Build linux x86'
 
@@ -56,14 +56,14 @@ jobs:
       mkdir $(buildDir)
       cd $(buildDir)
       cmake .. -A x64 -DBUILD_TESTS=OFF
-      cmake --build . --config Release --parallel
+      cmake --build . --config RelWithDebInfo --parallel
     displayName: 'Build windows x86_64'
 
   - script: |
       cd $(buildDir)
       del /f CMakeCache.txt
       cmake .. -A Win32 -DBUILD_TESTS=OFF
-      cmake --build . --config Release --parallel
+      cmake --build . --config RelWithDebInfo --parallel
     displayName: 'Build windows x86'
   - task: CopyFiles@2
     inputs:
@@ -87,7 +87,7 @@ jobs:
 
   - script: |
       mkdir $(buildDir) && cd $(buildDir)
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET="10.10"
+      cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET="10.10"
       cmake --build . --parallel
     displayName: 'Build macOS x86_64'
   - task: CopyFiles@2
@@ -124,7 +124,7 @@ jobs:
 
   - script: |
       cd $(buildDir)
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+      cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=OFF
       make mod_release
     displayName: 'Pack release zip'
 
