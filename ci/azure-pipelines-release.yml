@@ -67,7 +67,9 @@ jobs:
     displayName: 'Build windows x86'
   - task: CopyFiles@2
     inputs:
-      contents: '*.dll'
+      contents: |
+        **.dll
+        **.pdb
       sourceFolder: '$(buildDir)/etjump'
       targetFolder: $(Build.ArtifactStagingDirectory)
     displayName: 'Copy binaries'
