@@ -954,7 +954,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_realFov,                  "etj_realFov",                 "0",                      CVAR_ARCHIVE             },
 	{ &etj_stretchCgaz,              "etj_stretchCgaz",             "1",                      CVAR_ARCHIVE             },
 	{ &etj_noActivateLean,           "etj_noActivateLean",          "0",                      CVAR_ARCHIVE             },
-	{ &shared, "shared", "0", CVAR_ROM },
+	{ &shared, "shared", "0", CVAR_SYSTEMINFO | CVAR_ROM },
 	{ &etj_drawObWatcher , "etj_drawObWatcher", "1", CVAR_ARCHIVE},
 	{ &etj_obWatcherX , "etj_obWatcherX", "100", CVAR_ARCHIVE},
 	{ &etj_obWatcherY , "etj_obWatcherY", "100", CVAR_ARCHIVE},
