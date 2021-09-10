@@ -68,9 +68,9 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-        **.dll
-        **.pdb
-      sourceFolder: '$(buildDir)/etjump'
+        *.dll
+        *.pdb
+      sourceFolder: '$(buildDir)/etjump/RelWithDebInfo'
       targetFolder: $(Build.ArtifactStagingDirectory)
     displayName: 'Copy binaries'
 
