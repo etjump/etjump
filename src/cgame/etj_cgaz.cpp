@@ -415,6 +415,11 @@ namespace ETJump
 			return true;
 		}
 
+		if (BG_PlayerMounted(ps->eFlags) || ps->weapon == WP_MOBILE_MG42_SET || ps->weapon == WP_MORTAR_SET)
+		{
+			return true;
+		}
+
 		// water and ladder movement are not important
 		// since speed is capped anyway
 		if (pm->pmext->waterlevel > 1 || pm->pmext->ladder)

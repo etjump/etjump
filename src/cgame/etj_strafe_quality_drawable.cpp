@@ -222,6 +222,11 @@ namespace ETJump
 			return true;
 		}
 
+		if (BG_PlayerMounted(pm->ps->eFlags) || pm->ps->weapon == WP_MOBILE_MG42_SET || pm->ps->weapon == WP_MORTAR_SET)
+		{
+			return true;
+		}
+
 		// no updates underwater or on ladders
 		if (pm->pmext->waterlevel > 1 || pm->pmext->ladder)
 		{
