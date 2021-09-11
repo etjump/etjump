@@ -30,7 +30,7 @@ function(create_compiler_opts target)
 		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
 			-flto              # link time optimizations
-			-O3                # max optimization
+			-O2                # override cmake implicit O3
 			-ffast-math>       # fast floating point math
 		$<$<CONFIG:Debug>:
 			-Og                # supress optimizations
