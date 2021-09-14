@@ -35,7 +35,8 @@ function(create_compiler_opts target)
 		$<$<CONFIG:Debug>:
 			-Og                # supress optimizations
 			-g3                # generate debug info
-			-ggdb3>)           # generate gdb friendly debug info
+			-ggdb3             # generate gdb friendly debug info
+			-ffast-math>)
 
 	# MSVC flags
 	set(MSVC_LINK_FLAGS 
