@@ -555,6 +555,7 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops)
 
 		// make sure we don't get any unwanted transition effects
 		*ops = *ps;
+		cg.duckChange = 0;
 
 		// DHM - Nerve :: After Limbo, make sure and do a CG_Respawn
 		if (ps->clientNum == cg.clientNum)
