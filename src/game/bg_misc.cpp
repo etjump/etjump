@@ -5717,9 +5717,9 @@ void BG_InitLocations(vec2_t world_mins, vec2_t world_maxs)
 	locInfo.gridStep[1] = 1200.f;
 
 	// ensure minimal grid density
-	while ((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0] < 7)
+	while (locInfo.gridStep[0] > 50.f && (world_maxs[0] - world_mins[0]) / locInfo.gridStep[0] < 7)
 		locInfo.gridStep[0] -= 50.f;
-	while ((world_mins[1] - world_maxs[1]) / locInfo.gridStep[1] < 7)
+	while (locInfo.gridStep[1] > 50.f && (world_mins[1] - world_maxs[1]) / locInfo.gridStep[1] < 7)
 		locInfo.gridStep[1] -= 50.f;
 
 	locInfo.gridStartCoord[0] = world_mins[0] + .5f * ((((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0]) - ((int)((world_maxs[0] - world_mins[0]) / locInfo.gridStep[0]))) * locInfo.gridStep[0]);

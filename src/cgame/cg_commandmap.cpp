@@ -254,9 +254,9 @@ static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scisso
 		gridStep[1] = 1200.f;
 
 		// ensure minimal grid density
-		while ((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0] < 7)
+		while (gridStep[0] > 50.f && (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0] < 7)
 			gridStep[0] -= 50.f;
-		while ((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1] < 7)
+		while (gridStep[1] > 50.f && (cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1] < 7)
 			gridStep[1] -= 50.f;
 
 		gridStartCoord[0] = .5f * ((((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]) - ((int)((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]))) * gridStep[0]);
