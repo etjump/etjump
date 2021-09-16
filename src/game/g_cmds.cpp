@@ -1014,6 +1014,11 @@ namespace ETJump
 			return{ false, "^7Cannot use ^3%s ^7while death run is active.\n" };
 		}
 
+		if (ent->client->ps.eFlags & EF_DEAD)
+		{
+			return{ false, "^7Cannot use ^3%s ^7in this state.\n" };
+		}
+
 		if (!g_cheats.integer || g_dedicated.integer > 0)
 		{
 			if (level.noNoclip)
