@@ -1646,7 +1646,6 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("?");
 	trap_AddCommand("bottomshots");
 	trap_AddCommand("commands");
-	trap_AddCommand("follow");
 	trap_AddCommand("lock");
 	trap_AddCommand("notready");
 	trap_AddCommand("pause");
