@@ -579,23 +579,10 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
 		if (mEnt->type == ME_PLAYER_REVIVE)
 		{
-			float  msec;
+			constexpr int interval = 2000;
+			const int msec = cg.time % interval;
 			vec4_t reviveClr = { 1.f, 1.f, 1.f, 1.f };
-
-			if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_AXIS)
-			{
-				msec = (cg_redlimbotime.integer - (cg.time % cg_redlimbotime.integer)) / (float)cg_redlimbotime.integer;
-			}
-			else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_ALLIES)
-			{
-				msec = (cg_bluelimbotime.integer - (cg.time % cg_bluelimbotime.integer)) / (float)cg_bluelimbotime.integer;
-			}
-			else
-			{
-				msec = 0;
-			}
-
-			reviveClr[3] = .5f + .5f * ((sin(sqrt(msec) * 25 * 2 * M_PI) + 1) * .5f);
+			reviveClr[3] = static_cast<float>((std::sin(msec * M_PI / interval) + 1) / 2);
 
 			trap_R_SetColor(reviveClr);
 			CG_DrawPic(icon_pos[0] + 3, icon_pos[1] + 3, icon_extends[0] - 3, icon_extends[1] - 3, cgs.media.medicIcon);
