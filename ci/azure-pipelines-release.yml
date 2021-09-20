@@ -23,7 +23,7 @@ jobs:
 
   - script: |
       mkdir $(buildDir) && cd $(buildDir)
-      cmake .. -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=OFF
+      cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=OFF
       cmake --build . --parallel
     displayName: 'Build linux x86_64'
 
