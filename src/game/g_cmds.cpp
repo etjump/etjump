@@ -5389,6 +5389,12 @@ void ClientCommand(int clientNum)
 		return;
 	}
 
+	// shut up console when we send this over from save
+	if (!Q_stricmp(cmd, "resetJumpSpeeds"))
+	{
+		return;
+	}
+
 	CP(va("print \"Unknown command %s^7.\n\"", cmd));
 }
 

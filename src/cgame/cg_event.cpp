@@ -1965,7 +1965,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		trap_S_StartSound(NULL, es->number, CHAN_VOICE, CG_CustomSound(es->number, "*jump1.wav"));
 		if (clientNum == cg.predictedPlayerState.clientNum)
 		{
-			ETJump::UpdateJumpSpeeds();
+			ETJump::entityEventsHandler->check(EV_JUMP, cent);
 		}
 		break;
 	case EV_TAUNT:
@@ -2618,7 +2618,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		                  CG_CustomSound(es->number, va("*death%i.wav", event - EV_DEATH1 + 1)));
 		if (clientNum == cg.predictedPlayerState.clientNum)
 		{
-			ETJump::QueueJumpSpeedsReset();
+			trap_SendConsoleCommand("resetJumpSpeeds\n");
 			trap_SendConsoleCommand("resetStrafeQuality\n");
 		}
 		break;
@@ -2648,7 +2648,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		CG_GibPlayer(cent, cent->lerpOrigin, dir);
 		if (clientNum == cg.predictedPlayerState.clientNum)
 		{
-			ETJump::QueueJumpSpeedsReset();
+			trap_SendConsoleCommand("resetJumpSpeeds\n");
 			trap_SendConsoleCommand("resetStrafeQuality\n");
 		}
 		break;
@@ -3037,16 +3037,8 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		DEBUGNAME("EV_LOAD_TELEPORT");
 		ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);
 		ETJump::playerEventsHandler->check("load", {});
-		ETJump::QueueJumpSpeedsReset();
+		trap_SendConsoleCommand("resetJumpSpeeds\n");
 		trap_SendConsoleCommand("resetStrafeQuality\n");
-		break;
-	case EV_SAVE:
-		DEBUGNAME("EV_SAVE");
-		if (clientNum == cg.predictedPlayerState.clientNum)
-		{
-			ETJump::QueueJumpSpeedsReset();
-			trap_SendConsoleCommand("resetStrafeQuality\n");
-		}
 		break;
 	default:
 		DEBUGNAME("UNKNOWN");

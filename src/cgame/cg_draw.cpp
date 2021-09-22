@@ -5704,7 +5704,6 @@ static void CG_Draw2D(void)
 		{
 			CG_DrawLagometer();
 			CG_DrawFollow();
-			ETJump::DrawJumpSpeeds();
 			CG_DrawOB();
 			CG_DrawSlick();
 			CG_DrawJumpDelay();

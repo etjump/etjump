@@ -25,19 +25,34 @@
 #pragma once
 
 #include "cg_local.h"
+#include "etj_irenderable.h"
+#include "etj_entity_events_handler.h"
 
 namespace ETJump
 {
-	constexpr int MAX_JUMPS = 10;
-	std::vector<int> jumpSpeedHistory;		// last 10 jump speeds
-	bool jumpSpeedDeleted;
-	bool resetQueued;
-	int lastDeletedSpeed;					// last jump speed that was deleted from history
-	int team;
+	class JumpSpeeds : public IRenderable
+	{
+	public:
+		explicit JumpSpeeds(EntityEventsHandler* entityEventsHandler);
+		~JumpSpeeds();
 
-	void DrawJumpSpeeds();
-	void UpdateJumpSpeeds();
-	void QueueJumpSpeedsReset();
-	void ResetJumpSpeeds();
-	void AdjustColors(int jumpNum, vec4_t* color);
+		void render() const override;
+		void beforeRender() override {};
+
+	private:
+		EntityEventsHandler* _entityEventsHandler;
+		static const int MAX_JUMPS = 10;
+		std::vector<int> jumpSpeedHistory;		// last 10 jump speeds
+		bool jumpSpeedDeleted;
+		bool resetQueued;
+		int lastDeletedSpeed;					// last jump speed that was deleted from history
+		int team;
+
+		void updateJumpSpeeds();
+		void queueJumpSpeedsReset();
+		void resetJumpSpeeds();
+		void adjustColors(int jumpNum, bool overwrite, vec4_t* color) const;
+		bool overwriteHistory(int jumpNum) const;
+		bool canSkipDraw() const;
+	};
 }
