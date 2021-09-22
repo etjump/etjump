@@ -24,12 +24,36 @@
 
 #include "etj_jump_speeds.h"
 #include "etj_utilities.h"
+#include "etj_client_commands_handler.h"
 
 namespace ETJump
 {
-	void DrawJumpSpeeds()
+	JumpSpeeds::JumpSpeeds(EntityEventsHandler* entityEventsHandler) :
+		_entityEventsHandler{ entityEventsHandler }
 	{
-		playerState_t* ps = getValidPlayerState();
+		serverCommandsHandler->subscribe("resetJumpSpeeds", [&](const std::vector<std::string>& args)
+		{
+			queueJumpSpeedsReset();
+		});
+		consoleCommandsHandler->subscribe("resetJumpSpeeds", [&](const std::vector<std::string>& args)
+			{
+				queueJumpSpeedsReset();
+			});
+		entityEventsHandler->subscribe(EV_JUMP, [&](centity_t* cent)
+		{
+			updateJumpSpeeds();
+		});
+	}
+
+	JumpSpeeds::~JumpSpeeds()
+	{
+		consoleCommandsHandler->unsubcribe("resetJumpSpeeds");
+		serverCommandsHandler->unsubcribe("resetJumpSpeeds");
+		_entityEventsHandler->unsubcribe(EV_JUMP);
+	}
+
+	void JumpSpeeds::render() const
+	{
 		float x1 = 6 + etj_jumpSpeedsX.value;
 		float x2 = 6 + 30 + etj_jumpSpeedsX.value;
 		float y1 = 240 + etj_jumpSpeedsY.value;
@@ -38,17 +62,7 @@ namespace ETJump
 		vec4_t color;
 		bool vertical = !etj_jumpSpeedsStyle.integer;
 
-		if (!etj_drawJumpSpeeds.integer)
-		{
-			return;
-		}
-
-		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR)
-		{
-			return;
-		}
-
-		if (cg.zoomedBinoc || cg.zoomedScope)
+		if (canSkipDraw())
 		{
 			return;
 		}
@@ -67,7 +81,7 @@ namespace ETJump
 			auto jumpSpeed = std::to_string(jumpSpeedHistory.at(i));
 			if (etj_jumpSpeedsShowDiff.integer)
 			{
-				AdjustColors(i, &color);
+				adjustColors(i, overwriteHistory(i), &color);
 			}
 			if (vertical)
 			{
@@ -93,7 +107,7 @@ namespace ETJump
 		}
 	}
 
-	void UpdateJumpSpeeds()
+	void JumpSpeeds::updateJumpSpeeds()
 	{
 		// events are processed at playerstate transition before interpolation runs,
 		// so we can't rely on predictedPlayerState on demos because it still contains
@@ -105,12 +119,12 @@ namespace ETJump
 		// queue reset if last update was on different team
 		if (team != ps->persistant[PERS_TEAM])
 		{
-			QueueJumpSpeedsReset();
+			queueJumpSpeedsReset();
 		}
 		// if reset is queued, do that before we start storing new jump speeds
 		if (resetQueued)
 		{
-			ResetJumpSpeeds();
+			resetJumpSpeeds();
 			resetQueued = false;
 		}
 
@@ -124,20 +138,24 @@ namespace ETJump
 			jumpSpeedHistory.erase(jumpSpeedHistory.begin());
 			jumpSpeedDeleted = true;
 		}
+		else
+		{
+			jumpSpeedDeleted = false;
+		}
 	}
 
-	void QueueJumpSpeedsReset()
+	void JumpSpeeds::queueJumpSpeedsReset()
 	{
 		resetQueued = true;
 	}
 
-	void ResetJumpSpeeds()
+	void JumpSpeeds::resetJumpSpeeds()
 	{
 		jumpSpeedHistory.clear();
 		lastDeletedSpeed = 0;
 	}
 
-	void AdjustColors(int jumpNum, vec4_t* color)
+	void JumpSpeeds::adjustColors(int jumpNum, bool overwrite, vec4_t* color) const
 	{
 		// equal/first jump color comes from etj_jumpSpeedsColor
 		vec4_t fasterColor;
@@ -152,7 +170,7 @@ namespace ETJump
 		// and we start deleting jump speeds (11th jump)
 		if (jumpNum == 0)
 		{
-			if (jumpSpeedHistory.size() == MAX_JUMPS && jumpSpeedDeleted)
+			if (overwrite)
 			{
 				// faster than previous jump
 				if (currentJumpSpeed > lastDeletedSpeed)
@@ -164,11 +182,6 @@ namespace ETJump
 				{
 					Vector4Copy(slowerColor, *color);
 				}
-			}
-			// history not full
-			else
-			{
-				jumpSpeedDeleted = false;
 			}
 		}
 		else
@@ -185,5 +198,35 @@ namespace ETJump
 				Vector4Copy(slowerColor, *color);
 			}
 		}
+	}
+
+	bool JumpSpeeds::overwriteHistory(int jumpNum) const
+	{
+		if (jumpSpeedHistory.size() == MAX_JUMPS && jumpSpeedDeleted)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool JumpSpeeds::canSkipDraw() const
+	{
+		if (!etj_drawJumpSpeeds.integer)
+		{
+			return true;
+		}
+
+		if (team == TEAM_SPECTATOR)
+		{
+			return true;
+		}
+
+		if (cg.zoomedBinoc || cg.zoomedScope)
+		{
+			return true;
+		}
+
+		return false;
 	}
 }

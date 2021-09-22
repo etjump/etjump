@@ -3098,6 +3098,12 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
+	// shut up console when we send this over from save
+	if (!Q_stricmp(cmd, "resetStrafeQuality"))
+	{
+		return;
+	}
+
 	if (found) return;
 
 	CG_Printf("Unknown client game command: %s\n", cmd);

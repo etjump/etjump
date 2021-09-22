@@ -222,7 +222,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	storePosition(client, pos);
 
-	G_AddEvent(ent, EV_SAVE, 0);
+	sendClientCommands(ent);
 
 	if (position == 0)
 	{
@@ -882,6 +882,13 @@ void ETJump::SaveSystem::storePosition(gclient_s* client, SavePosition *pos)
 	{
 		pos->stance = Stand;
 	}
+}
+
+void ETJump::SaveSystem::sendClientCommands(gentity_t* ent)
+{
+	auto client = ClientNum(ent);
+	trap_SendServerCommand(client, "resetStrafeQuality\n");
+	trap_SendServerCommand(client, "resetJumpSpeeds\n");
 }
 
 

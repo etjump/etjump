@@ -4025,10 +4025,6 @@ namespace ETJump
 	int checkExtraTrace(int value);
 	void onPlayerRespawn(qboolean revived);
 	void runFrameEnd();
-	void DrawJumpSpeeds();
-	void UpdateJumpSpeeds();
-	void QueueJumpSpeedsReset();
-	void ResetJumpSpeeds();
 	playerState_t *getValidPlayerState();
 
 	enum extraTraceOptions {

@@ -24,6 +24,7 @@
 #include "etj_utilities.h"
 #include "etj_speed_drawable.h"
 #include "etj_strafe_quality_drawable.h"
+#include "etj_jump_speeds.h"
 #include "etj_quick_follow_drawable.h"
 #include "etj_awaited_command_handler.h"
 #include "etj_event_loop.h"
@@ -3796,9 +3797,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
     );
 	ETJump::eventLoop = std::make_shared<ETJump::EventLoop>();
 
-	// reset jump speed history
-	ETJump::ResetJumpSpeeds();
-
 	////////////////////////////////////////////////////////////////
 	// TODO: move these to own client commands handler
 	////////////////////////////////////////////////////////////////
@@ -3817,6 +3815,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::StrafeQuality()));
+	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::JumpSpeeds(ETJump::entityEventsHandler.get())));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::QuickFollowDrawer()));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::CGaz()));
 	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::Snaphud()));
@@ -3889,8 +3888,6 @@ void CG_Shutdown(void)
 		ETJump::consoleCommandsHandler->unsubcribe("minimize");
 		////////////////////////////////////////////////////////////////
 
-		ETJump::consoleCommandsHandler = nullptr;
-		ETJump::serverCommandsHandler = nullptr;
 		ETJump::operatingSystem = nullptr;
 		ETJump::authentication = nullptr;
 		ETJump::renderables.clear();
@@ -3902,6 +3899,8 @@ void CG_Shutdown(void)
 		ETJump::consoleAlphaHandler = nullptr;
 		ETJump::eventLoop->shutdown();
 		ETJump::eventLoop = nullptr;
+		ETJump::consoleCommandsHandler = nullptr;
+		ETJump::serverCommandsHandler = nullptr;
 		ETJump::playerEventsHandler = nullptr;
 		ETJump::entityEventsHandler = nullptr;
 

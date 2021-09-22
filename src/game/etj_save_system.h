@@ -162,6 +162,9 @@ namespace ETJump
 		
 		SavePosition* getValidTeamUnloadPos(gentity_t* ent, team_t team);
 
+		// Commands that are sent to client when they succesfully save position
+		void sendClientCommands(gentity_t* ent);
+
 		// All clients' save related data
 		Client _clients[MAX_CLIENTS];
 
