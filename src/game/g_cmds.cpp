@@ -1359,7 +1359,6 @@ namespace ETJump
 	void softNoclip(gentity_t* ent)
 	{
 		auto* name = ConcatArgs(1);
-		auto clientNum = ClientNum(ent);
 		auto oldSpecState = ent->client->sess.spectatorState;
 
 		if (!Q_stricmp(name, "on") || atoi(name) || !ent->client->softNoclip)
