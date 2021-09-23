@@ -534,7 +534,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 
 		// Rafael - Activate
 		// Ridah, made it a latched event (occurs on keydown only)
-		if (client->latched_buttons & BUTTON_ACTIVATE)
+		if (client->latched_buttons & BUTTON_ACTIVATE && !client->softNoclip)
 		{
 			Cmd_Activate_f(ent);
 		}
@@ -542,7 +542,10 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 		// save results of pmove
 		VectorCopy(client->ps.origin, ent->s.origin);
 
-		G_TouchTriggers(ent);
+		if (!client->softNoclip)
+		{
+			G_TouchTriggers(ent);
+		}
 		trap_UnlinkEntity(ent);
 	}
 
@@ -2151,7 +2154,10 @@ void ClientEndFrame(gentity_t *ent)
 	// zinx - #280 - run touch functions here too, so movers don't have to wait
 	// until the next ClientThink, which will be too late for some map
 	// scripts (railgun)
-	G_TouchTriggers(ent);
+	if (!ent->client->softNoclip)
+	{
+		G_TouchTriggers(ent);
+	}
 
 	// run entity scripting
 	G_Script_ScriptRun(ent);
