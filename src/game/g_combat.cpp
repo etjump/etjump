@@ -760,6 +760,9 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int 
 
 	CalculateRanks();
 
+	// if we're softnoclipping, we can still die, so reset the state
+	self->client->softNoclip = false;
+
 	if (self->client->sess.timerunActive)
 	{
 		limbo(self, qfalse);

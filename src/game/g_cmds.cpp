@@ -997,6 +997,36 @@ void capitalizeWithColor(std::string &str)
 
 namespace ETJump
 {
+	OperationResult canSoftNoclip(gentity_t* ent)
+	{
+		if (!ent || !ent->client)
+		{
+			return{ false, "^7Non-player entities cannot use ^3%s^7.\n" };
+		}
+
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+		{
+			return{ false, "^7Cannot use ^3%s ^7as a spectator.\n" };
+		}
+
+		if (ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0)
+		{
+			return{ false, "^7Cannot use ^3%s ^7while timer is running.\n" };
+		}
+
+		if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
+		{
+			return{ false, "^7Cannot use ^3%s ^7while death run is active.\n" };
+		}
+
+		if (ent->client->ps.eFlags & EF_DEAD )
+		{
+			return{ false, "^7Cannot use ^3%s ^7in this state.\n" };
+		}
+
+		return{ true, "" };
+	}
+
 	OperationResult canNoclip(gentity_t *ent)
 	{
 		if (!ent || !ent->client)
@@ -1278,6 +1308,79 @@ namespace ETJump
 		saveSystem->resetSavedPositions(ent);
 		Printer::SendCenterMessage(clientNum, "^7Your saves were removed.\n");
 	}
+
+	enum class SoftNoclipStance
+	{
+		Stand,
+		Crouch,
+		Prone
+	};
+
+	void storeSoftNoclipState(gentity_t* ent)
+	{
+		auto client = ent->client;
+		if (client->ps.eFlags & EF_CROUCHING)
+		{
+			client->softNoclipStance = static_cast<int>(SoftNoclipStance::Crouch);
+		}
+		else if (client->ps.eFlags & EF_PRONE)
+		{
+			client->softNoclipStance = static_cast<int>(SoftNoclipStance::Prone);
+		}
+		else
+		{
+			client->softNoclipStance = static_cast<int>(SoftNoclipStance::Stand);
+		}
+
+		VectorCopy(client->ps.viewangles, client->softNoclipVAngles);
+	}
+
+	void restoreSoftNoclipState(gentity_t* ent)
+	{
+		auto client = ent->client;
+		if (client->softNoclipStance == static_cast<int>(SoftNoclipStance::Crouch))
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.eFlags &= ~EF_PRONE_MOVING;
+			client->ps.pm_flags |= PMF_DUCKED;
+		}
+		else if (client->softNoclipStance == static_cast<int>(SoftNoclipStance::Prone))
+		{
+			client->ps.eFlags |= EF_PRONE;
+		}
+		else
+		{
+			client->ps.eFlags &= ~EF_PRONE;
+			client->ps.eFlags &= ~EF_PRONE_MOVING;
+			client->ps.pm_flags &= ~PMF_DUCKED;
+		}
+	}
+
+	void softNoclip(gentity_t* ent)
+	{
+		auto* name = ConcatArgs(1);
+		auto clientNum = ClientNum(ent);
+		auto oldSpecState = ent->client->sess.spectatorState;
+
+		if (!Q_stricmp(name, "on") || atoi(name) || !ent->client->softNoclip)
+		{
+			VectorCopy(ent->client->ps.origin, ent->client->softNoclipStartPos);
+			storeSoftNoclipState(ent);
+			// clear prone flags
+			ent->client->ps.eFlags &= ~EF_PRONE;
+			ent->client->ps.eFlags &= ~EF_PRONE_MOVING;
+			ent->client->sess.spectatorState = SPECTATOR_FREE; // we might be in SPECTATOR_FOLLOW
+			ent->client->softNoclip = true;
+		}
+		else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0") || ent->client->softNoclip)
+		{
+			VectorClear(ent->client->ps.velocity);
+			restoreSoftNoclipState(ent);
+			TeleportPlayer(ent, ent->client->softNoclipStartPos, ent->client->softNoclipVAngles);
+			ent->client->sess.spectatorState = oldSpecState; // restore spectator state
+			ent->client->softNoclip = false;
+		}
+	}
 }
 
 /*
@@ -1295,9 +1398,23 @@ void Cmd_Noclip_f(gentity_t *ent)
 
 	if (!result.success)
 	{
-		std::string str = (boost::format(result.message) % "noclip").str();
-		capitalizeWithColor(str);
-		Printer::SendCenterMessage(clientNum, str);
+		// try softnoclip as a fallback
+		auto newResult = ETJump::canSoftNoclip(ent);
+		if (!newResult.success)
+		{
+			std::string str = (boost::format(result.message) % "noclip").str();
+			capitalizeWithColor(str);
+			Printer::SendCenterMessage(clientNum, str);
+		}
+		else
+		{
+			// only print if we are not already softnoclipping
+			if (!ent->client->softNoclip)
+			{
+				Printer::SendChatMessage(clientNum, "^3noclip^7 unavailable - enabling ^3softnoclip^7\n");
+			}
+			ETJump::softNoclip(ent);
+		}
 		return;
 	}
 
@@ -1313,23 +1430,11 @@ void Cmd_Noclip_f(gentity_t *ent)
 	{
 		ent->client->noclip = !ent->client->noclip ? qtrue : qfalse;
 	}
-	
-	// ETJump: we don't need noclip messages
-	// const char *message;
 
 	if (ent->client->noclip)
 	{
-		// message = "noclip ON\n";
 		ETJump::decreaseNoclipCount(ent, "noclip");
 	}
-	/*
-	else
-	{
-		message = "noclip OFF\n";
-	}
-
-	trap_SendServerCommand(ent - g_entities, va("print \"%s\"", message));
-	*/
 }
 
 /*
@@ -5149,6 +5254,7 @@ static command_t noIntermissionCommands[] =
 	{ "tracker_print", qtrue, ETJump::printTracker },
 	{ "tracker_set", qtrue, ETJump::setTracker },
 	{ "clearsaves", qtrue, ETJump::clearSaves },
+	{ "softnoclip", qfalse, ETJump::softNoclip },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)

@@ -493,11 +493,13 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 			client->pmext.noclipScale = client->pers.noclipScale;
 		}
 
-		if (client->ps.sprintExertTime)
+		if (client->ps.sprintExertTime && !client->softNoclip)
 		{
 			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
-
-
+		}
+		if (client->softNoclip)
+		{
+			client->ps.speed *= client->pmext.noclipScale;
 		}
 		// OSP - dead players are frozen too, in a timeout
 		if ((client->ps.pm_flags & PMF_LIMBO) && level.match_pause != PAUSE_NONE)
@@ -560,7 +562,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd)
 	client->latched_wbuttons = client->wbuttons & ~client->oldwbuttons;
 
 	// attack button cycles through spectators
-	if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK))
+	if (((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK)) && !ent->client->softNoclip)
 	{
 		Cmd_FollowCycle_f(ent, 1);
 	}
@@ -1191,7 +1193,7 @@ void ClientThink_real(gentity_t *ent)
 
 	// spectators don't do much
 	// DHM - Nerve :: In limbo use SpectatorThink
-	if (client->sess.sessionTeam == TEAM_SPECTATOR || client->ps.pm_flags & PMF_LIMBO)
+	if (client->sess.sessionTeam == TEAM_SPECTATOR || client->ps.pm_flags & PMF_LIMBO || client->softNoclip)
 	{
 		/*if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
 		    return;

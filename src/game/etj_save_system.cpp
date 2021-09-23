@@ -143,6 +143,12 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 		return;
 	}
 
+	if (client->softNoclip)
+	{
+		CPTo(ent, "^7You can not ^3save^7 while softnoclipping.");
+		return;
+	}
+
 	if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 	{
 		CPTo(ent, "^3Save ^7is disabled for this timerun.");

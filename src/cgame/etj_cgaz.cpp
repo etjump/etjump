@@ -400,6 +400,12 @@ namespace ETJump
 			return true;
 		}
 
+		// a bit weird but this will match players who are softnoclipping
+		if (!(ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) && ps->pm_type == PM_SPECTATOR)
+		{
+			return true;
+		}
+
 		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR || ps->pm_type == PM_NOCLIP)
 		{
 			return true;

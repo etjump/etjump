@@ -1113,6 +1113,11 @@ struct gclient_s
 	qboolean alreadyActivatedSetHealth;
 
 	etj_votingInfo_t votingInfo;
+
+	bool softNoclip;
+	vec3_t softNoclipStartPos;
+	int softNoclipStance;
+	vec3_t softNoclipVAngles;
 };
 
 typedef struct

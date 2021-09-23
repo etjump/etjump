@@ -211,6 +211,12 @@ namespace ETJump
 			return true;
 		}
 
+		// a bit weird but this will match players who are softnoclipping
+		if (!(_team == TEAM_SPECTATOR) && pm->ps->pm_type == PM_SPECTATOR)
+		{
+			return true;
+		}
+
 		// don't update if not in air or on ice
 		if (pm->ps->groundEntityNum != ENTITYNUM_NONE && !(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK))
 		{
