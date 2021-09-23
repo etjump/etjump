@@ -5254,7 +5254,6 @@ static command_t noIntermissionCommands[] =
 	{ "tracker_print", qtrue, ETJump::printTracker },
 	{ "tracker_set", qtrue, ETJump::setTracker },
 	{ "clearsaves", qtrue, ETJump::clearSaves },
-	{ "softnoclip", qfalse, ETJump::softNoclip },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent)
