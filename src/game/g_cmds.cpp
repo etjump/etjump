@@ -1410,7 +1410,7 @@ void Cmd_Noclip_f(gentity_t *ent)
 			// only print if we are not already softnoclipping
 			if (!ent->client->softNoclip)
 			{
-				Printer::SendChatMessage(clientNum, "^3noclip^7 unavailable - enabling ^3softnoclip^7\n");
+				Printer::SendConsoleMessage(clientNum, "^3noclip^7 unavailable - enabling ^3softnoclip^7\n");
 			}
 			ETJump::softNoclip(ent);
 		}

@@ -89,7 +89,7 @@ void P_WorldEffects(gentity_t *ent)
 {
 	int waterlevel;
 
-	if (ent->client->noclip)
+	if (ent->client->noclip || ent->client->softNoclip)
 	{
 		ent->client->airOutTime = level.time + HOLDBREATHTIME;  // don't need air
 		return;
