@@ -149,7 +149,7 @@ void Cmd_Score_f(gentity_t *ent)
 CheatsOk
 ==================
 */
-qboolean    CheatsOk(gentity_t *ent)
+qboolean CheatsOk(gentity_t *ent)
 {
 	if (!g_cheats.integer)
 	{
@@ -1059,7 +1059,7 @@ namespace ETJump
 			if (ent->client->pers.noclipCount == 0 &&
 				!ent->client->noclip)
 			{
-				if (!g_noclip.integer && !CheatsOk(ent))
+				if (!g_noclip.integer)
 				{
 					return{ false, "^7You can no longer use ^3%s^7.\n" };
 				}
