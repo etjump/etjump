@@ -354,6 +354,11 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 #define MAX_CHARACTERS  16
 
+#define MAX_FIRETEAMS       12
+#define MAX_FIRETEAM_USERS  15
+
+extern const char* bg_fireteamNames[MAX_FIRETEAMS];
+
 //
 // config strings are a general means of communicating variable length strings
 // from the server to all connected clients.
@@ -2303,11 +2308,6 @@ typedef struct botpool_x
 } botpool_t;
 
 // END Mad Doc - TDF
-
-#define MAX_FIRETEAMS       12
-#define MAX_FIRETEAM_USERS  15
-
-extern const char *bg_fireteamNames[MAX_FIRETEAMS];
 
 typedef struct
 {
