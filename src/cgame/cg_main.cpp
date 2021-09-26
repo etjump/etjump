@@ -3859,6 +3859,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 
 	ETJump::isInitialized = true;
 
+	CG_InitLocations();
 	CG_AutoExec_f();
 }
 

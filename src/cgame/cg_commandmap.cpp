@@ -229,213 +229,26 @@ void CG_ParseMapEntityInfo(int axis_number, int allied_number)
 
 static vec2_t   gridStartCoord, gridStep;
 
-static void CG_DrawGrid(float x, float y, float w, float h, mapScissor_t *scissor)
+void CG_InitLocations(void)
 {
-	vec2_t step;
-	vec2_t dim_x, dim_y;
-	vec4_t line;
-	float  xscale, yscale;
-	float  grid_x, grid_y;
-	vec2_t dist;
-	vec4_t gridColour;
-
 	// sanity check
 	if (!cg.mapcoordsValid)
 	{
 		return;
 	}
 
-	dist[0] = cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0];
-	dist[1] = cg.mapcoordsMaxs[1] - cg.mapcoordsMins[1];
+	gridStep[0] = 1200.f;
+	gridStep[1] = 1200.f;
 
-	if (!cg.gridInitDone)
-	{
-		gridStep[0] = 1200.f;
-		gridStep[1] = 1200.f;
+	// ensure minimal grid density
+	while (gridStep[0] > 50.f && (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0] < 7)
+		gridStep[0] -= 50.f;
+	while (gridStep[1] > 50.f && (cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1] < 7)
+		gridStep[1] -= 50.f;
 
-		// ensure minimal grid density
-		while (gridStep[0] > 50.f && (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0] < 7)
-			gridStep[0] -= 50.f;
-		while (gridStep[1] > 50.f && (cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1] < 7)
-			gridStep[1] -= 50.f;
-
-		gridStartCoord[0] = .5f * ((((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]) - ((int)((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]))) * gridStep[0]);
-		gridStartCoord[1] = .5f * ((((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]) - ((int)((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]))) * gridStep[1]);
-
-		cg.gridInitDone = qtrue;
-	}
-
-	if (scissor)
-	{
-		dim_x[0] = cg.mapcoordsMins[0];
-		dim_x[1] = cg.mapcoordsMaxs[0];
-
-		dim_y[0] = cg.mapcoordsMaxs[1];
-		dim_y[1] = cg.mapcoordsMins[1];
-
-		// transform
-		xscale = (w * scissor->zoomFactor) / dist[0];
-		yscale = (h * scissor->zoomFactor) / -dist[1];
-
-		dim_x[0] = (dim_x[0] - cg.mapcoordsMins[0]) * xscale;
-		dim_x[1] = (dim_x[1] - cg.mapcoordsMins[0]) * xscale;
-
-		dim_y[0] = (dim_y[0] - cg.mapcoordsMaxs[1]) * yscale;
-		dim_y[1] = (dim_y[1] - cg.mapcoordsMaxs[1]) * yscale;
-
-		grid_x = ((gridStartCoord[0] / dist[0]) * w * scissor->zoomFactor) - scissor->tl[0];
-		grid_y = ((-gridStartCoord[1] / dist[1]) * h * scissor->zoomFactor) - scissor->tl[1];
-
-		step[0] = gridStep[0] * xscale;
-		step[1] = gridStep[1] * yscale;
-
-		// draw
-		Vector4Set(gridColour, clrBrownLine[0], clrBrownLine[1], clrBrownLine[2], .4f);
-		trap_R_SetColor(gridColour);
-		for ( ; grid_x < dim_x[1]; grid_x += step[0])
-		{
-			if (grid_x < dim_x[0])
-			{
-				continue;
-			}
-
-			if (grid_x > w)
-			{
-				break;
-			}
-
-			if (scissor->circular)
-			{
-				// clip line against circle
-				float xc, yc;
-
-				line[0] = x + grid_x;
-				xc      = line[0] >= x + .5f * w ? line[0] - (x + .5f * w) : (x + .5f * w) - line[0];
-				yc      = std::sqrt(Square(.5f * w) - Square(xc));
-				line[1] = y + (.5f * h) - yc;
-				line[2] = 1.f;
-				line[3] = 2 * yc;
-			}
-			else
-			{
-				Vector4Set(line, x + grid_x, y + dim_y[0], 1.f, h);
-			}
-			line[0] *= cgs.screenXScale;
-			line[1] *= cgs.screenYScale;
-			line[3] *= cgs.screenYScale;
-			trap_R_DrawStretchPic(line[0], line[1], line[2], line[3], 0, 0, 0, 1, cgs.media.whiteShader);
-		}
-
-		for ( ; grid_y < dim_y[1]; grid_y += step[1])
-		{
-			if (grid_y < dim_y[0])
-			{
-				continue;
-			}
-
-			if (grid_y > h)
-			{
-				break;
-			}
-
-			if (scissor->circular)
-			{
-				// clip line against circle
-				float xc, yc;
-
-				line[1] = y + grid_y;
-				yc      = line[1] >= y + .5f * h ? line[1] - (y + .5f * h) : (y + .5f * h) - line[1];
-				xc      = std::sqrt(Square(.5f * h) - Square(yc));
-				line[0] = x + (.5f * w) - xc;
-				line[2] = 2 * xc;
-				line[3] = 1.f;
-			}
-			else
-			{
-				Vector4Set(line, x + dim_x[0], y + grid_y, w, 1);
-			}
-			line[0] *= cgs.screenXScale;
-			line[1] *= cgs.screenYScale;
-			line[2] *= cgs.screenXScale;
-			trap_R_DrawStretchPic(line[0], line[1], line[2], line[3], 0, 0, 0, 1, cgs.media.whiteShader);
-		}
-		trap_R_SetColor(NULL);
-	}
-	else
-	{
-		// Zero: changed coord_char from [3] to [6], was causing overflow on huge maps like handbreaker4_antefinal
-		char   coord_char[6], coord_int;
-		float  text_width, text_height;
-		vec2_t textOrigin;
-
-		dim_x[0] = cg.mapcoordsMins[0];
-		dim_x[1] = cg.mapcoordsMaxs[0];
-
-		dim_y[0] = cg.mapcoordsMaxs[1];
-		dim_y[1] = cg.mapcoordsMins[1];
-
-		// transform
-		xscale = w / dist[0];
-		yscale = h / -dist[1];
-
-		dim_x[0] = (dim_x[0] - cg.mapcoordsMins[0]) * xscale;
-		dim_x[1] = (dim_x[1] - cg.mapcoordsMins[0]) * xscale;
-
-		dim_y[0] = (dim_y[0] - cg.mapcoordsMaxs[1]) * yscale;
-		dim_y[1] = (dim_y[1] - cg.mapcoordsMaxs[1]) * yscale;
-
-		grid_x = gridStartCoord[0] * xscale;
-		grid_y = gridStartCoord[1] * yscale;
-
-		step[0] = gridStep[0] * xscale;
-		step[1] = gridStep[1] * yscale;
-
-		// draw
-		textOrigin[0] = grid_x;
-		textOrigin[1] = grid_y;
-
-		Vector4Set(gridColour, clrBrownLine[0], clrBrownLine[1], clrBrownLine[2], 1.f);
-
-		coord_char[1] = '\0';
-		coord_char[5] = '\0';
-		for (coord_char[0] = ('A' - 1); grid_x < dim_x[1]; grid_x += step[0], coord_char[0]++)
-		{
-			if (coord_char[0] >= 'A')
-			{
-				text_width  = CG_Text_Width_Ext(coord_char, 0.2f, 0, &cgs.media.limboFont2);
-				text_height = CG_Text_Height_Ext(coord_char, 0.2f, 0, &cgs.media.limboFont2);
-				CG_Text_Paint_Ext((x + grid_x) - (.5f * step[0]) - (.5f * text_width), y + dim_y[0] + textOrigin[1] + 1.5f * text_height, 0.2f, 0.2f, colorBlack, coord_char, 0, 0, 0, &cgs.media.limboFont2);
-			}
-			trap_R_SetColor(gridColour);
-
-			Vector4Set(line, x + grid_x, y + dim_y[0], 1, dim_x[1] - dim_x[0]);
-			line[0] *= cgs.screenXScale;
-			line[1] *= cgs.screenYScale;
-			line[3] *= cgs.screenYScale;
-			trap_R_DrawStretchPic(line[0], line[1], line[2], line[3], 0, 0, 0, 1, cgs.media.whiteShader);
-		}
-
-		for (coord_int = -1; grid_y < dim_y[1]; grid_y += step[1], coord_int++)
-		{
-			if (coord_int >= 0)
-			{
-				Com_sprintf(coord_char, sizeof(coord_char), "%i", coord_int);
-				text_width  = CG_Text_Width_Ext("0", 0.2f, 0, &cgs.media.limboFont2);
-				text_height = CG_Text_Height_Ext(coord_char, 0.2f, 0, &cgs.media.limboFont2);
-				CG_Text_Paint_Ext(x + dim_x[0] + textOrigin[0] + .5f * text_width, (y + grid_y) - (.5f * step[1]) + (.5f * text_height), 0.2f, 0.2f, colorBlack, coord_char, 0, 0, 0, &cgs.media.limboFont2);
-			}
-			trap_R_SetColor(gridColour);
-
-			Vector4Set(line, x + dim_x[0], y + grid_y, dim_y[1] - dim_y[0], 1);
-			line[0] *= cgs.screenXScale;
-			line[1] *= cgs.screenYScale;
-			line[2] *= cgs.screenXScale;
-			trap_R_DrawStretchPic(line[0], line[1], line[2], line[3], 0, 0, 0, 1, cgs.media.whiteShader);
-		}
-		trap_R_SetColor(NULL);
-	}
+	gridStartCoord[0] = .5f * ((((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]) - ((int)((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]))) * gridStep[0]);
+	gridStartCoord[1] = .5f * ((((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]) - ((int)((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]))) * gridStep[1]);
 }
-
 
 #define COMMANDMAP_PLAYER_ICON_SIZE 6
 #define AUTOMAP_PLAYER_ICON_SIZE 5
@@ -1053,9 +866,6 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter, mapScissor_t
 			                                                                        // the next trap_R_DrawStretchPic issued. This works
 			                                                                        // around this.
 		}
-
-		// Draw the grid
-		CG_DrawGrid(x, y, w, h, scissor);
 	}
 	else
 	{
@@ -1075,9 +885,6 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter, mapScissor_t
 			}
 			trap_R_SetColor(NULL);
 		}
-
-		// Draw the grid
-		CG_DrawGrid(x, y, w, h, NULL);
 	}
 
 	if (borderblend)
