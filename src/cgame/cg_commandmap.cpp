@@ -307,6 +307,12 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
 		cent = &cg_entities[mEnt->data];
 
+		// note that cg.mapcoordsMaxs[1] < cg.mapcoordsMins[1]
+		if (cent->lerpOrigin[0] < cg.mapcoordsMins[0] || cent->lerpOrigin[0] > cg.mapcoordsMaxs[0] || cent->lerpOrigin[1] > cg.mapcoordsMins[1] || cent->lerpOrigin[1] < cg.mapcoordsMaxs[1])
+		{
+			return;
+		}
+
 		if (mEnt->type == ME_PLAYER_DISGUISED && !(cent->currentState.powerups & (1 << PW_OPS_DISGUISED)))
 		{
 			return;
