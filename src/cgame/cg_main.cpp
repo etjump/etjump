@@ -611,6 +611,7 @@ vmCvar_t etj_strafeQualitySize;
 vmCvar_t etj_strafeQualityStyle;
 
 vmCvar_t etj_projection;
+vmCvar_t etj_saveMsg;
 
 typedef struct
 {
@@ -1042,6 +1043,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_strafeQualityStyle, "etj_strafeQualityStyle", "0", CVAR_ARCHIVE },
 
 	{ &etj_projection, "etj_projection", "0", CVAR_ARCHIVE },
+	{ &etj_saveMsg, "etj_saveMsg", "^7Saved", CVAR_ARCHIVE },
 };
 
 

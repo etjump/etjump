@@ -4,7 +4,7 @@
 #define WINDOW_WIDTH 608
 #define WINDOW_HEIGHT 448
 #define SUBW_GENERAL_Y 32
-#define SUBW_PLAYERS_Y 272
+#define SUBW_PLAYERS_Y 286
 #define SUBW_CHAT_Y 32
 #define SUBW_CONSOLE_Y 212
 #define SUBW_SOUNDS_Y 284
@@ -25,7 +25,7 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 232, "GENERAL")
+    SUBWINDOW(8, 32, 292, 244, "GENERAL")
         YESNO				(16, SUBW_GENERAL_Y + 20, 276, 8, "pmove_fixed:", 0.2, 8, "pmove_fixed", "Enable fixed 125 FPS player movement\npmove_fixed")
         MULTI				(16, SUBW_GENERAL_Y + 32, 276, 8, "Max FPS:", 0.2, 8, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 "250" 250 "333" 333 }, "Sets the FPS limit\ncom_maxfps")
         MULTI				(16, SUBW_GENERAL_Y + 44, 276, 8, "Memory limit:", 0.2, 8, "com_hunkmegs", cvarFloatList { "56MB" 56 "64MB" 64 "128MB" 128 "256MB" 256 "512MB" 512 }, "How much memory ET can use (restart required)\ncom_hunkmegs")
@@ -44,8 +44,9 @@ menuDef {
         YESNO				(16, SUBW_GENERAL_Y + 188, 276, 8, "Item pickup text:", 0.2, 8, "etj_itemPickupText", "Notify on item pickups\netj_itemPickupText")
         YESNO				(16, SUBW_GENERAL_Y + 200, 276, 8, "Draw tokens:", 0.2, 8, "etj_drawTokens", "Draw collectible tokens\netj_drawTokens")
         YESNO				(16, SUBW_GENERAL_Y + 212, 276, 8, "Log banners:", 0.2, 8, "etj_logBanner", "Log banners in console\netj_logBanner")
+        EDITFIELD           (16, SUBW_GENERAL_Y + 224, 276, 10, "Save message:", 0.2, 8, "etj_saveMsg", 128, 32, "Message to print when saving position\netj_saveMsg")
 
-    SUBWINDOW(8, 272, 292, 112, "PLAYERS")
+    SUBWINDOW(8, 286, 292, 112, "PLAYERS")
         YESNO				(16, SUBW_PLAYERS_Y + 20, 276, 8, "Hide players:", 0.2, 8, "etj_hide", "Hides other players when they are too close\netj_hide")
         CVARINTLABEL		(16, SUBW_PLAYERS_Y + 32, 276, 8, "etj_hideDistance", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
         SLIDER				(16, SUBW_PLAYERS_Y + 32, 276, 8, "Hide distance:", 0.2, 8, etj_hideDistance 128 0 1000 10, "Distance at which other players are hidden\netj_hideDistance")

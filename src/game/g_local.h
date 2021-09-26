@@ -1995,7 +1995,6 @@ extern vmCvar_t g_nofatigue;
 extern vmCvar_t g_blockCheatCvars;
 extern vmCvar_t g_weapons;
 extern vmCvar_t g_noclip;
-extern vmCvar_t g_savemsg;
 extern vmCvar_t g_nameChangeLimit;
 extern vmCvar_t g_nameChangeInterval;
 

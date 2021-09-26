@@ -1823,7 +1823,6 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator)
 	}
 
 	ETJump::saveSystem->forceSave(self, activator);
-	trap_SendServerCommand(activator - g_entities, g_savemsg.string);
 }
 
 void SP_target_save(gentity_t *self)

@@ -3104,6 +3104,22 @@ static void CG_ServerCommand(void)
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "savePrint"))
+	{
+		if (trap_Argc() > 1)
+		{
+			auto pos = atoi(CG_Argv(1));
+			std::string saveMsg = etj_saveMsg.string;
+			saveMsg += ' ' + std::to_string(pos);
+			CPri(saveMsg.c_str());
+		}
+		else
+		{
+			CPri(etj_saveMsg.string);
+		}
+		return;
+	}
+
 	if (found) return;
 
 	CG_Printf("Unknown client game command: %s\n", cmd);
