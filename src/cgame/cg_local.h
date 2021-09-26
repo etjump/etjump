@@ -2662,6 +2662,7 @@ extern vmCvar_t etj_strafeQualitySize;
 extern vmCvar_t etj_strafeQualityStyle;
 
 extern vmCvar_t etj_projection;
+extern vmCvar_t etj_saveMsg;
 
 //
 // cg_main.c

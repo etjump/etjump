@@ -222,16 +222,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 
 	storePosition(client, pos);
 
-	sendClientCommands(ent);
-
-	if (position == 0)
-	{
-		CP(va("cp \"%s\n\"", g_savemsg.string));
-	}
-	else
-	{
-		CP(va("cp \"%s ^7%d\n\"", g_savemsg.string, position));
-	}
+	sendClientCommands(ent, position);
 }
 
 // Loads position
@@ -345,7 +336,7 @@ void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent)
 		? Crouch
 		: client->ps.eFlags & EF_PRONE ? Prone : Stand;
 
-	trap_SendServerCommand(ent - g_entities, g_savemsg.string);
+	trap_SendServerCommand(ent - g_entities, "savePrint");
 }
 
 // Loads backup position
@@ -884,11 +875,12 @@ void ETJump::SaveSystem::storePosition(gclient_s* client, SavePosition *pos)
 	}
 }
 
-void ETJump::SaveSystem::sendClientCommands(gentity_t* ent)
+void ETJump::SaveSystem::sendClientCommands(gentity_t* ent, int position)
 {
 	auto client = ClientNum(ent);
 	trap_SendServerCommand(client, "resetStrafeQuality\n");
 	trap_SendServerCommand(client, "resetJumpSpeeds\n");
+	trap_SendServerCommand(client, position == 0 ? "savePrint\n" : va("savePrint %d\n", position));
 }
 
 

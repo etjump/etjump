@@ -216,7 +216,6 @@ vmCvar_t g_nofatigue;
 vmCvar_t g_blockCheatCvars;
 vmCvar_t g_weapons;
 vmCvar_t g_noclip;
-vmCvar_t g_savemsg;
 vmCvar_t g_mapScriptDir;
 vmCvar_t g_blockedMaps;
 vmCvar_t g_nameChangeLimit;
@@ -491,7 +490,6 @@ cvarTable_t gameCvarTable[] =
 	{ &g_blockCheatCvars,           "g_blockCheatCvars",           "0",                                                      CVAR_ARCHIVE },
 	{ &g_weapons,                   "g_weapons",                   "1",                                                      CVAR_ARCHIVE },
 	{ &g_noclip,                    "g_noclip",                    "0",                                                      CVAR_ARCHIVE },
-	{ &g_savemsg,                   "g_savemsg",                   "^7Saved",                                                CVAR_ARCHIVE },
 	{ &g_nameChangeLimit,           "g_nameChangeLimit",           "5",                                                      CVAR_ARCHIVE },
 	{ &g_nameChangeInterval,        "g_nameChangeInterval",        "60",                                                     CVAR_ARCHIVE },
 	{ &g_mapScriptDir,              "g_mapScriptDir",              "scripts",                                                CVAR_ARCHIVE },
