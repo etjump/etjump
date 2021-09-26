@@ -26,6 +26,10 @@
 #include <algorithm>
 
 
+ETJump::DeathrunSystem::DeathrunSystem(): _defaultLocation(PrintLocation::Left)
+{
+}
+
 void ETJump::DeathrunSystem::addStartMessage(const std::string& startMessage)
 {
 	_startMessage = startMessage;
