@@ -1257,7 +1257,6 @@ typedef struct
 	bool requiresEntityTypeAdjustment; // ETJump 2.3.0 specific hack
 
 	char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
-	qboolean gridInitDone;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -3841,6 +3840,7 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw, mapSciss
 void CG_CommandMap_SetHighlightText(const char *text, float x, float y);
 void CG_CommandMap_DrawHighlightText(void);
 qboolean CG_CommandCentreSpawnPointClick(void);
+void CG_InitLocations(void);
 
 #define LIMBO_3D_X  287 + SCREEN_OFFSET_X //% 280
 #define LIMBO_3D_Y  382
