@@ -19,8 +19,11 @@ extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL  * syscallptr)(intptr_t arg, .
 #endif
 #endif
 
-inline int PASSFLOAT(const float &f) noexcept {
-  return *reinterpret_cast<const int *>(&f);
+inline int PASSFLOAT(const float &f) noexcept
+{
+  floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
 
 void trap_PumpEventLoop(void)

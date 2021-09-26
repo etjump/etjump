@@ -26,14 +26,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 
-ETJump::CommandParser::CommandParser()
-{
-}
-
-ETJump::CommandParser::~CommandParser()
-{
-}
-
 ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition definition, std::vector<std::string> args)
 {
 	Command command;
