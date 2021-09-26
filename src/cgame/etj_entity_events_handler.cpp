@@ -31,10 +31,6 @@ ETJump::EntityEventsHandler::EntityEventsHandler()
 	_callbacks.clear();
 }
 
-ETJump::EntityEventsHandler::~EntityEventsHandler()
-{
-}
-
 bool ETJump::EntityEventsHandler::check(const std::string &eventName, centity_t *cent)
 {
 	auto lowercaseCommand = boost::algorithm::to_lower_copy(eventName);

@@ -45,7 +45,6 @@ namespace ETJump
 	{
 	public:
 		explicit EntityEventsHandler();
-		~EntityEventsHandler();
 
 		// returns true if a match was found and function was called
 		bool check(const std::string &eventName, centity_t *cent);

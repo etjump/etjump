@@ -20,12 +20,11 @@ extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL * syscallptr)(intptr_t arg, ..
 #endif
 #endif
 
-inline int PASSFLOAT(const float &f) noexcept {
-  return *reinterpret_cast<const int *>(&f);
-}
-
-inline float PASSINT(const int &f) noexcept {
-  return *reinterpret_cast<const float *>(&f);
+inline int PASSFLOAT(const float &f) noexcept
+{
+  floatint_t fi;
+	fi.f = f;
+	return fi.i;
 }
 
 void trap_Print(const char *string)
@@ -60,9 +59,9 @@ void trap_Cvar_Set(const char *var_name, const char *value)
 
 float trap_Cvar_VariableValue(const char *var_name)
 {
-	int temp;
-	temp = SystemCall(UI_CVAR_VARIABLEVALUE, var_name);
-	return PASSINT(temp);
+	floatint_t fi;
+	fi.i = SystemCall(UI_CVAR_VARIABLEVALUE, var_name);
+	return fi.f;
 }
 
 void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize)

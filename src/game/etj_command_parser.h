@@ -77,9 +77,6 @@ namespace ETJump
 			std::vector<std::string> extraArgs;
 		};
 
-		CommandParser();
-		~CommandParser();
-
 		Command parse(CommandDefinition definition, std::vector<std::string> args);
 
 	private:

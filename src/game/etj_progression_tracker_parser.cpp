@@ -125,8 +125,4 @@ namespace ETJump
 	{
 		return _errors;
 	}
-
-	ProgressionTrackerParser::~ProgressionTrackerParser()
-	{
-	}
 }
