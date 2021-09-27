@@ -217,7 +217,7 @@ namespace ETJump
 			return true;
 		}
 
-		if (pm->ps->pm_type == PM_NOCLIP)
+		if (pm->ps->pm_type == PM_NOCLIP || pm->ps->pm_type == PM_DEAD)
 		{
 			return true;
 		}
