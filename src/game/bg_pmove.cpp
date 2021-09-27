@@ -6338,21 +6338,8 @@ void PM_CheckLadderMove(void)
 	pm->ps->pm_flags &= ~PMF_LADDER;    // clear ladder bit
 	ladderforward     = qfalse;
 
-	/*
-	if (pm->ps->eFlags & EF_DEAD) {	// dead bodies should fall down ladders
-	    return;
-	}
-
-	if (pm->ps->pm_flags & PM_DEAD && pm->ps->stats[STAT_HEALTH] <= 0)
+	if (pm->ps->pm_type == PM_DEAD)
 	{
-	    return;
-	}
-	*/
-	if (pm->ps->stats[STAT_HEALTH] <= 0)
-	{
-		pm->ps->groundEntityNum = ENTITYNUM_NONE;
-		pm->groundPlane         = qfalse;
-		pm->walking             = qfalse;
 		return;
 	}
 
