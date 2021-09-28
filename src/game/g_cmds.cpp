@@ -1019,6 +1019,30 @@ namespace ETJump
 			return{ false, "^7Cannot use ^3%s ^7while death run is active.\n" };
 		}
 
+		// don't allow softnoclip inside nosave areas while moving
+		// or it can be used as a pseudo save to stop in high speed
+		if (VectorLengthSquared(ent->client->ps.velocity) != 0)
+		{
+			trace_t trace;
+			trap_TraceCapsule(&trace, ent->client->ps.origin, ent->r.mins,
+				ent->r.maxs, ent->client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
+
+			if (level.noSave)
+			{
+				if (!trace.fraction != 1.0f)
+				{
+					return{ false, "^7Cannot use ^3%s ^7inside this area while moving.\n" };
+				}
+			}
+			else
+			{
+				if (trace.fraction != 1.0f)
+				{
+					return{ false, "^7Cannot use ^3%s ^7inside this area while moving.\n" };
+				}
+			}
+		}
+
 		if (ent->client->ps.eFlags & EF_DEAD )
 		{
 			return{ false, "^7Cannot use ^3%s ^7in this state.\n" };
@@ -1399,13 +1423,13 @@ void Cmd_Noclip_f(gentity_t *ent)
 	{
 		// try softnoclip as a fallback
 		auto newResult = ETJump::canSoftNoclip(ent);
-		if (!newResult.success)
+		if (!newResult.success) // softnoclip not successful - print softnoclip error message
 		{
-			std::string str = (boost::format(result.message) % "noclip").str();
+			std::string str = (boost::format(newResult.message) % "softnoclip").str();
 			capitalizeWithColor(str);
 			Printer::SendCenterMessage(clientNum, str);
 		}
-		else
+		else if (newResult.success) // softnoclip successful
 		{
 			// only print if we are not already softnoclipping
 			if (!ent->client->softNoclip)
@@ -1413,6 +1437,12 @@ void Cmd_Noclip_f(gentity_t *ent)
 				Printer::SendConsoleMessage(clientNum, "^3noclip^7 unavailable - enabling ^3softnoclip^7\n");
 			}
 			ETJump::softNoclip(ent);
+		}
+		else // neither was successful - print noclip error message
+		{
+			std::string str = (boost::format(result.message) % "noclip").str();
+			capitalizeWithColor(str);
+			Printer::SendCenterMessage(clientNum, str);
 		}
 		return;
 	}
