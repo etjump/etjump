@@ -268,6 +268,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 	vec2_t           icon_extends, icon_pos, string_pos = { 0, 0 };
 	int              customimage = 0;
 	oidInfo_t        *oidInfo    = NULL;
+	float            origX, origY, yaw;
 
 	switch (mEnt->type)
 	{
@@ -307,8 +308,13 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
 		cent = &cg_entities[mEnt->data];
 
+		// for these, if availaible, ignore the coordinate data and grab the most up to date pvs data
+		origX = (cent - cg_entities == cg.clientNum ? cg.predictedPlayerEntity.lerpOrigin[0] : cent->lerpOrigin[0]);
+		origY = (cent - cg_entities == cg.clientNum ? cg.predictedPlayerEntity.lerpOrigin[1] : cent->lerpOrigin[1]);
+		yaw = (cent - cg_entities == cg.clientNum ? cg.predictedPlayerState.viewangles[YAW] : cent->lerpAngles[YAW]);
+
 		// note that cg.mapcoordsMaxs[1] < cg.mapcoordsMins[1]
-		if (cent->lerpOrigin[0] < cg.mapcoordsMins[0] || cent->lerpOrigin[0] > cg.mapcoordsMaxs[0] || cent->lerpOrigin[1] > cg.mapcoordsMins[1] || cent->lerpOrigin[1] < cg.mapcoordsMaxs[1])
+		if (origX < cg.mapcoordsMins[0] || origX > cg.mapcoordsMaxs[0] || origY > cg.mapcoordsMins[1] || origY < cg.mapcoordsMaxs[1])
 		{
 			return;
 		}
@@ -320,36 +326,20 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
 		classInfo = CG_PlayerClassForClientinfo(ci, cent);
 
-		// For these, if availaible, ignore the coordinate data and grab the most up to date pvs data
-		if (cent - cg_entities == cg.clientNum)
+		if (cent - cg_entities == cg.clientNum || (ci->team == snap->ps.persistant[PERS_TEAM] && cent->currentValid))
 		{
 			if (!scissor)
 			{
-				mEnt->transformed[0] = ((cg.predictedPlayerEntity.lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
-				mEnt->transformed[1] = ((cg.predictedPlayerEntity.lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
+				mEnt->transformed[0] = ((origX - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
+				mEnt->transformed[1] = ((origY - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
 			}
 			else
 			{
-				mEnt->automapTransformed[0] = ((cg.predictedPlayerEntity.lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
-				mEnt->automapTransformed[1] = ((cg.predictedPlayerEntity.lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
+				mEnt->automapTransformed[0] = ((origX - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
+				mEnt->automapTransformed[1] = ((origY - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
 			}
 
-			mEnt->yaw = cg.predictedPlayerState.viewangles[YAW];
-		}
-		else if (ci->team == snap->ps.persistant[PERS_TEAM] && cent->currentValid)
-		{
-			if (!scissor)
-			{
-				mEnt->transformed[0] = ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
-				mEnt->transformed[1] = ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
-			}
-			else
-			{
-				mEnt->automapTransformed[0] = ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
-				mEnt->automapTransformed[1] = ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
-			}
-
-			mEnt->yaw = cent->lerpAngles[YAW];
+			mEnt->yaw = yaw;
 		}
 		else
 		{
@@ -359,7 +349,6 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 				return;
 			}
 		}
-
 
 		// now check to see if the entity is within our clip region
 		if (scissor && CG_ScissorEntIsCulled(mEnt, scissor))
