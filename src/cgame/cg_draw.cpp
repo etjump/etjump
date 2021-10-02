@@ -3187,7 +3187,7 @@ static qboolean CG_IsOverBounce(float vel, float initHeight,
                                 float finalHeight, float rintv,
                                 float psec, int gravity)
 {
-	float a, b, c;
+	float a, b, c, D;
 	float n1;
 	//float			n2;
 	float hn;
@@ -3196,8 +3196,22 @@ static qboolean CG_IsOverBounce(float vel, float initHeight,
 	a  = -psec * rintv / 2;
 	b  = psec * (vel - gravity * psec / 2 + rintv / 2);
 	c  = initHeight - finalHeight;
-	n1 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
-	//n2 = (-b + sqrt(b * b - 4 * a * c)) / (2 * a);
+
+	if (a == 0)
+	{
+		// no quadratic equation
+		return qfalse;
+	}
+
+	D = b * b - 4 * a * c; // discriminant
+	if (D < 0)
+	{
+		// no real roots
+		return qfalse;
+	}
+
+	n1 = (-b - std::sqrt(D)) / (2 * a);
+	//n2 = (-b + sqrt(D)) / (2 * a);
 	//CG_Printf("n1=%f, n2=%f\n", n1, n2);
 
 	n  = floor(n1);
