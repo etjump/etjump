@@ -506,6 +506,12 @@ static void PM_Friction(void)
 	}
 
 	speed = VectorLength(vec);
+
+	if (speed == 0)
+	{
+		return;
+	}
+
 	// rain - #179 don't do this for PM_SPECTATOR/PM_NOCLIP, we always want them to stop
 	if (speed < 1 && pm->ps->pm_type != PM_SPECTATOR && pm->ps->pm_type != PM_NOCLIP)
 	{
