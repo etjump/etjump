@@ -3564,11 +3564,8 @@ void        CG_FreeCamera(int camNum);
 
 bg_playerclass_t *CG_PlayerClassForClientinfo(clientInfo_t *ci, centity_t *cent);
 
-void CG_FitTextToWidth(char *instr, int w, int size);
-void CG_FitTextToWidth2(char *instr, float scale, float w, int size);
 void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo_t *font);
 int CG_TrimLeftPixels(char *instr, float scale, float w, int size);
-void CG_FitTextToWidth_SingleLine(char *instr, float scale, float w, int size);
 
 void CG_LocateCampaign(void);
 void CG_LocateArena(void);

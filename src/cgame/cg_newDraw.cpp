@@ -3,53 +3,6 @@
 
 int CG_DrawField(int x, int y, int width, int value, int charWidth, int charHeight, qboolean dodrawpic, qboolean leftAlign);        // NERVE - SMF
 
-/*void CG_FitTextToWidth( char* instr, int w, int size) {
-    char buffer[1024];
-    char	*s, *p, *c, *ls;
-    int		l;
-
-    strcpy(buffer, instr);
-    memset(instr, 0, size);
-
-    c = s = instr;
-    p = buffer;
-    ls = NULL;
-    l = 0;
-    while(*p) {
-        *c = *p++;
-        l++;
-
-        if(*c == ' ') {
-            ls = c;
-        } // store last space, to try not to break mid word
-
-        c++;
-
-        if(*p == '\n') {
-            s = c+1;
-            l = 0;
-        } else if(l > w) {
-            if(ls) {
-                *ls = '\n';
-                l = strlen(ls+1);
-            } else {
-                *c = *(c-1);
-                *(c-1) = '\n';
-                s = c++;
-                l = 0;
-            }
-
-            ls = NULL;
-        }
-    }
-
-    if(c != buffer && (*(c-1) != '\n')) {
-        *c++ = '\n';
-    }
-
-    *c = '\0';
-}*/
-
 int CG_TrimLeftPixels(char *instr, float scale, float w, int size)
 {
 	char buffer[1024];
@@ -139,83 +92,6 @@ void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo
 	}
 
 	*c = '\0';
-}
-
-void CG_FitTextToWidth2(char *instr, float scale, float w, int size)
-{
-	char buffer[1024];
-	char *s, *p, *c, *ls;
-	int  l;
-
-	Q_strncpyz(buffer, instr, 1024);
-	memset(instr, 0, size);
-
-	c  = s = instr;
-	p  = buffer;
-	ls = NULL;
-	l  = 0;
-	while (*p)
-	{
-		*c = *p++;
-		l++;
-
-		if (*c == ' ')
-		{
-			ls = c;
-		} // store last space, to try not to break mid word
-
-		c++;
-
-		if (*p == '\n')
-		{
-			s = c + 1;
-			l = 0;
-		}
-		else if (CG_Text_Width(s, scale, 0) > w)
-		{
-			if (ls)
-			{
-				*ls = '\n';
-				s   = ls + 1;
-			}
-			else
-			{
-				*c       = *(c - 1);
-				*(c - 1) = '\n';
-				s        = c++;
-			}
-
-			ls = NULL;
-			l  = 0;
-		}
-	}
-
-	if (c != buffer && (*(c - 1) != '\n'))
-	{
-		*c++ = '\n';
-	}
-
-	*c = '\0';
-}
-
-void CG_FitTextToWidth_SingleLine(char *instr, float scale, float w, int size)
-{
-	char *s, *p;
-	char buffer[1024];
-
-	Q_strncpyz(buffer, instr, 1024);
-	memset(instr, 0, size);
-	p = instr;
-
-	for (s = buffer; *s; s++, p++)
-	{
-		*p = *s;
-		if (CG_Text_Width(instr, scale, 0) > w)
-		{
-			*p = '\0';
-			return;
-		}
-	}
 }
 
 /*
