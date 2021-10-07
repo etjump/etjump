@@ -2577,22 +2577,14 @@ qboolean Item_SetFocus(itemDef_t *item, float x, float y)
 int Item_ListBox_MaxScroll(itemDef_t *item)
 {
 	listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
-	int          count    = DC->feederCount(item->special);
-	int          max;
+	int max = DC->feederCount(item->special);
 
-	if (item->window.flags & WINDOW_HORIZONTAL)
+	if (max > 0)
 	{
-		max = count - (int)(item->window.rect.w / listPtr->elementWidth);
+		max -= static_cast<int>(item->window.flags & WINDOW_HORIZONTAL ? item->window.rect.w / listPtr->elementWidth : item->window.rect.h / listPtr->elementHeight);
 	}
-	else
-	{
-		max = count - (int)(item->window.rect.h / listPtr->elementHeight);
-	}
-	if (max < 0)
-	{
-		return 0;
-	}
-	return max;
+
+	return std::max(0, max);
 }
 
 int Item_ListBox_ThumbPosition(itemDef_t *item)
