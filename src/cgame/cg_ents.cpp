@@ -336,8 +336,6 @@ static void CG_EntityEffects(centity_t *cent)
 	// DHM - Nerve :: If EF_SMOKING is set, emit smoke
 	else if (cent->currentState.eFlags & EF_SMOKING)
 	{
-		float rnd = random();
-
 		if (cent->lastTrailTime < cg.time)
 		{
 			cent->lastTrailTime = cg.time + 100;
@@ -353,8 +351,9 @@ static void CG_EntityEffects(centity_t *cent)
 //			dir[1] = crandom() * 10;
 //			dir[2] = 10 + rnd * 30;
 // jpw
+			const float rnd = std::min(0.3f + random(), 1.0f);
 			CG_SmokePuff(cent->lerpOrigin, dir, 15 + (random() * 10),
-			             0.3 + rnd, 0.3 + rnd, 0.3 + rnd, 0.4, 1500 + (rand() % 500),
+			             rnd, rnd, rnd, 0.4, 1500 + (rand() % 500),
 			             cg.time, cg.time + 500, 0, cgs.media.smokePuffShader);
 		}
 	}
