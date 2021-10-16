@@ -226,9 +226,9 @@ typedef struct
 	float backlerp;
 
 	float yawAngle;
-	qboolean yawing;
+	int yawing;                     // 0 = off, 1 = right, 2 = left
 	float pitchAngle;
-	qboolean pitching;
+	int pitching;                   // 0 = off, 1/2 presumably up/down, however 2 unused
 
 	int animationNumber;            // may include ANIM_TOGGLEBIT
 	int oldAnimationNumber;         // may include ANIM_TOGGLEBIT
