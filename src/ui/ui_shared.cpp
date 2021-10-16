@@ -4691,7 +4691,7 @@ static float GetCharWidth(const char *symbol, float scale, fontInfo_t *font)
 
 	if (symbol)
 	{
-		glyph = &font->glyphs[static_cast<std::size_t>(*symbol)];
+		glyph = &font->glyphs[static_cast<unsigned char>(*symbol)];
 		out = glyph->xSkip;
 	}
 	return out * scale * font->glyphScale;
