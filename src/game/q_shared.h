@@ -1520,8 +1520,8 @@ typedef enum
 
 typedef struct entityState_s
 {
-	int number;                     // entity index
-	entityType_t eType;             // entityType_t
+	int number;             // entity index
+	int eType;              // changed from entityType_t to int to allow ET_EVENTS + eventNum
 	int eFlags;
 
 	trajectory_t pos;       // for calculating position
