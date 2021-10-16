@@ -1045,7 +1045,7 @@ CG_SwingAngles
 ==================
 */
 static void CG_SwingAngles(float destination, float swingTolerance, float clampTolerance,
-                           float speed, float *angle, qboolean *swinging)
+                           float speed, float *angle, int *swinging)
 {
 	float swing;
 	float move;
@@ -1087,7 +1087,7 @@ static void CG_SwingAngles(float destination, float swingTolerance, float clampT
 		}
 		else
 		{
-			*swinging = (qboolean)SWING_LEFT;     // left
+			*swinging = SWING_LEFT;     // left
 		}
 		*angle = AngleMod(*angle + move);
 	}
@@ -1101,7 +1101,7 @@ static void CG_SwingAngles(float destination, float swingTolerance, float clampT
 		}
 		else
 		{
-			*swinging = (qboolean)SWING_RIGHT;    // right
+			*swinging = SWING_RIGHT;    // right
 		}
 		*angle = AngleMod(*angle + move);
 	}
@@ -2805,7 +2805,7 @@ CG_SwingAngles_Limbo
 ==================
 */
 static void CG_SwingAngles_Limbo(float destination, float swingTolerance, float clampTolerance,
-                                 float speed, float *angle, qboolean *swinging)
+                                 float speed, float *angle, int *swinging)
 {
 	float swing;
 	float move;
