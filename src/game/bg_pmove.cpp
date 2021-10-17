@@ -3920,6 +3920,14 @@ void PM_AdjustAimSpreadScale(void)
 	float increase, decrease;       // (SA) was losing lots of precision on slower weapons (scoped)
 	float viewchange, cmdTime, wpnScale;
 
+	cmdTime = (pm->cmd.serverTime - pm->oldcmd.serverTime) / 1000.0f;
+
+	if (cmdTime == 0)
+	{
+		// no time has passed for whatever reason
+		return;
+	}
+
 	// all weapons are very inaccurate in zoomed mode
 	if (pm->ps->eFlags & EF_ZOOMING)
 	{
@@ -3927,8 +3935,6 @@ void PM_AdjustAimSpreadScale(void)
 		pm->ps->aimSpreadScaleFloat = 255;
 		return;
 	}
-
-	cmdTime = (float)(pm->cmd.serverTime - pm->oldcmd.serverTime) / 1000.0;
 
 	wpnScale = 0.0f;
 	switch (pm->ps->weapon)
