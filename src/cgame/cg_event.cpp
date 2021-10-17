@@ -2881,7 +2881,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 			break;
 		}
 
-		len = 1.0f - (len / (float)cent->currentState.onFireStart);
+		if (cent->currentState.onFireStart != 0)
+		{
+			len = 1.0f - len / cent->currentState.onFireStart;
+		}
 		len = std::min(1.f, len);
 
 		CG_StartShakeCamera(len, es);
