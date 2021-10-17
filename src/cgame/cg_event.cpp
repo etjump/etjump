@@ -2681,7 +2681,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		break;
 
 	case EV_FLAMETHROWER_EFFECT:
-		CG_FireFlameChunks(cent, cent->currentState.origin, cent->currentState.apos.trBase, 0.6, (qboolean)2);
+		CG_FireFlameChunks(cent, cent->currentState.origin, cent->currentState.apos.trBase, 0.6, qtrue);
 		break;
 
 	case EV_DUST:
