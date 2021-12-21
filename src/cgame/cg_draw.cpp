@@ -2279,11 +2279,6 @@ static void CG_DrawCrosshair(void)
 		break;
 	}
 
-	if (cg.predictedPlayerState.eFlags & EF_PRONE_MOVING)
-	{
-		return;
-	}
-
 	// FIXME: spectators/chasing?
 	if (cg.predictedPlayerState.weapon == WP_MORTAR_SET && cg.predictedPlayerState.weaponstate != WEAPON_RAISING)
 	{
