@@ -43,7 +43,6 @@ namespace ETJump
 			"models/mapobjects/tree_temperate_sd/leaves_temperate2",
 			"models/mapobjects/tree_temperate_sd/leaves_temperate3",
 			"models/mapobjects/tree_desert_sd/palm_leaf1",
-			"models/mapobjects/tree_desert_sd/palm_leaves2",
 			"models/mapobjects/plants_sd/bush_desert1",
 			"models/mapobjects/plants_sd/bush_desert2",
 			"models/mapobjects/plants_sd/bush_snow1",
