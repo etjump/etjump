@@ -5136,11 +5136,7 @@ static void CG_DrawWeapRecharge(rectDef_t *rect)
 		chargeTime = cg.soldierChargeTime[cg.snap->ps.persistant[PERS_TEAM] - 1];
 	}
 
-	barFrac = (float)(cg.time - cg.snap->ps.classWeaponTime) / chargeTime;
-	if (barFrac > 1.0)
-	{
-		barFrac = 1.0;
-	}
+	barFrac = (chargeTime == 0 ? 1.0f : std::min(static_cast<float>(cg.time - cg.snap->ps.classWeaponTime) / chargeTime, 1.0f));
 
 	color[0] = 1.0f;
 	color[1] = color[2] = barFrac;
