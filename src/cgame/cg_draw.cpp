@@ -3049,7 +3049,6 @@ static void CG_DrawSpectatorMessage(void)
 {
 	std::string str;
 	const char  *str2;
-	float       y;
 	static int  lastconfigGet = 0;
 
 	if (cgs.demoCam.renderingFreeCam)
@@ -3079,10 +3078,6 @@ static void CG_DrawSpectatorMessage(void)
 		lastconfigGet = cg.time;
 	}
 
-	y = 408;
-
-	y -= 2 * TINYCHAR_HEIGHT;
-
 	str2 = BindingFromName("openlimbomenu");
 	if (!Q_stricmp(str2, "(openlimbomenu)"))
 	{
@@ -3098,7 +3093,7 @@ static void CG_DrawSpectatorMessage(void)
 #ifdef MV_SUPPORT
 	str2 = BindingFromName("mvactivate");
 	str  = va(CG_TranslateString("- Press %s to %s multiview mode"), str2, ((cg.mvTotalClients > 0) ? "disable" : "activate"));
-	CG_DrawStringExt(x, y, str, colorWhite, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+	CG_DrawStringExt(0, 408 - 2 * TINYCHAR_HEIGHT, str, colorWhite, qtrue, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 	y += TINYCHAR_HEIGHT;
 #endif
 }

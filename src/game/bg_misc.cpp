@@ -5962,18 +5962,6 @@ void RGBtoHSL(const vec4_t rgb, vec4_t *hsl)
 //NOTE: Helper method to HSLtoRGB
 float Hue_2_RGB(float v1, float v2, float vH)
 {
-
-	float t_H = 0;
-
-	if (vH < 0)
-	{
-		t_H += 1;
-	}
-	if (vH > 1)
-	{
-		t_H -= 1;
-	}
-
 	if ((6 * vH) < 1)
 	{
 		return (v1 + (v2 - v1) * 6 * vH);

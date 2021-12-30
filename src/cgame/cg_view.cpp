@@ -1281,7 +1281,6 @@ static void CG_DamageBlendBlob(void)
 	refEntity_t  ent;
 	qboolean     pointDamage;
 	viewDamage_t *vd;
-	float        redFlash;
 
 	// Gordon: no damage blend blobs if in limbo or spectator, and in the limbo menu
 	if ((cg.snap->ps.pm_flags & PMF_LIMBO || cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) && cg.showGameView)
@@ -1294,8 +1293,6 @@ static void CG_DamageBlendBlob(void)
 	{
 		return;
 	}
-
-	redFlash = 0;
 
 	for (i = 0; i < MAX_VIEWDAMAGE; i++)
 	{
@@ -1319,7 +1316,6 @@ static void CG_DamageBlendBlob(void)
 		// if not point Damage, only do flash blend
 		if (!pointDamage)
 		{
-			redFlash += 10.0 * (1.0 - (float)t / maxTime);
 			continue;
 		}
 
@@ -1341,8 +1337,6 @@ static void CG_DamageBlendBlob(void)
 		                           (cg_bloodDamageBlend.value < 0.0f) ? 0.0f : cg_bloodDamageBlend.value);
 
 		trap_R_AddRefEntityToScene(&ent);
-
-		redFlash += ent.radius;
 	}
 }
 
