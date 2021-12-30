@@ -234,7 +234,7 @@ void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t colo
 
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color, const std::string &text, float adjust, int limit, int style, fontInfo_t *font)
 {
-    CG_Text_Paint_Ext(x, y, scalex, scaley, color, text.c_str(), adjust, limit, style, font);
+	CG_Text_Paint_Ext(x, y, scalex, scaley, color, text.c_str(), adjust, limit, style, font);
 }
 
 void CG_Text_Paint(float x, float y, float scale, vec4_t color, const char *text, float adjust, int limit, int style)
@@ -830,29 +830,32 @@ CG_DrawTeamInfo
 */
 static void CG_DrawTeamInfo(void)
 {
-	int w;
-	int i, len;
-	vec4_t hcolor;
-	float alphapercent, chatbgalpha;
-	float chatScale = Numeric::clamp(etj_chatScale.value, 0, 5);
-	float fontSize = 0.2f;
-	float fontSizeScaled = chatScale * fontSize;
-	float lineHeight = 9.0f * chatScale;
+	int       w;
+	int       i, len;
+	vec4_t    hcolor;
+	float     alphapercent, chatbgalpha;
+	float     chatScale      = Numeric::clamp(etj_chatScale.value, 0, 5);
+	float     fontSize       = 0.2f;
+	float     fontSizeScaled = chatScale * fontSize;
+	float     lineHeight     = 9.0f * chatScale;
 	qhandle_t flag;
-	int maxLineLength = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
-	int chatWidth = calcBackgroundWidth(maxLineLength, fontSizeScaled, &cgs.media.limboFont2) + 5;
-	int chatHeight = Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
-	int textStyle = ITEM_TEXTSTYLE_NORMAL;
-	float textAlpha = etj_chatAlpha.value;
+	int       maxLineLength = Numeric::clamp(etj_chatLineWidth.integer, 1, TEAMCHAT_WIDTH);
+	int       chatWidth     = calcBackgroundWidth(maxLineLength, fontSizeScaled, &cgs.media.limboFont2) + 5;
+	int       chatHeight    = Numeric::clamp(cg_teamChatHeight.integer, 0, TEAMCHAT_HEIGHT);
+	int       textStyle     = ITEM_TEXTSTYLE_NORMAL;
+	float     textAlpha     = etj_chatAlpha.value;
 
-	if (etj_chatShadow.integer > 0) {
+	if (etj_chatShadow.integer > 0)
+	{
 		textStyle = ITEM_TEXTSTYLE_SHADOWED;
 	}
 
-	if (textAlpha > 1.0) {
+	if (textAlpha > 1.0)
+	{
 		textAlpha = 1.0;
 	}
-	else if (textAlpha < 0.0) {
+	else if (textAlpha < 0.0)
+	{
 		textAlpha = 0.0;
 	}
 	if (chatHeight <= 0)
@@ -923,8 +926,9 @@ static void CG_DrawTeamInfo(void)
 			hcolor[3] = alphapercent * textAlpha;
 			trap_R_SetColor(hcolor);
 
-			if (etj_chatFlags.integer) {
-				
+			if (etj_chatFlags.integer)
+			{
+
 				if (cgs.teamChatMsgTeams[i % chatHeight] == TEAM_AXIS)
 				{
 					flag = cgs.media.axisFlag;
@@ -941,8 +945,8 @@ static void CG_DrawTeamInfo(void)
 				{
 					float flagScaleX = 12.0f * chatScale;
 					float flagScaleY = 9.0f * chatScale;
-					float flagPosX = (CHATLOC_TEXT_X + etj_chatPosX.value) - (13 * chatScale);
-					float flagPosY = (CHATLOC_Y + etj_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight) - (9 * chatScale);
+					float flagPosX   = (CHATLOC_TEXT_X + etj_chatPosX.value) - (13 * chatScale);
+					float flagPosY   = (CHATLOC_Y + etj_chatPosY.value - (cgs.teamChatPos - i - 1) * lineHeight) - (9 * chatScale);
 					CG_DrawPic(flagPosX, flagPosY, flagScaleX, flagScaleY, flag);
 				}
 
@@ -2279,11 +2283,6 @@ static void CG_DrawCrosshair(void)
 		break;
 	}
 
-	if (cg.predictedPlayerState.eFlags & EF_PRONE_MOVING)
-	{
-		return;
-	}
-
 	// FIXME: spectators/chasing?
 	if (cg.predictedPlayerState.weapon == WP_MORTAR_SET && cg.predictedPlayerState.weaponstate != WEAPON_RAISING)
 	{
@@ -2319,7 +2318,7 @@ static void CG_DrawCrosshair(void)
 	else
 	{
 		vec4_t crosshairColor = { 1.0, 1.0, 1.0, 1.0 };
-		float crosshairAlpha = cg_crosshairAlpha.value;
+		float  crosshairAlpha = cg_crosshairAlpha.value;
 
 		ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
 		crosshairColor[3] = Numeric::clamp(crosshairAlpha, 0.0f, 1.0f);
@@ -2351,7 +2350,7 @@ static void CG_DrawCrosshair(void)
 		if (cg_crosshairHealth.integer == 0)
 		{
 			vec4_t crosshairColorAlt = { 1.0, 1.0, 1.0, 1.0 };
-			float crosshairAlphaAlt = cg_crosshairAlphaAlt.value;
+			float  crosshairAlphaAlt = cg_crosshairAlphaAlt.value;
 
 			ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
 			crosshairColorAlt[3] = Numeric::clamp(crosshairAlphaAlt, 0.0f, 1.0f);
@@ -2609,7 +2608,7 @@ static void CG_DrawMoverHealthBar(float frac, vec4_t color)
 {
 	vec4_t bgcolor;
 	vec4_t c;
-	float barFrac = Numeric::clamp(frac, 0, 1.0);
+	float  barFrac = Numeric::clamp(frac, 0, 1.0);
 
 	c[0] = 1.0f;
 	c[1] = c[2] = barFrac;
@@ -2622,7 +2621,7 @@ static void CG_DrawMoverHealthBar(float frac, vec4_t color)
 static void CG_DrawPlyerName(vec4_t color)
 {
 	const char *s = va("%s", cgs.clientinfo[cg.crosshairClientNum].name);
-	float w = ETJump::DrawStringWidth(s, 0.23f);
+	float      w  = ETJump::DrawStringWidth(s, 0.23f);
 
 	ETJump::DrawString(SCREEN_CENTER_X - w / 2, 182, 0.23f, 0.25f, color, qfalse, s, 0, ITEM_TEXTSTYLE_SHADOWED);
 	trap_R_SetColor(nullptr);
@@ -2640,7 +2639,7 @@ static void CG_DrawCrosshairNames(void)
 	{
 		return;
 	}
-	
+
 	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
 	{
 		return;
@@ -2650,7 +2649,7 @@ static void CG_DrawCrosshairNames(void)
 	// Distance to the entity under the crosshair
 	// scan the known entities to see if the crosshair is sighted on one
 	float zChange = 0;
-	float dist = CG_ScanForCrosshairEntity(&zChange, &hitClient);
+	float dist    = CG_ScanForCrosshairEntity(&zChange, &hitClient);
 
 	// draw the name of the player being looked at
 	float *color = CG_FadeColor(cg.crosshairClientTime, 1000);
@@ -2662,8 +2661,8 @@ static void CG_DrawCrosshairNames(void)
 	}
 
 	float playerHealth = 0.f;
-	float maxHealth = 1.f;
-	bool isMover = false;
+	float maxHealth    = 1.f;
+	bool  isMover      = false;
 
 	// NERVE - SMF
 	if (cg.crosshairClientNum > MAX_CLIENTS)
@@ -2710,7 +2709,7 @@ static void CG_DrawCrosshairNames(void)
 	{
 		CG_DrawMoverHealthBar(playerHealth / maxHealth, color);
 	}
-	else 
+	else
 	{
 		if ((etj_hide.integer == 1 && dist < etj_hideDistance.integer) || etj_hide.integer == 2)
 		{
@@ -2761,13 +2760,13 @@ CG_DrawVote
 */
 static void CG_DrawVote(void)
 {
-	char  str1[32], str2[32];
+	char   str1[32], str2[32];
 	vec4_t color{ 1, 1, 0, 1 };
 
 	std::string line_a;
 	std::string line_b;
-	auto x_a = 8;
-	auto x_b = 8;
+	auto        x_a = 8;
+	auto        x_b = 8;
 
 	Q_strncpyz(str1, BindingFromName("vote yes"), 32);
 	Q_strncpyz(str2, BindingFromName("vote no"), 32);
@@ -2849,7 +2848,7 @@ static void CG_DrawVote(void)
 		if (!(cg.snap->ps.eFlags & EF_VOTED))
 		{
 			line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
-			
+
 			if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR && etj_spectatorVote.integer <= 0)
 			{
 				line_b = ETJump::stringFormat("YES:%i, NO:%i (%s)", cgs.voteYes, cgs.voteNo, "Spectators can't vote");
@@ -2863,7 +2862,7 @@ static void CG_DrawVote(void)
 		{
 			line_a = ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
 			line_b = ETJump::stringFormat("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
-			x_b = 13;
+			x_b    = 13;
 
 			if (cgs.votedYes)
 			{
@@ -2871,8 +2870,8 @@ static void CG_DrawVote(void)
 			}
 			else
 			{
-				std::string yesVotes = ETJump::stringFormat("Y:%i", cgs.voteYes);
-				auto textWidth = ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f);
+				std::string yesVotes  = ETJump::stringFormat("Y:%i", cgs.voteYes);
+				auto        textWidth = ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f);
 				CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1, color);
 			}
 		}
@@ -2899,7 +2898,7 @@ static void CG_DrawVote(void)
 
 	if (cgs.propositionEndTime > cg.time && cgs.propositionClient < 0)
 	{
-		switch (cgs.propositionClient) 
+		switch (cgs.propositionClient)
 		{
 		case -1:
 			line_a = "Your proposition has been submitted";
@@ -2935,9 +2934,9 @@ static void CG_DrawVote(void)
 		}
 	}
 
-	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) || 
-		(cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) || 
-		(cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
+	if ((cgs.autoFireteamEndTime > cg.time && cgs.autoFireteamNum == -2) ||
+	    (cgs.autoFireteamCreateEndTime > cg.time && cgs.autoFireteamCreateNum == -2) ||
+	    (cgs.autoFireteamJoinEndTime > cg.time && cgs.autoFireteamJoinNum == -2))
 	{
 		line_a = "Response Sent";
 	}
@@ -3049,9 +3048,9 @@ CG_DrawSpectatorMessage
 static void CG_DrawSpectatorMessage(void)
 {
 	std::string str;
-	const char *str2;
-	float      y;
-	static int lastconfigGet = 0;
+	const char  *str2;
+	float       y;
+	static int  lastconfigGet = 0;
 
 	if (cgs.demoCam.renderingFreeCam)
 	{
@@ -3149,7 +3148,7 @@ static void CG_DrawLimboMessage(void)
 	float         color[4] = { 1, 1, 1, 1 };
 	std::string   str;
 	playerState_t *ps = &cg.snap->ps;
-	int           y = 130;
+	int           y   = 130;
 
 	if (cgs.demoCam.renderingFreeCam)
 	{
@@ -3222,7 +3221,8 @@ static bool CG_SurfaceAllowsOverbounce(trace_t *trace)
 	if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE)
 	{
 		return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-	} else
+	}
+	else
 	{
 		return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
 	}
@@ -3237,15 +3237,15 @@ Fast OB detection.
 */
 static void CG_DrawOB(void)
 {
-	float         psec;
-	int           gravity;
-	vec3_t        snap;
-	float         rintv;
-	float         v0;
-	float         h0, t;
-	trace_t       trace;
-	vec3_t        start, end;
-	float         x;
+	float   psec;
+	int     gravity;
+	vec3_t  snap;
+	float   rintv;
+	float   v0;
+	float   h0, t;
+	trace_t trace;
+	vec3_t  start, end;
+	float   x;
 
 	if (!etj_drawOB.integer || cg_thirdPerson.integer)
 	{
@@ -3336,7 +3336,7 @@ static void CG_DrawOB(void)
 		}
 
 		// sticky ob
-		b   = qfalse;
+		b = qfalse;
 
 		// don't display stickies on the same height we're currently at
 		// since obviously it's possible and it's just distracting
@@ -3349,23 +3349,23 @@ static void CG_DrawOB(void)
 			if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 			{
 				CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
-					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 				b = qtrue;
 			}
 
 			// sticky jump ob
 			if (ps->groundEntityNum != ENTITYNUM_NONE
-				&& CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
+			    && CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec, gravity) && CG_SurfaceAllowsOverbounce(&trace))
 			{
 				CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 				b = qtrue;
 			}
 
 			if (b && CG_SurfaceAllowsOverbounce(&trace))
 			{
 				CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse, qtrue,
-					TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				                 TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
 		}
 	}
@@ -3373,10 +3373,10 @@ static void CG_DrawOB(void)
 
 static void CG_DrawSlick(void)
 {
-	trace_t       trace;
-	vec3_t        start, end;
-	const float   minWalkNormal = 0.7;
-	float         x;
+	trace_t     trace;
+	vec3_t      start, end;
+	const float minWalkNormal = 0.7;
+	float       x;
 
 	if (!etj_drawSlick.integer)
 	{
@@ -3407,9 +3407,9 @@ static void CG_DrawSlick(void)
 static void CG_DrawJumpDelay(void)
 {
 	trace_t trace;
-	vec3_t start, end;
-	float x = etj_noJumpDelayX.integer;
-	float y = etj_noJumpDelayY.integer;
+	vec3_t  start, end;
+	float   x = etj_noJumpDelayX.integer;
+	float   y = etj_noJumpDelayY.integer;
 
 	if (!etj_drawNoJumpDelay.integer)
 	{
@@ -3441,46 +3441,46 @@ static void CG_DrawJumpDelay(void)
 
 namespace ETJump
 {
-	const vec4_t SaveIconColor{ 0.88f, 0.88f, 0.88f, 1.f };
-	const auto SaveIconSize = 20.f;
+const vec4_t SaveIconColor{ 0.88f, 0.88f, 0.88f, 1.f };
+const auto   SaveIconSize = 20.f;
 
-	const vec4_t ProneIconColor{ 0.88f, 0.88f, 0.88f, 1.f };
-	const auto ProneIconSize = 20.f;
+const vec4_t ProneIconColor{ 0.88f, 0.88f, 0.88f, 1.f };
+const auto   ProneIconSize = 20.f;
 
-	const auto ForbidIconSize = 20.f;
+const auto ForbidIconSize = 20.f;
 
-	static void drawSaveIcon(float x, float y)
+static void drawSaveIcon(float x, float y)
+{
+	drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor);
+}
+
+static void drawProneIcon(float x, float y)
+{
+	drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor);
+}
+
+static void printNoProne(void)
+{
+	playerState_t *ps = ETJump::getValidPlayerState();
+	if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE)
 	{
-		drawPic(x, y, SaveIconSize, SaveIconSize, cgs.media.saveIcon, SaveIconColor);
-	}
-
-	static void drawProneIcon(float x, float y)
-	{
-		drawPic(x, y, ProneIconSize, ProneIconSize, cgs.media.proneIcon, ProneIconColor);
-	}
-
-	static void printNoProne(void)
-	{
-		playerState_t *ps = ETJump::getValidPlayerState();
-		if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE)
+		if (cg.time > cg.pronePressTime)
 		{
-			if (cg.time > cg.pronePressTime)
-			{
-				CG_CenterPrint("^7You cannot ^3prone ^7inside this area.", SCREEN_HEIGHT - 88, SMALLCHAR_WIDTH);
-				cg.pronePressTime = cg.time + 1000;
-			}
+			CG_CenterPrint("^7You cannot ^3prone ^7inside this area.", SCREEN_HEIGHT - 88, SMALLCHAR_WIDTH);
+			cg.pronePressTime = cg.time + 1000;
 		}
 	}
+}
 
-	static void drawForbidIcon(float x, float y)
-	{
-		drawPic(x, y, ForbidIconSize, ForbidIconSize, cgs.media.friendShader);
-	}
+static void drawForbidIcon(float x, float y)
+{
+	drawPic(x, y, ForbidIconSize, ForbidIconSize, cgs.media.friendShader);
+}
 }
 
 static void CG_DrawSaveIndicator(void)
 {
-	trace_t trace;
+	trace_t       trace;
 	playerState_t *ps = ETJump::getValidPlayerState();
 
 	float x = etj_saveIndicatorX.integer;
@@ -3551,7 +3551,7 @@ static void CG_DrawSaveIndicator(void)
 
 static void CG_DrawProneIndicator(void)
 {
-	trace_t trace;
+	trace_t       trace;
 	playerState_t *ps = ETJump::getValidPlayerState();
 
 	float x = etj_proneIndicatorX.integer;
@@ -3621,7 +3621,7 @@ static void CG_DrawProneIndicator(void)
 
 static void CG_DrawPronePrint(void)
 {
-	trace_t trace;
+	trace_t       trace;
 	playerState_t *ps = ETJump::getValidPlayerState();
 
 	if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
@@ -3929,10 +3929,10 @@ static void CG_DrawFlashFade(void)
 		// OSP - Show who is speclocked
 		if (fBlackout)
 		{
-			int   i, nOffset = 90;
-			const char  *str, *format = "The %s team is speclocked!";
-			const char  *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIES", "???" };
-			float color[4]               = { 1, 1, 0, 1 };
+			int        i, nOffset = 90;
+			const char *str, *format = "The %s team is speclocked!";
+			const char *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIES", "???" };
+			float      color[4]               = { 1, 1, 0, 1 };
 
 			for (i = TEAM_AXIS; i <= TEAM_ALLIES; i++)
 			{
@@ -4609,7 +4609,7 @@ static void CG_DrawNewCompass(void)
 	snapshot_t *snap;
 	float angle;
 	int i;
-	static float lastangle  = 0;
+	static float lastangle = 0;
 	static float anglespeed = 0;
 	float diff;
 
@@ -4674,8 +4674,8 @@ static void CG_DrawNewCompass(void)
 
 	CG_DrawPic(basex + 4, basey + 4, basew - 8, baseh - 8, cgs.media.compassShader);
 
-	angle       = (cg.predictedPlayerState.viewangles[YAW] + 180.f) / 360.f - (0.125f);
-	diff        = AngleSubtract(angle * 360, lastangle * 360) / 360.f;
+	angle = (cg.predictedPlayerState.viewangles[YAW] + 180.f) / 360.f - (0.125f);
+	diff = AngleSubtract(angle * 360, lastangle * 360) / 360.f;
 	anglespeed /= 1.08f;
 	anglespeed += diff * 0.01f;
 	if (std::abs(anglespeed) < 0.00001f)
@@ -4945,7 +4945,7 @@ static void CG_DrawPlayerStatusHead(void)
 	hudHeadAnimNumber_t anim;
 	rectDef_t headRect = { 44, 480 - 92, 62, 80 };
 //	rectDef_t headHintRect =	{ 40, 480 - 22, 20, 20 };
-	bg_character_t *character     = CG_CharacterForPlayerstate(&cg.snap->ps);
+	bg_character_t *character = CG_CharacterForPlayerstate(&cg.snap->ps);
 	bg_character_t *headcharacter = BG_GetCharacter(cgs.clientinfo[cg.snap->ps.clientNum].team, cgs.clientinfo[cg.snap->ps.clientNum].cls);
 
 	qhandle_t painshader = 0;
@@ -5044,12 +5044,12 @@ static void CG_DrawPlayerHealthBar(rectDef_t *rect)
 
 static void CG_DrawStaminaBar(rectDef_t *rect)
 {
-	vec4_t bgcolour  = { 1.f, 1.f, 1.f, 0.3f };
-	vec4_t colour    = { 0.1f, 1.0f, 0.1f, 0.5f };
+	vec4_t bgcolour = { 1.f, 1.f, 1.f, 0.3f };
+	vec4_t colour = { 0.1f, 1.0f, 0.1f, 0.5f };
 	vec4_t colourlow = { 1.0f, 0.1f, 0.1f, 0.5f };
-	vec_t *color     = colour;
-	int flags        = 1 | 4 | 16 | 64;
-	float frac       = cg.pmext.sprintTime / (float)SPRINTTIME;
+	vec_t *color = colour;
+	int flags = 1 | 4 | 16 | 64;
+	float frac = cg.pmext.sprintTime / (float)SPRINTTIME;
 
 	if (cg.snap->ps.powerups[PW_ADRENALINE])
 	{
@@ -5140,7 +5140,7 @@ static void CG_DrawWeapRecharge(rectDef_t *rect)
 	if (fade)
 	{
 		bgcolor[3] *= 0.4f;
-		color[3]   *= 0.4;
+		color[3] *= 0.4;
 	}
 
 	CG_FilledBar(rect->x, rect->y + (rect->h * 0.1f), rect->w, rect->h * 0.84f, color, NULL, bgcolor, barFrac, flags);
@@ -5171,7 +5171,7 @@ static void CG_DrawPlayerStatus(void)
 	{
 		int ws = (cg.mvTotalClients > 0) ? cgs.clientinfo[cg.snap->ps.clientNum].weaponState : BG_simpleWeaponState(cg.snap->ps.weaponstate);
 
-		if (cg_drawWeaponIconFlash.integer >= 2)	// ETPro's extended weapon icon flash
+		if (cg_drawWeaponIconFlash.integer >= 2)    // ETPro's extended weapon icon flash
 		{
 			CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH || ws == WSTATE_RELOAD) ? &colorYellow : (ws == WSTATE_FIRE) ? &colorRed : &colorWhite));
 		}
@@ -5180,13 +5180,13 @@ static void CG_DrawPlayerStatus(void)
 			CG_DrawPlayerWeaponIcon(&rect, (ws != WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT, ((ws == WSTATE_SWITCH) ? &colorWhite : (ws == WSTATE_FIRE) ? &colorRed : &colorYellow));
 		}
 	}
-	
+
 	if (etj_HUD_weaponIcon.integer)
 	{
 		// Draw ammo
 		value = value2 = value3 = 0;
 		CG_PlayerAmmoValue(&value, &value2, &value3);
-		
+
 		if (value3 >= 0)
 		{
 			Com_sprintf(buffer, sizeof(buffer), "%i|%i/%i", value3, value, value2);
@@ -5328,7 +5328,7 @@ static void CG_DrawPlayerStats(void)
 	if (etj_HUD_playerHealth.integer)
 	{
 		str = va("%i", cg.snap->ps.stats[STAT_HEALTH]);
-		w   = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
+		w = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X - 28 - w, 480 - 4, 0.25f, 0.25f, colorWhite, str, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X - 28 + 2, 480 - 4, 0.2f, 0.2f, colorWhite, "HP", 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 	}
@@ -5363,7 +5363,7 @@ static void CG_DrawPlayerStats(void)
 
 
 		str = va("%i", cg.snap->ps.stats[STAT_XP]);
-		w   = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
+		w = CG_Text_Width_Ext(str, 0.25f, 0, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X + 28 - w, 480 - 4, 0.25f, 0.25f, clr, str, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 		CG_Text_Paint_Ext(SKILLS_X + 28 + 2, 480 - 4, 0.2f, 0.2f, clr, "XP", 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont1);
 
@@ -5406,7 +5406,7 @@ void CG_StatsDebugAddText(const char *text)
 		}
 
 		Q_strncpyz(statsDebugStrings[statsDebugPos], text, 512);
-		statsDebugTime[statsDebugPos]      = cg.time;
+		statsDebugTime[statsDebugPos] = cg.time;
 		statsDebugTextWidth[statsDebugPos] = CG_Text_Width_Ext(text, .15f, 0, &cgs.media.limboFont2);
 
 		CG_Printf("%s\n", text);
@@ -5676,7 +5676,8 @@ static void CG_Draw2D(void)
 			CG_DrawStatsDebug();
 		}
 
-		if (!cg.cameraMode) {
+		if (!cg.cameraMode)
+		{
 			CG_DrawTeamInfo();
 			CG_DrawVote();
 			CG_DrawLagometer();
@@ -5734,7 +5735,7 @@ static void CG_Draw2D(void)
 	{
 		CG_Fireteams_Draw();
 	}
-	
+
 	if (!cgs.demoCam.renderingFreeCam)
 	{
 		ETJump_DrawDrawables();
@@ -5754,7 +5755,7 @@ static void CG_Draw2D(void)
 
 	// Info overlays
 	CG_DrawOverlays();
-	
+
 	if (!cgs.demoCam.renderingFreeCam)
 	{
 		// OSP - window updates
@@ -5778,24 +5779,27 @@ void CG_StartShakeCamera(float p, entityState_t *es)
 	auto attacker = static_cast<char>(es->clientNum);
 
 	//ETJump: never shake cam from explosions
-	if (etj_explosivesShake.integer == 0) {
+	if (etj_explosivesShake.integer == 0)
+	{
 		return;
 	}
 
 	//ETJump: shake cam only from other players explosives
-	if (etj_explosivesShake.integer == 1 && attacker == cg.clientNum) {
+	if (etj_explosivesShake.integer == 1 && attacker == cg.clientNum)
+	{
 		return;
 	}
 
 	//ETJump: shake cam only from own explosives
-	if (etj_explosivesShake.integer == 2 && attacker != cg.clientNum) {
+	if (etj_explosivesShake.integer == 2 && attacker != cg.clientNum)
+	{
 		return;
 	}
 
 	cg.cameraShakeScale = p;
 	cg.cameraShakeLength = 1000 * (p * p);
-	cg.cameraShakeTime   = cg.time + cg.cameraShakeLength;
-	cg.cameraShakePhase  = crandom() * M_PI; // start chain in random dir
+	cg.cameraShakeTime = cg.time + cg.cameraShakeLength;
+	cg.cameraShakePhase = crandom() * M_PI;  // start chain in random dir
 }
 
 void CG_ShakeCamera()
@@ -5814,19 +5818,19 @@ void CG_ShakeCamera()
 	// ydnar: move the camera
 	#if 0
 	// up/down
-	val                     = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
 	cg.refdefViewAngles[0] += val;
 
 	// left/right
-	val                     = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
 	cg.refdefViewAngles[1] += val;
 	#else
 	// move
-	val                   = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[2] += val;
-	val                   = sin(M_PI * 13 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
+	val = sin(M_PI * 13 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[1] += val;
-	val                   = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
+	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[0] += val;
 	#endif
 
@@ -5842,7 +5846,7 @@ void CG_DrawMiscGamemodels(void)
 
 	memset(&ent, 0, sizeof(ent));
 
-	ent.reType            = RT_MODEL;
+	ent.reType = RT_MODEL;
 	ent.nonNormalizedAxes = qtrue;
 
 	// ydnar: static gamemodels don't project shadows
@@ -5922,9 +5926,9 @@ void SetFov(float fov)
 
 static void CG_ChangeFovBasedOnSpeed()
 {
-	float speed           = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
-	float speedDiff       = speed - movie_fovMinSpeed.value;
-	float additionalFov   = movie_fovMax.value - movie_fovMin.value;
+	float speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+	float speedDiff = speed - movie_fovMinSpeed.value;
+	float additionalFov = movie_fovMax.value - movie_fovMin.value;
 	float minMaxSpeedDiff = movie_fovMaxSpeed.value - movie_fovMinSpeed.value;
 	float currentSpeedFov = movie_fovMin.value;
 
