@@ -1371,8 +1371,6 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head)
 	int          contents;
 	vec3_t       mang, morg, maxis[3];
 
-	ci = &cgs.clientinfo[cent->currentState.number];
-
 	if (!cg_enableBreath.integer)
 	{
 		return;
@@ -1383,7 +1381,7 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head)
 		return;
 	}
 
-	if (!(cent->currentState.eFlags & EF_DEAD))
+	if (cent->currentState.eFlags & EF_DEAD)
 	{
 		return;
 	}
@@ -1399,6 +1397,8 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head)
 	{
 		return;
 	}
+
+	ci = &cgs.clientinfo[cent->currentState.number];
 	if (ci->breathPuffTime > cg.time)
 	{
 		return;
