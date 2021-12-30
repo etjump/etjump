@@ -2121,7 +2121,7 @@ static void PM_CrashLand(void)
 	float c = -dist;
 
 	float den = b * b - 4 * a * c;
-	if (den < 0)
+	if (a == 0 || den < 0)
 	{
 		return;
 	}
