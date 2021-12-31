@@ -156,7 +156,7 @@ CG_CalcMoveSpeeds
 static void CG_CalcMoveSpeeds(bg_character_t *character)
 {
 	const char          *tags[2] = { "tag_footleft", "tag_footright" };
-	vec3_t        oldPos[2];
+	vec3_t        oldPos[2] = {0};
 	refEntity_t   refent;
 	animation_t   *anim;
 	int           i, j, k;
