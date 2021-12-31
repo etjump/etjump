@@ -1071,12 +1071,12 @@ namespace ETJump
 	// General purpose etj_hideMe check for cgame events
 	bool hideMeCheck(int entityNum)
 	{
-		auto ci = &cgs.clientinfo[entityNum];
-		bool isHiddenPlayer = ci->hideMe && entityNum != cg.clientNum;
 		if (entityNum < MAX_CLIENTS)
 		{
-			if (isHiddenPlayer)
+			// entity is a player
+			if (cgs.clientinfo[entityNum].hideMe && entityNum != cg.clientNum)
 			{
+				// player is hidden and it is not ourselves
 				return true;
 			}
 		}
