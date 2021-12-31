@@ -222,7 +222,7 @@ namespace ETJump
 			return true;
 		}
 
-		if (cg.zoomedBinoc || cg.zoomedScope)
+		if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson)
 		{
 			return true;
 		}
