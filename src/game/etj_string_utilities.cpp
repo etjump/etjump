@@ -1,7 +1,7 @@
 /*
  * MIT License
  * 
- * Copyright (c) 2021 ETJump team <zero@etjump.com>
+ * Copyright (c) 2022 ETJump team <zero@etjump.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -252,4 +252,3 @@ void ETJump::StringUtil::replaceAll(std::string& input, const std::string& from,
 		startPost += to.length();
 	}
 }
-
