@@ -1,6 +1,6 @@
 # ETJump
 
-[![Build Status](https://dev.azure.com/etjump/etjump/_apis/build/status/etjump.etjump.CI?branchName=master)](https://dev.azure.com/etjump/etjump/_build/latest?definitionId=2&branchName=master)
+[![etjump-CI](https://github.com/etjump/etjump/actions/workflows/ci.yml/badge.svg)](https://github.com/etjump/etjump/actions/workflows/ci.yml)
 
 This is source code repository for [ETJump](http://etjump.com/), a [Wolfenstein: Enemy Territory](https://en.wikipedia.org/wiki/Wolfenstein:_Enemy_Territory) trickjump modification. 
 
