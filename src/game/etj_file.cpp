@@ -23,12 +23,12 @@
  */
 
 #include "etj_file.h"
-#include <boost/format.hpp>
 #ifdef GAMEDLL
 #include "g_local.h"
 #elif CGAMEDLL
 #include "../cgame/cg_local.h"
 #endif
+#include "etj_string_utilities.h"
 
 ETJump::File::File(const std::string& path, Mode mode) : _path(path), _handle(INVALID_FILE_HANDLE), _mode(mode)
 {
@@ -101,8 +101,7 @@ void ETJump::File::write(const char* data, int len) const
 	auto bytesWritten = trap_FS_Write(data, len, _handle);
 	if (bytesWritten != len)
 	{
-		throw WriteFailedException((boost::format("Write to file %s failed. Wrote %d out of %d bytes.")
-			% _path % bytesWritten % len).str());
+		throw WriteFailedException(ETJump::stringFormat("Write to file %s failed. Wrote %d out of %d bytes.", _path, bytesWritten, len));
 	}
 #else
 	trap_FS_Write(data, len, _handle);
@@ -139,7 +138,7 @@ std::string ETJump::File::getPath(const std::string file)
 	trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
 	trap_Cvar_VariableStringBuffer("fs_homepath", base, sizeof(base));
 
-	auto path = (boost::format("%s/%s/%s") % base % game % file).str();
+	auto path = ETJump::stringFormat("%s/%s/%s", base, game, file);
 	for (auto & c : path)
 	{
 		if (c == '/' || c == '\\')

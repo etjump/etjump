@@ -27,6 +27,8 @@
 #include <vector>
 #include <array>
 
+#include "etj_progression_tracker_parser.h"
+
 namespace ETJump
 {
 	class ProgressionTrackers

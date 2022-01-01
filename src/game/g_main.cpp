@@ -7,6 +7,7 @@
 #include "etj_save_system.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+#include "etj_progression_tracker.h"
 
 level_locals_t level;
 
@@ -32,6 +33,7 @@ namespace ETJump
 	std::shared_ptr<SaveSystem> saveSystem;
 	std::shared_ptr<Database> database;
 	std::shared_ptr<Session> session;
+	std::shared_ptr<ProgressionTrackers> progressionTrackers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,6 +46,7 @@ static void initializeETJump()
 	ETJump::database = std::make_shared<Database>();
 	ETJump::session = std::make_shared<Session>(ETJump::database);
 	ETJump::saveSystem = std::make_shared<ETJump::SaveSystem>(ETJump::session);
+	ETJump::progressionTrackers = std::make_shared<ETJump::ProgressionTrackers>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +56,10 @@ static void initializeETJump()
 static void shutdownETJump()
 {
 	ETJump::deathrunSystem = nullptr;
+	ETJump::database = nullptr;
+	ETJump::session = nullptr;
 	ETJump::saveSystem = nullptr;
+	ETJump::progressionTrackers = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -590,47 +596,47 @@ This must be the very first function compiled into the .q3vm file
 
 extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1, intptr_t arg2, intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6)
 {
-	switch (command)
-	{
-	case GAME_INIT:
-		G_InitGame(arg0, arg1, arg2);
-		return 0;
-	case GAME_SHUTDOWN:
-		G_ShutdownGame(arg0);
-		return 0;
-	case GAME_CLIENT_CONNECT:
-        return (intptr_t)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
-	case GAME_CLIENT_THINK:
-		ClientThink(arg0);
-		return 0;
-	case GAME_CLIENT_USERINFO_CHANGED:
-		ClientUserinfoChanged(arg0);
-		return 0;
-	case GAME_CLIENT_DISCONNECT:
-		ClientDisconnect(arg0);
-		return 0;
-	case GAME_CLIENT_BEGIN:
-		ClientBegin(arg0);
-		return 0;
-	case GAME_CLIENT_COMMAND:
-		ClientCommand(arg0);
-		return 0;
-	case GAME_RUN_FRAME:
-		G_RunFrame(arg0);
-		return 0;
-	case GAME_CONSOLE_COMMAND:
-		return ConsoleCommand();
-	case BOTAI_START_FRAME:
-		return 0;
-	case BOT_VISIBLEFROMPOS:
-		return qfalse;
-	case BOT_CHECKATTACKATPOS:
-		return qfalse;
-	case GAME_SNAPSHOT_CALLBACK:
-		return G_SnapshotCallback(arg0, arg1);
-	case GAME_MESSAGERECEIVED:
-		return -1;
-	}
+		switch (command)
+		{
+		case GAME_INIT:
+			G_InitGame(arg0, arg1, arg2);
+			return 0;
+		case GAME_SHUTDOWN:
+			G_ShutdownGame(arg0);
+			return 0;
+		case GAME_CLIENT_CONNECT:
+			return (intptr_t)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
+		case GAME_CLIENT_THINK:
+			ClientThink(arg0);
+			return 0;
+		case GAME_CLIENT_USERINFO_CHANGED:
+			ClientUserinfoChanged(arg0);
+			return 0;
+		case GAME_CLIENT_DISCONNECT:
+			ClientDisconnect(arg0);
+			return 0;
+		case GAME_CLIENT_BEGIN:
+			ClientBegin(arg0);
+			return 0;
+		case GAME_CLIENT_COMMAND:
+			ClientCommand(arg0);
+			return 0;
+		case GAME_RUN_FRAME:
+			G_RunFrame(arg0);
+			return 0;
+		case GAME_CONSOLE_COMMAND:
+			return ConsoleCommand();
+		case BOTAI_START_FRAME:
+			return 0;
+		case BOT_VISIBLEFROMPOS:
+			return qfalse;
+		case BOT_CHECKATTACKATPOS:
+			return qfalse;
+		case GAME_SNAPSHOT_CALLBACK:
+			return G_SnapshotCallback(arg0, arg1);
+		case GAME_MESSAGERECEIVED:
+			return -1;
+		}
 
 	return -1;
 }
@@ -676,7 +682,7 @@ void QDECL G_Error(const char *fmt, ...)
 	va_start(argptr, fmt);
 	Q_vsnprintf(text, sizeof(text), fmt, argptr);
 	va_end(argptr);
-
+	
 	trap_Error(text);
 }
 //bani

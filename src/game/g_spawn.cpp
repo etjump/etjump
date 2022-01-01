@@ -6,11 +6,11 @@
 */
 #include <sstream>
 #include <string>
-#include <boost/algorithm/string.hpp>
 #include <unordered_map>
 
 #include "g_local.h"
 #include "etj_save_system.h"
+#include "etj_string_utilities.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out, const char *file, int line)
 {
@@ -1113,7 +1113,7 @@ namespace ETJump{
 			std::string token;
 			while (str >> token)
 			{
-				boost::algorithm::to_lower(token);
+				token = ETJump::StringUtil::toLowerCase(token);
 				value |= static_cast<int>(allowedStrictValues[token]); // else 0
 			}
 		}

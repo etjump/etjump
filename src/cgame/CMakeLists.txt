@@ -100,7 +100,7 @@ add_library(cgame MODULE
 	${CGAME_HEADERS}
 )
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
-target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libboost)
+target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libuuid4 fmt::fmt)
 
 set_target_properties(cgame PROPERTIES 
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

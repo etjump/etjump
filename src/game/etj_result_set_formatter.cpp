@@ -25,7 +25,7 @@
 #include "etj_result_set_formatter.h"
 #include <algorithm>
 #include <numeric>
-#include <boost/algorithm/string/case_conv.hpp>
+#include "etj_string_utilities.h"
 
 Utilities::ResultSetFormatter::ResultSetFormatter()
 {
@@ -106,7 +106,7 @@ std::string Utilities::ResultSetFormatter::toString(std::vector<std::string> hea
 			const auto iter = row.find(header);
 			if (iter == end(row))
 			{
-				auto lwrCase = boost::to_lower_copy(header);
+				auto lwrCase = ETJump::StringUtil::toLowerCase(header);
 				if (lwrCase == "index" || lwrCase == "idx" || lwrCase == "i")
 				{
                     maxColumnWidths[header] = std::max(

@@ -26,8 +26,7 @@
 #include <sqlite3.h>
 #include <algorithm>
 #include "etj_utilities.h"
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
+#include "etj_string_utilities.h"
 #include "g_local.h"
 
 
@@ -165,14 +164,14 @@ void MapStatistics::saveChanges()
 	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to open database. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to open database. (%d) %s.\n", rc, sqlite3_errmsg(db)));
 		return;
 	}
 
 	rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to start transaction. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to start transaction. (%d) %s.\n", rc, sqlite3_errmsg(db)));
 		return;
 	}
 
@@ -180,12 +179,10 @@ void MapStatistics::saveChanges()
 	{
 		if (map.changed)
 		{
-			rc = sqlite3_exec(db, (boost::format("UPDATE map_statistics SET seconds_played=%d, callvoted=%d, votes_passed=%d, times_played=%d, last_played=%d WHERE id=%d;")
-			                       % map.secondsPlayed % map.callvoted % map.votesPassed % map.timesPlayed % map.lastPlayed % map.id
-			                       ).str().c_str(), nullptr, nullptr, nullptr);
+			rc = sqlite3_exec(db, ETJump::stringFormat("UPDATE map_statistics SET seconds_played=%d, callvoted=%d, votes_passed=%d, times_played=%d, last_played=%d WHERE id=%d;", map.secondsPlayed, map.callvoted, map.votesPassed, map.timesPlayed, map.lastPlayed, map.id).c_str(), nullptr, nullptr, nullptr);
 			if (rc != SQLITE_OK)
 			{
-				Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to update map. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
+				Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to update map. (%d) %s.\n", rc, sqlite3_errmsg(db)));
 				return;
 			}
 		}
@@ -194,14 +191,14 @@ void MapStatistics::saveChanges()
 	rc = sqlite3_exec(db, "END TRANSACTION;", nullptr, nullptr, nullptr);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to end transaction. (%d) %s.\n") % rc % sqlite3_errmsg(db)).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to end transaction. (%d) %s.\n", rc, sqlite3_errmsg(db)));
 		return;
 	}
 
 	rc = sqlite3_close(db);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::saveChanges: Error: Failed to close sqlite db. (%d) %s") % rc % sqlite3_errmsg(db)).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to close sqlite db. (%d) %s", rc, sqlite3_errmsg(db)));
 	}
 }
 
@@ -268,8 +265,7 @@ void MapStatistics::setCurrentMap(const std::string currentMap)
 
 	if (it == _maps.end())
 	{
-		Utilities::Error((boost::format("Error: Failed to set the current map to %s. Map could not be found in the maps vector. Map count: %d\n")
-		                  % currentMap % _maps.size()).str());
+		Utilities::Error(ETJump::stringFormat("Error: Failed to set the current map to %s. Map could not be found in the maps vector. Map count: %d\n", currentMap, _maps.size()));
 		return;
 	}
 
@@ -299,7 +295,7 @@ void MapStatistics::addNewMaps()
 			continue;
 		}
 
-		Utilities::Console((boost::format("Notification: New map %s found.\n") % map).str());
+		Utilities::Console(ETJump::stringFormat("Notification: New map %s found.\n", map));
 
 		MapInformation mapInformation;
 		mapInformation.name       = map;
@@ -312,8 +308,7 @@ void MapStatistics::addNewMaps()
 	auto count = newMaps.size();
 	saveNewMaps(std::move(newMaps));
 
-	Utilities::Console((boost::format("%d maps on the server. Added %d new maps.\n")
-	                    % mapCount % count).str());
+	Utilities::Console(ETJump::stringFormat("%d maps on the server. Added %d new maps.\n", mapCount, count));
 }
 
 void MapStatistics::saveNewMaps(std::vector<std::string> newMaps)
@@ -322,20 +317,20 @@ void MapStatistics::saveNewMaps(std::vector<std::string> newMaps)
 	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::saveNewMaps: Error: Could not open map database %s\n") % _databaseName).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::saveNewMaps: Error: Could not open map database %s\n", _databaseName));
 		return;
 	}
 
 	for (auto newMap : newMaps)
 	{
 		std::string sqlEscapedMapName = newMap;
-		boost::replace_all(sqlEscapedMapName, "'", "''");
+		ETJump::StringUtil::replaceAll(sqlEscapedMapName, "'", "''");
 		// Map names won't be doing any SQL injection
 		rc = sqlite3_exec(db,
-		                  (boost::format("INSERT INTO map_statistics (name, seconds_played, callvoted, votes_passed, times_played, last_played) VALUES ('%s', 0, 0, 0, 0, 0);") % sqlEscapedMapName).str().c_str(), nullptr, nullptr, nullptr);
+			ETJump::stringFormat("INSERT INTO map_statistics (name, seconds_played, callvoted, votes_passed, times_played, last_played) VALUES ('%s', 0, 0, 0, 0, 0);", sqlEscapedMapName).c_str(), nullptr, nullptr, nullptr);
 		if (rc != SQLITE_OK)
 		{
-			Utilities::Error((boost::format("MapStatistics::saveNewMaps: Error: Failed to execute statement: (%d) %s") % rc % sqlite3_errmsg(db)).str());
+			Utilities::Error(ETJump::stringFormat("MapStatistics::saveNewMaps: Error: Failed to execute statement: (%d) %s", rc, sqlite3_errmsg(db)));
 			sqlite3_close(db);
 			return;
 		}
@@ -378,8 +373,7 @@ bool MapStatistics::loadMaps()
 	auto rc = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Failed to open database %s\n")
-		                  % _databaseName).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::loadMaps: Error: Failed to open database %s\n", _databaseName));
 		return false;
 	}
 
@@ -388,8 +382,7 @@ bool MapStatistics::loadMaps()
 	rc = sqlite3_prepare(db, "SELECT id, name, seconds_played, callvoted, votes_passed, times_played, last_played FROM map_statistics;", -1, &stmt, nullptr);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Failed to prepare statement: (%d) %s\n")
-		                  % rc % sqlite3_errmsg(db)).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::loadMaps: Error: Failed to prepare statement: (%d) %s\n", rc, sqlite3_errmsg(db)));
 		sqlite3_close(db);
 		return false;
 	}
@@ -415,8 +408,7 @@ bool MapStatistics::loadMaps()
 
 	if (rc != SQLITE_DONE)
 	{
-		Utilities::Error((boost::format("MapStatistics::loadMaps: Error: Reading map statistics failed. (%d) %s\n")
-		                  % rc % sqlite3_errmsg(db)).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::loadMaps: Error: Reading map statistics failed. (%d) %s\n", rc, sqlite3_errmsg(db)));
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return false;
@@ -434,8 +426,7 @@ bool MapStatistics::createDatabase()
 	auto    rc  = sqlite3_open(Utilities::getPath(_databaseName).c_str(), &db);
 	if (rc != SQLITE_OK)
 	{
-		Utilities::Error((boost::format("MapStatistics::createDatabase: Error: Failed to open database %s\n")
-		                  % _databaseName).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::createDatabase: Error: Failed to open database %s\n", _databaseName));
 		return false;
 	}
 
@@ -445,8 +436,7 @@ bool MapStatistics::createDatabase()
 	{
 		sqlite3_free(errorMessage);
 		sqlite3_close(db);
-		Utilities::Error((boost::format("MapStatistics::createDatabase: Error: Failed to create database %s. (%d) %s")
-		                  % _databaseName % rc % errorMessage).str());
+		Utilities::Error(ETJump::stringFormat("MapStatistics::createDatabase: Error: Failed to create database %s. (%d) %s\n", _databaseName, rc, errorMessage));
 		return false;
 	}
 	sqlite3_free(errorMessage);
@@ -497,9 +487,7 @@ const char *MapStatistics::randomMap() const
 
 std::string MapStatistics::getBlockedMapsStr() const
 {
-	std::string blockedMapsStr = g_blockedMaps.string;
-	boost::to_lower(blockedMapsStr);
-	return blockedMapsStr;
+	return ETJump::StringUtil::toLowerCase(g_blockedMaps.string);
 }
 
 bool MapStatistics::isValidMap(const MapInformation* mapInfo) const

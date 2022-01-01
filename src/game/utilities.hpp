@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <boost/format.hpp>
 #include "etj_local.h"
 
 typedef float vec_t;
@@ -15,10 +14,9 @@ typedef vec_t vec5_t[5];
 const std::string NEWLINE = "\n";
 
 void LogPrint(std::string message);
-void LogPrint(boost::format fmt);
 
 // C++ versions of the printing functions
-void ConsolePrintTo(gentity_t *target, boost::format fmt);
+void ConsolePrintTo(gentity_t *target, const std::string& msg);
 void BPAll(const std::string& msg, bool toConsole = true);
 void BPTo(gentity_t *target, const std::string& msg);
 void BeginBufferPrint();
@@ -26,12 +24,10 @@ void BufferPrint(gentity_t *ent, const std::string& msg);
 void FinishBufferPrint(gentity_t *ent, bool insertNewLine = false);
 void CPAll(const std::string& msg, bool toConsole = true);
 void CPMAll(const std::string& msg, bool toConsole = true);
-void CPMTo(gentity_t *target, const std::string& msg);
-void CPMTo(gentity_t *target, boost::format fmt);
+void CPMTo(gentity_t* target, const std::string& msg);
 void CPTo(gentity_t *target, const std::string& msg);
 void ChatPrintAll(const std::string& msg, bool toConsole = true);
 void ChatPrintTo(gentity_t *target, const std::string& msg);
-void ConsolePrintAll(const std::string& msg);
 void ConsolePrintTo(gentity_t *target, const std::string& msg);
 
 // Argument handling

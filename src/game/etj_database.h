@@ -24,17 +24,15 @@
 
 #ifndef DATABASE_HH
 #define DATABASE_HH
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/shared_ptr.hpp>
-#include "etj_local.h"
-#include <sqlite3.h>
+
 #include <vector>
+#include <map>
+
+#include <sqlite3.h>
+
+#include "etj_local.h"
 #include "etj_iauthentication.h"
 #include "etj_async_operation.h"
-
-using namespace boost::multi_index;
 
 // Loads the data from SQLite database to memory as
 // some servers don't support threads making it impossible
@@ -82,22 +80,9 @@ class Database : public IAuthentication
 public:
 	Database();
 	~Database();
-	typedef boost::shared_ptr<User_s> User;
-
-	typedef multi_index_container<
-	        User,
-	        indexed_by<
-	            ordered_unique<mem_fun<User_s, unsigned, &User_s::GetId> >,
-	            ordered_unique<mem_fun<User_s, std::string, &User_s::GetGuid> >
-	            >
-	        > Users;
-
-	typedef Users::nth_index<0>::type::iterator IdIterator;
-	typedef Users::nth_index<0>::type::const_iterator ConstIdIterator;
-	typedef Users::nth_index<1>::type::iterator GuidIterator;
-	typedef Users::nth_index<1>::type::const_iterator ConstGuidIterator;
-
-	typedef boost::shared_ptr<Ban_s> Ban;
+	typedef std::shared_ptr<User_s> User;
+	typedef std::shared_ptr<Ban_s> Ban;
+	typedef std::map<unsigned, User> Users;
 
 	const User_s *GetUserData(unsigned id) const;
 
@@ -136,9 +121,6 @@ public:
 	// When user is added, all we have is the guid, hwid, name, lastSeen and level
 	// Adds user to database
 	bool Save(User user, unsigned updated);
-	bool Save(IdIterator user, unsigned updated);
-
-
 
 	bool ListBans(gentity_t *ent, int page);
 	bool Unban(gentity_t *ent, int id);
@@ -161,23 +143,19 @@ private:
 
 	bool BindInt(sqlite3_stmt *stmt, int index, int val);
 	bool BindString(sqlite3_stmt *stmt, int index, const std::string& val);
-	IdIterator GetUser(unsigned id) const;
-	ConstIdIterator GetUserConst(unsigned id) const;
-	GuidIterator GetUser(const std::string& guid) const;
+	Users::iterator GetUser(unsigned id);
+	Users::const_iterator GetUserConst(unsigned id) const;
 	bool PrepareStatement(char const *query, sqlite3_stmt **stmt);
-	ConstGuidIterator GetUserConst(const std::string& guid) const;
-	bool InstantSync() const;
-	Users            users_;
+	Users users_;
 	std::vector<Ban> bans_;
 	sqlite3          *db_;
 	std::string      message_;
 
-	ConstIdIterator IdIterEnd() const;
-	ConstGuidIterator GuidIterEnd() const;
+	const Users::iterator IdIterEnd() const;
 
 	// If instant database sync is disabled, all the
 	// database operations needed are added to this queue
-	std::vector<boost::shared_ptr<DatabaseOperation> > databaseOperations_;
+	std::vector<std::shared_ptr<DatabaseOperation> > databaseOperations_;
 
 	class InsertUserOperation : public AsyncOperation
 	{

@@ -25,6 +25,7 @@
 #include "etj_banner_system.h"
 #include "etj_common.h"
 #include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 static const char *LocationText[] = {
 	"Center",
@@ -41,11 +42,13 @@ ETJump::BannerSystem::BannerSystem(Options options): _bannerIdx(0)
 		check(levelTime);
 	});
 	Printer::LogPrintln(
-		(boost::format("Initialized banner system\n"
-		"- %d banners\n"
-		"- %ds interval\n"
-		"- %s location"
-	) % _options.messages.size() % (_options.interval / 1000) % LocationText[_options.location]).str());
+		stringFormat("Initialized banner system\n"
+			"- %d banners\n"
+			"- %ds interval\n"
+			"- %s location",
+			_options.messages.size(), (_options.interval / 1000), LocationText[_options.location]
+		)
+	);
 }
 
 void ETJump::BannerSystem::check(int levelTime)

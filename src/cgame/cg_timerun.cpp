@@ -1,6 +1,5 @@
 #include "cg_timerun.h"
 #include <string>
-#include <boost/format.hpp>
 #include "../game/etj_string_utilities.h"
 
 Timerun::Timerun(int clientNum)

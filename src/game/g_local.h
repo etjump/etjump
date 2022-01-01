@@ -1826,7 +1826,6 @@ float AngleDifference(float ang1, float ang2);
 void Props_Chair_Skyboxtouch(gentity_t *ent);
 
 #include "g_team.h" // teamplay specific stuff
-
 extern level_locals_t   level;
 extern gentity_t        g_entities[];   //DAJ was explicit set to MAX_ENTITIES
 extern g_campaignInfo_t g_campaigns[];
@@ -2792,8 +2791,22 @@ namespace ETJump
 	extern std::shared_ptr<ETJump::SaveSystem> saveSystem;
 	extern std::shared_ptr<Session> session;
 	extern std::shared_ptr<Database> database;
-}
+	class ProgressionTrackers;
+	extern std::shared_ptr<ProgressionTrackers> progressionTrackers;
 
+	struct GameLogicException : public std::exception
+	{
+	private:
+		std::string message;
+	public:
+		GameLogicException(const std::string& message) : message(message) {}
+		~GameLogicException() {}
+
+		const char* what() const throw () {
+			return message.c_str();
+		}
+	};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

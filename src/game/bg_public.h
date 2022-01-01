@@ -13,18 +13,16 @@
 
 #define BUILD_TIME __DATE__ " " __TIME__
 
-#include <boost/preprocessor/facilities/is_empty.hpp>
-
-#if !defined(GAME_NAME) || BOOST_PP_IS_EMPTY(GAME_NAME)
+#if !defined(GAME_NAME)
 	#define GAME_NAME "etjump"
 #endif
 
-#if !defined(GAME_URL) || BOOST_PP_IS_EMPTY(GAME_URL)
+#if !defined(GAME_URL)
 	#define GAME_URL "etjump.com"
 #endif
 
-#if !defined(GAME_VERSION) || BOOST_PP_IS_EMPTY(GAME_VERSION)
-	#define GAME_VERSION "2.3.0"
+#if !defined(GAME_VERSION)
+	#define GAME_VERSION "unversioned"
 #endif
 
 #if defined(_DEBUG)

@@ -23,7 +23,6 @@
  */
 
 #include <memory>
-#include <boost/algorithm/string.hpp>
 #include "etj_progression_tracker_parser.h"
 
 #include "g_local.h"
@@ -31,6 +30,8 @@
 #include "etj_progression_tracker.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+
+#include <iostream>
 
 const char *ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET = "-1";
 
@@ -46,7 +47,7 @@ ETJump::ProgressionTrackers::~ProgressionTrackers()
 void ETJump::ProgressionTrackers::printParserErrors(const std::vector<std::string>& errors, const std::string& text)
 {
 	auto buffer = "Tracker parse error on line: " + text + "\n";
-	buffer += boost::algorithm::join(errors, "\n");
+	buffer += ETJump::StringUtil::join(errors, "\n");
 	G_Error(buffer.c_str());
 }
 
@@ -91,12 +92,6 @@ int ETJump::ProgressionTrackers::registerTracker(ProgressionTrackerKeys keys)
 	_progressionTrackers.push_back(progressionTracker);
 	return _progressionTrackers.size() - 1;
 }
-
-namespace ETJump
-{
-	static std::unique_ptr<ProgressionTrackers> progressionTrackers;
-}
-
 
 void ETJump::ProgressionTrackers::useTracker(gentity_t *ent, gentity_t* activator, const ProgressionTracker& tracker)
 {
@@ -211,10 +206,6 @@ void SP_target_tracker(gentity_t *self)
 	G_SpawnString("tracker_inc", "0", &keys.increment);
 	G_SpawnString("tracker_inc_if", "0", &keys.incrementIf);
 
-	if (!ETJump::progressionTrackers)
-	{
-		ETJump::progressionTrackers = std::unique_ptr<ETJump::ProgressionTrackers>(new ETJump::ProgressionTrackers);
-	}
 	self->key = ETJump::progressionTrackers->registerTracker(keys);
 	self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator)
 	{
@@ -238,11 +229,6 @@ void SP_trigger_tracker(gentity_t *self)
 	G_SpawnString("tracker_set_if", ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET, &keys.setIf);
 	G_SpawnString("tracker_inc", "0", &keys.increment);
 	G_SpawnString("tracker_inc_if", "0", &keys.incrementIf);
-
-	if (!ETJump::progressionTrackers)
-	{
-		ETJump::progressionTrackers = std::unique_ptr<ETJump::ProgressionTrackers>(new ETJump::ProgressionTrackers);
-	}
 
 	self->key = ETJump::progressionTrackers->registerTracker(keys);
 	self->use = [](gentity_t *ent, gentity_t *other, gentity_t *activator)

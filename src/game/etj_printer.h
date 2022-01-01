@@ -34,7 +34,6 @@
 
 #include <string>
 #include <vector>
-#include <boost/format.hpp>
 
 class Printer {
 public:
@@ -110,7 +109,7 @@ public:
 	* Sends a banner print message to all clients.
 	* @param message The message to be sent
 	*/
-	static void BroadCastBannerMessage(const boost::format& fmt);
+	static void BroadCastBannerMessage(const std::string& message);
 	/**
 	 * Sends a command to client specified by clientNum. This should probably
 	 * be elsewhere but is here for now.

@@ -39,6 +39,7 @@ class Session
 public:
 	static const unsigned MAX_COMMANDS = 256;
 	Session(std::shared_ptr<IAuthentication> database);
+	~Session();
 	void ResetClient(int clientNum);
 
 	struct Client

@@ -23,7 +23,6 @@
  */
 
 #include "etj_printer.h"
-#include <boost/format.hpp>
 #include "etj_string_utilities.h"
 
 #include "g_local.h"
@@ -116,10 +115,10 @@ void Printer::BroadcastLeftBannerMessage(const std::string &message)
 	G_Printf("%s\n", message.c_str());
 }
 
-void Printer::BroadCastBannerMessage(const boost::format &fmt)
+void Printer::BroadCastBannerMessage(const std::string& message)
 {
-	trap_SendServerCommand(-1, va("cpm \"%s\n\"", fmt.str().c_str()));
-	G_Printf("%s\n", fmt.str().c_str());
+	trap_SendServerCommand(-1, va("cpm \"%s\n\"", message.c_str()));
+	G_Printf("%s\n", message.c_str());
 }
 
 void Printer::SendBannerMessage(int clientNum, const std::string &message)
@@ -153,7 +152,7 @@ void Printer::BroadcastCenterMessage(const std::string& message)
 
 void Printer::SendCenterMessage(int clientNum, const std::string& message)
 {
-	trap_SendServerCommand(clientNum, (boost::format("cp \"%s\n\"") % message).str().c_str());
+	trap_SendServerCommand(clientNum, ETJump::stringFormat("cp \"%s\n\"", message).c_str());
 }
 
 void Printer::SendCommandToAll(const std::string& command)

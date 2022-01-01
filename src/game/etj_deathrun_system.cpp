@@ -24,9 +24,14 @@
 
 #include "etj_deathrun_system.h"
 #include <algorithm>
+#include <iostream>
 
 
 ETJump::DeathrunSystem::DeathrunSystem(): _defaultLocation(PrintLocation::Left)
+{
+}
+
+ETJump::DeathrunSystem::~DeathrunSystem()
 {
 }
 

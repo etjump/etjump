@@ -23,7 +23,7 @@
  */
 
 #include "etj_player_events_handler.h"
-#include <boost/algorithm/string/case_conv.hpp>
+#include "../game/etj_string_utilities.h"
 
 ETJump::PlayerEventsHandler::PlayerEventsHandler()
 {
@@ -36,7 +36,7 @@ ETJump::PlayerEventsHandler::~PlayerEventsHandler()
 
 bool ETJump::PlayerEventsHandler::check(const std::string& event, const std::vector<std::string>& arguments)
 {
-	auto lowerEvent = boost::algorithm::to_lower_copy(event);
+	auto lowerEvent = ETJump::StringUtil::toLowerCase(event);
 	auto match = _callbacks.find(lowerEvent);
 	if (match != end(_callbacks))
 	{
@@ -49,14 +49,14 @@ bool ETJump::PlayerEventsHandler::check(const std::string& event, const std::vec
 bool ETJump::PlayerEventsHandler::subscribe(const std::string& event,
 std::function<void(const std::vector<std::string>&)> callback)
 {
-	auto lowerEvent = boost::algorithm::to_lower_copy(event);
+	auto lowerEvent = ETJump::StringUtil::toLowerCase(event);
 	_callbacks[lowerEvent].push_back(callback);
 	return true;
 }
 
 bool ETJump::PlayerEventsHandler::unsubscribe(const std::string& event)
 {
-	auto lowerEvent = boost::algorithm::to_lower_copy(event);
+	auto lowerEvent = ETJump::StringUtil::toLowerCase(event);
 	auto listeners = _callbacks.find(lowerEvent);
 	if (listeners == end(_callbacks)) return false;
 	_callbacks.erase(listeners);

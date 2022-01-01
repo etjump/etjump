@@ -26,8 +26,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
+#include "etj_string_utilities.h"
 
 namespace ETJump
 {
@@ -36,6 +35,8 @@ namespace ETJump
 		parse();
 	}
 
+	ProgressionTrackerParser::~ProgressionTrackerParser()
+	{}
 
 	void ProgressionTrackerParser::parse()
 	{
@@ -43,14 +44,12 @@ namespace ETJump
 		_trackerString.erase(remove_if(begin(_trackerString), end(_trackerString), ::isspace), end(_trackerString));
 
 		// get pairs
-		std::vector<std::string> pairs;
-		split(pairs, _trackerString, boost::is_any_of("|"));
+		std::vector<std::string> pairs = ETJump::StringUtil::split(_trackerString, "|");
 
 		_parsedPairs.clear();
 		for (const auto & pair : pairs)
 		{
-			std::vector<std::string> indexValuePair;
-			split(indexValuePair, pair, boost::is_any_of(","));
+			std::vector<std::string> indexValuePair = ETJump::StringUtil::split(pair, ",");
 
 			_parsedPairs.push_back(parseIndexValuePair(indexValuePair));
 		}
@@ -68,11 +67,11 @@ namespace ETJump
 			}
 			catch (const std::invalid_argument&)
 			{
-				_errors.push_back((boost::format("value \"%s\" is not an integer") % indexValuePair[0]).str());
+				_errors.push_back(ETJump::stringFormat("value \"%s\" is not an integer", indexValuePair[0]));
 			}
 			catch (const std::out_of_range&)
 			{
-				_errors.push_back((boost::format("value \"%s\" is out of range") % indexValuePair[0]).str());
+				_errors.push_back(ETJump::stringFormat("value \"%s\" is out of range", indexValuePair[0]));
 			}
 		}
 		else
@@ -83,16 +82,16 @@ namespace ETJump
 			}
 			catch (const std::invalid_argument&)
 			{
-				_errors.push_back((boost::format("index \"%s\" is not an integer") % indexValuePair[0]).str());
+				_errors.push_back(ETJump::stringFormat("index \"%s\" is not an integer", indexValuePair[0]));
 			}
 			catch (const std::out_of_range&)
 			{
-				_errors.push_back((boost::format("index \"%s\" is out of range") % indexValuePair[0]).str());
+				_errors.push_back(ETJump::stringFormat("index \"%s\" is out of range", indexValuePair[0]));
 			}
 
 			if (result.index < 0)
 			{
-				_errors.push_back((boost::format("index \"%s\" is less than 0") % indexValuePair[0]).str());
+				_errors.push_back(ETJump::stringFormat("index \"%s\" is less than 0", indexValuePair[0]));
 			}
 
 			try
@@ -101,11 +100,11 @@ namespace ETJump
 			}
 			catch (const std::invalid_argument&)
 			{
-				_errors.push_back((boost::format("value \"%s\" is not an integer") % indexValuePair[1]).str());
+				_errors.push_back(ETJump::stringFormat("value \"%s\" is not an integer", indexValuePair[1]));
 			}
 			catch (const std::out_of_range&)
 			{
-				_errors.push_back((boost::format("value \"%s\" is out of range") % indexValuePair[1]).str());
+				_errors.push_back(ETJump::stringFormat("value \"%s\" is out of range", indexValuePair[1]));
 			}
 		}
 		return result;

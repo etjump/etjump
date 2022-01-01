@@ -39,6 +39,7 @@ namespace ETJump
 		};
 
 		ProgressionTrackerParser(const std::string& trackerString);
+		~ProgressionTrackerParser();
 
 		std::vector<std::string> getErrors() const;
 		std::vector<IndexValuePair> getParsedPairs() const;

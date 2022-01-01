@@ -322,11 +322,11 @@ namespace ETJump
 				if (mapsOnCurrentRow > perRow)
 				{
 					mapsOnCurrentRow = 1;
-					resultedMap += (boost::format("\n%-22s") % map).str();
+					resultedMap += ETJump::stringFormat("\n%-22s", map);
 				}
 				else
 				{
-					resultedMap += (boost::format("%-22s") % map).str();
+					resultedMap += ETJump::stringFormat("%-22s", map);
 				}
 			}
 			resultedMap += "\n";

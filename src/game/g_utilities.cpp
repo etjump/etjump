@@ -1,10 +1,8 @@
-#include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
 #include <vector>
 
 #include "utilities.hpp"
 #include "etj_local.h"
+#include "etj_string_utilities.h"
 
 using std::string;
 using std::vector;
@@ -18,10 +16,10 @@ using std::vector;
 const int MAX_CLIENT_PRINT_LEN = 998;
 const int MAX_SERVER_PRINT_LEN = 1013;
 
-void ConsolePrintTo(gentity_t *target, boost::format fmt)
+void ConsolePrintTo(gentity_t *target, const std::string &msg)
 {
 	int         maxLen  = MAX_CLIENT_PRINT_LEN;
-	std::string message = fmt.str();
+	std::string message = msg;
 
 	if (!target)
 	{
@@ -58,9 +56,9 @@ void ConsolePrintTo(gentity_t *target, boost::format fmt)
 	}
 }
 
-void LogPrint(boost::format fmt)
+void LogPrint(const std::string &msg)
 {
-	string message = fmt.str();
+	string message = msg;
 	while (message.length() > 0)
 	{
 		if (message.length() > MAX_SERVER_PRINT_LEN)
@@ -76,23 +74,6 @@ void LogPrint(boost::format fmt)
 	}
 }
 
-/*
- * Printing related
- */
-void ConsolePrintTo(gentity_t *target, const string& msg)
-{
-	char toPrint[MAX_TOKEN_CHARS] = "\0";
-	Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
-	if (target)
-	{
-		trap_SendServerCommand(ClientNum(target), toPrint);
-	}
-	else
-	{
-		G_Printf("%s\n", msg.c_str());
-	}
-}
-
 void C_ConsolePrintTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
@@ -104,17 +85,6 @@ void C_ConsolePrintTo(gentity_t *target, const char *msg)
 	else
 	{
 		G_Printf("%s\n", msg);
-	}
-}
-
-void ConsolePrintAll(const string& msg, bool toConsole)
-{
-	char toPrint[MAX_TOKEN_CHARS] = "\0";
-	Com_sprintf(toPrint, sizeof(toPrint), "print \"%s\n\"", msg.c_str());
-	trap_SendServerCommand(-1, toPrint);
-	if (toConsole)
-	{
-		G_Printf("%s\n", msg.c_str());
 	}
 }
 
@@ -234,19 +204,6 @@ void CPMTo(gentity_t *target, const string& msg)
 	}
 }
 
-void CPMTo(gentity_t *target, boost::format fmt)
-{
-	std::string toPrint = "cpm \"" + fmt.str() + "\n\"";
-	if (target)
-	{
-		trap_SendServerCommand(ClientNum(target), toPrint.c_str());
-	}
-	else
-	{
-		G_Printf("%s\n", fmt.str().c_str());
-	}
-}
-
 void C_CPMTo(gentity_t *target, const char *msg)
 {
 	char toPrint[MAX_TOKEN_CHARS] = "\0";
@@ -346,31 +303,24 @@ void FinishBufferPrint(gentity_t *ent, bool insertNewLine)
 {
 	if (ent)
 	{
-		boost::format toPrint("print \"%s\"");
 		if (insertNewLine)
 		{
-			toPrint % (bigTextBuffer + NEWLINE);
-			trap_SendServerCommand(ClientNum(ent),
-			                       toPrint.str().c_str());
+			trap_SendServerCommand(ClientNum(ent), ETJump::stringFormat("print \"%s\"", bigTextBuffer + NEWLINE).c_str());
 		}
 		else
 		{
-			toPrint % bigTextBuffer;
-			trap_SendServerCommand(ClientNum(ent),
-			                       toPrint.str().c_str());
+			trap_SendServerCommand(ClientNum(ent), ETJump::stringFormat("print \"%s\"", bigTextBuffer).c_str());
 		}
 	}
 	else
 	{
 		if (insertNewLine)
 		{
-			G_Printf("%s\n",
-			         (bigTextBuffer).c_str());
+			G_Printf("%s\n", bigTextBuffer.c_str());
 		}
 		else
 		{
-			G_Printf("%s",
-			         bigTextBuffer.c_str());
+			G_Printf("%s", bigTextBuffer.c_str());
 		}
 	}
 }
@@ -454,11 +404,9 @@ bool ToInt(const string& toConvert, int& value)
 {
 	try
 	{
-		int result = boost::lexical_cast<int>(toConvert);
-
-		value = result;
+		value = std::stoi(toConvert);
 	}
-	catch (/* boost::bad_lexical_cast& e */ ...)
+	catch (...)
 	{
 		return false;
 	}
@@ -469,11 +417,9 @@ bool ToUnsigned(const std::string& toConvert, unsigned& value)
 {
 	try
 	{
-		unsigned result = boost::lexical_cast<unsigned>(toConvert);
-
-		value = result;
+		value = std::stoul(toConvert);
 	}
-	catch (/* boost::bad_lexical_cast& e */ ...)
+	catch (...)
 	{
 		return false;
 	}
@@ -485,11 +431,9 @@ bool ToFloat(const std::string& toConvert, float& value)
 {
 	try
 	{
-		float result = boost::lexical_cast<float>(toConvert);
-
-		value = result;
+		value = std::stof(toConvert);
 	}
-	catch (/* boost::bad_lexical_cast& e */ ...)
+	catch (...)
 	{
 		return false;
 	}
@@ -753,7 +697,7 @@ bool ValidGuid(std::string guid)
 const char *EscapeString(const char *in)
 {
 	string str = in;
-	boost::replace_all(str, "=", "\x19=");
+	ETJump::StringUtil::replaceAll(str, "=", "\x19=");
 	static char out[MAX_TOKEN_CHARS] = "\0";
 	Q_strncpyz(out, str.c_str(), sizeof(out));
 	return out;
@@ -804,16 +748,13 @@ void BufferPrinter::Finish(bool insertNewLine)
 {
 	if (ent_)
 	{
-		boost::format toPrint("print \"%s\"");
 		if (insertNewLine)
 		{
-			toPrint % (buffer_ + NEWLINE);
-			trap_SendServerCommand(ClientNum(ent_), toPrint.str().c_str());
+			trap_SendServerCommand(ClientNum(ent_), ETJump::stringFormat("print \"%s\"", buffer_ + NEWLINE).c_str());
 		}
 		else
 		{
-			toPrint % buffer_;
-			trap_SendServerCommand(ClientNum(ent_), toPrint.str().c_str());
+			trap_SendServerCommand(ClientNum(ent_), ETJump::stringFormat("print \"%s\"", buffer_).c_str());
 		}
 	}
 	else
@@ -860,9 +801,7 @@ std::vector<int> getMatchingIds(const std::string& name)
 std::string interpolateNametags(std::string input)
 {
 	std::string              interpolated;
-	std::vector<std::string> split;
-
-	boost::algorithm::split(split, input, boost::is_any_of("@"));
+	std::vector<std::string> split = ETJump::StringUtil::split(input, "@");
 
 	if (split.size() == 1 || split.size() == 2)
 	{
@@ -884,7 +823,7 @@ std::string interpolateNametags(std::string input)
 			auto names = getNames(getMatchingIds(split[i]));
 			if (names.size() > 0)
 			{
-				interpolated += "^7" + boost::algorithm::join(names, "^2, ^7") + "^2";
+				interpolated += "^7" + ETJump::StringUtil::join(names, "^2, ^7") + "^2";
 			}
 			else
 			{
@@ -915,7 +854,7 @@ const char *findAndReplaceNametags(const char *text, const char *name)
 	static char buf[MAX_SAY_TEXT] = "\0";
 
 	auto str = std::string(text);
-	boost::replace_all(str, "[n]", name);
+	ETJump::StringUtil::replaceAll(str, "[n]", name);
 
 	Q_strncpyz(buf, str.c_str(), sizeof(buf));
 	return buf;

@@ -15,10 +15,11 @@ add_library(ui MODULE
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
 	"../cgame/etj_utilities.cpp"
+	"../game/etj_string_utilities.cpp"
 	${UI_HEADERS}
 )
 target_compile_definitions(ui PRIVATE UIDLL)
-target_link_libraries(ui PRIVATE cxx_compiler_opts libboost)
+target_link_libraries(ui PRIVATE cxx_compiler_opts libsha1 fmt::fmt)
 set_target_properties(ui PROPERTIES 
   	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"

@@ -1,8 +1,6 @@
 #include "g_local.h"
 #include <vector>
 #include <regex>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
 #include "etj_result_set_formatter.h"
 #include "utilities.hpp"
 #include "etj_printer.h"
@@ -1049,7 +1047,7 @@ namespace ETJump
 		if (ent->client->pers.noclipCount > 0)
 		{
 			--ent->client->pers.noclipCount;
-			Printer::SendCenterMessage(ClientNum(ent), (boost::format("^7You may use ^3%s ^2%d^7 more times.\n") % action % ent->client->pers.noclipCount).str());
+			Printer::SendCenterMessage(ClientNum(ent), ETJump::stringFormat("^7You may use ^3%s ^2%d^7 more times.\n", action, ent->client->pers.noclipCount));
 		}
 	}
 
@@ -1070,7 +1068,7 @@ namespace ETJump
 
 		if (!result.success)
 		{
-			std::string str = (boost::format(result.message) % "setoffset").str();
+			std::string str = ETJump::stringFormat(result.message, "setoffset");
 			capitalizeWithColor(str);
 			Printer::SendConsoleMessage(clientNum, str);
 			return;
@@ -1295,7 +1293,7 @@ void Cmd_Noclip_f(gentity_t *ent)
 
 	if (!result.success)
 	{
-		std::string str = (boost::format(result.message) % "noclip").str();
+		std::string str = ETJump::stringFormat(result.message, "noclip");
 		capitalizeWithColor(str);
 		Printer::SendCenterMessage(clientNum, str);
 		return;
@@ -4939,12 +4937,7 @@ void Cmd_Class_f(gentity_t *ent)
 
 		for (auto loadout : ETJump::availableLoadouts)
 		{
-			usageText += (
-				boost::format("  ^7%-30s ^9/class %s %i\n") 
-					% loadout.description
-					% ETJump::getPlayerClassSymbol(loadout.classId)
-					% loadout.weaponSlot
-			).str();
+			usageText += ETJump::stringFormat("  ^7%-30s ^9/class %s %i\n", loadout.description, ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
 		}
 
 		Printer::SendConsoleMessage(clientNum, usageText);
@@ -4983,11 +4976,7 @@ void Cmd_Class_f(gentity_t *ent)
 	{
 		if (loadout.classId == classId && loadout.weaponSlot == weaponSlot)
 		{
-			Printer::SendCenterMessage(clientNum, (
-				boost::format("You will spawn as an %s %s")
-				% ETJump::getPlayerTeamName(ent->client->sess.sessionTeam)
-				% loadout.description
-			).str());
+			Printer::SendCenterMessage(clientNum, ETJump::stringFormat("You will spawn as an %s %s", ETJump::getPlayerTeamName(ent->client->sess.sessionTeam), loadout.description));
 			break;
 		}
 	}
@@ -5181,8 +5170,6 @@ qboolean ClientIsFlooding(gentity_t *ent)
 
 	return qfalse;
 }
-
-std::unique_ptr<Utilities::ResultSetFormatter> fmt = std::unique_ptr<Utilities::ResultSetFormatter>(new Utilities::ResultSetFormatter);
 
 void ClientCommand(int clientNum)
 {

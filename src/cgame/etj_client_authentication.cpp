@@ -22,16 +22,11 @@
  * SOFTWARE.
  */
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include "etj_client_authentication.h"
 #include "../game/etj_file.h"
 #include "../game/etj_shared.h"
 #include "../game/etj_string_utilities.h"
+#include <uuid4.h>
 
 ETJump::ClientAuthentication::ClientAuthentication(
 	std::function<void(const std::string&)> sendClientCommand, 
@@ -61,7 +56,7 @@ void ETJump::ClientAuthentication::login()
 		_print("^1Error: " + result.message);
 	}
 	auto hwid = getHwid();
-	auto authenticate = (boost::format("%s %s %s") % Constants::Authentication::AUTHENTICATE % ETJump::hash(guid) % hwid).str();
+	auto authenticate = ETJump::stringFormat("%s %s %s", Constants::Authentication::AUTHENTICATE, ETJump::hash(guid), hwid);
 	_sendClientCommand(authenticate);
 }
 
@@ -85,9 +80,11 @@ std::string ETJump::ClientAuthentication::getHwid()
 
 std::string ETJump::ClientAuthentication::createGuid() const
 {
-	boost::uuids::random_generator gen;
-	auto u = gen();
-	return boost::to_upper_copy(boost::lexical_cast<std::string>(u));
+	char buf[UUID4_LEN];
+	uuid4_init();
+	uuid4_generate(buf);
+	auto guid = ETJump::StringUtil::toUpperCase(buf);
+	return guid;
 }
 
 ETJump::ClientAuthentication::OperationResult ETJump::ClientAuthentication::saveGuid(const std::string& guid) const

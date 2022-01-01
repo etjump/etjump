@@ -23,7 +23,7 @@
  */
 
 #include "etj_keyset_keybind_drawer.h"
-#include <boost/algorithm/string.hpp>
+#include "../game/etj_string_utilities.h"
 
 ETJump::KeySetKeyBindDrawer::KeySetKeyBindDrawer(
 	const std::vector<KeyShader>& keyShaders,
@@ -63,8 +63,7 @@ void ETJump::KeySetKeyBindDrawer::drawPressShader(qhandle_t shader, int position
 	} 
 	else
 	{
-		auto binding = getKeyCodeBinding(keyCode);
-		boost::to_upper(binding);
+		auto binding = ETJump::StringUtil::toUpperCase(getKeyCodeBinding(keyCode));
 		// factor = 16 / ... = 0.20
 		// size / factor;
 		auto bindWidth = DrawStringWidth(binding.c_str(), 0.2f);

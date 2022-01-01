@@ -22,14 +22,10 @@
  * SOFTWARE.
  */
 
-#include "etj_string_utilities.h"
 #include <algorithm>
 #include <cctype>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include "etj_string_utilities.h"
 
 extern "C" {
 #include "../sha-1/sha1.h"
@@ -55,13 +51,6 @@ std::string ETJump::hash(const std::string& input)
 		sha.Message_Digest[3],
 		sha.Message_Digest[4]);
 	return buffer;
-}
-
-std::string ETJump::newGuid()
-{
-	boost::uuids::random_generator gen;
-	auto u = gen();
-	return boost::uuids::to_string(u);
 }
 
 // https://en.wikipedia.org/wiki/Levenshtein_distance
@@ -144,20 +133,22 @@ std::string ETJump::getValue(const std::string& value, const std::string& defaul
 		: defaultValue;
 }
 
-std::string ETJump::trimStart(std::string input)
+std::string ETJump::trimStart(const std::string& input)
 {
-	input.erase(input.begin(), std::find_if(input.begin(), input.end(), [](int ch) {
+	std::string str = input;
+	str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
 		return !std::isspace(ch);
 	}));
-	return input;
+	return str;
 }
 
-std::string ETJump::trimEnd(std::string input)
+std::string ETJump::trimEnd(const std::string& input)
 {
-	input.erase(std::find_if(input.rbegin(), input.rend(), [](int ch) {
+	std::string str = input;
+	str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
 		return !std::isspace(ch);
-	}).base(), input.end());
-	return input;
+	}).base(), str.end());
+	return str;
 }
 
 std::string ETJump::trim(const std::string& input)
@@ -165,6 +156,7 @@ std::string ETJump::trim(const std::string& input)
 	return trimEnd(trimStart(input));
 }
 
+// word-wrapper
 std::vector<std::string> ETJump::splitString(std::string &input, char separator, size_t maxLength)
 {
 	std::vector<std::string> output;
@@ -207,3 +199,57 @@ std::vector<std::string> ETJump::splitString(std::string &input, char separator,
 	}
 	return output;
 }
+
+std::string ETJump::StringUtil::toLowerCase(const std::string& input)
+{
+	std::string str = input;
+	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+	return str;
+}
+
+std::string ETJump::StringUtil::toUpperCase(const std::string& input)
+{
+	std::string str = input;
+	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+	return str;
+}
+
+std::string ETJump::StringUtil::eraseLast(const std::string& input, const std::string& substring)
+{
+	std::string str = input;
+	auto pos = str.rfind(substring);
+	if (pos != std::string::npos)
+	{
+		str.erase(pos, substring.size());
+	}
+	return str;
+}
+
+std::vector<std::string> ETJump::StringUtil::split(const std::string& input, const std::string& delimiter)
+{
+	size_t posStart = 0, posEnd, delimLen = delimiter.length();
+	std::string token;
+	std::vector<std::string> splits;
+
+	while ((posEnd = input.find(delimiter, posStart)) != std::string::npos)
+	{
+		token = input.substr(posStart, posEnd - posStart);
+		posStart = posEnd + delimLen;
+		splits.push_back(token);
+	}
+
+	splits.push_back(input.substr(posStart));
+
+	return splits;
+}
+
+void ETJump::StringUtil::replaceAll(std::string& input, const std::string& from, const std::string& to)
+{
+	size_t startPost = 0;
+	while ((startPost = input.find(from, startPost)) != std::string::npos)
+	{
+		input.replace(startPost, from.length(), to);
+		startPost += to.length();
+	}
+}
+

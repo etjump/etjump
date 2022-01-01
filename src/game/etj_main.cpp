@@ -24,9 +24,11 @@
 
 #include "etj_local.h"
 
+#include <functional>
 #include <memory>
 #include "etj_banner_system.h"
 #include "etj_printer.h"
+
 
 namespace 
 {

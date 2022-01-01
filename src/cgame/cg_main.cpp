@@ -3768,7 +3768,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	CG_Printf("---------------------------------------------------\n");
-	CG_Printf("ETJump initialization started.\n");
+	CG_Printf("ETJump 22 initialization started.\n");
 	CG_Printf("Loading modules... ");
 
 	// NOTE: client server commands handlers must be created before other modules as other modules use them
