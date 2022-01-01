@@ -3293,8 +3293,11 @@ void trap_PumpEventLoop(void);
 int         trap_Milliseconds(void);
 int         trap_RealTime(qtime_t *qtime);
 
-// ETJump: refactored print related syscalls to own file
-#include "cg_print_syscalls.h"
+// print message on the local console
+void trap_Print(const char* fmt);
+
+// abort the game
+void trap_Error(const char* fmt);
 
 // console variable interaction
 void        trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);

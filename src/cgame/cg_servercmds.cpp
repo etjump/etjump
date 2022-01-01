@@ -3,7 +3,7 @@
 // be a valid snapshot this frame
 
 #include "cg_local.h"
-#include "cg_mainext.h"
+#include "etj_init.h"
 #include <vector>
 #include "etj_client_commands_handler.h"
 #include "../game/etj_numeric_utilities.h"

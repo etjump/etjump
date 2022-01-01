@@ -9,7 +9,7 @@
 #include <cmath>
 
 #include "cg_local.h"
-#include "cg_mainext.h"
+#include "etj_init.h"
 #include "etj_client_commands_handler.h"
 #include "etj_entity_events_handler.h"
 #include "etj_overbounce_watcher.h"
