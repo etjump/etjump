@@ -24,12 +24,13 @@
 
 #include <regex>
 #include <unordered_map>
+#include <string>
 #include <sstream>
 #include <memory>
-#include <boost/algorithm/string.hpp>
 
 #include "etj_utilities.h"
 #include "etj_event_loop.h"
+#include "../game/etj_string_utilities.h"
 
 namespace ETJump
 {
@@ -162,7 +163,8 @@ const std::string hashdRegex{ "^#[a-f0-9]+" }; // #ff0000
 void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 {	
 	Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
-	std::string token{ boost::algorithm::to_lower_copy(boost::algorithm::trim_copy(colorString)) };
+
+	std::string token{ ETJump::StringUtil::toLowerCase(ETJump::trim(colorString)) };
 
 	if (std::regex_match(token, std::regex(alphaRegex)))
 	{

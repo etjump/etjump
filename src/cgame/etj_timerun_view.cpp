@@ -23,11 +23,12 @@
  */
 
 #include <string>
-#include <boost/format.hpp>
+
 #include "cg_local.h"
 #include "etj_timerun_view.h"
 #include "etj_utilities.h"
 #include "etj_cvar_update_handler.h"
+#include "../game/etj_string_utilities.h"
 
 ETJump::TimerunView::TimerunView() : Drawable()
 {
@@ -116,9 +117,9 @@ void ETJump::TimerunView::draw()
 		color = &inactiveTimerColor;
 	}
 	
-	vec4_t incolor;
-	vec4_t ryGreen = { 0.627f, 0.941f, 0.349f, 1.0f };
-	vec4_t ryRed = { 0.976f, 0.262f, 0.262f, 1.0f };
+	vec4_t colorTemp;
+	vec4_t colorSuccess = { 0.627f, 0.941f, 0.349f, 1.0f };
+	vec4_t colorFail = { 0.976f, 0.262f, 0.262f, 1.0f };
 
 	auto range = getTransitionRange(run->previousRecord);
 	auto style = ITEM_TEXTSTYLE_NORMAL;
@@ -133,21 +134,21 @@ void ETJump::TimerunView::draw()
 	{
 		if (millis > run->previousRecord)
 		{
-			color = &ryRed;
+			color = &colorFail;
 		}
 		// add timer color transition when player gets closer to his pb
 		else if ( millis + range >= run->previousRecord ) {
 			auto start = run->previousRecord - range;
 			auto step = (millis - start) / (float)(run->previousRecord - start);
 			
-			ETJump_LerpColors(&colorWhite, &ryRed, &incolor, step / 2);
-			color = &incolor;
+			ETJump_LerpColors(&colorWhite, &colorFail, &colorTemp, step / 2);
+			color = &colorTemp;
 		}
 	}
 
 	// set green color for pb time
 	if (!run->running && millis && (run->previousRecord > millis || run->previousRecord == -1)) {
-		color = &ryGreen;
+		color = &colorSuccess;
 	}
 
 	auto ms = millis;
@@ -156,10 +157,7 @@ void ETJump::TimerunView::draw()
 	auto seconds = millis / 1000;
 	millis -= seconds * 1000;
 
-	auto text = (boost::format("%02d:%02d.%03d")
-		% minutes
-		% seconds
-		% millis).str();
+	auto text = ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
 
 	auto textWidth = CG_Text_Width_Ext(text.c_str(), 0.3, 0, &cgs.media.limboFont1) / 2;
 	auto x = etj_runTimerX.value;
@@ -180,8 +178,8 @@ void ETJump::TimerunView::draw()
 
 			auto step = (cg.time - fstart) / (float)(fend - fstart);
 
-			ETJump_LerpColors(color, &toColor, &incolor, step);
-			color = &incolor;
+			ETJump_LerpColors(color, &toColor, &colorTemp, step);
+			color = &colorTemp;
 		
 		}
 		else if(cg.time > fend) {

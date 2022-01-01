@@ -13,7 +13,6 @@ USER INTERFACE MAIN
 #include <cmath>
 #include "ui_local.h"
 #include <memory>
-#include <boost/algorithm/string.hpp>
 #include "../game/etj_string_utilities.h"
 #include "../cgame/etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
@@ -4887,7 +4886,7 @@ static void UI_LoadDemos()
     {
         uiInfo.currentDemoPath.push_back("demos");
     }
-    std::string path = boost::algorithm::join(uiInfo.currentDemoPath, std::string(PATH_SEP_STRING));
+    std::string path = ETJump::StringUtil::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
     const auto bufferSize = 200000;
     auto dirList = std::unique_ptr<char[]>(new char[bufferSize]);
     auto demoList = std::unique_ptr<char[]>(new char[bufferSize]);
@@ -5469,8 +5468,7 @@ void UI_RunMenuScript(char **args)
 	                // the path
 	                auto front = uiInfo.currentDemoPath.front();
 	                uiInfo.currentDemoPath.pop_front();
-	                auto demoPath = (boost::algorithm::join(uiInfo.currentDemoPath, "/") + "/" + uiInfo.demoObjects[uiInfo.
-	                    demoIndex].name);
+	                auto demoPath = ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") + "/" + uiInfo.demoObjects[uiInfo.demoIndex].name;
 	                uiInfo.currentDemoPath.push_front(front);
 	                trap_Cmd_ExecuteText(EXEC_APPEND, va("demo \"%s\"\n", demoPath.c_str()));
 	            }
@@ -5481,8 +5479,7 @@ void UI_RunMenuScript(char **args)
 	    {
 	        if (uiInfo.demoIndex >= 0 && uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size()))
 	        {
-	            auto demoPath = (boost::algorithm::join(uiInfo.currentDemoPath, "/") + "/" + uiInfo.demoObjects[uiInfo.
-	                demoIndex].name);
+	            auto demoPath = ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") + "/" + uiInfo.demoObjects[uiInfo.demoIndex].name;
 	            trap_FS_Delete(demoPath.c_str());
 	        }
 	        return;

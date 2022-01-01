@@ -5,7 +5,6 @@
  *
 */
 
-#include <boost/algorithm/string.hpp>
 #include "etj_deathrun_system.h"
 #include "g_local.h"
 #include "etj_utilities.h"
@@ -164,7 +163,7 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator)
 	if (ent->client && ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts))
 	{
 		std::string msg = message;
-		boost::replace_all(msg, "[n]", ent->client->pers.netname);
+		ETJump::StringUtil::replaceAll(msg, "[n]", ent->client->pers.netname);
 		Q_strncpyz(message, msg.c_str(), sizeof(message));
 	}
 
@@ -2411,7 +2410,7 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *act
 	auto location = ETJump::deathrunSystem->getPrintLocation();
 	if (message.length() > 0)
 	{
-		boost::replace_all(message, "[n]", activator->client->pers.netname);
+		ETJump::StringUtil::replaceAll(message, "[n]", activator->client->pers.netname);
 		auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
 		auto output = va(fmtString.c_str(), message.c_str());
 		for (const auto & c : affectedClients)
@@ -2471,8 +2470,8 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t
 		auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
 		auto checkpointMessage = ETJump::deathrunSystem->getCheckpointMessage(self->id);
 		auto score = ETJump::deathrunSystem->getScore(clientNum);
-		boost::replace_all(message, "[n]", activator->client->pers.netname);
-		boost::replace_all(message, "[s]", std::to_string(score));
+		ETJump::StringUtil::replaceAll(message, "[n]", activator->client->pers.netname);
+		ETJump::StringUtil::replaceAll(message, "[s]", std::to_string(score));
 		auto output = va(fmtString.c_str(), message.c_str());
 		for (const auto & cnum : affectedPlayers)
 		{

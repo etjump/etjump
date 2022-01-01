@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include <stdexcept>
+
 #include "etj_utilities.h"
 #include "etj_save_system.h"
-#include <boost/algorithm/string.hpp>
 #include "etj_map_statistics.h"
 
 #include "g_local.h"
@@ -325,7 +326,7 @@ std::vector<std::string> Utilities::getMaps()
 
 		char buf[64] = "\0";
 		Q_strncpyz(buf, dirPtr, sizeof(buf));
-		boost::to_lower(buf);
+		Q_strlwr(buf);
 
 		if (strstr(mapStats.getBlockedMapsStr().c_str(), buf) != nullptr)
 		{

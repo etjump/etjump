@@ -23,7 +23,6 @@
  */
 
 #include "etj_cvar_update_handler.h"
-#include <boost/algorithm/string/case_conv.hpp>
 
 ETJump::CvarUpdateHandler::CvarUpdateHandler()
 {

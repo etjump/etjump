@@ -71,3 +71,31 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnMaxWidthE
 	    EXPECT_EQ(splits[i], expectedSplits[i]);
 	}
 }
+
+TEST_F(StringUtilitiesTests, toLowerCase_ShouldConvertStringIntoLowercasedCopy)
+{
+    std::string input = "HELLO WORLD";
+    auto fixedString = StringUtil::toLowerCase(input);
+    EXPECT_EQ(fixedString, "hello world");
+}
+
+TEST_F(StringUtilitiesTests, toLowerCase_ShouldConvertStringIntoUppercasedCopy)
+{
+    std::string input = "hello world";
+    auto fixedString = StringUtil::toUpperCase(input);
+    EXPECT_EQ(fixedString, "HELLO WORLD");
+}
+
+TEST_F(StringUtilitiesTests, eraseLast_ShouldEraseLastSubstringOccurenceFromInputStringCopy)
+{
+    std::string input = "hello world, hello world";
+    auto fixedString = StringUtil::eraseLast(input, "hello");
+    EXPECT_EQ(fixedString, "hello world,  world");
+}
+
+TEST_F(StringUtilitiesTests, join_ShouldConcatenateStringChunksIntoOneDelimitedPiece)
+{
+    std::vector<std::string> input = { "hello world", "hello world" };
+    auto fixedString = StringUtil::join(input, ", ");
+    EXPECT_EQ(fixedString, "hello world, hello world");
+}

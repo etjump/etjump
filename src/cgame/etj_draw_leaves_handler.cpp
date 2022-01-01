@@ -23,7 +23,6 @@
  */
 
 #include <string>
-#include <boost/format.hpp>
 
 #include "cg_local.h"
 #include "etj_draw_leaves_handler.h"

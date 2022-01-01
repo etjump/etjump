@@ -23,8 +23,6 @@
  */
 
 #include <bitset>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include "etj_commands.h"
 #include "etj_local.h"
 #include "etj_save_system.h"
@@ -35,13 +33,14 @@
 #include "etj_map_statistics.h"
 #include "etj_utilities.h"
 #include "etj_tokens.h"
+#include "etj_string_utilities.h"
 
-typedef boost::function<bool (gentity_t *ent, Arguments argv)> Command;
-typedef std::pair<boost::function<bool (gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
-typedef std::map< std::string, boost::function<bool (gentity_t *ent, Arguments argv)> >::const_iterator ConstCommandIterator;
-typedef std::map< std::string, std::pair<boost::function<bool (gentity_t *ent, Arguments argv)>, char> >::const_iterator ConstAdminCommandIterator;
-typedef std::map< std::string, boost::function<bool (gentity_t *ent, Arguments argv)> >::iterator CommandIterator;
-typedef std::map< std::string, std::pair<boost::function<bool (gentity_t *ent, Arguments argv)>, char> >::iterator AdminCommandIterator;
+typedef std::function<bool (gentity_t *ent, Arguments argv)> Command;
+typedef std::pair<std::function<bool (gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
+typedef std::map< std::string, std::function<bool (gentity_t *ent, Arguments argv)> >::const_iterator ConstCommandIterator;
+typedef std::map< std::string, std::pair<std::function<bool (gentity_t *ent, Arguments argv)>, char> >::const_iterator ConstAdminCommandIterator;
+typedef std::map< std::string, std::function<bool (gentity_t *ent, Arguments argv)> >::iterator CommandIterator;
+typedef std::map< std::string, std::pair<std::function<bool (gentity_t *ent, Arguments argv)>, char> >::iterator AdminCommandIterator;
 
 namespace CommandFlags
 {
@@ -291,8 +290,8 @@ bool AddLevel(gentity_t *ent, Arguments argv)
 			it++;
 		}
 
-		boost::trim_right(greeting);
-		boost::trim_right(title);
+		greeting = ETJump::trimEnd(greeting);
+		title = ETJump::trimEnd(title);
 	}
 
 	if (!game.levels->Add(level, title, commands, greeting))
@@ -690,8 +689,8 @@ bool EditLevel(gentity_t *ent, Arguments argv)
 			it++;
 		}
 
-		boost::trim_right(greeting);
-		boost::trim_right(title);
+		greeting = ETJump::trimEnd(greeting);
+		title = ETJump::trimEnd(title);
 	}
 
 	game.levels->Edit(adminLevel, title, commands, greeting, updated);
@@ -797,9 +796,9 @@ bool EditUser(gentity_t *ent, Arguments argv)
 
 		it++;
 	}
-
-	boost::trim_right(greeting);
-	boost::trim_right(title);
+		
+	greeting = ETJump::trimEnd(greeting);
+	title = ETJump::trimEnd(title);
 
 	ChatPrintTo(ent, va("^3edituser: ^7updating user %d", id));
 	return ETJump::database->UpdateUser(ent, id, commands, greeting, title, updated);
@@ -857,11 +856,11 @@ bool FindMap(gentity_t *ent, Arguments argv)
 		if (mapsOnCurrentRow > perRow)
 		{
 			mapsOnCurrentRow = 1;
-			buffer          += (boost::format("\n%-22s") % map).str();
+			buffer          += ETJump::stringFormat("\n%-22s", map);
 		}
 		else
 		{
-			buffer += (boost::format("%-22s") % map).str();
+			buffer += ETJump::stringFormat("%-22s", map);
 		}
 
 	}
@@ -1000,35 +999,35 @@ std::string playedTimeFmtString(int seconds)
 	{
 		if (weeks == 1)
 		{
-			str = (boost::format("%d week") % weeks).str();
+			str = ETJump::stringFormat("%d week", weeks);
 		}
 		else
 		{
-			str = (boost::format("%d weeks") % weeks).str();
+			str = ETJump::stringFormat("%d weeks", weeks);
 		}
 	}
 	else if (days)
 	{
 		if (days == 1)
 		{
-			str = (boost::format("%d day") % days).str();
+			str = ETJump::stringFormat("%d day", days);
 		}
 		else
 		{
-			str = (boost::format("%d days") % days).str();
+			str = ETJump::stringFormat("%d days", days);
 		}
 	}
 	else if (hours)
 	{
-		str = (boost::format("%d hours %d minutes %d seconds") % hours % minutes % seconds).str();
+		str = ETJump::stringFormat("%d hours %d minutes %d seconds", hours, minutes, seconds);
 	}
 	else if (minutes)
 	{
-		str = (boost::format("%d hours %d minutes %d seconds") % hours % minutes % seconds).str();
+		str = ETJump::stringFormat("%d hours %d minutes %d seconds", hours, minutes, seconds);
 	}
 	else if (seconds)
 	{
-		str = (boost::format("%d hours %d minutes %d seconds") % hours % minutes % seconds).str();
+		str = ETJump::stringFormat("%d hours %d minutes %d seconds", hours, minutes, seconds);
 	}
 
 	if (str.length() == 0)
@@ -1049,7 +1048,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv)
 		}
 		catch (const std::invalid_argument&)
 		{
-			ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
+			ChatPrintTo(ent, ETJump::stringFormat("^3Error: ^7%s^7 is not a number", argv->at(1)));
 			return false;
 		}
 		catch (const std::out_of_range&)
@@ -1072,7 +1071,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv)
 		}
 
 		buffer += green ? "^g" : "^7";
-		buffer += (boost::format("%-22s %-30s %-17s     %s\n") % map->name % playedTimeFmtString(map->secondsPlayed) % Utilities::timestampToString(map->lastPlayed) % map->timesPlayed).str();
+		buffer += ETJump::stringFormat("%-22s %-30s %-17s     %s\n", map->name, playedTimeFmtString(map->secondsPlayed), Utilities::timestampToString(map->lastPlayed), map->timesPlayed);
 		green   = !green;
 
 		++listedMaps;
@@ -1141,7 +1140,7 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 		}
 		catch (const std::invalid_argument&)
 		{
-			ChatPrintTo(ent, (boost::format("^3listmaps: ^7%s^7 is not a number") % argv->at(1)).str());
+			ChatPrintTo(ent, ETJump::stringFormat("^3listmaps: ^7%s^7 is not a number", argv->at(1)));
 			return false;
 		}
 		catch (const std::out_of_range&)
@@ -1170,18 +1169,18 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 		if (mapsOnCurrentRow > perRow)
 		{
 			mapsOnCurrentRow = 1;
-			buffer          += (boost::format("\n%-22s") % map).str();
+			buffer          += ETJump::stringFormat("\n%-22s", map);
 		}
 		else
 		{
-			buffer += (boost::format("%-22s") % map).str();
+			buffer += ETJump::stringFormat("%-22s", map);
 		}
 
 	}
 
 	buffer += "\n";
 
-	buffer += (boost::format("\n^zFound ^3%d ^zmaps on the server.\n") % static_cast<int>(maps.size())).str();
+	buffer += ETJump::stringFormat("\n^zFound ^3%d ^zmaps on the server.\n", static_cast<int>(maps.size()));
 
 	Utilities::toConsole(ent, buffer);
 
@@ -1220,7 +1219,7 @@ bool ListPlayers(gentity_t *ent, Arguments argv)
 		{
 			if (level.numConnectedClients > 1)
 			{
-				BufferPrint(ent, (boost::format("^7There are currently %d connected players.\n") % level.numConnectedClients).str());
+				BufferPrint(ent, ETJump::stringFormat("^7There are currently %d connected players.\n", level.numConnectedClients));
 			}
 			else
 			{
@@ -1235,11 +1234,11 @@ bool ListPlayers(gentity_t *ent, Arguments argv)
 			auto clientNum = level.sortedClients[i];
 			auto id        = ETJump::session->GetId(g_entities + clientNum);
 
-			BufferPrint(ent, (boost::format("^7%-2d %-9d %-6d %-s\n")
-			                  % clientNum
-			                  % (id == -1 ? "-" : std::to_string(id))
-			                  % ETJump::session->GetLevel(g_entities + clientNum)
-			                  % (g_entities + clientNum)->client->pers.netname).str());
+			BufferPrint(ent, ETJump::stringFormat("^7%-2d %-9s %-6d %-s\n",
+			                  clientNum,
+			                  (id == -1 ? "-" : std::to_string(id)),
+			                  ETJump::session->GetLevel(g_entities + clientNum),
+			                  (g_entities + clientNum)->client->pers.netname));
 		}
 
 		FinishBufferPrint(ent);
@@ -1256,8 +1255,7 @@ bool Map(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	std::string requestedMap = argv->at(1);
-	boost::to_lower(requestedMap);
+	std::string requestedMap = ETJump::StringUtil::toLowerCase(argv->at(1));
 
 	if (!MapExists(requestedMap))
 	{
@@ -1299,24 +1297,23 @@ bool MapInfo(gentity_t *ent, Arguments argv)
 	std::string message;
 	if (mi == currentMap)
 	{
-		message = (boost::format("^3mapinfo: ^7%s is the current map on the server. It has been played for a total of %d days %d hours %d minutes %d seconds.")
-		           % mi->name
-		           % days
-		           % hours
-		           % minutes
-		           % seconds).str();
+		message = ETJump::stringFormat("^3mapinfo: ^7%s is the current map on the server. It has been played for a total of %d days %d hours %d minutes %d seconds.",
+		           mi->name,
+		           days,
+		           hours,
+		           minutes,
+		           seconds);
 	}
 	else
 	{
 		if (mi->lastPlayed == 0)
 		{
-			message = (boost::format("^3mapinfo: ^7%s has never been played.")
-			           % mi->name).str();
+			message = ETJump::stringFormat("^3mapinfo: ^7%s has never been played.", mi->name);
 		}
 		else
 		{
-			message = (boost::format("^3mapinfo: ^7%s was last played on %s. It has been played for a total of %d days %d hours %d minutes %d seconds.")
-			           % mi->name % Utilities::timestampToString(mi->lastPlayed) % days % hours % minutes % seconds).str();
+			message = ETJump::stringFormat("^3mapinfo: ^7%s was last played on %s. It has been played for a total of %d days %d hours %d minutes %d seconds.",
+						mi->name, Utilities::timestampToString(mi->lastPlayed), days, hours, minutes, seconds);
 		}
 	}
 	ChatPrintTo(ent, message);
@@ -1335,7 +1332,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv)
 		}
 		catch (const std::invalid_argument&)
 		{
-			ChatPrintTo(ent, (boost::format("^3Error: ^7%s^7 is not a number") % argv->at(1)).str());
+			ChatPrintTo(ent, ETJump::stringFormat("^3Error: ^7%s^7 is not a number", argv->at(1)));
 			return false;
 		}
 		catch (const std::out_of_range&)
@@ -1358,7 +1355,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv)
 		}
 
 		buffer += green ? "^g" : "^7";
-		buffer += (boost::format("%-22s %-30s %-17s     %s\n") % map->name % playedTimeFmtString(map->secondsPlayed) % Utilities::timestampToString(map->lastPlayed) % map->timesPlayed).str();
+		buffer += ETJump::stringFormat("%-22s %-30s %-17s     %s\n", map->name, playedTimeFmtString(map->secondsPlayed), Utilities::timestampToString(map->lastPlayed), map->timesPlayed);
 		green   = !green;
 
 		++listedMaps;
@@ -1920,7 +1917,7 @@ bool createToken(gentity_t *ent, Arguments argv)
 		return false;
 	}
 
-	ChatPrintTo(ent, (boost::format("Creating a token at (%f, %f, %f) for difficulty (%d)") % coordinates[0] % coordinates[1] % coordinates[2] % difficulty).str());
+	ChatPrintTo(ent, ETJump::stringFormat("Creating a token at (%f, %f, %f) for difficulty (%d)", coordinates[0], coordinates[1], coordinates[2], difficulty));
 	auto result = game.tokens->createToken(difficulty, coordinates);
 	if (!result.first)
 	{
@@ -2264,7 +2261,7 @@ Commands::Commands()
 	commands_["ranks"]    = ClientCommands::Records;
 }
 
-bool Commands::ClientCommand(gentity_t *ent, std::string commandStr)
+bool Commands::ClientCommand(gentity_t *ent, const std::string& commandStr)
 {
 	G_DPrintf("Commands::ClientCommand called for %d\n", ClientNum(ent));
 
@@ -2361,8 +2358,8 @@ bool Commands::AdminCommand(gentity_t *ent)
 	{
 		return false;
 	}
-
-	boost::to_lower(command);
+	
+	command = ETJump::StringUtil::toLowerCase(command);
 
 	ConstAdminCommandIterator it = adminCommands_.lower_bound(command);
 
@@ -2427,10 +2424,9 @@ void Commands::ListCommandFlags(gentity_t *ent)
 
 	BeginBufferPrint();
 
-	boost::format fmt("%c %s\n");
 	for (ConstAdminCommandIterator it = adminCommands_.begin(), end = adminCommands_.end(); it != end; it++)
 	{
-		BufferPrint(ent, (fmt % it->second.second % it->first).str());
+		BufferPrint(ent, ETJump::stringFormat("%c %s\n", it->second.second, it->first));
 	}
 
 	// Just manually print this since it's not an actual command

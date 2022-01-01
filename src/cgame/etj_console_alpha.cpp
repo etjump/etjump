@@ -23,11 +23,11 @@
  */
 
 #include <string>
-#include <boost/format.hpp>
 
 #include "cg_local.h"
 #include "etj_console_alpha.h"
 #include "etj_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 using namespace ETJump;
 
@@ -51,7 +51,8 @@ std::string ConsoleAlphaHandler::createBackground()
 
 std::string ConsoleAlphaHandler::createTexturedBackground()
 {
-	auto alphaGen = (boost::format("alphaGen const %f") % etj_consoleAlpha.value).str();
+	auto alphaGen = ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+
 	return composeShader(
 		shaderName,
 		{ "nopicmip" },
@@ -88,8 +89,8 @@ std::string ConsoleAlphaHandler::createSolidBackground()
 {
 	vec4_t bg;
 	parseColorString(etj_consoleColor.string, bg);
-	auto alphaGen = (boost::format("alphaGen const %f") % etj_consoleAlpha.value).str();
-	auto colorGen = (boost::format("rgbGen const ( %f %f %f )") % bg[0] % bg[1] % bg[2]).str();
+	auto alphaGen = ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+	auto colorGen = ETJump::stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
 
 	return composeShader(
 		shaderName,

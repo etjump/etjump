@@ -30,11 +30,12 @@ using std::vector;
 #include "etj_save_system.h"
 #include "utilities.hpp"
 #include "etj_session.h"
+#include <iostream>
 
 ETJump::SaveSystem::Client::Client()
 {
-	alliesBackupPositions = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
-	axisBackupPositions   = boost::circular_buffer<SavePosition>(MAX_BACKUP_POSITIONS);
+	alliesBackupPositions.clear();
+	axisBackupPositions.clear();
 
 	for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
 	{
@@ -846,10 +847,12 @@ void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos)
 	// Can never be spectator as this would not be called
 	if (ent->client->sess.sessionTeam == TEAM_ALLIES)
 	{
+		_clients[ClientNum(ent)].alliesBackupPositions.pop_back();
 		_clients[ClientNum(ent)].alliesBackupPositions.push_front(backup);
 	}
 	else
 	{
+		_clients[ClientNum(ent)].axisBackupPositions.pop_back();
 		_clients[ClientNum(ent)].axisBackupPositions.push_front(backup);
 	}
 
@@ -910,5 +913,4 @@ ETJump::SaveSystem::SaveSystem(const std::shared_ptr<Session> session) :
 
 ETJump::SaveSystem::~SaveSystem()
 {
-
 }

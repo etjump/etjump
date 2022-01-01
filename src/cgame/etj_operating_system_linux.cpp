@@ -29,7 +29,7 @@
 #include <net/if.h>
 #include <netinet/in.h>
 #include <cstring>
-#include <boost/format.hpp>
+#include "../game/etj_string_utilities.h"
 
 const char *G_SHA1(const char *str);
 
@@ -86,14 +86,15 @@ std::string ETJump::OperatingSystem::getHwid()
 	if (success)
 	{
 		memcpy(mac_address, ifr.ifr_hwaddr.sa_data, 6);
-		boost::format fmt("%02X:%02X:%02X:%02X:%02X:%02X");
-		fmt % mac_address[0]
-			% mac_address[1]
-			% mac_address[2]
-			% mac_address[3]
-			% mac_address[4]
-			% mac_address[5];
-		return G_SHA1(fmt.str().c_str());
+		auto fmt = ETJump::stringFormat("%02X:%02X:%02X:%02X:%02X:%02X",
+			mac_address[0],
+			mac_address[1],
+			mac_address[2],
+			mac_address[3],
+			mac_address[4],
+			mac_address[5]
+			);
+		return G_SHA1(fmt.c_str());
 	}
 	else
 	{

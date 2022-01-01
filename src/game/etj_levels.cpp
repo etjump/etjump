@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
-#include <boost/algorithm/string.hpp>
 #include "etj_levels.h"
 #include "etj_local.h"
 #include "utilities.hpp"
+#include "etj_string_utilities.h"
 
 Levels::Level::Level(int level, std::string const& name, std::string const& greeting, std::string const& commands)
 {
@@ -304,7 +304,7 @@ Levels::Iter Levels::Find(int level)
 	return it;
 }
 
-void ReadInt(char **configFile, int& level)
+int ReadInt(char **configFile)
 {
 	auto token = COM_ParseExt(configFile, qfalse);
 
@@ -317,10 +317,10 @@ void ReadInt(char **configFile, int& level)
 		G_LogPrintf("readconfig: missing = before \"%s\" on line %d.",
 		            token, COM_GetCurrentParseLine());
 	}
-	level = atoi(token);
+	return atoi(token);
 }
 
-void ReadString(char **configFile, std::string& str)
+std::string ReadString(char **configFile)
 {
 	auto token = COM_ParseExt(configFile, qfalse);
 
@@ -333,15 +333,17 @@ void ReadString(char **configFile, std::string& str)
 		G_LogPrintf("readconfig: missing = before \"%s\" on line %d.",
 		            token, COM_GetCurrentParseLine());
 	}
-	str.clear();
+
+	std::string output;
+	
 	while (token[0])
 	{
-		str += token;
-		str.push_back(' ');
+		output += token;
+		output.push_back(' ');
 		token = COM_ParseExt(configFile, qfalse);
 	}
-
-	boost::trim_right(str);
+	
+	return ETJump::trimEnd(std::move(output));
 }
 
 bool Levels::ReadFromConfig()
@@ -391,19 +393,19 @@ bool Levels::ReadFromConfig()
 		}
 		else if (!Q_stricmp(token, "cmds"))
 		{
-			ReadString(&file2, tempLevel->commands);
+			tempLevel->commands = ReadString(&file2);
 		}
 		else if (!Q_stricmp(token, "level"))
 		{
-			ReadInt(&file2, tempLevel->level);
+			tempLevel->level =  ReadInt(&file2);
 		}
 		else if (!Q_stricmp(token, "greeting"))
 		{
-			ReadString(&file2, tempLevel->greeting);
+			tempLevel->greeting = ReadString(&file2);
 		}
 		else if (!Q_stricmp(token, "name"))
 		{
-			ReadString(&file2, tempLevel->name);
+			tempLevel->name = ReadString(&file2);
 		}
 		else
 		{

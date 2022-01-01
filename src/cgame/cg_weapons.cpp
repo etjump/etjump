@@ -7,7 +7,7 @@
 
 #include "cg_local.h"
 #include "../game/bg_classes.h"
-#include "boost/algorithm/string/erase.hpp"
+#include "../game/etj_string_utilities.h"
 
 vec3_t ejectBrassCasingOrigin;
 
@@ -1961,8 +1961,7 @@ void CG_RegisterWeapon(int weaponNum, qboolean force)
 		if (weaponInfo->pickupModelPath[0] != '\0')
 		{
 			COM_StripExtension(weaponInfo->pickupModelPath, weaponInfo->pickupModelPath);
-			std::string path{ weaponInfo->pickupModelPath };
-			boost::erase_last(path, "_pickup");
+			std::string path = ETJump::StringUtil::eraseLast(weaponInfo->pickupModelPath, "_pickup");
 			path += "_stand.md3";
 			weaponInfo->standModel = trap_R_RegisterModel(path.c_str());
 		}

@@ -23,8 +23,8 @@
  */
 
 #include "etj_user.h"
-#include <boost/algorithm/string/join.hpp>
 #include "utilities.hpp"
+#include "etj_string_utilities.h"
 
 User_s::User_s()
 {
@@ -59,7 +59,7 @@ std::string User_s::GetGuid()
 
 char const *User_s::ToChar() const
 {
-	return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (boost::algorithm::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
+	return va("%d %s %d %d %s %s %s %s %s", id, guid.c_str(), level, lastSeen, name.c_str(), (ETJump::StringUtil::join(hwids, ", ")).c_str(), title.c_str(), commands.c_str(), greeting.c_str());
 }
 
 std::string User_s::GetLastSeenString() const

@@ -29,6 +29,7 @@
 #include <memory>
 #include <array>
 #include <map>
+#include <string>
 
 class Timerun {
 public:

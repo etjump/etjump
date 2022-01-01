@@ -24,8 +24,8 @@
 
 #include "etj_database.h"
 #include "utilities.hpp"
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
+#include "etj_string_utilities.h"
+#include <iostream>
 
 Database::Database()
 {
@@ -36,19 +36,14 @@ Database::~Database()
 {
 }
 
-Database::IdIterator Database::GetUser(unsigned id) const
+Database::Users::iterator Database::GetUser(unsigned id)
 {
-	return users_.get<0>().find(id);
+	return users_.find(id);
 }
 
-Database::ConstIdIterator Database::GetUserConst(unsigned id) const
+Database::Users::const_iterator Database::GetUserConst(unsigned id) const
 {
-	return users_.get<0>().find(id);
-}
-
-Database::GuidIterator Database::GetUser(std::string const& guid) const
-{
-	return users_.get<1>().find(guid);
+	return users_.find(id);
 }
 
 bool Database::PrepareStatement(const char *query, sqlite3_stmt **stmt)
@@ -171,21 +166,19 @@ bool Database::AddUserToSQLite(User user)
 unsigned Database::GetHighestFreeId() const
 {
 	// if it's empty, let's start from 1
-	if (users_.get<0>().empty())
+	if (users_.empty())
 	{
 		return 1;
 	}
-	return users_.get<0>().rbegin()->get()->id + 1;
+	return users_.rbegin()->second->id + 1;
 }
 
 bool Database::UserExists(std::string const& guid)
 {
-	ConstGuidIterator user = GetUserConst(guid);
-	if (user != GuidIterEnd())
-	{
-		return true;
-	}
-	return false;
+	auto user = std::find_if(users_.begin(), users_.end(), [&guid] (const std::pair<int, User>& u) -> bool {
+		return u.second->guid == guid;
+	});
+	return user != users_.end();
 }
 
 //bool Database::ExecuteQueuedOperations()
@@ -218,9 +211,9 @@ bool Database::UserExists(std::string const& guid)
 
 bool Database::UserInfo(gentity_t *ent, int id)
 {
-	ConstIdIterator user = GetUserConst(id);
+	auto user = GetUserConst(id);
 
-	if (user == users_.get<0>().end())
+	if (user == users_.end())
 	{
 		ChatPrintTo(ent, "^3userinfo: ^7no user found with id " + std::to_string(id));
 		return false;
@@ -241,7 +234,7 @@ bool Database::UserInfo(gentity_t *ent, int id)
 	//std::vector<std::string> hwids;
 	//unsigned updated;
 	BufferPrint(ent, va("^5ID: ^7%d\n^5GUID: ^7%s\n^5Level: ^7%d\n^5Last seen:^7 %s\n^5Name: ^7%s\n^5Title: ^7%s\n^5Commands: ^7%s\n^5Greeting: ^7%s\n",
-	                    user->get()->id, user->get()->guid.c_str(), user->get()->level, TimeStampToString(user->get()->lastSeen).c_str(), user->get()->name.c_str(), user->get()->title.c_str(), user->get()->commands.c_str(), user->get()->greeting.c_str()));
+	                    user->second->id, user->second->guid.c_str(), user->second->level, TimeStampToString(user->second->lastSeen).c_str(), user->second->name.c_str(), user->second->title.c_str(), user->second->commands.c_str(), user->second->greeting.c_str()));
 
 	FinishBufferPrint(ent, false);
 	return true;
@@ -260,8 +253,8 @@ bool Database::ListUsers(gentity_t *ent, int page)
 		return false;
 	}
 
-	ConstIdIterator it  = users_.get<0>().begin();
-	ConstIdIterator end = users_.get<0>().end();
+	auto it  = users_.begin();
+	auto end = users_.end();
 
 	ChatPrintTo(ent, "^3listusers: ^7check console for more information.");
 	BeginBufferPrint();
@@ -275,7 +268,7 @@ bool Database::ListUsers(gentity_t *ent, int page)
 	{
 		if (curr >= i && curr < i + USERS_PER_PAGE)
 		{
-			BufferPrint(ent, va("^7%-5d %-10d %-15s %-36s\n", it->get()->id, it->get()->level, (TimeStampDifferenceToString(static_cast<unsigned>(t) - it->get()->lastSeen) + " ago").c_str(), it->get()->name.c_str()));
+			BufferPrint(ent, va("^7%-5d %-10d %-15s %-36s\n", it->second->id, it->second->level, (TimeStampDifferenceToString(static_cast<unsigned>(t) - it->second->lastSeen) + " ago").c_str(), it->second->name.c_str()));
 		}
 
 		curr++;
@@ -435,8 +428,8 @@ bool Database::BanUser(std::string const& name, std::string const& guid, std::st
 
 bool Database::UserExists(unsigned id)
 {
-	ConstIdIterator user = GetUserConst(id);
-	if (user != IdIterEnd())
+	auto user = GetUserConst(id);
+	if (user != users_.end())
 	{
 		return true;
 	}
@@ -452,23 +445,23 @@ void Database::NewName(int id, std::string const& name)
 
 bool Database::UpdateUser(gentity_t *ent, int id, std::string const& commands, std::string const& greeting, std::string const& title, int updated)
 {
-	IdIterator user = GetUser(id);
-	if (user != IdIterEnd())
+	auto user = GetUser(id);
+	if (user != users_.end())
 	{
 		if (updated & Updated::COMMANDS)
 		{
-			user->get()->commands = commands;
+			user->second->commands = commands;
 		}
 		if (updated & Updated::GREETING)
 		{
-			user->get()->greeting = greeting;
+			user->second->greeting = greeting;
 		}
 		if (updated & Updated::TITLE)
 		{
-			user->get()->title = title;
+			user->second->title = title;
 		}
 
-		return Save(user, updated);
+		return Save(user->second, updated);
 	}
 
 	message_ = "Couldn't find user with id " + std::to_string(id);
@@ -513,12 +506,12 @@ bool Database::UpdateLastSeenToSQLite(User user)
 
 bool Database::UpdateLastSeen(int id, int lastSeen)
 {
-	IdIterator user = GetUser(id);
-	if (user != IdIterEnd())
+	auto user = GetUser(id);
+	if (user != users_.end())
 	{
-		(*user)->lastSeen = lastSeen;
+		user->second->lastSeen = lastSeen;
 
-		UpdateLastSeenToSQLite(*user);
+		UpdateLastSeenToSQLite(user->second);
 
 //        if (!InstantSync())
 //        {
@@ -537,17 +530,17 @@ bool Database::UpdateLastSeen(int id, int lastSeen)
 
 bool Database::SetLevel(int id, int level)
 {
-	IdIterator user = GetUser(id);
-	if (user != IdIterEnd())
+	auto user = GetUser(id);
+	if (user != users_.end())
 	{
-		user->get()->level = level;
+		user->second->level = level;
 
 //        if (!InstantSync())
 //        {
 //            databaseOperations_.push_back(SaveUserOperationPtr(new SaveUserOperation(this, *user, Updated::LEVEL)));
 //            return true;
 //        }
-		return Save(user, Updated::LEVEL);
+		return Save(user->second, Updated::LEVEL);
 	}
 
 	message_ = "Couldn't find user with id " + std::to_string(id);
@@ -670,11 +663,6 @@ bool Database::Save(User user, unsigned updated)
 //    return true;
 }
 
-bool Database::Save(IdIterator user, unsigned updated)
-{
-	return Save(*user, updated);
-}
-
 bool Database::AddNewHWIDToDatabase(User user)
 {
 	sqlite3_stmt *stmt = NULL;
@@ -685,7 +673,7 @@ bool Database::AddNewHWIDToDatabase(User user)
 		return false;
 	}
 
-	std::string hwids = boost::algorithm::join(user->hwids, ",");
+	std::string hwids = ETJump::StringUtil::join(user->hwids, ",");
 
 	if (!BindString(stmt, 1, hwids) ||
 	    !BindInt(stmt, 2, user->id))
@@ -707,13 +695,13 @@ bool Database::AddNewHWIDToDatabase(User user)
 
 bool Database::AddNewHardwareId(int id, std::string const& hwid)
 {
-	IdIterator user = GetUser(id);
+	auto user = GetUser(id);
 
-	if (user != IdIterEnd())
+	if (user != users_.end())
 	{
-		(*user)->hwids.push_back(hwid);
+		user->second->hwids.push_back(hwid);
 
-		InsertNewHardwareIdOperation *op = new InsertNewHardwareIdOperation(*user);
+		InsertNewHardwareIdOperation *op = new InsertNewHardwareIdOperation(user->second);
 		op->RunAndDeleteObject();
 
 		return true;
@@ -726,17 +714,20 @@ bool Database::AddUser(std::string const& guid, std::string const& hwid, std::st
 {
 	unsigned id = GetHighestFreeId();
 
-	User newUser(new User_s(id, guid, name, hwid));
-
-	// Automatically generated type.. :D
-	auto ret = users_.insert(newUser);
-	if (!ret.second)
+	if (UserExists(guid))
 	{
 		message_ = "User guid is not unique.";
 		return false;
 	}
 
-	if (!AddUserToSQLite(newUser))
+	auto res = users_.emplace(id, std::make_shared<User_s>(id, guid, name, hwid));
+
+	// already exists, no insertion
+	if (!res.second) {
+		return true;
+	}
+
+	if (!AddUserToSQLite(res.first->second))
 	{
 		return false;
 	}
@@ -765,12 +756,13 @@ bool Database::CloseDatabase()
 
 User_s const *Database::GetUserData(unsigned id) const
 {
-	ConstIdIterator user = GetUser(id);
-	if (user != IdIterEnd())
-	{
-		return user->get();
+	auto user = users_.find(id);
+
+	if (user == users_.end()) {
+		return NULL;
 	}
-	return NULL;
+
+	return user->second.get();
 }
 
 bool Database::CreateNamesTable()
@@ -859,31 +851,31 @@ bool Database::LoadUsers()
 	rc = sqlite3_step(stmt);
 	while (rc != SQLITE_DONE)
 	{
-		User newUser(new User_s());
+		User_s newUser;
 
 		switch (rc)
 		{
 		case SQLITE_ROW:
-			newUser->id       = sqlite3_column_int(stmt, 0);
+			newUser.id       = sqlite3_column_int(stmt, 0);
 			val               = (const char *)(sqlite3_column_text(stmt, 1));
-			newUser->guid     = val ? val : "";
-			newUser->level    = sqlite3_column_int(stmt, 2);
-			newUser->lastSeen = sqlite3_column_int(stmt, 3);
+			newUser.guid     = val ? val : "";
+			newUser.level    = sqlite3_column_int(stmt, 2);
+			newUser.lastSeen = sqlite3_column_int(stmt, 3);
 			val               = (const char *)(sqlite3_column_text(stmt, 4));
-			newUser->name     = val ? val : "";
+			newUser.name     = val ? val : "";
 			val               = (const char *)(sqlite3_column_text(stmt, 5));
 			if (val)
 			{
-				newUser->hwids = split(newUser->hwids, val, boost::algorithm::is_any_of(","));
+				newUser.hwids = ETJump::StringUtil::split(val, ",");
 			}
 			val               = (const char *)(sqlite3_column_text(stmt, 6));
-			newUser->title    = val ? val : "";
+			newUser.title    = val ? val : "";
 			val               = (const char *)(sqlite3_column_text(stmt, 7));
-			newUser->commands = val ? val : "";
+			newUser.commands = val ? val : "";
 			val               = (const char *)(sqlite3_column_text(stmt, 8));
-			newUser->greeting = val ? val : "";
-			users_.insert(newUser);
-			G_DPrintf("User: %s\n", newUser->ToChar());
+			newUser.greeting = val ? val : "";
+			users_.emplace(newUser.id, std::make_shared<User_s>(newUser));
+			G_DPrintf("User: %s\n", newUser.ToChar());
 			break;
 		case SQLITE_BUSY:
 		case SQLITE_ERROR:
@@ -943,22 +935,20 @@ std::string const Database::GetMessage() const
 
 User_s const *Database::GetUserData(int id) const
 {
-	ConstIdIterator user = GetUser(id);
-	if (user != IdIterEnd())
+	auto user = GetUserConst(static_cast<unsigned>(id));
+	if (user != users_.end())
 	{
-		return user->get();
+		return user->second.get();
 	}
 	return NULL;
 }
 
 User_s const *Database::GetUserData(std::string const& guid) const
 {
-	ConstGuidIterator user = GetUser(guid);
-	if (user != GuidIterEnd())
-	{
-		return user->get();
-	}
-	return NULL;
+	auto user = std::find_if(users_.begin(), users_.end(), [&guid](const std::pair<int, User>& u) -> bool {
+		return u.second->guid == guid;
+	});
+	return user->second.get();
 }
 
 bool Database::InitDatabase(char const *config)
@@ -996,21 +986,6 @@ bool Database::InitDatabase(char const *config)
 	return true;
 }
 
-Database::ConstIdIterator Database::IdIterEnd() const
-{
-	return users_.get<0>().end();
-}
-
-Database::ConstGuidIterator Database::GuidIterEnd() const
-{
-	return users_.get<1>().end();
-}
-
-Database::ConstGuidIterator Database::GetUserConst(std::string const& guid) const
-{
-	return users_.get<1>().find(guid);
-}
-
 Database::InsertUserOperation::InsertUserOperation(User user)
 	: user_(user)
 {
@@ -1036,7 +1011,7 @@ void Database::InsertUserOperation::Execute()
 		return;
 	}
 
-	std::string hardwareIds = boost::algorithm::join(user_->hwids, ",");
+	std::string hardwareIds = ETJump::StringUtil::join(user_->hwids, ",");
 
 	if (!BindInt(1, user_->id) ||
 	    !BindString(2, user_->guid) ||
@@ -1087,7 +1062,7 @@ void Database::InsertNewHardwareIdOperation::Execute()
 		return;
 	}
 
-	std::string hwids = boost::algorithm::join(user_->hwids, ",");
+	std::string hwids = ETJump::StringUtil::join(user_->hwids, ",");
 
 	if (!BindString(1, hwids) ||
 	    !BindInt(2, user_->id))
@@ -1151,7 +1126,7 @@ void Database::AsyncSaveUserOperation::Execute()
 		queryOptions.push_back("title=:title");
 	}
 
-	std::string query = "UPDATE users SET " + boost::join(queryOptions, ", ") + " WHERE id=:id;";
+	std::string query = "UPDATE users SET " + ETJump::StringUtil::join(queryOptions, ", ") + " WHERE id=:id;";
 
 	if (!OpenDatabase(g_userConfig.string))
 	{
@@ -1418,14 +1393,11 @@ void Database::FindUserOperation::Execute()
 	BufferPrinter printer(ent_);
 	printer.Begin();
 	printer.Print("ID       Name\n");
-	boost::format toPrint("%-8d %-36s^7\n");
 	for (unsigned i = 0; i < users.size(); i++)
 	{
-		toPrint % users[i].first % users[i].second;
-		printer.Print(toPrint.str());
+		printer.Print(ETJump::stringFormat("%-8d %-36s^7\n", users[i].first, users[i].second));
 	}
 	printer.Finish(false);
-
 }
 
 Database::SaveNameOperation::SaveNameOperation(std::string const& name, int id) : name_(name), id_(id)
@@ -1515,9 +1487,7 @@ void Database::ListUserNamesOperation::Execute()
 		ConsolePrintTo(ent_, "^3listusernames: ^7check console for more information.");
 		BufferPrinter printer(ent_);
 		printer.Begin();
-		boost::format toPrint("Found %d names with id: %d\n");
-		toPrint % names.size() % id_;
-		printer.Print(toPrint.str());
+		printer.Print(ETJump::stringFormat("Found %d names with id: %d\n", names.size(), id_));
 		for (unsigned i = 0; i < names.size(); i++)
 		{
 			printer.Print(names[i] + "\n");
@@ -1528,16 +1498,16 @@ void Database::ListUserNamesOperation::Execute()
 
 int Database::ResetUsersWithLevel(int level)
 {
-	IdIterator it  = users_.begin();
-	IdIterator end = IdIterEnd();
+	auto it  = users_.begin();
+	auto end = users_.end();
 
 	int resetedUsersCount = 0;
 
 	while (it != end)
 	{
-		if (it->get()->level == level)
+		if (it->second->level == level)
 		{
-			it->get()->level = 0;
+			it->second->level = 0;
 			resetedUsersCount++;
 		}
 		it++;

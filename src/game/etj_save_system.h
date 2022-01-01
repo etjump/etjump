@@ -34,7 +34,7 @@
 
 #include <map>
 #include <string>
-#include <boost/circular_buffer.hpp>
+#include <deque>
 
 #include "etj_local.h"
 
@@ -73,11 +73,11 @@ namespace ETJump
 			Client();
 
 			SavePosition alliesSavedPositions[MAX_SAVED_POSITIONS];
-			boost::circular_buffer<SavePosition> alliesBackupPositions;
+			std::deque<SavePosition> alliesBackupPositions;
 			SavePosition alliesLastLoadPosition;
 
 			SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
-			boost::circular_buffer<SavePosition> axisBackupPositions;
+			std::deque<SavePosition> axisBackupPositions;
 			SavePosition axisLastLoadPosition;
 
 			// contains a couple of extra positions for TEAM_SPEC and TEAM_FREE,

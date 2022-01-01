@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 
+#include <stdexcept>
 #include "etj_command_parser.h"
-#include <boost/algorithm/string/case_conv.hpp>
-
 
 ETJump::CommandParser::Command ETJump::CommandParser::parse(CommandDefinition definition, std::vector<std::string> args)
 {

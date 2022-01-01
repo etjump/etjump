@@ -31,12 +31,12 @@
 #include "etj_database.h"
 #include "etj_custom_map_votes.h"
 #include "etj_utilities.h"
-#include <boost/algorithm/string.hpp>
 #include "etj_motd.h"
 #include "etj_timerun.h"
 #include "etj_map_statistics.h"
 #include "etj_tokens.h"
 #include "etj_shared.h"
+#include "etj_string_utilities.h"
 
 Game game;
 
@@ -99,7 +99,7 @@ Changes map to a random map
 void ChangeMap()
 {
 	std::string map = game.mapStatistics->randomMap();
-	CPAll((boost::format("Changing map to %s.") % map).str());
+	CPAll(ETJump::stringFormat("Changing map to %s.", map));
 	trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
 }
 
@@ -184,8 +184,7 @@ qboolean OnConnectedClientCommand(gentity_t *ent)
 	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
 	auto argv    = GetArgs();
-	auto command = (*argv)[0];
-	boost::to_lower(command);
+	auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
 
 	if (ent->client->pers.connected != CON_CONNECTED)
 	{
@@ -211,8 +210,7 @@ qboolean OnClientCommand(gentity_t *ent)
 	G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
 	auto argv    = GetArgs();
-	auto command = (*argv)[0];
-	boost::to_lower(command);
+	auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
 
 	if (command == ETJump::Constants::Authentication::AUTHENTICATE)
 	{
@@ -234,8 +232,7 @@ qboolean OnConsoleCommand()
 	G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
 	auto argv    = GetArgs();
-	auto command = (*argv)[0];
-	boost::to_lower(command);
+	auto command = ETJump::StringUtil::toLowerCase((*argv)[0]);
 
 	if (command == "generatemotd")
 	{
@@ -272,8 +269,7 @@ const char *G_MatchOneMap(const char *arg)
 {
 	auto                     currentMaps = game.mapStatistics->getCurrentMaps();
 	std::vector<std::string> matchingMaps;
-	std::string              mapName = arg ? arg : "";
-	boost::algorithm::to_lower(mapName);
+	std::string              mapName = arg ? ETJump::StringUtil::toLowerCase(arg) : "";
 
 	for (auto & map : *(currentMaps))
 	{
@@ -307,8 +303,7 @@ std::vector<std::string> G_MatchAllMaps(const char *arg)
 {
     auto                     currentMaps = game.mapStatistics->getCurrentMaps();
     std::vector<std::string> matchingMaps;
-    std::string              mapName = arg ? arg : "";
-    boost::algorithm::to_lower(mapName);
+    std::string              mapName = arg ? ETJump::StringUtil::toLowerCase(arg) : "";
 
     for (auto & map : *(currentMaps))
     {
@@ -379,13 +374,12 @@ void LogServerState()
 	time_t t;
 	time(&t);
 	std::string   state = "Server state at " + TimeStampToString(static_cast<int>(t)) + ":\n";
-	boost::format fmter("%1% %2% %3%");
+
 	for (int i = 0; i < level.numConnectedClients; i++)
 	{
 		int clientNum = level.sortedClients[i];
 
-		fmter % clientNum % GetTeamString(clientNum) % (g_entities + clientNum)->client->pers.netname;
-		state += fmter.str() + "\n";
+		state += ETJump::stringFormat("%i %s %s\n", clientNum, GetTeamString(clientNum), (g_entities + clientNum)->client->pers.netname);
 	}
 
 	if (level.numConnectedClients == 0)

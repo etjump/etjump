@@ -23,7 +23,7 @@
  */
 
 #include "etj_client_commands_handler.h"
-#include <boost/algorithm/string/case_conv.hpp>
+#include "../game/etj_string_utilities.h"
 
 
 ETJump::ClientCommandsHandler::ClientCommandsHandler(void (*addToAutocompleteList)(const char *)):
@@ -39,8 +39,8 @@ ETJump::ClientCommandsHandler::~ClientCommandsHandler()
 
 bool ETJump::ClientCommandsHandler::check(const std::string& command, const std::vector<std::string>& arguments)
 {
-	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
-	auto match = _callbacks.find(lowercaseCommand);
+	auto lowercasedCommand = ETJump::StringUtil::toLowerCase(command);
+	auto match = _callbacks.find(lowercasedCommand);
 	if (match != end(_callbacks))
 	{
 		match->second(arguments);
@@ -51,13 +51,13 @@ bool ETJump::ClientCommandsHandler::check(const std::string& command, const std:
 
 bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::function<void(const std::vector<std::string>&)> callback, bool autocomplete)
 {
-	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
-	if (_callbacks.find(lowercaseCommand) != end(_callbacks))
+	auto lowercasedCommand = ETJump::StringUtil::toLowerCase(command);
+	if (_callbacks.find(lowercasedCommand) != end(_callbacks))
 	{
 		return false;
 	}
 
-	_callbacks[lowercaseCommand] = callback;
+	_callbacks[lowercasedCommand] = callback;
 	if (_addToAutocompleteList != nullptr && autocomplete)
 	{
 		_addToAutocompleteList(command.c_str());
@@ -67,8 +67,8 @@ bool ETJump::ClientCommandsHandler::subscribe(const std::string& command, std::f
 
 bool ETJump::ClientCommandsHandler::unsubcribe(const std::string& command)
 {
-	auto lowercaseCommand = boost::algorithm::to_lower_copy(command);
-	auto callback = _callbacks.find(lowercaseCommand);
+	auto lowercasedCommand = ETJump::StringUtil::toLowerCase(command);
+	auto callback = _callbacks.find(lowercasedCommand);
 	if (callback != end(_callbacks))
 	{
 		return false;

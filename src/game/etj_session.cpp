@@ -24,8 +24,9 @@
 
 #include "etj_session.h"
 #include "utilities.hpp"
+#include "etj_string_utilities.h"
 #include "etj_levels.h"
-#include <boost/algorithm/string.hpp>
+#include <iostream>
 
 Session::Session(std::shared_ptr<IAuthentication> database)
 	: database_(database)
@@ -34,6 +35,10 @@ Session::Session(std::shared_ptr<IAuthentication> database)
 	{
 		ResetClient(i);
 	}
+}
+
+Session::~Session()
+{
 }
 
 void Session::ResetClient(int clientNum)
@@ -313,9 +318,9 @@ void Session::PrintGreeting(gentity_t *ent)
 	if (cl->user->greeting.length() > 0)
 	{
 		std::string greeting = cl->user->greeting;
-		boost::replace_all(greeting, "[n]", ent->client->pers.netname);
-		boost::replace_all(greeting, "[t]", cl->user->GetLastSeenString());
-		boost::replace_all(greeting, "[d]", cl->user->GetLastVisitString());
+		ETJump::StringUtil::replaceAll(greeting, "[n]", ent->client->pers.netname);
+		ETJump::StringUtil::replaceAll(greeting, "[t]", cl->user->GetLastSeenString());
+		ETJump::StringUtil::replaceAll(greeting, "[d]", cl->user->GetLastVisitString());
 		G_DPrintf("Printing greeting %s\n", greeting.c_str());
 		ChatPrintAll(greeting);
 	}
@@ -329,9 +334,9 @@ void Session::PrintGreeting(gentity_t *ent)
 		if (cl->level->greeting.length() > 0)
 		{
 			std::string greeting = cl->level->greeting;
-			boost::replace_all(greeting, "[n]", ent->client->pers.netname);
-			boost::replace_all(greeting, "[t]", cl->user->GetLastSeenString());
-			boost::replace_all(greeting, "[d]", cl->user->GetLastVisitString());
+			ETJump::StringUtil::replaceAll(greeting, "[n]", ent->client->pers.netname);
+			ETJump::StringUtil::replaceAll(greeting, "[t]", cl->user->GetLastSeenString());
+			ETJump::StringUtil::replaceAll(greeting, "[d]", cl->user->GetLastVisitString());
 			G_DPrintf("Printing greeting %s\n", greeting.c_str());
 			ChatPrintAll(greeting);
 		}
