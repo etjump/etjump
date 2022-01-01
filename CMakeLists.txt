@@ -36,8 +36,9 @@ target_link_libraries(libjson PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsha1 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libuuid4 PRIVATE cxx_compiler_opts_w0)
 target_link_libraries(libsqlite PRIVATE cxx_compiler_opts_w0)
+target_link_libraries(fmt PRIVATE cxx_compiler_opts_w0)
 
-set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libuuid4
+set_target_properties(gmock gmock_main gtest gtest_main libjson libsha1 libsqlite libuuid4 fmt
                       PROPERTIES FOLDER ${BUNDLED_TARGETS_FOLDER})
 
 add_subdirectory(src/cgame)
