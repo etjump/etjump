@@ -1714,25 +1714,28 @@ void Weapon_Engineer(gentity_t *ent)
 	traceEnt = &g_entities[tr.entityNum];
 	if (G_EmplacedGunIsRepairable(traceEnt, ent))
 	{
-		// "Ammo" for this weapon is time based
-		if (ent->client->ps.classWeaponTime + level.engineerChargeTime[ent->client->sess.sessionTeam - 1] < level.time)
+		if (g_engineerChargeTime.integer > 150)
 		{
-			ent->client->ps.classWeaponTime = level.time - level.engineerChargeTime[ent->client->sess.sessionTeam - 1];
-		}
+			// "Ammo" for this weapon is time based
+			if (ent->client->ps.classWeaponTime + level.engineerChargeTime[ent->client->sess.sessionTeam - 1] < level.time)
+			{
+				ent->client->ps.classWeaponTime = level.time - level.engineerChargeTime[ent->client->sess.sessionTeam - 1];
+			}
 
-		if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3)
-		{
-			ent->client->ps.classWeaponTime += .66f * 150;
-		}
-		else
-		{
-			ent->client->ps.classWeaponTime += 150;
-		}
+			if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3)
+			{
+				ent->client->ps.classWeaponTime += .66f * 150;
+			}
+			else
+			{
+				ent->client->ps.classWeaponTime += 150;
+			}
 
-		if (ent->client->ps.classWeaponTime > level.time)
-		{
-			ent->client->ps.classWeaponTime = level.time;
-			return;     // Out of "ammo"
+			if (ent->client->ps.classWeaponTime > level.time)
+			{
+				ent->client->ps.classWeaponTime = level.time;
+				return;     // Out of "ammo"
+			}
 		}
 
 		if (traceEnt->health >= 255)
