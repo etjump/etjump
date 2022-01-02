@@ -6944,6 +6944,9 @@ void PmoveSingle(pmove_t *pmove)
 	{
 		PM_NoclipMove();
 		PM_DropTimers();
+		// this doesn't actually cool weapons as pm->ps->weapHeat remains unchanged in noclip,
+		// but instead it hides the overheat bar on unmount
+		PM_CoolWeapons();
 		return;
 	}
 
