@@ -79,7 +79,8 @@
   * made the scoreboard overall a bit bigger
 * changed and added several features to CGaz and snaphud [#666](https://github.com/etjump/etjump/pull/666) [#686](https://github.com/etjump/etjump/pull/686)
   * CGaz/snaphud are no longer drawn on ladders or underwater
-  * CGaz/snaphud are no longer drawn while noclipping
+  * CGaz/snaphud are no longer drawn while noclipping or dead
+  * CGaz/snaphud are no longer drawn while mounted or using set weapons
   * added `etj_projection` to set projection type of CGaz 1 and snaphud
     * __0__ = rectilinear projection (default, current)
     * __1__ = cylindrical projection
@@ -109,6 +110,34 @@
       * __2__ = show true groundzones
 * `g_password` is no longer stored in `ClientUserinfo` [#682](https://github.com/etjump/etjump/pull/682)
 * clamped `target_scale_velocity` `BASE` scaling to __0.25__ - __3.0__ [#687](https://github.com/etjump/etjump/pull/687)
+* item pickup sound is no longer tied to `etj_itemPickupText` [#692](https://github.com/etjump/etjump/pull/692)
+* fixed following sounds not being affected by `etj_weaponVolume` [#694](https://github.com/etjump/etjump/pull/694)
+  * reload sound
+  * weapon switch sound
+  * satchel detonator idle sound
+  * panzer/satchel detonator spin-up
+  * mounted MG42s and tanks
+  * overheating sounds
+  * dynamite spin-up
+* fixed incorrect cvar flags for `shared` causing issues with ET:L/ETe clients [#701](https://github.com/etjump/etjump/pull/701)
+* dead players can no longer use `noclip` [#714](https://github.com/etjump/etjump/pull/714)
+* fixed player view transition errors when following players from free spec [#715](https://github.com/etjump/etjump/pull/715) [#717](https://github.com/etjump/etjump/pull/717)
+  * view no longer transitions from crouch to prone when following prone players
+  * view no longer persistently shifts after step-ups and hard landings upon following
+* revive icon alpha value is no longer tied to spawntimes [#718](https://github.com/etjump/etjump/pull/718)
+* fixed potential division by zero in map grid code causing crash with certain client/OS setups [#716](https://github.com/etjump/etjump/pull/716)
+* fixed a visual bug which made flamethrower appear to be able to fire while noclipping [#721](https://github.com/etjump/etjump/pull/721)
+* fixed `configstrings` not including `MAX_FIRETEAMS` in its value [#725](https://github.com/etjump/etjump/pull/725)
+* map grid is no longer drawn on command map [#726](https://github.com/etjump/etjump/pull/726)
+  * grid system is still calculated in the background for command map positions etc.
+* player icons no longer draw outside the boundaries of command map [#727](https://github.com/etjump/etjump/pull/727)
+* fixed speedmeter showing 1ups while wounded on a non-flat surface [#731](https://github.com/etjump/etjump/pull/731)
+* improved command map accuracy by using latest PVS data for all players [#734](https://github.com/etjump/etjump/pull/734)
+* crosshair is no longer hidden while moving in prone [#744](https://github.com/etjump/etjump/pull/744)
+* fixed `etj_drawLeaves` trying to remap a non-existing shader [#745](https://github.com/etjump/etjump/pull/745)
+* fixed mounted MG42s being unrepairable when `g_engineerChargeTime` was set to a low value [#754](https://github.com/etjump/etjump/pull/754)
+* fixed weapon heat bar not disappearing when unmounting tank while noclipping [#755](https://github.com/etjump/etjump/pull/755)
+* fixed tank MG rotation being incorrect while using `cg_thirdperson` [#756](https://github.com/etjump/etjump/pull/756)
 
 # ETJump 2.4.0
 
