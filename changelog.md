@@ -131,6 +131,7 @@
 * map grid is no longer drawn on command map [#726](https://github.com/etjump/etjump/pull/726)
   * grid system is still calculated in the background for command map positions etc.
 * player icons no longer draw outside the boundaries of command map [#727](https://github.com/etjump/etjump/pull/727)
+* removed server sided `g_saveMsg` and added client sided `etj_saveMsg` - clients can now specify their own save message [#729](https://github.com/etjump/etjump/pull/729)
 * fixed speedmeter showing 1ups while wounded on a non-flat surface [#731](https://github.com/etjump/etjump/pull/731)
 * improved command map accuracy by using latest PVS data for all players [#734](https://github.com/etjump/etjump/pull/734)
 * crosshair is no longer hidden while moving in prone [#744](https://github.com/etjump/etjump/pull/744)
