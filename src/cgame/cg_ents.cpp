@@ -3572,7 +3572,7 @@ void CG_AttachBitsToTank(centity_t *tank, refEntity_t *mg42base, refEntity_t *mg
 		for (i = 0; i < MAX_CLIENTS; i++)
 		{
 			// Gordon: is this entity mounted on a tank, and attached to _OUR_ turret entity (which could be us)
-			if (cg_entities[i].currentValid && cg_entities[i].currentState.eFlags & EF_MOUNTEDTANK && cg_entities[i].tagParent == tank - cg_entities)
+			if ((cg_entities[i].currentValid || (i == cg.snap->ps.clientNum && cg.renderingThirdPerson)) && cg_entities[i].currentState.eFlags & EF_MOUNTEDTANK && cg_entities[i].tagParent == tank - cg_entities)
 			{
 				angles[YAW]   -= tank->lerpAngles[YAW];
 				angles[PITCH] -= tank->lerpAngles[PITCH];
