@@ -32,7 +32,7 @@ void CG_CheckAmmo(void)
 
 	for (i = 0 ; i < WP_NUM_WEAPONS ; i++)
 	{
-		if (!(weapons[0] & (1 << i)))
+		if (!(static_cast<long>(weapons[0]) & (1L << i)))
 		{
 			continue;
 		}
