@@ -14,21 +14,6 @@
 #include "etj_inline_command_parser.h"
 #include "../game/etj_string_utilities.h"
 
-void CG_TargetCommand_f(void)
-{
-	int  targetNum;
-	char test[4];
-
-	targetNum = CG_CrosshairPlayer();
-	if (!targetNum)
-	{
-		return;
-	}
-
-	trap_Argv(1, test, 4);
-	trap_SendConsoleCommand(va("gc %i %i\n", targetNum, atoi(test)));
-}
-
 /*
 =============
 CG_Viewpos_f
@@ -45,13 +30,16 @@ static void CG_Viewpos_f(void)
 
 void CG_LimboMenu_f(void)
 {
-	if (cg.showGameView)
+	if (!cg.demoPlayback)
 	{
-		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-	}
-	else
-	{
-		CG_EventHandling(CGAME_EVENT_GAMEVIEW, qfalse);
+		if (cg.showGameView)
+		{
+			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+		}
+		else
+		{
+			CG_EventHandling(CGAME_EVENT_GAMEVIEW, qfalse);
+		}
 	}
 }
 
@@ -429,43 +417,49 @@ void CG_QuickFireteamMessage_f(void)
 
 void CG_QuickFireteamAdmin_f(void)
 {
-	trap_UI_Popup(UIMENU_NONE);
-
-	if (cg.showFireteamMenu)
+	if (!cg.demoPlayback)
 	{
-		if (cgs.ftMenuMode == 1)
+		trap_UI_Popup(UIMENU_NONE);
+
+		if (cg.showFireteamMenu)
 		{
-			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+			if (cgs.ftMenuMode == 1)
+			{
+				CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+			}
+			else
+			{
+				cgs.ftMenuMode = 1;
+			}
 		}
 		else
 		{
+			CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
 			cgs.ftMenuMode = 1;
 		}
-	}
-	else
-	{
-		CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-		cgs.ftMenuMode = 1;
 	}
 }
 
 static void CG_QuickFireteams_f(void)
 {
-	if (cg.showFireteamMenu)
+	if (!cg.demoPlayback)
 	{
-		if (cgs.ftMenuMode == 0)
+		if (cg.showFireteamMenu)
 		{
-			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+			if (cgs.ftMenuMode == 0)
+			{
+				CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+			}
+			else
+			{
+				cgs.ftMenuMode = 0;
+			}
 		}
-		else
+		else if (CG_IsOnFireteam(cg.clientNum))
 		{
+			CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
 			cgs.ftMenuMode = 0;
 		}
-	}
-	else if (CG_IsOnFireteam(cg.clientNum))
-	{
-		CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-		cgs.ftMenuMode = 0;
 	}
 }
 
@@ -1438,7 +1432,6 @@ static consoleCommand_t commands[] =
 	{ "weaponbank",          CG_WeaponBank_f         },
 	{ "tell_target",         CG_TellTarget_f         },
 	{ "tell_attacker",       CG_TellAttacker_f       },
-	{ "tcmd",                CG_TargetCommand_f      },
 	{ "fade",                CG_Fade_f               }, // duffy
 	{ "loadhud",             CG_LoadHud_f            },
 	{ "loadweapons",         CG_LoadWeapons_f        },
