@@ -108,7 +108,7 @@ vmCvar_t g_swapteams;
 // -NERVE - SMF
 
 vmCvar_t g_restarted;
-vmCvar_t g_log;
+vmCvar_t g_logFile;
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -125,7 +125,6 @@ vmCvar_t g_banIPs;
 vmCvar_t g_filterBan;
 vmCvar_t g_rankings;
 vmCvar_t g_smoothClients;
-vmCvar_t pmove_fixed;
 vmCvar_t pmove_msec;
 
 // Rafael
@@ -317,7 +316,7 @@ cvarTable_t gameCvarTable[] =
 	{ NULL,                         "gamename",                    GAME_NAME,                                                CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
 	{ NULL,                         "gamedate",                    __DATE__,                                                 CVAR_ROM,                                        0, qfalse},
 	{ &g_restarted,                 "g_restarted",                 "0",                                                      CVAR_ROM,                                        0, qfalse},
-	{ NULL,                         "sv_mapname",                  "",                                                       CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
+	{ NULL,                         "mapname",                     "",                                                       CVAR_SERVERINFO | CVAR_ROM,                      0, qfalse},
 
 	// latched vars
 	{ &g_gametype,                  "g_gametype",                  "2",                                                      CVAR_SERVERINFO | CVAR_LATCH,                    0, qfalse}, // Arnout: default to GT_WOLF_CAMPAIGN
@@ -364,7 +363,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_swapteams,                 "g_swapteams",                 "0",                                                      CVAR_ROM,                                        0, qfalse, qtrue},
 	// -NERVE - SMF
 
-	{ &g_log,                       "g_log",                       "",                                                       CVAR_ARCHIVE,                                    0, qfalse},
+	{ &g_logFile,                   "g_log",                       "",                                                       CVAR_ARCHIVE,                                    0, qfalse},
 	{ &g_logSync,                   "g_logSync",                   "0",                                                      CVAR_ARCHIVE,                                    0, qfalse},
 
 	{ &g_password,                  "g_password",                  "none",                                                   CVAR_TEMP,                                       0, qfalse},
@@ -404,7 +403,6 @@ cvarTable_t gameCvarTable[] =
 	{ &g_userAim,                   "g_userAim",                   "1",                                                      CVAR_CHEAT,                                      0, qfalse},
 
 	{ &g_smoothClients,             "g_smoothClients",             "1",                                                      0,                                               0, qfalse},
-	{ &pmove_fixed,                 "pmove_fixed",                 "0",                                                      0,                                               0, qfalse},
 	{ &pmove_msec,                  "pmove_msec",                  "8",                                                      CVAR_SYSTEMINFO,                                 0, qfalse},
 
 	{ &g_footstepAudibleRange,      "g_footstepAudibleRange",      "256",                                                    CVAR_CHEAT,                                      0, qfalse},
@@ -1952,25 +1950,25 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 	{
 		trap_Cvar_Set("g_log", va("logs/%s-%02d-%02d.log", Months[ct.tm_mon], ct.tm_mday, 1900 + ct.tm_year));
 		trap_Cvar_Set("g_adminLog", va("logs/admin-%s-%02d-%02d.log", Months[ct.tm_mon], ct.tm_mday, 1900 + ct.tm_year));
-		trap_Cvar_Update(&g_log);
+		trap_Cvar_Update(&g_logFile);
 		trap_Cvar_Update(&g_adminLog);
 	}
 
-	if (g_log.string[0])
+	if (g_logFile.string[0])
 	{
 		if (g_logSync.integer)
 		{
-			trap_FS_FOpenFile(g_log.string, &level.logFile, FS_APPEND_SYNC);
+			trap_FS_FOpenFile(g_logFile.string, &level.logFile, FS_APPEND_SYNC);
 			trap_FS_FOpenFile(g_adminLog.string, &level.adminLogFile, FS_APPEND_SYNC);
 		}
 		else
 		{
-			trap_FS_FOpenFile(g_log.string, &level.logFile, FS_APPEND);
+			trap_FS_FOpenFile(g_logFile.string, &level.logFile, FS_APPEND);
 			trap_FS_FOpenFile(g_adminLog.string, &level.adminLogFile, FS_APPEND);
 		}
 		if (!level.logFile || !level.adminLogFile)
 		{
-			G_Printf("WARNING: Couldn't open logfile: %s\n", g_log.string);
+			G_Printf("WARNING: Couldn't open logfile: %s\n", g_logFile.string);
 		}
 		else
 		{
