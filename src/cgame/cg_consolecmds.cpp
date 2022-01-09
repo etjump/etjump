@@ -30,47 +30,41 @@ static void CG_Viewpos_f(void)
 
 void CG_LimboMenu_f(void)
 {
-	if (!cg.demoPlayback)
+	if (cg.showGameView)
 	{
-		if (cg.showGameView)
-		{
-			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-		}
-		else
-		{
-			CG_EventHandling(CGAME_EVENT_GAMEVIEW, qfalse);
-		}
+		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+	}
+	else
+	{
+		CG_EventHandling(CGAME_EVENT_GAMEVIEW, qfalse);
 	}
 }
 
 static void CG_StatsDown_f(void)
 {
-	if (!cg.demoPlayback)
+	int i = (cg.mvTotalClients > 0) ? (cg.mvCurrentActive->mvInfo & MV_PID) : cg.snap->ps.clientNum;
+
+	if (cg.mvTotalClients < 1 && cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
 	{
-		int i = (cg.mvTotalClients > 0) ? (cg.mvCurrentActive->mvInfo & MV_PID) : cg.snap->ps.clientNum;
+		Pri("You must be a player or following a player to use +stats\n");
+		return;
+	}
 
-		if (cg.mvTotalClients < 1 && cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
-		{
-			Pri("You must be a player or following a player to use +stats\n");
-			return;
-		}
+	if (cgs.gamestats.show == SHOW_SHUTDOWN && cg.time < cgs.gamestats.fadeTime)
+	{
+		cgs.gamestats.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.gamestats.fadeTime;
+	}
+	else if (cgs.gamestats.show != SHOW_ON)
+	{
+		cgs.gamestats.fadeTime = cg.time + STATS_FADE_TIME;
+	}
 
-		if (cgs.gamestats.show == SHOW_SHUTDOWN && cg.time < cgs.gamestats.fadeTime)
-		{
-			cgs.gamestats.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.gamestats.fadeTime;
-		}
-		else if (cgs.gamestats.show != SHOW_ON)
-		{
-			cgs.gamestats.fadeTime = cg.time + STATS_FADE_TIME;
-		}
+	cgs.gamestats.show = SHOW_ON;
 
-		cgs.gamestats.show = SHOW_ON;
-
-		if (cgs.gamestats.requestTime < cg.time)
-		{
-			cgs.gamestats.requestTime = cg.time + 2000;
-			trap_SendClientCommand(va("sgstats %d", i));
-		}
+	if (cgs.gamestats.requestTime < cg.time)
+	{
+		cgs.gamestats.requestTime = cg.time + 2000;
+		trap_SendClientCommand(va("sgstats %d", i));
 	}
 }
 
@@ -92,24 +86,21 @@ static void CG_StatsUp_f(void)
 
 void CG_topshotsDown_f(void)
 {
-	if (!cg.demoPlayback)
+	if (cgs.topshots.show == SHOW_SHUTDOWN && cg.time < cgs.topshots.fadeTime)
 	{
-		if (cgs.topshots.show == SHOW_SHUTDOWN && cg.time < cgs.topshots.fadeTime)
-		{
-			cgs.topshots.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.topshots.fadeTime;
-		}
-		else if (cgs.topshots.show != SHOW_ON)
-		{
-			cgs.topshots.fadeTime = cg.time + STATS_FADE_TIME;
-		}
+		cgs.topshots.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.topshots.fadeTime;
+	}
+	else if (cgs.topshots.show != SHOW_ON)
+	{
+		cgs.topshots.fadeTime = cg.time + STATS_FADE_TIME;
+	}
 
-		cgs.topshots.show = SHOW_ON;
+	cgs.topshots.show = SHOW_ON;
 
-		if (cgs.topshots.requestTime < cg.time)
-		{
-			cgs.topshots.requestTime = cg.time + 2000;
-			trap_SendClientCommand("stshots");
-		}
+	if (cgs.topshots.requestTime < cg.time)
+	{
+		cgs.topshots.requestTime = cg.time + 2000;
+		trap_SendClientCommand("stshots");
 	}
 }
 
@@ -139,7 +130,7 @@ void CG_ScoresDown_f(void)
 		cg.scoresRequestTime = cg.time;
 
 		// OSP - we get periodic score updates if we are merging clients
-		if (!cg.demoPlayback && cg.mvTotalClients < 1)
+		if (cg.mvTotalClients < 1)
 		{
 			trap_SendClientCommand("score");
 		}
@@ -152,7 +143,7 @@ void CG_ScoresDown_f(void)
 
 			// ETJump: we are not resetting numScores here, so we could use cached data, 
 			// until we get fresh one
-			/*if (!cg.demoPlayback && cg.mvTotalClients < 1)
+			/*if (cg.mvTotalClients < 1)
 			{
 				cg.numScores = 0;
 			}*/
@@ -417,49 +408,43 @@ void CG_QuickFireteamMessage_f(void)
 
 void CG_QuickFireteamAdmin_f(void)
 {
-	if (!cg.demoPlayback)
-	{
-		trap_UI_Popup(UIMENU_NONE);
+	trap_UI_Popup(UIMENU_NONE);
 
-		if (cg.showFireteamMenu)
+	if (cg.showFireteamMenu)
+	{
+		if (cgs.ftMenuMode == 1)
 		{
-			if (cgs.ftMenuMode == 1)
-			{
-				CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-			}
-			else
-			{
-				cgs.ftMenuMode = 1;
-			}
+			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
 		}
 		else
 		{
-			CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
 			cgs.ftMenuMode = 1;
 		}
+	}
+	else
+	{
+		CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
+		cgs.ftMenuMode = 1;
 	}
 }
 
 static void CG_QuickFireteams_f(void)
 {
-	if (!cg.demoPlayback)
+	if (cg.showFireteamMenu)
 	{
-		if (cg.showFireteamMenu)
+		if (cgs.ftMenuMode == 0)
 		{
-			if (cgs.ftMenuMode == 0)
-			{
-				CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-			}
-			else
-			{
-				cgs.ftMenuMode = 0;
-			}
+			CG_EventHandling(CGAME_EVENT_NONE, qfalse);
 		}
-		else if (CG_IsOnFireteam(cg.clientNum))
+		else
 		{
-			CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
 			cgs.ftMenuMode = 0;
 		}
+	}
+	else if (CG_IsOnFireteam(cg.clientNum))
+	{
+		CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
+		cgs.ftMenuMode = 0;
 	}
 }
 
@@ -868,12 +853,6 @@ void CG_vstrUp_f(void)
 
 void CG_keyOn_f(void)
 {
-	if (!cg.demoPlayback)
-	{
-		CG_Printf("[cgnotify]^3*** NOT PLAYING A DEMO!!\n");
-		return;
-	}
-
 	if (demo_infoWindow.integer > 0)
 	{
 		CG_ShowHelp_On(&cg.demohelpWindow);
@@ -884,10 +863,6 @@ void CG_keyOn_f(void)
 
 void CG_keyOff_f(void)
 {
-	if (!cg.demoPlayback)
-	{
-		return;
-	}
 	CG_EventHandling(CGAME_EVENT_NONE, qfalse);
 }
 
@@ -927,7 +902,7 @@ void CG_wStatsUp_f(void)
 
 void CG_toggleSpecHelp_f(void)
 {
-	if (cg.mvTotalClients > 0 && !cg.demoPlayback)
+	if (cg.mvTotalClients > 0)
 	{
 		if (cg.spechelpWindow != SHOW_ON && cg_specHelp.integer > 0)
 		{
@@ -1407,7 +1382,7 @@ typedef struct
 	void (*function)(void);
 } consoleCommand_t;
 
-static consoleCommand_t commands[] =
+static const consoleCommand_t noDemoCommands[] =
 {
 //	{ "obj", CG_Obj_f },
 //	{ "setspawnpt", CG_Obj_f },
@@ -1417,7 +1392,6 @@ static consoleCommand_t commands[] =
 	{ "prevframe",           CG_TestModelPrevFrame_f },
 	{ "nextskin",            CG_TestModelNextSkin_f  },
 	{ "prevskin",            CG_TestModelPrevSkin_f  },
-	{ "viewpos",             CG_Viewpos_f            },
 	{ "+scores",             CG_ScoresDown_f         },
 	{ "-scores",             CG_ScoresUp_f           },
 	{ "zoomin",              CG_ZoomIn_f             },
@@ -1442,32 +1416,26 @@ static consoleCommand_t commands[] =
 	{ "wm_sayPlayerClass",   CG_SayPlayerClass_f     },
 	{ "wm_ftsayPlayerClass", CG_FTSayPlayerClass_f   },
 
-
 	{ "VoiceChat",           CG_VoiceChat_f          },
 	{ "VoiceTeamChat",       CG_TeamVoiceChat_f      },
+	{ "VoiceFireTeamChat",   CG_BuddyVoiceChat_f     },
 
 	// ydnar: say, teamsay, etc
 	{ "messageMode",         CG_MessageMode_f        },
 	{ "messageMode2",        CG_MessageMode_f        },
 	{ "messageMode3",        CG_MessageMode_f        },
 	{ "messageSend",         CG_MessageSend_f        },
-
-	{ "SetWeaponCrosshair",  CG_SetWeaponCrosshair_f },
-	// -NERVE - SMF
-
-	{ "VoiceFireTeamChat",   CG_BuddyVoiceChat_f     },
-
+	
 	{ "openlimbomenu",       CG_LimboMenu_f          },
 
 	{ "+stats",              CG_StatsDown_f          },
 	{ "-stats",              CG_StatsUp_f            },
 	{ "+topshots",           CG_topshotsDown_f       },
 	{ "-topshots",           CG_topshotsUp_f         },
+	{ "statsdump",           CG_dumpStats_f          },
 
 	// OSP
 	{ "autoRecord",          CG_autoRecord_f         },
-	{ "autoScreenshot",      CG_autoScreenShot_f     },
-	{ "currentTime",         CG_currentTime_f        },
 	{ "keyoff",              CG_keyOff_f             },
 	{ "keyon",               CG_keyOn_f              },
 #ifdef MV_SUPPORT
@@ -1480,17 +1448,8 @@ static consoleCommand_t commands[] =
 	{ "mvtoggle",            CG_mvToggleView_f       },
 	{ "spechelp",            CG_toggleSpecHelp_f     },
 #endif
-	{ "statsdump",           CG_dumpStats_f          },
-	{ "+vstr",               CG_vstrDown_f           },
-	{ "-vstr",               CG_vstrUp_f             },
 	// OSP
-
 	{ "selectbuddy",         CG_SelectBuddy_f        },
-
-	{ "MapZoomIn",           CG_AutomapZoomIn_f      },
-	{ "MapZoomOut",          CG_AutomapZoomOut_f     },
-	{ "+mapexpand",          CG_AutomapExpandDown_f  },
-	{ "-mapexpand",          CG_AutomapExpandUp_f    },
 
 	{ "generateTracemap",    CG_GenerateTracemap     },
 	// xkan, 11/27/2002, toggle automap on/off
@@ -1500,38 +1459,53 @@ static consoleCommand_t commands[] =
 	{ "dumpSpeaker",         CG_DumpSpeaker_f        },
 	{ "modifySpeaker",       CG_ModifySpeaker_f      },
 	{ "undoSpeaker",         CG_UndoSpeaker_f        },
-	{ "cpm",                 CG_CPM_f                },
 	{ "forcetapout",         CG_ForceTapOut_f        },
 	{ "startTimer",          CG_StartTimer           },
 	{ "stopTimer",           CG_StopTimer            },
+};
+
+static const consoleCommand_t anyTimeCommands[] =
+{
+	{ "SetWeaponCrosshair",  CG_SetWeaponCrosshair_f },
+	{ "autoScreenshot",      CG_autoScreenShot_f     },
+
+	{ "+vstr",               CG_vstrDown_f           },
+	{ "-vstr",               CG_vstrUp_f             },
+	{ "cpm",                 CG_CPM_f                },
+
+	{ "MapZoomIn",           CG_AutomapZoomIn_f      },
+	{ "MapZoomOut",          CG_AutomapZoomOut_f     },
+	{ "+mapexpand",          CG_AutomapExpandDown_f  },
+	{ "-mapexpand",          CG_AutomapExpandUp_f    },
+
+	{ "noclip",              CG_NoClip_f               },
+
+	{ "+freecam_turnleft",   CG_FreecamTurnLeftDown_f  },
+	{ "-freecam_turnleft",   CG_FreecamTurnLeftUp_f    },
+	{ "+freecam_turnright",  CG_FreecamTurnRightDown_f },
+	{ "-freecam_turnright",  CG_FreecamTurnRightUp_f   },
+	{ "+freecam_turnup",     CG_FreecamTurnUpDown_f    },
+	{ "-freecam_turnup",     CG_FreecamTurnUpUp_f      },
+	{ "+freecam_turndown",   CG_FreecamTurnDownDown_f  },
+	{ "-freecam_turndown",   CG_FreecamTurnDownUp_f    },
+	{ "+freecam_rollleft",   CG_FreecamRollLeftDown_f  },
+	{ "-freecam_rollleft",   CG_FreecamRollLeftUp_f    },
+	{ "+freecam_rollright",  CG_FreecamRollRightDown_f },
+	{ "-freecam_rollright",  CG_FreecamRollRightUp_f   },
+	{ "freecam",             CG_Freecam_f              },
+	{ "freecamsetpos",       CG_FreecamSetPos_f        },
+	{ "freecamgetpos",       CG_FreecamGetPos_f        },
+
+	{ "viewpos",             CG_Viewpos_f            },
 	{ "portal",              CG_portalinfo_f         },
 	{ "chs",                 CG_InfoCHS_f            },
 	{ "help",                CG_Manual_f             },
 	{ "man",                 CG_Manual_f             },
 	{ "manual",              CG_Manual_f             },
-
-	{ "+freecam_turnleft",   CG_FreecamTurnLeftDown_f },
-	{ "-freecam_turnleft",   CG_FreecamTurnLeftUp_f },
-	{ "+freecam_turnright",  CG_FreecamTurnRightDown_f },
-	{ "-freecam_turnright",  CG_FreecamTurnRightUp_f },
-
-	{ "+freecam_turnup",     CG_FreecamTurnUpDown_f },
-	{ "-freecam_turnup",     CG_FreecamTurnUpUp_f },
-	{ "+freecam_turndown",   CG_FreecamTurnDownDown_f },
-	{ "-freecam_turndown",   CG_FreecamTurnDownUp_f },
-
-	{ "+freecam_rollleft",   CG_FreecamRollLeftDown_f },
-	{ "-freecam_rollleft",   CG_FreecamRollLeftUp_f },
-	{ "+freecam_rollright",  CG_FreecamRollRightDown_f },
-	{ "-freecam_rollright",  CG_FreecamRollRightUp_f },
-	{ "freecam",             CG_Freecam_f },
-	{ "freecamsetpos",       CG_FreecamSetPos_f },
-	{ "freecamgetpos",       CG_FreecamGetPos_f },
-	{ "noclip",              CG_NoClip_f },
-
-	{ "mod_information", CG_ModInformation_f },
-	{ "incrementVar", CG_IncrementVar_f },
-	{ "extraTrace", CG_ExtraTrace_f },
+	{ "currentTime",         CG_currentTime_f        },
+	{ "mod_information",     CG_ModInformation_f     },
+	{ "incrementVar",        CG_IncrementVar_f       },
+	{ "extraTrace",          CG_ExtraTrace_f         },
 };
 
 
@@ -1556,12 +1530,26 @@ qboolean CG_ConsoleCommand(void)
 
 	cmd = CG_Argv(0);
 
-	for (i = 0 ; i < static_cast<int>(sizeof(commands) / sizeof(commands[0])) ; i++)
+	// check for commands allowed anytime
+	for (i = 0 ; i < static_cast<int>(sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0])) ; i++)
 	{
-		if (!Q_stricmp(cmd, commands[i].cmd))
+		if (!Q_stricmp(cmd, anyTimeCommands[i].cmd))
 		{
-			commands[i].function();
+			anyTimeCommands[i].function();
 			return qtrue;
+		}
+	}
+	
+	if (!cg.demoPlayback)
+	{
+		// check for commands allowed outside of demos only 
+		for (i = 0 ; i < static_cast<int>(sizeof(noDemoCommands) / sizeof(noDemoCommands[0])) ; i++)
+		{
+			if (!Q_stricmp(cmd, noDemoCommands[i].cmd))
+			{
+				noDemoCommands[i].function();
+				return qtrue;
+			}
 		}
 	}
 
@@ -1599,9 +1587,14 @@ void CG_InitConsoleCommands(void)
 {
 	int i;
 
-	for (i = 0 ; i < static_cast<int>(sizeof(commands) / sizeof(commands[0])) ; i++)
+	for (i = 0 ; i < static_cast<int>(sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0])) ; i++)
 	{
-		trap_AddCommand(commands[i].cmd);
+		trap_AddCommand(anyTimeCommands[i].cmd);
+	}
+
+	for (i = 0 ; i < static_cast<int>(sizeof(noDemoCommands) / sizeof(noDemoCommands[0])) ; i++)
+	{
+		trap_AddCommand(noDemoCommands[i].cmd);
 	}
 
 	//
