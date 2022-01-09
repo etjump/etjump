@@ -976,7 +976,7 @@ static qboolean CG_ParseWeaponConfig(const char *filename, weaponInfo_t *wi)
 	char         *token;
 	qboolean     newfmt = qfalse;   //----(SA)
 	const int CONFIG_BUFFER_SIZE = 20000;
-	auto text = std::unique_ptr<char[]>(new char[CONFIG_BUFFER_SIZE]);
+	auto text = std::make_unique<char[]>(CONFIG_BUFFER_SIZE);
 	fileHandle_t f;
 
 	// load the file

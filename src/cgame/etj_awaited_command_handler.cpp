@@ -133,7 +133,7 @@ void ETJump::AwaitedCommandHandler::awaitCommand(const std::vector<std::string>&
         return;
     }
 
-    auto command = std::unique_ptr<AwaitedCommand>(new AwaitedCommand());
+    auto command = std::make_unique<AwaitedCommand>();
     command->currentFrameCount = 0;
     command->requiredFrameCount = waitedFrames;
     command->commands = InlineCommandParser().parse(std::vector<std::string>(args.begin() + 1, args.end()));

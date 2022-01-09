@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 
+#include <string>
+#include <memory>
+
 #include "cg_local.h"
 
 #include "etj_trickjump_lines.h"
@@ -31,18 +34,90 @@
 #include "etj_event_loop.h"
 #include "etj_awaited_command_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_client_authentication.h"
+#include "etj_operating_system.h"
+#include "etj_draw_leaves_handler.h"
+#include "etj_console_alpha.h"
+#include "etj_cvar_shadow.h"
+#include "etj_keyset_system.h"
+#include "etj_irenderable.h"
+#include "etj_overbounce_watcher.h"
+#include "etj_maxspeed.h"
+#include "etj_speed_drawable.h"
+#include "etj_strafe_quality_drawable.h"
+#include "etj_jump_speeds.h"
+#include "etj_quick_follow_drawable.h"
+#include "etj_cgaz.h"
+#include "etj_snaphud.h"
+#include "etj_autodemo_recorder.h"
 
-#include <string>
-#include <memory>
+namespace ETJump
+{
+	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
+	std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
+	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
+	std::shared_ptr<ClientAuthentication> authentication;
+	std::shared_ptr<OperatingSystem> operatingSystem;
+	std::vector<std::shared_ptr<IRenderable>> renderables;
+	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+	std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
+	std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
+	std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
+	std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
+	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
+	std::shared_ptr<EventLoop> eventLoop;
+	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+	std::shared_ptr<Timerun> timerun;
+	std::shared_ptr<ETJump::TimerunView> timerunView;
+	std::shared_ptr<TrickjumpLines> trickjumpLines;
+}
 
-static std::unique_ptr<Timerun> timerun;
-static std::unique_ptr<ETJump::TimerunView> timerunView;
-
-static std::unique_ptr<TrickjumpLines> trickjumpLines;
+static bool isInitialized{ false };
 static int nextNearest = 0;
 
 namespace ETJump
 {
+	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime)
+	{
+		if (etj_loopedSounds.integer > 0)
+		{
+			trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
+		}
+	}
+	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime)
+	{
+		if (etj_loopedSounds.integer > 0)
+		{
+			trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
+		}
+	}
+
+	// General purpose etj_hideMe check for cgame events
+	bool hideMeCheck(int entityNum)
+	{
+		auto ci = &cgs.clientinfo[entityNum];
+		bool isHiddenPlayer = ci->hideMe && entityNum != cg.clientNum;
+		if (entityNum < MAX_CLIENTS)
+		{
+			if (isHiddenPlayer)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// Get correct trace contents depending on etj_extraTrace value
+	int checkExtraTrace(int value)
+	{
+		if (etj_extraTrace.integer & 1 << value)
+		{
+			return CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+		}
+
+		return CONTENTS_SOLID;
+	}
+
 	void initTimer()
 	{
 		if (timerun)
@@ -51,8 +126,8 @@ namespace ETJump
 			timerun = nullptr;
 			timerunView = nullptr;
 		}
-		timerun = std::unique_ptr<Timerun>(new Timerun(cg.clientNum));
-		timerunView = std::unique_ptr<TimerunView>(new TimerunView());
+		timerun = std::make_shared<Timerun>(cg.clientNum);
+		timerunView = std::make_shared<TimerunView>();
 	}
 	void execCmdOnRunStart()
 	{
@@ -72,45 +147,181 @@ namespace ETJump
 	{
 		playerEventsHandler->check("respawn", { revived ? "1" : "0" });
 	}
+
+	void initDrawKeys(KeySetSystem* keySetSystem)
+	{
+		// key set themes
+		const char* keySetNames[]{
+			"keyset", // Keyset 1 (original)
+			"keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
+			"keyset3",
+			"keyset4",
+			// + add more
+		};
+		for (const auto& keySetName : keySetNames)
+		{
+			keySetSystem->addSet(keySetName);
+		}
+		keySetSystem->addKeyBindSet("keyset5");
+	}
+
+	// shadow cvars mapping to real cvars, forces locked values change
+	std::vector<std::pair<vmCvar_t*, std::string>> cvars{
+		{ &etj_drawFoliage, "r_drawfoliage"},
+		{ &etj_showTris, "r_showtris" },
+		{ &etj_wolfFog, "r_wolffog" },
+		{ &etj_zFar, "r_zfar" },
+		{ &etj_viewlog, "viewlog" },
+		{ &etj_offsetFactor, "r_offsetFactor" },
+		{ &etj_offsetUnits, "r_offsetUnits" },
+		{ &etj_speeds, "r_speeds" },
+		{ &etj_lightmap, "r_lightmap" },
+		{ &etj_drawNotify, "con_drawNotify" },
+	};
+
+	void init()
+	{
+		
+		CG_Printf(S_COLOR_LTGREY GAME_HEADER);
+		CG_Printf(S_COLOR_LTGREY "____________________________\n");
+
+		CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME " init...\n");
+
+		isInitialized = false;
+
+		// NOTE: client server commands handlers must be created before other modules as other modules use them
+		// to subcribe to commands.
+		// Generally all modules should get these as constructor params but they're still being used in the C code
+		// => make sure they're created first
+		serverCommandsHandler = std::make_shared<ClientCommandsHandler>(nullptr);
+		consoleCommandsHandler = std::make_shared<ClientCommandsHandler>(trap_AddCommand);
+		entityEventsHandler = std::make_shared<EntityEventsHandler>();
+		operatingSystem = std::make_shared<OperatingSystem>();
+		authentication = std::make_shared<ClientAuthentication>([](const std::string& command) {
+			trap_SendClientCommand(command.c_str());
+		}, [](const std::string& message) {
+			CG_Printf(message.c_str());
+		}, bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem), 
+			ETJump::serverCommandsHandler
+		);
+
+		playerEventsHandler = std::make_shared<PlayerEventsHandler>();
+		awaitedCommandHandler = std::make_shared<AwaitedCommandHandler>(
+			consoleCommandsHandler,
+			trap_SendConsoleCommand,
+			[](const char* text)
+			{
+				Com_Printf(text);
+			}
+		);
+		eventLoop = std::make_shared<ETJump::EventLoop>();
+
+		////////////////////////////////////////////////////////////////
+		// TODO: move these to own client commands handler
+		////////////////////////////////////////////////////////////////
+		auto minimize = [](const std::vector<std::string>& args)
+		{
+			operatingSystem->minimize();
+		};
+		consoleCommandsHandler->subscribe("min", minimize);
+		consoleCommandsHandler->subscribe("minimize", minimize);
+		////////////////////////////////////////////////////////////////
+
+		// initialize renderables
+		// Overbounce watcher
+		ETJump::renderables.push_back(std::make_shared<OverbounceWatcher>(consoleCommandsHandler.get()));
+		// Display max speed from previous load session
+		ETJump::renderables.push_back(std::make_shared<DisplayMaxSpeed>(ETJump::entityEventsHandler.get()));
+		ETJump::renderables.push_back(std::make_shared<DisplaySpeed>());
+		ETJump::renderables.push_back(std::make_shared<StrafeQuality>());
+		ETJump::renderables.push_back(std::make_shared<JumpSpeeds>(ETJump::entityEventsHandler.get()));
+		ETJump::renderables.push_back(std::make_shared<QuickFollowDrawer>());
+		ETJump::renderables.push_back(std::make_shared<CGaz>());
+		ETJump::renderables.push_back(std::make_shared<Snaphud>());
+
+		ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
+		ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
+		auto keySetSystem = new ETJump::KeySetSystem(etj_drawKeys);
+		ETJump::renderables.push_back(std::shared_ptr<ETJump::IRenderable>(keySetSystem));
+		ETJump::initDrawKeys(keySetSystem);
+		ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+
+		for (auto& shadow : cvars)
+		{
+			ETJump::cvarShadows.push_back(std::make_shared<CvarShadow>(shadow.first, shadow.second));
+		}
+
+		ETJump_ClearDrawables();
+		initTimer();
+		// restores timerun after vid_restart (if required)
+		trap_SendClientCommand("timerun_status");
+
+		trickjumpLines = std::make_shared<TrickjumpLines>();
+
+		// Check if load TJL on connection is enable
+		if (etj_tjlAlwaysLoadTJL.integer == 1)
+		{
+			//CG_Printf("All mapper Trickjump lines will be loaded due to your cvar : etj_tjlAlwaysLoadTJL. \n");
+			trickjumpLines->loadRoutes(nullptr);
+		}
+
+		if (etj_tjlEnableLine.integer == 1)
+		{
+			trickjumpLines->toggleRoutes(true);
+		}
+		else
+		{
+			trickjumpLines->toggleRoutes(false);
+		}
+
+		if (etj_tjlEnableMarker.integer == 1)
+		{
+			trickjumpLines->toggleMarker(true);
+		}
+		else
+		{
+			trickjumpLines->toggleMarker(false);
+		}
+
+		CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME  " init... " S_COLOR_GREEN "DONE\n");
+
+		isInitialized = true;
+	}
+
+	void shutdown()
+	{
+		CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION_DATED " " S_COLOR_LTGREY GAME_BINARY_NAME " shutdown...\n");
+
+		if (ETJump::consoleCommandsHandler)
+		{
+			ETJump::consoleCommandsHandler->unsubcribe("min");
+			ETJump::consoleCommandsHandler->unsubcribe("minimize");
+		}
+
+		ETJump::operatingSystem = nullptr;
+		ETJump::authentication = nullptr;
+		ETJump::renderables.clear();
+		ETJump::cvarShadows.clear();
+		ETJump::cvarUpdateHandler = nullptr;
+
+		// clear dynamic shaders in reverse order
+		ETJump::drawLeavesHandler = nullptr;
+		ETJump::consoleAlphaHandler = nullptr;
+		if (ETJump::eventLoop) {
+			ETJump::eventLoop->shutdown();
+			ETJump::eventLoop = nullptr;
+		}
+		ETJump::consoleCommandsHandler = nullptr;
+		ETJump::serverCommandsHandler = nullptr;
+		ETJump::playerEventsHandler = nullptr;
+		ETJump::entityEventsHandler = nullptr;
+
+		isInitialized = false;
+
+		CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME " shutdown... " S_COLOR_GREEN "DONE\n");
+	}
 }
 
-/**
- * Initializes the CPP side of client
- */
-void InitGame()
-{
-	ETJump_ClearDrawables();
-	ETJump::initTimer();
-	// restores timerun after vid_restart (if required)
-	trap_SendClientCommand("timerun_status");
-
-	trickjumpLines = std::unique_ptr<TrickjumpLines>(new TrickjumpLines);
-	
-	// Check if load TJL on connection is enable
-	if (etj_tjlAlwaysLoadTJL.integer == 1)
-	{		
-		//CG_Printf("All mapper Trickjump lines will be loaded due to your cvar : etj_tjlAlwaysLoadTJL. \n");
-		trickjumpLines->loadRoutes(nullptr);
-	}
-
-	if (etj_tjlEnableLine.integer == 1)
-	{
-		trickjumpLines->toggleRoutes(true);
-	}
-	else
-	{
-		trickjumpLines->toggleRoutes(false);
-	}
-
-	if (etj_tjlEnableMarker.integer == 1)
-	{
-		trickjumpLines->toggleMarker(true);
-	}
-	else
-	{
-		trickjumpLines->toggleMarker(false);
-	}
-}
 
 /**
  * Extended CG_ServerCommand function. Checks whether server
@@ -128,7 +339,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		auto        startTime      = atoi(CG_Argv(1));
 		std::string runName        = CG_Argv(2);
 		auto        previousRecord = atoi(CG_Argv(3));
-		timerun->startTimerun(runName, startTime, previousRecord);
+		ETJump::timerun->startTimerun(runName, startTime, previousRecord);
 		ETJump::execCmdOnRunStart();
 		// run name, completion time, previous record
 		ETJump::playerEventsHandler->check("timerun:start", {runName, CG_Argv(1), CG_Argv(3) });
@@ -147,13 +358,13 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		std::string runName        = CG_Argv(3);
 		auto        previousRecord = atoi(CG_Argv(4));
 
-		timerun->startSpectatorTimerun(clientNum, runName, runStartTime, previousRecord);
+		ETJump::timerun->startSpectatorTimerun(clientNum, runName, runStartTime, previousRecord);
 
 		return qtrue;
 	}
 	if (command == "timerun_interrupt")
 	{
-		timerun->interrupt();
+		ETJump::timerun->interrupt();
 		ETJump::execCmdOnRunEnd();
 		return qtrue;
 	}
@@ -162,7 +373,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	{
 		auto completionTime = atoi(CG_Argv(1));
 
-		timerun->stopTimerun(completionTime);
+		ETJump::timerun->stopTimerun(completionTime);
 		ETJump::execCmdOnRunEnd();
 		// run name, completion time
 		ETJump::playerEventsHandler->check("timerun:stop", { CG_Argv(2), CG_Argv(1) });
@@ -180,7 +391,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		auto        completionTime = atoi(CG_Argv(2));
 		std::string runName        = CG_Argv(3);
 
-		timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
+		ETJump::timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
 
 		return qtrue;
 	}
@@ -190,7 +401,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		std::string runName        = CG_Argv(2);
 		auto        completionTime = atoi(CG_Argv(3));
 
-		timerun->record(clientNum, runName, completionTime);
+		ETJump::timerun->record(clientNum, runName, completionTime);
 		
 		if (clientNum == cg.clientNum)
 		{
@@ -206,7 +417,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 		std::string runName        = CG_Argv(2);
 		auto        completionTime = atoi(CG_Argv(3));
 
-		timerun->completion(clientNum, runName, completionTime);
+		ETJump::timerun->completion(clientNum, runName, completionTime);
 
 		if (clientNum == cg.clientNum)
 		{
@@ -218,7 +429,7 @@ qboolean CG_ServerCommandExt(const char *cmd)
 	}
 	if (command == "timerun")
 	{
-		return timerunView->parseServerCommand() ? qtrue : qfalse;
+		return ETJump::timerunView->parseServerCommand() ? qtrue : qfalse;
 	}
 
 	if (command == "tjl_displaybyname")
@@ -256,7 +467,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 
 	if (command == "tjl_clearrender")
 	{
-		trickjumpLines->setCurrentRouteToRender(-1);
+		ETJump::trickjumpLines->setCurrentRouteToRender(-1);
 		return qtrue;
 	}
 
@@ -266,32 +477,32 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		const auto argc = trap_Argc();
 		if (argc == 1)
 		{
-			trickjumpLines->record(nullptr);
+			ETJump::trickjumpLines->record(nullptr);
 		}
 		else
 		{
 			auto name = CG_Argv(1);
-			trickjumpLines->record(name);
+			ETJump::trickjumpLines->record(name);
 		}
 		return qtrue;
 	}
 
 	if (command == "tjl_stoprecord")
 	{
-		trickjumpLines->stopRecord();
+		ETJump::trickjumpLines->stopRecord();
 		return qtrue;
 	}
 
 	if (command == "tjl_listroute")
 	{
-		trickjumpLines->listRoutes();
+		ETJump::trickjumpLines->listRoutes();
 		return qtrue;
 	}
 
 
 	if (command == "tjl_displaynearestroute")
 	{
-		trickjumpLines->displayNearestRoutes();
+		ETJump::trickjumpLines->displayNearestRoutes();
 		return qtrue;
 	}
 
@@ -303,11 +514,11 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		{
 			const std::string name = CG_Argv(1);
 			const std::string name2 = CG_Argv(2);
-			trickjumpLines->renameRoute(name.c_str(), name2.c_str());
+			ETJump::trickjumpLines->renameRoute(name.c_str(), name2.c_str());
 		}
 		else
 		{
-			trickjumpLines->renameRoute(nullptr, nullptr);
+			ETJump::trickjumpLines->renameRoute(nullptr, nullptr);
 		}
 		return qtrue;
 	}
@@ -318,7 +529,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		if (argc > 1)
 		{
 			const auto name = CG_Argv(1);
-			trickjumpLines->saveRoutes(name);
+			ETJump::trickjumpLines->saveRoutes(name);
 			return qtrue;
 		}
 		else
@@ -334,11 +545,11 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		if (argc > 1)
 		{
 			const auto name = CG_Argv(1);
-			trickjumpLines->loadRoutes(name);
+			ETJump::trickjumpLines->loadRoutes(name);
 		}
 		else
 		{
-			trickjumpLines->loadRoutes(nullptr);
+			ETJump::trickjumpLines->loadRoutes(nullptr);
 		}
 		return qtrue;
 	}
@@ -349,11 +560,11 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		if (argc > 1)
 		{
 			const auto name = CG_Argv(1);
-			trickjumpLines->deleteRoute(name);
+			ETJump::trickjumpLines->deleteRoute(name);
 		}
 		else
 		{
-			trickjumpLines->deleteRoute(nullptr);
+			ETJump::trickjumpLines->deleteRoute(nullptr);
 		}
 		return qtrue;
 	}
@@ -363,12 +574,12 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 		const auto argc = trap_Argc();
 		if (argc == 1)
 		{
-			trickjumpLines->overwriteRecording(nullptr);
+			ETJump::trickjumpLines->overwriteRecording(nullptr);
 		}
 		else
 		{
 			const auto name = CG_Argv(1);
-			trickjumpLines->overwriteRecording(name);
+			ETJump::trickjumpLines->overwriteRecording(name);
 		}
 		return qtrue;
 	}
@@ -386,11 +597,11 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 			const std::string state = CG_Argv(1);
 			if (state == "0")
 			{
-				trickjumpLines->toggleRoutes(false);
+				ETJump::trickjumpLines->toggleRoutes(false);
 			}
 			else
 			{
-				trickjumpLines->toggleRoutes(true);
+				ETJump::trickjumpLines->toggleRoutes(true);
 			}
 			return qtrue;
 		}
@@ -410,11 +621,11 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 			CG_Printf("Enable marker arg : %s \n", state.c_str());
 			if (state == "0")
 			{
-				trickjumpLines->toggleMarker(false);
+				ETJump::trickjumpLines->toggleMarker(false);
 			}
 			else
 			{
-				trickjumpLines->toggleMarker(true);
+				ETJump::trickjumpLines->toggleMarker(true);
 			}
 			return qtrue;
 		}
@@ -427,10 +638,10 @@ qboolean CG_ConsoleCommandExt(const char *cmd)
 void CG_DrawActiveFrameExt()
 {
 	// Check if recording
-	if (trickjumpLines->isRecording())
+	if (ETJump::trickjumpLines->isRecording())
 	{
 		// TODO : (xis) player origin doesn't change if crouch or prone, stay on feet. //cg.refdef.vieworg , //cg.predictedPlayerState.origin
-		trickjumpLines->addPosition(cg.predictedPlayerState.origin);
+		ETJump::trickjumpLines->addPosition(cg.predictedPlayerState.origin);
 	}
 	else
 	{
@@ -440,26 +651,26 @@ void CG_DrawActiveFrameExt()
 			// Check if nearest mode timer is due to check for nearest.
 			if (nextNearest < cg.time)
 			{
-				if (trickjumpLines->isDebug())
+				if (ETJump::trickjumpLines->isDebug())
 				{
 					CG_Printf("Check for nearest line!. \n");
 				}
-				trickjumpLines->displayNearestRoutes();
+				ETJump::trickjumpLines->displayNearestRoutes();
 				nextNearest = cg.time + 1000 * etj_tjlNearestInterval.integer;
 			}
 		}
 
 		// Check if line or jumper marker are enable.
-		if (trickjumpLines->isEnableLine() || trickjumpLines->isEnableMarker())
+		if (ETJump::trickjumpLines->isEnableLine() || ETJump::trickjumpLines->isEnableMarker())
 		{
 			// Check if record or if there line in the list
-			if (trickjumpLines->countRoute() > 0 && !trickjumpLines->isRecording())
+			if (ETJump::trickjumpLines->countRoute() > 0 && !ETJump::trickjumpLines->isRecording())
 			{
 				// Check if display has not been cleared.
-				if (trickjumpLines->getCurrentRouteToRender() != -1)
+				if (ETJump::trickjumpLines->getCurrentRouteToRender() != -1)
 				{
 					// Display current route with the #
-					trickjumpLines->displayCurrentRoute(trickjumpLines->getCurrentRouteToRender());
+					ETJump::trickjumpLines->displayCurrentRoute(ETJump::trickjumpLines->getCurrentRouteToRender());
 				}
 			}
 		}
@@ -490,11 +701,11 @@ qboolean CG_displaybyname()
 	if (argc > 1)
 	{
 		const auto name = CG_Argv(1);
-		trickjumpLines->displayByName(name);
+		ETJump::trickjumpLines->displayByName(name);
 	}
 	else
 	{
-		trickjumpLines->displayByName(nullptr);
+		ETJump::trickjumpLines->displayByName(nullptr);
 	}
 	return qtrue;
 }
@@ -505,10 +716,10 @@ qboolean CG_displaybynumber()
 	if (argc > 1)
 	{
 		const auto number = atoi(CG_Argv(1));
-		const auto total = trickjumpLines->countRoute();
+		const auto total = ETJump::trickjumpLines->countRoute();
 		if (number > -1 && number < total)
 		{
-			trickjumpLines->setCurrentRouteToRender(number);
+			ETJump::trickjumpLines->setCurrentRouteToRender(number);
 			return qtrue;
 		}
 		return qfalse;

@@ -25,11 +25,6 @@
 #pragma once
 
 /**
-* Initializes the CPP side of client
-*/
-void InitGame();
-
-/**
 * Extended CG_ServerCommand function. Checks whether server
 * sent command matches to any defined here. If no match is found
 * returns false
@@ -41,3 +36,8 @@ void CG_DrawActiveFrameExt();
 
 qboolean CG_displaybyname();
 qboolean CG_displaybynumber();
+
+namespace ETJump {
+	void init();
+	void shutdown();
+}

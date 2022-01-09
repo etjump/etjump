@@ -27,11 +27,29 @@
 
 #if defined(_DEBUG)
 	#define GAME_VERSION_DATED  GAME_VERSION " " CPUSTRING " " __DATE__ " DEBUG"
+	#define GAME_VERSION_N GAME_VERSION  " DEBUG"
 #else
 	#define GAME_VERSION_DATED  GAME_VERSION " " CPUSTRING " " __DATE__
+	#define GAME_VERSION_N GAME_VERSION 
 #endif
 
 #define GAME_TAG (GAME_NAME " " GAME_VERSION)
+
+#define GAME_SIGNATURE "      __    _               \n" \
+					   " ___ / /_  (_)_ ____ _  ___ \n" \
+					   "/ -_) __/ / / // /  ' \\/ _ \\\n" \
+					   "\\__/\\__/_/ /\\_,_/_/_/_/ .__/\n" \
+					   "      |___/          /_/    \n"
+
+#define GAME_HEADER GAME_SIGNATURE \
+					"\n" \
+					"- MOD NAME:     " GAME_NAME "\n" \
+					"- MOD URL:      " GAME_URL "\n" \
+					"- MOD BINARY:   " GAME_BINARY_NAME "\n" \
+					"- MOD VERSION:  " GAME_VERSION_N "\n" \
+					"- BUILD DATE:   " __DATE__ "\n" \
+					"- BUILD COMMIT: " GIT_COMMIT_HASH "\n" \
+					"- BUILD ARCH:   " CPUSTRING "\n"
 
 //bani
 #ifdef __GNUC__
