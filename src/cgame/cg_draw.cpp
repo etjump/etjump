@@ -1312,7 +1312,7 @@ static void CG_DrawLagometer(void)
 
 	if (cg_nopredict.integer
 #ifdef ALLOW_GSYNC
-	    || cg_synchronousClients.integer
+	    || cgs.synchronousClients
 #endif // ALLOW_GSYNC
 	    )
 	{
@@ -3265,7 +3265,7 @@ static void CG_DrawOB(void)
 
 	playerState_t *ps = ETJump::getValidPlayerState();
 
-	psec    = pmove_msec.integer / 1000.0;
+	psec    = cgs.pmove_msec / 1000.0;
 	gravity = ps->gravity;
 	v0      = ps->velocity[2];
 	h0      = ps->origin[2] + ps->mins[2];
@@ -3437,7 +3437,7 @@ static void CG_DrawJumpDelay(void)
 
 	if (trace.surfaceFlags & SURF_NOJUMPDELAY)
 	{
-		if (shared.integer & BG_LEVEL_NO_JUMPDELAY)
+		if (cgs.shared & BG_LEVEL_NO_JUMPDELAY)
 		{
 			CG_DrawStringExt(x, y, "D", colorWhite, qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 		}
@@ -3518,12 +3518,12 @@ static void CG_DrawSaveIndicator(void)
 	{
 		ETJump::drawSaveIcon(x, y);
 		// level no save AND not in the volume
-		if ((shared.integer & BG_LEVEL_NO_SAVE) && trace.fraction == 1.0)
+		if ((cgs.shared & BG_LEVEL_NO_SAVE) && trace.fraction == 1.0)
 		{
 			ETJump::drawForbidIcon(x, y);
 		}
 		// level save AND in the volume
-		else if (!(shared.integer & BG_LEVEL_NO_SAVE) && trace.fraction != 1.0)
+		else if (!(cgs.shared & BG_LEVEL_NO_SAVE) && trace.fraction != 1.0)
 		{
 			ETJump::drawForbidIcon(x, y);
 		}
@@ -3536,7 +3536,7 @@ static void CG_DrawSaveIndicator(void)
 		{
 			ETJump::drawSaveIcon(x, y);
 			// level no save
-			if (shared.integer & BG_LEVEL_NO_SAVE)
+			if (cgs.shared & BG_LEVEL_NO_SAVE)
 			{
 				ETJump::drawForbidIcon(x, y);
 			}
@@ -3550,7 +3550,7 @@ static void CG_DrawSaveIndicator(void)
 		{
 			ETJump::drawSaveIcon(x, y);
 			// level save
-			if (!(shared.integer & BG_LEVEL_NO_SAVE))
+			if (!(cgs.shared & BG_LEVEL_NO_SAVE))
 			{
 				ETJump::drawForbidIcon(x, y);
 			}
@@ -3588,12 +3588,12 @@ static void CG_DrawProneIndicator(void)
 	{
 		ETJump::drawProneIcon(x, y);
 		// level no prone AND not in the volume
-		if ((shared.integer & BG_LEVEL_NO_PRONE) && trace.fraction == 1.0)
+		if ((cgs.shared & BG_LEVEL_NO_PRONE) && trace.fraction == 1.0)
 		{
 			ETJump::drawForbidIcon(x, y);
 		}
 		// level prone AND in the volume
-		else if (!(shared.integer & BG_LEVEL_NO_PRONE) && trace.fraction != 1.0)
+		else if (!(cgs.shared & BG_LEVEL_NO_PRONE) && trace.fraction != 1.0)
 		{
 			ETJump::drawForbidIcon(x, y);
 		}
@@ -3606,7 +3606,7 @@ static void CG_DrawProneIndicator(void)
 		{
 			ETJump::drawProneIcon(x, y);
 			// level no prone
-			if (shared.integer & BG_LEVEL_NO_PRONE)
+			if (cgs.shared & BG_LEVEL_NO_PRONE)
 			{
 				ETJump::drawForbidIcon(x, y);
 			}
@@ -3620,7 +3620,7 @@ static void CG_DrawProneIndicator(void)
 		{
 			ETJump::drawProneIcon(x, y);
 			// level prone
-			if (!(shared.integer & BG_LEVEL_NO_PRONE))
+			if (!(cgs.shared & BG_LEVEL_NO_PRONE))
 			{
 				ETJump::drawForbidIcon(x, y);
 			}
@@ -3640,7 +3640,7 @@ static void CG_DrawPronePrint(void)
 
 	CG_TraceCapsule(&trace, ps->origin, ps->mins, ps->maxs, ps->origin, ps->clientNum, CONTENTS_NOPRONE);
 
-	if (shared.integer & BG_LEVEL_NO_PRONE)
+	if (cgs.shared & BG_LEVEL_NO_PRONE)
 	{
 		if (trace.fraction != 1.0f)
 		{

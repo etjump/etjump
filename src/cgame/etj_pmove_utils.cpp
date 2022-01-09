@@ -83,7 +83,7 @@ namespace ETJump
 		pmove.pointcontents = CG_PointContents;
 		pmove.skill = cgs.clientinfo[cg.snap->ps.clientNum].skill;
 		pmove.cmd = cmd;
-		pmove.pmove_msec = pmove_msec.integer;
+		pmove.pmove_msec = cgs.pmove_msec;
 		PmoveSingle(&pmove);
 		return &pmove;
 	}
