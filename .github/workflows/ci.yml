@@ -156,7 +156,7 @@ jobs:
     - name: Pack release zip
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=OFF
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
         make mod_release
 
     - name: Upload release 
