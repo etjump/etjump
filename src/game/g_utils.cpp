@@ -789,7 +789,7 @@ gentity_t *G_TempEntity(vec3_t origin, int event)
 	vec3_t    snapped;
 
 	e          = G_Spawn();
-	e->s.eType = static_cast<entityType_t>(ET_EVENTS + event);
+	e->s.eType = ET_EVENTS + event;
 
 	e->classname      = "tempEntity";
 	e->eventTime      = level.time;
@@ -811,7 +811,7 @@ gentity_t *G_PopupMessage(popupMessageType_t type)
 	gentity_t *e;
 
 	e                 = G_Spawn();
-	e->s.eType        = static_cast<entityType_t>(ET_EVENTS + EV_POPUPMESSAGE);
+	e->s.eType        = ET_EVENTS + EV_POPUPMESSAGE;
 	e->classname      = "messageent";
 	e->eventTime      = level.time;
 	e->r.eventTime    = level.time;

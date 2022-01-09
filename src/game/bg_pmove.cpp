@@ -506,6 +506,12 @@ static void PM_Friction(void)
 	}
 
 	speed = VectorLength(vec);
+
+	if (speed == 0)
+	{
+		return;
+	}
+
 	// rain - #179 don't do this for PM_SPECTATOR/PM_NOCLIP, we always want them to stop
 	if (speed < 1 && pm->ps->pm_type != PM_SPECTATOR && pm->ps->pm_type != PM_NOCLIP)
 	{
@@ -2115,7 +2121,7 @@ static void PM_CrashLand(void)
 	float c = -dist;
 
 	float den = b * b - 4 * a * c;
-	if (den < 0)
+	if (a == 0 || den < 0)
 	{
 		return;
 	}
@@ -3914,6 +3920,14 @@ void PM_AdjustAimSpreadScale(void)
 	float increase, decrease;       // (SA) was losing lots of precision on slower weapons (scoped)
 	float viewchange, cmdTime, wpnScale;
 
+	cmdTime = (pm->cmd.serverTime - pm->oldcmd.serverTime) / 1000.0f;
+
+	if (cmdTime == 0)
+	{
+		// no time has passed for whatever reason
+		return;
+	}
+
 	// all weapons are very inaccurate in zoomed mode
 	if (pm->ps->eFlags & EF_ZOOMING)
 	{
@@ -3921,8 +3935,6 @@ void PM_AdjustAimSpreadScale(void)
 		pm->ps->aimSpreadScaleFloat = 255;
 		return;
 	}
-
-	cmdTime = (float)(pm->cmd.serverTime - pm->oldcmd.serverTime) / 1000.0;
 
 	wpnScale = 0.0f;
 	switch (pm->ps->weapon)
@@ -6944,6 +6956,9 @@ void PmoveSingle(pmove_t *pmove)
 	{
 		PM_NoclipMove();
 		PM_DropTimers();
+		// this doesn't actually cool weapons as pm->ps->weapHeat remains unchanged in noclip,
+		// but instead it hides the overheat bar on unmount
+		PM_CoolWeapons();
 		return;
 	}
 

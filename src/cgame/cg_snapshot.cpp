@@ -536,7 +536,7 @@ static snapshot_t *CG_ReadNextSnapshot(void)
 					}
 					// shifting back all eTypes in demo, so it would match the current enum order
 					else if (es->eType > 9) {
-						es->eType = static_cast<entityType_t>(es->eType - 1);
+						--es->eType;
 					}
 				}
 			}

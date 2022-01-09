@@ -226,9 +226,9 @@ typedef struct
 	float backlerp;
 
 	float yawAngle;
-	qboolean yawing;
+	int yawing;                     // 0 = off, 1 = right, 2 = left
 	float pitchAngle;
-	qboolean pitching;
+	int pitching;                   // 0 = off, 1/2 presumably up/down, however 2 unused
 
 	int animationNumber;            // may include ANIM_TOGGLEBIT
 	int oldAnimationNumber;         // may include ANIM_TOGGLEBIT
@@ -3569,11 +3569,8 @@ void        CG_FreeCamera(int camNum);
 
 bg_playerclass_t *CG_PlayerClassForClientinfo(clientInfo_t *ci, centity_t *cent);
 
-void CG_FitTextToWidth(char *instr, int w, int size);
-void CG_FitTextToWidth2(char *instr, float scale, float w, int size);
 void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo_t *font);
 int CG_TrimLeftPixels(char *instr, float scale, float w, int size);
-void CG_FitTextToWidth_SingleLine(char *instr, float scale, float w, int size);
 
 void CG_LocateCampaign(void);
 void CG_LocateArena(void);

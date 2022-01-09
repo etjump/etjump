@@ -727,11 +727,10 @@ void CG_AddTrailToScene(trailJunc_t *trail, int iteration, int numJuncs)
 		}
 		else
 		{
-			//s += sInc;
-			s += VectorDistance(j->pos, jNext->pos) / sInc;
-			if (s > 1.0)
+			s += (sInc == 0 ? 1.0f : VectorDistance(j->pos, jNext->pos) / sInc);
+			if (s > 1.0f)
 			{
-				s = 1.0;
+				s = 1.0f;
 			}
 		}
 

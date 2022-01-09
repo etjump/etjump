@@ -1045,7 +1045,7 @@ CG_SwingAngles
 ==================
 */
 static void CG_SwingAngles(float destination, float swingTolerance, float clampTolerance,
-                           float speed, float *angle, qboolean *swinging)
+                           float speed, float *angle, int *swinging)
 {
 	float swing;
 	float move;
@@ -1087,7 +1087,7 @@ static void CG_SwingAngles(float destination, float swingTolerance, float clampT
 		}
 		else
 		{
-			*swinging = (qboolean)SWING_LEFT;     // left
+			*swinging = SWING_LEFT;     // left
 		}
 		*angle = AngleMod(*angle + move);
 	}
@@ -1101,7 +1101,7 @@ static void CG_SwingAngles(float destination, float swingTolerance, float clampT
 		}
 		else
 		{
-			*swinging = (qboolean)SWING_RIGHT;    // right
+			*swinging = SWING_RIGHT;    // right
 		}
 		*angle = AngleMod(*angle + move);
 	}
@@ -1371,8 +1371,6 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head)
 	int          contents;
 	vec3_t       mang, morg, maxis[3];
 
-	ci = &cgs.clientinfo[cent->currentState.number];
-
 	if (!cg_enableBreath.integer)
 	{
 		return;
@@ -1383,7 +1381,7 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head)
 		return;
 	}
 
-	if (!(cent->currentState.eFlags & EF_DEAD))
+	if (cent->currentState.eFlags & EF_DEAD)
 	{
 		return;
 	}
@@ -1399,6 +1397,8 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head)
 	{
 		return;
 	}
+
+	ci = &cgs.clientinfo[cent->currentState.number];
 	if (ci->breathPuffTime > cg.time)
 	{
 		return;
@@ -2805,7 +2805,7 @@ CG_SwingAngles_Limbo
 ==================
 */
 static void CG_SwingAngles_Limbo(float destination, float swingTolerance, float clampTolerance,
-                                 float speed, float *angle, qboolean *swinging)
+                                 float speed, float *angle, int *swinging)
 {
 	float swing;
 	float move;

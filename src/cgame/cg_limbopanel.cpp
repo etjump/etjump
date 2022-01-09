@@ -2368,7 +2368,7 @@ int CG_LimboPanel_RenderCounter_ValueForButton(panel_button_t *button)
 	return 0;
 }
 
-int CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button)
+float CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button)
 {
 	float diff;
 	switch (button->data[0])
@@ -2376,25 +2376,21 @@ int CG_LimboPanel_RenderCounter_RollTimeForButton(panel_button_t *button)
 	case 0:     // class counts
 	case 1:     // team counts
 		return 100.f;
-
 	case 4:     // skills
 		return 1000.f;
-
 	case 6:     // stats
 		diff = std::abs(button->data[3] - CG_LimboPanel_RenderCounter_ValueForButton(button));
 		if (diff < 5)
 		{
-			return 200.f / diff;
+			return (diff == 0 ? 1000.f : 200.f / diff);
 		}
-		else
-		{
-			return 50.f;
-		}
-
+		return 50.f;
 	case 5:     // clock
 	case 3:     // respawn time
 	case 2:     // xp
 		return 50.f;
+	default:
+		break;
 	}
 
 	return 1000.f;

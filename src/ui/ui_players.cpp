@@ -492,7 +492,7 @@ UI_SwingAngles
 ==================
 */
 static void UI_SwingAngles(float destination, float swingTolerance, float clampTolerance,
-                           float speed, float *angle, qboolean *swinging)
+                           float speed, float *angle, int *swinging)
 {
 	float swing;
 	float move;
