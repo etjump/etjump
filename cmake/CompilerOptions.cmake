@@ -76,5 +76,5 @@ function(create_compiler_opts target)
 			_CRT_NONSTDC_NO_WARNING
 			_SCL_SECURE_NO_WARNINGS>
 		${arg_DEFINE})
-	target_compile_features(${target} INTERFACE cxx_std_11)
+	target_compile_features(${target} INTERFACE cxx_std_14)
 endfunction()
