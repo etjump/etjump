@@ -144,6 +144,29 @@ void CG_ParseServerinfo(void)
 	trap_Cvar_Set("cg_ui_voteFlags", Info_ValueForKey(info, "voteFlags"));
 }
 
+void CG_ParseSysteminfo( void ) {
+	// force original cvars to match the shadow values
+	for (auto &cvarShadow : ETJump::cvarShadows)
+	{
+		cvarShadow.get()->forceCvarSet();
+	}
+
+	const char *info = CG_ConfigString( CS_SYSTEMINFO );
+
+    cgs.shared = atoi(Info_ValueForKey(info, "shared"));
+
+	cgs.pmove_msec = atoi( Info_ValueForKey( info, "pmove_msec" ) );
+	if ( cgs.pmove_msec < 8 ) {
+		cgs.pmove_msec = 8;
+	} else if ( cgs.pmove_msec > 33 ) {
+		cgs.pmove_msec = 33;
+	}
+
+#ifdef ALLOW_GSYNC
+	cgs.synchronousClients = ( atoi( Info_ValueForKey( info, "g_synchronousClients" ) ) ) ? qtrue : qfalse;
+#endif
+}
+
 /*
 ==================
 CG_ParseWarmup
@@ -676,6 +699,10 @@ static void CG_ConfigStringModified(void)
 	{
 		CG_ParseServerinfo();
 	}
+	else if (num == CS_SYSTEMINFO)
+	{
+		CG_ParseSysteminfo();
+	}
 	else if (num == CS_WARMUP)
 	{
 		CG_ParseWarmup();
@@ -828,14 +855,6 @@ static void CG_ConfigStringModified(void)
 	else if (num >= CS_OID_DATA && num < CS_OID_DATA + MAX_OID_TRIGGERS)
 	{
 		CG_ParseOIDInfo(num);
-	}
-	else if (num == CS_SYSTEMINFO)
-	{
-		// force original cvars to match the shadow values
-		for (auto &cvarShadow : ETJump::cvarShadows)
-		{
-			cvarShadow.get()->forceCvarSet();
-		}
 	}
 }
 

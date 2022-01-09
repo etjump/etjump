@@ -1958,6 +1958,12 @@ typedef struct
 	gametype_t gametype;
 	int antilag;
 
+	int shared;
+	int pmove_msec;
+#ifdef ALLOW_GSYNC
+	qboolean synchronousClients;
+#endif
+
 	float timelimit;                        // NERVE - SMF - made this a float
 	int maxclients;
 	char mapname[MAX_QPATH];
@@ -2247,9 +2253,6 @@ extern vmCvar_t cg_thirdPersonAngle;
 extern vmCvar_t cg_thirdPerson;
 extern vmCvar_t cg_stereoSeparation;
 extern vmCvar_t cg_lagometer;
-#ifdef ALLOW_GSYNC
-extern vmCvar_t cg_synchronousClients;
-#endif // ALLOW_GSYNC
 extern vmCvar_t cg_teamChatTime;
 extern vmCvar_t cg_teamChatHeight;
 extern vmCvar_t cg_stats;
@@ -2268,7 +2271,6 @@ extern vmCvar_t cg_enableBreath;
 extern vmCvar_t cg_autoactivate;
 extern vmCvar_t cg_smoothClients;
 extern vmCvar_t pmove_fixed;
-extern vmCvar_t pmove_msec;
 
 extern vmCvar_t cg_cameraOrbit;
 extern vmCvar_t cg_cameraOrbitDelay;
@@ -3248,6 +3250,7 @@ void CG_FreecamGetPos_f(void);
 //
 void CG_ExecuteNewServerCommands(int latestSequence);
 void CG_ParseServerinfo(void);
+void CG_ParseSysteminfo( void );
 void CG_ParseWolfinfo(void);            // NERVE - SMF
 void CG_ParseSpawns(void);
 void CG_ParseServerVersionInfo(const char *pszVersionInfo);

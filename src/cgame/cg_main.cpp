@@ -196,9 +196,6 @@ vmCvar_t cg_thirdPersonRange;
 vmCvar_t cg_thirdPersonAngle;
 vmCvar_t cg_stereoSeparation;
 vmCvar_t cg_lagometer;
-#ifdef ALLOW_GSYNC
-vmCvar_t cg_synchronousClients;
-#endif // ALLOW_GSYNC
 vmCvar_t cg_teamChatTime;
 vmCvar_t cg_teamChatHeight;
 vmCvar_t cg_stats;
@@ -216,7 +213,6 @@ vmCvar_t cg_blinktime;      //----(SA)	added
 
 vmCvar_t cg_smoothClients;
 vmCvar_t pmove_fixed;
-vmCvar_t pmove_msec;
 
 // Rafael - particle switch
 vmCvar_t cg_wolfparticles;
@@ -713,7 +709,6 @@ cvarTable_t cvarTable[] =
 	{ &cg_timescale,                "timescale",                   "1",                      0                        },
 	{ &cg_cameraMode,               "com_cameraMode",              "0",                      CVAR_CHEAT               },
 	{ &pmove_fixed,                 "pmove_fixed",                 "1",                      0                        },
-	{ &pmove_msec,                  "pmove_msec",                  "8",                      CVAR_CHEAT               },
 	{ &cg_noTaunt,                  "cg_noTaunt",                  "0",                      CVAR_ARCHIVE             }, // NERVE - SMF
 	{ &cg_voiceSpriteTime,          "cg_voiceSpriteTime",          "6000",                   CVAR_ARCHIVE             }, // DHM - Nerve
 	{ &cg_smallFont,                "ui_smallFont",                "0.25",                   CVAR_ARCHIVE             },
@@ -3621,6 +3616,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	cg.warmupCount = -1;
 
 	CG_ParseServerinfo();
+	CG_ParseSysteminfo();
 	CG_ParseWolfinfo();             // NERVE - SMF
 
 	cgs.campaignInfoLoaded = qfalse;
