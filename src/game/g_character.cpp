@@ -86,8 +86,7 @@ static qboolean G_CheckForExistingAnimModelInfo(const char *animationGroup, cons
 	{
 		*animModelInfo = firstFree;
 		// clear the structure out ready for use
-		// FIXME: doesn't actually clear the entire structure, just the sizeof int ptr
-		memset(*animModelInfo, 0, sizeof(animModelInfo_t));
+		memset(*animModelInfo, 0, sizeof(animModelInfo));
 	}
 
 	// qfalse signifies that we need to parse the information from the script files
