@@ -139,6 +139,7 @@ jobs:
           ${{github.workspace}}/build/etjump
 
   package:
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-18.04
     needs: [linux-x86, linux-x86_64, windows-x86, windows-x86_64, macOS]
 
@@ -165,4 +166,12 @@ jobs:
         name: etjump-snapshot-release
         path: ${{github.workspace}}/build/*.zip
 
-    
+    - name: Create latest build
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        automatic_release_tag: "latest"
+        prerelease: false
+        title: Latest Build
+        files: |
+          ${{github.workspace}}/build/*.zip
