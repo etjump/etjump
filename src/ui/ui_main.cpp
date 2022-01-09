@@ -9255,8 +9255,9 @@ void _UI_Init(int legacyClient, int clientVersion)
 	int x;
 
 	//uiInfo.inGameLoad = inGameLoad;
-
-	Com_Printf(S_COLOR_LTGREY "Initializing " GAME_NAME " ui " S_COLOR_GREEN GAME_VERSION "\n");
+	Com_Printf(S_COLOR_LTGREY GAME_HEADER);
+	Com_Printf(S_COLOR_LTGREY "____________________________\n");
+	Com_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME " init...\n");
 
 	UI_RegisterCvars();
 	UI_InitMemory();
@@ -9436,6 +9437,8 @@ void _UI_Init(int legacyClient, int clientVersion)
 
 	trap_AddCommand("campaign");
 	trap_AddCommand("listcampaigns");
+
+	Com_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME  " init... " S_COLOR_GREEN "DONE\n");
 }
 
 

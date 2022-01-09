@@ -2613,11 +2613,13 @@ extern vmCvar_t etj_autoLoad;
 extern vmCvar_t etj_uphillSteps;
 extern vmCvar_t etj_quickFollow;
 extern vmCvar_t etj_chatLineWidth;
+extern vmCvar_t etj_loopedSounds;
 extern vmCvar_t etj_onRunStart;
 extern vmCvar_t etj_onRunEnd;
 extern vmCvar_t etj_lagometerX;
 extern vmCvar_t etj_lagometerY;
 extern vmCvar_t etj_spectatorVote;
+extern vmCvar_t etj_extraTrace;
 
 // Autodemo
 extern vmCvar_t etj_autoDemo;
@@ -4012,17 +4014,18 @@ namespace ETJump
 	class EventLoop;
 	class PlayerEventsHandler;
 	class PmoveUtils;
+	class CvarShadow;
 
 	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
 	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
 	extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
-	extern std::vector<std::unique_ptr<IRenderable>> renderables;
+	extern std::vector<std::shared_ptr<IRenderable>> renderables;
 	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
+	extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
 	extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 	extern std::shared_ptr<EventLoop> eventLoop;
 	extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
-	extern std::shared_ptr<PmoveUtils> pmoveUtils;
 	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
 	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 	bool hideMeCheck(int entityNum);

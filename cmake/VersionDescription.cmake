@@ -17,7 +17,19 @@ macro(get_version_description VAR)
 			set("${VAR}_MINOR" "${CMAKE_MATCH_2}")
 			set("${VAR}_PATCH" "${CMAKE_MATCH_3}")
 			set("${VAR}_COMMIT" "${CMAKE_MATCH_4}")
-			set("${VAR}_COMMIT_HASH" "${CMAKE_MATCH_5}")
+			set("${VAR}_COMMIT_HASH_SHORT" "${CMAKE_MATCH_5}")
+		endif()
+
+		execute_process(
+			COMMAND ${GIT_EXECUTABLE} rev-parse --verify HEAD
+			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+			RESULT_VARIABLE GIT_RESULT
+			OUTPUT_VARIABLE GIT_HASH
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+			ERROR_QUIET
+		)
+		if (GIT_RESULT EQUAL 0)
+			set("${VAR}_COMMIT_HASH" "${GIT_HASH}")
 		endif()
 	endif()
 	if ("${${VAR}}" STREQUAL "")
@@ -26,6 +38,7 @@ macro(get_version_description VAR)
 		set("${VAR}_MINOR" "${CMAKE_PROJECT_VERSION_MINOR}")
 		set("${VAR}_PATCH" "${CMAKE_PROJECT_VERSION_PATCH}")
 		set("${VAR}_COMMIT" "0")
-		set("${VAR}_COMMIT_HASH" "0")
+		set("${VAR}_COMMIT_HASH" "n/a")
+		set("${VAR}_COMMIT_HASH_SHORT" "n/a")
 	endif()
 endmacro()

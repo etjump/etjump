@@ -10,29 +10,8 @@
 
 #include "cg_local.h"
 #include "etj_init.h"
-#include "etj_client_commands_handler.h"
-#include "etj_entity_events_handler.h"
-#include "etj_overbounce_watcher.h"
-#include "etj_maxspeed.h"
-#include "etj_client_authentication.h"
-#include "etj_operating_system.h"
-#include "etj_cvar_update_handler.h"
 #include "etj_cvar_shadow.h"
-#include "etj_console_alpha.h"
-#include "etj_draw_leaves_handler.h"
-#include "etj_keyset_system.h"
-#include "etj_utilities.h"
-#include "etj_speed_drawable.h"
-#include "etj_strafe_quality_drawable.h"
-#include "etj_jump_speeds.h"
-#include "etj_quick_follow_drawable.h"
-#include "etj_awaited_command_handler.h"
-#include "etj_event_loop.h"
-#include "etj_autodemo_recorder.h"
-#include "etj_player_events_handler.h"
-#include "etj_cgaz.h"
-#include "etj_snaphud.h"
-#include "etj_pmove_utils.h"
+#include "etj_cvar_update_handler.h"
 
 displayContextDef_t cgDC;
 
@@ -94,30 +73,6 @@ extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1, 
 		break;
 	}
 	return -1;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ETJump objects
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-namespace ETJump
-{
-	std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-	std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	std::shared_ptr<EntityEventsHandler> entityEventsHandler;
-	std::shared_ptr<ClientAuthentication> authentication;
-	std::shared_ptr<OperatingSystem> operatingSystem;
-	std::vector<std::unique_ptr<IRenderable>> renderables;
-	std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-    std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
-	static std::shared_ptr<ConsoleAlphaHandler> consoleAlphaHandler;
-	static std::shared_ptr<DrawLeavesHandler> drawLeavesHandler;
-	static bool isInitialized{ false };
-	std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
-	std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
-	std::shared_ptr<EventLoop> eventLoop;
-	std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
-	std::shared_ptr<PmoveUtils> pmoveUtils;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1046,51 +1001,6 @@ int      cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
 qboolean cvarsLoaded   = qfalse;
 void CG_setClientFlags(void);
 
-namespace ETJump
-{
-	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime)
-	{
-		if (etj_loopedSounds.integer > 0)
-		{
-			trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
-		}
-	}
-	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime)
-	{
-		if (etj_loopedSounds.integer > 0)
-		{
-			trap_S_AddRealLoopingSound(origin, velocity, sfx, range, volume, soundTime);
-		}
-	}
-
-	// General purpose etj_hideMe check for cgame events
-	bool hideMeCheck(int entityNum)
-	{
-		if (entityNum < MAX_CLIENTS)
-		{
-			// entity is a player
-			if (cgs.clientinfo[entityNum].hideMe && entityNum != cg.clientNum)
-			{
-				// player is hidden and it is not ourselves
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// Get correct trace contents depending on etj_extraTrace value
-	int checkExtraTrace(int value)
-	{
-		if (etj_extraTrace.integer & 1 << value)
-		{
-			return CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
-		}
-
-		return CONTENTS_SOLID;
-	}
-}
-
-
 /*
 =================
 CG_RegisterCvars
@@ -1119,27 +1029,6 @@ void CG_RegisterCvars(void)
 				cv->modificationCount = cv->vmCvar->modificationCount;
 			}
 		}
-	}
-
-	// shadow cvars mapping to real cvars, forces locked values change
-	std::vector<std::pair<vmCvar_t*, std::string>> cvars {
-		{ &etj_drawFoliage, "r_drawfoliage"},
-		{ &etj_showTris, "r_showtris" },
-		{ &etj_wolfFog, "r_wolffog" },
-		{ &etj_zFar, "r_zfar" },
-		{ &etj_viewlog, "viewlog" },
-		{ &etj_offsetFactor, "r_offsetFactor" },
-		{ &etj_offsetUnits, "r_offsetUnits" },
-		{ &etj_speeds, "r_speeds" },
-		{ &etj_lightmap, "r_lightmap" },
-		{ &etj_drawNotify, "con_drawNotify" },
-	};
-
-	for (auto &shadow : cvars)
-	{
-		ETJump::cvarShadows.push_back(
-			std::unique_ptr<ETJump::CvarShadow>(new ETJump::CvarShadow{ shadow.first, shadow.second })
-		);
 	}
 
 	// see if we are also running the server on this machine
@@ -3484,26 +3373,6 @@ void CG_ClearTrails(void);
 extern qboolean initparticles;
 void CG_ClearParticles(void);
 
-namespace ETJump
-{
-	void initDrawKeys(KeySetSystem *keySetSystem)
-	{
-		// key set themes
-		const char* keySetNames[]{
-			"keyset", // Keyset 1 (original)
-			"keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
-			"keyset3",
-			"keyset4",
-			// + add more
-		};
-		for (const auto &keySetName : keySetNames)
-		{
-			keySetSystem->addSet(keySetName);
-		}
-		keySetSystem->addKeyBindSet("keyset5");
-	}
-}
-
 /*
 =================
 CG_Init
@@ -3546,8 +3415,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 #endif // _DEBUG
 
 	//	int startat = trap_Milliseconds();
-
-	Com_Printf(S_COLOR_LTGREY "Initializing " GAME_NAME " cgame " S_COLOR_GREEN GAME_VERSION "\n");
+	Com_Printf("CG_Init...\n");
 
 	// clear everything
 	memset( &cgs, 0, sizeof(cgs));
@@ -3556,7 +3424,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	memset(cg_weapons, 0, sizeof(cg_weapons));
 	memset(cg_items, 0, sizeof(cg_items));
 
-	ETJump::cvarUpdateHandler = std::make_shared<ETJump::CvarUpdateHandler>();
+	ETJump::cvarUpdateHandler = std::make_unique<ETJump::CvarUpdateHandler>();
 
 	cgs.initing = qtrue;
 
@@ -3759,79 +3627,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 		trap_S_FadeAllSound(1.0f, 0, qfalse);           // fade sound up
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// ETJump initialization
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	CG_Printf("---------------------------------------------------\n");
-	CG_Printf("ETJump initialization started.\n");
-	CG_Printf("Loading modules... ");
-
-	// NOTE: client server commands handlers must be created before other modules as other modules use them
-	// to subcribe to commands.
-	// Generally all modules should get these as constructor params but they're still being used in the C code
-	// => make sure they're created first
-	ETJump::serverCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(nullptr);
-	ETJump::consoleCommandsHandler = std::make_shared<ETJump::ClientCommandsHandler>(trap_AddCommand);
-	ETJump::entityEventsHandler = std::make_shared<ETJump::EntityEventsHandler>();
-	ETJump::operatingSystem = std::make_shared<ETJump::OperatingSystem>();
-	ETJump::authentication = std::make_shared<ETJump::ClientAuthentication>([](const std::string& command)
-	{
-		trap_SendClientCommand(command.c_str());
-	}, [](const std::string& message)
-	{
-		CG_Printf(message.c_str());
-	}, bind(&ETJump::OperatingSystem::getHwid, ETJump::operatingSystem),
-		ETJump::serverCommandsHandler
-	);
-	ETJump::playerEventsHandler = std::make_shared<ETJump::PlayerEventsHandler>();
-    ETJump::awaitedCommandHandler = std::make_shared<ETJump::AwaitedCommandHandler>(
-        ETJump::consoleCommandsHandler,
-        trap_SendConsoleCommand,
-        [](const char *text)
-        {
-            Com_Printf(text);
-        }
-    );
-	ETJump::eventLoop = std::make_shared<ETJump::EventLoop>();
-
-	////////////////////////////////////////////////////////////////
-	// TODO: move these to own client commands handler
-	////////////////////////////////////////////////////////////////
-	auto minimize = [](const std::vector<std::string>&args)
-	{
-		ETJump::operatingSystem->minimize();
-	};
-	ETJump::consoleCommandsHandler->subscribe("min", minimize);
-	ETJump::consoleCommandsHandler->subscribe("minimize", minimize);
-	////////////////////////////////////////////////////////////////
-
-	// initialize renderables
-	// Overbounce watcher
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::OverbounceWatcher(ETJump::consoleCommandsHandler.get())));
-	// Display max speed from previous load session
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplayMaxSpeed(ETJump::entityEventsHandler.get())));
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::DisplaySpeed()));
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::StrafeQuality()));
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::JumpSpeeds(ETJump::entityEventsHandler.get())));
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::QuickFollowDrawer()));
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::CGaz()));
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(new ETJump::Snaphud()));
-
-	ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
-	ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
-	auto keySetSystem = new ETJump::KeySetSystem(etj_drawKeys);
-	ETJump::renderables.push_back(std::unique_ptr<ETJump::IRenderable>(keySetSystem));
-	ETJump::initDrawKeys(keySetSystem);
-	ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
-	ETJump::pmoveUtils = std::make_shared<ETJump::PmoveUtils>();
-
-	CG_Printf("done\n");
-	CG_Printf("ETJump initialized.\n");
-	CG_Printf("---------------------------------------------------\n");
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	// OSP
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
@@ -3843,8 +3638,6 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 	cgs.demoCam.startLean = qfalse;
 	cgs.demoCam.noclip = qfalse;
 
-	InitGame();
-
 	if (cg.demoPlayback)
 	{
 		// Marks the right 2.3.0 version to perform the entity type adjustement hack
@@ -3855,10 +3648,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qbo
 		}
 	}	
 
-	ETJump::isInitialized = true;
-
 	CG_InitLocations();
+
+	ETJump::init();
+
 	CG_AutoExec_f();
+
+	Com_Printf("CG_Init... DONE\n");
 }
 
 /*
@@ -3875,36 +3671,7 @@ void CG_Shutdown(void)
 
 	CG_EventHandling(CGAME_EVENT_NONE, qtrue);
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// ETJump shutdown
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if (ETJump::isInitialized)
-	{
-		////////////////////////////////////////////////////////////////
-		// TODO: move these to own client commands handler
-		////////////////////////////////////////////////////////////////
-		ETJump::consoleCommandsHandler->unsubcribe("min");
-		ETJump::consoleCommandsHandler->unsubcribe("minimize");
-		////////////////////////////////////////////////////////////////
-
-		ETJump::operatingSystem = nullptr;
-		ETJump::authentication = nullptr;
-		ETJump::renderables.clear();
-		ETJump::cvarUpdateHandler = nullptr;
-		ETJump::cvarShadows.clear();
-
-		// clear dynamic shaders in reverse order
-		ETJump::drawLeavesHandler = nullptr;
-		ETJump::consoleAlphaHandler = nullptr;
-		ETJump::eventLoop->shutdown();
-		ETJump::eventLoop = nullptr;
-		ETJump::consoleCommandsHandler = nullptr;
-		ETJump::serverCommandsHandler = nullptr;
-		ETJump::playerEventsHandler = nullptr;
-		ETJump::entityEventsHandler = nullptr;
-
-		ETJump::isInitialized = false;
-	}
+	ETJump::shutdown();
 
 	Shutdown_Display();
 }

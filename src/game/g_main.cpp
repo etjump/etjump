@@ -1820,8 +1820,10 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 	qtime_t ct;
-	
-	Com_Printf(S_COLOR_LTGREY "Initializing " GAME_NAME " game " S_COLOR_GREEN GAME_VERSION "\n");
+
+	G_Printf(S_COLOR_LTGREY GAME_HEADER);
+	G_Printf(S_COLOR_LTGREY "____________________________\n");
+	G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME " init...\n");
 
 	trap_RealTime(&ct);
 
@@ -2127,6 +2129,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart)
 
 	OnGameInit();
 	ETJump_InitGame(levelTime, randomSeed, restart);
+
+	G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME  " init... " S_COLOR_GREEN "DONE\n");
 }
 
 

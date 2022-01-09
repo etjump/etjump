@@ -13,10 +13,6 @@
 
 void CG_LimboMenu_f();
 
-namespace ETJump {
-    extern std::vector<std::unique_ptr<CvarShadow>> cvarShadows;
-}
-
 /*
 =================
 CG_ParseScores
@@ -1217,7 +1213,7 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList, int
 	int          len, i;
 	int          current = 0;
 	fileHandle_t f;
-	auto buf = std::unique_ptr<char[]>(new char[MAX_VOICEFILESIZE]);
+	auto buf = std::make_unique<char[]>(MAX_VOICEFILESIZE);
 	char         **p, *ptr;
 	char         *token;
 	voiceChat_t  *voiceChats;
@@ -1383,7 +1379,7 @@ int CG_HeadModelVoiceChats(char *filename)
 {
 	int          len, i;
 	fileHandle_t f;
-	auto         buf = std::unique_ptr<char[]>(new char[MAX_VOICEFILESIZE]);
+	auto         buf = std::make_unique<char[]>(MAX_VOICEFILESIZE);
 	char         **p, *ptr;
 	char         *token;
 

@@ -55,6 +55,7 @@ endfunction()
 function(set_target_platform_details target)
 	get_platform_suffix(PLATFORM_SUFFIX)
 	set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}${PLATFORM_SUFFIX}" PREFIX "")
+	target_compile_definitions(${target} PRIVATE GAME_BINARY_NAME="${target}${PLATFORM_SUFFIX}")
 	if (APPLE)
 		# For the build to succeed in arm the libs need to be fixed as well.
 		# set(MACOS_COMPILE_PLATFORMS "x86_64;arm64")

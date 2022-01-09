@@ -2,6 +2,7 @@
 // string allocation/managment
 
 #include <vector>
+#include <algorithm>
 
 #include "ui_shared.h"
 #include "ui_local.h"   // For CS settings/retrieval
