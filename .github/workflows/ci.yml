@@ -139,7 +139,7 @@ jobs:
           ${{github.workspace}}/build/etjump
 
   package:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-18.04
     needs: [linux-x86, linux-x86_64, windows-x86, windows-x86_64, macOS]
 
