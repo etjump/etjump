@@ -1835,7 +1835,7 @@ extern int              saveGamePending;
 
 extern vmCvar_t g_gametype;
 
-extern vmCvar_t g_log;
+extern vmCvar_t g_logFile;
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
 extern vmCvar_t g_maxclients;               // allow this many total, including spectators
@@ -1875,7 +1875,6 @@ extern vmCvar_t g_banIPs;
 extern vmCvar_t g_filterBan;
 extern vmCvar_t g_rankings;
 extern vmCvar_t g_smoothClients;
-extern vmCvar_t pmove_fixed;
 extern vmCvar_t pmove_msec;
 
 //Rafael
