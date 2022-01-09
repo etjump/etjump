@@ -15,6 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
@@ -26,6 +28,13 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
 
+    - name: Archive linux-x86_64 artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: etjump-artifacts
+        path: |
+          ${{github.workspace}}/build/etjump
+
   linux-x86:
     runs-on: ubuntu-18.04
 
@@ -34,6 +43,8 @@ jobs:
       run: sudo apt-get install gcc-multilib g++-multilib
     
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
@@ -44,12 +55,21 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
+    
+    - name: Archive linux-x86 artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: etjump-artifacts
+        path: |
+          ${{github.workspace}}/build/etjump
   
   windows-x86_64:
     runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Visual Studio 16 2019" -A x64
@@ -60,12 +80,21 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
+
+    - name: Archive windows-x86_64 artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: etjump-artifacts
+        path: |
+          ${{github.workspace}}/build/etjump
   
   windows-x86:
     runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Visual Studio 16 2019" -A Win32
@@ -76,12 +105,21 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
+
+    - name: Archive windows-x86 artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: etjump-artifacts
+        path: |
+          ${{github.workspace}}/build/etjump
       
   macOS:
     runs-on: macos-10.15
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
@@ -92,3 +130,39 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}  
+
+    - name: Archive macos-10.15 artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: etjump-artifacts
+        path: |
+          ${{github.workspace}}/build/etjump
+
+  package:
+    runs-on: ubuntu-18.04
+    needs: [linux-x86, linux-x86_64, windows-x86, windows-x86_64, macOS]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with: 
+        name: etjump-artifacts
+        path: ${{github.workspace}}/build/etjump
+
+    - name: Pack release zip
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+        make mod_release
+
+    - name: Upload release 
+      uses: actions/upload-artifact@v2
+      with:
+        name: etjump-snapshot-release
+        path: ${{github.workspace}}/build/*.zip
+
+    
