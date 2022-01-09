@@ -120,7 +120,7 @@ void ETJump::OverbounceWatcher::render() const
 		return;
 	}
 
-	float psec = pmove_msec.integer / 1000.f;
+	float psec = cgs.pmove_msec / 1000.f;
 	int gravity = ps->gravity;
 	float velocity = ps->velocity[2];
 	float currentHeight = ps->origin[2] + ps->mins[2];

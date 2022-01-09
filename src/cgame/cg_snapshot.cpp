@@ -340,7 +340,7 @@ static void CG_TransitionSnapshot(void)
 		if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW)
 		    || cg_nopredict.integer
 #ifdef ALLOW_GSYNC
-		    || cg_synchronousClients.integer
+		    || cgs.synchronousClients
 #endif // ALLOW_GSYNC
 		    )
 		{
