@@ -81,4 +81,4 @@ namespace ETJump
 		playerState_t* ps = &cg.predictedPlayerState;
 		pmove_t* pm;
 	};
-}\
+}
