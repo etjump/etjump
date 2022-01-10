@@ -3,7 +3,7 @@ find_package(Git)
 macro(get_version_description VAR)
 	if(Git_FOUND)
 		execute_process(
-			COMMAND ${GIT_EXECUTABLE} describe --tags
+			COMMAND ${GIT_EXECUTABLE} describe
 			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 			RESULT_VARIABLE GIT_RESULT
 			OUTPUT_VARIABLE GIT_DESCRIPTION
