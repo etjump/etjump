@@ -967,7 +967,7 @@ void CG_DrawExpandedAutoMap(void)
 		}
 	}
 
-	CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse, .7f, qfalse);
+	CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse, 1.f, qfalse);
 
 	// Draw the border
 
