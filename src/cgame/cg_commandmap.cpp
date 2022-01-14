@@ -1,4 +1,5 @@
 #include "cg_local.h"
+#include "../game/etj_numeric_utilities.h"
 
 static mapEntityData_t mapEntities[MAX_GENTITIES];
 static int             mapEntityCount = 0;
@@ -967,7 +968,7 @@ void CG_DrawExpandedAutoMap(void)
 		}
 	}
 
-	CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse, .7f, qfalse);
+	CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse, Numeric::clamp(etj_expandedMapAlpha.value, 0, 1), qfalse);
 
 	// Draw the border
 
