@@ -19,15 +19,15 @@ void UI_LoadPanel_RenderPercentageMeter(panel_button_t *button);
 panel_button_text_t missiondescriptionTxt =
 {
 	0.2f,                0.2f,
-	{ 0.0f,              0.0f,0.0f,    1.f },
-	0,                   0,
+	{ 0.0f,              0.0f,   0.0f, 1.f },
+	0,                      0,
 	&bg_loadscreenfont2,
 };
 
 panel_button_text_t missiondescriptionHeaderTxt =
 {
-	0.2f,                0.2f,
-	{ 0.0f,              0.0f,             0.0f,    0.8f },
+	0.2f,                             0.2f,
+	{ 0.0f,                           0.0f,   0.0f, 0.8f },
 	0,                   ITEM_ALIGN_CENTER,
 	&bg_loadscreenfont2,
 };
@@ -35,16 +35,16 @@ panel_button_text_t missiondescriptionHeaderTxt =
 panel_button_text_t campaignpheaderTxt =
 {
 	0.2f,                0.2f,
-	{ 1.0f,              1.0f,1.0f,    0.6f },
-	0,                   0,
+	{ 1.0f,              1.0f,   1.0f, 0.6f },
+	0,                      0,
 	&bg_loadscreenfont2,
 };
 
 panel_button_text_t campaignpTxt =
 {
 	0.35f,               0.35f,
-	{ 1.0f,              1.0f, 1.0f,  0.6f },
-	0,                   0,
+	{ 1.0f,               1.0f, 1.0f, 0.6f },
+	0,                       0,
 	&bg_loadscreenfont2,
 };
 
@@ -52,8 +52,8 @@ panel_button_t loadScreenMap =
 {
 	"gfx/loading/camp_map",
 	NULL,
-	{ 0,                      0,  440, 480 }, // shouldn't this be square??
-	{ 0,                      0,  0,   0, 0, 0, 0, 0},
+	{ 0,                       0, 440, 480 }, // shouldn't this be square??
+	{ 0,                       0,   0,0, 0, 0, 0, 0 },
 	NULL,                     /* font		*/
 	NULL,                     /* keyDown	*/
 	NULL,                     /* keyUp	*/
@@ -65,8 +65,8 @@ panel_button_t loadScreenBack =
 {
 	"gfx/loading/camp_side",
 	NULL,
-	{ 440,                    0,  200, 480 },
-	{ 0,                      0,  0,   0, 0, 0, 0, 0},
+	{ 440,                     0, 200, 480 },
+	{ 0,                       0,   0,0, 0, 0, 0, 0 },
 	NULL,                     /* font		*/
 	NULL,                     /* keyDown	*/
 	NULL,                     /* keyUp	*/
@@ -90,8 +90,8 @@ panel_button_t loadingPanelText =
 {
 	NULL,
 	NULL,
-	{ 460,                         72,   160, 244 },
-	{ 0,                           0,    0,   0, 0, 0, 0, 0},
+	{ 460,                           72, 160, 244 },
+	{ 0,                              0,   0,0, 0, 0, 0, 0 },
 	&missiondescriptionTxt,        /* font		*/
 	NULL,                          /* keyDown	*/
 	NULL,                          /* keyUp	*/
@@ -115,8 +115,8 @@ panel_button_t campaignPanelText =
 {
 	NULL,
 	NULL,                         //"CONNECTING...",
-	{ 470,                        33,   152, 232 },
-	{ 0,                          0,    0,   0, 0, 0, 0, 0},
+	{ 451,                          11, 178, 35 },
+	{ 0,                             0,   0,0, 0, 0, 0, 0 },
 	&campaignpTxt,                /* font		*/
 	NULL,                         /* keyDown	*/
 	NULL,                         /* keyUp	*/
@@ -147,7 +147,7 @@ void UI_LoadPanel_Init()
 
 	for (auto panelBtnPtr : loadpanelButtons)
 	{
-		if (panelBtnPtr) 
+		if (panelBtnPtr)
 		{
 			loadpanelButtonsLayout.push_back(*panelBtnPtr);
 		}
@@ -304,6 +304,18 @@ void UI_LoadPanel_RenderHeaderText(panel_button_t *button)
 		button->text = "CONNECTING...";
 	}
 
+	// we can't really do this in the rendering function
+	// since it's used to render other things too
+
+	// restore default values first
+	button->rect.x = 451 + SCREEN_OFFSET_X;
+	button->rect.y = 11;
+
+	auto w = static_cast<float>(DC->textWidthExt(button->text, button->font->scalex, 0, button->font->font));
+	auto h = static_cast<float>(DC->textHeightExt(button->text, button->font->scaley, 0, button->font->font));
+	button->rect.x = button->rect.x + (button->rect.w - w) * 0.5f;
+	button->rect.y = button->rect.y + (button->rect.h + h) * 0.5f;
+
 	BG_PanelButtonsRender_Text(button);
 }
 
@@ -363,7 +375,7 @@ const char *UI_DownloadInfo(const char *downloadName)
 		// Extrapolate estimated completion time
 		if (downloadSize && xferRate)
 		{
-			int n        = downloadSize / xferRate; // estimated time for entire d/l in secs
+			int n = downloadSize / xferRate;        // estimated time for entire d/l in secs
 			int timeleft = 0, i;
 
 			// We do it in K (/1024) because we'd overflow around 4MB
@@ -419,12 +431,12 @@ const char *UI_DownloadInfo(const char *downloadName)
 
 void UI_LoadPanel_RenderLoadingText(panel_button_t *button)
 {
-	uiClientState_t    cstate;
-	char               downloadName[MAX_INFO_VALUE];
-	char               buff[2560];
-	char               *p;
-	const char *s = "";
-	float              y;
+	uiClientState_t cstate;
+	char            downloadName[MAX_INFO_VALUE];
+	char            buff[2560];
+	char            *p;
+	const char      *s = "";
+	float           y;
 
 	trap_GetClientState(&cstate);
 

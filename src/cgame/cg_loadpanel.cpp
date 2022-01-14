@@ -29,15 +29,15 @@ qhandle_t bg_mappic;
 panel_button_text_t missiondescriptionTxt =
 {
 	0.2f,                0.2f,
-	{ 0.0f,              0.0f,0.0f,    1.f },
-	0,                   0,
+	{ 0.0f,              0.0f,   0.0f, 1.f },
+	0,                      0,
 	&bg_loadscreenfont2,
 };
 
 panel_button_text_t missiondescriptionHeaderTxt =
 {
-	0.2f,                0.2f,
-	{ 0.0f,              0.0f,             0.0f,    0.8f },
+	0.2f,                             0.2f,
+	{ 0.0f,                           0.0f,   0.0f, 0.8f },
 	0,                   ITEM_ALIGN_CENTER,
 	&bg_loadscreenfont2,
 };
@@ -45,23 +45,23 @@ panel_button_text_t missiondescriptionHeaderTxt =
 panel_button_text_t campaignpheaderTxt =
 {
 	0.2f,                0.2f,
-	{ 1.0f,              1.0f,1.0f,    0.6f },
-	0,                   0,
+	{ 1.0f,              1.0f,   1.0f, 0.6f },
+	0,                      0,
 	&bg_loadscreenfont2,
 };
 
 panel_button_text_t campaignpTxt =
 {
 	0.30f,               0.30f,
-	{ 1.0f,              1.0f, 1.0f,  0.6f },
-	0,                   0,
+	{ 1.0f,               1.0f, 1.0f, 0.6f },
+	0,                       0,
 	&bg_loadscreenfont2,
 };
 
 panel_button_text_t loadScreenMeterBackTxt =
 {
-	0.22f,               0.22f,
-	{ 0.1f,              0.1f,             0.1f,  0.8f },
+	0.22f,                           0.22f,
+	{ 0.1f,                           0.1f, 0.1f, 0.8f },
 	0,                   ITEM_ALIGN_CENTER,
 	&bg_loadscreenfont2,
 };
@@ -70,8 +70,8 @@ panel_button_t loadScreenMap =
 {
 	"gfx/loading/camp_map",
 	NULL,
-	{ 0,                      0,  440, 480 }, // shouldn't this be square?? // Gordon: no, the map is actually WIDER that tall, which makes it even worse...
-	{ 0,                      0,  0,   0, 0, 0, 0, 0},
+	{ 0,                       0, 440, 480 }, // shouldn't this be square?? // Gordon: no, the map is actually WIDER that tall, which makes it even worse...
+	{ 0,                       0,   0,0, 0, 0, 0, 0 },
 	NULL,                     /* font		*/
 	NULL,                     /* keyDown	*/
 	NULL,                     /* keyUp	*/
@@ -83,8 +83,8 @@ panel_button_t loadScreenBack =
 {
 	"gfx/loading/camp_side",
 	NULL,
-	{ 440,                    0,  200, 480 },
-	{ 0,                      0,  0,   0, 0, 0, 0, 0},
+	{ 440,                     0, 200, 480 },
+	{ 0,                       0,   0,0, 0, 0, 0, 0 },
 	NULL,                     /* font		*/
 	NULL,                     /* keyDown	*/
 	NULL,                     /* keyUp	*/
@@ -96,8 +96,8 @@ panel_button_t loadScreenPins =
 {
 	NULL,
 	NULL,
-	{ 0,                            0,  640, 480 },
-	{ 0,                            0,  0,   0, 0, 0, 0, 0},
+	{ 0,                             0, 640, 480 },
+	{ 0,                             0,   0,0, 0, 0, 0, 0 },
 	NULL,                           /* font		*/
 	NULL,                           /* keyDown	*/
 	NULL,                           /* keyUp	*/
@@ -110,7 +110,7 @@ panel_button_t missiondescriptionPanelHeaderText =
 	NULL,
 	"***TOP SECRET***",
 	{ 440,                     72, 200, 32 },
-	{ 0,                       0,  0,   0, 0, 0, 0, 0},
+	{ 0,                        0,   0,0, 0, 0, 0, 0 },
 	&missiondescriptionHeaderTxt,/* font		*/
 	NULL,                      /* keyDown	*/
 	NULL,                      /* keyUp	*/
@@ -122,8 +122,8 @@ panel_button_t missiondescriptionPanelText =
 {
 	NULL,
 	NULL,
-	{ 460,                                    84,   160, 232 },
-	{ 0,                                      0,    0,   0, 0, 0, 0, 0},
+	{ 460,                                      84, 160, 232 },
+	{ 0,                                         0,   0,0, 0, 0, 0, 0 },
 	&missiondescriptionTxt,                   /* font		*/
 	NULL,                                     /* keyDown	*/
 	NULL,                                     /* keyUp	*/
@@ -131,25 +131,12 @@ panel_button_t missiondescriptionPanelText =
 	NULL,
 };
 
-panel_button_t campaignheaderPanelText =
-{
-	NULL,
-	NULL,
-	{ 456,                              24,   152, 232 },
-	{ 0,                                0,    0,   0, 0, 0, 0, 0},
-	&campaignpheaderTxt,                /* font		*/
-	NULL,                               /* keyDown	*/
-	NULL,                               /* keyUp	*/
-	CG_LoadPanel_RenderCampaignTypeText,
-	NULL,
-};
-
 panel_button_t campaignPanelText =
 {
 	NULL,
 	NULL,
-	{ 464,                              40,   152, 232 },
-	{ 0,                                0,    0,   0, 0, 0, 0, 0},
+	{ 451,                                11, 178, 35 },
+	{ 0,                                   0,   0,0, 0, 0, 0, 0 },
 	&campaignpTxt,                      /* font		*/
 	NULL,                               /* keyDown	*/
 	NULL,                               /* keyUp	*/
@@ -161,8 +148,8 @@ panel_button_t loadScreenMeterBack =
 {
 	"gfx/loading/progressbar_back",
 	NULL,
-	{ 440 + 26,                    480 - 30 + 1,200 - 56, 20 },
-	{ 0,                           0,  0,        0, 0, 0, 0, 0},
+	{ 440 + 26,          480 - 30 + 1, 200 - 56, 20 },
+	{ 0,                            0,        0,0, 0, 0, 0, 0 },
 	NULL,                          /* font		*/
 	NULL,                          /* keyDown	*/
 	NULL,                          /* keyUp	*/
@@ -174,8 +161,8 @@ panel_button_t loadScreenMeterBack2 =
 {
 	"gfx/loading/progressbar",
 	NULL,
-	{ 440 + 26,                   480 - 30 + 1,200 - 56, 20 },
-	{ 1,                          255,  0,        0, 255, 0, 0, 0},
+	{ 440 + 26,           480 - 30 + 1, 200 - 56, 20 },
+	{ 1,                           255,        0,0, 255, 0, 0, 0 },
 	NULL,                         /* font		*/
 	NULL,                         /* keyDown	*/
 	NULL,                         /* keyUp	*/
@@ -187,8 +174,8 @@ panel_button_t loadScreenMeterBackText =
 {
 	NULL,
 	"LOADING",
-	{ 440 + 28,                480 - 28 + 12 + 1,   200 - 56 - 2, 16 },
-	{ 0,                       0,                   0,            0, 0, 0, 0, 0},
+	{ 440 + 28,                  480 - 28 + 12 + 1, 200 - 56 - 2, 16 },
+	{ 0,                                         0,            0,0, 0, 0, 0, 0 },
 	&loadScreenMeterBackTxt,   /* font		*/
 	NULL,                      /* keyDown	*/
 	NULL,                      /* keyUp	*/
@@ -203,7 +190,7 @@ panel_button_t *loadpanelButtons[] =
 
 	&missiondescriptionPanelText, &missiondescriptionPanelHeaderText,
 
-	&campaignheaderPanelText,     &campaignPanelText,
+	&campaignPanelText,
 
 	&loadScreenMeterBack,         &loadScreenMeterBack2,             &loadScreenMeterBackText,
 
@@ -220,32 +207,9 @@ CG_DrawConnectScreen
 ================
 */
 
-const char *CG_LoadPanel_GameTypeName(gametype_t gt)
-{
-	switch (gt)
-	{
-	case GT_SINGLE_PLAYER:
-		return "Single Player";
-	case GT_COOP:
-		return "Co-op";
-	case GT_WOLF:
-		return "Objective";
-	case GT_WOLF_STOPWATCH:
-		return "Stopwatch";
-	case GT_WOLF_CAMPAIGN:
-		return "Campaign";
-	case GT_WOLF_LMS:
-		return "Last Man Standing";
-	default:
-		break;
-	}
-
-	return "Invalid";
-}
-
 void CG_LoadPanel_Init()
 {
-	bg_mappic = 0;
+	bg_mappic           = 0;
 	bg_loadscreeninited = qfalse;
 	trap_Cvar_Set("ui_connecting", "0");
 
@@ -271,7 +235,7 @@ void CG_LoadPanel_Init()
 
 	for (auto panelBtnPtr : loadpanelButtons)
 	{
-		if (panelBtnPtr) 
+		if (panelBtnPtr)
 		{
 			loadpanelButtonsLayout.push_back(*panelBtnPtr);
 		}
@@ -430,59 +394,30 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button)
 	CG_DrawPicST(button->rect.x, button->rect.y, button->rect.w * frac, button->rect.h, 0, 0, frac, 1, button->hShaderNormal);
 }
 
-void CG_LoadPanel_RenderCampaignTypeText(panel_button_t *button)
-{
-/*	char buffer[1024];
-    const char* str;
-    DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
-    if( !*buffer ) {
-        return;
-    }
-
-    str = Info_ValueForKey( buffer, "g_gametype" );
-*/
-	CG_Text_Paint_Ext(button->rect.x, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, va("%s:", CG_LoadPanel_GameTypeName(cgs.gametype)), 0, 0, button->font->style, button->font->font);
-}
 
 
 void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button)
 {
-	const char *cs;
-	float      w;
+	const int MAX_LEN   = 18; // the box fits roughly 18 chars on default text scale
+	float     textScale = button->font->scalex;
+	int       len       = Q_PrintStrlen(cgs.arenaData.longname);
 
-	//char buffer[1024];
-	//int gametype;
-
-	//DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
-	//cs = Info_ValueForKey( buffer, "g_gametype" );
-	//gametype = atoi(cs);
-
-	if (cgs.gametype == GT_WOLF_CAMPAIGN)
+	if (!cgs.arenaInfoLoaded)
 	{
-
-		cs = DC->nameForCampaign();
-		if (!cs)
-		{
-			return;
-		}
-
-		cs = va("%s %iof%i", cs, cgs.currentCampaignMap + 1, cgs.campaignData.mapCount);
-
-		w = CG_Text_Width_Ext(cs, button->font->scalex, 0, button->font->font);
-		CG_Text_Paint_Ext(button->rect.x + (button->rect.w - w) * 0.5f, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, cs, 0, 0, 0, button->font->font);
-
+		return;
 	}
-	else
+
+	if (len > MAX_LEN)
 	{
-
-		if (!cgs.arenaInfoLoaded)
-		{
-			return;
-		}
-
-		w = CG_Text_Width_Ext(cgs.arenaData.longname, button->font->scalex, 0, button->font->font);
-		CG_Text_Paint_Ext(button->rect.x + (button->rect.w - w) * 0.5f, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, cgs.arenaData.longname, 0, 0, 0, button->font->font);
+		// theoretically longname can be up to 128 chars, but let's not scale
+		// beyond 32 chars to keep it at readable size
+		textScale /= (static_cast<float>(len > 32 ? 32 : len) / MAX_LEN);
 	}
+
+	auto w = static_cast<float>(CG_Text_Width_Ext(cgs.arenaData.longname, textScale, 0, button->font->font));
+	auto h = static_cast<float>(CG_Text_Height_Ext(cgs.arenaData.longname, textScale, 0, button->font->font));
+	CG_Text_Paint_Ext(button->rect.x + (button->rect.w - w) * 0.5f, button->rect.y + (button->rect.h + h) * 0.5f,
+	                  textScale, textScale, button->font->colour, cgs.arenaData.longname, 0, 0, 0, button->font->font);
 }
 
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button)
@@ -583,8 +518,8 @@ qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key)
 
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize, float backheight)
 {
-	vec4_t colourFadedBlack = { 0.f, 0.f, 0.f, 0.4f };
-	const auto textWidth = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
+	vec4_t     colourFadedBlack = { 0.f, 0.f, 0.f, 0.4f };
+	const auto textWidth        = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
 
 	if (px + 30 + textWidth > 440)
 	{
