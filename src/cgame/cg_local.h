@@ -1252,7 +1252,7 @@ typedef struct
 	// ETJump: hold last jump position for chs
 	vec3_t etjLastJumpPos;
 
-	int pronePressTime;		// No prone print delay: when client last pressed prone
+	int pronePressTime;     // No prone print delay: when client last pressed prone
 
 	bool requiresEntityTypeAdjustment; // ETJump 2.3.0 specific hack
 
@@ -2775,13 +2775,13 @@ int CG_DrawStrlen(const char *str);
 
 namespace ETJump
 {
-	int DrawStringWidth(const char* text, float scalex);
-	int DrawStringHeight(const char* text, float scalex);
-	void DrawString(float x, float y, float scalex, float scaley, const vec4_t color, qboolean forceColor, const char *text, int limit, int style);
-	void DrawMiniString(int x, int y, const char *s, float alpha);
-	void DrawSmallString(int x, int y, const char *s, float alpha);
-	void DrawBigString(int x, int y, const char *s, float alpha);
-	void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor = nullptr, const vec4_t shadowColor = nullptr);
+int DrawStringWidth(const char *text, float scalex);
+int DrawStringHeight(const char *text, float scalex);
+void DrawString(float x, float y, float scalex, float scaley, const vec4_t color, qboolean forceColor, const char *text, int limit, int style);
+void DrawMiniString(int x, int y, const char *s, float alpha);
+void DrawSmallString(int x, int y, const char *s, float alpha);
+void DrawBigString(int x, int y, const char *s, float alpha);
+void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor = nullptr, const vec4_t shadowColor = nullptr);
 }
 
 
@@ -3069,7 +3069,7 @@ void    CG_AddLocalEntities(void);
 //
 // cg_effects.c
 //
-int CG_GetOriginForTag(centity_t * cent, refEntity_t * parent, const char *tagName, int startIndex, vec3_t org, vec3_t axis[3]);
+int CG_GetOriginForTag(centity_t *cent, refEntity_t *parent, const char *tagName, int startIndex, vec3_t org, vec3_t axis[3]);
 localEntity_t *CG_SmokePuff(const vec3_t p,
                             const vec3_t vel,
                             float radius,
@@ -3254,7 +3254,7 @@ void CG_FreecamGetPos_f(void);
 //
 void CG_ExecuteNewServerCommands(int latestSequence);
 void CG_ParseServerinfo(void);
-void CG_ParseSysteminfo( void );
+void CG_ParseSysteminfo(void);
 void CG_ParseWolfinfo(void);            // NERVE - SMF
 void CG_ParseSpawns(void);
 void CG_ParseServerVersionInfo(const char *pszVersionInfo);
@@ -3301,10 +3301,10 @@ int         trap_Milliseconds(void);
 int         trap_RealTime(qtime_t *qtime);
 
 // print message on the local console
-void trap_Print(const char* fmt);
+void trap_Print(const char *fmt);
 
 // abort the game
-void trap_Error(const char* fmt);
+void trap_Error(const char *fmt);
 
 // console variable interaction
 void        trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);
@@ -3946,7 +3946,6 @@ void CG_LoadPanel_Init();
 void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize, float backheight);
 void CG_LoadPanel_RenderCampaignPins(panel_button_t *button);
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button);
-void CG_LoadPanel_RenderCampaignTypeText(panel_button_t *button);
 void CG_LoadPanel_RenderCampaignNameText(panel_button_t *button);
 void CG_LoadPanel_RenderPercentageMeter(panel_button_t *button);
 void CG_LoadPanel_RenderContinueButton(panel_button_t *button);
@@ -4008,44 +4007,45 @@ void ETJump_EnableWidthScale(bool enable);
 
 namespace ETJump
 {
-	class ClientCommandsHandler;
-	class EntityEventsHandler;
-	class IRenderable;
-	class CvarUpdateHandler;
-	class AutoDemoRecorder;
-	class EventLoop;
-	class PlayerEventsHandler;
-	class PmoveUtils;
-	class CvarShadow;
+class ClientCommandsHandler;
+class EntityEventsHandler;
+class IRenderable;
+class CvarUpdateHandler;
+class AutoDemoRecorder;
+class EventLoop;
+class PlayerEventsHandler;
+class PmoveUtils;
+class CvarShadow;
 
-	extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
-	extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
-	extern std::shared_ptr<EntityEventsHandler> entityEventsHandler;
-	extern std::shared_ptr<AwaitedCommandHandler> awaitedCommandHandler;
-	extern std::vector<std::shared_ptr<IRenderable>> renderables;
-	extern std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-	extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
-	extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
-	extern std::shared_ptr<EventLoop> eventLoop;
-	extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
-	void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
-	void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
-	bool hideMeCheck(int entityNum);
-	int checkExtraTrace(int value);
-	void onPlayerRespawn(qboolean revived);
-	void runFrameEnd();
-	playerState_t *getValidPlayerState();
+extern std::shared_ptr<ClientCommandsHandler>     serverCommandsHandler;
+extern std::shared_ptr<ClientCommandsHandler>     consoleCommandsHandler;
+extern std::shared_ptr<EntityEventsHandler>       entityEventsHandler;
+extern std::shared_ptr<AwaitedCommandHandler>     awaitedCommandHandler;
+extern std::vector<std::shared_ptr<IRenderable> > renderables;
+extern std::shared_ptr<CvarUpdateHandler>         cvarUpdateHandler;
+extern std::vector<std::shared_ptr<CvarShadow> >  cvarShadows;
+extern std::shared_ptr<AutoDemoRecorder>          autoDemoRecorder;
+extern std::shared_ptr<EventLoop>                 eventLoop;
+extern std::shared_ptr<PlayerEventsHandler>       playerEventsHandler;
+void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume, int soundTime);
+void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
+bool hideMeCheck(int entityNum);
+int checkExtraTrace(int value);
+void onPlayerRespawn(qboolean revived);
+void runFrameEnd();
+playerState_t *getValidPlayerState();
 
-	enum extraTraceOptions {
-		OB_DETECTOR,
-		SLICK_DETECTOR,
-		NJD_DETECTOR,
-		CHS_10_11,
-		CHS_12,
-		CHS_13_15,
-		CHS_16,
-		CHS_53,
-	};
+enum extraTraceOptions
+{
+	OB_DETECTOR,
+	SLICK_DETECTOR,
+	NJD_DETECTOR,
+	CHS_10_11,
+	CHS_12,
+	CHS_13_15,
+	CHS_16,
+	CHS_53,
+};
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
