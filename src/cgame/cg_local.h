@@ -2457,6 +2457,8 @@ extern vmCvar_t etj_viewPlayerPortals;         //Enable/Disable viewing other pl
 //TODO: May add cvars to allow players to override portal colors
 //		when etj_viewPlayerPortals is set to 0 (disabled)
 
+extern vmCvar_t etj_expandedMapAlpha;
+
 extern vmCvar_t etj_chatPosX;
 extern vmCvar_t etj_chatPosY;
 extern vmCvar_t etj_chatBackgroundAlpha;
