@@ -1,0 +1,31 @@
+// ETJump settings menu definitions
+
+// Main settings window
+#define WINDOW_X 16
+#define WINDOW_Y 16
+#define WINDOW_WIDTH 608
+#define WINDOW_HEIGHT 448
+
+// Subwindows
+#define SUBW_RECT_LEFT_X 8
+#define SUBW_RECT_RIGHT_X 308
+#define SUBW_Y 32
+#define SUBW_HEADER_HEIGHT 16
+#define SUBW_SPACING_Y 4
+#define SUBW_WIDTH 292
+#define SUBW_ITEM_WIDTH 276
+#define SUBW_ITEM_HEIGHT 8
+#define SUBW_EDITFIELD_HEIGHT 10
+#define SUBW_EDITFIELD_MAXCHARS 128
+#define SUBW_EDITFIELD_MAXPAINTCHARS 32
+#define SUBW_ITEM_SPACING_Y 12
+#define SUBW_ITEM_LEFT_X SUBW_RECT_LEFT_X + 8
+#define SUBW_ITEM_RIGHT_X SUBW_RECT_RIGHT_X + 8
+
+// Buttons
+#define ETJ_BUTTON_X 8
+#define ETJ_BUTTON_Y 424
+#define ETJ_BUTTON_WIDTH 92
+#define ETJ_BUTTON_SPACING_X 100
+#define ETJ_BUTTON_HEIGHT 18
+#define ETJ_BUTTON_ITEM_HEIGHT 14

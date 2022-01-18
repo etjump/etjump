@@ -1,17 +1,35 @@
 #include "ui/menudef.h"
-#define WINDOW_X 16
-#define WINDOW_Y 16
-#define WINDOW_WIDTH 608
-#define WINDOW_HEIGHT 448
-#define SUBW_GENERAL_Y 32
-#define SUBW_PLAYERS_Y 286
-#define SUBW_CHAT_Y 32
-#define SUBW_CONSOLE_Y 212
-#define SUBW_SOUNDS_Y 284
-#define SUBW_SCOREBOARD_Y 356
-#define GROUP_NAME "group_etjump_settings_1"
+#include "ui/menudef_ext.h"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
+
+// Left side menus
+#define SUBW_GENERAL_Y SUBW_Y
+#define SUBW_GENERAL_ITEM_Y SUBW_GENERAL_Y + SUBW_HEADER_HEIGHT
+#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 18)
+
+#define SUBW_PLAYERS_Y SUBW_GENERAL_Y + SUBW_GENERAL_HEIGHT + SUBW_SPACING_Y
+#define SUBW_PLAYERS_ITEM_Y SUBW_PLAYERS_Y + SUBW_HEADER_HEIGHT
+#define SUBW_PLAYERS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 6)
+
+// Right side menus
+#define SUBW_CHAT_Y SUBW_Y
+#define SUBW_CHAT_ITEM_Y SUBW_CHAT_Y + SUBW_HEADER_HEIGHT
+#define SUBW_CHAT_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 11)
+
+#define SUBW_CONSOLE_Y SUBW_CHAT_Y + SUBW_CHAT_HEIGHT + SUBW_SPACING_Y
+#define SUBW_CONSOLE_ITEM_Y SUBW_CONSOLE_Y + SUBW_HEADER_HEIGHT
+#define SUBW_CONSOLE_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 2)
+
+#define SUBW_SOUNDS_Y SUBW_CONSOLE_Y + SUBW_CONSOLE_HEIGHT + SUBW_SPACING_Y
+#define SUBW_SOUNDS_ITEM_Y SUBW_SOUNDS_Y + SUBW_HEADER_HEIGHT
+#define SUBW_SOUNDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 2)
+
+#define SUBW_SCOREBOARD_Y SUBW_SOUNDS_Y + SUBW_SOUNDS_HEIGHT + SUBW_SPACING_Y
+#define SUBW_SCOREBOARD_ITEM_Y SUBW_SCOREBOARD_Y + SUBW_HEADER_HEIGHT
+#define SUBW_SCOREBOARD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 1)
+
+#define GROUP_NAME "group_etjump_settings_1"
 
 menuDef {
     name "etjump_settings_1"
@@ -25,81 +43,81 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 250, "GENERAL")
-        YESNO				(16, SUBW_GENERAL_Y + 20, 276, 8, "pmove_fixed:", 0.2, 8, "pmove_fixed", "Enable fixed 125 FPS player movement\npmove_fixed")
-        MULTI				(16, SUBW_GENERAL_Y + 32, 276, 8, "Max FPS:", 0.2, 8, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 "250" 250 "333" 333 }, "Sets the FPS limit\ncom_maxfps")
-        MULTI				(16, SUBW_GENERAL_Y + 44, 276, 8, "Memory limit:", 0.2, 8, "com_hunkmegs", cvarFloatList { "56MB" 56 "64MB" 64 "128MB" 128 "256MB" 256 "512MB" 512 }, "How much memory ET can use (restart required)\ncom_hunkmegs")
-        MULTI				(16, SUBW_GENERAL_Y + 56, 276, 8, "Rendering primitives:", 0.2, 8, "r_primitives", cvarFloatList { "Auto" 0 "1" 1 "2" 2 }, "Sets rendering primitives mode\nr_primitives")
-        YESNO				(16, SUBW_GENERAL_Y + 68, 276, 8, "No fatigue:", 0.2, 8, "etj_nofatigue", "Enable unlimited sprint\netj_nofatigue")
-        YESNO				(16, SUBW_GENERAL_Y + 80, 276, 8, "Load view angles:", 0.2, 8, "etj_loadviewangles", "Load view angles when loading position\netj_loadviewangles")
-        YESNO				(16, SUBW_GENERAL_Y + 92, 276, 8, "Auto load:", 0.2, 8, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
-        YESNO				(16, SUBW_GENERAL_Y + 104, 276, 8, "Real FOV:", 0.2, 8, "etj_realFov", "Take aspect ratio into account when calculating FOV\netj_realFov")
-        YESNO				(16, SUBW_GENERAL_Y + 116, 276, 8, "No +activate lean:", 0.2, 8, "etj_noActivateLean", "Disable leaning when +activate is held\netj_noActivateLean")
-        MULTI				(16, SUBW_GENERAL_Y + 128, 276, 8, "Quick follow:", 0.2, 8, "etj_quickFollow", cvarFloatList { "No" 0 "Yes" 1 "Yes + draw hint" 2 }, "Spectate other players by aiming and pressing +activate\netj_quickFollow")
-        CVARFLOATLABEL		(16, SUBW_GENERAL_Y + 140, 276, 8, "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_GENERAL_Y + 140, 276, 8, "Noclip scale:", 0.2, 8, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
-        MULTI				(16, SUBW_GENERAL_Y + 152, 276, 8, "Auto weapon pickup:", 0.2, 8, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "All" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
-        MULTI				(16, SUBW_GENERAL_Y + 164, 276, 8, "Draw player portals:", 0.2, 8, "etj_viewPlayerPortals", cvarFloatList { "No" 0 "Yes" 1 "Only when spectating" 2 }, "Draw other players' portals\netj_viewPlayerPortals")
-        MULTI				(16, SUBW_GENERAL_Y + 176, 276, 8, "Explosion shake:", 0.2, 8, "etj_explosivesShake", cvarFloatList { "No" 0 "From others" 1 "From own" 2 "Yes" 3 }, "Shake screen from explosions\netj_explosivesShake")
-        YESNO				(16, SUBW_GENERAL_Y + 188, 276, 8, "Item pickup text:", 0.2, 8, "etj_itemPickupText", "Notify on item pickups\netj_itemPickupText")
-        YESNO				(16, SUBW_GENERAL_Y + 200, 276, 8, "Draw tokens:", 0.2, 8, "etj_drawTokens", "Draw collectible tokens\netj_drawTokens")
-        YESNO				(16, SUBW_GENERAL_Y + 212, 276, 8, "Log banners:", 0.2, 8, "etj_logBanner", "Log banners in console\netj_logBanner")
-        EDITFIELD           (16, SUBW_GENERAL_Y + 224, 276, 10, "Save message:", 0.2, 8, "etj_saveMsg", 128, 32, "Message to print when saving position\netj_saveMsg")
-        CVARFLOATLABEL		(16, SUBW_GENERAL_Y + 236, 276, 8, "etj_expandedMapAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_GENERAL_Y + 236, 276, 8, "Expanded map alpha:", 0.2, 8, etj_expandedMapAlpha 0.7 0 1 0.05, "Sets transparency of expanded map\netj_expandedMapAlpha")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_GENERAL_Y, SUBW_WIDTH, SUBW_GENERAL_HEIGHT, "GENERAL")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "pmove_fixed:", 0.2, SUBW_ITEM_HEIGHT, "pmove_fixed", "Enable fixed 125 FPS player movement\npmove_fixed")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Max FPS:", 0.2, SUBW_ITEM_HEIGHT, "com_maxfps", cvarFloatList { "43" 43 "76" 76 "125" 125 "250" 250 "333" 333 }, "Sets the FPS limit\ncom_maxfps")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Memory limit:", 0.2, SUBW_ITEM_HEIGHT, "com_hunkmegs", cvarFloatList { "56MB" 56 "64MB" 64 "128MB" 128 "256MB" 256 "512MB" 512 }, "How much memory ET can use (restart required)\ncom_hunkmegs")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Rendering primitives:", 0.2, SUBW_ITEM_HEIGHT, "r_primitives", cvarFloatList { "Auto" 0 "1" 1 "2" 2 }, "Sets rendering primitives mode\nr_primitives")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "No fatigue:", 0.2, SUBW_ITEM_HEIGHT, "etj_nofatigue", "Enable unlimited sprint\netj_nofatigue")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Load view angles:", 0.2, SUBW_ITEM_HEIGHT, "etj_loadviewangles", "Load view angles when loading position\netj_loadviewangles")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Auto load:", 0.2, SUBW_ITEM_HEIGHT, "etj_autoLoad", "Automatically load to latest saved position when joining team\netj_autoLoad")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Real FOV:", 0.2, SUBW_ITEM_HEIGHT, "etj_realFov", "Take aspect ratio into account when calculating FOV\netj_realFov")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "No +activate lean:", 0.2, SUBW_ITEM_HEIGHT, "etj_noActivateLean", "Disable leaning when +activate is held\netj_noActivateLean")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Quick follow:", 0.2, SUBW_ITEM_HEIGHT, "etj_quickFollow", cvarFloatList { "No" 0 "Yes" 1 "Yes + draw hint" 2 }, "Spectate other players by aiming and pressing +activate\netj_quickFollow")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_noclipScale", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Noclip scale:", 0.2, SUBW_ITEM_HEIGHT, etj_noclipScale 1 0 10 0.2, "Scales the speed of noclip\netj_noclipScale")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Auto weapon pickup:", 0.2, SUBW_ITEM_HEIGHT, "etj_touchPickupWeapons", cvarFloatList { "No" 0 "Own + Spawned" 1 "All" 2 }, "Automatically pickup weapons when touching them\netj_touchPickupWeapons")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw player portals:", 0.2, SUBW_ITEM_HEIGHT, "etj_viewPlayerPortals", cvarFloatList { "No" 0 "Yes" 1 "Only when spectating" 2 }, "Draw other players' portals\netj_viewPlayerPortals")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Explosion shake:", 0.2, SUBW_ITEM_HEIGHT, "etj_explosivesShake", cvarFloatList { "No" 0 "From others" 1 "From own" 2 "Yes" 3 }, "Shake screen from explosions\netj_explosivesShake")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Item pickup text:", 0.2, SUBW_ITEM_HEIGHT, "etj_itemPickupText", "Notify on item pickups\netj_itemPickupText")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 15), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw tokens:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawTokens", "Draw collectible tokens\netj_drawTokens")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 16), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Log banners:", 0.2, SUBW_ITEM_HEIGHT, "etj_logBanner", "Log banners in console\netj_logBanner")
+        EDITFIELD           (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 17), SUBW_ITEM_WIDTH, SUBW_EDITFIELD_HEIGHT, "Save message:", 0.2, SUBW_ITEM_HEIGHT, "etj_saveMsg", SUBW_EDITFIELD_MAXCHARS, SUBW_EDITFIELD_MAXPAINTCHARS, "Message to print when saving position\netj_saveMsg")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 18), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_expandedMapAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 18), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Expanded map alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_expandedMapAlpha 0.7 0 1 0.05, "Sets transparency of expanded map\netj_expandedMapAlpha")
 
-    SUBWINDOW(8, 286, 292, 112, "PLAYERS")
-        YESNO				(16, SUBW_PLAYERS_Y + 20, 276, 8, "Hide players:", 0.2, 8, "etj_hide", "Hides other players when they are too close\netj_hide")
-        CVARINTLABEL		(16, SUBW_PLAYERS_Y + 32, 276, 8, "etj_hideDistance", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_PLAYERS_Y + 32, 276, 8, "Hide distance:", 0.2, 8, etj_hideDistance 128 0 1000 10, "Distance at which other players are hidden\netj_hideDistance")
-        CVARINTLABEL		(16, SUBW_PLAYERS_Y + 44, 276, 8, "etj_hideFadeRange", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_PLAYERS_Y + 44, 276, 8, "Hide fade range:", 0.2, 8, etj_hideFadeRange 200 0 1000 20, "Additional fade range before other players are hidden\netj_hideFadeRange")
-        YESNO				(16, SUBW_PLAYERS_Y + 56, 276, 8, "Hide self:", 0.2, 8, "etj_hideMe", "Hide yourself from other players\netj_hideMe")
-        CVARFLOATLABEL		(16, SUBW_PLAYERS_Y + 68, 276, 8, "etj_playerOpacity", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_PLAYERS_Y + 68, 276, 8, "Player opacity:", 0.2, 8, etj_playerOpacity 1 0 1 0.05, "Sets transparency of other players\netj_playerOpacity")
-        YESNO				(16, SUBW_PLAYERS_Y + 80, 276, 8, "Simple player shader:", 0.2, 8, "etj_drawSimplePlayers", "Draw other players as solid color\netj_drawSimplePlayers")
-        MULTI				(16, SUBW_PLAYERS_Y + 92, 276, 8, "Player shader color:", 0.2, 8, "etj_simplePlayersColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of simple player shader\netj_simplePlayersColor")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_PLAYERS_Y, SUBW_WIDTH, SUBW_PLAYERS_HEIGHT, "PLAYERS")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide players:", 0.2, SUBW_ITEM_HEIGHT, "etj_hide", "Hides other players when they are too close\netj_hide")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_hideDistance", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide distance:", 0.2, SUBW_ITEM_HEIGHT, etj_hideDistance 128 0 1000 10, "Distance at which other players are hidden\netj_hideDistance")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_hideFadeRange", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide fade range:", 0.2, SUBW_ITEM_HEIGHT, etj_hideFadeRange 200 0 1000 20, "Additional fade range before other players are hidden\netj_hideFadeRange")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide self:", 0.2, SUBW_ITEM_HEIGHT, "etj_hideMe", "Hide yourself from other players\netj_hideMe")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_playerOpacity", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player opacity:", 0.2, SUBW_ITEM_HEIGHT, etj_playerOpacity 1 0 1 0.05, "Sets transparency of other players\netj_playerOpacity")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Simple player shader:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSimplePlayers", "Draw other players as solid color\netj_drawSimplePlayers")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player shader color:", 0.2, SUBW_ITEM_HEIGHT, "etj_simplePlayersColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of simple player shader\netj_simplePlayersColor")
 
-    SUBWINDOW(308, 32, 292, 172, "CHAT")
-        CVARFLOATLABEL		(316, SUBW_CHAT_Y + 20, 276, 8, "etj_chatAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CHAT_Y + 20, 276, 8, "Chat alpha:", 0.2, 8, etj_chatAlpha 1 0 1 0.05, "Sets transparency of chat\netj_chatAlpha")
-        CVARFLOATLABEL		(316, SUBW_CHAT_Y + 32, 276, 8, "etj_chatBackgroundAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CHAT_Y + 32, 276, 8, "Chat background alpha:", 0.2, 8, etj_chatBackgroundAlpha 0.33 0 1 0.05, "Sets transparency of chat background\netj_chatBackgroundAlpha")
-        CVARINTLABEL		(316, SUBW_CHAT_Y + 44, 276, 8, "etj_chatPosX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CHAT_Y + 44, 276, 8, "Chat X position:", 0.2, 8, etj_chatPosX 0 -640 640 10, "Sets X offset of chat\netj_chatPosX")
-        CVARINTLABEL		(316, SUBW_CHAT_Y + 56, 276, 8, "etj_chatPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CHAT_Y + 56, 276, 8, "Chat Y position:", 0.2, 8, etj_chatPosY 0 -480 480 10, "Sets Y offset of chat\netj_chatPosY")
-        YESNO				(316, SUBW_CHAT_Y + 68, 276, 8, "Chat shadow:", 0.2, 8, "etj_chatShadow", "Draw shadow on chat messages\netj_chatShadow")
-        YESNO				(316, SUBW_CHAT_Y + 80, 276, 8, "Chat flags:", 0.2, 8, "etj_chatFlags", "Display team flag next to chat messages\netj_chatFlags")
-        MULTI				(316, SUBW_CHAT_Y + 92, 276, 8, "Chat timestamps:", 0.2, 8, "etj_drawMessageTime", cvarFloatList { "No" 0 "hh:mm" 1 "hh:mm:ss" 2 }, "Draw timestamp next to chat messages\netj_drawMessageTime")
-        CVARFLOATLABEL		(316, SUBW_CHAT_Y + 104, 276, 8, "etj_chatScale", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CHAT_Y + 104, 276, 8, "Chat scale:", 0.2, 8, etj_chatScale 1 0.1 5 0.1, "Sets chat size scale\netj_chatScale")
-        CVARINTLABEL		(316, SUBW_CHAT_Y + 116, 276, 8, "etj_chatLineWidth", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CHAT_Y + 116, 276, 8, "Chat line width:", 0.2, 8, etj_chatLineWidth 62 15 100 1, "Amount of characters on one line before chat wraps to new line\netj_chatLineWidth")
-        YESNO				(316, SUBW_CHAT_Y + 128, 276, 8, "Chat highlight:", 0.2, 8, "etj_highlight", "Highlight chat messages if you are mentioned\netj_highlight")
-        EDITFIELD			(316, SUBW_CHAT_Y + 140, 276, 10, "Highlight text:", 0.2, 8, "etj_highlightText", 128, 32, "Prefix of chat message where you are highlighted\netj_highlightText")
-        EDITFIELD			(316, SUBW_CHAT_Y + 152, 276, 10, "Highlight sound:", 0.2, 8, "etj_highlightSound", 128, 32, "Sound to play when you are highlighted in chat\netj_highlightSound")
-        
-    SUBWINDOW(308, 212, 292, 64, "CONSOLE")
-        CVARFLOATLABEL		(316, SUBW_CONSOLE_Y + 20, 276, 8, "etj_consoleAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CONSOLE_Y + 20, 276, 8, "Console alpha:", 0.2, 8, etj_consoleAlpha 1 0 1 0.05, "Sets transparency of console (vid_restart required)\netj_consoleAlpha")
-        YESNO				(316, SUBW_CONSOLE_Y + 32, 276, 8, "Console shader:", 0.2, 8, "etj_consoleShader", "Draw console background shader (vid_restart required)\netj_consoleShader")
-        MULTI				(316, SUBW_CONSOLE_Y + 44, 276, 8, "Console color:", 0.2, 8, "etj_consoleColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets console color when console shader is disabled (vid_restart required)\netj_consoleColor")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CHAT_Y, SUBW_WIDTH, SUBW_CHAT_HEIGHT, "CHAT")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_chatAlpha 1 0 1 0.05, "Sets transparency of chat\netj_chatAlpha")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatBackgroundAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat background alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_chatBackgroundAlpha 0.33 0 1 0.05, "Sets transparency of chat background\netj_chatBackgroundAlpha")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatPosX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat X position:", 0.2, SUBW_ITEM_HEIGHT, etj_chatPosX 0 -640 640 10, "Sets X offset of chat\netj_chatPosX")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatPosY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat Y position:", 0.2, SUBW_ITEM_HEIGHT, etj_chatPosY 0 -480 480 10, "Sets Y offset of chat\netj_chatPosY")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_chatShadow", "Draw shadow on chat messages\netj_chatShadow")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat flags:", 0.2, SUBW_ITEM_HEIGHT, "etj_chatFlags", "Display team flag next to chat messages\netj_chatFlags")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat timestamps:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawMessageTime", cvarFloatList { "No" 0 "hh:mm" 1 "hh:mm:ss" 2 }, "Draw timestamp next to chat messages\netj_drawMessageTime")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatScale", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat scale:", 0.2, SUBW_ITEM_HEIGHT, etj_chatScale 1 0.1 5 0.1, "Sets chat size scale\netj_chatScale")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatLineWidth", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat line width:", 0.2, SUBW_ITEM_HEIGHT, etj_chatLineWidth 62 15 100 1, "Amount of characters on one line before chat wraps to new line\netj_chatLineWidth")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Chat highlight:", 0.2, SUBW_ITEM_HEIGHT, "etj_highlight", "Highlight chat messages if you are mentioned\netj_highlight")
+        EDITFIELD           (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_EDITFIELD_HEIGHT, "Highlight text:", 0.2, SUBW_ITEM_HEIGHT, "etj_highlightText", SUBW_EDITFIELD_MAXCHARS, SUBW_EDITFIELD_MAXPAINTCHARS, "Prefix of chat message where you are highlighted\netj_highlightText")
+        EDITFIELD           (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_EDITFIELD_HEIGHT, "Highlight sound:", 0.2, SUBW_ITEM_HEIGHT, "etj_highlightSound", SUBW_EDITFIELD_MAXCHARS, SUBW_EDITFIELD_MAXPAINTCHARS, "Sound to play when you are highlighted in chat\netj_highlightSound")
 
-    SUBWINDOW(308, 284, 292, 64, "SOUNDS")
-        CVARFLOATLABEL		(316, SUBW_SOUNDS_Y + 20, 276, 8, "etj_weaponVolume", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER      		(316, SUBW_SOUNDS_Y + 20, 276, 8, "Weapon sound volume:", 0.2, 8, etj_weaponVolume 1 0 5 0.1, "Scale weapon sound volume\netj_weaponVolume")
-        YESNO				(316, SUBW_SOUNDS_Y + 32, 276, 8, "Looped sounds:", 0.2, 8, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
-        YESNO				(316, SUBW_SOUNDS_Y + 44, 276, 8, "Uphill step sounds:", 0.2, 8, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CONSOLE_Y, SUBW_WIDTH, SUBW_CONSOLE_HEIGHT, "CONSOLE")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CONSOLE_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_consoleAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CONSOLE_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Console alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_consoleAlpha 1 0 1 0.05, "Sets transparency of console (vid_restart required)\netj_consoleAlpha")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CONSOLE_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Console shader:", 0.2, SUBW_ITEM_HEIGHT, "etj_consoleShader", "Draw console background shader (vid_restart required)\netj_consoleShader")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CONSOLE_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Console color:", 0.2, SUBW_ITEM_HEIGHT, "etj_consoleColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets console color when console shader is disabled (vid_restart required)\netj_consoleColor")
 
-    SUBWINDOW(308, 356, 292, 52, "SCOREBOARD")
-        MULTI				(316, SUBW_SCOREBOARD_Y + 20, 276, 8, "Custom scoreboard:", 0.2, 8, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
-        YESNO				(316, SUBW_SCOREBOARD_Y + 32, 276, 8, "Draw idle indicator:", 0.2, 8, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_SOUNDS_Y, SUBW_WIDTH, SUBW_SOUNDS_HEIGHT, "SOUNDS")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_weaponVolume", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Weapon sound volume:", 0.2, SUBW_ITEM_HEIGHT, etj_weaponVolume 1 0 5 0.1, "Scale weapon sound volume\netj_weaponVolume")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Looped sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Uphill step sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
 
-        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_1; open etjump)
-        BUTTONACTIVE		(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_1; open etjump_settings_1)
-        BUTTON				(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_1; open etjump_settings_2)
-        BUTTON				(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_1; open etjump_settings_3)
-        BUTTON				(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_1; open etjump_settings_4)
-        BUTTON      		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_1; open etjump_settings_5)
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_SCOREBOARD_Y, SUBW_WIDTH, SUBW_SCOREBOARD_HEIGHT, "SCOREBOARD")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Custom scoreboard:", 0.2, SUBW_ITEM_HEIGHT, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw idle indicator:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
+
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump)
+        BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_1)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 2), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 2", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_2)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 3), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 3", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_3)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 4), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 4", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_4)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 5), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 5", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_5)
 }

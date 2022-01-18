@@ -1,16 +1,31 @@
 #include "ui/menudef.h"
-#define WINDOW_X 16
-#define WINDOW_Y 16
-#define WINDOW_WIDTH 608
-#define WINDOW_HEIGHT 448
-#define SUBW_HUD_Y 32
-#define SUBW_GUN_Y 232
-#define SUBW_KEYS_Y 324
-#define SUBW_CGAZ_Y 32
-#define SUBW_POPUPS_Y 208
-#define GROUP_NAME "group_etjump_settings_2"
+#include "ui/menudef_ext.h"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
+
+// Left side menus
+#define SUBW_HUD_Y SUBW_Y
+#define SUBW_HUD_ITEM_Y SUBW_HUD_Y + SUBW_HEADER_HEIGHT
+#define SUBW_HUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 13)
+
+#define SUBW_GUN_Y SUBW_HUD_Y + SUBW_HUD_HEIGHT + SUBW_SPACING_Y
+#define SUBW_GUN_ITEM_Y SUBW_GUN_Y + SUBW_HEADER_HEIGHT
+#define SUBW_GUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 4)
+
+#define SUBW_KEYS_Y SUBW_GUN_Y + SUBW_GUN_HEIGHT + SUBW_SPACING_Y
+#define SUBW_KEYS_ITEM_Y SUBW_KEYS_Y + SUBW_HEADER_HEIGHT
+#define SUBW_KEYS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 5)
+
+// Right side menus
+#define SUBW_CGAZ_Y SUBW_Y
+#define SUBW_CGAZ_ITEM_Y SUBW_CGAZ_Y + SUBW_HEADER_HEIGHT
+#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 11)
+
+#define SUBW_POPUPS_Y SUBW_CGAZ_Y + SUBW_CGAZ_HEIGHT + SUBW_SPACING_Y
+#define SUBW_POPUPS_ITEM_Y SUBW_POPUPS_Y + SUBW_HEADER_HEIGHT
+#define SUBW_POPUPS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 9)
+
+#define GROUP_NAME "group_etjump_settings_2"
 
 menuDef {
     name "etjump_settings_2"
@@ -24,85 +39,85 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 190, "HUD")
-        YESNO				(16, SUBW_HUD_Y + 20, 276, 8, "FPS:", 0.2, 8, "cg_drawFPS", "Draw FPS\ncg_drawFPS")
-        MULTI				(16, SUBW_HUD_Y + 32, 276, 8, "Clock:", 0.2, 8, "etj_drawClock", cvarFloatList { "No" 0 "24h" 1 "12h" 2 }, "Draw local clock\netj_drawClock")
-        YESNO				(16, SUBW_HUD_Y + 44, 276, 8, "Connection issues:", 0.2, 8, "etj_drawConnectionIssues", "Draw connection interrupted message with high ping\netj_drawConnectionIssues")
-        YESNO				(16, SUBW_HUD_Y + 56, 276, 8, "Charge bar:", 0.2, 8, "etj_HUD_chargeBar", "Draw charge bar on HUD\netj_HUD_chargeBar")
-        YESNO				(16, SUBW_HUD_Y + 68, 276, 8, "Fatigue bar:", 0.2, 8, "etj_HUD_fatigueBar", "Draw fatigue bar on HUD\netj_HUD_fatigueBar")
-        YESNO				(16, SUBW_HUD_Y + 80, 276, 8, "Health bar:", 0.2, 8, "etj_HUD_healthBar", "Draw health bar on HUD\netj_HUD_healthBar")
-        YESNO				(16, SUBW_HUD_Y + 92, 276, 8, "Player head:", 0.2, 8, "etj_HUD_playerHead", "Draw player head on HUD\netj_HUD_playerHead")
-        YESNO				(16, SUBW_HUD_Y + 104, 276, 8, "Health:", 0.2, 8, "etj_HUD_playerHealth", "Draw health on HUD\netj_HUD_playerHealth")
-        YESNO				(16, SUBW_HUD_Y + 116, 276, 8, "Weapon icon:", 0.2, 8, "etj_HUD_weaponIcon", "Draw weapon icon on HUD\netj_HUD_weaponIcon")
-        YESNO				(16, SUBW_HUD_Y + 128, 276, 8, "XP Info:", 0.2, 8, "etj_HUD_xpInfo", "Draw XP info on HUD\netj_HUD_xpInfo")
-        YESNO				(16, SUBW_HUD_Y + 140, 276, 8, "Lagometer:", 0.2, 8, "cg_lagometer", "Draw lagometer on HUD\ncg_lagometer")
-        CVARINTLABEL		(16, SUBW_HUD_Y + 152, 276, 8, "etj_lagometerX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_HUD_Y + 152, 276, 8, "Lagometer X:", 0.2, 8, etj_lagometerX 0 -640 640 10, "Sets X offset for lagometer\netj_lagometerX")
-        CVARINTLABEL		(16, SUBW_HUD_Y + 164, 276, 8, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_HUD_Y + 164, 276, 8, "Lagometer Y:", 0.2, 8, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
-        MULTI				(16, SUBW_HUD_Y + 176, 276, 8, "Projection:", 0.2, 8, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_HUD_Y, SUBW_WIDTH, SUBW_HUD_HEIGHT, "HUD")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "FPS:", 0.2, SUBW_ITEM_HEIGHT, "cg_drawFPS", "Draw FPS\ncg_drawFPS")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Clock:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawClock", cvarFloatList { "No" 0 "24h" 1 "12h" 2 }, "Draw local clock\netj_drawClock")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Connection issues:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawConnectionIssues", "Draw connection interrupted message with high ping\netj_drawConnectionIssues")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Charge bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_chargeBar", "Draw charge bar on HUD\netj_HUD_chargeBar")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fatigue bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_fatigueBar", "Draw fatigue bar on HUD\netj_HUD_fatigueBar")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Health bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_healthBar", "Draw health bar on HUD\netj_HUD_healthBar")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player head:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_playerHead", "Draw player head on HUD\netj_HUD_playerHead")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Health:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_playerHealth", "Draw health on HUD\netj_HUD_playerHealth")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Weapon icon:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_weaponIcon", "Draw weapon icon on HUD\netj_HUD_weaponIcon")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "XP Info:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_xpInfo", "Draw XP info on HUD\netj_HUD_xpInfo")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer:", 0.2, SUBW_ITEM_HEIGHT, "cg_lagometer", "Draw lagometer on HUD\ncg_lagometer")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer X:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerX 0 -640 640 10, "Sets X offset for lagometer\netj_lagometerX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer Y:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Projection:", 0.2, SUBW_ITEM_HEIGHT, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
 
-    SUBWINDOW(8, 232, 292, 82, "GUN")
-        YESNO				(16, SUBW_GUN_Y + 20, 276, 8, "Gun:", 0.2, 8, "cg_drawGun", "Draw gun\ncg_drawGun")
-        CVARFLOATLABEL		(16, SUBW_GUN_Y + 32, 276, 8, "cg_gunX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_GUN_Y + 32, 276, 8, "Gun X:", 0.2, 8, cg_gunX 0 -30 30 0.5, "Sets X position of gun\ncg_gunx")
-        CVARFLOATLABEL		(16, SUBW_GUN_Y + 44, 276, 8, "cg_gunY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_GUN_Y + 44, 276, 8, "Gun Y:", 0.2, 8, cg_gunY 0 -30 30 0.5, "Sets Y position of gun\ncg_guny")
-        CVARFLOATLABEL		(16, SUBW_GUN_Y + 56, 276, 8, "cg_gunZ", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_GUN_Y + 56, 276, 8, "Gun Z:", 0.2, 8, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
-        YESNO				(16, SUBW_GUN_Y + 68, 276, 8, "Gun sway:", 0.2, 8, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_GUN_Y, SUBW_WIDTH, SUBW_GUN_HEIGHT, "GUN")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun:", 0.2, SUBW_ITEM_HEIGHT, "cg_drawGun", "Draw gun\ncg_drawGun")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "cg_gunX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun X:", 0.2, SUBW_ITEM_HEIGHT, cg_gunX 0 -30 30 0.5, "Sets X position of gun\ncg_gunx")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "cg_gunY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun Y:", 0.2, SUBW_ITEM_HEIGHT, cg_gunY 0 -30 30 0.5, "Sets Y position of gun\ncg_guny")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "cg_gunZ", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun Z:", 0.2, SUBW_ITEM_HEIGHT, cg_gunZ 0 -30 30 0.5, "Sets Z position of gun\ncg_gunz")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun sway:", 0.2, SUBW_ITEM_HEIGHT, "etj_gunSway", "Enable gun sway/bobbing\netj_gunSway")
 
-    SUBWINDOW(8, 324, 292, 94, "KEYS")
-        MULTI				(16, SUBW_KEYS_Y + 20, 276, 8, "Pressed keys:", 0.2, 8, "etj_drawKeys", cvarFloatList { "No" 0 "ETJump 1" 1 "DeFRaG default" 2 "ETJump 2" 3 "ETJump 3" 4 "ETJump 4" 5 }, "Draw pressed keys\netj_drawKeys")
-        CVARINTLABEL		(16, SUBW_KEYS_Y + 32, 276, 8, "etj_keysX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_KEYS_Y + 32, 276, 8, "Keys X:", 0.2, 8, etj_keysX 610 0 640 10, "Sets X position of pressed keys\netj_keysX")
-        CVARINTLABEL		(16, SUBW_KEYS_Y + 44, 276, 8, "etj_keysY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_KEYS_Y + 44, 276, 8, "Keys Y:", 0.2, 8, etj_keysY 220 0 480 10, "Sets Y position of pressed keys\netj_keysY")
-        CVARINTLABEL		(16, SUBW_KEYS_Y + 56, 276, 8, "etj_keysSize", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_KEYS_Y + 56, 276, 8, "Keys size:", 0.2, 8, etj_keysSize 48 1 100 1, "Sets size of pressed keys\netj_keysSize")
-        MULTI				(16, SUBW_KEYS_Y + 68, 276, 8, "Keys color:", 0.2, 8, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of pressed keys\netj_keysColor")
-        YESNO				(16, SUBW_KEYS_Y + 80, 276, 8, "Keys shadow:", 0.2, 8, "etj_keysShadow", "Draw shadow on pressed keys\netj_keysShadow")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_KEYS_Y, SUBW_WIDTH, SUBW_KEYS_HEIGHT, "KEYS")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Pressed keys:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawKeys", cvarFloatList { "No" 0 "ETJump 1" 1 "DeFRaG default" 2 "ETJump 2" 3 "ETJump 3" 4 "ETJump 4" 5 }, "Draw pressed keys\netj_drawKeys")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_keysX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Keys X:", 0.2, SUBW_ITEM_HEIGHT, etj_keysX 610 0 640 10, "Sets X position of pressed keys\netj_keysX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_keysY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Keys Y:", 0.2, SUBW_ITEM_HEIGHT, etj_keysY 220 0 480 10, "Sets Y position of pressed keys\netj_keysY")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_keysSize", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Keys size:", 0.2, SUBW_ITEM_HEIGHT, etj_keysSize 48 1 100 1, "Sets size of pressed keys\netj_keysSize")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Keys color:", 0.2, SUBW_ITEM_HEIGHT, "etj_keysColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of pressed keys\netj_keysColor")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Keys shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_keysShadow", "Draw shadow on pressed keys\netj_keysShadow")
 
-    SUBWINDOW(308, 32, 292, 166, "CGAZ")
-        MULTI				(316, SUBW_CGAZ_Y + 20, 276, 8, "CGaz:", 0.2, 8, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 }, "Draw CGaz HUD\netj_drawCGaz")
-        MULTI				(316, SUBW_CGAZ_Y + 32, 276, 8, "CGaz 1 color 1:", 0.2, 8, "etj_CGaz1Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
-        MULTI				(316, SUBW_CGAZ_Y + 44, 276, 8, "CGaz 1 color 2:", 0.2, 8, "etj_CGaz1Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
-        MULTI				(316, SUBW_CGAZ_Y + 56, 276, 8, "CGaz 1 color 3:", 0.2, 8, "etj_CGaz1Color3", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets accel zone color of CGaz 1\netj_CGaz1Color3")
-        MULTI				(316, SUBW_CGAZ_Y + 68, 276, 8, "CGaz 1 color 4:", 0.2, 8, "etj_CGaz1Color4", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets max angle color of CGaz 1\netj_CGaz1Color4")
-        MULTI				(316, SUBW_CGAZ_Y + 80, 276, 8, "CGaz 2 color 1:", 0.2, 8, "etj_CGaz2Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of CGaz 2\netj_CGaz2Color1")
-        MULTI				(316, SUBW_CGAZ_Y + 92, 276, 8, "CGaz 2 color 2:", 0.2, 8, "etj_CGaz2Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of CGaz 2\netj_CGaz2Color2")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 104, 276, 8, "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 104, 276, 8, "CGaz height:", 0.2, 8, etj_CGazHeight 20 1 100 1, "Sets height of CGaz 1\netj_CGazHeight")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 116, 276, 8, "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 116, 276, 8, "CGaz Y position:", 0.2, 8, etj_CGazY 260 0 480 10, "Sets Y position of CGaz 1\netj_CGazY")
-        CVARINTLABEL		(316, SUBW_CGAZ_Y + 128, 276, 8, "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_CGAZ_Y + 128, 276, 8, "CGaz FOV:", 0.2, 8, etj_CGazFov 0 0 179 5, "Sets FOV of CGaz 1, 0 to use your current FOV\netj_CGazFov")
-        YESNO				(316, SUBW_CGAZ_Y + 140, 276, 8, "Stretch CGaz:", 0.2, 8, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
-        MULTI				(316, SUBW_CGAZ_Y + 152, 276, 8, "CGaz trueness:", 0.2, 8, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of CGaz\netj_CGazTrueness")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CGAZ_Y, SUBW_WIDTH, SUBW_CGAZ_HEIGHT, "CGAZ")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 }, "Draw CGaz HUD\netj_drawCGaz")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 1:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 3:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color3", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets accel zone color of CGaz 1\netj_CGaz1Color3")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 4:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color4", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets max angle color of CGaz 1\netj_CGaz1Color4")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 2 color 1:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz2Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of CGaz 2\netj_CGaz2Color1")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 2 color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz2Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of CGaz 2\netj_CGaz2Color2")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGazHeight", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz height:", 0.2, SUBW_ITEM_HEIGHT, etj_CGazHeight 20 1 100 1, "Sets height of CGaz 1\netj_CGazHeight")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGazY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz Y position:", 0.2, SUBW_ITEM_HEIGHT, etj_CGazY 260 0 480 10, "Sets Y position of CGaz 1\netj_CGazY")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz FOV:", 0.2, SUBW_ITEM_HEIGHT, etj_CGazFov 0 0 179 5, "Sets FOV of CGaz 1, 0 to use your current FOV\netj_CGazFov")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Stretch CGaz:", 0.2, SUBW_ITEM_HEIGHT, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz trueness:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of CGaz\netj_CGazTrueness")
 
-    SUBWINDOW(308, 208, 292, 140, "POPUPS")
-        MULTI				(316, SUBW_POPUPS_Y + 20, 276, 8, "Draw popups:", 0.2, 8, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
-        CVARINTLABEL		(316, SUBW_POPUPS_Y + 32, 276, 8, "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 32, 276, 8, "Number of popups:", 0.2, 8, etj_numPopups 5 1 16 1, "How many popup messages to display\netj_numPopups")
-        CVARFLOATLABEL		(316, SUBW_POPUPS_Y + 44, 276, 8, "etj_popupAlpha", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 44, 276, 8, "Popup alpha:", 0.2, 8, etj_popupAlpha 1 0 1 0.05, "Sets transparency of popup messages\netj_popupAlpha")
-        CVARINTLABEL		(316, SUBW_POPUPS_Y + 56, 276, 8, "etj_popupPosX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 56, 276, 8, "Popup X:", 0.2, 8, etj_popupPosX 0 -640 640 10, "Sets X offset for popup messages\netj_popupPosX")
-        CVARINTLABEL		(316, SUBW_POPUPS_Y + 68, 276, 8, "etj_popupPosY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 68, 276, 8, "Popup Y:", 0.2, 8, etj_popupPosY 0 -480 480 10, "Sets Y offset for popup messages\netj_popupPosY")
-        YESNO				(316, SUBW_POPUPS_Y + 80, 276, 8, "Popup shadow:", 0.2, 8, "etj_popupShadow", "Draw shadow on popup messages\netj_popupShadow")
-        CVARINTLABEL		(316, SUBW_POPUPS_Y + 92, 276, 8, "etj_popupTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 92, 276, 8, "Popup delay:", 0.2, 8, etj_popupTime 1000 0 5000 250, "Time in milliseconds before new popup message is drawn after previous one\netj_popupTime")
-        CVARINTLABEL		(316, SUBW_POPUPS_Y + 104, 276, 8, "etj_popupStayTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 104, 276, 8, "Popup stay time:", 0.2, 8, etj_popupStayTime 2000 0 30000 250, "How long in milliseconds popup messages stay on screen\netj_popupStayTime")
-        CVARINTLABEL		(316, SUBW_POPUPS_Y + 116, 276, 8, "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_POPUPS_Y + 116, 276, 8, "Popup fade time:", 0.2, 8, etj_popupFadeTime 2500 0 10000 250, "Duration of fade animation in milliseconds on popup messages\netj_popupFadeTime")
-        MULTI				(316, SUBW_POPUPS_Y + 128, 276, 8, "Group popups:", 0.2, 8, "etj_popupGrouped", cvarFloatList { "No" 0 "Popups" 1 "Popups + console" 2 }, "Group identical popups to one message\netj_popupGrouped")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_POPUPS_Y, SUBW_WIDTH, SUBW_POPUPS_HEIGHT, "POPUPS")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_numPopups", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Number of popups:", 0.2, SUBW_ITEM_HEIGHT, etj_numPopups 5 1 16 1, "How many popup messages to display\netj_numPopups")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup alpha:", 0.2, SUBW_ITEM_HEIGHT, etj_popupAlpha 1 0 1 0.05, "Sets transparency of popup messages\netj_popupAlpha")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupPosX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup X:", 0.2, SUBW_ITEM_HEIGHT, etj_popupPosX 0 -640 640 10, "Sets X offset for popup messages\netj_popupPosX")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupPosY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup Y:", 0.2, SUBW_ITEM_HEIGHT, etj_popupPosY 0 -480 480 10, "Sets Y offset for popup messages\netj_popupPosY")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_popupShadow", "Draw shadow on popup messages\netj_popupShadow")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupTime", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup delay:", 0.2, SUBW_ITEM_HEIGHT, etj_popupTime 1000 0 5000 250, "Time in milliseconds before new popup message is drawn after previous one\netj_popupTime")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupStayTime", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup stay time:", 0.2, SUBW_ITEM_HEIGHT, etj_popupStayTime 2000 0 30000 250, "How long in milliseconds popup messages stay on screen\netj_popupStayTime")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup fade time:", 0.2, SUBW_ITEM_HEIGHT, etj_popupFadeTime 2500 0 10000 250, "Duration of fade animation in milliseconds on popup messages\netj_popupFadeTime")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Group popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_popupGrouped", cvarFloatList { "No" 0 "Popups" 1 "Popups + console" 2 }, "Group identical popups to one message\netj_popupGrouped")
         
-        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_2; open etjump)
-        BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_2; open etjump_settings_1)
-        BUTTONACTIVE		(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_2; open etjump_settings_2)
-        BUTTON				(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_2; open etjump_settings_3)
-        BUTTON				(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_2; open etjump_settings_4)
-        BUTTON      		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_2; open etjump_settings_5)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_1)
+        BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 2), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 2", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_2)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 3), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 3", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_3)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 4), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 4", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_4)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 5), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 5", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_5)
 }
