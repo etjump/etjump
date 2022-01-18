@@ -1,15 +1,27 @@
 #include "ui/menudef.h"
-#define WINDOW_X 16
-#define WINDOW_Y 16
-#define WINDOW_WIDTH 608
-#define WINDOW_HEIGHT 448
-#define SUBW_SNAPHUD_Y 32
-#define SUBW_SPECTATOR_Y 184
-#define SUBW_JUMPSPEEDS_Y 252
-#define SUBW_STRAFEQUALITY_Y 32
-#define GROUP_NAME "group_etjump_settings_5"
+#include "ui/menudef_ext.h"
 #include "ui/menumacros.h"
 #include "ui/menumacros_ext.h"
+
+// Left side menus
+#define SUBW_SNAPHUD_Y SUBW_Y
+#define SUBW_SNAPHUD_ITEM_Y SUBW_SNAPHUD_Y + SUBW_HEADER_HEIGHT
+#define SUBW_SNAPHUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 9)
+
+#define SUBW_SPECTATOR_Y SUBW_SNAPHUD_Y + SUBW_SNAPHUD_HEIGHT + SUBW_SPACING_Y
+#define SUBW_SPECTATOR_ITEM_Y SUBW_SPECTATOR_Y + SUBW_HEADER_HEIGHT
+#define SUBW_SPECTATOR_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 2)
+
+#define SUBW_JUMPSPEEDS_Y SUBW_SPECTATOR_Y + SUBW_SPECTATOR_HEIGHT + SUBW_SPACING_Y
+#define SUBW_JUMPSPEEDS_ITEM_Y SUBW_JUMPSPEEDS_Y + SUBW_HEADER_HEIGHT
+#define SUBW_JUMPSPEEDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 8)
+
+// Right side menus
+#define SUBW_STRAFEQUALITY_Y SUBW_Y
+#define SUBW_STRAFEQUALITY_ITEM_Y SUBW_STRAFEQUALITY_Y + SUBW_HEADER_HEIGHT
+#define SUBW_STRAFEQUALITY_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 6)
+
+#define GROUP_NAME "group_etjump_settings_5"
 
 menuDef {
     name "etjump_settings_5"
@@ -23,56 +35,56 @@ menuDef {
 
     WINDOW("SETTINGS", 94)
 
-    SUBWINDOW(8, 32, 292, 148, "SNAPHUD")
-        YESNO				(16, SUBW_SNAPHUD_Y + 20, 276, 8, "Velocity Snapping HUD:", 0.2, 8, "etj_drawSnapHUD", "Draw velocity snapping HUD\netj_drawSnapHUD")
-        CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 32, 276, 8, "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_SNAPHUD_Y + 32, 276, 8, "Snaphud Y:", 0.2, 8, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
-        CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 44, 276, 8, "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_SNAPHUD_Y + 44, 276, 8, "Snaphud Height:", 0.2, 8, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
-        CVARINTLABEL		(16, SUBW_SNAPHUD_Y + 56, 276, 8, "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_SNAPHUD_Y + 56, 276, 8, "Snaphud FOV:", 0.2, 8, etj_snapHUDFov 0 0 179 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
-        YESNO				(16, SUBW_SNAPHUD_Y + 68, 276, 8, "Highlight active zone:", 0.2, 8, "etj_snapHUDHLActive", "Highlight active snaphud zone HUD\netj_snapHUDHLActive")
-        MULTI				(16, SUBW_SNAPHUD_Y + 80, 276, 8, "Snaphud trueness:", 0.2, 8, "etj_snapHUDTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of snaphud\netj_snapHUDTrueness")
-        MULTI				(16, SUBW_SNAPHUD_Y + 92, 276, 8, "Snaphud color 1:", 0.2, 8, "etj_snapHUDColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of snaphud\netj_snapHUDColor1")
-        MULTI				(16, SUBW_SNAPHUD_Y + 104, 276, 8, "Snaphud color 2:", 0.2, 8, "etj_snapHUDColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of snaphud\netj_snapHUDColor2")
-        MULTI				(16, SUBW_SNAPHUD_Y + 116, 276, 8, "Highlight color 1:", 0.2, 8, "etj_snapHUDHLColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active primary snapzone\netj_snapHUDHLColor1")
-        MULTI				(16, SUBW_SNAPHUD_Y + 128, 276, 8, "Highlight color 2:", 0.2, 8, "etj_snapHUDHLColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active secondary snapzone\netj_snapHUDHLColor2")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_SNAPHUD_Y, SUBW_WIDTH, SUBW_SNAPHUD_HEIGHT, "SNAPHUD")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Velocity Snapping HUD:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSnapHUD", "Draw velocity snapping HUD\netj_drawSnapHUD")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud Y:", 0.2, SUBW_ITEM_HEIGHT, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud Height:", 0.2, SUBW_ITEM_HEIGHT, etj_snapHUDHeight 10 1 100 1, "Sets the height of snaphud\netj_snapHUDHeight")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDFov", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud FOV:", 0.2, SUBW_ITEM_HEIGHT, etj_snapHUDFov 0 0 179 5, "Sets FOV of snaphud, 0 to use your current FOV\netj_snapHUDFov")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Highlight active zone:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDHLActive", "Highlight active snaphud zone HUD\netj_snapHUDHLActive")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud trueness:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of snaphud\netj_snapHUDTrueness")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud color 1:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets primary color of snaphud\netj_snapHUDColor1")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of snaphud\netj_snapHUDColor2")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Highlight color 1:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDHLColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active primary snapzone\netj_snapHUDHLColor1")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Highlight color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDHLColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active secondary snapzone\netj_snapHUDHLColor2")
 
-    SUBWINDOW(8, 184, 292, 64, "SPECTATOR")
-        YESNO				(16, SUBW_SPECTATOR_Y + 20, 276, 8, "Spectator list:", 0.2, 8, "etj_drawSpectatorInfo", "Draw a list of people spectating you\netj_drawSpectatorInfo")
-        CVARINTLABEL		(16, SUBW_SPECTATOR_Y + 32, 276, 8, "etj_spectatorInfoX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_SPECTATOR_Y + 32, 276, 8, "Spec list X:", 0.2, 8, etj_spectatorInfoX 320 0 640 10, "Sets X position of spectator list\netj_spectatorInfoX")
-        CVARINTLABEL		(16, SUBW_SPECTATOR_Y + 44, 276, 8, "etj_spectatorInfoY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_SPECTATOR_Y + 44, 276, 8, "Spec list Y:", 0.2, 8, etj_spectatorInfoY 40 0 480 10, "Sets Y position of spectator list\netj_spectatorInfoY")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_SPECTATOR_Y, SUBW_WIDTH, SUBW_SPECTATOR_HEIGHT, "SPECTATOR")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_SPECTATOR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Spectator list:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSpectatorInfo", "Draw a list of people spectating you\netj_drawSpectatorInfo")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SPECTATOR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_spectatorInfoX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SPECTATOR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Spec list X:", 0.2, SUBW_ITEM_HEIGHT, etj_spectatorInfoX 320 0 640 10, "Sets X position of spectator list\netj_spectatorInfoX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SPECTATOR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_spectatorInfoY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SPECTATOR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Spec list Y:", 0.2, SUBW_ITEM_HEIGHT, etj_spectatorInfoY 40 0 480 10, "Sets Y position of spectator list\netj_spectatorInfoY")
 
-    SUBWINDOW(8, 252, 292, 136, "JUMP SPEEDS")
-        YESNO				(16, SUBW_JUMPSPEEDS_Y + 20, 276, 8, "Jump speeds:", 0.2, 8, "etj_drawJumpSpeeds", "Draw jump speed list\netj_drawJumpSpeeds")
-        CVARINTLABEL		(16, SUBW_JUMPSPEEDS_Y + 32, 276, 8, "etj_jumpSpeedsX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_JUMPSPEEDS_Y + 32, 276, 8, "Jump speeds X:", 0.2, 8, etj_jumpSpeedsX 0 -6 634 10, "Sets X offset of jump speed list\netj_jumpSpeedsX")
-        CVARINTLABEL		(16, SUBW_JUMPSPEEDS_Y + 44, 276, 8, "etj_jumpSpeedsY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(16, SUBW_JUMPSPEEDS_Y + 44, 276, 8, "Jump speeds Y:", 0.2, 8, etj_jumpSpeedsY 0 -240 240 10, "Sets Y offset of jump speed list\netj_jumpSpeedsY")   
-        MULTI				(16, SUBW_JUMPSPEEDS_Y + 56, 276, 8, "Jump speeds color:", 0.2, 8, "etj_jumpSpeedsColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of jump speed list\netj_jumpSpeedsColor")
-        YESNO				(16, SUBW_JUMPSPEEDS_Y + 68, 276, 8, "Jump speeds shadow:", 0.2, 8, "etj_jumpSpeedsShadow", "Draw shadow on jump speed list\netj_jumpSpeedsShadow")
-        MULTI				(16, SUBW_JUMPSPEEDS_Y + 80, 276, 8, "List style:", 0.2, 8, "etj_jumpSpeedsStyle", cvarFloatList { "Vertical" 0 "Horizontal" 1 }, "Jump speed history style\netj_jumpSpeedsStyle")
-        YESNO				(16, SUBW_JUMPSPEEDS_Y + 92, 276, 8, "Show difference:", 0.2, 8, "etj_jumpSpeedsShowDiff", "Colorize speed if it's faster/slower than previous\netj_jumpSpeedsShowDiff")
-        MULTI				(16, SUBW_JUMPSPEEDS_Y + 104, 276, 8, "Faster color:", 0.2, 8, "etj_jumpSpeedsFasterColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of faster jumps\netj_jumpSpeedsFasterColor")
-        MULTI				(16, SUBW_JUMPSPEEDS_Y + 116, 276, 8, "Slower color:", 0.2, 8, "etj_jumpSpeedsSlowerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_JUMPSPEEDS_Y, SUBW_WIDTH, SUBW_JUMPSPEEDS_HEIGHT, "JUMP SPEEDS")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Jump speeds:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawJumpSpeeds", "Draw jump speed list\netj_drawJumpSpeeds")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Jump speeds X:", 0.2, SUBW_ITEM_HEIGHT, etj_jumpSpeedsX 0 -6 634 10, "Sets X offset of jump speed list\netj_jumpSpeedsX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Jump speeds Y:", 0.2, SUBW_ITEM_HEIGHT, etj_jumpSpeedsY 0 -240 240 10, "Sets Y offset of jump speed list\netj_jumpSpeedsY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Jump speeds color:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of jump speed list\netj_jumpSpeedsColor")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Jump speeds shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsShadow", "Draw shadow on jump speed list\netj_jumpSpeedsShadow")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "List style:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsStyle", cvarFloatList { "Vertical" 0 "Horizontal" 1 }, "Jump speed history style\netj_jumpSpeedsStyle")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Show difference:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsShowDiff", "Colorize speed if it's faster/slower than previous\netj_jumpSpeedsShowDiff")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Faster color:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsFasterColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of faster jumps\netj_jumpSpeedsFasterColor")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Slower color:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsSlowerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
 
-    SUBWINDOW(308, 32, 292, 112, "STRAFE QUALITY")
-        YESNO				(316, SUBW_STRAFEQUALITY_Y + 20, 276, 8, "Strafe quality:", 0.2, 8, "etj_drawStrafeQuality", "Draw strafe quality\netj_drawStrafeQuality")
-        CVARINTLABEL		(316, SUBW_STRAFEQUALITY_Y + 32, 276, 8, "etj_strafeQualityX", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_STRAFEQUALITY_Y + 32, 276, 8, "Strafe quality X:", 0.2, 8, etj_strafeQualityX 0 -100 540 5, "Sets X offset of strafe quality\netj_strafeQualityX")
-        CVARINTLABEL		(316, SUBW_STRAFEQUALITY_Y + 44, 276, 8, "etj_strafeQualityY", 0.2, ITEM_ALIGN_RIGHT, 276, 8)
-        SLIDER				(316, SUBW_STRAFEQUALITY_Y + 44, 276, 8, "Strafe quality Y:", 0.2, 8, etj_strafeQualityY 0 -100 380 5, "Sets Y offset of strafe quality\netj_strafeQualityY")
-        MULTI				(316, SUBW_STRAFEQUALITY_Y + 56, 276, 8, "Strafe quality color:", 0.2, 8, "etj_strafeQualityColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of strafe quality\netj_strafeQualityColor")
-        YESNO				(316, SUBW_STRAFEQUALITY_Y + 68, 276, 8, "Strafe quality shadow:", 0.2, 8, "etj_strafeQualityShadow", "Draw shadow on strafe quality\netj_strafeQualityShadow")
-        MULTI				(316, SUBW_STRAFEQUALITY_Y + 80, 276, 8, "Strafe quality size:", 0.2, 8, "etj_strafeQualitySize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of strafe quality\netj_strafeQualitySize")
-        MULTI				(316, SUBW_STRAFEQUALITY_Y + 92, 276, 8, "Strafe quality style:", 0.2, 8, "etj_strafeQualityStyle", cvarFloatList { "Full" 0 "Percent" 1 "Number" 2 }, "Strafe quality style\netj_strafeQualityStyle")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_STRAFEQUALITY_Y, SUBW_WIDTH, SUBW_STRAFEQUALITY_HEIGHT, "STRAFE QUALITY")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawStrafeQuality", "Draw strafe quality\netj_drawStrafeQuality")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_strafeQualityX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality X:", 0.2, SUBW_ITEM_HEIGHT, etj_strafeQualityX 0 -100 540 5, "Sets X offset of strafe quality\netj_strafeQualityX")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_strafeQualityY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality Y:", 0.2, SUBW_ITEM_HEIGHT, etj_strafeQualityY 0 -100 380 5, "Sets Y offset of strafe quality\netj_strafeQualityY")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality color:", 0.2, SUBW_ITEM_HEIGHT, "etj_strafeQualityColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of strafe quality\netj_strafeQualityColor")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_strafeQualityShadow", "Draw shadow on strafe quality\netj_strafeQualityShadow")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality size:", 0.2, SUBW_ITEM_HEIGHT, "etj_strafeQualitySize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of strafe quality\netj_strafeQualitySize")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality style:", 0.2, SUBW_ITEM_HEIGHT, "etj_strafeQualityStyle", cvarFloatList { "Full" 0 "Percent" 1 "Number" 2 }, "Strafe quality style\netj_strafeQualityStyle")
 
-        BUTTON				(8, 424, 92, 18, "BACK", 0.3, 14, close etjump_settings_5; open etjump)
-        BUTTON				(108, 424, 92, 18, "TAB 1", 0.3, 14, close etjump_settings_5; open etjump_settings_1)
-        BUTTON				(208, 424, 92, 18, "TAB 2", 0.3, 14, close etjump_settings_5; open etjump_settings_2)
-        BUTTON				(308, 424, 92, 18, "TAB 3", 0.3, 14, close etjump_settings_5; open etjump_settings_3)
-        BUTTON      		(408, 424, 92, 18, "TAB 4", 0.3, 14, close etjump_settings_5; open etjump_settings_4)
-        BUTTONACTIVE		(508, 424, 92, 18, "TAB 5", 0.3, 14, close etjump_settings_5; open etjump_settings_5)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_1)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 2), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 2", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_2)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 3), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 3", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_3)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 4), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 4", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_4)
+        BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 5), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 5", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_5)
 }
