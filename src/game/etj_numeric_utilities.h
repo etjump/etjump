@@ -26,17 +26,9 @@
 
 namespace Numeric
 {
-    template <typename T>
-    T clamp(T value, double min, double max)
+    template <typename T, typename U, typename V>
+    inline T clamp(const T &value, const U &min, const V &max) noexcept
     {
-        if (value < min)
-        {
-            value = min;
-        }
-        else if (value > max)
-        {
-            value = max;
-        }
-        return value;
+        return (std::isfinite(value) ? std::min(std::max(value, static_cast<T>(min)), static_cast<T>(max)) : 0);
     }
 }
