@@ -5087,7 +5087,7 @@ typedef struct
 	void (*function)(gentity_t *ent);
 } command_t;
 
-static command_t anyTimeCommands[] =
+static const command_t anyTimeCommands[] =
 {
 	{ "score",     qfalse, Cmd_Score_f                         },
 	{ "vote",      qtrue,  Cmd_Vote_f                          },
@@ -5107,7 +5107,7 @@ static command_t anyTimeCommands[] =
 	{ "nocall",    qfalse, Cmd_noCall_f                        },
 };
 
-static command_t noIntermissionCommands[] =
+static const command_t noIntermissionCommands[] =
 {
 	{ "class",           qfalse, Cmd_Class_f           },
 	{ "give",            qfalse, Cmd_Give_f            },
