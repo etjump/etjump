@@ -1,11 +1,34 @@
 #include "ui/menudef.h"
-#define WINDOW_X 16
-#define WINDOW_Y 16
-#define WINDOW_WIDTH 210
-#define WINDOW_HEIGHT 142
-#define SUBW_CONTROLS_Y 32
-#define GROUP_NAME "groupETJumpControls"
+#include "ui/menudef_ext.h"
 #include "ui/menumacros.h"
+
+// Left side menus
+#define SUBW_POSITION_Y SUBW_Y
+#define SUBW_POSITION_ITEM_Y SUBW_POSITION_Y + SUBW_HEADER_HEIGHT
+#define SUBW_POSITION_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 10)
+
+#define SUBW_MOVEMENT_Y SUBW_POSITION_Y + SUBW_POSITION_HEIGHT + SUBW_SPACING_Y
+#define SUBW_MOVEMENT_ITEM_Y SUBW_MOVEMENT_Y + SUBW_HEADER_HEIGHT
+#define SUBW_MOVEMENT_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
+
+#define SUBW_TEAM_Y SUBW_MOVEMENT_Y + SUBW_MOVEMENT_HEIGHT + SUBW_SPACING_Y
+#define SUBW_TEAM_ITEM_Y SUBW_TEAM_Y + SUBW_HEADER_HEIGHT
+#define SUBW_TEAM_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 2)
+
+#define SUBW_PORTALGUN_Y SUBW_TEAM_Y + SUBW_TEAM_HEIGHT + SUBW_SPACING_Y
+#define SUBW_PORTALGUN_ITEM_Y SUBW_PORTALGUN_Y + SUBW_HEADER_HEIGHT
+#define SUBW_PORTALGUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 1)
+
+#define SUBW_OBWATCHER_Y SUBW_PORTALGUN_Y + SUBW_PORTALGUN_HEIGHT + SUBW_SPACING_Y
+#define SUBW_OBWATCHER_ITEM_Y SUBW_OBWATCHER_Y + SUBW_HEADER_HEIGHT
+#define SUBW_OBWATCHER_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 1)
+
+// Right side menus
+#define SUBW_MISC_Y SUBW_Y
+#define SUBW_MISC_ITEM_Y SUBW_MISC_Y + SUBW_HEADER_HEIGHT
+#define SUBW_MISC_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 4)
+
+#define GROUP_NAME "groupETJumpControls"
 
 menuDef {
     name "etjump_controls"
@@ -19,12 +42,46 @@ menuDef {
 
     WINDOW("CONTROLS", 94)
 
-    SUBWINDOW(8, SUBW_CONTROLS_Y, 194, 78, "BINDS")
-        BIND(8, SUBW_CONTROLS_Y + 16, 190, 10, "Save:", .2, 8, save, "To save your position.")
-        BIND(8, SUBW_CONTROLS_Y + 28, 190, 10, "Load:", .2, 8, load, "To load your position.")
-        BIND(8, SUBW_CONTROLS_Y + 40, 190, 10, "No goto:", .2, 8, nogoto, "To enable/disable goto.")
-        BIND(8, SUBW_CONTROLS_Y + 52, 190, 10, "No call:", .2, 8, nocall, "To enable/disable call.")
-        BIND(8, SUBW_CONTROLS_Y + 64, 190, 10, "Second portal:", .2, 8, "+attack2", "")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_POSITION_Y, SUBW_WIDTH, SUBW_POSITION_HEIGHT, "POSITION")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save:", .2, SUBW_ITEM_HEIGHT, "save", "Saves your position to slot 0\nsave")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load:", .2, SUBW_ITEM_HEIGHT, "load", "Loads your position from slot 0\nload")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Backup:", .2, SUBW_ITEM_HEIGHT, "backup", "Loads your saved position before your current saved position\nbackup")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save 1:", .2, SUBW_ITEM_HEIGHT, "save 1", "Saves your position to slot 1\nsave 1")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save 2:", .2, SUBW_ITEM_HEIGHT, "save 2", "Saves your position to slot 2\nsave 2")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load 1:", .2, SUBW_ITEM_HEIGHT, "load 1", "Loads your position from slot 1\nload 1")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load 2:", .2, SUBW_ITEM_HEIGHT, "load 2", "Loads your position from slot 2\nload 2")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Backup 2:", .2, SUBW_ITEM_HEIGHT, "backup 2", "Loads your saved position 2 positions before your current saved position\nbackup 2")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Backup 3:", .2, SUBW_ITEM_HEIGHT, "backup 3", "Loads your saved position 3 positions before your current saved position\nbackup 3")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Unload:", .2, SUBW_ITEM_HEIGHT, "unload", "Undo last load command and teleport to latest position you loaded from\nunload")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Clear saves:", .2, SUBW_ITEM_HEIGHT, "clearsaves", "Clears your saved positions on all slots on both teams\nclearsaves")
 
-    BUTTON(8, 116, WINDOW_WIDTH - 16, 18, "BACK", .3, 14, close etjump_controls; open etjump)
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_MOVEMENT_Y, SUBW_WIDTH, SUBW_MOVEMENT_HEIGHT, "MOVEMENT")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Noclip:", .2, SUBW_ITEM_HEIGHT, "noclip", "Toggles noclip\nnoclip")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Mouse strafing:", .2, SUBW_ITEM_HEIGHT, "+strafe", "Enables mouse strafing to perform overbounces\n+strafe")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "m_side", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Sideways sensitivity:", 0.2, SUBW_ITEM_HEIGHT, m_side 0.25 0 1 0.01, "Sideways sensitivity while mouse strafing\nm_side")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "m_forward", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Forward sensitivity:", 0.2, SUBW_ITEM_HEIGHT, m_forward 0.25 0 1 0.01, "Forward/backwards sensitivity while mouse strafing\nm_forward")
+
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_TEAM_Y, SUBW_WIDTH, SUBW_TEAM_HEIGHT, "TEAM")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_TEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Join Allies:", .2, SUBW_ITEM_HEIGHT, "team b 1", "Join Allies as Medic\nteam b 1")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_TEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Join Axis:", .2, SUBW_ITEM_HEIGHT, "team r 1", "Join Axis as Medic\nteam r 1")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_TEAM_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Join Spectators:", .2, SUBW_ITEM_HEIGHT, "team s", "Join Spectators\nteam s")
+
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_PORTALGUN_Y, SUBW_WIDTH, SUBW_PORTALGUN_HEIGHT, "PORTALGUN")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_PORTALGUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Portal Gun:", .2, SUBW_ITEM_HEIGHT, "weaponbank 9", "Switch to portal gun\nweaponbank 9")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_PORTALGUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Second portal:", .2, SUBW_ITEM_HEIGHT, "+attack2", "Fire a second portal\n+attack2")
+
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_OBWATCHER_Y, SUBW_WIDTH, SUBW_OBWATCHER_HEIGHT, "OB WATCHER")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save OB position:", .2, SUBW_ITEM_HEIGHT, "ob_save", "Saves your current position as coordinates for OB watcher\nob_save")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Reset OB position:", .2, SUBW_ITEM_HEIGHT, "ob_reset", "Reset currently saved OB watcher position\nob_reset")
+
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_MISC_Y, SUBW_WIDTH,  SUBW_MISC_HEIGHT, "MISC")
+        BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Self-kill:", .2, SUBW_ITEM_HEIGHT, "kill", "Perform a self-kill to respawn\nkill")
+        BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Minimize game:", .2, SUBW_ITEM_HEIGHT, "minimize", "Minimizes the game (Windows only)\nminimize")
+        BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Interrupt timerun:", .2, SUBW_ITEM_HEIGHT, "interruptrun", "Stops current timerun without setting a record\ninterruptRun")
+        BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "No call:", .2, SUBW_ITEM_HEIGHT, "nocall", "Toggle allowing other players to target you with call\nnocall")
+        BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "No goto:", .2, SUBW_ITEM_HEIGHT, "nogoto", "Toggle allowing other players to target you with goto\nnogoto")
+
+        BUTTON              (ETJ_BUTTON_X, ETJ_BUTTON_Y, WINDOW_WIDTH - 16, ETJ_BUTTON_HEIGHT, "BACK", .3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_controls; open etjump)
 }
