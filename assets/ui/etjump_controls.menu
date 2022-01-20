@@ -5,7 +5,7 @@
 // Left side menus
 #define SUBW_POSITION_Y SUBW_Y
 #define SUBW_POSITION_ITEM_Y SUBW_POSITION_Y + SUBW_HEADER_HEIGHT
-#define SUBW_POSITION_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 4)
+#define SUBW_POSITION_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 10)
 
 #define SUBW_MOVEMENT_Y SUBW_POSITION_Y + SUBW_POSITION_HEIGHT + SUBW_SPACING_Y
 #define SUBW_MOVEMENT_ITEM_Y SUBW_MOVEMENT_Y + SUBW_HEADER_HEIGHT
@@ -46,8 +46,14 @@ menuDef {
         BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save:", .2, SUBW_ITEM_HEIGHT, "save", "Saves your position to slot 0\nsave")
         BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load:", .2, SUBW_ITEM_HEIGHT, "load", "Loads your position from slot 0\nload")
         BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Backup:", .2, SUBW_ITEM_HEIGHT, "backup", "Loads your saved position before your current saved position\nbackup")
-        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Unload:", .2, SUBW_ITEM_HEIGHT, "unload", "Undo last load command and teleport to latest position you loaded from\nunload")
-        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Clear saves:", .2, SUBW_ITEM_HEIGHT, "clearsaves", "Clears your saved positions on all slots on both teams\nclearsaves")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save 1:", .2, SUBW_ITEM_HEIGHT, "save 1", "Saves your position to slot 1\nsave 1")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save 2:", .2, SUBW_ITEM_HEIGHT, "save 2", "Saves your position to slot 2\nsave 2")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load 1:", .2, SUBW_ITEM_HEIGHT, "load 1", "Loads your position from slot 1\nload 1")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load 2:", .2, SUBW_ITEM_HEIGHT, "load 2", "Loads your position from slot 2\nload 2")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Backup 2:", .2, SUBW_ITEM_HEIGHT, "backup 2", "Loads your saved position 2 positions before your current saved position\nbackup 2")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Backup 3:", .2, SUBW_ITEM_HEIGHT, "backup 3", "Loads your saved position 3 positions before your current saved position\nbackup 3")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Unload:", .2, SUBW_ITEM_HEIGHT, "unload", "Undo last load command and teleport to latest position you loaded from\nunload")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_POSITION_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Clear saves:", .2, SUBW_ITEM_HEIGHT, "clearsaves", "Clears your saved positions on all slots on both teams\nclearsaves")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_MOVEMENT_Y, SUBW_WIDTH, SUBW_MOVEMENT_HEIGHT, "MOVEMENT")
         BIND                (SUBW_ITEM_LEFT_X, SUBW_MOVEMENT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Noclip:", .2, SUBW_ITEM_HEIGHT, "noclip", "Toggles noclip\nnoclip")

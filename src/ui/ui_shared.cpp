@@ -5429,11 +5429,17 @@ static bind_t g_bindings[] =
 
     // ETJump controls menu commands
 	{ "save",             -1,              -1,  -1,              -1 },
+    { "save 1",           -1,              -1,  -1,              -1 },
+    { "save 2",           -1,              -1,  -1,              -1 },
 	{ "load",             -1,              -1,  -1,              -1 },
+    { "load 1",           -1,              -1,  -1,              -1 },
+    { "load 2",           -1,              -1,  -1,              -1 },
 	{ "nocall",           -1,              -1,  -1,              -1 },
 	{ "nogoto",           -1,              -1,  -1,              -1 },
 	{ "+attack2",         -1,              -1,  -1,              -1 },
     { "backup",           -1,              -1,  -1,              -1 },
+    { "backup 2",         -1,              -1,  -1,              -1 },
+    { "backup 3",         -1,              -1,  -1,              -1 },
     { "unload",           -1,              -1,  -1,              -1 },
     { "clearsaves",       -1,              -1,  -1,              -1 },
     { "ob_save",          -1,              -1,  -1,              -1 },
