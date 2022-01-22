@@ -18,7 +18,7 @@ function(get_platform_suffix var_name)
 
 	# generator specified architecture
 	if(MSVC AND CMAKE_GENERATOR_PLATFORM)
-		if("${CMAKE_GENERATOR_PLATFORM}" MATCHES "(Win32)")
+		if("${CMAKE_GENERATOR_PLATFORM}" MATCHES "(Win32|win32)$")
 			set(CMAKE_SYSTEM_PROCESSOR X86)
 		else()
 			set(CMAKE_SYSTEM_PROCESSOR AMD64)
