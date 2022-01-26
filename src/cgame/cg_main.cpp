@@ -628,7 +628,7 @@ cvarTable_t cvarTable[] =
 	{ &cg_autoactivate,             "cg_autoactivate",             "1",                      CVAR_ARCHIVE             },
 	{ &cg_swingSpeed,               "cg_swingSpeed",               "0.1",                    CVAR_CHEAT               }, // was 0.3 for Q3
 	{ &cg_bloodTime,                "cg_bloodTime",                "120",                    CVAR_ARCHIVE             },
-	{ &cg_skybox,                   "cg_skybox",                   "1",                      CVAR_CHEAT               },
+	{ &cg_skybox,                   "cg_skybox",                   "1",                      CVAR_ARCHIVE             },
 	{ &cg_message,                  "cg_message",                  "1",                      CVAR_TEMP                },
 	{ &cg_messageType,              "cg_messageType",              "1",                      CVAR_TEMP                },
 	{ &cg_messagePlayer,            "cg_messagePlayer",            "",                       CVAR_TEMP                },
