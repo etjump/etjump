@@ -1071,7 +1071,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv)
 		}
 
 		buffer += green ? "^g" : "^7";
-		buffer += ETJump::stringFormat("%-22s %-30s %-17s     %s\n", map->name, playedTimeFmtString(map->secondsPlayed), Utilities::timestampToString(map->lastPlayed), map->timesPlayed);
+		buffer += ETJump::stringFormat("%-22s %-30s %-17s     %d\n", map->name, playedTimeFmtString(map->secondsPlayed), Utilities::timestampToString(map->lastPlayed), map->timesPlayed);
 		green   = !green;
 
 		++listedMaps;
@@ -1355,7 +1355,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv)
 		}
 
 		buffer += green ? "^g" : "^7";
-		buffer += ETJump::stringFormat("%-22s %-30s %-17s     %s\n", map->name, playedTimeFmtString(map->secondsPlayed), Utilities::timestampToString(map->lastPlayed), map->timesPlayed);
+		buffer += ETJump::stringFormat("%-22s %-30s %-17s     %d\n", map->name, playedTimeFmtString(map->secondsPlayed), Utilities::timestampToString(map->lastPlayed), map->timesPlayed);
 		green   = !green;
 
 		++listedMaps;
