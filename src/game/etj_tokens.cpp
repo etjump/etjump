@@ -296,13 +296,13 @@ bool Tokens::loadTokens(const std::string& filepath)
 
 
 bool allTokensCollected(gentity_t *ent);
-static void entThink(gentity_t *ent)
+static void entThink(gentity_t *self)
 {
 	vec3_t mins = { 0, 0, 0 };
 	vec3_t maxs = { 0, 0, 0 };
 	vec3_t range = { 16, 16, 16 };
-	VectorSubtract(ent->r.currentOrigin, range, mins);
-	VectorAdd(ent->r.currentOrigin, range, maxs);
+	VectorSubtract(self->r.currentOrigin, range, mins);
+	VectorAdd(self->r.currentOrigin, range, maxs);
 
 	int entityList[MAX_GENTITIES];
 	auto count = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
@@ -317,19 +317,19 @@ static void entThink(gentity_t *ent)
 
 		const char *difficulty = NULL;
 		qboolean *collected = NULL;
-		switch (ent->tokenInformation->difficulty)
+		switch (self->tokenInformation->difficulty)
 		{
 		case Tokens::Difficulty::Easy:
 			difficulty = "^2easy";
-			collected	= &ent->client->pers.collectedEasyTokens[ent->tokenInformation->idx];
+			collected	= &ent->client->pers.collectedEasyTokens[self->tokenInformation->idx];
 			break;
 		case Tokens::Difficulty::Medium:
 			difficulty = "^3medium";
-			collected	= &ent->client->pers.collectedMediumTokens[ent->tokenInformation->idx];
+			collected	= &ent->client->pers.collectedMediumTokens[self->tokenInformation->idx];
 			break;
 		case Tokens::Difficulty::Hard:
 			difficulty = "^1hard";
-			collected	= &ent->client->pers.collectedHardTokens[ent->tokenInformation->idx];
+			collected	= &ent->client->pers.collectedHardTokens[self->tokenInformation->idx];
 			break;
 		default:
 			G_Error("Visited unknown difficulty.");
@@ -341,7 +341,7 @@ static void entThink(gentity_t *ent)
 		}
 
 		*collected = qtrue;
-		C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, ent->tokenInformation->idx + 1));
+		C_CPMTo(ent, va("^7You collected %s ^7token ^5#%d", difficulty, self->tokenInformation->idx + 1));
 
 		if (allTokensCollected(ent))
 		{
@@ -356,7 +356,7 @@ static void entThink(gentity_t *ent)
 		}
 	}
 
-	ent->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + FRAMETIME;
 }
 
 
