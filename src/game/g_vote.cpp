@@ -313,7 +313,7 @@ namespace ETJump
 
 		if (matchedMaps.size() > 1 && resultedMap.empty())
 		{
-			resultedMap = stringFormat("^3callvote: ^7found ^3%s ^7maps matching ^3%s^7.\n", matchedMaps.size(), voteArg);
+			resultedMap = stringFormat("^3callvote: ^7found ^3%zu ^7maps matching ^3%s^7.\n", matchedMaps.size(), voteArg);
 			auto perRow = 3;
 			auto mapsOnCurrentRow = 0;
 			for (auto& map : matchedMaps)
