@@ -129,6 +129,7 @@ static int weapIconDrawSize(int weap)
 	case WP_K43_SCOPE:
 	case WP_MORTAR:
 	case WP_MORTAR_SET:
+	case WP_PORTAL_GUN:
 		return 2;
 	}
 

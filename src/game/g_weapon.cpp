@@ -4003,9 +4003,11 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	}
 
 
-	//DEBUG - RailTrail...
-	//tent = G_TempEntity( muzzleTrace, EV_RAILTRAIL );
-	tent = G_TempEntity(start, EV_RAILTRAIL);
+	// Railtrail
+	// close enough for the barrel on most cases, realistically we should
+	// grab the starting point from the weapon tags
+	// TODO: make the trail correspond to the color of the portal being fired
+	tent = G_TempEntity( muzzleEffect, EV_RAILTRAIL );
 
 	SnapVectorTowards(tr.endpos, start);
 	VectorCopy(tr.endpos, tent->s.origin2);
@@ -4755,6 +4757,10 @@ void CalcMuzzlePoint(gentity_t *ent, int weapon, vec3_t forward, vec3_t right, v
 	case WP_AKIMBO_LUGER:
 	case WP_AKIMBO_SILENCEDLUGER:
 		VectorMA(muzzlePoint, -6, right, muzzlePoint);
+		VectorMA(muzzlePoint, -4, up, muzzlePoint);
+		break;
+	case WP_PORTAL_GUN:
+		VectorMA(muzzlePoint, 2, right, muzzlePoint);
 		VectorMA(muzzlePoint, -4, up, muzzlePoint);
 		break;
 	default:
