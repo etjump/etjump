@@ -557,16 +557,19 @@ int Text_Height(const char *text, float scale, int limit)
 	return Text_Height_Ext(text, scale, limit, font);
 }
 
+// despite the name, this is also used for single line tooltips
 int Multiline_Text_Height(const char *text, float scale, int limit)
 {
 	int         len, count;
-	float       max;
-	float       totalheight = 0;
+	float       heightMin, heightMax;
+	float       lineHeight = 0;
 	glyphInfo_t *glyph;
 	const char  *s    = text;
 	fontInfo_t  *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
+	bool multiline = false;
 
-	max = 0;
+	heightMin = 0;
+	heightMax = 0;
 	if (text)
 	{
 		len = strlen(text);
@@ -586,19 +589,26 @@ int Multiline_Text_Height(const char *text, float scale, int limit)
 			{
 				if (*s == '\n')
 				{
-					if (!totalheight)
-					{
-						totalheight += 5;   // 5 is the vertical spacing that autowrap painting uses
-					}
-					totalheight += max;
-					max          = 0;
+					lineHeight += abs(heightMin - heightMax);
+					lineHeight += 5;   // 5 is the vertical spacing that autowrap painting uses
+					heightMin = 0;
+					heightMax = 0;
+					multiline = true;
 				}
 				else
 				{
 					glyph = &font->glyphs[(unsigned char)*s];           // NERVE - SMF - this needs to be an unsigned cast for localization
-					if (max < glyph->height)
+					if (heightMax < glyph->height)
 					{
-						max = glyph->height;
+						heightMax = glyph->height;
+					}
+					// some glyphs (mainly '_') use negative top position
+					if (glyph->top < 0)
+					{
+						if (heightMin < glyph->top - glyph->height)
+						{
+							heightMin = glyph->top - glyph->height;
+						}
 					}
 				}
 				s++;
@@ -607,19 +617,9 @@ int Multiline_Text_Height(const char *text, float scale, int limit)
 		}
 	}
 
-	if (totalheight > 0)
-	{
-		if (!totalheight)
-		{
-			totalheight += 5;   // 5 is the vertical spacing that autowrap painting uses
-		}
-		totalheight += max;
-		return totalheight * scale * font->glyphScale;
-	}
-	else
-	{
-		return max * scale * font->glyphScale;
-	}
+	lineHeight += multiline ? abs(heightMin - heightMax) + 5 : heightMax; // 5 is the vertical spacing that autowrap painting uses
+
+	return lineHeight * scale * font->glyphScale;
 }
 
 void Text_PaintCharExt(float x, float y, float w, float h, float scalex, float scaley, float s, float t, float s2, float t2, qhandle_t hShader)
