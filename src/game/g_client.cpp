@@ -2689,10 +2689,7 @@ void ClientDisconnect(int clientNum)
 			Cmd_FollowCycle_f(flag, 1);
 		}
 		// invalidate our specinvites
-		if (COM_BitCheck(flag->client->sess.specInvitedClients, clientNum))
-		{
-			COM_BitClear(flag->client->sess.specInvitedClients, clientNum);
-		}
+		COM_BitClear(flag->client->sess.specInvitedClients, clientNum);
 	}
 
 	if (g_landminetimeout.integer)
