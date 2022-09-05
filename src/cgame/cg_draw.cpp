@@ -640,8 +640,8 @@ static float CG_DrawTimer(float y)
 	msec = cg.time - cgs.levelStartTime;
 
 	auto seconds = (msec / 1000) % 60 ;
-	auto minutes = ((msec / (1000 * 60)) % 60);
-	auto hours   = ((msec / (1000 * 60 * 60)) % 24);
+	auto minutes = (msec / (1000 * 60)) % 60;
+	auto hours   = (msec / (1000 * 60 * 60)) % 24;
 
 	s = hours > 0 ? va("%02d:%02d:%02d", hours, minutes, seconds) : va("%02d:%02d", minutes, seconds);
 
