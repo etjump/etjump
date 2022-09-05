@@ -622,6 +622,39 @@ static float CG_DrawSpeed(float y)
 	return y + 12 + 4;
 }
 
+/*
+=================
+CG_DrawTimer
+=================
+*/
+
+static float CG_DrawTimer(float y)
+{
+	char   *s;
+	int    w;
+	int    msec;
+	vec4_t color           = { 0.625f, 0.625f, 0.6f, 1.0f };
+	vec4_t timerBackground = { 0.16f, 0.2f, 0.17f, 0.8f };
+	vec4_t timerBorder     = { 0.5f, 0.5f, 0.5f, 0.5f };
+
+	msec = cg.time - cgs.levelStartTime;
+
+	auto seconds = (msec / 1000) % 60 ;
+	auto minutes = ((msec / (1000 * 60)) % 60);
+	auto hours   = ((msec / (1000 * 60 * 60)) % 24);
+
+	s = hours > 0 ? va("%02d:%02d:%02d", hours, minutes, seconds) : va("%02d:%02d", minutes, seconds);
+
+	w = CG_Text_Width_Ext(s, 0.19f, 0, &cgs.media.limboFont1);
+
+	CG_FillRect(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, timerBackground);
+	CG_DrawRect_FixedBorder(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1, timerBorder);
+
+	CG_Text_Paint_Ext(UPPERRIGHT_X - w, y + 11, 0.19f, 0.19f, color, s, 0, 0, 0, &cgs.media.limboFont1);
+
+	return y + 12 + 4;
+}
+
 float CG_DrawTime(float y)
 {
 	char    displayTime[12];
@@ -780,9 +813,10 @@ static void CG_DrawUpperRight(void)
 		return;
 	}
 
-	/*if ( cg_drawRoundTimer.integer ) {
+	if (cg_drawRoundTimer.integer)
+	{
 	    y = CG_DrawTimer( y );
-	}*/
+	}
 
 	if (etj_drawClock.integer)
 	{
