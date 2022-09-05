@@ -29,6 +29,8 @@ extern itemDef_t *g_editItem;
 
 uiInfo_t uiInfo;
 
+static const int glyphxSkipMax = 14;	// the biggest xSkip value used in glyph mapping
+
 static const char *MonthAbbrev[] =
 {
 	"Jan", "Feb", "Mar",
@@ -454,7 +456,6 @@ int Multiline_Text_Width(const char *text, float scale, int limit)
 	int         count, len;
 	float       out = 0;
 	float       width, widest = 0;
-	glyphInfo_t *glyph;
 	const char  *s    = text;
 	fontInfo_t  *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
 
@@ -486,8 +487,10 @@ int Multiline_Text_Width(const char *text, float scale, int limit)
 				}
 				else
 				{
-					glyph = &font->glyphs[(unsigned char)*s];
-					out  += glyph->xSkip;
+					// this will ensure a bit more flexible x spacing in tooltips
+					// since xSkip varies per glyph, but the positioning of glyphs
+					// isn't all that precise, sometimes resulting in badly spaced tooltips
+					out  += glyphxSkipMax;
 				}
 				s++;
 				count++;
