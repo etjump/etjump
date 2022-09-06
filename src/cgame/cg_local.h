@@ -2670,6 +2670,8 @@ extern vmCvar_t etj_strafeQualityStyle;
 extern vmCvar_t etj_projection;
 extern vmCvar_t etj_saveMsg;
 
+extern vmCvar_t etj_FPSMeterUpdateInterval;
+
 //
 // cg_main.c
 //

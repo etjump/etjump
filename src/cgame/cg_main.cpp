@@ -566,6 +566,8 @@ vmCvar_t etj_strafeQualityStyle;
 vmCvar_t etj_projection;
 vmCvar_t etj_saveMsg;
 
+vmCvar_t etj_FPSMeterUpdateInterval;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -998,6 +1000,8 @@ cvarTable_t cvarTable[] =
 
 	{ &etj_projection, "etj_projection", "0", CVAR_ARCHIVE },
 	{ &etj_saveMsg, "etj_saveMsg", "^7Saved", CVAR_ARCHIVE },
+
+	{ &etj_FPSMeterUpdateInterval, "etj_FPSMeterUpdateInterval", "250", CVAR_ARCHIVE },
 };
 
 
