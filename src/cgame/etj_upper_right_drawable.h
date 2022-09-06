@@ -50,8 +50,7 @@ namespace ETJump
 		void DrawFPS(float &y) const;
 		void DrawSpeed(float &y) const;
 		void DrawSnapshot(float &y) const;
-
-		void startListeners();
+		
 	public:
 		UpperRight();
 		void render() const override;
