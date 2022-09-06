@@ -40,9 +40,15 @@ ETJump::Clock ETJump::getCurrentClock()
 	return{ tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec, (int)ms.count() };
 }
 
-ETJump::Clock ETJump::toClock(long long timestamp)
+ETJump::Clock ETJump::toClock(long long timestamp, bool useHours)
 {
-	auto hours = timestamp / 6000;
+	auto hours = timestamp / 3600000;
+
+	if (useHours)
+	{
+		timestamp -= hours * 3600000;
+	}
+
 	auto minutes = timestamp / 60000;
 	timestamp -= minutes * 60000;
 	auto seconds = timestamp / 1000;

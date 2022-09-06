@@ -57,7 +57,7 @@ namespace ETJump
 
 	long long getCurrentTimestamp();
 	Clock getCurrentClock();
-	Clock toClock(long long timestamp);
+	Clock toClock(long long timestamp, bool useHours);
 	Date getCurrentDate();
 	Time getCurrentTime();
 }

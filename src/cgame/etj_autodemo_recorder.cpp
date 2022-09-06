@@ -202,7 +202,7 @@ std::string ETJump::AutoDemoRecorder::createTimeString()
 
 std::string ETJump::AutoDemoRecorder::formatRunTime(int millis)
 {
-	Clock clock = toClock(millis);
+	Clock clock = toClock(millis, false);
 	return stringFormat("%02d.%02d.%03d", clock.min, clock.sec, clock.ms);
 }
 
