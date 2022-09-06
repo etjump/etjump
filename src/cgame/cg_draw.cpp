@@ -9,6 +9,7 @@
 #include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_time_utilities.h"
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -638,12 +639,9 @@ static float CG_DrawTimer(float y)
 	vec4_t timerBorder     = { 0.5f, 0.5f, 0.5f, 0.5f };
 
 	msec = cg.time - cgs.levelStartTime;
+	auto time = ETJump::toClock(msec, true);
 
-	auto seconds = (msec / 1000) % 60 ;
-	auto minutes = (msec / (1000 * 60)) % 60;
-	auto hours   = (msec / (1000 * 60 * 60)) % 24;
-
-	s = hours > 0 ? va("%02d:%02d:%02d", hours, minutes, seconds) : va("%02d:%02d", minutes, seconds);
+	s = time.hours > 0 ? va("%02d:%02d:%02d", time.hours, time.min, time.sec) : va("%02d:%02d", time.min, time.sec);
 
 	w = CG_Text_Width_Ext(s, 0.19f, 0, &cgs.media.limboFont1);
 
