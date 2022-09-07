@@ -139,6 +139,25 @@
 * fixed mounted MG42s being unrepairable when `g_engineerChargeTime` was set to a low value [#754](https://github.com/etjump/etjump/pull/754)
 * fixed weapon heat bar not disappearing when unmounting tank while noclipping [#755](https://github.com/etjump/etjump/pull/755)
 * fixed tank MG rotation being incorrect while using `cg_thirdperson` [#756](https://github.com/etjump/etjump/pull/756)
+* corrected some incorrect cvars from both client and server
+  * removed `shared`, `cg_synchronousClients` and `pmove_msec` cvars from cgame cvars [#762](https://github.com/etjump/etjump/pull/762)
+  * removed `pmove_fixed` cvar from server, renamed `mapname` -> `sv_mapname`[#764](https://github.com/etjump/etjump/pull/764)
+* added `etj_expandedMapAlpha` to control transparency of expanded map [#771](https://github.com/etjump/etjump/pull/771)
+* removed `Objective:` text from loading screen and made mapname font size to scale automatically to the boundaries of the box [#770](https://github.com/etjump/etjump/pull/770)
+* prevented several commands from being executed during demo playback to avoid potentially unwated behavior [#757](https://github.com/etjump/etjump/pull/757)
+* added several new binding options to ETJump binds menu [#774](https://github.com/etjump/etjump/pull/774)
+* `cg_skybox` is no longer cheat protected so skyportals can be turned off [#776](https://github.com/etjump/etjump/pull/776)
+* fixed incorrect wording in max tracker indices error message [#786](https://github.com/etjump/etjump/pull/786)
+* added a new portalgun model [787](https://github.com/etjump/etjump/pull/787)
+* improved spacing of multiline tooltips in menus [#788](https://github.com/etjump/etjump/pull/788)
+* speclock improvements:
+  * speclock and specinvites are now persistent across map changes [#769](https://github.com/etjump/etjump/pull/796)
+  * disconnecting will now invalidate your invitation to spectate someone, preventing other players to unintentionally bypass the lock [#789](https://github.com/etjump/etjump/pull/789)
+* `cg_drawRoundTimer` will now display the elapsed time of current map [#791](https://github.com/etjump/etjump/pull/791)
+* added `etj_FPSMeterUpdateInterval` to control the update rate of FPS meter[#793](https://github.com/etjump/etjump/pull/793)
+* fixed binocular/scope overlay disappearing while scoreboard is up [#794](https://github.com/etjump/etjump/pull/794)
+  * the reticles are now hidden while scoreboard is up to improve readability
+
 
 # ETJump 2.4.0
 
