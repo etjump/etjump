@@ -4036,6 +4036,7 @@ int checkExtraTrace(int value);
 void onPlayerRespawn(qboolean revived);
 void runFrameEnd();
 playerState_t *getValidPlayerState();
+bool showingScores();
 
 enum extraTraceOptions
 {

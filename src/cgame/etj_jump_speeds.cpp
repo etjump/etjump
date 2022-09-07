@@ -227,7 +227,7 @@ namespace ETJump
 			return true;
 		}
 
-		if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+		if (showingScores())
 		{
 			return true;
 		}

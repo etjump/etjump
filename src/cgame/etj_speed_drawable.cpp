@@ -180,7 +180,7 @@ std::string ETJump::DisplaySpeed::getStatus() const
 
 bool ETJump::DisplaySpeed::canSkipDraw() const
 {
-	return !etj_drawSpeed2.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
+	return !etj_drawSpeed2.integer || ETJump::showingScores();
 }
 
 void ETJump::DisplaySpeed::popOldStoredSpeeds()

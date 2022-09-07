@@ -57,7 +57,7 @@ bool ETJump::QuickFollowDrawer::canSkipDraw() const
 	{
 		return true;
 	}
-	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+	if (ETJump::showingScores())
 	{
 		return true;
 	}

@@ -129,5 +129,5 @@ void ETJump::DisplayMaxSpeed::render() const
 
 bool ETJump::DisplayMaxSpeed::canSkipDraw() const
 {
-	return !etj_drawMaxSpeed.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time;
+	return !etj_drawMaxSpeed.integer || ETJump::showingScores();
 }
