@@ -1434,7 +1434,7 @@ static void CG_DrawWeapReticle(void)
         }*/
 
 		// hairs
-		if (!(cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time))
+		if (!ETJump::showingScores())
 		{
 			CG_FillRect(SCREEN_OFFSET_X + 84, 239, 150, 3, color);    // left
 			CG_FillRect(SCREEN_OFFSET_X + 234, 240, 173, 1, color);   // horiz center
@@ -1461,7 +1461,7 @@ static void CG_DrawWeapReticle(void)
 		}
 
 		// hairs
-		if (!(cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time))
+		if (!ETJump::showingScores())
 		{
 			CG_FillRect(SCREEN_OFFSET_X + 84, 239, 177, 2, color);    // left
 			CG_FillRect(SCREEN_OFFSET_X + 320, 242, 1, 58, color);    // center top
@@ -1837,7 +1837,7 @@ static void CG_DrawBinocReticle(void)
 		CG_FillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, color);
 	}
 
-	if (!CG_DrawScoreboard())
+	if (!ETJump::showingScores())
 	{
 		CG_FillRect(SCREEN_OFFSET_X + 146, 239, 348, 1, color);
 
@@ -1943,7 +1943,7 @@ static void CG_DrawCrosshair(void)
 	}
 
 	// any exceptions are handled, we can exit at this point if scoreboard is up
-	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+	if (ETJump::showingScores())
 	{
 		return;
 	}
@@ -2305,7 +2305,7 @@ static void CG_DrawCrosshairNames(void)
 		return;
 	}
 
-	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+	if (ETJump::showingScores())
 	{
 		return;
 	}
@@ -2401,7 +2401,7 @@ static void CG_DrawSpectator(void)
 {
 	const char *s;
 
-	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+	if (ETJump::showingScores())
 	{
 		return;
 	}
@@ -5438,7 +5438,7 @@ static void CG_Draw2D(void)
 
 	CG_DrawDemoRecording();
 
-	if (!CG_DrawScoreboard() && !cgs.demoCam.renderingFreeCam)
+	if (!ETJump::showingScores() && !cgs.demoCam.renderingFreeCam)
 	{
 		CG_DrawNewCompass();
 	}

@@ -63,7 +63,7 @@ void ETJump::UpperRight::beforeRender()
 
 void ETJump::UpperRight::render() const
 {
-	if (!cg_drawFireteamOverlay.integer || cg_paused.integer || cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
+	if (cg_paused.integer || ETJump::showingScores())
 	{
 		return;
 	}

@@ -166,6 +166,11 @@ namespace ETJump
 		keySetSystem->addKeyBindSet("keyset5");
 	}
 
+	bool showingScores()
+	{
+		return (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time);
+	}
+
 	// shadow cvars mapping to real cvars, forces locked values change
 	std::vector<std::pair<vmCvar_t*, std::string>> cvars{
 		{ &etj_drawFoliage, "r_drawfoliage"},
