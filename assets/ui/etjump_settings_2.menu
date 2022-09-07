@@ -6,7 +6,7 @@
 // Left side menus
 #define SUBW_HUD_Y SUBW_Y
 #define SUBW_HUD_ITEM_Y SUBW_HUD_Y + SUBW_HEADER_HEIGHT
-#define SUBW_HUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 13)
+#define SUBW_HUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 14)
 
 #define SUBW_GUN_Y SUBW_HUD_Y + SUBW_HUD_HEIGHT + SUBW_SPACING_Y
 #define SUBW_GUN_ITEM_Y SUBW_GUN_Y + SUBW_HEADER_HEIGHT
@@ -41,21 +41,23 @@ menuDef {
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_HUD_Y, SUBW_WIDTH, SUBW_HUD_HEIGHT, "HUD")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "FPS:", 0.2, SUBW_ITEM_HEIGHT, "cg_drawFPS", "Draw FPS\ncg_drawFPS")
-        MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Clock:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawClock", cvarFloatList { "No" 0 "24h" 1 "12h" 2 }, "Draw local clock\netj_drawClock")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Connection issues:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawConnectionIssues", "Draw connection interrupted message with high ping\netj_drawConnectionIssues")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Charge bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_chargeBar", "Draw charge bar on HUD\netj_HUD_chargeBar")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fatigue bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_fatigueBar", "Draw fatigue bar on HUD\netj_HUD_fatigueBar")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Health bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_healthBar", "Draw health bar on HUD\netj_HUD_healthBar")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player head:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_playerHead", "Draw player head on HUD\netj_HUD_playerHead")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Health:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_playerHealth", "Draw health on HUD\netj_HUD_playerHealth")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Weapon icon:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_weaponIcon", "Draw weapon icon on HUD\netj_HUD_weaponIcon")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "XP Info:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_xpInfo", "Draw XP info on HUD\netj_HUD_xpInfo")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer:", 0.2, SUBW_ITEM_HEIGHT, "cg_lagometer", "Draw lagometer on HUD\ncg_lagometer")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer X:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerX 0 -640 640 10, "Sets X offset for lagometer\netj_lagometerX")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer Y:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
-        MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Projection:", 0.2, SUBW_ITEM_HEIGHT, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_FPSMeterUpdateInterval", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "FPS update interval:", 0.2, SUBW_ITEM_HEIGHT, etj_FPSMeterUpdateInterval 250 0 1000 10, "Sets FPS meter update interval in milliseconds\netj_FPSMeterUpdateInterval")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Clock:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawClock", cvarFloatList { "No" 0 "24h" 1 "12h" 2 }, "Draw local clock\netj_drawClock")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Connection issues:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawConnectionIssues", "Draw connection interrupted message with high ping\netj_drawConnectionIssues")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Charge bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_chargeBar", "Draw charge bar on HUD\netj_HUD_chargeBar")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Fatigue bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_fatigueBar", "Draw fatigue bar on HUD\netj_HUD_fatigueBar")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Health bar:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_healthBar", "Draw health bar on HUD\netj_HUD_healthBar")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player head:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_playerHead", "Draw player head on HUD\netj_HUD_playerHead")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Health:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_playerHealth", "Draw health on HUD\netj_HUD_playerHealth")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Weapon icon:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_weaponIcon", "Draw weapon icon on HUD\netj_HUD_weaponIcon")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "XP Info:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_xpInfo", "Draw XP info on HUD\netj_HUD_xpInfo")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer:", 0.2, SUBW_ITEM_HEIGHT, "cg_lagometer", "Draw lagometer on HUD\ncg_lagometer")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer X:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerX 0 -640 640 10, "Sets X offset for lagometer\netj_lagometerX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer Y:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Projection:", 0.2, SUBW_ITEM_HEIGHT, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_GUN_Y, SUBW_WIDTH, SUBW_GUN_HEIGHT, "GUN")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun:", 0.2, SUBW_ITEM_HEIGHT, "cg_drawGun", "Draw gun\ncg_drawGun")

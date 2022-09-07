@@ -1,6 +1,6 @@
 file(GLOB CGAME_HEADERS "*.h" "*.hpp")
 
-add_library(cgame MODULE 
+add_library(cgame MODULE
 	"cg_atmospheric.cpp"
 	"cg_character.cpp"
 	"cg_commandmap.cpp"
@@ -75,6 +75,7 @@ add_library(cgame MODULE
 	"etj_snaphud.cpp"
 	"etj_speed_drawable.cpp"
 	"etj_strafe_quality_drawable.cpp"
+	"etj_upper_right_drawable.cpp"
 	"etj_timerun.cpp"
 	"etj_timerun_view.cpp"
 	"etj_trickjump_lines.cpp"
@@ -102,14 +103,14 @@ add_library(cgame MODULE
 target_compile_definitions(cgame PRIVATE CGAMEDLL)
 target_link_libraries(cgame PRIVATE cxx_compiler_opts libjson libsha1 libuuid4 fmt::fmt)
 
-set_target_properties(cgame PROPERTIES 
-  	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
+set_target_properties(cgame PROPERTIES
+	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${BASE_DIR_PATH}"
 	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_DIR_PATH}")
 set_target_platform_details(cgame)
 
-set_target_properties(cgame PROPERTIES 
-    VS_DEBUGGER_COMMAND "$(ETROOT)\\ET.exe"
+set_target_properties(cgame PROPERTIES
+	VS_DEBUGGER_COMMAND "$(ETROOT)\\ET.exe"
 	VS_DEBUGGER_COMMAND_ARGUMENTS "+set fs_basepath \"$(SolutionDir)\" +set fs_homepath . +set fs_game ${CMAKE_PROJECT_NAME} +set sv_pure 0"
 	VS_DEBUGGER_WORKING_DIRECTORY "$(ETROOT)")
 
