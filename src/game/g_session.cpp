@@ -28,11 +28,14 @@ void G_WriteClientSessionData(gclient_t *client, qboolean restart)
 		G_deleteStats(client - level.clients);
 	}
 
-	s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 	       client->sess.sessionTeam,
 	       client->sess.spectatorTime,
 	       client->sess.spectatorState,
 	       client->sess.spectatorClient,
+	       client->sess.specLocked,
+	       client->sess.specInvitedClients[0],
+	       client->sess.specInvitedClients[1],
 	       client->sess.playerType,         // DHM - Nerve
 	       client->sess.playerWeapon,       // DHM - Nerve
 	       client->sess.playerWeapon2,
@@ -196,11 +199,14 @@ void G_ReadSessionData(gclient_t *client)
 
 	trap_Cvar_VariableStringBuffer(va("session%i", client - level.clients), s, sizeof(s));
 
-	sscanf(s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+	sscanf(s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
 	       (int *)&client->sess.sessionTeam,
 	       &client->sess.spectatorTime,
 	       (int *)&client->sess.spectatorState,
 	       &client->sess.spectatorClient,
+	       (int *)&client->sess.specLocked,
+	       &client->sess.specInvitedClients[0],
+	       &client->sess.specInvitedClients[1],
 	       &client->sess.playerType,        // DHM - Nerve
 	       &client->sess.playerWeapon,      // DHM - Nerve
 	       &client->sess.playerWeapon2,
