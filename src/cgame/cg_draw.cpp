@@ -1794,7 +1794,7 @@ static void CG_DrawWeapReticle(void)
         }*/
 
 		// hairs
-		if (!CG_DrawScoreboard())
+		if (!(cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time))
 		{
 			CG_FillRect(SCREEN_OFFSET_X + 84, 239, 150, 3, color);    // left
 			CG_FillRect(SCREEN_OFFSET_X + 234, 240, 173, 1, color);   // horiz center
@@ -1821,7 +1821,7 @@ static void CG_DrawWeapReticle(void)
 		}
 
 		// hairs
-		if (!CG_DrawScoreboard())
+		if (!(cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time))
 		{
 			CG_FillRect(SCREEN_OFFSET_X + 84, 239, 177, 2, color);    // left
 			CG_FillRect(SCREEN_OFFSET_X + 320, 242, 1, 58, color);    // center top
@@ -2303,7 +2303,7 @@ static void CG_DrawCrosshair(void)
 	}
 
 	// any exceptions are handled, we can exit at this point if scoreboard is up
-	if (CG_DrawScoreboard())
+	if (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time)
 	{
 		return;
 	}
