@@ -109,16 +109,15 @@ void ETJump::UpperRight::render() const
 
 void ETJump::UpperRight::DrawTimer(float &y) const
 {
-	#define UPPERRIGHT_X (SCREEN_WIDTH - 6)
 	const int msec = cg.time - cgs.levelStartTime;
 	auto time = ETJump::toClock(msec, true);
 	
 	const char *s = time.hours > 0 ? va("%02d:%02d:%02d", time.hours, time.min, time.sec) : va("%02d:%02d", time.min, time.sec);
 	const int w = CG_Text_Width_Ext(s, textScale, 0, &cgs.media.limboFont1);
 
-	CG_FillRect(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, backgroundColor);
-	CG_DrawRect_FixedBorder(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1, borderColor);
-	CG_Text_Paint_Ext(UPPERRIGHT_X - w, y + 11, textScale, textScale, textColor, s, 0, 0, 0, &cgs.media.limboFont1);
+	CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
+	CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+	CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, s, 0, 0, 0, &cgs.media.limboFont1);
 
 	y += 16;
 }
@@ -153,10 +152,10 @@ void ETJump::UpperRight::DrawTime(float &y) const
 
 	const int w = CG_Text_Width_Ext(displayTime, textScale, 0, &cgs.media.limboFont1);
 
-	CG_FillRect(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, backgroundColor);
-	CG_DrawRect_FixedBorder(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1,
+	CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
+	CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1,
 	                        borderColor);
-	CG_Text_Paint_Ext(UPPERRIGHT_X - w, y + 11, textScale, textScale, textColor,
+	CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor,
 	                  displayTime, 0, 0, 0, &cgs.media.limboFont1);
 
 	y += 16;
@@ -164,13 +163,12 @@ void ETJump::UpperRight::DrawTime(float &y) const
 
 void ETJump::UpperRight::DrawFPS(float &y) const
 {
-	#define UPPERRIGHT_X (SCREEN_WIDTH - 6)
 	const std::string s = std::to_string(fps) + " FPS";
 	const int w = CG_Text_Width_Ext(s.c_str(), textScale, 0, &cgs.media.limboFont1);
 
-	CG_FillRect(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, backgroundColor);
-	CG_DrawRect_FixedBorder(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1, borderColor);
-	CG_Text_Paint_Ext(UPPERRIGHT_X - w, y + 11, textScale, textScale, textColor, s.c_str(), 0, 0, 0, &cgs.media.limboFont1);
+	CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
+	CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+	CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, s.c_str(), 0, 0, 0, &cgs.media.limboFont1);
 
 	y += 16;
 }
@@ -258,9 +256,9 @@ void ETJump::UpperRight::DrawSpeed(float &y) const
 
 	const int w = CG_Text_Width_Ext(s, textScale, 0, &cgs.media.limboFont1);
 
-	CG_FillRect(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, backgroundColor);
-	CG_DrawRect_FixedBorder(UPPERRIGHT_X - w - 2, y, w + 5, 12 + 2, 1, borderColor);
-	CG_Text_Paint_Ext(UPPERRIGHT_X - w, y + 11, textScale, textScale, textColor, s, 0, 0, 0, &cgs.media.limboFont1);
+	CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
+	CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+	CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, s, 0, 0, 0, &cgs.media.limboFont1);
 
 	y += 16;
 }
@@ -271,7 +269,7 @@ void ETJump::UpperRight::DrawSnapshot(float &y) const
 	       cg.latestSnapshotNum, cgs.serverCommandSequence);
 	const int w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
 
-	CG_DrawBigString(UPPERRIGHT_X - w, y + 2, s, 1.0F);
+	CG_DrawBigString(upperRight_x - w, y + 2, s, 1.0F);
 
 	y += BIGCHAR_HEIGHT + 4;
 }

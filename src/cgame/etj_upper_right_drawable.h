@@ -36,8 +36,9 @@ namespace ETJump
 		mutable vec4_t textColor = { 0.625f, 0.625f, 0.6f, 1.0f };
 		const vec4_t backgroundColor = { 0.16f, 0.2f, 0.17f, 0.8f };
 		const vec4_t borderColor = { 0.5f, 0.5f, 0.5f, 0.5f };
+		const int upperRight_x = SCREEN_WIDTH - 6;
 
-		static constexpr std::size_t FPSFrames = 10;
+		static constexpr std::size_t FPSFrames = 20;
 		std::array<long long, FPSFrames> FPSFrameTimes;
 		std::size_t FPSIndex;
 		std::size_t FPSInit;
