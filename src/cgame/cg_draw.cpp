@@ -1762,23 +1762,19 @@ CG_DrawWeapReticle
 static void CG_DrawWeapReticle(void)
 {
 	vec4_t   color = { 0, 0, 0, 1 };
-	qboolean fg, garand, k43;
+	bool fg42;
 
 	// DHM - Nerve :: So that we will draw reticle
 	if ((cg.snap->ps.pm_flags & PMF_FOLLOW) || cg.demoPlayback)
 	{
-		garand = (qboolean)(cg.snap->ps.weapon == WP_GARAND_SCOPE);
-		k43    = (qboolean)(cg.snap->ps.weapon == WP_K43_SCOPE);
-		fg     = (qboolean)(cg.snap->ps.weapon == WP_FG42SCOPE);
+		fg42 = static_cast<bool>(cg.snap->ps.weapon == WP_FG42SCOPE);
 	}
 	else
 	{
-		fg     = (qboolean)(cg.weaponSelect == WP_FG42SCOPE);
-		garand = (qboolean)(cg.weaponSelect == WP_GARAND_SCOPE);
-		k43    = (qboolean)(cg.weaponSelect == WP_K43_SCOPE);
+		fg42 = static_cast<bool>(cg.weaponSelect == WP_FG42SCOPE);
 	}
 
-	if (fg)
+	if (fg42)
 	{
 		// sides
 		CG_FillRect(0, 0, SCREEN_OFFSET_X + 80, 480, color);
@@ -1798,18 +1794,21 @@ static void CG_DrawWeapReticle(void)
         }*/
 
 		// hairs
-		CG_FillRect(SCREEN_OFFSET_X + 84, 239, 150, 3, color);    // left
-		CG_FillRect(SCREEN_OFFSET_X + 234, 240, 173, 1, color);   // horiz center
-		CG_FillRect(SCREEN_OFFSET_X + 407, 239, 150, 3, color);   // right
+		if (!CG_DrawScoreboard())
+		{
+			CG_FillRect(SCREEN_OFFSET_X + 84, 239, 150, 3, color);    // left
+			CG_FillRect(SCREEN_OFFSET_X + 234, 240, 173, 1, color);   // horiz center
+			CG_FillRect(SCREEN_OFFSET_X + 407, 239, 150, 3, color);   // right
 
 
-		CG_FillRect(SCREEN_OFFSET_X + 319, 2, 3, 151, color);     // top center top
-		CG_FillRect(SCREEN_OFFSET_X + 320, 153, 1, 114, color);   // top center bot
+			CG_FillRect(SCREEN_OFFSET_X + 319, 2, 3, 151, color);     // top center top
+			CG_FillRect(SCREEN_OFFSET_X + 320, 153, 1, 114, color);   // top center bot
 
-		CG_FillRect(SCREEN_OFFSET_X + 320, 241, 1, 87, color);    // bot center top
-		CG_FillRect(SCREEN_OFFSET_X + 319, 327, 3, 151, color);   // bot center bot
+			CG_FillRect(SCREEN_OFFSET_X + 320, 241, 1, 87, color);    // bot center top
+			CG_FillRect(SCREEN_OFFSET_X + 319, 327, 3, 151, color);   // bot center bot
+		}
 	}
-	else if (garand)
+	else // garand/k43
 	{
 		// sides
 		CG_FillRect(0, 0, SCREEN_OFFSET_X + 80, 480, color);
@@ -1822,28 +1821,13 @@ static void CG_DrawWeapReticle(void)
 		}
 
 		// hairs
-		CG_FillRect(SCREEN_OFFSET_X + 84, 239, 177, 2, color);    // left
-		CG_FillRect(SCREEN_OFFSET_X + 320, 242, 1, 58, color);    // center top
-		CG_FillRect(SCREEN_OFFSET_X + 319, 300, 2, 178, color);   // center bot
-		CG_FillRect(SCREEN_OFFSET_X + 380, 239, 177, 2, color);   // right
-	}
-	else if (k43)
-	{
-		// sides
-		CG_FillRect(0, 0, SCREEN_OFFSET_X + 80, 480, color);
-		CG_FillRect(SCREEN_OFFSET_X + 560, 0, SCREEN_OFFSET_X + 80, 480, color);
-
-		// center
-		if (cgs.media.reticleShaderSimple)
+		if (!CG_DrawScoreboard())
 		{
-			CG_DrawPic(SCREEN_OFFSET_X + 80, 0, 480, 480, cgs.media.reticleShaderSimple);
+			CG_FillRect(SCREEN_OFFSET_X + 84, 239, 177, 2, color);    // left
+			CG_FillRect(SCREEN_OFFSET_X + 320, 242, 1, 58, color);    // center top
+			CG_FillRect(SCREEN_OFFSET_X + 319, 300, 2, 178, color);   // center bot
+			CG_FillRect(SCREEN_OFFSET_X + 380, 239, 177, 2, color);   // right
 		}
-
-		// hairs
-		CG_FillRect(SCREEN_OFFSET_X + 84, 239, 177, 2, color);    // left
-		CG_FillRect(SCREEN_OFFSET_X + 320, 242, 1, 58, color);    // center top
-		CG_FillRect(SCREEN_OFFSET_X + 319, 300, 2, 178, color);   // center bot
-		CG_FillRect(SCREEN_OFFSET_X + 380, 239, 177, 2, color);   // right
 	}
 }
 
@@ -2213,15 +2197,18 @@ static void CG_DrawBinocReticle(void)
 		CG_FillRect(SCREEN_OFFSET_X + 640, 0, SCREEN_OFFSET_X, 480, color);
 	}
 
-	CG_FillRect(SCREEN_OFFSET_X + 146, 239, 348, 1, color);
+	if (!CG_DrawScoreboard())
+	{
+		CG_FillRect(SCREEN_OFFSET_X + 146, 239, 348, 1, color);
 
-	CG_FillRect(SCREEN_OFFSET_X + 188, 234, 1, 13, color);    // ll
-	CG_FillRect(SCREEN_OFFSET_X + 234, 226, 1, 29, color);    // l
-	CG_FillRect(SCREEN_OFFSET_X + 274, 234, 1, 13, color);    // lr
-	CG_FillRect(SCREEN_OFFSET_X + 320, 213, 1, 55, color);    // center
-	CG_FillRect(SCREEN_OFFSET_X + 360, 234, 1, 13, color);    // rl
-	CG_FillRect(SCREEN_OFFSET_X + 406, 226, 1, 29, color);    // r
-	CG_FillRect(SCREEN_OFFSET_X + 452, 234, 1, 13, color);    // rr
+		CG_FillRect(SCREEN_OFFSET_X + 188, 234, 1, 13, color);    // ll
+		CG_FillRect(SCREEN_OFFSET_X + 234, 226, 1, 29, color);    // l
+		CG_FillRect(SCREEN_OFFSET_X + 274, 234, 1, 13, color);    // lr
+		CG_FillRect(SCREEN_OFFSET_X + 320, 213, 1, 55, color);    // center
+		CG_FillRect(SCREEN_OFFSET_X + 360, 234, 1, 13, color);    // rl
+		CG_FillRect(SCREEN_OFFSET_X + 406, 226, 1, 29, color);    // r
+		CG_FillRect(SCREEN_OFFSET_X + 452, 234, 1, 13, color);    // rr
+	}
 }
 
 void CG_FinishWeaponChange(int lastweap, int newweap); // JPW NERVE
@@ -2313,6 +2300,12 @@ static void CG_DrawCrosshair(void)
 		break;
 	default:
 		break;
+	}
+
+	// any exceptions are handled, we can exit at this point if scoreboard is up
+	if (CG_DrawScoreboard())
+	{
+		return;
 	}
 
 	// FIXME: spectators/chasing?
@@ -4681,6 +4674,11 @@ static void CG_DrawNewCompass(void)
 		return;
 	}
 
+	if (cg.zoomedBinoc || cg.zoomedScope)
+	{
+		return;
+	}
+
 	if (cgs.autoMapExpanded)
 	{
 		if (cg.time - cgs.autoMapExpandTime < 100.f)
@@ -5784,7 +5782,7 @@ static void CG_Draw2D(void)
 		}
 	}
 
-	if (!cg.cameraMode && !CG_DrawScoreboard() && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
+	if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 || (cg.snap->ps.pm_flags & PMF_FOLLOW)))
 	{
 		CG_DrawCrosshair();
 		CG_DrawCrosshairNames();

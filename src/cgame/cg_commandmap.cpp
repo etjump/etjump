@@ -1115,6 +1115,11 @@ void CG_DrawAutoMap(void)
 		return;
 	}
 
+	if (cg.zoomedScope || cg.zoomedBinoc)
+	{
+		return;
+	}
+
 	mapScissor.circular = qtrue;
 
 	mapScissor.zoomFactor = automapZoom;
