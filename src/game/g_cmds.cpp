@@ -4554,12 +4554,6 @@ void Cmd_Goto_f(gentity_t *ent)
 		return;
 	}
 
-	if (ent->client->sess.timerunActive)
-	{
-		CP("print \"Goto is disabled while timerun is active.\n\"");
-		return;
-	}
-
 	if (level.noGoto)
 	{
 		CP("print \"Goto is disabled on this map.\n\"");
@@ -4569,6 +4563,12 @@ void Cmd_Goto_f(gentity_t *ent)
 	if (!ent->client->sess.gotoAllowed)
 	{
 		CP("print \"You are not allowed to use goto.\n\"");
+		return;
+	}
+
+	if (ent->client->sess.timerunActive)
+	{
+		CP("print \"Goto is disabled while timerun is active.\n\"");
 		return;
 	}
 
@@ -4586,16 +4586,28 @@ void Cmd_Goto_f(gentity_t *ent)
 
 	other = g_entities + clientNum;
 
-	if (other->client->sess.noGoto)
+	if (clientNum == ent - g_entities)
 	{
-		CP("cpm \"^7Target player has disabled ^3goto^7!\n\"");
-		CP("cpm \"^7You need to ask the other player to enable goto by using ^3/nogoto^7!\n\"");
+		CP("print \"^7You can not ^3goto ^7yourself!\n\"");
 		return;
 	}
 
 	if (other->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
-		CP("cpm \"^7You can not ^3goto^7 a spectator!\n\"");
+		CP("print \"^7You can not ^3goto^7 a spectator!\n\"");
+		return;
+	}
+
+	if (other->client->sess.noGoto)
+	{
+		CP("print \"^7Target player has disabled ^3goto^7!\n\"");
+		CP("print \"^7You need to ask the other player to enable goto by using ^3/nogoto^7!\n\"");
+		return;
+	}
+
+	if (VectorLengthSquared(other->client->ps.velocity) > 0)
+	{
+		CP("print \" ^7You can not ^3goto ^7 moving player!\n\"");
 		return;
 	}
 
@@ -4613,18 +4625,6 @@ void Cmd_Goto_f(gentity_t *ent)
 		}
 	}
 
-	if (VectorLengthSquared(other->client->ps.velocity) > 0)
-	{
-		CP("cpm \" ^7You can not ^3goto ^7 moving player!\n\"");
-		return;
-	}
-
-	if (clientNum == ent - g_entities)
-	{
-		CP("cpm \"^7You can not ^3goto ^7yourself!\n\"");
-		return;
-	}
-
 	VectorCopy(other->client->ps.origin, ent->client->ps.origin);
 	VectorClear(ent->client->ps.velocity);
 	trap_SendServerCommand(ClientNum(ent), va("cpm \"%s^7 -> %s\n\"", ent->client->pers.netname, other->client->pers.netname));
@@ -4636,11 +4636,6 @@ void Cmd_Call_f(gentity_t *ent)
 	int       clientNum;
 	char      cmd[MAX_TOKEN_CHARS];
 	gentity_t *other;
-
-	if (!ent)
-	{
-		return;
-	}
 
 	if (!g_goto.integer)
 	{
@@ -4674,34 +4669,34 @@ void Cmd_Call_f(gentity_t *ent)
 
 	other = g_entities + clientNum;
 
+	if (clientNum == ent - g_entities)
+	{
+		CP("print \"^7You can not ^3call ^7yourself!\n\"");
+		return;
+	}
+
 	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
-		CP("cpm \"^7You can not ^3call^7 as a spectator.\n\"");
+		CP("print \"^7You can not ^3call^7 as a spectator!\n\"");
 		return;
 	}
 
 	if (other->client->sess.timerunActive)
 	{
-		CP("print \"^3call: ^7cannot call while target player is racing.\n\"");
-		return;
-	}
-
-	if (clientNum == ent - g_entities)
-	{
-		CP("cpm \"^7You can not ^3call ^7yourself!\n\"");
-		return;
-	}
-
-	if (VectorLengthSquared(other->client->ps.velocity) > 0)
-	{
-		CP("cpm \"^7You can not ^3call ^7a moving player!\n\"");
+		CP("print \"^7You can not ^3call^7 a timerunning player!\n\"");
 		return;
 	}
 
 	if (other->client->sess.noCall)
 	{
-		CP("cpm \"^7Target player has disabled ^3call^7!\n\"");
-		CP("cpm \"^7You need to ask the other player to enable call by using ^3/nocall^7!\n\"");
+		CP("print \"^7Target player has disabled ^3call^7!\n\"");
+		CP("print \"^7You need to ask the other player to enable call by using ^3/nocall^7!\n\"");
+		return;
+	}
+
+	if (VectorLengthSquared(other->client->ps.velocity) > 0)
+	{
+		CP("print \"^7You can not ^3call ^7a moving player!\n\"");
 		return;
 	}
 
