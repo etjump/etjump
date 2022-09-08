@@ -4677,13 +4677,13 @@ void Cmd_Call_f(gentity_t *ent)
 
 	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
 	{
-		CP("print \"^7You can not ^3call^7 as a spectator.\n\"");
+		CP("print \"^7You can not ^3call^7 as a spectator!\n\"");
 		return;
 	}
 
 	if (other->client->sess.timerunActive)
 	{
-		CP("print \"^7You can not ^3call^7 a racing player.\n\"");
+		CP("print \"^7You can not ^3call^7 a timerunning player!\n\"");
 		return;
 	}
 
