@@ -2841,7 +2841,7 @@ static void CG_DrawLimboMessage(void)
 		y += 18;
 
 		// JPW NERVE
-		str = ETJump::stringFormat("Reinforcements deploy in %d seconds.", CG_CalculateReinfTime(qfalse));
+		str = "Reinforcements deploy in " + ETJump::getSecondsString(CG_CalculateReinfTime(qfalse)) + ".";
 		ETJump::DrawString(INFOTEXT_STARTX, y, 0.23f, 0.25f, color, qfalse, str.c_str(), 0, 0);
 	}
 }

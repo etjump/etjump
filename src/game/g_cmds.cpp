@@ -2846,17 +2846,6 @@ void Cmd_Where_f(gentity_t *ent)
 
 /*
 ==================
-getSecondsString
-Returns "second" or "seconds"
-==================
-*/
-const char *getSecondsString(int time)
-{
-	return (time / 1000 == 1) ? "second" : "seconds";
-}
-
-/*
-==================
 checkVoteConditions
 Checks if a vote can be called
 ==================
@@ -2899,15 +2888,15 @@ bool checkVoteConditions(gentity_t *ent, int clientNum)
 
 	if (level.time - level.startTime < g_disableVoteAfterMapChange.integer)
 	{
-		int remainingTime = g_disableVoteAfterMapChange.integer - (level.time - level.startTime);
-		voteError = ETJump::stringFormat("You must wait for %d more %s to vote after a map change.\n", remainingTime / 1000, getSecondsString(remainingTime));
+		const int remainingTime = std::ceil((g_disableVoteAfterMapChange.integer - (level.time - level.startTime)) / 1000.0);
+		voteError = "You must wait " + ETJump::getSecondsString(remainingTime) + " before voting after a map change.\n";
 		Printer::SendPopupMessage(clientNum, voteError);
 		return false;
 	}
 	if (level.time - ent->client->lastVoteTime < g_voteCooldown.integer * 1000)
 	{
-		int voteCooldown = (g_voteCooldown.integer * 1000) - (level.time - ent->client->lastVoteTime);
-		voteError = ETJump::stringFormat("^3callvote:^7 you must wait %d more %s to vote again.\n", voteCooldown / 1000, getSecondsString(voteCooldown));
+		const int voteCooldown = std::ceil(((g_voteCooldown.integer * 1000) - (level.time - ent->client->lastVoteTime)) / 1000.0);
+		voteError = "^3callvote:^7 you must wait " + ETJump::getSecondsString(voteCooldown) + " before voting again.\n";
 		Printer::SendChatMessage(clientNum, voteError);
 		return false;
 	}

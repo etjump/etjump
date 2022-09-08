@@ -1,6 +1,7 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_inactivity_timer.h"
+#include "etj_string_utilities.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -1613,7 +1614,7 @@ void G_NameChanged(gentity_t *ent)
 
 	if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0)
 	{
-		C_CPMTo(ent, va("^3WARNING: ^7You must wait atleast %d seconds before renaming.", g_nameChangeInterval.integer));
+		C_CPMTo(ent, va("^3WARNING: ^7You must wait at least %s before renaming.", ETJump::getSecondsString(g_nameChangeInterval.integer).c_str()));
 	}
 	else if (client->sess.nameChangeCount > g_nameChangeLimit.integer)
 	{

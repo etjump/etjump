@@ -333,11 +333,12 @@ bool Ball8(gentity_t *ent, Arguments argv)
 		"Outlook not so good",
 		"Very doubtful"
 	};
-	const int DELAY_8BALL = 3000;     // in milliseconds
+	constexpr int DELAY_8BALL = 3000;     // in milliseconds
 
 	if (ent && ent->client->last8BallTime + DELAY_8BALL > level.time)
 	{
-		ChatPrintTo(ent, va("^3!8ball: ^7you must wait %i seconds before using !8ball again.", (ent->client->last8BallTime + DELAY_8BALL - level.time) / 1000));
+		const int remainingSeconds = std::ceil((ent->client->last8BallTime + DELAY_8BALL - level.time) / 1000.0);
+		ChatPrintTo(ent, "^3!8ball: ^7you must wait " + ETJump::getSecondsString(remainingSeconds) + " before using !8ball again.");
 		return false;
 	}
 
@@ -997,37 +998,15 @@ std::string playedTimeFmtString(int seconds)
 	std::string str;
 	if (weeks)
 	{
-		if (weeks == 1)
-		{
-			str = ETJump::stringFormat("%d week", weeks);
-		}
-		else
-		{
-			str = ETJump::stringFormat("%d weeks", weeks);
-		}
+		str = ETJump::getWeeksString(weeks);
 	}
 	else if (days)
 	{
-		if (days == 1)
-		{
-			str = ETJump::stringFormat("%d day", days);
-		}
-		else
-		{
-			str = ETJump::stringFormat("%d days", days);
-		}
+		str = ETJump::getDaysString(days);
 	}
-	else if (hours)
+	else if (hours || minutes || seconds)
 	{
-		str = ETJump::stringFormat("%d hours %d minutes %d seconds", hours, minutes, seconds);
-	}
-	else if (minutes)
-	{
-		str = ETJump::stringFormat("%d hours %d minutes %d seconds", hours, minutes, seconds);
-	}
-	else if (seconds)
-	{
-		str = ETJump::stringFormat("%d hours %d minutes %d seconds", hours, minutes, seconds);
+		str = ETJump::getHoursString(hours) + " " + ETJump::getMinutesString(minutes) + " " + ETJump::getSecondsString(seconds);
 	}
 
 	if (str.length() == 0)
@@ -1297,12 +1276,7 @@ bool MapInfo(gentity_t *ent, Arguments argv)
 	std::string message;
 	if (mi == currentMap)
 	{
-		message = ETJump::stringFormat("^3mapinfo: ^7%s is the current map on the server. It has been played for a total of %d days %d hours %d minutes %d seconds.",
-		           mi->name,
-		           days,
-		           hours,
-		           minutes,
-		           seconds);
+		message = "^3mapinfo: ^7" + mi->name + " is the current map on the server. It has been played for a total of " + ETJump::getDaysString(days) + " " + ETJump::getHoursString(hours) + " " + ETJump::getMinutesString(minutes) + " " + ETJump::getSecondsString(seconds);
 	}
 	else
 	{
@@ -1312,8 +1286,7 @@ bool MapInfo(gentity_t *ent, Arguments argv)
 		}
 		else
 		{
-			message = ETJump::stringFormat("^3mapinfo: ^7%s was last played on %s. It has been played for a total of %d days %d hours %d minutes %d seconds.",
-						mi->name, Utilities::timestampToString(mi->lastPlayed), days, hours, minutes, seconds);
+			message = "^3mapinfo: ^7" + mi->name + " was last played on " + Utilities::timestampToString(mi->lastPlayed) + ". It has been played for a total of " + ETJump::getDaysString(days) + " " + ETJump::getHoursString(hours) + " " + ETJump::getMinutesString(minutes) + " " + ETJump::getSecondsString(seconds);
 		}
 	}
 	ChatPrintTo(ent, message);

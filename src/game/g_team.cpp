@@ -1,7 +1,7 @@
-
 #include <limits.h>
 
 #include "g_local.h"
+#include "etj_string_utilities.h"
 
 typedef struct teamgame_s
 {
@@ -1378,15 +1378,13 @@ void checkpoint_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		if (holderteam == TEAM_AXIS)
 		{
 			time = ent->health / 2;
-			time++;
-			trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %i seconds!\n\"", time));
 		}
 		else
 		{
 			time = (10 - ent->health) / 2;
-			time++;
-			trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %i seconds!\n\"", time));
 		}
+		time++;
+		trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %s!\n\"", ETJump::getSecondsString(time).c_str()));
 		return;
 	}
 
@@ -1400,8 +1398,6 @@ void checkpoint_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		}
 
 		time = ent->health / 2;
-		time++;
-		trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %i seconds!\n\"", time));
 	}
 	else
 	{
@@ -1413,9 +1409,9 @@ void checkpoint_use(gentity_t *ent, gentity_t *other, gentity_t *activator)
 		}
 
 		time = (10 - ent->health) / 2;
-		time++;
-		trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %i seconds!\n\"", time));
 	}
+	time++;
+	trap_SendServerCommand(activator - g_entities, va("cp \"Flag will be held in %s!\n\"", ETJump::getSecondsString(time).c_str()));
 
 	ent->count2    = level.time;
 	ent->think     = checkpoint_use_think;

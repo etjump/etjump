@@ -3,6 +3,7 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 team_t CG_Debriefing_FindWinningTeam(void);
 team_t CG_Debriefing_FindOveralWinningTeam(void);
@@ -1646,7 +1647,7 @@ void CG_DebriefingTitle_Draw(panel_button_t *button)
 
 	CG_Text_Paint_Ext(x, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour, s, 0, 0, 0, button->font->font);
 
-	s = va("%i seconds to next map", std::max(60 - (cg.time - cgs.intermissionStartTime) / 1000, 0));
+	s = va("%s to next map", ETJump::getSecondsString(std::ceil(std::max(60 - (cg.time - cgs.intermissionStartTime) / 1000.0, 0.0))));
 	w = CG_Text_Width_Ext(s, button->font->scalex, 0, button->font->font);
 	x = button->rect.x + button->rect.w - w - 4;
 
