@@ -200,6 +200,41 @@ std::vector<std::string> ETJump::splitString(std::string &input, char separator,
 	return output;
 }
 
+std::string ETJump::getSecondsString(const int &seconds)
+{
+	return std::to_string(seconds) + " second" + (seconds != 1 ? "s" : "");
+}
+
+std::string ETJump::getMinutesString(const int &minutes)
+{
+	return std::to_string(minutes) + " minute" + (minutes != 1 ? "s" : "");
+}
+
+std::string ETJump::getHoursString(const int &hours)
+{
+	return std::to_string(hours) + " hour" + (hours != 1 ? "s" : "");
+}
+
+std::string ETJump::getDaysString(const int &days)
+{
+	return std::to_string(days) + " day" + (days != 1 ? "s" : "");
+}
+
+std::string ETJump::getWeeksString(const int &weeks)
+{
+	return std::to_string(weeks) + " week" + (weeks != 1 ? "s" : "");
+}
+
+std::string ETJump::getMonthsString(const int &months)
+{
+	return std::to_string(months) + " month" + (months != 1 ? "s" : "");
+}
+
+std::string ETJump::getYearsString(const int &years)
+{
+	return std::to_string(years) + " year" + (years != 1 ? "s" : "");
+}
+
 std::string ETJump::StringUtil::toLowerCase(const std::string& input)
 {
 	std::string str = input;

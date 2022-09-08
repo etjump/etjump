@@ -50,11 +50,19 @@ namespace ETJump
 		return fmt::sprintf(format, Fargs...);
 	}
 
-    std::string trimStart(const std::string& input);
-    std::string trimEnd(const std::string& input);
-    std::string trim(const std::string& input);
+	std::string trimStart(const std::string& input);
+	std::string trimEnd(const std::string& input);
+	std::string trim(const std::string& input);
 
-    std::vector<std::string> splitString(std::string &input, char separator, size_t maxLength);
+	std::vector<std::string> splitString(std::string &input, char separator, size_t maxLength);
+
+	std::string getSecondsString(const int &seconds);
+	std::string getMinutesString(const int &minutes);
+	std::string getHoursString(const int &hours);
+	std::string getDaysString(const int &days);
+	std::string getWeeksString(const int &weeks);
+	std::string getMonthsString(const int &months);
+	std::string getYearsString(const int &years);
 
 	namespace StringUtil 
 	{

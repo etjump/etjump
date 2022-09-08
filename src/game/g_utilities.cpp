@@ -651,27 +651,27 @@ std::string TimeStampDifferenceToString(int diff)
 
 	if (diff < HOUR)
 	{
-		return std::to_string(diff / MINUTE) + " minutes";
+		return ETJump::getMinutesString(diff / MINUTE);
 	}
 	else if (diff < DAY)
 	{
-		return std::to_string(diff / HOUR) + " hours";
+		return ETJump::getHoursString(diff / HOUR);
 	}
 	else if (diff < WEEK)
 	{
-		return std::to_string(diff / DAY) + " days";
+		return ETJump::getDaysString(diff / DAY);
 	}
 	else if (diff >= WEEK && diff < MONTH)
 	{
-		return std::to_string(diff / WEEK) + " weeks";
+		return ETJump::getWeeksString(diff / WEEK);
 	}
 	else if (diff >= MONTH && diff < YEAR)
 	{
-		return std::to_string(diff / MONTH) + " months";
+		return ETJump::getMonthsString(diff / MONTH);
 	}
 	else if (diff >= YEAR)
 	{
-		return std::to_string(diff / YEAR) + " years";
+		return ETJump::getYearsString(diff / YEAR);
 	}
 	return "";
 }

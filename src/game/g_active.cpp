@@ -4,6 +4,7 @@
 #include "etj_printer.h"
 #include "etj_inactivity_timer.h"
 #include "etj_numeric_utilities.h"
+#include "etj_string_utilities.h"
 
 /*
 ===============
@@ -636,7 +637,7 @@ qboolean ClientInactivityTimer(gclient_t *client)
 			client->sess.loadedPosBeforeInactivity = qfalse;
 			client->sess.teamBeforeInactivitySpec  = client->sess.sessionTeam;
 			G_LogPrintf("%f %f %f\n", client->sess.posBeforeInactivity[0], client->sess.posBeforeInactivity[1], client->sess.posBeforeInactivity[2]);
-			AP(va("cpm \"%s ^7was removed from teams due to inactivity! (%i seconds) \n\"", client->pers.netname, g_inactivity.integer));
+			AP(va("cpm \"%s ^7was removed from teams due to inactivity! (%s) \n\"", client->pers.netname, ETJump::getSecondsString(g_inactivity.integer).c_str()));
 			SetTeam(g_entities + (client - level.clients), "s", qtrue, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
 
 			return(qfalse);
