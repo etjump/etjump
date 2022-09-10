@@ -25,6 +25,7 @@
 #include "etj_jump_speeds.h"
 #include "etj_utilities.h"
 #include "etj_client_commands_handler.h"
+#include "etj_cvar_update_handler.h"
 
 namespace ETJump
 {
@@ -36,9 +37,9 @@ namespace ETJump
 			queueJumpSpeedsReset();
 		});
 		consoleCommandsHandler->subscribe("resetJumpSpeeds", [&](const std::vector<std::string>& args)
-			{
-				queueJumpSpeedsReset();
-			});
+		{
+			queueJumpSpeedsReset();
+		});
 		entityEventsHandler->subscribe(EV_JUMP, [&](centity_t* cent)
 		{
 			updateJumpSpeeds();
@@ -57,54 +58,102 @@ namespace ETJump
 		float x1 = 6 + etj_jumpSpeedsX.value;
 		float x2 = 6 + 30 + etj_jumpSpeedsX.value;
 		float y1 = 240 + etj_jumpSpeedsY.value;
-		float y2 = 240 + 12 +etj_jumpSpeedsY.value;
+		float y2 = y1;
 		auto textStyle = etj_jumpSpeedsShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 		vec4_t color;
-		bool vertical = !etj_jumpSpeedsStyle.integer;
+		bool horizontal = etj_jumpSpeedsStyle.integer & static_cast<int>(jumpSpeedStyle::Horizontal);
+		int numJumps = static_cast<int>(jumpSpeeds.size());
 
 		if (canSkipDraw())
 		{
 			return;
 		}
 
-		// draw the label text first
 		x1 = ETJump_AdjustPosition(x1);
 		x2 = ETJump_AdjustPosition(x2);
-		parseColorString(etj_jumpSpeedsColor.string, color);
-		DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, "Jump Speeds:", 0, textStyle);
-
-		// adjust x or y depending on style chosen
-		vertical ? y1 += 12 : x1 += DrawStringWidth("Jump Speeds: ", 0.2f) + 5;
-
-		for (auto i = 0; i < static_cast<int>(jumpSpeedHistory.size()); i++)
+		if (!(etj_jumpSpeedsStyle.integer & static_cast<int>(jumpSpeedStyle::NoLabel)))
 		{
-			auto jumpSpeed = std::to_string(jumpSpeedHistory.at(i));
-			if (etj_jumpSpeedsShowDiff.integer)
+			parseColorString(baseColorStr, color);
+			DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, "Jump Speeds:", 0, textStyle);
+
+			// adjust x or y depending on style chosen
+			if (horizontal)
 			{
-				adjustColors(i, overwriteHistory(i), &color);
+				x1 += static_cast<float>(DrawStringWidth("Jump Speeds: ", 0.2f)) + 5;
 			}
-			if (vertical)
-			{
-				// first column
-				if (i < 5)
-				{
-					DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, textStyle);
-					y1 += 12;
-				}
-				// second column
-				else
-				{
-					DrawString(x2, y2, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, textStyle);
-					y2 += 12;
-				}
-			}
-			// horizontal list
 			else
 			{
-				DrawString(x1, y1, 0.2f, 0.2f, color, qfalse, jumpSpeed.c_str(), 0, textStyle);
-				x1 += 30;
+				y1 += 12;
+				y2 += 12;
 			}
 		}
+
+		if (etj_jumpSpeedsStyle.integer & static_cast<int>(jumpSpeedStyle::Reversed))
+		{
+			for (auto i = numJumps - 1; i >= 0; i--)
+			{
+				auto jumpSpeed = std::to_string(jumpSpeeds[i].first);
+
+				if (horizontal)
+				{
+					DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+					x1 += 30;
+				}
+				else
+				{
+					// max 5 jumps - first column
+					if (numJumps <= 5)
+					{
+						DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+						y1 += 12;
+					}
+					else
+					{
+						// second column
+						if (i < numJumps - 5)
+						{
+							DrawString(x2, y2, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+							y2 += 12;
+						}
+						// first column
+						else
+						{
+							DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+							y1 += 12;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			for (auto i = 0; i < numJumps; i++)
+			{
+				auto jumpSpeed = std::to_string(jumpSpeeds[i].first);
+
+				if (horizontal)
+				{
+					DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+					x1 += 30;
+				}
+				else
+				{
+					// first column
+					if (i < 5)
+					{
+						DrawString(x1, y1, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+						y1 += 12;
+					}
+					// second column
+					else
+					{
+						DrawString(x2, y2, 0.2f, 0.2f, jumpSpeedsColors[i], qfalse, jumpSpeed.c_str(), 0, textStyle);
+						y2 += 12;
+					}
+				}
+			}
+		}
+
 	}
 
 	void JumpSpeeds::updateJumpSpeeds()
@@ -124,24 +173,27 @@ namespace ETJump
 		// if reset is queued, do that before we start storing new jump speeds
 		if (resetQueued)
 		{
-			resetJumpSpeeds();
+			jumpSpeeds.clear();
 			resetQueued = false;
 		}
 
 		team = ps->persistant[PERS_TEAM];
-		jumpSpeedHistory.push_back(ps->persistant[PERS_JUMP_SPEED]);
+		baseColorStr = etj_jumpSpeedsColor.string;
+		jumpSpeeds.emplace_back(ps->persistant[PERS_JUMP_SPEED], baseColorStr);
+
 		// we only want to keep last 10 jumps, so remove first value if we go over that
-		if (jumpSpeedHistory.size() > MAX_JUMPS)
+		if (jumpSpeeds.size() > MAX_JUMPS)
 		{
-			// store the deleted speed so we can do diff comparisons later
-			lastDeletedSpeed = jumpSpeedHistory.front();
-			jumpSpeedHistory.erase(jumpSpeedHistory.begin());
-			jumpSpeedDeleted = true;
+			jumpSpeeds.erase(jumpSpeeds.begin());
 		}
-		else
+
+		if (etj_jumpSpeedsShowDiff.integer && jumpSpeeds.size() > 1)
 		{
-			jumpSpeedDeleted = false;
+			adjustColors();
 		}
+
+		// parse the colors for drawing here, so we don't need to do it every frame
+		colorStrToVec();
 	}
 
 	void JumpSpeeds::queueJumpSpeedsReset()
@@ -149,65 +201,28 @@ namespace ETJump
 		resetQueued = true;
 	}
 
-	void JumpSpeeds::resetJumpSpeeds()
+	void JumpSpeeds::adjustColors()
 	{
-		jumpSpeedHistory.clear();
-		lastDeletedSpeed = 0;
+		auto jumpNum = jumpSpeeds.size() - 1;
+		fasterColorStr = etj_jumpSpeedsFasterColor.string;
+		slowerColorStr = etj_jumpSpeedsSlowerColor.string;
+
+		if (jumpSpeeds[jumpNum].first == jumpSpeeds[jumpNum - 1].first)
+		{
+			return;	// color is already set to default, no need to adjust
+		}
+
+		jumpSpeeds[jumpNum].second = jumpSpeeds[jumpNum].first > jumpSpeeds[jumpNum - 1].first
+				? fasterColorStr
+				: slowerColorStr;
 	}
 
-	void JumpSpeeds::adjustColors(int jumpNum, bool overwrite, vec4_t* color) const
+	void JumpSpeeds::colorStrToVec()
 	{
-		// equal/first jump color comes from etj_jumpSpeedsColor
-		vec4_t fasterColor;
-		vec4_t slowerColor;
-		parseColorString(etj_jumpSpeedsFasterColor.string, fasterColor);
-		parseColorString(etj_jumpSpeedsSlowerColor.string, slowerColor);
-		auto currentJumpSpeed = jumpSpeedHistory[jumpNum];
-
-		// when checking for the first jump speed, we need to make sure
-		// we don't do comparison of (first jump - 1). Instead, compare against
-		// previously deleted jump speed, but only if the history is full
-		// and we start deleting jump speeds (11th jump)
-		if (jumpNum == 0)
+		for (std::size_t i = 0; i < jumpSpeeds.size(); i++)
 		{
-			if (overwrite)
-			{
-				// faster than previous jump
-				if (currentJumpSpeed > lastDeletedSpeed)
-				{
-					Vector4Copy(fasterColor, *color);
-				}
-				// slower than previous jump
-				else if (currentJumpSpeed < lastDeletedSpeed)
-				{
-					Vector4Copy(slowerColor, *color);
-				}
-			}
+			parseColorString(jumpSpeeds[i].second, jumpSpeedsColors[i]);
 		}
-		else
-		{
-			auto previousJumpSpeed = jumpSpeedHistory[jumpNum - 1];
-			// faster than previous jump
-			if (currentJumpSpeed > previousJumpSpeed)
-			{
-				Vector4Copy(fasterColor, *color);
-			}
-			// slower than previous jump
-			else if (previousJumpSpeed > currentJumpSpeed)
-			{
-				Vector4Copy(slowerColor, *color);
-			}
-		}
-	}
-
-	bool JumpSpeeds::overwriteHistory(int jumpNum) const
-	{
-		if (jumpSpeedHistory.size() == MAX_JUMPS && jumpSpeedDeleted)
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	bool JumpSpeeds::canSkipDraw() const
@@ -217,7 +232,10 @@ namespace ETJump
 			return true;
 		}
 
-		if (team == TEAM_SPECTATOR)
+		// need to get playerState here because we only update team
+		// in the update function, which is never called as a spectator
+		playerState_s *ps = getValidPlayerState();
+		if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR)
 		{
 			return true;
 		}
