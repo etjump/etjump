@@ -2072,8 +2072,7 @@ static void CG_RegisterGraphics(void)
 	static const char *ccExtensions[] =
 	{
 		"tga",
-		"jpg",
-		"png"
+		"jpg"
 	};
 
 	// do while loop to account for cgs.ccLayers
@@ -2117,8 +2116,8 @@ static void CG_RegisterGraphics(void)
 				shaderName,
 				{
 					"noPicMip",
-				  "nocompress",
-				  "noMipMaps"
+					"nocompress",
+					"noMipMaps"
 				},
 				{
 					{
