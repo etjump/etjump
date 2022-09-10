@@ -25,7 +25,6 @@
 #include "etj_jump_speeds.h"
 #include "etj_utilities.h"
 #include "etj_client_commands_handler.h"
-#include "etj_cvar_update_handler.h"
 
 namespace ETJump
 {
