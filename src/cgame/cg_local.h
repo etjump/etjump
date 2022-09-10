@@ -2667,6 +2667,25 @@ extern vmCvar_t etj_strafeQualityShadow;
 extern vmCvar_t etj_strafeQualitySize;
 extern vmCvar_t etj_strafeQualityStyle;
 
+// Upmove meter
+extern vmCvar_t etj_drawUpmoveMeter;
+extern vmCvar_t etj_upmoveMeterMaxDelay;
+extern vmCvar_t etj_upmoveMeterGraphX;
+extern vmCvar_t etj_upmoveMeterGraphY;
+extern vmCvar_t etj_upmoveMeterGraphW;
+extern vmCvar_t etj_upmoveMeterGraphH;
+extern vmCvar_t etj_upmoveMeterGraphColor;
+extern vmCvar_t etj_upmoveMeterGraphOnGroundColor;
+extern vmCvar_t etj_upmoveMeterGraphPreJumpColor;
+extern vmCvar_t etj_upmoveMeterGraphPostJumpColor;
+extern vmCvar_t etj_upmoveMeterGraphOutlineW;
+extern vmCvar_t etj_upmoveMeterGraphOutlineColor;
+extern vmCvar_t etj_upmoveMeterTextX;
+extern vmCvar_t etj_upmoveMeterTextH;
+extern vmCvar_t etj_upmoveMeterTextColor;
+extern vmCvar_t etj_upmoveMeterTextShadow;
+extern vmCvar_t etj_upmoveMeterTextSize;
+
 extern vmCvar_t etj_projection;
 extern vmCvar_t etj_saveMsg;
 

@@ -563,6 +563,25 @@ vmCvar_t etj_strafeQualityShadow;
 vmCvar_t etj_strafeQualitySize;
 vmCvar_t etj_strafeQualityStyle;
 
+// Upmove meter
+vmCvar_t etj_drawUpmoveMeter;
+vmCvar_t etj_upmoveMeterMaxDelay;
+vmCvar_t etj_upmoveMeterGraphX;
+vmCvar_t etj_upmoveMeterGraphY;
+vmCvar_t etj_upmoveMeterGraphW;
+vmCvar_t etj_upmoveMeterGraphH;
+vmCvar_t etj_upmoveMeterGraphColor;
+vmCvar_t etj_upmoveMeterGraphOnGroundColor;
+vmCvar_t etj_upmoveMeterGraphPreJumpColor;
+vmCvar_t etj_upmoveMeterGraphPostJumpColor;
+vmCvar_t etj_upmoveMeterGraphOutlineW;
+vmCvar_t etj_upmoveMeterGraphOutlineColor;
+vmCvar_t etj_upmoveMeterTextX;
+vmCvar_t etj_upmoveMeterTextH;
+vmCvar_t etj_upmoveMeterTextColor;
+vmCvar_t etj_upmoveMeterTextShadow;
+vmCvar_t etj_upmoveMeterTextSize;
+
 vmCvar_t etj_projection;
 vmCvar_t etj_saveMsg;
 
@@ -997,6 +1016,24 @@ cvarTable_t cvarTable[] =
 	{ &etj_strafeQualityShadow, "etj_strafeQualityShadow", "1", CVAR_ARCHIVE },
 	{ &etj_strafeQualitySize, "etj_strafeQualitySize", "3", CVAR_ARCHIVE },
 	{ &etj_strafeQualityStyle, "etj_strafeQualityStyle", "0", CVAR_ARCHIVE },
+	// Upmove meter
+	{ &etj_drawUpmoveMeter, "etj_drawUpmoveMeter", "0", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterMaxDelay, "etj_upmoveMeterMaxDelay", "360", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphX, "etj_upmoveMeterGraphX", "8", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphY, "etj_upmoveMeterGraphY", "8", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphW, "etj_upmoveMeterGraphW", "6", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphH, "etj_upmoveMeterGraphH", "80", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphColor, "etj_upmoveMeterGraphColor", "mdgrey", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphOnGroundColor, "etj_upmoveMeterGraphOnGroundColor", "Green", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphPreJumpColor, "etj_upmoveMeterGraphPreJumpColor", "Blue", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphPostJumpColor, "etj_upmoveMeterGraphPostJumpColor", "Red", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphOutlineW, "etj_upmoveMeterGraphOutlineW", "1", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterGraphOutlineColor, "etj_upmoveMeterGraphOutlineColor", "White", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterTextX, "etj_upmoveMeterTextX", "6", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterTextH, "etj_upmoveMeterTextH", "12", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterTextColor, "etj_upmoveMeterTextColor", "White", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterTextShadow, "etj_upmoveMeterTextShadow", "1", CVAR_ARCHIVE },
+	{ &etj_upmoveMeterTextSize, "etj_upmoveMeterTextSize", "2", CVAR_ARCHIVE },
 
 	{ &etj_projection, "etj_projection", "0", CVAR_ARCHIVE },
 	{ &etj_saveMsg, "etj_saveMsg", "^7Saved", CVAR_ARCHIVE },

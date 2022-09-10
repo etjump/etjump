@@ -1689,6 +1689,7 @@ void CG_InitConsoleCommands(void)
 	trap_AddCommand("resetmaxspeed");
 	trap_AddCommand("resetStrafeQuality");
 	trap_AddCommand("resetJumpSpeeds");
+	trap_AddCommand("resetUpmoveMeter");
 	trap_AddCommand("class");
 	trap_AddCommand("startTimer");
 	trap_AddCommand("stopTimer");

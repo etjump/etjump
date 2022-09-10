@@ -76,6 +76,7 @@ add_library(cgame MODULE
 	"etj_speed_drawable.cpp"
 	"etj_strafe_quality_drawable.cpp"
 	"etj_upper_right_drawable.cpp"
+	"etj_upmove_meter_drawable.cpp"
 	"etj_timerun.cpp"
 	"etj_timerun_view.cpp"
 	"etj_trickjump_lines.cpp"
