@@ -3436,6 +3436,12 @@ void CG_AddViewWeapon(playerState_t *ps)
 		return;
 	}
 
+	// allow forcing a certain gun in demo playback, e.g. for making movies
+	if (cg.demoPlayback && etj_demo_weapon.integer > WP_NONE && etj_demo_weapon.integer < WP_NUM_WEAPONS)
+	{
+		ps->weapon = cg.predictedPlayerEntity.currentState.weapon = etj_demo_weapon.integer;
+	}
+
 	if (ps->weapon > WP_NONE)
 	{
 		ETJump_SetEntityRGBA(&hand, 1.0f, 1.0f, 1.0f, 1.0f);

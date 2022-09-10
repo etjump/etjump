@@ -2581,6 +2581,7 @@ extern vmCvar_t etj_demo_pitchturnspeed;
 extern vmCvar_t etj_demo_rollspeed;
 extern vmCvar_t etj_demo_lookat;
 extern vmCvar_t etj_demo_freecamspeed;
+extern vmCvar_t etj_demo_weapon;
 extern vmCvar_t etj_predefineddemokeys;
 
 extern vmCvar_t etj_drawNoJumpDelay;

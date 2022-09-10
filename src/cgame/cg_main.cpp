@@ -479,6 +479,7 @@ vmCvar_t etj_demo_pitchturnspeed;
 vmCvar_t etj_demo_rollspeed;
 vmCvar_t etj_demo_lookat;
 vmCvar_t etj_demo_freecamspeed;
+vmCvar_t etj_demo_weapon;
 vmCvar_t etj_predefineddemokeys;
 
 vmCvar_t etj_drawNoJumpDelay;
@@ -922,6 +923,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_demo_pitchturnspeed, "etj_demo_pitchturnspeed", "140", CVAR_ARCHIVE },
 	{ &etj_demo_rollspeed, "etj_demo_rollspeed", "140", CVAR_ARCHIVE },
 	{ &etj_demo_freecamspeed, "etj_demo_freecamspeed", "800", CVAR_ARCHIVE },
+	{ &etj_demo_weapon, "etj_demo_weapon", "0", CVAR_ARCHIVE },
 	{ &etj_demo_lookat, "b_demo_lookat", "-1", CVAR_CHEAT },
 	{ &etj_predefineddemokeys, "etj_predefineddemokeys", "1", CVAR_CHEAT | CVAR_ARCHIVE },
 	{ &etj_drawNoJumpDelay, "etj_drawNoJumpDelay", "1", CVAR_ARCHIVE },
