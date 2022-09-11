@@ -6,7 +6,7 @@
 // Left side menus
 #define SUBW_HUD_Y SUBW_Y
 #define SUBW_HUD_ITEM_Y SUBW_HUD_Y + SUBW_HEADER_HEIGHT
-#define SUBW_HUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 14)
+#define SUBW_HUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 15)
 
 #define SUBW_GUN_Y SUBW_HUD_Y + SUBW_HUD_HEIGHT + SUBW_SPACING_Y
 #define SUBW_GUN_ITEM_Y SUBW_GUN_Y + SUBW_HEADER_HEIGHT
@@ -58,6 +58,7 @@ menuDef {
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_lagometerY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Lagometer Y:", 0.2, SUBW_ITEM_HEIGHT, etj_lagometerY 0 -480 480 10, "Sets Y offset for lagometer\netj_lagometerY")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Projection:", 0.2, SUBW_ITEM_HEIGHT, "etj_projection", cvarFloatList { "Rectilinear" 0 "Cylindrical" 1 "Panini" 2 }, "Sets projection type of CGaz 1 and snaphud\netj_projection")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_HUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 15), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Banners:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawBanners", "Draw banner prints on HUD\netj_drawBanners")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_GUN_Y, SUBW_WIDTH, SUBW_GUN_HEIGHT, "GUN")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Gun:", 0.2, SUBW_ITEM_HEIGHT, "cg_drawGun", "Draw gun\ncg_drawGun")
