@@ -89,7 +89,7 @@ namespace ETJump
 
 		if (etj_jumpSpeedsStyle.integer & static_cast<int>(jumpSpeedStyle::Reversed))
 		{
-			for (auto i = numJumps - 1; i >= 0; i--)
+			for (int i = numJumps - 1; i >= 0; i--)
 			{
 				auto jumpSpeed = std::to_string(jumpSpeeds[i].first);
 
@@ -126,7 +126,7 @@ namespace ETJump
 		}
 		else
 		{
-			for (auto i = 0; i < numJumps; i++)
+			for (int i = 0; i < numJumps; i++)
 			{
 				auto jumpSpeed = std::to_string(jumpSpeeds[i].first);
 
