@@ -2671,6 +2671,8 @@ extern vmCvar_t etj_saveMsg;
 
 extern vmCvar_t etj_FPSMeterUpdateInterval;
 
+extern vmCvar_t etj_fixedCompassShader;
+
 //
 // cg_main.c
 //

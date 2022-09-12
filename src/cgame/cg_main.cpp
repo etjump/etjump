@@ -569,6 +569,8 @@ vmCvar_t etj_saveMsg;
 
 vmCvar_t etj_FPSMeterUpdateInterval;
 
+vmCvar_t etj_fixedCompassShader;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -1003,6 +1005,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_saveMsg, "etj_saveMsg", "^7Saved", CVAR_ARCHIVE },
 
 	{ &etj_FPSMeterUpdateInterval, "etj_FPSMeterUpdateInterval", "250", CVAR_ARCHIVE },
+
+	{ &etj_fixedCompassShader, "etj_fixedCompassShader", "0", CVAR_LATCH | CVAR_ARCHIVE },
 };
 
 
@@ -1868,7 +1872,7 @@ static void CG_RegisterSounds(void)
 
 //===================================================================================
 
-static std::vector<const char *> dynamicallyLoadedShaders;
+static std::vector<std::string> dynamicallyLoadedShaders;
 
 /*
 =================
@@ -2094,43 +2098,47 @@ static void CG_RegisterGraphics(void)
 			cgs.media.commandCentreAutomapShader[i] = logoAutomap;
 		}
 
-		// check whether a levelshot image exists
-		fileHandle_t f;
-		int len = 0;
-		char *ccShaderPath;
-		for (const auto &ext : ccExtensions) {
-			ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc.%s", cgs.rawmapname, ext);
-			len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
+		if (etj_fixedCompassShader.integer)
+		{
+			// check whether a levelshot image exists
+			fileHandle_t f;
+			int len = 0;
+			char *ccShaderPath;
+			for (const auto &ext : ccExtensions) {
+				ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc.%s", cgs.rawmapname, ext);
+				len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
+				if (len > 0)
+				{
+					trap_FS_FCloseFile(f);
+					break;
+				}
+			}
+
+			// if a levelshot image exists, use it and override the compass shader with a custom shader even if the original shader may not be broken
+			// this ensures that the corners of the rectangular compass map are not visible outside of the circular compass due to blending
 			if (len > 0)
 			{
-				break;
-			}
-		}
-
-		// if a levelshot image exists, use it and override the compass shader with a custom shader even if the original shader may not be broken
-		// this ensures that the corners of the rectangular compass map are not visible outside of the circular compass due to blending
-		if (len > 0)
-		{
-			const char *shaderName = cgs.ccLayers ? va("levelshots/%s_%i_cc_automap_fixed", cgs.rawmapname, i) : va("levelshots/%s_cc_automap_fixed", cgs.rawmapname);
-			const std::string shader = ETJump::composeShader(
-				shaderName,
-				{
-					"noPicMip",
-					"nocompress",
-					"noMipMaps"
-				},
-				{
+				const char *shaderName = cgs.ccLayers ? va("levelshots/%s_%i_cc_automap_fixed", cgs.rawmapname, i) : va("levelshots/%s_cc_automap_fixed", cgs.rawmapname);
+				const std::string shader = ETJump::composeShader(
+					shaderName,
 					{
-						va("clampmap %s", ccShaderPath),
-						"depthFunc equal",
-						"rgbGen identity",
+						"noPicMip",
+						"nocompress",
+						"noMipMaps"
+					},
+					{
+						{
+							va("clampmap %s", ccShaderPath),
+							"depthFunc equal",
+							"rgbGen identity",
+						}
 					}
-				}
-			);
-			trap_R_LoadDynamicShader(shaderName, shader.c_str());
-			dynamicallyLoadedShaders.push_back(shaderName);
+				);
+				trap_R_LoadDynamicShader(shaderName, shader.c_str());
+				dynamicallyLoadedShaders.push_back(shaderName);
 
-			cgs.media.commandCentreAutomapShader[i] = trap_R_RegisterShaderNoMip(shaderName);
+				cgs.media.commandCentreAutomapShader[i] = trap_R_RegisterShaderNoMip(shaderName);
+			}
 		}
 
 		++i;
@@ -3745,8 +3753,9 @@ void CG_Shutdown(void)
 	// unload dynamically loaded shaders
 	for (const auto &shaderName : dynamicallyLoadedShaders)
 	{
-		trap_R_LoadDynamicShader(shaderName, nullptr);
+		trap_R_LoadDynamicShader(shaderName.c_str(), nullptr);
 	}
+	dynamicallyLoadedShaders.clear();
 
 	Shutdown_Display();
 }
