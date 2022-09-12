@@ -823,3 +823,32 @@ gfx/2d/idle
 		rgbGen vertex
 	}
 }
+
+////////////////
+// Logo
+////////////////
+
+gfx/2d/logo_cc_trans	// default mapexpand shader
+{
+	noPicMip
+	nocompress
+	noMipMaps
+	{
+		clampmap gfx/2d/logo.tga
+		blendFunc blend
+		rgbGen identity
+		alphaGen vertex
+	}
+}
+
+gfx/2d/logo_cc_automap	// default compass shader
+{
+	noPicMip
+	nocompress
+	noMipMaps
+	{
+		clampmap gfx/2d/logo.tga
+		depthFunc equal
+		rgbGen identity
+	}
+}

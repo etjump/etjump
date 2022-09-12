@@ -12,6 +12,7 @@
 #include "etj_init.h"
 #include "etj_cvar_shadow.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_utilities.h"
 
 displayContextDef_t cgDC;
 
@@ -568,6 +569,8 @@ vmCvar_t etj_saveMsg;
 
 vmCvar_t etj_FPSMeterUpdateInterval;
 
+vmCvar_t etj_fixedCompassShader;
+
 typedef struct
 {
 	vmCvar_t *vmCvar;
@@ -1002,6 +1005,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_saveMsg, "etj_saveMsg", "^7Saved", CVAR_ARCHIVE },
 
 	{ &etj_FPSMeterUpdateInterval, "etj_FPSMeterUpdateInterval", "250", CVAR_ARCHIVE },
+
+	{ &etj_fixedCompassShader, "etj_fixedCompassShader", "0", CVAR_LATCH | CVAR_ARCHIVE },
 };
 
 
@@ -1867,6 +1872,8 @@ static void CG_RegisterSounds(void)
 
 //===================================================================================
 
+static std::vector<std::string> dynamicallyLoadedShaders;
+
 /*
 =================
 CG_RegisterGraphics
@@ -2060,21 +2067,100 @@ static void CG_RegisterGraphics(void)
 	//	cgs.media.waypointCompassDefendShader	= trap_R_RegisterShaderNoMip( "sprites/waypoint_defend_compass" );
 	//	cgs.media.waypointCompassRegroupShader	= trap_R_RegisterShaderNoMip( "sprites/waypoint_regroup_compass" );
 	//	cgs.media.commandCentreWoodShader		= trap_R_RegisterShaderNoMip( "ui/assets2/commandMap" );
-	if (cgs.ccLayers)
+
+	// load default etjump shaders
+	const qhandle_t logoTrans = trap_R_RegisterShaderNoMip("gfx/2d/logo_cc_trans");
+	const qhandle_t logoAutomap = trap_R_RegisterShaderNoMip("gfx/2d/logo_cc_automap");
+
+	// list of supported command centre map image extensions
+	static const char *ccExtensions[] =
 	{
-		for (i = 0; i < cgs.ccLayers; i++)
+		"tga",
+		"jpg"
+	};
+
+	// do while loop to account for cgs.ccLayers
+	// if !cgs.ccLayers, then index i=0 corresponds to the (only) map and compass shaders
+	i = 0;
+	do
+	{
+		// register the map and compass shaders
+		cgs.media.commandCentreMapShaderTrans[i] = trap_R_RegisterShaderNoMip(cgs.ccLayers ? va("levelshots/%s_%i_cc_trans", cgs.rawmapname, i) : va("levelshots/%s_cc_trans", cgs.rawmapname));
+		cgs.media.commandCentreAutomapShader[i]  = trap_R_RegisterShaderNoMip(cgs.ccLayers ? va("levelshots/%s_%i_cc_automap", cgs.rawmapname, i) : va("levelshots/%s_cc_automap", cgs.rawmapname));
+		
+		// if returned qhandles are empty due to e.g. missing shaders or a misnomer like in gamma_mill_b3, override with default etjump shaders
+		if (!cgs.media.commandCentreMapShaderTrans[i])
 		{
-			cgs.media.commandCentreMapShader[i]      = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc.tga", cgs.rawmapname, i));
-			cgs.media.commandCentreMapShaderTrans[i] = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc_trans", cgs.rawmapname, i));
-			cgs.media.commandCentreAutomapShader[i]  = trap_R_RegisterShaderNoMip(va("levelshots/%s_%i_cc_automap", cgs.rawmapname, i));
+			cgs.media.commandCentreMapShaderTrans[i] = logoTrans;
 		}
-	}
-	else
-	{
-		cgs.media.commandCentreMapShader[0]      = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc.tga", cgs.rawmapname));
-		cgs.media.commandCentreMapShaderTrans[0] = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc_trans", cgs.rawmapname));
-		cgs.media.commandCentreAutomapShader[0]  = trap_R_RegisterShaderNoMip(va("levelshots/%s_cc_automap", cgs.rawmapname));
-	}
+		if (!cgs.media.commandCentreAutomapShader[i])
+		{
+			cgs.media.commandCentreAutomapShader[i] = logoAutomap;
+		}
+
+		// check for explicitly named images without actual shaders
+		bool explicitlyNamedImages = false;
+		fileHandle_t f;
+		int len = 0;
+		char *ccShaderPath;
+		for (const auto &ext : ccExtensions) {
+			ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc_automap.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc_automap.%s", cgs.rawmapname, ext);
+			len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
+			if (len > 0)
+			{
+				trap_FS_FCloseFile(f);
+				explicitlyNamedImages = true;
+				break;
+			}
+		}
+
+		if (etj_fixedCompassShader.integer || explicitlyNamedImages)
+		{
+			if (!explicitlyNamedImages)
+			{
+				// check whether a (normal) levelshot image exists
+				len = 0;
+				for (const auto &ext : ccExtensions) {
+					ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc.%s", cgs.rawmapname, ext);
+					len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
+					if (len > 0)
+					{
+						trap_FS_FCloseFile(f);
+						break;
+					}
+				}
+			}
+
+			// if a levelshot image exists, use it and override the compass shader with a custom shader even if the original shader may not be broken
+			// this ensures that the corners of the rectangular compass map are not visible outside of the circular compass due to blending
+			if (len > 0)
+			{
+				const char *shaderName = cgs.ccLayers ? va("levelshots/%s_%i_cc_automap_fixed", cgs.rawmapname, i) : va("levelshots/%s_cc_automap_fixed", cgs.rawmapname);
+				const std::string shader = ETJump::composeShader(
+					shaderName,
+					{
+						"noPicMip",
+						"nocompress",
+						"noMipMaps"
+					},
+					{
+						{
+							va("clampmap %s", ccShaderPath),
+							"depthFunc equal",
+							"rgbGen identity",
+						}
+					}
+				);
+				trap_R_LoadDynamicShader(shaderName, shader.c_str());
+				dynamicallyLoadedShaders.push_back(shaderName);
+
+				cgs.media.commandCentreAutomapShader[i] = trap_R_RegisterShaderNoMip(shaderName);
+			}
+		}
+
+		++i;
+	} while (i < cgs.ccLayers);
+
 	cgs.media.commandCentreAutomapMaskShader    = trap_R_RegisterShaderNoMip("levelshots/automap_mask");
 	cgs.media.commandCentreAutomapBorderShader  = trap_R_RegisterShaderNoMip("ui/assets2/maptrim_long");
 	cgs.media.commandCentreAutomapBorder2Shader = trap_R_RegisterShaderNoMip("ui/assets2/maptrim_long2");
@@ -3680,6 +3766,13 @@ void CG_Shutdown(void)
 	CG_EventHandling(CGAME_EVENT_NONE, qtrue);
 
 	ETJump::shutdown();
+
+	// unload dynamically loaded shaders
+	for (const auto &shaderName : dynamicallyLoadedShaders)
+	{
+		trap_R_LoadDynamicShader(shaderName.c_str(), nullptr);
+	}
+	dynamicallyLoadedShaders.clear();
 
 	Shutdown_Display();
 }

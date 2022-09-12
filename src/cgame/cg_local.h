@@ -1448,7 +1448,6 @@ typedef struct
 	qhandle_t waypointCompassDefendShader;
 	qhandle_t waypointCompassRegroupShader;
 	qhandle_t commandCentreWoodShader;
-	qhandle_t commandCentreMapShader[MAX_COMMANDMAP_LAYERS];
 	qhandle_t commandCentreMapShaderTrans[MAX_COMMANDMAP_LAYERS];
 	qhandle_t commandCentreAutomapShader[MAX_COMMANDMAP_LAYERS];
 	qhandle_t commandCentreAutomapMaskShader;
@@ -2671,6 +2670,8 @@ extern vmCvar_t etj_projection;
 extern vmCvar_t etj_saveMsg;
 
 extern vmCvar_t etj_FPSMeterUpdateInterval;
+
+extern vmCvar_t etj_fixedCompassShader;
 
 //
 // cg_main.c
