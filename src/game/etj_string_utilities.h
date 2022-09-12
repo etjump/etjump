@@ -56,6 +56,12 @@ namespace ETJump
 
 	std::vector<std::string> splitString(std::string &input, char separator, size_t maxLength);
 
+	template <typename T>
+	std::string getPluralizedString(const T &val, const std::string &str)
+	{
+		return std::to_string(val) + " " + str + (val == 1 ? "" : "s");
+	}
+
 	std::string getSecondsString(const int &seconds);
 	std::string getMinutesString(const int &minutes);
 	std::string getHoursString(const int &hours);
