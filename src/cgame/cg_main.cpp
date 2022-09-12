@@ -2098,19 +2098,36 @@ static void CG_RegisterGraphics(void)
 			cgs.media.commandCentreAutomapShader[i] = logoAutomap;
 		}
 
-		if (etj_fixedCompassShader.integer)
+		// check for explicitly named images without actual shaders
+		bool explicitlyNamedImages = false;
+		fileHandle_t f;
+		int len = 0;
+		char *ccShaderPath;
+		for (const auto &ext : ccExtensions) {
+			ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc_automap.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc_automap.%s", cgs.rawmapname, ext);
+			len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
+			if (len > 0)
+			{
+				trap_FS_FCloseFile(f);
+				explicitlyNamedImages = true;
+				break;
+			}
+		}
+
+		if (etj_fixedCompassShader.integer || explicitlyNamedImages)
 		{
-			// check whether a levelshot image exists
-			fileHandle_t f;
-			int len = 0;
-			char *ccShaderPath;
-			for (const auto &ext : ccExtensions) {
-				ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc.%s", cgs.rawmapname, ext);
-				len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
-				if (len > 0)
-				{
-					trap_FS_FCloseFile(f);
-					break;
+			if (!explicitlyNamedImages)
+			{
+				// check whether a (normal) levelshot image exists
+				len = 0;
+				for (const auto &ext : ccExtensions) {
+					ccShaderPath = cgs.ccLayers ? va("levelshots/%s_%i_cc.%s", cgs.rawmapname, i, ext) : va("levelshots/%s_cc.%s", cgs.rawmapname, ext);
+					len = trap_FS_FOpenFile(ccShaderPath, &f, FS_READ);
+					if (len > 0)
+					{
+						trap_FS_FCloseFile(f);
+						break;
+					}
 				}
 			}
 
