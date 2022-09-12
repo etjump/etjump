@@ -1947,7 +1947,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 		}
 	}
 
-	if (connPerIP > g_maxConnsPerIP.integer)
+	if (g_maxConnsPerIP.integer > 0 && connPerIP > g_maxConnsPerIP.integer)
 	{
 		G_LogPrintf("Possible DoS attack. Rejecting client from %s "
 		            "(%d connections already)\n", ip, g_maxConnsPerIP.integer);
