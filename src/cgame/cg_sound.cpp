@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "cg_local.h"
+#include "../game/etj_string_utilities.h"
 
 // we have to define these static lists, since we can't alloc memory within the cgame
 
@@ -698,7 +699,7 @@ qboolean CG_SaveSpeakersToScript(void)
 
 	trap_FS_FCloseFile(fh);
 
-	CG_Printf("Saved %i speakers to 'sound/maps/%s.sps'\n", BG_NumScriptSpeakers(), cgs.rawmapname);
+	CG_Printf("Saved %s to 'sound/maps/%s.sps'\n", ETJump::getPluralizedString(BG_NumScriptSpeakers(), "speaker").c_str(), cgs.rawmapname);
 
 	return qtrue;
 }

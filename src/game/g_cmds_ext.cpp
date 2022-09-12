@@ -312,7 +312,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue)
 	}
 	else
 	{
-		G_Printf("\n%2d total players\n\n", cnt);
+		G_Printf("\n%s\n\n", ETJump::getPluralizedString(cnt, "total player").c_str());
 	}
 
 	// Team speclock info

@@ -202,37 +202,37 @@ std::vector<std::string> ETJump::splitString(std::string &input, char separator,
 
 std::string ETJump::getSecondsString(const int &seconds)
 {
-	return std::to_string(seconds) + " second" + (seconds != 1 ? "s" : "");
+	return getPluralizedString(seconds, "second");
 }
 
 std::string ETJump::getMinutesString(const int &minutes)
 {
-	return std::to_string(minutes) + " minute" + (minutes != 1 ? "s" : "");
+	return getPluralizedString(minutes, "minute");
 }
 
 std::string ETJump::getHoursString(const int &hours)
 {
-	return std::to_string(hours) + " hour" + (hours != 1 ? "s" : "");
+	return getPluralizedString(hours, "hour");
 }
 
 std::string ETJump::getDaysString(const int &days)
 {
-	return std::to_string(days) + " day" + (days != 1 ? "s" : "");
+	return getPluralizedString(days, "day");
 }
 
 std::string ETJump::getWeeksString(const int &weeks)
 {
-	return std::to_string(weeks) + " week" + (weeks != 1 ? "s" : "");
+	return getPluralizedString(weeks, "week");
 }
 
 std::string ETJump::getMonthsString(const int &months)
 {
-	return std::to_string(months) + " month" + (months != 1 ? "s" : "");
+	return getPluralizedString(months, "month");
 }
 
 std::string ETJump::getYearsString(const int &years)
 {
-	return std::to_string(years) + " year" + (years != 1 ? "s" : "");
+	return getPluralizedString(years, "year");
 }
 
 std::string ETJump::StringUtil::toLowerCase(const std::string& input)

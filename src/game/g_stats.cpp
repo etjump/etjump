@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include "etj_string_utilities.h"
 
 void G_LogDeath(gentity_t *ent, weapon_t weap)
 {
@@ -249,7 +250,7 @@ void G_LoseSkillPoints(gentity_t *ent, skillType_t skill, float points)
 		ent->client->sess.skillpoints[skill] = skillLevels[oldskill];
 	}
 
-	G_Printf("%s just lost %f skill points for skill %s\n", ent->client->pers.netname, oldskillpoints - ent->client->sess.skillpoints[skill], skillNames[skill]);
+	G_Printf("%s just lost %s for skill %s\n", ent->client->pers.netname, ETJump::getPluralizedString(oldskillpoints - ent->client->sess.skillpoints[skill], "skill point").c_str(), skillNames[skill]);
 
 	trap_PbStat(ent - g_entities, "loseskill",
 	            va("%d %d %d %f", ent->client->sess.sessionTeam, ent->client->sess.playerType,

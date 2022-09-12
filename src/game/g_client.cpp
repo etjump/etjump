@@ -1950,7 +1950,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	if (connPerIP > g_maxConnsPerIP.integer)
 	{
 		G_LogPrintf("Possible DoS attack. Rejecting client from %s "
-		            "(%d connections already)\n", ip, g_maxConnsPerIP.integer);
+		            "(%s already)\n", ip, ETJump::getPluralizedString(g_maxConnsPerIP.integer, "connection").c_str());
 		return "Too many connections from your ip.";
 	}
 
