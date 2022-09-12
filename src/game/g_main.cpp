@@ -496,7 +496,7 @@ cvarTable_t gameCvarTable[] =
 	{ &g_noclip,                    "g_noclip",                    "0",                                                      CVAR_ARCHIVE },
 	{ &g_nameChangeLimit,           "g_nameChangeLimit",           "5",                                                      CVAR_ARCHIVE },
 	{ &g_nameChangeInterval,        "g_nameChangeInterval",        "60",                                                     CVAR_ARCHIVE },
-	{ &g_mapScriptDir,              "g_mapScriptDir",              "scripts",                                                CVAR_ARCHIVE },
+	{ &g_mapScriptDir,              "g_mapScriptDir",              "mapscripts",                                             CVAR_ARCHIVE },
 	{ &g_blockedMaps,               "g_blockedMaps",               "",                                                       CVAR_ARCHIVE },
 
 
