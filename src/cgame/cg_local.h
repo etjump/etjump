@@ -2645,7 +2645,7 @@ extern vmCvar_t etj_snapHUDTrueness;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
-extern vmCvar_t etj_demo_drawBanners;
+extern vmCvar_t etj_drawBanners;
 
 // Jump speed history
 extern vmCvar_t etj_drawJumpSpeeds;

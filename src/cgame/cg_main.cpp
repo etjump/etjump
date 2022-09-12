@@ -541,7 +541,7 @@ vmCvar_t etj_snapHUDTrueness;
 
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
-vmCvar_t etj_demo_drawBanners;
+vmCvar_t etj_drawBanners;
 
 // Jump speed history
 vmCvar_t etj_drawJumpSpeeds;
@@ -978,7 +978,7 @@ cvarTable_t cvarTable[] =
 	{ &etj_snapHUDTrueness, "etj_snapHUDTrueness", "0", CVAR_ARCHIVE },
 	{ &etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE },
 	{ &etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1", CVAR_ARCHIVE },
-	{ &etj_demo_drawBanners, "etj_demo_drawBanners", "1", CVAR_ARCHIVE },
+	{ &etj_drawBanners, "etj_drawBanners", "1", CVAR_ARCHIVE },
 	// Jump speed history
 	{ &etj_drawJumpSpeeds, "etj_drawJumpSpeeds", "0", CVAR_ARCHIVE },
 	{ &etj_jumpSpeedsX, "etj_jumpSpeedsX", "0", CVAR_ARCHIVE },

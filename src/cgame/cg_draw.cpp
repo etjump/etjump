@@ -1114,7 +1114,7 @@ static void CG_DrawBannerPrint(void)
 		return;
 	}
 
-	if (cg.demoPlayback && !etj_demo_drawBanners.integer)
+	if (!etj_drawBanners.integer)
 	{
 		return;
 	}
