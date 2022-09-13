@@ -2048,6 +2048,8 @@ static void PM_CheckFallDamage(const float delta)
 	}
 	else if (delta > 67)
 	{
+		pm->ps->pm_time = 1000;
+		pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
 		PM_AddEventExt(EV_FALL_DMG_50, PM_FootstepForSurface());
 	}
 	else if (delta > 58)
@@ -2055,6 +2057,8 @@ static void PM_CheckFallDamage(const float delta)
 		// this is a pain grunt, so don't play it if dead
 		if (pm->ps->stats[STAT_HEALTH] > 0)
 		{
+			pm->ps->pm_time = 250;
+			pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
 			PM_AddEventExt(EV_FALL_DMG_25, PM_FootstepForSurface());
 		}
 	}
@@ -2063,6 +2067,8 @@ static void PM_CheckFallDamage(const float delta)
 		// this is a pain grunt, so don't play it if dead
 		if (pm->ps->stats[STAT_HEALTH] > 0)
 		{
+			pm->ps->pm_time = 1000;
+			pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
 			PM_AddEventExt(EV_FALL_DMG_15, PM_FootstepForSurface());
 		}
 	}
@@ -2071,6 +2077,8 @@ static void PM_CheckFallDamage(const float delta)
 		// this is a pain grunt, so don't play it if dead
 		if (pm->ps->stats[STAT_HEALTH] > 0)
 		{
+			pm->ps->pm_time = 1000;
+			pm->ps->pm_flags |= PMF_TIME_KNOCKBACK;
 			PM_AddEventExt(EV_FALL_DMG_10, PM_FootstepForSurface());
 		}
 	}
@@ -2438,7 +2446,10 @@ static void PM_GroundTrace(void)
 		{
 			// don't allow another jump for a little while
 			pm->ps->pm_flags |= PMF_TIME_LAND;
-			pm->ps->pm_time   = 250;
+			if (pm->ps->pm_time < 250)
+			{
+				pm->ps->pm_time   = 250;
+			}
 		}
 	}
 

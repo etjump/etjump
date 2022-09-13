@@ -786,53 +786,6 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 			//case EV_FALL_DMG_75:
 
 			crashEvent = event; //Feen: Store for processing after event loop
-
-			// rain - VectorClear() used to be done here whenever falling
-			// damage occured, but I moved it to bg_pmove where it belongs.
-
-			//Feen: Moved outside of event loop - CrashLand Fix
-			/*
-
-			if ( ent->s.eType != ET_PLAYER ) {
-			    break;		// not in the player model
-			}
-			if ( event == EV_FALL_NDIE )
-			{
-			    damage = 9999;
-			}
-			else if (event == EV_FALL_DMG_50)
-			{
-			    damage = 50;
-			    ent->client->ps.pm_time = 1000;
-			    ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-			}
-			else if (event == EV_FALL_DMG_25)
-			{
-			    damage = 25;
-			    ent->client->ps.pm_time = 250;
-			    ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-			}
-			else if (event == EV_FALL_DMG_15)
-			{
-			    damage = 15;
-			    ent->client->ps.pm_time = 1000;
-			    ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-			}
-			else if (event == EV_FALL_DMG_10)
-			{
-			    damage = 10;
-			    ent->client->ps.pm_time = 1000;
-			    ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-			}
-			else
-			    damage = 5; // never used
-			VectorSet (dir, 0, 0, 1);
-			ent->pain_debounce_time = level.time + 200;	// no normal pain sound
-			G_Damage (ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING);
-			break;
-
-			*/
-
 			break;
 
 		case EV_FIRE_WEAPON_MG42:
@@ -885,23 +838,15 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 
 	if (crashEvent > 0)
 	{
-
-
 		if (ent->s.eType != ET_PLAYER)
 		{
 			return;     // not in the player model
 		}
 
-
 		if (!portalEvent)
 		{
-
 			// rain - VectorClear() used to be done here whenever falling
 			// damage occured, but I moved it to bg_pmove where it belongs.
-
-			//un-fixed rain's fix...
-			VectorClear(ent->client->ps.velocity);
-
 
 			if (crashEvent == EV_FALL_NDIE)
 			{
@@ -910,26 +855,18 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 			else if (crashEvent == EV_FALL_DMG_50)
 			{
 				damage                    = 50;
-				ent->client->ps.pm_time   = 1000;
-				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else if (crashEvent == EV_FALL_DMG_25)
 			{
 				damage                    = 25;
-				ent->client->ps.pm_time   = 250;
-				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else if (crashEvent == EV_FALL_DMG_15)
 			{
 				damage                    = 15;
-				ent->client->ps.pm_time   = 1000;
-				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else if (crashEvent == EV_FALL_DMG_10)
 			{
 				damage                    = 10;
-				ent->client->ps.pm_time   = 1000;
-				ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 			}
 			else
 			{
@@ -937,10 +874,7 @@ void ClientEvents(gentity_t *ent, int oldEventSequence)
 			}
 			ent->pain_debounce_time = level.time + 200; // no normal pain sound
 			G_Damage(ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING);
-
-
 		}
-
 	}//Feen: End CrashLand Fix
 
 
