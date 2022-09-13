@@ -42,17 +42,25 @@ namespace ETJump
 	private:
 		EntityEventsHandler* _entityEventsHandler;
 		static const int MAX_JUMPS = 10;
-		std::vector<int> jumpSpeedHistory;		// last 10 jump speeds
-		bool jumpSpeedDeleted;
-		bool resetQueued;
-		int lastDeletedSpeed;					// last jump speed that was deleted from history
-		int team;
+		std::vector<std::pair<int, std::string>> jumpSpeeds;	// jumpspeeds + color string
+		vec4_t jumpSpeedsColors[10];							// jumpspeed colors parsed to vec4_t for drawing
+		std::string baseColorStr = etj_jumpSpeedsColor.string;
+		std::string fasterColorStr = etj_jumpSpeedsFasterColor.string;
+		std::string slowerColorStr = etj_jumpSpeedsSlowerColor.string;
+		bool resetQueued = false;
+		int team = 0;
+
+		enum class jumpSpeedStyle
+		{
+			Horizontal = 1,
+			NoLabel = 2,
+			Reversed = 4
+		};
 
 		void updateJumpSpeeds();
 		void queueJumpSpeedsReset();
-		void resetJumpSpeeds();
-		void adjustColors(int jumpNum, bool overwrite, vec4_t* color) const;
-		bool overwriteHistory(int jumpNum) const;
+		void adjustColors();
+		void colorStrToVec();
 		bool canSkipDraw() const;
 	};
 }
