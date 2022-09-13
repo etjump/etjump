@@ -73,7 +73,7 @@ namespace ETJump {
 		pmove_t *pm;
 
 		void startListeners();
-		void parseColor();
+		void parseAllColors();
 		void resetUpmoveMeter();
 		bool canSkipDraw() const;
 		bool canSkipUpdate() const;

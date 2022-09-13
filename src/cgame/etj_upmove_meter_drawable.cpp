@@ -32,7 +32,7 @@ namespace ETJump
 {
 	UpmoveMeter::UpmoveMeter()
 	{
-		parseColor();
+		parseAllColors();
 		startListeners();
 
 		team_ = 0;
@@ -43,27 +43,27 @@ namespace ETJump
 		// only subscribe to cvars whose parsing would be inefficient each frame
 		cvarUpdateHandler->subscribe(&etj_upmoveMeterGraphColor,
 			[&](const vmCvar_t *cvar) {
-				parseColor();
+				parseColorString(etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
 			});
 		cvarUpdateHandler->subscribe(&etj_upmoveMeterGraphOnGroundColor,
 			[&](const vmCvar_t *cvar) {
-				parseColor();
+				parseColorString(etj_upmoveMeterGraphOnGroundColor.string, jump_.graph_rgbaOnGround);
 			});
 		cvarUpdateHandler->subscribe(&etj_upmoveMeterGraphPreJumpColor,
 			[&](const vmCvar_t *cvar) {
-				parseColor();
+				parseColorString(etj_upmoveMeterGraphPreJumpColor.string, jump_.graph_rgbaPreJump);
 			});
 		cvarUpdateHandler->subscribe(&etj_upmoveMeterGraphPostJumpColor,
 			[&](const vmCvar_t *cvar) {
-				parseColor();
+				parseColorString(etj_upmoveMeterGraphPostJumpColor.string, jump_.graph_rgbaPostJump);
 			});
 		cvarUpdateHandler->subscribe(&etj_upmoveMeterGraphOutlineColor,
 			[&](const vmCvar_t *cvar) {
-				parseColor();
+				parseColorString(etj_upmoveMeterGraphOutlineColor.string, jump_.graph_outline_rgba);
 			});
 		cvarUpdateHandler->subscribe(&etj_upmoveMeterTextColor,
 			[&](const vmCvar_t *cvar) {
-				parseColor();
+				parseColorString(etj_upmoveMeterTextColor.string, jump_.text_rgba);
 			});
 
 		consoleCommandsHandler->subscribe(
@@ -73,7 +73,7 @@ namespace ETJump
 			});
 	}
 
-	void UpmoveMeter::parseColor()
+	void UpmoveMeter::parseAllColors()
 	{
 		parseColorString(etj_upmoveMeterGraphColor.string, jump_.graph_rgba);
 		parseColorString(etj_upmoveMeterGraphOnGroundColor.string, jump_.graph_rgbaOnGround);
@@ -107,7 +107,7 @@ namespace ETJump
 		if (team_ != ps.persistant[PERS_TEAM])
 		{
 			team_ = ps.persistant[PERS_TEAM];
-			// reset strafe quality upon team change
+			// reset upon team change
 			// note: not handled by consoleCommandsHandler because team is needed in
 			// render() either ways
 			resetUpmoveMeter();
@@ -118,7 +118,15 @@ namespace ETJump
 			return;
 		}
 
-		const int now = pm->ps->commandTime;
+		int now;
+		if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
+		{
+			now = ((cg.time >> 3) << 3) + ((cg.time % 8) >= 4 ? 8 : 0);
+		}
+		else
+		{
+			now =	pm->ps->commandTime;
+		}
 		const bool inAir = ps.groundEntityNum == ENTITYNUM_NONE;
 		const bool jumping = cmd.upmove > 0;
 

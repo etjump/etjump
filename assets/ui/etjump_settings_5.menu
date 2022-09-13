@@ -86,7 +86,7 @@ menuDef {
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality style:", 0.2, SUBW_ITEM_HEIGHT, "etj_strafeQualityStyle", cvarFloatList { "Full" 0 "Percent" 1 "Number" 2 }, "Strafe quality style\netj_strafeQualityStyle")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_UPMOVEMETER_Y, SUBW_WIDTH, SUBW_UPMOVEMETER_HEIGHT, "UPMOVE METER")
-        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_UPMOVEMETER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Upmove meter:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawUpmoveMeter", cvarFloatList { "Off" 0 "Bar" 1 "Text" 2 "Bar/Text" 3 }, "Draw upmove meter\netj_drawUpmoveMeter")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_UPMOVEMETER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Upmove meter:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawUpmoveMeter", cvarFloatList { "Off" 0 "Bar" 1 "Text" 2 "Bar + Text" 3 }, "Draw upmove meter\netj_drawUpmoveMeter")
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_UPMOVEMETER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_upmoveMeterMaxDelay", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_UPMOVEMETER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Max delay:", 0.2, SUBW_ITEM_HEIGHT, etj_upmoveMeterMaxDelay 360 10 1000 10, "Sets max delay of upmove meter\netj_upmoveMeterMaxDelay")
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_UPMOVEMETER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_upmoveMeterGraphX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
