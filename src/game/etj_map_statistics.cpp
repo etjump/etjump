@@ -175,17 +175,39 @@ void MapStatistics::saveChanges()
 		return;
 	}
 
-	for (auto &map : _maps)
+	// client-sided, non-vanilla game_restart somehow unloads the map_statistics table, therefore check whether the table still exists
+	int tableExists;
+	const auto callback = [](void *exists, int, char **data, char **)
 	{
-		if (map.changed)
+		int *exists_int = static_cast<int*>(exists);
+		*exists_int = std::atoi(data[0]);
+		return 0;
+	};
+	rc = sqlite3_exec(db, "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='map_statistics')", callback, &tableExists, nullptr);
+	if (rc != SQLITE_OK)
+	{
+		Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to check table existence. (%d) %s.\n", rc, sqlite3_errmsg(db)));
+		return;
+	}
+
+	if (tableExists)
+	{
+		for (auto &map : _maps)
 		{
-			rc = sqlite3_exec(db, ETJump::stringFormat("UPDATE map_statistics SET seconds_played=%d, callvoted=%d, votes_passed=%d, times_played=%d, last_played=%d WHERE id=%d;", map.secondsPlayed, map.callvoted, map.votesPassed, map.timesPlayed, map.lastPlayed, map.id).c_str(), nullptr, nullptr, nullptr);
-			if (rc != SQLITE_OK)
+			if (map.changed)
 			{
-				Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to update map. (%d) %s.\n", rc, sqlite3_errmsg(db)));
-				return;
+				rc = sqlite3_exec(db, ETJump::stringFormat("UPDATE map_statistics SET seconds_played=%d, callvoted=%d, votes_passed=%d, times_played=%d, last_played=%d WHERE id=%d;", map.secondsPlayed, map.callvoted, map.votesPassed, map.timesPlayed, map.lastPlayed, map.id).c_str(), nullptr, nullptr, nullptr);
+				if (rc != SQLITE_OK)
+				{
+					Utilities::Error(ETJump::stringFormat("MapStatistics::saveChanges: Error: Failed to update map. (%d) %s.\n", rc, sqlite3_errmsg(db)));
+					return;
+				}
 			}
 		}
+	}
+	else
+	{
+		Utilities::Console("MapStatistics::saveChanges: Warning: game_restart omits map statistics save.\n");
 	}
 
 	rc = sqlite3_exec(db, "END TRANSACTION;", nullptr, nullptr, nullptr);
