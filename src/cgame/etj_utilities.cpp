@@ -155,10 +155,15 @@ static void normalizeColorIfRequired(vec4_t &v)
 	}
 }
 
-const std::string alphaRegex{ "^[a-z]+" }; // white, black, etc
-const std::string digitRegex{ "^([-+]?[0-9]*\\.?[0-9]+\\s*)+" }; // 255 0 0, 1.0 0 0
-const std::string hexedRegex{ "^0[x][a-f0-9]+" }; // 0xff0000
-const std::string hashdRegex{ "^#[a-f0-9]+" }; // #ff0000
+const std::string alphaRegexStr{ "^[a-z]+" }; // white, black, etc
+const std::string digitRegexStr{ "^([-+]?[0-9]*\\.?[0-9]+\\s*)+" }; // 255 0 0, 1.0 0 0
+const std::string hexedRegexStr{ "^0[x][a-f0-9]+" }; // 0xff0000
+const std::string hashdRegexStr{ "^#[a-f0-9]+" }; // #ff0000
+
+const std::basic_regex<char> alphaRegex = std::regex(alphaRegexStr);
+const std::basic_regex<char> digitRegex = std::regex(digitRegexStr);
+const std::basic_regex<char> hexedRegex = std::regex(hexedRegexStr);
+const std::basic_regex<char> hashdRegex = std::regex(hashdRegexStr);
 
 void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 {	
@@ -166,20 +171,20 @@ void ETJump::parseColorString(const std::string &colorString, vec4_t &color)
 
 	std::string token{ ETJump::StringUtil::toLowerCase(ETJump::trim(colorString)) };
 
-	if (std::regex_match(token, std::regex(alphaRegex)))
+	if (std::regex_match(token, alphaRegex))
 	{
 		parseNamedColorString(token, color);
 		return;
 	}
-	else if (std::regex_match(token, std::regex(digitRegex)))
+	else if (std::regex_match(token, digitRegex))
 	{
 		parseRGBAValuedColorString(token, color);
 	}
-	else if (std::regex_match(token, std::regex(hexedRegex)))
+	else if (std::regex_match(token, hexedRegex))
 	{
 		parseHexValuedColorString(token.substr(2, 8), color);
 	}
-	else if (std::regex_match(token, std::regex(hashdRegex)))
+	else if (std::regex_match(token, hashdRegex))
 	{
 		parseHexValuedColorString(token.substr(1, 8), color);
 	}
