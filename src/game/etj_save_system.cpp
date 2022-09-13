@@ -880,10 +880,22 @@ void ETJump::SaveSystem::storePosition(gclient_s* client, SavePosition *pos)
 
 void ETJump::SaveSystem::sendClientCommands(gentity_t* ent, int position)
 {
-	auto client = ClientNum(ent);
-	trap_SendServerCommand(client, "resetStrafeQuality\n");
-	trap_SendServerCommand(client, "resetJumpSpeeds\n");
-	trap_SendServerCommand(client, position == 0 ? "savePrint\n" : va("savePrint %d\n", position));
+	auto self = ClientNum(ent);
+	int target;
+
+	// Send the commands to ourselves and any following clients
+	for (int i = 0; i < level.numConnectedClients; i++)
+	{
+		target = level.sortedClients[i];
+		if (target == self || (level.clients[target].sess.sessionTeam == TEAM_SPECTATOR
+		&& level.clients[target].sess.spectatorState == SPECTATOR_FOLLOW
+		&& level.clients[target].sess.spectatorClient == self))
+		{
+			trap_SendServerCommand(target, "resetStrafeQuality\n");
+			trap_SendServerCommand(target, "resetJumpSpeeds\n");
+			trap_SendServerCommand(target, position == 0 ? "savePrint\n" : va("savePrint %d\n", position));
+		}
+	}
 }
 
 
