@@ -177,7 +177,7 @@ Used by CGaz 2
 ==============
 */
 // Dzikie
-void DrawLine(float x1, float y1, float x2, float y2, vec4_t color)
+void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color)
 {
 	float len, stepx, stepy;
 	float i;

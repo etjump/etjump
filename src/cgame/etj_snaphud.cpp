@@ -27,6 +27,7 @@
 #include "../game/etj_numeric_utilities.h"
 #include "etj_pmove_utils.h"
 #include "etj_cgaz.h"
+#include "etj_cvar_update_handler.h"
 
 // Snaphud implementation based on cgame_proxymod
 // HUGE thanks to Jelvan1 for his snaphud code
@@ -34,6 +35,39 @@
 
 namespace ETJump
 {
+	Snaphud::Snaphud()
+	{
+		parseColorString(etj_snapHUDColor1.string, snaphudColors[0]);
+		parseColorString(etj_snapHUDColor2.string, snaphudColors[1]);
+
+		// always parse the highlighting colors on init to make sure they are initialized
+		// even in cases where client connects to server with highlighting disabled
+		parseColorString(etj_snapHUDHLColor1.string, snaphudColors[2]);
+		parseColorString(etj_snapHUDHLColor2.string, snaphudColors[3]);
+
+		startListeners();
+	}
+
+	void Snaphud::startListeners()
+	{
+		cvarUpdateHandler->subscribe(&etj_snapHUDColor1, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_snapHUDColor1.string, snaphudColors[0]);
+			});
+		cvarUpdateHandler->subscribe(&etj_snapHUDColor2, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_snapHUDColor2.string, snaphudColors[1]);
+			});
+		cvarUpdateHandler->subscribe(&etj_snapHUDHLColor1, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_snapHUDHLColor1.string, snaphudColors[2]);
+			});
+		cvarUpdateHandler->subscribe(&etj_snapHUDHLColor2, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_snapHUDHLColor2.string, snaphudColors[3]);
+			});
+	}
+
 	void Snaphud::InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd)
 	{
 		// set default key combination if no user input
@@ -272,18 +306,6 @@ namespace ETJump
 			fov = Numeric::clamp(etj_snapHUDFov.value, 1, 179);
 		}
 
-		vec4_t color[4];
-		parseColorString(etj_snapHUDColor1.string, color[0]);
-		parseColorString(etj_snapHUDColor2.string, color[1]);
-
-		// parse highlight colors if highlighting is enabled
-		bool hlActive = etj_snapHUDHLActive.integer;
-		if (hlActive)
-		{
-			parseColorString(etj_snapHUDHLColor1.string, color[2]);
-			parseColorString(etj_snapHUDHLColor2.string, color[3]);
-		}
-
 		int8_t altColor = 0;
 		for (int i = 0; i < 2 * snap.maxAccel; ++i)
 		{
@@ -293,13 +315,13 @@ namespace ETJump
 				int const eSnap = snap.zones[i + 1] + j;
 
 				// highlight active snapzone?
-				if (hlActive && AngleNormalize65536(yaw - bSnap) <= AngleNormalize65536(eSnap - bSnap))
+				if (etj_snapHUDHLActive.integer && AngleNormalize65536(yaw - bSnap) <= AngleNormalize65536(eSnap - bSnap))
 				{
-					CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y, h, fov, color[2 + altColor]);
+					CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y, h, fov, snaphudColors[2 + altColor]);
 				}
 				else
 				{
-					CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y, h, fov, color[altColor]);
+					CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
 				}
 			}
 			altColor ^= 1;

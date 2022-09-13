@@ -29,9 +29,56 @@
 #include "etj_utilities.h"
 #include "etj_pmove_utils.h"
 #include "../game/etj_numeric_utilities.h"
+#include "etj_cvar_update_handler.h"
 
 namespace ETJump
 {
+	CGaz::CGaz()
+	{
+		// CGaz 1
+		parseColorString(etj_CGaz1Color1.string, CGaz1Colors[0]);
+		parseColorString(etj_CGaz1Color2.string, CGaz1Colors[1]);
+		parseColorString(etj_CGaz1Color3.string, CGaz1Colors[2]);
+		parseColorString(etj_CGaz1Color4.string, CGaz1Colors[3]);
+
+		// CGaz 2
+		parseColorString(etj_CGaz2Color1.string, CGaz2Colors[0]);
+		parseColorString(etj_CGaz2Color2.string, CGaz2Colors[1]);
+
+		startListeners();
+	}
+
+	void CGaz::startListeners()
+	{
+		// CGaz 1
+		cvarUpdateHandler->subscribe(&etj_CGaz1Color1, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_CGaz1Color1.string, CGaz1Colors[0]);
+			});
+		cvarUpdateHandler->subscribe(&etj_CGaz1Color2, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_CGaz1Color2.string, CGaz1Colors[1]);
+			});
+		cvarUpdateHandler->subscribe(&etj_CGaz1Color3, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_CGaz1Color3.string, CGaz1Colors[2]);
+			});
+		cvarUpdateHandler->subscribe(&etj_CGaz1Color4, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_CGaz1Color4.string, CGaz1Colors[3]);
+			});
+
+		// CGaz 2
+		cvarUpdateHandler->subscribe(&etj_CGaz2Color1, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_CGaz2Color1.string, CGaz2Colors[0]);
+			});
+		cvarUpdateHandler->subscribe(&etj_CGaz2Color2, [&](const vmCvar_t* cvar)
+			{
+				parseColorString(etj_CGaz2Color2.string, CGaz2Colors[1]);
+			});
+	}
+
 	void CGaz::UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd)
 	{
 		// set default key combination if no user input
@@ -194,26 +241,20 @@ namespace ETJump
 				fov = Numeric::clamp(etj_CGazFov.value, 1, 179);
 			}
 
-			vec4_t color;
-
 			// No accel zone
-			parseColorString(etj_CGaz1Color1.string, color);
-			CG_FillAngleYaw(-drawMin, +drawMin, yaw, y, h, fov, color);
+			CG_FillAngleYaw(-drawMin, +drawMin, yaw, y, h, fov, CGaz1Colors[0]);
 
 			// Min angle
-			parseColorString(etj_CGaz1Color2.string, color);
-			CG_FillAngleYaw(+drawMin, +drawOpt, yaw, y, h, fov, color);
-			CG_FillAngleYaw(-drawOpt, -drawMin, yaw, y, h, fov, color);
+			CG_FillAngleYaw(+drawMin, +drawOpt, yaw, y, h, fov, CGaz1Colors[1]);
+			CG_FillAngleYaw(-drawOpt, -drawMin, yaw, y, h, fov, CGaz1Colors[1]);
 
 			// Accel zone
-			parseColorString(etj_CGaz1Color3.string, color);
-			CG_FillAngleYaw(+drawOpt, +drawMaxCos, yaw, y, h, fov, color);
-			CG_FillAngleYaw(-drawMaxCos, -drawOpt, yaw, y, h, fov, color);
+			CG_FillAngleYaw(+drawOpt, +drawMaxCos, yaw, y, h, fov, CGaz1Colors[2]);
+			CG_FillAngleYaw(-drawMaxCos, -drawOpt, yaw, y, h, fov, CGaz1Colors[2]);
 
 			// Max angle
-			parseColorString(etj_CGaz1Color4.string, color);
-			CG_FillAngleYaw(+drawMaxCos, +drawMax, yaw, y, h, fov, color);
-			CG_FillAngleYaw(-drawMax, -drawMaxCos, yaw, y, h, fov, color);
+			CG_FillAngleYaw(+drawMaxCos, +drawMax, yaw, y, h, fov, CGaz1Colors[3]);
+			CG_FillAngleYaw(-drawMax, -drawMaxCos, yaw, y, h, fov, CGaz1Colors[3]);
 
 			return;
 		}
@@ -224,17 +265,13 @@ namespace ETJump
 			const usercmd_t cmd = pm->cmd;
 			int scx = SCREEN_CENTER_X - 1;
 			int scy = SCREEN_CENTER_Y - 1;
-			vec4_t color1, color2;
-
-			parseColorString(etj_CGaz2Color1.string, color1);
-			parseColorString(etj_CGaz2Color2.string, color2);
 
 			if (etj_stretchCgaz.integer)
 			{
 				ETJump_EnableWidthScale(false);
 				scx -= SCREEN_OFFSET_X;
 			}
-			DrawLine(scx, scy, scx + cmd.rightmove, scy - cmd.forwardmove, color2);
+			DrawLine(scx, scy, scx + cmd.rightmove, scy - cmd.forwardmove, CGaz2Colors[1]);
 
 			// When under wishspeed velocity, most accel happens when you move straight
 			// towards your current velocity, so skip drawing the "wings" on the sides
@@ -249,17 +286,17 @@ namespace ETJump
 
 			DrawLine(scx, scy,
 				scx + velSize * sin(drawVel),
-				scy - velSize * cos(drawVel), color1);
+				scy - velSize * cos(drawVel), CGaz2Colors[0]);
 
 			if (drawSides)
 			{
 				velSize /= 2;
 				DrawLine(scx, scy,
 					scx + velSize * sin(drawVel + drawOpt),
-					scy - velSize * cos(drawVel + drawOpt), color1);
+					scy - velSize * cos(drawVel + drawOpt), CGaz2Colors[0]);
 				DrawLine(scx, scy,
 					scx + velSize * sin(drawVel - drawOpt),
-					scy - velSize * cos(drawVel - drawOpt), color1);
+					scy - velSize * cos(drawVel - drawOpt), CGaz2Colors[0]);
 			}
 
 			if (etj_stretchCgaz.integer)

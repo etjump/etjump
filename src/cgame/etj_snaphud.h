@@ -36,11 +36,15 @@ namespace ETJump
 		void beforeRender() override;
 		static bool inMainAccelZone(const playerState_t& ps, pmove_t* pm);
 
+		Snaphud();
+		~Snaphud() {};
+
 	private:
 		bool canSkipDraw() const;
 		void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
 		void UpdateMaxSnapZones(float wishspeed, pmove_t* pm);
 		void UpdateSnapState(void);
+		void startListeners();
 
 		enum class SnapTrueness
 		{
@@ -63,6 +67,7 @@ namespace ETJump
 		snaphud_t snap;
 
 		int yaw;
+		vec4_t snaphudColors[4];
 
 		playerState_t* ps = &cg.predictedPlayerState;
 		pmove_t* pm;
