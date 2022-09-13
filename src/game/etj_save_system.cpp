@@ -880,20 +880,20 @@ void ETJump::SaveSystem::storePosition(gclient_s* client, SavePosition *pos)
 
 void ETJump::SaveSystem::sendClientCommands(gentity_t* ent, int position)
 {
-	gentity_t *followingClient;
-	auto client = ClientNum(ent);
+	auto self = ClientNum(ent);
+	int target;
 
-	// Send the commands to client and any following clients
+	// Send the commands to ourselves and any following clients
 	for (int i = 0; i < level.numConnectedClients; i++)
 	{
-		followingClient = g_entities + level.sortedClients[i];
-		if (i == client || (followingClient->client->sess.sessionTeam == TEAM_SPECTATOR
-		&& followingClient->client->sess.spectatorState == SPECTATOR_FOLLOW
-		&& followingClient->client->sess.spectatorClient == client))
+		target = level.sortedClients[i];
+		if (target == self || (level.clients[target].sess.sessionTeam == TEAM_SPECTATOR
+		&& level.clients[target].sess.spectatorState == SPECTATOR_FOLLOW
+		&& level.clients[target].sess.spectatorClient == self))
 		{
-			trap_SendServerCommand(i, "resetStrafeQuality\n");
-			trap_SendServerCommand(i, "resetJumpSpeeds\n");
-			trap_SendServerCommand(i, position == 0 ? "savePrint\n" : va("savePrint %d\n", position));
+			trap_SendServerCommand(target, "resetStrafeQuality\n");
+			trap_SendServerCommand(target, "resetJumpSpeeds\n");
+			trap_SendServerCommand(target, position == 0 ? "savePrint\n" : va("savePrint %d\n", position));
 		}
 	}
 }
