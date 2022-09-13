@@ -2615,6 +2615,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		{
 			trap_SendConsoleCommand("resetJumpSpeeds\n");
 			trap_SendConsoleCommand("resetStrafeQuality\n");
+			trap_SendConsoleCommand("resetUpmoveMeter\n");
 		}
 		break;
 
@@ -2645,6 +2646,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		{
 			trap_SendConsoleCommand("resetJumpSpeeds\n");
 			trap_SendConsoleCommand("resetStrafeQuality\n");
+			trap_SendConsoleCommand("resetUpmoveMeter\n");
 		}
 		break;
 
@@ -3037,6 +3039,7 @@ void CG_EntityEvent(centity_t *cent, vec3_t position)
 		ETJump::playerEventsHandler->check("load", {});
 		trap_SendConsoleCommand("resetJumpSpeeds\n");
 		trap_SendConsoleCommand("resetStrafeQuality\n");
+		trap_SendConsoleCommand("resetUpmoveMeter\n");
 		break;
 	default:
 		DEBUGNAME("UNKNOWN");

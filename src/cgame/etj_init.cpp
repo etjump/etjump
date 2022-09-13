@@ -51,6 +51,7 @@
 #include "etj_snaphud.h"
 #include "etj_autodemo_recorder.h"
 #include "etj_upper_right_drawable.h"
+#include "etj_upmove_meter_drawable.h"
 
 namespace ETJump
 {
@@ -245,7 +246,7 @@ namespace ETJump
 		ETJump::renderables.push_back(std::make_shared<CGaz>());
 		ETJump::renderables.push_back(std::make_shared<Snaphud>());
 		ETJump::renderables.push_back(std::make_shared<UpperRight>());
-
+		ETJump::renderables.push_back(std::make_shared<UpmoveMeter>());
 
 		ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
 		ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();
