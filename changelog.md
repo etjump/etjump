@@ -26,7 +26,7 @@
   * use `nosound` as `noise` key to disable sound completely
 * added `spawnflags` __8__ to `func_static` to allow disabling random __500-1500ms__ delay between activations [#582](https://github.com/etjump/etjump/pull/582)
   * minimum delay between activations when using this spawnflag is __100ms__
-* added `etj_demo_drawBanners` to hide banners during demo playback [#587](https://github.com/etjump/etjump/pull/587)
+* added `etj_drawBanners` to allow hiding banners [#587](https://github.com/etjump/etjump/pull/587) [#805](https://github.com/etjump/etjump/pull/805)
 * `!listmaps` now displays total number of maps on server [#588](https://github.com/etjump/etjump/pull/588)
 * fixed duplicate spam protection print with `team` command [#591](https://github.com/etjump/etjump/pull/591)
 * added back binoculars to field ops [#593](https://github.com/etjump/etjump/pull/593)
@@ -42,12 +42,12 @@
   * cgaz and snaphud no longer draw when zooming in with binoculars or scoped weapons
 * timeruns will now interrupt if client sets `com_maxfps < 25` to prevent trigger abuse [#602](https://github.com/etjump/etjump/pull/602)
 * added CHS info __55__ to display last jump speed [#603](https://github.com/etjump/etjump/pull/603)
-* added `etj_drawJumpSpeeds` to display last 10 jump speeds [#608](https://github.com/etjump/etjump/pull/608)
+* added `etj_drawJumpSpeeds` to display last 10 jump speeds [#608](https://github.com/etjump/etjump/pull/608) [#803](https://github.com/etjump/etjump/pull/803)
   * `etj_drawJumpSpeeds` - toggle on/off (default `0`)
   * `etj_jumpSpeedsX/Y` - X/Y offset (default `0/0`)
   * `etj_jumpSpeedsColor` - RGBA color (default `1.0 1.0 1.0 1.0`)
   * `etj_jumpSpeedsShadow` - toggle shadow (default `1`)
-  * `etj_jumpSpeedsStyle` - __0__ = vertical, __1__ = horizontal (default `0`)
+  * `etj_jumpSpeedsStyle` - (bitflag) __0__ = vertical, __1__ = horizontal, __2__ no label text, __4__ reversed list (default `0`)
   * `etj_jumpSpeedsShowDiff` - color jumps speeds based on if it was faster/slower than previous jump (default `0`)
   * `etj_jumpSpeedsFasterColor` - RGBA color for faster speeds (default `0.0 1.0 0.0 1.0`)
   * `etj_jumpSpeedsSlowerColor` - RGBA color for slower speeds (default `1.0 0.0 0.0 1.0`)
@@ -61,13 +61,14 @@
 * fixed CGaz showing incorrect angles on ground strafing [#635](https://github.com/etjump/etjump/pull/635)
 * fixed client ID 0 sounds being played from too far on OpenAL sound backend [#644](https://github.com/etjump/etjump/pull/644)
 * added strafe quality meter to display percentage of pmove frames spent on optimal accel zone [#641](https://github.com/etjump/etjump/pull/641)
+  * fully accurate only while playing - spectator/demo playback is an rough approximation due to `sv_fps 20` (50ms commandTime intervals instead of 8ms)
   * `etj_drawStrafeQuality` - toggle on/off (default `0`)
   * `etj_strafeQualityX/Y` - X/Y offset (default `0/0`)
   * `etj_strafeQualityColor`- RGBA color (default `1.0 1.0 1.0 1.0`)
   * `etj_strafeQualityShadow` - toggle shadow (default `1`)
   * `etj_strafeQualitySize`- text size (default `3`)
   * `etj_strafeQualityStyle` - display style, __0__ = label + percentage, __1__ = percentage, __2__ = value only
-* compass is now always drawn on top of HUD [#630](https://github.com/etjump/etjump/pull/630)
+* expanded map is now always drawn on top of HUD [#630](https://github.com/etjump/etjump/pull/630)
 * increased `G_Alloc` memory pool size to avoid crashes on some maps on 64-bit clients/servers [#654](https://github.com/etjump/etjump/pull/654)
 * tied timeruns records are now displayed in white rather than red [#658](https://github.com/etjump/etjump/pull/658)
 * fixed potential segfault with mapstatistics and tokens on shutdown [#653](https://github.com/etjump/etjump/pull/653)
@@ -148,7 +149,7 @@
 * added several new binding options to ETJump binds menu [#774](https://github.com/etjump/etjump/pull/774)
 * `cg_skybox` is no longer cheat protected so skyportals can be turned off [#776](https://github.com/etjump/etjump/pull/776)
 * fixed incorrect wording in max tracker indices error message [#786](https://github.com/etjump/etjump/pull/786)
-* added a new portalgun model [787](https://github.com/etjump/etjump/pull/787)
+* added a new portalgun model [#787](https://github.com/etjump/etjump/pull/787)
 * improved spacing of multiline tooltips in menus [#788](https://github.com/etjump/etjump/pull/788)
 * speclock improvements:
   * speclock and specinvites are now persistent across map changes [#769](https://github.com/etjump/etjump/pull/796)
@@ -157,7 +158,33 @@
 * added `etj_FPSMeterUpdateInterval` to control the update rate of FPS meter[#793](https://github.com/etjump/etjump/pull/793)
 * fixed binocular/scope overlay disappearing while scoreboard is up [#794](https://github.com/etjump/etjump/pull/794)
   * the reticles are now hidden while scoreboard is up to improve readability
-
+* fixed some inconsistencies with `call/goto` print logic when checking for conditions for the commands [#799](https://github.com/etjump/etjump/pull/799)
+* changed default `g_mapScriptDir` cvar value from `scripts` -> `mapscripts` for consistency between mostly all other mods [#804](https://github.com/etjump/etjump/pull/804)
+* improvements to handling of broken/missing command map shaders [#800](https://github.com/etjump/etjump/pull/800)
+  * added a default command map to display when a map does not include one - no more ugly black/orange texture
+  * added `etj_fixedCompassShader` cvar - when enabled, will override the command map shader used by the current map with a shader that ensures proper masking of command map, preventing map corners from drawing outside of compass borders
+    * the original image is still used, only the shader contents are overridden
+    * this will break some special command maps when enabled such as the animated command map in Skacharohuth, but in turn will always ensure proper masking
+* `g_maxConnsPerIP` can no longer be set to negative value [#807](https://github.com/etjump/etjump/pull/807)
+* added upmove meter to display how long `+moveup` is being held for while jumping [#802](https://github.com/etjump/etjump/pull/802)
+  * displays 4 statistics: ground/pre-jump - total - post jump (bottom to top on HUD)
+  * fully accurate only while playing - spectator/demo playback is an rough approximation due to `sv_fps 20` (50ms commandTime intervals instead of 8ms)
+  * customizeable with following cvars
+    * `etj_drawUpmoveMeter` - (bitflag) __0__ = off (default) __1__ = graph __2__ = text
+    * `etj_upmoveMeterMaxDelay` - maximum value for each statistics in ms (default __360__)
+    * `etj_upmoveMeterGraphX/Y/W/H` - X/Y/W/H of graph display (default __8 8 6 80__)
+    * `etj_upmoveMeterGraphColor` - RGBA color of the graph background (default __mdgrey__)
+    * `etj_upmoveMeterGraphOnGroundColor` - RGBA color of ground frames on graph (default __green__)
+    * `etj_upmoveMeterGraphPreJumpColor` - RGBA color of pre jump frames on graph (default __blue__)
+    * `etj_upmoveMeterGraphPostJumpColor` - RGBA color of post jump frames on graph (default __red__)
+    * `etj_upmoveMeterGraphOutlineW` - width of graph border (default __1__)
+    * `etj_upmoveMeterGraphOutlineColor` - RGBA color of graph border (default __white__)
+    * `etj_upmoveMeterTextX` - X offset of text display from graph (default __6__)
+    * `etj_upmoveMeterTextH` - vertical spacing between the text displays (default __12__)
+    * `etj_upmoveMeterTextColor` - RGBA color of the text display (default __white__)
+    * `etj_upmoveMeterTextShadow` - draw shadow on text (default __1__)
+    * `etj_upmoveMeterTextSize` - size of text display (default __2__)
+* fixed prediction errors with crashlandings which caused delay on applying knockback event & view duck [#812](https://github.com/etjump/etjump/pull/812)
 
 # ETJump 2.4.0
 
