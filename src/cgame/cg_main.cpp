@@ -492,6 +492,7 @@ vmCvar_t etj_drawProneIndicator;
 vmCvar_t etj_proneIndicatorX;
 vmCvar_t etj_proneIndicatorY;
 
+// Cvar unlocks
 vmCvar_t etj_viewlog;
 vmCvar_t etj_drawFoliage;
 vmCvar_t etj_showTris;
@@ -502,6 +503,9 @@ vmCvar_t etj_offsetUnits;
 vmCvar_t etj_speeds;
 vmCvar_t etj_lightmap;
 vmCvar_t etj_drawNotify;
+vmCvar_t etj_drawClips;
+vmCvar_t etj_drawTriggers;
+vmCvar_t etj_drawSlicks;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_consoleColor;
@@ -952,6 +956,8 @@ cvarTable_t cvarTable[] =
 	{ &etj_drawSaveIndicator, "etj_drawSaveIndicator", "3", CVAR_ARCHIVE },
 	{ &etj_saveIndicatorX, "etj_saveIndicatorX", "615", CVAR_ARCHIVE },
 	{ &etj_saveIndicatorY, "etj_saveIndicatorY", "363", CVAR_ARCHIVE },
+
+	// Cvar unlocks
 	{ &etj_drawFoliage, "etj_drawFoliage", "1", CVAR_ARCHIVE },
 	{ &etj_showTris, "etj_showTris", "0", CVAR_ARCHIVE },
 	{ &etj_wolfFog, "etj_wolfFog", "1", CVAR_ARCHIVE },
@@ -962,6 +968,10 @@ cvarTable_t cvarTable[] =
 	{ &etj_speeds, "etj_speeds", "0", CVAR_ARCHIVE },
 	{ &etj_lightmap, "etj_lightmap", "0", CVAR_ARCHIVE },
 	{ &etj_drawNotify, "etj_drawNotify", "0", CVAR_ARCHIVE },
+	{ &etj_drawClips, "etj_drawClips", "0", CVAR_ARCHIVE },
+	{ &etj_drawTriggers, "etj_drawTriggers", "0", CVAR_ARCHIVE },
+	{ &etj_drawSlicks, "etj_drawSlicks", "0", CVAR_ARCHIVE },
+
 	{ &etj_consoleAlpha, "etj_consoleAlpha", "1.0", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_consoleColor, "etj_consoleColor", "0.0 0.0 0.0", CVAR_LATCH | CVAR_ARCHIVE },
 	{ &etj_consoleShader, "etj_consoleShader", "1", CVAR_LATCH | CVAR_ARCHIVE },
