@@ -213,12 +213,12 @@ void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t colo
 			else
 			{
 				float yadj = scaley * glyph->top;
-				if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+				if (style == ITEM_TEXTSTYLE_SHADOWED)
 				{
-					int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+					constexpr float ofs = 2.5f;
 					colorBlack[3] = newColor[3];
 					trap_R_SetColor(colorBlack);
-					CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs, y - yadj + ofs, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+					CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs * scalex, y - yadj + ofs * scaley, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
 					colorBlack[3] = 1.0;
 					trap_R_SetColor(newColor);
 				}

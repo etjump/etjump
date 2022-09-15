@@ -510,7 +510,7 @@ CG_DrawChar
 Coordinates and size in 640*480 virtual screen size
 ===============
 */
-void CG_DrawChar(int x, int y, int width, int height, int ch)
+void CG_DrawChar(int x, int y, int width, int height, int ch, qboolean isShadow)
 {
 	ch &= 255;
 
@@ -519,15 +519,17 @@ void CG_DrawChar(int x, int y, int width, int height, int ch)
 		return;
 	}
 
-	auto font = &cgs.media.limboFont2;
-	auto glyph = &font->glyphs[ch];
-	auto scalex = height / 65.f * font->glyphScale;
-	auto scaley = height / 65.f * font->glyphScale;
-	auto adj = scaley * glyph->top + 2.f;
-	auto ax = x + 1;
-	auto ay = y + height;
+	const auto font = &cgs.media.limboFont2;
+	const auto glyph = &font->glyphs[ch];
+	const float scalex = height / 65.f * font->glyphScale; // height (not width) intended
+	const float scaley = height / 65.f * font->glyphScale;
+	const float adj = scaley * glyph->top + 2.f;
+	const float ax = x + 1;
+	const float ay = y + height;
+
+	const float ofs = isShadow ? 3.0f : 0.0f;
 	
-	CG_Text_PaintChar_Ext(ax, ay - adj, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+	CG_Text_PaintChar_Ext(ax + ofs * scalex, ay - adj + ofs * scaley, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
 }
 
 /*
@@ -537,7 +539,7 @@ CG_DrawChar2
 Coordinates and size in 640*480 virtual screen size
 ===============
 */
-void CG_DrawChar2(int x, int y, int width, int height, int ch)
+static void CG_DrawChar2(int x, int y, int width, int height, int ch, qboolean isShadow)
 {
 	int   row, col;
 	float frow, fcol;
@@ -551,18 +553,20 @@ void CG_DrawChar2(int x, int y, int width, int height, int ch)
 		return;
 	}
 
-	ax = x;
-	ay = y;
-	aw = width;
-	ah = height;
-	CG_AdjustFrom640(&ax, &ay, &aw, &ah);
-
 	row = ch >> 4;
 	col = ch & 15;
 
-	frow = row * 0.0625;
-	fcol = col * 0.0625;
-	size = 0.0625;
+	frow = row * 0.0625f;
+	fcol = col * 0.0625f;
+	size = 0.0625f;
+
+	const float ofs = isShadow ? 0.1f : 0.0f;
+
+	ax = x + ofs * width;
+	ay = y + ofs * height;
+	aw = width;
+	ah = height;
+	CG_AdjustFrom640(&ax, &ay, &aw, &ah);
 
 	trap_R_DrawStretchPic(ax, ay, aw, ah,
 	                      fcol, frow,
@@ -610,7 +614,7 @@ void CG_DrawStringExt(int x, int y, const char *string, const float *setColor,
 				s += 2;
 				continue;
 			}
-			CG_DrawChar(xx + 1, y + 1, charWidth, charHeight, *s);
+			CG_DrawChar(xx, y, charWidth, charHeight, *s, qtrue);
 			cnt++;
 			xx += charWidth;
 			s++;
@@ -642,7 +646,7 @@ void CG_DrawStringExt(int x, int y, const char *string, const float *setColor,
 			s += 2;
 			continue;
 		}
-		CG_DrawChar(xx, y, charWidth, charHeight, *s);
+		CG_DrawChar(xx, y, charWidth, charHeight, *s, qfalse);
 		xx += charWidth;
 		cnt++;
 		s++;
@@ -690,7 +694,7 @@ void CG_DrawStringExt_Shadow(int x, int y, const char *string, const float *setC
 				s += 2;
 				continue;
 			}
-			CG_DrawChar2(xx + ((charWidth < 12) ? 1 : 2), y + ((charHeight < 12) ? 1 : 2), charWidth, charHeight, *s);
+			CG_DrawChar2(xx, y, charWidth, charHeight, *s, qtrue);
 			cnt++;
 			xx += charWidth;
 			s++;
@@ -722,7 +726,7 @@ void CG_DrawStringExt_Shadow(int x, int y, const char *string, const float *setC
 			s += 2;
 			continue;
 		}
-		CG_DrawChar2(xx, y, charWidth, charHeight, *s);
+		CG_DrawChar2(xx, y, charWidth, charHeight, *s, qfalse);
 		xx += charWidth;
 		cnt++;
 		s++;
@@ -788,7 +792,7 @@ void CG_DrawStringExt3(int x, int y, const char *string, const float *setColor,
 				s += 2;
 				continue;
 			}
-			CG_DrawChar2(xx + ((charWidth < 12) ? 1 : 2), y + ((charHeight < 12) ? 1 : 2), charWidth, charHeight, *s);
+			CG_DrawChar2(xx, y, charWidth, charHeight, *s, qtrue);
 			cnt++;
 			xx += charWidth;
 			s++;
@@ -820,76 +824,13 @@ void CG_DrawStringExt3(int x, int y, const char *string, const float *setColor,
 			s += 2;
 			continue;
 		}
-		CG_DrawChar2(xx, y, charWidth, charHeight, *s);
+		CG_DrawChar2(xx, y, charWidth, charHeight, *s, qfalse);
 		xx += charWidth;
 		cnt++;
 		s++;
 	}
 	trap_R_SetColor(NULL);
 }
-
-/*
-==================
-CG_DrawStringExt2
-
-Draws a multi-colored string with a drop shadow, optionally forcing
-to a fixed color.
-
-Coordinates are at 640 by 480 virtual resolution
-==================
-*/
-/*void CG_DrawStringExt2( int x, int y, const char *string, const float *setColor,
-        qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars ) {
-    vec4_t		color;
-    const char	*s;
-    int			xx;
-    int			cnt;
-
-    if (maxChars <= 0)
-        maxChars = 32767; // do them all!
-
-    // draw the drop shadow
-    if (shadow) {
-        color[0] = color[1] = color[2] = 0;
-        color[3] = setColor[3];
-        trap_R_SetColor( color );
-        s = string;
-        xx = x;
-        cnt = 0;
-        while ( *s && cnt < maxChars) {
-            if ( Q_IsColorString( s ) ) {
-                s += 2;
-                continue;
-            }
-            CG_DrawChar2( xx + 2, y + 2, charWidth, charHeight, *s );
-            cnt++;
-            xx += charWidth;
-            s++;
-        }
-    }
-
-    // draw the colored text
-    s = string;
-    xx = x;
-    cnt = 0;
-    trap_R_SetColor( setColor );
-    while ( *s && cnt < maxChars) {
-        if ( Q_IsColorString( s ) ) {
-            if ( !forceColor ) {
-                memcpy( color, g_color_table[ColorIndex(*(s+1))], sizeof( color ) );
-                color[3] = setColor[3];
-                trap_R_SetColor( color );
-            }
-            s += 2;
-            continue;
-        }
-        CG_DrawChar2( xx, y, charWidth, charHeight, *s );
-        xx += charWidth;
-        cnt++;
-        s++;
-    }
-    trap_R_SetColor( NULL );
-}*/
 
 void CG_DrawBigString(int x, int y, const char *s, float alpha)
 {
@@ -1727,12 +1668,12 @@ namespace ETJump
 				else
 				{
 					float yadj = scaley * glyph->top;
-					if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+					if (style == ITEM_TEXTSTYLE_SHADOWED)
 					{
-						int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+						constexpr float ofs = 2.5f;
 						colorBlack[3] = newColor[3];
 						trap_R_SetColor(colorBlack);
-						CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs, y - yadj + ofs, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+						CG_Text_PaintChar_Ext(x + (glyph->pitch * scalex) + ofs * scalex, y - yadj + ofs * scaley, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
 						colorBlack[3] = 1.0;
 						trap_R_SetColor(newColor);
 					}

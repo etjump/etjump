@@ -693,13 +693,13 @@ void Text_Paint_Ext(float x, float y, float scalex, float scaley, vec4_t color, 
 			else
 			{
 				float yadj = scaley * glyph->top;
-				if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+				if (style == ITEM_TEXTSTYLE_SHADOWED)
 				{
-					int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+					constexpr float ofs = 2.5f;
 					colorBlack[3] = newColor[3];
 
 					trap_R_SetColor(colorBlack);
-					Text_PaintCharExt(x + (glyph->pitch * scalex) + ofs, y - yadj + ofs, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
+					Text_PaintCharExt(x + (glyph->pitch * scalex) + ofs * scalex, y - yadj + ofs * scaley, glyph->imageWidth, glyph->imageHeight, scalex, scaley, glyph->s, glyph->t, glyph->s2, glyph->t2, glyph->glyph);
 					trap_R_SetColor(newColor);
 
 					colorBlack[3] = 1.0;
@@ -808,12 +808,12 @@ char *Text_AutoWrap_Paint_Chunk(float x, float y, int width, float scale, vec4_t
 
 				if (!dummy)
 				{
-					if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+					if (style == ITEM_TEXTSTYLE_SHADOWED)
 					{
-						int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+						constexpr float ofs = 2.5f;
 						colorBlack[3] = newColor[3];
 						trap_R_SetColor(colorBlack);
-						Text_PaintChar(x + ofs, y - yadj + ofs,
+						Text_PaintChar(x + ofs * useScale, y - yadj + ofs * useScale,
 						               glyph->imageWidth,
 						               glyph->imageHeight,
 						               useScale,
@@ -932,12 +932,12 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, vec4_t cu
 			    continue;
 			} else*/{
 				yadj = useScale * glyph->top;
-				if (style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE)
+				if (style == ITEM_TEXTSTYLE_SHADOWED)
 				{
-					int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+					constexpr float ofs = 2.5f;
 					colorBlack[3] = newColor[3];
 					trap_R_SetColor(colorBlack);
-					Text_PaintChar(x + (glyph->pitch * useScale) + ofs, y - yadj + ofs,
+					Text_PaintChar(x + (glyph->pitch * useScale) + ofs * useScale, y - yadj + ofs * useScale,
 					               glyph->imageWidth,
 					               glyph->imageHeight,
 					               useScale,
@@ -9876,7 +9876,7 @@ void UI_PrintTime(char *buf, int bufsize, int time)
 void Text_PaintCenter(float x, float y, float scale, vec4_t color, const char *text, float adjust)
 {
 	int len = Text_Width(text, scale, 0);
-	Text_Paint(x - len / 2, y, scale, color, text, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE);
+	Text_Paint(x - len / 2, y, scale, color, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED);
 }
 
 #if 0 // rain - unused

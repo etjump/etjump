@@ -2770,7 +2770,7 @@ void CG_HorizontalPercentBar(float x, float y, float width, float height, float 
 void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader);
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);
 void CG_DrawRotatedPic(float x, float y, float width, float height, qhandle_t hShader, float angle);        // NERVE - SMF
-void CG_DrawChar(int x, int y, int width, int height, int ch);
+void CG_DrawChar(int x, int y, int width, int height, int ch, qboolean isShadow);
 void CG_FilledBar(float x, float y, float w, float h, float *startColor, float *endColor, const float *bgColor, float frac, int flags);
 // JOSEPH 10-26-99
 void CG_DrawStretchPic(float x, float y, float width, float height, qhandle_t hShader);
