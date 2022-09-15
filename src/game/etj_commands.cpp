@@ -1398,7 +1398,7 @@ bool Mute(gentity_t *ent, Arguments argv)
 
 bool Noclip(gentity_t *ent, Arguments argv)
 {
-	if (level.noNoclip)
+	if (!g_cheats.integer && level.noNoclip)
 	{
 		ChatPrintTo(ent, "^3noclip: ^7noclip is disabled on this map.");
 		return false;
@@ -1411,7 +1411,7 @@ bool Noclip(gentity_t *ent, Arguments argv)
 			return false;
 		}
 
-		if (ent->client->sess.timerunActive)
+		if (!g_cheats.integer && ent->client->sess.timerunActive)
 		{
 			ChatPrintTo(ent, "^3noclip: ^7cheats are disabled while timerun is active.");
 			return false;
@@ -1437,7 +1437,7 @@ bool Noclip(gentity_t *ent, Arguments argv)
 			return false;
 		}
 
-		if (other->client->sess.timerunActive)
+		if (!g_cheats.integer && other->client->sess.timerunActive)
 		{
 			ChatPrintTo(other, "^3noclip: ^7cheats are disabled while timerun is active.");
 			return false;
