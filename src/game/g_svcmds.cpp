@@ -745,7 +745,7 @@ Svcmd_ResetMatch_f
 OSP - multiuse now for both map restarts and total match resets
 ==================
 */
-void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart)
+void Svcmd_ResetMatch_f(qboolean fDoRestart)
 {
 	int i;
 
@@ -756,7 +756,7 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart)
 
 	if (fDoRestart)
 	{
-		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", ((g_gamestate.integer != GS_PLAYING) ? GS_RESET : GS_WARMUP)));
+		trap_SendConsoleCommand(EXEC_APPEND, "map_restart 0\n");
 	}
 }
 

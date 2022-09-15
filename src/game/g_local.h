@@ -2308,7 +2308,7 @@ messageStatus_t trap_MessageStatus(int clientNum);
 
 void G_ExplodeMissile(gentity_t *ent);
 
-void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart);
+void Svcmd_ResetMatch_f(qboolean fDoRestart);
 
 void trap_PbStat(int clientNum, const char *category, const char *values) ;
 

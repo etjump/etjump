@@ -1643,7 +1643,7 @@ bool Rename(gentity_t *ent, Arguments argv)
 
 bool Restart(gentity_t *ent, Arguments argv)
 {
-	Svcmd_ResetMatch_f(qfalse, qtrue);
+	Svcmd_ResetMatch_f(qtrue);
 	return true;
 }
 
