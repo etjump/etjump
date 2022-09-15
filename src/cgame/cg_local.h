@@ -586,14 +586,12 @@ typedef struct clientInfo_s
 	int sprintTime;
 	int pmoveFixed;
 	int maxFPS;
-	int CGaz;
 	int weapHeat;
 	int weaponState;
 	int weaponState_last;
 	int hideMe;
 	qboolean specLocked;
 	qboolean timerunActive;
-	bool snaphud;
 	bool clientIsInactive;
 } clientInfo_t;
 

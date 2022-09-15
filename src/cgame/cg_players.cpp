@@ -239,9 +239,6 @@ void CG_NewClientInfo(int clientNum)
 	v              = Info_ValueForKey(configstring, "fps");
 	newInfo.maxFPS = atoi(v);
 
-	v            = Info_ValueForKey(configstring, "cgaz");
-	newInfo.CGaz = atoi(v);
-
 	v              = Info_ValueForKey(configstring, "h");
 	newInfo.hideMe = atoi(v);
 
@@ -250,9 +247,6 @@ void CG_NewClientInfo(int clientNum)
 
 	v              = Info_ValueForKey(configstring, "tr");
 	newInfo.timerunActive = atoi(v) > 0 ? qtrue : qfalse;
-
-	v              = Info_ValueForKey(configstring, "vs");
-	newInfo.snaphud = atoi(v);
 
 	v              = Info_ValueForKey(configstring, "i");
 	newInfo.clientIsInactive = atoi(v);

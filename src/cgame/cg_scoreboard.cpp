@@ -21,8 +21,8 @@ vec4_t compactUiBorder = { .75f, .75f, .75f, .75f };
 #define ALT_SCOREBOARD_HORIZONTAL_DELTA 20
 #define ALT_SCOREBOARD_VERTICAL_DELTA 13
 
-#define ALT_SCOREBOARD_PLAYER_WIDTH 105
-#define ALT_SCOREBOARD_INFO_WIDTH 40
+#define ALT_SCOREBOARD_PLAYER_WIDTH 120
+#define ALT_SCOREBOARD_INFO_WIDTH 50
 #define ALT_SCOREBOARD_FPS_WIDTH 36
 #define ALT_SCOREBOARD_PING_WIDTH 40
 
@@ -51,7 +51,7 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t co
 	vec4_t textColor;
 	float tempX = x;
 	float offsetX = 0.0f;
-	int nameMaxWidth = 12;
+	int nameMaxWidth = 14;
 	Vector4Copy(color, textColor);
 	textColor[3] *= fade;
 
@@ -97,7 +97,12 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t co
 		CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
 		tempX += ALT_SCOREBOARD_PING_WIDTH;
 
-		CG_DrawMiniString(tempX, y, va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "", ci->CGaz ? "^8C" : "", ci->team == TEAM_ALLIES ? "^4B" : "^1R"), fade);
+		CG_DrawMiniString(tempX, y, va("%1s%1s%1s %1s",
+									   ci->pmoveFixed ? "^2P" : "",
+									   ci->hideMe ? "^bH" : "",
+									   ci->specLocked ? "^9S" : "",
+									   ci->team == TEAM_ALLIES ? "^4B" : "^1R"),
+									   fade);
 	}
 }
 
@@ -123,7 +128,8 @@ void CG_DrawPlayers(float x, float y, float fade)
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
 	tempX += ALT_SCOREBOARD_FPS_WIDTH;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
-	tempX += ALT_SCOREBOARD_PING_WIDTH;
+	// FIXME: text is right aligned using left side coordinates... rewrite this entire crap some day pls
+	tempX += ALT_SCOREBOARD_PING_WIDTH + 9;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
 	tempX += ALT_SCOREBOARD_INFO_WIDTH;
 
@@ -188,10 +194,10 @@ Alt scoreboard 2
 #define THIRD_SCOREBOARD_SUBHEADER_HEIGHT 30
 #define THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT 20 // TODO: rename pls :D
 #define THIRD_SCOREBOARD_DIVIDER_WIDTH 4
-#define THIRD_SCOREBOARD_PLAYER_WIDTH 180
+#define THIRD_SCOREBOARD_PLAYER_WIDTH 170
 #define THIRD_SCOREBOARD_FPS_WIDTH 36
 #define THIRD_SCOREBOARD_PING_WIDTH 40
-#define THIRD_SCOREBOARD_INFO_WIDTH 40
+#define THIRD_SCOREBOARD_INFO_WIDTH 50
 
 
 void CG_DrawHeader2(float x, float y, float fade)
@@ -251,7 +257,8 @@ void CG_DrawHeader2(float x, float y, float fade)
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
 	tempX += THIRD_SCOREBOARD_FPS_WIDTH;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
-	tempX += THIRD_SCOREBOARD_PING_WIDTH;
+	// FIXME: hey cool yet another right aligned text drawn from an arbitary left side coordinate
+	tempX += THIRD_SCOREBOARD_PING_WIDTH + 9;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
 	tempX += THIRD_SCOREBOARD_INFO_WIDTH;
 
@@ -271,7 +278,7 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t 
 	vec4_t textColor;
 	float tempX = x;
 	float offsetX = 0.0f;
-	int nameMaxWidth = 22;
+	int nameMaxWidth = 20;
 	Vector4Copy(color, textColor);
 	textColor[3] *= fade;
 
@@ -322,7 +329,12 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t 
 		CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
 		tempX += ALT_SCOREBOARD_PING_WIDTH;
 
-		CG_DrawMiniString(tempX, y, va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "", ci->CGaz ? "^8C" : "", ci->team == TEAM_ALLIES ? "^4B" : "^1R"), fade);
+		CG_DrawMiniString(tempX, y, va("%1s%1s%1s %1s",
+									   ci->pmoveFixed ? "^2P" : "",
+									   ci->hideMe ? "^bH" : "",
+									   ci->specLocked ? "^9S" : "",
+									   ci->team == TEAM_ALLIES ? "^4B" : "^1R"),
+									   fade);
 	}
 }
 
@@ -481,9 +493,9 @@ Alt scoreboard 3
 
 #define ALT_SCOREBOARD_3_DIVIDER                20
 
-#define ALT_SCOREBOARD_3_PLAYER_WIDTH           242
+#define ALT_SCOREBOARD_3_PLAYER_WIDTH           256
 #define ALT_SCOREBOARD_3_FPS_WIDTH              23
-#define ALT_SCOREBOARD_3_INFO_WIDTH             52
+#define ALT_SCOREBOARD_3_INFO_WIDTH             38
 #define ALT_SCOREBOARD_3_PING_WIDTH             23
 
 #define ALT_SCOREBOARD_3_PLAYER_X               SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2 + ALT_SCOREBOARD_3_TEXT_XY_PADDING;
@@ -597,20 +609,16 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float 
 
 	// Draw client info
 	const char *clientInfoPmove = ci->pmoveFixed ? "^2P" : "";
-	const char *clientInfoCGaz = ci->CGaz ? "^8C" : "";
-	const char* clientInfoSnapHUD = ci->snaphud ? "^5V" : "";
 	const char *clientInfoHideMe = ci->hideMe ? "^bH" : "";
 	const char *clientInfoSpecLock = ci->specLocked ? "^9S" : "";
 	const char *clientInfoTimerun = ci->timerunActive ? "^3T" : "";
 	const char *clientInfoTeam = ci->team == TEAM_ALLIES ? "^4B" : "^1R";
 
 	CG_Text_Paint_Centred_Ext(infoX + 5, y, 0.15f, 0.15f, textColor, clientInfoPmove, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 12, y, 0.15f, 0.15f, textColor, clientInfoCGaz, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 19, y, 0.15f, 0.15f, textColor, clientInfoSnapHUD, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 26, y, 0.15f, 0.15f, textColor, clientInfoHideMe, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 33, y, 0.15f, 0.15f, textColor, clientInfoSpecLock, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 40, y, 0.15f, 0.15f, textColor, clientInfoTimerun, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-	CG_Text_Paint_Centred_Ext(infoX + 47, y, 0.15f, 0.15f, textColor, clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 12, y, 0.15f, 0.15f, textColor, clientInfoHideMe, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 19, y, 0.15f, 0.15f, textColor, clientInfoSpecLock, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 26, y, 0.15f, 0.15f, textColor, clientInfoTimerun, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Centred_Ext(infoX + 33, y, 0.15f, 0.15f, textColor, clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Draw client ping
 	std::string ping = ETJump::stringFormat("%i", score->ping);
@@ -688,7 +696,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	float rightTextX = SCREEN_WIDTH - playerX;
 	float connectingTextOffsetX = CG_Text_Width_Ext(connecting, 0.15f, 0, font);
 	float spectatorTextOffsetX = CG_Text_Width_Ext(spectator, 0.15f, 0, font);
-	float followedClientTextOffsetX = CG_Text_Width_Ext(followedClient, 0.15f, 0, font);
+	float followedClientTextOffsetX = CG_Text_Width_Ext(followedClient, 0.15f, 26, font);
 
 	// Draw indicator if player is idle
 	if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive)
@@ -698,7 +706,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	}
 
 	// Draw player
-	CG_Text_Paint_Ext(playerX, y, 0.15f, 0.15f, textColor, ci->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+	CG_Text_Paint_Ext(playerX, y, 0.15f, 0.15f, textColor, ci->name, 0, 31, ITEM_TEXTSTYLE_SHADOWED, font);
 
 	// Draw connecting text, spectator text or followed client
 	if (score->ping == -1)
@@ -712,7 +720,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 	else
 	{
 		CG_Text_Paint_Ext(SCREEN_CENTER_X, y, 0.15f, 0.15f, textColor, following, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-		CG_Text_Paint_Ext(rightTextX - followedClientTextOffsetX - 25, y, 0.15f, 0.15f, textColor, followedClient, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+		CG_Text_Paint_Ext(rightTextX - followedClientTextOffsetX - 25, y, 0.15f, 0.15f, textColor, followedClient, 0, 26, ITEM_TEXTSTYLE_SHADOWED, font);
 	}
 
 	// Draw ping
@@ -852,10 +860,9 @@ WM_DrawObjectives
 namespace INFO
 {
 	static const int TOTAL_WIDTH =   280;
-	static const int PLAYER_WIDTH =  0.54 * TOTAL_WIDTH;
+	static const int PLAYER_WIDTH =  0.66 * TOTAL_WIDTH;
 	static const int FPS_WIDTH =     0.09 * TOTAL_WIDTH;
 	static const int PMOVE_WIDTH =   0.14 * TOTAL_WIDTH;
-	static const int CGAZ_WIDTH =    0.12 * TOTAL_WIDTH;
 	static const int LATENCY_WIDTH = 0.11 * TOTAL_WIDTH;
 	static const int TEAM_HEIGHT =   20;
 	static const int LINE_HEIGHT =   16;
@@ -934,7 +941,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 		const char *s;
 		int textWidth;
 		float offsetX = 0.0f;
-		int nameMaxWidth = 18;
+		int nameMaxWidth = 22;
 		// DHM - Nerve
 		Vector4Set(hcolor, 1, 1, 1, fade);
 		
@@ -984,35 +991,44 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 
 		if (ci->team == TEAM_SPECTATOR)
 		{
-			ETJump::DrawString(
-				x + 4 + offsetX,
-				y + 12,
-				0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
+			// draw spectators info first so we can adjust drawing limits easier
 			x += INFO::PLAYER_WIDTH;
 
 			if (score->ping == -1)
 			{
 				s = CG_TranslateString("^3CONNECTING");
+				textWidth = ETJump::DrawStringWidth(s, 0.23f);
 				ETJump::DrawSmallString(
-					x + 13, 
+					x + INFO::FPS_WIDTH + INFO::PMOVE_WIDTH - textWidth - 5, /* x starts at x + 5*/
 					y + 12, 
 					s, fade);
 			}
 			else if (ci->clientNum == score->followedClient)
 			{
 				s = CG_TranslateString("^3SPECTATOR");
+				textWidth = ETJump::DrawStringWidth(s, 0.23f);
 				ETJump::DrawSmallString(
-					x + 13, 
-					y + 12, 
+					x + INFO::FPS_WIDTH + INFO::PMOVE_WIDTH - textWidth - 5, /* x starts at x + 5*/
+					y + 12,
 					s, fade);
 			}
 			else
 			{
+				int tempX = x;
+				tempX -= INFO::PLAYER_WIDTH;
+				tempX += (INFO::PLAYER_WIDTH + INFO::FPS_WIDTH + INFO::PMOVE_WIDTH + INFO::LATENCY_WIDTH) * 0.5f;
 				s = va("%s%s", "^3> ^7", cgs.clientinfo[score->followedClient].name);
-				ETJump::DrawString(x - 12, y + 12, 0.23f, 0.25f, hcolor, qfalse, s, 14, 0);
+				ETJump::DrawString(tempX, y + 12, 0.23f, 0.25f, hcolor, qfalse, s, 15, 0);
+
+				nameMaxWidth -= 4;
 			}
 
-			x += INFO::FPS_WIDTH + INFO::PMOVE_WIDTH + INFO::CGAZ_WIDTH;
+			ETJump::DrawString(
+					x - INFO::PLAYER_WIDTH + 4 + offsetX,
+					y + 12,
+					0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
+
+			x += INFO::FPS_WIDTH + INFO::PMOVE_WIDTH;
 
 			s = va("%i", score->ping);
 			textWidth = ETJump::DrawStringWidth(s, 0.23f);
@@ -1044,14 +1060,6 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 				y + 12,
 				s, fade);
 			x += INFO::PMOVE_WIDTH;
-
-			s = va("%s", ci->CGaz ? "Yes" : "No");
-			textWidth = ETJump::DrawStringWidth(s, 0.23f);
-			ETJump::DrawSmallString(
-				x + INFO::CGAZ_WIDTH / 2 - textWidth / 2 - 1,
-				y + 12,
-				s, fade);
-			x += INFO::CGAZ_WIDTH;
 
 			s = va("%i", score->ping);
 			textWidth = ETJump::DrawStringWidth(s, 0.23f);
@@ -1100,13 +1108,16 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 		Vector4Set(hcolor, 0, 0, 0, fade);
 		CG_DrawRect_FixedBorder(x, y, width, INFO::TEAM_HEIGHT, 1, hcolor);
 
+		std::string playersStr = ETJump::getPluralizedString(cg.teamPlayers[team], "PLAYER");
+		playersStr = ETJump::StringUtil::toUpperCase(playersStr);
+
 		if (team == TEAM_AXIS)
 		{
-			text = va("%s (%d %s)", CG_TranslateString("AXIS"), cg.teamPlayers[team], cg.teamPlayers[team] == 1 ? CG_TranslateString("PLAYER") : CG_TranslateString("PLAYERS"));
+			text = va("%s (%s)", CG_TranslateString("AXIS"), playersStr.c_str());
 		}
 		else
 		{
-			text = va("%s (%d %s)", CG_TranslateString("ALLIES"), cg.teamPlayers[team], cg.teamPlayers[team] == 1 ? CG_TranslateString("PLAYER") : CG_TranslateString("PLAYERS"));
+			text = va("%s (%s)", CG_TranslateString("ALLIES"), playersStr.c_str());
 		}
 
 		textWidth = CG_Text_Width_Ext(text, 0.22f, 0, boldFont);
@@ -1133,9 +1144,6 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 
 		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Pmove"), fade);
 		tempx += INFO::PMOVE_WIDTH;
-
-		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("CGaz"), fade);
-		tempx += INFO::CGAZ_WIDTH;
 
 		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Ping"), fade);
 

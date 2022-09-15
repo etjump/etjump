@@ -1204,7 +1204,6 @@ void CG_setClientFlags(void)
 	                                 ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
 	                                 ((etj_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
 	                                 ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
-	                                 ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
 	                                 ((cl_yawspeed.integer > 0 || (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
 	                                   cl_freelook.integer == 0) ? CGF_CHEATCVARSON : 0) |
 	                                 ((etj_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
@@ -1212,8 +1211,7 @@ void CG_setClientFlags(void)
 									 ((etj_enableTimeruns.integer > 0) ? CGF_ENABLE_TIMERUNS : 0) |
 									 ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
 									 ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
-									 ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
-									 ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0)
+									 ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0)
 	                                 // Add more in here, as needed
 	                             ),
 
