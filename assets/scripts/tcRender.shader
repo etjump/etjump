@@ -1,15 +1,4 @@
 // unlagged's bbox shaders adapated
-tcRenderShader
-{
-	polygonOffset
-	nopicmip
-	{
-		map gfx/misc/tcRenderShader.tga
-		blendFunc GL_ONE GL_ONE
-		rgbGen vertex
-	}
-}
-
 tcRenderShader_nocull
 {
 	nopicmip
@@ -28,7 +17,7 @@ tcRenderShader1r
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.2 0 0 )
+		rgbGen const ( 0.2 0 0 )
 	}
 }
 
@@ -39,7 +28,7 @@ tcRenderShader1g
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0.2 0 )
+		rgbGen const ( 0 0.2 0 )
 	}
 }
 
@@ -50,7 +39,7 @@ tcRenderShader1b
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0 0.2 )
+		rgbGen const ( 0 0 0.2 )
 	}
 }
 
@@ -61,7 +50,7 @@ tcRenderShader1c
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0.2 0.2 )
+		rgbGen const ( 0 0.2 0.2 )
 	}
 }
 
@@ -72,7 +61,7 @@ tcRenderShader1m
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.2 0 0.2 )
+		rgbGen const ( 0.2 0 0.2 )
 	}
 }
 
@@ -83,7 +72,7 @@ tcRenderShader1y
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.2 0.2 0 )
+		rgbGen const ( 0.2 0.2 0 )
 	}
 }
 
@@ -94,7 +83,7 @@ tcRenderShader2r
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.05 0 0 )
+		rgbGen const ( 0.05 0 0 )
 	}
 }
 
@@ -105,7 +94,7 @@ tcRenderShader2g
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0.05 0 )
+		rgbGen const ( 0 0.05 0 )
 	}
 }
 
@@ -116,7 +105,7 @@ tcRenderShader2b
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0 0.05 )
+		rgbGen const ( 0 0 0.05 )
 	}
 }
 
@@ -127,7 +116,7 @@ tcRenderShader2c
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0.05 0.05 )
+		rgbGen const ( 0 0.05 0.05 )
 	}
 }
 
@@ -138,7 +127,7 @@ tcRenderShader2m
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.05 0 0.05 )
+		rgbGen const ( 0.05 0 0.05 )
 	}
 }
 
@@ -149,10 +138,9 @@ tcRenderShader2y
 	{
 		map gfx/misc/tcRenderShader.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.05 0.05 0 )
+		rgbGen const ( 0.05 0.05 0 )
 	}
 }
-
 
 tcRenderShader3r
 {
@@ -161,7 +149,7 @@ tcRenderShader3r
 	{
 		map gfx/misc/tcRenderShader_tr.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.5 0 0 )
+		rgbGen const ( 0.5 0 0 )
 	}
 }
 
@@ -172,7 +160,7 @@ tcRenderShader3g
 	{
 		map gfx/misc/tcRenderShader_tr.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0.5 0 )
+		rgbGen const ( 0 0.5 0 )
 	}
 }
 
@@ -183,7 +171,7 @@ tcRenderShader3b
 	{
 		map gfx/misc/tcRenderShader_tr.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0 0.5 )
+		rgbGen const ( 0 0 0.5 )
 	}
 }
 
@@ -194,7 +182,7 @@ tcRenderShader3c
 	{
 		map gfx/misc/tcRenderShader_tr.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0 0.5 0.5 )
+		rgbGen const ( 0 0.5 0.5 )
 	}
 }
 
@@ -205,7 +193,7 @@ tcRenderShader3m
 	{
 		map gfx/misc/tcRenderShader_tr.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.5 0 0.5 )
+		rgbGen const ( 0.5 0 0.5 )
 	}
 }
 
@@ -216,6 +204,6 @@ tcRenderShader3y
 	{
 		map gfx/misc/tcRenderShader_tr.tga
 		blendFunc GL_ONE GL_ONE
-        rgbGen const ( 0.5 0.5 0 )
+		rgbGen const ( 0.5 0.5 0 )
 	}
 }
