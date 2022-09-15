@@ -27,7 +27,6 @@
 #define ITEM_TEXTSTYLE_SHADOWED 		3	// drop shadow ( need a color for this )
 #define ITEM_TEXTSTYLE_OUTLINED 		4	// drop shadow ( need a color for this )
 #define ITEM_TEXTSTYLE_OUTLINESHADOWED	5	// drop shadow ( need a color for this )
-#define ITEM_TEXTSTYLE_SHADOWEDMORE 	6	// drop shadow ( need a color for this )
 						  
 #define WINDOW_BORDER_NONE			0		// no border
 #define WINDOW_BORDER_FULL			1		// full border based on border color ( single pixel )
