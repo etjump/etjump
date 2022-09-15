@@ -184,6 +184,9 @@ namespace ETJump
 		{ &etj_speeds, "r_speeds" },
 		{ &etj_lightmap, "r_lightmap" },
 		{ &etj_drawNotify, "con_drawNotify" },
+		{ &etj_drawClips, "r_drawClips" },
+		{ &etj_drawTriggers, "r_drawTriggers" },
+		{ &etj_drawSlicks, "r_drawSlicks" },
 	};
 
 	void init()

@@ -2594,6 +2594,7 @@ extern vmCvar_t etj_drawProneIndicator;
 extern vmCvar_t etj_proneIndicatorX;
 extern vmCvar_t etj_proneIndicatorY;
 
+// Cvar unlocks
 extern vmCvar_t etj_viewlog;
 extern vmCvar_t etj_drawFoliage;
 extern vmCvar_t etj_showTris;
@@ -2604,6 +2605,9 @@ extern vmCvar_t etj_offsetUnits;
 extern vmCvar_t etj_speeds;
 extern vmCvar_t etj_lightmap;
 extern vmCvar_t etj_drawNotify;
+extern vmCvar_t etj_drawClips;
+extern vmCvar_t etj_drawTriggers;
+extern vmCvar_t etj_drawSlicks;
 
 extern vmCvar_t etj_consoleAlpha;
 extern vmCvar_t etj_consoleColor;
