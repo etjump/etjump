@@ -483,7 +483,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 		}
 		else
 		{
-			Svcmd_ResetMatch_f(qtrue, qfalse);
+			Svcmd_ResetMatch_f(qfalse);
 			trap_Cvar_VariableStringBuffer("nextmap", s, sizeof(s));
 			trap_SendConsoleCommand(EXEC_APPEND, va("map %s%s\n", level.voteInfo.vote_value, ((*s) ? va("; set nextmap \"%s\"", s) : "")));
 		}
@@ -512,11 +512,9 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	}
 	else
 	{
-		// Restart the map back to warmup
-		Svcmd_ResetMatch_f(qfalse, qtrue);
-		AP("cp \"^1*** Level Restarted! ***\n\"");
+		// Restart the map
+		Svcmd_ResetMatch_f(qtrue);
 	}
 
 	return(G_OK);
 }
-
