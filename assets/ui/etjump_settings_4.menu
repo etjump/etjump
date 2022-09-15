@@ -102,9 +102,9 @@ menuDef {
         CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_offsetFactor", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Polygon offset factor:", 0.2, SUBW_ITEM_HEIGHT, etj_offsetFactor -1 -5 0 0.1, "Factor of polygon offset amount\netj_offsetFactor (r_offsetfactor)")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Render speeds:", 0.2, SUBW_ITEM_HEIGHT, "etj_speeds", cvarFloatList { "Off" 0 "Surfaces" 1 "Culling" 2 "Viewcluster" 3 "Dlights" 4 "Render distance" 5 "Flares" 6 "Decals" 7 }, "Output various render statistics to console\netj_speeds (r_speeds)")
-		YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Clips:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawClips", "Draw clip brushes (ETe only)\netj_drawClips (r_drawClips)")
-		YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Triggers:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawTriggers", "Draw trigger brushes (ETe only)\netj_drawTriggers (r_drawTriggers)")
-		YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Slicks:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSlicks", "Draw slick brushes & angle slicks (ETe only)\netj_drawSlicks (r_drawSlicks)")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Clips:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawClips", "Draw clip brushes (ETe only)\netj_drawClips (r_drawClips)")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Triggers:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawTriggers", "Draw trigger brushes (ETe only)\netj_drawTriggers (r_drawTriggers)")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Slicks:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSlicks", "Draw slick brushes & angle slicks (ETe only)\netj_drawSlicks (r_drawSlicks)")
 
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_DEMO_Y, SUBW_WIDTH, SUBW_DEMO_HEIGHT, "DEMO")
