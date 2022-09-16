@@ -158,6 +158,8 @@ void CG_ParseSysteminfo( void ) {
 		cgs.pmove_msec = 33;
 	}
 
+	cgs.cheats = atoi(Info_ValueForKey(info, "sv_cheats"));
+
 #ifdef ALLOW_GSYNC
 	cgs.synchronousClients = ( atoi( Info_ValueForKey( info, "g_synchronousClients" ) ) ) ? qtrue : qfalse;
 #endif

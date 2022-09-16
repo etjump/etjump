@@ -457,6 +457,11 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, con
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
+		if (!g_dedicated.integer && ent)
+		{
+			G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting is disabled on localhost.", arg);
+			return(G_INVALID);
+		}
 		if (vote_allow_map.integer <= 0 && ent)
 		{
 			G_voteDisableMessage(ent, arg);
