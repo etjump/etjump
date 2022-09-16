@@ -21,8 +21,8 @@ vec4_t compactUiBorder = { .75f, .75f, .75f, .75f };
 #define ALT_SCOREBOARD_HORIZONTAL_DELTA 20
 #define ALT_SCOREBOARD_VERTICAL_DELTA 13
 
-#define ALT_SCOREBOARD_PLAYER_WIDTH 120
-#define ALT_SCOREBOARD_INFO_WIDTH 50
+#define ALT_SCOREBOARD_PLAYER_WIDTH 130
+#define ALT_SCOREBOARD_INFO_WIDTH 40
 #define ALT_SCOREBOARD_FPS_WIDTH 36
 #define ALT_SCOREBOARD_PING_WIDTH 40
 
@@ -97,7 +97,7 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t co
 		CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
 		tempX += ALT_SCOREBOARD_PING_WIDTH;
 
-		CG_DrawMiniString(tempX, y, va("%1s%1s%1s %1s",
+		CG_DrawMiniString(tempX, y, va("%1s%1s%1s%1s",
 									   ci->pmoveFixed ? "^2P" : "",
 									   ci->hideMe ? "^bH" : "",
 									   ci->specLocked ? "^9S" : "",
@@ -128,8 +128,7 @@ void CG_DrawPlayers(float x, float y, float fade)
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
 	tempX += ALT_SCOREBOARD_FPS_WIDTH;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
-	// FIXME: text is right aligned using left side coordinates... rewrite this entire crap some day pls
-	tempX += ALT_SCOREBOARD_PING_WIDTH + 9;
+	tempX += ALT_SCOREBOARD_PING_WIDTH;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
 	tempX += ALT_SCOREBOARD_INFO_WIDTH;
 
@@ -194,10 +193,10 @@ Alt scoreboard 2
 #define THIRD_SCOREBOARD_SUBHEADER_HEIGHT 30
 #define THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT 20 // TODO: rename pls :D
 #define THIRD_SCOREBOARD_DIVIDER_WIDTH 4
-#define THIRD_SCOREBOARD_PLAYER_WIDTH 170
+#define THIRD_SCOREBOARD_PLAYER_WIDTH 180
 #define THIRD_SCOREBOARD_FPS_WIDTH 36
 #define THIRD_SCOREBOARD_PING_WIDTH 40
-#define THIRD_SCOREBOARD_INFO_WIDTH 50
+#define THIRD_SCOREBOARD_INFO_WIDTH 40
 
 
 void CG_DrawHeader2(float x, float y, float fade)
@@ -257,8 +256,7 @@ void CG_DrawHeader2(float x, float y, float fade)
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("FPS"), fade);
 	tempX += THIRD_SCOREBOARD_FPS_WIDTH;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Ping"), fade);
-	// FIXME: hey cool yet another right aligned text drawn from an arbitary left side coordinate
-	tempX += THIRD_SCOREBOARD_PING_WIDTH + 9;
+	tempX += THIRD_SCOREBOARD_PING_WIDTH;
 	CG_DrawMiniString(tempX, tempY, CG_TranslateString("Info"), fade);
 	tempX += THIRD_SCOREBOARD_INFO_WIDTH;
 
@@ -329,7 +327,7 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, vec4_t 
 		CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
 		tempX += ALT_SCOREBOARD_PING_WIDTH;
 
-		CG_DrawMiniString(tempX, y, va("%1s%1s%1s %1s",
+		CG_DrawMiniString(tempX, y, va("%1s%1s%1s%1s",
 									   ci->pmoveFixed ? "^2P" : "",
 									   ci->hideMe ? "^bH" : "",
 									   ci->specLocked ? "^9S" : "",
@@ -862,7 +860,7 @@ namespace INFO
 	static const int TOTAL_WIDTH =   280;
 	static const int PLAYER_WIDTH =  0.66 * TOTAL_WIDTH;
 	static const int FPS_WIDTH =     0.09 * TOTAL_WIDTH;
-	static const int PMOVE_WIDTH =   0.14 * TOTAL_WIDTH;
+	static const int INFO_WIDTH =    0.14 * TOTAL_WIDTH;
 	static const int LATENCY_WIDTH = 0.11 * TOTAL_WIDTH;
 	static const int TEAM_HEIGHT =   20;
 	static const int LINE_HEIGHT =   16;
@@ -999,7 +997,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 				s = CG_TranslateString("^3CONNECTING");
 				textWidth = ETJump::DrawStringWidth(s, 0.23f);
 				ETJump::DrawSmallString(
-					x + INFO::FPS_WIDTH + INFO::PMOVE_WIDTH - textWidth - 5, /* x starts at x + 5*/
+					x + INFO::FPS_WIDTH + INFO::INFO_WIDTH - textWidth - 5, /* x starts at x + 5*/
 					y + 12, 
 					s, fade);
 			}
@@ -1008,7 +1006,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 				s = CG_TranslateString("^3SPECTATOR");
 				textWidth = ETJump::DrawStringWidth(s, 0.23f);
 				ETJump::DrawSmallString(
-					x + INFO::FPS_WIDTH + INFO::PMOVE_WIDTH - textWidth - 5, /* x starts at x + 5*/
+					x + INFO::FPS_WIDTH + INFO::INFO_WIDTH - textWidth - 5, /* x starts at x + 5*/
 					y + 12,
 					s, fade);
 			}
@@ -1016,7 +1014,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 			{
 				int tempX = x;
 				tempX -= INFO::PLAYER_WIDTH;
-				tempX += (INFO::PLAYER_WIDTH + INFO::FPS_WIDTH + INFO::PMOVE_WIDTH + INFO::LATENCY_WIDTH) * 0.5f;
+				tempX += (INFO::PLAYER_WIDTH + INFO::FPS_WIDTH + INFO::INFO_WIDTH + INFO::LATENCY_WIDTH) * 0.5f;
 				s = va("%s%s", "^3> ^7", cgs.clientinfo[score->followedClient].name);
 				ETJump::DrawString(tempX, y + 12, 0.23f, 0.25f, hcolor, qfalse, s, 15, 0);
 
@@ -1028,7 +1026,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 					y + 12,
 					0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
 
-			x += INFO::FPS_WIDTH + INFO::PMOVE_WIDTH;
+			x += INFO::FPS_WIDTH + INFO::INFO_WIDTH;
 
 			s = va("%i", score->ping);
 			textWidth = ETJump::DrawStringWidth(s, 0.23f);
@@ -1053,13 +1051,16 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade)
 				s, fade);
 			x += INFO::FPS_WIDTH;
 
-			s = va("%i", ci->pmoveFixed);
+			s = va("%1s%1s%1s",
+				   ci->pmoveFixed ? "^2P" : "",
+				   ci->hideMe ? "^bH" : "",
+				   ci->specLocked ? "^9S" : "");
 			textWidth = ETJump::DrawStringWidth(s, 0.23f);
 			ETJump::DrawSmallString(
-				x + INFO::PMOVE_WIDTH / 2 - textWidth / 2 - 1,
+				x + INFO::INFO_WIDTH / 2 - textWidth / 2 - 1,
 				y + 12,
 				s, fade);
-			x += INFO::PMOVE_WIDTH;
+			x += INFO::INFO_WIDTH;
 
 			s = va("%i", score->ping);
 			textWidth = ETJump::DrawStringWidth(s, 0.23f);
@@ -1142,8 +1143,8 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows)
 		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("FPS"), fade);
 		tempx += INFO::FPS_WIDTH;
 
-		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Pmove"), fade);
-		tempx += INFO::PMOVE_WIDTH;
+		ETJump::DrawSmallString(tempx + 4, y + 12, CG_TranslateString("Info"), fade);
+		tempx += INFO::INFO_WIDTH;
 
 		ETJump::DrawSmallString(tempx, y + 12, CG_TranslateString("Ping"), fade);
 
