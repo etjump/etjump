@@ -295,7 +295,7 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 	{
 		saveLastLoadPos(ent); // store position for unload command
 		restoreStanceFromSave(ent, validSave);
-		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+		if (!g_cheats.integer && client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
 			InterruptRun(ent);
 		}
