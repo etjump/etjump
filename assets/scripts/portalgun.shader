@@ -113,3 +113,95 @@ models/weapons2/portalgun/portalgun_3rdP
         depthWrite
     }
 }
+
+gfx/misc/portal_blue
+{
+	nopicmip
+	nomipmaps
+	cull none
+	{
+		clampMap gfx/misc/portal_blue.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate 70
+		tcMod stretch sin 1 0.05 0.25 0.8
+	}
+	{
+		clampMap gfx/misc/portal_blue.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate -100
+		tcMod stretch sin 1 0.05 1 0.7
+	}
+}
+
+gfx/misc/portal_red
+{
+	nopicmip
+	nomipmaps
+	cull none
+	{
+		clampMap gfx/misc/portal_red.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate 70
+		tcMod stretch sin 1 0.05 0.25 0.8
+	}
+	{
+		clampMap gfx/misc/portal_red.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate -100
+		tcMod stretch sin 1 0.05 1 0.7
+	}
+}
+
+gfx/misc/portal_green
+{
+	nopicmip
+	nomipmaps
+	cull none
+	{
+		clampMap gfx/misc/portal_green.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate 70
+		tcMod stretch sin 1 0.05 0.25 0.8
+	}
+	{
+		clampMap gfx/misc/portal_green.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate -100
+		tcMod stretch sin 1 0.05 1 0.7
+	}
+}
+
+gfx/misc/portal_yellow
+{
+	nopicmip
+	nomipmaps
+	cull none
+	{
+		clampMap gfx/misc/portal_yellow.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate 70
+		tcMod stretch sin 1 0.05 0.25 0.8
+	}
+	{
+		clampMap gfx/misc/portal_yellow.tga
+		blendFunc GL_ONE GL_ONE
+		alphaGen vertex
+		rgbGen identityLighting
+		tcMod rotate -100
+		tcMod stretch sin 1 0.05 1 0.7
+	}
+}
