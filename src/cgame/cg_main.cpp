@@ -2744,8 +2744,10 @@ static void CG_RegisterGraphics(void)
 	}
 
 	//Feen: PGM - Register shaders...
-	cgs.media.portal_blueShader = trap_R_RegisterShader("gfx/misc/portal_blueShader");                //trap_R_RegisterShader( "gfx/misc/electricity_portal2" );
-	cgs.media.portal_redShader  = trap_R_RegisterShader("gfx/misc/portal_redShader");                //Change to red later...
+	cgs.media.portalBlueShader = trap_R_RegisterShader("gfx/misc/portal_blue");
+	cgs.media.portalRedShader  = trap_R_RegisterShader("gfx/misc/portal_red");
+	cgs.media.portalGreenShader  = trap_R_RegisterShader("gfx/misc/portal_green");
+	cgs.media.portalYellowShader  = trap_R_RegisterShader("gfx/misc/portal_yellow");
 
 	cgs.media.simplePlayersShader = trap_R_RegisterShader("etjump/simple_player");
 	cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");

@@ -2711,7 +2711,7 @@ void Portal_Think(gentity_t *self);
 void Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace);
 
 //g_weapon.c
-void Weapon_Portal_Fire(gentity_t *ent, int PortalNum);   //TODO add switch for different portals....
+void Weapon_Portal_Fire(gentity_t *ent, int portalNum);   //TODO add switch for different portals....
 
 
 //Feen: END PGM

@@ -1824,9 +1824,11 @@ typedef struct
 
 	qhandle_t fireteamicons[6];
 
-	//Feen: PGM - Portal Shaders //NOTE - Maybe add shaders for other player portals as well....
-	qhandle_t portal_blueShader;       //Portal 1
-	qhandle_t portal_redShader;        //Portal 2
+	//Feen: PGM - Portal Shaders
+	qhandle_t portalBlueShader;       //Portal 1
+	qhandle_t portalRedShader;        //Portal 2
+	qhandle_t portalGreenShader;      //Portal 1 equivalent for other players
+	qhandle_t portalYellowShader;     //Portal 2 equivalent for other players
 
 	qhandle_t simplePlayersShader;
 	qhandle_t saveIcon;
@@ -2981,8 +2983,8 @@ void CG_MissileHitPlayer(centity_t *cent, int weapon, vec3_t origin, vec3_t dir,
 qboolean CG_CalcMuzzlePoint(int entityNum, vec3_t muzzle);
 void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, int fleshEntityNum, int otherEntNum2, float waterfraction, int seed);
 
-void CG_RailTrail(clientInfo_t *ci, vec3_t start, vec3_t end, int type);    //----(SA)	added 'type'
-void CG_RailTrail2(clientInfo_t *ci, vec3_t start, vec3_t end);
+void CG_RailTrail(clientInfo_t *ci, const vec3_t start, const vec3_t end, int type, const vec3_t color);    //----(SA)	added 'type'
+void CG_RailTrail2(clientInfo_t *ci, const vec3_t start, const vec3_t end, const vec3_t color);
 void CG_GrappleTrail(centity_t *ent, const weaponInfo_t *wi);
 void CG_AddViewWeapon(playerState_t *ps);
 void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent);

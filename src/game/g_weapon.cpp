@@ -3875,7 +3875,7 @@ Portal Gun
 ======================================================================
 */
 
-void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
+void Weapon_Portal_Fire(gentity_t *ent, int portalNumber)
 {
 	const int MAX_PORTAL_RANGE   = 5000; // max range where you can place next portal gate
 	const float MIN_PORTALS_DIST = 75.0f; // min distance between two portal center points, used to avoid overlaping
@@ -3894,6 +3894,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	vec3_t t_portalAngles; //Could be used for all angles conversions...
 	float  P_DEPTH, P_HEIGHT, P_WIDTH;
 
+	vec3_t blueTrail   = { 0.0f, 0.0f, 1.0f };
+	vec3_t redTrail    = { 1.0f, 0.0f, 0.0f };
 
 	//From knife...
 	/*
@@ -3962,7 +3964,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	if ((ent->portalBlue) || (ent->portalRed))
 	{
 
-		if (PortalNumber == 1 && ent->portalRed)
+		if (portalNumber == 1 && ent->portalRed)
 		{
 			
 			if (Distance(t_portalAngles, ent->portalRed->s.angles) < MIN_ANGLES_DIFF &&
@@ -3972,7 +3974,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 			}			
 
 		}
-		else if (PortalNumber == 2 && ent->portalBlue)
+		else if (portalNumber == 2 && ent->portalBlue)
 		{
 
 			if (Distance(t_portalAngles, ent->portalBlue->s.angles) < MIN_ANGLES_DIFF &&
@@ -3987,14 +3989,14 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 
 
 	//Free any previous instances of each portal if any
-	if (PortalNumber == 1 && ent->portalBlue)
+	if (portalNumber == 1 && ent->portalBlue)
 	{
 
 		G_FreeEntity(ent->portalBlue);
 		ent->portalBlue = NULL;
 
 	}
-	else if (PortalNumber == 2 && ent->portalRed)
+	else if (portalNumber == 2 && ent->portalRed)
 	{
 
 		G_FreeEntity(ent->portalRed);
@@ -4006,8 +4008,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	// Railtrail
 	// close enough for the barrel on most cases, realistically we should
 	// grab the starting point from the weapon tags
-	// TODO: make the trail correspond to the color of the portal being fired
 	tent = G_TempEntity( muzzleEffect, EV_RAILTRAIL );
+	portalNumber == 1 ? VectorCopy(blueTrail, tent->s.angles) : VectorCopy(redTrail, tent->s.angles);
 
 	SnapVectorTowards(tr.endpos, start);
 	VectorCopy(tr.endpos, tent->s.origin2);
@@ -4018,7 +4020,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int PortalNumber)
 	portal->classname = "portal_gate";
 
 	//Assign ent to player as well as the portal type..
-	if (PortalNumber == 1)
+	if (portalNumber == 1)
 	{
 		portal->s.eType = ET_PORTAL_BLUE; //Portal 1
 
