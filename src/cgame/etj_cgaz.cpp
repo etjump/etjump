@@ -101,6 +101,12 @@ namespace ETJump
 
 	void CGaz::UpdateDraw(float wishspeed, float accel)
 	{
+		// this can happen when running > 125fps, set default wishspeed to avoid div by 0 later
+		if (wishspeed == 0)
+		{
+			wishspeed = ps->speed * ps->sprintSpeedScale;
+		}
+
 		state.gSquared = GetSlickGravity();
 		state.vSquared = VectorLengthSquared2(pm->pmext->previous_velocity);
 		state.vfSquared = VectorLengthSquared2(pm->pmext->velocity);
