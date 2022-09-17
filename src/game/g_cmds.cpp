@@ -4921,7 +4921,7 @@ void Cmd_Class_f(gentity_t *ent)
 
 		for (auto loadout : ETJump::availableLoadouts)
 		{
-			usageText += ETJump::stringFormat("  ^7%-30s ^9/class %s %i\n", loadout.description, ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
+			usageText += ETJump::stringFormat("  ^7%-30s ^9/class %c %i\n", loadout.description, ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
 		}
 
 		Printer::SendConsoleMessage(clientNum, usageText);
