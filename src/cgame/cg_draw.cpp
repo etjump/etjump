@@ -3298,7 +3298,7 @@ static void CG_DrawPronePrint(void)
 	trace_t       trace;
 	playerState_t *ps = ETJump::getValidPlayerState();
 
-	if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
+	if (cgs.cheats || cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR)
 	{
 		return;
 	}

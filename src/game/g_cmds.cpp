@@ -826,7 +826,7 @@ void Cmd_God_f(gentity_t *ent)
 		return;
 	}
 
-	if (level.noGod)
+	if (!g_cheats.integer && level.noGod)
 	{
 		CP("cp \"God has been disabled on this map.\n\"");
 		return;
@@ -1002,12 +1002,12 @@ namespace ETJump
 			return{ false, "^7Non-player entities cannot use ^3%s^7.\n" };
 		}
 
-		if (ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0)
+		if (!g_cheats.integer && ent->client->sess.timerunActive && g_debugTimeruns.integer <= 0)
 		{
 			return{ false, "^7Cannot use ^3%s ^7while timer is running.\n" };
 		}
 
-		if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
+		if (!g_cheats.integer && ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active))
 		{
 			return{ false, "^7Cannot use ^3%s ^7while death run is active.\n" };
 		}
@@ -1017,7 +1017,7 @@ namespace ETJump
 			return{ false, "^7Cannot use ^3%s ^7in this state.\n" };
 		}
 
-		if (!g_cheats.integer || g_dedicated.integer > 0)
+		if (!g_cheats.integer)
 		{
 			if (level.noNoclip)
 			{
@@ -4554,7 +4554,7 @@ void Cmd_Goto_f(gentity_t *ent)
 		return;
 	}
 
-	if (level.noGoto)
+	if (!g_cheats.integer && level.noGoto)
 	{
 		CP("print \"Goto is disabled on this map.\n\"");
 		return;
@@ -4566,7 +4566,7 @@ void Cmd_Goto_f(gentity_t *ent)
 		return;
 	}
 
-	if (ent->client->sess.timerunActive)
+	if (!g_cheats.integer && ent->client->sess.timerunActive)
 	{
 		CP("print \"Goto is disabled while timerun is active.\n\"");
 		return;
@@ -4643,7 +4643,7 @@ void Cmd_Call_f(gentity_t *ent)
 		return;
 	}
 
-	if (level.noGoto)
+	if (!g_cheats.integer && level.noGoto)
 	{
 		CP("print \"Call is disabled on this map.\n\"");
 		return;
@@ -4681,7 +4681,7 @@ void Cmd_Call_f(gentity_t *ent)
 		return;
 	}
 
-	if (other->client->sess.timerunActive)
+	if (!g_cheats.integer && other->client->sess.timerunActive)
 	{
 		CP("print \"^7You can not ^3call^7 a timerunning player!\n\"");
 		return;

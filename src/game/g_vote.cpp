@@ -38,14 +38,26 @@ typedef struct
 	const char *pszVoteHelp;
 } vote_reference_t;
 
+static int G_Map_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
+{
+	return G_Map_v(ent, dwVoteIndex, arg, arg2, false);
+}
+
+static int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
+{
+	return G_Map_v(ent, dwVoteIndex, arg, arg2, true);
+}
+
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] =
 {
-	{ 0x1ff, "map",           G_Map_v,           "Change map to",
-	  " <mapname>^7\n  Votes for a new map to be loaded" },
-	{ 0x1ff, "maprestart",    G_MapRestart_v,    "Map Restart",
+	{ 0x1ff, "map",           G_Map_v_Wrapper,      "Map",
+	  " <mapname>^7\n  Votes for a map to be loaded with cheats disabled" },
+	{ 0x1ff, "devmap",        G_DevMap_v_Wrapper,   "Devmap",
+	  " <mapname>^7\n  Votes for a map to be loaded with cheats enabled" },
+	{ 0x1ff, "maprestart",    G_MapRestart_v,       "Map Restart",
 	  "^7\n  Restarts the current map in progress" },
-	{ 0x1ff, "randommap",     G_RandomMap_v,     "Random Map",
+	{ 0x1ff, "randommap",     G_RandomMap_v,        "Random Map",
 	  " ^7\n Votes a new random map to be loaded" },
 	{ 0,     0,               NULL,              0 }
 };
@@ -285,7 +297,7 @@ void G_voteSetVoteString(const char *desc)
 
 namespace ETJump
 {
-	static bool matchMap(const char *voteArg, std::string &resultedMap)
+	static bool matchMap(const char *voteArg, std::string &resultedMap, const bool &cheats)
 	{
 		if (voteArg[0] == '\0')
 		{
@@ -337,9 +349,9 @@ namespace ETJump
 			resultedMap = matchedMaps[0];
 		}
 
-		if (resultedMap == level.rawmapname)
+		if (resultedMap == level.rawmapname && cheats == static_cast<bool>(g_cheats.integer))
 		{
-			resultedMap = stringFormat("^3callvote: ^7%s is the current map.\n", level.rawmapname);
+			resultedMap = stringFormat("^3callvote: ^7%s is the current map (cheats %s).\n", level.rawmapname, cheats ? "enabled" : "disabled");
 			return false;
 		}
 
@@ -436,7 +448,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2)
 }
 
 // *** Map - simpleton: we dont verify map is allowed/exists ***
-int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
+int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, const bool &cheats)
 {
 	int clientNum = ent - g_entities;
 	// Vote request (vote is being initiated)
@@ -445,20 +457,23 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
+		if (!g_dedicated.integer && ent)
+		{
+			G_cpmPrintf(ent, "Sorry, [lof]^3%s^7 [lon]voting is disabled on localhost.", arg);
+			return(G_INVALID);
+		}
 		if (vote_allow_map.integer <= 0 && ent)
 		{
 			G_voteDisableMessage(ent, arg);
-			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
 			return(G_INVALID);
 		}
 		if (G_voteDescription(ent, dwVoteIndex))
 		{
-			G_voteCurrentSetting(ent, arg, Info_ValueForKey(serverinfo, "mapname"));
 			return(G_INVALID);
 		}
 		
 		std::string map;
-		if (!ETJump::matchMap(arg2, map))
+		if (!ETJump::matchMap(arg2, map, cheats))
 		{
 			Printer::SendConsoleMessage(clientNum, map);
 			return G_INVALID;
@@ -485,7 +500,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2)
 		{
 			Svcmd_ResetMatch_f(qfalse);
 			trap_Cvar_VariableStringBuffer("nextmap", s, sizeof(s));
-			trap_SendConsoleCommand(EXEC_APPEND, va("map %s%s\n", level.voteInfo.vote_value, ((*s) ? va("; set nextmap \"%s\"", s) : "")));
+			trap_SendConsoleCommand(EXEC_APPEND, va("%s %s%s\n", cheats ? "devmap" : "map", level.voteInfo.vote_value, ((*s) ? va("; set nextmap \"%s\"", s) : "")));
 		}
 	}
 

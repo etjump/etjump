@@ -5745,7 +5745,7 @@ void UI_RunMenuScript(char **args)
 			{
 				if (ui_currentNetMap.integer >= 0 && ui_currentNetMap.integer < uiInfo.mapCount)
 				{
-					trap_Cmd_ExecuteText(EXEC_APPEND, va("callvote map %s\n", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
+					trap_Cmd_ExecuteText(EXEC_APPEND, va("callvote %s %s\n", ui_voteCheats.integer ? "devmap" : "map", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName));
 				}
 			}
 			return;
@@ -10301,6 +10301,8 @@ vmCvar_t cl_bypassMouseInput;
 //bani
 vmCvar_t ui_autoredirect;
 
+vmCvar_t ui_voteCheats;
+
 cvarTable_t cvarTable[] =
 {
 
@@ -10534,6 +10536,8 @@ cvarTable_t cvarTable[] =
 
 	//bani
 	{ &ui_autoredirect,                 "ui_autoredirect",                 "0",                          CVAR_ARCHIVE                   },
+
+	{ &ui_voteCheats,                   "ui_voteCheats",                   "0",                          CVAR_ARCHIVE                   },
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

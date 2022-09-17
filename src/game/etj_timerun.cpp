@@ -249,7 +249,7 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName)
 		auto millis = commandTime - player->runStartTime;
 		player->completionTime = millis;
 
-		if (!isDebugging(clientNum))
+		if (!g_cheats.integer && !isDebugging(clientNum))
 		{
 			checkRecord(player, clientNum);
 		}

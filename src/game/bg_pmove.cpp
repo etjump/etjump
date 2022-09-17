@@ -15,8 +15,10 @@
 
 #ifdef CGAMEDLL
 #define PM_GameType cg_gameType.integer
+#define PM_Cheats cgs.cheats
 #elif GAMEDLL
 #define PM_GameType g_gametype.integer
+#define PM_Cheats g_cheats.integer
 #endif
 
 #define PM_IsSinglePlayerGame() (PM_GameType == GT_SINGLE_PLAYER || PM_GameType == GT_COOP)
@@ -662,6 +664,7 @@ extern vmCvar_t cg_movespeed;
 #endif
 #ifdef GAMEDLL
 extern vmCvar_t g_gametype;
+extern vmCvar_t g_cheats;
 extern vmCvar_t g_movespeed;
 #endif
 
@@ -1053,22 +1056,25 @@ static qboolean PM_CheckProne(void)
 	trace_t trace;
 	pm->trace(&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin, pm->ps->clientNum, CONTENTS_NOPRONE);
 
-	if (pm->shared & BG_LEVEL_NO_PRONE)
+	if (!PM_Cheats)
 	{
-		if (trace.fraction == 1.0f)
+		if (pm->shared & BG_LEVEL_NO_PRONE)
 		{
-			pm->ps->eFlags &= ~EF_PRONE;
-			pm->ps->eFlags &= ~EF_PRONE_MOVING;
-			return qfalse;
+			if (trace.fraction == 1.0f)
+			{
+				pm->ps->eFlags &= ~EF_PRONE;
+				pm->ps->eFlags &= ~EF_PRONE_MOVING;
+				return qfalse;
+			}
 		}
-	}
-	else
-	{
-		if (trace.fraction != 1.0f)
+		else
 		{
-			pm->ps->eFlags &= ~EF_PRONE;
-			pm->ps->eFlags &= ~EF_PRONE_MOVING;
-			return qfalse;
+			if (trace.fraction != 1.0f)
+			{
+				pm->ps->eFlags &= ~EF_PRONE;
+				pm->ps->eFlags &= ~EF_PRONE_MOVING;
+				return qfalse;
+			}
 		}
 	}
 

@@ -88,13 +88,13 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 		return;
 	}
 
-	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
 		CPTo(ent, "^3Save ^7is disabled for this death run.");
 		return;
 	}
 
-	if (level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Move))
+	if (!g_cheats.integer && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Move))
 	{
 		// comparing to zero vector
 		if (!VectorCompare(client->ps.velocity, vec3_origin))
@@ -105,7 +105,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 	}
 
 	// No saving while dead if it's disabled by map
-	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
+	if (!g_cheats.integer && client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
 		CPTo(ent, "^3Save ^7is disabled while dead on this map.");
 		return;
@@ -123,7 +123,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 			return;
 		}
 
-		if (position > 0 &&
+		if (!g_cheats.integer && position > 0 &&
 			client->sess.timerunActive &&
 			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
@@ -144,7 +144,7 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 		return;
 	}
 
-	if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+	if (!g_cheats.integer && client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 	{
 		CPTo(ent, "^3Save ^7is disabled for this timerun.");
 		return;
@@ -154,55 +154,58 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 	trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins,
 	                  ent->r.maxs, client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
 
-	if (level.noSave)
+	if (!g_cheats.integer)
 	{
-		if ((!trace.fraction) != 1.0f)
+		if (level.noSave)
 		{
-			CPTo(ent, "^7You can not ^3save ^7inside this area.");
-			return;
-		}
-	}
-	else
-	{
-		if (trace.fraction != 1.0f)
-		{
-			CPTo(ent, "^7You can not ^3save ^7inside this area.");
-			return;
-		}
-	}
-
-	if (client->pers.race.isRacing)
-	{
-		if (client->pers.race.saveLimit == 0)
-		{
-			CPTo(ent, "^5You've used all your saves.");
-			return;
-		}
-
-		if (client->pers.race.saveLimit > 0)
-		{
-			client->pers.race.saveLimit--;
-		}
-	}
-	else
-	{
-		fireteamData_t *ft;
-		if (G_IsOnFireteam(ent - g_entities, &ft))
-		{
-			if (ft->saveLimit < 0)
+			if ((!trace.fraction) != 1.0f)
 			{
-				client->sess.saveLimit = 0;
+				CPTo(ent, "^7You can not ^3save ^7inside this area.");
+				return;
 			}
-			if (ft->saveLimit)
+		}
+		else
+		{
+			if (trace.fraction != 1.0f)
 			{
-				if (client->sess.saveLimit)
+				CPTo(ent, "^7You can not ^3save ^7inside this area.");
+				return;
+			}
+		}
+
+		if (client->pers.race.isRacing)
+		{
+			if (client->pers.race.saveLimit == 0)
+			{
+				CPTo(ent, "^5You've used all your saves.");
+				return;
+			}
+
+			if (client->pers.race.saveLimit > 0)
+			{
+				client->pers.race.saveLimit--;
+			}
+		}
+		else
+		{
+			fireteamData_t *ft;
+			if (G_IsOnFireteam(ent - g_entities, &ft))
+			{
+				if (ft->saveLimit < 0)
 				{
-					client->sess.saveLimit--;
+					client->sess.saveLimit = 0;
 				}
-				else
+				if (ft->saveLimit)
 				{
-					CPTo(ent, "^5You've used all your fireteam saves.");
-					return;
+					if (client->sess.saveLimit)
+					{
+						client->sess.saveLimit--;
+					}
+					else
+					{
+						CPTo(ent, "^5You've used all your fireteam saves.");
+						return;
+					}
 				}
 			}
 		}
@@ -248,13 +251,13 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 		return;
 	}
 
-	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 		{
 		CPTo(ent, "^3Load ^7is disabled for this death run.");
 		return;
 	}
 
-	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
+	if (!g_cheats.integer && client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
 		CPTo(ent, "^3Load ^7is disabled while dead on this map.");
 		return;
@@ -272,7 +275,7 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 			return;
 		}
 
-		if (slot > 0 &&
+		if (!g_cheats.integer && slot > 0 &&
 			client->sess.timerunActive &&
 			client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 		{
@@ -292,7 +295,7 @@ void ETJump::SaveSystem::load(gentity_t *ent)
 	{
 		saveLastLoadPos(ent); // store position for unload command
 		restoreStanceFromSave(ent, validSave);
-		if (client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
+		if (!g_cheats.integer && client->sess.timerunActive && client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)
 		{
 			InterruptRun(ent);
 		}
@@ -362,20 +365,20 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent)
 		return;
 	}
 
-	if (client->sess.timerunActive &&
+	if (!g_cheats.integer && client->sess.timerunActive &&
 		client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS)
 	{
 		CPTo(ent, "Backup is disabled for this timerun.");
 		return;
 	}
 
-	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
 		CPTo(ent, "^3Backup ^7is disabled for this death run.");
 		return;
 	}
 
-	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
+	if (!g_cheats.integer && client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
 		CPTo(ent, "^3Backup ^7is disabled while dead on this map.");
 		return;
@@ -453,13 +456,13 @@ void ETJump::SaveSystem::unload(gentity_t* ent)
 		return;
 	}
 
-	if ((client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
+	if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave)))
 	{
 		CPTo(ent, "^3unload ^7is disabled for this death run.");
 		return;
 	}
 
-	if (client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
+	if (!g_cheats.integer && client->ps.pm_type == PM_DEAD && level.saveLoadRestrictions & static_cast<int>(SaveLoadRestrictions::Dead))
 	{
 		CPTo(ent, "^3unload ^7is disabled while dead on this map.");
 		return;
@@ -471,7 +474,7 @@ void ETJump::SaveSystem::unload(gentity_t* ent)
 		return;
 	}
 
-	if (client->sess.timerunActive)
+	if (!g_cheats.integer && client->sess.timerunActive)
 	{
 		CPTo(ent, "^3unload ^7is not available during timeruns.");
 		return;
@@ -481,25 +484,28 @@ void ETJump::SaveSystem::unload(gentity_t* ent)
 	
 	if (validPos)
 	{
-		// check for nosave areas only if we have valid pos
-		trace_t trace;
-		trap_TraceCapsule(&trace, validPos->origin, ent->r.mins,
-			ent->r.maxs, validPos->origin, ent->s.number, CONTENTS_NOSAVE);
+		if (!g_cheats.integer)
+		{
+			// check for nosave areas only if we have valid pos
+			trace_t trace;
+			trap_TraceCapsule(&trace, validPos->origin, ent->r.mins,
+				ent->r.maxs, validPos->origin, ent->s.number, CONTENTS_NOSAVE);
 
-		if (level.noSave)
-		{
-			if ((!trace.fraction) != 1.0f)
+			if (level.noSave)
 			{
-				CPTo(ent, "^7You can not ^3unload ^7to this area.");
-				return;
+				if ((!trace.fraction) != 1.0f)
+				{
+					CPTo(ent, "^7You can not ^3unload ^7to this area.");
+					return;
+				}
 			}
-		}
-		else
-		{
-			if (trace.fraction != 1.0f)
+			else
 			{
-				CPTo(ent, "^7You can not ^3unload ^7to this area.");
-				return;
+				if (trace.fraction != 1.0f)
+				{
+					CPTo(ent, "^7You can not ^3unload ^7to this area.");
+					return;
+				}
 			}
 		}
 

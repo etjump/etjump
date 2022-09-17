@@ -132,6 +132,8 @@ extern vmCvar_t cl_bypassMouseInput;
 //bani
 extern vmCvar_t ui_autoredirect;
 
+extern vmCvar_t ui_voteCheats;
+
 //
 // ui_qmenu.c
 //
