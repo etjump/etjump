@@ -477,7 +477,7 @@ bool DeleteLevel(gentity_t *ent, Arguments argv)
 
 	int usersWithLevel = ETJump::session->LevelDeleted(level);
 
-	ChatPrintTo(ent, "^3deletelevel: ^7deleted level. Set " + std::to_string(usersWithLevel) + " users to level 0.");
+	ChatPrintTo(ent, "^3deletelevel: ^7deleted level. Set " + ETJump::getPluralizedString(usersWithLevel, "user") + " to level 0.");
 
 	return true;
 }
@@ -863,8 +863,7 @@ bool FindMap(gentity_t *ent, Arguments argv)
 	}
 
 	auto        mapsOnCurrentRow = 0;
-	std::string buffer           = ETJump::stringFormat("^zFound %d maps matching ^3%s^z:\n^7",
-														static_cast<int>(matching.size()), argv->at(1));
+	std::string buffer = "^zFound ^3" + ETJump::getPluralizedString(matching.size(), "^zmap") + " matching ^3" + argv->at(1) + "^z:\n^7";
 	for (auto& map : matching)
 	{
 		// color every other column grey for readability
@@ -1179,7 +1178,7 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 
 	buffer += "\n";
 
-	buffer += ETJump::stringFormat("\n^zFound ^3%d ^zmaps on the server.\n", static_cast<int>(maps.size()));
+	buffer += "\n^zFound ^3" + ETJump::getPluralizedString(maps.size(), "^zmap") + " on the server.\n";
 
 	Printer::SendConsoleMessage(ClientNum(ent), buffer);
 
@@ -2229,7 +2228,7 @@ bool NewMaps(gentity_t *ent, Arguments argv)
 		numMaps = totalMaps;
 	}
 
-	std::string buffer = ETJump::stringFormat("^zLatest ^3%d ^zmaps added to server:\n\n", numMaps);
+	std::string buffer = "^zLatest ^3" + ETJump::getPluralizedString(numMaps, "^zmap") + " added to server:\n\n";
 	int lines = 0;
 	for (int i = numMaps; i > 0 ; i--)
 	{
