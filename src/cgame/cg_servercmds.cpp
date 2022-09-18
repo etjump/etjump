@@ -3123,17 +3123,21 @@ static void CG_ServerCommand(void)
 
 	if (!Q_stricmp(cmd, "savePrint"))
 	{
-		if (trap_Argc() > 1)
+		int pos = atoi(CG_Argv(1));
+		std::string saveMsg = etj_saveMsg.string;
+
+		if (pos)
 		{
-			auto pos = atoi(CG_Argv(1));
-			std::string saveMsg = etj_saveMsg.string;
 			saveMsg += ' ' + std::to_string(pos);
-			CPri(saveMsg.c_str());
 		}
-		else
+		if (trap_Argc() == 3)
 		{
-			CPri(etj_saveMsg.string);
+			int remainingSaves = atoi(CG_Argv(2));
+			std::string remainingSavesStr = va("^7(^3%d ^7remaining)\n", remainingSaves);
+			saveMsg += '\n' + remainingSavesStr;
 		}
+
+		CPri(saveMsg.c_str());
 		return;
 	}
 

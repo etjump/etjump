@@ -101,6 +101,9 @@ namespace ETJump
 
 			// So called "map ident"
 			int progression;
+
+			// Global map savelimit
+			int saveLimit;
 		};
 
 		enum class SaveLoadRestrictions
