@@ -149,7 +149,8 @@
 * added several new binding options to ETJump binds menu [#774](https://github.com/etjump/etjump/pull/774)
 * `cg_skybox` is no longer cheat protected so skyportals can be turned off [#776](https://github.com/etjump/etjump/pull/776)
 * fixed incorrect wording in max tracker indices error message [#786](https://github.com/etjump/etjump/pull/786)
-* added a new portalgun model [#787](https://github.com/etjump/etjump/pull/787)
+* added a new portalgun model and portal shaders [#787](https://github.com/etjump/etjump/pull/787) [#822](https://github.com/etjump/etjump/pull/822)
+  * portalgun range is increased to 131072 units [#824](https://github.com/etjump/etjump/pull/824)
 * improved spacing of multiline tooltips in menus [#788](https://github.com/etjump/etjump/pull/788)
 * speclock improvements:
   * speclock and specinvites are now persistent across map changes [#769](https://github.com/etjump/etjump/pull/796)
@@ -185,6 +186,25 @@
     * `etj_upmoveMeterTextShadow` - draw shadow on text (default __1__)
     * `etj_upmoveMeterTextSize` - size of text display (default __2__)
 * fixed prediction errors with crashlandings which caused delay on applying knockback event & view duck [#812](https://github.com/etjump/etjump/pull/812)
+* `!restart` and `reset_match` commands now start the map instantly instead of briefly having a warmup before actual map start [#815](https://github.com/etjump/etjump/pull/815)
+* added cvar unlockers for ETe clip/trigger/slick drawing [#813](https://github.com/etjump/etjump/pull/813)
+  * requires ETe build from Sep 10th 2022 or newer
+  * alternative shaders included in the mod to replace built-in ones from engine
+* text shadowing amount is no longer hardcoded to pure pixel values and scales with the text size [#816](https://github.com/etjump/etjump/pull/816)
+* added `callvote` devmap and removed several restrictions when running with cheats [#814](https://github.com/etjump/etjump/pull/814)
+  * save isn't restricted
+  * noclip is always available
+  * god is always available
+  * cheats are enabled during timeruns (no records are saved)
+  * save is available during nosave timeruns, load doesn't reset the run
+  * prone isn't restricted
+* `!listmaps` and `!findmap` improvements [#825](https://github.com/etjump/etjump/pull/825)
+  * `!listmaps` now defaults to 5 columns instead of 3, capped max columns to 5 to prevent output print breaking due to console char limits
+  * both `!listmaps` and `!findmap` outputs are now alphabetically ordered and every other column colored grey to improve readability
+  * `!findmap` now displays the number of matches similar to `callvote map <partialmapname>`
+  * added `!newmaps [N]` command to display `N` latest maps added to server (flag `a`)
+* fixed pluralization of some admin command outputs [#826](https://github.com/etjump/etjump/pull/826/files)
+* fixed non-functional `savelimit` worldspawn key [#827](https://github.com/etjump/etjump/pull/827)
 
 # ETJump 2.4.0
 
