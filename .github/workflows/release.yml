@@ -162,7 +162,7 @@ jobs:
     - name: Upload release 
       uses: actions/upload-artifact@v2
       with:
-        name: etjump-snapshot-release
+        name: etjump-stable-release
         path: ${{github.workspace}}/build/*.zip
 
     - name: Create release build
