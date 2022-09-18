@@ -34,6 +34,7 @@
 #include "etj_utilities.h"
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
+#include "etj_printer.h"
 
 typedef std::function<bool (gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool (gentity_t *ent, Arguments argv)>, char> AdminCommandPair;
@@ -840,6 +841,7 @@ bool FindMap(gentity_t *ent, Arguments argv)
 	}
 
 	auto                     maps = game.mapStatistics->getMaps();
+	std::sort(maps.begin(), maps.end());
 	std::vector<std::string> matching;
 	for (auto &map : maps)
 	{
@@ -850,25 +852,29 @@ bool FindMap(gentity_t *ent, Arguments argv)
 	}
 
 	auto        mapsOnCurrentRow = 0;
-	std::string buffer           = "^zFound " + std::to_string(matching.size()) + " maps:\n^7";
+	std::string buffer           = ETJump::stringFormat("^zFound %d maps matching ^3%s^z:\n^7",
+														static_cast<int>(matching.size()), argv->at(1));
 	for (auto& map : matching)
 	{
+		// color every other column grey for readability
+		buffer += mapsOnCurrentRow % 2 == 0 ? "^7" : "^z";
+
 		++mapsOnCurrentRow;
 		if (mapsOnCurrentRow > perRow)
 		{
 			mapsOnCurrentRow = 1;
-			buffer          += ETJump::stringFormat("\n%-22s", map);
+			buffer          += ETJump::stringFormat("\n^7%-23s", map);
 		}
 		else
 		{
-			buffer += ETJump::stringFormat("%-22s", map);
+			buffer += ETJump::stringFormat("%-23s", map);
 		}
 
 	}
 
 	buffer += "\n";
 
-	Utilities::toConsole(ent, buffer);
+	Printer::SendConsoleMessage(ClientNum(ent), buffer);
 	return true;
 }
 
@@ -1056,7 +1062,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv)
 		++listedMaps;
 	}
 
-	Utilities::toConsole(ent, buffer);
+	Printer::SendConsoleMessage(ClientNum(ent), buffer);
 
 	return true;
 }
@@ -1109,13 +1115,13 @@ bool ListFlags(gentity_t *ent, Arguments argv)
 
 bool ListMaps(gentity_t *ent, Arguments argv)
 {
-	auto perRow = 3;
+	auto perRow = 5;
 
 	if (argv->size() == 2)
 	{
 		try
 		{
-			perRow = std::stoi(argv->at(1), 0, 10);
+			perRow = std::stoi(argv->at(1), nullptr, 10);
 		}
 		catch (const std::invalid_argument&)
 		{
@@ -1124,7 +1130,7 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 		}
 		catch (const std::out_of_range&)
 		{
-			perRow = 10;
+			perRow = 5;
 		}
 
 		if (perRow < 0)
@@ -1133,35 +1139,38 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 			return false;
 		}
 
-		if (perRow > 10)
+		if (perRow > 5)
 		{
-			perRow = 10;
+			perRow = 5;
 		}
 	}
 
 	std::string buffer           = "^zListing all maps on server:\n^7";
 	auto        maps             = game.mapStatistics->getMaps();
+	std::sort(maps.begin(), maps.end());
 	auto        mapsOnCurrentRow = 0;
 	for (auto& map : maps)
 	{
+		// color every other column grey for readability
+		buffer += mapsOnCurrentRow % 2 == 0 ? "^7" : "^z";
+
 		++mapsOnCurrentRow;
 		if (mapsOnCurrentRow > perRow)
 		{
 			mapsOnCurrentRow = 1;
-			buffer          += ETJump::stringFormat("\n%-22s", map);
+			buffer          += ETJump::stringFormat("\n^7%-23s", map);
 		}
 		else
 		{
-			buffer += ETJump::stringFormat("%-22s", map);
+			buffer += ETJump::stringFormat("%-23s", map);
 		}
-
 	}
 
 	buffer += "\n";
 
 	buffer += ETJump::stringFormat("\n^zFound ^3%d ^zmaps on the server.\n", static_cast<int>(maps.size()));
 
-	Utilities::toConsole(ent, buffer);
+	Printer::SendConsoleMessage(ClientNum(ent), buffer);
 
 	return true;
 }
@@ -1334,7 +1343,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv)
 		++listedMaps;
 	}
 
-	Utilities::toConsole(ent, buffer);
+	Printer::SendConsoleMessage(ClientNum(ent), buffer);
 
 	return true;
 }
@@ -2021,7 +2030,7 @@ bool Tokens(gentity_t *ent, Arguments argv)
 		if (argv->size() < 2)
 		{
 			ChatPrintTo(ent, "^3usage: ^7check console for more information");
-			Utilities::toConsole(ent,
+			Printer::SendConsoleMessage(ClientNum(ent),
 			                     "^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new token\n"
 			                     "^7!tokens move ^9| Moves nearest token to your location\n"
 			                     "^7!tokens delete ^9| Deletes nearest token to your location\n"
@@ -2034,7 +2043,7 @@ bool Tokens(gentity_t *ent, Arguments argv)
 	{
 		if (argv->size() < 4)
 		{
-			Utilities::toConsole(ent,
+			Printer::SendConsoleMessage(ClientNum(ent),
 			                     "^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> <x> <y> <z>\n"
 			                     "!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n"
 			                     );
@@ -2169,6 +2178,60 @@ bool MoverScale(gentity_t *ent, Arguments argv)
 	return true;
 }
 
+bool NewMaps(gentity_t *ent, Arguments argv)
+{
+	auto numMaps = 5;
+	if (argv->size() > 1)
+	{
+		try
+		{
+			numMaps = std::stoi(argv->at(1), nullptr, 10);
+		}
+		catch (const std::invalid_argument&)
+		{
+			Printer::SendChatMessage(ClientNum(ent), ETJump::stringFormat("^3newmaps: ^7%s^7 is not a number", argv->at(1)));
+			return false;
+		}
+		catch (const std::out_of_range&)
+		{
+			numMaps = 5;
+		}
+
+		if (numMaps <= 0)
+		{
+			Printer::SendChatMessage(ClientNum(ent), "^3newmaps: ^7second argument must be over 0");
+			return false;
+		}
+
+		if (numMaps > 10)
+		{
+			numMaps = 10;
+		}
+	}
+
+	auto maps = game.mapStatistics->getMaps();
+	int totalMaps = static_cast<int>(maps.size());
+
+	// very unlikely but can potentially happen
+	if (numMaps > totalMaps)
+	{
+		numMaps = totalMaps;
+	}
+
+	std::string buffer = ETJump::stringFormat("^zLatest ^3%d ^zmaps added to server:\n\n", numMaps);
+	int lines = 0;
+	for (int i = numMaps; i > 0 ; i--)
+	{
+		buffer += lines % 2 == 0 ? "^7" : "^z";
+		buffer += ETJump::stringFormat("%s\n", maps.at(totalMaps - i));
+		lines++;
+	}
+
+	Printer::SendConsoleMessage(ClientNum(ent), buffer);
+
+	return true;
+}
+
 
 }
 
@@ -2222,6 +2285,7 @@ Commands::Commands()
 	adminCommands_["unmute"]   = AdminCommandPair(AdminCommands::Unmute, CommandFlags::MUTE);
 	adminCommands_["userinfo"] = AdminCommandPair(AdminCommands::UserInfo, CommandFlags::EDIT);
 	adminCommands_["moverscale"] = AdminCommandPair(AdminCommands::MoverScale, CommandFlags::MOVERSCALE);
+	adminCommands_["newmaps"] = AdminCommandPair(AdminCommands::NewMaps, CommandFlags::BASIC);
 
 	commands_["backup"] = ClientCommands::BackupLoad;
 	commands_["save"]   = ClientCommands::Save;

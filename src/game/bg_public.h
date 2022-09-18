@@ -2639,6 +2639,7 @@ static const struct Manual commandManuals[] = {
 		{ "userinfo",     "!userinfo [id]",                                                                                                                                                                 "Prints user info."                                                                  },
 		{ "ad_save",      "/ad_save [(optional) name]", "Saves currently ongoing autodemo temp file manually with given name." },
 		{ "clearsaves",   "/clearsaves", "Removes all your saved positions." },
+		{ "newmaps",      "!newmaps [(optional) count]", "Lists latest ^3[count] ^7maps added to server, sorted from oldest to newest." },
 };
 
 typedef struct
