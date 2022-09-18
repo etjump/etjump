@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include "etj_numeric_utilities.h"
 
 // Gordon
 // What we need....
@@ -336,7 +337,7 @@ void G_AddClientToFireteam(int entityNum, int leaderNum)
 
 			G_UpdateFireteamConfigString(ft);
 
-			otherEnt->client->sess.saveLimit = ft->saveLimit;
+			otherEnt->client->sess.saveLimitFt = ft->saveLimit;
 
 			return;
 		}
@@ -431,7 +432,7 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print)
 			else
 			{
 				ent                         = g_entities + ft->joinOrder[i];
-				ent->client->sess.saveLimit = ft->saveLimit;
+				ent->client->sess.saveLimitFt = ft->saveLimit;
 			}
 		}
 	}
@@ -827,9 +828,26 @@ void G_FireteamRace(int clientNum)
 //	}
 }
 
+void G_SetFireTeamSaveLimit(fireteamData_t *ft, int limit)
+{
+	gentity_t *ent;
+
+	for (int i = 0; i < level.numConnectedClients; i++)
+	{
+		if (ft->joinOrder[i] == -1)
+		{
+			continue;
+		}
+		else
+		{
+			ent                         = g_entities + ft->joinOrder[i];
+			ent->client->sess.saveLimitFt = limit;
+		}
+	}
+}
+
 void G_SetFireTeamRules(int clientNum)
 {
-	int            i;
 	char           arg1[MAX_TOKEN_CHARS];
 	char           val[MAX_TOKEN_CHARS];
 	fireteamData_t *ft;
@@ -858,53 +876,24 @@ void G_SetFireTeamRules(int clientNum)
 
 	if (!Q_stricmp(arg1, "savelimit"))
 	{
-		gentity_t *ent;
+		if (level.saveLimit > 0)
+		{
+			G_ClientPrintAndReturn(clientNum, "fireteam: unable to set savelimit - save is limited globally.");
+		}
+
 		trap_Argv(3, val, sizeof(val));
 
 		if (!Q_stricmp(val, "reset"))
 		{
-			for (i = 0; i < level.numConnectedClients; i++)
-			{
-				if (ft->joinOrder[i] == -1)
-				{
-					continue;
-				}
-				else
-				{
-					ent                         = g_entities + ft->joinOrder[i];
-					ent->client->sess.saveLimit = ft->saveLimit;
-				}
-			}
+			G_SetFireTeamSaveLimit(ft, ft->saveLimit);
 			return;
 		}
 
-		if (atoi(val) > 100)
-		{
-			ft->saveLimit = 100;
-		}
-		else if (atoi(val) < 0)
-		{
-			ft->saveLimit = -1;
-		}
-		else
-		{
-			ft->saveLimit = atoi(val);
-		}
+		int limit = Numeric::clamp(atoi(val), -1, 100);
+		ft->saveLimit = limit;
 
-		ft->saveLimit = atoi(val);
-		trap_SendServerCommand(clientNum, va("print \"Fireteam: savelimit was set to %i\n\"", atoi(val)));
-		for (i = 0; i < level.numConnectedClients; i++)
-		{
-			if (ft->joinOrder[i] == -1)
-			{
-				continue;
-			}
-			else
-			{
-				ent                         = g_entities + ft->joinOrder[i];
-				ent->client->sess.saveLimit = ft->saveLimit;
-			}
-		}
+		trap_SendServerCommand(clientNum, va("print \"Fireteam: savelimit was set to %i\n\"", limit));
+		G_SetFireTeamSaveLimit(ft, limit);
 		return;
 	}
 

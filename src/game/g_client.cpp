@@ -2065,6 +2065,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot)
 	ent->client->sess.muted             = qfalse;
 	ent->client->pers.race.isRouteMaker = qfalse;
 	client->sess.portalTeam             = 0;
+	client->sess.saveLimit              = level.saveLimit;
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();

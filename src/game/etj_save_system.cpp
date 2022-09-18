@@ -22,11 +22,6 @@
  * SOFTWARE.
  */
 
-#include <string>
-#include <vector>
-using std::string;
-using std::vector;
-
 #include "etj_save_system.h"
 #include "utilities.hpp"
 #include "etj_session.h"
@@ -173,38 +168,51 @@ void ETJump::SaveSystem::save(gentity_t *ent)
 			}
 		}
 
-		if (client->pers.race.isRacing)
+		if (level.saveLimit > 0)
 		{
-			if (client->pers.race.saveLimit == 0)
+			if (client->sess.saveLimit == 0)
 			{
-				CPTo(ent, "^5You've used all your saves.");
+				CPTo(ent, "^7You've used all your saves.");
 				return;
 			}
 
-			if (client->pers.race.saveLimit > 0)
-			{
-				client->pers.race.saveLimit--;
-			}
+			client->sess.saveLimit--;
 		}
 		else
 		{
-			fireteamData_t *ft;
-			if (G_IsOnFireteam(ent - g_entities, &ft))
+			if (client->pers.race.isRacing)
 			{
-				if (ft->saveLimit < 0)
+				if (client->pers.race.saveLimit == 0)
 				{
-					client->sess.saveLimit = 0;
+					CPTo(ent, "^7You've used all your saves.");
+					return;
 				}
-				if (ft->saveLimit)
+
+				if (client->pers.race.saveLimit > 0)
 				{
-					if (client->sess.saveLimit)
+					client->pers.race.saveLimit--;
+				}
+			}
+			else
+			{
+				fireteamData_t *ft;
+				if (G_IsOnFireteam(ent - g_entities, &ft))
+				{
+					if (ft->saveLimit < 0)
 					{
-						client->sess.saveLimit--;
+						client->sess.saveLimitFt = 0;
 					}
-					else
+					if (ft->saveLimit)
 					{
-						CPTo(ent, "^5You've used all your fireteam saves.");
-						return;
+						if (client->sess.saveLimitFt)
+						{
+							client->sess.saveLimitFt--;
+						}
+						else
+						{
+							CPTo(ent, "^7You've used all your fireteam saves.");
+							return;
+						}
 					}
 				}
 			}
@@ -588,7 +596,7 @@ void ETJump::SaveSystem::savePositionsToDatabase(gentity_t *ent)
 		return;
 	}
 
-	string guid = _session->Guid(ent);
+	std::string guid = _session->Guid(ent);
 
 	DisconnectedClient client;
 
@@ -611,9 +619,10 @@ void ETJump::SaveSystem::savePositionsToDatabase(gentity_t *ent)
 	}
 
 	client.progression                           = ent->client->sess.clientMapProgression;
+	client.saveLimit                             = ent->client->sess.saveLimit;
 	ent->client->sess.loadPreviousSavedPositions = qfalse;
 
-	std::map<string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
+	std::map<std::string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
 
 	if (it != _savedPositions.end())
 	{
@@ -640,9 +649,9 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 		return;
 	}
 
-	string guid = _session->Guid(ent);
+	std::string guid = _session->Guid(ent);
 
-	std::map<string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
+	std::map<std::string, DisconnectedClient>::iterator it = _savedPositions.find(guid);
 
 	if (it != _savedPositions.end())
 	{
@@ -680,6 +689,7 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent)
 
 		ent->client->sess.loadPreviousSavedPositions = qfalse;
 		ent->client->sess.clientMapProgression       = it->second.progression;
+		ent->client->sess.saveLimit                  = it->second.saveLimit;
 		if (validPositionsCount)
 		{
 			ChatPrintTo(ent, "^<ETJump: ^7loaded saved positions from previous session.");
@@ -888,6 +898,12 @@ void ETJump::SaveSystem::sendClientCommands(gentity_t* ent, int position)
 {
 	auto self = ClientNum(ent);
 	int target;
+	std::string saveMsg = va("savePrint %d\n", position);
+
+	if (!g_cheats.integer && level.saveLimit > 0)
+	{
+		saveMsg += va(" %d", ent->client->sess.saveLimit);
+	}
 
 	// Send the commands to ourselves and any following clients
 	for (int i = 0; i < level.numConnectedClients; i++)
@@ -899,7 +915,7 @@ void ETJump::SaveSystem::sendClientCommands(gentity_t* ent, int position)
 		{
 			trap_SendServerCommand(target, "resetStrafeQuality\n");
 			trap_SendServerCommand(target, "resetJumpSpeeds\n");
-			trap_SendServerCommand(target, position == 0 ? "savePrint\n" : va("savePrint %d\n", position));
+			trap_SendServerCommand(target, saveMsg.c_str());
 		}
 	}
 }

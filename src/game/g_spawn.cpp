@@ -1305,12 +1305,13 @@ void SP_worldspawn(void)
 	G_SpawnString("savelimit", "0", &s);
 	if (atoi(s))
 	{
-		level.saveLimit = qtrue;
-		G_Printf("Save is limited.\n");
+		int limit = atoi(s);
+		level.saveLimit = limit;
+		G_Printf("Save is limited to %s.\n", ETJump::getPluralizedString(limit, "save").c_str());
 	}
 	else
 	{
-		level.saveLimit = qfalse;
+		level.saveLimit = 0;
 		G_Printf("Save is not limited.\n");
 	}
 

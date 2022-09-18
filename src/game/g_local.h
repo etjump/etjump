@@ -743,6 +743,8 @@ typedef struct
 	qboolean specLocked;
 	int specInvitedClients[MAX_CLIENTS / (sizeof(int) * 8)];
 	// Fireteam save limit
+	int saveLimitFt;
+	// Global map savelimit
 	int saveLimit;
 	// Map ident
 	int clientMapProgression;
@@ -1380,7 +1382,7 @@ typedef struct
 	ipMute_t ipMutes[MAX_IP_MUTES];    // I don't think we need more than 16
 
 	qboolean ghostPlayers;
-	qboolean saveLimit;
+	int saveLimit;
 	int portalTeam;
 
 #define MAX_TIMERUNS 20
