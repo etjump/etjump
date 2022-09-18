@@ -838,6 +838,17 @@ bool FindMap(gentity_t *ent, Arguments argv)
 		{
 			perRow = 3;
 		}
+
+		if (perRow <= 0)
+		{
+			ChatPrintTo(ent, "^3findmap: ^7third argument must be over 0");
+			return false;
+		}
+
+		if (perRow > 5)
+		{
+			perRow = 5;
+		}
 	}
 
 	auto                     maps = game.mapStatistics->getMaps();
