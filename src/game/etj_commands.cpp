@@ -1133,7 +1133,7 @@ bool ListMaps(gentity_t *ent, Arguments argv)
 			perRow = 5;
 		}
 
-		if (perRow < 0)
+		if (perRow <= 0)
 		{
 			ChatPrintTo(ent, "^3listmaps: ^7second argument must be over 0");
 			return false;
