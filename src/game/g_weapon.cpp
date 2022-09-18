@@ -3877,7 +3877,7 @@ Portal Gun
 
 void Weapon_Portal_Fire(gentity_t *ent, int portalNumber)
 {
-	const int MAX_PORTAL_RANGE   = 5000; // max range where you can place next portal gate
+	const float MAX_PORTAL_RANGE = 2 << 16; // max range where you can place next portal gate
 	const float MIN_PORTALS_DIST = 75.0f; // min distance between two portal center points, used to avoid overlaping
 	const float MIN_ANGLES_DIFF  = 100.0f; // min angle difference between two portals, used to avoid overlaping
 
