@@ -1,9 +1,7 @@
 name: etjump-release
 
 on:
-  push:
-    tags:
-      - "*.*.*"
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
@@ -163,12 +161,3 @@ jobs:
       with:
         name: etjump-stable-release
         path: ${{github.workspace}}/build/*.zip
-
-    - name: Create release build
-      uses: marvinpinto/action-automatic-releases@latest
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        prerelease: false
-        title: ETJump ${{ github.ref_name }}
-        files: |
-          ${{github.workspace}}/build/*.zip
