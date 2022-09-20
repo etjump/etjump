@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -27,64 +27,57 @@
 #include "etj_irenderable.h"
 #include "cg_local.h"
 
-namespace ETJump
-{
-	class CGaz : public IRenderable
-	{
-	public:
-		static bool strafingForwards(const playerState_t& ps, pmove_t* pm);
-		static float getOptAngle(const playerState_t& ps, pmove_t* pm);
+namespace ETJump {
+class CGaz : public IRenderable {
+public:
+  static bool strafingForwards(const playerState_t &ps, pmove_t *pm);
+  static float getOptAngle(const playerState_t &ps, pmove_t *pm);
 
-		CGaz();
-		~CGaz() {};
+  CGaz();
+  ~CGaz(){};
 
-		void render() const override;
-		void beforeRender() override;
+  void render() const override;
+  void beforeRender() override;
 
-	private:
-		enum class CGazTrueness
-		{
-			CGAZ_JUMPCROUCH = 1,
-			CGAZ_GROUND = 2
-		};
+private:
+  enum class CGazTrueness { CGAZ_JUMPCROUCH = 1, CGAZ_GROUND = 2 };
 
-		struct state_t
-		{
-			float gSquared;		// 0 when not on slick
-			float vSquared;		// previous_velocity squared
-			float vfSquared;	// velocity squared
-			float aSquared;		// accel squared
+  struct state_t {
+    float gSquared;  // 0 when not on slick
+    float vSquared;  // previous_velocity squared
+    float vfSquared; // velocity squared
+    float aSquared;  // accel squared
 
-			float v;			// previous_velocity
-			float vf;			// velocity
-			float a;			// accel
+    float v;  // previous_velocity
+    float vf; // velocity
+    float a;  // accel
 
-			float wishspeed;
-		};
+    float wishspeed;
+  };
 
-		state_t state;
+  state_t state;
 
-		float drawMin;
-		float drawOpt;
-		float drawMaxCos;
-		float drawMax;
-		float drawVel;
-		float yaw;
-		vec4_t CGaz1Colors[4];
-		vec4_t CGaz2Colors[2];
+  float drawMin;
+  float drawOpt;
+  float drawMaxCos;
+  float drawMax;
+  float drawVel;
+  float yaw;
+  vec4_t CGaz1Colors[4];
+  vec4_t CGaz2Colors[2];
 
-		bool canSkipDraw() const;
-		void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
-		void UpdateCGaz2(void);
-		float GetSlickGravity();
-		void UpdateDraw(float wishspeed, float accel);
-		float UpdateDrawMin(state_t const* state);
-		float UpdateDrawOpt(state_t const* state);
-		float UpdateDrawMaxCos(state_t const* state, float d_opt);
-		float UpdateDrawMax(state_t const* state, float d_max_cos);
-		void startListeners();
+  bool canSkipDraw() const;
+  void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
+  void UpdateCGaz2(void);
+  float GetSlickGravity();
+  void UpdateDraw(float wishspeed, float accel);
+  float UpdateDrawMin(state_t const *state);
+  float UpdateDrawOpt(state_t const *state);
+  float UpdateDrawMaxCos(state_t const *state, float d_opt);
+  float UpdateDrawMax(state_t const *state, float d_max_cos);
+  void startListeners();
 
-		playerState_t* ps = &cg.predictedPlayerState;
-		pmove_t* pm;
-	};
-}
+  playerState_t *ps = &cg.predictedPlayerState;
+  pmove_t *pm;
+};
+} // namespace ETJump

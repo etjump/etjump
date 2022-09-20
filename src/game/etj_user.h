@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2022 ETJump team <zero@etjump.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,32 +28,33 @@
 #include <string>
 #include <vector>
 
-struct User_s
-{
-	User_s();
-	User_s(unsigned id, const std::string& guid, const std::string& name, const std::string& hwid);
-	User_s(unsigned id, std::string const& guid, int level, unsigned lastSeen,
-	       std::string const& name, std::string const& hwid, std::string const& title,
-	       std::string const& commands, std::string const& greeting);
+struct User_s {
+  User_s();
+  User_s(unsigned id, const std::string &guid, const std::string &name,
+         const std::string &hwid);
+  User_s(unsigned id, std::string const &guid, int level, unsigned lastSeen,
+         std::string const &name, std::string const &hwid,
+         std::string const &title, std::string const &commands,
+         std::string const &greeting);
 
-	// These are needed for multi_index_container operations
-	unsigned GetId();
-	std::string GetGuid();
+  // These are needed for multi_index_container operations
+  unsigned GetId();
+  std::string GetGuid();
 
-	const char *ToChar() const;
-	std::string GetLastSeenString() const;
-	std::string GetLastVisitString() const;
+  const char *ToChar() const;
+  std::string GetLastSeenString() const;
+  std::string GetLastVisitString() const;
 
-	int id;
-	std::string guid;
-	int level;
-	int lastSeen;
-	std::string name;
-	std::string title;
-	std::string commands;
-	std::string greeting;
-	std::vector<std::string> hwids;
-	unsigned updated;
+  int id;
+  std::string guid;
+  int level;
+  int lastSeen;
+  std::string name;
+  std::string title;
+  std::string commands;
+  std::string greeting;
+  std::vector<std::string> hwids;
+  unsigned updated;
 };
 
 #endif

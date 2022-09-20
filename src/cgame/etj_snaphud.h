@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -27,49 +27,42 @@
 #include "etj_irenderable.h"
 #include "cg_local.h"
 
-namespace ETJump
-{
-	class Snaphud : public IRenderable
-	{
-	public:
-		void render() const override;
-		void beforeRender() override;
-		static bool inMainAccelZone(const playerState_t& ps, pmove_t* pm);
+namespace ETJump {
+class Snaphud : public IRenderable {
+public:
+  void render() const override;
+  void beforeRender() override;
+  static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
 
-		Snaphud();
-		~Snaphud() {};
+  Snaphud();
+  ~Snaphud(){};
 
-	private:
-		bool canSkipDraw() const;
-		void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
-		void UpdateMaxSnapZones(float wishspeed, pmove_t* pm);
-		void UpdateSnapState(void);
-		void startListeners();
+private:
+  bool canSkipDraw() const;
+  void InitSnaphud(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
+  void UpdateMaxSnapZones(float wishspeed, pmove_t *pm);
+  void UpdateSnapState(void);
+  void startListeners();
 
-		enum class SnapTrueness
-		{
-			SNAP_JUMPCROUCH = 1,
-			SNAP_GROUND = 2
-		};
+  enum class SnapTrueness { SNAP_JUMPCROUCH = 1, SNAP_GROUND = 2 };
 
-		struct snaphud_t
-		{
-			float a;
-			unsigned char maxAccel;
-			std::vector<unsigned short>zones;
-			std::vector<unsigned char>xAccel;
-			std::vector<unsigned char>yAccel;
-			std::vector<float>absAccel;
-			float minAbsAccel;
-			float maxAbsAccel;
-		};
-		
-		snaphud_t snap;
+  struct snaphud_t {
+    float a;
+    unsigned char maxAccel;
+    std::vector<unsigned short> zones;
+    std::vector<unsigned char> xAccel;
+    std::vector<unsigned char> yAccel;
+    std::vector<float> absAccel;
+    float minAbsAccel;
+    float maxAbsAccel;
+  };
 
-		int yaw;
-		vec4_t snaphudColors[4];
+  snaphud_t snap;
 
-		playerState_t* ps = &cg.predictedPlayerState;
-		pmove_t* pm;
-	};
-}
+  int yaw;
+  vec4_t snaphudColors[4];
+
+  playerState_t *ps = &cg.predictedPlayerState;
+  pmove_t *pm;
+};
+} // namespace ETJump
