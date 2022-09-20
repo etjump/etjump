@@ -27,33 +27,33 @@
 #include "cg_local.h"
 
 namespace ETJump {
-	class StrafeQuality : public IRenderable {
-		double _totalFrames{ 0 };
-		double _goodFrames{ 0 };
-		double _strafeQuality{ 0 };
-		int _lastUpdateTime{ 0 };
+class StrafeQuality : public IRenderable {
+  double _totalFrames{0};
+  double _goodFrames{0};
+  double _strafeQuality{0};
+  int _lastUpdateTime{0};
 
-		float _oldSpeed{ 0 };
-		int _team{ 0 };
-		mutable vec4_t _color;
+  float _oldSpeed{0};
+  int _team{0};
+  mutable vec4_t _color;
 
-		// default absolute hud position
-		static constexpr float _x = 100;
-		static constexpr float _y = 100;
-		// amount of digits to show on hud
-		static constexpr std::size_t _digits = 4;
+  // default absolute hud position
+  static constexpr float _x = 100;
+  static constexpr float _y = 100;
+  // amount of digits to show on hud
+  static constexpr std::size_t _digits = 4;
 
-		void startListeners();
-		void parseColor();
-		void resetStrafeQuality();
-		bool canSkipDraw() const;
-		bool canSkipUpdate(usercmd_t cmd, int frameTime);
+  void startListeners();
+  void parseColor();
+  void resetStrafeQuality();
+  bool canSkipDraw() const;
+  bool canSkipUpdate(usercmd_t cmd, int frameTime);
 
-		pmove_t* pm;
+  pmove_t *pm;
 
-	public:
-		StrafeQuality();
-		void beforeRender() override;
-		void render() const override;
-	};
+public:
+  StrafeQuality();
+  void beforeRender() override;
+  void render() const override;
+};
 } // namespace ETJump

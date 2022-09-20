@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -24,28 +24,27 @@
 
 #ifdef __APPLE__
 
-#include "etj_operating_system.h"
+  #include "etj_operating_system.h"
 
-#include <IOKit/IOKitLib.h>
+  #include <IOKit/IOKitLib.h>
 
 const char *G_SHA1(const char *str);
 
 ETJump::OperatingSystem::OperatingSystem() = default;
 
-void ETJump::OperatingSystem::minimize()
-{
-}
+void ETJump::OperatingSystem::minimize() {}
 
-std::string ETJump::OperatingSystem::getHwid()
-{
-	char buf[512];
-	io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
-	auto uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
-	IOObjectRelease(ioRegistryRoot);
-	CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
-	CFRelease(uuidCf);
+std::string ETJump::OperatingSystem::getHwid() {
+  char buf[512];
+  io_registry_entry_t ioRegistryRoot =
+      IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
+  auto uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(
+      ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
+  IOObjectRelease(ioRegistryRoot);
+  CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
+  CFRelease(uuidCf);
 
-	return G_SHA1(buf);
+  return G_SHA1(buf);
 }
 
 #endif

@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -26,28 +26,30 @@
 
 #include "cg_local.h"
 
-namespace ETJump
-{
-	class PmoveUtils
-	{
-	public:
-		// returns real userCmd for players and a faked
-		// one for spectators/demo playback
-		static usercmd_t getUserCmd(const playerState_t& ps, int8_t uCmdScale);
+namespace ETJump {
+class PmoveUtils {
+public:
+  // returns real userCmd for players and a faked
+  // one for spectators/demo playback
+  static usercmd_t getUserCmd(const playerState_t &ps, int8_t uCmdScale);
 
-		// returns cg_pmove for players or runs PmoveSingle again
-		// for spectators/demo playback to get correct values for pmext
-		static pmove_t* getPmove(usercmd_t cmd);
+  // returns cg_pmove for players or runs PmoveSingle again
+  // for spectators/demo playback to get correct values for pmext
+  static pmove_t *getPmove(usercmd_t cmd);
 
-		// returns either sprintSpeedScale or runSpeedScale
-		static float PM_SprintScale(const playerState_t* ps);
+  // returns either sprintSpeedScale or runSpeedScale
+  static float PM_SprintScale(const playerState_t *ps);
 
-		// calculates wishspeed projected onto flat ground plane
-		static float PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps, pmove_t *pm);
+  // calculates wishspeed projected onto flat ground plane
+  static float PM_GetWishspeed(vec3_t wishvel, float scale, usercmd_t cmd,
+                               vec3_t forward, vec3_t right, vec3_t up,
+                               const playerState_t &ps, pmove_t *pm);
 
-		// updates XY wishvel based on cmdScale and angle vectors
-		// projects velocity down to a flat ground plane
-		// Z vector is taken as input for AngleVectors
-		static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward, vec3_t right, vec3_t up, const playerState_t& ps);
-	};
-}
+  // updates XY wishvel based on cmdScale and angle vectors
+  // projects velocity down to a flat ground plane
+  // Z vector is taken as input for AngleVectors
+  static void PM_UpdateWishvel(vec3_t wishvel, usercmd_t cmd, vec3_t forward,
+                               vec3_t right, vec3_t up,
+                               const playerState_t &ps);
+};
+} // namespace ETJump

@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2022 ETJump team <zero@etjump.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,50 +31,36 @@
 
 using namespace ETJump;
 
-DrawLeavesHandler::DrawLeavesHandler()
-{
-	auto shader = composeShader(
-		shaderName,
-		{
-			{
-				"map *white",
-				"blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-				"alphaGen const 0.0"
-			}
-		}
-	);
-	trap_R_LoadDynamicShader(shaderName, shader.c_str());
-	trap_R_RegisterShader(shaderName);
-	
-	if (!etj_drawLeaves.integer)
-	{
-		turnOffLeaves();
-	}
+DrawLeavesHandler::DrawLeavesHandler() {
+  auto shader = composeShader(
+      shaderName,
+      {{"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+        "alphaGen const 0.0"}});
+  trap_R_LoadDynamicShader(shaderName, shader.c_str());
+  trap_R_RegisterShader(shaderName);
 
-	cvarUpdateHandler->subscribe(&etj_drawLeaves, [&](const vmCvar_t* cvar) {
-		cvar->integer ? turnOnLeaves() : turnOffLeaves();
-	});
+  if (!etj_drawLeaves.integer) {
+    turnOffLeaves();
+  }
+
+  cvarUpdateHandler->subscribe(&etj_drawLeaves, [&](const vmCvar_t *cvar) {
+    cvar->integer ? turnOnLeaves() : turnOffLeaves();
+  });
 }
 
-void DrawLeavesHandler::turnOnLeaves()
-{
-	for (auto &leavesShader : leavesShaders)
-	{
-		trap_R_RemapShader(leavesShader, leavesShader, "0");
-	}
+void DrawLeavesHandler::turnOnLeaves() {
+  for (auto &leavesShader : leavesShaders) {
+    trap_R_RemapShader(leavesShader, leavesShader, "0");
+  }
 }
 
-void DrawLeavesHandler::turnOffLeaves()
-{
-	for (auto &leavesShader : leavesShaders)
-	{
-		trap_R_RemapShader(leavesShader, shaderName, "0");
-	}
+void DrawLeavesHandler::turnOffLeaves() {
+  for (auto &leavesShader : leavesShaders) {
+    trap_R_RemapShader(leavesShader, shaderName, "0");
+  }
 }
 
-
-DrawLeavesHandler::~DrawLeavesHandler()
-{
-	trap_R_LoadDynamicShader(shaderName, nullptr);
-	turnOnLeaves();
+DrawLeavesHandler::~DrawLeavesHandler() {
+  trap_R_LoadDynamicShader(shaderName, nullptr);
+  turnOnLeaves();
 }

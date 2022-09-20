@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2022 ETJump team <zero@etjump.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,84 +31,69 @@
 
 using namespace ETJump;
 
-ConsoleAlphaHandler::ConsoleAlphaHandler()
-{
-	auto shader = createBackground();
-	trap_R_LoadDynamicShader(shaderName, shader.c_str());
-	// once shader is registered, any changes to dynamic shader will have no effect
-	trap_R_RegisterShader(shaderName);
-	trap_R_RemapShader("console-16bit", shaderName, "0");
+ConsoleAlphaHandler::ConsoleAlphaHandler() {
+  auto shader = createBackground();
+  trap_R_LoadDynamicShader(shaderName, shader.c_str());
+  // once shader is registered, any changes to dynamic shader will have
+  // no effect
+  trap_R_RegisterShader(shaderName);
+  trap_R_RemapShader("console-16bit", shaderName, "0");
 }
 
-std::string ConsoleAlphaHandler::createBackground()
-{
-	if (etj_consoleShader.integer > 0)
-	{
-		return createTexturedBackground();
-	}
-	return createSolidBackground();
+std::string ConsoleAlphaHandler::createBackground() {
+  if (etj_consoleShader.integer > 0) {
+    return createTexturedBackground();
+  }
+  return createSolidBackground();
 }
 
-std::string ConsoleAlphaHandler::createTexturedBackground()
-{
-	auto alphaGen = ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+std::string ConsoleAlphaHandler::createTexturedBackground() {
+  auto alphaGen =
+      ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
 
-	return composeShader(
-		shaderName,
-		{ "nopicmip" },
-		{
-			{
-				"map textures/skies_sd/wurzburg_clouds.tga",
-				"blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-				alphaGen.c_str(),
-				"rgbGen identityLighting",
-				"tcMod scale 1.5 .75",
-				"tcMod scroll 0.01 -0.005"
-			},
-			{
-				"map textures/skies_sd/wurzburg_clouds.tga",
-				"blendFunc GL_DST_COLOR GL_ONE",
-				"rgbGen identityLighting",
-				"tcMod scale 1.25 .85",
-				"tcMod transform 0 1 1 0 0 0",
-				"tcMod scroll 0.03 -0.015",
-			},
-			{
-				"clampmap textures/skies_sd/colditz_mask.tga",
-				"blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-				alphaGen.c_str(),
-				"rgbGen identityLighting",
-				"tcMod scale 0.85 0.5",
-				"tcMod transform 1 0 0 1 -0.075 0.42",
-			}
-		}
-	);
+  return composeShader(shaderName, {"nopicmip"},
+                       {{"map textures/skies_sd/wurzburg_clouds.tga",
+                         "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+                         alphaGen.c_str(), "rgbGen identityLighting",
+                         "tcMod scale 1.5 .75", "tcMod scroll 0.01 -0.005"},
+                        {
+                            "map textures/skies_sd/wurzburg_clouds.tga",
+                            "blendFunc GL_DST_COLOR GL_ONE",
+                            "rgbGen identityLighting",
+                            "tcMod scale 1.25 .85",
+                            "tcMod transform 0 1 1 0 0 0",
+                            "tcMod scroll 0.03 -0.015",
+                        },
+                        {
+                            "clampmap textures/skies_sd/colditz_mask.tga",
+                            "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+                            alphaGen.c_str(),
+                            "rgbGen identityLighting",
+                            "tcMod scale 0.85 0.5",
+                            "tcMod transform 1 0 0 1 -0.075 0.42",
+                        }});
 }
 
-std::string ConsoleAlphaHandler::createSolidBackground()
-{
-	vec4_t bg;
-	parseColorString(etj_consoleColor.string, bg);
-	auto alphaGen = ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
-	auto colorGen = ETJump::stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
+std::string ConsoleAlphaHandler::createSolidBackground() {
+  vec4_t bg;
+  parseColorString(etj_consoleColor.string, bg);
+  auto alphaGen =
+      ETJump::stringFormat("alphaGen const %f", etj_consoleAlpha.value);
+  auto colorGen =
+      ETJump::stringFormat("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
 
-	return composeShader(
-		shaderName,
-		{ "nopicmip" },
-		{
-			{
-				"map $whiteimage",
-				"blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-				alphaGen.c_str(),
-				colorGen.c_str(),
-			}	
-		}
-	);
+  return composeShader(shaderName, {"nopicmip"},
+                       {{
+                           "map $whiteimage",
+                           "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+                           alphaGen.c_str(),
+                           colorGen.c_str(),
+                       }});
 }
 
-ConsoleAlphaHandler::~ConsoleAlphaHandler()
-{
-	// unload dynamic shader, so if you do `vid_restart` you won't accidently load it twice
-	trap_R_LoadDynamicShader(shaderName, nullptr);
-	trap_R_RemapShader("console-16bit", "console-16bit", "0");
+ConsoleAlphaHandler::~ConsoleAlphaHandler() {
+  // unload dynamic shader, so if you do `vid_restart` you won't
+  // accidently load it twice
+  trap_R_LoadDynamicShader(shaderName, nullptr);
+  trap_R_RemapShader("console-16bit", "console-16bit", "0");
 }

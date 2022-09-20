@@ -30,229 +30,204 @@
 #include "etj_cgaz.h"
 #include "etj_pmove_utils.h"
 
-namespace ETJump
-{
-	StrafeQuality::StrafeQuality()
-	{
-		parseColor();
-		startListeners();
-	}
+namespace ETJump {
+StrafeQuality::StrafeQuality() {
+  parseColor();
+  startListeners();
+}
 
-	void StrafeQuality::startListeners()
-	{
-		// only subscribe to cvars whose parsing would be inefficient each frame
-		cvarUpdateHandler->subscribe(&etj_strafeQualityColor,
-			[&](const vmCvar_t *cvar) {
-				parseColor();
-			});
+void StrafeQuality::startListeners() {
+  // only subscribe to cvars whose parsing would be inefficient each
+  // frame
+  cvarUpdateHandler->subscribe(&etj_strafeQualityColor,
+                               [&](const vmCvar_t *cvar) { parseColor(); });
 
-		consoleCommandsHandler->subscribe(
-			"resetStrafeQuality",
-			[&](const std::vector<std::string> &args) {
-				resetStrafeQuality();
-			});
-	}
+  consoleCommandsHandler->subscribe(
+      "resetStrafeQuality",
+      [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
+}
 
-	void StrafeQuality::parseColor()
-	{
-		parseColorString(etj_strafeQualityColor.string, _color);
-	}
+void StrafeQuality::parseColor() {
+  parseColorString(etj_strafeQualityColor.string, _color);
+}
 
-	void StrafeQuality::resetStrafeQuality()
-	{
-		// reset underlying vars, but not what is rendered until actually needed
-		_totalFrames = _goodFrames = _oldSpeed = 0;
-	}
+void StrafeQuality::resetStrafeQuality() {
+  // reset underlying vars, but not what is rendered until actually
+  // needed
+  _totalFrames = _goodFrames = _oldSpeed = 0;
+}
 
-	void StrafeQuality::beforeRender()
-	{
-		// get player state
-		const playerState_t& ps = cg.predictedPlayerState;
+void StrafeQuality::beforeRender() {
+  // get player state
+  const playerState_t &ps = cg.predictedPlayerState;
 
-		// get usercmd
-		// cmdScale is only checked here to be 0 or !0
-		// so we can just use CMDSCALE_DEFAULT
-		const int8_t ucmdScale     = CMDSCALE_DEFAULT;
-		const usercmd_t  cmd       = PmoveUtils::getUserCmd(ps, ucmdScale);
-		
-		// get correct pmove
-		pm = PmoveUtils::getPmove(cmd);
+  // get usercmd
+  // cmdScale is only checked here to be 0 or !0
+  // so we can just use CMDSCALE_DEFAULT
+  const int8_t ucmdScale = CMDSCALE_DEFAULT;
+  const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
 
-		// update team
-		if (_team != ps.persistant[PERS_TEAM])
-		{
-			_team = ps.persistant[PERS_TEAM];
-			// reset strafe quality upon team change
-			// note: not handled by consoleCommandsHandler because _team is needed in
-			// render() either ways
-			resetStrafeQuality();
-		}
+  // get correct pmove
+  pm = PmoveUtils::getPmove(cmd);
 
-		// check if current frame should count towards strafe quality
-		// we check for framerate dependency here by comparing current time
-		// to last update time, using commandTime for clients for 100% accuracy
-		// and cg.time for spectators/demos as an approximation
-		// note: this will be wrong for clients running < 125FPS... oh well
-		const auto frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
-			? cg.time
-			: pm->ps->commandTime;
+  // update team
+  if (_team != ps.persistant[PERS_TEAM]) {
+    _team = ps.persistant[PERS_TEAM];
+    // reset strafe quality upon team change
+    // note: not handled by consoleCommandsHandler because _team
+    // is needed in render() either ways
+    resetStrafeQuality();
+  }
 
-		if (canSkipUpdate(cmd, frameTime))
-		{
-			return;
-		}
+  // check if current frame should count towards strafe quality
+  // we check for framerate dependency here by comparing current time
+  // to last update time, using commandTime for clients for 100%
+  // accuracy and cg.time for spectators/demos as an approximation note:
+  // this will be wrong for clients running < 125FPS... oh well
+  const auto frameTime = (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback)
+                             ? cg.time
+                             : pm->ps->commandTime;
 
-		// count this frame towards strafe quality
-		_lastUpdateTime = frameTime;
-		++_totalFrames;
+  if (canSkipUpdate(cmd, frameTime)) {
+    return;
+  }
 
-		// check whether user input is good
-		const float speed = VectorLength2(ps.velocity);
-		vec3_t wishvel;
-		const float wishspeed = PmoveUtils::PM_GetWishspeed(wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right, pm->pmext->up, ps, pm);
-		if (speed < wishspeed)
-		{
-			// possibly good frame under ground speed if speed increased
-			// note that without speed increased you could go forward in a
-			// "ps.speed - 1" angle endlessly because of velocity snapping
-			if (speed > _oldSpeed)
-			{
-				// good frame if no upmove and either only forwardmove or only rightmove
-				if (cmd.upmove == 0 && ((cmd.forwardmove != 0 && cmd.rightmove == 0) ||
-					(cmd.forwardmove == 0 && cmd.rightmove != 0)))
-				{
-					++_goodFrames;
-				}
-				// otherwise only half as good because not optimal
-				else
-				{
-					_goodFrames += 0.5;
-				}
-			}
-		}
-		else
-		{
-			// good frame above ground speed if no upmove and in main accel zone
-			if (cmd.upmove == 0 && Snaphud::inMainAccelZone(ps, pm))
-			{
-				++_goodFrames;
-			}
-			// or if speed increased, half as good because not optimal
-			else if (speed > _oldSpeed)
-			{
-				_goodFrames += 0.5;
-			}
-		}
+  // count this frame towards strafe quality
+  _lastUpdateTime = frameTime;
+  ++_totalFrames;
 
-		// update strafe quality
-		_strafeQuality = 100 * _goodFrames / _totalFrames;
+  // check whether user input is good
+  const float speed = VectorLength2(ps.velocity);
+  vec3_t wishvel;
+  const float wishspeed = PmoveUtils::PM_GetWishspeed(
+      wishvel, pm->pmext->scale, cmd, pm->pmext->forward, pm->pmext->right,
+      pm->pmext->up, ps, pm);
+  if (speed < wishspeed) {
+    // possibly good frame under ground speed if speed increased
+    // note that without speed increased you could go forward in
+    // a "ps.speed - 1" angle endlessly because of velocity
+    // snapping
+    if (speed > _oldSpeed) {
+      // good frame if no upmove and either only
+      // forwardmove or only rightmove
+      if (cmd.upmove == 0 && ((cmd.forwardmove != 0 && cmd.rightmove == 0) ||
+                              (cmd.forwardmove == 0 && cmd.rightmove != 0))) {
+        ++_goodFrames;
+      }
+      // otherwise only half as good because not optimal
+      else {
+        _goodFrames += 0.5;
+      }
+    }
+  } else {
+    // good frame above ground speed if no upmove and in main
+    // accel zone
+    if (cmd.upmove == 0 && Snaphud::inMainAccelZone(ps, pm)) {
+      ++_goodFrames;
+    }
+    // or if speed increased, half as good because not optimal
+    else if (speed > _oldSpeed) {
+      _goodFrames += 0.5;
+    }
+  }
 
-		// update vars for next frame
-		_oldSpeed = speed;
-	}
+  // update strafe quality
+  _strafeQuality = 100 * _goodFrames / _totalFrames;
 
-	void StrafeQuality::render() const
-	{
-		// check whether to skip render
-		if (canSkipDraw())
-		{
-			return;
-		}
+  // update vars for next frame
+  _oldSpeed = speed;
+}
 
-		// get coordinates and size
-		float       x    = _x + etj_strafeQualityX.value;
-		float       y    = _y + etj_strafeQualityY.value;
-		const float size = 0.1f * etj_strafeQualitySize.value;
-		ETJump_AdjustPosition(&x);
+void StrafeQuality::render() const {
+  // check whether to skip render
+  if (canSkipDraw()) {
+    return;
+  }
 
-		// get hud text
-		std::string str;
-		std::string qualityStr = std::to_string(_strafeQuality);
-		qualityStr.resize(_digits + 1);
-		switch (etj_strafeQualityStyle.integer)
-		{
-		case 1:
-			// percent
-			str = qualityStr + "%";
-			break;
-		case 2:
-			// number
-			str = qualityStr;
-			break;
-		default:
-			// full
-			str = "Strafe Quality: " + qualityStr + "%";
-			break;
-		}
+  // get coordinates and size
+  float x = _x + etj_strafeQualityX.value;
+  float y = _y + etj_strafeQualityY.value;
+  const float size = 0.1f * etj_strafeQualitySize.value;
+  ETJump_AdjustPosition(&x);
 
-		// get hud shadow
-		const auto textStyle =
-			(etj_strafeQualityShadow.integer != 0 ? ITEM_TEXTSTYLE_SHADOWED
-			: ITEM_TEXTSTYLE_NORMAL);
+  // get hud text
+  std::string str;
+  std::string qualityStr = std::to_string(_strafeQuality);
+  qualityStr.resize(_digits + 1);
+  switch (etj_strafeQualityStyle.integer) {
+    case 1:
+      // percent
+      str = qualityStr + "%";
+      break;
+    case 2:
+      // number
+      str = qualityStr;
+      break;
+    default:
+      // full
+      str = "Strafe Quality: " + qualityStr + "%";
+      break;
+  }
 
-		// draw quality on screen
-		CG_Text_Paint_Ext(x, y, size, size, _color, str, 0, 0, textStyle,
-			&cgs.media.limboFont1);
-	}
+  // get hud shadow
+  const auto textStyle =
+      (etj_strafeQualityShadow.integer != 0 ? ITEM_TEXTSTYLE_SHADOWED
+                                            : ITEM_TEXTSTYLE_NORMAL);
 
-	bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime)
-	{
-		// only count this frame if it's relevant to pmove
-		// this makes sure that if clients FPS > 125
-		// we only count frames at pmove_msec intervals
-		if (_lastUpdateTime + pm->pmove_msec > frameTime)
-		{
-			return true;
-		}
+  // draw quality on screen
+  CG_Text_Paint_Ext(x, y, size, size, _color, str, 0, 0, textStyle,
+                    &cgs.media.limboFont1);
+}
 
-		// not strafing
-		if (cmd.forwardmove == 0 && cmd.rightmove == 0)
-		{
-			return true;
-		}
+bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime) {
+  // only count this frame if it's relevant to pmove
+  // this makes sure that if clients FPS > 125
+  // we only count frames at pmove_msec intervals
+  if (_lastUpdateTime + pm->pmove_msec > frameTime) {
+    return true;
+  }
 
-		// don't update if not in air or on ice
-		if (pm->ps->groundEntityNum != ENTITYNUM_NONE && !(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK))
-		{
-			return true;
-		}
+  // not strafing
+  if (cmd.forwardmove == 0 && cmd.rightmove == 0) {
+    return true;
+  }
 
-		if (pm->ps->pm_type == PM_NOCLIP || pm->ps->pm_type == PM_DEAD)
-		{
-			return true;
-		}
+  // don't update if not in air or on ice
+  if (pm->ps->groundEntityNum != ENTITYNUM_NONE &&
+      !(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK)) {
+    return true;
+  }
 
-		if (BG_PlayerMounted(pm->ps->eFlags) || pm->ps->weapon == WP_MOBILE_MG42_SET || pm->ps->weapon == WP_MORTAR_SET)
-		{
-			return true;
-		}
+  if (pm->ps->pm_type == PM_NOCLIP || pm->ps->pm_type == PM_DEAD) {
+    return true;
+  }
 
-		// no updates underwater or on ladders
-		if (pm->pmext->waterlevel > 1 || pm->pmext->ladder)
-		{
-			return true;
-		}
+  if (BG_PlayerMounted(pm->ps->eFlags) ||
+      pm->ps->weapon == WP_MOBILE_MG42_SET || pm->ps->weapon == WP_MORTAR_SET) {
+    return true;
+  }
 
-		return false;
-	}
+  // no updates underwater or on ladders
+  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
+    return true;
+  }
 
-	bool StrafeQuality::canSkipDraw() const
-	{
-		if (!etj_drawStrafeQuality.integer)
-		{
-			return true;
-		}
+  return false;
+}
 
-		if (_team == TEAM_SPECTATOR)
-		{
-			return true;
-		}
+bool StrafeQuality::canSkipDraw() const {
+  if (!etj_drawStrafeQuality.integer) {
+    return true;
+  }
 
-		if (showingScores())
-		{
-			return true;
-		}
+  if (_team == TEAM_SPECTATOR) {
+    return true;
+  }
 
-		return false;
-	}
+  if (showingScores()) {
+    return true;
+  }
+
+  return false;
+}
 } // namespace ETJump
