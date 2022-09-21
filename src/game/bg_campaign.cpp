@@ -20,7 +20,7 @@ qboolean BG_LoadCampaignSave(const char *filename, cpsFile_t *file,
                              const char *profile) {
   fileHandle_t f;
   long hash;
-  char *ch;
+  const char *ch;
   int i, j;
 
   memset(file, 0, sizeof(cpsFile_t));
@@ -44,7 +44,7 @@ qboolean BG_LoadCampaignSave(const char *filename, cpsFile_t *file,
   trap_FS_Read(&file->header.profileHash, sizeof(int), f);
 
   // generate hash for profile
-  for (hash = 0, ch = (char *)profile; *ch != '\0'; ch++) {
+  for (hash = 0, ch = profile; *ch != '\0'; ch++) {
     hash += (long)(tolower(*ch)) * ((ch - profile) + 119);
   }
 
@@ -77,7 +77,7 @@ qboolean BG_StoreCampaignSave(const char *filename, cpsFile_t *file,
                               const char *profile) {
   fileHandle_t f;
   long hash;
-  char *ch;
+  const char *ch;
   int i, j;
 
   // open the file
@@ -94,7 +94,7 @@ qboolean BG_StoreCampaignSave(const char *filename, cpsFile_t *file,
   trap_FS_Write(&file->header.numCampaigns, sizeof(int), f);
 
   // generate hash for profile
-  for (hash = 0, ch = (char *)profile; *ch != '\0'; ch++) {
+  for (hash = 0, ch = profile; *ch != '\0'; ch++) {
     hash += (long)(tolower(*ch)) * ((ch - profile) + 119);
   }
 

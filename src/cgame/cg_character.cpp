@@ -64,7 +64,7 @@ CG_ParseHudHeadConfig
 ======================
 */
 static qboolean CG_ParseHudHeadConfig(const char *filename, animation_t *hha) {
-  char *text_p;
+  const char *text_p;
   int len;
   int i;
   float fps;

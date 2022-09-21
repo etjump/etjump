@@ -287,11 +287,11 @@ G_Script_EventMatch_IntInRange
 */
 qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event,
                                         const char *eventParm) {
-  char *pString, *token;
+  const char *pString, *token;
   int int1, int2, eInt;
 
   // get the cast name
-  pString = (char *)eventParm;
+  pString = eventParm;
   token = COM_ParseExt(&pString, qfalse);
   int1 = atoi(token);
   token = COM_ParseExt(&pString, qfalse);
@@ -425,9 +425,10 @@ G_Script_ParseSpawnbot
   Parses "Spawnbot" command, precaching a custom character if specified
 ==============
 */
-void G_Script_ParseSpawnbot(char **ppScript, char params[], int paramsize) {
+static void G_Script_ParseSpawnbot(const char **ppScript, char params[],
+                                   int paramsize) {
   qboolean parsingCharacter = qfalse;
-  char *token;
+  const char *token;
 
   token = COM_ParseExt(ppScript, qfalse);
   while (token[0]) {
@@ -498,7 +499,7 @@ G_Script_ScriptParse
 ==============
 */
 void G_Script_ScriptParse(gentity_t *ent) {
-  char *pScript;
+  const char *pScript;
   char *token;
   qboolean wantName;
   qboolean inScript;

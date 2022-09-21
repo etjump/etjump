@@ -1691,8 +1691,8 @@ void G_swapTeams(void) {
 }
 
 int QDECL G_SortPlayersByXP(const void *a, const void *b) {
-  gclient_t *cla = &level.clients[*((int *)a)];
-  gclient_t *clb = &level.clients[*((int *)b)];
+  gclient_t *cla = &level.clients[*((const int *)a)];
+  gclient_t *clb = &level.clients[*((const int *)b)];
 
   if (cla->ps.persistant[PERS_SCORE] > clb->ps.persistant[PERS_SCORE]) {
     return -1;

@@ -18,8 +18,8 @@ int QDECL CG_SortFireTeam(const void *a, const void *b) {
   clientInfo_t *ca, *cb;
   int cna, cnb;
 
-  cna = *(int *)a;
-  cnb = *(int *)b;
+  cna = *(const int *)a;
+  cnb = *(const int *)b;
 
   ca = &cgs.clientinfo[cna];
   cb = &cgs.clientinfo[cnb];

@@ -160,7 +160,7 @@ int reloadableWeapons[] = {WP_MP40,
 // Gordon: changed to actually use the maxammo values
 ammotable_t ammoTableMP[WP_NUM_WEAPONS] = {
     //	MAX				USES	MAX		START	START
-    //RELOAD
+    // RELOAD
     // FIRE
     // NEXT
     // HEAT,

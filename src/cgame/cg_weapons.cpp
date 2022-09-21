@@ -939,11 +939,11 @@ CG_ParseWeaponConfig
 ======================
 */
 static qboolean CG_ParseWeaponConfig(const char *filename, weaponInfo_t *wi) {
-  char *text_p, *prev;
+  const char *text_p, *prev;
   int len;
   int i;
   float fps;
-  char *token;
+  const char *token;
   qboolean newfmt = qfalse; //----(SA)
   const int CONFIG_BUFFER_SIZE = 20000;
   auto text = std::make_unique<char[]>(CONFIG_BUFFER_SIZE);
@@ -4459,10 +4459,10 @@ void CG_NextWeapon_f(void) {
   //				present, but would discard the reload.  So
   // the when you switched 				back you'd have
   // to start the
-  // reload over.  This seems bad, however 				the delay for
-  // the current reload is already in effect, so you'd lose
-  // the reload time twice.  (the first pause for the current weapon reload, and
-  // the pause when you have to reload again 'cause you canceled this one)
+  // reload over.  This seems bad, however 				the delay
+  // for the current reload is already in effect, so you'd lose the reload time
+  // twice.  (the first pause for the current weapon reload, and the pause when
+  // you have to reload again 'cause you canceled this one)
 
   if (cg.snap->ps.weaponstate == WEAPON_RELOADING) {
     return;

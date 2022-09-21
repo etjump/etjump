@@ -57,7 +57,7 @@ void COM_StripExtension(const char *in, char *out) {
   *out = 0;
 }
 
-void COM_StripFilename(char *in, char *out) {
+void COM_StripFilename(const char *in, char *out) {
   char *end;
   Q_strncpyz(out, in, strlen(in) + 1);
   end = COM_SkipPath(out);
@@ -279,19 +279,19 @@ static char com_parsename[MAX_TOKEN_CHARS];
 static int com_lines;
 
 static int backup_lines;
-static char *backup_text;
+static const char *backup_text;
 
 void COM_BeginParseSession(const char *name) {
   com_lines = 0;
   Com_sprintf(com_parsename, sizeof(com_parsename), "%s", name);
 }
 
-void COM_BackupParseSession(char **data_p) {
+void COM_BackupParseSession(const char **data_p) {
   backup_lines = com_lines;
   backup_text = *data_p;
 }
 
-void COM_RestoreParseSession(char **data_p) {
+void COM_RestoreParseSession(const char **data_p) {
   com_lines = backup_lines;
   *data_p = backup_text;
 }
@@ -300,7 +300,7 @@ void COM_SetCurrentParseLine(int line) { com_lines = line; }
 
 int COM_GetCurrentParseLine(void) { return com_lines; }
 
-char *COM_Parse(char **data_p) { return COM_ParseExt(data_p, qtrue); }
+char *COM_Parse(const char **data_p) { return COM_ParseExt(data_p, qtrue); }
 
 void COM_ParseError(const char *format, ...) {
   va_list argptr;
@@ -336,7 +336,7 @@ string will be returned if the next token is
 a newline.
 ==============
 */
-static char *SkipWhitespace(char *data, qboolean *hasNewLines) {
+static const char *SkipWhitespace(const char *data, qboolean *hasNewLines) {
   int c;
 
   while ((c = *data) <= ' ') {
@@ -401,10 +401,10 @@ int COM_Compress(char *data_p) {
   return size;
 }
 
-char *COM_ParseExt(char **data_p, qboolean allowLineBreaks) {
+char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
   int c = 0, len;
   qboolean hasNewLines = qfalse;
-  char *data;
+  const char *data;
 
   data = *data_p;
   len = 0;
@@ -476,7 +476,7 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks) {
 
           if (!c) {
             com_token[len] = 0;
-            *data_p = (char *)data;
+            *data_p = data;
             break;
           }
           if ((c == '\\' && *(data) == '\"')) {
@@ -496,7 +496,7 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks) {
       }
       if (c == '\"' || !c) {
         com_token[len] = 0;
-        *data_p = (char *)data;
+        *data_p = data;
         return com_token;
       }
       if (len < MAX_TOKEN_CHARS) {
@@ -527,7 +527,7 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks) {
   }
   com_token[len] = 0;
 
-  *data_p = (char *)data;
+  *data_p = data;
   return com_token;
 }
 
@@ -536,8 +536,8 @@ char *COM_ParseExt(char **data_p, qboolean allowLineBreaks) {
 COM_MatchToken
 ==================
 */
-void COM_MatchToken(char **buf_p, const char *match) {
-  char *token;
+void COM_MatchToken(const char **buf_p, const char *match) {
+  const char *token;
 
   token = COM_Parse(buf_p);
   if (strcmp(token, match)) {
@@ -551,7 +551,7 @@ SkipBracedSection_Depth
 
 =================
 */
-void SkipBracedSection_Depth(char **program, int depth) {
+void SkipBracedSection_Depth(const char **program, int depth) {
   char *token;
 
   do {
@@ -575,7 +575,7 @@ Skips until a matching close brace is found.
 Internal brace depths are properly skipped.
 =================
 */
-void SkipBracedSection(char **program) {
+void SkipBracedSection(const char **program) {
   char *token;
   int depth;
 
@@ -597,8 +597,8 @@ void SkipBracedSection(char **program) {
 SkipRestOfLine
 =================
 */
-void SkipRestOfLine(char **data) {
-  char *p;
+void SkipRestOfLine(const char **data) {
+  const char *p;
   int c;
 
   p = *data;
@@ -612,7 +612,7 @@ void SkipRestOfLine(char **data) {
   *data = p;
 }
 
-void Parse1DMatrix(char **buf_p, int x, float *m) {
+void Parse1DMatrix(const char **buf_p, int x, float *m) {
   char *token;
   int i;
 
@@ -626,7 +626,7 @@ void Parse1DMatrix(char **buf_p, int x, float *m) {
   COM_MatchToken(buf_p, ")");
 }
 
-void Parse2DMatrix(char **buf_p, int y, int x, float *m) {
+void Parse2DMatrix(const char **buf_p, int y, int x, float *m) {
   int i;
 
   COM_MatchToken(buf_p, "(");
@@ -638,7 +638,7 @@ void Parse2DMatrix(char **buf_p, int y, int x, float *m) {
   COM_MatchToken(buf_p, ")");
 }
 
-void Parse3DMatrix(char **buf_p, int z, int y, int x, float *m) {
+void Parse3DMatrix(const char **buf_p, int z, int y, int x, float *m) {
   int i;
 
   COM_MatchToken(buf_p, "(");
@@ -655,7 +655,7 @@ void Parse3DMatrix(char **buf_p, int z, int y, int x, float *m) {
 Com_ParseInfos
 ===============
 */
-int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING]) {
+int Com_ParseInfos(const char *buf, int max, char infos[][MAX_INFO_STRING]) {
   const char *token;
   int count;
   char key[MAX_TOKEN_CHARS];
@@ -758,26 +758,6 @@ int Q_isforfilename(int c) {
     return (1);
   }
   return (0);
-}
-
-char *Q_strrchr(const char *string, int c) {
-  char cc = c;
-  char *s;
-  char *sp = (char *)0;
-
-  s = (char *)string;
-
-  while (*s) {
-    if (*s == cc) {
-      sp = s;
-    }
-    s++;
-  }
-  if (cc == 0) {
-    sp = s;
-  }
-
-  return sp;
 }
 
 /*

@@ -55,7 +55,7 @@ CG_SoundScriptPrecache
 int CG_SoundScriptPrecache(const char *name) {
   soundScriptSound_t *scriptSound;
   long hash;
-  char *s;
+  const char *s;
   soundScript_t *sound;
   //	byte buf[1024];
   int i;
@@ -66,7 +66,7 @@ int CG_SoundScriptPrecache(const char *name) {
 
   hash = generateHashValue(name);
 
-  s = (char *)name;
+  s = name;
   for (sound = hashTable[hash]; sound; sound = sound->nextHash) {
     if (!Q_stricmp(s, sound->name)) {
       // found a match, precache these sounds
@@ -230,7 +230,7 @@ CG_SoundPlaySoundScript
 int CG_SoundPlaySoundScript(const char *name, vec3_t org, int entnum,
                             qboolean buffer) {
   long hash;
-  char *s;
+  const char *s;
   soundScript_t *sound;
 
   if (!name || !name[0]) {
@@ -239,7 +239,7 @@ int CG_SoundPlaySoundScript(const char *name, vec3_t org, int entnum,
 
   hash = generateHashValue(name);
 
-  s = (char *)name;
+  s = name;
   sound = hashTable[hash];
   while (sound) {
     if (!Q_stricmp(s, sound->name)) {
@@ -289,8 +289,8 @@ void CG_SoundPlayIndexedScript(int index, vec3_t org, int entnum) {
 CG_SoundParseSounds
 ===============
 */
-static void CG_SoundParseSounds(char *filename, char *buffer) {
-  char *token, **text;
+static void CG_SoundParseSounds(const char *filename, const char *buffer) {
+  const char *token, **text;
   long hash;
   soundScript_t sound = {0,      "", 0, 0, qfalse, qfalse,
                          qfalse, 0,  0, 0}; // the current sound being read
@@ -458,7 +458,7 @@ extern char bigTextBuffer[100000]; // we got it anyway, might as well use it
 #define MAX_SOUND_FILES 128
 static void CG_SoundLoadSoundFiles(void) {
   char soundFiles[MAX_SOUND_FILES][MAX_QPATH];
-  char *text;
+  const char *text;
   char filename[MAX_QPATH];
   fileHandle_t f;
   int numSounds;
@@ -1035,11 +1035,11 @@ void CG_SpeakerEditor_RenderButton(panel_button_t *button) {
   button->rect.y -= 9.f;
 }
 
-char *CG_GetStrFromStrArray(const char *in, const int index) {
-  char *ptr, *s;
+static const char *CG_GetStrFromStrArray(const char *in, const int index) {
+  const char *ptr, *s;
   int i;
 
-  s = ptr = (char *)in;
+  s = ptr = in;
   i = 0;
   while (1) {
     if (i == index) {
@@ -1061,7 +1061,7 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
   float textboxW;
   rectDef_t rect;
   int i;
-  char *s;
+  const char *s;
 
   memcpy(&rect, &button->rect, sizeof(rect));
 
@@ -1185,7 +1185,7 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
       int i, numfiles, filelen;
       char *fileptr;
 
-      COM_StripFilename((char *)button->text, dirname);
+      COM_StripFilename(button->text, dirname);
       Q_strncpyz(filename, COM_SkipPath((char *)button->text),
                  sizeof(filename));
 

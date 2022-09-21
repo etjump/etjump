@@ -14,67 +14,6 @@ int ui_numBots;
 // static char *ui_botInfos[MAX_BOTS];
 
 static int ui_numArenas;
-// static char		*ui_arenaInfos[MAX_ARENAS];
-
-// static int		ui_numSinglePlayerArenas; // TTimo: unused
-// static int		ui_numSpecialSinglePlayerArenas; // TTimo: unused
-
-/*
-===============
-UI_ParseInfos
-===============
-*/
-int UI_ParseInfos(char *buf, int max, char *infos[], int totalmax) {
-  char *token;
-  int count;
-  char key[MAX_TOKEN_CHARS];
-  char info[MAX_INFO_STRING];
-
-  count = 0;
-
-  while (1) {
-    token = COM_Parse(&buf);
-    if (!token[0]) {
-      break;
-    }
-    if (strcmp(token, "{")) {
-      Com_Printf("Missing { in info file\n");
-      break;
-    }
-
-    if (count == max) {
-      Com_Printf("Max infos exceeded\n");
-      break;
-    }
-
-    info[0] = '\0';
-    while (1) {
-      token = COM_ParseExt(&buf, qtrue);
-      if (!token[0]) {
-        Com_Printf("Unexpected end of info file\n");
-        break;
-      }
-      if (!strcmp(token, "}")) {
-        break;
-      }
-      Q_strncpyz(key, token, sizeof(key));
-
-      token = COM_ParseExt(&buf, qfalse);
-      if (!token[0]) {
-        strcpy(token, "<NULL>");
-      }
-      Info_SetValueForKey(info, key, token);
-    }
-    // NOTE: extra space for arena number
-    infos[count] = static_cast<char *>(UI_Alloc(
-        strlen(info) + strlen("\\num\\") + strlen(va("%d", totalmax)) + 1));
-    if (infos[count]) {
-      strcpy(infos[count], info);
-      count++;
-    }
-  }
-  return count;
-}
 
 /*
 ===============
@@ -82,28 +21,6 @@ UI_LoadArenasFromFile
 ===============
 */
 static void UI_LoadArenasFromFile(char *filename) {
-  /*	int				len;
-      fileHandle_t	f;
-      char			buf[MAX_ARENAS_TEXT];
-
-      len = trap_FS_FOpenFile( filename, &f, FS_READ );
-      if ( !f ) {
-          trap_Print( va( S_COLOR_RED "file not found: %s\n", filename )
-     ); return;
-      }
-      if ( len >= MAX_ARENAS_TEXT ) {
-          trap_Print( va( S_COLOR_RED "file too large: %s is %i, max
-     allowed is %i", filename, len, MAX_ARENAS_TEXT ) );
-     trap_FS_FCloseFile( f ); return;
-      }
-
-      trap_FS_Read( buf, len, f );
-      buf[len] = 0;
-      trap_FS_FCloseFile( f );
-
-      ui_numArenas += UI_ParseInfos( buf, MAX_ARENAS - ui_numArenas,
-     &ui_arenaInfos[ui_numArenas], MAX_ARENAS );*/
-
   int handle;
   pc_token_t token;
 

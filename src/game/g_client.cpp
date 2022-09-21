@@ -2276,7 +2276,7 @@ void ClientBegin(int clientNum) {
 
 gentity_t *SelectSpawnPointFromList(char *list, vec3_t spawn_origin,
                                     vec3_t spawn_angles) {
-  char *pStr, *token;
+  const char *pStr, *token;
   gentity_t *spawnPoint = NULL, *trav;
 #define MAX_SPAWNPOINTFROMLIST_POINTS 16
   int valid[MAX_SPAWNPOINTFROMLIST_POINTS];
