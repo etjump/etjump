@@ -63,10 +63,8 @@ static void SelectCorrectWeapon(gclient_t *cl) {
   // early out if our currently held weapon is allowed
   // even though disallowed weapons are already removed, we'll still get to
   // keep any if it's currently equipped, so we force a weapon swap later
-  for (int i = 0; i < WP_NUM_WEAPONS; i++) {
-    if (i == cl->ps.weapon && !BG_WeaponDisallowedInTimeruns(i)) {
-      return;
-    }
+  if (!BG_WeaponDisallowedInTimeruns(cl->ps.weapon)) {
+    return;
   }
 
   // our currently held weapon was removed, so swap to a valid one
