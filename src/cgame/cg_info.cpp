@@ -834,8 +834,8 @@ void CG_DemoHelpDraw() {
     for (i = 0; i < static_cast<int>(sizeof(help) / sizeof(char *)); i++) {
       y += tSpacing;
       if (help[i] != NULL) {
-        CG_Text_Paint_Ext(x, y, tScale, tScale, tColor, (char *)help[i], 0.0f,
-                          0, tStyle, tFont);
+        CG_Text_Paint_Ext(x, y, tScale, tScale, tColor, help[i], 0.0f, 0,
+                          tStyle, tFont);
       }
     }
 
@@ -843,8 +843,8 @@ void CG_DemoHelpDraw() {
       for (i = 0; i < static_cast<int>(sizeof(mvhelp) / sizeof(char *)); i++) {
         y += tSpacing;
         if (mvhelp[i] != NULL) {
-          CG_Text_Paint_Ext(x, y, tScale, tScale, tColor, (char *)mvhelp[i],
-                            0.0f, 0, tStyle, tFont);
+          CG_Text_Paint_Ext(x, y, tScale, tScale, tColor, mvhelp[i], 0.0f, 0,
+                            tStyle, tFont);
         }
       }
     }

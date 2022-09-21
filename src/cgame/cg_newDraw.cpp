@@ -833,4 +833,4 @@ void CG_GetTeamColor(vec4_t *color) {
   }
 }
 
-void CG_RunMenuScript(char **args) {}
+void CG_RunMenuScript(const char **args) {}

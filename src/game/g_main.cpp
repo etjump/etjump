@@ -2183,8 +2183,8 @@ SortRanks
 int QDECL SortRanks(const void *a, const void *b) {
   gclient_t *ca, *cb;
 
-  ca = &level.clients[*(int *)a];
-  cb = &level.clients[*(int *)b];
+  ca = &level.clients[*(const int *)a];
+  cb = &level.clients[*(const int *)b];
 
   // sort special clients last
   if (/*ca->sess.spectatorState == SPECTATOR_SCOREBOARD ||*/ ca->sess

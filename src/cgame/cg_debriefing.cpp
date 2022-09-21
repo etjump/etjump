@@ -1586,8 +1586,8 @@ void CG_DebriefingPlayerList_Draw(panel_button_t *button) {
 }
 
 int QDECL CG_SortPlayersByXP(const void *a, const void *b) {
-  int ca = *(int *)a;
-  int cb = *(int *)b;
+  int ca = *(const int *)a;
+  int cb = *(const int *)b;
 
   if (!cgs.clientinfo[cb].infoValid) {
     return -1;
@@ -2497,7 +2497,7 @@ const char *awardNames[NUM_ENDGAME_AWARDS] = {
 
 void CG_Debreifing2_Awards_Parse(void) {
   int i = 0;
-  char *cs = (char *)CG_ConfigString(CS_ENDGAME_STATS);
+  const char *cs = CG_ConfigString(CS_ENDGAME_STATS);
   const char *token;
   char *s;
   int size, len;
@@ -2506,7 +2506,7 @@ void CG_Debreifing2_Awards_Parse(void) {
   Q_strncpyz(buffer, cs, sizeof(cgs.dbAwardNamesBuffer));
   cs = buffer;
 
-  while ((s = strchr(cs, ';'))) {
+  while ((s = (char *)strchr(cs, ';')) != NULL) {
     *s = '"';
   }
 

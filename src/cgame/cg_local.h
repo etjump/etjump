@@ -2904,7 +2904,7 @@ float CG_GetValue(int ownerDraw,
                   int type); // 'type' is relative or absolute (fractional-'0.5'
                              // or absolute- '50' health)
 qboolean CG_OwnerDrawVisible(int flags);
-void CG_RunMenuScript(char **args);
+void CG_RunMenuScript(const char **args);
 void CG_GetTeamColor(vec4_t *color);
 void CG_Draw3DModel(float x, float y, float w, float h, qhandle_t model,
                     qhandle_t skin, vec3_t origin, vec3_t angles);

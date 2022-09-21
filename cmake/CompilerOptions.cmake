@@ -25,7 +25,7 @@ function(create_compiler_opts target)
 		-fPIC
 		-fvisibility=hidden
 		-fdiagnostics-color=always
-		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall -Wextra -Wpedantic>
+		$<IF:$<STREQUAL:${WARN_LEVEL},0>,-w,-Wall -Wextra -Wpedantic -Wcast-qual>
 		-Wno-unused-parameter
 		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:

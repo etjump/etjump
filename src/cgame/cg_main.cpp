@@ -1542,15 +1542,15 @@ void CG_LoadObjectiveData(void) {
 //========================================================================
 void CG_SetupDlightstyles(void) {
   int i, j;
-  char *str;
-  char *token;
+  const char *str;
+  const char *token;
   int entnum;
   centity_t *cent;
 
   cg.lightstylesInited = qtrue;
 
   for (i = 1; i < MAX_DLIGHT_CONFIGSTRINGS; i++) {
-    str = (char *)CG_ConfigString(CS_DLIGHTS + i);
+    str = CG_ConfigString(CS_DLIGHTS + i);
     if (!strlen(str)) {
       break;
     }
@@ -3055,11 +3055,11 @@ CG_StartMusic
 ======================
 */
 void CG_StartMusic(void) {
-  char *s;
+  const char *s;
   char parm1[MAX_QPATH], parm2[MAX_QPATH];
 
   // start the background music
-  s = (char *)CG_ConfigString(CS_MUSIC);
+  s = CG_ConfigString(CS_MUSIC);
   Q_strncpyz(parm1, COM_Parse(&s), sizeof(parm1));
   Q_strncpyz(parm2, COM_Parse(&s), sizeof(parm2));
 
@@ -3074,11 +3074,11 @@ CG_QueueMusic
 ==============
 */
 void CG_QueueMusic(void) {
-  char *s;
+  const char *s;
   char parm[MAX_QPATH];
 
   // prepare the next background track
-  s = (char *)CG_ConfigString(CS_MUSIC_QUEUE);
+  s = CG_ConfigString(CS_MUSIC_QUEUE);
   Q_strncpyz(parm, COM_Parse(&s), sizeof(parm));
 
   // even if no strlen(parm).  we want to be able to clear the queue
@@ -3305,10 +3305,8 @@ void CG_ParseMenu(const char *menuFile) {
   trap_PC_FreeSource(handle);
 }
 
-qboolean CG_Load_Menu(char **p) {
-  char *token;
-
-  token = COM_ParseExt(p, qtrue);
+static qboolean CG_Load_Menu(const char **p) {
+  const char *token = COM_ParseExt(p, qtrue);
 
   if (token[0] != '{') {
     return qfalse;
@@ -3332,8 +3330,8 @@ qboolean CG_Load_Menu(char **p) {
 }
 
 void CG_LoadMenus(char *menuFile) {
-  char *token;
-  char *p;
+  const char *token;
+  const char *p;
   int len, start;
   fileHandle_t f;
   static char buf[MAX_MENUDEFFILE];
@@ -3999,14 +3997,14 @@ void CG_EncodeQP(const char *in, char *out, int maxlen) {
   }
 
   while (*in) {
-    if (*in == '"' || *in == '%' || *in == '=' || *((byte *)in) > 127) {
+    if (*in == '"' || *in == '%' || *in == '=' || *((const byte *)in) > 127) {
       if (out - first + 4 >= maxlen) {
         break;
       }
       *out++ = '=';
-      t = *((byte *)in) / 16;
+      t = *((const byte *)in) / 16;
       *out++ = t <= 9 ? t + '0' : t - 10 + 'A';
-      t = *((byte *)in) % 16;
+      t = *((const byte *)in) % 16;
       *out++ = t <= 9 ? t + '0' : t - 10 + 'A';
       in++;
     } else {

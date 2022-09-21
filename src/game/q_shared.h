@@ -736,15 +736,15 @@ float Com_Clamp(float min, float max, float value);
 char *COM_SkipPath(char *pathname);
 void COM_FixPath(char *pathname);
 void COM_StripExtension(const char *in, char *out);
-void COM_StripFilename(char *in, char *out);
+void COM_StripFilename(const char *in, char *out);
 void COM_DefaultExtension(char *path, int maxSize, const char *extension);
 
 void COM_BeginParseSession(const char *name);
-void COM_RestoreParseSession(char **data_p);
+void COM_RestoreParseSession(const char **data_p);
 void COM_SetCurrentParseLine(int line);
 int COM_GetCurrentParseLine(void);
-char *COM_Parse(char **data_p);
-char *COM_ParseExt(char **data_p, qboolean allowLineBreak);
+char *COM_Parse(const char **data_p);
+char *COM_ParseExt(const char **data_p, qboolean allowLineBreak);
 int COM_Compress(char *data_p);
 void COM_ParseError(const char *format, ...);
 void COM_ParseWarning(const char *format, ...);
@@ -777,16 +777,16 @@ typedef struct pc_token_s {
 
 // data is an in/out parm, returns a parsed out token
 
-void COM_MatchToken(char **buf_p, const char *match);
+void COM_MatchToken(const char **buf_p, const char *match);
 
-void SkipBracedSection(char **program);
-void SkipBracedSection_Depth(char **program,
-                             int depth); // start at given depth if already
-void SkipRestOfLine(char **data);
+void SkipBracedSection(const char **program);
+// start at given depth if already
+void SkipBracedSection_Depth(const char **program, int depth);
+void SkipRestOfLine(const char **data);
 
-void Parse1DMatrix(char **buf_p, int x, float *m);
-void Parse2DMatrix(char **buf_p, int y, int x, float *m);
-void Parse3DMatrix(char **buf_p, int z, int y, int x, float *m);
+void Parse1DMatrix(const char **buf_p, int x, float *m);
+void Parse2DMatrix(const char **buf_p, int y, int x, float *m);
+void Parse3DMatrix(const char **buf_p, int z, int y, int x, float *m);
 
 void QDECL Com_sprintf(char *dest, int size, const char *fmt, ...);
 
@@ -811,7 +811,6 @@ int Q_strncmp(const char *s1, const char *s2, int n);
 int Q_stricmpn(const char *s1, const char *s2, int n);
 char *Q_strlwr(char *s1);
 char *Q_strupr(char *s1);
-char *Q_strrchr(const char *string, int c);
 
 // buffer size safe library replacements
 void Q_strncpyz(char *dest, const char *src, int destsize);
@@ -1459,7 +1458,7 @@ typedef enum {
   TR_LINEAR_STOP_BACK, //----(SA)	added.  so reverse movement can
                        // be
                        // different than forward
-  TR_SINE, // value = base + sin( time / duration ) * delta
+  TR_SINE,             // value = base + sin( time / duration ) * delta
   TR_GRAVITY,
   // Ridah
   TR_GRAVITY_LOW,

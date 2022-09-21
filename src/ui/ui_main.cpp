@@ -848,26 +848,6 @@ char *Text_AutoWrap_Paint_Chunk(float x, float y, int width, float scale,
   return text + strlen(text);
 }
 
-// count the lines that we will need to have to print with the given wrap
-// parameters
-int Count_Text_AutoWrap_Paint(float x, float y, int width, float scale,
-                              vec4_t color, const char *text, float adjust,
-                              int style) {
-  const char *ret, *end;
-  int i = 0;
-
-  ret = text;
-  end = text + strlen(text);
-
-  do {
-    ret = Text_AutoWrap_Paint_Chunk(x, y, width, scale, color, (char *)ret,
-                                    adjust, 0, style, qtrue, NULL);
-    i++;
-  } while (ret < end);
-
-  return i;
-}
-
 void Text_AutoWrap_Paint(float x, float y, int width, int height, float scale,
                          vec4_t color, const char *l_text, float adjust,
                          int style) {
@@ -4202,7 +4182,7 @@ UI_ServersQsortCompare
 static int QDECL UI_ServersQsortCompare(const void *arg1, const void *arg2) {
   return trap_LAN_CompareServers(
       ui_netSource.integer, uiInfo.serverStatus.sortKey,
-      uiInfo.serverStatus.sortDir, *(int *)arg1, *(int *)arg2);
+      uiInfo.serverStatus.sortDir, *(const int *)arg1, *(const int *)arg2);
 }
 
 /*
@@ -4466,22 +4446,6 @@ static void UI_LoadMovies() {
   }
 }
 
-/* qsort C-string comparison function */
-int cstring_cmp(const void *a, const void *b) {
-  const char **ia = (const char **)a;
-  const char **ib = (const char **)b;
-  return strcmp(*ia, *ib);
-  /* strcmp functions works exactly as expected from
-  comparison function */
-}
-
-/* case insensitive qsort C-string comparison function */
-int cstring_icmp(const void *a, const void *b) {
-  const char **ia = (const char **)a;
-  const char **ib = (const char **)b;
-  return Q_stricmp(*ia, *ib);
-}
-
 /*
 ===============
 UI_LoadDemos
@@ -4736,7 +4700,7 @@ void UI_Update(const char *name) {
 UI_RunMenuScript
 ==============
 */
-void UI_RunMenuScript(char **args) {
+void UI_RunMenuScript(const char **args) {
   const char *name, *name2;
   char *s;
   char buff[1024];
@@ -8195,8 +8159,8 @@ static void UI_ParseTeamInfo(const char *teamFile) {
 GameType_Parse
 ==============
 */
-static qboolean GameType_Parse(char **p, qboolean join) {
-  char *token;
+static qboolean GameType_Parse(const char **p, qboolean join) {
+  const char *token;
 
   token = COM_ParseExt(p, qtrue);
 
@@ -8359,8 +8323,8 @@ static qboolean MapList_Parse(char **p)
 #endif
 
 static void UI_ParseGameInfo(const char *teamFile) {
-  char *token;
-  char *p;
+  const char *token;
+  const char *p;
   char *buff = NULL;
   // int mode = 0; // TTimo: unused
 
@@ -8849,9 +8813,8 @@ void keepServerListUpdating() {
 void openPlayOnlineMenu() {
   Menus_CloseByName("main"); // opened by main_opener after ui reload
   Menus_ActivateByName("playonline", qtrue);
-  char str[]{"clearError"}; // clears com_errorMessage
-  char *strp = str;
-  UI_RunMenuScript(&strp);
+  const char *str = "clearError"; // clears com_errorMessage
+  UI_RunMenuScript(&str);
 }
 
 void handleIllegalRedirect() {

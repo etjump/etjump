@@ -615,8 +615,8 @@ qboolean CG_PlayerSeesItem(playerState_t *ps, entityState_t *item, int atTime,
   //		It'd be nice if the angle vectors for the player
   //		have already been figured at this point and I can
   //		just pick them up.  (if anybody is storing this
-  // somewhere, 		for the current frame please let me know so I don't
-  // have to do redundant calcs)
+  // somewhere, 		for the current frame please let me know so I
+  // don't have to do redundant calcs)
   AngleVectors(ps->viewangles, viewa, 0, 0);
   dot = DotProduct(viewa, dir);
 
@@ -1508,14 +1508,14 @@ static void CG_SpotlightEfx(centity_t *cent) {
   float dist, fov = 90;
   vec4_t color = {1.f, 1.f, 1.f, .1f};
   int splinetarget = 0;
-  char *cs;
+  const char *cs;
 
   VectorCopy(cent->currentState.origin2, targetpos);
 
   splinetarget = cent->overheatTime;
 
   if (!splinetarget) {
-    cs = (char *)CG_ConfigString(CS_SPLINES + cent->currentState.density);
+    cs = CG_ConfigString(CS_SPLINES + cent->currentState.density);
     cent->overheatTime = splinetarget =
         CG_LoadCamera(va("cameras/%s.camera", cs));
     if (splinetarget != -1) {

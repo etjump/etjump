@@ -31,7 +31,7 @@ static animScriptData_t *globalScriptData = NULL;
 
 #define MAX_ANIM_DEFINES 16
 
-static char *globalFilename; // to prevent redundant params
+static const char *globalFilename; // to prevent redundant params
 
 // these are used globally during script parsing
 static int numDefines[NUM_ANIM_CONDITIONS];
@@ -419,7 +419,7 @@ BG_IndexForString
   errors out if no match found
 =================
 */
-int BG_IndexForString(char *token, animStringItem_t *strings,
+int BG_IndexForString(const char *token, animStringItem_t *strings,
                       qboolean allowFail) {
   int i, hash;
   animStringItem_t *strav;
@@ -508,8 +508,9 @@ BG_ParseConditionBits
 or end of line
 =================
 */
-void BG_ParseConditionBits(char **text_pp, animStringItem_t *stringTable,
-                           int condIndex, int result[2]) {
+static void BG_ParseConditionBits(const char **text_pp,
+                                  animStringItem_t *stringTable, int condIndex,
+                                  int result[2]) {
   qboolean endFlag = qfalse;
   int indexFound;
   int /*indexBits,*/ tempBits[2];
@@ -639,7 +640,8 @@ BG_ParseConditions
   returns qtrue if everything went ok, error drops otherwise
 =================
 */
-qboolean BG_ParseConditions(char **text_pp, animScriptItem_t *scriptItem) {
+static qboolean BG_ParseConditions(const char **text_pp,
+                                   animScriptItem_t *scriptItem) {
   int conditionIndex, conditionValue[2];
   char *token;
 
@@ -717,10 +719,10 @@ qboolean BG_ParseConditions(char **text_pp, animScriptItem_t *scriptItem) {
 BG_ParseCommands
 =================
 */
-static void BG_ParseCommands(char **input, animScriptItem_t *scriptItem,
+static void BG_ParseCommands(const char **input, animScriptItem_t *scriptItem,
                              animModelInfo_t *animModelInfo,
                              animScriptData_t *scriptData) {
-  char *token;
+  const char *token;
   // TTimo gcc: might be used uninitialized
   animScriptCommand_t *command = NULL;
   int partIndex = 0;
@@ -891,8 +893,8 @@ void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo,
 
   // FIXME: change this to use the botlib parser
 
-  char *text_p;
-  char *token;
+  const char *text_p;
+  const char *token;
   animScriptParseMode_t parseMode;
   animScript_t *currentScript;
   animScriptItem_t tempScriptItem;
@@ -910,7 +912,7 @@ void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo,
   parseMode = PARSEMODE_DEFINES;
 
   // init the global defines
-  globalFilename = (char *)filename;
+  globalFilename = filename;
   memset(defineStr, 0, sizeof(defineStr));
   memset(defineStrings, 0, sizeof(defineStrings));
   memset(numDefines, 0, sizeof(numDefines));

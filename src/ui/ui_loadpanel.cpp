@@ -426,7 +426,7 @@ void UI_LoadPanel_RenderLoadingText(panel_button_t *button) {
         case CA_DISCONNECTED:
         case CA_CONNECTED:
           if (*downloadName || cstate.connState == CA_DISCONNECTED) {
-            s = (char *)UI_DownloadInfo(downloadName);
+            s = UI_DownloadInfo(downloadName);
           } else {
             s = trap_TranslateString("Awaiting "
                                      "gamestate...");
@@ -439,7 +439,7 @@ void UI_LoadPanel_RenderLoadingText(panel_button_t *button) {
       }
     } else if (trap_Cvar_VariableValue("ui_dl_running")) {
       // only toggle during a disconnected download
-      s = (char *)UI_DownloadInfo(downloadName);
+      s = UI_DownloadInfo(downloadName);
     }
 
     Q_strcat(buff, sizeof(buff), va("\n\n%s^*", s));

@@ -396,10 +396,10 @@ CG_ParseScreenFade
 =====================
 */
 static void CG_ParseScreenFade(void) {
-  char *info;
-  char *token;
+  const char *info;
+  const char *token;
 
-  info = (char *)CG_ConfigString(CS_SCREENFADE);
+  info = CG_ConfigString(CS_SCREENFADE);
 
   token = COM_Parse(&info);
   cgs.fadeAlpha = Q_atof(token);
@@ -425,12 +425,12 @@ CG_ParseFog
 ==============
 */
 static void CG_ParseFog(void) {
-  char *info;
-  char *token;
+  const char *info;
+  const char *token;
   float ne, fa, r, g, b, density;
   int time;
 
-  info = (char *)CG_ConfigString(CS_FOGVARS);
+  info = CG_ConfigString(CS_FOGVARS);
 
   token = COM_Parse(&info);
   ne = Q_atof(token);
@@ -457,13 +457,13 @@ static void CG_ParseFog(void) {
 }
 
 static void CG_ParseGlobalFog(void) {
-  char *info;
-  char *token;
+  const char *info;
+  const char *token;
   qboolean restore;
   float r, g, b, depthForOpaque;
   int duration;
 
-  info = (char *)CG_ConfigString(CS_GLOBALFOGVARS);
+  info = CG_ConfigString(CS_GLOBALFOGVARS);
 
   token = COM_Parse(&info);
   restore = atoi(token) ? qtrue : qfalse;
@@ -1090,8 +1090,8 @@ int CG_ParseVoiceChats(const char *filename, voiceChatList_t *voiceChatList,
   int current = 0;
   fileHandle_t f;
   auto buf = std::make_unique<char[]>(MAX_VOICEFILESIZE);
-  char **p, *ptr;
-  char *token;
+  const char **p, *ptr;
+  const char *token;
   voiceChat_t *voiceChats;
   qboolean compress;
 
@@ -1249,8 +1249,8 @@ int CG_HeadModelVoiceChats(char *filename) {
   int len, i;
   fileHandle_t f;
   auto buf = std::make_unique<char[]>(MAX_VOICEFILESIZE);
-  char **p, *ptr;
-  char *token;
+  const char **p, *ptr;
+  const char *token;
 
   len = trap_FS_FOpenFile(filename, &f, FS_READ);
   if (!f) {

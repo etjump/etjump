@@ -1482,7 +1482,7 @@ int CG_CalcViewValues(void) {
 
 //=========================================================================
 
-char *CG_MustParse(char **pString, const char *pErrorMsg) {
+char *CG_MustParse(const char **pString, const char *pErrorMsg) {
   char *token = COM_Parse(pString);
   if (!*token) {
     CG_Error(pErrorMsg);
@@ -1492,10 +1492,10 @@ char *CG_MustParse(char **pString, const char *pErrorMsg) {
 
 void CG_ParseSkyBox(void) {
   int fogStart, fogEnd;
-  char *cstr, *token;
+  const char *cstr, *token;
   vec4_t fogColor;
 
-  cstr = (char *)CG_ConfigString(CS_SKYBOXORG);
+  cstr = CG_ConfigString(CS_SKYBOXORG);
 
   if (!*cstr) {
     cg.skyboxEnabled = qfalse;
@@ -1571,9 +1571,7 @@ void CG_ParseTagConnects(void) {
 }
 
 void CG_ParseTagConnect(int tagNum) {
-  char *token,
-      *pString = (char *)CG_ConfigString(
-          tagNum); // Gordon: bleh, i hate that cast away of the const
+  const char *token, *pString = CG_ConfigString(tagNum);
   int entNum;
 
   if (!*pString) {

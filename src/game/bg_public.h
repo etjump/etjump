@@ -2267,7 +2267,7 @@ int BG_AnimScriptCannedAnimation(playerState_t *ps, animModelInfo_t *modelInfo);
 int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *modelInfo,
                        scriptAnimEventTypes_t event, qboolean isContinue,
                        qboolean force);
-int BG_IndexForString(char *token, animStringItem_t *strings,
+int BG_IndexForString(const char *token, animStringItem_t *strings,
                       qboolean allowFail);
 int BG_PlayAnimName(playerState_t *ps, animModelInfo_t *animModelInfo,
                     char *animName, animBodyPart_t bodyPart, qboolean setTimer,

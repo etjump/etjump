@@ -393,7 +393,7 @@ typedef struct {
 
 typedef struct {
   const char *name;
-  void (*handler)(itemDef_t *item, qboolean *bAbort, char **args);
+  void (*handler)(itemDef_t *item, qboolean *bAbort, const char **args);
 } commandDef_t;
 
 typedef struct {
@@ -437,7 +437,7 @@ typedef struct {
                         qhandle_t shader, int textStyle);
   float (*getValue)(int ownerDraw, int type);
   qboolean (*ownerDrawVisible)(int flags);
-  void (*runScript)(char **p);
+  void (*runScript)(const char **p);
   void (*getTeamColor)(vec4_t *color);
   void (*getCVarString)(const char *cvar, char *buffer, int bufsize);
   float (*getCVarValue)(const char *cvar);
@@ -527,12 +527,11 @@ menuDef_t *Menu_GetFocused();
 void Menu_HandleKey(menuDef_t *menu, int key, qboolean down);
 void Menu_HandleMouseMove(menuDef_t *menu, float x, float y);
 void Menu_ScrollFeeder(menuDef_t *menu, int feeder, qboolean down);
-qboolean Float_Parse(char **p, float *f);
-qboolean Color_Parse(char **p, vec4_t *c);
-qboolean Int_Parse(char **p, int *i);
-qboolean Rect_Parse(char **p, rectDef_t *r);
-qboolean String_Parse(char **p, const char **out);
-qboolean Script_Parse(char **p, const char **out);
+qboolean Float_Parse(const char **p, float *f);
+qboolean Color_Parse(const char **p, vec4_t *c);
+qboolean Int_Parse(const char **p, int *i);
+qboolean Rect_Parse(const char **p, rectDef_t *r);
+qboolean String_Parse(const char **p, const char **out);
 void PC_SourceError(int handle, const char *format, ...);
 void PC_SourceWarning(int handle, const char *format, ...);
 qboolean PC_Float_Parse(int handle, float *f);

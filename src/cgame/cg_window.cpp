@@ -86,7 +86,7 @@ void CG_createMOTDWindow(void) {
     for (i = 0; i < MAX_MOTDLINES; i++) {
       str = CG_ConfigString(CS_CUSTMOTD + i);
       if (str != NULL && *str != 0) {
-        CG_printWindow((char *)str);
+        CG_printWindow(str);
       } else {
         break;
       }
