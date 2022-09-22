@@ -2503,11 +2503,6 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_S_StartSound(NULL, es->number, CHAN_VOICE,
                         CG_CustomSound(es->number, va("*death%i.wav",
                                                       event - EV_DEATH1 + 1)));
-      if (clientNum == cg.predictedPlayerState.clientNum) {
-        trap_SendConsoleCommand("resetJumpSpeeds\n");
-        trap_SendConsoleCommand("resetStrafeQuality\n");
-        trap_SendConsoleCommand("resetUpmoveMeter\n");
-      }
       break;
 
     case EV_OBITUARY:
@@ -2535,11 +2530,6 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_S_StartSound(es->pos.trBase, -1, CHAN_AUTO, cgs.media.gibSound);
       ByteToDir(es->eventParm, dir);
       CG_GibPlayer(cent, cent->lerpOrigin, dir);
-      if (clientNum == cg.predictedPlayerState.clientNum) {
-        trap_SendConsoleCommand("resetJumpSpeeds\n");
-        trap_SendConsoleCommand("resetStrafeQuality\n");
-        trap_SendConsoleCommand("resetUpmoveMeter\n");
-      }
       break;
 
     case EV_STOPLOOPINGSOUND:

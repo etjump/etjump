@@ -27,6 +27,7 @@
 #include "etj_client_commands_handler.h"
 #include "etj_utilities.h"
 #include "etj_pmove_utils.h"
+#include "etj_player_events_handler.h"
 
 namespace ETJump {
 UpmoveMeter::UpmoveMeter() {
@@ -70,6 +71,10 @@ void UpmoveMeter::startListeners() {
 
   consoleCommandsHandler->subscribe(
       "resetUpmoveMeter",
+      [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
+
+  playerEventsHandler->subscribe(
+      "respawn",
       [&](const std::vector<std::string> &args) { resetUpmoveMeter(); });
 }
 

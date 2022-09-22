@@ -29,6 +29,7 @@
 #include "etj_snaphud.h"
 #include "etj_cgaz.h"
 #include "etj_pmove_utils.h"
+#include "etj_player_events_handler.h"
 
 namespace ETJump {
 StrafeQuality::StrafeQuality() {
@@ -44,6 +45,9 @@ void StrafeQuality::startListeners() {
 
   consoleCommandsHandler->subscribe(
       "resetStrafeQuality",
+      [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
+  playerEventsHandler->subscribe(
+      "respawn",
       [&](const std::vector<std::string> &args) { resetStrafeQuality(); });
 }
 
