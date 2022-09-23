@@ -769,7 +769,7 @@ void UI_LoadCampaigns(void) {
   int i, j;
   int dirlen;
   long hash;
-  char *ch;
+  const char *ch;
 
   uiInfo.campaignCount = 0;
   memset(&uiInfo.campaignList, 0, sizeof(uiInfo.campaignList));
@@ -830,8 +830,8 @@ void UI_LoadCampaigns(void) {
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
     // generate hash for campaign shortname
-    for (hash = 0, ch = (char *)uiInfo.campaignList[i].campaignShortName;
-         *ch != '\0'; ch++) {
+    for (hash = 0, ch = uiInfo.campaignList[i].campaignShortName; *ch != '\0';
+         ch++) {
       hash += (long)(tolower(*ch)) *
               ((ch - uiInfo.campaignList[i].campaignShortName) + 119);
     }
