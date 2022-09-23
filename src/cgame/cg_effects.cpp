@@ -560,8 +560,7 @@ int CG_GetOriginForTag(centity_t *cent, refEntity_t *parent,
   }
 
   if (axis) {
-    // had to cast away the const to avoid compiler problems...
-    MatrixMultiply(lerped.axis, ((refEntity_t *)parent)->axis, axis);
+    MatrixMultiply(lerped.axis, parent->axis, axis);
   }
 
   return retval;
