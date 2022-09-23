@@ -2091,7 +2091,7 @@ void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
     }
 
     // Rafael mg42
-    if (!cg.showGameView && !cgs.dbShowing) {
+    if (!cg.showGameView) {
       if (!cg.snap->ps.persistant[PERS_HWEAPON_USE]) {
         CG_AddViewWeapon(&cg.predictedPlayerState);
       } else {

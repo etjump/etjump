@@ -2131,32 +2131,6 @@ typedef struct {
   int ccRequestedObjective;
   int ccLastObjectiveRequestTime;
 
-  int loadingLatch; // ( 0 = nothing yet, 1 = latched )
-
-  //	qboolean			playedLimboMusic;
-
-  int dbSortedClients[MAX_CLIENTS];
-  int dbSelectedClient;
-
-  int dbMode;
-  qboolean dbShowing;
-  qboolean dbAccuraciesRecieved;
-  qboolean dbPlayerKillsDeathsRecieved;
-  qboolean dbWeaponStatsRecieved;
-  qboolean dbAwardsParsed;
-  char *dbAwardNames[NUM_ENDGAME_AWARDS];
-  team_t dbAwardTeams[NUM_ENDGAME_AWARDS];
-  char dbAwardNamesBuffer[1024];
-  int dbLastRequestTime;
-  int dbLastScoreRequest;
-  int dbPlayerListOffset;
-  int dbWeaponListOffset;
-  cg_weaponstats_t dbWeaponStats[WS_MAX];
-  int dbChatMode;
-
-  int tdbMapListOffset;
-  int tdbSelectedMap;
-
   int ftMenuPos;
   int ftMenuMode;
   int ftMenuModeEx;
@@ -3153,7 +3127,6 @@ void CG_SoundInit(void);
 void CG_SetViewanglesForSpeakerEditor(void);
 void CG_SpeakerEditorDraw(void);
 void CG_SpeakerEditor_KeyHandling(int key, qboolean down);
-void CG_Debriefing_KeyEvent(int key, qboolean down);
 void CG_SpeakerEditorMouseMove_Handling(int x, int y);
 void CG_ActivateEditSoundMode(void);
 void CG_DeActivateEditSoundMode(void);
@@ -4062,67 +4035,6 @@ void CG_PlayPMItemSound(centity_t *cent);
 qhandle_t CG_GetPMItemIcon(centity_t *cent);
 void CG_DrawKeyHint(rectDef_t *rect, const char *binding);
 
-//
-// cg_debriefing.c
-//
-
-clientInfo_t *CG_Debriefing_GetSelectedClientInfo(void);
-void CG_Debrieing_SetSelectedClient(int clientNum);
-
-qboolean CG_Debriefing_Draw(void);
-void CG_ChatPanel_Setup(void);
-
-void CG_Debriefing_ChatEditFinish(panel_button_t *button);
-void CG_Debriefing_BackButton_Draw(panel_button_t *button);
-void CG_Debriefing_HTMLButton_Draw(panel_button_t *button);
-void CG_Debriefing_NextButton_Draw(panel_button_t *button);
-void CG_Debriefing_ChatButton_Draw(panel_button_t *button);
-void CG_Debriefing_ReadyButton_Draw(panel_button_t *button);
-qboolean CG_Debriefing_ChatButton_KeyDown(panel_button_t *button, int key);
-qboolean CG_Debriefing_BackButton_KeyDown(panel_button_t *button, int key);
-qboolean CG_Debriefing_ReadyButton_KeyDown(panel_button_t *button, int key);
-qboolean CG_Debriefing_QCButton_KeyDown(panel_button_t *button, int key);
-qboolean CG_Debriefing_NextButton_KeyDown(panel_button_t *button, int key);
-
-void CG_PanelButtonsRender_Button_Ext(rectDef_t *r, const char *text);
-void CG_Debriefing_PlayerName_Draw(panel_button_t *button);
-void CG_Debriefing_PlayerRank_Draw(panel_button_t *button);
-void CG_Debriefing_PlayerMedals_Draw(panel_button_t *button);
-void CG_Debriefing_PlayerTime_Draw(panel_button_t *button);
-void CG_Debriefing_PlayerXP_Draw(panel_button_t *button);
-void CG_Debriefing_PlayerACC_Draw(panel_button_t *button);
-void CG_Debriefing_PlayerSkills_Draw(panel_button_t *button);
-
-void CG_DebriefingPlayerWeaponStats_Draw(panel_button_t *button);
-
-void CG_DebriefingXPHeader_Draw(panel_button_t *button);
-
-void CG_DebriefingTitle_Draw(panel_button_t *button);
-void CG_DebriefingPlayerList_Draw(panel_button_t *button);
-qboolean CG_DebriefingPlayerList_KeyDown(panel_button_t *button, int key);
-
-void CG_Debriefing_ChatEdit_Draw(panel_button_t *button);
-void CG_Debriefing_ChatBox_Draw(panel_button_t *button);
-void CG_Debriefing_Scrollbar_Draw(panel_button_t *button);
-qboolean CG_Debriefing_Scrollbar_KeyDown(panel_button_t *button, int key);
-qboolean CG_Debriefing_Scrollbar_KeyUp(panel_button_t *button, int key);
-float CG_Debriefing_CalcCampaignProgress(void);
-
-const char *CG_Debriefing_RankNameForClientInfo(clientInfo_t *ci);
-const char *CG_Debriefing_FullRankNameForClientInfo(clientInfo_t *ci);
-void CG_Debriefing_Startup(void);
-void CG_Debriefing_Shutdown(void);
-qboolean CG_Debriefing_ServerCommand(const char *cmd);
-void CG_Debriefing_MouseEvent(int x, int y);
-
-void CG_TeamDebriefingOutcome_Draw(panel_button_t *button);
-void CG_TeamDebriefingMapList_Draw(panel_button_t *button);
-qboolean CG_TeamDebriefingMapList_KeyDown(panel_button_t *button, int key);
-void CG_TeamDebriefingMapWinner_Draw(panel_button_t *button);
-void CG_TeamDebriefingMapShot_Draw(panel_button_t *button);
-void CG_TeamDebriefingTeamXP_Draw(panel_button_t *button);
-void CG_TeamDebriefingTeamSkillXP_Draw(panel_button_t *button);
-
 const char *CG_PickupItemText(int item);
 
 void CG_LoadPanel_Init();
@@ -4138,18 +4050,6 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button);
 void CG_LoadPanel_KeyHandling(int key, qboolean down);
 qboolean CG_LoadPanel_ContinueButtonKeyDown(panel_button_t *button, int key);
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh);
-
-qboolean CG_Debriefing2_Maps_KeyDown(panel_button_t *button, int key);
-void CG_Debriefing2TeamSkillHeaders_Draw(panel_button_t *button);
-void CG_Debriefing2TeamSkillXP_Draw(panel_button_t *button);
-void CG_Debreifing2_MissionTitle_Draw(panel_button_t *button);
-void CG_Debreifing2_Mission_Draw(panel_button_t *button);
-void CG_Debreifing2_Maps_Draw(panel_button_t *button);
-void CG_Debreifing2_Awards_Draw(panel_button_t *button);
-void CG_PanelButtonsRender_Window(panel_button_t *button);
-void CG_PanelButtonsRender_Button(panel_button_t *button);
-
-team_t CG_Debriefing_FindWinningTeamForMap(void);
 
 int CG_CalcViewValues(void);
 void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe,

@@ -2488,13 +2488,6 @@ static void CG_DrawIntermission(void) {
       doDemostop = 0;
     }
   }
-
-  // Intermission view
-  CG_Debriefing_Draw();
-
-  /*	cg.scoreFadeTime = cg.time;
-      CG_DrawScoreboard();
-  */
 }
 
 /*
@@ -4867,10 +4860,6 @@ static void CG_Draw2D(void) {
   if (cg.snap->ps.pm_type == PM_INTERMISSION) {
     CG_DrawIntermission();
     return;
-  } else {
-    if (cgs.dbShowing) {
-      CG_Debriefing_Shutdown();
-    }
   }
 
   if (cg.editingSpeakers) {
