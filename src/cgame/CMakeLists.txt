@@ -5,7 +5,6 @@ add_library(cgame MODULE
 	"cg_character.cpp"
 	"cg_commandmap.cpp"
 	"cg_consolecmds.cpp"
-	"cg_debriefing.cpp"
 	"cg_draw.cpp"
 	"cg_drawtools.cpp"
 	"cg_edv.cpp"

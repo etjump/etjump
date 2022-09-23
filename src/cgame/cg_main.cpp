@@ -2598,8 +2598,6 @@ static void CG_RegisterGraphics(void) {
   // Gordon: limbo menu setup
   CG_LimboPanel_Init();
 
-  CG_ChatPanel_Setup();
-
   CG_Fireteams_Setup();
 
   cgs.media.waypointMarker =

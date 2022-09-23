@@ -655,7 +655,6 @@ void CG_MouseEvent(int x, int y) {
       break;
     default:
       if (cg.snap->ps.pm_type == PM_INTERMISSION) {
-        CG_Debriefing_MouseEvent(x, y);
         return;
       }
 
@@ -786,7 +785,6 @@ void CG_KeyEvent(int key, qboolean down) {
 
     default:
       if (cg.snap->ps.pm_type == PM_INTERMISSION) {
-        CG_Debriefing_KeyEvent(key, down);
         return;
       }
 
