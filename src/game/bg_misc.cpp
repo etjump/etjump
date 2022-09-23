@@ -2918,6 +2918,60 @@ weapon_t BG_GrenadeTypeForTeam(team_t team) {
   }
 }
 
+qboolean BG_CheckMagicAmmo(const playerState_t *ps, int *skill, int teamNum) {
+  int i, weapon;
+  int maxammo;
+  int clip;
+
+  // Gordon: handle grenades first
+
+  i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS], skill);
+  weapon = BG_GrenadeTypeForTeam(static_cast<team_t>(teamNum));
+
+  clip = BG_FindClipForWeapon(static_cast<weapon_t>(weapon));
+  if (ps->ammoclip[clip] < i) {
+    return qtrue;
+  }
+
+  if (COM_BitCheck(ps->weapons, WP_MEDIC_SYRINGE)) {
+    i = skill[SK_FIRST_AID] >= 2 ? 12 : 10;
+
+    clip = BG_FindClipForWeapon(WP_MEDIC_SYRINGE);
+
+    if (ps->ammoclip[clip] < i) {
+      return qtrue;
+    }
+  }
+
+  // Gordon: now other weapons
+  for (i = 0; reloadableWeapons[i] >= 0; i++) {
+    weapon = reloadableWeapons[i];
+    if (COM_BitCheck(ps->weapons, weapon)) {
+      maxammo = BG_MaxAmmoForWeapon(static_cast<weapon_t>(weapon), skill);
+
+      // Handle weapons that just use clip, and not ammo
+      if (weapon == WP_FLAMETHROWER) {
+        clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
+        if (ps->ammoclip[clip] < maxammo) {
+          return qtrue;
+        }
+      } else if (weapon == WP_PANZERFAUST) {
+        clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
+        if (ps->ammoclip[clip] < maxammo) {
+          return qtrue;
+        }
+      } else {
+        clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
+        if (ps->ammo[clip] < maxammo) {
+          return qtrue;
+        }
+      }
+    }
+  }
+
+  return qfalse;
+}
+
 // Gordon: setting numOfClips = 0 allows you to check if the client needs ammo,
 // but doesnt give any
 qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
@@ -2928,6 +2982,10 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
   int clip;
   int weapNumOfClips;
 
+  if (!numOfClips) {
+    return BG_CheckMagicAmmo(ps, skill, teamNum);
+  }
+
   // Gordon: handle grenades first
 
   i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS], skill);
@@ -2935,12 +2993,6 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
 
   clip = BG_FindClipForWeapon(static_cast<weapon_t>(weapon));
   if (ps->ammoclip[clip] < i) {
-
-    // Gordon: early out
-    if (!numOfClips) {
-      return qtrue;
-    }
-
     ps->ammoclip[clip] += numOfClips;
 
     ammoAdded = qtrue;
@@ -2958,10 +3010,6 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
     clip = BG_FindClipForWeapon(WP_MEDIC_SYRINGE);
 
     if (ps->ammoclip[clip] < i) {
-      if (!numOfClips) {
-        return qtrue;
-      }
-
       ps->ammoclip[clip] += numOfClips;
 
       ammoAdded = qtrue;
@@ -2982,24 +3030,12 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
       if (weapon == WP_FLAMETHROWER) {
         clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
         if (ps->ammoclip[clip] < maxammo) {
-          // early out
-          if (!numOfClips) {
-            return qtrue;
-          }
-
           ammoAdded = qtrue;
           ps->ammoclip[clip] = maxammo;
         }
-      } else if (weapon == WP_PANZERFAUST) //%	|| weapon ==
-                                           // WP_MORTAR ) {
-      {
+      } else if (weapon == WP_PANZERFAUST) {
         clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
         if (ps->ammoclip[clip] < maxammo) {
-          // early out
-          if (!numOfClips) {
-            return qtrue;
-          }
-
           ammoAdded = qtrue;
           ps->ammoclip[clip] += numOfClips;
           if (ps->ammoclip[clip] >= maxammo) {
@@ -3009,16 +3045,11 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
       } else {
         clip = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
         if (ps->ammo[clip] < maxammo) {
-          // early out
-          if (!numOfClips) {
-            return qtrue;
-          }
           ammoAdded = qtrue;
 
           if (BG_IsAkimboWeapon(weapon)) {
-            weapNumOfClips = numOfClips * 2; // double
-                                             // clips
-                                             // babeh!
+            // double clips babeh!
+            weapNumOfClips = numOfClips * 2;
           } else {
             weapNumOfClips = numOfClips;
           }
@@ -3032,6 +3063,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
       }
     }
   }
+
   return ammoAdded ? qtrue : qfalse;
 }
 
@@ -3149,16 +3181,7 @@ qboolean BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps,
   switch (item->giType) {
     case IT_WEAPON:
       if (item->giTag == WP_AMMO) {
-        // magic ammo for any two-handed weapon
-        // xkan, 11/21/2002 - only pick up if
-        // ammo is not full, numClips is 0, so
-        // ps will NOT be changed (I know, it
-        // places the burden on the programmer,
-        // rather than the compiler, to ensure
-        // that).
-        return BG_AddMagicAmmo((playerState_t *)ps, skill, teamNum,
-                               0); // Arnout: had to cast const
-                                   // away
+        return BG_CheckMagicAmmo(ps, skill, teamNum);
       }
 
       return qtrue;
