@@ -17,7 +17,7 @@ panel_button_text_t fireteamFont = {
 
 panel_button_t fireteamTopBorder = {
     NULL,
-    NULL,
+    "",
     {10, 129, 204, 136},
     {1, (int)(255 * .5f), (int)(255 * .5f), (int)(255 * .5f), (int)(255 * .5f),
      1, 0, 0},
@@ -30,7 +30,7 @@ panel_button_t fireteamTopBorder = {
 
 panel_button_t fireteamTopBorderBack = {
     "white",
-    NULL,
+    "",
     {11, 130, 202, 134},
     {1, 0, 0, 0, (int)(255 * 0.75f), 0, 0, 0},
     NULL, /* font		*/
@@ -42,7 +42,7 @@ panel_button_t fireteamTopBorderBack = {
 
 panel_button_t fireteamTopBorderInner = {
     "white",
-    NULL,
+    "",
     {12, 131, 200, 12},
     {1, 41, 51, 43, 204, 0, 0, 0},
     NULL, /* font		*/
@@ -54,7 +54,7 @@ panel_button_t fireteamTopBorderInner = {
 
 panel_button_t fireteamTopBorderInnerText = {
     NULL,
-    NULL,
+    "",
     {15, 141, 200, 12},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &fireteamTitleFont, /* font		*/
@@ -66,7 +66,7 @@ panel_button_t fireteamTopBorderInnerText = {
 
 panel_button_t fireteamMenuItemText = {
     NULL,
-    NULL,
+    "",
     {16, 153, 128, 12},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &fireteamFont, /* font		*/

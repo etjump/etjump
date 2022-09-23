@@ -967,7 +967,7 @@ panel_button_text_t speakerEditorTxt = {
 
 panel_button_t speakerInfo = {
     NULL,
-    NULL,
+    "",
     {344, 184, 272, 72},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt, /* font		*/
@@ -1105,7 +1105,7 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
       button->rect.y + 9.f, button->font->scalex, button->font->scaley, colour,
       "V", 0, 0, 0, button->font->font);
 
-  s = CG_GetStrFromStrArray(button->text, button->data[1]);
+  s = CG_GetStrFromStrArray(button->text.c_str(), button->data[1]);
 
   CG_Text_Paint_Ext(
       button->rect.x + (textboxW - CG_Text_Width_Ext(s, button->font->scalex, 0,
@@ -1134,7 +1134,7 @@ void CG_SpeakerEditor_RenderDropdown(panel_button_t *button) {
 
       CG_FillRect(rect.x, rect.y, rect.w, rect.h, colour);
 
-      s = CG_GetStrFromStrArray(button->text, i);
+      s = CG_GetStrFromStrArray(button->text.c_str(), i);
 
       CG_Text_Paint_Ext(
           rect.x + (textboxW - CG_Text_Width_Ext(s, button->font->scalex, 0,
@@ -1185,11 +1185,13 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
       int i, numfiles, filelen;
       char *fileptr;
 
-      COM_StripFilename(button->text, dirname);
-      Q_strncpyz(filename, COM_SkipPath((char *)button->text),
-                 sizeof(filename));
+      COM_StripFilename(button->text.c_str(), dirname);
+      const std::size_t rfind = button->text.rfind("/");
+      const std::string textNoPath = button->text.substr(
+          rfind == std::string::npos ? 0 : rfind + 1, button->text.size());
+      Q_strncpyz(filename, textNoPath.c_str(), sizeof(filename));
 
-      if (!Q_stricmp(button->text, dirname)) {
+      if (!Q_stricmp(button->text.c_str(), dirname)) {
         return qtrue;
       }
 
@@ -1257,8 +1259,8 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
         return qtrue;
       }
 
-      Com_sprintf((char *)button->text, button->data[0], "%s%s", dirname,
-                  match);
+      button->text = std::string(dirname) + std::string(match);
+      button->text.resize(button->data[0]);
 
       return qtrue;
     } else {
@@ -1276,7 +1278,7 @@ qboolean CG_SpeakerEditor_NoiseEdit_KeyDown(panel_button_t *button, int key) {
 }
 
 void CG_SpeakerEditor_NoiseEditFinish(panel_button_t *button) {
-  Q_strncpyz(editSpeaker->filename, button->text,
+  Q_strncpyz(editSpeaker->filename, button->text.c_str(),
              sizeof(editSpeaker->filename));
 
   if (*editSpeaker->filename) {
@@ -1287,7 +1289,7 @@ void CG_SpeakerEditor_NoiseEditFinish(panel_button_t *button) {
 }
 
 void CG_SpeakerEditor_TargetnameEditFinish(panel_button_t *button) {
-  Q_strncpyz(editSpeaker->targetname, button->text,
+  Q_strncpyz(editSpeaker->targetname, button->text.c_str(),
              sizeof(editSpeaker->targetname));
 }
 
@@ -1367,66 +1369,61 @@ qboolean CG_SpeakerEditor_Broadcast_KeyUp(panel_button_t *button, int key) {
 }
 
 void CG_SpeakerEditor_WaitEditFinish(panel_button_t *button) {
-  if (*button->text) {
-    editSpeaker->wait = atoi(button->text);
+  const int len = button->text.size();
+  if (len) {
+    editSpeaker->wait = std::stoi(button->text);
     if (editSpeaker->wait < 0) {
       editSpeaker->wait = 0;
-      Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                  editSpeaker->range);
+      button->text = std::to_string(editSpeaker->range);
     }
   } else {
     editSpeaker->wait = 0;
-    Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                editSpeaker->wait);
+    button->text = std::to_string(editSpeaker->wait);
   }
 }
 
 void CG_SpeakerEditor_RandomEditFinish(panel_button_t *button) {
-  if (*button->text) {
-    editSpeaker->random = atoi(button->text);
+  const int len = button->text.size();
+  if (len) {
+    editSpeaker->random = std::stoi(button->text);
     if (editSpeaker->random < 0) {
       editSpeaker->random = 0;
-      Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                  editSpeaker->random);
+      button->text = std::to_string(editSpeaker->random);
     }
   } else {
     editSpeaker->random = 0;
-    Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                editSpeaker->random);
+    button->text = std::to_string(editSpeaker->random);
   }
 }
 
 void CG_SpeakerEditor_VolumeEditFinish(panel_button_t *button) {
-  if (*button->text) {
-    editSpeaker->volume = atoi(button->text);
+  const int len = button->text.size();
+  if (len) {
+    editSpeaker->volume = std::stoi(button->text);
     if (editSpeaker->volume < 0) {
       editSpeaker->volume = 0;
-      Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                  editSpeaker->volume);
+      button->text = std::to_string(editSpeaker->volume);
     } else if (editSpeaker->volume > 65535) {
       editSpeaker->volume = 65535;
-      Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                  editSpeaker->volume);
+      button->text = std::to_string(editSpeaker->volume);
     }
   } else {
     editSpeaker->volume = 127;
-    Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                editSpeaker->volume);
+    button->text = std::to_string(editSpeaker->volume);
   }
 }
 
 void CG_SpeakerEditor_RangeEditFinish(panel_button_t *button) {
-  if (*button->text) {
-    editSpeaker->range = atoi(button->text);
+  const int len = button->text.size();
+  if (len) {
+    editSpeaker->range = std::stoi(button->text);
     if (editSpeaker->range < 0) {
       editSpeaker->range = 0;
-      Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                  editSpeaker->range);
+      button->text = std::to_string(editSpeaker->range);
     }
   } else {
     editSpeaker->range = 1250;
-    Com_sprintf((char *)button->text, sizeof(button->text), "%i",
-                editSpeaker->range);
+    button->text = std::to_string(editSpeaker->range);
   }
 }
 
@@ -1516,7 +1513,7 @@ qboolean CG_SpeakerEditor_Delete_KeyUp(panel_button_t *button, int key) {
 
 panel_button_t speakerEditorBack = {
     NULL,
-    NULL,
+    "",
     {360, 330, 272, 142},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -1528,7 +1525,7 @@ panel_button_t speakerEditorBack = {
 
 panel_button_t speakerEditorLocInfo = {
     NULL,
-    NULL,
+    "",
     {361, 330 + 9, 272, 10},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &speakerEditorTxt, /* font		*/

@@ -58,7 +58,7 @@ panel_button_text_t loadScreenMeterBackTxt = {
 
 panel_button_t loadScreenMap = {
     "gfx/loading/camp_map",
-    NULL,
+    "",
     {0, 0, 440, 480}, // shouldn't this be square?? // Gordon: no, the map is
                       // actually WIDER that tall, which makes it even worse...
     {0, 0, 0, 0, 0, 0, 0, 0},
@@ -71,7 +71,7 @@ panel_button_t loadScreenMap = {
 
 panel_button_t loadScreenBack = {
     "gfx/loading/camp_side",
-    NULL,
+    "",
     {440, 0, 200, 480},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -83,7 +83,7 @@ panel_button_t loadScreenBack = {
 
 panel_button_t loadScreenPins = {
     NULL,
-    NULL,
+    "",
     {0, 0, 640, 480},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -107,7 +107,7 @@ panel_button_t missiondescriptionPanelHeaderText = {
 
 panel_button_t missiondescriptionPanelText = {
     NULL,
-    NULL,
+    "",
     {460, 84, 160, 232},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &missiondescriptionTxt, /* font		*/
@@ -119,7 +119,7 @@ panel_button_t missiondescriptionPanelText = {
 
 panel_button_t campaignPanelText = {
     NULL,
-    NULL,
+    "",
     {451, 11, 178, 35},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &campaignpTxt, /* font		*/
@@ -131,7 +131,7 @@ panel_button_t campaignPanelText = {
 
 panel_button_t loadScreenMeterBack = {
     "gfx/loading/progressbar_back",
-    NULL,
+    "",
     {440 + 26, 480 - 30 + 1, 200 - 56, 20},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -143,7 +143,7 @@ panel_button_t loadScreenMeterBack = {
 
 panel_button_t loadScreenMeterBack2 = {
     "gfx/loading/progressbar",
-    NULL,
+    "",
     {440 + 26, 480 - 30 + 1, 200 - 56, 20},
     {1, 255, 0, 0, 255, 0, 0, 0},
     NULL, /* font		*/

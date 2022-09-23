@@ -2,6 +2,7 @@
 #define __UI_SHARED_H
 
 #include <vector>
+#include <string>
 
 #include "../game/q_shared.h"
 #include "../cgame/tr_types.h"
@@ -616,7 +617,7 @@ struct panel_button_s {
   const char *shaderNormal;
 
   // text
-  const char *text;
+  std::string text;
 
   // rect
   rectDef_t rect;

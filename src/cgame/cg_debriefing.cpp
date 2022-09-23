@@ -41,7 +41,7 @@ panel_button_text_t debriefPlayerHeadingSmallerFont = {
 
 panel_button_t debriefTitleBack = {
     "white",
-    NULL,
+    "",
     {10, 4, 620, 20},
     {1, 41, 51, 43, 204, 0, 0, 0},
     NULL, /* font		*/
@@ -53,7 +53,7 @@ panel_button_t debriefTitleBack = {
 
 panel_button_t debriefTitleBackBorderLower = {
     NULL,
-    NULL,
+    "",
     {10, 24, 620, 200},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -65,7 +65,7 @@ panel_button_t debriefTitleBackBorderLower = {
 
 panel_button_t debriefTitleBackLower = {
     "white",
-    NULL,
+    "",
     {10, 24, 620, 200},
     {1, 0, 0, 0, 153, 0, 0, 0},
     NULL, /* font		*/
@@ -77,7 +77,7 @@ panel_button_t debriefTitleBackLower = {
 
 panel_button_t debriefTitleBackBorder = {
     NULL,
-    NULL,
+    "",
     {10, 4, 620, 20},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -89,7 +89,7 @@ panel_button_t debriefTitleBackBorder = {
 
 panel_button_t debriefTitle = {
     NULL,
-    NULL,
+    "",
     {10, 20, 620, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefTitleFont, /* font		*/
@@ -101,7 +101,7 @@ panel_button_t debriefTitle = {
 
 panel_button_t debriefPlayerHeaderBackBorderLower = {
     NULL,
-    NULL,
+    "",
     {10, 260 - 14, 196, 110},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -113,7 +113,7 @@ panel_button_t debriefPlayerHeaderBackBorderLower = {
 
 panel_button_t debriefPlayerHeaderBackLower = {
     "white",
-    NULL,
+    "",
     {10, 260 - 14, 196, 110},
     {1, 0, 0, 0, 153, 0, 0, 0},
     NULL, /* font		*/
@@ -125,7 +125,7 @@ panel_button_t debriefPlayerHeaderBackLower = {
 
 panel_button_t debriefPlayerHeaderBack = {
     "white",
-    NULL,
+    "",
     {10, 240 - 14, 196, 20},
     {1, 41, 51, 43, 204, 0, 0, 0},
     NULL, /* font		*/
@@ -137,7 +137,7 @@ panel_button_t debriefPlayerHeaderBack = {
 
 panel_button_t debriefPlayerHeaderBackBorder = {
     NULL,
-    NULL,
+    "",
     {10, 240 - 14, 196, 20},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -149,7 +149,7 @@ panel_button_t debriefPlayerHeaderBackBorder = {
 
 panel_button_t debriefPlayerSkillsBackBorderLower = {
     NULL,
-    NULL,
+    "",
     {210, 260 - 14, 80, 110},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -161,7 +161,7 @@ panel_button_t debriefPlayerSkillsBackBorderLower = {
 
 panel_button_t debriefPlayerSkillsBackLower = {
     "white",
-    NULL,
+    "",
     {210, 260 - 14, 80, 110},
     {1, 0, 0, 0, 153, 0, 0, 0},
     NULL, /* font		*/
@@ -173,7 +173,7 @@ panel_button_t debriefPlayerSkillsBackLower = {
 
 panel_button_t debriefPlayerSkillsBack = {
     "white",
-    NULL,
+    "",
     {210, 240 - 14, 80, 20},
     {1, 41, 51, 43, 204, 0, 0, 0},
     NULL, /* font		*/
@@ -185,7 +185,7 @@ panel_button_t debriefPlayerSkillsBack = {
 
 panel_button_t debriefPlayerSkillsBackBorder = {
     NULL,
-    NULL,
+    "",
     {210, 240 - 14, 80, 20},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -257,7 +257,7 @@ panel_button_t debriefPlayerWeaponStatsKillsHeader = {
 
 panel_button_t debriefPlayerWeaponStatsList = {
     NULL,
-    NULL,
+    "",
     {18, 262, 164, 80},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerHeadingSmallerFont, /* font		*/
@@ -269,7 +269,7 @@ panel_button_t debriefPlayerWeaponStatsList = {
 
 panel_button_t debriefPlayerWeaponStatsListScroll = {
     NULL,
-    NULL,
+    "",
     {18 + 164, 262, 16, 80},
     {1, 0, 0, 0, 0, 0, 0, 0},
     NULL,                            /* font		*/
@@ -281,7 +281,7 @@ panel_button_t debriefPlayerWeaponStatsListScroll = {
 
 panel_button_t debriefTitleWindow = {
     NULL,
-    NULL,
+    "",
     {10, 4, 620, 22},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -293,7 +293,7 @@ panel_button_t debriefTitleWindow = {
 
 panel_button_t debriefMissionTitleWindow = {
     NULL,
-    NULL,
+    "",
     {10, 30, 193, 240},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -305,7 +305,7 @@ panel_button_t debriefMissionTitleWindow = {
 
 panel_button_t debriefMissionImage = {
     NULL,
-    NULL,
+    "",
     {16, 46, 181, 161},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -317,7 +317,7 @@ panel_button_t debriefMissionImage = {
 
 panel_button_t debriefMissionMaps = {
     NULL,
-    NULL,
+    "",
     {12, 210, 189, 60},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                        /* font		*/
@@ -341,7 +341,7 @@ panel_button_t debriefMissionAwardsWindow = {
 
 panel_button_t debriefMissionAwardsList = {
     NULL,
-    NULL,
+    "",
     {215, 44, 413, 220},
     {ITEM_ALIGN_CENTER, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -365,7 +365,7 @@ panel_button_t debriefMissionStatsWindow = {
 
 panel_button_t debriefMissionStatsHeaders = {
     NULL,
-    NULL,
+    "",
     {16, 298, 608, 16},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -377,7 +377,7 @@ panel_button_t debriefMissionStatsHeaders = {
 
 panel_button_t debriefMissionStatsWinner = {
     NULL,
-    NULL,
+    "",
     {16, 314, 608, 16},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -389,7 +389,7 @@ panel_button_t debriefMissionStatsWinner = {
 
 panel_button_t debriefMissionStatsLoser = {
     NULL,
-    NULL,
+    "",
     {16, 330, 608, 16},
     {1, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -504,7 +504,7 @@ panel_button_t debriefHeadingDeaths = {
 
 panel_button_t debriefPlayerList = {
     NULL,
-    NULL,
+    "",
     {DB_RANK_X, DH_HEADING_Y, 640 - 10 - 8 - 16 - DB_RANK_X - 16, 292},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerListFont,          /* font		*/
@@ -516,7 +516,7 @@ panel_button_t debriefPlayerList = {
 
 panel_button_t debriefPlayerListScroll = {
     NULL,
-    NULL,
+    "",
     {640 - 10 - 8 - 16, DH_HEADING_Y, 16, 292},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                            /* font		*/
@@ -544,7 +544,7 @@ panel_button_t debriefPlayerInfoWindow = {
 
 panel_button_t debriefPlayerInfoName = {
     NULL,
-    NULL,
+    "",
     {14, 56, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerInfoFont, /* font		*/
@@ -556,7 +556,7 @@ panel_button_t debriefPlayerInfoName = {
 
 panel_button_t debriefPlayerInfoRank = {
     NULL,
-    NULL,
+    "",
     {74, 70, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerInfoFont, /* font		*/
@@ -568,7 +568,7 @@ panel_button_t debriefPlayerInfoRank = {
 
 panel_button_t debriefPlayerInfoMedals = {
     NULL,
-    NULL,
+    "",
     {74, 84, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerInfoFont, /* font		*/
@@ -580,7 +580,7 @@ panel_button_t debriefPlayerInfoMedals = {
 
 panel_button_t debriefPlayerInfoTime = {
     NULL,
-    NULL,
+    "",
     {74, 98, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerInfoFont, /* font		*/
@@ -592,7 +592,7 @@ panel_button_t debriefPlayerInfoTime = {
 
 panel_button_t debriefPlayerInfoXP = {
     NULL,
-    NULL,
+    "",
     {74, 112, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerInfoFont, /* font		*/
@@ -604,7 +604,7 @@ panel_button_t debriefPlayerInfoXP = {
 
 panel_button_t debriefPlayerInfoACC = {
     NULL,
-    NULL,
+    "",
     {74, 126, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefPlayerInfoFont, /* font		*/
@@ -617,7 +617,7 @@ panel_button_t debriefPlayerInfoACC = {
 #define PLAYERHEADER_SKILLS(number)                                            \
   panel_button_t debriefPlayerInfoSkills##number = {                           \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {18 + (100 * (number % 2)), 140 + (number / 2 * 24), 12, 12},            \
       {number, 0, 0, 0, 0, 0, 0, 0},                                           \
       &debriefPlayerInfoFont, /* font		*/                                      \
@@ -681,7 +681,7 @@ std::vector<panel_button_t> debriefPanelButtonsLayout;
 
 panel_button_t teamDebriefOutcome = {
     "white",
-    NULL,
+    "",
     {14, 26, 432, 224},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -693,7 +693,7 @@ panel_button_t teamDebriefOutcome = {
 
 panel_button_t teamDebriefMapListBackBorderLower = {
     NULL,
-    NULL,
+    "",
     {460, 22, 170, 232},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -705,7 +705,7 @@ panel_button_t teamDebriefMapListBackBorderLower = {
 
 panel_button_t teamDebriefMapListBackLower = {
     "white",
-    NULL,
+    "",
     {460, 22, 170, 232},
     {1, 0, 0, 0, 153, 0, 0, 0},
     NULL, /* font		*/
@@ -717,7 +717,7 @@ panel_button_t teamDebriefMapListBackLower = {
 
 panel_button_t teamDebriefMapListBackBorder = {
     NULL,
-    NULL,
+    "",
     {460, 4, 170, 20},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -729,7 +729,7 @@ panel_button_t teamDebriefMapListBackBorder = {
 
 panel_button_t teamDebriefMapListBack = {
     "white",
-    NULL,
+    "",
     {460, 4, 170, 20},
     {1, 41, 51, 43, 204, 0, 0, 0},
     NULL, /* font		*/
@@ -741,7 +741,7 @@ panel_button_t teamDebriefMapListBack = {
 
 panel_button_t teamDebriefMapList = {
     NULL,
-    NULL,
+    "",
     {470, 196, 130, 50},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &debriefListFont,                 /* font		*/
@@ -753,7 +753,7 @@ panel_button_t teamDebriefMapList = {
 
 panel_button_t teamDebriefMapListScroll = {
     NULL,
-    NULL,
+    "",
     {604, 198, 16, 50},
     {2, 0, 0, 0, 0, 0, 0, 0},
     NULL,                            /* font		*/
@@ -765,7 +765,7 @@ panel_button_t teamDebriefMapListScroll = {
 
 panel_button_t teamDebriefMapShot = {
     NULL,
-    NULL,
+    "",
     {464, 28, 170 - 8, 170 - 8},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -789,7 +789,7 @@ panel_button_text_t teamDebriefTitle = {
 
 panel_button_t teamDebriefMapWinnerText = {
     NULL,
-    NULL,
+    "",
     {10, 273, 620, 20},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &teamDebriefBigTitle, /* font		*/
@@ -801,7 +801,7 @@ panel_button_t teamDebriefMapWinnerText = {
 
 panel_button_t teamDebriefMapWinnerBackBorderLower = {
     NULL,
-    NULL,
+    "",
     {10, 277, 620, 77},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -813,7 +813,7 @@ panel_button_t teamDebriefMapWinnerBackBorderLower = {
 
 panel_button_t teamDebriefMapWinnerBackLower = {
     "white",
-    NULL,
+    "",
     {10, 277, 620, 77},
     {1, 0, 0, 0, 153, 0, 0, 0},
     NULL, /* font		*/
@@ -825,7 +825,7 @@ panel_button_t teamDebriefMapWinnerBackLower = {
 
 panel_button_t teamDebriefMapWinnerTextBackBorder = {
     NULL,
-    NULL,
+    "",
     {10, 258, 620, 20},
     {1, 127, 127, 127, 255, 1, 0, 0},
     NULL, /* font		*/
@@ -837,7 +837,7 @@ panel_button_t teamDebriefMapWinnerTextBackBorder = {
 
 panel_button_t teamDebriefMapWinnerTextBack = {
     "white",
-    NULL,
+    "",
     {10, 258, 620, 20},
     {1, 41, 51, 43, 204, 0, 0, 0},
     NULL, /* font		*/
@@ -896,7 +896,7 @@ TDB_SKILL_TITLES_XP(7, "Total", 1);
 #define TDB_SKILL_AXIS_XP(number)                                              \
   panel_button_t teamDebriefSkillXPText0_##number = {                          \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {110 + (number * 65), 320, 470, 200},                                    \
       {0, number, 0, 0, 0, 0, 0, 0},                                           \
       &teamDebriefTitle, /* font		*/                                           \
@@ -909,7 +909,7 @@ TDB_SKILL_TITLES_XP(7, "Total", 1);
 #define TDB_SKILL_ALLIES_XP(number)                                            \
   panel_button_t teamDebriefSkillXPText1_##number = {                          \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {110 + (number * 65), 340, 470, 200},                                    \
       {1, number, 0, 0, 0, 0, 0, 0},                                           \
       &teamDebriefTitle, /* font		*/                                           \
@@ -975,7 +975,7 @@ panel_button_t chatPanelWindow = {
 
 panel_button_t chatPanelText = {
     NULL,
-    NULL,
+    "",
     {18, 480 - 34, 640 - 36, TEAMCHAT_HEIGHT},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -1035,7 +1035,7 @@ panel_button_t chatPanelReadyButton = {
 
 panel_button_t chatTypeButton = {
     NULL,
-    NULL,
+    "",
     {10 + 4, 480 - 30, 80, 16},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                             /* font		*/
@@ -1047,7 +1047,7 @@ panel_button_t chatTypeButton = {
 
 panel_button_t charPanelEditSurround = {
     NULL,
-    NULL,
+    "",
     {10 + 4 + 80 + 4, 480 - 30, 252, 16},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -1076,7 +1076,7 @@ void CG_Debriefing_ChatEdit_Draw(panel_button_t *button) {
   char buffer[256 + 1];
   const char *cs;
 
-  trap_Cvar_VariableStringBuffer(button->text, buffer, sizeof(buffer));
+  trap_Cvar_VariableStringBuffer(button->text.c_str(), buffer, sizeof(buffer));
 
   if ((cg.time / 1000) % 2) {
     if (trap_Key_GetOverstrikeMode()) {
@@ -2158,7 +2158,7 @@ void CG_Debriefing_NextButton_Draw(panel_button_t *button) {
 
 void CG_Debriefing_ChatEditFinish(panel_button_t *button) {
   char buffer[256];
-  trap_Cvar_VariableStringBuffer(button->text, buffer, 256);
+  trap_Cvar_VariableStringBuffer(button->text.c_str(), buffer, 256);
 
   switch (cgs.dbChatMode) {
     case 0:
@@ -2172,7 +2172,7 @@ void CG_Debriefing_ChatEditFinish(panel_button_t *button) {
       break;
   }
 
-  trap_Cvar_Set(button->text, "");
+  trap_Cvar_Set(button->text.c_str(), "");
 }
 
 float CG_Debriefing_CalcCampaignProgress(void) {
@@ -2359,7 +2359,7 @@ void CG_PanelButtonsRender_Button_Ext(rectDef_t *r, const char *text) {
 }
 
 void CG_PanelButtonsRender_Button(panel_button_t *button) {
-  CG_PanelButtonsRender_Button_Ext(&button->rect, button->text);
+  CG_PanelButtonsRender_Button_Ext(&button->rect, button->text.c_str());
 }
 
 void CG_PanelButtonsRender_Window_Ext(rectDef_t *r, const char *text, int align,
@@ -2394,8 +2394,8 @@ void CG_PanelButtonsRender_Window_Ext(rectDef_t *r, const char *text, int align,
 }
 
 void CG_PanelButtonsRender_Window(panel_button_t *button) {
-  CG_PanelButtonsRender_Window_Ext(&button->rect, button->text, button->data[0],
-                                   12, 0.19f, 11);
+  CG_PanelButtonsRender_Window_Ext(&button->rect, button->text.c_str(),
+                                   button->data[0], 12, 0.19f, 11);
 }
 
 const char *CG_Debreifing2_WinStringForTeam(team_t team) {
