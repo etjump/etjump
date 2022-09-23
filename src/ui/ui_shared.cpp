@@ -8041,14 +8041,13 @@ void BG_PanelButton_RenderEdit(panel_button_t *button) {
     if (BG_PanelButtons_GetFocusButton() == button &&
         ((DC->realTime / 1000) % 2)) {
       if (DC->getOverstrikeMode()) {
-        s = va("^7%s^0|", button->text);
+        s = va("^7%s^0|", button->text.c_str());
       } else {
-        s = va("^7%s^0_", button->text);
+        s = va("^7%s^0_", button->text.c_str());
       }
     } else {
-      s = va("^7%s ",
-             button->text); // space hack to make the
-                            // text not blink
+      // space hack to make the text not blink
+      s = va("^7%s ", button->text.c_str());
     }
 
     do {
