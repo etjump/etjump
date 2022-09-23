@@ -39,7 +39,7 @@ panel_button_text_t campaignpTxt = {
 
 panel_button_t loadScreenMap = {
     "gfx/loading/camp_map",
-    NULL,
+    "",
     {0, 0, 440, 480}, // shouldn't this be square??
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -51,7 +51,7 @@ panel_button_t loadScreenMap = {
 
 panel_button_t loadScreenBack = {
     "gfx/loading/camp_side",
-    NULL,
+    "",
     {440, 0, 200, 480},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -75,7 +75,7 @@ panel_button_t loadScreenBack = {
 
 panel_button_t loadingPanelText = {
     NULL,
-    NULL,
+    "",
     {460, 72, 160, 244},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &missiondescriptionTxt, /* font		*/
@@ -99,7 +99,7 @@ panel_button_t loadingPanelText = {
 */
 panel_button_t campaignPanelText = {
     NULL,
-    NULL, //"CONNECTING...",
+    "", //"CONNECTING...",
     {451, 11, 178, 35},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &campaignpTxt, /* font		*/
@@ -290,9 +290,9 @@ void UI_LoadPanel_RenderHeaderText(panel_button_t *button) {
   button->rect.y = 11;
 
   auto w = static_cast<float>(DC->textWidthExt(
-      button->text, button->font->scalex, 0, button->font->font));
+      button->text.c_str(), button->font->scalex, 0, button->font->font));
   auto h = static_cast<float>(DC->textHeightExt(
-      button->text, button->font->scaley, 0, button->font->font));
+      button->text.c_str(), button->font->scaley, 0, button->font->font));
   button->rect.x = button->rect.x + (button->rect.w - w) * 0.5f;
   button->rect.y = button->rect.y + (button->rect.h + h) * 0.5f;
 

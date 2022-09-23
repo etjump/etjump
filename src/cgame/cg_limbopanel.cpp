@@ -79,7 +79,7 @@ panel_button_text_t objectivePanelTxt = {
 
 panel_button_t rightLimboPannel = {
     "gfx/limbo/limbo_back",
-    NULL,
+    "",
     {440, 0, 200, 480},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -99,7 +99,7 @@ panel_button_t rightLimboPannel = {
 #define MEDAL_PIC(number)                                                      \
   panel_button_t medalPic##number = {                                          \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {MEDAL_PIC_X + MEDAL_PIC_GAP +                                           \
            (number * (MEDAL_PIC_GAP + MEDAL_PIC_WIDTH)),                       \
        119, MEDAL_PIC_WIDTH, 26},                                              \
@@ -132,7 +132,7 @@ MEDAL_PIC(6);
 #define TEAM_COUNTER(number)                                                   \
   panel_button_t teamCounter##number = {                                       \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {TEAM_COUNTER_X + TEAM_COUNTER_GAP +                                     \
            (number * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH)),                 \
        236, TEAM_COUNTER_WIDTH, 14},                                           \
@@ -145,7 +145,7 @@ MEDAL_PIC(6);
   };                                                                           \
   panel_button_t teamCounterLight##number = {                                  \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {TEAM_COUNTER_X + TEAM_COUNTER_GAP +                                     \
            (number * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH)) - 20,            \
        236, 16, 16},                                                           \
@@ -158,7 +158,7 @@ MEDAL_PIC(6);
   };                                                                           \
   panel_button_t teamButton##number = {                                        \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {TEAM_COUNTER_X + TEAM_COUNTER_GAP +                                     \
            (number * (TEAM_COUNTER_GAP + TEAM_COUNTER_WIDTH) +                 \
             (TEAM_COUNTER_BUTTON_DIFF / 2.f)) -                                \
@@ -191,7 +191,7 @@ TEAM_COUNTER(2);
 #define CLASS_COUNTER(number)                                                  \
   panel_button_t classCounter##number = {                                      \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {CLASS_COUNTER_X + CLASS_COUNTER_GAP +                                   \
            (number * (CLASS_COUNTER_GAP + CLASS_COUNTER_WIDTH)),               \
        302, CLASS_COUNTER_WIDTH, 14},                                          \
@@ -204,7 +204,7 @@ TEAM_COUNTER(2);
   };                                                                           \
   panel_button_t classButton##number = {                                       \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {CLASS_COUNTER_X + CLASS_COUNTER_GAP +                                   \
            (number * (CLASS_COUNTER_GAP + CLASS_COUNTER_WIDTH)) +              \
            (CLASS_COUNTER_BUTTON_DIFF / 2.f),                                  \
@@ -216,24 +216,10 @@ TEAM_COUNTER(2);
       CG_LimboPanel_RenderClassButton,                                         \
       NULL,                                                                    \
   }
-/*panel_button_t classCounterLight##number = {\
-    NULL, \
-    NULL, \
-    { CLASS_COUNTER_X + CLASS_COUNTER_GAP + (number*(CLASS_COUNTER_GAP +
-CLASS_COUNTER_WIDTH)) + (CLASS_COUNTER_LIGHT_DIFF/2.f), 266, CLASS_COUNTER_WIDTH
-- CLASS_COUNTER_LIGHT_DIFF, 16 },	\
-    { 0, number, 0, 0, 0, 0, 0, 0 },		\
-    NULL, \
-    CG_LimboPanel_ClassButton_KeyDown,		\
-    NULL, \
-    CG_LimboPanel_RenderLight,				\
-    NULL, \
-};
-\*/
 
 panel_button_t classBar = {
     "gfx/limbo/lightup_bar",
-    NULL,
+    "",
     {470, 320, 140, 20},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -245,7 +231,7 @@ panel_button_t classBar = {
 
 panel_button_t classBarText = {
     NULL,
-    NULL,
+    "",
     {460, 334, 160, 16},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &classBarFont, /* font		*/
@@ -264,7 +250,7 @@ CLASS_COUNTER(4);
 #define FILTER_BUTTON(number)                                                  \
   panel_button_t filterButton##number = {                                      \
       NULL,                                                                    \
-      NULL,                                                                    \
+      "",                                                                      \
       {15, 54 + (number * 31), 26, 26},                                        \
       {number, 0, 0, 0, 0, 0, 0, 0},                                           \
       NULL,                         /* font		*/                                \
@@ -298,7 +284,7 @@ panel_button_t filterTitleText = {
 #define LEFT_FRAME(shader, number, x, y, w, h)                                 \
   panel_button_t leftFrame0##number = {                                        \
       shader,                                                                  \
-      NULL,                                                                    \
+      "",                                                                      \
       {x, y, w, h},                                                            \
       {0, 0, 0, 0, 0, 0, 0, 0},                                                \
       NULL, /* font		*/                                                        \
@@ -338,7 +324,7 @@ LEFT_FRAME("gfx/limbo/limbo_frame08", 8, 0, LF_Y1, LF_W1, LF_H2);
 
 panel_button_t playerLimboHead = {
     NULL,
-    NULL,
+    "",
     {456, 30, 68, 84},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -362,7 +348,7 @@ panel_button_t playerXPCounterText = {
 
 panel_button_t playerXPCounter = {
     NULL,
-    NULL,
+    "",
     {564, 96, 60, 16},
     {2, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -374,7 +360,7 @@ panel_button_t playerXPCounter = {
 
 panel_button_t playerSkillCounter0 = {
     NULL,
-    NULL,
+    "",
     {552, 36, 60, 16},
     {4, 0, 0, 0, 0, 0, 4, 0},
     NULL, /* font		*/
@@ -386,7 +372,7 @@ panel_button_t playerSkillCounter0 = {
 
 panel_button_t playerSkillCounter1 = {
     NULL,
-    NULL,
+    "",
     {552, 56, 60, 16},
     {4, 1, 0, 0, 0, 0, 4, 0},
     NULL, /* font		*/
@@ -398,7 +384,7 @@ panel_button_t playerSkillCounter1 = {
 
 panel_button_t playerSkillCounter2 = {
     NULL,
-    NULL,
+    "",
     {552, 76, 60, 16},
     {4, 2, 0, 0, 0, 0, 4, 0},
     NULL, /* font		*/
@@ -410,7 +396,7 @@ panel_button_t playerSkillCounter2 = {
 
 panel_button_t playerSkillIcon0 = {
     NULL,
-    NULL,
+    "",
     {532, 36, 16, 16},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -422,7 +408,7 @@ panel_button_t playerSkillIcon0 = {
 
 panel_button_t playerSkillIcon1 = {
     NULL,
-    NULL,
+    "",
     {532, 56, 16, 16},
     {1, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -434,7 +420,7 @@ panel_button_t playerSkillIcon1 = {
 
 panel_button_t playerSkillIcon2 = {
     NULL,
-    NULL,
+    "",
     {532, 76, 16, 16},
     {2, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -448,7 +434,7 @@ panel_button_t playerSkillIcon2 = {
 
 panel_button_t mapTimeCounter = {
     NULL,
-    NULL,
+    "",
     {276, 5, 20, 14},
     {5, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -460,7 +446,7 @@ panel_button_t mapTimeCounter = {
 
 panel_button_t mapTimeCounter2 = {
     NULL,
-    NULL,
+    "",
     {252, 5, 20, 14},
     {5, 1, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -486,7 +472,7 @@ panel_button_t mapTimeCounterText = {
 
 panel_button_t respawnCounter = {
     NULL,
-    NULL,
+    "",
     {400, 5, 20, 14},
     {3, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -550,7 +536,7 @@ panel_button_t skillsText = {
 
 panel_button_t weaponPanel = {
     NULL,
-    NULL,
+    "",
     {455, 353, 140, 56},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                              /* font		*/
@@ -562,7 +548,7 @@ panel_button_t weaponPanel = {
 
 panel_button_t weaponLight1 = {
     NULL,
-    NULL,
+    "",
     {605, 362, 20, 20},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                               /* font		*/
@@ -586,7 +572,7 @@ panel_button_t weaponLight1Text = {
 
 panel_button_t weaponLight2 = {
     NULL,
-    NULL,
+    "",
     {605, 386, 20, 20},
     {1, 0, 0, 0, 0, 0, 0, 0},
     NULL,                               /* font		*/
@@ -622,7 +608,7 @@ panel_button_t weaponStatsShotsText = {
 
 panel_button_t weaponStatsShotsCounter = {
     NULL,
-    NULL,
+    "",
     {460, 426, 40, 14},
     {6, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -646,7 +632,7 @@ panel_button_t weaponStatsHitsText = {
 
 panel_button_t weaponStatsHitsCounter = {
     NULL,
-    NULL,
+    "",
     {516, 426, 40, 14},
     {6, 1, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -670,7 +656,7 @@ panel_button_t weaponStatsAccText = {
 
 panel_button_t weaponStatsAccCounter = {
     NULL,
-    NULL,
+    "",
     {570, 426, 30, 14},
     {6, 2, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -696,7 +682,7 @@ panel_button_t weaponStatsAccPercentage = {
 
 panel_button_t commandmapPanel = {
     NULL,
-    NULL,
+    "",
     {CC_2D_X, CC_2D_Y, CC_2D_W, CC_2D_H},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -710,7 +696,7 @@ panel_button_t commandmapPanel = {
 
 panel_button_t objectivePanel = {
     NULL,
-    NULL,
+    "",
     {8, 398, 240, 74},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL, /* font		*/
@@ -722,7 +708,7 @@ panel_button_t objectivePanel = {
 
 panel_button_t objectivePanelText = {
     NULL,
-    NULL,
+    "",
     {8, 398, 240, 74},
     {0, 0, 0, 0, 0, 0, 0, 0},
     &objectivePanelTxt, /* font		*/
@@ -746,7 +732,7 @@ panel_button_t objectivePanelTitle = {
 
 panel_button_t objectivePanelButtonUp = {
     "gfx/limbo/but_objective_up",
-    NULL,
+    "",
     {252, 416, 24, 24},
     {0, 0, 0, 0, 0, 0, 0, 1},
     NULL,                                /* font		*/
@@ -758,7 +744,7 @@ panel_button_t objectivePanelButtonUp = {
 
 panel_button_t briefingButton = {
     NULL,
-    NULL,
+    "",
     {252, 388, 24, 24},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                                 /* font		*/
@@ -770,7 +756,7 @@ panel_button_t briefingButton = {
 
 panel_button_t objectivePanelButtonDown = {
     "gfx/limbo/but_objective_dn",
-    NULL,
+    "",
     {252, 444, 24, 24},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                                /* font		*/
@@ -796,7 +782,7 @@ panel_button_t okButtonText = {
 
 panel_button_t okButton = {
     NULL,
-    NULL,
+    "",
     {454 + 2, 454 + 2, 82 - 4, 18 - 4},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                           /* font		*/
@@ -820,7 +806,7 @@ panel_button_t cancelButtonText = {
 
 panel_button_t cancelButton = {
     NULL,
-    NULL,
+    "",
     {543 + 2, 454 + 2, 82 - 4, 18 - 4},
     {0, 0, 0, 0, 0, 0, 0, 0},
     NULL,                               /* font		*/
@@ -846,7 +832,7 @@ panel_button_t nameEdit = {
 
 panel_button_t plusButton = {
     NULL,
-    NULL,
+    "",
     {19, 320, 18, 14},
     {12, 0, 0, 0, 0, 0, 0, 0},
     NULL,                             /* font		*/
@@ -870,7 +856,7 @@ panel_button_t plusButtonText = {
 
 panel_button_t minusButton = {
     NULL,
-    NULL,
+    "",
     {19, 346, 18, 14},
     {12, 0, 0, 0, 0, 0, 0, 0},
     NULL,                              /* font		*/
@@ -1055,7 +1041,7 @@ void CG_LimboPanel_BriefingButton_Draw(panel_button_t *button) {
 
 void CG_LimboPanel_NameEditFinish(panel_button_t *button) {
   char buffer[256];
-  trap_Cvar_VariableStringBuffer(button->text, buffer, 256);
+  trap_Cvar_VariableStringBuffer(button->text.c_str(), buffer, 256);
   trap_Cvar_Set("name", buffer);
 }
 
@@ -1600,8 +1586,8 @@ void CG_LimboPanel_RenderLight(panel_button_t *button) {
     button->data[3] = button->data[3] ^ 1;
     //			if( button->data[3] ) {
     //				button->data[2] = cg.time + rand() %
-    // 200; 			} else { 				button->data[2] = cg.time + rand() %
-    // 1000;
+    // 200; 			} else { 				button->data[2] = cg.time + rand()
+    // % 1000;
     //			}
     //		}
 

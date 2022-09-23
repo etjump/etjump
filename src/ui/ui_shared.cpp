@@ -8009,7 +8009,8 @@ void BG_PanelButton_RenderEdit(panel_button_t *button) {
 
   if (useCvar) {
     char buffer[256 + 1];
-    trap_Cvar_VariableStringBuffer(button->text, buffer, sizeof(buffer));
+    trap_Cvar_VariableStringBuffer(button->text.c_str(), buffer,
+                                   sizeof(buffer));
 
     if (BG_PanelButtons_GetFocusButton() == button &&
         ((DC->realTime / 1000) % 2)) {
@@ -8082,18 +8083,16 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key) {
     return qfalse;
   } else {
     char buffer[256];
-    char *s = NULL;
     int len, maxlen;
     qboolean useCvar = button->data[0] ? qfalse : qtrue;
 
     if (useCvar) {
       maxlen = sizeof(buffer);
-      DC->getCVarString(button->text, buffer, sizeof(buffer));
+      DC->getCVarString(button->text.c_str(), buffer, sizeof(buffer));
       len = strlen(buffer);
     } else {
       maxlen = button->data[0];
-      s = (char *)button->text;
-      len = strlen(s);
+      len = button->text.size();
     }
 
     if (key & K_CHAR_FLAG) {
@@ -8104,9 +8103,9 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key) {
         if (len) {
           if (useCvar) {
             buffer[len - 1] = '\0';
-            DC->setCVar(button->text, buffer);
+            DC->setCVar(button->text.c_str(), buffer);
           } else {
-            s[len - 1] = '\0';
+            button->text[len - 1] = '\0';
           }
         }
         return qtrue;
@@ -8133,10 +8132,10 @@ qboolean BG_PanelButton_EditClick(panel_button_t *button, int key) {
       if (useCvar) {
         buffer[len] = key;
         buffer[len + 1] = '\0';
-        trap_Cvar_Set(button->text, buffer);
+        trap_Cvar_Set(button->text.c_str(), buffer);
       } else {
-        s[len] = key;
-        s[len + 1] = '\0';
+        // no need to push back termination char because .c_str() handles that
+        button->text.push_back(key);
       }
       return qtrue;
     } else {
@@ -8341,7 +8340,7 @@ void BG_PanelButtonsRender_TextExt(panel_button_t *button, const char *text) {
 }
 
 void BG_PanelButtonsRender_Text(panel_button_t *button) {
-  BG_PanelButtonsRender_TextExt(button, button->text);
+  BG_PanelButtonsRender_TextExt(button, button->text.c_str());
 }
 
 void BG_PanelButtonsRender_Img(panel_button_t *button) {
