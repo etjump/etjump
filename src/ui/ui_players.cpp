@@ -305,8 +305,7 @@ static void UI_PositionEntityOnTag(refEntity_t *entity,
     VectorMA(entity->origin, lerped.origin[i], parent->axis[i], entity->origin);
   }
 
-  // cast away const because of compiler problems
-  MatrixMultiply(lerped.axis, ((refEntity_t *)parent)->axis, entity->axis);
+  MatrixMultiply(lerped.axis, parent->axis, entity->axis);
   entity->backlerp = parent->backlerp;
 }
 
@@ -332,8 +331,7 @@ static void UI_PositionRotatedEntityOnTag(refEntity_t *entity,
     VectorMA(entity->origin, lerped.origin[i], parent->axis[i], entity->origin);
   }
 
-  // cast away const because of compiler problems
-  MatrixMultiply(entity->axis, ((refEntity_t *)parent)->axis, tempAxis);
+  MatrixMultiply(entity->axis, parent->axis, tempAxis);
   MatrixMultiply(lerped.axis, tempAxis, entity->axis);
 }
 
