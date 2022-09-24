@@ -17,9 +17,6 @@ qboolean G_SpawnStringExt(const char *key, const char *defaultString,
   int i;
 
   if (!level.spawning) {
-    *out = (char *)defaultString;
-    // Gordon: 26/11/02: re-enabling
-    // see InitMover
     G_Error("G_SpawnString() called while not spawning, file "
             "%s, line %i",
             file, line);
@@ -32,7 +29,9 @@ qboolean G_SpawnStringExt(const char *key, const char *defaultString,
     }
   }
 
-  *out = (char *)defaultString;
+  // cast is fairly reasonable here, as nobody spawns a string just to overwrite
+  // the default arg
+  *out = const_cast<char *>(defaultString);
   return qfalse;
 }
 
