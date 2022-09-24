@@ -11,7 +11,6 @@ qboolean CG_SpawnString(const char *key, const char *defaultString,
   int i;
 
   if (!cg.spawning) {
-    *out = (char *)defaultString;
     CG_Error("CG_SpawnString() called while not spawning");
   }
 
@@ -22,7 +21,9 @@ qboolean CG_SpawnString(const char *key, const char *defaultString,
     }
   }
 
-  *out = (char *)defaultString;
+  // cast is fairly reasonable here, as nobody spawns a string just to overwrite
+  // the default arg
+  *out = const_cast<char *>(defaultString);
   return qfalse;
 }
 

@@ -6777,10 +6777,9 @@ qboolean ItemParse_cvar(itemDef_t *item, int handle) {
   editFieldDef_t *editPtr;
 
   Item_ValidateTypeData(item);
-  if (!PC_String_Parse(handle, &item->cvar)) {
+  if (!PC_String_ParseLower(handle, &item->cvar)) {
     return qfalse;
   }
-  Q_strlwr((char *)item->cvar);
   if (item->typeData) {
     editPtr = (editFieldDef_t *)item->typeData;
     editPtr->minVal = -1;

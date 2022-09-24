@@ -4958,6 +4958,20 @@ qboolean PC_String_Parse(int handle, const char **out) {
   *(out) = String_Alloc(token.string);
   return qtrue;
 }
+
+// same as above but converts to lower before allocating in the string pool
+qboolean PC_String_ParseLower(int handle, const char **out) {
+  char buf[MAX_TOKEN_CHARS];
+  pc_token_t token;
+  if (!trap_PC_ReadToken(handle, &token)) {
+    return qfalse;
+  }
+  Q_strncpyz(buf, token.string, sizeof(buf));
+  Q_strlwr(buf);
+
+  *(out) = String_Alloc(buf);
+  return qtrue;
+}
 #endif
 
 /*
