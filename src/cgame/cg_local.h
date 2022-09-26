@@ -4239,6 +4239,7 @@ enum extraTraceOptions {
 
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();
+void CG_ResetTransitionEffects();
 
 extern displayContextDef_t *DC;
 

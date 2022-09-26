@@ -653,3 +653,7 @@ qboolean CG_displaybynumber() {
     return qfalse;
   }
 }
+
+void CG_ResetTransitionEffects() {
+  cg.stepChange = cg.duckChange = cg.landChange = cg.damageTime = 0;
+}

@@ -484,7 +484,7 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops) {
 
     // make sure we don't get any unwanted transition effects
     *ops = *ps;
-    cg.stepChange = cg.duckChange = cg.landChange = 0;
+    CG_ResetTransitionEffects();
 
     // DHM - Nerve :: After Limbo, make sure and do a CG_Respawn
     if (ps->clientNum == cg.clientNum) {
@@ -556,12 +556,12 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops) {
     }
   }
 
-  // run events
-  CG_CheckPlayerstateEvents(ps, ops);
-
   // smooth the ducking viewheight change
   if (ps->viewheight != ops->viewheight) {
     cg.duckChange = ps->viewheight - ops->viewheight;
     cg.duckTime = cg.time;
   }
+
+  // run events
+  CG_CheckPlayerstateEvents(ps, ops);
 }
