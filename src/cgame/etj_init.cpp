@@ -655,5 +655,5 @@ qboolean CG_displaybynumber() {
 }
 
 void CG_ResetTransitionEffects() {
-  cg.stepChange = cg.duckChange = cg.landChange = cg.damageTime = 0;
+  cg.damageTime = cg.duckTime = cg.landTime = cg.stepTime = 0;
 }
