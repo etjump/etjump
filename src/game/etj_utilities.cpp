@@ -60,8 +60,14 @@ static void SelectCorrectWeapon(gclient_t *cl) {
   auto primary = cl->sess.playerWeapon;
   auto secondary = cl->sess.playerWeapon2;
 
-  // we have already removed disallowed weapons at this point,
-  // so we only need to check if we have the weapon & ammo for it
+  // early out if our currently held weapon is allowed
+  // even though disallowed weapons are already removed, we'll still get to
+  // keep any if it's currently equipped, so we force a weapon swap later
+  if (!BG_WeaponDisallowedInTimeruns(cl->ps.weapon)) {
+    return;
+  }
+
+  // our currently held weapon was removed, so swap to a valid one
   if (COM_BitCheck(cl->ps.weapons, primary) &&
       BG_WeaponHasAmmo(&cl->ps, primary)) {
     cl->ps.weapon = primary;
@@ -104,12 +110,6 @@ void Utilities::startRun(int clientNum) {
   RemovePlayerWeapons(clientNum);
   RemovePlayerProjectiles(clientNum);
   SelectCorrectWeapon(player->client);
-
-  //	// Disable any weapons except kife
-  //	player->client->ps.weapons[0] = 0;
-  //	player->client->ps.weapons[1] = 0;
-  //
-  //	AddWeaponToPlayer(player->client, WP_KNIFE, 1, 0, qtrue);
   ClearPortals(player);
 }
 
