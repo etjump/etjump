@@ -4,6 +4,8 @@
 * fixed jump speeds, strafe quality and upmove reset sometimes not resetting on death due to dropped events [#834](https://github.com/etjump/etjump/pull/834)
 * fixed view transitions happening on load when stance is different than saved stance (e.g. load from stand to prone) [#837](https://github.com/etjump/etjump/pull/837)
 * fixed a crash with ETe in localhost when changing a map while playing (not speccing) [#835](https://github.com/etjump/etjump/pull/835)
+* fixed `etj_speedColorUsesAccel` ignoring `etj_speedAlpha` [#840](https://github.com/etjump/etjump/pull/840)
+* renamed `savelimit` worldspawn key to `limitedsaves` to avoid issues with old maps which might have set the key prior to it working in 2.5.0 [#841](https://github.com/etjump/etjump/pull/841)
 
 # ETJump 2.5.0
 
