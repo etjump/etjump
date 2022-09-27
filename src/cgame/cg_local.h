@@ -988,8 +988,8 @@ typedef struct {
 
   // blend blobs
   viewDamage_t viewDamage[MAX_VIEWDAMAGE];
-  float damageTime; // last time any kind of damage was recieved
-  int damageIndex;  // slot that was filled in
+  int damageTime;  // last time any kind of damage was recieved
+  int damageIndex; // slot that was filled in
   float damageX, damageY, damageValue;
 
   int grenLastTime;
@@ -4239,6 +4239,7 @@ enum extraTraceOptions {
 
 qboolean CG_ConsoleCommandExt(const char *cmd);
 void CG_DrawActiveFrameExt();
+void CG_ResetTransitionEffects();
 
 extern displayContextDef_t *DC;
 
