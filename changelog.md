@@ -1,3 +1,10 @@
+# ETJump 2.5.1
+
+* fixed weapon getting swapped briefly to primary weapon when starting a timerun while not holding a primary weapon [#832](https://github.com/etjump/etjump/pull/832)
+* fixed jump speeds, strafe quality and upmove reset sometimes not resetting on death due to dropped events [#834](https://github.com/etjump/etjump/pull/834)
+* fixed view transitions happening on load when stance is different than saved stance (e.g. load from stand to prone) [#837](https://github.com/etjump/etjump/pull/837)
+* fixed a crash with ETe in localhost when changing a map while playing (not speccing) [#835](https://github.com/etjump/etjump/pull/835)
+
 # ETJump 2.5.0
 
 * added silent command flag `/` to `!listflags` [#557](https://github.com/etjump/etjump/pull/557)
