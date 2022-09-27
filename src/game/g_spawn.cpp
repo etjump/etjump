@@ -1212,14 +1212,14 @@ void SP_worldspawn(void) {
     G_Printf("Ghosting is enabled.\n");
   }
 
-  G_SpawnString("savelimit", "0", &s);
+  G_SpawnString("limitedsaves", "0", &s);
   if (atoi(s)) {
     int limit = atoi(s);
-    level.saveLimit = limit;
+    level.limitedSaves = limit;
     G_Printf("Save is limited to %s.\n",
              ETJump::getPluralizedString(limit, "save").c_str());
   } else {
-    level.saveLimit = 0;
+    level.limitedSaves = 0;
     G_Printf("Save is not limited.\n");
   }
 
