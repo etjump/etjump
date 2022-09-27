@@ -760,7 +760,7 @@ void G_SetFireTeamRules(int clientNum) {
   trap_Argv(2, arg1, sizeof(arg1));
 
   if (!Q_stricmp(arg1, "savelimit")) {
-    if (level.saveLimit > 0) {
+    if (level.limitedSaves > 0) {
       G_ClientPrintAndReturn(clientNum,
                              "fireteam: unable to set savelimit - save is "
                              "limited globally.");

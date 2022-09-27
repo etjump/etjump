@@ -152,7 +152,7 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
       }
     }
 
-    if (level.saveLimit > 0) {
+    if (level.limitedSaves > 0) {
       if (client->sess.saveLimit == 0) {
         CPTo(ent, "^7You've used all your saves.");
         return;
@@ -778,7 +778,7 @@ void ETJump::SaveSystem::sendClientCommands(gentity_t *ent, int position) {
   int target;
   std::string saveMsg = va("savePrint %d\n", position);
 
-  if (!g_cheats.integer && level.saveLimit > 0) {
+  if (!g_cheats.integer && level.limitedSaves > 0) {
     saveMsg += va(" %d", ent->client->sess.saveLimit);
   }
 

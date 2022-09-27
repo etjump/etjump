@@ -1233,7 +1233,7 @@ typedef struct {
   int follow1, follow2;           // clientNums for auto-follow spectators
 
   //	int			snd_fry;				// sound
-  //index for standing in lava
+  // index for standing in lava
 
   int warmupModificationCount; // for detecting if g_warmup is changed
 
@@ -1416,7 +1416,7 @@ typedef struct {
   ipMute_t ipMutes[MAX_IP_MUTES]; // I don't think we need more than 16
 
   qboolean ghostPlayers;
-  int saveLimit;
+  int limitedSaves;
   int portalTeam;
 
 #define MAX_TIMERUNS 20
