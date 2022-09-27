@@ -25,6 +25,7 @@
 #include "etj_jump_speeds.h"
 #include "etj_utilities.h"
 #include "etj_client_commands_handler.h"
+#include "etj_player_events_handler.h"
 
 namespace ETJump {
 JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
@@ -37,6 +38,9 @@ JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
       [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
   entityEventsHandler->subscribe(EV_JUMP,
                                  [&](centity_t *cent) { updateJumpSpeeds(); });
+  playerEventsHandler->subscribe(
+      "respawn",
+      [&](const std::vector<std::string> &args) { queueJumpSpeedsReset(); });
 }
 
 JumpSpeeds::~JumpSpeeds() {
