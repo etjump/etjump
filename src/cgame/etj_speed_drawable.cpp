@@ -137,6 +137,8 @@ void ETJump::DisplaySpeed::render() const {
     frac = std::min(frac, 1.f);
 
     LerpColor(colorWhite, accelColor, color, frac);
+    // LerpColor adjusts alpha, make sure we still respect etj_speedAlpha
+    color[3] = etj_speedAlpha.value;
   }
 
   CG_Text_Paint_Ext(x - w, y, size, size, color, status.c_str(), 0, 0, style,
