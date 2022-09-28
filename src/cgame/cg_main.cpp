@@ -702,7 +702,7 @@ cvarTable_t cvarTable[] = {
     {&cg_timescaleFadeSpeed, "cg_timescaleFadeSpeed", "0", 0},
     {&cg_timescale, "timescale", "1", 0},
     {&cg_cameraMode, "com_cameraMode", "0", CVAR_CHEAT},
-    {&pmove_fixed, "pmove_fixed", "1", 0},
+    {&pmove_fixed, "pmove_fixed", "1", CVAR_ARCHIVE},
     {&cg_noTaunt, "cg_noTaunt", "0", CVAR_ARCHIVE}, // NERVE - SMF
     {&cg_voiceSpriteTime, "cg_voiceSpriteTime", "6000",
      CVAR_ARCHIVE}, // DHM - Nerve
