@@ -30,6 +30,7 @@
 namespace ETJump {
 static pmove_t pmove;
 static pmoveExt_t pmext;
+static playerState_t temp_ps;
 
 usercmd_t PmoveUtils::getUserCmd(const playerState_t &ps, int8_t uCmdScale) {
   usercmd_t cmd;
@@ -69,7 +70,7 @@ pmove_t *PmoveUtils::getPmove(usercmd_t cmd) {
     return &cg_pmove;
   }
 
-  playerState_t temp_ps = cg.predictedPlayerState;
+  temp_ps = cg.predictedPlayerState;
   pmove.ps = &temp_ps;
   pmove.pmext = &pmext;
   pmove.character =
