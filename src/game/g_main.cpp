@@ -297,13 +297,16 @@ vmCvar_t g_enableVote;
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
-vmCvar_t g_oss; //   0 - vanilla/unknown/ET:L auto setup
-                //   1 - Windows
-                //   2 - Linux
-                //   4 - Linux 64
-                //   8 - Mac OS X
-                //  16 - Android
-                //  32 - Raspberry Pi
+vmCvar_t g_oss; //   0  - vanilla/unknown/ET:L auto setup
+                //   1  - Windows x86
+                //   2  - Linux x86
+                //   4  - Linux x86_64
+                //   8  - macOS x86_64
+                //  16  - Android aarch64
+                //  32  - Raspberry Pi arm
+                //  64  - Raspberry Pi aarch64
+                //  128 - macOS aarch64 (M1)
+                //  256 - Windows x86_64 Pi
 
 cvarTable_t gameCvarTable[] = {
     // don't override the cheat state set by the system
@@ -601,7 +604,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH},
     {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
-    {&g_oss, "g_oss", "15", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qfalse},
+    {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qfalse},
 };
 
 // bk001129 - made static to avoid aliasing
