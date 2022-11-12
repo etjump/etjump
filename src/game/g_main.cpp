@@ -306,7 +306,7 @@ vmCvar_t g_oss; //   0  - vanilla/unknown/ET:L auto setup
                 //  32  - Raspberry Pi arm
                 //  64  - Raspberry Pi aarch64
                 //  128 - macOS aarch64 (M1)
-                //  256 - Windows x86_64 Pi
+                //  256 - Windows x86_64
 
 cvarTable_t gameCvarTable[] = {
     // don't override the cheat state set by the system
