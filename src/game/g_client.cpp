@@ -1787,7 +1787,9 @@ bool UpdateClientConfigString(gentity_t &gent) {
          gent.client->sess.playerWeapon, gent.client->sess.latchPlayerWeapon,
          gent.client->sess.latchPlayerWeapon2, gent.client->sess.muted ? 1 : 0,
          gent.client->pers.pmoveFixed ? 1 : 0,
-         gent.client->pers.maxFPS < 999 && gent.client->pers.maxFPS > 0
+         // while engine caps at 1000 fps, 2.60b doesn't actually cap com_maxfps
+         // value, but let's not display such silliness
+         gent.client->pers.maxFPS <= 1000 && gent.client->pers.maxFPS > 0
              ? gent.client->pers.maxFPS
              : 0,
          gent.client->pers.cgaz > 0 ? gent.client->pers.cgaz : 0,
