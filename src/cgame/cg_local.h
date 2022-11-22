@@ -671,10 +671,10 @@ typedef struct weaponInfo_s {
   sfxHandle_t reloadSound;
   sfxHandle_t reloadFastSound;
 
-  sfxHandle_t spinupSound; //----(SA)	added // sound started when fire
-                           // button goes
-                           // down, and stepped on when the first fire
-                           // event happens
+  sfxHandle_t spinupSound;   //----(SA)	added // sound started when fire
+                             // button goes
+                             // down, and stepped on when the first fire
+                             // event happens
   sfxHandle_t spindownSound; //----(SA)	added // sound called if the above is
                              // running
                              // but player doesn't follow through and fire
@@ -2406,6 +2406,7 @@ extern vmCvar_t etj_CGaz1Color3;
 extern vmCvar_t etj_CGaz1Color4;
 extern vmCvar_t etj_CGazFov;
 extern vmCvar_t etj_CGazTrueness;
+extern vmCvar_t etj_CGazOnTop;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
