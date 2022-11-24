@@ -2,6 +2,7 @@
 #include "etj_save_system.h"
 #include "etj_inactivity_timer.h"
 #include "etj_string_utilities.h"
+#include "etj_numeric_utilities.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -1774,6 +1775,10 @@ bool UpdateClientConfigString(gentity_t &gent) {
     // could break...
   }
 
+  // while engine caps at 1000 fps, 2.60b doesn't actually cap com_maxfps
+  // value, but let's not display such silliness
+  gent.client->pers.maxFPS = Numeric::clamp(gent.client->pers.maxFPS, 0, 1000);
+
   // send over a subset of the userinfo keys so other clients can
   // print scoreboards, display models, and play custom sounds
   auto newcs =
@@ -1786,10 +1791,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
          skillStr, gent.client->disguiseNetname, gent.client->disguiseRank,
          gent.client->sess.playerWeapon, gent.client->sess.latchPlayerWeapon,
          gent.client->sess.latchPlayerWeapon2, gent.client->sess.muted ? 1 : 0,
-         gent.client->pers.pmoveFixed ? 1 : 0,
-         gent.client->pers.maxFPS < 999 && gent.client->pers.maxFPS > 0
-             ? gent.client->pers.maxFPS
-             : 0,
+         gent.client->pers.pmoveFixed ? 1 : 0, gent.client->pers.maxFPS,
          gent.client->pers.cgaz > 0 ? gent.client->pers.cgaz : 0,
          gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
          gent.client->sess.specLocked ? 1 : 0,

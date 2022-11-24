@@ -87,7 +87,7 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
                        MINICHAR_HEIGHT, 12);
     }
   } else {
-    CG_DrawMiniString(tempX, y, va("%3i", ci->maxFPS), fade);
+    CG_DrawMiniString(tempX, y, va("%i", ci->maxFPS), fade);
     tempX += ALT_SCOREBOARD_FPS_WIDTH;
 
     CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
@@ -306,7 +306,7 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
                        MINICHAR_HEIGHT, 12);
     }
   } else {
-    CG_DrawMiniString(tempX, y, va("%3i", ci->maxFPS), fade);
+    CG_DrawMiniString(tempX, y, va("%i", ci->maxFPS), fade);
     tempX += ALT_SCOREBOARD_FPS_WIDTH;
 
     CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
