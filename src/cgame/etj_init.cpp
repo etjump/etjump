@@ -221,8 +221,15 @@ void init() {
   ETJump::renderables.push_back(
       std::make_shared<JumpSpeeds>(ETJump::entityEventsHandler.get()));
   ETJump::renderables.push_back(std::make_shared<QuickFollowDrawer>());
-  ETJump::renderables.push_back(std::make_shared<CGaz>());
-  ETJump::renderables.push_back(std::make_shared<Snaphud>());
+
+  if (etj_CGazOnTop.integer) {
+    ETJump::renderables.push_back(std::make_shared<Snaphud>());
+    ETJump::renderables.push_back(std::make_shared<CGaz>());
+  } else {
+    ETJump::renderables.push_back(std::make_shared<CGaz>());
+    ETJump::renderables.push_back(std::make_shared<Snaphud>());
+  }
+
   ETJump::renderables.push_back(std::make_shared<UpperRight>());
   ETJump::renderables.push_back(std::make_shared<UpmoveMeter>());
 

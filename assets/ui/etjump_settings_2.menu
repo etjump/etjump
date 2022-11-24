@@ -19,7 +19,7 @@
 // Right side menus
 #define SUBW_CGAZ_Y SUBW_Y
 #define SUBW_CGAZ_ITEM_Y SUBW_CGAZ_Y + SUBW_HEADER_HEIGHT
-#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 11)
+#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 12)
 
 #define SUBW_POPUPS_Y SUBW_CGAZ_Y + SUBW_CGAZ_HEIGHT + SUBW_SPACING_Y
 #define SUBW_POPUPS_ITEM_Y SUBW_POPUPS_Y + SUBW_HEADER_HEIGHT
@@ -95,8 +95,9 @@ menuDef {
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz Y position:", 0.2, SUBW_ITEM_HEIGHT, etj_CGazY 260 0 480 10, "Sets Y position of CGaz 1\netj_CGazY")
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGazFov", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz FOV:", 0.2, SUBW_ITEM_HEIGHT, etj_CGazFov 0 0 179 5, "Sets FOV of CGaz 1, 0 to use your current FOV\netj_CGazFov")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Stretch CGaz:", 0.2, SUBW_ITEM_HEIGHT, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz)")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Stretch CGaz:", 0.2, SUBW_ITEM_HEIGHT, "etj_stretchCgaz", "Stretch CGaz 2 when using widescreen resolution\netj_stretchCgaz")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz trueness:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazTrueness", cvarFloatList { "Off" 0 "Upmove" 1 "Groundzones" 2 "Upmove + Groundzones" 3 }, "Sets trueness of CGaz\netj_CGazTrueness")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz over Snaphud:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazOnTop", "Draw CGaz on top of snaphud (vid_restart required)\netj_CGazOnTop")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_POPUPS_Y, SUBW_WIDTH, SUBW_POPUPS_HEIGHT, "POPUPS")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
