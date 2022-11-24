@@ -604,7 +604,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_debugTimeruns, "g_debugTimeruns", "0", CVAR_ARCHIVE | CVAR_LATCH},
     {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
-    {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qfalse},
+    {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
 };
 
 // bk001129 - made static to avoid aliasing
