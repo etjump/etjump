@@ -8,6 +8,7 @@
 * renamed `savelimit` worldspawn key to `limitedsaves` to avoid issues with old maps which might have set the key prior to it working in 2.5.0 [#841](https://github.com/etjump/etjump/pull/841)
 * (hopefully) fixed random crashes related to pmove utils [#835](https://github.com/etjump/etjump/pull/835) [#844](https://github.com/etjump/etjump/pull/844)
 * updated `g_oss` default value to __399__ to reflect Win x64/M1 Mac support [e5f6a79](https://github.com/etjump/etjump/commit/e5f6a79402c56bbe655eac6cc4ef27b533b08954)
+  * the cvar is now read-only as it's not meant to be changed by server operators [#850](https://github.com/etjump/etjump/pull/850)
 * fixed FPS on scoreboard displaying 0 when client had `com_maxfps` > 998 [#849](https://github.com/etjump/etjump/pull/849)
 * added `etj_CGazOnTop` for drawing CGaz on top of Snaphud [#848](https://github.com/etjump/etjump/pull/848)
 
