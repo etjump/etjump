@@ -22,7 +22,7 @@ menuDef {
 
 	WINDOW( "CREDITS", 94 )
 
-	LABELWHITE(130, 35, WINDOW_WIDTH - 24, 18, "^7ETJump 2.5.0 Credits^7\n^7Developed by:\n^f_^7zero ^k>:3\n^1F^7eengur\n^zeT^>|^7setup^>.\n^0X^9I^7S\n^zeT^>|^7vallz^>.\n^7ryven\n^7^z999^7aciz\nsuburb\n\nSpecial thanks to:\n^wH^0e^wX^9|^wFate\nApple\n^99^z9^79^z|^0N^9o^zo^7d^zl^7e\n^7999Luvah\n^7999hazz\n^@W^!uTang^@H\n^5Ensiform\n^1ET^7: Legacy team\n\n^7We would also like to thank the entire Wolfenstein: Enemy Territory trickjump community for ideas, feedback and for being there. :)", .2, ITEM_ALIGN_CENTER, 0, 8 )
+	LABELWHITE(130, 35, WINDOW_WIDTH - 24, 18, "^7ETJump 2.5.1 Credits^7\n^7Developed by:\n^f_^7zero ^k>:3\n^1F^7eengur\n^zeT^>|^7setup^>.\n^0X^9I^7S\n^zeT^>|^7vallz^>.\n^7ryven\n^7^z999^7aciz\nsuburb\n\nSpecial thanks to:\n^wH^0e^wX^9|^wFate\nApple\n^99^z9^79^z|^0N^9o^zo^7d^zl^7e\n^7999Luvah\n^7999hazz\n^@W^!uTang^@H\n^5Ensiform\n^1ET^7: Legacy team\n\n^7We would also like to thank the entire Wolfenstein: Enemy Territory trickjump community for ideas, feedback and for being there. :)", .2, ITEM_ALIGN_CENTER, 0, 8 )
 
 	BUTTON(6, 342, WINDOW_WIDTH - 12, 18, "BACK", .3, 14, close etjump_credits; open etjump)
 }
