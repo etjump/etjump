@@ -1574,9 +1574,6 @@ void G_FreeEntity(gentity_t *e);
 
 void G_TouchTriggers(gentity_t *ent);
 
-float *tv(float x, float y, float z);
-char *vtos(const vec3_t v);
-
 void G_AddPredictableEvent(gentity_t *ent, int event, int eventParm);
 void G_AddEvent(gentity_t *ent, int event, int eventParm);
 void G_SetOrigin(gentity_t *ent, vec3_t origin);

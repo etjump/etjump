@@ -858,6 +858,8 @@ float BigFloat(float l);
 void Swap_Init(void);
 char *QDECL va(const char *format, ...);
 float *tv(float x, float y, float z);
+char *vtos(const vec3_t v);
+char *vtosf(const vec3_t v);
 
 //=============================================
 
