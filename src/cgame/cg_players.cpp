@@ -1834,20 +1834,6 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team,
   *ent = backupRefEnt;
 }
 
-char *vtosf(const vec3_t v) {
-  static int index;
-  static char str[8][64];
-  char *s;
-
-  // use an array so that multiple vtos won't collide
-  s = str[index];
-  index = (index + 1) & 7;
-
-  Com_sprintf(s, 64, "(%f %f %f)", v[0], v[1], v[2]);
-
-  return s;
-}
-
 /*
 ===============
 CG_AnimPlayerConditions
