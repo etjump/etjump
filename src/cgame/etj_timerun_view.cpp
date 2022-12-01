@@ -85,8 +85,9 @@ void ETJump::TimerunView::draw() {
   }
 
   auto run = currentRun();
+  auto hasTimerun = ((cg.demoPlayback && (run->lastRunTimer || run->running)) ||
+                     cg.hasTimerun);
 
-  auto hasTimerun = (cg.demoPlayback && run->running) || cg.hasTimerun;
   if (etj_drawRunTimer.integer == 0 || !hasTimerun) {
     return;
   }
