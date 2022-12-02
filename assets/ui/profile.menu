@@ -43,7 +43,7 @@ menuDef {
 		rect			6 32 240 90
 		type			ITEM_TYPE_LISTBOX
 		textfont		UI_FONT_COURBD_21
-                textstyle		ITEM_TEXTSTYLE_SHADOWED
+		textstyle		ITEM_TEXTSTYLE_SHADOWED
 		textscale		.2
 		textaligny		-3
 		forecolor		.6 .6 .6 1
