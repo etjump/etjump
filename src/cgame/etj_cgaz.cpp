@@ -262,7 +262,8 @@ void CGaz::render() const {
     // drawing the "wings" on the sides
     auto drawSides = state.vf > state.wishspeed;
 
-    auto velSize = state.vf;
+    auto velSize =
+        etj_CGaz2FixedSpeed.value > 0 ? etj_CGaz2FixedSpeed.value : state.vf;
     velSize /= 5;
     if (velSize > SCREEN_HEIGHT / 2) {
       velSize = SCREEN_HEIGHT / 2;
