@@ -88,7 +88,7 @@ menuDef {
         EDITFIELD           (SUBW_ITEM_RIGHT_X, SUBW_AUTODEMO_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_EDITFIELD_HEIGHT, "Autodemo path:", 0.2, SUBW_ITEM_HEIGHT, "etj_ad_targetPath", SUBW_EDITFIELD_MAXCHARS, SUBW_EDITFIELD_MAXPAINTCHARS, "Path to store autodemo demos in (demos/...)\netj_ad_targetPath")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_UNLOCKED_Y, SUBW_WIDTH, SUBW_UNLOCKED_HEIGHT, "UNLOCKED")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "View log:", 0.2, SUBW_ITEM_HEIGHT, "etj_viewlog", "View external console window (ALT + TAB when enabling)\netj_viewlog (viewlog)")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "View log:", 0.2, SUBW_ITEM_HEIGHT, "etj_viewlog", "View external console window (ALT + TAB when enabling)\n2.60b/ETe only, use +set viewlog 1 launch option on ET: Legacy\netj_viewlog (viewlog)")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Show tris:", 0.2, SUBW_ITEM_HEIGHT, "etj_showTris", cvarFloatList { "No" 0 "POV" 1 "PVS" 2 }, "Draw edges of triangles\netj_showTris (r_showtris)")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Foliage:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawFoliage", "Draw foliage\netj_drawFoliage (r_drawfoliage)")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Leaves:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawLeaves", "Draw leaves on trees\netj_drawLeaves")
