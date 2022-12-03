@@ -238,7 +238,6 @@ void UpmoveMeter::render() const {
   ETJump_AdjustPosition(&jump_.graph_xywh[0]);
   jump_.graph_xywh[1] = graphY_ + etj_upmoveMeterGraphY.value;
   jump_.graph_xywh[2] = etj_upmoveMeterGraphW.value;
-  ETJump_AdjustPosition(&jump_.graph_xywh[2]);
   jump_.graph_xywh[3] = etj_upmoveMeterGraphH.value;
 
   jump_.text_xh[0] = etj_upmoveMeterTextX.value;
