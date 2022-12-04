@@ -444,31 +444,31 @@ void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote) {
   switch (vote) {
     case ETJump::VotingTypes::VoteYes:
       level.voteInfo.voteYes++;
-      client->votingInfo.isVotedYes = true;
+      client->pers.votingInfo.isVotedYes = true;
       break;
     case ETJump::VotingTypes::VoteNo:
       level.voteInfo.voteNo++;
-      client->votingInfo.isVotedYes = false;
+      client->pers.votingInfo.isVotedYes = false;
       break;
     case ETJump::VotingTypes::RevoteYes:
       level.voteInfo.voteYes++;
       level.voteInfo.voteNo--;
-      client->votingInfo.isVotedYes = true;
+      client->pers.votingInfo.isVotedYes = true;
       break;
     case ETJump::VotingTypes::RevoteNo:
       level.voteInfo.voteYes--;
       level.voteInfo.voteNo++;
-      client->votingInfo.isVotedYes = false;
+      client->pers.votingInfo.isVotedYes = false;
   }
 
-  if (client->votingInfo.isVotedYes) {
+  if (client->pers.votingInfo.isVotedYes) {
     trap_SendServerCommand(client->ps.clientNum, "voted yes");
   } else {
     trap_SendServerCommand(client->ps.clientNum, "voted no");
   }
 
-  client->votingInfo.time = level.time;
-  client->votingInfo.attempts++;
+  client->pers.votingInfo.time = level.time;
+  client->pers.votingInfo.attempts++;
 
   trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
   trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
@@ -2874,29 +2874,29 @@ void Cmd_Vote_f(gentity_t *ent) {
     // don't allow to revote anymore if time range is passed or
     // there are no attempts left
     if (level.time > allowedRevoteTimeRange ||
-        client->votingInfo.attempts > ETJump::VOTING_ATTEMPTS) {
-      if (client->votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
+        client->pers.votingInfo.attempts > ETJump::VOTING_ATTEMPTS) {
+      if (client->pers.votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
         // stops excessive spam from server if
         // user keeps votting in timeouts
-        if (!client->votingInfo.isWarned) {
-          client->votingInfo.isWarned = true;
+        if (!client->pers.votingInfo.isWarned) {
+          client->pers.votingInfo.isWarned = true;
           trap_SendServerCommand(ent - g_entities, "print \"You can't "
                                                    "revote anymore.\n\"");
         }
         return;
       }
 
-      client->votingInfo.time = level.time;
-      client->votingInfo.isWarned = false;
+      client->pers.votingInfo.time = level.time;
+      client->pers.votingInfo.isWarned = false;
       return;
     }
 
     // defaults to 2s timeout
-    if (client->votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
+    if (client->pers.votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
       // stops excessive spam from server if user keeps
       // votting in timeouts
-      if (!client->votingInfo.isWarned) {
-        client->votingInfo.isWarned = true;
+      if (!client->pers.votingInfo.isWarned) {
+        client->pers.votingInfo.isWarned = true;
         trap_SendServerCommand(ent - g_entities,
                                "print \"You can't revote that "
                                "often.\n\"");
@@ -2904,26 +2904,26 @@ void Cmd_Vote_f(gentity_t *ent) {
       return;
     }
 
-    client->votingInfo.isWarned = false;
+    client->pers.votingInfo.isWarned = false;
 
     // allow revote
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-      if (!client->votingInfo.isVotedYes) {
+      if (!client->pers.votingInfo.isVotedYes) {
         etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteYes);
         trap_SendServerCommand(
             ent - g_entities,
             va("print \"Vote cast, you have %d "
                "attempts left.\n\"",
-               ETJump::VOTING_ATTEMPTS + 1 - client->votingInfo.attempts));
+               ETJump::VOTING_ATTEMPTS + 1 - client->pers.votingInfo.attempts));
       }
     } else {
-      if (client->votingInfo.isVotedYes) {
+      if (client->pers.votingInfo.isVotedYes) {
         etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteNo);
         trap_SendServerCommand(
             ent - g_entities,
             va("print \"Vote cast, you have %d "
                "attempts left.\n\"",
-               ETJump::VOTING_ATTEMPTS + 1 - client->votingInfo.attempts));
+               ETJump::VOTING_ATTEMPTS + 1 - client->pers.votingInfo.attempts));
       }
     }
 
