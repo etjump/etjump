@@ -5178,6 +5178,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
   int numOptionalImages;
   listBoxDef_t *listPtr = (listBoxDef_t *)item->typeData;
   rectDef_t fillRect = item->window.rect;
+  item->textStyle = ITEM_TEXTSTYLE_SHADOWED;
 
   /*if( item->window.borderSize ) {
       fillRect.x += item->window.borderSize;
