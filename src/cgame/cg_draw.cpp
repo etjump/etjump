@@ -159,6 +159,26 @@ void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
                     font);
 }
 
+void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
+                                    float scaley, vec4_t color,
+                                    const char *text, float adjust, int limit,
+                                    int style, fontInfo_t *font) {
+  x -= CG_Text_Width_Ext(text, scalex, limit, font);
+
+  CG_Text_Paint_Ext(x, y, scalex, scaley, color, text, adjust, limit, style,
+                    font);
+}
+
+void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
+                                    float scaley, vec4_t color,
+                                    const std::string &text, float adjust,
+                                    int limit, int style, fontInfo_t *font) {
+  x -= CG_Text_Width_Ext(text, scalex, limit, font);
+
+  CG_Text_Paint_Ext(x, y, scalex, scaley, color, text, adjust, limit, style,
+                    font);
+}
+
 void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
                        vec4_t color, const char *text, float adjust, int limit,
                        int style, fontInfo_t *font) {

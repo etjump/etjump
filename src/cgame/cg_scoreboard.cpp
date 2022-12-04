@@ -512,14 +512,14 @@ Alt scoreboard 3
 #define ALT_SCOREBOARD_3_PING_WIDTH 23
 
 #define ALT_SCOREBOARD_3_PLAYER_X                                              \
-  SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2 +                           \
-      ALT_SCOREBOARD_3_TEXT_XY_PADDING;
+  (SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f +                       \
+   ALT_SCOREBOARD_3_TEXT_XY_PADDING)
 #define ALT_SCOREBOARD_3_FPS_X                                                 \
-  ALT_SCOREBOARD_3_PLAYER_X + ALT_SCOREBOARD_3_PLAYER_WIDTH
+  (ALT_SCOREBOARD_3_PLAYER_X + ALT_SCOREBOARD_3_PLAYER_WIDTH)
 #define ALT_SCOREBOARD_3_INFO_X                                                \
-  ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH
+  (ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH)
 #define ALT_SCOREBOARD_3_PING_X                                                \
-  ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH
+  (ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH)
 
 void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
                     fontInfo_t *font) {
@@ -560,7 +560,8 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
   std::string modVersion = ETJump::stringFormat("^7%s", GAME_TAG);
   float bottomTextY = headerTextY + ALT_SCOREBOARD_3_HEADER_HEIGHT -
                       ALT_SCOREBOARD_3_TEXT_XY_PADDING;
-  float modVersionOffsetX = CG_Text_Width_Ext(modVersion, 0.15f, 0, font);
+  auto modVersionOffsetX =
+      static_cast<float>(CG_Text_Width_Ext(modVersion, 0.15f, 0, font));
 
   CG_Text_Paint_Ext(leftTextX, bottomTextY, 0.15f, 0.15f, textColor, ipAddress,
                     0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
@@ -606,7 +607,8 @@ void CG_DrawPlayerHeader3(float x, float y, int playerCount, float fade,
                           vec4_t textColor, fontInfo_t *font) {
   std::string playerHeader =
       ETJump::stringFormat("^7Players (%d)", playerCount);
-  float textHeight = CG_Text_Height_Ext(playerHeader, 0.2f, 0, font);
+  auto textHeight =
+      static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
   float playerHeaderY = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
 
   CG_Text_Paint_Centred_Ext(x, playerHeaderY, 0.2f, 0.2f, textColor,
@@ -676,8 +678,9 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor,
 
   // Player
   std::string playerHeader = "^7Player";
-  float textHeight = CG_Text_Height_Ext(playerHeader, 0.15f, 0,
-                                        font); // reusing this for everything
+  auto textHeight = static_cast<float>(
+      CG_Text_Height_Ext(playerHeader, 0.15f, 0,
+                         font)); // reusing this for everything
   float playerCenterY = y + (ALT_SCOREBOARD_3_ROW_HEIGHT + textHeight) / 2;
 
   float playerX = ALT_SCOREBOARD_3_PLAYER_X;
@@ -686,24 +689,23 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor,
 
   // FPS
   std::string fpsHeader = "^7FPS";
-  float fpsX = playerX + ALT_SCOREBOARD_3_PLAYER_WIDTH;
-  float fpsCenterX = fpsX + ALT_SCOREBOARD_3_FPS_WIDTH / 2;
+  float fpsCenterX = ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH * 0.5f;
 
   CG_Text_Paint_Centred_Ext(fpsCenterX, playerCenterY, 0.15f, 0.15f, textColor,
                             fpsHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Info
   std::string infoHeader = "^7Info";
-  float infoX = fpsX + ALT_SCOREBOARD_3_FPS_WIDTH;
-  float infoCenterX = infoX + ALT_SCOREBOARD_3_INFO_WIDTH / 2;
+  float infoCenterX =
+      ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH * 0.5f;
 
   CG_Text_Paint_Centred_Ext(infoCenterX, playerCenterY, 0.15f, 0.15f, textColor,
                             infoHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Ping
   std::string pingHeader = "^7Ping";
-  float pingX = infoX + ALT_SCOREBOARD_3_INFO_WIDTH;
-  float pingCenterX = pingX + ALT_SCOREBOARD_3_PING_WIDTH / 2;
+  float pingCenterX =
+      ALT_SCOREBOARD_3_PING_X + ALT_SCOREBOARD_3_PING_WIDTH * 0.5f;
 
   CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.15f, 0.15f, textColor,
                             pingHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
@@ -719,8 +721,8 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor,
     y += ALT_SCOREBOARD_3_ROW_HEIGHT;
 
     CG_AddPlayerToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT,
-                        fpsCenterX, infoX, pingCenterX, &cg.scores[i],
-                        textColor, font);
+                        fpsCenterX, ALT_SCOREBOARD_3_INFO_X, pingCenterX,
+                        &cg.scores[i], textColor, font);
     playerCenterY += ALT_SCOREBOARD_3_ROW_HEIGHT;
   }
 }
@@ -729,7 +731,8 @@ void CG_DrawSpectatorHeader3(float x, float y, int spectatorCount, float fade,
                              vec4_t textColor, fontInfo_t *font) {
   std::string playerHeader =
       ETJump::stringFormat("^7Spectators (%d)", spectatorCount);
-  float textHeight = CG_Text_Height_Ext(playerHeader, 0.2f, 0, font);
+  auto textHeight =
+      static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
   float spectatorHeaderY = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
 
   CG_Text_Paint_Centred_Ext(x, spectatorHeaderY, 0.2f, 0.2f, textColor,
@@ -741,41 +744,61 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
   clientInfo_t *ci = &cgs.clientinfo[score->client];
   std::string connecting = "^3CONNECTING";
   std::string spectator = "^3SPECTATOR";
-  std::string following = "^3>";
+  std::string followingArrow = "^3>";
   std::string followedClient = cgs.clientinfo[score->followedClient].name;
   std::string ping = ETJump::stringFormat("%i", score->ping);
   float playerX = ALT_SCOREBOARD_3_PLAYER_X;
-  float rightTextX = SCREEN_WIDTH - playerX;
-  float connectingTextOffsetX = CG_Text_Width_Ext(connecting, 0.15f, 0, font);
-  float spectatorTextOffsetX = CG_Text_Width_Ext(spectator, 0.15f, 0, font);
-  float followedClientTextOffsetX =
-      CG_Text_Width_Ext(followedClient, 0.15f, 0, font);
+  float rightTextX = ALT_SCOREBOARD_3_PING_X - ALT_SCOREBOARD_3_TEXT_XY_PADDING;
+  auto followingArrowHalfW = static_cast<float>(CG_Text_Width_Ext(
+                                 followingArrow.c_str(), 0.15f, 0, font)) *
+                             0.5f;
+  bool following = ci->clientNum != score->followedClient;
+  bool idle = etj_drawScoreboardInactivity.integer && ci->clientIsInactive;
+  int playerLimit = 0;
+  int followedLimit = 0;
 
   // Draw indicator if player is idle
-  if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
+  if (idle) {
     CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
     playerX += 10;
   }
 
-  // Draw player
-  CG_Text_Paint_Ext(playerX, y, 0.15f, 0.15f, textColor, ci->name, 0, 0,
-                    ITEM_TEXTSTYLE_SHADOWED, font);
+  // calculate limits for player name and followed client drawing
+  if (following) {
+    float playerW =
+        (playerX - (idle ? 20.f : 0.f) + ALT_SCOREBOARD_3_TEXT_XY_PADDING +
+         followingArrowHalfW + SCREEN_CENTER_X) -
+        SCREEN_CENTER_X;
+    CG_Printf("%.3f\n", playerW);
+    const float followedW = (ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f) -
+                            (ALT_SCOREBOARD_3_TEXT_XY_PADDING * 3) -
+                            ALT_SCOREBOARD_3_PING_WIDTH - followingArrowHalfW;
 
-  // Draw connecting text, spectator text or followed client
+    playerLimit = ETJump::MaxCharsForWidth(ci->name, 0.15f, playerW, font);
+    followedLimit = ETJump::MaxCharsForWidth(followedClient.c_str(), 0.15f,
+                                             followedW, font);
+  }
+
+  // Draw player
+  CG_Text_Paint_Ext(playerX, y, 0.15f, 0.15f, textColor, ci->name, 0,
+                    playerLimit, ITEM_TEXTSTYLE_SHADOWED, font);
+
+  // Draw connecting text, followed client or spectator text
   if (score->ping == -1) {
-    CG_Text_Paint_Ext(rightTextX - connectingTextOffsetX - 25, y, 0.15f, 0.15f,
-                      textColor, connecting, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
-                      font);
-  } else if (ci->clientNum == score->followedClient) {
-    CG_Text_Paint_Ext(rightTextX - spectatorTextOffsetX - 25, y, 0.15f, 0.15f,
-                      textColor, spectator, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
-                      font);
+    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor,
+                                   connecting, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                                   font);
+  } else if (following) {
+    CG_Text_Paint_Centred_Ext(SCREEN_CENTER_X, y, 0.15f, 0.15f, textColor,
+                              followingArrow, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                              font);
+    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor,
+                                   followedClient, 0, followedLimit,
+                                   ITEM_TEXTSTYLE_SHADOWED, font);
   } else {
-    CG_Text_Paint_Ext(SCREEN_CENTER_X, y, 0.15f, 0.15f, textColor, following, 0,
-                      0, ITEM_TEXTSTYLE_SHADOWED, font);
-    CG_Text_Paint_Ext(rightTextX - followedClientTextOffsetX - 25, y, 0.15f,
-                      0.15f, textColor, followedClient, 0, 0,
-                      ITEM_TEXTSTYLE_SHADOWED, font);
+    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor,
+                                   spectator, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                                   font);
   }
 
   // Draw ping
@@ -802,7 +825,7 @@ void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor,
   std::string pingHeader = "^7Ping";
   float pingX = playerX + ALT_SCOREBOARD_3_PLAYER_WIDTH +
                 ALT_SCOREBOARD_3_FPS_WIDTH + ALT_SCOREBOARD_3_INFO_WIDTH;
-  float pingCenterX = pingX + ALT_SCOREBOARD_3_PING_WIDTH / 2;
+  float pingCenterX = pingX + ALT_SCOREBOARD_3_PING_WIDTH * 0.5f;
 
   CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.15f, 0.15f, textColor,
                             pingHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
@@ -864,7 +887,7 @@ void CG_DrawAltScoreboard3(float fade) {
   }
 
   // Draw header
-  float headerX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_HEADER_WIDTH / 2;
+  float headerX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_HEADER_WIDTH * 0.5f;
   float headerY = baseY;
 
   CG_FillRect(headerX, headerY, ALT_SCOREBOARD_3_HEADER_WIDTH,
@@ -882,7 +905,7 @@ void CG_DrawAltScoreboard3(float fade) {
                        textColor, font);
 
   // Draw player list
-  float playerListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2;
+  float playerListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f;
   float playerListY = playerHeaderY + ALT_SCOREBOARD_3_DIVIDER;
   float playerListHeight =
       ALT_SCOREBOARD_3_ROW_HEIGHT + playerCount * ALT_SCOREBOARD_3_ROW_HEIGHT;
@@ -906,7 +929,7 @@ void CG_DrawAltScoreboard3(float fade) {
                           fade, textColor, font);
 
   // Draw spectator list
-  float spectatorListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH / 2;
+  float spectatorListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f;
   float spectatorListY = spectatorHeaderY + ALT_SCOREBOARD_3_DIVIDER;
   float spectatorListHeight = ALT_SCOREBOARD_3_ROW_HEIGHT +
                               spectatorCount * ALT_SCOREBOARD_3_ROW_HEIGHT;

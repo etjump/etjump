@@ -118,8 +118,8 @@
 #define WID_STATS 0x01    // Stats (reusable due to scroll effect)
 #define WID_TOPSHOTS 0x02 // Top/Bottom-shots
 #define WID_MOTD 0x04     // MOTD
-//#define WID_DEMOHELP		0x08	// Demo key control info
-//#define WID_SPECHELP		0x10	// MV spectator key control info
+// #define WID_DEMOHELP		0x08	// Demo key control info
+// #define WID_SPECHELP		0x10	// MV spectator key control info
 
 #define WFX_TEXTSIZING 0x01 // Size the window based on text/font setting
 #define WFX_FLASH 0x02      // Alternate between bg and b2 every half second
@@ -2794,6 +2794,8 @@ int CG_DrawStrlen(const char *str);
 namespace ETJump {
 int DrawStringWidth(const char *text, float scalex);
 int DrawStringHeight(const char *text, float scalex);
+int MaxCharsForWidth(const char *text, float scalex, float width,
+                     fontInfo_t *font);
 void DrawString(float x, float y, float scalex, float scaley,
                 const vec4_t color, qboolean forceColor, const char *text,
                 int limit, int style);
@@ -2862,6 +2864,14 @@ void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
                                vec4_t color, const std::string &text,
                                float adjust, int limit, int style,
                                fontInfo_t *font);
+void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
+                                    float scaley, vec4_t color,
+                                    const char *text, float adjust, int limit,
+                                    int style, fontInfo_t *font);
+void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
+                                    float scaley, vec4_t color,
+                                    const std::string &text, float adjust,
+                                    int limit, int style, fontInfo_t *font);
 void CG_Text_Paint(float x, float y, float scale, vec4_t color,
                    const char *text, float adjust, int limit, int style);
 void CG_Text_SetActiveFont(int font);
@@ -3756,8 +3766,8 @@ void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim,
 #define CC_FILTER_CONSTRUCTIONS (1 << 5)
 #define CC_FILTER_DESTRUCTIONS (1 << 6)
 #define CC_FILTER_OBJECTIVES (1 << 7)
-//#define CC_FILTER_WAYPOINTS		(1 << 7)
-//#define CC_FILTER_OBJECTIVES	(1 << 8)
+// #define CC_FILTER_WAYPOINTS		(1 << 7)
+// #define CC_FILTER_OBJECTIVES	(1 << 8)
 
 typedef struct {
   qhandle_t shader;

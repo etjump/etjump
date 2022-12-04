@@ -1483,6 +1483,29 @@ int DrawStringHeight(const char *text, float scalex) {
   return CG_Text_Height_Ext(text, scalex, 0, &cgs.media.limboFont2);
 }
 
+int MaxCharsForWidth(const char *text, float scalex, float width,
+                     fontInfo_t *font) {
+  int maxChars = 0;
+  int limit = 0;
+
+  while (text != nullptr) {
+    if (static_cast<float>(CG_Text_Width_Ext(text, scalex, 0, font)) < width) {
+      maxChars = Q_PrintStrlen(text);
+      break;
+    }
+
+    limit++;
+    maxChars++;
+
+    if (static_cast<float>(CG_Text_Width_Ext(text, scalex, limit, font)) >
+        width) {
+      break;
+    }
+  }
+
+  return maxChars;
+}
+
 void DrawString(float x, float y, float scalex, float scaley,
                 const vec4_t color, qboolean forceColor, const char *text,
                 int limit, int style) {
