@@ -838,6 +838,15 @@ typedef struct raceStruct_s {
   int saveLimit;
 } raceStruct_t;
 
+// stores client voting information
+struct etj_votingInfo_t {
+  bool isVotedYes; // is the client voted yes
+  int time;        // last time client voted, used for timeouts between revotes
+  int attempts;    // revote attempts
+  bool isWarned;   // if client attempts to revote but timeout doesn't
+                   // allow yet, notification will be sent
+};
+
 // client data that stays across multiple respawns, but is cleared
 // on each level change or team change at ClientBegin()
 typedef struct {
@@ -942,6 +951,8 @@ typedef struct {
   int tokenCollectionStartTime;
 
   int previousSetHealthTime;
+
+  etj_votingInfo_t votingInfo;
 } clientPersistant_t;
 
 typedef struct {
@@ -973,15 +984,6 @@ typedef struct debrisChunk_s {
 } debrisChunk_t;
 
 #define MAX_DEBRISCHUNKS 256
-
-// storea client voting information
-struct etj_votingInfo_t {
-  bool isVotedYes; // is the client voted yes
-  int time;        // last time client voted, used for timeouts between revotes
-  int attempts;    // revote attempts
-  bool isWarned;   // if client attempts to revote but timeout doesn't
-                   // allow yet, notification will be sent
-};
 
 // ===================
 
@@ -1141,8 +1143,6 @@ struct gclient_s {
 
   // Whether the client already activated target_set_health
   qboolean alreadyActivatedSetHealth;
-
-  etj_votingInfo_t votingInfo;
 };
 
 typedef struct {
