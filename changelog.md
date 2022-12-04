@@ -1,3 +1,14 @@
+# ETJump 2.6.0
+
+* fixed timerun timer disappearing on demo playback when timerun ends [#835](https://github.com/etjump/etjump/pull/853)
+* updated viewlog menu tooltip to inform viewlog usage on ET: Legacy clients [1bd5f8b](https://github.com/etjump/etjump/commit/1bd5f8b6c363ddf17df366462afe9462e07831d7)
+* fixed upmove meter graph being stretched on widescreen resolutions [d04378c](https://github.com/etjump/etjump/commit/d04378c93775193c7c52d3c73ee4e816b3077d2b)
+* added `etj_CGaz2FixedSpeed` cvar to allow specifying fixed speed for drawing CGaz 2 [#855](https://github.com/etjump/etjump/pull/855)
+* listbox UI menus (demo, mods, mapvote etc.) are now drawn using shadowed text for better readability [#857](https://github.com/etjump/etjump/pull/857)
+* fixed long names overlapping while following/being followed on scoreboard 3 [#862](https://github.com/etjump/etjump/pull/862)
+* scoreboard now indicates if a server is running with cheats enabled [#863](https://github.com/etjump/etjump/pull/863)
+* fixed being able to cast multiple votes by switching teams [#864](https://github.com/etjump/etjump/pull/864)
+
 # ETJump 2.5.1
 
 * fixed weapon getting swapped briefly to primary weapon when starting a timerun while not holding a primary weapon [#832](https://github.com/etjump/etjump/pull/832)
