@@ -42,7 +42,10 @@ void CG_DrawHeader(float x, float y, float fade) {
                     y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 
   y += ALT_SCOREBOARD_VERTICAL_DELTA;
-  header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
+  header =
+      cgs.cheats
+          ? va(CG_TranslateString(va("^7%s%s", cgs.rawmapname, " ^9(cheats)")))
+          : va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
   CG_Text_Paint_Ext(SCREEN_CENTER_X -
                         CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
                     y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
@@ -196,7 +199,6 @@ void CG_DrawHeader2(float x, float y, float fade) {
   vec4_t textColor = {0.6f, 0.6f, 0.6f, 0};
   float tempX = x + 20;
   float tempY = y + (THIRD_SCOREBOARD_HEADER_HEIGHT / 2) + 4;
-  float mapNameWidth = 0;
   float scoreboardWidth = ALT_SCOREBOARD_WIDTH;
   float teamScoreboardWidth = scoreboardWidth / 2;
 
@@ -214,10 +216,13 @@ void CG_DrawHeader2(float x, float y, float fade) {
 
   // Draw the current map name
   header = va(CG_TranslateString(va("^7%s", cgs.rawmapname)));
-  mapNameWidth = CG_Text_Width_Ext(header, 0.25f, 0, font);
-  tempX = x + ALT_SCOREBOARD_WIDTH - 20 - mapNameWidth;
-  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0,
-                    font);
+  tempX = x + ALT_SCOREBOARD_WIDTH - 20;
+  CG_Text_Paint_RightAligned_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header,
+                                 0, 0, 0, font);
+  if (cgs.cheats) {
+    CG_Text_Paint_RightAligned_Ext(tempX, tempY + 10, 0.15f, 0.15f, textColor,
+                                   "^9(cheats)", 0, 0, 0, font);
+  }
 
   // Draw the "jumping" text
   header = va(CG_TranslateString("^7Jumping"));
@@ -534,6 +539,9 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
   std::string hostName = ETJump::stringFormat(
       "^7%s", Info_ValueForKey(configString, "sv_hostname"));
   std::string mapName = ETJump::stringFormat("^7%s", cgs.rawmapname);
+  if (cgs.cheats) {
+    mapName += " ^9(cheats)";
+  }
   int hostNameLimit = 0;
 
   // Limit hostname + mapname legth to prevent overlapping
@@ -993,7 +1001,7 @@ int WM_DrawObjectives(int x, int y, int width, float fade) {
   CG_Text_Paint_Ext(x + 5, y + 17, 0.25f, 0.25f, color1, s, 0, 0, 0, font);
 
   // ETJump: map name on the center
-  s = cgs.rawmapname;
+  s = cgs.cheats ? va("^7%s%s", cgs.rawmapname, " ^9(cheats)") : cgs.rawmapname;
   textWidth = CG_Text_Width_Ext(s, 0.25f, 0, font);
   CG_Text_Paint_Ext(x + width / 2 - textWidth / 2, y + 17, 0.25f, 0.25f, color2,
                     s, 0, 0, 0, font);
