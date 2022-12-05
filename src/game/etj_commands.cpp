@@ -35,6 +35,7 @@
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
+#include "etj_numeric_utilities.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -922,7 +923,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
   auto mapsToList = 10;
   if (argv->size() == 2) {
     try {
-      mapsToList = std::stoi((*argv)[1]);
+      mapsToList = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
       ChatPrintTo(ent, ETJump::stringFormat("^3Error: ^7%s^7 is not a number",
                                             argv->at(1)));
@@ -933,6 +934,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
   }
 
   auto leastPlayed = game.mapStatistics->getLeastPlayed();
+  mapsToList = Numeric::clamp(mapsToList, 0, 100);
 
   auto listedMaps = 0;
   std::string buffer = "^zLeast played maps are:\n"
@@ -1178,17 +1180,18 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
   auto mapsToList = 10;
   if (argv->size() == 2) {
     try {
-      mapsToList = std::stoi((*argv)[1]);
+      mapsToList = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
       ChatPrintTo(ent, ETJump::stringFormat("^3Error: ^7%s^7 is not a number",
                                             argv->at(1)));
       return false;
     } catch (const std::out_of_range &) {
-      mapsToList = 1000;
+      mapsToList = 10;
     }
   }
 
   auto mostPlayed = game.mapStatistics->getMostPlayed();
+  mapsToList = Numeric::clamp(mapsToList, 0, 100);
 
   auto listedMaps = 0;
   std::string buffer = "^zMost played maps are:\n"
