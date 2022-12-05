@@ -777,7 +777,6 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
         (playerX - (idle ? 20.f : 0.f) + ALT_SCOREBOARD_3_TEXT_XY_PADDING +
          followingArrowHalfW + SCREEN_CENTER_X) -
         SCREEN_CENTER_X;
-    CG_Printf("%.3f\n", playerW);
     const float followedW = (ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f) -
                             (ALT_SCOREBOARD_3_TEXT_XY_PADDING * 3) -
                             ALT_SCOREBOARD_3_PING_WIDTH - followingArrowHalfW;
