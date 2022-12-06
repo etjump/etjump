@@ -922,7 +922,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
   auto mapsToList = 10;
   if (argv->size() == 2) {
     try {
-      mapsToList = std::stoi((*argv)[1]);
+      mapsToList = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
       ChatPrintTo(ent, ETJump::stringFormat("^3Error: ^7%s^7 is not a number",
                                             argv->at(1)));
@@ -930,10 +930,18 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     } catch (const std::out_of_range &) {
       mapsToList = 10;
     }
+
+    if (mapsToList <= 0) {
+      ChatPrintTo(ent, "^3leastplayed: ^7second argument must be over 0");
+      return false;
+    }
+
+    if (mapsToList > 100) {
+      mapsToList = 100;
+    }
   }
 
   auto leastPlayed = game.mapStatistics->getLeastPlayed();
-
   auto listedMaps = 0;
   std::string buffer = "^zLeast played maps are:\n"
                        "^gMap                    Played                        "
@@ -1012,8 +1020,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
     }
 
     if (perRow <= 0) {
-      ChatPrintTo(ent, "^3listmaps: ^7second argument "
-                       "must be over 0");
+      ChatPrintTo(ent, "^3listmaps: ^7second argument must be over 0");
       return false;
     }
 
@@ -1178,18 +1185,26 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
   auto mapsToList = 10;
   if (argv->size() == 2) {
     try {
-      mapsToList = std::stoi((*argv)[1]);
+      mapsToList = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
       ChatPrintTo(ent, ETJump::stringFormat("^3Error: ^7%s^7 is not a number",
                                             argv->at(1)));
       return false;
     } catch (const std::out_of_range &) {
-      mapsToList = 1000;
+      mapsToList = 10;
+    }
+
+    if (mapsToList <= 0) {
+      ChatPrintTo(ent, "^3mostplayed: ^7second argument must be over 0");
+      return false;
+    }
+
+    if (mapsToList > 100) {
+      mapsToList = 100;
     }
   }
 
   auto mostPlayed = game.mapStatistics->getMostPlayed();
-
   auto listedMaps = 0;
   std::string buffer = "^zMost played maps are:\n"
                        "^gMap                    Played                        "
