@@ -35,7 +35,6 @@
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
-#include "etj_numeric_utilities.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -931,11 +930,18 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     } catch (const std::out_of_range &) {
       mapsToList = 10;
     }
+
+    if (mapsToList <= 0) {
+      ChatPrintTo(ent, "^3leastplayed: ^7second argument must be over 0");
+      return false;
+    }
+
+    if (mapsToList > 100) {
+      mapsToList = 100;
+    }
   }
 
   auto leastPlayed = game.mapStatistics->getLeastPlayed();
-  mapsToList = Numeric::clamp(mapsToList, 0, 100);
-
   auto listedMaps = 0;
   std::string buffer = "^zLeast played maps are:\n"
                        "^gMap                    Played                        "
@@ -1014,8 +1020,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
     }
 
     if (perRow <= 0) {
-      ChatPrintTo(ent, "^3listmaps: ^7second argument "
-                       "must be over 0");
+      ChatPrintTo(ent, "^3listmaps: ^7second argument must be over 0");
       return false;
     }
 
@@ -1188,11 +1193,18 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     } catch (const std::out_of_range &) {
       mapsToList = 10;
     }
+
+    if (mapsToList <= 0) {
+      ChatPrintTo(ent, "^3mostplayed: ^7second argument must be over 0");
+      return false;
+    }
+
+    if (mapsToList > 100) {
+      mapsToList = 100;
+    }
   }
 
   auto mostPlayed = game.mapStatistics->getMostPlayed();
-  mapsToList = Numeric::clamp(mapsToList, 0, 100);
-
   auto listedMaps = 0;
   std::string buffer = "^zMost played maps are:\n"
                        "^gMap                    Played                        "
