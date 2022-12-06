@@ -14,7 +14,7 @@
 
 #define SUBW_JUMPSPEEDS_Y SUBW_SPECTATOR_Y + SUBW_SPECTATOR_HEIGHT + SUBW_SPACING_Y
 #define SUBW_JUMPSPEEDS_ITEM_Y SUBW_JUMPSPEEDS_Y + SUBW_HEADER_HEIGHT
-#define SUBW_JUMPSPEEDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 8)
+#define SUBW_JUMPSPEEDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 9)
 
 // Right side menus
 #define SUBW_STRAFEQUALITY_Y SUBW_Y
@@ -73,6 +73,8 @@ menuDef {
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Show difference:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsShowDiff", "Colorize speed if it's faster/slower than previous\netj_jumpSpeedsShowDiff")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Faster color:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsFasterColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of faster jumps\netj_jumpSpeedsFasterColor")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Slower color:", 0.2, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsSlowerColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of slower jumps\netj_jumpSpeedsSlowerColor")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_jumpSpeedsMinSpeed", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_JUMPSPEEDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Minimum speed:", 0.2, SUBW_ITEM_HEIGHT, etj_jumpSpeedsMinSpeed 0 0 500 1, "Color jumps below this value with the slower color value\netj_jumpSpeedsMinSpeed")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_STRAFEQUALITY_Y, SUBW_WIDTH, SUBW_STRAFEQUALITY_HEIGHT, "STRAFE QUALITY")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_STRAFEQUALITY_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Strafe quality:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawStrafeQuality", "Draw strafe quality\netj_drawStrafeQuality")
