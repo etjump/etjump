@@ -5002,6 +5002,21 @@ const voteType_t voteToggles[] = {
     {"vote_allow_randommap", CV_SVF_RANDOMMAP},
 };
 
+const char *BG_TeamnameForNumber(team_t teamNum) {
+  switch (teamNum) {
+    case TEAM_FREE:
+      return "free";
+    case TEAM_AXIS:
+      return "axis";
+    case TEAM_ALLIES:
+      return "allies";
+    case TEAM_SPECTATOR:
+      return "spectator";
+    default:
+      return "unknown";
+  }
+}
+
 int numVotesAvailable = sizeof(voteToggles) / sizeof(voteType_t);
 
 // consts to offset random reinforcement seeds

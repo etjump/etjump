@@ -210,6 +210,8 @@ A respawn happened this snapshot
 ================
 */
 void CG_Respawn(qboolean revived) {
+  static int oldTeam = -1;
+
   cg.serverRespawning = qfalse; // Arnout: just in case
 
   // no error decay on player movement
@@ -258,6 +260,22 @@ void CG_Respawn(qboolean revived) {
   }
 
   cg.proneMovingTime = 0;
+
+  if (!revived && cgs.clientinfo[cg.clientNum].team != oldTeam) {
+    int len;
+    fileHandle_t f;
+    std::string str = BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team);
+
+    str = "autoexec_" + str + ".cfg";
+    len = trap_FS_FOpenFile(str.c_str(), &f, FS_READ);
+    if (len <= 0) {
+      return; // no autoexec_teamname.cfg found
+    }
+
+    str = "exec \"" + str + "\"\n";
+    trap_SendConsoleCommand(str.c_str());
+    oldTeam = cgs.clientinfo[cg.clientNum].team;
+  }
 
   // reset fog to world fog (if present)
   trap_R_SetFog(FOG_CMD_SWITCHFOG, FOG_MAP, 20, 0, 0, 0, 0);
