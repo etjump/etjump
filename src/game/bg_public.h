@@ -2725,11 +2725,7 @@ static const struct Manual commandManuals[] = {
      "Gives noclip to yourself or target player. Use count to specify how many "
      "times "
      "the target can use noclip."},
-    {"nogoto", "!nogoto [target]", "Disables goto for target player."},
-    {"nosave", "!nosave [target]", "Disables save for target player."},
     {"passvote", "!passvote", "Passes current vote in progress."},
-    {"putteam", "!putteam [target] [b|r|s]",
-     "Puts target player to target team."},
     //	{ "race",         "/race [start|end|checkpoint|clear|settings|undo]
     //[additional parameters]\n\n/race start [xyz size]\n/race start [xy size]
     //[z size]\n/race start [x size] [y size] [z size]\n\n",
@@ -2740,7 +2736,6 @@ static const struct Manual commandManuals[] = {
     {"restart", "!restart", "Restarts map."},
     //    { "routemaker", "!routemaker [player]", "Makes target player the route
     //    maker." },
-    {"rmsaves", "!rmsaves [target]", "Clears target's saved positions."},
     {"setlevel", "!setlevel [target] [level]\n!setlevel -id [id] [level]",
      "Sets the target's admin level."},
     {"spectate", "!spectate [(optional) target]",

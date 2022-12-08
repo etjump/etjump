@@ -70,14 +70,11 @@ const char LISTPLAYERS = 'l';
 const char MAP = 'M';
 const char MUTE = 'm';
 const char NOCLIP = 'N';
-const char NOGOTO = 'K';
 const char PASSVOTE = 'P';
-const char PUTTEAM = 'p';
 // const char READCONFIG  = 'G';
 const char RENAME = 'R';
 const char RESTART = 'r';
 const char TOKENS = 'V';
-const char SAVESYSTEM = 'T';
 const char SETLEVEL = 's';
 const char MOVERSCALE = 'v';
 } // namespace CommandFlags
@@ -244,10 +241,7 @@ bool AddLevel(gentity_t *ent, Arguments argv) {
       } else {
         switch (open) {
           case 0:
-            ChatPrintTo(ent, va("^3addlevel:"
-                                " ^7ignored "
-                                "argument "
-                                "\"%s^7\".",
+            ChatPrintTo(ent, va("^3addlevel: ^7ignored argument \"%s^7\".",
                                 it->c_str()));
             break;
           case CMDS_OPEN:
@@ -486,8 +480,7 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
   std::string duplicateFlags = "";
   for (size_t i = 0; i < addCommands.size(); i++) {
     if (deleteCommands.find(addCommands[i]) != std::string::npos) {
-      ChatPrintTo(ent, va("^3editcommands: ^7ignoring "
-                          "command flag \"%c\". Are "
+      ChatPrintTo(ent, va("^3editcommands: ^7ignoring command flag \"%c\". Are "
                           "you trying to add or delete it?",
                           addCommands[i]));
       duplicateFlags.push_back(addCommands[i]);
@@ -525,7 +518,6 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
   ChatPrintTo(ent, "^3editcommands: ^7edited level " + (*argv)[1] +
                        " permissions. New permissions are: " +
                        game.levels->GetLevel(level)->commands);
-
   return true;
 }
 
@@ -580,38 +572,7 @@ bool EditLevel(gentity_t *ent, Arguments argv) {
         switch (open) {
           case 0:
             if (updated == 0) {
-              ChatPrintTo(ent, va("^"
-                                  "e"
-                                  "d"
-                                  "i"
-                                  "t"
-                                  "l"
-                                  "e"
-                                  "v"
-                                  "e"
-                                  "l"
-                                  ":"
-                                  " "
-                                  "^"
-                                  "7"
-                                  "i"
-                                  "g"
-                                  "n"
-                                  "o"
-                                  "r"
-                                  "e"
-                                  "d"
-                                  " "
-                                  "a"
-                                  "r"
-                                  "g"
-                                  "u"
-                                  "m"
-                                  "e"
-                                  "n"
-                                  "t"
-                                  " "
-                                  "\"%s^7\".",
+              ChatPrintTo(ent, va("^3editlevel: ^7ignored argument \"%s^7\".",
                                   it->c_str()));
             }
 
@@ -701,10 +662,8 @@ bool EditUser(gentity_t *ent, Arguments argv) {
     } else {
       switch (open) {
         case 0:
-          ChatPrintTo(ent, va("^3edituser: "
-                              "^7ignored argument "
-                              "\"%s^7\".",
-                              it->c_str()));
+          ChatPrintTo(
+              ent, va("^3edituser: ^7ignored argument \"%s^7\".", it->c_str()));
           break;
         case CMDS_OPEN:
           commands += *it;
@@ -1080,12 +1039,11 @@ bool ListPlayers(gentity_t *ent, Arguments argv) {
                        "connected players.\n");
     } else {
       if (level.numConnectedClients > 1) {
-        BufferPrint(ent, ETJump::stringFormat("^7There are currently %d "
-                                              "connected players.\n",
-                                              level.numConnectedClients));
+        BufferPrint(ent, ETJump::stringFormat(
+                             "^7There are currently %d connected players.\n",
+                             level.numConnectedClients));
       } else {
-        BufferPrint(ent, "^7There is currently 1 "
-                         "connected player.\n");
+        BufferPrint(ent, "^7There is currently 1 connected player.\n");
       }
     }
 
@@ -1155,8 +1113,7 @@ bool MapInfo(gentity_t *ent, Arguments argv) {
   std::string message;
   if (mi == currentMap) {
     message = "^3mapinfo: ^7" + mi->name +
-              " is the current map on the server. It has been "
-              "played for a "
+              " is the current map on the server. It has been played for a "
               "total of " +
               ETJump::getDaysString(days) + " " +
               ETJump::getHoursString(hours) + " " +
@@ -1293,8 +1250,8 @@ bool Noclip(gentity_t *ent, Arguments argv) {
     }
 
     if (!g_cheats.integer && ent->client->sess.timerunActive) {
-      ChatPrintTo(ent, "^3noclip: ^7cheats are disabled "
-                       "while timerun is active.");
+      ChatPrintTo(ent,
+                  "^3noclip: ^7cheats are disabled while timerun is active.");
       return false;
     }
 
@@ -1314,23 +1271,19 @@ bool Noclip(gentity_t *ent, Arguments argv) {
     }
 
     if (!g_cheats.integer && other->client->sess.timerunActive) {
-      ChatPrintTo(other, "^3noclip: ^7cheats are disabled "
-                         "while timerun is active.");
+      ChatPrintTo(other,
+                  "^3noclip: ^7cheats are disabled while timerun is active.");
       return false;
     }
 
     if (count > 1) {
-      ChatPrintTo(other, va("^3noclip: ^7you can use "
-                            "/noclip %d times.",
-                            count));
-      ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use "
-                          "/noclip %d times.",
+      ChatPrintTo(other,
+                  va("^3noclip: ^7you can use /noclip %d times.", count));
+      ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip %d times.",
                           other->client->pers.netname, count));
     } else if (count < 0) {
-      ChatPrintTo(other, "^3noclip: ^7you can use "
-                         "/noclip infinitely.");
-      ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use "
-                          "/noclip infinitely.",
+      ChatPrintTo(other, "^3noclip: ^7you can use /noclip infinitely.");
+      ChatPrintTo(ent, va("^3noclip: ^7%s^7 can use /noclip infinitely.",
                           other->client->pers.netname));
     } else {
       ChatPrintTo(other, "^3noclip: ^7you can use /noclip once.");
@@ -1339,75 +1292,6 @@ bool Noclip(gentity_t *ent, Arguments argv) {
     }
 
     other->client->pers.noclipCount = count;
-  }
-
-  return true;
-}
-
-bool NoGoto(gentity_t *ent, Arguments argv) {
-  if (argv->size() != 2) {
-    PrintManual(ent, "nogoto");
-    return false;
-  }
-
-  std::string err;
-  gentity_t *target = NULL;
-  target = PlayerGentityFromString(argv->at(1), err);
-  if (!target) {
-    ChatPrintTo(ent, "^3nocall: ^7" + err);
-    return false;
-  }
-
-  if (target->client->sess.noGoto) {
-    target->client->sess.noGoto = qfalse;
-    ChatPrintTo(ent, va("^nogoto: ^7%s can use /goto now.",
-                        target->client->pers.netname));
-    ChatPrintTo(target, "^3nogoto: ^7you can use /goto now.");
-  } else {
-    target->client->sess.noGoto = qtrue;
-    ChatPrintTo(ent, va("^3nogoto: ^7%s can no longer use /goto.",
-                        target->client->pers.netname));
-    ChatPrintTo(target, "^3nogoto: ^7you can no longer use /goto.");
-  }
-
-  return true;
-}
-
-bool NoSave(gentity_t *ent, Arguments argv) {
-  if (argv->size() != 2) {
-    PrintManual(ent, "nosave");
-    return false;
-  }
-
-  std::string err;
-  gentity_t *target = PlayerGentityFromString(argv->at(1), err);
-  if (!target) {
-    ChatPrintTo(ent, "^3nosave: ^7" + err);
-    return false;
-  }
-
-  if (IsTargetHigherLevel(ent, target, true)) {
-    ChatPrintTo(ent, "^3nosave:^7 can't disable fellow admin's "
-                     "save and load.");
-    return false;
-  }
-
-  if (target->client->sess.saveAllowed) {
-    target->client->sess.saveAllowed = qfalse;
-    ChatPrintTo(target, va("^3system:^7 %s^7 you are not "
-                           "allowed to save your position.",
-                           target->client->pers.netname));
-    ChatPrintTo(ent, va("^3system:^7 %s^7 is not allowed to "
-                        "save their position.",
-                        target->client->pers.netname));
-  } else {
-    target->client->sess.saveAllowed = qtrue;
-    ChatPrintTo(target, va("^3system:^7 %s^7 you are now "
-                           "allowed to save your position.",
-                           target->client->pers.netname));
-    ChatPrintTo(ent, va("^3system:^7 %s^7 is now allowed to "
-                        "save their position.",
-                        target->client->pers.netname));
   }
 
   return true;
@@ -1423,58 +1307,8 @@ bool Passvote(gentity_t *ent, Arguments argv) {
   return qtrue;
 }
 
-bool Putteam(gentity_t *ent, Arguments argv) {
-  if (argv->size() != 3) {
-    PrintManual(ent, "putteam");
-    return false;
-  }
-
-  std::string err;
-  gentity_t *target = PlayerGentityFromString(argv->at(1), err);
-  if (!target) {
-    ChatPrintTo(ent, "^3putteam: ^7" + err);
-    return false;
-  }
-
-  if (IsTargetHigherLevel(ent, target, false)) {
-    ChatPrintTo(ent, "^3putteam: ^7you can't use putteam on a "
-                     "fellow admin.");
-    return false;
-  }
-
-  const weapon_t w = static_cast<weapon_t>(-1);
-  SetTeam(target, argv->at(2).c_str(), qfalse, w, w, qtrue);
-
-  return true;
-}
-
 bool ReadConfig(gentity_t *ent, Arguments argv) {
   ChatPrintTo(ent, "ReadConfig is not implemented.");
-  return true;
-}
-
-bool RemoveSaves(gentity_t *ent, Arguments argv) {
-  if (argv->size() != 2) {
-    PrintManual(ent, "rmsaves");
-    return false;
-  }
-
-  std::string error;
-  gentity_t *target = PlayerGentityFromString(argv->at(1), error);
-  if (!target) {
-    ChatPrintTo(ent, "^3rmsaves: ^7" + error);
-    return false;
-  }
-
-  if (IsTargetHigherLevel(ent, target, true)) {
-    ChatPrintTo(ent, "^3rmsaves: ^7can't remove fellow admin's saves.");
-    return false;
-  }
-
-  ETJump::saveSystem->resetSavedPositions(target);
-  ChatPrintTo(ent, va("^3system: ^7%s^7's saves were removed.",
-                      target->client->pers.netname));
-  ChatPrintTo(target, "^3system: ^7your saves were removed");
   return true;
 }
 
@@ -1531,14 +1365,13 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
 
     if (ent) {
       if (IsTargetHigherLevel(ent, target, false)) {
-        ChatPrintTo(ent, "^3setlevel: ^7you can't set the "
-                         "level of a fellow admin.");
+        ChatPrintTo(ent,
+                    "^3setlevel: ^7you can't set the level of a fellow admin.");
         return false;
       }
 
       if (level > ETJump::session->GetLevel(ent)) {
-        ChatPrintTo(ent, "^3setlevel: ^7you're not "
-                         "allowed to setlevel higher "
+        ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher "
                          "than your own level.");
         return false;
       }
@@ -1583,14 +1416,13 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
 
     if (ent) {
       if (IsTargetHigherLevel(ent, id, false)) {
-        ChatPrintTo(ent, "^3setlevel: ^7you can't set the "
-                         "level of a fellow admin.");
+        ChatPrintTo(ent,
+                    "^3setlevel: ^7you can't set the level of a fellow admin.");
         return false;
       }
 
       if (level > ETJump::session->GetLevel(ent)) {
-        ChatPrintTo(ent, "^3setlevel: ^7you're not "
-                         "allowed to setlevel higher "
+        ChatPrintTo(ent, "^3setlevel: ^7you're not allowed to setlevel higher "
                          "than your own level.");
         return false;
       }
@@ -1607,8 +1439,7 @@ bool SetLevel(gentity_t *ent, Arguments argv) {
       return false;
     }
 
-    ChatPrintTo(ent, va("^3setlevel: ^7user with id %d is now "
-                        "a level %d user.",
+    ChatPrintTo(ent, va("^3setlevel: ^7user with id %d is now a level %d user.",
                         id, level));
   } else {
   }
@@ -1664,14 +1495,13 @@ bool Spectate(gentity_t *ent, Arguments argv) {
 bool createToken(gentity_t *ent, Arguments argv) {
   if (ent) {
     if (argv->size() != 3) {
-      ChatPrintTo(ent, "^3usage: ^7!tokens create <easy "
-                       "(e)|medium (m)|hard (h)>");
+      ChatPrintTo(ent,
+                  "^3usage: ^7!tokens create <easy (e)|medium (m)|hard (h)>");
       return false;
     }
   } else {
     if (argv->size() != 6) {
-      ChatPrintTo(ent, "^3usage: ^7!tokens create "
-                       "<easy (e)|medium (m)|hard "
+      ChatPrintTo(ent, "^3usage: ^7!tokens create <easy (e)|medium (m)|hard "
                        "(h)> <x> <y> <z>");
       return false;
     }
@@ -1716,8 +1546,7 @@ bool createToken(gentity_t *ent, Arguments argv) {
   } else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h") {
     difficulty = Tokens::Hard;
   } else {
-    ChatPrintTo(ent, "^3tokens: ^7difficulty must be either "
-                     "easy (e), medium "
+    ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium "
                      "(m) or hard (h)");
     return false;
   }
@@ -1756,8 +1585,9 @@ bool moveToken(gentity_t *ent) {
 bool deleteToken(gentity_t *ent, Arguments argv) {
   if (!ent) {
     if (argv->size() != 4) {
-      ChatPrintTo(ent, "^3usage: ^7!tokens <delete> <easy "
-                       "(e)|medium (m)|hard (h)> <1-6>");
+      ChatPrintTo(
+          ent,
+          "^3usage: ^7!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>");
       return false;
     }
   }
@@ -1785,8 +1615,7 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
     } else if ((*argv)[2] == "hard" || ((*argv)[2]) == "h") {
       difficulty = Tokens::Hard;
     } else {
-      ChatPrintTo(ent, "^3tokens: ^7difficulty must be "
-                       "either easy (e), medium "
+      ChatPrintTo(ent, "^3tokens: ^7difficulty must be either easy (e), medium "
                        "(m) or hard (h)");
       return false;
     }
@@ -1804,8 +1633,7 @@ bool deleteToken(gentity_t *ent, Arguments argv) {
     }
 
     if (num < 1 || num > 6) {
-      ChatPrintTo(ent, "^3tokens: ^7number should be "
-                       "between 1 and 6.");
+      ChatPrintTo(ent, "^3tokens: ^7number should be between 1 and 6.");
       return false;
     }
 
@@ -1836,27 +1664,23 @@ bool Tokens(gentity_t *ent, Arguments argv) {
     if (argv->size() < 2) {
       ChatPrintTo(ent, "^3usage: ^7check console for "
                        "more information");
-      Printer::SendConsoleMessage(ClientNum(ent),
-                                  "^7!tokens create <easy (e)|medium (m)|hard "
-                                  "(h)> ^9| Creates a new "
-                                  "token\n"
-                                  "^7!tokens move ^9| Moves nearest token to "
-                                  "your location\n"
-                                  "^7!tokens delete ^9| Deletes nearest token "
-                                  "to your location\n"
-                                  "^7!tokens delete <easy (e)|medium (m)|hard "
-                                  "(h)> <1-6> ^9| Deletes "
-                                  "specified token\n");
+      Printer::SendConsoleMessage(
+          ClientNum(ent),
+          "^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new "
+          "token\n"
+          "^7!tokens move ^9| Moves nearest token to your location\n"
+          "^7!tokens delete ^9| Deletes nearest token to your location\n"
+          "^7!tokens delete <easy (e)|medium (m)|hard (h)> <1-6> ^9| Deletes "
+          "specified token\n");
       return false;
     }
   } else {
     if (argv->size() < 4) {
-      Printer::SendConsoleMessage(ClientNum(ent),
-                                  "^3usage: \n^7!tokens <easy (e)|medium "
-                                  "(m)|hard (h)> <difficulty> "
-                                  "<x> <y> <z>\n"
-                                  "!tokens <delete> <easy (e)|medium (m)|hard "
-                                  "(h)> <1-6>\n");
+      Printer::SendConsoleMessage(
+          ClientNum(ent),
+          "^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> "
+          "<x> <y> <z>\n"
+          "!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n");
       return false;
     }
   }
@@ -1985,8 +1809,8 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     }
 
     if (numMaps <= 0) {
-      Printer::SendChatMessage(ClientNum(ent), "^3newmaps: ^7second "
-                                               "argument must be over 0");
+      Printer::SendChatMessage(ClientNum(ent),
+                               "^3newmaps: ^7second argument must be over 0");
       return false;
     }
 
@@ -2083,19 +1907,11 @@ Commands::Commands() {
       AdminCommandPair(AdminCommands::Mute, CommandFlags::MUTE);
   adminCommands_["noclip"] =
       AdminCommandPair(AdminCommands::Noclip, CommandFlags::NOCLIP);
-  adminCommands_["nogoto"] =
-      AdminCommandPair(AdminCommands::NoGoto, CommandFlags::NOGOTO);
-  adminCommands_["nosave"] =
-      AdminCommandPair(AdminCommands::NoSave, CommandFlags::SAVESYSTEM);
   adminCommands_["passvote"] =
       AdminCommandPair(AdminCommands::Passvote, CommandFlags::PASSVOTE);
-  adminCommands_["putteam"] =
-      AdminCommandPair(AdminCommands::Putteam, CommandFlags::PUTTEAM);
   //    adminCommands_["readconfig"] =
   //    AdminCommandPair(AdminCommands::ReadConfig,
   //    CommandFlags::READCONFIG);
-  adminCommands_["rmsaves"] =
-      AdminCommandPair(AdminCommands::RemoveSaves, CommandFlags::SAVESYSTEM);
   adminCommands_["rename"] =
       AdminCommandPair(AdminCommands::Rename, CommandFlags::RENAME);
   adminCommands_["restart"] =
