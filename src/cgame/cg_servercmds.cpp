@@ -137,11 +137,6 @@ void CG_ParseServerinfo(void) {
 }
 
 void CG_ParseSysteminfo(void) {
-  // force original cvars to match the shadow values
-  for (auto &cvarShadow : ETJump::cvarShadows) {
-    cvarShadow.get()->forceCvarSet();
-  }
-
   const char *info = CG_ConfigString(CS_SYSTEMINFO);
 
   cgs.shared = atoi(Info_ValueForKey(info, "shared"));
