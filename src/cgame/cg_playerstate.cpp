@@ -6,6 +6,7 @@
 // when the snapshot transitions like all the other entities
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 /*
 ==============
@@ -262,18 +263,8 @@ void CG_Respawn(qboolean revived) {
   cg.proneMovingTime = 0;
 
   if (!revived && cgs.clientinfo[cg.clientNum].team != oldTeam) {
-    int len;
-    fileHandle_t f;
-    std::string str = BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team);
-
-    str = "autoexec_" + str + ".cfg";
-    len = trap_FS_FOpenFile(str.c_str(), &f, FS_READ);
-    if (len <= 0) {
-      return; // no autoexec_teamname.cfg found
-    }
-
-    str = "exec \"" + str + "\"\n";
-    trap_SendConsoleCommand(str.c_str());
+    ETJump::execFile(va("autoexec_%s", BG_TeamnameForNumber(
+                                           cgs.clientinfo[cg.clientNum].team)));
     oldTeam = cgs.clientinfo[cg.clientNum].team;
   }
 

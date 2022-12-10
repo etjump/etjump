@@ -3670,24 +3670,6 @@ Will perform callbacks to make the loading info screen update.
     }
 #endif // _DEBUG
 
-// Executes autoexec_mapname.cfg whenever map changes
-// if it exists.
-void CG_AutoExec_f() {
-  int len;
-  fileHandle_t f;
-  std::string str = cgs.rawmapname;
-
-  str = "autoexec_" + str + ".cfg";
-  len = trap_FS_FOpenFile(str.c_str(), &f, FS_READ);
-  if (len <= 0) {
-    // no autoexec_mapname.cfg file found
-    return;
-  }
-
-  str = "exec \"" + str + "\"\n";
-  trap_SendConsoleCommand(str.c_str());
-}
-
 void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
              qboolean demoPlayback) {
   const char *s;
@@ -3940,7 +3922,7 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   ETJump::init();
 
-  CG_AutoExec_f();
+  ETJump::execFile(va("autoexec_%s", cgs.rawmapname));
 
   Com_Printf("CG_Init... DONE\n");
 }

@@ -44,12 +44,21 @@ constexpr std::size_t nelem(T (&)[N]) {
 #ifdef CGAMEDLL
 
 int setTimeout(std::function<void()> fun, int delay);
+
 bool clearTimeout(int handle);
+
 int setInterval(std::function<void()> fun, int delay);
+
 bool clearInterval(int handle);
+
 int setImmediate(std::function<void()> fun);
+
 bool clearImmediate(int handle);
+
 void executeTimeout(int handle);
+
+// executes a cfg file with given name, omit .cfg extension
+void execFile(const std::string &filename);
 
 #endif
 } // namespace ETJump
