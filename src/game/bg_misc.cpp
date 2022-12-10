@@ -5004,8 +5004,6 @@ const voteType_t voteToggles[] = {
 
 const char *BG_TeamnameForNumber(team_t teamNum) {
   switch (teamNum) {
-    case TEAM_FREE:
-      return "free";
     case TEAM_AXIS:
       return "axis";
     case TEAM_ALLIES:
@@ -5013,6 +5011,7 @@ const char *BG_TeamnameForNumber(team_t teamNum) {
     case TEAM_SPECTATOR:
       return "spectator";
     default:
+      Com_Error(ERR_DROP, va("BG_TeamnameForNumber: unknown team %d", teamNum));
       return "unknown";
   }
 }
