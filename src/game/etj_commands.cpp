@@ -1990,8 +1990,8 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
       return false;
     }
 
-    if (numMaps > 10) {
-      numMaps = 10;
+    if (numMaps > 50) {
+      numMaps = 50;
     }
   }
 
