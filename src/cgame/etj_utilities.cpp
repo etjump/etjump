@@ -31,6 +31,7 @@
 #include "etj_utilities.h"
 #include "etj_event_loop.h"
 #include "../game/etj_string_utilities.h"
+#include "cg_local.h"
 
 namespace ETJump {
 extern std::shared_ptr<EventLoop> eventLoop;
@@ -181,5 +182,20 @@ bool ETJump::clearImmediate(int handle) {
 }
 
 void ETJump::executeTimeout(int handle) { eventLoop->execute(handle); }
+
+void ETJump::execFile(const std::string &filename) {
+  int len;
+  fileHandle_t f;
+  std::string str = filename + ".cfg";
+
+  len = trap_FS_FOpenFile(str.c_str(), &f, FS_READ);
+  if (!f || len < 0) {
+    return; // file not found
+  }
+
+  str = "exec \"" + str + "\"\n";
+  trap_SendConsoleCommand(str.c_str());
+  trap_FS_FCloseFile(f);
+}
 
 #endif

@@ -6,6 +6,7 @@
 // when the snapshot transitions like all the other entities
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 
 /*
 ==============
@@ -210,6 +211,8 @@ A respawn happened this snapshot
 ================
 */
 void CG_Respawn(qboolean revived) {
+  static int oldTeam = -1;
+
   cg.serverRespawning = qfalse; // Arnout: just in case
 
   // no error decay on player movement
@@ -258,6 +261,12 @@ void CG_Respawn(qboolean revived) {
   }
 
   cg.proneMovingTime = 0;
+
+  if (!revived && cgs.clientinfo[cg.clientNum].team != oldTeam) {
+    ETJump::execFile(va("autoexec_%s", BG_TeamnameForNumber(
+                                           cgs.clientinfo[cg.clientNum].team)));
+    oldTeam = cgs.clientinfo[cg.clientNum].team;
+  }
 
   // reset fog to world fog (if present)
   trap_R_SetFog(FOG_CMD_SWITCHFOG, FOG_MAP, 20, 0, 0, 0, 0);

@@ -2313,6 +2313,8 @@ void BG_DisableWeaponForAllClasses(int weapon);
 extern bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES];
 extern bg_playerclass_t bg_axis_playerclasses[NUM_PLAYER_CLASSES];
 
+const char *BG_TeamnameForNumber(team_t teamNum);
+
 #define MAX_PATH_CORNERS 512
 
 typedef struct {
