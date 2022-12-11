@@ -512,6 +512,7 @@ vmCvar_t etj_drawNotify;
 vmCvar_t etj_drawClips;
 vmCvar_t etj_drawTriggers;
 vmCvar_t etj_drawSlicks;
+vmCvar_t etj_clear;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_consoleColor;
@@ -994,6 +995,7 @@ cvarTable_t cvarTable[] = {
     {&etj_drawClips, "etj_drawClips", "0", CVAR_ARCHIVE},
     {&etj_drawTriggers, "etj_drawTriggers", "0", CVAR_ARCHIVE},
     {&etj_drawSlicks, "etj_drawSlicks", "0", CVAR_ARCHIVE},
+    {&etj_clear, "etj_clear", "0", CVAR_ARCHIVE},
 
     {&etj_consoleAlpha, "etj_consoleAlpha", "1.0", CVAR_LATCH | CVAR_ARCHIVE},
     {&etj_consoleColor, "etj_consoleColor", "0.0 0.0 0.0",

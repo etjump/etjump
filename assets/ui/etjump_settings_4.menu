@@ -27,7 +27,7 @@
 
 #define SUBW_UNLOCKED_Y SUBW_AUTODEMO_Y + SUBW_AUTODEMO_HEIGHT + SUBW_SPACING_Y
 #define SUBW_UNLOCKED_ITEM_Y SUBW_UNLOCKED_Y + SUBW_HEADER_HEIGHT
-#define SUBW_UNLOCKED_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 13)
+#define SUBW_UNLOCKED_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 14)
 
 #define SUBW_DEMO_Y SUBW_UNLOCKED_Y + SUBW_UNLOCKED_HEIGHT + SUBW_SPACING_Y
 #define SUBW_DEMO_ITEM_Y SUBW_DEMO_Y + SUBW_HEADER_HEIGHT
@@ -105,6 +105,7 @@ menuDef {
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Clips:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawClips", "Draw clip brushes (ETe only)\netj_drawClips (r_drawClips)")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Triggers:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawTriggers", "Draw trigger brushes (ETe only)\netj_drawTriggers (r_drawTriggers)")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw Slicks:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSlicks", "Draw slick brushes & angle slicks (ETe only)\netj_drawSlicks (r_drawSlicks)")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_UNLOCKED_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Clear screen:", 0.2, SUBW_ITEM_HEIGHT, "etj_clear", "Force screen clearing every frame, eliminating HoM effect in void\netj_clear (r_clear)")
 
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_DEMO_Y, SUBW_WIDTH, SUBW_DEMO_HEIGHT, "DEMO")

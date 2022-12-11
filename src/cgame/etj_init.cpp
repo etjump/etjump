@@ -161,7 +161,7 @@ std::vector<std::pair<vmCvar_t *, std::string>> cvars{
     {&etj_offsetUnits, "r_offsetUnits"}, {&etj_speeds, "r_speeds"},
     {&etj_lightmap, "r_lightmap"},       {&etj_drawNotify, "con_drawNotify"},
     {&etj_drawClips, "r_drawClips"},     {&etj_drawTriggers, "r_drawTriggers"},
-    {&etj_drawSlicks, "r_drawSlicks"},
+    {&etj_drawSlicks, "r_drawSlicks"},   {&etj_clear, "r_clear"},
 };
 
 void init() {
