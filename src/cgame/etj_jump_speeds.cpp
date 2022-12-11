@@ -172,8 +172,13 @@ void JumpSpeeds::updateJumpSpeeds() {
     adjustColors();
   }
 
-  // parse the colors for drawing here, so we don't need to do it every
-  // frame
+  if (etj_jumpSpeedsMinSpeed.integer >
+      jumpSpeeds.at(jumpSpeeds.size() - 1).first) {
+    jumpSpeeds.at(jumpSpeeds.size() - 1).second =
+        etj_jumpSpeedsSlowerColor.string;
+  }
+
+  // parse the colors for drawing here, so we don't need to do it every frame
   colorStrToVec();
 }
 
@@ -185,8 +190,7 @@ void JumpSpeeds::adjustColors() {
   slowerColorStr = etj_jumpSpeedsSlowerColor.string;
 
   if (jumpSpeeds[jumpNum].first == jumpSpeeds[jumpNum - 1].first) {
-    return; // color is already set to default, no need to
-            // adjust
+    return; // color is already set to default, no need to adjust
   }
 
   jumpSpeeds[jumpNum].second =
