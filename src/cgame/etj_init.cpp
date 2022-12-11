@@ -621,6 +621,16 @@ namespace ETJump {
 void runFrameEnd() {
   awaitedCommandHandler->runFrame();
   eventLoop->run();
+
+  // force original cvars to match the shadow values
+  // we need to delay this a bit from initial cgame load because ETe and ETL
+  // reset cheat cvars to original values after cgame VMCall is done
+  if (cg.clientFrame >= 10 && !cg.shadowCvarsSet) {
+    for (auto &cvarShadow : cvarShadows) {
+      cvarShadow->forceCvarSet();
+    }
+    cg.shadowCvarsSet = true;
+  }
 }
 
 playerState_t *getValidPlayerState() {
