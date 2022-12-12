@@ -2685,6 +2685,7 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent) {
   char msg[64];
   auto *client = ent->client;
+  auto clientNum = ClientNum(ent);
 
   if (ent->client->pers.applicationEndTime > level.time) {
 
@@ -2700,14 +2701,13 @@ void Cmd_Vote_f(gentity_t *ent) {
     trap_Argv(1, msg, sizeof(msg));
 
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-      trap_SendServerCommand(ent - g_entities, "application -4");
+      trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -3");
 
-      G_AddClientToFireteam(ent->client->pers.applicationClient,
-                            ent - g_entities);
+      G_AddClientToFireteam(ent->client->pers.applicationClient, clientNum);
     } else {
-      trap_SendServerCommand(ent - g_entities, "application -4");
+      trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -2");
     }
@@ -2734,12 +2734,11 @@ void Cmd_Vote_f(gentity_t *ent) {
     trap_Argv(1, msg, sizeof(msg));
 
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-      trap_SendServerCommand(ent - g_entities, "invitation -4");
+      trap_SendServerCommand(clientNum, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -3");
 
-      G_AddClientToFireteam(ent - g_entities,
-                            ent->client->pers.invitationClient);
+      G_AddClientToFireteam(clientNum, ent->client->pers.invitationClient);
     } else {
       trap_SendServerCommand(ent - g_entities, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
@@ -2767,13 +2766,13 @@ void Cmd_Vote_f(gentity_t *ent) {
     trap_Argv(1, msg, sizeof(msg));
 
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-      trap_SendServerCommand(ent - g_entities, "proposition -4");
+      trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -3");
 
-      G_InviteToFireTeam(ent - g_entities, ent->client->pers.propositionClient);
+      G_InviteToFireTeam(clientNum, ent->client->pers.propositionClient);
     } else {
-      trap_SendServerCommand(ent - g_entities, "proposition -4");
+      trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -2");
     }
@@ -2791,13 +2790,13 @@ void Cmd_Vote_f(gentity_t *ent) {
     trap_Argv(1, msg, sizeof(msg));
 
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-      trap_SendServerCommand(ent - g_entities, "aft -2");
+      trap_SendServerCommand(clientNum, "aft -2");
 
-      if (G_IsFireteamLeader(ent - g_entities, &ft)) {
+      if (G_IsFireteamLeader(clientNum, &ft)) {
         ft->priv = qtrue;
       }
     } else {
-      trap_SendServerCommand(ent - g_entities, "aft -2");
+      trap_SendServerCommand(clientNum, "aft -2");
     }
 
     ent->client->pers.autofireteamEndTime = 0;
@@ -2809,11 +2808,11 @@ void Cmd_Vote_f(gentity_t *ent) {
     trap_Argv(1, msg, sizeof(msg));
 
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-      trap_SendServerCommand(ent - g_entities, "aftc -2");
+      trap_SendServerCommand(clientNum, "aftc -2");
 
-      G_RegisterFireteam(ent - g_entities);
+      G_RegisterFireteam(clientNum);
     } else {
-      trap_SendServerCommand(ent - g_entities, "aftc -2");
+      trap_SendServerCommand(clientNum, "aftc -2");
     }
 
     ent->client->pers.autofireteamCreateEndTime = 0;
@@ -2827,14 +2826,14 @@ void Cmd_Vote_f(gentity_t *ent) {
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
       fireteamData_t *ft;
 
-      trap_SendServerCommand(ent - g_entities, "aftj -2");
+      trap_SendServerCommand(clientNum, "aftj -2");
 
       ft = G_FindFreePublicFireteam(ent->client->sess.sessionTeam);
       if (ft) {
-        G_AddClientToFireteam(ent - g_entities, ft->joinOrder[0]);
+        G_AddClientToFireteam(clientNum, ft->joinOrder[0]);
       }
     } else {
-      trap_SendServerCommand(ent - g_entities, "aftj -2");
+      trap_SendServerCommand(clientNum, "aftj -2");
     }
 
     ent->client->pers.autofireteamCreateEndTime = 0;
@@ -2847,8 +2846,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   ent->client->pers.propositionClient2 = -1;
 
   if (!level.voteInfo.voteTime) {
-    trap_SendServerCommand(ent - g_entities,
-                           "print \"No vote in progress.\n\"");
+    Printer::SendConsoleMessage(clientNum, "No vote in progress.\n");
     return;
   }
   if (ent->client->ps.eFlags & EF_VOTED) {
@@ -2876,12 +2874,11 @@ void Cmd_Vote_f(gentity_t *ent) {
     if (level.time > allowedRevoteTimeRange ||
         client->pers.votingInfo.attempts > ETJump::VOTING_ATTEMPTS) {
       if (client->pers.votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
-        // stops excessive spam from server if
-        // user keeps votting in timeouts
+        // stops excessive spam from server if user keeps voting in timeouts
         if (!client->pers.votingInfo.isWarned) {
           client->pers.votingInfo.isWarned = true;
-          trap_SendServerCommand(ent - g_entities, "print \"You can't "
-                                                   "revote anymore.\n\"");
+          Printer::SendPopupMessage(
+              clientNum, "You can't re-vote on this vote anymore.\n");
         }
         return;
       }
@@ -2893,13 +2890,16 @@ void Cmd_Vote_f(gentity_t *ent) {
 
     // defaults to 2s timeout
     if (client->pers.votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
-      // stops excessive spam from server if user keeps
-      // votting in timeouts
+      // stops excessive spam from server if user keeps voting in timeouts
       if (!client->pers.votingInfo.isWarned) {
         client->pers.votingInfo.isWarned = true;
-        trap_SendServerCommand(ent - g_entities,
-                               "print \"You can't revote that "
-                               "often.\n\"");
+        Printer::SendPopupMessage(
+            clientNum,
+            ETJump::stringFormat(
+                "You must wait for %s before re-voting.\n",
+                ETJump::getSecondsString((client->pers.votingInfo.time +
+                                          ETJump::VOTING_TIMEOUT - level.time) /
+                                         1000)));
       }
       return;
     }
@@ -2910,34 +2910,32 @@ void Cmd_Vote_f(gentity_t *ent) {
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
       if (!client->pers.votingInfo.isVotedYes) {
         etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteYes);
-        trap_SendServerCommand(
-            ent - g_entities,
-            va("print \"Vote cast, you have %d "
-               "attempts left.\n\"",
-               ETJump::VOTING_ATTEMPTS + 1 - client->pers.votingInfo.attempts));
       }
     } else {
       if (client->pers.votingInfo.isVotedYes) {
         etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteNo);
-        trap_SendServerCommand(
-            ent - g_entities,
-            va("print \"Vote cast, you have %d "
-               "attempts left.\n\"",
-               ETJump::VOTING_ATTEMPTS + 1 - client->pers.votingInfo.attempts));
       }
     }
+
+    Printer::SendPopupMessage(
+        clientNum,
+        ETJump::stringFormat(
+            "Vote cast, you can change your vote %s.\n",
+            ETJump::getPluralizedString(ETJump::VOTING_ATTEMPTS + 1 -
+                                            client->pers.votingInfo.attempts,
+                                        "time")));
 
     return;
   }
 
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-      !(g_spectatorVote.integer >= 1)) {
-    trap_SendServerCommand(ent - g_entities,
-                           "print \"Not allowed to vote as spectator.\n\"");
+      g_spectatorVote.integer < 1) {
+    Printer::SendPopupMessage(clientNum,
+                              "You are not allowed to vote as a spectator.\n");
     return;
   }
 
-  trap_SendServerCommand(ent - g_entities, "print \"Vote cast.\n\"");
+  Printer::SendConsoleMessage(clientNum, "Vote cast.\n");
 
   ent->client->ps.eFlags |= EF_VOTED;
   level.voteInfo.voteCanceled = qfalse;
