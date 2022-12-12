@@ -8,6 +8,18 @@
 * fixed long names overlapping while following/being followed on scoreboard 3 [#862](https://github.com/etjump/etjump/pull/862)
 * scoreboard now indicates if a server is running with cheats enabled [#863](https://github.com/etjump/etjump/pull/863)
 * fixed being able to cast multiple votes by switching teams [#864](https://github.com/etjump/etjump/pull/864)
+* `!most/leastplayed` output is now limited to 100 maps to avoid a msg overflow error in engine [#865](https://github.com/etjump/etjump/pull/865)
+* vsay prints in console are no longer prefixed with a colon [9aa7acb](https://github.com/etjump/etjump/commit/9aa7acbd99daf5ba04f299d92a3073bf97490923)
+* fixed certain weapon icons being affected by `r_picmip` [cc82a07](https://github.com/etjump/etjump/commit/cc82a073bcb12482229d0675c1a62dde795d0778)
+* increased `!newmaps` max output to 50 maps [b38223a](https://github.com/etjump/etjump/commit/b38223a0bd7f12eaf45103b159ad4ef534774b25)
+* unlocked `r_clear` via `etj_clear` [#856](https://github.com/etjump/etjump/pull/856)
+* added `etj_jumpSpeedsMinSpeed` for setting a minimum threashold for jump spees list [#866](https://github.com/etjump/etjump/pull/866)
+  * any jump under the specified speed will be colored with `etj_jumpSpeedsSlowerColor`
+  * works independently of `etj_jumpSpeedsShowDiff`
+* added support for team-specific autoexecs [#867](https://github.com/etjump/etjump/pull/867)
+* removed `!nohoto`, `!nosave`, `!putteam` and `!rmsaves` admin commands [#869](https://github.com/etjump/etjump/pull/869)
+* fixed shadow cvars from getting unsynced from real ones on map changes with ETe/ETL [#870](https://github.com/etjump/etjump/pull/870)
+* increased UI memory pool size for 64-bit clients [#875](https://github.com/etjump/etjump/pull/875)
 
 # ETJump 2.5.1
 
