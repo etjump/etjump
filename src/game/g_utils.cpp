@@ -1721,7 +1721,7 @@ int FindClientByName(char *name) {
   return -1;
 }
 
-int ClientNum(gentity_t *ent) { return ent - g_entities; }
+int ClientNum(gentity_t *ent) { return static_cast<int>(ent - g_entities); }
 
 const char *ClientIPAddr(gentity_t *ent) {
   char userinfo[MAX_INFO_STRING] = "\0";
