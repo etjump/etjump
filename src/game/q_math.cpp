@@ -531,6 +531,25 @@ void VectorRotate(vec3_t in, vec3_t matrix[3], vec3_t out) {
 //============================================================================
 
 /*
+** float q_rsqrt( float number )
+*/
+float Q_rsqrt(float f) {
+  floatint_t t;
+  float x2, y;
+  const float threehalfs = 1.5F;
+
+  x2 = f * 0.5F;
+  t.f = f;
+  t.i = 0x5f3759df - (t.i >> 1); // what the fuck?
+  y = t.f;
+  y = y * (threehalfs - (x2 * y * y)); // 1st iteration
+  // y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be
+  // removed
+
+  return y;
+}
+
+/*
 ===============
 LerpAngle
 
@@ -1156,7 +1175,7 @@ vec_t VectorNormalize(vec3_t v) {
 void VectorNormalizeFast(vec3_t v) {
   float ilength;
 
-  ilength = 1.0f / std::sqrt(DotProduct(v, v));
+  ilength = Q_rsqrt(DotProduct(v, v));
 
   v[0] *= ilength;
   v[1] *= ilength;
