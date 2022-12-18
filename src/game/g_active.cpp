@@ -1175,6 +1175,8 @@ void ClientThink_real(gentity_t *ent) {
   pm.noWeapClips = qfalse;
 
   VectorCopy(client->ps.origin, client->oldOrigin);
+  VectorCopy(ent->r.mins, pm.mins);
+  VectorCopy(ent->r.maxs, pm.maxs);
 
   // NERVE - SMF
   pm.gametype = g_gametype.integer;
