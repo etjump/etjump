@@ -67,6 +67,7 @@ add_library(qagame MODULE
 	"etj_main.cpp"
 	"etj_main_ext.cpp"
 	"etj_map_statistics.cpp"
+	"etj_missilepad.cpp"
 	"etj_motd.cpp"
 	"etj_printer.cpp"
 	"etj_progression_tracker.cpp"

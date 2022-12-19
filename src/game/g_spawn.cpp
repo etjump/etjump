@@ -476,6 +476,8 @@ void SP_target_tjldisplay(gentity_t *self);
 
 void SP_target_init(gentity_t *self);
 
+void SP_func_missilepad(gentity_t *ent);
+
 spawn_t spawns[] = {
     // info entities don't do anything at all, but provide positional
     // information for things controlled by other processes
@@ -720,6 +722,7 @@ spawn_t spawns[] = {
     {"target_displaytjl", SP_target_tjldisplay},
     {"target_cleartjl", SP_target_tjlclear},
     {"target_init", SP_target_init},
+    {"func_missilepad", SP_func_missilepad},
     {0, 0}};
 
 /*
