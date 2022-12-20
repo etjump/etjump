@@ -285,13 +285,19 @@ void UpmoveMeter::render() const {
 }
 
 bool UpmoveMeter::canSkipUpdate() const {
-  if (cg.snap->ps.pm_type == PM_NOCLIP || cg.snap->ps.pm_type == PM_DEAD) {
+  // do not try to update if we don't have a valid playerState yet
+  // this is usually the case for few frames at the start of a map
+  // especially on high client frame rates
+  if (!pm->ps) {
     return true;
   }
 
-  if (BG_PlayerMounted(cg.snap->ps.eFlags) ||
-      cg.snap->ps.weapon == WP_MOBILE_MG42_SET ||
-      cg.snap->ps.weapon == WP_MORTAR_SET) {
+  if (pm->ps->pm_type == PM_NOCLIP || pm->ps->pm_type == PM_DEAD) {
+    return true;
+  }
+
+  if (BG_PlayerMounted(pm->ps->eFlags) ||
+      pm->ps->weapon == WP_MOBILE_MG42_SET || pm->ps->weapon == WP_MORTAR_SET) {
     return true;
   }
 
