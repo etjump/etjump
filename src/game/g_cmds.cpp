@@ -465,9 +465,9 @@ void etj_UpdateVotingInfo(gentity_t *ent, ETJump::VotingTypes vote) {
   }
 
   if (client->pers.votingInfo.isVotedYes) {
-    Printer::SendCommand(clientNum, "voted yes");
+    trap_SendServerCommand(clientNum, "voted yes");
   } else {
-    Printer::SendCommand(clientNum, "voted no");
+    trap_SendServerCommand(clientNum, "voted no");
   }
 
   client->pers.votingInfo.time = level.time;
