@@ -1942,6 +1942,7 @@ Commands::Commands() {
   commands_["records"] = ClientCommands::Records;
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;
+  commands_["top"] = ClientCommands::Records;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {
