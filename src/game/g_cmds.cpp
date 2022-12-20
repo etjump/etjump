@@ -440,7 +440,10 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
 }
 
 // Updates voting stats
-void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote) {
+void etj_UpdateVotingInfo(gentity_t *ent, ETJump::VotingTypes vote) {
+  auto client = ent->client;
+  auto clientNum = ClientNum(ent);
+
   switch (vote) {
     case ETJump::VotingTypes::VoteYes:
       level.voteInfo.voteYes++;
@@ -462,9 +465,9 @@ void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote) {
   }
 
   if (client->pers.votingInfo.isVotedYes) {
-    trap_SendServerCommand(client->ps.clientNum, "voted yes");
+    Printer::SendCommand(clientNum, "voted yes");
   } else {
-    trap_SendServerCommand(client->ps.clientNum, "voted no");
+    Printer::SendCommand(clientNum, "voted no");
   }
 
   client->pers.votingInfo.time = level.time;
@@ -2909,11 +2912,11 @@ void Cmd_Vote_f(gentity_t *ent) {
     // allow revote
     if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
       if (!client->pers.votingInfo.isVotedYes) {
-        etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteYes);
+        etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteYes);
       }
     } else {
       if (client->pers.votingInfo.isVotedYes) {
-        etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteNo);
+        etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteNo);
       }
     }
 
@@ -2945,10 +2948,10 @@ void Cmd_Vote_f(gentity_t *ent) {
   trap_Argv(1, msg, sizeof(msg));
 
   if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-    etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteYes);
+    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteYes);
 
   } else {
-    etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteNo);
+    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteNo);
   }
 
   // a majority will be determined in G_CheckVote, which will also
