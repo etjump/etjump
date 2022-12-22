@@ -13,13 +13,20 @@
 * fixed certain weapon icons being affected by `r_picmip` [cc82a07](https://github.com/etjump/etjump/commit/cc82a073bcb12482229d0675c1a62dde795d0778)
 * increased `!newmaps` max output to 50 maps [b38223a](https://github.com/etjump/etjump/commit/b38223a0bd7f12eaf45103b159ad4ef534774b25)
 * unlocked `r_clear` via `etj_clear` [#856](https://github.com/etjump/etjump/pull/856)
-* added `etj_jumpSpeedsMinSpeed` for setting a minimum threashold for jump spees list [#866](https://github.com/etjump/etjump/pull/866)
+* added `etj_jumpSpeedsMinSpeed` for setting a minimum threshold for jump speeds list [#866](https://github.com/etjump/etjump/pull/866)
   * any jump under the specified speed will be colored with `etj_jumpSpeedsSlowerColor`
   * works independently of `etj_jumpSpeedsShowDiff`
 * added support for team-specific autoexecs [#867](https://github.com/etjump/etjump/pull/867)
-* removed `!nohoto`, `!nosave`, `!putteam` and `!rmsaves` admin commands [#869](https://github.com/etjump/etjump/pull/869)
+* removed `!nogoto`, `!nosave`, `!putteam` and `!rmsaves` admin commands [#869](https://github.com/etjump/etjump/pull/869)
 * fixed shadow cvars from getting unsynced from real ones on map changes with ETe/ETL [#870](https://github.com/etjump/etjump/pull/870)
 * increased UI memory pool size for 64-bit clients [#875](https://github.com/etjump/etjump/pull/875)
+* rephrased some vote related messages and moved some from console prints to popups [#876](https://github.com/etjump/etjump/pull/876)
+* fixed players getting stuck when spawning on same spawnpoint with `g_ghostplayers 0` [#879](https://github.com/etjump/etjump/pull/879)
+* fixed issues with player collision with other players and entities with `pmove_fixed 1` by making sure collision always uses valid mins/maxs [#880](https://github.com/etjump/etjump/pull/880)
+* fixed visual bug in vote UI where voting yes as a spectator while following someone would show that you voted no [#882](https://github.com/etjump/etjump/pull/882)
+* added `top` alias for viewing timerun records [#884](https://github.com/etjump/etjump/pull/884)
+* removed spawntime and charge time related cvars from serverinfo [#885](https://github.com/etjump/etjump/pull/885)
+* improved update accuracy of upmove meter and strafe quality meter, most notably fixing the delay introduced in 2.5.1 where initial update of strafe quality was delayed due to client waiting for a snapshot [#833](https://github.com/etjump/etjump/pull/883)
 
 # ETJump 2.5.1
 
