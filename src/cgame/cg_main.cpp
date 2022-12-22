@@ -699,7 +699,7 @@ cvarTable_t cvarTable[] = {
     {&cg_drawTeamOverlay, "cg_drawTeamOverlay", "2", CVAR_ARCHIVE},
     {&cg_stats, "cg_stats", "0", 0},
     {&cg_blinktime, "cg_blinktime", "100", CVAR_ARCHIVE}, //----(SA)	added
-    {&cg_enableBreath, "cg_enableBreath", "1", CVAR_SERVERINFO},
+    {&cg_enableBreath, "cg_enableBreath", "1", CVAR_ARCHIVE},
     {&cg_cameraOrbit, "cg_cameraOrbit", "0", CVAR_CHEAT},
     {&cg_cameraOrbitDelay, "cg_cameraOrbitDelay", "50", CVAR_ARCHIVE},
     {&cg_timescaleFadeEnd, "cg_timescaleFadeEnd", "1", 0},
