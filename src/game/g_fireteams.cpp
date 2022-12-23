@@ -177,7 +177,11 @@ int G_FindFreeFireteamIdent(team_t team) {
   qboolean freeIdent[MAX_FIRETEAMS];
   int i;
 
-  memset(freeIdent, qtrue, sizeof(freeIdent));
+  // this was memset, which is wrong since it works on bytes
+  // we need to set all elements to 1 (qtrue) initially instead
+  for (i = 0; i < MAX_FIRETEAMS; i++) {
+    freeIdent[i] = qtrue;
+  }
 
   for (i = 0; i < MAX_FIRETEAMS; i++) {
     if (!level.fireTeams[i].inuse) {
