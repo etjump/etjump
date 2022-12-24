@@ -178,7 +178,7 @@ int G_FindFreeFireteamIdent(team_t team) {
   int i;
 
   // this was memset, which is wrong since it works on bytes
-  // we need to set all elements to 1 (qtrue) initially instead
+  // we need to set all elements to true initially instead
   std::fill_n(freeIdent, MAX_FIRETEAMS, true);
 
   for (i = 0; i < MAX_FIRETEAMS; i++) {
