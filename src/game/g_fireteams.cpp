@@ -174,19 +174,19 @@ qboolean G_IsFireteamLeader(int entityNum, fireteamData_t **teamNum) {
 }
 
 int G_FindFreeFireteamIdent(team_t team) {
-  qboolean freeIdent[MAX_FIRETEAMS];
+  bool freeIdent[MAX_FIRETEAMS];
   int i;
 
   // this was memset, which is wrong since it works on bytes
   // we need to set all elements to 1 (qtrue) initially instead
-  std::fill_n(freeIdent, MAX_FIRETEAMS, qtrue);
+  std::fill_n(freeIdent, MAX_FIRETEAMS, true);
 
   for (i = 0; i < MAX_FIRETEAMS; i++) {
     if (!level.fireTeams[i].inuse) {
       continue;
     }
     // Set every team that is inuse not free
-    freeIdent[level.fireTeams[i].ident - 1] = qfalse;
+    freeIdent[level.fireTeams[i].ident - 1] = false;
   }
 
   for (i = 0; i < (MAX_FIRETEAMS); i++) {
