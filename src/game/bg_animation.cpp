@@ -796,7 +796,7 @@ static void BG_ParseCommands(const char **input, animScriptItem_t *scriptItem,
                               "duration "
                               "value");
           }
-          command->animDuration[partIndex] = atoi(token);
+          command->animDuration[partIndex] = Q_atoi(token);
         } else // unget the token
         {
           COM_RestoreParseSession(input);

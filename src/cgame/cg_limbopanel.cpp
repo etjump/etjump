@@ -1407,7 +1407,7 @@ int CG_LimboPanel_GetMaxObjectives(void) {
     return 0;
   }
 
-  return atoi(
+  return Q_atoi(
       Info_ValueForKey(CG_ConfigString(CS_MULTI_INFO), "numobjectives"));
 }
 
@@ -1464,13 +1464,13 @@ void CG_LimboPanel_RenderObjectiveText(panel_button_t *button) {
           // info = Info_ValueForKey(
           // cs, "axis_desc" );
           info = cg.objDescription_Axis[cgs.ccSelectedObjective];
-          status = atoi(
+          status = Q_atoi(
               Info_ValueForKey(cs, va("x%i", cgs.ccSelectedObjective + 1)));
         } else {
           // info = Info_ValueForKey(
           // cs, "allied_desc" );
           info = cg.objDescription_Allied[cgs.ccSelectedObjective];
-          status = atoi(
+          status = Q_atoi(
               Info_ValueForKey(cs, va("a%i", cgs.ccSelectedObjective + 1)));
         }
 

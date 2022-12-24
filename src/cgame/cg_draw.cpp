@@ -3226,7 +3226,7 @@ static void CG_DrawWarmup(void) {
            cgs.currentRound + 1);
 
     cs = CG_ConfigString(CS_MULTI_INFO);
-    defender = atoi(Info_ValueForKey(cs, "defender"));
+    defender = Q_atoi(Info_ValueForKey(cs, "defender"));
 
     if (!defender) {
       if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_AXIS) {

@@ -288,7 +288,7 @@ int ClientNumberFromString(gentity_t *to, char *s) {
 
   // numeric values are just slot numbers
   if (fIsNumber) {
-    idnum = atoi(s);
+    idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
       CPx(to - g_entities, va("print \"Bad client slot: [lof]%i\n\"", idnum));
       return -1;
@@ -345,7 +345,7 @@ int ClientNumbersFromString(const char *s, int *plist) {
     }
   }
   if (is_slot) {
-    i = atoi(s);
+    i = Q_atoi(s);
     if (i >= 0 && i < level.maxclients) {
       p = &level.clients[i];
       if (p->pers.connected == CON_CONNECTED ||
@@ -551,7 +551,7 @@ void Cmd_Give_f(gentity_t *ent) {
   if (*amt) {
     hasAmount = qtrue;
   }
-  amount = atoi(amt);
+  amount = Q_atoi(amt);
   //----(SA)	end
 
   name = ConcatArgs(1);
@@ -763,7 +763,7 @@ void Cmd_God_f(gentity_t *ent) {
       msg = "godmode all OFF\n";
     }
   } else {
-    if (!Q_stricmp(name, "on") || atoi(name)) {
+    if (!Q_stricmp(name, "on") || Q_atoi(name)) {
       ent->flags |= FL_GODMODE;
     } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
       ent->flags &= ~FL_GODMODE;
@@ -799,7 +799,7 @@ void Cmd_Nofatigue_f(gentity_t *ent) {
     return;
   }
 
-  if (!Q_stricmp(name, "on") || atoi(name)) {
+  if (!Q_stricmp(name, "on") || Q_atoi(name)) {
     ent->flags |= FL_NOFATIGUE;
   } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
     ent->flags &= ~FL_NOFATIGUE;
@@ -1010,7 +1010,7 @@ void printTracker(gentity_t *ent) {
 
     for (i = 1; i < numArgs; i++) {
       trap_Argv(i, buffer, sizeof buffer);
-      int idx = atoi(buffer);
+      int idx = Q_atoi(buffer);
 
       if (checkTrackerIndex(clientNum, idx, buffer, false)) {
         printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx,
@@ -1046,7 +1046,7 @@ void setTracker(gentity_t *ent) {
   }
 
   trap_Argv(1, bufferIndex, sizeof bufferIndex);
-  int idx = atoi(bufferIndex);
+  int idx = Q_atoi(bufferIndex);
 
   if (!Q_stricmp("all", bufferIndex)) {
     if (trap_Argc() == 2) {
@@ -1056,7 +1056,7 @@ void setTracker(gentity_t *ent) {
     }
 
     trap_Argv(2, bufferValue, sizeof bufferValue);
-    value = atoi(bufferValue);
+    value = Q_atoi(bufferValue);
 
     if (checkTrackerValue(clientNum, bufferValue)) {
       for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
@@ -1098,7 +1098,7 @@ void setTracker(gentity_t *ent) {
       }
 
       if (checkTrackerValue(clientNum, bufferValue)) {
-        value = atoi(bufferValue);
+        value = Q_atoi(bufferValue);
         ent->client->sess.progression[idx - 1] = value;
         setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i "
                                      "^7value: ^2%i\n",
@@ -1135,7 +1135,7 @@ void Cmd_Noclip_f(gentity_t *ent) {
     return;
   }
 
-  if (!Q_stricmp(name, "on") || atoi(name)) {
+  if (!Q_stricmp(name, "on") || Q_atoi(name)) {
     ent->client->noclip = qtrue;
   } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
     ent->client->noclip = qfalse;
@@ -1668,10 +1668,10 @@ void Cmd_Team_f(gentity_t *ent) {
   trap_Argv(3, weap, sizeof(weap));
   trap_Argv(4, weap2, sizeof(weap2));
 
-  w = static_cast<weapon_t>(atoi(weap));
-  w2 = static_cast<weapon_t>(atoi(weap2));
+  w = static_cast<weapon_t>(Q_atoi(weap));
+  w2 = static_cast<weapon_t>(Q_atoi(weap2));
 
-  ent->client->sess.latchPlayerType = atoi(ptype);
+  ent->client->sess.latchPlayerType = Q_atoi(ptype);
   if (ent->client->sess.latchPlayerType < PC_SOLDIER ||
       ent->client->sess.latchPlayerType > PC_COVERTOPS) {
     ent->client->sess.latchPlayerType = PC_SOLDIER;
@@ -1746,7 +1746,7 @@ void Cmd_TeamBot_f(gentity_t *foo) {
   gentity_t *ent;
 
   trap_Argv(1, entNumStr, sizeof(entNumStr));
-  entNum = atoi(entNumStr);
+  entNum = Q_atoi(entNumStr);
 
   ent = g_entities + entNum;
 
@@ -1754,11 +1754,11 @@ void Cmd_TeamBot_f(gentity_t *foo) {
   trap_Argv(4, weap, sizeof(weap));
   trap_Argv(5, fireteam, sizeof(fireteam));
 
-  ent->client->sess.latchPlayerType = atoi(ptype);
-  ent->client->sess.latchPlayerWeapon = atoi(weap);
+  ent->client->sess.latchPlayerType = Q_atoi(ptype);
+  ent->client->sess.latchPlayerWeapon = Q_atoi(weap);
   ent->client->sess.latchPlayerWeapon2 = 0;
-  ent->client->sess.playerType = atoi(ptype);
-  ent->client->sess.playerWeapon = atoi(weap);
+  ent->client->sess.playerType = Q_atoi(ptype);
+  ent->client->sess.playerWeapon = Q_atoi(weap);
 
   // remove any weapon info from the userinfo, so SetWolfSpawnWeapons()
   // doesn't reset the weapon as that
@@ -2256,10 +2256,10 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
 
     trap_Argv(1, buffer, 32);
 
-    cls = atoi(buffer);
+    cls = Q_atoi(buffer);
 
     trap_Argv(2, buffer, 32);
-    cnt = atoi(buffer);
+    cnt = Q_atoi(buffer);
     if (cnt > MAX_CLIENTS) {
       cnt = MAX_CLIENTS;
     }
@@ -2267,7 +2267,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
     for (i = 0; i < cnt; i++) {
       trap_Argv(3 + i, buffer, 32);
 
-      num = atoi(buffer);
+      num = Q_atoi(buffer);
       if (num < 0) {
         continue;
       }
@@ -2335,7 +2335,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     if (Q_isnumeric(variant[0])) {
       id = 2;
       cust = 3;
-      vsay.variant = atoi(variant);
+      vsay.variant = Q_atoi(variant);
     }
 
     trap_Argv(id, vsay.id, sizeof(vsay.id));
@@ -2346,7 +2346,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     int index;
 
     trap_Argv(2, buffer, sizeof(buffer));
-    index = atoi(buffer);
+    index = Q_atoi(buffer);
     if (index < 0) {
       index = 0;
     }
@@ -2360,7 +2360,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     if (Q_isnumeric(variant[0])) {
       id = 4 + index;
       cust = 5 + index;
-      vsay.variant = atoi(variant);
+      vsay.variant = Q_atoi(variant);
     } else {
       id = 3;
       cust = 4;
@@ -2397,7 +2397,7 @@ static void Cmd_VoiceTell_f(gentity_t *ent, qboolean voiceonly)
 	}
 
 	trap_Argv(1, arg, sizeof(arg));
-	targetNum = atoi(arg);
+	targetNum = Q_atoi(arg);
 	if (targetNum < 0 || targetNum >= level.maxclients)
 	{
 		return;
@@ -3665,11 +3665,11 @@ void Cmd_ClientMonsterSlickAngle (gentity_t *clent) {
     }
 
     trap_Argv( 1, s, sizeof( s ) );
-    entnum = atoi(s);
+    entnum = Q_atoi(s);
     ent = &g_entities[entnum];
 
     trap_Argv( 2, s, sizeof( s ) );
-    angle = atoi(s);
+    angle = Q_atoi(s);
 
     // sanity check (also protect from cheaters)
     if (g_gametype.integer != GT_SINGLE_PLAYER && entnum != clent->s.number) {
@@ -3694,8 +3694,8 @@ void G_UpdateSpawnCounts(void) {
   for (i = 0; i < level.numspawntargets; i++) {
     trap_GetConfigstring(CS_MULTI_SPAWNTARGETS + i, cs, sizeof(cs));
 
-    current = atoi(Info_ValueForKey(cs, "c"));
-    team = atoi(Info_ValueForKey(cs, "t")) & ~256;
+    current = Q_atoi(Info_ValueForKey(cs, "c"));
+    team = Q_atoi(Info_ValueForKey(cs, "t")) & ~256;
 
     count = 0;
     for (j = 0; j < level.numConnectedClients; j++) {
@@ -3770,7 +3770,7 @@ void Cmd_SetSpawnPoint_f(gentity_t *ent) {
   }
 
   trap_Argv(1, arg, sizeof(arg));
-  val = atoi(arg);
+  val = Q_atoi(arg);
 
   if (ent->client) {
     SetPlayerSpawn(ent, val, qtrue);
@@ -3892,7 +3892,7 @@ waypoints as spectator.\n\"" ); return;
 
     VectorCopy( trace.endpos, loc );
 
-    G_SetWayPoint( ent, atoi(arg), loc );
+    G_SetWayPoint( ent, Q_atoi(arg), loc );
 }*/
 
 /*
@@ -3922,7 +3922,7 @@ void Cmd_WeaponStat_f(gentity_t *ent) {
     return;
   }
   trap_Argv(1, buffer, 16);
-  stat = static_cast<extWeaponStats_t>(atoi(buffer));
+  stat = static_cast<extWeaponStats_t>(Q_atoi(buffer));
   if (stat >= 0 && stat < WS_MAX) {
     trap_SendServerCommand(ent - g_entities,
                            va("rws %i %i",
@@ -3941,7 +3941,7 @@ void Cmd_IntermissionWeaponStats_f(gentity_t *ent) {
 
   trap_Argv(1, buffer, sizeof(buffer));
 
-  clientNum = atoi(buffer);
+  clientNum = Q_atoi(buffer);
   if (clientNum < 0 || clientNum > MAX_CLIENTS) {
     return;
   }
@@ -4058,7 +4058,7 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
     return;
   }
   trap_Argv(1, buffer, 16);
-  val = atoi(buffer) + 1;
+  val = Q_atoi(buffer) + 1;
 
   for (i = 0; i < level.numLimboCams; i++) {
     if (!level.limboCams[i].spawn && level.limboCams[i].info == val) {

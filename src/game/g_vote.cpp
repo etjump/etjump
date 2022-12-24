@@ -218,7 +218,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
     return (G_INVALID);
   }
 
-  if ((atoi(arg2) && curr_setting) || (!atoi(arg2) && !curr_setting)) {
+  if ((Q_atoi(arg2) && curr_setting) || (!Q_atoi(arg2) && !curr_setting)) {
     G_cpmPrintf(ent, "^3%s^5 is already %s!", aVoteInfo[vote_type].pszVoteName,
                 ((curr_setting) ? ENABLED : DISABLED));
     return (G_INVALID);
@@ -226,7 +226,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
 
   Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
   Com_sprintf(arg2, VOTE_MAXSTRING, "%s",
-              (atoi(arg2)) ? ACTIVATED : DEACTIVATED);
+              (Q_atoi(arg2)) ? ACTIVATED : DEACTIVATED);
 
   return (G_OK);
 }
@@ -236,7 +236,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
 //
 void G_voteSetOnOff(const char *desc, const char *cvar) {
   AP(va("cpm \"^3%s is: ^5%s\n\"", desc,
-        (atoi(level.voteInfo.vote_value)) ? ENABLED : DISABLED));
+        (Q_atoi(level.voteInfo.vote_value)) ? ENABLED : DISABLED));
   // trap_SendConsoleCommand(EXEC_APPEND, va("%s %s\n", cvar,
   // level.voteInfo.vote_value));
   trap_Cvar_Set(cvar, level.voteInfo.vote_value);

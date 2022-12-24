@@ -1371,7 +1371,7 @@ qboolean Load_Menu(int handle) {
 
 #ifdef LOCALIZATION_SUPPORT
     // NERVE - SMF - localization crap
-    cl_language = atoi(UI_Cvar_VariableString("cl_language"));
+    cl_language = Q_atoi(UI_Cvar_VariableString("cl_language"));
 
     if (cl_language) {
       const char *s = NULL; // TTimo: init
@@ -3081,10 +3081,10 @@ static void UI_BuildPlayerList() {
   trap_GetClientState(&cs);
   trap_GetConfigString(CS_PLAYERS + cs.clientNum, info, MAX_INFO_STRING);
   uiInfo.playerNumber = cs.clientNum;
-  uiInfo.teamLeader = atoi(Info_ValueForKey(info, "tl")) ? qtrue : qfalse;
-  team = atoi(Info_ValueForKey(info, "t"));
+  uiInfo.teamLeader = Q_atoi(Info_ValueForKey(info, "tl")) ? qtrue : qfalse;
+  team = Q_atoi(Info_ValueForKey(info, "t"));
   trap_GetConfigString(CS_SERVERINFO, info, sizeof(info));
-  count = atoi(Info_ValueForKey(info, "sv_maxclients"));
+  count = Q_atoi(Info_ValueForKey(info, "sv_maxclients"));
   uiInfo.playerCount = 0;
   uiInfo.myTeamCount = 0;
   playerTeamNumber = 0;
@@ -3098,14 +3098,14 @@ static void UI_BuildPlayerList() {
       //			Q_CleanStr( namebuf );
       Q_strncpyz(uiInfo.playerNames[uiInfo.playerCount], namebuf,
                  sizeof(uiInfo.playerNames[0]));
-      muted = atoi(Info_ValueForKey(info, "mu"));
+      muted = Q_atoi(Info_ValueForKey(info, "mu"));
       if (muted) {
         uiInfo.playerMuted[uiInfo.playerCount] = qtrue;
       } else {
         uiInfo.playerMuted[uiInfo.playerCount] = qfalse;
       }
       uiInfo.playerCount++;
-      team2 = atoi(Info_ValueForKey(info, "t"));
+      team2 = Q_atoi(Info_ValueForKey(info, "t"));
       if (team2 == team) {
         Q_strncpyz(namebuf, Info_ValueForKey(info, "n"), sizeof(namebuf));
         // fretn - dont expand colors twice, so:
@@ -5348,11 +5348,11 @@ void UI_RunMenuScript(const char **args) {
 
       trap_GetConfigString(CS_SERVERTOGGLES, info, sizeof(info));
       trap_Cvar_Set("ui_voteWarmupDamage",
-                    va("%d", ((atoi(info) & CV_SVS_WARMUPDMG) >> 2)));
+                    va("%d", ((Q_atoi(info) & CV_SVS_WARMUPDMG) >> 2)));
 
       trap_GetConfigString(CS_SERVERINFO, info, sizeof(info));
       trap_Cvar_Set("ui_voteTimelimit",
-                    va("%i", atoi(Info_ValueForKey(info, "timelimit"))));
+                    va("%i", Q_atoi(Info_ValueForKey(info, "timelimit"))));
 
       return;
     }
@@ -5573,7 +5573,7 @@ void UI_RunMenuScript(const char **args) {
       return;
     }
     if (Q_stricmp(name, "showSpecScores") == 0) {
-      if (atoi(UI_Cvar_VariableString("ui_isSpectator"))) {
+      if (Q_atoi(UI_Cvar_VariableString("ui_isSpectator"))) {
         trap_Cmd_ExecuteText(EXEC_APPEND, "+scores\n");
       }
       return;
@@ -6575,12 +6575,12 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_LAN_GetServerInfo(ui_netSource.integer, i, info, MAX_STRING_CHARS);
 
-      clients = atoi(Info_ValueForKey(info, "clients"));
+      clients = Q_atoi(Info_ValueForKey(info, "clients"));
       uiInfo.serverStatus.numPlayersOnServers += clients;
 
       trap_Cvar_Update(&ui_browserShowEmptyOrFull);
       if (ui_browserShowEmptyOrFull.integer) {
-        maxClients = atoi(Info_ValueForKey(info, "sv_maxclients"));
+        maxClients = Q_atoi(Info_ValueForKey(info, "sv_maxclients"));
 
         if (clients != maxClients &&
             ((!clients && ui_browserShowEmptyOrFull.integer == 2) ||
@@ -6600,7 +6600,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowPasswordProtected);
       if (ui_browserShowPasswordProtected.integer) {
-        password = atoi(Info_ValueForKey(info, "needpass"));
+        password = Q_atoi(Info_ValueForKey(info, "needpass"));
         if ((password && ui_browserShowPasswordProtected.integer == 2) ||
             (!password && ui_browserShowPasswordProtected.integer == 1)) {
           trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
@@ -6610,7 +6610,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowFriendlyFire);
       if (ui_browserShowFriendlyFire.integer) {
-        friendlyFire = atoi(Info_ValueForKey(info, "friendlyFire"));
+        friendlyFire = Q_atoi(Info_ValueForKey(info, "friendlyFire"));
 
         if ((friendlyFire && ui_browserShowFriendlyFire.integer == 2) ||
             (!friendlyFire && ui_browserShowFriendlyFire.integer == 1)) {
@@ -6621,7 +6621,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowMaxlives);
       if (ui_browserShowMaxlives.integer) {
-        maxlives = atoi(Info_ValueForKey(info, "maxlives"));
+        maxlives = Q_atoi(Info_ValueForKey(info, "maxlives"));
         if ((maxlives && ui_browserShowMaxlives.integer == 2) ||
             (!maxlives && ui_browserShowMaxlives.integer == 1)) {
           trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
@@ -6631,7 +6631,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowPunkBuster);
       if (ui_browserShowPunkBuster.integer) {
-        punkbuster = atoi(Info_ValueForKey(info, "punkbuster"));
+        punkbuster = Q_atoi(Info_ValueForKey(info, "punkbuster"));
 
         if ((punkbuster && ui_browserShowPunkBuster.integer == 2) ||
             (!punkbuster && ui_browserShowPunkBuster.integer == 1)) {
@@ -6642,7 +6642,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowAntilag);
       if (ui_browserShowAntilag.integer) {
-        antilag = atoi(Info_ValueForKey(info, "g_antilag"));
+        antilag = Q_atoi(Info_ValueForKey(info, "g_antilag"));
 
         if ((antilag && ui_browserShowAntilag.integer == 2) ||
             (!antilag && ui_browserShowAntilag.integer == 1)) {
@@ -6653,7 +6653,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowWeaponsRestricted);
       if (ui_browserShowWeaponsRestricted.integer) {
-        weaponrestricted = atoi(Info_ValueForKey(info, "weaprestrict"));
+        weaponrestricted = Q_atoi(Info_ValueForKey(info, "weaprestrict"));
 
         if ((weaponrestricted != 100 &&
              ui_browserShowWeaponsRestricted.integer == 2) ||
@@ -6666,7 +6666,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_browserShowTeamBalanced);
       if (ui_browserShowTeamBalanced.integer) {
-        balancedteams = atoi(Info_ValueForKey(info, "balancedteams"));
+        balancedteams = Q_atoi(Info_ValueForKey(info, "balancedteams"));
 
         if ((balancedteams && ui_browserShowTeamBalanced.integer == 2) ||
             (!balancedteams && ui_browserShowTeamBalanced.integer == 1)) {
@@ -6677,7 +6677,7 @@ static void UI_BuildServerDisplayList(int force) {
 
       trap_Cvar_Update(&ui_joinGameType);
       if (ui_joinGameType.integer != -1) {
-        game = atoi(Info_ValueForKey(info, "gametype"));
+        game = Q_atoi(Info_ValueForKey(info, "gametype"));
         if (game != ui_joinGameType.integer) {
           trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
           continue;
@@ -7368,7 +7368,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
         lastColumn = column;
         lastTime = uiInfo.uiDC.realTime;
       }
-      ping = atoi(Info_ValueForKey(info, "ping"));
+      ping = Q_atoi(Info_ValueForKey(info, "ping"));
       if (ping == -1) {
         // if we ever see a ping that is out of
         // date, do a server refresh
@@ -7386,7 +7386,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
                           "[%"
                           "s]",
                           Info_ValueForKey(info, "hostname"),
-                          netnames[atoi(Info_ValueForKey(info, "nettype"))]);
+                          netnames[Q_atoi(Info_ValueForKey(info, "nettype"))]);
               return hostname;
             } else {
               return trimLeadingWiteSpace(Info_ValueForKey(info, "hostname"));
@@ -7400,7 +7400,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
                       Info_ValueForKey(info, "sv_maxclients"));
           return clientBuff;
         case SORT_GAME:
-          game = atoi(Info_ValueForKey(info, "gametype"));
+          game = Q_atoi(Info_ValueForKey(info, "gametype"));
           if (ping > /*=*/0 && game >= 0 && game < uiInfo.numGameTypes) {
             int i;
 
@@ -7422,7 +7422,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
             return "...";
           } else {
             /*antilag =
-            atoi(Info_ValueForKey(info,
+            Q_atoi(Info_ValueForKey(info,
             "g_antilag")); if
             (!antilag)
                 Com_sprintf(
@@ -7431,8 +7431,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
             "^3%3i", ping );
             else*/
 
-            serverload = atoi(Info_ValueForKey(info, "serverloa"
-                                                     "d"));
+            serverload = Q_atoi(Info_ValueForKey(info, "serverload"));
             if (serverload == -1) {
               Com_sprintf(pingstr, sizeof(pingstr),
                           " %"
@@ -7462,21 +7461,13 @@ const char *UI_FeederItemText(float feederID, int index, int column,
             return "";
           } else {
             *numhandles = 7;
-            needpass = atoi(Info_ValueForKey(info, "needpas"
-                                                   "s"));
-            friendlyfire = atoi(Info_ValueForKey(info, "friendlyFi"
-                                                       "re"));
-            maxlives = atoi(Info_ValueForKey(info, "maxlive"
-                                                   "s"));
-            punkbuster = atoi(Info_ValueForKey(info, "punkbuste"
-                                                     "r"));
-            weaponrestrictions = atoi(Info_ValueForKey(info, "weapre"
-                                                             "stric"
-                                                             "t"));
-            antilag = atoi(Info_ValueForKey(info, "g_"
-                                                  "antilag"));
-            balancedteams = atoi(Info_ValueForKey(info, "balancedte"
-                                                        "ams"));
+            needpass = Q_atoi(Info_ValueForKey(info, "needpass"));
+            friendlyfire = Q_atoi(Info_ValueForKey(info, "friendlyFire"));
+            maxlives = Q_atoi(Info_ValueForKey(info, "maxlives"));
+            punkbuster = Q_atoi(Info_ValueForKey(info, "punkbuster"));
+            weaponrestrictions = Q_atoi(Info_ValueForKey(info, "weaprestrict"));
+            antilag = Q_atoi(Info_ValueForKey(info, "g_antilag"));
+            balancedteams = Q_atoi(Info_ValueForKey(info, "balancedteams"));
 
             if (needpass) {
               handles[0] = uiInfo.passwordFilter;

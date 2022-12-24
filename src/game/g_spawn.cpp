@@ -51,7 +51,7 @@ qboolean G_SpawnIntExt(const char *key, const char *defaultString, int *out,
   qboolean present;
 
   present = G_SpawnStringExt(key, defaultString, &s, file, line);
-  *out = atoi(s);
+  *out = Q_atoi(s);
   return present;
 }
 
@@ -842,7 +842,7 @@ void G_ParseField(const char *key, const char *value, gentity_t *ent) {
           ((float *)(b + f->ofs))[2] = vec[2];
           break;
         case F_INT:
-          *(int *)(b + f->ofs) = atoi(value);
+          *(int *)(b + f->ofs) = Q_atoi(value);
           break;
         case F_FLOAT:
           *(float *)(b + f->ofs) = Q_atof(value);
@@ -1125,15 +1125,15 @@ void SP_worldspawn(void) {
   trap_SetConfigstring(CS_MESSAGE, s); // map specific message
 
   G_SpawnString("cclayers", "0", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     level.ccLayers = qtrue;
   }
 
   G_Printf("ETJump: checking worldspawn key values:\n");
 
   G_SpawnString("noexplosives", "0", &s);
-  if (atoi(s)) {
-    int noExplosives = atoi(s);
+  if (Q_atoi(s)) {
+    int noExplosives = Q_atoi(s);
     if (noExplosives > 2) {
       noExplosives = 2;
     } else if (noExplosives < 0) {
@@ -1145,7 +1145,7 @@ void SP_worldspawn(void) {
   G_Printf("Explosives are %s.\n", level.noExplosives ? "disabled" : "enabled");
 
   G_SpawnString("nonoclip", "0", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     level.noNoclip = qtrue;
   } else {
     level.noNoclip = qfalse;
@@ -1153,7 +1153,7 @@ void SP_worldspawn(void) {
   G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
 
   G_SpawnString("nogod", "0", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     level.noGod = qtrue;
   } else {
     level.noGod = qfalse;
@@ -1161,7 +1161,7 @@ void SP_worldspawn(void) {
   G_Printf("God mode is %s.\n", level.noGod ? "disabled" : "enabled");
 
   G_SpawnString("nogoto", "0", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     level.noGoto = qtrue;
   } else {
     level.noGoto = qfalse;
@@ -1171,7 +1171,7 @@ void SP_worldspawn(void) {
   // Feen: PGM - Enable/Disable frivolous use
   //			  of portal gun....
   G_SpawnString("portalgun_spawn", "1", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     level.portalEnabled = qtrue;
     G_Printf("Players spawn with portal gun by default.\n");
   } else {
@@ -1180,7 +1180,7 @@ void SP_worldspawn(void) {
   }
 
   G_SpawnString("portalsurfaces", "1", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     level.portalSurfaces = qtrue;
   } else {
     level.portalSurfaces = qfalse;
@@ -1189,7 +1189,7 @@ void SP_worldspawn(void) {
            level.portalSurfaces ? "enabled" : "disabled");
 
   G_SpawnString("noghost", "0", &s);
-  if (atoi(s)) {
+  if (Q_atoi(s)) {
     char buf[32] = "\0";
     int currentValue = g_ghostPlayers.integer;
     currentValue |= 2;
@@ -1212,8 +1212,8 @@ void SP_worldspawn(void) {
   }
 
   G_SpawnString("limitedsaves", "0", &s);
-  if (atoi(s)) {
-    int limit = atoi(s);
+  if (Q_atoi(s)) {
+    int limit = Q_atoi(s);
     level.limitedSaves = limit;
     G_Printf("Save is limited to %s.\n",
              ETJump::getPluralizedString(limit, "save").c_str());
@@ -1223,7 +1223,7 @@ void SP_worldspawn(void) {
   }
 
   G_SpawnString("portalteam", "0", &s);
-  val = atoi(s);
+  val = Q_atoi(s);
   if (val) {
     if (val == 1) {
       level.portalTeam = 1;
@@ -1254,7 +1254,7 @@ void SP_worldspawn(void) {
   trap_SetConfigstring(CS_MOTD, g_motd.string); // message of the day
 
   G_SpawnString("spawnflags", "0", &s);
-  g_entities[ENTITYNUM_WORLD].spawnflags = atoi(s);
+  g_entities[ENTITYNUM_WORLD].spawnflags = Q_atoi(s);
   g_entities[ENTITYNUM_WORLD].r.worldflags =
       g_entities[ENTITYNUM_WORLD].spawnflags;
 

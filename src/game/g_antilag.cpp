@@ -125,8 +125,8 @@ void G_ResetMarkers(gentity_t *ent) {
 
   trap_Cvar_VariableStringBuffer("sv_fps", buffer, sizeof(buffer) - 1);
 
-  period = atoi(buffer);
-  if (!period) {
+  period = Q_atof(buffer);
+  if (period == 0.0f) {
     period = 50;
   } else {
     period = 1000.f / period;

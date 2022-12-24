@@ -41,7 +41,7 @@ qboolean CG_SpawnInt(const char *key, const char *defaultString, int *out) {
   qboolean present;
 
   present = CG_SpawnString(key, defaultString, &s);
-  *out = atoi(s);
+  *out = Q_atoi(s);
   return present;
 }
 
@@ -350,11 +350,11 @@ void SP_worldspawn(void) {
   CG_ParseSpawns();
 
   CG_SpawnString("cclayers", "0", &s);
-  cgs.ccLayers = atoi(s);
+  cgs.ccLayers = Q_atoi(s);
 
   for (i = 0; i < cgs.ccLayers; i++) {
     CG_SpawnString(va("cclayerceil%i", i), "0", &s);
-    cgs.ccLayerCeils[i] = atoi(s);
+    cgs.ccLayerCeils[i] = Q_atoi(s);
   }
 
   cg.mapcoordsScale[0] = 1 / (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]);

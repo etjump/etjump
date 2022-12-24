@@ -4116,7 +4116,7 @@ void InitExplosive(gentity_t *ent) {
 
   // pick it up if the level designer uses "damage" instead of "dmg"
   if (G_SpawnString("damage", "0", &damage)) {
-    ent->damage = atoi(damage);
+    ent->damage = Q_atoi(damage);
   }
 
   ent->s.eType = ET_EXPLOSIVE;
@@ -4640,7 +4640,7 @@ void func_constructible_use(gentity_t *self, gentity_t *other,
   self->s.modelindex = 0;
 
   if (!self->count2) {
-    self->s.modelindex2 = atoi(self->model + 1);
+    self->s.modelindex2 = Q_atoi(self->model + 1);
   } else {
     self->s.modelindex2 = self->conbmodels[0];
   }
@@ -5102,16 +5102,15 @@ void func_constructiblespawn(gentity_t *ent) {
 
           bmodel = bmodel_ent->model + 1;
 
-          ent->conbmodels[ent->count2++] = atoi(bmodel);
+          ent->conbmodels[ent->count2++] = Q_atoi(bmodel);
         }
 
         target_ptr = ptr + 1;
       }
     }
 
-    ent->conbmodels[ent->count2++] =
-        atoi(ent->model + 1); // the brushmodel of the func_constructible is
-                              // the final stage
+    // the brushmodel of the func_constructible is the final stage
+    ent->conbmodels[ent->count2++] = Q_atoi(ent->model + 1);
 
     // parse the destruction stages
     if (ent->count2 && ent->desstages) {
@@ -5161,7 +5160,7 @@ void func_constructiblespawn(gentity_t *ent) {
 
             bmodel = bmodel_ent->model + 1;
 
-            ent->desbmodels[numDesStages++] = atoi(bmodel);
+            ent->desbmodels[numDesStages++] = Q_atoi(bmodel);
           }
 
           target_ptr = ptr + 1;
@@ -5207,7 +5206,7 @@ void func_constructiblespawn(gentity_t *ent) {
       // other contents?
       trap_LinkEntity(ent);
 
-      ent->s.modelindex2 = atoi(ent->model + 1);
+      ent->s.modelindex2 = Q_atoi(ent->model + 1);
     } else {
       // set initial contents
       trap_SetBrushModel(ent, va("*%i", ent->conbmodels[0]));
@@ -5421,7 +5420,7 @@ void SP_func_brushmodel(gentity_t *ent) {
   }
 
   if (ent->targetname && level.numBrushModels < 128) {
-    level.brushModelInfo[level.numBrushModels].model = atoi(ent->model + 1);
+    level.brushModelInfo[level.numBrushModels].model = Q_atoi(ent->model + 1);
     Q_strncpyz(level.brushModelInfo[level.numBrushModels].modelname,
                ent->targetname, 32);
     level.numBrushModels++;
@@ -5464,7 +5463,7 @@ void SP_func_debris(gentity_t *ent) {
 
   debris = G_AllocDebrisChunk();
 
-  debris->model = atoi(ent->model + 1);
+  debris->model = Q_atoi(ent->model + 1);
 
   Q_strncpyz(debris->target, ent->target, sizeof(debris->target));
   Q_strncpyz(debris->targetname, ent->targetname, sizeof(debris->targetname));

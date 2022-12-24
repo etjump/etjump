@@ -364,7 +364,7 @@ qboolean Int_Parse(const char **p, int *i) {
   token = COM_ParseExt(p, qfalse);
 
   if (token && token[0] != 0) {
-    *i = atoi(token);
+    *i = Q_atoi(token);
     return qtrue;
   } else {
     return qfalse;
@@ -1515,13 +1515,13 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
              cvar, "voteflags", 9 ) ) {
               char
              info[MAX_INFO_STRING]; int
-             voteflags = atoi(cvar + 9);
+             voteflags = Q_atoi(cvar + 9);
 
               trap_Cvar_VariableStringBuffer(
              "cg_ui_voteFlags", info,
              sizeof(info) );
 
-              if( (atoi(info) &
+              if( (Q_atoi(info) &
              item->voteFlag) !=
              item->voteFlag ) {
                   Item_RunScript( item,
@@ -1531,7 +1531,7 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
               }*/
 #ifndef CGAMEDLL
         } else if (!Q_stricmpn(cvar, "serversort_", 11)) {
-          int sorttype = atoi(cvar + 11);
+          int sorttype = Q_atoi(cvar + 11);
 
           if (sorttype != uiInfo.serverStatus.sortKey) {
             Item_RunScript(item, bAbort, script2);
@@ -1552,7 +1552,7 @@ void Script_ConditionalScript(itemDef_t *item, qboolean *bAbort,
           int r_mode = DC->getCVarValue("r_mode");
 
           DC->getCVarString("r_oldMode", r_oldModeStr, sizeof(r_oldModeStr));
-          r_oldMode = atoi(r_oldModeStr);
+          r_oldMode = Q_atoi(r_oldModeStr);
 
           if (*r_oldModeStr && r_oldMode != r_mode) {
             Item_RunScript(item, bAbort, script1);
@@ -1794,7 +1794,7 @@ void Script_AddListItem(itemDef_t *item, qboolean *bAbort, const char **args) {
       String_Parse(args, &name)) {
     t = Menu_FindItemByName((menuDef_t *)item->parent, itemname);
     if (t && t->special) {
-      DC->feederAddItem(t->special, name, atoi(val));
+      DC->feederAddItem(t->special, name, Q_atoi(val));
     }
   }
 }
@@ -1851,9 +1851,9 @@ qboolean Script_CheckProfile(char *profile_path) {
   trap_FS_Read(&f_data, sizeof(f_data) - 1, f);
 
   DC->getCVarString("com_pid", com_pid, sizeof(com_pid));
-  pid = atoi(com_pid);
+  pid = Q_atoi(com_pid);
 
-  f_pid = atoi(f_data);
+  f_pid = Q_atoi(f_data);
   if (f_pid != pid) {
     // pid doesn't match
     trap_FS_FCloseFile(f);
@@ -2122,16 +2122,16 @@ qboolean Item_SettingShow(itemDef_t *item, qboolean fVoteTest) {
 
   if (fVoteTest) {
     trap_Cvar_VariableStringBuffer("cg_ui_voteFlags", info, sizeof(info));
-    return ((atoi(info) & item->voteFlag) != item->voteFlag) ? qtrue : qfalse;
+    return ((Q_atoi(info) & item->voteFlag) != item->voteFlag) ? qtrue : qfalse;
   }
 
   DC->getConfigString(CS_SERVERTOGGLES, info, sizeof(info));
 
   if (item->settingFlags & SVS_ENABLED_SHOW) {
-    return (atoi(info) & item->settingTest) ? qtrue : qfalse;
+    return (Q_atoi(info) & item->settingTest) ? qtrue : qfalse;
   }
   if (item->settingFlags & SVS_DISABLED_SHOW) {
-    return (!(atoi(info) & item->settingTest)) ? qtrue : qfalse;
+    return (!(Q_atoi(info) & item->settingTest)) ? qtrue : qfalse;
   }
 
   return (qtrue);
@@ -8513,7 +8513,7 @@ void ETJump_DrawMapDetails() {
   trap_Cvar_LatchedVariableStringBuffer("ui_map_details", isUIopen_str,
                                         sizeof(isUIopen_str));
 
-  if (atoi(isUIopen_str) != 1) {
+  if (Q_atoi(isUIopen_str) != 1) {
     return;
   }
 

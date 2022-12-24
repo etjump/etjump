@@ -156,7 +156,7 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
   cg_fxflags = 0;
 
   trap_Cvar_VariableStringBuffer("r_oldMode", buff, sizeof(buff));
-  if (atoi(buff)) {
+  if (Q_atoi(buff)) {
     // Arnout: confirmation screen
     trap_UI_Popup(UIMENU_INGAME);
   } else if (cg.demoPlayback) {
