@@ -323,8 +323,10 @@ cvarTable_t gameCvarTable[] = {
      qfalse}, // Arnout: default to GT_WOLF_CAMPAIGN
 
     // JPW NERVE multiplayer stuffs
-    {&g_redlimbotime, "g_redlimbotime", "30000", CVAR_LATCH, 0, qfalse},
-    {&g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_LATCH, 0, qfalse},
+    {&g_redlimbotime, "g_redlimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH,
+     0, qfalse},
+    {&g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH,
+     0, qfalse},
     {&g_medicChargeTime, "g_medicChargeTime", "1", CVAR_LATCH, 0, qfalse,
      qtrue},
     {&g_engineerChargeTime, "g_engineerChargeTime", "1", CVAR_LATCH, 0, qfalse,
