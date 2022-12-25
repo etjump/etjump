@@ -1293,11 +1293,6 @@ int Q_log2(int val) {
   return answer;
 }
 
-float Q_atof(const char *str) {
-  const float f = std::atof(str);
-  return (std::isfinite(f) ? f : 0);
-}
-
 /*
 =================
 PlaneTypeForNormal

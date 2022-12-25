@@ -326,9 +326,9 @@ qboolean CG_ServerCommandExt(const char *cmd) {
 
   // timerun_start runStartTime{integer} runName{string}
   if (command == "timerun_start") {
-    auto startTime = atoi(CG_Argv(1));
+    auto startTime = Q_atoi(CG_Argv(1));
     std::string runName = CG_Argv(2);
-    auto previousRecord = atoi(CG_Argv(3));
+    auto previousRecord = Q_atoi(CG_Argv(3));
     ETJump::timerun->startTimerun(runName, startTime, previousRecord);
     ETJump::execCmdOnRunStart();
     // run name, completion time, previous record
@@ -343,10 +343,10 @@ qboolean CG_ServerCommandExt(const char *cmd) {
       return qtrue;
     }
 
-    auto clientNum = atoi(CG_Argv(1));
-    auto runStartTime = atoi(CG_Argv(2));
+    auto clientNum = Q_atoi(CG_Argv(1));
+    auto runStartTime = Q_atoi(CG_Argv(2));
     std::string runName = CG_Argv(3);
-    auto previousRecord = atoi(CG_Argv(4));
+    auto previousRecord = Q_atoi(CG_Argv(4));
 
     ETJump::timerun->startSpectatorTimerun(clientNum, runName, runStartTime,
                                            previousRecord);
@@ -360,7 +360,7 @@ qboolean CG_ServerCommandExt(const char *cmd) {
   }
   // timerun_stop completionTime{integer}
   if (command == "timerun_stop") {
-    auto completionTime = atoi(CG_Argv(1));
+    auto completionTime = Q_atoi(CG_Argv(1));
 
     ETJump::timerun->stopTimerun(completionTime);
     ETJump::execCmdOnRunEnd();
@@ -376,8 +376,8 @@ qboolean CG_ServerCommandExt(const char *cmd) {
       return qtrue;
     }
 
-    auto clientNum = atoi(CG_Argv(1));
-    auto completionTime = atoi(CG_Argv(2));
+    auto clientNum = Q_atoi(CG_Argv(1));
+    auto completionTime = Q_atoi(CG_Argv(2));
     std::string runName = CG_Argv(3);
 
     ETJump::timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
@@ -385,9 +385,9 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return qtrue;
   }
   if (command == "record") {
-    auto clientNum = atoi(CG_Argv(1));
+    auto clientNum = Q_atoi(CG_Argv(1));
     std::string runName = CG_Argv(2);
-    auto completionTime = atoi(CG_Argv(3));
+    auto completionTime = Q_atoi(CG_Argv(3));
 
     ETJump::timerun->record(clientNum, runName, completionTime);
 
@@ -400,9 +400,9 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return qtrue;
   }
   if (command == "completion") {
-    auto clientNum = atoi(CG_Argv(1));
+    auto clientNum = Q_atoi(CG_Argv(1));
     std::string runName = CG_Argv(2);
-    auto completionTime = atoi(CG_Argv(3));
+    auto completionTime = Q_atoi(CG_Argv(3));
 
     ETJump::timerun->completion(clientNum, runName, completionTime);
 
@@ -656,7 +656,7 @@ qboolean CG_displaybyname() {
 qboolean CG_displaybynumber() {
   const auto argc = trap_Argc();
   if (argc > 1) {
-    const auto number = atoi(CG_Argv(1));
+    const auto number = Q_atoi(CG_Argv(1));
     const auto total = ETJump::trickjumpLines->countRoute();
     if (number > -1 && number < total) {
       ETJump::trickjumpLines->setCurrentRouteToRender(number);

@@ -425,7 +425,7 @@ void G_deleteStats(int nClient) {
 void G_parseStats(char *pszStatsInfo) {
   gclient_t *cl;
   const char *tmp = pszStatsInfo;
-  unsigned int i, dwWeaponMask, dwClientID = atoi(pszStatsInfo);
+  unsigned int i, dwWeaponMask, dwClientID = Q_atoi(pszStatsInfo);
 
   if (dwClientID > MAX_CLIENTS) {
     return;
@@ -437,7 +437,7 @@ void G_parseStats(char *pszStatsInfo) {
   if ((tmp = strchr(tmp, ' ')) == NULL) {                                      \
     return;                                                                    \
   }                                                                            \
-  x = atoi(++tmp);
+  x = Q_atoi(++tmp);
 
   GETVAL(cl->sess.rounds);
   GETVAL(dwWeaponMask);

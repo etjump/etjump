@@ -760,6 +760,15 @@ int Q_isforfilename(int c) {
   return (0);
 }
 
+float Q_atof(const char *str) {
+  const float f = std::strtof(str, nullptr);
+  return (std::isfinite(f) ? f : 0);
+}
+
+int Q_atoi(const char *str) {
+  return static_cast<int>(std::strtol(str, nullptr, 10));
+}
+
 /*
 =============
 Q_strncpyz

@@ -709,7 +709,7 @@ void TrickjumpLines::loadRoutes(const char *loadname) {
       Json::Value colorValue = root[i]["color"];
       for (int j = 0; j < static_cast<int>(colorValue.size()); ++j) {
         loadRoute.color[j] =
-            (unsigned char)std::atoi(colorValue[j].asString().c_str());
+            (unsigned char)Q_atoi(colorValue[j].asString().c_str());
       }
 
       // Loop on each trail in a route (tjl)

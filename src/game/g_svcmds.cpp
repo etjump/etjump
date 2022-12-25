@@ -105,7 +105,7 @@ qboolean StringToFilter(const char *s, ipFilter_t *f) {
       num[j++] = *s++;
     }
     num[j] = 0;
-    b[i] = atoi(num);
+    b[i] = Q_atoi(num);
     m[i] = 255;
 
     if (!*s) {
@@ -467,7 +467,7 @@ int refClientNumFromString(char *s) {
 
   // numeric values are just slot numbers
   if (fIsNumber) {
-    idnum = atoi(s);
+    idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
       G_Printf("Bad client slot: ^3%i\n", idnum);
       return -1;
@@ -515,7 +515,7 @@ gclient_t *ClientForString(const char *s) {
 
   // numeric values are just slot numbers
   if (s[0] >= '0' && s[0] <= '9') {
-    idnum = atoi(s);
+    idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
       Com_Printf("Bad client slot: %i\n", idnum);
       return NULL;
@@ -541,7 +541,7 @@ static qboolean G_Is_SV_Running(void) {
   char cvar[MAX_TOKEN_CHARS];
 
   trap_Cvar_VariableStringBuffer("sv_running", cvar, sizeof(cvar));
-  return (qboolean)atoi(cvar);
+  return (qboolean)Q_atoi(cvar);
 }
 
 /*
@@ -718,7 +718,7 @@ static void Svcmd_KickNum_f(void) {
 
   if (trap_Argc() == 3) {
     trap_Argv(2, sTimeout, sizeof(sTimeout));
-    timeout = atoi(sTimeout);
+    timeout = Q_atoi(sTimeout);
   } else {
     timeout = 300;
   }

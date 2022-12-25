@@ -2581,7 +2581,7 @@ void SP_mg42(gentity_t *self) {
   self->nextthink = level.time + FRAMETIME;
 
   if (G_SpawnString("damage", "0", &damage)) {
-    self->damage = atoi(damage);
+    self->damage = Q_atoi(damage);
   }
 
   G_SpawnString("accuracy", "1.0", &accuracy);

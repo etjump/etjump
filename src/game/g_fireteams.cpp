@@ -613,7 +613,7 @@ int G_FireteamNumberForString(const char *name, team_t team) {
   }
 
   if (fireteam <= 0) {
-    fireteam = atoi(name);
+    fireteam = Q_atoi(name);
   }
 
   return fireteam;
@@ -775,7 +775,7 @@ void G_SetFireTeamRules(int clientNum) {
       return;
     }
 
-    int limit = Numeric::clamp(atoi(val), -1, 100);
+    int limit = Numeric::clamp(Q_atoi(val), -1, 100);
     ft->saveLimit = limit;
 
     trap_SendServerCommand(
@@ -845,7 +845,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||
@@ -881,7 +881,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||
@@ -917,7 +917,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||
@@ -953,7 +953,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||

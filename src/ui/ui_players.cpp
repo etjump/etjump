@@ -1081,7 +1081,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
       if (!token) {
         break;
       }
-      animModelInfo->version = atoi(token);
+      animModelInfo->version = Q_atoi(token);
       continue;
     } else if (!Q_stricmp(token, "skeletal")) {
       animModelInfo->isSkeletal = qtrue;
@@ -1139,7 +1139,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
       Q_strlwr(animations[i].name);
     }
 
-    animations[i].firstFrame = atoi(token);
+    animations[i].firstFrame = Q_atoi(token);
 
     if (!animModelInfo->isSkeletal) // skeletal models dont
                                     // require adjustment
@@ -1160,7 +1160,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
       // of file without
       // ENDANIMS" );
     }
-    animations[i].numFrames = atoi(token);
+    animations[i].numFrames = Q_atoi(token);
 
     token = COM_ParseExt(&text_p, qfalse);
     if (!token || !token[0]) {
@@ -1168,7 +1168,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
       // of file without
       // ENDANIMS: line %i" );
     }
-    animations[i].loopFrames = atoi(token);
+    animations[i].loopFrames = Q_atoi(token);
 
     token = COM_ParseExt(&text_p, qfalse);
     if (!token || !token[0]) {
@@ -1190,14 +1190,14 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
       // of file without
       // ENDANIMS" );
     }
-    animations[i].moveSpeed = atoi(token);
+    animations[i].moveSpeed = Q_atoi(token);
 
     // animation blending
     token = COM_ParseExt(&text_p, qfalse); // must be on same line
     if (!token) {
       animations[i].animBlend = 0;
     } else {
-      animations[i].animBlend = atoi(token);
+      animations[i].animBlend = Q_atoi(token);
     }
 
     // calculate the duration
@@ -1251,10 +1251,10 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
         }
 
         if (!i) {
-          skip = atoi(token);
+          skip = Q_atoi(token);
         }
 
-        headAnims[i].firstFrame = atoi(token);
+        headAnims[i].firstFrame = Q_atoi(token);
         // modify according to last frame of the
         // main animations, since the head is
         // totally seperate
@@ -1266,7 +1266,7 @@ static qboolean AnimParseAnimConfig(playerInfo_t *animModelInfo,
         if (!token || !token[0]) {
           break;
         }
-        headAnims[i].numFrames = atoi(token);
+        headAnims[i].numFrames = Q_atoi(token);
 
         // skip the movespeed
         token = COM_ParseExt(&text_p, qfalse);
@@ -1377,7 +1377,7 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi) {
           if ( !token ) {
               break;
           }
-          animations[i].firstFrame = atoi( token );
+          animations[i].firstFrame = Q_atoi( token );
           // leg only frames are adjusted to not count the upper body
      only frames if ( i == LEGS_WALKCR ) { skip =
      animations[LEGS_WALKCR].firstFrame
@@ -1391,13 +1391,13 @@ static qboolean UI_ParseAnimationFile(const char *filename, playerInfo_t *pi) {
           if ( !token ) {
               break;
           }
-          animations[i].numFrames = atoi( token );
+          animations[i].numFrames = Q_atoi( token );
 
           token = COM_Parse( &text_p );
           if ( !token ) {
               break;
           }
-          animations[i].loopFrames = atoi( token );
+          animations[i].loopFrames = Q_atoi( token );
 
           token = COM_Parse( &text_p );
           if ( !token ) {

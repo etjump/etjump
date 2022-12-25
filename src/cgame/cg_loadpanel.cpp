@@ -307,13 +307,13 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
     }
 
     str = Info_ValueForKey(buffer, "sv_punkbuster");
-    if (str && *str && atoi(str)) {
+    if (str && *str && Q_atoi(str)) {
       x = SCREEN_OFFSET_X + 518;
       CG_DrawPic(x, y, 16, 16, bg_filter_pb);
     }
 
     str = Info_ValueForKey(buffer, "g_antilag");
-    if (str && *str && atoi(str)) {
+    if (str && *str && Q_atoi(str)) {
       x = SCREEN_OFFSET_X + 575;
       CG_DrawPic(x, y, 16, 16, bg_filter_al);
     }
@@ -401,7 +401,7 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
 
   // DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
   // cs = Info_ValueForKey( buffer, "g_gametype" );
-  // gametype = atoi(cs);
+  // gametype = Q_atoi(cs);
 
   //	DC->fillRect( button->rect.x, button->rect.y, button->rect.w,
   // button->rect.h, colorRed );
@@ -512,7 +512,7 @@ void CG_LoadPanel_RenderCampaignPins(panel_button_t *button) {
 
   DC->getConfigString( CS_SERVERINFO, buffer, sizeof( buffer ) );
   s = Info_ValueForKey( buffer, "g_gametype" );
-  gametype = atoi(s);*/
+  gametype = Q_atoi(s);*/
 
   if (cgs.gametype == GT_WOLF_STOPWATCH || cgs.gametype == GT_WOLF_LMS ||
       cgs.gametype == GT_WOLF) {
@@ -535,8 +535,8 @@ void CG_LoadPanel_RenderCampaignPins(panel_button_t *button) {
     for (i = 0; i < cgs.campaignData.mapCount; i++) {
       float px, py;
 
-      cg.teamWonRounds[1] = atoi(CG_ConfigString(CS_ROUNDSCORES1));
-      cg.teamWonRounds[0] = atoi(CG_ConfigString(CS_ROUNDSCORES2));
+      cg.teamWonRounds[1] = Q_atoi(CG_ConfigString(CS_ROUNDSCORES1));
+      cg.teamWonRounds[0] = Q_atoi(CG_ConfigString(CS_ROUNDSCORES2));
 
       if (cg.teamWonRounds[1] & (1 << i)) {
         shader = bg_axispin;

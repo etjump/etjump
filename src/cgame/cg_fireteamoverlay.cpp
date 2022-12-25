@@ -113,7 +113,7 @@ void CG_ParseFireteams() {
     //		CG_Printf("Fireteam: %s\n",
     // cg.fireTeams[i].name);
 
-    j = atoi(Info_ValueForKey(p, "id"));
+    j = Q_atoi(Info_ValueForKey(p, "id"));
     if (j == -1) {
       cg.fireTeams[i].inuse = qfalse;
       continue;
@@ -123,7 +123,7 @@ void CG_ParseFireteams() {
     }
 
     s = Info_ValueForKey(p, "l");
-    cg.fireTeams[i].leader = atoi(s);
+    cg.fireTeams[i].leader = Q_atoi(s);
 
     s = Info_ValueForKey(p, "c");
     Q_strncpyz(hexbuffer + 2, s, 9);

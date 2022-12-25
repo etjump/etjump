@@ -2531,7 +2531,7 @@ void FindIntermissionPoint(void) {
 
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
   buf = Info_ValueForKey(cs, "winner");
-  winner = atoi(buf);
+  winner = Q_atoi(buf);
 
   // Change from scripting value for winner (0==AXIS, 1==ALLIES) to
   // spawnflag value
@@ -2875,7 +2875,7 @@ qboolean ScoreIsTied(void) {
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 
   buf = Info_ValueForKey(cs, "winner");
-  a = atoi(buf);
+  a = Q_atoi(buf);
 
   return a == -1 ? qtrue : qfalse;
 }
@@ -3271,14 +3271,14 @@ static void G_CheckLoadGame(void) {
 
   // trap_Cvar_Set( "g_reloading", "1" );	// moved down
 
-  if (strlen(loading) > 0 && atoi(loading) != 0) {
+  if (strlen(loading) > 0 && Q_atoi(loading) != 0) {
     trap_Cvar_Set("g_reloading", "1");
 
     // screen should be black if we are at this stage
     trap_SetConfigstring(CS_SCREENFADE, va("1 %i 1", level.time - 10));
 
-    //		if (!reloading && atoi(loading) == 2) {
-    if (!(g_reloading.integer) && atoi(loading) == 2) {
+    //		if (!reloading && Q_atoi(loading) == 2) {
+    if (!(g_reloading.integer) && Q_atoi(loading) == 2) {
       // (SA) hmm, this seems redundant when it sets it
       // above...
       //			reloading = qtrue;

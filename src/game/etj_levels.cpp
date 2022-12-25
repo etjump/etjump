@@ -272,7 +272,7 @@ int ReadInt(const char **configFile) {
     G_LogPrintf("readconfig: missing = before \"%s\" on line %d.", token,
                 COM_GetCurrentParseLine());
   }
-  return atoi(token);
+  return Q_atoi(token);
 }
 
 std::string ReadString(const char **configFile) {

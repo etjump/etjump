@@ -1516,7 +1516,7 @@ void CG_ParseSkyBox(void) {
 
   token = CG_MustParse(&cstr,
                        "CG_ParseSkyBox: error parsing skybox configstring\n");
-  cg.skyboxViewFov = atoi(token);
+  cg.skyboxViewFov = Q_atof(token);
 
   if (!cg.skyboxViewFov) {
     cg.skyboxViewFov = 90;
@@ -1526,7 +1526,7 @@ void CG_ParseSkyBox(void) {
   // after that
   token = CG_MustParse(&cstr, "CG_ParseSkyBox: error parsing skybox "
                               "configstring.  No fog state\n");
-  if (atoi(token)) // this camera has fog
+  if (Q_atoi(token)) // this camera has fog
   {
     token = CG_MustParse(&cstr, "CG_DrawSkyBoxPortal: error parsing "
                                 "skybox configstring.  No fog[0]\n");
@@ -1541,10 +1541,10 @@ void CG_ParseSkyBox(void) {
     fogColor[2] = Q_atof(token);
 
     token = COM_ParseExt(&cstr, qfalse);
-    fogStart = atoi(token);
+    fogStart = Q_atoi(token);
 
     token = COM_ParseExt(&cstr, qfalse);
-    fogEnd = atoi(token);
+    fogEnd = Q_atoi(token);
 
     trap_R_SetFog(FOG_PORTALVIEW, fogStart, fogEnd, fogColor[0], fogColor[1],
                   fogColor[2], 1.1f);
@@ -1580,14 +1580,14 @@ void CG_ParseTagConnect(int tagNum) {
 
   token = CG_MustParse(&pString, "Invalid TAGCONNECT configstring\n");
 
-  entNum = atoi(token);
+  entNum = Q_atoi(token);
   if (entNum < 0 || entNum >= MAX_GENTITIES) {
     CG_Error("Invalid TAGCONNECT entitynum\n");
   }
 
   token = CG_MustParse(&pString, "Invalid TAGCONNECT configstring\n");
 
-  cg_entities[entNum].tagParent = atoi(token);
+  cg_entities[entNum].tagParent = Q_atoi(token);
   if (cg_entities[entNum].tagParent < 0 ||
       cg_entities[entNum].tagParent >= MAX_GENTITIES) {
     CG_Error("Invalid TAGCONNECT tagparent\n");
