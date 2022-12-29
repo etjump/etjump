@@ -262,7 +262,7 @@ void Snaphud::beforeRender() {
     a = 85;
   }
 
-  if (a != snap.a) {
+  if (a != snap.a || a == 0.0f) {
     snap.a = a;
     UpdateMaxSnapZones(wishspeed, pm);
     UpdateSnapState();

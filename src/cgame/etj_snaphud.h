@@ -47,7 +47,7 @@ private:
   enum class SnapTrueness { SNAP_JUMPCROUCH = 1, SNAP_GROUND = 2 };
 
   struct snaphud_t {
-    float a;
+    float a = 0.0f;
     unsigned char maxAccel;
     std::vector<unsigned short> zones;
     std::vector<unsigned char> xAccel;
