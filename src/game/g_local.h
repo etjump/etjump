@@ -2856,6 +2856,9 @@ void Weapon_Portal_Fire(
 
 // Feen: END PGM
 
+void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
+                                gentity_t *activator);
+
 // g_utilities.cpp
 // C versions of printing functions
 void C_BPAll(const char *msg);
