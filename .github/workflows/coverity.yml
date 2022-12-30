@@ -2,8 +2,6 @@
 name: "Coverity Scan"
 
 on:
-  push:
-    branches: [ "master" ]
   schedule:
     - cron: '0 10 * * SUN'
   workflow_dispatch:
