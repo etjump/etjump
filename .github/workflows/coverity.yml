@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Configure build
-      - run: |
+        run: |
           mkdir -p build
           cd build
           cmake ..
