@@ -13,15 +13,15 @@ jobs:
   coverity:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-    - uses: actions/checkout@v3
-    - name: Configure build
-      run: |
-        mkdir -p build
-        cd build
-        cmake ..
-    - name: Run coverity scan action
-    - uses: vapier/coverity-scan-action@v1
-      with:
-        email: ${{ secrets.COVERITY_SCAN_EMAIL }}
-        token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      - name: Checkout repository
+      - uses: actions/checkout@v3
+      - name: Configure build
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+      - name: Run coverity scan action
+      - uses: vapier/coverity-scan-action@v1
+        with:
+          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
