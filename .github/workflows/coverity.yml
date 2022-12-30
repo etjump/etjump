@@ -22,3 +22,4 @@ jobs:
         with:
           email: ${{ secrets.COVERITY_SCAN_EMAIL }}
           token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          command: make -C ${{github.workspace}}/build
