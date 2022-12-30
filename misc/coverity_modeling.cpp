@@ -18,5 +18,5 @@ long random(void) {
 
 void srand(unsigned int seed) {
   // ignore
-  __coverity_tainted_data_sanitize__(seed);
+  __coverity_tainted_data_sanitize__(*(void **)seed);
 }
