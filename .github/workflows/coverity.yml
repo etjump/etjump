@@ -1,5 +1,3 @@
-# Unofficial coverity scan action
-# https://github.com/vapier/coverity-scan-action
 name: Coverity Scan
 
 on:
