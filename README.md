@@ -1,6 +1,8 @@
 # ETJump
 
 [![etjump-CI](https://github.com/etjump/etjump/actions/workflows/ci.yml/badge.svg)](https://github.com/etjump/etjump/actions/workflows/ci.yml)
+[![Coverity scan](https://scan.coverity.com/projects/27244/badge.svg)](https://scan.coverity.com/projects/27244)
+[![CodeQL](https://github.com/etjump/etjump/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/etjump/etjump/actions/workflows/codeql-analysis.yml)
 
 This is source code repository for [ETJump](http://etjump.com/), a [Wolfenstein: Enemy Territory](https://en.wikipedia.org/wiki/Wolfenstein:_Enemy_Territory) trickjump modification. 
 
