@@ -145,7 +145,7 @@ jobs:
         fetch-depth: '0'
 
     - name: Download artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with: 
         name: etjump-artifacts
         path: ${{github.workspace}}/build/etjump
