@@ -1,4 +1,5 @@
-name: Coverity Scan
+# https://github.com/vapier/coverity-scan-action
+name: "Coverity Scan"
 
 on:
   push:
