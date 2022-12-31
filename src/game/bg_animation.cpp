@@ -930,8 +930,8 @@ void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo,
     token = COM_Parse(&text_p);
     if (!token || !*token) {
       if (indentLevel) {
-        BG_AnimParseError("BG_AnimParseAnimScript: "
-                          "unexpected end of file: %s");
+        BG_AnimParseError("BG_AnimParseAnimScript: unexpected end of file: %s",
+                          token);
       }
       break;
     }

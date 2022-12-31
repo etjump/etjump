@@ -433,8 +433,7 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
     if (!Q_stricmp(token, "sound")) {
 
       if (scriptSound->numsounds >= MAX_SOUNDSCRIPT_SOUNDS) {
-        CG_Error("Too many sounds for "
-                 "soundscript %s\n");
+        CG_Error("Too many sounds for soundscript %s\n", token);
       }
 
       token = COM_ParseExt(text, qtrue);
