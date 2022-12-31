@@ -154,14 +154,14 @@ static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, const char *params,
   // get target name
   auto token = COM_ParseExt(&params, qfalse);
   if (!token[0]) {
-    G_Error(va("G_Scripting: %s must have a target spawn\n"), mod);
+    G_Error(va("G_Scripting: %s must have a target spawn\n", mod));
   }
   // get objective entity
   char spawnname[MAX_QPATH];
   Q_strncpyz(spawnname, token, MAX_QPATH);
   auto tent = G_Find(nullptr, FOFS(message), spawnname);
   if (!tent) {
-    G_Error(va("G_Scripting: %s, couldn't find target\n"), mod);
+    G_Error(va("G_Scripting: %s, couldn't find target\n", mod));
   }
   if (!tent->count) {
     return qfalse;

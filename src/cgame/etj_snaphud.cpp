@@ -211,8 +211,10 @@ void Snaphud::UpdateMaxSnapZones(float wishspeed, pmove_t *pm) {
   // this needs to be dynamically calculated because
   // ps->speed can be modified by target_scale_velocity
   // default: 57 on ground, 7 in air (352 wishspeed)
-  const int maxSnaphudZonesQ1 =
-      round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) * 2 + 1;
+  const int maxSnaphudZonesQ1 = static_cast<int>(
+      std::round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) *
+          2 +
+      1);
 
   snap.zones.resize(maxSnaphudZonesQ1);
   snap.xAccel.resize(maxSnaphudZonesQ1);
@@ -258,6 +260,7 @@ void Snaphud::beforeRender() {
   float a = accel * wishspeed * pm->pmext->frametime;
 
   // clamp the max value to match max scaling of target_scale_velocity
+  // FIXME: magic number bad
   if (a > 85) {
     a = 85;
   }

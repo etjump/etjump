@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "g_local.h"
+#include "etj_printer.h"
 
 vec3_t forward, right, up;
 vec3_t muzzleEffect;
@@ -601,8 +602,8 @@ void Weapon_Syringe(gentity_t *ent) {
           ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
         }
         if (ent && ent->client) {
-          G_LogPrintf("Medic_Revive: %d %d\n", ent - g_entities,
-                      traceEnt - g_entities); // OSP
+          G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
+                      ClientNum(traceEnt)); // OSP
         }
         if (!traceEnt->isProp) // Gordon: flag for
                                // if they were
@@ -1646,6 +1647,7 @@ void Weapon_Engineer(gentity_t *ent) {
   int dynamiteDropTeam;
   vec3_t end;
   vec3_t origin;
+  auto clientNum = ClientNum(ent);
 
   // DHM - Nerve :: Can't heal an MG42 if you're using one!
   if (ent->client->ps.persistant[PERS_HWEAPON_USE]) {
@@ -1714,8 +1716,7 @@ void Weapon_Engineer(gentity_t *ent) {
         traceEnt->health = MG42_MULTIPLAYER_HEALTH;
       }
 
-      G_LogPrintf("Repair: %d\n",
-                  ent - g_entities); // OSP
+      G_LogPrintf("Repair: %d\n", clientNum); // OSP
 
       if (traceEnt->sound3to2 != ent->client->sess.sessionTeam) {
         AddScore(ent,
@@ -1731,8 +1732,7 @@ void Weapon_Engineer(gentity_t *ent) {
       traceEnt->takedamage = qtrue;
       traceEnt->s.eFlags &= ~EF_SMOKING;
 
-      trap_SendServerCommand(ent - g_entities,
-                             "cp \"You have repaired the MG!\n\"");
+      Printer::SendCenterMessage(clientNum, "You have repaired the MG!");
       G_AddEvent(ent, EV_MG42_FIXED, 0);
     } else {
       traceEnt->health += 3;
@@ -1770,9 +1770,8 @@ void Weapon_Engineer(gentity_t *ent) {
           (tr2.entityNum != ENTITYNUM_WORLD &&
            (!g_entities[tr2.entityNum].inuse ||
             g_entities[tr2.entityNum].s.eType != ET_CONSTRUCTIBLE))) {
-        trap_SendServerCommand(ent - g_entities,
-                               "cp \"Landmine cannot be armed "
-                               "here...\" 1");
+        trap_SendServerCommand(clientNum,
+                               "cp \"Landmine cannot be armed here...\" 1");
 
         G_FreeEntity(traceEnt);
 
@@ -1808,9 +1807,8 @@ void Weapon_Engineer(gentity_t *ent) {
           //!)
           // return;
 
-          trap_SendServerCommand(ent - g_entities, "cp \"Your team has too "
-                                                   "many landmines "
-                                                   "placed...\" 1");
+          trap_SendServerCommand(
+              clientNum, "cp \"Your team has too many landmines placed...\" 1");
 
           G_FreeEntity(traceEnt);
 
@@ -1843,8 +1841,7 @@ void Weapon_Engineer(gentity_t *ent) {
             return;
           }
 
-          G_PrintClientSpammyCenterPrint(ent - g_entities,
-                                         "Arming landmine...");
+          G_PrintClientSpammyCenterPrint(clientNum, "Arming landmine...");
 
           // Give health until it is
           // full, don't continue
@@ -1857,8 +1854,7 @@ void Weapon_Engineer(gentity_t *ent) {
           if (traceEnt->health >= 250) {
             // traceEnt->health
             // = 255;
-            trap_SendServerCommand(ent - g_entities, "cp \"Landmine "
-                                                     "armed...\" 1");
+            trap_SendServerCommand(clientNum, "cp \"Landmine armed...\" 1");
           } else {
             return;
           }
@@ -1897,7 +1893,7 @@ void Weapon_Engineer(gentity_t *ent) {
             traceEnt->health += 3;
           }
 
-          G_PrintClientSpammyCenterPrint(ent - g_entities, "Defusing landmine");
+          G_PrintClientSpammyCenterPrint(clientNum, "Defusing landmine");
 
           if (traceEnt->health >= 250) {
             /*						traceEnt->health
@@ -1906,9 +1902,7 @@ void Weapon_Engineer(gentity_t *ent) {
                                     traceEnt->nextthink = level.time +
                FRAMETIME;*/
 
-            trap_SendServerCommand(ent - g_entities, "cp \"Landmine "
-                                                     "defused...\" "
-                                                     "1");
+            trap_SendServerCommand(clientNum, "cp \"Landmine defused...\" 1");
 
             Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
 
@@ -1982,14 +1976,15 @@ void Weapon_Engineer(gentity_t *ent) {
             }*/
             {
               mapEntityData_t *mEnt;
+              int tEntNum = static_cast<int>(traceEnt - g_entities);
 
-              if ((mEnt = G_FindMapEntityData(&mapEntityData[0],
-                                              traceEnt - g_entities)) != NULL) {
+              if ((mEnt = G_FindMapEntityData(&mapEntityData[0], tEntNum)) !=
+                  NULL) {
                 G_FreeMapEntityData(&mapEntityData[0], mEnt);
               }
 
-              if ((mEnt = G_FindMapEntityData(&mapEntityData[1],
-                                              traceEnt - g_entities)) != NULL) {
+              if ((mEnt = G_FindMapEntityData(&mapEntityData[1], tEntNum)) !=
+                  NULL) {
                 G_FreeMapEntityData(&mapEntityData[1], mEnt);
               }
 
@@ -2010,8 +2005,7 @@ void Weapon_Engineer(gentity_t *ent) {
       // Give health until it is full, don't continue
       traceEnt->health += 3;
 
-      G_PrintClientSpammyCenterPrint(ent - g_entities,
-                                     "Disarming satchel charge...");
+      G_PrintClientSpammyCenterPrint(clientNum, "Disarming satchel charge...");
 
       if (traceEnt->health >= 250) {
 
@@ -2021,8 +2015,7 @@ void Weapon_Engineer(gentity_t *ent) {
 
         // bani - consistency with dynamite
         // defusing
-        G_PrintClientSpammyCenterPrint(ent - g_entities,
-                                       "Satchel charge disarmed...");
+        G_PrintClientSpammyCenterPrint(clientNum, "Satchel charge disarmed...");
 
         G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
         G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f,
@@ -2067,7 +2060,7 @@ void Weapon_Engineer(gentity_t *ent) {
           return;
         }
 
-        G_PrintClientSpammyCenterPrint(ent - g_entities, "Arming dynamite...");
+        G_PrintClientSpammyCenterPrint(clientNum, "Arming dynamite...");
 
         // Give health until it is full, don't
         // continue
@@ -2198,10 +2191,9 @@ void Weapon_Engineer(gentity_t *ent) {
         // bani
         if (friendlyObj && !enemyObj) {
           G_FreeEntity(traceEnt);
-          trap_SendServerCommand(ent - g_entities, "cp \"You cannot arm "
-                                                   "dynamite near a "
-                                                   "friendly objective!\" "
-                                                   "1");
+          trap_SendServerCommand(
+              clientNum,
+              "cp \"You cannot arm dynamite near a friendly objective!\" 1");
           return;
         }
 
@@ -2231,9 +2223,9 @@ void Weapon_Engineer(gentity_t *ent) {
         // two prints when dynamite IS near
         // objective
 
-        trap_SendServerCommand(ent - g_entities,
-                               "cp \"Dynamite is now armed with a "
-                               "30 second timer!\" 1");
+        trap_SendServerCommand(
+            clientNum,
+            "cp \"Dynamite is now armed with a 30 second timer!\" 1");
 
         // check if player is in trigger
         // objective field NERVE - SMF - made
@@ -2309,7 +2301,7 @@ void Weapon_Engineer(gentity_t *ent) {
                                                // dropped it
                 if (traceEnt->parent && traceEnt->parent->client) {
                   G_LogPrintf("Dynamite_Plant: %d\n",
-                              traceEnt->parent - g_entities); // OSP
+                              ClientNum(traceEnt->parent)); // OSP
                 }
                 traceEnt->parent =
                     ent; // give explode score to guy who armed it
@@ -2426,7 +2418,7 @@ void Weapon_Engineer(gentity_t *ent) {
                                                // dropped it
                 if (traceEnt->parent && traceEnt->parent->client) {
                   G_LogPrintf("Dynamite_Plant: %d\n",
-                              traceEnt->parent - g_entities); // OSP
+                              ClientNum(traceEnt->parent)); // OSP
                 }
                 traceEnt->parent =
                     ent; // give explode score to guy who armed it
@@ -2459,8 +2451,7 @@ void Weapon_Engineer(gentity_t *ent) {
           traceEnt->health += 3;
         }
 
-        G_PrintClientSpammyCenterPrint(ent - g_entities,
-                                       "Defusing dynamite...");
+        G_PrintClientSpammyCenterPrint(clientNum, "Defusing dynamite...");
 
         if (traceEnt->health >= 248) {
           // bani
@@ -2666,7 +2657,7 @@ void Weapon_Engineer(gentity_t *ent) {
                   AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
                   if (ent && ent->client) {
                     G_LogPrintf("Dynamite_Diffuse: %d\n",
-                                ent - g_entities); // OSP
+                                ClientNum(ent)); // OSP
                   }
                   G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
                   G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
@@ -2690,7 +2681,7 @@ void Weapon_Engineer(gentity_t *ent) {
                   AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
                   if (ent && ent->client) {
                     G_LogPrintf("Dynamite_Diffuse: %d\n",
-                                ent - g_entities); // OSP
+                                ClientNum(ent)); // OSP
                   }
                   G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
                   G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
