@@ -708,8 +708,7 @@ void CG_AddParticleToScene(cparticle_t *p, vec3_t org, float alpha) {
     }
 
     i = p->shaderAnim;
-    j = static_cast<int>(std::floor(static_cast<double>(ratio) *
-                                    shaderAnimCounts[p->shaderAnim]));
+    j = static_cast<int>(std::floor(ratio * shaderAnimCounts[p->shaderAnim]));
     p->pshader = shaderAnims[i][j];
 
     // JPW NERVE more particle testing

@@ -163,8 +163,8 @@ float CGaz::UpdateDrawMax(state_t const *state, float drawMaxCos) {
 float CGaz::GetSlickGravity(void) {
   if ((pm->pmext->groundTrace.surfaceFlags & SURF_SLICK) ||
       (ps->pm_flags & PMF_TIME_KNOCKBACK)) {
-    return static_cast<float>(
-        std::pow(static_cast<double>(ps->gravity) * pm->pmext->frametime, 2));
+    // this really wants to return a double for some reason
+    return static_cast<float>(std::pow(ps->gravity * pm->pmext->frametime, 2));
   }
 
   return 0;

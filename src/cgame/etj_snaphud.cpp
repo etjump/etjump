@@ -212,8 +212,7 @@ void Snaphud::UpdateMaxSnapZones(float wishspeed, pmove_t *pm) {
   // ps->speed can be modified by target_scale_velocity
   // default: 57 on ground, 7 in air (352 wishspeed)
   const int maxSnaphudZonesQ1 = static_cast<int>(
-      std::round(static_cast<double>(wishspeed / (1000.0 / pm->pmove_msec) *
-                                     pm->pmext->accel)) *
+      std::round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) *
           2 +
       1);
 
