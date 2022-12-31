@@ -2003,6 +2003,8 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
              const char *name, const char *message, qboolean localize,
              qboolean encoded) {
   const char *cmd;
+  auto clientNum = ClientNum(ent);
+  auto otherClientNum = ClientNum(other);
 
   if (!other || !other->inuse || !other->client) {
     return;
@@ -2016,10 +2018,10 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   {
     if (ent->s.clientNum != other->s.clientNum) {
       fireteamData_t *ft1, *ft2;
-      if (!G_IsOnFireteam(other - g_entities, &ft1)) {
+      if (!G_IsOnFireteam(otherClientNum, &ft1)) {
         return;
       }
-      if (!G_IsOnFireteam(ent - g_entities, &ft2)) {
+      if (!G_IsOnFireteam(clientNum, &ft2)) {
         return;
       }
       if (ft1 != ft2) {
@@ -2034,9 +2036,9 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
     cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "tchat" : "chat";
   }
 
-  trap_SendServerCommand(other - g_entities,
+  trap_SendServerCommand(otherClientNum,
                          va("%s \"%s%c%c%s\" %i %i", cmd, name, Q_COLOR_ESCAPE,
-                            color, message, ent - g_entities, localize));
+                            color, message, clientNum, localize));
 }
 
 void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,

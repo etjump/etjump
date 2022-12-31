@@ -225,7 +225,8 @@ void TrickjumpLines::stopRecord() {
   _routes.push_back(_currentRoute);
 
   CG_Printf("Stopped recording: %s\n", _currentRoute.name.c_str());
-  CG_Printf("Total of trail in this route : %d\n", _currentRoute.trails.size());
+  CG_Printf("Total of trail in this route : %d\n",
+            static_cast<int>(_currentRoute.trails.size()));
 
   setCurrentRouteToRender(countRoute() - 1);
   displayCurrentRoute(getCurrentRouteToRender());

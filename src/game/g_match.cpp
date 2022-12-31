@@ -397,9 +397,8 @@ char *G_createStats(gentity_t *refEnt) {
     }
   }
 
-  return (va("%d %d %d%s %d%s", refEnt - g_entities,
-             refEnt->client->sess.rounds, dwWeaponMask, strWeapInfo,
-             dwSkillPointMask, strSkillInfo));
+  return (va("%d %d %d%s %d%s", ClientNum(refEnt), refEnt->client->sess.rounds,
+             dwWeaponMask, strWeapInfo, dwSkillPointMask, strSkillInfo));
 }
 
 // Resets player's current stats

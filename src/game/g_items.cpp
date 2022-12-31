@@ -562,10 +562,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
               LT_SPECIAL_PICKUP_MOD)) {
           AddScore(ent->parent, WOLF_AMMO_UP);
           if (ent->parent && ent->parent->client) {
-            G_LogPrintf("Ammo_Pack: %d "
-                        "%d\n",
-                        ent->parent - g_entities,
-                        other - g_entities); // OSP
+            G_LogPrintf("Ammo_Pack: %d %d\n", ClientNum(ent->parent),
+                        ClientNum(other)); // OSP
           }
         }
         ent->parent->client->PCSpecialPickedUpCount++;
@@ -696,8 +694,8 @@ int Pickup_Health(gentity_t *ent, gentity_t *other) {
       if (!(ent->parent->client->PCSpecialPickedUpCount %
             MEDIC_SPECIAL_PICKUP_MOD)) {
         AddScore(ent->parent, WOLF_HEALTH_UP);
-        G_LogPrintf("Health_Pack: %d %d\n", ent->parent - g_entities,
-                    other - g_entities); // OSP
+        G_LogPrintf("Health_Pack: %d %d\n", ClientNum(ent->parent),
+                    ClientNum(other)); // OSP
       }
       G_AddSkillPoints(ent->parent, SK_FIRST_AID, 1.f);
       G_DebugAddSkillPoints(ent->parent, SK_FIRST_AID, 1.f,
@@ -1123,7 +1121,7 @@ void FinishSpawningItem(gentity_t *ent) {
                                       // place in signaling a dropped item
                                       //----(SA)	we don't use this (yet,
                                       // anyway) so I'm taking it so you
-                              // can
+                                      // can
   // specify a model for treasure items and clipboards
   // ent->s.modelindex2 = 0;
   // // zero indicates this isn't a dropped item

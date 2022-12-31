@@ -475,7 +475,7 @@ static void CG_SoundLoadSoundFiles(void) {
   }
   if (len > static_cast<int>(sizeof(bigTextBuffer))) {
     CG_Error("%s is too big, make it smaller (max = %i bytes)\n", filename,
-             sizeof(bigTextBuffer));
+             static_cast<int>(sizeof(bigTextBuffer)));
   }
   // load the file into memory
   trap_FS_Read(bigTextBuffer, len, f);
@@ -512,9 +512,8 @@ static void CG_SoundLoadSoundFiles(void) {
       continue;
     }
     if (len > static_cast<int>(sizeof(bigTextBuffer))) {
-      CG_Error("%s is too big, make it smaller (max = "
-               "%i bytes)\n",
-               filename, sizeof(bigTextBuffer));
+      CG_Error("%s is too big, make it smaller (max = %i bytes)\n", filename,
+               static_cast<int>(sizeof(bigTextBuffer)));
     }
     memset(bigTextBuffer, 0, sizeof(bigTextBuffer));
     trap_FS_Read(bigTextBuffer, len, f);

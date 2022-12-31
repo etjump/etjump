@@ -2877,6 +2877,8 @@ const char *findAndReplaceNametags(const char *text, const char *name);
 
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
+// Returns clientnum from client
+int ClientNum(gclient_t *client);
 
 // mainext.cpp
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
