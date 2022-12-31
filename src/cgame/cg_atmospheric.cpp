@@ -566,9 +566,11 @@ static void CG_SnowParticleRender(cg_atmosphericParticle_t *particle) {
 
   VectorCopy(particle->pos, start);
 
-  sinTumbling = sin(particle->pos[2] * 0.03125f * (0.5f * particle->weight));
-  cosTumbling = cos((particle->pos[2] + particle->pos[1]) * 0.03125f *
-                    (0.5f * particle->weight));
+  sinTumbling = static_cast<float>(
+      std::sin(particle->pos[2] * 0.03125 * (0.5 * particle->weight)));
+  cosTumbling =
+      static_cast<float>(std::cos((particle->pos[2] + particle->pos[1]) *
+                                  0.03125 * (0.5 * particle->weight)));
   start[0] += 24 * (1 - particle->deltaNormalized[2]) * sinTumbling;
   start[1] += 24 * (1 - particle->deltaNormalized[2]) * cosTumbling;
 

@@ -3436,7 +3436,9 @@ static void CG_DrawFlashDamage(void) {
   }
 
   if (cg.v_dmg_time > cg.time) {
-    redFlash = fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
+    redFlash = static_cast<float>(std::fabs(
+        cg.v_dmg_pitch *
+        static_cast<double>((cg.v_dmg_time - cg.time) / DAMAGE_TIME)));
 
     // blend the entire screen red
     if (redFlash > 5) {

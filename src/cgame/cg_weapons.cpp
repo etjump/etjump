@@ -738,8 +738,10 @@ static void CG_DynamiteTrail(centity_t *ent, const weaponInfo_t *wi) {
     mult = 0.004f * (cg.time - ent->currentState.effect1Time) / 30000.0f;
     trap_R_AddLightToScene(
         origin, 320,
-        fabs(sin((cg.time - ent->currentState.effect1Time) * mult)), 1.0, 0.0,
-        0.0, 0, REF_FORCE_DLIGHT);
+        static_cast<float>(std::fabs(std::sin(
+            static_cast<double>(cg.time - ent->currentState.effect1Time) *
+            mult))),
+        1.0, 0.0, 0.0, 0, REF_FORCE_DLIGHT);
   } else {
     mult = 1 - ((cg.time - ent->trailTime) / 15500.0f);
     //%	trap_R_AddLightToScene( origin, 10 + 300 *
@@ -4459,10 +4461,10 @@ void CG_NextWeapon_f(void) {
   //				present, but would discard the reload.  So
   // the when you switched 				back you'd have
   // to start the
-  // reload over.  This seems bad, however 				the delay
-  // for the current reload is already in effect, so you'd lose the reload time
-  // twice.  (the first pause for the current weapon reload, and the pause when
-  // you have to reload again 'cause you canceled this one)
+  // reload over.  This seems bad, however 				the
+  // delay for the current reload is already in effect, so you'd lose the reload
+  // time twice.  (the first pause for the current weapon reload, and the pause
+  // when you have to reload again 'cause you canceled this one)
 
   if (cg.snap->ps.weaponstate == WEAPON_RELOADING) {
     return;
