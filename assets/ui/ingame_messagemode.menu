@@ -83,7 +83,7 @@ menuDef
 	itemDef {
 		name		"efleftbackSay:"
 		group		GROUP_NAME
-		rect		$evalfloat((SUBWINDOW_X+8)) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-16) $evalfloat(20)
+		rect		$evalfloat((SUBWINDOW_X+8)) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-16) $evalfloat(22)
 		style		WINDOW_STYLE_FILLED
 		backcolor	.5 .5 .5 .2
 		visible		1
@@ -95,7 +95,7 @@ menuDef
 	itemDef {
 		name			"inChatMessageText"
       	group			GROUP_NAME
-      	rect			$evalfloat(SUBWINDOW_X+10) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-28) 20
+      	rect			$evalfloat(SUBWINDOW_X+10) $evalfloat(SUBWINDOW_Y+20) $evalfloat(SUBWINDOW_WIDTH-28) $evalfloat(22)
 		type			ITEM_TYPE_EDITFIELD
 		textfont		UI_FONT_COURBD_21
 		textstyle		ITEM_TEXTSTYLE_SHADOWED

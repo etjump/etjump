@@ -3917,11 +3917,11 @@ void Rect_ToWindowCoords(rectDef_t *rect, windowDef_t *window) {
   ToWindowCoords(&rect->x, &rect->y, window);
 }
 
-void Item_SetTextExtents(itemDef_t *item, int *width, int *height,
+void Item_SetTextExtents(itemDef_t *item, float *width, float *height,
                          const char *text) {
   const char *textPtr = (text) ? text : item->text;
 
-  if (textPtr == NULL) {
+  if (textPtr == nullptr) {
     return;
   }
 
@@ -3935,8 +3935,6 @@ void Item_SetTextExtents(itemDef_t *item, int *width, int *height,
       item->textalignment == ITEM_ALIGN_CENTER2 ||
       item->type == ITEM_TYPE_TIMEOUT_COUNTER) // ydnar
   {
-    //%	int originalWidth = DC->textWidth(item->text,
-    // item->textscale, 0);
     int originalWidth = DC->textWidth(textPtr, item->textscale, 0);
 
     if (item->type == ITEM_TYPE_OWNERDRAW &&
@@ -4024,17 +4022,17 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
                                qboolean hasCursor) {
   const char *p, *newLinePtr;
   char buff[1024], cursor;
-  int width, height, len, newLine, newLineWidth, cursorPos, startLine,
-      previousLine;
+  int len, newLine, cursorPos, startLine, previousLine;
   qboolean hasWhitespace;
-  float y;
+  float y, width, height, newLineWidth;
   vec4_t color, cursorColor;
   int linesCount = 0;
   fontInfo_t *font = DC->getActiveFont();
   float lineWidth = 0;
-  int lineHeight = 0;
+  float lineHeight = 0;
+  constexpr float DEFAULT_LINEHEIGHT = 11.0f;
 
-  newLinePtr = NULL;
+  newLinePtr = nullptr;
 
   Item_TextColor(item, &color);
   Item_SetTextExtents(item, &width, &height, textPtr);
@@ -4042,7 +4040,7 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
   if (item->lineHeight > 0) {
     lineHeight = item->lineHeight;
   } else {
-    lineHeight = height + 5;
+    lineHeight = DEFAULT_LINEHEIGHT;
   }
 
   if (hasCursor) {
@@ -4094,17 +4092,13 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
         ToWindowCoords(&item->textRect.x, &item->textRect.y, &item->window);
 
         buff[newLine] = '\0';
-        cursorPos = item->cursorPos - startLine; // position relatively to
-                                                 // line
+        cursorPos = item->cursorPos - startLine; // position relatively to line
         linesCount++;
 
-        // the line we are suppose to draw caret
-        // on
+        // the line we are supposed to draw caret on
         if (hasCursor && cursorPos >= 0 && newLine >= cursorPos) {
 
-          // avoid drawing caret on two
-          // different lines in the same
-          // time
+          // avoid drawing caret on two different lines in the same time
           if (newLine == cursorPos && !hasWhitespace) {
             DC->drawText(item->textRect.x, item->textRect.y, item->textscale,
                          color, buff, 0, 0, item->textStyle);
@@ -4112,15 +4106,7 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
             // caret jumps up
             if (item->cursorDir == -1) {
               item->cursorDir = 0;
-              // check
-              // for
-              // line
-              // overflow,
-              // snap to
-              // the
-              // last
-              // line
-              // character
+              // check for line overflow, snap to the last line character
               if (startLine > previousLine &&
                   previousLine + cursorPos > startLine) {
                 item->cursorPos = startLine - 1;
@@ -4134,8 +4120,7 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
                                    cursorPos, cursor, 0, item->textStyle);
           }
         }
-        // draw caret even if the last character
-        // on the line is space
+        // draw caret even if the last character on the line is space
         else if (hasCursor && (newLine + 1) == cursorPos && *p == ' ' &&
                  *newLinePtr == '\0') {
           DC->drawTextWithCursor(item->textRect.x, item->textRect.y,
@@ -4145,14 +4130,10 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
           // caret jumps down
           if (startLine > item->cursorPos && item->cursorDir == 1) {
             item->cursorDir = 0;
-            // calculate new
-            // caret position
+            // calculate new caret position
             cursorPos = item->cursorPos - previousLine;
-            // check if we can
-            // set caret on the
-            // same position
-            // under the current
-            // line
+            // check if we can set caret on the same position
+            // under the current line
             if (startLine + cursorPos > startLine + newLine) {
               item->cursorPos = startLine + newLine;
             } else {
@@ -4210,7 +4191,9 @@ void Item_Text_DrawAutoWrapped(itemDef_t *item, const char *textPtr,
   // calculate offset height for specific element
   if (hasCursor) {
     if (linesCount > 2) {
-      DC->setCVar("ui_mtOffset", va("%i", (linesCount - 2) * 10));
+      DC->setCVar(
+          "ui_mtOffset",
+          va("%i", (linesCount - 2) * static_cast<int>(DEFAULT_LINEHEIGHT)));
     } else {
       DC->setCVar("ui_mtOffset", va("%i", 0));
     }
@@ -4242,15 +4225,14 @@ void Item_Text_Wrapped_Paint(itemDef_t *item) {
   char text[1024];
   const char *p, *start, *textPtr;
   char buff[1024];
-  int width, height;
-  float x, y;
+  float x, y, width, height;
   vec4_t color;
 
   // now paint the text and/or any optional images
   // default to left
 
-  if (item->text == NULL) {
-    if (item->cvar == NULL) {
+  if (item->text == nullptr) {
+    if (item->cvar == nullptr) {
       return;
     } else {
       DC->getCVarString(item->cvar, text, sizeof(text));
@@ -4284,10 +4266,10 @@ void Item_Text_Wrapped_Paint(itemDef_t *item) {
 void Item_Text_Paint(itemDef_t *item) {
   char text[1024];
   const char *textPtr;
-  int height, width, size;
+  int size, seconds;
+  float height, width;
   vec4_t color;
-  int seconds;
-  menuDef_t *menu = (menuDef_t *)item->parent;
+  auto *menu = static_cast<menuDef_t *>(item->parent);
 
   if (item->window.flags & WINDOW_WRAPPED) {
     Item_Text_Wrapped_Paint(item);
@@ -4298,8 +4280,8 @@ void Item_Text_Paint(itemDef_t *item) {
     return;
   }
 
-  if (item->cvarLength || item->text == NULL) {
-    if (item->cvar == NULL) {
+  if (item->cvarLength || item->text == nullptr) {
+    if (item->cvar == nullptr) {
       return;
     } else {
       if (item->cvarLength) {
@@ -4334,10 +4316,8 @@ void Item_Text_Paint(itemDef_t *item) {
 
     // build string
     if (seconds <= 2) {
-      // Com_sprintf( text, 255, "^1%d", seconds );
       Com_sprintf(text, 255, item->text, va("^1%d^*", seconds));
     } else {
-      // Com_sprintf( text, 255, "%d", seconds );
       Com_sprintf(text, 255, item->text, va("%d", seconds));
     }
 
@@ -4353,53 +4333,6 @@ void Item_Text_Paint(itemDef_t *item) {
   }
 
   Item_TextColor(item, &color);
-
-  // FIXME: this is a fucking mess
-  /*
-      adjust = 0;
-      if (item->textStyle == ITEM_TEXTSTYLE_OUTLINED || item->textStyle
-     == ITEM_TEXTSTYLE_OUTLINESHADOWED) { adjust = 0.5;
-      }
-
-      if (item->textStyle == ITEM_TEXTSTYLE_SHADOWED || item->textStyle
-     == ITEM_TEXTSTYLE_OUTLINESHADOWED) { Fade(&item->window.flags,
-     &DC->Assets.shadowColor[3], DC->Assets.fadeClamp,
-     &item->window.nextTime, DC->Assets.fadeCycle, qfalse);
-     DC->drawText(item->textRect.x + DC->Assets.shadowX,
-     item->textRect.y + DC->Assets.shadowY, item->textscale,
-     DC->Assets.shadowColor, textPtr, adjust);
-      }
-  */
-
-  //	if (item->textStyle == ITEM_TEXTSTYLE_OUTLINED ||
-  // item->textStyle ==
-  // ITEM_TEXTSTYLE_OUTLINESHADOWED) { Fade(&item->window.flags,
-  //&item->window.outlineColor[3], DC->Assets.fadeClamp,
-  //&item->window.nextTime,
-  // DC->Assets.fadeCycle, qfalse);
-  //		/*
-  //		Text_Paint(item->textRect.x-1, item->textRect.y-1,
-  // item->textscale, item->window.foreColor, textPtr, adjust);
-  // Text_Paint(item->textRect.x, item->textRect.y-1, item->textscale,
-  // item->window.foreColor, textPtr, adjust);
-  // Text_Paint(item->textRect.x+1, item->textRect.y-1, item->textscale,
-  // item->window.foreColor, textPtr, adjust);
-  // Text_Paint(item->textRect.x-1, item->textRect.y, item->textscale,
-  // item->window.foreColor, textPtr, adjust);
-  // Text_Paint(item->textRect.x+1,
-  // item->textRect.y, item->textscale, item->window.foreColor, textPtr,
-  // adjust);
-  // Text_Paint(item->textRect.x-1, item->textRect.y+1, item->textscale,
-  // item->window.foreColor, textPtr,
-  // adjust); 		Text_Paint(item->textRect.x, item->textRect.y+1,
-  // item->textscale, item->window.foreColor, textPtr, adjust);
-  // Text_Paint(item->textRect.x+1, item->textRect.y+1, item->textscale,
-  // item->window.foreColor, textPtr, adjust);
-  //		*/
-  //		DC->drawText(item->textRect.x - 1, item->textRect.y + 1,
-  // item->textscale * 1.02, item->window.outlineColor, textPtr,
-  // adjust);
-  //	}
 
   DC->drawText(item->textRect.x, item->textRect.y, item->textscale, color,
                textPtr, 0, 0, item->textStyle);
