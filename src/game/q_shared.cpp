@@ -361,21 +361,24 @@ int COM_Compress(char *data_p) {
   datai = datao = data_p;
   if (datai) {
     while ((c = static_cast<unsigned char>(*datai)) != 0) {
-      if (!(c == 13 || c == 10)) {
+      if (c == 13 || c == 10) {
+        *datao = static_cast<char>(c);
+        datao++;
+        datai++;
+        size++;
         // skip double slash comments
-        if (c == '/' && datai[1] == '/') {
-          while (*datai && *datai != '\n') {
-            datai++;
-          }
-          // skip /* */ comments
-        } else if (c == '/' && datai[1] == '*') {
-          datai += 2; // Arnout: skip over '/*'
-          while (*datai && (*datai != '*' || datai[1] != '/')) {
-            datai++;
-          }
-          if (*datai) {
-            datai += 2;
-          }
+      } else if (c == '/' && datai[1] == '/') {
+        while (*datai && *datai != '\n') {
+          datai++;
+        }
+        // skip /* */ comments
+      } else if (c == '/' && datai[1] == '*') {
+        datai += 2; // Arnout: skip over '/*'
+        while (*datai && (*datai != '*' || datai[1] != '/')) {
+          datai++;
+        }
+        if (*datai) {
+          datai += 2;
         }
       } else {
         *datao = static_cast<char>(c);
