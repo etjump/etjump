@@ -247,35 +247,23 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
   vec4_t sideColor = {0.145f, 0.172f, 0.145f, 1.f};
   DC->setColor(sideColor);
   DC->drawHandlePic(0, 0, SCREEN_WIDTH, 480, bg_loadscreenbg);
-  DC->setColor(NULL);
+  DC->setColor(nullptr);
 
   BG_PanelButtonsRender(loadpanelButtonsLayout);
 
   if (interactive) {
-    DC->drawHandlePic(DC->cursorx, DC->cursory, 32, 32, DC->Assets.cursor);
+    DC->drawHandlePic(static_cast<float>(DC->cursorx),
+                      static_cast<float>(DC->cursory), 32, 32,
+                      DC->Assets.cursor);
   }
 
   DC->getConfigString(CS_SERVERINFO, buffer, sizeof(buffer));
   if (*buffer) {
     const char *str;
-    qboolean enabled = qfalse;
     float x, y;
     int i;
-    //		vec4_t clr1 = { 41/255.f,	51/255.f,
-    // 43/255.f,
-    // 204/255.f
-    //}; 		vec4_t clr2 = { 0.f,		0.f,
-    // 0.f, 225/255.f
-    //};
     vec4_t clr3 = {1.f, 1.f, 1.f, .6f};
 
-    /*		CG_FillRect( 8, 8, 230, 16, clr1 );
-            CG_DrawRect_FixedBorder( 8, 8, 230, 16, 1,
-       colorMdGrey );
-
-            CG_FillRect( 8, 23, 230, 210, clr2 );
-            CG_DrawRect_FixedBorder( 8, 23, 230, 216, 1,
-       colorMdGrey );*/
     y = 322;
     CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.22f, 0.22f, clr3,
                               GAME_TAG, 0, 0, 0, &bg_loadscreenfont1);
@@ -300,11 +288,6 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
     }
 
     y = 417;
-
-    if (enabled) {
-      x = SCREEN_OFFSET_X + 489;
-      CG_DrawPic(x, y, 16, 16, bg_filter_lv);
-    }
 
     str = Info_ValueForKey(buffer, "sv_punkbuster");
     if (str && *str && Q_atoi(str)) {
@@ -331,7 +314,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
     trap_R_SetColor(colorBlack);
     CG_DrawPic(SCREEN_OFFSET_X + 16 + 1, 2 + 1, 192, 144, bg_mappic);
 
-    trap_R_SetColor(NULL);
+    trap_R_SetColor(nullptr);
     CG_DrawPic(SCREEN_OFFSET_X + 16, 2, 192, 144, bg_mappic);
 
     CG_DrawPic(SCREEN_OFFSET_X + 16 + 80, 2 + 6, 20, 20, bg_pin);

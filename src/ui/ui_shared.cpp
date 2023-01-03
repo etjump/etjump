@@ -3657,50 +3657,39 @@ static rectDef_t *Item_CorrectedTextRect(itemDef_t *item) {
 
 void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
   int i;
-  itemDef_t *item = NULL;
-  qboolean inHandler = qfalse;
+  itemDef_t *item = nullptr;
 
-  Menu_HandleMouseMove(menu, DC->cursorx,
-                       DC->cursory); // NERVE - SMF - fix for focus not
-                                     // resetting on unhidden buttons
+  // NERVE - SMF - fix for focus not resetting on unhidden buttons
+  Menu_HandleMouseMove(menu, DC->cursorx, DC->cursory);
 
-  if (inHandler) {
-    return;
-  }
-
-  // ydnar: enter key handling for the window supercedes item enter
-  // handling
+  // ydnar: enter key handling for the window supersedes item enter handling
   if (down && ((key == K_ENTER || key == K_KP_ENTER) && menu->onEnter)) {
     itemDef_t it;
     it.parent = menu;
-    Item_RunScript(&it, NULL, menu->onEnter);
+    Item_RunScript(&it, nullptr, menu->onEnter);
     return;
   }
 
-  inHandler = qtrue;
   if (g_waitingForKey && down) {
     Item_Bind_HandleKey(g_bindItem, key, down);
-    inHandler = qfalse;
     return;
   }
 
   if (g_editingField && down) {
     if (!Item_TextField_HandleKey(g_editItem, key)) {
       g_editingField = qfalse;
-      g_editItem = NULL;
-      inHandler = qfalse;
+      g_editItem = nullptr;
       return;
     } else if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
       g_editingField = qfalse;
-      g_editItem = NULL;
-      Display_MouseMove(NULL, DC->cursorx, DC->cursory);
+      g_editItem = nullptr;
+      Display_MouseMove(nullptr, DC->cursorx, DC->cursory);
     } else if (key == K_TAB || key == K_UPARROW || key == K_DOWNARROW) {
       return;
     }
   }
 
-  if (menu == NULL) {
-    inHandler = qfalse;
+  if (menu == nullptr) {
     return;
   }
 
@@ -3715,7 +3704,6 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
       inHandleKey = qtrue;
       Menus_HandleOOBClick(menu, key, down);
       inHandleKey = qfalse;
-      inHandler = qfalse;
       return;
     }
   }
@@ -3727,16 +3715,14 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     }
   }
 
-  if (item != NULL) {
+  if (item != nullptr) {
     if (Item_HandleKey(item, key, down)) {
       Item_Action(item);
-      inHandler = qfalse;
       return;
     }
   }
 
   if (!down) {
-    inHandler = qfalse;
     return;
   }
 
@@ -3749,7 +3735,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     if (key > 0 && key <= 255 && menu->onKey[key]) {
       itemDef_t it;
       it.parent = menu;
-      Item_RunScript(&it, NULL, menu->onKey[key]);
+      Item_RunScript(&it, nullptr, menu->onKey[key]);
       return;
     }
 
@@ -3762,12 +3748,11 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     for (i = 0; i < menu->itemCount; i++) {
       it = menu->items[i];
 
-      // is the hotkey for this the same as what was
-      // pressed?
+      // is the hotkey for this the same as what was pressed?
       if (it->hotkey == key
           // and is this item visible?
           && Item_EnableShowViaCvar(it, CVAR_SHOW)) {
-        Item_RunScript(it, NULL, it->onKey);
+        Item_RunScript(it, nullptr, it->onKey);
         return;
       }
     }
@@ -3798,7 +3783,7 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
       if (!g_waitingForKey && menu->onESC) {
         itemDef_t it;
         it.parent = menu;
-        Item_RunScript(&it, NULL, menu->onESC);
+        Item_RunScript(&it, nullptr, menu->onESC);
       }
       break;
 
@@ -3901,7 +3886,6 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
     case K_AUX16:
       break;
   }
-  inHandler = qfalse;
 }
 
 void ToWindowCoords(float *x, float *y, windowDef_t *window) {

@@ -3621,57 +3621,6 @@ float G_GetWeaponSpread(int weapon) {
 #define K43SCOPE_SPREAD G_GetWeaponSpread(WP_K43_SCOPE)
 #define K43SCOPE_DAMAGE G_GetWeaponDamage(WP_K43_SCOPE)
 
-void RubbleFlagCheck(gentity_t *ent, trace_t tr) {
-  qboolean is_valid = qfalse;
-  int type = 0;
-
-  // (SA) moving client-side
-
-  return;
-
-  if (tr.surfaceFlags & SURF_RUBBLE || tr.surfaceFlags & SURF_GRAVEL) {
-    is_valid = qtrue;
-    type = 4;
-  } else if (tr.surfaceFlags & SURF_METAL) {
-    //----(SA)	removed
-    //		is_valid = qtrue;
-    //		type = 2;
-  } else if (tr.surfaceFlags & SURF_WOOD) {
-    is_valid = qtrue;
-    type = 1;
-  }
-
-  if (is_valid && ent->client &&
-      (ent->client->ps.persistant[PERS_HWEAPON_USE])) {
-    if (rand() % 100 > 75) {
-      gentity_t *sfx;
-      vec3_t start;
-      vec3_t dir;
-
-      sfx = G_Spawn();
-
-      sfx->s.density = type;
-
-      VectorCopy(tr.endpos, start);
-
-      VectorCopy(muzzleTrace, dir);
-      VectorNegate(dir, dir);
-
-      G_SetOrigin(sfx, start);
-      G_SetAngle(sfx, dir);
-
-      G_AddEvent(sfx, EV_SHARD, DirToByte(dir));
-
-      sfx->think = G_FreeEntity;
-      sfx->nextthink = level.time + 1000;
-
-      sfx->s.frame = 3 + (rand() % 3);
-
-      trap_LinkEntity(sfx);
-    }
-  }
-}
-
 /*
 ==============
 EmitterCheck
@@ -3782,18 +3731,19 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
 
   qboolean waslinked = qfalse;
 
-  // bani - prevent shooting ourselves in the head when prone, firing
-  // through a breakable
+  // bani - prevent shooting ourselves in the head when prone,
+  // firing through a breakable
   if (g_entities[attacker->s.number].client &&
       g_entities[attacker->s.number].r.linked == qtrue) {
     g_entities[attacker->s.number].r.linked = qfalse;
     waslinked = qtrue;
   }
 
-  G_Trace(source, &tr, start, NULL, NULL, end, source->s.number, MASK_SOLID);
+  G_Trace(source, &tr, start, nullptr, nullptr, end, source->s.number,
+          MASK_SOLID);
 
-  // bani - prevent shooting ourselves in the head when prone, firing
-  // through a breakable
+  // bani - prevent shooting ourselves in the head when prone,
+  // firing through a breakable
   if (waslinked == qtrue) {
     g_entities[attacker->s.number].r.linked = qtrue;
   }
@@ -3804,8 +3754,6 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     VectorCopy(tr.endpos, tent->s.origin2);
     tent->s.otherEntityNum2 = attacker->s.number;
   }
-
-  RubbleFlagCheck(attacker, tr);
 
   traceEnt = &g_entities[tr.entityNum];
 
@@ -3819,7 +3767,6 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
     vec3_t shotvec;
     float scale;
 
-    // VectorSubtract( tr.endpos, start, shotvec );
     VectorSubtract(tr.endpos, muzzleTrace, shotvec);
     dist = VectorLengthSquared(shotvec);
 
@@ -3855,13 +3802,12 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
       scale = 0.5f;
     }
 
-    damage *= scale;
+    damage *= static_cast<int>(scale);
 #endif
   }
 
   // send bullet impact
-  if (traceEnt->takedamage &&
-      traceEnt->client /*&& !(traceEnt->flags & FL_DEFENSE_GUARD)*/) {
+  if (traceEnt->takedamage && traceEnt->client) {
     tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
     tent->s.eventParm = traceEnt->s.number;
 
@@ -3869,8 +3815,8 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
       hitClient = qtrue;
     }
 
-    if (g_debugBullets.integer >= 2) // show hit player bb
-    {
+    // show hit player bb
+    if (g_debugBullets.integer >= 2) {
       gentity_t *bboxEnt;
       vec3_t b1, b2;
       VectorCopy(traceEnt->r.currentOrigin, b1);
@@ -3902,7 +3848,7 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
 
     tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 
-    G_Trace(source, &tr2, start, NULL, NULL, end, source->s.number,
+    G_Trace(source, &tr2, start, nullptr, nullptr, end, source->s.number,
             MASK_WATER | MASK_SOLID);
 
     if ((tr.entityNum != tr2.entityNum && tr2.fraction != 1)) {
@@ -3929,16 +3875,14 @@ qboolean Bullet_Fire_Extended(gentity_t *source, gentity_t *attacker,
              (distance_falloff ? DAMAGE_DISTANCEFALLOFF : 0),
              GetAmmoTableData(attacker->s.weapon)->mod);
 
-    // allow bullets to "pass through" func_explosives if they
-    // break by taking another simultanious shot
+    // allow bullets to "pass through" func_explosives if they break
+    // by taking another simultaneous shot
     if (traceEnt->s.eType == ET_EXPLOSIVE) {
       if (traceEnt->health <= damage) {
-        // start new bullet at position this hit
-        // the bmodel and continue to the end
-        // position (ignoring shot-through
-        // bmodel in next trace) spread = 0 as
-        // this is an extension of an already
-        // spread shot
+        // start new bullet at position this
+        // hit the bmodel and continue to the end position
+        // (ignoring shot-through bmodel in next trace)
+        // spread = 0 as this is an extension of an already spread shot
         return Bullet_Fire_Extended(traceEnt, attacker, tr.endpos, end, 0,
                                     damage, distance_falloff);
       }

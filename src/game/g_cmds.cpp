@@ -4325,16 +4325,17 @@ void Cmd_Call_f(gentity_t *ent) {
 void Cmd_PrivateMessage_f(gentity_t *ent) {
   int clientNum = -1;
   char cmd[MAX_TOKEN_CHARS] = "\0";
-  gentity_t *other = NULL;
-  char *msg = NULL;
+  gentity_t *other = nullptr;
+  char *msg = nullptr;
+  auto selfNum = ClientNum(ent);
 
   if (trap_Argc() < 3) {
-    CP("print \"^7usage: ^3m ^7<name> <message>.\n\"");
+    Printer::SendConsoleMessage(selfNum, "^7usage: ^3m ^7<name> <message>.\n");
     return;
   }
 
   if (ent && ent->client->sess.muted && g_mute.integer & 1) {
-    CP("print \"^NOTE: ^7You are muted.\n\"");
+    Printer::SendConsoleMessage(selfNum, "^3NOTE: ^7You are muted.\n");
     return;
   }
 
@@ -4347,33 +4348,27 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!ent) {
     msg = ConcatArgs(2);
-    CPx(other - g_entities, va("chat \"^7Private message from "
-                               "server console^7: ^3%s\"",
-                               msg));
-
-    G_Printf(va("Private message to %s^7: ^3%s\"", other->client->pers.netname,
-                msg));
+    Printer::SendChatMessage(
+        ClientNum(other),
+        va("^7Private message from server console: ^3%s\n", msg));
+    G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
+             msg);
     return;
   }
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    CPx(other - g_entities, va("chat \"^7Private message from %s^7: ^3%s\"",
-                               ent->client->pers.netname, msg));
+    Printer::SendChatMessage(ClientNum(other),
+                             va("^7Private message from %s^7: ^3%s\n",
+                                ent->client->pers.netname, msg));
     if (ent) {
-      CP(va("chat \"^7Private message to %s^7: ^3%s\"",
-            other->client->pers.netname, msg));
+      Printer::SendChatMessage(selfNum, va("^7Private message to %s^7: ^3%s\n",
+                                           other->client->pers.netname, msg));
     }
   } else {
-    CP(va("print \"Private message to %s was ignored by the "
-          "player.\n\"",
-          other->client->pers.netname));
-  }
-  if (ent) {
-    // G_LogPrintf("%s -> %s: %s", ent->client->pers.netname,
-    // other->client->pers.netname, msg);
-  } else {
-    G_LogPrintf("Console -> %s: %s", other->client->pers.netname, msg);
+    Printer::SendConsoleMessage(
+        selfNum, va("Private message to %s was ignored by the player.\n",
+                    other->client->pers.netname));
   }
 }
 

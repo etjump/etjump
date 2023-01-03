@@ -260,9 +260,8 @@ CG_DrawCursorHints
 */
 void CG_DrawCursorhint(rectDef_t *rect) {
   float *color;
-  qhandle_t icon, icon2 = 0;
+  qhandle_t icon;
   float scale, halfscale;
-  // qboolean	redbar = qfalse;
   qboolean yellowbar = qfalse;
 
   if (!cg_cursorHints.integer) {
@@ -421,11 +420,9 @@ void CG_DrawCursorhint(rectDef_t *rect) {
 
     // Mad Doc - TDF
     case HINT_LOCKPICK:
-      icon = cgs.media.doorLockHintShader; // TAT 1/30/2003 -
-                                           // use the locked
+      icon = cgs.media.doorLockHintShader; // TAT 1/30/2003 - use the locked
                                            // door hint cursor
-      yellowbar = qtrue;                   // draw the status bar in
-                                           // yellow so it shows up better
+      yellowbar = qtrue; // draw the status bar in yellow, so it shows up better
       break;
 
     case HINT_ACTIVATE:
@@ -442,12 +439,12 @@ void CG_DrawCursorhint(rectDef_t *rect) {
   // color
   color = CG_FadeColor(cg.cursorHintTime, cg.cursorHintFade);
   if (!color) {
-    trap_R_SetColor(NULL);
+    trap_R_SetColor(nullptr);
     return;
   }
 
   if (cg_cursorHints.integer == 3) {
-    color[3] *= 0.5 + 0.5 * sin((float)cg.time / 150.0);
+    color[3] *= static_cast<float>(0.5 + 0.5 * std::sin(cg.time / 150.0));
   }
 
   // size
@@ -456,11 +453,11 @@ void CG_DrawCursorhint(rectDef_t *rect) {
     scale = halfscale = 0;
   } else {
     if (cg_cursorHints.integer == 2) {
-      scale =
-          (float)((cg.cursorHintTime) % 1000) / 100.0f; // one way size pulse
+      scale = static_cast<float>((cg.cursorHintTime) % 1000) /
+              100.0f; // one way size pulse
     } else {
       scale = CURSORHINT_SCALE *
-              (0.5 + 0.5 * sin((float)cg.time / 150.0)); // sin pulse
+              (0.5 + 0.5 * std::sin(cg.time / 150.0)); // sin pulse
     }
     halfscale = scale * 0.5f;
   }
@@ -470,12 +467,7 @@ void CG_DrawCursorhint(rectDef_t *rect) {
   CG_DrawPic(rect->x - halfscale, rect->y - halfscale, rect->w + scale,
              rect->h + scale, icon);
 
-  if (icon2) {
-    CG_DrawPic(rect->x - halfscale, rect->y - halfscale, rect->w + scale,
-               rect->h + scale, icon2);
-  }
-
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
 
   // draw status bar under the cursor hint
   if (cg.cursorHintValue) {
@@ -484,8 +476,8 @@ void CG_DrawCursorhint(rectDef_t *rect) {
     } else {
       Vector4Set(color, 0, 0, 1, 0.5f);
     }
-    CG_FilledBar(rect->x, rect->y + rect->h + 4, rect->w, 8, color, NULL, NULL,
-                 (float)cg.cursorHintValue / 255.0f, 0);
+    CG_FilledBar(rect->x, rect->y + rect->h + 4, rect->w, 8, color, nullptr,
+                 nullptr, static_cast<float>(cg.cursorHintValue) / 255.0f, 0);
   }
 }
 

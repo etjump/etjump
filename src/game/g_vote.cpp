@@ -97,14 +97,16 @@ int G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2) {
 
 // Voting help summary.
 void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
-  int i, rows = 0,
-         num_cmds =
-             sizeof(aVoteInfo) / sizeof(aVoteInfo[0]) - 1; // Remove terminator;
+  int i, rows = 0;
+  int num_cmds =
+      sizeof(aVoteInfo) / sizeof(aVoteInfo[0]) - 1; // Remove terminator;
   int vi[100]; // Just make it large static.
+  auto clientNum = ClientNum(ent);
 
   if (fShowVote) {
-    CP("print \"\nValid ^3callvote^7 commands "
-       "are:\n^3----------------------------\n\"");
+    Printer::SendConsoleMessage(clientNum,
+                                "\nValid ^3callvote^7 commands are:\n"
+                                "^3----------------------------\n");
   }
 
   for (i = 0; i < num_cmds; i++) {
@@ -119,35 +121,35 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
   if (num_cmds % HELP_COLUMNS) {
     rows++;
   }
-  if (rows < 0) {
-    return;
-  }
 
   for (i = 0; i < rows; i++) {
     if (i + rows * 3 + 1 <= num_cmds) {
-      G_cpmPrintf(ent, "^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                  aVoteInfo[vi[i + rows]].pszVoteName,
-                  aVoteInfo[vi[i + rows * 2]].pszVoteName,
-                  aVoteInfo[vi[i + rows * 3]].pszVoteName);
+      Printer::SendConsoleMessage(
+          clientNum, va("^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                        aVoteInfo[vi[i + rows]].pszVoteName,
+                        aVoteInfo[vi[i + rows * 2]].pszVoteName,
+                        aVoteInfo[vi[i + rows * 3]].pszVoteName));
     } else if (i + rows * 2 + 1 <= num_cmds) {
-      G_cpmPrintf(ent, "^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                  aVoteInfo[vi[i + rows]].pszVoteName,
-                  aVoteInfo[vi[i + rows * 2]].pszVoteName);
+      Printer::SendConsoleMessage(
+          clientNum, va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                        aVoteInfo[vi[i + rows]].pszVoteName,
+                        aVoteInfo[vi[i + rows * 2]].pszVoteName));
     } else if (i + rows + 1 <= num_cmds) {
-      G_cpmPrintf(ent, "^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                  aVoteInfo[vi[i + rows]].pszVoteName);
+      Printer::SendConsoleMessage(
+          clientNum, va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                        aVoteInfo[vi[i + rows]].pszVoteName));
     } else {
-      G_cpmPrintf(ent, "^5%-17s", aVoteInfo[vi[i]].pszVoteName);
+      Printer::SendConsoleMessage(clientNum,
+                                  va("^5%-17s", aVoteInfo[vi[i]].pszVoteName));
     }
   }
 
   if (fShowVote) {
-    CP("print \"\nUsage: ^3\\callvote <command> "
-       "<params>\n^7For current "
-       "settings/help, use: ^3\\callvote <command> ?\n\n\"");
+    Printer::SendConsoleMessage(
+        clientNum,
+        "\n\nUsage: ^3callvote <command> <params>\n"
+        "^7For current settings/help, use: ^3callvote <command> ?\n");
   }
-
-  return;
 }
 
 // Set disabled votes for client UI

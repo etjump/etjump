@@ -5,7 +5,6 @@ add_library(ui MODULE
 	"ui_gameinfo.cpp"
 	"ui_loadpanel.cpp"
 	"ui_main.cpp"
-	"ui_players.cpp"
 	"ui_shared.cpp"
 	"ui_syscalls.cpp"
 	"ui_util.cpp"
