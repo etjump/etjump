@@ -6013,24 +6013,17 @@ void CG_MissileHitWallSmall(int weapon, int clientNum, vec3_t origin,
   qhandle_t mark;
   sfxHandle_t sfx;
   float radius;
-  vec3_t lightColor;
   vec3_t sprOrg, sprVel;
   vec4_t projection, color;
 
   mark = 0;
   radius = 32;
   sfx = 0;
-  lightColor[0] = 1;
-  lightColor[1] = 1;
-  lightColor[2] = 0;
 
   // set defaults
   sfx = cgs.media.sfx_rockexp;
   mark = cgs.media.burnMarkShader;
   radius = 80;
-  lightColor[0] = 0.75;
-  lightColor[1] = 0.5;
-  lightColor[2] = 0.1;
 
   // Ridah, explosion sprite animation
   VectorMA(origin, 16, dir, sprOrg);
