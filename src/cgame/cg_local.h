@@ -2239,7 +2239,6 @@ extern vmCvar_t cg_coronas;
 extern vmCvar_t cg_buildScript;
 extern vmCvar_t cg_paused;
 extern vmCvar_t cg_blood;
-extern vmCvar_t cg_predictItems;
 extern vmCvar_t cg_deferPlayers;
 extern vmCvar_t cg_teamChatsOnly;
 extern vmCvar_t cg_noVoiceChats; // NERVE - SMF

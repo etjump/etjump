@@ -164,7 +164,6 @@ vmCvar_t cg_coronafardist;
 vmCvar_t cg_coronas;
 vmCvar_t cg_paused;
 vmCvar_t cg_blood;
-vmCvar_t cg_predictItems;
 vmCvar_t cg_deferPlayers;
 vmCvar_t cg_drawTeamOverlay;
 vmCvar_t cg_enableBreath;
@@ -694,7 +693,6 @@ cvarTable_t cvarTable[] = {
     {&cg_teamChatHeight, "cg_teamChatHeight", "8", CVAR_ARCHIVE},
     {&cg_coronafardist, "cg_coronafardist", "1536", CVAR_ARCHIVE},
     {&cg_coronas, "cg_coronas", "1", CVAR_ARCHIVE},
-    {&cg_predictItems, "cg_predictItems", "1", CVAR_ARCHIVE},
     {&cg_deferPlayers, "cg_deferPlayers", "1", CVAR_ARCHIVE},
     {&cg_drawTeamOverlay, "cg_drawTeamOverlay", "2", CVAR_ARCHIVE},
     {&cg_stats, "cg_stats", "0", 0},
@@ -1167,12 +1165,12 @@ void CG_UpdateCvars(void) {
         if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
             cv->vmCvar == &int_cl_timenudge ||
             cv->vmCvar == &int_cl_maxpackets ||
-            cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
-            cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-            cv->vmCvar == &etj_nofatigue || cv->vmCvar == &etj_drawCGaz ||
-            cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
-            cv->vmCvar == &int_m_pitch || cv->vmCvar == &etj_loadviewangles ||
-            cv->vmCvar == &etj_hideMe || cv->vmCvar == &etj_noclipScale ||
+            cv->vmCvar == &cg_autoactivate || cv->vmCvar == &pmove_fixed ||
+            cv->vmCvar == &com_maxfps || cv->vmCvar == &etj_nofatigue ||
+            cv->vmCvar == &etj_drawCGaz || cv->vmCvar == &cl_yawspeed ||
+            cv->vmCvar == &cl_freelook || cv->vmCvar == &int_m_pitch ||
+            cv->vmCvar == &etj_loadviewangles || cv->vmCvar == &etj_hideMe ||
+            cv->vmCvar == &etj_noclipScale ||
             cv->vmCvar == &etj_enableTimeruns ||
             cv->vmCvar == &etj_noActivateLean ||
             cv->vmCvar == &etj_touchPickupWeapons ||
@@ -1226,7 +1224,6 @@ void CG_setClientFlags(void) {
          (((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
           ((cg_autoAction.integer & AA_STATSDUMP) ? CGF_STATSDUMP : 0) |
           ((cg_autoactivate.integer > 0) ? CGF_AUTOACTIVATE : 0) |
-          ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
           ((etj_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
           ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
           ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |

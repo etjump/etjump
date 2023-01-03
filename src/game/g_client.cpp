@@ -1865,8 +1865,6 @@ void ClientUserinfoChanged(int clientNum) {
   client->pers.autoActivate = (client->pers.clientFlags & CGF_AUTOACTIVATE)
                                   ? PICKUP_TOUCH
                                   : PICKUP_ACTIVATE;
-  client->pers.predictItemPickup =
-      ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0) ? qtrue : qfalse;
 
   if (client->pers.clientFlags & CGF_AUTORELOAD) {
     client->pers.bAutoReloadAux = qtrue;
@@ -1908,7 +1906,7 @@ void ClientUserinfoChanged(int clientNum) {
   ClientCleanName(s, client->pers.netname, sizeof(client->pers.netname));
 
   if (client->pers.connected == CON_CONNECTED) {
-    if (strcmp(oldname, client->pers.netname)) {
+    if (strcmp(oldname, client->pers.netname) != 0) {
 
       ClientNameChanged(ent);
 

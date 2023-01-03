@@ -851,12 +851,11 @@ struct etj_votingInfo_t {
 // on each level change or team change at ClientBegin()
 typedef struct {
   clientConnected_t connected;
-  usercmd_t cmd;              // we would lose angles if not persistant
-  usercmd_t oldcmd;           // previous command processed by pmove()
-  qboolean localClient;       // true if "ip" info key is "localhost"
-  qboolean initialSpawn;      // the first spawn should be at a cool location
-  qboolean predictItemPickup; // based on cg_predictItems userinfo
-  qboolean pmoveFixed;        //
+  usercmd_t cmd;         // we would lose angles if not persistant
+  usercmd_t oldcmd;      // previous command processed by pmove()
+  qboolean localClient;  // true if "ip" info key is "localhost"
+  qboolean initialSpawn; // the first spawn should be at a cool location
+  qboolean pmoveFixed;
   qboolean nofatigue;
   qboolean cgaz;
   qboolean loadViewAngles;
