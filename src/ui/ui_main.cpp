@@ -2810,7 +2810,6 @@ static void UI_OwnerDraw(float x, float y, float w, float h, float text_x,
   rect.h = h;
 
   switch (ownerDraw) {
-    break;
     case UI_EFFECTS:
       UI_DrawEffects(&rect, scale, color);
       break;
