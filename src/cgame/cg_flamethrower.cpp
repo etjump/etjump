@@ -1036,10 +1036,7 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
         balpha = 1.0;
       }
 
-      if (!skip) {
-        // draw the sprite
-        CG_AddFlameSpriteToScene(f, lifeFrac, alpha);
-      }
+      CG_AddFlameSpriteToScene(f, lifeFrac, balpha);
       // update the sizeRate
       f->sizeRate = GET_FLAME_SIZE_SPEED(f->sizeMax);
     }
