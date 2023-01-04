@@ -1,6 +1,5 @@
 #include "q_shared.h"
 #include "bg_public.h"
-#include "bg_classes.h"
 
 bg_playerclass_t bg_allies_playerclasses[NUM_PLAYER_CLASSES] = {
     {

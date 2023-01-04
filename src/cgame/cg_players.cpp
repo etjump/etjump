@@ -7,8 +7,6 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
-#include "../game/bg_classes.h"
-#include "../game/bg_classes.h"
 
 #define SWING_RIGHT 1
 #define SWING_LEFT 2

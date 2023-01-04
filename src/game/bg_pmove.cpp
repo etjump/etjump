@@ -2334,23 +2334,20 @@ static void PM_CheckDuck(void) {
 PM_Footsteps
 ===============
 */
-static void PM_Footsteps(void) {
+static void PM_Footsteps() {
   float bobmove;
   int old;
   qboolean footstep;
-  qboolean iswalking;
   int animResult = -1;
 
   if (pm->ps->eFlags & EF_DEAD) {
 
-    // if ( pm->ps->groundEntityNum == ENTITYNUM_NONE )
     if (pm->ps->pm_flags & PMF_FLAILING) {
       animResult = BG_AnimScriptAnimation(pm->ps, pm->character->animModelInfo,
                                           ANIM_MT_FLAILING, qtrue);
 
       if (!pm->ps->pm_time) {
-        pm->ps->pm_flags &= ~PMF_FLAILING; // the eagle has
-                                           // landed
+        pm->ps->pm_flags &= ~PMF_FLAILING; // the eagle has landed
       }
     } else if (!pm->ps->pm_time &&
                !(pm->ps->pm_flags & PMF_LIMBO)) // DHM - Nerve :: before going
@@ -2370,8 +2367,6 @@ static void PM_Footsteps(void) {
 
     return;
   }
-
-  iswalking = qfalse;
 
   //
   // calculate speed and cycle to be used for
@@ -2409,15 +2404,9 @@ static void PM_Footsteps(void) {
       if (pm->ps->velocity[2] >= 0) {
         animResult = BG_AnimScriptAnimation(
             pm->ps, pm->character->animModelInfo, ANIM_MT_CLIMBUP, qtrue);
-        // BG_PlayAnimName( pm->ps,
-        // "BOTH_CLIMB", ANIM_BP_BOTH, qfalse,
-        // qtrue, qfalse );
       } else if (pm->ps->velocity[2] < 0) {
         animResult = BG_AnimScriptAnimation(
             pm->ps, pm->character->animModelInfo, ANIM_MT_CLIMBDOWN, qtrue);
-        // BG_PlayAnimName( pm->ps,
-        // "BOTH_CLIMB_DOWN", ANIM_BP_BOTH,
-        // qfalse, qtrue, qfalse );
       }
     }
 
@@ -2430,8 +2419,7 @@ static void PM_Footsteps(void) {
       pm->ps->bobCycle = 0; // start at beginning of cycle again
     }
     if (pm->xyspeed > 120) {
-      return; // continue what they were doing last
-              // frame, until we stop
+      return; // continue what they were doing last frame, until we stop
     }
 
     if (pm->ps->eFlags & EF_PRONE) {
@@ -2486,9 +2474,8 @@ static void PM_Footsteps(void) {
               pm->ps, pm->character->animModelInfo, ANIM_MT_STRAFELEFT, qtrue);
         }
       }
-      if (animResult < 0) // if we havent found an anim
-                          // yet, play the run
-      {
+      // if we haven't found an anim yet, play the run
+      if (animResult < 0) {
         animResult = BG_AnimScriptAnimation(
             pm->ps, pm->character->animModelInfo, ANIM_MT_RUNBK, qtrue);
       }
@@ -2504,9 +2491,8 @@ static void PM_Footsteps(void) {
               pm->ps, pm->character->animModelInfo, ANIM_MT_STRAFELEFT, qtrue);
         }
       }
-      if (animResult < 0) // if we havent found an anim
-                          // yet, play the run
-      {
+      // if we haven't found an anim yet, play the run
+      if (animResult < 0) {
         animResult = BG_AnimScriptAnimation(
             pm->ps, pm->character->animModelInfo, ANIM_MT_WALKBK, qtrue);
       }
@@ -2527,9 +2513,8 @@ static void PM_Footsteps(void) {
               pm->ps, pm->character->animModelInfo, ANIM_MT_STRAFELEFT, qtrue);
         }
       }
-      if (animResult < 0) // if we havent found an anim
-                          // yet, play the run
-      {
+      // if we haven't found an anim yet, play the run
+      if (animResult < 0) {
         animResult = BG_AnimScriptAnimation(
             pm->ps, pm->character->animModelInfo, ANIM_MT_RUN, qtrue);
       }
@@ -2544,9 +2529,8 @@ static void PM_Footsteps(void) {
               pm->ps, pm->character->animModelInfo, ANIM_MT_STRAFELEFT, qtrue);
         }
       }
-      if (animResult < 0) // if we havent found an anim
-                          // yet, play the run
-      {
+      // if we haven't found an anim yet, play the run
+      if (animResult < 0) {
         animResult = BG_AnimScriptAnimation(
             pm->ps, pm->character->animModelInfo, ANIM_MT_WALK, qtrue);
       }
@@ -2561,33 +2545,10 @@ static void PM_Footsteps(void) {
 
   // check for footstep / splash sounds
   old = pm->ps->bobCycle;
-  pm->ps->bobCycle = (int)(old + bobmove * pml.msec) & 255;
+  pm->ps->bobCycle = static_cast<int>(old + bobmove * pml.msec) & 255;
 
-  // if we just crossed a cycle boundary, play an apropriate footstep
-  // event
-  if (iswalking) {
-    // sounds much more natural this way
-    if (old > pm->ps->bobCycle) {
-
-      if (pm->waterlevel == 0) {
-        if (footstep && !pm->noFootsteps) {
-          PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
-        }
-      } else if (pm->waterlevel == 1) {
-        // splashing
-        PM_AddEvent(EV_FOOTSPLASH);
-      } else if (pm->waterlevel == 2) {
-        // wading / swimming at surface
-        PM_AddEvent(EV_SWIM);
-      } else if (pm->waterlevel == 3) {
-        // no sound when completely underwater
-      }
-    }
-  } else if (((old + 64) ^ (pm->ps->bobCycle + 64)) & 128) {
-
-    /*		if (pm->ps->sprintExertTime && pm->waterlevel <=
-       2) PM_ExertSound ();*/
-
+  // if we just crossed a cycle boundary, play an appropriate footstep event
+  if (((old + 64) ^ (pm->ps->bobCycle + 64)) & 128) {
     if (pm->waterlevel == 0) {
       // on ground will only play sounds if running
       if (footstep && !pm->noFootsteps) {
@@ -2599,8 +2560,6 @@ static void PM_Footsteps(void) {
     } else if (pm->waterlevel == 2) {
       // wading / swimming at surface
       PM_AddEvent(EV_SWIM);
-    } else if (pm->waterlevel == 3) {
-      // no sound when completely underwater
     }
   }
 }

@@ -635,72 +635,6 @@ const char *CG_PickupItemText(int item) {
 }
 
 /*
-=================
-CG_DrawNotify
-=================
-*/
-#define NOTIFYLOC_Y 42 // bottom end
-#define NOTIFYLOC_X 0
-#define NOTIFYLOC_Y_SP 128
-
-static void CG_DrawNotify(void) {
-  int w;
-  int i, len;
-  vec4_t hcolor;
-  int chatHeight;
-  float alphapercent;
-  char var[MAX_TOKEN_CHARS];
-  float notifytime = 1.0f;
-  int yLoc;
-
-  return;
-
-  yLoc = NOTIFYLOC_Y;
-
-  trap_Cvar_VariableStringBuffer("con_notifytime", var, sizeof(var));
-  notifytime = Q_atof(var) * 1000;
-
-  if (notifytime <= 100.f) {
-    notifytime = 100.0f;
-  }
-
-  chatHeight = NOTIFY_HEIGHT;
-
-  if (cgs.notifyLastPos != cgs.notifyPos) {
-    if (cg.time - cgs.notifyMsgTimes[cgs.notifyLastPos % chatHeight] >
-        notifytime) {
-      cgs.notifyLastPos++;
-    }
-
-    w = 0;
-
-    for (i = cgs.notifyLastPos; i < cgs.notifyPos; i++) {
-      len = CG_DrawStrlen(cgs.notifyMsgs[i % chatHeight]);
-      if (len > w) {
-        w = len;
-      }
-    }
-    w *= TINYCHAR_WIDTH;
-    w += TINYCHAR_WIDTH * 2;
-
-    for (i = cgs.notifyPos - 1; i >= cgs.notifyLastPos; i--) {
-      alphapercent =
-          1.0f - ((cg.time - cgs.notifyMsgTimes[i % chatHeight]) / notifytime);
-      Numeric::clamp(alphapercent, 0.0f, 1.0f);
-
-      hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
-      hcolor[3] = alphapercent;
-      trap_R_SetColor(hcolor);
-
-      CG_DrawStringExt(NOTIFYLOC_X + TINYCHAR_WIDTH,
-                       yLoc - (cgs.notifyPos - i) * TINYCHAR_HEIGHT,
-                       cgs.notifyMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-                       TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
-    }
-  }
-}
-
-/*
 ===============================================================================
 
 LAGOMETER
@@ -3744,29 +3678,13 @@ void CG_Fade(int r, int g, int b, int a, int time, int duration) {
 
   // incorporate this into the current fade scheme
 
-  cgs.fadeAlpha = (float)a / 255.0f;
+  cgs.fadeAlpha = static_cast<float>(a) / 255.0f;
   cgs.fadeStartTime = time;
   cgs.fadeDuration = duration;
 
   if (cgs.fadeStartTime + cgs.fadeDuration <= cg.time) {
     cgs.fadeAlphaCurrent = cgs.fadeAlpha;
   }
-  return;
-
-  if (time <= 0) // do instantly
-  {
-    cg.fadeRate = 1;
-    cg.fadeTime = cg.time - 1; // set cg.fadeTime behind cg.time
-                               // so it will start out 'done'
-  } else {
-    cg.fadeRate = 1.0f / time;
-    cg.fadeTime = cg.time + time;
-  }
-
-  cg.fadeColor2[0] = (float)r / 255.0f;
-  cg.fadeColor2[1] = (float)g / 255.0f;
-  cg.fadeColor2[2] = (float)b / 255.0f;
-  cg.fadeColor2[3] = (float)a / 255.0f;
 }
 
 /*
@@ -4411,23 +4329,12 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
 
 static void CG_DrawWeapRecharge(rectDef_t *rect) {
   float barFrac, chargeTime;
-  int /*weap,*/ flags;
-  qboolean fade = qfalse;
+  int flags;
 
   vec4_t bgcolor = {1.0f, 1.0f, 1.0f, 0.25f};
   vec4_t color;
 
   flags = 1 | 4 | 16;
-
-  // weap = cg.snap->ps.weapon;
-
-  //	if( !(cg.snap->ps.eFlags & EF_ZOOMING) ) {
-  //		if ( weap != WP_PANZERFAUST && weap != WP_DYNAMITE && weap
-  //!=
-  // WP_MEDKIT && weap != WP_SMOKE_GRENADE && weap != WP_PLIERS && weap
-  // != WP_AMMO ) { 			fade = qtrue;
-  //		}
-  //	}
 
   // Draw power bar
   if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
@@ -4451,17 +4358,12 @@ static void CG_DrawWeapRecharge(rectDef_t *rect) {
 
   color[0] = 1.0f;
   color[1] = color[2] = barFrac;
-  color[3] = 0.25 + barFrac * 0.5;
-
-  if (fade) {
-    bgcolor[3] *= 0.4f;
-    color[3] *= 0.4;
-  }
+  color[3] = 0.25f + barFrac * 0.5f;
 
   CG_FilledBar(rect->x, rect->y + (rect->h * 0.1f), rect->w, rect->h * 0.84f,
-               color, NULL, bgcolor, barFrac, flags);
+               color, nullptr, bgcolor, barFrac, flags);
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
   CG_DrawPic(rect->x, rect->y, rect->w, rect->h, cgs.media.hudSprintBar);
   CG_DrawPic(rect->x + (rect->w * 0.25f) - 1, rect->y + rect->h + 4,
              (rect->w * 0.5f) + 2, rect->w + 2, cgs.media.hudPowerIcon);
@@ -4965,8 +4867,6 @@ static void CG_Draw2D(void) {
     CG_DrawPMItems();
     CG_DrawPMItemsBig();
     CG_DrawWarmup();
-
-    CG_DrawNotify();
 
     CG_DrawObjectiveInfo();
 

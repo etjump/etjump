@@ -142,7 +142,7 @@ int CG_SoundPickOldestRandomSound(soundScript_t *sound, vec3_t org,
   soundScriptSound_t *oldestSound;
   soundScriptSound_t *scriptSound;
 
-  oldestSound = NULL;
+  oldestSound = nullptr;
   scriptSound = sound->soundList;
   while (scriptSound) {
     if (!oldestSound || (scriptSound->lastPlayed < oldestTime)) {
@@ -170,10 +170,9 @@ int CG_SoundPickOldestRandomSound(soundScript_t *sound, vec3_t org,
     } else {
       return trap_S_StartStreamingSound(
           oldestSound->sounds[pos].filename,
-          sound->looping ? oldestSound->sounds[pos].filename : NULL, entnum,
+          sound->looping ? oldestSound->sounds[pos].filename : nullptr, entnum,
           sound->channel, sound->attenuation);
     }
-    oldestSound->lastPlayed = cg.time;
   } else {
     CG_Error("Unable to locate a valid sound for soundScript: %s\n",
              sound->name);
@@ -455,7 +454,7 @@ CG_SoundLoadSoundFiles
 extern char bigTextBuffer[100000]; // we got it anyway, might as well use it
 
 #define MAX_SOUND_FILES 128
-static void CG_SoundLoadSoundFiles(void) {
+static void CG_SoundLoadSoundFiles() {
   char soundFiles[MAX_SOUND_FILES][MAX_QPATH];
   const char *text;
   char filename[MAX_QPATH];
@@ -483,7 +482,7 @@ static void CG_SoundLoadSoundFiles(void) {
   // parse the list
   text = bigTextBuffer;
   numSounds = 0;
-  while (1) {
+  while (true) {
     token = COM_ParseExt(&text, qtrue);
     if (!token[0]) {
       break;
@@ -493,11 +492,6 @@ static void CG_SoundLoadSoundFiles(void) {
 
   // add the map specific soundfile
   Com_sprintf(soundFiles[numSounds++], MAX_QPATH, "%s.sounds", cgs.rawmapname);
-
-  if (!numSounds) {
-    CG_Printf(S_COLOR_RED "WARNING: no sound files found\n");
-    return;
-  }
 
   // load and parse sound files
   for (i = 0; i < numSounds; i++) {
