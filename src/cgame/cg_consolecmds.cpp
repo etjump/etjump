@@ -1336,7 +1336,7 @@ Let the client system know about all of our commands
 so it can perform tab completion
 =================
 */
-void CG_InitConsoleCommands(void) {
+void CG_InitConsoleCommands() {
   int i;
 
   for (i = 0; i < static_cast<int>(sizeof(anyTimeCommands) /
@@ -1370,6 +1370,7 @@ void CG_InitConsoleCommands(void) {
   trap_AddCommand("addbot");
   trap_AddCommand("setviewpos");
   trap_AddCommand("callvote");
+  trap_AddCommand("cv");
   trap_AddCommand("vote");
 
   // Rafael
