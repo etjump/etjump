@@ -25,8 +25,12 @@
 * fixed issues with player collision with other players and entities with `pmove_fixed 1` by making sure collision always uses valid mins/maxs [#880](https://github.com/etjump/etjump/pull/880)
 * fixed visual bug in vote UI where voting yes as a spectator while following someone would show that you voted no [#882](https://github.com/etjump/etjump/pull/882)
 * added `top` alias for viewing timerun records [#884](https://github.com/etjump/etjump/pull/884)
-* removed spawntime and charge time related cvars from serverinfo [#885](https://github.com/etjump/etjump/pull/885)
+* removed charge time related cvars from serverinfo [#885](https://github.com/etjump/etjump/pull/885) [#988](https://github.com/etjump/etjump/pull/889)
 * improved update accuracy of upmove meter and strafe quality meter, most notably fixing the delay introduced in 2.5.1 where initial update of strafe quality was delayed due to client waiting for a snapshot [#833](https://github.com/etjump/etjump/pull/883)
+* removed mission time and spawntime from limbo menu [#892](https://github.com/etjump/etjump/pull/892)
+* fixed chatbox lineheight calculation sometimes resulting in too small lineheights and overlapping text [#899](https://github.com/etjump/etjump/pull/899)
+* removed unused `cg_predictItems` cvar [#900](https://github.com/etjump/etjump/pull/900)
+* added `cv` alias for `callvote` [#902](https://github.com/etjump/etjump/pull/902)
 
 # ETJump 2.5.1
 
