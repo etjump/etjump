@@ -6,17 +6,26 @@
 // to call the coverity API
 void make_error_disappear(const char *msg) { __coverity_panic__(); }
 
+#define QDECL
+
 int rand(void) {
   // ignore
-  return 0;
 }
 
 long random(void) {
   // ignore
-  return 0L;
 }
 
 void srand(unsigned int seed) {
   // ignore
-  __coverity_tainted_data_sanitize__(*(void **)seed);
+}
+
+void QDECL G_Error(const char *fmt, ...) {
+  // exit
+  __coverity_panic__();
+}
+
+void QDECL CG_Error(const char *msg, ...) {
+  // exit
+  __coverity_panic__();
 }
