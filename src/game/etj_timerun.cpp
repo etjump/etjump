@@ -25,10 +25,7 @@
 #include <sqlite3.h>
 #include <ctime>
 #include <thread>
-#include <vector>
-#include <memory>
-#include <array>
-#include <map>
+
 #include "etj_timerun.h"
 #include "etj_sqlite_wrapper.h"
 #include "etj_printer.h"
@@ -301,25 +298,16 @@ std::string diffToString(int selfTime, int otherTime) {
     diffSign = "^z+";
   }
 
-  auto diffFormated =
-      ETJump::stringFormat("%s%02i:%02i.%03i", diffSign, diffComponents.min,
-                           diffComponents.sec, diffComponents.ms);
-
-  return diffFormated;
+  return ETJump::stringFormat("%s%02i:%02i.%03i", diffSign, diffComponents.min,
+                              diffComponents.sec, diffComponents.ms);
 }
 
 void Timerun::printRecordsForRun(int clientNum, const std::string &runName) {
-  auto lowercaseName = runName;
-  transform(begin(lowercaseName), end(lowercaseName), begin(lowercaseName),
-            tolower);
-
   const std::pair<const std::basic_string<char>,
                   std::vector<std::unique_ptr<Record>>> *run = nullptr;
+
   for (const auto &iter : _recordsByName) {
-    auto currentLowercaseName = iter.first;
-    transform(begin(currentLowercaseName), end(currentLowercaseName),
-              begin(currentLowercaseName), tolower);
-    if (currentLowercaseName == lowercaseName) {
+    if (ETJump::sanitize(iter.first, true) == ETJump::sanitize(runName, true)) {
       run = &iter;
     }
   }
@@ -333,13 +321,12 @@ void Timerun::printRecordsForRun(int clientNum, const std::string &runName) {
   const auto self = _players[clientNum].get();
   auto foundSelf = false;
 
-  std::string buffer = "^g============================================="
-                       "================\n"
-                       " ^2Top 50 records for map: ^7" +
-                       _currentMap +
-                       "\n"
-                       "^g============================================="
-                       "================\n";
+  std::string buffer =
+      "^g=============================================================\n"
+      " ^2Top 50 records for map: ^7" +
+      _currentMap +
+      "\n"
+      "^g=============================================================\n";
 
   auto rank = 1;
   buffer += " ^2Run: ^7" + run->first + "\n\n";
@@ -358,20 +345,15 @@ void Timerun::printRecordsForRun(int clientNum, const std::string &runName) {
   for (auto &record : run->second) {
     if (rank <= 50) {
       if (record->userId == self->userId) {
-        buffer += ETJump::stringFormat("^7%5s    ^7%s                 "
-                                       "^7%s ^7(^1You^7)\n",
-                                       rankToString(rank),
-                                       millisToString(record->time),
-                                       record->playerName);
+        buffer += ETJump::stringFormat(
+            "^7%5s    ^7%s                 ^7%s ^7(^1You^7)\n",
+            rankToString(rank), millisToString(record->time),
+            record->playerName);
       } else {
-        auto diff = foundSelf ? diffToString(selfTime,
-                                             record->time)
-                              : "          "; // Just print
-                                              // bunch of
-                                              // whitespace as
-                                              // difference if
-                                              // client has no
-                                              // record
+        auto diff = foundSelf
+                        ? diffToString(selfTime, record->time)
+                        : "          "; // Just print bunch of whitespace as
+                                        // difference if client has no record
         buffer += ETJump::stringFormat(
             "^7%5s    ^7%s  ^9%s     ^7%s\n", rankToString(rank),
             millisToString(record->time), diff, record->playerName);
@@ -381,12 +363,12 @@ void Timerun::printRecordsForRun(int clientNum, const std::string &runName) {
         break;
       }
 
+      // FIXME: this is dead code as of now, fix the logic so this
+      //  can actually get printed out when we have record outside top 50
       if (record->userId == self->userId) {
-        buffer += ETJump::stringFormat("^7%4s     ^7%s     ^7%s "
-                                       "^7(^1You^7)\n",
-                                       rankToString(rank),
-                                       millisToString(record->time),
-                                       record->playerName);
+        buffer += ETJump::stringFormat(
+            "^7%4s     ^7%s     ^7%s ^7(^1You^7)\n", rankToString(rank),
+            millisToString(record->time), record->playerName);
         foundSelf = true;
       }
     }
@@ -397,8 +379,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string &runName) {
     buffer += "^7You haven't set a record on this run yet!\n";
   }
 
-  buffer += "^g========================================================"
-            "=====\n";
+  buffer += "^g=============================================================\n";
   Printer::SendConsoleMessage(clientNum, buffer);
 }
 
