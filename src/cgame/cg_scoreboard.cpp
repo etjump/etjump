@@ -63,12 +63,16 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
 
   // draw indicators
   if (ci->timerunActive) {
+    trap_R_SetColor(textColor); // for pic fading
     CG_DrawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon);
+    trap_R_SetColor(nullptr);
     offsetX += 8 + 2;
     nameMaxWidth -= 1;
   }
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
+    trap_R_SetColor(textColor); // for pic fading
     CG_DrawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon);
+    trap_R_SetColor(nullptr);
     offsetX += 8 + 2;
     nameMaxWidth -= 1;
   }
@@ -284,12 +288,16 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
 
   // draw indicators
   if (ci->timerunActive) {
+    trap_R_SetColor(textColor); // for pic fading
     CG_DrawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon);
+    trap_R_SetColor(nullptr);
     offsetX += 8 + 2;
     nameMaxWidth -= 2;
   }
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
+    trap_R_SetColor(textColor); // for pic fading
     CG_DrawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon);
+    trap_R_SetColor(nullptr);
     offsetX += 8 + 2;
     nameMaxWidth -= 2;
   }
@@ -630,7 +638,9 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX,
 
   // Draw indicator if player is idle
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
+    trap_R_SetColor(textColor); // for pic fading
     CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
+    trap_R_SetColor(nullptr);
     x += 10;
   }
 
@@ -767,7 +777,9 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 
   // Draw indicator if player is idle
   if (idle) {
+    trap_R_SetColor(textColor); // for pic fading
     CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
+    trap_R_SetColor(nullptr);
     playerX += 10;
   }
 
@@ -1042,6 +1054,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
       int playerType;
       playerType = ci->cls;
 
+      trap_R_SetColor(hcolor); // for pic fading
       if (playerType == PC_MEDIC) {
         CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID]);
       } else if (playerType == PC_ENGINEER) {
@@ -1056,18 +1069,23 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
       } else {
         CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS]);
       }
+      trap_R_SetColor(nullptr);
 
       offsetX = 12 + 2;
     }
 
     // draw indicators
     if (ci->timerunActive) {
+      trap_R_SetColor(hcolor); // for pic fading
       CG_DrawPic(x + 4 + offsetX, y + 2, 12, 12, cgs.media.stopwatchIcon);
+      trap_R_SetColor(nullptr);
       offsetX += 12 + 2;
       nameMaxWidth -= 2;
     }
     if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
+      trap_R_SetColor(hcolor); // for pic fading
       CG_DrawPic(x + 4 + offsetX, y + 2, 11, 11, cgs.media.idleIcon);
+      trap_R_SetColor(nullptr);
       offsetX += 11 + 2;
       nameMaxWidth -= 2;
     }
