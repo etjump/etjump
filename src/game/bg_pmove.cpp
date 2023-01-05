@@ -6229,8 +6229,8 @@ void PmoveSingle(pmove_t *pmove) {
   }
 
   if (pm->ps->pm_type >= PM_DEAD ||
-      pm->ps->pm_flags & (PMF_LIMBO | PMF_TIME_LOCKPLAYER)) // DHM - Nerve
-  {
+      pm->ps->pm_flags & (PMF_LIMBO | PMF_TIME_LOCKPLAYER) || // DHM - Nerve
+      BG_PlayerMounted(pm->ps->eFlags)) {
     pm->cmd.forwardmove = 0;
     pm->cmd.rightmove = 0;
     pm->cmd.upmove = 0;
