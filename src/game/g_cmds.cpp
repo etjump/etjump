@@ -2682,8 +2682,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
 }
 
-static const char *yesMsgs[] = {"yes", "Yes", "y", "Y", "1"};
-static const char *noMsgs[] = {"no", "No", "n", "N", "0"};
+static const char *yesMsgs[] = {"yes", "y", "1"};
+static const char *noMsgs[] = {"no", "n", "0"};
 
 /*
 ==================
@@ -2739,7 +2739,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
     if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "application -4");
@@ -2776,7 +2776,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
     if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "invitation -4");
@@ -2812,7 +2812,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
     if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
@@ -2840,7 +2840,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     fireteamData_t *ft;
 
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
     if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "aft -2");
@@ -2862,7 +2862,7 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->pers.autofireteamCreateEndTime > level.time) {
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
     if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
@@ -2882,7 +2882,7 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->pers.autofireteamJoinEndTime > level.time) {
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
     if (votedYes(msgstr)) {
       fireteamData_t *ft;
@@ -2915,7 +2915,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
   if (ent->client->ps.eFlags & EF_VOTED) {
     trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = std::string(msg);
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
     // If the caller decides to hit f2 after calling the vote
     // cancel it.
     if (ClientNum(ent) == level.voteInfo.voter_cn) {
@@ -3007,7 +3007,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
 
   trap_Argv(1, msg, sizeof(msg));
-  const auto msgstr = std::string(msg);
+  const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
   if (votedYes(msgstr)) {
 
