@@ -351,8 +351,7 @@ void Timerun::printRecordsForRun(int clientNum, const std::string &runName) {
             record->playerName);
       } else {
         auto diff = foundSelf
-                        ? diffToString(selfTime,
-                                       record->time)
+                        ? diffToString(selfTime, record->time)
                         : "          "; // Just print bunch of whitespace as
                                         // difference if client has no record
         buffer += ETJump::stringFormat(
