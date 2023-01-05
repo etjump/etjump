@@ -2682,6 +2682,9 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
 }
 
+static const char *yesMsgs[] = {"yes", "Yes", "y", "Y", "1"};
+static const char *noMsgs[] = {"no", "No", "n", "N", "0"};
+
 /*
 ==================
 Cmd_Vote_f
@@ -2691,6 +2694,38 @@ void Cmd_Vote_f(gentity_t *ent) {
   char msg[64];
   auto *client = ent->client;
   auto clientNum = ClientNum(ent);
+
+  static const auto votedYes = [](const std::string &msg) {
+    for (const auto &ym : yesMsgs) {
+      if (ym == msg) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  static const auto votedNo = [](const std::string &msg) {
+    for (const auto &nm : noMsgs) {
+      if (nm == msg) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  static const auto printVoteMsgs = [&]() {
+    std::string voteMsgs = "^7Invalid vote argument.\n";
+    voteMsgs += "  ^7Valid arguments for '^2Yes^7' are: ";
+    for (const auto &ym : yesMsgs) {
+      voteMsgs += std::string(ym) + " ";
+    }
+    voteMsgs += "\n  ^7Valid arguments for '^1No^7' are: ";
+    for (const auto &nm : noMsgs) {
+      voteMsgs += std::string(nm) + " ";
+    }
+    voteMsgs += "\n";
+    Printer::SendConsoleMessage(clientNum, voteMsgs);
+  };
 
   if (ent->client->pers.applicationEndTime > level.time) {
 
@@ -2704,17 +2739,21 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -3");
 
       G_AddClientToFireteam(ent->client->pers.applicationClient, clientNum);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.applicationEndTime = 0;
@@ -2737,17 +2776,21 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -3");
 
       G_AddClientToFireteam(clientNum, ent->client->pers.invitationClient);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(ent - g_entities, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.invitationEndTime = 0;
@@ -2769,17 +2812,21 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -3");
 
       G_InviteToFireTeam(clientNum, ent->client->pers.propositionClient);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.propositionEndTime = 0;
@@ -2793,15 +2840,19 @@ void Cmd_Vote_f(gentity_t *ent) {
     fireteamData_t *ft;
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "aft -2");
 
       if (G_IsFireteamLeader(clientNum, &ft)) {
         ft->priv = qtrue;
       }
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "aft -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.autofireteamEndTime = 0;
@@ -2811,13 +2862,17 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->pers.autofireteamCreateEndTime > level.time) {
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
 
       G_RegisterFireteam(clientNum);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.autofireteamCreateEndTime = 0;
@@ -2827,8 +2882,9 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->pers.autofireteamJoinEndTime > level.time) {
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       fireteamData_t *ft;
 
       trap_SendServerCommand(clientNum, "aftj -2");
@@ -2837,8 +2893,11 @@ void Cmd_Vote_f(gentity_t *ent) {
       if (ft) {
         G_AddClientToFireteam(clientNum, ft->joinOrder[0]);
       }
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "aftj -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.autofireteamCreateEndTime = 0;
@@ -2856,17 +2915,21 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
   if (ent->client->ps.eFlags & EF_VOTED) {
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = std::string(msg);
     // If the caller decides to hit f2 after calling the vote
     // cancel it.
     if (ClientNum(ent) == level.voteInfo.voter_cn) {
-      if ((msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')) {
+      if (votedYes(msgstr)) {
         // Do nothing...
         return;
-      } else {
+      } else if (votedNo(msgstr)) {
         level.voteInfo.voteCanceled = qtrue;
         level.voteInfo.voteNo = level.numConnectedClients;
         level.voteInfo.voteYes = 0;
         Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
+        return;
+      } else {
+        printVoteMsgs();
         return;
       }
     }
@@ -2912,14 +2975,17 @@ void Cmd_Vote_f(gentity_t *ent) {
     client->pers.votingInfo.isWarned = false;
 
     // allow revote
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       if (!client->pers.votingInfo.isVotedYes) {
         etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteYes);
       }
-    } else {
+    } else if (votedNo(msgstr)) {
       if (client->pers.votingInfo.isVotedYes) {
         etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteNo);
       }
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     Printer::SendPopupMessage(
@@ -2940,24 +3006,26 @@ void Cmd_Vote_f(gentity_t *ent) {
     return;
   }
 
+  trap_Argv(1, msg, sizeof(msg));
+  const auto msgstr = std::string(msg);
+
+  if (votedYes(msgstr)) {
+
+    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteYes);
+
+  } else if (votedNo(msgstr)) {
+    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteNo);
+  } else {
+    printVoteMsgs();
+    return;
+  }
+
   Printer::SendConsoleMessage(clientNum, "Vote cast.\n");
 
   ent->client->ps.eFlags |= EF_VOTED;
   level.voteInfo.voteCanceled = qfalse;
 
   CalculateRanks();
-
-  trap_Argv(1, msg, sizeof(msg));
-
-  if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteYes);
-
-  } else {
-    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteNo);
-  }
-
-  // a majority will be determined in G_CheckVote, which will also
-  // account for players entering or leaving
 }
 
 qboolean G_canPickupMelee(gentity_t *ent) {
