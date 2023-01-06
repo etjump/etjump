@@ -2155,7 +2155,7 @@ static void CG_RegisterGraphics(void) {
 
   cgs.media.tankHintShader = trap_R_RegisterShaderNoMip("gfx/2d/tankHint");
   cgs.media.satchelchargeHintShader =
-      trap_R_RegisterShaderNoMip("gfx/2d/satchelchargeHint"),
+      trap_R_RegisterShaderNoMip("gfx/2d/satchelchargeHint");
   cgs.media.landmineHintShader =
       trap_R_RegisterShaderNoMip("gfx/2d/landmineHint");
   cgs.media.uniformHintShader =
