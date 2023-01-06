@@ -35,8 +35,6 @@ ProgressionTrackerParser::ProgressionTrackerParser(
   parse();
 }
 
-ProgressionTrackerParser::~ProgressionTrackerParser() {}
-
 void ProgressionTrackerParser::parse() {
   // remove whitespace
   _trackerString.erase(

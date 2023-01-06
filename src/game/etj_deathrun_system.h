@@ -40,7 +40,6 @@ public:
   };
 
   DeathrunSystem();
-  ~DeathrunSystem();
 
   /**
    * Adds a start message that will be displayed when the run starts
