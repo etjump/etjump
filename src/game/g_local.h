@@ -24,8 +24,8 @@
 #ifndef PRE_RELEASE_DEMO
 
 #else
-  //#define MOD_VERSION			"You look like you need a
-  // monkey!"
+  // #define MOD_VERSION			"You look like you need a
+  //  monkey!"
   #define MOD_VERSION "ettest"
 #endif // PRE_RELEASE_DEMO
 
@@ -170,8 +170,8 @@ typedef struct {
 } g_script_stack_item_t;
 //
 // Gordon: need to up this, forest has a HUGE script for the tank.....
-//#define	G_MAX_SCRIPT_STACK_ITEMS	128
-//#define	G_MAX_SCRIPT_STACK_ITEMS	176
+// #define	G_MAX_SCRIPT_STACK_ITEMS	128
+// #define	G_MAX_SCRIPT_STACK_ITEMS	176
 // RF, upped this again for the tank
 // Gordon: and again...
 #define G_MAX_SCRIPT_STACK_ITEMS 196
@@ -593,7 +593,7 @@ struct gentity_s {
 };
 
 // Ridah
-//#include "ai_cast_global.h"
+// #include "ai_cast_global.h"
 // done.
 
 typedef enum {
@@ -792,7 +792,7 @@ typedef struct {
   int deathrunFlags;
 
   float velocityScale;
-  bool clientIsInactive;
+  int clientLastActive;
 
   int weaponsOnSpawn[MAX_WEAPONS /
                      (sizeof(int) * 8)]; // state of ps.weapons on spawn
@@ -1034,8 +1034,8 @@ struct gclient_s {
   int respawnTime;            // can respawn when time > this, force after
                               // g_forcerespwan
   int inactivityTime;         // kick players when time > this
-  int realInactivityTime;     // real inactivity time of client, independent
-                              // of inactivity cvars
+  bool inactive;              // level.time >= clientLastActive
+                              // + 1000 * clientInactivityTimer
   qboolean inactivityWarning; // qtrue if the five seoond warning has
                               // been given
   int rewardTime; // clear the EF_AWARD_IMPRESSIVE, etc when time > this

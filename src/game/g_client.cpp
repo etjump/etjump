@@ -1796,8 +1796,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
          gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
          gent.client->sess.specLocked ? 1 : 0,
          gent.client->sess.timerunActive ? 1 : 0,
-         gent.client->pers.snaphud ? 1 : 0,
-         gent.client->sess.clientIsInactive ? 1 : 0);
+         gent.client->pers.snaphud ? 1 : 0, gent.client->inactive ? 1 : 0);
 
   trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
@@ -2085,6 +2084,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     client->sess.loadedPosBeforeInactivity = qtrue;
     client->sess.motdPrinted = qfalse;
     client->sess.timerunActive = qfalse;
+    client->inactive = false;
+    client->sess.clientLastActive = level.time;
   } else {
     client->sess.gotoAllowed = qtrue; // Feen: TEMP FIX! - Also added these two
                                       // here as well.
@@ -2634,8 +2635,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
   client->respawnTime = level.timeCurrent;
   client->inactivityTime = level.time + g_inactivity.integer * 1000;
-  client->realInactivityTime =
-      level.time + ETJump::clientInactivityTimer * 1000;
   client->latched_buttons = 0;
   client->latched_wbuttons = 0; //----(SA)	added
 
