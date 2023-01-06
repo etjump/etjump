@@ -757,17 +757,24 @@ static void CG_DrawDisconnect(void) {
 CG_DrawLagometer
 ==============
 */
-static void CG_DrawLagometer(void) {
+static void CG_DrawLagometer() {
   int a, x, y, i;
   float v;
   float ax, ay, aw, ah, mid, range;
   int color;
   float vscale;
 
-  if (!cg_lagometer.integer) {
-    //	if(0) {
-    CG_DrawDisconnect();
-    return;
+  switch (cg_lagometer.integer) {
+    case 0:
+      CG_DrawDisconnect();
+      return;
+    case 1:
+      if (cgs.localServer) {
+        CG_DrawDisconnect();
+        return;
+      }
+    default:
+      break;
   }
 
   //
@@ -776,7 +783,7 @@ static void CG_DrawLagometer(void) {
   x = SCREEN_WIDTH - 48 + ETJump_AdjustPosition(etj_lagometerX.value);
   y = 480 - 200 + etj_lagometerY.value;
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
   CG_DrawPic(x, y, 48, 48, cgs.media.lagometerShader);
 
   ax = x;
@@ -856,7 +863,7 @@ static void CG_DrawLagometer(void) {
     }
   }
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
 
   if (cg_nopredict.integer
 #ifdef ALLOW_GSYNC
