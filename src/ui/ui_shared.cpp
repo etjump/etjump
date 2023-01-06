@@ -8302,7 +8302,6 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
                            fontInfo_t *font) {
   char buffer[1024];
   char *s, *p, *c, *ls;
-  int l;
 
   if (*instr == '\0') {
     return;
@@ -8314,10 +8313,8 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
   c = s = instr;
   p = buffer;
   ls = NULL;
-  l = 0;
   while (*p) {
     *c = *p++;
-    l++;
 
     if (*c == ' ') {
       ls = c;
@@ -8327,7 +8324,6 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
 
     if (*p == '\n') {
       s = c + 1;
-      l = 0;
     } else if (DC->textWidthExt(s, scale, 0, font) > w) {
       if (ls) {
         *ls = '\n';
@@ -8339,7 +8335,6 @@ void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
       }
 
       ls = NULL;
-      l = 0;
     }
   }
 
