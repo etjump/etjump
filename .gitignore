@@ -9,6 +9,7 @@
 *.suo
 *.opendb
 *.VC.db
+assets/ui/git_version.h
 
 #################
 ## Eclipse

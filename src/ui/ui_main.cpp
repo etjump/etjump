@@ -6059,7 +6059,7 @@ static void UI_BuildServerDisplayList(int force) {
       trap_Cvar_Update(&ui_browserShowETJump);
       if (ui_browserShowETJump.integer > 0) {
         bool isETJump =
-            Q_stricmpn(Info_ValueForKey(info, "game"), "etjump", 6) == 0;
+            Q_stricmpn(Info_ValueForKey(info, "game"), GAME_NAME, 6) == 0;
         if ((isETJump && ui_browserShowETJump.integer == 2) ||
             (!isETJump && ui_browserShowETJump.integer == 1)) {
           trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);

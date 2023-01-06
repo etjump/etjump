@@ -1,3 +1,5 @@
+#include "ui/git_version.h"
+
 #define WINDOW_FUI( WINDOW_TEXT, GRADIENT_START_OFFSET )														\
 	itemDef {																									\
 		name		"window"																					\
