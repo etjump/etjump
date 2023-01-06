@@ -764,17 +764,9 @@ static void CG_DrawLagometer() {
   int color;
   float vscale;
 
-  switch (cg_lagometer.integer) {
-    case 0:
-      CG_DrawDisconnect();
-      return;
-    case 1:
-      if (cgs.localServer) {
-        CG_DrawDisconnect();
-        return;
-      }
-    default:
-      break;
+  if (!cg_lagometer.integer || (cg_lagometer.integer == 1 && cgs.localServer)) {
+    CG_DrawDisconnect();
+    return;
   }
 
   //
