@@ -5879,7 +5879,6 @@ static void UI_BuildServerDisplayList(int force) {
       maxlives, punkbuster, antilag, password, weaponrestricted, balancedteams;
   char info[MAX_STRING_CHARS];
   // qboolean startRefresh = qtrue; // TTimo: unused
-  static int numinvisible;
 
   game = 0; // NERVE - SMF - shut up compiler warning
 
@@ -5908,7 +5907,6 @@ static void UI_BuildServerDisplayList(int force) {
   }
 
   if (force) {
-    numinvisible = 0;
     // clear number of displayed servers
     uiInfo.serverStatus.numDisplayServers = 0;
     uiInfo.serverStatus.numPlayersOnServers = 0;
@@ -6089,7 +6087,6 @@ static void UI_BuildServerDisplayList(int force) {
       // done with this server
       if (ping > /*=*/0) {
         trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
-        numinvisible++;
       }
     }
   }
@@ -6316,7 +6313,7 @@ UI_BuildFindPlayerList
 ==================
 */
 static void UI_BuildFindPlayerList(qboolean force) {
-  static int numFound, numTimeOuts;
+  static int numFound;
   int i, j, resend;
   serverStatusInfo_t info;
   char name[MAX_NAME_LENGTH + 2];
@@ -6354,7 +6351,6 @@ static void UI_BuildFindPlayerList(qboolean force) {
         sizeof(uiInfo.foundPlayerServerNames[uiInfo.numFoundPlayerServers - 1]),
         "searching %d...", uiInfo.pendingServerStatus.num);
     numFound = 0;
-    numTimeOuts++;
   }
   for (i = 0; i < MAX_SERVERSTATUSREQUESTS; i++) {
     // if this pending server is valid
@@ -6422,9 +6418,6 @@ static void UI_BuildFindPlayerList(qboolean force) {
     if (!uiInfo.pendingServerStatus.server[i].valid ||
         uiInfo.pendingServerStatus.server[i].startTime <
             uiInfo.uiDC.realTime - ui_serverStatusTimeOut.integer) {
-      if (uiInfo.pendingServerStatus.server[i].valid) {
-        numTimeOuts++;
-      }
       // reset server status request for this address
       UI_GetServerStatusInfo(uiInfo.pendingServerStatus.server[i].adrstr, NULL);
       // reuse pending slot

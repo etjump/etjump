@@ -5006,7 +5006,6 @@ void CG_ShakeCamera() {
 void CG_DrawMiscGamemodels(void) {
   int i, j;
   refEntity_t ent;
-  int drawn = 0;
 
   memset(&ent, 0, sizeof(ent));
 
@@ -5069,8 +5068,6 @@ void CG_DrawMiscGamemodels(void) {
     ent.hModel = cgs.miscGameModels[i].model;
 
     trap_R_AddRefEntityToScene(&ent);
-
-    drawn++;
   }
 }
 
