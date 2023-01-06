@@ -184,7 +184,8 @@ ipXPStorage_t *G_FindIpData(ipXPStorageList_t *ipXPStorageList, char *from) {
     if (!*p || *p == ':') {
       break;
     }
-    i++, p++;
+    i++;
+    p++;
   }
 
   in = *(unsigned *)m;
@@ -226,7 +227,8 @@ qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
     if (!*p || *p == ':') {
       break;
     }
-    i++, p++;
+    i++;
+    p++;
   }
 
   in = *(unsigned *)m;
