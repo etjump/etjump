@@ -2678,6 +2678,10 @@ extern vmCvar_t etj_FPSMeterUpdateInterval;
 
 extern vmCvar_t etj_fixedCompassShader;
 
+// unlagged - optimized prediction
+extern vmCvar_t etj_optimizePrediction;
+// END unlagged - optimized prediction
+
 //
 // cg_main.c
 //
