@@ -1107,21 +1107,22 @@ void CG_PredictPlayerState() {
     // get the previous command
     trap_GetUserCmd(cmdNum - 1, &cg_pmove.oldcmd);
 
-    // don't do anything if the time is before the snapshot player time
-    if (cg_pmove.cmd.serverTime <= cg.predictedPlayerState.commandTime) {
-      continue;
-    }
-
-    // don't do anything if the command was from a previous
-    // map_restart
-    if (cg_pmove.cmd.serverTime > latestCmd.serverTime) {
-      continue;
-    }
-
     // check for a prediction error from last frame on a lan,
     // this will often be the exact value from the snapshot,
     // but on a wan we will have to predict several commands
     // to get to the point we want to compare
+
+    // this was moved here to fix pmove_fixed prediction error detection and
+    // subsequent error smoothing:
+    // when using pmove_fixed not all user commands will result in
+    // an actual move because commands are run for the duration of pmove_msec
+    // if commands are generated every 4ms (250fps) and pmove_msec is 8ms,
+    // only 1 out of those 2 commands will be run
+    // this will mean that in most situations, the check below would happen
+    // on 2nd user command which is not run, and the prediction error
+    // is not registered, causing more jittery game when miss prediction happens
+    // since there might be many user commands for same playerstate commandTime
+    // (as explained above) need to make sure it is only checked once per frame
     if (cg.predictedPlayerState.commandTime == oldPlayerState.commandTime) {
       vec3_t delta;
       float len;
@@ -1178,6 +1179,18 @@ void CG_PredictPlayerState() {
           cg.predictedErrorTime = cg.oldTime;
         }
       }
+    }
+
+    // don't do anything if the time is before the snapshot player time
+    if (cg_pmove.cmd.serverTime <= cg.predictedPlayerState.commandTime) {
+      memcpy(&pmext, &oldpmext[cmdNum & CMD_MASK], sizeof(pmoveExt_t));
+      continue;
+    }
+
+    // don't do anything if the command was from a previous
+    // map_restart
+    if (cg_pmove.cmd.serverTime > latestCmd.serverTime) {
+      continue;
     }
 
     // don't predict gauntlet firing, which is only supposed to
