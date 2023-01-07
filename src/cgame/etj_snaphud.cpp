@@ -95,6 +95,7 @@ void Snaphud::UpdateSnapState(void) {
     snap.zones[snap.maxAccel + i] =
         16383 - (unsigned short)(RAD2SHORT(acosf((i + 0.5f) / snap.a)));
   }
+
   for (unsigned char i = xnyAccel; i <= snap.maxAccel - 1; ++i) {
     snap.zones[snap.maxAccel + (snap.maxAccel - 1) - (i - xnyAccel)] =
         (unsigned short)(RAD2SHORT(acosf((i + 0.5f) / snap.a)));

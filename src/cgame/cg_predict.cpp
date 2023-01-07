@@ -824,7 +824,7 @@ void CG_PredictPlayerState() {
   pmoveExt_t pmext;
 
   // unlagged - optimized prediction
-  int stateIndex, predictCmd;
+  int stateIndex = 0, predictCmd = 0;
   int numPredicted = 0, numPlayedBack = 0; // debug code
   // END unlagged - optimized prediction
 
@@ -1232,8 +1232,6 @@ void CG_PredictPlayerState() {
           (stateIndex + 1) % MAX_BACKUP_STATES == cg.backupStateTop) {
         // run the Pmove
         Pmove(&cg_pmove);
-
-        moved = true;
         numPredicted++; // debug code
 
         // record the last predicted command
@@ -1266,11 +1264,11 @@ void CG_PredictPlayerState() {
     } else {
       // run the Pmove
       Pmove(&cg_pmove);
-
-      moved = true;
       numPredicted++; // debug code
     }
     // END unlagged - optimized prediction
+
+    moved = true;
 
     // add push trigger movement effects
     CG_TouchTriggerPrediction();
