@@ -2199,13 +2199,14 @@ static void CG_CalculateWeaponPosition(vec3_t origin, vec3_t angles) {
 CG_FlamethrowerFlame
 ===============
 */
-static void CG_FlamethrowerFlame(centity_t *cent, vec3_t origin) {
+static void CG_FlamethrowerFlame(centity_t *cent, vec3_t origin,
+                                 qboolean firing = qtrue) {
 
   if (cent->currentState.weapon != WP_FLAMETHROWER) {
     return;
   }
 
-  CG_FireFlameChunks(cent, origin, cent->lerpAngles, 1.0, qtrue);
+  CG_FireFlameChunks(cent, origin, cent->lerpAngles, 1.0, firing);
   return;
 }
 // done.
@@ -3034,8 +3035,7 @@ void CG_AddViewWeapon(playerState_t *ps) {
     vec3_t origin;
 
     // bani - #589
-    if (cg.predictedPlayerState.eFlags & EF_FIRING &&
-        !(cg.predictedPlayerState.eFlags & (EF_MG42_ACTIVE | EF_MOUNTEDTANK))) {
+    if (!(cg.predictedPlayerState.eFlags & (EF_MG42_ACTIVE | EF_MOUNTEDTANK))) {
       // special hack for flamethrower...
       VectorCopy(cg.refdef_current->vieworg, origin);
 
@@ -3044,7 +3044,9 @@ void CG_AddViewWeapon(playerState_t *ps) {
       VectorMA(origin, -4, cg.refdef_current->viewaxis[2], origin);
 
       // Ridah, Flamethrower effect
-      CG_FlamethrowerFlame(&cg.predictedPlayerEntity, origin);
+      const qboolean firing =
+          cg.predictedPlayerState.eFlags & EF_FIRING ? qtrue : qfalse;
+      CG_FlamethrowerFlame(&cg.predictedPlayerEntity, origin, firing);
     }
 
     if (cg.binocZoomTime) {
@@ -6089,8 +6091,8 @@ VENOM GUN TRACING
 
 //----(SA)	all changes to venom below should be mine
 #define DEFAULT_VENOM_COUNT 10
-//#define DEFAULT_VENOM_SPREAD 20
-//#define DEFAULT_VENOM_SPREAD 400
+// #define DEFAULT_VENOM_SPREAD 20
+// #define DEFAULT_VENOM_SPREAD 400
 #define DEFAULT_VENOM_SPREAD 700
 
 /*
