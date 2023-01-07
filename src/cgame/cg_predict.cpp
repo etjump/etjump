@@ -1123,7 +1123,8 @@ void CG_PredictPlayerState() {
     // is not registered, causing more jittery game when miss prediction happens
     // since there might be many user commands for same playerstate commandTime
     // (as explained above) need to make sure it is only checked once per frame
-    if (cg.predictedPlayerState.commandTime == oldPlayerState.commandTime) {
+    if (cg.predictedPlayerState.commandTime == oldPlayerState.commandTime &&
+        cg.predictedErrorTime != cg.oldTime) {
       vec3_t delta;
       float len;
 
