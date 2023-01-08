@@ -601,6 +601,10 @@ vmCvar_t etj_FPSMeterUpdateInterval;
 
 vmCvar_t etj_fixedCompassShader;
 
+// unlagged - optimized prediction
+vmCvar_t etj_optimizePrediction;
+// END unlagged - optimized prediction
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1098,6 +1102,10 @@ cvarTable_t cvarTable[] = {
 
     {&etj_fixedCompassShader, "etj_fixedCompassShader", "0",
      CVAR_LATCH | CVAR_ARCHIVE},
+
+    // unlagged - optimized prediction
+    {&etj_optimizePrediction, "etj_optimizePrediction", "1", CVAR_ARCHIVE},
+    // END unlagged - optimized prediction
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
