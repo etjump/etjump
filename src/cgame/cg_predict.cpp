@@ -817,7 +817,7 @@ pmoveExt_t oldpmext[CMD_BACKUP];
 void CG_PredictPlayerState() {
   int cmdNum, current;
   playerState_t oldPlayerState;
-  bool moved;
+  bool moved, predictError;
   usercmd_t oldestCmd;
   usercmd_t latestCmd;
   vec3_t deltaAngles;
@@ -1101,6 +1101,7 @@ void CG_PredictPlayerState() {
 
   // run cmds
   moved = false;
+  predictError = true;
   for (cmdNum = current - CMD_BACKUP + 1; cmdNum <= current; cmdNum++) {
     // get the command
     trap_GetUserCmd(cmdNum, &cg_pmove.cmd);
@@ -1124,10 +1125,11 @@ void CG_PredictPlayerState() {
     // since there might be many user commands for same playerstate commandTime
     // (as explained above) need to make sure it is only checked once per frame
     if (cg.predictedPlayerState.commandTime == oldPlayerState.commandTime &&
-        cg.predictedErrorTime != cg.oldTime) {
+        predictError) {
       vec3_t delta;
       float len;
 
+      predictError = false;
       if (BG_PlayerMounted(cg_pmove.ps->eFlags)) {
         // no prediction errors here, we're locked in place
         VectorClear(cg.predictedError);
