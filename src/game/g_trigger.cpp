@@ -22,7 +22,8 @@ void multi_wait(gentity_t *ent) { ent->nextthink = 0; }
 
 // Activates for multiple clients
 void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator) {
-  int triggerWait = (ent->wait + ent->random * crandom()) * 1000;
+  int triggerWait =
+      static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
 
   if (activator->client->multiTriggerActivationTime + triggerWait >
       level.time) {
@@ -31,9 +32,14 @@ void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   ent->activator = activator;
 
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  // make sure we only pass in team if the activator is a client
+  if (activator->client) {
+    G_Script_ScriptEvent(
+        ent, "activate",
+        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(ent, "activate", nullptr);
+  }
 
   G_UseTargets(ent, ent->activator);
   activator->client->multiTriggerActivationTime = level.time;
@@ -48,9 +54,14 @@ void parallel_multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   ent->activator = activator;
 
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  // make sure we only pass in team if the activator is a client
+  if (activator->client) {
+    G_Script_ScriptEvent(
+        ent, "activate",
+        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(ent, "activate", nullptr);
+  }
 
   G_UseTargets(ent, ent->activator);
   activator->client->alreadyActivatedTrigger = qtrue;
@@ -66,19 +77,25 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
     return; // can't retrigger until the wait is over
   }
 
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  // make sure we only pass in team if the activator is a client
+  if (activator->client) {
+    G_Script_ScriptEvent(
+        ent, "activate",
+        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(ent, "activate", nullptr);
+  }
 
   G_UseTargets(ent, ent->activator);
 
   if (ent->wait > 0) {
     ent->think = multi_wait;
-    ent->nextthink = level.time + (ent->wait + ent->random * crandom()) * 1000;
+    ent->nextthink = static_cast<int>(
+        level.time + (ent->wait + ent->random * crandom()) * 1000);
   } else {
     // we can't just remove (self) here, because this is a touch
     // function called while looping through area links...
-    ent->touch = 0;
+    ent->touch = nullptr;
     ent->nextthink = level.time + FRAMETIME;
     ent->think = G_FreeEntity;
   }
