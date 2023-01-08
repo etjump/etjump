@@ -37,7 +37,7 @@ void ETJump::DemoRecorder::start(const std::string &name) {
   _startTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
-  trap_SendConsoleCommand(stringFormat("record %s\n", name.c_str()).c_str());
+  trap_SendConsoleCommand(stringFormat("record %s\n", name).c_str());
   trap_SendConsoleCommand("set cl_noprint 0\n");
 }
 
