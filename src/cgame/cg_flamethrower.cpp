@@ -947,15 +947,17 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
 
           shader = nozzleShaders[(cg.time / 50 + (cg.time / 50 >> 1)) %
                                  NUM_NOZZLE_SPRITES];
-          if (!cg_drawGun.integer) {
-            shader = 0;
+
+          // if we have cg_drawGun 0, make the idle flame nozzle size 0
+          float nozzleSize = f->size;
+          if (f->ignitionOnly) {
+            nozzleSize = cg_drawGun.integer ? nozzleSize * 2.0f : 0.0f;
           }
 
           blueTrailHead = CG_AddTrailJunc(
               blueTrailHead, nullptr, /* rain - zinx's trail fix */ shader,
-              cg.time, STYPE_STRETCH, f->org, 1, alpha, alpha,
-              f->size * (f->ignitionOnly ? 2.0f : 1.0f), FLAME_MAX_SIZE,
-              TJFL_NOCULL | TJFL_FIXDISTORT, c, c, 1.0, 5.0);
+              cg.time, STYPE_STRETCH, f->org, 1, alpha, alpha, nozzleSize,
+              FLAME_MAX_SIZE, TJFL_NOCULL | TJFL_FIXDISTORT, c, c, 1.0, 5.0);
         }
 
         // fire stream
