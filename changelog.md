@@ -25,12 +25,30 @@
 * fixed issues with player collision with other players and entities with `pmove_fixed 1` by making sure collision always uses valid mins/maxs [#880](https://github.com/etjump/etjump/pull/880)
 * fixed visual bug in vote UI where voting yes as a spectator while following someone would show that you voted no [#882](https://github.com/etjump/etjump/pull/882)
 * added `top` alias for viewing timerun records [#884](https://github.com/etjump/etjump/pull/884)
-* removed charge time related cvars from serverinfo [#885](https://github.com/etjump/etjump/pull/885) [#988](https://github.com/etjump/etjump/pull/889)
+* removed charge time related cvars from serverinfo [#885](https://github.com/etjump/etjump/pull/885) [#889](https://github.com/etjump/etjump/pull/889)
 * improved update accuracy of upmove meter and strafe quality meter, most notably fixing the delay introduced in 2.5.1 where initial update of strafe quality was delayed due to client waiting for a snapshot [#833](https://github.com/etjump/etjump/pull/883)
 * removed mission time and spawntime from limbo menu [#892](https://github.com/etjump/etjump/pull/892)
 * fixed chatbox lineheight calculation sometimes resulting in too small lineheights and overlapping text [#899](https://github.com/etjump/etjump/pull/899)
 * removed unused `cg_predictItems` cvar [#900](https://github.com/etjump/etjump/pull/900)
 * added `cv` alias for `callvote` [#902](https://github.com/etjump/etjump/pull/902)
+* fixed players map icon warping when trying to `noclip` while mounted in a tank [#903](https://github.com/etjump/etjump/pull/903)
+* fixed detailed run records being impossible to fetch if the run name has color codes [#904](https://github.com/etjump/etjump/pull/904)
+* invalid arguments for `vote` command no longer default to `vote no` [#906](https://github.com/etjump/etjump/pull/906)
+  * commands are no longer case sensitive and ignore color codes
+  * invalid arguments now print a help text with valid vote arguments
+* scoreboard inactivity icon will now correctly persist across map changes [#906](https://github.com/etjump/etjump/pull/907) [#913](https://github.com/etjump/etjump/pull/913)
+* etjump credits menu will now automatically fetch the correct version for non-release builds too [#910](https://github.com/etjump/etjump/pull/910)
+* icons in scoreboard will now correctly fade out with the rest of the scoreboard [#908](https://github.com/etjump/etjump/pull/908)
+* restored vanilla lagometer behavior (don't draw lagometer on localhost by default) [#912](https://github.com/etjump/etjump/pull/912)
+  * lagometer can be drawn always if desired by setting `cg_lagometer 2`
+* fixed flamethrower spawning too many flames with `cg_drawGun 0` when repeatedly tapping `+attack` [#919](https://github.com/etjump/etjump/pull/919)
+* fixed and improved several aspects of playerstate prediction [#916](https://github.com/etjump/etjump/pull/916)
+  * added unlagged's optimized prediction via `etj_optimizePrediction` and fixed some issues it has with `pmove_fixed 1`
+  * fixed jittery view when colliding with movers with `com_maxfps > 125`
+  * fixed landing view animation not resetting when switching teams in the middle of the animation
+  * fixed prediction errors not being cleared on respawn
+  * fixed view transition happening when joining spectators while proning
+* fixed a potential crash when activating `trigger_multiple` with a non-player entity [#920](https://github.com/etjump/etjump/pull/920)
 
 # ETJump 2.5.1
 
