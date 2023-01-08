@@ -145,13 +145,13 @@ static vec3_t flameChunkMaxs = {0, 0, 0};
 #define GET_FLAME_SIZE_SPEED(x)                                                \
   (((float)x / FLAME_LIFETIME) / 0.3) // x is the current sizeMax
 
-//#define	FLAME_MIN_DRAWSIZE		20
+// #define	FLAME_MIN_DRAWSIZE		20
 
 // enable this for the fuel stream
-//#define FLAME_ENABLE_FUEL_STREAM
+// #define FLAME_ENABLE_FUEL_STREAM
 
 // enable this for dynamic lighting around flames
-//#define FLAMETHROW_LIGHTS
+// #define FLAMETHROW_LIGHTS
 
 // disable this to stop rotating flames (this is variable so we can change it at
 // run-time)
@@ -688,7 +688,7 @@ static vec3_t rright, rup;
               // all times (only enabled to generate updated shaders)
   #ifdef ALLOW_GEN_SHADERS // secondary security measure
 
-  //#define	GEN_FLAME_SHADER
+  // #define	GEN_FLAME_SHADER
 
   #endif // ALLOW_GEN_SHADERS
 #endif   // _DEBUG
@@ -948,11 +948,16 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
           shader = nozzleShaders[(cg.time / 50 + (cg.time / 50 >> 1)) %
                                  NUM_NOZZLE_SPRITES];
 
+          // if we have cg_drawGun 0, make the idle flame nozzle size 0
+          float nozzleSize = f->size;
+          if (f->ignitionOnly) {
+            nozzleSize = cg_drawGun.integer ? nozzleSize * 2.0f : 0.0f;
+          }
+
           blueTrailHead = CG_AddTrailJunc(
               blueTrailHead, nullptr, /* rain - zinx's trail fix */ shader,
-              cg.time, STYPE_STRETCH, f->org, 1, alpha, alpha,
-              f->size * (f->ignitionOnly ? 2.0f : 1.0f), FLAME_MAX_SIZE,
-              TJFL_NOCULL | TJFL_FIXDISTORT, c, c, 1.0, 5.0);
+              cg.time, STYPE_STRETCH, f->org, 1, alpha, alpha, nozzleSize,
+              FLAME_MAX_SIZE, TJFL_NOCULL | TJFL_FIXDISTORT, c, c, 1.0, 5.0);
         }
 
         // fire stream
