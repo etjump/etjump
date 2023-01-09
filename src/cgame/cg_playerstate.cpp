@@ -505,6 +505,11 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops) {
     if (ps->clientNum == cg.clientNum) {
       ops->persistant[PERS_SPAWN_COUNT]--;
     }
+  } else {
+    // reset cg.thisFrameTeleport as spectators never run the code on
+    // CG_PredictPlayerState that would reset it,
+    // so the viewheight check at the end does not fail
+    cg.thisFrameTeleport = qfalse;
   }
 
   if (ps->eFlags & EF_FIRING) {
