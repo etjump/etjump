@@ -5282,6 +5282,11 @@ void CG_FireWeapon(centity_t *cent) {
       weap->ejectBrassFunc(cent);
     }
   } // jpw
+
+  // set the timestamp for adrenaline firing for stamina bar visuals
+  if (ent->weapon == WP_MEDIC_ADRENALINE) {
+    cg.realAdrenalineTime = cg.time;
+  }
 }
 
 // Ridah

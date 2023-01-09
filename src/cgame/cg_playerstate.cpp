@@ -274,6 +274,9 @@ void CG_Respawn(qboolean revived) {
     oldTeam = cgs.clientinfo[cg.clientNum].team;
   }
 
+  // clear adrenaline firing timestamp so stamina bar visuals work correctly
+  cg.realAdrenalineTime = 0;
+
   // reset fog to world fog (if present)
   trap_R_SetFog(FOG_CMD_SWITCHFOG, FOG_MAP, 20, 0, 0, 0, 0);
   // dhm - end

@@ -1383,7 +1383,17 @@ void ClientThink_real(gentity_t *ent) {
     Cmd_Activate_f(ent);
   }
 
-  if (client->pers.nofatigue && g_nofatigue.integer) {
+  // handle etj_nofatigue - give player adrenaline if:
+  // 1. nofatigue is enabled on both client and server
+  // 2. we have less than 100ms remaining on adrenaline OR
+  // we are in the first 10 seconds of the level and DON'T have adrenaline yet
+
+  // instead of giving it to player every frame, handle it this way to minimize
+  // the prediction errors caused by ps.powerups change,
+  // which hinders the effectiveness of optimized prediction
+  if (client->pers.nofatigue && g_nofatigue.integer &&
+      ((ent->client->ps.powerups[PW_ADRENALINE] + 9900 < level.time) ||
+       (!(ent->client->ps.powerups[PW_ADRENALINE]) && level.time < 10000))) {
     ent->client->ps.powerups[PW_ADRENALINE] = level.time + 10000;
   }
 
