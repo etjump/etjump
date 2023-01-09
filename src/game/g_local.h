@@ -785,6 +785,7 @@ typedef struct {
 
   qboolean timerunActive;
   qboolean receivedTimerunStates;
+  bool timerunCheatsNotified;
 
   // new implementation of progression
 #define MAX_PROGRESSION_TRACKERS 50
