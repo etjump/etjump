@@ -1389,8 +1389,7 @@ void ClientThink_real(gentity_t *ent) {
   // the powerup when client and/or server has disabled nofatigue
   if (g_nofatigue.integer && ent->client->pers.nofatigue) {
     ent->client->ps.powerups[PW_ADRENALINE] = 1;
-  } else if (ent->client->pmext.adrenalineTime &&
-             ent->client->pmext.adrenalineTime < level.time) {
+  } else if (ent->client->pmext.adrenalineTime < level.time) {
     ent->client->ps.powerups[PW_ADRENALINE] = 0;
   }
 

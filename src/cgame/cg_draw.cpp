@@ -4300,7 +4300,7 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
 
   // make sure we only draw adrenaline visual if we actually used adrenaline
   // and not when we simply have etj_nofatigue
-  if (cg.snap->ps.powerups[PW_ADRENALINE] && cg.pmext.adrenalineTime != 0 &&
+  if (cg.snap->ps.powerups[PW_ADRENALINE] &&
       cg.pmext.adrenalineTime > cg.time) {
     if (cg.snap->ps.pm_flags & PMF_FOLLOW) {
       Vector4Average(colour, colorWhite, std::sin(cg.time * .005f), colour);
