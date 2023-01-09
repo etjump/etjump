@@ -1266,9 +1266,6 @@ typedef struct {
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
   bool shadowCvarsSet;
-
-  // timestamp we used adrenaline syringe on, for stamina bar visuals
-  int realAdrenalineTime;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21

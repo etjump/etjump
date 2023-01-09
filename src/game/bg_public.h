@@ -616,6 +616,9 @@ typedef struct {
   float scale;
   float scaleAlt; // cmdScale without upmove component
   float accel;
+
+  // timestamp adrenaline should expire at
+  int adrenalineTime;
 } pmoveExt_t; // data used both in client and server - store it here
               // instead of playerstate to prevent different engine versions of
               // playerstate between XP and MP
@@ -845,6 +848,8 @@ typedef enum {
 #define BG_PlayerMounted(eFlags)                                               \
   ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) ||                   \
    (eFlags & EF_AAGUN_ACTIVE))
+
+constexpr int ADRENALINE_TIME = 10000;
 
 // !! NOTE: only place flags that don't need to go to the client beyond
 // 0x00800000

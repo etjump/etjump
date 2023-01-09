@@ -4296,17 +4296,16 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
   vec4_t colourlow = {1.0f, 0.1f, 0.1f, 0.5f};
   vec_t *color = colour;
   int flags = 1 | 4 | 16 | 64;
-  float frac = cg.pmext.sprintTime / (float)SPRINTTIME;
+  float frac = static_cast<float>(cg.pmext.sprintTime) / SPRINTTIME;
 
   // make sure we only draw adrenaline visual if we actually used adrenaline
   // and not when we simply have etj_nofatigue
-  if (cg.snap->ps.powerups[PW_ADRENALINE] && cg.realAdrenalineTime != 0 &&
-      cg.realAdrenalineTime + 10000 > cg.time) {
+  if (cg.snap->ps.powerups[PW_ADRENALINE] && cg.pmext.adrenalineTime != 0 &&
+      cg.pmext.adrenalineTime > cg.time) {
     if (cg.snap->ps.pm_flags & PMF_FOLLOW) {
       Vector4Average(colour, colorWhite, std::sin(cg.time * .005f), colour);
     } else {
-      auto msec =
-          static_cast<float>(cg.snap->ps.powerups[PW_ADRENALINE] - cg.time);
+      auto msec = static_cast<float>(cg.pmext.adrenalineTime - cg.time);
 
       if (msec < 0) {
         msec = 0;

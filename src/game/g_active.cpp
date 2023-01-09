@@ -1383,18 +1383,15 @@ void ClientThink_real(gentity_t *ent) {
     Cmd_Activate_f(ent);
   }
 
-  // handle etj_nofatigue - give player adrenaline if:
-  // 1. nofatigue is enabled on both client and server
-  // 2. we have less than 100ms remaining on adrenaline OR
-  // we are in the first 10 seconds of the level and DON'T have adrenaline yet
-
-  // instead of giving it to player every frame, handle it this way to minimize
-  // the prediction errors caused by ps.powerups change,
-  // which hinders the effectiveness of optimized prediction
-  if (client->pers.nofatigue && g_nofatigue.integer &&
-      ((ent->client->ps.powerups[PW_ADRENALINE] + 9900 < level.time) ||
-       (!(ent->client->ps.powerups[PW_ADRENALINE]) && level.time < 10000))) {
-    ent->client->ps.powerups[PW_ADRENALINE] = level.time + 10000;
+  // etj/g_nofatigue handling: PW_ADRENALINE no longer expires,
+  // instead we treat it as a boolean value
+  // adrenalineTime is set on PM_Weapon, and is used as a timer for expiring
+  // the powerup when client and/or server has disabled nofatigue
+  if (g_nofatigue.integer && ent->client->pers.nofatigue) {
+    ent->client->ps.powerups[PW_ADRENALINE] = 1;
+  } else if (ent->client->pmext.adrenalineTime &&
+             ent->client->pmext.adrenalineTime < level.time) {
+    ent->client->ps.powerups[PW_ADRENALINE] = 0;
   }
 
   if (ent->flags & FL_NOFATIGUE) {
@@ -1836,7 +1833,7 @@ void ClientEndFrame(gentity_t *ent) {
         i == PW_ELECTRIC || i == PW_BREATHER || i == PW_NOFATIGUE ||
         ent->client->ps.powerups[i] == 0 // OSP
         || i == PW_OPS_CLASS_1 || i == PW_OPS_CLASS_2 || i == PW_OPS_CLASS_3 ||
-        i == PW_OPS_DISGUISED) {
+        i == PW_OPS_DISGUISED || i == PW_ADRENALINE) {
 
       continue;
     }

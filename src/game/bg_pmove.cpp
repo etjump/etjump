@@ -4831,6 +4831,11 @@ static void PM_Weapon(void) {
     }
   }
 
+  // store adrenaline firing timestamp since we treat it as a boolean
+  if (pm->ps->weapon == WP_MEDIC_ADRENALINE) {
+    pm->pmext->adrenalineTime = pm->ps->commandTime + ADRENALINE_TIME;
+  }
+
   // RF
   // rain - moved releasedFire into pmext instead of ps
   pm->pmext->releasedFire = qfalse;
