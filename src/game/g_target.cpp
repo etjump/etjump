@@ -1748,10 +1748,6 @@ void target_startTimer_use(gentity_t *self, gentity_t *other,
   auto clientNum = ClientNum(activator);
   float speed = VectorLength(activator->client->ps.velocity);
 
-  if (!activator) {
-    return;
-  }
-
   if (!activator->client) {
     return;
   }
@@ -1771,24 +1767,25 @@ void target_startTimer_use(gentity_t *self, gentity_t *other,
   // We don't need any of these checks if we are debugging
   if (g_debugTimeruns.integer <= 0) {
     if (activator->client->noclip || activator->flags == FL_GODMODE) {
-      Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not "
-                                            "started. Invalid playerstate!");
+      Printer::SendCenterMessage(
+          clientNum,
+          "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
       return;
     }
 
     if (speed > self->velocityUpperLimit) {
-      std::string speedMsg =
-          ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too "
-                               "high "
+      Printer::SendCenterMessage(
+          clientNum,
+          ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too high "
                                "starting speed (%.2f > %.2f)\n",
-                               speed, self->velocityUpperLimit);
-      Printer::SendCenterMessage(clientNum, speedMsg);
+                               speed, self->velocityUpperLimit));
       return;
     }
 
     if (activator->client->ps.viewangles[ROLL] != 0) {
-      Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not "
-                                            "started. Z-rotation detected!");
+      Printer::SendCenterMessage(
+          clientNum,
+          "^3WARNING: ^7Timerun was not started. Z-rotation detected!");
       return;
     }
   }
@@ -1799,11 +1796,18 @@ void target_startTimer_use(gentity_t *self, gentity_t *other,
   if (activator->client->sess.runSpawnflags == 0 ||
       activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL) {
     if (activator->client->pers.pmoveFixed == qfalse) {
-      Printer::SendCenterMessage(clientNum,
-                                 "^3WARNING: ^7Timerun was not started. "
-                                 "pmove_fixed is set to 0!");
+      Printer::SendCenterMessage(
+          clientNum,
+          "^3WARNING: ^7Timerun was not started. pmove_fixed is set to 0!");
       return;
     }
+  }
+
+  if (!activator->client->sess.timerunCheatsNotified && g_cheats.integer) {
+    Printer::SendPopupMessage(clientNum,
+                              "^3WARNING: ^7Cheats are enabled! Timerun "
+                              "records will not be saved!\n");
+    activator->client->sess.timerunCheatsNotified = true;
   }
 
   StartTimer(level.timerunNames[self->runIndex], activator);
