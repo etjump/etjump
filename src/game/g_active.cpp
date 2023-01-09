@@ -1383,8 +1383,14 @@ void ClientThink_real(gentity_t *ent) {
     Cmd_Activate_f(ent);
   }
 
-  if (client->pers.nofatigue && g_nofatigue.integer) {
-    ent->client->ps.powerups[PW_ADRENALINE] = level.time + 10000;
+  // etj/g_nofatigue handling: PW_ADRENALINE no longer expires,
+  // instead we treat it as a boolean value
+  // adrenalineTime is set on PM_Weapon, and is used as a timer for expiring
+  // the powerup when client and/or server has disabled nofatigue
+  if (g_nofatigue.integer && ent->client->pers.nofatigue) {
+    ent->client->ps.powerups[PW_ADRENALINE] = 1;
+  } else if (ent->client->pmext.adrenalineTime < level.time) {
+    ent->client->ps.powerups[PW_ADRENALINE] = 0;
   }
 
   if (ent->flags & FL_NOFATIGUE) {
@@ -1826,7 +1832,7 @@ void ClientEndFrame(gentity_t *ent) {
         i == PW_ELECTRIC || i == PW_BREATHER || i == PW_NOFATIGUE ||
         ent->client->ps.powerups[i] == 0 // OSP
         || i == PW_OPS_CLASS_1 || i == PW_OPS_CLASS_2 || i == PW_OPS_CLASS_3 ||
-        i == PW_OPS_DISGUISED) {
+        i == PW_OPS_DISGUISED || i == PW_ADRENALINE) {
 
       continue;
     }

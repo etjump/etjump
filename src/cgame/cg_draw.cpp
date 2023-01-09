@@ -4296,19 +4296,23 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
   vec4_t colourlow = {1.0f, 0.1f, 0.1f, 0.5f};
   vec_t *color = colour;
   int flags = 1 | 4 | 16 | 64;
-  float frac = cg.pmext.sprintTime / (float)SPRINTTIME;
+  float frac = static_cast<float>(cg.pmext.sprintTime) / SPRINTTIME;
 
-  if (cg.snap->ps.powerups[PW_ADRENALINE]) {
+  // make sure we only draw adrenaline visual if we actually used adrenaline
+  // and not when we simply have etj_nofatigue
+  if (cg.snap->ps.powerups[PW_ADRENALINE] &&
+      cg.pmext.adrenalineTime > cg.time) {
     if (cg.snap->ps.pm_flags & PMF_FOLLOW) {
-      Vector4Average(colour, colorWhite, sin(cg.time * .005f), colour);
+      Vector4Average(colour, colorWhite, std::sin(cg.time * .005f), colour);
     } else {
-      float msec = cg.snap->ps.powerups[PW_ADRENALINE] - cg.time;
+      auto msec = static_cast<float>(cg.pmext.adrenalineTime - cg.time);
 
       if (msec < 0) {
         msec = 0;
       } else {
         Vector4Average(colour, colorWhite,
-                       .5f + sin(.2f * sqrt(msec) * 2 * M_PI) * .5f, colour);
+                       .5f + sin(.2f * std::sqrt(msec) * 2 * M_PI) * .5f,
+                       colour);
       }
     }
   } else {
@@ -4318,9 +4322,9 @@ static void CG_DrawStaminaBar(rectDef_t *rect) {
   }
 
   CG_FilledBar(rect->x, rect->y + (rect->h * 0.1f), rect->w, rect->h * 0.84f,
-               color, NULL, bgcolour, frac, flags);
+               color, nullptr, bgcolour, frac, flags);
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
   CG_DrawPic(rect->x, rect->y, rect->w, rect->h, cgs.media.hudSprintBar);
   CG_DrawPic(rect->x, rect->y + rect->h + 4, rect->w, rect->w,
              cgs.media.hudSprintIcon);
