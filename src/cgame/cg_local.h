@@ -2589,6 +2589,7 @@ extern vmCvar_t etj_drawClips;
 extern vmCvar_t etj_drawTriggers;
 extern vmCvar_t etj_drawSlicks;
 extern vmCvar_t etj_clear;
+extern vmCvar_t etj_flareSize;
 
 extern vmCvar_t etj_consoleAlpha;
 extern vmCvar_t etj_consoleColor;
