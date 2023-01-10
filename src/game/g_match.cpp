@@ -426,7 +426,7 @@ void G_parseStats(char *pszStatsInfo) {
   const char *tmp = pszStatsInfo;
   unsigned int i, dwWeaponMask, dwClientID = Q_atoi(pszStatsInfo);
 
-  if (dwClientID > MAX_CLIENTS) {
+  if (dwClientID >= MAX_CLIENTS) {
     return;
   }
 
