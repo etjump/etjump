@@ -4012,7 +4012,7 @@ void Cmd_IntermissionWeaponStats_f(gentity_t *ent) {
   trap_Argv(1, buffer, sizeof(buffer));
 
   clientNum = Q_atoi(buffer);
-  if (clientNum < 0 || clientNum > MAX_CLIENTS) {
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
     return;
   }
 
