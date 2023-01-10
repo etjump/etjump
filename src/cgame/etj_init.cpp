@@ -153,17 +153,6 @@ bool showingScores() {
   return (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time);
 }
 
-// shadow cvars mapping to real cvars, forces locked values change
-std::vector<std::pair<vmCvar_t *, std::string>> cvars{
-    {&etj_drawFoliage, "r_drawfoliage"}, {&etj_showTris, "r_showtris"},
-    {&etj_wolfFog, "r_wolffog"},         {&etj_zFar, "r_zfar"},
-    {&etj_viewlog, "viewlog"},           {&etj_offsetFactor, "r_offsetFactor"},
-    {&etj_offsetUnits, "r_offsetUnits"}, {&etj_speeds, "r_speeds"},
-    {&etj_lightmap, "r_lightmap"},       {&etj_drawNotify, "con_drawNotify"},
-    {&etj_drawClips, "r_drawClips"},     {&etj_drawTriggers, "r_drawTriggers"},
-    {&etj_drawSlicks, "r_drawSlicks"},   {&etj_clear, "r_clear"},
-};
-
 void init() {
 
   CG_Printf(S_COLOR_LTGREY GAME_HEADER);
@@ -240,6 +229,24 @@ void init() {
       std::shared_ptr<ETJump::IRenderable>(keySetSystem));
   ETJump::initDrawKeys(keySetSystem);
   ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+
+  const std::vector<std::pair<const vmCvar_t *, const std::string>> cvars{
+      {&etj_drawFoliage, "r_drawfoliage"},
+      {&etj_showTris, "r_showtris"},
+      {&etj_wolfFog, "r_wolffog"},
+      {&etj_zFar, "r_zfar"},
+      {&etj_viewlog, "viewlog"},
+      {&etj_offsetFactor, "r_offsetFactor"},
+      {&etj_offsetUnits, "r_offsetUnits"},
+      {&etj_speeds, "r_speeds"},
+      {&etj_lightmap, "r_lightmap"},
+      {&etj_drawNotify, "con_drawNotify"},
+      {&etj_drawClips, "r_drawClips"},
+      {&etj_drawTriggers, "r_drawTriggers"},
+      {&etj_drawSlicks, "r_drawSlicks"},
+      {&etj_clear, "r_clear"},
+      {&etj_flareSize, "r_flareSize"},
+  };
 
   for (auto &shadow : cvars) {
     ETJump::cvarShadows.push_back(
