@@ -1968,10 +1968,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   int clientNum2 = -1;
   char ip[20] = "\0", ip2[20] = "\0";
   char userinfo2[MAX_INFO_STRING] = "\0";
-#ifdef USEXPSTORAGE
-  ipXPStorage_t *xpBackup;
-  int i;
-#endif // USEXPSTORAGE
 
   ent = &g_entities[clientNum];
 
