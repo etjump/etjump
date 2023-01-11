@@ -35,7 +35,7 @@ In general, it's preferred to write more "C++ style" code rather than "C-style" 
 
 ```cpp
 // bad
-auto isValid = isAValid() ? true : isBValid() ? true : false
+auto isValid = isAValid() ? true : isBValid() ? true : false;
 
 // good
 bool isValid;
@@ -50,24 +50,21 @@ if (isAValid() || isBValid()) {
 
 ```cpp
 namespace ETJump {
-class Example {
-};
-};
+class Example {};
+}; // namespace ETJump
 ```
 
 * Functions, class methods and variables should be __camelCased__:
 
 ```cpp
-void aCamelCasedName() {
-}
+void aCamelCasedName() {}
 ```
 
 * `Class` names and `enums` should be __PascalCased__:
 
 ```cpp
 class FileSystem {
-  enum FileOpenModes {
-  };
+  enum FileOpenModes {};
 };
 ```
 
