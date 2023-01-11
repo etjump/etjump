@@ -543,9 +543,12 @@ qboolean PC_String_Parse(int handle, const char **out);
 qboolean PC_String_ParseLower(int handle, const char **out);
 qboolean PC_Script_Parse(int handle, const char **out);
 qboolean PC_Char_Parse(int handle, char *out); // NERVE - SMF
+
 namespace ETJump {
 bool PC_hasFloat(int handle);
-}
+void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy);
+} // namespace ETJump
+
 int Menu_Count();
 menuDef_t *Menu_Get(int handle);
 void Menu_New(int handle);
