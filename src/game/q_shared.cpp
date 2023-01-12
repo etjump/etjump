@@ -356,16 +356,14 @@ static const char *SkipWhitespace(const char *data, qboolean *hasNewLines) {
 int COM_Compress(char *data_p) {
   char *datai, *datao;
   int c, size;
-  qboolean ws = qfalse;
 
   size = 0;
   datai = datao = data_p;
   if (datai) {
-    while ((c = *datai) != 0) {
+    while ((c = static_cast<unsigned char>(*datai)) != 0) {
       if (c == 13 || c == 10) {
-        *datao = c;
+        *datao = static_cast<char>(c);
         datao++;
-        ws = qfalse;
         datai++;
         size++;
         // skip double slash comments
@@ -373,7 +371,6 @@ int COM_Compress(char *data_p) {
         while (*datai && *datai != '\n') {
           datai++;
         }
-        ws = qfalse;
         // skip /* */ comments
       } else if (c == '/' && datai[1] == '*') {
         datai += 2; // Arnout: skip over '/*'
@@ -383,16 +380,10 @@ int COM_Compress(char *data_p) {
         if (*datai) {
           datai += 2;
         }
-        ws = qfalse;
       } else {
-        if (ws) {
-          *datao = ' ';
-          datao++;
-        }
-        *datao = c;
+        *datao = static_cast<char>(c);
         datao++;
         datai++;
-        ws = qfalse;
         size++;
       }
     }
@@ -758,6 +749,15 @@ int Q_isforfilename(int c) {
     return (1);
   }
   return (0);
+}
+
+float Q_atof(const char *str) {
+  const float f = std::strtof(str, nullptr);
+  return (std::isfinite(f) ? f : 0);
+}
+
+int Q_atoi(const char *str) {
+  return static_cast<int>(std::strtol(str, nullptr, 10));
 }
 
 /*

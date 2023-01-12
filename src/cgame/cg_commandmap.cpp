@@ -133,7 +133,7 @@ void CG_ParseMapEntity(int *mapEntityCount, int *offset, team_t team) {
   char buffer[16];
 
   trap_Argv((*offset)++, buffer, 16);
-  mEnt->type = atoi(buffer);
+  mEnt->type = static_cast<char>(Q_atoi(buffer));
 
   switch (mEnt->type) {
     case ME_CONSTRUCT: // Gordon: these ones don't need much
@@ -146,36 +146,36 @@ void CG_ParseMapEntity(int *mapEntityCount, int *offset, team_t team) {
     case ME_TANK:
     case ME_TANK_DEAD:
       trap_Argv((*offset)++, buffer, 16);
-      mEnt->x = atoi(buffer) * 128;
+      mEnt->x = Q_atoi(buffer) * 128;
 
       trap_Argv((*offset)++, buffer, 16);
-      mEnt->y = atoi(buffer) * 128;
+      mEnt->y = Q_atoi(buffer) * 128;
 
       if (cgs.ccLayers) {
         trap_Argv((*offset)++, buffer, 16);
-        mEnt->z = atoi(buffer) * 128;
+        mEnt->z = Q_atoi(buffer) * 128;
       }
       break;
 
     default:
       trap_Argv((*offset)++, buffer, 16);
-      mEnt->x = atoi(buffer) * 128;
+      mEnt->x = Q_atoi(buffer) * 128;
 
       trap_Argv((*offset)++, buffer, 16);
-      mEnt->y = atoi(buffer) * 128;
+      mEnt->y = Q_atoi(buffer) * 128;
 
       if (cgs.ccLayers) {
         trap_Argv((*offset)++, buffer, 16);
-        mEnt->z = atoi(buffer) * 128;
+        mEnt->z = Q_atoi(buffer) * 128;
       }
 
       trap_Argv((*offset)++, buffer, 16);
-      mEnt->yaw = atoi(buffer);
+      mEnt->yaw = Q_atoi(buffer);
       break;
   }
 
   trap_Argv((*offset)++, buffer, 16);
-  mEnt->data = atoi(buffer);
+  mEnt->data = Q_atoi(buffer);
 
   mEnt->transformed[0] =
       (mEnt->x - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0] * CC_2D_W;
@@ -560,7 +560,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
       }
 
       /*		if((mEnt->yaw & 0xFF) & (1 <<
-         (atoi(CG_ConfigString(mEnt->team == TEAM_AXIS ?
+         (Q_atoi(CG_ConfigString(mEnt->team == TEAM_AXIS ?
          CS_MAIN_AXIS_OBJECTIVE :
          CS_MAIN_ALLIES_OBJECTIVE)) - 1))) {
          trap_R_SetColor( colorYellow );

@@ -288,7 +288,7 @@ int ClientNumberFromString(gentity_t *to, char *s) {
 
   // numeric values are just slot numbers
   if (fIsNumber) {
-    idnum = atoi(s);
+    idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
       CPx(to - g_entities, va("print \"Bad client slot: [lof]%i\n\"", idnum));
       return -1;
@@ -345,7 +345,7 @@ int ClientNumbersFromString(const char *s, int *plist) {
     }
   }
   if (is_slot) {
-    i = atoi(s);
+    i = Q_atoi(s);
     if (i >= 0 && i < level.maxclients) {
       p = &level.clients[i];
       if (p->pers.connected == CON_CONNECTED ||
@@ -440,7 +440,10 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
 }
 
 // Updates voting stats
-void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote) {
+void etj_UpdateVotingInfo(gentity_t *ent, ETJump::VotingTypes vote) {
+  auto client = ent->client;
+  auto clientNum = ClientNum(ent);
+
   switch (vote) {
     case ETJump::VotingTypes::VoteYes:
       level.voteInfo.voteYes++;
@@ -462,9 +465,9 @@ void etj_UpdateVotingInfo(gclient_t *client, ETJump::VotingTypes vote) {
   }
 
   if (client->pers.votingInfo.isVotedYes) {
-    trap_SendServerCommand(client->ps.clientNum, "voted yes");
+    trap_SendServerCommand(clientNum, "voted yes");
   } else {
-    trap_SendServerCommand(client->ps.clientNum, "voted no");
+    trap_SendServerCommand(clientNum, "voted no");
   }
 
   client->pers.votingInfo.time = level.time;
@@ -548,7 +551,7 @@ void Cmd_Give_f(gentity_t *ent) {
   if (*amt) {
     hasAmount = qtrue;
   }
-  amount = atoi(amt);
+  amount = Q_atoi(amt);
   //----(SA)	end
 
   name = ConcatArgs(1);
@@ -760,7 +763,7 @@ void Cmd_God_f(gentity_t *ent) {
       msg = "godmode all OFF\n";
     }
   } else {
-    if (!Q_stricmp(name, "on") || atoi(name)) {
+    if (!Q_stricmp(name, "on") || Q_atoi(name)) {
       ent->flags |= FL_GODMODE;
     } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
       ent->flags &= ~FL_GODMODE;
@@ -796,7 +799,7 @@ void Cmd_Nofatigue_f(gentity_t *ent) {
     return;
   }
 
-  if (!Q_stricmp(name, "on") || atoi(name)) {
+  if (!Q_stricmp(name, "on") || Q_atoi(name)) {
     ent->flags |= FL_NOFATIGUE;
   } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
     ent->flags &= ~FL_NOFATIGUE;
@@ -1007,7 +1010,7 @@ void printTracker(gentity_t *ent) {
 
     for (i = 1; i < numArgs; i++) {
       trap_Argv(i, buffer, sizeof buffer);
-      int idx = atoi(buffer);
+      int idx = Q_atoi(buffer);
 
       if (checkTrackerIndex(clientNum, idx, buffer, false)) {
         printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx,
@@ -1043,7 +1046,7 @@ void setTracker(gentity_t *ent) {
   }
 
   trap_Argv(1, bufferIndex, sizeof bufferIndex);
-  int idx = atoi(bufferIndex);
+  int idx = Q_atoi(bufferIndex);
 
   if (!Q_stricmp("all", bufferIndex)) {
     if (trap_Argc() == 2) {
@@ -1053,7 +1056,7 @@ void setTracker(gentity_t *ent) {
     }
 
     trap_Argv(2, bufferValue, sizeof bufferValue);
-    value = atoi(bufferValue);
+    value = Q_atoi(bufferValue);
 
     if (checkTrackerValue(clientNum, bufferValue)) {
       for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
@@ -1095,7 +1098,7 @@ void setTracker(gentity_t *ent) {
       }
 
       if (checkTrackerValue(clientNum, bufferValue)) {
-        value = atoi(bufferValue);
+        value = Q_atoi(bufferValue);
         ent->client->sess.progression[idx - 1] = value;
         setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i "
                                      "^7value: ^2%i\n",
@@ -1132,7 +1135,7 @@ void Cmd_Noclip_f(gentity_t *ent) {
     return;
   }
 
-  if (!Q_stricmp(name, "on") || atoi(name)) {
+  if (!Q_stricmp(name, "on") || Q_atoi(name)) {
     ent->client->noclip = qtrue;
   } else if (!Q_stricmp(name, "off") || !Q_stricmp(name, "0")) {
     ent->client->noclip = qfalse;
@@ -1665,10 +1668,10 @@ void Cmd_Team_f(gentity_t *ent) {
   trap_Argv(3, weap, sizeof(weap));
   trap_Argv(4, weap2, sizeof(weap2));
 
-  w = static_cast<weapon_t>(atoi(weap));
-  w2 = static_cast<weapon_t>(atoi(weap2));
+  w = static_cast<weapon_t>(Q_atoi(weap));
+  w2 = static_cast<weapon_t>(Q_atoi(weap2));
 
-  ent->client->sess.latchPlayerType = atoi(ptype);
+  ent->client->sess.latchPlayerType = Q_atoi(ptype);
   if (ent->client->sess.latchPlayerType < PC_SOLDIER ||
       ent->client->sess.latchPlayerType > PC_COVERTOPS) {
     ent->client->sess.latchPlayerType = PC_SOLDIER;
@@ -1743,7 +1746,7 @@ void Cmd_TeamBot_f(gentity_t *foo) {
   gentity_t *ent;
 
   trap_Argv(1, entNumStr, sizeof(entNumStr));
-  entNum = atoi(entNumStr);
+  entNum = Q_atoi(entNumStr);
 
   ent = g_entities + entNum;
 
@@ -1751,11 +1754,11 @@ void Cmd_TeamBot_f(gentity_t *foo) {
   trap_Argv(4, weap, sizeof(weap));
   trap_Argv(5, fireteam, sizeof(fireteam));
 
-  ent->client->sess.latchPlayerType = atoi(ptype);
-  ent->client->sess.latchPlayerWeapon = atoi(weap);
+  ent->client->sess.latchPlayerType = Q_atoi(ptype);
+  ent->client->sess.latchPlayerWeapon = Q_atoi(weap);
   ent->client->sess.latchPlayerWeapon2 = 0;
-  ent->client->sess.playerType = atoi(ptype);
-  ent->client->sess.playerWeapon = atoi(weap);
+  ent->client->sess.playerType = Q_atoi(ptype);
+  ent->client->sess.playerWeapon = Q_atoi(weap);
 
   // remove any weapon info from the userinfo, so SetWolfSpawnWeapons()
   // doesn't reset the weapon as that
@@ -2000,6 +2003,8 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
              const char *name, const char *message, qboolean localize,
              qboolean encoded) {
   const char *cmd;
+  auto clientNum = ClientNum(ent);
+  auto otherClientNum = ClientNum(other);
 
   if (!other || !other->inuse || !other->client) {
     return;
@@ -2013,10 +2018,10 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   {
     if (ent->s.clientNum != other->s.clientNum) {
       fireteamData_t *ft1, *ft2;
-      if (!G_IsOnFireteam(other - g_entities, &ft1)) {
+      if (!G_IsOnFireteam(otherClientNum, &ft1)) {
         return;
       }
-      if (!G_IsOnFireteam(ent - g_entities, &ft2)) {
+      if (!G_IsOnFireteam(clientNum, &ft2)) {
         return;
       }
       if (ft1 != ft2) {
@@ -2031,9 +2036,9 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
     cmd = mode == SAY_TEAM || mode == SAY_BUDDY ? "tchat" : "chat";
   }
 
-  trap_SendServerCommand(other - g_entities,
+  trap_SendServerCommand(otherClientNum,
                          va("%s \"%s%c%c%s\" %i %i", cmd, name, Q_COLOR_ESCAPE,
-                            color, message, ent - g_entities, localize));
+                            color, message, clientNum, localize));
 }
 
 void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
@@ -2253,10 +2258,10 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
 
     trap_Argv(1, buffer, 32);
 
-    cls = atoi(buffer);
+    cls = Q_atoi(buffer);
 
     trap_Argv(2, buffer, 32);
-    cnt = atoi(buffer);
+    cnt = Q_atoi(buffer);
     if (cnt > MAX_CLIENTS) {
       cnt = MAX_CLIENTS;
     }
@@ -2264,7 +2269,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
     for (i = 0; i < cnt; i++) {
       trap_Argv(3 + i, buffer, 32);
 
-      num = atoi(buffer);
+      num = Q_atoi(buffer);
       if (num < 0) {
         continue;
       }
@@ -2332,7 +2337,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     if (Q_isnumeric(variant[0])) {
       id = 2;
       cust = 3;
-      vsay.variant = atoi(variant);
+      vsay.variant = Q_atoi(variant);
     }
 
     trap_Argv(id, vsay.id, sizeof(vsay.id));
@@ -2343,7 +2348,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     int index;
 
     trap_Argv(2, buffer, sizeof(buffer));
-    index = atoi(buffer);
+    index = Q_atoi(buffer);
     if (index < 0) {
       index = 0;
     }
@@ -2357,7 +2362,7 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     if (Q_isnumeric(variant[0])) {
       id = 4 + index;
       cust = 5 + index;
-      vsay.variant = atoi(variant);
+      vsay.variant = Q_atoi(variant);
     } else {
       id = 3;
       cust = 4;
@@ -2394,7 +2399,7 @@ static void Cmd_VoiceTell_f(gentity_t *ent, qboolean voiceonly)
 	}
 
 	trap_Argv(1, arg, sizeof(arg));
-	targetNum = atoi(arg);
+	targetNum = Q_atoi(arg);
 	if (targetNum < 0 || targetNum >= level.maxclients)
 	{
 		return;
@@ -2677,6 +2682,9 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
 }
 
+static const char *yesMsgs[] = {"yes", "y", "1"};
+static const char *noMsgs[] = {"no", "n", "0"};
+
 /*
 ==================
 Cmd_Vote_f
@@ -2686,6 +2694,38 @@ void Cmd_Vote_f(gentity_t *ent) {
   char msg[64];
   auto *client = ent->client;
   auto clientNum = ClientNum(ent);
+
+  static const auto votedYes = [](const std::string &msg) {
+    for (const auto &ym : yesMsgs) {
+      if (ym == msg) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  static const auto votedNo = [](const std::string &msg) {
+    for (const auto &nm : noMsgs) {
+      if (nm == msg) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  static const auto printVoteMsgs = [&]() {
+    std::string voteMsgs = "^7Invalid vote argument.\n";
+    voteMsgs += "  ^7Valid arguments for '^2Yes^7' are: ";
+    for (const auto &ym : yesMsgs) {
+      voteMsgs += std::string(ym) + " ";
+    }
+    voteMsgs += "\n  ^7Valid arguments for '^1No^7' are: ";
+    for (const auto &nm : noMsgs) {
+      voteMsgs += std::string(nm) + " ";
+    }
+    voteMsgs += "\n";
+    Printer::SendConsoleMessage(clientNum, voteMsgs);
+  };
 
   if (ent->client->pers.applicationEndTime > level.time) {
 
@@ -2699,17 +2739,21 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -3");
 
       G_AddClientToFireteam(ent->client->pers.applicationClient, clientNum);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.applicationEndTime = 0;
@@ -2732,17 +2776,21 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -3");
 
       G_AddClientToFireteam(clientNum, ent->client->pers.invitationClient);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(ent - g_entities, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.invitationEndTime = 0;
@@ -2764,17 +2812,21 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -3");
 
       G_InviteToFireTeam(clientNum, ent->client->pers.propositionClient);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.propositionEndTime = 0;
@@ -2788,15 +2840,19 @@ void Cmd_Vote_f(gentity_t *ent) {
     fireteamData_t *ft;
 
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "aft -2");
 
       if (G_IsFireteamLeader(clientNum, &ft)) {
         ft->priv = qtrue;
       }
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "aft -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.autofireteamEndTime = 0;
@@ -2806,13 +2862,17 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->pers.autofireteamCreateEndTime > level.time) {
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
 
       G_RegisterFireteam(clientNum);
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.autofireteamCreateEndTime = 0;
@@ -2822,8 +2882,9 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   if (ent->client->pers.autofireteamJoinEndTime > level.time) {
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       fireteamData_t *ft;
 
       trap_SendServerCommand(clientNum, "aftj -2");
@@ -2832,8 +2893,11 @@ void Cmd_Vote_f(gentity_t *ent) {
       if (ft) {
         G_AddClientToFireteam(clientNum, ft->joinOrder[0]);
       }
-    } else {
+    } else if (votedNo(msgstr)) {
       trap_SendServerCommand(clientNum, "aftj -2");
+    } else {
+      printVoteMsgs();
+      return;
     }
 
     ent->client->pers.autofireteamCreateEndTime = 0;
@@ -2851,17 +2915,21 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
   if (ent->client->ps.eFlags & EF_VOTED) {
     trap_Argv(1, msg, sizeof(msg));
+    const auto msgstr = ETJump::sanitize(std::string(msg), true);
     // If the caller decides to hit f2 after calling the vote
     // cancel it.
     if (ClientNum(ent) == level.voteInfo.voter_cn) {
-      if ((msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')) {
+      if (votedYes(msgstr)) {
         // Do nothing...
         return;
-      } else {
+      } else if (votedNo(msgstr)) {
         level.voteInfo.voteCanceled = qtrue;
         level.voteInfo.voteNo = level.numConnectedClients;
         level.voteInfo.voteYes = 0;
         Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
+        return;
+      } else {
+        printVoteMsgs();
         return;
       }
     }
@@ -2907,14 +2975,17 @@ void Cmd_Vote_f(gentity_t *ent) {
     client->pers.votingInfo.isWarned = false;
 
     // allow revote
-    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
+    if (votedYes(msgstr)) {
       if (!client->pers.votingInfo.isVotedYes) {
-        etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteYes);
+        etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteYes);
+      }
+    } else if (votedNo(msgstr)) {
+      if (client->pers.votingInfo.isVotedYes) {
+        etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteNo);
       }
     } else {
-      if (client->pers.votingInfo.isVotedYes) {
-        etj_UpdateVotingInfo(client, ETJump::VotingTypes::RevoteNo);
-      }
+      printVoteMsgs();
+      return;
     }
 
     Printer::SendPopupMessage(
@@ -2935,24 +3006,26 @@ void Cmd_Vote_f(gentity_t *ent) {
     return;
   }
 
+  trap_Argv(1, msg, sizeof(msg));
+  const auto msgstr = ETJump::sanitize(std::string(msg), true);
+
+  if (votedYes(msgstr)) {
+
+    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteYes);
+
+  } else if (votedNo(msgstr)) {
+    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteNo);
+  } else {
+    printVoteMsgs();
+    return;
+  }
+
   Printer::SendConsoleMessage(clientNum, "Vote cast.\n");
 
   ent->client->ps.eFlags |= EF_VOTED;
   level.voteInfo.voteCanceled = qfalse;
 
   CalculateRanks();
-
-  trap_Argv(1, msg, sizeof(msg));
-
-  if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1') {
-    etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteYes);
-
-  } else {
-    etj_UpdateVotingInfo(client, ETJump::VotingTypes::VoteNo);
-  }
-
-  // a majority will be determined in G_CheckVote, which will also
-  // account for players entering or leaving
 }
 
 qboolean G_canPickupMelee(gentity_t *ent) {
@@ -3662,11 +3735,11 @@ void Cmd_ClientMonsterSlickAngle (gentity_t *clent) {
     }
 
     trap_Argv( 1, s, sizeof( s ) );
-    entnum = atoi(s);
+    entnum = Q_atoi(s);
     ent = &g_entities[entnum];
 
     trap_Argv( 2, s, sizeof( s ) );
-    angle = atoi(s);
+    angle = Q_atoi(s);
 
     // sanity check (also protect from cheaters)
     if (g_gametype.integer != GT_SINGLE_PLAYER && entnum != clent->s.number) {
@@ -3691,8 +3764,8 @@ void G_UpdateSpawnCounts(void) {
   for (i = 0; i < level.numspawntargets; i++) {
     trap_GetConfigstring(CS_MULTI_SPAWNTARGETS + i, cs, sizeof(cs));
 
-    current = atoi(Info_ValueForKey(cs, "c"));
-    team = atoi(Info_ValueForKey(cs, "t")) & ~256;
+    current = Q_atoi(Info_ValueForKey(cs, "c"));
+    team = Q_atoi(Info_ValueForKey(cs, "t")) & ~256;
 
     count = 0;
     for (j = 0; j < level.numConnectedClients; j++) {
@@ -3767,7 +3840,7 @@ void Cmd_SetSpawnPoint_f(gentity_t *ent) {
   }
 
   trap_Argv(1, arg, sizeof(arg));
-  val = atoi(arg);
+  val = Q_atoi(arg);
 
   if (ent->client) {
     SetPlayerSpawn(ent, val, qtrue);
@@ -3889,7 +3962,7 @@ waypoints as spectator.\n\"" ); return;
 
     VectorCopy( trace.endpos, loc );
 
-    G_SetWayPoint( ent, atoi(arg), loc );
+    G_SetWayPoint( ent, Q_atoi(arg), loc );
 }*/
 
 /*
@@ -3919,7 +3992,7 @@ void Cmd_WeaponStat_f(gentity_t *ent) {
     return;
   }
   trap_Argv(1, buffer, 16);
-  stat = static_cast<extWeaponStats_t>(atoi(buffer));
+  stat = static_cast<extWeaponStats_t>(Q_atoi(buffer));
   if (stat >= 0 && stat < WS_MAX) {
     trap_SendServerCommand(ent - g_entities,
                            va("rws %i %i",
@@ -3938,8 +4011,8 @@ void Cmd_IntermissionWeaponStats_f(gentity_t *ent) {
 
   trap_Argv(1, buffer, sizeof(buffer));
 
-  clientNum = atoi(buffer);
-  if (clientNum < 0 || clientNum > MAX_CLIENTS) {
+  clientNum = Q_atoi(buffer);
+  if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
     return;
   }
 
@@ -4055,7 +4128,7 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
     return;
   }
   trap_Argv(1, buffer, 16);
-  val = atoi(buffer) + 1;
+  val = Q_atoi(buffer) + 1;
 
   for (i = 0; i < level.numLimboCams; i++) {
     if (!level.limboCams[i].spawn && level.limboCams[i].info == val) {
@@ -4320,16 +4393,17 @@ void Cmd_Call_f(gentity_t *ent) {
 void Cmd_PrivateMessage_f(gentity_t *ent) {
   int clientNum = -1;
   char cmd[MAX_TOKEN_CHARS] = "\0";
-  gentity_t *other = NULL;
-  char *msg = NULL;
+  gentity_t *other = nullptr;
+  char *msg = nullptr;
+  auto selfNum = ClientNum(ent);
 
   if (trap_Argc() < 3) {
-    CP("print \"^7usage: ^3m ^7<name> <message>.\n\"");
+    Printer::SendConsoleMessage(selfNum, "^7usage: ^3m ^7<name> <message>.\n");
     return;
   }
 
   if (ent && ent->client->sess.muted && g_mute.integer & 1) {
-    CP("print \"^NOTE: ^7You are muted.\n\"");
+    Printer::SendConsoleMessage(selfNum, "^3NOTE: ^7You are muted.\n");
     return;
   }
 
@@ -4342,33 +4416,27 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!ent) {
     msg = ConcatArgs(2);
-    CPx(other - g_entities, va("chat \"^7Private message from "
-                               "server console^7: ^3%s\"",
-                               msg));
-
-    G_Printf(va("Private message to %s^7: ^3%s\"", other->client->pers.netname,
-                msg));
+    Printer::SendChatMessage(
+        ClientNum(other),
+        va("^7Private message from server console: ^3%s\n", msg));
+    G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
+             msg);
     return;
   }
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    CPx(other - g_entities, va("chat \"^7Private message from %s^7: ^3%s\"",
-                               ent->client->pers.netname, msg));
+    Printer::SendChatMessage(ClientNum(other),
+                             va("^7Private message from %s^7: ^3%s\n",
+                                ent->client->pers.netname, msg));
     if (ent) {
-      CP(va("chat \"^7Private message to %s^7: ^3%s\"",
-            other->client->pers.netname, msg));
+      Printer::SendChatMessage(selfNum, va("^7Private message to %s^7: ^3%s\n",
+                                           other->client->pers.netname, msg));
     }
   } else {
-    CP(va("print \"Private message to %s was ignored by the "
-          "player.\n\"",
-          other->client->pers.netname));
-  }
-  if (ent) {
-    // G_LogPrintf("%s -> %s: %s", ent->client->pers.netname,
-    // other->client->pers.netname, msg);
-  } else {
-    G_LogPrintf("Console -> %s: %s", other->client->pers.netname, msg);
+    Printer::SendConsoleMessage(
+        selfNum, va("Private message to %s was ignored by the player.\n",
+                    other->client->pers.netname));
   }
 }
 

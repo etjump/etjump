@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,16 +45,16 @@ ETJump::TimerunView::TimerunView() : Drawable() {
 ETJump::TimerunView::~TimerunView() {}
 
 void ETJump::TimerunView::start() {
-  auto clientNum = atoi(CG_Argv(2));
-  _playersTimerunInformation[clientNum].startTime = atoi(CG_Argv(3));
+  auto clientNum = Q_atoi(CG_Argv(2));
+  _playersTimerunInformation[clientNum].startTime = Q_atoi(CG_Argv(3));
   _playersTimerunInformation[clientNum].runName = CG_Argv(4);
-  _playersTimerunInformation[clientNum].previousRecord = atoi(CG_Argv(5));
+  _playersTimerunInformation[clientNum].previousRecord = Q_atoi(CG_Argv(5));
   _playersTimerunInformation[clientNum].running = true;
 }
 
 void ETJump::TimerunView::stop() {
-  auto clientNum = atoi(CG_Argv(2));
-  _playersTimerunInformation[clientNum].completionTime = atoi(CG_Argv(3));
+  auto clientNum = Q_atoi(CG_Argv(2));
+  _playersTimerunInformation[clientNum].completionTime = Q_atoi(CG_Argv(3));
   _playersTimerunInformation[clientNum].running = false;
   _playersTimerunInformation[clientNum].lastRunTimer = cg.time;
 }
@@ -70,7 +70,7 @@ void ETJump::TimerunView::interrupt(
 }
 
 void ETJump::TimerunView::interrupt() {
-  auto clientNum = atoi(CG_Argv(2));
+  auto clientNum = Q_atoi(CG_Argv(2));
   interrupt(_playersTimerunInformation[clientNum]);
 }
 

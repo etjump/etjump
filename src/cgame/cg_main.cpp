@@ -164,7 +164,6 @@ vmCvar_t cg_coronafardist;
 vmCvar_t cg_coronas;
 vmCvar_t cg_paused;
 vmCvar_t cg_blood;
-vmCvar_t cg_predictItems;
 vmCvar_t cg_deferPlayers;
 vmCvar_t cg_drawTeamOverlay;
 vmCvar_t cg_enableBreath;
@@ -513,6 +512,7 @@ vmCvar_t etj_drawClips;
 vmCvar_t etj_drawTriggers;
 vmCvar_t etj_drawSlicks;
 vmCvar_t etj_clear;
+vmCvar_t etj_flareSize;
 
 vmCvar_t etj_consoleAlpha;
 vmCvar_t etj_consoleColor;
@@ -601,6 +601,10 @@ vmCvar_t etj_saveMsg;
 vmCvar_t etj_FPSMeterUpdateInterval;
 
 vmCvar_t etj_fixedCompassShader;
+
+// unlagged - optimized prediction
+vmCvar_t etj_optimizePrediction;
+// END unlagged - optimized prediction
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -694,12 +698,11 @@ cvarTable_t cvarTable[] = {
     {&cg_teamChatHeight, "cg_teamChatHeight", "8", CVAR_ARCHIVE},
     {&cg_coronafardist, "cg_coronafardist", "1536", CVAR_ARCHIVE},
     {&cg_coronas, "cg_coronas", "1", CVAR_ARCHIVE},
-    {&cg_predictItems, "cg_predictItems", "1", CVAR_ARCHIVE},
     {&cg_deferPlayers, "cg_deferPlayers", "1", CVAR_ARCHIVE},
     {&cg_drawTeamOverlay, "cg_drawTeamOverlay", "2", CVAR_ARCHIVE},
     {&cg_stats, "cg_stats", "0", 0},
     {&cg_blinktime, "cg_blinktime", "100", CVAR_ARCHIVE}, //----(SA)	added
-    {&cg_enableBreath, "cg_enableBreath", "1", CVAR_SERVERINFO},
+    {&cg_enableBreath, "cg_enableBreath", "1", CVAR_ARCHIVE},
     {&cg_cameraOrbit, "cg_cameraOrbit", "0", CVAR_CHEAT},
     {&cg_cameraOrbitDelay, "cg_cameraOrbitDelay", "50", CVAR_ARCHIVE},
     {&cg_timescaleFadeEnd, "cg_timescaleFadeEnd", "1", 0},
@@ -997,6 +1000,7 @@ cvarTable_t cvarTable[] = {
     {&etj_drawTriggers, "etj_drawTriggers", "0", CVAR_ARCHIVE},
     {&etj_drawSlicks, "etj_drawSlicks", "0", CVAR_ARCHIVE},
     {&etj_clear, "etj_clear", "0", CVAR_ARCHIVE},
+    {&etj_flareSize, "etj_flareSize", "40", CVAR_ARCHIVE},
 
     {&etj_consoleAlpha, "etj_consoleAlpha", "1.0", CVAR_LATCH | CVAR_ARCHIVE},
     {&etj_consoleColor, "etj_consoleColor", "0.0 0.0 0.0",
@@ -1100,6 +1104,10 @@ cvarTable_t cvarTable[] = {
 
     {&etj_fixedCompassShader, "etj_fixedCompassShader", "0",
      CVAR_LATCH | CVAR_ARCHIVE},
+
+    // unlagged - optimized prediction
+    {&etj_optimizePrediction, "etj_optimizePrediction", "1", CVAR_ARCHIVE},
+    // END unlagged - optimized prediction
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1135,7 +1143,7 @@ void CG_RegisterCvars(void) {
 
   // see if we are also running the server on this machine
   trap_Cvar_VariableStringBuffer("sv_running", var, sizeof(var));
-  cgs.localServer = atoi(var) ? qtrue : qfalse;
+  cgs.localServer = Q_atoi(var) ? qtrue : qfalse;
 
   // Gordon: um, here, why?
   CG_setClientFlags();
@@ -1167,12 +1175,12 @@ void CG_UpdateCvars(void) {
         if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
             cv->vmCvar == &int_cl_timenudge ||
             cv->vmCvar == &int_cl_maxpackets ||
-            cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems ||
-            cv->vmCvar == &pmove_fixed || cv->vmCvar == &com_maxfps ||
-            cv->vmCvar == &etj_nofatigue || cv->vmCvar == &etj_drawCGaz ||
-            cv->vmCvar == &cl_yawspeed || cv->vmCvar == &cl_freelook ||
-            cv->vmCvar == &int_m_pitch || cv->vmCvar == &etj_loadviewangles ||
-            cv->vmCvar == &etj_hideMe || cv->vmCvar == &etj_noclipScale ||
+            cv->vmCvar == &cg_autoactivate || cv->vmCvar == &pmove_fixed ||
+            cv->vmCvar == &com_maxfps || cv->vmCvar == &etj_nofatigue ||
+            cv->vmCvar == &etj_drawCGaz || cv->vmCvar == &cl_yawspeed ||
+            cv->vmCvar == &cl_freelook || cv->vmCvar == &int_m_pitch ||
+            cv->vmCvar == &etj_loadviewangles || cv->vmCvar == &etj_hideMe ||
+            cv->vmCvar == &etj_noclipScale ||
             cv->vmCvar == &etj_enableTimeruns ||
             cv->vmCvar == &etj_noActivateLean ||
             cv->vmCvar == &etj_touchPickupWeapons ||
@@ -1226,7 +1234,6 @@ void CG_setClientFlags(void) {
          (((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
           ((cg_autoAction.integer & AA_STATSDUMP) ? CGF_STATSDUMP : 0) |
           ((cg_autoactivate.integer > 0) ? CGF_AUTOACTIVATE : 0) |
-          ((cg_predictItems.integer > 0) ? CGF_PREDICTITEMS : 0) |
           ((etj_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
           ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
           ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
@@ -1417,7 +1424,7 @@ int CG_findClientNum(char *s) {
 
   // numeric values are just slot numbers
   if (fIsNumber) {
-    id = atoi(s);
+    id = Q_atoi(s);
     if (id >= 0 && id < cgs.maxclients && cgs.clientinfo[id].infoValid) {
       return (id);
     }
@@ -1562,24 +1569,24 @@ void CG_SetupDlightstyles(void) {
     }
 
     token = COM_Parse(&str); // ent num
-    entnum = atoi(token);
+    entnum = Q_atoi(token);
     cent = &cg_entities[entnum];
 
     token = COM_Parse(&str); // stylestring
     Q_strncpyz(cent->dl_stylestring, token, strlen(token));
 
     token = COM_Parse(&str); // offset
-    cent->dl_frame = atoi(token);
+    cent->dl_frame = Q_atoi(token);
     cent->dl_oldframe = cent->dl_frame - 1;
     if (cent->dl_oldframe < 0) {
       cent->dl_oldframe = strlen(cent->dl_stylestring);
     }
 
     token = COM_Parse(&str); // sound id
-    cent->dl_sound = atoi(token);
+    cent->dl_sound = Q_atoi(token);
 
     token = COM_Parse(&str); // attenuation
-    cent->dl_atten = atoi(token);
+    cent->dl_atten = Q_atoi(token);
 
     for (j = 0; j < static_cast<int>(strlen(cent->dl_stylestring)); j++) {
 
@@ -2158,7 +2165,7 @@ static void CG_RegisterGraphics(void) {
 
   cgs.media.tankHintShader = trap_R_RegisterShaderNoMip("gfx/2d/tankHint");
   cgs.media.satchelchargeHintShader =
-      trap_R_RegisterShaderNoMip("gfx/2d/satchelchargeHint"),
+      trap_R_RegisterShaderNoMip("gfx/2d/satchelchargeHint");
   cgs.media.landmineHintShader =
       trap_R_RegisterShaderNoMip("gfx/2d/landmineHint");
   cgs.media.uniformHintShader =
@@ -3780,10 +3787,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
                 GAME_VERSION_DATED); // So server can check
 
   s = CG_ConfigString(CS_LEVEL_START_TIME);
-  cgs.levelStartTime = atoi(s);
+  cgs.levelStartTime = Q_atoi(s);
 
   s = CG_ConfigString(CS_INTERMISSION_START_TIME);
-  cgs.intermissionStartTime = atoi(s);
+  cgs.intermissionStartTime = Q_atoi(s);
 
   cg.lastScoreTime = 0;
 
@@ -3870,10 +3877,10 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   trap_S_ClearLoopingSounds();
   trap_S_ClearSounds(qfalse);
 
-  cg.teamWonRounds[1] = atoi(CG_ConfigString(CS_ROUNDSCORES1));
-  cg.teamWonRounds[0] = atoi(CG_ConfigString(CS_ROUNDSCORES2));
+  cg.teamWonRounds[1] = Q_atoi(CG_ConfigString(CS_ROUNDSCORES1));
+  cg.teamWonRounds[0] = Q_atoi(CG_ConfigString(CS_ROUNDSCORES2));
 
-  cg.filtercams = atoi(CG_ConfigString(CS_FILTERCAMS)) ? qtrue : qfalse;
+  cg.filtercams = Q_atoi(CG_ConfigString(CS_FILTERCAMS)) ? qtrue : qfalse;
 
   CG_ParseFireteams();
 

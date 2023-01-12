@@ -52,11 +52,6 @@ typedef struct ipGUID_s {
 
 #define MAX_IPFILTERS 1024
 
-#define MAX_XPSTORAGEITEMS MAX_CLIENTS
-typedef struct ipXPStorageList_s {
-  ipXPStorage_t ipFilters[MAX_XPSTORAGEITEMS];
-} ipXPStorageList_t;
-
 typedef struct ipFilterList_s {
   ipFilter_t ipFilters[MAX_IPFILTERS];
   int numIPFilters;
@@ -64,9 +59,6 @@ typedef struct ipFilterList_s {
 } ipFilterList_t;
 
 static ipFilterList_t ipFilters;
-#ifdef USEXPSTORAGE
-static ipXPStorageList_t ipXPStorage;
-#endif
 
 /*
 =================
@@ -105,7 +97,7 @@ qboolean StringToFilter(const char *s, ipFilter_t *f) {
       num[j++] = *s++;
     }
     num[j] = 0;
-    b[i] = atoi(num);
+    b[i] = Q_atoi(num);
     m[i] = 255;
 
     if (!*s) {
@@ -163,49 +155,6 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 
 /*
 =================
-G_FindIpData
-=================
-*/
-
-ipXPStorage_t *G_FindIpData(ipXPStorageList_t *ipXPStorageList, char *from) {
-  int i;
-  unsigned in;
-  byte m[4];
-  char *p;
-
-  i = 0;
-  p = from;
-  while (*p && i < 4) {
-    m[i] = 0;
-    while (*p >= '0' && *p <= '9') {
-      m[i] = m[i] * 10 + (*p - '0');
-      p++;
-    }
-    if (!*p || *p == ':') {
-      break;
-    }
-    i++, p++;
-  }
-
-  in = *(unsigned *)m;
-
-  for (i = 0; i < MAX_IPFILTERS; i++) {
-    if (!ipXPStorageList->ipFilters[i].timeadded ||
-        level.time - ipXPStorageList->ipFilters[i].timeadded > (5 * 60000)) {
-      continue;
-    }
-
-    if ((in & ipXPStorageList->ipFilters[i].filter.mask) ==
-        ipXPStorageList->ipFilters[i].filter.compare) {
-      return &ipXPStorageList->ipFilters[i];
-    }
-  }
-
-  return NULL;
-}
-
-/*
-=================
 G_FilterPacket
 =================
 */
@@ -226,7 +175,8 @@ qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
     if (!*p || *p == ':') {
       break;
     }
-    i++, p++;
+    i++;
+    p++;
   }
 
   in = *(unsigned *)m;
@@ -467,7 +417,7 @@ int refClientNumFromString(char *s) {
 
   // numeric values are just slot numbers
   if (fIsNumber) {
-    idnum = atoi(s);
+    idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
       G_Printf("Bad client slot: ^3%i\n", idnum);
       return -1;
@@ -515,7 +465,7 @@ gclient_t *ClientForString(const char *s) {
 
   // numeric values are just slot numbers
   if (s[0] >= '0' && s[0] <= '9') {
-    idnum = atoi(s);
+    idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
       Com_Printf("Bad client slot: %i\n", idnum);
       return NULL;
@@ -541,86 +491,7 @@ static qboolean G_Is_SV_Running(void) {
   char cvar[MAX_TOKEN_CHARS];
 
   trap_Cvar_VariableStringBuffer("sv_running", cvar, sizeof(cvar));
-  return (qboolean)atoi(cvar);
-}
-
-/*
-==================
-G_GetPlayerByNum
-==================
-*/
-gclient_t *G_GetPlayerByNum(int clientNum) {
-  gclient_t *cl;
-
-  // make sure server is running
-  if (!G_Is_SV_Running()) {
-    return NULL;
-  }
-
-  if (trap_Argc() < 2) {
-    G_Printf("No player specified.\n");
-    return NULL;
-  }
-
-  if (clientNum < 0 || clientNum >= level.maxclients) {
-    Com_Printf("Bad client slot: %i\n", clientNum);
-    return NULL;
-  }
-
-  cl = &level.clients[clientNum];
-  if (cl->pers.connected == CON_DISCONNECTED) {
-    G_Printf("Client %i is not connected\n", clientNum);
-    return NULL;
-  }
-
-  if (cl) {
-    return cl;
-  }
-
-  G_Printf("User %d is not on the server\n", clientNum);
-
-  return NULL;
-}
-
-/*
-==================
-G_GetPlayerByName
-==================
-*/
-gclient_t *G_GetPlayerByName(char *name) {
-
-  int i;
-  gclient_t *cl;
-  char cleanName[64];
-
-  // make sure server is running
-  if (!G_Is_SV_Running()) {
-    return NULL;
-  }
-
-  if (trap_Argc() < 2) {
-    G_Printf("No player specified.\n");
-    return NULL;
-  }
-
-  for (i = 0; i < level.numConnectedClients; i++) {
-
-    cl = &level.clients[i];
-
-    if (!Q_stricmp(cl->pers.netname, name)) {
-      return cl;
-    }
-
-    Q_strncpyz(cleanName, cl->pers.netname, sizeof(cleanName));
-    Q_CleanStr(cleanName);
-    if (!Q_stricmp(cleanName, name)) {
-      return cl;
-    }
-  }
-
-  G_Printf("Player %s is not on the server\n", name);
-
-  return NULL;
+  return (qboolean)Q_atoi(cvar);
 }
 
 // -fretn
@@ -718,7 +589,7 @@ static void Svcmd_KickNum_f(void) {
 
   if (trap_Argc() == 3) {
     trap_Argv(2, sTimeout, sizeof(sTimeout));
-    timeout = atoi(sTimeout);
+    timeout = Q_atoi(sTimeout);
   } else {
     timeout = 300;
   }

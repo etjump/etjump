@@ -30,60 +30,89 @@ typedef struct {
 
 // VC optimizes for dup strings :)
 static const cmd_reference_t aCommandInfo[] = {
-    {"+stats", qtrue, qtrue, NULL,
+    {"+stats", qtrue, qtrue, nullptr,
      ":^7 HUD overlay showing current weapon stats info"},
-    {"+topshots", qtrue, qtrue, NULL,
+
+    {"+topshots", qtrue, qtrue, nullptr,
      ":^7 HUD overlay showing current top accuracies of all players"},
+
     {"?", qtrue, qtrue, G_commands_cmd,
      ":^7 Gives a list of OSP-specific commands"},
-    {"autorecord", qtrue, qtrue, NULL,
+
+    {"autorecord", qtrue, qtrue, nullptr,
      ":^7 Creates a demo with a consistent naming scheme"},
-    {"autoscreenshot", qtrue, qtrue, NULL,
+
+    {"autoscreenshot", qtrue, qtrue, nullptr,
      ":^7 Creates a screenshot with a consistent naming scheme"},
+
     {"bottomshots", qtrue, qfalse, G_weaponRankings_cmd,
      ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all "
      "stats for a weapon"},
+
     {"callvote", qtrue, qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"},
+
+    {"cv", qtrue, qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"},
+
     {"commands", qtrue, qtrue, G_commands_cmd,
      ":^7 Gives a list of OSP-specific commands"},
-    {"currenttime", qtrue, qtrue, NULL, ":^7 Displays current local time"},
+
+    {"currenttime", qtrue, qtrue, nullptr, ":^7 Displays current local time"},
+
     {"follow", qtrue, qtrue, Cmd_Follow_f,
      " <player_ID|allies|axis>:^7 Spectates a particular player or team"},
+
     {"notready", qtrue, qfalse, G_ready_cmd,
      ":^7 Sets your status to ^5not ready^7 to start a match"},
+
     {"players", qtrue, qtrue, G_players_cmd,
      ":^7 Lists all active players and their IDs/information"},
+
     {"ready", qtrue, qtrue, G_ready_cmd,
      ":^7 Sets your status to ^5ready^7 to start a match"},
+
     {"readyteam", qfalse, qtrue, G_teamready_cmd,
      ":^7 Sets an entire team's status to ^5ready^7 to start a match"},
+
     {"say_teamnl", qtrue, qtrue, G_say_teamnl_cmd,
      "<msg>:^7 Sends a team chat without location info"},
+
     {"scores", qtrue, qtrue, G_scores_cmd,
      ":^7 Displays current match stat info"},
+
     {"specinvite", qtrue, qtrue, Cmd_SpecInvite_f,
      ":^7 Invites a player to spectate"},
+
     {"specuninvite", qtrue, qfalse, Cmd_SpecInvite_f,
      ":^7 Uninvites a player to spectate"},
+
     {"speclock", qtrue, qtrue, Cmd_SpecLock_f,
      ":^7 Locks a player from spectators"},
+
     {"specunlock", qtrue, qfalse, Cmd_SpecLock_f,
      ":^7Unlocks a player from spectators"},
+
     {"speclist", qtrue, qtrue, Cmd_SpecList_f, ":^7Lists specinvited players"},
+
     {"statsall", qtrue, qfalse, G_statsall_cmd,
      ":^7 Shows weapon accuracy stats for all players"},
-    {"statsdump", qtrue, qtrue, NULL,
+
+    {"statsdump", qtrue, qtrue, nullptr,
      ":^7 Shows player stats + match info saved locally to a file"},
+
     {"team", qtrue, qtrue, Cmd_Team2_f,
      " <b|r|s|none>:^7 Joins a team (b = allies, r = axis, s = spectator)"},
+
     {"topshots", qtrue, qtrue, G_weaponRankings_cmd,
      ":^7 Shows BEST player for each weapon. Add ^3<weapon_ID>^7 to show all "
      "stats for a weapon"},
+
     {"unready", qtrue, qfalse, G_ready_cmd,
      ":^7 Sets your status to ^5not ready^7 to start a match"},
+
     {"weaponstats", qtrue, qfalse, G_weaponStats_cmd,
      " [player_ID]:^7 Shows weapon accuracy stats for a player"},
-    {0, qfalse, qtrue, NULL, 0}};
+
+    {nullptr, qfalse, qtrue, nullptr, nullptr}};
 
 // OSP-specific Commands
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime) {
@@ -250,9 +279,9 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     } else {
       trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
       s = Info_ValueForKey(userinfo, "rate");
-      user_rate = (max_rate > 0 && atoi(s) > max_rate) ? max_rate : atoi(s);
+      user_rate = (max_rate > 0 && Q_atoi(s) > max_rate) ? max_rate : Q_atoi(s);
       s = Info_ValueForKey(userinfo, "snaps");
-      user_snaps = atoi(s);
+      user_snaps = Q_atoi(s);
 
       strcpy(rate, va("%5d%6d%9d%7d", cl->pers.clientTimeNudge, user_rate,
                       cl->pers.clientMaxPackets, user_snaps));
@@ -665,7 +694,7 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand,
 
   // Find the weapon
   trap_Argv(1, z, sizeof(z));
-  if ((iWeap = atoi(z)) == 0 || iWeap < WS_KNIFE || iWeap >= WS_MAX) {
+  if ((iWeap = Q_atoi(z)) == 0 || iWeap < WS_KNIFE || iWeap >= WS_MAX) {
     for (iWeap = WS_SYRINGE; iWeap >= WS_KNIFE; iWeap--) {
       if (!Q_stricmp(z, aWeaponInfo[iWeap].pszCode)) {
         break;

@@ -44,8 +44,9 @@ void G_SendSystemMessage(sysMsg_t message, int team) {
       continue;
     }
 
-    trap_SendServerCommand(other - g_entities,
-                           va("vschat 0 %d 3 %s 0 0 0", other - g_entities,
-                              systemMessages[message]));
+    auto otherClientNum = ClientNum(other);
+    trap_SendServerCommand(
+        otherClientNum,
+        va("vschat 0 %d 3 %s 0 0 0", otherClientNum, systemMessages[message]));
   }
 }

@@ -432,70 +432,6 @@ panel_button_t playerSkillIcon2 = {
 
 // =======================
 
-panel_button_t mapTimeCounter = {
-    NULL,
-    "",
-    {276, 5, 20, 14},
-    {5, 0, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    CG_LimboPanel_RenderCounter,
-    NULL,
-};
-
-panel_button_t mapTimeCounter2 = {
-    NULL,
-    "",
-    {252, 5, 20, 14},
-    {5, 1, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    CG_LimboPanel_RenderCounter,
-    NULL,
-};
-
-panel_button_t mapTimeCounterText = {
-    NULL,
-    "MISSION TIME",
-    {172, 16, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &spawnLimboFont, /* font		*/
-    NULL,            /* keyDown	*/
-    NULL,            /* keyUp	*/
-    BG_PanelButtonsRender_Text,
-    NULL,
-};
-
-// =======================
-
-panel_button_t respawnCounter = {
-    NULL,
-    "",
-    {400, 5, 20, 14},
-    {3, 0, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    CG_LimboPanel_RenderCounter,
-    NULL,
-};
-
-panel_button_t respawnCounterText = {
-    NULL,
-    "REINFORCEMENTS",
-    {300, 16, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &spawnLimboFont, /* font		*/
-    NULL,            /* keyDown	*/
-    NULL,            /* keyUp	*/
-    BG_PanelButtonsRender_Text,
-    NULL,
-};
-
-// =======================
-
 panel_button_t limboTitleText = {
     NULL,
     "COMMAND MAP",
@@ -937,12 +873,6 @@ panel_button_t *limboPanelButtons[] = {
     &playerLimboHead,
     &playerXPCounter,
     &playerXPCounterText,
-
-    &respawnCounter,
-    &respawnCounterText,
-    &mapTimeCounter,
-    &mapTimeCounter2,
-    &mapTimeCounterText,
 
     &playerSkillCounter0,
     &playerSkillCounter1,
@@ -1407,7 +1337,7 @@ int CG_LimboPanel_GetMaxObjectives(void) {
     return 0;
   }
 
-  return atoi(
+  return Q_atoi(
       Info_ValueForKey(CG_ConfigString(CS_MULTI_INFO), "numobjectives"));
 }
 
@@ -1464,13 +1394,13 @@ void CG_LimboPanel_RenderObjectiveText(panel_button_t *button) {
           // info = Info_ValueForKey(
           // cs, "axis_desc" );
           info = cg.objDescription_Axis[cgs.ccSelectedObjective];
-          status = atoi(
+          status = Q_atoi(
               Info_ValueForKey(cs, va("x%i", cgs.ccSelectedObjective + 1)));
         } else {
           // info = Info_ValueForKey(
           // cs, "allied_desc" );
           info = cg.objDescription_Allied[cgs.ccSelectedObjective];
-          status = atoi(
+          status = Q_atoi(
               Info_ValueForKey(cs, va("a%i", cgs.ccSelectedObjective + 1)));
         }
 
@@ -1586,8 +1516,8 @@ void CG_LimboPanel_RenderLight(panel_button_t *button) {
     button->data[3] = button->data[3] ^ 1;
     //			if( button->data[3] ) {
     //				button->data[2] = cg.time + rand() %
-    // 200; 			} else { 				button->data[2] = cg.time + rand()
-    // % 1000;
+    // 200; 			} else { 				button->data[2] = cg.time +
+    // rand() % 1000;
     //			}
     //		}
 
@@ -2193,7 +2123,7 @@ int CG_LimboPanel_RenderCounter_ValueForButton(panel_button_t *button) {
     case 2: // xp
       return cg.xp;
     case 3: // respawn time
-      return CG_CalculateReinfTime(qtrue);
+      return 0;
     case 4: // skills
       switch (button->data[1]) {
         case 0:
@@ -2210,17 +2140,6 @@ int CG_LimboPanel_RenderCounter_ValueForButton(panel_button_t *button) {
 
       return (1 << count) - 1;
     case 5: // clock
-      if (!cgs.timelimit) {
-        return 0;
-      }
-      count =
-          ((cgs.timelimit * 60 * 1000) - (cg.time - cgs.levelStartTime)) / 1000;
-      switch (button->data[1]) {
-        case 0: // secs
-          return count % 60;
-        case 1: // mins
-          return count / 60;
-      }
       return 0;
     case 6: // stats
       switch (button->data[1]) {

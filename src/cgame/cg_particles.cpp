@@ -708,7 +708,7 @@ void CG_AddParticleToScene(cparticle_t *p, vec3_t org, float alpha) {
     }
 
     i = p->shaderAnim;
-    j = (int)floor(ratio * shaderAnimCounts[p->shaderAnim]);
+    j = static_cast<int>(std::floor(ratio * shaderAnimCounts[p->shaderAnim]));
     p->pshader = shaderAnims[i][j];
 
     // JPW NERVE more particle testing
@@ -974,10 +974,6 @@ void CG_ParticleSnowFlurry(qhandle_t pshader, centity_t *cent) {
   }
 
   VectorCopy(cent->currentState.origin, p->org);
-
-  p->org[0] = p->org[0];
-  p->org[1] = p->org[1];
-  p->org[2] = p->org[2];
 
   p->vel[0] = p->vel[1] = 0;
 
@@ -1468,7 +1464,7 @@ int CG_NewParticleArea(int num) {
 
   // returns type 128 64 or 32
   token = COM_Parse(&str);
-  type = atoi(token);
+  type = Q_atoi(token);
 
   if (type == 1) {
     range = 128;
@@ -1499,13 +1495,13 @@ int CG_NewParticleArea(int num) {
   }
 
   token = COM_Parse(&str);
-  numparticles = atoi(token);
+  numparticles = Q_atoi(token);
 
   token = COM_Parse(&str);
-  turb = atoi(token);
+  turb = Q_atoi(token);
 
   token = COM_Parse(&str);
-  snum = atoi(token);
+  snum = Q_atoi(token);
 
   for (i = 0; i < numparticles; i++) {
     if (type >= 4) {

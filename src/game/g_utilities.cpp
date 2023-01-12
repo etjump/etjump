@@ -504,12 +504,12 @@ string TimeStampToString(int t) {
 }
 
 std::string TimeStampDifferenceToString(int diff) {
-  const int MINUTE = 60;
-  const int HOUR = 60 * MINUTE;
-  const int DAY = 24 * HOUR;
-  const int WEEK = 7 * DAY;
-  const int MONTH = 30 * DAY;
-  const int YEAR = 365 * DAY;
+  constexpr int MINUTE = 60;
+  constexpr int HOUR = 60 * MINUTE;
+  constexpr int DAY = 24 * HOUR;
+  constexpr int WEEK = 7 * DAY;
+  constexpr int MONTH = 30 * DAY;
+  constexpr int YEAR = 365 * DAY;
 
   if (diff < HOUR) {
     return ETJump::getMinutesString(diff / MINUTE);
@@ -517,14 +517,13 @@ std::string TimeStampDifferenceToString(int diff) {
     return ETJump::getHoursString(diff / HOUR);
   } else if (diff < WEEK) {
     return ETJump::getDaysString(diff / DAY);
-  } else if (diff >= WEEK && diff < MONTH) {
+  } else if (diff < MONTH) {
     return ETJump::getWeeksString(diff / WEEK);
-  } else if (diff >= MONTH && diff < YEAR) {
+  } else if (diff < YEAR) {
     return ETJump::getMonthsString(diff / MONTH);
-  } else if (diff >= YEAR) {
+  } else {
     return ETJump::getYearsString(diff / YEAR);
   }
-  return "";
 }
 
 bool ValidGuid(std::string guid) {

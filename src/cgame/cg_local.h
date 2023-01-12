@@ -2239,7 +2239,6 @@ extern vmCvar_t cg_coronas;
 extern vmCvar_t cg_buildScript;
 extern vmCvar_t cg_paused;
 extern vmCvar_t cg_blood;
-extern vmCvar_t cg_predictItems;
 extern vmCvar_t cg_deferPlayers;
 extern vmCvar_t cg_teamChatsOnly;
 extern vmCvar_t cg_noVoiceChats; // NERVE - SMF
@@ -2590,6 +2589,7 @@ extern vmCvar_t etj_drawClips;
 extern vmCvar_t etj_drawTriggers;
 extern vmCvar_t etj_drawSlicks;
 extern vmCvar_t etj_clear;
+extern vmCvar_t etj_flareSize;
 
 extern vmCvar_t etj_consoleAlpha;
 extern vmCvar_t etj_consoleColor;
@@ -2678,6 +2678,10 @@ extern vmCvar_t etj_saveMsg;
 extern vmCvar_t etj_FPSMeterUpdateInterval;
 
 extern vmCvar_t etj_fixedCompassShader;
+
+// unlagged - optimized prediction
+extern vmCvar_t etj_optimizePrediction;
+// END unlagged - optimized prediction
 
 //
 // cg_main.c

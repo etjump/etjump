@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -225,7 +225,8 @@ void TrickjumpLines::stopRecord() {
   _routes.push_back(_currentRoute);
 
   CG_Printf("Stopped recording: %s\n", _currentRoute.name.c_str());
-  CG_Printf("Total of trail in this route : %d\n", _currentRoute.trails.size());
+  CG_Printf("Total of trail in this route : %d\n",
+            static_cast<int>(_currentRoute.trails.size()));
 
   setCurrentRouteToRender(countRoute() - 1);
   displayCurrentRoute(getCurrentRouteToRender());
@@ -709,7 +710,7 @@ void TrickjumpLines::loadRoutes(const char *loadname) {
       Json::Value colorValue = root[i]["color"];
       for (int j = 0; j < static_cast<int>(colorValue.size()); ++j) {
         loadRoute.color[j] =
-            (unsigned char)std::atoi(colorValue[j].asString().c_str());
+            (unsigned char)Q_atoi(colorValue[j].asString().c_str());
       }
 
       // Loop on each trail in a route (tjl)

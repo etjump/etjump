@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -153,17 +153,6 @@ bool showingScores() {
   return (cg.showScores || cg.scoreFadeTime + FADE_TIME > cg.time);
 }
 
-// shadow cvars mapping to real cvars, forces locked values change
-std::vector<std::pair<vmCvar_t *, std::string>> cvars{
-    {&etj_drawFoliage, "r_drawfoliage"}, {&etj_showTris, "r_showtris"},
-    {&etj_wolfFog, "r_wolffog"},         {&etj_zFar, "r_zfar"},
-    {&etj_viewlog, "viewlog"},           {&etj_offsetFactor, "r_offsetFactor"},
-    {&etj_offsetUnits, "r_offsetUnits"}, {&etj_speeds, "r_speeds"},
-    {&etj_lightmap, "r_lightmap"},       {&etj_drawNotify, "con_drawNotify"},
-    {&etj_drawClips, "r_drawClips"},     {&etj_drawTriggers, "r_drawTriggers"},
-    {&etj_drawSlicks, "r_drawSlicks"},   {&etj_clear, "r_clear"},
-};
-
 void init() {
 
   CG_Printf(S_COLOR_LTGREY GAME_HEADER);
@@ -240,6 +229,24 @@ void init() {
       std::shared_ptr<ETJump::IRenderable>(keySetSystem));
   ETJump::initDrawKeys(keySetSystem);
   ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+
+  const std::vector<std::pair<const vmCvar_t *, const std::string>> cvars{
+      {&etj_drawFoliage, "r_drawfoliage"},
+      {&etj_showTris, "r_showtris"},
+      {&etj_wolfFog, "r_wolffog"},
+      {&etj_zFar, "r_zfar"},
+      {&etj_viewlog, "viewlog"},
+      {&etj_offsetFactor, "r_offsetFactor"},
+      {&etj_offsetUnits, "r_offsetUnits"},
+      {&etj_speeds, "r_speeds"},
+      {&etj_lightmap, "r_lightmap"},
+      {&etj_drawNotify, "con_drawNotify"},
+      {&etj_drawClips, "r_drawClips"},
+      {&etj_drawTriggers, "r_drawTriggers"},
+      {&etj_drawSlicks, "r_drawSlicks"},
+      {&etj_clear, "r_clear"},
+      {&etj_flareSize, "r_flareSize"},
+  };
 
   for (auto &shadow : cvars) {
     ETJump::cvarShadows.push_back(
@@ -326,9 +333,9 @@ qboolean CG_ServerCommandExt(const char *cmd) {
 
   // timerun_start runStartTime{integer} runName{string}
   if (command == "timerun_start") {
-    auto startTime = atoi(CG_Argv(1));
+    auto startTime = Q_atoi(CG_Argv(1));
     std::string runName = CG_Argv(2);
-    auto previousRecord = atoi(CG_Argv(3));
+    auto previousRecord = Q_atoi(CG_Argv(3));
     ETJump::timerun->startTimerun(runName, startTime, previousRecord);
     ETJump::execCmdOnRunStart();
     // run name, completion time, previous record
@@ -343,10 +350,10 @@ qboolean CG_ServerCommandExt(const char *cmd) {
       return qtrue;
     }
 
-    auto clientNum = atoi(CG_Argv(1));
-    auto runStartTime = atoi(CG_Argv(2));
+    auto clientNum = Q_atoi(CG_Argv(1));
+    auto runStartTime = Q_atoi(CG_Argv(2));
     std::string runName = CG_Argv(3);
-    auto previousRecord = atoi(CG_Argv(4));
+    auto previousRecord = Q_atoi(CG_Argv(4));
 
     ETJump::timerun->startSpectatorTimerun(clientNum, runName, runStartTime,
                                            previousRecord);
@@ -360,7 +367,7 @@ qboolean CG_ServerCommandExt(const char *cmd) {
   }
   // timerun_stop completionTime{integer}
   if (command == "timerun_stop") {
-    auto completionTime = atoi(CG_Argv(1));
+    auto completionTime = Q_atoi(CG_Argv(1));
 
     ETJump::timerun->stopTimerun(completionTime);
     ETJump::execCmdOnRunEnd();
@@ -376,8 +383,8 @@ qboolean CG_ServerCommandExt(const char *cmd) {
       return qtrue;
     }
 
-    auto clientNum = atoi(CG_Argv(1));
-    auto completionTime = atoi(CG_Argv(2));
+    auto clientNum = Q_atoi(CG_Argv(1));
+    auto completionTime = Q_atoi(CG_Argv(2));
     std::string runName = CG_Argv(3);
 
     ETJump::timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
@@ -385,9 +392,9 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return qtrue;
   }
   if (command == "record") {
-    auto clientNum = atoi(CG_Argv(1));
+    auto clientNum = Q_atoi(CG_Argv(1));
     std::string runName = CG_Argv(2);
-    auto completionTime = atoi(CG_Argv(3));
+    auto completionTime = Q_atoi(CG_Argv(3));
 
     ETJump::timerun->record(clientNum, runName, completionTime);
 
@@ -400,9 +407,9 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     return qtrue;
   }
   if (command == "completion") {
-    auto clientNum = atoi(CG_Argv(1));
+    auto clientNum = Q_atoi(CG_Argv(1));
     std::string runName = CG_Argv(2);
-    auto completionTime = atoi(CG_Argv(3));
+    auto completionTime = Q_atoi(CG_Argv(3));
 
     ETJump::timerun->completion(clientNum, runName, completionTime);
 
@@ -656,7 +663,7 @@ qboolean CG_displaybyname() {
 qboolean CG_displaybynumber() {
   const auto argc = trap_Argc();
   if (argc > 1) {
-    const auto number = atoi(CG_Argv(1));
+    const auto number = Q_atoi(CG_Argv(1));
     const auto total = ETJump::trickjumpLines->countRoute();
     if (number > -1 && number < total) {
       ETJump::trickjumpLines->setCurrentRouteToRender(number);

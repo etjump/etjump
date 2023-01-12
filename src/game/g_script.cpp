@@ -293,11 +293,11 @@ qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event,
   // get the cast name
   pString = eventParm;
   token = COM_ParseExt(&pString, qfalse);
-  int1 = atoi(token);
+  int1 = Q_atoi(token);
   token = COM_ParseExt(&pString, qfalse);
-  int2 = atoi(token);
+  int2 = Q_atoi(token);
 
-  eInt = atoi(event->params);
+  eInt = Q_atoi(event->params);
 
   if (eventParm && eInt > int1 && eInt <= int2) {
     return qtrue;
@@ -1282,7 +1282,7 @@ void SP_script_mover(gentity_t *ent) {
 
     if (G_SpawnString("description", "", &s)) {
       trap_GetConfigstring(CS_SCRIPT_MOVER_NAMES, cs, sizeof(cs));
-      Info_SetValueForKey(cs, va("%i", ent - g_entities), s);
+      Info_SetValueForKey(cs, va("%i", ClientNum(ent)), s);
       trap_SetConfigstring(CS_SCRIPT_MOVER_NAMES, cs);
     }
   } else {

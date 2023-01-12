@@ -1723,6 +1723,10 @@ int FindClientByName(char *name) {
 
 int ClientNum(gentity_t *ent) { return static_cast<int>(ent - g_entities); }
 
+int ClientNum(gclient_t *client) {
+  return static_cast<int>(client - level.clients);
+}
+
 const char *ClientIPAddr(gentity_t *ent) {
   char userinfo[MAX_INFO_STRING] = "\0";
   char *ip = NULL;

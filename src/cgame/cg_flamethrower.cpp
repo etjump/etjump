@@ -145,13 +145,13 @@ static vec3_t flameChunkMaxs = {0, 0, 0};
 #define GET_FLAME_SIZE_SPEED(x)                                                \
   (((float)x / FLAME_LIFETIME) / 0.3) // x is the current sizeMax
 
-//#define	FLAME_MIN_DRAWSIZE		20
+// #define	FLAME_MIN_DRAWSIZE		20
 
 // enable this for the fuel stream
-//#define FLAME_ENABLE_FUEL_STREAM
+// #define FLAME_ENABLE_FUEL_STREAM
 
 // enable this for dynamic lighting around flames
-//#define FLAMETHROW_LIGHTS
+// #define FLAMETHROW_LIGHTS
 
 // disable this to stop rotating flames (this is variable so we can change it at
 // run-time)
@@ -688,7 +688,7 @@ static vec3_t rright, rup;
               // all times (only enabled to generate updated shaders)
   #ifdef ALLOW_GEN_SHADERS // secondary security measure
 
-  //#define	GEN_FLAME_SHADER
+  // #define	GEN_FLAME_SHADER
 
   #endif // ALLOW_GEN_SHADERS
 #endif   // _DEBUG
@@ -846,10 +846,10 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
   float lived;
   int headTimeStart;
   float vdist, bdot;
-  flameChunk_t *lastBlowChunk = NULL;
+  flameChunk_t *lastBlowChunk = nullptr;
   qboolean isClientFlame;
   int shader;
-  flameChunk_t *lastBlueChunk = NULL;
+  flameChunk_t *lastBlueChunk = nullptr;
   qboolean skip = qfalse, droppedTrail;
   vec3_t v;
   vec3_t lightOrg; // origin to place light at
@@ -880,7 +880,7 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
     if (f->nextFlameChunk && f->nextFlameChunk->dead) {
       // kill it
       CG_FreeFlameChunk(f->nextFlameChunk);
-      f->nextFlameChunk = NULL;
+      f->nextFlameChunk = nullptr;
     }
 
     // draw this chunk
@@ -889,15 +889,15 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
     lived = (float)(headTimeStart - f->timeStart);
 
     // update the "blow" sound volume (louder as we sway it)
-    vdist = Distance(cg.refdef_current->vieworg,
-                     f->org); // NOTE: this needs to be here or the
-                              // flameSound code further below won't work
+    // NOTE: this needs to be here
+    // or the flameSound code further below won't work
+    vdist = Distance(cg.refdef_current->vieworg, f->org);
     if (lastBlowChunk && (centFlameStatus[f->ownerCent].blowVolume < 1.0) &&
         ((bdot = DotProduct(lastBlowChunk->startVelDir, f->startVelDir)) <
          1.0)) {
       if (vdist < FLAME_SOUND_RANGE) {
-        centFlameStatus[f->ownerCent].blowVolume +=
-            500.0 * (1.0 - bdot) * (1.0 - (vdist / FLAME_SOUND_RANGE));
+        centFlameStatus[f->ownerCent].blowVolume += static_cast<float>(
+            500.0 * (1.0 - bdot) * (1.0 - (vdist / FLAME_SOUND_RANGE)));
         if (centFlameStatus[f->ownerCent].blowVolume > 1.0) {
           centFlameStatus[f->ownerCent].blowVolume = 1.0;
         }
@@ -907,7 +907,7 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
 
     VectorMA(lightOrg, f->size / 20.0, f->org, lightOrg);
     lightSize += f->size;
-    lightFlameCount += f->size / 20.0;
+    lightFlameCount += f->size / 20.0f;
 
     droppedTrail = qfalse;
 
@@ -915,19 +915,16 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
     if (!f->ignitionOnly && f->velSpeed < 1) {
       CG_AddFlameSpriteToScene(f, f->lifeFrac, 1.0);
 
-      // is it in the blue ignition section of the
-      // flame?
+      // is it in the blue ignition section of the flame?
     } else if (isClientFlame && f->blueLife > (lived / 2.0)) {
 
       skip = qfalse;
 
-      // if this is backwards from the last chunk, then
-      // skip it
+      // if this is backwards from the last chunk, then skip it
       if (fNext && f != fHead && lastBlueChunk) {
         VectorSubtract(f->org, lastBlueChunk->org, v);
-        if (VectorNormalize(v) < f->size / 2) {
-          skip = qtrue;
-        } else if (DotProduct(v, f->velDir) < 0) {
+        if (VectorNormalize(v) < f->size / 2 ||
+            (DotProduct(v, f->velDir) < 0)) {
           skip = qtrue;
         }
       }
@@ -941,35 +938,25 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
       }
 
       if (!skip) {
-
-        // just call this for damage checking
-        // if (!f->ignitionOnly)
-        // CG_AddFlameSpriteToScene( f,
-        // f->lifeFrac, -1 );
-
         lastBlueChunk = f;
 
         alpha = 1.0; // new nozzle sprite
         VectorScale(whiteColor, alpha, c);
 
-        if (f->blueLife > lived * (f->ignitionOnly ? 3.0 : 3.0)) {
+        if (f->blueLife > lived * 3.0) {
 
           shader = nozzleShaders[(cg.time / 50 + (cg.time / 50 >> 1)) %
                                  NUM_NOZZLE_SPRITES];
 
+          // if we have cg_drawGun 0, make the idle flame nozzle size 0
+          float nozzleSize = f->size;
+          if (f->ignitionOnly) {
+            nozzleSize = cg_drawGun.integer ? nozzleSize * 2.0f : 0.0f;
+          }
+
           blueTrailHead = CG_AddTrailJunc(
-              blueTrailHead,
-              NULL, // rain - zinx's
-                    // trail fix
-              shader, cg.time, STYPE_STRETCH, f->org, 1, alpha, alpha,
-              f->size * (f->ignitionOnly /*&&
-                                            (cg.snap->ps.clientNum
-                                            !=
-                                            f->ownerCent
-                                            ||
-                                            cg_thirdPerson.integer)*/
-                             ? 2.0
-                             : 1.0),
+              blueTrailHead, nullptr, /* rain - zinx's trail fix */ shader,
+              cg.time, STYPE_STRETCH, f->org, 1, alpha, alpha, nozzleSize,
               FLAME_MAX_SIZE, TJFL_NOCULL | TJFL_FIXDISTORT, c, c, 1.0, 5.0);
         }
 
@@ -1012,14 +999,10 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
             droppedTrail = qtrue;
 
             fuelTrailHead = CG_AddTrailJunc(
-                fuelTrailHead,
-                NULL, // rain -
-                      // zinx's
-                      // trail
-                      // fix
-                cgs.media.flamethrowerFireStream, cg.time,
-                (f->ignitionOnly ? STYPE_STRETCH : STYPE_REPEAT), f->org, 1,
-                alpha, alpha,
+                fuelTrailHead, nullptr,
+                /* rain - zinx's trail fix */ cgs.media.flamethrowerFireStream,
+                cg.time, (f->ignitionOnly ? STYPE_STRETCH : STYPE_REPEAT),
+                f->org, 1, alpha, alpha,
                 (f->size / 2 < f->sizeMax / 4 ? f->size / 2 : f->sizeMax / 4),
                 FLAME_MAX_SIZE, TJFL_NOCULL | TJFL_FIXDISTORT | TJFL_CROSSOVER,
                 c, c, 0.5, 1.5);
@@ -1030,11 +1013,10 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
 
 #define FLAME_SPRITE_START_BLUE_SCALE 0.2
 
-    if (!f->ignitionOnly &&
-        ((float)(FLAME_SPRITE_START_BLUE_SCALE * f->blueLife) < (float)lived)) {
+    if (!f->ignitionOnly && (static_cast<float>(FLAME_SPRITE_START_BLUE_SCALE *
+                                                f->blueLife) < lived)) {
 
-      float alpha, lifeFrac;
-      qboolean skip = qfalse;
+      float balpha, lifeFrac;
 
       // should we merge it with the next sprite?
       while (fNext && !droppedTrail) {
@@ -1043,30 +1025,23 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
             (std::abs(f->size - fNext->size) < 40.0) &&
             (std::abs(f->timeStart - fNext->timeStart) < 100) &&
             (DotProduct(f->velDir, fNext->velDir) > 0.99)) {
-          if (!droppedTrail) {
-            CG_MergeFlameChunks(f, fNext);
-            fNext = f->nextFlameChunk; // it may have changed
-          } else {
-            skip = qtrue;
-            break;
-          }
+          CG_MergeFlameChunks(f, fNext);
+          fNext = f->nextFlameChunk; // it may have changed
         } else {
           break;
         }
       }
 
-      lifeFrac = (lived - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife) /
-                 (FLAME_LIFETIME - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife);
+      lifeFrac = static_cast<float>(
+          (lived - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife) /
+          (FLAME_LIFETIME - FLAME_SPRITE_START_BLUE_SCALE * f->blueLife));
 
-      alpha = (1.0 - lifeFrac) * 1.4;
-      if (alpha > 1.0) {
-        alpha = 1.0;
+      balpha = (1.0f - lifeFrac) * 1.4f;
+      if (balpha > 1.0) {
+        balpha = 1.0;
       }
 
-      if (!skip) {
-        // draw the sprite
-        CG_AddFlameSpriteToScene(f, lifeFrac, alpha);
-      }
+      CG_AddFlameSpriteToScene(f, lifeFrac, balpha);
       // update the sizeRate
       f->sizeRate = GET_FLAME_SIZE_SPEED(f->sizeMax);
     }
@@ -1090,11 +1065,10 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
   if (lightSize > 500) {
     lightSize = 500;
   }
-  lightSize *=
-      1.0 + 0.2 * (sin(1.0 * cg.time / 50.0) * cos(1.0 * cg.time / 43.0));
+  lightSize *= static_cast<float>(1.0 + 0.2 * (std::sin(1.0 * cg.time / 50.0) *
+                                               std::cos(1.0 * cg.time / 43.0)));
   // set the alpha
-  //%	alpha = lightSize / 500.0;
-  alpha = lightSize * 0.005; // ydnar
+  alpha = lightSize * 0.005f; // ydnar
   if (alpha > 2.0) {
     alpha = 2.0;
   }
@@ -1104,15 +1078,8 @@ void CG_AddFlameToScene(flameChunk_t *fHead) {
     if (lightSize > 80) {
       lightSize = 80;
     }
-    //%	trap_R_AddLightToScene( lightOrg, 90 + lightSize, 0, 0,
-    // alpha, 0 +
-    // isClientFlame * (fHead->ownerCent ==
-    // cg.snap->ps.clientNum) );
     trap_R_AddLightToScene(lightOrg, 80, alpha, 0.2, 0.21, 0.5, 0, 0);
   } else if (isClientFlame || (fHead->ownerCent == cg.snap->ps.clientNum)) {
-    //%	trap_R_AddLightToScene( lightOrg, 90 +
-    // lightSize, 1.000000*alpha,
-    // 0.603922*alpha, 0.207843*alpha, 0 );
     trap_R_AddLightToScene(lightOrg, 320, alpha, 1.000000, 0.603922, 0.207843,
                            0, 0);
   }

@@ -174,17 +174,19 @@ qboolean G_IsFireteamLeader(int entityNum, fireteamData_t **teamNum) {
 }
 
 int G_FindFreeFireteamIdent(team_t team) {
-  qboolean freeIdent[MAX_FIRETEAMS];
+  bool freeIdent[MAX_FIRETEAMS];
   int i;
 
-  memset(freeIdent, qtrue, sizeof(freeIdent));
+  // this was memset, which is wrong since it works on bytes
+  // we need to set all elements to true initially instead
+  std::fill_n(freeIdent, MAX_FIRETEAMS, true);
 
   for (i = 0; i < MAX_FIRETEAMS; i++) {
     if (!level.fireTeams[i].inuse) {
       continue;
     }
     // Set every team that is inuse not free
-    freeIdent[level.fireTeams[i].ident - 1] = qfalse;
+    freeIdent[level.fireTeams[i].ident - 1] = false;
   }
 
   for (i = 0; i < (MAX_FIRETEAMS); i++) {
@@ -611,7 +613,7 @@ int G_FireteamNumberForString(const char *name, team_t team) {
   }
 
   if (fireteam <= 0) {
-    fireteam = atoi(name);
+    fireteam = Q_atoi(name);
   }
 
   return fireteam;
@@ -773,7 +775,7 @@ void G_SetFireTeamRules(int clientNum) {
       return;
     }
 
-    int limit = Numeric::clamp(atoi(val), -1, 100);
+    int limit = Numeric::clamp(Q_atoi(val), -1, 100);
     ft->saveLimit = limit;
 
     trap_SendServerCommand(
@@ -843,7 +845,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||
@@ -879,7 +881,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||
@@ -915,7 +917,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||
@@ -951,7 +953,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     }
 
     if (clientnum <= 0) {
-      clientnum = atoi(namebuffer);
+      clientnum = Q_atoi(namebuffer);
 
       if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
           !g_entities[clientnum - 1].inuse ||

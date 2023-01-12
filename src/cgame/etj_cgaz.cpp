@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -163,7 +163,8 @@ float CGaz::UpdateDrawMax(state_t const *state, float drawMaxCos) {
 float CGaz::GetSlickGravity(void) {
   if ((pm->pmext->groundTrace.surfaceFlags & SURF_SLICK) ||
       (ps->pm_flags & PMF_TIME_KNOCKBACK)) {
-    return pow(ps->gravity * pm->pmext->frametime, 2);
+    // this really wants to return a double for some reason
+    return static_cast<float>(std::pow(ps->gravity * pm->pmext->frametime, 2));
   }
 
   return 0;

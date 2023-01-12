@@ -327,18 +327,17 @@ cvarTable_t gameCvarTable[] = {
      0, qfalse},
     {&g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH,
      0, qfalse},
-    {&g_medicChargeTime, "g_medicChargeTime", "1", CVAR_SERVERINFO | CVAR_LATCH,
-     0, qfalse, qtrue},
-    {&g_engineerChargeTime, "g_engineerChargeTime", "1",
-     CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qtrue},
-    {&g_LTChargeTime, "g_LTChargeTime", "1", CVAR_SERVERINFO | CVAR_LATCH, 0,
-     qfalse, qtrue},
-    {&g_soldierChargeTime, "g_soldierChargeTime", "1",
-     CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qtrue},
+    {&g_medicChargeTime, "g_medicChargeTime", "1", CVAR_LATCH, 0, qfalse,
+     qtrue},
+    {&g_engineerChargeTime, "g_engineerChargeTime", "1", CVAR_LATCH, 0, qfalse,
+     qtrue},
+    {&g_LTChargeTime, "g_LTChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
+    {&g_soldierChargeTime, "g_soldierChargeTime", "1", CVAR_LATCH, 0, qfalse,
+     qtrue},
     // jpw
 
-    {&g_covertopsChargeTime, "g_covertopsChargeTime", "1",
-     CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse, qtrue},
+    {&g_covertopsChargeTime, "g_covertopsChargeTime", "1", CVAR_LATCH, 0,
+     qfalse, qtrue},
     {&g_landminetimeout, "g_landminetimeout", "1", CVAR_ARCHIVE, 0, qfalse,
      qtrue},
 
@@ -2532,7 +2531,7 @@ void FindIntermissionPoint(void) {
 
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
   buf = Info_ValueForKey(cs, "winner");
-  winner = atoi(buf);
+  winner = Q_atoi(buf);
 
   // Change from scripting value for winner (0==AXIS, 1==ALLIES) to
   // spawnflag value
@@ -2876,7 +2875,7 @@ qboolean ScoreIsTied(void) {
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 
   buf = Info_ValueForKey(cs, "winner");
-  a = atoi(buf);
+  a = Q_atoi(buf);
 
   return a == -1 ? qtrue : qfalse;
 }
@@ -3272,14 +3271,14 @@ static void G_CheckLoadGame(void) {
 
   // trap_Cvar_Set( "g_reloading", "1" );	// moved down
 
-  if (strlen(loading) > 0 && atoi(loading) != 0) {
+  if (strlen(loading) > 0 && Q_atoi(loading) != 0) {
     trap_Cvar_Set("g_reloading", "1");
 
     // screen should be black if we are at this stage
     trap_SetConfigstring(CS_SCREENFADE, va("1 %i 1", level.time - 10));
 
-    //		if (!reloading && atoi(loading) == 2) {
-    if (!(g_reloading.integer) && atoi(loading) == 2) {
+    //		if (!reloading && Q_atoi(loading) == 2) {
+    if (!(g_reloading.integer) && Q_atoi(loading) == 2) {
       // (SA) hmm, this seems redundant when it sets it
       // above...
       //			reloading = qtrue;

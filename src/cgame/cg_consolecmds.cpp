@@ -521,7 +521,7 @@ static void CG_MessageSend_f(void) {
   // get values
   trap_Cvar_VariableStringBuffer("cg_messageType", messageText,
                                  sizeof(messageText));
-  messageType = atoi(messageText);
+  messageType = Q_atoi(messageText);
   trap_Cvar_VariableStringBuffer("cg_messageText", messageText,
                                  sizeof(messageText));
 
@@ -555,12 +555,12 @@ static void CG_SetWeaponCrosshair_f(void) {
   char crosshair[64];
 
   trap_Argv(1, crosshair, 64);
-  cg.newCrosshairIndex = atoi(crosshair) + 1;
+  cg.newCrosshairIndex = Q_atoi(crosshair) + 1;
 }
 // -NERVE - SMF
 
 static void CG_SelectBuddy_f(void) {
-  int pos = atoi(CG_Argv(1));
+  int pos = Q_atoi(CG_Argv(1));
   int i;
   clientInfo_t *ci;
 
@@ -815,9 +815,9 @@ static void CG_DumpSpeaker_f(void) {
           Q_strncpyz( soundfile, soundfile, buffptr - soundfile + 1 );
 
           if( !Q_stricmp( soundfile, "wait" ) )
-              wait = atoi( valueptr );
+              wait = Q_atoi( valueptr );
           else if( !Q_stricmp( soundfile, "random" ) )
-              random = atoi( valueptr );
+              random = Q_atoi( valueptr );
       }
 
       // parse soundfile
@@ -1336,7 +1336,7 @@ Let the client system know about all of our commands
 so it can perform tab completion
 =================
 */
-void CG_InitConsoleCommands(void) {
+void CG_InitConsoleCommands() {
   int i;
 
   for (i = 0; i < static_cast<int>(sizeof(anyTimeCommands) /
@@ -1370,6 +1370,7 @@ void CG_InitConsoleCommands(void) {
   trap_AddCommand("addbot");
   trap_AddCommand("setviewpos");
   trap_AddCommand("callvote");
+  trap_AddCommand("cv");
   trap_AddCommand("vote");
 
   // Rafael
@@ -1464,6 +1465,7 @@ void CG_InitConsoleCommands(void) {
   trap_AddCommand("records");
   trap_AddCommand("times");
   trap_AddCommand("ranks");
+  trap_AddCommand("top");
 
   // XIS tjl command
   trap_AddCommand("tjl_enableline");       // display a route by it number

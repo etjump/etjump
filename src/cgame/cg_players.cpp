@@ -7,8 +7,6 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
-#include "../game/bg_classes.h"
-#include "../game/bg_classes.h"
 
 #define SWING_RIGHT 1
 #define SWING_LEFT 2
@@ -156,22 +154,22 @@ void CG_NewClientInfo(int clientNum) {
 
   // bot skill
   v = Info_ValueForKey(configstring, "skill");
-  newInfo.botSkill = atoi(v);
+  newInfo.botSkill = Q_atoi(v);
 
   // team
   v = Info_ValueForKey(configstring, "t");
-  newInfo.team = (team_t)atoi(v);
+  newInfo.team = (team_t)Q_atoi(v);
 
   // class
   v = Info_ValueForKey(configstring, "c");
-  newInfo.cls = atoi(v);
+  newInfo.cls = Q_atoi(v);
 
   // rank
   v = Info_ValueForKey(configstring, "r");
-  newInfo.rank = atoi(v);
+  newInfo.rank = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "f");
-  newInfo.fireteam = atoi(v);
+  newInfo.fireteam = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "m");
   if (*v) {
@@ -180,14 +178,14 @@ void CG_NewClientInfo(int clientNum) {
     buf[1] = '\0';
     for (i = 0; i < SK_NUM_SKILLS; i++) {
       buf[0] = *v;
-      newInfo.medals[i] = atoi(buf);
+      newInfo.medals[i] = Q_atoi(buf);
       v++;
     }
   }
 
   v = Info_ValueForKey(configstring, "ch");
   if (*v) {
-    newInfo.character = cgs.gameCharacters[atoi(v)];
+    newInfo.character = cgs.gameCharacters[Q_atoi(v)];
   }
 
   v = Info_ValueForKey(configstring, "s");
@@ -200,7 +198,7 @@ void CG_NewClientInfo(int clientNum) {
       skill[0] = v[i];
       skill[1] = '\0';
 
-      newInfo.skill[i] = atoi(skill);
+      newInfo.skill[i] = Q_atoi(skill);
     }
   }
 
@@ -210,42 +208,42 @@ void CG_NewClientInfo(int clientNum) {
 
   // disguiseRank
   v = Info_ValueForKey(configstring, "dr");
-  newInfo.disguiseRank = atoi(v);
+  newInfo.disguiseRank = Q_atoi(v);
 
   // Gordon: weapon and latchedweapon ( FIXME: make these more secure )
   v = Info_ValueForKey(configstring, "w");
-  newInfo.weapon = atoi(v);
+  newInfo.weapon = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "lw");
-  newInfo.latchedweapon = atoi(v);
+  newInfo.latchedweapon = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "sw");
-  newInfo.secondaryweapon = atoi(v);
+  newInfo.secondaryweapon = Q_atoi(v);
 
   // pmove_fixed
   v = Info_ValueForKey(configstring, "pm");
-  newInfo.pmoveFixed = atoi(v);
+  newInfo.pmoveFixed = Q_atoi(v);
   // com_maxfps
   v = Info_ValueForKey(configstring, "fps");
-  newInfo.maxFPS = atoi(v);
+  newInfo.maxFPS = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "cgaz");
-  newInfo.CGaz = atoi(v);
+  newInfo.CGaz = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "h");
-  newInfo.hideMe = atoi(v);
+  newInfo.hideMe = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "sl");
-  newInfo.specLocked = atoi(v) > 0 ? qtrue : qfalse;
+  newInfo.specLocked = Q_atoi(v) > 0 ? qtrue : qfalse;
 
   v = Info_ValueForKey(configstring, "tr");
-  newInfo.timerunActive = atoi(v) > 0 ? qtrue : qfalse;
+  newInfo.timerunActive = Q_atoi(v) > 0 ? qtrue : qfalse;
 
   v = Info_ValueForKey(configstring, "vs");
-  newInfo.snaphud = atoi(v);
+  newInfo.snaphud = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "i");
-  newInfo.clientIsInactive = atoi(v);
+  newInfo.clientIsInactive = Q_atoi(v);
 
   // Gordon: detect rank/skill changes client side
   if (clientNum == cg.clientNum) {
@@ -2463,7 +2461,7 @@ void CG_ResetPlayerEntity(centity_t *cent) {
   VectorCopy(cent->lerpAngles, cent->rawAngles);
 
   if (cg_debugPosition.integer) {
-    CG_Printf("%i ResetPlayerEntity yaw=%i\n", cent->currentState.number,
+    CG_Printf("%i ResetPlayerEntity yaw=%.6f\n", cent->currentState.number,
               cent->pe.torso.yawAngle);
   }
 

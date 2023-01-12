@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -1942,6 +1942,7 @@ Commands::Commands() {
   commands_["records"] = ClientCommands::Records;
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;
+  commands_["top"] = ClientCommands::Records;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

@@ -712,8 +712,7 @@ void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
          return;
                           }
                       }
-                      else							//
-         user does not have key
+                      else // user does not have key
                       {
                           if (!(self->spawnflags & 8) )
                           {
@@ -1337,13 +1336,13 @@ void SP_target_rumble(gentity_t *self) {
   }
 
   G_SpawnString("rampup", "0", &rampup);
-  self->start_size = atoi(rampup) * 1000;
+  self->start_size = Q_atoi(rampup) * 1000;
   if (!(self->start_size)) {
     self->start_size = 1000;
   }
 
   G_SpawnString("rampdown", "0", &rampdown);
-  self->end_size = atoi(rampdown) * 1000;
+  self->end_size = Q_atoi(rampdown) * 1000;
   if (!(self->end_size)) {
     self->end_size = 1000;
   }
@@ -1749,10 +1748,6 @@ void target_startTimer_use(gentity_t *self, gentity_t *other,
   auto clientNum = ClientNum(activator);
   float speed = VectorLength(activator->client->ps.velocity);
 
-  if (!activator) {
-    return;
-  }
-
   if (!activator->client) {
     return;
   }
@@ -1772,24 +1767,25 @@ void target_startTimer_use(gentity_t *self, gentity_t *other,
   // We don't need any of these checks if we are debugging
   if (g_debugTimeruns.integer <= 0) {
     if (activator->client->noclip || activator->flags == FL_GODMODE) {
-      Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not "
-                                            "started. Invalid playerstate!");
+      Printer::SendCenterMessage(
+          clientNum,
+          "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
       return;
     }
 
     if (speed > self->velocityUpperLimit) {
-      std::string speedMsg =
-          ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too "
-                               "high "
+      Printer::SendCenterMessage(
+          clientNum,
+          ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too high "
                                "starting speed (%.2f > %.2f)\n",
-                               speed, self->velocityUpperLimit);
-      Printer::SendCenterMessage(clientNum, speedMsg);
+                               speed, self->velocityUpperLimit));
       return;
     }
 
     if (activator->client->ps.viewangles[ROLL] != 0) {
-      Printer::SendCenterMessage(clientNum, "^3WARNING: ^7Timerun was not "
-                                            "started. Z-rotation detected!");
+      Printer::SendCenterMessage(
+          clientNum,
+          "^3WARNING: ^7Timerun was not started. Z-rotation detected!");
       return;
     }
   }
@@ -1800,11 +1796,18 @@ void target_startTimer_use(gentity_t *self, gentity_t *other,
   if (activator->client->sess.runSpawnflags == 0 ||
       activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL) {
     if (activator->client->pers.pmoveFixed == qfalse) {
-      Printer::SendCenterMessage(clientNum,
-                                 "^3WARNING: ^7Timerun was not started. "
-                                 "pmove_fixed is set to 0!");
+      Printer::SendCenterMessage(
+          clientNum,
+          "^3WARNING: ^7Timerun was not started. pmove_fixed is set to 0!");
       return;
     }
+  }
+
+  if (!activator->client->sess.timerunCheatsNotified && g_cheats.integer) {
+    Printer::SendPopupMessage(clientNum,
+                              "^3WARNING: ^7Cheats are enabled! Timerun "
+                              "records will not be saved!\n");
+    activator->client->sess.timerunCheatsNotified = true;
   }
 
   StartTimer(level.timerunNames[self->runIndex], activator);
@@ -2171,129 +2174,3 @@ void SP_target_deathrun_checkpoint(gentity_t *self) {
   self->id = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
   self->use = target_deathrun_checkpoint_use;
 }
-
-enum class TargetInitSpawnflags {
-  None = 0,
-  KeepHealth = 1,
-  KeepAmmo = 2,
-  KeepWeapons = 4,
-  KeepPortalgun = 8,
-  KeepHoldable = 16,
-  KeepIdent = 32,
-  KeepTracker = 64,
-  RemoveStartingWeapons = 128
-};
-
-void target_init_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
-  if (!activator || !activator->client) {
-    return;
-  }
-
-  if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
-    return;
-  }
-
-  if (!(self->spawnflags &
-        static_cast<int>(TargetInitSpawnflags::KeepHealth))) {
-    activator->health = activator->client->ps.stats[STAT_MAX_HEALTH];
-  }
-
-  if (!(self->spawnflags & static_cast<int>(TargetInitSpawnflags::KeepAmmo))) {
-    ResetPlayerAmmo(activator->client, activator);
-  }
-
-  if (!(self->spawnflags &
-        static_cast<int>(TargetInitSpawnflags::KeepWeapons))) {
-    auto weapon = activator->client->sess.playerWeapon;
-
-    // restore the ammo we spawned with incase we don't have our
-    // weapon anymore
-    if (!(COM_BitCheck(activator->client->ps.weapons, weapon))) {
-      activator->client->ps.ammo[weapon] =
-          activator->client->sess.ammoOnSpawn[weapon];
-      activator->client->ps.ammoclip[weapon] =
-          activator->client->sess.ammoclipOnSpawn[weapon];
-    }
-
-    memcpy(activator->client->ps.weapons,
-           activator->client->sess.weaponsOnSpawn,
-           sizeof(activator->client->sess.weaponsOnSpawn));
-    // remove any disallowed weapons we might have restored if
-    // timerun is active
-    if (activator->client->sess.timerunActive) {
-      for (auto i = 0; i < WP_NUM_WEAPONS; i++) {
-        if (BG_WeaponDisallowedInTimeruns(i)) {
-          COM_BitClear(activator->client->ps.weapons, i);
-        }
-      }
-    }
-    // swap to the restored weapon if our current weapon was
-    // removed
-    if (!(COM_BitCheck(activator->client->ps.weapons,
-                       activator->client->ps.weapon))) {
-      activator->client->ps.weapon = weapon;
-    }
-  }
-
-  if (!(self->spawnflags &
-        static_cast<int>(TargetInitSpawnflags::KeepPortalgun))) {
-    // swap weapons incase portalgun was equipped
-    // if we have ammo: primary > seconday > knife
-    if (activator->client->ps.weapon == WP_PORTAL_GUN) {
-      if (BG_WeaponHasAmmo(&activator->client->ps,
-                           activator->client->sess.playerWeapon)) {
-        activator->client->ps.weapon = activator->client->sess.playerWeapon;
-      } else if (BG_WeaponHasAmmo(&activator->client->ps,
-                                  activator->client->sess.playerWeapon2)) {
-        activator->client->ps.weapon = activator->client->sess.playerWeapon2;
-      } else {
-        activator->client->ps.weapon = WP_KNIFE;
-      }
-    }
-    COM_BitClear(activator->client->ps.weapons, WP_PORTAL_GUN);
-  }
-
-  if (!(self->spawnflags &
-        static_cast<int>(TargetInitSpawnflags::KeepHoldable))) {
-    // we can just utilize target_remove_powerups here
-    Use_target_remove_powerups(self, other, activator);
-  }
-
-  if (!(self->spawnflags & static_cast<int>(TargetInitSpawnflags::KeepIdent))) {
-    activator->client->sess.clientMapProgression = 0;
-  }
-
-  if (!(self->spawnflags &
-        static_cast<int>(TargetInitSpawnflags::KeepTracker))) {
-    for (auto i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-      activator->client->sess.progression[i] = 0;
-    }
-  }
-
-  if (self->spawnflags &
-          static_cast<int>(TargetInitSpawnflags::RemoveStartingWeapons) &&
-      !(self->spawnflags &
-        static_cast<int>(TargetInitSpawnflags::KeepWeapons))) {
-    auto allowedWeapons = std::vector<int>{WP_NONE,
-                                           WP_KNIFE,
-                                           WP_MEDKIT,
-                                           WP_MEDIC_SYRINGE,
-                                           WP_MEDIC_ADRENALINE,
-                                           WP_PLIERS,
-                                           WP_BINOCULARS};
-
-    for (auto i = 0; i < WP_NUM_WEAPONS; i++) {
-      if (std::find(allowedWeapons.begin(), allowedWeapons.end(), i) !=
-          allowedWeapons.end()) {
-        continue;
-      }
-      COM_BitClear(activator->client->ps.weapons, i);
-      // swap to knife if our weapon was removed
-      if (activator->client->ps.weapon == i) {
-        activator->client->ps.weapon = WP_KNIFE;
-      }
-    }
-  }
-}
-
-void SP_target_init(gentity_t *self) { self->use = target_init_use; }

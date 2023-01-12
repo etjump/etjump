@@ -216,7 +216,10 @@ void CG_Respawn(qboolean revived) {
   cg.serverRespawning = qfalse; // Arnout: just in case
 
   // no error decay on player movement
+  // also clear prediction errors, so they don't carry over from previous spawn
   cg.thisFrameTeleport = qtrue;
+  cg.predictedErrorTime = 0;
+  VectorClear(cg.predictedError);
 
   // need to reset client-side weapon animations
   cg.predictedPlayerState.weapAnim =
@@ -247,8 +250,8 @@ void CG_Respawn(qboolean revived) {
   // clear pmext
   memset(&cg.pmext, 0, sizeof(cg.pmext));
 
-  cg.pmext.noclipScale = (etj_noclipScale.value);
-  cg.pmext.bAutoReload = (cg_autoReload.integer > 0) ? qtrue : qfalse;
+  cg.pmext.noclipScale = etj_noclipScale.value;
+  cg.pmext.bAutoReload = cg_autoReload.integer ? qtrue : qfalse;
 
   cg.pmext.sprintTime = SPRINTTIME;
 
@@ -261,6 +264,9 @@ void CG_Respawn(qboolean revived) {
   }
 
   cg.proneMovingTime = 0;
+
+  // clear transition effects here, otherwise they carry over on team switch
+  CG_ResetTransitionEffects();
 
   if (!revived && cgs.clientinfo[cg.clientNum].team != oldTeam) {
     ETJump::execFile(va("autoexec_%s", BG_TeamnameForNumber(
@@ -499,6 +505,11 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops) {
     if (ps->clientNum == cg.clientNum) {
       ops->persistant[PERS_SPAWN_COUNT]--;
     }
+  } else {
+    // reset cg.thisFrameTeleport as spectators never run the code on
+    // CG_PredictPlayerState that would reset it,
+    // so the viewheight check at the end does not fail
+    cg.thisFrameTeleport = qfalse;
   }
 
   if (ps->eFlags & EF_FIRING) {
@@ -565,9 +576,10 @@ void CG_TransitionPlayerState(playerState_t *ps, playerState_t *ops) {
     }
   }
 
-  // smooth the ducking viewheight change
-  if (ps->viewheight != ops->viewheight) {
-    cg.duckChange = ps->viewheight - ops->viewheight;
+  // smooth the ducking viewheight change, unless we teleported this frame:
+  // switching teams will cause view transition otherwise
+  if (ps->viewheight != ops->viewheight && !cg.thisFrameTeleport) {
+    cg.duckChange = static_cast<float>(ps->viewheight - ops->viewheight);
     cg.duckTime = cg.time;
   }
 

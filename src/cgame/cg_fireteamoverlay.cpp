@@ -3,6 +3,7 @@
 ****/
 
 #include "cg_local.h"
+#include "../game/etj_numeric_utilities.h"
 
 /******************************************************************************
 ***** Defines, constants, etc
@@ -113,7 +114,7 @@ void CG_ParseFireteams() {
     //		CG_Printf("Fireteam: %s\n",
     // cg.fireTeams[i].name);
 
-    j = atoi(Info_ValueForKey(p, "id"));
+    j = Q_atoi(Info_ValueForKey(p, "id"));
     if (j == -1) {
       cg.fireTeams[i].inuse = qfalse;
       continue;
@@ -123,7 +124,7 @@ void CG_ParseFireteams() {
     }
 
     s = Info_ValueForKey(p, "l");
-    cg.fireTeams[i].leader = atoi(s);
+    cg.fireTeams[i].leader = Q_atoi(s);
 
     s = Info_ValueForKey(p, "c");
     Q_strncpyz(hexbuffer + 2, s, 9);
@@ -268,13 +269,13 @@ clientInfo_t *CG_SortedFireTeamPlayerForPosition(int pos, int max) {
 #define FT_BAR_YSPACING 2.f
 #define FT_BAR_HEIGHT 10.f
 void CG_DrawFireTeamOverlay(rectDef_t *rect) {
-  int x = rect->x;
-  int y = rect->y + 1 +
-          etj_fireteamPosY.integer; // +1, jitter it into place in 1024 :)
+  float x = rect->x;
+  float y = rect->y + 1 +
+            etj_fireteamPosY.value; // +1, jitter it into place in 1024 :)
   float h;
-  clientInfo_t *ci = NULL;
+  clientInfo_t *ci = nullptr;
   char buffer[64];
-  fireteamData_t *f = NULL;
+  fireteamData_t *f = nullptr;
   int i;
   vec4_t clr1 = {.16f, .2f, .17f, .8f};
   vec4_t clr2 = {0.f, 0.f, 0.f, .2f};
@@ -288,12 +289,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
   x += fireteamOffsetX;
 
-  // ft alpha
-  if (fireteamAlpha > 1.0) {
-    fireteamAlpha = 1.0;
-  } else if (fireteamAlpha < 0.0) {
-    fireteamAlpha = 0.0;
-  }
+  fireteamAlpha = Numeric::clamp(fireteamAlpha, 0.0f, 1.0f);
 
   clr1[3] *= fireteamAlpha;
   clr2[3] *= fireteamAlpha;
@@ -314,7 +310,6 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
     ci = CG_SortedFireTeamPlayerForPosition(i, 15);
     if (!ci) {
       break;
-      ;
     }
 
     h += FT_BAR_HEIGHT + FT_BAR_YSPACING;
@@ -334,7 +329,6 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
                     &cgs.media.limboFont1);
 
   x += 2;
-  // y += 2;
 
   for (i = 0; i < 15; i++) {
     y += FT_BAR_HEIGHT + FT_BAR_YSPACING;
@@ -343,7 +337,6 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
     ci = CG_SortedFireTeamPlayerForPosition(i, 15);
     if (!ci) {
       break;
-      ;
     }
 
     if (ci->selected) {
@@ -367,22 +360,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
     CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, ci->name, 0, 17,
                       ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
-    x += 90;
-
-    /*		CG_DrawPic(x + 2, y + 2, FT_BAR_HEIGHT - 4,
-       FT_BAR_HEIGHT - 4, cgs.media.movementAutonomyIcons[0]); x
-       += FT_BAR_HEIGHT;
-
-            CG_DrawPic(x + 2, y + 2, FT_BAR_HEIGHT - 4,
-       FT_BAR_HEIGHT - 4, cgs.media.weaponAutonomyIcons[0]); x
-       += FT_BAR_HEIGHT; x += 4;*/
-
-    /*		if( isLeader ) {
-                CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f,
-       .2f, tclr, va("%i", i+4), 0, 0, ITEM_TEXTSTYLE_SHADOWED,
-       &cgs.media.limboFont2 );
-            }*/
-    x += 20;
+    x += 110;
 
     if (ci->team == TEAM_SPECTATOR) {
       CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, "^3S", 0, 0,
@@ -391,31 +369,31 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
       if (ci->health > 80) {
         CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
-                          va("%i", ci->health < 0 ? 0 : ci->health), 0, 0,
-                          ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+                          va("%i", ci->health), 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                          &cgs.media.limboFont2);
       } else if (ci->health > 0) {
         CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, colorYellow,
-                          va("%i", ci->health < 0 ? 0 : ci->health), 0, 0,
-                          ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+                          va("%i", ci->health), 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                          &cgs.media.limboFont2);
       } else {
         CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, colorRed,
                           va("%i", ci->health < 0 ? 0 : ci->health), 0, 0,
                           ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
       }
     }
-    // x += 20;
-
     {
       vec2_t loc;
       char *s;
 
-      loc[0] = ci->location[0];
-      loc[1] = ci->location[1];
+      loc[0] = static_cast<float>(ci->location[0]);
+      loc[1] = static_cast<float>(ci->location[1]);
 
       s = va("^3(%s)", BG_GetLocationString(loc));
 
       x = rect->x +
-          (204 - 4 - CG_Text_Width_Ext(s, .2f, 0, &cgs.media.limboFont2)) +
+          (204 - 4 -
+           static_cast<float>(
+               CG_Text_Width_Ext(s, .2f, 0, &cgs.media.limboFont2))) +
           fireteamOffsetX;
 
       CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,

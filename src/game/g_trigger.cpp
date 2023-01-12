@@ -22,7 +22,8 @@ void multi_wait(gentity_t *ent) { ent->nextthink = 0; }
 
 // Activates for multiple clients
 void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator) {
-  int triggerWait = (ent->wait + ent->random * crandom()) * 1000;
+  int triggerWait =
+      static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
 
   if (activator->client->multiTriggerActivationTime + triggerWait >
       level.time) {
@@ -31,9 +32,14 @@ void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   ent->activator = activator;
 
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  // make sure we only pass in team if the activator is a client
+  if (activator->client) {
+    G_Script_ScriptEvent(
+        ent, "activate",
+        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(ent, "activate", nullptr);
+  }
 
   G_UseTargets(ent, ent->activator);
   activator->client->multiTriggerActivationTime = level.time;
@@ -48,9 +54,14 @@ void parallel_multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   ent->activator = activator;
 
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  // make sure we only pass in team if the activator is a client
+  if (activator->client) {
+    G_Script_ScriptEvent(
+        ent, "activate",
+        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(ent, "activate", nullptr);
+  }
 
   G_UseTargets(ent, ent->activator);
   activator->client->alreadyActivatedTrigger = qtrue;
@@ -66,19 +77,25 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
     return; // can't retrigger until the wait is over
   }
 
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  // make sure we only pass in team if the activator is a client
+  if (activator->client) {
+    G_Script_ScriptEvent(
+        ent, "activate",
+        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(ent, "activate", nullptr);
+  }
 
   G_UseTargets(ent, ent->activator);
 
   if (ent->wait > 0) {
     ent->think = multi_wait;
-    ent->nextthink = level.time + (ent->wait + ent->random * crandom()) * 1000;
+    ent->nextthink = static_cast<int>(
+        level.time + (ent->wait + ent->random * crandom()) * 1000);
   } else {
     // we can't just remove (self) here, because this is a touch
     // function called while looping through area links...
-    ent->touch = 0;
+    ent->touch = nullptr;
     ent->nextthink = level.time + FRAMETIME;
     ent->think = G_FreeEntity;
   }
@@ -852,7 +869,7 @@ void SP_trigger_heal(gentity_t *self) {
   // healtotal specifies the maximum amount of health this trigger area
   // restores
   G_SpawnString("healtotal", "0", &spawnstr);
-  healvalue = atoi(spawnstr);
+  healvalue = Q_atoi(spawnstr);
   // Gordon: -9999 means infinite now
   self->health = healvalue;
   if (self->health <= 0) {
@@ -872,7 +889,7 @@ void SP_trigger_heal(gentity_t *self) {
 
   // healrate specifies the amount of healing per second
   G_SpawnString("healrate", "20", &spawnstr);
-  healvalue = atoi(spawnstr);
+  healvalue = Q_atoi(spawnstr);
   self->damage = healvalue; // store the rate of heal in damage
 }
 // END		xkan, 9/17/2002
@@ -1051,7 +1068,7 @@ void SP_trigger_ammo(gentity_t *self) {
   // ammototal specifies the maximum amount of ammo this trigger
   // contains
   G_SpawnString("ammototal", "0", &spawnstr);
-  ammovalue = atoi(spawnstr);
+  ammovalue = Q_atoi(spawnstr);
   // Gordon: -9999 means infinite now
   self->health = ammovalue;
   if (self->health <= 0) {
@@ -1071,7 +1088,7 @@ void SP_trigger_ammo(gentity_t *self) {
 
   // ammorate specifies the amount of ammo added per second
   G_SpawnString("ammorate", "1", &spawnstr);
-  ammovalue = atoi(spawnstr);
+  ammovalue = Q_atoi(spawnstr);
   // store the rate of ammo addition in damage
   self->damage = ammovalue;
 }
@@ -1756,7 +1773,7 @@ void SP_trigger_objective_info(gentity_t *ent) {
   }
 
   G_SetConfigStringValue(CS_OID_DATA + level.numOidTriggers, "e",
-                         va("%i", ent - g_entities));
+                         va("%i", ClientNum(ent)));
   G_SetConfigStringValue(CS_OID_DATA + level.numOidTriggers, "o",
                          va("%i", objflags));
   G_SetConfigStringValue(CS_OID_DATA + level.numOidTriggers, "cix",
@@ -1828,9 +1845,6 @@ void trigger_concussive_touch(gentity_t *ent, gentity_t *other,
                               trace_t *trace) {
   return; // FIXME this should be NULLed out in
           // SP_trigger_concussive_dust after everything works
-  G_Printf("hit concussive ent %d mins=%f,%f,%f maxs=%f,%f,%f\n",
-           ent - g_entities, ent->r.mins[0], ent->r.mins[1], ent->r.mins[2],
-           ent->r.maxs[0], ent->r.maxs[1], ent->r.maxs[2]);
 }
 
 /*QUAKED trigger_concussive_dust (.5 .5 .5) ?

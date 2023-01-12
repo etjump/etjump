@@ -31,6 +31,14 @@ create_compiler_opts(cxx_compiler_opts WARN 3 DEFINE
 )
 create_compiler_opts(cxx_compiler_opts_w0 WARN 0)
 
+# need to re-set these again for git_version.h since it can't read compiler opts
+# we still need to set compiler opts for the stuff in bg_public.h though
+set(GAME_NAME "${CMAKE_PROJECT_NAME}")
+set(GAME_URL "${CMAKE_PROJECT_HOMEPAGE_URL}")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/git_version.h.in"
+		"${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/git_version.h" @ONLY)
+
 add_subdirectory(deps/json)
 add_subdirectory(deps/sha-1)
 add_subdirectory(deps/sqlite)

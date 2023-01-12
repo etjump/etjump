@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -272,7 +272,7 @@ int ReadInt(const char **configFile) {
     G_LogPrintf("readconfig: missing = before \"%s\" on line %d.", token,
                 COM_GetCurrentParseLine());
   }
-  return atoi(token);
+  return Q_atoi(token);
 }
 
 std::string ReadString(const char **configFile) {

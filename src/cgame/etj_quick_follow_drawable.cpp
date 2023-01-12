@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ void ETJump::QuickFollowDrawer::render() const {
 }
 
 bool ETJump::QuickFollowDrawer::canSkipDraw() const {
-  if (etj_quickFollow.integer < 2 || cg.crosshairClientNum > MAX_CLIENTS) {
+  if (etj_quickFollow.integer < 2 || cg.crosshairClientNum >= MAX_CLIENTS) {
     return true;
   }
   if (ETJump::showingScores()) {

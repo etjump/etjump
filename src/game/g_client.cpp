@@ -1796,8 +1796,7 @@ bool UpdateClientConfigString(gentity_t &gent) {
          gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
          gent.client->sess.specLocked ? 1 : 0,
          gent.client->sess.timerunActive ? 1 : 0,
-         gent.client->pers.snaphud ? 1 : 0,
-         gent.client->sess.clientIsInactive ? 1 : 0);
+         gent.client->pers.snaphud ? 1 : 0, gent.client->inactive ? 1 : 0);
 
   trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
@@ -1865,8 +1864,6 @@ void ClientUserinfoChanged(int clientNum) {
   client->pers.autoActivate = (client->pers.clientFlags & CGF_AUTOACTIVATE)
                                   ? PICKUP_TOUCH
                                   : PICKUP_ACTIVATE;
-  client->pers.predictItemPickup =
-      ((client->pers.clientFlags & CGF_PREDICTITEMS) != 0) ? qtrue : qfalse;
 
   if (client->pers.clientFlags & CGF_AUTORELOAD) {
     client->pers.bAutoReloadAux = qtrue;
@@ -1908,7 +1905,7 @@ void ClientUserinfoChanged(int clientNum) {
   ClientCleanName(s, client->pers.netname, sizeof(client->pers.netname));
 
   if (client->pers.connected == CON_CONNECTED) {
-    if (strcmp(oldname, client->pers.netname)) {
+    if (strcmp(oldname, client->pers.netname) != 0) {
 
       ClientNameChanged(ent);
 
@@ -1971,10 +1968,6 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   int clientNum2 = -1;
   char ip[20] = "\0", ip2[20] = "\0";
   char userinfo2[MAX_INFO_STRING] = "\0";
-#ifdef USEXPSTORAGE
-  ipXPStorage_t *xpBackup;
-  int i;
-#endif // USEXPSTORAGE
 
   ent = &g_entities[clientNum];
 
@@ -2060,10 +2053,10 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // client disconnect may never be called, thus flag can get lost in
   // the ether
   if (ent->inuse) {
-    G_LogPrintf("Forcing disconnect on active client: %i\n", ent - g_entities);
+    G_LogPrintf("Forcing disconnect on active client: %i\n", clientNum);
     // so lets just fix up anything that should happen on a
     // disconnect
-    ClientDisconnect(ent - g_entities);
+    ClientDisconnect(clientNum);
   }
 
   // they can connect
@@ -2087,6 +2080,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     client->sess.loadedPosBeforeInactivity = qtrue;
     client->sess.motdPrinted = qfalse;
     client->sess.timerunActive = qfalse;
+    client->inactive = false;
+    client->sess.clientLastActive = level.time;
   } else {
     client->sess.gotoAllowed = qtrue; // Feen: TEMP FIX! - Also added these two
                                       // here as well.
@@ -2636,8 +2631,6 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
   client->respawnTime = level.timeCurrent;
   client->inactivityTime = level.time + g_inactivity.integer * 1000;
-  client->realInactivityTime =
-      level.time + ETJump::clientInactivityTimer * 1000;
   client->latched_buttons = 0;
   client->latched_wbuttons = 0; //----(SA)	added
 

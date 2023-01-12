@@ -1,0 +1,11 @@
+// mod name
+#define GAME_NAME "@GAME_NAME@"
+
+// mod website
+#define GAME_URL "@GAME_URL@"
+
+// mod version, annotated with:
+// 1. most recent tag
+// 2. number of commits since last tag
+// 3. git hash of the latest commit
+#define GAME_VERSION "@GAME_VERSION@"

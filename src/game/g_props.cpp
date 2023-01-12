@@ -199,38 +199,6 @@ void SP_props_box_64(gentity_t *self) {
 }
 // END JOSEPH
 
-// Rafael
-
-void Psmoke_think(gentity_t *ent) {
-  gentity_t *tent;
-
-  ent->count++;
-
-  if (ent->count == 30) {
-    ent->think = G_FreeEntity;
-  }
-
-  tent = G_TempEntity(ent->s.origin, EV_SMOKE);
-  VectorCopy(ent->s.origin, tent->s.origin);
-  tent->s.time = 3000;
-  tent->s.time2 = 100;
-  tent->s.density = 0;
-  tent->s.angles2[0] = 4;
-  tent->s.angles2[1] = 32;
-  tent->s.angles2[2] = 50;
-
-  ent->nextthink = level.time + FRAMETIME;
-}
-
-void prop_smoke(gentity_t *ent) {
-  gentity_t *Psmoke;
-
-  Psmoke = G_Spawn();
-  VectorCopy(ent->r.currentOrigin, Psmoke->s.origin);
-  Psmoke->think = Psmoke_think;
-  Psmoke->nextthink = level.time + FRAMETIME;
-}
-
 /*QUAKED props_sparks (.8 .46 .16) (-8 -8 -8) (8 8 8) ELECTRIC
 the default direction is strait up use info_no_null for alt direction
 
@@ -257,35 +225,13 @@ void PGUNsparks_use(gentity_t *ent, gentity_t *self, gentity_t *activator) {
   tent->s.angles2[2] = ent->speed;
 }
 
-void Psparks_think(gentity_t *ent) {
-  gentity_t *tent;
-
-  //(SA) MOVE TO CLIENT!
-  return;
-
-  if (ent->spawnflags & 1) {
-    tent = G_TempEntity(ent->r.currentOrigin, EV_SPARKS_ELECTRIC);
-  } else {
-    tent = G_TempEntity(ent->r.currentOrigin, EV_SPARKS);
-  }
-  VectorCopy(ent->r.currentOrigin, tent->s.origin);
-  VectorCopy(ent->r.currentAngles, tent->s.angles);
-  tent->s.density = ent->health;
-  tent->s.frame = ent->wait;
-  tent->s.angles2[0] = ent->start_size;
-  tent->s.angles2[1] = ent->end_size;
-  tent->s.angles2[2] = ent->speed;
-
-  ent->nextthink = level.time + FRAMETIME + ent->delay + (rand() % 600);
-}
-
 void sparks_angles_think(gentity_t *ent) {
 
-  gentity_t *target = NULL;
+  gentity_t *target = nullptr;
   vec3_t vec;
 
   if (ent->target) {
-    target = G_FindByTargetname(NULL, ent->target);
+    target = G_FindByTargetname(nullptr, ent->target);
   }
 
   if (!target) {
@@ -299,49 +245,15 @@ void sparks_angles_think(gentity_t *ent) {
   trap_LinkEntity(ent);
 
   ent->nextthink = level.time + FRAMETIME;
-  if (!Q_stricmp(ent->classname, "props_sparks")) {
-    ent->think = Psparks_think;
-  } else {
-    ent->use = PGUNsparks_use;
-  }
+  ent->use = PGUNsparks_use;
 }
 
 void SP_props_sparks(gentity_t *ent) {
   // (SA) don't use in multiplayer right now since it makes decyphering
   // net messages almost impossible
+
+  // Not implemented in ET, spawn function kept for compatibility reasons
   ent->think = G_FreeEntity;
-  return;
-
-  G_SetOrigin(ent, ent->s.origin);
-  ent->r.svFlags = 0;
-  ent->s.eType = ET_GENERAL;
-
-  ent->think = sparks_angles_think;
-  ent->nextthink = level.time + FRAMETIME;
-
-  if (!ent->health) {
-    ent->health = 8;
-  }
-
-  if (!ent->wait) {
-    ent->wait = 1200;
-  } else {
-    ent->wait *= 1000;
-  }
-
-  if (!ent->start_size) {
-    ent->start_size = 8;
-  }
-
-  if (!ent->end_size) {
-    ent->end_size = 8;
-  }
-
-  if (!ent->speed) {
-    ent->speed = 2;
-  }
-
-  trap_LinkEntity(ent);
 }
 
 /*QUAKED props_gunsparks (.8 .46 .16) (-8 -8 -8) (8 8 8)
@@ -1661,52 +1573,6 @@ void SP_Props_DamageInflictor(gentity_t *ent) {
   trap_LinkEntity(ent);
 }
 
-/*QUAKED props_shard_generator (.8 .5 .1) (-4 -4 -4) (4 4 4)
-
-wait = defaults to 5 how many shards to spawn ( try not to exceed 20 )
-
-shard =
-    FXTYPE_WOOD = 0,
-    FXTYPE_GLASS = 1,
-    FXTYPE_METAL = 2
-
-*/
-
-void Use_Props_Shard_Generator(gentity_t *ent, gentity_t *other,
-                               gentity_t *activator) {
-  int quantity;
-  int type;
-  gentity_t *inflictor = NULL;
-
-  type = ent->count;
-  quantity = ent->wait;
-
-  inflictor = G_Find(NULL, FOFS(targetname), ent->target);
-
-  if (inflictor) {
-    Spawn_Shard(ent, inflictor, quantity, type);
-  }
-
-  G_FreeEntity(ent);
-}
-
-void SP_props_shard_generator(gentity_t *ent) {
-  G_SetOrigin(ent, ent->s.origin);
-  ent->r.svFlags = 0;
-  ent->s.eType = ET_GENERAL;
-  ent->use = Use_Props_Shard_Generator;
-
-  if (!ent->count) {
-    ent->count = FXTYPE_WOOD;
-  }
-
-  if (!ent->wait) {
-    ent->wait = 5;
-  }
-
-  trap_LinkEntity(ent);
-}
-
 /*QUAKED props_desklamp (.8 .6 .2) (-16 -16 0) (16 16 32)
 point entity
 health = default = 10
@@ -1773,30 +1639,14 @@ this will ensure that the oil sprite will show up where you want it
 ( be sure to put it on the floor )
 the default is in the middle of the barrel on the floor
 */
-void Props_Barrel_Touch(gentity_t *self, gentity_t *other, trace_t *trace) {
-  return; // barrels cant move
-
-  if (!(self->spawnflags & 4)) {
-    Props_Chair_Touch(self, other, trace);
-  }
-}
-
 void Props_Barrel_Animate(gentity_t *ent) {
   float ratio;
   vec3_t v;
 
   if (ent->s.frame == 14) {
     if (ent->spawnflags & 1) {
-      //	G_UseTargets (ent, NULL);
       ent->think = G_FreeEntity;
       ent->nextthink = level.time + 25000;
-      return;
-    } else {
-      //	G_UseTargets (ent, NULL);
-      ent->think = G_FreeEntity;
-      ent->nextthink = level.time + 25000;
-      // ent->s.time = level.time;
-      // ent->s.time2 = level.time + 2000;
       return;
     }
   } else {
@@ -1808,7 +1658,7 @@ void Props_Barrel_Animate(gentity_t *ent) {
   if (!(ent->spawnflags & 1)) {
     ratio = 2.5;
     VectorSubtract(ent->r.currentOrigin, ent->enemy->r.currentOrigin, v);
-    moveit(ent, vectoyaw(v), (ent->delay * ratio * FRAMETIME) * .001);
+    moveit(ent, vectoyaw(v), (ent->delay * ratio * FRAMETIME) * .001f);
   }
 }
 
@@ -1828,17 +1678,6 @@ void barrel_smoke(gentity_t *ent) {
   tent->s.angles2[2] = 50;
 }
 
-void smoker_think(gentity_t *ent) {
-  ent->count--;
-
-  if (!ent->count) {
-    G_FreeEntity(ent);
-  } else {
-    barrel_smoke(ent);
-    ent->nextthink = level.time + FRAMETIME;
-  }
-}
-
 void SP_OilSlick(gentity_t *ent) {
   gentity_t *tent;
 
@@ -1848,100 +1687,6 @@ void SP_OilSlick(gentity_t *ent) {
   tent->s.angles2[1] = 48;
   tent->s.angles2[2] = 10000;
   tent->s.density = ent->s.number;
-}
-
-void OilParticles_think(gentity_t *ent) {
-  gentity_t *tent;
-  gentity_t *owner;
-
-  owner = &g_entities[ent->s.density];
-
-  if (owner && owner->takedamage && ent->count2 > level.time - 5000) {
-    ent->nextthink = (level.time + FRAMETIME / 2);
-
-    tent = G_TempEntity(ent->r.currentOrigin, EV_OILPARTICLES);
-    VectorCopy(ent->r.currentOrigin, tent->s.origin);
-    tent->s.time = ent->count2;
-    tent->s.density = ent->s.density;
-    VectorCopy(ent->rotate, tent->s.origin2);
-  } else {
-    G_FreeEntity(ent);
-  }
-}
-
-void Delayed_Leak_Think(gentity_t *ent) {
-  vec3_t point;
-  gentity_t *tent;
-
-  VectorCopy(ent->r.currentOrigin, point);
-
-  tent = G_TempEntity(point, EV_OILSLICK);
-  VectorCopy(point, tent->s.origin);
-
-  tent->s.angles2[0] = 0;
-  tent->s.angles2[1] = 0;
-  tent->s.angles2[2] = 2000;
-  tent->s.density = ent->count;
-}
-
-qboolean validOilSlickSpawnPoint(vec3_t point, gentity_t *ent) {
-  trace_t tr;
-  vec3_t end;
-  gentity_t *traceEnt;
-
-  VectorCopy(point, end);
-  end[2] -= 9999;
-
-  trap_Trace(&tr, point, NULL, NULL, end, ent->s.number, MASK_SHOT);
-
-  traceEnt = &g_entities[tr.entityNum];
-
-  if (traceEnt && traceEnt->classname) {
-    if (!Q_stricmp(traceEnt->classname, "worldspawn")) {
-      if (tr.plane.normal[0] == 0 && tr.plane.normal[1] == 0 &&
-          tr.plane.normal[2] == 1) {
-        return qtrue;
-      }
-    }
-  }
-
-  return qfalse;
-}
-
-void SP_OilParticles(gentity_t *ent) {
-  gentity_t *OilLeak;
-  vec3_t point;
-  vec3_t vec;
-  vec3_t forward;
-
-  // Note to self quick fix
-  // need to move this to client
-  return;
-
-  OilLeak = G_Spawn();
-
-  VectorCopy(ent->r.currentOrigin, point);
-
-  point[2] = ent->pos3[2];
-
-  VectorSubtract(ent->pos3, point, vec);
-  vectoangles(vec, vec);
-  AngleVectors(vec, forward, NULL, NULL);
-  VectorMA(point, 12, forward, point);
-
-  G_SetOrigin(OilLeak, point);
-
-  G_SetAngle(OilLeak, ent->r.currentAngles);
-
-  VectorCopy(forward, OilLeak->rotate);
-
-  OilLeak->think = OilParticles_think;
-  OilLeak->nextthink = level.time + FRAMETIME;
-
-  OilLeak->s.density = ent->s.number;
-  OilLeak->count2 = level.time;
-
-  trap_LinkEntity(OilLeak);
 }
 
 void Props_Barrel_Pain(gentity_t *ent, gentity_t *attacker, int damage,
@@ -1954,12 +1699,6 @@ void Props_Barrel_Pain(gentity_t *ent, gentity_t *attacker, int damage,
   if (!(ent->spawnflags & 8)) {
     SP_OilSlick(ent);
     ent->spawnflags |= 8;
-  }
-
-  ent->count2++;
-
-  if (ent->count2 < 6) {
-    SP_OilParticles(ent);
   }
 }
 
@@ -2084,8 +1823,6 @@ void SP_Props_Flamebarrel(gentity_t *ent) {
 
   ent->think = Props_Barrel_Think;
   ent->nextthink = level.time + FRAMETIME;
-
-  ent->touch = Props_Barrel_Touch;
 
   ent->die = Props_Barrel_Die;
 
@@ -2375,29 +2112,6 @@ void flippy_table_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   }
 }
 
-void flippy_table_animate(gentity_t *ent) {
-  return;
-
-  if (ent->s.frame == 9) {
-    G_UseTargets(ent, NULL);
-    ent->think = G_FreeEntity;
-    ent->nextthink = level.time + 2000;
-  } else {
-    ent->s.frame++;
-    ent->nextthink = level.time + (FRAMETIME / 2);
-  }
-}
-
-void props_flippy_table_die(gentity_t *ent, gentity_t *inflictor,
-                            gentity_t *attacker, int damage, int mod) {
-  ent->think = flippy_table_animate;
-  ent->nextthink = level.time + FRAMETIME;
-
-  ent->takedamage = qfalse;
-
-  G_UseTargets(ent, NULL);
-}
-
 void props_flippy_blocked(gentity_t *ent, gentity_t *other) {
   vec3_t velocity;
   vec3_t angles;
@@ -2548,86 +2262,6 @@ void SP_Props_58x112tablew(gentity_t *ent) {
   ent->clipmask = CONTENTS_SOLID;
 
   ent->die = props_58x112tablew_die;
-
-  trap_LinkEntity(ent);
-}
-
-/*QUAKED props_castlebed (.8 .6 .2) ?
-dimensions are 112 x 128 x 80 (x,y,z)
-
-requires an origin brush
-
-breakable NOT pushable
-
-brushmodel only
-
-  health = default = 20
-wait = defaults to 10 how many shards to spawn ( try not to exceed 20 )
-
-shard =
-    FXTYPE_GLASS = 0,
-    FXTYPE_WOOD = 1,
-    FXTYPE_METAL = 2
-
-*/
-
-void props_castlebed_touch(gentity_t *ent, gentity_t *other, trace_t *trace) {
-  if (!other->client) {
-    return;
-  }
-
-  if (other->client->ps.pm_flags & PMF_JUMP_HELD &&
-      other->s.groundEntityNum == ent->s.number && !other->client->ps.pm_time) {
-    G_Damage(ent, other, other, NULL, NULL, 1, 0, MOD_CRUSH);
-
-    // TDB: need sound of bed springs for this
-    G_Printf("SOUND sqweeky\n");
-
-    other->client->ps.velocity[2] += 250;
-
-    other->client->ps.pm_time = 250;
-    other->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-  }
-}
-
-void props_castlebed_animate(gentity_t *ent) {
-  ent->s.frame++;
-
-  if (ent->s.frame < 8) {
-    ent->nextthink = level.time + (FRAMETIME / 2);
-  } else {
-    ent->clipmask = 0;
-    ent->r.contents = 0;
-    G_UseTargets(ent, NULL);
-  }
-}
-
-void props_castlebed_die(gentity_t *ent, gentity_t *inflictor,
-                         gentity_t *attacker, int damage, int mod) {
-  ent->think = props_castlebed_animate;
-  ent->nextthink = level.time + FRAMETIME;
-  ent->touch = NULL;
-  ent->takedamage = qfalse;
-
-  ent->count = FXTYPE_WOOD;
-  Prop_Break_Sound(ent);
-}
-
-void SP_props_castlebed(gentity_t *ent) {
-  trap_SetBrushModel(ent, ent->model);
-
-  InitProp(ent);
-
-  if (!ent->health) {
-    ent->health = 20;
-  }
-
-  ent->takedamage = qtrue;
-
-  ent->clipmask = CONTENTS_SOLID;
-
-  ent->die = props_castlebed_die;
-  ent->touch = props_castlebed_touch;
 
   trap_LinkEntity(ent);
 }
@@ -3101,7 +2735,7 @@ void SP_props_decoration(gentity_t *ent) {
   char *startonframe;
 
   if (G_SpawnString("startonframe", "0", &startonframe)) {
-    ent->s.frame = atoi(startonframe);
+    ent->s.frame = Q_atoi(startonframe);
   }
 
   if (ent->model2) {
@@ -3113,7 +2747,7 @@ void SP_props_decoration(gentity_t *ent) {
   }
 
   if ((ent->spawnflags & 32) && G_SpawnString("loop", "100", &loop)) {
-    ent->props_frame_state = atoi(loop);
+    ent->props_frame_state = Q_atoi(loop);
   }
 
   // if the "color" or "light" keys are set, setup constantLight

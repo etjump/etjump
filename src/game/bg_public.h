@@ -359,18 +359,17 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 #define CGF_AUTORELOAD 0x01
 #define CGF_STATSDUMP 0x02
 #define CGF_AUTOACTIVATE 0x04
-#define CGF_PREDICTITEMS 0x08
-#define CGF_NOFATIGUE 0x10
-#define CGF_PMOVEFIXED 0x20
-#define CGF_CGAZ 0x40
-#define CGF_LOADVIEWANGLES 0x80
-#define CGF_CHEATCVARSON 0x100
-#define CGF_HIDEME 0x200
-#define CGF_ENABLE_TIMERUNS 0x400
-#define CGF_NOACTIVATELEAN 0x800
-#define CGF_AUTO_LOAD 0x1000
-#define CGF_QUICK_FOLLOW 0x2000
-#define CGF_SNAPHUD 0x4000
+#define CGF_NOFATIGUE 0x08
+#define CGF_PMOVEFIXED 0x10
+#define CGF_CGAZ 0x20
+#define CGF_LOADVIEWANGLES 0x40
+#define CGF_CHEATCVARSON 0x80
+#define CGF_HIDEME 0x100
+#define CGF_ENABLE_TIMERUNS 0x200
+#define CGF_NOACTIVATELEAN 0x400
+#define CGF_AUTO_LOAD 0x800
+#define CGF_QUICK_FOLLOW 0x1000
+#define CGF_SNAPHUD 0x2000
 
 #define MAX_MOTDLINES 6
 
@@ -617,6 +616,9 @@ typedef struct {
   float scale;
   float scaleAlt; // cmdScale without upmove component
   float accel;
+
+  // timestamp adrenaline should expire at
+  int adrenalineTime;
 } pmoveExt_t; // data used both in client and server - store it here
               // instead of playerstate to prevent different engine versions of
               // playerstate between XP and MP
@@ -846,6 +848,8 @@ typedef enum {
 #define BG_PlayerMounted(eFlags)                                               \
   ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) ||                   \
    (eFlags & EF_AAGUN_ACTIVE))
+
+constexpr int ADRENALINE_TIME = 10000;
 
 // !! NOTE: only place flags that don't need to go to the client beyond
 // 0x00800000

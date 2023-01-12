@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ private:
   enum class SnapTrueness { SNAP_JUMPCROUCH = 1, SNAP_GROUND = 2 };
 
   struct snaphud_t {
-    float a;
+    float a = 0.0f;
     unsigned char maxAccel;
     std::vector<unsigned short> zones;
     std::vector<unsigned char> xAccel;

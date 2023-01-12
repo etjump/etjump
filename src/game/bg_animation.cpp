@@ -796,7 +796,7 @@ static void BG_ParseCommands(const char **input, animScriptItem_t *scriptItem,
                               "duration "
                               "value");
           }
-          command->animDuration[partIndex] = atoi(token);
+          command->animDuration[partIndex] = Q_atoi(token);
         } else // unget the token
         {
           COM_RestoreParseSession(input);
@@ -930,8 +930,8 @@ void BG_AnimParseAnimScript(animModelInfo_t *animModelInfo,
     token = COM_Parse(&text_p);
     if (!token || !*token) {
       if (indentLevel) {
-        BG_AnimParseError("BG_AnimParseAnimScript: "
-                          "unexpected end of file: %s");
+        BG_AnimParseError("BG_AnimParseAnimScript: unexpected end of file: %s",
+                          token);
       }
       break;
     }

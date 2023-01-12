@@ -1,0 +1,23 @@
+# https://github.com/vapier/coverity-scan-action
+name: "Coverity Scan"
+
+on:
+  schedule:
+    - cron: '0 10 * * SUN'
+  workflow_dispatch:
+  
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure build
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+      - uses: vapier/coverity-scan-action@v1
+        with:
+          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          command: make -C ${{github.workspace}}/build

@@ -1404,15 +1404,12 @@ Use_BinaryMover
 ================
 */
 void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  //	int		total;
-  //	int		partial;
   qboolean isblocked = qfalse;
   qboolean nosound = qfalse;
 
-  if (level.time <=
-      4000) // hack.  don't play door sounds if in the first /four/
-            // seconds of game (FIXME: TODO: THIS IS STILL A HACK)
-  {
+  // hack.  don't play door sounds if in the first /four/ seconds of game
+  // (FIXME: TODO: THIS IS STILL A HACK)
+  if (level.time <= 4000) {
     nosound = qtrue;
   }
 
@@ -1431,8 +1428,7 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     return;
   }
 
-  // only check for blocking when opening, otherwise the door has no
-  // choice
+  // only check for blocking when opening, otherwise the door has no choice
   if (ent->moverState == MOVER_POS1 || ent->moverState == MOVER_POS1ROTATE) {
     isblocked = IsBinaryMoverBlocked(ent, other, activator);
   }
@@ -1440,8 +1436,6 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (isblocked) {
     // start moving 50 msec later, becase if this was player
     // triggered, level.time hasn't been advanced yet
-    // ent->angle *= -1;
-    // MatchTeam( ent, MOVER_1TO2ROTATE, level.time + 50 );
     MatchTeamReverseAngleOnSlaves(ent, MOVER_1TO2ROTATE, level.time + 50);
 
     // starting sound
@@ -1449,12 +1443,6 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
       if (ent->flags & FL_SOFTACTIVATE) {
         G_AddEvent(ent, EV_GENERAL_SOUND, ent->soundSoftopen);
       } else {
-        //				if(activator)
-        //					AICast_AudibleEvent(
-        // activator->s.number, ent->s.origin,
-        // HEAR_RANGE_DOOR_KICKOPEN );
-        //// "someone kicked open a door near
-        /// me!"
         G_AddEvent(ent, EV_GENERAL_SOUND, ent->sound1to2);
       }
     }
@@ -1464,8 +1452,6 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     // looping sound
     if (!nosound) {
       ent->s.loopSound = ent->sound2to3;
-    } else if (!nosound) {
-      ent->s.loopSound = ent->soundLoop;
     }
 
     // open areaportal
@@ -1520,11 +1506,6 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
       if (ent->flags & FL_SOFTACTIVATE) {
         G_AddEvent(ent, EV_GENERAL_SOUND, ent->soundSoftopen);
       } else {
-        //				if(activator)
-        //					AICast_AudibleEvent(
-        // activator->s.number, ent->s.origin,
-        // HEAR_RANGE_DOOR_OPEN );	//
-        //"someone opened a door near me!"
         G_AddEvent(ent, EV_GENERAL_SOUND, ent->sound1to2);
       }
     }
@@ -1569,7 +1550,7 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   // only partway down before reversing
   if (ent->moverState == MOVER_2TO1) {
-    Blocked_Door(ent, NULL);
+    Blocked_Door(ent, nullptr);
 
     if (!nosound) {
       G_AddEvent(ent, EV_GENERAL_SOUND, ent->sound1to2);
@@ -1579,7 +1560,7 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   // only partway up before reversing
   if (ent->moverState == MOVER_1TO2) {
-    Blocked_Door(ent, NULL);
+    Blocked_Door(ent, nullptr);
 
     if (!nosound) {
       G_AddEvent(ent, EV_GENERAL_SOUND, ent->sound2to1);
@@ -1589,7 +1570,7 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   // only partway closed before reversing
   if (ent->moverState == MOVER_2TO1ROTATE) {
-    Blocked_DoorRotate(ent, NULL);
+    Blocked_DoorRotate(ent, nullptr);
 
     if (!nosound) {
       G_AddEvent(ent, EV_GENERAL_SOUND, ent->sound1to2);
@@ -1599,7 +1580,7 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   // only partway open before reversing
   if (ent->moverState == MOVER_1TO2ROTATE) {
-    Blocked_DoorRotate(ent, NULL);
+    Blocked_DoorRotate(ent, nullptr);
 
     if (!nosound) {
       if (ent->flags & FL_SOFTACTIVATE) {
@@ -4116,7 +4097,7 @@ void InitExplosive(gentity_t *ent) {
 
   // pick it up if the level designer uses "damage" instead of "dmg"
   if (G_SpawnString("damage", "0", &damage)) {
-    ent->damage = atoi(damage);
+    ent->damage = Q_atoi(damage);
   }
 
   ent->s.eType = ET_EXPLOSIVE;
@@ -4640,7 +4621,7 @@ void func_constructible_use(gentity_t *self, gentity_t *other,
   self->s.modelindex = 0;
 
   if (!self->count2) {
-    self->s.modelindex2 = atoi(self->model + 1);
+    self->s.modelindex2 = Q_atoi(self->model + 1);
   } else {
     self->s.modelindex2 = self->conbmodels[0];
   }
@@ -5102,16 +5083,15 @@ void func_constructiblespawn(gentity_t *ent) {
 
           bmodel = bmodel_ent->model + 1;
 
-          ent->conbmodels[ent->count2++] = atoi(bmodel);
+          ent->conbmodels[ent->count2++] = Q_atoi(bmodel);
         }
 
         target_ptr = ptr + 1;
       }
     }
 
-    ent->conbmodels[ent->count2++] =
-        atoi(ent->model + 1); // the brushmodel of the func_constructible is
-                              // the final stage
+    // the brushmodel of the func_constructible is the final stage
+    ent->conbmodels[ent->count2++] = Q_atoi(ent->model + 1);
 
     // parse the destruction stages
     if (ent->count2 && ent->desstages) {
@@ -5161,7 +5141,7 @@ void func_constructiblespawn(gentity_t *ent) {
 
             bmodel = bmodel_ent->model + 1;
 
-            ent->desbmodels[numDesStages++] = atoi(bmodel);
+            ent->desbmodels[numDesStages++] = Q_atoi(bmodel);
           }
 
           target_ptr = ptr + 1;
@@ -5207,7 +5187,7 @@ void func_constructiblespawn(gentity_t *ent) {
       // other contents?
       trap_LinkEntity(ent);
 
-      ent->s.modelindex2 = atoi(ent->model + 1);
+      ent->s.modelindex2 = Q_atoi(ent->model + 1);
     } else {
       // set initial contents
       trap_SetBrushModel(ent, va("*%i", ent->conbmodels[0]));
@@ -5421,7 +5401,7 @@ void SP_func_brushmodel(gentity_t *ent) {
   }
 
   if (ent->targetname && level.numBrushModels < 128) {
-    level.brushModelInfo[level.numBrushModels].model = atoi(ent->model + 1);
+    level.brushModelInfo[level.numBrushModels].model = Q_atoi(ent->model + 1);
     Q_strncpyz(level.brushModelInfo[level.numBrushModels].modelname,
                ent->targetname, 32);
     level.numBrushModels++;
@@ -5464,7 +5444,7 @@ void SP_func_debris(gentity_t *ent) {
 
   debris = G_AllocDebrisChunk();
 
-  debris->model = atoi(ent->model + 1);
+  debris->model = Q_atoi(ent->model + 1);
 
   Q_strncpyz(debris->target, ent->target, sizeof(debris->target));
   Q_strncpyz(debris->targetname, ent->targetname, sizeof(debris->targetname));

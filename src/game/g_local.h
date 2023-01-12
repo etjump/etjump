@@ -24,8 +24,8 @@
 #ifndef PRE_RELEASE_DEMO
 
 #else
-  //#define MOD_VERSION			"You look like you need a
-  // monkey!"
+  // #define MOD_VERSION			"You look like you need a
+  //  monkey!"
   #define MOD_VERSION "ettest"
 #endif // PRE_RELEASE_DEMO
 
@@ -170,8 +170,8 @@ typedef struct {
 } g_script_stack_item_t;
 //
 // Gordon: need to up this, forest has a HUGE script for the tank.....
-//#define	G_MAX_SCRIPT_STACK_ITEMS	128
-//#define	G_MAX_SCRIPT_STACK_ITEMS	176
+// #define	G_MAX_SCRIPT_STACK_ITEMS	128
+// #define	G_MAX_SCRIPT_STACK_ITEMS	176
 // RF, upped this again for the tank
 // Gordon: and again...
 #define G_MAX_SCRIPT_STACK_ITEMS 196
@@ -593,7 +593,7 @@ struct gentity_s {
 };
 
 // Ridah
-//#include "ai_cast_global.h"
+// #include "ai_cast_global.h"
 // done.
 
 typedef enum {
@@ -785,6 +785,7 @@ typedef struct {
 
   qboolean timerunActive;
   qboolean receivedTimerunStates;
+  bool timerunCheatsNotified;
 
   // new implementation of progression
 #define MAX_PROGRESSION_TRACKERS 50
@@ -792,7 +793,7 @@ typedef struct {
   int deathrunFlags;
 
   float velocityScale;
-  bool clientIsInactive;
+  int clientLastActive;
 
   int weaponsOnSpawn[MAX_WEAPONS /
                      (sizeof(int) * 8)]; // state of ps.weapons on spawn
@@ -851,12 +852,11 @@ struct etj_votingInfo_t {
 // on each level change or team change at ClientBegin()
 typedef struct {
   clientConnected_t connected;
-  usercmd_t cmd;              // we would lose angles if not persistant
-  usercmd_t oldcmd;           // previous command processed by pmove()
-  qboolean localClient;       // true if "ip" info key is "localhost"
-  qboolean initialSpawn;      // the first spawn should be at a cool location
-  qboolean predictItemPickup; // based on cg_predictItems userinfo
-  qboolean pmoveFixed;        //
+  usercmd_t cmd;         // we would lose angles if not persistant
+  usercmd_t oldcmd;      // previous command processed by pmove()
+  qboolean localClient;  // true if "ip" info key is "localhost"
+  qboolean initialSpawn; // the first spawn should be at a cool location
+  qboolean pmoveFixed;
   qboolean nofatigue;
   qboolean cgaz;
   qboolean loadViewAngles;
@@ -1035,8 +1035,8 @@ struct gclient_s {
   int respawnTime;            // can respawn when time > this, force after
                               // g_forcerespwan
   int inactivityTime;         // kick players when time > this
-  int realInactivityTime;     // real inactivity time of client, independent
-                              // of inactivity cvars
+  bool inactive;              // level.time >= clientLastActive
+                              // + 1000 * clientInactivityTimer
   qboolean inactivityWarning; // qtrue if the five seoond warning has
                               // been given
   int rewardTime; // clear the EF_AWARD_IMPRESSIVE, etc when time > this
@@ -2856,6 +2856,9 @@ void Weapon_Portal_Fire(
 
 // Feen: END PGM
 
+void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
+                                gentity_t *activator);
+
 // g_utilities.cpp
 // C versions of printing functions
 void C_BPAll(const char *msg);
@@ -2874,6 +2877,8 @@ const char *findAndReplaceNametags(const char *text, const char *name);
 
 // Returns clientnum from ent
 int ClientNum(gentity_t *ent);
+// Returns clientnum from client
+int ClientNum(gclient_t *client);
 
 // mainext.cpp
 void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot);

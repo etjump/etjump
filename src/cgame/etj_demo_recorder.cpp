@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ void ETJump::DemoRecorder::start(const std::string &name) {
   _startTime = cg.time;
 
   trap_SendConsoleCommand("set cl_noprint 1\n");
-  trap_SendConsoleCommand(stringFormat("record %s\n", name.c_str()).c_str());
+  trap_SendConsoleCommand(stringFormat("record %s\n", name).c_str());
   trap_SendConsoleCommand("set cl_noprint 0\n");
 }
 

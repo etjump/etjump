@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -211,8 +211,10 @@ void Snaphud::UpdateMaxSnapZones(float wishspeed, pmove_t *pm) {
   // this needs to be dynamically calculated because
   // ps->speed can be modified by target_scale_velocity
   // default: 57 on ground, 7 in air (352 wishspeed)
-  const int maxSnaphudZonesQ1 =
-      round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) * 2 + 1;
+  const int maxSnaphudZonesQ1 = static_cast<int>(
+      std::round(wishspeed / (1000.0f / pm->pmove_msec) * pm->pmext->accel) *
+          2 +
+      1);
 
   snap.zones.resize(maxSnaphudZonesQ1);
   snap.xAccel.resize(maxSnaphudZonesQ1);
@@ -258,11 +260,12 @@ void Snaphud::beforeRender() {
   float a = accel * wishspeed * pm->pmext->frametime;
 
   // clamp the max value to match max scaling of target_scale_velocity
+  // FIXME: magic number bad
   if (a > 85) {
     a = 85;
   }
 
-  if (a != snap.a) {
+  if (a != snap.a || a == 0.0f) {
     snap.a = a;
     UpdateMaxSnapZones(wishspeed, pm);
     UpdateSnapState();

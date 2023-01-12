@@ -97,14 +97,16 @@ int G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2) {
 
 // Voting help summary.
 void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
-  int i, rows = 0,
-         num_cmds =
-             sizeof(aVoteInfo) / sizeof(aVoteInfo[0]) - 1; // Remove terminator;
+  int i, rows = 0;
+  int num_cmds =
+      sizeof(aVoteInfo) / sizeof(aVoteInfo[0]) - 1; // Remove terminator;
   int vi[100]; // Just make it large static.
+  auto clientNum = ClientNum(ent);
 
   if (fShowVote) {
-    CP("print \"\nValid ^3callvote^7 commands "
-       "are:\n^3----------------------------\n\"");
+    Printer::SendConsoleMessage(clientNum,
+                                "\nValid ^3callvote^7 commands are:\n"
+                                "^3----------------------------\n");
   }
 
   for (i = 0; i < num_cmds; i++) {
@@ -119,35 +121,35 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
   if (num_cmds % HELP_COLUMNS) {
     rows++;
   }
-  if (rows < 0) {
-    return;
-  }
 
   for (i = 0; i < rows; i++) {
     if (i + rows * 3 + 1 <= num_cmds) {
-      G_cpmPrintf(ent, "^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                  aVoteInfo[vi[i + rows]].pszVoteName,
-                  aVoteInfo[vi[i + rows * 2]].pszVoteName,
-                  aVoteInfo[vi[i + rows * 3]].pszVoteName);
+      Printer::SendConsoleMessage(
+          clientNum, va("^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                        aVoteInfo[vi[i + rows]].pszVoteName,
+                        aVoteInfo[vi[i + rows * 2]].pszVoteName,
+                        aVoteInfo[vi[i + rows * 3]].pszVoteName));
     } else if (i + rows * 2 + 1 <= num_cmds) {
-      G_cpmPrintf(ent, "^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                  aVoteInfo[vi[i + rows]].pszVoteName,
-                  aVoteInfo[vi[i + rows * 2]].pszVoteName);
+      Printer::SendConsoleMessage(
+          clientNum, va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                        aVoteInfo[vi[i + rows]].pszVoteName,
+                        aVoteInfo[vi[i + rows * 2]].pszVoteName));
     } else if (i + rows + 1 <= num_cmds) {
-      G_cpmPrintf(ent, "^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                  aVoteInfo[vi[i + rows]].pszVoteName);
+      Printer::SendConsoleMessage(
+          clientNum, va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                        aVoteInfo[vi[i + rows]].pszVoteName));
     } else {
-      G_cpmPrintf(ent, "^5%-17s", aVoteInfo[vi[i]].pszVoteName);
+      Printer::SendConsoleMessage(clientNum,
+                                  va("^5%-17s", aVoteInfo[vi[i]].pszVoteName));
     }
   }
 
   if (fShowVote) {
-    CP("print \"\nUsage: ^3\\callvote <command> "
-       "<params>\n^7For current "
-       "settings/help, use: ^3\\callvote <command> ?\n\n\"");
+    Printer::SendConsoleMessage(
+        clientNum,
+        "\n\nUsage: ^3callvote <command> <params>\n"
+        "^7For current settings/help, use: ^3callvote <command> ?\n");
   }
-
-  return;
 }
 
 // Set disabled votes for client UI
@@ -218,7 +220,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
     return (G_INVALID);
   }
 
-  if ((atoi(arg2) && curr_setting) || (!atoi(arg2) && !curr_setting)) {
+  if ((Q_atoi(arg2) && curr_setting) || (!Q_atoi(arg2) && !curr_setting)) {
     G_cpmPrintf(ent, "^3%s^5 is already %s!", aVoteInfo[vote_type].pszVoteName,
                 ((curr_setting) ? ENABLED : DISABLED));
     return (G_INVALID);
@@ -226,7 +228,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
 
   Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
   Com_sprintf(arg2, VOTE_MAXSTRING, "%s",
-              (atoi(arg2)) ? ACTIVATED : DEACTIVATED);
+              (Q_atoi(arg2)) ? ACTIVATED : DEACTIVATED);
 
   return (G_OK);
 }
@@ -236,7 +238,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
 //
 void G_voteSetOnOff(const char *desc, const char *cvar) {
   AP(va("cpm \"^3%s is: ^5%s\n\"", desc,
-        (atoi(level.voteInfo.vote_value)) ? ENABLED : DISABLED));
+        (Q_atoi(level.voteInfo.vote_value)) ? ENABLED : DISABLED));
   // trap_SendConsoleCommand(EXEC_APPEND, va("%s %s\n", cvar,
   // level.voteInfo.vote_value));
   trap_Cvar_Set(cvar, level.voteInfo.vote_value);

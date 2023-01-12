@@ -267,20 +267,20 @@ void UI_LoadArenas(void) {
   // set timelimit
   /*		str = Info_ValueForKey( ui_arenaInfos[n], "Timelimit" );
           if ( *str )
-              uiInfo.mapList[uiInfo.mapCount].Timelimit = atoi( str );
+              uiInfo.mapList[uiInfo.mapCount].Timelimit = Q_atoi( str );
           else
               uiInfo.mapList[uiInfo.mapCount].Timelimit = 0;
 
           // set axis respawn time
           str = Info_ValueForKey( ui_arenaInfos[n], "AxisRespawnTime" );
           if ( *str )
-              uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime = atoi(
+              uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime = Q_atoi(
      str ); else uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime = 0;
 
           // set allied respawn time
           str = Info_ValueForKey( ui_arenaInfos[n], "AlliedRespawnTime"
      ); if ( *str ) uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime =
-     atoi( str ); else uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime
+     Q_atoi( str ); else uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime
      = 0;
           // -NERVE - SMF
 

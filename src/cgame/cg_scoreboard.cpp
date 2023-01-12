@@ -63,12 +63,13 @@ void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
 
   // draw indicators
   if (ci->timerunActive) {
-    CG_DrawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon);
+    ETJump::drawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon, textColor);
     offsetX += 8 + 2;
     nameMaxWidth -= 1;
   }
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-    CG_DrawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon);
+    ETJump::drawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon,
+                    textColor);
     offsetX += 8 + 2;
     nameMaxWidth -= 1;
   }
@@ -284,12 +285,13 @@ void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
 
   // draw indicators
   if (ci->timerunActive) {
-    CG_DrawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon);
+    ETJump::drawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon, textColor);
     offsetX += 8 + 2;
     nameMaxWidth -= 2;
   }
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-    CG_DrawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon);
+    ETJump::drawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon,
+                    textColor);
     offsetX += 8 + 2;
     nameMaxWidth -= 2;
   }
@@ -630,7 +632,7 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX,
 
   // Draw indicator if player is idle
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-    CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
+    ETJump::drawPic(x, y - 6, 8, 8, cgs.media.idleIcon, textColor);
     x += 10;
   }
 
@@ -767,7 +769,7 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
 
   // Draw indicator if player is idle
   if (idle) {
-    CG_DrawPic(x, y - 6, 8, 8, cgs.media.idleIcon);
+    ETJump::drawPic(x, y - 6, 8, 8, cgs.media.idleIcon, textColor);
     playerX += 10;
   }
 
@@ -1043,18 +1045,23 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
       playerType = ci->cls;
 
       if (playerType == PC_MEDIC) {
-        CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID]);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID],
+                        hcolor);
       } else if (playerType == PC_ENGINEER) {
-        CG_DrawPic(x + 4, y + 2, 12, 12,
-                   cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION]);
+        ETJump::drawPic(x + 4, y + 2, 12, 12,
+                        cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION],
+                        hcolor);
       } else if (playerType == PC_FIELDOPS) {
-        CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_SIGNALS]);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_SIGNALS],
+                        hcolor);
       } else if (playerType == PC_COVERTOPS) {
-        CG_DrawPic(
+        ETJump::drawPic(
             x + 4, y + 2, 12, 12,
-            cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS]);
+            cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS],
+            hcolor);
       } else {
-        CG_DrawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS]);
+        ETJump::drawPic(x + 4, y + 2, 12, 12,
+                        cgs.media.skillPics[SK_HEAVY_WEAPONS], hcolor);
       }
 
       offsetX = 12 + 2;
@@ -1062,12 +1069,14 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
 
     // draw indicators
     if (ci->timerunActive) {
-      CG_DrawPic(x + 4 + offsetX, y + 2, 12, 12, cgs.media.stopwatchIcon);
+      ETJump::drawPic(x + 4 + offsetX, y + 2, 12, 12, cgs.media.stopwatchIcon,
+                      hcolor);
       offsetX += 12 + 2;
       nameMaxWidth -= 2;
     }
     if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-      CG_DrawPic(x + 4 + offsetX, y + 2, 11, 11, cgs.media.idleIcon);
+      ETJump::drawPic(x + 4 + offsetX, y + 2, 11, 11, cgs.media.idleIcon,
+                      hcolor);
       offsetX += 11 + 2;
       nameMaxWidth -= 2;
     }

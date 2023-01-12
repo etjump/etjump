@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -184,6 +184,13 @@ void StrafeQuality::render() const {
 }
 
 bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime) {
+  // do not try to update if we don't have a valid playerState yet
+  // this is usually the case for few frames at the start of a map
+  // especially on high client frame rates
+  if (!pm->ps) {
+    return true;
+  }
+
   // only count this frame if it's relevant to pmove
   // this makes sure that if clients FPS > 125
   // we only count frames at pmove_msec intervals
@@ -197,18 +204,17 @@ bool StrafeQuality::canSkipUpdate(usercmd_t cmd, int frameTime) {
   }
 
   // don't update if not in air or on ice
-  if (cg.snap->ps.groundEntityNum != ENTITYNUM_NONE &&
+  if (pm->ps->groundEntityNum != ENTITYNUM_NONE &&
       !(pm->pmext->groundTrace.surfaceFlags & SURF_SLICK)) {
     return true;
   }
 
-  if (cg.snap->ps.pm_type == PM_NOCLIP || cg.snap->ps.pm_type == PM_DEAD) {
+  if (pm->ps->pm_type == PM_NOCLIP || pm->ps->pm_type == PM_DEAD) {
     return true;
   }
 
-  if (BG_PlayerMounted(cg.snap->ps.eFlags) ||
-      cg.snap->ps.weapon == WP_MOBILE_MG42_SET ||
-      cg.snap->ps.weapon == WP_MORTAR_SET) {
+  if (BG_PlayerMounted(pm->ps->eFlags) ||
+      pm->ps->weapon == WP_MOBILE_MG42_SET || pm->ps->weapon == WP_MORTAR_SET) {
     return true;
   }
 

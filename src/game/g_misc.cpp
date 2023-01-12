@@ -2581,7 +2581,7 @@ void SP_mg42(gentity_t *self) {
   self->nextthink = level.time + FRAMETIME;
 
   if (G_SpawnString("damage", "0", &damage)) {
-    self->damage = atoi(damage);
+    self->damage = Q_atoi(damage);
   }
 
   G_SpawnString("accuracy", "1.0", &accuracy);
@@ -3036,7 +3036,7 @@ void SP_misc_constructiblemarker(gentity_t *ent) {
     char cs[MAX_INFO_STRING];
 
     trap_GetConfigstring(CS_CONSTRUCTION_NAMES, cs, sizeof(cs));
-    Info_SetValueForKey(cs, va("%i", ent - g_entities), s);
+    Info_SetValueForKey(cs, va("%i", ClientNum(ent)), s);
     trap_SetConfigstring(CS_CONSTRUCTION_NAMES, cs);
   }
 

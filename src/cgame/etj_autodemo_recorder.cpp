@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 ETJump team <zero@etjump.com>
+ * Copyright (c) 2023 ETJump team <zero@etjump.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
 
   playerEventsHandler->subscribe("respawn",
                                  [&](const std::vector<std::string> &args) {
-                                   auto revive = atoi(args[0].c_str());
+                                   auto revive = Q_atoi(args[0].c_str());
                                    if (revive)
                                      return;
                                    if (etj_autoDemo.integer > 0)
@@ -190,7 +190,7 @@ ETJump::AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
       FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
       FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
       cgs.rawmapname, FileSystem::Path::sanitize(runName),
-      formatRunTime(atoi(runTime.c_str())), createTimeString());
+      formatRunTime(Q_atoi(runTime.c_str())), createTimeString());
 }
 
 std::string
