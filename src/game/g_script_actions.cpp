@@ -4117,11 +4117,13 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
   Q_strncpyz(lastToken, token, sizeof(lastToken));
   token = COM_ParseExt(&pString, qfalse);
 
-  if (!Q_stricmp(lastToken, "inc")) {
+  // ETJump: we don't allow these as they can be abused
+  if (!Q_stricmp(lastToken, "inc") ||
+      (!Q_stricmp(lastToken, "set") || (!Q_stricmp(lastToken, "random")))) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
     }
-    trap_Cvar_Set(cvarName, va("%i", cvarValue + 1));
+    G_Printf("G_Scripting: cvar %s is not allowed.\n", lastToken);
   } else if (!Q_stricmp(lastToken, "abort_if_less_than")) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
@@ -4188,17 +4190,6 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
       ent->scriptStatus.scriptStackHead =
           ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
-  } else if (!Q_stricmp(lastToken, "set")) {
-    if (!token[0]) {
-      G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
-    }
-    trap_Cvar_Set(cvarName, va("%i", Q_atoi(token)));
-  } else if (!Q_stricmp(lastToken, "random")) {
-    if (!token[0]) {
-      G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
-    }
-    cvarValue = rand() % Q_atoi(token);
-    trap_Cvar_Set(cvarName, va("%i", cvarValue));
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
@@ -4206,36 +4197,33 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
     if (cvarValue == Q_atoi(token)) {
       gentity_t *trent;
       int oldId;
-      //			qboolean loop = qfalse;
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(lastToken, token, sizeof(lastToken));
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       terminate = qfalse;
       found = qfalse;
       // for all entities/bots with this scriptName
-      trent = NULL;
+      trent = nullptr;
 
       for (trent = G_Find(trent, FOFS(scriptName), lastToken); trent;
            trent = G_Find(trent, FOFS(scriptName), lastToken)) {
         found = qtrue;
         oldId = trent->scriptStatus.scriptId;
         G_Script_ScriptEvent(trent, "trigger", name);
-        // if the script changed, return false
-        // so we don't muck with it's variables
+        // if the script changed, return false,
+        // so we don't muck with its variables
         if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
           terminate = qtrue;
         }
@@ -4247,9 +4235,6 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
       if (found) {
         return qtrue;
       }
-      //
-      //			G_Error( "G_Scripting:
-      // trigger has unknown name: %s\n", name );
       G_Printf("G_Scripting: trigger has unknown name: %s\n", name);
       return qtrue;
     }
