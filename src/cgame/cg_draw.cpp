@@ -4906,10 +4906,6 @@ static void CG_Draw2D(void) {
     }
   }
 
-  if (cg.showFireteamMenu) {
-    CG_Fireteams_Draw();
-  }
-
   if (!cgs.demoCam.renderingFreeCam) {
     ETJump_DrawDrawables();
 
@@ -4917,6 +4913,10 @@ static void CG_Draw2D(void) {
       r->beforeRender();
       r->render();
     }
+  }
+
+  if (cg.showFireteamMenu) {
+    CG_Fireteams_Draw();
   }
 
   if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 ||
