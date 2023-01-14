@@ -1545,51 +1545,61 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       DEBUGNAME("EV_FOOTSTEP");
       if (es->eventParm != FOOTSTEP_TOTAL && cg_footsteps.integer) {
         if (es->eventParm) {
-          trap_S_StartSound(nullptr, es->number, CHAN_BODY,
-                            cgs.media.footsteps[es->eventParm][footstepcnt]);
+          trap_S_StartSoundVControl(
+              nullptr, es->number, CHAN_BODY,
+              cgs.media.footsteps[es->eventParm][footstepcnt],
+              static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         } else {
           bg_character_t *character =
               CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-          trap_S_StartSound(
+          trap_S_StartSoundVControl(
               nullptr, es->number, CHAN_BODY,
               cgs.media
-                  .footsteps[character->animModelInfo->footsteps][footstepcnt]);
+                  .footsteps[character->animModelInfo->footsteps][footstepcnt],
+              static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         }
       }
       break;
     case EV_FOOTSPLASH:
       DEBUGNAME("EV_FOOTSPLASH");
       if (cg_footsteps.integer)
-        trap_S_StartSound(
+        trap_S_StartSoundVControl(
             nullptr, es->number, CHAN_BODY,
-            cgs.media.footsteps[FOOTSTEP_SPLASH][splashfootstepcnt]);
+            cgs.media.footsteps[FOOTSTEP_SPLASH][splashfootstepcnt],
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
       break;
     case EV_FOOTWADE:
       DEBUGNAME("EV_FOOTWADE");
       if (cg_footsteps.integer)
-        trap_S_StartSound(
+        trap_S_StartSoundVControl(
             nullptr, es->number, CHAN_BODY,
-            cgs.media.footsteps[FOOTSTEP_SPLASH][splashfootstepcnt]);
+            cgs.media.footsteps[FOOTSTEP_SPLASH][splashfootstepcnt],
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
       break;
     case EV_SWIM:
       DEBUGNAME("EV_SWIM");
       if (cg_footsteps.integer)
-        trap_S_StartSound(nullptr, es->number, CHAN_BODY,
-                          cgs.media.footsteps[FOOTSTEP_SPLASH][footstepcnt]);
+        trap_S_StartSoundVControl(
+            nullptr, es->number, CHAN_BODY,
+            cgs.media.footsteps[FOOTSTEP_SPLASH][footstepcnt],
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
       break;
 
     case EV_FALL_SHORT:
       DEBUGNAME("EV_FALL_SHORT");
       if (es->eventParm != FOOTSTEP_TOTAL) {
         if (es->eventParm) {
-          trap_S_StartSound(nullptr, es->number, CHAN_AUTO,
-                            cgs.media.landSound[es->eventParm]);
+          trap_S_StartSoundVControl(
+              nullptr, es->number, CHAN_AUTO,
+              cgs.media.landSound[es->eventParm],
+              static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         } else {
           bg_character_t *character =
               CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-          trap_S_StartSound(
+          trap_S_StartSoundVControl(
               nullptr, es->number, CHAN_AUTO,
-              cgs.media.landSound[character->animModelInfo->footsteps]);
+              cgs.media.landSound[character->animModelInfo->footsteps],
+              static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         }
       }
       if (clientNum == cg.predictedPlayerState.clientNum) {
@@ -1605,17 +1615,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (!(cg.thisFrameTeleport || cg.nextFrameTeleport)) {
         if (es->eventParm != FOOTSTEP_TOTAL) {
           if (es->eventParm) {
-            trap_S_StartSound(nullptr, es->number, CHAN_AUTO,
-                              cgs.media.landSound[es->eventParm]);
+            trap_S_StartSoundVControl(
+                nullptr, es->number, CHAN_AUTO,
+                cgs.media.landSound[es->eventParm],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           } else {
             bg_character_t *character =
                 CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-            trap_S_StartSound(
+            trap_S_StartSoundVControl(
                 nullptr, es->number, CHAN_AUTO,
-                cgs.media.landSound[character->animModelInfo->footsteps]);
+                cgs.media.landSound[character->animModelInfo->footsteps],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           }
         }
-        trap_S_StartSound(nullptr, es->number, CHAN_AUTO, cgs.media.landHurt);
+        trap_S_StartSoundVControl(
+            nullptr, es->number, CHAN_AUTO, cgs.media.landHurt,
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         cent->pe.painTime = cg.time; // don't play a pain sound right after this
         if (clientNum == cg.predictedPlayerState.clientNum) {
           // smooth landing z changes
@@ -1631,17 +1646,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (!(cg.thisFrameTeleport || cg.nextFrameTeleport)) {
         if (es->eventParm != FOOTSTEP_TOTAL) {
           if (es->eventParm) {
-            trap_S_StartSound(nullptr, es->number, CHAN_AUTO,
-                              cgs.media.landSound[es->eventParm]);
+            trap_S_StartSoundVControl(
+                nullptr, es->number, CHAN_AUTO,
+                cgs.media.landSound[es->eventParm],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           } else {
             bg_character_t *character =
                 CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-            trap_S_StartSound(
+            trap_S_StartSoundVControl(
                 nullptr, es->number, CHAN_AUTO,
-                cgs.media.landSound[character->animModelInfo->footsteps]);
+                cgs.media.landSound[character->animModelInfo->footsteps],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           }
         }
-        trap_S_StartSound(nullptr, es->number, CHAN_AUTO, cgs.media.landHurt);
+        trap_S_StartSoundVControl(
+            nullptr, es->number, CHAN_AUTO, cgs.media.landHurt,
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         cent->pe.painTime = cg.time; // don't play a pain sound right after this
         if (clientNum == cg.predictedPlayerState.clientNum) {
           // smooth landing z changes
@@ -1657,17 +1677,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (!(cg.thisFrameTeleport || cg.nextFrameTeleport)) {
         if (es->eventParm != FOOTSTEP_TOTAL) {
           if (es->eventParm) {
-            trap_S_StartSound(nullptr, es->number, CHAN_AUTO,
-                              cgs.media.landSound[es->eventParm]);
+            trap_S_StartSoundVControl(
+                nullptr, es->number, CHAN_AUTO,
+                cgs.media.landSound[es->eventParm],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           } else {
             bg_character_t *character =
                 CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-            trap_S_StartSound(
+            trap_S_StartSoundVControl(
                 nullptr, es->number, CHAN_AUTO,
-                cgs.media.landSound[character->animModelInfo->footsteps]);
+                cgs.media.landSound[character->animModelInfo->footsteps],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           }
         }
-        trap_S_StartSound(nullptr, es->number, CHAN_AUTO, cgs.media.landHurt);
+        trap_S_StartSoundVControl(
+            nullptr, es->number, CHAN_AUTO, cgs.media.landHurt,
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         cent->pe.painTime = cg.time; // don't play a pain sound right after this
         if (clientNum == cg.predictedPlayerState.clientNum) {
           // smooth landing z changes
@@ -1683,17 +1708,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (!(cg.thisFrameTeleport || cg.nextFrameTeleport)) {
         if (es->eventParm != FOOTSTEP_TOTAL) {
           if (es->eventParm) {
-            trap_S_StartSound(nullptr, es->number, CHAN_AUTO,
-                              cgs.media.landSound[es->eventParm]);
+            trap_S_StartSoundVControl(
+                nullptr, es->number, CHAN_AUTO,
+                cgs.media.landSound[es->eventParm],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           } else {
             bg_character_t *character =
                 CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-            trap_S_StartSound(
+            trap_S_StartSoundVControl(
                 nullptr, es->number, CHAN_AUTO,
-                cgs.media.landSound[character->animModelInfo->footsteps]);
+                cgs.media.landSound[character->animModelInfo->footsteps],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           }
         }
-        trap_S_StartSound(nullptr, es->number, CHAN_AUTO, cgs.media.landHurt);
+        trap_S_StartSoundVControl(
+            nullptr, es->number, CHAN_AUTO, cgs.media.landHurt,
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         cent->pe.painTime = cg.time; // don't play a pain sound right after this
         if (clientNum == cg.predictedPlayerState.clientNum) {
           // smooth landing z changes
@@ -1709,17 +1739,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       if (!(cg.thisFrameTeleport || cg.nextFrameTeleport)) {
         if (es->eventParm != FOOTSTEP_TOTAL) {
           if (es->eventParm) {
-            trap_S_StartSound(nullptr, es->number, CHAN_AUTO,
-                              cgs.media.landSound[es->eventParm]);
+            trap_S_StartSoundVControl(
+                nullptr, es->number, CHAN_AUTO,
+                cgs.media.landSound[es->eventParm],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           } else {
             bg_character_t *character =
                 CG_CharacterForClientinfo(&cgs.clientinfo[clientNum], cent);
-            trap_S_StartSound(
+            trap_S_StartSoundVControl(
                 nullptr, es->number, CHAN_AUTO,
-                cgs.media.landSound[character->animModelInfo->footsteps]);
+                cgs.media.landSound[character->animModelInfo->footsteps],
+                static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
           }
         }
-        trap_S_StartSound(nullptr, es->number, CHAN_AUTO, cgs.media.landHurt);
+        trap_S_StartSoundVControl(
+            nullptr, es->number, CHAN_AUTO, cgs.media.landHurt,
+            static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
         cent->pe.painTime = cg.time; // don't play a pain sound
                                      // right after this splat
       }
@@ -2415,7 +2450,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
 
     case EV_GIB_PLAYER:
       DEBUGNAME("EV_GIB_PLAYER");
-      trap_S_StartSound(es->pos.trBase, -1, CHAN_AUTO, cgs.media.gibSound);
+      trap_S_StartSoundVControl(
+          es->pos.trBase, -1, CHAN_AUTO, cgs.media.gibSound,
+          static_cast<int>(DEFAULT_VOLUME * etj_footstepVolume.value));
       ByteToDir(es->eventParm, dir);
       CG_GibPlayer(cent, cent->lerpOrigin, dir);
       break;
