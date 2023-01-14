@@ -2128,7 +2128,7 @@ static void CG_DrawCrosshairNames(void) {
   bool isMover = false;
 
   // NERVE - SMF
-  if (cg.crosshairClientNum > MAX_CLIENTS) {
+  if (cg.crosshairClientNum >= MAX_CLIENTS) {
     if (!cg_drawCrosshairNames.integer) {
       return;
     }
