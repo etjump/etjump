@@ -787,30 +787,50 @@ void G_SetFireTeamRules(int clientNum) {
   G_ClientPrintAndReturn(clientNum, "fireteam: failed to set rules.");
 }
 
+// Checks if given command buffer matches a valid client on the server
+// Returns true if given argument matches a valid client
+bool validClientForFireteam(gentity_t *ent, int *targetNum, char *numbuffer) {
+  bool validClient = true;
+
+  if ((*targetNum = ClientNumberFromString(ent, numbuffer)) == -1) {
+    validClient = false;
+  } else {
+    gentity_t *other = g_entities + *targetNum;
+
+    if (!other->inuse || !other->client) {
+      validClient = false;
+    }
+  }
+
+  return validClient;
+}
+
 // Command handler
 void Cmd_FireTeam_MP_f(gentity_t *ent) {
-  char command[MAX_TOKEN_CHARS];
+  char command[MAX_NAME_LENGTH]; // more than enough to hold the commands
+  auto selfNum = ClientNum(ent);
+  int targetNum = -1;
 
   if (trap_Argc() < 2) {
-    G_ClientPrintAndReturn(ent - g_entities,
+    G_ClientPrintAndReturn(selfNum,
                            "usage: fireteam <create|leave|apply|invite|rules>");
   }
 
   trap_Argv(1, command, sizeof(command));
 
   if (!Q_stricmp(command, "create")) {
-    G_RegisterFireteam(ent - g_entities);
+    G_RegisterFireteam(selfNum);
   } else if (!Q_stricmp(command, "disband")) {
-    G_DestroyFireteam(ent - g_entities);
+    G_DestroyFireteam(selfNum);
   } else if (!Q_stricmp(command, "leave")) {
-    G_RemoveClientFromFireteams(ent - g_entities, qtrue, qtrue);
+    G_RemoveClientFromFireteams(selfNum, qtrue, qtrue);
   } else if (!Q_stricmp(command, "apply")) {
-    char namebuffer[MAX_TOKEN_CHARS];
+    char namebuffer[MAX_NAME_LENGTH];
     int fireteam;
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam apply "
-                                               "<fireteamname|fireteamnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
     }
 
     trap_Argv(2, namebuffer, sizeof(namebuffer));
@@ -818,83 +838,79 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
         G_FireteamNumberForString(namebuffer, ent->client->sess.sessionTeam);
 
     if (fireteam <= 0) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam apply "
-                                               "<fireteamname|fireteamnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
     }
 
-    G_ApplyToFireTeam(ent - g_entities, fireteam - 1);
+    G_ApplyToFireTeam(selfNum, fireteam - 1);
   } else if (!Q_stricmp(command, "invite")) {
-    char numbuffer[MAX_TOKEN_CHARS];
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities,
-                             "usage: fireteam invite <clientnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam invite <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
-    const int clientnum = Q_atoi(numbuffer);
-    if ((clientnum < 0 || clientnum >= MAX_CLIENTS) ||
-        !g_entities[clientnum].inuse || !g_entities[clientnum].client) {
-      G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    G_InviteToFireTeam(ent - g_entities, clientnum);
+    G_InviteToFireTeam(selfNum, targetNum);
   } else if (!Q_stricmp(command, "warn")) {
-    char numbuffer[MAX_TOKEN_CHARS];
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities,
-                             "usage: fireteam warn <clientnumber>");
+      G_ClientPrintAndReturn(selfNum,
+                             "usage: fireteam warn <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
-    const int clientnum = Q_atoi(numbuffer);
-    if ((clientnum < 0 || clientnum >= MAX_CLIENTS) ||
-        !g_entities[clientnum].inuse || !g_entities[clientnum].client) {
-      G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    G_WarnFireTeamPlayer(ent - g_entities, clientnum);
+    G_WarnFireTeamPlayer(selfNum, targetNum);
   } else if (!Q_stricmp(command, "kick")) {
-    char numbuffer[MAX_TOKEN_CHARS];
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities,
-                             "usage: fireteam kick <clientnumber>");
+      G_ClientPrintAndReturn(selfNum,
+                             "usage: fireteam kick <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
-    const int clientnum = Q_atoi(numbuffer);
-    if ((clientnum < 0 || clientnum >= MAX_CLIENTS) ||
-        !g_entities[clientnum].inuse || !g_entities[clientnum].client) {
-      G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    G_KickFireTeamPlayer(ent - g_entities, clientnum);
+    G_KickFireTeamPlayer(selfNum, targetNum);
   } else if (!Q_stricmp(command, "propose")) {
-    char numbuffer[MAX_TOKEN_CHARS];
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities,
-                             "usage: fireteam propose <clientnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam propose <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
-    const int clientnum = Q_atoi(numbuffer);
-    if ((clientnum < 0 || clientnum >= MAX_CLIENTS) ||
-        !g_entities[clientnum].inuse || !g_entities[clientnum].client) {
-      G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    G_ProposeFireTeamPlayer(ent - g_entities, clientnum);
+    G_ProposeFireTeamPlayer(selfNum, targetNum);
   }
   // Challenge group.
   // Only leader
   else if (!Q_stricmp(command, "rules")) {
-    G_SetFireTeamRules(ent - g_entities);
+    G_SetFireTeamRules(selfNum);
   } else if (!Q_stricmp(command, "tj")) {
-    G_TeamJumpMode(ent - g_entities);
+    G_TeamJumpMode(selfNum);
   } else if (!Q_stricmp(command, "race")) {
-    G_FireteamRace(ent - g_entities);
+    G_FireteamRace(selfNum);
   }
 }
