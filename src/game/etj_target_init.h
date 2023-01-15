@@ -27,7 +27,7 @@
 namespace ETJump {
 class TargetInit {
 private:
-  enum class _spawnFlags {
+  enum class SpawnFlags {
     None = 0,
     KeepHealth = 1,
     KeepAmmo = 2,
@@ -41,7 +41,7 @@ private:
 
   static constexpr int NUM_KEPT_WEAPONS = 7;
 
-  static void _use(gentity_t *self, gentity_t *other, gentity_t *activator);
+  static void use(gentity_t *self, gentity_t *other, gentity_t *activator);
 
 public:
   static void spawn(gentity_t *self);

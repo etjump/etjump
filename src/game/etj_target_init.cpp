@@ -29,9 +29,9 @@
 #include "etj_target_init.h"
 
 namespace ETJump {
-void TargetInit::spawn(gentity_t *self) { self->use = TargetInit::_use; }
+void TargetInit::spawn(gentity_t *self) { self->use = TargetInit::use; }
 
-void TargetInit::_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
+void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     return;
   }
@@ -40,15 +40,15 @@ void TargetInit::_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     return;
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepHealth))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepHealth))) {
     activator->health = activator->client->ps.stats[STAT_MAX_HEALTH];
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepAmmo))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepAmmo))) {
     ResetPlayerAmmo(activator->client, activator);
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepWeapons))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepWeapons))) {
     auto weapon = activator->client->sess.playerWeapon;
 
     // restore the ammo we spawned with in case we don't have our weapon anymore
@@ -78,7 +78,7 @@ void TargetInit::_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     }
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepPortalgun))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepPortalgun))) {
     // swap weapons in case portalgun was equipped
     // if we have ammo: primary > secondary > knife
     if (activator->client->ps.weapon == WP_PORTAL_GUN) {
@@ -95,23 +95,23 @@ void TargetInit::_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     COM_BitClear(activator->client->ps.weapons, WP_PORTAL_GUN);
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepHoldable))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepHoldable))) {
     // we can just utilize target_remove_powerups here
     Use_target_remove_powerups(self, other, activator);
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepIdent))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepIdent))) {
     activator->client->sess.clientMapProgression = 0;
   }
 
-  if (!(self->spawnflags & static_cast<int>(_spawnFlags::KeepTracker))) {
+  if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepTracker))) {
     for (int &i : activator->client->sess.progression) {
       i = 0;
     }
   }
 
-  if (self->spawnflags & static_cast<int>(_spawnFlags::RemoveStartingWeapons) &&
-      !(self->spawnflags & static_cast<int>(_spawnFlags::KeepWeapons))) {
+  if (self->spawnflags & static_cast<int>(SpawnFlags::RemoveStartingWeapons) &&
+      !(self->spawnflags & static_cast<int>(SpawnFlags::KeepWeapons))) {
     auto allowedWeapons = std::array<int, NUM_KEPT_WEAPONS>{WP_NONE,
                                                             WP_KNIFE,
                                                             WP_MEDKIT,
