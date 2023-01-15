@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <array>
 
 #include "ui_shared.h"
 #include "ui_local.h" // For CS settings/retrieval
@@ -7751,6 +7752,17 @@ void *Display_CaptureItem(int x, int y) {
   }
   return NULL;
 }
+
+namespace ETJump {
+void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy) {
+  static std::array<float, 2> mouseMenuBuffer = {0.0f, 0.0f};
+
+  mouseMenuBuffer[0] += etj_menuSensitivity.value * x;
+  mouseMenuBuffer[1] += etj_menuSensitivity.value * y;
+  mouseMenuBuffer[0] = modff(mouseMenuBuffer[0], mdx);
+  mouseMenuBuffer[1] = modff(mouseMenuBuffer[1], mdy);
+}
+} // namespace ETJump
 
 // FIXME:
 qboolean Display_MouseMove(void *p, int x, int y) {

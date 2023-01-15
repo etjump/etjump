@@ -606,6 +606,8 @@ vmCvar_t etj_fixedCompassShader;
 vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
+vmCvar_t etj_menuSensitivity;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1108,6 +1110,8 @@ cvarTable_t cvarTable[] = {
     // unlagged - optimized prediction
     {&etj_optimizePrediction, "etj_optimizePrediction", "1", CVAR_ARCHIVE},
     // END unlagged - optimized prediction
+
+    {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

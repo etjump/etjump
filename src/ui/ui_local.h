@@ -134,6 +134,8 @@ extern vmCvar_t ui_autoredirect;
 
 extern vmCvar_t ui_voteCheats;
 
+extern vmCvar_t etj_menuSensitivity;
+
 //
 // ui_qmenu.c
 //

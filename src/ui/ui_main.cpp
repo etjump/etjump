@@ -8104,6 +8104,11 @@ UI_MouseEvent
 =================
 */
 void _UI_MouseEvent(int dx, int dy) {
+  float mdx, mdy;
+  ETJump::scaleMenuSensitivity(dx, dy, &mdx, &mdy);
+  dx = static_cast<int>(mdx);
+  dy = static_cast<int>(mdy);
+
   // update mouse screen position
   uiInfo.uiDC.cursorx += dx;
   if (uiInfo.uiDC.cursorx < 0) {
@@ -8120,10 +8125,7 @@ void _UI_MouseEvent(int dx, int dy) {
   }
 
   if (Menu_Count() > 0) {
-    // menuDef_t *menu = Menu_GetFocused();
-    // Menu_HandleMouseMove(menu, uiInfo.uiDC.cursorx,
-    // uiInfo.uiDC.cursory);
-    Display_MouseMove(NULL, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
+    Display_MouseMove(nullptr, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
   }
 }
 
@@ -8908,6 +8910,8 @@ vmCvar_t ui_autoredirect;
 
 vmCvar_t ui_voteCheats;
 
+vmCvar_t etj_menuSensitivity;
+
 cvarTable_t cvarTable[] = {
 
     {&ui_glCustom, "ui_glCustom", "4",
@@ -9168,6 +9172,8 @@ cvarTable_t cvarTable[] = {
     {&ui_autoredirect, "ui_autoredirect", "0", CVAR_ARCHIVE},
 
     {&ui_voteCheats, "ui_voteCheats", "0", CVAR_ARCHIVE},
+
+    {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

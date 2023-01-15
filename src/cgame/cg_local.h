@@ -2683,6 +2683,8 @@ extern vmCvar_t etj_fixedCompassShader;
 extern vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
+extern vmCvar_t etj_menuSensitivity;
+
 //
 // cg_main.c
 //
