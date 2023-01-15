@@ -2491,6 +2491,7 @@ extern vmCvar_t etj_fireteamAlpha;
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t etj_logBanner;
 extern vmCvar_t etj_weaponVolume;
+extern vmCvar_t etj_footstepVolume;
 
 extern vmCvar_t etj_noclipScale;
 extern vmCvar_t etj_drawSlick;

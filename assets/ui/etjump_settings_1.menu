@@ -23,7 +23,7 @@
 
 #define SUBW_SOUNDS_Y SUBW_CONSOLE_Y + SUBW_CONSOLE_HEIGHT + SUBW_SPACING_Y
 #define SUBW_SOUNDS_ITEM_Y SUBW_SOUNDS_Y + SUBW_HEADER_HEIGHT
-#define SUBW_SOUNDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 2)
+#define SUBW_SOUNDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
 #define SUBW_SCOREBOARD_Y SUBW_SOUNDS_Y + SUBW_SOUNDS_HEIGHT + SUBW_SPACING_Y
 #define SUBW_SCOREBOARD_ITEM_Y SUBW_SCOREBOARD_Y + SUBW_HEADER_HEIGHT
@@ -110,8 +110,10 @@ menuDef {
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_SOUNDS_Y, SUBW_WIDTH, SUBW_SOUNDS_HEIGHT, "SOUNDS")
         CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_weaponVolume", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Weapon sound volume:", 0.2, SUBW_ITEM_HEIGHT, etj_weaponVolume 1 0 5 0.1, "Scale weapon sound volume\netj_weaponVolume")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Looped sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Uphill step sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_footstepVolume", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Footstep sound volume:", 0.2, SUBW_ITEM_HEIGHT, etj_footstepVolume 1 0 5 0.1, "Scale footstep and landing sound volume\netj_footstepVolume")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Looped sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Uphill step sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_SCOREBOARD_Y, SUBW_WIDTH, SUBW_SCOREBOARD_HEIGHT, "SCOREBOARD")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Custom scoreboard:", 0.2, SUBW_ITEM_HEIGHT, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
