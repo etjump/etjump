@@ -1137,6 +1137,25 @@ void CG_ExtraTrace_f(void) {
   CG_Printf(listPrint.c_str());
 }
 
+namespace ETJump {
+void listSpawnPoints() {
+  CG_Printf("^7Available spawn points:\n");
+  for (int i = 0; i < cg.spawnCount; i++) {
+    // autospawn
+    if (i == 0) {
+      CG_Printf("^7[^3%2i^7]   ^7%-26s\n", i, cg.spawnPoints[i]);
+      // invalid spawnpoint
+    } else if ((cg.spawnTeams[i] & 0xF) == 0) {
+      continue;
+    } else {
+      CG_Printf("^7[^3%2i^7] %s ^7%-26s\n", i,
+                cg.spawnTeams[i] == TEAM_AXIS ? "^1X" : "^dA",
+                cg.spawnPoints[i]);
+    }
+  }
+}
+} // namespace ETJump
+
 typedef struct {
   const char *cmd;
   void (*function)(void);
@@ -1264,6 +1283,7 @@ static const consoleCommand_t anyTimeCommands[] = {
     {"mod_information", CG_ModInformation_f},
     {"incrementVar", CG_IncrementVar_f},
     {"extraTrace", CG_ExtraTrace_f},
+    {"listspawnpt", ETJump::listSpawnPoints},
 };
 
 /*
@@ -1497,4 +1517,5 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("tracker_print");
   trap_AddCommand("tracker_set");
   trap_AddCommand("clearsaves");
+  trap_AddCommand("listspawnpt");
 }
