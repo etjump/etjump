@@ -698,8 +698,9 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     }
   }
 
-  if (self->client->sess.runSpawnflags == 0 ||
-      self->client->sess.runSpawnflags & TIMERUN_RESET_ON_DEATH) {
+  if (!self->client->sess.runSpawnflags ||
+      self->client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::ResetDeath)) {
     InterruptRun(self);
   }
 

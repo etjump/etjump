@@ -1861,7 +1861,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   level.covertopsChargeTimeModifier[0] = level.covertopsChargeTimeModifier[1] =
       1.f;
 
-  level.hasTimerun = qfalse;
+  level.hasTimerun = false;
 
   cs[0] = '\0';
   Info_SetValueForKey(cs, "axs_sld", va("%i", level.soldierChargeTime[0]));
