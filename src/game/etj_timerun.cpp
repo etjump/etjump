@@ -181,10 +181,11 @@ void Timerun::connectNotify(int clientNum) {
       if (previousRecord) {
         fastestCompletionTime = previousRecord->time;
       }
-      Printer::SendCommand(
-          clientNum, ETJump::stringFormat(
-                         "timerun start %d %d %s %d", idx, player->runStartTime,
-                         player->currentRunName, fastestCompletionTime));
+      Printer::SendCommand(clientNum,
+                           ETJump::stringFormat("timerun start %d %d \"%s\" %d",
+                                                idx, player->runStartTime,
+                                                player->currentRunName,
+                                                fastestCompletionTime));
     }
   }
 }
@@ -198,17 +199,17 @@ void Timerun::startNotify(int clientNum) {
   if (previousRecord) {
     fastestCompletionTime = previousRecord->time;
   }
-  Printer::SendCommand(clientNum, ETJump::stringFormat("timerun_start %d %s %d",
-                                                       player->runStartTime,
-                                                       player->currentRunName,
-                                                       fastestCompletionTime));
-  Printer::SendCommand(spectators,
-                       ETJump::stringFormat("timerun_start_spec %d %d %s %d",
-                                            clientNum, player->runStartTime,
-                                            player->currentRunName,
-                                            fastestCompletionTime));
+  Printer::SendCommand(
+      clientNum,
+      ETJump::stringFormat("timerun_start %d \"%s\" %d", player->runStartTime,
+                           player->currentRunName, fastestCompletionTime));
+  Printer::SendCommand(
+      spectators,
+      ETJump::stringFormat("timerun_start_spec %d %d \"%s\" %d", clientNum,
+                           player->runStartTime, player->currentRunName,
+                           fastestCompletionTime));
   Printer::SendCommandToAll(ETJump::stringFormat(
-      "timerun start %d %d %s %d", clientNum, player->runStartTime,
+      "timerun start %d %d \"%s\" %d", clientNum, player->runStartTime,
       player->currentRunName, fastestCompletionTime));
 }
 
@@ -256,15 +257,16 @@ void Timerun::stopTimer(int clientNum, int commandTime, std::string runName) {
     player->racing = false;
 
     Printer::SendCommand(clientNum,
-                         ETJump::stringFormat("timerun_stop %d %s", millis,
+                         ETJump::stringFormat("timerun_stop %d \"%s\"", millis,
                                               player->currentRunName));
     auto spectators = Utilities::getSpectators(clientNum);
     Printer::SendCommand(spectators,
-                         ETJump::stringFormat("timerun_stop_spec %d %d %s",
+                         ETJump::stringFormat("timerun_stop_spec %d %d \"%s\"",
                                               clientNum, millis,
                                               player->currentRunName));
-    Printer::SendCommandToAll(ETJump::stringFormat(
-        "timerun stop %d %d %s", clientNum, millis, player->currentRunName));
+    Printer::SendCommandToAll(ETJump::stringFormat("timerun stop %d %d \"%s\"",
+                                                   clientNum, millis,
+                                                   player->currentRunName));
 
     player->currentRunName = "";
     Utilities::stopRun(clientNum);
