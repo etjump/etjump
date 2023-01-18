@@ -49,6 +49,20 @@
   * fixed prediction errors not being cleared on respawn
   * fixed view transition happening when joining spectators while proning
 * fixed a potential crash when activating `trigger_multiple` with a non-player entity [#920](https://github.com/etjump/etjump/pull/920)
+* improvements to `etj_nofatigue` and stamina bar [#922](https://github.com/etjump/etjump/pull/922)
+  * `PW_ADRENALINE` is no longer given to player every frame, improving prediction performance when `etj_optimizePrediction` is enabled
+  * `etj_nofatigue` no longer makes stamina bar appear as if you have adrenaline - only using real adrenaline syringe will display the color lerping
+* players now receive a once per map warning when starting a timerun if cheats are enabled [#924](https://github.com/etjump/etjump/pull/924)
+* unlocked `r_flareSize` via `etj_flareSize` [#925](https://github.com/etjump/etjump/pull/925)
+* fixed `fireteam invite/warn/kick/propose` console command handling [#928](https://github.com/etjump/etjump/pull/928)
+  * action by clientnum now sends the command to correct client instead of the previous client
+  * action by clientname now returns invalid clientnum and errors if matching multiple clients
+* fixed fireteam admin menu drawing behind certain HUD elements [#936](https://github.com/etjump/etjump/pull/936)
+* added `etj_menuSensitivity` for controlling mouse sensitivity in UI/menus [#931](https://github.com/etjump/etjump/pull/931)
+* added `listspawnpt` command to list valid spawnpoints in a map [#933](https://github.com/etjump/etjump/pull/933)
+* removed mapscript actions `cvar set/inc/random` [#934](https://github.com/etjump/etjump/pull/934)
+* added `etj_footstepVolume` to control volume of movement-generated sounds (stepsounds/landings) [#938](https://github.com/etjump/etjump/pull/938)
+* fixed runtimer colors (red/green when record is set) breaking when the run name had spaces [#941](https://github.com/etjump/etjump/pull/941)
 
 # ETJump 2.5.1
 
@@ -118,6 +132,7 @@
   * `etj_jumpSpeedsFasterColor` - RGBA color for faster speeds (default `0.0 1.0 0.0 1.0`)
   * `etj_jumpSpeedsSlowerColor` - RGBA color for slower speeds (default `1.0 0.0 0.0 1.0`)
 * reinforcement timer is now hidden when `cg_descriptiveText` is set to __0__ [#612](https://github.com/etjump/etjump/pull/612)
+* `etj_speedSize` now accepts floating point values [#617](https://github.com/etjump/etjump/pull/617)
 * `etj_CGazAlpha` no longer affects CGaz 5 [#618](https://github.com/etjump/etjump/pull/618)
 * spectators can no longer use `spec(un)lock` [#619](https://github.com/etjump/etjump/pull/619)
 * added missing `speclist` client command for autocompletion [#619](https://github.com/etjump/etjump/pull/619)
