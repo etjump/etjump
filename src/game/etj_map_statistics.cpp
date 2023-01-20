@@ -492,7 +492,7 @@ const char *MapStatistics::randomMap() const {
   }
 
   if (mapIdx >= 0) {
-    strcpy(mapName, _maps[mapIdx].name.c_str());
+    Q_strncpyz(mapName, _maps[mapIdx].name.c_str(), sizeof(mapName));
   }
 
   return mapName;

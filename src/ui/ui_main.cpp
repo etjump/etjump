@@ -1472,9 +1472,9 @@ void UI_Load() {
   menuDef_t *menu = Menu_GetFocused();
   const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
   if (menu && menu->window.name) {
-    strcpy(lastName, menu->window.name);
+    Q_strncpyz(lastName, menu->window.name, sizeof(lastName));
   }
-  if (menuSet == NULL || menuSet[0] == '\0') {
+  if (menuSet == nullptr || menuSet[0] == '\0') {
     menuSet = "ui/menus.txt";
   }
 
@@ -4884,7 +4884,7 @@ void UI_RunMenuScript(const char **args) {
         int selectedPlayer =
             static_cast<int>(trap_Cvar_VariableValue("cg_selectedPlayer"));
         if (selectedPlayer < uiInfo.myTeamCount) {
-          strcpy(buff, orders);
+          Q_strncpyz(buff, orders, sizeof(buff));
           trap_Cmd_ExecuteText(EXEC_APPEND,
                                va(buff, uiInfo.teamClientNums[selectedPlayer]));
           trap_Cmd_ExecuteText(EXEC_APPEND, "\n");
@@ -4895,7 +4895,7 @@ void UI_RunMenuScript(const char **args) {
                           uiInfo.teamNames[i]) == 0) {
               continue;
             }
-            strcpy(buff, orders);
+            Q_strncpyz(buff, orders, sizeof(buff));
             trap_Cmd_ExecuteText(EXEC_APPEND, va(buff, uiInfo.teamNames[i]));
             trap_Cmd_ExecuteText(EXEC_APPEND, "\n");
           }
@@ -4929,7 +4929,7 @@ void UI_RunMenuScript(const char **args) {
         int selectedPlayer =
             static_cast<int>(trap_Cvar_VariableValue("cg_selectedPlayer"));
         if (selectedPlayer < uiInfo.myTeamCount) {
-          strcpy(buff, orders);
+          Q_strncpyz(buff, orders, sizeof(buff));
           trap_Cmd_ExecuteText(EXEC_APPEND,
                                va(buff, uiInfo.teamClientNums[selectedPlayer]));
           trap_Cmd_ExecuteText(EXEC_APPEND, "\n");
@@ -5875,8 +5875,8 @@ UI_BuildServerDisplayList
 ==================
 */
 static void UI_BuildServerDisplayList(int force) {
-  int i, count, clients, maxClients, ping, game, len, visible, friendlyFire,
-      maxlives, punkbuster, antilag, password, weaponrestricted, balancedteams;
+  int i, count, clients, maxClients, ping, game, len, friendlyFire, maxlives,
+      punkbuster, antilag, password, weaponrestricted, balancedteams;
   char info[MAX_STRING_CHARS];
   // qboolean startRefresh = qtrue; // TTimo: unused
 
@@ -5895,11 +5895,12 @@ static void UI_BuildServerDisplayList(int force) {
   // do motd updates here too
   trap_Cvar_VariableStringBuffer("cl_motdString", uiInfo.serverStatus.motd,
                                  sizeof(uiInfo.serverStatus.motd));
-  len = strlen(uiInfo.serverStatus.motd);
+  len = static_cast<int>(strlen(uiInfo.serverStatus.motd));
   if (len == 0) {
-    strcpy(uiInfo.serverStatus.motd,
-           va("Enemy Territory - Version: %s", Q3_VERSION));
-    len = strlen(uiInfo.serverStatus.motd);
+    Q_strncpyz(uiInfo.serverStatus.motd,
+               va("Enemy Territory - Version: %s", Q3_VERSION),
+               sizeof(uiInfo.serverStatus.motd));
+    len = static_cast<int>(strlen(uiInfo.serverStatus.motd));
   }
   if (len != uiInfo.serverStatus.motdLen) {
     uiInfo.serverStatus.motdLen = len;
@@ -5911,9 +5912,8 @@ static void UI_BuildServerDisplayList(int force) {
     uiInfo.serverStatus.numDisplayServers = 0;
     uiInfo.serverStatus.numPlayersOnServers = 0;
     // set list box index to zero
-    Menu_SetFeederSelection(NULL, FEEDER_SERVERS, 0, NULL);
-    // mark all servers as visible so we store ping updates for
-    // them
+    Menu_SetFeederSelection(nullptr, FEEDER_SERVERS, 0, nullptr);
+    // mark all servers as visible, so we store ping updates for them
     trap_LAN_MarkServerVisible(ui_netSource.integer, -1, qtrue);
   }
 
@@ -5932,13 +5932,11 @@ static void UI_BuildServerDisplayList(int force) {
     uiInfo.serverStatus.currentServerPreview = 0;
   }
 
-  visible = qfalse;
   for (i = 0; i < count; i++) {
     // if we already got info for this server
     if (!trap_LAN_ServerIsVisible(ui_netSource.integer, i)) {
       continue;
     }
-    visible = qtrue;
     // get the ping for this server
     ping = trap_LAN_GetServerPing(ui_netSource.integer, i);
     if (ping > 0 || ui_netSource.integer == AS_FAVORITES) {
@@ -6078,26 +6076,19 @@ static void UI_BuildServerDisplayList(int force) {
               va("levelshots/%s", Info_ValueForKey(info, "mapname")));
         } else {
           uiInfo.serverStatus.currentServerPreview =
-              trap_R_RegisterShaderNoMip("levelshots/"
-                                         "unknownmap");
+              trap_R_RegisterShaderNoMip("levelshots/unknownmap");
         }
       }
 
       UI_BinaryServerInsertion(i);
       // done with this server
-      if (ping > /*=*/0) {
+      if (ping > 0) {
         trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
       }
     }
   }
 
   uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime;
-
-  // if there were no servers visible for ping updates
-  if (!visible) {
-    //		UI_StopServerRefresh();
-    //		uiInfo.serverStatus.nextDisplayRefresh = 0;
-  }
 }
 
 typedef struct {

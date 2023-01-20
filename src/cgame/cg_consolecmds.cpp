@@ -231,7 +231,7 @@ CG_SetInitialCamera
 */
 void CG_SetInitialCamera(const char *name, qboolean startBlack) {
   // Store this info to get reset after first snapshot inited
-  strcpy(g_initialCamera, name);
+  Q_strncpyz(g_initialCamera, name, sizeof(g_initialCamera));
   g_initialCameraStartBlack = startBlack;
 }
 
