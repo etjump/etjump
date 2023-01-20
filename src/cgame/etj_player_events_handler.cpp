@@ -34,7 +34,7 @@ bool ETJump::PlayerEventsHandler::check(
   auto lowerEvent = ETJump::StringUtil::toLowerCase(event);
   auto match = _callbacks.find(lowerEvent);
   if (match != end(_callbacks)) {
-    for (auto listener : match->second) listener(arguments);
+    for (const auto &listener : match->second) listener(arguments);
     return true;
   }
   return false;
@@ -42,7 +42,7 @@ bool ETJump::PlayerEventsHandler::check(
 
 bool ETJump::PlayerEventsHandler::subscribe(
     const std::string &event,
-    std::function<void(const std::vector<std::string> &)> callback) {
+    const std::function<void(const std::vector<std::string> &)> &callback) {
   auto lowerEvent = ETJump::StringUtil::toLowerCase(event);
   _callbacks[lowerEvent].push_back(callback);
   return true;

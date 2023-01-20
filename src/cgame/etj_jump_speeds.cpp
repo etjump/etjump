@@ -46,7 +46,7 @@ JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
 JumpSpeeds::~JumpSpeeds() {
   consoleCommandsHandler->unsubcribe("resetJumpSpeeds");
   serverCommandsHandler->unsubcribe("resetJumpSpeeds");
-  _entityEventsHandler->unsubcribe(EV_JUMP);
+  _entityEventsHandler->unsubscribe(EV_JUMP);
 }
 
 void JumpSpeeds::render() const {

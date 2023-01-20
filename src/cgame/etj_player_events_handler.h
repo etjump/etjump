@@ -59,9 +59,9 @@ public:
   ~PlayerEventsHandler();
   bool check(const std::string &event,
              const std::vector<std::string> &arguments);
-  bool
-  subscribe(const std::string &event,
-            std::function<void(const std::vector<std::string> &)> callback);
+  bool subscribe(
+      const std::string &event,
+      const std::function<void(const std::vector<std::string> &)> &callback);
   bool unsubscribe(const std::string &event);
 };
 } // namespace ETJump

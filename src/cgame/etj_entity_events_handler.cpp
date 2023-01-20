@@ -32,7 +32,7 @@ bool ETJump::EntityEventsHandler::check(const std::string &eventName,
   auto lowercasedCommand = ETJump::StringUtil::toLowerCase(eventName);
   auto match = _callbacks.find(lowercasedCommand);
   if (match != end(_callbacks)) {
-    for (auto callback : match->second) {
+    for (const auto &callback : match->second) {
       callback(cent);
     }
     return true;
@@ -47,19 +47,19 @@ bool ETJump::EntityEventsHandler::check(int event, centity_t *cent) {
 
 bool ETJump::EntityEventsHandler::subscribe(
     const std::string &eventName,
-    std::function<void(centity_t *cent)> callback) {
+    const std::function<void(centity_t *cent)> &callback) {
   auto lowercasedCommand = ETJump::StringUtil::toLowerCase(eventName);
   _callbacks[lowercasedCommand].push_back(callback);
   return true;
 }
 
 bool ETJump::EntityEventsHandler::subscribe(
-    int event, std::function<void(centity_t *cent)> callback) {
+    int event, const std::function<void(centity_t *cent)> &callback) {
   auto eventName = ETJump::stringFormat("__event__%d", event);
   return subscribe(eventName, callback);
 }
 
-bool ETJump::EntityEventsHandler::unsubcribe(const std::string &eventName) {
+bool ETJump::EntityEventsHandler::unsubscribe(const std::string &eventName) {
   auto lowercasedCommand = ETJump::StringUtil::toLowerCase(eventName);
   auto callback = _callbacks.find(lowercasedCommand);
   if (callback != end(_callbacks)) {
@@ -70,7 +70,7 @@ bool ETJump::EntityEventsHandler::unsubcribe(const std::string &eventName) {
   return true;
 }
 
-bool ETJump::EntityEventsHandler::unsubcribe(int event) {
+bool ETJump::EntityEventsHandler::unsubscribe(int event) {
   auto eventName = ETJump::stringFormat("__event__%d", event);
-  return unsubcribe(eventName);
+  return unsubscribe(eventName);
 }

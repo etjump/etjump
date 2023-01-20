@@ -4569,7 +4569,7 @@ void Cmd_Class_f(gentity_t *ent) {
   if (args->size() < 2) {
     std::string usageText{"^3Usage:\n"};
 
-    for (auto loadout : ETJump::availableLoadouts) {
+    for (auto &loadout : ETJump::availableLoadouts) {
       usageText += ETJump::stringFormat(
           "  ^7%-30s ^9/class %c %i\n", loadout.description,
           ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
@@ -4608,7 +4608,7 @@ void Cmd_Class_f(gentity_t *ent) {
       static_cast<weapon_t>(ent->client->sess.latchPlayerWeapon2);
 
   // display center print message
-  for (auto loadout : ETJump::availableLoadouts) {
+  for (auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
       Printer::SendCenterMessage(
           clientNum, ETJump::stringFormat("You will spawn as an %s %s",
