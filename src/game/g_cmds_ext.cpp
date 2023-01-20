@@ -224,7 +224,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   const char *s;
   char userinfo[MAX_INFO_STRING];
   const char *coach, *tc;
-  int clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
 
   if (ent) {
     Printer::SendConsoleMessage(clientNum,
