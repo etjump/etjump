@@ -49,7 +49,7 @@ TEST_F(EntityEventsHandlerTests, UnsubcribeShouldRemoveCallback)
 	ASSERT_TRUE(called);
 	called = false;
 
-	handler.unsubcribe(eventName);
+	handler.unsubscribe(eventName);
 	ASSERT_FALSE(called);
 }
 

@@ -865,7 +865,7 @@ void TrickjumpLines::listRoutes() {
 
   // Display name of the route with the associate status.
   int id = 0;
-  for (auto route : _routes) {
+  for (const auto &route : _routes) {
     if (route.status == routeStatus::map) {
       CG_Printf("%s (# %d) with status : %s \n", (route.name).c_str(), id,
                 getTextForEnum(route.status));
@@ -876,8 +876,6 @@ void TrickjumpLines::listRoutes() {
     }
     id++;
   }
-
-  return;
 }
 
 void TrickjumpLines::displayByName(const char *name) {

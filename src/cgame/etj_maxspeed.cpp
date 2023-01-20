@@ -58,7 +58,7 @@ ETJump::DisplayMaxSpeed::DisplayMaxSpeed(
 }
 
 ETJump::DisplayMaxSpeed::~DisplayMaxSpeed() {
-  _entityEventsHandler->unsubcribe(EV_LOAD_TELEPORT);
+  _entityEventsHandler->unsubscribe(EV_LOAD_TELEPORT);
 }
 
 void ETJump::DisplayMaxSpeed::parseColor(const std::string &color,

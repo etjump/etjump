@@ -1125,10 +1125,10 @@ extraTraceListOptions extraTraceList[]{
     {1 << ETJump::CHS_53, "CHS 53"},
 };
 
-void CG_ExtraTrace_f(void) {
+void CG_ExtraTrace_f() {
   std::string listPrint{"Bitmask values for ^3etj_extraTrace^7:\n"};
 
-  for (auto traceList : extraTraceList) {
+  for (auto &traceList : extraTraceList) {
     std::string listValues = ETJump::stringFormat(
         "  ^3%d ^7= %s\n", traceList.bitmaskValue, traceList.description);
     listPrint += (listValues);

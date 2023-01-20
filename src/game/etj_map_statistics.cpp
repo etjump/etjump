@@ -316,7 +316,7 @@ void MapStatistics::saveNewMaps(std::vector<std::string> newMaps) {
     return;
   }
 
-  for (auto newMap : newMaps) {
+  for (auto &newMap : newMaps) {
     std::string sqlEscapedMapName = newMap;
     ETJump::StringUtil::replaceAll(sqlEscapedMapName, "'", "''");
     // Map names won't be doing any SQL injection

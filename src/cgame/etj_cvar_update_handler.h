@@ -47,7 +47,7 @@ public:
   ~CvarUpdateHandler();
   bool check(const vmCvar_t *cvar);
   bool subscribe(const vmCvar_t *target,
-                 std::function<void(const vmCvar_t *cvar)> callback);
+                 const std::function<void(const vmCvar_t *cvar)> &callback);
   bool unsubscribe(const vmCvar_t *target);
 };
 } // namespace ETJump
