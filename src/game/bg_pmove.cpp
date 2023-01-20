@@ -3457,7 +3457,7 @@ void PM_CoolWeapons(void) {
 PM_AdjustAimSpreadScale
 ==============
 */
-//#define	AIMSPREAD_DECREASE_RATE		300.0f
+// #define	AIMSPREAD_DECREASE_RATE		300.0f
 #define AIMSPREAD_DECREASE_RATE                                                \
   200.0f // (SA) when I made the increase/decrease floats (so slower
          // weapon recover could happen for scoped weaps) the average
@@ -3621,7 +3621,7 @@ Generates weapon events and modifes the weapon counter
 #define VENOM_ATTACK WEAP_ATTACK2
 #define VENOM_LOWER WEAP_ATTACK_LASTSHOT
 
-//#define DO_WEAPON_DBG 1
+// #define DO_WEAPON_DBG 1
 
 static void PM_Weapon(void) {
   int addTime = 0; // TTimo: init
@@ -3637,7 +3637,7 @@ static void PM_Weapon(void) {
 #endif
 
   // Feen Weapon Dbug
-  //#ifdef GAMEDLL
+  // #ifdef GAMEDLL
 
 #ifdef FEEN_WPN_DBG
   // REGULAR BUTTONS
@@ -3698,8 +3698,8 @@ static void PM_Weapon(void) {
   }
 #endif
 
-  //#endif
-  // END FEEN TEST
+  // #endif
+  //  END FEEN TEST
 
   // don't allow attack until all buttons are up
   if (pm->ps->pm_flags & PMF_RESPAWNED) {
@@ -6050,6 +6050,9 @@ void PmoveSingle(pmove_t *pmove) {
   // setup - copy pressed keys into playerstate
   // buttons, wbuttons
   pm->ps->stats[STAT_USERCMD_BUTTONS] = pm->cmd.buttons << 8;
+  // stats are sent as 16-bit signed integers, so we need to mask out
+  // BUTTON_ANY, since 128 << 8 will overflow, and it isn't required anyway
+  pm->ps->stats[STAT_USERCMD_BUTTONS] &= ~(BUTTON_ANY << 8);
   pm->ps->stats[STAT_USERCMD_BUTTONS] |= pm->cmd.wbuttons;
   pm->ps->stats[STAT_USERCMD_MOVE] = 0;
   // forwardmove
