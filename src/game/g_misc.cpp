@@ -608,7 +608,8 @@ void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
 
   // ETJump: disable portalgun pickup
   if (other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags & TIMERUN_DISABLE_PORTALGUN_PICKUP)) {
+      (other->client->sess.runSpawnflags &
+       static_cast<int>(ETJump::TimerunSpawnflags::NoPortalgunPickup))) {
     return;
   }
 

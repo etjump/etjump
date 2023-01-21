@@ -1689,8 +1689,9 @@ void Cmd_Team_f(gentity_t *ent) {
     G_SetClientWeapons(ent, w, w2, qtrue);
   }
 
-  if (ent->client->sess.runSpawnflags == 0 ||
-      ent->client->sess.runSpawnflags & TIMERUN_RESET_ON_TEAM_CHANGE) {
+  if (!ent->client->sess.runSpawnflags ||
+      ent->client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
     InterruptRun(ent);
   }
 }

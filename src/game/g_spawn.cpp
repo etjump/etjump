@@ -458,7 +458,7 @@ void SP_target_savelimit_set(gentity_t *self);
 void SP_target_savelimit_inc(gentity_t *self);
 void SP_target_decay(gentity_t *self);
 void SP_target_startTimer(gentity_t *self);
-void SP_target_endTimer(gentity_t *self);
+void SP_target_stopTimer(gentity_t *self);
 void SP_target_interrupt_timerun(gentity_t *self);
 // Check speed and if it's too high/low, fire the target
 void SP_target_activate_if_velocity(gentity_t *self);
@@ -706,9 +706,7 @@ spawn_t spawns[] = {
     {"target_savelimit_inc", SP_target_savelimit_inc},
     {"target_decay", SP_target_decay},
     {"target_starttimer", SP_target_startTimer},
-    {"target_startTimer", SP_target_startTimer},
-    {"target_stoptimer", SP_target_endTimer},
-    {"target_stopTimer", SP_target_endTimer},
+    {"target_stoptimer", SP_target_stopTimer},
     {"target_interrupt_timerun", SP_target_interrupt_timerun},
     {"target_activate_if_velocity", SP_target_activate_if_velocity},
     {"target_scale_velocity", SP_target_scale_velocity},
@@ -720,7 +718,8 @@ spawn_t spawns[] = {
     {"target_displaytjl", SP_target_tjldisplay},
     {"target_cleartjl", SP_target_tjlclear},
     {"target_init", SP_target_init},
-    {0, 0}};
+    {nullptr, nullptr},
+};
 
 /*
 ===============
@@ -741,7 +740,7 @@ qboolean G_CallSpawn(gentity_t *ent) {
 
   // check item spawn functions
   for (item = bg_itemlist + 1; item->classname; item++) {
-    if (!strcmp(item->classname, ent->classname)) {
+    if (!Q_stricmp(item->classname, ent->classname)) {
       // found it
       if (g_gametype.integer != GT_WOLF_LMS) // Gordon: lets not have items in
                                              // last man standing for the
@@ -760,7 +759,7 @@ qboolean G_CallSpawn(gentity_t *ent) {
 
   // check normal spawn functions
   for (s = spawns; s->name; s++) {
-    if (!strcmp(s->name, ent->classname)) {
+    if (!Q_stricmp(s->name, ent->classname)) {
       // found it
       s->spawn(ent);
 

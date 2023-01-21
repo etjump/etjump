@@ -1423,7 +1423,7 @@ typedef struct {
 #define MAX_TIMERUN_NAME_LENGTH 64
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
-  qboolean hasTimerun;
+  bool hasTimerun;
   int saveLoadRestrictions;
 } level_locals_t;
 
@@ -2902,14 +2902,24 @@ void LogServerState();
 
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
-#define TIMERUN_RESET_ON_TEAM_CHANGE 0x01
-#define TIMERUN_RESET_ON_DEATH 0x02
-#define TIMERUN_RESET_ON_END 0x04
-#define TIMERUN_RESET_ON_PMOVE_NULL 0x08
-#define TIMERUN_DISABLE_BACKUPS 0x10
-#define TIMERUN_DISABLE_EXPLOSIVES_PICKUP 0x20
-#define TIMERUN_DISABLE_PORTALGUN_PICKUP 0x40
-#define TIMERUN_DISABLE_SAVE 0x80
+namespace ETJump {
+enum class TimerunSpawnflags {
+  // ResetEnd is unused in code, but it's used by mappers to specify a run
+  // which does not end either on team change or death, since those flags
+  // are also checked against having no flags at all, so that "default"
+  // behavior is to reset a run on team change or death
+
+  None = 0,
+  ResetTeamChange = 1,
+  ResetDeath = 2,
+  ResetEnd = 4,
+  ResetNoPmove = 8,
+  NoBackups = 16,
+  NoExplosivesPickup = 32,
+  NoPortalgunPickup = 64,
+  NoSave = 128,
+};
+}
 
 void StartTimer(const char *runName, gentity_t *ent);
 void StopTimer(const char *runName, gentity_t *ent);

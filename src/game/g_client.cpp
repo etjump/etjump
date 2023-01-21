@@ -1927,9 +1927,10 @@ void ClientUserinfoChanged(int clientNum) {
   client->ps.stats[STAT_PLAYER_CLASS] = client->sess.playerType;
   // Gordon: Not needed any more as it's in clientinfo?
 
-  if (client->pers.pmoveFixed == qfalse) {
-    if (client->sess.runSpawnflags == 0 ||
-        client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL) {
+  if (!client->pers.pmoveFixed) {
+    if (!client->sess.runSpawnflags ||
+        client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::ResetNoPmove)) {
       InterruptRun(ent);
     }
   }

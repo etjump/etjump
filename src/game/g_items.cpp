@@ -848,7 +848,8 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
   // ETJump: disable explosives pickup
   if (BG_WeaponIsExplosive(ent->item->giTag) &&
       other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags & TIMERUN_DISABLE_EXPLOSIVES_PICKUP)) {
+      (other->client->sess.runSpawnflags &
+       static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup))) {
     return;
   }
 

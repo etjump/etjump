@@ -145,8 +145,11 @@ void OnGameInit() {
 void OnGameShutdown() {
   WriteSessionData();
   //    ETJump::database->ExecuteQueuedOperations();
-  ETJump::database->CloseDatabase();
-  // these may be null, e.g. when G_Alloc fails
+  // these may be null, e.g. when G_Alloc or stack unwinding fails
+  // after engine calls longjmp on errors
+  if (ETJump::database != nullptr) {
+    ETJump::database->CloseDatabase();
+  }
   if (game.mapStatistics != nullptr) {
     game.mapStatistics->saveChanges();
   }

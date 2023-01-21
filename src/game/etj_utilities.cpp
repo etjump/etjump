@@ -98,7 +98,8 @@ void Utilities::startRun(int clientNum) {
   player->client->sess.timerunActive = qtrue;
   ETJump::UpdateClientConfigString(*player);
 
-  if (!(player->client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)) {
+  if (!(player->client->sess.runSpawnflags &
+        static_cast<int>(ETJump::TimerunSpawnflags::NoSave))) {
     ETJump::saveSystem->resetSavedPositions(player);
   }
 
