@@ -3875,7 +3875,7 @@ void CG_mvZoomBinoc(float x, float y, float w, float h);
 void CG_mvZoomSniper(float x, float y, float w, float h);
 
 // cg_window.c
-qboolean CG_addString(cg_window_t *w, const char *buf);
+bool CG_addString(cg_window_t *w, const char *buf);
 // void CG_createDemoHelpWindow(void);
 // void CG_createSpecHelpWindow(void);
 void CG_createStatsWindow(void);

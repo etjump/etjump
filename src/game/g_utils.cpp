@@ -29,14 +29,17 @@ void AddRemap(const char *oldShader, const char *newShader, float timeOffset) {
   for (i = 0; i < remapCount; i++) {
     if (Q_stricmp(oldShader, remappedShaders[i].oldShader) == 0) {
       // found it, just update this one
-      strcpy(remappedShaders[i].newShader, newShader);
+      Q_strncpyz(remappedShaders[i].newShader, newShader,
+                 sizeof(remappedShaders[i].newShader));
       remappedShaders[i].timeOffset = timeOffset;
       return;
     }
   }
   if (remapCount < MAX_SHADER_REMAPS) {
-    strcpy(remappedShaders[remapCount].newShader, newShader);
-    strcpy(remappedShaders[remapCount].oldShader, oldShader);
+    Q_strncpyz(remappedShaders[remapCount].newShader, newShader,
+               sizeof(remappedShaders[remapCount].newShader));
+    Q_strncpyz(remappedShaders[remapCount].oldShader, oldShader,
+               sizeof(remappedShaders[remapCount].oldShader));
     remappedShaders[remapCount].timeOffset = timeOffset;
     remapCount++;
   }
@@ -1345,7 +1348,7 @@ qboolean G_MapIsValidCampaignStartMap(void) {
   return qfalse;
 }
 
-void G_ParseCampaigns(void) {
+void G_ParseCampaigns() {
   int numdirs;
   char filename[128];
   char dirlist[1024];
@@ -1363,9 +1366,9 @@ void G_ParseCampaigns(void) {
   dirptr = dirlist;
   for (i = 0; i < numdirs && level.campaignCount < MAX_CAMPAIGNS;
        i++, dirptr += dirlen + 1) {
-    dirlen = strlen(dirptr);
-    strcpy(filename, "scripts/");
-    strcat(filename, dirptr);
+    dirlen = static_cast<int>(strlen(dirptr));
+    Q_strncpyz(filename, "scripts/", sizeof(filename));
+    Q_strcat(filename, sizeof(filename), dirptr);
 
     if (G_LoadCampaignsFromFile(filename)) {
       mapFound = qtrue;
@@ -1377,13 +1380,12 @@ void G_ParseCampaigns(void) {
     trap_Cvar_Set("g_currentCampaign", "");
     trap_Cvar_Set("g_currentCampaignMap", "0");
   } else if (!mapFound) {
-    // map isn't found in the current campaign, see if it's the
-    // first map in another campaign
+    // map isn't found in the current campaign,
+    // see if it's the first map in another campaign
     for (i = 0; i < level.campaignCount; i++) {
       if (!Q_stricmp(g_campaigns[i].mapnames[0], level.rawmapname)) {
-        // someone manually specified a /map
-        // command, and it's the first map in a
-        // campaign
+        // someone manually specified a /map command,
+        // and it's the first map in a campaign
         trap_Cvar_Set("g_oldCampaign", g_currentCampaign.string);
         trap_Cvar_Set("g_currentCampaign", g_campaigns[i].shortname);
         trap_Cvar_Set("g_currentCampaignMap", "0");

@@ -188,146 +188,26 @@ static void UI_LoadArenasFromFile(char *filename) {
 UI_LoadArenas
 ===============
 */
-void UI_LoadArenas(void) {
+void UI_LoadArenas() {
   int numdirs;
-  //	vmCvar_t	arenasFile;
   char filename[128];
   char dirlist[16000];
   char *dirptr;
-  int i /*, n*/;
+  int i;
   int dirlen;
-  // char		*type, *str;
 
   ui_numArenas = 0;
   uiInfo.mapCount = 0;
 
-  /*	NERVE - SMF - commented out
-      trap_Cvar_Register( &arenasFile, "g_arenasFile", "",
-     CVAR_INIT|CVAR_ROM ); if( *arenasFile.string ) {
-          UI_LoadArenasFromFile(arenasFile.string);
-      }
-      else {
-          UI_LoadArenasFromFile("scripts/arenas.txt");
-      }
-  */
   // get all arenas from .arena files
   numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 12000);
   dirptr = dirlist;
   for (i = 0; i < numdirs; i++, dirptr += dirlen + 1) {
-    dirlen = strlen(dirptr);
-    strcpy(filename, "scripts/");
-    strcat(filename, dirptr);
+    dirlen = static_cast<int>(strlen(dirptr));
+    Q_strncpyz(filename, "scripts/", sizeof(filename));
+    Q_strcat(filename, sizeof(filename), dirptr);
     UI_LoadArenasFromFile(filename);
   }
-  //	trap_DPrint( va( "%i arenas parsed\n", ui_numArenas ) ); // JPW
-  // NERVE
-  // pulled per atvi req
-  /*	if (UI_OutOfMemory()) {
-          trap_Print(S_COLOR_YELLOW"WARNING: not anough memory in pool
-     to load all arenas\n");
-      }*/
-
-  /*	for( n = 0; n < ui_numArenas; n++ ) {
-          // determine type
-
-          uiInfo.mapList[uiInfo.mapCount].cinematic = -1;
-          uiInfo.mapList[uiInfo.mapCount].mapLoadName =
-  String_Alloc(Info_ValueForKey(ui_arenaInfos[n], "map"));
-          uiInfo.mapList[uiInfo.mapCount].mapName =
-  String_Alloc(Info_ValueForKey(ui_arenaInfos[n], "longname"));
-          uiInfo.mapList[uiInfo.mapCount].levelShot = -1;
-          uiInfo.mapList[uiInfo.mapCount].imageName =
-  String_Alloc(va("levelshots/%s",
-  uiInfo.mapList[uiInfo.mapCount].mapLoadName));
-          uiInfo.mapList[uiInfo.mapCount].typeBits = 0;
-
-          uiInfo.mapList[uiInfo.mapCount].briefing =
-  String_Alloc(Info_ValueForKey(ui_arenaInfos[n], "briefing"));
-          uiInfo.mapList[uiInfo.mapCount].lmsbriefing =
-  String_Alloc(Info_ValueForKey(ui_arenaInfos[n], "lmsbriefing"));
-  //		uiInfo.mapList[uiInfo.mapCount].objectives =
-  String_Alloc(Info_ValueForKey(ui_arenaInfos[n], "objectives"));*/
-  // Gordon: cant use "\" in a key/pair translating * to \n for the
-  // moment, reeally should be using PC_ parsing stuff for this too eek,
-  // no ; either.....
-
-  // Arnout: THIS IS BAD DO NOT MODIFY A STRING AFTER IT IS ALLOCATED
-  /*{
-      char* p;
-      while(p = strchr(uiInfo.mapList[uiInfo.mapCount].description,
-  '*')) { *p = '\n';
-      }
-
-      while(p = strchr(uiInfo.mapList[uiInfo.mapCount].objectives, '*'))
-  { *p = '\n';
-      }
-  }*/
-
-  // NERVE - SMF
-  // set timelimit
-  /*		str = Info_ValueForKey( ui_arenaInfos[n], "Timelimit" );
-          if ( *str )
-              uiInfo.mapList[uiInfo.mapCount].Timelimit = Q_atoi( str );
-          else
-              uiInfo.mapList[uiInfo.mapCount].Timelimit = 0;
-
-          // set axis respawn time
-          str = Info_ValueForKey( ui_arenaInfos[n], "AxisRespawnTime" );
-          if ( *str )
-              uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime = Q_atoi(
-     str ); else uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime = 0;
-
-          // set allied respawn time
-          str = Info_ValueForKey( ui_arenaInfos[n], "AlliedRespawnTime"
-     ); if ( *str ) uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime =
-     Q_atoi( str ); else uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime
-     = 0;
-          // -NERVE - SMF
-
-          type = Info_ValueForKey( ui_arenaInfos[n], "type" );
-          if( *type ) {
-              // NERVE - SMF
-              if( strstr( type, "wolfsp" ) ) {
-                  uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 <<
-     GT_SINGLE_PLAYER);
-              }
-              if( strstr( type, "wolflms" ) ) {
-                  uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 <<
-     GT_WOLF_LMS);
-              }
-              if( strstr( type, "wolfmp" ) ) {
-                  uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 <<
-     GT_WOLF);
-              }
-              if( strstr( type, "wolfsw" ) ) {
-                  uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 <<
-     GT_WOLF_STOPWATCH);
-              }
-              // -NERVE - SMF
-          } else { // Gordon: default is wolf now
-              uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 <<
-     GT_WOLF);
-          }
-
-          str = Info_ValueForKey( ui_arenaInfos[n], "mapposition_x" );
-          if ( *str ) {
-              uiInfo.mapList[uiInfo.mapCount].mappos[0] = Q_atof(str);
-          } else {
-              uiInfo.mapList[uiInfo.mapCount].mappos[0] = 0.f;
-          }
-
-          str = Info_ValueForKey( ui_arenaInfos[n], "mapposition_y" );
-          if ( *str ) {
-              uiInfo.mapList[uiInfo.mapCount].mappos[1] = Q_atof(str);
-          } else {
-              uiInfo.mapList[uiInfo.mapCount].mappos[1] = 0.f;
-          }
-
-          uiInfo.mapCount++;
-          if (uiInfo.mapCount >= MAX_MAPS) {
-              break;
-          }
-      }*/
 }
 
 mapInfo *UI_FindMapInfoByMapname(const char *name) {
@@ -761,7 +641,7 @@ int UI_FindCampaignInCampaignList(const char *shortName) {
 UI_LoadCampaigns
 ===============
 */
-void UI_LoadCampaigns(void) {
+void UI_LoadCampaigns() {
   int numdirs;
   char filename[128];
   char dirlist[1024];
@@ -779,20 +659,16 @@ void UI_LoadCampaigns(void) {
   dirptr = dirlist;
   for (i = 0; i < numdirs && uiInfo.campaignCount < MAX_CAMPAIGNS;
        i++, dirptr += dirlen + 1) {
-    dirlen = strlen(dirptr);
-    strcpy(filename, "scripts/");
-    strcat(filename, dirptr);
+    dirlen = static_cast<int>(strlen(dirptr));
+    Q_strncpyz(filename, "scripts/", sizeof(filename));
+    Q_strcat(filename, sizeof(filename), dirptr);
     UI_LoadCampaignsFromFile(filename);
-    // UI_LoadCampaignsFromFile( filename, uiInfo.campaignList,
-    // &uiInfo.campaignCount, MAX_CAMPAIGNS );
-    // UI_LinkCampaignsToArenas();
   }
-  //	trap_DPrint( va( "%i campaigns parsed\n", ui_numCampaigns ) );
   //// JPW
   // NERVE pulled per atvi req
   if (UI_OutOfMemory()) {
-    trap_Print(S_COLOR_YELLOW "WARNING: not anough memory in "
-                              "pool to load all campaigns\n");
+    trap_Print(S_COLOR_YELLOW
+               "WARNING: not enough memory in pool to load all campaigns\n");
   }
 
   // Sort the campaigns for single player
@@ -809,9 +685,9 @@ void UI_LoadCampaigns(void) {
     }
   }
 
-  // now use the initial nextCampaignShortName to find the next one, etc
-  // etc for single player campaigns rain - don't let i go above the
-  // maximum number of campaigns
+  // now use the initial nextCampaignShortName to find the next one,
+  // etc. for single player campaigns
+  // rain - don't let it go above the maximum number of campaigns
   while (i < MAX_CAMPAIGNS) {
     j = UI_FindCampaignInCampaignList(
         uiInfo.campaignList[i].nextCampaignShortName);
@@ -832,8 +708,9 @@ void UI_LoadCampaigns(void) {
     // generate hash for campaign shortname
     for (hash = 0, ch = uiInfo.campaignList[i].campaignShortName; *ch != '\0';
          ch++) {
-      hash += (long)(tolower(*ch)) *
-              ((ch - uiInfo.campaignList[i].campaignShortName) + 119);
+      hash += static_cast<long>(
+          (tolower(*ch)) *
+          ((ch - uiInfo.campaignList[i].campaignShortName) + 119));
     }
 
     // find the entry in the campaignsave
@@ -846,13 +723,5 @@ void UI_LoadCampaigns(void) {
             &uiInfo.campaignStatus.campaigns[j];
       }
     }
-
-    /*if( !uiInfo.campaignStatus.header.numCampaigns ||
-        j == uiInfo.campaignStatus.header.numCampaigns ) {
-        // not found, so not unlocked
-        uiInfo.campaignList[i].unlocked = qfalse;
-        uiInfo.campaignList[i].progress = 0;
-        uiInfo.campaignList[i].cpsCampaign = NULL;
-    }*/
   }
 }

@@ -368,18 +368,19 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
       return G_INVALID;
     }
 
-    if (G_voteDescription(ent, dwVoteIndex, false)) {
+    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
       return G_INVALID;
     }
 
     std::string map;
     if (!ETJump::matchRandomMap(arg2, map)) {
-      Printer::SendConsoleMessage(ent - g_entities, map);
+      Printer::SendConsoleMessage(ClientNum(ent), map);
       return G_INVALID;
     }
 
     const char *mapTypeDesc = CustomMapTypeExists(arg2);
-    strcpy(arg2, mapTypeDesc ? mapTypeDesc : "");
+    // array size is set in Cmd_CallVote_f
+    Q_strncpyz(arg2, mapTypeDesc ? mapTypeDesc : "", MAX_STRING_TOKENS);
     Q_strncpyz(level.voteInfo.vote_value, map.c_str(),
                sizeof(level.voteInfo.vote_value));
   } else {
@@ -390,27 +391,25 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
   return G_OK;
 }
 
-// *** Map - simpleton: we dont verify map is allowed/exists ***
+// *** Map - simpleton: we don't verify map is allowed/exists ***
 int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
             const bool &cheats) {
-  int clientNum = ent - g_entities;
+  const int clientNum = ClientNum(ent);
   // Vote request (vote is being initiated)
   if (arg) {
     char serverinfo[MAX_INFO_STRING];
     trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
     if (!g_dedicated.integer && ent) {
-      G_cpmPrintf(ent,
-                  "Sorry, [lof]^3%s^7 [lon]voting is "
-                  "disabled on localhost.",
-                  arg);
+      G_cpmPrintf(
+          ent, "Sorry, [lof]^3%s^7 [lon]voting is disabled on localhost.", arg);
       return (G_INVALID);
     }
     if (vote_allow_map.integer <= 0 && ent) {
       G_voteDisableMessage(ent, arg);
       return (G_INVALID);
     }
-    if (G_voteDescription(ent, dwVoteIndex)) {
+    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex))) {
       return (G_INVALID);
     }
 
@@ -420,7 +419,8 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
       return G_INVALID;
     }
 
-    strcpy(arg2, map.c_str());
+    // array size is set in Cmd_CallVote_f
+    Q_strncpyz(arg2, map.c_str(), MAX_STRING_TOKENS);
     Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
     G_increaseCallvoteCount(arg2);
 

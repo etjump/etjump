@@ -4312,13 +4312,13 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   p = params;
 
   // Get each key/value pair
-  while (1) {
+  while (true) {
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
       break;
     }
 
-    strcpy(key, token);
+    Q_strncpyz(key, token, sizeof(key));
 
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
@@ -4326,7 +4326,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
       break;
     }
 
-    strcpy(value, token);
+    Q_strncpyz(value, token, sizeof(value));
 
     if (g_scriptDebug.integer) {
       G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time,
@@ -4350,9 +4350,9 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
     G_ParseField(key, value, ent);
 
     if (!Q_stricmp(key, "targetname")) {
-      // need to hash this ent targetname for setstate
-      // script targets...
-      ent->targetnamehash = BG_StringHashValue(ent->targetname);
+      // need to hash this ent targetname for setstate script targets...
+      ent->targetnamehash =
+          static_cast<int>(BG_StringHashValue(ent->targetname));
     }
   }
 
@@ -4394,13 +4394,13 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
   p = params;
 
   // get each key/value pair
-  while (1) {
+  while (true) {
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
       break;
     }
 
-    strcpy(key, token);
+    Q_strncpyz(key, token, sizeof(key));
 
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {

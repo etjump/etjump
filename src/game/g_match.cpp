@@ -13,7 +13,7 @@ void G_initMatch(void) {
 }
 
 // Setting initialization
-void G_loadMatchGame(void) {
+void G_loadMatchGame() {
   unsigned int i, dwBlueOffset, dwRedOffset;
   unsigned int aRandomValues[MAX_REINFSEEDS];
   char strReinfSeeds[MAX_STRING_CHARS];
@@ -29,29 +29,25 @@ void G_loadMatchGame(void) {
   // Voting flags
   G_voteFlags();
 
-  // Set version info for demoplayback compatibility
-  //	trap_SetConfigstring(CS_OSPVERSION, va("%s", G_BASEVERSION));
-  //// Add
-  // more tokens as needed
-
-  // Set up the random reinforcement seeds for both teams and send to
-  // clients
+  // Set up the random reinforcement seeds for both teams and send to clients
   dwBlueOffset = rand() % MAX_REINFSEEDS;
   dwRedOffset = rand() % MAX_REINFSEEDS;
-  strcpy(strReinfSeeds,
-         va("%d %d",
-            (dwBlueOffset << REINF_BLUEDELT) + (rand() % (1 << REINF_BLUEDELT)),
-            (dwRedOffset << REINF_REDDELT) + (rand() % (1 << REINF_REDDELT))));
+  Q_strncpyz(
+      strReinfSeeds,
+      va("%d %d",
+         (dwBlueOffset << REINF_BLUEDELT) + (rand() % (1 << REINF_BLUEDELT)),
+         (dwRedOffset << REINF_REDDELT) + (rand() % (1 << REINF_REDDELT))),
+      sizeof(strReinfSeeds));
 
   for (i = 0; i < MAX_REINFSEEDS; i++) {
     aRandomValues[i] = (rand() % REINF_RANGE) * aReinfSeeds[i];
-    strcat(strReinfSeeds, va(" %d", aRandomValues[i]));
+    Q_strcat(strReinfSeeds, sizeof(strReinfSeeds), va(" %d", aRandomValues[i]));
   }
 
-  level.dwBlueReinfOffset =
-      1000 * aRandomValues[dwBlueOffset] / aReinfSeeds[dwBlueOffset];
-  level.dwRedReinfOffset =
-      1000 * aRandomValues[dwRedOffset] / aReinfSeeds[dwRedOffset];
+  level.dwBlueReinfOffset = static_cast<int>(
+      1000 * aRandomValues[dwBlueOffset] / aReinfSeeds[dwBlueOffset]);
+  level.dwRedReinfOffset = static_cast<int>(1000 * aRandomValues[dwRedOffset] /
+                                            aReinfSeeds[dwRedOffset]);
 
   trap_SetConfigstring(CS_REINFSEEDS, strReinfSeeds);
 }
