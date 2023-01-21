@@ -293,11 +293,11 @@ std::string diffToString(int selfTime, int otherTime) {
 
   const char *diffSign;
   if (diff > 0) {
-    diffSign = "^\\+";
+    diffSign = "^2-";
   } else if (diff < 0) {
-    diffSign = "^j-";
+    diffSign = "^1+";
   } else {
-    diffSign = "^z+";
+    diffSign = "^7+";
   }
 
   return ETJump::stringFormat("%s%02i:%02i.%03i", diffSign, diffComponents.min,
@@ -739,20 +739,34 @@ void Timerun::sortRecords() {
 }
 
 void Timerun::checkRecord(Player *player, int clientNum) {
-  time_t t;
-  time(&t);
+  int currentBestTime = 0;
 
-  int millis = player->completionTime;
-  int seconds = millis / 1000;
-  millis = millis - seconds * 1000;
-  int minutes = seconds / 60;
-  seconds = seconds - minutes * 60;
+  // sort and grab the #1 records for each run before storing completion time
+  // otherwise we might have our current run time as currentBestTime
+  sortRecords();
+  for (const auto &records : _recordsByName) {
+    if (ETJump::sanitize(player->currentRunName, true) ==
+        ETJump::sanitize(records.first, true)) {
+      currentBestTime = records.second[0]->time;
+    }
+  }
 
   auto previousRecord = findPreviousRecord(player);
   if (previousRecord) {
     updatePreviousRecord(previousRecord, player, clientNum);
   } else {
     addNewRecord(player, clientNum);
+  }
+
+  // currentBestTime will be 0 for completely new records since records
+  // are only registered on the first completion of any run, so the loop
+  // above will not register anything for a run with no records
+  if (player->completionTime < currentBestTime) {
+    std::string cleanRunName = ETJump::sanitize(player->currentRunName, false);
+    Printer::BroadCastBannerMessage(ETJump::stringFormat(
+        "^7%s ^7broke the server record on ^3%s\n^7with ^3%s ^z(%s^z) ^7!!!\n",
+        player->name, cleanRunName, millisToString(player->completionTime),
+        diffToString(player->completionTime, currentBestTime)));
   }
 }
 
