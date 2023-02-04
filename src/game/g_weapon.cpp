@@ -4124,8 +4124,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   portal->nextthink =
       level.time + 100; //.1 sec til next think - mainly used for bbox dbug
 
-  portal->r.svFlags = SVF_BROADCAST; // broadcast ent to all players
-
   portal->r.ownerNum = ent->s.number;
   portal->parent = ent;
 
