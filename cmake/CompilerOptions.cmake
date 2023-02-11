@@ -16,7 +16,7 @@ function(create_compiler_opts target)
 	set(GCC_LINK_FLAGS
 		$<IF:$<PLATFORM_ID:Darwin>,-Wl$<COMMA>-undefined$<COMMA>error,-Wl$<COMMA>--no-undefined>
 		$<$<CONFIG:Release>:
-			-flto                                # link time optimizations
+			-flto=auto                           # link time optimizations
 			-O3                                  # max optimization
 			$<IF:$<STREQUAL:${APPLE},1>,,-s>>)   # strip symbols
 
@@ -29,7 +29,7 @@ function(create_compiler_opts target)
 		-Wno-unused-parameter
 		-Wno-missing-field-initializers
 		$<$<CONFIG:Release>:
-			-flto              # link time optimizations
+			-flto=auto         # link time optimizations
 			-O3                # max optimization
 			-ffast-math>       # fast floating point math
 		$<$<CONFIG:Debug>:
