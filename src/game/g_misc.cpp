@@ -1106,8 +1106,8 @@ void SP_misc_gamemodel(gentity_t *ent) {
     G_SpawnString("reverse", "", &dummy);
 
     if (num_frames == 0) {
-      G_Error("'misc_model' with ANIMATE spawnflag set "
-              "has 'frames' set to 0\n");
+      G_Error("'misc_gamemodel' with ANIMATE spawnflag set has 'frames' set to "
+              "0\n");
     }
 
     ent->s.torsoAnim = num_frames;
