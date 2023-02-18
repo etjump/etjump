@@ -3904,13 +3904,12 @@ Portal Gun
 */
 
 void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
-  const float MAX_PORTAL_RANGE =
-      2 << 16; // max range where you can place next portal gate
-  const float MIN_PORTALS_DIST =
-      75.0f; // min distance between two portal center points, used to
-             // avoid overlaping
-  const float MIN_ANGLES_DIFF = 100.0f; // min angle difference between two
-                                        // portals, used to avoid overlaping
+  // max range where you can place next portal gate
+  const float MAX_PORTAL_RANGE = 2 << 16;
+  // min distance between two portal center points, used to avoid overlapping
+  const float MIN_PORTALS_DIST = 75.0f;
+  // min angle difference between two portals, used to avoid overlapping
+  const float MIN_ANGLES_DIFF = 100.0f;
 
   gentity_t *portal, *tent;
   vec3_t t_endpos;
@@ -3928,25 +3927,12 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   vec3_t blueTrail = {0.0f, 0.0f, 1.0f};
   vec3_t redTrail = {1.0f, 0.0f, 0.0f};
 
-  // From knife...
-  /*
-  trace_t		tr;
-
-  vec3_t		end;
-
-  AngleVectors (ent->client->ps.viewangles, forward, right, up);
-  CalcMuzzlePoint ( ent, ent->s.weapon, forward, right, up, muzzleTrace
-  ); VectorMA (muzzleTrace, PORTAL_GUN_DIST, forward, end);
-  G_HistoricalTrace(ent, &tr, muzzleTrace, NULL, NULL, end,
-  ent->s.number, MASK_PORTAL);
-  */
-
   // NOTE: NEW trace setup.... pulled from flamethrower
-  AngleVectors(ent->client->ps.viewangles, forward, right,
-               up); // NOTE: Need this for +attack2 call...
+  // NOTE: Need this for +attack2 call...
+  AngleVectors(ent->client->ps.viewangles, forward, right, up);
 
   VectorCopy(ent->r.currentOrigin, start);
-  start[2] += ent->client->ps.viewheight;
+  start[2] += static_cast<float>(ent->client->ps.viewheight);
   VectorCopy(start, trace_start);
 
   // Muzzle position
@@ -3958,15 +3944,10 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   VectorMA(trace_start, MAX_PORTAL_RANGE, forward, trace_end);
 
   // Trace
-  G_HistoricalTrace(ent, &tr, trace_start, NULL, NULL, trace_end, ent->s.number,
-                    MASK_PORTAL);
+  G_Trace(ent, &tr, trace_start, nullptr, nullptr, trace_end, ent->s.number,
+          MASK_PORTAL);
 
-  if (tr.surfaceFlags & SURF_NOIMPACT) {
-    return;
-  }
-
-  // no contact
-  if (tr.fraction == 1.0f) {
+  if (tr.surfaceFlags & SURF_NOIMPACT || tr.fraction == 1.0f) {
     return;
   }
 
@@ -4013,12 +3994,12 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   if (portalNumber == 1 && ent->portalBlue) {
 
     G_FreeEntity(ent->portalBlue);
-    ent->portalBlue = NULL;
+    ent->portalBlue = nullptr;
 
   } else if (portalNumber == 2 && ent->portalRed) {
 
     G_FreeEntity(ent->portalRed);
-    ent->portalRed = NULL;
+    ent->portalRed = nullptr;
   }
 
   // Railtrail
@@ -4066,12 +4047,6 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   VectorCopy(t_endpos, portal->r.currentOrigin);
 
   // Bounding box
-
-  // New bbox code... 12/10/11
-
-  // if ((t_portalAngles[PITCH] >= -105 && t_portalAngles[PITCH] <= -75)
-  // || (t_portalAngles[PITCH] >= -285 && t_portalAngles[PITCH] <=
-  // -255)) {
   // //Horizontal portal (floor/ceiling)
   if ((t_portalAngles[PITCH] >= -135 && t_portalAngles[PITCH] <= -45) ||
       (t_portalAngles[PITCH] >= -315 &&
@@ -4131,17 +4106,8 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   portal->s.otherEntityNum =
       ent->s.clientNum; // HACK: Using this for render checks.....
 
-  // Set portal team to shooters team. Anyone with same team can
-  // use the portal
+  // Set portal team to shooters team. Anyone with same team can use the portal
   portal->portalTeam = ent->client->sess.portalTeam;
-
-  // NOTE: Moved up
-  /*
-  //Set origin (obviously)
-  G_SetOrigin(portal, t_endpos);
-
-  VectorCopy(t_endpos, portal->s.origin);
-  */
 
   // Set angle of entity based on normal of plane....
   vectoangles(tr.plane.normal,
