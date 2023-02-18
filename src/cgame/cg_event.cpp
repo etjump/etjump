@@ -2810,6 +2810,22 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     default:
       DEBUGNAME("UNKNOWN");
       break;
+    case EV_PORTAL_TRAIL:
+      DEBUGNAME("EV_PORTAL_TRAIL");
+      if (!etj_viewPlayerPortals.integer &&
+          es->otherEntityNum2 != cg.clientNum) {
+        return;
+      }
+      if (etj_viewPlayerPortals.integer == 2 &&
+          cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
+          es->otherEntityNum2 != cg.clientNum) {
+        return;
+      }
+
+      vec3_t color = {es->angles[0], es->angles[1], es->angles[2]};
+      CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2,
+                   es->pos.trBase, es->dmgFlags, color);
+      break;
   }
   {
     int rval;

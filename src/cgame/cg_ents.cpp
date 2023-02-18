@@ -2488,23 +2488,14 @@ static void CG_PortalGate(centity_t *cent) {
   const float radius = 64.0f;
   int i;
 
-  switch (etj_viewPlayerPortals.integer) {
-    case 0:
-      if (cent->currentState.otherEntityNum != cg.clientNum) // not our portal
-      {
-        return;
-      }
-      break;
-    case 2:
-      if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
-          cent->currentState.otherEntityNum != cg.clientNum) // not our portal,
-                                                             // not speccing
-      {
-        return;
-      }
-      break;
-    default:
-      break;
+  if (!etj_viewPlayerPortals.integer &&
+      cent->currentState.otherEntityNum != cg.clientNum) {
+    return;
+  }
+  if (etj_viewPlayerPortals.integer == 2 &&
+      cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
+      cent->currentState.otherEntityNum != cg.clientNum) {
+    return;
   }
 
   VectorCopy(cent->currentState.angles, angleInverse);

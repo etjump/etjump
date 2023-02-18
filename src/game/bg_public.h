@@ -67,9 +67,9 @@
 #endif // NOTE: Used _DEPRECATE instead of _WARNINGS for backward
        //		 compatibility with compilers.
 
-//#define SAVEGAME_SUPPORT	// uncomment to enable savegames
-// enabling this requires you to run extractfuncs.bat as well before compiling
-// qagame
+// #define SAVEGAME_SUPPORT	// uncomment to enable savegames
+//  enabling this requires you to run extractfuncs.bat as well before compiling
+//  qagame
 
 #define SPRINTTIME 20000.0f
 
@@ -86,29 +86,29 @@
 
 #define RANK_TIED_FLAG 0x4000
 
-//#define DEFAULT_SHOTGUN_SPREAD	700
-//#define DEFAULT_SHOTGUN_COUNT	11
+// #define DEFAULT_SHOTGUN_SPREAD	700
+// #define DEFAULT_SHOTGUN_COUNT	11
 
-//#define	ITEM_RADIUS			15		// item sizes
-// are needed for client side pickup detection
+// #define	ITEM_RADIUS			15		// item sizes
+//  are needed for client side pickup detection
 #define ITEM_RADIUS                                                            \
   10 // Rafael changed the radius so that the items would fit in the 3
      // new containers
 
 // RF, zombie getup
-//#define	TIMER_RESPAWN	(38*(1000/15)+100)
+// #define	TIMER_RESPAWN	(38*(1000/15)+100)
 
-//#define	LIGHTNING_RANGE		600
-//#define	TESLA_RANGE			800
+// #define	LIGHTNING_RANGE		600
+// #define	TESLA_RANGE			800
 
 #define FLAMETHROWER_RANGE                                                     \
   2500 // DHM - Nerve :: multiplayer range, was 850 in SP
 
-//#define ZOMBIE_FLAME_RADIUS 300
+// #define ZOMBIE_FLAME_RADIUS 300
 
 // RF, AI effects
-//#define	PORTAL_ZOMBIE_SPAWNTIME		3000
-//#define	PORTAL_FEMZOMBIE_SPAWNTIME	3000
+// #define	PORTAL_ZOMBIE_SPAWNTIME		3000
+// #define	PORTAL_FEMZOMBIE_SPAWNTIME	3000
 
 #define SCORE_NOT_PRESENT                                                      \
   -9999 // for the CS_SCORES[12] when only one player is present
@@ -116,15 +116,15 @@
 #define VOTE_TIME 30000 // 30 seconds before vote times out
 
 // Ridah, disabled these
-//#define	MINS_Z				-24
-//#define	DEFAULT_VIEWHEIGHT	26
-//#define CROUCH_VIEWHEIGHT	12
+// #define	MINS_Z				-24
+// #define	DEFAULT_VIEWHEIGHT	26
+// #define CROUCH_VIEWHEIGHT	12
 // done.
 
 // Rafael
 // note to self: Corky test
-//#define	DEFAULT_VIEWHEIGHT	26
-//#define CROUCH_VIEWHEIGHT	12
+// #define	DEFAULT_VIEWHEIGHT	26
+// #define CROUCH_VIEWHEIGHT	12
 #define DEFAULT_VIEWHEIGHT 40
 #define CROUCH_VIEWHEIGHT 16
 #define DEAD_VIEWHEIGHT -16
@@ -456,8 +456,8 @@ extern const char *bg_fireteamNames[MAX_FIRETEAMS];
   #error overflow: (CS_MAX) > MAX_CONFIGSTRINGS
 #endif
 
-//#ifndef GAMETYPES
-//#define GAMETYPES
+// #ifndef GAMETYPES
+// #define GAMETYPES
 typedef enum {
   GT_SINGLE_PLAYER,
   GT_COOP,
@@ -469,7 +469,7 @@ typedef enum {
   GT_CTF,
   GT_MAX_GAME_TYPE
 } gametype_t;
-//#define GAMETYPES
+// #define GAMETYPES
 
 // Rafael gameskill
 /*typedef enum {
@@ -481,7 +481,7 @@ typedef enum {
     GSKILL_MAX		// must always be last
 } gameskill_t;*/
 
-//#endif // ifndef GAMETYPES
+// #endif // ifndef GAMETYPES
 
 typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
 
@@ -536,7 +536,7 @@ typedef enum {
 #define PMF_TIME_KNOCKBACK 64  // pm_time is an air-accelerate only time
 #define PMF_TIME_WATERJUMP 256 // pm_time is waterjump
 #define PMF_RESPAWNED 512      // clear after attack and jump buttons come up
-//#define PMF_PRONE_BIPOD		1024	// prone with a bipod set
+// #define PMF_PRONE_BIPOD		1024	// prone with a bipod set
 #define PMF_FLAILING 2048
 #define PMF_FOLLOW 4096 // spectate following another player
 #define PMF_TIME_LOAD                                                          \
@@ -1270,7 +1270,7 @@ typedef enum {
   EV_PORTAL_TELEPORT,
   EV_LOAD_TELEPORT,
   EV_UPHILLSTEP,
-  EV_SAVE,
+  EV_PORTAL_TRAIL,
   EV_MAX_EVENTS // just added as an 'endcap'
 } entity_event_t;
 
@@ -1768,7 +1768,7 @@ bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
 #define MASK_PLAYERSOLID (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_BODY)
 #define MASK_DEADSOLID (CONTENTS_SOLID | CONTENTS_PLAYERCLIP)
 #define MASK_WATER (CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLIME)
-//#define	MASK_OPAQUE
+// #define	MASK_OPAQUE
 //(CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA)
 #define MASK_OPAQUE                                                            \
   (CONTENTS_SOLID | CONTENTS_LAVA) //----(SA)	modified since slime is
@@ -1879,7 +1879,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
 //----(SA)	removed PM_ammoNeeded 11/27/00
 void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce);
 
-//#define ARENAS_PER_TIER		4
+// #define ARENAS_PER_TIER		4
 #define MAX_ARENAS 64
 #define MAX_ARENAS_TEXT 8192
 
@@ -2611,7 +2611,7 @@ extern ammotable_t ammoTableMP[WP_NUM_WEAPONS];
 
 qboolean BG_BBoxCollision(vec3_t min1, vec3_t max1, vec3_t min2, vec3_t max2);
 
-//#define VISIBLE_TRIGGERS
+// #define VISIBLE_TRIGGERS
 
 //
 // bg_stats.c

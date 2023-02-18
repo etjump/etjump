@@ -4024,7 +4024,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   // Railtrail
   // close enough for the barrel on most cases, realistically we should
   // grab the starting point from the weapon tags
-  tent = G_TempEntity(muzzleEffect, EV_RAILTRAIL);
+  tent = G_TempEntity(muzzleEffect, EV_PORTAL_TRAIL);
   portalNumber == 1 ? VectorCopy(blueTrail, tent->s.angles)
                     : VectorCopy(redTrail, tent->s.angles);
 
