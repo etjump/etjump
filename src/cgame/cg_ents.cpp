@@ -2488,10 +2488,12 @@ static void CG_PortalGate(centity_t *cent) {
   const float radius = 64.0f;
   int i;
 
+  // not our portal
   if (!etj_viewPlayerPortals.integer &&
       cent->currentState.otherEntityNum != cg.clientNum) {
     return;
   }
+  // not our portal, not spectating
   if (etj_viewPlayerPortals.integer == 2 &&
       cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
       cent->currentState.otherEntityNum != cg.clientNum) {
