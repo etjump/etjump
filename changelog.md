@@ -63,6 +63,12 @@
 * removed mapscript actions `cvar set/inc/random` [#934](https://github.com/etjump/etjump/pull/934)
 * added `etj_footstepVolume` to control volume of movement-generated sounds (stepsounds/landings) [#938](https://github.com/etjump/etjump/pull/938)
 * fixed runtimer colors (red/green when record is set) breaking when the run name had spaces [#941](https://github.com/etjump/etjump/pull/941)
+* new #1 records on timeruns are now broadcasted with a banner print [#935](https://github.com/etjump/etjump/pull/935)
+  * diff column coloring on `ranks` command is now reversed, meaning faster records before you are colored green with `-` as opposed to red with `+`
+* portalgun portals no longer render when they're out of PVS, fixing portals sometimes being visible through skyboxes due to shader sorting order [#949](https://github.com/etjump/etjump/pull/949)
+* fixed incorrect error message when `misc_gamemodel` was used with `ANIMATE` spawnflag with 0 frames set [89d7f32](https://github.com/etjump/etjump/commit/89d7f320d0b9c925be51f55379f29da72d3b2483)
+* fixed player head being a valid portal surface [#957](https://github.com/etjump/etjump/pull/957)
+* fixed portalgun trails not respecting `etj_viewPlayerPortals` [#959](https://github.com/etjump/etjump/pull/959)
 
 # ETJump 2.5.1
 
