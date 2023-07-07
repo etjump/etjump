@@ -2807,6 +2807,24 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       trap_SendConsoleCommand("resetUpmoveMeter\n");
       CG_ResetTransitionEffects();
       break;
+    case EV_PORTAL_TRAIL:
+      DEBUGNAME("EV_PORTAL_TRAIL");
+      // not our portal trail
+      if (!etj_viewPlayerPortals.integer &&
+          es->otherEntityNum2 != cg.clientNum) {
+        return;
+      }
+      // not our portal trail, not spectating
+      if (etj_viewPlayerPortals.integer == 2 &&
+          cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR &&
+          es->otherEntityNum2 != cg.clientNum) {
+        return;
+      }
+
+      CG_RailTrail(&cgs.clientinfo[es->otherEntityNum2], es->origin2,
+                   es->pos.trBase, es->dmgFlags,
+                   tv(es->angles[0], es->angles[1], es->angles[2]));
+      break;
     default:
       DEBUGNAME("UNKNOWN");
       break;
