@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "ui_local.h"
 
 // this file is only included when building a dll
