@@ -280,6 +280,11 @@ void ETJump::SaveSystem::load(gentity_t *ent) {
             static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
       InterruptRun(ent);
     }
+    // allow fast respawn + load if we got gibbed to skip death sequence
+    if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
+      ent->client->ps.pm_flags &= ~PMF_LIMBO;
+      ClientSpawn(ent, qfalse);
+    }
     teleportPlayer(ent, validSave);
   } else {
     CPTo(ent, "^7Use ^3save ^7first.");
