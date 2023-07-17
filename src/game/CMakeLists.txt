@@ -58,6 +58,7 @@ add_library(qagame MODULE
 	"etj_commands.cpp"
 	"etj_custom_map_votes.cpp"
 	"etj_database.cpp"
+	"etj_database_v2.cpp"
 	"etj_deathrun_system.cpp"
 	"etj_entity_utilities.cpp"
 	"etj_file.cpp"
@@ -86,7 +87,7 @@ add_library(qagame MODULE
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
-target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libuuid4 fmt::fmt)
+target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES 
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"
