@@ -426,6 +426,8 @@ vmCvar_t etj_altScoreboard;
 vmCvar_t etj_drawSpectatorInfo;
 vmCvar_t etj_spectatorInfoX;
 vmCvar_t etj_spectatorInfoY;
+vmCvar_t etj_spectatorInfoSize;
+vmCvar_t etj_spectatorInfoShadow;
 
 vmCvar_t etj_drawRunTimer;
 vmCvar_t etj_runTimerX;
@@ -924,7 +926,9 @@ cvarTable_t cvarTable[] = {
     {&etj_altScoreboard, "etj_altScoreboard", "0", CVAR_ARCHIVE},
     {&etj_drawSpectatorInfo, "etj_drawSpectatorInfo", "0", CVAR_ARCHIVE},
     {&etj_spectatorInfoX, "etj_spectatorInfoX", "320", CVAR_ARCHIVE},
-    {&etj_spectatorInfoY, "etj_spectatorInfoY", "40", CVAR_ARCHIVE},
+    {&etj_spectatorInfoY, "etj_spectatorInfoY", "30", CVAR_ARCHIVE},
+    {&etj_spectatorInfoSize, "etj_spectatorInfoSize", "2.3", CVAR_ARCHIVE},
+    {&etj_spectatorInfoShadow, "etj_spectatorInfoShadow", "1", CVAR_ARCHIVE},
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
