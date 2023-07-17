@@ -40,7 +40,9 @@ jobs:
 
     steps:
     - name: Install deps
-      run: sudo apt-get install gcc-multilib g++-multilib
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc-multilib g++-multilib
     
     - uses: actions/checkout@v3
       with:
