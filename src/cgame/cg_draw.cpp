@@ -4733,42 +4733,6 @@ void CG_DrawDemoRecording(void) {
                     status, 0, 0, 0, &cgs.media.limboFont2);
 }
 
-void CG_DrawSpectatorInfo(void) {
-  int i = 0;
-  int y = etj_spectatorInfoY.integer;
-
-  if (etj_drawSpectatorInfo.integer == 0) {
-    return;
-  }
-
-  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
-    // don't do anything if we're spectating
-    return;
-  }
-
-  if (cg.time > cg.lastScoreTime + 3000) {
-    trap_SendClientCommand("score");
-    cg.lastScoreTime = cg.time;
-  }
-
-  for (; i < cg.numScores; i++) {
-    if (cg.snap->ps.clientNum == cg.scores[i].client) {
-      // ignore self
-      continue;
-    }
-    if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR) {
-      if (cg.scores[i].followedClient == cg.snap->ps.clientNum) {
-        float x = etj_spectatorInfoX.integer;
-        ETJump_AdjustPosition(&x);
-        // spectating me
-        ETJump::DrawSmallString(
-            x, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
-        y += 12;
-      }
-    }
-  }
-}
-
 /*
 =================
 CG_Draw2D
@@ -4889,8 +4853,6 @@ static void CG_Draw2D(void) {
     }
 
     CG_DrawCHS();
-
-    CG_DrawSpectatorInfo();
   } else {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
       //			qboolean old =
