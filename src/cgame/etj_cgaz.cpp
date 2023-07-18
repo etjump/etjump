@@ -217,11 +217,13 @@ void CGaz::render() const {
 
   // DeFRaG proxymod CGaz by Jelvan1
   if (etj_drawCGaz.integer == 1) {
-    float y = etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0;
-    float h = etj_CGazHeight.integer > 0 ? etj_CGazHeight.integer : 0;
+    auto y =
+        static_cast<float>(etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0);
+    auto h = static_cast<float>(
+        etj_CGazHeight.integer > 0 ? etj_CGazHeight.integer : 0);
 
     float fov;
-    if (!etj_CGazFov.value) {
+    if (etj_CGazFov.value == 0.0f) {
       fov = cg.refdef.fov_x;
     } else {
       fov = Numeric::clamp(etj_CGazFov.value, 1, 179);
@@ -248,15 +250,15 @@ void CGaz::render() const {
   // Dzikie Weze's 2D-CGaz
   if (etj_drawCGaz.integer == 2) {
     const usercmd_t cmd = pm->cmd;
-    int scx = SCREEN_CENTER_X - 1;
-    int scy = SCREEN_CENTER_Y - 1;
+    float scx = SCREEN_CENTER_X;
+    float scy = SCREEN_CENTER_Y;
 
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(false);
       scx -= SCREEN_OFFSET_X;
     }
-    DrawLine(scx, scy, scx + cmd.rightmove, scy - cmd.forwardmove,
-             CGaz2Colors[1]);
+    DrawLine(scx, scy, scx + static_cast<float>(cmd.rightmove),
+             scy - static_cast<float>(cmd.forwardmove), CGaz2Colors[1]);
 
     // When under wishspeed velocity, most accel happens when
     // you move straight towards your current velocity, so skip
@@ -266,19 +268,19 @@ void CGaz::render() const {
     auto velSize =
         etj_CGaz2FixedSpeed.value > 0 ? etj_CGaz2FixedSpeed.value : state.vf;
     velSize /= 5;
-    if (velSize > SCREEN_HEIGHT / 2) {
-      velSize = SCREEN_HEIGHT / 2;
+    if (velSize > SCREEN_HEIGHT * 0.5f) {
+      velSize = SCREEN_HEIGHT * 0.5f;
     }
 
-    DrawLine(scx, scy, scx + velSize * sin(drawVel),
-             scy - velSize * cos(drawVel), CGaz2Colors[0]);
+    DrawLine(scx, scy, scx + velSize * std::sin(drawVel),
+             scy - velSize * std::cos(drawVel), CGaz2Colors[0]);
 
     if (drawSides) {
       velSize /= 2;
-      DrawLine(scx, scy, scx + velSize * sin(drawVel + drawOpt),
-               scy - velSize * cos(drawVel + drawOpt), CGaz2Colors[0]);
-      DrawLine(scx, scy, scx + velSize * sin(drawVel - drawOpt),
-               scy - velSize * cos(drawVel - drawOpt), CGaz2Colors[0]);
+      DrawLine(scx, scy, scx + velSize * std::sin(drawVel + drawOpt),
+               scy - velSize * std::cos(drawVel + drawOpt), CGaz2Colors[0]);
+      DrawLine(scx, scy, scx + velSize * std::sin(drawVel - drawOpt),
+               scy - velSize * std::cos(drawVel - drawOpt), CGaz2Colors[0]);
     }
 
     if (etj_stretchCgaz.integer) {
