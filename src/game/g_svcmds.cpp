@@ -390,7 +390,7 @@ Svcmd_EntityList_f
 static void Svcmd_EntityList_f(void) {
   int e;
   const gentity_t *check;
-  int count;
+  int not_inuse = 0;
   int max_type_length = 20; // starting point, no less than 11
 
   check = g_entities;
@@ -400,39 +400,43 @@ static void Svcmd_EntityList_f(void) {
     }
 
     int l;
-    if (check->s.eType < ET_EVENTS)
+    if (check->s.eType < ET_EVENTS) {
       l = (int)strlen(entityTypeNames[check->s.eType]);
-    else
+    } else {
       l = (int)strlen(eventnames[check->s.eType - ET_EVENTS]);
-
-    if (l > max_type_length)
+    }
+    if (l > max_type_length) {
       max_type_length = l;
+    }
   }
 
   check = g_entities;
-  count = 0;
   G_Printf("%-4s  %-*s %-20s\n", " Num", max_type_length, "Entity Type",
            "Class");
   G_Printf(
       "--------------------------------------------------------------------\n");
   for (e = 0; e < level.num_entities; e++, check++) {
     if (!check->inuse) {
+      ++not_inuse;
       continue;
     }
 
-    if (check->s.eType < ET_EVENTS)
+    if (check->s.eType < ET_EVENTS) {
       G_Printf("%4i: %-*s %-20s\n", e, max_type_length,
                entityTypeNames[check->s.eType],
                check->classname && check->classname[0] ? check->classname
                                                        : "noclass");
-    else
+    } else {
       G_Printf("%4i: %-*s %-20s\n", e, max_type_length,
                eventnames[check->s.eType - ET_EVENTS],
                check->classname && check->classname[0] ? check->classname
                                                        : "noclass");
-    count++;
+    }
   }
-  G_Printf("...%d entities\n", count);
+  G_Printf(
+      "--------------------------------------------------------------------\n");
+  G_Printf("%4i / %4i total entities\n", level.num_entities, MAX_GENTITIES);
+  G_Printf("%4i / %4i entities inactive\n", not_inuse, level.num_entities);
 }
 
 int refClientNumFromString(char *s) {
