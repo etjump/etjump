@@ -1756,6 +1756,19 @@ void InitGhosting() {
 void ResetNumSpawnTargets();
 void ETJump_InitGame(int levelTime, int randomSeed, int restart);
 
+static bool G_PatchFixEnabled() {
+  char cs[MAX_INFO_STRING];
+  trap_GetConfigstring(CS_SYSTEMINFO, cs, sizeof(cs));
+  const char *sysInfo = Info_ValueForKey(cs, "cm_optimizePatchPlanes");
+
+  // cm_optimizePatchPlanes 0 = fixed patch collision
+  if (sysInfo[0] == '0') {
+    return true;
+  }
+
+  return false;
+}
+
 /*
 ============
 G_InitGame
@@ -3873,6 +3886,15 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
   G_CheckReloadStatus();
 #endif // SAVEGAME_SUPPORT
   ETJump_RunFrame(levelTime);
+
+  if (!level.patchFixWarned && G_PatchFixEnabled()) {
+    G_Printf("\n^7--------- ^1!!! WARNING !!! ^7---------\n\n^7Server started "
+             "with ^3cm_optimizePatchPlanes 0\n^7Patch collision is different "
+             "from vanilla and prediction errors might occur!\n\n^7Please "
+             "start the server with ^3+set cm_optimizePatchPlanes "
+             "1\n\n^7-----------------------------------\n");
+    level.patchFixWarned = true;
+  }
 }
 
 // Is this a single player type game - sp or coop?
