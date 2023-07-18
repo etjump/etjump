@@ -1518,4 +1518,5 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("tracker_set");
   trap_AddCommand("clearsaves");
   trap_AddCommand("listspawnpt");
+  trap_AddCommand("entitylist");
 }

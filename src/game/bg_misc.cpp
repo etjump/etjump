@@ -3961,6 +3961,7 @@ const char *eventnames[] = {
     "EV_GRENADE_BOUNCE",
     "EV_GENERAL_SOUND",
     "EV_GENERAL_SOUND_VOLUME",
+    "EV_GENERAL_CLIENT_SOUND_VOLUME",
     "EV_GLOBAL_SOUND",
     "EV_GLOBAL_CLIENT_SOUND",
     "EV_GLOBAL_TEAM_SOUND",
@@ -4001,6 +4002,8 @@ const char *eventnames[] = {
     "EV_MISSILE_MISS_LARGE",
     "EV_MORTAR_IMPACT",
     "EV_MORTAR_MISS",
+    "EV_SPIT_HIT",
+    "EV_SPIT_MISS",
     "EV_SHARD",
     "EV_JUNK",
     "EV_EMITTER",
@@ -4036,8 +4039,15 @@ const char *eventnames[] = {
     "EV_ARTYMESSAGE",
     "EV_AIRSTRIKEMESSAGE",
     "EV_MEDIC_CALL",
+    "EV_PORTAL_TELEPORT",
+    "EV_LOAD_TELEPORT",
+    "EV_UPHILLSTEP",
+    "EV_SAVE",
     "EV_MAX_EVENTS",
 };
+
+static_assert(sizeof(eventnames) / sizeof(eventnames[0]) == EV_MAX_EVENTS + 1,
+              "Event names array size does not match enum list");
 
 /*
 ===============
