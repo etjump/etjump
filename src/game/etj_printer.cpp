@@ -44,7 +44,7 @@ void Printer::LogPrintln(const std::string &message) {
 }
 
 void Printer::SendConsoleMessage(int clientNum, std::string message) {
-  auto splits = ETJump::splitString(message, '\n', BYTES_PER_PACKET);
+  auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
   for (auto &split : splits) {
     if (clientNum == CONSOLE_CLIENT_NUMBER) {
       G_Printf("%s", split.c_str());
@@ -71,7 +71,7 @@ void Printer::SendPopupMessage(int clientNum, const std::string &message) {
 }
 
 void Printer::BroadcastConsoleMessage(std::string message) {
-  auto splits = ETJump::splitString(message, '\n', BYTES_PER_PACKET);
+  auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
   for (auto &split : splits) {
     trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
     G_Printf("%s", split.c_str());

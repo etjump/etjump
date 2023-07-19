@@ -56,6 +56,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   } else {
     ETJump::session->ReadSessionData(clientNum);
     game.timerun->clientConnect(clientNum, ETJump::session->GetId(clientNum));
+    game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
   }
 
   if (ETJump::session->IsIpBanned(clientNum)) {
@@ -70,12 +71,14 @@ void OnClientBegin(gentity_t *ent) {
     game.motd->PrintMotd(ent);
     ent->client->sess.motdPrinted = qtrue;
   }
+  ETJump::Log::processMessages();
 }
 
 void OnClientDisconnect(gentity_t *ent) {
   G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
 
   ETJump::session->OnClientDisconnect(ClientNum(ent));
+  ETJump::Log::processMessages();
 }
 
 void WriteSessionData() {
@@ -97,6 +100,7 @@ void ChangeMap() {
 void RunFrame(int levelTime) {
   game.mapStatistics->runFrame(levelTime);
   game.timerunV2->runFrame();
+  ETJump::Log::processMessages();
 }
 
 void OnGameInit() {
@@ -108,8 +112,12 @@ void OnGameInit() {
   game.motd = std::make_shared<Motd>();
   game.timerun = std::make_shared<Timerun>();
   game.tokens = std::make_shared<Tokens>();
-  game.timerunV2 =
-      std::make_shared<ETJump::TimerunV2>(std::make_unique<ETJump::Log>("timerunv2"), std::make_unique<ETJump::SynchronizationContext>());
+  game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
+      level.rawmapname,
+      std::make_unique<ETJump::DatabaseV2>(
+          "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
+      std::make_unique<ETJump::Log>("timerunv2"),
+      std::make_unique<ETJump::SynchronizationContext>());
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -138,10 +146,7 @@ void OnGameInit() {
   game.customMapVotes->Load();
   game.motd->Initialize();
   game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
-  game.timerunV2->initialize(
-      {GetPath(g_timerunsDatabase.string) + ".v2"});
-
-  auto opt = Utilities::Optional<std::chrono::system_clock::time_point>();
+  game.timerunV2->initialize();
 
   if (g_tokensMode.integer) {
     // Utilities::WriteFile handles the correct path
@@ -150,6 +155,7 @@ void OnGameInit() {
                 std::string(level.rawmapname) + ".json";
     game.tokens->loadTokens(path);
   }
+  ETJump::Log::processMessages();
 }
 
 void OnGameShutdown() {
@@ -178,6 +184,7 @@ void OnGameShutdown() {
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
+  ETJump::Log::processMessages();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) {
@@ -213,6 +220,8 @@ qboolean OnClientCommand(gentity_t *ent) {
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
     ETJump::session->GuidReceived(ent);
     game.timerun->clientConnect(ClientNum(ent), ETJump::session->GetId(ent));
+    game.timerunV2->clientConnect(ClientNum(ent),
+                                  ETJump::session->GetId(ClientNum(ent)));
     return qtrue;
   }
 
@@ -364,12 +373,15 @@ void StartTimer(const char *runName, gentity_t *ent) {
   game.timerun->startTimer(runName, ClientNum(ent), ent->client->pers.netname,
                            ent->client->ps.commandTime);
 }
+
 void StopTimer(const char *runName, gentity_t *ent) {
   game.timerun->stopTimer(ClientNum(ent), ent->client->ps.commandTime, runName);
 }
+
 void TimerunConnectNotify(gentity_t *ent) {
   game.timerun->connectNotify(ClientNum(ent));
 }
+
 void InterruptRun(gentity_t *ent) {
   if (!ent) {
     return;

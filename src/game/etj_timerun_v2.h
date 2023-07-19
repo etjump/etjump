@@ -24,7 +24,8 @@
 
 #pragma once
 
-#include <chrono>
+#include <array>
+#include <map>
 
 #include "etj_database_v2.h"
 #include "etj_log.h"
@@ -35,17 +36,19 @@
 namespace ETJump {
 class TimerunV2 {
 public:
-  TimerunV2(std::unique_ptr<Log> logger,
+
+
+  TimerunV2(std::string currentMap,
+            std::unique_ptr<DatabaseV2> database,
+            std::unique_ptr<Log> logger,
             std::unique_ptr<SynchronizationContext>
             synchronizationContext);
 
-  struct Options {
-    std::string path;
-  };
-
-  void initialize(const Options &options);
+  void initialize();
   void shutdown();
   void runFrame();
+  void clientConnect(int clientNum, int userId);
+  void clientDisconnect(int clientNum);
 
   struct AddSeasonParams {
     int clientNum;
@@ -54,11 +57,40 @@ public:
     opt<Time> endTime;
   };
 
+  static const int CheckpointNotSet = -1;
+
+  struct Run {
+    int seasonId;
+    std::string map;
+    std::string run;
+    int userId;
+    int time;
+    std::vector<int> checkpoints;
+    Time recordDate;
+    std::string playerName;
+    std::map<std::string, std::string> metadata;
+  };
+
+  struct Player {
+    Player(int clientId, int userId, const std::vector<Run> &runs)
+      : clientId(clientId),
+        userId(userId),
+        runs(runs) {
+    }
+
+    int clientId;
+    int userId;
+    std::vector<Run> runs;
+  };
+
   void addSeason(AddSeasonParams season);
 
 private:
+  std::string _currentMap;
   std::unique_ptr<DatabaseV2> _database;
   std::unique_ptr<Log> _logger;
   std::unique_ptr<SynchronizationContext> _sc;
+  std::array<std::unique_ptr<Player>, 64> _players;
+  std::vector<int> _activeSeasons;
 };
 }

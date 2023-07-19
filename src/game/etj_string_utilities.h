@@ -55,7 +55,7 @@ std::string trimStart(const std::string &input);
 std::string trimEnd(const std::string &input);
 std::string trim(const std::string &input);
 
-std::vector<std::string> splitString(std::string &input, char separator,
+std::vector<std::string> wrapWords(std::string &input, char separator,
                                      size_t maxLength);
 
 template <typename T>

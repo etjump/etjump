@@ -51,7 +51,7 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnSeparator
     std::string input = "Lorem ipsum \ndolor sit amet, \nconsectetur \nadipisicing elit. \nTenetur, fuga!";
     std::vector<std::string> expectedSplits { 
     	"Lorem ipsum \ndolor sit amet, \n", "consectetur \nadipisicing elit. \n", "Tenetur, fuga!" };
-	auto splits = splitString(input, '\n', 40);
+	auto splits = wrapWords(input, '\n', 40);
    	EXPECT_EQ(splits.size(), expectedSplits.size());
    	for (int i = 0; i < static_cast<int>(splits.size()); i++) 
 	{
@@ -64,7 +64,7 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnMaxWidthE
     std::string input = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, fuga!";
     std::vector<std::string> expectedSplits { 
 		"Lorem ipsum dolor sit amet, consectetur ", "adipisicing elit. Tenetur, fuga!"};
-	auto splits = splitString(input, '\n', 40);
+	auto splits = wrapWords(input, '\n', 40);
    	EXPECT_EQ(splits.size(), expectedSplits.size());
    	for (int i = 0; i < static_cast<int>(splits.size()); i++) 
 	{

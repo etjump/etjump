@@ -52,7 +52,7 @@ void ETJump::SynchronizationContext::processCompletedTasks() {
         op->errorCallback(std::move(op->error.value()));
       }
     } catch (const std::runtime_error& e) {
-      op->errorCallback(std::move(e));
+      op->errorCallback(e);
     }
   }
 }
