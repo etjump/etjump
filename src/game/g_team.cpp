@@ -927,7 +927,7 @@ void TeamplayInfoMessage(team_t team) {
         break;
       }
       Q_strncpyz(string + stringlength, entry,
-                 static_cast<int>(sizeof(string) + stringlength));
+                 static_cast<int>(sizeof(string) - stringlength));
       stringlength += j;
       cnt++;
     }
