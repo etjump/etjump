@@ -23,12 +23,18 @@
  */
 
 #pragma once
+#include <mutex>
+#include <vector>
 #include <string>
 
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
 namespace ETJump {
+/**
+ * Thread safe implementation of a logger
+ * All messages are queued and main thread will process them on next frame
+ */
 class Log {
 public:
   explicit Log(std::string name) : _name(std::move(name)) {}
@@ -38,8 +44,12 @@ public:
     println("info", stringFormat(format, fargs...));
   }
 
+  static void processMessages();
 private:
-  void println(const std::string& level, const std::string& message) const;
   std::string _name;
+
+  void println(const std::string &level, const std::string &message) const;
+  static std::mutex _messagesLock;
+  static std::vector<std::string> _messages;
 };
 }
