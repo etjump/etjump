@@ -37,6 +37,7 @@
 #include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_string_utilities.h"
+#include "etj_timerun_v2.h"
 
 Game game;
 
@@ -93,7 +94,10 @@ void ChangeMap() {
   trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
 }
 
-void RunFrame(int levelTime) { game.mapStatistics->runFrame(levelTime); }
+void RunFrame(int levelTime) {
+  game.mapStatistics->runFrame(levelTime);
+  game.timerunV2->runFrame();
+}
 
 void OnGameInit() {
   game.levels = std::make_shared<Levels>();
@@ -104,6 +108,8 @@ void OnGameInit() {
   game.motd = std::make_shared<Motd>();
   game.timerun = std::make_shared<Timerun>();
   game.tokens = std::make_shared<Tokens>();
+  game.timerunV2 =
+      std::make_shared<ETJump::TimerunV2>(std::make_unique<ETJump::Log>("timerunv2"), std::make_unique<ETJump::SynchronizationContext>());
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -132,6 +138,13 @@ void OnGameInit() {
   game.customMapVotes->Load();
   game.motd->Initialize();
   game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
+  game.timerunV2->initialize(
+      {GetPath(g_timerunsDatabase.string) + ".v2"});
+
+  auto opt = Utilities::Optional<std::chrono::system_clock::time_point>();
+
+  game.timerunV2->addSeason({"name", std::chrono::system_clock::now(),
+                             opt});
 
   if (g_tokensMode.integer) {
     // Utilities::WriteFile handles the correct path
@@ -156,6 +169,9 @@ void OnGameShutdown() {
   if (game.tokens != nullptr) {
     game.tokens->reset();
   }
+  if (game.timerunV2) {
+    game.timerunV2->shutdown();
+  }
 
   game.levels = nullptr;
   game.commands = nullptr;
@@ -164,6 +180,7 @@ void OnGameShutdown() {
   game.timerun = nullptr;
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
+  game.timerunV2 = nullptr;
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) {

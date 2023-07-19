@@ -26,6 +26,11 @@
 #define GAME_HPP
 
 #include <memory>
+
+namespace ETJump {
+class TimerunV2;
+}
+
 class Levels;
 class Commands;
 class CustomMapVotes;
@@ -44,6 +49,7 @@ struct Game {
   std::shared_ptr<Timerun> timerun;
   std::shared_ptr<MapStatistics> mapStatistics;
   std::shared_ptr<Tokens> tokens;
+  std::shared_ptr<ETJump::TimerunV2> timerunV2;
 };
 
 #endif

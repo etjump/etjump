@@ -101,6 +101,55 @@ std::string timestampToString(int timestamp,
                               const char *start = "never");
 
 void RemovePlayerWeapons(int clientNum);
+
+template <typename T>
+class Optional {
+public:
+  Optional()
+    : _hasValue(false) {
+  }
+
+  explicit Optional(T val)
+    : _hasValue(true), _value(std::move(val)) {
+  }
+
+  bool hasValue() const {
+    return _hasValue;
+
+  }
+
+  T &operator*() {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+  const T &operator*() const {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+  T &value() {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+  const T &value() const {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+private:
+  bool _hasValue;
+  T _value;
+};
 } // namespace Utilities
 
 #endif // ETJUMP_UTILITIES_H

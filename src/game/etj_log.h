@@ -24,31 +24,23 @@
 
 #pragma once
 #include <string>
-#include <sqlite_modern_cpp.h>
+
+#include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 namespace ETJump {
-class DatabaseV2 {
+class Log {
 public:
-  struct Migration {
-    std::string name;
-    std::vector<std::string> statements;
-  };
+  explicit Log(std::string name) : _name(std::move(name)) {}
 
-  explicit DatabaseV2(const std::string& name, const std::string &fileName);
-  ~DatabaseV2();
-
-  void addMigration(const Migration &migration);
-  void addMigration(const std::string &name, const std::vector<std::string>& statements);
-
-  void applyMigrations();
-
-  // expose the database object directly
-  // as it provides a reasonable interface
-  // to database
-  sqlite::database sql;
+  template <typename... Targs>
+  void info(const std::string &format, const Targs &...fargs) const {
+    Printer::LogPrintln(format);
+    //println("info", stringFormat(format, fargs...));
+  }
 
 private:
+  void println(const std::string& level, const std::string& message) const;
   std::string _name;
-  std::vector<Migration> _migrations;
 };
 }

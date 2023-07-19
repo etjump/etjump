@@ -3,6 +3,8 @@
 // this file holds commands that can be executed by the server console, but not
 // remote clients
 
+#include "etj_local.h"
+#include "etj_timerun_v2.h"
 #include "g_local.h"
 
 /*
@@ -771,6 +773,14 @@ qboolean ConsoleCommand(void) {
   if (!Q_stricmp(cmd, "mod_information")) {
     G_LogPrintf("%s %s %s\n", GAME_NAME, GAME_VERSION_DATED, __TIME__);
     return qtrue;
+  }
+
+  if (!Q_stricmp(cmd, "add_season")) {
+    trap_Argv(1, cmd, sizeof(cmd));
+
+    game.timerunV2->addSeason(ETJump::TimerunV2::AddSeasonParams{
+        std::string(cmd), std::chrono::system_clock::now(),
+        Utilities::Optional<std::chrono::system_clock::time_point>()});
   }
 
   if (OnConsoleCommand()) {

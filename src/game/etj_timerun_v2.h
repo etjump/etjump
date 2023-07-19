@@ -23,32 +23,40 @@
  */
 
 #pragma once
-#include <string>
-#include <sqlite_modern_cpp.h>
+
+#include <chrono>
+
+#include "etj_database_v2.h"
+#include "etj_log.h"
+#include "etj_synchronization_context.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
-class DatabaseV2 {
+class TimerunV2 {
 public:
-  struct Migration {
-    std::string name;
-    std::vector<std::string> statements;
+  TimerunV2(std::unique_ptr<Log> logger,
+            std::unique_ptr<SynchronizationContext>
+            synchronizationContext);
+
+  struct Options {
+    std::string path;
   };
 
-  explicit DatabaseV2(const std::string& name, const std::string &fileName);
-  ~DatabaseV2();
+  void initialize(const Options &options);
+  void shutdown();
+  void runFrame();
 
-  void addMigration(const Migration &migration);
-  void addMigration(const std::string &name, const std::vector<std::string>& statements);
+  struct AddSeasonParams {
+    std::string name;
+    std::chrono::system_clock::time_point startTime;
+    Utilities::Optional<std::chrono::system_clock::time_point> endTime;
+  };
 
-  void applyMigrations();
-
-  // expose the database object directly
-  // as it provides a reasonable interface
-  // to database
-  sqlite::database sql;
+  void addSeason(AddSeasonParams season);
 
 private:
-  std::string _name;
-  std::vector<Migration> _migrations;
+  std::unique_ptr<DatabaseV2> _database;
+  std::unique_ptr<Log> _logger;
+  std::unique_ptr<SynchronizationContext> _sc;
 };
 }
