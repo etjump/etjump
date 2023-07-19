@@ -35,8 +35,7 @@ public:
 
   template <typename... Targs>
   void info(const std::string &format, const Targs &...fargs) const {
-    Printer::LogPrintln(format);
-    //println("info", stringFormat(format, fargs...));
+    println("info", stringFormat(format, fargs...));
   }
 
 private:
