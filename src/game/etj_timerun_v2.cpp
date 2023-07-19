@@ -76,78 +76,77 @@ void ETJump::TimerunV2::shutdown() {
 
 void ETJump::TimerunV2::runFrame() { _sc->processCompletedTasks(); }
 
-void ETJump::TimerunV2::addSeason(AddSeasonParams season) {
-  _sc->postTask([this]() {
-                  return std::make_unique<SynchronizationContext::ResultBase>();
-                },
-                [this](
-                std::unique_ptr<SynchronizationContext::ResultBase> result) {
-                  std::string name;
+class AddSeasonResult : public ETJump::SynchronizationContext::ResultBase {
+public:
+  AddSeasonResult(std::string message)
+    : message(message) {
+  }
 
-                  _logger->info("success");
+  std::string message;
+};
+
+void ETJump::TimerunV2::addSeason(AddSeasonParams season) {
+  _sc->postTask([this, season]() {
+                  int count = 0;
+                  _database->sql << R"(
+                      select count(name) from season where name=? collate nocase;
+                    )" << season.name >>
+                      count;
+
+                  if (count > 0) {
+                    return std::make_unique<AddSeasonResult>(stringFormat(
+                        "Cannot add season `%s` as it already exists.",
+                        season.name));
+                  }
+
+                  if (season.endTime.hasValue()) {
+                    if (season.startTime >= season.endTime.value()) {
+                      return std::make_unique<AddSeasonResult>(
+                          "Start time cannot be after end time");
+                    }
+                  }
+
+                  std::string insert = R"(
+                    insert into season (
+                      name,
+                      start_time,
+                      end_time
+                    ) values (
+                      ?,
+                      ?,
+                      ?
+                    );
+                  )";
+
+                  if (season.endTime.hasValue())
+                    _database->sql << insert << season.name
+                        << season.startTime.toDateTimeString()
+                        << (*season.endTime).toDateTimeString();
+                  else
+                    _database->sql << insert << season.name
+                        << season.startTime.toDateTimeString()
+                        << nullptr;
+
+                  return std::make_unique<AddSeasonResult>(
+                      stringFormat("Successfully added season `%s`",
+                                   season.name));
+
                 },
-                [this](std::runtime_error e) {
-                  _logger->info("error: %s", e.what());
+                [this, season](
+                std::unique_ptr<SynchronizationContext::ResultBase> result) {
+
+                  auto addSeasonResult =
+                      static_cast<AddSeasonResult *>(result.get());
+
+                  auto t = std::this_thread::get_id();
+
+                  Printer::SendConsoleMessage(season.clientNum,
+                                              addSeasonResult->message);
+                },
+                [this, season](std::runtime_error e) {
+                  Printer::SendConsoleMessage(
+                      season.clientNum,
+                      stringFormat("Unable to add season: %s", e.what()));
                 }
       );
-
-  //auto addSeasonTask = [this](AddSeasonParams params) -> AsyncResult {
-  //  int count = 0;
-  //  _database->sql << R"(
-  //    select count(name) from season where name=? collate nocase;
-  //  )" << params.name >>
-  //      count;
-
-  //  if (count > 0) {
-  //    return AsyncResult{
-  //        stringFormat("Cannot add season `%s` as it already exists.",
-  //                     params.name),
-  //        ""};
-  //  }
-
-  //  if (params.endTime.hasValue()) {
-  //    if (params.startTime >= *params.endTime) {
-  //      return {"Start time cannot be after end time", ""};
-  //    }
-  //  }
-
-  //  std::string insert = R"(
-  //    insert into season (
-  //      name,
-  //      start_time,
-  //      end_time
-  //    ) values (
-  //      ?,
-  //      ?,
-  //      ?
-  //    );
-  //  )";
-
-  //  if (params.endTime.hasValue())
-  //    _database->sql << insert << params.name
-  //        << params.startTime.time_since_epoch().count()
-  //        << (*params.endTime).time_since_epoch().count();
-  //  else
-  //    _database->sql << insert << params.name
-  //        << params.startTime.time_since_epoch().count() << nullptr;
-
-  //  return {"", ""};
-  //};
-
-  //auto res = std::async(std::launch::async, addSeasonTask, season);
-
-  //auto status = res.wait_for(std::chrono::seconds(0));
-
-  //try {
-  //  if (status == std::future_status::ready) {
-  //    _logger->info("ready");
-  //  } else {
-  //    res.wait();
-  //    _logger->info("done");
-  //  }
-  //  _logger->info(res.get().error);
-  //} catch (std::runtime_error &e) {
-  //  _logger->info(e.what());
-  //}
-
 }

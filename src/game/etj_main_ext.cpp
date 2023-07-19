@@ -143,9 +143,6 @@ void OnGameInit() {
 
   auto opt = Utilities::Optional<std::chrono::system_clock::time_point>();
 
-  game.timerunV2->addSeason({"name", std::chrono::system_clock::now(),
-                             opt});
-
   if (g_tokensMode.integer) {
     // Utilities::WriteFile handles the correct path
     // (etjump/...)

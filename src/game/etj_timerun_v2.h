@@ -29,6 +29,7 @@
 #include "etj_database_v2.h"
 #include "etj_log.h"
 #include "etj_synchronization_context.h"
+#include "etj_time_utilities.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
@@ -47,9 +48,10 @@ public:
   void runFrame();
 
   struct AddSeasonParams {
+    int clientNum;
     std::string name;
-    std::chrono::system_clock::time_point startTime;
-    Utilities::Optional<std::chrono::system_clock::time_point> endTime;
+    Time startTime;
+    opt<Time> endTime;
   };
 
   void addSeason(AddSeasonParams season);

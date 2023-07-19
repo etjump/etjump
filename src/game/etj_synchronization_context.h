@@ -16,7 +16,6 @@ using opt = Utilities::Optional<T>;
 class SynchronizationContext {
 public:
   class ResultBase {
-
   };
 
   using TaskFn = std::function<std::unique_ptr<ResultBase>()>;

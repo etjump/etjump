@@ -1,5 +1,3 @@
-
-
 // this file holds commands that can be executed by the server console, but not
 // remote clients
 
@@ -553,7 +551,7 @@ void Svcmd_RevivePlayer(char *name) {
 
   if (!g_cheats.integer) {
     trap_SendServerCommand(-1, va("print \"Cheats are not enabled "
-                                  "on this server.\n\""));
+                               "on this server.\n\""));
     return;
   }
 
@@ -779,8 +777,11 @@ qboolean ConsoleCommand(void) {
     trap_Argv(1, cmd, sizeof(cmd));
 
     game.timerunV2->addSeason(ETJump::TimerunV2::AddSeasonParams{
-        std::string(cmd), std::chrono::system_clock::now(),
-        Utilities::Optional<std::chrono::system_clock::time_point>()});
+        -1,
+        std::string(cmd), ETJump::getCurrentTime(),
+        ETJump::opt<ETJump::Time>()});
+
+    return qtrue;
   }
 
   if (OnConsoleCommand()) {

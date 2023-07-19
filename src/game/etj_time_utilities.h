@@ -30,6 +30,9 @@
 #ifdef max
   #undef max
 #endif
+#include <string>
+
+#include "etj_string_utilities.h"
 
 namespace ETJump {
 struct Clock {
@@ -49,6 +52,51 @@ struct Date {
 struct Time {
   Clock clock;
   Date date;
+
+    bool operator==(const Time &other) const {
+    return (clock.hours == other.clock.hours && clock.min == other.clock.min &&
+            clock.sec == other.clock.sec && clock.ms == other.clock.ms &&
+            date.year == other.date.year && date.mon == other.date.mon &&
+            date.day == other.date.day && date.days == other.date.days);
+  }
+
+  bool operator!=(const Time &other) const { return !(*this == other); }
+
+  bool operator<(const Time &other) const {
+    if (date.year != other.date.year) {
+      return date.year < other.date.year;
+    }
+    if (date.mon != other.date.mon) {
+      return date.mon < other.date.mon;
+    }
+    if (date.day != other.date.day) {
+      return date.day < other.date.day;
+    }
+    if (clock.hours != other.clock.hours) {
+      return clock.hours < other.clock.hours;
+    }
+    if (clock.min != other.clock.min) {
+      return clock.min < other.clock.min;
+    }
+    if (clock.sec != other.clock.sec) {
+      return clock.sec < other.clock.sec;
+    }
+    return clock.ms < other.clock.ms;
+  }
+
+  bool operator<=(const Time &other) const {
+    return (*this < other) || (*this == other);
+  }
+
+  bool operator>(const Time &other) const { return !(*this <= other); }
+
+  bool operator>=(const Time &other) const { return !(*this < other); }
+
+   std::string toDateTimeString() const {
+    return stringFormat("%04d-%02d-%02d %02d:%02d:%02d", this->date.year,
+                        this->date.mon, this->date.day, this->clock.hours,
+                        this->clock.min, this->clock.sec);
+  }
 };
 
 long long getCurrentTimestamp();
