@@ -2325,7 +2325,7 @@ static void UI_DrawMissionBriefingObjectives(rectDef_t *rect, float scale,
 static void UI_DrawNetFilter(rectDef_t *rect, float scale, vec4_t color,
                              int textStyle) {
   if (ui_serverFilterType.integer < 0 ||
-      ui_serverFilterType.integer > numServerFilters) {
+      ui_serverFilterType.integer >= numServerFilters) {
     ui_serverFilterType.integer = 0;
   }
   Text_Paint(
