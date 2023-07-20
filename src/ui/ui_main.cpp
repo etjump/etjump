@@ -2487,7 +2487,7 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
       break;
     case UI_NETFILTER:
       if (ui_serverFilterType.integer < 0 ||
-          ui_serverFilterType.integer > numServerFilters) {
+          ui_serverFilterType.integer >= numServerFilters) {
         ui_serverFilterType.integer = 0;
       }
       s = va("Filter: %s",
