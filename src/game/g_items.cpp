@@ -1208,7 +1208,7 @@ void FinishSpawningItem(gentity_t *ent) {
     // or ammo item specify it as "multi-stage" TTimo left-hand
     // operand of comma expression has no effect initial line:
     // for(i=0;i<4,ent->item->world_model[i];i++) {}
-    for (i = 0; i < 4 && ent->item->world_model[i]; i++) {
+    for (i = 0; i < MAX_ITEM_MODELS && ent->item->world_model[i]; i++) {
     }
 
     ent->s.density = i - 1; // store number of stages in 'density' for client
