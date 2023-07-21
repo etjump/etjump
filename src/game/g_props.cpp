@@ -1549,7 +1549,7 @@ void Use_DamageInflictor(gentity_t *ent, gentity_t *other,
   gentity_t *daent;
 
   daent = NULL;
-  while ((daent = G_FindByTargetname(daent, daent->target)) != NULL) {
+  while ((daent = G_FindByTargetname(daent, daent ? daent->target : "")) != NULL) {
     if (daent == ent) {
       G_Printf("Use_DamageInflictor damaging self.\n");
     } else {
