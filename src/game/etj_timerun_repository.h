@@ -49,11 +49,14 @@ public:
   Timerun::Season addSeason(Timerun::AddSeasonParams params);
   std::vector<Timerun::Record> getRecordsForPlayer(
       const std::vector<int> &activeSeasons,
-      const std::string &map, const std::string& run, int userId);
+      const std::string &map, const std::string &run, int userId);
   std::vector<Timerun::Record> getRecordsForRun(const std::string &map,
                                                 const std::string &run) const;
-  void insertRecord(const Timerun::Record & record);
-  void updateRecord(const Timerun::Record & record);
+  void insertRecord(const Timerun::Record &record);
+  void updateRecord(const Timerun::Record &record);
+  opt<Timerun::Record>
+  getTopRecord(int seasonId, const std::string &map,
+               const std::string &run);
 
 private:
   void migrate();

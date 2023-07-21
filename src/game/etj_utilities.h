@@ -177,6 +177,12 @@ auto filter(const InputContainer& container, Predicate&& pred) {
 
   return result;
 }
+
+template <typename Container, typename Element>
+bool isIn(const Container &container, const Element &element) {
+  return std::find(container.begin(), container.end(), element) !=
+         container.end();
+}
 } // namespace Utilities
 
 #endif // ETJUMP_UTILITIES_H

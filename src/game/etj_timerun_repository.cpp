@@ -260,7 +260,45 @@ void ETJump::TimerunRepository::updateRecord(const Timerun::Record &record) {
   )" << record.time
       << StringUtil::join(record.checkpoints, ",") << record.recordDate.
       toDateTimeString() << record.playerName << serializeMetadata(
-          record.metadata) << record.seasonId << record.map << record.run << record.userId;
+          record.metadata) << record.seasonId << record.map << record.run <<
+      record.userId;
+}
+
+ETJump::opt<ETJump::Timerun::Record>
+ETJump::TimerunRepository::getTopRecord(int seasonId,
+                                             const std::string &map,
+                                             const std::string &run) {
+  opt<Timerun::Record> record;
+  _database->sql << R"(
+    select
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    from record
+    where 
+      season_id=? and
+      map=? and
+      run=?
+    order by time asc
+    limit 1
+    )"
+      << seasonId << map << run >>
+      [&record](int seasonId, std::string map, std::string runName, int userId,
+                int time, std::string checkpointsString,
+                std::string recordDate, std::string playerName,
+                std::string metadataString) {
+        record = opt<Timerun::Record>(getRecordFromStandardQueryResult(
+            seasonId, map, runName, userId, time, checkpointsString, recordDate,
+            playerName, metadataString));
+      };
+
+  return record;
 }
 
 void ETJump::TimerunRepository::migrate() {

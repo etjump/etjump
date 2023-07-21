@@ -26,15 +26,21 @@
 #include <array>
 #include <map>
 
+#include "etj_log.h"
+
 namespace ETJump {
 class TimerunEntity {
 private:
+  static Log logger;
   static std::map<std::string, int> runIndices;
 
 protected:
   static void setTimerunIndex(gentity_t *self);
   static bool canActivate(gentity_t *activator);
   static int getOrSetTimerunIndex(const std::string &runName);
+
+public:
+  static void validateTimerunEntities();
 };
 
 /**

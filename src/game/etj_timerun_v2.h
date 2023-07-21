@@ -31,7 +31,6 @@
 #include "etj_log.h"
 #include "etj_synchronization_context.h"
 #include "etj_timerun_models.h"
-#include "etj_time_utilities.h"
 #include "etj_utilities.h"
 #include "g_local.h"
 
@@ -89,7 +88,7 @@ private:
    * We can have multiple seasons running at once. This will
    * figure out which one is the most relevant for the user
    */
-  const Timerun::Season &getMostRelevantSeason();
+  const Timerun::Season *getMostRelevantSeason();
 
   std::string _currentMap;
   std::unique_ptr<TimerunRepository> _repository;
@@ -98,6 +97,7 @@ private:
   std::array<std::unique_ptr<Player>, 64> _players;
   std::vector<int> _activeSeasonsIds;
   std::vector<Timerun::Season> _activeSeasons;
+  const Timerun::Season * _mostRelevantSeason;
 };
 
 }

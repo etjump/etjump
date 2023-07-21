@@ -8,6 +8,7 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_timerun_entities.h"
 
 level_locals_t level;
 
@@ -2007,6 +2008,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   // parse the key/value pairs and spawn gentities
   G_SpawnEntitiesFromString();
+
+  ETJump::TimerunEntity::validateTimerunEntities();
 
   // TAT 11/13/2002 - entities are spawned, so now we can do setup
   InitialServerEntitySetup();

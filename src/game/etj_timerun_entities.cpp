@@ -33,7 +33,8 @@
 #include "etj_timerun_v2.h"
 
 namespace ETJump {
-std::map<std::string, int> ETJump::TimerunEntity::runIndices;
+std::map<std::string, int> TimerunEntity::runIndices;
+ETJump::Log TimerunEntity::logger = ETJump::Log("timerun entity");
 
 void TimerunEntity::setTimerunIndex(gentity_t *self) {
   char *name = nullptr;
@@ -71,6 +72,55 @@ int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
              sizeof(level.timerunNames[idx]));
 
   return runIndices[runName];
+}
+
+struct TimerunEntityValidationResult {
+  bool hasStartTimer;
+  bool hasStopTimer;
+  bool hasCheckpoints;
+};
+
+std::vector<std::string> timerunEntities{
+    "target_startTimer", "trigger_startTimer", "target_stopTimer",
+    "trigger_stopTimer", "target_checkpoint", "trigger_checkpoint"};
+
+void TimerunEntity::validateTimerunEntities() {
+  std::map<std::string, TimerunEntityValidationResult> validationResults;
+
+  for (int i = 0; i < MAX_GENTITIES; ++i) {
+    auto ent = g_entities[i];
+
+    if (!Utilities::isIn(timerunEntities, ent.runName)) {
+      continue;
+    }
+
+      if (validationResults.count(ent.runName) == 0) {
+        validationResults[ent.runName] = TimerunEntityValidationResult{};
+      }
+
+    if (ent.classname == std::string("target_startTimer") ||
+        ent.classname == std::string("trigger_startTimer")) {
+      validationResults[ent.runName].hasStartTimer = true;
+    } else if (ent.classname == std::string("target_stopTimer") ||
+               ent.classname == std::string("trigger_stopTimer")) {
+      validationResults[ent.runName].hasStopTimer = true;
+    } else if (ent.classname == std::string("target_checkpoint") ||
+               ent.classname == std::string("trigger_checkpoint")) {
+      validationResults[ent.runName].hasCheckpoints = true;
+    }
+  }
+
+  for (const auto &r : validationResults) {
+    if (!r.second.hasStartTimer) {
+
+      logger.error("Timerun `%s` is missing a start timer. Add one.\n",
+                   r.first);
+    }
+    if (!r.second.hasStopTimer) {
+      logger.error("Timerun `%s` is missing a start timer. Add one.\n",
+                   r.first);
+    }
+  }
 }
 
 void TargetStartTimer::spawn(gentity_t *self) {
