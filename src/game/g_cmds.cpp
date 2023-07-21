@@ -2194,15 +2194,15 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay,
 
   if (mode == SAY_TEAM || mode == SAY_BUDDY) {
     CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd,
-                               voiceonly, ent - g_entities, color, vsay->id,
+                               voiceonly, ClientNum(ent), color, vsay->id,
                                static_cast<int>(ent->s.pos.trBase[0]),
                                static_cast<int>(ent->s.pos.trBase[1]),
                                static_cast<int>(ent->s.pos.trBase[2]),
                                vsay->variant, vsay->random, vsay->custom));
   } else {
     CPx(other - g_entities,
-        va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ent - g_entities,
-           color, vsay->id, vsay->variant, vsay->random, vsay->custom));
+        va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ClientNum(ent), color,
+           vsay->id, vsay->variant, vsay->random, vsay->custom));
   }
 }
 
