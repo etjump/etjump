@@ -3999,7 +3999,7 @@ qboolean UI_CheckExecKey(int key) {
     return qtrue;
   }
 
-  if (key > 256) {
+  if (key >= static_cast<int>(sizeof(menu->onKey) / sizeof(*menu->onKey))) {
     return qfalse;
   }
 
