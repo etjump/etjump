@@ -23,52 +23,38 @@
  */
 
 #pragma once
-#include <array>
 #include <map>
+#include <string>
+
+#include "etj_synchronization_context.h"
+#include "etj_time_utilities.h"
 
 namespace ETJump {
-class TimerunEntity {
-private:
-  static std::map<std::string, int> runIndices;
-
-protected:
-  static void setTimerunIndex(gentity_t *self);
-  static bool canActivate(gentity_t *activator);
-  static int getOrSetTimerunIndex(const std::string &runName);
+namespace Timerun {
+struct Season {
+  int id;
+  std::string name;
+  Time startTime;
+  opt<Time> endTime;
 };
 
-/**
- * TargetStartTimer
- */
-class TargetStartTimer : public TimerunEntity {
-private:
-  static void use(gentity_t *self, gentity_t *activator);
-  static bool canStartTimerun(gentity_t *self, gentity_t *activator,
-                              const int *clientNum, const float *speed);
-
-public:
-  static void spawn(gentity_t *self);
+struct Record {
+  int seasonId;
+  std::string map;
+  std::string run;
+  int userId;
+  int time;
+  std::vector<int> checkpoints;
+  Time recordDate;
+  std::string playerName;
+  std::map<std::string, std::string> metadata;
 };
 
-/**
- * TargetStopTimer
- */
-class TargetStopTimer : public TimerunEntity {
-private:
-  static void use(gentity_t *self, gentity_t *activator);
-
-public:
-  static void spawn(gentity_t *self);
+struct AddSeasonParams {
+  int clientNum;
+  std::string name;
+  Time startTime;
+  opt<Time> endTime;
 };
-
-/**
- * TargetCheckpoint
- */
-class TargetCheckpoint : public TimerunEntity {
-private:
-  static void use(gentity_t *self, gentity_t *activator);
-
-public:
-  static void spawn(gentity_t *self);
-};
-} // namespace ETJump
+}
+}

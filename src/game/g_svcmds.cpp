@@ -776,7 +776,7 @@ qboolean ConsoleCommand(void) {
   if (!Q_stricmp(cmd, "add_season")) {
     trap_Argv(1, cmd, sizeof(cmd));
 
-    game.timerunV2->addSeason(ETJump::TimerunV2::AddSeasonParams{
+    game.timerunV2->addSeason(ETJump::Timerun::AddSeasonParams{
         -1,
         std::string(cmd), ETJump::getCurrentTime(),
         ETJump::opt<ETJump::Time>()});

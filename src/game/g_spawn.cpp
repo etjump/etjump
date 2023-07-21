@@ -11,6 +11,7 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_string_utilities.h"
+#include "etj_timerun_entities.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -457,8 +458,6 @@ void SP_target_ftrelay(gentity_t *self);
 void SP_target_savelimit_set(gentity_t *self);
 void SP_target_savelimit_inc(gentity_t *self);
 void SP_target_decay(gentity_t *self);
-void SP_target_startTimer(gentity_t *self);
-void SP_target_stopTimer(gentity_t *self);
 void SP_target_interrupt_timerun(gentity_t *self);
 // Check speed and if it's too high/low, fire the target
 void SP_target_activate_if_velocity(gentity_t *self);
@@ -705,8 +704,9 @@ spawn_t spawns[] = {
     {"target_savelimit_set", SP_target_savelimit_set},
     {"target_savelimit_inc", SP_target_savelimit_inc},
     {"target_decay", SP_target_decay},
-    {"target_starttimer", SP_target_startTimer},
-    {"target_stoptimer", SP_target_stopTimer},
+    {"target_starttimer", ETJump::TargetStartTimer::spawn},
+    {"target_stoptimer", ETJump::TargetStopTimer::spawn},
+    {"target_checkpoint", ETJump::TargetCheckpoint::spawn},
     {"target_interrupt_timerun", SP_target_interrupt_timerun},
     {"target_activate_if_velocity", SP_target_activate_if_velocity},
     {"target_scale_velocity", SP_target_scale_velocity},

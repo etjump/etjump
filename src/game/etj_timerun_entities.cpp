@@ -24,10 +24,17 @@
 
 #include "g_local.h"
 #include "etj_timerun_entities.h"
+
+#include <stdexcept>
+
+#include "etj_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
+#include "etj_timerun_v2.h"
 
 namespace ETJump {
+std::map<std::string, int> ETJump::TimerunEntity::runIndices;
+
 void TimerunEntity::setTimerunIndex(gentity_t *self) {
   char *name = nullptr;
   int i;
@@ -39,21 +46,7 @@ void TimerunEntity::setTimerunIndex(gentity_t *self) {
     return;
   }
 
-  for (i = 0; i < level.timerunNamesCount; i++) {
-    // set the index for any duplicate target_starttimers with same run name,
-    // or to link target_stoptimer to the corresponding target_starttimer
-    if (!Q_stricmp(level.timerunNames[i], name)) {
-      self->runIndex = i;
-      break;
-    }
-  }
-
-  if (i == level.timerunNamesCount) {
-    Q_strncpyz(level.timerunNames[level.timerunNamesCount], name,
-               sizeof(level.timerunNames[level.timerunNamesCount]));
-    self->runIndex = level.timerunNamesCount;
-    ++level.timerunNamesCount;
-  }
+  self->runIndex = getOrSetTimerunIndex(name);
 }
 
 bool TimerunEntity::canActivate(gentity_t *activator) {
@@ -65,6 +58,19 @@ bool TimerunEntity::canActivate(gentity_t *activator) {
   }
 
   return true;
+}
+
+int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
+  if (runIndices.count(runName) == 0) {
+    runIndices[runName] = level.timerunNamesCount++;
+  }
+
+  auto idx = runIndices[runName];
+
+  Q_strncpyz(level.timerunNames[idx], runName.c_str(),
+             sizeof(level.timerunNames[idx]));
+
+  return runIndices[runName];
 }
 
 void TargetStartTimer::spawn(gentity_t *self) {
@@ -130,7 +136,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   // check for pmove_fixed 0
   if (!client->sess.runSpawnflags ||
       client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
+      static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
     if (!client->pers.pmoveFixed) {
       Printer::SendCenterMessage(
           clientNum,
@@ -147,6 +153,10 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   }
 
   StartTimer(level.timerunNames[self->runIndex], activator);
+
+  game.timerunV2->startTimer(level.timerunNames[self->runIndex], clientNum,
+                             activator->client->pers.netname,
+                             activator->client->ps.commandTime);
 }
 
 void TargetStopTimer::spawn(gentity_t *self) {
@@ -156,18 +166,42 @@ void TargetStopTimer::spawn(gentity_t *self) {
     use(self, activator);
   };
 }
+
+void TargetCheckpoint::use(gentity_t *self, gentity_t *activator) {
+  if (!canActivate(activator)) {
+    return;
+  }
+
+  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
+                             self->checkpointIndex, ClientNum(activator),
+                             activator->client->ps.commandTime);
+}
+
+void TargetCheckpoint::spawn(gentity_t *self) {
+  char *name = nullptr;
+  G_SpawnString("name", "default", &name);
+
+  Q_strncpyz(self->runName, name, sizeof(self->runName));
+
+  setTimerunIndex(self);
+
+  level.hasCheckpoints = true;
+
+  self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+}
+
 void TargetStopTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
   }
 
   StopTimer(level.timerunNames[self->runIndex], activator);
+
+  game.timerunV2->stopTimer(level.timerunNames[self->runIndex],
+                            ClientNum(activator),
+                            activator->client->ps.commandTime);
 }
 } // namespace ETJump
-
-void SP_target_startTimer(gentity_t *self) {
-  ETJump::TargetStartTimer::spawn(self);
-}
-void SP_target_stopTimer(gentity_t *self) {
-  ETJump::TargetStopTimer::spawn(self);
-}

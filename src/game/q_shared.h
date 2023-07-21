@@ -1795,6 +1795,8 @@ typedef enum {
 
 #define SQR(a) ((a) * (a))
 
+constexpr int MAX_TIMERUN_CHECKPOINTS = 16;
+
 /**
  * @def VM_CALL_END
  *

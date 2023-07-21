@@ -254,6 +254,9 @@ struct TokenInformation_s {
 };
 typedef struct TokenInformation_s TokenInformation;
 
+constexpr int MAX_TIMERUNS = 20;
+constexpr int MAX_TIMERUN_NAME_LENGTH = 64;
+
 //====================================================================
 
 #define MAX_NETNAME 36
@@ -573,6 +576,8 @@ struct gentity_s {
   int portalTeam;
 
   int runIndex;
+  char runName[MAX_TIMERUN_NAME_LENGTH];
+  int checkpointIndex;
 
   float velocityLowerLimit;
   float velocityUpperLimit;
@@ -1424,7 +1429,9 @@ typedef struct {
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
+  bool hasCheckpoints;
   int saveLoadRestrictions;
+  int checkpointsCount[MAX_TIMERUNS];
 } level_locals_t;
 
 typedef struct {

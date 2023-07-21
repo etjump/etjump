@@ -44,6 +44,11 @@ public:
     println("info", stringFormat(format, fargs...));
   }
 
+  template <typename... Targs>
+  void error(const std::string &format, const Targs &...fargs) const {
+    println("error", stringFormat(format, fargs...));
+  }
+
   static void processMessages();
 private:
   std::string _name;

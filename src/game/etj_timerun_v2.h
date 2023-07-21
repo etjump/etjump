@@ -30,67 +30,74 @@
 #include "etj_database_v2.h"
 #include "etj_log.h"
 #include "etj_synchronization_context.h"
+#include "etj_timerun_models.h"
 #include "etj_time_utilities.h"
 #include "etj_utilities.h"
+#include "g_local.h"
 
 namespace ETJump {
+class TimerunRepository;
+
 class TimerunV2 {
 public:
-
-
   TimerunV2(std::string currentMap,
-            std::unique_ptr<DatabaseV2> database,
+            std::unique_ptr<TimerunRepository> repository,
             std::unique_ptr<Log> logger,
             std::unique_ptr<SynchronizationContext>
             synchronizationContext);
+
+  static const int CheckpointNotSet = -1;
+
+  struct Player {
+    Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
+      : clientNum(clientNum), userId(userId), records(runs), running(false),
+        startTime(opt<int>()), completionTime(opt<int>()) {
+    }
+
+    int clientNum;
+    int userId;
+    std::vector<Timerun::Record> records;
+    bool running{};
+    std::string name;
+    Utilities::Optional<int> startTime;
+    Utilities::Optional<int> completionTime;
+    std::string activeRunName;
+    std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
+
+    const Timerun::Record *getRecord(const std::string &runName) const;
+  };
 
   void initialize();
   void shutdown();
   void runFrame();
   void clientConnect(int clientNum, int userId);
   void clientDisconnect(int clientNum);
-
-  struct AddSeasonParams {
-    int clientNum;
-    std::string name;
-    Time startTime;
-    opt<Time> endTime;
-  };
-
-  static const int CheckpointNotSet = -1;
-
-  struct Run {
-    int seasonId;
-    std::string map;
-    std::string run;
-    int userId;
-    int time;
-    std::vector<int> checkpoints;
-    Time recordDate;
-    std::string playerName;
-    std::map<std::string, std::string> metadata;
-  };
-
-  struct Player {
-    Player(int clientId, int userId, const std::vector<Run> &runs)
-      : clientId(clientId),
-        userId(userId),
-        runs(runs) {
-    }
-
-    int clientId;
-    int userId;
-    std::vector<Run> runs;
-  };
-
-  void addSeason(AddSeasonParams season);
+  void startTimer(const std::string &runName, int clientNum,
+                  const std::string &playerName, int currentTimeMs);
+  void checkpoint(const std::string &runName, int checkpointIndex,
+                  int clientNum, int currentTimeMs);
+  void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
+  void addSeason(Timerun::AddSeasonParams season);
+  void interrupt(int clientNum);
+  void connectNotify(int clientNum);
 
 private:
+  void startNotify(Player *player);
+  bool isDebugging(int clientNum);
+  void checkRecord(Player *player);
+  /**
+   * We can have multiple seasons running at once. This will
+   * figure out which one is the most relevant for the user
+   */
+  const Timerun::Season &getMostRelevantSeason();
+
   std::string _currentMap;
-  std::unique_ptr<DatabaseV2> _database;
+  std::unique_ptr<TimerunRepository> _repository;
   std::unique_ptr<Log> _logger;
   std::unique_ptr<SynchronizationContext> _sc;
   std::array<std::unique_ptr<Player>, 64> _players;
-  std::vector<int> _activeSeasons;
+  std::vector<int> _activeSeasonsIds;
+  std::vector<Timerun::Season> _activeSeasons;
 };
+
 }

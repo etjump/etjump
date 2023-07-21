@@ -23,52 +23,41 @@
  */
 
 #pragma once
-#include <array>
+
 #include <map>
+#include <string>
+
+#include "etj_synchronization_context.h"
+#include "etj_timerun_models.h"
+#include "etj_time_utilities.h"
 
 namespace ETJump {
-class TimerunEntity {
-private:
-  static std::map<std::string, int> runIndices;
+class DatabaseV2;
 
-protected:
-  static void setTimerunIndex(gentity_t *self);
-  static bool canActivate(gentity_t *activator);
-  static int getOrSetTimerunIndex(const std::string &runName);
-};
-
-/**
- * TargetStartTimer
- */
-class TargetStartTimer : public TimerunEntity {
-private:
-  static void use(gentity_t *self, gentity_t *activator);
-  static bool canStartTimerun(gentity_t *self, gentity_t *activator,
-                              const int *clientNum, const float *speed);
-
+class TimerunRepository {
 public:
-  static void spawn(gentity_t *self);
-};
+  explicit TimerunRepository(std::unique_ptr<DatabaseV2> database)
+    : _database(std::move(database)) {
+  }
 
-/**
- * TargetStopTimer
- */
-class TargetStopTimer : public TimerunEntity {
+  void initialize();
+  void shutdown();
+
+  std::vector<Timerun::Season> getActiveSeasons(const Time &currentTime) const;
+  std::vector<Timerun::Record> getRecordsForPlayer(
+      const std::vector<int> activeSeasons, const std::string &map, int userId);
+  Timerun::Season addSeason(Timerun::AddSeasonParams params);
+  std::vector<Timerun::Record> getRecordsForPlayer(
+      const std::vector<int> &activeSeasons,
+      const std::string &map, const std::string& run, int userId);
+  std::vector<Timerun::Record> getRecordsForRun(const std::string &map,
+                                                const std::string &run) const;
+  void insertRecord(const Timerun::Record & record);
+  void updateRecord(const Timerun::Record & record);
+
 private:
-  static void use(gentity_t *self, gentity_t *activator);
-
-public:
-  static void spawn(gentity_t *self);
+  void migrate();
+  std::string serializeMetadata(std::map<std::string, std::string> metadata);
+  std::unique_ptr<DatabaseV2> _database;
 };
-
-/**
- * TargetCheckpoint
- */
-class TargetCheckpoint : public TimerunEntity {
-private:
-  static void use(gentity_t *self, gentity_t *activator);
-
-public:
-  static void spawn(gentity_t *self);
-};
-} // namespace ETJump
+}

@@ -37,6 +37,7 @@
 #include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_string_utilities.h"
+#include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
 
 Game game;
@@ -79,6 +80,7 @@ void OnClientDisconnect(gentity_t *ent) {
 
   ETJump::session->OnClientDisconnect(ClientNum(ent));
   ETJump::Log::processMessages();
+  game.timerunV2->clientDisconnect(ClientNum(ent));
 }
 
 void WriteSessionData() {
@@ -114,8 +116,9 @@ void OnGameInit() {
   game.tokens = std::make_shared<Tokens>();
   game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
       level.rawmapname,
-      std::make_unique<ETJump::DatabaseV2>(
-          "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
+      std::make_unique<ETJump::TimerunRepository>(
+          std::make_unique<ETJump::DatabaseV2>(
+              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2")),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
 
@@ -380,6 +383,7 @@ void StopTimer(const char *runName, gentity_t *ent) {
 
 void TimerunConnectNotify(gentity_t *ent) {
   game.timerun->connectNotify(ClientNum(ent));
+  game.timerunV2->connectNotify(ClientNum(ent));
 }
 
 void InterruptRun(gentity_t *ent) {
@@ -388,6 +392,7 @@ void InterruptRun(gentity_t *ent) {
   }
 
   game.timerun->interrupt(ClientNum(ent));
+  game.timerunV2->interrupt(ClientNum(ent));
 }
 
 void G_increaseCallvoteCount(const char *mapName) {

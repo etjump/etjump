@@ -65,6 +65,10 @@ void ETJump::SynchronizationContext::worker() {
     });
 
     if (!_running) {
+      // NOTE: we're currently dropping anything that wasn't processed to
+      // technically there's a chance that we lose some information. Should
+      // we instead loop through the existing incomplete list and execute
+      // them?
       return;
     }
 
