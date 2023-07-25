@@ -1178,6 +1178,11 @@ void ClientThink_real(gentity_t *ent) {
   VectorCopy(ent->r.mins, pm.mins);
   VectorCopy(ent->r.maxs, pm.maxs);
 
+  // save waterlevel/type in case we skip Pmove this frame
+  // (>125fps & pmove_fixed 1) so P_WorldEffects doesn't reset pmext->airLeft
+  pm.waterlevel = ent->waterlevel;
+  pm.watertype = ent->watertype;
+
   // NERVE - SMF
   pm.gametype = g_gametype.integer;
   pm.ltChargeTime = level.lieutenantChargeTime[client->sess.sessionTeam - 1];
