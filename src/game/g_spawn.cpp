@@ -1095,7 +1095,7 @@ static void initNoProne() {
 static void initNoDrop() {
   auto value = 0;
   G_SpawnInt("nodrop", "0", &value);
-  level.noDrop = value > 0 ? qtrue : qfalse;
+  level.noDrop = value > 0;
   level.noDrop ? shared.integer |= BG_LEVEL_NO_DROP
                : shared.integer &= ~BG_LEVEL_NO_DROP;
 
