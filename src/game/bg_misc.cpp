@@ -5678,3 +5678,22 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad) {
   BG_GetPushVelocity(ps, jumppad->origin2, spawnflags, outVelocity);
   VectorCopy(outVelocity, ps->velocity);
 }
+
+/*
+================
+BG_DropItems
+Checks shared for nodrop worldspawn key value and current content flags,
+and returns whether we should drop items to floor or delete them
+================
+*/
+bool BG_DropItems(const int contents, const int shared) {
+  if (!(shared & BG_LEVEL_NO_DROP) && !(contents & CONTENTS_NODROP)) {
+    return true;
+  }
+
+  if ((shared & BG_LEVEL_NO_DROP) && (contents & CONTENTS_NODROP)) {
+    return true;
+  }
+
+  return false;
+}

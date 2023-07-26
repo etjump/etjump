@@ -288,7 +288,7 @@ player_die
 
 void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
                 int damage, int meansOfDeath) {
-  int contents = 0, i, killer = ENTITYNUM_WORLD;
+  int i, killer = ENTITYNUM_WORLD;
   const char *killerName = "<world>";
   qboolean nogib = qtrue;
   gitem_t *item = NULL;
@@ -598,7 +598,8 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
 
   // never gib in a nodrop
   // FIXME: contents is always 0 here
-  if (self->health <= GIB_HEALTH && !(contents & CONTENTS_NODROP)) {
+  // not fixing this, this was silly, why would we not gib in nodrop?
+  if (self->health <= GIB_HEALTH) {
     GibEntity(self, killer);
     nogib = qfalse;
   }

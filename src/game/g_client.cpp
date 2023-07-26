@@ -341,7 +341,7 @@ void CopyToBodyQue(gentity_t *ent) {
 
   // if client is in a nodrop area, don't leave the body
   contents = trap_PointContents(ent->client->ps.origin, -1);
-  if (contents & CONTENTS_NODROP) {
+  if (!BG_DropItems(contents, shared.integer)) {
     return;
   }
 
@@ -515,7 +515,7 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
     contents = trap_PointContents(ent->r.currentOrigin,
                                   -1);            // drop stuff
     ent->s.weapon = ent->client->limboDropWeapon; // stored in player_die()
-    if (makeCorpse && !(contents & CONTENTS_NODROP)) {
+    if (makeCorpse && BG_DropItems(contents, shared.integer)) {
       TossClientItems(ent);
     }
 
