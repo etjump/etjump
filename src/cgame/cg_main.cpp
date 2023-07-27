@@ -667,8 +667,8 @@ cvarTable_t cvarTable[] = {
     {&cg_gun_z, "cg_gunZ", "0", CVAR_ARCHIVE},
     {&cg_centertime, "cg_centertime", "5",
      CVAR_ARCHIVE}, // DHM - Nerve :: changed from 3 to 5
-    {&cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
-    {&cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE},
+    {&cg_runpitch, "cg_runpitch", "0", CVAR_ARCHIVE},
+    {&cg_runroll, "cg_runroll", "0", CVAR_ARCHIVE},
     {&cg_bobup, "cg_bobup", "0", CVAR_ARCHIVE},
     {&cg_bobpitch, "cg_bobpitch", "0", CVAR_ARCHIVE},
     {&cg_bobroll, "cg_bobroll", "0", CVAR_ARCHIVE},
