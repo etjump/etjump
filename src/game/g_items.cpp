@@ -1410,7 +1410,7 @@ void G_RunItem(gentity_t *ent) {
 
   // if it is in a nodrop volume, remove it
   contents = trap_PointContents(ent->r.currentOrigin, -1);
-  if (contents & CONTENTS_NODROP) {
+  if (!BG_DropItems(contents, shared.integer)) {
     if (ent->item && ent->item->giType == IT_TEAM) {
       Team_ReturnFlag(ent);
     } else {

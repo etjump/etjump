@@ -1091,6 +1091,17 @@ static void initNoProne() {
   trap_Cvar_Set("shared", va("%d", shared.integer));
   G_Printf("Prone is %s.\n", level.noProne ? "disabled" : "enabled");
 }
+
+static void initNoDrop() {
+  auto value = 0;
+  G_SpawnInt("nodrop", "0", &value);
+  level.noDrop = value > 0;
+  level.noDrop ? shared.integer |= BG_LEVEL_NO_DROP
+               : shared.integer &= ~BG_LEVEL_NO_DROP;
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+  G_Printf("Nodrop is %s.\n", level.noDrop ? "enabled" : "disabled");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1238,6 +1249,7 @@ void SP_worldspawn(void) {
   ETJump::initStrictSaveLoad();
   ETJump::initNoFallDamage();
   ETJump::initNoProne();
+  ETJump::initNoDrop();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

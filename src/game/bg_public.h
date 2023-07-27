@@ -1874,6 +1874,8 @@ qboolean BG_CheckMagicAmmo(const playerState_t *ps, int *skill, int teamNum);
 qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
                          int numOfClips);
 
+bool BG_DropItems(int contents, int shared);
+
 #define OVERCLIP 1.001
 
 //----(SA)	removed PM_ammoNeeded 11/27/00
@@ -2780,5 +2782,7 @@ const int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
 const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
 // Prone is disabled
 const int BG_LEVEL_NO_PRONE = 1 << 5;
+// Nodrop is enabled
+const int BG_LEVEL_NO_DROP = 1 << 6;
 
 #endif // __BG_PUBLIC_H__
