@@ -1425,8 +1425,6 @@ typedef struct {
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
   int saveLoadRestrictions;
-
-  bool patchFixWarned; // Warning about ET:L/ETe patch collision fix is printed
 } level_locals_t;
 
 typedef struct {
