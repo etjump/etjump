@@ -69,6 +69,19 @@
 * fixed incorrect error message when `misc_gamemodel` was used with `ANIMATE` spawnflag with 0 frames set [89d7f32](https://github.com/etjump/etjump/commit/89d7f320d0b9c925be51f55379f29da72d3b2483)
 * fixed player head being a valid portal surface [#957](https://github.com/etjump/etjump/pull/957)
 * fixed portalgun trails not respecting `etj_viewPlayerPortals` [#959](https://github.com/etjump/etjump/pull/959)
+* `load` will now respawn & load players position if executed during deathcam after falling to death [#962](https://github.com/etjump/etjump/pull/962)
+* improved spectator info list [#964](https://github.com/etjump/etjump/pull/964)
+  * `etj_drawSpectatorInfo` now accepts 1-3 values, 1 = left align, 2 = center align, 3 = right align
+  * `etj_spectatorInfoSize` and `etj_spectatorInfoShadow` to set text size and enable shadow, respectively
+  * `etj_spectatorInfoY` is now calculated from top-left rather than bottom-left of first name on the list, so value + will no longer hide the first player off screen
+    * Default was changed from 40 -> 30
+* added `entitylist` to console autocompletion and improved it's output [#954](https://github.com/etjump/etjump/pull/954)
+* CGaz 2 is now correctly centered on crosshair instead of being slightly shifted to left [#966](https://github.com/etjump/etjump/pull/966)
+* fixed players not drowning consistently when using `pmove_fixed 1` and `com_maxfps > 125` [#984](https://github.com/etjump/etjump/pull/984)
+* `cg_runroll` and `cg_runpitch` default values are now 0 [#987](https://github.com/etjump/etjump/pull/987)
+* added `nodrop` worldspawn key to globally enable nodrop in the map [#986](https://github.com/etjump/etjump/pull/986)
+  * when enabled, items will only drop to ground inside `CONTENTS_NODROP` brushes
+* added a warning when starting server a on ET: Legacy or ETe without vanilla patch collision [#967](https://github.com/etjump/etjump/pull/967)
 
 # ETJump 2.5.1
 
