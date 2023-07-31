@@ -49,7 +49,7 @@ struct PlayerTimerunInformation {
 
 class TimerunView : public Drawable {
 public:
-  TimerunView();
+  explicit TimerunView(std::shared_ptr<PlayerEventsHandler> playerEventsHandler);
   ~TimerunView();
   static const int MaxClients = 64;
   // whenever server sends any command that starts with
@@ -88,6 +88,7 @@ private:
 
   std::array<PlayerTimerunInformation, MaxClients> _playersTimerunInformation;
   vec4_t inactiveTimerColor;
+  std::shared_ptr<PlayerEventsHandler> _playerEventsHandler;
 
   bool canSkipDraw() const;
 };

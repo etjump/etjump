@@ -292,7 +292,7 @@ void ETJump::TimerunV2::interrupt(int clientNum) {
 }
 
 void ETJump::TimerunV2::connectNotify(int clientNum) {
-  for (int idx = 0; idx < 64; ++idx) {
+  for (int idx = 0; idx < MAX_CLIENTS; ++idx) {
     auto player = _players[idx].get();
     if (player && player->activeRunName.length() > 0) {
       auto previousRecord =
@@ -331,19 +331,6 @@ void ETJump::TimerunV2::startNotify(Player *player) {
     checkpointsStr = StringUtil::join(player->checkpointTimes, ",");
   }
 
-  Printer::SendCommand(
-      player->clientNum,
-      stringFormat("timerun_start %d \"%s\" %d \"%s\"",
-                   player->startTime.value(),
-                   player->activeRunName,
-                   fastestCompletionTime, checkpointsStr));
-  Printer::SendCommand(
-      spectators,
-      stringFormat("timerun_start_spec %d %d \"%s\" %d \"%s\"",
-                   player->clientNum, player->startTime.value(),
-                   player->activeRunName,
-                   fastestCompletionTime,
-                   checkpointsStr));
   Printer::SendCommandToAll(stringFormat(
       "timerun start %d %d \"%s\" %d \"%s\"", player->clientNum,
       player->startTime.value(), player->activeRunName, fastestCompletionTime,

@@ -28,12 +28,14 @@
 #include "etj_timerun_view.h"
 #include "etj_utilities.h"
 #include "etj_cvar_update_handler.h"
+#include "etj_player_events_handler.h"
 #include "../game/etj_string_utilities.h"
 #include "../game/etj_container_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 
-ETJump::TimerunView::TimerunView()
-  : Drawable() {
+ETJump::TimerunView::TimerunView(
+    std::shared_ptr<PlayerEventsHandler> playerEventsHandler)
+  : Drawable(), _playerEventsHandler(playerEventsHandler) {
   for (auto &info : _playersTimerunInformation) {
     interrupt(info);
   }
@@ -75,6 +77,14 @@ void ETJump::TimerunView::start() {
       _playersTimerunInformation[clientNum].previousRecordCheckpoints.fill(-1);
     }
   }
+
+  _playerEventsHandler->check(
+      "timerun:record",
+      {_playersTimerunInformation[clientNum].runName,
+       std::to_string(_playersTimerunInformation[clientNum].startTime),
+       std::to_string(_playersTimerunInformation[clientNum].previousRecord)});
+
+  playerEventsHandler->check("timerun:stop", {CG_Argv(2), CG_Argv(1)});
 }
 
 void ETJump::TimerunView::stop() {

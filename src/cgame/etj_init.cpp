@@ -120,7 +120,7 @@ void initTimer() {
     timerunView = nullptr;
   }
   timerun = std::make_shared<Timerun>(cg.clientNum);
-  timerunView = std::make_shared<TimerunView>();
+  timerunView = std::make_shared<TimerunView>(playerEventsHandler);
 }
 void execCmdOnRunStart() {
   if (etj_onRunStart.string[0]) {
@@ -343,23 +343,6 @@ qboolean CG_ServerCommandExt(const char *cmd) {
     // run name, completion time, previous record
     ETJump::playerEventsHandler->check("timerun:start",
                                        {runName, CG_Argv(1), CG_Argv(3)});
-    return qtrue;
-  }
-  // timerun_start_spec clientNum{integer} runStartTime{integer}
-  // runName{string}
-  if (command == "timerun_start_spec") {
-    if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) {
-      return qtrue;
-    }
-
-    auto clientNum = Q_atoi(CG_Argv(1));
-    auto runStartTime = Q_atoi(CG_Argv(2));
-    std::string runName = CG_Argv(3);
-    auto previousRecord = Q_atoi(CG_Argv(4));
-
-    ETJump::timerun->startSpectatorTimerun(clientNum, runName, runStartTime,
-                                           previousRecord);
-
     return qtrue;
   }
   if (command == "timerun_interrupt") {
