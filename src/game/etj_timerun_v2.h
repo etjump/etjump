@@ -81,6 +81,7 @@ public:
                   int clientNum, int checkpointIndex, int currentTimeMs);
   void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
   void addSeason(Timerun::AddSeasonParams season);
+  void editSeason(Timerun::EditSeasonParams params);
   void interrupt(int clientNum);
   void connectNotify(int clientNum);
 

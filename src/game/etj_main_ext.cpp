@@ -123,49 +123,6 @@ void OnGameInit() {
   game.serverCommands = std::make_unique<ETJump::ServerCommands>(
       std::make_unique<ETJump::Log>("serverCommands"));
 
-
-
-  game.serverCommands->addCommand(
-      ETJump::CommandParser::CommandDefinition::create(
-          "add_season1", "Adds a new timerun season")
-      .addOption("season-name", "Name of the season to add",
-                 ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                 true)
-      .addOption("start-date-inclusive",
-                 "Start date for the timerun season in YYYY-MM-DD format.",
-                 ETJump::CommandParser::OptionDefinition::Type::Date, true)
-      .addOption("end-date-inclusive",
-                 "End date for the timerun season in YYYY-MM-DD format "
-                 "(e.g. 2000-01-01)",
-                 ETJump::CommandParser::OptionDefinition::Type::Token,
-                 false),
-      [](const ETJump::CommandParser::Command &command) {
-        auto name = command.options.at("season-name").text;
-        auto start = command.options.at("start-date-inclusive").date;
-        auto end = command.options.count("end-date-inclusive") > 0
-                       ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(
-                             command.options.at("end-date-inclusive").date))
-                       : ETJump::opt<ETJump::Time>();
-
-        if (end.hasValue()) {
-          if ((*end).date < start) {
-            Printer::PrintLn(ETJump::stringFormat(
-                "Start time `%s` is after end time `%s`", start.toDateString(),
-                end.value().date.toDateString()));
-            return;
-          }
-        }
-
-        ETJump::Timerun::AddSeasonParams params{};
-        params.clientNum = -1;
-        params.startTime = ETJump::Time::fromDate(start);
-        params.endTime = end;
-        params.name = name;
-
-
-        game.timerunV2->addSeason(params);
-      });
-
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
       G_LogPrintf("Error while reading admin config: %s\n",

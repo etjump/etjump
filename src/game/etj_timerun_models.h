@@ -61,5 +61,12 @@ struct AddSeasonParams {
   Time startTime;
   opt<Time> endTime;
 };
+
+struct EditSeasonParams {
+  int clientNum;
+  std::string name;
+  opt<Time> startTime;
+  opt<Time> endTime;
+};
 }
 }

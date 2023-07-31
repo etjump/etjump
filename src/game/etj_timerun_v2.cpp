@@ -275,6 +275,39 @@ void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
       );
 }
 
+class EditSeasonResult : public ETJump::SynchronizationContext::ResultBase {
+public:
+  EditSeasonResult(std::string message)
+    : message(message) {
+  }
+
+  std::string message;
+};
+
+void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
+  _sc->postTask([this, params]() {
+                  try {
+                    _repository->editSeason(params);
+                    return std::make_unique<EditSeasonResult>(
+                        stringFormat("Successfully edited season `%s`",
+                                     params.name));
+                  } catch (const std::runtime_error &e) {
+                    return std::make_unique<EditSeasonResult>(e.what());
+                  }
+                },
+                [this,params](auto r) {
+                  auto editSeasonResult = static_cast<EditSeasonResult *>(r.
+                    get());
+                  Printer::SendConsoleMessage(params.clientNum,
+                                              editSeasonResult->message + "\n");
+                },
+                [this, params](auto &e) {
+                  Printer::SendConsoleMessage(
+                      params.clientNum,
+                      stringFormat("Unable to edit season: %s\n", e.what()));
+                });
+}
+
 void ETJump::TimerunV2::interrupt(int clientNum) {
   Player *player = _players[clientNum].get();
 
@@ -534,7 +567,8 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           // refresh the records cache
           bool foundExistingRecord = false;
           for (auto &oldCachedRecord : _players[clientNum]->records) {
-            if (oldCachedRecord.isSameRunAs(&checkRecordResult->newRelevantRecord.value().record)) {
+            if (oldCachedRecord.isSameRunAs(
+                &checkRecordResult->newRelevantRecord.value().record)) {
               oldCachedRecord =
                   checkRecordResult->newRelevantRecord.value().record;
               foundExistingRecord = true;

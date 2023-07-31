@@ -304,6 +304,84 @@ ETJump::TimerunRepository::getTopRecord(int seasonId,
   return record;
 }
 
+void ETJump::TimerunRepository::editSeason(
+    const Timerun::EditSeasonParams &params) {
+  int seasonId = -1;
+  Time startTime;
+  ETJump::opt<Time> endTime;
+
+  _database->sql << R"(
+    select
+      id,
+      start_time,
+      end_time
+    from season
+    where name=?
+    collate nocase
+  )" << params.name >>
+      [&](int sid, std::string s, std::unique_ptr<std::string> e) {
+        seasonId = sid;
+        startTime = Time::fromString(s);
+        if (e) {
+          endTime = ETJump::opt<ETJump::Time>(Time::fromString(*e));
+        }
+      };
+
+  if (seasonId < 0) {
+    throw std::runtime_error(
+        stringFormat("No season matching name `%s`", params.name));
+  }
+
+  std::vector<std::string> updatedFields;
+  std::vector<std::string> updatedParams;
+  bool anythingToUpdate = false;
+
+  Time newStartTime = startTime;
+  opt<Time> newEndTime = endTime;
+
+  if (params.startTime.hasValue()) {
+    newStartTime = params.startTime.value();
+    anythingToUpdate = true;
+    updatedFields.push_back("start_time");
+    updatedParams.push_back(params.startTime.value().toDateTimeString());
+
+  } else if (params.endTime.hasValue()) {
+    newEndTime = params.endTime;
+    anythingToUpdate = true;
+    updatedFields.push_back("end_time");
+    updatedParams.push_back(params.endTime.value().toDateTimeString());
+  }
+
+  if (newEndTime.hasValue() && newEndTime.value() < newStartTime) {
+    throw std::runtime_error("End time cannot be before start time.");
+  }
+
+  if (!anythingToUpdate) {
+    return;
+  }
+
+  std::string updatedFieldsString =
+      StringUtil::join(Container::map(updatedFields, [](auto a) {
+        return a + "=?";
+      }), ",");
+
+  auto query = stringFormat(R"(
+    update
+      season
+    set
+      %s
+    where
+      id=?
+  )", updatedFieldsString);
+
+  auto q = _database->sql << query;
+
+  for (const auto & p : updatedParams) {
+    q << p;
+  }
+  q << seasonId;
+}
+
 void ETJump::TimerunRepository::migrate() {
   _database->addMigration(
       "initial",

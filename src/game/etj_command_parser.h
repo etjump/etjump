@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "etj_container_utilities.h"
+#include "etj_synchronization_context.h"
 #include "etj_time_utilities.h"
 
 namespace ETJump {
@@ -44,6 +45,24 @@ public:
       Decimal,
       Date,
     };
+
+    static std::string typeToString(Type t) {
+      switch (t) {
+        case Type::Boolean:
+          return "BOOLEAN";
+        case Type::Token:
+          return "TEXT";
+        case Type::MultiToken:
+          return "MULTI-PART TEXT";
+        case Type::Integer:
+          return "INTEGER";
+        case Type::Decimal:
+          return "DECIMAL";
+        case Type::Date:
+          return "DATE";
+      }
+      return "";
+    }
 
     std::string name{};
     std::string description{};
@@ -68,6 +87,18 @@ public:
     std::string name{};
     std::string description{};
     std::map<std::string, OptionDefinition> options{};
+
+    std::string help() const {
+      auto optionsToStrings = Container::map(options, [](const auto &pair) {
+        return stringFormat("    --%s (%s) %s", pair.second.name,
+                            OptionDefinition::typeToString(pair.second.type),
+                            pair.second.description);
+      });
+
+      return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s", name,
+                          description,
+                          StringUtil::join(optionsToStrings, "\n"));
+    }
 
     static CommandDefinition
     create(const std::string name, const std::string description) {
@@ -97,7 +128,11 @@ public:
 
   struct Option {
     Option() = default;
-    explicit Option(const std::string &name) : name(name) {}
+
+    explicit Option(const std::string &name)
+      : name(name) {
+    }
+
     std::string name{};
     bool boolean{};
     std::string text{};
@@ -110,19 +145,28 @@ public:
     std::vector<std::string> errors;
     std::map<std::string, Option> options;
     std::vector<std::string> extraArgs;
+    bool helpRequested{};
+
+    opt<Option> getOptional(const std::string &name) {
+      if (options.count(name) == 0) {
+        return ETJump::opt<Option>();
+      }
+      return ETJump::opt<Option>(options[name]);
+    };
   };
 
   CommandParser(CommandDefinition definition, std::vector<std::string> args)
-      : _args(args),
-        _current(begin(args)), _def(definition), _cmd(Command()) {}
+    : _args(args),
+      _current(begin(args)), _def(definition), _cmd(Command()) {
+  }
 
   const OptionDefinition *getOptionOrNull();
-  void expectBoolean(const OptionDefinition * optionDefinition);
-  void expectToken(const OptionDefinition * optionDefinition);
-  void expectMultipleTokens(const OptionDefinition * optionDefinition);
-  void expectInteger(const OptionDefinition * optionDefinition);
-  void expectDecimal(const OptionDefinition * optionDefinition);
-  void expectDate(const OptionDefinition * optionDefinition);
+  void expectBoolean(const OptionDefinition *optionDefinition);
+  void expectToken(const OptionDefinition *optionDefinition);
+  void expectMultipleTokens(const OptionDefinition *optionDefinition);
+  void expectInteger(const OptionDefinition *optionDefinition);
+  void expectDecimal(const OptionDefinition *optionDefinition);
+  void expectDate(const OptionDefinition *optionDefinition);
   void expectOption();
   void expectExtraArg();
   void expectOptionOrExtraArgs();

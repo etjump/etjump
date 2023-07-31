@@ -181,6 +181,10 @@ expectDate(const OptionDefinition *optionDefinition) {
 }
 
 void ETJump::CommandParser::expectOption() {
+  if (*_current == "--help") {
+    _cmd.helpRequested = true;
+    return;
+  }
   auto optionOrNull = getOptionOrNull();
   if (optionOrNull) {
     switch (optionOrNull->type) {
@@ -202,7 +206,6 @@ void ETJump::CommandParser::expectOption() {
       case OptionDefinition::Type::Date:
         expectDate(optionOrNull);
         break;
-      default: ;
     }
   } else {
     expectExtraArg();

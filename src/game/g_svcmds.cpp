@@ -835,29 +835,7 @@ qboolean ConsoleCommand(void) {
     return qtrue;
   }
 
-  if (!Q_stricmp(cmd, "add_season")) {
-    trap_Argv(1, cmd, sizeof(cmd));
-
-    game.timerunV2->addSeason(ETJump::Timerun::AddSeasonParams{
-        -1,
-        std::string(cmd), ETJump::getCurrentTime(),
-        ETJump::opt<ETJump::Time>()});
-
-    return qtrue;
-  }
-
   if (OnConsoleCommand()) {
-    return qtrue;
-  }
-
-  std::vector<std::string> args{};
-  for (int i = 1; i < trap_Argc(); ++i) {
-    char arg[MAX_TOKEN_CHARS]{};
-    trap_Argv(i, arg, sizeof(arg));
-    args.push_back(arg);
-  }
-
-  if (game.serverCommands->check( cmd, args)) {
     return qtrue;
   }
 

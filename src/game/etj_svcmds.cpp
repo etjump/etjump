@@ -26,6 +26,11 @@ bool ETJump::ServerCommands::check(const std::string &name,
 
   auto result = CommandParser(*definition, args).parse();
 
+  if (result.helpRequested) {
+    Printer::PrintLn(definition->help());
+    return true;
+  }
+
   if (!result.errors.empty()) {
     for (const auto & e : result.errors) {
       Printer::PrintLn(e);

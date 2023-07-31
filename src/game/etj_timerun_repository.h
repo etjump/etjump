@@ -57,6 +57,7 @@ public:
   opt<Timerun::Record>
   getTopRecord(int seasonId, const std::string &map,
                const std::string &run);
+  void editSeason(const Timerun::EditSeasonParams & params);
 
 private:
   void migrate();
