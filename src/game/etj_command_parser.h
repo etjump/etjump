@@ -26,7 +26,11 @@
 
 #include <string>
 #include <map>
+#include <ostream>
 #include <vector>
+
+#include "etj_container_utilities.h"
+#include "etj_time_utilities.h"
 
 namespace ETJump {
 class CommandParser {
@@ -39,29 +43,67 @@ public:
       Integer,
       Decimal,
       Date,
-      Duration
     };
 
-    std::string name;
-    std::string description;
-    Type type;
-    bool required;
+    std::string name{};
+    std::string description{};
+    Type type{Type::Token};
+    bool required{true};
+
+    static OptionDefinition create(const std::string &name,
+                                   const std::string &description, Type type,
+                                   bool required) {
+      auto def = OptionDefinition{};
+
+      def.name = name;
+      def.description = description;
+      def.type = type;
+      def.required = required;
+
+      return def;
+    }
   };
 
   struct CommandDefinition {
-    std::string name;
-    std::string description;
-    std::map<std::string, OptionDefinition> options;
+    std::string name{};
+    std::string description{};
+    std::map<std::string, OptionDefinition> options{};
+
+    static CommandDefinition
+    create(const std::string name, const std::string description) {
+      CommandDefinition def;
+
+      def.name = name;
+      def.description = description;
+      def.options = {};
+
+      return def;
+    }
+
+    CommandDefinition &addOption(const std::string &name,
+                                 const std::string &description,
+                                 OptionDefinition::Type type, bool required) {
+      auto opt = OptionDefinition{};
+      opt.name = name;
+      opt.description = description;
+      opt.type = type;
+      opt.required = required;
+
+      this->options[name] = opt;
+
+      return *this;
+    }
   };
 
   struct Option {
-    std::string name;
-    bool boolean;
-    std::string text;
-    int integer;
-    double decimal;
-    long date;
-    long duration;
+    Option() = default;
+    explicit Option(const std::string &name) : name(name) {}
+    std::string name{};
+    bool boolean{};
+    std::string text{};
+    int integer{};
+    double decimal{};
+    Date date{};
   };
 
   struct Command {
@@ -70,16 +112,27 @@ public:
     std::vector<std::string> extraArgs;
   };
 
-  Command parse(CommandDefinition definition, std::vector<std::string> args);
+  CommandParser(CommandDefinition definition, std::vector<std::string> args)
+      : _args(args),
+        _current(begin(args)), _def(definition), _cmd(Command()) {}
+
+  const OptionDefinition *getOptionOrNull();
+  void expectBoolean(const OptionDefinition * optionDefinition);
+  void expectToken(const OptionDefinition * optionDefinition);
+  void expectMultipleTokens(const OptionDefinition * optionDefinition);
+  void expectInteger(const OptionDefinition * optionDefinition);
+  void expectDecimal(const OptionDefinition * optionDefinition);
+  void expectDate(const OptionDefinition * optionDefinition);
+  void expectOption();
+  void expectExtraArg();
+  void expectOptionOrExtraArgs();
+  void validateCommand();
+  Command parse();
 
 private:
-  /**
-   * Tries to parse an option. Returns true if successful and updates
-   * option Returns false if failed
-   * @param arg
-   * @param option
-   * @returns boolean
-   */
-  bool parseOption(const std::string &arg, std::string &option);
+  std::vector<std::string> _args;
+  std::vector<std::string>::iterator _current;
+  CommandDefinition _def;
+  Command _cmd;
 };
 } // namespace ETJump

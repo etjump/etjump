@@ -27,6 +27,18 @@
 
 #include "g_local.h"
 
+void Printer::PrintLn(std::string message) {
+  std::string partialMessage ;
+  while (message.length() > 1000) {
+    partialMessage = message.substr(0, 1000);
+    message = message.substr(1000);
+    G_Printf("%s\n", partialMessage.c_str());
+  }
+  if (message.length() > 0) {
+    G_Printf(message.c_str());
+  }
+}
+
 void Printer::LogPrint(std::string message) {
   std::string partialMessage;
   while (message.length() > 1000) {

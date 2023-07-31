@@ -260,3 +260,25 @@ void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
     startPost += to.length();
   }
 }
+
+bool ETJump::StringUtil::startsWith(const std::string &str,
+    const std::string &prefix) {
+  if (prefix.length() > str.length())
+    return false;
+
+  return str.compare(0, prefix.length(), prefix) == 0;
+}
+
+bool ETJump::StringUtil::endsWith(const std::string &str,
+                                  const std::string &suffix) {
+  if (suffix.length() > str.length())
+    return false;
+
+  return str.compare(str.length() - suffix.length(), suffix.length(), suffix) ==
+         0;
+}
+
+bool ETJump::StringUtil::contains(const std::string &str,
+    const std::string &text) {
+  return str.find(text) != std::string::npos;
+}

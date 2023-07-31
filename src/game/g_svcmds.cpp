@@ -2,6 +2,7 @@
 // remote clients
 
 #include "etj_local.h"
+#include "etj_svcmds.h"
 #include "etj_timerun_v2.h"
 #include "g_local.h"
 
@@ -846,6 +847,17 @@ qboolean ConsoleCommand(void) {
   }
 
   if (OnConsoleCommand()) {
+    return qtrue;
+  }
+
+  std::vector<std::string> args{};
+  for (int i = 1; i < trap_Argc(); ++i) {
+    char arg[MAX_TOKEN_CHARS]{};
+    trap_Argv(i, arg, sizeof(arg));
+    args.push_back(arg);
+  }
+
+  if (game.serverCommands->check( cmd, args)) {
     return qtrue;
   }
 

@@ -63,8 +63,7 @@ ETJump::Date ETJump::getCurrentDate() {
 
   time_t now = std::time(nullptr);
   tm tstruct = *std::localtime(&now);
-  return {tstruct.tm_year + 1900, tstruct.tm_mon + 1, tstruct.tm_mday,
-          tstruct.tm_yday};
+  return {tstruct.tm_year + 1900, tstruct.tm_mon + 1, tstruct.tm_mday};
 }
 
 ETJump::Time ETJump::getCurrentTime() {

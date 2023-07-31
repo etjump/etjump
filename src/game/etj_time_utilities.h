@@ -45,10 +45,70 @@ struct Clock {
 };
 
 struct Date {
+  bool operator==(const Date &other) const {
+    return year == other.year && mon == other.mon && day == other.day;
+  }
+
+  bool operator!=(const Date &other) const { return !(*this == other); }
+
+  bool operator<(const Date &other) const {
+    if (year < other.year)
+      return true;
+    if (year > other.year)
+      return false;
+
+    if (mon < other.mon)
+      return true;
+    if (mon > other.mon)
+      return false;
+
+    return day < other.day;
+  }
+
+  bool operator>(const Date &other) const { return other < *this; }
+
+  bool operator<=(const Date &other) const { return !(other < *this); }
+
+  bool operator>=(const Date &other) const { return !(*this < other); }
+
+  static Date fromString(const std::string &dateString) {
+    std::string format = "%Y-%m-%d";
+    Date date{};
+    std::istringstream ss(dateString);
+
+    std::tm t = {};
+    ss >> std::get_time(&t, format.c_str());
+
+    if (ss.fail()) {
+      throw std::invalid_argument(stringFormat(
+          "`%s` does not match to format `%s`", dateString, format));
+    }
+
+    if (t.tm_year < 70) {
+      throw std::invalid_argument(
+          stringFormat("`%s` has to be above year 1970"));
+    }
+
+    if (t.tm_mday < 1) {
+      throw std::invalid_argument(stringFormat("Day should be defined"));
+    }
+
+    date.year = t.tm_year + 1900;
+    date.mon = t.tm_mon + 1;
+    date.day = t.tm_mday;
+
+    // Parse the date string using std::get_time
+    return date;
+  }
+
+  std::string toDateString() const {
+    return stringFormat("%04d-%02d-%02d", this->year,
+                        this->mon, this->day);
+  }
+
   int year; // year
   int mon;  // month
   int day;  // day of the month
-  int days; // days passed since January 1
 };
 
 struct Time {
@@ -59,7 +119,7 @@ struct Time {
     return (clock.hours == other.clock.hours && clock.min == other.clock.min &&
             clock.sec == other.clock.sec && clock.ms == other.clock.ms &&
             date.year == other.date.year && date.mon == other.date.mon &&
-            date.day == other.date.day && date.days == other.date.days);
+            date.day == other.date.day);
   }
 
   bool operator!=(const Time &other) const { return !(*this == other); }
@@ -108,15 +168,25 @@ struct Time {
     ss >> std::get_time(&t, format.c_str());
 
     Time time;
-    time.date.year = t.tm_year + 1900; 
+    time.date.year = t.tm_year + 1900;
     time.date.mon =
-        t.tm_mon + 1; 
+        t.tm_mon + 1;
     time.date.day = t.tm_mday;
-    time.date.days = t.tm_yday;
 
     time.clock.hours = t.tm_hour;
     time.clock.min = t.tm_min;
     time.clock.sec = t.tm_sec;
+
+    return time;
+  }
+
+  static Time fromDate(const Date &date) {
+    Time time{};
+    time.date.year = date.year;
+    time.date.mon = date.mon;
+    time.date.day = date.day;
+
+    time.clock = {};
 
     return time;
   }

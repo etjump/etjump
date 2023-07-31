@@ -28,6 +28,7 @@
 #include <memory>
 
 namespace ETJump {
+class ServerCommands;
 class TimerunV2;
 }
 
@@ -49,6 +50,7 @@ struct Game {
   std::shared_ptr<MapStatistics> mapStatistics;
   std::shared_ptr<Tokens> tokens;
   std::shared_ptr<ETJump::TimerunV2> timerunV2;
+  std::shared_ptr<ETJump::ServerCommands> serverCommands;
 };
 
 #endif
