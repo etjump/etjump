@@ -52,6 +52,7 @@
 #include "etj_autodemo_recorder.h"
 #include "etj_upper_right_drawable.h"
 #include "etj_upmove_meter_drawable.h"
+#include "etj_spectatorinfo_drawable.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -210,6 +211,7 @@ void init() {
   ETJump::renderables.push_back(
       std::make_shared<JumpSpeeds>(ETJump::entityEventsHandler.get()));
   ETJump::renderables.push_back(std::make_shared<QuickFollowDrawer>());
+  ETJump::renderables.push_back(std::make_shared<SpectatorInfo>());
 
   if (etj_CGazOnTop.integer) {
     ETJump::renderables.push_back(std::make_shared<Snaphud>());

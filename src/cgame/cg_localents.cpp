@@ -5,7 +5,7 @@
 #include "cg_local.h"
 
 // Ridah, increased this
-//#define	MAX_LOCAL_ENTITIES	512
+// #define	MAX_LOCAL_ENTITIES	512
 #define MAX_LOCAL_ENTITIES                                                     \
   768 // renderer can only handle 1024 entities max, so we should avoid
       // overwriting game entities
@@ -121,7 +121,7 @@ Leave expanding blood puffs behind gibs
 ================
 */
 // use this to change between particle and trail code
-//#define BLOOD_PARTICLE_TRAIL
+// #define BLOOD_PARTICLE_TRAIL
 void CG_BloodTrail(localEntity_t *le) {
   int t;
   int t2;
@@ -308,8 +308,8 @@ void CG_ReflectVelocity(localEntity_t *le, trace_t *trace) {
               (le->pos.trDelta[2] < 40 ||
                le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2]))) {
     //----(SA)	if it's a fragment and it's not resting on the
-    // world... 			if(le->leType == LE_DEBRIS && trace->entityNum
-    // < (MAX_ENTITIES
+    // world... 			if(le->leType == LE_DEBRIS &&
+    // trace->entityNum < (MAX_ENTITIES
     //- 1))
     if (le->leType == LE_FRAGMENT && trace->entityNum < (MAX_ENTITIES - 1)) {
       le->pos.trType = TR_GRAVITY_PAUSED;
@@ -556,7 +556,10 @@ void CG_AddFragment(localEntity_t *le) {
   // if it is in a nodrop zone, remove it
   // this keeps gibs from waiting at the bottom of pits of death
   // and floating levels
-  if (CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP) {
+  // FIXME: static_cast to silence bogus clang-tidy warning
+  if (!BG_DropItems(
+          static_cast<int>(CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP),
+          cgs.shared)) {
     CG_FreeLocalEntity(le);
     return;
   }
@@ -1040,7 +1043,10 @@ void CG_AddShrapnel(localEntity_t *le) {
   // if it is in a nodrop zone, remove it
   // this keeps gibs from waiting at the bottom of pits of death
   // and floating levels
-  if (CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP) {
+  // FIXME: static_cast to silence bogus clang-tidy warning
+  if (!BG_DropItems(
+          static_cast<int>(CG_PointContents(trace.endpos, 0) & CONTENTS_NODROP),
+          cgs.shared)) {
     CG_FreeLocalEntity(le);
     return;
   }

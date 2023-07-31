@@ -3961,6 +3961,7 @@ const char *eventnames[] = {
     "EV_GRENADE_BOUNCE",
     "EV_GENERAL_SOUND",
     "EV_GENERAL_SOUND_VOLUME",
+    "EV_GENERAL_CLIENT_SOUND_VOLUME",
     "EV_GLOBAL_SOUND",
     "EV_GLOBAL_CLIENT_SOUND",
     "EV_GLOBAL_TEAM_SOUND",
@@ -4001,6 +4002,8 @@ const char *eventnames[] = {
     "EV_MISSILE_MISS_LARGE",
     "EV_MORTAR_IMPACT",
     "EV_MORTAR_MISS",
+    "EV_SPIT_HIT",
+    "EV_SPIT_MISS",
     "EV_SHARD",
     "EV_JUNK",
     "EV_EMITTER",
@@ -4036,8 +4039,15 @@ const char *eventnames[] = {
     "EV_ARTYMESSAGE",
     "EV_AIRSTRIKEMESSAGE",
     "EV_MEDIC_CALL",
+    "EV_PORTAL_TELEPORT",
+    "EV_LOAD_TELEPORT",
+    "EV_UPHILLSTEP",
+    "EV_SAVE",
     "EV_MAX_EVENTS",
 };
+
+static_assert(sizeof(eventnames) / sizeof(eventnames[0]) == EV_MAX_EVENTS + 1,
+              "Event names array size does not match enum list");
 
 /*
 ===============
@@ -5667,4 +5677,23 @@ void BG_TouchVelocityJumpPad(playerState_t *ps, entityState_t *jumppad) {
   int spawnflags = (jumppad->constantLight >> 8) & 0xff;
   BG_GetPushVelocity(ps, jumppad->origin2, spawnflags, outVelocity);
   VectorCopy(outVelocity, ps->velocity);
+}
+
+/*
+================
+BG_DropItems
+Checks shared for nodrop worldspawn key value and current content flags,
+and returns whether we should drop items to floor or delete them
+================
+*/
+bool BG_DropItems(const int contents, const int shared) {
+  if (!(shared & BG_LEVEL_NO_DROP) && !(contents & CONTENTS_NODROP)) {
+    return true;
+  }
+
+  if ((shared & BG_LEVEL_NO_DROP) && (contents & CONTENTS_NODROP)) {
+    return true;
+  }
+
+  return false;
 }

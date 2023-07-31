@@ -987,6 +987,12 @@ void ClientThink_real(gentity_t *ent) {
     //		G_Printf("serverTime >>>>>\n" );
   }
 
+  if (client->pers.pmoveFixed) {
+    ucmd->serverTime =
+        ((ucmd->serverTime + pmove_msec.integer - 1) / pmove_msec.integer) *
+        pmove_msec.integer;
+  }
+
   msec = ucmd->serverTime - client->ps.commandTime;
 
   // following others may result in bad times, but we still want
@@ -996,12 +1002,6 @@ void ClientThink_real(gentity_t *ent) {
   }
   if (msec > 200) {
     msec = 200;
-  }
-
-  if (client->pers.pmoveFixed) {
-    ucmd->serverTime =
-        ((ucmd->serverTime + pmove_msec.integer - 1) / pmove_msec.integer) *
-        pmove_msec.integer;
   }
 
   if (client->wantsscore) {
@@ -1177,6 +1177,11 @@ void ClientThink_real(gentity_t *ent) {
   VectorCopy(client->ps.origin, client->oldOrigin);
   VectorCopy(ent->r.mins, pm.mins);
   VectorCopy(ent->r.maxs, pm.maxs);
+
+  // save waterlevel/type in case we skip Pmove this frame
+  // (>125fps & pmove_fixed 1) so P_WorldEffects doesn't reset pmext->airLeft
+  pm.waterlevel = ent->waterlevel;
+  pm.watertype = ent->watertype;
 
   // NERVE - SMF
   pm.gametype = g_gametype.integer;
@@ -1452,6 +1457,11 @@ void ClientThink_real(gentity_t *ent) {
                                "this area.\" 1");
       }
     }
+  }
+
+  // perform once-a-second actions
+  if (level.match_pause == PAUSE_NONE) {
+    ClientTimerActions(ent, msec);
   }
 
   CheckForEvents(ent);
@@ -1874,11 +1884,6 @@ void ClientEndFrame(gentity_t *ent) {
     ent->lastHintCheckTime += time_delta;
     ent->pain_debounce_time += time_delta;
     ent->s.onFireEnd += time_delta;
-  }
-
-  // perform once-a-second actions unless dead
-  if (level.match_pause == PAUSE_NONE && !(ent->client->ps.eFlags & EF_DEAD)) {
-    ClientTimerActions(ent, level.time - level.previousTime);
   }
 
   //

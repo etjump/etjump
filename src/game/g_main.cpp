@@ -1757,6 +1757,20 @@ void InitGhosting() {
 void ResetNumSpawnTargets();
 void ETJump_InitGame(int levelTime, int randomSeed, int restart);
 
+static bool G_PatchFixEnabled() {
+  char patchFix[MAX_QPATH];
+  trap_Cvar_VariableStringBuffer("cm_optimizePatchPlanes", patchFix,
+                                 sizeof(patchFix));
+
+  // if the cvar doesn't exist (2.60b/old versions of ETL/ETe),
+  // we get a null char
+  if (patchFix[0] != '\0' && Q_atoi(patchFix) == 0) {
+    return true;
+  }
+
+  return false;
+}
+
 /*
 ============
 G_InitGame
@@ -2078,6 +2092,14 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   OnGameInit();
   ETJump_InitGame(levelTime, randomSeed, restart);
+
+  if (G_PatchFixEnabled()) {
+    G_Printf("\n^7--------- ^1!!! WARNING !!! ^7---------\n\n^7Server started "
+             "with ^3cm_optimizePatchPlanes 0\n^7Patch collision is different "
+             "from vanilla and prediction errors might occur!\n\n^7Please "
+             "start the server with ^3+set cm_optimizePatchPlanes "
+             "1\n\n^7-----------------------------------\n");
+  }
 
   G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
