@@ -48,6 +48,11 @@ struct Record {
   Time recordDate;
   std::string playerName;
   std::map<std::string, std::string> metadata;
+
+  bool isSameRunAs(const Record *otherRecord) const {
+    return this->seasonId == otherRecord->seasonId &&
+           this->map == otherRecord->map && this->run == otherRecord->run;
+  }
 };
 
 struct AddSeasonParams {

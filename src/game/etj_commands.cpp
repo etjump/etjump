@@ -133,7 +133,6 @@ bool Records(gentity_t *ent, Arguments argv) {
     map = argv->at(2);
   }
 
-  game.timerun->printRecords(ClientNum(ent), map, runName);
   return true;
 }
 } // namespace ClientCommands

@@ -25,6 +25,8 @@
 #include <utility>
 
 #include "etj_timerun_v2.h"
+
+#include "etj_container_utilities.h"
 #include "etj_log.h"
 #include "etj_printer.h"
 #include "etj_synchronization_context.h"
@@ -43,9 +45,10 @@ std::string millisToString(int millis);
 std::string diffToString(int selfTime, int otherTime);
 
 const ETJump::Timerun::Record *ETJump::TimerunV2::Player::getRecord(
+    int seasonId,
     const std::string &runName) const {
   for (const auto &r : records) {
-    if (r.run == runName) {
+    if (r.seasonId == seasonId && r.run == runName) {
       return &r;
     }
   }
@@ -57,18 +60,19 @@ void ETJump::TimerunV2::initialize() {
     _activeSeasonsIds = std::vector<int>();
     _activeSeasons = std::vector<Timerun::Season>();
 
+    _repository->initialize();
     _activeSeasons = _repository->getActiveSeasons(getCurrentTime());
 
     _mostRelevantSeason = getMostRelevantSeason();
 
-    _activeSeasonsIds = Utilities::map(
+    _activeSeasonsIds = Container::map(
         _activeSeasons, [](const Timerun::Season &s) {
           return s.id;
         });
 
     _logger->info(
         "Active seasons: %s",
-        StringUtil::join(Utilities::map(_activeSeasons,
+        StringUtil::join(Container::map(_activeSeasons,
                                         [](const Timerun::Season &s) {
                                           return stringFormat(
                                               "%s (%d)", s.name,
@@ -104,11 +108,12 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
   _sc->postTask(
       [this, clientNum, userId] {
 
-        auto parameters = StringUtil::join(Utilities::map(_activeSeasonsIds,
-                                             [](int season) {
-                                               return std::to_string(season);
-                                             }),
-                                           ", ");
+        auto parameters = StringUtil::join(
+            Container::map(_activeSeasonsIds,
+                           [](int season) {
+                             return std::to_string(season);
+                           }),
+            ", ");
 
         auto runs = _repository->getRecordsForPlayer(
             _activeSeasonsIds, _currentMap, userId);
@@ -162,18 +167,17 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
   player->startTime = opt<int>(currentTimeMs);
   player->completionTime = opt<int>();
   player->activeRunName = runName;
-
-  for (auto &cp : player->checkpointTimes) {
-    cp = -1;
-  }
+  player->checkpointTimes.fill(-1);
+  player->checkpointIndexesHit.fill(false);
+  player->nextCheckpointIdx = 0;
 
   startNotify(player);
 
   Utilities::startRun(clientNum);
 }
 
-void ETJump::TimerunV2::checkpoint(const std::string &runName,
-                                   int checkpointIndex, int clientNum,
+void ETJump::TimerunV2::checkpoint(const std::string &runName, int clientNum,
+                                   int checkpointIndex,
                                    int currentTimeMs) {
   Player *player = _players[clientNum].get();
 
@@ -181,12 +185,28 @@ void ETJump::TimerunV2::checkpoint(const std::string &runName,
     return;
   }
 
-  if (!player->running) {
+  if (!player->running || player->activeRunName != runName) {
     return;
   }
 
-  player->checkpointTimes[checkpointIndex] =
+  if (player->nextCheckpointIdx >= MAX_TIMERUN_CHECKPOINTS) {
+    return;
+  }
+
+  if (player->checkpointIndexesHit[checkpointIndex]) {
+    return;
+  }
+
+  player->checkpointIndexesHit[checkpointIndex] = true;
+
+  player->checkpointTimes[player->nextCheckpointIdx++] =
       currentTimeMs - player->startTime.value();
+
+  Printer::SendCommandToAll(stringFormat(
+      "timerun checkpoint %d %d %d \"%s\"", clientNum,
+      player->nextCheckpointIdx - 1,
+      player->checkpointTimes[player->nextCheckpointIdx - 1],
+      player->activeRunName));
 }
 
 void ETJump::TimerunV2::stopTimer(const std::string &runName, int clientNum,
@@ -210,12 +230,6 @@ void ETJump::TimerunV2::stopTimer(const std::string &runName, int clientNum,
 
   player->running = false;
 
-  Printer::SendCommand(clientNum, stringFormat("timerun_stop %d \"%s\"", millis,
-                                               player->activeRunName));
-  auto spectators = Utilities::getSpectators(clientNum);
-  Printer::SendCommand(spectators,
-                       stringFormat("timerun_stop_spec %d %d \"%s\"", clientNum,
-                                    millis, player->activeRunName));
   Printer::SendCommandToAll(stringFormat("timerun stop %d %d \"%s\"", clientNum,
                                          millis, player->activeRunName));
 
@@ -281,14 +295,16 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
   for (int idx = 0; idx < 64; ++idx) {
     auto player = _players[idx].get();
     if (player && player->activeRunName.length() > 0) {
-      auto previousRecord = player->getRecord(player->activeRunName);
+      auto previousRecord =
+          player->getRecord(_mostRelevantSeason->id, player->activeRunName);
 
       int fastestCompletionTime = -1;
       if (previousRecord) {
         fastestCompletionTime = previousRecord->time;
       }
       Printer::SendCommand(clientNum,
-                           stringFormat("timerun start %d %d \"%s\" %d", idx,
+                           stringFormat("timerun start %d %d \"%s\" %d \"%s\"",
+                                        idx,
                                         player->startTime.value(),
                                         player->activeRunName,
                                         fastestCompletionTime));
@@ -298,26 +314,40 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
 
 void ETJump::TimerunV2::startNotify(Player *player) {
   auto spectators = Utilities::getSpectators(player->clientNum);
-  auto previousRecord = player->getRecord(player->activeRunName);
+  auto previousRecord = player->getRecord(_mostRelevantSeason->id,
+                                          player->activeRunName);
 
   int fastestCompletionTime = -1;
   if (previousRecord) {
     fastestCompletionTime = previousRecord->time;
   }
+
+  std::string checkpointsStr;
+  auto prevRecord =
+      player->getRecord(_mostRelevantSeason->id, player->activeRunName);
+  if (prevRecord) {
+    checkpointsStr = StringUtil::join(prevRecord->checkpoints, ",");
+  } else {
+    checkpointsStr = StringUtil::join(player->checkpointTimes, ",");
+  }
+
   Printer::SendCommand(
       player->clientNum,
-      stringFormat("timerun_start %d \"%s\" %d", player->startTime.value(),
-                   player->activeRunName, fastestCompletionTime));
+      stringFormat("timerun_start %d \"%s\" %d \"%s\"",
+                   player->startTime.value(),
+                   player->activeRunName,
+                   fastestCompletionTime, checkpointsStr));
   Printer::SendCommand(
       spectators,
-      stringFormat("timerun_start_spec %d %d \"%s\" %d",
+      stringFormat("timerun_start_spec %d %d \"%s\" %d \"%s\"",
                    player->clientNum, player->startTime.value(),
                    player->activeRunName,
-                   fastestCompletionTime));
+                   fastestCompletionTime,
+                   checkpointsStr));
   Printer::SendCommandToAll(stringFormat(
-      "timerun start %d %d \"%s\" %d", player->clientNum,
-      player->startTime.value(),
-      player->activeRunName, fastestCompletionTime));
+      "timerun start %d %d \"%s\" %d \"%s\"", player->clientNum,
+      player->startTime.value(), player->activeRunName, fastestCompletionTime,
+      checkpointsStr));
 }
 
 bool ETJump::TimerunV2::isDebugging(int clientNum) {
@@ -375,7 +405,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
   std::map<std::string, std::string> metadata = {{"mod_version", GAME_VERSION}};
   std::string playerName = player->name;
   auto checkpoints =
-      Utilities::map(player->checkpointTimes, [](int time) { return time; });
+      Container::map(player->checkpointTimes, [](int time) { return time; });
 
   _sc->postTask(
       [this, activeRunName, userId, completionTime, playerName, metadata,
@@ -515,14 +545,18 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
 
           // refresh the records cache
+          bool foundExistingRecord = false;
           for (auto &oldCachedRecord : _players[clientNum]->records) {
-            if (oldCachedRecord.seasonId == checkRecordResult->
-                                            newRelevantRecord
-                                            .value().record.seasonId) {
+            if (oldCachedRecord.isSameRunAs(&checkRecordResult->newRelevantRecord.value().record)) {
               oldCachedRecord =
                   checkRecordResult->newRelevantRecord.value().record;
-
+              foundExistingRecord = true;
             }
+          }
+
+          if (!foundExistingRecord) {
+            _players[clientNum]->records.push_back(
+                checkRecordResult->newRelevantRecord.value().record);
           }
         }
 
@@ -545,8 +579,16 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                   diffString));
 
           // refresh the records cache
+          bool foundExistingRecord = false;
           for (auto &oldCachedRecord : _players[clientNum]->records) {
-            oldCachedRecord = r.record;
+            if (oldCachedRecord.isSameRunAs(&r.record)) {
+              oldCachedRecord = r.record;
+              foundExistingRecord = true;
+            }
+          }
+
+          if (!foundExistingRecord) {
+            _players[clientNum]->records.push_back(r.record);
           }
         }
       },

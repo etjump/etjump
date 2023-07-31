@@ -1,5 +1,6 @@
 #include "etj_timerun_repository.h"
 
+#include "etj_container_utilities.h"
 #include "etj_database_v2.h"
 
 void ETJump::TimerunRepository::initialize() { migrate(); }
@@ -33,11 +34,12 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
     int seasonId, std::string map, std::string runName, int userId, int time,
     std::string checkpointsString, std::string recordDate,
     std::string playerName, std::string metadataString) {
-  auto checkpoints = Utilities::map(
-      Utilities::filter(ETJump::StringUtil::split(checkpointsString, ","),
-                        [](const std::string &input) {
-                          return ETJump::trim(input).length() > 0;
-                        }),
+  auto checkpoints = ETJump::Container::map(
+      ETJump::Container::filter(
+          ETJump::StringUtil::split(checkpointsString, ","),
+          [](const std::string &input) {
+            return ETJump::trim(input).length() > 0;
+          }),
       [](const std::string &checkpoint) {
         try {
           return std::stoi(ETJump::trim(checkpoint));
@@ -54,7 +56,8 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
   }
 
   std::map<std::string, std::string> metadata;
-  for (const auto &kvp : Utilities::map(
+  for (const auto &kvp :
+       ETJump::Container::map(
            ETJump::StringUtil::split(metadataString, ","),
            [](const std::string &kvp) {
              return ETJump::StringUtil::split(kvp, "=");
@@ -84,7 +87,7 @@ std::vector<ETJump::Timerun::Record>
 ETJump::TimerunRepository::getRecordsForPlayer(
     const std::vector<int> activeSeasons, const std::string &map, int userId) {
   auto parameters = StringUtil::join(
-      Utilities::map(activeSeasons,
+      Container::map(activeSeasons,
                      [](int season) { return std::to_string(season); }),
       ", ");
 
@@ -266,8 +269,8 @@ void ETJump::TimerunRepository::updateRecord(const Timerun::Record &record) {
 
 ETJump::opt<ETJump::Timerun::Record>
 ETJump::TimerunRepository::getTopRecord(int seasonId,
-                                             const std::string &map,
-                                             const std::string &run) {
+                                        const std::string &map,
+                                        const std::string &run) {
   opt<Timerun::Record> record;
   _database->sql << R"(
     select

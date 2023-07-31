@@ -114,7 +114,7 @@ public:
   explicit Optional(T val)
     : _hasValue(true), _value(std::move(val)) {
   }
-
+   
   bool hasValue() const {
     return _hasValue;
 
@@ -152,37 +152,6 @@ private:
   bool _hasValue;
   T _value;
 };
-
-template <typename InputContainer, typename UnaryFunction>
-auto map(const InputContainer &container, UnaryFunction &&func) {
-  using InputType = typename InputContainer::value_type;
-  using ResultType = std::result_of_t<UnaryFunction(InputType)>;
-
-  std::vector<ResultType> result;
-  result.reserve(container.size());
-
-  std::transform(container.begin(), container.end(), std::back_inserter(result),
-                 std::forward<UnaryFunction>(func));
-
-  return result;
-}
-
-template <typename InputContainer, typename Predicate>
-auto filter(const InputContainer& container, Predicate&& pred) {
-  using InputType = typename InputContainer::value_type;
-  std::vector<InputType> result;
-
-  std::copy_if(container.begin(), container.end(), std::back_inserter(result),
-               std::forward<Predicate>(pred));
-
-  return result;
-}
-
-template <typename Container, typename Element>
-bool isIn(const Container &container, const Element &element) {
-  return std::find(container.begin(), container.end(), element) !=
-         container.end();
-}
 } // namespace Utilities
 
 #endif // ETJUMP_UTILITIES_H

@@ -50,7 +50,8 @@ public:
   struct Player {
     Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
       : clientNum(clientNum), userId(userId), records(runs), running(false),
-        startTime(opt<int>()), completionTime(opt<int>()) {
+        startTime(opt<int>()), completionTime(opt<int>()),
+        nextCheckpointIdx(0) {
     }
 
     int clientNum;
@@ -61,9 +62,12 @@ public:
     Utilities::Optional<int> startTime;
     Utilities::Optional<int> completionTime;
     std::string activeRunName;
+    int nextCheckpointIdx;
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
+    std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
 
-    const Timerun::Record *getRecord(const std::string &runName) const;
+    const Timerun::Record *getRecord(int seasonId,
+                                     const std::string &runName) const;
   };
 
   void initialize();
@@ -73,8 +77,8 @@ public:
   void clientDisconnect(int clientNum);
   void startTimer(const std::string &runName, int clientNum,
                   const std::string &playerName, int currentTimeMs);
-  void checkpoint(const std::string &runName, int checkpointIndex,
-                  int clientNum, int currentTimeMs);
+  void checkpoint(const std::string &runName,
+                  int clientNum, int checkpointIndex, int currentTimeMs);
   void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
   void addSeason(Timerun::AddSeasonParams season);
   void interrupt(int clientNum);
@@ -97,7 +101,7 @@ private:
   std::array<std::unique_ptr<Player>, 64> _players;
   std::vector<int> _activeSeasonsIds;
   std::vector<Timerun::Season> _activeSeasons;
-  const Timerun::Season * _mostRelevantSeason;
+  const Timerun::Season *_mostRelevantSeason;
 };
 
 }

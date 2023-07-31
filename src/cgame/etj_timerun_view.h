@@ -30,13 +30,21 @@
 
 namespace ETJump {
 struct PlayerTimerunInformation {
-  int startTime;
-  int completionTime;
+  PlayerTimerunInformation() {
+    previousRecordCheckpoints.fill(-1);
+    checkpoints.fill(-1);
+  };
+  int startTime{};
+  int completionTime{};
   std::string runName;
-  int previousRecord;
-  bool running;
+  int previousRecord{};
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> previousRecordCheckpoints;
+  bool running{};
   // used for fading
-  int lastRunTimer;
+  int lastRunTimer{};
+  int numCheckpointsHit{};
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints;
+  int nextFreeCheckpointIdx{};
 };
 
 class TimerunView : public Drawable {
@@ -53,6 +61,9 @@ public:
 
   // whenever the player stops a timerun
   void stop();
+
+  // whenever the player hits a checkpoint
+  void checkpoint();
 
   // whenever the player's timerun is interrupted (not finished)
   void interrupt();
@@ -73,8 +84,9 @@ public:
   const PlayerTimerunInformation *currentRun() const;
 
 private:
+  std::string getTimerString(const int msec);
+
   std::array<PlayerTimerunInformation, MaxClients> _playersTimerunInformation;
-  PlayerTimerunInformation _ownTimerunInformation;
   vec4_t inactiveTimerColor;
 
   bool canSkipDraw() const;

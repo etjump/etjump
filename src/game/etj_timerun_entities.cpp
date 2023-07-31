@@ -27,6 +27,7 @@
 
 #include <stdexcept>
 
+#include "etj_container_utilities.h"
 #include "etj_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
@@ -90,7 +91,7 @@ void TimerunEntity::validateTimerunEntities() {
   for (int i = 0; i < MAX_GENTITIES; ++i) {
     auto ent = g_entities[i];
 
-    if (!Utilities::isIn(timerunEntities, ent.runName)) {
+    if (!Container::isIn(timerunEntities, ent.runName)) {
       continue;
     }
 
@@ -202,8 +203,6 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
     client->sess.timerunCheatsNotified = true;
   }
 
-  StartTimer(level.timerunNames[self->runIndex], activator);
-
   game.timerunV2->startTimer(level.timerunNames[self->runIndex], clientNum,
                              activator->client->pers.netname,
                              activator->client->ps.commandTime);
@@ -222,8 +221,7 @@ void TargetCheckpoint::use(gentity_t *self, gentity_t *activator) {
     return;
   }
 
-  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
-                             self->checkpointIndex, ClientNum(activator),
+  game.timerunV2->checkpoint(level.timerunNames[self->runIndex], ClientNum(activator), self->checkpointIndex,
                              activator->client->ps.commandTime);
 }
 
@@ -247,8 +245,6 @@ void TargetStopTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
   }
-
-  StopTimer(level.timerunNames[self->runIndex], activator);
 
   game.timerunV2->stopTimer(level.timerunNames[self->runIndex],
                             ClientNum(activator),

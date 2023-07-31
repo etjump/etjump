@@ -56,7 +56,6 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
         clientNum, ETJump::Constants::Authentication::GUID_REQUEST.c_str());
   } else {
     ETJump::session->ReadSessionData(clientNum);
-    game.timerun->clientConnect(clientNum, ETJump::session->GetId(clientNum));
     game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
   }
 
@@ -112,7 +111,6 @@ void OnGameInit() {
   game.customMapVotes =
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
   game.motd = std::make_shared<Motd>();
-  game.timerun = std::make_shared<Timerun>();
   game.tokens = std::make_shared<Tokens>();
   game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
       level.rawmapname,
@@ -148,7 +146,6 @@ void OnGameInit() {
                                  level.rawmapname);
   game.customMapVotes->Load();
   game.motd->Initialize();
-  game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
   game.timerunV2->initialize();
 
   if (g_tokensMode.integer) {
@@ -183,7 +180,6 @@ void OnGameShutdown() {
   game.commands = nullptr;
   game.customMapVotes = nullptr;
   game.motd = nullptr;
-  game.timerun = nullptr;
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
@@ -222,7 +218,6 @@ qboolean OnClientCommand(gentity_t *ent) {
 
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
     ETJump::session->GuidReceived(ent);
-    game.timerun->clientConnect(ClientNum(ent), ETJump::session->GetId(ent));
     game.timerunV2->clientConnect(ClientNum(ent),
                                   ETJump::session->GetId(ClientNum(ent)));
     return qtrue;
@@ -372,17 +367,7 @@ void LogServerState() {
   LogPrint(state);
 }
 
-void StartTimer(const char *runName, gentity_t *ent) {
-  game.timerun->startTimer(runName, ClientNum(ent), ent->client->pers.netname,
-                           ent->client->ps.commandTime);
-}
-
-void StopTimer(const char *runName, gentity_t *ent) {
-  game.timerun->stopTimer(ClientNum(ent), ent->client->ps.commandTime, runName);
-}
-
 void TimerunConnectNotify(gentity_t *ent) {
-  game.timerun->connectNotify(ClientNum(ent));
   game.timerunV2->connectNotify(ClientNum(ent));
 }
 
@@ -391,7 +376,6 @@ void InterruptRun(gentity_t *ent) {
     return;
   }
 
-  game.timerun->interrupt(ClientNum(ent));
   game.timerunV2->interrupt(ClientNum(ent));
 }
 

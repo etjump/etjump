@@ -434,6 +434,14 @@ vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 vmCvar_t etj_runTimerInactiveColor;
 
+vmCvar_t etj_drawCheckpoints;
+vmCvar_t etj_checkpointsX;
+vmCvar_t etj_checkpointsY;
+vmCvar_t etj_checkpointsSize;
+vmCvar_t etj_checkpointsShadow;
+vmCvar_t etj_checkpointsStyle;
+vmCvar_t etj_checkpointsCount;
+
 vmCvar_t etj_drawMessageTime;
 
 vmCvar_t movie_changeFovBasedOnSpeed;
@@ -932,6 +940,14 @@ cvarTable_t cvarTable[] = {
     {&etj_runTimerAutoHide, "etj_runTimerAutoHide", "1", CVAR_ARCHIVE},
     {&etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey",
      CVAR_ARCHIVE},
+
+    {&etj_drawCheckpoints, "etj_drawCheckpoints", "1", CVAR_ARCHIVE},
+    {&etj_checkpointsX, "etj_checkpointsX", "320", CVAR_ARCHIVE},
+    {&etj_checkpointsY, "etj_checkpointsY", "380", CVAR_ARCHIVE},
+    {&etj_checkpointsSize, "etj_checkpointsSize", "2", CVAR_ARCHIVE},
+    {&etj_checkpointsShadow, "etj_checkpointsShadow", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsStyle, "etj_checkpointsStyle", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsCount, "etj_checkpointsCount", "3", CVAR_ARCHIVE},
 
     {&etj_drawMessageTime, "etj_drawMessageTime", "2", CVAR_ARCHIVE},
 

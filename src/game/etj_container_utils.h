@@ -26,23 +26,4 @@
 #include <memory>
 
 namespace ETJump {
-
-template <typename T>
-class CircularBuffer {
-private:
-  std::unique_ptr<T[]> buffer;
-  size_t tail;
-  size_t maxSize;
-  T emptyItem;
-
-public:
-  CircularBuffer<T>(size_t maxSize)
-      : buffer(std::make_unique<T[]>(maxSize)), maxSize(maxSize) {}
-  void push_back(const T &&item) {
-    buffer[tail] = item;
-    tail = (tail + 1) % maxSize;
-  }
-  void push_front(const T &&item) {}
-  // operator[] ()
-};
 }; // namespace ETJump

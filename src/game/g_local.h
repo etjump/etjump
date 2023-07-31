@@ -2928,8 +2928,6 @@ enum class TimerunSpawnflags {
 };
 }
 
-void StartTimer(const char *runName, gentity_t *ent);
-void StopTimer(const char *runName, gentity_t *ent);
 void TimerunConnectNotify(gentity_t *ent);
 
 void InterruptRun(gentity_t *ent);

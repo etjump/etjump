@@ -46,7 +46,6 @@ struct Game {
   std::shared_ptr<Commands> commands;
   std::shared_ptr<CustomMapVotes> customMapVotes;
   std::shared_ptr<Motd> motd;
-  std::shared_ptr<Timerun> timerun;
   std::shared_ptr<MapStatistics> mapStatistics;
   std::shared_ptr<Tokens> tokens;
   std::shared_ptr<ETJump::TimerunV2> timerunV2;
