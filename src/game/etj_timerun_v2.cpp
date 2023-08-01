@@ -164,7 +164,7 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
   player->startTime = opt<int>(currentTimeMs);
   player->completionTime = opt<int>();
   player->activeRunName = runName;
-  player->checkpointTimes.fill(-1);
+  player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
   player->checkpointIndexesHit.fill(false);
   player->nextCheckpointIdx = 0;
 

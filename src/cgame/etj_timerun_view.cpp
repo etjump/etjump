@@ -56,7 +56,8 @@ void ETJump::TimerunView::start() {
   _playersTimerunInformation[clientNum].runName = CG_Argv(4);
   _playersTimerunInformation[clientNum].previousRecord = Q_atoi(CG_Argv(5));
   _playersTimerunInformation[clientNum].running = true;
-  _playersTimerunInformation[clientNum].checkpoints.fill(-1);
+  _playersTimerunInformation[clientNum].checkpoints.fill(
+      TIMERUN_CHECKPOINT_NOT_SET);
   _playersTimerunInformation[clientNum].nextFreeCheckpointIdx = 0;
   _playersTimerunInformation[clientNum].numCheckpointsHit = 0;
   auto checkpointsStr = CG_Argv(6);
@@ -74,7 +75,8 @@ void ETJump::TimerunView::start() {
     } catch (const std::runtime_error &) {
       _playersTimerunInformation[clientNum].previousRecordCheckpoints =
           std::array<int, MAX_TIMERUN_CHECKPOINTS>();
-      _playersTimerunInformation[clientNum].previousRecordCheckpoints.fill(-1);
+      _playersTimerunInformation[clientNum].previousRecordCheckpoints.fill(
+          TIMERUN_CHECKPOINT_NOT_SET);
     }
   }
 

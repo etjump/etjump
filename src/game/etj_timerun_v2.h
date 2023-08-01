@@ -45,8 +45,6 @@ public:
             std::unique_ptr<SynchronizationContext>
             synchronizationContext);
 
-  static const int CheckpointNotSet = -1;
-
   struct Player {
     Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
       : clientNum(clientNum), userId(userId), records(runs), running(false),

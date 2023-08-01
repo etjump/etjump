@@ -31,8 +31,8 @@
 namespace ETJump {
 struct PlayerTimerunInformation {
   PlayerTimerunInformation() {
-    previousRecordCheckpoints.fill(-1);
-    checkpoints.fill(-1);
+    previousRecordCheckpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
+    checkpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
   };
   int startTime{};
   int completionTime{};

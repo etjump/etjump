@@ -2,6 +2,7 @@
 
 #include "etj_container_utilities.h"
 #include "etj_database_v2.h"
+#include "q_shared.h"
 
 void ETJump::TimerunRepository::initialize() { migrate(); }
 
@@ -44,8 +45,7 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
         try {
           return std::stoi(ETJump::trim(checkpoint));
         } catch (const std::runtime_error &e) {
-          // TODO: magic const
-          return -1;
+          return TIMERUN_CHECKPOINT_NOT_SET;
         }
       });
   ETJump::Time recordDateTime{};
@@ -530,7 +530,7 @@ void ETJump::TimerunRepository::tryToMigrateRecords() {
         r.recordDate = Time::fromInt(recordDate);
         r.userId = userId;
         r.playerName = playerName;
-        r.checkpoints = std::vector<int>(16, -1);
+        r.checkpoints = std::vector<int>(MAX_TIMERUN_CHECKPOINTS, TIMERUN_CHECKPOINT_NOT_SET);
         r.metadata = {{"mod_version", "unknown(imported)"}};
         oldRecords.push_back(r);
       };
