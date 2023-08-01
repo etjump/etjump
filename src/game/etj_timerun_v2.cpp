@@ -301,7 +301,7 @@ void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
                   Printer::SendConsoleMessage(params.clientNum,
                                               editSeasonResult->message + "\n");
                 },
-                [this, params](auto &e) {
+                [this, params](const std::runtime_error &e) {
                   Printer::SendConsoleMessage(
                       params.clientNum,
                       stringFormat("Unable to edit season: %s\n", e.what()));

@@ -5,6 +5,9 @@
 #include <mutex>
 #include <queue>
 #include <stdexcept>
+#include <condition_variable>
+#include <atomic>
+#include <thread>
 
 #include "etj_utilities.h"
 
