@@ -32,7 +32,6 @@
 #include "etj_custom_map_votes.h"
 #include "etj_utilities.h"
 #include "etj_motd.h"
-#include "etj_timerun.h"
 #include "etj_map_statistics.h"
 #include "etj_tokens.h"
 #include "etj_shared.h"

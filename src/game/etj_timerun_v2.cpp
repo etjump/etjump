@@ -41,9 +41,6 @@ ETJump::TimerunV2::TimerunV2(
     _sc(std::move(synchronizationContext)) {
 }
 
-std::string millisToString(int millis);
-std::string diffToString(int selfTime, int otherTime);
-
 const ETJump::Timerun::Record *ETJump::TimerunV2::Player::getRecord(
     int seasonId,
     const std::string &runName) const {
@@ -356,7 +353,18 @@ public:
   std::vector<ETJump::Timerun::Season> seasons;
 };
 
-std::string rankToString(int rank);
+std::string rankToString(int rank) {
+  switch (rank) {
+    case 1:
+      return "^3#1";
+    case 2:
+      return "^z#2";
+    case 3:
+      return "^l#3";
+    default:
+      return "^7#" + std::to_string(rank);
+  }
+}
 
 void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
   _sc->postTask([this, params] {

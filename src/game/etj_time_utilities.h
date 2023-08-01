@@ -213,4 +213,7 @@ Clock getCurrentClock();
 Clock toClock(long long timestamp, bool useHours);
 Date getCurrentDate();
 Time getCurrentTime();
+
+std::string millisToString(int millis);
+std::string diffToString(int selfTime, int otherTime);
 } // namespace ETJump

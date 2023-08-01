@@ -69,3 +69,32 @@ ETJump::Date ETJump::getCurrentDate() {
 ETJump::Time ETJump::getCurrentTime() {
   return {getCurrentClock(), getCurrentDate()};
 }
+
+std::string ETJump::millisToString(int millis) {
+  int minutes, seconds;
+
+  minutes = millis / 60000;
+  millis -= minutes * 60000;
+  seconds = millis / 1000;
+  millis -= seconds * 1000;
+
+  return ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
+}
+
+std::string ETJump::diffToString(int selfTime, int otherTime) {
+  auto diff = otherTime - selfTime;
+  auto ams = std::abs(diff);
+  auto diffComponents = ETJump::toClock(ams, false);
+
+  const char *diffSign;
+  if (diff > 0) {
+    diffSign = "^2-";
+  } else if (diff < 0) {
+    diffSign = "^1+";
+  } else {
+    diffSign = "^7+";
+  }
+
+  return ETJump::stringFormat("%s%02i:%02i.%03i", diffSign, diffComponents.min,
+                              diffComponents.sec, diffComponents.ms);
+}

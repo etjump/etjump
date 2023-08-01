@@ -31,7 +31,6 @@
 #include "etj_save_system.h"
 #include "etj_session.h"
 #include "etj_custom_map_votes.h"
-#include "etj_timerun.h"
 #include "g_local.h"
 #include "etj_map_statistics.h"
 #include "etj_utilities.h"
