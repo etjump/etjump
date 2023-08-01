@@ -58,6 +58,8 @@ public:
   getTopRecord(int seasonId, const std::string &map,
                const std::string &run);
   void editSeason(const Timerun::EditSeasonParams & params);
+  std::vector<Timerun::Record> getRecords(const Timerun::PrintRecordsParams & params);
+  std::vector<Timerun::Season> getSeasonsForName(const std::string &name, bool exact);
 
 private:
   void migrate();

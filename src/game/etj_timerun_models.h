@@ -68,5 +68,12 @@ struct EditSeasonParams {
   opt<Time> startTime;
   opt<Time> endTime;
 };
+
+struct PrintRecordsParams {
+  int clientNum;
+  opt<std::string> season;
+  opt<std::string> map;
+  opt<std::string> run;
+};
 }
 }

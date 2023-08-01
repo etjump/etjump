@@ -84,6 +84,7 @@ public:
   void editSeason(Timerun::EditSeasonParams params);
   void interrupt(int clientNum);
   void connectNotify(int clientNum);
+  void printRecords(Timerun::PrintRecordsParams params);
 
 private:
   void startNotify(Player *player);

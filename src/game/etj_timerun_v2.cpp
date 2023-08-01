@@ -345,6 +345,96 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
   }
 }
 
+class PrintRecordsResult : public ETJump::SynchronizationContext::ResultBase {
+public:
+  PrintRecordsResult(std::vector<ETJump::Timerun::Record> records,
+                     std::vector<ETJump::Timerun::Season> seasons)
+    : records(records), seasons(seasons) {
+  }
+
+  std::vector<ETJump::Timerun::Record> records;
+  std::vector<ETJump::Timerun::Season> seasons;
+};
+
+std::string rankToString(int rank);
+
+void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
+  _sc->postTask([this, params] {
+                  auto records = _repository->getRecords(params);
+                  auto seasons = _repository->getSeasonsForName(
+                      params.season.value(), false);
+                  return std::make_unique<PrintRecordsResult>(
+                      std::move(records), std::move(seasons));
+                },
+                [this, params](auto p) {
+                  auto result = static_cast<PrintRecordsResult *>(p.get());
+
+                  if (result->records.size() == 0) {
+                    Printer::SendConsoleMessage(params.clientNum,
+                                                "No records available.");
+                    return;
+                  }
+
+                  std::map<int, Timerun::Season> seasonIdToName{};
+                  for (const auto & s : result->seasons) {
+                    seasonIdToName[s.id] = s;
+                  }
+
+                  bool printTop = !params.run.hasValue();
+
+                  // clang-format off
+                  std::string message =
+                      stringFormat(
+                          "^g=============================================================\n"
+                          " ^2Top records for map: ^7%s\n"
+                          "^g=============================================================\n",
+                          params.map.value());
+                  // clang-format on
+
+                  // records are sorted by season, map, run, time
+                  int season = 0;
+                  std::string run = "";
+                  int rank = 1;
+                  for (const auto &r : result->records) {
+                    if (season != r.seasonId) {
+                      // clang-format off
+                      message +=
+                          "^f=============================================================\n";
+                      message += stringFormat(" ^dSeason: ^7%s (%s -> %s)\n", 
+                          seasonIdToName[r.seasonId].name, 
+                          seasonIdToName[r.seasonId].startTime.date.toDateString(), 
+                          (seasonIdToName[r.seasonId].endTime.hasValue() ? seasonIdToName[r.seasonId].endTime.value().date.toDateString() : "*"));
+                      message += "^f=============================================================\n";
+                      // clang-format on
+                      run = "";
+                    }
+                    season = r.seasonId;
+
+                    if (run != r.run) {
+                      rank = 1;
+                      // clang-format off
+                      message +=
+                          "^g=============================================================\n";
+                      message += stringFormat(" ^2Run: ^7%s\n\n", r.run);
+                      message += "^g Rank   Time        Player\n";
+                      // clang-format on
+                    }
+                    run = r.run;
+
+                    message += stringFormat(
+                        "^7 %4s    ^7 %s   %s\n", rankToString(rank++),
+                        millisToString(r.time), r.playerName);
+                  }
+
+                  Printer::SendConsoleMessage(params.clientNum, message);
+                },
+                [this, params](const std::runtime_error &e) {
+                  Printer::SendConsoleMessage(
+                      params.clientNum,
+                      stringFormat("Unable to print records: %s\n", e.what()));
+                });
+}
+
 void ETJump::TimerunV2::startNotify(Player *player) {
   auto spectators = Utilities::getSpectators(player->clientNum);
   auto previousRecord = player->getRecord(_mostRelevantSeason->id,

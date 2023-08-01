@@ -114,10 +114,16 @@ public:
   explicit Optional(T val)
     : _hasValue(true), _value(std::move(val)) {
   }
-   
+
   bool hasValue() const {
     return _hasValue;
+  }
 
+  T &valueOr(T defaultValue) {
+    if (!_hasValue) {
+      return defaultValue;
+    }
+    return _value;
   }
 
   T &operator*() {
