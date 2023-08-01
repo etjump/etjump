@@ -70,10 +70,13 @@ struct EditSeasonParams {
 };
 
 struct PrintRecordsParams {
-  int clientNum;
+  int clientNum{};
   opt<std::string> season;
-  opt<std::string> map;
+  std::string map;
+  bool exactMap{};
   opt<std::string> run;
+  int page{};
+  int pageSize{};
 };
 }
 }

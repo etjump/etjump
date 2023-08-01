@@ -177,7 +177,9 @@ bool Records(gentity_t *ent, Arguments argv) {
               "run",
               "Name of the run to print the records for. Default will print "
               "top 3 records for all runs on specified map and your record.",
-              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false),
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("page", "Which page to display starting at 1", ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("page-size", "How many records to show on a single page", ETJump::CommandParser::OptionDefinition::Type::Integer, false),
       argv);
 
   if (!optCommand.hasValue()) {
@@ -189,6 +191,8 @@ bool Records(gentity_t *ent, Arguments argv) {
   auto optSeason = command.getOptional("season");
   auto optMap = command.getOptional("map");
   auto optRun = command.getOptional("run");
+  auto optPage = command.getOptional("page");
+  auto optPageSize = command.getOptional("page-size");
 
   auto season = optSeason.hasValue() ? optSeason.value().text : "Default";
   auto map = optMap.hasValue() ? optMap.value().text : level.rawmapname;
@@ -197,8 +201,12 @@ bool Records(gentity_t *ent, Arguments argv) {
   params.clientNum =
       ClientNum(ent);
   params.season = ETJump::opt<std::string>(season);
-  params.map = ETJump::opt<std::string>(map);
+  params.map = map;
+  // use exact map search if user did not specify the map
+  params.exactMap = optMap.hasValue() ? false : true;
   params.run = optRun.hasValue() ? ETJump::opt<std::string>(optRun.value().text) : ETJump::opt<std::string>();
+  params.page = optPage.hasValue() ? optPage.value().integer : 1;
+  params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
 
   game.timerunV2->printRecords(params);
 

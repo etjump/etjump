@@ -4,6 +4,57 @@
 #include "etj_database_v2.h"
 #include "q_shared.h"
 
+ETJump::Timerun::Record getRecordFromStandardQueryResult(
+    int seasonId, std::string map, std::string runName, int userId, int time,
+    std::string checkpointsString, std::string recordDate,
+    std::string playerName, std::string metadataString) {
+  auto checkpoints = ETJump::Container::map(
+      ETJump::Container::filter(
+          ETJump::StringUtil::split(checkpointsString, ","),
+          [](const std::string &input) {
+            return ETJump::trim(input).length() > 0;
+          }),
+      [](const std::string &checkpoint) {
+        try {
+          return std::stoi(ETJump::trim(checkpoint));
+        } catch (const std::runtime_error &e) {
+          return TIMERUN_CHECKPOINT_NOT_SET;
+        }
+      });
+  ETJump::Time recordDateTime{};
+  try {
+    recordDateTime = ETJump::Time::fromString(recordDate);
+  } catch (const std::runtime_error &e) {
+    recordDateTime = ETJump::Time::fromString("1900-01-01 00:00:00");
+  }
+
+  std::map<std::string, std::string> metadata;
+  for (const auto &kvp :
+       ETJump::Container::map(ETJump::StringUtil::split(metadataString, ","),
+                              [](const std::string &kvp) {
+                                return ETJump::StringUtil::split(kvp, "=");
+                              })) {
+    if (kvp.size() != 2) {
+      continue;
+    }
+
+    metadata[kvp[0]] = kvp[1];
+  }
+
+  ETJump::Timerun::Record record;
+  record.seasonId = seasonId;
+  record.map = map;
+  record.run = runName;
+  record.userId = userId;
+  record.time = time;
+  record.recordDate = recordDateTime;
+  record.checkpoints = checkpoints;
+  record.playerName = playerName;
+  record.metadata = metadata;
+
+  return record;
+}
+
 void ETJump::TimerunRepository::initialize() { migrate(); }
 
 void ETJump::TimerunRepository::shutdown() { _database = nullptr; }
@@ -31,58 +82,6 @@ getActiveSeasons(const Time &currentTime) const {
   return activeSeasons;
 }
 
-ETJump::Timerun::Record getRecordFromStandardQueryResult(
-    int seasonId, std::string map, std::string runName, int userId, int time,
-    std::string checkpointsString, std::string recordDate,
-    std::string playerName, std::string metadataString) {
-  auto checkpoints = ETJump::Container::map(
-      ETJump::Container::filter(
-          ETJump::StringUtil::split(checkpointsString, ","),
-          [](const std::string &input) {
-            return ETJump::trim(input).length() > 0;
-          }),
-      [](const std::string &checkpoint) {
-        try {
-          return std::stoi(ETJump::trim(checkpoint));
-        } catch (const std::runtime_error &e) {
-          return TIMERUN_CHECKPOINT_NOT_SET;
-        }
-      });
-  ETJump::Time recordDateTime{};
-  try {
-    recordDateTime = ETJump::Time::fromString(recordDate);
-  } catch (const std::runtime_error &e) {
-    recordDateTime = ETJump::Time::fromString("1900-01-01 00:00:00");
-  }
-
-  std::map<std::string, std::string> metadata;
-  for (const auto &kvp :
-       ETJump::Container::map(
-           ETJump::StringUtil::split(metadataString, ","),
-           [](const std::string &kvp) {
-             return ETJump::StringUtil::split(kvp, "=");
-           })) {
-    if (kvp.size() != 2) {
-      continue;
-    }
-
-    metadata[kvp[0]] = kvp[1];
-  }
-
-  ETJump::Timerun::Record record;
-  record.seasonId = seasonId;
-  record.map = map;
-  record.run = runName;
-  record.userId = userId;
-  record.time = time;
-  record.recordDate = recordDateTime;
-  record.checkpoints = checkpoints;
-  record.playerName = playerName;
-  record.metadata = metadata;
-
-  return record;
-}
-
 std::vector<ETJump::Timerun::Record>
 ETJump::TimerunRepository::getRecordsForPlayer(
     const std::vector<int> activeSeasons, const std::string &map, int userId) {
@@ -91,39 +90,21 @@ ETJump::TimerunRepository::getRecordsForPlayer(
                      [](int season) { return std::to_string(season); }),
       ", ");
 
-  std::vector<Timerun::Record> runs;
-
-  // Above parameters are just season IDs, no risk of SQL injection
-  // hence the direct interpolation
-  _database->sql << stringFormat(R"(
+  auto binder = _database->sql << stringFormat(R"(
           select
-            season_id,
-            map,
-            run,
-            user_id,
-            time,
-            checkpoints,
-            record_date,
-            player_name,
-            metadata
+            %s
           from record
           where season_id in (%s) and
             map=? and
             user_id=?;
         )",
-                                 parameters)
-      << map << userId >>
-      [&runs, this](int seasonId, std::string map, std::string runName,
-                    int userId, int time, std::string checkpointsString,
-                    std::string recordDate, std::string playerName,
-                    std::string metadataString) {
+                                               _defaultRecordFieldsStr,
+                                               parameters)
+                << map << userId;
 
-        runs.push_back(std::move(getRecordFromStandardQueryResult(
-            seasonId, map, runName, userId, time, checkpointsString, recordDate,
-            playerName, metadataString)));
-      };
+  auto records = getRecordsFromQuery(binder);
 
-  return runs;
+  return records;
 }
 
 ETJump::Timerun::Season
@@ -382,14 +363,30 @@ void ETJump::TimerunRepository::editSeason(
   q << seasonId;
 }
 
+std::vector<std::string> ETJump::TimerunRepository::getMapsForName(
+    const std::string &map, bool exact) {
+
+  std::string mapFilter = exact ? "map=?" : "map like ?";
+  std::string mapSearchString = exact ? map : "%" + map + "%";
+
+  std::vector<std::string> maps;
+  _database->sql << stringFormat(R"(
+    select
+      distinct map
+    from record
+    where %s
+    collate nocase
+  )",
+                                 mapFilter)
+      << mapSearchString >>
+      [&maps](std::string map) { maps.push_back(map); };
+  return maps;
+}
+
 std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     const Timerun::PrintRecordsParams &params) {
-  if (!params.map.hasValue()) {
-    throw std::runtime_error("Map has to be defined for getRecords query");
-  }
-
   auto season = params.season.hasValue() ? params.season.value() : "Default";
-  auto map = params.map.value();
+  auto map = params.map;
   auto runSpecified = params.run.hasValue();
 
   auto seasons = getSeasonsForName(season, false);
@@ -399,11 +396,31 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
         stringFormat("No season matches name `%s`", season));
   }
 
+  auto maps = getMapsForName(params.map, params.exactMap);
+  if (maps.size() > 1) {
+    std::string error = stringFormat("^3records: ^7found %d maps matching ^3%s^7\n",
+                                     maps.size(), params.map);
+
+    const int perRow = 3;
+    int i = 0;
+    for (const auto & map : maps) {
+      if (i != 0 && i % perRow == 0) {
+        error += "\n";
+      }
+
+      error += stringFormat("%-22s", map);
+      ++i;
+    }
+
+    throw std::runtime_error(error);
+  }
+
   std::string seasonPlaceholders =
       StringUtil::join(Container::map(seasons, [](const auto &s) {
-    return "season_id=?"; }), " or ");
+        return "season_id=?";
+      }), " or ");
 
-  std::string runPlaceholder = runSpecified ? "and run=?" : "";
+  std::string runPlaceholder = runSpecified ? "and lsanitize(run) like ?" : "";
 
   auto query = stringFormat(R"(
     select
@@ -421,23 +438,24 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
       (%s) and
       map like ?
       %s
+    collate nocase
     order by season_id, map, run, time asc
   )",
                             seasonPlaceholders, runPlaceholder);
 
   auto binder = _database->sql << query;
 
-  for (const auto & s : seasons) {
+  for (const auto &s : seasons) {
     binder << s.id;
   }
 
-  binder << map;
+  binder << "%" + map + "%";
 
   if (runSpecified) {
-    binder << params.run.value();
+    binder << "%" + params.run.value() + "%";
   }
 
-  std::vector<Timerun::Record> records;
+  auto records = getRecordsFromQuery(binder);
 
   binder >> [&records](int seasonId, std::string map, std::string runName,
                        int userId, int time, std::string checkpointsString,
@@ -502,7 +520,8 @@ ETJump::TimerunRepository::getSeasonsForName(
 
 void ETJump::TimerunRepository::tryToMigrateRecords() {
   int count = 0;
-  _oldDatabase->sql << "select count(*) from sqlite_master where tbl_name='records'" >> count;
+  _oldDatabase->sql <<
+      "select count(*) from sqlite_master where tbl_name='records'" >> count;
   if (count == 0) {
     return;
   }
@@ -530,14 +549,15 @@ void ETJump::TimerunRepository::tryToMigrateRecords() {
         r.recordDate = Time::fromInt(recordDate);
         r.userId = userId;
         r.playerName = playerName;
-        r.checkpoints = std::vector<int>(MAX_TIMERUN_CHECKPOINTS, TIMERUN_CHECKPOINT_NOT_SET);
+        r.checkpoints = std::vector<int>(MAX_TIMERUN_CHECKPOINTS,
+                                         TIMERUN_CHECKPOINT_NOT_SET);
         r.metadata = {{"mod_version", "unknown(imported)"}};
         oldRecords.push_back(r);
       };
 
   _database->sql << "begin;";
 
-  for (const auto & r : oldRecords) {
+  for (const auto &r : oldRecords) {
     insertRecord(r);
   }
 
@@ -606,4 +626,21 @@ std::string ETJump::TimerunRepository::serializeMetadata(
     result += kvp.first + "=" + kvp.second;
   }
   return result;
+}
+
+std::vector<ETJump::Timerun::Record>
+ETJump::TimerunRepository::getRecordsFromQuery(
+    sqlite::database_binder &binder) {
+  std::vector<Timerun::Record> records;
+  binder >> [&records](int seasonId, std::string map, std::string runName,
+                       int userId, int time, std::string checkpointsString,
+                       std::string recordDate, std::string playerName,
+                       std::string metadataString) {
+    auto record = getRecordFromStandardQueryResult(
+        seasonId, map, runName, userId, time, checkpointsString, recordDate,
+        playerName, metadataString);
+
+    records.push_back(record);
+  };
+  return records;
 }

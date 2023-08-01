@@ -12,6 +12,11 @@ DatabaseV2::DatabaseV2(const std::string& name, const std::string &fileName)
   logger.info(
       stringFormat("Initializing `%s` at `%s`", name, fileName));
   sql << "PRAGMA journal_mode=WAL;";
+
+  sql.define("lsanitize",
+             [](std::string s) { return ETJump::sanitize(s, true); });
+  sql.define("sanitize",
+             [](std::string s) { return ETJump::sanitize(s, false); });
 }
 
 DatabaseV2::~DatabaseV2() = default;

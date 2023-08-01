@@ -25,6 +25,7 @@
 #pragma once
 
 #include <map>
+#include <sqlite_modern_cpp.h>
 #include <string>
 
 #include "etj_synchronization_context.h"
@@ -36,7 +37,8 @@ class DatabaseV2;
 
 class TimerunRepository {
 public:
-  explicit TimerunRepository(std::unique_ptr<DatabaseV2> database, std::unique_ptr<DatabaseV2> oldDatabase)
+  explicit TimerunRepository(std::unique_ptr<DatabaseV2> database,
+                             std::unique_ptr<DatabaseV2> oldDatabase)
     : _database(std::move(database)), _oldDatabase(std::move(oldDatabase)) {
   }
 
@@ -57,13 +59,41 @@ public:
   opt<Timerun::Record>
   getTopRecord(int seasonId, const std::string &map,
                const std::string &run);
-  void editSeason(const Timerun::EditSeasonParams & params);
-  std::vector<Timerun::Record> getRecords(const Timerun::PrintRecordsParams & params);
-  std::vector<Timerun::Season> getSeasonsForName(const std::string &name, bool exact);
+  void editSeason(const Timerun::EditSeasonParams &params);
+  std::vector<std::string> getMapsForName(const std::string &map, bool exact);
+  std::vector<Timerun::Record> getRecords(
+      const Timerun::PrintRecordsParams &params);
+  std::vector<Timerun::Season> getSeasonsForName(
+      const std::string &name, bool exact);
 
 private:
   void tryToMigrateRecords();
   void migrate();
+
+  const std::vector<std::string> _defaultSeasonFields{"id", "name",
+    "start_time", "end_time"};
+  const std::string _defaultSeasonFieldsStr =
+      StringUtil::join(_defaultSeasonFields, ",");
+  const std::string _defaultSeasonQueryBase = stringFormat(R"(
+    select
+      %s
+    from season    
+  )", _defaultSeasonFieldsStr);
+  const std::vector<std::string> _defaultRecordFields{
+      "season_id", "map", "run", "user_id", "time",
+      "checkpoints", "record_date", "player_name", "metadata"};
+  const std::string _defaultRecordFieldsStr =
+      StringUtil::join(_defaultRecordFields, ",");
+  const std::string _defaultRecordQueryBase =
+      stringFormat(R"(
+        select
+          %s
+        from record
+      )", _defaultRecordFieldsStr);
+
+  static std::vector<Timerun::Record> getRecordsFromQuery(
+      sqlite::database_binder &binder);
+
   std::string serializeMetadata(std::map<std::string, std::string> metadata);
   std::unique_ptr<DatabaseV2> _database;
   std::unique_ptr<DatabaseV2> _oldDatabase;
