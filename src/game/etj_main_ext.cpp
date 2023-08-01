@@ -117,7 +117,9 @@ void OnGameInit() {
       level.rawmapname,
       std::make_unique<ETJump::TimerunRepository>(
           std::make_unique<ETJump::DatabaseV2>(
-              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2")),
+              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
+          std::make_unique<ETJump::DatabaseV2>(
+              "timerunv1", GetPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
   game.serverCommands = std::make_unique<ETJump::ServerCommands>(

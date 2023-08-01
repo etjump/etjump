@@ -36,8 +36,8 @@ class DatabaseV2;
 
 class TimerunRepository {
 public:
-  explicit TimerunRepository(std::unique_ptr<DatabaseV2> database)
-    : _database(std::move(database)) {
+  explicit TimerunRepository(std::unique_ptr<DatabaseV2> database, std::unique_ptr<DatabaseV2> oldDatabase)
+    : _database(std::move(database)), _oldDatabase(std::move(oldDatabase)) {
   }
 
   void initialize();
@@ -62,8 +62,10 @@ public:
   std::vector<Timerun::Season> getSeasonsForName(const std::string &name, bool exact);
 
 private:
+  void tryToMigrateRecords();
   void migrate();
   std::string serializeMetadata(std::map<std::string, std::string> metadata);
   std::unique_ptr<DatabaseV2> _database;
+  std::unique_ptr<DatabaseV2> _oldDatabase;
 };
 }

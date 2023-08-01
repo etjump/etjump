@@ -160,6 +160,22 @@ struct Time {
                         this->clock.min, this->clock.sec);
   }
 
+  static Time fromInt(int input) {
+    time_t value = input;
+    tm* t = std::gmtime(&value);
+
+    Time time;
+    time.date.year = t->tm_year + 1900;
+    time.date.mon = t->tm_mon + 1;
+    time.date.day = t->tm_mday;
+
+    time.clock.hours = t->tm_hour;
+    time.clock.min = t->tm_min;
+    time.clock.sec = t->tm_sec;
+
+    return time;
+  }
+
   // https://en.cppreference.com/w/cpp/io/manip/get_time
   static Time fromString(const std::string &input,
                          const std::string &format = "%Y-%m-%d %H:%M:%S") {

@@ -500,6 +500,50 @@ ETJump::TimerunRepository::getSeasonsForName(
   return seasons;
 }
 
+void ETJump::TimerunRepository::tryToMigrateRecords() {
+  int count = 0;
+  _oldDatabase->sql << "select count(*) from sqlite_master where tbl_name='records'" >> count;
+  if (count == 0) {
+    return;
+  }
+
+  std::vector<Timerun::Record> oldRecords;
+
+  _oldDatabase->sql << R"(
+    select
+        id,
+        time,
+        record_date,
+        map,
+        run,
+        user_id,
+        player_name
+    from records;
+  )" >>
+      [&oldRecords](int id, int time, int recordDate, std::string map,
+                    std::string run, int userId, std::string playerName) {
+        Timerun::Record r{};
+        r.seasonId = 1;
+        r.map = map;
+        r.run = run;
+        r.time = time;
+        r.recordDate = Time::fromInt(recordDate);
+        r.userId = userId;
+        r.playerName = playerName;
+        r.checkpoints = std::vector<int>(16, -1);
+        r.metadata = {{"mod_version", "unknown(imported)"}};
+        oldRecords.push_back(r);
+      };
+
+  _database->sql << "begin;";
+
+  for (const auto & r : oldRecords) {
+    insertRecord(r);
+  }
+
+  _database->sql << "commit;";
+}
+
 void ETJump::TimerunRepository::migrate() {
   _database->addMigration(
       "initial",
@@ -545,6 +589,13 @@ void ETJump::TimerunRepository::migrate() {
        "run, user_id);"});
 
   _database->applyMigrations();
+
+  int count = 0;
+  _database->sql << "select count(*) from record" >> count;
+
+  if (count == 0) {
+    tryToMigrateRecords();
+  }
 }
 
 std::string ETJump::TimerunRepository::serializeMetadata(
