@@ -103,21 +103,22 @@ std::string timestampToString(int timestamp,
                               const char *start = "never");
 
 void RemovePlayerWeapons(int clientNum);
+} // namespace Utilities
+
+namespace ETJump {
 
 template <typename T>
-class Optional {
+class opt {
 public:
-  Optional()
+  opt()
     : _hasValue(false) {
   }
 
-  explicit Optional(T val)
+  explicit opt(T val)
     : _hasValue(true), _value(std::move(val)) {
   }
 
-  bool hasValue() const {
-    return _hasValue;
-  }
+  bool hasValue() const { return _hasValue; }
 
   T &valueOr(T defaultValue) {
     if (!_hasValue) {
@@ -158,6 +159,6 @@ private:
   bool _hasValue;
   T _value;
 };
-} // namespace Utilities
+} // namespace ETJump
 
 #endif // ETJUMP_UTILITIES_H

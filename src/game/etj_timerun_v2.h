@@ -59,8 +59,8 @@ public:
     std::vector<Timerun::Record> records;
     bool running{};
     std::string name;
-    Utilities::Optional<int> startTime;
-    Utilities::Optional<int> completionTime;
+    opt<int> startTime;
+    opt<int> completionTime;
     std::string activeRunName;
     int nextCheckpointIdx;
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};

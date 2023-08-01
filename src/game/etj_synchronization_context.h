@@ -12,10 +12,6 @@
 #include "etj_utilities.h"
 
 namespace ETJump {
-
-template <typename T>
-using opt = Utilities::Optional<T>;
-
 class SynchronizationContext {
 public:
   class ResultBase {
