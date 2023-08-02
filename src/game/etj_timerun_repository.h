@@ -65,6 +65,7 @@ public:
       const Timerun::PrintRecordsParams &params);
   std::vector<Timerun::Season> getSeasonsForName(
       const std::string &name, bool exact);
+  opt<Timerun::Record> getRecord(const std::string & map, const std::string & run, int rank);
 
 private:
   void tryToMigrateRecords();

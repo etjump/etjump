@@ -27,6 +27,7 @@
 #include <array>
 #include <map>
 
+#include "etj_command_parser.h"
 #include "etj_database_v2.h"
 #include "etj_log.h"
 #include "etj_synchronization_context.h"
@@ -63,6 +64,9 @@ public:
     int nextCheckpointIdx;
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
+    // /loadcheckpoints stores checkpoints here
+    std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
+        overriddenCheckpoints{};
 
     const Timerun::Record *getRecord(int seasonId,
                                      const std::string &runName) const;
@@ -83,6 +87,7 @@ public:
   void interrupt(int clientNum);
   void connectNotify(int clientNum);
   void printRecords(Timerun::PrintRecordsParams params);
+  void loadCheckpoints(int clientNum, const std::string& mapName, const std::string & runName, int rank);
 
 private:
   void startNotify(Player *player);

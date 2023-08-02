@@ -518,6 +518,41 @@ ETJump::TimerunRepository::getSeasonsForName(
   return seasons;
 }
 
+ETJump::opt<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecord(
+    const std::string &map, const std::string &run, int rank) {
+  opt<Timerun::Record> record;
+
+      _database->sql << R"(
+    select *
+      from (
+        select
+          season_id,
+          map,
+          run,
+          user_id,
+          time,
+          checkpoints,
+          record_date,
+          player_name,
+          metadata,
+          rank() over (partition by season_id, map, run order by time asc) as rank
+        FROM record
+        where season_id=1 and map=? and lsanitize(run)=?
+      ) as ranked_records
+      where rank = ?;
+  )" << map << run
+                 << rank >>
+      [&record](int seasonId, std::string map, std::string runName, int userId,
+                int time, std::string checkpointsString, std::string recordDate,
+                std::string playerName, std::string metadataString, int rank) {
+        record = getRecordFromStandardQueryResult(
+            seasonId, map, runName, userId, time, checkpointsString, recordDate,
+            playerName, metadataString);
+      };
+
+  return record;
+}
+
 void ETJump::TimerunRepository::tryToMigrateRecords() {
   int count = 0;
   _oldDatabase->sql <<

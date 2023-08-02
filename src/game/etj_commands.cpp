@@ -165,7 +165,8 @@ bool Records(gentity_t *ent, Arguments argv) {
       "records",
       ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
-          "records", "Print the timerun records.\n    /records --season <season name> --map <map name> --run <run name>\n\n    Has a shorthand format of:\n    /records <run name>\n    /records <map name> <run name>\n    /records <season name> <map name> <run name>")
+          "records",
+          "Print the timerun records.\n    /records --season <season name> --map <map name> --run <run name>\n\n    Has a shorthand format of:\n    /records <run name>\n    /records <map name> <run name>\n    /records <season name> <map name> <run name>")
       .addOption("season",
                  "Name of the season to print the records for. Default is "
                  "the overall season.",
@@ -240,6 +241,36 @@ bool Records(gentity_t *ent, Arguments argv) {
   params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
 
   game.timerunV2->printRecords(params);
+
+  return true;
+}
+
+bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
+  auto optCommand = deprecated_getCommand(
+      "loadcheckpoints", ClientNum(ent),
+      ETJump::CommandParser::CommandDefinition::create(
+          "loadcheckpoints",
+          "Load checkpoints from a previous record.\n    /loadcheckpoints --season <season name> --run <run name> --rank <rank>\n\n"
+          "    Has a shorthand format of:\n"
+          "    /loadcheckpoints <run name> <rank>\n")
+      .addOption(
+          "run",
+          "Name of the run to load the records from.",
+          ETJump::CommandParser::OptionDefinition::Type::Token, true, 0)
+      .addOption("rank", "Rank to load checkpoints from. Defaults to 1",
+                 ETJump::CommandParser::OptionDefinition::Type::Integer, false, 1),
+      &ETJump::Container::skipFirstN(*argv, 1)
+      );
+
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto runName = optCommand.value().options.at("run").text;
+  auto optRank = optCommand.value().getOptional("rank");
+  auto rank = optRank.hasValue() ? optRank.value().integer : 1;
+
+  game.timerunV2->loadCheckpoints(ClientNum(ent), level.rawmapname, runName, rank);
 
   return true;
 }
@@ -1956,7 +1987,8 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
   // this for now
   auto def =
       ETJump::CommandParser::CommandDefinition::create(
-          "add-season", "Adds a new timerun season")
+          "add-season",
+          "Adds a new timerun season\n    !add-season --name <name> --start-date <2000-01-01>")
       .addOption("name", "Name of the season to add",
                  ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                  true)
@@ -2162,6 +2194,8 @@ Commands::Commands() {
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;
   commands_["top"] = ClientCommands::Records;
+  commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
+  commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

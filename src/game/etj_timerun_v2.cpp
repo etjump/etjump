@@ -459,6 +459,57 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
       });
 }
 
+class LoadCheckpointsResult
+    : public ETJump::SynchronizationContext::ResultBase {
+public:
+  explicit LoadCheckpointsResult(std::vector<int> checkpoints)
+    : checkpoints(std::move(checkpoints)) {
+  }
+
+  std::vector<int> checkpoints;
+};
+
+
+void ETJump::TimerunV2::loadCheckpoints(int clientNum,
+                                        const std::string &mapName,
+                                        const std::string &runName,
+                                        int rank) {
+  _sc->postTask(
+      [this, clientNum, mapName, runName, rank] {
+        auto record = _repository->getRecord(mapName, runName, rank);
+
+        if (!record.hasValue()) {
+          throw std::runtime_error(stringFormat(
+              "Could not find a record on map `%s` for run `%s` for rank `%d`",
+              mapName, runName, rank));
+        }
+
+        return std::make_unique<LoadCheckpointsResult>(
+            record.value().checkpoints);
+      },
+      [this, clientNum, runName, rank](auto r) {
+        auto result = static_cast<LoadCheckpointsResult *>(r.get());
+
+        _players[clientNum]->overriddenCheckpoints[runName] = {};
+
+        auto checkpointsToCopy =
+            std::min(result->checkpoints.size(),
+                     _players[clientNum]->overriddenCheckpoints[runName].
+                     size());
+
+        std::copy_n(begin(result->checkpoints), checkpointsToCopy,
+                    begin(_players[clientNum]->overriddenCheckpoints[runName]));
+
+        Printer::SendConsoleMessage(
+            clientNum,
+            stringFormat(
+                "^7Loaded checkpoints for run ^3`%s`^7 from rank ^3`%d`^7 record.\n",
+                runName, rank));
+      }, [clientNum](auto e) {
+        Printer::SendConsoleMessage(clientNum, e.what());
+      });
+}
+
 void ETJump::TimerunV2::startNotify(Player *player) {
   auto spectators = Utilities::getSpectators(player->clientNum);
   auto previousRecord = player->getRecord(_mostRelevantSeason->id,
@@ -470,12 +521,17 @@ void ETJump::TimerunV2::startNotify(Player *player) {
   }
 
   std::string checkpointsStr;
-  auto prevRecord =
-      player->getRecord(_mostRelevantSeason->id, player->activeRunName);
-  if (prevRecord) {
-    checkpointsStr = StringUtil::join(prevRecord->checkpoints, ",");
+  if (player->overriddenCheckpoints.count(player->activeRunName)) {
+    checkpointsStr = StringUtil::join(
+        player->overriddenCheckpoints[player->activeRunName], ",");
   } else {
-    checkpointsStr = StringUtil::join(player->checkpointTimes, ",");
+    auto prevRecord =
+        player->getRecord(_mostRelevantSeason->id, player->activeRunName);
+    if (prevRecord) {
+      checkpointsStr = StringUtil::join(prevRecord->checkpoints, ",");
+    } else {
+      checkpointsStr = StringUtil::join(player->checkpointTimes, ",");
+    }
   }
 
   Printer::SendCommandToAll(stringFormat(
