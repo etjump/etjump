@@ -114,7 +114,9 @@ public:
     : _hasValue(false) {
   }
 
-  explicit opt(T val)
+  // we want this to be implicit
+  // e.g. opt<int> x = 5;
+  opt(T val)
     : _hasValue(true), _value(std::move(val)) {
   }
 

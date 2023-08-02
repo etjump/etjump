@@ -244,31 +244,32 @@ public:
 };
 
 void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
-  _sc->postTask([this, season]() {
-                  try {
-                    _repository->addSeason(season);
-                    return std::make_unique<AddSeasonResult>(
-                        stringFormat("Successfully added season `%s`",
-                                     season.name));
-                  } catch (const std::runtime_error &e) {
-                    return std::make_unique<AddSeasonResult>(e.what());
-                  }
-                },
-                [this, season](
-                std::unique_ptr<SynchronizationContext::ResultBase> result) {
+  _sc->postTask(
+      [this, season]() {
+        try {
+          _repository->addSeason(season);
+          return std::make_unique<AddSeasonResult>(
+              stringFormat("Successfully added season `%s`",
+                           season.name));
+        } catch (const std::runtime_error &e) {
+          return std::make_unique<AddSeasonResult>(e.what());
+        }
+      },
+      [this, season](
+      std::unique_ptr<SynchronizationContext::ResultBase> result) {
 
-                  auto addSeasonResult =
-                      static_cast<AddSeasonResult *>(result.get());
+        auto addSeasonResult =
+            static_cast<AddSeasonResult *>(result.get());
 
-                  Printer::SendConsoleMessage(season.clientNum,
-                                              addSeasonResult->message + "\n");
-                },
-                [this, season](const std::runtime_error &e) {
-                  const char *what = e.what();
-                  Printer::SendConsoleMessage(
-                      season.clientNum,
-                      stringFormat("Unable to add season: %s\n", e.what()));
-                }
+        Printer::SendConsoleMessage(season.clientNum,
+                                    addSeasonResult->message + "\n");
+      },
+      [this, season](const std::runtime_error &e) {
+        const char *what = e.what();
+        Printer::SendConsoleMessage(
+            season.clientNum,
+            stringFormat("Unable to add season: %s\n", e.what()));
+      }
       );
 }
 
@@ -282,27 +283,28 @@ public:
 };
 
 void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
-  _sc->postTask([this, params]() {
-                  try {
-                    _repository->editSeason(params);
-                    return std::make_unique<EditSeasonResult>(
-                        stringFormat("Successfully edited season `%s`",
-                                     params.name));
-                  } catch (const std::runtime_error &e) {
-                    return std::make_unique<EditSeasonResult>(e.what());
-                  }
-                },
-                [this,params](auto r) {
-                  auto editSeasonResult = static_cast<EditSeasonResult *>(r.
-                    get());
-                  Printer::SendConsoleMessage(params.clientNum,
-                                              editSeasonResult->message + "\n");
-                },
-                [this, params](const std::runtime_error &e) {
-                  Printer::SendConsoleMessage(
-                      params.clientNum,
-                      stringFormat("Unable to edit season: %s\n", e.what()));
-                });
+  _sc->postTask(
+      [this, params]() {
+        try {
+          _repository->editSeason(params);
+          return std::make_unique<EditSeasonResult>(
+              stringFormat("Successfully edited season `%s`",
+                           params.name));
+        } catch (const std::runtime_error &e) {
+          return std::make_unique<EditSeasonResult>(e.what());
+        }
+      },
+      [this,params](auto r) {
+        auto editSeasonResult = static_cast<EditSeasonResult *>(r.
+          get());
+        Printer::SendConsoleMessage(params.clientNum,
+                                    editSeasonResult->message + "\n");
+      },
+      [this, params](const std::runtime_error &e) {
+        Printer::SendConsoleMessage(
+            params.clientNum,
+            stringFormat("Unable to edit season: %s\n", e.what()));
+      });
 }
 
 void ETJump::TimerunV2::interrupt(int clientNum) {

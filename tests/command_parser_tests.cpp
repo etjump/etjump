@@ -299,5 +299,37 @@ TEST_F(CommandParserTests, CommandParser_ReturnsError_IfDateIsNotValid) {
   auto parser = CreateCommandParser(def, args);
 
   auto expectedDate = Date{2023, 1, 5};
-  ASSERT_TRUE(StringUtil::contains(parser.parse().errors[0], "does not match the expected format"));
+  ASSERT_TRUE(
+      StringUtil::contains(parser.parse().errors[0],
+        "does not match the expected format"));
+}
+
+TEST_F(CommandParserTests, CommandParser_HandlesPositionalArgumentsCorrectly) {
+  auto args = std::vector<std::string>{"a", "b"};
+  auto def =
+      CreateCommandDefinition()
+          .addOption("field-a", "desc",
+                     CommandParser::OptionDefinition::Type::Token, true, 0)
+          .addOption("field-b", "desc",
+                     CommandParser::OptionDefinition::Type::Token, true, 1);
+
+  auto parser = CreateCommandParser(def, args);
+
+  ASSERT_EQ(parser.parse().options["field-a"].text, "a");
+  ASSERT_EQ(parser.parse().options["field-b"].text, "b");
+}
+
+TEST_F(CommandParserTests, CommandParser_HandlesPositionalArgumentsCorrectly_IfSomeArePassedExplicitly) {
+  auto args = std::vector<std::string>{"--field-b", "b", "a"};
+  auto def =
+      CreateCommandDefinition()
+          .addOption("field-a", "desc",
+                     CommandParser::OptionDefinition::Type::Token, true, 0)
+          .addOption("field-b", "desc",
+                     CommandParser::OptionDefinition::Type::Token, true, 1);
+
+  auto parser = CreateCommandParser(def, args);
+
+  ASSERT_EQ(parser.parse().options["field-a"].text, "a");
+  ASSERT_EQ(parser.parse().options["field-b"].text, "b");
 }

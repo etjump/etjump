@@ -87,14 +87,15 @@ const char TIMERUN_MANAGEMENT = 'T';
 // continuing to use this.
 // This is only in use to keep the scope of the timerun improvement
 // reasonable
-auto deprecated_getCommand(const std::string& commandPrefix, int clientNum,
+auto deprecated_getCommand(const std::string &commandPrefix, int clientNum,
                            const ETJump::CommandParser::CommandDefinition &def,
                            Arguments args) {
   auto command = ETJump::CommandParser(def, *args).parse();
 
   if (command.helpRequested) {
     Printer::SendChatMessage(
-        clientNum, ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
+        clientNum,
+        ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
     Printer::SendConsoleMessage(clientNum, def.help());
     return ETJump::opt<ETJump::CommandParser::Command>();
   }
@@ -102,7 +103,9 @@ auto deprecated_getCommand(const std::string& commandPrefix, int clientNum,
   if (command.errors.size() > 0) {
     Printer::SendChatMessage(
         clientNum,
-        ETJump::stringFormat("^3%s: ^7operation failed. Check console for more information.", commandPrefix));
+        ETJump::stringFormat(
+            "^3%s: ^7operation failed. Check console for more information.",
+            commandPrefix));
 
     for (const auto &e : command.errors) {
       Printer::SendConsoleMessage(clientNum, e);
@@ -162,25 +165,27 @@ bool Records(gentity_t *ent, Arguments argv) {
       "records",
       ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
-          "ranks", "Print the timerun records")
-          .addOption("season",
-                     "Name of the season to print the records for. Default is "
-                     "the overall season.",
-                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                     false)
-          .addOption("map",
-                     "Name of the map to print the records for. Default is the "
-                     "current map.",
-                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
-                     false)
-          .addOption(
-              "run",
-              "Name of the run to print the records for. Default will print "
-              "top 3 records for all runs on specified map and your record.",
-              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
-          .addOption("page", "Which page to display starting at 1", ETJump::CommandParser::OptionDefinition::Type::Integer, false)
-          .addOption("page-size", "How many records to show on a single page", ETJump::CommandParser::OptionDefinition::Type::Integer, false),
-      argv);
+          "records", "Print the timerun records.\n    /records --season <season name> --map <map name> --run <run name>\n\n    Has a shorthand format of:\n    /records <run name>\n    /records <map name> <run name>\n    /records <season name> <map name> <run name>")
+      .addOption("season",
+                 "Name of the season to print the records for. Default is "
+                 "the overall season.",
+                 ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                 false)
+      .addOption("map",
+                 "Name of the map to print the records for. Default is the "
+                 "current map.",
+                 ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                 false)
+      .addOption(
+          "run",
+          "Name of the run to print the records for. Default will print "
+          "top 3 records for all runs on specified map and your record.",
+          ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+      .addOption("page", "Which page to display starting at 1",
+                 ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+      .addOption("page-size", "How many records to show on a single page",
+                 ETJump::CommandParser::OptionDefinition::Type::Integer, false),
+      &ETJump::Container::skipFirstN(*argv, 1));
 
   if (!optCommand.hasValue()) {
     return true;
@@ -194,17 +199,43 @@ bool Records(gentity_t *ent, Arguments argv) {
   auto optPage = command.getOptional("page");
   auto optPageSize = command.getOptional("page-size");
 
-  auto season = optSeason.hasValue() ? optSeason.value().text : "Default";
-  auto map = optMap.hasValue() ? optMap.value().text : level.rawmapname;
+  std::string season;
+  std::string map;
+  ETJump::opt<std::string> run;
+
+  if (command.extraArgs.size() >= 3) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+  } else if (command.extraArgs.size() >= 2) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+  } else if (command.extraArgs.size() >= 1) {
+    run = command.extraArgs[0];
+  }
+
+  if (season.empty()) {
+    season = optSeason.hasValue() ? optSeason.value().text : "Default";
+  }
+  bool exactMap{};
+  if (map.empty()) {
+    map = optMap.hasValue() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.hasValue();
+  } else {
+    exactMap = false;
+  }
+  if (!run.hasValue()) {
+    run = optRun.hasValue() ? optRun.value().text : ETJump::opt<std::string>();
+  }
 
   ETJump::Timerun::PrintRecordsParams params;
   params.clientNum =
       ClientNum(ent);
-  params.season = ETJump::opt<std::string>(season);
+  params.season = season;
   params.map = map;
   // use exact map search if user did not specify the map
-  params.exactMap = optMap.hasValue() ? false : true;
-  params.run = optRun.hasValue() ? ETJump::opt<std::string>(optRun.value().text) : ETJump::opt<std::string>();
+  params.exactMap = exactMap;
+  params.run = run;
   params.page = optPage.hasValue() ? optPage.value().integer : 1;
   params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
 
@@ -1993,7 +2024,7 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
           "(e.g. 2000-01-01)",
           ETJump::CommandParser::OptionDefinition::Type::Date, false);
 
-    auto optCommand = deprecated_getCommand("edit-season", clientNum, def, argv);
+  auto optCommand = deprecated_getCommand("edit-season", clientNum, def, argv);
 
   if (!optCommand.hasValue()) {
     return true;
@@ -2005,13 +2036,16 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
   auto start = command.getOptional("start-date");
   auto end = command.getOptional("end-date");
 
-  auto startTime = start.hasValue() ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(start.value().date))
-                                    : ETJump::opt<ETJump::Time>();
+  auto startTime = start.hasValue()
+                     ? ETJump::opt<ETJump::Time>(
+                         ETJump::Time::fromDate(start.value().date))
+                     : ETJump::opt<ETJump::Time>();
   auto endTime = end.hasValue()
-                       ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(end.value().date))
-                       : ETJump::opt<ETJump::Time>();
+                   ? ETJump::opt<ETJump::Time>(
+                       ETJump::Time::fromDate(end.value().date))
+                   : ETJump::opt<ETJump::Time>();
 
-  game.timerunV2->editSeason({ clientNum, name, startTime, endTime });
+  game.timerunV2->editSeason({clientNum, name, startTime, endTime});
 
   return true;
 }

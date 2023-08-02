@@ -70,5 +70,16 @@ bool isIn(const Container &container, const Element &element) {
   return std::find(container.begin(), container.end(), element) !=
          container.end();
 }
+
+template <typename TElement>
+std::vector<TElement> skipFirstN(const std::vector<TElement> &input,
+                                 int count) {
+  if (count >= static_cast<int>(input.size())) {
+    return std::vector<TElement>(); // Return an empty vector if count is
+                                    // greater than or equal to the input size.
+  }
+
+  return std::vector<TElement>(input.begin() + count, input.end());
+}
 }
 }

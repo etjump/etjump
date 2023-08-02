@@ -59,10 +59,17 @@ void ETJump::CommandParser::expectToken(
     return;
   }
 
-  Option option(optionDefinition->name);
-  option.text = *_current;
+  
 
-  _cmd.options[optionDefinition->name] = option;
+  _cmd.options[optionDefinition->name] = createTokenOption(optionDefinition, *_current);
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createTokenOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
+  Option option(optionDefinition->name);
+  option.text = text;
+
+  return option;
 }
 
 void ETJump::CommandParser::expectMultipleTokens(
@@ -110,22 +117,27 @@ void ETJump::CommandParser::expectInteger(
     return;
   }
 
+  _cmd.options[optionDefinition->name] = createIntegerOption(optionDefinition, *_current);
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createIntegerOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
   Option option(optionDefinition->name);
-  option.text = *_current;
+  option.text = text;
 
   try {
-    option.integer = std::stoi(option.text);
+    option.integer = std::stoi(text);
   } catch (const std::invalid_argument &) {
     _cmd.errors.push_back(stringFormat(
-        "`%s` is not an integer. Expected an integer for parameter `%s`",
-        option.text, option.name));
+        "`%s` is not an integer. Expected an integer for parameter `%s`", text,
+        option.name));
   } catch (const std::out_of_range &) {
     _cmd.errors.push_back(stringFormat(
-        "`%s` is out of range. Expected an integer for parameter `%s`",
-        option.text, option.name));
+        "`%s` is out of range. Expected an integer for parameter `%s`", text,
+        option.name));
   }
 
-  _cmd.options[optionDefinition->name] = std::move(option);
+  return option;
 }
 
 void ETJump::CommandParser::expectDecimal(
@@ -138,22 +150,28 @@ void ETJump::CommandParser::expectDecimal(
     return;
   }
 
+  _cmd.options[optionDefinition->name] = std::move(
+      createDecimalOption(optionDefinition, *_current));
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createDecimalOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
   Option option(optionDefinition->name);
-  option.text = *_current;
+  option.text = text;
 
   try {
-    option.decimal = std::stod(option.text);
+    option.decimal = std::stod(text);
   } catch (const std::invalid_argument &) {
     _cmd.errors.push_back(stringFormat(
-        "`%s` is not a decimal. Expected a decimal for parameter `%s`",
-        option.text, option.name));
+        "`%s` is not a decimal. Expected a decimal for parameter `%s`", text,
+        option.name));
   } catch (const std::out_of_range &) {
     _cmd.errors.push_back(stringFormat(
-        "`%s` is out of range. Expected a decimal for parameter `%s`",
-        option.text, option.name));
+        "`%s` is out of range. Expected a decimal for parameter `%s`", text,
+        option.name));
   }
 
-  _cmd.options[optionDefinition->name] = std::move(option);
+  return option;
 }
 
 void ETJump::CommandParser::
@@ -166,18 +184,23 @@ expectDate(const OptionDefinition *optionDefinition) {
     return;
   }
 
+  _cmd.options[optionDefinition->name] = createDateOption(
+      optionDefinition, *_current);
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createDateOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
   Option option(optionDefinition->name);
-  option.text = *_current;
+  option.text = text;
 
   try {
-    option.date = Date::fromString(*_current);
+    option.date = Date::fromString(text);
   } catch (const std::invalid_argument &) {
-    _cmd.errors.push_back(
-        stringFormat("`%s` does not match the expected format of `YYYY-MM-DD`",
-                     *_current));
+    _cmd.errors.push_back(stringFormat(
+        "`%s` does not match the expected format of `YYYY-MM-DD`", text));
   }
 
-  _cmd.options[optionDefinition->name] = std::move(option);
+  return option;
 }
 
 void ETJump::CommandParser::expectOption() {
@@ -228,6 +251,43 @@ void ETJump::CommandParser::expectOptionOrExtraArgs() {
   }
 }
 
+void ETJump::CommandParser::processPositionalArguments() {
+  for (const auto &optDef : _def.options) {
+    if (optDef.second.position.hasValue()) {
+      if (_cmd.options.count(optDef.second.name) > 0) {
+        continue;
+      }
+      auto pos = optDef.second.position.value();
+
+      if (_cmd.extraArgs.size() - 1 >= pos) {
+        switch (optDef.second.type) {
+          case OptionDefinition::Type::Boolean:
+            continue;
+          case OptionDefinition::Type::Token:
+            _cmd.options[optDef.second.name] =
+                createTokenOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+          case OptionDefinition::Type::MultiToken:
+            continue;
+          case OptionDefinition::Type::Integer:
+            _cmd.options[optDef.second.name] =
+                createIntegerOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+          case OptionDefinition::Type::Decimal:
+            _cmd.options[optDef.second.name] =
+                createDecimalOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+          case OptionDefinition::Type::Date:
+            _cmd.options[optDef.second.name] =
+                createDateOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+        }
+        
+      }
+    }
+  }
+}
+
 void ETJump::CommandParser::validateCommand() {
   for (const auto &option : _def.options) {
     if (option.second.required && _cmd.options.count(option.first) == 0) {
@@ -257,6 +317,8 @@ ETJump::CommandParser::parse() {
 
       ++_current;
     }
+
+    processPositionalArguments();
 
     validateCommand();
 

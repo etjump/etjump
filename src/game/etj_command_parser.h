@@ -68,6 +68,7 @@ public:
     std::string description{};
     Type type{Type::Token};
     bool required{true};
+    opt<int> position;
 
     static OptionDefinition create(const std::string &name,
                                    const std::string &description, Type type,
@@ -90,9 +91,23 @@ public:
 
     std::string help() const {
       auto optionsToStrings = Container::map(options, [](const auto &pair) {
-        return stringFormat("    --%s (%s) %s", pair.second.name,
-                            OptionDefinition::typeToString(pair.second.type),
-                            pair.second.description);
+        auto optionName = pair.second.name;
+        auto optionType = OptionDefinition::typeToString(pair.second.type);
+        auto desc = pair.second.description;
+        auto requiredString = pair.second.required ? " [required] " : "";
+        auto positionString =
+            stringFormat(
+                "(pos: %d)", pair.second.position.hasValue() ? pair.second.position.value() : 0);
+
+        return stringFormat(
+            "    --%s (%s) %s%s%s",
+            optionName, optionType,
+            desc,
+            requiredString,
+            pair.second.position.hasValue()
+              ? positionString
+              : ""
+            );
       });
 
       return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s", name,
@@ -119,6 +134,38 @@ public:
       opt.description = description;
       opt.type = type;
       opt.required = required;
+
+      this->options[name] = opt;
+
+      return *this;
+    }
+
+    CommandDefinition &addOption(const std::string &name,
+                                 const std::string &description,
+                                 OptionDefinition::Type type, bool required,
+                                 int position) {
+      for (const auto &o : this->options) {
+        if (o.second.position.hasValue() && o.second.position.value() ==
+            position) {
+          throw std::runtime_error(
+              stringFormat("`%s` already has argument `%s` configured to "
+                           "position `%d`. Use a different position for `%s`.",
+                           this->name, o.second.name, position, name));
+        }
+      }
+
+      if (type == OptionDefinition::Type::Boolean || type ==
+          OptionDefinition::Type::MultiToken) {
+        throw std::runtime_error("Positional arguments are not supported for "
+            "boolean or multitoken types.");
+      }
+
+      auto opt = OptionDefinition{};
+      opt.name = name;
+      opt.description = description;
+      opt.type = type;
+      opt.required = required;
+      opt.position = position;
 
       this->options[name] = opt;
 
@@ -160,17 +207,6 @@ public:
       _current(begin(args)), _def(definition), _cmd(Command()) {
   }
 
-  const OptionDefinition *getOptionOrNull();
-  void expectBoolean(const OptionDefinition *optionDefinition);
-  void expectToken(const OptionDefinition *optionDefinition);
-  void expectMultipleTokens(const OptionDefinition *optionDefinition);
-  void expectInteger(const OptionDefinition *optionDefinition);
-  void expectDecimal(const OptionDefinition *optionDefinition);
-  void expectDate(const OptionDefinition *optionDefinition);
-  void expectOption();
-  void expectExtraArg();
-  void expectOptionOrExtraArgs();
-  void validateCommand();
   Command parse();
 
 private:
@@ -178,5 +214,26 @@ private:
   std::vector<std::string>::iterator _current;
   CommandDefinition _def;
   Command _cmd;
+
+  const OptionDefinition *getOptionOrNull();
+  void expectBoolean(const OptionDefinition *optionDefinition);
+  void expectToken(const OptionDefinition *optionDefinition);
+  Option createTokenOption(const OptionDefinition *optionDefinition,
+                           const std::string &text);
+  void expectMultipleTokens(const OptionDefinition *optionDefinition);
+  void expectInteger(const OptionDefinition *optionDefinition);
+  Option createIntegerOption(const OptionDefinition *optionDefinition,
+                             const std::string &text);
+  void expectDecimal(const OptionDefinition *optionDefinition);
+  Option createDecimalOption(const OptionDefinition *optionDefinition,
+                             const std::string &text);
+  void expectDate(const OptionDefinition *optionDefinition);
+  Option createDateOption(const OptionDefinition *optionDefinition,
+                          const std::string &text);
+  void expectOption();
+  void expectExtraArg();
+  void expectOptionOrExtraArgs();
+  void processPositionalArguments();
+  void validateCommand();
 };
 } // namespace ETJump
