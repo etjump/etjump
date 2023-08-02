@@ -259,7 +259,7 @@ void ETJump::CommandParser::processPositionalArguments() {
       }
       auto pos = optDef.second.position.value();
 
-      if (_cmd.extraArgs.size() - 1 >= pos) {
+      if (_cmd.extraArgs.size() >= pos + 1) {
         switch (optDef.second.type) {
           case OptionDefinition::Type::Boolean:
             continue;

@@ -333,3 +333,13 @@ TEST_F(CommandParserTests, CommandParser_HandlesPositionalArgumentsCorrectly_IfS
   ASSERT_EQ(parser.parse().options["field-a"].text, "a");
   ASSERT_EQ(parser.parse().options["field-b"].text, "b");
 }
+
+TEST_F(CommandParserTests, CommandParser_ShouldNotCrash_IfNoParametersArePassed) {
+  auto args = std::vector<std::string>{};
+  auto def = CreateCommandDefinition().addOption(
+      "field-a", "desc", CommandParser::OptionDefinition::Type::Token, false, 0);
+
+  auto parser = CreateCommandParser(def, args);
+
+  ASSERT_NO_THROW(parser.parse());
+}
