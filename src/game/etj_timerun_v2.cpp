@@ -403,51 +403,128 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
                 result->records[0].map);
         // clang-format on
 
-        // records are sorted by season, map, run, time
-        int season = 0;
-        std::string run = "";
-        int rank = 1;
+        using SeasonId = int;
+        using MapName = std::string;
+        using RunName = std::string;
+
+        std::map<
+              SeasonId,
+              std::map<MapName, std::map<
+                         RunName, std::vector<const Timerun::Record *>>>>
+            processedRecords;
+        std::map<SeasonId, std::map<MapName, std::map<RunName, int>>>
+            ownRecords;
+
         for (const auto &r : result->records) {
-          if (season != r.seasonId) {
-            // clang-format off
-            message +=
-                "^f=============================================================\n";
-            message += stringFormat(" ^dSeason: ^7%s (%s -> %s)\n",
-                                    seasonIdToName[r.seasonId].name,
-                                    seasonIdToName[r.seasonId].
-                                    startTime.date.toDateString(),
-                                    (seasonIdToName[r.seasonId].
-                                     endTime.hasValue()
-                                       ? seasonIdToName[r.seasonId].
-                                         endTime.value().date.
-                                         toDateString()
-                                       : "*"));
-            message +=
-                "^f=============================================================\n";
-            // clang-format on
-            run = "";
-          }
-          season = r.seasonId;
-
-          if (run != r.run) {
-            rank = 1;
-            // clang-format off
-            message +=
-                "^g=============================================================\n";
-            message += stringFormat(" ^2Run: ^7%s\n\n", r.run);
-            message += "^g Rank   Time        Player\n";
-            // clang-format on
-          }
-          run = r.run;
-
-          if (rank > (params.page - 1) * params.pageSize &&
-              rank <= (params.page) * params.pageSize) {
-            message +=
-                stringFormat("^7 %4s    ^7 %s   %s\n", rankToString(rank),
-                             millisToString(r.time), r.playerName);
+          if (processedRecords.count(r.seasonId) == 0) {
+            processedRecords[r.seasonId] = {};
+            ownRecords[r.seasonId] = {};
           }
 
-          rank++;
+          if (processedRecords[r.seasonId].count(r.map) == 0) {
+            processedRecords[r.seasonId][r.map] = {};
+            ownRecords[r.seasonId][r.map] = {};
+          }
+
+          if (processedRecords[r.seasonId][r.map].count(r.run) == 0) {
+            processedRecords[r.seasonId][r.map][r.run] =
+                std::vector<const Timerun::Record *>();
+          }
+
+          if (r.userId == params.userId) {
+            ownRecords[r.seasonId][r.map][r.run] = r.time;
+          }
+          processedRecords[r.seasonId][r.map][r.run].push_back(&r);
+        }
+
+        for (const auto &skvp : processedRecords) {
+          auto seasonIt = seasonIdToName.find(skvp.first);
+          const Timerun::Season *season = &seasonIt->second;
+
+          // clang-format off
+          message +=
+              "^f=============================================================\n";
+          message += stringFormat(" ^dSeason: ^7%s (%s -> %s)\n",
+                                  season->name,
+                                  season->startTime.date.toDateString(),
+                                  (season->endTime.hasValue()
+                                     ? season->endTime.value().date.
+                                               toDateString()
+                                     : "*"));
+          message +=
+              "^f=============================================================\n";
+          // clang-format on
+
+          for (const auto &mkvp : skvp.second) {
+            auto mapName = mkvp.first;
+            for (const auto &rkvp : mkvp.second) {
+              auto runName = rkvp.first;
+              int rank = 1;
+              int rank1Time = rkvp.second.size() > 0 ? rkvp.second[0]->time : 0;
+              int ownTime =
+                  ownRecords[season->id][mapName].count(runName) > 0
+                    ? ownRecords[season->id][mapName][runName]
+                    : rank1Time;
+              message +=
+                  "^g=============================================================\n";
+              message += stringFormat(" ^2Run: ^7%s\n\n", rkvp.first);
+
+              const int rankWidth = 4;
+              const int timeWidth = 10;
+              const int diffWidth = 11;
+
+              message += "^g Rank Time       Difference  Player\n";
+              // clang-format on
+              std::string ownRecordString;
+              for (const auto &r : rkvp.second) {
+                auto isOnVisiblePage =
+                    rank > (params.page - 1) * params.pageSize &&
+                    rank <= (params.page) * params.pageSize;
+                auto isOwnRecord = r->userId == params.userId;
+
+                if (isOnVisiblePage || isOwnRecord) {
+                  auto ownRecord = r->userId == params.userId;
+                  auto rankString = rankToString(rank);
+                  auto millisString = millisToString(r->time);
+                  std::string diffString;
+                  if (ownRecord || rank == 1 && ownTime == r->time) {
+                    diffString = "";
+                  } else {
+                    diffString = diffToString(r->time, ownTime);
+                  }
+                  auto playerNameString = ownRecord ? r->playerName + " ^g(You)" : r->playerName;
+
+                  auto rankPadding =
+                      rankWidth +
+                      StringUtil::countExtraPadding(rankString);
+                  auto millisPadding =
+                      timeWidth + StringUtil::countExtraPadding(millisString);
+                  auto diffPadding =
+                      diffWidth + StringUtil::countExtraPadding(diffString);
+
+                  auto formatString =
+                      stringFormat("^7 %%-%ds^7 %%-%ds^7 %%-%ds^7 %%s^7\n",
+                                   rankPadding, millisPadding, diffPadding);
+
+                  // we want to print our own record as the last one if it's not visible
+                  if (isOnVisiblePage) {
+                    message +=
+                        stringFormat(formatString, rankString, millisString,
+                                     diffString, playerNameString);  
+                  } else {
+                    ownRecordString =
+                        stringFormat(formatString, rankString, millisString,
+                                     diffString, playerNameString);
+                  }
+                }
+                rank++;
+              }
+
+              if (ownRecordString.length() > 0) {
+                message += "\n" + ownRecordString;
+              }
+            }
+          }
         }
 
         Printer::SendConsoleMessage(params.clientNum, message);

@@ -99,3 +99,10 @@ TEST_F(StringUtilitiesTests, join_ShouldConcatenateStringChunksIntoOneDelimitedP
     auto fixedString = StringUtil::join(input, ", ");
     EXPECT_EQ(fixedString, "hello world, hello world");
 }
+
+TEST_F(StringUtilitiesTests, countExtraPadding_ShouldWorkCorrectly) {
+    EXPECT_EQ(StringUtil::countExtraPadding("123"), 0);
+    EXPECT_EQ(StringUtil::countExtraPadding("^1123"), 2);
+    EXPECT_EQ(StringUtil::countExtraPadding("^^1123"), 2);
+    EXPECT_EQ(StringUtil::countExtraPadding("^1t^2e^3s^4t"), 8);
+}

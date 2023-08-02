@@ -282,3 +282,7 @@ bool ETJump::StringUtil::contains(const std::string &str,
     const std::string &text) {
   return str.find(text) != std::string::npos;
 }
+
+unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
+  return input.length() - sanitize(input).length();
+}

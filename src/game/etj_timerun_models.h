@@ -77,6 +77,7 @@ struct PrintRecordsParams {
   opt<std::string> run;
   int page{};
   int pageSize{};
+  int userId{};
 };
 }
 }
