@@ -25,6 +25,7 @@
 #pragma once
 #include <array>
 #include <map>
+#include <set>
 
 #include "etj_log.h"
 
@@ -33,9 +34,11 @@ class TimerunEntity {
 private:
   static Log logger;
   static std::map<std::string, int> runIndices;
+  static std::set<std::string> cleanNames;
+  static std::set<std::string> names;
 
 protected:
-  static void setTimerunIndex(gentity_t *self);
+                  static void setTimerunIndex(gentity_t *self);
   static bool canActivate(gentity_t *activator);
   static int getOrSetTimerunIndex(const std::string &runName);
 

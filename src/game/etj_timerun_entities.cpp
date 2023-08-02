@@ -35,6 +35,8 @@
 
 namespace ETJump {
 std::map<std::string, int> TimerunEntity::runIndices;
+std::set<std::string> TimerunEntity::cleanNames;
+std::set<std::string> TimerunEntity::names;
 ETJump::Log TimerunEntity::logger = ETJump::Log("timerun entity");
 
 void TimerunEntity::setTimerunIndex(gentity_t *self) {
@@ -65,6 +67,16 @@ bool TimerunEntity::canActivate(gentity_t *activator) {
 int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
   if (runIndices.count(runName) == 0) {
     runIndices[runName] = level.timerunNamesCount++;
+  }
+
+  cleanNames.insert(sanitize(runName, true));
+  names.insert(sanitize(runName, true));
+
+  if (cleanNames.size() != names.size()) {
+    G_Error(
+        "Timeruns should have the same names with different color codes. E.g. "
+        "^1Run and ^2Run are not valid names. Please rename the runs. Possible run name to rename: %s\n", runName.c_str());
+    return 0;
   }
 
   auto idx = runIndices[runName];
