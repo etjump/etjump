@@ -107,9 +107,7 @@ auto deprecated_getCommand(const std::string &commandPrefix, int clientNum,
             "^3%s: ^7operation failed. Check console for more information.",
             commandPrefix));
 
-    for (const auto &e : command.errors) {
-      Printer::SendConsoleMessage(clientNum, e);
-    }
+    Printer::SendConsoleMessage(clientNum, command.getErrorMessage() + "\n");
 
     return ETJump::opt<ETJump::CommandParser::Command>();
   }

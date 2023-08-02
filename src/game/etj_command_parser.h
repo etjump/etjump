@@ -97,7 +97,9 @@ public:
         auto requiredString = pair.second.required ? " [required] " : "";
         auto positionString =
             stringFormat(
-                "(pos: %d)", pair.second.position.hasValue() ? pair.second.position.value() : 0);
+                " (pos: %d) ", pair.second.position.hasValue()
+                                 ? pair.second.position.value()
+                                 : 0);
 
         return stringFormat(
             "    --%s (%s) %s%s%s",
@@ -200,6 +202,10 @@ public:
       }
       return ETJump::opt<Option>(options[name]);
     };
+
+    std::string getErrorMessage() const {
+      return StringUtil::join(errors, "\n");
+    }
   };
 
   CommandParser(CommandDefinition definition, std::vector<std::string> args)
