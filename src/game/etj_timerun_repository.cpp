@@ -601,6 +601,7 @@ void ETJump::TimerunRepository::tryToMigrateRecords() {
 
 void ETJump::TimerunRepository::migrate() {
   _database->addMigration(
+      // clang-format off
       "initial",
       {R"(
           create table season (
@@ -640,8 +641,8 @@ void ETJump::TimerunRepository::migrate() {
           )",
        "create index idx_season_id_map on record(season_id, map);",
        "create index idx_season_id_map_run on record(season_id, map, run);",
-       "create index idx_season_id_map_run_user_id on record(season_id, map, "
-       "run, user_id);"});
+       "create index idx_season_id_map_run_user_id on record(season_id, map, run, user_id);"});
+  // clang-format on
 
   _database->applyMigrations();
 
