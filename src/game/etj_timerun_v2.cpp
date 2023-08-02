@@ -723,7 +723,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
             }
 
             Printer::BroadCastBannerMessage(ETJump::stringFormat(
-                "^7%s ^7broke the server record on season %s for ^3%s\n^7with ^3%s %s"
+                "^7%s ^7broke the server record on ^3%s^7 season for ^3%s\n^7with ^3%s %s"
                 "^7!!!\n",
                 playerName,
                 checkRecordResult->newRelevantRecord.value().seasonName,
