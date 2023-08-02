@@ -427,7 +427,7 @@ bool Snaphud::canSkipDraw() const {
     return true;
   }
 
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(weapnumForClient())) {
     return true;
   }
 

@@ -25,9 +25,9 @@
 #define SUBW_SOUNDS_ITEM_Y SUBW_SOUNDS_Y + SUBW_HEADER_HEIGHT
 #define SUBW_SOUNDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
-#define SUBW_SCOREBOARD_Y SUBW_SOUNDS_Y + SUBW_SOUNDS_HEIGHT + SUBW_SPACING_Y
-#define SUBW_SCOREBOARD_ITEM_Y SUBW_SCOREBOARD_Y + SUBW_HEADER_HEIGHT
-#define SUBW_SCOREBOARD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 1)
+#define SUBW_CROSSHAIR_Y SUBW_SOUNDS_Y + SUBW_SOUNDS_HEIGHT + SUBW_SPACING_Y
+#define SUBW_CROSSHAIR_ITEM_Y SUBW_CROSSHAIR_Y + SUBW_HEADER_HEIGHT
+#define SUBW_CROSSHAIR_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
 #define GROUP_NAME "group_etjump_settings_1"
 
@@ -115,9 +115,14 @@ menuDef {
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Looped sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Uphill step sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
 
-    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_SCOREBOARD_Y, SUBW_WIDTH, SUBW_SCOREBOARD_HEIGHT, "SCOREBOARD")
-        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Custom scoreboard:", 0.2, SUBW_ITEM_HEIGHT, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw idle indicator:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CROSSHAIR_Y, SUBW_WIDTH, SUBW_CROSSHAIR_HEIGHT, "CROSSHAIR")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairScaleX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Scale X:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairScaleX 1.0 -5.0 5.0 0.1, "Horizontal scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleX")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairScaleY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Scale Y:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairScaleY 1.0 -5.0 5.0 0.1, "Vertical scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleY")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairThickness", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Line thickness:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairThickness 1.0 0.0 5.0 0.1, "Line thickness of ETJump crosshairs\netj_crosshairThickness")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Crosshair outline:", 0.2, SUBW_ITEM_HEIGHT, "etj_crosshairOutline", "Draw outline on ETJump crosshairs\netj_crosshairOutline")
 
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump)
         BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_1)

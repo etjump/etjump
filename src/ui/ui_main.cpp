@@ -363,19 +363,10 @@ void AssetCache() {
 
   for (n = 0; n < NUM_CROSSHAIRS; n++) {
     uiInfo.uiDC.Assets.crosshairShader[n] =
-        trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c", 'a' + n));
+        ETJump::shaderForCrosshair(n, false);
     uiInfo.uiDC.Assets.crosshairAltShader[n] =
-        trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n));
+        ETJump::shaderForCrosshair(n, true);
   }
-
-  // uiInfo.newHighScoreSound =
-  // trap_S_RegisterSound("sound/feedback/voc_newhighscore.wav");
-
-  /*	for ( n = 1; weaponTypes[n].shadername; n++ ) {
-          if ( weaponTypes[n].shadername )
-              trap_R_RegisterShaderNoMip( weaponTypes[n].shadername );
-      }*/
-  // -NERVE - SMF
 }
 
 void _UI_DrawSides(float x, float y, float w, float h, float size) {
@@ -2533,7 +2524,7 @@ static void UI_DrawRedBlue(rectDef_t *rect, float scale, vec4_t color,
 }
 
 static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
-  float size = cg_crosshairSize.integer;
+  float size = cg_crosshairSize.value;
 
   // Make sure currentCrosshair is updated if crosshair is changed via
   // console
@@ -2549,23 +2540,36 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
 
   vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
 
-  ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
-  crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
-  trap_R_SetColor(crosshairColor);
-  UI_DrawHandlePic(rect->x + (rect->w - size) / 2,
-                   rect->y + (rect->h - size) / 2, size, size,
-                   uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
+  if (uiInfo.currentCrosshair < 10) {
+    ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+    crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+    trap_R_SetColor(crosshairColor);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
+        size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
 
-  vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
+    vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
-  ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
-  crosshairColorAlt[3] = Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
-  trap_R_SetColor(crosshairColorAlt);
-  UI_DrawHandlePic(
-      rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
-      size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+    ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+    crosshairColorAlt[3] =
+        Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+    trap_R_SetColor(crosshairColorAlt);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
+        size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+  } else {
+    const auto text = va("Crosshair %d", uiInfo.currentCrosshair);
+    const auto width = static_cast<float>(
+        Text_Width_Ext(text, 0.12f, 0, &uiInfo.loadscreenfont1));
+    const auto height = static_cast<float>(
+        Text_Height_Ext(text, 0.12f, 0, &uiInfo.loadscreenfont1));
+    Text_Paint_Ext(rect->x + (rect->w - width) * 0.5f,
+                   rect->y + (rect->h + height) * 0.5f, 0.12f, 0.12f,
+                   colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                   &uiInfo.loadscreenfont1);
+  }
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
 }
 
 /*

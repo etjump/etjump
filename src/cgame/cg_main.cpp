@@ -611,6 +611,11 @@ vmCvar_t etj_optimizePrediction;
 
 vmCvar_t etj_menuSensitivity;
 
+vmCvar_t etj_crosshairScaleX;
+vmCvar_t etj_crosshairScaleY;
+vmCvar_t etj_crosshairThickness;
+vmCvar_t etj_crosshairOutline;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1118,6 +1123,11 @@ cvarTable_t cvarTable[] = {
     // END unlagged - optimized prediction
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+
+    {&etj_crosshairScaleX, "etj_crosshairScaleX", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairScaleY, "etj_crosshairScaleY", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -2337,10 +2347,8 @@ static void CG_RegisterGraphics(void) {
   cgs.media.buddyShader = trap_R_RegisterShaderNoMip("sprites/buddy.tga");
 
   for (i = 0; i < NUM_CROSSHAIRS; i++) {
-    cgs.media.crosshairShader[i] =
-        trap_R_RegisterShader(va("gfx/2d/crosshair%c", 'a' + i));
-    cg.crosshairShaderAlt[i] =
-        trap_R_RegisterShader(va("gfx/2d/crosshair%c_alt", 'a' + i));
+    cgs.media.crosshairShader[i] = ETJump::shaderForCrosshair(i, false);
+    cg.crosshairShaderAlt[i] = ETJump::shaderForCrosshair(i, true);
   }
 
   for (i = 0; i < SK_NUM_SKILLS; i++) {

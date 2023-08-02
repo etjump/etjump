@@ -258,7 +258,7 @@ void CGaz::render() const {
       scx -= SCREEN_OFFSET_X;
     }
     DrawLine(scx, scy, scx + static_cast<float>(cmd.rightmove),
-             scy - static_cast<float>(cmd.forwardmove), CGaz2Colors[1]);
+             scy - static_cast<float>(cmd.forwardmove), 1, 1, CGaz2Colors[1]);
 
     // When under wishspeed velocity, most accel happens when
     // you move straight towards your current velocity, so skip
@@ -273,14 +273,16 @@ void CGaz::render() const {
     }
 
     DrawLine(scx, scy, scx + velSize * std::sin(drawVel),
-             scy - velSize * std::cos(drawVel), CGaz2Colors[0]);
+             scy - velSize * std::cos(drawVel), 1, 1, CGaz2Colors[0]);
 
     if (drawSides) {
       velSize /= 2;
       DrawLine(scx, scy, scx + velSize * std::sin(drawVel + drawOpt),
-               scy - velSize * std::cos(drawVel + drawOpt), CGaz2Colors[0]);
+               scy - velSize * std::cos(drawVel + drawOpt), 1, 1,
+               CGaz2Colors[0]);
       DrawLine(scx, scy, scx + velSize * std::sin(drawVel - drawOpt),
-               scy - velSize * std::cos(drawVel - drawOpt), CGaz2Colors[0]);
+               scy - velSize * std::cos(drawVel - drawOpt), 1, 1,
+               CGaz2Colors[0]);
     }
 
     if (etj_stretchCgaz.integer) {
@@ -417,7 +419,7 @@ bool CGaz::canSkipDraw() const {
     return true;
   }
 
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(weapnumForClient())) {
     return true;
   }
 

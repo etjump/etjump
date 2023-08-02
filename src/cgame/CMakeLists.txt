@@ -47,6 +47,8 @@ add_library(cgame MODULE
 	"etj_client_authentication.cpp"
 	"etj_client_commands_handler.cpp"
 	"etj_console_alpha.cpp"
+	"etj_crosshair.cpp"
+	"etj_crosshair_drawer.cpp"
 	"etj_cvar_master_drawer.cpp"
 	"etj_cvar_shadow.cpp"
 	"etj_cvar_update_handler.cpp"

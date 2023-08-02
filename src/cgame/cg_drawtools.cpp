@@ -145,25 +145,15 @@ range_t AnglesToRange(float start, float end, float yaw, float fov) {
 
 /*
 ==============
-PutPixel
-Used by CGaz 2
-==============
-*/
-// Dzikie
-void PutPixel(float x, float y) {
-  CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
-}
-
-/*
-==============
 DrawLine
-Used by CGaz 2
+Mainly used for drawing diagonal lines
 ==============
 */
 // Dzikie
-void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color) {
-  float len, stepx, stepy;
-  float i;
+void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
+              const vec4_t color) {
+  float len, stepX, stepY;
+  float i = 0;
 
   if (x1 == x2 && y1 == y2) {
     return;
@@ -173,22 +163,139 @@ void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color) {
 
   // Use a single DrawPic for horizontal or vertical lines
   if (x1 == x2) {
-    CG_DrawPic(x1, y1 < y2 ? y1 : y2, 1, abs(y1 - y2), cgs.media.whiteShader);
+    CG_DrawPic(x1, y1 < y2 ? y1 : y2, w, std::abs(y1 - y2),
+               cgs.media.whiteShader);
   } else if (y1 == y2) {
-    CG_DrawPic(x1 < x2 ? x1 : x2, y1, abs(x1 - x2), 1, cgs.media.whiteShader);
+    CG_DrawPic(x1 < x2 ? x1 : x2, y1, std::abs(x1 - x2), h,
+               cgs.media.whiteShader);
   } else {
     len = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-    len = sqrt(len);
-    stepx = (x2 - x1) / len;
-    stepy = (y2 - y1) / len;
-    for (i = 0; i < len; i++) {
-      PutPixel(x1, y1);
-      x1 += stepx;
-      y1 += stepy;
+    len = std::sqrt(len);
+    stepX = (x2 - x1) / len;
+    stepY = (y2 - y1) / len;
+    while (i < len) {
+      CG_DrawPic(x1, y1, w, h, cgs.media.whiteShader);
+      x1 += stepX;
+      y1 += stepY;
+      i++;
     }
   }
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
+}
+
+struct Point {
+  float x;
+  float y;
+};
+
+static Point RotatePoint(float x, float y, float angle) {
+  float theta = DEG2RAD(angle);
+  float cos_theta = std::cos(theta);
+  float sin_theta = std::sin(theta);
+
+  float newX = x * cos_theta - y * sin_theta;
+  float newY = x * sin_theta + y * cos_theta;
+  return {newX, newY};
+}
+
+static Point TranslatePoint(Point p, float angle, const vec2_t origin) {
+  // translate triangle to the origin
+  p.x -= origin[0];
+  p.y -= origin[1];
+
+  // rotate
+  p = RotatePoint(p.x, p.y, angle);
+
+  // translate triangle back to origin
+  p.x += origin[0];
+  p.y += origin[1];
+
+  return {p.x, p.y};
+}
+
+/*
+==============
+EdgeFunction
+Edge function to determine if a point (x, y) lies inside or outside the
+triangle defined by p1, p2, and p3. The function returns a positive value if
+the point is inside the triangle, a negative value if it's outside, and zero
+if the point lies on the triangle's edge.
+==============
+*/
+static float EdgeFunction(const Point &a, const Point &b, float x, float y) {
+  return (b.x - a.x) * (y - a.y) - (b.y - a.y) * (x - a.x);
+}
+
+static void FillTriangle(const Point &p1, const Point &p2, const Point &p3,
+                         const vec4_t fillColor) {
+  // find the bounding box of the triangle
+  float minX = std::min(std::min(p1.x, p2.x), p3.x);
+  float maxX = std::max(std::max(p1.x, p2.x), p3.x);
+  float minY = std::min(std::min(p1.y, p2.y), p3.y);
+  float maxY = std::max(std::max(p1.y, p2.y), p3.y);
+
+  trap_R_SetColor(fillColor);
+
+  // iterate through the bounding box and fill the pixels inside the triangle
+  float y = minY;
+  while (y <= maxY) {
+    float x = minX;
+    while (x <= maxX) {
+      // calculate the edge functions for each vertex of the triangle
+      float w0 = EdgeFunction(p1, p2, x, y);
+      float w1 = EdgeFunction(p2, p3, x, y);
+      float w2 = EdgeFunction(p3, p1, x, y);
+
+      // check if the point (x, y) lies inside the triangle
+      if ((w0 >= 0 && w1 >= 0 && w2 >= 0) || (w0 <= 0 && w1 <= 0 && w2 <= 0)) {
+        CG_DrawPic(x, y, 1, 1, cgs.media.whiteShader);
+      }
+      x++;
+    }
+    y++;
+  }
+
+  trap_R_SetColor(nullptr);
+}
+
+/*
+==============
+DrawTriangle
+Draws a triangle at given angle (in degrees), optionally filled with color
+The initial angle is 0, with 1st vertex (p1) centered at the upper edge,
+2nd (p2) one at bottom left, and 3rd (p3) at bottom right
+==============
+*/
+
+void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
+                  bool fill, const vec4_t color, const vec4_t fillColor) {
+  // sanity check for triangle with no area
+  if (w == 0 || h == 0) {
+    return;
+  }
+
+  Point p1 = {x + (w * 0.5f), y};
+  Point p2 = {x, y + h};
+  Point p3 = {x + w, y + h};
+  vec2_t origin = {x + (w * 0.5f), y + (h * 0.5f)};
+
+  // calculate new points if we're drawing at an angle
+  if (angle != 0) {
+    p1 = TranslatePoint(p1, angle, origin);
+    p2 = TranslatePoint(p2, angle, origin);
+    p3 = TranslatePoint(p3, angle, origin);
+  }
+
+  // draw fill first so it's underneath the edges
+  if (fill) {
+    FillTriangle(p1, p2, p3, fillColor);
+  }
+
+  // draw outer edges clockwise, starting from p1
+  DrawLine(p1.x, p1.y, p2.x, p2.y, lineW, lineW, color);
+  DrawLine(p2.x, p2.y, p3.x, p3.y, lineW, lineW, color);
+  DrawLine(p3.x, p3.y, p1.x, p1.y, lineW, lineW, color);
 }
 
 /*
