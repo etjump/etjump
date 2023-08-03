@@ -24,6 +24,7 @@
 
 #pragma once
 #include <string>
+#include <stdexcept>
 
 namespace ETJump {
 namespace Constants {
