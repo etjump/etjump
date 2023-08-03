@@ -33,13 +33,8 @@
 #include "../game/etj_container_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 
-ETJump::TimerunView::TimerunView(
-    std::shared_ptr<PlayerEventsHandler> playerEventsHandler)
-  : Drawable(), _playerEventsHandler(playerEventsHandler) {
-  for (auto &info : _playersTimerunInformation) {
-    interrupt(info);
-  }
-
+ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
+  : _timerun(timerun), Drawable() {
   parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
   cvarUpdateHandler->subscribe(
       &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
@@ -50,79 +45,10 @@ ETJump::TimerunView::TimerunView(
 ETJump::TimerunView::~TimerunView() {
 }
 
-void ETJump::TimerunView::start() {
-  auto clientNum = Q_atoi(CG_Argv(2));
-  _playersTimerunInformation[clientNum].startTime = Q_atoi(CG_Argv(3));
-  _playersTimerunInformation[clientNum].runName = CG_Argv(4);
-  _playersTimerunInformation[clientNum].previousRecord = Q_atoi(CG_Argv(5));
-  _playersTimerunInformation[clientNum].running = true;
-  _playersTimerunInformation[clientNum].checkpoints.fill(
-      TIMERUN_CHECKPOINT_NOT_SET);
-  _playersTimerunInformation[clientNum].nextFreeCheckpointIdx = 0;
-  _playersTimerunInformation[clientNum].numCheckpointsHit = 0;
-  auto checkpointsStr = CG_Argv(6);
-  if (strlen(checkpointsStr) > 0) {
-    try {
-      auto checkpoints =
-          Container::map(StringUtil::split(CG_Argv(6), ","),
-                         [](const std::string &i) { return std::stoi(i); });
 
-      for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS && i < checkpoints.size(); ++
-           i) {
-        _playersTimerunInformation[clientNum].previousRecordCheckpoints[i] =
-            checkpoints[i];
-      }
-    } catch (const std::runtime_error &) {
-      _playersTimerunInformation[clientNum].previousRecordCheckpoints =
-          std::array<int, MAX_TIMERUN_CHECKPOINTS>();
-      _playersTimerunInformation[clientNum].previousRecordCheckpoints.fill(
-          TIMERUN_CHECKPOINT_NOT_SET);
-    }
-  }
-
-  _playerEventsHandler->check(
-      "timerun:record",
-      {_playersTimerunInformation[clientNum].runName,
-       std::to_string(_playersTimerunInformation[clientNum].startTime),
-       std::to_string(_playersTimerunInformation[clientNum].previousRecord)});
-
-  playerEventsHandler->check("timerun:stop", {CG_Argv(2), CG_Argv(1)});
-}
-
-void ETJump::TimerunView::stop() {
-  auto clientNum = Q_atoi(CG_Argv(2));
-  _playersTimerunInformation[clientNum].completionTime = Q_atoi(CG_Argv(3));
-  _playersTimerunInformation[clientNum].running = false;
-  _playersTimerunInformation[clientNum].lastRunTimer = cg.time;
-}
-
-void ETJump::TimerunView::checkpoint() {
-  const int clientNum = Q_atoi(CG_Argv(2));
-  const int checkpointIndex = Q_atoi(CG_Argv(3));
-  const int checkpointTime = Q_atoi(CG_Argv(4));
-  _playersTimerunInformation[clientNum].checkpoints[checkpointIndex] =
-      checkpointTime;
-  _playersTimerunInformation[clientNum].numCheckpointsHit = checkpointIndex + 1;
-}
-
-void ETJump::TimerunView::interrupt(
-    PlayerTimerunInformation &playerTimerunInformation) {
-  playerTimerunInformation.running = false;
-  playerTimerunInformation.runName = "";
-  playerTimerunInformation.completionTime = -1;
-  playerTimerunInformation.previousRecord = 0;
-  playerTimerunInformation.startTime = 0;
-  playerTimerunInformation.lastRunTimer = cg.time;
-}
-
-void ETJump::TimerunView::interrupt() {
-  auto clientNum = Q_atoi(CG_Argv(2));
-  interrupt(_playersTimerunInformation[clientNum]);
-}
-
-const ETJump::PlayerTimerunInformation *
+const ETJump::Timerun::PlayerTimerunInformation *
 ETJump::TimerunView::currentRun() const {
-  return &_playersTimerunInformation[cg.snap->ps.clientNum];
+  return _timerun->getTimerunInformationFor(cg.snap->ps.clientNum);
 }
 
 std::string ETJump::TimerunView::getTimerString(const int msec) {
@@ -350,31 +276,6 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char *text,
                     0, 0, 0, &cgs.media.limboFont1);
 }
 
-bool ETJump::TimerunView::parseServerCommand() {
-  auto argc = trap_Argc();
-
-  if (argc == 1) {
-    return false;
-  }
-
-  char cmd[MAX_TOKEN_CHARS]{};
-  trap_Argv(1, cmd, sizeof(cmd));
-
-  if (cmd == std::string("start")) {
-    start();
-  } else if (cmd == std::string("checkpoint")) {
-    checkpoint();
-  } else if (cmd == std::string("stop")) {
-    stop();
-  } else if (cmd == std::string("interrupt")) {
-    interrupt();
-  } else {
-    return false;
-  }
-
-  return true;
-}
-
 bool ETJump::TimerunView::canSkipDraw() const {
-  return ETJump::showingScores();
+  return showingScores();
 }

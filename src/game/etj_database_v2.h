@@ -26,6 +26,9 @@
 #include <string>
 #include <sqlite_modern_cpp.h>
 
+#include "etj_container_utilities.h"
+#include "etj_string_utilities.h"
+
 namespace ETJump {
 class DatabaseV2 {
 public:
@@ -34,13 +37,21 @@ public:
     std::vector<std::string> statements;
   };
 
-  explicit DatabaseV2(const std::string& name, const std::string &fileName);
+  explicit DatabaseV2(const std::string &name, const std::string &fileName);
   ~DatabaseV2();
 
   void addMigration(const Migration &migration);
-  void addMigration(const std::string &name, const std::vector<std::string>& statements);
+  void addMigration(const std::string &name,
+                    const std::vector<std::string> &statements);
 
   void applyMigrations();
+
+  template <typename T>
+  static std::string createPlaceholderString(const std::vector<T> &input) {
+    return StringUtil::join(Container::map(input, [](const auto &e) {
+      return "?";
+    }), ",");
+  }
 
   // expose the database object directly
   // as it provides a reasonable interface

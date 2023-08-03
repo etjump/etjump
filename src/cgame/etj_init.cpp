@@ -70,7 +70,7 @@ std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 std::shared_ptr<EventLoop> eventLoop;
 std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 std::shared_ptr<Timerun> timerun;
-std::shared_ptr<ETJump::TimerunView> timerunView;
+std::shared_ptr<TimerunView> timerunView;
 std::shared_ptr<TrickjumpLines> trickjumpLines;
 } // namespace ETJump
 
@@ -84,6 +84,7 @@ void addLoopingSound(const vec3_t origin, const vec3_t velocity,
     trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
   }
 }
+
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume,
                          int soundTime) {
@@ -119,19 +120,22 @@ void initTimer() {
     timerun = nullptr;
     timerunView = nullptr;
   }
-  timerun = std::make_shared<Timerun>(cg.clientNum);
-  timerunView = std::make_shared<TimerunView>(playerEventsHandler);
+  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler);
+  timerunView = std::make_shared<TimerunView>(timerun);
 }
+
 void execCmdOnRunStart() {
   if (etj_onRunStart.string[0]) {
     trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
   }
 }
+
 void execCmdOnRunEnd() {
   if (etj_onRunEnd.string[0]) {
     trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
   }
 }
+
 void onPlayerRespawn(qboolean revived) {
   playerEventsHandler->check("respawn", {revived ? "1" : "0"});
 }
@@ -160,8 +164,8 @@ void init() {
   CG_Printf(S_COLOR_LTGREY "____________________________\n");
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
-                                     " init...\n");
+      " " S_COLOR_LTGREY GAME_BINARY_NAME
+      " init...\n");
 
   isInitialized = false;
 
@@ -255,6 +259,29 @@ void init() {
         std::make_shared<CvarShadow>(shadow.first, shadow.second));
   }
 
+  playerEventsHandler->subscribe(
+      "timerun:start",
+      [](auto a) {
+        auto clientNum = std::stoi(a[0]);
+        if (clientNum == cg.clientNum) {
+          execCmdOnRunStart();
+        }
+      });
+  playerEventsHandler->subscribe(
+      "timerun:stop", [](auto a) {
+        auto clientNum = std::stoi(a[0]);
+        if (clientNum == cg.clientNum) {
+          execCmdOnRunEnd();
+        }
+      });
+  playerEventsHandler->subscribe(
+      "timerun:interrupt", [](auto a) {
+        auto clientNum = std::stoi(a[0]);
+        if (clientNum == cg.clientNum) {
+          execCmdOnRunEnd();
+        }
+      });
+
   ETJump_ClearDrawables();
   initTimer();
   // restores timerun after vid_restart (if required)
@@ -282,16 +309,16 @@ void init() {
   }
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
-                                     " init... " S_COLOR_GREEN "DONE\n");
+      " " S_COLOR_LTGREY GAME_BINARY_NAME
+      " init... " S_COLOR_GREEN "DONE\n");
 
   isInitialized = true;
 }
 
 void shutdown() {
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION_DATED
-                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
-                                     " shutdown...\n");
+      " " S_COLOR_LTGREY GAME_BINARY_NAME
+      " shutdown...\n");
 
   if (ETJump::consoleCommandsHandler) {
     ETJump::consoleCommandsHandler->unsubcribe("min");
@@ -319,8 +346,8 @@ void shutdown() {
   isInitialized = false;
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
-                                     " shutdown... " S_COLOR_GREEN "DONE\n");
+      " " S_COLOR_LTGREY GAME_BINARY_NAME
+      " shutdown... " S_COLOR_GREEN "DONE\n");
 }
 } // namespace ETJump
 
@@ -333,81 +360,18 @@ void shutdown() {
 qboolean CG_ServerCommandExt(const char *cmd) {
   const std::string command = cmd != nullptr ? cmd : "";
 
-  // timerun_start runStartTime{integer} runName{string}
-  if (command == "timerun_start") {
-    auto startTime = Q_atoi(CG_Argv(1));
-    std::string runName = CG_Argv(2);
-    auto previousRecord = Q_atoi(CG_Argv(3));
-    ETJump::timerun->startTimerun(runName, startTime, previousRecord);
-    ETJump::execCmdOnRunStart();
-    // run name, completion time, previous record
-    ETJump::playerEventsHandler->check("timerun:start",
-                                       {runName, CG_Argv(1), CG_Argv(3)});
-    return qtrue;
-  }
-  if (command == "timerun_interrupt") {
-    ETJump::timerun->interrupt();
-    ETJump::execCmdOnRunEnd();
-    return qtrue;
-  }
-  // timerun_stop completionTime{integer}
-  if (command == "timerun_stop") {
-    auto completionTime = Q_atoi(CG_Argv(1));
-
-    ETJump::timerun->stopTimerun(completionTime);
-    ETJump::execCmdOnRunEnd();
-    // run name, completion time
-    ETJump::playerEventsHandler->check("timerun:stop",
-                                       {CG_Argv(2), CG_Argv(1)});
-    return qtrue;
-  }
-  // timerun_stop_spec clientNum{integer} completionTime{integer}
-  // runName{string}
-  if (command == "timerun_stop_spec") {
-    if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) {
-      return qtrue;
-    }
-
-    auto clientNum = Q_atoi(CG_Argv(1));
-    auto completionTime = Q_atoi(CG_Argv(2));
-    std::string runName = CG_Argv(3);
-
-    ETJump::timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
-
-    return qtrue;
-  }
-  if (command == "record") {
-    auto clientNum = Q_atoi(CG_Argv(1));
-    std::string runName = CG_Argv(2);
-    auto completionTime = Q_atoi(CG_Argv(3));
-
-    ETJump::timerun->record(clientNum, runName, completionTime);
-
-    if (clientNum == cg.clientNum) {
-      // run name, completion time
-      ETJump::playerEventsHandler->check("timerun:record",
-                                         {CG_Argv(2), CG_Argv(3)});
-    }
-
-    return qtrue;
-  }
-  if (command == "completion") {
-    auto clientNum = Q_atoi(CG_Argv(1));
-    std::string runName = CG_Argv(2);
-    auto completionTime = Q_atoi(CG_Argv(3));
-
-    ETJump::timerun->completion(clientNum, runName, completionTime);
-
-    if (clientNum == cg.clientNum) {
-      // run name, completion time
-      ETJump::playerEventsHandler->check("timerun:completion",
-                                         {CG_Argv(2), CG_Argv(3)});
-    }
-
-    return qtrue;
-  }
   if (command == "timerun") {
-    return ETJump::timerunView->parseServerCommand() ? qtrue : qfalse;
+    char arg[MAX_TOKEN_CHARS]{};
+    std::vector<std::string> args;
+
+    for (int i = 0, len = trap_Argc(); i < len; ++i) {
+      trap_Argv(i, arg, sizeof(arg));
+
+      args.push_back(arg);
+    }
+
+    ETJump::timerun->parseServerCommand(args);
+    return qtrue;
   }
 
   if (command == "tjl_displaybyname") {
@@ -490,8 +454,8 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
       return qtrue;
     } else {
       CG_Printf("Please provide a name to save your "
-                "TJL. (without .tjl "
-                "extension). \n");
+          "TJL. (without .tjl "
+          "extension). \n");
       return qfalse;
     }
   }
@@ -533,7 +497,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     const auto argc = trap_Argc();
     if (argc == 1) {
       CG_Printf("Please add 0 or 1 as argument to "
-                "enable or disable line.\n");
+          "enable or disable line.\n");
       return qfalse;
     } else {
       const std::string state = CG_Argv(1);
@@ -550,7 +514,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     const auto argc = trap_Argc();
     if (argc == 1) {
       CG_Printf("Please add 0 or 1 as argument to "
-                "enable or disable marker.\n");
+          "enable or disable marker.\n");
       return qfalse;
     } else {
       std::string state = CG_Argv(1);
@@ -583,7 +547,7 @@ void CG_DrawActiveFrameExt() {
       if (nextNearest < cg.time) {
         if (ETJump::trickjumpLines->isDebug()) {
           CG_Printf("Check for nearest "
-                    "line!. \n");
+              "line!. \n");
         }
         ETJump::trickjumpLines->displayNearestRoutes();
         nextNearest = cg.time + 1000 * etj_tjlNearestInterval.integer;
@@ -627,10 +591,10 @@ void runFrameEnd() {
 
 playerState_t *getValidPlayerState() {
   return (cg.snap->ps.clientNum != cg.clientNum)
-             // spectating
-             ? &cg.snap->ps
-             // playing
-             : &cg.predictedPlayerState;
+           // spectating
+           ? &cg.snap->ps
+           // playing
+           : &cg.predictedPlayerState;
 }
 } // namespace ETJump
 
@@ -657,8 +621,8 @@ qboolean CG_displaybynumber() {
     return qfalse;
   } else {
     CG_Printf("You need to pass the route number by argument. "
-              "Use command "
-              "/tjl_listroute to get number. \n");
+        "Use command "
+        "/tjl_listroute to get number. \n");
     return qfalse;
   }
 }

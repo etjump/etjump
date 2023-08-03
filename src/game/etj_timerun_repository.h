@@ -59,6 +59,9 @@ public:
   opt<Timerun::Record>
   getTopRecord(int seasonId, const std::string &map,
                const std::string &run);
+  std::vector<Timerun::Record> getTopRecords(const std::vector<int>& seasonIds,
+                                             const std::string &map,
+                                             const std::string &run) const;
   void editSeason(const Timerun::EditSeasonParams &params);
   std::vector<std::string> getMapsForName(const std::string &map, bool exact);
   std::vector<Timerun::Record> getRecords(

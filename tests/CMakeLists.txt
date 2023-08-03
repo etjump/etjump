@@ -9,6 +9,7 @@ add_executable(tests
 	"../src/game/etj_deathrun_system.cpp"
 	"../src/game/etj_deathrun_system.cpp"
 	"../src/game/etj_string_utilities.cpp"
+	"../src/game/etj_timerun_shared.cpp"
 	"../src/game/q_math.cpp"
 	"client_commands_handler_tests.cpp"
 	"color_string_parser_tests.cpp"
@@ -18,6 +19,7 @@ add_executable(tests
 	"inline_command_parser_tests.cpp"
 	"string_utilities_tests.cpp"
 	"time_utilities_tests.cpp"
+	"timerun_shared_tests.cpp"
 )
 target_link_libraries(tests PRIVATE gtest_main libsha1 fmt::fmt cxx_compiler_opts)
 target_compile_options(tests PRIVATE $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU,Clang>>:-ggdb>)

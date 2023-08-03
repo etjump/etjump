@@ -84,6 +84,7 @@ add_library(qagame MODULE
 	"etj_timerun_repository.cpp"
 	"etj_timerun_v2.cpp"
 	"etj_timerun_entities.cpp"
+	"etj_timerun_shared.cpp"
 	"etj_tokens.cpp"
 	"etj_user.cpp"
 	"etj_utilities.cpp"

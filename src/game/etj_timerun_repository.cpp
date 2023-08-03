@@ -285,6 +285,54 @@ ETJump::TimerunRepository::getTopRecord(int seasonId,
   return record;
 }
 
+std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getTopRecords(
+    const std::vector<int>& seasonIds, const std::string &map,
+    const std::string &run) const {
+  auto seasonIdsPlaceholder = DatabaseV2::createPlaceholderString(seasonIds);
+
+  std::string query = stringFormat(
+      R"(
+        select *
+        from (select season_id,
+                     map,
+                     run,
+                     user_id,
+                     time,
+                     checkpoints,
+                     record_date,
+                     player_name,
+                     metadata,
+                     rank() over (partition by season_id, map, run order by time asc) as rank
+              FROM record
+              where season_id in (%s)
+                and map = ?
+                and run = ?) as ranked_records
+        where rank = 1;
+      )",
+      seasonIdsPlaceholder);
+
+  auto binder = _database->sql << query;
+
+  for (const auto &seasonId : seasonIds) {
+    binder << seasonId;
+  }
+
+  binder << map << run;
+
+  std::vector<Timerun::Record> records;
+  binder >>
+      [&records](int seasonId, std::string map, std::string runName, int userId,
+                 int time, std::string checkpointsString,
+                 std::string recordDate,
+                 std::string playerName, std::string metadataString, int rank) {
+        records.push_back(getRecordFromStandardQueryResult(
+            seasonId, map, runName, userId, time, checkpointsString, recordDate,
+            playerName, metadataString));
+      };
+
+  return records;
+}
+
 void ETJump::TimerunRepository::editSeason(
     const Timerun::EditSeasonParams &params) {
   int seasonId = -1;
@@ -398,12 +446,13 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
 
   auto maps = getMapsForName(params.map, params.exactMap);
   if (maps.size() > 1) {
-    std::string error = stringFormat("^3records: ^7found %d maps matching ^3%s^7\n",
-                                     maps.size(), params.map);
+    std::string error = stringFormat(
+        "^3records: ^7found %d maps matching ^3%s^7\n",
+        maps.size(), params.map);
 
     const int perRow = 3;
     int i = 0;
-    for (const auto & map : maps) {
+    for (const auto &map : maps) {
       if (i != 0 && i % perRow == 0) {
         error += "\n";
       }
@@ -522,7 +571,7 @@ ETJump::opt<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecord(
     const std::string &map, const std::string &run, int rank) {
   opt<Timerun::Record> record;
 
-      _database->sql << R"(
+  _database->sql << R"(
     select *
       from (
         select
@@ -541,7 +590,7 @@ ETJump::opt<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecord(
       ) as ranked_records
       where rank = ?;
   )" << map << run
-                 << rank >>
+      << rank >>
       [&record](int seasonId, std::string map, std::string runName, int userId,
                 int time, std::string checkpointsString, std::string recordDate,
                 std::string playerName, std::string metadataString, int rank) {
@@ -620,7 +669,7 @@ void ETJump::TimerunRepository::migrate() {
             ) values (
               1,
               'Default',
-              current_timestamp,
+              '2000-01-01 00:00:00',
               null
             );
           )",

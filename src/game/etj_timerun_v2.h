@@ -40,6 +40,8 @@ class TimerunRepository;
 
 class TimerunV2 {
 public:
+  const int defaultSeasonId = 1;
+
   TimerunV2(std::string currentMap,
             std::unique_ptr<TimerunRepository> repository,
             std::unique_ptr<Log> logger,
@@ -93,6 +95,7 @@ private:
   void startNotify(Player *player);
   bool isDebugging(int clientNum);
   void checkRecord(Player *player);
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> toCheckpointsArray(const std::vector<int> *vector);
   /**
    * We can have multiple seasons running at once. This will
    * figure out which one is the most relevant for the user
@@ -108,5 +111,4 @@ private:
   std::vector<Timerun::Season> _activeSeasons;
   const Timerun::Season *_mostRelevantSeason;
 };
-
 }

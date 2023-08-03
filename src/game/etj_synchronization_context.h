@@ -9,6 +9,7 @@
 #include <atomic>
 #include <thread>
 
+#include "etj_shared.h"
 #include "etj_utilities.h"
 
 namespace ETJump {

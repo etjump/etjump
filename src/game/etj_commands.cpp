@@ -246,11 +246,12 @@ bool Records(gentity_t *ent, Arguments argv) {
 }
 
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
+  auto args = ETJump::Container::skipFirstN(*argv, 1);
   auto optCommand = deprecated_getCommand(
       "loadcheckpoints", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
           "loadcheckpoints",
-          "Load checkpoints from a previous record.\n    /loadcheckpoints --season <season name> --run <run name> --rank <rank>\n\n"
+          "Load checkpoints from a previous record.\n    /loadcheckpoints --run <run name> --rank <rank>\n\n"
           "    Has a shorthand format of:\n"
           "    /loadcheckpoints <run name> <rank>\n")
       .addOption(
@@ -259,7 +260,7 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
           ETJump::CommandParser::OptionDefinition::Type::Token, true, 0)
       .addOption("rank", "Rank to load checkpoints from. Defaults to 1",
                  ETJump::CommandParser::OptionDefinition::Type::Integer, false, 1),
-      &ETJump::Container::skipFirstN(*argv, 1)
+      &args
       );
 
   if (!optCommand.hasValue()) {

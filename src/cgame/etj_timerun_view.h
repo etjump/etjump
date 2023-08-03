@@ -24,51 +24,15 @@
 
 #pragma once
 
-#include <array>
 #include <string>
 #include "etj_drawable.h"
+#include "etj_timerun.h"
 
 namespace ETJump {
-struct PlayerTimerunInformation {
-  PlayerTimerunInformation() {
-    previousRecordCheckpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
-    checkpoints.fill(TIMERUN_CHECKPOINT_NOT_SET);
-  };
-  int startTime{};
-  int completionTime{};
-  std::string runName;
-  int previousRecord{};
-  std::array<int, MAX_TIMERUN_CHECKPOINTS> previousRecordCheckpoints;
-  bool running{};
-  // used for fading
-  int lastRunTimer{};
-  int numCheckpointsHit{};
-  std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints;
-  int nextFreeCheckpointIdx{};
-};
-
 class TimerunView : public Drawable {
 public:
-  explicit TimerunView(std::shared_ptr<PlayerEventsHandler> playerEventsHandler);
+  explicit TimerunView(std::shared_ptr<Timerun> timerun);
   ~TimerunView();
-  static const int MaxClients = 64;
-  // whenever server sends any command that starts with
-  // `timerun` this will be called
-  bool parseServerCommand();
-
-  // whenever the player starts a timerun
-  void start();
-
-  // whenever the player stops a timerun
-  void stop();
-
-  // whenever the player hits a checkpoint
-  void checkpoint();
-
-  // whenever the player's timerun is interrupted (not finished)
-  void interrupt();
-  static void interrupt(PlayerTimerunInformation &playerTimerunInformation);
-
   // draws the timer
   void draw();
 
@@ -81,14 +45,13 @@ public:
   // e.g. if player is running => return player's run,
   // else if player is running and we're speccing the player
   // => return that player's run
-  const PlayerTimerunInformation *currentRun() const;
+  const Timerun::PlayerTimerunInformation *currentRun() const;
 
 private:
   std::string getTimerString(const int msec);
 
-  std::array<PlayerTimerunInformation, MaxClients> _playersTimerunInformation;
   vec4_t inactiveTimerColor;
-  std::shared_ptr<PlayerEventsHandler> _playerEventsHandler;
+  std::shared_ptr<Timerun> _timerun;
 
   bool canSkipDraw() const;
 };
