@@ -44,14 +44,14 @@ public:
 
   bool hasValue() const { return _hasValue; }
 
-  const T &valueOr(T defaultValue) const {
+  const T &valueOr(const T& defaultValue) const {
     if (!_hasValue) {
       return defaultValue;
     }
     return _value;
   }
 
-  T &valueOr(T defaultValue) {
+  T valueOr(T defaultValue) {
     if (!_hasValue) {
       return defaultValue;
     }

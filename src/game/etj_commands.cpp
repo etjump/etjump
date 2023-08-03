@@ -159,6 +159,7 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
 }
 
 bool Records(gentity_t *ent, Arguments argv) {
+  auto args = ETJump::Container::skipFirstN(*argv, 1);
   auto optCommand = deprecated_getCommand(
       "records",
       ClientNum(ent),
@@ -184,7 +185,7 @@ bool Records(gentity_t *ent, Arguments argv) {
                  ETJump::CommandParser::OptionDefinition::Type::Integer, false)
       .addOption("page-size", "How many records to show on a single page",
                  ETJump::CommandParser::OptionDefinition::Type::Integer, false),
-      &ETJump::Container::skipFirstN(*argv, 1));
+      &args);
 
   if (!optCommand.hasValue()) {
     return true;

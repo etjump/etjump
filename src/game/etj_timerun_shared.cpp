@@ -94,7 +94,7 @@ TimerunCommands::Start::deserialize(
 
   start.previousRecord = parseTime(args[5]);
 
-  int idx = 0;
+  unsigned idx = 0;
   for (const auto &v : Container::map(StringUtil::split(args[6], ","),
                                       [](auto c) { return std::stoi(c); })) {
     if (idx >= start.checkpoints.size()) {

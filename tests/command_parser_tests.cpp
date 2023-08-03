@@ -298,7 +298,6 @@ TEST_F(CommandParserTests, CommandParser_ReturnsError_IfDateIsNotValid) {
       "date", "desc", CommandParser::OptionDefinition::Type::Date, true);
   auto parser = CreateCommandParser(def, args);
 
-  auto expectedDate = Date{2023, 1, 5};
   ASSERT_TRUE(
       StringUtil::contains(parser.parse().errors[0],
         "does not match the expected format"));

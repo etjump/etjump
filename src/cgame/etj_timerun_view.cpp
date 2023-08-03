@@ -34,7 +34,7 @@
 #include "../game/etj_numeric_utilities.h"
 
 ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
-  : _timerun(timerun), Drawable() {
+  : Drawable(), _timerun(timerun) {
   parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
   cvarUpdateHandler->subscribe(
       &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
@@ -218,7 +218,7 @@ void ETJump::TimerunView::draw() {
       // so render checkpoint as white
       if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
         checkpointColor = &colorWhite;
-      } else if (checkpointTimeNotSet && currentTime < recordCheckpointTime || !checkpointTimeNotSet && checkpointTime < recordCheckpointTime) {
+      } else if ((checkpointTimeNotSet && currentTime < recordCheckpointTime) || (!checkpointTimeNotSet && checkpointTime < recordCheckpointTime)) {
         checkpointColor = &colorSuccess;
         dir = "-";
       } else {
