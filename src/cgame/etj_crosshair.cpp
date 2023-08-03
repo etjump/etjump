@@ -55,8 +55,10 @@ void Crosshair::parseColors() {
 }
 
 void Crosshair::adjustSize() {
-  crosshair.w = cg_crosshairSize.value * etj_crosshairScaleX.value;
-  crosshair.h = cg_crosshairSize.value * etj_crosshairScaleY.value;
+  const float scaleX = Numeric::clamp(etj_crosshairScaleX.value, -5, 5);
+  const float scaleY = Numeric::clamp(etj_crosshairScaleY.value, -5, 5);
+  crosshair.w = cg_crosshairSize.value * scaleX;
+  crosshair.h = cg_crosshairSize.value * scaleY;
   crosshair.f = 0.0f;
   crosshair.t = Numeric::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
 
