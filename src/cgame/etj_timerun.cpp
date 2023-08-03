@@ -209,7 +209,7 @@ std::string Timerun::createCompletionMessage(const clientInfo_t &player,
 
   if (previousTime.hasValue()) {
     timeDifference =
-        +"(" + diffToString(completionTime, previousTime.value()) + ")";
+        +"^7(" + diffToString(completionTime, previousTime.value()) + "^7)";
   }
 
   std::string message =

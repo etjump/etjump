@@ -51,14 +51,18 @@ ETJump::TimerunView::currentRun() const {
   return _timerun->getTimerunInformationFor(cg.snap->ps.clientNum);
 }
 
-std::string ETJump::TimerunView::getTimerString(const int msec) {
+std::string ETJump::TimerunView::getTimerString(int msec) {
+  if (msec < 0) {
+    msec *= -1;
+  }
+
   auto millis = msec;
   auto minutes = millis / 60000;
   millis -= minutes * 60000;
   auto seconds = millis / 1000;
   millis -= seconds * 1000;
 
-  return ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
+  return stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
 }
 
 void ETJump::TimerunView::draw() {
@@ -140,12 +144,13 @@ void ETJump::TimerunView::draw() {
   // timer fading/hiding routine
   ETJump_AdjustPosition(&x);
 
+  bool hideCheckpoints = false;
+
   if (!run->running && etj_runTimerAutoHide.integer) {
     auto fstart = run->lastRunTimer + fadeStart;
     auto fend = fstart + fadeOut;
 
     if (fstart < cg.time && fend > cg.time) {
-
       vec4_t toColor;
       memcpy(&toColor, color, sizeof(toColor));
       toColor[3] = 0;
@@ -155,11 +160,21 @@ void ETJump::TimerunView::draw() {
       ETJump_LerpColors(color, &toColor, &colorTemp, step);
       color = &colorTemp;
 
+      hideCheckpoints = true;
     } else if (cg.time > fend) {
       // dont draw timer once fading is done
       return;
     }
 
+  }
+
+  CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0,
+                    style, font);
+
+  // FIXME: hack, cba dealing with handcrafted fading
+  // for checkpoints.
+  if (hideCheckpoints) {
+    return;
   }
 
   if (etj_drawCheckpoints.integer && etj_checkpointsCount.integer > 0) {
@@ -181,25 +196,54 @@ void ETJump::TimerunView::draw() {
     const int startIndex = run->numCheckpointsHit;
     const int endIndex = run->numCheckpointsHit - count;
 
-    for (int i = startIndex; i > 0 && i > endIndex; i--) {
+    for (int i = startIndex; i >= 0 && i > endIndex; i--) {
       vec4_t *checkpointColor = &colorWhite;
-      const int checkpointTime = run->checkpoints[i - 1];
-      const int previousCheckpointTime = run->previousRecordCheckpoints[i - 1];
+      const int checkpointTime = run->checkpoints[i];
+      const int recordCheckpointTime = run->previousRecordCheckpoints[i];
+      const int currentTime =
+          cg.predictedPlayerState.commandTime - run->startTime;
 
-      if (previousCheckpointTime >= 0) {
-        if (checkpointTime < previousCheckpointTime) {
+      std::string dir = "+";
+      std::string timerStr;
+      if (checkpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
+        if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
+          // don't draw the ongoing checkpoint timer if we don't
+          // have anything to compare against
+          continue;
+        }
+
+        if (currentTime < recordCheckpointTime) {
           checkpointColor = &colorSuccess;
         } else {
           checkpointColor = &colorFail;
         }
+
+        timerStr =
+              getTimerString(etj_checkpointsStyle.integer == 1
+                                 ? currentTime
+                                        : currentTime - recordCheckpointTime);
+        if (currentTime - recordCheckpointTime < 0) {
+          dir = "-";
+        }
+      } else {
+
+        if (recordCheckpointTime >= 0) {
+          if (checkpointTime < recordCheckpointTime) {
+            checkpointColor = &colorSuccess;
+          } else {
+            checkpointColor = &colorFail;
+          }
+        }
+
+        timerStr = getTimerString(etj_checkpointsStyle.integer == 1
+                                      ? checkpointTime
+                                      : checkpointTime - recordCheckpointTime);
+        if (checkpointTime - recordCheckpointTime < 0) {
+          dir = "-";
+        }
       }
 
-      /* if (etj_checkpointsStyle.integer == 1) {
-        // absolute time
-      } else {
-        // relative time
-      } */
-      const auto timerStr = getTimerString(checkpointTime);
+      timerStr = dir + timerStr;
 
       textWidth =
           static_cast<float>(CG_Text_Width_Ext(timerStr, textSize, 0, font)) *
@@ -217,9 +261,6 @@ void ETJump::TimerunView::draw() {
       pastRecordAnimation(color, text.c_str(), ms, run->previousRecord);
     }
   }
-
-  CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0,
-                    style, font);
 }
 
 int ETJump::TimerunView::getTransitionRange(int previousRunTime) {
