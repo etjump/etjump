@@ -2763,6 +2763,7 @@ void CG_FillRect(float x, float y, float width, float height,
                  const float *color);
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color);
+void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color);
 void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
               const vec4_t color);
 void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,

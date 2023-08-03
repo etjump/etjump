@@ -132,44 +132,44 @@ void Crosshair::render() const {
       Vector4Copy(colorBlack, crosshairOutline.colorAlt);
     }
 
-    switch (cg_drawCrosshair.integer) {
-      case 10: // vertical line
+    switch (static_cast<ETJumpCrosshairs>(cg_drawCrosshair.integer)) {
+      case ETJumpCrosshairs::VerticalLine:
         if (outline) {
           CrosshairDrawer::drawLineOutline(crosshairOutline, shader, flipY);
         }
         CrosshairDrawer::drawLine(crosshair, shader, flipY);
         break;
-      case 11: // cross
+      case ETJumpCrosshairs::Cross:
         if (outline) {
           CrosshairDrawer::drawCrossOutline(crosshairOutline, shader);
         }
         CrosshairDrawer::drawCross(crosshair, shader);
         break;
-      case 12: // 45-degree cross
+      case ETJumpCrosshairs::DiagonalCross:
         if (outline) {
           CrosshairDrawer::drawDiagCross(crosshairOutline);
         }
         CrosshairDrawer::drawDiagCross(crosshair);
         break;
-      case 13: // upward pointing 'V'
+      case ETJumpCrosshairs::V:
         if (outline) {
           CrosshairDrawer::drawV(crosshairOutline);
         }
         CrosshairDrawer::drawV(crosshair);
         break;
-      case 14: // upward pointing triangle
+      case ETJumpCrosshairs::Triangle:
         if (outline) {
           CrosshairDrawer::drawTriangle(crosshairOutline, false);
         }
         CrosshairDrawer::drawTriangle(crosshair, fill);
         break;
-      case 15: // T-shaped
+      case ETJumpCrosshairs::T:
         if (outline) {
           CrosshairDrawer::drawTOutline(crosshairOutline, shader, flipX, flipY);
         }
         CrosshairDrawer::drawT(crosshair, shader, flipX, flipY);
         break;
-      case 16: // double vertical lines
+      case ETJumpCrosshairs::TwoVerticalLines:
         if (outline) {
           CrosshairDrawer::drawTwoLinesOutline(crosshairOutline, shader);
         }

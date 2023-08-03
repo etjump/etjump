@@ -143,6 +143,10 @@ range_t AnglesToRange(float start, float end, float yaw, float fov) {
   return ret;
 }
 
+void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color) {
+  DrawLine(x1, y1, x2, y2, 1, 1, color);
+}
+
 /*
 ==============
 DrawLine
@@ -217,10 +221,10 @@ static Point TranslatePoint(Point p, float angle, const vec2_t origin) {
 /*
 ==============
 EdgeFunction
-Edge function to determine if a point (x, y) lies inside or outside the
-triangle defined by p1, p2, and p3. The function returns a positive value if
-the point is inside the triangle, a negative value if it's outside, and zero
-if the point lies on the triangle's edge.
+Edge function to determine if a point (x, y) lies inside or outside a
+triangle. The function returns a positive value if the point is inside a
+triangle, a negative value if it's outside, and zero if the point lies on a
+triangle's edge. This should be called for each vertex pair of a triangle.
 ==============
 */
 static float EdgeFunction(const Point &a, const Point &b, float x, float y) {

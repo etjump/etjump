@@ -35,6 +35,16 @@ class Crosshair : public IRenderable {
   void adjustPosition();
   static bool canSkipDraw();
 
+  enum class ETJumpCrosshairs {
+    VerticalLine = 10,
+    Cross = 11,
+    DiagonalCross = 12,
+    V = 13,
+    Triangle = 14,
+    T = 15,
+    TwoVerticalLines = 16
+  };
+
 protected:
   typedef struct {
     vec4_t color;
