@@ -202,46 +202,34 @@ void ETJump::TimerunView::draw() {
       const int recordCheckpointTime = run->previousRecordCheckpoints[i];
       const int currentTime =
           cg.predictedPlayerState.commandTime - run->startTime;
+      bool checkpointTimeNotSet = checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
+      int timeDifference = checkpointTimeNotSet ? currentTime - recordCheckpointTime
+                                    : checkpointTime - recordCheckpointTime;
 
-      std::string dir = "+";
-      std::string timerStr;
-      if (checkpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
-        if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
-          // don't draw the ongoing checkpoint timer if we don't
-          // have anything to compare against
-          continue;
-        }
-
-        if (currentTime < recordCheckpointTime) {
-          checkpointColor = &colorSuccess;
-        } else {
-          checkpointColor = &colorFail;
-        }
-
-        timerStr =
-              getTimerString(etj_checkpointsStyle.integer == 1
-                                 ? currentTime
-                                        : currentTime - recordCheckpointTime);
-        if (currentTime - recordCheckpointTime < 0) {
-          dir = "-";
-        }
-      } else {
-
-        if (recordCheckpointTime >= 0) {
-          if (checkpointTime < recordCheckpointTime) {
-            checkpointColor = &colorSuccess;
-          } else {
-            checkpointColor = &colorFail;
-          }
-        }
-
-        timerStr = getTimerString(etj_checkpointsStyle.integer == 1
-                                      ? checkpointTime
-                                      : checkpointTime - recordCheckpointTime);
-        if (checkpointTime - recordCheckpointTime < 0) {
-          dir = "-";
-        }
+      // if we don't have current or next checkpoint set, no point in displaying
+      // anything
+      if (checkpointTimeNotSet &&
+          recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
+        continue;
       }
+
+      std::string dir = "";
+      // if we don't have a next checkpoint set, we can't compare to anything
+      // so render checkpoint as white
+      if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
+        checkpointColor = &colorWhite;
+      } else if (checkpointTimeNotSet && currentTime < recordCheckpointTime || !checkpointTimeNotSet && checkpointTime < recordCheckpointTime) {
+        checkpointColor = &colorSuccess;
+        dir = "-";
+      } else {
+        checkpointColor = &colorFail;
+        dir = "+";
+      }
+
+      std::string timerStr =
+          getTimerString(etj_checkpointsStyle.integer == 1
+                             ? (checkpointTimeNotSet ? currentTime : checkpointTime)
+                             : timeDifference);
 
       timerStr = dir + timerStr;
 
