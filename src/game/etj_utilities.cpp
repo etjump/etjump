@@ -244,18 +244,18 @@ std::vector<std::string> Utilities::getMaps() {
   int i = 0;
   int numDirs = 0;
   int dirLen = 0;
-  char dirList[8196];
+  char dirList[32768];
   char *dirPtr = nullptr;
   numDirs = trap_FS_GetFileList("maps", ".bsp", dirList, sizeof(dirList));
   dirPtr = dirList;
 
   for (i = 0; i < numDirs; i++, dirPtr += dirLen + 1) {
-    dirLen = strlen(dirPtr);
+    dirLen = static_cast<int>(strlen(dirPtr));
     if (strlen(dirPtr) > 4) {
       dirPtr[strlen(dirPtr) - 4] = '\0';
     }
 
-    char buf[64] = "\0";
+    char buf[MAX_QPATH] = "\0";
     Q_strncpyz(buf, dirPtr, sizeof(buf));
     Q_strlwr(buf);
 
@@ -263,7 +263,7 @@ std::vector<std::string> Utilities::getMaps() {
       continue;
     }
 
-    maps.push_back(buf);
+    maps.emplace_back(buf);
   }
 
   return maps;

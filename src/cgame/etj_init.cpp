@@ -643,8 +643,8 @@ void runFrameEnd() {
 }
 
 playerState_t *getValidPlayerState() {
-  return (cg.snap->ps.clientNum != cg.clientNum)
-             // spectating
+  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback)
+             // spectating/demo playback
              ? &cg.snap->ps
              // playing
              : &cg.predictedPlayerState;

@@ -1378,8 +1378,6 @@ void CG_InitConsoleCommands() {
   //
   trap_AddCommand("kill");
   trap_AddCommand("say");
-  trap_AddCommand("say_limbo"); // NERVE - SMF
-  trap_AddCommand("tell");
   trap_AddCommand("listbotgoals");
   trap_AddCommand("give");
   trap_AddCommand("god");
@@ -1400,9 +1398,6 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("follownext");
   trap_AddCommand("followprev");
 
-  trap_AddCommand("start_match");
-  trap_AddCommand("reset_match");
-  trap_AddCommand("swap_teams");
   // -NERVE - SMF
   // OSP
   trap_AddCommand("?");
@@ -1417,6 +1412,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("ref");
   trap_AddCommand("say_teamnl");
   trap_AddCommand("say_team");
+  trap_AddCommand("say_buddy");
   trap_AddCommand("scores");
   trap_AddCommand("specinvite");
   trap_AddCommand("specuninvite");
@@ -1425,34 +1421,24 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("speclist");
   trap_AddCommand("statsall");
   trap_AddCommand("statsdump");
-  trap_AddCommand("timein");
-  trap_AddCommand("timeout");
   trap_AddCommand("topshots");
-  trap_AddCommand("unlock");
-  trap_AddCommand("unpause");
   trap_AddCommand("unready");
   trap_AddCommand("weaponstats");
   // OSP
 
   trap_AddCommand("fireteam");
-  trap_AddCommand("buddylist");
   trap_AddCommand("showstats");
 
   trap_AddCommand("ignore");
   trap_AddCommand("unignore");
 
-  trap_AddCommand("addtt");
   trap_AddCommand("selectbuddy");
-  trap_AddCommand("selectNextBuddy"); // xkan 9/26/2002
 
   trap_AddCommand("loadgame");
   trap_AddCommand("savegame");
 
   trap_AddCommand("campaign");
   trap_AddCommand("listcampaigns");
-
-  trap_AddCommand("setweapons");
-  trap_AddCommand("setclass");
 
   trap_AddCommand("save");
   trap_AddCommand("load");
@@ -1519,4 +1505,8 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("clearsaves");
   trap_AddCommand("listspawnpt");
   trap_AddCommand("entitylist");
+
+  trap_AddCommand("enc_say");
+  trap_AddCommand("enc_say_team");
+  trap_AddCommand("enc_say_buddy");
 }
