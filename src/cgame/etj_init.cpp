@@ -164,8 +164,8 @@ void init() {
   CG_Printf(S_COLOR_LTGREY "____________________________\n");
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-      " " S_COLOR_LTGREY GAME_BINARY_NAME
-      " init...\n");
+                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
+                                     " init...\n");
 
   isInitialized = false;
 
@@ -259,28 +259,24 @@ void init() {
         std::make_shared<CvarShadow>(shadow.first, shadow.second));
   }
 
-  playerEventsHandler->subscribe(
-      "timerun:start",
-      [](auto a) {
-        auto clientNum = std::stoi(a[0]);
-        if (clientNum == cg.clientNum) {
-          execCmdOnRunStart();
-        }
-      });
-  playerEventsHandler->subscribe(
-      "timerun:stop", [](auto a) {
-        auto clientNum = std::stoi(a[0]);
-        if (clientNum == cg.clientNum) {
-          execCmdOnRunEnd();
-        }
-      });
-  playerEventsHandler->subscribe(
-      "timerun:interrupt", [](auto a) {
-        auto clientNum = std::stoi(a[0]);
-        if (clientNum == cg.clientNum) {
-          execCmdOnRunEnd();
-        }
-      });
+  playerEventsHandler->subscribe("timerun:start", [](auto a) {
+    auto clientNum = std::stoi(a[0]);
+    if (clientNum == cg.clientNum) {
+      execCmdOnRunStart();
+    }
+  });
+  playerEventsHandler->subscribe("timerun:stop", [](auto a) {
+    auto clientNum = std::stoi(a[0]);
+    if (clientNum == cg.clientNum) {
+      execCmdOnRunEnd();
+    }
+  });
+  playerEventsHandler->subscribe("timerun:interrupt", [](auto a) {
+    auto clientNum = std::stoi(a[0]);
+    if (clientNum == cg.clientNum) {
+      execCmdOnRunEnd();
+    }
+  });
 
   ETJump_ClearDrawables();
   initTimer();
@@ -309,16 +305,16 @@ void init() {
   }
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-      " " S_COLOR_LTGREY GAME_BINARY_NAME
-      " init... " S_COLOR_GREEN "DONE\n");
+                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
+                                     " init... " S_COLOR_GREEN "DONE\n");
 
   isInitialized = true;
 }
 
 void shutdown() {
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION_DATED
-      " " S_COLOR_LTGREY GAME_BINARY_NAME
-      " shutdown...\n");
+                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
+                                     " shutdown...\n");
 
   if (ETJump::consoleCommandsHandler) {
     ETJump::consoleCommandsHandler->unsubcribe("min");
@@ -346,8 +342,8 @@ void shutdown() {
   isInitialized = false;
 
   CG_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-      " " S_COLOR_LTGREY GAME_BINARY_NAME
-      " shutdown... " S_COLOR_GREEN "DONE\n");
+                                     " " S_COLOR_LTGREY GAME_BINARY_NAME
+                                     " shutdown... " S_COLOR_GREEN "DONE\n");
 }
 } // namespace ETJump
 
@@ -454,8 +450,8 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
       return qtrue;
     } else {
       CG_Printf("Please provide a name to save your "
-          "TJL. (without .tjl "
-          "extension). \n");
+                "TJL. (without .tjl "
+                "extension). \n");
       return qfalse;
     }
   }
@@ -497,7 +493,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     const auto argc = trap_Argc();
     if (argc == 1) {
       CG_Printf("Please add 0 or 1 as argument to "
-          "enable or disable line.\n");
+                "enable or disable line.\n");
       return qfalse;
     } else {
       const std::string state = CG_Argv(1);
@@ -514,7 +510,7 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
     const auto argc = trap_Argc();
     if (argc == 1) {
       CG_Printf("Please add 0 or 1 as argument to "
-          "enable or disable marker.\n");
+                "enable or disable marker.\n");
       return qfalse;
     } else {
       std::string state = CG_Argv(1);
@@ -547,7 +543,7 @@ void CG_DrawActiveFrameExt() {
       if (nextNearest < cg.time) {
         if (ETJump::trickjumpLines->isDebug()) {
           CG_Printf("Check for nearest "
-              "line!. \n");
+                    "line!. \n");
         }
         ETJump::trickjumpLines->displayNearestRoutes();
         nextNearest = cg.time + 1000 * etj_tjlNearestInterval.integer;
@@ -590,11 +586,11 @@ void runFrameEnd() {
 }
 
 playerState_t *getValidPlayerState() {
-  return (cg.snap->ps.clientNum != cg.clientNum)
-           // spectating
-           ? &cg.snap->ps
-           // playing
-           : &cg.predictedPlayerState;
+  return (cg.snap->ps.clientNum != cg.clientNum || cg.demoPlayback)
+             // spectating/demo playback
+             ? &cg.snap->ps
+             // playing
+             : &cg.predictedPlayerState;
 }
 } // namespace ETJump
 
@@ -621,8 +617,8 @@ qboolean CG_displaybynumber() {
     return qfalse;
   } else {
     CG_Printf("You need to pass the route number by argument. "
-        "Use command "
-        "/tjl_listroute to get number. \n");
+              "Use command "
+              "/tjl_listroute to get number. \n");
     return qfalse;
   }
 }
