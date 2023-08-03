@@ -824,8 +824,9 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
 
           std::string diffString = "";
           if (record.previousTime.hasValue()) {
-            diffString =
-                diffToString(record.record.time, record.previousTime.value());
+            diffString = "^7(" + diffToString(record.record.time,
+                                              record.previousTime.value()) +
+                         "^7)";
           }
 
           Printer::BroadCastBannerMessage(stringFormat(
@@ -906,7 +907,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                   clientNum, completionTime.value(),
                   checkRecordResult->previousOverallRecord.hasValue()
                     ? checkRecordResult->previousOverallRecord.value().time
-                      : opt<int>(),
+                    : opt<int>(),
                   activeRunName)
               .serialize());
         }

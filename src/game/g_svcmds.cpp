@@ -2,7 +2,6 @@
 // remote clients
 
 #include "etj_local.h"
-#include "etj_svcmds.h"
 #include "etj_timerun_v2.h"
 #include "g_local.h"
 

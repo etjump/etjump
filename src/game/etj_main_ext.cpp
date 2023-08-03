@@ -36,7 +36,6 @@
 #include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_string_utilities.h"
-#include "etj_svcmds.h"
 #include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
 
@@ -121,8 +120,6 @@ void OnGameInit() {
               "timerunv1", GetPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),
       std::make_unique<ETJump::SynchronizationContext>());
-  game.serverCommands = std::make_unique<ETJump::ServerCommands>(
-      std::make_unique<ETJump::Log>("serverCommands"));
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -187,7 +184,6 @@ void OnGameShutdown() {
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
-  game.serverCommands = nullptr;
   ETJump::Log::processMessages();
 }
 

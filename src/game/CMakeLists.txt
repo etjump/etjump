@@ -75,7 +75,6 @@ add_library(qagame MODULE
 	"etj_result_set_formatter.cpp"
 	"etj_save_system.cpp"
 	"etj_session.cpp"
-	"etj_svcmds.cpp"
 	"etj_synchronization_context.cpp"
 	"etj_sqlite_wrapper.cpp"
 	"etj_string_utilities.cpp"
