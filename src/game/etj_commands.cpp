@@ -104,21 +104,22 @@ bool Unload(gentity_t *ent, Arguments argv) {
 bool ListInfo(gentity_t *ent, Arguments argv) {
   if (argv->size() != 2) {
     std::string types = game.customMapVotes->ListTypes();
-    ConsolePrintTo(ent, "^<List of custom map types: ^7" + types);
+    Printer::SendConsoleMessage(
+        ClientNum(ent), "^7Available custom map vote lists:\n^z" + types +
+                            "\n\n^7Use ^3listinfo [listname] ^7to type "
+                            "maps in the specified type.\n");
     return true;
   }
 
-  const std::vector<std::string> *lines =
-      game.customMapVotes->ListInfo(argv->at(1));
-  if (lines->size() == 0) {
-    ChatPrintTo(ent, "^<<listinfo: ^7list could not be found.");
+  const auto &type = argv->at(1);
+  const std::string maplist = game.customMapVotes->ListInfo(type);
+  if (maplist.empty()) {
+    Printer::SendConsoleMessage(
+        ClientNum(ent),
+        ETJump::stringFormat("^3listinfo: ^7Could not find type ^3%s\n", type));
     return false;
   }
-  BeginBufferPrint();
-  for (unsigned i = 0; i < lines->size(); i++) {
-    BufferPrint(ent, lines->at(i));
-  }
-  FinishBufferPrint(ent, false);
+  Printer::SendConsoleMessage(ClientNum(ent), maplist);
   return true;
 }
 
