@@ -53,6 +53,7 @@
 #include "etj_upper_right_drawable.h"
 #include "etj_upmove_meter_drawable.h"
 #include "etj_spectatorinfo_drawable.h"
+#include "etj_crosshair.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -111,6 +112,14 @@ int checkExtraTrace(int value) {
   }
 
   return CONTENTS_SOLID;
+}
+
+int weapnumForClient() {
+  if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback) {
+    return cg.snap->ps.weapon;
+  }
+
+  return cg.weaponSelect;
 }
 
 void initTimer() {
@@ -231,6 +240,8 @@ void init() {
       std::shared_ptr<ETJump::IRenderable>(keySetSystem));
   ETJump::initDrawKeys(keySetSystem);
   ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
+
+  ETJump::renderables.push_back(std::make_shared<Crosshair>());
 
   const std::vector<std::pair<const vmCvar_t *, const std::string>> cvars{
       {&etj_drawFoliage, "r_drawfoliage"},

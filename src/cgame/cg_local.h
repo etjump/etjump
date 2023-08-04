@@ -71,7 +71,7 @@
 #define GIANT_WIDTH 32
 #define GIANT_HEIGHT 48
 
-#define NUM_CROSSHAIRS 10
+#define NUM_CROSSHAIRS 17
 
 // Ridah, trails
 #define STYPE_STRETCH 0
@@ -2688,6 +2688,11 @@ extern vmCvar_t etj_optimizePrediction;
 
 extern vmCvar_t etj_menuSensitivity;
 
+extern vmCvar_t etj_crosshairScaleX;
+extern vmCvar_t etj_crosshairScaleY;
+extern vmCvar_t etj_crosshairThickness;
+extern vmCvar_t etj_crosshairOutline;
+
 //
 // cg_main.c
 //
@@ -2758,8 +2763,12 @@ void CG_FillRect(float x, float y, float width, float height,
                  const float *color);
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color);
-void PutPixel(float x, float y);
 void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color);
+void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
+              const vec4_t color);
+void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
+                  bool fill, const vec4_t color,
+                  const vec4_t fillColor = nullptr);
 float AngleToScreenX(float angle, float fov);
 range_t AnglesToRange(float start, float end, float yaw, float fov);
 void CG_HorizontalPercentBar(float x, float y, float width, float height,
@@ -2922,6 +2931,8 @@ int CG_CalculateReinfTime(qboolean menu);
 float CG_CalculateReinfTime_Float(qboolean menu);
 void CG_Fade(int r, int g, int b, int a, int time, int duration);
 int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo);
+
+void CG_DrawMortarReticle();
 
 //
 // cg_player.c
@@ -4143,6 +4154,7 @@ void addLoopingSound(const vec3_t origin, const vec3_t velocity,
                      sfxHandle_t sfx, int volume, int soundTime);
 bool hideMeCheck(int entityNum);
 int checkExtraTrace(int value);
+int weapnumForClient();
 void onPlayerRespawn(qboolean revived);
 void runFrameEnd();
 playerState_t *getValidPlayerState();

@@ -7762,6 +7762,27 @@ void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy) {
   mouseMenuBuffer[0] = modff(mouseMenuBuffer[0], mdx);
   mouseMenuBuffer[1] = modff(mouseMenuBuffer[1], mdy);
 }
+
+// this is kinda terrible, but it ensures simple-ish expansion
+// if we ever add more shader-based crosshairs
+qhandle_t shaderForCrosshair(const int crosshairNum, const bool isAltShader) {
+  qhandle_t shader;
+
+  // default crosshairs (0-9)
+  if (crosshairNum >= 0 && crosshairNum < 10) {
+    if (isAltShader) {
+      shader = trap_R_RegisterShaderNoMip(
+          va("gfx/2d/crosshair%c_alt", 'a' + crosshairNum));
+    } else {
+      shader = trap_R_RegisterShaderNoMip(
+          va("gfx/2d/crosshair%c", 'a' + crosshairNum));
+    }
+  } else { // this should change if more shader-based crosshairs are added
+    shader = trap_R_RegisterShaderNoMip("white");
+  }
+
+  return shader;
+}
 } // namespace ETJump
 
 // FIXME:

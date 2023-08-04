@@ -1066,7 +1066,7 @@ void CG_DrawAutoMap(void) {
     return;
   }
 
-  if (cg.zoomedScope || cg.zoomedBinoc) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(ETJump::weapnumForClient())) {
     return;
   }
 
