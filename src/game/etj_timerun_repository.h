@@ -31,10 +31,9 @@
 #include "etj_synchronization_context.h"
 #include "etj_timerun_models.h"
 #include "etj_time_utilities.h"
+#include "etj_database_v2.h"
 
 namespace ETJump {
-class DatabaseV2;
-
 class TimerunRepository {
 public:
   explicit TimerunRepository(std::unique_ptr<DatabaseV2> database,
@@ -64,11 +63,13 @@ public:
                                              const std::string &run) const;
   void editSeason(const Timerun::EditSeasonParams &params);
   std::vector<std::string> getMapsForName(const std::string &map, bool exact);
+  std::vector<Timerun::Record> getRecords();
   std::vector<Timerun::Record> getRecords(
       const Timerun::PrintRecordsParams &params);
   std::vector<Timerun::Season> getSeasonsForName(
       const std::string &name, bool exact);
   opt<Timerun::Record> getRecord(const std::string & map, const std::string & run, int rank);
+  std::vector<Timerun::Season> getSeasons();
 
 private:
   void tryToMigrateRecords();

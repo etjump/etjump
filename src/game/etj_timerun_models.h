@@ -79,5 +79,13 @@ struct PrintRecordsParams {
   int pageSize{};
   int userId{};
 };
+
+struct PrintRankingsParams {
+  int clientNum{};
+  int userId{};
+  opt<std::string> season;
+  int page{};
+  int pageSize{};
+};
 }
 }

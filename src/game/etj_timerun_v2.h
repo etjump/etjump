@@ -45,8 +45,7 @@ public:
   TimerunV2(std::string currentMap,
             std::unique_ptr<TimerunRepository> repository,
             std::unique_ptr<Log> logger,
-            std::unique_ptr<SynchronizationContext>
-            synchronizationContext);
+            std::unique_ptr<SynchronizationContext> synchronizationContext);
 
   struct Player {
     Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
@@ -68,12 +67,27 @@ public:
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
-        overriddenCheckpoints{};
+    overriddenCheckpoints{};
 
     const Timerun::Record *getRecord(int seasonId,
                                      const std::string &runName) const;
   };
 
+  struct Ranking {
+    Ranking(int rank, int userId, const std::string &name, double score)
+      : rank(rank),
+        userId(userId),
+        name(name),
+        score(score) {
+    }
+
+    int rank;
+    int userId;
+    std::string name;
+    double score;
+  };
+
+  void computeRanks();
   void initialize();
   void shutdown();
   void runFrame();
@@ -89,18 +103,24 @@ public:
   void interrupt(int clientNum);
   void connectNotify(int clientNum);
   void printRecords(Timerun::PrintRecordsParams params);
-  void loadCheckpoints(int clientNum, const std::string& mapName, const std::string & runName, int rank);
+  void loadCheckpoints(int clientNum, const std::string &mapName,
+                       const std::string &runName, int rank);
+  void printRankings(const Timerun::PrintRankingsParams &params);
+  void printSeasons(int clientNum);
 
 private:
   void startNotify(Player *player);
   bool isDebugging(int clientNum);
   void checkRecord(Player *player);
-  std::array<int, MAX_TIMERUN_CHECKPOINTS> toCheckpointsArray(const std::vector<int> *vector);
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> toCheckpointsArray(
+      const std::vector<int> *vector);
   /**
    * We can have multiple seasons running at once. This will
    * figure out which one is the most relevant for the user
    */
   const Timerun::Season *getMostRelevantSeason();
+  static std::string getRankingsStringFor(const std::vector<Ranking> *vector,
+                                   const Timerun::PrintRankingsParams &params);
 
   std::string _currentMap;
   std::unique_ptr<TimerunRepository> _repository;
@@ -110,5 +130,6 @@ private:
   std::vector<int> _activeSeasonsIds;
   std::vector<Timerun::Season> _activeSeasons;
   const Timerun::Season *_mostRelevantSeason;
+  std::map<int, std::vector<Ranking>> _rankingsPerSeason;
 };
 }

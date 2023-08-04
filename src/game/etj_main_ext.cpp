@@ -111,15 +111,6 @@ void OnGameInit() {
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
   game.motd = std::make_shared<Motd>();
   game.tokens = std::make_shared<Tokens>();
-  game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
-      level.rawmapname,
-      std::make_unique<ETJump::TimerunRepository>(
-          std::make_unique<ETJump::DatabaseV2>(
-              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
-          std::make_unique<ETJump::DatabaseV2>(
-              "timerunv1", GetPath(g_timerunsDatabase.string))),
-      std::make_unique<ETJump::Log>("timerunv2"),
-      std::make_unique<ETJump::SynchronizationContext>());
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -142,6 +133,16 @@ void OnGameInit() {
                   g_userConfig.string);
     }
   }
+
+  game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
+      level.rawmapname,
+      std::make_unique<ETJump::TimerunRepository>(
+          std::make_unique<ETJump::DatabaseV2>(
+              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
+          std::make_unique<ETJump::DatabaseV2>(
+              "timerunv1", GetPath(g_timerunsDatabase.string))),
+      std::make_unique<ETJump::Log>("timerunv2"),
+      std::make_unique<ETJump::SynchronizationContext>());
 
   game.mapStatistics->initialize(std::string(g_mapDatabase.string),
                                  level.rawmapname);

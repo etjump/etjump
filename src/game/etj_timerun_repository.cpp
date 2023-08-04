@@ -286,7 +286,7 @@ ETJump::TimerunRepository::getTopRecord(int seasonId,
 }
 
 std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getTopRecords(
-    const std::vector<int>& seasonIds, const std::string &map,
+    const std::vector<int> &seasonIds, const std::string &map,
     const std::string &run) const {
   auto seasonIdsPlaceholder = DatabaseV2::createPlaceholderString(seasonIds);
 
@@ -429,6 +429,25 @@ std::vector<std::string> ETJump::TimerunRepository::getMapsForName(
       << mapSearchString >>
       [&maps](std::string map) { maps.push_back(map); };
   return maps;
+}
+
+std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords() {
+  auto binder = _database->sql << R"(
+    select
+      season_id,
+      map,
+      run,
+      user_id,
+      time,
+      checkpoints,
+      record_date,
+      player_name,
+      metadata
+    from record
+    order by season_id, map, run, time;
+  )";
+
+  return getRecordsFromQuery(binder);
 }
 
 std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
@@ -600,6 +619,31 @@ ETJump::opt<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecord(
       };
 
   return record;
+}
+
+std::vector<ETJump::Timerun::Season> ETJump::TimerunRepository::getSeasons() {
+  std::vector<Timerun::Season> seasons;
+
+  _database->sql << R"(
+    select
+      id,
+      name,
+      start_time,
+      end_time
+    from season;
+  )" >>
+      [this, &seasons](int id, std::string name, std::string startTimeStr,
+                       std::string endTimeStr) {
+        auto startTime = Time::fromString(startTimeStr);
+        opt<Time> endTime;
+        if (endTimeStr.length() != 0) {
+          endTime = opt<Time>(Time::fromString(endTimeStr));
+        }
+
+        seasons.push_back(Timerun::Season{id, name, startTime, endTime});
+      };
+
+  return seasons;
 }
 
 void ETJump::TimerunRepository::tryToMigrateRecords() {

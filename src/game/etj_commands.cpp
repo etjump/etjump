@@ -33,6 +33,7 @@
 #include "etj_custom_map_votes.h"
 #include "g_local.h"
 #include "etj_map_statistics.h"
+#include "etj_numeric_utilities.h"
 #include "etj_utilities.h"
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
@@ -155,6 +156,47 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
     BufferPrint(ent, lines->at(i));
   }
   FinishBufferPrint(ent, false);
+  return true;
+}
+
+bool Rankings(gentity_t *ent, Arguments argv) {
+  auto args = ETJump::Container::skipFirstN(*argv, 1);
+
+  auto optCommand =
+      deprecated_getCommand("rankings", ClientNum(ent),
+      ETJump::CommandParser::CommandDefinition::create("rankings", "Displays the player rankings for a specific season. Uses the overall as the default.\n/rankings --season <season> --page <page> --page-size <page size>")
+          .addOption("season", "Name of the season to list rankings for", ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("page", "Which page of rankings to show", ETJump::CommandParser::OptionDefinition::Type::Integer, false)
+          .addOption("page-size", "How many rankings to show per page",ETJump::CommandParser::OptionDefinition::Type::Integer, false),
+      &args);
+
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto command = optCommand.value();
+
+  auto optSeason = command.getOptional("season");
+  auto optPage = command.getOptional("page");
+  auto optPageSize = command.getOptional("page-size");
+
+  ETJump::opt<std::string> season = optSeason.hasValue() ? ETJump::StringUtil::toLowerCase(optSeason.value().text) : ETJump::opt<std::string>();
+  auto page = optPage.hasValue() ? optPage.value().integer - 1 : 0;
+  auto pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
+
+  pageSize = Numeric::clamp(pageSize, 1, 100);
+
+  auto userId = ETJump::session->GetId(ent);
+
+  ETJump::Timerun::PrintRankingsParams params{ClientNum(ent), userId, season, page,
+                                              pageSize};
+
+  game.timerunV2->printRankings(params);
+  return true;
+}
+
+bool ListSeasons(gentity_t *ent, Arguments argv) {
+  game.timerunV2->printSeasons(ClientNum(ent));
   return true;
 }
 
@@ -2013,9 +2055,9 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
 
   auto name = command.options.at("name").text;
   auto start = command.options.at("start-date").date;
-  auto end = command.options.count("end-date-inclusive") > 0
+  auto end = command.options.count("end-date-exclusive") > 0
                ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(
-                   command.options.at("end-date-inclusive").date))
+                   command.options.at("end-date-exclusive").date))
                : ETJump::opt<ETJump::Time>();
 
   if (end.hasValue()) {
@@ -2198,6 +2240,8 @@ Commands::Commands() {
   commands_["top"] = ClientCommands::Records;
   commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
   commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
+  commands_["rankings"] = ClientCommands::Rankings;
+  commands_["seasons"] = ClientCommands::ListSeasons;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {

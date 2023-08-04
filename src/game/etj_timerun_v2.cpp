@@ -30,6 +30,7 @@
 #include "etj_log.h"
 #include "etj_printer.h"
 #include "etj_synchronization_context.h"
+#include "etj_synchronization_context.h"
 #include "etj_timerun_repository.h"
 #include "etj_timerun_shared.h"
 
@@ -51,6 +52,130 @@ const ETJump::Timerun::Record *ETJump::TimerunV2::Player::getRecord(
     }
   }
   return nullptr;
+}
+
+class ComputeRanksResult : public ETJump::SynchronizationContext::ResultBase {
+public:
+  explicit ComputeRanksResult(
+      const std::map<int, std::vector<ETJump::TimerunV2::Ranking>> &rankings)
+    : rankings(rankings) {
+  }
+
+  std::map<int, std::vector<ETJump::TimerunV2::Ranking>> rankings;
+};
+
+void ETJump::TimerunV2::computeRanks() {
+  _sc->postTask(
+      [this]() {
+        auto start = std::chrono::high_resolution_clock::now();
+        auto records = _repository->getRecords();
+        auto now = std::chrono::high_resolution_clock::now();
+        _logger->info("loaded all records for rankings computation in %fs",
+                      (now - start).count() / 1000.0 / 1000.0 / 1000.0);
+
+        start = now;
+
+        int seasonId = 1;
+        std::string map;
+        std::string run;
+        int rank = 1;
+        int topTime = 0;
+
+        using SeasonId = int;
+        using UserId = int;
+
+        std::map<SeasonId, std::map<UserId, double>> scores;
+        std::map<UserId, std::string> latestName{};
+        const double maxPointsPerRun = 1000.0;
+
+        for (const auto &r : records) {
+          if (scores.count(r.seasonId) == 0) {
+            scores[r.seasonId] = {};
+          }
+          if (scores[r.seasonId].count(r.userId) == 0) {
+            scores[r.seasonId][r.userId] = 0;
+          }
+          latestName[r.userId] = r.playerName;
+          if (seasonId != r.seasonId || map != r.map || run != r.run) {
+            seasonId = r.seasonId;
+            map = r.map;
+            run = r.run;
+            rank = 1;
+            topTime = r.time;
+
+            scores[r.seasonId][r.userId] += maxPointsPerRun;
+          } else {
+            if (topTime == 0 || r.time == 0) {
+              continue;
+            }
+
+            // c1 == (#1 time) / (time of the current player)
+            double c1 =
+                static_cast<double>(topTime) / static_cast<double>(r.time);
+
+            const double pctLoss2to50 = 1.0;
+            const double pctLoss51to100 = 0.5;
+            const double pctLoss101onwards = 0.25;
+
+            double c2 = 100.0 - pctLoss2to50 *
+                        std::min(static_cast<double>(rank), 50.0);
+            if (rank > 50)
+              c2 -= pctLoss51to100 *
+                  (std::min(static_cast<double>(rank), 100.0) - 50.0);
+            if (rank > 100)
+              c2 -= pctLoss101onwards * static_cast<double>(rank - 100);
+
+            c2 /= 100;
+
+            if (c2 < 0) {
+              continue;
+            }
+
+            scores[r.seasonId][r.userId] += maxPointsPerRun * c1 * c2;
+          }
+          ++rank;
+        }
+
+        std::map<SeasonId, std::vector<Ranking>> rankings;
+
+        for (const auto &season : scores) {
+          if (rankings.count(season.first) == 0) {
+            rankings[season.first] = {};
+          }
+
+          for (const auto &user : season.second) {
+            rankings[season.first].push_back(
+                Ranking(0, user.first, latestName[user.first], user.second));
+          }
+        }
+
+        for (auto &season : rankings) {
+          std::sort(begin(season.second), end(season.second),
+                    [](const auto lhs, const auto rhs) {
+                      return lhs.score > rhs.score;
+                    });
+
+          for (unsigned i = 0, len = season.second.size(); i < len; ++i) {
+            season.second[i].rank = static_cast<int>(i) + 1;
+          }
+        }
+
+        now = std::chrono::high_resolution_clock::now();
+
+        _logger->info("computed rankings in %fs",
+                      (now - start).count() / 1000.0 / 1000.0 / 1000.0);
+
+        return std::make_unique<ComputeRanksResult>(rankings);
+      },
+
+      [this](auto r) {
+        auto result = static_cast<ComputeRanksResult *>(r.get());
+
+        _rankingsPerSeason = std::move(result->rankings);
+      },
+      [this](auto e) {
+        _logger->error("failed to compute rankings: %s", e.what());
+      });
 }
 
 void ETJump::TimerunV2::initialize() {
@@ -77,12 +202,14 @@ void ETJump::TimerunV2::initialize() {
                                               s.id);
                                         }),
                          ", "));
+
   } catch (const std::exception &e) {
     Printer::LogPrintln(std::string("Unable to initialize timerun database") +
                         e.what());
   }
 
   _sc->startWorkerThreads(1);
+  computeRanks();
 }
 
 void ETJump::TimerunV2::shutdown() {
@@ -603,6 +730,157 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum,
                 runName, rank));
       }, [clientNum](auto e) {
         Printer::SendConsoleMessage(clientNum, e.what());
+      });
+}
+
+class PrintResult : public ETJump::SynchronizationContext::ResultBase {
+public:
+  explicit PrintResult(const std::string &message)
+    : message(message) {
+  }
+
+  std::string message;
+};
+
+std::string ETJump::TimerunV2::getRankingsStringFor(
+    const std::vector<Ranking> *rankings,
+    const Timerun::PrintRankingsParams &params) {
+  std::string message;
+  message += "^gRank  Player                                      Score\n";
+  for (size_t i = 0, len = rankings->size(); i < len;
+       ++i) {
+    unsigned rank = i + 1;
+    const auto *r = &(*rankings)[i];
+    auto isOnVisiblePage = rank > (params.page) * params.pageSize &&
+                           rank <= (params.page + 1) * params.pageSize;
+    auto isOwnRanking = r->userId == params.userId;
+
+    if (isOnVisiblePage) {
+      auto rankString = rankToString(i + 1);
+      auto rankStringWidth = 5 + StringUtil::countExtraPadding(rankString);
+
+      auto name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
+      auto nameStringWidth =
+          MAX_NAME_LENGTH + 1 + 5 + StringUtil::countExtraPadding(name);
+
+      std::string formatString = stringFormat("^7%%-%ds ^7%%-%ds  ^7%%.0f\n",
+                                              rankStringWidth, nameStringWidth);
+
+      message += stringFormat(formatString, rankString, name, r->score);
+    }
+
+    if (isOwnRanking && !isOnVisiblePage) {
+      auto rankString = rankToString(i + 1);
+      auto rankStringWidth = 5 + StringUtil::countExtraPadding(rankString);
+      auto name = isOwnRanking ? (r->name + " ^g(You)") : r->name;
+      auto nameStringWidth =
+          MAX_NAME_LENGTH + 1 + 5 + StringUtil::countExtraPadding(name);
+
+      std::string formatString = stringFormat("\n^7%%-%ds ^7%%-%ds  ^7%%.0f\n",
+                                              rankStringWidth, nameStringWidth);
+
+      message += stringFormat(formatString, rankString, name, r->score);
+    }
+  }
+  return message;
+}
+
+void ETJump::TimerunV2::printRankings(
+    const Timerun::PrintRankingsParams &params) {
+  _sc->postTask(
+      [this, params] {
+        std::string message;
+        if (params.season.hasValue()) {
+          auto matchingSeasons =
+              _repository->getSeasonsForName(params.season.value(), false);
+
+          if (!matchingSeasons.size()) {
+            message = stringFormat("No matching season for name `%s`",
+                                   params.season.value());
+          } else {
+            for (const auto &s : matchingSeasons) {
+              if (_rankingsPerSeason.count(s.id) == 0) {
+                message = stringFormat("No records for season `%s`", s.name);
+              } else {
+                // clang-format off
+                message =
+                    stringFormat(
+                        "^g=============================================================\n"
+                        " ^gRankings for season: ^2%s^7\n"
+                        "^g=============================================================\n",
+                        s.name);
+                // clang-format on
+                message +=
+                    this->getRankingsStringFor(&_rankingsPerSeason[s.id],
+                                               params);
+              }
+            }
+          }
+
+        } else {
+          if (_rankingsPerSeason.count(defaultSeasonId) == 0) {
+            message += "No overall records";
+          } else {
+            // clang-format off
+            message =
+                "^g=============================================================\n"
+                " ^gOverall rankings^7\n"
+                "^g=============================================================\n";
+            // clang-format on
+            message += this->getRankingsStringFor(
+                &_rankingsPerSeason[defaultSeasonId], params);
+          }
+        }
+
+        return std::make_unique<PrintResult>(message);
+      },
+      [this, params](auto r) {
+        auto result = static_cast<PrintResult *>(r.get());
+
+        Printer::SendConsoleMessage(params.clientNum, result->message);
+      },
+      [params](auto e) {
+        Printer::SendConsoleMessage(
+            params.clientNum,
+            stringFormat("Unable to print rankings: %s", e.what()));
+      });
+}
+
+void ETJump::TimerunV2::printSeasons(int clientNum) {
+  _sc->postTask(
+      [this] {
+        auto seasons = _repository->getSeasons();
+
+        // clang-format off
+        std::string message =
+            "^g=============================================================\n"
+            " ^gSeasons^7\n"
+            "^g=============================================================\n"
+            "^g Season                         From -> To\n";
+        // clang-format on
+
+        for (const auto & s : seasons) {
+          std::string formatString = stringFormat(
+              " ^2%%-%ds ^7(%%s -> %%s^7)\n",
+              30 + StringUtil::countExtraPadding(s.name));
+
+          message += stringFormat(
+              formatString, s.name, s.startTime.toDateTimeString(),
+              s.endTime.hasValue() ? s.endTime.value().toDateTimeString()
+                                   : "*");
+        }
+
+        return std::make_unique<PrintResult>(message);
+      },
+      [clientNum](auto r) {
+        auto result = static_cast<PrintResult *>(r.get());
+
+        Printer::SendConsoleMessage(clientNum, result->message);
+      },
+      [clientNum](auto e) {
+        Printer::SendConsoleMessage(
+            clientNum,
+            stringFormat("Unable to print seasons: %s", e.what()));
       });
 }
 
