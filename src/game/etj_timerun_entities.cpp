@@ -94,6 +94,12 @@ bool TargetStartTimer::canStartTimerun(gentity_t *self, gentity_t *activator,
           "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
       return false;
     }
+    if (client->noclipThisLife) {
+      Printer::SendCenterMessage(*clientNum,
+                                 "^3WARNING: ^7Timerun was not started. Noclip "
+                                 "activated this life, ^3/kill ^7required!");
+      return false;
+    }
     if (*speed > self->velocityUpperLimit) {
       Printer::SendCenterMessage(
           *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. Too "
