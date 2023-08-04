@@ -47,6 +47,8 @@ class Crosshair : public IRenderable {
 
 protected:
   typedef struct {
+    int current;
+
     vec4_t color;
     vec4_t colorAlt;
 

@@ -62,7 +62,7 @@ void Crosshair::adjustSize() {
   crosshair.f = 0.0f;
   crosshair.t = Numeric::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
 
-  if (cg_drawCrosshair.integer < 10) {
+  if (crosshair.current < 10) {
     // using abs makes sure negative scale will flip correctly
     crosshair.w = std::abs(crosshair.w);
     crosshair.h = std::abs(crosshair.h);
@@ -86,6 +86,7 @@ void Crosshair::adjustPosition() {
 }
 
 void Crosshair::beforeRender() {
+  crosshair.current = cg_drawCrosshair.integer % NUM_CROSSHAIRS;
   adjustSize();
 
   // crosshair health must be checked here instead of parseColors
@@ -105,14 +106,14 @@ void Crosshair::render() const {
     return;
   }
 
-  const qhandle_t shader = cgs.media.crosshairShader[cg_drawCrosshair.integer];
-  const qhandle_t shaderAlt = cg.crosshairShaderAlt[cg_drawCrosshair.integer];
+  const qhandle_t shader = cgs.media.crosshairShader[crosshair.current];
+  const qhandle_t shaderAlt = cg.crosshairShaderAlt[crosshair.current];
 
   // standard crosshairs (0-9)
-  if (cg_drawCrosshair.integer < 10) {
+  if (crosshair.current < 10) {
     CrosshairDrawer::drawShader(crosshair, shader);
 
-    if (cg.crosshairShaderAlt[cg_drawCrosshair.integer]) {
+    if (cg.crosshairShaderAlt[crosshair.current]) {
       CrosshairDrawer::drawShader(crosshair, shaderAlt);
     }
   } else {
@@ -132,7 +133,7 @@ void Crosshair::render() const {
       Vector4Copy(colorBlack, crosshairOutline.colorAlt);
     }
 
-    switch (static_cast<ETJumpCrosshairs>(cg_drawCrosshair.integer)) {
+    switch (static_cast<ETJumpCrosshairs>(crosshair.current)) {
       case ETJumpCrosshairs::VerticalLine:
         if (outline) {
           CrosshairDrawer::drawLineOutline(crosshairOutline, shader, flipY);
