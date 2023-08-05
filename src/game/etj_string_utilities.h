@@ -55,7 +55,7 @@ std::string trimStart(const std::string &input);
 std::string trimEnd(const std::string &input);
 std::string trim(const std::string &input);
 
-std::vector<std::string> splitString(std::string &input, char separator,
+std::vector<std::string> wrapWords(std::string &input, char separator,
                                      size_t maxLength);
 
 template <typename T>
@@ -90,5 +90,11 @@ std::vector<std::string> split(const std::string &input,
                                const std::string &delimiter);
 void replaceAll(std::string &input, const std::string &from,
                 const std::string &to);
+bool startsWith(const std::string &str, const std::string &prefix);
+bool endsWith(const std::string &str, const std::string &suffix);
+bool contains(const std::string &str, const std::string &text);
+// Counts the extra padding needed when using format specifiers like
+// %-20s with text that contains ET color codes
+unsigned countExtraPadding(const std::string &input);
 } // namespace StringUtil
 } // namespace ETJump

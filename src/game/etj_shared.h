@@ -24,6 +24,7 @@
 
 #pragma once
 #include <string>
+#include <stdexcept>
 
 namespace ETJump {
 namespace Constants {
@@ -32,4 +33,62 @@ const std::string GUID_REQUEST = "guid_request";
 const std::string AUTHENTICATE = "authenticate";
 } // namespace Authentication
 } // namespace Constants
+
+template <typename T>
+class opt {
+public:
+  opt() : _hasValue(false) {}
+
+  // we want this to be implicit
+  // e.g. opt<int> x = 5;
+  opt(T val) : _hasValue(true), _value(std::move(val)) {}
+
+  bool hasValue() const { return _hasValue; }
+
+  const T &valueOr(const T& defaultValue) const {
+    if (!_hasValue) {
+      return defaultValue;
+    }
+    return _value;
+  }
+
+  T valueOr(T defaultValue) {
+    if (!_hasValue) {
+      return defaultValue;
+    }
+    return _value;
+  }
+
+  T &operator*() {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+  const T &operator*() const {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+  T &value() {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+  const T &value() const {
+    if (!_hasValue) {
+      throw std::runtime_error("Optional value is not set");
+    }
+    return _value;
+  }
+
+private:
+  bool _hasValue;
+  T _value;
+};
 } // namespace ETJump

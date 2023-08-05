@@ -1,8 +1,8 @@
-
-
 // this file holds commands that can be executed by the server console, but not
 // remote clients
 
+#include "etj_local.h"
+#include "etj_timerun_v2.h"
 #include "g_local.h"
 
 /*
@@ -612,7 +612,7 @@ void Svcmd_RevivePlayer(char *name) {
 
   if (!g_cheats.integer) {
     trap_SendServerCommand(-1, va("print \"Cheats are not enabled "
-                                  "on this server.\n\""));
+                               "on this server.\n\""));
     return;
   }
 

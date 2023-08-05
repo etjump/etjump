@@ -1472,6 +1472,9 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("times");
   trap_AddCommand("ranks");
   trap_AddCommand("top");
+  trap_AddCommand("rankings");
+  trap_AddCommand("seasons");
+  trap_AddCommand("loadcheckpoints");
 
   // XIS tjl command
   trap_AddCommand("tjl_enableline");       // display a route by it number

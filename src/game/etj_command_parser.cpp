@@ -25,114 +25,449 @@
 #include <stdexcept>
 #include "etj_command_parser.h"
 
-ETJump::CommandParser::Command
-ETJump::CommandParser::parse(CommandDefinition definition,
-                             std::vector<std::string> args) {
-  Command command;
+#include "etj_string_utilities.h"
 
-  if (definition.options.size() == 0) {
-    command.extraArgs.insert(end(command.extraArgs), begin(args), end(args));
-    return command;
+const ETJump::CommandParser::OptionDefinition *ETJump::CommandParser::
+getOptionOrNull() {
+  if (StringUtil::startsWith(*_current, "--")) {
+    const auto optionName = (*_current).substr(2);
+
+    if (_def.options.count(optionName) > 0) {
+      return &_def.options[optionName];
+    }
   }
 
-  std::string option;
-  auto optionDefinition = std::end(definition.options);
-  auto newOptionDefinition = optionDefinition;
-  auto end = std::end(definition.options);
-  Option currentOption;
+  return nullptr;
+}
 
-  /**
-   * Parse each argument from the args vector
-   * If current arg is an option and it can be found in the options
-   * definition save currently parsed option if there's any and start a
-   * new option
-   */
+void ETJump::CommandParser::expectBoolean(
+    const OptionDefinition *optionDefinition) {
+  Option option(optionDefinition->name);
 
-  for (const auto &arg : args) {
-    newOptionDefinition = end;
-    if (parseOption(arg, option)) {
-      newOptionDefinition = definition.options.find(option);
+  option.boolean = true;
+
+  _cmd.options[option.name] = option;
+}
+
+void ETJump::CommandParser::expectToken(
+    const OptionDefinition *optionDefinition) {
+  ++_current;
+
+  if (_current == end(_args)) {
+    _cmd.errors.push_back(
+        stringFormat("Missing parameter for `%s`", optionDefinition->name));
+    return;
+  }
+
+  
+
+  _cmd.options[optionDefinition->name] = createTokenOption(optionDefinition, *_current);
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createTokenOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
+  Option option(optionDefinition->name);
+  option.text = text;
+
+  return option;
+}
+
+void ETJump::CommandParser::expectMultipleTokens(
+    const OptionDefinition *optionDefinition) {
+  ++_current;
+
+  if (_current == end(_args)) {
+    _cmd.errors.push_back(
+        stringFormat("Missing parameter for `%s`", optionDefinition->name));
+    return;
+  }
+
+  Option option(optionDefinition->name);
+  std::vector<std::string> tokens{};
+
+  while (_current != end(_args) && getOptionOrNull() == nullptr) {
+    tokens.push_back(*_current);
+    ++_current;
+  }
+
+  if (_current != end(_args)) {
+    // we peeked the next one and we want the parser to continue from
+    // it instead of the one after that
+    --_current;
+  }
+
+  if (tokens.size() == 0) {
+    _cmd.errors.push_back(
+        stringFormat("Missing parameter for `%s`", optionDefinition->name));
+    return;
+  }
+
+  option.text = StringUtil::join(tokens, " ");
+
+  _cmd.options[optionDefinition->name] = std::move(option);
+}
+
+void ETJump::CommandParser::expectInteger(
+    const OptionDefinition *optionDefinition) {
+  ++_current;
+
+  if (_current == end(_args)) {
+    _cmd.errors.push_back(
+        stringFormat("Missing parameter for `%s`", optionDefinition->name));
+    return;
+  }
+
+  _cmd.options[optionDefinition->name] = createIntegerOption(optionDefinition, *_current);
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createIntegerOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
+  Option option(optionDefinition->name);
+  option.text = text;
+
+  try {
+    option.integer = std::stoi(text);
+  } catch (const std::invalid_argument &) {
+    _cmd.errors.push_back(stringFormat(
+        "`%s` is not an integer. Expected an integer for parameter `%s`", text,
+        option.name));
+  } catch (const std::out_of_range &) {
+    _cmd.errors.push_back(stringFormat(
+        "`%s` is out of range. Expected an integer for parameter `%s`", text,
+        option.name));
+  }
+
+  return option;
+}
+
+void ETJump::CommandParser::expectDecimal(
+    const OptionDefinition *optionDefinition) {
+  ++_current;
+
+  if (_current == end(_args)) {
+    _cmd.errors.push_back(
+        stringFormat("Missing parameter for `%s`", optionDefinition->name));
+    return;
+  }
+
+  _cmd.options[optionDefinition->name] = std::move(
+      createDecimalOption(optionDefinition, *_current));
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createDecimalOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
+  Option option(optionDefinition->name);
+  option.text = text;
+
+  try {
+    option.decimal = std::stod(text);
+  } catch (const std::invalid_argument &) {
+    _cmd.errors.push_back(stringFormat(
+        "`%s` is not a decimal. Expected a decimal for parameter `%s`", text,
+        option.name));
+  } catch (const std::out_of_range &) {
+    _cmd.errors.push_back(stringFormat(
+        "`%s` is out of range. Expected a decimal for parameter `%s`", text,
+        option.name));
+  }
+
+  return option;
+}
+
+void ETJump::CommandParser::
+expectDate(const OptionDefinition *optionDefinition) {
+  ++_current;
+
+  if (_current == end(_args)) {
+    _cmd.errors.push_back(
+        stringFormat("Missing parameter for `%s`", optionDefinition->name));
+    return;
+  }
+
+  _cmd.options[optionDefinition->name] = createDateOption(
+      optionDefinition, *_current);
+}
+
+ETJump::CommandParser::Option ETJump::CommandParser::createDateOption(
+    const OptionDefinition *optionDefinition, const std::string &text) {
+  Option option(optionDefinition->name);
+  option.text = text;
+
+  try {
+    option.date = Date::fromString(text);
+  } catch (const std::invalid_argument &) {
+    _cmd.errors.push_back(stringFormat(
+        "`%s` does not match the expected format of `YYYY-MM-DD`", text));
+  }
+
+  return option;
+}
+
+void ETJump::CommandParser::expectOption() {
+  if (*_current == "--help") {
+    _cmd.helpRequested = true;
+    return;
+  }
+  auto optionOrNull = getOptionOrNull();
+  if (optionOrNull) {
+    switch (optionOrNull->type) {
+      case OptionDefinition::Type::Boolean:
+        expectBoolean(optionOrNull);
+        break;
+      case OptionDefinition::Type::Token:
+        expectToken(optionOrNull);
+        break;
+      case OptionDefinition::Type::MultiToken:
+        expectMultipleTokens(optionOrNull);
+        break;
+      case OptionDefinition::Type::Integer:
+        expectInteger(optionOrNull);
+        break;
+      case OptionDefinition::Type::Decimal:
+        expectDecimal(optionOrNull);
+        break;
+      case OptionDefinition::Type::Date:
+        expectDate(optionOrNull);
+        break;
+    }
+  } else {
+    expectExtraArg();
+  }
+}
+
+void ETJump::CommandParser::expectExtraArg() {
+  _cmd.extraArgs.push_back(*_current);
+}
+
+void ETJump::CommandParser::expectOptionOrExtraArgs() {
+  if (_current == end(_args)) {
+    return;
+  }
+
+  if (StringUtil::startsWith(*_current, "-")) {
+    expectOption();
+  } else {
+    expectExtraArg();
+  }
+}
+
+void ETJump::CommandParser::processPositionalArguments() {
+  for (const auto &optDef : _def.options) {
+    if (optDef.second.position.hasValue()) {
+      if (_cmd.options.count(optDef.second.name) > 0) {
+        continue;
+      }
+      auto pos = optDef.second.position.value();
+
+      if (_cmd.extraArgs.size() >= static_cast<unsigned>(pos) + 1) {
+        switch (optDef.second.type) {
+          case OptionDefinition::Type::Boolean:
+            continue;
+          case OptionDefinition::Type::Token:
+            _cmd.options[optDef.second.name] =
+                createTokenOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+          case OptionDefinition::Type::MultiToken:
+            continue;
+          case OptionDefinition::Type::Integer:
+            _cmd.options[optDef.second.name] =
+                createIntegerOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+          case OptionDefinition::Type::Decimal:
+            _cmd.options[optDef.second.name] =
+                createDecimalOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+          case OptionDefinition::Type::Date:
+            _cmd.options[optDef.second.name] =
+                createDateOption(&optDef.second, _cmd.extraArgs[pos]);
+            break;
+        }
+        
+      }
+    }
+  }
+}
+
+void ETJump::CommandParser::validateCommand() {
+  for (const auto &option : _def.options) {
+    if (option.second.required && _cmd.options.count(option.first) == 0) {
+      _cmd.errors.push_back(stringFormat(
+          "Required option `%s` was not specified.", option.first));
+    }
+  }
+}
+
+ETJump::CommandParser::Command
+ETJump::CommandParser::parse() {
+  try {
+    if (_def.options.size() == 0) {
+      _cmd.extraArgs.insert(end(_cmd.extraArgs), begin(_args), end(_args));
+      return _cmd;
     }
 
-    if (optionDefinition == end && newOptionDefinition == end) {
-      command.extraArgs.push_back(arg);
-      continue;
-    }
+    _current = begin(_args);
 
-    if (newOptionDefinition == end) {
-      switch (optionDefinition->second.type) {
-        case OptionDefinition::Type::Boolean:
-          throw std::runtime_error("Trying to add args for "
-                                   "OptionDefinition::Type::"
-                                   "Boolean.");
-          // Single token
-        case OptionDefinition::Type::Token:
-        case OptionDefinition::Type::Integer:
-        case OptionDefinition::Type::Decimal:
-        case OptionDefinition::Type::Date:
-        case OptionDefinition::Type::Duration:
-          currentOption.name = optionDefinition->second.name;
-          currentOption.text = arg;
-          optionDefinition = end;
-          command.options[currentOption.name] = currentOption;
-          break;
-          // Multi token
-        case OptionDefinition::Type::MultiToken:
-          currentOption.name = optionDefinition->second.name;
-          currentOption.text +=
-              currentOption.text.length() > 0 ? " " + arg : arg;
-          break;
-        default:
-          throw std::runtime_error(
-              "Unknown option type: `" +
-              std::to_string(static_cast<int>(optionDefinition->second.type)) +
-              "`");
+    while (_current != end(_args)) {
+      expectOptionOrExtraArgs();
+
+      // option parser might increment the iterator
+      if (_current == end(_args)) {
+        break;
       }
 
-      continue;
+      ++_current;
     }
 
-    if (optionDefinition != end) {
-      command.options[currentOption.name] = currentOption;
-    }
+    processPositionalArguments();
 
-    // special case for boolean
-    if (newOptionDefinition->second.type == OptionDefinition::Type::Boolean) {
-      command.options[newOptionDefinition->second.name].boolean = true;
-      command.options[newOptionDefinition->second.name].name =
-          newOptionDefinition->second.name;
-    } else {
-      optionDefinition = newOptionDefinition;
-      currentOption = Option{};
-      currentOption.name = newOptionDefinition->second.name;
-    }
+    validateCommand();
+
+    return _cmd;
+  } catch (const std::runtime_error &e) {
+    _cmd.errors.push_back(
+        stringFormat("Unknown runtime error: `%s`", e.what()));
+    return _cmd;
   }
 
-  if (optionDefinition != end) {
-    command.options[currentOption.name] = currentOption;
-  }
+  //std::string option;
+  //auto optionDefinition = std::end(definition.options);
+  //auto newOptionDefinition = optionDefinition;
+  //auto end = std::end(definition.options);
+  //Option currentOption;
 
-  for (const auto &opt : definition.options) {
-    if (opt.second.required &&
-        command.options.find(opt.first) == std::end(command.options)) {
-      throw std::runtime_error("Required option `" + opt.first +
-                               "` was not specified.");
-    }
-  }
+  ///**
+  // * Parse each argument from the args vector
+  // * If current arg is an option and it can be found in the options
+  // * definition save currently parsed option if there's any and start a
+  // * new option
+  // */
 
-  return command;
+  //for (const auto &arg : args) {
+  //  newOptionDefinition = end;
+  //  if (parseOption(arg, option)) {
+  //    newOptionDefinition = definition.options.find(option);
+  //  }
+
+  //  if (optionDefinition == end && newOptionDefinition == end) {
+  //    command.extraArgs.push_back(arg);
+  //    continue;
+  //  }
+
+  //  if (newOptionDefinition == end) {
+  //    switch (optionDefinition->second.type) {
+  //      case OptionDefinition::Type::Boolean:
+  //        throw std::runtime_error("Trying to add args for "
+  //            "OptionDefinition::Type::"
+  //            "Boolean.");
+  //      // Single token
+  //      case OptionDefinition::Type::Token:
+  //      case OptionDefinition::Type::Integer:
+  //      case OptionDefinition::Type::Decimal:
+  //      case OptionDefinition::Type::Date:
+  //      case OptionDefinition::Type::Duration:
+  //        currentOption.name = optionDefinition->second.name;
+  //        currentOption.text = arg;
+
+  //        command.options[currentOption.name] = currentOption;
+  //        break;
+  //      // Multi token
+  //      case OptionDefinition::Type::MultiToken:
+  //        currentOption.name = optionDefinition->second.name;
+  //        currentOption.text +=
+  //            currentOption.text.length() > 0 ? " " + arg : arg;
+  //        break;
+  //      default:
+  //        throw std::runtime_error(
+  //            "Unknown option type: `" +
+  //            std::to_string(static_cast<int>(optionDefinition->second.type)) +
+  //            "`");
+  //    }
+
+  //    if (optionDefinition->second.type == OptionDefinition::Type::Integer) {
+  //      try {
+  //        currentOption.integer = std::stoi(currentOption.text);
+  //      } catch (const std::invalid_argument &) {
+  //        command.errors.push_back(
+  //            stringFormat("`%s` is not an integer (parameter for `%s`).",
+  //                         currentOption.text, currentOption.name));
+  //      } catch (const std::out_of_range &) {
+  //        command.errors.push_back(
+  //            stringFormat(
+  //                "`%s` is out of range for integer (parameter for `%s`).",
+  //                currentOption.text, currentOption.name));
+  //      }
+  //    } else if (optionDefinition->second.type ==
+  //               OptionDefinition::Type::Decimal) {
+  //      try {
+  //        currentOption.decimal = std::stod(currentOption.text);
+  //      } catch (const std::invalid_argument &) {
+  //        command.errors.push_back(
+  //            stringFormat("`%s` is not a double (parameter for `%s`).",
+  //                         currentOption.text, currentOption.name));
+  //      } catch (const std::out_of_range &) {
+  //        command.errors.push_back(stringFormat(
+  //            "`%s` is out of range for a double (parameter for `%s`).",
+  //            currentOption.text, currentOption.name));
+  //      }
+  //    } else if (optionDefinition->second.type == OptionDefinition::Type::Date) {
+  //      try {
+  //        currentOption.date =
+  //            Time::fromString(currentOption.text, "%Y-%m-%d").date;
+  //      } catch (const std::runtime_error& e) {
+  //        command.errors.push_back(
+  //            stringFormat("`%s` is not a valid date (parameter for `%s`): %s.",
+  //                         currentOption.text, currentOption.name, e.what()));
+  //      }
+  //    }
+
+  //    if (optionDefinition->second.type != OptionDefinition::Type::MultiToken) {
+  //      optionDefinition = end;
+  //    }
+
+  //    continue;
+  //  }
+
+  //  if (optionDefinition != end) {
+  //    command.options[currentOption.name] = currentOption;
+  //  }
+
+  //  // special case for boolean
+  //  if (newOptionDefinition->second.type == OptionDefinition::Type::Boolean) {
+  //    command.options[newOptionDefinition->second.name].boolean = true;
+  //    command.options[newOptionDefinition->second.name].name =
+  //        newOptionDefinition->second.name;
+  //  } else {
+  //    optionDefinition = newOptionDefinition;
+  //    currentOption = Option{};
+  //    currentOption.name = newOptionDefinition->second.name;
+  //  }
+  //}
+
+  //if (optionDefinition != end) {
+  //  command.options[currentOption.name] = currentOption;
+  //}
+
+  //for (const auto &opt : definition.options) {
+  //  if (opt.second.required &&
+  //      command.options.find(opt.first) == std::end(command.options)) {
+  //    command.errors.push_back("Required option `" + opt.first +
+  //                             "` was not specified.");
+  //  }
+  //}
+
+  //return command;
 }
 
-bool ETJump::CommandParser::parseOption(const std::string &arg,
-                                        std::string &option) {
-  if (arg.length() <= 2) {
-    return false;
-  }
-
-  if (arg[0] != '-' || arg[1] != '-') {
-    return false;
-  }
-
-  option = arg.substr(2);
-  return true;
-}
+//bool ETJump::CommandParser::parseOption(const std::string &arg,
+//                                        std::string &option) {
+//  if (arg.length() <= 2) {
+//    return false;
+//  }
+//
+//  if (arg[0] != '-' || arg[1] != '-') {
+//    return false;
+//  }
+//
+//  option = arg.substr(2);
+//  return true;
+//}

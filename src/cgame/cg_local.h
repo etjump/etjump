@@ -2514,6 +2514,14 @@ extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 extern vmCvar_t etj_runTimerInactiveColor;
 
+extern vmCvar_t etj_drawCheckpoints;
+extern vmCvar_t etj_checkpointsX;
+extern vmCvar_t etj_checkpointsY;
+extern vmCvar_t etj_checkpointsSize;
+extern vmCvar_t etj_checkpointsShadow;
+extern vmCvar_t etj_checkpointsStyle;
+extern vmCvar_t etj_checkpointsCount;
+
 extern vmCvar_t etj_drawMessageTime;
 
 extern vmCvar_t movie_changeFovBasedOnSpeed;

@@ -26,10 +26,10 @@
         Any player related events, excluding spectated players or other players.
         Currently added:
         *	respawn ( revived: "1" or "0")
-        *	timerun:start ( runname, starttime, recordtime )
-        *	timerun:stop ( runname, completiontime )
-        *	timerun:record ( runname, completiontime )
-        *	timerun:completion ( runname, compiletiontime )
+        *	timerun:start ( clientNum, runname, starttime, recordtime )
+        *	timerun:stop ( clientNum, runname, completionTime )
+        *	timerun:record ( clientNum, runname, completionTime )
+        *	timerun:completion ( clientNum, runname, completionTime )
         *	load
         add more as needed
 */

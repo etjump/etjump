@@ -23,21 +23,69 @@
  */
 
 #pragma once
-#include "etj_command_parser.h"
-#include <functional>
+#include <map>
+#include <string>
+
+#include "etj_synchronization_context.h"
+#include "etj_time_utilities.h"
 
 namespace ETJump {
-class CommandSystem {
-public:
-  CommandSystem();
-  ~CommandSystem();
-
-  int subscribe(const std::string &command,
-                const CommandParser::CommandDefinition &commandDefinition,
-                std::function<void(const CommandParser::Command &)> callback);
-  void unsubscribe(int handle);
-
-private:
-  CommandParser _parser;
+namespace Timerun {
+struct Season {
+  int id;
+  std::string name;
+  Time startTime;
+  opt<Time> endTime;
 };
-} // namespace ETJump
+
+struct Record {
+  int seasonId;
+  std::string map;
+  std::string run;
+  int userId;
+  int time;
+  std::vector<int> checkpoints;
+  Time recordDate;
+  std::string playerName;
+  std::map<std::string, std::string> metadata;
+
+  bool isSameRunAs(const Record *otherRecord) const {
+    return this->seasonId == otherRecord->seasonId &&
+           this->map == otherRecord->map && this->run == otherRecord->run;
+  }
+};
+
+struct AddSeasonParams {
+  int clientNum;
+  std::string name;
+  Time startTime;
+  opt<Time> endTime;
+};
+
+struct EditSeasonParams {
+  int clientNum;
+  std::string name;
+  opt<Time> startTime;
+  opt<Time> endTime;
+};
+
+struct PrintRecordsParams {
+  int clientNum{};
+  opt<std::string> season;
+  std::string map;
+  bool exactMap{};
+  opt<std::string> run;
+  int page{};
+  int pageSize{};
+  int userId{};
+};
+
+struct PrintRankingsParams {
+  int clientNum{};
+  int userId{};
+  opt<std::string> season;
+  int page{};
+  int pageSize{};
+};
+}
+}

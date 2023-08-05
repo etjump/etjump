@@ -51,7 +51,7 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnSeparator
     std::string input = "Lorem ipsum \ndolor sit amet, \nconsectetur \nadipisicing elit. \nTenetur, fuga!";
     std::vector<std::string> expectedSplits { 
     	"Lorem ipsum \ndolor sit amet, \n", "consectetur \nadipisicing elit. \n", "Tenetur, fuga!" };
-	auto splits = splitString(input, '\n', 40);
+	auto splits = wrapWords(input, '\n', 40);
    	EXPECT_EQ(splits.size(), expectedSplits.size());
    	for (int i = 0; i < static_cast<int>(splits.size()); i++) 
 	{
@@ -64,7 +64,7 @@ TEST_F(StringUtilitiesTests, splitString_ShouldEffectivelySplitStringOnMaxWidthE
     std::string input = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, fuga!";
     std::vector<std::string> expectedSplits { 
 		"Lorem ipsum dolor sit amet, consectetur ", "adipisicing elit. Tenetur, fuga!"};
-	auto splits = splitString(input, '\n', 40);
+	auto splits = wrapWords(input, '\n', 40);
    	EXPECT_EQ(splits.size(), expectedSplits.size());
    	for (int i = 0; i < static_cast<int>(splits.size()); i++) 
 	{
@@ -98,4 +98,11 @@ TEST_F(StringUtilitiesTests, join_ShouldConcatenateStringChunksIntoOneDelimitedP
     std::vector<std::string> input = { "hello world", "hello world" };
     auto fixedString = StringUtil::join(input, ", ");
     EXPECT_EQ(fixedString, "hello world, hello world");
+}
+
+TEST_F(StringUtilitiesTests, countExtraPadding_ShouldWorkCorrectly) {
+    EXPECT_EQ(StringUtil::countExtraPadding("123"), 0);
+    EXPECT_EQ(StringUtil::countExtraPadding("^1123"), 2);
+    EXPECT_EQ(StringUtil::countExtraPadding("^^1123"), 2);
+    EXPECT_EQ(StringUtil::countExtraPadding("^1t^2e^3s^4t"), 8);
 }
