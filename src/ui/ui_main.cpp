@@ -64,6 +64,8 @@ static const char *netnames[] = {"???", "UDP", "IPX", NULL};
 static int gamecodetoui[] = {4, 2, 3, 0, 5, 1, 6};
 static int uitogamecode[] = {4, 6, 2, 3, 1, 5, 7};
 
+static int ui_serverFilterType = 0;
+
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
 static void UI_StopServerRefresh(void);
@@ -2315,14 +2317,12 @@ static void UI_DrawMissionBriefingObjectives(rectDef_t *rect, float scale,
 
 static void UI_DrawNetFilter(rectDef_t *rect, float scale, vec4_t color,
                              int textStyle) {
-  if (ui_serverFilterType.integer < 0 ||
-      ui_serverFilterType.integer >= numServerFilters) {
-    ui_serverFilterType.integer = 0;
+  if (ui_serverFilterType < 0 || ui_serverFilterType >= numServerFilters) {
+    ui_serverFilterType = 0;
   }
-  Text_Paint(
-      rect->x, rect->y, scale, color,
-      va("Filter: %s", serverFilters[ui_serverFilterType.integer].description),
-      0, 0, textStyle);
+  Text_Paint(rect->x, rect->y, scale, color,
+             va("Filter: %s", serverFilters[ui_serverFilterType].description),
+             0, 0, textStyle);
 }
 
 static void UI_NextOpponent() {
@@ -2477,12 +2477,10 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
       s = uiInfo.gameTypes[ui_gameType.integer].gameType;
       break;
     case UI_NETFILTER:
-      if (ui_serverFilterType.integer < 0 ||
-          ui_serverFilterType.integer >= numServerFilters) {
-        ui_serverFilterType.integer = 0;
+      if (ui_serverFilterType < 0 || ui_serverFilterType >= numServerFilters) {
+        ui_serverFilterType = 0;
       }
-      s = va("Filter: %s",
-             serverFilters[ui_serverFilterType.integer].description);
+      s = va("Filter: %s", serverFilters[ui_serverFilterType].description);
       break;
     case UI_KEYBINDSTATUS:
       if (Display_KeyBindPending()) {
@@ -3401,15 +3399,15 @@ static qboolean UI_NetFilter_HandleKey(int flags, float *special, int key) {
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
     if (key == K_MOUSE2) {
-      ui_serverFilterType.integer--;
+      ui_serverFilterType--;
     } else {
-      ui_serverFilterType.integer++;
+      ui_serverFilterType++;
     }
 
-    if (ui_serverFilterType.integer >= numServerFilters) {
-      ui_serverFilterType.integer = 0;
-    } else if (ui_serverFilterType.integer < 0) {
-      ui_serverFilterType.integer = numServerFilters - 1;
+    if (ui_serverFilterType >= numServerFilters) {
+      ui_serverFilterType = 0;
+    } else if (ui_serverFilterType < 0) {
+      ui_serverFilterType = numServerFilters - 1;
     }
     UI_BuildServerDisplayList(qtrue);
     return qtrue;
@@ -8828,7 +8826,6 @@ vmCvar_t ui_clipboardName; // the name of the group for the current clipboard
 vmCvar_t ui_notebookCurrentPage; //----(SA)	added
 
 // NERVE - SMF - cvars for multiplayer
-vmCvar_t ui_serverFilterType;
 vmCvar_t ui_currentNetMap;
 vmCvar_t ui_currentMap;
 vmCvar_t ui_mapIndex;
