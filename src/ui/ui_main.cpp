@@ -1483,8 +1483,12 @@ void UI_Load() {
 // ui_gameType assumes gametype 0 is -1 ALL and will not show
 static void UI_DrawGameType(rectDef_t *rect, float scale, vec4_t color,
                             int textStyle) {
-  Text_Paint(rect->x, rect->y, scale, color,
-             uiInfo.gameTypes[ui_gameType.integer].gameType, 0, 0, textStyle);
+  Text_Paint(
+      rect->x, rect->y, scale, color,
+      uiInfo
+          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+          .gameType,
+      0, 0, textStyle);
 }
 
 static int UI_TeamIndexFromName(const char *name) {
@@ -1539,7 +1543,10 @@ void UI_DrawMapPreview(rectDef_t *rect, float scale, vec4_t color,
                        qboolean net) {
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
   int game = net ? ui_netGameType.integer
-                 : uiInfo.gameTypes[ui_gameType.integer].gtEnum;
+                 : uiInfo
+                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                 MAX_GAMETYPES - 1)]
+                       .gtEnum;
 
   if (game == GT_WOLF_CAMPAIGN) {
     if (map < 0 || map > uiInfo.campaignCount) {
@@ -1709,7 +1716,8 @@ ui_currentMap.integer > uiInfo.mapCount) { ui_currentMap.integer = 0;
     }
 
     time =
-uiInfo.mapList[ui_currentMap.integer].timeToBeat[uiInfo.gameTypes[ui_gameType.integer].gtEnum];
+uiInfo.mapList[ui_currentMap.integer].timeToBeat[uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
+0, MAX_GAMETYPES-1)].gtEnum];
 
     minutes = time / 60;
     seconds = time % 60;
@@ -1723,7 +1731,10 @@ static void UI_DrawMapCinematic(rectDef_t *rect, float scale, vec4_t color,
 
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
   int game = net ? ui_netGameType.integer
-                 : uiInfo.gameTypes[ui_gameType.integer].gtEnum;
+                 : uiInfo
+                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                 MAX_GAMETYPES - 1)]
+                       .gtEnum;
 
   if (game == GT_WOLF_CAMPAIGN) {
     if (map < 0 || map > uiInfo.campaignCount) {
@@ -2474,7 +2485,10 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
 
   switch (ownerDraw) {
     case UI_GAMETYPE:
-      s = uiInfo.gameTypes[ui_gameType.integer].gameType;
+      s = uiInfo
+              .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                        MAX_GAMETYPES - 1)]
+              .gameType;
       break;
     case UI_NETFILTER:
       if (ui_serverFilterType.integer < 0 ||
@@ -3236,7 +3250,10 @@ static qboolean UI_GameType_HandleKey(int flags, float *special, int key,
 
     trap_Cvar_Set("ui_gameType", va("%d", ui_gameType.integer));
     UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-                      uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+                      uiInfo
+                          .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                    MAX_GAMETYPES - 1)]
+                          .gtEnum);
     if (resetMap && oldCount != UI_MapCountByGameType(qtrue)) {
       trap_Cvar_Set("ui_currentMap", "0");
       Menu_SetFeederSelection(nullptr, FEEDER_MAPS, 0, nullptr);
@@ -4300,7 +4317,8 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "loadGameInfo") == 0) {
       UI_ParseGameInfo("gameinfo.txt");
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       return;
     }
     if (Q_stricmp(name, "resetScores") == 0) {
@@ -4325,7 +4343,10 @@ void UI_RunMenuScript(const char **args) {
         trap_Cmd_ExecuteText(
             EXEC_APPEND,
             va("demo %s_%i", uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-               uiInfo.gameTypes[ui_gameType.integer].gtEnum));
+               uiInfo
+                   .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                             MAX_GAMETYPES - 1)]
+                   .gtEnum));
       }
       return;
     }
@@ -5713,7 +5734,10 @@ UI_MapCountByGameType
 static int UI_MapCountByGameType(qboolean singlePlayer) {
   int i, c, game;
   c = 0;
-  game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+  game = singlePlayer ? uiInfo
+                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                      MAX_GAMETYPES - 1)]
+                            .gtEnum
                       : ui_netGameType.integer;
 
   if (game == GT_WOLF_CAMPAIGN) {
@@ -5774,8 +5798,9 @@ UI_CampaignCount
 static int UI_CampaignCount(qboolean singlePlayer) {
   int i, c /*, game*/;
   c = 0;
-  // game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
-  // : uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
+  // game = singlePlayer ? uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
+  // 0, MAX_GAMETYPES-1)].gtEnum :
+  // uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
     if (singlePlayer &&
@@ -6577,7 +6602,10 @@ static const char *UI_SelectedMap(qboolean singlePlayer, int index,
                                   int *actual) {
   int i, c, game;
   c = 0;
-  game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+  game = singlePlayer ? uiInfo
+                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                      MAX_GAMETYPES - 1)]
+                            .gtEnum
                       : ui_netGameType.integer;
   *actual = 0;
 
@@ -6969,7 +6997,10 @@ static qhandle_t UI_FeederItemImage(float feederID, int index) {
     UI_SelectedMap(feederID == FEEDER_MAPS ? qtrue : qfalse, index, &actual);
     index = actual;
     game = feederID == FEEDER_MAPS
-               ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+               ? uiInfo
+                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                               MAX_GAMETYPES - 1)]
+                     .gtEnum
                : ui_netGameType.integer;
     if (game == GT_WOLF_CAMPAIGN) {
       if (index >= 0 && index < uiInfo.campaignCount) {
@@ -7032,7 +7063,10 @@ void UI_FeederSelection(float feederID, int index) {
     // map  = (feederID == FEEDER_ALLMAPS) ?
     // ui_currentNetMap.integer : ui_currentMap.integer;
     game = feederID == FEEDER_MAPS
-               ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+               ? uiInfo
+                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                               MAX_GAMETYPES - 1)]
+                     .gtEnum
                : ui_netGameType.integer;
     /*if( game == GT_WOLF_CAMPAIGN ) {
         if (uiInfo.campaignList[map].campaignCinematic >= 0) {
@@ -7076,7 +7110,8 @@ void UI_FeederSelection(float feederID, int index) {
       // 0, 0, 0, 0,
       //(CIN_loop | CIN_silent) );
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       //			trap_Cvar_Set("ui_opponentModel",
       // uiInfo.mapList[ui_currentMap.integer].opponentName);
       // updateOpponentModel = qtrue;
@@ -7123,7 +7158,8 @@ void UI_FeederSelection(float feederID, int index) {
       // uiInfo.campaignList[ui_currentCampaign.integer].campaignShortName),
       // 0, 0, 0, 0, (CIN_loop | CIN_silent) );
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentCampaign.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       //			trap_Cvar_Set("ui_opponentModel",
       // uiInfo.mapList[ui_currentMap.integer].opponentName);
       // updateOpponentModel = qtrue;
@@ -8000,8 +8036,11 @@ void _UI_Init(int legacyClient, int clientVersion) {
   Menus_CloseAll();
 
   trap_LAN_LoadCachedServers();
-  UI_LoadBestScores(uiInfo.mapList[0].mapLoadName,
-                    uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+  UI_LoadBestScores(
+      uiInfo.mapList[0].mapLoadName,
+      uiInfo
+          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+          .gtEnum);
 
   // sets defaults for ui temp cvars
   // rain - bounds check array index, although I'm pretty sure this
