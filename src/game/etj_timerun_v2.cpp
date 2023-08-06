@@ -262,7 +262,7 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
             "not work. Try to reconnect or file a bug report at "
             "github.com/etjump/etjump.");
         Printer::SendConsoleMessage(clientNum,
-                                    stringFormat("cause: %s", error.what()));
+                                    stringFormat("cause: %s\n", error.what()));
       });
 }
 
@@ -526,7 +526,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
 
         if (result->records.size() == 0) {
           Printer::SendConsoleMessage(params.clientNum,
-                                      "No records available.");
+                                      "No records available.\n");
           return;
         }
 
@@ -675,9 +675,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
         Printer::SendConsoleMessage(params.clientNum, message);
       },
       [this, params](const std::runtime_error &e) {
-        Printer::SendConsoleMessage(
-            params.clientNum,
-            e.what());
+        Printer::SendConsoleMessage(params.clientNum, e.what() + std::string("\n"));
       });
 }
 
@@ -734,7 +732,7 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum,
               "^7You need to restart the run for the changes to take effect.\n");
         }
       }, [clientNum](auto e) {
-        Printer::SendConsoleMessage(clientNum, e.what());
+        Printer::SendConsoleMessage(clientNum, e.what() + std::string("\n"));
       });
 }
 
@@ -847,7 +845,7 @@ void ETJump::TimerunV2::printRankings(
       [params](auto e) {
         Printer::SendConsoleMessage(
             params.clientNum,
-            stringFormat("Unable to print rankings: %s", e.what()));
+            stringFormat("Unable to print rankings: %s\n", e.what()));
       });
 }
 
@@ -885,7 +883,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
       [clientNum](auto e) {
         Printer::SendConsoleMessage(
             clientNum,
-            stringFormat("Unable to print seasons: %s", e.what()));
+            stringFormat("Unable to print seasons: %s\n", e.what()));
       });
 }
 
