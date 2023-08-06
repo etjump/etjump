@@ -728,6 +728,12 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum,
             stringFormat(
                 "^7Loaded checkpoints for run ^3`%s`^7 from rank ^3`%d`^7 record.\n",
                 runName, rank));
+
+        if (_players[clientNum]->running) {
+          Printer::SendConsoleMessage(
+              clientNum,
+              "^7You need to restart the run for the changes to take effect.\n");
+        }
       }, [clientNum](auto e) {
         Printer::SendConsoleMessage(clientNum, e.what());
       });
