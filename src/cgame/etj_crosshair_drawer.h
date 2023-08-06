@@ -22,4 +22,28 @@
  * SOFTWARE.
  */
 
-#include "etj_container_utils.h"
+#pragma once
+
+#include "etj_crosshair.h"
+
+namespace ETJump {
+class CrosshairDrawer : public Crosshair {
+public:
+  static void drawShader(const crosshair_t &crosshair, qhandle_t shader);
+  static void drawLine(const crosshair_t &crosshair, qhandle_t shader,
+                       bool flipY);
+  static void drawLineOutline(crosshair_t &crosshair, qhandle_t shader,
+                              bool flipY);
+  static void drawCross(const crosshair_t &crosshair, qhandle_t shader);
+  static void drawCrossOutline(crosshair_t &crosshair, qhandle_t shader);
+  static void drawDiagCross(const crosshair_t &crosshair);
+  static void drawV(const crosshair_t &crosshair);
+  static void drawTriangle(const crosshair_t &crosshair, bool fill);
+  static void drawT(const crosshair_t &crosshair, qhandle_t shader, bool flipX,
+                    bool flipY);
+  static void drawTOutline(crosshair_t &crosshair, qhandle_t shader, bool flipX,
+                           bool flipY);
+  static void drawTwoLines(const crosshair_t &crosshair, qhandle_t shader);
+  static void drawTwoLinesOutline(crosshair_t &crosshair, qhandle_t shader);
+};
+} // namespace ETJump

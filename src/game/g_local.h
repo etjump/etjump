@@ -254,6 +254,9 @@ struct TokenInformation_s {
 };
 typedef struct TokenInformation_s TokenInformation;
 
+constexpr int MAX_TIMERUNS = 20;
+constexpr int MAX_TIMERUN_NAME_LENGTH = 64;
+
 //====================================================================
 
 #define MAX_NETNAME 36
@@ -573,6 +576,8 @@ struct gentity_s {
   int portalTeam;
 
   int runIndex;
+  char runName[MAX_TIMERUN_NAME_LENGTH];
+  int checkpointIndex;
 
   float velocityLowerLimit;
   float velocityUpperLimit;
@@ -998,6 +1003,7 @@ struct gclient_s {
   clientSession_t sess;
 
   qboolean noclip;
+  bool noclipThisLife;
 
   int lastCmdTime; // level.time of last usercmd_t, for EF_CONNECTION
                    // we can't just use pers.lastCommand.time, because
@@ -1425,7 +1431,9 @@ typedef struct {
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
+  bool hasCheckpoints;
   int saveLoadRestrictions;
+  int checkpointsCount[MAX_TIMERUNS];
 } level_locals_t;
 
 typedef struct {
@@ -2922,8 +2930,6 @@ enum class TimerunSpawnflags {
 };
 }
 
-void StartTimer(const char *runName, gentity_t *ent);
-void StopTimer(const char *runName, gentity_t *ent);
 void TimerunConnectNotify(gentity_t *ent);
 
 void InterruptRun(gentity_t *ent);

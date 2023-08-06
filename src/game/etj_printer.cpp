@@ -27,6 +27,18 @@
 
 #include "g_local.h"
 
+void Printer::PrintLn(std::string message) {
+  std::string partialMessage ;
+  while (message.length() > 1000) {
+    partialMessage = message.substr(0, 1000);
+    message = message.substr(1000);
+    G_Printf("%s\n", partialMessage.c_str());
+  }
+  if (message.length() > 0) {
+    G_Printf(message.c_str());
+  }
+}
+
 void Printer::LogPrint(std::string message) {
   std::string partialMessage;
   while (message.length() > 1000) {
@@ -44,7 +56,7 @@ void Printer::LogPrintln(const std::string &message) {
 }
 
 void Printer::SendConsoleMessage(int clientNum, std::string message) {
-  auto splits = ETJump::splitString(message, '\n', BYTES_PER_PACKET);
+  auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
   for (auto &split : splits) {
     if (clientNum == CONSOLE_CLIENT_NUMBER) {
       G_Printf("%s", split.c_str());
@@ -71,7 +83,7 @@ void Printer::SendPopupMessage(int clientNum, const std::string &message) {
 }
 
 void Printer::BroadcastConsoleMessage(std::string message) {
-  auto splits = ETJump::splitString(message, '\n', BYTES_PER_PACKET);
+  auto splits = ETJump::wrapWords(message, '\n', BYTES_PER_PACKET);
   for (auto &split : splits) {
     trap_SendServerCommand(-1, va("print \"%s\"", split.c_str()));
     G_Printf("%s", split.c_str());

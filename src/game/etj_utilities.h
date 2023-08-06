@@ -25,6 +25,8 @@
 #ifndef ETJUMP_UTILITIES_H
 #define ETJUMP_UTILITIES_H
 
+#include <algorithm>
+#include <iterator>
 #include <vector>
 #include "etj_levels.h"
 
@@ -102,5 +104,8 @@ std::string timestampToString(int timestamp,
 
 void RemovePlayerWeapons(int clientNum);
 } // namespace Utilities
+
+namespace ETJump {
+} // namespace ETJump
 
 #endif // ETJUMP_UTILITIES_H

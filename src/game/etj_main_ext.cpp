@@ -32,11 +32,12 @@
 #include "etj_custom_map_votes.h"
 #include "etj_utilities.h"
 #include "etj_motd.h"
-#include "etj_timerun.h"
 #include "etj_map_statistics.h"
 #include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_string_utilities.h"
+#include "etj_timerun_repository.h"
+#include "etj_timerun_v2.h"
 
 Game game;
 
@@ -54,7 +55,7 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
         clientNum, ETJump::Constants::Authentication::GUID_REQUEST.c_str());
   } else {
     ETJump::session->ReadSessionData(clientNum);
-    game.timerun->clientConnect(clientNum, ETJump::session->GetId(clientNum));
+    game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
   }
 
   if (ETJump::session->IsIpBanned(clientNum)) {
@@ -69,12 +70,15 @@ void OnClientBegin(gentity_t *ent) {
     game.motd->PrintMotd(ent);
     ent->client->sess.motdPrinted = qtrue;
   }
+  ETJump::Log::processMessages();
 }
 
 void OnClientDisconnect(gentity_t *ent) {
   G_DPrintf("OnClientDisconnect called by %d\n", ClientNum(ent));
 
   ETJump::session->OnClientDisconnect(ClientNum(ent));
+  ETJump::Log::processMessages();
+  game.timerunV2->clientDisconnect(ClientNum(ent));
 }
 
 void WriteSessionData() {
@@ -93,7 +97,11 @@ void ChangeMap() {
   trap_SendConsoleCommand(EXEC_APPEND, va("map %s\n", map.c_str()));
 }
 
-void RunFrame(int levelTime) { game.mapStatistics->runFrame(levelTime); }
+void RunFrame(int levelTime) {
+  game.mapStatistics->runFrame(levelTime);
+  game.timerunV2->runFrame();
+  ETJump::Log::processMessages();
+}
 
 void OnGameInit() {
   game.levels = std::make_shared<Levels>();
@@ -102,7 +110,6 @@ void OnGameInit() {
   game.customMapVotes =
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
   game.motd = std::make_shared<Motd>();
-  game.timerun = std::make_shared<Timerun>();
   game.tokens = std::make_shared<Tokens>();
 
   if (strlen(g_levelConfig.string)) {
@@ -127,11 +134,21 @@ void OnGameInit() {
     }
   }
 
+  game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
+      level.rawmapname,
+      std::make_unique<ETJump::TimerunRepository>(
+          std::make_unique<ETJump::DatabaseV2>(
+              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
+          std::make_unique<ETJump::DatabaseV2>(
+              "timerunv1", GetPath(g_timerunsDatabase.string))),
+      std::make_unique<ETJump::Log>("timerunv2"),
+      std::make_unique<ETJump::SynchronizationContext>());
+
   game.mapStatistics->initialize(std::string(g_mapDatabase.string),
                                  level.rawmapname);
   game.customMapVotes->Load();
   game.motd->Initialize();
-  game.timerun->init(GetPath(g_timerunsDatabase.string), level.rawmapname);
+  game.timerunV2->initialize();
 
   if (g_tokensMode.integer) {
     // Utilities::WriteFile handles the correct path
@@ -140,6 +157,7 @@ void OnGameInit() {
                 std::string(level.rawmapname) + ".json";
     game.tokens->loadTokens(path);
   }
+  ETJump::Log::processMessages();
 }
 
 void OnGameShutdown() {
@@ -156,14 +174,18 @@ void OnGameShutdown() {
   if (game.tokens != nullptr) {
     game.tokens->reset();
   }
+  if (game.timerunV2) {
+    game.timerunV2->shutdown();
+  }
 
   game.levels = nullptr;
   game.commands = nullptr;
   game.customMapVotes = nullptr;
   game.motd = nullptr;
-  game.timerun = nullptr;
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
+  game.timerunV2 = nullptr;
+  ETJump::Log::processMessages();
 }
 
 qboolean OnConnectedClientCommand(gentity_t *ent) {
@@ -198,7 +220,8 @@ qboolean OnClientCommand(gentity_t *ent) {
 
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
     ETJump::session->GuidReceived(ent);
-    game.timerun->clientConnect(ClientNum(ent), ETJump::session->GetId(ent));
+    game.timerunV2->clientConnect(ClientNum(ent),
+                                  ETJump::session->GetId(ClientNum(ent)));
     return qtrue;
   }
 
@@ -346,22 +369,16 @@ void LogServerState() {
   LogPrint(state);
 }
 
-void StartTimer(const char *runName, gentity_t *ent) {
-  game.timerun->startTimer(runName, ClientNum(ent), ent->client->pers.netname,
-                           ent->client->ps.commandTime);
-}
-void StopTimer(const char *runName, gentity_t *ent) {
-  game.timerun->stopTimer(ClientNum(ent), ent->client->ps.commandTime, runName);
-}
 void TimerunConnectNotify(gentity_t *ent) {
-  game.timerun->connectNotify(ClientNum(ent));
+  game.timerunV2->connectNotify(ClientNum(ent));
 }
+
 void InterruptRun(gentity_t *ent) {
   if (!ent) {
     return;
   }
 
-  game.timerun->interrupt(ClientNum(ent));
+  game.timerunV2->interrupt(ClientNum(ent));
 }
 
 void G_increaseCallvoteCount(const char *mapName) {

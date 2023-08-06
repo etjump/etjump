@@ -23,13 +23,32 @@
  */
 
 #pragma once
+#include <array>
+#include <map>
+#include <set>
+
+#include "etj_log.h"
 
 namespace ETJump {
 class TimerunEntity {
+private:
+  static Log logger;
+  static std::map<std::string, int> runIndices;
+  static std::set<std::string> cleanNames;
+  static std::set<std::string> names;
+
 protected:
-  static void setTimerunIndex(gentity_t *self);
+                  static void setTimerunIndex(gentity_t *self);
   static bool canActivate(gentity_t *activator);
+  static int getOrSetTimerunIndex(const std::string &runName);
+
+public:
+  static void validateTimerunEntities();
 };
+
+/**
+ * TargetStartTimer
+ */
 class TargetStartTimer : public TimerunEntity {
 private:
   static void use(gentity_t *self, gentity_t *activator);
@@ -39,7 +58,22 @@ private:
 public:
   static void spawn(gentity_t *self);
 };
+
+/**
+ * TargetStopTimer
+ */
 class TargetStopTimer : public TimerunEntity {
+private:
+  static void use(gentity_t *self, gentity_t *activator);
+
+public:
+  static void spawn(gentity_t *self);
+};
+
+/**
+ * TargetCheckpoint
+ */
+class TargetCheckpoint : public TimerunEntity {
 private:
   static void use(gentity_t *self, gentity_t *activator);
 

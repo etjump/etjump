@@ -1,6 +1,7 @@
 // cg_view.c -- setup all the parameters (position, angle, etc)
 // for a 3D rendering
 #include "cg_local.h"
+#include "../game/etj_numeric_utilities.h"
 
 //========================
 extern pmove_t cg_pmove;
@@ -242,8 +243,8 @@ static void CG_OffsetFreeCamView(void) {
   if (etj_demo_lookat.integer != -1) {
     centity_t *temp;
     vec3_t dir;
-
-    temp = &cg_entities[etj_demo_lookat.integer];
+    int entNum = Numeric::clamp(etj_demo_lookat.integer, 0, MAX_GENTITIES - 1);
+    temp = &cg_entities[entNum];
     VectorSubtract(temp->lerpOrigin, cgs.demoCam.camOrigin, dir);
 
     vectoangles(dir, cg.refdefViewAngles);
@@ -1881,7 +1882,7 @@ qboolean CG_CullPointAndRadius(const vec3_t pt, vec_t radius) {
 
 extern void CG_SetupDlightstyles(void);
 
-//#define DEBUGTIME_ENABLED
+// #define DEBUGTIME_ENABLED
 #ifdef DEBUGTIME_ENABLED
   #define DEBUGTIME                                                            \
     elapsed = (trap_Milliseconds() - dbgTime);                                 \
@@ -1894,7 +1895,7 @@ extern void CG_SetupDlightstyles(void);
 #endif
 
 #ifdef _DEBUG
-  //#define FAKELAG
+  // #define FAKELAG
   #ifdef FAKELAG
 extern int snapshotDelayTime;
   #endif // FAKELAG

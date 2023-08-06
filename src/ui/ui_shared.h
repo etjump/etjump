@@ -16,7 +16,7 @@
 #define MAX_MENUDEFFILE 4096
 #define MAX_MENUFILE 32768
 #define MAX_MENUS 128
-//#define MAX_MENUITEMS 256
+// #define MAX_MENUITEMS 256
 #define MAX_MENUITEMS 128 // JPW NERVE q3ta was 96
 #define MAX_COLOR_RANGES 10
 #define MAX_MODAL_MENUS 16
@@ -105,7 +105,7 @@
 #define SLIDER_HEIGHT 10.0 // 16.0
 #define SLIDER_THUMB_WIDTH 12.0
 #define SLIDER_THUMB_HEIGHT 12.0 // 20.0
-#define NUM_CROSSHAIRS 10
+#define NUM_CROSSHAIRS 17
 
 typedef struct scriptDef_s {
   const char *command;
@@ -547,6 +547,7 @@ qboolean PC_Char_Parse(int handle, char *out); // NERVE - SMF
 namespace ETJump {
 bool PC_hasFloat(int handle);
 void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy);
+qhandle_t shaderForCrosshair(int crosshairNum, bool isAltShader);
 } // namespace ETJump
 
 int Menu_Count();

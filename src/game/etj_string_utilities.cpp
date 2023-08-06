@@ -145,7 +145,7 @@ std::string ETJump::trim(const std::string &input) {
 }
 
 // word-wrapper
-std::vector<std::string> ETJump::splitString(std::string &input, char separator,
+std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
                                              size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
@@ -259,4 +259,30 @@ void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
     input.replace(startPost, from.length(), to);
     startPost += to.length();
   }
+}
+
+bool ETJump::StringUtil::startsWith(const std::string &str,
+    const std::string &prefix) {
+  if (prefix.length() > str.length())
+    return false;
+
+  return str.compare(0, prefix.length(), prefix) == 0;
+}
+
+bool ETJump::StringUtil::endsWith(const std::string &str,
+                                  const std::string &suffix) {
+  if (suffix.length() > str.length())
+    return false;
+
+  return str.compare(str.length() - suffix.length(), suffix.length(), suffix) ==
+         0;
+}
+
+bool ETJump::StringUtil::contains(const std::string &str,
+    const std::string &text) {
+  return str.find(text) != std::string::npos;
+}
+
+unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
+  return input.length() - sanitize(input).length();
 }

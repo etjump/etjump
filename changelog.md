@@ -76,12 +76,22 @@
   * `etj_spectatorInfoY` is now calculated from top-left rather than bottom-left of first name on the list, so value + will no longer hide the first player off screen
     * Default was changed from 40 -> 30
 * added `entitylist` to console autocompletion and improved it's output [#954](https://github.com/etjump/etjump/pull/954)
-* CGaz 2 is now correctly centered on crosshair instead of being slightly shifted to left [#966](https://github.com/etjump/etjump/pull/966)
+* CGaz 2 is now correctly centered on crosshair instead of being slightly shifted to left [#966](https://github.com/etjump/etjump/pull/966) [#999](https://github.com/etjump/etjump/pull/999)
 * fixed players not drowning consistently when using `pmove_fixed 1` and `com_maxfps > 125` [#984](https://github.com/etjump/etjump/pull/984)
 * `cg_runroll` and `cg_runpitch` default values are now 0 [#987](https://github.com/etjump/etjump/pull/987)
 * added `nodrop` worldspawn key to globally enable nodrop in the map [#986](https://github.com/etjump/etjump/pull/986)
   * when enabled, items will only drop to ground inside `CONTENTS_NODROP` brushes
 * added a warning when starting server a on ET: Legacy or ETe without vanilla patch collision [#967](https://github.com/etjump/etjump/pull/967)
+* quadrupled the number of supported maps on a server by the mod, should be roughly 2000 maps now [#990](https://github.com/etjump/etjump/pull/990)
+* fixed certain indicators being inaccurate during playback at the cost of slower update rate, most notably OB detector [#992](https://github.com/etjump/etjump/pull/992)
+* added missing `say_buddy` and `enc_say*` commands to tab completion and removed some invalid commands [#994](https://github.com/etjump/etjump/pull/994)
+* added 7 new crosshairs drawn as vector graphics [#993](https://github.com/etjump/etjump/pull/993)
+  * `etj_crosshairScaleX/Y` to scale on x/y (also works for old crosshairs, range -5-5)
+  * `etj_crosshairThickness` to set line thickness (range 0-5)
+  * `etj_crosshairOutline` toggles drawing outline with the new crosshairs
+* improved output of `listinfo` command [#996](https://github.com/etjump/etjump/pull/996)
+* fixed `tracker_not_eq` key on tracker entities working as an OR statement instead of AND - targets will now fire only if ALL specified values do not match [#997](https://github.com/etjump/etjump/pull/997)
+* timeruns no longer start if a client has used `noclip` after respawning [#998](https://github.com/etjump/etjump/pull/998)
 
 # ETJump 2.5.1
 

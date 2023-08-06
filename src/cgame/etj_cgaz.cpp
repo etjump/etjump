@@ -250,8 +250,8 @@ void CGaz::render() const {
   // Dzikie Weze's 2D-CGaz
   if (etj_drawCGaz.integer == 2) {
     const usercmd_t cmd = pm->cmd;
-    float scx = SCREEN_CENTER_X;
-    float scy = SCREEN_CENTER_Y;
+    float scx = SCREEN_CENTER_X - 0.5f; // -0.5 since thickness is 1px
+    float scy = SCREEN_CENTER_Y - 0.5f;
 
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(false);
@@ -417,7 +417,7 @@ bool CGaz::canSkipDraw() const {
     return true;
   }
 
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(weapnumForClient())) {
     return true;
   }
 

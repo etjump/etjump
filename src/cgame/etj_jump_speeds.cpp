@@ -217,10 +217,6 @@ bool JumpSpeeds::canSkipDraw() const {
     return true;
   }
 
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
-    return true;
-  }
-
   if (showingScores()) {
     return true;
   }

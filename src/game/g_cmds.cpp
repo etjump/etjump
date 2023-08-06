@@ -1143,21 +1143,10 @@ void Cmd_Noclip_f(gentity_t *ent) {
     ent->client->noclip = !ent->client->noclip ? qtrue : qfalse;
   }
 
-  // ETJump: we don't need noclip messages
-  // const char *message;
-
   if (ent->client->noclip) {
-    // message = "noclip ON\n";
+    ent->client->noclipThisLife = true;
     ETJump::decreaseNoclipCount(ent, "noclip");
   }
-  /*
-  else
-  {
-          message = "noclip OFF\n";
-  }
-
-  trap_SendServerCommand(ent - g_entities, va("print \"%s\"", message));
-  */
 }
 
 /*

@@ -64,6 +64,8 @@ static const char *netnames[] = {"???", "UDP", "IPX", NULL};
 static int gamecodetoui[] = {4, 2, 3, 0, 5, 1, 6};
 static int uitogamecode[] = {4, 6, 2, 3, 1, 5, 7};
 
+static int ui_serverFilterType = 0;
+
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
 static void UI_StopServerRefresh(void);
@@ -363,19 +365,10 @@ void AssetCache() {
 
   for (n = 0; n < NUM_CROSSHAIRS; n++) {
     uiInfo.uiDC.Assets.crosshairShader[n] =
-        trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c", 'a' + n));
+        ETJump::shaderForCrosshair(n, false);
     uiInfo.uiDC.Assets.crosshairAltShader[n] =
-        trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n));
+        ETJump::shaderForCrosshair(n, true);
   }
-
-  // uiInfo.newHighScoreSound =
-  // trap_S_RegisterSound("sound/feedback/voc_newhighscore.wav");
-
-  /*	for ( n = 1; weaponTypes[n].shadername; n++ ) {
-          if ( weaponTypes[n].shadername )
-              trap_R_RegisterShaderNoMip( weaponTypes[n].shadername );
-      }*/
-  // -NERVE - SMF
 }
 
 void _UI_DrawSides(float x, float y, float w, float h, float size) {
@@ -1492,8 +1485,12 @@ void UI_Load() {
 // ui_gameType assumes gametype 0 is -1 ALL and will not show
 static void UI_DrawGameType(rectDef_t *rect, float scale, vec4_t color,
                             int textStyle) {
-  Text_Paint(rect->x, rect->y, scale, color,
-             uiInfo.gameTypes[ui_gameType.integer].gameType, 0, 0, textStyle);
+  Text_Paint(
+      rect->x, rect->y, scale, color,
+      uiInfo
+          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+          .gameType,
+      0, 0, textStyle);
 }
 
 static int UI_TeamIndexFromName(const char *name) {
@@ -1548,7 +1545,10 @@ void UI_DrawMapPreview(rectDef_t *rect, float scale, vec4_t color,
                        qboolean net) {
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
   int game = net ? ui_netGameType.integer
-                 : uiInfo.gameTypes[ui_gameType.integer].gtEnum;
+                 : uiInfo
+                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                 MAX_GAMETYPES - 1)]
+                       .gtEnum;
 
   if (game == GT_WOLF_CAMPAIGN) {
     if (map < 0 || map > uiInfo.campaignCount) {
@@ -1718,7 +1718,8 @@ ui_currentMap.integer > uiInfo.mapCount) { ui_currentMap.integer = 0;
     }
 
     time =
-uiInfo.mapList[ui_currentMap.integer].timeToBeat[uiInfo.gameTypes[ui_gameType.integer].gtEnum];
+uiInfo.mapList[ui_currentMap.integer].timeToBeat[uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
+0, MAX_GAMETYPES-1)].gtEnum];
 
     minutes = time / 60;
     seconds = time % 60;
@@ -1732,7 +1733,10 @@ static void UI_DrawMapCinematic(rectDef_t *rect, float scale, vec4_t color,
 
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
   int game = net ? ui_netGameType.integer
-                 : uiInfo.gameTypes[ui_gameType.integer].gtEnum;
+                 : uiInfo
+                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                 MAX_GAMETYPES - 1)]
+                       .gtEnum;
 
   if (game == GT_WOLF_CAMPAIGN) {
     if (map < 0 || map > uiInfo.campaignCount) {
@@ -2324,14 +2328,12 @@ static void UI_DrawMissionBriefingObjectives(rectDef_t *rect, float scale,
 
 static void UI_DrawNetFilter(rectDef_t *rect, float scale, vec4_t color,
                              int textStyle) {
-  if (ui_serverFilterType.integer < 0 ||
-      ui_serverFilterType.integer >= numServerFilters) {
-    ui_serverFilterType.integer = 0;
+  if (ui_serverFilterType < 0 || ui_serverFilterType >= numServerFilters) {
+    ui_serverFilterType = 0;
   }
-  Text_Paint(
-      rect->x, rect->y, scale, color,
-      va("Filter: %s", serverFilters[ui_serverFilterType.integer].description),
-      0, 0, textStyle);
+  Text_Paint(rect->x, rect->y, scale, color,
+             va("Filter: %s", serverFilters[ui_serverFilterType].description),
+             0, 0, textStyle);
 }
 
 static void UI_NextOpponent() {
@@ -2483,15 +2485,16 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
 
   switch (ownerDraw) {
     case UI_GAMETYPE:
-      s = uiInfo.gameTypes[ui_gameType.integer].gameType;
+      s = uiInfo
+              .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                        MAX_GAMETYPES - 1)]
+              .gameType;
       break;
     case UI_NETFILTER:
-      if (ui_serverFilterType.integer < 0 ||
-          ui_serverFilterType.integer >= numServerFilters) {
-        ui_serverFilterType.integer = 0;
+      if (ui_serverFilterType < 0 || ui_serverFilterType >= numServerFilters) {
+        ui_serverFilterType = 0;
       }
-      s = va("Filter: %s",
-             serverFilters[ui_serverFilterType.integer].description);
+      s = va("Filter: %s", serverFilters[ui_serverFilterType].description);
       break;
     case UI_KEYBINDSTATUS:
       if (Display_KeyBindPending()) {
@@ -2533,7 +2536,7 @@ static void UI_DrawRedBlue(rectDef_t *rect, float scale, vec4_t color,
 }
 
 static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
-  float size = cg_crosshairSize.integer;
+  float size = cg_crosshairSize.value;
 
   // Make sure currentCrosshair is updated if crosshair is changed via
   // console
@@ -2549,23 +2552,36 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
 
   vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
 
-  ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
-  crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
-  trap_R_SetColor(crosshairColor);
-  UI_DrawHandlePic(rect->x + (rect->w - size) / 2,
-                   rect->y + (rect->h - size) / 2, size, size,
-                   uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
+  if (uiInfo.currentCrosshair < 10) {
+    ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+    crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+    trap_R_SetColor(crosshairColor);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
+        size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
 
-  vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
+    vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
-  ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
-  crosshairColorAlt[3] = Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
-  trap_R_SetColor(crosshairColorAlt);
-  UI_DrawHandlePic(
-      rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
-      size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+    ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+    crosshairColorAlt[3] =
+        Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+    trap_R_SetColor(crosshairColorAlt);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
+        size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+  } else {
+    const auto text = va("Crosshair %d", uiInfo.currentCrosshair);
+    const auto width = static_cast<float>(
+        Text_Width_Ext(text, 0.12f, 0, &uiInfo.loadscreenfont1));
+    const auto height = static_cast<float>(
+        Text_Height_Ext(text, 0.12f, 0, &uiInfo.loadscreenfont1));
+    Text_Paint_Ext(rect->x + (rect->w - width) * 0.5f,
+                   rect->y + (rect->h + height) * 0.5f, 0.12f, 0.12f,
+                   colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                   &uiInfo.loadscreenfont1);
+  }
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
 }
 
 /*
@@ -3232,7 +3248,10 @@ static qboolean UI_GameType_HandleKey(int flags, float *special, int key,
 
     trap_Cvar_Set("ui_gameType", va("%d", ui_gameType.integer));
     UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-                      uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+                      uiInfo
+                          .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                    MAX_GAMETYPES - 1)]
+                          .gtEnum);
     if (resetMap && oldCount != UI_MapCountByGameType(qtrue)) {
       trap_Cvar_Set("ui_currentMap", "0");
       Menu_SetFeederSelection(nullptr, FEEDER_MAPS, 0, nullptr);
@@ -3397,15 +3416,15 @@ static qboolean UI_NetFilter_HandleKey(int flags, float *special, int key) {
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
     if (key == K_MOUSE2) {
-      ui_serverFilterType.integer--;
+      ui_serverFilterType--;
     } else {
-      ui_serverFilterType.integer++;
+      ui_serverFilterType++;
     }
 
-    if (ui_serverFilterType.integer >= numServerFilters) {
-      ui_serverFilterType.integer = 0;
-    } else if (ui_serverFilterType.integer < 0) {
-      ui_serverFilterType.integer = numServerFilters - 1;
+    if (ui_serverFilterType >= numServerFilters) {
+      ui_serverFilterType = 0;
+    } else if (ui_serverFilterType < 0) {
+      ui_serverFilterType = numServerFilters - 1;
     }
     UI_BuildServerDisplayList(qtrue);
     return qtrue;
@@ -4296,7 +4315,8 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "loadGameInfo") == 0) {
       UI_ParseGameInfo("gameinfo.txt");
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       return;
     }
     if (Q_stricmp(name, "resetScores") == 0) {
@@ -4321,7 +4341,10 @@ void UI_RunMenuScript(const char **args) {
         trap_Cmd_ExecuteText(
             EXEC_APPEND,
             va("demo %s_%i", uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-               uiInfo.gameTypes[ui_gameType.integer].gtEnum));
+               uiInfo
+                   .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                             MAX_GAMETYPES - 1)]
+                   .gtEnum));
       }
       return;
     }
@@ -5709,7 +5732,10 @@ UI_MapCountByGameType
 static int UI_MapCountByGameType(qboolean singlePlayer) {
   int i, c, game;
   c = 0;
-  game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+  game = singlePlayer ? uiInfo
+                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                      MAX_GAMETYPES - 1)]
+                            .gtEnum
                       : ui_netGameType.integer;
 
   if (game == GT_WOLF_CAMPAIGN) {
@@ -5770,8 +5796,9 @@ UI_CampaignCount
 static int UI_CampaignCount(qboolean singlePlayer) {
   int i, c /*, game*/;
   c = 0;
-  // game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
-  // : uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
+  // game = singlePlayer ? uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
+  // 0, MAX_GAMETYPES-1)].gtEnum :
+  // uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
     if (singlePlayer &&
@@ -6573,7 +6600,10 @@ static const char *UI_SelectedMap(qboolean singlePlayer, int index,
                                   int *actual) {
   int i, c, game;
   c = 0;
-  game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+  game = singlePlayer ? uiInfo
+                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                      MAX_GAMETYPES - 1)]
+                            .gtEnum
                       : ui_netGameType.integer;
   *actual = 0;
 
@@ -6965,7 +6995,10 @@ static qhandle_t UI_FeederItemImage(float feederID, int index) {
     UI_SelectedMap(feederID == FEEDER_MAPS ? qtrue : qfalse, index, &actual);
     index = actual;
     game = feederID == FEEDER_MAPS
-               ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+               ? uiInfo
+                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                               MAX_GAMETYPES - 1)]
+                     .gtEnum
                : ui_netGameType.integer;
     if (game == GT_WOLF_CAMPAIGN) {
       if (index >= 0 && index < uiInfo.campaignCount) {
@@ -7028,7 +7061,10 @@ void UI_FeederSelection(float feederID, int index) {
     // map  = (feederID == FEEDER_ALLMAPS) ?
     // ui_currentNetMap.integer : ui_currentMap.integer;
     game = feederID == FEEDER_MAPS
-               ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+               ? uiInfo
+                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                               MAX_GAMETYPES - 1)]
+                     .gtEnum
                : ui_netGameType.integer;
     /*if( game == GT_WOLF_CAMPAIGN ) {
         if (uiInfo.campaignList[map].campaignCinematic >= 0) {
@@ -7072,7 +7108,8 @@ void UI_FeederSelection(float feederID, int index) {
       // 0, 0, 0, 0,
       //(CIN_loop | CIN_silent) );
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       //			trap_Cvar_Set("ui_opponentModel",
       // uiInfo.mapList[ui_currentMap.integer].opponentName);
       // updateOpponentModel = qtrue;
@@ -7119,7 +7156,8 @@ void UI_FeederSelection(float feederID, int index) {
       // uiInfo.campaignList[ui_currentCampaign.integer].campaignShortName),
       // 0, 0, 0, 0, (CIN_loop | CIN_silent) );
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentCampaign.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       //			trap_Cvar_Set("ui_opponentModel",
       // uiInfo.mapList[ui_currentMap.integer].opponentName);
       // updateOpponentModel = qtrue;
@@ -7996,8 +8034,11 @@ void _UI_Init(int legacyClient, int clientVersion) {
   Menus_CloseAll();
 
   trap_LAN_LoadCachedServers();
-  UI_LoadBestScores(uiInfo.mapList[0].mapLoadName,
-                    uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+  UI_LoadBestScores(
+      uiInfo.mapList[0].mapLoadName,
+      uiInfo
+          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+          .gtEnum);
 
   // sets defaults for ui temp cvars
   // rain - bounds check array index, although I'm pretty sure this
@@ -8824,7 +8865,6 @@ vmCvar_t ui_clipboardName; // the name of the group for the current clipboard
 vmCvar_t ui_notebookCurrentPage; //----(SA)	added
 
 // NERVE - SMF - cvars for multiplayer
-vmCvar_t ui_serverFilterType;
 vmCvar_t ui_currentNetMap;
 vmCvar_t ui_currentMap;
 vmCvar_t ui_mapIndex;

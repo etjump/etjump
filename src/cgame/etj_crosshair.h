@@ -23,21 +23,49 @@
  */
 
 #pragma once
-#include "etj_command_parser.h"
-#include <functional>
+
+#include "cg_local.h"
+#include "etj_irenderable.h"
 
 namespace ETJump {
-class CommandSystem {
+class Crosshair : public IRenderable {
+  void startListeners();
+  void parseColors();
+  void adjustSize();
+  void adjustPosition();
+  static bool canSkipDraw();
+
+  enum class ETJumpCrosshairs {
+    VerticalLine = 10,
+    Cross = 11,
+    DiagonalCross = 12,
+    V = 13,
+    Triangle = 14,
+    T = 15,
+    TwoVerticalLines = 16
+  };
+
+protected:
+  typedef struct {
+    int current;
+
+    vec4_t color;
+    vec4_t colorAlt;
+
+    float x;
+    float y;
+    float w;
+    float h;
+    float t; // crosshair thickness
+
+    float f; // cg_crosshairPulse size modifier
+  } crosshair_t;
+
+  crosshair_t crosshair{};
+
 public:
-  CommandSystem();
-  ~CommandSystem();
-
-  int subscribe(const std::string &command,
-                const CommandParser::CommandDefinition &commandDefinition,
-                std::function<void(const CommandParser::Command &)> callback);
-  void unsubscribe(int handle);
-
-private:
-  CommandParser _parser;
+  Crosshair();
+  void render() const override;
+  void beforeRender() override;
 };
 } // namespace ETJump

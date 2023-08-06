@@ -22,8 +22,44 @@
  * SOFTWARE.
  */
 
-#include "etj_command_system.h"
+#pragma once
+#include <string>
+#include <sqlite_modern_cpp.h>
 
-ETJump::CommandSystem::CommandSystem() : _parser(CommandParser()) {}
+#include "etj_container_utilities.h"
+#include "etj_string_utilities.h"
 
-ETJump::CommandSystem::~CommandSystem() {}
+namespace ETJump {
+class DatabaseV2 {
+public:
+  struct Migration {
+    std::string name;
+    std::vector<std::string> statements;
+  };
+
+  explicit DatabaseV2(const std::string &name, const std::string &fileName);
+  ~DatabaseV2();
+
+  void addMigration(const Migration &migration);
+  void addMigration(const std::string &name,
+                    const std::vector<std::string> &statements);
+
+  void applyMigrations();
+
+  template <typename T>
+  static std::string createPlaceholderString(const std::vector<T> &input) {
+    return StringUtil::join(Container::map(input, [](const auto &e) {
+      return "?";
+    }), ",");
+  }
+
+  // expose the database object directly
+  // as it provides a reasonable interface
+  // to database
+  sqlite::database sql;
+
+private:
+  std::string _name;
+  std::vector<Migration> _migrations;
+};
+}

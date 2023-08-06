@@ -436,6 +436,14 @@ vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 vmCvar_t etj_runTimerInactiveColor;
 
+vmCvar_t etj_drawCheckpoints;
+vmCvar_t etj_checkpointsX;
+vmCvar_t etj_checkpointsY;
+vmCvar_t etj_checkpointsSize;
+vmCvar_t etj_checkpointsShadow;
+vmCvar_t etj_checkpointsStyle;
+vmCvar_t etj_checkpointsCount;
+
 vmCvar_t etj_drawMessageTime;
 
 vmCvar_t movie_changeFovBasedOnSpeed;
@@ -610,6 +618,11 @@ vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
 
 vmCvar_t etj_menuSensitivity;
+
+vmCvar_t etj_crosshairScaleX;
+vmCvar_t etj_crosshairScaleY;
+vmCvar_t etj_crosshairThickness;
+vmCvar_t etj_crosshairOutline;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -937,6 +950,14 @@ cvarTable_t cvarTable[] = {
     {&etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey",
      CVAR_ARCHIVE},
 
+    {&etj_drawCheckpoints, "etj_drawCheckpoints", "1", CVAR_ARCHIVE},
+    {&etj_checkpointsX, "etj_checkpointsX", "320", CVAR_ARCHIVE},
+    {&etj_checkpointsY, "etj_checkpointsY", "380", CVAR_ARCHIVE},
+    {&etj_checkpointsSize, "etj_checkpointsSize", "2", CVAR_ARCHIVE},
+    {&etj_checkpointsShadow, "etj_checkpointsShadow", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsStyle, "etj_checkpointsStyle", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsCount, "etj_checkpointsCount", "3", CVAR_ARCHIVE},
+
     {&etj_drawMessageTime, "etj_drawMessageTime", "2", CVAR_ARCHIVE},
 
     {&movie_changeFovBasedOnSpeed, "movie_changeFovBasedOnSpeed", "0",
@@ -1118,6 +1139,11 @@ cvarTable_t cvarTable[] = {
     // END unlagged - optimized prediction
 
     {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+
+    {&etj_crosshairScaleX, "etj_crosshairScaleX", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairScaleY, "etj_crosshairScaleY", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -2337,10 +2363,8 @@ static void CG_RegisterGraphics(void) {
   cgs.media.buddyShader = trap_R_RegisterShaderNoMip("sprites/buddy.tga");
 
   for (i = 0; i < NUM_CROSSHAIRS; i++) {
-    cgs.media.crosshairShader[i] =
-        trap_R_RegisterShader(va("gfx/2d/crosshair%c", 'a' + i));
-    cg.crosshairShaderAlt[i] =
-        trap_R_RegisterShader(va("gfx/2d/crosshair%c_alt", 'a' + i));
+    cgs.media.crosshairShader[i] = ETJump::shaderForCrosshair(i, false);
+    cg.crosshairShaderAlt[i] = ETJump::shaderForCrosshair(i, true);
   }
 
   for (i = 0; i < SK_NUM_SKILLS; i++) {

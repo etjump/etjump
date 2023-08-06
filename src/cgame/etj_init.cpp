@@ -53,6 +53,7 @@
 #include "etj_upper_right_drawable.h"
 #include "etj_upmove_meter_drawable.h"
 #include "etj_spectatorinfo_drawable.h"
+#include "etj_crosshair.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -70,7 +71,7 @@ std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 std::shared_ptr<EventLoop> eventLoop;
 std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 std::shared_ptr<Timerun> timerun;
-std::shared_ptr<ETJump::TimerunView> timerunView;
+std::shared_ptr<TimerunView> timerunView;
 std::shared_ptr<TrickjumpLines> trickjumpLines;
 } // namespace ETJump
 
@@ -84,6 +85,7 @@ void addLoopingSound(const vec3_t origin, const vec3_t velocity,
     trap_S_AddLoopingSound(origin, velocity, sfx, volume, soundTime);
   }
 }
+
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume,
                          int soundTime) {
@@ -113,25 +115,36 @@ int checkExtraTrace(int value) {
   return CONTENTS_SOLID;
 }
 
+int weapnumForClient() {
+  if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.demoPlayback) {
+    return cg.snap->ps.weapon;
+  }
+
+  return cg.weaponSelect;
+}
+
 void initTimer() {
   if (timerun) {
     timerunView->removeFromDrawables();
     timerun = nullptr;
     timerunView = nullptr;
   }
-  timerun = std::make_shared<Timerun>(cg.clientNum);
-  timerunView = std::make_shared<TimerunView>();
+  timerun = std::make_shared<Timerun>(cg.clientNum, playerEventsHandler);
+  timerunView = std::make_shared<TimerunView>(timerun);
 }
+
 void execCmdOnRunStart() {
   if (etj_onRunStart.string[0]) {
     trap_SendConsoleCommand(va("%s\n", etj_onRunStart.string));
   }
 }
+
 void execCmdOnRunEnd() {
   if (etj_onRunEnd.string[0]) {
     trap_SendConsoleCommand(va("%s\n", etj_onRunEnd.string));
   }
 }
+
 void onPlayerRespawn(qboolean revived) {
   playerEventsHandler->check("respawn", {revived ? "1" : "0"});
 }
@@ -232,6 +245,8 @@ void init() {
   ETJump::initDrawKeys(keySetSystem);
   ETJump::autoDemoRecorder = std::make_shared<ETJump::AutoDemoRecorder>();
 
+  ETJump::renderables.push_back(std::make_shared<Crosshair>());
+
   const std::vector<std::pair<const vmCvar_t *, const std::string>> cvars{
       {&etj_drawFoliage, "r_drawfoliage"},
       {&etj_showTris, "r_showtris"},
@@ -254,6 +269,25 @@ void init() {
     ETJump::cvarShadows.push_back(
         std::make_shared<CvarShadow>(shadow.first, shadow.second));
   }
+
+  playerEventsHandler->subscribe("timerun:start", [](auto a) {
+    auto clientNum = std::stoi(a[0]);
+    if (clientNum == cg.clientNum) {
+      execCmdOnRunStart();
+    }
+  });
+  playerEventsHandler->subscribe("timerun:stop", [](auto a) {
+    auto clientNum = std::stoi(a[0]);
+    if (clientNum == cg.clientNum) {
+      execCmdOnRunEnd();
+    }
+  });
+  playerEventsHandler->subscribe("timerun:interrupt", [](auto a) {
+    auto clientNum = std::stoi(a[0]);
+    if (clientNum == cg.clientNum) {
+      execCmdOnRunEnd();
+    }
+  });
 
   ETJump_ClearDrawables();
   initTimer();
@@ -333,98 +367,18 @@ void shutdown() {
 qboolean CG_ServerCommandExt(const char *cmd) {
   const std::string command = cmd != nullptr ? cmd : "";
 
-  // timerun_start runStartTime{integer} runName{string}
-  if (command == "timerun_start") {
-    auto startTime = Q_atoi(CG_Argv(1));
-    std::string runName = CG_Argv(2);
-    auto previousRecord = Q_atoi(CG_Argv(3));
-    ETJump::timerun->startTimerun(runName, startTime, previousRecord);
-    ETJump::execCmdOnRunStart();
-    // run name, completion time, previous record
-    ETJump::playerEventsHandler->check("timerun:start",
-                                       {runName, CG_Argv(1), CG_Argv(3)});
-    return qtrue;
-  }
-  // timerun_start_spec clientNum{integer} runStartTime{integer}
-  // runName{string}
-  if (command == "timerun_start_spec") {
-    if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) {
-      return qtrue;
-    }
-
-    auto clientNum = Q_atoi(CG_Argv(1));
-    auto runStartTime = Q_atoi(CG_Argv(2));
-    std::string runName = CG_Argv(3);
-    auto previousRecord = Q_atoi(CG_Argv(4));
-
-    ETJump::timerun->startSpectatorTimerun(clientNum, runName, runStartTime,
-                                           previousRecord);
-
-    return qtrue;
-  }
-  if (command == "timerun_interrupt") {
-    ETJump::timerun->interrupt();
-    ETJump::execCmdOnRunEnd();
-    return qtrue;
-  }
-  // timerun_stop completionTime{integer}
-  if (command == "timerun_stop") {
-    auto completionTime = Q_atoi(CG_Argv(1));
-
-    ETJump::timerun->stopTimerun(completionTime);
-    ETJump::execCmdOnRunEnd();
-    // run name, completion time
-    ETJump::playerEventsHandler->check("timerun:stop",
-                                       {CG_Argv(2), CG_Argv(1)});
-    return qtrue;
-  }
-  // timerun_stop_spec clientNum{integer} completionTime{integer}
-  // runName{string}
-  if (command == "timerun_stop_spec") {
-    if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) {
-      return qtrue;
-    }
-
-    auto clientNum = Q_atoi(CG_Argv(1));
-    auto completionTime = Q_atoi(CG_Argv(2));
-    std::string runName = CG_Argv(3);
-
-    ETJump::timerun->stopSpectatorTimerun(clientNum, completionTime, runName);
-
-    return qtrue;
-  }
-  if (command == "record") {
-    auto clientNum = Q_atoi(CG_Argv(1));
-    std::string runName = CG_Argv(2);
-    auto completionTime = Q_atoi(CG_Argv(3));
-
-    ETJump::timerun->record(clientNum, runName, completionTime);
-
-    if (clientNum == cg.clientNum) {
-      // run name, completion time
-      ETJump::playerEventsHandler->check("timerun:record",
-                                         {CG_Argv(2), CG_Argv(3)});
-    }
-
-    return qtrue;
-  }
-  if (command == "completion") {
-    auto clientNum = Q_atoi(CG_Argv(1));
-    std::string runName = CG_Argv(2);
-    auto completionTime = Q_atoi(CG_Argv(3));
-
-    ETJump::timerun->completion(clientNum, runName, completionTime);
-
-    if (clientNum == cg.clientNum) {
-      // run name, completion time
-      ETJump::playerEventsHandler->check("timerun:completion",
-                                         {CG_Argv(2), CG_Argv(3)});
-    }
-
-    return qtrue;
-  }
   if (command == "timerun") {
-    return ETJump::timerunView->parseServerCommand() ? qtrue : qfalse;
+    char arg[MAX_TOKEN_CHARS]{};
+    std::vector<std::string> args;
+
+    for (int i = 0, len = trap_Argc(); i < len; ++i) {
+      trap_Argv(i, arg, sizeof(arg));
+
+      args.push_back(arg);
+    }
+
+    ETJump::timerun->parseServerCommand(args);
+    return qtrue;
   }
 
   if (command == "tjl_displaybyname") {
