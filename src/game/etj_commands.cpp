@@ -2228,6 +2228,14 @@ Commands::Commands() {
       AdminCommands::TimerunEditSeason, CommandFlags::TIMERUN_MANAGEMENT);
   adminCommands_["delete-season"] = AdminCommandPair(
       AdminCommands::TimerunDeleteSeason, CommandFlags::TIMERUN_MANAGEMENT);
+  adminCommands_["records"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["rankings"] =
+      AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
+  adminCommands_["loadcheckpoints"] =
+      AdminCommandPair(ClientCommands::LoadCheckpoints, CommandFlags::BASIC);
+  adminCommands_["seasons"] =
+      AdminCommandPair(ClientCommands::ListSeasons, CommandFlags::BASIC);
 
   commands_["backup"] = ClientCommands::BackupLoad;
   commands_["save"] = ClientCommands::Save;
