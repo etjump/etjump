@@ -169,7 +169,7 @@ void ETJump::TimerunV2::computeRanks() {
       },
 
       [this](auto r) {
-        auto result = static_cast<ComputeRanksResult *>(r.get());
+        auto result = dynamic_cast<ComputeRanksResult *>(r.get());
 
         _rankingsPerSeason = std::move(result->rankings);
       },
@@ -248,7 +248,7 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
       [this, clientNum, userId](
       std::unique_ptr<SynchronizationContext::ResultBase> result) {
         auto clientConnectResult =
-            static_cast<ClientConnectResult *>(result.get());
+            dynamic_cast<ClientConnectResult *>(result.get());
 
         _players[clientNum] = std::make_unique<Player>(
             clientNum, userId, clientConnectResult->runs);
@@ -388,8 +388,7 @@ void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
       [this, season](
       std::unique_ptr<SynchronizationContext::ResultBase> result) {
 
-        auto addSeasonResult =
-            static_cast<AddSeasonResult *>(result.get());
+        auto addSeasonResult = dynamic_cast<AddSeasonResult *>(result.get());
 
         Printer::SendConsoleMessage(season.clientNum,
                                     addSeasonResult->message + "\n");
@@ -425,7 +424,7 @@ void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
         }
       },
       [this,params](auto r) {
-        auto editSeasonResult = static_cast<EditSeasonResult *>(r.
+        auto editSeasonResult = dynamic_cast<EditSeasonResult *>(r.
           get());
         Printer::SendConsoleMessage(params.clientNum,
                                     editSeasonResult->message + "\n");
@@ -523,7 +522,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
             std::move(records), std::move(seasons));
       },
       [this, params](auto p) {
-        auto result = static_cast<PrintRecordsResult *>(p.get());
+        auto result = dynamic_cast<PrintRecordsResult *>(p.get());
 
         if (result->records.size() == 0) {
           Printer::SendConsoleMessage(params.clientNum,
@@ -711,7 +710,7 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum,
             record.value().checkpoints);
       },
       [this, clientNum, runName, rank](auto r) {
-        auto result = static_cast<LoadCheckpointsResult *>(r.get());
+        auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
 
         _players[clientNum]->overriddenCheckpoints[runName] = {};
 
@@ -841,7 +840,7 @@ void ETJump::TimerunV2::printRankings(
         return std::make_unique<PrintResult>(message);
       },
       [this, params](auto r) {
-        auto result = static_cast<PrintResult *>(r.get());
+        auto result = dynamic_cast<PrintResult *>(r.get());
 
         Printer::SendConsoleMessage(params.clientNum, result->message);
       },
@@ -879,7 +878,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
         return std::make_unique<PrintResult>(message);
       },
       [clientNum](auto r) {
-        auto result = static_cast<PrintResult *>(r.get());
+        auto result = dynamic_cast<PrintResult *>(r.get());
 
         Printer::SendConsoleMessage(clientNum, result->message);
       },
@@ -1096,7 +1095,8 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
       ,
       [this, completionTime, activeRunName, playerName, clientNum](
       std::unique_ptr<SynchronizationContext::ResultBase> result) {
-        auto checkRecordResult = static_cast<CheckRecordResult *>(result.
+        auto checkRecordResult =
+            dynamic_cast<CheckRecordResult *>(result.
           get());
 
         bool recordOrCompletionSent = false;

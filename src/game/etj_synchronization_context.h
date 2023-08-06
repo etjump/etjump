@@ -16,6 +16,8 @@ namespace ETJump {
 class SynchronizationContext {
 public:
   class ResultBase {
+  public:
+    virtual ~ResultBase() = default;
   };
 
   using TaskFn = std::function<std::unique_ptr<ResultBase>()>;
