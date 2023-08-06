@@ -633,7 +633,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
                   if (ownRecord || rank == 1 && ownTime == r->time) {
                     diffString = "";
                   } else {
-                    diffString = diffToString(r->time, ownTime);
+                    diffString = diffToString(ownTime, r->time);
                   }
                   auto playerNameString = ownRecord
                                             ? r->playerName + " ^g(You)"
