@@ -161,6 +161,12 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
 }
 
 bool Rankings(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
 
   auto optCommand =
@@ -197,11 +203,23 @@ bool Rankings(gentity_t *ent, Arguments argv) {
 }
 
 bool ListSeasons(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   game.timerunV2->printSeasons(ClientNum(ent));
   return true;
 }
 
 bool Records(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
   auto optCommand = deprecated_getCommand(
       "records",
@@ -290,6 +308,12 @@ bool Records(gentity_t *ent, Arguments argv) {
 }
 
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
   auto optCommand = deprecated_getCommand(
       "loadcheckpoints", ClientNum(ent),
