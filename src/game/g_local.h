@@ -2928,7 +2928,9 @@ enum class TimerunSpawnflags {
   NoPortalgunPickup = 64,
   NoSave = 128,
 };
-}
+
+bool checkCheatCvars(gclient_s *client, bool aggressive);
+} // namespace ETJump
 
 void TimerunConnectNotify(gentity_t *ent);
 
