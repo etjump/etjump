@@ -112,7 +112,7 @@ public:
             );
       });
 
-      return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s", name,
+      return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name,
                           description,
                           StringUtil::join(optionsToStrings, "\n"));
     }
