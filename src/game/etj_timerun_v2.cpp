@@ -1057,7 +1057,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
 
           record.previousTime =
               seasonIdToPreviousRecord.count(seasonId) > 0
-                ? seasonIdToPreviousRecord[_mostRelevantSeason->id]->time
+                                    ? seasonIdToPreviousRecord[seasonId]->time
                 : opt<int>();
           record.record = seasonIdToNewRecord[seasonId];
 
