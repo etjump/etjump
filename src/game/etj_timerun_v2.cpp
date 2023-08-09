@@ -535,15 +535,8 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           seasonIdToName[s.id] = s;
         }
 
-        bool printTop = !params.run.hasValue();
-
         // clang-format off
-        std::string message =
-            stringFormat(
-                "^g=============================================================\n"
-                " ^2Top records for map: ^7%s\n"
-                "^g=============================================================\n",
-                result->records[0].map);
+        std::string message = "";
         // clang-format on
 
         using SeasonId = int;
@@ -585,18 +578,13 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           const Timerun::Season *season = &seasonIt->second;
 
           // clang-format off
-          message +=
-              "^f=============================================================\n";
-          message += stringFormat(" ^dSeason: ^7%s (%s -> %s)\n",
-                                  season->name,
-                                  season->startTime.date.toDateString(),
-                                  (season->endTime.hasValue()
-                                     ? season->endTime.value().date.
-                                               toDateString()
-                                     : "*"));
-          message +=
-              "^f=============================================================\n";
-          // clang-format on
+          if (seasonIt->first == defaultSeasonId) {
+            message += stringFormat("^2Overall records for map ^7%s\n",
+                                    result->records[0].map);
+          } else {
+            message += stringFormat("^2Records for map ^7%s ^2on season ^7%s\n",
+                                    result->records[0].map, season->name);
+          }
 
           for (const auto &mkvp : skvp.second) {
             auto mapName = mkvp.first;
@@ -609,7 +597,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
                     ? ownRecords[season->id][mapName][runName]
                     : rank1Time;
               message +=
-                  "^g=============================================================\n";
+                  "^g-------------------------------------------------------------\n";
               message += stringFormat(" ^2Run: ^7%s\n\n", rkvp.first);
 
               const int rankWidth = 4;
@@ -675,7 +663,8 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
         Printer::SendConsoleMessage(params.clientNum, message);
       },
       [this, params](const std::runtime_error &e) {
-        Printer::SendConsoleMessage(params.clientNum, e.what() + std::string("\n"));
+        Printer::SendConsoleMessage(params.clientNum,
+                                    e.what() + std::string("\n"));
       });
 }
 
@@ -862,15 +851,16 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
             "^g Season                         From -> To\n";
         // clang-format on
 
-        for (const auto & s : seasons) {
+        for (const auto &s : seasons) {
           std::string formatString = stringFormat(
               " ^2%%-%ds ^7(%%s -> %%s^7)\n",
               30 + StringUtil::countExtraPadding(s.name));
 
           message += stringFormat(
               formatString, s.name, s.startTime.toDateTimeString(),
-              s.endTime.hasValue() ? s.endTime.value().toDateTimeString()
-                                   : "*");
+              s.endTime.hasValue()
+                ? s.endTime.value().toDateTimeString()
+                : "*");
         }
 
         return std::make_unique<PrintResult>(message);
@@ -1057,7 +1047,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
 
           record.previousTime =
               seasonIdToPreviousRecord.count(seasonId) > 0
-                                    ? seasonIdToPreviousRecord[seasonId]->time
+                ? seasonIdToPreviousRecord[seasonId]->time
                 : opt<int>();
           record.record = seasonIdToNewRecord[seasonId];
 
@@ -1095,7 +1085,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
       std::unique_ptr<SynchronizationContext::ResultBase> result) {
         auto checkRecordResult =
             dynamic_cast<CheckRecordResult *>(result.
-          get());
+              get());
 
         bool recordOrCompletionSent = false;
 
