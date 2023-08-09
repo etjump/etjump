@@ -2348,8 +2348,6 @@ bool Commands::AdminCommand(gentity_t *ent) {
       return false;
     }
     command = &arg[1];
-  } else if (ent == NULL) {
-    command = arg;
   } else {
     return false;
   }
