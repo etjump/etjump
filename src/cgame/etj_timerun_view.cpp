@@ -215,13 +215,13 @@ void ETJump::TimerunView::draw() {
               : run->previousRecordCheckpoints[i];
       
       bool checkpointTimeNotSet = checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
-      int timeDifference = checkpointTimeNotSet ? currentTime - recordCheckpointTime
+      int relativeTime = checkpointTimeNotSet ? currentTime - recordCheckpointTime
                                     : checkpointTime - recordCheckpointTime;
 
       // if we don't have current or next checkpoint set, just display the runtimer
       if (checkpointTimeNotSet &&
           recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
-        timeDifference = currentTime;
+        relativeTime = currentTime;
       }
 
       std::string dir = "";
@@ -237,10 +237,12 @@ void ETJump::TimerunView::draw() {
         dir = "+";
       }
 
+      auto absoluteTime = checkpointTimeNotSet ? currentTime : checkpointTime;
+
       std::string timerStr =
           getTimerString(etj_checkpointsStyle.integer == 1
-                             ? (checkpointTimeNotSet ? currentTime : checkpointTime)
-                             : timeDifference);
+                             ? absoluteTime
+                             : relativeTime);
 
       timerStr = dir + timerStr;
 
