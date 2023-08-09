@@ -80,4 +80,14 @@ private:
 public:
   static void spawn(gentity_t *self);
 };
+
+/**
+ * TriggerCheckpoint
+ */
+class TriggerCheckpoint : public TimerunEntity {
+private:
+  static void use(gentity_t *self, gentity_t *activator);
+public:
+  static void spawn(gentity_t *self);
+};
 } // namespace ETJump

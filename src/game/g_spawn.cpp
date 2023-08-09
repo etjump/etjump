@@ -707,6 +707,7 @@ spawn_t spawns[] = {
     {"target_starttimer", ETJump::TargetStartTimer::spawn},
     {"target_stoptimer", ETJump::TargetStopTimer::spawn},
     {"target_checkpoint", ETJump::TargetCheckpoint::spawn},
+    {"trigger_checkpoint", ETJump::TriggerCheckpoint::spawn},
     {"target_interrupt_timerun", SP_target_interrupt_timerun},
     {"target_activate_if_velocity", SP_target_activate_if_velocity},
     {"target_scale_velocity", SP_target_scale_velocity},

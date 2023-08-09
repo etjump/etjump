@@ -33,7 +33,7 @@ class TimerunView : public Drawable {
 public:
   explicit TimerunView(std::shared_ptr<Timerun> timerun);
   ~TimerunView();
-  // draws the timer
+  
   void draw();
 
   int getTransitionRange(int previousRunTime);

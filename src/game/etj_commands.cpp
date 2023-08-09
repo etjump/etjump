@@ -161,6 +161,12 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
 }
 
 bool Rankings(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
 
   auto optCommand =
@@ -197,11 +203,23 @@ bool Rankings(gentity_t *ent, Arguments argv) {
 }
 
 bool ListSeasons(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   game.timerunV2->printSeasons(ClientNum(ent));
   return true;
 }
 
 bool Records(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
   auto optCommand = deprecated_getCommand(
       "records",
@@ -290,6 +308,12 @@ bool Records(gentity_t *ent, Arguments argv) {
 }
 
 bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
   auto optCommand = deprecated_getCommand(
       "loadcheckpoints", ClientNum(ent),
@@ -2228,6 +2252,14 @@ Commands::Commands() {
       AdminCommands::TimerunEditSeason, CommandFlags::TIMERUN_MANAGEMENT);
   adminCommands_["delete-season"] = AdminCommandPair(
       AdminCommands::TimerunDeleteSeason, CommandFlags::TIMERUN_MANAGEMENT);
+  adminCommands_["records"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["rankings"] =
+      AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
+  adminCommands_["loadcheckpoints"] =
+      AdminCommandPair(ClientCommands::LoadCheckpoints, CommandFlags::BASIC);
+  adminCommands_["seasons"] =
+      AdminCommandPair(ClientCommands::ListSeasons, CommandFlags::BASIC);
 
   commands_["backup"] = ClientCommands::BackupLoad;
   commands_["save"] = ClientCommands::Save;
@@ -2316,8 +2348,6 @@ bool Commands::AdminCommand(gentity_t *ent) {
       return false;
     }
     command = &arg[1];
-  } else if (ent == NULL) {
-    command = arg;
   } else {
     return false;
   }

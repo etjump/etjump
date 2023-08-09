@@ -259,6 +259,37 @@ void TargetCheckpoint::spawn(gentity_t *self) {
   };
 }
 
+void TriggerCheckpoint::use(gentity_t *self, gentity_t *activator) {
+  if (!canActivate(activator)) {
+    return;
+  }
+
+  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
+                             ClientNum(activator), self->checkpointIndex,
+                             activator->client->ps.commandTime);
+}
+
+void TriggerCheckpoint::spawn(gentity_t *self) {
+  char *name = nullptr;
+  G_SpawnString("name", "default", &name);
+
+  Q_strncpyz(self->runName, name, sizeof(self->runName));
+
+  setTimerunIndex(self);
+
+  level.hasCheckpoints = true;
+
+  self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
+    use(self, other);
+  };
+  self->s.eType = ET_TRIGGER_MULTIPLE;
+  InitTrigger(self);
+}
+
 void TargetStopTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
