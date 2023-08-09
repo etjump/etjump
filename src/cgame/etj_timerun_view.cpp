@@ -204,7 +204,7 @@ void ETJump::TimerunView::draw() {
       return;
     }
 
-    for (int i = startIndex; i >= 0 && i >= endIndex; i--) {
+    for (int i = startIndex; i >= 0 && i > endIndex; i--) {
       vec4_t *checkpointColor = &colorWhite;
       const int checkpointTime = run->checkpoints[i];
       // Use the previous record as checkpoint time if no new ones
@@ -222,12 +222,13 @@ void ETJump::TimerunView::draw() {
       if (checkpointTimeNotSet &&
           recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
         relativeTime = currentTime;
-      }
+      } 
 
       std::string dir = "";
       // if we don't have a next checkpoint set, we can't compare to anything
       // so render checkpoint as white
-      if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
+      if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET ||
+          relativeTime == 0) {
         checkpointColor = &colorWhite;
       } else if ((checkpointTimeNotSet && currentTime < recordCheckpointTime) || (!checkpointTimeNotSet && checkpointTime < recordCheckpointTime)) {
         checkpointColor = &colorSuccess;
