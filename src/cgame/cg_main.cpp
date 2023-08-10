@@ -3967,7 +3967,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   ETJump::init();
 
-  ETJump::execFile(va("autoexec_%s", cgs.rawmapname));
+  // map-specific autoexec
+  const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
+  if (ETJump::configFileExists(mapConfig)) {
+    ETJump::execFile(mapConfig);
+  } else if (ETJump::configFileExists("autoexec_default")) {
+    ETJump::execFile("autoexec_default");
+  }
 
   Com_Printf("CG_Init... DONE\n");
 }

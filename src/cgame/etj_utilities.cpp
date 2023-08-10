@@ -183,19 +183,24 @@ bool ETJump::clearImmediate(int handle) {
 
 void ETJump::executeTimeout(int handle) { eventLoop->execute(handle); }
 
-void ETJump::execFile(const std::string &filename) {
+bool ETJump::configFileExists(const std::string &filename) {
+  bool fileExists = true;
   int len;
   fileHandle_t f;
   std::string str = filename + ".cfg";
 
   len = trap_FS_FOpenFile(str.c_str(), &f, FS_READ);
   if (!f || len < 0) {
-    return; // file not found
+    // file not found
+    fileExists = false;
   }
 
-  str = "exec \"" + str + "\"\n";
-  trap_SendConsoleCommand(str.c_str());
   trap_FS_FCloseFile(f);
+  return fileExists;
+}
+
+void ETJump::execFile(const std::string &filename) {
+  trap_SendConsoleCommand(va("exec \"%s.cfg\"\n", filename.c_str()));
 }
 
 #endif
