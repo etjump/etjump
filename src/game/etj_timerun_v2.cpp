@@ -363,7 +363,9 @@ public:
   std::string message;
 };
 
-void ETJump::TimerunV2::addSeason(const Timerun::AddSeasonParams &season) {
+// do not pass by ref! postTask runs asynchronously and passing by
+// ref will lead to undefined behavior
+void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
   _sc->postTask(
       [this, season]() {
         try {
@@ -397,7 +399,9 @@ public:
   std::string message;
 };
 
-void ETJump::TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
+// do not pass by ref! postTask runs asynchronously and passing by
+// ref will lead to undefined behavior
+void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
   _sc->postTask(
       [this, params]() {
         try {
@@ -491,8 +495,9 @@ std::string rankToString(int rank) {
   }
 }
 
-void ETJump::TimerunV2::printRecords(
-    const Timerun::PrintRecordsParams &params) {
+// do not pass by ref! postTask runs asynchronously and passing by
+// ref will lead to undefined behavior
+void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
   _sc->postTask(
       [this, params] {
         auto records = _repository->getRecords(params);
@@ -652,9 +657,10 @@ public:
   std::vector<int> checkpoints;
 };
 
-void ETJump::TimerunV2::loadCheckpoints(int clientNum,
-                                        const std::string &mapName,
-                                        const std::string &runName, int rank) {
+// do not pass by ref! postTask runs asynchronously and passing by
+// ref will lead to undefined behavior
+void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
+                                        std::string runName, int rank) {
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         auto record = _repository->getRecord(mapName, runName, rank);
@@ -745,8 +751,9 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
   return message;
 }
 
-void ETJump::TimerunV2::printRankings(
-    const Timerun::PrintRankingsParams &params) {
+// do not pass by ref! postTask runs asynchronously and passing by
+// ref will lead to undefined behavior
+void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
   _sc->postTask(
       [this, params] {
         std::string message;
@@ -805,6 +812,8 @@ void ETJump::TimerunV2::printRankings(
       });
 }
 
+// do not pass by ref! postTask runs asynchronously and passing by
+// ref will lead to undefined behavior
 void ETJump::TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
