@@ -34,7 +34,7 @@
 #include "../game/etj_numeric_utilities.h"
 
 ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
-  : Drawable(), _timerun(timerun) {
+    : Drawable(), _timerun(timerun) {
   parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
   cvarUpdateHandler->subscribe(
       &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
@@ -42,9 +42,7 @@ ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
       });
 }
 
-ETJump::TimerunView::~TimerunView() {
-}
-
+ETJump::TimerunView::~TimerunView() {}
 
 const ETJump::Timerun::PlayerTimerunInformation *
 ETJump::TimerunView::currentRun() const {
@@ -136,8 +134,7 @@ void ETJump::TimerunView::draw() {
 
   auto text = ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
 
-  float textWidth =
-      CG_Text_Width_Ext(text.c_str(), 0.3, 0, font) / 2;
+  float textWidth = CG_Text_Width_Ext(text.c_str(), 0.3, 0, font) / 2;
   auto x = etj_runTimerX.value;
   auto y = etj_runTimerY.value;
 
@@ -165,7 +162,6 @@ void ETJump::TimerunView::draw() {
       // dont draw timer once fading is done
       return;
     }
-
   }
 
   CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0,
@@ -177,7 +173,7 @@ void ETJump::TimerunView::draw() {
     return;
   }
 
-  if (etj_drawCheckpoints.integer && etj_checkpointsCount.integer > 0) {
+  if (etj_drawCheckpoints.integer) {
     // only adjust x/y if we're drawing checkpoints detached from runtimer
     if (etj_drawCheckpoints.integer == 2) {
       x = etj_checkpointsX.value;
@@ -191,10 +187,10 @@ void ETJump::TimerunView::draw() {
         run->running ? cg.time - run->startTime : run->completionTime;
     const float textSize = 0.1f * etj_checkpointsSize.value;
     const auto textStyle = etj_checkpointsShadow.integer
-                             ? ITEM_TEXTSTYLE_SHADOWED
-                             : ITEM_TEXTSTYLE_NORMAL;
+                               ? ITEM_TEXTSTYLE_SHADOWED
+                               : ITEM_TEXTSTYLE_NORMAL;
 
-    const int count = Numeric::clamp(etj_checkpointsCount.integer, 0, 5);
+    const int count = Numeric::clamp(etj_checkpointsCount.integer, 1, 5);
     const int startIndex = run->numCheckpointsHit;
     const int endIndex = run->numCheckpointsHit - count;
 
@@ -213,16 +209,18 @@ void ETJump::TimerunView::draw() {
           run->previousRecordCheckpoints[i] == TIMERUN_CHECKPOINT_NOT_SET
               ? run->previousRecord
               : run->previousRecordCheckpoints[i];
-      
-      bool checkpointTimeNotSet = checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
-      int relativeTime = checkpointTimeNotSet ? currentTime - recordCheckpointTime
-                                    : checkpointTime - recordCheckpointTime;
 
-      // if we don't have current or next checkpoint set, just display the runtimer
+      bool checkpointTimeNotSet = checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
+      int relativeTime = checkpointTimeNotSet
+                             ? currentTime - recordCheckpointTime
+                             : checkpointTime - recordCheckpointTime;
+
+      // if we don't have current or next checkpoint set, just display the
+      // runtimer
       if (checkpointTimeNotSet &&
           recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
         relativeTime = currentTime;
-      } 
+      }
 
       std::string dir = "";
       // if we don't have a next checkpoint set, we can't compare to anything
@@ -230,7 +228,9 @@ void ETJump::TimerunView::draw() {
       if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET ||
           relativeTime == 0) {
         checkpointColor = &colorWhite;
-      } else if ((checkpointTimeNotSet && currentTime < recordCheckpointTime) || (!checkpointTimeNotSet && checkpointTime < recordCheckpointTime)) {
+      } else if ((checkpointTimeNotSet && currentTime < recordCheckpointTime) ||
+                 (!checkpointTimeNotSet &&
+                  checkpointTime < recordCheckpointTime)) {
         checkpointColor = &colorSuccess;
         dir = "-";
       } else {
@@ -240,10 +240,8 @@ void ETJump::TimerunView::draw() {
 
       auto absoluteTime = checkpointTimeNotSet ? currentTime : checkpointTime;
 
-      std::string timerStr =
-          getTimerString(etj_checkpointsStyle.integer == 1
-                             ? absoluteTime
-                             : relativeTime);
+      std::string timerStr = getTimerString(
+          etj_checkpointsStyle.integer == 1 ? absoluteTime : relativeTime);
 
       timerStr = dir + timerStr;
 
@@ -319,6 +317,4 @@ void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char *text,
                     0, 0, 0, &cgs.media.limboFont1);
 }
 
-bool ETJump::TimerunView::canSkipDraw() const {
-  return showingScores();
-}
+bool ETJump::TimerunView::canSkipDraw() const { return showingScores(); }

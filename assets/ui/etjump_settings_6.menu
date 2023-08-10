@@ -1,0 +1,53 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+// Left side menus
+
+#define SUBW_TIMERUN_Y SUBW_Y
+#define SUBW_TIMERUN_ITEM_Y SUBW_TIMERUN_Y + SUBW_HEADER_HEIGHT
+#define SUBW_TIMERUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 13)
+
+#define GROUP_NAME "group_etjump_settings_6"
+
+menuDef {
+    name "etjump_settings_6"
+    visible 0
+    fullscreen 0
+    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+    style WINDOW_STYLE_FILLED
+    onESC {
+        close etjump_settings_6; open etjump
+    }
+
+    WINDOW("SETTINGS", 94)
+
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_TIMERUN_Y, SUBW_WIDTH, SUBW_TIMERUN_HEIGHT, "TIMERUNS")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Enable timeruns:", 0.2, SUBW_ITEM_HEIGHT, "etj_enableTimeruns", "Enable timeruns\netj_enableTimeruns")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw runtimer:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawRunTimer", "Draw timerun timer\netj_drawRunTimer")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_runTimerX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Runtimer X:", 0.2, SUBW_ITEM_HEIGHT, etj_runTimerX 320 0 640 10, "Sets X position of timerun timer\netj_runTimerX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_runTimerY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Runtimer Y:", 0.2, SUBW_ITEM_HEIGHT, etj_runTimerY 360 0 480 10, "Sets Y position of timerun timer\netj_runTimerY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Runtimer inact. color:", 0.2, SUBW_ITEM_HEIGHT, "etj_runTimerInactiveColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of timerun timer when not running\netj_runTimerInactiveColor")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Runtimer shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_runTimerShadow", "Draw shadow on timerun timer\netj_runTimerShadow")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Auto hide timer:", 0.2, SUBW_ITEM_HEIGHT, "etj_runTimerAutoHide", "Automatically hide timerun timer if not running\netj_runTimerAutoHide")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw checkpoints:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawCheckpoints", cvarFloatList { "No" 0 "Below runtimer" 1 "Detached" 2 }, "Draw checkpoint timer\netj_drawCheckpoints")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints style:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsStyle", cvarFloatList { "Relative time" 0 "Absolute time" 1 }, "Set display style of checkpoints timer\netj_checkpointsStyle")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints count:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsCount", cvarFloatList { "1" 1 "2" 2 "3" 3 "4" 4 "5" 5 }, "Number of checkpoints to draw\netj_checkpointsCount")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints X:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsX 320 0 640 10, "Sets X position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints Y:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsY 320 0 640 10, "Sets Y position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints size:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of checkpoint timer\netj_checkpointsSize")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsShadow", "Draw shadow on checkpoint timer\netj_checkpointsShadow")
+
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_1)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 2), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 2", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_2)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 3), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 3", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_3)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 4), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 4", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_4)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 5), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 5", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_5)
+        BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 6), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 6", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_6)
+}

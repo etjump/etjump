@@ -123,4 +123,5 @@ menuDef {
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 3), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 3", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_3)
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 4), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 4", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_4)
         BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 5), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 5", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_5)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 6), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 6", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_5; open etjump_settings_6)
 }
