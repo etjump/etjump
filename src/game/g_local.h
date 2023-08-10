@@ -2133,6 +2133,7 @@ extern vmCvar_t g_customMapVotesFile;
 
 // Start of timeruns support
 extern vmCvar_t g_timerunsDatabase;
+extern vmCvar_t g_timeruns2Database;
 // End of timeruns support
 
 // tokens
