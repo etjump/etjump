@@ -95,6 +95,10 @@ bool SpectatorInfo::canSkipDraw() {
     return true;
   }
 
+  if (showingScores()) {
+    return true;
+  }
+
   return false;
 }
 } // namespace ETJump
