@@ -624,6 +624,8 @@ vmCvar_t etj_crosshairScaleY;
 vmCvar_t etj_crosshairThickness;
 vmCvar_t etj_crosshairOutline;
 
+vmCvar_t etj_ftSavelimit;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1144,6 +1146,10 @@ cvarTable_t cvarTable[] = {
     {&etj_crosshairScaleY, "etj_crosshairScaleY", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
+
+    // fireteam savelimit - added here to retain value it's set to
+    // upon re-opening the fireteam savelimit menu
+    {&etj_ftSavelimit, "etj_ftSavelimit", "-1", CVAR_TEMP},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

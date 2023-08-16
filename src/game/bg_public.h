@@ -381,6 +381,7 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 #define MAX_FIRETEAMS 12
 #define MAX_FIRETEAM_USERS 15
+constexpr int FT_SAVELIMIT_NOT_SET = -1;
 
 extern const char *bg_fireteamNames[MAX_FIRETEAMS];
 
@@ -2481,6 +2482,9 @@ typedef enum {
 
   // ydnar: say, team say, etc
   UIMENU_INGAME_MESSAGEMODE,
+
+  // fireteam savelimit input box
+  UIMENU_INGAME_FT_SAVELIMIT,
 } uiMenuCommand_t;
 
 void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right,

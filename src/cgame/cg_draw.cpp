@@ -5105,4 +5105,10 @@ void CG_DrawActive(stereoFrame_t stereoView) {
   } else {
     CG_LimboPanel_Draw();
   }
+
+  if (cg_blood.integer == 999) {
+
+    CG_Printf("\nftMenuPos: %d\nftMenuModeEx: %d\n", cgs.ftMenuPos,
+              cgs.ftMenuModeEx);
+  }
 }

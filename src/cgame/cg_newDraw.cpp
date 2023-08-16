@@ -738,8 +738,8 @@ void CG_EventHandling(int type, qboolean fForced) {
     CG_LimboPanel_Setup();
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else if (type == CGAME_EVENT_FIRETEAMMSG) {
-    cgs.ftMenuPos = -1;
-    cgs.ftMenuMode = 0;
+    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
+    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
     cg.showFireteamMenu = qtrue;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);

@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "etj_numeric_utilities.h"
+#include "etj_printer.h"
 
 // Gordon
 // What we need....
@@ -102,12 +103,10 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
       }
     }
 
-    //		Com_sprintf(buffer, 128,
-    //"\\n\\%s\\l\\%i\\c\\%.8x%.8x",
-    // ft->name, ft->joinOrder[0], clnts[1], clnts[0]);
-    Com_sprintf(buffer, 128, "\\id\\%i\\l\\%i\\c\\%.8x%.8x", ft->ident - 1,
-                ft->joinOrder[0], clnts[1], clnts[0]);
-    //		G_Printf(va("%s\n", buffer));
+    Com_sprintf(buffer, 128, "\\id\\%i\\l\\%i\\sl\\%i\\c\\%.8x%.8x",
+                ft->ident - 1, ft->joinOrder[0], ft->saveLimit, clnts[1],
+                clnts[0]);
+    // G_Printf(va("%s\n", buffer));
   }
 
   trap_SetConfigstring(CS_FIRETEAMS + (ft - level.fireTeams), buffer);
@@ -168,7 +167,7 @@ qboolean G_IsFireteamLeader(int entityNum, fireteamData_t **teamNum) {
   }
 
   if (teamNum) {
-    *teamNum = NULL;
+    *teamNum = nullptr;
   }
   return qfalse;
 }
@@ -200,7 +199,7 @@ int G_FindFreeFireteamIdent(team_t team) {
 }
 
 // Should be the only function that ever creates a fireteam
-void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
+void G_RegisterFireteam(int entityNum) {
   fireteamData_t *ft;
   gentity_t *leader;
   int count, ident;
@@ -216,17 +215,12 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
             "entity with no client\n");
   }
 
-  if (G_IsOnFireteam(entityNum, NULL)) {
+  if (G_IsOnFireteam(entityNum, nullptr)) {
     G_ClientPrintAndReturn(entityNum,
                            "You are already on a fireteam, leave it first");
   }
 
-  /*	if(!name || !*name) {
-          G_ClientPrintAndReturn(entityNum, "You must choose a name for
-     your fireteam");
-      }*/
-
-  if ((ft = G_FindFreeFireteam()) == NULL) {
+  if ((ft = G_FindFreeFireteam()) == nullptr) {
     G_ClientPrintAndReturn(entityNum, "No free fireteams available");
   }
 
@@ -244,9 +238,9 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
   // good to go now, i hope!
   ft->inuse = qtrue;
   memset(ft->joinOrder, -1, sizeof(level.fireTeams[0].joinOrder));
-  ft->joinOrder[0] = leader - g_entities;
+  ft->joinOrder[0] = static_cast<char>(leader - g_entities);
   ft->ident = ident;
-  ft->saveLimit = 0;
+  ft->saveLimit = FT_SAVELIMIT_NOT_SET;
   ft->teamJumpMode = qfalse;
 
   if (g_autoFireteams.integer) {
@@ -258,7 +252,6 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
     ft->priv = qfalse;
   }
 
-  //	Q_strncpyz(ft->name, name, 32);
   G_UpdateFireteamConfigString(ft);
 }
 
@@ -297,11 +290,11 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
     if (ft->joinOrder[i] == -1) {
       gentity_t *otherEnt = g_entities + entityNum;
       // found a free position
-      ft->joinOrder[i] = entityNum;
-
-      G_UpdateFireteamConfigString(ft);
+      ft->joinOrder[i] = static_cast<char>(entityNum);
 
       otherEnt->client->sess.saveLimitFt = ft->saveLimit;
+
+      G_UpdateFireteamConfigString(ft);
 
       return;
     }
@@ -368,13 +361,9 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
     }
   }
 
-  if (update) {
-    G_UpdateFireteamConfigString(ft);
-  }
-
   // if the leader leaves it seems the savelimit will be set to
   // 2^32-1 / -2^32-1 so this should fix it.
-  if (!ft->saveLimit) {
+  if (ft->saveLimit != FT_SAVELIMIT_NOT_SET) {
     gentity_t *ent;
     for (i = 0; i < level.numConnectedClients; i++) {
       if (ft->joinOrder[i] == -1) {
@@ -384,6 +373,10 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
         ent->client->sess.saveLimitFt = ft->saveLimit;
       }
     }
+  }
+
+  if (update) {
+    G_UpdateFireteamConfigString(ft);
   }
 }
 
@@ -733,6 +726,9 @@ void G_SetFireTeamSaveLimit(fireteamData_t *ft, int limit) {
     } else {
       ent = g_entities + ft->joinOrder[i];
       ent->client->sess.saveLimitFt = limit;
+      Printer::SendPopupMessage(
+          ClientNum(ent),
+          va("^gFireteam rules: ^3savelimit ^gwas set to ^3%i^g.\n", limit));
     }
   }
 }
@@ -777,10 +773,9 @@ void G_SetFireTeamRules(int clientNum) {
 
     int limit = Numeric::clamp(Q_atoi(val), -1, 100);
     ft->saveLimit = limit;
-
-    trap_SendServerCommand(
-        clientNum, va("print \"Fireteam: savelimit was set to %i\n\"", limit));
     G_SetFireTeamSaveLimit(ft, limit);
+
+    G_UpdateFireteamConfigString(ft);
     return;
   }
 

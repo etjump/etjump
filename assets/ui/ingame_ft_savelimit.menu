@@ -1,0 +1,40 @@
+#include "ui/menudef.h"
+#include "ui/menudef_ext.h"
+
+// Macros //
+
+#include "ui/menumacros.h"
+#include "ui/menumacros_ext.h"
+
+// Fireteam savelimit menu //
+
+menuDef {
+	name		"ingame_ft_savelimit"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+
+	onESC {
+		close ingame_ft_savelimit ;
+	}
+
+	onEnter	{
+		close ingame_ft_savelimit ;
+		exec ftSaveLimitSet ;
+	}
+
+// Subwindows //
+
+#define SUBWINDOW_WIDTH		224
+#define SUBWINDOW_HEIGHT	64
+#define SUBWINDOW_X			0.5 * (WINDOW_WIDTH - SUBWINDOW_WIDTH)
+#define SUBWINDOW_Y			0.5 * (WINDOW_HEIGHT - SUBWINDOW_HEIGHT)
+
+	SUBWINDOWBLACK( SUBWINDOW_X, SUBWINDOW_Y, SUBWINDOW_WIDTH, SUBWINDOW_HEIGHT, "SAVE LIMIT" )
+	CVARINTLABEL (SUBWINDOW_X - 64, SUBWINDOW_Y + 22, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_ftSavelimit", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+	SLIDER ( SUBWINDOW_X - 64, SUBWINDOW_Y + 22, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Savelimit:", 0.2, SUBW_ITEM_HEIGHT, etj_ftSavelimit -1 -1 100 1, "Fireteam save limit")
+
+	BUTTON( SUBWINDOW_X + 6, SUBWINDOW_Y + SUBWINDOW_HEIGHT - 24, 0.5 * (SUBWINDOW_WIDTH - 18), 18, "SET", .3, 14, close ingame_ft_savelimit ; exec ftSaveLimitSet )
+	BUTTON( SUBWINDOW_X + 6 + 0.5 * (SUBWINDOW_WIDTH - 18) + 6, SUBWINDOW_Y + SUBWINDOW_HEIGHT - 24, 0.5 * (SUBWINDOW_WIDTH - 18), 18, "CANCEL", .3, 14, close ingame_ft_savelimit )
+}
