@@ -25,7 +25,7 @@ TEST_F(TimerunSharedTests, Start_ShouldSerialize) {
   ASSERT_EQ(
       start.serialize(),
       "timerun start 1 2 \"3\" 4 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
-      "\"-1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
+      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
