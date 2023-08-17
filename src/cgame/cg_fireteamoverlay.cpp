@@ -312,10 +312,12 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
   if (saveLimit) {
     if (f->saveLimit == 0) {
+      vec4_t friendShaderColor = {1.0f, 1.0f, 1.0f, fireteamAlpha};
       ETJump::drawPic(rect->x + FT_WIDTH - 4 - 8 + fireteamOffsetX,
                       y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
       ETJump::drawPic(rect->x + FT_WIDTH - 4 - 8 + fireteamOffsetX,
-                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.friendShader);
+                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.friendShader,
+                      friendShaderColor);
 
     } else {
       buffer = ETJump::stringFormat("%i", f->saveLimit);
@@ -362,11 +364,10 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
       CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, "^3S", 0, 0,
                         ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
     } else {
-      vec4_t healthColor;
+      vec4_t healthColor = {0.6f, 0.6f, 0.6f, 1.0f};
       const char *healthStr;
 
       if (ci->health > 80) {
-        Vector4Copy(tclr, healthColor);
         healthStr = va("%i", ci->health);
       } else if (ci->health > 0) {
         Vector4Copy(colorYellow, healthColor);
