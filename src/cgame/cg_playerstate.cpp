@@ -269,8 +269,12 @@ void CG_Respawn(qboolean revived) {
   CG_ResetTransitionEffects();
 
   if (!revived && cgs.clientinfo[cg.clientNum].team != oldTeam) {
-    ETJump::execFile(va("autoexec_%s", BG_TeamnameForNumber(
-                                           cgs.clientinfo[cg.clientNum].team)));
+    const auto teamConfig = va(
+        "autoexec_%s", BG_TeamnameForNumber(cgs.clientinfo[cg.clientNum].team));
+    if (ETJump::configFileExists(teamConfig)) {
+      ETJump::execFile(teamConfig);
+    }
+
     oldTeam = cgs.clientinfo[cg.clientNum].team;
   }
 
