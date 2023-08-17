@@ -307,7 +307,7 @@ G_InitWorldSession
 
 ==================
 */
-void G_InitWorldSession(void) {
+void G_InitWorldSession() {
   char s[MAX_STRING_CHARS];
   int gt;
   int i, j;
@@ -339,13 +339,12 @@ void G_InitWorldSession(void) {
     // See if we need to clear player stats
     // FIXME: deal with the multi-map missions
     if (g_gametype.integer != GT_WOLF_CAMPAIGN) {
-      if ((tmp = strchr(va("%s", tmp), ' ')) != NULL) {
+      if ((tmp = strchr(va("%s", tmp), ' ')) != nullptr) {
         tmp++;
         trap_GetServerinfo(s, sizeof(s));
         if (Q_stricmp(tmp, Info_ValueForKey(s, "mapname"))) {
           level.fResetStats = qtrue;
-          G_Printf("Map changed, clearing "
-                   "player stats.\n");
+          G_Printf("Map changed, clearing player stats.\n");
         }
       }
     }
@@ -355,16 +354,6 @@ void G_InitWorldSession(void) {
     char *p, *c;
 
     trap_Cvar_VariableStringBuffer(va("fireteam%i", i), s, sizeof(s));
-
-    /*		p = Info_ValueForKey( s, "n" );
-
-            if(p && *p) {
-                Q_strncpyz( level.fireTeams[i].name, p, 32 );
-                level.fireTeams[i].inuse = qtrue;
-            } else {
-                *level.fireTeams[i].name = '\0';
-                level.fireTeams[i].inuse = qfalse;
-            }*/
 
     p = Info_ValueForKey(s, "id");
     j = Q_atoi(p);
@@ -399,6 +388,10 @@ void G_InitWorldSession(void) {
     for (; j < MAX_CLIENTS; j++) {
       level.fireTeams[i].joinOrder[j] = -1;
     }
+
+    // fireteam savelimit should not linger around from previous map
+    level.fireTeams[i].saveLimit = FT_SAVELIMIT_NOT_SET;
+
     G_UpdateFireteamConfigString(&level.fireTeams[i]);
   }
 }

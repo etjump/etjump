@@ -347,31 +347,31 @@ void CG_QuickFireteamMessage_f(void) {
   }
 }
 
-void CG_QuickFireteamAdmin_f(void) {
+void CG_QuickFireteamAdmin_f() {
   trap_UI_Popup(UIMENU_NONE);
 
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == 1) {
+    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_MANAGE)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = 1;
+      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
     }
   } else {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = 1;
+    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
   }
 }
 
-static void CG_QuickFireteams_f(void) {
+static void CG_QuickFireteams_f() {
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == 0) {
+    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_VSAY)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = 0;
+      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
     }
   } else if (CG_IsOnFireteam(cg.clientNum)) {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = 0;
+    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
   }
 }
 

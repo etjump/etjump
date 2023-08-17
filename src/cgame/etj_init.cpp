@@ -534,6 +534,17 @@ qboolean CG_ConsoleCommandExt(const char *cmd) {
       return qtrue;
     }
   }
+
+  if (command == "ftSaveLimitSet") {
+    char buffer[MAX_CVAR_VALUE_STRING];
+    int limit;
+
+    trap_Cvar_VariableStringBuffer("etj_ftSaveLimit", buffer, sizeof(buffer));
+    limit = Q_atoi(buffer);
+
+    trap_SendConsoleCommand(va("fireteam rules savelimit %i\n", limit));
+    return qtrue;
+  }
   return qfalse;
 }
 
