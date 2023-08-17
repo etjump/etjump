@@ -1,4 +1,4 @@
-/*
+/*< ^325 ^gor ^3com_maxfps ^g> ^3125
  * MIT License
  *
  * Copyright (c) 2023 ETJump team <zero@etjump.com>

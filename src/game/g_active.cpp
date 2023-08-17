@@ -1467,7 +1467,7 @@ void ClientThink_real(gentity_t *ent) {
   CheckForEvents(ent);
 
   if (g_blockCheatCvars.integer) {
-    if (ETJump::checkCheatCvars(client, g_blockCheatCvars.integer > 1)) {
+    if (ETJump::checkCheatCvars(client, g_blockCheatCvars.integer)) {
       SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1),
               static_cast<weapon_t>(-1), qfalse);
     }

@@ -89,30 +89,33 @@ void WriteSessionData() {
 }
 
 namespace ETJump {
-bool checkCheatCvars(gclient_s *client, bool aggressive) {
+bool checkCheatCvars(gclient_s *client, int flags) {
   bool cheatCvarsEnabled = false;
   const int clientNum = ClientNum(client);
   std::string message =
-      "^gThe following cvars are not allowed on this server:\n"
-      "^3cl_yawspeed != 0\n"
-      "^3cl_freelook 0\n";
+      "^gThe following cvars are not allowed on this server:\n";
 
-  if (client->pers.clientFlags & CGF_CHEATCVARSON) {
-    cheatCvarsEnabled = true;
-    trap_SendServerCommand(clientNum, "cheatCvarsOff");
+  if (flags & static_cast<int>(CheatCvarFlags::LookYaw)) {
+    message += "^3cl_yawspeed != 0\n"
+               "^3cl_freelook 0\n";
+
+    if (client->pers.clientFlags & CGF_CHEATCVARSON) {
+      cheatCvarsEnabled = true;
+    }
   }
 
-  if (aggressive) {
+  if (flags & static_cast<int>(CheatCvarFlags::PmoveFPS)) {
     message += "^3pmove_fixed 0 ^gwith:\n"
-               "^3com_maxfps ^g< ^325 ^gor ^3com_maxfps ^g> ^3125\n\"";
+               "^3com_maxfps ^goutside of ^325-125\n\"";
+
     if ((client->pers.maxFPS > 125 || client->pers.maxFPS < 25) &&
         !client->pers.pmoveFixed) {
       cheatCvarsEnabled = true;
-      trap_SendServerCommand(clientNum, "cheatCvarsOffAggressive");
     }
   }
 
   if (cheatCvarsEnabled) {
+    trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
     Printer::SendChatMessage(clientNum,
                              "^gCheat cvars are not allowed on this server, "
                              "check console for more information.\n");

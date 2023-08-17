@@ -2929,7 +2929,7 @@ enum class TimerunSpawnflags {
   NoSave = 128,
 };
 
-bool checkCheatCvars(gclient_s *client, bool aggressive);
+bool checkCheatCvars(gclient_s *client, int flags);
 } // namespace ETJump
 
 void TimerunConnectNotify(gentity_t *ent);

@@ -2785,4 +2785,12 @@ const int BG_LEVEL_NO_PRONE = 1 << 5;
 // Nodrop is enabled
 const int BG_LEVEL_NO_DROP = 1 << 6;
 
+namespace ETJump {
+enum class CheatCvarFlags {
+  None = 0,
+  LookYaw = 1,
+  PmoveFPS = 2,
+};
+}
+
 #endif // __BG_PUBLIC_H__
