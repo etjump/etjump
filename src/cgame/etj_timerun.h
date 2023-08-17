@@ -40,7 +40,7 @@ class Start;
 class Checkpoint;
 class Interrupt;
 class Stop;
-}
+} // namespace TimerunCommands
 
 class PlayerEventsHandler;
 
@@ -68,8 +68,7 @@ public:
 
   explicit Timerun(int clientNum,
                    std::shared_ptr<PlayerEventsHandler> playerEventsHandler)
-    : _clientNum(clientNum), _playerEventsHandler(playerEventsHandler) {
-  }
+      : _clientNum(clientNum), _playerEventsHandler(playerEventsHandler) {}
 
   void onStop(const TimerunCommands::Stop *stop);
   void onInterrupt(const TimerunCommands::Interrupt *interrupt);
@@ -80,17 +79,18 @@ public:
   void onCompletion(const TimerunCommands::Completion *completion);
   void parseServerCommand(const std::vector<std::string> &args);
   const PlayerTimerunInformation *getTimerunInformationFor(int clientNum);
+  static int getNumCheckpointsHit(
+      const std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
 private:
   int _clientNum;
 
-  std::string createCompletionMessage(
-      const clientInfo_t &player,
-      const std::string &runName,
-      int completionTime,
-      ETJump::opt<int> previousTime);
+  std::string createCompletionMessage(const clientInfo_t &player,
+                                      const std::string &runName,
+                                      int completionTime,
+                                      ETJump::opt<int> previousTime);
 
   std::array<PlayerTimerunInformation, MAX_CLIENTS> _playersTimerunInformation;
   std::shared_ptr<PlayerEventsHandler> _playerEventsHandler;
 };
-}
+} // namespace ETJump

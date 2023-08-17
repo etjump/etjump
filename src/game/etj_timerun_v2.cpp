@@ -464,10 +464,11 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
       }
 
       Printer::SendCommand(
-          clientNum, TimerunCommands::Start(idx, player->startTime.value(),
-                                            player->activeRunName,
-                                            fastestCompletionTime, checkpoints)
-                         .serialize());
+          clientNum,
+          TimerunCommands::Start(idx, player->startTime.value(),
+                                 player->activeRunName, fastestCompletionTime,
+                                 checkpoints, player->checkpointTimes)
+              .serialize());
     }
   }
 }
@@ -877,7 +878,7 @@ void ETJump::TimerunV2::startNotify(Player *player) {
   Printer::SendCommandToAll(
       TimerunCommands::Start(player->clientNum, player->startTime.value(),
                              player->activeRunName, fastestCompletionTime,
-                             checkpoints)
+                             checkpoints, player->checkpointTimes)
           .serialize());
 }
 
