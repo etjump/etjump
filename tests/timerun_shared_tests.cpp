@@ -117,7 +117,7 @@ TEST_F(TimerunSharedTests, Interrupt_ShouldDeserialize) {
 TEST_F(TimerunSharedTests, Record_ShouldSerialize) {
   auto record = TimerunCommands::Record(1, 2, 3, "run");
 
-  ASSERT_EQ(record.serialize(), "timerun record 1 2 3 \"run\"")
+  ASSERT_EQ(record.serialize(), "timerun record 1 2 3 \"run\"");
 }
 
 TEST_F(TimerunSharedTests, Record_ShouldDeserialize) {
