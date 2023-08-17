@@ -45,13 +45,15 @@ public:
   Start();
   Start(int clientNum, int startTime, const std::string &runName,
         const opt<int> &previousRecord,
-        std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints);
+        std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
+        std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
   int clientNum{};
   int startTime{};
   std::string runName{};
   opt<int> previousRecord{};
   std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
 
   std::string serialize();
 
@@ -64,11 +66,8 @@ public:
 
   Checkpoint(int clientNum, int checkpointIndex, int checkpointTime,
              const std::string &runName)
-    : clientNum(clientNum),
-      checkpointIndex(checkpointIndex),
-      checkpointTime(checkpointTime),
-      runName(runName) {
-  }
+      : clientNum(clientNum), checkpointIndex(checkpointIndex),
+        checkpointTime(checkpointTime), runName(runName) {}
 
   int clientNum{};
   int checkpointIndex{};
@@ -84,9 +83,7 @@ class Interrupt {
 public:
   Interrupt() = default;
 
-  explicit Interrupt(int clientNum)
-    : clientNum(clientNum) {
-  }
+  explicit Interrupt(int clientNum) : clientNum(clientNum) {}
 
   int clientNum{};
 
@@ -100,12 +97,9 @@ public:
   Completion() = default;
 
   Completion(int clientNum, int completionTime, opt<int> previousRecordTime,
-         const std::string &runName)
-    : clientNum(clientNum),
-      completionTime(completionTime),
-      previousRecordTime(previousRecordTime),
-      runName(runName) {
-  }
+             const std::string &runName)
+      : clientNum(clientNum), completionTime(completionTime),
+        previousRecordTime(previousRecordTime), runName(runName) {}
 
   int clientNum{};
   int completionTime{};
@@ -123,11 +117,8 @@ public:
 
   Record(int clientNum, int completionTime, opt<int> previousRecordTime,
          const std::string &runName)
-    : clientNum(clientNum),
-      completionTime(completionTime),
-      previousRecordTime(previousRecordTime),
-      runName(runName) {
-  }
+      : clientNum(clientNum), completionTime(completionTime),
+        previousRecordTime(previousRecordTime), runName(runName) {}
 
   int clientNum{};
   int completionTime{};
@@ -144,10 +135,7 @@ public:
   Stop() = default;
 
   Stop(int clientNum, int time, const std::string &runName)
-    : clientNum(clientNum),
-      completionTime(time),
-      runName(runName) {
-  }
+      : clientNum(clientNum), completionTime(time), runName(runName) {}
 
   int clientNum{};
   int completionTime{};
