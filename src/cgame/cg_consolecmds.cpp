@@ -1154,16 +1154,6 @@ void listSpawnPoints() {
     }
   }
 }
-
-static void ftSaveLimitSet() {
-  char buffer[MAX_CVAR_VALUE_STRING];
-  int limit;
-
-  trap_Cvar_VariableStringBuffer("etj_ftSaveLimit", buffer, sizeof(buffer));
-  limit = Q_atoi(buffer);
-
-  trap_SendConsoleCommand(va("fireteam rules savelimit %i\n", limit));
-}
 } // namespace ETJump
 
 typedef struct {
@@ -1294,8 +1284,6 @@ static const consoleCommand_t anyTimeCommands[] = {
     {"incrementVar", CG_IncrementVar_f},
     {"extraTrace", CG_ExtraTrace_f},
     {"listspawnpt", ETJump::listSpawnPoints},
-
-    {"ftSaveLimitSet", ETJump::ftSaveLimitSet},
 };
 
 /*
