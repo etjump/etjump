@@ -545,8 +545,9 @@ qboolean G_CanPickupWeapon(weapon_t weapon, gentity_t *ent) {
 }
 
 int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
-  int quantity;
-  qboolean alreadyHave = qfalse;
+  const int quantity = ent->count;
+  // ent->delay carries secondary weapon ammo
+  const int quantityAlt = static_cast<int>(ent->delay);
 
   // JPW NERVE -- magic ammo for any two-handed weapon
   if (ent->item->giTag == WP_AMMO) {
@@ -580,18 +581,17 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
     }
   }
 
-  quantity = ent->count;
-
   // check if player already had the weapon
-  alreadyHave = COM_BitCheck(other->client->ps.weapons, ent->item->giTag);
+  const bool alreadyHave =
+      COM_BitCheck(other->client->ps.weapons, ent->item->giTag);
 
   // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
   if (alreadyHave) {
     Add_Ammo(other, ent->item->giTag, quantity, qfalse);
 
     // Gordon: secondary weapon ammo
-    if (ent->delay) {
-      Add_Ammo(other, weapAlts[ent->item->giTag], ent->delay, qfalse);
+    if (quantityAlt) {
+      Add_Ammo(other, weapAlts[ent->item->giTag], quantityAlt, qfalse);
     }
   } else {
     if (level.time - other->client->dropWeaponTime < 1000) {
@@ -614,61 +614,55 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
     if (G_CanPickupWeapon(static_cast<weapon_t>(ent->item->giTag), other)) {
       weapon_t primaryWeapon = G_GetPrimaryWeaponForClient(other->client);
 
-      // rain - added parens around ambiguous &&
-      if (primaryWeapon || (other->client->sess.playerType == PC_SOLDIER &&
-                            other->client->sess.skill[SK_HEAVY_WEAPONS] >= 4)) {
+      if (primaryWeapon) {
+        // drop our primary weapon
+        G_DropWeapon(other, primaryWeapon);
+      }
 
-        if (primaryWeapon) {
-          // drop our primary weapon
-          G_DropWeapon(other, primaryWeapon);
+      // now pickup the other one
+      other->client->dropWeaponTime = level.time;
+
+      // add the weapon
+      COM_BitSet(other->client->ps.weapons, ent->item->giTag);
+
+      // DHM - Fixup mauser/sniper issues
+      if (ent->item->giTag == WP_FG42) {
+        COM_BitSet(other->client->ps.weapons, WP_FG42SCOPE);
+      } else if (ent->item->giTag == WP_GARAND) {
+        COM_BitSet(other->client->ps.weapons, WP_GARAND_SCOPE);
+      } else if (ent->item->giTag == WP_K43) {
+        COM_BitSet(other->client->ps.weapons, WP_K43_SCOPE);
+      } else if (ent->item->giTag == WP_MORTAR) {
+        COM_BitSet(other->client->ps.weapons, WP_MORTAR_SET);
+      } else if (ent->item->giTag == WP_MOBILE_MG42) {
+        COM_BitSet(other->client->ps.weapons, WP_MOBILE_MG42_SET);
+      } else if (ent->item->giTag == WP_CARBINE) {
+        COM_BitSet(other->client->ps.weapons, WP_M7);
+      } else if (ent->item->giTag == WP_KAR98) {
+        COM_BitSet(other->client->ps.weapons, WP_GPG40);
+      }
+
+      other->client->ps.ammoclip[BG_FindClipForWeapon(
+          static_cast<weapon_t>(ent->item->giTag))] = 0;
+      other->client->ps
+          .ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ent->item->giTag))] =
+          0;
+
+      if (ent->item->giTag == WP_MORTAR) {
+        other->client->ps.ammo[BG_FindClipForWeapon(
+            static_cast<weapon_t>(ent->item->giTag))] = quantity;
+
+        // Gordon: secondary weapon ammo
+        if (quantityAlt) {
+          Add_Ammo(other, weapAlts[ent->item->giTag], quantityAlt, qfalse);
         }
-
-        // now pickup the other one
-        other->client->dropWeaponTime = level.time;
-
-        // add the weapon
-        COM_BitSet(other->client->ps.weapons, ent->item->giTag);
-
-        // DHM - Fixup mauser/sniper issues
-        if (ent->item->giTag == WP_FG42) {
-          COM_BitSet(other->client->ps.weapons, WP_FG42SCOPE);
-        } else if (ent->item->giTag == WP_GARAND) {
-          COM_BitSet(other->client->ps.weapons, WP_GARAND_SCOPE);
-        } else if (ent->item->giTag == WP_K43) {
-          COM_BitSet(other->client->ps.weapons, WP_K43_SCOPE);
-        } else if (ent->item->giTag == WP_MORTAR) {
-          COM_BitSet(other->client->ps.weapons, WP_MORTAR_SET);
-        } else if (ent->item->giTag == WP_MOBILE_MG42) {
-          COM_BitSet(other->client->ps.weapons, WP_MOBILE_MG42_SET);
-        } else if (ent->item->giTag == WP_CARBINE) {
-          COM_BitSet(other->client->ps.weapons, WP_M7);
-        } else if (ent->item->giTag == WP_KAR98) {
-          COM_BitSet(other->client->ps.weapons, WP_GPG40);
-        }
-
+      } else {
         other->client->ps.ammoclip[BG_FindClipForWeapon(
-            static_cast<weapon_t>(ent->item->giTag))] = 0;
-        other->client->ps.ammo[BG_FindAmmoForWeapon(
-            static_cast<weapon_t>(ent->item->giTag))] = 0;
+            static_cast<weapon_t>(ent->item->giTag))] = quantity;
 
-        if (ent->item->giTag == WP_MORTAR) {
-          other->client->ps.ammo[BG_FindClipForWeapon(
-              static_cast<weapon_t>(ent->item->giTag))] = quantity;
-
-          // Gordon: secondary weapon
-          // ammo
-          if (ent->delay) {
-            Add_Ammo(other, weapAlts[ent->item->giTag], ent->delay, qfalse);
-          }
-        } else {
-          other->client->ps.ammoclip[BG_FindClipForWeapon(
-              static_cast<weapon_t>(ent->item->giTag))] = quantity;
-
-          // Gordon: secondary weapon
-          // ammo
-          if (ent->delay) {
-            other->client->ps.ammo[weapAlts[ent->item->giTag]] = ent->delay;
-          }
+        // Gordon: secondary weapon ammo
+        if (quantityAlt) {
+          other->client->ps.ammo[weapAlts[ent->item->giTag]] = quantityAlt;
         }
       }
     } else {
