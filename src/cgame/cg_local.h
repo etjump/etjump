@@ -2717,6 +2717,8 @@ extern vmCvar_t etj_crosshairScaleY;
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
 
+extern vmCvar_t etj_noPanzerAutoswitch;
+
 //
 // cg_main.c
 //

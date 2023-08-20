@@ -869,6 +869,7 @@ typedef struct {
   qboolean autoLoad;
   qboolean quickFollow;
   bool snaphud;
+  bool noPanzerAutoswitch;
 
   unsigned int maxFPS;
   char netname[MAX_NETNAME];
