@@ -6,7 +6,7 @@
 // Left side menus
 #define SUBW_GENERAL_Y SUBW_Y
 #define SUBW_GENERAL_ITEM_Y SUBW_GENERAL_Y + SUBW_HEADER_HEIGHT
-#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 20)
+#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 21)
 
 #define SUBW_PLAYERS_Y SUBW_GENERAL_Y + SUBW_GENERAL_HEIGHT + SUBW_SPACING_Y
 #define SUBW_PLAYERS_ITEM_Y SUBW_PLAYERS_Y + SUBW_HEADER_HEIGHT
@@ -68,6 +68,7 @@ menuDef {
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 19), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Optimized Prediction:", 0.2, SUBW_ITEM_HEIGHT, "etj_optimizePrediction", "Enable optimized playerstate prediction\netj_optimizePrediction")
         CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 20), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 20), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Menu sensitivity:", 0.2, SUBW_ITEM_HEIGHT, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 21), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "No panzer autoswitch:", 0.2, SUBW_ITEM_HEIGHT, "etj_noPanzerAutoswitch", "Toggle automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_PLAYERS_Y, SUBW_WIDTH, SUBW_PLAYERS_HEIGHT, "PLAYERS")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide players:", 0.2, SUBW_ITEM_HEIGHT, "etj_hide", "Hides other players when they are too close\netj_hide")

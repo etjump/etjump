@@ -4789,7 +4789,8 @@ static void PM_Weapon(void) {
 
   // JPW NERVE -- in multiplayer, pfaust fires once then switches to
   // pistol since it's useless for a while
-  if ((pm->ps->weapon == WP_PANZERFAUST) ||
+  if ((pm->ps->weapon == WP_PANZERFAUST &&
+       (!pm->noPanzerAutoswitch || pm->ps->ammoclip[WP_PANZERFAUST] == 0)) ||
       (pm->ps->weapon == WP_SMOKE_MARKER) || (pm->ps->weapon == WP_DYNAMITE) ||
       (pm->ps->weapon == WP_SMOKE_BOMB) || (pm->ps->weapon == WP_LANDMINE) ||
       (pm->ps->weapon == WP_SATCHEL)) {

@@ -4785,7 +4785,7 @@ void CG_OutOfAmmoChange(qboolean allowforceswitch) {
 
     // JPW NERVE -- early out if we just fired Panzerfaust, go
     // to pistola, then grenades
-    if (cg.weaponSelect == WP_PANZERFAUST) {
+    if (cg.weaponSelect == WP_PANZERFAUST && !etj_noPanzerAutoswitch.integer) {
       for (i = 0; i < MAX_WEAPS_IN_BANK_MP; i++) {
         if (CG_WeaponSelectable(weapBanksMultiPlayer[2][i])) // find a pistol
         {
