@@ -3,6 +3,7 @@
 ****/
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
@@ -503,6 +504,12 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly) {
 
   ft = CG_IsOnFireteam(cg.clientNum);
   if (!ft) {
+    return qfalse;
+  }
+
+  // spectators are soldiers, but doesn't make much sense
+  // to let them access class-specifc vsay strings
+  if (!ETJump::isPlaying(cg.clientNum)) {
     return qfalse;
   }
 

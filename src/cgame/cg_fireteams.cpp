@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 
 panel_button_text_t fireteamTitleFont = {
@@ -575,7 +576,7 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
         for (i = 0; ftMenuRootStrings[i]; i++) {
           const char *str;
 
-          if (i < 5) {
+          if (i < NUM_PLAYER_CLASSES) {
             if (!CG_FireteamHasClass(i, qtrue)) {
               continue;
             }
@@ -595,40 +596,30 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
           y += button->rect.h;
         }
       } else {
-        // FT_MENUPOS_NONE or out of enum range
-        if (cgs.ftMenuPos < 0 || cgs.ftMenuPos > 5) {
+        // spectators don't get class-specific vsays
+        if (!ETJump::isPlaying(cg.clientNum)) {
           return;
-        } else {
-          int ftMenuStringsIdx = cgs.ftMenuPos;
-          int ftMenuStringsAlphacharsIdx = cgs.ftMenuPos;
-          ftMenuStringsIdx = Numeric::clamp(
-              ftMenuStringsIdx, 0,
-              (sizeof(ftMenuStrings) / sizeof(ftMenuStrings[0]) - 1));
-          ftMenuStringsAlphacharsIdx =
-              Numeric::clamp(ftMenuStringsAlphacharsIdx, 0,
-                             (sizeof(ftMenuStringsAlphachars) /
-                              sizeof(ftMenuStringsAlphachars[0])) -
-                                 1);
+        }
 
-          const char **strings = ftMenuStrings[ftMenuStringsIdx];
+        // sanity check, cls should be valid but let's make sure
+        int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
+                                 NUM_PLAYER_CLASSES - 1);
+        const char **strings = ftMenuStrings[idx];
 
-          for (i = 0; strings[i]; i++) {
-            const char *str;
+        for (i = 0; strings[i]; i++) {
+          const char *str;
 
-            if (cg_quickMessageAlt.integer) {
-              str = va("%i. %s", (i + 1) % 10, strings[i]);
-            } else {
-              str = va("%s. %s",
-                       (ftMenuStringsAlphachars[ftMenuStringsAlphacharsIdx])[i],
-                       strings[i]);
-            }
-
-            CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                              button->font->scaley, button->font->colour, str,
-                              0, 0, button->font->style, button->font->font);
-
-            y += button->rect.h;
+          if (cg_quickMessageAlt.integer) {
+            str = va("%i. %s", (i + 1) % 10, strings[i]);
+          } else {
+            str = va("%s. %s", (ftMenuStringsAlphachars[idx])[i], strings[i]);
           }
+
+          CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                            button->font->scaley, button->font->colour, str, 0,
+                            0, button->font->style, button->font->font);
+
+          y += button->rect.h;
         }
       }
       break;
@@ -792,7 +783,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           if (key >= '0' && key <= '9') {
             int i = ((key - '0') + 9) % 10;
 
-            if (i < 5) {
+            if (i < NUM_PLAYER_CLASSES) {
               if (!CG_FireteamHasClass(i, qtrue)) {
                 return qfalse;
               }
@@ -803,7 +794,8 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
             }
 
             if (doaction) {
-              if (i < 5) {
+              // class-specific vsays
+              if (i < NUM_PLAYER_CLASSES) {
                 cgs.ftMenuPos = i;
               } else if (i == 5) {
                 CG_QuickFireteamMessage_f();
@@ -822,14 +814,15 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
           for (i = 0; ftMenuRootStrings[i]; i++) {
             if (key == tolower(*ftMenuRootStringsAlphachars[i])) {
-              if (i < 5) {
+              if (i < NUM_PLAYER_CLASSES) {
                 if (!CG_FireteamHasClass(i, qtrue)) {
                   return qfalse;
                 }
               }
 
               if (doaction) {
-                if (i < 5) {
+                // class-specifc vsays
+                if (i < NUM_PLAYER_CLASSES) {
                   cgs.ftMenuPos = i;
                 } else if (i == 5) {
                   CG_QuickFireteamMessage_f();
@@ -845,34 +838,29 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           }
         }
       } else {
-        // FT_MENUPOS_NONE or out of enum range
-        if (cgs.ftMenuPos < 0 || cgs.ftMenuPos > 5) {
+        // spectators don't get class-specific vsays
+        if (!ETJump::isPlaying(cg.clientNum)) {
           return qfalse;
         }
 
-        int ftMenuStringsIdx = cgs.ftMenuPos;
-        int ftMenuStringsMsgIdx = cgs.ftMenuPos;
-        ftMenuStringsIdx = Numeric::clamp(
-            ftMenuStringsIdx, 0,
-            (sizeof(ftMenuStrings) / sizeof(ftMenuStrings[0]) - 1));
-        ftMenuStringsMsgIdx = Numeric::clamp(
-            ftMenuStringsMsgIdx, 0,
-            (sizeof(ftMenuStringsMsg) / sizeof(ftMenuStringsMsg[0]) - 1));
+        // sanity check, cls should be valid but let's make sure
+        int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
+                                 NUM_PLAYER_CLASSES - 1);
 
         if (cg_quickMessageAlt.integer) {
           if (key >= '0' && key <= '9') {
             int i = ((key - '0') + 9) % 10;
             int x;
 
-            const char **strings = ftMenuStrings[ftMenuStringsIdx];
+            const char **strings = ftMenuStrings[idx];
 
             for (x = 0; strings[x]; x++) {
               if (x == i) {
                 if (doaction) {
-                  trap_SendClientCommand(
-                      va("vsay_buddy %i %s %s", cgs.ftMenuPos,
-                         CG_BuildSelectedFirteamString(),
-                         (ftMenuStringsMsg[ftMenuStringsMsgIdx])[i]));
+                  trap_SendClientCommand(va("vsay_buddy %i %s %s",
+                                            cgs.ftMenuPos,
+                                            CG_BuildSelectedFirteamString(),
+                                            (ftMenuStringsMsg[idx])[i]));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 }
 
@@ -882,26 +870,16 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           }
         } else {
           int i;
-          const char **strings = ftMenuStrings[ftMenuStringsIdx];
-
-          int ftMenuStringsAlphacharsIdx = cgs.ftMenuPos;
-          ftMenuStringsAlphacharsIdx =
-              Numeric::clamp(ftMenuStringsAlphacharsIdx, 0,
-                             (sizeof(ftMenuStringsAlphachars) /
-                                  sizeof(ftMenuStringsAlphachars[0]) -
-                              1));
+          const char **strings = ftMenuStrings[idx];
 
           for (i = 0; strings[i]; i++) {
-            if (key ==
-                tolower(
-                    *ftMenuStringsAlphachars[ftMenuStringsAlphacharsIdx][i])) {
+            if (key == tolower(*ftMenuStringsAlphachars[idx][i])) {
 
               if (doaction) {
 
-                trap_SendClientCommand(
-                    va("vsay_buddy %i %s %s", cgs.ftMenuPos,
-                       CG_BuildSelectedFirteamString(),
-                       (ftMenuStringsMsg[ftMenuStringsMsgIdx])[i]));
+                trap_SendClientCommand(va("vsay_buddy %i %s %s", cgs.ftMenuPos,
+                                          CG_BuildSelectedFirteamString(),
+                                          (ftMenuStringsMsg[idx])[i]));
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
               }
               return qtrue;
