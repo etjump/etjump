@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "cg_local.h"
+#include "../game/etj_numeric_utilities.h"
 
 panel_button_text_t fireteamTitleFont = {
     0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f}, 0, 0, &cgs.media.limboFont1_lo,
@@ -598,7 +599,18 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
         if (cgs.ftMenuPos < 0 || cgs.ftMenuPos > 5) {
           return;
         } else {
-          const char **strings = ftMenuStrings[cgs.ftMenuPos];
+          int ftMenuStringsIdx = cgs.ftMenuPos;
+          int ftMenuStringsAlphacharsIdx = cgs.ftMenuPos;
+          ftMenuStringsIdx = Numeric::clamp(
+              ftMenuStringsIdx, 0,
+              (sizeof(ftMenuStrings) / sizeof(ftMenuStrings[0]) - 1));
+          ftMenuStringsAlphacharsIdx =
+              Numeric::clamp(ftMenuStringsAlphacharsIdx, 0,
+                             (sizeof(ftMenuStringsAlphachars) /
+                              sizeof(ftMenuStringsAlphachars[0])) -
+                                 1);
+
+          const char **strings = ftMenuStrings[ftMenuStringsIdx];
 
           for (i = 0; strings[i]; i++) {
             const char *str;
@@ -606,7 +618,8 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
             if (cg_quickMessageAlt.integer) {
               str = va("%i. %s", (i + 1) % 10, strings[i]);
             } else {
-              str = va("%s. %s", (ftMenuStringsAlphachars[cgs.ftMenuPos])[i],
+              str = va("%s. %s",
+                       (ftMenuStringsAlphachars[ftMenuStringsAlphacharsIdx])[i],
                        strings[i]);
             }
 
@@ -837,12 +850,21 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           return qfalse;
         }
 
+        int ftMenuStringsIdx = cgs.ftMenuPos;
+        int ftMenuStringsMsgIdx = cgs.ftMenuPos;
+        ftMenuStringsIdx = Numeric::clamp(
+            ftMenuStringsIdx, 0,
+            (sizeof(ftMenuStrings) / sizeof(ftMenuStrings[0]) - 1));
+        ftMenuStringsMsgIdx = Numeric::clamp(
+            ftMenuStringsMsgIdx, 0,
+            (sizeof(ftMenuStringsMsg) / sizeof(ftMenuStringsMsg[0]) - 1));
+
         if (cg_quickMessageAlt.integer) {
           if (key >= '0' && key <= '9') {
             int i = ((key - '0') + 9) % 10;
             int x;
 
-            const char **strings = ftMenuStrings[cgs.ftMenuPos];
+            const char **strings = ftMenuStrings[ftMenuStringsIdx];
 
             for (x = 0; strings[x]; x++) {
               if (x == i) {
@@ -850,7 +872,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
                   trap_SendClientCommand(
                       va("vsay_buddy %i %s %s", cgs.ftMenuPos,
                          CG_BuildSelectedFirteamString(),
-                         (ftMenuStringsMsg[cgs.ftMenuPos])[i]));
+                         (ftMenuStringsMsg[ftMenuStringsMsgIdx])[i]));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 }
 
@@ -860,17 +882,26 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           }
         } else {
           int i;
-          const char **strings = ftMenuStrings[cgs.ftMenuPos];
+          const char **strings = ftMenuStrings[ftMenuStringsIdx];
+
+          int ftMenuStringsAlphacharsIdx = cgs.ftMenuPos;
+          ftMenuStringsAlphacharsIdx =
+              Numeric::clamp(ftMenuStringsAlphacharsIdx, 0,
+                             (sizeof(ftMenuStringsAlphachars) /
+                                  sizeof(ftMenuStringsAlphachars[0]) -
+                              1));
 
           for (i = 0; strings[i]; i++) {
-            if (key == tolower(*ftMenuStringsAlphachars[cgs.ftMenuPos][i])) {
+            if (key ==
+                tolower(
+                    *ftMenuStringsAlphachars[ftMenuStringsAlphacharsIdx][i])) {
 
               if (doaction) {
 
                 trap_SendClientCommand(
                     va("vsay_buddy %i %s %s", cgs.ftMenuPos,
                        CG_BuildSelectedFirteamString(),
-                       (ftMenuStringsMsg[cgs.ftMenuPos])[i]));
+                       (ftMenuStringsMsg[ftMenuStringsMsgIdx])[i]));
                 CG_EventHandling(CGAME_EVENT_NONE, qfalse);
               }
               return qtrue;
