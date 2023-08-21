@@ -602,8 +602,8 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
         }
 
         // sanity check, cls should be valid but let's make sure
-        int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
-                                 NUM_PLAYER_CLASSES - 1);
+        const int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
+                                       NUM_PLAYER_CLASSES - 1);
         const char **strings = ftMenuStrings[idx];
 
         for (i = 0; strings[i]; i++) {
@@ -844,8 +844,8 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         }
 
         // sanity check, cls should be valid but let's make sure
-        int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
-                                 NUM_PLAYER_CLASSES - 1);
+        const int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
+                                       NUM_PLAYER_CLASSES - 1);
 
         if (cg_quickMessageAlt.integer) {
           if (key >= '0' && key <= '9') {
