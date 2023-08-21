@@ -203,7 +203,7 @@ void ETJump::execFile(const std::string &filename) {
   trap_SendConsoleCommand(va("exec \"%s.cfg\"\n", filename.c_str()));
 }
 
-bool ETJump::isPlaying(int clientNum) {
+bool ETJump::isPlaying(const int clientNum) {
   return (cgs.clientinfo[clientNum].team == TEAM_ALLIES ||
           cgs.clientinfo[clientNum].team == TEAM_AXIS);
 }
