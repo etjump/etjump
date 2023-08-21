@@ -368,10 +368,12 @@ static void CG_QuickFireteams_f() {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
       cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
+      cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
     }
   } else if (CG_IsOnFireteam(cg.clientNum)) {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
     cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
+    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
   }
 }
 

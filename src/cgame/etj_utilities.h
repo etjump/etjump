@@ -63,5 +63,8 @@ bool configFileExists(const std::string &filename);
 // executes a cfg file with given name, omit .cfg extension
 void execFile(const std::string &filename);
 
+// returns true if client is currently playing (team axis/allies)
+bool isPlaying(int clientNum);
+
 #endif
 } // namespace ETJump

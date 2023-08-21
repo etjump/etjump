@@ -3,6 +3,7 @@
 ****/
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
@@ -506,6 +507,12 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly) {
     return qfalse;
   }
 
+  // spectators are soldiers, but doesn't make much sense
+  // to let them access class-specifc vsay strings
+  if (!ETJump::isPlaying(cg.clientNum)) {
+    return qfalse;
+  }
+
   for (i = 0; i < MAX_CLIENTS; i++) {
     /*		if( i == cgs.clientinfo ) {
                 continue;
@@ -533,15 +540,15 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly) {
   return qfalse;
 }
 
-const char *CG_BuildSelectedFirteamString(void) {
+const char *CG_BuildSelectedFirteamString() {
   char buffer[256];
   clientInfo_t *ci;
   int cnt = 0;
   int i;
 
   *buffer = '\0';
-  for (i = 0; i < 6; i++) {
-    ci = CG_SortedFireTeamPlayerForPosition(i, 6);
+  for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
+    ci = CG_SortedFireTeamPlayerForPosition(i, MAX_FIRETEAM_USERS);
     if (!ci) {
       break;
     }
