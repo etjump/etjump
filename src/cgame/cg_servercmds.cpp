@@ -1021,6 +1021,10 @@ static void CG_MapRestart(void) {
 
   cg.filtercams = Q_atoi(CG_ConfigString(CS_FILTERCAMS)) ? qtrue : qfalse;
 
+  // reset on map restart to avoid de-sync from cheat protected cvars
+  // on ETe/ETL due to them resetting cheat cvars on map start
+  cg.shadowCvarsSet = false;
+
   CG_ChargeTimesChanged();
 
   CG_ParseFireteams();
