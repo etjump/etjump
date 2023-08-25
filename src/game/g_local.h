@@ -869,6 +869,7 @@ typedef struct {
   qboolean autoLoad;
   qboolean quickFollow;
   bool snaphud;
+  bool noPanzerAutoswitch;
 
   unsigned int maxFPS;
   char netname[MAX_NETNAME];
@@ -2133,6 +2134,7 @@ extern vmCvar_t g_customMapVotesFile;
 
 // Start of timeruns support
 extern vmCvar_t g_timerunsDatabase;
+extern vmCvar_t g_timeruns2Database;
 // End of timeruns support
 
 // tokens
@@ -2928,7 +2930,9 @@ enum class TimerunSpawnflags {
   NoPortalgunPickup = 64,
   NoSave = 128,
 };
-}
+
+bool checkCheatCvars(gclient_s *client, int flags);
+} // namespace ETJump
 
 void TimerunConnectNotify(gentity_t *ent);
 

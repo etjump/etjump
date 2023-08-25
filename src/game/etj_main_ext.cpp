@@ -88,6 +88,44 @@ void WriteSessionData() {
   }
 }
 
+namespace ETJump {
+bool checkCheatCvars(gclient_s *client, int flags) {
+  bool cheatCvarsEnabled = false;
+  const int clientNum = ClientNum(client);
+  std::string message =
+      "^gThe following cvars are not allowed on this server:\n";
+
+  if (flags & static_cast<int>(CheatCvarFlags::LookYaw)) {
+    message += "^3cl_yawspeed != 0\n"
+               "^3cl_freelook 0\n";
+
+    if (client->pers.clientFlags & CGF_CHEATCVARSON) {
+      cheatCvarsEnabled = true;
+    }
+  }
+
+  if (flags & static_cast<int>(CheatCvarFlags::PmoveFPS)) {
+    message += "^3pmove_fixed 0 ^gwith:\n"
+               "^3com_maxfps ^goutside of ^325-125\n\"";
+
+    if ((client->pers.maxFPS > 125 || client->pers.maxFPS < 25) &&
+        !client->pers.pmoveFixed) {
+      cheatCvarsEnabled = true;
+    }
+  }
+
+  if (cheatCvarsEnabled) {
+    trap_SendServerCommand(clientNum, va("cheatCvarsOff %i", flags));
+    Printer::SendChatMessage(clientNum,
+                             "^gCheat cvars are not allowed on this server, "
+                             "check console for more information.\n");
+    Printer::SendConsoleMessage(clientNum, message);
+  }
+
+  return cheatCvarsEnabled;
+}
+} // namespace ETJump
+
 /*
 Changes map to a random map
 */
@@ -138,7 +176,7 @@ void OnGameInit() {
       level.rawmapname,
       std::make_unique<ETJump::TimerunRepository>(
           std::make_unique<ETJump::DatabaseV2>(
-              "timerunv2", GetPath(g_timerunsDatabase.string) + ".v2"),
+              "timerunv2", GetPath(g_timeruns2Database.string)),
           std::make_unique<ETJump::DatabaseV2>(
               "timerunv1", GetPath(g_timerunsDatabase.string))),
       std::make_unique<ETJump::Log>("timerunv2"),

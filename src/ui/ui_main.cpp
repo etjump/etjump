@@ -8464,6 +8464,11 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu) {
         Menus_OpenByName("ingame_messagemode");
         return;
 
+      case UIMENU_INGAME_FT_SAVELIMIT:
+        trap_Key_SetCatcher(KEYCATCH_UI);
+        Menus_OpenByName("ingame_ft_savelimit");
+        return;
+
       default:
         return; // TTimo: a lot of not handled
     }

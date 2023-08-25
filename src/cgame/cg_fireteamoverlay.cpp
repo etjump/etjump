@@ -3,7 +3,9 @@
 ****/
 
 #include "cg_local.h"
+#include "etj_utilities.h"
 #include "../game/etj_numeric_utilities.h"
+#include "../game/etj_string_utilities.h"
 
 /******************************************************************************
 ***** Defines, constants, etc
@@ -86,14 +88,6 @@ void CG_ParseFireteams() {
   int clnts[2];
   unsigned int tmp;
 
-  // qboolean onFireteam2;
-  // qboolean isLeader2;
-
-  //	qboolean onFireteam =	CG_IsOnFireteam( cg.clientNum ) ? qtrue
-  //:
-  // qfalse; 	qboolean isLeader =		CG_IsFireTeamLeader(
-  // cg.clientNum ) ? qtrue : qfalse;
-
   for (i = 0; i < MAX_CLIENTS; i++) {
     cgs.clientinfo[i].fireteamData = NULL;
   }
@@ -101,18 +95,6 @@ void CG_ParseFireteams() {
   for (i = 0; i < MAX_FIRETEAMS; i++) {
     char hexbuffer[11] = "0x00000000";
     p = CG_ConfigString(CS_FIRETEAMS + i);
-
-    /*		s = Info_ValueForKey(p, "n");
-            if(!s || !*s) {
-                cg.fireTeams[i].inuse = qfalse;
-                continue;
-            } else {
-                cg.fireTeams[i].inuse = qtrue;
-            }*/
-
-    //		Q_strncpyz(cg.fireTeams[i].name, s, 32);
-    //		CG_Printf("Fireteam: %s\n",
-    // cg.fireTeams[i].name);
 
     j = Q_atoi(Info_ValueForKey(p, "id"));
     if (j == -1) {
@@ -126,6 +108,9 @@ void CG_ParseFireteams() {
     s = Info_ValueForKey(p, "l");
     cg.fireTeams[i].leader = Q_atoi(s);
 
+    s = Info_ValueForKey(p, "sl");
+    cg.fireTeams[i].saveLimit = Q_atoi(s);
+
     s = Info_ValueForKey(p, "c");
     Q_strncpyz(hexbuffer + 2, s, 9);
     sscanf(hexbuffer, "%x", &tmp);
@@ -138,8 +123,6 @@ void CG_ParseFireteams() {
       if (COM_BitCheck(clnts, j)) {
         cg.fireTeams[i].joinOrder[j] = qtrue;
         cgs.clientinfo[j].fireteamData = &cg.fireTeams[i];
-        //				CG_Printf("%s\n",
-        // cgs.clientinfo[j].name);
       } else {
         cg.fireTeams[i].joinOrder[j] = qfalse;
       }
@@ -147,9 +130,6 @@ void CG_ParseFireteams() {
   }
 
   CG_SortClientFireteam();
-
-  // onFireteam2 = CG_IsOnFireteam(cg.clientNum) ? qtrue : qfalse;
-  // isLeader2   = CG_IsFireTeamLeader(cg.clientNum) ? qtrue : qfalse;
 }
 
 // Fireteam that both specified clients are on, if they both are on the same
@@ -266,16 +246,19 @@ clientInfo_t *CG_SortedFireTeamPlayerForPosition(int pos, int max) {
 ***** Main Functions
 ****/
 
-#define FT_BAR_YSPACING 2.f
-#define FT_BAR_HEIGHT 10.f
+constexpr float FT_BAR_YSPACING = 2.0f;
+constexpr float FT_BAR_HEIGHT = 10.0f;
+constexpr int FT_WIDTH = 204;
+constexpr int FT_HEADER_HEIGHT = 12;
+
 void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   float x = rect->x;
   float y = rect->y + 1 +
             etj_fireteamPosY.value; // +1, jitter it into place in 1024 :)
   float h;
-  clientInfo_t *ci = nullptr;
-  char buffer[64];
-  fireteamData_t *f = nullptr;
+  clientInfo_t *ci;
+  std::string buffer;
+  fireteamData_t *f;
   int i;
   vec4_t clr1 = {.16f, .2f, .17f, .8f};
   vec4_t clr2 = {0.f, 0.f, 0.f, .2f};
@@ -284,12 +267,11 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   vec4_t bgColor = {0.0f, 0.0f, 0.0f, 0.6f};     // window
   vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f}; // window
 
-  float fireteamAlpha = etj_fireteamAlpha.value;
-  float fireteamOffsetX = ETJump_AdjustPosition(etj_fireteamPosX.value);
-
+  const float fireteamOffsetX = ETJump_AdjustPosition(etj_fireteamPosX.value);
   x += fireteamOffsetX;
 
-  fireteamAlpha = Numeric::clamp(fireteamAlpha, 0.0f, 1.0f);
+  const float fireteamAlpha =
+      Numeric::clamp(etj_fireteamAlpha.value, 0.0f, 1.0f);
 
   clr1[3] *= fireteamAlpha;
   clr2[3] *= fireteamAlpha;
@@ -304,10 +286,11 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
     return;
   }
 
-  h = 12 + 2 + 2;
-  // Changed i < 6 to i < 15, should allow 15 ppl to FT now.
-  for (i = 0; i < 15; i++) {
-    ci = CG_SortedFireTeamPlayerForPosition(i, 15);
+  const bool saveLimit = f->saveLimit != FT_SAVELIMIT_NOT_SET;
+  h = FT_HEADER_HEIGHT + 2 + 2;
+
+  for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
+    ci = CG_SortedFireTeamPlayerForPosition(i, MAX_FIRETEAM_USERS);
     if (!ci) {
       break;
     }
@@ -315,90 +298,96 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
     h += FT_BAR_HEIGHT + FT_BAR_YSPACING;
   }
 
-  CG_DrawRect(x, y, 204, h, 1, borderColor);
-  CG_FillRect(x + 1, y + 1, 204 - 2, h - 2, bgColor);
+  CG_DrawRect(x, y, FT_WIDTH, h, 1, borderColor);
+  CG_FillRect(x + 1, y + 1, FT_WIDTH - 2, h - 2, bgColor);
 
   x += 2;
   y += 2;
 
-  CG_FillRect(x, y, 204 - 4, 12, clr1);
+  CG_FillRect(x, y, FT_WIDTH - 4, FT_HEADER_HEIGHT, clr1);
 
-  sprintf(buffer, "Fireteam: %s", bg_fireteamNames[f->ident]);
-  Q_strupr(buffer);
+  buffer = ETJump::StringUtil::toUpperCase(
+      ETJump::stringFormat("Fireteam: %s", bg_fireteamNames[f->ident]));
   CG_Text_Paint_Ext(x + 3, y + FT_BAR_HEIGHT, .19f, .19f, tclr, buffer, 0, 0, 0,
                     &cgs.media.limboFont1);
 
+  if (saveLimit) {
+    if (f->saveLimit == 0) {
+      vec4_t friendShaderColor = {1.0f, 1.0f, 1.0f, fireteamAlpha};
+      ETJump::drawPic(rect->x + FT_WIDTH - 4 - 8 + fireteamOffsetX,
+                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
+      ETJump::drawPic(rect->x + FT_WIDTH - 4 - 8 + fireteamOffsetX,
+                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.friendShader,
+                      friendShaderColor);
+
+    } else {
+      buffer = ETJump::stringFormat("%i", f->saveLimit);
+      auto textW = static_cast<float>(
+          CG_Text_Width_Ext(buffer, 0.19f, 0, &cgs.media.limboFont1));
+      CG_Text_Paint_RightAligned_Ext(
+          rect->x + FT_WIDTH - 4 + fireteamOffsetX, y + FT_BAR_HEIGHT, .19f,
+          .19f, tclr, va("%i", f->saveLimit), 0, 0, 0, &cgs.media.limboFont1);
+      ETJump::drawPic(rect->x + FT_WIDTH - 4 - textW - 12 + fireteamOffsetX,
+                      y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
+    }
+  }
+
   x += 2;
 
-  for (i = 0; i < 15; i++) {
+  for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
     y += FT_BAR_HEIGHT + FT_BAR_YSPACING;
     x = rect->x + 2 + fireteamOffsetX;
 
-    ci = CG_SortedFireTeamPlayerForPosition(i, 15);
+    ci = CG_SortedFireTeamPlayerForPosition(i, MAX_FIRETEAM_USERS);
     if (!ci) {
       break;
     }
 
     if (ci->selected) {
-      CG_FillRect(x, y + FT_BAR_YSPACING, 204 - 4, FT_BAR_HEIGHT, clr3);
+      CG_FillRect(x, y + FT_BAR_YSPACING, FT_WIDTH - 4, FT_BAR_HEIGHT, clr3);
     } else {
-      CG_FillRect(x, y + FT_BAR_YSPACING, 204 - 4, FT_BAR_HEIGHT, clr2);
+      CG_FillRect(x, y + FT_BAR_YSPACING, FT_WIDTH - 4, FT_BAR_HEIGHT, clr2);
     }
 
     x += 4;
 
-    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
-                      BG_ClassLetterForNumber(ci->cls), 0, 0,
-                      ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
-    x += 10;
+    CG_Text_Paint_Ext(
+        x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
+        ci->team != TEAM_SPECTATOR ? BG_ClassLetterForNumber(ci->cls) : "", 0,
+        0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+    x += 12;
 
-    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
-                      ci->team == TEAM_AXIS ? miniRankNames_Axis[ci->rank]
-                                            : miniRankNames_Allies[ci->rank],
-                      0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
-    x += 22;
-
-    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, ci->name, 0, 17,
+    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, ci->name, 0, 25,
                       ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
-    x += 110;
+    x += 176;
 
     if (ci->team == TEAM_SPECTATOR) {
       CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, "^3S", 0, 0,
                         ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
     } else {
+      vec4_t healthColor = {0.6f, 0.6f, 0.6f, 1.0f};
+      const char *healthStr;
 
       if (ci->health > 80) {
-        CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
-                          va("%i", ci->health), 0, 0, ITEM_TEXTSTYLE_SHADOWED,
-                          &cgs.media.limboFont2);
+        healthStr = va("%i", ci->health);
       } else if (ci->health > 0) {
-        CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, colorYellow,
-                          va("%i", ci->health), 0, 0, ITEM_TEXTSTYLE_SHADOWED,
-                          &cgs.media.limboFont2);
+        Vector4Copy(colorYellow, healthColor);
+        healthStr = va("%i", ci->health);
       } else {
-        CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, colorRed,
-                          va("%i", ci->health < 0 ? 0 : ci->health), 0, 0,
-                          ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+        Vector4Copy(colorRed, healthColor);
+        healthStr = va("%i", ci->health < 0 ? 0 : ci->health);
       }
-    }
-    {
-      vec2_t loc;
-      char *s;
 
-      loc[0] = static_cast<float>(ci->location[0]);
-      loc[1] = static_cast<float>(ci->location[1]);
-
-      s = va("^3(%s)", BG_GetLocationString(loc));
+      healthColor[3] *= fireteamAlpha;
 
       x = rect->x +
-          (204 - 4 -
+          (FT_WIDTH - 4 -
            static_cast<float>(
-               CG_Text_Width_Ext(s, .2f, 0, &cgs.media.limboFont2))) +
+               CG_Text_Width_Ext(healthStr, .2f, 0, &cgs.media.limboFont2))) +
           fireteamOffsetX;
 
-      CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
-                        va("^3(%s)", BG_GetLocationString(loc)), 0, 0,
-                        ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, healthColor, healthStr,
+                        0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
     }
   }
 }
@@ -518,6 +507,12 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly) {
     return qfalse;
   }
 
+  // spectators are soldiers, but doesn't make much sense
+  // to let them access class-specifc vsay strings
+  if (!ETJump::isPlaying(cg.clientNum)) {
+    return qfalse;
+  }
+
   for (i = 0; i < MAX_CLIENTS; i++) {
     /*		if( i == cgs.clientinfo ) {
                 continue;
@@ -545,15 +540,15 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly) {
   return qfalse;
 }
 
-const char *CG_BuildSelectedFirteamString(void) {
+const char *CG_BuildSelectedFirteamString() {
   char buffer[256];
   clientInfo_t *ci;
   int cnt = 0;
   int i;
 
   *buffer = '\0';
-  for (i = 0; i < 6; i++) {
-    ci = CG_SortedFireTeamPlayerForPosition(i, 6);
+  for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
+    ci = CG_SortedFireTeamPlayerForPosition(i, MAX_FIRETEAM_USERS);
     if (!ci) {
       break;
     }

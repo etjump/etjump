@@ -164,8 +164,7 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
     } else {
       if (client->pers.race.isRacing) {
         if (client->pers.race.saveLimit == 0) {
-          CPTo(ent, "^7You've used all "
-                    "your saves.");
+          CPTo(ent, "^7You've used all your saves.");
           return;
         }
 
@@ -174,26 +173,14 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
         }
       } else {
         fireteamData_t *ft;
-        if (G_IsOnFireteam(ent - g_entities, &ft)) {
-          if (ft->saveLimit < 0) {
-            client->sess.saveLimitFt = 0;
-          }
-          if (ft->saveLimit) {
+        if (G_IsOnFireteam(ClientNum(ent), &ft)) {
+          if (ft->saveLimit == FT_SAVELIMIT_NOT_SET) {
+            client->sess.saveLimitFt = FT_SAVELIMIT_NOT_SET;
+          } else {
             if (client->sess.saveLimitFt) {
               client->sess.saveLimitFt--;
             } else {
-              CPTo(ent, "^7Yo"
-                        "u'"
-                        "ve "
-                        "used"
-                        " all"
-                        " you"
-                        "r "
-                        "fire"
-                        "team"
-                        " sav"
-                        "es"
-                        ".");
+              CPTo(ent, "^7You've used all your fireteam saves.");
               return;
             }
           }

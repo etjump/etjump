@@ -624,6 +624,10 @@ vmCvar_t etj_crosshairScaleY;
 vmCvar_t etj_crosshairThickness;
 vmCvar_t etj_crosshairOutline;
 
+vmCvar_t etj_ftSavelimit;
+
+vmCvar_t etj_noPanzerAutoswitch;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1144,6 +1148,12 @@ cvarTable_t cvarTable[] = {
     {&etj_crosshairScaleY, "etj_crosshairScaleY", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
     {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
+
+    // fireteam savelimit - added here to retain value it's set to
+    // upon re-opening the fireteam savelimit menu
+    {&etj_ftSavelimit, "etj_ftSavelimit", "-1", CVAR_TEMP},
+
+    {&etj_noPanzerAutoswitch, "etj_noPanzerAutoswitch", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1221,7 +1231,8 @@ void CG_UpdateCvars(void) {
             cv->vmCvar == &etj_noActivateLean ||
             cv->vmCvar == &etj_touchPickupWeapons ||
             cv->vmCvar == &etj_autoLoad || cv->vmCvar == &etj_quickFollow ||
-            cv->vmCvar == &etj_drawSnapHUD) {
+            cv->vmCvar == &etj_drawSnapHUD ||
+            cv->vmCvar == &etj_noPanzerAutoswitch) {
           fSetFlags = qtrue;
         } else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string) {
           trap_SendConsoleCommand(va("rconAuth %s\n", cg_rconPassword.string));
@@ -1273,9 +1284,7 @@ void CG_setClientFlags(void) {
           ((etj_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
           ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
           ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
-          ((cl_yawspeed.integer > 0 ||
-            (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
-            cl_freelook.integer == 0)
+          ((cl_yawspeed.integer != 0 || cl_freelook.integer == 0)
                ? CGF_CHEATCVARSON
                : 0) |
           ((etj_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
@@ -1284,7 +1293,8 @@ void CG_setClientFlags(void) {
           ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
           ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
           ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
-          ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0)
+          ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0) |
+          ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0)
           // Add more in here, as needed
           ),
 
@@ -3967,7 +3977,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   ETJump::init();
 
-  ETJump::execFile(va("autoexec_%s", cgs.rawmapname));
+  // map-specific autoexec
+  const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
+  if (ETJump::configFileExists(mapConfig)) {
+    ETJump::execFile(mapConfig);
+  } else if (ETJump::configFileExists("autoexec_default")) {
+    ETJump::execFile("autoexec_default");
+  }
 
   Com_Printf("CG_Init... DONE\n");
 }

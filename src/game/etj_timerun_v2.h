@@ -26,6 +26,7 @@
 
 #include <array>
 #include <map>
+#include <utility>
 
 #include "etj_command_parser.h"
 #include "etj_database_v2.h"
@@ -49,10 +50,9 @@ public:
 
   struct Player {
     Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
-      : clientNum(clientNum), userId(userId), records(runs), running(false),
-        startTime(opt<int>()), completionTime(opt<int>()),
-        nextCheckpointIdx(0) {
-    }
+        : clientNum(clientNum), userId(userId), records(runs), running(false),
+          startTime(opt<int>()), completionTime(opt<int>()),
+          nextCheckpointIdx(0) {}
 
     int clientNum;
     int userId;
@@ -67,19 +67,15 @@ public:
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
     // /loadcheckpoints stores checkpoints here
     std::map<std::string, std::array<int, MAX_TIMERUN_CHECKPOINTS>>
-    overriddenCheckpoints{};
+        overriddenCheckpoints{};
 
     const Timerun::Record *getRecord(int seasonId,
                                      const std::string &runName) const;
   };
 
   struct Ranking {
-    Ranking(int rank, int userId, const std::string &name, double score)
-      : rank(rank),
-        userId(userId),
-        name(name),
-        score(score) {
-    }
+    Ranking(int rank, int userId, std::string name, double score)
+        : rank(rank), userId(userId), name(std::move(name)), score(score) {}
 
     int rank;
     int userId;
@@ -95,32 +91,33 @@ public:
   void clientDisconnect(int clientNum);
   void startTimer(const std::string &runName, int clientNum,
                   const std::string &playerName, int currentTimeMs);
-  void checkpoint(const std::string &runName,
-                  int clientNum, int checkpointIndex, int currentTimeMs);
+  void checkpoint(const std::string &runName, int clientNum,
+                  int checkpointIndex, int currentTimeMs);
   void stopTimer(const std::string &runName, int clientNum, int currentTimeMs);
   void addSeason(Timerun::AddSeasonParams season);
   void editSeason(Timerun::EditSeasonParams params);
   void interrupt(int clientNum);
   void connectNotify(int clientNum);
   void printRecords(Timerun::PrintRecordsParams params);
-  void loadCheckpoints(int clientNum, const std::string &mapName,
-                       const std::string &runName, int rank);
-  void printRankings(const Timerun::PrintRankingsParams &params);
+  void loadCheckpoints(int clientNum, std::string mapName, std::string runName,
+                       int rank);
+  void printRankings(Timerun::PrintRankingsParams params);
   void printSeasons(int clientNum);
 
 private:
   void startNotify(Player *player);
-  bool isDebugging(int clientNum);
+  static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
-  std::array<int, MAX_TIMERUN_CHECKPOINTS> toCheckpointsArray(
-      const std::vector<int> *vector);
+  static std::array<int, MAX_TIMERUN_CHECKPOINTS>
+  toCheckpointsArray(const std::vector<int> *vector);
   /**
    * We can have multiple seasons running at once. This will
    * figure out which one is the most relevant for the user
    */
   const Timerun::Season *getMostRelevantSeason();
-  static std::string getRankingsStringFor(const std::vector<Ranking> *vector,
-                                   const Timerun::PrintRankingsParams &params);
+  static std::string
+  getRankingsStringFor(const std::vector<Ranking> *vector,
+                       const Timerun::PrintRankingsParams &params);
 
   std::string _currentMap;
   std::unique_ptr<TimerunRepository> _repository;
@@ -129,7 +126,7 @@ private:
   std::array<std::unique_ptr<Player>, 64> _players;
   std::vector<int> _activeSeasonsIds;
   std::vector<Timerun::Season> _activeSeasons;
-  const Timerun::Season *_mostRelevantSeason;
+  const Timerun::Season *_mostRelevantSeason{};
   std::map<int, std::vector<Ranking>> _rankingsPerSeason;
 };
-}
+} // namespace ETJump

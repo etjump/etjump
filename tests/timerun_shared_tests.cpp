@@ -5,28 +5,39 @@ using namespace ETJump;
 
 class TimerunSharedTests : public testing::Test {
 public:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 
   std::array<int, MAX_TIMERUN_CHECKPOINTS> CreateDefaultCheckpoints() {
     return {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -1, -1};
   }
+
+  std::array<int, MAX_TIMERUN_CHECKPOINTS> CreateDefaultCurrentCheckpoints() {
+    return {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -1, -1, -1, -1, -1};
+  }
 };
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize) {
-  auto start = TimerunCommands::Start(1, 2, "3", 4, CreateDefaultCheckpoints());
+  auto start = TimerunCommands::Start(1, 2, "3", 4, CreateDefaultCheckpoints(),
+                                      CreateDefaultCurrentCheckpoints());
 
-  ASSERT_EQ(start.serialize(),
-            "timerun start 1 2 \"3\" 4 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\"");
+  ASSERT_EQ(
+      start.serialize(),
+      "timerun start 1 2 \"3\" 4 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
+      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
   auto args =
-      std::vector<std::string>{"timerun", "start", "1", "2", "3", "4",
-                               "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1"};
+      std::vector<std::string>{"timerun",
+                               "start",
+                               "1",
+                               "2",
+                               "3",
+                               "4",
+                               "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1",
+                               "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1"};
   auto deserialized = TimerunCommands::Start::deserialize(args);
 
   ASSERT_EQ(deserialized.value().clientNum, 1);
@@ -34,24 +45,34 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
   ASSERT_EQ(deserialized.value().runName, "3");
   ASSERT_EQ(deserialized.value().previousRecord.value(), 4);
   ASSERT_EQ(deserialized.value().checkpoints[10], 11);
+  ASSERT_EQ(deserialized.value().currentRunCheckpoints[10], -1);
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize_IfNoPreviousRecord) {
-  auto start = TimerunCommands::Start(1, 2, "3", opt<int>(),
-                                      CreateDefaultCheckpoints());
+  auto start =
+      TimerunCommands::Start(1, 2, "3", opt<int>(), CreateDefaultCheckpoints(),
+                             CreateDefaultCurrentCheckpoints());
 
-  ASSERT_EQ(start.serialize(),
-            "timerun start 1 2 \"3\" -1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\"");
+  ASSERT_EQ(
+      start.serialize(),
+      "timerun start 1 2 \"3\" -1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
+      "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldDeserialize_IfNoPreviousRecord) {
-  auto args = std::vector<std::string>{"timerun", "start", "1", "2", "3", "-1",
-                                       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1"};
+  auto args =
+      std::vector<std::string>{"timerun",
+                               "start",
+                               "1",
+                               "2",
+                               "3",
+                               "-1",
+                               "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1",
+                               "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1"};
   auto deserialized = TimerunCommands::Start::deserialize(args);
 
   ASSERT_FALSE(deserialized.value().previousRecord.hasValue());
 }
-
 
 TEST_F(TimerunSharedTests, Checkpoint_ShouldSerialize) {
   auto checkpoint = TimerunCommands::Checkpoint(1, 2, 3, "4");
@@ -100,7 +121,8 @@ TEST_F(TimerunSharedTests, Record_ShouldSerialize) {
 }
 
 TEST_F(TimerunSharedTests, Record_ShouldDeserialize) {
-  auto args = std::vector<std::string>{"timerun", "record", "1", "2", "3", "run"};
+  auto args =
+      std::vector<std::string>{"timerun", "record", "1", "2", "3", "run"};
   auto record = TimerunCommands::Record::deserialize(args);
 
   ASSERT_EQ(record.value().clientNum, 1);
@@ -116,7 +138,8 @@ TEST_F(TimerunSharedTests, Completion_ShouldSerialize) {
 }
 
 TEST_F(TimerunSharedTests, Completion_ShouldDeserialize) {
-  auto args = std::vector<std::string>{"timerun", "completion", "1", "2", "3", "run"};
+  auto args =
+      std::vector<std::string>{"timerun", "completion", "1", "2", "3", "run"};
   auto interrupt = TimerunCommands::Completion::deserialize(args);
 
   ASSERT_EQ(interrupt.value().clientNum, 1);

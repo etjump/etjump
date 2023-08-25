@@ -1842,7 +1842,6 @@ typedef struct {
   qhandle_t simplePlayersShader;
   qhandle_t saveIcon;
   qhandle_t proneIcon;
-  qhandle_t forbidIcon;
   qhandle_t stopwatchIcon;
   qhandle_t stopwatchIconGreen;
   qhandle_t stopwatchIconRed;
@@ -2154,6 +2153,23 @@ struct range_t {
   bool split;
 };
 // End CGaz 5
+
+enum class FTMenuMode {
+  FT_VSAY = 0,
+  FT_MANAGE = 1, // create, leave, disband
+  FT_APPLY = 2,
+  FT_PROPOSE = 3,
+  FT_ADMIN = 4
+};
+
+// sub-pages of fireteam menus
+enum class FTMenuPos {
+  FT_MENUPOS_NONE = -1,
+  FT_MENUPOS_INVITE = 2,
+  FT_MENUPOS_KICK = 3,
+  FT_MENUPOS_WARN = 4,
+  FT_MENUPOS_RULES = 5
+};
 
 //==============================================================================
 
@@ -2700,6 +2716,8 @@ extern vmCvar_t etj_crosshairScaleX;
 extern vmCvar_t etj_crosshairScaleY;
 extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
+
+extern vmCvar_t etj_noPanzerAutoswitch;
 
 //
 // cg_main.c

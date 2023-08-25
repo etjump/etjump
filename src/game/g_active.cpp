@@ -481,6 +481,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd) {
     pm.trace = trap_TraceCapsuleNoEnts;
     pm.pointcontents = trap_PointContents;
     pm.noActivateLean = client->pers.noActivateLean;
+    pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
 #ifdef SAVEGAME_SUPPORT
     if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer) {
@@ -1171,6 +1172,7 @@ void ClientThink_real(gentity_t *ent) {
   pm.pmove_msec = pmove_msec.integer;
   pm.shared = shared.integer;
   pm.noActivateLean = client->pers.noActivateLean;
+  pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
   pm.noWeapClips = qfalse;
 
@@ -1467,21 +1469,7 @@ void ClientThink_real(gentity_t *ent) {
   CheckForEvents(ent);
 
   if (g_blockCheatCvars.integer) {
-    if (client->pers.clientFlags & CGF_CHEATCVARSON ||
-        (client->pers.maxFPS > 125 && !client->pers.pmoveFixed) ||
-        (client->pers.maxFPS < 25)) {
-      const char *message = "print \"^gThe following cvar values are not "
-                            "allowed on this server:\n"
-                            "^7m_pitch:      (-0.01 <= x <= 0.01)\n"
-                            "^7cl_yawspeed:  (not 0)\n"
-                            "^7cl_freelook:  (0)\n"
-                            "^7pmove_Fixed:  (0) with "
-                            "^7com_maxFPS:   (25 < x or x > 125)\n\"";
-      CP("chat \"^3Notification: ^7cheat cvars are "
-         "disabled on this server. "
-         "Check console for more information");
-      CP(message);
-      trap_SendServerCommand(ent - g_entities, "cheatCvarsOff");
+    if (ETJump::checkCheatCvars(client, g_blockCheatCvars.integer)) {
       SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1),
               static_cast<weapon_t>(-1), qfalse);
     }

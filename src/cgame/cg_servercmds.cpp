@@ -2311,11 +2311,18 @@ static void CG_ServerCommand(void) {
     return;
   }
 
-  if (!Q_stricmp(cmd, "cheatCvarsOff")) {
-    trap_SendConsoleCommand("set cl_freelook 1\n");
-    trap_SendConsoleCommand("set cl_yawspeed 0\n");
-    trap_SendConsoleCommand("set pmove_fixed 1\n");
-    trap_SendConsoleCommand("set m_pitch 0.022\n");
+  if (!Q_stricmpn(cmd, "cheatCvarsOff",
+                  static_cast<int>(strlen("cheatCvarsOff")))) {
+    const int flags = Q_atoi(CG_Argv(1));
+
+    if (flags & static_cast<int>(ETJump::CheatCvarFlags::LookYaw)) {
+      trap_SendConsoleCommand("set cl_freelook 1\n");
+      trap_SendConsoleCommand("set cl_yawspeed 0\n");
+    }
+
+    if (flags & static_cast<int>(ETJump::CheatCvarFlags::PmoveFPS)) {
+      trap_SendConsoleCommand("set pmove_fixed 1\n");
+    }
     return;
   }
 

@@ -271,6 +271,7 @@ vmCvar_t g_customMapVotesFile;
 
 // Start of timeruns support
 vmCvar_t g_timerunsDatabase;
+vmCvar_t g_timeruns2Database;
 // End of timeruns support
 
 vmCvar_t g_chatOptions;
@@ -586,6 +587,7 @@ cvarTable_t gameCvarTable[] = {
 
     // Start of timeruns support
     {&g_timerunsDatabase, "g_timerunsDatabase", "timeruns.db", CVAR_ARCHIVE},
+    {&g_timeruns2Database, "g_timeruns2Database", "timeruns.v2.db", CVAR_ARCHIVE},
     // End of timeruns support
 
     {&g_chatOptions, "g_chatOptions", "1", CVAR_ARCHIVE},
