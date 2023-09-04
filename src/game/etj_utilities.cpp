@@ -259,7 +259,7 @@ std::vector<std::string> Utilities::getMaps() {
     Q_strncpyz(buf, dirPtr, sizeof(buf));
     Q_strlwr(buf);
 
-    if (strstr(mapStats.getBlockedMapsStr().c_str(), buf) != nullptr) {
+    if (MapStatistics::isBlockedMap(buf)) {
       continue;
     }
 

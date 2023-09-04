@@ -309,10 +309,7 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
     return false;
   }
 
-  MapStatistics mapStats;
-
-  if (strstr(mapStats.getBlockedMapsStr().c_str(), resultedMap.c_str()) !=
-      nullptr) {
+  if (MapStatistics::isBlockedMap(resultedMap)) {
     resultedMap = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n",
                                resultedMap);
     return false;

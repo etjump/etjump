@@ -69,7 +69,8 @@ public:
   std::vector<const MapInformation *> getLeastPlayed();
   std::vector<std::string> getMaps();
   const std::vector<std::string> *getCurrentMaps();
-  std::string getBlockedMapsStr() const;
+  static std::vector<std::string> blockedMaps();
+  static bool isBlockedMap(const std::string &mapName);
 
 private:
   std::vector<MapInformation> _maps;
