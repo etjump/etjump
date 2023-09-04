@@ -61,6 +61,8 @@ private:
 
   int yaw;
   vec4_t snaphudColors[4];
+  bool edgesOnly;
+  int edgeThickness;
 
   playerState_t *ps = &cg.predictedPlayerState;
   pmove_t *pm;
