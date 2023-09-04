@@ -498,15 +498,15 @@ const char *MapStatistics::randomMap() const {
 }
 
 std::vector<std::string> MapStatistics::blockedMaps() {
-  std::string blockedMapsStr =
+  const std::string blockedMapsStr =
       ETJump::StringUtil::toLowerCase(g_blockedMaps.string);
   return ETJump::StringUtil::split(blockedMapsStr, " ");
 }
 
 bool MapStatistics::isBlockedMap(const std::string &mapName) {
   bool isBlocked = false;
-  auto blockedMaps = MapStatistics::blockedMaps();
-  auto numBlockedMaps = blockedMaps.size();
+  const auto blockedMaps = MapStatistics::blockedMaps();
+  const auto numBlockedMaps = blockedMaps.size();
 
   for (int i = 0; i < numBlockedMaps; i++) {
     if (ETJump::StringUtil::matches(blockedMaps[i], mapName)) {
