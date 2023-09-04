@@ -912,10 +912,9 @@ int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
   int index;
   std::string currentRun;
 
-  for (int i = 0; i < level.timerunNamesCount; i++) {
-    currentRun = sanitize(level.timerunNames[i], true);
+  for (index = 0; index < level.timerunNamesCount; index++) {
+    currentRun = sanitize(level.timerunNames[index], true);
     if (currentRun == sanitize(runName, true)) {
-      index = i;
       break;
     }
   }
