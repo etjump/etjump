@@ -271,7 +271,7 @@ void Snaphud::beforeRender() {
     UpdateSnapState();
   }
 
-  edgesOnly = etj_snapHUDEdgesOnly.integer;
+  edgesOnly = etj_drawSnapHUD.integer == 2;
   edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 50);
 }
 

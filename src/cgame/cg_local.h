@@ -2654,7 +2654,6 @@ extern vmCvar_t etj_snapHUDHLColor2;
 extern vmCvar_t etj_snapHUDFov;
 extern vmCvar_t etj_snapHUDHLActive;
 extern vmCvar_t etj_snapHUDTrueness;
-extern vmCvar_t etj_snapHUDEdgesOnly;
 extern vmCvar_t etj_snapHUDEdgeThickness;
 
 extern vmCvar_t etj_gunSway;

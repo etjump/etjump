@@ -6,7 +6,7 @@
 // Left side menus
 #define SUBW_SNAPHUD_Y SUBW_Y
 #define SUBW_SNAPHUD_ITEM_Y SUBW_SNAPHUD_Y + SUBW_HEADER_HEIGHT
-#define SUBW_SNAPHUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 11)
+#define SUBW_SNAPHUD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 10)
 
 #define SUBW_SPECINFO_Y SUBW_SNAPHUD_Y + SUBW_SNAPHUD_HEIGHT + SUBW_SPACING_Y
 #define SUBW_SPECINFO_ITEM_Y SUBW_SPECINFO_Y + SUBW_HEADER_HEIGHT
@@ -40,7 +40,7 @@ menuDef {
     WINDOW("SETTINGS", 94)
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_SNAPHUD_Y, SUBW_WIDTH, SUBW_SNAPHUD_HEIGHT, "SNAPHUD")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Velocity Snapping HUD:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSnapHUD", "Draw velocity snapping HUD\netj_drawSnapHUD")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Velocity Snapping HUD:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSnapHUD", cvarFloatList { "No" 0 "Full zones" 1 "Edges only" 2 }, "Draw velocity snapping HUD\netj_drawSnapHUD")
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDOffsetY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud Y:", 0.2, SUBW_ITEM_HEIGHT, etj_snapHUDOffsetY 0 -240 240 5, "Sets Y offset of snaphud\netj_snapHUDOffsetY")
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDHeight", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
@@ -53,9 +53,8 @@ menuDef {
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 7), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Snaphud color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets secondary color of snaphud\netj_snapHUDColor2")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Highlight color 1:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDHLColor1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active primary snapzone\netj_snapHUDHLColor1")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Highlight color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDHLColor2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of active secondary snapzone\netj_snapHUDHLColor2")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Edges only:", 0.2, SUBW_ITEM_HEIGHT, "etj_snapHUDEdgesOnly", "Only draw edges of each snapzone\netj_snapHUDEdgesOnly")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDEdgeThickness", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Edge thickness:", 0.2, SUBW_ITEM_HEIGHT, etj_snapHUDEdgeThickness 10 1 50 1, "Thickness of snapzone edges\netj_snapHUDEdgeThickness")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_snapHUDEdgeThickness", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_SNAPHUD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Edge thickness:", 0.2, SUBW_ITEM_HEIGHT, etj_snapHUDEdgeThickness 10 1 50 1, "Thickness of snapzone edges when using edge-only snaphud\netj_snapHUDEdgeThickness")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_SPECINFO_Y, SUBW_WIDTH, SUBW_SPECINFO_HEIGHT, "SPECTATOR INFO")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_SPECINFO_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Spectator list:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSpectatorInfo", cvarFloatList { "Off" 0 "Left aligned" 1 "Center Aligned" 2 "Right aligned" 3 }, "Draw a list of people spectating you\netj_drawSpectatorInfo")
