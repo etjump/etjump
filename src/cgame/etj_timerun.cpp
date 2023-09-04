@@ -77,6 +77,8 @@ void Timerun::onStart(const TimerunCommands::Start *start) {
   _playersTimerunInformation[clientNum].checkpoints =
       start->currentRunCheckpoints;
   _playersTimerunInformation[clientNum].nextFreeCheckpointIdx = 0;
+  _playersTimerunInformation[clientNum].runHasCheckpoints =
+      start->runHasCheckpoints;
   _playersTimerunInformation[clientNum].numCheckpointsHit =
       Timerun::getNumCheckpointsHit(start->currentRunCheckpoints);
   _playersTimerunInformation[clientNum].previousRecordCheckpoints =

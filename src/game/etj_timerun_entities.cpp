@@ -75,7 +75,9 @@ int TimerunEntity::getOrSetTimerunIndex(const std::string &runName) {
   if (cleanNames.size() != names.size()) {
     G_Error(
         "Timeruns should have the same names with different color codes. E.g. "
-        "^1Run and ^2Run are not valid names. Please rename the runs. Possible run name to rename: %s\n", runName.c_str());
+        "^1Run and ^2Run are not valid names. Please rename the runs. Possible "
+        "run name to rename: %s\n",
+        runName.c_str());
     return 0;
   }
 
@@ -95,7 +97,7 @@ struct TimerunEntityValidationResult {
 
 std::vector<std::string> timerunEntities{
     "target_startTimer", "trigger_startTimer", "target_stopTimer",
-    "trigger_stopTimer", "target_checkpoint", "trigger_checkpoint"};
+    "trigger_stopTimer", "target_checkpoint",  "trigger_checkpoint"};
 
 void TimerunEntity::validateTimerunEntities() {
   std::map<std::string, TimerunEntityValidationResult> validationResults;
@@ -107,9 +109,9 @@ void TimerunEntity::validateTimerunEntities() {
       continue;
     }
 
-      if (validationResults.count(ent.runName) == 0) {
-        validationResults[ent.runName] = TimerunEntityValidationResult{};
-      }
+    if (validationResults.count(ent.runName) == 0) {
+      validationResults[ent.runName] = TimerunEntityValidationResult{};
+    }
 
     if (ent.classname == std::string("target_startTimer") ||
         ent.classname == std::string("trigger_startTimer")) {
@@ -205,7 +207,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   // check for pmove_fixed 0
   if (!client->sess.runSpawnflags ||
       client->sess.runSpawnflags &
-      static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
+          static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
     if (!client->pers.pmoveFixed) {
       Printer::SendCenterMessage(
           clientNum,
@@ -239,7 +241,8 @@ void TargetCheckpoint::use(gentity_t *self, gentity_t *activator) {
     return;
   }
 
-  game.timerunV2->checkpoint(level.timerunNames[self->runIndex], ClientNum(activator), self->checkpointIndex,
+  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
+                             ClientNum(activator), self->checkpointIndex,
                              activator->client->ps.commandTime);
 }
 
@@ -250,8 +253,6 @@ void TargetCheckpoint::spawn(gentity_t *self) {
   Q_strncpyz(self->runName, name, sizeof(self->runName));
 
   setTimerunIndex(self);
-
-  level.hasCheckpoints = true;
 
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
   self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
@@ -276,8 +277,6 @@ void TriggerCheckpoint::spawn(gentity_t *self) {
   Q_strncpyz(self->runName, name, sizeof(self->runName));
 
   setTimerunIndex(self);
-
-  level.hasCheckpoints = true;
 
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
   self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {

@@ -285,6 +285,8 @@ void ETJump::TimerunV2::startTimer(const std::string &runName, int clientNum,
   player->startTime = opt<int>(currentTimeMs);
   player->completionTime = opt<int>();
   player->activeRunName = runName;
+  player->runHasCheckpoints =
+      level.checkpointsCount[indexForRunname(runName)] != 0;
   player->checkpointTimes.fill(TIMERUN_CHECKPOINT_NOT_SET);
   player->checkpointIndexesHit.fill(false);
   player->nextCheckpointIdx = 0;
@@ -464,11 +466,11 @@ void ETJump::TimerunV2::connectNotify(int clientNum) {
       }
 
       Printer::SendCommand(
-          clientNum,
-          TimerunCommands::Start(idx, player->startTime.value(),
-                                 player->activeRunName, fastestCompletionTime,
-                                 checkpoints, player->checkpointTimes)
-              .serialize());
+          clientNum, TimerunCommands::Start(
+                         idx, player->startTime.value(), player->activeRunName,
+                         fastestCompletionTime, player->runHasCheckpoints,
+                         checkpoints, player->checkpointTimes)
+                         .serialize());
     }
   }
 }
@@ -852,7 +854,7 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
       });
 }
 
-void ETJump::TimerunV2::startNotify(Player *player) {
+void ETJump::TimerunV2::startNotify(Player *player) const {
   auto spectators = Utilities::getSpectators(player->clientNum);
   auto previousRecord =
       player->getRecord(defaultSeasonId, player->activeRunName);
@@ -868,17 +870,16 @@ void ETJump::TimerunV2::startNotify(Player *player) {
   if (player->overriddenCheckpoints.count(player->activeRunName)) {
     checkpoints = player->overriddenCheckpoints[player->activeRunName];
   } else if (previousRecord) {
-    if (previousRecord) {
-      checkpoints = toCheckpointsArray(&previousRecord->checkpoints);
-    } else {
-      checkpoints = player->checkpointTimes;
-    }
+    checkpoints = toCheckpointsArray(&previousRecord->checkpoints);
+  } else {
+    checkpoints = player->checkpointTimes;
   }
 
   Printer::SendCommandToAll(
       TimerunCommands::Start(player->clientNum, player->startTime.value(),
                              player->activeRunName, fastestCompletionTime,
-                             checkpoints, player->checkpointTimes)
+                             player->runHasCheckpoints, checkpoints,
+                             player->checkpointTimes)
           .serialize());
 }
 
@@ -905,6 +906,21 @@ bool ETJump::TimerunV2::isDebugging(int clientNum) {
   }
 
   return false;
+}
+
+int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
+  int index;
+  std::string currentRun;
+
+  for (int i = 0; i < level.timerunNamesCount; i++) {
+    currentRun = sanitize(level.timerunNames[i], true);
+    if (currentRun == sanitize(runName, true)) {
+      index = i;
+      break;
+    }
+  }
+
+  return index;
 }
 
 class CheckRecordResult : public ETJump::SynchronizationContext::ResultBase {

@@ -44,7 +44,7 @@ class Start {
 public:
   Start();
   Start(int clientNum, int startTime, const std::string &runName,
-        const opt<int> &previousRecord,
+        const opt<int> &previousRecord, bool runHasCheckpoints,
         std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
         std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints);
 
@@ -52,6 +52,7 @@ public:
   int startTime{};
   std::string runName{};
   opt<int> previousRecord{};
+  bool runHasCheckpoints = false;
   std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
   std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints{};
 

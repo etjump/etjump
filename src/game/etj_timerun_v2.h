@@ -52,7 +52,7 @@ public:
     Player(int clientNum, int userId, const std::vector<Timerun::Record> &runs)
         : clientNum(clientNum), userId(userId), records(runs), running(false),
           startTime(opt<int>()), completionTime(opt<int>()),
-          nextCheckpointIdx(0) {}
+          runHasCheckpoints(false), nextCheckpointIdx(0) {}
 
     int clientNum;
     int userId;
@@ -62,6 +62,7 @@ public:
     opt<int> startTime;
     opt<int> completionTime;
     std::string activeRunName;
+    bool runHasCheckpoints;
     int nextCheckpointIdx;
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointTimes{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpointIndexesHit{};
@@ -105,11 +106,12 @@ public:
   void printSeasons(int clientNum);
 
 private:
-  void startNotify(Player *player);
+  void startNotify(Player *player) const;
   static bool isDebugging(int clientNum);
   void checkRecord(Player *player);
   static std::array<int, MAX_TIMERUN_CHECKPOINTS>
   toCheckpointsArray(const std::vector<int> *vector);
+  static int indexForRunname(const std::string &runName);
   /**
    * We can have multiple seasons running at once. This will
    * figure out which one is the most relevant for the user
