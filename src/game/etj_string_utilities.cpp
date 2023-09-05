@@ -149,6 +149,8 @@ std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
                                              size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
+  // make sure separator char won't result in exceeding maxLength
+  maxLength -= std::strlen(&separator);
 
   if (input.size() <= maxLength) {
     output.push_back(input);
