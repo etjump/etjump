@@ -9,6 +9,7 @@
 #include "etj_string_utilities.h"
 #include "etj_progression_tracker.h"
 #include "etj_timerun_entities.h"
+#include "etj_entity_utilities.h"
 
 level_locals_t level;
 
@@ -587,7 +588,8 @@ cvarTable_t gameCvarTable[] = {
 
     // Start of timeruns support
     {&g_timerunsDatabase, "g_timerunsDatabase", "timeruns.db", CVAR_ARCHIVE},
-    {&g_timeruns2Database, "g_timeruns2Database", "timeruns.v2.db", CVAR_ARCHIVE},
+    {&g_timeruns2Database, "g_timeruns2Database", "timeruns.v2.db",
+     CVAR_ARCHIVE},
     // End of timeruns support
 
     {&g_chatOptions, "g_chatOptions", "1", CVAR_ARCHIVE},
@@ -3625,6 +3627,17 @@ void G_RunEntity(gentity_t *ent, int msec) {
 
   if (!ent->inuse) {
     return;
+  }
+
+  if (g_scriptDebug.integer) {
+    if (!Q_stricmp(ent->classname, "trigger_multiple_ext")) {
+      ETJump::drawRailBox(ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+                          colorGreen, ent->s.number);
+    }
+    if (!Q_stricmp(ent->classname, "func_fakebrush")) {
+      ETJump::drawRailBox(ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+                          colorRed, ent->s.number);
+    }
   }
 
   if (ent->tagParent) {
