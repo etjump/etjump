@@ -23,9 +23,32 @@
  */
 
 #include "etj_entity_utilities.h"
-#include "etj_local.h"
 
 bool ETJump::isPlayer(gentity_t *ent) {
   auto cnum = ClientNum(ent);
   return cnum >= 0 && cnum < MAX_CLIENTS;
+}
+
+void ETJump::drawRailBox(const vec_t *origin, const vec_t *mins,
+                         const vec_t *maxs, const vec_t *color, int index) {
+  vec3_t b1;
+  vec3_t b2;
+  gentity_t *temp;
+
+  VectorCopy(origin, b1);
+  VectorCopy(origin, b2);
+  VectorAdd(b1, mins, b1);
+  VectorAdd(b2, maxs, b2);
+
+  temp = G_TempEntity(b1, EV_RAILTRAIL);
+
+  VectorCopy(b2, temp->s.origin2);
+  VectorCopy(color, temp->s.angles);
+  temp->s.dmgFlags = 1;
+
+  temp->s.angles[0] = color[0] * 255;
+  temp->s.angles[1] = color[1] * 255;
+  temp->s.angles[2] = color[2] * 255;
+
+  temp->s.effect1Time = index + 1;
 }
