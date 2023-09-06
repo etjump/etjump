@@ -157,6 +157,13 @@ std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
 
   while (true) {
     auto pos = input.rfind(separator, lastPos + maxLength);
+
+    // if we landed on a separator char, back off one char and re-search,
+    // otherwise we'll exceed maxLength as pos is incremented
+    if (input[pos] == separator) {
+      pos = input.rfind(separator, lastPos + maxLength - 1);
+    }
+
     /* separator not found */
     if (pos == std::string::npos) {
       /* split by length; */
