@@ -232,10 +232,10 @@ std::string const CustomMapVotes::RandomMap(std::string const &type) {
   return "";
 }
 
+// FIXME: this should just be nuked and custom map votes should use
+//  MapStatistics::isValidMap but that takes MapInfo as argument
+//  and isn't simple to refactor so bleh
 bool CustomMapVotes::isValidMap(const std::string &mapName) {
-  MapStatistics mapStats;
-
   return G_MapExists(mapName.c_str()) && mapName != level.rawmapname &&
-         strstr(mapStats.getBlockedMapsStr().c_str(), mapName.c_str()) ==
-             nullptr;
+         !MapStatistics::isBlockedMap(mapName);
 }

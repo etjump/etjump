@@ -71,8 +71,7 @@ std::vector<std::string> MapStatistics::getMaps() {
   std::vector<std::string> maps;
 
   for (auto &map : _maps) {
-    if (map.isOnServer &&
-        strstr(getBlockedMapsStr().c_str(), map.name.c_str()) == nullptr) {
+    if (map.isOnServer && !MapStatistics::isBlockedMap(map.name)) {
       maps.push_back(map.name);
     }
   }
@@ -498,13 +497,30 @@ const char *MapStatistics::randomMap() const {
   return mapName;
 }
 
-std::string MapStatistics::getBlockedMapsStr() const {
-  return ETJump::StringUtil::toLowerCase(g_blockedMaps.string);
+std::vector<std::string> MapStatistics::blockedMaps() {
+  const std::string blockedMapsStr =
+      ETJump::StringUtil::toLowerCase(g_blockedMaps.string);
+  return ETJump::StringUtil::split(blockedMapsStr, " ");
+}
+
+bool MapStatistics::isBlockedMap(const std::string &mapName) {
+  bool isBlocked = false;
+  const auto blockedMaps = MapStatistics::blockedMaps();
+  const auto numBlockedMaps = blockedMaps.size();
+
+  for (int i = 0; i < numBlockedMaps; i++) {
+    if (ETJump::StringUtil::matches(blockedMaps[i], mapName)) {
+      isBlocked = true;
+      break;
+    }
+  }
+
+  return isBlocked;
 }
 
 bool MapStatistics::isValidMap(const MapInformation *mapInfo) const {
   return mapInfo != _currentMap && mapInfo->isOnServer &&
-         strstr(getBlockedMapsStr().c_str(), mapInfo->name.c_str()) == nullptr;
+         !MapStatistics::isBlockedMap(mapInfo->name);
 }
 
 MapStatistics::~MapStatistics() {}

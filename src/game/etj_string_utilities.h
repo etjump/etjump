@@ -56,7 +56,7 @@ std::string trimEnd(const std::string &input);
 std::string trim(const std::string &input);
 
 std::vector<std::string> wrapWords(std::string &input, char separator,
-                                     size_t maxLength);
+                                   size_t maxLength);
 
 template <typename T>
 std::string getPluralizedString(const T &val, const std::string &str) {
@@ -93,6 +93,7 @@ void replaceAll(std::string &input, const std::string &from,
 bool startsWith(const std::string &str, const std::string &prefix);
 bool endsWith(const std::string &str, const std::string &suffix);
 bool contains(const std::string &str, const std::string &text);
+bool matches(const std::string &str, const std::string &text);
 // Counts the extra padding needed when using format specifiers like
 // %-20s with text that contains ET color codes
 unsigned countExtraPadding(const std::string &input);

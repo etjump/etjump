@@ -309,10 +309,7 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
     return false;
   }
 
-  MapStatistics mapStats;
-
-  if (strstr(mapStats.getBlockedMapsStr().c_str(), resultedMap.c_str()) !=
-      nullptr) {
+  if (MapStatistics::isBlockedMap(resultedMap)) {
     resultedMap = stringFormat("^3callvote: ^7Voting for %s is not allowed.\n",
                                resultedMap);
     return false;
@@ -400,11 +397,12 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
     char serverinfo[MAX_INFO_STRING];
     trap_GetServerinfo(serverinfo, sizeof(serverinfo));
 
-    if (!g_dedicated.integer && ent) {
-      G_cpmPrintf(
-          ent, "Sorry, [lof]^3%s^7 [lon]voting is disabled on localhost.", arg);
-      return (G_INVALID);
-    }
+    //    if (!g_dedicated.integer && ent) {
+    //      G_cpmPrintf(
+    //          ent, "Sorry, [lof]^3%s^7 [lon]voting is disabled on localhost.",
+    //          arg);
+    //      return (G_INVALID);
+    //    }
     if (vote_allow_map.integer <= 0 && ent) {
       G_voteDisableMessage(ent, arg);
       return (G_INVALID);
