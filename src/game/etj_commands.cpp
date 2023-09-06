@@ -313,8 +313,11 @@ bool Records(gentity_t *ent, Arguments argv) {
   params.exactMap = exactMap;
   params.run = run;
   params.page = optPage.hasValue() ? optPage.value().integer : 1;
-  params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
-
+  if (command.extraArgs.empty()) {
+    params.pageSize = 3;
+  } else {
+    params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
+  }
   params.userId = ETJump::session->GetId(ent);
 
   game.timerunV2->printRecords(params);
