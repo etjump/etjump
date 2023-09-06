@@ -1,3 +1,57 @@
+# ETJump 3.0.0
+
+* new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021)
+  * support for checkpoints (`target_checkpoint` & `trigger_checkpoint`) entities & related cvars for client
+    * `etj_drawCheckpoints` - **1** - below runtimer, **2** - detached
+    * `etj_checkpointsX/Y` - checkpoint timer location (only with `etj_drawCheckpoints 2`)
+    * `etj_checkpointsStyle` - **0** - relative time, **1** - absolute time
+    * `etj_checkpointsCount` - how many checkpoint times to draw (range 1-5)
+    * `etj_checkpointsSize` - size of checkpoint timer
+    * `etj_checkpointsShadow` - toggle shadow on checkpoint timer
+    * `loadcheckpoints <run> [required] <rank>` - load checkpoints from another run for comparision - if `<rank>` isn't specified, loads #1 rank checkpoints
+  * timerun seasons - per-server seasonal records, defined by server admins with `!add-season` command
+    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date [YYYY-MM-DD]`
+    * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]`
+    * commands are accessible via admin flag `T`
+  * ranking system - per-server rankings for players, points are calculated using the [DFWC EESystem](https://docs.google.com/forms/d/e/1FAIpQLSczfUVq5sPQlYcDLw9rY6MxodMBdIiM0HuPdocgksLR3NDtgw/viewform) (minus the nascar clause)
+    * available via `!rankings` or `/rankings` commands (admin flag `a`)
+    * `rankings --season <season> --page-size <size> --page <page>`
+      * overall rankings are printed by default
+  * improved records printing (`records/ranks/times/top`)
+    * `records --season <season> --map <mapname> --run <runname> --page <page> --page-size <size>`
+      * overall records are printed by default
+    * shorthand command supports for `records <run>`, `records <map> <run>` & `records <season> <map> <run>`
+      * all parameters support partial matching, no need to type out entire name
+    * detailed records now show top 20 times by default, and always shows your time if not currently visible
+    * records can now be fetched for any map on the server, regardless of which map is currently running
+  * `g_timeruns2Database` cvar to set new timerun database name on server (default `timeruns.v2.db`)
+    * old timerun database will automatically be migrated to the new database format - no manual intervention required by server admins
+* fireteam UI improvements [#1026](https://github.com/etjump/etjump/pull/1026) [#1030](https://github.com/etjump/etjump/pull/1030)
+  * removed ranks and locations from fireteam UI
+  * health display now respects `etj_fireteamAlpha` regardless of color being used
+  * spectators are no longer drawn as having soldier as their class
+  * fireteam savelimit can now be set via fireteam admin menu
+  * savelimit `-1` is now the default (no restrictions) and `0` disables save
+  * savelimit changes are now communicated to all fireteam members and cleared when a map changes
+  * added UI element to display currently set fireteam savelimit
+* fixed spectator list drawing while scoreboard is up [#1024](https://github.com/etjump/etjump/pull/1024)
+* support for `autoexec_default` on client side for map-specific autoexec - executed if `autoexec_mapname` isn't present [#1023](https://github.com/etjump/etjump/pull/1023)
+* reworked `g_blockCheatCvars` [#1016](https://github.com/etjump/etjump/pull/1016)
+  * cvar now works as a bitflag value
+    * **1** - force `cl_yawspeed 0` & `cl_freelook 1`
+    * **2** - force `com_maxfps 25-125` when `pmove_fixed 0`
+  * `m_pitch` is no longer enforced
+* fixed being unable to pick up weapons after they were removed with `target_init` `REMOVE_STARTING_WEAPONS` spawnflag [#1028](https://github.com/etjump/etjump/pull/1028)
+* added `etj_noPanzerAutoswitch` to disable autoswitch after firing a panzerfaust [#1029](https://github.com/etjump/etjump/pull/1029)
+  * switch still occurs if completely out of ammo
+* fixed shadow cvars getting out of sync after map restart [#1032](https://github.com/etjump/etjump/pull/1032)
+* fixed `g_blockedMaps` matching maps on partial match - exact match is now required [#1035](https://github.com/etjump/etjump/pull/1035)
+* added edge-only snaphud (`etj_drawSnapHUD 2`) [#1037](https://github.com/etjump/etjump/pull/1037)
+  * edge thickness controllable with `etj_snaoHUDEdgeThickness` (range 1-50)
+* limbo menu camera will now display a view from spectator spawn point if no limbo cameras are set in the map [#1040](https://github.com/etjump/etjump/pull/1040)
+* fixed `EV_LOAD_TELEPORT` being processed on wrong clients, causing events related to `load` firing for wrong clients [#1041](https://github.com/etjump/etjump/pull/1041)
+* `trigger_multiple_ext` and `func_fakebrush` entities are now drawn when `g_scriptDebug 1` is set for easier mapscripting [#1042](https://github.com/etjump/etjump/pull/1042)
+
 # ETJump 2.6.0
 
 * fixed timerun timer disappearing on demo playback when timerun ends [#835](https://github.com/etjump/etjump/pull/853)
