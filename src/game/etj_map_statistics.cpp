@@ -523,4 +523,10 @@ bool MapStatistics::isValidMap(const MapInformation *mapInfo) const {
          !MapStatistics::isBlockedMap(mapInfo->name);
 }
 
+bool MapStatistics::mapExists(const std::string &mapName) {
+  auto maps = MapStatistics::getMaps();
+  auto it = std::find(maps.begin(), maps.end(), mapName);
+  return it != maps.end();
+}
+
 MapStatistics::~MapStatistics() {}

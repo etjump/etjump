@@ -71,6 +71,7 @@ public:
   const std::vector<std::string> *getCurrentMaps();
   static std::vector<std::string> blockedMaps();
   static bool isBlockedMap(const std::string &mapName);
+  bool mapExists(const std::string &mapName);
 
 private:
   std::vector<MapInformation> _maps;
