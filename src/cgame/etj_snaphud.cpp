@@ -270,6 +270,9 @@ void Snaphud::beforeRender() {
     UpdateMaxSnapZones(wishspeed, pm);
     UpdateSnapState();
   }
+
+  edgesOnly = etj_drawSnapHUD.integer == 2;
+  edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 50);
 }
 
 void Snaphud::render() const {
@@ -293,15 +296,34 @@ void Snaphud::render() const {
       int const bSnap = snap.zones[i] + 1 + j;
       int const eSnap = snap.zones[i + 1] + j;
 
-      // highlight active snapzone?
-      if (etj_snapHUDHLActive.integer &&
-          AngleNormalize65536(yaw - bSnap) <=
-              AngleNormalize65536(eSnap - bSnap)) {
-        CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
-                        h, fov, snaphudColors[2 + altColor]);
+      if (edgesOnly) {
+        // highlight active snapzone?
+        if (etj_snapHUDHLActive.integer &&
+            AngleNormalize65536(yaw - bSnap) <=
+                AngleNormalize65536(eSnap - bSnap)) {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(bSnap + edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov,
+                          snaphudColors[2 + altColor]);
+          CG_FillAngleYaw(SHORT2RAD(eSnap), SHORT2RAD(eSnap - edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov,
+                          snaphudColors[2 + altColor]);
+        } else {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(bSnap + edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
+          CG_FillAngleYaw(SHORT2RAD(eSnap), SHORT2RAD(eSnap - edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
+        }
       } else {
-        CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
-                        h, fov, snaphudColors[altColor]);
+        // highlight active snapzone?
+        if (etj_snapHUDHLActive.integer &&
+            AngleNormalize65536(yaw - bSnap) <=
+                AngleNormalize65536(eSnap - bSnap)) {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
+                          h, fov, snaphudColors[2 + altColor]);
+        } else {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
+                          h, fov, snaphudColors[altColor]);
+        }
       }
     }
     altColor ^= 1;
