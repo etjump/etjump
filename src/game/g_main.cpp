@@ -3630,14 +3630,7 @@ void G_RunEntity(gentity_t *ent, int msec) {
   }
 
   if (g_scriptDebug.integer) {
-    if (!Q_stricmp(ent->classname, "trigger_multiple_ext")) {
-      ETJump::drawRailBox(ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-                          colorGreen, ent->s.number);
-    }
-    if (!Q_stricmp(ent->classname, "func_fakebrush")) {
-      ETJump::drawRailBox(ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-                          colorRed, ent->s.number);
-    }
+    ETJump::EntityUtilities::checkForRailBox(ent);
   }
 
   if (ent->tagParent) {
