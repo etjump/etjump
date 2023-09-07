@@ -27,7 +27,11 @@
 #include "g_local.h"
 
 namespace ETJump {
-bool isPlayer(gentity_t *ent);
-void drawRailBox(const vec_t *origin, const vec_t *mins, const vec_t *maxs,
-                 const vec_t *color, int index);
+class EntityUtilities {
+  static void drawRailBox(gentity_t *ent, std::vector<float>);
+
+public:
+  static bool isPlayer(gentity_t *ent);
+  static void checkForRailBox(gentity_t *ent);
+};
 } // namespace ETJump

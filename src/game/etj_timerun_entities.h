@@ -69,6 +69,15 @@ public:
 };
 
 /**
+ * TriggerStartTimerExt
+ */
+class TriggerStartTimerExt : virtual public TimerunEntity,
+                             virtual public TargetStartTimer {
+public:
+  static void spawn(gentity_t *self);
+};
+
+/**
  * TargetStopTimer
  */
 class TargetStopTimer : virtual public TimerunEntity {
@@ -80,10 +89,19 @@ public:
 };
 
 /**
- * TargetStopTimer
+ * TriggerStopTimer
  */
 class TriggerStopTimer : virtual public TimerunEntity,
                          virtual public TargetStopTimer {
+public:
+  static void spawn(gentity_t *self);
+};
+
+/**
+ * TriggerStopTimerExt
+ */
+class TriggerStopTimerExt : virtual public TimerunEntity,
+                            virtual public TargetStopTimer {
 public:
   static void spawn(gentity_t *self);
 };
@@ -104,6 +122,15 @@ public:
  */
 class TriggerCheckpoint : virtual public TimerunEntity,
                           virtual public TargetCheckpoint {
+public:
+  static void spawn(gentity_t *self);
+};
+
+/**
+ * TriggerCheckpointExt
+ */
+class TriggerCheckpointExt : virtual public TimerunEntity,
+                             virtual public TargetCheckpoint {
 public:
   static void spawn(gentity_t *self);
 };

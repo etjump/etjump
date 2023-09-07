@@ -24,21 +24,38 @@
 
 #include "etj_entity_utilities.h"
 
-bool ETJump::isPlayer(gentity_t *ent) {
+namespace ETJump {
+bool EntityUtilities::isPlayer(gentity_t *ent) {
   auto cnum = ClientNum(ent);
   return cnum >= 0 && cnum < MAX_CLIENTS;
 }
 
-void ETJump::drawRailBox(const vec_t *origin, const vec_t *mins,
-                         const vec_t *maxs, const vec_t *color, int index) {
+// vectors don't seem to like vec_t as their value,
+// so using raw values for colors here instead of colorRed, colorGreen etc.
+const std::vector<std::pair<std::string, std::vector<float>>> railBoxEnts{
+    {"trigger_multiple_ext", {0.0f, 1.0f, 0.0f}},
+    {"trigger_starttimer_ext", {0.0f, 0.0f, 1.0f}},
+    {"trigger_stoptimer_ext", {0.0f, 0.0f, 1.0f}},
+    {"trigger_checkpoint_ext", {1.0f, 0.0f, 1.0f}},
+    {"func_fakebrush", {1.0f, 0.0f, 0.0f}}};
+
+void EntityUtilities::checkForRailBox(gentity_t *ent) {
+  for (const auto &railBoxEnt : railBoxEnts) {
+    if (ent->classname == railBoxEnt.first) {
+      drawRailBox(ent, railBoxEnt.second);
+    }
+  }
+}
+
+void EntityUtilities::drawRailBox(gentity_t *ent, std::vector<float> color) {
   vec3_t b1;
   vec3_t b2;
   gentity_t *temp;
 
-  VectorCopy(origin, b1);
-  VectorCopy(origin, b2);
-  VectorAdd(b1, mins, b1);
-  VectorAdd(b2, maxs, b2);
+  VectorCopy(ent->r.currentOrigin, b1);
+  VectorCopy(ent->r.currentOrigin, b2);
+  VectorAdd(b1, ent->r.mins, b1);
+  VectorAdd(b2, ent->r.maxs, b2);
 
   temp = G_TempEntity(b1, EV_RAILTRAIL);
 
@@ -50,5 +67,6 @@ void ETJump::drawRailBox(const vec_t *origin, const vec_t *mins,
   temp->s.angles[1] = color[1] * 255;
   temp->s.angles[2] = color[2] * 255;
 
-  temp->s.effect1Time = index + 1;
+  temp->s.effect1Time = ent->s.number + 1;
 }
+} // namespace ETJump

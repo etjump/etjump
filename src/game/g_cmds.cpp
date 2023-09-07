@@ -3652,7 +3652,7 @@ tryagain:
 
 namespace ETJump {
 bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
-  if (!ETJump::isPlayer(traceEnt)) {
+  if (!EntityUtilities::isPlayer(traceEnt)) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {

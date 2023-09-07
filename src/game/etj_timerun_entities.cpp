@@ -204,6 +204,30 @@ void TriggerStartTimer::spawn(gentity_t *self) {
   InitTrigger(self);
 }
 
+void TriggerStartTimerExt::spawn(gentity_t *self) {
+  setTimerunIndex(self);
+  level.hasTimerun = true;
+  G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
+
+  if (!G_SpawnVector("mins", "0 0 0", self->r.mins)) {
+    G_Error("'trigger_starttimer_ext' does not have mins\n");
+  }
+  if (!G_SpawnVector("maxs", "0 0 0", self->r.maxs)) {
+    G_Error("'trigger_starttimer_ext' does not have maxs\n");
+  }
+
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
+    use(self, other);
+  };
+
+  self->s.eType = ET_TRIGGER_MULTIPLE;
+  InitTrigger(self);
+  trap_LinkEntity(self);
+}
+
 void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
@@ -264,6 +288,28 @@ void TriggerStopTimer::spawn(gentity_t *self) {
   InitTrigger(self);
 }
 
+void TriggerStopTimerExt::spawn(gentity_t *self) {
+  setTimerunIndex(self);
+
+  if (!G_SpawnVector("mins", "0 0 0", self->r.mins)) {
+    G_Error("'trigger_stoptimer_ext' does not have mins\n");
+  }
+  if (!G_SpawnVector("maxs", "0 0 0", self->r.maxs)) {
+    G_Error("'trigger_stoptimer_ext' does not have maxs\n");
+  }
+
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
+    use(self, other);
+  };
+
+  self->s.eType = ET_TRIGGER_MULTIPLE;
+  InitTrigger(self);
+  trap_LinkEntity(self);
+}
+
 void TargetStopTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
@@ -309,6 +355,33 @@ void TriggerCheckpoint::spawn(gentity_t *self) {
   };
   self->s.eType = ET_TRIGGER_MULTIPLE;
   InitTrigger(self);
+}
+
+void TriggerCheckpointExt::spawn(gentity_t *self) {
+  char *name = nullptr;
+  G_SpawnString("name", "default", &name);
+
+  Q_strncpyz(self->runName, name, sizeof(self->runName));
+
+  setTimerunIndex(self);
+
+  if (!G_SpawnVector("mins", "0 0 0", self->r.mins)) {
+    G_Error("'trigger_checkpoint_ext' does not have mins\n");
+  }
+  if (!G_SpawnVector("maxs", "0 0 0", self->r.maxs)) {
+    G_Error("'trigger_checkpoint_ext' does not have maxs\n");
+  }
+
+  self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
+    use(self, other);
+  };
+  self->s.eType = ET_TRIGGER_MULTIPLE;
+  InitTrigger(self);
+  trap_LinkEntity(self);
 }
 
 void TargetCheckpoint::use(gentity_t *self, gentity_t *activator) {
