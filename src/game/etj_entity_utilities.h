@@ -28,7 +28,7 @@
 
 namespace ETJump {
 class EntityUtilities {
-  static void drawRailBox(gentity_t *ent, std::vector<float>);
+  static void drawRailBox(gentity_t *ent, const std::vector<float> &color);
 
 public:
   static bool isPlayer(gentity_t *ent);

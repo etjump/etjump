@@ -47,7 +47,8 @@ void EntityUtilities::checkForRailBox(gentity_t *ent) {
   }
 }
 
-void EntityUtilities::drawRailBox(gentity_t *ent, std::vector<float> color) {
+void EntityUtilities::drawRailBox(gentity_t *ent,
+                                  const std::vector<float> &color) {
   vec3_t b1;
   vec3_t b2;
   gentity_t *temp;
