@@ -1,6 +1,6 @@
 # ETJump 3.0.0
 
-* new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021)
+* new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021) [#1043](https://github.com/etjump/etjump/pull/1043) [#1048](https://github.com/etjump/etjump/pull/1048)
   * support for checkpoints (`target_checkpoint` & `trigger_checkpoint`) entities & related cvars for client
     * `etj_drawCheckpoints` - **1** - below runtimer, **2** - detached
     * `etj_checkpointsX/Y` - checkpoint timer location (only with `etj_drawCheckpoints 2`)
@@ -9,10 +9,12 @@
     * `etj_checkpointsSize` - size of checkpoint timer
     * `etj_checkpointsShadow` - toggle shadow on checkpoint timer
     * `loadcheckpoints <run> [required] <rank>` - load checkpoints from another run for comparision - if `<rank>` isn't specified, loads #1 rank checkpoints
+  * `trigger_starttimer` & `trigger_stoptimer` entities
+  * `_ext` versions of all timerun entities for mapscripting purposes
   * timerun seasons - per-server seasonal records, defined by server admins with `!add-season` command
-    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date [YYYY-MM-DD]`
-    * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]`
-    * commands are accessible via admin flag `T`
+    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date [YYYY-MM-DD]` (admin flag T)
+    * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]` (admin flag T)
+    * `!seasons` - lists all seasons (admin flag a)
   * ranking system - per-server rankings for players, points are calculated using the [DFWC EESystem](https://docs.google.com/forms/d/e/1FAIpQLSczfUVq5sPQlYcDLw9rY6MxodMBdIiM0HuPdocgksLR3NDtgw/viewform) (minus the nascar clause)
     * available via `!rankings` or `/rankings` commands (admin flag `a`)
     * `rankings --season <season> --page-size <size> --page <page>`
@@ -47,10 +49,15 @@
 * fixed shadow cvars getting out of sync after map restart [#1032](https://github.com/etjump/etjump/pull/1032)
 * fixed `g_blockedMaps` matching maps on partial match - exact match is now required [#1035](https://github.com/etjump/etjump/pull/1035)
 * added edge-only snaphud (`etj_drawSnapHUD 2`) [#1037](https://github.com/etjump/etjump/pull/1037)
-  * edge thickness controllable with `etj_snaoHUDEdgeThickness` (range 1-50)
+  * edge thickness controllable with `etj_snaoHUDEdgeThickness` (range 1-128)
 * limbo menu camera will now display a view from spectator spawn point if no limbo cameras are set in the map [#1040](https://github.com/etjump/etjump/pull/1040)
 * fixed `EV_LOAD_TELEPORT` being processed on wrong clients, causing events related to `load` firing for wrong clients [#1041](https://github.com/etjump/etjump/pull/1041)
-* `trigger_multiple_ext` and `func_fakebrush` entities are now drawn when `g_scriptDebug 1` is set for easier mapscripting [#1042](https://github.com/etjump/etjump/pull/1042)
+* added railbox drawing for following entities when `g_scriptDebug 1` is set for easier mapscripting [#1042](https://github.com/etjump/etjump/pull/1042) [#1048](https://github.com/etjump/etjump/pull/1048)
+  * `trigger_multiple_ext` (green)
+  * `trigger_starttimer_ext` (blue)
+  * `trigger_stoptimer_ext` (blue)
+  * `trigger_checkpoint_ext` (magenta)
+  * `func_fakebrush` (red)
 
 # ETJump 2.6.0
 
