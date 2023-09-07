@@ -2798,6 +2798,10 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
       break;
 
     case EV_LOAD_TELEPORT:
+      if (es->clientNum != cg.snap->ps.clientNum) {
+        return;
+      }
+
       // should refactor users to playereventshandler
       DEBUGNAME("EV_LOAD_TELEPORT");
       ETJump::entityEventsHandler->check(EV_LOAD_TELEPORT, cent);

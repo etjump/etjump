@@ -30,9 +30,10 @@
 #include "etj_log.h"
 #include "etj_printer.h"
 #include "etj_synchronization_context.h"
-#include "etj_synchronization_context.h"
 #include "etj_timerun_repository.h"
 #include "etj_timerun_shared.h"
+#include "etj_local.h"
+#include "etj_map_statistics.h"
 
 ETJump::TimerunV2::TimerunV2(
     std::string currentMap, std::unique_ptr<TimerunRepository> repository,
@@ -87,6 +88,11 @@ void ETJump::TimerunV2::computeRanks() {
         const double maxPointsPerRun = 1000.0;
 
         for (const auto &r : records) {
+          // we don't want to compute score for maps not on the server,
+          // e.g. when a new version of a map is released
+          if (!game.mapStatistics->mapExists(r.map)) {
+            continue;
+          }
           if (scores.count(r.seasonId) == 0) {
             scores[r.seasonId] = {};
           }

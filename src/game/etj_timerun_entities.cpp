@@ -41,7 +41,6 @@ ETJump::Log TimerunEntity::logger = ETJump::Log("timerun entity");
 
 void TimerunEntity::setTimerunIndex(gentity_t *self) {
   char *name = nullptr;
-  int i;
   G_SpawnString("name", "default", &name);
 
   if (level.timerunNamesCount > MAX_TIMERUNS) {
@@ -138,19 +137,8 @@ void TimerunEntity::validateTimerunEntities() {
   }
 }
 
-void TargetStartTimer::spawn(gentity_t *self) {
-  setTimerunIndex(self);
-  level.hasTimerun = true;
-  G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
-
-  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
-    use(self, activator);
-  };
-}
-
-bool TargetStartTimer::canStartTimerun(gentity_t *self, gentity_t *activator,
-                                       const int *clientNum,
-                                       const float *speed) {
+bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
+                                    const int *clientNum, const float *speed) {
   auto client = activator->client;
 
   if (!client->pers.enableTimeruns || client->sess.timerunActive) {
@@ -188,6 +176,32 @@ bool TargetStartTimer::canStartTimerun(gentity_t *self, gentity_t *activator,
   }
 
   return true;
+}
+
+void TargetStartTimer::spawn(gentity_t *self) {
+  setTimerunIndex(self);
+  level.hasTimerun = true;
+  G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
+
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+}
+
+void TriggerStartTimer::spawn(gentity_t *self) {
+  setTimerunIndex(self);
+  level.hasTimerun = true;
+  G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
+
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
+    use(self, other);
+  };
+
+  self->s.eType = ET_TRIGGER_MULTIPLE;
+  InitTrigger(self);
 }
 
 void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
@@ -236,14 +250,28 @@ void TargetStopTimer::spawn(gentity_t *self) {
   };
 }
 
-void TargetCheckpoint::use(gentity_t *self, gentity_t *activator) {
+void TriggerStopTimer::spawn(gentity_t *self) {
+  setTimerunIndex(self);
+
+  self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
+    use(self, activator);
+  };
+  self->touch = [](gentity_t *self, gentity_t *other, trace_t *t) {
+    use(self, other);
+  };
+
+  self->s.eType = ET_TRIGGER_MULTIPLE;
+  InitTrigger(self);
+}
+
+void TargetStopTimer::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
   }
 
-  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
-                             ClientNum(activator), self->checkpointIndex,
-                             activator->client->ps.commandTime);
+  game.timerunV2->stopTimer(level.timerunNames[self->runIndex],
+                            ClientNum(activator),
+                            activator->client->ps.commandTime);
 }
 
 void TargetCheckpoint::spawn(gentity_t *self) {
@@ -258,16 +286,6 @@ void TargetCheckpoint::spawn(gentity_t *self) {
   self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
     use(self, activator);
   };
-}
-
-void TriggerCheckpoint::use(gentity_t *self, gentity_t *activator) {
-  if (!canActivate(activator)) {
-    return;
-  }
-
-  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
-                             ClientNum(activator), self->checkpointIndex,
-                             activator->client->ps.commandTime);
 }
 
 void TriggerCheckpoint::spawn(gentity_t *self) {
@@ -289,13 +307,13 @@ void TriggerCheckpoint::spawn(gentity_t *self) {
   InitTrigger(self);
 }
 
-void TargetStopTimer::use(gentity_t *self, gentity_t *activator) {
+void TargetCheckpoint::use(gentity_t *self, gentity_t *activator) {
   if (!canActivate(activator)) {
     return;
   }
 
-  game.timerunV2->stopTimer(level.timerunNames[self->runIndex],
-                            ClientNum(activator),
-                            activator->client->ps.commandTime);
+  game.timerunV2->checkpoint(level.timerunNames[self->runIndex],
+                             ClientNum(activator), self->checkpointIndex,
+                             activator->client->ps.commandTime);
 }
 } // namespace ETJump
