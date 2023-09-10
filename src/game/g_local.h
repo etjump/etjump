@@ -1432,7 +1432,6 @@ typedef struct {
   int timerunNamesCount;
   char timerunNames[MAX_TIMERUNS][MAX_TIMERUN_NAME_LENGTH];
   bool hasTimerun;
-  bool hasCheckpoints;
   int saveLoadRestrictions;
   int checkpointsCount[MAX_TIMERUNS];
 } level_locals_t;

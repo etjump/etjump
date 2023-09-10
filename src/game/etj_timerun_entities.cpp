@@ -328,8 +328,6 @@ void TargetCheckpoint::spawn(gentity_t *self) {
 
   setTimerunIndex(self);
 
-  level.hasCheckpoints = true;
-
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
   self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
     use(self, activator);
@@ -343,8 +341,6 @@ void TriggerCheckpoint::spawn(gentity_t *self) {
   Q_strncpyz(self->runName, name, sizeof(self->runName));
 
   setTimerunIndex(self);
-
-  level.hasCheckpoints = true;
 
   self->checkpointIndex = level.checkpointsCount[self->runIndex]++;
   self->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {

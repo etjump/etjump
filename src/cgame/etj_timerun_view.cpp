@@ -173,7 +173,7 @@ void ETJump::TimerunView::draw() {
     return;
   }
 
-  if (etj_drawCheckpoints.integer) {
+  if (etj_drawCheckpoints.integer && run->runHasCheckpoints) {
     // only adjust x/y if we're drawing checkpoints detached from runtimer
     if (etj_drawCheckpoints.integer == 2) {
       x = etj_checkpointsX.value;

@@ -43,24 +43,24 @@ TimerunCommands::Start::Start() = default;
 
 TimerunCommands::Start::Start(
     int clientNum, int startTime, const std::string &runName,
-    const opt<int> &previousRecord,
+    const opt<int> &previousRecord, bool runHasCheckpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints,
     std::array<int, MAX_TIMERUN_CHECKPOINTS> currentRunCheckpoints)
     : clientNum(clientNum), startTime(startTime), runName(runName),
-      previousRecord(previousRecord), checkpoints(checkpoints),
-      currentRunCheckpoints(currentRunCheckpoints) {}
+      previousRecord(previousRecord), runHasCheckpoints(runHasCheckpoints),
+      checkpoints(checkpoints), currentRunCheckpoints(currentRunCheckpoints) {}
 
 std::string TimerunCommands::Start::serialize() {
-  return stringFormat("timerun start %d %d \"%s\" %d \"%s\" \"%s\"", clientNum,
-                      startTime, runName,
+  return stringFormat("timerun start %d %d \"%s\" %d %d \"%s\" \"%s\"",
+                      clientNum, startTime, runName,
                       previousRecord.hasValue() ? previousRecord.value() : -1,
-                      StringUtil::join(checkpoints, ","),
+                      runHasCheckpoints, StringUtil::join(checkpoints, ","),
                       StringUtil::join(currentRunCheckpoints, ","));
 }
 
 opt<TimerunCommands::Start>
 TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
-  const int numExpectedFields = 8;
+  const int numExpectedFields = 9;
 
   if (args.size() < numExpectedFields) {
     return opt<Start>();
@@ -92,8 +92,10 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
 
   start.previousRecord = parseTime(args[5]);
 
+  start.runHasCheckpoints = std::stoi(args[6]);
+
   unsigned idx = 0;
-  for (const auto &v : Container::map(StringUtil::split(args[6], ","),
+  for (const auto &v : Container::map(StringUtil::split(args[7], ","),
                                       [](auto c) { return std::stoi(c); })) {
     if (idx >= start.checkpoints.size()) {
       break;
@@ -105,7 +107,7 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
   }
 
   idx = 0;
-  for (const auto &v : Container::map(StringUtil::split(args[7], ","),
+  for (const auto &v : Container::map(StringUtil::split(args[8], ","),
                                       [](auto c) { return std::stoi(c); })) {
     if (idx >= start.currentRunCheckpoints.size()) {
       break;

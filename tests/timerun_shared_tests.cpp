@@ -19,12 +19,13 @@ public:
 };
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize) {
-  auto start = TimerunCommands::Start(1, 2, "3", 4, CreateDefaultCheckpoints(),
-                                      CreateDefaultCurrentCheckpoints());
+  auto start =
+      TimerunCommands::Start(1, 2, "3", 4, 1, CreateDefaultCheckpoints(),
+                             CreateDefaultCurrentCheckpoints());
 
   ASSERT_EQ(
       start.serialize(),
-      "timerun start 1 2 \"3\" 4 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
+      "timerun start 1 2 \"3\" 4 1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
       "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
 }
 
@@ -36,6 +37,7 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
                                "2",
                                "3",
                                "4",
+                               "1",
                                "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1",
                                "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1"};
   auto deserialized = TimerunCommands::Start::deserialize(args);
@@ -44,18 +46,19 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize) {
   ASSERT_EQ(deserialized.value().startTime, 2);
   ASSERT_EQ(deserialized.value().runName, "3");
   ASSERT_EQ(deserialized.value().previousRecord.value(), 4);
+  ASSERT_EQ(deserialized.value().runHasCheckpoints, 1);
   ASSERT_EQ(deserialized.value().checkpoints[10], 11);
   ASSERT_EQ(deserialized.value().currentRunCheckpoints[10], -1);
 }
 
 TEST_F(TimerunSharedTests, Start_ShouldSerialize_IfNoPreviousRecord) {
-  auto start =
-      TimerunCommands::Start(1, 2, "3", opt<int>(), CreateDefaultCheckpoints(),
-                             CreateDefaultCurrentCheckpoints());
+  auto start = TimerunCommands::Start(1, 2, "3", opt<int>(), 1,
+                                      CreateDefaultCheckpoints(),
+                                      CreateDefaultCurrentCheckpoints());
 
   ASSERT_EQ(
       start.serialize(),
-      "timerun start 1 2 \"3\" -1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
+      "timerun start 1 2 \"3\" -1 1 \"1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1\" "
       "\"1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1\"");
 }
 
@@ -67,6 +70,7 @@ TEST_F(TimerunSharedTests, Start_ShouldDeserialize_IfNoPreviousRecord) {
                                "2",
                                "3",
                                "-1",
+                               "1",
                                "1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1",
                                "1,2,3,4,5,6,7,8,9,10,-1,-1,-1,-1,-1,-1"};
   auto deserialized = TimerunCommands::Start::deserialize(args);
