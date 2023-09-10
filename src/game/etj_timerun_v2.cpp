@@ -917,10 +917,11 @@ bool ETJump::TimerunV2::isDebugging(int clientNum) {
 int ETJump::TimerunV2::indexForRunname(const std::string &runName) {
   int index;
   std::string currentRun;
+  std::string activeRun = sanitize(runName, true);
 
   for (index = 0; index < level.timerunNamesCount; index++) {
     currentRun = sanitize(level.timerunNames[index], true);
-    if (currentRun == sanitize(runName, true)) {
+    if (currentRun == activeRun) {
       break;
     }
   }
