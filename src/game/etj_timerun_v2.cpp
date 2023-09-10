@@ -882,16 +882,16 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       },
       [this,
         clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
-        auto addSeasonResult = dynamic_cast<DeleteSeasonResult *>(result.get());
+        auto deleteSeasonResult = dynamic_cast<DeleteSeasonResult *>(result.get());
 
         Printer::SendConsoleMessage(clientNum,
-                                    addSeasonResult->message + "\n");
+                                    deleteSeasonResult->message + "\n");
       },
       [this, clientNum](const std::runtime_error &e) {
         const char *what = e.what();
         Printer::SendConsoleMessage(
             clientNum,
-            stringFormat("Unable to add season: %s\n", e.what()));
+            stringFormat("Unable to delete season: %s\n", e.what()));
       });
 }
 
