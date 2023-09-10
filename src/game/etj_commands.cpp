@@ -2170,6 +2170,23 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
 
 bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   int clientNum = ClientNum(ent);
+
+  auto def = ETJump::CommandParser::CommandDefinition::create(
+                 "delete-season", "Delete a season. This will delete all the "
+                                  "records within the season.")
+                 .addOption("name", "Exact name of the season to delete", ETJump::CommandParser::OptionDefinition::Type::MultiToken, true);
+
+  auto optCommand =
+      deprecated_getCommand("delete-season", clientNum, def, argv);
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto command = std::move(optCommand.value());
+  auto name = command.options["name"].text;
+
+  game.timerunV2->deleteSeason(clientNum, ETJump::StringUtil::toLowerCase(name));
+
   return true;
 }
 

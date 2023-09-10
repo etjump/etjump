@@ -860,6 +860,41 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
       });
 }
 
+
+class DeleteSeasonResult : public ETJump::SynchronizationContext::ResultBase {
+public:
+  explicit DeleteSeasonResult(std::string message)
+      : message(std::move(message)) {}
+
+  std::string message;
+};
+
+void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
+  _sc->postTask(
+      [this, name]() {
+        try {
+          _repository->deleteSeason(name);
+          return std::make_unique<DeleteSeasonResult>(
+              stringFormat("Successfully deleted season `%s`", name));
+        } catch (const std::runtime_error &e) {
+          return std::make_unique<DeleteSeasonResult>(e.what());
+        }
+      },
+      [this,
+        clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        auto deleteSeasonResult = dynamic_cast<DeleteSeasonResult *>(result.get());
+
+        Printer::SendConsoleMessage(clientNum,
+                                    deleteSeasonResult->message + "\n");
+      },
+      [this, clientNum](const std::runtime_error &e) {
+        const char *what = e.what();
+        Printer::SendConsoleMessage(
+            clientNum,
+            stringFormat("Unable to delete season: %s\n", e.what()));
+      });
+}
+
 void ETJump::TimerunV2::startNotify(Player *player) const {
   auto spectators = Utilities::getSpectators(player->clientNum);
   auto previousRecord =
