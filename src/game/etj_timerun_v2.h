@@ -104,6 +104,7 @@ public:
                        int rank);
   void printRankings(Timerun::PrintRankingsParams params);
   void printSeasons(int clientNum);
+  void deleteSeason(int clientNum, const std::string & name);
 
 private:
   void startNotify(Player *player) const;

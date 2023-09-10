@@ -646,6 +646,25 @@ std::vector<ETJump::Timerun::Season> ETJump::TimerunRepository::getSeasons() {
   return seasons;
 }
 
+void ETJump::TimerunRepository::deleteSeason(const std::string &name) {
+  if (name == "default") {
+    throw std::runtime_error("Cannot delete default season.");
+  }
+  int id = 0;
+  _database->sql << "select coalesce((select id from season where name=?), -1);" << name >> id;
+  if (id < 0) {
+    throw std::runtime_error(stringFormat("Season `%s` does not exist.", name));
+  }
+
+  // for some reason someone named it something else
+  if (id == 1) {
+    throw std::runtime_error("Cannot delete default season.");
+  }
+
+  _database->sql << "delete from record where season_id=?;" << id;
+  _database->sql << "delete from season where id=?" << id;
+}
+
 void ETJump::TimerunRepository::tryToMigrateRecords() {
   int count = 0;
   _oldDatabase->sql <<

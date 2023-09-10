@@ -70,6 +70,7 @@ public:
       const std::string &name, bool exact);
   opt<Timerun::Record> getRecord(const std::string & map, const std::string & run, int rank);
   std::vector<Timerun::Season> getSeasons();
+  void deleteSeason(const std::string & name);
 
 private:
   void tryToMigrateRecords();
