@@ -61,6 +61,7 @@ public:
     bool running{};
     // used for fading
     int lastRunTimer{};
+    bool runHasCheckpoints = false;
     int numCheckpointsHit{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
     int nextFreeCheckpointIdx{};

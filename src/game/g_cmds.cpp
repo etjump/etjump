@@ -3652,7 +3652,7 @@ tryagain:
 
 namespace ETJump {
 bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
-  if (!ETJump::isPlayer(traceEnt)) {
+  if (!EntityUtilities::isPlayer(traceEnt)) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {
@@ -4110,15 +4110,25 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
     return;
   }
 
-  //	if( ent->client->sess.sessionTeam != TEAM_SPECTATOR &&
-  //!(ent->client->ps.pm_flags & PMF_LIMBO) ) { 		return;
-  //	}
-
   if (trap_Argc() != 2) {
     return;
   }
   trap_Argv(1, buffer, 16);
   val = Q_atoi(buffer) + 1;
+
+  // if limbo cams aren't present, use spectator spawnpoint by default,
+  // so we don't get limbo cams potentially in void
+  if (!level.numLimboCams) {
+    VectorCopy(level.intermission_origin, ent->s.origin2);
+    ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
+    trap_SendServerCommand(
+        ClientNum(ent),
+        va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+           level.intermission_origin[0], level.intermission_origin[1],
+           level.intermission_origin[2], level.intermission_angle[0],
+           level.intermission_angle[1], level.intermission_angle[2], -1));
+    return;
+  }
 
   for (i = 0; i < level.numLimboCams; i++) {
     if (!level.limboCams[i].spawn && level.limboCams[i].info == val) {
@@ -4126,17 +4136,12 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
         VectorCopy(level.limboCams[i].origin, ent->s.origin2);
         ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
         trap_SendServerCommand(
-            ent - g_entities,
-            va("portalcampos %i %i %i %i %i %i "
-               "%i %i",
-               val - 1, (int)level.limboCams[i].origin[0],
-               (int)level.limboCams[i].origin[1],
-               (int)level.limboCams[i].origin[2],
-               (int)level.limboCams[i].angles[0],
-               (int)level.limboCams[i].angles[1],
-               (int)level.limboCams[i].angles[2],
+            ClientNum(ent),
+            va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+               level.limboCams[i].origin[0], level.limboCams[i].origin[1],
+               level.limboCams[i].origin[2], level.limboCams[i].angles[0],
+               level.limboCams[i].angles[1], level.limboCams[i].angles[2],
                level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
-
         break;
       } else {
         dist = VectorDistanceSquared(
@@ -4156,11 +4161,11 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
     VectorCopy(level.limboCams[i].origin, ent->s.origin2);
     ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
     trap_SendServerCommand(
-        ent - g_entities,
-        va("portalcampos %i %i %i %i %i %i %i %i", val - 1,
-           (int)level.limboCams[i].origin[0], (int)level.limboCams[i].origin[1],
-           (int)level.limboCams[i].origin[2], (int)level.limboCams[i].angles[0],
-           (int)level.limboCams[i].angles[1], (int)level.limboCams[i].angles[2],
+        ClientNum(ent),
+        va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+           level.limboCams[i].origin[0], level.limboCams[i].origin[1],
+           level.limboCams[i].origin[2], level.limboCams[i].angles[0],
+           level.limboCams[i].angles[1], level.limboCams[i].angles[2],
            level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
   }
 }

@@ -1,0 +1,322 @@
+// ETJump mapscript for branx.bsp
+// Modifications:
+// - fixed empty wm_announce when allies captured the end flag
+
+game_manager 
+{ 
+   spawn 
+   { 
+      wm_axis_respawntime 1
+      wm_allied_respawntime 1 
+      wm_set_round_timelimit 90
+      wm_number_of_objectives 1
+      wm_setwinner -1 
+   } 
+} 
+
+// FLAG 1
+//
+flag1
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger axis_capture	// flag has been touched by an Axis player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 0					// Axis own the pole
+		wm_announce	"hier kommt deine message"
+		//alertentity flag1spawns
+		//alertentity flag1area
+
+		globalaccum 0 abort_if_greater_than 0 // atleast flag number 1 already taken, abort
+		globalaccum 0 set 1
+		wait 500
+		//setautospawn "Flag 1" 0
+		setautospawn "Flag 1" 1
+	}
+
+	trigger allied_capture	// flag has been touched by an allied player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 1					// Allies own the pole
+		wm_announce	"hier kommt deine message"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+	      wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		alertentity flag1spawns
+		alertentity flag1area
+
+		globalaccum 0 abort_if_greater_than 0 // atleast flag number 1 already taken, abort
+		globalaccum 0 set 1
+		wait 500
+		//setautospawn "Flag 1" 0
+		setautospawn "Flag 1" 1
+	}
+
+	trigger kill
+	{
+		remove
+	}
+}
+
+// FLAG 2
+//
+flag2
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger axis_capture	// flag has been touched by an Axis player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 0					// Axis own the pole
+		wm_announce	"hier kommt deine message"
+		//alertentity flag2spawns
+		//alertentity flag2area
+
+		globalaccum 0 abort_if_greater_than 1 // atleast flag number 2 already taken, abort
+		globalaccum 0 set 2
+		wait 500
+		//setautospawn "Flag 2" 0
+		setautospawn "Flag 2" 1
+	}
+
+	trigger allied_capture	// flag has been touched by an allied player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 1					// Allies own the pole
+		wm_announce	"hier kommt deine message"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+	      wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		alertentity flag2spawns
+		alertentity flag2area
+
+		globalaccum 0 abort_if_greater_than 1 // atleast flag number 2 already taken, abort
+		globalaccum 0 set 2
+		wait 500
+		//setautospawn "Flag 2" 0
+		setautospawn "Flag 2" 1
+	}
+
+	trigger kill
+	{
+		remove
+	}
+}
+
+// FLAG 3
+//
+flag3
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger axis_capture	// flag has been touched by an Axis player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 0					// Axis own the pole
+		wm_announce	"hier kommt deine message"
+		//alertentity flag3spawns
+		//alertentity flag3area
+
+		globalaccum 0 abort_if_greater_than 2 // atleast flag number 3 already taken, abort
+		globalaccum 0 set 3
+		wait 500
+		//setautospawn "Flag 3" 0
+		setautospawn "Flag 3" 1
+	}
+
+	trigger allied_capture	// flag has been touched by an allied player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 1					// Allies own the pole
+		wm_announce	"hier kommt deine message"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+	      wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		alertentity flag3spawns
+		alertentity flag3area
+
+		globalaccum 0 abort_if_greater_than 2 // atleast flag number 3 already taken, abort
+		globalaccum 0 set 3
+		wait 500
+		//setautospawn "Flag 3" 0
+		setautospawn "Flag 3" 1
+	}
+
+	trigger kill
+	{
+		remove
+	}
+}
+
+// FLAG 4
+//
+flag4
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger axis_capture	// flag has been touched by an Axis player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 0					// Axis own the pole
+		wm_announce	"hier kommt deine message"
+		//alertentity flag4spawns
+		//alertentity flag4area
+
+		globalaccum 0 abort_if_greater_than 3 // atleast flag number 4 already taken, abort
+		globalaccum 0 set 4
+		wait 500
+		//setautospawn "Flag 4" 0
+		setautospawn "Flag 4" 1
+	}
+
+	trigger allied_capture	// flag has been touched by an allied player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 1					// Allies own the pole
+		wm_announce	"hier kommt deine message"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+	      wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		alertentity flag4spawns
+		alertentity flag4area
+
+		globalaccum 0 abort_if_greater_than 3 // atleast flag number 4 already taken, abort
+		globalaccum 0 set 4
+		wait 500
+		//setautospawn "Flag 4" 0
+		setautospawn "Flag 4" 1
+	}
+
+	trigger kill
+	{
+		remove
+	}
+}
+
+// FLAG 5
+//
+flag5
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger axis_capture	// flag has been touched by an Axis player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 0					// Axis own the pole
+		wm_announce	"hier kommt deine message"
+		//alertentity flag5spawns
+		//alertentity flag5area
+
+		globalaccum 0 abort_if_greater_than 4 // atleast flag number 5 already taken, abort
+		globalaccum 0 set 5
+		wait 500
+		//setautospawn "Flag 5" 0
+		setautospawn "Flag 5" 1
+	}
+
+	trigger allied_capture	// flag has been touched by an allied player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 1					// Allies own the pole
+		wm_announce	"hier kommt deine message"
+	      wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+	      wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		alertentity flag5spawns
+		alertentity flag5area
+
+		globalaccum 0 abort_if_greater_than 4 // atleast flag number 5 already taken, abort
+		globalaccum 0 set 5
+		wait 500
+		//setautospawn "Flag 5" 0
+		setautospawn "Flag 5" 1
+	}
+
+	trigger kill
+	{
+		remove
+	}
+}
+
+// FLAG 6
+//
+flag6
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger axis_capture	// flag has been touched by an Axis player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 0					// Axis own the pole
+		wm_announce	"hier kommt deine message"
+		//alertentity flag6spawns
+		//alertentity flag6area
+
+		globalaccum 0 abort_if_greater_than 5 // atleast flag number 6 already taken, abort
+		globalaccum 0 set 6
+		wait 500
+		//setautospawn "Flag 6" 0
+		setautospawn "Flag 6" 1
+	}
+
+	trigger allied_capture	// flag has been touched by an allied player
+	{
+		accum 1 abort_if_not_equal -1	// flag owned by someone, then abort.
+		accum 1 set 1					// Allies own the pole
+		wm_announce	"hier kommt deine message"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+	      wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		alertentity flag6spawns
+		alertentity flag6area
+
+		globalaccum 0 abort_if_greater_than 5 // atleast flag number 6 already taken, abort
+		globalaccum 0 set 6
+		wait 500
+		//setautospawn "Flag 6" 0
+		setautospawn "Flag 6" 1
+	}
+
+	trigger kill
+	{
+		remove
+	}
+}
+
+endflag
+{
+	trigger allied_capture
+	{
+		// wm_announce ""
+		wm_announce "^zGood Job ^1!"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+		wm_teamvoiceannounce 1 "allies_hq_objective_captured"		
+		wait 5000
+		wm_setwinner 1
+		wm_endround
+	}
+
+	trigger axis_capture
+	{
+		wm_announce "^zGood Job ^1!"
+		wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+		wm_teamvoiceannounce 1 "axis_hq_objective_captured"		
+		wait 5000
+		wm_setwinner 0
+		wm_endround
+	}
+}
+// end of file

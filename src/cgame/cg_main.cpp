@@ -561,6 +561,7 @@ vmCvar_t etj_snapHUDHLColor2;
 vmCvar_t etj_snapHUDFov;
 vmCvar_t etj_snapHUDHLActive;
 vmCvar_t etj_snapHUDTrueness;
+vmCvar_t etj_snapHUDEdgeThickness;
 
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
@@ -1075,6 +1076,8 @@ cvarTable_t cvarTable[] = {
     {&etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE},
     {&etj_snapHUDHLActive, "etj_snapHUDHLActive", "0", CVAR_ARCHIVE},
     {&etj_snapHUDTrueness, "etj_snapHUDTrueness", "0", CVAR_ARCHIVE},
+    {&etj_snapHUDEdgeThickness, "etj_snapHUDEdgeThickness", "10", CVAR_ARCHIVE},
+
     {&etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE},
     {&etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1",
      CVAR_ARCHIVE},
