@@ -2171,10 +2171,13 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
 bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   int clientNum = ClientNum(ent);
 
-  auto def = ETJump::CommandParser::CommandDefinition::create(
-                 "delete-season", "Delete a season. This will delete all the "
-                                  "records within the season.")
-                 .addOption("name", "Exact name of the season to delete", ETJump::CommandParser::OptionDefinition::Type::MultiToken, true);
+  auto def =
+      ETJump::CommandParser::CommandDefinition::create(
+          "delete-season", "Delete a season. This will delete all the "
+                           "records within the season.")
+          .addOption("name", "Exact name of the season to delete",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true);
 
   auto optCommand =
       deprecated_getCommand("delete-season", clientNum, def, argv);
@@ -2185,7 +2188,8 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   auto command = std::move(optCommand.value());
   auto name = command.options["name"].text;
 
-  game.timerunV2->deleteSeason(clientNum, ETJump::StringUtil::toLowerCase(name));
+  game.timerunV2->deleteSeason(clientNum,
+                               ETJump::StringUtil::toLowerCase(name));
 
   return true;
 }
@@ -2330,7 +2334,8 @@ bool Commands::List(gentity_t *ent) {
   const int clienNum = ClientNum(ent);
   std::string helpMsg;
 
-  Printer::SendChatMessage(clienNum, "^3help: ^gcheck console for more information.");
+  Printer::SendChatMessage(clienNum,
+                           "^3help: ^gcheck console for more information.");
 
   int i = 1;
   std::bitset<256> perm = ETJump::session->Permissions(ent);
