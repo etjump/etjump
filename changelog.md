@@ -1,6 +1,6 @@
 # ETJump 3.0.0
 
-* new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021) [#1043](https://github.com/etjump/etjump/pull/1043) [#1048](https://github.com/etjump/etjump/pull/1048)
+* new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021) [#1043](https://github.com/etjump/etjump/pull/1043) [#1048](https://github.com/etjump/etjump/pull/1048) [#1050](https://github.com/etjump/etjump/pull/1050)
   * support for checkpoints (`target_checkpoint` & `trigger_checkpoint`) entities & related cvars for client
     * `etj_drawCheckpoints` - **1** - below runtimer, **2** - detached
     * `etj_checkpointsX/Y` - checkpoint timer location (only with `etj_drawCheckpoints 2`)
@@ -12,9 +12,11 @@
   * `trigger_starttimer` & `trigger_stoptimer` entities
   * `_ext` versions of all timerun entities for mapscripting purposes
   * timerun seasons - per-server seasonal records, defined by server admins with `!add-season` command
-    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date [YYYY-MM-DD]` (admin flag T)
-    * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]` (admin flag T)
     * `!seasons` - lists all seasons (admin flag a)
+    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date-exclusive [YYYY-MM-DD]` (admin flag T)
+    * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]` (admin flag T)
+    * `!delete-season --name <name> [required]` (admin flag T)
+      * deleting a season will delete all records associated with the season
   * ranking system - per-server rankings for players, points are calculated using the [DFWC EESystem](https://docs.google.com/forms/d/e/1FAIpQLSczfUVq5sPQlYcDLw9rY6MxodMBdIiM0HuPdocgksLR3NDtgw/viewform) (minus the nascar clause)
     * available via `!rankings` or `/rankings` commands (admin flag `a`)
     * `rankings --season <season> --page-size <size> --page <page>`
@@ -26,6 +28,7 @@
       * all parameters support partial matching, no need to type out entire name
     * detailed records now show top 20 times by default, and always shows your time if not currently visible
     * records can now be fetched for any map on the server, regardless of which map is currently running
+    * records command (and it's aliases) can now be executed as admin commands too (admin flag a)
   * `g_timeruns2Database` cvar to set new timerun database name on server (default `timeruns.v2.db`)
     * old timerun database will automatically be migrated to the new database format - no manual intervention required by server admins
 * fireteam UI improvements [#1026](https://github.com/etjump/etjump/pull/1026) [#1030](https://github.com/etjump/etjump/pull/1030)
@@ -58,6 +61,7 @@
   * `trigger_stoptimer_ext` (blue)
   * `trigger_checkpoint_ext` (magenta)
   * `func_fakebrush` (red)
+* bundled fixed mapscripts for `branx`, `branx2` and `freestyle` with the mod so they work out of box without a custom script [#1039](https://github.com/etjump/etjump/pull/1039)
 
 # ETJump 2.6.0
 

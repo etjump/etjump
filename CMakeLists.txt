@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(etjump VERSION 2.6.0 HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
+project(etjump VERSION 3.0.0 HOMEPAGE_URL "etjump.com" LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
 
 option(BUILD_TESTS "Enable tests building (ON by default)" ON)
