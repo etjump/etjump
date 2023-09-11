@@ -2171,10 +2171,13 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
 bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   int clientNum = ClientNum(ent);
 
-  auto def = ETJump::CommandParser::CommandDefinition::create(
-                 "delete-season", "Delete a season. This will delete all the "
-                                  "records within the season.")
-                 .addOption("name", "Exact name of the season to delete", ETJump::CommandParser::OptionDefinition::Type::MultiToken, true);
+  auto def =
+      ETJump::CommandParser::CommandDefinition::create(
+          "delete-season", "Delete a season. This will delete all the "
+                           "records within the season.")
+          .addOption("name", "Exact name of the season to delete",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true);
 
   auto optCommand =
       deprecated_getCommand("delete-season", clientNum, def, argv);
@@ -2185,7 +2188,8 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   auto command = std::move(optCommand.value());
   auto name = command.options["name"].text;
 
-  game.timerunV2->deleteSeason(clientNum, ETJump::StringUtil::toLowerCase(name));
+  game.timerunV2->deleteSeason(clientNum,
+                               ETJump::StringUtil::toLowerCase(name));
 
   return true;
 }
@@ -2327,19 +2331,22 @@ bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {
 bool Commands::List(gentity_t *ent) {
   ConstAdminCommandIterator it = adminCommands_.begin(),
                             end = adminCommands_.end();
+  const int clienNum = ClientNum(ent);
+  std::string helpMsg;
 
-  BeginBufferPrint();
-  ChatPrintTo(ent, "^3help: ^7check console for more information.");
+  Printer::SendChatMessage(clienNum,
+                           "^3help: ^gcheck console for more information.");
+
   int i = 1;
   std::bitset<256> perm = ETJump::session->Permissions(ent);
   for (; it != end; it++) {
-    if (perm[it->second.second] == false) {
+    if (!perm[it->second.second]) {
       continue;
     }
 
-    BufferPrint(ent, va("%-20s ", it->first.c_str()));
+    helpMsg += va("%-20s ", it->first.c_str());
     if (i != 0 && i % 3 == 0) {
-      BufferPrint(ent, "\n");
+      helpMsg += "\n";
     }
 
     i++;
@@ -2347,15 +2354,15 @@ bool Commands::List(gentity_t *ent) {
 
   // Add a newline if last row is incomplete
   if (i % 3 != 1) {
-    BufferPrint(ent, "\n");
+    helpMsg += "\n";
   }
 
   // Let client know if they have access to silent commands
   if (ent && ETJump::session->HasPermission(ent, '/')) {
-    BufferPrint(ent, "\n^7Use admin commands silently with ^3/!command");
+    helpMsg += "\n^gUse admin commands silently with ^3/!command";
   }
 
-  FinishBufferPrint(ent, true);
+  Printer::SendConsoleMessage(clienNum, helpMsg);
   return true;
 }
 
