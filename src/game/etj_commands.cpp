@@ -2292,6 +2292,12 @@ Commands::Commands() {
       AdminCommands::TimerunDeleteSeason, CommandFlags::TIMERUN_MANAGEMENT);
   adminCommands_["records"] =
       AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["ranks"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["times"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["top"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
   adminCommands_["rankings"] =
       AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
   adminCommands_["loadcheckpoints"] =
@@ -2359,7 +2365,7 @@ bool Commands::List(gentity_t *ent) {
 
   // Let client know if they have access to silent commands
   if (ent && ETJump::session->HasPermission(ent, '/')) {
-    helpMsg += "\n^gUse admin commands silently with ^3/!command";
+    helpMsg += "\n^gUse admin commands silently with ^3/!command\n";
   }
 
   Printer::SendConsoleMessage(clienNum, helpMsg);
