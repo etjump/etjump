@@ -13,7 +13,7 @@
   * `_ext` versions of all timerun entities for mapscripting purposes
   * timerun seasons - per-server seasonal records, defined by server admins with `!add-season` command
     * `!seasons` - lists all seasons (admin flag a)
-    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date [YYYY-MM-DD]` (admin flag T)
+    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date-exclusive [YYYY-MM-DD]` (admin flag T)
     * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]` (admin flag T)
     * `!delete-season --name <name> [required]` (admin flag T)
       * deleting a season will delete all records associated with the season
@@ -28,6 +28,7 @@
       * all parameters support partial matching, no need to type out entire name
     * detailed records now show top 20 times by default, and always shows your time if not currently visible
     * records can now be fetched for any map on the server, regardless of which map is currently running
+    * records command (and it's aliases) can now be executed as admin commands too (admin flag a)
   * `g_timeruns2Database` cvar to set new timerun database name on server (default `timeruns.v2.db`)
     * old timerun database will automatically be migrated to the new database format - no manual intervention required by server admins
 * fireteam UI improvements [#1026](https://github.com/etjump/etjump/pull/1026) [#1030](https://github.com/etjump/etjump/pull/1030)
