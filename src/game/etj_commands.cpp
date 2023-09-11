@@ -313,7 +313,7 @@ bool Records(gentity_t *ent, Arguments argv) {
   params.exactMap = exactMap;
   params.run = run;
   params.page = optPage.hasValue() ? optPage.value().integer : 1;
-  if (command.extraArgs.empty()) {
+  if (!params.run.hasValue() && !optPageSize.hasValue()) {
     params.pageSize = 3;
   } else {
     params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
