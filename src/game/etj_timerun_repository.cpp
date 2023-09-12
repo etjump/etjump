@@ -651,7 +651,7 @@ void ETJump::TimerunRepository::deleteSeason(const std::string &name) {
     throw std::runtime_error("Cannot delete default season.");
   }
   int id = 0;
-  _database->sql << "select coalesce((select id from season where name=?), -1);" << name >> id;
+  _database->sql << "select coalesce((select id from season where name=? collate nocase), -1);" << name >> id;
   if (id < 0) {
     throw std::runtime_error(stringFormat("Season `%s` does not exist.", name));
   }
