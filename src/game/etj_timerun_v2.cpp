@@ -860,7 +860,6 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
       });
 }
 
-
 class DeleteSeasonResult : public ETJump::SynchronizationContext::ResultBase {
 public:
   explicit DeleteSeasonResult(std::string message)
@@ -881,8 +880,9 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
         }
       },
       [this,
-        clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
-        auto deleteSeasonResult = dynamic_cast<DeleteSeasonResult *>(result.get());
+       clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+        auto deleteSeasonResult =
+            dynamic_cast<DeleteSeasonResult *>(result.get());
 
         Printer::SendConsoleMessage(clientNum,
                                     deleteSeasonResult->message + "\n");
@@ -890,8 +890,7 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       [this, clientNum](const std::runtime_error &e) {
         const char *what = e.what();
         Printer::SendConsoleMessage(
-            clientNum,
-            stringFormat("Unable to delete season: %s\n", e.what()));
+            clientNum, stringFormat("Unable to delete season: %s\n", e.what()));
       });
 }
 
@@ -1149,7 +1148,9 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           std::string diffString;
           if (record.previousTime.hasValue()) {
             diffString =
-                diffToString(record.record.time, record.previousTime.value());
+                "^7(" +
+                diffToString(record.record.time, record.previousTime.value()) +
+                "^7)";
 
             Printer::BroadCastBannerMessage(stringFormat(
                 // clang-format off
@@ -1171,8 +1172,10 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
           std::string diffString;
           if (record.second.previousTime.hasValue()) {
-            diffString = diffToString(record.second.record.time,
-                                      record.second.previousTime.value());
+            diffString = "^7(" +
+                         diffToString(record.second.record.time,
+                                      record.second.previousTime.value()) +
+                         "^7)";
           }
           Printer::SendConsoleMessage(
               checkRecordResult->clientNum,
