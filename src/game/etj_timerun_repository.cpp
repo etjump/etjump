@@ -504,7 +504,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     from record
     where 
       (%s) and
-      map like ?
+      map=?
       %s
     collate nocase
     order by season_id, map, run, time asc
@@ -517,7 +517,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     binder << s.id;
   }
 
-  binder << "%" + map + "%";
+  binder << map;
 
   if (runSpecified) {
     binder << "%" + params.run.value() + "%";
