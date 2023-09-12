@@ -94,15 +94,13 @@ void Timerun::printMessage(const std::string &message, int shader) {
 }
 
 void Timerun::onRecord(const TimerunCommands::Record *record) {
-  if (record->clientNum == cg.snap->ps.clientNum) {
-    std::string message = createCompletionMessage(
-        cgs.clientinfo[record->clientNum], record->runName,
-        record->completionTime, record->previousRecordTime);
-    int shader = !record->previousRecordTime.hasValue()
-                     ? cgs.media.stopwatchIcon
-                     : cgs.media.stopwatchIconGreen;
-    printMessage(message, shader);
-  }
+  std::string message = createCompletionMessage(
+      cgs.clientinfo[record->clientNum], record->runName,
+      record->completionTime, record->previousRecordTime);
+  int shader = !record->previousRecordTime.hasValue()
+                   ? cgs.media.stopwatchIcon
+                   : cgs.media.stopwatchIconGreen;
+  printMessage(message, shader);
 
   _playerEventsHandler->check(
       "timerun:record", {std::to_string(record->clientNum), record->runName,
