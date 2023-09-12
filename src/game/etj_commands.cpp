@@ -259,7 +259,9 @@ bool Records(gentity_t *ent, Arguments argv) {
           .addOption("page", "Which page to display starting at 1",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false)
-          .addOption("page-size", "How many records to show on a single page",
+          .addOption("page-size",
+                     "How many records to show on a single page. Max page size "
+                     "is 100 if a run is specified, otherwise 10.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false),
       &args);
@@ -313,10 +315,14 @@ bool Records(gentity_t *ent, Arguments argv) {
   params.exactMap = exactMap;
   params.run = run;
   params.page = optPage.hasValue() ? optPage.value().integer : 1;
-  if (!params.run.hasValue() && !optPageSize.hasValue()) {
-    params.pageSize = 3;
+  if (!params.run.hasValue()) {
+    params.pageSize = optPageSize.hasValue()
+                          ? Numeric::clamp(optPageSize.value().integer, 1, 10)
+                          : 3;
   } else {
-    params.pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
+    params.pageSize = optPageSize.hasValue()
+                          ? Numeric::clamp(optPageSize.value().integer, 1, 100)
+                          : 20;
   }
   params.userId = ETJump::session->GetId(ent);
 
