@@ -142,8 +142,8 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
   if (argv->size() != 2) {
     std::string types = game.customMapVotes->ListTypes();
     Printer::SendConsoleMessage(
-        ClientNum(ent), "^7Available custom map vote lists:\n^z" + types +
-                            "\n\n^7Use ^3listinfo [listname] ^7to type "
+        ClientNum(ent), "^gAvailable custom map vote lists:\n^z" + types +
+                            "\n\n^gUse ^3listinfo [listname] ^gto type "
                             "maps in the specified type.\n");
     return true;
   }
@@ -153,7 +153,7 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
   if (maplist.empty()) {
     Printer::SendConsoleMessage(
         ClientNum(ent),
-        ETJump::stringFormat("^3listinfo: ^7Could not find type ^3%s\n", type));
+        ETJump::stringFormat("^3listinfo: ^gCould not find type ^3%s\n", type));
     return false;
   }
   Printer::SendConsoleMessage(ClientNum(ent), maplist);

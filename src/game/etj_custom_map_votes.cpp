@@ -172,26 +172,30 @@ std::string CustomMapVotes::ListInfo(const std::string &type) {
 
   for (auto &customMapVote : customMapVotes_) {
     if (customMapVote.type == type) {
-      buffer += ETJump::stringFormat("^7Maps on the list ^3%s^7: \n", type);
+      buffer += ETJump::stringFormat("^gMaps on the list ^3%s^g: \n", type);
+      auto numMapsOnServer = customMapVote.mapsOnServer.size();
 
       int count = 0;
       for (auto &mapOnServer : customMapVote.mapsOnServer) {
         buffer += ETJump::stringFormat("^7%-30s", mapOnServer);
 
         ++count;
-        if (count % 3 == 0) {
+        if (count % 3 == 0 || count == numMapsOnServer) {
           buffer += "\n";
         }
       }
 
-      buffer += "\n^7Maps included on the list, but missing on server: \n";
-      count = 0;
-      for (auto &mapNotOnServer : customMapVote.otherMaps) {
-        buffer += ETJump::stringFormat("^9%-30s", mapNotOnServer);
+      if (!customMapVote.otherMaps.empty()) {
+        buffer += "\n^gMaps included on the list, but missing on server: \n";
+        count = 0;
+        auto numMapsNotOnServer = customMapVote.otherMaps.size();
+        for (auto &mapNotOnServer : customMapVote.otherMaps) {
+          buffer += ETJump::stringFormat("^9%-30s", mapNotOnServer);
 
-        ++count;
-        if (count % 3 == 0) {
-          buffer += "\n";
+          ++count;
+          if (count % 3 == 0 || count == numMapsNotOnServer) {
+            buffer += "\n";
+          }
         }
       }
     }
