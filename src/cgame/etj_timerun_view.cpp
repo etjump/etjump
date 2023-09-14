@@ -81,8 +81,16 @@ void ETJump::TimerunView::draw() {
   auto color = &colorWhite;
   const auto font = &cgs.media.limboFont1;
 
+  // ensure correct 8ms interval timer when playing
+  // specs/demo playback get approximation from cg.time, so timer stays smooth
+  // one day this can maybe be real commandTime for all scenarios
+  // if we get to sv_fps 125 servers...
+  const int timeVar = (isPlaying(cg.clientNum) && !cg.demoPlayback)
+                          ? cg.predictedPlayerState.commandTime
+                          : cg.time;
+
   if (run->running) {
-    millis = cg.time - startTime;
+    millis = timeVar - startTime;
   } else {
     millis = run->completionTime;
     if (millis == -1) {
@@ -147,18 +155,18 @@ void ETJump::TimerunView::draw() {
     auto fstart = run->lastRunTimer + fadeStart;
     auto fend = fstart + fadeOut;
 
-    if (fstart < cg.time && fend > cg.time) {
+    if (fstart < timeVar && fend > timeVar) {
       vec4_t toColor;
       memcpy(&toColor, color, sizeof(toColor));
       toColor[3] = 0;
 
-      auto step = (cg.time - fstart) / (float)(fend - fstart);
+      auto step = (timeVar - fstart) / (float)(fend - fstart);
 
       ETJump_LerpColors(color, &toColor, &colorTemp, step);
       color = &colorTemp;
 
       hideCheckpoints = true;
-    } else if (cg.time > fend) {
+    } else if (timeVar > fend) {
       // dont draw timer once fading is done
       return;
     }
@@ -184,7 +192,7 @@ void ETJump::TimerunView::draw() {
       y += 20;
     }
     const int currentTime =
-        run->running ? cg.time - run->startTime : run->completionTime;
+        run->running ? timeVar - run->startTime : run->completionTime;
     const float textSize = 0.1f * etj_checkpointsSize.value;
     const auto textStyle = etj_checkpointsShadow.integer
                                ? ITEM_TEXTSTYLE_SHADOWED
