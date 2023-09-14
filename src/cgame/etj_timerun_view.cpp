@@ -217,11 +217,21 @@ void ETJump::TimerunView::draw() {
           run->previousRecordCheckpoints[i] == TIMERUN_CHECKPOINT_NOT_SET
               ? run->previousRecord
               : run->previousRecordCheckpoints[i];
+      bool noRecordCheckpoint =
+          recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET;
 
       bool checkpointTimeNotSet = checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
-      int relativeTime = checkpointTimeNotSet
-                             ? currentTime - recordCheckpointTime
-                             : checkpointTime - recordCheckpointTime;
+
+      // make sure we don't subtract -1 from timestamp if we don't
+      // have a checkpoint time set at all
+      int relativeTime;
+      if (checkpointTimeNotSet) {
+        relativeTime =
+            currentTime - (noRecordCheckpoint ? 0 : recordCheckpointTime);
+      } else {
+        relativeTime =
+            checkpointTime - (noRecordCheckpoint ? 0 : recordCheckpointTime);
+      }
 
       // if we don't have current or next checkpoint set, just display the
       // runtimer
