@@ -2153,8 +2153,6 @@ extern vmCvar_t g_debugTimeruns;
 extern vmCvar_t g_spectatorVote;
 extern vmCvar_t g_enableVote;
 
-extern vmCvar_t g_logMapsToFile;
-
 void trap_Printf(const char *fmt);
 void trap_Error(const char *fmt);
 int trap_Milliseconds(void);

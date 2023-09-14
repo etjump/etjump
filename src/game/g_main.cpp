@@ -297,8 +297,6 @@ vmCvar_t g_debugTimeruns;
 vmCvar_t g_spectatorVote;
 vmCvar_t g_enableVote;
 
-vmCvar_t g_logMapsToFile;
-
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
 // systems on server
@@ -611,7 +609,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
     {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
-    {&g_logMapsToFile, "g_logMapsToFile", "", CVAR_ARCHIVE}};
+};
 
 // bk001129 - made static to avoid aliasing
 static int gameCvarTableSize = sizeof(gameCvarTable) / sizeof(gameCvarTable[0]);

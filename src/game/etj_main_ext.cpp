@@ -196,9 +196,7 @@ void OnGameInit() {
     game.tokens->loadTokens(path);
   }
 
-  if (strlen(g_logMapsToFile.string) > 0) {
-    game.mapStatistics->writeMapsToDisk(g_logMapsToFile.string);
-  }
+  game.mapStatistics->writeMapsToDisk("maps.json");
 
   ETJump::Log::processMessages();
 }

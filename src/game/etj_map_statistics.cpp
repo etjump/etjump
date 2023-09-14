@@ -543,7 +543,7 @@ void MapStatistics::writeMapsToDisk(const std::string &fileName) {
   auto str = writer.write(mapsArray);
 
   fileHandle_t f;
-  trap_FS_FOpenFile(g_logMapsToFile.string, &f, FS_WRITE);
+  trap_FS_FOpenFile(fileName.c_str(), &f, FS_WRITE);
   trap_FS_Write(str.c_str(), str.length(), f);
   trap_FS_FCloseFile(f);
 }
