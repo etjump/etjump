@@ -72,6 +72,7 @@ public:
   static std::vector<std::string> blockedMaps();
   static bool isBlockedMap(const std::string &mapName);
   bool mapExists(const std::string &mapName);
+  void writeMapsToDisk(const std::string &fileName);
 
 private:
   std::vector<MapInformation> _maps;

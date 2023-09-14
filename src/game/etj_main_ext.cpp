@@ -195,6 +195,11 @@ void OnGameInit() {
                 std::string(level.rawmapname) + ".json";
     game.tokens->loadTokens(path);
   }
+
+  if (strlen(g_logMapsToFile.string) > 0) {
+    game.mapStatistics->writeMapsToDisk(g_logMapsToFile.string);
+  }
+
   ETJump::Log::processMessages();
 }
 

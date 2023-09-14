@@ -25,6 +25,8 @@
 #include "etj_map_statistics.h"
 #include <sqlite3.h>
 #include <algorithm>
+#include <json.h>
+
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
 #include "g_local.h"
@@ -527,6 +529,23 @@ bool MapStatistics::mapExists(const std::string &mapName) {
   auto maps = MapStatistics::getMaps();
   auto it = std::find(maps.begin(), maps.end(), mapName);
   return it != maps.end();
+}
+
+void MapStatistics::writeMapsToDisk(const std::string &fileName) {
+  auto maps = getCurrentMaps();
+
+  Json::Value mapsArray;
+  for (const auto &map : (*maps)) {
+    mapsArray.append(map);
+  }
+
+  Json::StyledWriter writer;
+  auto str = writer.write(mapsArray);
+
+  fileHandle_t f;
+  trap_FS_FOpenFile(g_logMapsToFile.string, &f, FS_WRITE);
+  trap_FS_Write(str.c_str(), str.length(), f);
+  trap_FS_FCloseFile(f);
 }
 
 MapStatistics::~MapStatistics() {}
