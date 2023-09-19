@@ -172,9 +172,11 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   auto optCommand = deprecated_getCommand(
       "rankings", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
-          "rankings", "Displays the player rankings for a specific season. "
-                      "Uses the overall as the default.\n/rankings --season "
-                      "<season> --page <page> --page-size <page size>")
+          "rankings",
+          "Displays the player rankings for a specific season. Uses the "
+          "overall as the default.\n\n    /rankings --season <season> --page "
+          "<page> --page-size <page size>\n\n    Has a shorthand format of:\n  "
+          "  /rankings <season>")
           .addOption("season", "Name of the season to list rankings for",
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      false)
@@ -196,10 +198,15 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   auto optPage = command.getOptional("page");
   auto optPageSize = command.getOptional("page-size");
 
-  ETJump::opt<std::string> season =
-      optSeason.hasValue()
-          ? ETJump::StringUtil::toLowerCase(optSeason.value().text)
-          : ETJump::opt<std::string>();
+  std::string season;
+
+  if (!command.extraArgs.empty()) {
+    season = command.extraArgs[0];
+  }
+
+  if (season.empty()) {
+    season = optSeason.hasValue() ? optSeason.value().text : "Default";
+  }
   auto page = optPage.hasValue() ? optPage.value().integer - 1 : 0;
   auto pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
 
