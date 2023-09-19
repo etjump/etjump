@@ -23,6 +23,7 @@
  */
 
 #include <string>
+#include <utility>
 
 #include "cg_local.h"
 #include "etj_timerun_view.h"
@@ -30,11 +31,10 @@
 #include "etj_cvar_update_handler.h"
 #include "etj_player_events_handler.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_container_utilities.h"
 #include "../game/etj_numeric_utilities.h"
 
 ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
-    : Drawable(), _timerun(timerun) {
+    : Drawable(), _timerun(std::move(timerun)) {
   parseColorString(etj_runTimerInactiveColor.string, inactiveTimerColor);
   cvarUpdateHandler->subscribe(
       &etj_runTimerInactiveColor, [&](const vmCvar_t *cvar) {
@@ -42,7 +42,7 @@ ETJump::TimerunView::TimerunView(std::shared_ptr<Timerun> timerun)
       });
 }
 
-ETJump::TimerunView::~TimerunView() {}
+ETJump::TimerunView::~TimerunView() = default;
 
 const ETJump::Timerun::PlayerTimerunInformation *
 ETJump::TimerunView::currentRun() const {
@@ -69,10 +69,10 @@ void ETJump::TimerunView::draw() {
   }
 
   auto run = currentRun();
-  auto hasTimerun = ((cg.demoPlayback && (run->lastRunTimer || run->running)) ||
-                     cg.hasTimerun);
+  auto hasTimerun =
+      (cg.demoPlayback && (run->lastRunTimer || run->running)) || cg.hasTimerun;
 
-  if (etj_drawRunTimer.integer == 0 || !hasTimerun) {
+  if (!etj_drawRunTimer.integer || !hasTimerun) {
     return;
   }
 
@@ -100,28 +100,19 @@ void ETJump::TimerunView::draw() {
   }
 
   vec4_t colorTemp;
-  vec4_t colorWhite = {1.0f, 1.0f, 1.0f, 1.0f};
-  vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
-  vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
-
-  auto range = getTransitionRange(run->previousRecord);
-  auto style = ITEM_TEXTSTYLE_NORMAL;
-  auto fadeOut = 2000;   // 2s fade out
-  auto fadeStart = 5000; // 5s pause
-
-  if (etj_runTimerShadow.integer > 0) {
-    style = ITEM_TEXTSTYLE_SHADOWED;
-  }
+  const auto range = getTransitionRange(run->previousRecord);
+  const auto style = etj_runTimerShadow.integer ? ITEM_TEXTSTYLE_SHADOWED
+                                                : ITEM_TEXTSTYLE_NORMAL;
 
   if (run->previousRecord > 0) {
     if (millis > run->previousRecord) {
       color = &colorFail;
     }
-    // add timer color transition when player gets closer to his
-    // pb
+    // add timer color transition when player gets closer to their pb
     else if (millis + range >= run->previousRecord) {
       auto start = run->previousRecord - range;
-      auto step = (millis - start) / (float)(run->previousRecord - start);
+      auto step = static_cast<float>(millis - start) /
+                  static_cast<float>(run->previousRecord - start);
 
       ETJump_LerpColors(&colorWhite, &colorFail, &colorTemp, step / 2);
       color = &colorTemp;
@@ -141,45 +132,18 @@ void ETJump::TimerunView::draw() {
   millis -= seconds * 1000;
 
   auto text = ETJump::stringFormat("%02d:%02d.%03d", minutes, seconds, millis);
-
-  float textWidth = CG_Text_Width_Ext(text.c_str(), 0.3, 0, font) / 2;
   auto x = etj_runTimerX.value;
   auto y = etj_runTimerY.value;
 
   // timer fading/hiding routine
   ETJump_AdjustPosition(&x);
 
-  bool hideCheckpoints = false;
-
-  if (!run->running && etj_runTimerAutoHide.integer) {
-    auto fstart = run->lastRunTimer + fadeStart;
-    auto fend = fstart + fadeOut;
-
-    if (fstart < timeVar && fend > timeVar) {
-      vec4_t toColor;
-      memcpy(&toColor, color, sizeof(toColor));
-      toColor[3] = 0;
-
-      auto step = (timeVar - fstart) / (float)(fend - fstart);
-
-      ETJump_LerpColors(color, &toColor, &colorTemp, step);
-      color = &colorTemp;
-
-      hideCheckpoints = true;
-    } else if (timeVar > fend) {
-      // dont draw timer once fading is done
-      return;
-    }
-  }
-
-  CG_Text_Paint_Ext(x - textWidth, y, 0.3, 0.3, *color, text.c_str(), 0, 0,
-                    style, font);
-
-  // FIXME: hack, cba dealing with handcrafted fading
-  // for checkpoints.
-  if (hideCheckpoints) {
+  (*color)[3] = getTimerAlpha(run->running, run->lastRunTimer, timeVar);
+  if (!color[3]) {
     return;
   }
+
+  CG_Text_Paint_Centred_Ext(x, y, 0.3, 0.3, *color, text, 0, 0, style, font);
 
   if (etj_drawCheckpoints.integer && run->runHasCheckpoints) {
     // only adjust x/y if we're drawing checkpoints detached from runtimer
@@ -240,7 +204,7 @@ void ETJump::TimerunView::draw() {
         relativeTime = currentTime;
       }
 
-      std::string dir = "";
+      std::string dir;
       // if we don't have a next checkpoint set, we can't compare to anything
       // so render checkpoint as white
       if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET ||
@@ -261,78 +225,86 @@ void ETJump::TimerunView::draw() {
       std::string timerStr = getTimerString(
           etj_checkpointsStyle.integer == 1 ? absoluteTime : relativeTime);
 
-      timerStr = dir + timerStr;
+      timerStr.insert(0, dir);
 
-      textWidth =
-          static_cast<float>(CG_Text_Width_Ext(timerStr, textSize, 0, font)) *
-          0.5f;
+      (*checkpointColor)[3] =
+          getTimerAlpha(run->running, run->lastRunTimer, timeVar);
+      if (!checkpointColor[3]) {
+        return;
+      }
 
-      CG_Text_Paint_Ext(x - textWidth, y, textSize, textSize, *checkpointColor,
-                        timerStr.c_str(), 0, 0, textStyle, font);
-      y += 15;
+      CG_Text_Paint_Centred_Ext(x, y, textSize, textSize, *checkpointColor,
+                                timerStr, 0, 0, textStyle, font);
+      y += static_cast<float>(2 *
+                              CG_Text_Height_Ext(timerStr, textSize, 0, font));
     }
   }
 
   if (run->running) {
-
     if (run->previousRecord != -1 && ms > run->previousRecord) {
       pastRecordAnimation(color, text.c_str(), ms, run->previousRecord);
     }
   }
 }
 
-int ETJump::TimerunView::getTransitionRange(int previousRunTime) {
-  auto range = 10000;
+float ETJump::TimerunView::getTimerAlpha(bool running, int lastRunTimer,
+                                         int timeVar) {
+  const int fadeStart = lastRunTimer + fadeHold;
+  const int fadeEnd = fadeStart + fadeOut;
 
-  if (3 * 1000 > previousRunTime) {
-    range = 0;
-  } else if (10 * 1000 > previousRunTime) {
-    range = 500; // just for a nice short transition effect,
-    // could be 0
-  } else if (30 * 1000 > previousRunTime) {
-    range = 2000;
-  } else if (60 * 1000 > previousRunTime) {
-    range = 3500;
-  } else if (120 * 1000 > previousRunTime) {
-    range = 5000;
+  if (!running && etj_runTimerAutoHide.integer) {
+    if (fadeStart < timeVar && fadeEnd > timeVar) {
+      const float step =
+          static_cast<float>(timeVar - fadeStart) / static_cast<float>(fadeOut);
+      return 1.0f - step;
+    } else if (timeVar >= fadeEnd) {
+      return 0.0f;
+    }
   }
 
-  return range;
+  return 1.0f;
+}
+
+int ETJump::TimerunView::getTransitionRange(int previousTime) {
+  const auto range = static_cast<float>(previousTime) * 0.1f;
+
+  // for very long runs/splits, cap the max transition range to 10s
+  return range <= 10000 ? static_cast<int>(range) : 10000;
 }
 
 void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char *text,
                                               int timerTime, int record) {
-  auto animationTime = 300;
-
   if (timerTime - record > animationTime) {
     return;
   }
 
   vec4_t toColor;
-  vec4_t incolor;
+  vec4_t inColor;
 
   auto x = etj_runTimerX.value;
-  auto y = etj_runTimerY.value;
+  const auto y = etj_runTimerY.value;
 
   ETJump_AdjustPosition(&x);
 
-  auto step = ((float)(timerTime - record) / animationTime);
-  auto scale = 0.3 + 0.25 * step;
+  const auto step = static_cast<float>(timerTime - record) /
+                    static_cast<float>(animationTime);
+  const auto scale = 0.3f + 0.25f * step;
 
-  auto originalTextHeight =
+  const auto originalTextHeight =
       CG_Text_Height_Ext(text, 0.3, 0, &cgs.media.limboFont1);
-  auto textWidth = CG_Text_Width_Ext(text, scale, 0, &cgs.media.limboFont1) / 2;
-  auto textHeight = (CG_Text_Height_Ext(text, scale, 0, &cgs.media.limboFont1) -
-                     originalTextHeight) /
-                    2;
+  const auto textHeight =
+      static_cast<float>(
+          CG_Text_Height_Ext(text, scale, 0, &cgs.media.limboFont1) -
+          originalTextHeight) *
+      0.5f;
 
   memcpy(&toColor, color, sizeof(toColor));
   toColor[3] = 0;
 
-  ETJump_LerpColors(color, &toColor, &incolor, step);
+  ETJump_LerpColors(color, &toColor, &inColor, step);
 
-  CG_Text_Paint_Ext(x - textWidth, y + textHeight, scale, scale, incolor, text,
-                    0, 0, 0, &cgs.media.limboFont1);
+  CG_Text_Paint_Centred_Ext(x, y + textHeight, scale, scale, inColor, text, 0,
+                            0, 0, &cgs.media.limboFont1);
 }
 
-bool ETJump::TimerunView::canSkipDraw() const { return showingScores(); }
+bool ETJump::TimerunView::canSkipDraw() { return showingScores(); }
