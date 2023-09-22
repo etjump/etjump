@@ -165,6 +165,7 @@ void ETJump::TimerunView::draw() {
     const int count = Numeric::clamp(etj_checkpointsCount.integer, 1, 5);
     const int startIndex = run->numCheckpointsHit;
     const int endIndex = run->numCheckpointsHit - count;
+    const bool previousRecordSet = run->previousRecord >= 0;
 
     // do not render checkpoints if we're not running and
     // did not just complete a run
@@ -175,52 +176,71 @@ void ETJump::TimerunView::draw() {
     for (int i = startIndex; i >= 0 && i > endIndex; i--) {
       vec4_t *checkpointColor = &colorWhite;
       const int checkpointTime = run->checkpoints[i];
-      // Use the previous record as checkpoint time if no new ones
-      // are available
-      const int recordCheckpointTime =
-          run->previousRecordCheckpoints[i] == TIMERUN_CHECKPOINT_NOT_SET
-              ? run->previousRecord
-              : run->previousRecordCheckpoints[i];
-      bool noRecordCheckpoint =
-          recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET;
+      const bool maxCheckpointsHit = i == MAX_TIMERUN_CHECKPOINTS;
 
-      bool checkpointTimeNotSet = checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
+      // this will be either the previous best checkpoint time,
+      // previous record or current run timer
+      int comparisonTime;
+
+      if (maxCheckpointsHit) {
+        comparisonTime = previousRecordSet ? run->previousRecord : currentTime;
+      } else if (run->previousRecordCheckpoints[i] ==
+                 TIMERUN_CHECKPOINT_NOT_SET) {
+        comparisonTime = run->previousRecord;
+      } else {
+        comparisonTime = run->previousRecordCheckpoints[i];
+      }
+
+      const bool noRecordCheckpoint =
+          comparisonTime == TIMERUN_CHECKPOINT_NOT_SET;
+      const bool noCheckpointTimeSet =
+          checkpointTime == TIMERUN_CHECKPOINT_NOT_SET;
 
       // make sure we don't subtract -1 from timestamp if we don't
       // have a checkpoint time set at all
+      const int relTimerOffset = noRecordCheckpoint ? 0 : comparisonTime;
       int relativeTime;
-      if (checkpointTimeNotSet) {
+      if (maxCheckpointsHit) {
         relativeTime =
-            currentTime - (noRecordCheckpoint ? 0 : recordCheckpointTime);
+            previousRecordSet ? comparisonTime - currentTime : comparisonTime;
       } else {
-        relativeTime =
-            checkpointTime - (noRecordCheckpoint ? 0 : recordCheckpointTime);
-      }
-
-      // if we don't have current or next checkpoint set, just display the
-      // runtimer
-      if (checkpointTimeNotSet &&
-          recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET) {
-        relativeTime = currentTime;
+        relativeTime = noCheckpointTimeSet ? currentTime - relTimerOffset
+                                           : checkpointTime - relTimerOffset;
       }
 
       std::string dir;
       // if we don't have a next checkpoint set, we can't compare to anything
       // so render checkpoint as white
-      if (recordCheckpointTime == TIMERUN_CHECKPOINT_NOT_SET ||
-          relativeTime == 0) {
+      if (noRecordCheckpoint || relativeTime == 0 ||
+          comparisonTime == currentTime) {
         checkpointColor = &colorWhite;
-      } else if ((checkpointTimeNotSet && currentTime < recordCheckpointTime) ||
-                 (!checkpointTimeNotSet &&
-                  checkpointTime < recordCheckpointTime)) {
-        checkpointColor = &colorSuccess;
-        dir = "-";
       } else {
-        checkpointColor = &colorFail;
-        dir = "+";
+        // if we've hit max checkpoints, checkpointTime will be 0,
+        // so we need to compare against the comparisonTime, which will be
+        // previously set record in this scenario
+        if (maxCheckpointsHit) {
+          if (currentTime < comparisonTime) {
+            checkpointColor = &colorSuccess;
+            dir = "-";
+          } else {
+            checkpointColor = &colorFail;
+            dir = "+";
+          }
+        } else {
+          if ((noCheckpointTimeSet && currentTime < comparisonTime) ||
+              (!noCheckpointTimeSet && checkpointTime < comparisonTime)) {
+            checkpointColor = &colorSuccess;
+            dir = "-";
+          } else {
+            checkpointColor = &colorFail;
+            dir = "+";
+          }
+        }
       }
 
-      auto absoluteTime = checkpointTimeNotSet ? currentTime : checkpointTime;
+      const int absoluteTime = noCheckpointTimeSet || maxCheckpointsHit
+                                   ? currentTime
+                                   : checkpointTime;
 
       std::string timerStr = getTimerString(
           etj_checkpointsStyle.integer == 1 ? absoluteTime : relativeTime);
@@ -266,10 +286,10 @@ float ETJump::TimerunView::getTimerAlpha(bool running, int lastRunTimer,
 }
 
 int ETJump::TimerunView::getTransitionRange(int previousTime) {
-  const auto range = static_cast<float>(previousTime) * 0.1f;
+  const int range = previousTime / 10;
 
   // for very long runs/splits, cap the max transition range to 10s
-  return range <= 10000 ? static_cast<int>(range) : 10000;
+  return range <= 10000 ? range : 10000;
 }
 
 void ETJump::TimerunView::pastRecordAnimation(vec4_t *color, const char *text,
