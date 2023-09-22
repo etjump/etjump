@@ -343,14 +343,17 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
       "loadcheckpoints", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
           "loadcheckpoints",
-          "Load checkpoints from a previous record.\n    /loadcheckpoints "
+          "Load checkpoints from an existing record.\n    /loadcheckpoints "
           "--run <run name> --rank <rank>\n\n"
           "    Has a shorthand format of:\n"
-          "    /loadcheckpoints <run name> <rank>\n")
+          "    /loadcheckpoints <run name> <rank>\n"
+          "    /loadcheckpoints <run name>")
           .addOption("run", "Name of the run to load the records from.",
                      ETJump::CommandParser::OptionDefinition::Type::Token, true,
                      0)
-          .addOption("rank", "Rank to load checkpoints from. Defaults to 1",
+          .addOption("rank",
+                     "Rank to load checkpoints from. Defaults to 1. Value -1 "
+                     "clears loaded checkpoints.",
                      ETJump::CommandParser::OptionDefinition::Type::Integer,
                      false, 1),
       &args);

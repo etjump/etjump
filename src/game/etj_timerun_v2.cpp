@@ -670,35 +670,95 @@ public:
 // ref will lead to undefined behavior
 void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
                                         std::string runName, int rank) {
+  std::string matchedRun;
+  std::string errMsg;
+  int matchedCount = 0;
+  const auto matchedRuns = _repository->getRunsForName(mapName, runName, false);
+  auto it = std::find(matchedRuns.cbegin(), matchedRuns.cend(), runName);
+
+  if (it != matchedRuns.cend()) {
+    matchedRun = *it;
+  } else {
+    // exact match not found, try partial match
+    for (const auto &run : matchedRuns) {
+      if (run.find(runName) != std::string::npos) {
+        matchedCount++;
+        matchedRun = run;
+      }
+    }
+  }
+
+  if (matchedCount > 1) {
+    const int runsPerRow = 3;
+    int runsOnCurrentRow = 0;
+    errMsg =
+        stringFormat("Multiple matches found for run ^3`%s`^7.\n", runName);
+
+    for (const auto &matches : matchedRuns) {
+      ++runsOnCurrentRow;
+      if (runsOnCurrentRow > runsPerRow) {
+        runsOnCurrentRow = 1;
+        errMsg += stringFormat("\n%-16s", sanitize(matches, false));
+      } else {
+        errMsg += stringFormat("%-16s", sanitize(matches, false));
+      }
+    }
+    errMsg += "\n";
+    Printer::SendConsoleMessage(clientNum, errMsg);
+    return;
+  }
+
   _sc->postTask(
-      [this, clientNum, mapName, runName, rank] {
-        auto record = _repository->getRecord(mapName, runName, rank);
+      [this, clientNum, mapName, runName, rank, matchedRun] {
+        if (rank == -1) {
+          _players[clientNum]->overriddenCheckpoints = {};
+          // not really a runtime error but can't return here so bleh
+          throw std::runtime_error(stringFormat(
+              "^7Cleared loaded checkpoints for run ^3`%s`", matchedRun));
+        }
+
+        // FIXME: this fails if the run name has color codes
+        auto record = _repository->getRecord(mapName, matchedRun, rank);
 
         if (!record.hasValue()) {
           throw std::runtime_error(stringFormat(
-              "Could not find a record on map `%s` for run `%s` for rank `%d`",
-              mapName, runName, rank));
+              "^7Could not find a record on map ^3`%s` ^7for run ^3`%s` ^7for "
+              "rank ^3`%d`",
+              mapName, matchedRun.empty() ? runName : matchedRun, rank));
         }
 
         return std::make_unique<LoadCheckpointsResult>(
             record.value().checkpoints);
       },
-      [this, clientNum, runName, rank](auto r) {
+      [this, clientNum, matchedRun, rank](auto r) {
         auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
 
-        _players[clientNum]->overriddenCheckpoints[runName] = {};
+        // bail out if no checkpoints are present
+        int noCheckpointSet = TIMERUN_CHECKPOINT_NOT_SET;
+        if (std::all_of(result->checkpoints.begin(), result->checkpoints.end(),
+                        [noCheckpointSet](int checkpoints) {
+                          return checkpoints == noCheckpointSet;
+                        })) {
+          throw std::runtime_error(
+              stringFormat("^7No checkpoint times found for run ^3`%s`^7 "
+                           "from rank ^3`%d`^7 record.",
+                           matchedRun, rank));
+        }
+
+        _players[clientNum]->overriddenCheckpoints[matchedRun] = {};
 
         auto checkpointsToCopy = std::min(
             result->checkpoints.size(),
-            _players[clientNum]->overriddenCheckpoints[runName].size());
+            _players[clientNum]->overriddenCheckpoints[matchedRun].size());
 
-        std::copy_n(begin(result->checkpoints), checkpointsToCopy,
-                    begin(_players[clientNum]->overriddenCheckpoints[runName]));
+        std::copy_n(
+            begin(result->checkpoints), checkpointsToCopy,
+            begin(_players[clientNum]->overriddenCheckpoints[matchedRun]));
 
         Printer::SendConsoleMessage(
             clientNum, stringFormat("^7Loaded checkpoints for run ^3`%s`^7 "
                                     "from rank ^3`%d`^7 record.\n",
-                                    runName, rank));
+                                    matchedRun, rank));
 
         if (_players[clientNum]->running) {
           Printer::SendConsoleMessage(clientNum,
