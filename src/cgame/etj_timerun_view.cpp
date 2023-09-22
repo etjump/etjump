@@ -215,26 +215,31 @@ void ETJump::TimerunView::draw() {
           comparisonTime == currentTime) {
         checkpointColor = &colorWhite;
       } else {
+        bool isFasterCheckpoint;
         // if we've hit max checkpoints, checkpointTime will be 0,
-        // so we need to compare against the comparisonTime, which will be
-        // previously set record in this scenario
+        // so we need to compare currentTime against the comparisonTime,
+        // which will be previously set record in this scenario
         if (maxCheckpointsHit) {
           if (currentTime < comparisonTime) {
-            checkpointColor = &colorSuccess;
-            dir = "-";
+            isFasterCheckpoint = true;
           } else {
-            checkpointColor = &colorFail;
-            dir = "+";
+            isFasterCheckpoint = false;
           }
         } else {
           if ((noCheckpointTimeSet && currentTime < comparisonTime) ||
               (!noCheckpointTimeSet && checkpointTime < comparisonTime)) {
-            checkpointColor = &colorSuccess;
-            dir = "-";
+            isFasterCheckpoint = true;
           } else {
-            checkpointColor = &colorFail;
-            dir = "+";
+            isFasterCheckpoint = false;
           }
+        }
+
+        if (isFasterCheckpoint) {
+          checkpointColor = &colorSuccess;
+          dir = "-";
+        } else {
+          checkpointColor = &colorFail;
+          dir = "+";
         }
       }
 
