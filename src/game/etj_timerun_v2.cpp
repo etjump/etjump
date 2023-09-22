@@ -981,16 +981,17 @@ public:
 };
 
 void ETJump::TimerunV2::checkRecord(Player *player) {
-  auto clientNum = player->clientNum;
-  auto activeRunName = player->activeRunName;
-  auto userId = player->userId;
-  auto completionTime = player->completionTime;
-  std::map<std::string, std::string> metadata = {{"mod_version", GAME_VERSION}};
-  std::string playerName = player->name;
-  auto checkpoints =
+  const auto clientNum = player->clientNum;
+  const auto activeRunName = player->activeRunName;
+  const auto userId = player->userId;
+  const auto completionTime = player->completionTime;
+  const std::map<std::string, std::string> metadata = {
+      {"mod_version", GAME_VERSION}};
+  const std::string playerName = player->name;
+  const auto checkpoints =
       Container::map(player->checkpointTimes, [](int time) { return time; });
 
-  auto topRecords =
+  const auto topRecords =
       _repository->getTopRecords(_activeSeasonsIds, _currentMap, activeRunName);
 
   _sc->postTask(
