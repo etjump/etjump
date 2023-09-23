@@ -64,7 +64,8 @@ public:
   void editSeason(const Timerun::EditSeasonParams &params);
   std::vector<std::string> getMapsForName(const std::string &map, bool exact);
   std::vector<std::string> getRunsForName(const std::string &map,
-                                          const std::string &run, bool exact);
+                                          const std::string &run, bool exact,
+                                          bool shouldSanitize);
   std::vector<Timerun::Record> getRecords();
   std::vector<Timerun::Record>
   getRecords(const Timerun::PrintRecordsParams &params);

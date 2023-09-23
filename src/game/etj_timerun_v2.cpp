@@ -673,7 +673,8 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
   std::string matchedRun;
   std::string errMsg;
   int matchedCount = 0;
-  const auto matchedRuns = _repository->getRunsForName(mapName, runName, false);
+  const auto matchedRuns =
+      _repository->getRunsForName(mapName, runName, false, true);
   auto it = std::find(matchedRuns.cbegin(), matchedRuns.cend(), runName);
 
   if (it != matchedRuns.cend()) {

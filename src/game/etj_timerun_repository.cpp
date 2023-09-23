@@ -430,9 +430,10 @@ ETJump::TimerunRepository::getMapsForName(const std::string &map, bool exact) {
 
 std::vector<std::string>
 ETJump::TimerunRepository::getRunsForName(const std::string &map,
-                                          const std::string &run, bool exact) {
+                                          const std::string &run, bool exact,
+                                          bool shouldSanitize) {
 
-  std::string runFilter = exact ? "run=?" : "run like ?";
+  std::string runFilter = exact ? "lsanitize(run)=?" : "lsanitize(run) like ?";
   std::string runSearchString = exact ? run : "%" + run + "%";
 
   std::vector<std::string> runs;
@@ -446,7 +447,9 @@ ETJump::TimerunRepository::getRunsForName(const std::string &map,
   )",
                                  runFilter)
                  << runSearchString << map >>
-      [&runs](const std::string &run) { runs.push_back(run); };
+      [&runs, shouldSanitize](const std::string &run) {
+        runs.push_back(shouldSanitize ? sanitize(run, true) : run);
+      };
   return runs;
 }
 
