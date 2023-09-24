@@ -148,6 +148,10 @@ void ETJump::TimerunV2::computeRanks() {
           }
 
           for (const auto &user : season.second) {
+            // exclude users with 0 points from rankings
+            if (user.second == 0) {
+              continue;
+            }
             rankings[season.first].emplace_back(
                 0, user.first, latestName[user.first], user.second);
           }
