@@ -977,26 +977,32 @@ public:
   // Most relevant season record
   std::map<int, bool> isTopRecordPerSeason{};
   std::map<int, NewRecord> newOwnRecordsPerSeason{};
+
+  // our previous overall record
+  ETJump::opt<ETJump::Timerun::Record> playerPreviousOverallRecord;
+  // our previous seasonal record
+  ETJump::opt<ETJump::Timerun::Record> playerPreviousSeasonalRecord;
+
+  // previous overall record
   ETJump::opt<ETJump::Timerun::Record> previousOverallRecord;
+  // previous seasonal record
+  ETJump::opt<ETJump::Timerun::Record> previousSeasonalRecord;
 };
 
 void ETJump::TimerunV2::checkRecord(Player *player) {
   const auto clientNum = player->clientNum;
   const auto activeRunName = player->activeRunName;
   const auto userId = player->userId;
-  const auto completionTime = player->completionTime;
+  const auto completionTime = player->completionTime.value();
   const std::map<std::string, std::string> metadata = {
       {"mod_version", GAME_VERSION}};
   const std::string playerName = player->name;
   const auto checkpoints =
       Container::map(player->checkpointTimes, [](int time) { return time; });
 
-  const auto topRecords =
-      _repository->getTopRecords(_activeSeasonsIds, _currentMap, activeRunName);
-
   _sc->postTask(
       [this, activeRunName, userId, completionTime, playerName, metadata,
-       checkpoints, clientNum, topRecords]() {
+       checkpoints, clientNum]() {
         /*
          * We want to check the record for all seasons.
          *
@@ -1006,27 +1012,41 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
          * printed for the player but not for others
          */
 
-        std::map<int, Timerun::Record> seasonIdToTopRecord{};
+        const auto topRecords = _repository->getTopRecords(
+            _activeSeasonsIds, _currentMap, activeRunName);
+
+        std::map<int, Timerun::Record> topRecordForSeason{};
+
+        // get the top times of the run we just finished for active seasons
         for (const auto &tr : topRecords) {
-          seasonIdToTopRecord[tr.seasonId] = tr;
+          topRecordForSeason[tr.seasonId] = tr;
         }
+
         auto playerRecords = _repository->getRecordsForPlayer(
             _activeSeasonsIds, _currentMap, activeRunName, userId);
 
-        std::map<int, Timerun::Record> seasonIdToNewRecord{};
-        std::map<int, const Timerun::Record *> seasonIdToPreviousRecord{};
+        std::map<int, const Timerun::Record *> playerTopRecordForSeason{};
+
+        // get our previous top times of the run we just finished
+        // for active seasons
         for (const auto &r : playerRecords) {
-          seasonIdToPreviousRecord[r.seasonId] = &r;
+          playerTopRecordForSeason[r.seasonId] = &r;
         }
 
-        std::map<int, bool> seasonIdToIsNewRecord{};
+        std::map<int, Timerun::Record> playerNewTopRecordForSeason{};
+        std::map<int, bool> isNewRecordForSeason{};
+
+        // go through active seasons and check if we beat any of the old records
+        // if we did, we store the record in playerNewTopRecordForSeason
+        // this only checks against our own personal previous times,
+        // not against other player's times
         for (auto seasonId : _activeSeasonsIds) {
           Timerun::Record record;
           record.seasonId = seasonId;
           record.map = _currentMap;
           record.run = activeRunName;
           record.userId = userId;
-          record.time = completionTime.value();
+          record.time = completionTime;
           record.checkpoints = checkpoints;
           record.recordDate = getCurrentTime();
           record.playerName = playerName;
@@ -1034,15 +1054,15 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
 
           auto insert = false;
           auto isNewRecord = false;
-          if (seasonIdToPreviousRecord.count(seasonId) == 0) {
+          if (playerTopRecordForSeason.count(seasonId) == 0) {
             isNewRecord = true;
             insert = true;
           } else {
             insert = false;
-            isNewRecord = completionTime.value() <
-                          seasonIdToPreviousRecord[seasonId]->time;
+            isNewRecord =
+                completionTime < playerTopRecordForSeason[seasonId]->time;
           }
-          seasonIdToIsNewRecord[seasonId] = isNewRecord;
+          isNewRecordForSeason[seasonId] = isNewRecord;
 
           if (isNewRecord) {
             if (insert) {
@@ -1050,14 +1070,15 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
             } else {
               _repository->updateRecord(record);
             }
-            seasonIdToNewRecord[seasonId] = std::move(record);
+            playerNewTopRecordForSeason[seasonId] = std::move(record);
           }
         }
 
         auto result = std::make_unique<CheckRecordResult>();
         result->clientNum = clientNum;
 
-        for (const auto &s : seasonIdToIsNewRecord) {
+        // setup new records for any of our old records we beat
+        for (const auto &s : isNewRecordForSeason) {
           if (!s.second) {
             continue;
           }
@@ -1073,16 +1094,24 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
             }
           }
 
-          record.previousTime = seasonIdToPreviousRecord.count(seasonId) > 0
-                                    ? seasonIdToPreviousRecord[seasonId]->time
+          record.previousTime = playerTopRecordForSeason.count(seasonId) > 0
+                                    ? playerTopRecordForSeason[seasonId]->time
                                     : opt<int>();
-          record.record = seasonIdToNewRecord[seasonId];
+          record.record = playerNewTopRecordForSeason[seasonId];
 
           result->newOwnRecordsPerSeason[seasonId] = record;
 
-          auto topRecordIt = seasonIdToTopRecord.find(seasonId);
-          if (topRecordIt != end(seasonIdToTopRecord)) {
+          // see if we beat the previous record time for this season
+          auto topRecordIt = topRecordForSeason.find(seasonId);
+          if (topRecordIt != end(topRecordForSeason)) {
             auto topTime = topRecordIt->second.time;
+
+            // store the old record
+            if (seasonId == defaultSeasonId) {
+              result->previousOverallRecord = topRecordIt->second;
+            } else {
+              result->previousSeasonalRecord = topRecordIt->second;
+            }
 
             if (record.record.time < topTime) {
               result->isTopRecordPerSeason[seasonId] = true;
@@ -1092,46 +1121,53 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
         }
 
+        // this seems redundant...? aren't these false by default anyway?
         for (const auto &seasonId : _activeSeasonsIds) {
           if (result->isTopRecordPerSeason.count(seasonId) == 0) {
             result->isTopRecordPerSeason[seasonId] = false;
           }
         }
 
-        auto previousOverallRecordIt =
-            seasonIdToPreviousRecord.find(defaultSeasonId);
+        auto playerPreviousOverallRecordIt =
+            playerTopRecordForSeason.find(defaultSeasonId);
 
-        if (previousOverallRecordIt != end(seasonIdToPreviousRecord)) {
-          result->previousOverallRecord = *previousOverallRecordIt->second;
+        // store our own previous overall record
+        if (playerPreviousOverallRecordIt != end(playerTopRecordForSeason)) {
+          result->playerPreviousOverallRecord =
+              *playerPreviousOverallRecordIt->second;
         }
 
         return std::move(result);
       },
-      [this, completionTime, activeRunName, playerName, clientNum,
-       topRecords](std::unique_ptr<SynchronizationContext::ResultBase> result) {
+      [this, completionTime, activeRunName, playerName,
+       clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         const auto checkRecordResult =
             dynamic_cast<CheckRecordResult *>(result.get());
         bool isNewRecord = false;
 
-        std::map<int, Timerun::Record> seasonIdToTopRecord{};
-        for (const auto &tr : topRecords) {
-          seasonIdToTopRecord[tr.seasonId] = tr;
-        }
-
         std::string diffString;
+        int previousTopRecordTime;
+
+        const int playerPreviousRecord =
+            checkRecordResult->playerPreviousOverallRecord.hasValue()
+                ? checkRecordResult->playerPreviousOverallRecord.value().time
+                : 0;
 
         // Overall record
         if (checkRecordResult->isTopRecordPerSeason[defaultSeasonId]) {
           const auto record =
               checkRecordResult->newOwnRecordsPerSeason[defaultSeasonId];
 
-          // print banner only if there was an existing record
-          if (seasonIdToTopRecord[defaultSeasonId].time) {
-            diffString =
-                "^7(" +
-                diffToString(record.record.time,
-                             seasonIdToTopRecord[defaultSeasonId].time) +
-                "^7)";
+          previousTopRecordTime =
+              checkRecordResult->previousOverallRecord.hasValue()
+                  ? checkRecordResult->previousOverallRecord.value().time
+                  : 0;
+
+          // print banner only if there was an existing overall record
+          if (completionTime < previousTopRecordTime) {
+            diffString = "^7(" +
+                         diffToString(completionTime, previousTopRecordTime) +
+                         "^7)";
 
             Printer::BroadCastBannerMessage(stringFormat(
                 // clang-format off
@@ -1155,14 +1191,16 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
               checkRecordResult
                   ->newOwnRecordsPerSeason[_mostRelevantSeason->id];
 
+          previousTopRecordTime =
+              checkRecordResult->previousSeasonalRecord.hasValue()
+                  ? checkRecordResult->previousSeasonalRecord.value().time
+                  : 0;
+
           // print banner only if there was an existing seasonal record
-          if (seasonIdToTopRecord[_mostRelevantSeason->id].time) {
-            diffString =
-                "^7(" +
-                diffToString(
-                    record.record.time,
-                    seasonIdToTopRecord[_mostRelevantSeason->id].time) +
-                "^7)";
+          if (completionTime < previousTopRecordTime) {
+            diffString = "^7(" +
+                         diffToString(completionTime, previousTopRecordTime) +
+                         "^7)";
 
             Printer::BroadCastBannerMessage(stringFormat(
                 // clang-format off
@@ -1171,13 +1209,18 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
                 playerName, record.seasonName, sanitize(record.record.run),
                 millisToString(record.record.time), diffString));
           }
-          Printer::SendCommandToAll(
-              TimerunCommands::Record(clientNum, record.record.time,
-                                      record.previousTime.valueOr(
-                                          TimerunCommands::NO_PREVIOUS_RECORD),
-                                      record.record.run)
-                  .serialize());
-          isNewRecord = true;
+
+          // Send a record only if we beat our old PB
+          if (completionTime < playerPreviousRecord) {
+            Printer::SendCommandToAll(
+                TimerunCommands::Record(
+                    clientNum, record.record.time,
+                    record.previousTime.valueOr(
+                        TimerunCommands::NO_PREVIOUS_RECORD),
+                    record.record.run)
+                    .serialize());
+            isNewRecord = true;
+          }
         }
 
         // By default, print the other seasons to console
@@ -1219,22 +1262,38 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
         }
 
+        // send a completion if we didn't make a new record,
+        // but had a previous record set for this run
+        // otherwise the player didn't have a time set on the run at all,
+        // so we should send a record so autodemo can save the demo
         if (!isNewRecord) {
-          Printer::SendCommandToAll(
-              TimerunCommands::Completion(
-                  clientNum, completionTime.value(),
-                  checkRecordResult->previousOverallRecord.hasValue()
-                      ? checkRecordResult->previousOverallRecord.value().time
-                      : opt<int>(),
-                  activeRunName)
-                  .serialize());
+          if (playerPreviousRecord && playerPreviousRecord < completionTime) {
+            Printer::SendCommandToAll(
+                TimerunCommands::Completion(
+                    clientNum, completionTime,
+                    checkRecordResult->playerPreviousOverallRecord.hasValue()
+                        ? checkRecordResult->playerPreviousOverallRecord.value()
+                              .time
+                        : opt<int>(),
+                    activeRunName)
+                    .serialize());
+          } else {
+            Printer::SendCommandToAll(
+                TimerunCommands::Record(
+                    clientNum, completionTime,
+                    checkRecordResult->playerPreviousOverallRecord.hasValue()
+                        ? checkRecordResult->playerPreviousOverallRecord.value()
+                              .time
+                        : opt<int>(),
+                    activeRunName)
+                    .serialize());
+          }
         }
       },
       [this, &activeRunName, &completionTime,
        clientNum](const std::runtime_error &e) {
         _logger->error("Unable to check the record (%s/%s/%d) for %s: %s",
-                       _currentMap, activeRunName, completionTime.value(),
-                       e.what());
+                       _currentMap, activeRunName, completionTime, e.what());
 
         Printer::SendChatMessage(
             clientNum, "Unable to process your timerun record. Please report "
