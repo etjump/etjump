@@ -1077,7 +1077,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
         auto result = std::make_unique<CheckRecordResult>();
         result->clientNum = clientNum;
 
-        // setup new records for any of our old records we beat
+        // go through old records and update any records we might have beaten
         for (const auto &s : isNewRecordForSeason) {
           if (!s.second) {
             continue;
@@ -1121,7 +1121,6 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
         }
 
-        // this seems redundant...? aren't these false by default anyway?
         for (const auto &seasonId : _activeSeasonsIds) {
           if (result->isTopRecordPerSeason.count(seasonId) == 0) {
             result->isTopRecordPerSeason[seasonId] = false;
