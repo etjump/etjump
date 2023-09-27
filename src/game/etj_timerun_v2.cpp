@@ -736,11 +736,7 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
         const auto runName = result->matchedRun;
 
         // bail out if no checkpoints are present
-        const int noCheckpointSet = TIMERUN_CHECKPOINT_NOT_SET;
-        if (std::all_of(result->checkpoints.begin(), result->checkpoints.end(),
-                        [noCheckpointSet](int checkpoints) {
-                          return checkpoints == noCheckpointSet;
-                        })) {
+        if (result->checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
           throw std::runtime_error(
               stringFormat("^7No checkpoint times found for run ^3`%s`^7 "
                            "from rank ^3`%d`^7 record.",
