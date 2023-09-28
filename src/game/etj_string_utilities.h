@@ -90,6 +90,10 @@ std::vector<std::string> split(const std::string &input,
                                const std::string &delimiter);
 void replaceAll(std::string &input, const std::string &from,
                 const std::string &to);
+// replaces all occurrences of specified character
+// and the following N characters in the string
+void replaceNextNChars(std::string &input, char character,
+                       const std::string &replacement, size_t numChars);
 bool startsWith(const std::string &str, const std::string &prefix);
 bool endsWith(const std::string &str, const std::string &suffix);
 bool contains(const std::string &str, const std::string &text);
