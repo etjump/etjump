@@ -1,3 +1,30 @@
+# ETJump 3.0.1
+
+* fixed missing parenthesis around diff prints on seasonal record banner prints [#1057](https://github.com/etjump/etjump/pull/1057)
+* `!delete-season` command is no longer case sensitive [#1058](https://github.com/etjump/etjump/pull/1058)
+* fixed `--page-size` argument on `records` not working in some scenarios [#1059](https://github.com/etjump/etjump/pull/1059)
+* fixed popups not printing for all other players when a player makes a new PB time [#1061](https://github.com/etjump/etjump/pull/1061)
+* `listinfo` no longer prints any text regarding missing maps if no maps from the list are missing [#1062](https://github.com/etjump/etjump/pull/1062)
+* `records` no longer prints records from other maps when the current map partially matches other map names on the server [#1063](https://github.com/etjump/etjump/pull/1063)
+* runtimer and checkpoint timer now use real 8ms interval timer for players [#1069](https://github.com/etjump/etjump/pull/1069)
+  * spectators/demo playback still display "fake" timer via cgame timer instead of command time
+* fixed relative checkpoint timer (`etj_checkpointsStyle 0`) being 1ms off when player had no record on a run [#1066](https://github.com/etjump/etjump/pull/1066)
+* various fixes to run/checkpoint timer [#1071](https://github.com/etjump/etjump/pull/1071)
+  * checkpoint timer no longer breaks when a player hits the max checkpoint limit (16)
+  * fixed checkpoint times not fading together with runtimer
+  * fixed checkpoint timer position when using non-default size
+  * adjusted the transition range in runtimer when closing in on PB - the transition duration is no longer hardcoded to several steps, instead transition starts at the last 10% of the run (capped to max 10s)
+* added `rankings <season>` command shorthand [#1073](https://github.com/etjump/etjump/pull/1073)
+* added `etj_CGaz2NoVelocityDir` cvar to hide velocity direction line on CGaz 2 [#1074](https://github.com/etjump/etjump/pull/1074)
+* fixed various issues with record checking [#1075](https://github.com/etjump/etjump/pull/1075)
+  * fixed banner prints displaying wrong diff - was displaying diff to your old time, now uses diff from new record to previous #1 record
+    * popup message will still display diff to your previous record instead of previous #1 record
+  * fixed banner prints not displaying if a player has no previous record set on a run, but breaks either the overall or seasonal record on their first run
+  * fixed autodemo not saving demos with `etj_ad_savePBOnly 1` if a player made a new PB, but it wasn't a new overall record
+* `loadcheckpoints` now supports partial name matching, and loaded checkpoints can be cleared by specifying `-1` as rank [#1077](https://github.com/etjump/etjump/pull/1077)
+* users with 0 points are no longer included in `rankings` [#1078](https://github.com/etjump/etjump/pull/1078)
+* fixed being unable to edit only season start or end date, not both, on a single command [#1079](https://github.com/etjump/etjump/pull/1079)
+
 # ETJump 3.0.0
 
 * new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021) [#1043](https://github.com/etjump/etjump/pull/1043) [#1048](https://github.com/etjump/etjump/pull/1048) [#1050](https://github.com/etjump/etjump/pull/1050)
