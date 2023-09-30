@@ -220,27 +220,15 @@ void ETJump::TimerunView::draw() {
         // so we need to compare currentTime against the comparisonTime,
         // which will be previously set record in this scenario
         if (maxCheckpointsHit) {
-          if (currentTime < comparisonTime) {
-            isFasterCheckpoint = true;
-          } else {
-            isFasterCheckpoint = false;
-          }
+          isFasterCheckpoint = currentTime < comparisonTime;
         } else {
-          if ((noCheckpointTimeSet && currentTime < comparisonTime) ||
-              (!noCheckpointTimeSet && checkpointTime < comparisonTime)) {
-            isFasterCheckpoint = true;
-          } else {
-            isFasterCheckpoint = false;
-          }
+          isFasterCheckpoint =
+              (noCheckpointTimeSet ? currentTime : checkpointTime) <
+              comparisonTime;
         }
 
-        if (isFasterCheckpoint) {
-          checkpointColor = &colorSuccess;
-          dir = "-";
-        } else {
-          checkpointColor = &colorFail;
-          dir = "+";
-        }
+        checkpointColor = isFasterCheckpoint ? &colorSuccess : &colorFail;
+        dir = isFasterCheckpoint ? "-" : "+";
       }
 
       const int absoluteTime = noCheckpointTimeSet || maxCheckpointsHit
