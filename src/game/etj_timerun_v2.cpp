@@ -660,9 +660,12 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
 class LoadCheckpointsResult
     : public ETJump::SynchronizationContext::ResultBase {
 public:
-  explicit LoadCheckpointsResult(std::vector<int> checkpoints)
-      : checkpoints(std::move(checkpoints)) {}
+  explicit LoadCheckpointsResult(std::string matchedRun,
+                                 std::vector<int> checkpoints)
+      : matchedRun(std::move(matchedRun)), checkpoints(std::move(checkpoints)) {
+  }
 
+  std::string matchedRun;
   std::vector<int> checkpoints;
 };
 
@@ -672,19 +675,73 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
                                         std::string runName, int rank) {
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
-        auto record = _repository->getRecord(mapName, runName, rank);
+        std::string matchedRun;
+        const std::string sanitizedRunName = sanitize(runName, true);
+        std::string errMsg;
+        int matchedCount = 0;
+        const auto matchedRuns =
+            _repository->getRunsForName(mapName, runName, false, true);
+        auto it = std::find(matchedRuns.cbegin(), matchedRuns.cend(), runName);
+
+        if (it != matchedRuns.cend()) {
+          matchedRun = *it;
+        } else {
+          // exact match not found, try partial match with sanitized name
+          for (const auto &run : matchedRuns) {
+            if (run.find(sanitizedRunName) != std::string::npos) {
+              matchedCount++;
+              matchedRun = run;
+            }
+          }
+        }
+
+        if (matchedCount > 1) {
+          const int runsPerRow = 3;
+          int runsOnCurrentRow = 0;
+          errMsg = stringFormat("Multiple matches found for run ^3`%s`^7.\n",
+                                runName);
+
+          for (const auto &matches : matchedRuns) {
+            ++runsOnCurrentRow;
+            if (runsOnCurrentRow > runsPerRow) {
+              runsOnCurrentRow = 1;
+              errMsg += stringFormat("\n%-16s", sanitize(matches, false));
+            } else {
+              errMsg += stringFormat("%-16s", sanitize(matches, false));
+            }
+          }
+          throw std::runtime_error(errMsg);
+        }
+        if (rank == -1) {
+          _players[clientNum]->overriddenCheckpoints = {};
+          // not really a runtime error but can't return here so bleh
+          throw std::runtime_error(stringFormat(
+              "^7Cleared loaded checkpoints for run ^3`%s`", matchedRun));
+        }
+
+        const auto record = _repository->getRecord(mapName, matchedRun, rank);
 
         if (!record.hasValue()) {
           throw std::runtime_error(stringFormat(
-              "Could not find a record on map `%s` for run `%s` for rank `%d`",
-              mapName, runName, rank));
+              "^7Could not find a record on map ^3`%s` ^7for run ^3`%s` ^7for "
+              "rank ^3`%d`",
+              mapName, matchedRun.empty() ? runName : matchedRun, rank));
         }
 
         return std::make_unique<LoadCheckpointsResult>(
-            record.value().checkpoints);
+            matchedRun, record.value().checkpoints);
       },
-      [this, clientNum, runName, rank](auto r) {
-        auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
+      [this, clientNum, rank](auto r) {
+        const auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
+        const auto runName = result->matchedRun;
+
+        // bail out if no checkpoints are present
+        if (result->checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
+          throw std::runtime_error(
+              stringFormat("^7No checkpoint times found for run ^3`%s`^7 "
+                           "from rank ^3`%d`^7 record.",
+                           runName, rank));
+        }
 
         _players[clientNum]->overriddenCheckpoints[runName] = {};
 
