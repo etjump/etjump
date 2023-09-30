@@ -369,13 +369,13 @@ void ETJump::TimerunRepository::editSeason(
   if (params.startTime.hasValue()) {
     newStartTime = params.startTime.value();
     anythingToUpdate = true;
-    updatedFields.push_back("start_time");
+    updatedFields.emplace_back("start_time");
     updatedParams.push_back(params.startTime.value().toDateTimeString());
 
-  } else if (params.endTime.hasValue()) {
+  } if (params.endTime.hasValue()) {
     newEndTime = params.endTime;
     anythingToUpdate = true;
-    updatedFields.push_back("end_time");
+    updatedFields.emplace_back("end_time");
     updatedParams.push_back(params.endTime.value().toDateTimeString());
   }
 
