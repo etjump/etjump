@@ -32,27 +32,36 @@ namespace ETJump {
 class TimerunView : public Drawable {
 public:
   explicit TimerunView(std::shared_ptr<Timerun> timerun);
-  ~TimerunView();
-  
-  void draw();
+  ~TimerunView() override;
 
-  int getTransitionRange(int previousRunTime);
+  void draw() override;
 
-  void pastRecordAnimation(vec4_t *color, const char *text, int timerTime,
-                           int record);
-
+private:
   // returns the currently active run if there's any
   // e.g. if player is running => return player's run,
-  // else if player is running and we're speccing the player
+  // else if player is running, and we're speccing the player
   // => return that player's run
   const Timerun::PlayerTimerunInformation *currentRun() const;
 
-private:
-  std::string getTimerString(const int msec);
+  static std::string getTimerString(int msec);
 
-  vec4_t inactiveTimerColor;
+  static int getTransitionRange(int previousTime);
+
+  static void pastRecordAnimation(vec4_t *color, const char *text,
+                                  int timerTime, int record);
+
+  // returns the alpha value of runtimer
+  static float getTimerAlpha(bool running, int lastRunTimer, int timeVar);
+
+  vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;
 
-  bool canSkipDraw() const;
+  vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
+  vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
+  static const int animationTime = 300;
+  static const int fadeOut = 2000;  // 2s fade out
+  static const int fadeHold = 5000; // 5s pause
+
+  static bool canSkipDraw();
 };
 } // namespace ETJump
