@@ -24,6 +24,7 @@
 * `loadcheckpoints` now supports partial name matching, and loaded checkpoints can be cleared by specifying `-1` as rank [#1077](https://github.com/etjump/etjump/pull/1077)
 * users with 0 points are no longer included in `rankings` [#1078](https://github.com/etjump/etjump/pull/1078)
 * fixed being unable to edit only season start or end date, not both, on a single command [#1079](https://github.com/etjump/etjump/pull/1079)
+* all maps on a server are now logged to `maps.json` on game init [#1070](https://github.com/etjump/etjump/pull/1070)
 
 # ETJump 3.0.0
 
