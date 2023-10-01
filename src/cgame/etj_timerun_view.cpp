@@ -78,7 +78,7 @@ void ETJump::TimerunView::draw() {
 
   auto startTime = run->startTime;
   auto millis = 0;
-  auto color = &colorWhite;
+  auto color = &colorDefault;
   const auto font = &cgs.media.limboFont1;
 
   // ensure correct 8ms interval timer when playing
@@ -114,7 +114,7 @@ void ETJump::TimerunView::draw() {
       auto step = static_cast<float>(millis - start) /
                   static_cast<float>(run->previousRecord - start);
 
-      ETJump_LerpColors(&colorWhite, &colorFail, &colorTemp, step / 2);
+      ETJump_LerpColors(&colorDefault, &colorFail, &colorTemp, step / 2);
       color = &colorTemp;
     }
   }
@@ -139,7 +139,7 @@ void ETJump::TimerunView::draw() {
   ETJump_AdjustPosition(&x);
 
   (*color)[3] = getTimerAlpha(run->running, run->lastRunTimer, timeVar);
-  if (!color[3]) {
+  if ((*color)[3] == 0) {
     return;
   }
 
@@ -174,7 +174,7 @@ void ETJump::TimerunView::draw() {
     }
 
     for (int i = startIndex; i >= 0 && i > endIndex; i--) {
-      vec4_t *checkpointColor = &colorWhite;
+      vec4_t *checkpointColor = &colorDefault;
       const int checkpointTime = run->checkpoints[i];
       const bool maxCheckpointsHit = i == MAX_TIMERUN_CHECKPOINTS;
 
@@ -213,7 +213,7 @@ void ETJump::TimerunView::draw() {
       // so render checkpoint as white
       if (noRecordCheckpoint || relativeTime == 0 ||
           comparisonTime == currentTime) {
-        checkpointColor = &colorWhite;
+        checkpointColor = &colorDefault;
       } else {
         bool isFasterCheckpoint;
         // if we've hit max checkpoints, checkpointTime will be 0,
@@ -240,11 +240,11 @@ void ETJump::TimerunView::draw() {
 
       timerStr.insert(0, dir);
 
+      // we do not need to check for alpha being 0 here because checkpoints
+      // follow same fading as runtimer, and if that is 0, we early out
+      // before ever reaching this part
       (*checkpointColor)[3] =
           getTimerAlpha(run->running, run->lastRunTimer, timeVar);
-      if (!checkpointColor[3]) {
-        return;
-      }
 
       CG_Text_Paint_Centred_Ext(x, y, textSize, textSize, *checkpointColor,
                                 timerStr, 0, 0, textStyle, font);

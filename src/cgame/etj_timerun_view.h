@@ -56,6 +56,7 @@ private:
   vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;
 
+  vec4_t colorDefault = {1.0f, 1.0f, 1.0f, 1.0f};
   vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
   vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
   static const int animationTime = 300;
