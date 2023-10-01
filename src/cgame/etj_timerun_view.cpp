@@ -139,7 +139,7 @@ void ETJump::TimerunView::draw() {
   ETJump_AdjustPosition(&x);
 
   (*color)[3] = getTimerAlpha(run->running, run->lastRunTimer, timeVar);
-  if (!color[3]) {
+  if ((*color)[3] == 0) {
     return;
   }
 
@@ -240,11 +240,11 @@ void ETJump::TimerunView::draw() {
 
       timerStr.insert(0, dir);
 
+      // we do not need to check for alpha being 0 here because checkpoints
+      // follow same fading as runtimer, and if that is 0, we early out
+      // before ever reaching this part
       (*checkpointColor)[3] =
           getTimerAlpha(run->running, run->lastRunTimer, timeVar);
-      if (!checkpointColor[3]) {
-        return;
-      }
 
       CG_Text_Paint_Centred_Ext(x, y, textSize, textSize, *checkpointColor,
                                 timerStr, 0, 0, textStyle, font);
