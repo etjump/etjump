@@ -78,7 +78,7 @@ void ETJump::TimerunView::draw() {
 
   auto startTime = run->startTime;
   auto millis = 0;
-  auto color = &colorWhite;
+  auto color = &colorDefault;
   const auto font = &cgs.media.limboFont1;
 
   // ensure correct 8ms interval timer when playing
@@ -114,7 +114,7 @@ void ETJump::TimerunView::draw() {
       auto step = static_cast<float>(millis - start) /
                   static_cast<float>(run->previousRecord - start);
 
-      ETJump_LerpColors(&colorWhite, &colorFail, &colorTemp, step / 2);
+      ETJump_LerpColors(&colorDefault, &colorFail, &colorTemp, step / 2);
       color = &colorTemp;
     }
   }
@@ -174,7 +174,7 @@ void ETJump::TimerunView::draw() {
     }
 
     for (int i = startIndex; i >= 0 && i > endIndex; i--) {
-      vec4_t *checkpointColor = &colorWhite;
+      vec4_t *checkpointColor = &colorDefault;
       const int checkpointTime = run->checkpoints[i];
       const bool maxCheckpointsHit = i == MAX_TIMERUN_CHECKPOINTS;
 
@@ -213,7 +213,7 @@ void ETJump::TimerunView::draw() {
       // so render checkpoint as white
       if (noRecordCheckpoint || relativeTime == 0 ||
           comparisonTime == currentTime) {
-        checkpointColor = &colorWhite;
+        checkpointColor = &colorDefault;
       } else {
         bool isFasterCheckpoint;
         // if we've hit max checkpoints, checkpointTime will be 0,
