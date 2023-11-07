@@ -1448,13 +1448,6 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
   const char *msgTime = "";
   qtime_t t;
 
-  /*	// NERVE - SMF - don't do this in wolfMP
-      // if we are going into the intermission, don't start any voices
-      if ( cg.intermissionStarted ) {
-          return;
-      }
-  */
-
   trap_RealTime(&t);
 
   if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
@@ -1502,18 +1495,16 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
 
       if (mode == SAY_TEAM) {
         Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s(%s)%c%c(%s): %c%c%s", msgTime, ci->name, Q_COLOR_ESCAPE,
-                    COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
+                    "%s(%s^7)^3(%s): %c%c%s", msgTime, ci->name, loc,
+                    Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
       } else if (mode == SAY_BUDDY) {
         Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s<%s>%c%c<%s>: %c%c%s", msgTime, ci->name, Q_COLOR_ESCAPE,
-                    COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
-      } else {
-        Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s%c%c: %c%c%s",
-                    msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW,
+                    "%s<%s^7>^3<%s>: %c%c%s", msgTime, ci->name, loc,
                     Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+      } else {
+        Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s^3: %c%c%s",
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
+                    CG_TranslateString(chat));
       }
       CG_AddBufferedVoiceChat(&vchat);
     }
