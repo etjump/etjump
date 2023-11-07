@@ -269,9 +269,9 @@ void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
   }
 }
 
-void ETJump::StringUtil::replaceNextNChars(std::string &input, char character,
-                                           const std::string &replacement,
-                                           size_t numChars) {
+void ETJump::StringUtil::stringSubstitute(std::string &input, char character,
+                                          const std::string &replacement,
+                                          size_t numChars) {
   size_t startPos = 0;
 
   while ((startPos = input.find(character, startPos)) != std::string::npos) {

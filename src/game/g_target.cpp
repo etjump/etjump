@@ -146,7 +146,7 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
     if (activator && activator->client) {
       const std::string nameStr =
           ETJump::stringFormat("%s^7", activator->client->pers.netname);
-      ETJump::StringUtil::replaceNextNChars(message, '%', nameStr, 1);
+      ETJump::StringUtil::stringSubstitute(message, '%', nameStr, 1);
       ETJump::StringUtil::replaceAll(message, "[n]", nameStr);
     } else {
       // better not call G_Error here since this error handling
