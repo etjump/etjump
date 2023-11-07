@@ -689,6 +689,8 @@ spawn_t spawns[] = {
     {"misc_landmine", SP_misc_landmine},
     {"target_setident", SP_target_set_ident},
     {"target_activate", SP_target_activate},
+
+    // deprecated, kept for compatibility, uses target_print code
     {"target_printname", SP_target_printname},
     /*{"etjump_target_relay",	SP_target_fireonce },*/ // Changed for RC1 -
                                                         // Feen

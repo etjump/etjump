@@ -133,49 +133,73 @@ If "private", only the activator gets the message.  If no checks, all clients
 get the message.
 */
 void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  // if no message to print, print whitespace
-  auto temp = ent->message ? ent->message : " ";
-  auto location =
+  const auto location =
       ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
           ? "cpm"
           : "cp";
-  char message[MAX_TOKEN_CHARS]{};
-  Q_strncpyz(message, temp, sizeof(message));
-  if (ent->client &&
-      ent->spawnflags &
-          static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
-    std::string msg = message;
-    ETJump::StringUtil::replaceAll(msg, "[n]", ent->client->pers.netname);
-    Q_strncpyz(message, msg.c_str(), sizeof(message));
+
+  // if no message to print, print whitespace
+  std::string message = ent->message ? ent->message : " ";
+
+  if (ent->spawnflags &
+      static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
+    if (activator && activator->client) {
+      const std::string nameStr =
+          ETJump::stringFormat("%s^7", activator->client->pers.netname);
+      ETJump::StringUtil::stringSubstitute(message, '%', nameStr, 1);
+      ETJump::StringUtil::replaceAll(message, "[n]", nameStr);
+    } else {
+      // better not call G_Error here since this error handling
+      // wasn't here earlier, just print a warning and exit
+      G_Printf("^3WARNING: ^7Use_Target_Print: name formatting requested but "
+               "activator isn't a client.\n");
+      return;
+    }
   }
 
   if ((ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::Private))) {
     if (!activator) {
-      G_Error("G_scripting: call to client only "
-              "target_print with no activator\n");
+      G_Error(
+          "G_scripting: call to client only target_print with no activator\n");
     }
 
     if (activator->client) {
-      trap_SendServerCommand(activator - g_entities,
-                             va("%s \"%s\"", location, message));
+      trap_SendServerCommand(ClientNum(activator),
+                             va("%s \"%s\"", location, message.c_str()));
       return;
     }
   }
 
   if (ent->spawnflags & 3) {
     if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AxisOnly)) {
-      G_TeamCommand(TEAM_AXIS, va("%s \"%s\"", location, message));
+      G_TeamCommand(TEAM_AXIS, va("%s \"%s\"", location, message.c_str()));
     }
     if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AlliedOnly)) {
-      G_TeamCommand(TEAM_ALLIES, va("%s \"%s\"", location, message));
+      G_TeamCommand(TEAM_ALLIES, va("%s \"%s\"", location, message.c_str()));
     }
     return;
   }
 
-  trap_SendServerCommand(-1, va("%s \"%s\"", location, message));
+  trap_SendServerCommand(-1, va("%s \"%s\"", location, message.c_str()));
 }
 
 void SP_target_print(gentity_t *ent) { ent->use = Use_Target_Print; }
+
+// Deprecated target_printname, this will simply call the use function
+// of target_print with the appropriate spawnflags set
+void SP_target_printname(gentity_t *ent) {
+  const int defaultSpawnFlags =
+      static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts) |
+      static_cast<int>(TargetPrintSpawnFlags::LocationCPM);
+
+  // add the necessary flags if not present to make target_print
+  // behave like target_printname used to behave
+  if ((ent->spawnflags & defaultSpawnFlags) != defaultSpawnFlags) {
+    ent->spawnflags |= defaultSpawnFlags;
+  }
+
+  ent->use = Use_Target_Print;
+}
 
 //==========================================================
 
@@ -1431,64 +1455,6 @@ void SP_target_activate(gentity_t *ent) {
 
   ent->use = target_activate_use;
 }
-
-//=============================================================
-/*QUAKED target_printname (0 0 1) (-8 -8 -8) (8 8 8)
-<NAME> <MSG>
-*/
-
-void target_printname_use(gentity_t *ent, gentity_t *other,
-                          gentity_t *activator) {
-
-  char msg[MAX_TOKEN_CHARS];
-  char text[MAX_TOKEN_CHARS];
-  int i = 0;
-
-  Com_sprintf(msg, sizeof(msg), "cpm \"%s\"", ent->message);
-
-  while (msg[i]) {
-    if (msg[i] == '%') {
-      if (msg[i + 1] != 's') {
-        msg[i + 1] = 's';
-      }
-    }
-    i++;
-  }
-
-  if (activator->client) {
-    Com_sprintf(text, sizeof(text), msg, activator->client->pers.netname);
-  } else {
-    return;
-  }
-
-  if ((ent->spawnflags & 4)) {
-    if (!activator) {
-      G_Error("G_scripting: call to client only "
-              "target_printname with no "
-              "activator\n");
-    }
-
-    if (activator->client) {
-      trap_SendServerCommand(activator - g_entities, text);
-      return;
-    }
-  }
-
-  if ((ent->spawnflags & 3)) {
-
-    if (ent->spawnflags & 1) {
-      G_TeamCommand(TEAM_AXIS, text);
-    }
-    if (ent->spawnflags & 2) {
-      G_TeamCommand(TEAM_ALLIES, text);
-    }
-    return;
-  }
-
-  trap_SendServerCommand(-1, text);
-}
-
-void SP_target_printname(gentity_t *ent) { ent->use = target_printname_use; }
 
 //=============================================================
 /*QUAKED target_fireonce (0 0 1) (-8 -8 -8) (8 8 8)
