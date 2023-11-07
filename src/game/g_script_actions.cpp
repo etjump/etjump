@@ -8,6 +8,7 @@
 
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
+#include "etj_printer.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -4417,6 +4418,26 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
     level.numSpawnVars++;
   }
   G_SpawnGEntityFromSpawnVars();
+
+  return qtrue;
+}
+
+// TODO: add support for string substitution ('%s' to display activator's name)
+qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
+  const char *pString, *token;
+
+  auto activator = ent->activator;
+  if (!activator && !activator->client) {
+    return qfalse;
+  }
+
+  pString = params;
+  token = COM_Parse(&pString);
+  if (!token[0]) {
+    G_Error("G_ScriptAction_Announce_Private: statement parameter required\n");
+  }
+
+  Printer::SendPopupMessage(ClientNum(activator), token);
 
   return qtrue;
 }

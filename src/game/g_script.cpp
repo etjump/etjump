@@ -122,6 +122,8 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params);
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
 
+qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
+
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] = {
     {"gotomarker", G_ScriptAction_GotoMarker},
@@ -233,7 +235,9 @@ g_script_stack_action_t gScriptActions[] = {
     {"constructible_health", G_ScriptAction_ConstructibleHealth},
     {"constructible_weaponclass", G_ScriptAction_ConstructibleWeaponclass},
     {"constructible_duration", G_ScriptAction_ConstructibleDuration},
-    {NULL, NULL}};
+
+    {"wm_announce_private", G_ScriptAction_Announce_Private},
+    {nullptr, nullptr}};
 
 qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
                                          const char *eventParm);
