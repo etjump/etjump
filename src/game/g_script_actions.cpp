@@ -9,6 +9,7 @@
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
 #include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -3415,8 +3416,15 @@ qboolean G_ScriptAction_Announce(gentity_t *ent, char *params) {
             "required\n");
   }
 
-  trap_SendServerCommand(-1, va("cpm \"%s\"", token));
-  //	trap_SendServerCommand( -1, va("cp \"%s\" 2", token ));
+  std::string str = token;
+  auto activator = ent->activator;
+  if (activator && activator->client) {
+    const std::string name =
+        ETJump::stringFormat("%s^7", activator->client->pers.netname);
+    ETJump::StringUtil::replaceAll(str, "%s", name);
+  }
+
+  Printer::BroadcastPopupMessage(str);
 
   return qtrue;
 }
@@ -4422,13 +4430,15 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
   return qtrue;
 }
 
-// TODO: add support for string substitution ('%s' to display activator's name)
 qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
   const char *pString, *token;
 
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
-    return qfalse;
+  if (!activator || !activator->client) {
+    // if we don't error out here, script execution hangs in the block where
+    // this gets called, so better to error out to avoid any confusion
+    G_Error("G_ScriptAction_Announce_Private: call to client only script "
+            "action with no activator\n");
   }
 
   pString = params;
@@ -4437,7 +4447,12 @@ qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
     G_Error("G_ScriptAction_Announce_Private: statement parameter required\n");
   }
 
-  Printer::SendPopupMessage(ClientNum(activator), token);
+  std::string str = token;
+  const std::string name =
+      ETJump::stringFormat("%s^7", activator->client->pers.netname);
+  ETJump::StringUtil::replaceAll(str, "%s", name);
+
+  Printer::SendPopupMessage(ClientNum(activator), str);
 
   return qtrue;
 }
