@@ -566,12 +566,12 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_GAMEVIEW:
     case CGAME_EVENT_CAMPAIGNBREIFING:
     case CGAME_EVENT_FIRETEAMMSG:
-      float mdx, mdy;
-      ETJump::scaleMenuSensitivity(x, y, &mdx, &mdy);
-      x = static_cast<int>(mdx);
-      y = static_cast<int>(mdy);
-
       if (!cgs.demoCam.renderingFreeCam) {
+        float mdx, mdy;
+        ETJump::scaleMenuSensitivity(x, y, &mdx, &mdy);
+        x = static_cast<int>(mdx);
+        y = static_cast<int>(mdy);
+
         cgs.cursorX += x;
         if (cgs.cursorX < 0) {
           cgs.cursorX = 0;
