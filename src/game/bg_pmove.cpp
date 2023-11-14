@@ -451,7 +451,8 @@ static void PM_Friction(void) {
   // to clients so we need to make sure this gets corrected for drawing
   // things
 #ifdef CGAMEDLL
-  if (pm->ps->pm_flags & PMF_FOLLOW || cg.demoPlayback) {
+  if (pm->ps->pm_flags & PMF_FOLLOW ||
+      (cg.demoPlayback && !cgs.demoCam.renderingFreeCam)) {
     frametime = pm->pmext->frametime;
   }
 #endif // CGAMEDLL
