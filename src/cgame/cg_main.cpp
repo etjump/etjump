@@ -3832,8 +3832,11 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   if (strcmp(s, GAME_NAME)) {
     CG_Error("Client/Server game mismatch: '%s/%s'", GAME_NAME, s);
   }
-  trap_Cvar_Set("cg_etVersion",
-                GAME_VERSION_DATED); // So server can check
+
+  // detect engine version
+  char versionStr[MAX_CVAR_VALUE_STRING];
+  trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
+  trap_Cvar_Set("cg_etVersion", versionStr[0] ? versionStr : "(undetected)");
 
   s = CG_ConfigString(CS_LEVEL_START_TIME);
   cgs.levelStartTime = Q_atoi(s);

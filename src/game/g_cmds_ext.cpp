@@ -212,130 +212,124 @@ void G_commands_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   CP("cpm \"\nType: ^3\\command_name ?^7 for more information\n\"");
 }
 
+struct playersCmdHeader {
+  const char *id = "ID";
+  const char *player = "Player";
+  const char *nudge = "Nudge";
+  const char *rate = "Rate";
+  const char *maxPackets = "MaxPkts";
+  const char *snaps = "Snaps";
+  const char *engine = "Engine";
+  const char *divider =
+      "------------------------------------------------------------------------"
+      "----------------------------"; // 100 chars
+};
+
 // ************** PLAYERS
 //
 // Show client info
 void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
-  int i, idnum, max_rate, cnt = 0, tteam;
-  int user_rate, user_snaps;
-  gclient_t *cl;
-  gentity_t *cl_ent;
-  char n2[MAX_NETNAME], ready[16], ref[16], rate[256];
+  int i, idnum, maxRate, count = 0;
+  int userRate, userSnaps;
+  gclient_t *client;
+  char name[MAX_NETNAME], info[256];
   const char *s;
   char userinfo[MAX_INFO_STRING];
-  const char *coach, *tc;
+  const char *team;
   const int clientNum = ClientNum(ent);
+  char userEngine[MAX_CVAR_VALUE_STRING];
+  playersCmdHeader header;
 
   if (ent) {
-    Printer::SendConsoleMessage(clientNum,
-                                "\n^3 ID^1 : ^3Player                    Nudge "
-                                " Rate  MaxPkts  Snaps\n");
     Printer::SendConsoleMessage(
-        clientNum,
-        "^1-----------------------------------------------------------^7\n");
+        clientNum, va("\n^g  %-4s%-25s%-7s%-6s%-9s%-7s%s\n", header.id,
+                      header.player, header.nudge, header.rate,
+                      header.maxPackets, header.snaps, header.engine));
+    Printer::SendConsoleMessage(clientNum, va("^g%s\n", header.divider));
   } else {
-    G_Printf(" ID : Player                    Nudge  Rate  MaxPkts  Snaps\n");
-    G_Printf("-----------------------------------------------------------\n");
+    G_Printf("  %-4s%-25s%-7s%-6s%-9s%-7s%s\n", header.id, header.player,
+             header.nudge, header.rate, header.maxPackets, header.snaps,
+             header.engine);
+    G_Printf("%s\n", header.divider);
   }
 
-  max_rate = trap_Cvar_VariableIntegerValue("sv_maxrate");
+  maxRate = trap_Cvar_VariableIntegerValue("sv_maxrate");
+  const int svFps = trap_Cvar_VariableIntegerValue("sv_fps");
 
   for (i = 0; i < level.numConnectedClients; i++) {
     idnum = level.sortedClients[i]; // level.sortedNames[i];
-    cl = &level.clients[idnum];
-    cl_ent = g_entities + idnum;
+    client = &level.clients[idnum];
 
-    SanitizeString(cl->pers.netname, n2, qtrue);
-    n2[26] = 0;
-    ref[0] = 0;
-    ready[0] = 0;
+    Q_strncpyz(name, client->pers.netname, sizeof(name));
+    // exclude color codes from the max string length
+    const auto colorChars = strlen(name) - Q_PrintStrlen(name);
+    name[23 + colorChars] = 0;
 
-    // Rate info
-    if (cl_ent->r.svFlags & SVF_BOT) {
-      Q_strncpyz(rate,
-                 va("%s%s%s%s", "[BOT]", " -----", "       --", "     --"),
-                 sizeof(rate));
-    } else if (cl->pers.connected == CON_CONNECTING) {
-      Q_strncpyz(rate, va("%s", "^3>>> CONNECTING <<<"), sizeof(rate));
+    // player info
+    if (client->pers.connected == CON_CONNECTING) {
+      Q_strncpyz(info, va("%s", "^3>>> CONNECTING <<<"), sizeof(info));
     } else {
       trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
       s = Info_ValueForKey(userinfo, "rate");
-      user_rate = (max_rate > 0 && Q_atoi(s) > max_rate) ? max_rate : Q_atoi(s);
+      userRate = (maxRate != 0 && Q_atoi(s) > maxRate) ? maxRate : Q_atoi(s);
       s = Info_ValueForKey(userinfo, "snaps");
-      user_snaps = Q_atoi(s);
+      userSnaps = Q_atoi(s);
 
-      Q_strncpyz(rate,
-                 va("%5d%6d%9d%7d", cl->pers.clientTimeNudge, user_rate,
-                    cl->pers.clientMaxPackets, user_snaps),
-                 sizeof(rate));
-    }
+      // check for ET: Legacy special userinfo key first
+      Q_strncpyz(userEngine, Info_ValueForKey(userinfo, "etVersion"),
+                 sizeof(userEngine));
+      if (!userEngine[0]) {
+        Q_strncpyz(userEngine, Info_ValueForKey(userinfo, "cg_etVersion"),
+                   sizeof(userEngine));
+      }
 
-    if (g_gamestate.integer != GS_PLAYING) {
-      if (cl->sess.sessionTeam == TEAM_SPECTATOR ||
-          cl->pers.connected == CON_CONNECTING) {
-        Q_strncpyz(ready, ((ent) ? "^5--------^1 :" : "-------- :"),
-                   sizeof(ready));
-      } else if (cl->pers.ready || (g_entities[idnum].r.svFlags & SVF_BOT)) {
-        Q_strncpyz(ready, ((ent) ? "^3(READY)^1  :" : "(READY)  :"),
-                   sizeof(ready));
+      if (ent) {
+        Q_strncpyz(info,
+                   va("%5d%6d%9d%s%7d  ^9%s", client->pers.clientTimeNudge,
+                      userRate, client->pers.clientMaxPackets,
+                      userSnaps < svFps ? "^1" : "^7", userSnaps, userEngine),
+                   sizeof(info));
       } else {
-        Q_strncpyz(ready, ((ent) ? "NOTREADY^1 :" : "NOTREADY :"),
-                   sizeof(ready));
+        Q_strncpyz(info,
+                   va("%5d%6d%9d%7d  %s", client->pers.clientTimeNudge,
+                      userRate, client->pers.clientMaxPackets, userSnaps,
+                      userEngine),
+                   sizeof(info));
       }
     }
 
-    if (cl->sess.coach_team) {
-      tteam = cl->sess.coach_team;
-      coach = (ent) ? "^3C" : "C";
-    } else {
-      tteam = cl->sess.sessionTeam;
-      coach = " ";
-    }
-
-    tc = (ent) ? "^7 " : " ";
-    if (g_gametype.integer >= GT_WOLF) {
-      if (tteam == TEAM_AXIS) {
-        tc = (ent) ? "^1X^7" : "X";
-      }
-      if (tteam == TEAM_ALLIES) {
-        tc = (ent) ? "^4L^7" : "L";
-      }
+    switch (client->sess.sessionTeam) {
+      case TEAM_AXIS:
+        team = (ent) ? "^1R^7 " : "R ";
+        break;
+      case TEAM_ALLIES:
+        team = (ent) ? "^4B^7 " : "B ";
+        break;
+      default:
+        team = (ent) ? "^7  " : "  ";
+        break;
     }
 
     if (ent) {
       Printer::SendConsoleMessage(
-          clientNum, va("%s%s%2d%s^1:%s %-26s^7%s  ^3%s\n", ready, tc, idnum,
-                        coach, ((ref[0]) ? "^3" : "^7"), n2, rate, ref));
+          clientNum,
+          va("%s%2d  %-*s^7%s\n", team, idnum, 25 + colorChars, name, info));
     } else {
-      G_Printf("%s%s%2d%s: %-26s%s  %s\n", ready, tc, idnum, coach, n2, rate,
-               ref);
+      G_Printf("%s%2d  %-25s%s\n", team, idnum,
+               ETJump::sanitize(name, false).c_str(), info);
     }
 
-    cnt++;
+    count++;
   }
 
   if (ent) {
     // can't use getPluralizedString() here due to color codes
     Printer::SendConsoleMessage(clientNum,
-                                va("\n^3%2d^7 total player%s\n\n", cnt,
+                                va("\n^3%2d^7 total player%s\n\n", count,
                                    level.numConnectedClients == 1 ? "" : "s"));
   } else {
     G_Printf("\n%s\n\n",
-             ETJump::getPluralizedString(cnt, "total player").c_str());
-  }
-
-  // Team speclock info
-  if (g_gametype.integer >= GT_WOLF) {
-    for (i = TEAM_AXIS; i <= TEAM_ALLIES; i++) {
-      if (teamInfo[i].spec_lock) {
-        if (ent) {
-          Printer::SendConsoleMessage(
-              clientNum, va("** %s team is speclocked.\n", aTeams[i]));
-        } else {
-          G_Printf("** %s team is speclocked.\n", aTeams[i]);
-        }
-      }
-    }
+             ETJump::getPluralizedString(count, "total player").c_str());
   }
 }
 
