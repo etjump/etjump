@@ -242,12 +242,12 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
   if (ent) {
     Printer::SendConsoleMessage(
-        clientNum, va("\n^g  %-4s%-25s%-7s%-6s%-9s%-7s%s\n", header.id,
+        clientNum, va("\n^g  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id,
                       header.player, header.nudge, header.rate,
                       header.maxPackets, header.snaps, header.engine));
     Printer::SendConsoleMessage(clientNum, va("^g%s\n", header.divider));
   } else {
-    G_Printf("  %-4s%-25s%-7s%-6s%-9s%-7s%s\n", header.id, header.player,
+    G_Printf("  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id, header.player,
              header.nudge, header.rate, header.maxPackets, header.snaps,
              header.engine);
     G_Printf("%s\n", header.divider);
@@ -271,7 +271,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     } else {
       trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
       s = Info_ValueForKey(userinfo, "rate");
-      userRate = (maxRate != 0 && Q_atoi(s) > maxRate) ? maxRate : Q_atoi(s);
+      userRate = (maxRate > 0 && Q_atoi(s) > maxRate) ? maxRate : Q_atoi(s);
       s = Info_ValueForKey(userinfo, "snaps");
       userSnaps = Q_atoi(s);
 
@@ -285,13 +285,13 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
       if (ent) {
         Q_strncpyz(info,
-                   va("%5d%6d%9d%s%7d  ^9%s", client->pers.clientTimeNudge,
+                   va("%5d%7d%9d%s%7d  ^9%s", client->pers.clientTimeNudge,
                       userRate, client->pers.clientMaxPackets,
                       userSnaps < svFps ? "^1" : "^7", userSnaps, userEngine),
                    sizeof(info));
       } else {
         Q_strncpyz(info,
-                   va("%5d%6d%9d%7d  %s", client->pers.clientTimeNudge,
+                   va("%5d%7d%9d%7d  %s", client->pers.clientTimeNudge,
                       userRate, client->pers.clientMaxPackets, userSnaps,
                       userEngine),
                    sizeof(info));
