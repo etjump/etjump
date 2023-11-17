@@ -229,7 +229,7 @@ struct playersCmdHeader {
 //
 // Show client info
 void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
-  int i, idnum, maxRate, count = 0;
+  int idNum, count = 0;
   int userRate, userSnaps;
   gclient_t *client;
   char name[MAX_NETNAME], info[256];
@@ -253,12 +253,12 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     G_Printf("%s\n", header.divider);
   }
 
-  maxRate = trap_Cvar_VariableIntegerValue("sv_maxrate");
+  const int maxRate = trap_Cvar_VariableIntegerValue("sv_maxrate");
   const int svFps = trap_Cvar_VariableIntegerValue("sv_fps");
 
-  for (i = 0; i < level.numConnectedClients; i++) {
-    idnum = level.sortedClients[i]; // level.sortedNames[i];
-    client = &level.clients[idnum];
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    idNum = level.sortedClients[i]; // level.sortedNames[i];
+    client = &level.clients[idNum];
 
     Q_strncpyz(name, client->pers.netname, sizeof(name));
     // exclude color codes from the max string length
@@ -269,7 +269,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     if (client->pers.connected == CON_CONNECTING) {
       Q_strncpyz(info, va("%s", "^3>>> CONNECTING <<<"), sizeof(info));
     } else {
-      trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
+      trap_GetUserinfo(idNum, userinfo, sizeof(userinfo));
       s = Info_ValueForKey(userinfo, "rate");
       userRate = (maxRate > 0 && Q_atoi(s) > maxRate) ? maxRate : Q_atoi(s);
       s = Info_ValueForKey(userinfo, "snaps");
@@ -313,9 +313,9 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     if (ent) {
       Printer::SendConsoleMessage(
           clientNum,
-          va("%s%2d  %-*s^7%s\n", team, idnum, 25 + colorChars, name, info));
+          va("%s%2d  %-*s^7%s\n", team, idNum, 25 + colorChars, name, info));
     } else {
-      G_Printf("%s%2d  %-25s%s\n", team, idnum,
+      G_Printf("%s%2d  %-25s%s\n", team, idNum,
                ETJump::sanitize(name, false).c_str(), info);
     }
 
