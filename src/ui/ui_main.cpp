@@ -4401,7 +4401,7 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "RunDemo") == 0) {
       if (uiInfo.demoIndex >= 0 &&
           uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size())) {
-        auto selected = uiInfo.demoObjects[uiInfo.demoIndex];
+        const auto &selected = uiInfo.demoObjects[uiInfo.demoIndex];
         if (selected.type == FileSystemObjectType::Folder) {
           if (selected.name == ".") {
             uiInfo.currentDemoPath.pop_back();
@@ -4415,7 +4415,7 @@ void UI_RunMenuScript(const char **args) {
         } else {
           // pop front because demo command automatically
           // appends demos/ to the beginning of the path
-          auto front = uiInfo.currentDemoPath.front();
+          const auto &front = uiInfo.currentDemoPath.front();
           uiInfo.currentDemoPath.pop_front();
           auto demoPath =
               ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") + "/" +

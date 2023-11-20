@@ -106,7 +106,7 @@ void ETJump::AwaitedCommandHandler::awaitCommand(
     return;
   }
 
-  auto waitedFramesStr = args[0];
+  const auto &waitedFramesStr = args[0];
   int waitedFrames = 0;
   std::string outOfRangeError =
       stringFormat("^3Error: ^7First parameter (number of frames) must be "

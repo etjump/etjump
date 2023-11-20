@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "etj_timerun_repository.h"
 
 #include "etj_container_utilities.h"
@@ -43,13 +45,13 @@ ETJump::Timerun::Record getRecordFromStandardQueryResult(
 
   ETJump::Timerun::Record record;
   record.seasonId = seasonId;
-  record.map = map;
-  record.run = runName;
+  record.map = std::move(map);
+  record.run = std::move(runName);
   record.userId = userId;
   record.time = time;
   record.recordDate = recordDateTime;
-  record.checkpoints = checkpoints;
-  record.playerName = playerName;
+  record.checkpoints = std::move(checkpoints);
+  record.playerName = std::move(playerName);
   record.metadata = metadata;
 
   return record;
@@ -371,8 +373,8 @@ void ETJump::TimerunRepository::editSeason(
     anythingToUpdate = true;
     updatedFields.emplace_back("start_time");
     updatedParams.push_back(params.startTime.value().toDateTimeString());
-
-  } if (params.endTime.hasValue()) {
+  }
+  if (params.endTime.hasValue()) {
     newEndTime = params.endTime;
     anythingToUpdate = true;
     updatedFields.emplace_back("end_time");

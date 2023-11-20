@@ -582,9 +582,9 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           }
 
           for (const auto &mkvp : skvp.second) {
-            auto mapName = mkvp.first;
+            const auto &mapName = mkvp.first;
             for (const auto &rkvp : mkvp.second) {
-              auto runName = rkvp.first;
+              const auto &runName = rkvp.first;
               int rank = 1;
               int rank1Time = !rkvp.second.empty() ? rkvp.second[0]->time : 0;
               int ownTime = ownRecords[season->id][mapName].count(runName) > 0
@@ -653,7 +653,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           }
         }
 
-        Printer::SendConsoleMessage(params.clientNum, message);
+        Printer::SendConsoleMessage(params.clientNum, std::move(message));
       },
       [this, params](const std::runtime_error &e) {
         Printer::SendConsoleMessage(params.clientNum,
@@ -737,7 +737,7 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
       },
       [this, clientNum, rank](auto r) {
         const auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
-        const auto runName = result->matchedRun;
+        const auto &runName = result->matchedRun;
 
         // bail out if no checkpoints are present
         if (result->checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
@@ -1052,7 +1052,7 @@ public:
 
 void ETJump::TimerunV2::checkRecord(Player *player) {
   const auto clientNum = player->clientNum;
-  const auto activeRunName = player->activeRunName;
+  const auto &activeRunName = player->activeRunName;
   const auto userId = player->userId;
   const auto completionTime = player->completionTime.value();
   const std::map<std::string, std::string> metadata = {
@@ -1247,7 +1247,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
         // Relevant season record
         else if (checkRecordResult
                      ->isTopRecordPerSeason[_mostRelevantSeason->id]) {
-          const auto record =
+          const auto &record =
               checkRecordResult
                   ->newOwnRecordsPerSeason[_mostRelevantSeason->id];
 

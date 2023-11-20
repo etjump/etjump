@@ -180,7 +180,7 @@ void ETJump::ProgressionTrackers::useTracker(
 
 void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t *ent,
                                                     gentity_t *activator) {
-  auto tracker = _progressionTrackers[ent->key];
+  const auto &tracker = _progressionTrackers[ent->key];
 
   if (!activator || !activator->client) {
     return;
@@ -192,7 +192,7 @@ void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t *ent,
 void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
                                                    gentity_t *other,
                                                    gentity_t *activator) {
-  auto tracker = _progressionTrackers[ent->key];
+  const auto &tracker = _progressionTrackers[ent->key];
 
   if (!activator || !activator->client) {
     return;

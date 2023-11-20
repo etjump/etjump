@@ -802,7 +802,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
     selfMsg =
         ETJump::stringFormat("%s^7 was removed from invited spectators.\n",
                              other->client->pers.netname);
-    Printer::SendConsoleMessage(selfClient, selfMsg);
+    Printer::SendConsoleMessage(selfClient, std::move(selfMsg));
     otherMsg =
         ETJump::stringFormat("^7You are no longer invited to spectate %s^7.\n",
                              ent->client->pers.netname);
@@ -831,7 +831,7 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
   if (ent->client->sess.specLocked == lock) {
     msg = ETJump::stringFormat("You are already %slocked from spectators!\n",
                                lock ? "" : "un");
-    Printer::SendConsoleMessage(client, msg);
+    Printer::SendConsoleMessage(client, std::move(msg));
     return;
   }
 

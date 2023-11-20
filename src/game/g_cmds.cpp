@@ -903,7 +903,7 @@ const float MaxAxisOffset = 4096.f;
 // offsets player's position by given vector if noclip is available
 void setPlayerOffset(gentity_t *ent) {
   static char buffer[64];
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
 
   if (trap_Argc() != 4) {
     Printer::SendConsoleMessage(clientNum,
@@ -918,7 +918,7 @@ void setPlayerOffset(gentity_t *ent) {
   if (!result.success) {
     std::string str = ETJump::stringFormat(result.message, "setoffset");
     capitalizeWithColor(str);
-    Printer::SendConsoleMessage(clientNum, str);
+    Printer::SendConsoleMessage(clientNum, std::move(str));
     return;
   }
 
@@ -1066,7 +1066,7 @@ void setTracker(gentity_t *ent) {
       setTrackerMsg = stringFormat("^7Set tracker value on all "
                                    "indices to ^2%i^7.\n",
                                    value);
-      Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+      Printer::SendConsoleMessage(clientNum, std::move(setTrackerMsg));
     }
   }
 
@@ -2683,7 +2683,7 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent) {
   char msg[64];
   auto *client = ent->client;
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
 
   static const auto votedYes = [](const std::string &msg) {
     for (const auto &ym : yesMsgs) {
@@ -2714,7 +2714,7 @@ void Cmd_Vote_f(gentity_t *ent) {
       voteMsgs += std::string(nm) + " ";
     }
     voteMsgs += "\n";
-    Printer::SendConsoleMessage(clientNum, voteMsgs);
+    Printer::SendConsoleMessage(clientNum, std::move(voteMsgs));
   };
 
   if (ent->client->pers.applicationEndTime > level.time) {
@@ -4570,7 +4570,7 @@ void Cmd_Class_f(gentity_t *ent) {
           ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
     }
 
-    Printer::SendConsoleMessage(clientNum, usageText);
+    Printer::SendConsoleMessage(clientNum, std::move(usageText));
     return;
   }
 

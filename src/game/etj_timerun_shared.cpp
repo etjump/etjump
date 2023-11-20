@@ -118,7 +118,7 @@ TimerunCommands::Start::deserialize(const std::vector<std::string> &args) {
     idx++;
   }
 
-  return start;
+  return std::move(start);
 }
 
 std::string TimerunCommands::Checkpoint::serialize() {
@@ -162,7 +162,7 @@ TimerunCommands::Checkpoint::deserialize(const std::vector<std::string> &args) {
   cp.checkpointTime = time.value();
   cp.runName = args[5];
 
-  return cp;
+  return std::move(cp);
 }
 
 std::string TimerunCommands::Interrupt::serialize() {
@@ -217,7 +217,7 @@ TimerunCommands::Completion::deserialize(const std::vector<std::string> &args) {
 
   completion.runName = args[5];
 
-  return completion;
+  return std::move(completion);
 }
 
 std::string TimerunCommands::Record::serialize() {
@@ -251,7 +251,7 @@ TimerunCommands::Record::deserialize(const std::vector<std::string> &args) {
 
   record.runName = args[5];
 
-  return record;
+  return std::move(record);
 }
 
 std::string TimerunCommands::Stop::serialize() {
@@ -282,7 +282,7 @@ TimerunCommands::Stop::deserialize(const std::vector<std::string> &args) {
 
   stop.runName = args[4];
 
-  return stop;
+  return std::move(stop);
 }
 
 } // namespace ETJump
