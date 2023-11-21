@@ -54,6 +54,7 @@
 #include "etj_upmove_meter_drawable.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_crosshair.h"
+#include "etj_overbounce_detector.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -216,6 +217,7 @@ void init() {
   // Overbounce watcher
   ETJump::renderables.push_back(
       std::make_shared<OverbounceWatcher>(consoleCommandsHandler.get()));
+  ETJump::renderables.push_back(std::make_shared<OverbounceDetector>());
   // Display max speed from previous load session
   ETJump::renderables.push_back(
       std::make_shared<DisplayMaxSpeed>(ETJump::entityEventsHandler.get()));

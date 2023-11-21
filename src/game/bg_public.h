@@ -2799,4 +2799,6 @@ enum class CheatCvarFlags {
 };
 }
 
+const int JUMP_VELOCITY = 270;
+
 #endif // __BG_PUBLIC_H__
