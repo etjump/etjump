@@ -50,7 +50,7 @@ void OverbounceDetector::beforeRender() {
     VectorCopy(ps->origin, start);
     start[2] = startHeight;
     VectorCopy(start, end);
-    end[2] -= MAX_TRACE_DIST;
+    end[2] -= Overbounce::MAX_TRACE_DIST;
 
     CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
              traceContents);
@@ -70,7 +70,7 @@ void OverbounceDetector::beforeRender() {
 
   // use origin from playerState?
   VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, MAX_TRACE_DIST, cg.refdef.viewaxis[0], end);
+  VectorMA(start, Overbounce::MAX_TRACE_DIST, cg.refdef.viewaxis[0], end);
 
   CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
            traceContents);

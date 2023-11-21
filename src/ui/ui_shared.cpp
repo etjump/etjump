@@ -4662,6 +4662,8 @@ static bind_t g_bindings[] = {
     {"clearsaves", -1, -1, -1, -1},
     {"ob_save", -1, -1, -1, -1},
     {"ob_reset", -1, -1, -1, -1},
+    {"ob_load", -1, -1, -1, -1},
+    {"ob_list", -1, -1, -1, -1},
     {"+strafe", -1, -1, -1, -1},
     {"interruptrun", -1, -1, -1, -1},
     {"minimize", -1, -1, -1, -1},

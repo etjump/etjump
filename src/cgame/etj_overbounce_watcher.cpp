@@ -27,50 +27,74 @@
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 #include "cg_local.h"
+#include "etj_overbounce_shared.h"
+#include "../game/etj_string_utilities.h"
 
-ETJump::OverbounceWatcher::OverbounceWatcher(
+namespace ETJump {
+OverbounceWatcher::OverbounceWatcher(
     ClientCommandsHandler *clientCommandsHandler)
-    : _clientCommandsHandler{clientCommandsHandler},
-      _positions{}, _current{nullptr} {
+    : _clientCommandsHandler{clientCommandsHandler}, _positions{},
+      _current{nullptr} {
   if (!clientCommandsHandler) {
     CG_Error("OverbounceWatcher: clientCommandsHandler is null.\n");
     return;
   }
 
+  shader = cgs.media.voiceChatShader;
   _positions.clear();
 
   clientCommandsHandler->subscribe(
       "ob_save", [&](const std::vector<std::string> &args) {
-        Coordinate c;
-        const auto ps = getPlayerState();
-        for (auto i = 0; i < 3; ++i) {
+        vec3_t c;
+        ps = getValidPlayerState();
+        for (int i = 0; i < 3; ++i) {
           c[i] = ps->origin[i];
         }
-        auto name = args.size() > 1 ? args[1] : "default";
+        // shift z-coordinate to feet level
+        c[2] += ps->mins[2];
+
+        auto name = !args.empty() ? sanitize(args[0], true) : "default";
         save(name, c);
-        CG_Printf("Saved coordinate as \"%s\": (%f, %f, %f)\n", name.c_str(),
-                  c[0], c[1], c[2]);
+        CG_AddPMItem(
+            PM_MESSAGE,
+            va("^3OB watcher: ^7saved coordinate as ^3%s ^7(%f, %f, %f)\n",
+               name.c_str(), c[0], c[1], c[2]),
+            shader);
       });
 
   clientCommandsHandler->subscribe(
       "ob_load", [&](const std::vector<std::string> &args) {
-        auto name = args.size() > 1 ? args[1] : "default";
+        auto name = !args.empty() ? sanitize(args[0], true) : "default";
         if (!load(name)) {
-          CG_Printf("^3Overbounce watcher: ^7%s has "
-                    "not been saved yet.\n",
-                    name.c_str());
+          CG_AddPMItem(PM_MESSAGE,
+                       va("^3OB watcher: ^7coordinate ^3%s ^7was not found.\n",
+                          name.c_str()),
+                       shader);
           return;
         }
 
-        CG_Printf("Loaded coordinate \"%s\" (%f, %f, %f)\n", name.c_str(),
-                  (*_current)[0], (*_current)[1], (*_current)[2]);
+        CG_AddPMItem(
+            PM_MESSAGE,
+            va("^3OB watcher: ^7loaded coordinate ^3%s ^7(%f, %f, %f)\n",
+               name.c_str(), (*_current)[0], (*_current)[1], (*_current)[2]),
+            shader);
       });
 
   clientCommandsHandler->subscribe(
       "ob_reset", [&](const std::vector<std::string> &args) {
         reset();
-        CG_Printf("Reset currently displayed overbounce "
-                  "watcher coordinates.\n");
+        CG_AddPMItem(PM_MESSAGE,
+                     "^3OB watcher: ^7current coordinates have been reset.\n",
+                     shader);
+      });
+
+  clientCommandsHandler->subscribe(
+      "ob_list", [&](const std::vector<std::string> &args) {
+        if (_positions.empty()) {
+          CG_Printf("^3OB watcher: ^7no saved positions.\n");
+          return;
+        }
+        list();
       });
 
   cvarUpdateHandler->subscribe(&etj_obWatcherColor, [&](const vmCvar_t *cvar) {
@@ -80,89 +104,73 @@ ETJump::OverbounceWatcher::OverbounceWatcher(
   parseColorString(etj_obWatcherColor.string, _color);
 }
 
-ETJump::OverbounceWatcher::~OverbounceWatcher() {
+OverbounceWatcher::~OverbounceWatcher() {
   _clientCommandsHandler->unsubcribe("ob_save");
   _clientCommandsHandler->unsubcribe("ob_load");
   _clientCommandsHandler->unsubcribe("ob_reset");
+  _clientCommandsHandler->unsubcribe("ob_list");
 }
 
-const playerState_t *ETJump::OverbounceWatcher::getPlayerState() {
-  return (cg.snap->ps.clientNum != cg.clientNum)
-             // spectating
-             ? &cg.snap->ps
-             // playing
-             : &cg.predictedPlayerState;
-}
+void OverbounceWatcher::beforeRender() {
+  ps = getValidPlayerState();
+  pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.f;
+  gravity = ps->gravity;
+  v0 = ps->velocity[2];
+  startHeight = ps->origin[2] + ps->mins[2];
+  x = etj_obWatcherX.value;
 
-void ETJump::OverbounceWatcher::render() const {
-  auto ps = getPlayerState();
+  overbounce = false;
 
-  if (!etj_drawObWatcher.integer) {
-    return;
-  }
+  VectorSet(snap, 0, 0, gravity * pmoveSec);
+  trap_SnapVector(snap);
+  v0Snapped = snap[2];
 
-  if (!_current) {
-    return;
-  }
+  // make sure we have a valid position to begin with
+  endHeight = _current ? (*_current)[2] : 0;
 
-  if (ps->groundEntityNum != ENTITYNUM_NONE) {
-    return;
-  }
-
-  if (ps->pm_type == PM_NOCLIP) {
-    return;
-  }
-
-  float psec = cgs.pmove_msec / 1000.f;
-  int gravity = ps->gravity;
-  float velocity = ps->velocity[2];
-  float currentHeight = ps->origin[2] + ps->mins[2];
-  float finalHeight = 0;
-  float x = etj_obWatcherX.value;
-  float sizex, sizey;
-
-  Coordinate snap{};
-  VectorSet(snap, 0, 0, gravity * psec);
-  trap_SnapVector(snap.data());
-  auto rintv = snap[2];
-
-  finalHeight = (*_current)[2] + ps->mins[2];
-
-  sizex = sizey = 0.1f;
-  sizex *= etj_obWatcherSize.value;
-  sizey *= etj_obWatcherSize.value;
+  sizeX = sizeY = 0.1f;
+  sizeX *= etj_obWatcherSize.value;
+  sizeY *= etj_obWatcherSize.value;
 
   ETJump_AdjustPosition(&x);
 
-  // determine if we are going to get OB on our saved surface and draw
-  // OB watcher accordingly
-  // TODO: Add nooverbounce check. Not critical since OB watcher is
-  // probably mostly used in original maps.
-  if (isOverbounce(velocity, currentHeight, finalHeight, rintv, psec,
-                   gravity)) {
-    ETJump::DrawString(x, etj_obWatcherY.integer, sizex, sizey, _color, qfalse,
-                       "OB", 0, ITEM_TEXTSTYLE_SHADOWED);
+  // setup & do trace, so we can determine if surface allows OB
+  trace_t trace;
+  VectorCopy(_current ? *_current : vec3_origin, start);
+  start[2] = startHeight;
+  VectorCopy(start, end);
+  end[2] -= Overbounce::MAX_TRACE_DIST;
+
+  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
+           CONTENTS_SOLID);
+
+  // CG_Printf("startHeight: %f endHeight: %f\n", startHeight, endHeight);
+  if (Overbounce::isOverbounce(v0, startHeight, endHeight, v0Snapped, pmoveSec,
+                               gravity) &&
+      Overbounce::surfaceAllowsOverbounce(&trace)) {
+    overbounce = true;
   }
 }
 
-void ETJump::OverbounceWatcher::beforeRender() {}
-
-void ETJump::OverbounceWatcher::save(const std::string &name,
-                                     Coordinate coordinate) {
-  auto pos = _positions.find(name);
-  if (pos != end(_positions)) {
-    _current = nullptr;
+void OverbounceWatcher::render() const {
+  if (canSkipDraw()) {
+    return;
   }
 
-  _positions[name] = coordinate;
+  DrawString(x, etj_obWatcherY.value, sizeX, sizeY, _color, qfalse, "OB", 0,
+             ITEM_TEXTSTYLE_SHADOWED);
+}
+
+void OverbounceWatcher::save(const std::string &name, const vec3_t coordinate) {
+  VectorCopy(coordinate, _positions[name]);
   _current = &_positions[name];
 }
 
-void ETJump::OverbounceWatcher::reset() { _current = nullptr; }
+void OverbounceWatcher::reset() { _current = nullptr; }
 
-bool ETJump::OverbounceWatcher::load(const std::string &name) {
+bool OverbounceWatcher::load(const std::string &name) {
   auto pos = _positions.find(name);
-  if (pos == end(_positions)) {
+  if (pos == _positions.end()) {
     return false;
   }
 
@@ -170,45 +178,39 @@ bool ETJump::OverbounceWatcher::load(const std::string &name) {
   return true;
 }
 
-std::vector<std::string> ETJump::OverbounceWatcher::list() const {
-  std::vector<std::string> names;
-  for (const auto &i : _positions) {
-    names.push_back(i.first);
+void OverbounceWatcher::list() const {
+  CG_Printf("^gSaved OB watcher coordinates\n"
+            "^g-----------------------------------\n");
+  for (const auto &pos : _positions) {
+    CG_Printf("^3%-15s ^7(%f %f %f)%s\n", pos.first.c_str(), pos.second[0],
+              pos.second[1], pos.second[2],
+              _current && VectorCompare(*_current, pos.second) ? " ^9(current)"
+                                                               : "");
   }
-  return names;
 }
 
-bool ETJump::OverbounceWatcher::isOverbounce(float vel, float currentHeight,
-                                             float finalHeight, float rintv,
-                                             float psec, int gravity) {
-  float a, b, c;
-  float n1;
-  float hn;
-  int n;
-
-  a = -psec * rintv / 2;
-  b = psec * (vel - gravity * psec / 2 + rintv / 2);
-  c = currentHeight - finalHeight;
-  n1 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
-
-  n = floor(n1);
-  hn = currentHeight +
-       psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
-
-  if (finalHeight > currentHeight && vel < 0) {
-    return false;
-  }
-
-  if (n && hn < finalHeight + 0.25 && hn > finalHeight) {
+bool OverbounceWatcher::canSkipDraw() const {
+  if (!etj_drawObWatcher.integer) {
     return true;
   }
+
+  if (!_current || !overbounce) {
+    return true;
+  }
+
+  if (ps->groundEntityNum != ENTITYNUM_NONE) {
+    return true;
+  }
+
+  // impossible OB - negative z velocity & below saved coordinate
+  if (v0 < 0 && startHeight < endHeight) {
+    return true;
+  }
+
+  if (ps->pm_type == PM_NOCLIP) {
+    return true;
+  }
+
   return false;
 }
-
-bool ETJump::OverbounceWatcher::surfaceAllowsOverbounce(trace_t *trace) {
-  if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE) {
-    return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  } else {
-    return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  }
-}
+} // namespace ETJump

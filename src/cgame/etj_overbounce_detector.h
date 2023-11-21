@@ -49,7 +49,5 @@ class OverbounceDetector : public IRenderable {
   bool jumpOverbounce;
   bool fallOverbounce;
   bool stickyOverbounce;
-
-  static constexpr int MAX_TRACE_DIST = MAX_MAP_SIZE * 2;
 };
 } // namespace ETJump

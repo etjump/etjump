@@ -34,5 +34,6 @@ public:
   static bool surfaceAllowsOverbounce(trace_t *trace);
 
   static constexpr float stickyOffset = 0.25f;
+  static constexpr int MAX_TRACE_DIST = MAX_MAP_SIZE * 2;
 };
 } // namespace ETJump
