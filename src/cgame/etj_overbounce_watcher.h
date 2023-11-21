@@ -64,7 +64,7 @@ private:
   playerState_t *ps;
   float x{};
   float pmoveSec{};
-  float v0{}, v0Snapped{};
+  float zVel{}, zVelSnapped{};
 
   float startHeight{}, endHeight{};
   vec3_t start{}, end{};

@@ -33,12 +33,12 @@ void OverbounceDetector::beforeRender() {
   traceContents = checkExtraTrace(ETJump::OB_DETECTOR);
   pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.0f;
   gravity = ps->gravity;
-  v0 = ps->velocity[2];
+  zVel = ps->velocity[2];
   startHeight = ps->origin[2] + ps->mins[2];
 
   VectorSet(snap, 0, 0, gravity * pmoveSec);
   trap_SnapVector(snap);
-  v0Snapped = snap[2];
+  zVelSnapped = snap[2];
 
   x = etj_OBX.value;
   ETJump_AdjustPosition(&x);
@@ -60,7 +60,7 @@ void OverbounceDetector::beforeRender() {
       endHeight = trace.endpos[2];
 
       // below ob
-      if (Overbounce::isOverbounce(v0, startHeight, endHeight, v0Snapped,
+      if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
                                    pmoveSec, gravity) &&
           Overbounce::surfaceAllowsOverbounce(&trace)) {
         belowOverbounce = true;
@@ -81,7 +81,7 @@ void OverbounceDetector::beforeRender() {
     // CG_Printf("startHeight=%f, endHeight=%f\n", startHeight, endHeight);
 
     // fall ob
-    if (Overbounce::isOverbounce(v0, startHeight, endHeight, v0Snapped,
+    if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
                                  pmoveSec, gravity) &&
         Overbounce::surfaceAllowsOverbounce(&trace)) {
       fallOverbounce = true;
@@ -89,8 +89,8 @@ void OverbounceDetector::beforeRender() {
 
     // jump ob
     if (ps->groundEntityNum != ENTITYNUM_NONE &&
-        Overbounce::isOverbounce(v0 + JUMP_VELOCITY, startHeight, endHeight,
-                                 v0Snapped, pmoveSec, gravity) &&
+        Overbounce::isOverbounce(zVel + JUMP_VELOCITY, startHeight, endHeight,
+                                 zVelSnapped, pmoveSec, gravity) &&
         Overbounce::surfaceAllowsOverbounce(&trace)) {
       jumpOverbounce = true;
     }
@@ -110,7 +110,7 @@ void OverbounceDetector::beforeRender() {
     // CG_Printf("startHeight=%f, endHeight=%f\n", startHeight, endHeight);
 
     // sticky fall ob
-    if (Overbounce::isOverbounce(v0, startHeight, endHeight, v0Snapped,
+    if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
                                  pmoveSec, gravity) &&
         Overbounce::surfaceAllowsOverbounce(&trace)) {
       fallOverbounce = true;
@@ -119,8 +119,8 @@ void OverbounceDetector::beforeRender() {
 
     // sticky jump ob
     if (ps->groundEntityNum != ENTITYNUM_NONE &&
-        Overbounce::isOverbounce(v0 + JUMP_VELOCITY, startHeight, endHeight,
-                                 v0Snapped, pmoveSec, gravity) &&
+        Overbounce::isOverbounce(zVel + JUMP_VELOCITY, startHeight, endHeight,
+                                 zVelSnapped, pmoveSec, gravity) &&
         Overbounce::surfaceAllowsOverbounce(&trace)) {
       jumpOverbounce = true;
       stickyOverbounce = true;

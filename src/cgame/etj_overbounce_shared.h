@@ -29,8 +29,8 @@
 namespace ETJump {
 class Overbounce {
 public:
-  static bool isOverbounce(float v0, float startHeight, float endHeight,
-                           float v0Snapped, float pmoveSec, int gravity);
+  static bool isOverbounce(float zVel, float startHeight, float endHeight,
+                           float zVelSnapped, float pmoveSec, int gravity);
   static bool surfaceAllowsOverbounce(trace_t *trace);
 
   static constexpr float stickyOffset = 0.25f;

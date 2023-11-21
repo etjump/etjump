@@ -115,7 +115,7 @@ void OverbounceWatcher::beforeRender() {
   ps = getValidPlayerState();
   pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.f;
   gravity = ps->gravity;
-  v0 = ps->velocity[2];
+  zVel = ps->velocity[2];
   startHeight = ps->origin[2] + ps->mins[2];
   x = etj_obWatcherX.value;
 
@@ -123,7 +123,7 @@ void OverbounceWatcher::beforeRender() {
 
   VectorSet(snap, 0, 0, gravity * pmoveSec);
   trap_SnapVector(snap);
-  v0Snapped = snap[2];
+  zVelSnapped = snap[2];
 
   // make sure we have a valid position to begin with
   endHeight = _current ? (*_current)[2] : 0;
@@ -145,8 +145,8 @@ void OverbounceWatcher::beforeRender() {
            CONTENTS_SOLID);
 
   // CG_Printf("startHeight: %f endHeight: %f\n", startHeight, endHeight);
-  if (Overbounce::isOverbounce(v0, startHeight, endHeight, v0Snapped, pmoveSec,
-                               gravity) &&
+  if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
+                               pmoveSec, gravity) &&
       Overbounce::surfaceAllowsOverbounce(&trace)) {
     overbounce = true;
   }
@@ -203,7 +203,7 @@ bool OverbounceWatcher::canSkipDraw() const {
   }
 
   // impossible OB - negative z velocity & below saved coordinate
-  if (v0 < 0 && startHeight < endHeight) {
+  if (zVel < 0 && startHeight < endHeight) {
     return true;
   }
 

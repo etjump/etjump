@@ -25,16 +25,16 @@
 #include "etj_overbounce_shared.h"
 
 namespace ETJump {
-bool Overbounce::isOverbounce(float v0, float startHeight, float endHeight,
-                              float v0Snapped, float pmoveSec, int gravity) {
+bool Overbounce::isOverbounce(float zVel, float startHeight, float endHeight,
+                              float zVelSnapped, float pmoveSec, int gravity) {
   float a, b, c, discriminant;
   float root1;
   float reachedHeight;
   int timeSteps;
 
-  a = -pmoveSec * v0Snapped / 2;
+  a = -pmoveSec * zVelSnapped / 2;
   b = pmoveSec *
-      (v0 - static_cast<float>(gravity) * pmoveSec / 2 + v0Snapped / 2);
+      (zVel - static_cast<float>(gravity) * pmoveSec / 2 + zVelSnapped / 2);
   c = startHeight - endHeight;
 
   if (a == 0) {
@@ -54,11 +54,11 @@ bool Overbounce::isOverbounce(float v0, float startHeight, float endHeight,
   timeSteps = static_cast<int>(std::floor(root1));
   reachedHeight =
       startHeight + pmoveSec * static_cast<float>(timeSteps) *
-                        (v0 - static_cast<float>(gravity) * pmoveSec / 2 -
-                         static_cast<float>(timeSteps - 1) * v0Snapped / 2);
+                        (zVel - static_cast<float>(gravity) * pmoveSec / 2 -
+                         static_cast<float>(timeSteps - 1) * zVelSnapped / 2);
 
-  // CG_Printf("v0=%f, startHeight=%f, endHeight=%f, timeSteps=%d,
-  // reachedHeight: %f\n", v0, startHeight, endHeight, timeSteps,
+  // CG_Printf("zVel=%f, startHeight=%f, endHeight=%f, timeSteps=%d,
+  // reachedHeight: %f\n", zVel, startHeight, endHeight, timeSteps,
   // reachedHeight);
 
   if (timeSteps && reachedHeight < endHeight + stickyOffset &&
