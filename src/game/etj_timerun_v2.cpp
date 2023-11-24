@@ -678,9 +678,10 @@ public:
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
+// NOLINTBEGIN(performance-unnecessary-value-param)
 void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
                                         std::string runName, int rank) {
+  // NOLINTEND(performance-unnecessary-value-param)
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         std::string matchedRun;
