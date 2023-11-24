@@ -27,6 +27,10 @@
 
 namespace ETJump {
 void OverbounceDetector::beforeRender() {
+  if (canSkipDraw()) {
+    return;
+  }
+
   belowOverbounce = jumpOverbounce = fallOverbounce = stickyOverbounce = false;
 
   ps = getValidPlayerState();

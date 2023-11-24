@@ -112,6 +112,10 @@ OverbounceWatcher::~OverbounceWatcher() {
 }
 
 void OverbounceWatcher::beforeRender() {
+  if (canSkipDraw()) {
+    return;
+  }
+
   ps = getValidPlayerState();
   pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.f;
   gravity = ps->gravity;
@@ -153,7 +157,7 @@ void OverbounceWatcher::beforeRender() {
 }
 
 void OverbounceWatcher::render() const {
-  if (canSkipDraw()) {
+  if (canSkipDraw() || !overbounce) {
     return;
   }
 
@@ -190,11 +194,7 @@ void OverbounceWatcher::list() const {
 }
 
 bool OverbounceWatcher::canSkipDraw() const {
-  if (!etj_drawObWatcher.integer) {
-    return true;
-  }
-
-  if (!_current || !overbounce) {
+  if (!etj_drawObWatcher.integer || !_current) {
     return true;
   }
 
