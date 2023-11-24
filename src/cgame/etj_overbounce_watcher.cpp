@@ -129,8 +129,7 @@ void OverbounceWatcher::beforeRender() {
   trap_SnapVector(snap);
   zVelSnapped = snap[2];
 
-  // make sure we have a valid position to begin with
-  endHeight = _current ? (*_current)[2] : 0;
+  endHeight = (*_current)[2];
 
   sizeX = sizeY = 0.1f;
   sizeX *= etj_obWatcherSize.value;
@@ -140,7 +139,7 @@ void OverbounceWatcher::beforeRender() {
 
   // setup & do trace, so we can determine if surface allows OB
   trace_t trace;
-  VectorCopy(_current ? *_current : vec3_origin, start);
+  VectorCopy(*_current, start);
   start[2] = startHeight;
   VectorCopy(start, end);
   end[2] -= Overbounce::MAX_TRACE_DIST;
