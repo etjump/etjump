@@ -34,7 +34,7 @@ namespace ETJump {
 OverbounceWatcher::OverbounceWatcher(
     ClientCommandsHandler *clientCommandsHandler)
     : _clientCommandsHandler{clientCommandsHandler}, _positions{},
-      _current{nullptr} {
+      _current{nullptr}, ps(nullptr) {
   if (!clientCommandsHandler) {
     CG_Error("OverbounceWatcher: clientCommandsHandler is null.\n");
     return;
@@ -53,7 +53,7 @@ OverbounceWatcher::OverbounceWatcher(
         // shift z-coordinate to feet level
         c[2] += ps->mins[2];
 
-        auto name = !args.empty() ? sanitize(args[0], true) : "default";
+        const auto &name = !args.empty() ? sanitize(args[0], true) : "default";
         save(name, c);
         CG_AddPMItem(
             PM_MESSAGE,
@@ -64,7 +64,7 @@ OverbounceWatcher::OverbounceWatcher(
 
   clientCommandsHandler->subscribe(
       "ob_load", [&](const std::vector<std::string> &args) {
-        auto name = !args.empty() ? sanitize(args[0], true) : "default";
+        const auto &name = !args.empty() ? sanitize(args[0], true) : "default";
         if (!load(name)) {
           CG_AddPMItem(PM_MESSAGE,
                        va("^3OB watcher: ^7coordinate ^3%s ^7was not found.\n",
