@@ -2290,7 +2290,7 @@ int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
 
 float Item_Slider_ThumbPosition(itemDef_t *item) {
   float value, range, x;
-  editFieldDef_t *editDef = (editFieldDef_t *)item->typeData;
+  auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
 
   if (item->text) {
     x = item->textRect.x + item->textRect.w + 8;
@@ -2298,7 +2298,7 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
     x = item->window.rect.x;
   }
 
-  if (editDef == NULL && item->cvar) {
+  if (editDef == nullptr && item->cvar) {
     return x;
   }
 
@@ -2320,11 +2320,8 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
   range = editDef->maxVal - editDef->minVal;
   value -= editDef->minVal;
   value /= range;
-  // value /= (editDef->maxVal - editDef->minVal);
   value *= SLIDER_WIDTH;
   x += value;
-  // vm fuckage
-  // x = x + (((float)value / editDef->maxVal) * SLIDER_WIDTH);
   return x;
 }
 
