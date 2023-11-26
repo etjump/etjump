@@ -252,6 +252,10 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
         auto clientConnectResult =
             dynamic_cast<ClientConnectResult *>(result.get());
 
+        if (!clientConnectResult) {
+          throw std::runtime_error("clientConnectResult is NULL");
+        }
+
         _players[clientNum] = std::make_unique<Player>(
             clientNum, userId, clientConnectResult->runs);
       },
@@ -525,6 +529,16 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
       [this, params](auto p) {
         auto result = dynamic_cast<PrintRecordsResult *>(p.get());
 
+        if (!result) {
+          _logger->info("printRecords: unable to load records for player "
+                        "'%d': PrintRecordsResult is NULL",
+                        params.clientNum);
+          throw std::runtime_error(
+              "printRecords: unable to load records. If the problem persists "
+              "after a map change, please report the bug at "
+              "github.com/etjump/etjump");
+        }
+
         if (result->records.empty()) {
           Printer::SendConsoleMessage(params.clientNum,
                                       "No records available.\n");
@@ -742,6 +756,16 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
       },
       [this, clientNum, rank](auto r) {
         const auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
+
+        if (!result) {
+          _logger->info("Unable to load checkpoints for client '%d': "
+                        "LoadCheckpointsResult is NULL",
+                        clientNum);
+          throw std::runtime_error(
+              "Loading checkpoints failed. If the problem persists after a map "
+              "change, please report the bug at github.com/etjump/etjump");
+        }
+
         const auto runName = result->matchedRun;
 
         // bail out if no checkpoints are present
@@ -879,6 +903,15 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
       [this, params](auto r) {
         auto result = dynamic_cast<PrintResult *>(r.get());
 
+        if (!result) {
+          _logger->info("Unable to fetch timerun rankings for client '%d': "
+                        "PrintResult is NULL",
+                        params.clientNum);
+          throw std::runtime_error(
+              "Fetching rankings failed. If the problem persists after a map "
+              "change, please report the bug at github.com/etjump/etjump");
+        }
+
         Printer::SendConsoleMessage(params.clientNum, result->message);
       },
       [params](auto e) {
@@ -917,8 +950,17 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
 
         return std::make_unique<PrintResult>(message);
       },
-      [clientNum](auto r) {
+      [clientNum, this](auto r) {
         auto result = dynamic_cast<PrintResult *>(r.get());
+
+        if (!result) {
+          _logger->info(
+              "Unable to fetch seasons for client '%d': PrintResult is NULL",
+              clientNum);
+          throw std::runtime_error(
+              "Fetching seasons failed. If the problem persists after a map "
+              "change, please report the bug at github.com/etjump/etjump");
+        }
 
         Printer::SendConsoleMessage(clientNum, result->message);
       },
@@ -1210,6 +1252,11 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
        clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         const auto checkRecordResult =
             dynamic_cast<CheckRecordResult *>(result.get());
+
+        if (!checkRecordResult) {
+          throw std::runtime_error("CheckRecordResult is NULL");
+        }
+
         bool isNewRecord = false;
 
         std::string diffString;
@@ -1357,11 +1404,11 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
         }
       },
-      [this, &activeRunName, &completionTime,
+      [this, activeRunName, completionTime,
        clientNum](const std::runtime_error &e) {
-        _logger->error("Unable to check the record (%s/%s/%d) for %s: %s",
-                       _currentMap, activeRunName, completionTime, e.what());
-
+        _logger->error("Unable to check the record (%s/%s/%d) for %d: %s",
+                       _currentMap, activeRunName, completionTime, clientNum,
+                       e.what());
         Printer::SendChatMessage(
             clientNum, "Unable to process your timerun record. Please report "
                        "this as a bug at github.com/etjump/etjump.");
