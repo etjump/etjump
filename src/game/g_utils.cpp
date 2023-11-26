@@ -414,7 +414,7 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
                     activator); // (door,other,activator)
         } else {
 
-          if (t->reqident && activator->client) {
+          if (t->reqident && (activator && activator->client)) {
             if (t->spawnflags & 1) {
               if (t->reqident < activator->client->sess.clientMapProgression) {
                 G_UseEntity(t, ent, activator);

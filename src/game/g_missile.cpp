@@ -476,7 +476,7 @@ void G_ExplodeMissile(gentity_t *ent) {
              (ent->s.teamNum == TEAM_ALLIES)) ||
             ((hit->spawnflags & ALLIED_OBJECTIVE) &&
              (ent->s.teamNum == TEAM_AXIS))) {
-          if (ent->parent->client &&
+          if (ent->parent->client && hit->target_ent &&
               G_GetWeaponClassForMOD(MOD_DYNAMITE) >=
                   hit->target_ent->constructibleStats.weaponclass) {
             G_AddKillSkillPointsForDestruction(
@@ -505,10 +505,12 @@ void G_ExplodeMissile(gentity_t *ent) {
       tent->s.onFireStart = ent->splashDamage * 4;
       tent->r.svFlags |= SVF_BROADCAST;
 
-      // ETJump: map entities don't have attacker id so
-      // we send -1
-      tent->s.clientNum = (ent->parent) ? ent->parent->client->ps.clientNum
-                                        : -1; // ETJump: send attacker's id
+      // map entities have no clientNum, so send -1 instead
+      if (!ent->parent || !ent->parent->client) {
+        tent->s.clientNum = -1;
+      } else {
+        tent->s.clientNum = ent->parent->client->ps.clientNum;
+      }
     }
   }
 }
@@ -1151,9 +1153,8 @@ void G_RunFlamechunk(gentity_t *ent) {
 
   // TAT 11/12/2002
   //		vel was only being set if (level.time - ent->timestamp >
-  // 50 		However, below, it was being used when we hit something and
-  // it
-  // was 		uninitialized
+  // 50 		However, below, it was being used when we hit something
+  // and it was 		uninitialized
   VectorCopy(ent->s.pos.trDelta, vel);
 
   // Adust the current speed of the chunk
@@ -1920,7 +1921,11 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
   bolt->s.weapon = grenadeWPID;
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
-  bolt->s.teamNum = self->client->sess.sessionTeam;
+
+  // no self->client for shooter_grenade's
+  if (self->client) {
+    bolt->s.teamNum = self->client->sess.sessionTeam;
+  }
 
   // JPW NERVE -- commented out bolt->damage and bolt->splashdamage,
   // override with G_GetWeaponDamage() so it works with different

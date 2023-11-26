@@ -1318,6 +1318,10 @@ Changes or adds a key/value pair
 void Info_SetValueForKey(char *s, const char *key, const char *value) {
   char newi[MAX_INFO_STRING];
 
+  if (!value || !strlen(value)) {
+    return;
+  }
+
   if (strlen(s) >= MAX_INFO_STRING) {
     Com_Error(ERR_DROP,
               "Info_SetValueForKey: oversize infostring [%s] "
@@ -1341,9 +1345,6 @@ void Info_SetValueForKey(char *s, const char *key, const char *value) {
   }
 
   Info_RemoveKey(s, key);
-  if (!value || !strlen(value)) {
-    return;
-  }
 
   Com_sprintf(newi, sizeof(newi), "\\%s\\%s", key, value);
 

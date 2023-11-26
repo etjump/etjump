@@ -601,7 +601,7 @@ void Weapon_Syringe(gentity_t *ent) {
         if (g_gamestate.integer == GS_PLAYING) {
           ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
         }
-        if (ent && ent->client) {
+        if (ent->client) {
           G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
                       ClientNum(traceEnt)); // OSP
         }
@@ -2655,7 +2655,7 @@ void Weapon_Engineer(gentity_t *ent) {
               if (ent->client->sess.sessionTeam == TEAM_AXIS) {
                 if (hit->s.teamNum == TEAM_AXIS && (!scored)) {
                   AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
-                  if (ent && ent->client) {
+                  if (ent->client) {
                     G_LogPrintf("Dynamite_Diffuse: %d\n",
                                 ClientNum(ent)); // OSP
                   }
@@ -2679,7 +2679,7 @@ void Weapon_Engineer(gentity_t *ent) {
               {
                 if (hit->s.teamNum == TEAM_ALLIES && (!scored)) {
                   AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
-                  if (ent && ent->client) {
+                  if (ent->client) {
                     G_LogPrintf("Dynamite_Diffuse: %d\n",
                                 ClientNum(ent)); // OSP
                   }

@@ -150,7 +150,7 @@ static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, const char *params,
                                             bool isAutoSpawn) {
   auto mod = isAutoSpawn ? "setplayerautospawn" : "setplayerspawn";
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
+  if (!activator || !activator->client) {
     return qfalse;
   }
   // get target name
@@ -218,7 +218,7 @@ qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params) {
 */
 qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params) {
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
+  if (!activator || !activator->client) {
     return qfalse;
   }
   const char *constparams = params;
@@ -240,7 +240,7 @@ qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params) {
 */
 qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params) {
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
+  if (!activator || !activator->client) {
     return qfalse;
   }
   activator->flags &= ~FL_GODMODE;

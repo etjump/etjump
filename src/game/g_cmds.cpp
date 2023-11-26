@@ -2536,12 +2536,12 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
                               "Voting is not enabled on this server.\n");
     return false;
   }
-  if (ent && ent->client->sess.muted && g_mute.integer & 2) {
+  if (ent->client->sess.muted && g_mute.integer & 2) {
     Printer::SendPopupMessage(clientNum, "^3callvote: ^7not allowed to "
                                          "call a vote while muted.\n");
     return false;
   }
-  if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
       !(g_spectatorVote.integer >= 2)) {
     Printer::SendPopupMessage(clientNum,
                               "^3callvote: ^7you are not allowed to call "

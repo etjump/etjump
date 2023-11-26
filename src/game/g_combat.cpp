@@ -295,18 +295,21 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   gentity_t *ent;
   qboolean killedintank = qfalse;
 
+  // you've done something terribly wrong if you ended up here in this state
+  if (!self->client) {
+    return;
+  }
+
   // float			timeLived;
   weapon_t weap = BG_WeaponForMOD(meansOfDeath);
 
   //	G_Printf( "player_die\n" );
 
   if (attacker == self) {
-    if (self->client) {
-      self->client->pers.playerStats.suicides++;
-      trap_PbStat(self - g_entities, "suicide",
-                  va("%d %d %d", self->client->sess.sessionTeam,
-                     self->client->sess.playerType, weap));
-    }
+    self->client->pers.playerStats.suicides++;
+    trap_PbStat(self - g_entities, "suicide",
+                va("%d %d %d", self->client->sess.sessionTeam,
+                   self->client->sess.playerType, weap));
   } else if (OnSameTeam(self, attacker)) {
     G_LogTeamKill(attacker, weap);
   } else {
@@ -331,7 +334,7 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   }
 
   // if we got killed by a landmine, update our map
-  if (self->client && meansOfDeath == MOD_LANDMINE) {
+  if (meansOfDeath == MOD_LANDMINE) {
     // if it's an enemy mine, update both teamlists
     /*int teamNum;
     mapEntityData_t	*mEnt;
@@ -539,11 +542,9 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
   }
 
   // send a fancy "MEDIC!" scream.  Sissies, ain' they?
-  if (self->client != NULL) {
-    if (self->health > GIB_HEALTH && meansOfDeath != MOD_SUICIDE &&
-        meansOfDeath != MOD_SWITCHTEAM) {
-      G_AddEvent(self, EV_MEDIC_CALL, 0);
-    }
+  if (self->health > GIB_HEALTH && meansOfDeath != MOD_SUICIDE &&
+      meansOfDeath != MOD_SWITCHTEAM) {
+    G_AddEvent(self, EV_MEDIC_CALL, 0);
   }
 
   Cmd_Score_f(self); // show scores
@@ -857,6 +858,10 @@ qboolean IsHeadShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod) {
     return qfalse;
   }
 
+  if (!dir || !point) {
+    return qfalse;
+  }
+
   if (!IsHeadShotWeapon(mod)) {
     return qfalse;
   }
@@ -916,7 +921,7 @@ qboolean IsLegShot(gentity_t *targ, vec3_t dir, vec3_t point, int mod) {
     return qfalse;
   }
 
-  if (!point) {
+  if (!dir || !point) {
     return qfalse;
   }
 
@@ -987,6 +992,10 @@ qboolean IsArmShot(gentity_t *targ, gentity_t *ent, vec3_t point, int mod) {
   }
 
   if (targ->health <= 0) {
+    return qfalse;
+  }
+
+  if (!point) {
     return qfalse;
   }
 

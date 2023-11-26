@@ -528,6 +528,9 @@ void Fade(int *flags, float *f, float clamp, int *nextTime, int offsetTime,
 
 void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
                   float fadeCycle) {
+  if (w == nullptr || (w->style == 0 && w->border == 0)) {
+    return;
+  }
   // float bordersize = 0;
   vec4_t color{1.f, 1.f, 1.f, 1.f};
   rectDef_t fillRect = w->rect;
@@ -535,10 +538,6 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
   if (debugMode) {
     color[0] = color[1] = color[2] = color[3] = 1;
     DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, 1, color);
-  }
-
-  if (w == NULL || (w->style == 0 && w->border == 0)) {
-    return;
   }
 
   // FIXME: do right thing for right border type
@@ -2301,6 +2300,13 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
 
   if (editDef == NULL && item->cvar) {
     return x;
+  }
+
+  // the above statement should realistically never execute
+  // sliders *should* always have a valid typeData pointer set to a function
+  // if you see this error, you've done goofed
+  if (editDef == nullptr) {
+    Com_Error(ERR_FATAL, "Item_Slider_ThumbPosition: NULL editDef\n");
   }
 
   value = DC->getCVarValue(item->cvar);
@@ -4301,9 +4307,9 @@ void Item_Text_Paint(itemDef_t *item) {
 
     // build string
     if (seconds <= 2) {
-      Com_sprintf(text, 255, item->text, va("^1%d^*", seconds));
+      Com_sprintf(text, 255, textPtr, va("^1%d^*", seconds));
     } else {
-      Com_sprintf(text, 255, item->text, va("%d", seconds));
+      Com_sprintf(text, 255, textPtr, va("%d", seconds));
     }
 
     // set ptr
@@ -5405,13 +5411,14 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 
 void Item_Paint(itemDef_t *item) {
   vec4_t red;
-  menuDef_t *parent = (menuDef_t *)item->parent;
   red[0] = red[3] = 1;
   red[1] = red[2] = 0;
 
   if (item == NULL) {
     return;
   }
+
+  auto *parent = static_cast<menuDef_t *>(item->parent);
 
   if (item->hOffset) {
     float off = DC->getCVarValue(item->hOffset);
