@@ -339,14 +339,13 @@ match (string)self.target and call their .use function
 */
 void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   gentity_t *t;
-  int hash;
 
   if (!ent) {
     return;
   }
 
   if (ent->targetShaderName && ent->targetShaderNewName) {
-    float f = level.time * 0.001;
+    float f = static_cast<float>(level.time) * 0.001f;
     AddRemap(ent->targetShaderName, ent->targetShaderNewName, f);
     trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
   }
@@ -355,80 +354,48 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
     return;
   }
 
-  bool entIsFuncStatic = Q_stricmp(ent->classname, "func_static") == 0;
-  t = NULL;
-  hash = BG_StringHashValue(ent->target);
-  while ((t = G_FindByTargetnameFast(t, ent->target, hash)) != NULL) {
+  const bool entIsFuncStatic = Q_stricmp(ent->classname, "func_static") == 0;
+  t = nullptr;
+  const auto hash = static_cast<int>(BG_StringHashValue(ent->target));
+  while ((t = G_FindByTargetnameFast(t, ent->target, hash)) != nullptr) {
     if (t == ent) {
       G_Printf("WARNING: Entity used itself.\n");
     } else {
       if (t->use) {
-        // G_Printf ("ent->classname %s
-        // ent->targetname %s t->targetname %s
-        // t->s.number %d\n", ent->classname,
-        // ent->targetname, t->targetname,
-        // t->s.number);
+        // (SA) If 'ent' was kicked to activate, pass this along to its targets.
+        // It may become handy to put a "KICKABLE" flag in ents
+        // so that it knows whether to pass this along or not.
+        // Right now, the only situation where it would be weird
+        // would be an invisible_user that is a 'button' near a rotating door
+        // that it triggers. Kick the switch and the door next to it flies open.
+        t->flags |= (ent->flags & FL_KICKACTIVATE);
 
-        t->flags |= (ent->flags & FL_KICKACTIVATE); // (SA) If 'ent'
-                                                    // was kicked to
-                                                    // activate, pass
-                                                    // this along to
-                                                    // it's targets.
-                                                    //		It
-                                                    // may become
-                                                    // handy to put a
-                                                    //"KICKABLE" flag
-                                                    // in ents so that
-                                                    // it knows
-                                                    // whether to
-                                                    // pass this
-                                                    // along or not
-                                                    // Right now, the
-                                                    // only situation
-                                                    // where it would
-                                                    // be weird would
-                                                    // be an
-                                                    // invisible_user
-                                                    // that is a
-                                                    // 'button'
-                                                    // near a
-                                                    // rotating door
-                                                    // that it
-                                                    // triggers. Kick
-                                                    // the switch and
-                                                    // the door next
-                                                    // to it flies
-                                                    // open.
-
-        t->flags |= (ent->flags & FL_SOFTACTIVATE); // (SA) likewise
-                                                    // for soft
-                                                    // activation
+        // (SA) likewise for soft activation
+        t->flags |= (ent->flags & FL_SOFTACTIVATE);
 
         if (activator && !entIsFuncStatic &&
             ((Q_stricmp(t->classname, "func_door") == 0) ||
              (Q_stricmp(t->classname, "func_door_rotating") == 0))) {
-          // check door usage rules
-          // before allowing any entity
-          // to trigger a door open
-          G_TryDoor(t, ent,
-                    activator); // (door,other,activator)
+          // check door usage rules before allowing any entity open a door
+          G_TryDoor(t, ent, activator); // (door,other,activator)
         } else {
-
           if (t->reqident && (activator && activator->client)) {
+            const auto clientMapProgression =
+                activator->client->sess.clientMapProgression;
             if (t->spawnflags & 1) {
-              if (t->reqident < activator->client->sess.clientMapProgression) {
+              if (t->reqident < clientMapProgression) {
                 G_UseEntity(t, ent, activator);
               }
             } else if (t->spawnflags & 2) {
-              if (t->reqident != activator->client->sess.clientMapProgression) {
+              if (t->reqident != clientMapProgression) {
                 G_UseEntity(t, ent, activator);
               }
             } else if (t->spawnflags & 4) {
-              if (t->reqident > activator->client->sess.clientMapProgression) {
+              if (t->reqident > clientMapProgression) {
                 G_UseEntity(t, ent, activator);
               }
             } else {
-              if (t->reqident == activator->client->sess.clientMapProgression) {
+              if (t->reqident == clientMapProgression) {
                 G_UseEntity(t, ent, activator);
               }
             }

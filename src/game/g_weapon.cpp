@@ -569,32 +569,28 @@ qboolean ReviveEntity(gentity_t *ent, gentity_t *traceEnt) {
 void Weapon_Syringe(gentity_t *ent) {
   vec3_t end;
   trace_t tr;
-  // qboolean  usedSyringe = qfalse;         // DHM - Nerve
   gentity_t *traceEnt;
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
   CalcMuzzlePointForActivate(ent, forward, right, up, muzzleTrace);
   VectorMA(muzzleTrace, 48, forward, end); // CH_ACTIVATE_DIST
-  // VectorMA (muzzleTrace, -16, forward, muzzleTrace);	// DHM - Back up
-  // the start point in case medic is
-  //  right on top of intended revivee.
-  trap_Trace(&tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT);
+  // the start point in case medic is right on top of intended revivee.
+  trap_Trace(&tr, muzzleTrace, nullptr, nullptr, end, ent->s.number, MASK_SHOT);
 
   if (tr.startsolid) {
     VectorMA(muzzleTrace, 8, forward, end); // CH_ACTIVATE_DIST
-    trap_Trace(&tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT);
+    trap_Trace(&tr, muzzleTrace, nullptr, nullptr, end, ent->s.number,
+               MASK_SHOT);
   }
 
   if (tr.fraction < 1.0) {
     traceEnt = &g_entities[tr.entityNum];
-    if (traceEnt->client != NULL) {
+    if (traceEnt->client != nullptr) {
 
       if ((traceEnt->client->ps.pm_type == PM_DEAD) &&
           (traceEnt->client->sess.sessionTeam ==
            ent->client->sess.sessionTeam)) {
-        // Mad Doc - TDF moved all the revive
-        // stuff into its own function
-        // usedSyringe =
+        // Mad Doc - TDF moved all the revive stuff into its own function
         ReviveEntity(ent, traceEnt);
 
         // OSP - syringe "hit"
@@ -605,49 +601,24 @@ void Weapon_Syringe(gentity_t *ent) {
           G_LogPrintf("Medic_Revive: %d %d\n", ClientNum(ent),
                       ClientNum(traceEnt)); // OSP
         }
-        if (!traceEnt->isProp) // Gordon: flag for
-                               // if they were
-                               // teamkilled or not
-        {
-          AddScore(ent,
-                   WOLF_MEDIC_BONUS); // JPW
-                                      // NERVE
-                                      // props
-                                      // to
-                                      // the
-                                      // medic
-                                      // for
-                                      // the
-                                      // swift
-                                      // and
-                                      // dexterous
-                                      // bit
-                                      // o
-                                      // healitude
+        // Gordon: flag for if they were teamkilled or not
+        if (!traceEnt->isProp) {
+          // JPW NERVE
+          // props to the medic for the swift and dexterous bit o healitude
+          AddScore(ent, WOLF_MEDIC_BONUS);
 
           G_AddSkillPoints(ent, SK_FIRST_AID, 4.f);
           G_DebugAddSkillPoints(ent, SK_FIRST_AID, 4.f, "reviving a player");
         }
 
-        // Arnout: calculate ranks to update
-        // numFinalDead arrays. Have to do it
-        // manually as addscore has an early out
+        // Arnout: calculate ranks to update numFinalDead arrays.
+        // Have to do it manually as addscore has an early out
         if (g_gametype.integer == GT_WOLF_LMS) {
           CalculateRanks();
         }
       }
     }
   }
-
-  /* Aciz: Syringe doesn't use ammo, so let's not add it back in case of
-  misses
-  // DHM - Nerve :: If the medicine wasn't used, give back the ammo
-  if (!usedSyringe)
-  {
-          ent->client->ps.ammoclip[BG_FindClipForWeapon(WP_MEDIC_SYRINGE)]
-  += 1;
-  }
-  */
 }
 // jpw
 
@@ -1647,7 +1618,7 @@ void Weapon_Engineer(gentity_t *ent) {
   int dynamiteDropTeam;
   vec3_t end;
   vec3_t origin;
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
 
   // DHM - Nerve :: Can't heal an MG42 if you're using one!
   if (ent->client->ps.persistant[PERS_HWEAPON_USE]) {
@@ -1662,10 +1633,10 @@ void Weapon_Engineer(gentity_t *ent) {
 
   AngleVectors(ent->client->ps.viewangles, forward, right, up);
   VectorCopy(ent->client->ps.origin, muzzleTrace);
-  muzzleTrace[2] += ent->client->ps.viewheight;
+  muzzleTrace[2] += static_cast<float>(ent->client->ps.viewheight);
 
   VectorMA(muzzleTrace, 64, forward, end); // CH_BREAKABLE_DIST
-  trap_EngineerTrace(&tr, muzzleTrace, NULL, NULL, end, ent->s.number,
+  trap_EngineerTrace(&tr, muzzleTrace, nullptr, nullptr, end, ent->s.number,
                      MASK_SHOT | CONTENTS_TRIGGER);
 
   if (tr.surfaceFlags & SURF_NOIMPACT) {
@@ -1694,7 +1665,7 @@ void Weapon_Engineer(gentity_t *ent) {
       }
 
       if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3) {
-        ent->client->ps.classWeaponTime += .66f * 150;
+        ent->client->ps.classWeaponTime += static_cast<int>(0.66f * 150);
       } else {
         ent->client->ps.classWeaponTime += 150;
       }
@@ -1719,11 +1690,8 @@ void Weapon_Engineer(gentity_t *ent) {
       G_LogPrintf("Repair: %d\n", clientNum); // OSP
 
       if (traceEnt->sound3to2 != ent->client->sess.sessionTeam) {
-        AddScore(ent,
-                 WOLF_REPAIR_BONUS); // JPW NERVE
-                                     // props to the
-                                     // E for the
-                                     // fixin'
+        // JPW NERVE props to the E for the fixin'
+        AddScore(ent, WOLF_REPAIR_BONUS);
         G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 3.f);
         G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 3.f,
                               "repairing a MG42");
@@ -1738,7 +1706,7 @@ void Weapon_Engineer(gentity_t *ent) {
       traceEnt->health += 3;
     }
   } else {
-    trap_EngineerTrace(&tr, muzzleTrace, NULL, NULL, end, ent->s.number,
+    trap_EngineerTrace(&tr, muzzleTrace, nullptr, nullptr, end, ent->s.number,
                        MASK_SHOT);
     if (tr.surfaceFlags & SURF_NOIMPACT) {
       return;
@@ -1755,741 +1723,317 @@ void Weapon_Engineer(gentity_t *ent) {
       trace_t tr2;
       vec3_t base;
       vec3_t tr_down = {0, 0, 16};
+      const float chargeFactor =
+          ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3 ? 0.33f
+                                                                       : 0.5f;
+      const int chargeBackTime = static_cast<int>(
+          chargeFactor *
+          static_cast<float>(
+              level.engineerChargeTime[ent->client->sess.sessionTeam - 1]));
 
       VectorSubtract(traceEnt->s.pos.trBase, tr_down, base);
 
-      trap_EngineerTrace(&tr2, traceEnt->s.pos.trBase, NULL, NULL, base,
+      trap_EngineerTrace(&tr2, traceEnt->s.pos.trBase, nullptr, nullptr, base,
                          traceEnt->s.number, MASK_SHOT);
 
-      // ydnar: added "surfaceparm landmine"
-      // (SURF_LANDMINE) support
-      //%	if(!(tr2.surfaceFlags & (SURF_GRASS |
-      // SURF_SNOW | SURF_GRAVEL))
-      //||
-      if (!(tr2.surfaceFlags & SURF_LANDMINE) ||
-          (tr2.entityNum != ENTITYNUM_WORLD &&
-           (!g_entities[tr2.entityNum].inuse ||
-            g_entities[tr2.entityNum].s.eType != ET_CONSTRUCTIBLE))) {
-        trap_SendServerCommand(clientNum,
-                               "cp \"Landmine cannot be armed here...\" 1");
-
-        G_FreeEntity(traceEnt);
-
-        Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
-
-        // rain - #202 - give back the correct
-        // charge amount
-        if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3) {
-          ent->client->ps.classWeaponTime -=
-              .33f *
-              level.engineerChargeTime[ent->client->sess.sessionTeam - 1];
-        } else {
-          ent->client->ps.classWeaponTime -=
-              .5f * level.engineerChargeTime[ent->client->sess.sessionTeam - 1];
-        }
-        ent->client->sess.aWeaponStats[WS_LANDMINE].atts--;
-        return;
-        // bani
-        //  rain - #384 - check landmine team so
-        //  that enemy mines can be disarmed
-        //  even if you're using all of yours :x
-      } else if (G_CountTeamLandmines(ent->client->sess.sessionTeam) >=
-                     MAX_TEAM_LANDMINES &&
-                 G_LandmineTeam(traceEnt) == ent->client->sess.sessionTeam) {
-
-        if (G_LandmineUnarmed(traceEnt)) {
-          // rain - should be impossible
-          // now
-          //					if (
-          // G_LandmineTeam( traceEnt )
-          //!=
-          //! ent->client->sess.sessionTeam
-          //!)
-          // return;
-
-          trap_SendServerCommand(
-              clientNum, "cp \"Your team has too many landmines placed...\" 1");
+      if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3) {
+        // ydnar: added "surfaceparm landmine"
+        if (!(tr2.surfaceFlags & SURF_LANDMINE) ||
+            (tr2.entityNum != ENTITYNUM_WORLD &&
+             (!g_entities[tr2.entityNum].inuse ||
+              g_entities[tr2.entityNum].s.eType != ET_CONSTRUCTIBLE))) {
+          trap_SendServerCommand(clientNum,
+                                 "cp \"Landmine cannot be armed here...\" 1");
 
           G_FreeEntity(traceEnt);
 
           Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
-          // rain - #202 - give back the
-          // correct charge amount
-          if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 3) {
-            ent->client->ps.classWeaponTime -=
-                .33f *
-                level.engineerChargeTime[ent->client->sess.sessionTeam - 1];
-          } else {
-            ent->client->ps.classWeaponTime -=
-                .5f *
-                level.engineerChargeTime[ent->client->sess.sessionTeam - 1];
-          }
 
+          // rain - #202 - give back the correct charge amount
+          ent->client->ps.classWeaponTime -= chargeBackTime;
           ent->client->sess.aWeaponStats[WS_LANDMINE].atts--;
           return;
-        }
-        // bani - #471
-        else {
-          goto evilbanigoto;
-        }
-      } else {
+          // bani
+          //  rain - #384 - check landmine team so that enemy mines
+          //  can be disarmed even if you're using all of yours :x
+        } else if (G_CountTeamLandmines(ent->client->sess.sessionTeam) >=
+                       MAX_TEAM_LANDMINES &&
+                   G_LandmineTeam(traceEnt) == ent->client->sess.sessionTeam) {
+          if (G_LandmineUnarmed(traceEnt)) {
+            trap_SendServerCommand(
+                clientNum,
+                "cp \"Your team has too many landmines placed...\" 1");
 
-        if (G_LandmineUnarmed(traceEnt)) {
-          // Opposing team cannot
-          // accidentally arm it
-          if (G_LandmineTeam(traceEnt) != ent->client->sess.sessionTeam) {
-            return;
-          }
-
-          G_PrintClientSpammyCenterPrint(clientNum, "Arming landmine...");
-
-          // Give health until it is
-          // full, don't continue
-          if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
-            traceEnt->health += 24;
-          } else {
-            traceEnt->health += 12;
-          }
-
-          if (traceEnt->health >= 250) {
-            // traceEnt->health
-            // = 255;
-            trap_SendServerCommand(clientNum, "cp \"Landmine armed...\" 1");
-          } else {
-            return;
-          }
-
-          traceEnt->r.contents = 0; // (player can walk
-                                    // through)
-          trap_LinkEntity(traceEnt);
-
-          // Don't allow disarming for
-          // sec (so guy that WAS arming
-          // doesn't start disarming it!
-          traceEnt->timestamp = level.time + 1000;
-          traceEnt->health = 0;
-
-          traceEnt->s.teamNum = ent->client->sess.sessionTeam;
-          traceEnt->s.modelindex2 = 0;
-
-          traceEnt->nextthink = level.time + 2000;
-          traceEnt->think = G_LandminePrime;
-        } else {
-        // bani - #471
-        evilbanigoto:
-          if (traceEnt->timestamp > level.time) {
-            return;
-          }
-          if (traceEnt->health >= 250) // have to do this so
-                                       // we don't score
-                                       // multiple times
-          {
-            return;
-          }
-
-          if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
-            traceEnt->health += 6;
-          } else {
-            traceEnt->health += 3;
-          }
-
-          G_PrintClientSpammyCenterPrint(clientNum, "Defusing landmine");
-
-          if (traceEnt->health >= 250) {
-            /*						traceEnt->health
-               = 255;
-                                    traceEnt->think = G_FreeEntity;
-                                    traceEnt->nextthink = level.time +
-               FRAMETIME;*/
-
-            trap_SendServerCommand(clientNum, "cp \"Landmine defused...\" 1");
+            G_FreeEntity(traceEnt);
 
             Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
-
-            if (G_LandmineTeam(traceEnt) != ent->client->sess.sessionTeam) {
-              G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 4.f);
-              G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 4.f,
-                                    "defu"
-                                    "sing"
-                                    " an "
-                                    "enem"
-                                    "y "
-                                    "land"
-                                    "min"
-                                    "e");
-            }
-
-            // update our map
-            /*{
-                // if it's an
-            enemy mine, update
-            both teamlists int
-            teamNum;
-                mapEntityData_t
-            *mEnt;
-                mapEntityData_Team_t
-            *teamList;
-
-                teamNum =
-            traceEnt->s.teamNum
-            % 4;
-
-                teamList =
-            ent->client->sess.sessionTeam
-            == TEAM_AXIS ?
-            &mapEntityData[0] :
-            &mapEntityData[1];
-            if((mEnt =
-            G_FindMapEntityData(teamList,
-            traceEnt-g_entities))
-            != NULL) {
-                    G_FreeMapEntityData(
-            teamList, mEnt );
-                }
-
-                teamList =
-            ent->client->sess.sessionTeam
-            == TEAM_AXIS ?
-            &mapEntityData[1] :
-            &mapEntityData[0];
-            // inverted if((mEnt
-            =
-            G_FindMapEntityData(teamList,
-            traceEnt-g_entities))
-            != NULL) { if(
-            teamNum !=
-            ent->client->sess.sessionTeam
-            ) {
-            G_FreeMapEntityData(
-            teamList, mEnt ); }
-            else {
-                    //
-            mEnt->type =
-            ME_LANDMINE;	//
-            set it back to this
-            as it might have
-            been set to 'about
-            to explode'.
-            mEnt->entNum = -1;
-                    }
-                }
-            }*/
-            {
-              mapEntityData_t *mEnt;
-              int tEntNum = static_cast<int>(traceEnt - g_entities);
-
-              if ((mEnt = G_FindMapEntityData(&mapEntityData[0], tEntNum)) !=
-                  NULL) {
-                G_FreeMapEntityData(&mapEntityData[0], mEnt);
-              }
-
-              if ((mEnt = G_FindMapEntityData(&mapEntityData[1], tEntNum)) !=
-                  NULL) {
-                G_FreeMapEntityData(&mapEntityData[1], mEnt);
-              }
-
-              G_FreeEntity(traceEnt);
-            }
-          } else {
+            // rain - #202 - give back the correct charge amount
+            ent->client->ps.classWeaponTime -= chargeBackTime;
+            ent->client->sess.aWeaponStats[WS_LANDMINE].atts--;
             return;
           }
-        }
-      }
-    } else if (traceEnt->methodOfDeath == MOD_SATCHEL) {
-      if (traceEnt->health >= 250) // have to do this so we don't score
-                                   // multiple times
-      {
-        return;
-      }
-
-      // Give health until it is full, don't continue
-      traceEnt->health += 3;
-
-      G_PrintClientSpammyCenterPrint(clientNum, "Disarming satchel charge...");
-
-      if (traceEnt->health >= 250) {
-
-        traceEnt->health = 255;
-        traceEnt->think = G_FreeEntity;
-        traceEnt->nextthink = level.time + FRAMETIME;
-
-        // bani - consistency with dynamite
-        // defusing
-        G_PrintClientSpammyCenterPrint(clientNum, "Satchel charge disarmed...");
-
-        G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
-        G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f,
-                              "disarming satchel charge");
-      } else {
-        return;
-      }
-// bani - no tripmine...
-#if 0
-		}
-		else if (traceEnt->methodOfDeath == MOD_TRIPMINE)
-		{
-			// Give health until it is full, don't continue
-			traceEnt->health += 3;
-
-			G_PrintClientSpammyCenterPrint(ent - g_entities, "Disarming tripmine...");
-
-			if (traceEnt->health >= 250)
-			{
-				traceEnt->health    = 255;
-				traceEnt->think     = G_FreeEntity;
-				traceEnt->nextthink = level.time + FRAMETIME;
-
-				Add_Ammo(ent, WP_TRIPMINE, 1, qfalse);
-			}
-			else
-			{
-				return;
-			}
-#endif
-    } else if (traceEnt->methodOfDeath == MOD_DYNAMITE) {
-
-      // Not armed
-      if (traceEnt->s.teamNum >= 4) {
-        // bani
-        qboolean friendlyObj = qfalse;
-        qboolean enemyObj = qfalse;
-
-        // Opposing team cannot accidentally arm
-        // it
-        if ((traceEnt->s.teamNum - 4) != ent->client->sess.sessionTeam) {
-          return;
-        }
-
-        G_PrintClientSpammyCenterPrint(clientNum, "Arming dynamite...");
-
-        // Give health until it is full, don't
-        // continue
-        if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
-          traceEnt->health += 14;
+          // bani - #471
+          else {
+            goto evilbanigoto;
+          }
         } else {
-          traceEnt->health += 7;
-        }
-
-        {
-          int entityList[MAX_GENTITIES];
-          int numListedEntities;
-          int e;
-          vec3_t org;
-
-          VectorCopy(traceEnt->r.currentOrigin, org);
-          org[2] += 4; // move out of ground
-
-          G_TempTraceIgnorePlayersAndBodies();
-          numListedEntities =
-              EntsThatRadiusCanDamage(org, traceEnt->splashRadius, entityList);
-          G_ResetTempTraceIgnoreEnts();
-
-          for (e = 0; e < numListedEntities; e++) {
-            hit = &g_entities[entityList[e]];
-
-            if (hit->s.eType != ET_CONSTRUCTIBLE) {
-              continue;
+          if (G_LandmineUnarmed(traceEnt)) {
+            // Opposing team cannot accidentally arm it
+            if (G_LandmineTeam(traceEnt) != ent->client->sess.sessionTeam) {
+              return;
             }
 
-            // invulnerable
-            if (hit->spawnflags & CONSTRUCTIBLE_INVULNERABLE ||
-                (hit->parent && hit->parent->spawnflags & 8)) {
-              continue;
+            G_PrintClientSpammyCenterPrint(clientNum, "Arming landmine...");
+
+            // Give health until it is full, don't continue
+            if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
+              traceEnt->health += 24;
+            } else {
+              traceEnt->health += 12;
             }
 
-            if (!G_ConstructionIsPartlyBuilt(hit)) {
-              continue;
+            if (traceEnt->health >= 250) {
+              // traceEnt->health = 255;
+              trap_SendServerCommand(clientNum, "cp \"Landmine armed...\" 1");
+            } else {
+              return;
             }
 
-            // is it a friendly
-            // constructible
-            if (hit->s.teamNum == traceEnt->s.teamNum - 4) {
-              // bani
-              //							G_FreeEntity(
-              // traceEnt
-              // );
-              // trap_SendServerCommand(
-              // ent-g_entities,
-              // "cp
-              // \"You
-              // cannot
-              // arm
-              // dynamite
-              // near a
-              // friendly
-              // construction!\"
-              // 1");
-              // return;
-              friendlyObj = qtrue;
+            traceEnt->r.contents = 0; // (player can walk through)
+            trap_LinkEntity(traceEnt);
+
+            // Don't allow disarming for a sec
+            // (so guy that WAS arming doesn't start disarming it!)
+            traceEnt->timestamp = level.time + 1000;
+            traceEnt->health = 0;
+
+            traceEnt->s.teamNum = ent->client->sess.sessionTeam;
+            traceEnt->s.modelindex2 = 0;
+
+            traceEnt->nextthink = level.time + 2000;
+            traceEnt->think = G_LandminePrime;
+          } else {
+          // bani - #471
+          evilbanigoto:
+            if (traceEnt->timestamp > level.time) {
+              return;
             }
-          }
-        }
-
-        VectorCopy(traceEnt->r.currentOrigin, origin);
-        SnapVector(origin);
-        VectorAdd(origin, traceEnt->r.mins, mins);
-        VectorAdd(origin, traceEnt->r.maxs, maxs);
-        num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
-        VectorAdd(origin, traceEnt->r.mins, mins);
-        VectorAdd(origin, traceEnt->r.maxs, maxs);
-
-        for (i = 0; i < num; i++) {
-          hit = &g_entities[touch[i]];
-
-          if (!(hit->r.contents & CONTENTS_TRIGGER)) {
-            continue;
-          }
-
-          if (hit->s.eType == ET_OID_TRIGGER) {
-            if (!(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE))) {
-              continue;
+            // have to do this, so we don't score multiple times
+            if (traceEnt->health >= 250) {
+              return;
             }
 
-            // Arnout - only if
-            // it targets a
-            // func_explosive
-            if (hit->target_ent &&
-                Q_stricmp(hit->target_ent->classname, "func_"
-                                                      "explosiv"
-                                                      "e")) {
-              continue;
+            if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
+              traceEnt->health += 6;
+            } else {
+              traceEnt->health += 3;
             }
 
-            if (((hit->spawnflags & AXIS_OBJECTIVE) &&
-                 (ent->client->sess.sessionTeam == TEAM_AXIS)) ||
-                ((hit->spawnflags & ALLIED_OBJECTIVE) &&
-                 (ent->client->sess.sessionTeam == TEAM_ALLIES))) {
-              // bani
-              //							G_FreeEntity(
-              // traceEnt
-              // );
-              // trap_SendServerCommand(
-              // ent-g_entities,
-              // "cp
-              // \"You
-              // cannot
-              // arm
-              // dynamite
-              // near a
-              // friendly
-              // objective!\"
-              // 1");
-              // return;
-              friendlyObj = qtrue;
-            }
+            G_PrintClientSpammyCenterPrint(clientNum, "Defusing landmine");
 
-            // bani
-            if (((hit->spawnflags & AXIS_OBJECTIVE) &&
-                 (ent->client->sess.sessionTeam == TEAM_ALLIES)) ||
-                ((hit->spawnflags & ALLIED_OBJECTIVE) &&
-                 (ent->client->sess.sessionTeam == TEAM_AXIS))) {
-              enemyObj = qtrue;
+            if (traceEnt->health >= 250) {
+              trap_SendServerCommand(clientNum, "cp \"Landmine defused...\" 1");
+
+              Add_Ammo(ent, WP_LANDMINE, 1, qfalse);
+
+              if (G_LandmineTeam(traceEnt) != ent->client->sess.sessionTeam) {
+                G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 4.f);
+                G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 4.f,
+                                      "defusing an enemy landmine");
+              }
+              {
+                mapEntityData_t *mEnt;
+                int tEntNum = static_cast<int>(traceEnt - g_entities);
+
+                if ((mEnt = G_FindMapEntityData(&mapEntityData[0], tEntNum)) !=
+                    nullptr) {
+                  G_FreeMapEntityData(&mapEntityData[0], mEnt);
+                }
+
+                if ((mEnt = G_FindMapEntityData(&mapEntityData[1], tEntNum)) !=
+                    nullptr) {
+                  G_FreeMapEntityData(&mapEntityData[1], mEnt);
+                }
+
+                G_FreeEntity(traceEnt);
+              }
+            } else {
+              return;
             }
           }
         }
-
-        // bani
-        if (friendlyObj && !enemyObj) {
-          G_FreeEntity(traceEnt);
-          trap_SendServerCommand(
-              clientNum,
-              "cp \"You cannot arm dynamite near a friendly objective!\" 1");
+      } else if (traceEnt->methodOfDeath == MOD_SATCHEL) {
+        // have to do this, so we don't score multiple times
+        if (traceEnt->health >= 250) {
           return;
         }
+
+        // Give health until it is full, don't continue
+        traceEnt->health += 3;
+
+        G_PrintClientSpammyCenterPrint(clientNum,
+                                       "Disarming satchel charge...");
 
         if (traceEnt->health >= 250) {
-          traceEnt->health = 255;
-        } else {
-          return;
-        }
-
-        // Don't allow disarming for sec (so guy
-        // that WAS arming doesn't start
-        // disarming it!
-        traceEnt->timestamp = level.time + 1000;
-        traceEnt->health = 5;
-
-        // set teamnum so we can check it for
-        // drop/defuse exploit
-        traceEnt->s.teamNum = ent->client->sess.sessionTeam;
-        // For dynamic light pulsing
-        traceEnt->s.effect1Time = level.time;
-
-        // ARM IT!
-        traceEnt->nextthink = level.time + 30000;
-        traceEnt->think = G_ExplodeMissile;
-
-        // Gordon: moved down here to prevent
-        // two prints when dynamite IS near
-        // objective
-
-        trap_SendServerCommand(
-            clientNum,
-            "cp \"Dynamite is now armed with a 30 second timer!\" 1");
-
-        // check if player is in trigger
-        // objective field NERVE - SMF - made
-        // this the actual bounding box of
-        // dynamite instead of range, also must
-        // snap origin to line up properly
-        VectorCopy(traceEnt->r.currentOrigin, origin);
-        SnapVector(origin);
-        VectorAdd(origin, traceEnt->r.mins, mins);
-        VectorAdd(origin, traceEnt->r.maxs, maxs);
-        num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
-
-        for (i = 0; i < num; i++) {
-          hit = &g_entities[touch[i]];
-
-          if (!(hit->r.contents & CONTENTS_TRIGGER)) {
-            continue;
-          }
-          if (hit->s.eType == ET_OID_TRIGGER) {
-
-            if (!(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE))) {
-              continue;
-            }
-
-            // Arnout - only if
-            // it targets a
-            // func_explosive
-            if (hit->target_ent &&
-                Q_stricmp(hit->target_ent->classname, "func_"
-                                                      "explosiv"
-                                                      "e")) {
-              continue;
-            }
-
-            if (hit->spawnflags & AXIS_OBJECTIVE) {
-              if (ent->client->sess.sessionTeam ==
-                  TEAM_ALLIES) // transfer score info if this is a bomb scoring
-                               // objective
-              {
-                traceEnt->accuracy = hit->accuracy;
-              }
-            } else if (hit->spawnflags & ALLIED_OBJECTIVE) {
-              if (ent->client->sess.sessionTeam ==
-                  TEAM_AXIS) // ditto other team
-              {
-                traceEnt->accuracy = hit->accuracy;
-              }
-            }
-
-            // rain - spawnflags
-            // 128 = disabled
-            // (#309)
-            if (!(hit->spawnflags & 128) &&
-                (((hit->spawnflags & AXIS_OBJECTIVE) &&
-                  (ent->client->sess.sessionTeam == TEAM_ALLIES)) ||
-                 ((hit->spawnflags & ALLIED_OBJECTIVE) &&
-                  (ent->client->sess.sessionTeam == TEAM_AXIS)))) {
-
-              gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
-              pm->s.effect2Time = 0;
-              pm->s.effect3Time = hit->s.teamNum;
-              pm->s.teamNum = ent->client->sess.sessionTeam;
-
-              G_Script_ScriptEvent(hit,
-                                   "dyna"
-                                   "mite"
-                                   "d",
-                                   "");
-
-              if (!(hit->spawnflags & OBJECTIVE_DESTROYED)) {
-                AddScore(traceEnt->parent,
-                         WOLF_DYNAMITE_PLANT); // give drop score to guy who
-                                               // dropped it
-                if (traceEnt->parent && traceEnt->parent->client) {
-                  G_LogPrintf("Dynamite_Plant: %d\n",
-                              ClientNum(traceEnt->parent)); // OSP
-                }
-                traceEnt->parent =
-                    ent; // give explode score to guy who armed it
-              }
-              // bani -
-              // fix
-              // #238
-              traceEnt->etpro_misc_1 |= 1;
-            }
-            // bani
-            //						i =
-            // num;
-            return; // bani -
-                    // bail out
-                    // here
-                    // because
-                    // primary
-                    // obj's
-                    // take
-                    // precendence
-                    // over
-                    // constructibles
-          }
-        }
-
-        // bani - reordered this check so its
-        // AFTER the primary obj check
-        //  Arnout - first see if the dynamite
-        //  is planted near a constructable
-        //  object that can be destroyed
-        {
-          int entityList[MAX_GENTITIES];
-          int numListedEntities;
-          int e;
-          vec3_t org;
-
-          VectorCopy(traceEnt->r.currentOrigin, org);
-          org[2] += 4; // move out of ground
-
-          G_TempTraceIgnorePlayersAndBodies();
-          numListedEntities =
-              EntsThatRadiusCanDamage(org, traceEnt->splashRadius, entityList);
-          G_ResetTempTraceIgnoreEnts();
-
-          for (e = 0; e < numListedEntities; e++) {
-            hit = &g_entities[entityList[e]];
-
-            if (hit->s.eType != ET_CONSTRUCTIBLE) {
-              continue;
-            }
-
-            // invulnerable
-            if (hit->spawnflags & CONSTRUCTIBLE_INVULNERABLE) {
-              continue;
-            }
-
-            if (!G_ConstructionIsPartlyBuilt(hit)) {
-              continue;
-            }
-
-            // is it a friendly
-            // constructible
-            if (hit->s.teamNum == traceEnt->s.teamNum) {
-              // bani -
-              // er,
-              // didnt
-              // we just
-              // pass
-              // this
-              // check
-              // earlier?
-              //							G_FreeEntity(
-              // traceEnt
-              // );
-              // trap_SendServerCommand(
-              // ent-g_entities,
-              // "cp
-              // \"You
-              // cannot
-              // arm
-              // dynamite
-              // near a
-              // friendly
-              // construction!\"
-              // 1");
-              // return;
-              continue;
-            }
-
-            // not dynamite-able
-            if (hit->constructibleStats.weaponclass < 1) {
-              continue;
-            }
-
-            if (hit->parent) {
-              gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
-              pm->s.effect2Time = 0; // 0 = planted
-              pm->s.effect3Time = hit->parent->s.teamNum;
-              pm->s.teamNum = ent->client->sess.sessionTeam;
-
-              G_Script_ScriptEvent(hit,
-                                   "dyna"
-                                   "mite"
-                                   "d",
-                                   "");
-
-              if ((!(hit->parent->spawnflags & OBJECTIVE_DESTROYED)) &&
-                  hit->s.teamNum &&
-                  (hit->s.teamNum ==
-                   ent->client->sess.sessionTeam)) // ==, as it's inverse
-              {
-                AddScore(traceEnt->parent,
-                         WOLF_DYNAMITE_PLANT); // give drop score to guy who
-                                               // dropped it
-                if (traceEnt->parent && traceEnt->parent->client) {
-                  G_LogPrintf("Dynamite_Plant: %d\n",
-                              ClientNum(traceEnt->parent)); // OSP
-                }
-                traceEnt->parent =
-                    ent; // give explode score to guy who armed it
-              }
-              // bani -
-              // fix
-              // #238
-              traceEnt->etpro_misc_1 |= 1;
-            }
-            return;
-          }
-        }
-      } else {
-        if (traceEnt->timestamp > level.time) {
-          return;
-        }
-        if (traceEnt->health >= 248) // have to do this so we don't
-                                     // score multiple times
-        {
-          return;
-        }
-        dynamiteDropTeam = traceEnt->s.teamNum; // set this here since
-                                                // we wack traceent
-                                                // later but want
-                                                // teamnum for scoring
-
-        if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
-          traceEnt->health += 6;
-        } else {
-          traceEnt->health += 3;
-        }
-
-        G_PrintClientSpammyCenterPrint(clientNum, "Defusing dynamite...");
-
-        if (traceEnt->health >= 248) {
-          // bani
-          qboolean defusedObj = qfalse;
 
           traceEnt->health = 255;
-          // Need some kind of
-          // event/announcement here
-
-          //					Add_Ammo(
-          // ent, WP_DYNAMITE, 1,
-          // qtrue
-          //);
-
           traceEnt->think = G_FreeEntity;
           traceEnt->nextthink = level.time + FRAMETIME;
 
-          VectorCopy(traceEnt->r.currentOrigin, origin);
-          SnapVector(origin);
-          VectorAdd(origin, traceEnt->r.mins, mins);
-          VectorAdd(origin, traceEnt->r.maxs, maxs);
-          num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
+          // bani - consistency with dynamite defusing
+          G_PrintClientSpammyCenterPrint(clientNum,
+                                         "Satchel charge disarmed...");
 
-          // don't report if not
-          // disarming *enemy* dynamite
-          // in field
-          /*					if
-             (dynamiteDropTeam ==
-             ent->client->sess.sessionTeam)
-             return;*/
+          G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
+          G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f,
+                                "disarming satchel charge");
+        } else {
+          return;
+        }
+      } else if (traceEnt->methodOfDeath == MOD_DYNAMITE) {
 
-          // bani - eh, why was this
-          // commented out? it makes
-          // sense, and prevents a
-          // sploit.
-          if (dynamiteDropTeam == ent->client->sess.sessionTeam) {
+        // Not armed
+        if (traceEnt->s.teamNum >= 4) {
+          // bani
+          qboolean friendlyObj = qfalse;
+          qboolean enemyObj = qfalse;
+
+          // Opposing team cannot accidentally arm it
+          if ((traceEnt->s.teamNum - 4) != ent->client->sess.sessionTeam) {
             return;
           }
+
+          G_PrintClientSpammyCenterPrint(clientNum, "Arming dynamite...");
+
+          // Give health until it is full, don't continue
+          if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
+            traceEnt->health += 14;
+          } else {
+            traceEnt->health += 7;
+          }
+
+          {
+            int entityList[MAX_GENTITIES];
+            int numListedEntities;
+            int e;
+            vec3_t org;
+
+            VectorCopy(traceEnt->r.currentOrigin, org);
+            org[2] += 4; // move out of ground
+
+            G_TempTraceIgnorePlayersAndBodies();
+            numListedEntities = EntsThatRadiusCanDamage(
+                org, static_cast<float>(traceEnt->splashRadius), entityList);
+            G_ResetTempTraceIgnoreEnts();
+
+            for (e = 0; e < numListedEntities; e++) {
+              hit = &g_entities[entityList[e]];
+
+              if (hit->s.eType != ET_CONSTRUCTIBLE) {
+                continue;
+              }
+
+              // invulnerable
+              if (hit->spawnflags & CONSTRUCTIBLE_INVULNERABLE ||
+                  (hit->parent && hit->parent->spawnflags & 8)) {
+                continue;
+              }
+
+              if (!G_ConstructionIsPartlyBuilt(hit)) {
+                continue;
+              }
+
+              // is it a friendly constructible
+              if (hit->s.teamNum == traceEnt->s.teamNum - 4) {
+                friendlyObj = qtrue;
+              }
+            }
+          }
+
+          VectorCopy(traceEnt->r.currentOrigin, origin);
+          SnapVector(origin) VectorAdd(origin, traceEnt->r.mins, mins);
+          VectorAdd(origin, traceEnt->r.maxs, maxs);
+          num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
+          VectorAdd(origin, traceEnt->r.mins, mins);
+          VectorAdd(origin, traceEnt->r.maxs, maxs);
+
+          for (i = 0; i < num; i++) {
+            hit = &g_entities[touch[i]];
+
+            if (!(hit->r.contents & CONTENTS_TRIGGER)) {
+              continue;
+            }
+
+            if (hit->s.eType == ET_OID_TRIGGER) {
+              if (!(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE))) {
+                continue;
+              }
+
+              // Arnout - only if it targets a func_explosive
+              if (hit->target_ent &&
+                  Q_stricmp(hit->target_ent->classname, "func_explosive")) {
+                continue;
+              }
+
+              if (((hit->spawnflags & AXIS_OBJECTIVE) &&
+                   (ent->client->sess.sessionTeam == TEAM_AXIS)) ||
+                  ((hit->spawnflags & ALLIED_OBJECTIVE) &&
+                   (ent->client->sess.sessionTeam == TEAM_ALLIES))) {
+                friendlyObj = qtrue;
+              }
+
+              // bani
+              if (((hit->spawnflags & AXIS_OBJECTIVE) &&
+                   (ent->client->sess.sessionTeam == TEAM_ALLIES)) ||
+                  ((hit->spawnflags & ALLIED_OBJECTIVE) &&
+                   (ent->client->sess.sessionTeam == TEAM_AXIS))) {
+                enemyObj = qtrue;
+              }
+            }
+          }
+
+          // bani
+          if (friendlyObj && !enemyObj) {
+            G_FreeEntity(traceEnt);
+            trap_SendServerCommand(
+                clientNum,
+                "cp \"You cannot arm dynamite near a friendly objective!\" 1");
+            return;
+          }
+
+          if (traceEnt->health >= 250) {
+            traceEnt->health = 255;
+          } else {
+            return;
+          }
+
+          // Don't allow disarming for a sec
+          // (so guy that WAS arming doesn't start disarming it!)
+          traceEnt->timestamp = level.time + 1000;
+          traceEnt->health = 5;
+
+          // set teamnum so we can check it for drop/defuse exploit
+          traceEnt->s.teamNum = ent->client->sess.sessionTeam;
+          // For dynamic light pulsing
+          traceEnt->s.effect1Time = level.time;
+
+          // ARM IT!
+          traceEnt->nextthink = level.time + 30000;
+          traceEnt->think = G_ExplodeMissile;
+
+          // Gordon: moved down here to prevent two prints
+          // when dynamite IS near objective
+          trap_SendServerCommand(
+              clientNum,
+              "cp \"Dynamite is now armed with a 30 second timer!\" 1");
+
+          // check if player is in trigger objective field
+          // NERVE - SMF - made this the actual bounding box of dynamite
+          // instead of range, also must snap origin to line up properly
+          VectorCopy(traceEnt->r.currentOrigin, origin);
+          SnapVector(origin) VectorAdd(origin, traceEnt->r.mins, mins);
+          VectorAdd(origin, traceEnt->r.maxs, maxs);
+          num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
 
           for (i = 0; i < num; i++) {
             hit = &g_entities[touch[i]];
@@ -2503,99 +2047,59 @@ void Weapon_Engineer(gentity_t *ent) {
                 continue;
               }
 
-              // rain -
-              // spawnflags
-              // 128 =
-              // disabled
-              // (#309)
-              if (hit->spawnflags & 128) {
+              // Arnout - only if it targets a func_explosive
+              if (hit->target_ent &&
+                  Q_stricmp(hit->target_ent->classname, "func_explosive")) {
                 continue;
               }
 
-              // bani -
-              // prevent
-              // plant/defuse
-              // exploit
-              // near
-              // a/h
-              // cabinets
-              // or
-              // non-destroyable
-              // locations
-              // (bank
-              // doors
-              // on
-              // goldrush)
-              if (!hit->target_ent ||
-                  hit->target_ent->s.eType != ET_EXPLOSIVE) {
-                continue;
+              if (hit->spawnflags & AXIS_OBJECTIVE) {
+                // transfer score info if this is a bomb scoring objective
+                if (ent->client->sess.sessionTeam == TEAM_ALLIES) {
+                  traceEnt->accuracy = hit->accuracy;
+                }
+              } else if (hit->spawnflags & ALLIED_OBJECTIVE) {
+                // ditto other team
+                if (ent->client->sess.sessionTeam == TEAM_AXIS) {
+                  traceEnt->accuracy = hit->accuracy;
+                }
               }
 
-              if (ent->client->sess.sessionTeam == TEAM_AXIS) {
-                if ((hit->spawnflags & AXIS_OBJECTIVE) && (!scored)) {
-                  AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
-                  G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
-                  G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
-                                        6.f, "defusing enemy dynamite");
-                  scored++;
-                }
-                if (hit->target_ent) {
-                  G_Script_ScriptEvent(hit->target_ent, "defused", "");
-                }
+              // rain - spawnflags 128 = disabled (#309)
+              if (!(hit->spawnflags & 128) &&
+                  (((hit->spawnflags & AXIS_OBJECTIVE) &&
+                    (ent->client->sess.sessionTeam == TEAM_ALLIES)) ||
+                   ((hit->spawnflags & ALLIED_OBJECTIVE) &&
+                    (ent->client->sess.sessionTeam == TEAM_AXIS)))) {
+                gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
+                pm->s.effect2Time = 0;
+                pm->s.effect3Time = hit->s.teamNum;
+                pm->s.teamNum = ent->client->sess.sessionTeam;
 
-                {
-                  gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
-                  pm->s.effect2Time = 1; // 1 = defused
-                  pm->s.effect3Time = hit->s.teamNum;
-                  pm->s.teamNum = ent->client->sess.sessionTeam;
-                }
+                G_Script_ScriptEvent(hit, "dynamited", "");
 
-                //								trap_SendServerCommand(-1,
-                //"cp \"Axis engineer disarmed the Dynamite!\n\""); bani
-                defusedObj = qtrue;
-              } else // TEAM_ALLIES
-              {
-                if ((hit->spawnflags & ALLIED_OBJECTIVE) && (!scored)) {
-                  AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
-                  G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
-                  G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
-                                        6.f, "defusing enemy dynamite");
-                  scored++;
-                  hit->spawnflags &=
-                      ~OBJECTIVE_DESTROYED; // "re-activate" objective since it
-                                            // wasn't destroyed
+                if (!(hit->spawnflags & OBJECTIVE_DESTROYED)) {
+                  // give drop score to guy who dropped it
+                  AddScore(traceEnt->parent, WOLF_DYNAMITE_PLANT);
+                  if (traceEnt->parent && traceEnt->parent->client) {
+                    G_LogPrintf("Dynamite_Plant: %d\n",
+                                ClientNum(traceEnt->parent)); // OSP
+                  }
+                  // give explode score to guy who armed it
+                  traceEnt->parent = ent;
                 }
-                if (hit->target_ent) {
-                  G_Script_ScriptEvent(hit->target_ent, "defused", "");
-                }
-
-                {
-                  gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
-                  pm->s.effect2Time = 1; // 1 = defused
-                  pm->s.effect3Time = hit->s.teamNum;
-                  pm->s.teamNum = ent->client->sess.sessionTeam;
-                }
-
-                //								trap_SendServerCommand(-1,
-                //"cp \"Allied engineer disarmed the Dynamite!\n\""); bani
-                defusedObj = qtrue;
+                // bani - fix #238
+                traceEnt->etpro_misc_1 |= 1;
               }
+              // bani - bail out here because primary obj's
+              // take precedence over constructibles
+              return;
             }
           }
-          // bani - prevent multiple
-          // messages here
-          if (defusedObj) {
-            return;
-          }
 
-          // bani - reordered this check
-          // so its AFTER the primary
-          // obj check
-          //  Gordon - first see if the
-          //  dynamite was planted near
-          //  a constructable object
-          //  that would have been
-          //  destroyed
+          // bani - reordered this check so it's AFTER the primary obj check
+          //  Arnout - first see if the dynamite is planted near a
+          //  constructable object that can be destroyed
           {
             int entityList[MAX_GENTITIES];
             int numListedEntities;
@@ -2603,11 +2107,12 @@ void Weapon_Engineer(gentity_t *ent) {
             vec3_t org;
 
             VectorCopy(traceEnt->r.currentOrigin, org);
-            org[2] += 4; // move out
-                         // of ground
+            org[2] += 4; // move out of ground
 
+            G_TempTraceIgnorePlayersAndBodies();
             numListedEntities = EntsThatRadiusCanDamage(
-                org, traceEnt->splashRadius, entityList);
+                org, static_cast<float>(traceEnt->splashRadius), entityList);
+            G_ResetTempTraceIgnoreEnts();
 
             for (e = 0; e < numListedEntities; e++) {
               hit = &g_entities[entityList[e]];
@@ -2616,96 +2121,249 @@ void Weapon_Engineer(gentity_t *ent) {
                 continue;
               }
 
-              // not
-              // completely
-              // build
-              // yet -
-              // NOTE:
-              // don't
-              // do
-              // this,
-              // in case
-              // someone
-              // places
-              // dynamite
-              // before
-              // construction
-              // is
-              // complete
-              // if(
-              // hit->s.angles2[0]
-              // < 255 )
-              //	continue;
-
               // invulnerable
               if (hit->spawnflags & CONSTRUCTIBLE_INVULNERABLE) {
                 continue;
               }
 
-              // not
-              // dynamite-able
+              if (!G_ConstructionIsPartlyBuilt(hit)) {
+                continue;
+              }
+
+              // is it a friendly constructible
+              if (hit->s.teamNum == traceEnt->s.teamNum) {
+                continue;
+              }
+
+              // not dynamite-able
               if (hit->constructibleStats.weaponclass < 1) {
                 continue;
               }
 
-              // we got
-              // somthing
-              // to
-              // destroy
-              if (ent->client->sess.sessionTeam == TEAM_AXIS) {
-                if (hit->s.teamNum == TEAM_AXIS && (!scored)) {
-                  AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
-                  if (ent->client) {
-                    G_LogPrintf("Dynamite_Diffuse: %d\n",
-                                ClientNum(ent)); // OSP
-                  }
-                  G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
-                  G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
-                                        6.f, "defusing enemy dynamite");
-                  scored++;
-                }
-                G_Script_ScriptEvent(hit, "defused", "");
+              if (hit->parent) {
+                gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
+                pm->s.effect2Time = 0; // 0 = planted
+                pm->s.effect3Time = hit->parent->s.teamNum;
+                pm->s.teamNum = ent->client->sess.sessionTeam;
 
+                G_Script_ScriptEvent(hit, "dynamited", "");
+
+                if ((!(hit->parent->spawnflags & OBJECTIVE_DESTROYED)) &&
+                    hit->s.teamNum &&
+                    (hit->s.teamNum ==
+                     ent->client->sess.sessionTeam)) // ==, as it's inverse
                 {
-                  gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
-                  pm->s.effect2Time = 1; // 1 = defused
-                  pm->s.effect3Time = hit->parent->s.teamNum;
-                  pm->s.teamNum = ent->client->sess.sessionTeam;
-                }
-
-                //								trap_SendServerCommand(-1,
-                //"cp \"Axis engineer disarmed the Dynamite!\" 2");
-              } else // TEAM_ALLIES
-              {
-                if (hit->s.teamNum == TEAM_ALLIES && (!scored)) {
-                  AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
-                  if (ent->client) {
-                    G_LogPrintf("Dynamite_Diffuse: %d\n",
-                                ClientNum(ent)); // OSP
+                  // give drop score to guy who dropped it
+                  AddScore(traceEnt->parent, WOLF_DYNAMITE_PLANT);
+                  if (traceEnt->parent && traceEnt->parent->client) {
+                    G_LogPrintf("Dynamite_Plant: %d\n",
+                                ClientNum(traceEnt->parent)); // OSP
                   }
-                  G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
-                  G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
-                                        6.f, "defusing enemy dynamite");
-                  scored++;
+                  // give explode score to guy who armed it
+                  traceEnt->parent = ent;
                 }
-                G_Script_ScriptEvent(hit, "defused", "");
-
-                {
-                  gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
-                  pm->s.effect2Time = 1; // 1 = defused
-                  pm->s.effect3Time = hit->parent->s.teamNum;
-                  pm->s.teamNum = ent->client->sess.sessionTeam;
-                }
-
-                //								trap_SendServerCommand(-1,
-                //"cp \"Allied engineer disarmed the Dynamite!\" 2");
+                // bani - fix #238
+                traceEnt->etpro_misc_1 |= 1;
               }
-
               return;
             }
           }
+        } else {
+          if (traceEnt->timestamp > level.time) {
+            return;
+          }
+          // have to do this, so we don't score multiple times
+          if (traceEnt->health >= 248) {
+            return;
+          }
+          // set this here since we wack traceent later but want teamnum for
+          // scoring
+          dynamiteDropTeam = traceEnt->s.teamNum;
+
+          if (ent->client->sess.skill[SK_EXPLOSIVES_AND_CONSTRUCTION] >= 2) {
+            traceEnt->health += 6;
+          } else {
+            traceEnt->health += 3;
+          }
+
+          G_PrintClientSpammyCenterPrint(clientNum, "Defusing dynamite...");
+
+          if (traceEnt->health >= 248) {
+            // bani
+            qboolean defusedObj = qfalse;
+
+            traceEnt->health = 255;
+
+            traceEnt->think = G_FreeEntity;
+            traceEnt->nextthink = level.time + FRAMETIME;
+
+            VectorCopy(traceEnt->r.currentOrigin, origin);
+            SnapVector(origin) VectorAdd(origin, traceEnt->r.mins, mins);
+            VectorAdd(origin, traceEnt->r.maxs, maxs);
+            num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
+
+            // bani - eh, why was this commented out?
+            // it makes sense, and prevents an exploit.
+            if (dynamiteDropTeam == ent->client->sess.sessionTeam) {
+              return;
+            }
+
+            for (i = 0; i < num; i++) {
+              hit = &g_entities[touch[i]];
+
+              if (!(hit->r.contents & CONTENTS_TRIGGER)) {
+                continue;
+              }
+              if (hit->s.eType == ET_OID_TRIGGER) {
+
+                if (!(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE))) {
+                  continue;
+                }
+
+                // rain - spawnflags 128 = disabled (#309)
+                if (hit->spawnflags & 128) {
+                  continue;
+                }
+
+                // bani - prevent plant/defuse exploit near a/h cabinets
+                // or non-destroyable locations (bank doors on goldrush)
+                if (!hit->target_ent ||
+                    hit->target_ent->s.eType != ET_EXPLOSIVE) {
+                  continue;
+                }
+
+                if (ent->client->sess.sessionTeam == TEAM_AXIS) {
+                  if ((hit->spawnflags & AXIS_OBJECTIVE) && (!scored)) {
+                    AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
+                    G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
+                    G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
+                                          6.f, "defusing enemy dynamite");
+                    scored++;
+                  }
+                  if (hit->target_ent) {
+                    G_Script_ScriptEvent(hit->target_ent, "defused", "");
+                  }
+
+                  {
+                    gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
+                    pm->s.effect2Time = 1; // 1 = defused
+                    pm->s.effect3Time = hit->s.teamNum;
+                    pm->s.teamNum = ent->client->sess.sessionTeam;
+                  }
+
+                  defusedObj = qtrue;
+                } else // TEAM_ALLIES
+                {
+                  if ((hit->spawnflags & ALLIED_OBJECTIVE) && (!scored)) {
+                    AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
+                    G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
+                    G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
+                                          6.f, "defusing enemy dynamite");
+                    scored++;
+                    // "re-activate" objective since it wasn't destroyed
+                    hit->spawnflags &= ~OBJECTIVE_DESTROYED;
+                  }
+                  if (hit->target_ent) {
+                    G_Script_ScriptEvent(hit->target_ent, "defused", "");
+                  }
+
+                  {
+                    gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
+                    pm->s.effect2Time = 1; // 1 = defused
+                    pm->s.effect3Time = hit->s.teamNum;
+                    pm->s.teamNum = ent->client->sess.sessionTeam;
+                  }
+                  defusedObj = qtrue;
+                }
+              }
+            }
+            // bani - prevent multiple messages here
+            if (defusedObj) {
+              return;
+            }
+
+            // bani - reordered this check, so it's AFTER the primary obj check
+            //  Gordon - first see if the dynamite was planted near
+            //  a constructable object that would have been destroyed
+            {
+              int entityList[MAX_GENTITIES];
+              int numListedEntities;
+              int e;
+              vec3_t org;
+
+              VectorCopy(traceEnt->r.currentOrigin, org);
+              org[2] += 4; // move out of ground
+
+              numListedEntities = EntsThatRadiusCanDamage(
+                  org, static_cast<float>(traceEnt->splashRadius), entityList);
+
+              for (e = 0; e < numListedEntities; e++) {
+                hit = &g_entities[entityList[e]];
+
+                if (hit->s.eType != ET_CONSTRUCTIBLE) {
+                  continue;
+                }
+
+                // invulnerable
+                if (hit->spawnflags & CONSTRUCTIBLE_INVULNERABLE) {
+                  continue;
+                }
+
+                // not dynamite-able
+                if (hit->constructibleStats.weaponclass < 1) {
+                  continue;
+                }
+
+                // we got something to destroy
+                if (ent->client->sess.sessionTeam == TEAM_AXIS) {
+                  if (hit->s.teamNum == TEAM_AXIS && (!scored)) {
+                    AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
+                    if (ent->client) {
+                      G_LogPrintf("Dynamite_Diffuse: %d\n",
+                                  ClientNum(ent)); // OSP
+                    }
+                    G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
+                    G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
+                                          6.f, "defusing enemy dynamite");
+                    scored++;
+                  }
+                  G_Script_ScriptEvent(hit, "defused", "");
+
+                  {
+                    gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
+                    pm->s.effect2Time = 1; // 1 = defused
+                    pm->s.effect3Time = hit->parent->s.teamNum;
+                    pm->s.teamNum = ent->client->sess.sessionTeam;
+                  }
+                } else // TEAM_ALLIES
+                {
+                  if (hit->s.teamNum == TEAM_ALLIES && (!scored)) {
+                    AddScore(ent, WOLF_DYNAMITE_DIFFUSE);
+                    if (ent->client) {
+                      G_LogPrintf("Dynamite_Diffuse: %d\n",
+                                  ClientNum(ent)); // OSP
+                    }
+                    G_AddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION, 6.f);
+                    G_DebugAddSkillPoints(ent, SK_EXPLOSIVES_AND_CONSTRUCTION,
+                                          6.f, "defusing enemy dynamite");
+                    scored++;
+                  }
+                  G_Script_ScriptEvent(hit, "defused", "");
+
+                  {
+                    gentity_t *pm = G_PopupMessage(PM_DYNAMITE);
+                    pm->s.effect2Time = 1; // 1 = defused
+                    pm->s.effect3Time = hit->parent->s.teamNum;
+                    pm->s.teamNum = ent->client->sess.sessionTeam;
+                  }
+                }
+
+                return;
+              }
+            }
+          }
+          // jpw
         }
-        // jpw
       }
     }
   }

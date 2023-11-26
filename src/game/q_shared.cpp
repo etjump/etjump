@@ -1324,9 +1324,8 @@ void Info_SetValueForKey(char *s, const char *key, const char *value) {
 
   if (strlen(s) >= MAX_INFO_STRING) {
     Com_Error(ERR_DROP,
-              "Info_SetValueForKey: oversize infostring [%s] "
-              "[%s] [%s]",
-              s, key, value);
+              "Info_SetValueForKey: oversize infostring [%s] [%s] [%s]", s, key,
+              value);
   }
 
   if (strchr(key, '\\') || strchr(value, '\\')) {

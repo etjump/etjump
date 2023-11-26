@@ -2064,12 +2064,11 @@ void flippy_table_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   // it would be odd to flip a table if your standing on it
   if (!other || other->s.groundEntityNum == ent->s.number) {
-    // G_Printf ("can't push table over while standing on
-    // it\n");
+    // G_Printf ("can't push table over while standing on it\n");
     return;
   }
 
-  ent->use = NULL;
+  ent->use = nullptr;
 
   is_infront = infront(ent, other);
 

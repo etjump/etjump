@@ -2529,23 +2529,22 @@ Checks if a vote can be called
 bool checkVoteConditions(gentity_t *ent, int clientNum) {
   std::string voteError;
 
-  if (voteFlags.integer ==
-      VOTING_DISABLED) // Setting g_enableVote 0 sets this flag as well
-  {
+  // Setting g_enableVote 0 sets this flag as well
+  if (voteFlags.integer == VOTING_DISABLED) {
     Printer::SendPopupMessage(clientNum,
                               "Voting is not enabled on this server.\n");
     return false;
   }
   if (ent->client->sess.muted && g_mute.integer & 2) {
-    Printer::SendPopupMessage(clientNum, "^3callvote: ^7not allowed to "
-                                         "call a vote while muted.\n");
+    Printer::SendPopupMessage(
+        clientNum, "^3callvote: ^7not allowed to call a vote while muted.\n");
     return false;
   }
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-      !(g_spectatorVote.integer >= 2)) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3callvote: ^7you are not allowed to call "
-                              "a vote as a spectator.\n");
+      g_spectatorVote.integer < 2) {
+    Printer::SendPopupMessage(
+        clientNum,
+        "^3callvote: ^7you are not allowed to call a vote as a spectator.\n");
     return false;
   }
   if (level.voteInfo.voteTime) {
@@ -2559,9 +2558,9 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
   }
   if (vote_limit.integer > 0 &&
       ent->client->pers.voteCount >= vote_limit.integer) {
-    voteError = ETJump::stringFormat("You have already called the "
-                                     "maximum number of votes (%d).\n",
-                                     vote_limit.integer);
+    voteError = ETJump::stringFormat(
+        "You have already called the maximum number of votes (%d).\n",
+        vote_limit.integer);
     Printer::SendPopupMessage(clientNum, voteError);
     return false;
   }

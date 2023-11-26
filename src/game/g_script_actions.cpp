@@ -156,14 +156,14 @@ static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, const char *params,
   // get target name
   auto token = COM_ParseExt(&params, qfalse);
   if (!token[0]) {
-    G_Error(va("G_Scripting: %s must have a target spawn\n", mod));
+    G_Error("G_Scripting: %s must have a target spawn\n", mod);
   }
   // get objective entity
   char spawnname[MAX_QPATH];
   Q_strncpyz(spawnname, token, MAX_QPATH);
   auto tent = G_Find(nullptr, FOFS(message), spawnname);
   if (!tent) {
-    G_Error(va("G_Scripting: %s, couldn't find target\n", mod));
+    G_Error("G_Scripting: %s, couldn't find target\n", mod);
   }
   if (!tent->count) {
     return qfalse;
@@ -3851,11 +3851,10 @@ qboolean G_ScriptAction_Construct(gentity_t *ent, char *params) {
     G_Error("G_Scripting: \"construct\" must have a targetname\n");
   }
 
-  constructible = G_FindByTargetname(NULL, token);
+  constructible = G_FindByTargetname(nullptr, token);
   if (!constructible || !constructible->inuse ||
       constructible->s.eType != ET_CONSTRUCTIBLE) {
-    G_Error("G_Scripting: \"construct\" could not find entity "
-            "with targetname: "
+    G_Error("G_Scripting: \"construct\" could not find entity with targetname: "
             "%s\n",
             token);
   }

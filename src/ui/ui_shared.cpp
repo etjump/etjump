@@ -531,7 +531,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
   if (w == nullptr || (w->style == 0 && w->border == 0)) {
     return;
   }
-  // float bordersize = 0;
+
   vec4_t color{1.f, 1.f, 1.f, 1.f};
   rectDef_t fillRect = w->rect;
 
@@ -551,12 +551,12 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
   if (w->style == WINDOW_STYLE_FILLED) {
     // box, but possible a shader that needs filled
     if (w->background) {
-      Fade(&w->flags, &w->backColor[3], fadeClamp, &w->nextTime, fadeCycle,
-           qtrue, fadeAmount);
+      Fade(&w->flags, &w->backColor[3], fadeClamp, &w->nextTime,
+           static_cast<int>(fadeCycle), qtrue, fadeAmount);
       DC->setColor(w->backColor);
       DC->drawHandlePic(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
                         w->background);
-      DC->setColor(NULL);
+      DC->setColor(nullptr);
     } else {
       DC->fillRect(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
                    w->backColor);
@@ -570,7 +570,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
     }
     DC->drawHandlePic(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
                       w->background);
-    DC->setColor(NULL);
+    DC->setColor(nullptr);
   } else if (w->style == WINDOW_STYLE_TEAMCOLOR) {
     if (DC->getTeamColor) {
       DC->getTeamColor(&color);
@@ -631,7 +631,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
       DC->drawTopBottom(w->rect.x, w->rect.y, w->rect.w, w->rect.h,
                         w->borderSize);
     }
-    DC->setColor(NULL);
+    DC->setColor(nullptr);
   } else if (w->border == WINDOW_BORDER_VERT) {
     // left right
     DC->setColor(w->borderColor);
@@ -641,7 +641,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
     } else {
       DC->drawSides(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
     }
-    DC->setColor(NULL);
+    DC->setColor(nullptr);
   } else if (w->border == WINDOW_BORDER_KCGRADIENT) {
     // this is just two gradient bars along each horz edge
     rectDef_t r = w->rect;
@@ -4307,9 +4307,9 @@ void Item_Text_Paint(itemDef_t *item) {
 
     // build string
     if (seconds <= 2) {
-      Com_sprintf(text, 255, textPtr, va("^1%d^*", seconds));
+      Com_sprintf(text, 255, item->text, va("^1%d^*", seconds));
     } else {
-      Com_sprintf(text, 255, textPtr, va("%d", seconds));
+      Com_sprintf(text, 255, item->text, va("%d", seconds));
     }
 
     // set ptr
@@ -4353,8 +4353,8 @@ void Item_TextField_Paint(itemDef_t *item) {
   int text_len = 0;  // screen length of the editfield text that will be printed
   int field_offset;  // character offset in the editfield string
   int screen_offset; // offset on screen for precise placement
-  menuDef_t *parent = (menuDef_t *)item->parent;
-  editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
+  auto *parent = static_cast<menuDef_t *>(item->parent);
+  auto *editPtr = static_cast<editFieldDef_t *>(item->typeData);
 
   buff[0] = '\0';
 
@@ -4512,7 +4512,7 @@ void Item_CheckBox_Paint(itemDef_t *item) {
 void Item_YesNo_Paint(itemDef_t *item) {
   vec4_t newColor, lowLight;
   float value;
-  menuDef_t *parent = (menuDef_t *)item->parent;
+  auto *parent = static_cast<menuDef_t *>(item->parent);
 
   value = (item->cvar) ? DC->getCVarValue(item->cvar) : 0;
 
@@ -4784,7 +4784,7 @@ char *BindingFromName(const char *cvar) {
 void Item_Slider_Paint(itemDef_t *item) {
   vec4_t newColor, lowLight;
   float x, y;
-  menuDef_t *parent = (menuDef_t *)item->parent;
+  auto parent = static_cast<menuDef_t *>(item->parent);
 
   if (item->window.flags & WINDOW_HASFOCUS &&
       item->window.flags & WINDOW_FOCUSPULSE) {
@@ -5331,7 +5331,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
 }
 
 void Item_OwnerDraw_Paint(itemDef_t *item) {
-  if (item == NULL) {
+  if (item == nullptr) {
     return;
   }
 
@@ -5414,11 +5414,11 @@ void Item_Paint(itemDef_t *item) {
   red[0] = red[3] = 1;
   red[1] = red[2] = 0;
 
-  if (item == NULL) {
+  if (item == nullptr) {
     return;
   }
 
-  auto *parent = static_cast<menuDef_t *>(item->parent);
+  auto parent = static_cast<menuDef_t *>(item->parent);
 
   if (item->hOffset) {
     float off = DC->getCVarValue(item->hOffset);
