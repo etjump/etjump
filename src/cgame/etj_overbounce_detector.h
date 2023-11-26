@@ -24,56 +24,30 @@
 
 #pragma once
 
-#include <map>
-
+#include "cg_local.h"
 #include "etj_irenderable.h"
-#include "../game/q_shared.h"
 
 namespace ETJump {
-class OverbounceWatcher : public IRenderable {
-public:
-  explicit OverbounceWatcher(ClientCommandsHandler *clientCommandsHandler);
-  ~OverbounceWatcher() override;
-
-private:
-  void render() const override;
+class OverbounceDetector : public IRenderable {
   void beforeRender() override;
-  bool canSkipDraw() const;
-
-  ClientCommandsHandler *_clientCommandsHandler;
-  std::map<std::string, vec3_t> _positions;
-
-  // Currently displayed position
-  vec3_t *_current;
-
-  // saves the position with name
-  void save(const std::string &name, const vec3_t coordinate);
-
-  // stop displaying anything
-  void reset();
-
-  // loads the position to currently displayed position
-  // if position is not found, returns false
-  bool load(const std::string &name);
-
-  // lists all available positions
-  void list() const;
-
-  bool overbounce = false;
+  void render() const override;
+  static bool canSkipDraw();
 
   playerState_t *ps;
-  float x{};
-  float pmoveSec{};
-  float zVel{}, zVelSnapped{};
+  float x;
+  float pmoveSec;
+  float zVel, zVelSnapped;
 
-  float startHeight{}, endHeight{};
-  vec3_t start{}, end{};
-  vec3_t snap{};
+  float startHeight, endHeight;
+  vec3_t start, end;
+  vec3_t snap;
 
-  int gravity{};
+  int traceContents;
+  int gravity;
 
-  float sizeX{}, sizeY{};
-  qhandle_t shader;
-  vec4_t _color{};
+  bool belowOverbounce;
+  bool jumpOverbounce;
+  bool fallOverbounce;
+  bool stickyOverbounce;
 };
 } // namespace ETJump

@@ -4,10 +4,9 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "../game/q_shared.h"
-#include "etj_irenderable.h"
 #include "etj_utilities.h"
 #include "etj_crosshair.h"
+#include "etj_overbounce_shared.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
@@ -2506,190 +2505,6 @@ static void CG_DrawLimboMessage(void) {
 }
 // -NERVE - SMF
 
-static qboolean CG_IsOverBounce(float vel, float initHeight, float finalHeight,
-                                float rintv, float psec, int gravity) {
-  float a, b, c, D;
-  float n1;
-  // float			n2;
-  float hn;
-  int n;
-
-  a = -psec * rintv / 2;
-  b = psec * (vel - gravity * psec / 2 + rintv / 2);
-  c = initHeight - finalHeight;
-
-  if (a == 0) {
-    // no quadratic equation
-    return qfalse;
-  }
-
-  D = b * b - 4 * a * c; // discriminant
-  if (D < 0) {
-    // no real roots
-    return qfalse;
-  }
-
-  n1 = (-b - std::sqrt(D)) / (2 * a);
-  // n2 = (-b + sqrt(D)) / (2 * a);
-  // CG_Printf("n1=%f, n2=%f\n", n1, n2);
-
-  n = floor(n1);
-  hn = initHeight + psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
-  // CG_Printf("vel=%f, initHeight=%f, finalHeight=%f, n=%d,
-  // reachedHeight: %f\n", initHeight, vel, finalHeight, n, hn);
-
-  if (n && hn < finalHeight + 0.25 && hn > finalHeight) {
-    return qtrue;
-  }
-  return qfalse;
-}
-
-static bool CG_SurfaceAllowsOverbounce(trace_t *trace) {
-  if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE) {
-    return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  } else {
-    return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  }
-}
-
-/*
-=========
-CG_DrawOB
-
-Fast OB detection.
-=========
-*/
-static void CG_DrawOB(void) {
-  float psec;
-  int gravity;
-  vec3_t snap;
-  float rintv;
-  float v0;
-  float h0, t;
-  trace_t trace;
-  vec3_t start, end;
-  float x;
-
-  if (!etj_drawOB.integer || cg_thirdPerson.integer) {
-    return;
-  }
-
-  int traceContents = ETJump::checkExtraTrace(ETJump::OB_DETECTOR);
-
-  playerState_t *ps = ETJump::getValidPlayerState();
-
-  psec = cgs.pmove_msec / 1000.0;
-  gravity = ps->gravity;
-  v0 = ps->velocity[2];
-  h0 = ps->origin[2] + ps->mins[2];
-  // CG_Printf("psec=%f, gravity=%d\n", psec, gravity);
-
-  VectorSet(snap, 0, 0, gravity * psec);
-  trap_SnapVector(snap);
-  rintv = snap[2];
-
-  x = etj_OBX.value;
-
-  ETJump_AdjustPosition(&x);
-
-  if (ps->groundEntityNum == ENTITYNUM_NONE) {
-    // below ob
-    VectorCopy(ps->origin, start);
-    start[2] = h0;
-    VectorCopy(start, end);
-    end[2] -= 131072;
-
-    CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-             traceContents);
-
-    if (trace.fraction != 1.0 && trace.plane.type == 2) {
-      // something was hit and it's a floor
-
-      t = trace.endpos[2];
-
-      // below ob
-      if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) &&
-          CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x + 10, etj_OBY.integer, "B", colorWhite, qfalse,
-                         qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      }
-    }
-  }
-
-  // use origin from playerState?
-  VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
-
-  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-           traceContents);
-
-  if (trace.fraction != 1.0 && trace.plane.type == 2) {
-    // something was hit and it's a floor
-    qboolean b = qfalse;
-
-    t = trace.endpos[2];
-    // CG_Printf("h0=%f, t=%f\n", h0, t);
-
-    // fall ob
-    if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) &&
-        CG_SurfaceAllowsOverbounce(&trace)) {
-      CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
-                       TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      b = qtrue;
-    }
-
-    // jump ob
-    if (ps->groundEntityNum != ENTITYNUM_NONE &&
-        CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec,
-                        gravity) &&
-        CG_SurfaceAllowsOverbounce(&trace)) {
-      CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-                       TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      b = qtrue;
-    }
-
-    // don't predict sticky ob if there is an ob already or if
-    // the sticky ob detection isn't requested
-    if (b || etj_drawOB.integer != 2) {
-      return;
-    }
-
-    // sticky ob
-    b = qfalse;
-
-    // don't display stickies on the same height we're currently
-    // at since obviously it's possible and it's just
-    // distracting
-    if (h0 != t) {
-      h0 += 0.25;
-      // CG_Printf("h0=%f, t=%f\n", h0, t);
-
-      // sticky fall ob
-      if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) &&
-          CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse,
-                         qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-        b = qtrue;
-      }
-
-      // sticky jump ob
-      if (ps->groundEntityNum != ENTITYNUM_NONE &&
-          CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec,
-                          gravity) &&
-          CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-                         TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-        b = qtrue;
-      }
-
-      if (b && CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse,
-                         qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      }
-    }
-  }
-}
-
 static void CG_DrawSlick(void) {
   trace_t trace;
   vec3_t start, end;
@@ -4749,7 +4564,6 @@ static void CG_Draw2D() {
     if (!cgs.demoCam.renderingFreeCam) {
       CG_DrawLagometer();
       CG_DrawFollow();
-      CG_DrawOB();
       CG_DrawSlick();
       CG_DrawJumpDelay();
       CG_DrawSaveIndicator();
