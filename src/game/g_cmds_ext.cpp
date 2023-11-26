@@ -262,7 +262,8 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
     Q_strncpyz(name, client->pers.netname, sizeof(name));
     // exclude color codes from the max string length
-    const auto colorChars = strlen(name) - Q_PrintStrlen(name);
+    const auto colorChars =
+        static_cast<int>(strlen(name)) - Q_PrintStrlen(name);
     name[23 + colorChars] = 0;
 
     // player info
