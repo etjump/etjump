@@ -6481,7 +6481,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     VectorMA(end, r, right, end);
     VectorMA(end, u, up, end);
 
-    CG_Trace(&tr, muzzle, NULL, NULL, end, otherEntNum2, MASK_SHOT);
+    CG_Trace(&tr, muzzle, nullptr, nullptr, end, otherEntNum2, MASK_SHOT);
 
     SnapVectorTowards(tr.endpos, muzzle);
     VectorCopy(tr.endpos, end);
@@ -6498,26 +6498,27 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
       if ((sourceContentType == destContentType) &&
           (sourceContentType & CONTENTS_WATER)) {
         CG_BubbleTrail(start, end, .5, 8);
-      } else if ((sourceContentType & CONTENTS_WATER)) // bubble trail from
-                                                       // water into air
+      } else if ((sourceContentType &
+                  CONTENTS_WATER)) // bubble trail from water into air
       {
-        trap_CM_BoxTrace(&trace, end, start, NULL, NULL, 0, CONTENTS_WATER);
+        trap_CM_BoxTrace(&trace, end, start, nullptr, nullptr, 0,
+                         CONTENTS_WATER);
         CG_BubbleTrail(start, trace.endpos, .5, 8);
-      } else if ((destContentType & CONTENTS_WATER)) // bubble trail from
-                                                     // air into water
-      { // only add bubbles if effect is close to viewer
+      } else if ((destContentType &
+                  CONTENTS_WATER)) // bubble trail from air into water
+      {
+        // only add bubbles if effect is close to viewer
         if (Distance(cg.snap->ps.origin, end) < 1024) {
-          trap_CM_BoxTrace(&trace, start, end, NULL, NULL, 0, CONTENTS_WATER);
+          trap_CM_BoxTrace(&trace, start, end, nullptr, nullptr, 0,
+                           CONTENTS_WATER);
           CG_BubbleTrail(end, trace.endpos, .5, 8);
         }
       }
 
       // if not flesh, then do a moving tracer
-      if (flesh) {
+      if (flesh && random() < cg_tracerChance.value) {
         // draw a tracer
-        if (random() < cg_tracerChance.value) {
-          CG_Tracer(start, end, 0);
-        }
+        CG_Tracer(start, end, 0);
       } else // (not flesh)
       {
         if (otherEntNum2 >= 0 && otherEntNum2 != ENTITYNUM_NONE) {
@@ -6541,8 +6542,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     }
 
     // JPW NERVE smoke puffs (sometimes with some blood)
-    VectorSubtract(end, start,
-                   smokedir); // get a nice "through the body" vector
+    // get a nice "through the body" vector
+    VectorSubtract(end, start, smokedir);
     VectorNormalize(smokedir);
     // all this to come up with a decent center-body
     // displacement of bullet impact point
@@ -6552,7 +6553,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     VectorScale(smokedir, tmpf, tmpv);
     VectorAdd(end, tmpv, origin);
     // whee, got a bullet impact point projected to center body
-    CG_GetOriginForTag(cent, &cent->pe.headRefEnt, "tag_mouth", 0, tmpv, NULL);
+    CG_GetOriginForTag(cent, &cent->pe.headRefEnt, "tag_mouth", 0, tmpv,
+                       nullptr);
     tmpv[2] += 5;
     VectorSubtract(tmpv, origin, tmpv2);
     headshot = (VectorLength(tmpv2) < 10);
@@ -6569,9 +6571,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                     tmpv2); // was 75, before that 55
         tmpv2[2] = 0;
         VectorAdd(tmpv, tmpv2, tmpv);
-        CG_SmokePuff(origin, tmpv, 5 + rnd * 10, 1, rnd * 0.8, rnd * 0.8, 0.5,
-                     500 + (rand() % 800), cg.time, 0, 0,
-                     cgs.media.fleshSmokePuffShader);
+        CG_SmokePuff(origin, tmpv, 5 + rnd * 10, 1, rnd * 0.8f, rnd * 0.8f,
+                     0.5f, static_cast<float>(500 + (rand() % 800)), cg.time, 0,
+                     0, cgs.media.fleshSmokePuffShader);
       }
     } else {
       // puff out the front (more dust no blood)
@@ -6582,34 +6584,26 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         tmpv[1] += crandom() * 25.0f;
         tmpv[2] += crandom() * 25.0f;
         CG_GetWindVector(tmpv2);
-        VectorScale(tmpv2, 35,
-                    tmpv2); // was 75, before that 55
+        VectorScale(tmpv2, 35, tmpv2); // was 75, before that 55
         tmpv2[2] = 0;
         VectorAdd(tmpv, tmpv2, tmpv);
         CG_SmokePuff(origin, tmpv, 5 + rnd * 10, rnd * 0.3f + 0.5f,
                      rnd * 0.3f + 0.5f, rnd * 0.3f + 0.5f, 0.125f,
-                     500 + (rand() % 300), cg.time, 0, 0,
+                     static_cast<float>(500 + (rand() % 300)), cg.time, 0, 0,
                      cgs.media.smokePuffShader);
       }
     }
     // jpw
 
     // play the bullet hit flesh sound
-    // HACK, if this is not us getting hit, make it quieter //
+    // HACK, if this is not us getting hit, make it quieter
     // JPW NERVE pulled hack, we like loud impact sounds for MP
     if (fleshEntityNum == cg.snap->ps.clientNum) {
-      // CG_SoundPlayIndexedScript(
-      // cgs.media.bulletHitFleshScript, NULL,
-      // fleshEntityNum );
       trap_S_StartSound(
-          NULL, fleshEntityNum, CHAN_BODY,
+          nullptr, fleshEntityNum, CHAN_BODY,
           cgs.media.sfx_bullet_stonehit[rand() % MAX_IMPACT_SOUNDS]);
     } else {
-      // CG_SoundPlayIndexedScript(
-      // cgs.media.bulletHitFleshScript,
-      // cg_entities[fleshEntityNum].currentState.origin,
-      // ENTITYNUM_WORLD ); // JPW NERVE changed from
-      // ,origin, to this
+      // JPW NERVE changed from,origin, to this
       trap_S_StartSound(
           cg_entities[fleshEntityNum].currentState.origin, ENTITYNUM_WORLD,
           CHAN_BODY, cgs.media.sfx_bullet_stonehit[rand() % MAX_IMPACT_SOUNDS]);
@@ -6625,20 +6619,10 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         VectorSubtract(end, start, dir);
         VectorNormalize(dir);
         VectorMA(end, 128, dir, trend);
-        trap_CM_BoxTrace(&trace, end, trend, NULL, NULL, 0,
+        trap_CM_BoxTrace(&trace, end, trend, nullptr, nullptr, 0,
                          MASK_SHOT & ~CONTENTS_BODY);
 
         if (trace.fraction < 1) {
-//%	CG_ImpactMark( cgs.media.bloodDotShaders[rand()%5], trace.endpos,
-// trace.plane.normal, random()*360, %		1,1,1,1, qtrue, 15+random()*20,
-// qfalse, cg_bloodTime.integer * 1000 );
-#if 0
-					VectorSubtract(vec3_origin, dir, projection);
-					projection[3] = 64;
-					VectorMA(trace.endpos, -8.0f, projection, markOrigin);
-					CG_ImpactMark(cgs.media.bloodDotShaders[rand() % 5], markOrigin, projection, 15.0f + random() * 20.0f, 360.0f * random(),
-					              1.0f, 1.0f, 1.0f, 1.0f, cg_bloodTime.integer * 1000);
-#else
           VectorSet(projection, 0, 0, -1);
           projection[3] = 15.0f + random() * 20.0f;
           Vector4Set(color, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -6646,26 +6630,15 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                               (vec3_t *)origin, projection, color,
                               cg_bloodTime.integer * 1000,
                               (cg_bloodTime.integer * 1000) >> 4);
-#endif
           lastBloodSpat = cg.time;
         } else if (lastBloodSpat < cg.time - 1000) {
           // drop one on the ground?
           VectorCopy(end, trend);
           trend[2] -= 64;
-          trap_CM_BoxTrace(&trace, end, trend, NULL, NULL, 0,
+          trap_CM_BoxTrace(&trace, end, trend, nullptr, nullptr, 0,
                            MASK_SHOT & ~CONTENTS_BODY);
 
           if (trace.fraction < 1) {
-//%	CG_ImpactMark( cgs.media.bloodDotShaders[rand()%5], trace.endpos,
-// trace.plane.normal, random()*360, %		1,1,1,1, qtrue, 15+random()*10,
-// qfalse, cg_bloodTime.integer * 1000 );
-#if 0
-						VectorSubtract(vec3_origin, dir, projection);
-						projection[3] = 64;
-						VectorMA(trace.endpos, -8.0f, projection, markOrigin);
-						CG_ImpactMark(cgs.media.bloodDotShaders[rand() % 5], markOrigin, projection, 15.0f + random() * 10.0f, 360.0f * random(),
-						              1.0f, 1.0f, 1.0f, 1.0f, cg_bloodTime.integer * 1000);
-#else
             VectorSet(projection, 0, 0, -1);
             projection[3] = 15.0f + random() * 20.0f;
             Vector4Set(color, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -6673,7 +6646,6 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
                                 (vec3_t *)origin, projection, color,
                                 cg_bloodTime.integer * 1000,
                                 (cg_bloodTime.integer * 1000) >> 4);
-#endif
             lastBloodSpat = cg.time;
           }
         }
@@ -6681,9 +6653,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
     }
 
   } else // (not flesh)
-  {      // Gordon: all bullet weapons have the same fx, and this stops pvs
-         // issues
-    // causing grenade explosions
+  {
+    // Gordon: all bullet weapons have the same fx,
+    // and this stops pvs issues causing grenade explosions
     int fromweap = WP_MP40; // cg_entities[sourceEntityNum].currentState.weapon;
 
     if (!fromweap ||
@@ -6696,10 +6668,9 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
 
     if (CG_CalcMuzzlePoint(sourceEntityNum, start) ||
         cg.snap->ps.persistant[PERS_HWEAPON_USE]) {
-      if (waterfraction) {
+      if (waterfraction != 0) {
         vec3_t dist;
         vec3_t end2;
-        vec3_t dir = {0, 0, 1};
 
         VectorSubtract(end, start, dist);
         VectorMA(start, waterfraction, dist, end2);
@@ -6707,70 +6678,31 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
         trap_S_StartSound(end, -1, CHAN_AUTO,
                           cgs.media.sfx_bullet_waterhit[rand() % 5]);
 
-        CG_MissileHitWall(fromweap, 2, end2, dir, 0);
-        // CG_MissileHitWall( fromweap, 1, end,
-        // normal, trace.surfaceFlags);
+        CG_MissileHitWall(fromweap, 2, end2, tv(0, 0, 1), 0);
         CG_MissileHitWall(fromweap, 1, end, trace.plane.normal, 0);
       } else {
-
-        // Gordon: um.... WTF? this doenst even
-        // make sense...
-        /*			vec3_t	start2;
-                VectorSubtract( end, start, dir
-           ); VectorNormalize( dir );*/
-        /*			VectorMA( end, -4,
-           dir, start2 );	// back off a
-           little so it doesn't start in solid
-           VectorMA( end, 64, dir, dir
-           );*/
-
-        // Arnout: but this does!
         VectorSubtract(end, start, dir);
         VectorNormalizeFast(dir);
         VectorMA(end, 4, dir, end);
 
-        // CG_RailTrail2( NULL, start, end );
-
-        CG_Trace(&trace, start, NULL, NULL, end, 0, MASK_SHOT);
+        CG_Trace(&trace, start, nullptr, nullptr, end, 0, MASK_SHOT);
         // JPW NERVE -- water check
-        CG_Trace(&trace2, start, NULL, NULL, end, 0, MASK_WATER | MASK_SHOT);
+        CG_Trace(&trace2, start, nullptr, nullptr, end, 0,
+                 MASK_WATER | MASK_SHOT);
         if (trace.fraction != trace2.fraction) {
-          // trap_CM_BoxTrace( &trace2,
-          // start, end, NULL, NULL, -1,
-          // MASK_WATER
-          // );
-
           trap_S_StartSound(end, -1, CHAN_AUTO,
                             cgs.media.sfx_bullet_waterhit[rand() % 5]);
 
-          CG_Trace(&trace2, start, NULL, NULL, end, -1, MASK_WATER);
+          CG_Trace(&trace2, start, nullptr, nullptr, end, -1, MASK_WATER);
           CG_MissileHitWall(fromweap, 2, trace2.endpos, trace2.plane.normal,
                             trace2.surfaceFlags);
           return;
         }
-
-        // CG_MissileHitWall( fromweap, 1, end,
-        // normal, trace.surfaceFlags);
-        // // smoke puff	//	(SA)
-        // modified to send missilehitwall
-        // surface parameters
-
-        //%	CG_MissileHitWall( fromweap, 1,
-        // trace.endpos,
-        // trace.plane.normal,
-        // trace.surfaceFlags);	// smoke puff
-        // //
-        //(SA) modified to send missilehitwall
-        // surface parameters
-
         // ydnar: better bullet marks
         VectorSubtract(vec3_origin, dir, dir);
         if (trace.entityNum >= MAX_CLIENTS && cg_ghostPlayers.integer > 0) {
           CG_MissileHitWall(fromweap, 1, trace.endpos, dir, trace.surfaceFlags);
         }
-
-        // CG_RailTrail2( NULL, start,
-        // trace.endpos );
       }
     }
   }
