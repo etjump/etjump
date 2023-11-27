@@ -291,36 +291,34 @@ CG_SoundParseSounds
 static void CG_SoundParseSounds(const char *filename, const char *buffer) {
   const char *token, **text;
   long hash;
-  soundScript_t sound = {0,      "", 0, 0, qfalse, qfalse,
-                         qfalse, 0,  0, 0}; // the current sound being read
-  soundScriptSound_t *scriptSound = NULL;
+  soundScript_t sound = {
+      0,      "",     0, 0,       qfalse,
+      qfalse, qfalse, 0, nullptr, nullptr}; // the current sound being read
+  soundScriptSound_t *scriptSound = nullptr;
   qboolean inSound, wantSoundName;
 
   inSound = qfalse;
   wantSoundName = qtrue;
   text = &buffer;
 
-  while (1) {
+  while (true) {
     token = COM_ParseExt(text, qtrue);
     if (!*token) {
       if (inSound) {
-        CG_Error("no concluding '}' in sound "
-                 "%s, file %s\n",
-                 sound.name, filename);
+        CG_Error("no concluding '}' in sound %s, file %s\n", sound.name,
+                 filename);
       }
       return;
     }
 
     if (!Q_stricmp(token, "{")) {
       if (inSound) {
-        CG_Error("no concluding '}' in sound "
-                 "%s, file %s\n",
-                 sound.name, filename);
+        CG_Error("no concluding '}' in sound %s, file %s\n", sound.name,
+                 filename);
       }
       if (wantSoundName) {
-        CG_Error("'{' found but not expected, "
-                 "after %s, file %s\n",
-                 sound.name, filename);
+        CG_Error("'{' found but not expected, after %s, file %s\n", sound.name,
+                 filename);
       }
       inSound = qtrue;
 
@@ -328,9 +326,8 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
       scriptSound = &soundScriptSounds[numSoundScriptSounds++];
 
       if (numSoundScripts >= MAX_SOUND_SCRIPT_SOUNDS) {
-        CG_Error("MAX_SOUND_SCRIPT_SOUNDS "
-                 "exceeded.\nReduce number of sound "
-                 "scripts.\n");
+        CG_Error("MAX_SOUND_SCRIPT_SOUNDS exceeded.\n"
+                 "Reduce number of sound scripts.\n");
       }
 
       scriptSound->lastPlayed = 0;
@@ -343,9 +340,8 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
 
     if (!Q_stricmp(token, "}")) {
       if (!inSound) {
-        CG_Error("'}' unexpected after sound "
-                 "%s, file %s\n",
-                 sound.name, filename);
+        CG_Error("'}' unexpected after sound %s, file %s\n", sound.name,
+                 filename);
       }
 
       // end of a sound, copy it to the global list and
@@ -356,9 +352,8 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
       hashTable[hash] = &soundScripts[numSoundScripts++];
 
       if (numSoundScripts >= MAX_SOUND_SCRIPTS) {
-        CG_Error("MAX_SOUND_SCRIPTS "
-                 "exceeded.\nReduce number of "
-                 "sound scripts.\n");
+        CG_Error("MAX_SOUND_SCRIPTS exceeded.\n"
+                 "Reduce number of sound scripts.\n");
       }
 
       inSound = qfalse;
@@ -372,9 +367,8 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
     if (!inSound) {
       // this is the identifier for a new sound
       if (!wantSoundName) {
-        CG_Error("'%s' unexpected after sound "
-                 "%s, file %s\n",
-                 token, sound.name, filename);
+        CG_Error("'%s' unexpected after sound %s, file %s\n", token, sound.name,
+                 filename);
       }
       memset(&sound, 0, sizeof(sound));
       Q_strncpyz(sound.name, token, sizeof(sound.name));
@@ -382,17 +376,15 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
       sound.index = numSoundScripts;
       // setup the new sound defaults
       sound.channel = CHAN_AUTO;
-      sound.attenuation = 1; // default to fade away with distance (for
-                             // streaming sounds)
-      //
+      // default to fade away with distance (for streaming sounds)
+      sound.attenuation = 1;
       continue;
     }
 
     // we are inside a sound script
 
     if (!Q_stricmp(token, "channel")) {
-      // ignore this now, just look for the channel
-      // identifiers explicitly
+      // ignore this now, just look for the channel identifiers explicitly
       continue;
     }
     if (!Q_stricmp(token, "local")) {
