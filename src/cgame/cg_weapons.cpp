@@ -6440,6 +6440,11 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
   static int lastBloodSpat;
   centity_t *cent;
 
+  // shouldn't ever happen
+  if (sourceEntityNum < 0 || sourceEntityNum >= MAX_GENTITIES) {
+    return;
+  }
+
   cent = &cg_entities[fleshEntityNum];
 
   // Hideme check to prevent tracers & impact sounds
@@ -6484,7 +6489,7 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
 
   // if the shooter is currently valid, calc a source point and possibly
   // do trail effects
-  if (sourceEntityNum >= 0 && cg_tracerChance.value > 0) {
+  if (cg_tracerChance.value > 0) {
     if (CG_CalcMuzzlePoint(sourceEntityNum, start)) {
       sourceContentType = CG_PointContents(start, 0);
       destContentType = CG_PointContents(end, 0);
