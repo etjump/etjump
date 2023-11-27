@@ -327,7 +327,7 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
       // grab a free scriptSound
       scriptSound = &soundScriptSounds[numSoundScriptSounds++];
 
-      if (numSoundScripts == MAX_SOUND_SCRIPT_SOUNDS) {
+      if (numSoundScripts >= MAX_SOUND_SCRIPT_SOUNDS) {
         CG_Error("MAX_SOUND_SCRIPT_SOUNDS "
                  "exceeded.\nReduce number of sound "
                  "scripts.\n");
@@ -355,7 +355,7 @@ static void CG_SoundParseSounds(const char *filename, const char *buffer) {
       soundScripts[numSoundScripts] = sound;
       hashTable[hash] = &soundScripts[numSoundScripts++];
 
-      if (numSoundScripts == MAX_SOUND_SCRIPTS) {
+      if (numSoundScripts >= MAX_SOUND_SCRIPTS) {
         CG_Error("MAX_SOUND_SCRIPTS "
                  "exceeded.\nReduce number of "
                  "sound scripts.\n");
