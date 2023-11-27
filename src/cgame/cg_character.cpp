@@ -530,13 +530,12 @@ bg_character_t *CG_CharacterForClientinfo(clientInfo_t *ci, centity_t *cent) {
 }
 
 bg_character_t *CG_CharacterForPlayerstate(playerState_t *ps) {
-  int team, cls;
-
   if (ps->powerups[PW_OPS_DISGUISED]) {
-    team = cgs.clientinfo[ps->clientNum].team == TEAM_AXIS ? TEAM_ALLIES
-                                                           : TEAM_AXIS;
+    const int team = cgs.clientinfo[ps->clientNum].team == TEAM_AXIS
+                         ? TEAM_ALLIES
+                         : TEAM_AXIS;
 
-    cls = 0;
+    int cls = 0;
     if (ps->powerups[PW_OPS_CLASS_1]) {
       cls |= 1;
     }
@@ -547,7 +546,8 @@ bg_character_t *CG_CharacterForPlayerstate(playerState_t *ps) {
       cls |= 4;
     }
 
-    return BG_GetCharacter(team, cls);
+    // cls should always be < NUM_PLAYER_CLASSES but just in case
+    return BG_GetCharacter(team, cls < NUM_PLAYER_CLASSES ? cls : 0);
   }
 
   return BG_GetCharacter(cgs.clientinfo[ps->clientNum].team,
