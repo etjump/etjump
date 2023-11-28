@@ -3242,10 +3242,6 @@ void CG_ClearFlameChunks(void);
 void CG_ProjectedSpotLight(vec3_t start, vec3_t dir);
 // done.
 
-//----(SA)
-void CG_Spotlight(centity_t *cent, float *color, vec3_t start, vec3_t dir,
-                  int segs, float range, int startWidth, float coneAngle,
-                  int flags);
 #define SL_NOTRACE                                                             \
   0x001 // don't do a trace check for shortening the beam, always draw
         // at full 'range' length
