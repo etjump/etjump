@@ -6900,8 +6900,9 @@ qboolean ParseColorRange(itemDef_t *item, int handle, int type) {
   colorRangeDef_t color{};
 
   if (item->numColors && type != item->colorRangeType) {
-    PC_SourceError(handle, "both addColorRange and addColorRangeRel - "
-                           "set within same itemdef\n");
+    PC_SourceError(
+        handle,
+        "both addColorRange and addColorRangeRel - set within same itemdef\n");
     return qfalse;
   }
 

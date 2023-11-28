@@ -41,16 +41,17 @@ usercmd_t PmoveUtils::getUserCmd(const playerState_t &ps, int8_t uCmdScale) {
   }
   // generate fake userCmd for following spectators and demos
   else {
-    cmd.forwardmove =
+    cmd.forwardmove = static_cast<signed char>(
         uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
-                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD));
-    cmd.rightmove = uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
-                                 !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT));
-    cmd.upmove = uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
-                              !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN));
+                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
+    cmd.rightmove = static_cast<signed char>(
+        uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
+                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
+    cmd.upmove = static_cast<signed char>(
+        uCmdScale * (!!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
+                     !!(ps.stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
 
-    // store buttons too so we get correct scale when sprint is
-    // held
+    // store buttons too, so we get correct scale when sprint is held
     cmd.buttons = ps.stats[STAT_USERCMD_BUTTONS] >> 8;
     cmd.wbuttons = ps.stats[STAT_USERCMD_BUTTONS] & 0xff;
 

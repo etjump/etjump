@@ -3505,15 +3505,16 @@ void G_TagLinkEntity(gentity_t *ent, int msec) {
       int pos;
       float frac;
 
-      if ((ent->backspline =
-               BG_GetSplineData(parent->s.effect2Time, &ent->back)) == NULL) {
+      if ((ent->backspline = BG_GetSplineData(parent->s.effect2Time,
+                                              &ent->back)) == nullptr) {
         return;
       }
 
-      ent->backdelta = parent->s.pos.trDuration
-                           ? (level.time - parent->s.pos.trTime) /
-                                 ((float)parent->s.pos.trDuration)
-                           : 0;
+      ent->backdelta =
+          parent->s.pos.trDuration
+              ? static_cast<float>(level.time - parent->s.pos.trTime) /
+                    static_cast<float>(parent->s.pos.trDuration)
+              : 0;
 
       if (ent->backdelta < 0.f) {
         ent->backdelta = 0.f;
@@ -3525,25 +3526,26 @@ void G_TagLinkEntity(gentity_t *ent, int msec) {
         ent->backdelta = 1 - ent->backdelta;
       }
 
-      pos = floor(ent->backdelta * (MAX_SPLINE_SEGMENTS));
+      pos = std::floor(ent->backdelta * (MAX_SPLINE_SEGMENTS));
       if (pos >= MAX_SPLINE_SEGMENTS) {
         pos = MAX_SPLINE_SEGMENTS - 1;
         frac = ent->backspline->segments[pos].length;
       } else {
-        frac = ((ent->backdelta * (MAX_SPLINE_SEGMENTS)) - pos) *
+        frac = ((ent->backdelta * (MAX_SPLINE_SEGMENTS)) -
+                static_cast<float>(pos)) *
                ent->backspline->segments[pos].length;
       }
 
       VectorMA(ent->backspline->segments[pos].start, frac,
                ent->backspline->segments[pos].v_norm, v);
-      if (parent->s.apos.trBase[0]) {
+      if (parent->s.apos.trBase[0] != 0) {
         BG_LinearPathOrigin2(parent->s.apos.trBase[0], &ent->backspline,
                              &ent->backdelta, v, ent->back);
       }
 
       VectorCopy(v, origin);
 
-      if (ent->s.angles2[0]) {
+      if (ent->s.angles2[0] != 0) {
         BG_LinearPathOrigin2(ent->s.angles2[0], &ent->backspline,
                              &ent->backdelta, v, ent->back);
       }
@@ -3574,7 +3576,7 @@ void G_TagLinkEntity(gentity_t *ent, int msec) {
 
       VectorCopy(v, origin);
 
-      if (ent->s.angles2[0]) {
+      if (ent->s.angles2[0] != 0) {
         BG_LinearPathOrigin2(ent->s.angles2[0], &ent->backspline,
                              &ent->backdelta, v, ent->back);
       }
