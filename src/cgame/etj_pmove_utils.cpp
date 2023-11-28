@@ -33,7 +33,7 @@ static pmoveExt_t pmext;
 static playerState_t temp_ps;
 
 usercmd_t PmoveUtils::getUserCmd(const playerState_t &ps, int8_t uCmdScale) {
-  usercmd_t cmd;
+  usercmd_t cmd{};
 
   if (!cg.demoPlayback && !(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
     int32_t const cmdNum = trap_GetCurrentCmdNumber();

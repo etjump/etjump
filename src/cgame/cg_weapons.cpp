@@ -2507,7 +2507,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
   //);
 
   if (isPlayer) {
-    refEntity_t brass;
+    refEntity_t brass{};
 
     if (BG_IsAkimboWeapon(weaponNum) && akimboFire) {
       CG_PositionRotatedEntityOnTag(&brass, parent, "tag_brass2");
@@ -6435,7 +6435,8 @@ void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
   trace_t trace, trace2;
   int sourceContentType, destContentType;
   vec3_t dir;
-  vec3_t start, trend; // JPW
+  vec3_t start{};
+  vec3_t trend; // JPW
   vec4_t projection;
   static int lastBloodSpat;
   centity_t *cent;

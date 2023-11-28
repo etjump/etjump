@@ -406,8 +406,8 @@ void CG_LaunchGib(centity_t *cent, vec3_t origin, vec3_t angles,
   }
 }
 
-//#define	GIB_VELOCITY	250
-//#define	GIB_JUMP		250
+// #define	GIB_VELOCITY	250
+// #define	GIB_JUMP		250
 
 #define GIB_VELOCITY 75
 #define GIB_JUMP 250
@@ -553,7 +553,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
   // Rafael
   // BloodCloud
   qboolean newjunction[MAXJUNCTIONS];
-  vec3_t junctionOrigin[MAXJUNCTIONS];
+  vec3_t junctionOrigin[MAXJUNCTIONS]{};
   int junction;
   int j;
   vec3_t axis[3], angles;

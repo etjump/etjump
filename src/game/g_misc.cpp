@@ -159,7 +159,8 @@ void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles) {
 //         created for clank's map
 void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
                                     vec3_t origin, vec3_t angles) {
-  vec3_t newOrigin, newViewAngles, newVelocity = {0, 0, 0}, offset = {0, 0, 0};
+  vec3_t newOrigin, newViewAngles{};
+  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
   vec3_t triggerOrigin, tempActivator, tempOrigin;
   vec3_t normalizedVelocity, veloAngles;
   vec3_t sPlane[6];
@@ -318,7 +319,8 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
 //         to be relative to the new destination angles
 void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
                               vec3_t origin, vec3_t angles) {
-  vec3_t newOrigin, newViewAngles, newVelocity = {0, 0, 0}, offset = {0, 0, 0};
+  vec3_t newOrigin, newViewAngles{};
+  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
   vec3_t triggerOrigin, tempActivator, tempOrigin;
   vec3_t normalizedVelocity, veloAngles;
   vec3_t sPlane[6];
