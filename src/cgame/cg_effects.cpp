@@ -213,7 +213,10 @@ localEntity_t *CG_MakeExplosion(vec3_t origin, vec3_t dir, qhandle_t hModel,
   ex->pos.trType = TR_LINEAR;
   ex->pos.trTime = cg.time;
   VectorCopy(newOrigin, ex->pos.trBase);
-  VectorScale(dir, 48, ex->pos.trDelta);
+
+  if (dir) {
+    VectorScale(dir, 48, ex->pos.trDelta);
+  }
   // done.
 
   ex->color[0] = ex->color[1] = ex->color[2] = 1.0;
@@ -400,14 +403,14 @@ void CG_LaunchGib(centity_t *cent, vec3_t origin, vec3_t angles,
   le->ownerNum = cent->currentState.number;
 
   // Ridah, if the player is on fire, then spawn some flaming gibs
-  if (cent && CG_EntOnFire(cent)) {
+  if (CG_EntOnFire(cent)) {
     le->onFireStart = cent->currentState.onFireStart;
     le->onFireEnd = re->fadeEndTime + 1000;
   }
 }
 
-//#define	GIB_VELOCITY	250
-//#define	GIB_JUMP		250
+// #define	GIB_VELOCITY	250
+// #define	GIB_JUMP		250
 
 #define GIB_VELOCITY 75
 #define GIB_JUMP 250
@@ -487,7 +490,7 @@ void CG_LoseHat(centity_t *cent, vec3_t dir) {
 
     // Ridah, if the player is on fire, then make the hat on
     // fire
-    if (cent && CG_EntOnFire(cent)) {
+    if (CG_EntOnFire(cent)) {
       le->onFireStart = cent->currentState.onFireStart;
       le->onFireEnd = cent->currentState.onFireEnd + 4000;
     }

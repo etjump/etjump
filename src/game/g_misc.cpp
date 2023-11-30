@@ -2357,7 +2357,7 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
 
   owner = &g_entities[gun->r.ownerNum];
 
-  if (gun && self->health <= 0) {
+  if (self->health <= 0) {
     gun->s.frame = 2;
     gun->takedamage = qfalse;
 
@@ -2376,8 +2376,8 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     if (tr.startsolid) {
       VectorCopy(owner->TargetAngles, owner->client->ps.origin);
       VectorCopy(owner->TargetAngles, owner->r.currentOrigin);
-      owner->r.contents = CONTENTS_CORPSE; // this will correct itself
-                                           // in ClientEndFrame
+      // this will correct itself in ClientEndFrame
+      owner->r.contents = CONTENTS_CORPSE;
     }
     owner->client->ps.eFlags &= ~EF_MG42_ACTIVE; // DHM - Nerve :: unset flag
 
@@ -2387,8 +2387,6 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     self->r.ownerNum = self->s.number;
     self->s.otherEntityNum = self->s.number;
     owner->client->ps.viewlocked = 0; // let them look around
-
-    // owner->client->ps.gunfx = 0;
 
     gun->mg42weapHeat = 0;
     gun->backupWeaponTime = 0;
