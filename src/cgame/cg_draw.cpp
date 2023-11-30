@@ -4481,8 +4481,9 @@ static void CG_Draw2D() {
     // crosshair is the only renderable that should be drawn here
     for (const auto &r : ETJump::renderables) {
       if (auto crosshair = std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
-        crosshair->beforeRender();
-        crosshair->render();
+        if (crosshair->beforeRender()) {
+          crosshair->render();
+        }
       }
     }
     CG_DrawFlashFade();
@@ -4591,8 +4592,9 @@ static void CG_Draw2D() {
     ETJump_DrawDrawables();
 
     for (const auto &r : ETJump::renderables) {
-      r->beforeRender();
-      r->render();
+      if (r->beforeRender()) {
+        r->render();
+      }
     }
   }
 

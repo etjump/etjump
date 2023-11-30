@@ -32,7 +32,7 @@ class SpectatorInfo : public IRenderable {
   static bool canSkipDraw();
 
 public:
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
 };
 } // namespace ETJump

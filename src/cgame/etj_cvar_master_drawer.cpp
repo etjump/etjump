@@ -36,10 +36,12 @@ void ETJump::CvarBasedMasterDrawer::updateCurrentIndex(int index) {
   currentIndex = Numeric::clamp(index, 1, renderables.size()) - 1;
 }
 
-void ETJump::CvarBasedMasterDrawer::beforeRender() {
+bool ETJump::CvarBasedMasterDrawer::beforeRender() {
   if (shouldRender()) {
-    renderables[currentIndex]->beforeRender();
+    return renderables[currentIndex]->beforeRender();
   }
+
+  return false;
 }
 
 void ETJump::CvarBasedMasterDrawer::render() const {

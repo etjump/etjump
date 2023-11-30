@@ -29,7 +29,7 @@
 
 namespace ETJump {
 class OverbounceDetector : public IRenderable {
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
   static bool canSkipDraw();
 

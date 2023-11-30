@@ -31,7 +31,7 @@ namespace ETJump {
 class Snaphud : public IRenderable {
 public:
   void render() const override;
-  void beforeRender() override;
+  bool beforeRender() override;
   static bool inMainAccelZone(const playerState_t &ps, pmove_t *pm);
 
   Snaphud();

@@ -44,6 +44,6 @@ public:
   explicit DisplayMaxSpeed(EntityEventsHandler *entityEventsHandler);
   ~DisplayMaxSpeed();
   void render() const override;
-  void beforeRender() override;
+  bool beforeRender() override;
 };
 } // namespace ETJump
