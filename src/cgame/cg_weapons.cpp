@@ -2427,7 +2427,7 @@ void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
         -.4f * AngleNormalize180(cg.pmext.mountedWeaponAngles[PITCH] -
                                  ps->viewangles[PITCH]);
 
-    AnglesToAxis(angles, gun.axis);
+    AnglesToAxis(mortarSetAngles, gun.axis);
 
     CG_PositionRotatedEntityOnTag(&gun, parent, "tag_weapon");
   } else if ((!ps || cg.renderingThirdPerson) &&
