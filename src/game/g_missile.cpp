@@ -1981,7 +1981,8 @@ gentity_t *fire_grenade(gentity_t *self, const vec3_t start, const vec3_t dir,
       break;
     case WP_LANDMINE:
       bolt->accuracy = 0;
-      bolt->s.teamNum = self->client->sess.sessionTeam + 4;
+      bolt->s.teamNum =
+          self->client ? self->client->sess.sessionTeam + 4 : self->s.teamNum;
       bolt->classname = "landmine";
       bolt->damage = 0;
       bolt->splashRadius = 225; // was: 400
@@ -2023,7 +2024,8 @@ gentity_t *fire_grenade(gentity_t *self, const vec3_t start, const vec3_t dir,
       Printer::SendCenterMessage(ClientNum(self),
                                  "Dynamite is set, but NOT armed!");
       // differentiate non-armed dynamite with non-pulsing dlight
-      bolt->s.teamNum = self->client->sess.sessionTeam + 4;
+      bolt->s.teamNum =
+          self->client ? self->client->sess.sessionTeam + 4 : self->s.teamNum;
       bolt->classname = "dynamite";
       bolt->damage = 0;
       bolt->splashRadius = 400;
