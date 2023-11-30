@@ -556,19 +556,16 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
   // Rafael
   // BloodCloud
   qboolean newjunction[MAXJUNCTIONS];
-  vec3_t junctionOrigin[MAXJUNCTIONS];
+  vec3_t junctionOrigin[MAXJUNCTIONS]{};
   int junction;
   int j;
   vec3_t axis[3], angles;
 
-  const char *JunctiongibTags[] = {// leg tag
-                                   "tag_footright", "tag_footleft",
-                                   "tag_legright", "tag_legleft",
-
-                                   // torsotags
-                                   "tag_armright", "tag_armleft",
-
-                                   "tag_torso", "tag_chest"};
+  const char *JunctiongibTags[] = {
+      // leg tag
+      "tag_footright", "tag_footleft", "tag_legright", "tag_legleft",
+      // torsotags
+      "tag_armright", "tag_armleft", "tag_torso", "tag_chest"};
 
   const char *ConnectTags[] = {
       // legs tags
@@ -580,18 +577,15 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
       // torso tags
       "tag_chest",
       "tag_chest",
-
       "tag_chest",
       "tag_torso",
   };
 
-  const char *gibTags[] = {// tags in the legs
-                           "tag_footright", "tag_footleft", "tag_legright",
-                           "tag_legleft", "tag_torso",
-
-                           // tags in the torso
-                           "tag_chest", "tag_armright", "tag_armleft",
-                           "tag_head", NULL};
+  const char *gibTags[] = {
+      // tags in the legs
+      "tag_footleft", "tag_legright", "tag_legleft", "tag_torso",
+      // tags in the torso
+      "tag_chest", "tag_armright", "tag_armleft", "tag_head", nullptr};
 
   if (cg_blood.integer) {
     // Rafael
@@ -605,13 +599,12 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
     character = CG_CharacterForClientinfo(ci, cent);
 
     // Ridah, fetch the various positions of the tag_gib*'s
-    // and spawn the gibs from the correct places (especially
-    // the head)
+    // and spawn the gibs from the correct places (especially the head)
     for (gibIndex = 0, count = 0, foundtag = qtrue;
          foundtag && gibIndex < MAX_GIB_MODELS && gibTags[gibIndex];
          gibIndex++) {
 
-      refEntity_t *re = 0;
+      refEntity_t *re = nullptr;
 
       foundtag = qfalse;
 
@@ -632,8 +625,8 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
         VectorNormalize(dir);
 
         // spawn a gib
-        velocity[0] = dir[0] * (0.5 + random()) * GIB_VELOCITY * 0.3;
-        velocity[1] = dir[1] * (0.5 + random()) * GIB_VELOCITY * 0.3;
+        velocity[0] = dir[0] * (0.5f + random()) * GIB_VELOCITY * 0.3f;
+        velocity[1] = dir[1] * (0.5f + random()) * GIB_VELOCITY * 0.3f;
         velocity[2] = GIB_JUMP + dir[2] * (0.5 + random()) * GIB_VELOCITY * 0.5;
 
         VectorMA(velocity, GIB_VELOCITY, gdir, velocity);
@@ -656,13 +649,7 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
         for (j = 0; j < MAXJUNCTIONS; j++) {
           if (!Q_stricmp(JunctiongibTags[j], ConnectTags[i])) {
             if (newjunction[j] == qtrue) {
-              // spawn a
-              // blood
-              // cloud
-              // somewhere
-              // on the
-              // vec
-              // from
+              // spawn a blood cloud somewhere on the vec from
               VectorSubtract(junctionOrigin[i], junctionOrigin[j], dir);
               CG_ParticleBloodCloud(cent, junctionOrigin[i], dir);
             }
@@ -674,14 +661,12 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
 // Ridah, spawn a bunch of blood dots around the place
 #define GIB_BLOOD_DOTS 3
     for (i = 0, count = 0; i < GIB_BLOOD_DOTS * 2; i++) {
-      // TTimo: unused
-      // static vec3_t mins = {-10,-10,-10};
-      // static vec3_t maxs = { 10, 10, 10};
-
       if (i > 0) {
-        velocity[0] = ((i % 2) * 2 - 1) * (40 + 40 * random());
-        velocity[1] = (((i / 2) % 2) * 2 - 1) * (40 + 40 * random());
-        velocity[2] = (((i < GIB_BLOOD_DOTS) * 2) - 1) * 40;
+        velocity[0] =
+            (static_cast<float>(i % 2) * 2 - 1) * (40 + 40 * random());
+        velocity[1] =
+            (static_cast<float>((i / 2) % 2) * 2 - 1) * (40 + 40 * random());
+        velocity[2] = ((static_cast<float>(i < GIB_BLOOD_DOTS) * 2) - 1) * 40;
       } else {
         VectorClear(velocity);
         velocity[2] = -64;
@@ -689,27 +674,17 @@ void CG_GibPlayer(centity_t *cent, vec3_t playerOrigin, vec3_t gdir) {
 
       VectorAdd(playerOrigin, velocity, origin);
 
-      CG_Trace(&trace, playerOrigin, NULL, NULL, origin, -1, CONTENTS_SOLID);
+      CG_Trace(&trace, playerOrigin, nullptr, nullptr, origin, -1,
+               CONTENTS_SOLID);
       if (trace.fraction < 1.0) {
-//%	BG_GetMarkDir( velocity, trace.plane.normal, velocity );
-//%	CG_ImpactMark( cgs.media.bloodDotShaders[rand()%5], trace.endpos,
-// velocity, random()*360, %		1,1,1,1, qtrue, 30, qfalse,
-// cg_bloodTime.integer * 1000 );
-#if 0
-				BG_GetMarkDir(velocity, trace.plane.normal, projection);
-				VectorSubtract(vec3_origin, projection, projection);
-				projection[3] = 64;
-				VectorMA(trace.endpos, -8.0f, projection, markOrigin);
-				CG_ImpactMark(cgs.media.bloodDotShaders[rand() % 5], markOrigin, projection, 30.0f, random() * 360.0f, 1.0f, 1.0f, 1.0f, 1.0f, cg_bloodTime.integer * 1000);
-#else
         VectorSet(projection, 0, 0, -1);
         projection[3] = 30.0f;
         Vector4Set(color, 1.0f, 1.0f, 1.0f, 1.0f);
-        trap_R_ProjectDecal(cgs.media.bloodDotShaders[rand() % 5], 1,
-                            (vec3_t *)trace.endpos, projection, color,
-                            cg_bloodTime.integer * 1000,
+        auto *endpos =
+            static_cast<vec3_t *>(static_cast<void *>(&trace.endpos));
+        trap_R_ProjectDecal(cgs.media.bloodDotShaders[rand() % 5], 1, endpos,
+                            projection, color, cg_bloodTime.integer * 1000,
                             (cg_bloodTime.integer * 1000) >> 4);
-#endif
 
         if (count++ > GIB_BLOOD_DOTS) {
           break;

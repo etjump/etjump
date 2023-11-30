@@ -154,12 +154,13 @@ void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles) {
 }
 
 // ETJump: teleports player in specific origin, converts angles(yaw) and
-// velocity
-//         to be relative to the new destination angles
+//         velocity to be relative to the new destination angles
 //         created for clank's map
+// FIXME: refactor this some day to share code with TeleportPlayerKeepAngles
 void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
-                                    vec3_t origin, vec3_t angles) {
-  vec3_t newOrigin, newViewAngles, newVelocity = {0, 0, 0}, offset = {0, 0, 0};
+                                    const vec3_t origin, const vec3_t angles) {
+  vec3_t newOrigin, newViewAngles{};
+  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
   vec3_t triggerOrigin, tempActivator, tempOrigin;
   vec3_t normalizedVelocity, veloAngles;
   vec3_t sPlane[6];
@@ -167,18 +168,18 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
   vec_t speed, length;
   auto negDir = qfalse;
 
-  // normalized velocity is the directionvector for calculating the
-  // intersectionpoints
+  // normalized velocity is the direction vector
+  // for calculating the intersection points
   VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
 
-  // calculate the origin of the triggerbrush
+  // calculate the origin of the trigger brush
   VectorSubtract(trigger->r.maxs, trigger->r.mins, tempOrigin);
   VectorMA(trigger->r.mins, 0.5f, tempOrigin, triggerOrigin);
 
-  // calculate the intersection-points of playermovement with the 6
-  // planes of the triggerbrush the shortest distance between player and
-  // intersectionpoints selects the plane (where did we get into the
-  // trigger, from what side?)
+  // calculate the intersection-points of player movement
+  // with the 6 planes of the trigger brush
+  // the shortest distance between player and intersection points
+  // selects the plane (where did we get into the trigger, from what side?)
   if (normalizedVelocity[0] != 0.0f) {
     VectorMA(player->client->ps.origin,
              (trigger->r.mins[0] - player->client->ps.origin[0]) /
@@ -226,7 +227,7 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
   VectorCopy(triggerOrigin, tempOrigin);
   VectorCopy(player->client->ps.origin, tempActivator);
 
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE YZ (NORMAL X)
   if (minDistYZ < minDistXZ && minDistYZ < minDistXY) {
     // check +/- direction of trigger
@@ -255,10 +256,10 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
       offset[1] *= -1.0f;
     }
     length = offset[1];
-    offset[0] = sin(-DEG2RAD(angles[1])) * length;
-    offset[1] = cos(-DEG2RAD(angles[1])) * length;
+    offset[0] = static_cast<float>(std::sin(-DEG2RAD(angles[1])) * length);
+    offset[1] = static_cast<float>(std::cos(-DEG2RAD(angles[1])) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XZ (NORMAL Y)
   else if (minDistXZ < minDistYZ && minDistXZ < minDistXY) {
     // check +/- direction of trigger
@@ -287,10 +288,12 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
       offset[0] *= -1.0f;
     }
     length = offset[0];
-    offset[1] = sin(DEG2RAD(angles[1] - 90.0f)) * length;
-    offset[0] = cos(DEG2RAD(angles[1] - 90.0f)) * length;
+    offset[1] =
+        static_cast<float>(std::sin(DEG2RAD(angles[1] - 90.0f)) * length);
+    offset[0] =
+        static_cast<float>(std::cos(DEG2RAD(angles[1] - 90.0f)) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XY (NORMAL Z) // makes no sense, set dest values
   else if (minDistXY < minDistXZ && minDistXY < minDistYZ) {
     // viewangles
@@ -314,11 +317,11 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
 }
 
 // ETJump: teleports player in specific origin, converts angles(yaw, pitch) and
-// velocity
-//         to be relative to the new destination angles
+//         velocity to be relative to the new destination angles
 void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
-                              vec3_t origin, vec3_t angles) {
-  vec3_t newOrigin, newViewAngles, newVelocity = {0, 0, 0}, offset = {0, 0, 0};
+                              const vec3_t origin, const vec3_t angles) {
+  vec3_t newOrigin, newViewAngles{};
+  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
   vec3_t triggerOrigin, tempActivator, tempOrigin;
   vec3_t normalizedVelocity, veloAngles;
   vec3_t sPlane[6];
@@ -326,18 +329,18 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
   vec_t speed, length;
   auto negDir = qfalse;
 
-  // normalized velocity is the directionvector for calculating the
-  // intersectionpoints
+  // normalized velocity is the direction vector
+  // for calculating the intersection points
   VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
 
-  // calculate the origin of the triggerbrush
+  // calculate the origin of the trigger brush
   VectorSubtract(trigger->r.maxs, trigger->r.mins, tempOrigin);
   VectorMA(trigger->r.mins, 0.5f, tempOrigin, triggerOrigin);
 
-  // calculate the intersection-points of playermovement with the 6
-  // planes of the triggerbrush the shortest distance between player and
-  // intersectionpoints selects the plane (where did we get into the
-  // trigger, from what side?)
+  // calculate the intersection-points of player movement
+  // with the 6 planes of the trigger brush
+  // the shortest distance between player and intersection points
+  // selects the plane (where did we get into the trigger, from what side?)
   if (normalizedVelocity[0] != 0.0f) {
     VectorMA(player->client->ps.origin,
              (trigger->r.mins[0] - player->client->ps.origin[0]) /
@@ -385,7 +388,7 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
   VectorCopy(triggerOrigin, tempOrigin);
   VectorCopy(player->client->ps.origin, tempActivator);
 
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE YZ (NORMAL X)
   if (minDistYZ < minDistXZ && minDistYZ < minDistXY) {
     // check +/- direction of trigger
@@ -415,10 +418,10 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
       offset[1] *= -1.0f;
     }
     length = offset[1];
-    offset[0] = sin(-DEG2RAD(angles[1])) * length;
-    offset[1] = cos(-DEG2RAD(angles[1])) * length;
+    offset[0] = static_cast<float>(std::sin(-DEG2RAD(angles[1])) * length);
+    offset[1] = static_cast<float>(std::cos(-DEG2RAD(angles[1])) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XZ (NORMAL Y)
   else if (minDistXZ < minDistYZ && minDistXZ < minDistXY) {
     // check +/- direction of trigger
@@ -448,10 +451,12 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
       offset[0] *= -1.0f;
     }
     length = offset[0];
-    offset[1] = sin(DEG2RAD(angles[1] - 90.0f)) * length;
-    offset[0] = cos(DEG2RAD(angles[1] - 90.0f)) * length;
+    offset[1] =
+        static_cast<float>(std::sin(DEG2RAD(angles[1] - 90.0f)) * length);
+    offset[0] =
+        static_cast<float>(std::cos(DEG2RAD(angles[1] - 90.0f)) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XY (NORMAL Z) // makes no sense, set dest values
   else if (minDistXY < minDistXZ && minDistXY < minDistYZ) {
     // viewangles

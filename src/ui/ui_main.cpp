@@ -1327,6 +1327,8 @@ void UI_Load() {
   }
   if (menuSet == nullptr || menuSet[0] == '\0') {
     menuSet = "ui/menus.txt";
+  } else {
+    lastName[0] = '\0';
   }
 
   String_Init();
