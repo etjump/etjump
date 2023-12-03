@@ -2039,27 +2039,24 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   char name[64];
   // don't let text be too long for malicious reasons
   char text[MAX_CHAT_TEXT];
-  const char *escapedName = NULL;
+  const char *escapedName = nullptr;
   qboolean localize = qfalse;
   char *loc;
-  const char *printText = NULL;
+  const char *printText = nullptr;
+  const int clientNum = ClientNum(ent);
 
   switch (mode) {
     default:
     case SAY_ALL:
       G_LogPrintf("say: %s: %s\n", ent->client->pers.netname, chatText);
-      Com_sprintf(name, sizeof(name), "%s%c%c: ", ent->client->pers.netname,
-                  Q_COLOR_ESCAPE, COLOR_WHITE);
+      Com_sprintf(name, sizeof(name), "%s^7: ", ent->client->pers.netname);
       color = COLOR_GREEN;
       break;
     case SAY_BUDDY:
       localize = qtrue;
-      // G_LogPrintf("saybuddy: %s: %s\n",
-      // ent->client->pers.netname, chatText);
       loc = BG_GetLocationString(ent->r.currentOrigin);
       Com_sprintf(name, sizeof(name),
-                  "[lof](%s%c%c) (%s): ", ent->client->pers.netname,
-                  Q_COLOR_ESCAPE, COLOR_WHITE, loc);
+                  "[lof](%s^7) (%s): ", ent->client->pers.netname, loc);
       color = COLOR_YELLOW;
       break;
     case SAY_TEAM:
@@ -2067,8 +2064,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       G_LogPrintf("sayteam: %s: %s\n", ent->client->pers.netname, chatText);
       loc = BG_GetLocationString(ent->r.currentOrigin);
       Com_sprintf(name, sizeof(name),
-                  "[lof](%s%c%c) (%s): ", ent->client->pers.netname,
-                  Q_COLOR_ESCAPE, COLOR_WHITE, loc);
+                  "[lof](%s^7) (%s): ", ent->client->pers.netname, loc);
       color = COLOR_CYAN;
       break;
     case SAY_TEAMNL:
@@ -2081,9 +2077,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   len = sizeof(text);
   Q_strncpyz(text, chatText, len);
 
-  // if chat message is too long, e.g. being send from console
+  // if chat message is too long, e.g. being sent from console
   // cut it and put ellipsis at the end
-  if (static_cast<int>(strnlen(chatText, 256)) > len) {
+  if (std::strlen(chatText) > len) {
     text[len - 2] = '.';
     text[len - 3] = '.';
     text[len - 4] = '.';
@@ -2097,24 +2093,17 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   }
 
   if (target) {
-    if (!COM_BitCheck(target->client->sess.ignoreClients, ent - g_entities)) {
+    if (!COM_BitCheck(target->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, target, mode, color, escapedName, printText, localize,
               encoded);
     }
     return;
   }
 
-  // Zero: do we really need double text on console?
-  //// echo the text to the console
-  // if (g_dedicated.integer)
-  //{
-  //	G_Printf("%s%s\n", name, text);
-  // }
-
-  // send it to all the apropriate clients
+  // send it to all the appropriate clients
   for (j = 0; j < level.numConnectedClients; j++) {
     other = &g_entities[level.sortedClients[j]];
-    if (!COM_BitCheck(other->client->sess.ignoreClients, ent - g_entities)) {
+    if (!COM_BitCheck(other->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, other, mode, color, escapedName, printText, localize,
               encoded);
     }
