@@ -1924,12 +1924,10 @@ extern vmCvar_t g_minGameClients; // NERVE - SMF - we need at least this many
                                   // before match actually starts
 extern vmCvar_t g_restarted;
 
-extern vmCvar_t g_fraglimit;
 extern vmCvar_t g_timelimit;
 extern vmCvar_t g_password;
 extern vmCvar_t sv_privatepassword;
 extern vmCvar_t g_knockback;
-extern vmCvar_t g_quadfactor;
 extern vmCvar_t g_forcerespawn;
 extern vmCvar_t g_inactivity;
 extern vmCvar_t g_debugMove;
@@ -1952,10 +1950,8 @@ extern vmCvar_t g_knifeonly; // Xian - Wacky Knife-Only rounds
 
 extern vmCvar_t g_needpass;
 extern vmCvar_t g_doWarmup;
-extern vmCvar_t g_teamAutoJoin;
 extern vmCvar_t g_banIPs;
 extern vmCvar_t g_filterBan;
-extern vmCvar_t g_rankings;
 extern vmCvar_t g_smoothClients;
 extern vmCvar_t pmove_msec;
 
@@ -1968,7 +1964,6 @@ extern vmCvar_t g_scriptDebug;
 extern vmCvar_t g_userAim;
 extern vmCvar_t g_developer;
 
-extern vmCvar_t g_footstepAudibleRange;
 // JPW NERVE multiplayer
 extern vmCvar_t g_redlimbotime;
 extern vmCvar_t g_bluelimbotime;
@@ -2001,14 +1996,11 @@ extern vmCvar_t g_reloading;
 #endif // SAVEGAME_SUPPORT
 
 // NERVE - SMF
-extern vmCvar_t g_warmupLatch;
 extern vmCvar_t g_nextTimeLimit;
-extern vmCvar_t g_showHeadshotRatio;
 extern vmCvar_t g_userTimeLimit;
 extern vmCvar_t g_userAlliedRespawnTime;
 extern vmCvar_t g_userAxisRespawnTime;
 extern vmCvar_t g_currentRound;
-extern vmCvar_t g_noTeamSwitching;
 extern vmCvar_t g_altStopwatchMode;
 extern vmCvar_t g_gamestate;
 extern vmCvar_t g_swapteams;
@@ -2022,7 +2014,6 @@ extern vmCvar_t refereePassword;
 extern vmCvar_t g_spectatorInactivity;
 extern vmCvar_t match_latejoin;
 extern vmCvar_t match_minplayers;
-extern vmCvar_t match_mutespecs;
 extern vmCvar_t match_readypercent;
 extern vmCvar_t match_timeoutcount;
 extern vmCvar_t match_timeoutlength;
@@ -2047,7 +2038,6 @@ extern vmCvar_t vote_allow_matchreset;
 extern vmCvar_t vote_allow_randommap;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
-extern vmCvar_t z_serverflags;
 extern vmCvar_t g_letterbox;
 extern vmCvar_t bot_enable;
 
@@ -2056,19 +2046,6 @@ extern vmCvar_t g_autoFireteams;
 
 extern vmCvar_t g_nextmap;
 extern vmCvar_t g_nextcampaign;
-
-extern vmCvar_t
-    bot_debug; // if set, draw "thought bubbles" for crosshair-selected bot
-extern vmCvar_t bot_debug_curAINode;  // the text of the current ainode for the
-                                      // bot begin debugged
-extern vmCvar_t bot_debug_alertState; // alert state of the bot being debugged
-extern vmCvar_t bot_debug_pos;        // coords of the bot being debugged
-extern vmCvar_t
-    bot_debug_weaponAutonomy; // weapon autonomy of the bot being debugged
-extern vmCvar_t
-    bot_debug_movementAutonomy; // movement autonomy of the bot being debugged
-extern vmCvar_t bot_debug_cover_spot; // What cover spot are we going to?
-extern vmCvar_t bot_debug_anim;       // what animation is the bot playing?
 
 extern vmCvar_t g_dailyLogs;
 
@@ -2088,7 +2065,6 @@ extern vmCvar_t g_mapScriptDir;
 extern vmCvar_t g_blockedMaps;
 
 extern vmCvar_t g_adminLog;
-extern vmCvar_t g_logCommands;
 extern vmCvar_t g_userConfig;
 extern vmCvar_t g_levelConfig;
 
@@ -2112,13 +2088,8 @@ extern vmCvar_t g_voteCooldown;
 
 extern vmCvar_t mod_version;
 
-extern vmCvar_t g_lastVisitedMessage;
-
 extern vmCvar_t g_mapDatabase;
 extern vmCvar_t g_banDatabase;
-
-extern vmCvar_t troll_speed;
-extern vmCvar_t g_raceDatabase;
 
 extern vmCvar_t g_disableVoteAfterMapChange;
 
