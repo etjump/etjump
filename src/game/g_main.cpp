@@ -72,7 +72,6 @@ int saveGamePending; // 0 = no, 1 = check, 2 = loading
 mapEntityData_Team_t mapEntityData[2];
 
 vmCvar_t g_gametype;
-vmCvar_t g_fraglimit;
 vmCvar_t g_timelimit;
 vmCvar_t g_password;
 vmCvar_t sv_privatepassword;
@@ -82,7 +81,6 @@ vmCvar_t g_minGameClients; // NERVE - SMF
 vmCvar_t g_dedicated;
 vmCvar_t g_cheats;
 vmCvar_t g_knockback;
-vmCvar_t g_quadfactor;
 vmCvar_t g_forcerespawn;
 vmCvar_t g_inactivity;
 vmCvar_t g_debugMove;
@@ -93,14 +91,11 @@ vmCvar_t g_motd;
 vmCvar_t g_warmup;
 
 // NERVE - SMF
-vmCvar_t g_warmupLatch;
 vmCvar_t g_nextTimeLimit;
-vmCvar_t g_showHeadshotRatio;
 vmCvar_t g_userTimeLimit;
 vmCvar_t g_userAlliedRespawnTime;
 vmCvar_t g_userAxisRespawnTime;
 vmCvar_t g_currentRound;
-vmCvar_t g_noTeamSwitching;
 vmCvar_t g_altStopwatchMode;
 vmCvar_t g_gamestate;
 vmCvar_t g_swapteams;
@@ -119,10 +114,8 @@ vmCvar_t g_knifeonly;         // Xian
 
 vmCvar_t g_needpass;
 vmCvar_t g_doWarmup;
-vmCvar_t g_teamAutoJoin;
 vmCvar_t g_banIPs;
 vmCvar_t g_filterBan;
-vmCvar_t g_rankings;
 vmCvar_t g_smoothClients;
 vmCvar_t pmove_msec;
 
@@ -134,7 +127,6 @@ vmCvar_t g_developer;
 
 vmCvar_t g_userAim;
 
-vmCvar_t g_footstepAudibleRange;
 // JPW NERVE multiplayer reinforcement times
 vmCvar_t g_redlimbotime;
 vmCvar_t g_bluelimbotime;
@@ -171,7 +163,6 @@ vmCvar_t vote_allow_matchreset;
 vmCvar_t vote_allow_randommap;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
-vmCvar_t z_serverflags;
 
 vmCvar_t g_covertopsChargeTime;
 vmCvar_t refereePassword;
@@ -230,7 +221,6 @@ vmCvar_t g_nameChangeInterval;
 vmCvar_t g_userConfig;
 vmCvar_t g_levelConfig;
 vmCvar_t g_adminLog;
-vmCvar_t g_logCommands;
 
 // Banner
 vmCvar_t g_bannerLocation;
@@ -257,13 +247,8 @@ vmCvar_t g_voteCooldown;
 
 vmCvar_t mod_version;
 
-vmCvar_t g_lastVisitedMessage;
-
 vmCvar_t g_mapDatabase;
 vmCvar_t g_banDatabase;
-
-vmCvar_t troll_speed;
-vmCvar_t g_raceDatabase;
 
 vmCvar_t g_disableVoteAfterMapChange;
 
@@ -353,26 +338,17 @@ cvarTable_t gameCvarTable[] = {
      qfalse}, // NERVE - SMF
 
     // change anytime vars
-    {&g_fraglimit, "fraglimit", "0",
-     /*CVAR_SERVERINFO |*/ CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue},
     {&g_timelimit, "timelimit", "0",
      CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue},
 
     {&g_warmup, "g_warmup", "60", CVAR_ARCHIVE, 0, qtrue},
     {&g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue},
 
-    // NERVE - SMF
-    {&g_warmupLatch, "g_warmupLatch", "1", 0, 0, qfalse},
-
     {&g_nextTimeLimit, "g_nextTimeLimit", "0", CVAR_WOLFINFO, 0, qfalse},
     {&g_currentRound, "g_currentRound", "0", CVAR_WOLFINFO, 0, qfalse, qtrue},
     {&g_altStopwatchMode, "g_altStopwatchMode", "0", CVAR_ARCHIVE, 0, qtrue,
      qtrue},
     {&g_gamestate, "gamestate", "-1", CVAR_WOLFINFO | CVAR_ROM, 0, qfalse},
-
-    {&g_noTeamSwitching, "g_noTeamSwitching", "0", CVAR_ARCHIVE, 0, qtrue},
-
-    {&g_showHeadshotRatio, "g_showHeadshotRatio", "0", 0, 0, qfalse},
 
     {&g_userTimeLimit, "g_userTimeLimit", "0", 0, 0, qfalse, qtrue},
     {&g_userAlliedRespawnTime, "g_userAlliedRespawnTime", "0", 0, 0, qfalse,
@@ -394,7 +370,6 @@ cvarTable_t gameCvarTable[] = {
     {&g_dedicated, "dedicated", "0", 0, 0, qfalse},
 
     {&g_knockback, "g_knockback", "1000", 0, 0, qtrue, qtrue},
-    {&g_quadfactor, "g_quadfactor", "3", 0, 0, qtrue},
 
     {&g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qtrue},
     {&g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue},
@@ -422,14 +397,10 @@ cvarTable_t gameCvarTable[] = {
     {&g_knifeonly, "g_knifeonly", "0", 0, 0, qtrue}, // Xian - Fast Medic Resing
 
     {&g_developer, "developer", "0", CVAR_TEMP, 0, qfalse},
-    {&g_rankings, "g_rankings", "0", 0, 0, qfalse},
     {&g_userAim, "g_userAim", "1", CVAR_CHEAT, 0, qfalse},
 
     {&g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
     {&pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
-
-    {&g_footstepAudibleRange, "g_footstepAudibleRange", "256", CVAR_CHEAT, 0,
-     qfalse},
 
     {&g_scriptName, "g_scriptName", "", CVAR_CHEAT, 0, qfalse},
 
@@ -465,9 +436,6 @@ cvarTable_t gameCvarTable[] = {
     {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
     {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
     {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
-
-    // state vars
-    {&z_serverflags, "z_serverflags", "0", 0, 0, qfalse, qfalse},
 
     {&g_debugConstruct, "g_debugConstruct", "0", CVAR_CHEAT, 0, qfalse},
 
@@ -546,7 +514,6 @@ cvarTable_t gameCvarTable[] = {
     {&g_blockedMaps, "g_blockedMaps", "", CVAR_ARCHIVE},
 
     {&g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE},
-    {&g_logCommands, "g_logCommands", "1", CVAR_ARCHIVE},
     {&g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE},
     {&g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE},
 
@@ -574,12 +541,8 @@ cvarTable_t gameCvarTable[] = {
     {&g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE},
     {&mod_version, "mod_version", GAME_VERSION, CVAR_SERVERINFO},
 
-    {&g_lastVisitedMessage, "g_lastVisitedMessage",
-     "^2Welcome back! Your last visit was on [t].", CVAR_ARCHIVE},
     {&g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE},
     {&g_banDatabase, "g_banDatabase", "bans.dat", CVAR_ARCHIVE},
-    {&troll_speed, "troll_speed", "127", CVAR_ARCHIVE},
-    {&g_raceDatabase, "g_raceDatabase", "races.db", CVAR_ARCHIVE | CVAR_LATCH},
     {&g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000",
      CVAR_ARCHIVE},
     {&g_motdFile, "g_motdFile", "motd.json", CVAR_ARCHIVE},
@@ -2959,119 +2922,6 @@ void CheckExitRules(void) {
   }
 }
 
-/*
-========================================================================
-
-FUNCTIONS CALLED EVERY FRAME
-
-========================================================================
-*/
-
-/*
-=============
-CheckWolfMP
-
-NERVE - SMF
-=============
-*/
-/*
-void CheckGameState() {
-    gamestate_t current_gs;
-
-    current_gs = trap_Cvar_VariableIntegerValue( "gamestate" );
-
-    if ( level.intermissiontime && current_gs != GS_INTERMISSION ) {
-        trap_Cvar_Set( "gamestate", va( "%i", GS_INTERMISSION ) );
-        return;
-    }
-
-    if ( g_noTeamSwitching.integer && !trap_Cvar_VariableIntegerValue(
-"sv_serverRestarting" ) ) { if ( current_gs != GS_WAITING_FOR_PLAYERS &&
-level.numPlayingClients <= 1 && level.lastRestartTime + 1000 < level.time ) {
-            level.lastRestartTime = level.time;
-            trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n",
-GS_WAITING_FOR_PLAYERS ) );
-        }
-    }
-
-    if ( current_gs == GS_WAITING_FOR_PLAYERS && g_minGameClients.integer > 1 &&
-        level.numPlayingClients >= g_minGameClients.integer &&
-level.lastRestartTime + 1000 < level.time ) {
-
-        level.lastRestartTime = level.time;
-        trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n",
-GS_WARMUP ) );
-    }
-
-    if( g_gametype.integer == GT_WOLF_LMS && current_gs ==
-GS_WAITING_FOR_PLAYERS && level.numPlayingClients > 1
-        && level.lastRestartTime + 1000 < level.time ) {
-        level.lastRestartTime = level.time;
-        trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n",
-GS_WARMUP ) );
-    }
-
-    // if the warmup is changed at the console, restart it
-    if ( current_gs == GS_WARMUP_COUNTDOWN && g_warmup.modificationCount !=
-level.warmupModificationCount ) { level.warmupModificationCount =
-g_warmup.modificationCount; current_gs = GS_WARMUP;
-    }
-
-    // check warmup latch
-    if ( current_gs == GS_WARMUP ) {
-        int delay = g_warmup.integer;
-
-        if( g_gametype.integer == GT_WOLF_CAMPAIGN || g_gametype.integer ==
-GT_WOLF_LMS ) delay *= 2;
-
-        delay++;
-
-        if ( delay < 6 ) {
-            trap_Cvar_Set( "g_warmup", "5" );
-            delay = 7;
-        }
-
-        level.warmupTime = level.time + ( delay * 1000 );
-        trap_SetConfigstring( CS_WARMUP, va("%i", level.warmupTime) );
-        trap_Cvar_Set( "gamestate", va( "%i", GS_WARMUP_COUNTDOWN ) );
-    }
-}
-*/
-
-/*
-=============
-CheckWolfMP
-
-NERVE - SMF - Once a frame, check for changes in wolf MP player state
-=============
-*/
-/*
-void CheckWolfMP() {
-  // TTimo unused
-//	static qboolean latch = qfalse;
-
-    // NERVE - SMF - check game state
-    CheckGameState();
-
-    if ( level.warmupTime == 0 ) {
-        return;
-    }
-
-
-    // Only do the restart for MP
-    if(g_gametype.integer != GT_SINGLE_PLAYER && g_gametype.integer != GT_COOP)
-
-    // if the warmup time has counted down, restart
-    if ( level.time > level.warmupTime ) {
-        level.warmupTime += 10000;
-        trap_Cvar_Set( "g_restarted", "1" );
-        trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-        level.restarted = qtrue;
-        return;
-    }
-}
-// -NERVE - SMF
-*/
 void CheckWolfMP() {
   // check because we run 6 game frames before calling Connect and/or
   // ClientBegin for clients on a map_restart
