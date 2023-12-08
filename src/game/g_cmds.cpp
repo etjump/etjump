@@ -2079,7 +2079,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
 
   // if chat message is too long, e.g. being sent from console
   // cut it and put ellipsis at the end
-  if (std::strlen(chatText) > len) {
+  if (Q_strnlen(chatText, MAX_SAY_TEXT) > len) {
     text[len - 2] = '.';
     text[len - 3] = '.';
     text[len - 4] = '.';
