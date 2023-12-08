@@ -2077,13 +2077,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   len = sizeof(text);
   Q_strncpyz(text, chatText, len);
 
-  // chat messages should be always null terminated but let's make sure
-  char chatSafeBuf[MAX_SAY_TEXT];
-  Q_strncpyz(chatSafeBuf, chatText, sizeof(chatSafeBuf));
-
   // if chat message is too long, e.g. being sent from console
   // cut it and put ellipsis at the end
-  if (std::strlen(chatSafeBuf) > len) {
+  if (std::strlen(chatText) > len) {
     text[len - 2] = '.';
     text[len - 3] = '.';
     text[len - 4] = '.';
