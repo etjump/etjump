@@ -41,11 +41,15 @@ void SpectatorInfo::render() const {
   float x = etj_spectatorInfoX.value;
   float y = etj_spectatorInfoY.value;
   const float size = 0.1f * etj_spectatorInfoSize.value;
+  const auto rowHeight = static_cast<float>(CG_Text_Height_Ext(
+                             "Yy", size, 0, &cgs.media.limboFont2)) *
+                         1.75f;
   float w;
   const char *spectator;
   const int textStyle = etj_spectatorInfoShadow.integer
                             ? ITEM_TEXTSTYLE_SHADOWED
                             : ITEM_TEXTSTYLE_NORMAL;
+  const vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
 
   ETJump_AdjustPosition(&x);
 
@@ -58,6 +62,8 @@ void SpectatorInfo::render() const {
     if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR) {
       if (cg.scores[i].followedClient == cg.snap->ps.clientNum) {
         spectator = cgs.clientinfo[cg.scores[i].client].name;
+        const bool inactive =
+            cgs.clientinfo[cg.scores[i].client].clientIsInactive;
 
         switch (etj_drawSpectatorInfo.integer) {
           case 2: // center align
@@ -76,12 +82,10 @@ void SpectatorInfo::render() const {
 
         // for consistent line height, use pre-defined string
         // for height calculation instead of current spectators name
-        y += static_cast<float>(
-                 CG_Text_Height_Ext("Yy", size, 0, &cgs.media.limboFont2)) *
-             1.75f;
+        y += rowHeight;
 
-        DrawString(x - w, y, size, size, colorWhite, qfalse, spectator, 0,
-                   textStyle);
+        DrawString(x - w, y, size, size, inactive ? inactiveColor : colorWhite,
+                   qfalse, spectator, 0, textStyle);
       }
     }
   }
