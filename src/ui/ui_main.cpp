@@ -3755,7 +3755,7 @@ UI_LoadDemos
 */
 static void UI_LoadDemos() {
   if (uiInfo.currentDemoPath.empty()) {
-    uiInfo.currentDemoPath.push_back("demos");
+    uiInfo.currentDemoPath.emplace_back("demos");
   }
   std::string path =
       ETJump::StringUtil::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
@@ -3777,7 +3777,8 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Folder;
     objectInfo.name = std::string(dirPtr);
-    objectInfo.displayName = "^7" + objectInfo.name + "/";
+    objectInfo.displayName =
+        "^7" + ETJump::sanitize(objectInfo.name, false) + "/";
     if (objectInfo.name != "." && objectInfo.name != "..") {
       directories.push_back(objectInfo);
     }
@@ -3790,6 +3791,7 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Item;
     objectInfo.name = std::string(namePtr);
+    objectInfo.displayName = ETJump::sanitize(objectInfo.name, false);
     files.push_back(objectInfo);
     namePtr += objectInfo.name.length() + 1;
   }
@@ -6802,13 +6804,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
     }
   } else if (feederID == FEEDER_DEMOS) {
     if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size())) {
-      const auto object = &uiInfo.demoObjects[index];
-      switch (object->type) {
-        case FileSystemObjectType::Folder:
-          return object->displayName.c_str();
-        case FileSystemObjectType::Item:
-          return object->name.c_str();
-      }
+      return uiInfo.demoObjects[index].displayName.c_str();
     }
   } else if (feederID == FEEDER_PROFILES) {
     if (index >= 0 && index < uiInfo.profileCount) {
