@@ -41,6 +41,9 @@ void SpectatorInfo::render() const {
   float x = etj_spectatorInfoX.value;
   float y = etj_spectatorInfoY.value;
   const float size = 0.1f * etj_spectatorInfoSize.value;
+
+  // for consistent line spacing, use pre-defined string
+  // for height calculation instead of current spectators name
   const auto rowHeight = static_cast<float>(CG_Text_Height_Ext(
                              "Yy", size, 0, &cgs.media.limboFont2)) *
                          1.75f;
@@ -80,8 +83,6 @@ void SpectatorInfo::render() const {
             break;
         }
 
-        // for consistent line height, use pre-defined string
-        // for height calculation instead of current spectators name
         y += rowHeight;
 
         DrawString(x - w, y, size, size, inactive ? inactiveColor : colorWhite,
