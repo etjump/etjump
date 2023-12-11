@@ -932,6 +932,12 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
 void ETJump::TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
+        // 1 active season means only default season is active
+        if (_activeSeasonsIds.size() == 1 && _upcomingSeasonsIds.empty() &&
+            _pastSeasonsIds.empty()) {
+          return std::make_unique<PrintResult>("No seasons found.\n");
+        }
+
         std::string seasonHeader = stringFormat(
             "\n^g %-30s %-15s%s\n", "Season", "Start Date", "End date");
 
@@ -941,57 +947,64 @@ void ETJump::TimerunV2::printSeasons(int clientNum) {
             "^g------------------------------------------------------------\n";
         // clang-format on
 
-        message += " ^gActive seasons\n" + seasonHeader;
+        if (_activeSeasonsIds.size() > 1) {
+          message += " ^gActive seasons\n" + seasonHeader;
 
-        for (const auto &s : _activeSeasons) {
-          // default season is always active and cannot be deleted,
-          // don't bother listing it
-          if (s.id == defaultSeasonId) {
-            continue;
+          for (const auto &s : _activeSeasons) {
+            // default season is always active and cannot be deleted,
+            // don't bother listing it
+            if (s.id == defaultSeasonId) {
+              continue;
+            }
+
+            std::string formatString =
+                stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
+                             30 + StringUtil::countExtraPadding(s.name));
+
+            message += stringFormat(
+                formatString, s.name, s.startTime.toAbbrevMonthDateString(),
+                s.endTime.hasValue()
+                    ? s.endTime.value().toAbbrevMonthDateString()
+                    : "*");
           }
-
-          std::string formatString =
-              stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
-                           30 + StringUtil::countExtraPadding(s.name));
-
-          message += stringFormat(
-              formatString, s.name, s.startTime.toAbbrevMonthDateString(),
-              s.endTime.hasValue() ? s.endTime.value().toAbbrevMonthDateString()
-                                   : "*");
         }
 
-        // clang-format off
-        message += "\n^g------------------------------------------------------------\n";
-        // clang-format on
+        if (!_upcomingSeasonsIds.empty()) {
+          // clang-format off
+          message += "\n^g------------------------------------------------------------\n";
+          // clang-format on
+          message += " ^gUpcoming seasons\n" + seasonHeader;
 
-        message += " ^gUpcoming seasons\n" + seasonHeader;
+          for (const auto &s : _upcomingSeasons) {
+            std::string formatString =
+                stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
+                             30 + StringUtil::countExtraPadding(s.name));
 
-        for (const auto &s : _upcomingSeasons) {
-          std::string formatString =
-              stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
-                           30 + StringUtil::countExtraPadding(s.name));
-
-          message += stringFormat(
-              formatString, s.name, s.startTime.toAbbrevMonthDateString(),
-              s.endTime.hasValue() ? s.endTime.value().toAbbrevMonthDateString()
-                                   : "*");
+            message += stringFormat(
+                formatString, s.name, s.startTime.toAbbrevMonthDateString(),
+                s.endTime.hasValue()
+                    ? s.endTime.value().toAbbrevMonthDateString()
+                    : "*");
+          }
         }
 
-        // clang-format off
-        message += "\n^g------------------------------------------------------------\n";
-        // clang-format on
+        if (!_pastSeasonsIds.empty()) {
+          // clang-format off
+          message += "\n^g------------------------------------------------------------\n";
+          // clang-format on
+          message += " ^gPast seasons\n" + seasonHeader;
 
-        message += " ^gPast seasons\n" + seasonHeader;
+          for (const auto &s : _pastSeasons) {
+            std::string formatString =
+                stringFormat(" ^9%%-%ds ^9%%-15s%%s\n",
+                             30 + StringUtil::countExtraPadding(s.name));
 
-        for (const auto &s : _pastSeasons) {
-          std::string formatString =
-              stringFormat(" ^9%%-%ds ^9%%-15s%%s\n",
-                           30 + StringUtil::countExtraPadding(s.name));
-
-          message += stringFormat(
-              formatString, s.name, s.startTime.toAbbrevMonthDateString(),
-              s.endTime.hasValue() ? s.endTime.value().toAbbrevMonthDateString()
-                                   : "*");
+            message += stringFormat(
+                formatString, s.name, s.startTime.toAbbrevMonthDateString(),
+                s.endTime.hasValue()
+                    ? s.endTime.value().toAbbrevMonthDateString()
+                    : "*");
+          }
         }
 
         return std::make_unique<PrintResult>(message);
