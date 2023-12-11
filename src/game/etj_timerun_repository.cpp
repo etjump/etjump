@@ -371,8 +371,8 @@ void ETJump::TimerunRepository::editSeason(
     anythingToUpdate = true;
     updatedFields.emplace_back("start_time");
     updatedParams.push_back(params.startTime.value().toDateTimeString());
-
-  } if (params.endTime.hasValue()) {
+  }
+  if (params.endTime.hasValue()) {
     newEndTime = params.endTime;
     anythingToUpdate = true;
     updatedFields.emplace_back("end_time");
@@ -480,7 +480,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
 
   auto seasons = getSeasonsForName(season, false);
 
-  if (seasons.size() == 0) {
+  if (seasons.empty()) {
     throw std::runtime_error(
         stringFormat("No season matches name `%s`", season));
   }
@@ -538,7 +538,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     binder << s.id;
   }
 
-  binder << map;
+  binder << StringUtil::toLowerCase(map);
 
   if (runSpecified) {
     binder << "%" + params.run.value() + "%";
