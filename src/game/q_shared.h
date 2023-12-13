@@ -824,7 +824,7 @@ char *Q_CleanStr(char *string);
 // removes whitespaces and other bad directory characters
 char *Q_CleanDirName(char *dirname);
 // safe strlen up to N chars
-size_t Q_strnlen(const char *str, size_t maxlan);
+size_t Q_strnlen(const char *str, size_t maxlen);
 
 // #define _vsnprintf use_Q_vsnprintf
 // #define vsnprintf use_Q_vsnprintf
