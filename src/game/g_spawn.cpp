@@ -1316,6 +1316,20 @@ void G_SpawnEntitiesFromString(void) {
     G_SpawnGEntityFromSpawnVars();
   }
 
+  if (!level.gameManager) {
+    G_Printf("^3WARNING: ^7No ^3'script_multiplayer' ^7found in the map, "
+             "checking for other entities with scriptname... ");
+
+    if (!ETJump::checkEntsForScriptname()) {
+      G_Printf("^7No scriptable entities found, spawning "
+               "^3'etjump_game_manager'^7... ");
+
+      ETJump::spawnGameManager();
+
+      G_Printf("^2DONE\n");
+    }
+  }
+
   G_Printf("Disable spawning!\n");
   level.spawning = qfalse; // any future calls to G_Spawn*() will be errors
 }

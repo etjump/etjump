@@ -453,3 +453,23 @@ bool allTokensCollected(gentity_t *ent) {
   return tokenCounts[0] == easyCount && tokenCounts[1] == mediumCount &&
          tokenCounts[2] == hardCount;
 }
+
+namespace ETJump {
+bool checkEntsForScriptname() {
+  // clients and bodyqueue don't have scriptname set
+  const int startEnt = MAX_CLIENTS + BODY_QUEUE_SIZE;
+
+  for (int i = startEnt; i < level.num_entities; i++) {
+    gentity_t *current = &g_entities[i];
+    if (!current->scriptName) {
+      continue;
+    } else {
+      G_Printf("^2FOUND\n");
+      return true; // ent with scriptname found, we can exit
+    }
+  }
+
+  G_Printf("^1NOT FOUND\n");
+  return false;
+}
+} // namespace ETJump
