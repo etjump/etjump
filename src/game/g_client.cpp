@@ -887,13 +887,6 @@ void SetWolfSpawnWeapons(gclient_t *client) {
 
   AddWeaponToPlayer(client, WP_KNIFE, 1, 0, qtrue);
 
-  // Feen: PSM -TEST
-  if ((g_portalMode.integer == 0) && (level.portalEnabled) &&
-      !client->sess.timerunActive) // Freestyle mode...
-  {
-    AddWeaponToPlayer(client, WP_PORTAL_GUN, 1, 0, qtrue);
-  }
-
   client->ps.weaponstate = WEAPON_READY;
 
   // Zero: CTF: if CTF give no other weapons than knife
@@ -988,7 +981,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
       }
     }
 
-    if (g_knifeonly.integer != 1) {
+    if (!g_knifeonly.integer) {
       // Field ops gets binoculars, ammo pack,
       // artillery, and a grenade
       if (pc == PC_FIELDOPS) {
@@ -1534,6 +1527,11 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         } else {
           AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 2, qfalse);
         }
+      }
+
+      if (!g_portalMode.integer && level.portalEnabled &&
+          !client->sess.timerunActive) {
+        AddWeaponToPlayer(client, WP_PORTAL_GUN, 1, 0, qfalse);
       }
     } else {
       // Knifeonly block
