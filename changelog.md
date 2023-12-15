@@ -22,6 +22,20 @@
     * fixed crash when firing `shooter_grenade` - the entity is now usable
     * fixed crash with `target_activate` when activated without activator
     * fixed crash with `setplayerspawn/setplayerautospawn/killplayer/damageplayer` script actions when activated without activator
+* cleaned up several unused server cvars [#1111](https://github.com/etjump/etjump/pull/1111)
+* fixed incorrect format specifier in `await` command causing a crash [#1120](https://github.com/etjump/etjump/pull/1120)
+* `[map]` parameter in `ranks [map] [run]` command is no longer case sensitive [#1119](https://github.com/etjump/etjump/pull/1119)
+* demo filenames in replay menu are now stripped of color codes [#1115](https://github.com/etjump/etjump/pull/1115)
+* inactive specators are now drawn semi transparent in spectator list [#1116](https://github.com/etjump/etjump/pull/1116)
+* fixed portalgun bypassing checks for `g_weapons` and `g_knifeOnly` [#1121](https://github.com/etjump/etjump/pull/1121)
+* optimized etjump renderable system, potentially increasing performance in some scenarios by ~30% [#1109](https://github.com/etjump/etjump/pull/1109)
+* added `etjump_game_manager` entity [#1123](https://github.com/etjump/etjump/pull/1123)
+  * automatically placed on a map if no `script_multiplayer` or entities with `scriptname` are present to always allow mapscripting on any map
+    * access is provided via `etjump_manager` script block
+  * not meant to be placed by mappers - this functions the same as `script_multiplayer` entity
+* added `etj_autoPortalBinds` cvar to automatically bind `weapalt` to `+attack2` and back when switchig to/from portalgun [#1125](https://github.com/etjump/etjump/pull/1125)
+  * this effectively allows you to use portalgun with `weapalt` without having to separetly bind `+attack2`
+* fixed not being able to enter wounded state during timeruns, which broke some timeruns (`2weeks` for example) [#1126](https://github.com/etjump/etjump/pull/1126)
 
 # ETJump 3.0.1
 
