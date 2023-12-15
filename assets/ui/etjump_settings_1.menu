@@ -6,11 +6,11 @@
 // Left side menus
 #define SUBW_GENERAL_Y SUBW_Y
 #define SUBW_GENERAL_ITEM_Y SUBW_GENERAL_Y + SUBW_HEADER_HEIGHT
-#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 21)
+#define SUBW_GENERAL_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 22)
 
-#define SUBW_PLAYERS_Y SUBW_GENERAL_Y + SUBW_GENERAL_HEIGHT + SUBW_SPACING_Y
-#define SUBW_PLAYERS_ITEM_Y SUBW_PLAYERS_Y + SUBW_HEADER_HEIGHT
-#define SUBW_PLAYERS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 6)
+#define SUBW_CROSSHAIR_Y SUBW_GENERAL_Y + SUBW_GENERAL_HEIGHT + SUBW_SPACING_Y
+#define SUBW_CROSSHAIR_ITEM_Y SUBW_CROSSHAIR_Y + SUBW_HEADER_HEIGHT
+#define SUBW_CROSSHAIR_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
 // Right side menus
 #define SUBW_CHAT_Y SUBW_Y
@@ -25,9 +25,9 @@
 #define SUBW_SOUNDS_ITEM_Y SUBW_SOUNDS_Y + SUBW_HEADER_HEIGHT
 #define SUBW_SOUNDS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
-#define SUBW_CROSSHAIR_Y SUBW_SOUNDS_Y + SUBW_SOUNDS_HEIGHT + SUBW_SPACING_Y
-#define SUBW_CROSSHAIR_ITEM_Y SUBW_CROSSHAIR_Y + SUBW_HEADER_HEIGHT
-#define SUBW_CROSSHAIR_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
+#define SUBW_PLAYERS_Y SUBW_SOUNDS_Y + SUBW_SOUNDS_HEIGHT + SUBW_SPACING_Y
+#define SUBW_PLAYERS_ITEM_Y SUBW_PLAYERS_Y + SUBW_HEADER_HEIGHT
+#define SUBW_PLAYERS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 6)
 
 #define GROUP_NAME "group_etjump_settings_1"
 
@@ -69,18 +69,16 @@ menuDef {
         CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 20), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_menuSensitivity", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 20), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Menu sensitivity:", 0.2, SUBW_ITEM_HEIGHT, etj_menuSensitivity 1.0 0.05 4.0 0.05, "Sets mouse sensitivity for menus\netj_menuSensitivity")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 21), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "No panzer autoswitch:", 0.2, SUBW_ITEM_HEIGHT, "etj_noPanzerAutoswitch", "Toggle automatic weapon switching after firing a panzerfaust\netj_noPanzerAutoswitch")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_GENERAL_ITEM_Y + (SUBW_ITEM_SPACING_Y * 22), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Portalgun auto binds:", 0.2, SUBW_ITEM_HEIGHT, "etj_autoPortalBinds", "Automatically set 'weapalt' bindings to '+attack2' and back when switching to/from portalgun\netj_autoPortalBinds")
 
-    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_PLAYERS_Y, SUBW_WIDTH, SUBW_PLAYERS_HEIGHT, "PLAYERS")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide players:", 0.2, SUBW_ITEM_HEIGHT, "etj_hide", "Hides other players when they are too close\netj_hide")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_hideDistance", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide distance:", 0.2, SUBW_ITEM_HEIGHT, etj_hideDistance 128 0 1000 10, "Distance at which other players are hidden\netj_hideDistance")
-        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_hideFadeRange", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide fade range:", 0.2, SUBW_ITEM_HEIGHT, etj_hideFadeRange 200 0 1000 20, "Additional fade range before other players are hidden\netj_hideFadeRange")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide self:", 0.2, SUBW_ITEM_HEIGHT, "etj_hideMe", "Hide yourself from other players\netj_hideMe")
-        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_playerOpacity", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player opacity:", 0.2, SUBW_ITEM_HEIGHT, etj_playerOpacity 1 0 1 0.05, "Sets transparency of other players\netj_playerOpacity")
-        YESNO               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Simple player shader:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSimplePlayers", "Draw other players as solid color\netj_drawSimplePlayers")
-        MULTI               (SUBW_ITEM_LEFT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player shader color:", 0.2, SUBW_ITEM_HEIGHT, "etj_simplePlayersColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of simple player shader\netj_simplePlayersColor")
+    SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_CROSSHAIR_Y, SUBW_WIDTH, SUBW_CROSSHAIR_HEIGHT, "CROSSHAIR")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairScaleX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Scale X:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairScaleX 1.0 -5.0 5.0 0.1, "Horizontal scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleX")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairScaleY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Scale Y:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairScaleY 1.0 -5.0 5.0 0.1, "Vertical scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleY")
+        CVARFLOATLABEL      (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairThickness", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Line thickness:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairThickness 1.0 0.0 5.0 0.1, "Line thickness of ETJump crosshairs\netj_crosshairThickness")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Crosshair outline:", 0.2, SUBW_ITEM_HEIGHT, "etj_crosshairOutline", "Draw outline on ETJump crosshairs\netj_crosshairOutline")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CHAT_Y, SUBW_WIDTH, SUBW_CHAT_HEIGHT, "CHAT")
         CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CHAT_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_chatAlpha", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
@@ -116,14 +114,17 @@ menuDef {
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Looped sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_loopedSounds", "Play looping sounds on map\netj_loopedSounds")
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SOUNDS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Uphill step sounds:", 0.2, SUBW_ITEM_HEIGHT, "etj_uphillSteps", "Enable stepsounds on very low impact speeds\netj_uphillSteps")
 
-    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CROSSHAIR_Y, SUBW_WIDTH, SUBW_CROSSHAIR_HEIGHT, "CROSSHAIR")
-        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairScaleX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Scale X:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairScaleX 1.0 -5.0 5.0 0.1, "Horizontal scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleX")
-        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairScaleY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Scale Y:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairScaleY 1.0 -5.0 5.0 0.1, "Vertical scale of crosshair, negative values will flip the crosshair\netj_crosshairScaleY")
-        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_crosshairThickness", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Line thickness:", 0.2, SUBW_ITEM_HEIGHT, etj_crosshairThickness 1.0 0.0 5.0 0.1, "Line thickness of ETJump crosshairs\netj_crosshairThickness")
-        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CROSSHAIR_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Crosshair outline:", 0.2, SUBW_ITEM_HEIGHT, "etj_crosshairOutline", "Draw outline on ETJump crosshairs\netj_crosshairOutline")
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_PLAYERS_Y, SUBW_WIDTH, SUBW_PLAYERS_HEIGHT, "PLAYERS")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide players:", 0.2, SUBW_ITEM_HEIGHT, "etj_hide", "Hides other players when they are too close\netj_hide")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_hideDistance", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide distance:", 0.2, SUBW_ITEM_HEIGHT, etj_hideDistance 128 0 1000 10, "Distance at which other players are hidden\netj_hideDistance")
+        CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_hideFadeRange", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide fade range:", 0.2, SUBW_ITEM_HEIGHT, etj_hideFadeRange 200 0 1000 20, "Additional fade range before other players are hidden\netj_hideFadeRange")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide self:", 0.2, SUBW_ITEM_HEIGHT, "etj_hideMe", "Hide yourself from other players\netj_hideMe")
+        CVARFLOATLABEL      (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_playerOpacity", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 4), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player opacity:", 0.2, SUBW_ITEM_HEIGHT, etj_playerOpacity 1 0 1 0.05, "Sets transparency of other players\netj_playerOpacity")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Simple player shader:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawSimplePlayers", "Draw other players as solid color\netj_drawSimplePlayers")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_PLAYERS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 6), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Player shader color:", 0.2, SUBW_ITEM_HEIGHT, "etj_simplePlayersColor", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets color of simple player shader\netj_simplePlayersColor")
 
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump)
         BUTTONACTIVE        (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_1; open etjump_settings_1)

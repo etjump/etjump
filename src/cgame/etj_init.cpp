@@ -607,6 +607,31 @@ void runFrameEnd() {
     }
     cg.shadowCvarsSet = true;
   }
+
+  if (etj_autoPortalBinds.integer) {
+    if (cg.weaponSelect == WP_PORTAL_GUN && !cg.portalgunBindingsAdjusted) {
+      cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
+      if (cg.weapAltB1 != -1) {
+        trap_Key_SetBinding(cg.weapAltB1, "+attack2");
+      }
+      if (cg.weapAltB2 != -1) {
+        trap_Key_SetBinding(cg.weapAltB2, "+attack2");
+      }
+
+      cg.portalgunBindingsAdjusted = true;
+    } else if (cg.weaponSelect != WP_PORTAL_GUN &&
+               cg.portalgunBindingsAdjusted) {
+      cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
+      if (cg.weapAltB1 != -1) {
+        trap_Key_SetBinding(cg.weapAltB1, "weapalt");
+      }
+      if (cg.weapAltB2 != -1) {
+        trap_Key_SetBinding(cg.weapAltB2, "weapalt");
+      }
+
+      cg.portalgunBindingsAdjusted = false;
+    }
+  }
 }
 
 playerState_t *getValidPlayerState() {
