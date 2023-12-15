@@ -339,6 +339,11 @@ void CopyToBodyQue(gentity_t *ent) {
 
   trap_UnlinkEntity(ent);
 
+  // no corpses if we're timerunning
+  if (ent->client->sess.timerunActive) {
+    return;
+  }
+
   // if client is in a nodrop area, don't leave the body
   contents = trap_PointContents(ent->client->ps.origin, -1);
   if (!BG_DropItems(contents, shared.integer)) {
@@ -349,22 +354,19 @@ void CopyToBodyQue(gentity_t *ent) {
   body = level.bodyQue[level.bodyQueIndex];
   level.bodyQueIndex = (level.bodyQueIndex + 1) % BODY_QUEUE_SIZE;
 
-  // Gordon: um, what on earth was this here for?
-  //	trap_UnlinkEntity (body);
-
   body->s = ent->s;
   body->s.eFlags = EF_DEAD; // clear EF_TALK, etc
 
   if (ent->client->ps.eFlags & EF_HEADSHOT) {
-    body->s.eFlags |= EF_HEADSHOT; // make sure the dead body draws no head
-                                   // (if killed that way)
+    // make sure the dead body draws no head (if killed that way)
+    body->s.eFlags |= EF_HEADSHOT;
   }
 
   body->s.eType = ET_CORPSE;
   body->classname = "corpse";
   body->s.powerups = 0;  // clear powerups
   body->s.loopSound = 0; // clear lava burning
-  body->s.number = body - g_entities;
+  body->s.number = static_cast<int>(body - g_entities);
   body->timestamp = level.time;
   body->physicsObject = qtrue;
   body->physicsBounce = 0; // don't bounce
@@ -382,8 +384,8 @@ void CopyToBodyQue(gentity_t *ent) {
   body->s.eventSequence = 0;
 
   // DHM - Nerve
-  // change the animation to the last-frame only, so the sequence
-  // doesn't repeat anew for the body
+  // change the animation to the last-frame only,
+  // so the sequence doesn't repeat anew for the body
   switch (body->s.legsAnim & ~ANIM_TOGGLEBIT) {
     case BOTH_DEATH1:
     case BOTH_DEAD1:
@@ -482,7 +484,6 @@ limbo
 */
 void limbo(gentity_t *ent, qboolean makeCorpse) {
   int i, contents;
-  // int startclient = ent->client->sess.spectatorClient;
   int startclient = ent->client->ps.clientNum;
 
   if (ent->r.svFlags & SVF_POW) {
@@ -490,7 +491,6 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
   }
 
   if (!(ent->client->ps.pm_flags & PMF_LIMBO)) {
-
     // DHM - Nerve :: First save off persistant info we'll need
     // for respawn
     for (i = 0; i < MAX_PERSISTANT; i++) {
@@ -512,10 +512,11 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
 
     ent->r.maxs[2] = 0;
     ent->r.currentOrigin[2] += 8;
-    contents = trap_PointContents(ent->r.currentOrigin,
-                                  -1);            // drop stuff
-    ent->s.weapon = ent->client->limboDropWeapon; // stored in player_die()
-    if (makeCorpse && BG_DropItems(contents, shared.integer)) {
+    contents = trap_PointContents(ent->r.currentOrigin, -1);
+    // stored in player_die()
+    ent->s.weapon = ent->client->limboDropWeapon;
+    if (makeCorpse && BG_DropItems(contents, shared.integer) &&
+        !ent->client->sess.timerunActive) {
       TossClientItems(ent);
     }
 
@@ -529,9 +530,6 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
       ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
     }
 
-    //		ClientUserinfoChanged( ent->client - level.clients );
-    //// NERVE
-    //- SMF - don't do this
     if (ent->client->sess.sessionTeam == TEAM_AXIS) {
       ent->client->deployQueueNumber = level.redNumWaiting;
       level.redNumWaiting++;
@@ -539,19 +537,6 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
       ent->client->deployQueueNumber = level.blueNumWaiting;
       level.blueNumWaiting++;
     }
-
-    /*
-    for(i=0; i<level.numConnectedClients; i++) {
-        gclient_t *cl = &level.clients[level.sortedClients[i]];
-        if(((cl->ps.pm_flags & PMF_LIMBO) ||
-          (cl->sess.sessionTeam == TEAM_SPECTATOR &&
-    cl->sess.spectatorState == SPECTATOR_FOLLOW)) &&
-    cl->sess.spectatorClient == ent - g_entities)
-    {//ent->s.number ) { Cmd_FollowCycle_f(
-    &g_entities[level.sortedClients[i]], 1 );
-        }
-    }
-    */
   }
 }
 
