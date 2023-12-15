@@ -2875,6 +2875,14 @@ void G_increaseCallvoteCount(const char *mapName);
 void G_increasePassedCount(const char *mapName);
 void LogServerState();
 
+namespace ETJump {
+// finds an entity with a scriptname, if not found,
+// we spawn in 'etjump_game_manager' so we always have
+// access to mapscripting
+bool checkEntsForScriptname();
+void spawnGameManager();
+} // namespace ETJump
+
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
 
 namespace ETJump {

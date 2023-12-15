@@ -2005,12 +2005,6 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   BG_LoadSpeakerScript(va("sound/maps/%s.sps", level.rawmapname));
 
-  // ===================
-
-  if (!level.gameManager) {
-    G_Printf("^1ERROR No 'script_multiplayer' found in map\n");
-  }
-
   level.tracemapLoaded = qfalse;
   if (!BG_LoadTraceMap(level.rawmapname, level.mapcoordsMins,
                        level.mapcoordsMaxs)) {
