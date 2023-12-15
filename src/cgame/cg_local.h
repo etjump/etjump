@@ -1266,6 +1266,11 @@ typedef struct {
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
   bool shadowCvarsSet;
+
+  // portalgun auto-binding
+  bool portalgunBindingsAdjusted;
+  int weapAltB1;
+  int weapAltB2;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
@@ -2720,6 +2725,8 @@ extern vmCvar_t etj_crosshairThickness;
 extern vmCvar_t etj_crosshairOutline;
 
 extern vmCvar_t etj_noPanzerAutoswitch;
+
+extern vmCvar_t etj_autoPortalBinds;
 
 //
 // cg_main.c
