@@ -96,9 +96,22 @@ void UpmoveMeter::resetUpmoveMeter() {
   jump_.lastState = AIR_NOJUMP;
 }
 
-void UpmoveMeter::beforeRender() {
-  // get player state
+bool UpmoveMeter::beforeRender() {
   const playerState_t &ps = cg.predictedPlayerState;
+
+  // update team before checking if we should draw or not,
+  // since we don't draw for spectators
+  if (team_ != ps.persistant[PERS_TEAM]) {
+    team_ = ps.persistant[PERS_TEAM];
+    // reset upon team change
+    // note: not handled by consoleCommandsHandler because team
+    // is needed in render() either ways
+    resetUpmoveMeter();
+  }
+
+  if (canSkipDraw()) {
+    return false;
+  }
 
   // get usercmd
   // cmdScale is only checked here to be 0 or !0
@@ -109,17 +122,9 @@ void UpmoveMeter::beforeRender() {
   // get correct pmove
   pm = PmoveUtils::getPmove(cmd);
 
-  // update team
-  if (team_ != ps.persistant[PERS_TEAM]) {
-    team_ = ps.persistant[PERS_TEAM];
-    // reset upon team change
-    // note: not handled by consoleCommandsHandler because team
-    // is needed in render() either ways
-    resetUpmoveMeter();
-  }
-
+  // just skip update, but return true so that we actually still draw
   if (canSkipUpdate()) {
-    return;
+    return true;
   }
 
   int now;
@@ -219,14 +224,11 @@ void UpmoveMeter::beforeRender() {
     jump_.postDelay = etj_upmoveMeterMaxDelay.integer;
 
   jump_.lastState = state;
+
+  return true;
 }
 
 void UpmoveMeter::render() const {
-  // check whether to skip render
-  if (canSkipDraw()) {
-    return;
-  }
-
   const int textStyle =
       (etj_upmoveMeterTextShadow.integer != 0 ? ITEM_TEXTSTYLE_SHADOWED
                                               : ITEM_TEXTSTYLE_NORMAL);

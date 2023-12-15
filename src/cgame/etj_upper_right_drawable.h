@@ -53,6 +53,6 @@ class UpperRight : public IRenderable {
 public:
   UpperRight();
   void render() const override;
-  void beforeRender() override;
+  bool beforeRender() override;
 };
 } // namespace ETJump

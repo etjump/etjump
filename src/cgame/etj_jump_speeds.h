@@ -35,7 +35,7 @@ public:
   ~JumpSpeeds();
 
   void render() const override;
-  void beforeRender() override{};
+  bool beforeRender() override;
 
 private:
   EntityEventsHandler *_entityEventsHandler;

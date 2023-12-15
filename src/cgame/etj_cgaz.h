@@ -37,7 +37,7 @@ public:
   ~CGaz() override = default;
 
   void render() const override;
-  void beforeRender() override;
+  bool beforeRender() override;
 
 private:
   enum class CGazTrueness { CGAZ_JUMPCROUCH = 1, CGAZ_GROUND = 2 };

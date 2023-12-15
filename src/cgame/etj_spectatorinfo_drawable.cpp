@@ -25,18 +25,22 @@
 #include "etj_spectatorinfo_drawable.h"
 
 namespace ETJump {
-void SpectatorInfo::beforeRender() {
+bool SpectatorInfo::beforeRender() {
   // poll for updates every 3 seconds to refresh list
+  // do this before checking if we should render, just to keep it up to date
   if (cg.time > cg.lastScoreTime + 3000) {
     trap_SendClientCommand("score");
     cg.lastScoreTime = cg.time;
   }
+
+  if (canSkipDraw()) {
+    return false;
+  }
+
+  return true;
 }
 
 void SpectatorInfo::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
 
   float x = etj_spectatorInfoX.value;
   float y = etj_spectatorInfoY.value;

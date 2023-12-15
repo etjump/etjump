@@ -111,9 +111,9 @@ OverbounceWatcher::~OverbounceWatcher() {
   _clientCommandsHandler->unsubcribe("ob_list");
 }
 
-void OverbounceWatcher::beforeRender() {
+bool OverbounceWatcher::beforeRender() {
   if (canSkipDraw()) {
-    return;
+    return false;
   }
 
   ps = getValidPlayerState();
@@ -153,13 +153,11 @@ void OverbounceWatcher::beforeRender() {
       Overbounce::surfaceAllowsOverbounce(&trace)) {
     overbounce = true;
   }
+
+  return overbounce;
 }
 
 void OverbounceWatcher::render() const {
-  if (canSkipDraw() || !overbounce) {
-    return;
-  }
-
   DrawString(x, etj_obWatcherY.value, sizeX, sizeY, _color, qfalse, "OB", 0,
              ITEM_TEXTSTYLE_SHADOWED);
 }
@@ -207,6 +205,10 @@ bool OverbounceWatcher::canSkipDraw() const {
   }
 
   if (ps->pm_type == PM_NOCLIP) {
+    return true;
+  }
+
+  if (showingScores()) {
     return true;
   }
 

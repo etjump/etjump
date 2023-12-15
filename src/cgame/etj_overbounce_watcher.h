@@ -37,7 +37,7 @@ public:
 
 private:
   void render() const override;
-  void beforeRender() override;
+  bool beforeRender() override;
   bool canSkipDraw() const;
 
   ClientCommandsHandler *_clientCommandsHandler;
