@@ -1949,7 +1949,8 @@ void Weapon_Engineer(gentity_t *ent) {
         }
 
         VectorCopy(traceEnt->r.currentOrigin, origin);
-        SnapVector(origin) VectorAdd(origin, traceEnt->r.mins, mins);
+        SnapVector(origin);
+        VectorAdd(origin, traceEnt->r.mins, mins);
         VectorAdd(origin, traceEnt->r.maxs, maxs);
         num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
         VectorAdd(origin, traceEnt->r.mins, mins);
@@ -2029,7 +2030,8 @@ void Weapon_Engineer(gentity_t *ent) {
         // NERVE - SMF - made this the actual bounding box of dynamite
         // instead of range, also must snap origin to line up properly
         VectorCopy(traceEnt->r.currentOrigin, origin);
-        SnapVector(origin) VectorAdd(origin, traceEnt->r.mins, mins);
+        SnapVector(origin);
+        VectorAdd(origin, traceEnt->r.mins, mins);
         VectorAdd(origin, traceEnt->r.maxs, maxs);
         num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
 
@@ -2197,7 +2199,8 @@ void Weapon_Engineer(gentity_t *ent) {
           traceEnt->nextthink = level.time + FRAMETIME;
 
           VectorCopy(traceEnt->r.currentOrigin, origin);
-          SnapVector(origin) VectorAdd(origin, traceEnt->r.mins, mins);
+          SnapVector(origin);
+          VectorAdd(origin, traceEnt->r.mins, mins);
           VectorAdd(origin, traceEnt->r.maxs, maxs);
           num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
 
