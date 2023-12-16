@@ -391,7 +391,8 @@ void G_ExplodeMissile(gentity_t *ent) {
 
   BG_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse,
                         ent->s.effect2Time);
-  SnapVector(origin) G_SetOrigin(ent, origin);
+  SnapVector(origin);
+  G_SetOrigin(ent, origin);
 
   // we don't have a valid direction, so just point straight up
   dir[0] = dir[1] = 0;
