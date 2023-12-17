@@ -1586,9 +1586,20 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     return;
   }
 
+  // activate targets if any portals were reset
   gentity_t *ent = G_PickTarget(self->target);
   if (ent && ent->use) {
     G_UseEntity(ent, self, activator);
+  }
+
+  // play sound to client
+  if (self->noise_index) {
+    gentity_t *noiseEnt = ETJump::soundEvent(
+        activator->r.currentOrigin,
+        EV_GENERAL_CLIENT_SOUND_VOLUME,
+        self->noise_index);
+
+    noiseEnt->s.onFireStart = 255;
   }
 
   if (self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT) {
@@ -1601,6 +1612,13 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
 
 void SP_target_remove_portals(gentity_t *self) {
   self->use = target_remove_portals_use;
+
+  char *s;
+  if (G_SpawnString("noise", "NOSOUND", &s)) {
+    char buffer[MAX_QPATH];
+    Q_strncpyz(buffer, s, sizeof(buffer));
+    self->noise_index = G_SoundIndex(buffer);
+  }
 }
 
 void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
