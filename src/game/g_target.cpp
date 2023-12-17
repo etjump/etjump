@@ -1568,14 +1568,23 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     return;
   }
 
+  qboolean found = qfalse;
+
   if (activator->portalBlue) {
     G_FreeEntity(activator->portalBlue);
     activator->portalBlue = NULL;
+    found = qtrue;
   }
 
   if (activator->portalRed) {
     G_FreeEntity(activator->portalRed);
     activator->portalRed = NULL;
+    found = qtrue;
+  }
+
+  if (!found) {
+    return;
+  }
   }
 
   if (self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT) {
