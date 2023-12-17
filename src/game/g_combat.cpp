@@ -578,6 +578,8 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     self->portalRed = nullptr;
   }
 
+  self->client->numPortals = 0;
+
   if (nogib) {
     // normal death
     // for the no-blood option, we need to prevent the health

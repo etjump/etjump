@@ -2679,12 +2679,16 @@ void ClearPortals(gentity_t *ent) {
   // Clear portalgun portals
   if (ent->portalBlue) {
     G_FreeEntity(ent->portalBlue);
-    ent->portalBlue = NULL;
+    ent->portalBlue = nullptr;
   }
 
   if (ent->portalRed) {
     G_FreeEntity(ent->portalRed);
-    ent->portalRed = NULL;
+    ent->portalRed = nullptr;
+  }
+
+  if (ent->client) {
+    ent->client->numPortals = 0;
   }
 }
 

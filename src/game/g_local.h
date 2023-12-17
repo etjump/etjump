@@ -1144,6 +1144,9 @@ struct gclient_s {
 
   // Whether the client already activated target_set_health
   qboolean alreadyActivatedSetHealth;
+
+  // Amount of portalgun portals shot since last reset
+  int numPortals;
 };
 
 typedef struct {

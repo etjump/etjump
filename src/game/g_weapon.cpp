@@ -3673,6 +3673,9 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   tent->s.otherEntityNum2 = ent->s.number;
   // END - Rail
 
+  // portal fired correctly, increment portal count
+  ent->client->numPortals++;
+
   portal = G_Spawn();
   portal->classname = "portal_gate";
 
@@ -3765,7 +3768,7 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   portal->s.otherEntityNum =
       ent->s.clientNum; // HACK: Using this for render checks.....
 
-  // Set portal team to shooters team. Anyone with same team can use the portal
+    // Set portal team to shooters team. Anyone with same team can use the portal
   portal->portalTeam = ent->client->sess.portalTeam;
 
   // Set angle of entity based on normal of plane....
