@@ -1568,18 +1568,18 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     return;
   }
 
-  qboolean found = qfalse;
+  auto found = false;
 
   if (activator->portalBlue) {
     G_FreeEntity(activator->portalBlue);
-    activator->portalBlue = NULL;
-    found = qtrue;
+    activator->portalBlue = nullptr;
+    found = true;
   }
 
   if (activator->portalRed) {
     G_FreeEntity(activator->portalRed);
-    activator->portalRed = NULL;
-    found = qtrue;
+    activator->portalRed = nullptr;
+    found = true;
   }
 
   if (!found) {
@@ -1602,12 +1602,9 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     noiseEnt->s.onFireStart = 255;
   }
 
-  if (self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT) {
-    return;
+  if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
+    Printer::SendCenterMessage(ClientNum(activator), "^7Your portal gun portals have been reset.");
   }
-
-  trap_SendServerCommand(activator - g_entities,
-                         "cp \"^7Your portal gun portals have been reset.\n\"");
 }
 
 void SP_target_remove_portals(gentity_t *self) {
