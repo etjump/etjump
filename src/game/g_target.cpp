@@ -1585,6 +1585,10 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
   if (!found) {
     return;
   }
+
+  gentity_t *ent = G_PickTarget(self->target);
+  if (ent && ent->use) {
+    G_UseEntity(ent, self, activator);
   }
 
   if (self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT) {
