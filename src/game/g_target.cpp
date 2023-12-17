@@ -1585,10 +1585,7 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
 
   if (hadActivePortals) {
     if (self->spawnflags & SF_REMOVE_PORTALS_ACTIVATE_TARGETS) {
-      gentity_t *ent = G_PickTarget(self->target);
-      if (ent && ent->use) {
-          G_UseEntity(ent, self, activator);
-      }
+      G_UseTargets(self, activator);
     }
 
     // play sound to client
