@@ -451,6 +451,7 @@ void SP_target_save(gentity_t *self);
 // Feen: PGM
 void SP_weapon_portalgun(gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
+void SP_target_portal_relay(gentity_t *self);
 void SP_target_ftrelay(gentity_t *self);
 
 // Savelimit
@@ -700,6 +701,7 @@ spawn_t spawns[] = {
     {"target_increase_ident", SP_target_increase_ident},
     {"target_save", SP_target_save},
     {"target_remove_portals", SP_target_remove_portals},
+    {"target_portal_relay", SP_target_portal_relay},
     {"target_ftrelay", SP_target_ftrelay},
     {"target_savelimit_set", SP_target_savelimit_set},
     {"target_savelimit_inc", SP_target_savelimit_inc},

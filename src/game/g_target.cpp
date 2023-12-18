@@ -1618,6 +1618,26 @@ void SP_target_remove_portals(gentity_t *self) {
   }
 }
 
+void target_portal_relay_use(gentity_t *self, gentity_t *other,
+                               gentity_t *activator) {
+  if (!activator ||
+      !activator->client ||
+      activator->client->sess.sessionTeam == TEAM_SPECTATOR ||
+      !self->target) {
+    return;
+  }
+  // don't need to check health, see comment in player_die
+
+  if (activator->client->numPortals <= self->count) {
+    G_UseTargets(self, activator);
+  }
+}
+
+void SP_target_portal_relay(gentity_t *self) {
+  self->use = target_portal_relay_use;
+  G_SpawnInt("maxportals", "-1", &self->count);
+}
+
 void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
   gentity_t *ent = NULL;
   ent = G_PickTarget(self->target);
