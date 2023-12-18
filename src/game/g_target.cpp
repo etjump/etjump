@@ -1595,7 +1595,7 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
           EV_GENERAL_CLIENT_SOUND_VOLUME,
           self->noise_index);
 
-      noiseEnt->s.onFireStart = 255;
+      noiseEnt->s.onFireStart = self->s.onFireStart;
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
@@ -1616,6 +1616,10 @@ void SP_target_remove_portals(gentity_t *self) {
     Q_strncpyz(buffer, s, sizeof(buffer));
     self->noise_index = G_SoundIndex(buffer);
   }
+  G_SpawnInt("volume", "255", &self->s.onFireStart);
+  if (!self->s.onFireStart) {
+    self->s.onFireStart = 255;
+  }
 }
 
 void target_portal_relay_use(gentity_t *self, gentity_t *other,
@@ -1623,8 +1627,7 @@ void target_portal_relay_use(gentity_t *self, gentity_t *other,
   if (!activator ||
       !activator->client ||
       activator->client->sess.sessionTeam == TEAM_SPECTATOR ||
-      !self->target ||
-      self->health <= 0) {
+      !self->target) {
     return;
   }
 
