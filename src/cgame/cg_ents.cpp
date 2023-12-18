@@ -2484,8 +2484,8 @@ static void CG_PortalGate(centity_t *cent) {
   polyVerts[3].st[0] = 1;
   polyVerts[3].st[1] = 1;
 
-  // our portals
-  if (cent->currentState.otherEntityNum == cg.clientNum) {
+  // our or spectated player's portals
+  if (cent->currentState.otherEntityNum == cg.snap->ps.clientNum) {
     if (cent->currentState.eType == ET_PORTAL_BLUE) {
       trap_R_AddPolyToScene(cgs.media.portalBlueShader, 4, polyVerts);
     }
