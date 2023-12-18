@@ -2431,7 +2431,7 @@ static void CG_PortalGate(centity_t *cent) {
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
-  const float radius = 64.0f;
+  const float radius = 48.0f;
   int i;
 
   // not our portal
