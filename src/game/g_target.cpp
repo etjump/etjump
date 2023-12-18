@@ -1555,6 +1555,7 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 void SP_target_save(gentity_t *self) { self->use = target_save_use; }
 
 #define SF_REMOVE_PORTALS_NO_TEXT 0x1
+#define SF_REMOVE_PORTALS_ACTIVATE_TARGETS 0x2
 void target_remove_portals_use(gentity_t *self, gentity_t *other,
                                gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -1568,43 +1569,42 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     return;
   }
 
-  auto found = false;
+  auto hadActivePortals = false;
 
   if (activator->portalBlue) {
     G_FreeEntity(activator->portalBlue);
     activator->portalBlue = nullptr;
-    found = true;
+    hadActivePortals = true;
   }
 
   if (activator->portalRed) {
     G_FreeEntity(activator->portalRed);
     activator->portalRed = nullptr;
-    found = true;
+    hadActivePortals = true;
   }
 
-  if (!found) {
-    return;
+  if (hadActivePortals) {
+    if (self->spawnflags & SF_REMOVE_PORTALS_ACTIVATE_TARGETS) {
+      G_UseTargets(self, activator);
+    }
+
+    // play sound to client
+    if (self->noise_index) {
+      gentity_t *noiseEnt = ETJump::soundEvent(
+          activator->r.currentOrigin,
+          EV_GENERAL_CLIENT_SOUND_VOLUME,
+          self->noise_index);
+
+      noiseEnt->s.onFireStart = self->s.onFireStart;
+    }
+
+    if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
+      Printer::SendCenterMessage(ClientNum(activator), "^7Your portal gun portals have been reset.");
+    }
   }
 
-  // activate targets if any portals were reset
-  gentity_t *ent = G_PickTarget(self->target);
-  if (ent && ent->use) {
-    G_UseEntity(ent, self, activator);
-  }
-
-  // play sound to client
-  if (self->noise_index) {
-    gentity_t *noiseEnt = ETJump::soundEvent(
-        activator->r.currentOrigin,
-        EV_GENERAL_CLIENT_SOUND_VOLUME,
-        self->noise_index);
-
-    noiseEnt->s.onFireStart = 255;
-  }
-
-  if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
-    Printer::SendCenterMessage(ClientNum(activator), "^7Your portal gun portals have been reset.");
-  }
+  // reset numPortals after everything else so the targeted entity can potentially use it
+  activator->client->numPortals = 0;
 }
 
 void SP_target_remove_portals(gentity_t *self) {
@@ -1616,6 +1616,29 @@ void SP_target_remove_portals(gentity_t *self) {
     Q_strncpyz(buffer, s, sizeof(buffer));
     self->noise_index = G_SoundIndex(buffer);
   }
+  G_SpawnInt("volume", "255", &self->s.onFireStart);
+  if (!self->s.onFireStart) {
+    self->s.onFireStart = 255;
+  }
+}
+
+void target_portal_relay_use(gentity_t *self, gentity_t *other,
+                               gentity_t *activator) {
+  if (!activator ||
+      !activator->client ||
+      activator->client->sess.sessionTeam == TEAM_SPECTATOR ||
+      !self->target) {
+    return;
+  }
+
+  if (activator->client->numPortals <= self->count) {
+    G_UseTargets(self, activator);
+  }
+}
+
+void SP_target_portal_relay(gentity_t *self) {
+  self->use = target_portal_relay_use;
+  G_SpawnInt("maxportals", "-1", &self->count);
 }
 
 void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
