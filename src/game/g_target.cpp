@@ -1623,10 +1623,10 @@ void target_portal_relay_use(gentity_t *self, gentity_t *other,
   if (!activator ||
       !activator->client ||
       activator->client->sess.sessionTeam == TEAM_SPECTATOR ||
-      !self->target) {
+      !self->target ||
+      self->health <= 0) {
     return;
   }
-  // don't need to check health, see comment in player_die
 
   if (activator->client->numPortals <= self->count) {
     G_UseTargets(self, activator);
