@@ -578,7 +578,8 @@ void player_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     self->portalRed = nullptr;
   }
 
-  self->client->numPortals = 0;
+  // DON'T clear numPortals here in case player is revived and keeps their position
+  // The whole client struct is initialized when player is gibbed/spawning.
 
   if (nogib) {
     // normal death
