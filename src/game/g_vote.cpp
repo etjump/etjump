@@ -2,10 +2,12 @@
 // -------------------------------
 //
 #include "g_local.h"
+#include "etj_local.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_map_statistics.h"
 #include "etj_numeric_utilities.h"
+#include "etj_rtv.h"
 #include <set>
 
 #define T_FFA 0x01
@@ -472,61 +474,6 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
 }
 
 namespace ETJump {
-bool checkRtvWinner() {
-  std::vector<std::string> mostVotedMaps{};
-  int previousVoteCount = 0;
-  int voteCount;
-
-  for (const auto &map : level.voteInfo.rtvMaps) {
-    voteCount = map.second;
-
-    if (voteCount > previousVoteCount) {
-      mostVotedMaps.clear();
-      mostVotedMaps.push_back(map.first);
-      previousVoteCount = map.second;
-    } else if (voteCount == previousVoteCount) {
-      mostVotedMaps.push_back(map.first);
-      previousVoteCount = map.second;
-    }
-  }
-
-  return mostVotedMaps.size() == 1;
-}
-
-void setRtvWinner() {
-  std::string mostVotedMap;
-  int previousVoteCount = 0;
-  int voteCount;
-
-  for (const auto &map : level.voteInfo.rtvMaps) {
-    voteCount = map.second;
-
-    // we don't need to care about tied votes here as vote timer
-    // will be extended in a tie scenario, and we'll always end up
-    // with a single map with most votes
-    if (voteCount > previousVoteCount) {
-      mostVotedMap = map.first;
-      previousVoteCount = map.second;
-    }
-  }
-
-  Q_strncpyz(level.voteInfo.vote_value, mostVotedMap.c_str(),
-             sizeof(level.voteInfo.vote_value));
-}
-
-void G_SetRtvConfigstrings() {
-  const size_t maxMaps = level.voteInfo.rtvMaps.size();
-  std::string newcs;
-
-  for (size_t i = 0; i < maxMaps; ++i) {
-    newcs += stringFormat("%s\\%i%s", level.voteInfo.rtvMaps[i].first,
-                          level.voteInfo.rtvMaps[i].second,
-                          i == maxMaps - 1 ? "" : "\\");
-  }
-
-  trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
-}
-
 int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     char *arg2) {
   if (arg) {
@@ -540,8 +487,9 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     //  g_rtvMapCount is set to will cause an infinite loop here
     const size_t maxMaps = Numeric::clamp(g_rtvMapCount.integer, 2, 9);
     std::set<std::string> uniqueMaps;
+    auto rtvMaps = game.rtv->getRtvMaps();
 
-    level.voteInfo.rtvMaps.clear();
+    game.rtv->clearRtvMaps();
 
     while (uniqueMaps.size() < maxMaps) {
       const char *map = GetRandomMap();
@@ -550,18 +498,18 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
     std::string cs;
     auto it = uniqueMaps.begin();
-    level.voteInfo.rtvMaps.resize(maxMaps);
+    rtvMaps->resize(maxMaps);
 
     for (size_t i = 0; i < maxMaps; ++i, ++it) {
-      level.voteInfo.rtvMaps[i].first = *it;
-      cs += ETJump::stringFormat("%s\\0%s", level.voteInfo.rtvMaps[i].first,
+      (*rtvMaps)[i].first = *it;
+      cs += ETJump::stringFormat("%s\\0%s", (*rtvMaps)[i].first,
                                  i == maxMaps - 1 ? "" : "\\");
     }
 
     // this will never overflow as MAX_QPATH is 64 and rtv supports max 9 maps
     trap_SetConfigstring(CS_VOTE_YES, cs.c_str());
   } else {
-    setRtvWinner();
+    game.rtv->setRtvWinner();
     G_increasePassedCount(level.voteInfo.vote_value);
     trap_SendConsoleCommand(EXEC_APPEND,
                             va("map %s\n", level.voteInfo.vote_value));

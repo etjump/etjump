@@ -23,6 +23,7 @@
  */
 
 #include "etj_rtv_drawable.h"
+#include "etj_client_rtv_handler.h"
 #include "cg_local.h"
 #include "../game/etj_string_utilities.h"
 #include <array>
@@ -133,6 +134,7 @@ void RtvDrawable::drawMenuTitleText(panel_button_t *button) {
 void RtvDrawable::drawMenuText(panel_button_t *button) {
   float y = button->rect.y;
   const auto arrSize = static_cast<int>(rtvMenuStrings.size());
+  auto rtvMaps = rtvHandler->getRtvMaps();
 
   for (int i = 0; i < arrSize; i++) {
     std::string str = stringFormat("%i. %s", (i + 1) % 10, rtvMenuStrings[i]);
@@ -142,7 +144,7 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
       const char *noCs = CG_ConfigString(CS_VOTE_NO);
       str += stringFormat(" (%i)", Q_atoi(noCs));
     } else {
-      str += stringFormat(" (%i)", cgs.rtvMaps[i].second);
+      str += stringFormat(" (%i)", (*rtvMaps)[i].second);
     }
 
     // only draw entries which are filled
@@ -174,7 +176,8 @@ qboolean RtvDrawable::checkExecKey(int key, qboolean doAction) {
     // so 0 = 'Keep current map'
     int selection = key - '0';
 
-    if (selection > static_cast<int>(cgs.rtvMaps.size()) && selection != 0) {
+    if (selection > static_cast<int>(rtvHandler->getRtvMaps()->size()) &&
+        selection != 0) {
       return qfalse;
     }
 
@@ -200,8 +203,10 @@ bool RtvDrawable::beforeRender() {
     return false;
   }
 
-  for (size_t i = 0; i < cgs.rtvMaps.size(); i++) {
-    rtvMenuStrings[i] = cgs.rtvMaps[i].first.c_str();
+  auto rtvMaps = rtvHandler->getRtvMaps();
+
+  for (size_t i = 0; i < rtvMaps->size(); i++) {
+    rtvMenuStrings[i] = (*rtvMaps)[i].first.c_str();
   }
 
   return true;
@@ -218,7 +223,7 @@ bool RtvDrawable::canSkipDraw() {
     return true;
   }
 
-  if (!cgs.isRtvVote || !cgs.voteTime) {
+  if (!rtvHandler->rtvVoteActive() || !cgs.voteTime) {
     return true;
   }
 

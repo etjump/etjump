@@ -9,6 +9,7 @@
 #include "etj_entity_utilities.h"
 #include "etj_string_utilities.h"
 #include "etj_numeric_utilities.h"
+#include "etj_rtv.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -448,7 +449,8 @@ namespace ETJump {
 void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
   auto client = ent->client;
   const int clientNum = ClientNum(ent);
-  const bool isRtvVote = level.voteInfo.isRtvVote;
+  const bool isRtvVote = game.rtv->rtvVoteActive();
+  auto rtvMaps = game.rtv->getRtvMaps();
 
   switch (vote) {
     case VotingTypes::VoteYes:
@@ -469,20 +471,18 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       level.voteInfo.voteNo++;
       client->pers.votingInfo.isVotedYes = false;
       if (isRtvVote) {
-        level.voteInfo.rtvMaps[ent->client->pers.votingInfo.lastRtvMapVoted]
-            .second--;
+        (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
       }
       break;
     case VotingTypes::VoteRtv:
-      level.voteInfo.rtvMaps[mapNum].second++;
+      (*rtvMaps)[mapNum].second++;
       ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
       level.voteInfo.voteYes++;
       break;
     case VotingTypes::RevoteRtv:
-      level.voteInfo.rtvMaps[ent->client->pers.votingInfo.lastRtvMapVoted]
-          .second--;
-      level.voteInfo.rtvMaps[mapNum].second++;
+      (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
+      (*rtvMaps)[mapNum].second++;
       ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
       break;
@@ -494,8 +494,8 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
   if (client->pers.votingInfo.isVotedYes) {
     trap_SendServerCommand(clientNum, "voted yes");
 
-    if (level.voteInfo.isRtvVote) {
-      G_SetRtvConfigstrings();
+    if (isRtvVote) {
+      game.rtv->setRtvConfigstrings();
     } else {
       trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
     }
@@ -2659,14 +2659,14 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
               voteStringFormat, arg1, arg2);
 
   if (level.voteInfo.vote_fn == ETJump::G_RockTheVote_v) {
-    level.voteInfo.isRtvVote = true;
+    game.rtv->setRtvStatus(true);
     trap_SendServerCommand(clientNum, "openRtvMenu");
   }
 
   // Zero: NOTE! if we call a randommap vote with a custom map type
   // it only changes the clientside info text, not everything.
 
-  if (!level.voteInfo.isRtvVote) {
+  if (!game.rtv->rtvVoteActive()) {
     level.voteInfo.voteYes = 1;
     trap_SendServerCommand(clientNum, "voted yes");
   }
@@ -2697,7 +2697,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   }
 
   ent->client->pers.voteCount++;
-  if (!level.voteInfo.isRtvVote) {
+  if (!game.rtv->rtvVoteActive()) {
     ent->client->ps.eFlags |= EF_VOTED;
   }
 
@@ -2706,8 +2706,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
   // do not set CS_VOTE_YES if we call rtv vote
   // as we use this to store each map and the amount of yes votes per map
-  if (level.voteInfo.isRtvVote) {
-    ETJump::G_SetRtvConfigstrings();
+  if (game.rtv->rtvVoteActive()) {
+    game.rtv->setRtvConfigstrings();
   } else {
     trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
   }
@@ -2728,7 +2728,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   char voteArg[64];
   auto *client = ent->client;
   const int clientNum = ClientNum(ent);
-  const bool isRtvVote = level.voteInfo.isRtvVote;
+  const bool isRtvVote = game.rtv->rtvVoteActive();
 
   static const auto votedYes = [](const std::string &msg) {
     return std::any_of(std::begin(yesMsgs), std::end(yesMsgs),
@@ -2755,10 +2755,11 @@ void Cmd_Vote_f(gentity_t *ent) {
   };
 
   static const auto printRtvVoteMsgs = [&]() {
+    auto rtvMaps = game.rtv->getRtvMaps();
     std::string voteMsgs = "^7Invalid vote argument.\n";
     voteMsgs += ETJump::stringFormat("^7Valid arguments for this vote are\n"
                                      "  ^3rtvVote 1-%i\n",
-                                     level.voteInfo.rtvMaps.size());
+                                     rtvMaps->size());
     voteMsgs += "  ^7Open map selection with: ^3vote ";
     for (const auto &ym : yesMsgs) {
       voteMsgs += std::string(ym) + " ";
@@ -2776,7 +2777,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     level.voteInfo.voteCanceled = qtrue;
     level.voteInfo.voteNo = level.numConnectedClients;
     level.voteInfo.voteYes = 0;
-    level.voteInfo.isRtvVote = false;
+    game.rtv->setRtvStatus(false);
     Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
   };
 
@@ -2960,7 +2961,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   // this is sent as + 1 from cgame for user convenience
   // e.g. /rtvVote 3 = vote for 3rd map on the list
   int mapNum = Q_atoi(voteArg) - 1;
-  const size_t maxMaps = level.voteInfo.rtvMaps.size() - 1;
+  const size_t maxMaps = game.rtv->getRtvMaps()->size() - 1;
 
   if (isRtvVote && isRtvVoteCmd) {
     if (!std::isdigit(voteArg[0]) || mapNum < 0 || mapNum > maxMaps) {

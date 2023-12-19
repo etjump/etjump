@@ -9,6 +9,7 @@
 #include "etj_overbounce_shared.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
+#include "etj_client_rtv_handler.h"
 
 #define STATUSBARHEIGHT 452
 char *BindingFromName(const char *cvar);
@@ -2117,6 +2118,8 @@ static void CG_DrawVote() {
   float x_a = 8.0f;
   float x_b = 8.0f;
 
+  const auto rtvHandler = ETJump::rtvHandler;
+
   Q_strncpyz(str1, BindingFromName("vote yes"), 32);
   Q_strncpyz(str2, BindingFromName("vote no"), 32);
 
@@ -2196,19 +2199,20 @@ static void CG_DrawVote() {
 
     const bool canVote = cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR ||
                          etj_spectatorVote.integer;
+    const bool isRtvVote = rtvHandler->rtvVoteActive();
+    const int rtvYesVotes = rtvHandler->getRtvYesVotes();
 
-    if (cgs.isRtvVote) {
+    if (isRtvVote) {
       if (!(cg.snap->ps.eFlags & EF_VOTED)) {
         line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
-        line_b =
-            ETJump::stringFormat("Change map(%s):%i, Keep current map(%s):%i%s",
-                                 str1, cgs.rtvVoteYes, str2, cgs.voteNo,
-                                 canVote ? "" : " (Spectators can't vote)");
+        line_b = ETJump::stringFormat(
+            "Change map(%s):%i, Keep current map(%s):%i%s", str1, rtvYesVotes,
+            str2, cgs.voteNo, canVote ? "" : " (Spectators can't vote)");
       } else {
         line_a =
             ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
         line_b = ETJump::stringFormat("Change map:%i, Keep current map:%i",
-                                      cgs.rtvVoteYes, cgs.voteNo);
+                                      rtvYesVotes, cgs.voteNo);
 
         x_b = 13;
 
@@ -2220,7 +2224,7 @@ static void CG_DrawVote() {
                                   color);
         } else if (cgs.votedNo) {
           std::string yesVotes =
-              ETJump::stringFormat("Change map:%i", cgs.rtvVoteYes);
+              ETJump::stringFormat("Change map:%i", rtvYesVotes);
           std::string noVotes =
               ETJump::stringFormat("Keep current map", cgs.voteNo);
           auto yesStrWidth = static_cast<float>(

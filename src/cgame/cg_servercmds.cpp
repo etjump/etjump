@@ -8,6 +8,7 @@
 #include "etj_client_commands_handler.h"
 #include "../game/etj_numeric_utilities.h"
 #include "etj_cvar_shadow.h"
+#include "etj_client_rtv_handler.h"
 
 #define SCOREPARSE_COUNT 9
 
@@ -616,33 +617,6 @@ void CG_ChargeTimesChanged(void) {
   cg.covertopsChargeTime[1] = Q_atoi(Info_ValueForKey(info, "ald_cvo"));
 }
 
-namespace ETJump {
-void CG_SetRtvConfigStrings(const char *cs) {
-  char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
-  char value[3];       // can't exceed MAX_CLIENTS + null terminator
-
-  cgs.rtvMaps.clear();
-
-  while (cs != nullptr) {
-    Info_NextPair(&cs, key, value);
-
-    if (!key[0]) {
-      break;
-    }
-
-    cgs.rtvMaps.emplace_back(key, Q_atoi(value));
-  }
-}
-
-void countRtvYesVotes() {
-  cgs.rtvVoteYes = 0;
-
-  for (const auto &votes : cgs.rtvMaps) {
-    cgs.rtvVoteYes += votes.second;
-  }
-}
-} // namespace ETJump
-
 /*
 ================
 CG_ConfigStringModified
@@ -652,6 +626,7 @@ CG_ConfigStringModified
 static void CG_ConfigStringModified(void) {
   const char *str;
   int num;
+  auto rtvHandler = ETJump::rtvHandler;
 
   num = Q_atoi(CG_Argv(1));
 
@@ -701,9 +676,9 @@ static void CG_ConfigStringModified(void) {
   } else if (num == CS_VOTE_YES) {
     // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial
     // 'callvote rtv' command, the check for cgs.isRtvVote might fail
-    if (cgs.isRtvVote || strlen(str) > 1) {
-      ETJump::CG_SetRtvConfigStrings(str);
-      ETJump::countRtvYesVotes();
+    if (rtvHandler->rtvVoteActive() || strlen(str) > 1) {
+      rtvHandler->setRtvConfigStrings(str);
+      rtvHandler->countRtvVotes();
     } else {
       cgs.voteYes = Q_atoi(str);
     }
@@ -713,7 +688,7 @@ static void CG_ConfigStringModified(void) {
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
-    cgs.isRtvVote = !Q_stricmp(cgs.voteString, "Rock The Vote");
+    rtvHandler->setRtvVoteStatus();
   } else if (num == CS_INTERMISSION) {
     cg.intermissionStarted = Q_atoi(str) ? qtrue : qfalse;
   } else if (num == CS_SCREENFADE) {

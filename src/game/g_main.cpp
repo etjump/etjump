@@ -11,6 +11,7 @@
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
 #include "etj_numeric_utilities.h"
+#include "etj_rtv.h"
 
 level_locals_t level;
 
@@ -3031,7 +3032,7 @@ void CheckVote() {
   }
 
   int minVoteDuration;
-  const bool isRtvVote = level.voteInfo.isRtvVote;
+  const bool isRtvVote = game.rtv->rtvVoteActive();
 
   // vote_minVoteDuration is likely low on most servers, so we use a separate
   // duration for rtv to give everyone some time to pick a map
@@ -3080,7 +3081,7 @@ void CheckVote() {
     level.voteInfo.voteNo = level.numConnectedClients;
   } else if (level.voteInfo.voteYes > requiredClients) {
     if (isRtvVote) {
-      if (ETJump::checkRtvWinner()) {
+      if (game.rtv->checkRtvWinner()) {
         passVote();
       } else {
         // FIXME: extend timer if we have a tie between two maps

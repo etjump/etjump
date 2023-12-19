@@ -22,35 +22,29 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
-#include <memory>
+#include <vector>
+#include <string>
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-} // namespace ETJump
+class RockTheVote {
+  bool isRtvVote;
+  // holds the map names and their vote counts for rtv
+  std::vector<std::pair<std::string, int>> rtvMaps;
 
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
+public:
+  RockTheVote();
+  ~RockTheVote() = default;
 
-struct Game {
-  Game() {}
+  std::vector<std::pair<std::string, int>> *getRtvMaps();
+  void clearRtvMaps();
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
+  bool checkRtvWinner();
+  void setRtvWinner();
+  void setRtvConfigstrings();
+
+  bool rtvVoteActive() const;
+  void setRtvStatus(bool status);
 };
-
-#endif
+} // namespace ETJump

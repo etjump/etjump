@@ -1200,10 +1200,6 @@ typedef struct voteInfo_s {
   int voter_cn;
   qboolean voteCanceled;
   qboolean forcePass;
-
-  bool isRtvVote;
-  // holds the map names and their vote counts for rtv
-  std::vector<std::pair<std::string, int>> rtvMaps;
 } voteInfo_t;
 
 typedef struct {
@@ -2758,8 +2754,6 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2);
 namespace ETJump {
 int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     char *arg2);
-void G_SetRtvConfigstrings();
-bool checkRtvWinner();
 } // namespace ETJump
 
 void G_LinkDebris(void);

@@ -1986,11 +1986,7 @@ typedef struct {
   qboolean voteModified; // beep whenever changed
   char voteString[MAX_STRING_TOKENS];
   bool votedYes;
-
-  std::vector<std::pair<std::string, int>> rtvMaps;
   bool votedNo; // rtv needs this since initial state for caller is no votes
-  int rtvVoteYes;
-  bool isRtvVote;
 
   int teamVoteTime[2];
   int teamVoteYes[2];
@@ -4175,6 +4171,7 @@ class EventLoop;
 class PlayerEventsHandler;
 class PmoveUtils;
 class CvarShadow;
+class ClientRtvHandler;
 
 extern std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
 extern std::shared_ptr<ClientCommandsHandler> consoleCommandsHandler;
@@ -4186,6 +4183,8 @@ extern std::vector<std::shared_ptr<CvarShadow>> cvarShadows;
 extern std::shared_ptr<AutoDemoRecorder> autoDemoRecorder;
 extern std::shared_ptr<EventLoop> eventLoop;
 extern std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
+extern std::shared_ptr<ClientRtvHandler> rtvHandler;
+
 void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
                          sfxHandle_t sfx, int range, int volume, int soundTime);
 void addLoopingSound(const vec3_t origin, const vec3_t velocity,
