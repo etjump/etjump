@@ -675,7 +675,7 @@ static void CG_ConfigStringModified(void) {
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_YES) {
     // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial
-    // 'callvote rtv' command, the check for cgs.isRtvVote might fail
+    // 'callvote rtv' command, the check for rtvVoteActive might return false
     if (rtvHandler->rtvVoteActive() || strlen(str) > 1) {
       rtvHandler->setRtvConfigStrings(str);
       rtvHandler->countRtvVotes();
