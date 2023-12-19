@@ -75,6 +75,7 @@ add_library(cgame MODULE
 	"etj_player_events_handler.cpp"
 	"etj_pmove_utils.cpp"
 	"etj_quick_follow_drawable.cpp"
+	"etj_rtv_drawable.cpp"
 	"etj_snaphud.cpp"
 	"etj_speed_drawable.cpp"
 	"etj_spectatorinfo_drawable.cpp"

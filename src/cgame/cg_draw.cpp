@@ -2108,14 +2108,14 @@ static void CG_DrawSpectator(void) {
 CG_DrawVote
 =================
 */
-static void CG_DrawVote(void) {
+static void CG_DrawVote() {
   char str1[32], str2[32];
   vec4_t color{1, 1, 0, 1};
 
   std::string line_a;
   std::string line_b;
-  auto x_a = 8;
-  auto x_b = 8;
+  float x_a = 8.0f;
+  float x_b = 8.0f;
 
   Q_strncpyz(str1, BindingFromName("vote yes"), 32);
   Q_strncpyz(str2, BindingFromName("vote no"), 32);
@@ -2194,30 +2194,65 @@ static void CG_DrawVote(void) {
       }
     }
 
-    if (!(cg.snap->ps.eFlags & EF_VOTED)) {
-      line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
+    const bool canVote = cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR ||
+                         etj_spectatorVote.integer;
 
-      if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR &&
-          etj_spectatorVote.integer <= 0) {
-        line_b = ETJump::stringFormat("YES:%i, NO:%i (%s)", cgs.voteYes,
-                                      cgs.voteNo, "Spectators can't vote");
+    if (cgs.isRtvVote) {
+      if (!(cg.snap->ps.eFlags & EF_VOTED)) {
+        line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
+        line_b =
+            ETJump::stringFormat("Change map(%s):%i, Keep current map(%s):%i%s",
+                                 str1, cgs.rtvVoteYes, str2, cgs.voteNo,
+                                 canVote ? "" : " (Spectators can't vote)");
       } else {
-        line_b = ETJump::stringFormat("YES(%s):%i, NO(%s):%i", str1,
-                                      cgs.voteYes, str2, cgs.voteNo);
+        line_a =
+            ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+        line_b = ETJump::stringFormat("Change map:%i, Keep current map:%i",
+                                      cgs.rtvVoteYes, cgs.voteNo);
+
+        x_b = 13;
+
+        if (cgs.votedYes) {
+          const char *yesVotes = "Change map";
+          auto strWidth =
+              static_cast<float>(ETJump::DrawStringWidth(yesVotes, 0.23f));
+          CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, strWidth + 4, 12, 1,
+                                  color);
+        } else if (cgs.votedNo) {
+          std::string yesVotes =
+              ETJump::stringFormat("Change map:%i", cgs.rtvVoteYes);
+          std::string noVotes =
+              ETJump::stringFormat("Keep current map", cgs.voteNo);
+          auto yesStrWidth = static_cast<float>(
+              ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f));
+          auto noStrWidth = static_cast<float>(
+              ETJump::DrawStringWidth(noVotes.c_str(), 0.23f));
+          CG_DrawRect_FixedBorder(x_b - 2 + yesStrWidth + 15, 214 - 10 + 12,
+                                  noStrWidth + 4, 12, 1, color);
+        }
       }
     } else {
-      line_a =
-          ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
-      line_b = ETJump::stringFormat("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
-      x_b = 13;
-
-      if (cgs.votedYes) {
-        CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
+      if (!(cg.snap->ps.eFlags & EF_VOTED)) {
+        line_a = ETJump::stringFormat("VOTE(%i): %s", sec, cgs.voteString);
+        line_b =
+            ETJump::stringFormat("YES:%i, NO:%i%s", cgs.voteYes, cgs.voteNo,
+                                 canVote ? "" : " (Spectators can't vote)");
       } else {
-        std::string yesVotes = ETJump::stringFormat("Y:%i", cgs.voteYes);
-        auto textWidth = ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f);
-        CG_DrawRect_FixedBorder(x_b + textWidth + 13, 214 - 10 + 12, 11, 12, 1,
-                                color);
+        line_a =
+            ETJump::stringFormat("(%i) YOU VOTED ON: %s", sec, cgs.voteString);
+        line_b = ETJump::stringFormat("Y:%i, N:%i", cgs.voteYes, cgs.voteNo);
+
+        x_b = 13;
+
+        if (cgs.votedYes) {
+          CG_DrawRect_FixedBorder(x_b - 2, 214 - 10 + 12, 11, 12, 1, color);
+        } else {
+          std::string yesVotes = ETJump::stringFormat("Y:%i", cgs.voteYes);
+          auto strWidth = static_cast<float>(
+              ETJump::DrawStringWidth(yesVotes.c_str(), 0.23f));
+          CG_DrawRect_FixedBorder(x_b + strWidth + 13, 214 - 10 + 12, 11, 12, 1,
+                                  color);
+        }
       }
     }
   }
@@ -4546,7 +4581,9 @@ static void CG_Draw2D() {
 
     if (!cg.cameraMode) {
       CG_DrawTeamInfo();
-      CG_DrawVote();
+      if (!cg.showRtvMenu) {
+        CG_DrawVote();
+      }
       CG_DrawLagometer();
     }
 

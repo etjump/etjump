@@ -616,6 +616,33 @@ void CG_ChargeTimesChanged(void) {
   cg.covertopsChargeTime[1] = Q_atoi(Info_ValueForKey(info, "ald_cvo"));
 }
 
+namespace ETJump {
+void CG_SetRtvConfigStrings(const char *cs) {
+  char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
+  char value[3];       // can't exceed MAX_CLIENTS + null terminator
+
+  cgs.rtvMaps.clear();
+
+  while (cs != nullptr) {
+    Info_NextPair(&cs, key, value);
+
+    if (!key[0]) {
+      break;
+    }
+
+    cgs.rtvMaps.emplace_back(key, Q_atoi(value));
+  }
+}
+
+void countRtvYesVotes() {
+  cgs.rtvVoteYes = 0;
+
+  for (const auto &votes : cgs.rtvMaps) {
+    cgs.rtvVoteYes += votes.second;
+  }
+}
+} // namespace ETJump
+
 /*
 ================
 CG_ConfigStringModified
@@ -672,13 +699,21 @@ static void CG_ConfigStringModified(void) {
     cgs.voteTime = Q_atoi(str);
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_YES) {
-    cgs.voteYes = Q_atoi(str);
+    // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial
+    // 'callvote rtv' command, the check for cgs.isRtvVote might fail
+    if (cgs.isRtvVote || strlen(str) > 1) {
+      ETJump::CG_SetRtvConfigStrings(str);
+      ETJump::countRtvYesVotes();
+    } else {
+      cgs.voteYes = Q_atoi(str);
+    }
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_NO) {
     cgs.voteNo = Q_atoi(str);
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
+    cgs.isRtvVote = !Q_stricmp(cgs.voteString, "Rock The Vote");
   } else if (num == CS_INTERMISSION) {
     cg.intermissionStarted = Q_atoi(str) ? qtrue : qfalse;
   } else if (num == CS_SCREENFADE) {
@@ -2455,7 +2490,8 @@ static void CG_ServerCommand(void) {
   }
 
   if (!Q_stricmp(cmd, "voted")) {
-    cgs.votedYes = !Q_strncmp(CG_Argv(1), "y", 1) ? true : false;
+    cgs.votedYes = !Q_strncmp(CG_Argv(1), "y", 1);
+    cgs.votedNo = !Q_strncmp(CG_Argv(1), "n", 1);
     return;
   }
 
@@ -2820,6 +2856,11 @@ static void CG_ServerCommand(void) {
     }
 
     CPri(saveMsg.c_str());
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "openRtvMenu")) {
+    trap_SendConsoleCommand("openRtvMenu");
     return;
   }
 

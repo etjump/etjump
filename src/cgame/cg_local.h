@@ -1271,6 +1271,8 @@ typedef struct {
   bool portalgunBindingsAdjusted;
   int weapAltB1;
   int weapAltB2;
+
+  bool showRtvMenu;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
@@ -1984,6 +1986,11 @@ typedef struct {
   qboolean voteModified; // beep whenever changed
   char voteString[MAX_STRING_TOKENS];
   bool votedYes;
+
+  std::vector<std::pair<std::string, int>> rtvMaps;
+  bool votedNo; // rtv needs this since initial state for caller is no votes
+  int rtvVoteYes;
+  bool isRtvVote;
 
   int teamVoteTime[2];
   int teamVoteYes[2];

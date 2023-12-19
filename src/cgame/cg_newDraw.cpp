@@ -1,5 +1,6 @@
 
 #include "cg_local.h"
+#include "etj_rtv_drawable.h"
 
 int CG_DrawField(int x, int y, int width, int value, int charWidth,
                  int charHeight, qboolean dodrawpic,
@@ -566,6 +567,7 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_GAMEVIEW:
     case CGAME_EVENT_CAMPAIGNBREIFING:
     case CGAME_EVENT_FIRETEAMMSG:
+    case CGAME_EVENT_RTV:
       if (!cgs.demoCam.renderingFreeCam) {
         float mdx, mdy;
         ETJump::scaleMenuSensitivity(x, y, &mdx, &mdy);
@@ -590,8 +592,7 @@ void CG_MouseEvent(int x, int y) {
           CG_SpeakerEditorMouseMove_Handling(x, y);
         }
       } else {
-        // mousemovement *should* feel the same
-        // as ingame
+        // mouse movement *should* feel the same as in-game
         char buffer[64];
         int mx = 0, my = 0;
         int mouse_x_pos = 0, mouse_y_pos = 0;
@@ -690,6 +691,7 @@ void CG_EventHandling(int type, qboolean fForced) {
     case CGAME_EVENT_NONE:
     case CGAME_EVENT_CAMPAIGNBREIFING:
     case CGAME_EVENT_FIRETEAMMSG:
+    case CGAME_EVENT_RTV:
     default:
       // default handling (cleanup mostly)
       if (cgs.eventHandling == CGAME_EVENT_GAMEVIEW) {
@@ -718,6 +720,9 @@ void CG_EventHandling(int type, qboolean fForced) {
       } else if (cgs.eventHandling == CGAME_EVENT_FIRETEAMMSG) {
         cg.showFireteamMenu = qfalse;
         trap_Cvar_Set("cl_bypassmouseinput", "0");
+      } else if (cgs.eventHandling == CGAME_EVENT_RTV) {
+        cg.showRtvMenu = false;
+        trap_Cvar_Set("cl_bypassmouseinput", "0");
       } else if (cg.snap && cg.snap->ps.pm_type == PM_INTERMISSION && fForced) {
         trap_UI_Popup(UIMENU_INGAME);
       }
@@ -741,6 +746,10 @@ void CG_EventHandling(int type, qboolean fForced) {
     cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
     cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
     cg.showFireteamMenu = qtrue;
+    trap_Cvar_Set("cl_bypassmouseinput", "1");
+    trap_Key_SetCatcher(KEYCATCH_CGAME);
+  } else if (type == CGAME_EVENT_RTV) {
+    cg.showRtvMenu = true;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else {
@@ -773,6 +782,10 @@ void CG_KeyEvent(int key, qboolean down) {
 
     case CGAME_EVENT_SPEAKEREDITOR:
       CG_SpeakerEditor_KeyHandling(key, down);
+      break;
+
+    case CGAME_EVENT_RTV:
+      ETJump::RtvDrawable::keyHandling(key, down);
       break;
 
     default:

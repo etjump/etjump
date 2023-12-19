@@ -13,6 +13,7 @@
 #include "etj_cvar_shadow.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
+#include "etj_rtv_drawable.h"
 
 displayContextDef_t cgDC;
 
@@ -4034,11 +4035,19 @@ qboolean CG_IsSinglePlayer(void) {
 }
 
 qboolean CG_CheckExecKey(int key) {
-  if (!cg.showFireteamMenu) {
+  if (!cg.showFireteamMenu && !cg.showRtvMenu) {
     return qfalse;
   }
 
-  return CG_FireteamCheckExecKey(key, qfalse);
+  if (cg.showFireteamMenu) {
+    return CG_FireteamCheckExecKey(key, qfalse);
+  }
+
+  if (cg.showRtvMenu) {
+    return ETJump::RtvDrawable::checkExecKey(key, qfalse);
+  }
+
+  return qfalse;
 }
 
 // Quoted-Printable like encoding

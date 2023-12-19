@@ -55,6 +55,7 @@
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_crosshair.h"
 #include "etj_overbounce_detector.h"
+#include "etj_rtv_drawable.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -238,6 +239,8 @@ void init() {
 
   ETJump::renderables.push_back(std::make_shared<UpperRight>());
   ETJump::renderables.push_back(std::make_shared<UpmoveMeter>());
+
+  ETJump::renderables.push_back(std::make_shared<RtvDrawable>());
 
   ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
   ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();

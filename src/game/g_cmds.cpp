@@ -8,13 +8,17 @@
 #include "etj_save_system.h"
 #include "etj_entity_utilities.h"
 #include "etj_string_utilities.h"
-
-void BotDebug(int clientNum);
-void GetBotAutonomies(int clientNum, int *weapAutonomy, int *moveAutonomy);
-qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum);
+#include "etj_numeric_utilities.h"
 
 namespace ETJump {
-enum class VotingTypes { VoteYes, VoteNo, RevoteYes, RevoteNo };
+enum class VotingTypes {
+  VoteYes,
+  VoteNo,
+  RevoteYes,
+  RevoteNo,
+  VoteRtv,
+  RevoteRtv
+};
 
 const static int VOTING_ATTEMPTS{3};
 const static int VOTING_TIMEOUT{2000};
@@ -440,42 +444,67 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
 }
 
 // Updates voting stats
-void etj_UpdateVotingInfo(gentity_t *ent, ETJump::VotingTypes vote) {
+namespace ETJump {
+void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
   auto client = ent->client;
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
+  const bool isRtvVote = level.voteInfo.isRtvVote;
 
   switch (vote) {
-    case ETJump::VotingTypes::VoteYes:
+    case VotingTypes::VoteYes:
       level.voteInfo.voteYes++;
       client->pers.votingInfo.isVotedYes = true;
       break;
-    case ETJump::VotingTypes::VoteNo:
+    case VotingTypes::VoteNo:
       level.voteInfo.voteNo++;
       client->pers.votingInfo.isVotedYes = false;
       break;
-    case ETJump::VotingTypes::RevoteYes:
+    case VotingTypes::RevoteYes:
       level.voteInfo.voteYes++;
       level.voteInfo.voteNo--;
       client->pers.votingInfo.isVotedYes = true;
       break;
-    case ETJump::VotingTypes::RevoteNo:
+    case VotingTypes::RevoteNo:
       level.voteInfo.voteYes--;
       level.voteInfo.voteNo++;
       client->pers.votingInfo.isVotedYes = false;
-  }
-
-  if (client->pers.votingInfo.isVotedYes) {
-    trap_SendServerCommand(clientNum, "voted yes");
-  } else {
-    trap_SendServerCommand(clientNum, "voted no");
+      if (isRtvVote) {
+        level.voteInfo.rtvMaps[ent->client->pers.votingInfo.lastRtvMapVoted]
+            .second--;
+      }
+      break;
+    case VotingTypes::VoteRtv:
+      level.voteInfo.rtvMaps[mapNum].second++;
+      ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
+      client->pers.votingInfo.isVotedYes = true;
+      level.voteInfo.voteYes++;
+      break;
+    case VotingTypes::RevoteRtv:
+      level.voteInfo.rtvMaps[ent->client->pers.votingInfo.lastRtvMapVoted]
+          .second--;
+      level.voteInfo.rtvMaps[mapNum].second++;
+      ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
+      client->pers.votingInfo.isVotedYes = true;
+      break;
   }
 
   client->pers.votingInfo.time = level.time;
   client->pers.votingInfo.attempts++;
 
-  trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
-  trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+  if (client->pers.votingInfo.isVotedYes) {
+    trap_SendServerCommand(clientNum, "voted yes");
+
+    if (level.voteInfo.isRtvVote) {
+      G_SetRtvConfigstrings();
+    } else {
+      trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+    }
+  } else {
+    trap_SendServerCommand(clientNum, "voted no");
+    trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+  }
 }
+} // namespace ETJump
 
 /*
 =================
@@ -2598,7 +2627,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   int i;
   char arg1[MAX_STRING_TOKENS];
   char arg2[MAX_STRING_TOKENS];
-  int clientNum = ent - g_entities;
+  const int clientNum = ClientNum(ent);
 
   if (!checkVoteConditions(ent, clientNum)) {
     return;
@@ -2609,18 +2638,16 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_Argv(2, arg2, sizeof(arg2));
 
   if (strchr(arg1, ';') || strchr(arg2, ';')) {
-    G_cpmPrintf(ent, "Invalid vote string.");
+    Printer::SendPopupMessage(clientNum, "Invalid vote string.\n");
     return;
   }
 
   if ((i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK) {
     if (i == G_NOTFOUND) {
       if (arg1[0]) {
-        std::string errorMessage =
-            ETJump::stringFormat("\n^3Unknown vote command: "
-                                 "^7%s %s\n",
-                                 arg1, arg2);
-        Printer::SendConsoleMessage(ent - g_entities, errorMessage);
+        std::string errorMessage = ETJump::stringFormat(
+            "\n^3Unknown vote command: ^7%s %s\n", arg1, arg2);
+        Printer::SendConsoleMessage(clientNum, errorMessage);
       }
       G_voteHelp(ent, qtrue);
     }
@@ -2631,11 +2658,18 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
               voteStringFormat, arg1, arg2);
 
+  if (level.voteInfo.vote_fn == ETJump::G_RockTheVote_v) {
+    level.voteInfo.isRtvVote = true;
+    trap_SendServerCommand(clientNum, "openRtvMenu");
+  }
+
   // Zero: NOTE! if we call a randommap vote with a custom map type
   // it only changes the clientside info text, not everything.
 
-  level.voteInfo.voteYes = 1;
-  trap_SendServerCommand(ent - g_entities, "voted yes");
+  if (!level.voteInfo.isRtvVote) {
+    level.voteInfo.voteYes = 1;
+    trap_SendServerCommand(clientNum, "voted yes");
+  }
 
   std::string calledVoteString = ETJump::stringFormat(
       "%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname,
@@ -2653,7 +2687,7 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
   level.voteInfo.voteTime = level.time;
   level.voteInfo.voteNo = 0;
-  level.voteInfo.voter_cn = ClientNum(ent);
+  level.voteInfo.voter_cn = clientNum;
   level.voteInfo.voter_team = ent->client->sess.sessionTeam;
 
   ent->client->lastVoteTime = level.time;
@@ -2663,12 +2697,22 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   }
 
   ent->client->pers.voteCount++;
-  ent->client->ps.eFlags |= EF_VOTED;
+  if (!level.voteInfo.isRtvVote) {
+    ent->client->ps.eFlags |= EF_VOTED;
+  }
 
-  trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
-  trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
-  trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
   trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
+  trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
+
+  // do not set CS_VOTE_YES if we call rtv vote
+  // as we use this to store each map and the amount of yes votes per map
+  if (level.voteInfo.isRtvVote) {
+    ETJump::G_SetRtvConfigstrings();
+  } else {
+    trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+  }
+
+  trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 }
 
 static const char *yesMsgs[] = {"yes", "y", "1"};
@@ -2680,26 +2724,20 @@ Cmd_Vote_f
 ==================
 */
 void Cmd_Vote_f(gentity_t *ent) {
-  char msg[64];
+  char voteCmd[64]; // either 'vote' or 'rtvVote'
+  char voteArg[64];
   auto *client = ent->client;
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
+  const bool isRtvVote = level.voteInfo.isRtvVote;
 
   static const auto votedYes = [](const std::string &msg) {
-    for (const auto &ym : yesMsgs) {
-      if (ym == msg) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(std::begin(yesMsgs), std::end(yesMsgs),
+                       [&msg](const char *ym) { return ym == msg; });
   };
 
   static const auto votedNo = [](const std::string &msg) {
-    for (const auto &nm : noMsgs) {
-      if (nm == msg) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(std::begin(noMsgs), std::end(noMsgs),
+                       [&msg](const char *nm) { return nm == msg; });
   };
 
   static const auto printVoteMsgs = [&]() {
@@ -2716,6 +2754,39 @@ void Cmd_Vote_f(gentity_t *ent) {
     Printer::SendConsoleMessage(clientNum, voteMsgs);
   };
 
+  static const auto printRtvVoteMsgs = [&]() {
+    std::string voteMsgs = "^7Invalid vote argument.\n";
+    voteMsgs += ETJump::stringFormat("^7Valid arguments for this vote are\n"
+                                     "  ^3rtvVote 1-%i\n",
+                                     level.voteInfo.rtvMaps.size());
+    voteMsgs += "  ^7Open map selection with: ^3vote ";
+    for (const auto &ym : yesMsgs) {
+      voteMsgs += std::string(ym) + " ";
+    }
+    voteMsgs += "\n  ^7Vote '^1No^7' to keep current map with: ^3vote ";
+    for (const auto &nm : noMsgs) {
+      voteMsgs += std::string(nm) + " ";
+    }
+
+    voteMsgs += "\n";
+    Printer::SendConsoleMessage(clientNum, voteMsgs);
+  };
+
+  static const auto cancelVote = [&]() {
+    level.voteInfo.voteCanceled = qtrue;
+    level.voteInfo.voteNo = level.numConnectedClients;
+    level.voteInfo.voteYes = 0;
+    level.voteInfo.isRtvVote = false;
+    Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
+  };
+
+  trap_Argv(0, voteCmd, sizeof(voteCmd));
+  const std::string voteCmdStr = ETJump::sanitize(std::string(voteCmd), true);
+  const bool isRtvVoteCmd = voteCmdStr == "rtvvote";
+
+  trap_Argv(1, voteArg, sizeof(voteArg));
+  const std::string voteArgStr = ETJump::sanitize(std::string(voteArg), true);
+
   if (ent->client->pers.applicationEndTime > level.time) {
 
     gclient_t *cl = g_entities[ent->client->pers.applicationClient].client;
@@ -2727,16 +2798,13 @@ void Cmd_Vote_f(gentity_t *ent) {
       return;
     }
 
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
-
-    if (votedYes(msgstr)) {
+    if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -3");
 
       G_AddClientToFireteam(ent->client->pers.applicationClient, clientNum);
-    } else if (votedNo(msgstr)) {
+    } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "application -4");
       trap_SendServerCommand(ent->client->pers.applicationClient,
                              "application -2");
@@ -2764,17 +2832,14 @@ void Cmd_Vote_f(gentity_t *ent) {
       return;
     }
 
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
-
-    if (votedYes(msgstr)) {
+    if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -3");
 
       G_AddClientToFireteam(clientNum, ent->client->pers.invitationClient);
-    } else if (votedNo(msgstr)) {
-      trap_SendServerCommand(ent - g_entities, "invitation -4");
+    } else if (votedNo(voteArgStr)) {
+      trap_SendServerCommand(clientNum, "invitation -4");
       trap_SendServerCommand(ent->client->pers.invitationClient,
                              "invitation -2");
     } else {
@@ -2800,16 +2865,13 @@ void Cmd_Vote_f(gentity_t *ent) {
       return;
     }
 
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
-
-    if (votedYes(msgstr)) {
+    if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -3");
 
       G_InviteToFireTeam(clientNum, ent->client->pers.propositionClient);
-    } else if (votedNo(msgstr)) {
+    } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
       trap_SendServerCommand(ent->client->pers.propositionClient2,
                              "proposition -2");
@@ -2828,16 +2890,13 @@ void Cmd_Vote_f(gentity_t *ent) {
   if (ent->client->pers.autofireteamEndTime > level.time) {
     fireteamData_t *ft;
 
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
-
-    if (votedYes(msgstr)) {
+    if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "aft -2");
 
       if (G_IsFireteamLeader(clientNum, &ft)) {
         ft->priv = qtrue;
       }
-    } else if (votedNo(msgstr)) {
+    } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "aft -2");
     } else {
       printVoteMsgs();
@@ -2850,14 +2909,12 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
 
   if (ent->client->pers.autofireteamCreateEndTime > level.time) {
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
 
-    if (votedYes(msgstr)) {
+    if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
 
       G_RegisterFireteam(clientNum);
-    } else if (votedNo(msgstr)) {
+    } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
     } else {
       printVoteMsgs();
@@ -2870,10 +2927,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
 
   if (ent->client->pers.autofireteamJoinEndTime > level.time) {
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
-
-    if (votedYes(msgstr)) {
+    if (votedYes(voteArgStr)) {
       fireteamData_t *ft;
 
       trap_SendServerCommand(clientNum, "aftj -2");
@@ -2882,7 +2936,7 @@ void Cmd_Vote_f(gentity_t *ent) {
       if (ft) {
         G_AddClientToFireteam(clientNum, ft->joinOrder[0]);
       }
-    } else if (votedNo(msgstr)) {
+    } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "aftj -2");
     } else {
       printVoteMsgs();
@@ -2902,31 +2956,58 @@ void Cmd_Vote_f(gentity_t *ent) {
     Printer::SendConsoleMessage(clientNum, "No vote in progress.\n");
     return;
   }
+
+  // this is sent as + 1 from cgame for user convenience
+  // e.g. /rtvVote 3 = vote for 3rd map on the list
+  int mapNum = Q_atoi(voteArg) - 1;
+  const size_t maxMaps = level.voteInfo.rtvMaps.size() - 1;
+
+  if (isRtvVote && isRtvVoteCmd) {
+    if (!std::isdigit(voteArg[0]) || mapNum < 0 || mapNum > maxMaps) {
+      printRtvVoteMsgs();
+      return;
+    }
+
+    Numeric::clamp(mapNum, 0, maxMaps);
+  }
+
   if (ent->client->ps.eFlags & EF_VOTED) {
-    trap_Argv(1, msg, sizeof(msg));
-    const auto msgstr = ETJump::sanitize(std::string(msg), true);
-    // If the caller decides to hit f2 after calling the vote
-    // cancel it.
-    if (ClientNum(ent) == level.voteInfo.voter_cn) {
-      if (votedYes(msgstr)) {
-        // Do nothing...
-        return;
-      } else if (votedNo(msgstr)) {
-        level.voteInfo.voteCanceled = qtrue;
-        level.voteInfo.voteNo = level.numConnectedClients;
-        level.voteInfo.voteYes = 0;
-        Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
-        return;
+    // If the caller decides to hit f2 after calling the vote, cancel it.
+    if (clientNum == level.voteInfo.voter_cn) {
+      if (isRtvVote) {
+        if (!isRtvVoteCmd) {
+          if (votedYes(voteArgStr)) {
+            trap_SendServerCommand(clientNum, "openRtvMenu");
+          } else if (votedNo(voteArgStr)) {
+            cancelVote();
+          } else {
+            printRtvVoteMsgs();
+          }
+          return;
+        }
       } else {
-        printVoteMsgs();
-        return;
+        if (votedYes(voteArgStr)) {
+          return; // do nothing
+        } else if (votedNo(voteArgStr)) {
+          cancelVote();
+          return;
+        } else {
+          printVoteMsgs();
+          return;
+        }
       }
     }
 
-    // so it's first 10s if vote time set to 30s
-    auto allowedRevoteTimeRange = level.voteInfo.voteTime + (VOTE_TIME / 3);
+    // don't take away re-vote attempts if we re-vote the same map on rtv
+    if (isRtvVote && client->pers.votingInfo.lastRtvMapVoted == mapNum) {
+      return;
+    }
 
-    // don't allow to revote anymore if time range is passed or
+    // so it's first 10s if vote time set to 30s
+    const int allowedRevoteTimeRange =
+        level.voteInfo.voteTime + (VOTE_TIME / 3);
+
+    // don't allow to re-vote anymore if time range is passed or
     // there are no attempts left
     if (level.time > allowedRevoteTimeRange ||
         client->pers.votingInfo.attempts > ETJump::VOTING_ATTEMPTS) {
@@ -2963,18 +3044,37 @@ void Cmd_Vote_f(gentity_t *ent) {
 
     client->pers.votingInfo.isWarned = false;
 
-    // allow revote
-    if (votedYes(msgstr)) {
-      if (!client->pers.votingInfo.isVotedYes) {
-        etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteYes);
-      }
-    } else if (votedNo(msgstr)) {
-      if (client->pers.votingInfo.isVotedYes) {
-        etj_UpdateVotingInfo(ent, ETJump::VotingTypes::RevoteNo);
+    // allow re-vote
+    if (isRtvVote) {
+      if (isRtvVoteCmd) {
+        ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::RevoteRtv);
+      } else {
+        if (votedYes(voteArgStr)) {
+          trap_SendServerCommand(clientNum, "openRtvMenu");
+          return;
+        } else if (votedNo(voteArgStr)) {
+          if (client->pers.votingInfo.isVotedYes) {
+            ETJump::updateVotingInfo(ent, mapNum,
+                                     ETJump::VotingTypes::RevoteNo);
+          }
+        } else {
+          printRtvVoteMsgs();
+          return;
+        }
       }
     } else {
-      printVoteMsgs();
-      return;
+      if (votedYes(voteArgStr)) {
+        if (!client->pers.votingInfo.isVotedYes) {
+          ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::RevoteYes);
+        }
+      } else if (votedNo(voteArgStr)) {
+        if (client->pers.votingInfo.isVotedYes) {
+          ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::RevoteNo);
+        }
+      } else {
+        printVoteMsgs();
+        return;
+      }
     }
 
     Printer::SendPopupMessage(
@@ -2989,24 +3089,44 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
 
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-      g_spectatorVote.integer < 1) {
+      !g_spectatorVote.integer) {
     Printer::SendPopupMessage(clientNum,
                               "You are not allowed to vote as a spectator.\n");
     return;
   }
 
-  trap_Argv(1, msg, sizeof(msg));
-  const auto msgstr = ETJump::sanitize(std::string(msg), true);
-
-  if (votedYes(msgstr)) {
-
-    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteYes);
-
-  } else if (votedNo(msgstr)) {
-    etj_UpdateVotingInfo(ent, ETJump::VotingTypes::VoteNo);
+  // we need to do all this handling here because the initial vote caller
+  // hasn't actually voted yet on rtv vote (so we skip the code above),
+  // and it's possible they just hit esc to close the menu without voting
+  if (isRtvVote) {
+    if (!isRtvVoteCmd) {
+      if (votedYes(voteArgStr)) {
+        trap_SendServerCommand(clientNum, "openRtvMenu");
+        return;
+      } else if (votedNo(voteArgStr)) {
+        if (level.voteInfo.voter_cn == clientNum) {
+          cancelVote();
+          return;
+        } else {
+          ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::VoteNo);
+        }
+      } else {
+        printRtvVoteMsgs();
+        return;
+      }
+    } else {
+      ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::VoteRtv);
+    }
   } else {
-    printVoteMsgs();
-    return;
+    // regular vote
+    if (votedYes(voteArgStr)) {
+      ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::VoteYes);
+    } else if (votedNo(voteArgStr)) {
+      ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::VoteNo);
+    } else {
+      printVoteMsgs();
+      return;
+    }
   }
 
   Printer::SendConsoleMessage(clientNum, "Vote cast.\n");
@@ -3133,8 +3253,8 @@ void Cmd_StopCamera_f(gentity_t *ent) {
     //))) {	// info_player_start becomes info_player_deathmatch
     // in it's
     // spawn
-    // functon 			if (Distance( ent->s.pos.trBase, sp->s.origin
-    // ) < 256
+    // functon 			if (Distance( ent->s.pos.trBase,
+    // sp->s.origin ) < 256
     // && trap_InPVS( ent->s.pos.trBase, sp->s.origin )) {
     // G_SaveGame( NULL ); 				break;
     //			}
@@ -3719,7 +3839,8 @@ void Cmd_ClientMonsterSlickAngle (gentity_t *clent) {
     vec3_t	forward;
 
     if (trap_Argc() != 3) {
-        G_Printf( "ClientDamage command issued with incorrect number of args\n"
+        G_Printf( "ClientDamage command issued with incorrect number of
+args\n"
 );
     }
 
@@ -4625,8 +4746,8 @@ void Cmd_shrug_f(gentity_t *ent) {
                      ANIM_ET_NOPOWER, qtrue, qfalse);
 }
 
-// sends back timerun specific information, used to restore runtimer after cgame
-// restart
+// sends back timerun specific information, used to restore runtimer after
+// cgame restart
 void Cmd_timerunStatus_f(gentity_t *ent) {
   if (level.hasTimerun) {
     trap_SendServerCommand(ClientNum(ent), "hasTimerun 1");
@@ -4736,6 +4857,7 @@ static const command_t anyTimeCommands[] = {
     {"m", qtrue, Cmd_PrivateMessage_f},
     {"nogoto", qfalse, Cmd_noGoto_f},
     {"nocall", qfalse, Cmd_noCall_f},
+    {"rtvVote", qfalse, Cmd_Vote_f},
 };
 
 static const command_t noIntermissionCommands[] = {

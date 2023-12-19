@@ -5,6 +5,8 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_map_statistics.h"
+#include "etj_numeric_utilities.h"
+#include <set>
 
 #define T_FFA 0x01
 #define T_1V1 0x02
@@ -56,7 +58,9 @@ static const vote_reference_t aVoteInfo[] = {
      "^7\n  Restarts the current map in progress"},
     {0x1ff, "randommap", G_RandomMap_v, "Random Map",
      " ^7\n Votes a new random map to be loaded"},
-    {0, 0, NULL, 0}};
+    {0x1ff, "rtv", ETJump::G_RockTheVote_v, "Rock The Vote",
+     " ^7\n Initiates Rock The Vote"},
+    {0, nullptr, nullptr, nullptr}};
 
 void G_cpmPrintf(gentity_t *ent, const char *fmt, ...) {
   va_list argptr;
@@ -455,7 +459,7 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
       return G_INVALID;
     }
 
-    if (G_voteDescription(ent, dwVoteIndex, false)) {
+    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
       return (G_INVALID);
     }
     // Vote action (vote has passed)
@@ -466,3 +470,103 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
 
   return (G_OK);
 }
+
+namespace ETJump {
+bool checkRtvWinner() {
+  std::vector<std::string> mostVotedMaps{};
+  int previousVoteCount = 0;
+  int voteCount;
+
+  for (const auto &map : level.voteInfo.rtvMaps) {
+    voteCount = map.second;
+
+    if (voteCount > previousVoteCount) {
+      mostVotedMaps.clear();
+      mostVotedMaps.push_back(map.first);
+      previousVoteCount = map.second;
+    } else if (voteCount == previousVoteCount) {
+      mostVotedMaps.push_back(map.first);
+      previousVoteCount = map.second;
+    }
+  }
+
+  return mostVotedMaps.size() == 1;
+}
+
+void setRtvWinner() {
+  std::string mostVotedMap;
+  int previousVoteCount = 0;
+  int voteCount;
+
+  for (const auto &map : level.voteInfo.rtvMaps) {
+    voteCount = map.second;
+
+    // we don't need to care about tied votes here as vote timer
+    // will be extended in a tie scenario, and we'll always end up
+    // with a single map with most votes
+    if (voteCount > previousVoteCount) {
+      mostVotedMap = map.first;
+      previousVoteCount = map.second;
+    }
+  }
+
+  Q_strncpyz(level.voteInfo.vote_value, mostVotedMap.c_str(),
+             sizeof(level.voteInfo.vote_value));
+}
+
+void G_SetRtvConfigstrings() {
+  const size_t maxMaps = level.voteInfo.rtvMaps.size();
+  std::string newcs;
+
+  for (size_t i = 0; i < maxMaps; ++i) {
+    newcs += stringFormat("%s\\%i%s", level.voteInfo.rtvMaps[i].first,
+                          level.voteInfo.rtvMaps[i].second,
+                          i == maxMaps - 1 ? "" : "\\");
+  }
+
+  trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
+}
+
+int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
+                    char *arg2) {
+  if (arg) {
+    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
+      return (G_INVALID);
+    }
+
+    // FIXME: check amount of maps on the server, theoretically we might
+    //  not even have 2 maps available if everything is blocked with
+    //  g_blockedMaps, and having less maps on the server than
+    //  g_rtvMapCount is set to will cause an infinite loop here
+    const size_t maxMaps = Numeric::clamp(g_rtvMapCount.integer, 2, 9);
+    std::set<std::string> uniqueMaps;
+
+    level.voteInfo.rtvMaps.clear();
+
+    while (uniqueMaps.size() < maxMaps) {
+      const char *map = GetRandomMap();
+      uniqueMaps.insert(map);
+    }
+
+    std::string cs;
+    auto it = uniqueMaps.begin();
+    level.voteInfo.rtvMaps.resize(maxMaps);
+
+    for (size_t i = 0; i < maxMaps; ++i, ++it) {
+      level.voteInfo.rtvMaps[i].first = *it;
+      cs += ETJump::stringFormat("%s\\0%s", level.voteInfo.rtvMaps[i].first,
+                                 i == maxMaps - 1 ? "" : "\\");
+    }
+
+    // this will never overflow as MAX_QPATH is 64 and rtv supports max 9 maps
+    trap_SetConfigstring(CS_VOTE_YES, cs.c_str());
+  } else {
+    setRtvWinner();
+    G_increasePassedCount(level.voteInfo.vote_value);
+    trap_SendConsoleCommand(EXEC_APPEND,
+                            va("map %s\n", level.voteInfo.vote_value));
+  }
+
+  return G_OK;
+}
+} // namespace ETJump

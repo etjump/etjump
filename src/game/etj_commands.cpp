@@ -1538,8 +1538,15 @@ bool Noclip(gentity_t *ent, Arguments argv) {
 
 bool Passvote(gentity_t *ent, Arguments argv) {
   if (level.voteInfo.voteTime) {
-    level.voteInfo.forcePass = qtrue;
-    ChatPrintAll("^3passvote:^7 vote has been passed.");
+    if (level.voteInfo.vote_fn == ETJump::G_RockTheVote_v) {
+      Printer::SendChatMessage(
+          ClientNum(ent),
+          ETJump::stringFormat("^3passvote:^7 %s cannot be force passed.",
+                               level.voteInfo.voteString));
+    } else {
+      level.voteInfo.forcePass = qtrue;
+      ChatPrintAll("^3passvote:^7 vote has been passed.");
+    }
   } else {
     ChatPrintAll("^3passvote:^7 no vote in progress.");
   }
