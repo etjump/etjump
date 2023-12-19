@@ -1824,6 +1824,7 @@ void QDECL G_DPrintf(const char *fmt, ...);
 void QDECL G_Error(const char *fmt, ...);
 // Is this a single player type game - sp or coop?
 qboolean G_IsSinglePlayerGame();
+void resetVote();
 
 //
 // g_client.c
