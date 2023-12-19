@@ -493,15 +493,17 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
 
   if (client->pers.votingInfo.isVotedYes) {
     trap_SendServerCommand(clientNum, "voted yes");
-
-    if (isRtvVote) {
-      game.rtv->setRtvConfigstrings();
-    } else {
-      trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
-    }
   } else {
     trap_SendServerCommand(clientNum, "voted no");
     trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+  }
+
+  // note: we must always send this during rtv to update map vote counts,
+  // as someone might vote for a map initially, but then re-vote no
+  if (isRtvVote) {
+    game.rtv->setRtvConfigstrings();
+  } else {
+    trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
   }
 }
 } // namespace ETJump
