@@ -481,7 +481,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return (G_INVALID);
     }
 
-    auto mapsOnServer = game.mapStatistics->getCurrentMaps();
+    const auto mapsOnServer = game.mapStatistics->getCurrentMaps();
     // - 1 since we don't want to include the current map
     const auto numMapsOnServer = static_cast<int>(mapsOnServer->size() - 1);
 
