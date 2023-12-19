@@ -4035,10 +4035,6 @@ qboolean CG_IsSinglePlayer(void) {
 }
 
 qboolean CG_CheckExecKey(int key) {
-  if (!cg.showFireteamMenu && !cg.showRtvMenu) {
-    return qfalse;
-  }
-
   if (cg.showFireteamMenu) {
     return CG_FireteamCheckExecKey(key, qfalse);
   }
