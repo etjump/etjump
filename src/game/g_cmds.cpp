@@ -2668,7 +2668,10 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   // Zero: NOTE! if we call a randommap vote with a custom map type
   // it only changes the clientside info text, not everything.
 
-  if (!game.rtv->rtvVoteActive()) {
+  // rtv starts with no initial votes as the caller hasn't picked a map yet
+  if (game.rtv->rtvVoteActive()) {
+    level.voteInfo.voteYes = 0;
+  } else {
     level.voteInfo.voteYes = 1;
     trap_SendServerCommand(clientNum, "voted yes");
   }
