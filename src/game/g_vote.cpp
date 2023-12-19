@@ -509,11 +509,6 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     } else {
       while (uniqueMaps.size() <= maxMaps) {
         const char *map = GetRandomMap();
-
-        if (!Q_stricmp(map, level.rawmapname)) {
-          continue;
-        }
-
         uniqueMaps.insert(map);
       }
     }
