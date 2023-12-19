@@ -204,6 +204,7 @@ bool RtvDrawable::beforeRender() {
   }
 
   auto rtvMaps = rtvHandler->getRtvMaps();
+  std::fill_n(rtvMenuStrings.begin(), rtvMenuStrings.size() - 1, "");
 
   for (size_t i = 0; i < rtvMaps->size(); i++) {
     rtvMenuStrings[i] = (*rtvMaps)[i].first.c_str();

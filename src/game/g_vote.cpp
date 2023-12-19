@@ -481,19 +481,41 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return (G_INVALID);
     }
 
-    // FIXME: check amount of maps on the server, theoretically we might
-    //  not even have 2 maps available if everything is blocked with
-    //  g_blockedMaps, and having less maps on the server than
-    //  g_rtvMapCount is set to will cause an infinite loop here
-    const size_t maxMaps = Numeric::clamp(g_rtvMapCount.integer, 2, 9);
+    auto mapsOnServer = game.mapStatistics->getCurrentMaps();
+    // - 1 since we don't want to include the current map
+    const auto numMapsOnServer = static_cast<int>(mapsOnServer->size() - 1);
+
+    if (numMapsOnServer == 1) {
+      Printer::SendPopupMessage(
+          ClientNum(ent),
+          ETJump::stringFormat("Sorry, calling [lof]^3%s^7[lon] with only 2 "
+                               "maps on the server is not possible.",
+                               arg));
+      return (G_INVALID);
+    }
+
+    const size_t maxMaps =
+        Numeric::clamp(g_rtvMapCount.integer, 2, std::min(numMapsOnServer, 9));
     std::set<std::string> uniqueMaps;
     auto rtvMaps = game.rtv->getRtvMaps();
 
     game.rtv->clearRtvMaps();
 
-    while (uniqueMaps.size() < maxMaps) {
-      const char *map = GetRandomMap();
-      uniqueMaps.insert(map);
+    // just copy all the maps if we don't have more maps than requested
+    if (numMapsOnServer <= maxMaps) {
+      std::copy(mapsOnServer->begin(), mapsOnServer->end(),
+                std::inserter(uniqueMaps, uniqueMaps.begin()));
+      uniqueMaps.erase(level.rawmapname);
+    } else {
+      while (uniqueMaps.size() <= maxMaps) {
+        const char *map = GetRandomMap();
+
+        if (!Q_stricmp(map, level.rawmapname)) {
+          continue;
+        }
+
+        uniqueMaps.insert(map);
+      }
     }
 
     std::string cs;

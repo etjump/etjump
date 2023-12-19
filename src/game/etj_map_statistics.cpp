@@ -480,6 +480,7 @@ const char *MapStatistics::randomMap() const {
     int testIdx = ui(re);
     if (isValidMap(&_maps[testIdx])) {
       mapIdx = testIdx;
+      break;
     }
   }
   // fallback, iterate map list and select first valid map
