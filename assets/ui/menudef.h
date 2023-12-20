@@ -422,6 +422,7 @@
 #define CV_SVF_MAP				1
 #define CV_SVF_MATCHRESET		2
 #define CV_SVF_RANDOMMAP		4
+#define CV_SVF_RTV			8
 
 // referee level
 #define RL_NONE					0

@@ -5010,6 +5010,7 @@ const voteType_t voteToggles[] = {
     {"vote_allow_map", CV_SVF_MAP},
     {"vote_allow_matchreset", CV_SVF_MATCHRESET},
     {"vote_allow_randommap", CV_SVF_RANDOMMAP},
+    {"vote_allow_rtv", CV_SVF_RTV},
 };
 
 const char *BG_TeamnameForNumber(team_t teamNum) {
