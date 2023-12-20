@@ -40,7 +40,8 @@ public:
   std::vector<std::pair<std::string, int>> *getRtvMaps();
   void clearRtvMaps();
 
-  bool checkRtvWinner();
+  std::vector<std::string> getMostVotedMaps();
+  // in a tie situation, this sets a random winner out of the most voted maps
   void setRtvWinner();
   void setRtvConfigstrings();
 

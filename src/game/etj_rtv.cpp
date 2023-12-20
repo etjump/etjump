@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include <random>
 #include "etj_rtv.h"
 #include "g_local.h"
 #include "etj_string_utilities.h"
@@ -33,12 +34,16 @@ RockTheVote::RockTheVote() {
   isRtvVote = false;
 }
 
-bool RockTheVote::checkRtvWinner() {
+std::vector<std::string> RockTheVote::getMostVotedMaps() {
   std::vector<std::string> mostVotedMaps{};
   int previousVoteCount = 0;
   int voteCount;
 
   for (const auto &map : rtvMaps) {
+    if (map.second == 0) {
+      continue;
+    }
+
     voteCount = map.second;
 
     if (voteCount > previousVoteCount) {
@@ -46,32 +51,24 @@ bool RockTheVote::checkRtvWinner() {
       mostVotedMaps.push_back(map.first);
       previousVoteCount = map.second;
     } else if (voteCount == previousVoteCount) {
-      mostVotedMaps.push_back(map.first);
-      previousVoteCount = map.second;
+      mostVotedMaps.push_back((map.first));
     }
   }
 
-  return mostVotedMaps.size() == 1;
+  return mostVotedMaps;
 }
 
 void RockTheVote::setRtvWinner() {
-  std::string mostVotedMap;
-  int previousVoteCount = 0;
-  int voteCount;
+  auto maps = getMostVotedMaps();
 
-  for (const auto &map : rtvMaps) {
-    voteCount = map.second;
+  if (maps.size() > 1) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-    // we don't need to care about tied votes here as vote timer
-    // will be extended in a tie scenario, and we'll always end up
-    // with a single map with most votes
-    if (voteCount > previousVoteCount) {
-      mostVotedMap = map.first;
-      previousVoteCount = map.second;
-    }
+    std::shuffle(maps.begin(), maps.end(), gen);
   }
 
-  Q_strncpyz(level.voteInfo.vote_value, mostVotedMap.c_str(),
+  Q_strncpyz(level.voteInfo.vote_value, maps[0].c_str(),
              sizeof(level.voteInfo.vote_value));
 }
 

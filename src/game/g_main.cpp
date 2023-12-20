@@ -3056,25 +3056,6 @@ void CheckVote() {
   const int requiredClients = validVotingClients * requiredPercentage / 100;
   const auto voter = g_entities + level.voteInfo.voter_cn;
 
-  static const auto passVote = [&]() {
-    Printer::BroadcastPopupMessage("^5Vote passed!");
-    G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
-
-    level.voteInfo.voteTime = 0;
-    level.voteInfo.voteCanceled = qfalse;
-    level.voteInfo.vote_fn(nullptr, 0, nullptr, nullptr);
-  };
-
-  static const auto failVote = [&]() {
-    std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
-                                                     level.voteInfo.voteString);
-    Printer::BroadcastPopupMessage(voteFailedMsg);
-    G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
-
-    level.voteInfo.voteTime = 0;
-    level.voteInfo.voteCanceled = qfalse;
-  };
-
   if (level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
     Printer::BroadcastPopupMessage("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
@@ -3083,20 +3064,22 @@ void CheckVote() {
     level.voteInfo.voteYes = 0;
     level.voteInfo.voteNo = level.numConnectedClients;
   } else if (level.voteInfo.voteYes > requiredClients) {
-    if (isRtvVote) {
-      if (game.rtv->checkRtvWinner()) {
-        passVote();
-      } else {
-        // FIXME: extend timer if we have a tie between two maps
-        failVote();
-      }
-    } else {
-      passVote();
-    }
+    Printer::BroadcastPopupMessage("^5Vote passed!");
+    G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
+
+    level.voteInfo.voteTime = 0;
+    level.voteInfo.voteCanceled = qfalse;
+    level.voteInfo.vote_fn(nullptr, 0, nullptr, nullptr);
   } else if (level.voteInfo.voteNo >=
                  level.numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
-    failVote();
+    std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
+                                                     level.voteInfo.voteString);
+    Printer::BroadcastPopupMessage(voteFailedMsg);
+    G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
+
+    level.voteInfo.voteTime = 0;
+    level.voteInfo.voteCanceled = qfalse;
   } else {
     return;
   }
