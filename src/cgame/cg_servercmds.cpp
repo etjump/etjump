@@ -672,6 +672,11 @@ static void CG_ConfigStringModified(void) {
     cgs.intermissionStartTime = Q_atoi(str);
   } else if (num == CS_VOTE_TIME) {
     cgs.voteTime = Q_atoi(str);
+
+    if (!rtvHandler->rtvVoteActive()) {
+      rtvHandler->resetRtvEventHandler();
+    }
+
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_YES) {
     // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial

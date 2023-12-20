@@ -70,4 +70,8 @@ void ClientRtvHandler::setRtvVoteStatus() {
 bool ClientRtvHandler::rtvVoteActive() const {
   return isRtvVote && cgs.voteTime;
 }
+
+void ClientRtvHandler::resetRtvEventHandler() {
+  CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+}
 } // namespace ETJump

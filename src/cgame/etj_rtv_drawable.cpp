@@ -200,10 +200,6 @@ qboolean RtvDrawable::checkExecKey(int key, qboolean doAction) {
 
 bool RtvDrawable::beforeRender() {
   if (canSkipDraw()) {
-    // this is the simplest and most reliable way to make sure we
-    // reset event handling correctly after rtv ends,
-    // every other way has some sort of caveat where it fails in some scenario
-    CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     return false;
   }
 
