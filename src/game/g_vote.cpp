@@ -532,7 +532,6 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     trap_SetConfigstring(CS_VOTE_YES, cs.c_str());
   } else {
     game.rtv->setRtvWinner();
-    G_increasePassedCount(level.voteInfo.vote_value);
     trap_SendConsoleCommand(EXEC_APPEND,
                             va("map %s\n", level.voteInfo.vote_value));
   }

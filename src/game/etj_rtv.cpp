@@ -66,6 +66,8 @@ void RockTheVote::setRtvWinner() {
     std::mt19937 gen(rd());
 
     std::shuffle(maps.begin(), maps.end(), gen);
+  } else {
+    G_increasePassedCount(maps[0].c_str());
   }
 
   Q_strncpyz(level.voteInfo.vote_value, maps[0].c_str(),
