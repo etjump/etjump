@@ -67,5 +67,7 @@ void ClientRtvHandler::setRtvVoteStatus() {
   isRtvVote = !Q_stricmp(cgs.voteString, "Rock The Vote");
 }
 
-bool ClientRtvHandler::rtvVoteActive() const { return isRtvVote; }
+bool ClientRtvHandler::rtvVoteActive() const {
+  return isRtvVote && cgs.voteTime;
+}
 } // namespace ETJump
