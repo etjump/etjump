@@ -1851,7 +1851,7 @@ static int PM_FootstepForSurface(void) {
 * Play step or short fall footstep depending on fall speed.
 */
 static void PM_GetCushionFootstep(const float delta) {
-  PM_AddEventExt(delta > 7 ? EV_FALL_SHORT : EV_FOOTSTEP,
+  PM_AddEventExt(delta > 7 ? EV_CUSHIONFALLSTEP : EV_FOOTSTEP,
                  PM_FootstepForSurface());
 }
 
