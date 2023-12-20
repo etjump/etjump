@@ -2217,6 +2217,11 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
   return true;
 }
 
+bool RockTheVote(gentity_t *ent, Arguments argv) {
+  trap_SendServerCommand(ClientNum(ent), "callvote rtv");
+  return true;
+}
+
 } // namespace AdminCommands
 
 Commands::Commands() {
@@ -2327,6 +2332,8 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::LoadCheckpoints, CommandFlags::BASIC);
   adminCommands_["seasons"] =
       AdminCommandPair(ClientCommands::ListSeasons, CommandFlags::BASIC);
+  adminCommands_["rtv"] =
+      AdminCommandPair(AdminCommands::RockTheVote, CommandFlags::BASIC);
 
   commands_["backup"] = ClientCommands::BackupLoad;
   commands_["save"] = ClientCommands::Save;

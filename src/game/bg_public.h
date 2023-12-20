@@ -2767,6 +2767,7 @@ static const struct Manual commandManuals[] = {
     {"newmaps", "!newmaps [(optional) count]",
      "Lists latest ^3[count] ^7maps added to server, sorted from oldest to "
      "newest."},
+    {"rtv", "!rtv", "Calls Rock The Vote."},
 };
 
 typedef struct {

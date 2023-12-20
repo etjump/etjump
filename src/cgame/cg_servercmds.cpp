@@ -2844,6 +2844,12 @@ static void CG_ServerCommand(void) {
     return;
   }
 
+  // for !rtv admin command
+  if (!Q_stricmp(cmd, "callvote")) {
+    trap_SendConsoleCommand(va("%s %s", cmd, arguments[0].c_str()));
+    return;
+  }
+
   if (found)
     return;
 
