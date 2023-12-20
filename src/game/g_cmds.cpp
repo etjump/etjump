@@ -2709,8 +2709,6 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
   trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
 
-  // do not set CS_VOTE_YES if we call rtv vote
-  // as we use this to store each map and the amount of yes votes per map
   if (game.rtv->rtvVoteActive()) {
     game.rtv->setRtvConfigstrings();
   } else {
@@ -3004,9 +3002,16 @@ void Cmd_Vote_f(gentity_t *ent) {
       }
     }
 
-    // don't take away re-vote attempts if we re-vote the same map on rtv
-    if (isRtvVote && client->pers.votingInfo.lastRtvMapVoted == mapNum) {
-      return;
+    if (isRtvVote) {
+      // allow opening the menu with 'vote yes' even when past re-vote period
+      if (!isRtvVoteCmd && votedYes(voteArgStr)) {
+        trap_SendServerCommand(clientNum, "openRtvMenu");
+        return;
+      }
+      // don't take away re-vote attempts if we re-vote the same map on rtv
+      if (client->pers.votingInfo.lastRtvMapVoted == mapNum) {
+        return;
+      }
     }
 
     // so it's first 10s if vote time set to 30s
@@ -3055,10 +3060,9 @@ void Cmd_Vote_f(gentity_t *ent) {
       if (isRtvVoteCmd) {
         ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::RevoteRtv);
       } else {
-        if (votedYes(voteArgStr)) {
-          trap_SendServerCommand(clientNum, "openRtvMenu");
-          return;
-        } else if (votedNo(voteArgStr)) {
+        // 'vote yes' is handled before the re-vote period check
+        // to always allow opening the menu, even when past re-vote period
+        if (votedNo(voteArgStr)) {
           if (client->pers.votingInfo.isVotedYes) {
             ETJump::updateVotingInfo(ent, mapNum,
                                      ETJump::VotingTypes::RevoteNo);
