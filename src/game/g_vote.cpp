@@ -477,6 +477,11 @@ namespace ETJump {
 int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     char *arg2) {
   if (arg) {
+    if (!vote_allow_rtv.integer) {
+      G_voteDisableMessage(ent, arg);
+      return G_INVALID;
+    }
+
     if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
       return (G_INVALID);
     }

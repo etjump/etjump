@@ -163,6 +163,7 @@ vmCvar_t server_motd5;
 vmCvar_t vote_allow_map;
 vmCvar_t vote_allow_matchreset;
 vmCvar_t vote_allow_randommap;
+vmCvar_t vote_allow_rtv;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 
@@ -440,6 +441,7 @@ cvarTable_t gameCvarTable[] = {
     {&vote_allow_matchreset, "vote_allow_matchreset", "1", 0, 0, qfalse,
      qfalse},
     {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
+    {&vote_allow_rtv, "vote_allow_rtv", "1", 0, 0, qfalse, qfalse},
     {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
     {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
 
@@ -1618,7 +1620,7 @@ void G_UpdateCvars(void) {
           if (cv->vmCvar == &vote_allow_map ||
               cv->vmCvar == &vote_allow_matchreset ||
               cv->vmCvar == &vote_allow_randommap ||
-              cv->vmCvar == &g_enableVote) {
+              cv->vmCvar == &vote_allow_rtv || cv->vmCvar == &g_enableVote) {
             fVoteFlags = qtrue;
           } else {
             fToggles =

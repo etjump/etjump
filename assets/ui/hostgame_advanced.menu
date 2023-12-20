@@ -92,6 +92,7 @@ menuDef {
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2, 188, .5*((SUBWINDOW_WIDTH)-6), 10, "Map:", .2, 24, 8, "vote_allow_map", "Allow players to vote for a different map" )
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2+(.5*((SUBWINDOW_WIDTH)-6))+2, 188, .5*((SUBWINDOW_WIDTH)-6), 10, "Match Reset:", .2, 24, 8, "vote_allow_matchreset", "Allow players to vote for the match to be reset" )
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2, 200, .5*((SUBWINDOW_WIDTH)-6), 10, "Random Map:", .2, 24, 8, "vote_allow_randommap", "Allow players to vote for a random map" )
+	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2+(.5*((SUBWINDOW_WIDTH)-6))+2, 200, .5*((SUBWINDOW_WIDTH)-6), 10, "Rock The Vote:", .2, 24, 8, "vote_allow_rtv", "Allow players to vote for Rock The Vote" )
 	
 // Message of the Day //
 

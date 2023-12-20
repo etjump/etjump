@@ -2044,6 +2044,7 @@ extern vmCvar_t team_nocontrols;
 extern vmCvar_t vote_allow_map;
 extern vmCvar_t vote_allow_matchreset;
 extern vmCvar_t vote_allow_randommap;
+extern vmCvar_t vote_allow_rtv;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
 extern vmCvar_t g_letterbox;

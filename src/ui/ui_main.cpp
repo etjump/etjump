@@ -9025,6 +9025,7 @@ cvarTable_t cvarTable[] = {
     {NULL, "vote_allow_map", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_matchreset", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_randommap", "1", CVAR_ARCHIVE},
+    {NULL, "vote_allow_rtv", "1", CVAR_ARCHIVE},
     {NULL, "vote_limit", "5", CVAR_ARCHIVE},
     {NULL, "vote_percent", "50", CVAR_ARCHIVE},
     // OSP
