@@ -4,6 +4,7 @@
 #include "etj_string_utilities.h"
 #include "etj_numeric_utilities.h"
 #include "etj_printer.h"
+#include "etj_rtv.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -2850,7 +2851,14 @@ void ClientDisconnect(int clientNum) {
   } else if (ent->client->ps.eFlags & EF_VOTED) {
     if (ent->client->pers.votingInfo.isVotedYes) {
       level.voteInfo.voteYes--;
-      trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+
+      if (game.rtv->rtvVoteActive()) {
+        auto rtvMaps = game.rtv->getRtvMaps();
+        (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
+        game.rtv->setRtvConfigstrings();
+      } else {
+        trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+      }
     } else {
       level.voteInfo.voteNo--;
       trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));

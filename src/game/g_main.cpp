@@ -3011,6 +3011,7 @@ void resetVote() {
   level.voteInfo.voteTime = 0;
   level.voteInfo.forcePass = qfalse;
   level.voteInfo.voteCanceled = qfalse;
+  game.rtv->setRtvStatus(false);
   trap_SetConfigstring(CS_VOTE_TIME, "");
 }
 
