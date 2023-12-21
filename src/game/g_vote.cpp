@@ -563,7 +563,7 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
     }
 
     // don't let users vote negative values
-    if (Q_atoi(arg2) <= 0) {
+    if (Q_atoi(arg2) < 0) {
       Q_strncpyz(arg2, "0", sizeof(arg2));
     }
 
