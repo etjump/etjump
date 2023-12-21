@@ -2657,6 +2657,17 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   }
 
   auto voteStringFormat = arg2[0] ? "%s %s" : "%s";
+
+  // make the vote message a bit nicer if users vote for auto rtv
+  if (level.voteInfo.vote_fn == ETJump::G_AutoRtv_v) {
+    if (Q_atoi(arg2) == 0) {
+      Q_strncpyz(arg2, "Off", sizeof(arg2));
+    } else {
+      Q_strncpyz(arg2, va("%s", ETJump::getMinutesString(Q_atoi(arg2)).c_str()),
+                 sizeof(arg2));
+    }
+  }
+
   Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
               voteStringFormat, arg1, arg2);
 

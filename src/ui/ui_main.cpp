@@ -4643,6 +4643,10 @@ void UI_RunMenuScript(const char **args) {
       trap_Cvar_Set("ui_voteTimelimit",
                     va("%i", Q_atoi(Info_ValueForKey(info, "timelimit"))));
 
+      trap_Cvar_Set(
+          "ui_voteAutoRtv",
+          va("%i", static_cast<int>(trap_Cvar_VariableValue("g_autoRtv"))));
+
       return;
     }
     if (Q_stricmp(name, "voteLeader") == 0) {
@@ -5580,6 +5584,14 @@ void UI_RunMenuScript(const char **args) {
       trap_Cvar_Set("ui_map_details", "0");
       return;
     }
+    if (!Q_stricmp(name, "voteAutoRtv")) {
+      trap_Cmd_ExecuteText(
+          EXEC_APPEND,
+          va("callvote autoRtv %i\n",
+             static_cast<int>(trap_Cvar_VariableValue("ui_voteAutoRtv"))));
+      return;
+    }
+
     Com_Printf("^3WARNING: unknown UI script %s\n", name);
   }
 }
@@ -9026,6 +9038,7 @@ cvarTable_t cvarTable[] = {
     {NULL, "vote_allow_matchreset", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_randommap", "1", CVAR_ARCHIVE},
     {NULL, "vote_allow_rtv", "1", CVAR_ARCHIVE},
+    {NULL, "vote_allow_autoRtv", "1", CVAR_ARCHIVE},
     {NULL, "vote_limit", "5", CVAR_ARCHIVE},
     {NULL, "vote_percent", "50", CVAR_ARCHIVE},
     // OSP

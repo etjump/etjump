@@ -62,6 +62,8 @@ static const vote_reference_t aVoteInfo[] = {
      " ^7\n Votes a new random map to be loaded"},
     {0x1ff, "rtv", ETJump::G_RockTheVote_v, "Rock The Vote",
      " ^7\n Initiates Rock The Vote"},
+    {0x1ff, "autoRtv", ETJump::G_AutoRtv_v, "Auto RTV",
+     " ^7\n Votes to set an interval for automatic Rock The Vote"},
     {0, nullptr, nullptr, nullptr}};
 
 void G_cpmPrintf(gentity_t *ent, const char *fmt, ...) {
@@ -506,7 +508,7 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                                  "than 3 maps on the server is not possible.",
                                  arg));
       }
-      return (G_INVALID);
+      return G_INVALID;
     }
 
     const size_t maxMaps =
@@ -544,6 +546,44 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     game.rtv->setRtvWinner();
     trap_SendConsoleCommand(EXEC_APPEND,
                             va("map %s\n", level.voteInfo.vote_value));
+  }
+
+  return G_OK;
+}
+
+int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
+  if (arg) {
+    if (!vote_allow_autoRtv.integer) {
+      G_voteDisableMessage(ent, arg);
+      return G_INVALID;
+    }
+
+    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
+      return G_INVALID;
+    }
+
+    // don't let users vote negative values
+    if (Q_atoi(arg2) <= 0) {
+      Q_strncpyz(arg2, "0", sizeof(arg2));
+    }
+
+    Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, arg2);
+  } else {
+    trap_SendConsoleCommand(EXEC_APPEND,
+                            va("g_autoRtv %s", level.voteInfo.vote_value));
+
+    if (!Q_stricmp(level.voteInfo.vote_value, "0")) {
+      Printer::BroadcastPopupMessage(
+          "^gAutomatic Rock The Vote has been turned off.");
+    } else {
+      const char *minutesStr =
+          Q_atoi(level.voteInfo.vote_value) == 1 ? "minute" : "minutes";
+      Printer::BroadcastPopupMessage(
+          "^gAutomatic Rock The Vote has been turned on!");
+      Printer::BroadcastPopupMessage(
+          stringFormat("^gNext vote will be called in ^3%i ^g%s.",
+                       Q_atoi(level.voteInfo.vote_value), minutesStr));
+    }
   }
 
   return G_OK;

@@ -88,15 +88,16 @@ menuDef {
 	MULTI( 6+(SUBWINDOW_WIDTH)+6+2, 142, (SUBWINDOW_WIDTH)-4, 10, "Successful voting %:", .2, 8, "vote_percent", cvarFloatList { "25%" 25 "50%" 50 "75%" 75 "100%" 100 }, "Specifies the minimum percentage required for a vote to pass" )
 	MULTI( 6+(SUBWINDOW_WIDTH)+6+2, 154, (SUBWINDOW_WIDTH)-4, 10, "Spectator voting:", .2, 8, "g_spectatorVote", cvarFloatList { "No" 0 "Cast votes" 1 "Call and cast votes" 2 }, "Allow spectators to participate in voting" )
 	
-	SUBWINDOW( 6+(SUBWINDOW_WIDTH)+6, 172, (SUBWINDOW_WIDTH), 40, "ALLOW VOTES" )
+	SUBWINDOW( 6+(SUBWINDOW_WIDTH)+6, 172, (SUBWINDOW_WIDTH), 52, "ALLOW VOTES" )
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2, 188, .5*((SUBWINDOW_WIDTH)-6), 10, "Map:", .2, 24, 8, "vote_allow_map", "Allow players to vote for a different map" )
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2+(.5*((SUBWINDOW_WIDTH)-6))+2, 188, .5*((SUBWINDOW_WIDTH)-6), 10, "Match Reset:", .2, 24, 8, "vote_allow_matchreset", "Allow players to vote for the match to be reset" )
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2, 200, .5*((SUBWINDOW_WIDTH)-6), 10, "Random Map:", .2, 24, 8, "vote_allow_randommap", "Allow players to vote for a random map" )
 	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2+(.5*((SUBWINDOW_WIDTH)-6))+2, 200, .5*((SUBWINDOW_WIDTH)-6), 10, "Rock The Vote:", .2, 24, 8, "vote_allow_rtv", "Allow players to vote for Rock The Vote" )
+	CHECKBOXALIGNX( 6+(SUBWINDOW_WIDTH)+6+2, 212, .5*((SUBWINDOW_WIDTH)-6), 10, "Auto RTV:", .2, 24, 8, "vote_allow_autoRtv", "Allow players to vote automatic Rock The Vote" )
 	
 // Message of the Day //
 
-	SUBWINDOW( 6+(SUBWINDOW_WIDTH)+6, 218, (SUBWINDOW_WIDTH), 76, "MESSAGE OF THE DAY" )
+	SUBWINDOW( 6+(SUBWINDOW_WIDTH)+6, 230, (SUBWINDOW_WIDTH), 76, "MESSAGE OF THE DAY" )
 
 	itemDef {
 		name		"efleftbackLine 1:"
@@ -107,7 +108,7 @@ menuDef {
 		visible		1
 		decoration
 	}
-	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 234, (SUBWINDOW_WIDTH)-8, 10, "Line 1:", .2, 8, "server_motd0", 26, 35, "Specifies the message clients will see when connecting to the server" )
+	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 246, (SUBWINDOW_WIDTH)-8, 10, "Line 1:", .2, 8, "server_motd0", 26, 35, "Specifies the message clients will see when connecting to the server" )
 	
 	itemDef {
 		name		"efleftbackLine 2:"
@@ -118,7 +119,7 @@ menuDef {
 		visible		1
 		decoration
 	}	
-	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 246, (SUBWINDOW_WIDTH)-8, 10, "Line 2:", .2, 8, "server_motd1", 26, 35, "Specifies the message clients will see when connecting to the server" )
+	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 258, (SUBWINDOW_WIDTH)-8, 10, "Line 2:", .2, 8, "server_motd1", 26, 35, "Specifies the message clients will see when connecting to the server" )
 
 	itemDef {
 		name		"efleftbackLine 3:"
@@ -129,7 +130,7 @@ menuDef {
 		visible		1
 		decoration
 	}	
-	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 258, (SUBWINDOW_WIDTH)-8, 10, "Line 3:", .2, 8, "server_motd2", 26, 35, "Specifies the message clients will see when connecting to the server" )
+	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 270, (SUBWINDOW_WIDTH)-8, 10, "Line 3:", .2, 8, "server_motd2", 26, 35, "Specifies the message clients will see when connecting to the server" )
 	
 	itemDef {
 		name		"efleftbackLine 4:"
@@ -140,7 +141,7 @@ menuDef {
 		visible		1
 		decoration
 	}	
-	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 270, (SUBWINDOW_WIDTH)-8, 10, "Line 4:", .2, 8, "server_motd3", 26, 35, "Specifies the message clients will see when connecting to the server" )
+	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 282, (SUBWINDOW_WIDTH)-8, 10, "Line 4:", .2, 8, "server_motd3", 26, 35, "Specifies the message clients will see when connecting to the server" )
 
 	itemDef {
 		name		"efleftbackLine 5:"
@@ -151,16 +152,16 @@ menuDef {
 		visible		1
 		decoration
 	}	
-	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 282, (SUBWINDOW_WIDTH)-8, 10, "Line 5:", .2, 8, "server_motd4", 26, 35, "Specifies the message clients will see when connecting to the server" )
+	EDITFIELDLEFT( 6+(SUBWINDOW_WIDTH)+6+4, 294, (SUBWINDOW_WIDTH)-8, 10, "Line 5:", .2, 8, "server_motd4", 26, 35, "Specifies the message clients will see when connecting to the server" )
 	
 // Download //
 
-	SUBWINDOW( 6+(SUBWINDOW_WIDTH)+6, 300, (SUBWINDOW_WIDTH), 64/*72*/, "DOWNLOAD" )
-	YESNO( 6+(SUBWINDOW_WIDTH)+6+2, 316, (SUBWINDOW_WIDTH)-4, 10, "Client Downloads:", .2, 8, "sv_allowDownload", "Allows players to download missing files from the server" )
-	NUMERICFIELD( 6+(SUBWINDOW_WIDTH)+6+2, 328, (SUBWINDOW_WIDTH)-4, 10, "Maximum Download Rate:", .2, 8, "sv_dl_maxRate", 6, "Specifies the maximum download rate from the server for players with missing files" )
-	YESNO( 6+(SUBWINDOW_WIDTH)+6+2, 340, (SUBWINDOW_WIDTH)-4, 10, "FTP/HTTP Redirects:", .2, 8, "sv_wwwDownload", "Redirects players with missing files to another server" )
-	EDITFIELD( 6+(SUBWINDOW_WIDTH)+6+2, 352, (SUBWINDOW_WIDTH)-4, 10, "Base URL:", .2, 8, "sv_wwwBaseUrl", 64, 18, "Used to build the URL given to clients for download" )
-//	EDITFIELD( 6+(SUBWINDOW_WIDTH)+6+2, 364, (SUBWINDOW_WIDTH)-4, 10, "Check Path:", .2, 8, "sv_wwwCheckPath", 64, 18, "A local path on the server to check for files" )
+	SUBWINDOW( 6+(SUBWINDOW_WIDTH)+6, 312, (SUBWINDOW_WIDTH), 64/*72*/, "DOWNLOAD" )
+	YESNO( 6+(SUBWINDOW_WIDTH)+6+2, 328, (SUBWINDOW_WIDTH)-4, 10, "Client Downloads:", .2, 8, "sv_allowDownload", "Allows players to download missing files from the server" )
+	NUMERICFIELD( 6+(SUBWINDOW_WIDTH)+6+2, 340, (SUBWINDOW_WIDTH)-4, 10, "Maximum Download Rate:", .2, 8, "sv_dl_maxRate", 6, "Specifies the maximum download rate from the server for players with missing files" )
+	YESNO( 6+(SUBWINDOW_WIDTH)+6+2, 352, (SUBWINDOW_WIDTH)-4, 10, "FTP/HTTP Redirects:", .2, 8, "sv_wwwDownload", "Redirects players with missing files to another server" )
+	EDITFIELD( 6+(SUBWINDOW_WIDTH)+6+2, 364, (SUBWINDOW_WIDTH)-4, 10, "Base URL:", .2, 8, "sv_wwwBaseUrl", 64, 18, "Used to build the URL given to clients for download" )
+//	EDITFIELD( 6+(SUBWINDOW_WIDTH)+6+2, 376, (SUBWINDOW_WIDTH)-4, 10, "Check Path:", .2, 8, "sv_wwwCheckPath", 64, 18, "A local path on the server to check for files" )
 
 // Buttons //
 	

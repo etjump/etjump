@@ -436,7 +436,15 @@
 		visible			1												\
 		tooltip			NUMERICFIELDLEFTEXT_TOOLTIP						\
 																		\
-		NUMERICFIELDLEFTEXT_EXT											\
+            mouseEnter {                                                    \
+                    setitemcolor "nfleftext" ## NUMERICFIELDLEFTEXT_TEXT forecolor .9 .9 .9 1 ;    \
+            }                                                               \
+                                                                    \
+            mouseExit {                                                     \
+                    setitemcolor "nfleftext" ## NUMERICFIELDLEFTEXT_TEXT forecolor .6 .6 .6 1 ;    \
+            }                                                               \
+                                                                    \
+            NUMERICFIELDLEFTEXT_EXT                                         \
     }
 
 #define YESNO( YESNO_X, YESNO_Y, YESNO_W, YESNO_H, YESNO_TEXT, YESNO_TEXT_SCALE, YESNO_TEXT_ALIGN_Y, YESNO_CVAR, YESNO_TOOLTIP )	\

@@ -62,6 +62,7 @@
 							setcvar vote_allow_matchreset 1 ;		\
 							setcvar vote_allow_randommap 1 ;		\
 							setcvar vote_allow_rtv 1 ;				\
+							setcvar vote_allow_autoRtv 1 ;			\
 							setcvar server_motd0 " ^NEnemy Territory ^7MOTD " ; \
 							clearcvar server_motd1 ;				\
 							clearcvar server_motd2 ;				\

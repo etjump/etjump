@@ -102,13 +102,14 @@ bool RockTheVote::rtvVoteActive() const { return isRtvVote; }
 void RockTheVote::setRtvStatus(bool status) { isRtvVote = status; }
 
 bool RockTheVote::checkAutoRtv() {
-  if (!level.numConnectedClients) {
-    // push the start time forward on empty servers
+  if (!level.numConnectedClients || g_autoRtv.integer <= 0) {
+    // push the start time forward on empty servers or if auto rtv is off
     autoRtvStartTime = level.time;
     return false;
   }
 
-  if (g_autoRtv.integer <= 0 || level.voteInfo.voteTime) {
+  // wait for any ongoing vote finish
+  if (level.voteInfo.voteTime) {
     return false;
   }
 
