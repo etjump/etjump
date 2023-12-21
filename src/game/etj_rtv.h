@@ -33,6 +33,10 @@ class RockTheVote {
   // holds the map names and their vote counts for rtv
   std::vector<std::pair<std::string, int>> rtvMaps;
 
+  int autoRtvStartTime;
+  bool anyonePlayedSinceLastVote;
+  bool twoMinWarningGiven;
+
 public:
   RockTheVote();
   ~RockTheVote() = default;
@@ -47,5 +51,11 @@ public:
 
   bool rtvVoteActive() const;
   void setRtvStatus(bool status);
+
+  bool checkAutoRtv();
+
+  // minimalistic reimplementation of Cmd_Callvote_f
+  // calls rtv with a null client, bypassing all restrictions
+  void callAutoRtv();
 };
 } // namespace ETJump

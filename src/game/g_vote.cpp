@@ -477,25 +477,35 @@ namespace ETJump {
 int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     char *arg2) {
   if (arg) {
-    if (!vote_allow_rtv.integer) {
-      G_voteDisableMessage(ent, arg);
-      return G_INVALID;
-    }
+    if (!level.voteInfo.isAutoRtvVote) {
+      if (!vote_allow_rtv.integer) {
+        G_voteDisableMessage(ent, arg);
+        return G_INVALID;
+      }
 
-    if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
-      return (G_INVALID);
+      if (G_voteDescription(ent, static_cast<int>(dwVoteIndex), false)) {
+        return (G_INVALID);
+      }
     }
 
     const auto mapsOnServer = game.mapStatistics->getCurrentMaps();
     // - 1 since we don't want to include the current map
     const auto numMapsOnServer = static_cast<int>(mapsOnServer->size() - 1);
 
-    if (numMapsOnServer == 1) {
-      Printer::SendPopupMessage(
-          ClientNum(ent),
-          ETJump::stringFormat("Sorry, calling [lof]^3%s^7[lon] with only 2 "
-                               "maps on the server is not possible.",
-                               arg));
+    if (numMapsOnServer < 2) {
+      // auto rtv
+      if (ent == nullptr) {
+        G_LogPrintf(
+            "Automatic %s is not possible on a server with less than 3 maps, "
+            "please add more maps to the server to use this feature.\n",
+            arg);
+      } else {
+        Printer::SendPopupMessage(
+            ClientNum(ent),
+            ETJump::stringFormat("Sorry, calling [lof]^3%s^7[lon] with less "
+                                 "than 3 maps on the server is not possible.",
+                                 arg));
+      }
       return (G_INVALID);
     }
 

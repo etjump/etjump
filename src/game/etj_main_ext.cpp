@@ -139,6 +139,11 @@ void ChangeMap() {
 void RunFrame(int levelTime) {
   game.mapStatistics->runFrame(levelTime);
   game.timerunV2->runFrame();
+
+  if (game.rtv->checkAutoRtv()) {
+    game.rtv->callAutoRtv();
+  }
+
   ETJump::Log::processMessages();
 }
 

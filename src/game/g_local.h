@@ -1200,6 +1200,8 @@ typedef struct voteInfo_s {
   int voter_cn;
   qboolean voteCanceled;
   qboolean forcePass;
+
+  bool isAutoRtvVote;
 } voteInfo_t;
 
 typedef struct {

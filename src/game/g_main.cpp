@@ -164,6 +164,7 @@ vmCvar_t vote_allow_map;
 vmCvar_t vote_allow_matchreset;
 vmCvar_t vote_allow_randommap;
 vmCvar_t vote_allow_rtv;
+vmCvar_t vote_allow_autoRtv;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 
@@ -442,6 +443,7 @@ cvarTable_t gameCvarTable[] = {
      qfalse},
     {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
     {&vote_allow_rtv, "vote_allow_rtv", "1", 0, 0, qfalse, qfalse},
+    {&vote_allow_autoRtv, "vote_allow_autoRtv", "1", 0, 0, qfalse, qfalse},
     {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
     {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
 
@@ -1620,7 +1622,9 @@ void G_UpdateCvars(void) {
           if (cv->vmCvar == &vote_allow_map ||
               cv->vmCvar == &vote_allow_matchreset ||
               cv->vmCvar == &vote_allow_randommap ||
-              cv->vmCvar == &vote_allow_rtv || cv->vmCvar == &g_enableVote) {
+              cv->vmCvar == &vote_allow_rtv ||
+              cv->vmCvar == &vote_allow_autoRtv ||
+              cv->vmCvar == &g_enableVote) {
             fVoteFlags = qtrue;
           } else {
             fToggles =
@@ -3036,6 +3040,7 @@ void CheckVote() {
 
   int minVoteDuration;
   const bool isRtvVote = game.rtv->rtvVoteActive();
+  const bool isAutoRtvVote = level.voteInfo.isAutoRtvVote;
 
   // vote_minVoteDuration is likely low on most servers, so we use a separate
   // duration for rtv to give everyone some time to pick a map
@@ -3054,9 +3059,11 @@ void CheckVote() {
   const int requiredPercentage = Numeric::clamp(vote_percent.integer, 1, 99);
   const int validVotingClients = getNumValidVoters();
   const int requiredClients = validVotingClients * requiredPercentage / 100;
-  const auto voter = g_entities + level.voteInfo.voter_cn;
+  const auto voter =
+      isAutoRtvVote ? nullptr : g_entities + level.voteInfo.voter_cn;
 
-  if (level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
+  if (!isAutoRtvVote &&
+      level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
     Printer::BroadcastPopupMessage("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
                 level.voteInfo.voteString, voter->client->pers.netname);
