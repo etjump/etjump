@@ -133,7 +133,6 @@ bool RockTheVote::checkAutoRtv() {
 
   if (!twoMinWarningGiven && level.time > autoRtvCooldown - (1000 * 60 * 2) &&
       g_autoRtv.integer >= 2) {
-    G_Printf("%i > %i\n", level.time, autoRtvCooldown - (1000 * 60 * 2));
     Printer::BroadcastChatMessage(
         "^gServer: automatic Rock The Vote will be called in ^32 ^gminutes.");
     twoMinWarningGiven = true;
