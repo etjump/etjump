@@ -942,7 +942,7 @@ char *Q_CleanDirName(char *dirname) {
 size_t Q_strnlen(const char *str, size_t maxlen) {
   if (!str) {
     Com_Error(ERR_FATAL, "Q_strnlen: NULL str");
-    return -1; // blah blah silence warning about str being null
+    return 0; // blah blah silence warning about str being null
   }
 
   auto *p = static_cast<const char *>(std::memchr(str, 0, maxlen));
