@@ -697,48 +697,46 @@ void TrickjumpLines::loadRoutes(const char *loadname) {
 
   try {
     // Loop on each route (tjl)
-    for (int i = 0; i < static_cast<int>(root.size()); ++i) {
+    for (auto &i : root) {
       Route loadRoute;
       if (loadname != nullptr) {
         loadRoute.filename = loadname;
       }
 
-      loadRoute.name = root[i]["name"].asString();
-      loadRoute.width = root[i]["width"].asFloat();
+      loadRoute.name = i["name"].asString();
+      loadRoute.width = i["width"].asFloat();
       loadRoute.status = loadStatus;
 
-      Json::Value colorValue = root[i]["color"];
+      Json::Value colorValue = i["color"];
       for (int j = 0; j < static_cast<int>(colorValue.size()); ++j) {
         loadRoute.color[j] =
             (unsigned char)Q_atoi(colorValue[j].asString().c_str());
       }
 
       // Loop on each trail in a route (tjl)
-      Json::Value trailsValue = root[i]["trails"];
+      Json::Value trailsValue = i["trails"];
       std::vector<std::vector<Node>> routeVec;
-      for (int j = 0; j < static_cast<int>(trailsValue.size()); ++j) {
+      for (auto &j : trailsValue) {
         // Loop on each node in a trail.
         std::vector<Node> trailVec;
-        for (int k = 0; k < static_cast<int>(trailsValue[j].size()); ++k) {
-          Node loadNode;
-          Json::Value coorValue = trailsValue[j][k]["coordinates"];
+        for (auto &k : j) {
+          Node loadNode{};
+          Json::Value coorValue = k["coordinates"];
           for (int l = 0; l < static_cast<int>(coorValue.size()); ++l) {
             loadNode.coor[l] = Q_atof(coorValue[l].asString().c_str());
           }
-          loadNode.speed = trailsValue[j][k]["speed"].asFloat();
-          trailVec.push_back(loadNode); // Add node to
-                                        // trail.
+          loadNode.speed = k["speed"].asFloat();
+          trailVec.push_back(loadNode); // Add node to trail.
         }
         routeVec.push_back(trailVec); // Add trail to route.
       }
-      loadRoute.trails = routeVec;
+      loadRoute.trails = std::move(routeVec);
       _routes.push_back(loadRoute); // Add route to object
     }
   } catch (...) {
     CG_Printf("There was a read error in %s parser\n", map.c_str());
     return;
   }
-  return;
 }
 
 void TrickjumpLines::saveRoutes(const char *savename) {

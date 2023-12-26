@@ -86,7 +86,7 @@ static void parseNamedColorString(const std::string &token, vec4_t &color) {
   }
 }
 
-static void parseRGBAValuedColorString(const std::string colorString,
+static void parseRGBAValuedColorString(const std::string &colorString,
                                        vec4_t &color) {
   std::istringstream tokenStream{colorString};
   std::string token;
