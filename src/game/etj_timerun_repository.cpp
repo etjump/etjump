@@ -454,7 +454,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords() {
 std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     const Timerun::PrintRecordsParams &params) {
   auto season = params.season.hasValue() ? params.season.value() : "Default";
-  auto map = params.map;
+  const auto &map = params.map;
   auto runSpecified = params.run.hasValue();
 
   auto seasons = getSeasonsForName(season, false);
