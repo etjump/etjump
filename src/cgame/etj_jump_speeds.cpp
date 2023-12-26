@@ -49,6 +49,13 @@ JumpSpeeds::~JumpSpeeds() {
   _entityEventsHandler->unsubscribe(EV_JUMP);
 }
 
+bool JumpSpeeds::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+  return true;
+}
+
 void JumpSpeeds::render() const {
   float x1 = 6 + etj_jumpSpeedsX.value;
   float x2 = 6 + 30 + etj_jumpSpeedsX.value;
@@ -60,10 +67,6 @@ void JumpSpeeds::render() const {
   bool horizontal = etj_jumpSpeedsStyle.integer &
                     static_cast<int>(jumpSpeedStyle::Horizontal);
   int numJumps = static_cast<int>(jumpSpeeds.size());
-
-  if (canSkipDraw()) {
-    return;
-  }
 
   x1 = ETJump_AdjustPosition(x1);
   x2 = ETJump_AdjustPosition(x2);

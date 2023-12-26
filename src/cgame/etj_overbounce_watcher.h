@@ -23,40 +23,31 @@
  */
 
 #pragma once
-#include <array>
+
 #include <map>
-#include <string>
-#include <vector>
+
 #include "etj_irenderable.h"
 #include "../game/q_shared.h"
 
-typedef struct playerState_s playerState_t;
-
 namespace ETJump {
-class ClientCommandsHandler;
-
 class OverbounceWatcher : public IRenderable {
 public:
-  using Coordinate = std::array<float, 3>;
-
   explicit OverbounceWatcher(ClientCommandsHandler *clientCommandsHandler);
-  ~OverbounceWatcher();
-
-  void render() const override;
-  void beforeRender() override;
-
-  vec4_t _color;
+  ~OverbounceWatcher() override;
 
 private:
-  ClientCommandsHandler *_clientCommandsHandler;
+  void render() const override;
+  bool beforeRender() override;
+  bool canSkipDraw() const;
 
-  std::map<std::string, Coordinate> _positions;
+  ClientCommandsHandler *_clientCommandsHandler;
+  std::map<std::string, vec3_t> _positions;
 
   // Currently displayed position
-  Coordinate *_current;
+  vec3_t *_current;
 
   // saves the position with name
-  void save(const std::string &name, Coordinate coordinate);
+  void save(const std::string &name, const vec3_t coordinate);
 
   // stop displaying anything
   void reset();
@@ -66,16 +57,23 @@ private:
   bool load(const std::string &name);
 
   // lists all available positions
-  std::vector<std::string> list() const;
+  void list() const;
 
-  static const playerState_t *getPlayerState();
+  bool overbounce = false;
 
-  // checks if it's possible to overbounce with current velocity and
-  // height
-  static bool isOverbounce(float vel, float currentHeight, float finalHeight,
-                           float rintv, float psec, int gravity);
+  playerState_t *ps;
+  float x{};
+  float pmoveSec{};
+  float zVel{}, zVelSnapped{};
 
-  // checks if current surface has disabled overbounce
-  static bool surfaceAllowsOverbounce(trace_t *trace);
+  float startHeight{}, endHeight{};
+  vec3_t start{}, end{};
+  vec3_t snap{};
+
+  int gravity{};
+
+  float sizeX{}, sizeY{};
+  qhandle_t shader;
+  vec4_t _color{};
 };
 } // namespace ETJump

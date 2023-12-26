@@ -1454,3 +1454,32 @@ void SP_script_multiplayer(gentity_t *ent) {
 
   trap_LinkEntity(ent);
 }
+
+namespace ETJump {
+void spawnGameManager() {
+  gentity_t *ent = G_Spawn();
+  ent->classname = "etjump_game_manager";
+  ent->scriptName = "etjump_manager";
+  ent->s.eType = ET_GAMEMANAGER;
+  ent->r.svFlags = SVF_BROADCAST;
+
+  // sanity check, should not happen
+  if (level.gameManager) {
+    G_Error("^1ERROR: multiple etjump_game_managers found\n");
+  }
+
+  level.gameManager = ent;
+  level.gameManager->s.otherEntityNum =
+      MAX_TEAM_LANDMINES; // axis landmine count
+  level.gameManager->s.otherEntityNum2 =
+      MAX_TEAM_LANDMINES;                    // allies landmine count
+  level.gameManager->s.modelindex = qfalse;  // axis HQ doesn't exist
+  level.gameManager->s.modelindex2 = qfalse; // allied HQ doesn't exist
+
+  trap_LinkEntity(ent);
+
+  // call the mapscript spawn functions, so we can spawn in entities
+  G_Script_ScriptParse(ent);
+  G_Script_ScriptEvent(ent, "spawn", "");
+}
+} // namespace ETJump

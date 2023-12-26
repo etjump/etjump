@@ -377,6 +377,7 @@ public:
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
   _sc->postTask(
       [this, season]() {
@@ -413,6 +414,7 @@ public:
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
   _sc->postTask(
       [this, params]() {
@@ -510,6 +512,7 @@ std::string rankToString(int rank) {
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
   _sc->postTask(
       [this, params] {
@@ -675,8 +678,10 @@ public:
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
+// NOLINTBEGIN(performance-unnecessary-value-param)
 void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
                                         std::string runName, int rank) {
+  // NOLINTEND(performance-unnecessary-value-param)
   _sc->postTask(
       [this, clientNum, mapName, runName, rank] {
         std::string matchedRun;
@@ -823,6 +828,7 @@ std::string ETJump::TimerunV2::getRankingsStringFor(
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
   _sc->postTask(
       [this, params] {
@@ -884,6 +890,7 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
 
 // do not pass by ref! postTask runs asynchronously and passing by
 // ref will lead to undefined behavior
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void ETJump::TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {

@@ -58,7 +58,7 @@ public:
   ~KeySetSystem();
   void addSet(const std::string &keySetName);
   void addKeyBindSet(const std::string &keySetName);
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
 };
 } // namespace ETJump

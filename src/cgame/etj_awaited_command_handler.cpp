@@ -107,10 +107,10 @@ void ETJump::AwaitedCommandHandler::awaitCommand(
   }
 
   const auto &waitedFramesStr = args[0];
-  int waitedFrames = 0;
+  int waitedFrames;
   std::string outOfRangeError =
       stringFormat("^3Error: ^7First parameter (number of frames) must be "
-                   "between ^31 ^7and ^3%s^7.",
+                   "between ^31 ^7and ^3%i^7.",
                    std::numeric_limits<int>::max());
   try {
     waitedFrames = std::stoi(waitedFramesStr);

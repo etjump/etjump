@@ -299,7 +299,6 @@ void SP_misc_portal_camera(gentity_t *ent);
 void SP_misc_portal_surface(gentity_t *ent);
 void SP_misc_light_surface(gentity_t *ent);
 void SP_misc_grabber_trap(gentity_t *ent);
-void SP_misc_spotlight(gentity_t *ent); //----(SA)	added
 
 void SP_misc_commandmap_marker(gentity_t *ent);
 
@@ -452,6 +451,7 @@ void SP_target_save(gentity_t *self);
 // Feen: PGM
 void SP_weapon_portalgun(gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
+void SP_target_portal_relay(gentity_t *self);
 void SP_target_ftrelay(gentity_t *self);
 
 // Savelimit
@@ -600,7 +600,6 @@ spawn_t spawns[] = {
     {"misc_vis_dummy_multiple", SP_misc_vis_dummy_multiple},
     {"misc_light_surface", SP_misc_light_surface},
     {"misc_grabber_trap", SP_misc_grabber_trap},
-    {"misc_spotlight", SP_misc_spotlight},
 
     {"misc_mg42", SP_mg42},
     {"misc_aagun", SP_aagun},
@@ -702,6 +701,7 @@ spawn_t spawns[] = {
     {"target_increase_ident", SP_target_increase_ident},
     {"target_save", SP_target_save},
     {"target_remove_portals", SP_target_remove_portals},
+    {"target_portal_relay", SP_target_portal_relay},
     {"target_ftrelay", SP_target_ftrelay},
     {"target_savelimit_set", SP_target_savelimit_set},
     {"target_savelimit_inc", SP_target_savelimit_inc},
@@ -938,9 +938,9 @@ char *G_AddSpawnVarToken(const char *string) {
   int l;
   char *dest;
 
-  l = strlen(string);
+  l = static_cast<int>(strlen(string));
   if (level.numSpawnVarChars + l + 1 > MAX_SPAWN_VARS_CHARS) {
-    G_Error("G_AddSpawnVarToken: MAX_SPAWN_VARS");
+    G_Error("G_AddSpawnVarToken: MAX_SPAWN_VARS_CHARS");
   }
 
   dest = level.spawnVarChars + level.numSpawnVarChars;
@@ -1316,6 +1316,20 @@ void G_SpawnEntitiesFromString(void) {
   // parse ents
   while (G_ParseSpawnVars()) {
     G_SpawnGEntityFromSpawnVars();
+  }
+
+  if (!level.gameManager) {
+    G_Printf("^3WARNING: ^7No ^3'script_multiplayer' ^7found in the map, "
+             "checking for other entities with scriptname... ");
+
+    if (!ETJump::checkEntsForScriptname()) {
+      G_Printf("^7No scriptable entities found, spawning "
+               "^3'etjump_game_manager'^7... ");
+
+      ETJump::spawnGameManager();
+
+      G_Printf("^2DONE\n");
+    }
   }
 
   G_Printf("Disable spawning!\n");

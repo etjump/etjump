@@ -48,7 +48,7 @@ class CvarBasedMasterDrawer : public IRenderable {
 public:
   explicit CvarBasedMasterDrawer(const vmCvar_t &cvar);
   virtual ~CvarBasedMasterDrawer() {}
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
   void push(IRenderable *renderable);
 };

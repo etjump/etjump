@@ -43,7 +43,7 @@ class QuickFollowDrawer : public IRenderable {
 public:
   explicit QuickFollowDrawer();
   virtual ~QuickFollowDrawer() {}
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
 };
 } // namespace ETJump

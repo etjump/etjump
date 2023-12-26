@@ -54,6 +54,7 @@
 #include "etj_upmove_meter_drawable.h"
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_crosshair.h"
+#include "etj_overbounce_detector.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -216,6 +217,7 @@ void init() {
   // Overbounce watcher
   ETJump::renderables.push_back(
       std::make_shared<OverbounceWatcher>(consoleCommandsHandler.get()));
+  ETJump::renderables.push_back(std::make_shared<OverbounceDetector>());
   // Display max speed from previous load session
   ETJump::renderables.push_back(
       std::make_shared<DisplayMaxSpeed>(ETJump::entityEventsHandler.get()));
@@ -604,6 +606,34 @@ void runFrameEnd() {
       cvarShadow->forceCvarSet();
     }
     cg.shadowCvarsSet = true;
+  }
+
+  if (etj_autoPortalBinds.integer) {
+    if (cg.weaponSelect == WP_PORTAL_GUN && !cg.portalgunBindingsAdjusted) {
+      cgDC.getKeysForBinding("weapalt", &cg.weapAltB1, &cg.weapAltB2);
+      if (cg.weapAltB1 != -1) {
+        trap_Key_SetBinding(cg.weapAltB1, "+attack2");
+        cg.portalgunBindingsAdjusted = true;
+      }
+      if (cg.weapAltB2 != -1) {
+        trap_Key_SetBinding(cg.weapAltB2, "+attack2");
+        cg.portalgunBindingsAdjusted = true;
+      }
+      // since you never spawn with a portalgun,
+      // binds should reset at the very beginning of a level too
+    } else if ((cg.weaponSelect != WP_PORTAL_GUN &&
+                cg.portalgunBindingsAdjusted) ||
+               cg.clientFrame < 10) {
+      cgDC.getKeysForBinding("+attack2", &cg.weapAltB1, &cg.weapAltB2);
+      if (cg.weapAltB1 != -1) {
+        trap_Key_SetBinding(cg.weapAltB1, "weapalt");
+        cg.portalgunBindingsAdjusted = false;
+      }
+      if (cg.weapAltB2 != -1) {
+        trap_Key_SetBinding(cg.weapAltB2, "weapalt");
+        cg.portalgunBindingsAdjusted = false;
+      }
+    }
   }
 }
 

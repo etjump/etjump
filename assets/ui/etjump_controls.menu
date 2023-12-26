@@ -21,7 +21,7 @@
 
 #define SUBW_OBWATCHER_Y SUBW_PORTALGUN_Y + SUBW_PORTALGUN_HEIGHT + SUBW_SPACING_Y
 #define SUBW_OBWATCHER_ITEM_Y SUBW_OBWATCHER_Y + SUBW_HEADER_HEIGHT
-#define SUBW_OBWATCHER_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 1)
+#define SUBW_OBWATCHER_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 3)
 
 // Right side menus
 #define SUBW_MISC_Y SUBW_Y
@@ -73,8 +73,10 @@ menuDef {
         BIND                (SUBW_ITEM_LEFT_X, SUBW_PORTALGUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Second portal:", .2, SUBW_ITEM_HEIGHT, "+attack2", "Fire a second portal\n+attack2")
 
     SUBWINDOW(SUBW_RECT_LEFT_X, SUBW_OBWATCHER_Y, SUBW_WIDTH, SUBW_OBWATCHER_HEIGHT, "OB WATCHER")
-        BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save OB position:", .2, SUBW_ITEM_HEIGHT, "ob_save", "Saves your current position as coordinates for OB watcher\nob_save")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Save OB position:", .2, SUBW_ITEM_HEIGHT, "ob_save", "Saves your current position as \"default\" coordinates for OB watcher\nob_save")
         BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Reset OB position:", .2, SUBW_ITEM_HEIGHT, "ob_reset", "Reset currently saved OB watcher position\nob_reset")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Load OB position:", .2, SUBW_ITEM_HEIGHT, "ob_load", "Load \"default\" coordinates for OB watcher\nob_load")
+        BIND                (SUBW_ITEM_LEFT_X, SUBW_OBWATCHER_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "List OB positions:", .2, SUBW_ITEM_HEIGHT, "ob_list", "List saved OB watcher coordinates\nob_list")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_MISC_Y, SUBW_WIDTH,  SUBW_MISC_HEIGHT, "MISC")
         BIND                (SUBW_ITEM_RIGHT_X, SUBW_MISC_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_BIND_HEIGHT, "Self-kill:", .2, SUBW_ITEM_HEIGHT, "kill", "Perform a self-kill to respawn\nkill")

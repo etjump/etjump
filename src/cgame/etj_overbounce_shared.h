@@ -23,37 +23,17 @@
  */
 
 #pragma once
-#include "etj_irenderable.h"
+
 #include "cg_local.h"
 
 namespace ETJump {
-class StrafeQuality : public IRenderable {
-  double _totalFrames{0};
-  double _goodFrames{0};
-  double _strafeQuality{0};
-  int _lastUpdateTime{0};
-
-  float _oldSpeed{0};
-  int _team{0};
-  mutable vec4_t _color;
-
-  // default absolute hud position
-  static constexpr float _x = 100;
-  static constexpr float _y = 100;
-  // amount of digits to show on hud
-  static constexpr std::size_t _digits = 4;
-
-  void startListeners();
-  void parseColor();
-  void resetStrafeQuality();
-  bool canSkipDraw() const;
-  bool canSkipUpdate(usercmd_t cmd, int frameTime);
-
-  pmove_t *pm;
-
+class Overbounce {
 public:
-  StrafeQuality();
-  bool beforeRender() override;
-  void render() const override;
+  static bool isOverbounce(float zVel, float startHeight, float endHeight,
+                           float zVelSnapped, float pmoveSec, int gravity);
+  static bool surfaceAllowsOverbounce(trace_t *trace);
+
+  static constexpr float stickyOffset = 0.25f;
+  static constexpr int MAX_TRACE_DIST = MAX_MAP_SIZE * 2;
 };
 } // namespace ETJump

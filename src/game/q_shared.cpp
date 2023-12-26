@@ -393,9 +393,10 @@ int COM_Compress(char *data_p) {
 }
 
 char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
-  int c = 0, len;
+  int c, len;
   qboolean hasNewLines = qfalse;
   const char *data;
+  constexpr int MAX_TOKEN_LEN = MAX_TOKEN_CHARS - 1;
 
   data = *data_p;
   len = 0;
@@ -403,18 +404,18 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
 
   // make sure incoming data is valid
   if (!data) {
-    *data_p = NULL;
+    *data_p = nullptr;
     return com_token;
   }
 
   // RF, backup the session data so we can unget easily
   COM_BackupParseSession(data_p);
 
-  while (1) {
+  while (true) {
     // skip whitespace
     data = SkipWhitespace(data, &hasNewLines);
     if (!data) {
-      *data_p = NULL;
+      *data_p = nullptr;
       return com_token;
     }
     if (hasNewLines && !allowLineBreaks) {
@@ -430,16 +431,12 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
       while (*data && *data != '\n') {
         data++;
       }
-      //			com_lines++;
     }
     // skip /* */ comments
     else if (c == '/' && data[1] == '*') {
       data += 2;
       while (*data && (*data != '*' || data[1] != '/')) {
         data++;
-        if (*data == '\n') {
-          //					com_lines++;
-        }
       }
       if (*data) {
         data += 2;
@@ -452,17 +449,17 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
   // handle quoted strings
   if (c == '\"') {
     data++;
-    while (1) {
+    while (true) {
       c = *data++;
       if (c == '\\' && *(data) == '\"') {
         // Arnout: string-in-string
-        if (len < MAX_TOKEN_CHARS) {
+        if (len < MAX_TOKEN_LEN) {
           com_token[len] = '\"';
           len++;
         }
         data++;
 
-        while (1) {
+        while (true) {
           c = *data++;
 
           if (!c) {
@@ -471,7 +468,7 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
             break;
           }
           if ((c == '\\' && *(data) == '\"')) {
-            if (len < MAX_TOKEN_CHARS) {
+            if (len < MAX_TOKEN_LEN) {
               com_token[len] = '\"';
               len++;
             }
@@ -479,7 +476,7 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
             c = *data++;
             break;
           }
-          if (len < MAX_TOKEN_CHARS) {
+          if (len < MAX_TOKEN_LEN) {
             com_token[len] = c;
             len++;
           }
@@ -490,7 +487,7 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
         *data_p = data;
         return com_token;
       }
-      if (len < MAX_TOKEN_CHARS) {
+      if (len < MAX_TOKEN_LEN) {
         com_token[len] = c;
         len++;
       }
@@ -499,7 +496,7 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
 
   // parse a regular word
   do {
-    if (len < MAX_TOKEN_CHARS) {
+    if (len < MAX_TOKEN_LEN) {
       com_token[len] = c;
       len++;
     }
@@ -510,12 +507,6 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
     }
   } while (c > 32);
 
-  if (len == MAX_TOKEN_CHARS) {
-    //		Com_Printf ("Token exceeded %i chars,
-    // discarded.\n",
-    // MAX_TOKEN_CHARS);
-    len = 0;
-  }
   com_token[len] = 0;
 
   *data_p = data;
@@ -1318,11 +1309,14 @@ Changes or adds a key/value pair
 void Info_SetValueForKey(char *s, const char *key, const char *value) {
   char newi[MAX_INFO_STRING];
 
+  if (!value || !strlen(value)) {
+    return;
+  }
+
   if (strlen(s) >= MAX_INFO_STRING) {
     Com_Error(ERR_DROP,
-              "Info_SetValueForKey: oversize infostring [%s] "
-              "[%s] [%s]",
-              s, key, value);
+              "Info_SetValueForKey: oversize infostring [%s] [%s] [%s]", s, key,
+              value);
   }
 
   if (strchr(key, '\\') || strchr(value, '\\')) {
@@ -1341,9 +1335,6 @@ void Info_SetValueForKey(char *s, const char *key, const char *value) {
   }
 
   Info_RemoveKey(s, key);
-  if (!value || !strlen(value)) {
-    return;
-  }
 
   Com_sprintf(newi, sizeof(newi), "\\%s\\%s", key, value);
 

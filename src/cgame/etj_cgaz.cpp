@@ -169,7 +169,11 @@ float CGaz::GetSlickGravity() {
   return 0;
 }
 
-void CGaz::beforeRender() {
+bool CGaz::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+
   const auto uCmdScale = static_cast<int8_t>(ps->stats[STAT_USERCMD_BUTTONS] &
                                                      (BUTTON_WALKING << 8)
                                                  ? CMDSCALE_WALK
@@ -178,6 +182,13 @@ void CGaz::beforeRender() {
 
   // get correct pmove state
   pm = PmoveUtils::getPmove(cmd);
+
+  // water and ladder movement are not important
+  // since speed is capped anyway
+  // check this only after we have a valid pmove
+  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
+    return false;
+  }
 
   // show upmove influence?
   const float scale =
@@ -207,13 +218,11 @@ void CGaz::beforeRender() {
     default:
       break;
   }
+
+  return true;
 }
 
 void CGaz::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
-
   // DeFRaG proxymod CGaz by Jelvan1
   if (etj_drawCGaz.integer == 1) {
     const auto y =
@@ -417,12 +426,6 @@ bool CGaz::canSkipDraw() const {
 
   if (BG_PlayerMounted(ps->eFlags) || ps->weapon == WP_MOBILE_MG42_SET ||
       ps->weapon == WP_MORTAR_SET) {
-    return true;
-  }
-
-  // water and ladder movement are not important
-  // since speed is capped anyway
-  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
     return true;
   }
 

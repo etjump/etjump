@@ -4,7 +4,7 @@
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-//#define PRE_RELEASE_DEMO
+// #define PRE_RELEASE_DEMO
 
 #ifndef PRE_RELEASE_DEMO
   #define Q3_VERSION "ET 2.60"
@@ -26,7 +26,7 @@
 
 #define CONFIG_NAME "etconfig.cfg"
 
-//#define LOCALIZATION_SUPPORT
+// #define LOCALIZATION_SUPPORT
 
 #define NEW_ANIMS
 #define MAX_TEAMNAME 32
@@ -55,12 +55,12 @@
   #pragma warning(disable : 4201)
   #pragma warning(disable : 4214)
   #pragma warning(disable : 4244)
-  //#pragma warning(disable	: 4142)		// benign redefinition
+  // #pragma warning(disable	: 4142)		// benign redefinition
   #pragma warning(disable : 4305) // truncation from const double to float
-  //#pragma warning(disable : 4310)		// cast truncates constant
-  // value #pragma warning(disable :	4505)		// unreferenced
-  // local function
-  // has been removed
+  // #pragma warning(disable : 4310)		// cast truncates constant
+  //  value #pragma warning(disable :	4505)		// unreferenced
+  //  local function
+  //  has been removed
   #pragma warning(disable : 4514)
   #pragma warning(disable : 4702) // unreachable code
   #pragma warning(disable : 4711) // selected for automatic inline expansion
@@ -113,7 +113,7 @@
 
 #ifdef _WIN32
 
-  //#pragma intrinsic( memset, memcpy )
+  // #pragma intrinsic( memset, memcpy )
 
 #endif
 
@@ -228,8 +228,8 @@ typedef int sfxHandle_t;
 typedef int fileHandle_t;
 typedef int clipHandle_t;
 
-//#define	SND_NORMAL			0x000	// (default) Allow sound
-// to be cut off only by the same sound on this channel
+// #define	SND_NORMAL			0x000	// (default) Allow sound
+//  to be cut off only by the same sound on this channel
 #define SND_OKTOCUT                                                            \
   0x001 // Allow sound to be cut off by any following sounds on this
         // channel
@@ -486,7 +486,7 @@ extern vec4_t clrBrownLineFull;
 #define COLOR_ORANGE '8'
 #define COLOR_MDGREY '9'
 #define COLOR_LTGREY ':'
-//#define COLOR_LTGREY	';'
+// #define COLOR_LTGREY	';'
 #define COLOR_MDGREEN '<'
 #define COLOR_MDYELLOW '='
 #define COLOR_MDBLUE '>'
@@ -510,7 +510,7 @@ extern vec4_t clrBrownLineFull;
 #define S_COLOR_ORANGE "^8"
 #define S_COLOR_MDGREY "^9"
 #define S_COLOR_LTGREY "^:"
-//#define S_COLOR_LTGREY		"^;"
+// #define S_COLOR_LTGREY		"^;"
 #define S_COLOR_MDGREEN "^<"
 #define S_COLOR_MDYELLOW "^="
 #define S_COLOR_MDBLUE "^>"
@@ -625,13 +625,9 @@ typedef struct {
    (o)[3] = ((v)[3] * (1 - (s))) + ((b)[3] * (s)))
 
 #define SnapVector(v)                                                          \
-  {                                                                            \
-    v[0] = ((int)(v[0]));                                                      \
-    v[1] = ((int)(v[1]));                                                      \
-    v[2] = ((int)(v[2]));                                                      \
-  }
+  (v[0] = ((int)(v[0])), v[1] = ((int)(v[1])), v[2] = ((int)(v[2])))
 
-// just in case you do't want to use the macros
+// just in case you don't want to use the macros
 vec_t _DotProduct(const vec3_t v1, const vec3_t v2);
 void _VectorSubtract(const vec3_t veca, const vec3_t vecb, vec3_t out);
 void _VectorAdd(const vec3_t veca, const vec3_t vecb, vec3_t out);
@@ -824,8 +820,8 @@ char *Q_CleanStr(char *string);
 // removes whitespaces and other bad directory characters
 char *Q_CleanDirName(char *dirname);
 
-//#define _vsnprintf use_Q_vsnprintf
-//#define vsnprintf use_Q_vsnprintf
+// #define _vsnprintf use_Q_vsnprintf
+// #define vsnprintf use_Q_vsnprintf
 int Q_vsnprintf(char *dest, int size, const char *fmt, va_list argptr);
 
 //=============================================
@@ -993,7 +989,7 @@ PlaneTypeForNormal
 =================
 */
 
-//#define PlaneTypeForNormal(x) (x[0] == 1.0 ? PLANE_X : (x[1] == 1.0 ? PLANE_Y
+// #define PlaneTypeForNormal(x) (x[0] == 1.0 ? PLANE_X : (x[1] == 1.0 ? PLANE_Y
 //: (x[2] == 1.0 ? PLANE_Z : PLANE_NON_AXIAL) ) )
 #define PlaneTypeForNormal(x)                                                  \
   (x[0] == 1.0                                                                 \
@@ -1179,11 +1175,11 @@ typedef enum {
 #define MAX_WEAPONS 64 // (SA) and yet more!
 
 // Ridah, increased this
-//#define	MAX_PS_EVENTS			2
+// #define	MAX_PS_EVENTS			2
 // ACK: I'd really like to make this 4, but that seems to cause network problems
 #define MAX_EVENTS 4 // max events per frame before we drop events
-//#define	MAX_EVENTS				2	// max events
-// per frame before we drop events
+// #define	MAX_EVENTS				2	// max events
+//  per frame before we drop events
 
 #define PS_PMOVEFRAMECOUNTBITS 6
 
@@ -1514,8 +1510,8 @@ typedef enum {
   ET_EXPLOSIVE_INDICATOR, // NERVE - SMF
 
   //---- (SA) Wolf
-  ET_EXPLOSIVE, // brush that will break into smaller bits when damaged
-  ET_EF_SPOTLIGHT,
+  ET_EXPLOSIVE,    // brush that will break into smaller bits when damaged
+  ET_EF_SPOTLIGHT, // ETJump: unused
   ET_ALARMBOX,
   ET_CORONA,
   ET_TRAP,
