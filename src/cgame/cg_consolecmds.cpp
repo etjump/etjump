@@ -924,15 +924,19 @@ void CG_StopTimer(void) {
   cg.stopTime = cg.time;
 }
 
-void CG_portalinfo_f(void) {
-  CG_Printf("^7The portal gun when enabled can be found in weaponbank 9, "
-            "this "
-            "is found by typing /weaponbank 9 in the console or scrolling to "
-            "the weapon before your knife.\n");
-  CG_Printf("^7The ^4first ^7portal is placed by using your normal "
-            "fire key.\n");
-  CG_Printf("^7The ^1second ^7portal is placed using +attack2 which you will "
-            "need to bind by typing '/bind key +attack2' in the console.\n");
+void CG_portalinfo_f() {
+  CG_Printf("^7If enabled, the portal gun can be found in ^3weaponbank 9^7. "
+            "This is found by typing ^3'weaponbank 9' ^7in the console,\n"
+            "or scrolling to the weapon before your knife.\n\n");
+  CG_Printf(
+      "^7The ^dfirst ^7portal is placed by using your normal fire key.\n");
+  CG_Printf(
+      "^7The ^jsecond ^7portal is placed using ^3+attack2 ^7which you will "
+      "need to bind by typing ^3'bind key +attack2' ^7in the console.\n\n");
+  CG_Printf("^7Alternatively, you can set ^3'etj_autoPortalBinds 1' ^7 to "
+            "automatically swap your ^3weapalt ^7bindings to ^3+attack2\n"
+            "^7when switching to portal gun, and restoring the old bindings "
+            "when switching off from portal gun.\n");
 }
 
 void CG_FreecamTurnLeftDown_f(void) { cgs.demoCam.turn |= 0x01; }

@@ -630,6 +630,8 @@ vmCvar_t etj_ftSavelimit;
 
 vmCvar_t etj_noPanzerAutoswitch;
 
+vmCvar_t etj_autoPortalBinds;
+
 typedef struct {
   vmCvar_t *vmCvar;
   const char *cvarName;
@@ -1159,6 +1161,8 @@ cvarTable_t cvarTable[] = {
     {&etj_ftSavelimit, "etj_ftSavelimit", "-1", CVAR_TEMP},
 
     {&etj_noPanzerAutoswitch, "etj_noPanzerAutoswitch", "0", CVAR_ARCHIVE},
+
+    {&etj_autoPortalBinds, "etj_autoPortalBinds", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

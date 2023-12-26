@@ -232,7 +232,7 @@ bool MapStatistics::initialize(std::string database,
     database = "maps_database.db";
   }
 
-  _databaseName = database;
+  _databaseName = std::move(database);
   if (!loadFromDatabase()) {
     // TODO: error handling
     return false;

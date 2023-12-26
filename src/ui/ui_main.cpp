@@ -728,148 +728,6 @@ void Text_Paint(float x, float y, float scale, vec4_t color, const char *text,
   Text_Paint_Ext(x, y, scale, scale, color, text, adjust, limit, style, font);
 }
 
-// copied over from Text_Paint
-// we use the bulk of Text_Paint to determine were we will hit the max width
-// can be used for actual text printing, or dummy run to get the number of lines
-// returns the next char to be printed after wrap, or the ending \0 of the
-// string NOTE: this is clearly non-optimal implementation, see
-// Item_Text_AutoWrap_Paint for one if color_save != NULL, use to keep track of
-// the current color between wraps
-char *Text_AutoWrap_Paint_Chunk(float x, float y, int width, float scale,
-                                vec4_t color, char *text, float adjust,
-                                int limit, int style, qboolean dummy,
-                                vec4_t color_save) {
-  int len, count;
-  vec4_t newColor;
-  glyphInfo_t *glyph;
-  float useScale;
-  fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
-  int index;
-  char *wrap_point = NULL;
-
-  float wrap_x = x + width;
-
-  useScale = scale * font->glyphScale;
-
-  if (text) {
-    char *s = text;
-    trap_R_SetColor(color);
-    memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-    len = strlen(text);
-    if (limit > 0 && len > limit) {
-      len = limit;
-    }
-    count = 0;
-    while (s && *s && count < len) {
-      index = (unsigned char)*s;
-      if (*s == ' ' || *s == '\t' || *s == '\n') {
-        wrap_point = s;
-      }
-
-      // NERVE - SMF - don't draw tabs and newlines
-      if (index < 20) {
-        s++;
-        count++;
-        continue;
-      }
-
-      glyph = &font->glyphs[index]; // NERVE - SMF -
-                                    // this needs to be
-                                    // an unsigned cast
-                                    // for localization
-      if (Q_IsColorString(s)) {
-        if (*(s + 1) == COLOR_NULL) {
-          memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-        } else {
-          memcpy(newColor, g_color_table[ColorIndex(*(s + 1))],
-                 sizeof(newColor));
-          newColor[3] = color[3];
-        }
-        if (!dummy) {
-          trap_R_SetColor(newColor);
-        }
-        if (color_save) {
-          memcpy(&color_save[0], &newColor[0], sizeof(vec4_t));
-        }
-        s += 2;
-        continue;
-      } else {
-        float yadj = useScale * glyph->top;
-
-        if (x + (glyph->xSkip * useScale) + adjust > wrap_x) {
-          if (wrap_point) {
-            return wrap_point + 1; // the
-                                   // next
-                                   // char to
-                                   // be
-                                   // printed
-                                   // after
-                                   // line
-                                   // wrap
-          }
-          // we haven't found the wrap
-          // point .. cut
-          return s;
-        }
-
-        if (!dummy) {
-          if (style == ITEM_TEXTSTYLE_SHADOWED) {
-            constexpr float ofs = 2.5f;
-            colorBlack[3] = newColor[3];
-            trap_R_SetColor(colorBlack);
-            Text_PaintChar(x + ofs * useScale, y - yadj + ofs * useScale,
-                           glyph->imageWidth, glyph->imageHeight, useScale,
-                           glyph->s, glyph->t, glyph->s2, glyph->t2,
-                           glyph->glyph);
-            trap_R_SetColor(newColor);
-            colorBlack[3] = 1.0;
-          }
-          Text_PaintChar(x, y - yadj, glyph->imageWidth, glyph->imageHeight,
-                         useScale, glyph->s, glyph->t, glyph->s2, glyph->t2,
-                         glyph->glyph);
-        }
-
-        x += (glyph->xSkip * useScale) + adjust;
-        s++;
-        count++;
-      }
-    }
-    if (!dummy) {
-      trap_R_SetColor(NULL);
-    }
-  }
-  return text + strlen(text);
-}
-
-void Text_AutoWrap_Paint(float x, float y, int width, int height, float scale,
-                         vec4_t color, const char *l_text, float adjust,
-                         int style) {
-  char text[1024];
-  char *ret, *end, *next;
-  char s;
-  vec4_t aux_color, next_color;
-
-  Q_strncpyz(text, l_text, sizeof(text) - 1);
-  ret = text;
-  end = text + strlen(text);
-  memcpy(&aux_color[0], &color[0], sizeof(vec4_t));
-
-  do {
-    // one run to get the word wrap
-    next = Text_AutoWrap_Paint_Chunk(x, y, width, scale, aux_color, ret, adjust,
-                                     0, style, qtrue, next_color);
-    // now print - hack around a bit to avoid the word wrapped
-    // chars
-    s = *next;
-    *next = '\0';
-    Text_Paint(x, y, scale, aux_color, ret, adjust, 0, style);
-    *next = s;
-    ret = next;
-    memcpy(&aux_color[0], &next_color[0], sizeof(vec4_t));
-    y += height;
-  } while (ret < end);
-}
-
 void Text_PaintWithCursor(float x, float y, float scale, vec4_t color,
                           vec4_t cursorColor, const char *text, int cursorPos,
                           char cursor, int limit, int style) {
@@ -1469,6 +1327,8 @@ void UI_Load() {
   }
   if (menuSet == nullptr || menuSet[0] == '\0') {
     menuSet = "ui/menus.txt";
+  } else {
+    lastName[0] = '\0';
   }
 
   String_Init();
@@ -3895,7 +3755,7 @@ UI_LoadDemos
 */
 static void UI_LoadDemos() {
   if (uiInfo.currentDemoPath.empty()) {
-    uiInfo.currentDemoPath.push_back("demos");
+    uiInfo.currentDemoPath.emplace_back("demos");
   }
   std::string path =
       ETJump::StringUtil::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
@@ -3917,7 +3777,8 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Folder;
     objectInfo.name = std::string(dirPtr);
-    objectInfo.displayName = "^7" + objectInfo.name + "/";
+    objectInfo.displayName =
+        "^7" + ETJump::sanitize(objectInfo.name, false) + "/";
     if (objectInfo.name != "." && objectInfo.name != "..") {
       directories.push_back(objectInfo);
     }
@@ -3930,6 +3791,7 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Item;
     objectInfo.name = std::string(namePtr);
+    objectInfo.displayName = ETJump::sanitize(objectInfo.name, false);
     files.push_back(objectInfo);
     namePtr += objectInfo.name.length() + 1;
   }
@@ -4401,7 +4263,7 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "RunDemo") == 0) {
       if (uiInfo.demoIndex >= 0 &&
           uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size())) {
-        auto selected = uiInfo.demoObjects[uiInfo.demoIndex];
+        const auto &selected = uiInfo.demoObjects[uiInfo.demoIndex];
         if (selected.type == FileSystemObjectType::Folder) {
           if (selected.name == ".") {
             uiInfo.currentDemoPath.pop_back();
@@ -4415,7 +4277,7 @@ void UI_RunMenuScript(const char **args) {
         } else {
           // pop front because demo command automatically
           // appends demos/ to the beginning of the path
-          auto front = uiInfo.currentDemoPath.front();
+          const auto &front = uiInfo.currentDemoPath.front();
           uiInfo.currentDemoPath.pop_front();
           auto demoPath =
               ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") + "/" +
@@ -6942,13 +6804,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
     }
   } else if (feederID == FEEDER_DEMOS) {
     if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size())) {
-      const auto object = &uiInfo.demoObjects[index];
-      switch (object->type) {
-        case FileSystemObjectType::Folder:
-          return object->displayName.c_str();
-        case FileSystemObjectType::Item:
-          return object->name.c_str();
-      }
+      return uiInfo.demoObjects[index].displayName.c_str();
     }
   } else if (feederID == FEEDER_PROFILES) {
     if (index >= 0 && index < uiInfo.profileCount) {

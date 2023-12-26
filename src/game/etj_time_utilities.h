@@ -24,15 +24,10 @@
 
 #pragma once
 
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <array>
 
 #include "etj_string_utilities.h"
 
@@ -102,18 +97,20 @@ struct Date {
   }
 
   std::string toDateString() const {
-    return stringFormat("%04d-%02d-%02d", this->year,
-                        this->mon, this->day);
+    return stringFormat("%04d-%02d-%02d", this->year, this->mon, this->day);
   }
 
-  int year; // year
-  int mon;  // month
-  int day;  // day of the month
+  int year{}; // year
+  int mon{};  // month
+  int day{};  // day of the month
+  std::array<std::string, 12> abbrevMonths = {"Jan", "Feb", "Mar", "Apr",
+                                              "May", "Jun", "Jul", "Aug",
+                                              "Sep", "Oct", "Nov", "Dec"};
 };
 
 struct Time {
-  Clock clock;
-  Date date;
+  Clock clock{};
+  Date date{};
 
   bool operator==(const Time &other) const {
     return (clock.hours == other.clock.hours && clock.min == other.clock.min &&
@@ -160,9 +157,15 @@ struct Time {
                         this->clock.min, this->clock.sec);
   }
 
+  // date with abbreviated month, e.g. 01 Jan 1970
+  std::string toAbbrevMonthDateString() const {
+    return stringFormat("%02d %s %04d", this->date.day,
+                        date.abbrevMonths[this->date.mon - 1], this->date.year);
+  }
+
   static Time fromInt(int input) {
     time_t value = input;
-    tm* t = std::gmtime(&value);
+    tm *t = std::gmtime(&value);
 
     Time time;
     time.date.year = t->tm_year + 1900;
@@ -185,8 +188,7 @@ struct Time {
 
     Time time;
     time.date.year = t.tm_year + 1900;
-    time.date.mon =
-        t.tm_mon + 1;
+    time.date.mon = t.tm_mon + 1;
     time.date.day = t.tm_mday;
 
     time.clock.hours = t.tm_hour;
@@ -197,7 +199,7 @@ struct Time {
   }
 
   static Time fromDate(const Date &date) {
-    Time time{};
+    Time time;
     time.date.year = date.year;
     time.date.mon = date.mon;
     time.date.day = date.day;

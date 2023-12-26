@@ -68,7 +68,9 @@ public:
   KeySetDrawer(const std::vector<KeyShader> &keyShaders);
   virtual ~KeySetDrawer(){};
   void render() const override;
-  void beforeRender() override{};
+  // FIXME: this should to be refactored, see etj_cvar_master_drawer.cpp/h,
+  //  this whole system with keysets is more complex than it needs to be
+  bool beforeRender() override { return true; }
   static std::string keyNameToString(KeyNames keyName);
 
 protected:

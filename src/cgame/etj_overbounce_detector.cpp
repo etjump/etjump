@@ -26,9 +26,9 @@
 #include "etj_overbounce_shared.h"
 
 namespace ETJump {
-void OverbounceDetector::beforeRender() {
+bool OverbounceDetector::beforeRender() {
   if (canSkipDraw()) {
-    return;
+    return false;
   }
 
   belowOverbounce = jumpOverbounce = fallOverbounce = stickyOverbounce = false;
@@ -99,44 +99,35 @@ void OverbounceDetector::beforeRender() {
       jumpOverbounce = true;
     }
 
-    // don't predict sticky ob if there is an ob already or if
-    // the sticky ob detection isn't requested
-    if (jumpOverbounce || fallOverbounce || etj_drawOB.integer != 2) {
-      return;
-    }
-    // don't display stickies on the same height we're currently
-    // at since obviously it's possible and it's just distracting
-    if (startHeight == endHeight) {
-      return;
-    }
+    if (!jumpOverbounce && !fallOverbounce && startHeight != endHeight &&
+        etj_drawOB.integer == 2) {
+      startHeight += Overbounce::stickyOffset;
+      // CG_Printf("startHeight=%f, endHeight=%f\n", startHeight, endHeight);
 
-    startHeight += Overbounce::stickyOffset;
-    // CG_Printf("startHeight=%f, endHeight=%f\n", startHeight, endHeight);
+      // sticky fall ob
+      if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
+                                   pmoveSec, gravity) &&
+          Overbounce::surfaceAllowsOverbounce(&trace)) {
+        fallOverbounce = true;
+        stickyOverbounce = true;
+      }
 
-    // sticky fall ob
-    if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
-                                 pmoveSec, gravity) &&
-        Overbounce::surfaceAllowsOverbounce(&trace)) {
-      fallOverbounce = true;
-      stickyOverbounce = true;
-    }
-
-    // sticky jump ob
-    if (ps->groundEntityNum != ENTITYNUM_NONE &&
-        Overbounce::isOverbounce(zVel + JUMP_VELOCITY, startHeight, endHeight,
-                                 zVelSnapped, pmoveSec, gravity) &&
-        Overbounce::surfaceAllowsOverbounce(&trace)) {
-      jumpOverbounce = true;
-      stickyOverbounce = true;
+      // sticky jump ob
+      if (ps->groundEntityNum != ENTITYNUM_NONE &&
+          Overbounce::isOverbounce(zVel + JUMP_VELOCITY, startHeight, endHeight,
+                                   zVelSnapped, pmoveSec, gravity) &&
+          Overbounce::surfaceAllowsOverbounce(&trace)) {
+        jumpOverbounce = true;
+        stickyOverbounce = true;
+      }
     }
   }
+
+  return belowOverbounce || fallOverbounce || jumpOverbounce ||
+         stickyOverbounce;
 }
 
 void OverbounceDetector::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
-
   if (belowOverbounce) {
     DrawString(x + 10, etj_OBY.value, 0.25f, 0.25f, colorWhite, qfalse, "B", 0,
                ITEM_TEXTSTYLE_SHADOWED);
@@ -157,6 +148,10 @@ void OverbounceDetector::render() const {
 
 bool OverbounceDetector::canSkipDraw() {
   if (!etj_drawOB.integer || cg_thirdPerson.integer) {
+    return true;
+  }
+
+  if (showingScores()) {
     return true;
   }
 

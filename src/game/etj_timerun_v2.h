@@ -104,7 +104,7 @@ public:
                        int rank);
   void printRankings(Timerun::PrintRankingsParams params);
   void printSeasons(int clientNum);
-  void deleteSeason(int clientNum, const std::string & name);
+  void deleteSeason(int clientNum, const std::string &name);
 
 private:
   void startNotify(Player *player) const;
@@ -118,6 +118,7 @@ private:
    * figure out which one is the most relevant for the user
    */
   const Timerun::Season *getMostRelevantSeason();
+  void updateSeasonStates();
   static std::string
   getRankingsStringFor(const std::vector<Ranking> *vector,
                        const Timerun::PrintRankingsParams &params);
@@ -127,8 +128,14 @@ private:
   std::unique_ptr<Log> _logger;
   std::unique_ptr<SynchronizationContext> _sc;
   std::array<std::unique_ptr<Player>, 64> _players;
+
   std::vector<int> _activeSeasonsIds;
   std::vector<Timerun::Season> _activeSeasons;
+  std::vector<int> _pastSeasonsIds;
+  std::vector<Timerun::Season> _pastSeasons;
+  std::vector<int> _upcomingSeasonsIds;
+  std::vector<Timerun::Season> _upcomingSeasons;
+
   const Timerun::Season *_mostRelevantSeason{};
   std::map<int, std::vector<Ranking>> _rankingsPerSeason;
 };

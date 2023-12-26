@@ -85,7 +85,11 @@ void Crosshair::adjustPosition() {
   crosshair.y = cg_crosshairY.value + (SCREEN_HEIGHT * 0.5f);
 }
 
-void Crosshair::beforeRender() {
+bool Crosshair::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+
   crosshair.current = cg_drawCrosshair.integer % NUM_CROSSHAIRS;
   adjustSize();
 
@@ -99,13 +103,11 @@ void Crosshair::beforeRender() {
   crosshair.color[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
   crosshair.colorAlt[3] =
       Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+
+  return true;
 }
 
 void Crosshair::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
-
   const qhandle_t shader = cgs.media.crosshairShader[crosshair.current];
   const qhandle_t shaderAlt = cg.crosshairShaderAlt[crosshair.current];
 

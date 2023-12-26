@@ -1266,6 +1266,11 @@ typedef struct {
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
   bool shadowCvarsSet;
+
+  // portalgun auto-binding
+  bool portalgunBindingsAdjusted;
+  int weapAltB1;
+  int weapAltB2;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
@@ -2721,6 +2726,8 @@ extern vmCvar_t etj_crosshairOutline;
 
 extern vmCvar_t etj_noPanzerAutoswitch;
 
+extern vmCvar_t etj_autoPortalBinds;
+
 //
 // cg_main.c
 //
@@ -3242,10 +3249,6 @@ void CG_ClearFlameChunks(void);
 void CG_ProjectedSpotLight(vec3_t start, vec3_t dir);
 // done.
 
-//----(SA)
-void CG_Spotlight(centity_t *cent, float *color, vec3_t start, vec3_t dir,
-                  int segs, float range, int startWidth, float coneAngle,
-                  int flags);
 #define SL_NOTRACE                                                             \
   0x001 // don't do a trace check for shortening the beam, always draw
         // at full 'range' length

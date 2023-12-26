@@ -41,11 +41,12 @@ public:
 
   // we want this to be implicit
   // e.g. opt<int> x = 5;
+  // NOLINTNEXTLINE(google-explicit-constructor)
   opt(T val) : _hasValue(true), _value(std::move(val)) {}
 
   bool hasValue() const { return _hasValue; }
 
-  const T &valueOr(const T& defaultValue) const {
+  const T &valueOr(const T &defaultValue) const {
     if (!_hasValue) {
       return defaultValue;
     }

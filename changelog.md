@@ -1,3 +1,42 @@
+# ETJump 3.1.0
+
+* deprecated `target_printname` entity - all functionality is included in `target_print` [#1080](https://github.com/etjump/etjump/pull/1080)
+  * existing `target_printname` entities continue to work normally
+* added support for `wm_announce_private` script action for doing per-client announces via mapscript [#1083](https://github.com/etjump/etjump/pull/1083)
+  * must be activated via entity that carries activator (e.g. `target_script_trigger` or `trigger_multiple`)
+* fixed team/ft chat closing parenthesis/bracket being affected by player name colors [#1084](https://github.com/etjump/etjump/pull/1084)
+* added name replacement support for `wm_announce/wm_announce_private` [#1085](https://github.com/etjump/etjump/pull/1085)
+  * `%s` will be replaced with activators name, needs activation via entity that carries activator (e.g. `target_script_trigger` or `trigger_multiple`)
+* fixed `cg_uinfo` bug on 64-bit Windows clients using ETe [#1086](https://github.com/etjump/etjump/pull/1086)
+* fixed incorrect friction and look sensitivity in freecam [#1088](https://github.com/etjump/etjump/pull/1088)
+* `players` command will now display the game engine used by each client [#1089](https://github.com/etjump/etjump/pull/1089)
+  * additionally value of `snaps` is colored red, if it's less than `sv_fps` value
+* OB watcher improvements [#1091](https://github.com/etjump/etjump/pull/1091)
+  * `ob_save [name]` and `ob_load [name]` are now functional
+  * implemented `ob_list` to display saved coordinates
+  * OB watcher now correctly detects surfaces that don't allow overbounce
+  * fixed coordinate prints having incorrect z height (was using `ps.origin`, now shifted to feet level)
+  * most prints are now popups instead of console prints
+* fixed multiple potential crashes in various places [#1093](https://github.com/etjump/etjump/pull/1093)
+  * most notable ones:
+    * fixed crash when firing `shooter_grenade` - the entity is now usable
+    * fixed crash with `target_activate` when activated without activator
+    * fixed crash with `setplayerspawn/setplayerautospawn/killplayer/damageplayer` script actions when activated without activator
+* cleaned up several unused server cvars [#1111](https://github.com/etjump/etjump/pull/1111)
+* fixed incorrect format specifier in `await` command causing a crash [#1120](https://github.com/etjump/etjump/pull/1120)
+* `[map]` parameter in `ranks [map] [run]` command is no longer case sensitive [#1119](https://github.com/etjump/etjump/pull/1119)
+* demo filenames in replay menu are now stripped of color codes [#1115](https://github.com/etjump/etjump/pull/1115)
+* inactive specators are now drawn semi transparent in spectator list [#1116](https://github.com/etjump/etjump/pull/1116)
+* fixed portalgun bypassing checks for `g_weapons` and `g_knifeOnly` [#1121](https://github.com/etjump/etjump/pull/1121)
+* optimized etjump renderable system, potentially increasing performance in some scenarios by ~30% [#1109](https://github.com/etjump/etjump/pull/1109)
+* added `etjump_game_manager` entity [#1123](https://github.com/etjump/etjump/pull/1123)
+  * automatically placed on a map if no `script_multiplayer` or entities with `scriptname` are present to always allow mapscripting on any map
+    * access is provided via `etjump_manager` script block
+  * not meant to be placed by mappers - this functions the same as `script_multiplayer` entity
+* added `etj_autoPortalBinds` cvar to automatically bind `weapalt` to `+attack2` and back when switchig to/from portalgun [#1125](https://github.com/etjump/etjump/pull/1125)
+  * this effectively allows you to use portalgun with `weapalt` without having to separetly bind `+attack2`
+* fixed not being able to enter wounded state during timeruns, which broke some timeruns (`2weeks` for example) [#1126](https://github.com/etjump/etjump/pull/1126)
+
 # ETJump 3.0.1
 
 * fixed missing parenthesis around diff prints on seasonal record banner prints [#1057](https://github.com/etjump/etjump/pull/1057)

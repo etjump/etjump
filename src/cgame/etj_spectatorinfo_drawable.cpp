@@ -25,27 +25,38 @@
 #include "etj_spectatorinfo_drawable.h"
 
 namespace ETJump {
-void SpectatorInfo::beforeRender() {
+bool SpectatorInfo::beforeRender() {
   // poll for updates every 3 seconds to refresh list
+  // do this before checking if we should render, just to keep it up to date
   if (cg.time > cg.lastScoreTime + 3000) {
     trap_SendClientCommand("score");
     cg.lastScoreTime = cg.time;
   }
+
+  if (canSkipDraw()) {
+    return false;
+  }
+
+  return true;
 }
 
 void SpectatorInfo::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
 
   float x = etj_spectatorInfoX.value;
   float y = etj_spectatorInfoY.value;
   const float size = 0.1f * etj_spectatorInfoSize.value;
+
+  // for consistent line spacing, use pre-defined string
+  // for height calculation instead of current spectators name
+  const auto rowHeight = static_cast<float>(CG_Text_Height_Ext(
+                             "Yy", size, 0, &cgs.media.limboFont2)) *
+                         1.75f;
   float w;
   const char *spectator;
   const int textStyle = etj_spectatorInfoShadow.integer
                             ? ITEM_TEXTSTYLE_SHADOWED
                             : ITEM_TEXTSTYLE_NORMAL;
+  const vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};
 
   ETJump_AdjustPosition(&x);
 
@@ -58,6 +69,8 @@ void SpectatorInfo::render() const {
     if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR) {
       if (cg.scores[i].followedClient == cg.snap->ps.clientNum) {
         spectator = cgs.clientinfo[cg.scores[i].client].name;
+        const bool inactive =
+            cgs.clientinfo[cg.scores[i].client].clientIsInactive;
 
         switch (etj_drawSpectatorInfo.integer) {
           case 2: // center align
@@ -74,14 +87,10 @@ void SpectatorInfo::render() const {
             break;
         }
 
-        // for consistent line height, use pre-defined string
-        // for height calculation instead of current spectators name
-        y += static_cast<float>(
-                 CG_Text_Height_Ext("Yy", size, 0, &cgs.media.limboFont2)) *
-             1.75f;
+        y += rowHeight;
 
-        DrawString(x - w, y, size, size, colorWhite, qfalse, spectator, 0,
-                   textStyle);
+        DrawString(x - w, y, size, size, inactive ? inactiveColor : colorWhite,
+                   qfalse, spectator, 0, textStyle);
       }
     }
   }

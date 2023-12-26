@@ -43,7 +43,6 @@ public:
   void initialize();
   void shutdown();
 
-  std::vector<Timerun::Season> getActiveSeasons(const Time &currentTime) const;
   std::vector<Timerun::Record>
   getRecordsForPlayer(const std::vector<int> activeSeasons,
                       const std::string &map, int userId);

@@ -42,7 +42,9 @@ void ETJump::KeySetSystem::addKeyBindSet(const std::string &keySetName) {
       createKeyPressSet(keySetName), createKeyBindSet(keySetName)));
 }
 
-void ETJump::KeySetSystem::beforeRender() { keySetMasterDrawer.beforeRender(); }
+bool ETJump::KeySetSystem::beforeRender() {
+  return keySetMasterDrawer.beforeRender();
+}
 
 void ETJump::KeySetSystem::render() const {
   if (canSkipDraw()) {

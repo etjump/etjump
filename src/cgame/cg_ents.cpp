@@ -1496,60 +1496,6 @@ static void CG_Corona(centity_t *cent) {
   }
 }
 
-/*
-==============
-CG_Efx
-==============
-*/
-static void CG_SpotlightEfx(centity_t *cent) {
-  vec3_t targetpos, normalized_direction, direction;
-  float dist, fov = 90;
-  vec4_t color = {1.f, 1.f, 1.f, .1f};
-  int splinetarget = 0;
-  const char *cs;
-
-  VectorCopy(cent->currentState.origin2, targetpos);
-
-  splinetarget = cent->overheatTime;
-
-  if (!splinetarget) {
-    cs = CG_ConfigString(CS_SPLINES + cent->currentState.density);
-    cent->overheatTime = splinetarget =
-        CG_LoadCamera(va("cameras/%s.camera", cs));
-    if (splinetarget != -1) {
-      trap_startCamera(splinetarget, cg.time);
-    }
-  } else {
-    vec3_t angles;
-    if (splinetarget != -1) {
-      if (trap_getCameraInfo(splinetarget, cg.time, &targetpos, &angles,
-                             &fov)) {
-
-      } else // loop
-      {
-        trap_startCamera(splinetarget, cg.time);
-        trap_getCameraInfo(splinetarget, cg.time, &targetpos, &angles, &fov);
-      }
-    }
-  }
-
-  normalized_direction[0] = direction[0] =
-      targetpos[0] - cent->currentState.origin[0];
-  normalized_direction[1] = direction[1] =
-      targetpos[1] - cent->currentState.origin[1];
-  normalized_direction[2] = direction[2] =
-      targetpos[2] - cent->currentState.origin[2];
-
-  dist = VectorNormalize(normalized_direction);
-
-  if (dist == 0) {
-    return;
-  }
-
-  CG_Spotlight(cent, color, cent->currentState.origin, normalized_direction,
-               999, 2048, 10, fov, 0);
-}
-
 //----(SA) adding func_explosive
 
 /*
@@ -2485,7 +2431,7 @@ static void CG_PortalGate(centity_t *cent) {
   vec3_t verts[4];
   vec3_t pushedOrigin, angleInverse;
   vec3_t axis[3];
-  const float radius = 64.0f;
+  const float radius = 48.0f;
   int i;
 
   // not our portal
@@ -2538,8 +2484,8 @@ static void CG_PortalGate(centity_t *cent) {
   polyVerts[3].st[0] = 1;
   polyVerts[3].st[1] = 1;
 
-  // our portals
-  if (cent->currentState.otherEntityNum == cg.clientNum) {
+  // our or spectated player's portals
+  if (cent->currentState.otherEntityNum == cg.snap->ps.clientNum) {
     if (cent->currentState.eType == ET_PORTAL_BLUE) {
       trap_R_AddPolyToScene(cgs.media.portalBlueShader, 4, polyVerts);
     }
@@ -2670,8 +2616,7 @@ static void CG_ProcessEntity(centity_t *cent) {
     case ET_CONSTRUCTIBLE_INDICATOR:
     case ET_TANK_INDICATOR:
     case ET_TANK_INDICATOR_DEAD:
-    case ET_COMMANDMAP_MARKER: // this one should _never_ reach
-                               // the client
+    case ET_COMMANDMAP_MARKER: // this one should _never_ reach the client
 #ifdef VISIBLE_TRIGGERS
     case ET_TRIGGER_MULTIPLE:
     case ET_TRIGGER_FLAGONLY:
@@ -2713,22 +2658,12 @@ static void CG_ProcessEntity(centity_t *cent) {
     case ET_RAMJET:
       CG_Missile(cent);
       break;
-    case ET_EF_SPOTLIGHT:
-      CG_SpotlightEfx(cent);
-      break;
     case ET_EXPLOSIVE:
       CG_Explosive(cent);
       break;
     case ET_CONSTRUCTIBLE:
       CG_Constructible(cent);
       break;
-    /*	case ET_WAYPOINT:
-        // TAT - 8/29/2002 - draw the botgoal indicator the same
-       way you draw the waypoint flag case ET_BOTGOAL_INDICATOR:
-       CG_Waypoint( cent ); break;*/
-    /*	case ET_CONSTRUCTIBLE_MARKER:
-            CG_ConstructibleMarker( cent );
-            break;*/
     case ET_TRAP:
       CG_Trap(cent);
       break;

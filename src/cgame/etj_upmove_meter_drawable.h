@@ -80,7 +80,7 @@ class UpmoveMeter : public IRenderable {
 
 public:
   UpmoveMeter();
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
 };
 } // namespace ETJump
