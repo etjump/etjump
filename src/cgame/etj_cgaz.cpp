@@ -289,7 +289,6 @@ void CGaz::render() const {
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(true);
     }
-    return;
   }
 }
 
