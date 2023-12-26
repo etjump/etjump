@@ -27,6 +27,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <array>
 
 #include "etj_string_utilities.h"
 
@@ -99,9 +100,12 @@ struct Date {
     return stringFormat("%04d-%02d-%02d", this->year, this->mon, this->day);
   }
 
-  int year; // year
-  int mon;  // month
-  int day;  // day of the month
+  int year{}; // year
+  int mon{};  // month
+  int day{};  // day of the month
+  std::array<std::string, 12> abbrevMonths = {"Jan", "Feb", "Mar", "Apr",
+                                              "May", "Jun", "Jul", "Aug",
+                                              "Sep", "Oct", "Nov", "Dec"};
 };
 
 struct Time {
@@ -151,6 +155,12 @@ struct Time {
     return stringFormat("%04d-%02d-%02d %02d:%02d:%02d", this->date.year,
                         this->date.mon, this->date.day, this->clock.hours,
                         this->clock.min, this->clock.sec);
+  }
+
+  // date with abbreviated month, e.g. 01 Jan 1970
+  std::string toAbbrevMonthDateString() const {
+    return stringFormat("%02d %s %04d", this->date.day,
+                        date.abbrevMonths[this->date.mon - 1], this->date.year);
   }
 
   static Time fromInt(int input) {

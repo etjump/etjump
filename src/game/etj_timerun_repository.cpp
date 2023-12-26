@@ -61,29 +61,6 @@ void ETJump::TimerunRepository::initialize() { migrate(); }
 
 void ETJump::TimerunRepository::shutdown() { _database = nullptr; }
 
-std::vector<ETJump::Timerun::Season>
-ETJump::TimerunRepository::getActiveSeasons(const Time &currentTime) const {
-  std::vector<Timerun::Season> activeSeasons;
-
-  auto currentTimeStr = currentTime.toDateTimeString();
-
-  _database->sql << "select id, name, start_time, end_time from season where "
-                    "start_time <= ? and (end_time is null or end_time > ?);"
-                 << currentTimeStr << currentTimeStr >>
-      [this, &activeSeasons](int id, std::string name, std::string startTimeStr,
-                             std::string endTimeStr) {
-        auto startTime = Time::fromString(startTimeStr);
-        opt<Time> endTime;
-        if (endTimeStr.length() != 0) {
-          endTime = opt<Time>(Time::fromString(endTimeStr));
-        }
-
-        activeSeasons.push_back(Timerun::Season{id, name, startTime, endTime});
-      };
-
-  return activeSeasons;
-}
-
 std::vector<ETJump::Timerun::Record>
 ETJump::TimerunRepository::getRecordsForPlayer(
     const std::vector<int> activeSeasons, const std::string &map, int userId) {
