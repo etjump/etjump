@@ -7,10 +7,10 @@
 
 #include "g_local.h"
 #include "etj_deathrun_system.h"
-#include "../game/q_shared.h"
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
+#include "etj_missilepad.h"
 
 extern vec3_t muzzleTrace;
 
@@ -1190,6 +1190,22 @@ void G_Damage(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           mod != MOD_GRENADE_LAUNCHER && mod != MOD_DYNAMITE &&
           mod != MOD_GPG40 && mod != MOD_M7 && mod != MOD_LANDMINE)) {
       targ->client->ps.velocity[2] *= 0.25;
+
+      // 'scale' key from func_missilepad
+      if (inflictor->speed != 0) {
+        if (inflictor->spawnflags &
+            static_cast<int>(ETJump::Missilepad::Spawnflags::ScaleHorOnly)) {
+          targ->client->ps.velocity[0] *= inflictor->speed;
+          targ->client->ps.velocity[1] *= inflictor->speed;
+        } else if (inflictor->spawnflags &
+                   static_cast<int>(
+                       ETJump::Missilepad::Spawnflags::ScaleVertOnly)) {
+          targ->client->ps.velocity[2] *= inflictor->speed;
+        } else {
+          VectorScale(targ->client->ps.velocity, inflictor->speed,
+                      targ->client->ps.velocity);
+        }
+      }
     }
 
     // set the timer so that the other client can't cancel

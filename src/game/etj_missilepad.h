@@ -29,12 +29,14 @@ class Missilepad {
   static void use(gentity_t *ent);
   static void touch(gentity_t *self, gentity_t *other);
 
+public:
   enum class Spawnflags {
     None = 0,
     StartInvis = 1,
+    ScaleHorOnly = 2,
+    ScaleVertOnly = 4,
   };
 
-public:
   static void spawn(gentity_t *ent);
 };
 } // namespace ETJump

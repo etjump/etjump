@@ -181,6 +181,11 @@ void G_MissileImpact(gentity_t *ent, trace_t *trace, int impactDamage) {
   if ((ent->s.weapon == WP_GPG40 || ent->s.weapon == WP_M7) &&
       !Q_stricmp(other->classname, "func_missilepad")) {
     other->touch(other, ent, trace);
+
+    // copy over 'scale' and spawnflags from the missilepad to the grenade
+    // so that we can scale things in G_Damage
+    ent->speed = other->speed;
+    ent->spawnflags = other->spawnflags;
   } else {
     // check for bounce
     if ((!other->takedamage || !ent->damage) &&

@@ -89,6 +89,8 @@ void Missilepad::spawn(gentity_t *ent) {
     ent->s.onFireStart = 255;
   }
 
+  G_SpawnFloat("scale", "1.0", &ent->speed);
+
   ent->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace) {
     Missilepad::touch(ent, activator);
   };
