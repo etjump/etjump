@@ -68,33 +68,46 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
   if (cg.demoPlayback)
     return;
 
-  playerEventsHandler->subscribe("load",
-                                 [&](const std::vector<std::string> &args) {
-                                   if (etj_autoDemo.integer > 0)
-                                     tryRestart();
-                                 });
+  playerEventsHandler->subscribe(
+      "load",
+      [&](const std::vector<std::string> &args) {
+        if (etj_autoDemo.integer > 0)
+          tryRestart();
+      });
 
-  playerEventsHandler->subscribe("respawn",
-                                 [&](const std::vector<std::string> &args) {
-                                   auto revive = Q_atoi(args[0].c_str());
-                                   if (revive)
-                                     return;
-                                   if (etj_autoDemo.integer > 0)
-                                     tryRestart();
-                                 });
+  playerEventsHandler->subscribe(
+      "respawn",
+      [&](const std::vector<std::string> &args) {
+        auto revive = Q_atoi(args[0].c_str());
+        if (revive)
+          return;
+        if (etj_autoDemo.integer > 0)
+          tryRestart();
+      });
 
   playerEventsHandler->subscribe(
       "timerun:completion", [&](const std::vector<std::string> &args) {
+        auto clientNum = std::stoi(args[0]);
+        if (clientNum != cg.clientNum) {
+          return;
+        }
+
         if (etj_autoDemo.integer > 0 && etj_ad_savePBOnly.integer <= 0) {
-          trySaveTimerunDemo(args[0], args[1]);
+          trySaveTimerunDemo(sanitize(args[1]), args[2]);
         }
       });
 
-  playerEventsHandler->subscribe("timerun:record",
-                                 [&](const std::vector<std::string> &args) {
-                                   if (etj_autoDemo.integer > 0)
-                                     trySaveTimerunDemo(args[0], args[1]);
-                                 });
+  playerEventsHandler->subscribe(
+      "timerun:record",
+      [&](const std::vector<std::string> &args) {
+        auto clientNum = std::stoi(args[0]);
+        if (clientNum != cg.clientNum) {
+          return;
+        }
+
+        if (etj_autoDemo.integer > 0)
+          trySaveTimerunDemo(sanitize(args[1]), args[2]);
+      });
 
   consoleCommandsHandler->subscribe(
       "ad_save", [&](const std::vector<std::string> &args) {
@@ -111,7 +124,8 @@ ETJump::AutoDemoRecorder::AutoDemoRecorder() {
       });
 }
 
-ETJump::AutoDemoRecorder::~AutoDemoRecorder() {}
+ETJump::AutoDemoRecorder::~AutoDemoRecorder() {
+}
 
 void ETJump::AutoDemoRecorder::tryRestart() {
   // no autodemo for specs

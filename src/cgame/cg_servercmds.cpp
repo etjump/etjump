@@ -1021,6 +1021,10 @@ static void CG_MapRestart(void) {
 
   cg.filtercams = Q_atoi(CG_ConfigString(CS_FILTERCAMS)) ? qtrue : qfalse;
 
+  // reset on map restart to avoid de-sync from cheat protected cvars
+  // on ETe/ETL due to them resetting cheat cvars on map start
+  cg.shadowCvarsSet = false;
+
   CG_ChargeTimesChanged();
 
   CG_ParseFireteams();
@@ -1444,13 +1448,6 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
   const char *msgTime = "";
   qtime_t t;
 
-  /*	// NERVE - SMF - don't do this in wolfMP
-      // if we are going into the intermission, don't start any voices
-      if ( cg.intermissionStarted ) {
-          return;
-      }
-  */
-
   trap_RealTime(&t);
 
   if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
@@ -1498,18 +1495,16 @@ void CG_VoiceChatLocal(int mode, qboolean voiceOnly, int clientNum, int color,
 
       if (mode == SAY_TEAM) {
         Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s(%s)%c%c(%s): %c%c%s", msgTime, ci->name, Q_COLOR_ESCAPE,
-                    COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
+                    "%s(%s^7)^3(%s): %c%c%s", msgTime, ci->name, loc,
+                    Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
       } else if (mode == SAY_BUDDY) {
         Com_sprintf(vchat.message, sizeof(vchat.message),
-                    "%s<%s>%c%c<%s>: %c%c%s", msgTime, ci->name, Q_COLOR_ESCAPE,
-                    COLOR_YELLOW, loc, Q_COLOR_ESCAPE, color,
-                    CG_TranslateString(chat));
-      } else {
-        Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s%c%c: %c%c%s",
-                    msgTime, ci->name, Q_COLOR_ESCAPE, COLOR_YELLOW,
+                    "%s<%s^7>^3<%s>: %c%c%s", msgTime, ci->name, loc,
                     Q_COLOR_ESCAPE, color, CG_TranslateString(chat));
+      } else {
+        Com_sprintf(vchat.message, sizeof(vchat.message), "%s%s^3: %c%c%s",
+                    msgTime, ci->name, Q_COLOR_ESCAPE, color,
+                    CG_TranslateString(chat));
       }
       CG_AddBufferedVoiceChat(&vchat);
     }
@@ -1639,19 +1634,11 @@ const char *CG_LocalizeServerCommand(const char *buf) {
   prev = 0;
 
   for (i = 0; *s; i++, s++) {
-    // TTimo:
-    // line was: if ( *s == '[' && !Q_strncmp( s, "[lon]", 5 )
-    // || !Q_strncmp( s,
-    // "[lof]", 5 ) ) {
-    // || prevails on &&, gcc warning was 'suggest parentheses
-    // around && within
-    // ||' modified to the correct behaviour
     if (*s == '[' && (!Q_strncmp(s, "[lon]", 5) || !Q_strncmp(s, "[lof]", 5))) {
-
       if (togloc) {
         memset(temp, 0, sizeof(temp));
         strncpy(temp, buf + prev, i - prev);
-        strcat(token, CG_TranslateString(temp));
+        Q_strcat(token, sizeof(token), CG_TranslateString(temp));
       } else {
         strncat(token, buf + prev, i - prev);
       }
@@ -1671,7 +1658,7 @@ const char *CG_LocalizeServerCommand(const char *buf) {
   if (togloc) {
     memset(temp, 0, sizeof(temp));
     strncpy(temp, buf + prev, i - prev);
-    strcat(token, CG_TranslateString(temp));
+    Q_strcat(token, sizeof(token), CG_TranslateString(temp));
   } else {
     strncat(token, buf + prev, i - prev);
   }
@@ -2311,11 +2298,18 @@ static void CG_ServerCommand(void) {
     return;
   }
 
-  if (!Q_stricmp(cmd, "cheatCvarsOff")) {
-    trap_SendConsoleCommand("set cl_freelook 1\n");
-    trap_SendConsoleCommand("set cl_yawspeed 0\n");
-    trap_SendConsoleCommand("set pmove_fixed 1\n");
-    trap_SendConsoleCommand("set m_pitch 0.022\n");
+  if (!Q_stricmpn(cmd, "cheatCvarsOff",
+                  static_cast<int>(strlen("cheatCvarsOff")))) {
+    const int flags = Q_atoi(CG_Argv(1));
+
+    if (flags & static_cast<int>(ETJump::CheatCvarFlags::LookYaw)) {
+      trap_SendConsoleCommand("set cl_freelook 1\n");
+      trap_SendConsoleCommand("set cl_yawspeed 0\n");
+    }
+
+    if (flags & static_cast<int>(ETJump::CheatCvarFlags::PmoveFPS)) {
+      trap_SendConsoleCommand("set pmove_fixed 1\n");
+    }
     return;
   }
 

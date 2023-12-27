@@ -37,13 +37,13 @@ public:
     std::vector<const char *> messages;
   };
 
-  BannerSystem(Options options);
+  explicit BannerSystem(Options options);
   ~BannerSystem();
   void check(int levelTime);
 
 private:
   Options _options;
   int _bannerIdx;
-  int _nextBannerTime;
+  int _nextBannerTime{};
 };
 } // namespace ETJump

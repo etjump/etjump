@@ -19,11 +19,15 @@
 // Right side menus
 #define SUBW_CGAZ_Y SUBW_Y
 #define SUBW_CGAZ_ITEM_Y SUBW_CGAZ_Y + SUBW_HEADER_HEIGHT
-#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 13)
+#define SUBW_CGAZ_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 14)
 
 #define SUBW_POPUPS_Y SUBW_CGAZ_Y + SUBW_CGAZ_HEIGHT + SUBW_SPACING_Y
 #define SUBW_POPUPS_ITEM_Y SUBW_POPUPS_Y + SUBW_HEADER_HEIGHT
 #define SUBW_POPUPS_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 9)
+
+#define SUBW_SCOREBOARD_Y SUBW_POPUPS_Y + SUBW_POPUPS_HEIGHT + SUBW_SPACING_Y
+#define SUBW_SCOREBOARD_ITEM_Y SUBW_SCOREBOARD_Y + SUBW_HEADER_HEIGHT
+#define SUBW_SCOREBOARD_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 1)
 
 #define GROUP_NAME "group_etjump_settings_2"
 
@@ -82,7 +86,7 @@ menuDef {
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_KEYS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 5), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Keys shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_keysShadow", "Draw shadow on pressed keys\netj_keysShadow")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_CGAZ_Y, SUBW_WIDTH, SUBW_CGAZ_HEIGHT, "CGAZ")
-        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 }, "Draw CGaz HUD\netj_drawCGaz")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawCGaz", cvarFloatList { "No" 0 "CGaz 1" 1 "CGaz 2" 2 "CGaz 1 and 2" 3 }, "Draw CGaz HUD\netj_drawCGaz")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 1:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color1", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets no accel zone color of CGaz 1\netj_CGaz1Color1")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 2), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 2:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color2", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets min angle color of CGaz 1\netj_CGaz1Color2")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 3), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz 1 color 3:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz1Color3", cvarStrList { "White"; "white"; "Yellow"; "yellow"; "Red"; "red"; "Green"; "green"; "Blue"; "blue"; "Magenta"; "magenta"; "Cyan"; "cyan"; "Orange"; "orange"; "Light Blue"; "0xa0c0ff"; "Medium Blue"; "mdblue"; "Light Red"; "0xffc0a0"; "Medium Red"; "mdred"; "Light Green"; "0xa0ffc0"; "Medium Green"; "mdgreen"; "Dark Green"; "dkgreen"; "Medium Cyan"; "mdcyan"; "Medium Yellow"; "mdyellow"; "Medium Orange"; "mdorange"; "Light Grey"; "ltgrey"; "Medium Grey"; "mdgrey"; "Dark Grey"; "dkgrey"; "Black"; "black" }, "Sets accel zone color of CGaz 1\netj_CGaz1Color3")
@@ -100,6 +104,7 @@ menuDef {
         YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz over Snaphud:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGazOnTop", "Draw CGaz on top of snaphud (vid_restart required)\netj_CGazOnTop")
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_CGaz2FixedSpeed", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "CGaz fixed speed:", 0.2, SUBW_ITEM_HEIGHT, etj_CGaz2FixedSpeed 0 0 1200 50, "Fixed speed value to use for drawing CGaz 2 instead of real speed\netj_CGaz2FixedSpeed")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_CGAZ_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Hide velocity dir:", 0.2, SUBW_ITEM_HEIGHT, "etj_CGaz2NoVelocityDir", "Hide velocity direction line on CGaz2\netj_CGaz2NoVelocityDir")
 
     SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_POPUPS_Y, SUBW_WIDTH, SUBW_POPUPS_HEIGHT, "POPUPS")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_HUD_popup", cvarFloatList { "No" 0 "Left" 1 "Right" 2 }, "Draw popups on HUD\netj_HUD_popup")
@@ -119,6 +124,10 @@ menuDef {
         CVARINTLABEL        (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_popupFadeTime", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 8), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup fade time:", 0.2, SUBW_ITEM_HEIGHT, etj_popupFadeTime 2500 0 10000 250, "Duration of fade animation in milliseconds on popup messages\netj_popupFadeTime")
         MULTI               (SUBW_ITEM_RIGHT_X, SUBW_POPUPS_ITEM_Y + (SUBW_ITEM_SPACING_Y * 9), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Group popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_popupGrouped", cvarFloatList { "No" 0 "Popups" 1 "Popups + console" 2 }, "Group identical popups to one message\netj_popupGrouped")
+
+    SUBWINDOW(SUBW_RECT_RIGHT_X, SUBW_SCOREBOARD_Y, SUBW_WIDTH, SUBW_SCOREBOARD_HEIGHT, "SCOREBOARD")
+        MULTI               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 0), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Custom scoreboard:", 0.2, SUBW_ITEM_HEIGHT, "etj_altScoreboard", cvarFloatList { "No" 0 "ETJump 1" 1 "ETJump 2" 2 "ETJump 3" 3 }, "Displays alternative scoreboard\netj_altScoreboard")
+        YESNO               (SUBW_ITEM_RIGHT_X, SUBW_SCOREBOARD_ITEM_Y + (SUBW_ITEM_SPACING_Y * 1), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Draw idle indicator:", 0.2, SUBW_ITEM_HEIGHT, "etj_drawScoreboardInactivity", "Draw idle indicator on inactive clients\netj_drawScoreboardInactivity")
         
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump)
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_1)
@@ -126,4 +135,5 @@ menuDef {
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 3), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 3", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_3)
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 4), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 4", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_4)
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 5), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 5", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_5)
+        BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 6), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 6", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_2; open etjump_settings_6)
 }

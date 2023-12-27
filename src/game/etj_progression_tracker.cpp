@@ -115,20 +115,35 @@ void ETJump::ProgressionTrackers::useTracker(
   }
 
   auto activate = true;
+  int clientTracker;
 
   for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
-    auto clientTracker = activator->client->sess.progression[idx];
+    clientTracker = activator->client->sess.progression[idx];
 
     if ((tracker.equal[idx] != ProgressionTrackerValueNotSet &&
          tracker.equal[idx] != clientTracker) ||
-        (tracker.notEqual[idx] != ProgressionTrackerValueNotSet &&
-         tracker.notEqual[idx] == clientTracker) ||
         (tracker.lessThan[idx] != ProgressionTrackerValueNotSet &&
          tracker.lessThan[idx] <= clientTracker) ||
         (tracker.greaterThan[idx] != ProgressionTrackerValueNotSet &&
          tracker.greaterThan[idx] >= clientTracker)) {
       activate = false;
       break;
+    }
+  }
+
+  // notEqual must be checked in a separate loop, otherwise it will work
+  // as an OR statement instead of AND
+  for (idx = 0; idx < MaxProgressionTrackers; ++idx) {
+    clientTracker = activator->client->sess.progression[idx];
+
+    if (tracker.notEqual[idx] != ProgressionTrackerValueNotSet) {
+      if (tracker.notEqual[idx] == clientTracker) {
+        activate = false;
+        continue;
+      } else { // value set but not matched - break and fire targets
+        activate = true;
+        break;
+      }
     }
   }
 
@@ -165,7 +180,7 @@ void ETJump::ProgressionTrackers::useTracker(
 
 void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t *ent,
                                                     gentity_t *activator) {
-  auto tracker = _progressionTrackers[ent->key];
+  const auto &tracker = _progressionTrackers[ent->key];
 
   if (!activator || !activator->client) {
     return;
@@ -177,7 +192,7 @@ void ETJump::ProgressionTrackers::useTriggerTracker(gentity_t *ent,
 void ETJump::ProgressionTrackers::useTargetTracker(gentity_t *ent,
                                                    gentity_t *other,
                                                    gentity_t *activator) {
-  auto tracker = _progressionTrackers[ent->key];
+  const auto &tracker = _progressionTrackers[ent->key];
 
   if (!activator || !activator->client) {
     return;

@@ -1,0 +1,273 @@
+// ETJump mapscript for branx2.bsp
+// Modifications:
+// - fixed empty wm_announce when allies captured the end flag
+
+game_manager
+{
+spawn
+{
+wm_axis_respawntime 1
+wm_allied_respawntime 1
+wm_number_of_objectives 1
+wm_set_round_timelimit 0
+wm_setwinner 1
+
+
+}
+}
+
+
+novicflag1
+{
+	spawn
+	{
+		accum 0 set 1			// Welches team gehoert die fahne? 1 = Axis 0 = Allied
+	}
+
+	trigger axis_capture				// Fahne wird von einen axen gecapt.
+	{
+		accum 0 abort_if_equal 0 		// Checken ob ein axe an der fahne war.
+
+		accum 0 set 0 			// Axen haben die fahne.
+		wm_announce "^2H^7ard ^2- ^7Jump ^22 ^7Captured^2!"
+	        wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+	        wm_teamvoiceannounce 1 "axis_hq_objective_captured"
+		setautospawn "novicflag1"  0	
+	}
+}
+
+
+
+
+game_manager
+{
+spawn
+{
+wm_axis_respawntime 1
+wm_allied_respawntime 1
+wm_number_of_objectives 1
+wm_set_round_timelimit 0
+wm_setwinner 1
+
+
+}
+}
+
+
+novicflag2
+{
+	spawn
+	{
+		accum 0 set 1			// Welches team gehoert die fahne? 1 = Axis 0 = Allied
+	}
+
+	trigger axis_capture				// Fahne wird von einen axen gecapt.
+	{
+		accum 0 abort_if_equal 0 		// Checken ob ein axe an der fahne war.
+
+		accum 0 set 0 			// Axen haben die fahne.
+		wm_announce "^2H^7ard ^2- ^7Jump ^23 ^7Captured^2!"
+	        wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+	        wm_teamvoiceannounce 1 "axis_hq_objective_captured"
+		setautospawn "novicflag2"  0	
+	}
+}
+
+
+
+
+game_manager
+{
+spawn
+{
+wm_axis_respawntime 1
+wm_allied_respawntime 1
+wm_number_of_objectives 1
+wm_set_round_timelimit 0
+wm_setwinner 1
+
+
+}
+}
+
+
+novicflag3
+{
+	spawn
+	{
+		accum 0 set 1			// Welches team gehoert die fahne? 1 = Axis 0 = Allied
+	}
+
+	trigger axis_capture				// Fahne wird von einen axen gecapt.
+	{
+		accum 0 abort_if_equal 0 		// Checken ob ein axe an der fahne war.
+
+		accum 0 set 0 			// Axen haben die fahne.
+		wm_announce "^1DEIN TEXT HIER"
+	        wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+	        wm_teamvoiceannounce 1 "axis_hq_objective_captured"
+		setautospawn "novicflag3"  0	
+	}
+}
+
+
+
+
+game_manager
+{
+spawn
+{
+wm_axis_respawntime 1
+wm_allied_respawntime 1
+wm_number_of_objectives 1
+wm_set_round_timelimit 0
+wm_setwinner 1
+
+
+}
+}
+
+
+novicflag4
+{
+	spawn
+	{
+		accum 0 set 1			// Welches team gehoert die fahne? 1 = Axis 0 = Allied
+	}
+
+	trigger axis_capture				// Fahne wird von einen axen gecapt.
+	{
+		accum 0 abort_if_equal 0 		// Checken ob ein axe an der fahne war.
+
+		accum 0 set 0 			// Axen haben die fahne.
+		wm_announce "^1DEIN TEXT HIER"
+	        wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+	        wm_teamvoiceannounce 1 "axis_hq_objective_captured"
+		setautospawn "novicflag4"  0	
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+game_manager
+{
+spawn
+{
+wm_axis_respawntime 1
+wm_allied_respawntime 1
+wm_number_of_objectives 1
+wm_set_round_timelimit 0
+wm_setwinner 1
+
+
+}
+}
+
+
+novicflag5
+{
+	spawn
+	{
+		accum 0 set 1			// Welches team gehoert die fahne? 1 = Axis 0 = Allied
+	}
+
+	trigger axis_capture				// Fahne wird von einen axen gecapt.
+	{
+		accum 0 abort_if_equal 0 		// Checken ob ein axe an der fahne war.
+
+		accum 0 set 0 			// Axen haben die fahne.
+		wm_announce "^1DEIN TEXT HIER"
+	        wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+	        wm_teamvoiceannounce 1 "axis_hq_objective_captured"
+		setautospawn "novicflag5"  0	
+	}
+}
+
+
+
+
+game_manager
+{
+spawn
+{
+wm_axis_respawntime 1
+wm_allied_respawntime 1
+wm_number_of_objectives 1
+wm_set_round_timelimit 0
+wm_setwinner 1
+
+
+}
+}
+
+
+novicflag6
+{
+	spawn
+	{
+		accum 0 set 1			// Welches team gehoert die fahne? 1 = Axis 0 = Allied
+	}
+
+	trigger axis_capture				// Fahne wird von einen axen gecapt.
+	{
+		accum 0 abort_if_equal 0 		// Checken ob ein axe an der fahne war.
+
+		accum 0 set 0 			// Axen haben die fahne.
+		wm_announce "^1DEIN TEXT HIER"
+	        wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+	        wm_teamvoiceannounce 1 "axis_hq_objective_captured"
+		setautospawn "novicflag6"  0	
+	}
+}
+
+
+
+
+game_manager 
+{ 
+   spawn 
+   { 
+      wm_axis_respawntime 1
+      wm_allied_respawntime 1 
+      wm_set_round_timelimit 90
+      wm_number_of_objectives 1
+      wm_setwinner -1 
+   } 
+} 
+
+
+
+endflag
+{
+	trigger allied_capture
+	{
+		// wm_announce ""
+		wm_announce "^zGood Job ^1!"
+		wm_teamvoiceannounce 0 "allies_hq_objective_captured"
+		wm_teamvoiceannounce 1 "allies_hq_objective_captured"		
+		wait 5000
+		wm_setwinner 1
+		wm_endround
+	}
+
+	trigger axis_capture
+	{
+		wm_announce "^zGood Job ^1!"
+		wm_teamvoiceannounce 0 "axis_hq_objective_captured"
+		wm_teamvoiceannounce 1 "axis_hq_objective_captured"		
+		wait 5000
+		wm_setwinner 0
+		wm_endround
+	}
+}
+
+
+

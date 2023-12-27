@@ -98,7 +98,8 @@ void Utilities::startRun(int clientNum) {
   player->client->sess.timerunActive = qtrue;
   ETJump::UpdateClientConfigString(*player);
 
-  if (!(player->client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE)) {
+  if (!(player->client->sess.runSpawnflags &
+        static_cast<int>(ETJump::TimerunSpawnflags::NoSave))) {
     ETJump::saveSystem->resetSavedPositions(player);
   }
 
@@ -243,26 +244,26 @@ std::vector<std::string> Utilities::getMaps() {
   int i = 0;
   int numDirs = 0;
   int dirLen = 0;
-  char dirList[8196];
+  char dirList[32768];
   char *dirPtr = nullptr;
   numDirs = trap_FS_GetFileList("maps", ".bsp", dirList, sizeof(dirList));
   dirPtr = dirList;
 
   for (i = 0; i < numDirs; i++, dirPtr += dirLen + 1) {
-    dirLen = strlen(dirPtr);
+    dirLen = static_cast<int>(strlen(dirPtr));
     if (strlen(dirPtr) > 4) {
       dirPtr[strlen(dirPtr) - 4] = '\0';
     }
 
-    char buf[64] = "\0";
+    char buf[MAX_QPATH] = "\0";
     Q_strncpyz(buf, dirPtr, sizeof(buf));
     Q_strlwr(buf);
 
-    if (strstr(mapStats.getBlockedMapsStr().c_str(), buf) != nullptr) {
+    if (MapStatistics::isBlockedMap(buf)) {
       continue;
     }
 
-    maps.push_back(buf);
+    maps.emplace_back(buf);
   }
 
   return maps;

@@ -122,6 +122,8 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params);
 qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Create(gentity_t *ent, char *params);
 
+qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params);
+
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] = {
     {"gotomarker", G_ScriptAction_GotoMarker},
@@ -233,7 +235,9 @@ g_script_stack_action_t gScriptActions[] = {
     {"constructible_health", G_ScriptAction_ConstructibleHealth},
     {"constructible_weaponclass", G_ScriptAction_ConstructibleWeaponclass},
     {"constructible_duration", G_ScriptAction_ConstructibleDuration},
-    {NULL, NULL}};
+
+    {"wm_announce_private", G_ScriptAction_Announce_Private},
+    {nullptr, nullptr}};
 
 qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
                                          const char *eventParm);
@@ -1450,3 +1454,32 @@ void SP_script_multiplayer(gentity_t *ent) {
 
   trap_LinkEntity(ent);
 }
+
+namespace ETJump {
+void spawnGameManager() {
+  gentity_t *ent = G_Spawn();
+  ent->classname = "etjump_game_manager";
+  ent->scriptName = "etjump_manager";
+  ent->s.eType = ET_GAMEMANAGER;
+  ent->r.svFlags = SVF_BROADCAST;
+
+  // sanity check, should not happen
+  if (level.gameManager) {
+    G_Error("^1ERROR: multiple etjump_game_managers found\n");
+  }
+
+  level.gameManager = ent;
+  level.gameManager->s.otherEntityNum =
+      MAX_TEAM_LANDMINES; // axis landmine count
+  level.gameManager->s.otherEntityNum2 =
+      MAX_TEAM_LANDMINES;                    // allies landmine count
+  level.gameManager->s.modelindex = qfalse;  // axis HQ doesn't exist
+  level.gameManager->s.modelindex2 = qfalse; // allied HQ doesn't exist
+
+  trap_LinkEntity(ent);
+
+  // call the mapscript spawn functions, so we can spawn in entities
+  G_Script_ScriptParse(ent);
+  G_Script_ScriptEvent(ent, "spawn", "");
+}
+} // namespace ETJump

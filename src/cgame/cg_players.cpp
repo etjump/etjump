@@ -451,7 +451,7 @@ void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
 
     // get the next frame based on the animation
     anim = lf->animation;
-    if (!anim->frameLerp) {
+    if (!anim || !anim->frameLerp) {
       return; // shouldn't happen
     }
     if (cg.time < lf->animationTime) {
@@ -645,6 +645,11 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
   // see if the animation sequence is switching
   if (newAnimation != lf->animationNumber || !lf->animation) {
     CG_SetLerpFrameAnimationRate(cent, ci, lf, newAnimation);
+    if (!lf->animation) {
+      // shouldn't happen
+      CG_Printf("^3WARNING: CG_RunLerpFrameRate: NULL animation\n");
+      return;
+    }
   }
 
   // Ridah, make sure the animation speed is updated when possible

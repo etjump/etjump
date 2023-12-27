@@ -222,7 +222,11 @@ void Snaphud::UpdateMaxSnapZones(float wishspeed, pmove_t *pm) {
   snap.absAccel.resize(maxSnaphudZonesQ1);
 }
 
-void Snaphud::beforeRender() {
+bool Snaphud::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+
   const int8_t uCmdScale =
       ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
           ? CMDSCALE_WALK
@@ -231,6 +235,13 @@ void Snaphud::beforeRender() {
 
   // get correct pmove state
   pm = PmoveUtils::getPmove(cmd);
+
+  // water and ladder movement are not important
+  // since speed is capped anyway
+  // check this only after we have a valid pmove
+  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
+    return false;
+  }
 
   // show upmove influence?
   float scale = etj_snapHUDTrueness.integer &
@@ -270,12 +281,14 @@ void Snaphud::beforeRender() {
     UpdateMaxSnapZones(wishspeed, pm);
     UpdateSnapState();
   }
+
+  edgesOnly = etj_drawSnapHUD.integer == 2;
+  edgeThickness = Numeric::clamp(etj_snapHUDEdgeThickness.integer, 1, 128);
+
+  return true;
 }
 
 void Snaphud::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
 
   float h = etj_snapHUDHeight.value;
   float y = 240 + etj_snapHUDOffsetY.value;
@@ -293,15 +306,34 @@ void Snaphud::render() const {
       int const bSnap = snap.zones[i] + 1 + j;
       int const eSnap = snap.zones[i + 1] + j;
 
-      // highlight active snapzone?
-      if (etj_snapHUDHLActive.integer &&
-          AngleNormalize65536(yaw - bSnap) <=
-              AngleNormalize65536(eSnap - bSnap)) {
-        CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
-                        h, fov, snaphudColors[2 + altColor]);
+      if (edgesOnly) {
+        // highlight active snapzone?
+        if (etj_snapHUDHLActive.integer &&
+            AngleNormalize65536(yaw - bSnap) <=
+                AngleNormalize65536(eSnap - bSnap)) {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(bSnap + edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov,
+                          snaphudColors[2 + altColor]);
+          CG_FillAngleYaw(SHORT2RAD(eSnap), SHORT2RAD(eSnap - edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov,
+                          snaphudColors[2 + altColor]);
+        } else {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(bSnap + edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
+          CG_FillAngleYaw(SHORT2RAD(eSnap), SHORT2RAD(eSnap - edgeThickness),
+                          SHORT2RAD(yaw), y, h, fov, snaphudColors[altColor]);
+        }
       } else {
-        CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
-                        h, fov, snaphudColors[altColor]);
+        // highlight active snapzone?
+        if (etj_snapHUDHLActive.integer &&
+            AngleNormalize65536(yaw - bSnap) <=
+                AngleNormalize65536(eSnap - bSnap)) {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
+                          h, fov, snaphudColors[2 + altColor]);
+        } else {
+          CG_FillAngleYaw(SHORT2RAD(bSnap), SHORT2RAD(eSnap), SHORT2RAD(yaw), y,
+                          h, fov, snaphudColors[altColor]);
+        }
       }
     }
     altColor ^= 1;
@@ -427,18 +459,12 @@ bool Snaphud::canSkipDraw() const {
     return true;
   }
 
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(weapnumForClient())) {
     return true;
   }
 
   if (BG_PlayerMounted(ps->eFlags) || ps->weapon == WP_MOBILE_MG42_SET ||
       ps->weapon == WP_MORTAR_SET) {
-    return true;
-  }
-
-  // water and ladder movement are not important
-  // since speed is capped anyway
-  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
     return true;
   }
 

@@ -1,3 +1,149 @@
+# ETJump 3.1.0
+
+* deprecated `target_printname` entity - all functionality is included in `target_print` [#1080](https://github.com/etjump/etjump/pull/1080)
+  * existing `target_printname` entities continue to work normally
+* added support for `wm_announce_private` script action for doing per-client announces via mapscript [#1083](https://github.com/etjump/etjump/pull/1083)
+  * must be activated via entity that carries activator (e.g. `target_script_trigger` or `trigger_multiple`)
+* fixed team/ft chat closing parenthesis/bracket being affected by player name colors [#1084](https://github.com/etjump/etjump/pull/1084)
+* added name replacement support for `wm_announce/wm_announce_private` [#1085](https://github.com/etjump/etjump/pull/1085)
+  * `%s` will be replaced with activators name, needs activation via entity that carries activator (e.g. `target_script_trigger` or `trigger_multiple`)
+* fixed `cg_uinfo` bug on 64-bit Windows clients using ETe [#1086](https://github.com/etjump/etjump/pull/1086)
+* fixed incorrect friction and look sensitivity in freecam [#1088](https://github.com/etjump/etjump/pull/1088)
+* `players` command will now display the game engine used by each client [#1089](https://github.com/etjump/etjump/pull/1089)
+  * additionally value of `snaps` is colored red, if it's less than `sv_fps` value
+* OB watcher improvements [#1091](https://github.com/etjump/etjump/pull/1091)
+  * `ob_save [name]` and `ob_load [name]` are now functional
+  * implemented `ob_list` to display saved coordinates
+  * OB watcher now correctly detects surfaces that don't allow overbounce
+  * fixed coordinate prints having incorrect z height (was using `ps.origin`, now shifted to feet level)
+  * most prints are now popups instead of console prints
+* fixed multiple potential crashes in various places [#1093](https://github.com/etjump/etjump/pull/1093)
+  * most notable ones:
+    * fixed crash when firing `shooter_grenade` - the entity is now usable
+    * fixed crash with `target_activate` when activated without activator
+    * fixed crash with `setplayerspawn/setplayerautospawn/killplayer/damageplayer` script actions when activated without activator
+* cleaned up several unused server cvars [#1111](https://github.com/etjump/etjump/pull/1111)
+* fixed incorrect format specifier in `await` command causing a crash [#1120](https://github.com/etjump/etjump/pull/1120)
+* `[map]` parameter in `ranks [map] [run]` command is no longer case sensitive [#1119](https://github.com/etjump/etjump/pull/1119)
+* demo filenames in replay menu are now stripped of color codes [#1115](https://github.com/etjump/etjump/pull/1115)
+* inactive specators are now drawn semi transparent in spectator list [#1116](https://github.com/etjump/etjump/pull/1116)
+* fixed portalgun bypassing checks for `g_weapons` and `g_knifeOnly` [#1121](https://github.com/etjump/etjump/pull/1121)
+* optimized etjump renderable system, potentially increasing performance in some scenarios by ~30% [#1109](https://github.com/etjump/etjump/pull/1109)
+* added `etjump_game_manager` entity [#1123](https://github.com/etjump/etjump/pull/1123)
+  * automatically placed on a map if no `script_multiplayer` or entities with `scriptname` are present to always allow mapscripting on any map
+    * access is provided via `etjump_manager` script block
+  * not meant to be placed by mappers - this functions the same as `script_multiplayer` entity
+* added `etj_autoPortalBinds` cvar to automatically bind `weapalt` to `+attack2` and back when switchig to/from portalgun [#1125](https://github.com/etjump/etjump/pull/1125)
+  * this effectively allows you to use portalgun with `weapalt` without having to separetly bind `+attack2`
+* fixed not being able to enter wounded state during timeruns, which broke some timeruns (`2weeks` for example) [#1126](https://github.com/etjump/etjump/pull/1126)
+* improved `target_remove_portals` entity [#1129](https://github.com/etjump/etjump/pull/1129) [#1130](https://github.com/etjump/etjump/pull/1130)
+  * added `spawnflags 2` to fire targets when portals are removed
+  * added `noise` & `volume` keys to play a sound when portals are removed
+* added `target_portal_relay` entity [#1130](https://github.com/etjump/etjump/pull/1130)
+  * fires targets if activator has fired less or equal amount of portals as defined by `maxportals` key since last portal reset
+* portalgun portals of spectated player are no longer displayed with "others" portal colors [#1132](https://github.com/etjump/etjump/pull/1132)
+* reduced portalgun portal shader size to match the actual portal size better [#1133](https://github.com/etjump/etjump/pull/1133)
+* casting multiple votes is no longer possible by reconnecting [#1134](https://github.com/etjump/etjump/pull/1134)
+  * votes called by a disconnecting client are also now automatically canceled
+* improved `!seasons` command output [#1118](https://github.com/etjump/etjump/pull/1118)
+  * seasons are now grouped to active, upcoming and past seasons
+  * `Default` season is no longer displayed
+  * start and end dates should be more legible
+* `etj_drawCGaz` is now a bitflag cvar and allows drawing both CGaz huds at the same time [#1137](https://github.com/etjump/etjump/pull/1137)
+
+# ETJump 3.0.1
+
+* fixed missing parenthesis around diff prints on seasonal record banner prints [#1057](https://github.com/etjump/etjump/pull/1057)
+* `!delete-season` command is no longer case sensitive [#1058](https://github.com/etjump/etjump/pull/1058)
+* fixed `--page-size` argument on `records` not working in some scenarios [#1059](https://github.com/etjump/etjump/pull/1059)
+* fixed popups not printing for all other players when a player makes a new PB time [#1061](https://github.com/etjump/etjump/pull/1061)
+* `listinfo` no longer prints any text regarding missing maps if no maps from the list are missing [#1062](https://github.com/etjump/etjump/pull/1062)
+* `records` no longer prints records from other maps when the current map partially matches other map names on the server [#1063](https://github.com/etjump/etjump/pull/1063)
+* runtimer and checkpoint timer now use real 8ms interval timer for players [#1069](https://github.com/etjump/etjump/pull/1069)
+  * spectators/demo playback still display "fake" timer via cgame timer instead of command time
+* fixed relative checkpoint timer (`etj_checkpointsStyle 0`) being 1ms off when player had no record on a run [#1066](https://github.com/etjump/etjump/pull/1066)
+* various fixes to run/checkpoint timer [#1071](https://github.com/etjump/etjump/pull/1071)
+  * checkpoint timer no longer breaks when a player hits the max checkpoint limit (16)
+  * fixed checkpoint times not fading together with runtimer
+  * fixed checkpoint timer position when using non-default size
+  * adjusted the transition range in runtimer when closing in on PB - the transition duration is no longer hardcoded to several steps, instead transition starts at the last 10% of the run (capped to max 10s)
+* added `rankings <season>` command shorthand [#1073](https://github.com/etjump/etjump/pull/1073)
+* added `etj_CGaz2NoVelocityDir` cvar to hide velocity direction line on CGaz 2 [#1074](https://github.com/etjump/etjump/pull/1074)
+* fixed various issues with record checking [#1075](https://github.com/etjump/etjump/pull/1075)
+  * fixed banner prints displaying wrong diff - was displaying diff to your old time, now uses diff from new record to previous #1 record
+    * popup message will still display diff to your previous record instead of previous #1 record
+  * fixed banner prints not displaying if a player has no previous record set on a run, but breaks either the overall or seasonal record on their first run
+  * fixed autodemo not saving demos with `etj_ad_savePBOnly 1` if a player made a new PB, but it wasn't a new overall record
+* `loadcheckpoints` now supports partial name matching, and loaded checkpoints can be cleared by specifying `-1` as rank [#1077](https://github.com/etjump/etjump/pull/1077)
+* users with 0 points are no longer included in `rankings` [#1078](https://github.com/etjump/etjump/pull/1078)
+* fixed being unable to edit only season start or end date, not both, on a single command [#1079](https://github.com/etjump/etjump/pull/1079)
+* all maps on a server are now logged to `maps.json` on game init [#1070](https://github.com/etjump/etjump/pull/1070)
+
+# ETJump 3.0.0
+
+* new timerun system [#995](https://github.com/etjump/etjump/pull/995) [#1014](https://github.com/etjump/etjump/pull/1014) [#1017](https://github.com/etjump/etjump/pull/1017) [#1020](https://github.com/etjump/etjump/pull/1020) [#1021](https://github.com/etjump/etjump/pull/1021) [#1043](https://github.com/etjump/etjump/pull/1043) [#1048](https://github.com/etjump/etjump/pull/1048) [#1050](https://github.com/etjump/etjump/pull/1050)
+  * support for checkpoints (`target_checkpoint` & `trigger_checkpoint`) entities & related cvars for client
+    * `etj_drawCheckpoints` - **1** - below runtimer, **2** - detached
+    * `etj_checkpointsX/Y` - checkpoint timer location (only with `etj_drawCheckpoints 2`)
+    * `etj_checkpointsStyle` - **0** - relative time, **1** - absolute time
+    * `etj_checkpointsCount` - how many checkpoint times to draw (range 1-5)
+    * `etj_checkpointsSize` - size of checkpoint timer
+    * `etj_checkpointsShadow` - toggle shadow on checkpoint timer
+    * `loadcheckpoints <run> [required] <rank>` - load checkpoints from another run for comparision - if `<rank>` isn't specified, loads #1 rank checkpoints
+  * `trigger_starttimer` & `trigger_stoptimer` entities
+  * `_ext` versions of all timerun entities for mapscripting purposes
+  * timerun seasons - per-server seasonal records, defined by server admins with `!add-season` command
+    * `!seasons` - lists all seasons (admin flag a)
+    * `!add-season --name <name> [required] --start-date <YYYY-MM-DD> [required] --end-date-exclusive [YYYY-MM-DD]` (admin flag T)
+    * `!edit-season --name <name> [required] --start-date <YYYY-MM-DD> --end-date [YYYY-MM-DD]` (admin flag T)
+    * `!delete-season --name <name> [required]` (admin flag T)
+      * deleting a season will delete all records associated with the season
+  * ranking system - per-server rankings for players, points are calculated using the [DFWC EESystem](https://docs.google.com/forms/d/e/1FAIpQLSczfUVq5sPQlYcDLw9rY6MxodMBdIiM0HuPdocgksLR3NDtgw/viewform) (minus the nascar clause)
+    * available via `!rankings` or `/rankings` commands (admin flag `a`)
+    * `rankings --season <season> --page-size <size> --page <page>`
+      * overall rankings are printed by default
+  * improved records printing (`records/ranks/times/top`)
+    * `records --season <season> --map <mapname> --run <runname> --page <page> --page-size <size>`
+      * overall records are printed by default
+    * shorthand command supports for `records <run>`, `records <map> <run>` & `records <season> <map> <run>`
+      * all parameters support partial matching, no need to type out entire name
+    * detailed records now show top 20 times by default, and always shows your time if not currently visible
+    * records can now be fetched for any map on the server, regardless of which map is currently running
+    * records command (and it's aliases) can now be executed as admin commands too (admin flag a)
+  * `g_timeruns2Database` cvar to set new timerun database name on server (default `timeruns.v2.db`)
+    * old timerun database will automatically be migrated to the new database format - no manual intervention required by server admins
+* fireteam UI improvements [#1026](https://github.com/etjump/etjump/pull/1026) [#1030](https://github.com/etjump/etjump/pull/1030)
+  * removed ranks and locations from fireteam UI
+  * health display now respects `etj_fireteamAlpha` regardless of color being used
+  * spectators are no longer drawn as having soldier as their class
+  * fireteam savelimit can now be set via fireteam admin menu
+  * savelimit `-1` is now the default (no restrictions) and `0` disables save
+  * savelimit changes are now communicated to all fireteam members and cleared when a map changes
+  * added UI element to display currently set fireteam savelimit
+* fixed spectator list drawing while scoreboard is up [#1024](https://github.com/etjump/etjump/pull/1024)
+* support for `autoexec_default` on client side for map-specific autoexec - executed if `autoexec_mapname` isn't present [#1023](https://github.com/etjump/etjump/pull/1023)
+* reworked `g_blockCheatCvars` [#1016](https://github.com/etjump/etjump/pull/1016)
+  * cvar now works as a bitflag value
+    * **1** - force `cl_yawspeed 0` & `cl_freelook 1`
+    * **2** - force `com_maxfps 25-125` when `pmove_fixed 0`
+  * `m_pitch` is no longer enforced
+* fixed being unable to pick up weapons after they were removed with `target_init` `REMOVE_STARTING_WEAPONS` spawnflag [#1028](https://github.com/etjump/etjump/pull/1028)
+* added `etj_noPanzerAutoswitch` to disable autoswitch after firing a panzerfaust [#1029](https://github.com/etjump/etjump/pull/1029)
+  * switch still occurs if completely out of ammo
+* fixed shadow cvars getting out of sync after map restart [#1032](https://github.com/etjump/etjump/pull/1032)
+* fixed `g_blockedMaps` matching maps on partial match - exact match is now required [#1035](https://github.com/etjump/etjump/pull/1035)
+* added edge-only snaphud (`etj_drawSnapHUD 2`) [#1037](https://github.com/etjump/etjump/pull/1037)
+  * edge thickness controllable with `etj_snaoHUDEdgeThickness` (range 1-128)
+* limbo menu camera will now display a view from spectator spawn point if no limbo cameras are set in the map [#1040](https://github.com/etjump/etjump/pull/1040)
+* fixed `EV_LOAD_TELEPORT` being processed on wrong clients, causing events related to `load` firing for wrong clients [#1041](https://github.com/etjump/etjump/pull/1041)
+* added railbox drawing for following entities when `g_scriptDebug 1` is set for easier mapscripting [#1042](https://github.com/etjump/etjump/pull/1042) [#1048](https://github.com/etjump/etjump/pull/1048)
+  * `trigger_multiple_ext` (green)
+  * `trigger_starttimer_ext` (blue)
+  * `trigger_stoptimer_ext` (blue)
+  * `trigger_checkpoint_ext` (magenta)
+  * `func_fakebrush` (red)
+* bundled fixed mapscripts for `branx`, `branx2` and `freestyle` with the mod so they work out of box without a custom script [#1039](https://github.com/etjump/etjump/pull/1039)
+
 # ETJump 2.6.0
 
 * fixed timerun timer disappearing on demo playback when timerun ends [#835](https://github.com/etjump/etjump/pull/853)
@@ -49,6 +195,49 @@
   * fixed prediction errors not being cleared on respawn
   * fixed view transition happening when joining spectators while proning
 * fixed a potential crash when activating `trigger_multiple` with a non-player entity [#920](https://github.com/etjump/etjump/pull/920)
+* improvements to `etj_nofatigue` and stamina bar [#922](https://github.com/etjump/etjump/pull/922)
+  * `PW_ADRENALINE` is no longer given to player every frame, improving prediction performance when `etj_optimizePrediction` is enabled
+  * `etj_nofatigue` no longer makes stamina bar appear as if you have adrenaline - only using real adrenaline syringe will display the color lerping
+* players now receive a once per map warning when starting a timerun if cheats are enabled [#924](https://github.com/etjump/etjump/pull/924)
+* unlocked `r_flareSize` via `etj_flareSize` [#925](https://github.com/etjump/etjump/pull/925)
+* fixed `fireteam invite/warn/kick/propose` console command handling [#928](https://github.com/etjump/etjump/pull/928)
+  * action by clientnum now sends the command to correct client instead of the previous client
+  * action by clientname now returns invalid clientnum and errors if matching multiple clients
+* fixed fireteam admin menu drawing behind certain HUD elements [#936](https://github.com/etjump/etjump/pull/936)
+* added `etj_menuSensitivity` for controlling mouse sensitivity in UI/menus [#931](https://github.com/etjump/etjump/pull/931)
+* added `listspawnpt` command to list valid spawnpoints in a map [#933](https://github.com/etjump/etjump/pull/933)
+* removed mapscript actions `cvar set/inc/random` [#934](https://github.com/etjump/etjump/pull/934)
+* added `etj_footstepVolume` to control volume of movement-generated sounds (stepsounds/landings) [#938](https://github.com/etjump/etjump/pull/938)
+* fixed runtimer colors (red/green when record is set) breaking when the run name had spaces [#941](https://github.com/etjump/etjump/pull/941)
+* new #1 records on timeruns are now broadcasted with a banner print [#935](https://github.com/etjump/etjump/pull/935)
+  * diff column coloring on `ranks` command is now reversed, meaning faster records before you are colored green with `-` as opposed to red with `+`
+* portalgun portals no longer render when they're out of PVS, fixing portals sometimes being visible through skyboxes due to shader sorting order [#949](https://github.com/etjump/etjump/pull/949)
+* fixed incorrect error message when `misc_gamemodel` was used with `ANIMATE` spawnflag with 0 frames set [89d7f32](https://github.com/etjump/etjump/commit/89d7f320d0b9c925be51f55379f29da72d3b2483)
+* fixed player head being a valid portal surface [#957](https://github.com/etjump/etjump/pull/957)
+* fixed portalgun trails not respecting `etj_viewPlayerPortals` [#959](https://github.com/etjump/etjump/pull/959)
+* `load` will now respawn & load players position if executed during deathcam after falling to death [#962](https://github.com/etjump/etjump/pull/962)
+* improved spectator info list [#964](https://github.com/etjump/etjump/pull/964)
+  * `etj_drawSpectatorInfo` now accepts 1-3 values, 1 = left align, 2 = center align, 3 = right align
+  * `etj_spectatorInfoSize` and `etj_spectatorInfoShadow` to set text size and enable shadow, respectively
+  * `etj_spectatorInfoY` is now calculated from top-left rather than bottom-left of first name on the list, so value + will no longer hide the first player off screen
+    * Default was changed from 40 -> 30
+* added `entitylist` to console autocompletion and improved it's output [#954](https://github.com/etjump/etjump/pull/954)
+* CGaz 2 is now correctly centered on crosshair instead of being slightly shifted to left [#966](https://github.com/etjump/etjump/pull/966) [#999](https://github.com/etjump/etjump/pull/999)
+* fixed players not drowning consistently when using `pmove_fixed 1` and `com_maxfps > 125` [#984](https://github.com/etjump/etjump/pull/984)
+* `cg_runroll` and `cg_runpitch` default values are now 0 [#987](https://github.com/etjump/etjump/pull/987)
+* added `nodrop` worldspawn key to globally enable nodrop in the map [#986](https://github.com/etjump/etjump/pull/986)
+  * when enabled, items will only drop to ground inside `CONTENTS_NODROP` brushes
+* added a warning when starting server a on ET: Legacy or ETe without vanilla patch collision [#967](https://github.com/etjump/etjump/pull/967)
+* quadrupled the number of supported maps on a server by the mod, should be roughly 2000 maps now [#990](https://github.com/etjump/etjump/pull/990)
+* fixed certain indicators being inaccurate during playback at the cost of slower update rate, most notably OB detector [#992](https://github.com/etjump/etjump/pull/992)
+* added missing `say_buddy` and `enc_say*` commands to tab completion and removed some invalid commands [#994](https://github.com/etjump/etjump/pull/994)
+* added 7 new crosshairs drawn as vector graphics [#993](https://github.com/etjump/etjump/pull/993)
+  * `etj_crosshairScaleX/Y` to scale on x/y (also works for old crosshairs, range -5-5)
+  * `etj_crosshairThickness` to set line thickness (range 0-5)
+  * `etj_crosshairOutline` toggles drawing outline with the new crosshairs
+* improved output of `listinfo` command [#996](https://github.com/etjump/etjump/pull/996)
+* fixed `tracker_not_eq` key on tracker entities working as an OR statement instead of AND - targets will now fire only if ALL specified values do not match [#997](https://github.com/etjump/etjump/pull/997)
+* timeruns no longer start if a client has used `noclip` after respawning [#998](https://github.com/etjump/etjump/pull/998)
 
 # ETJump 2.5.1
 
@@ -118,6 +307,7 @@
   * `etj_jumpSpeedsFasterColor` - RGBA color for faster speeds (default `0.0 1.0 0.0 1.0`)
   * `etj_jumpSpeedsSlowerColor` - RGBA color for slower speeds (default `1.0 0.0 0.0 1.0`)
 * reinforcement timer is now hidden when `cg_descriptiveText` is set to __0__ [#612](https://github.com/etjump/etjump/pull/612)
+* `etj_speedSize` now accepts floating point values [#617](https://github.com/etjump/etjump/pull/617)
 * `etj_CGazAlpha` no longer affects CGaz 5 [#618](https://github.com/etjump/etjump/pull/618)
 * spectators can no longer use `spec(un)lock` [#619](https://github.com/etjump/etjump/pull/619)
 * added missing `speclist` client command for autocompletion [#619](https://github.com/etjump/etjump/pull/619)

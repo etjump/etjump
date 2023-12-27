@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <array>
 
 #include "ui_shared.h"
 #include "ui_local.h" // For CS settings/retrieval
@@ -527,17 +528,16 @@ void Fade(int *flags, float *f, float clamp, int *nextTime, int offsetTime,
 
 void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
                   float fadeCycle) {
-  // float bordersize = 0;
+  if (w == nullptr || (w->style == 0 && w->border == 0)) {
+    return;
+  }
+
   vec4_t color{1.f, 1.f, 1.f, 1.f};
   rectDef_t fillRect = w->rect;
 
   if (debugMode) {
     color[0] = color[1] = color[2] = color[3] = 1;
     DC->drawRect(w->rect.x, w->rect.y, w->rect.w, w->rect.h, 1, color);
-  }
-
-  if (w == NULL || (w->style == 0 && w->border == 0)) {
-    return;
   }
 
   // FIXME: do right thing for right border type
@@ -551,12 +551,12 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
   if (w->style == WINDOW_STYLE_FILLED) {
     // box, but possible a shader that needs filled
     if (w->background) {
-      Fade(&w->flags, &w->backColor[3], fadeClamp, &w->nextTime, fadeCycle,
-           qtrue, fadeAmount);
+      Fade(&w->flags, &w->backColor[3], fadeClamp, &w->nextTime,
+           static_cast<int>(fadeCycle), qtrue, fadeAmount);
       DC->setColor(w->backColor);
       DC->drawHandlePic(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
                         w->background);
-      DC->setColor(NULL);
+      DC->setColor(nullptr);
     } else {
       DC->fillRect(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
                    w->backColor);
@@ -570,7 +570,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
     }
     DC->drawHandlePic(fillRect.x, fillRect.y, fillRect.w, fillRect.h,
                       w->background);
-    DC->setColor(NULL);
+    DC->setColor(nullptr);
   } else if (w->style == WINDOW_STYLE_TEAMCOLOR) {
     if (DC->getTeamColor) {
       DC->getTeamColor(&color);
@@ -631,7 +631,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
       DC->drawTopBottom(w->rect.x, w->rect.y, w->rect.w, w->rect.h,
                         w->borderSize);
     }
-    DC->setColor(NULL);
+    DC->setColor(nullptr);
   } else if (w->border == WINDOW_BORDER_VERT) {
     // left right
     DC->setColor(w->borderColor);
@@ -641,7 +641,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp,
     } else {
       DC->drawSides(w->rect.x, w->rect.y, w->rect.w, w->rect.h, w->borderSize);
     }
-    DC->setColor(NULL);
+    DC->setColor(nullptr);
   } else if (w->border == WINDOW_BORDER_KCGRADIENT) {
     // this is just two gradient bars along each horz edge
     rectDef_t r = w->rect;
@@ -2290,7 +2290,7 @@ int Item_ListBox_ThumbDrawPosition(itemDef_t *item) {
 
 float Item_Slider_ThumbPosition(itemDef_t *item) {
   float value, range, x;
-  editFieldDef_t *editDef = (editFieldDef_t *)item->typeData;
+  auto *editDef = static_cast<editFieldDef_t *>(item->typeData);
 
   if (item->text) {
     x = item->textRect.x + item->textRect.w + 8;
@@ -2298,8 +2298,15 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
     x = item->window.rect.x;
   }
 
-  if (editDef == NULL && item->cvar) {
+  if (editDef == nullptr && item->cvar) {
     return x;
+  }
+
+  // the above statement should realistically never execute
+  // sliders *should* always have a valid typeData pointer set to a function
+  // if you see this error, you've done goofed
+  if (editDef == nullptr) {
+    Com_Error(ERR_FATAL, "Item_Slider_ThumbPosition: NULL editDef\n");
   }
 
   value = DC->getCVarValue(item->cvar);
@@ -2313,11 +2320,8 @@ float Item_Slider_ThumbPosition(itemDef_t *item) {
   range = editDef->maxVal - editDef->minVal;
   value -= editDef->minVal;
   value /= range;
-  // value /= (editDef->maxVal - editDef->minVal);
   value *= SLIDER_WIDTH;
   x += value;
-  // vm fuckage
-  // x = x + (((float)value / editDef->maxVal) * SLIDER_WIDTH);
   return x;
 }
 
@@ -4346,8 +4350,8 @@ void Item_TextField_Paint(itemDef_t *item) {
   int text_len = 0;  // screen length of the editfield text that will be printed
   int field_offset;  // character offset in the editfield string
   int screen_offset; // offset on screen for precise placement
-  menuDef_t *parent = (menuDef_t *)item->parent;
-  editFieldDef_t *editPtr = (editFieldDef_t *)item->typeData;
+  auto *parent = static_cast<menuDef_t *>(item->parent);
+  auto *editPtr = static_cast<editFieldDef_t *>(item->typeData);
 
   buff[0] = '\0';
 
@@ -4505,7 +4509,7 @@ void Item_CheckBox_Paint(itemDef_t *item) {
 void Item_YesNo_Paint(itemDef_t *item) {
   vec4_t newColor, lowLight;
   float value;
-  menuDef_t *parent = (menuDef_t *)item->parent;
+  auto *parent = static_cast<menuDef_t *>(item->parent);
 
   value = (item->cvar) ? DC->getCVarValue(item->cvar) : 0;
 
@@ -4661,6 +4665,8 @@ static bind_t g_bindings[] = {
     {"clearsaves", -1, -1, -1, -1},
     {"ob_save", -1, -1, -1, -1},
     {"ob_reset", -1, -1, -1, -1},
+    {"ob_load", -1, -1, -1, -1},
+    {"ob_list", -1, -1, -1, -1},
     {"+strafe", -1, -1, -1, -1},
     {"interruptrun", -1, -1, -1, -1},
     {"minimize", -1, -1, -1, -1},
@@ -4775,7 +4781,7 @@ char *BindingFromName(const char *cvar) {
 void Item_Slider_Paint(itemDef_t *item) {
   vec4_t newColor, lowLight;
   float x, y;
-  menuDef_t *parent = (menuDef_t *)item->parent;
+  auto parent = static_cast<menuDef_t *>(item->parent);
 
   if (item->window.flags & WINDOW_HASFOCUS &&
       item->window.flags & WINDOW_FOCUSPULSE) {
@@ -5322,7 +5328,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
 }
 
 void Item_OwnerDraw_Paint(itemDef_t *item) {
-  if (item == NULL) {
+  if (item == nullptr) {
     return;
   }
 
@@ -5402,13 +5408,14 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 
 void Item_Paint(itemDef_t *item) {
   vec4_t red;
-  menuDef_t *parent = (menuDef_t *)item->parent;
   red[0] = red[3] = 1;
   red[1] = red[2] = 0;
 
-  if (item == NULL) {
+  if (item == nullptr) {
     return;
   }
+
+  auto parent = static_cast<menuDef_t *>(item->parent);
 
   if (item->hOffset) {
     float off = DC->getCVarValue(item->hOffset);
@@ -6894,11 +6901,12 @@ qboolean ItemParse_cvarListUndefined(itemDef_t *item, int handle) {
 }
 
 qboolean ParseColorRange(itemDef_t *item, int handle, int type) {
-  colorRangeDef_t color;
+  colorRangeDef_t color{};
 
   if (item->numColors && type != item->colorRangeType) {
-    PC_SourceError(handle, "both addColorRange and addColorRangeRel - "
-                           "set within same itemdef\n");
+    PC_SourceError(
+        handle,
+        "both addColorRange and addColorRangeRel - set within same itemdef\n");
     return qfalse;
   }
 
@@ -7751,6 +7759,38 @@ void *Display_CaptureItem(int x, int y) {
   }
   return NULL;
 }
+
+namespace ETJump {
+void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy) {
+  static std::array<float, 2> mouseMenuBuffer = {0.0f, 0.0f};
+
+  mouseMenuBuffer[0] += etj_menuSensitivity.value * x;
+  mouseMenuBuffer[1] += etj_menuSensitivity.value * y;
+  mouseMenuBuffer[0] = modff(mouseMenuBuffer[0], mdx);
+  mouseMenuBuffer[1] = modff(mouseMenuBuffer[1], mdy);
+}
+
+// this is kinda terrible, but it ensures simple-ish expansion
+// if we ever add more shader-based crosshairs
+qhandle_t shaderForCrosshair(const int crosshairNum, const bool isAltShader) {
+  qhandle_t shader;
+
+  // default crosshairs (0-9)
+  if (crosshairNum >= 0 && crosshairNum < 10) {
+    if (isAltShader) {
+      shader = trap_R_RegisterShaderNoMip(
+          va("gfx/2d/crosshair%c_alt", 'a' + crosshairNum));
+    } else {
+      shader = trap_R_RegisterShaderNoMip(
+          va("gfx/2d/crosshair%c", 'a' + crosshairNum));
+    }
+  } else { // this should change if more shader-based crosshairs are added
+    shader = trap_R_RegisterShaderNoMip("white");
+  }
+
+  return shader;
+}
+} // namespace ETJump
 
 // FIXME:
 qboolean Display_MouseMove(void *p, int x, int y) {

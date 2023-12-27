@@ -231,7 +231,7 @@ CG_SetInitialCamera
 */
 void CG_SetInitialCamera(const char *name, qboolean startBlack) {
   // Store this info to get reset after first snapshot inited
-  strcpy(g_initialCamera, name);
+  Q_strncpyz(g_initialCamera, name, sizeof(g_initialCamera));
   g_initialCameraStartBlack = startBlack;
 }
 
@@ -347,31 +347,33 @@ void CG_QuickFireteamMessage_f(void) {
   }
 }
 
-void CG_QuickFireteamAdmin_f(void) {
+void CG_QuickFireteamAdmin_f() {
   trap_UI_Popup(UIMENU_NONE);
 
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == 1) {
+    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_MANAGE)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = 1;
+      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
     }
   } else {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = 1;
+    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
   }
 }
 
-static void CG_QuickFireteams_f(void) {
+static void CG_QuickFireteams_f() {
   if (cg.showFireteamMenu) {
-    if (cgs.ftMenuMode == 0) {
+    if (cgs.ftMenuMode == static_cast<int>(FTMenuMode::FT_VSAY)) {
       CG_EventHandling(CGAME_EVENT_NONE, qfalse);
     } else {
-      cgs.ftMenuMode = 0;
+      cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
+      cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
     }
   } else if (CG_IsOnFireteam(cg.clientNum)) {
     CG_EventHandling(CGAME_EVENT_FIRETEAMMSG, qfalse);
-    cgs.ftMenuMode = 0;
+    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
+    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
   }
 }
 
@@ -922,15 +924,19 @@ void CG_StopTimer(void) {
   cg.stopTime = cg.time;
 }
 
-void CG_portalinfo_f(void) {
-  CG_Printf("^7The portal gun when enabled can be found in weaponbank 9, "
-            "this "
-            "is found by typing /weaponbank 9 in the console or scrolling to "
-            "the weapon before your knife.\n");
-  CG_Printf("^7The ^4first ^7portal is placed by using your normal "
-            "fire key.\n");
-  CG_Printf("^7The ^1second ^7portal is placed using +attack2 which you will "
-            "need to bind by typing '/bind key +attack2' in the console.\n");
+void CG_portalinfo_f() {
+  CG_Printf("^7If enabled, the portal gun can be found in ^3weaponbank 9^7. "
+            "This is found by typing ^3'weaponbank 9' ^7in the console,\n"
+            "or scrolling to the weapon before your knife.\n\n");
+  CG_Printf(
+      "^7The ^dfirst ^7portal is placed by using your normal fire key.\n");
+  CG_Printf(
+      "^7The ^jsecond ^7portal is placed using ^3+attack2 ^7which you will "
+      "need to bind by typing ^3'bind key +attack2' ^7in the console.\n\n");
+  CG_Printf("^7Alternatively, you can set ^3'etj_autoPortalBinds 1' ^7 to "
+            "automatically swap your ^3weapalt ^7bindings to ^3+attack2\n"
+            "^7when switching to portal gun, and restoring the old bindings "
+            "when switching off from portal gun.\n");
 }
 
 void CG_FreecamTurnLeftDown_f(void) { cgs.demoCam.turn |= 0x01; }
@@ -1125,10 +1131,10 @@ extraTraceListOptions extraTraceList[]{
     {1 << ETJump::CHS_53, "CHS 53"},
 };
 
-void CG_ExtraTrace_f(void) {
+void CG_ExtraTrace_f() {
   std::string listPrint{"Bitmask values for ^3etj_extraTrace^7:\n"};
 
-  for (auto traceList : extraTraceList) {
+  for (auto &traceList : extraTraceList) {
     std::string listValues = ETJump::stringFormat(
         "  ^3%d ^7= %s\n", traceList.bitmaskValue, traceList.description);
     listPrint += (listValues);
@@ -1136,6 +1142,25 @@ void CG_ExtraTrace_f(void) {
 
   CG_Printf(listPrint.c_str());
 }
+
+namespace ETJump {
+void listSpawnPoints() {
+  CG_Printf("^7Available spawn points:\n");
+  for (int i = 0; i < cg.spawnCount; i++) {
+    // autospawn
+    if (i == 0) {
+      CG_Printf("^7[^3%2i^7]   ^7%-26s\n", i, cg.spawnPoints[i]);
+      // invalid spawnpoint
+    } else if ((cg.spawnTeams[i] & 0xF) == 0) {
+      continue;
+    } else {
+      CG_Printf("^7[^3%2i^7] %s ^7%-26s\n", i,
+                cg.spawnTeams[i] == TEAM_AXIS ? "^1X" : "^dA",
+                cg.spawnPoints[i]);
+    }
+  }
+}
+} // namespace ETJump
 
 typedef struct {
   const char *cmd;
@@ -1264,6 +1289,7 @@ static const consoleCommand_t anyTimeCommands[] = {
     {"mod_information", CG_ModInformation_f},
     {"incrementVar", CG_IncrementVar_f},
     {"extraTrace", CG_ExtraTrace_f},
+    {"listspawnpt", ETJump::listSpawnPoints},
 };
 
 /*
@@ -1358,8 +1384,6 @@ void CG_InitConsoleCommands() {
   //
   trap_AddCommand("kill");
   trap_AddCommand("say");
-  trap_AddCommand("say_limbo"); // NERVE - SMF
-  trap_AddCommand("tell");
   trap_AddCommand("listbotgoals");
   trap_AddCommand("give");
   trap_AddCommand("god");
@@ -1380,9 +1404,6 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("follownext");
   trap_AddCommand("followprev");
 
-  trap_AddCommand("start_match");
-  trap_AddCommand("reset_match");
-  trap_AddCommand("swap_teams");
   // -NERVE - SMF
   // OSP
   trap_AddCommand("?");
@@ -1397,6 +1418,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("ref");
   trap_AddCommand("say_teamnl");
   trap_AddCommand("say_team");
+  trap_AddCommand("say_buddy");
   trap_AddCommand("scores");
   trap_AddCommand("specinvite");
   trap_AddCommand("specuninvite");
@@ -1405,34 +1427,24 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("speclist");
   trap_AddCommand("statsall");
   trap_AddCommand("statsdump");
-  trap_AddCommand("timein");
-  trap_AddCommand("timeout");
   trap_AddCommand("topshots");
-  trap_AddCommand("unlock");
-  trap_AddCommand("unpause");
   trap_AddCommand("unready");
   trap_AddCommand("weaponstats");
   // OSP
 
   trap_AddCommand("fireteam");
-  trap_AddCommand("buddylist");
   trap_AddCommand("showstats");
 
   trap_AddCommand("ignore");
   trap_AddCommand("unignore");
 
-  trap_AddCommand("addtt");
   trap_AddCommand("selectbuddy");
-  trap_AddCommand("selectNextBuddy"); // xkan 9/26/2002
 
   trap_AddCommand("loadgame");
   trap_AddCommand("savegame");
 
   trap_AddCommand("campaign");
   trap_AddCommand("listcampaigns");
-
-  trap_AddCommand("setweapons");
-  trap_AddCommand("setclass");
 
   trap_AddCommand("save");
   trap_AddCommand("load");
@@ -1466,6 +1478,9 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("times");
   trap_AddCommand("ranks");
   trap_AddCommand("top");
+  trap_AddCommand("rankings");
+  trap_AddCommand("seasons");
+  trap_AddCommand("loadcheckpoints");
 
   // XIS tjl command
   trap_AddCommand("tjl_enableline");       // display a route by it number
@@ -1497,4 +1512,10 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("tracker_print");
   trap_AddCommand("tracker_set");
   trap_AddCommand("clearsaves");
+  trap_AddCommand("listspawnpt");
+  trap_AddCommand("entitylist");
+
+  trap_AddCommand("enc_say");
+  trap_AddCommand("enc_say_team");
+  trap_AddCommand("enc_say_buddy");
 }

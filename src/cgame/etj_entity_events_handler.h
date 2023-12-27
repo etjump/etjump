@@ -51,13 +51,14 @@ public:
   // registers a event handler that will be called if the event was
   // received from the server
   bool subscribe(const std::string &eventName,
-                 std::function<void(centity_t *cent)> callback);
-  bool subscribe(int event, std::function<void(centity_t *cent)> callback);
+                 const std::function<void(centity_t *cent)> &callback);
+  bool subscribe(int event,
+                 const std::function<void(centity_t *cent)> &callback);
 
   // unsubscribes the event handler
   // returns false if it does not exist
-  bool unsubcribe(const std::string &eventName);
-  bool unsubcribe(int event);
+  bool unsubscribe(const std::string &eventName);
+  bool unsubscribe(int event);
 
 private:
   std::map<std::string, std::vector<std::function<void(centity_t *cent)>>>

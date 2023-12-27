@@ -30,7 +30,11 @@ ETJump::UpperRight::UpperRight() {
   FPSLastUpdate = FPSLastTime = fps = 0;
 }
 
-void ETJump::UpperRight::beforeRender() {
+bool ETJump::UpperRight::beforeRender() {
+  if (cg_paused.integer || ETJump::showingScores()) {
+    return false;
+  }
+
   // FPS meter
   const long long currentTime = getCurrentTimestamp();
   if (FPSInit < FPSFrames + 1) {
@@ -54,13 +58,11 @@ void ETJump::UpperRight::beforeRender() {
   }
 
   FPSLastTime = currentTime;
+
+  return true;
 }
 
 void ETJump::UpperRight::render() const {
-  if (cg_paused.integer || ETJump::showingScores()) {
-    return;
-  }
-
   if (etj_HUD_fireteam.integer && CG_IsOnFireteam(cg.clientNum)) {
     rectDef_t rect = {10, 10, 100, 100};
     CG_DrawFireTeamOverlay(&rect);

@@ -306,6 +306,7 @@ vmCvar_t etj_CGazFov;
 vmCvar_t etj_CGazTrueness;
 vmCvar_t etj_CGazOnTop;
 vmCvar_t etj_CGaz2FixedSpeed;
+vmCvar_t etj_CGaz2NoVelocityDir;
 
 vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -414,6 +415,7 @@ vmCvar_t etj_fireteamAlpha;
 
 vmCvar_t etj_logBanner;
 vmCvar_t etj_weaponVolume;
+vmCvar_t etj_footstepVolume;
 vmCvar_t etj_noclipScale;
 
 vmCvar_t etj_drawSlick;
@@ -425,6 +427,8 @@ vmCvar_t etj_altScoreboard;
 vmCvar_t etj_drawSpectatorInfo;
 vmCvar_t etj_spectatorInfoX;
 vmCvar_t etj_spectatorInfoY;
+vmCvar_t etj_spectatorInfoSize;
+vmCvar_t etj_spectatorInfoShadow;
 
 vmCvar_t etj_drawRunTimer;
 vmCvar_t etj_runTimerX;
@@ -432,6 +436,21 @@ vmCvar_t etj_runTimerY;
 vmCvar_t etj_runTimerShadow;
 vmCvar_t etj_runTimerAutoHide;
 vmCvar_t etj_runTimerInactiveColor;
+
+vmCvar_t etj_drawCheckpoints;
+vmCvar_t etj_checkpointsX;
+vmCvar_t etj_checkpointsY;
+vmCvar_t etj_checkpointsSize;
+vmCvar_t etj_checkpointsShadow;
+vmCvar_t etj_checkpointsStyle;
+vmCvar_t etj_checkpointsCount;
+
+vmCvar_t etj_checkpointsPopup;
+vmCvar_t etj_checkpointsPopupX;
+vmCvar_t etj_checkpointsPopupY;
+vmCvar_t etj_checkpointsPopupSize;
+vmCvar_t etj_checkpointsPopupShadow;
+vmCvar_t etj_checkpointsPopupDuration;
 
 vmCvar_t etj_drawMessageTime;
 
@@ -550,6 +569,7 @@ vmCvar_t etj_snapHUDHLColor2;
 vmCvar_t etj_snapHUDFov;
 vmCvar_t etj_snapHUDHLActive;
 vmCvar_t etj_snapHUDTrueness;
+vmCvar_t etj_snapHUDEdgeThickness;
 
 vmCvar_t etj_gunSway;
 vmCvar_t etj_drawScoreboardInactivity;
@@ -605,6 +625,19 @@ vmCvar_t etj_fixedCompassShader;
 // unlagged - optimized prediction
 vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
+
+vmCvar_t etj_menuSensitivity;
+
+vmCvar_t etj_crosshairScaleX;
+vmCvar_t etj_crosshairScaleY;
+vmCvar_t etj_crosshairThickness;
+vmCvar_t etj_crosshairOutline;
+
+vmCvar_t etj_ftSavelimit;
+
+vmCvar_t etj_noPanzerAutoswitch;
+
+vmCvar_t etj_autoPortalBinds;
 
 typedef struct {
   vmCvar_t *vmCvar;
@@ -662,8 +695,8 @@ cvarTable_t cvarTable[] = {
     {&cg_gun_z, "cg_gunZ", "0", CVAR_ARCHIVE},
     {&cg_centertime, "cg_centertime", "5",
      CVAR_ARCHIVE}, // DHM - Nerve :: changed from 3 to 5
-    {&cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
-    {&cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE},
+    {&cg_runpitch, "cg_runpitch", "0", CVAR_ARCHIVE},
+    {&cg_runroll, "cg_runroll", "0", CVAR_ARCHIVE},
     {&cg_bobup, "cg_bobup", "0", CVAR_ARCHIVE},
     {&cg_bobpitch, "cg_bobpitch", "0", CVAR_ARCHIVE},
     {&cg_bobroll, "cg_bobroll", "0", CVAR_ARCHIVE},
@@ -818,6 +851,7 @@ cvarTable_t cvarTable[] = {
     {&etj_CGazTrueness, "etj_CGazTrueness", "2", CVAR_ARCHIVE},
     {&etj_CGazOnTop, "etj_CGazOnTop", "0", CVAR_ARCHIVE | CVAR_LATCH},
     {&etj_CGaz2FixedSpeed, "etj_CGaz2FixedSpeed", "0", CVAR_ARCHIVE},
+    {&etj_CGaz2NoVelocityDir, "etj_CGaz2NoVelocityDir", "0", CVAR_ARCHIVE},
 
     {&cl_yawspeed, "cl_yawspeed", "0", CVAR_ARCHIVE},
     {&cl_freelook, "cl_freelook", "1", CVAR_ARCHIVE},
@@ -913,6 +947,7 @@ cvarTable_t cvarTable[] = {
 
     {&etj_logBanner, "etj_logBanner", "1", CVAR_ARCHIVE},
     {&etj_weaponVolume, "etj_weaponVolume", "1.0", CVAR_ARCHIVE},
+    {&etj_footstepVolume, "etj_footstepVolume", "1.0", CVAR_ARCHIVE},
     {&etj_noclipScale, "etj_noclipScale", "1", CVAR_ARCHIVE},
     {&etj_drawSlick, "etj_drawSlick", "1", CVAR_ARCHIVE},
     {&etj_slickX, "etj_slickX", "304", CVAR_ARCHIVE},
@@ -920,13 +955,32 @@ cvarTable_t cvarTable[] = {
     {&etj_altScoreboard, "etj_altScoreboard", "0", CVAR_ARCHIVE},
     {&etj_drawSpectatorInfo, "etj_drawSpectatorInfo", "0", CVAR_ARCHIVE},
     {&etj_spectatorInfoX, "etj_spectatorInfoX", "320", CVAR_ARCHIVE},
-    {&etj_spectatorInfoY, "etj_spectatorInfoY", "40", CVAR_ARCHIVE},
+    {&etj_spectatorInfoY, "etj_spectatorInfoY", "30", CVAR_ARCHIVE},
+    {&etj_spectatorInfoSize, "etj_spectatorInfoSize", "2.3", CVAR_ARCHIVE},
+    {&etj_spectatorInfoShadow, "etj_spectatorInfoShadow", "1", CVAR_ARCHIVE},
     {&etj_drawRunTimer, "etj_drawRunTimer", "1", CVAR_ARCHIVE},
     {&etj_runTimerX, "etj_runTimerX", "320", CVAR_ARCHIVE},
     {&etj_runTimerY, "etj_runTimerY", "360", CVAR_ARCHIVE},
     {&etj_runTimerShadow, "etj_runTimerShadow", "0", CVAR_ARCHIVE},
     {&etj_runTimerAutoHide, "etj_runTimerAutoHide", "1", CVAR_ARCHIVE},
     {&etj_runTimerInactiveColor, "etj_runTimerInactiveColor", "mdgrey",
+     CVAR_ARCHIVE},
+
+    {&etj_drawCheckpoints, "etj_drawCheckpoints", "1", CVAR_ARCHIVE},
+    {&etj_checkpointsX, "etj_checkpointsX", "320", CVAR_ARCHIVE},
+    {&etj_checkpointsY, "etj_checkpointsY", "380", CVAR_ARCHIVE},
+    {&etj_checkpointsSize, "etj_checkpointsSize", "2", CVAR_ARCHIVE},
+    {&etj_checkpointsShadow, "etj_checkpointsShadow", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsStyle, "etj_checkpointsStyle", "0", CVAR_ARCHIVE},
+    {&etj_checkpointsCount, "etj_checkpointsCount", "3", CVAR_ARCHIVE},
+
+    {&etj_checkpointsPopup, "etj_checkpointsPopup", "1", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupX, "etj_checkpointsPopupX", "320", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupY, "etj_checkpointsPopupY", "200", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupSize, "etj_checkpointsPopupSize", "2", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupShadow, "etj_checkpointsPopupShadow", "1",
+     CVAR_ARCHIVE},
+    {&etj_checkpointsPopupDuration, "etj_checkpointsPopupDuration", "1000",
      CVAR_ARCHIVE},
 
     {&etj_drawMessageTime, "etj_drawMessageTime", "2", CVAR_ARCHIVE},
@@ -1042,6 +1096,8 @@ cvarTable_t cvarTable[] = {
     {&etj_snapHUDFov, "etj_snapHUDFov", "0", CVAR_ARCHIVE},
     {&etj_snapHUDHLActive, "etj_snapHUDHLActive", "0", CVAR_ARCHIVE},
     {&etj_snapHUDTrueness, "etj_snapHUDTrueness", "0", CVAR_ARCHIVE},
+    {&etj_snapHUDEdgeThickness, "etj_snapHUDEdgeThickness", "10", CVAR_ARCHIVE},
+
     {&etj_gunSway, "etj_gunSway", "1", CVAR_ARCHIVE},
     {&etj_drawScoreboardInactivity, "etj_drawScoreboardInactivity", "1",
      CVAR_ARCHIVE},
@@ -1108,6 +1164,21 @@ cvarTable_t cvarTable[] = {
     // unlagged - optimized prediction
     {&etj_optimizePrediction, "etj_optimizePrediction", "1", CVAR_ARCHIVE},
     // END unlagged - optimized prediction
+
+    {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
+
+    {&etj_crosshairScaleX, "etj_crosshairScaleX", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairScaleY, "etj_crosshairScaleY", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairThickness, "etj_crosshairThickness", "1.0", CVAR_ARCHIVE},
+    {&etj_crosshairOutline, "etj_crosshairOutline", "1", CVAR_ARCHIVE},
+
+    // fireteam savelimit - added here to retain value it's set to
+    // upon re-opening the fireteam savelimit menu
+    {&etj_ftSavelimit, "etj_ftSavelimit", "-1", CVAR_TEMP},
+
+    {&etj_noPanzerAutoswitch, "etj_noPanzerAutoswitch", "0", CVAR_ARCHIVE},
+
+    {&etj_autoPortalBinds, "etj_autoPortalBinds", "0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);
@@ -1185,7 +1256,8 @@ void CG_UpdateCvars(void) {
             cv->vmCvar == &etj_noActivateLean ||
             cv->vmCvar == &etj_touchPickupWeapons ||
             cv->vmCvar == &etj_autoLoad || cv->vmCvar == &etj_quickFollow ||
-            cv->vmCvar == &etj_drawSnapHUD) {
+            cv->vmCvar == &etj_drawSnapHUD ||
+            cv->vmCvar == &etj_noPanzerAutoswitch) {
           fSetFlags = qtrue;
         } else if (cv->vmCvar == &cg_rconPassword && *cg_rconPassword.string) {
           trap_SendConsoleCommand(va("rconAuth %s\n", cg_rconPassword.string));
@@ -1237,9 +1309,7 @@ void CG_setClientFlags(void) {
           ((etj_nofatigue.integer > 0) ? CGF_NOFATIGUE : 0) |
           ((pmove_fixed.integer > 0) ? CGF_PMOVEFIXED : 0) |
           ((etj_drawCGaz.integer > 0) ? CGF_CGAZ : 0) |
-          ((cl_yawspeed.integer > 0 ||
-            (int_m_pitch.value < 0.01 && int_m_pitch.value > -0.01) ||
-            cl_freelook.integer == 0)
+          ((cl_yawspeed.integer != 0 || cl_freelook.integer == 0)
                ? CGF_CHEATCVARSON
                : 0) |
           ((etj_loadviewangles.integer > 0) ? CGF_LOADVIEWANGLES : 0) |
@@ -1248,7 +1318,8 @@ void CG_setClientFlags(void) {
           ((etj_noActivateLean.integer > 0) ? CGF_NOACTIVATELEAN : 0) |
           ((etj_autoLoad.integer > 0) ? CGF_AUTO_LOAD : 0) |
           ((etj_quickFollow.integer > 0) ? CGF_QUICK_FOLLOW : 0) |
-          ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0)
+          ((etj_drawSnapHUD.integer > 0) ? CGF_SNAPHUD : 0) |
+          ((etj_noPanzerAutoswitch.integer > 0) ? CGF_NOPANZERSWITCH : 0)
           // Add more in here, as needed
           ),
 
@@ -2327,10 +2398,8 @@ static void CG_RegisterGraphics(void) {
   cgs.media.buddyShader = trap_R_RegisterShaderNoMip("sprites/buddy.tga");
 
   for (i = 0; i < NUM_CROSSHAIRS; i++) {
-    cgs.media.crosshairShader[i] =
-        trap_R_RegisterShader(va("gfx/2d/crosshair%c", 'a' + i));
-    cg.crosshairShaderAlt[i] =
-        trap_R_RegisterShader(va("gfx/2d/crosshair%c_alt", 'a' + i));
+    cgs.media.crosshairShader[i] = ETJump::shaderForCrosshair(i, false);
+    cg.crosshairShaderAlt[i] = ETJump::shaderForCrosshair(i, true);
   }
 
   for (i = 0; i < SK_NUM_SKILLS; i++) {
@@ -3783,8 +3852,11 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
   if (strcmp(s, GAME_NAME)) {
     CG_Error("Client/Server game mismatch: '%s/%s'", GAME_NAME, s);
   }
-  trap_Cvar_Set("cg_etVersion",
-                GAME_VERSION_DATED); // So server can check
+
+  // detect engine version
+  char versionStr[MAX_CVAR_VALUE_STRING];
+  trap_Cvar_VariableStringBuffer("version", versionStr, sizeof(versionStr));
+  trap_Cvar_Set("cg_etVersion", versionStr[0] ? versionStr : "(undetected)");
 
   s = CG_ConfigString(CS_LEVEL_START_TIME);
   cgs.levelStartTime = Q_atoi(s);
@@ -3933,7 +4005,13 @@ void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum,
 
   ETJump::init();
 
-  ETJump::execFile(va("autoexec_%s", cgs.rawmapname));
+  // map-specific autoexec
+  const auto mapConfig = va("autoexec_%s", cgs.rawmapname);
+  if (ETJump::configFileExists(mapConfig)) {
+    ETJump::execFile(mapConfig);
+  } else if (ETJump::configFileExists("autoexec_default")) {
+    ETJump::execFile("autoexec_default");
+  }
 
   Com_Printf("CG_Init... DONE\n");
 }

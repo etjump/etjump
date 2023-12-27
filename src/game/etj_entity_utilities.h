@@ -24,9 +24,14 @@
 
 #pragma once
 
-struct gentity_s;
-typedef gentity_s gentity_t;
+#include "g_local.h"
 
 namespace ETJump {
-bool isPlayer(gentity_t *ent);
-}
+class EntityUtilities {
+  static void drawRailBox(gentity_t *ent, const std::vector<float> &color);
+
+public:
+  static bool isPlayer(gentity_t *ent);
+  static void checkForRailBox(gentity_t *ent);
+};
+} // namespace ETJump

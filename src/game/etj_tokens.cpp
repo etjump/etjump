@@ -359,7 +359,7 @@ void Tokens::createEntity(Token &token, Difficulty difficulty) {
 }
 
 std::array<int, 3> Tokens::getTokenCounts() const {
-  std::array<int, 3> ret;
+  std::array<int, 3> ret{};
   for (auto &val : ret) {
     val = 0;
   }

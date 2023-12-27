@@ -742,14 +742,18 @@ void CG_mvOverlayClientUpdate(int pID, int index) {
   cg.mvOverlay[index].classID = cg_entities[pID].currentState.teamNum;
   w = CG_mvClientLocate(pID);
   cg.mvOverlay[index].w = w;
-  if (w != NULL) {
-    strcpy(cg.mvOverlay[index].info,
-           va("%s%s%2d", strClassHighlights[cg.mvOverlay[index].classID * 2],
-              (w == cg.mvCurrentMainview) ? "*" : "", pID));
+  if (w != nullptr) {
+    const char *mvClientInfoStr =
+        va("%s%s%2d", strClassHighlights[cg.mvOverlay[index].classID * 2],
+           (w == cg.mvCurrentMainview) ? "*" : "", pID);
+    Q_strncpyz(cg.mvOverlay[index].info, mvClientInfoStr,
+               sizeof(cg.mvOverlay[index].info));
   } else {
-    strcpy(cg.mvOverlay[index].info,
-           va("%s%2d",
-              strClassHighlights[(cg.mvOverlay[index].classID * 2) + 1], pID));
+    const char *mvClientInfoStr =
+        va("%s%2d", strClassHighlights[(cg.mvOverlay[index].classID * 2) + 1],
+           pID);
+    Q_strncpyz(cg.mvOverlay[index].info, mvClientInfoStr,
+               sizeof(cg.mvOverlay[index].info));
   }
 
   cg.mvOverlay[index].width =

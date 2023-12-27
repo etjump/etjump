@@ -61,9 +61,22 @@ void StrafeQuality::resetStrafeQuality() {
   _totalFrames = _goodFrames = _oldSpeed = 0;
 }
 
-void StrafeQuality::beforeRender() {
-  // get player state
+bool StrafeQuality::beforeRender() {
   const playerState_t &ps = cg.predictedPlayerState;
+
+  // update team before checking if we should draw or not,
+  // since we don't draw for spectators
+  if (_team != ps.persistant[PERS_TEAM]) {
+    _team = ps.persistant[PERS_TEAM];
+    // reset strafe quality upon team change
+    // note: not handled by consoleCommandsHandler because _team
+    // is needed in render() either ways
+    resetStrafeQuality();
+  }
+
+  if (canSkipDraw()) {
+    return false;
+  }
 
   // get usercmd
   // cmdScale is only checked here to be 0 or !0
@@ -74,15 +87,6 @@ void StrafeQuality::beforeRender() {
   // get correct pmove
   pm = PmoveUtils::getPmove(cmd);
 
-  // update team
-  if (_team != ps.persistant[PERS_TEAM]) {
-    _team = ps.persistant[PERS_TEAM];
-    // reset strafe quality upon team change
-    // note: not handled by consoleCommandsHandler because _team
-    // is needed in render() either ways
-    resetStrafeQuality();
-  }
-
   // check if current frame should count towards strafe quality
   // we check for framerate dependency here by comparing current time
   // to last update time, using commandTime for clients for 100%
@@ -92,8 +96,9 @@ void StrafeQuality::beforeRender() {
                              ? cg.time
                              : pm->ps->commandTime;
 
+  // just skip update, but return true so that we actually still draw
   if (canSkipUpdate(cmd, frameTime)) {
-    return;
+    return true;
   }
 
   // count this frame towards strafe quality
@@ -140,14 +145,11 @@ void StrafeQuality::beforeRender() {
 
   // update vars for next frame
   _oldSpeed = speed;
+
+  return true;
 }
 
 void StrafeQuality::render() const {
-  // check whether to skip render
-  if (canSkipDraw()) {
-    return;
-  }
-
   // get coordinates and size
   float x = _x + etj_strafeQualityX.value;
   float y = _y + etj_strafeQualityY.value;

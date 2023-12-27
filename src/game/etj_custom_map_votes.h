@@ -52,9 +52,9 @@ public:
   bool Load();
   TypeInfo GetTypeInfo(const std::string &type) const;
   const std::string RandomMap(const std::string &type);
-  bool isValidMap(const std::string &mapName);
+  static bool isValidMap(const std::string &mapName);
   std::string ListTypes() const;
-  const std::vector<std::string> *ListInfo(const std::string &name);
+  std::string ListInfo(const std::string &name);
   void GenerateVotesFile();
 
 private:

@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include "etj_printer.h"
 
 #define MISSILE_PRESTEP_TIME 50
 
@@ -341,19 +342,18 @@ void G_ExplodeMissile(gentity_t *ent) {
                MASK_SHOT);
 
     // bani - #512
+    const auto splashDamage = static_cast<float>(ent->splashDamage);
+    const auto splashRadius = static_cast<float>(ent->splashRadius);
     if ((ent->s.weapon == WP_DYNAMITE && (ent->etpro_misc_1 & 1)) ||
         ent->s.weapon == WP_SATCHEL) {
-      etpro_RadiusDamage(origin, ent, ent->parent, ent->splashDamage,
-                         ent->splashRadius, ent, ent->splashMethodOfDeath,
-                         qtrue);
+      etpro_RadiusDamage(origin, ent, ent->parent, splashDamage, splashRadius,
+                         ent, ent->splashMethodOfDeath, qtrue);
       G_TempTraceIgnorePlayersAndBodies();
-      etpro_RadiusDamage(origin, ent, ent->parent, ent->splashDamage,
-                         ent->splashRadius, ent, ent->splashMethodOfDeath,
-                         qfalse);
+      etpro_RadiusDamage(origin, ent, ent->parent, splashDamage, splashRadius,
+                         ent, ent->splashMethodOfDeath, qfalse);
       G_ResetTempTraceIgnoreEnts();
     } else {
-      G_RadiusDamage(origin, ent, ent->parent, ent->splashDamage,
-                     ent->splashRadius, ent,
+      G_RadiusDamage(origin, ent, ent->parent, splashDamage, splashRadius, ent,
                      ent->splashMethodOfDeath); //----(SA)
     }
   }
@@ -385,17 +385,18 @@ void G_ExplodeMissile(gentity_t *ent) {
   trap_LinkEntity(ent);
 
   if (etype == ET_MISSILE || etype == ET_BOMB) {
-
     if (ent->s.weapon == WP_LANDMINE) {
       mapEntityData_t *mEnt;
 
-      if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) !=
-          NULL) {
+      if ((mEnt = G_FindMapEntityData(&mapEntityData[0],
+                                      static_cast<int>(ent - g_entities))) !=
+          nullptr) {
         G_FreeMapEntityData(&mapEntityData[0], mEnt);
       }
 
-      if ((mEnt = G_FindMapEntityData(&mapEntityData[1], ent - g_entities)) !=
-          NULL) {
+      if ((mEnt = G_FindMapEntityData(&mapEntityData[1],
+                                      static_cast<int>(ent - g_entities))) !=
+          nullptr) {
         G_FreeMapEntityData(&mapEntityData[1], mEnt);
       }
       // bani - #238
@@ -406,8 +407,7 @@ void G_ExplodeMissile(gentity_t *ent) {
       int i, num, touch[MAX_GENTITIES];
       gentity_t *hit;
 
-      ent->free = NULL; // Gordon: no defused tidy up if
-                        // we exploded
+      ent->free = nullptr; // Gordon: no defused tidy up if we exploded
 
       // NERVE - SMF - made this the actual bounding box
       // of dynamite instead of range
@@ -430,8 +430,7 @@ void G_ExplodeMissile(gentity_t *ent) {
         }
 
         if (hit->target_ent) {
-          // Arnout - only if it targets
-          // a func_explosive
+          // Arnout - only if it targets a func_explosive
           if (hit->target_ent->s.eType != ET_EXPLOSIVE) {
             continue;
           }
@@ -445,7 +444,7 @@ void G_ExplodeMissile(gentity_t *ent) {
              (ent->s.teamNum == TEAM_ALLIES)) ||
             ((hit->spawnflags & ALLIED_OBJECTIVE) &&
              (ent->s.teamNum == TEAM_AXIS))) {
-          if (ent->parent->client &&
+          if (ent->parent->client && hit->target_ent &&
               G_GetWeaponClassForMOD(MOD_DYNAMITE) >=
                   hit->target_ent->constructibleStats.weaponclass) {
             G_AddKillSkillPointsForDestruction(
@@ -466,18 +465,17 @@ void G_ExplodeMissile(gentity_t *ent) {
         ent->s.weapon == WP_GRENADE_PINEAPPLE ||
         ent->s.weapon == WP_MAPMORTAR || ent->s.weapon == WP_ARTY ||
         ent->s.weapon == WP_SMOKE_MARKER || ent->s.weapon == WP_LANDMINE ||
-        ent->s.weapon == WP_SATCHEL ||
-        ent->s.weapon == WP_TRIPMINE /*|| ent->s.weapon == WP_SMOKE_BOMB*/
-    ) {
-
+        ent->s.weapon == WP_SATCHEL || ent->s.weapon == WP_TRIPMINE) {
       gentity_t *tent = G_TempEntity(ent->r.currentOrigin, EV_SHAKE);
       tent->s.onFireStart = ent->splashDamage * 4;
       tent->r.svFlags |= SVF_BROADCAST;
 
-      // ETJump: map entities don't have attacker id so
-      // we send -1
-      tent->s.clientNum = (ent->parent) ? ent->parent->client->ps.clientNum
-                                        : -1; // ETJump: send attacker's id
+      // map entities have no clientNum, so send -1 instead
+      if (!ent->parent || !ent->parent->client) {
+        tent->s.clientNum = -1;
+      } else {
+        tent->s.clientNum = ent->parent->client->ps.clientNum;
+      }
     }
   }
 }
@@ -1833,7 +1831,7 @@ fire_grenade
 
 =================
 */
-gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
+gentity_t *fire_grenade(gentity_t *self, const vec3_t start, const vec3_t dir,
                         int grenadeWPID) {
   gentity_t *bolt;
   qboolean noExplode = qfalse;
@@ -1888,7 +1886,10 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
   bolt->s.weapon = grenadeWPID;
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
-  bolt->s.teamNum = self->client->sess.sessionTeam;
+  // no self->client for shooter_grenade's
+  if (self->client) {
+    bolt->s.teamNum = self->client->sess.sessionTeam;
+  }
 
   // JPW NERVE -- commented out bolt->damage and bolt->splashdamage,
   // override with G_GetWeaponDamage() so it works with different
@@ -1918,21 +1919,13 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
       bolt->nextthink = level.time + 4000;
       break;
     case WP_SMOKE_BOMB:
-      // xkan 11/25/2002, fixed typo, classname used to
-      // be "somke_bomb"
+      // xkan 11/25/2002, fixed typo, classname used to be "somke_bomb"
       bolt->classname = "smoke_bomb";
       bolt->s.eFlags = EF_BOUNCE_HALF | EF_BOUNCE;
-      // rain - this is supposed to be MOD_SMOKEBOMB,
-      // not SMOKEGRENADE
+      // rain - this is supposed to be MOD_SMOKEBOMB, not SMOKEGRENADE
       bolt->methodOfDeath = MOD_SMOKEBOMB;
       break;
     case WP_GRENADE_LAUNCHER:
-      bolt->classname = "grenade";
-      bolt->splashRadius = 300;
-      bolt->methodOfDeath = MOD_GRENADE_LAUNCHER;
-      bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
-      bolt->s.eFlags = EF_BOUNCE_HALF | EF_BOUNCE;
-      break;
     case WP_GRENADE_PINEAPPLE:
       bolt->classname = "grenade";
       bolt->splashRadius = 300;
@@ -1958,7 +1951,8 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
       break;
     case WP_LANDMINE:
       bolt->accuracy = 0;
-      bolt->s.teamNum = self->client->sess.sessionTeam + 4;
+      bolt->s.teamNum =
+          self->client ? self->client->sess.sessionTeam + 4 : self->s.teamNum;
       bolt->classname = "landmine";
       bolt->damage = 0;
       bolt->splashRadius = 225; // was: 400
@@ -1994,19 +1988,16 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
       VectorCopy(bolt->r.maxs, bolt->r.absmax);
       break;
     case WP_DYNAMITE:
-
-      bolt->accuracy = 0; // JPW NERVE sets to score below if
-                          // dynamite is in trigger_objective_info &
-                          // it's an objective
-      trap_SendServerCommand(self - g_entities,
-                             "cp \"Dynamite is set, but NOT armed!\"");
-      // differentiate non-armed dynamite with
-      // non-pulsing dlight
-      bolt->s.teamNum = self->client->sess.sessionTeam + 4;
+      // JPW NERVE sets to score below if dynamite is in
+      // trigger_objective_info & it's an objective
+      bolt->accuracy = 0;
+      Printer::SendCenterMessage(ClientNum(self),
+                                 "Dynamite is set, but NOT armed!");
+      // differentiate non-armed dynamite with non-pulsing dlight
+      bolt->s.teamNum =
+          self->client ? self->client->sess.sessionTeam + 4 : self->s.teamNum;
       bolt->classname = "dynamite";
       bolt->damage = 0;
-      //			bolt->splashDamage
-      //= 300;
       bolt->splashRadius = 400;
       bolt->methodOfDeath = MOD_DYNAMITE;
       bolt->splashMethodOfDeath = MOD_DYNAMITE;
@@ -2018,22 +2009,15 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
 
       bolt->r.contents = CONTENTS_CORPSE; // (player can walk through)
 
-      // nope - this causes the dynamite to impact on
-      // the players bb when he throws it. will try
-      // setting it when it settles
-      //			bolt->r.ownerNum
-      //=
-      // ENTITYNUM_WORLD;	// (SA) make the world
-      // the owner of the dynamite, so the player can
-      // shoot it without modifying the bullet code to
-      // ignore players id for hits
-
       // small target cube
       VectorSet(bolt->r.mins, -12, -12, 0);
       VectorCopy(bolt->r.mins, bolt->r.absmin);
       VectorSet(bolt->r.maxs, 12, 12, 20);
       VectorCopy(bolt->r.maxs, bolt->r.absmax);
       break;
+    default:
+      // shouldn't happen...
+      G_Error("fire_grenade: invalid grenadeWPID %i\n", grenadeWPID);
   }
 
   // JPW NERVE -- blast radius proportional to damage
@@ -2047,11 +2031,6 @@ gentity_t *fire_grenade(gentity_t *self, vec3_t start, vec3_t dir,
       level.time - MISSILE_PRESTEP_TIME; // move a bit on the very first frame
   VectorCopy(start, bolt->s.pos.trBase);
   VectorCopy(dir, bolt->s.pos.trDelta);
-
-  // ydnar: add velocity of player (:sigh: guess people don't like it)
-  //%	VectorAdd( bolt->s.pos.trDelta, self->s.pos.trDelta,
-  // bolt->s.pos.trDelta
-  //);
 
   // ydnar: add velocity of ground entity
   if (self->s.groundEntityNum != ENTITYNUM_NONE &&

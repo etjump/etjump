@@ -1549,7 +1549,8 @@ void Use_DamageInflictor(gentity_t *ent, gentity_t *other,
   gentity_t *daent;
 
   daent = NULL;
-  while ((daent = G_FindByTargetname(daent, daent->target)) != NULL) {
+  while ((daent = G_FindByTargetname(daent, daent ? daent->target : "")) !=
+         NULL) {
     if (daent == ent) {
       G_Printf("Use_DamageInflictor damaging self.\n");
     } else {
@@ -2062,13 +2063,12 @@ void flippy_table_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   gentity_t *slave;
 
   // it would be odd to flip a table if your standing on it
-  if (other && other->s.groundEntityNum == ent->s.number) {
-    // G_Printf ("can't push table over while standing on
-    // it\n");
+  if (!other || other->s.groundEntityNum == ent->s.number) {
+    // G_Printf ("can't push table over while standing on it\n");
     return;
   }
 
-  ent->use = NULL;
+  ent->use = nullptr;
 
   is_infront = infront(ent, other);
 
@@ -2522,7 +2522,7 @@ for wood:
 for concrete:
 for stone:
 */
-//#define EXPLOPARTPIECES	8
+// #define EXPLOPARTPIECES	8
 
 /*void props_ExploPartUse (gentity_t *ent, gentity_t *other, gentity_t
 *activator)

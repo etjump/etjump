@@ -124,8 +124,6 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
 
   cg.snap = snap;
 
-  //	trap_S_ClearSounds( qtrue );
-
   BG_PlayerStateToEntityState(
       &snap->ps, &cg_entities[snap->ps.clientNum].currentState, qfalse);
 
@@ -162,32 +160,25 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
   } else if (cg.demoPlayback) {
     ccInitial = qtrue;
   } else {
-    static char prevmap[64] = {0};
-    char curmap[64];
+    static char prevmap[MAX_QPATH] = {0};
+    char curmap[MAX_QPATH];
 
-    trap_Cvar_VariableStringBuffer("mapname", curmap, 64);
+    trap_Cvar_VariableStringBuffer("mapname", curmap, MAX_QPATH);
 
     if (Q_stricmp(curmap, prevmap)) {
-      strcpy(prevmap, curmap);
+      Q_strncpyz(prevmap, curmap, sizeof(prevmap));
       if (cgs.campaignInfoLoaded) {
         if (!cg.showGameView) {
           CG_LimboMenu_f();
         }
-        /*			} else {
-                        ccInitial = qtrue;
-
-                        // Start the Initial
-           Camera if specified
-                        CG_StartInitialCamera();
-         */
       }
     }
   }
 
   // OSP - remove motd window
-  if (cg.motdWindow != NULL) {
+  if (cg.motdWindow != nullptr) {
     CG_windowFree(cg.motdWindow);
-    cg.motdWindow = NULL;
+    cg.motdWindow = nullptr;
   }
 
   // Activate alternate input handler during demo playback

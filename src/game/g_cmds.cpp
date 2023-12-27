@@ -903,7 +903,7 @@ const float MaxAxisOffset = 4096.f;
 // offsets player's position by given vector if noclip is available
 void setPlayerOffset(gentity_t *ent) {
   static char buffer[64];
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
 
   if (trap_Argc() != 4) {
     Printer::SendConsoleMessage(clientNum,
@@ -918,7 +918,7 @@ void setPlayerOffset(gentity_t *ent) {
   if (!result.success) {
     std::string str = ETJump::stringFormat(result.message, "setoffset");
     capitalizeWithColor(str);
-    Printer::SendConsoleMessage(clientNum, str);
+    Printer::SendConsoleMessage(clientNum, std::move(str));
     return;
   }
 
@@ -1066,7 +1066,7 @@ void setTracker(gentity_t *ent) {
       setTrackerMsg = stringFormat("^7Set tracker value on all "
                                    "indices to ^2%i^7.\n",
                                    value);
-      Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+      Printer::SendConsoleMessage(clientNum, std::move(setTrackerMsg));
     }
   }
 
@@ -1143,21 +1143,10 @@ void Cmd_Noclip_f(gentity_t *ent) {
     ent->client->noclip = !ent->client->noclip ? qtrue : qfalse;
   }
 
-  // ETJump: we don't need noclip messages
-  // const char *message;
-
   if (ent->client->noclip) {
-    // message = "noclip ON\n";
+    ent->client->noclipThisLife = true;
     ETJump::decreaseNoclipCount(ent, "noclip");
   }
-  /*
-  else
-  {
-          message = "noclip OFF\n";
-  }
-
-  trap_SendServerCommand(ent - g_entities, va("print \"%s\"", message));
-  */
 }
 
 /*
@@ -1689,8 +1678,9 @@ void Cmd_Team_f(gentity_t *ent) {
     G_SetClientWeapons(ent, w, w2, qtrue);
   }
 
-  if (ent->client->sess.runSpawnflags == 0 ||
-      ent->client->sess.runSpawnflags & TIMERUN_RESET_ON_TEAM_CHANGE) {
+  if (!ent->client->sess.runSpawnflags ||
+      ent->client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
     InterruptRun(ent);
   }
 }
@@ -2049,27 +2039,24 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   char name[64];
   // don't let text be too long for malicious reasons
   char text[MAX_CHAT_TEXT];
-  const char *escapedName = NULL;
+  const char *escapedName = nullptr;
   qboolean localize = qfalse;
   char *loc;
-  const char *printText = NULL;
+  const char *printText = nullptr;
+  const int clientNum = ClientNum(ent);
 
   switch (mode) {
     default:
     case SAY_ALL:
       G_LogPrintf("say: %s: %s\n", ent->client->pers.netname, chatText);
-      Com_sprintf(name, sizeof(name), "%s%c%c: ", ent->client->pers.netname,
-                  Q_COLOR_ESCAPE, COLOR_WHITE);
+      Com_sprintf(name, sizeof(name), "%s^7: ", ent->client->pers.netname);
       color = COLOR_GREEN;
       break;
     case SAY_BUDDY:
       localize = qtrue;
-      // G_LogPrintf("saybuddy: %s: %s\n",
-      // ent->client->pers.netname, chatText);
       loc = BG_GetLocationString(ent->r.currentOrigin);
       Com_sprintf(name, sizeof(name),
-                  "[lof](%s%c%c) (%s): ", ent->client->pers.netname,
-                  Q_COLOR_ESCAPE, COLOR_WHITE, loc);
+                  "[lof](%s^7) (%s): ", ent->client->pers.netname, loc);
       color = COLOR_YELLOW;
       break;
     case SAY_TEAM:
@@ -2077,8 +2064,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       G_LogPrintf("sayteam: %s: %s\n", ent->client->pers.netname, chatText);
       loc = BG_GetLocationString(ent->r.currentOrigin);
       Com_sprintf(name, sizeof(name),
-                  "[lof](%s%c%c) (%s): ", ent->client->pers.netname,
-                  Q_COLOR_ESCAPE, COLOR_WHITE, loc);
+                  "[lof](%s^7) (%s): ", ent->client->pers.netname, loc);
       color = COLOR_CYAN;
       break;
     case SAY_TEAMNL:
@@ -2091,9 +2077,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   len = sizeof(text);
   Q_strncpyz(text, chatText, len);
 
-  // if chat message is too long, e.g. being send from console
+  // if chat message is too long, e.g. being sent from console
   // cut it and put ellipsis at the end
-  if (static_cast<int>(strnlen(chatText, 256)) > len) {
+  if (Q_strnlen(chatText, MAX_SAY_TEXT) > len) {
     text[len - 2] = '.';
     text[len - 3] = '.';
     text[len - 4] = '.';
@@ -2107,24 +2093,17 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   }
 
   if (target) {
-    if (!COM_BitCheck(target->client->sess.ignoreClients, ent - g_entities)) {
+    if (!COM_BitCheck(target->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, target, mode, color, escapedName, printText, localize,
               encoded);
     }
     return;
   }
 
-  // Zero: do we really need double text on console?
-  //// echo the text to the console
-  // if (g_dedicated.integer)
-  //{
-  //	G_Printf("%s%s\n", name, text);
-  // }
-
-  // send it to all the apropriate clients
+  // send it to all the appropriate clients
   for (j = 0; j < level.numConnectedClients; j++) {
     other = &g_entities[level.sortedClients[j]];
-    if (!COM_BitCheck(other->client->sess.ignoreClients, ent - g_entities)) {
+    if (!COM_BitCheck(other->client->sess.ignoreClients, clientNum)) {
       G_SayTo(ent, other, mode, color, escapedName, printText, localize,
               encoded);
     }
@@ -2193,15 +2172,15 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay,
 
   if (mode == SAY_TEAM || mode == SAY_BUDDY) {
     CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd,
-                               voiceonly, ent - g_entities, color, vsay->id,
+                               voiceonly, ClientNum(ent), color, vsay->id,
                                static_cast<int>(ent->s.pos.trBase[0]),
                                static_cast<int>(ent->s.pos.trBase[1]),
                                static_cast<int>(ent->s.pos.trBase[2]),
                                vsay->variant, vsay->random, vsay->custom));
   } else {
     CPx(other - g_entities,
-        va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ent - g_entities,
-           color, vsay->id, vsay->variant, vsay->random, vsay->custom));
+        va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ClientNum(ent), color,
+           vsay->id, vsay->variant, vsay->random, vsay->custom));
   }
 }
 
@@ -2539,23 +2518,22 @@ Checks if a vote can be called
 bool checkVoteConditions(gentity_t *ent, int clientNum) {
   std::string voteError;
 
-  if (voteFlags.integer ==
-      VOTING_DISABLED) // Setting g_enableVote 0 sets this flag as well
-  {
+  // Setting g_enableVote 0 sets this flag as well
+  if (voteFlags.integer == VOTING_DISABLED) {
     Printer::SendPopupMessage(clientNum,
                               "Voting is not enabled on this server.\n");
     return false;
   }
-  if (ent && ent->client->sess.muted && g_mute.integer & 2) {
-    Printer::SendPopupMessage(clientNum, "^3callvote: ^7not allowed to "
-                                         "call a vote while muted.\n");
+  if (ent->client->sess.muted && g_mute.integer & 2) {
+    Printer::SendPopupMessage(
+        clientNum, "^3callvote: ^7not allowed to call a vote while muted.\n");
     return false;
   }
-  if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-      !(g_spectatorVote.integer >= 2)) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3callvote: ^7you are not allowed to call "
-                              "a vote as a spectator.\n");
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
+      g_spectatorVote.integer < 2) {
+    Printer::SendPopupMessage(
+        clientNum,
+        "^3callvote: ^7you are not allowed to call a vote as a spectator.\n");
     return false;
   }
   if (level.voteInfo.voteTime) {
@@ -2569,9 +2547,9 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
   }
   if (vote_limit.integer > 0 &&
       ent->client->pers.voteCount >= vote_limit.integer) {
-    voteError = ETJump::stringFormat("You have already called the "
-                                     "maximum number of votes (%d).\n",
-                                     vote_limit.integer);
+    voteError = ETJump::stringFormat(
+        "You have already called the maximum number of votes (%d).\n",
+        vote_limit.integer);
     Printer::SendPopupMessage(clientNum, voteError);
     return false;
   }
@@ -2693,7 +2671,7 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent) {
   char msg[64];
   auto *client = ent->client;
-  auto clientNum = ClientNum(ent);
+  const int clientNum = ClientNum(ent);
 
   static const auto votedYes = [](const std::string &msg) {
     for (const auto &ym : yesMsgs) {
@@ -2724,7 +2702,7 @@ void Cmd_Vote_f(gentity_t *ent) {
       voteMsgs += std::string(nm) + " ";
     }
     voteMsgs += "\n";
-    Printer::SendConsoleMessage(clientNum, voteMsgs);
+    Printer::SendConsoleMessage(clientNum, std::move(voteMsgs));
   };
 
   if (ent->client->pers.applicationEndTime > level.time) {
@@ -3662,7 +3640,7 @@ tryagain:
 
 namespace ETJump {
 bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
-  if (!ETJump::isPlayer(traceEnt)) {
+  if (!EntityUtilities::isPlayer(traceEnt)) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {
@@ -4120,15 +4098,25 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
     return;
   }
 
-  //	if( ent->client->sess.sessionTeam != TEAM_SPECTATOR &&
-  //!(ent->client->ps.pm_flags & PMF_LIMBO) ) { 		return;
-  //	}
-
   if (trap_Argc() != 2) {
     return;
   }
   trap_Argv(1, buffer, 16);
   val = Q_atoi(buffer) + 1;
+
+  // if limbo cams aren't present, use spectator spawnpoint by default,
+  // so we don't get limbo cams potentially in void
+  if (!level.numLimboCams) {
+    VectorCopy(level.intermission_origin, ent->s.origin2);
+    ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
+    trap_SendServerCommand(
+        ClientNum(ent),
+        va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+           level.intermission_origin[0], level.intermission_origin[1],
+           level.intermission_origin[2], level.intermission_angle[0],
+           level.intermission_angle[1], level.intermission_angle[2], -1));
+    return;
+  }
 
   for (i = 0; i < level.numLimboCams; i++) {
     if (!level.limboCams[i].spawn && level.limboCams[i].info == val) {
@@ -4136,17 +4124,12 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
         VectorCopy(level.limboCams[i].origin, ent->s.origin2);
         ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
         trap_SendServerCommand(
-            ent - g_entities,
-            va("portalcampos %i %i %i %i %i %i "
-               "%i %i",
-               val - 1, (int)level.limboCams[i].origin[0],
-               (int)level.limboCams[i].origin[1],
-               (int)level.limboCams[i].origin[2],
-               (int)level.limboCams[i].angles[0],
-               (int)level.limboCams[i].angles[1],
-               (int)level.limboCams[i].angles[2],
+            ClientNum(ent),
+            va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+               level.limboCams[i].origin[0], level.limboCams[i].origin[1],
+               level.limboCams[i].origin[2], level.limboCams[i].angles[0],
+               level.limboCams[i].angles[1], level.limboCams[i].angles[2],
                level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
-
         break;
       } else {
         dist = VectorDistanceSquared(
@@ -4166,11 +4149,11 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
     VectorCopy(level.limboCams[i].origin, ent->s.origin2);
     ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
     trap_SendServerCommand(
-        ent - g_entities,
-        va("portalcampos %i %i %i %i %i %i %i %i", val - 1,
-           (int)level.limboCams[i].origin[0], (int)level.limboCams[i].origin[1],
-           (int)level.limboCams[i].origin[2], (int)level.limboCams[i].angles[0],
-           (int)level.limboCams[i].angles[1], (int)level.limboCams[i].angles[2],
+        ClientNum(ent),
+        va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+           level.limboCams[i].origin[0], level.limboCams[i].origin[1],
+           level.limboCams[i].origin[2], level.limboCams[i].angles[0],
+           level.limboCams[i].angles[1], level.limboCams[i].angles[2],
            level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
   }
 }
@@ -4569,13 +4552,13 @@ void Cmd_Class_f(gentity_t *ent) {
   if (args->size() < 2) {
     std::string usageText{"^3Usage:\n"};
 
-    for (auto loadout : ETJump::availableLoadouts) {
+    for (auto &loadout : ETJump::availableLoadouts) {
       usageText += ETJump::stringFormat(
           "  ^7%-30s ^9/class %c %i\n", loadout.description,
           ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
     }
 
-    Printer::SendConsoleMessage(clientNum, usageText);
+    Printer::SendConsoleMessage(clientNum, std::move(usageText));
     return;
   }
 
@@ -4608,7 +4591,7 @@ void Cmd_Class_f(gentity_t *ent) {
       static_cast<weapon_t>(ent->client->sess.latchPlayerWeapon2);
 
   // display center print message
-  for (auto loadout : ETJump::availableLoadouts) {
+  for (auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
       Printer::SendCenterMessage(
           clientNum, ETJump::stringFormat("You will spawn as an %s %s",

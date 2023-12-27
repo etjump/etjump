@@ -567,6 +567,11 @@ void CG_MouseEvent(int x, int y) {
     case CGAME_EVENT_CAMPAIGNBREIFING:
     case CGAME_EVENT_FIRETEAMMSG:
       if (!cgs.demoCam.renderingFreeCam) {
+        float mdx, mdy;
+        ETJump::scaleMenuSensitivity(x, y, &mdx, &mdy);
+        x = static_cast<int>(mdx);
+        y = static_cast<int>(mdy);
+
         cgs.cursorX += x;
         if (cgs.cursorX < 0) {
           cgs.cursorX = 0;
@@ -733,8 +738,8 @@ void CG_EventHandling(int type, qboolean fForced) {
     CG_LimboPanel_Setup();
     trap_Key_SetCatcher(KEYCATCH_CGAME);
   } else if (type == CGAME_EVENT_FIRETEAMMSG) {
-    cgs.ftMenuPos = -1;
-    cgs.ftMenuMode = 0;
+    cgs.ftMenuPos = static_cast<int>(FTMenuPos::FT_MENUPOS_NONE);
+    cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_VSAY);
     cg.showFireteamMenu = qtrue;
     trap_Cvar_Set("cl_bypassmouseinput", "1");
     trap_Key_SetCatcher(KEYCATCH_CGAME);

@@ -904,8 +904,7 @@ void TeamplayInfoMessage(team_t team) {
     player = g_entities + level.sortedClients[i];
     if (player->inuse && player->client->sess.sessionTeam == team) {
 
-      // DHM - Nerve :: If in LIMBO, don't show
-      // followee's health
+      // DHM - Nerve :: If in LIMBO, don't show follower's health
       if (player->client->ps.pm_flags & PMF_LIMBO) {
         h = -1;
       } else {
@@ -923,11 +922,12 @@ void TeamplayInfoMessage(team_t team) {
           player->client->pers.teamState.location[0],
           player->client->pers.teamState.location[1], h, player->s.powerups);
 
-      j = strlen(entry);
+      j = static_cast<int>(strlen(entry));
       if (stringlength + j > static_cast<int>(sizeof(string))) {
         break;
       }
-      strcpy(string + stringlength, entry);
+      Q_strncpyz(string + stringlength, entry,
+                 static_cast<int>(sizeof(string) - stringlength));
       stringlength += j;
       cnt++;
     }

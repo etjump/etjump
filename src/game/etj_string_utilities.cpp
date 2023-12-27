@@ -145,8 +145,8 @@ std::string ETJump::trim(const std::string &input) {
 }
 
 // word-wrapper
-std::vector<std::string> ETJump::splitString(std::string &input, char separator,
-                                             size_t maxLength) {
+std::vector<std::string> ETJump::wrapWords(std::string &input, char separator,
+                                           size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
 
@@ -157,6 +157,7 @@ std::vector<std::string> ETJump::splitString(std::string &input, char separator,
 
   while (true) {
     auto pos = input.rfind(separator, lastPos + maxLength);
+
     /* separator not found */
     if (pos == std::string::npos) {
       /* split by length; */
@@ -167,6 +168,13 @@ std::vector<std::string> ETJump::splitString(std::string &input, char separator,
       }
       break;
     }
+
+    // if we landed on a separator char, back off one char and re-search,
+    // otherwise we'll exceed maxLength as pos is incremented
+    if (input[pos] == separator) {
+      pos = input.rfind(separator, lastPos + maxLength - 1);
+    }
+
     pos += 1;
     /* no new separators were found */
     if (pos == lastPos) {
@@ -259,4 +267,47 @@ void ETJump::StringUtil::replaceAll(std::string &input, const std::string &from,
     input.replace(startPost, from.length(), to);
     startPost += to.length();
   }
+}
+
+void ETJump::StringUtil::stringSubstitute(std::string &input, char character,
+                                          const std::string &replacement,
+                                          size_t numChars) {
+  size_t startPos = 0;
+
+  while ((startPos = input.find(character, startPos)) != std::string::npos) {
+    size_t charsToReplace = std::min(numChars, input.length() - startPos - 1);
+    input.replace(startPos, charsToReplace + 1, replacement);
+    startPos += replacement.length();
+  }
+}
+
+bool ETJump::StringUtil::startsWith(const std::string &str,
+                                    const std::string &prefix) {
+  if (prefix.length() > str.length())
+    return false;
+
+  return str.compare(0, prefix.length(), prefix) == 0;
+}
+
+bool ETJump::StringUtil::endsWith(const std::string &str,
+                                  const std::string &suffix) {
+  if (suffix.length() > str.length())
+    return false;
+
+  return str.compare(str.length() - suffix.length(), suffix.length(), suffix) ==
+         0;
+}
+
+bool ETJump::StringUtil::contains(const std::string &str,
+                                  const std::string &text) {
+  return str.find(text) != std::string::npos;
+}
+
+bool ETJump::StringUtil::matches(const std::string &str,
+                                 const std::string &text) {
+  return str == text;
+}
+
+unsigned ETJump::StringUtil::countExtraPadding(const std::string &input) {
+  return input.length() - sanitize(input).length();
 }

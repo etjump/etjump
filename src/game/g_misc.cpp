@@ -154,12 +154,13 @@ void TeleportPlayerExt(gentity_t *player, vec3_t origin, vec3_t angles) {
 }
 
 // ETJump: teleports player in specific origin, converts angles(yaw) and
-// velocity
-//         to be relative to the new destination angles
+//         velocity to be relative to the new destination angles
 //         created for clank's map
+// FIXME: refactor this some day to share code with TeleportPlayerKeepAngles
 void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
-                                    vec3_t origin, vec3_t angles) {
-  vec3_t newOrigin, newViewAngles, newVelocity = {0, 0, 0}, offset = {0, 0, 0};
+                                    const vec3_t origin, const vec3_t angles) {
+  vec3_t newOrigin, newViewAngles{};
+  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
   vec3_t triggerOrigin, tempActivator, tempOrigin;
   vec3_t normalizedVelocity, veloAngles;
   vec3_t sPlane[6];
@@ -167,18 +168,18 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
   vec_t speed, length;
   auto negDir = qfalse;
 
-  // normalized velocity is the directionvector for calculating the
-  // intersectionpoints
+  // normalized velocity is the direction vector
+  // for calculating the intersection points
   VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
 
-  // calculate the origin of the triggerbrush
+  // calculate the origin of the trigger brush
   VectorSubtract(trigger->r.maxs, trigger->r.mins, tempOrigin);
   VectorMA(trigger->r.mins, 0.5f, tempOrigin, triggerOrigin);
 
-  // calculate the intersection-points of playermovement with the 6
-  // planes of the triggerbrush the shortest distance between player and
-  // intersectionpoints selects the plane (where did we get into the
-  // trigger, from what side?)
+  // calculate the intersection-points of player movement
+  // with the 6 planes of the trigger brush
+  // the shortest distance between player and intersection points
+  // selects the plane (where did we get into the trigger, from what side?)
   if (normalizedVelocity[0] != 0.0f) {
     VectorMA(player->client->ps.origin,
              (trigger->r.mins[0] - player->client->ps.origin[0]) /
@@ -226,7 +227,7 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
   VectorCopy(triggerOrigin, tempOrigin);
   VectorCopy(player->client->ps.origin, tempActivator);
 
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE YZ (NORMAL X)
   if (minDistYZ < minDistXZ && minDistYZ < minDistXY) {
     // check +/- direction of trigger
@@ -255,10 +256,10 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
       offset[1] *= -1.0f;
     }
     length = offset[1];
-    offset[0] = sin(-DEG2RAD(angles[1])) * length;
-    offset[1] = cos(-DEG2RAD(angles[1])) * length;
+    offset[0] = static_cast<float>(std::sin(-DEG2RAD(angles[1])) * length);
+    offset[1] = static_cast<float>(std::cos(-DEG2RAD(angles[1])) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XZ (NORMAL Y)
   else if (minDistXZ < minDistYZ && minDistXZ < minDistXY) {
     // check +/- direction of trigger
@@ -287,10 +288,12 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
       offset[0] *= -1.0f;
     }
     length = offset[0];
-    offset[1] = sin(DEG2RAD(angles[1] - 90.0f)) * length;
-    offset[0] = cos(DEG2RAD(angles[1] - 90.0f)) * length;
+    offset[1] =
+        static_cast<float>(std::sin(DEG2RAD(angles[1] - 90.0f)) * length);
+    offset[0] =
+        static_cast<float>(std::cos(DEG2RAD(angles[1] - 90.0f)) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XY (NORMAL Z) // makes no sense, set dest values
   else if (minDistXY < minDistXZ && minDistXY < minDistYZ) {
     // viewangles
@@ -314,11 +317,11 @@ void TeleportPlayerKeepAngles_Clank(gentity_t *player, gentity_t *trigger,
 }
 
 // ETJump: teleports player in specific origin, converts angles(yaw, pitch) and
-// velocity
-//         to be relative to the new destination angles
+//         velocity to be relative to the new destination angles
 void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
-                              vec3_t origin, vec3_t angles) {
-  vec3_t newOrigin, newViewAngles, newVelocity = {0, 0, 0}, offset = {0, 0, 0};
+                              const vec3_t origin, const vec3_t angles) {
+  vec3_t newOrigin, newViewAngles{};
+  vec3_t newVelocity = {0, 0, 0}, offset = {0, 0, 0};
   vec3_t triggerOrigin, tempActivator, tempOrigin;
   vec3_t normalizedVelocity, veloAngles;
   vec3_t sPlane[6];
@@ -326,18 +329,18 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
   vec_t speed, length;
   auto negDir = qfalse;
 
-  // normalized velocity is the directionvector for calculating the
-  // intersectionpoints
+  // normalized velocity is the direction vector
+  // for calculating the intersection points
   VectorNormalize2(player->client->ps.velocity, normalizedVelocity);
 
-  // calculate the origin of the triggerbrush
+  // calculate the origin of the trigger brush
   VectorSubtract(trigger->r.maxs, trigger->r.mins, tempOrigin);
   VectorMA(trigger->r.mins, 0.5f, tempOrigin, triggerOrigin);
 
-  // calculate the intersection-points of playermovement with the 6
-  // planes of the triggerbrush the shortest distance between player and
-  // intersectionpoints selects the plane (where did we get into the
-  // trigger, from what side?)
+  // calculate the intersection-points of player movement
+  // with the 6 planes of the trigger brush
+  // the shortest distance between player and intersection points
+  // selects the plane (where did we get into the trigger, from what side?)
   if (normalizedVelocity[0] != 0.0f) {
     VectorMA(player->client->ps.origin,
              (trigger->r.mins[0] - player->client->ps.origin[0]) /
@@ -385,7 +388,7 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
   VectorCopy(triggerOrigin, tempOrigin);
   VectorCopy(player->client->ps.origin, tempActivator);
 
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE YZ (NORMAL X)
   if (minDistYZ < minDistXZ && minDistYZ < minDistXY) {
     // check +/- direction of trigger
@@ -415,10 +418,10 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
       offset[1] *= -1.0f;
     }
     length = offset[1];
-    offset[0] = sin(-DEG2RAD(angles[1])) * length;
-    offset[1] = cos(-DEG2RAD(angles[1])) * length;
+    offset[0] = static_cast<float>(std::sin(-DEG2RAD(angles[1])) * length);
+    offset[1] = static_cast<float>(std::cos(-DEG2RAD(angles[1])) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XZ (NORMAL Y)
   else if (minDistXZ < minDistYZ && minDistXZ < minDistXY) {
     // check +/- direction of trigger
@@ -448,10 +451,12 @@ void TeleportPlayerKeepAngles(gentity_t *player, gentity_t *trigger,
       offset[0] *= -1.0f;
     }
     length = offset[0];
-    offset[1] = sin(DEG2RAD(angles[1] - 90.0f)) * length;
-    offset[0] = cos(DEG2RAD(angles[1] - 90.0f)) * length;
+    offset[1] =
+        static_cast<float>(std::sin(DEG2RAD(angles[1] - 90.0f)) * length);
+    offset[0] =
+        static_cast<float>(std::cos(DEG2RAD(angles[1] - 90.0f)) * length);
   }
-  ////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // PLANE XY (NORMAL Z) // makes no sense, set dest values
   else if (minDistXY < minDistXZ && minDistXY < minDistYZ) {
     // viewangles
@@ -608,7 +613,8 @@ void weapon_portalgun_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
 
   // ETJump: disable portalgun pickup
   if (other->client->sess.timerunActive &&
-      (other->client->sess.runSpawnflags & TIMERUN_DISABLE_PORTALGUN_PICKUP)) {
+      (other->client->sess.runSpawnflags &
+       static_cast<int>(ETJump::TimerunSpawnflags::NoPortalgunPickup))) {
     return;
   }
 
@@ -987,61 +993,6 @@ void SP_misc_grabber_trap(gentity_t *ent) {
   trap_LinkEntity(trig);
 }
 
-void use_spotlight(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  gentity_t *tent;
-
-  if (ent->r.linked) {
-    trap_UnlinkEntity(ent);
-  } else {
-    tent = G_PickTarget(ent->target);
-    VectorCopy(tent->s.origin, ent->s.origin2);
-
-    ent->active = qfalse;
-    trap_LinkEntity(ent);
-  }
-}
-
-void spotlight_finish_spawning(gentity_t *ent) {
-  if (ent->spawnflags & 1) // START_ON
-  {
-    ent->active = qfalse;
-    trap_LinkEntity(ent);
-  }
-
-  ent->use = use_spotlight;
-  ent->think = 0;
-  ent->nextthink = 0;
-}
-
-//----(SA)	added
-/*QUAKED misc_spotlight (1 0 0) (-16 -16 -16) (16 16 16) START_ON BACK_AND_FORTH
-"model" - 'base' model that moves with the light.  Default:
-"models/mapobjects/light/searchlight_pivot.md3" "target" - .camera (spline) file
-for light to track.  do not specify file extension.
-
-BACK_AND_FORTH - when end of target spline is hit, reverse direction rather than
-looping (looping is default) ( /\ not active yet /\ )
-*/
-void SP_misc_spotlight(gentity_t *ent) {
-
-  ent->s.eType = ET_EF_SPOTLIGHT;
-
-  ent->think = spotlight_finish_spawning;
-  ent->nextthink = level.time + 100;
-
-  if (ent->model) {
-    ent->s.modelindex = G_ModelIndex(ent->model);
-  } else {
-    ent->s.modelindex =
-        G_ModelIndex("models/mapobjects/light/searchlight_pivot.md3");
-  }
-
-  if (ent->target) {
-    ent->s.density = G_FindConfigstringIndex(ent->target, CS_SPLINES,
-                                             MAX_SPLINE_CONFIGSTRINGS, qtrue);
-  }
-}
-
 //----(SA)	end
 
 //===========================================================
@@ -1105,8 +1056,8 @@ void SP_misc_gamemodel(gentity_t *ent) {
     G_SpawnString("reverse", "", &dummy);
 
     if (num_frames == 0) {
-      G_Error("'misc_model' with ANIMATE spawnflag set "
-              "has 'frames' set to 0\n");
+      G_Error("'misc_gamemodel' with ANIMATE spawnflag set has 'frames' set to "
+              "0\n");
     }
 
     ent->s.torsoAnim = num_frames;
@@ -2356,7 +2307,7 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
 
   owner = &g_entities[gun->r.ownerNum];
 
-  if (gun && self->health <= 0) {
+  if (self->health <= 0) {
     gun->s.frame = 2;
     gun->takedamage = qfalse;
 
@@ -2375,8 +2326,8 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     if (tr.startsolid) {
       VectorCopy(owner->TargetAngles, owner->client->ps.origin);
       VectorCopy(owner->TargetAngles, owner->r.currentOrigin);
-      owner->r.contents = CONTENTS_CORPSE; // this will correct itself
-                                           // in ClientEndFrame
+      // this will correct itself in ClientEndFrame
+      owner->r.contents = CONTENTS_CORPSE;
     }
     owner->client->ps.eFlags &= ~EF_MG42_ACTIVE; // DHM - Nerve :: unset flag
 
@@ -2386,8 +2337,6 @@ void mg42_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
     self->r.ownerNum = self->s.number;
     self->s.otherEntityNum = self->s.number;
     owner->client->ps.viewlocked = 0; // let them look around
-
-    // owner->client->ps.gunfx = 0;
 
     gun->mg42weapHeat = 0;
     gun->backupWeaponTime = 0;

@@ -1,6 +1,8 @@
 #include <vector>
 
 #include "cg_local.h"
+#include "etj_utilities.h"
+#include "../game/etj_numeric_utilities.h"
 
 panel_button_text_t fireteamTitleFont = {
     0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f}, 0, 0, &cgs.media.limboFont1_lo,
@@ -170,50 +172,62 @@ const char **ftMenuStringsMsg[] = {
 };
 
 void CG_Fireteams_MenuTitleText_Draw(panel_button_t *button) {
-  switch (cgs.ftMenuMode) {
-    case 0:
-      CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                        button->font->scalex, button->font->scaley,
-                        button->font->colour, "MESSAGE", 0, 0,
-                        button->font->style, button->font->font);
+  switch (static_cast<FTMenuMode>(cgs.ftMenuMode)) {
+    case FTMenuMode::FT_VSAY:
+      CG_Text_Paint_Ext(
+          button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
+          button->font->scalex, button->font->scaley, button->font->colour,
+          "MESSAGE", 0, 0, button->font->style, button->font->font);
       break;
-    case 1:
-      CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                        button->font->scalex, button->font->scaley,
-                        button->font->colour, "FIRETEAMS", 0, 0,
-                        button->font->style, button->font->font);
+    case FTMenuMode::FT_MANAGE:
+      CG_Text_Paint_Ext(
+          button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
+          button->font->scalex, button->font->scaley, button->font->colour,
+          "FIRETEAMS", 0, 0, button->font->style, button->font->font);
       break;
-    case 2:
-      CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                        button->font->scalex, button->font->scaley,
-                        button->font->colour, "JOIN", 0, 0, button->font->style,
-                        button->font->font);
+    case FTMenuMode::FT_APPLY:
+      CG_Text_Paint_Ext(
+          button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
+          button->font->scalex, button->font->scaley, button->font->colour,
+          "JOIN", 0, 0, button->font->style, button->font->font);
       break;
-    case 3:
-      CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                        button->font->scalex, button->font->scaley,
-                        button->font->colour, "PROPOSE", 0, 0,
-                        button->font->style, button->font->font);
+    case FTMenuMode::FT_PROPOSE:
+      CG_Text_Paint_Ext(
+          button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
+          button->font->scalex, button->font->scaley, button->font->colour,
+          "PROPOSE", 0, 0, button->font->style, button->font->font);
       break;
-    case 4:
-      switch (cgs.ftMenuPos) {
-        case 2:
-          CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                            button->font->scalex, button->font->scaley,
-                            button->font->colour, "INVITE", 0, 0,
-                            button->font->style, button->font->font);
+    case FTMenuMode::FT_ADMIN:
+      switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
+        case FTMenuPos::FT_MENUPOS_INVITE:
+          CG_Text_Paint_Ext(
+              button->rect.x,
+              button->rect.y + static_cast<float>(button->data[0]),
+              button->font->scalex, button->font->scaley, button->font->colour,
+              "INVITE", 0, 0, button->font->style, button->font->font);
           break;
-        case 3:
-          CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                            button->font->scalex, button->font->scaley,
-                            button->font->colour, "KICK", 0, 0,
-                            button->font->style, button->font->font);
+        case FTMenuPos::FT_MENUPOS_KICK:
+          CG_Text_Paint_Ext(
+              button->rect.x,
+              button->rect.y + static_cast<float>(button->data[0]),
+              button->font->scalex, button->font->scaley, button->font->colour,
+              "KICK", 0, 0, button->font->style, button->font->font);
           break;
-        case 4:
-          CG_Text_Paint_Ext(button->rect.x, button->rect.y + button->data[0],
-                            button->font->scalex, button->font->scaley,
-                            button->font->colour, "WARN", 0, 0,
-                            button->font->style, button->font->font);
+        case FTMenuPos::FT_MENUPOS_WARN:
+          CG_Text_Paint_Ext(
+              button->rect.x,
+              button->rect.y + static_cast<float>(button->data[0]),
+              button->font->scalex, button->font->scaley, button->font->colour,
+              "WARN", 0, 0, button->font->style, button->font->font);
+          break;
+        case FTMenuPos::FT_MENUPOS_RULES:
+          CG_Text_Paint_Ext(
+              button->rect.x,
+              button->rect.y + static_cast<float>(button->data[0]),
+              button->font->scalex, button->font->scaley, button->font->colour,
+              "RULES", 0, 0, button->font->style, button->font->font);
+          break;
+        default:
           break;
       }
   }
@@ -222,33 +236,45 @@ void CG_Fireteams_MenuTitleText_Draw(panel_button_t *button) {
 const char *ftOffMenuList[] = {
     "Apply",
     "Create",
-    NULL,
+    nullptr,
 };
 
 const char *ftOffMenuListAlphachars[] = {
     "A",
     "C",
-    NULL,
+    nullptr,
 };
 
 const char *ftOnMenuList[] = {
     "Propose",
     "Leave",
-    NULL,
+    nullptr,
 };
 
 const char *ftOnMenuListAlphachars[] = {
     "P",
     "L",
-    NULL,
+    nullptr,
+};
+
+const char *ftOnMenuRulesList[] = {
+    "Reset",
+    "Savelimit",
+    nullptr,
+};
+
+const char *ftOnMenuRulesListAlphaChars[] = {
+    "R",
+    "S",
+    nullptr,
 };
 
 const char *ftLeaderMenuList[] = {
-    "Disband", "Leave", "Invite", "Kick", "Warn", NULL,
+    "Disband", "Leave", "Invite", "Kick", "Warn", "Rules", nullptr,
 };
 
 const char *ftLeaderMenuListAlphachars[] = {
-    "D", "L", "I", "K", "W", NULL,
+    "D", "L", "I", "K", "W", "R", nullptr,
 };
 
 int CG_CountFireteamsByTeam(team_t t) {
@@ -520,17 +546,37 @@ void CG_DrawPlayerNF(panel_button_t *button, int *pageofs) {
   }
 }
 
+void CG_DrawFireteamRules(panel_button_t *button) {
+  float y = button->rect.y;
+  const char *str;
+  int i;
+
+  for (i = 0; ftOnMenuRulesList[i]; i++) {
+    if (cg_quickMessageAlt.integer) {
+      str = va("%i. %s", (i + 1) % 10, ftOnMenuRulesList[i]);
+    } else {
+      str = va("%s. %s", ftOnMenuRulesListAlphaChars[i], ftOnMenuRulesList[i]);
+    }
+
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                      button->font->scaley, button->font->colour, str, 0, 0,
+                      button->font->style, button->font->font);
+
+    y += button->rect.h;
+  }
+}
+
 void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
   float y = button->rect.y;
   int i;
 
-  switch (cgs.ftMenuMode) {
-    case 0:
-      if (cgs.ftMenuPos == -1) {
+  switch (static_cast<FTMenuMode>(cgs.ftMenuMode)) {
+    case FTMenuMode::FT_VSAY:
+      if (cgs.ftMenuPos == static_cast<int>(FTMenuPos::FT_MENUPOS_NONE)) {
         for (i = 0; ftMenuRootStrings[i]; i++) {
           const char *str;
 
-          if (i < 5) {
+          if (i < NUM_PLAYER_CLASSES) {
             if (!CG_FireteamHasClass(i, qtrue)) {
               continue;
             }
@@ -550,34 +596,34 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
           y += button->rect.h;
         }
       } else {
-        if (cgs.ftMenuPos < 0 || cgs.ftMenuPos > 4) {
+        // spectators don't get class-specific vsays
+        if (!ETJump::isPlaying(cg.clientNum)) {
           return;
-        } else {
-          const char **strings = ftMenuStrings[cgs.ftMenuPos];
+        }
 
-          for (i = 0; strings[i]; i++) {
-            const char *str;
+        // sanity check, cls should be valid but let's make sure
+        const int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
+                                       NUM_PLAYER_CLASSES - 1);
+        const char **strings = ftMenuStrings[idx];
 
-            if (cg_quickMessageAlt.integer) {
-              str = va("%i. "
-                       "%s",
-                       (i + 1) % 10, strings[i]);
-            } else {
-              str = va("%s. "
-                       "%s",
-                       (ftMenuStringsAlphachars[cgs.ftMenuPos])[i], strings[i]);
-            }
+        for (i = 0; strings[i]; i++) {
+          const char *str;
 
-            CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                              button->font->scaley, button->font->colour, str,
-                              0, 0, button->font->style, button->font->font);
-
-            y += button->rect.h;
+          if (cg_quickMessageAlt.integer) {
+            str = va("%i. %s", (i + 1) % 10, strings[i]);
+          } else {
+            str = va("%s. %s", (ftMenuStringsAlphachars[idx])[i], strings[i]);
           }
+
+          CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
+                            button->font->scaley, button->font->colour, str, 0,
+                            0, button->font->style, button->font->font);
+
+          y += button->rect.h;
         }
       }
       break;
-    case 1:
+    case FTMenuMode::FT_MANAGE:
       if (!CG_IsOnFireteam(cg.clientNum)) {
         for (i = 0; ftOffMenuList[i]; i++) {
           const char *str;
@@ -609,13 +655,9 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
             }
 
             if (cg_quickMessageAlt.integer) {
-              str = va("%i. "
-                       "%s",
-                       (i + 1) % 10, ftOnMenuList[i]);
+              str = va("%i. %s", (i + 1) % 10, ftOnMenuList[i]);
             } else {
-              str = va("%s. "
-                       "%s",
-                       ftOnMenuListAlphachars[i], ftOnMenuList[i]);
+              str = va("%s. %s", ftOnMenuListAlphachars[i], ftOnMenuList[i]);
             }
 
             CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -637,13 +679,10 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
             }
 
             if (cg_quickMessageAlt.integer) {
-              str = va("%i. "
-                       "%s",
-                       (i + 1) % 10, ftLeaderMenuList[i]);
+              str = va("%i. %s", (i + 1) % 10, ftLeaderMenuList[i]);
             } else {
-              str = va("%s. "
-                       "%s",
-                       ftLeaderMenuListAlphachars[i], ftLeaderMenuList[i]);
+              str = va("%s. %s", ftLeaderMenuListAlphachars[i],
+                       ftLeaderMenuList[i]);
             }
 
             CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
@@ -656,43 +695,48 @@ void CG_Fireteams_MenuText_Draw(panel_button_t *button) {
       }
       break;
 
-    case 2:
+    case FTMenuMode::FT_APPLY:
       if (!CG_CountFireteamsByTeam(cgs.clientinfo[cg.clientNum].team) ||
           CG_IsOnFireteam(cg.clientNum)) {
-        cgs.ftMenuMode = 1;
+        cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
         break;
       }
 
       CG_DrawFireteamsByTeam(button, cgs.clientinfo[cg.clientNum].team);
       break;
 
-    case 3:
+    case FTMenuMode::FT_PROPOSE:
       if (!CG_CountPlayersNF()) {
-        cgs.ftMenuMode = 1;
+        cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
         break;
       }
 
       CG_DrawPlayerNF(button, &cgs.ftMenuModeEx);
       break;
 
-    case 4:
-      switch (cgs.ftMenuPos) {
-        case 2:
+    case FTMenuMode::FT_ADMIN:
+      switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
+        case FTMenuPos::FT_MENUPOS_INVITE:
           if (!CG_CountPlayersNF()) {
-            cgs.ftMenuMode = 1;
+            cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
             break;
           }
 
           CG_DrawPlayerNF(button, &cgs.ftMenuModeEx);
           break;
-        case 3:
-        case 4:
+        case FTMenuPos::FT_MENUPOS_KICK:
+        case FTMenuPos::FT_MENUPOS_WARN:
           if (!CG_CountPlayersSF()) {
-            cgs.ftMenuMode = 1;
+            cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_MANAGE);
             break;
           }
 
           CG_DrawPlayerSF(button, &cgs.ftMenuModeEx);
+          break;
+        case FTMenuPos::FT_MENUPOS_RULES:
+          CG_DrawFireteamRules(button);
+          break;
+        default:
           break;
       }
       break;
@@ -732,14 +776,14 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
   key &= ~K_CHAR_FLAG;
 
-  switch (cgs.ftMenuMode) {
-    case 0:
-      if (cgs.ftMenuPos == -1) {
+  switch (static_cast<FTMenuMode>(cgs.ftMenuMode)) {
+    case FTMenuMode::FT_VSAY:
+      if (cgs.ftMenuPos == static_cast<int>(FTMenuPos::FT_MENUPOS_NONE)) {
         if (cg_quickMessageAlt.integer) {
           if (key >= '0' && key <= '9') {
             int i = ((key - '0') + 9) % 10;
 
-            if (i < 5) {
+            if (i < NUM_PLAYER_CLASSES) {
               if (!CG_FireteamHasClass(i, qtrue)) {
                 return qfalse;
               }
@@ -750,7 +794,8 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
             }
 
             if (doaction) {
-              if (i < 5) {
+              // class-specific vsays
+              if (i < NUM_PLAYER_CLASSES) {
                 cgs.ftMenuPos = i;
               } else if (i == 5) {
                 CG_QuickFireteamMessage_f();
@@ -767,51 +812,55 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         } else {
           int i;
 
-          if (key >= 'a' || key <= 'z') {
-            for (i = 0; ftMenuRootStrings[i]; i++) {
-              if (key == tolower(*ftMenuRootStringsAlphachars[i])) {
-                if (i < 5) {
-                  if (!CG_FireteamHasClass(i, qtrue)) {
-                    return qfalse;
-                  }
+          for (i = 0; ftMenuRootStrings[i]; i++) {
+            if (key == tolower(*ftMenuRootStringsAlphachars[i])) {
+              if (i < NUM_PLAYER_CLASSES) {
+                if (!CG_FireteamHasClass(i, qtrue)) {
+                  return qfalse;
                 }
-
-                if (doaction) {
-                  if (i < 5) {
-                    cgs.ftMenuPos = i;
-                  } else if (i == 5) {
-                    CG_QuickFireteamMessage_f();
-                  } else {
-                    trap_SendClientCommand(va("vsay_buddy -1 %s %s",
-                                              CG_BuildSelectedFirteamString(),
-                                              ftMenuRootStringsMsg[i]));
-                    CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-                  }
-                }
-                return qtrue;
               }
+
+              if (doaction) {
+                // class-specifc vsays
+                if (i < NUM_PLAYER_CLASSES) {
+                  cgs.ftMenuPos = i;
+                } else if (i == 5) {
+                  CG_QuickFireteamMessage_f();
+                } else {
+                  trap_SendClientCommand(va("vsay_buddy -1 %s %s",
+                                            CG_BuildSelectedFirteamString(),
+                                            ftMenuRootStringsMsg[i]));
+                  CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                }
+              }
+              return qtrue;
             }
           }
         }
       } else {
-        if (cgs.ftMenuPos < 0 || cgs.ftMenuPos > 4) {
+        // spectators don't get class-specific vsays
+        if (!ETJump::isPlaying(cg.clientNum)) {
           return qfalse;
         }
+
+        // sanity check, cls should be valid but let's make sure
+        const int idx = Numeric::clamp(cgs.clientinfo[cg.clientNum].cls, 0,
+                                       NUM_PLAYER_CLASSES - 1);
 
         if (cg_quickMessageAlt.integer) {
           if (key >= '0' && key <= '9') {
             int i = ((key - '0') + 9) % 10;
             int x;
 
-            const char **strings = ftMenuStrings[cgs.ftMenuPos];
+            const char **strings = ftMenuStrings[idx];
 
             for (x = 0; strings[x]; x++) {
               if (x == i) {
                 if (doaction) {
-                  trap_SendClientCommand(
-                      va("vsay_buddy %i %s %s", cgs.ftMenuPos,
-                         CG_BuildSelectedFirteamString(),
-                         (ftMenuStringsMsg[cgs.ftMenuPos])[i]));
+                  trap_SendClientCommand(va("vsay_buddy %i %s %s",
+                                            cgs.ftMenuPos,
+                                            CG_BuildSelectedFirteamString(),
+                                            (ftMenuStringsMsg[idx])[i]));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                 }
 
@@ -821,28 +870,25 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           }
         } else {
           int i;
-          const char **strings = ftMenuStrings[cgs.ftMenuPos];
+          const char **strings = ftMenuStrings[idx];
 
-          if (key >= 'a' || key <= 'z') {
-            for (i = 0; strings[i]; i++) {
-              if (key == tolower(*ftMenuStringsAlphachars[cgs.ftMenuPos][i])) {
+          for (i = 0; strings[i]; i++) {
+            if (key == tolower(*ftMenuStringsAlphachars[idx][i])) {
 
-                if (doaction) {
+              if (doaction) {
 
-                  trap_SendClientCommand(
-                      va("vsay_buddy %i %s %s", cgs.ftMenuPos,
-                         CG_BuildSelectedFirteamString(),
-                         (ftMenuStringsMsg[cgs.ftMenuPos])[i]));
-                  CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-                }
-                return qtrue;
+                trap_SendClientCommand(va("vsay_buddy %i %s %s", cgs.ftMenuPos,
+                                          CG_BuildSelectedFirteamString(),
+                                          (ftMenuStringsMsg[idx])[i]));
+                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
               }
+              return qtrue;
             }
           }
         }
       }
       break;
-    case 1: {
+    case FTMenuMode::FT_MANAGE: {
       int i = -1, x;
 
       if (cg_quickMessageAlt.integer) {
@@ -862,12 +908,10 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           }
         }
 
-        if (key >= 'a' || key <= 'z') {
-          for (x = 0; strings[x]; x++) {
-            if (key == tolower(*strings[x])) {
-              i = x;
-              break;
-            }
+        for (x = 0; strings[x]; x++) {
+          if (key == tolower(*strings[x])) {
+            i = x;
+            break;
           }
         }
       }
@@ -888,11 +932,10 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
         if (doaction) {
           if (i == 1) {
-            trap_SendConsoleCommand("fireteam "
-                                    "create\n");
+            trap_SendConsoleCommand("fireteam create\n");
             CG_EventHandling(CGAME_EVENT_NONE, qfalse);
           } else {
-            cgs.ftMenuMode = 2;
+            cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_APPLY);
             cgs.ftMenuModeEx = 0;
             cgs.ftMenuPos = i;
           }
@@ -911,14 +954,10 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
           if (doaction) {
             if (i == 1) {
-              trap_SendConsoleCommand("fire"
-                                      "team"
-                                      " lea"
-                                      "ve"
-                                      "\n");
+              trap_SendConsoleCommand("fireteam leave\n");
               CG_EventHandling(CGAME_EVENT_NONE, qfalse);
             } else {
-              cgs.ftMenuMode = 3;
+              cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_PROPOSE);
               cgs.ftMenuModeEx = 0;
               cgs.ftMenuPos = i;
             }
@@ -926,7 +965,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
           return qtrue;
         } else {
-          if (i >= 5) {
+          if (i >= 6) {
             break;
           }
 
@@ -940,21 +979,13 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
 
           if (doaction) {
             if (i == 0) {
-              trap_SendConsoleCommand("fire"
-                                      "team"
-                                      " dis"
-                                      "band"
-                                      "\n");
+              trap_SendConsoleCommand("fireteam disband\n");
               CG_EventHandling(CGAME_EVENT_NONE, qfalse);
             } else if (i == 1) {
-              trap_SendConsoleCommand("fire"
-                                      "team"
-                                      " lea"
-                                      "ve"
-                                      "\n");
+              trap_SendConsoleCommand("fireteam leave\n");
               CG_EventHandling(CGAME_EVENT_NONE, qfalse);
             } else {
-              cgs.ftMenuMode = 4;
+              cgs.ftMenuMode = static_cast<int>(FTMenuMode::FT_ADMIN);
               cgs.ftMenuModeEx = 0;
               cgs.ftMenuPos = i;
             }
@@ -964,7 +995,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         }
       }
     } break;
-    case 2: {
+    case FTMenuMode::FT_APPLY: {
       int i;
 
       for (i = 0; i < MAX_FIRETEAMS; i++) {
@@ -983,19 +1014,17 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
             }
           }
         } else {
-          if (key >= 'a' || key <= 'z') {
-            if (key - 'a' == cg.fireTeams[i].ident) {
-              if (doaction) {
-                trap_SendConsoleCommand(va("fireteam apply %i\n", i + 1));
-                CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-              }
-              return qtrue;
+          if (key - 'a' == cg.fireTeams[i].ident) {
+            if (doaction) {
+              trap_SendConsoleCommand(va("fireteam apply %i\n", i + 1));
+              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
             }
+            return qtrue;
           }
         }
       }
     } break;
-    case 3: {
+    case FTMenuMode::FT_PROPOSE: {
       int i = -1, x;
 
       if (cg_quickMessageAlt.integer) {
@@ -1003,9 +1032,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           i = ((key - '0') + 9) % 10;
         }
       } else {
-        if (key >= 'a' || key <= 'g') {
-          i = key - 'a';
-        }
+        i = key - 'a';
 
         if (key == 'n') {
           i = 9;
@@ -1033,15 +1060,15 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
       x = CG_PlayerNFFromPos(i, &cgs.ftMenuModeEx);
       if (x != -1) {
         if (doaction) {
-          trap_SendConsoleCommand(va("fireteam propose %i\n", x + 1));
+          trap_SendConsoleCommand(va("fireteam propose %i\n", x));
           CG_EventHandling(CGAME_EVENT_NONE, qfalse);
         }
 
         return qtrue;
       }
       break;
-    } break;
-    case 4: {
+    }
+    case FTMenuMode::FT_ADMIN: {
       int i = -1, x;
 
       if (cg_quickMessageAlt.integer) {
@@ -1049,9 +1076,7 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           i = ((key - '0') + 9) % 10;
         }
       } else {
-        if (key >= 'a' || key <= 'g') {
-          i = key - 'a';
-        }
+        i = key - 'a';
 
         if (key == 'n') {
           i = 9;
@@ -1066,8 +1091,8 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
         break;
       }
 
-      switch (cgs.ftMenuPos) {
-        case 2:
+      switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
+        case FTMenuPos::FT_MENUPOS_INVITE:
           if (CG_CountPlayersNF() > (cgs.ftMenuModeEx + 1) * 8) {
             if (i == 9) {
               if (doaction) {
@@ -1089,34 +1114,15 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           x = CG_PlayerNFFromPos(i, &cgs.ftMenuModeEx);
           if (x != -1) {
             if (doaction) {
-              trap_SendConsoleCommand(va("f"
-                                         "i"
-                                         "r"
-                                         "e"
-                                         "t"
-                                         "e"
-                                         "a"
-                                         "m"
-                                         " "
-                                         "i"
-                                         "n"
-                                         "v"
-                                         "i"
-                                         "t"
-                                         "e"
-                                         " "
-                                         "%"
-                                         "i"
-                                         "\n",
-                                         x + 1));
+              trap_SendConsoleCommand(va("fireteam invite %i\n", x));
               CG_EventHandling(CGAME_EVENT_NONE, qfalse);
             }
 
             return qtrue;
           }
           break;
-        case 3:
-        case 4:
+        case FTMenuPos::FT_MENUPOS_KICK:
+        case FTMenuPos::FT_MENUPOS_WARN:
           if (CG_CountPlayersSF() > (cgs.ftMenuModeEx + 1) * 8) {
             if (i == 0) {
               cgs.ftMenuModeEx++;
@@ -1130,20 +1136,36 @@ qboolean CG_FireteamCheckExecKey(int key, qboolean doaction) {
           x = CG_PlayerSFFromPos(i, &cgs.ftMenuModeEx);
           if (x != -1) {
             if (doaction) {
-              switch (cgs.ftMenuPos) {
-                case 4:
-                  trap_SendConsoleCommand(va("fireteam warn %i\n", x + 1));
+              switch (static_cast<FTMenuPos>(cgs.ftMenuPos)) {
+                case FTMenuPos::FT_MENUPOS_KICK:
+                  trap_SendConsoleCommand(va("fireteam kick %i\n", x));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
                   break;
-                case 3:
-                  trap_SendConsoleCommand(va("fireteam kick %i\n", x + 1));
+                case FTMenuPos::FT_MENUPOS_WARN:
+                  trap_SendConsoleCommand(va("fireteam warn %i\n", x));
                   CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+                  break;
+                default:
                   break;
               }
             }
 
             return qtrue;
           }
+          break;
+        case FTMenuPos::FT_MENUPOS_RULES:
+          if (doaction) {
+            if (i == 0) {
+              trap_SendConsoleCommand("fireteam rules savelimit reset\n");
+              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+            } else if (i == 1) {
+              trap_UI_Popup(UIMENU_INGAME_FT_SAVELIMIT);
+              CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+            }
+          }
+
+          return qtrue;
+        default:
           break;
       }
     } break;

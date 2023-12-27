@@ -71,7 +71,7 @@
 #define GIANT_WIDTH 32
 #define GIANT_HEIGHT 48
 
-#define NUM_CROSSHAIRS 10
+#define NUM_CROSSHAIRS 17
 
 // Ridah, trails
 #define STYPE_STRETCH 0
@@ -1266,6 +1266,11 @@ typedef struct {
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
   bool shadowCvarsSet;
+
+  // portalgun auto-binding
+  bool portalgunBindingsAdjusted;
+  int weapAltB1;
+  int weapAltB2;
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES 21
@@ -1842,7 +1847,6 @@ typedef struct {
   qhandle_t simplePlayersShader;
   qhandle_t saveIcon;
   qhandle_t proneIcon;
-  qhandle_t forbidIcon;
   qhandle_t stopwatchIcon;
   qhandle_t stopwatchIconGreen;
   qhandle_t stopwatchIconRed;
@@ -2155,6 +2159,23 @@ struct range_t {
 };
 // End CGaz 5
 
+enum class FTMenuMode {
+  FT_VSAY = 0,
+  FT_MANAGE = 1, // create, leave, disband
+  FT_APPLY = 2,
+  FT_PROPOSE = 3,
+  FT_ADMIN = 4
+};
+
+// sub-pages of fireteam menus
+enum class FTMenuPos {
+  FT_MENUPOS_NONE = -1,
+  FT_MENUPOS_INVITE = 2,
+  FT_MENUPOS_KICK = 3,
+  FT_MENUPOS_WARN = 4,
+  FT_MENUPOS_RULES = 5
+};
+
 //==============================================================================
 
 extern cgs_t cgs;
@@ -2383,6 +2404,7 @@ extern vmCvar_t etj_CGazFov;
 extern vmCvar_t etj_CGazTrueness;
 extern vmCvar_t etj_CGazOnTop;
 extern vmCvar_t etj_CGaz2FixedSpeed;
+extern vmCvar_t etj_CGaz2NoVelocityDir;
 
 extern vmCvar_t etj_drawOB;
 // Aciz: movable drawOB
@@ -2491,6 +2513,7 @@ extern vmCvar_t etj_fireteamAlpha;
 #define CONLOG_BANNERPRINT 1
 extern vmCvar_t etj_logBanner;
 extern vmCvar_t etj_weaponVolume;
+extern vmCvar_t etj_footstepVolume;
 
 extern vmCvar_t etj_noclipScale;
 extern vmCvar_t etj_drawSlick;
@@ -2503,6 +2526,8 @@ extern vmCvar_t etj_altScoreboard;
 extern vmCvar_t etj_drawSpectatorInfo;
 extern vmCvar_t etj_spectatorInfoX;
 extern vmCvar_t etj_spectatorInfoY;
+extern vmCvar_t etj_spectatorInfoSize;
+extern vmCvar_t etj_spectatorInfoShadow;
 
 extern vmCvar_t etj_drawRunTimer;
 extern vmCvar_t etj_runTimerX;
@@ -2510,6 +2535,21 @@ extern vmCvar_t etj_runTimerY;
 extern vmCvar_t etj_runTimerShadow;
 extern vmCvar_t etj_runTimerAutoHide;
 extern vmCvar_t etj_runTimerInactiveColor;
+
+extern vmCvar_t etj_drawCheckpoints;
+extern vmCvar_t etj_checkpointsX;
+extern vmCvar_t etj_checkpointsY;
+extern vmCvar_t etj_checkpointsSize;
+extern vmCvar_t etj_checkpointsShadow;
+extern vmCvar_t etj_checkpointsStyle;
+extern vmCvar_t etj_checkpointsCount;
+
+extern vmCvar_t etj_checkpointsPopup;
+extern vmCvar_t etj_checkpointsPopupX;
+extern vmCvar_t etj_checkpointsPopupY;
+extern vmCvar_t etj_checkpointsPopupSize;
+extern vmCvar_t etj_checkpointsPopupShadow;
+extern vmCvar_t etj_checkpointsPopupDuration;
 
 extern vmCvar_t etj_drawMessageTime;
 
@@ -2627,6 +2667,7 @@ extern vmCvar_t etj_snapHUDHLColor2;
 extern vmCvar_t etj_snapHUDFov;
 extern vmCvar_t etj_snapHUDHLActive;
 extern vmCvar_t etj_snapHUDTrueness;
+extern vmCvar_t etj_snapHUDEdgeThickness;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
@@ -2682,6 +2723,17 @@ extern vmCvar_t etj_fixedCompassShader;
 // unlagged - optimized prediction
 extern vmCvar_t etj_optimizePrediction;
 // END unlagged - optimized prediction
+
+extern vmCvar_t etj_menuSensitivity;
+
+extern vmCvar_t etj_crosshairScaleX;
+extern vmCvar_t etj_crosshairScaleY;
+extern vmCvar_t etj_crosshairThickness;
+extern vmCvar_t etj_crosshairOutline;
+
+extern vmCvar_t etj_noPanzerAutoswitch;
+
+extern vmCvar_t etj_autoPortalBinds;
 
 //
 // cg_main.c
@@ -2753,8 +2805,12 @@ void CG_FillRect(float x, float y, float width, float height,
                  const float *color);
 void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
                      float fov, vec4_t const color);
-void PutPixel(float x, float y);
 void DrawLine(float x1, float y1, float x2, float y2, const vec4_t color);
+void DrawLine(float x1, float y1, float x2, float y2, float w, float h,
+              const vec4_t color);
+void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
+                  bool fill, const vec4_t color,
+                  const vec4_t fillColor = nullptr);
 float AngleToScreenX(float angle, float fov);
 range_t AnglesToRange(float start, float end, float yaw, float fov);
 void CG_HorizontalPercentBar(float x, float y, float width, float height,
@@ -2917,6 +2973,8 @@ int CG_CalculateReinfTime(qboolean menu);
 float CG_CalculateReinfTime_Float(qboolean menu);
 void CG_Fade(int r, int g, int b, int a, int time, int duration);
 int CG_PlayerAmmoValue(int *ammo, int *clips, int *akimboammo);
+
+void CG_DrawMortarReticle();
 
 //
 // cg_player.c
@@ -3198,10 +3256,6 @@ void CG_ClearFlameChunks(void);
 void CG_ProjectedSpotLight(vec3_t start, vec3_t dir);
 // done.
 
-//----(SA)
-void CG_Spotlight(centity_t *cent, float *color, vec3_t start, vec3_t dir,
-                  int segs, float range, int startWidth, float coneAngle,
-                  int flags);
 #define SL_NOTRACE                                                             \
   0x001 // don't do a trace check for shortening the beam, always draw
         // at full 'range' length
@@ -3872,7 +3926,7 @@ void CG_mvZoomBinoc(float x, float y, float w, float h);
 void CG_mvZoomSniper(float x, float y, float w, float h);
 
 // cg_window.c
-qboolean CG_addString(cg_window_t *w, const char *buf);
+bool CG_addString(cg_window_t *w, const char *buf);
 // void CG_createDemoHelpWindow(void);
 // void CG_createSpecHelpWindow(void);
 void CG_createStatsWindow(void);
@@ -4138,6 +4192,7 @@ void addLoopingSound(const vec3_t origin, const vec3_t velocity,
                      sfxHandle_t sfx, int volume, int soundTime);
 bool hideMeCheck(int entityNum);
 int checkExtraTrace(int value);
+int weapnumForClient();
 void onPlayerRespawn(qboolean revived);
 void runFrameEnd();
 playerState_t *getValidPlayerState();

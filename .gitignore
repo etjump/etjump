@@ -192,3 +192,4 @@ scons.signatures.dblite
 out
 cmake-build*/
 checks.json
+build-linux-x64/

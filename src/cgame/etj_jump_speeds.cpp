@@ -46,7 +46,14 @@ JumpSpeeds::JumpSpeeds(EntityEventsHandler *entityEventsHandler)
 JumpSpeeds::~JumpSpeeds() {
   consoleCommandsHandler->unsubcribe("resetJumpSpeeds");
   serverCommandsHandler->unsubcribe("resetJumpSpeeds");
-  _entityEventsHandler->unsubcribe(EV_JUMP);
+  _entityEventsHandler->unsubscribe(EV_JUMP);
+}
+
+bool JumpSpeeds::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+  return true;
 }
 
 void JumpSpeeds::render() const {
@@ -60,10 +67,6 @@ void JumpSpeeds::render() const {
   bool horizontal = etj_jumpSpeedsStyle.integer &
                     static_cast<int>(jumpSpeedStyle::Horizontal);
   int numJumps = static_cast<int>(jumpSpeeds.size());
-
-  if (canSkipDraw()) {
-    return;
-  }
 
   x1 = ETJump_AdjustPosition(x1);
   x2 = ETJump_AdjustPosition(x2);
@@ -214,10 +217,6 @@ bool JumpSpeeds::canSkipDraw() const {
   // in the update function, which is never called as a spectator
   playerState_s *ps = getValidPlayerState();
   if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
-    return true;
-  }
-
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
     return true;
   }
 

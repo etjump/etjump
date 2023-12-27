@@ -25,6 +25,8 @@
 #include "etj_map_statistics.h"
 #include <sqlite3.h>
 #include <algorithm>
+#include <json.h>
+
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
 #include "g_local.h"
@@ -71,8 +73,7 @@ std::vector<std::string> MapStatistics::getMaps() {
   std::vector<std::string> maps;
 
   for (auto &map : _maps) {
-    if (map.isOnServer &&
-        strstr(getBlockedMapsStr().c_str(), map.name.c_str()) == nullptr) {
+    if (map.isOnServer && !MapStatistics::isBlockedMap(map.name)) {
       maps.push_back(map.name);
     }
   }
@@ -231,7 +232,7 @@ bool MapStatistics::initialize(std::string database,
     database = "maps_database.db";
   }
 
-  _databaseName = database;
+  _databaseName = std::move(database);
   if (!loadFromDatabase()) {
     // TODO: error handling
     return false;
@@ -316,7 +317,7 @@ void MapStatistics::saveNewMaps(std::vector<std::string> newMaps) {
     return;
   }
 
-  for (auto newMap : newMaps) {
+  for (auto &newMap : newMaps) {
     std::string sqlEscapedMapName = newMap;
     ETJump::StringUtil::replaceAll(sqlEscapedMapName, "'", "''");
     // Map names won't be doing any SQL injection
@@ -492,19 +493,59 @@ const char *MapStatistics::randomMap() const {
   }
 
   if (mapIdx >= 0) {
-    strcpy(mapName, _maps[mapIdx].name.c_str());
+    Q_strncpyz(mapName, _maps[mapIdx].name.c_str(), sizeof(mapName));
   }
 
   return mapName;
 }
 
-std::string MapStatistics::getBlockedMapsStr() const {
-  return ETJump::StringUtil::toLowerCase(g_blockedMaps.string);
+std::vector<std::string> MapStatistics::blockedMaps() {
+  const std::string blockedMapsStr =
+      ETJump::StringUtil::toLowerCase(g_blockedMaps.string);
+  return ETJump::StringUtil::split(blockedMapsStr, " ");
+}
+
+bool MapStatistics::isBlockedMap(const std::string &mapName) {
+  bool isBlocked = false;
+  const auto blockedMaps = MapStatistics::blockedMaps();
+  const auto numBlockedMaps = blockedMaps.size();
+
+  for (int i = 0; i < numBlockedMaps; i++) {
+    if (ETJump::StringUtil::matches(blockedMaps[i], mapName)) {
+      isBlocked = true;
+      break;
+    }
+  }
+
+  return isBlocked;
 }
 
 bool MapStatistics::isValidMap(const MapInformation *mapInfo) const {
   return mapInfo != _currentMap && mapInfo->isOnServer &&
-         strstr(getBlockedMapsStr().c_str(), mapInfo->name.c_str()) == nullptr;
+         !MapStatistics::isBlockedMap(mapInfo->name);
+}
+
+bool MapStatistics::mapExists(const std::string &mapName) {
+  auto maps = MapStatistics::getMaps();
+  auto it = std::find(maps.begin(), maps.end(), mapName);
+  return it != maps.end();
+}
+
+void MapStatistics::writeMapsToDisk(const std::string &fileName) {
+  auto maps = getCurrentMaps();
+
+  Json::Value mapsArray;
+  for (const auto &map : (*maps)) {
+    mapsArray.append(map);
+  }
+
+  Json::StyledWriter writer;
+  auto str = writer.write(mapsArray);
+
+  fileHandle_t f;
+  trap_FS_FOpenFile(fileName.c_str(), &f, FS_WRITE);
+  trap_FS_Write(str.c_str(), str.length(), f);
+  trap_FS_FCloseFile(f);
 }
 
 MapStatistics::~MapStatistics() {}

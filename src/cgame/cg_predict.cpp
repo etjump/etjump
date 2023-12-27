@@ -1231,6 +1231,7 @@ void CG_PredictPlayerState() {
 
     // ETJump: client side no activate lean
     cg_pmove.noActivateLean = etj_noActivateLean.integer ? qtrue : qfalse;
+    cg_pmove.noPanzerAutoswitch = etj_noPanzerAutoswitch.integer;
 
     // grab data, we only want the final result
     // rain - copy the pmext as it was just before we

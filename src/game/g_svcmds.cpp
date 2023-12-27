@@ -1,8 +1,8 @@
-
-
 // this file holds commands that can be executed by the server console, but not
 // remote clients
 
+#include "etj_local.h"
+#include "etj_timerun_v2.h"
 #include "g_local.h"
 
 /*
@@ -305,77 +305,138 @@ void Svcmd_RemoveIP_f(void) {
   G_Printf("Didn't find %s.\n", str);
 }
 
+static const char *entityTypeNames[] = {
+    "ET_GENERAL",
+    "ET_PLAYER",
+    "ET_ITEM",
+    "ET_MISSILE",
+    "ET_MOVER",
+    "ET_BEAM",
+    "ET_PORTAL",
+    "ET_SPEAKER",
+    "ET_PUSH_TRIGGER",
+    "ET_TELEPORT_TRIGGER",
+    "ET_INVISIBLE",
+    "ET_CONCUSSIVE_TRIGGER",
+    "ET_OID_TRIGGER",
+    "ET_EXPLOSIVE_INDICATOR",
+    "ET_EXPLOSIVE",
+    "ET_EF_SPOTLIGHT",
+    "ET_ALARMBOX",
+    "ET_CORONA",
+    "ET_TRAP",
+    "ET_GAMEMODEL",
+    "ET_FOOTLOCKER",
+    "ET_FLAMEBARREL",
+    "ET_FP_PARTS",
+    "ET_FIRE_COLUMN",
+    "ET_FIRE_COLUMN_SMOKE",
+    "ET_RAMJET",
+    "ET_FLAMETHROWER_CHUNK",
+    "ET_EXPLO_PART",
+    "ET_PROP",
+    "ET_AI_EFFECT",
+    "ET_CAMERA",
+    "ET_MOVERSCALED",
+    "ET_CONSTRUCTIBLE_INDICATOR",
+    "ET_CONSTRUCTIBLE",
+    "ET_CONSTRUCTIBLE_MARKER",
+    "ET_BOMB",
+    "ET_WAYPOINT",
+    "ET_BEAM_2",
+    "ET_TANK_INDICATOR",
+    "ET_TANK_INDICATOR_DEAD",
+    "ET_BOTGOAL_INDICATOR",
+    "ET_CORPSE",
+    "ET_SMOKER",
+    "ET_TEMPHEAD",
+    "ET_MG42_BARREL",
+    "ET_TEMPLEGS",
+    "ET_TRIGGER_MULTIPLE",
+    "ET_TRIGGER_FLAGONLY",
+    "ET_TRIGGER_FLAGONLY_MULTIPLE",
+    "ET_GAMEMANAGER",
+    "ET_AAGUN",
+    "ET_CABINET_H",
+    "ET_CABINET_A",
+    "ET_HEALER",
+    "ET_SUPPLIER",
+    "ET_PORTAL_BLUE",
+    "ET_PORTAL_RED",
+    "ET_TOKEN_EASY",
+    "ET_TOKEN_MEDIUM",
+    "ET_TOKEN_HARD",
+    "ET_LANDMINE_HINT",
+    "ET_ATTRACTOR_HINT",
+    "ET_SNIPER_HINT",
+    "ET_LANDMINESPOT_HINT",
+    "ET_COMMANDMAP_MARKER",
+    "ET_WOLF_OBJECTIVE",
+    "ET_VELOCITY_PUSH_TRIGGER",
+    "ET_EVENTS",
+};
+
+static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
+                  ET_EVENTS + 1,
+              "Entity types array size does not match enum list");
+
+extern const char *eventnames[];
+
 /*
 ===================
 Svcmd_EntityList_f
 ===================
 */
-void Svcmd_EntityList_f(void) {
+static void Svcmd_EntityList_f(void) {
   int e;
-  gentity_t *check;
+  const gentity_t *check;
+  int not_inuse = 0;
+  int max_type_length = 20; // starting point, no less than 11
 
-  check = g_entities + 1;
-  for (e = 1; e < level.num_entities; e++, check++) {
+  check = g_entities;
+  for (e = 0; e < level.num_entities; e++, check++) {
     if (!check->inuse) {
       continue;
     }
-    G_Printf("%3i:", e);
-    switch (check->s.eType) {
-      case ET_GENERAL:
-        G_Printf("ET_GENERAL          ");
-        break;
-      case ET_PLAYER:
-        G_Printf("ET_PLAYER           ");
-        break;
-      case ET_ITEM:
-        G_Printf("ET_ITEM             ");
-        break;
-      case ET_MISSILE:
-        G_Printf("ET_MISSILE          ");
-        break;
-      case ET_MOVER:
-        G_Printf("ET_MOVER            ");
-        break;
-      case ET_BEAM:
-        G_Printf("ET_BEAM             ");
-        break;
-      case ET_PORTAL:
-        G_Printf("ET_PORTAL           ");
-        break;
-      case ET_SPEAKER:
-        G_Printf("ET_SPEAKER          ");
-        break;
-      case ET_PUSH_TRIGGER:
-        G_Printf("ET_PUSH_TRIGGER     ");
-        break;
-      case ET_CONCUSSIVE_TRIGGER:
-        G_Printf("ET_CONCUSSIVE_TRIGGR");
-        break;
-      case ET_TELEPORT_TRIGGER:
-        G_Printf("ET_TELEPORT_TRIGGER ");
-        break;
-      case ET_INVISIBLE:
-        G_Printf("ET_INVISIBLE        ");
-        break;
-      case ET_EXPLOSIVE:
-        G_Printf("ET_EXPLOSIVE        ");
-        break;
-      case ET_EF_SPOTLIGHT:
-        G_Printf("ET_EF_SPOTLIGHT     ");
-        break;
-      case ET_ALARMBOX:
-        G_Printf("ET_ALARMBOX          ");
-        break;
-      default:
-        G_Printf("%3i                 ", check->s.eType);
-        break;
+
+    int l;
+    if (check->s.eType < ET_EVENTS) {
+      l = (int)strlen(entityTypeNames[check->s.eType]);
+    } else {
+      l = (int)strlen(eventnames[check->s.eType - ET_EVENTS]);
+    }
+    if (l > max_type_length) {
+      max_type_length = l;
+    }
+  }
+
+  check = g_entities;
+  G_Printf("%-4s  %-*s %-20s\n", " Num", max_type_length, "Entity Type",
+           "Class");
+  G_Printf(
+      "--------------------------------------------------------------------\n");
+  for (e = 0; e < level.num_entities; e++, check++) {
+    if (!check->inuse) {
+      ++not_inuse;
+      continue;
     }
 
-    if (check->classname) {
-      G_Printf("%s", check->classname);
+    if (check->s.eType < ET_EVENTS) {
+      G_Printf("%4i: %-*s %-20s\n", e, max_type_length,
+               entityTypeNames[check->s.eType],
+               check->classname && check->classname[0] ? check->classname
+                                                       : "noclass");
+    } else {
+      G_Printf("%4i: %-*s %-20s\n", e, max_type_length,
+               eventnames[check->s.eType - ET_EVENTS],
+               check->classname && check->classname[0] ? check->classname
+                                                       : "noclass");
     }
-    G_Printf("\n");
   }
+  G_Printf(
+      "--------------------------------------------------------------------\n");
+  G_Printf("%4i / %4i total entities\n", level.num_entities, MAX_GENTITIES);
+  G_Printf("%4i / %4i entities inactive\n", not_inuse, level.num_entities);
 }
 
 int refClientNumFromString(char *s) {
@@ -551,7 +612,7 @@ void Svcmd_RevivePlayer(char *name) {
 
   if (!g_cheats.integer) {
     trap_SendServerCommand(-1, va("print \"Cheats are not enabled "
-                                  "on this server.\n\""));
+                               "on this server.\n\""));
     return;
   }
 

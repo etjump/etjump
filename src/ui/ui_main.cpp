@@ -64,6 +64,8 @@ static const char *netnames[] = {"???", "UDP", "IPX", NULL};
 static int gamecodetoui[] = {4, 2, 3, 0, 5, 1, 6};
 static int uitogamecode[] = {4, 6, 2, 3, 1, 5, 7};
 
+static int ui_serverFilterType = 0;
+
 // NERVE - SMF - enabled for multiplayer
 static void UI_StartServerRefresh(qboolean full);
 static void UI_StopServerRefresh(void);
@@ -363,19 +365,10 @@ void AssetCache() {
 
   for (n = 0; n < NUM_CROSSHAIRS; n++) {
     uiInfo.uiDC.Assets.crosshairShader[n] =
-        trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c", 'a' + n));
+        ETJump::shaderForCrosshair(n, false);
     uiInfo.uiDC.Assets.crosshairAltShader[n] =
-        trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n));
+        ETJump::shaderForCrosshair(n, true);
   }
-
-  // uiInfo.newHighScoreSound =
-  // trap_S_RegisterSound("sound/feedback/voc_newhighscore.wav");
-
-  /*	for ( n = 1; weaponTypes[n].shadername; n++ ) {
-          if ( weaponTypes[n].shadername )
-              trap_R_RegisterShaderNoMip( weaponTypes[n].shadername );
-      }*/
-  // -NERVE - SMF
 }
 
 void _UI_DrawSides(float x, float y, float w, float h, float size) {
@@ -733,148 +726,6 @@ void Text_Paint(float x, float y, float scale, vec4_t color, const char *text,
   fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
 
   Text_Paint_Ext(x, y, scale, scale, color, text, adjust, limit, style, font);
-}
-
-// copied over from Text_Paint
-// we use the bulk of Text_Paint to determine were we will hit the max width
-// can be used for actual text printing, or dummy run to get the number of lines
-// returns the next char to be printed after wrap, or the ending \0 of the
-// string NOTE: this is clearly non-optimal implementation, see
-// Item_Text_AutoWrap_Paint for one if color_save != NULL, use to keep track of
-// the current color between wraps
-char *Text_AutoWrap_Paint_Chunk(float x, float y, int width, float scale,
-                                vec4_t color, char *text, float adjust,
-                                int limit, int style, qboolean dummy,
-                                vec4_t color_save) {
-  int len, count;
-  vec4_t newColor;
-  glyphInfo_t *glyph;
-  float useScale;
-  fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
-  int index;
-  char *wrap_point = NULL;
-
-  float wrap_x = x + width;
-
-  useScale = scale * font->glyphScale;
-
-  if (text) {
-    char *s = text;
-    trap_R_SetColor(color);
-    memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-    len = strlen(text);
-    if (limit > 0 && len > limit) {
-      len = limit;
-    }
-    count = 0;
-    while (s && *s && count < len) {
-      index = (unsigned char)*s;
-      if (*s == ' ' || *s == '\t' || *s == '\n') {
-        wrap_point = s;
-      }
-
-      // NERVE - SMF - don't draw tabs and newlines
-      if (index < 20) {
-        s++;
-        count++;
-        continue;
-      }
-
-      glyph = &font->glyphs[index]; // NERVE - SMF -
-                                    // this needs to be
-                                    // an unsigned cast
-                                    // for localization
-      if (Q_IsColorString(s)) {
-        if (*(s + 1) == COLOR_NULL) {
-          memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-        } else {
-          memcpy(newColor, g_color_table[ColorIndex(*(s + 1))],
-                 sizeof(newColor));
-          newColor[3] = color[3];
-        }
-        if (!dummy) {
-          trap_R_SetColor(newColor);
-        }
-        if (color_save) {
-          memcpy(&color_save[0], &newColor[0], sizeof(vec4_t));
-        }
-        s += 2;
-        continue;
-      } else {
-        float yadj = useScale * glyph->top;
-
-        if (x + (glyph->xSkip * useScale) + adjust > wrap_x) {
-          if (wrap_point) {
-            return wrap_point + 1; // the
-                                   // next
-                                   // char to
-                                   // be
-                                   // printed
-                                   // after
-                                   // line
-                                   // wrap
-          }
-          // we haven't found the wrap
-          // point .. cut
-          return s;
-        }
-
-        if (!dummy) {
-          if (style == ITEM_TEXTSTYLE_SHADOWED) {
-            constexpr float ofs = 2.5f;
-            colorBlack[3] = newColor[3];
-            trap_R_SetColor(colorBlack);
-            Text_PaintChar(x + ofs * useScale, y - yadj + ofs * useScale,
-                           glyph->imageWidth, glyph->imageHeight, useScale,
-                           glyph->s, glyph->t, glyph->s2, glyph->t2,
-                           glyph->glyph);
-            trap_R_SetColor(newColor);
-            colorBlack[3] = 1.0;
-          }
-          Text_PaintChar(x, y - yadj, glyph->imageWidth, glyph->imageHeight,
-                         useScale, glyph->s, glyph->t, glyph->s2, glyph->t2,
-                         glyph->glyph);
-        }
-
-        x += (glyph->xSkip * useScale) + adjust;
-        s++;
-        count++;
-      }
-    }
-    if (!dummy) {
-      trap_R_SetColor(NULL);
-    }
-  }
-  return text + strlen(text);
-}
-
-void Text_AutoWrap_Paint(float x, float y, int width, int height, float scale,
-                         vec4_t color, const char *l_text, float adjust,
-                         int style) {
-  char text[1024];
-  char *ret, *end, *next;
-  char s;
-  vec4_t aux_color, next_color;
-
-  Q_strncpyz(text, l_text, sizeof(text) - 1);
-  ret = text;
-  end = text + strlen(text);
-  memcpy(&aux_color[0], &color[0], sizeof(vec4_t));
-
-  do {
-    // one run to get the word wrap
-    next = Text_AutoWrap_Paint_Chunk(x, y, width, scale, aux_color, ret, adjust,
-                                     0, style, qtrue, next_color);
-    // now print - hack around a bit to avoid the word wrapped
-    // chars
-    s = *next;
-    *next = '\0';
-    Text_Paint(x, y, scale, aux_color, ret, adjust, 0, style);
-    *next = s;
-    ret = next;
-    memcpy(&aux_color[0], &next_color[0], sizeof(vec4_t));
-    y += height;
-  } while (ret < end);
 }
 
 void Text_PaintWithCursor(float x, float y, float scale, vec4_t color,
@@ -1472,10 +1323,12 @@ void UI_Load() {
   menuDef_t *menu = Menu_GetFocused();
   const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
   if (menu && menu->window.name) {
-    strcpy(lastName, menu->window.name);
+    Q_strncpyz(lastName, menu->window.name, sizeof(lastName));
   }
-  if (menuSet == NULL || menuSet[0] == '\0') {
+  if (menuSet == nullptr || menuSet[0] == '\0') {
     menuSet = "ui/menus.txt";
+  } else {
+    lastName[0] = '\0';
   }
 
   String_Init();
@@ -1492,8 +1345,12 @@ void UI_Load() {
 // ui_gameType assumes gametype 0 is -1 ALL and will not show
 static void UI_DrawGameType(rectDef_t *rect, float scale, vec4_t color,
                             int textStyle) {
-  Text_Paint(rect->x, rect->y, scale, color,
-             uiInfo.gameTypes[ui_gameType.integer].gameType, 0, 0, textStyle);
+  Text_Paint(
+      rect->x, rect->y, scale, color,
+      uiInfo
+          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+          .gameType,
+      0, 0, textStyle);
 }
 
 static int UI_TeamIndexFromName(const char *name) {
@@ -1548,7 +1405,10 @@ void UI_DrawMapPreview(rectDef_t *rect, float scale, vec4_t color,
                        qboolean net) {
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
   int game = net ? ui_netGameType.integer
-                 : uiInfo.gameTypes[ui_gameType.integer].gtEnum;
+                 : uiInfo
+                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                 MAX_GAMETYPES - 1)]
+                       .gtEnum;
 
   if (game == GT_WOLF_CAMPAIGN) {
     if (map < 0 || map > uiInfo.campaignCount) {
@@ -1718,7 +1578,8 @@ ui_currentMap.integer > uiInfo.mapCount) { ui_currentMap.integer = 0;
     }
 
     time =
-uiInfo.mapList[ui_currentMap.integer].timeToBeat[uiInfo.gameTypes[ui_gameType.integer].gtEnum];
+uiInfo.mapList[ui_currentMap.integer].timeToBeat[uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
+0, MAX_GAMETYPES-1)].gtEnum];
 
     minutes = time / 60;
     seconds = time % 60;
@@ -1732,7 +1593,10 @@ static void UI_DrawMapCinematic(rectDef_t *rect, float scale, vec4_t color,
 
   int map = (net) ? ui_currentNetMap.integer : ui_currentMap.integer;
   int game = net ? ui_netGameType.integer
-                 : uiInfo.gameTypes[ui_gameType.integer].gtEnum;
+                 : uiInfo
+                       .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                 MAX_GAMETYPES - 1)]
+                       .gtEnum;
 
   if (game == GT_WOLF_CAMPAIGN) {
     if (map < 0 || map > uiInfo.campaignCount) {
@@ -2324,14 +2188,12 @@ static void UI_DrawMissionBriefingObjectives(rectDef_t *rect, float scale,
 
 static void UI_DrawNetFilter(rectDef_t *rect, float scale, vec4_t color,
                              int textStyle) {
-  if (ui_serverFilterType.integer < 0 ||
-      ui_serverFilterType.integer > numServerFilters) {
-    ui_serverFilterType.integer = 0;
+  if (ui_serverFilterType < 0 || ui_serverFilterType >= numServerFilters) {
+    ui_serverFilterType = 0;
   }
-  Text_Paint(
-      rect->x, rect->y, scale, color,
-      va("Filter: %s", serverFilters[ui_serverFilterType.integer].description),
-      0, 0, textStyle);
+  Text_Paint(rect->x, rect->y, scale, color,
+             va("Filter: %s", serverFilters[ui_serverFilterType].description),
+             0, 0, textStyle);
 }
 
 static void UI_NextOpponent() {
@@ -2483,15 +2345,16 @@ static int UI_OwnerDrawWidth(int ownerDraw, float scale) {
 
   switch (ownerDraw) {
     case UI_GAMETYPE:
-      s = uiInfo.gameTypes[ui_gameType.integer].gameType;
+      s = uiInfo
+              .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                        MAX_GAMETYPES - 1)]
+              .gameType;
       break;
     case UI_NETFILTER:
-      if (ui_serverFilterType.integer < 0 ||
-          ui_serverFilterType.integer > numServerFilters) {
-        ui_serverFilterType.integer = 0;
+      if (ui_serverFilterType < 0 || ui_serverFilterType >= numServerFilters) {
+        ui_serverFilterType = 0;
       }
-      s = va("Filter: %s",
-             serverFilters[ui_serverFilterType.integer].description);
+      s = va("Filter: %s", serverFilters[ui_serverFilterType].description);
       break;
     case UI_KEYBINDSTATUS:
       if (Display_KeyBindPending()) {
@@ -2533,7 +2396,7 @@ static void UI_DrawRedBlue(rectDef_t *rect, float scale, vec4_t color,
 }
 
 static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
-  float size = cg_crosshairSize.integer;
+  float size = cg_crosshairSize.value;
 
   // Make sure currentCrosshair is updated if crosshair is changed via
   // console
@@ -2549,23 +2412,36 @@ static void UI_DrawCrosshair(rectDef_t *rect, float scale, vec4_t color) {
 
   vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
 
-  ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
-  crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
-  trap_R_SetColor(crosshairColor);
-  UI_DrawHandlePic(rect->x + (rect->w - size) / 2,
-                   rect->y + (rect->h - size) / 2, size, size,
-                   uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
+  if (uiInfo.currentCrosshair < 10) {
+    ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
+    crosshairColor[3] = Numeric::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+    trap_R_SetColor(crosshairColor);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
+        size, uiInfo.uiDC.Assets.crosshairShader[uiInfo.currentCrosshair]);
 
-  vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
+    vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
 
-  ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
-  crosshairColorAlt[3] = Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
-  trap_R_SetColor(crosshairColorAlt);
-  UI_DrawHandlePic(
-      rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
-      size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+    ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
+    crosshairColorAlt[3] =
+        Numeric::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
+    trap_R_SetColor(crosshairColorAlt);
+    UI_DrawHandlePic(
+        rect->x + (rect->w - size) / 2, rect->y + (rect->h - size) / 2, size,
+        size, uiInfo.uiDC.Assets.crosshairAltShader[uiInfo.currentCrosshair]);
+  } else {
+    const auto text = va("Crosshair %d", uiInfo.currentCrosshair);
+    const auto width = static_cast<float>(
+        Text_Width_Ext(text, 0.12f, 0, &uiInfo.loadscreenfont1));
+    const auto height = static_cast<float>(
+        Text_Height_Ext(text, 0.12f, 0, &uiInfo.loadscreenfont1));
+    Text_Paint_Ext(rect->x + (rect->w - width) * 0.5f,
+                   rect->y + (rect->h + height) * 0.5f, 0.12f, 0.12f,
+                   colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                   &uiInfo.loadscreenfont1);
+  }
 
-  trap_R_SetColor(NULL);
+  trap_R_SetColor(nullptr);
 }
 
 /*
@@ -3232,7 +3108,10 @@ static qboolean UI_GameType_HandleKey(int flags, float *special, int key,
 
     trap_Cvar_Set("ui_gameType", va("%d", ui_gameType.integer));
     UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-                      uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+                      uiInfo
+                          .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                    MAX_GAMETYPES - 1)]
+                          .gtEnum);
     if (resetMap && oldCount != UI_MapCountByGameType(qtrue)) {
       trap_Cvar_Set("ui_currentMap", "0");
       Menu_SetFeederSelection(nullptr, FEEDER_MAPS, 0, nullptr);
@@ -3397,15 +3276,15 @@ static qboolean UI_NetFilter_HandleKey(int flags, float *special, int key) {
   if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_ENTER ||
       key == K_KP_ENTER) {
     if (key == K_MOUSE2) {
-      ui_serverFilterType.integer--;
+      ui_serverFilterType--;
     } else {
-      ui_serverFilterType.integer++;
+      ui_serverFilterType++;
     }
 
-    if (ui_serverFilterType.integer >= numServerFilters) {
-      ui_serverFilterType.integer = 0;
-    } else if (ui_serverFilterType.integer < 0) {
-      ui_serverFilterType.integer = numServerFilters - 1;
+    if (ui_serverFilterType >= numServerFilters) {
+      ui_serverFilterType = 0;
+    } else if (ui_serverFilterType < 0) {
+      ui_serverFilterType = numServerFilters - 1;
     }
     UI_BuildServerDisplayList(qtrue);
     return qtrue;
@@ -3876,7 +3755,7 @@ UI_LoadDemos
 */
 static void UI_LoadDemos() {
   if (uiInfo.currentDemoPath.empty()) {
-    uiInfo.currentDemoPath.push_back("demos");
+    uiInfo.currentDemoPath.emplace_back("demos");
   }
   std::string path =
       ETJump::StringUtil::join(uiInfo.currentDemoPath, PATH_SEP_STRING);
@@ -3898,7 +3777,8 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Folder;
     objectInfo.name = std::string(dirPtr);
-    objectInfo.displayName = "^7" + objectInfo.name + "/";
+    objectInfo.displayName =
+        "^7" + ETJump::sanitize(objectInfo.name, false) + "/";
     if (objectInfo.name != "." && objectInfo.name != "..") {
       directories.push_back(objectInfo);
     }
@@ -3911,6 +3791,7 @@ static void UI_LoadDemos() {
     FileSystemObjectInfo objectInfo;
     objectInfo.type = FileSystemObjectType::Item;
     objectInfo.name = std::string(namePtr);
+    objectInfo.displayName = ETJump::sanitize(objectInfo.name, false);
     files.push_back(objectInfo);
     namePtr += objectInfo.name.length() + 1;
   }
@@ -3999,7 +3880,7 @@ qboolean UI_CheckExecKey(int key) {
     return qtrue;
   }
 
-  if (key > 256) {
+  if (key >= static_cast<int>(sizeof(menu->onKey) / sizeof(*menu->onKey))) {
     return qfalse;
   }
 
@@ -4296,7 +4177,8 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "loadGameInfo") == 0) {
       UI_ParseGameInfo("gameinfo.txt");
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       return;
     }
     if (Q_stricmp(name, "resetScores") == 0) {
@@ -4321,7 +4203,10 @@ void UI_RunMenuScript(const char **args) {
         trap_Cmd_ExecuteText(
             EXEC_APPEND,
             va("demo %s_%i", uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-               uiInfo.gameTypes[ui_gameType.integer].gtEnum));
+               uiInfo
+                   .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                             MAX_GAMETYPES - 1)]
+                   .gtEnum));
       }
       return;
     }
@@ -4378,7 +4263,7 @@ void UI_RunMenuScript(const char **args) {
     if (Q_stricmp(name, "RunDemo") == 0) {
       if (uiInfo.demoIndex >= 0 &&
           uiInfo.demoIndex < static_cast<int>(uiInfo.demoObjects.size())) {
-        auto selected = uiInfo.demoObjects[uiInfo.demoIndex];
+        const auto &selected = uiInfo.demoObjects[uiInfo.demoIndex];
         if (selected.type == FileSystemObjectType::Folder) {
           if (selected.name == ".") {
             uiInfo.currentDemoPath.pop_back();
@@ -4392,7 +4277,7 @@ void UI_RunMenuScript(const char **args) {
         } else {
           // pop front because demo command automatically
           // appends demos/ to the beginning of the path
-          auto front = uiInfo.currentDemoPath.front();
+          const auto &front = uiInfo.currentDemoPath.front();
           uiInfo.currentDemoPath.pop_front();
           auto demoPath =
               ETJump::StringUtil::join(uiInfo.currentDemoPath, "/") + "/" +
@@ -4884,7 +4769,7 @@ void UI_RunMenuScript(const char **args) {
         int selectedPlayer =
             static_cast<int>(trap_Cvar_VariableValue("cg_selectedPlayer"));
         if (selectedPlayer < uiInfo.myTeamCount) {
-          strcpy(buff, orders);
+          Q_strncpyz(buff, orders, sizeof(buff));
           trap_Cmd_ExecuteText(EXEC_APPEND,
                                va(buff, uiInfo.teamClientNums[selectedPlayer]));
           trap_Cmd_ExecuteText(EXEC_APPEND, "\n");
@@ -4895,7 +4780,7 @@ void UI_RunMenuScript(const char **args) {
                           uiInfo.teamNames[i]) == 0) {
               continue;
             }
-            strcpy(buff, orders);
+            Q_strncpyz(buff, orders, sizeof(buff));
             trap_Cmd_ExecuteText(EXEC_APPEND, va(buff, uiInfo.teamNames[i]));
             trap_Cmd_ExecuteText(EXEC_APPEND, "\n");
           }
@@ -4929,7 +4814,7 @@ void UI_RunMenuScript(const char **args) {
         int selectedPlayer =
             static_cast<int>(trap_Cvar_VariableValue("cg_selectedPlayer"));
         if (selectedPlayer < uiInfo.myTeamCount) {
-          strcpy(buff, orders);
+          Q_strncpyz(buff, orders, sizeof(buff));
           trap_Cmd_ExecuteText(EXEC_APPEND,
                                va(buff, uiInfo.teamClientNums[selectedPlayer]));
           trap_Cmd_ExecuteText(EXEC_APPEND, "\n");
@@ -5709,7 +5594,10 @@ UI_MapCountByGameType
 static int UI_MapCountByGameType(qboolean singlePlayer) {
   int i, c, game;
   c = 0;
-  game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+  game = singlePlayer ? uiInfo
+                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                      MAX_GAMETYPES - 1)]
+                            .gtEnum
                       : ui_netGameType.integer;
 
   if (game == GT_WOLF_CAMPAIGN) {
@@ -5770,8 +5658,9 @@ UI_CampaignCount
 static int UI_CampaignCount(qboolean singlePlayer) {
   int i, c /*, game*/;
   c = 0;
-  // game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
-  // : uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
+  // game = singlePlayer ? uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer,
+  // 0, MAX_GAMETYPES-1)].gtEnum :
+  // uiInfo.gameTypes[ui_netGameType.integer].gtEnum;
 
   for (i = 0; i < uiInfo.campaignCount; i++) {
     if (singlePlayer &&
@@ -5875,8 +5764,8 @@ UI_BuildServerDisplayList
 ==================
 */
 static void UI_BuildServerDisplayList(int force) {
-  int i, count, clients, maxClients, ping, game, len, visible, friendlyFire,
-      maxlives, punkbuster, antilag, password, weaponrestricted, balancedteams;
+  int i, count, clients, maxClients, ping, game, len, friendlyFire, maxlives,
+      punkbuster, antilag, password, weaponrestricted, balancedteams;
   char info[MAX_STRING_CHARS];
   // qboolean startRefresh = qtrue; // TTimo: unused
 
@@ -5895,11 +5784,12 @@ static void UI_BuildServerDisplayList(int force) {
   // do motd updates here too
   trap_Cvar_VariableStringBuffer("cl_motdString", uiInfo.serverStatus.motd,
                                  sizeof(uiInfo.serverStatus.motd));
-  len = strlen(uiInfo.serverStatus.motd);
+  len = static_cast<int>(strlen(uiInfo.serverStatus.motd));
   if (len == 0) {
-    strcpy(uiInfo.serverStatus.motd,
-           va("Enemy Territory - Version: %s", Q3_VERSION));
-    len = strlen(uiInfo.serverStatus.motd);
+    Q_strncpyz(uiInfo.serverStatus.motd,
+               va("Enemy Territory - Version: %s", Q3_VERSION),
+               sizeof(uiInfo.serverStatus.motd));
+    len = static_cast<int>(strlen(uiInfo.serverStatus.motd));
   }
   if (len != uiInfo.serverStatus.motdLen) {
     uiInfo.serverStatus.motdLen = len;
@@ -5911,9 +5801,8 @@ static void UI_BuildServerDisplayList(int force) {
     uiInfo.serverStatus.numDisplayServers = 0;
     uiInfo.serverStatus.numPlayersOnServers = 0;
     // set list box index to zero
-    Menu_SetFeederSelection(NULL, FEEDER_SERVERS, 0, NULL);
-    // mark all servers as visible so we store ping updates for
-    // them
+    Menu_SetFeederSelection(nullptr, FEEDER_SERVERS, 0, nullptr);
+    // mark all servers as visible, so we store ping updates for them
     trap_LAN_MarkServerVisible(ui_netSource.integer, -1, qtrue);
   }
 
@@ -5932,13 +5821,11 @@ static void UI_BuildServerDisplayList(int force) {
     uiInfo.serverStatus.currentServerPreview = 0;
   }
 
-  visible = qfalse;
   for (i = 0; i < count; i++) {
     // if we already got info for this server
     if (!trap_LAN_ServerIsVisible(ui_netSource.integer, i)) {
       continue;
     }
-    visible = qtrue;
     // get the ping for this server
     ping = trap_LAN_GetServerPing(ui_netSource.integer, i);
     if (ping > 0 || ui_netSource.integer == AS_FAVORITES) {
@@ -6078,26 +5965,19 @@ static void UI_BuildServerDisplayList(int force) {
               va("levelshots/%s", Info_ValueForKey(info, "mapname")));
         } else {
           uiInfo.serverStatus.currentServerPreview =
-              trap_R_RegisterShaderNoMip("levelshots/"
-                                         "unknownmap");
+              trap_R_RegisterShaderNoMip("levelshots/unknownmap");
         }
       }
 
       UI_BinaryServerInsertion(i);
       // done with this server
-      if (ping > /*=*/0) {
+      if (ping > 0) {
         trap_LAN_MarkServerVisible(ui_netSource.integer, i, qfalse);
       }
     }
   }
 
   uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime;
-
-  // if there were no servers visible for ping updates
-  if (!visible) {
-    //		UI_StopServerRefresh();
-    //		uiInfo.serverStatus.nextDisplayRefresh = 0;
-  }
 }
 
 typedef struct {
@@ -6582,7 +6462,10 @@ static const char *UI_SelectedMap(qboolean singlePlayer, int index,
                                   int *actual) {
   int i, c, game;
   c = 0;
-  game = singlePlayer ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+  game = singlePlayer ? uiInfo
+                            .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                                      MAX_GAMETYPES - 1)]
+                            .gtEnum
                       : ui_netGameType.integer;
   *actual = 0;
 
@@ -6921,13 +6804,7 @@ const char *UI_FeederItemText(float feederID, int index, int column,
     }
   } else if (feederID == FEEDER_DEMOS) {
     if (index >= 0 && index < static_cast<int>(uiInfo.demoObjects.size())) {
-      const auto object = &uiInfo.demoObjects[index];
-      switch (object->type) {
-        case FileSystemObjectType::Folder:
-          return object->displayName.c_str();
-        case FileSystemObjectType::Item:
-          return object->name.c_str();
-      }
+      return uiInfo.demoObjects[index].displayName.c_str();
     }
   } else if (feederID == FEEDER_PROFILES) {
     if (index >= 0 && index < uiInfo.profileCount) {
@@ -6974,7 +6851,10 @@ static qhandle_t UI_FeederItemImage(float feederID, int index) {
     UI_SelectedMap(feederID == FEEDER_MAPS ? qtrue : qfalse, index, &actual);
     index = actual;
     game = feederID == FEEDER_MAPS
-               ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+               ? uiInfo
+                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                               MAX_GAMETYPES - 1)]
+                     .gtEnum
                : ui_netGameType.integer;
     if (game == GT_WOLF_CAMPAIGN) {
       if (index >= 0 && index < uiInfo.campaignCount) {
@@ -7037,7 +6917,10 @@ void UI_FeederSelection(float feederID, int index) {
     // map  = (feederID == FEEDER_ALLMAPS) ?
     // ui_currentNetMap.integer : ui_currentMap.integer;
     game = feederID == FEEDER_MAPS
-               ? uiInfo.gameTypes[ui_gameType.integer].gtEnum
+               ? uiInfo
+                     .gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+                                               MAX_GAMETYPES - 1)]
+                     .gtEnum
                : ui_netGameType.integer;
     /*if( game == GT_WOLF_CAMPAIGN ) {
         if (uiInfo.campaignList[map].campaignCinematic >= 0) {
@@ -7081,7 +6964,8 @@ void UI_FeederSelection(float feederID, int index) {
       // 0, 0, 0, 0,
       //(CIN_loop | CIN_silent) );
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentMap.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       //			trap_Cvar_Set("ui_opponentModel",
       // uiInfo.mapList[ui_currentMap.integer].opponentName);
       // updateOpponentModel = qtrue;
@@ -7128,7 +7012,8 @@ void UI_FeederSelection(float feederID, int index) {
       // uiInfo.campaignList[ui_currentCampaign.integer].campaignShortName),
       // 0, 0, 0, 0, (CIN_loop | CIN_silent) );
       //			UI_LoadBestScores(uiInfo.mapList[ui_currentCampaign.integer].mapLoadName,
-      // uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+      // uiInfo.gameTypes[Numeric::clamp(ui_gameType.integer, 0,
+      // MAX_GAMETYPES-1)].gtEnum);
       //			trap_Cvar_Set("ui_opponentModel",
       // uiInfo.mapList[ui_currentMap.integer].opponentName);
       // updateOpponentModel = qtrue;
@@ -8005,8 +7890,11 @@ void _UI_Init(int legacyClient, int clientVersion) {
   Menus_CloseAll();
 
   trap_LAN_LoadCachedServers();
-  UI_LoadBestScores(uiInfo.mapList[0].mapLoadName,
-                    uiInfo.gameTypes[ui_gameType.integer].gtEnum);
+  UI_LoadBestScores(
+      uiInfo.mapList[0].mapLoadName,
+      uiInfo
+          .gameTypes[Numeric::clamp(ui_gameType.integer, 0, MAX_GAMETYPES - 1)]
+          .gtEnum);
 
   // sets defaults for ui temp cvars
   // rain - bounds check array index, although I'm pretty sure this
@@ -8104,6 +7992,11 @@ UI_MouseEvent
 =================
 */
 void _UI_MouseEvent(int dx, int dy) {
+  float mdx, mdy;
+  ETJump::scaleMenuSensitivity(dx, dy, &mdx, &mdy);
+  dx = static_cast<int>(mdx);
+  dy = static_cast<int>(mdy);
+
   // update mouse screen position
   uiInfo.uiDC.cursorx += dx;
   if (uiInfo.uiDC.cursorx < 0) {
@@ -8120,10 +8013,7 @@ void _UI_MouseEvent(int dx, int dy) {
   }
 
   if (Menu_Count() > 0) {
-    // menuDef_t *menu = Menu_GetFocused();
-    // Menu_HandleMouseMove(menu, uiInfo.uiDC.cursorx,
-    // uiInfo.uiDC.cursory);
-    Display_MouseMove(NULL, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
+    Display_MouseMove(nullptr, uiInfo.uiDC.cursorx, uiInfo.uiDC.cursory);
   }
 }
 
@@ -8428,6 +8318,11 @@ void _UI_SetActiveMenu(uiMenuCommand_t menu) {
         // trap_Cvar_Set( "cl_paused", "1" );
         trap_Key_SetCatcher(KEYCATCH_UI);
         Menus_OpenByName("ingame_messagemode");
+        return;
+
+      case UIMENU_INGAME_FT_SAVELIMIT:
+        trap_Key_SetCatcher(KEYCATCH_UI);
+        Menus_OpenByName("ingame_ft_savelimit");
         return;
 
       default:
@@ -8831,7 +8726,6 @@ vmCvar_t ui_clipboardName; // the name of the group for the current clipboard
 vmCvar_t ui_notebookCurrentPage; //----(SA)	added
 
 // NERVE - SMF - cvars for multiplayer
-vmCvar_t ui_serverFilterType;
 vmCvar_t ui_currentNetMap;
 vmCvar_t ui_currentMap;
 vmCvar_t ui_mapIndex;
@@ -8907,6 +8801,8 @@ vmCvar_t cl_bypassMouseInput;
 vmCvar_t ui_autoredirect;
 
 vmCvar_t ui_voteCheats;
+
+vmCvar_t etj_menuSensitivity;
 
 cvarTable_t cvarTable[] = {
 
@@ -9168,6 +9064,8 @@ cvarTable_t cvarTable[] = {
     {&ui_autoredirect, "ui_autoredirect", "0", CVAR_ARCHIVE},
 
     {&ui_voteCheats, "ui_voteCheats", "0", CVAR_ARCHIVE},
+
+    {&etj_menuSensitivity, "etj_menuSensitivity", "1.0", CVAR_ARCHIVE},
 };
 
 int cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

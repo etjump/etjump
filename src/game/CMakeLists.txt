@@ -53,17 +53,18 @@ add_library(qagame MODULE
 	"etj_async_operation.cpp"
 	"etj_banner_system.cpp"
 	"etj_command_parser.cpp"
-	"etj_command_system.cpp"
 	"etj_command_variables.cpp"
 	"etj_commands.cpp"
 	"etj_custom_map_votes.cpp"
 	"etj_database.cpp"
+	"etj_database_v2.cpp"
 	"etj_deathrun_system.cpp"
 	"etj_entity_utilities.cpp"
 	"etj_file.cpp"
 	"etj_filesystem.cpp"
 	"etj_inactivity_timer.cpp"
 	"etj_levels.cpp"
+	"etj_log.cpp"
 	"etj_main.cpp"
 	"etj_main_ext.cpp"
 	"etj_map_statistics.cpp"
@@ -75,18 +76,21 @@ add_library(qagame MODULE
 	"etj_result_set_formatter.cpp"
 	"etj_save_system.cpp"
 	"etj_session.cpp"
-	"etj_sqlite_wrapper.cpp"
+	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"
 	"etj_target_init.cpp"
 	"etj_time_utilities.cpp"
-	"etj_timerun.cpp"
+	"etj_timerun_repository.cpp"
+	"etj_timerun_v2.cpp"
+	"etj_timerun_entities.cpp"
+	"etj_timerun_shared.cpp"
 	"etj_tokens.cpp"
 	"etj_user.cpp"
 	"etj_utilities.cpp"
 	${GAME_HEADERS}
 )
 target_compile_definitions(qagame PRIVATE GAMEDLL)
-target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libuuid4 fmt::fmt)
+target_link_libraries(qagame PRIVATE cxx_compiler_opts libjson libsha1 libsqlite libsqlite_modern_cpp libuuid4 fmt::fmt)
 target_link_libraries(qagame PRIVATE $<IF:$<CXX_COMPILER_ID:MSVC>,,pthread>)
 set_target_properties(qagame PROPERTIES 
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

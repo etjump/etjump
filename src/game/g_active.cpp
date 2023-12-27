@@ -481,6 +481,7 @@ void SpectatorThink(gentity_t *ent, usercmd_t *ucmd) {
     pm.trace = trap_TraceCapsuleNoEnts;
     pm.pointcontents = trap_PointContents;
     pm.noActivateLean = client->pers.noActivateLean;
+    pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
 #ifdef SAVEGAME_SUPPORT
     if (g_gametype.integer == GT_SINGLE_PLAYER && g_reloading.integer) {
@@ -987,6 +988,12 @@ void ClientThink_real(gentity_t *ent) {
     //		G_Printf("serverTime >>>>>\n" );
   }
 
+  if (client->pers.pmoveFixed) {
+    ucmd->serverTime =
+        ((ucmd->serverTime + pmove_msec.integer - 1) / pmove_msec.integer) *
+        pmove_msec.integer;
+  }
+
   msec = ucmd->serverTime - client->ps.commandTime;
 
   // following others may result in bad times, but we still want
@@ -996,12 +1003,6 @@ void ClientThink_real(gentity_t *ent) {
   }
   if (msec > 200) {
     msec = 200;
-  }
-
-  if (client->pers.pmoveFixed) {
-    ucmd->serverTime =
-        ((ucmd->serverTime + pmove_msec.integer - 1) / pmove_msec.integer) *
-        pmove_msec.integer;
   }
 
   if (client->wantsscore) {
@@ -1171,12 +1172,18 @@ void ClientThink_real(gentity_t *ent) {
   pm.pmove_msec = pmove_msec.integer;
   pm.shared = shared.integer;
   pm.noActivateLean = client->pers.noActivateLean;
+  pm.noPanzerAutoswitch = client->pers.noPanzerAutoswitch;
 
   pm.noWeapClips = qfalse;
 
   VectorCopy(client->ps.origin, client->oldOrigin);
   VectorCopy(ent->r.mins, pm.mins);
   VectorCopy(ent->r.maxs, pm.maxs);
+
+  // save waterlevel/type in case we skip Pmove this frame
+  // (>125fps & pmove_fixed 1) so P_WorldEffects doesn't reset pmext->airLeft
+  pm.waterlevel = ent->waterlevel;
+  pm.watertype = ent->watertype;
 
   // NERVE - SMF
   pm.gametype = g_gametype.integer;
@@ -1454,24 +1461,15 @@ void ClientThink_real(gentity_t *ent) {
     }
   }
 
+  // perform once-a-second actions
+  if (level.match_pause == PAUSE_NONE) {
+    ClientTimerActions(ent, msec);
+  }
+
   CheckForEvents(ent);
 
   if (g_blockCheatCvars.integer) {
-    if (client->pers.clientFlags & CGF_CHEATCVARSON ||
-        (client->pers.maxFPS > 125 && !client->pers.pmoveFixed) ||
-        (client->pers.maxFPS < 25)) {
-      const char *message = "print \"^gThe following cvar values are not "
-                            "allowed on this server:\n"
-                            "^7m_pitch:      (-0.01 <= x <= 0.01)\n"
-                            "^7cl_yawspeed:  (not 0)\n"
-                            "^7cl_freelook:  (0)\n"
-                            "^7pmove_Fixed:  (0) with "
-                            "^7com_maxFPS:   (25 < x or x > 125)\n\"";
-      CP("chat \"^3Notification: ^7cheat cvars are "
-         "disabled on this server. "
-         "Check console for more information");
-      CP(message);
-      trap_SendServerCommand(ent - g_entities, "cheatCvarsOff");
+    if (ETJump::checkCheatCvars(client, g_blockCheatCvars.integer)) {
       SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1),
               static_cast<weapon_t>(-1), qfalse);
     }
@@ -1874,11 +1872,6 @@ void ClientEndFrame(gentity_t *ent) {
     ent->lastHintCheckTime += time_delta;
     ent->pain_debounce_time += time_delta;
     ent->s.onFireEnd += time_delta;
-  }
-
-  // perform once-a-second actions unless dead
-  if (level.match_pause == PAUSE_NONE && !(ent->client->ps.eFlags & EF_DEAD)) {
-    ClientTimerActions(ent, level.time - level.previousTime);
   }
 
   //

@@ -34,10 +34,10 @@ public:
   static float getOptAngle(const playerState_t &ps, pmove_t *pm);
 
   CGaz();
-  ~CGaz(){};
+  ~CGaz() override = default;
 
   void render() const override;
-  void beforeRender() override;
+  bool beforeRender() override;
 
 private:
   enum class CGazTrueness { CGAZ_JUMPCROUCH = 1, CGAZ_GROUND = 2 };
@@ -55,29 +55,29 @@ private:
     float wishspeed;
   };
 
-  state_t state;
+  state_t state{};
 
-  float drawMin;
-  float drawOpt;
-  float drawMaxCos;
-  float drawMax;
-  float drawVel;
-  float yaw;
-  vec4_t CGaz1Colors[4];
-  vec4_t CGaz2Colors[2];
+  float drawMin{};
+  float drawOpt{};
+  float drawMaxCos{};
+  float drawMax{};
+  float drawVel{};
+  float yaw{};
+  vec4_t CGaz1Colors[4]{};
+  vec4_t CGaz2Colors[2]{};
 
   bool canSkipDraw() const;
   void UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd);
-  void UpdateCGaz2(void);
+  void UpdateCGaz2();
   float GetSlickGravity();
   void UpdateDraw(float wishspeed, float accel);
-  float UpdateDrawMin(state_t const *state);
-  float UpdateDrawOpt(state_t const *state);
-  float UpdateDrawMaxCos(state_t const *state, float d_opt);
-  float UpdateDrawMax(state_t const *state, float d_max_cos);
+  static float UpdateDrawMin(state_t const *state);
+  static float UpdateDrawOpt(state_t const *state);
+  static float UpdateDrawMaxCos(state_t const *state, float d_opt);
+  static float UpdateDrawMax(state_t const *state, float d_max_cos);
   void startListeners();
 
   playerState_t *ps = &cg.predictedPlayerState;
-  pmove_t *pm;
+  pmove_t *pm{};
 };
 } // namespace ETJump

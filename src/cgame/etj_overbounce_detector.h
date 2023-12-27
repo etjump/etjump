@@ -22,8 +22,32 @@
  * SOFTWARE.
  */
 
-#include "etj_command_system.h"
+#pragma once
 
-ETJump::CommandSystem::CommandSystem() : _parser(CommandParser()) {}
+#include "cg_local.h"
+#include "etj_irenderable.h"
 
-ETJump::CommandSystem::~CommandSystem() {}
+namespace ETJump {
+class OverbounceDetector : public IRenderable {
+  bool beforeRender() override;
+  void render() const override;
+  static bool canSkipDraw();
+
+  playerState_t *ps;
+  float x;
+  float pmoveSec;
+  float zVel, zVelSnapped;
+
+  float startHeight, endHeight;
+  vec3_t start, end;
+  vec3_t snap;
+
+  int traceContents;
+  int gravity;
+
+  bool belowOverbounce;
+  bool jumpOverbounce;
+  bool fallOverbounce;
+  bool stickyOverbounce;
+};
+} // namespace ETJump

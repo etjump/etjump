@@ -8,6 +8,8 @@
 
 #include "../game/g_local.h"
 #include "../game/q_shared.h"
+#include "etj_printer.h"
+#include "etj_string_utilities.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -148,20 +150,20 @@ static qboolean etjump_ScriptSetPlayerSpawn(gentity_t *ent, const char *params,
                                             bool isAutoSpawn) {
   auto mod = isAutoSpawn ? "setplayerautospawn" : "setplayerspawn";
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
+  if (!activator || !activator->client) {
     return qfalse;
   }
   // get target name
   auto token = COM_ParseExt(&params, qfalse);
   if (!token[0]) {
-    G_Error(va("G_Scripting: %s must have a target spawn\n", mod));
+    G_Error("G_Scripting: %s must have a target spawn\n", mod);
   }
   // get objective entity
   char spawnname[MAX_QPATH];
   Q_strncpyz(spawnname, token, MAX_QPATH);
   auto tent = G_Find(nullptr, FOFS(message), spawnname);
   if (!tent) {
-    G_Error(va("G_Scripting: %s, couldn't find target\n", mod));
+    G_Error("G_Scripting: %s, couldn't find target\n", mod);
   }
   if (!tent->count) {
     return qfalse;
@@ -216,7 +218,7 @@ qboolean G_ScriptAction_SetPlayerSpawn(gentity_t *ent, char *params) {
 */
 qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params) {
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
+  if (!activator || !activator->client) {
     return qfalse;
   }
   const char *constparams = params;
@@ -238,7 +240,7 @@ qboolean G_ScriptAction_DamagePlayer(gentity_t *ent, char *params) {
 */
 qboolean G_ScriptAction_KillPlayer(gentity_t *ent, char *params) {
   auto activator = ent->activator;
-  if (!activator && !activator->client) {
+  if (!activator || !activator->client) {
     return qfalse;
   }
   activator->flags &= ~FL_GODMODE;
@@ -3414,8 +3416,15 @@ qboolean G_ScriptAction_Announce(gentity_t *ent, char *params) {
             "required\n");
   }
 
-  trap_SendServerCommand(-1, va("cpm \"%s\"", token));
-  //	trap_SendServerCommand( -1, va("cp \"%s\" 2", token ));
+  std::string str = token;
+  auto activator = ent->activator;
+  if (activator && activator->client) {
+    const std::string name =
+        ETJump::stringFormat("%s^7", activator->client->pers.netname);
+    ETJump::StringUtil::replaceAll(str, "%s", name);
+  }
+
+  Printer::BroadcastPopupMessage(str);
 
   return qtrue;
 }
@@ -3842,11 +3851,10 @@ qboolean G_ScriptAction_Construct(gentity_t *ent, char *params) {
     G_Error("G_Scripting: \"construct\" must have a targetname\n");
   }
 
-  constructible = G_FindByTargetname(NULL, token);
+  constructible = G_FindByTargetname(nullptr, token);
   if (!constructible || !constructible->inuse ||
       constructible->s.eType != ET_CONSTRUCTIBLE) {
-    G_Error("G_Scripting: \"construct\" could not find entity "
-            "with targetname: "
+    G_Error("G_Scripting: \"construct\" could not find entity with targetname: "
             "%s\n",
             token);
   }
@@ -4117,11 +4125,13 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
   Q_strncpyz(lastToken, token, sizeof(lastToken));
   token = COM_ParseExt(&pString, qfalse);
 
-  if (!Q_stricmp(lastToken, "inc")) {
+  // ETJump: we don't allow these as they can be abused
+  if (!Q_stricmp(lastToken, "inc") ||
+      (!Q_stricmp(lastToken, "set") || (!Q_stricmp(lastToken, "random")))) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
     }
-    trap_Cvar_Set(cvarName, va("%i", cvarValue + 1));
+    G_Printf("G_Scripting: cvar %s is not allowed.\n", lastToken);
   } else if (!Q_stricmp(lastToken, "abort_if_less_than")) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
@@ -4188,17 +4198,6 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
       ent->scriptStatus.scriptStackHead =
           ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
-  } else if (!Q_stricmp(lastToken, "set")) {
-    if (!token[0]) {
-      G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
-    }
-    trap_Cvar_Set(cvarName, va("%i", Q_atoi(token)));
-  } else if (!Q_stricmp(lastToken, "random")) {
-    if (!token[0]) {
-      G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
-    }
-    cvarValue = rand() % Q_atoi(token);
-    trap_Cvar_Set(cvarName, va("%i", cvarValue));
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
@@ -4206,36 +4205,33 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
     if (cvarValue == Q_atoi(token)) {
       gentity_t *trent;
       int oldId;
-      //			qboolean loop = qfalse;
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(lastToken, token, sizeof(lastToken));
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       terminate = qfalse;
       found = qfalse;
       // for all entities/bots with this scriptName
-      trent = NULL;
+      trent = nullptr;
 
       for (trent = G_Find(trent, FOFS(scriptName), lastToken); trent;
            trent = G_Find(trent, FOFS(scriptName), lastToken)) {
         found = qtrue;
         oldId = trent->scriptStatus.scriptId;
         G_Script_ScriptEvent(trent, "trigger", name);
-        // if the script changed, return false
-        // so we don't muck with it's variables
+        // if the script changed, return false,
+        // so we don't muck with its variables
         if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
           terminate = qtrue;
         }
@@ -4247,9 +4243,6 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
       if (found) {
         return qtrue;
       }
-      //
-      //			G_Error( "G_Scripting:
-      // trigger has unknown name: %s\n", name );
       G_Printf("G_Scripting: trigger has unknown name: %s\n", name);
       return qtrue;
     }
@@ -4327,13 +4320,13 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   p = params;
 
   // Get each key/value pair
-  while (1) {
+  while (true) {
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
       break;
     }
 
-    strcpy(key, token);
+    Q_strncpyz(key, token, sizeof(key));
 
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
@@ -4341,7 +4334,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
       break;
     }
 
-    strcpy(value, token);
+    Q_strncpyz(value, token, sizeof(value));
 
     if (g_scriptDebug.integer) {
       G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time,
@@ -4365,9 +4358,9 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
     G_ParseField(key, value, ent);
 
     if (!Q_stricmp(key, "targetname")) {
-      // need to hash this ent targetname for setstate
-      // script targets...
-      ent->targetnamehash = BG_StringHashValue(ent->targetname);
+      // need to hash this ent targetname for setstate script targets...
+      ent->targetnamehash =
+          static_cast<int>(BG_StringHashValue(ent->targetname));
     }
   }
 
@@ -4409,13 +4402,13 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
   p = params;
 
   // get each key/value pair
-  while (1) {
+  while (true) {
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
       break;
     }
 
-    strcpy(key, token);
+    Q_strncpyz(key, token, sizeof(key));
 
     token = COM_ParseExt(&p, qfalse);
     if (!token[0]) {
@@ -4432,6 +4425,33 @@ qboolean G_ScriptAction_Create(gentity_t *ent, char *params) {
     level.numSpawnVars++;
   }
   G_SpawnGEntityFromSpawnVars();
+
+  return qtrue;
+}
+
+qboolean G_ScriptAction_Announce_Private(gentity_t *ent, char *params) {
+  const char *pString, *token;
+
+  auto activator = ent->activator;
+  if (!activator || !activator->client) {
+    // if we don't error out here, script execution hangs in the block where
+    // this gets called, so better to error out to avoid any confusion
+    G_Error("G_ScriptAction_Announce_Private: call to client only script "
+            "action with no activator\n");
+  }
+
+  pString = params;
+  token = COM_Parse(&pString);
+  if (!token[0]) {
+    G_Error("G_ScriptAction_Announce_Private: statement parameter required\n");
+  }
+
+  std::string str = token;
+  const std::string name =
+      ETJump::stringFormat("%s^7", activator->client->pers.netname);
+  ETJump::StringUtil::replaceAll(str, "%s", name);
+
+  Printer::SendPopupMessage(ClientNum(activator), str);
 
   return qtrue;
 }

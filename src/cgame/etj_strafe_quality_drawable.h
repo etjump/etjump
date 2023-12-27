@@ -53,7 +53,7 @@ class StrafeQuality : public IRenderable {
 
 public:
   StrafeQuality();
-  void beforeRender() override;
+  bool beforeRender() override;
   void render() const override;
 };
 } // namespace ETJump

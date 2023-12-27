@@ -29,13 +29,15 @@ char *BindingFromName(const char *cvar);
 
 ETJump::QuickFollowDrawer::QuickFollowDrawer() {}
 
-void ETJump::QuickFollowDrawer::beforeRender() {}
-
-void ETJump::QuickFollowDrawer::render() const {
+bool ETJump::QuickFollowDrawer::beforeRender() {
   if (canSkipDraw()) {
-    return;
+    return false;
   }
 
+  return true;
+}
+
+void ETJump::QuickFollowDrawer::render() const {
   float *color = CG_FadeColor(cg.crosshairClientTime, 1000);
   if (!color) {
     return;

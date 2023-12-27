@@ -26,10 +26,10 @@
         Any player related events, excluding spectated players or other players.
         Currently added:
         *	respawn ( revived: "1" or "0")
-        *	timerun:start ( runname, starttime, recordtime )
-        *	timerun:stop ( runname, completiontime )
-        *	timerun:record ( runname, completiontime )
-        *	timerun:completion ( runname, compiletiontime )
+        *	timerun:start ( clientNum, runname, starttime, recordtime )
+        *	timerun:stop ( clientNum, runname, completionTime )
+        *	timerun:record ( clientNum, runname, completionTime )
+        *	timerun:completion ( clientNum, runname, completionTime )
         *	load
         add more as needed
 */
@@ -59,9 +59,9 @@ public:
   ~PlayerEventsHandler();
   bool check(const std::string &event,
              const std::vector<std::string> &arguments);
-  bool
-  subscribe(const std::string &event,
-            std::function<void(const std::vector<std::string> &)> callback);
+  bool subscribe(
+      const std::string &event,
+      const std::function<void(const std::vector<std::string> &)> &callback);
   bool unsubscribe(const std::string &event);
 };
 } // namespace ETJump

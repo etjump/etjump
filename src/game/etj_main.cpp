@@ -27,13 +27,16 @@
 #include <functional>
 #include <memory>
 #include "etj_banner_system.h"
+#include "etj_database_v2.h"
 #include "etj_printer.h"
 
 namespace {
 // each of these will be called on every frame
 std::vector<std::function<void(int levelTime)>> runFrameCallbacks;
 
-std::unique_ptr<ETJump::BannerSystem> bannerSystem = nullptr;
+// suppress clang-tidy - this might be unused if g_banners is set to 0
+[[maybe_unused]] std::unique_ptr<ETJump::BannerSystem> bannerSystem = nullptr;
+
 void InitBannerSystem() {
   ETJump::BannerSystem::Options options;
   options.interval = g_bannerTime.integer;
@@ -50,13 +53,14 @@ void InitBannerSystem() {
   if (strlen(g_banner5.string) > 0)
     options.messages.push_back(g_banner5.string);
 
-  bannerSystem =
-      std::unique_ptr<ETJump::BannerSystem>(new ETJump::BannerSystem(options));
+  bannerSystem = std::make_unique<ETJump::BannerSystem>(std::move(options));
 }
 
 void ShutdownBannerSystem() {
   Printer::LogPrintln("Banner system shut down");
-  bannerSystem = nullptr;
+  if (bannerSystem) {
+    bannerSystem = nullptr;
+  }
 }
 } // namespace
 

@@ -111,7 +111,8 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
     }
 
     if (!g_cheats.integer && position > 0 && client->sess.timerunActive &&
-        client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS) {
+        client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
       CPTo(ent, "Save slots are disabled for this timerun.");
       return;
     }
@@ -128,7 +129,8 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->sess.timerunActive &&
-      client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE) {
+      client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
     CPTo(ent, "^3Save ^7is disabled for this timerun.");
     return;
   }
@@ -162,8 +164,7 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
     } else {
       if (client->pers.race.isRacing) {
         if (client->pers.race.saveLimit == 0) {
-          CPTo(ent, "^7You've used all "
-                    "your saves.");
+          CPTo(ent, "^7You've used all your saves.");
           return;
         }
 
@@ -172,26 +173,14 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
         }
       } else {
         fireteamData_t *ft;
-        if (G_IsOnFireteam(ent - g_entities, &ft)) {
-          if (ft->saveLimit < 0) {
-            client->sess.saveLimitFt = 0;
-          }
-          if (ft->saveLimit) {
+        if (G_IsOnFireteam(ClientNum(ent), &ft)) {
+          if (ft->saveLimit == FT_SAVELIMIT_NOT_SET) {
+            client->sess.saveLimitFt = FT_SAVELIMIT_NOT_SET;
+          } else {
             if (client->sess.saveLimitFt) {
               client->sess.saveLimitFt--;
             } else {
-              CPTo(ent, "^7Yo"
-                        "u'"
-                        "ve "
-                        "used"
-                        " all"
-                        " you"
-                        "r "
-                        "fire"
-                        "team"
-                        " sav"
-                        "es"
-                        ".");
+              CPTo(ent, "^7You've used all your fireteam saves.");
               return;
             }
           }
@@ -257,7 +246,8 @@ void ETJump::SaveSystem::load(gentity_t *ent) {
     }
 
     if (!g_cheats.integer && slot > 0 && client->sess.timerunActive &&
-        client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS) {
+        client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
       CPTo(ent, "Save slots are disabled for this timerun.");
       return;
     }
@@ -273,8 +263,14 @@ void ETJump::SaveSystem::load(gentity_t *ent) {
     saveLastLoadPos(ent); // store position for unload command
     restoreStanceFromSave(ent, validSave);
     if (!g_cheats.integer && client->sess.timerunActive &&
-        client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE) {
+        client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
       InterruptRun(ent);
+    }
+    // allow fast respawn + load if we got gibbed to skip death sequence
+    if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
+      ent->client->ps.pm_flags &= ~PMF_LIMBO;
+      ClientSpawn(ent, qfalse);
     }
     teleportPlayer(ent, validSave);
   } else {
@@ -330,7 +326,8 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->sess.timerunActive &&
-      client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS) {
+      client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
     CPTo(ent, "Backup is disabled for this timerun.");
     return;
   }
@@ -379,7 +376,8 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent) {
   if (pos->isValid) {
     restoreStanceFromSave(ent, pos);
     if (client->sess.timerunActive &&
-        client->sess.runSpawnflags & TIMERUN_DISABLE_SAVE) {
+        client->sess.runSpawnflags &
+            static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
       InterruptRun(ent);
     }
     teleportPlayer(ent, pos);
@@ -740,7 +738,8 @@ void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
   }
 
   if (ent->client->sess.timerunActive &&
-      ent->client->sess.runSpawnflags & TIMERUN_DISABLE_BACKUPS) {
+      ent->client->sess.runSpawnflags &
+          static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
     return;
   }
 

@@ -4,9 +4,9 @@
 #include <algorithm>
 
 #include "cg_local.h"
-#include "../game/q_shared.h"
-#include "etj_irenderable.h"
 #include "etj_utilities.h"
+#include "etj_crosshair.h"
+#include "etj_overbounce_shared.h"
 #include "../game/etj_numeric_utilities.h"
 #include "../game/etj_string_utilities.h"
 
@@ -1308,7 +1308,7 @@ static void CG_DrawWeapReticle(void) {
 CG_DrawMortarReticle
 ==============
 */
-static void CG_DrawMortarReticle(void) {
+void CG_DrawMortarReticle() {
   vec4_t color = {1.f, 1.f, 1.f, .5f};
   vec4_t color_back = {0.f, 0.f, 0.f, .25f};
   vec4_t color_extends = {.77f, .73f, .1f, 1.f};
@@ -1336,8 +1336,7 @@ static void CG_DrawMortarReticle(void) {
   // total of 360 units
   // nothing displayed between 150 and 210 units
   // 360 / 10 = 36 bits, means 36 * 5 = 180 degrees
-  // that means left is cg.predictedPlayerState.viewangles[YAW] - .5f *
-  // 180
+  // that means left is cg.predictedPlayerState.viewangles[YAW] - .5f * 180
   angle =
       360 - AngleNormalize360(cg.predictedPlayerState.viewangles[YAW] - 90.f);
 
@@ -1682,37 +1681,22 @@ static void CG_DrawBinocReticle(void) {
   }
 }
 
-void CG_FinishWeaponChange(int lastweap, int newweap); // JPW NERVE
-
-/*
-=================
-CG_DrawCrosshair
-=================
-*/
-static void CG_DrawCrosshair(void) {
-  float w, h;
-  qhandle_t hShader;
-  float f;
-  float x, y;
-  int weapnum; // DHM - Nerve
-
-  if (cg.renderingThirdPerson) {
-    return;
-  }
-
+static void CG_CheckForReticle() {
   // using binoculars
   if (cg.zoomedBinoc && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) {
     CG_DrawBinocReticle();
     return;
   }
 
-  // DHM - Nerve :: show reticle in limbo and spectator
-  if ((cg.snap->ps.pm_flags & PMF_FOLLOW) || cg.demoPlayback) {
-    weapnum = cg.snap->ps.weapon;
-  } else {
-    weapnum = cg.weaponSelect;
+  // FIXME: spectators/chasing?
+  if (cg.predictedPlayerState.weapon == WP_MORTAR_SET &&
+      cg.predictedPlayerState.weaponstate != WEAPON_RAISING) {
+    CG_DrawMortarReticle();
+    return;
   }
 
+  // DHM - Nerve :: show reticle in limbo and spectator
+  int weapnum = ETJump::weapnumForClient();
   switch (weapnum) {
 
     // weapons that get no reticle
@@ -1732,9 +1716,8 @@ static void CG_DrawCrosshair(void) {
     case WP_GARAND_SCOPE:
     case WP_K43_SCOPE:
       if (!BG_PlayerMounted(cg.snap->ps.eFlags)) {
-        // JPW NERVE -- don't let players run
-        // with rifles -- speed 80 == crouch,
-        // 128 == walk, 256 == run
+        // JPW NERVE -- don't let players run with rifles
+        // -- speed 80 == crouch, 128 == walk, 256 == run
         if (VectorLengthSquared(cg.snap->ps.velocity) > SQR(127)) {
           if (cg.snap->ps.weapon == WP_FG42SCOPE) {
             CG_FinishWeaponChange(WP_FG42SCOPE, WP_FG42);
@@ -1757,92 +1740,6 @@ static void CG_DrawCrosshair(void) {
       break;
     default:
       break;
-  }
-
-  // any exceptions are handled, we can exit at this point if scoreboard
-  // is up
-  if (ETJump::showingScores()) {
-    return;
-  }
-
-  // FIXME: spectators/chasing?
-  if (cg.predictedPlayerState.weapon == WP_MORTAR_SET &&
-      cg.predictedPlayerState.weaponstate != WEAPON_RAISING) {
-    CG_DrawMortarReticle();
-    return;
-  }
-
-  if (cg_drawCrosshair.integer < 0) //----(SA)	moved down so it doesn't keep
-                                    // the scoped weaps from drawing reticles
-  {
-    return;
-  }
-
-  // no crosshair while leaning
-  if (cg.snap->ps.leanf) {
-    return;
-  }
-
-  // TAT 1/10/2003 - Don't draw crosshair if have exit hintcursor
-  if (cg.snap->ps.serverCursorHint >= HINT_EXIT &&
-      cg.snap->ps.serverCursorHint <= HINT_NOEXIT) {
-    return;
-  }
-
-  // set color based on health
-  if (cg_crosshairHealth.integer) {
-    vec4_t hcolor;
-
-    CG_ColorForHealth(hcolor);
-    trap_R_SetColor(hcolor);
-  } else {
-    vec4_t crosshairColor = {1.0, 1.0, 1.0, 1.0};
-    float crosshairAlpha = cg_crosshairAlpha.value;
-
-    ETJump::parseColorString(cg_crosshairColor.string, crosshairColor);
-    crosshairColor[3] = Numeric::clamp(crosshairAlpha, 0.0f, 1.0f);
-    trap_R_SetColor(crosshairColor);
-  }
-
-  w = h = cg_crosshairSize.value;
-
-  // RF, crosshair size represents aim spread
-  f = (float)((cg_crosshairPulse.integer == 0)
-                  ? 0
-                  : cg.snap->ps.aimSpreadScale / 255.0);
-  w *= (1 + f * 2.0);
-  h *= (1 + f * 2.0);
-
-  x = cg_crosshairX.integer;
-  y = cg_crosshairY.integer;
-  CG_AdjustFrom640(&x, &y, &w, &h);
-
-  hShader =
-      cgs.media.crosshairShader[cg_drawCrosshair.integer % NUM_CROSSHAIRS];
-
-  trap_R_DrawStretchPic(x + 0.5 * (cg.refdef_current->width - w),
-                        y + 0.5 * (cg.refdef_current->height - h), w, h, 0, 0,
-                        1, 1, hShader);
-
-  if (cg.crosshairShaderAlt[cg_drawCrosshair.integer % NUM_CROSSHAIRS]) {
-    w = h = cg_crosshairSize.value;
-    x = cg_crosshairX.integer;
-    y = cg_crosshairY.integer;
-    CG_AdjustFrom640(&x, &y, &w, &h);
-
-    if (cg_crosshairHealth.integer == 0) {
-      vec4_t crosshairColorAlt = {1.0, 1.0, 1.0, 1.0};
-      float crosshairAlphaAlt = cg_crosshairAlphaAlt.value;
-
-      ETJump::parseColorString(cg_crosshairColorAlt.string, crosshairColorAlt);
-      crosshairColorAlt[3] = Numeric::clamp(crosshairAlphaAlt, 0.0f, 1.0f);
-      trap_R_SetColor(crosshairColorAlt);
-    }
-
-    trap_R_DrawStretchPic(
-        x + 0.5 * (cg.refdef_current->width - w),
-        y + 0.5 * (cg.refdef_current->height - h), w, h, 0, 0, 1, 1,
-        cg.crosshairShaderAlt[cg_drawCrosshair.integer % NUM_CROSSHAIRS]);
   }
 }
 
@@ -2607,190 +2504,6 @@ static void CG_DrawLimboMessage(void) {
   }
 }
 // -NERVE - SMF
-
-static qboolean CG_IsOverBounce(float vel, float initHeight, float finalHeight,
-                                float rintv, float psec, int gravity) {
-  float a, b, c, D;
-  float n1;
-  // float			n2;
-  float hn;
-  int n;
-
-  a = -psec * rintv / 2;
-  b = psec * (vel - gravity * psec / 2 + rintv / 2);
-  c = initHeight - finalHeight;
-
-  if (a == 0) {
-    // no quadratic equation
-    return qfalse;
-  }
-
-  D = b * b - 4 * a * c; // discriminant
-  if (D < 0) {
-    // no real roots
-    return qfalse;
-  }
-
-  n1 = (-b - std::sqrt(D)) / (2 * a);
-  // n2 = (-b + sqrt(D)) / (2 * a);
-  // CG_Printf("n1=%f, n2=%f\n", n1, n2);
-
-  n = floor(n1);
-  hn = initHeight + psec * n * (vel - gravity * psec / 2 - (n - 1) * rintv / 2);
-  // CG_Printf("vel=%f, initHeight=%f, finalHeight=%f, n=%d,
-  // reachedHeight: %f\n", initHeight, vel, finalHeight, n, hn);
-
-  if (n && hn < finalHeight + 0.25 && hn > finalHeight) {
-    return qtrue;
-  }
-  return qfalse;
-}
-
-static bool CG_SurfaceAllowsOverbounce(trace_t *trace) {
-  if (cg_pmove.shared & BG_LEVEL_NO_OVERBOUNCE) {
-    return ((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  } else {
-    return !((trace->surfaceFlags & SURF_OVERBOUNCE) != 0);
-  }
-}
-
-/*
-=========
-CG_DrawOB
-
-Fast OB detection.
-=========
-*/
-static void CG_DrawOB(void) {
-  float psec;
-  int gravity;
-  vec3_t snap;
-  float rintv;
-  float v0;
-  float h0, t;
-  trace_t trace;
-  vec3_t start, end;
-  float x;
-
-  if (!etj_drawOB.integer || cg_thirdPerson.integer) {
-    return;
-  }
-
-  int traceContents = ETJump::checkExtraTrace(ETJump::OB_DETECTOR);
-
-  playerState_t *ps = ETJump::getValidPlayerState();
-
-  psec = cgs.pmove_msec / 1000.0;
-  gravity = ps->gravity;
-  v0 = ps->velocity[2];
-  h0 = ps->origin[2] + ps->mins[2];
-  // CG_Printf("psec=%f, gravity=%d\n", psec, gravity);
-
-  VectorSet(snap, 0, 0, gravity * psec);
-  trap_SnapVector(snap);
-  rintv = snap[2];
-
-  x = etj_OBX.value;
-
-  ETJump_AdjustPosition(&x);
-
-  if (ps->groundEntityNum == ENTITYNUM_NONE) {
-    // below ob
-    VectorCopy(ps->origin, start);
-    start[2] = h0;
-    VectorCopy(start, end);
-    end[2] -= 131072;
-
-    CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-             traceContents);
-
-    if (trace.fraction != 1.0 && trace.plane.type == 2) {
-      // something was hit and it's a floor
-
-      t = trace.endpos[2];
-
-      // below ob
-      if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) &&
-          CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x + 10, etj_OBY.integer, "B", colorWhite, qfalse,
-                         qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      }
-    }
-  }
-
-  // use origin from playerState?
-  VectorCopy(cg.refdef.vieworg, start);
-  VectorMA(start, 131072, cg.refdef.viewaxis[0], end);
-
-  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-           traceContents);
-
-  if (trace.fraction != 1.0 && trace.plane.type == 2) {
-    // something was hit and it's a floor
-    qboolean b = qfalse;
-
-    t = trace.endpos[2];
-    // CG_Printf("h0=%f, t=%f\n", h0, t);
-
-    // fall ob
-    if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) &&
-        CG_SurfaceAllowsOverbounce(&trace)) {
-      CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse, qtrue,
-                       TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      b = qtrue;
-    }
-
-    // jump ob
-    if (ps->groundEntityNum != ENTITYNUM_NONE &&
-        CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec,
-                        gravity) &&
-        CG_SurfaceAllowsOverbounce(&trace)) {
-      CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-                       TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      b = qtrue;
-    }
-
-    // don't predict sticky ob if there is an ob already or if
-    // the sticky ob detection isn't requested
-    if (b || etj_drawOB.integer != 2) {
-      return;
-    }
-
-    // sticky ob
-    b = qfalse;
-
-    // don't display stickies on the same height we're currently
-    // at since obviously it's possible and it's just
-    // distracting
-    if (h0 != t) {
-      h0 += 0.25;
-      // CG_Printf("h0=%f, t=%f\n", h0, t);
-
-      // sticky fall ob
-      if (CG_IsOverBounce(v0, h0, t, rintv, psec, gravity) &&
-          CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x - 10, etj_OBY.integer, "F", colorWhite, qfalse,
-                         qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-        b = qtrue;
-      }
-
-      // sticky jump ob
-      if (ps->groundEntityNum != ENTITYNUM_NONE &&
-          CG_IsOverBounce(v0 + 270 /*JUMP_VELOCITY*/, h0, t, rintv, psec,
-                          gravity) &&
-          CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x, etj_OBY.integer, "J", colorWhite, qfalse, qtrue,
-                         TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-        b = qtrue;
-      }
-
-      if (b && CG_SurfaceAllowsOverbounce(&trace)) {
-        CG_DrawStringExt(x - 20, etj_OBY.integer, "S", colorWhite, qfalse,
-                         qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
-      }
-    }
-  }
-}
 
 static void CG_DrawSlick(void) {
   trace_t trace;
@@ -3906,7 +3619,7 @@ static void CG_DrawNewCompass(void) {
     return;
   }
 
-  if (cg.zoomedBinoc || cg.zoomedScope) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(ETJump::weapnumForClient())) {
     return;
   }
 
@@ -4733,48 +4446,12 @@ void CG_DrawDemoRecording(void) {
                     status, 0, 0, 0, &cgs.media.limboFont2);
 }
 
-void CG_DrawSpectatorInfo(void) {
-  int i = 0;
-  int y = etj_spectatorInfoY.integer;
-
-  if (etj_drawSpectatorInfo.integer == 0) {
-    return;
-  }
-
-  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
-    // don't do anything if we're spectating
-    return;
-  }
-
-  if (cg.time > cg.lastScoreTime + 3000) {
-    trap_SendClientCommand("score");
-    cg.lastScoreTime = cg.time;
-  }
-
-  for (; i < cg.numScores; i++) {
-    if (cg.snap->ps.clientNum == cg.scores[i].client) {
-      // ignore self
-      continue;
-    }
-    if (cgs.clientinfo[cg.scores[i].client].team == TEAM_SPECTATOR) {
-      if (cg.scores[i].followedClient == cg.snap->ps.clientNum) {
-        float x = etj_spectatorInfoX.integer;
-        ETJump_AdjustPosition(&x);
-        // spectating me
-        ETJump::DrawSmallString(
-            x, y, va("%s", cgs.clientinfo[cg.scores[i].client].name), 1);
-        y += 12;
-      }
-    }
-  }
-}
-
 /*
 =================
 CG_Draw2D
 =================
 */
-static void CG_Draw2D(void) {
+static void CG_Draw2D() {
   CG_ScreenFade();
   // Arnout: no 2d when in esc menu
   // FIXME: do allow for quickchat (bleh)
@@ -4799,7 +4476,16 @@ static void CG_Draw2D(void) {
     if (cg.demoPlayback) {
       return;
     }
-    CG_DrawCrosshair();
+    CG_CheckForReticle();
+
+    // crosshair is the only renderable that should be drawn here
+    for (const auto &r : ETJump::renderables) {
+      if (auto crosshair = std::dynamic_pointer_cast<ETJump::Crosshair>(r)) {
+        if (crosshair->beforeRender()) {
+          crosshair->render();
+        }
+      }
+    }
     CG_DrawFlashFade();
     return;
   }
@@ -4816,9 +4502,8 @@ static void CG_Draw2D(void) {
       // don't draw any status if dead
       if (cg.snap->ps.stats[STAT_HEALTH] > 0 ||
           (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+        CG_CheckForReticle();
         CG_DrawNoShootIcon();
-
-        //				CG_DrawPickupItem();
       }
 
       if (cg_drawStatus.integer) {
@@ -4880,7 +4565,6 @@ static void CG_Draw2D(void) {
     if (!cgs.demoCam.renderingFreeCam) {
       CG_DrawLagometer();
       CG_DrawFollow();
-      CG_DrawOB();
       CG_DrawSlick();
       CG_DrawJumpDelay();
       CG_DrawSaveIndicator();
@@ -4889,8 +4573,6 @@ static void CG_Draw2D(void) {
     }
 
     CG_DrawCHS();
-
-    CG_DrawSpectatorInfo();
   } else {
     if (cgs.eventHandling != CGAME_EVENT_NONE) {
       //			qboolean old =
@@ -4906,22 +4588,22 @@ static void CG_Draw2D(void) {
     }
   }
 
+  if (!cgs.demoCam.renderingFreeCam) {
+    for (const auto &r : ETJump::renderables) {
+      if (r->beforeRender()) {
+        r->render();
+      }
+    }
+
+    ETJump_DrawDrawables();
+  }
+
   if (cg.showFireteamMenu) {
     CG_Fireteams_Draw();
   }
 
-  if (!cgs.demoCam.renderingFreeCam) {
-    ETJump_DrawDrawables();
-
-    for (const auto &r : ETJump::renderables) {
-      r->beforeRender();
-      r->render();
-    }
-  }
-
   if (!cg.cameraMode && (cg.snap->ps.stats[STAT_HEALTH] > 0 ||
                          (cg.snap->ps.pm_flags & PMF_FOLLOW))) {
-    CG_DrawCrosshair();
     CG_DrawCrosshairNames();
   }
 

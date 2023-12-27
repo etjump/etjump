@@ -24,6 +24,7 @@
 
 #include "etj_custom_map_votes.h"
 #include "etj_map_statistics.h"
+#include "etj_string_utilities.h"
 #include <fstream>
 #include "utilities.hpp"
 #include "../json/json.h"
@@ -166,44 +167,41 @@ void CustomMapVotes::GenerateVotesFile() {
   Load();
 }
 
-const std::vector<std::string> *
-CustomMapVotes::ListInfo(const std::string &type) {
-  static std::vector<std::string> lines;
-  lines.clear();
+std::string CustomMapVotes::ListInfo(const std::string &type) {
+  std::string buffer;
 
-  for (unsigned i = 0; i < customMapVotes_.size(); i++) {
-    if (customMapVotes_[i].type == type) {
-      lines.push_back("^<Maps on the list: ^7\n");
+  for (auto &customMapVote : customMapVotes_) {
+    if (customMapVote.type == type) {
+      buffer += ETJump::stringFormat("^gMaps on the list ^3%s^g: \n", type);
+      auto numMapsOnServer = customMapVote.mapsOnServer.size();
 
       int count = 0;
-      for (auto &mapOnServer : customMapVotes_[i].mapsOnServer) {
-        lines.push_back(va("^7%-30s ", mapOnServer.c_str()));
+      for (auto &mapOnServer : customMapVote.mapsOnServer) {
+        buffer += ETJump::stringFormat("^7%-30s", mapOnServer);
 
         ++count;
-        if (count % 3) {
-          lines.push_back("\n");
+        if (count % 3 == 0 || count == numMapsOnServer) {
+          buffer += "\n";
         }
       }
-      if (lines[lines.size() - 1] != "\n") {
-        lines.push_back("\n");
-      }
-      lines.push_back("^<Maps that are not on the server: ^7\n");
-      count = 0;
-      for (auto &mapNotOnServer : customMapVotes_[i].otherMaps) {
-        lines.push_back(va("^9%-30s ", mapNotOnServer.c_str()));
 
-        ++count;
-        if (count % 3) {
-          lines.push_back("\n");
+      if (!customMapVote.otherMaps.empty()) {
+        buffer += "\n^gMaps included on the list, but missing on server: \n";
+        count = 0;
+        auto numMapsNotOnServer = customMapVote.otherMaps.size();
+        for (auto &mapNotOnServer : customMapVote.otherMaps) {
+          buffer += ETJump::stringFormat("^9%-30s", mapNotOnServer);
+
+          ++count;
+          if (count % 3 == 0 || count == numMapsNotOnServer) {
+            buffer += "\n";
+          }
         }
-      }
-      if (lines[lines.size() - 1] != "\n") {
-        lines.push_back("\n");
       }
     }
   }
 
-  return &lines;
+  return buffer;
 }
 
 std::string const CustomMapVotes::RandomMap(std::string const &type) {
@@ -238,10 +236,10 @@ std::string const CustomMapVotes::RandomMap(std::string const &type) {
   return "";
 }
 
+// FIXME: this should just be nuked and custom map votes should use
+//  MapStatistics::isValidMap but that takes MapInfo as argument
+//  and isn't simple to refactor so bleh
 bool CustomMapVotes::isValidMap(const std::string &mapName) {
-  MapStatistics mapStats;
-
   return G_MapExists(mapName.c_str()) && mapName != level.rawmapname &&
-         strstr(mapStats.getBlockedMapsStr().c_str(), mapName.c_str()) ==
-             nullptr;
+         !MapStatistics::isBlockedMap(mapName);
 }

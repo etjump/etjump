@@ -62,7 +62,11 @@ void ETJump::DisplaySpeed::startListeners() {
       [&](const std::vector<std::string> &args) { resetMaxSpeed(); });
 }
 
-void ETJump::DisplaySpeed::beforeRender() {
+bool ETJump::DisplaySpeed::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+
   auto speed = std::sqrt(cg.predictedPlayerState.velocity[0] *
                              cg.predictedPlayerState.velocity[0] +
                          cg.predictedPlayerState.velocity[1] *
@@ -76,6 +80,8 @@ void ETJump::DisplaySpeed::beforeRender() {
   } else if (!_storedSpeeds.empty()) {
     _storedSpeeds.clear();
   }
+
+  return true;
 }
 
 void ETJump::DisplaySpeed::resetMaxSpeed() {
@@ -88,10 +94,6 @@ void ETJump::DisplaySpeed::checkShadow() {
 }
 
 void ETJump::DisplaySpeed::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
-
   float size = 0.1f * etj_speedSize.value;
   float x = etj_speedX.integer;
   float y = etj_speedY.integer;

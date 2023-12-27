@@ -11,6 +11,7 @@
 #include "g_local.h"
 #include "etj_save_system.h"
 #include "etj_string_utilities.h"
+#include "etj_timerun_entities.h"
 
 qboolean G_SpawnStringExt(const char *key, const char *defaultString,
                           char **out, const char *file, int line) {
@@ -298,7 +299,6 @@ void SP_misc_portal_camera(gentity_t *ent);
 void SP_misc_portal_surface(gentity_t *ent);
 void SP_misc_light_surface(gentity_t *ent);
 void SP_misc_grabber_trap(gentity_t *ent);
-void SP_misc_spotlight(gentity_t *ent); //----(SA)	added
 
 void SP_misc_commandmap_marker(gentity_t *ent);
 
@@ -451,14 +451,13 @@ void SP_target_save(gentity_t *self);
 // Feen: PGM
 void SP_weapon_portalgun(gentity_t *self);
 void SP_target_remove_portals(gentity_t *self);
+void SP_target_portal_relay(gentity_t *self);
 void SP_target_ftrelay(gentity_t *self);
 
 // Savelimit
 void SP_target_savelimit_set(gentity_t *self);
 void SP_target_savelimit_inc(gentity_t *self);
 void SP_target_decay(gentity_t *self);
-void SP_target_startTimer(gentity_t *self);
-void SP_target_endTimer(gentity_t *self);
 void SP_target_interrupt_timerun(gentity_t *self);
 // Check speed and if it's too high/low, fire the target
 void SP_target_activate_if_velocity(gentity_t *self);
@@ -603,7 +602,6 @@ spawn_t spawns[] = {
     {"misc_vis_dummy_multiple", SP_misc_vis_dummy_multiple},
     {"misc_light_surface", SP_misc_light_surface},
     {"misc_grabber_trap", SP_misc_grabber_trap},
-    {"misc_spotlight", SP_misc_spotlight},
 
     {"misc_mg42", SP_mg42},
     {"misc_aagun", SP_aagun},
@@ -692,6 +690,8 @@ spawn_t spawns[] = {
     {"misc_landmine", SP_misc_landmine},
     {"target_setident", SP_target_set_ident},
     {"target_activate", SP_target_activate},
+
+    // deprecated, kept for compatibility, uses target_print code
     {"target_printname", SP_target_printname},
     /*{"etjump_target_relay",	SP_target_fireonce },*/ // Changed for RC1 -
                                                         // Feen
@@ -703,14 +703,20 @@ spawn_t spawns[] = {
     {"target_increase_ident", SP_target_increase_ident},
     {"target_save", SP_target_save},
     {"target_remove_portals", SP_target_remove_portals},
+    {"target_portal_relay", SP_target_portal_relay},
     {"target_ftrelay", SP_target_ftrelay},
     {"target_savelimit_set", SP_target_savelimit_set},
     {"target_savelimit_inc", SP_target_savelimit_inc},
     {"target_decay", SP_target_decay},
-    {"target_starttimer", SP_target_startTimer},
-    {"target_startTimer", SP_target_startTimer},
-    {"target_stoptimer", SP_target_endTimer},
-    {"target_stopTimer", SP_target_endTimer},
+    {"target_starttimer", ETJump::TargetStartTimer::spawn},
+    {"trigger_starttimer", ETJump::TriggerStartTimer::spawn},
+    {"trigger_starttimer_ext", ETJump::TriggerStartTimerExt::spawn},
+    {"target_stoptimer", ETJump::TargetStopTimer::spawn},
+    {"trigger_stoptimer", ETJump::TriggerStopTimer::spawn},
+    {"trigger_stoptimer_ext", ETJump::TriggerStopTimerExt::spawn},
+    {"target_checkpoint", ETJump::TargetCheckpoint::spawn},
+    {"trigger_checkpoint", ETJump::TriggerCheckpoint::spawn},
+    {"trigger_checkpoint_ext", ETJump::TriggerCheckpointExt::spawn},
     {"target_interrupt_timerun", SP_target_interrupt_timerun},
     {"target_activate_if_velocity", SP_target_activate_if_velocity},
     {"target_scale_velocity", SP_target_scale_velocity},
@@ -723,7 +729,8 @@ spawn_t spawns[] = {
     {"target_cleartjl", SP_target_tjlclear},
     {"target_init", SP_target_init},
     {"func_missilepad", SP_func_missilepad},
-    {0, 0}};
+    {nullptr, nullptr},
+};
 
 /*
 ===============
@@ -744,7 +751,7 @@ qboolean G_CallSpawn(gentity_t *ent) {
 
   // check item spawn functions
   for (item = bg_itemlist + 1; item->classname; item++) {
-    if (!strcmp(item->classname, ent->classname)) {
+    if (!Q_stricmp(item->classname, ent->classname)) {
       // found it
       if (g_gametype.integer != GT_WOLF_LMS) // Gordon: lets not have items in
                                              // last man standing for the
@@ -763,7 +770,7 @@ qboolean G_CallSpawn(gentity_t *ent) {
 
   // check normal spawn functions
   for (s = spawns; s->name; s++) {
-    if (!strcmp(s->name, ent->classname)) {
+    if (!Q_stricmp(s->name, ent->classname)) {
       // found it
       s->spawn(ent);
 
@@ -934,9 +941,9 @@ char *G_AddSpawnVarToken(const char *string) {
   int l;
   char *dest;
 
-  l = strlen(string);
+  l = static_cast<int>(strlen(string));
   if (level.numSpawnVarChars + l + 1 > MAX_SPAWN_VARS_CHARS) {
-    G_Error("G_AddSpawnVarToken: MAX_SPAWN_VARS");
+    G_Error("G_AddSpawnVarToken: MAX_SPAWN_VARS_CHARS");
   }
 
   dest = level.spawnVarChars + level.numSpawnVarChars;
@@ -1095,6 +1102,17 @@ static void initNoProne() {
   trap_Cvar_Set("shared", va("%d", shared.integer));
   G_Printf("Prone is %s.\n", level.noProne ? "disabled" : "enabled");
 }
+
+static void initNoDrop() {
+  auto value = 0;
+  G_SpawnInt("nodrop", "0", &value);
+  level.noDrop = value > 0;
+  level.noDrop ? shared.integer |= BG_LEVEL_NO_DROP
+               : shared.integer &= ~BG_LEVEL_NO_DROP;
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+  G_Printf("Nodrop is %s.\n", level.noDrop ? "enabled" : "disabled");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1242,6 +1260,7 @@ void SP_worldspawn(void) {
   ETJump::initStrictSaveLoad();
   ETJump::initNoFallDamage();
   ETJump::initNoProne();
+  ETJump::initNoDrop();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",
@@ -1300,6 +1319,20 @@ void G_SpawnEntitiesFromString(void) {
   // parse ents
   while (G_ParseSpawnVars()) {
     G_SpawnGEntityFromSpawnVars();
+  }
+
+  if (!level.gameManager) {
+    G_Printf("^3WARNING: ^7No ^3'script_multiplayer' ^7found in the map, "
+             "checking for other entities with scriptname... ");
+
+    if (!ETJump::checkEntsForScriptname()) {
+      G_Printf("^7No scriptable entities found, spawning "
+               "^3'etjump_game_manager'^7... ");
+
+      ETJump::spawnGameManager();
+
+      G_Printf("^2DONE\n");
+    }
   }
 
   G_Printf("Disable spawning!\n");

@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "etj_numeric_utilities.h"
+#include "etj_printer.h"
 
 // Gordon
 // What we need....
@@ -102,12 +103,10 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
       }
     }
 
-    //		Com_sprintf(buffer, 128,
-    //"\\n\\%s\\l\\%i\\c\\%.8x%.8x",
-    // ft->name, ft->joinOrder[0], clnts[1], clnts[0]);
-    Com_sprintf(buffer, 128, "\\id\\%i\\l\\%i\\c\\%.8x%.8x", ft->ident - 1,
-                ft->joinOrder[0], clnts[1], clnts[0]);
-    //		G_Printf(va("%s\n", buffer));
+    Com_sprintf(buffer, 128, "\\id\\%i\\l\\%i\\sl\\%i\\c\\%.8x%.8x",
+                ft->ident - 1, ft->joinOrder[0], ft->saveLimit, clnts[1],
+                clnts[0]);
+    // G_Printf(va("%s\n", buffer));
   }
 
   trap_SetConfigstring(CS_FIRETEAMS + (ft - level.fireTeams), buffer);
@@ -168,7 +167,7 @@ qboolean G_IsFireteamLeader(int entityNum, fireteamData_t **teamNum) {
   }
 
   if (teamNum) {
-    *teamNum = NULL;
+    *teamNum = nullptr;
   }
   return qfalse;
 }
@@ -200,7 +199,7 @@ int G_FindFreeFireteamIdent(team_t team) {
 }
 
 // Should be the only function that ever creates a fireteam
-void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
+void G_RegisterFireteam(int entityNum) {
   fireteamData_t *ft;
   gentity_t *leader;
   int count, ident;
@@ -216,17 +215,12 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
             "entity with no client\n");
   }
 
-  if (G_IsOnFireteam(entityNum, NULL)) {
+  if (G_IsOnFireteam(entityNum, nullptr)) {
     G_ClientPrintAndReturn(entityNum,
                            "You are already on a fireteam, leave it first");
   }
 
-  /*	if(!name || !*name) {
-          G_ClientPrintAndReturn(entityNum, "You must choose a name for
-     your fireteam");
-      }*/
-
-  if ((ft = G_FindFreeFireteam()) == NULL) {
+  if ((ft = G_FindFreeFireteam()) == nullptr) {
     G_ClientPrintAndReturn(entityNum, "No free fireteams available");
   }
 
@@ -244,9 +238,9 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
   // good to go now, i hope!
   ft->inuse = qtrue;
   memset(ft->joinOrder, -1, sizeof(level.fireTeams[0].joinOrder));
-  ft->joinOrder[0] = leader - g_entities;
+  ft->joinOrder[0] = static_cast<char>(leader - g_entities);
   ft->ident = ident;
-  ft->saveLimit = 0;
+  ft->saveLimit = FT_SAVELIMIT_NOT_SET;
   ft->teamJumpMode = qfalse;
 
   if (g_autoFireteams.integer) {
@@ -258,7 +252,6 @@ void G_RegisterFireteam(/*const char* name,*/ int entityNum) {
     ft->priv = qfalse;
   }
 
-  //	Q_strncpyz(ft->name, name, 32);
   G_UpdateFireteamConfigString(ft);
 }
 
@@ -297,11 +290,11 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
     if (ft->joinOrder[i] == -1) {
       gentity_t *otherEnt = g_entities + entityNum;
       // found a free position
-      ft->joinOrder[i] = entityNum;
-
-      G_UpdateFireteamConfigString(ft);
+      ft->joinOrder[i] = static_cast<char>(entityNum);
 
       otherEnt->client->sess.saveLimitFt = ft->saveLimit;
+
+      G_UpdateFireteamConfigString(ft);
 
       return;
     }
@@ -368,13 +361,9 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
     }
   }
 
-  if (update) {
-    G_UpdateFireteamConfigString(ft);
-  }
-
   // if the leader leaves it seems the savelimit will be set to
   // 2^32-1 / -2^32-1 so this should fix it.
-  if (!ft->saveLimit) {
+  if (ft->saveLimit != FT_SAVELIMIT_NOT_SET) {
     gentity_t *ent;
     for (i = 0; i < level.numConnectedClients; i++) {
       if (ft->joinOrder[i] == -1) {
@@ -384,6 +373,10 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
         ent->client->sess.saveLimitFt = ft->saveLimit;
       }
     }
+  }
+
+  if (update) {
+    G_UpdateFireteamConfigString(ft);
   }
 }
 
@@ -733,6 +726,9 @@ void G_SetFireTeamSaveLimit(fireteamData_t *ft, int limit) {
     } else {
       ent = g_entities + ft->joinOrder[i];
       ent->client->sess.saveLimitFt = limit;
+      Printer::SendPopupMessage(
+          ClientNum(ent),
+          va("^gFireteam rules: ^3savelimit ^gwas set to ^3%i^g.\n", limit));
     }
   }
 }
@@ -777,205 +773,139 @@ void G_SetFireTeamRules(int clientNum) {
 
     int limit = Numeric::clamp(Q_atoi(val), -1, 100);
     ft->saveLimit = limit;
-
-    trap_SendServerCommand(
-        clientNum, va("print \"Fireteam: savelimit was set to %i\n\"", limit));
     G_SetFireTeamSaveLimit(ft, limit);
+
+    G_UpdateFireteamConfigString(ft);
     return;
   }
 
   G_ClientPrintAndReturn(clientNum, "fireteam: failed to set rules.");
 }
 
+// Checks if given command buffer matches a valid client on the server
+// Returns true if given argument matches a valid client
+bool validClientForFireteam(gentity_t *ent, int *targetNum, char *numbuffer) {
+  bool validClient = true;
+
+  if ((*targetNum = ClientNumberFromString(ent, numbuffer)) == -1) {
+    validClient = false;
+  } else {
+    gentity_t *other = g_entities + *targetNum;
+
+    if (!other->inuse || !other->client) {
+      validClient = false;
+    }
+  }
+
+  return validClient;
+}
+
 // Command handler
 void Cmd_FireTeam_MP_f(gentity_t *ent) {
-  char command[32];
-  int i;
+  char command[MAX_NAME_LENGTH]; // more than enough to hold the commands
+  auto selfNum = ClientNum(ent);
+  int targetNum = -1;
 
   if (trap_Argc() < 2) {
-    G_ClientPrintAndReturn(ent - g_entities,
+    G_ClientPrintAndReturn(selfNum,
                            "usage: fireteam <create|leave|apply|invite|rules>");
   }
 
-  trap_Argv(1, command, 32);
+  trap_Argv(1, command, sizeof(command));
 
   if (!Q_stricmp(command, "create")) {
-    G_RegisterFireteam(ent - g_entities);
+    G_RegisterFireteam(selfNum);
   } else if (!Q_stricmp(command, "disband")) {
-    G_DestroyFireteam(ent - g_entities);
+    G_DestroyFireteam(selfNum);
   } else if (!Q_stricmp(command, "leave")) {
-    G_RemoveClientFromFireteams(ent - g_entities, qtrue, qtrue);
+    G_RemoveClientFromFireteams(selfNum, qtrue, qtrue);
   } else if (!Q_stricmp(command, "apply")) {
-    char namebuffer[32];
+    char namebuffer[MAX_NAME_LENGTH];
     int fireteam;
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam apply "
-                                               "<fireteamname|fireteamnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
     }
 
-    trap_Argv(2, namebuffer, 32);
+    trap_Argv(2, namebuffer, sizeof(namebuffer));
     fireteam =
         G_FireteamNumberForString(namebuffer, ent->client->sess.sessionTeam);
 
     if (fireteam <= 0) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam apply "
-                                               "<fireteamname|fireteamnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
     }
 
-    G_ApplyToFireTeam(ent - g_entities, fireteam - 1);
+    G_ApplyToFireTeam(selfNum, fireteam - 1);
   } else if (!Q_stricmp(command, "invite")) {
-    char namebuffer[32];
-    int clientnum = 0;
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam invite "
-                                               "<clientname|clientnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam invite <clientname|clientnumber>");
+    }
+    trap_Argv(2, numbuffer, sizeof(numbuffer));
+
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    trap_Argv(2, namebuffer, 32);
-    for (i = 0; i < MAX_CLIENTS; i++) {
-      if (!g_entities[i].inuse || !g_entities[i].client) {
-        continue;
-      }
-
-      if (!Q_stricmp(g_entities[i].client->pers.netname, namebuffer)) {
-        clientnum = i + 1;
-      }
-    }
-
-    if (clientnum <= 0) {
-      clientnum = Q_atoi(namebuffer);
-
-      if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
-          !g_entities[clientnum - 1].inuse ||
-          !g_entities[clientnum - 1].client) {
-        G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
-      }
-    }
-
-    if (clientnum <= 0) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam invite "
-                                               "<clientname|clientnumber>");
-    }
-
-    G_InviteToFireTeam(ent - g_entities, clientnum - 1);
+    G_InviteToFireTeam(selfNum, targetNum);
   } else if (!Q_stricmp(command, "warn")) {
-    char namebuffer[32];
-    int clientnum = 0;
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam warn "
-                                               "<clientname|clientnumber>");
+      G_ClientPrintAndReturn(selfNum,
+                             "usage: fireteam warn <clientname|clientnumber>");
+    }
+    trap_Argv(2, numbuffer, sizeof(numbuffer));
+
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    trap_Argv(2, namebuffer, 32);
-    for (i = 0; i < MAX_CLIENTS; i++) {
-      if (!g_entities[i].inuse || !g_entities[i].client) {
-        continue;
-      }
-
-      if (!Q_stricmp(g_entities[i].client->pers.netname, namebuffer)) {
-        clientnum = i + 1;
-      }
-    }
-
-    if (clientnum <= 0) {
-      clientnum = Q_atoi(namebuffer);
-
-      if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
-          !g_entities[clientnum - 1].inuse ||
-          !g_entities[clientnum - 1].client) {
-        G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
-      }
-    }
-
-    if (clientnum <= 0) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam warn "
-                                               "<clientname|clientnumber>");
-    }
-
-    G_WarnFireTeamPlayer(ent - g_entities, clientnum - 1);
+    G_WarnFireTeamPlayer(selfNum, targetNum);
   } else if (!Q_stricmp(command, "kick")) {
-    char namebuffer[32];
-    int clientnum = 0;
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam kick "
-                                               "<clientname|clientnumber>");
+      G_ClientPrintAndReturn(selfNum,
+                             "usage: fireteam kick <clientname|clientnumber>");
+    }
+    trap_Argv(2, numbuffer, sizeof(numbuffer));
+
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    trap_Argv(2, namebuffer, 32);
-    for (i = 0; i < MAX_CLIENTS; i++) {
-      if (!g_entities[i].inuse || !g_entities[i].client) {
-        continue;
-      }
-
-      if (!Q_stricmp(g_entities[i].client->pers.netname, namebuffer)) {
-        clientnum = i + 1;
-      }
-    }
-
-    if (clientnum <= 0) {
-      clientnum = Q_atoi(namebuffer);
-
-      if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
-          !g_entities[clientnum - 1].inuse ||
-          !g_entities[clientnum - 1].client) {
-        G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
-      }
-    }
-
-    if (clientnum <= 0) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam kick "
-                                               "<clientname|clientnumber>");
-    }
-
-    G_KickFireTeamPlayer(ent - g_entities, clientnum - 1);
+    G_KickFireTeamPlayer(selfNum, targetNum);
   } else if (!Q_stricmp(command, "propose")) {
-    char namebuffer[32];
-    int clientnum = 0;
+    char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam propose "
-                                               "<clientname|clientnumber>");
+      G_ClientPrintAndReturn(
+          selfNum, "usage: fireteam propose <clientname|clientnumber>");
+    }
+    trap_Argv(2, numbuffer, sizeof(numbuffer));
+
+    targetNum = Q_atoi(numbuffer);
+    if (!validClientForFireteam(ent, &targetNum, numbuffer)) {
+      G_ClientPrintAndReturn(selfNum, "Invalid client selected");
     }
 
-    trap_Argv(2, namebuffer, 32);
-    for (i = 0; i < MAX_CLIENTS; i++) {
-      if (!g_entities[i].inuse || !g_entities[i].client) {
-        continue;
-      }
-
-      if (!Q_stricmp(g_entities[i].client->pers.netname, namebuffer)) {
-        clientnum = i + 1;
-      }
-    }
-
-    if (clientnum <= 0) {
-      clientnum = Q_atoi(namebuffer);
-
-      if ((clientnum <= 0 || clientnum > MAX_CLIENTS) ||
-          !g_entities[clientnum - 1].inuse ||
-          !g_entities[clientnum - 1].client) {
-        G_ClientPrintAndReturn(ent - g_entities, "Invalid client selected");
-      }
-    }
-
-    if (clientnum <= 0) {
-      G_ClientPrintAndReturn(ent - g_entities, "usage: fireteam propose "
-                                               "<clientname|clientnumber>");
-    }
-
-    G_ProposeFireTeamPlayer(ent - g_entities, clientnum - 1);
+    G_ProposeFireTeamPlayer(selfNum, targetNum);
   }
   // Challenge group.
   // Only leader
   else if (!Q_stricmp(command, "rules")) {
-    G_SetFireTeamRules(ent - g_entities);
+    G_SetFireTeamRules(selfNum);
   } else if (!Q_stricmp(command, "tj")) {
-    G_TeamJumpMode(ent - g_entities);
+    G_TeamJumpMode(selfNum);
   } else if (!Q_stricmp(command, "race")) {
-    G_FireteamRace(ent - g_entities);
+    G_FireteamRace(selfNum);
   }
 }

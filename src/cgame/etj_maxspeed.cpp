@@ -58,7 +58,7 @@ ETJump::DisplayMaxSpeed::DisplayMaxSpeed(
 }
 
 ETJump::DisplayMaxSpeed::~DisplayMaxSpeed() {
-  _entityEventsHandler->unsubcribe(EV_LOAD_TELEPORT);
+  _entityEventsHandler->unsubscribe(EV_LOAD_TELEPORT);
 }
 
 void ETJump::DisplayMaxSpeed::parseColor(const std::string &color,
@@ -67,19 +67,22 @@ void ETJump::DisplayMaxSpeed::parseColor(const std::string &color,
   out[3] *= etj_speedAlpha.value;
 }
 
-void ETJump::DisplayMaxSpeed::beforeRender() {
+bool ETJump::DisplayMaxSpeed::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+
   auto speed = sqrt(cg.snap->ps.velocity[0] * cg.snap->ps.velocity[0] +
                     cg.snap->ps.velocity[1] * cg.snap->ps.velocity[1]);
 
   if (speed >= _maxSpeed) {
     _maxSpeed = speed;
   }
+
+  return true;
 }
 
 void ETJump::DisplayMaxSpeed::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
 
   vec4_t color;
   auto fade = CG_FadeAlpha(_animationStartTime, etj_maxSpeedDuration.integer);

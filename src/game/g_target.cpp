@@ -133,49 +133,73 @@ If "private", only the activator gets the message.  If no checks, all clients
 get the message.
 */
 void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  // if no message to print, print whitespace
-  auto temp = ent->message ? ent->message : " ";
-  auto location =
+  const auto location =
       ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
           ? "cpm"
           : "cp";
-  char message[MAX_TOKEN_CHARS]{};
-  Q_strncpyz(message, temp, sizeof(message));
-  if (ent->client &&
-      ent->spawnflags &
-          static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
-    std::string msg = message;
-    ETJump::StringUtil::replaceAll(msg, "[n]", ent->client->pers.netname);
-    Q_strncpyz(message, msg.c_str(), sizeof(message));
+
+  // if no message to print, print whitespace
+  std::string message = ent->message ? ent->message : " ";
+
+  if (ent->spawnflags &
+      static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
+    if (activator && activator->client) {
+      const std::string nameStr =
+          ETJump::stringFormat("%s^7", activator->client->pers.netname);
+      ETJump::StringUtil::stringSubstitute(message, '%', nameStr, 1);
+      ETJump::StringUtil::replaceAll(message, "[n]", nameStr);
+    } else {
+      // better not call G_Error here since this error handling
+      // wasn't here earlier, just print a warning and exit
+      G_Printf("^3WARNING: ^7Use_Target_Print: name formatting requested but "
+               "activator isn't a client.\n");
+      return;
+    }
   }
 
   if ((ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::Private))) {
     if (!activator) {
-      G_Error("G_scripting: call to client only "
-              "target_print with no activator\n");
+      G_Error(
+          "G_scripting: call to client only target_print with no activator\n");
     }
 
     if (activator->client) {
-      trap_SendServerCommand(activator - g_entities,
-                             va("%s \"%s\"", location, message));
+      trap_SendServerCommand(ClientNum(activator),
+                             va("%s \"%s\"", location, message.c_str()));
       return;
     }
   }
 
   if (ent->spawnflags & 3) {
     if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AxisOnly)) {
-      G_TeamCommand(TEAM_AXIS, va("%s \"%s\"", location, message));
+      G_TeamCommand(TEAM_AXIS, va("%s \"%s\"", location, message.c_str()));
     }
     if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::AlliedOnly)) {
-      G_TeamCommand(TEAM_ALLIES, va("%s \"%s\"", location, message));
+      G_TeamCommand(TEAM_ALLIES, va("%s \"%s\"", location, message.c_str()));
     }
     return;
   }
 
-  trap_SendServerCommand(-1, va("%s \"%s\"", location, message));
+  trap_SendServerCommand(-1, va("%s \"%s\"", location, message.c_str()));
 }
 
 void SP_target_print(gentity_t *ent) { ent->use = Use_Target_Print; }
+
+// Deprecated target_printname, this will simply call the use function
+// of target_print with the appropriate spawnflags set
+void SP_target_printname(gentity_t *ent) {
+  const int defaultSpawnFlags =
+      static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts) |
+      static_cast<int>(TargetPrintSpawnFlags::LocationCPM);
+
+  // add the necessary flags if not present to make target_print
+  // behave like target_printname used to behave
+  if ((ent->spawnflags & defaultSpawnFlags) != defaultSpawnFlags) {
+    ent->spawnflags |= defaultSpawnFlags;
+  }
+
+  ent->use = Use_Target_Print;
+}
 
 //==========================================================
 
@@ -1433,64 +1457,6 @@ void SP_target_activate(gentity_t *ent) {
 }
 
 //=============================================================
-/*QUAKED target_printname (0 0 1) (-8 -8 -8) (8 8 8)
-<NAME> <MSG>
-*/
-
-void target_printname_use(gentity_t *ent, gentity_t *other,
-                          gentity_t *activator) {
-
-  char msg[MAX_TOKEN_CHARS];
-  char text[MAX_TOKEN_CHARS];
-  int i = 0;
-
-  Com_sprintf(msg, sizeof(msg), "cpm \"%s\"", ent->message);
-
-  while (msg[i]) {
-    if (msg[i] == '%') {
-      if (msg[i + 1] != 's') {
-        msg[i + 1] = 's';
-      }
-    }
-    i++;
-  }
-
-  if (activator->client) {
-    Com_sprintf(text, sizeof(text), msg, activator->client->pers.netname);
-  } else {
-    return;
-  }
-
-  if ((ent->spawnflags & 4)) {
-    if (!activator) {
-      G_Error("G_scripting: call to client only "
-              "target_printname with no "
-              "activator\n");
-    }
-
-    if (activator->client) {
-      trap_SendServerCommand(activator - g_entities, text);
-      return;
-    }
-  }
-
-  if ((ent->spawnflags & 3)) {
-
-    if (ent->spawnflags & 1) {
-      G_TeamCommand(TEAM_AXIS, text);
-    }
-    if (ent->spawnflags & 2) {
-      G_TeamCommand(TEAM_ALLIES, text);
-    }
-    return;
-  }
-
-  trap_SendServerCommand(-1, text);
-}
-
-void SP_target_printname(gentity_t *ent) { ent->use = target_printname_use; }
-
-//=============================================================
 /*QUAKED target_fireonce (0 0 1) (-8 -8 -8) (8 8 8)
 Fires once
 */
@@ -1589,6 +1555,7 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 void SP_target_save(gentity_t *self) { self->use = target_save_use; }
 
 #define SF_REMOVE_PORTALS_NO_TEXT 0x1
+#define SF_REMOVE_PORTALS_ACTIVATE_TARGETS 0x2
 void target_remove_portals_use(gentity_t *self, gentity_t *other,
                                gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -1602,26 +1569,76 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     return;
   }
 
+  auto hadActivePortals = false;
+
   if (activator->portalBlue) {
     G_FreeEntity(activator->portalBlue);
-    activator->portalBlue = NULL;
+    activator->portalBlue = nullptr;
+    hadActivePortals = true;
   }
 
   if (activator->portalRed) {
     G_FreeEntity(activator->portalRed);
-    activator->portalRed = NULL;
+    activator->portalRed = nullptr;
+    hadActivePortals = true;
   }
 
-  if (self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT) {
-    return;
+  if (hadActivePortals) {
+    if (self->spawnflags & SF_REMOVE_PORTALS_ACTIVATE_TARGETS) {
+      G_UseTargets(self, activator);
+    }
+
+    // play sound to client
+    if (self->noise_index) {
+      gentity_t *noiseEnt = ETJump::soundEvent(
+          activator->r.currentOrigin,
+          EV_GENERAL_CLIENT_SOUND_VOLUME,
+          self->noise_index);
+
+      noiseEnt->s.onFireStart = self->s.onFireStart;
+    }
+
+    if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
+      Printer::SendCenterMessage(ClientNum(activator), "^7Your portal gun portals have been reset.");
+    }
   }
 
-  trap_SendServerCommand(activator - g_entities,
-                         "cp \"^7Your portal gun portals have been reset.\n\"");
+  // reset numPortals after everything else so the targeted entity can potentially use it
+  activator->client->numPortals = 0;
 }
 
 void SP_target_remove_portals(gentity_t *self) {
   self->use = target_remove_portals_use;
+
+  char *s;
+  if (G_SpawnString("noise", "NOSOUND", &s)) {
+    char buffer[MAX_QPATH];
+    Q_strncpyz(buffer, s, sizeof(buffer));
+    self->noise_index = G_SoundIndex(buffer);
+  }
+  G_SpawnInt("volume", "255", &self->s.onFireStart);
+  if (!self->s.onFireStart) {
+    self->s.onFireStart = 255;
+  }
+}
+
+void target_portal_relay_use(gentity_t *self, gentity_t *other,
+                               gentity_t *activator) {
+  if (!activator ||
+      !activator->client ||
+      activator->client->sess.sessionTeam == TEAM_SPECTATOR ||
+      !self->target) {
+    return;
+  }
+
+  if (activator->client->numPortals <= self->count) {
+    G_UseTargets(self, activator);
+  }
+}
+
+void SP_target_portal_relay(gentity_t *self) {
+  self->use = target_portal_relay_use;
+  G_SpawnInt("maxportals", "-1", &self->count);
 }
 
 void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
@@ -1727,159 +1744,6 @@ void SP_target_decay(gentity_t *self) {
 
   self->use = target_decay_use;
 }
-
-// Begin of timeruns support
-
-// target_starttimer
-//------------------
-// name:    run name.
-// spawnflags:
-//    0 always reset the run
-//    1 reset the run on team change
-//    2 reset the run on death
-//    4 only reset when you reach the end
-//    8 reset/disable the run if player doesnt use fixed pmove
-//   16 disable use of save slots and backups
-//   32 disable explosive weapons pickup
-//   64 disable potralgun pickup
-//   128 disable save, reset when loading
-void target_startTimer_use(gentity_t *self, gentity_t *other,
-                           gentity_t *activator) {
-  auto clientNum = ClientNum(activator);
-  float speed = VectorLength(activator->client->ps.velocity);
-
-  if (!activator->client) {
-    return;
-  }
-
-  if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
-    return;
-  }
-
-  if (!activator->client->pers.enableTimeruns) {
-    return;
-  }
-
-  if (activator->client->sess.timerunActive) {
-    return;
-  }
-
-  // We don't need any of these checks if we are debugging
-  if (g_debugTimeruns.integer <= 0) {
-    if (activator->client->noclip || activator->flags == FL_GODMODE) {
-      Printer::SendCenterMessage(
-          clientNum,
-          "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
-      return;
-    }
-
-    if (speed > self->velocityUpperLimit) {
-      Printer::SendCenterMessage(
-          clientNum,
-          ETJump::stringFormat("^3WARNING: ^7Timerun was not started. Too high "
-                               "starting speed (%.2f > %.2f)\n",
-                               speed, self->velocityUpperLimit));
-      return;
-    }
-
-    if (activator->client->ps.viewangles[ROLL] != 0) {
-      Printer::SendCenterMessage(
-          clientNum,
-          "^3WARNING: ^7Timerun was not started. Z-rotation detected!");
-      return;
-    }
-  }
-
-  activator->client->sess.runSpawnflags = self->spawnflags;
-
-  // disable timer if pmove is not fixed
-  if (activator->client->sess.runSpawnflags == 0 ||
-      activator->client->sess.runSpawnflags & TIMERUN_RESET_ON_PMOVE_NULL) {
-    if (activator->client->pers.pmoveFixed == qfalse) {
-      Printer::SendCenterMessage(
-          clientNum,
-          "^3WARNING: ^7Timerun was not started. pmove_fixed is set to 0!");
-      return;
-    }
-  }
-
-  if (!activator->client->sess.timerunCheatsNotified && g_cheats.integer) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3WARNING: ^7Cheats are enabled! Timerun "
-                              "records will not be saved!\n");
-    activator->client->sess.timerunCheatsNotified = true;
-  }
-
-  StartTimer(level.timerunNames[self->runIndex], activator);
-}
-
-void SetTimerunIndex(gentity_t *self) {
-  char *name = NULL;
-  int i = 0;
-  G_SpawnString("name", "default", &name);
-
-  for (; i < level.timerunNamesCount; i++) {
-    // Timerun with that name already exists. Set the index
-    if (!Q_stricmp(level.timerunNames[i], name)) {
-      self->runIndex = i;
-      break;
-    }
-  }
-
-  if (i == level.timerunNamesCount) {
-    if (level.timerunNamesCount >= 20) {
-      G_Error("Too many startTimers on the map\n");
-      return;
-    }
-    Q_strncpyz(level.timerunNames[level.timerunNamesCount], name,
-               sizeof(level.timerunNames[level.timerunNamesCount]));
-    self->runIndex = level.timerunNamesCount;
-    ++level.timerunNamesCount;
-  }
-}
-
-// Starts a time run
-// each run has a "name" that is used as an
-// identifier
-void SP_target_startTimer(gentity_t *self) {
-  SetTimerunIndex(self);
-
-  level.hasTimerun = qtrue;
-
-  G_SpawnFloat("speed_limit", "700", &self->velocityUpperLimit);
-
-  self->use = target_startTimer_use;
-}
-
-// target_endtimer
-// name:    run name.
-void target_endTimer_use(gentity_t *self, gentity_t *other,
-                         gentity_t *activator) {
-  if (!activator) {
-    return;
-  }
-
-  if (!activator->client) {
-    return;
-  }
-
-  if (activator->client->sess.sessionTeam == TEAM_SPECTATOR) {
-    return;
-  }
-
-  StopTimer(level.timerunNames[self->runIndex], activator);
-}
-
-// Stops a time run if the names match
-// each run has a name that is used as
-// an identifier
-void SP_target_endTimer(gentity_t *self) {
-  SetTimerunIndex(self);
-
-  self->use = target_endTimer_use;
-}
-
-// End of timeruns support
 
 // target_displaytjl
 // # Keys

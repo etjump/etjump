@@ -32,14 +32,9 @@ void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   ent->activator = activator;
 
-  // make sure we only pass in team if the activator is a client
-  if (activator->client) {
-    G_Script_ScriptEvent(
-        ent, "activate",
-        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
-  } else {
-    G_Script_ScriptEvent(ent, "activate", nullptr);
-  }
+  G_Script_ScriptEvent(
+      ent, "activate",
+      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
   G_UseTargets(ent, ent->activator);
   activator->client->multiTriggerActivationTime = level.time;
@@ -54,14 +49,9 @@ void parallel_multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   ent->activator = activator;
 
-  // make sure we only pass in team if the activator is a client
-  if (activator->client) {
-    G_Script_ScriptEvent(
-        ent, "activate",
-        activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
-  } else {
-    G_Script_ScriptEvent(ent, "activate", nullptr);
-  }
+  G_Script_ScriptEvent(
+      ent, "activate",
+      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
   G_UseTargets(ent, ent->activator);
   activator->client->alreadyActivatedTrigger = qtrue;

@@ -24,17 +24,21 @@
 
 #include <bitset>
 #include "etj_commands.h"
+
+#include "etj_command_parser.h"
+#include "etj_command_parser.h"
 #include "etj_local.h"
 #include "etj_save_system.h"
 #include "etj_session.h"
 #include "etj_custom_map_votes.h"
-#include "etj_timerun.h"
 #include "g_local.h"
 #include "etj_map_statistics.h"
+#include "etj_numeric_utilities.h"
 #include "etj_utilities.h"
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
 #include "etj_printer.h"
+#include "etj_timerun_v2.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
 typedef std::pair<std::function<bool(gentity_t *ent, Arguments argv)>, char>
@@ -77,7 +81,40 @@ const char RESTART = 'r';
 const char TOKENS = 'V';
 const char SETLEVEL = 's';
 const char MOVERSCALE = 'v';
+const char TIMERUN_MANAGEMENT = 'T';
 } // namespace CommandFlags
+
+// refactor admin system to use the new command parser instead of
+// continuing to use this.
+// This is only in use to keep the scope of the timerun improvement
+// reasonable
+auto deprecated_getCommand(const std::string &commandPrefix, int clientNum,
+                           const ETJump::CommandParser::CommandDefinition &def,
+                           Arguments args) {
+  auto command = ETJump::CommandParser(def, *args).parse();
+
+  if (command.helpRequested) {
+    Printer::SendChatMessage(
+        clientNum,
+        ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
+    Printer::SendConsoleMessage(clientNum, def.help());
+    return ETJump::opt<ETJump::CommandParser::Command>();
+  }
+
+  if (command.errors.size() > 0) {
+    Printer::SendChatMessage(
+        clientNum,
+        ETJump::stringFormat(
+            "^3%s: ^7operation failed. Check console for more information.",
+            commandPrefix));
+
+    Printer::SendConsoleMessage(clientNum, command.getErrorMessage() + "\n");
+
+    return ETJump::opt<ETJump::CommandParser::Command>();
+  }
+
+  return ETJump::opt<ETJump::CommandParser::Command>(std::move(command));
+}
 
 namespace ClientCommands {
 
@@ -104,36 +141,241 @@ bool Unload(gentity_t *ent, Arguments argv) {
 bool ListInfo(gentity_t *ent, Arguments argv) {
   if (argv->size() != 2) {
     std::string types = game.customMapVotes->ListTypes();
-    ConsolePrintTo(ent, "^<List of custom map types: ^7" + types);
+    Printer::SendConsoleMessage(
+        ClientNum(ent), "^gAvailable custom map vote lists:\n^z" + types +
+                            "\n\n^gUse ^3listinfo [listname] ^gto type "
+                            "maps in the specified type.\n");
     return true;
   }
 
-  const std::vector<std::string> *lines =
-      game.customMapVotes->ListInfo(argv->at(1));
-  if (lines->size() == 0) {
-    ChatPrintTo(ent, "^<<listinfo: ^7list could not be found.");
+  const auto &type = argv->at(1);
+  const std::string maplist = game.customMapVotes->ListInfo(type);
+  if (maplist.empty()) {
+    Printer::SendConsoleMessage(
+        ClientNum(ent),
+        ETJump::stringFormat("^3listinfo: ^gCould not find type ^3%s\n", type));
     return false;
   }
-  BeginBufferPrint();
-  for (unsigned i = 0; i < lines->size(); i++) {
-    BufferPrint(ent, lines->at(i));
+  Printer::SendConsoleMessage(ClientNum(ent), maplist);
+  return true;
+}
+
+bool Rankings(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
   }
-  FinishBufferPrint(ent, false);
+  auto args = ETJump::Container::skipFirstN(*argv, 1);
+
+  auto optCommand = deprecated_getCommand(
+      "rankings", ClientNum(ent),
+      ETJump::CommandParser::CommandDefinition::create(
+          "rankings",
+          "Displays the player rankings for a specific season. Uses the "
+          "overall as the default.\n\n    /rankings --season <season> --page "
+          "<page> --page-size <page size>\n\n    Has a shorthand format of:\n  "
+          "  /rankings <season>")
+          .addOption("season", "Name of the season to list rankings for",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("page", "Which page of rankings to show",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("page-size", "How many rankings to show per page",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false),
+      &args);
+
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto command = optCommand.value();
+
+  auto optSeason = command.getOptional("season");
+  auto optPage = command.getOptional("page");
+  auto optPageSize = command.getOptional("page-size");
+
+  std::string season;
+
+  if (!command.extraArgs.empty()) {
+    season = command.extraArgs[0];
+  }
+
+  if (season.empty()) {
+    season = optSeason.hasValue() ? optSeason.value().text : "Default";
+  }
+  auto page = optPage.hasValue() ? optPage.value().integer - 1 : 0;
+  auto pageSize = optPageSize.hasValue() ? optPageSize.value().integer : 20;
+
+  pageSize = Numeric::clamp(pageSize, 1, 100);
+
+  auto userId = ETJump::session->GetId(ent);
+
+  ETJump::Timerun::PrintRankingsParams params{
+      ClientNum(ent), userId, std::move(season), page, pageSize};
+
+  game.timerunV2->printRankings(std::move(params));
+  return true;
+}
+
+bool ListSeasons(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
+  game.timerunV2->printSeasons(ClientNum(ent));
   return true;
 }
 
 bool Records(gentity_t *ent, Arguments argv) {
-  std::string map = level.rawmapname, runName;
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
+  auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto optCommand = deprecated_getCommand(
+      "records", ClientNum(ent),
+      ETJump::CommandParser::CommandDefinition::create(
+          "records",
+          "Print the timerun records.\n    /records --season <season name> "
+          "--map <map name> --run <run name>\n\n    Has a shorthand format "
+          "of:\n    /records <run name>\n    /records <map name> <run name>\n  "
+          "  /records <season name> <map name> <run name>")
+          .addOption("season",
+                     "Name of the season to print the records for. Default is "
+                     "the overall season.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("map",
+                     "Name of the map to print the records for. Default is the "
+                     "current map.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption(
+              "run",
+              "Name of the run to print the records for. Default will print "
+              "top 3 records for all runs on specified map and your record.",
+              ETJump::CommandParser::OptionDefinition::Type::MultiToken, false)
+          .addOption("page", "Which page to display starting at 1",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false)
+          .addOption("page-size",
+                     "How many records to show on a single page. Max page size "
+                     "is 100 if a run is specified, otherwise 10.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false),
+      &args);
 
-  if (argv->size() > 1) {
-    runName = argv->at(1);
+  if (!optCommand.hasValue()) {
+    return true;
   }
 
-  if (argv->size() > 2) {
-    map = argv->at(2);
+  auto command = optCommand.value();
+
+  auto optSeason = command.getOptional("season");
+  auto optMap = command.getOptional("map");
+  auto optRun = command.getOptional("run");
+  auto optPage = command.getOptional("page");
+  auto optPageSize = command.getOptional("page-size");
+
+  std::string season;
+  std::string map;
+  ETJump::opt<std::string> run;
+
+  if (command.extraArgs.size() >= 3) {
+    season = command.extraArgs[0];
+    map = command.extraArgs[1];
+    run = command.extraArgs[2];
+  } else if (command.extraArgs.size() >= 2) {
+    map = command.extraArgs[0];
+    run = command.extraArgs[1];
+  } else if (!command.extraArgs.empty()) {
+    run = command.extraArgs[0];
   }
 
-  game.timerun->printRecords(ClientNum(ent), map, runName);
+  if (season.empty()) {
+    season = optSeason.hasValue() ? optSeason.value().text : "Default";
+  }
+  bool exactMap{};
+  if (map.empty()) {
+    map = optMap.hasValue() ? optMap.value().text : level.rawmapname;
+    exactMap = !optMap.hasValue();
+  } else {
+    exactMap = false;
+  }
+  if (!run.hasValue()) {
+    run = optRun.hasValue() ? optRun.value().text : ETJump::opt<std::string>();
+  }
+
+  ETJump::Timerun::PrintRecordsParams params;
+  params.clientNum = ClientNum(ent);
+  params.season = std::move(season);
+  params.map = std::move(map);
+  // use exact map search if user did not specify the map
+  params.exactMap = exactMap;
+  params.run = std::move(run);
+  params.page = optPage.hasValue() ? optPage.value().integer : 1;
+  if (!params.run.hasValue()) {
+    params.pageSize = optPageSize.hasValue()
+                          ? Numeric::clamp(optPageSize.value().integer, 1, 10)
+                          : 3;
+  } else {
+    params.pageSize = optPageSize.hasValue()
+                          ? Numeric::clamp(optPageSize.value().integer, 1, 100)
+                          : 20;
+  }
+  params.userId = ETJump::session->GetId(ent);
+
+  game.timerunV2->printRecords(std::move(params));
+
+  return true;
+}
+
+bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
+  // these are console commands but to make them more accessible
+  // they were also made admin commands
+  // server can't call these as they expect clientNum
+  if (!ent) {
+    return false;
+  }
+  auto args = ETJump::Container::skipFirstN(*argv, 1);
+  auto optCommand = deprecated_getCommand(
+      "loadcheckpoints", ClientNum(ent),
+      ETJump::CommandParser::CommandDefinition::create(
+          "loadcheckpoints",
+          "Load checkpoints from an existing record.\n    /loadcheckpoints "
+          "--run <run name> --rank <rank>\n\n"
+          "    Has a shorthand format of:\n"
+          "    /loadcheckpoints <run name> <rank>\n"
+          "    /loadcheckpoints <run name>")
+          .addOption("run", "Name of the run to load the records from.",
+                     ETJump::CommandParser::OptionDefinition::Type::Token, true,
+                     0)
+          .addOption("rank",
+                     "Rank to load checkpoints from. Defaults to 1. Value -1 "
+                     "clears loaded checkpoints.",
+                     ETJump::CommandParser::OptionDefinition::Type::Integer,
+                     false, 1),
+      &args);
+
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  const auto &runName = optCommand.value().options.at("run").text;
+  auto optRank = optCommand.value().getOptional("rank");
+  auto rank = optRank.hasValue() ? optRank.value().integer : 1;
+
+  game.timerunV2->loadCheckpoints(ClientNum(ent), level.rawmapname, runName,
+                                  rank);
+
   return true;
 }
 } // namespace ClientCommands
@@ -210,8 +452,7 @@ bool Admintest(gentity_t *ent, Arguments argv) {
 }
 
 bool AddLevel(gentity_t *ent, Arguments argv) {
-  // !addlevel [level] -cmds [commands] -greeting [greeting] -title
-  // [title]
+  // !addlevel [level] -cmds [commands] -greeting [greeting] -title [title]
   if (argv->size() < 2) {
     PrintManual(ent, "addlevel");
     return false;
@@ -229,7 +470,7 @@ bool AddLevel(gentity_t *ent, Arguments argv) {
   }
 
   if (argv->size() > 2) {
-    ConstArgIter it = argv->begin() + 2;
+    auto it = argv->begin() + 2;
 
     while (it != argv->end()) {
       if (*it == "-cmds" && it + 1 != argv->end()) {
@@ -265,7 +506,8 @@ bool AddLevel(gentity_t *ent, Arguments argv) {
     title = ETJump::trimEnd(title);
   }
 
-  if (!game.levels->Add(level, title, commands, greeting)) {
+  if (!game.levels->Add(level, std::move(title), std::move(commands),
+                        std::move(greeting))) {
     ChatPrintTo(ent, "^3addlevel: ^7" + game.levels->ErrorMessage());
     return false;
   }
@@ -378,7 +620,7 @@ bool Ban(gentity_t *ent, Arguments argv) {
       }
     }
   }
-  if (!ETJump::session->Ban(ent, player, expires, reason)) {
+  if (!ETJump::session->Ban(ent, player, expires, std::move(reason))) {
     ChatPrintTo(ent, "^3ban: ^7" + ETJump::session->GetMessage());
     return false;
   }
@@ -444,8 +686,8 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  ConstArgIter it = argv->begin() + 2;
-  ConstArgIter end = argv->end();
+  auto it = argv->begin() + 2;
+  auto end = argv->end();
 
   std::string currentPermissions = game.levels->GetLevel(level)->commands;
 
@@ -477,32 +719,32 @@ bool EditCommands(gentity_t *ent, Arguments argv) {
     }
   }
 
-  std::string duplicateFlags = "";
-  for (size_t i = 0; i < addCommands.size(); i++) {
-    if (deleteCommands.find(addCommands[i]) != std::string::npos) {
+  std::string duplicateFlags;
+  for (char addCommand : addCommands) {
+    if (deleteCommands.find(addCommand) != std::string::npos) {
       ChatPrintTo(ent, va("^3editcommands: ^7ignoring command flag \"%c\". Are "
                           "you trying to add or delete it?",
-                          addCommands[i]));
-      duplicateFlags.push_back(addCommands[i]);
+                          addCommand));
+      duplicateFlags.push_back(addCommand);
     }
   }
 
   if (duplicateFlags.length() > 0) {
     std::string temp;
-    for (size_t i = 0; i < addCommands.length(); i++) {
-      if (duplicateFlags.find(addCommands[i]) == std::string::npos) {
-        temp += addCommands[i];
+    for (char addCommand : addCommands) {
+      if (duplicateFlags.find(addCommand) == std::string::npos) {
+        temp += addCommand;
       }
     }
     addCommands = temp;
 
     temp.clear();
-    for (size_t i = 0; i < deleteCommands.length(); i++) {
-      if (duplicateFlags.find(deleteCommands[i]) == std::string::npos) {
-        temp += deleteCommands[i];
+    for (char deleteCommand : deleteCommands) {
+      if (duplicateFlags.find(deleteCommand) == std::string::npos) {
+        temp += deleteCommand;
       }
     }
-    deleteCommands = temp;
+    deleteCommands = std::move(temp);
   }
 
   // always has + in it
@@ -753,7 +995,7 @@ bool FindMap(gentity_t *ent, Arguments argv) {
 
   buffer += "\n";
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
   return true;
 }
 
@@ -921,7 +1163,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
 
   return true;
 }
@@ -1010,7 +1252,7 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
   buffer += "\n^zFound ^3" + ETJump::getPluralizedString(maps.size(), "^zmap") +
             " on the server.\n";
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
 
   return true;
 }
@@ -1079,10 +1321,7 @@ bool Map(gentity_t *ent, Arguments argv) {
     return false;
   }
 
-  MapStatistics mapStats;
-
-  if (strstr(mapStats.getBlockedMapsStr().c_str(), requestedMap.c_str()) !=
-      nullptr) {
+  if (MapStatistics::isBlockedMap(requestedMap)) {
     ChatPrintTo(ent, "^3map: ^7" + requestedMap +
                          " cannot be played on this server.");
     return false;
@@ -1182,7 +1421,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
 
   return true;
 }
@@ -1837,7 +2076,136 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     lines++;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  Printer::SendConsoleMessage(ClientNum(ent), std::move(buffer));
+
+  return true;
+}
+
+bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+
+  // All commands should be refactored to use this but will do this like
+  // this for now
+  auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create(
+          "add-season", "Adds a new timerun season\n    !add-season --name "
+                        "<name> --start-date <2000-01-01>")
+          .addOption("name", "Name of the season to add",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true)
+          .addOption("start-date",
+                     "Start date for the timerun season in YYYY-MM-DD format "
+                     "(e.g. 2000-01-01)",
+                     ETJump::CommandParser::OptionDefinition::Type::Date, true)
+          .addOption("end-date-exclusive",
+                     "End date for the timerun season in YYYY-MM-DD format "
+                     "(e.g. 2000-01-01)",
+                     ETJump::CommandParser::OptionDefinition::Type::Date,
+                     false));
+  auto optCommand = deprecated_getCommand("add-season", clientNum, def, argv);
+
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto command = std::move(optCommand.value());
+
+  const auto &name = command.options.at("name").text;
+  auto start = command.options.at("start-date").date;
+  auto end = command.options.count("end-date-exclusive") > 0
+                 ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(
+                       command.options.at("end-date-exclusive").date))
+                 : ETJump::opt<ETJump::Time>();
+
+  if (end.hasValue()) {
+    if ((*end).date < start) {
+      Printer::SendChatMessage(
+          clientNum,
+          ETJump::stringFormat(
+              "^3addseason: ^7Start time `%s` is after end time `%s`",
+              start.toDateString(), end.value().date.toDateString()));
+      return true;
+    }
+  }
+
+  ETJump::Timerun::AddSeasonParams params{};
+  params.clientNum = clientNum;
+  params.startTime = ETJump::Time::fromDate(start);
+  params.endTime = end;
+  params.name = name;
+
+  game.timerunV2->addSeason(std::move(params));
+
+  return true;
+}
+
+bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+
+  auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create(
+          "edit-season", "Edit an existing timerun season")
+          .addOption("name", "Name of the season to edit",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true)
+          .addOption("start-date",
+                     "Start date for the timerun season in YYYY-MM-DD format "
+                     "(e.g. 2000-01-01)",
+                     ETJump::CommandParser::OptionDefinition::Type::Date, false)
+          .addOption("end-date",
+                     "End date for the timerun season in YYYY-MM-DD format "
+                     "(e.g. 2000-01-01)",
+                     ETJump::CommandParser::OptionDefinition::Type::Date,
+                     false));
+
+  auto optCommand = deprecated_getCommand("edit-season", clientNum, def, argv);
+
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto command = std::move(optCommand.value());
+
+  const auto &name = command.options["name"].text;
+  auto start = command.getOptional("start-date");
+  auto end = command.getOptional("end-date");
+
+  const auto &startTime = start.hasValue()
+                              ? ETJump::opt<ETJump::Time>(
+                                    ETJump::Time::fromDate(start.value().date))
+                              : ETJump::opt<ETJump::Time>();
+  const auto &endTime =
+      end.hasValue()
+          ? ETJump::opt<ETJump::Time>(ETJump::Time::fromDate(end.value().date))
+          : ETJump::opt<ETJump::Time>();
+
+  game.timerunV2->editSeason({clientNum, name, startTime, endTime});
+
+  return true;
+}
+
+bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+
+  auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create(
+          "delete-season", "Delete a season. This will delete all the "
+                           "records within the season.")
+          .addOption("name", "Exact name of the season to delete",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true));
+
+  auto optCommand =
+      deprecated_getCommand("delete-season", clientNum, def, argv);
+  if (!optCommand.hasValue()) {
+    return true;
+  }
+
+  auto command = std::move(optCommand.value());
+  const auto &name = command.options["name"].text;
+
+  game.timerunV2->deleteSeason(clientNum,
+                               ETJump::StringUtil::toLowerCase(name));
 
   return true;
 }
@@ -1932,6 +2300,26 @@ Commands::Commands() {
       AdminCommandPair(AdminCommands::MoverScale, CommandFlags::MOVERSCALE);
   adminCommands_["newmaps"] =
       AdminCommandPair(AdminCommands::NewMaps, CommandFlags::BASIC);
+  adminCommands_["add-season"] = AdminCommandPair(
+      AdminCommands::TimerunAddSeason, CommandFlags::TIMERUN_MANAGEMENT);
+  adminCommands_["edit-season"] = AdminCommandPair(
+      AdminCommands::TimerunEditSeason, CommandFlags::TIMERUN_MANAGEMENT);
+  adminCommands_["delete-season"] = AdminCommandPair(
+      AdminCommands::TimerunDeleteSeason, CommandFlags::TIMERUN_MANAGEMENT);
+  adminCommands_["records"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["ranks"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["times"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["top"] =
+      AdminCommandPair(ClientCommands::Records, CommandFlags::BASIC);
+  adminCommands_["rankings"] =
+      AdminCommandPair(ClientCommands::Rankings, CommandFlags::BASIC);
+  adminCommands_["loadcheckpoints"] =
+      AdminCommandPair(ClientCommands::LoadCheckpoints, CommandFlags::BASIC);
+  adminCommands_["seasons"] =
+      AdminCommandPair(ClientCommands::ListSeasons, CommandFlags::BASIC);
 
   commands_["backup"] = ClientCommands::BackupLoad;
   commands_["save"] = ClientCommands::Save;
@@ -1943,6 +2331,10 @@ Commands::Commands() {
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;
   commands_["top"] = ClientCommands::Records;
+  commands_["loadcheckpoints"] = ClientCommands::LoadCheckpoints;
+  commands_["load-checkpoints"] = ClientCommands::LoadCheckpoints;
+  commands_["rankings"] = ClientCommands::Rankings;
+  commands_["seasons"] = ClientCommands::ListSeasons;
 }
 
 bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {
@@ -1961,19 +2353,22 @@ bool Commands::ClientCommand(gentity_t *ent, const std::string &commandStr) {
 bool Commands::List(gentity_t *ent) {
   ConstAdminCommandIterator it = adminCommands_.begin(),
                             end = adminCommands_.end();
+  const int clienNum = ClientNum(ent);
+  std::string helpMsg;
 
-  BeginBufferPrint();
-  ChatPrintTo(ent, "^3help: ^7check console for more information.");
+  Printer::SendChatMessage(clienNum,
+                           "^3help: ^gcheck console for more information.");
+
   int i = 1;
   std::bitset<256> perm = ETJump::session->Permissions(ent);
   for (; it != end; it++) {
-    if (perm[it->second.second] == false) {
+    if (!perm[it->second.second]) {
       continue;
     }
 
-    BufferPrint(ent, va("%-20s ", it->first.c_str()));
+    helpMsg += va("%-20s ", it->first.c_str());
     if (i != 0 && i % 3 == 0) {
-      BufferPrint(ent, "\n");
+      helpMsg += "\n";
     }
 
     i++;
@@ -1981,20 +2376,20 @@ bool Commands::List(gentity_t *ent) {
 
   // Add a newline if last row is incomplete
   if (i % 3 != 1) {
-    BufferPrint(ent, "\n");
+    helpMsg += "\n";
   }
 
   // Let client know if they have access to silent commands
   if (ent && ETJump::session->HasPermission(ent, '/')) {
-    BufferPrint(ent, "\n^7Use admin commands silently with ^3/!command");
+    helpMsg += "\n^gUse admin commands silently with ^3/!command\n";
   }
 
-  FinishBufferPrint(ent, true);
+  Printer::SendConsoleMessage(clienNum, std::move(helpMsg));
   return true;
 }
 
 bool Commands::AdminCommand(gentity_t *ent) {
-  std::string command = "", arg = SayArgv(0);
+  std::string command, arg = SayArgv(0);
   int skip = 0;
 
   if (arg == "say" || arg == "enc_say") {
@@ -2016,8 +2411,6 @@ bool Commands::AdminCommand(gentity_t *ent) {
       return false;
     }
     command = &arg[1];
-  } else if (ent == NULL) {
-    command = arg;
   } else {
     return false;
   }

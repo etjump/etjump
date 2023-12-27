@@ -87,7 +87,6 @@ extern vmCvar_t ui_notebookCurrentPage;
 extern vmCvar_t ui_clipboardName;
 
 // NERVE - SMF - multiplayer cvars
-extern vmCvar_t ui_serverFilterType;
 extern vmCvar_t ui_currentNetMap;
 extern vmCvar_t ui_currentMap;
 extern vmCvar_t ui_mapIndex;
@@ -133,6 +132,8 @@ extern vmCvar_t cl_bypassMouseInput;
 extern vmCvar_t ui_autoredirect;
 
 extern vmCvar_t ui_voteCheats;
+
+extern vmCvar_t etj_menuSensitivity;
 
 //
 // ui_qmenu.c

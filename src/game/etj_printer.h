@@ -39,6 +39,10 @@ class Printer {
 public:
   static const int CONSOLE_CLIENT_NUMBER = -1;
   /**
+   * Prints the message to server console
+   */
+  static void PrintLn(std::string message);
+  /**
    * Prints the message to server console and log. Will
    * send multiple messages if the message is longer than 1000 bytes
    * @param message The message to be sent

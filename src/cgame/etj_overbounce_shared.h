@@ -21,28 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #pragma once
 
-#include <memory>
+#include "cg_local.h"
 
 namespace ETJump {
-
-template <typename T>
-class CircularBuffer {
-private:
-  std::unique_ptr<T[]> buffer;
-  size_t tail;
-  size_t maxSize;
-  T emptyItem;
-
+class Overbounce {
 public:
-  CircularBuffer<T>(size_t maxSize)
-      : buffer(std::make_unique<T[]>(maxSize)), maxSize(maxSize) {}
-  void push_back(const T &&item) {
-    buffer[tail] = item;
-    tail = (tail + 1) % maxSize;
-  }
-  void push_front(const T &&item) {}
-  // operator[] ()
+  static bool isOverbounce(float zVel, float startHeight, float endHeight,
+                           float zVelSnapped, float pmoveSec, int gravity);
+  static bool surfaceAllowsOverbounce(trace_t *trace);
+
+  static constexpr float stickyOffset = 0.25f;
+  static constexpr int MAX_TRACE_DIST = MAX_MAP_SIZE * 2;
 };
-}; // namespace ETJump
+} // namespace ETJump

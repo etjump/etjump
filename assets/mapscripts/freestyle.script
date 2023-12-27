@@ -1,0 +1,155 @@
+// ETJump mapscript for freestyle.bsp
+// Modifications:
+// - removed extra closing brace after game_manager, causing the map failing to load
+
+game_manager
+{ 
+   	spawn 
+   	{ 
+		wait 50		
+
+      		wm_axis_respawntime 1
+      		wm_allied_respawntime 1
+      		wm_setwinner -1
+		wm_set_round_timelimit -1
+	}
+}
+
+
+
+moving_plate_1 
+{
+	spawn
+	{
+		wait 50
+		trigger moving_plate_1 start
+	}
+	
+	trigger start
+	{
+		gotomarker 2 100 wait
+		gotomarker 3 100 wait
+		gotomarker 4 100 wait
+		gotomarker 5 100 wait
+		gotomarker 6 100 wait
+		gotomarker 7 100 wait
+		gotomarker 8 100 wait
+		gotomarker 9 100 wait
+		gotomarker 10 100 wait
+		gotomarker 11 100 wait
+		gotomarker 12 100 wait
+		gotomarker 13 100 wait
+		gotomarker 14 100 wait
+		gotomarker 15 100 wait
+		gotomarker 16 100 wait
+		gotomarker 17 100 wait
+		gotomarker 18 100 wait
+		gotomarker 19 100 wait
+		gotomarker 20 100 wait
+		gotomarker 1 100 wait
+		trigger moving_plate_1 start		
+	}
+}
+
+moving_plate_2
+{
+	spawn
+	{
+		wait 50
+		trigger moving_plate_2 start
+	}
+	
+	trigger start
+	{
+		gotomarker 6 100 wait
+		gotomarker 7 100 wait
+		gotomarker 8 100 wait
+		gotomarker 9 100 wait
+		gotomarker 10 100 wait
+		gotomarker 11 100 wait
+		gotomarker 12 100 wait
+		gotomarker 13 100 wait
+		gotomarker 14 100 wait
+		gotomarker 15 100 wait
+		gotomarker 16 100 wait
+		gotomarker 17 100 wait
+		gotomarker 18 100 wait
+		gotomarker 19 100 wait
+		gotomarker 20 100 wait
+		gotomarker 1 100 wait
+		gotomarker 2 100 wait
+		gotomarker 3 100 wait
+		gotomarker 4 100 wait
+		gotomarker 5 100 wait
+		trigger moving_plate_2 start		
+	}
+}
+
+moving_plate_3
+{
+	spawn
+	{
+		wait 50
+		trigger moving_plate_3 start
+	}
+	
+	trigger start
+	{
+		gotomarker 11 100 wait
+		gotomarker 12 100 wait
+		gotomarker 13 100 wait
+		gotomarker 14 100 wait
+		gotomarker 15 100 wait
+		gotomarker 16 100 wait
+		gotomarker 17 100 wait
+		gotomarker 18 100 wait
+		gotomarker 19 100 wait
+		gotomarker 20 100 wait
+		gotomarker 1 100 wait
+		gotomarker 2 100 wait
+		gotomarker 3 100 wait
+		gotomarker 4 100 wait
+		gotomarker 5 100 wait
+		gotomarker 6 100 wait
+		gotomarker 7 100 wait
+		gotomarker 8 100 wait
+		gotomarker 9 100 wait
+		gotomarker 10 100 wait
+		trigger moving_plate_3 start		
+	}
+}
+
+moving_plate_4
+{
+	spawn
+	{
+		wait 50
+		trigger moving_plate_4 start
+	}
+	
+	trigger start
+	{
+
+		gotomarker 16 100 wait
+		gotomarker 17 100 wait
+		gotomarker 18 100 wait
+		gotomarker 19 100 wait
+		gotomarker 20 100 wait
+		gotomarker 1 100 wait
+		gotomarker 2 100 wait
+		gotomarker 3 100 wait
+		gotomarker 4 100 wait
+		gotomarker 5 100 wait
+		gotomarker 6 100 wait
+		gotomarker 7 100 wait
+		gotomarker 8 100 wait
+		gotomarker 9 100 wait
+		gotomarker 10 100 wait
+		gotomarker 11 100 wait
+		gotomarker 12 100 wait
+		gotomarker 13 100 wait
+		gotomarker 14 100 wait
+		gotomarker 15 100 wait
+		trigger moving_plate_4 start		
+	}
+}

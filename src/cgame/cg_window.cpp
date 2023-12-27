@@ -692,11 +692,11 @@ void CG_initStrings(void) {
   }
 }
 
-qboolean CG_addString(cg_window_t *w, const char *buf) {
+bool CG_addString(cg_window_t *w, const char *buf) {
   int i;
 
   // Check if we're reusing the current buf
-  if (w->lineText[w->lineCount] != NULL) {
+  if (w->lineText[w->lineCount] != nullptr) {
     for (i = 0; i < MAX_STRINGS; i++) {
       if (!cg.aStringPool[i].fActive) {
         continue;
@@ -705,9 +705,9 @@ qboolean CG_addString(cg_window_t *w, const char *buf) {
       if (w->lineText[w->lineCount] == (char *)&cg.aStringPool[i].str) {
         w->lineCount++;
         cg.aStringPool[i].fActive = qtrue;
-        strcpy(cg.aStringPool[i].str, buf);
+        Q_strncpyz(cg.aStringPool[i].str, buf, sizeof(cg.aStringPool[i].str));
 
-        return (qtrue);
+        return true;
       }
     }
   }
@@ -715,14 +715,14 @@ qboolean CG_addString(cg_window_t *w, const char *buf) {
   for (i = 0; i < MAX_STRINGS; i++) {
     if (!cg.aStringPool[i].fActive) {
       cg.aStringPool[i].fActive = qtrue;
-      strcpy(cg.aStringPool[i].str, buf);
+      Q_strncpyz(cg.aStringPool[i].str, buf, sizeof(cg.aStringPool[i].str));
       w->lineText[w->lineCount++] = (char *)&cg.aStringPool[i].str;
 
-      return (qtrue);
+      return true;
     }
   }
 
-  return (qfalse);
+  return false;
 }
 
 void CG_removeStrings(cg_window_t *w) {

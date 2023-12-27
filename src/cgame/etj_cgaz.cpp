@@ -83,7 +83,7 @@ void CGaz::UpdateCGaz1(vec3_t wishvel, int8_t uCmdScale, usercmd_t cmd) {
   yaw = atan2f(wishvel[1], wishvel[0]) - drawVel;
 }
 
-void CGaz::UpdateCGaz2(void) {
+void CGaz::UpdateCGaz2() {
   drawVel = AngleNormalize180(ps->viewangles[YAW] -
                               AngleNormalize180(RAD2DEG(drawVel)));
   drawVel = DEG2RAD(drawVel);
@@ -93,7 +93,7 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
   // this can happen when running > 125fps, set default wishspeed to
   // avoid div by 0 later
   if (wishspeed == 0) {
-    wishspeed = ps->speed * ps->sprintSpeedScale;
+    wishspeed = static_cast<float>(ps->speed) * ps->sprintSpeedScale;
   }
 
   state.gSquared = GetSlickGravity();
@@ -101,7 +101,7 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
   state.vfSquared = VectorLengthSquared2(pm->pmext->velocity);
   state.wishspeed = wishspeed;
   state.a = accel * state.wishspeed * pm->pmext->frametime;
-  state.aSquared = pow(state.a, 2);
+  state.aSquared = powf(state.a, 2);
   // show true ground zones?
   if (!(etj_CGazTrueness.integer &
         static_cast<int>(CGazTrueness::CGAZ_GROUND)) ||
@@ -160,28 +160,38 @@ float CGaz::UpdateDrawMax(state_t const *state, float drawMaxCos) {
   return drawMax;
 }
 
-float CGaz::GetSlickGravity(void) {
+float CGaz::GetSlickGravity() {
   if ((pm->pmext->groundTrace.surfaceFlags & SURF_SLICK) ||
       (ps->pm_flags & PMF_TIME_KNOCKBACK)) {
-    // this really wants to return a double for some reason
-    return static_cast<float>(std::pow(ps->gravity * pm->pmext->frametime, 2));
+    return powf(static_cast<float>(ps->gravity) * pm->pmext->frametime, 2);
   }
 
   return 0;
 }
 
-void CGaz::beforeRender() {
-  const int8_t uCmdScale =
-      ps->stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
-          ? CMDSCALE_WALK
-          : CMDSCALE_DEFAULT;
+bool CGaz::beforeRender() {
+  if (canSkipDraw()) {
+    return false;
+  }
+
+  const auto uCmdScale = static_cast<int8_t>(ps->stats[STAT_USERCMD_BUTTONS] &
+                                                     (BUTTON_WALKING << 8)
+                                                 ? CMDSCALE_WALK
+                                                 : CMDSCALE_DEFAULT);
   const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, uCmdScale);
 
   // get correct pmove state
   pm = PmoveUtils::getPmove(cmd);
 
+  // water and ladder movement are not important
+  // since speed is capped anyway
+  // check this only after we have a valid pmove
+  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
+    return false;
+  }
+
   // show upmove influence?
-  float scale =
+  const float scale =
       etj_CGazTrueness.integer & static_cast<int>(CGazTrueness::CGAZ_JUMPCROUCH)
           ? pm->pmext->scale
           : pm->pmext->scaleAlt;
@@ -193,35 +203,30 @@ void CGaz::beforeRender() {
 
   // set default wishspeed for drawing if no user input
   if (!cmd.forwardmove && !cmd.rightmove) {
-    wishspeed = ps->speed * ps->sprintSpeedScale;
+    wishspeed = static_cast<float>(ps->speed) * ps->sprintSpeedScale;
   }
 
-  switch (etj_drawCGaz.integer) {
-    case 1:
-      UpdateDraw(wishspeed, pm->pmext->accel);
-      UpdateCGaz1(wishvel, uCmdScale, cmd);
-      break;
-    case 2:
-      UpdateDraw(wishspeed, pm->pmext->accel);
-      UpdateCGaz2();
-      break;
-    default:
-      break;
+  UpdateDraw(wishspeed, pm->pmext->accel);
+
+  if (etj_drawCGaz.integer & 1) {
+    UpdateCGaz1(wishvel, uCmdScale, cmd);
   }
+  if (etj_drawCGaz.integer & 2) {
+    UpdateCGaz2();
+  }
+
+  return true;
 }
 
 void CGaz::render() const {
-  if (canSkipDraw()) {
-    return;
-  }
-
   // DeFRaG proxymod CGaz by Jelvan1
-  if (etj_drawCGaz.integer == 1) {
-    float y = etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0;
-    float h = etj_CGazHeight.integer > 0 ? etj_CGazHeight.integer : 0;
+  if (etj_drawCGaz.integer & 1) {
+    const auto y =
+        static_cast<float>(etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0);
+    const float h = etj_CGazHeight.value > 0 ? etj_CGazHeight.value : 0;
 
     float fov;
-    if (!etj_CGazFov.value) {
+    if (etj_CGazFov.value == 0) {
       fov = cg.refdef.fov_x;
     } else {
       fov = Numeric::clamp(etj_CGazFov.value, 1, 179);
@@ -241,50 +246,49 @@ void CGaz::render() const {
     // Max angle
     CG_FillAngleYaw(+drawMaxCos, +drawMax, yaw, y, h, fov, CGaz1Colors[3]);
     CG_FillAngleYaw(-drawMax, -drawMaxCos, yaw, y, h, fov, CGaz1Colors[3]);
-
-    return;
   }
 
   // Dzikie Weze's 2D-CGaz
-  if (etj_drawCGaz.integer == 2) {
+  if (etj_drawCGaz.integer & 2) {
     const usercmd_t cmd = pm->cmd;
-    int scx = SCREEN_CENTER_X - 1;
-    int scy = SCREEN_CENTER_Y - 1;
+    float scx = SCREEN_CENTER_X - 0.5f; // -0.5 since thickness is 1px
+    const float scy = SCREEN_CENTER_Y - 0.5f;
 
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(false);
       scx -= SCREEN_OFFSET_X;
     }
-    DrawLine(scx, scy, scx + cmd.rightmove, scy - cmd.forwardmove,
-             CGaz2Colors[1]);
+    DrawLine(scx, scy, scx + static_cast<float>(cmd.rightmove),
+             scy - static_cast<float>(cmd.forwardmove), CGaz2Colors[1]);
 
     // When under wishspeed velocity, most accel happens when
     // you move straight towards your current velocity, so skip
     // drawing the "wings" on the sides
-    auto drawSides = state.vf > state.wishspeed;
+    const bool drawSides = state.vf > state.wishspeed;
 
     auto velSize =
         etj_CGaz2FixedSpeed.value > 0 ? etj_CGaz2FixedSpeed.value : state.vf;
     velSize /= 5;
-    if (velSize > SCREEN_HEIGHT / 2) {
-      velSize = SCREEN_HEIGHT / 2;
+    if (velSize > SCREEN_HEIGHT * 0.5f) {
+      velSize = SCREEN_HEIGHT * 0.5f;
     }
 
-    DrawLine(scx, scy, scx + velSize * sin(drawVel),
-             scy - velSize * cos(drawVel), CGaz2Colors[0]);
+    if (!etj_CGaz2NoVelocityDir.integer) {
+      DrawLine(scx, scy, scx + velSize * std::sin(drawVel),
+               scy - velSize * std::cos(drawVel), CGaz2Colors[0]);
+    }
 
     if (drawSides) {
       velSize /= 2;
-      DrawLine(scx, scy, scx + velSize * sin(drawVel + drawOpt),
-               scy - velSize * cos(drawVel + drawOpt), CGaz2Colors[0]);
-      DrawLine(scx, scy, scx + velSize * sin(drawVel - drawOpt),
-               scy - velSize * cos(drawVel - drawOpt), CGaz2Colors[0]);
+      DrawLine(scx, scy, scx + velSize * std::sin(drawVel + drawOpt),
+               scy - velSize * std::cos(drawVel + drawOpt), CGaz2Colors[0]);
+      DrawLine(scx, scy, scx + velSize * std::sin(drawVel - drawOpt),
+               scy - velSize * std::cos(drawVel - drawOpt), CGaz2Colors[0]);
     }
 
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(true);
     }
-    return;
   }
 }
 
@@ -301,13 +305,14 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   const float scale = PmoveUtils::PM_SprintScale(&ps);
 
   // get usercmd
-  const int8_t ucmdScale =
-      ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8) ? CMDSCALE_WALK
-                                                             : CMDSCALE_DEFAULT;
+  const auto ucmdScale =
+      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
+                              ? CMDSCALE_WALK
+                              : CMDSCALE_DEFAULT);
   const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
 
   // not strafing if speed lower than ground speed or no user input
-  if (speed < ps.speed * scale ||
+  if (speed < static_cast<float>(ps.speed) * scale ||
       (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return false;
   }
@@ -323,21 +328,13 @@ bool CGaz::strafingForwards(const playerState_t &ps, pmove_t *pm) {
   const float diffAngle = AngleDelta(wishvelAngle, velAngle);
 
   // return true if diffAngle matches notion of "forwards"
-  if (cmd.rightmove < 0) {
-    // fullbeat / halfbeat / invert (holding +moveleft)
-    if (diffAngle >= 0) {
-      return true;
-    }
-  } else if (cmd.rightmove > 0) {
-    // fullbeat / halfbeat / invert (holding +moveright)
-    if (diffAngle < 0) {
-      return true;
-    }
-  } else if (cmd.forwardmove != 0) {
-    // nobeat
-    if (diffAngle >= 0) {
-      return true;
-    }
+  // fullbeat / halfbeat / invert (holding +moveleft) or
+  // fullbeat / halfbeat / invert (holding +moveright) or
+  // nobeat
+  if ((cmd.rightmove < 0 && diffAngle >= 0) ||
+      (cmd.rightmove > 0 && diffAngle < 0) ||
+      (cmd.forwardmove != 0 && diffAngle >= 0)) {
+    return true;
   }
 
   return false;
@@ -351,14 +348,15 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm) {
   const float scale = PmoveUtils::PM_SprintScale(&ps);
 
   // get usercmd
-  const int8_t ucmdScale =
-      ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8) ? CMDSCALE_WALK
-                                                             : CMDSCALE_DEFAULT;
+  const auto ucmdScale =
+      static_cast<int8_t>(ps.stats[STAT_USERCMD_BUTTONS] & (BUTTON_WALKING << 8)
+                              ? CMDSCALE_WALK
+                              : CMDSCALE_DEFAULT);
   const usercmd_t cmd = PmoveUtils::getUserCmd(ps, ucmdScale);
 
   // no meaningful value if speed lower than ground speed or no user
   // input
-  if (speed < ps.speed * scale ||
+  if (speed < static_cast<float>(ps.speed) * scale ||
       (cmd.forwardmove == 0 && cmd.rightmove == 0)) {
     return 0;
   }
@@ -370,7 +368,7 @@ float CGaz::getOptAngle(const playerState_t &ps, pmove_t *pm) {
   const bool forwards = strafingForwards(ps, pm);
 
   // get accel defined by physics
-  const float accel = ps.speed * pm->pmext->frametime;
+  const float accel = static_cast<float>(ps.speed) * pm->pmext->frametime;
 
   // get variables associated with optimal angle
   const float velAngle = RAD2DEG(std::atan2(ps.velocity[1], ps.velocity[0]));
@@ -415,18 +413,12 @@ bool CGaz::canSkipDraw() const {
     return true;
   }
 
-  if ((cg.zoomedBinoc || cg.zoomedScope) && !cg.renderingThirdPerson) {
+  if (cg.zoomedBinoc || BG_IsScopedWeapon(weapnumForClient())) {
     return true;
   }
 
   if (BG_PlayerMounted(ps->eFlags) || ps->weapon == WP_MOBILE_MG42_SET ||
       ps->weapon == WP_MORTAR_SET) {
-    return true;
-  }
-
-  // water and ladder movement are not important
-  // since speed is capped anyway
-  if (pm->pmext->waterlevel > 1 || pm->pmext->ladder) {
     return true;
   }
 

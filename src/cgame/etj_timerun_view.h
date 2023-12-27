@@ -24,59 +24,47 @@
 
 #pragma once
 
-#include <array>
 #include <string>
 #include "etj_drawable.h"
+#include "etj_timerun.h"
 
 namespace ETJump {
-struct PlayerTimerunInformation {
-  int startTime;
-  int completionTime;
-  std::string runName;
-  int previousRecord;
-  bool running;
-  // used for fading
-  int lastRunTimer;
-};
-
 class TimerunView : public Drawable {
 public:
-  TimerunView();
-  ~TimerunView();
-  static const int MaxClients = 64;
-  // whenever server sends any command that starts with
-  // `timerun` this will be called
-  bool parseServerCommand();
+  explicit TimerunView(std::shared_ptr<Timerun> timerun);
+  ~TimerunView() override;
 
-  // whenever the player starts a timerun
-  void start();
-
-  // whenever the player stops a timerun
-  void stop();
-
-  // whenever the player's timerun is interrupted (not finished)
-  void interrupt();
-  static void interrupt(PlayerTimerunInformation &playerTimerunInformation);
-
-  // draws the timer
-  void draw();
-
-  int getTransitionRange(int previousRunTime);
-
-  void pastRecordAnimation(vec4_t *color, const char *text, int timerTime,
-                           int record);
-
-  // returns the currently active run if there's any
-  // e.g. if player is running => return player's run,
-  // else if player is running and we're speccing the player
-  // => return that player's run
-  const PlayerTimerunInformation *currentRun() const;
+  void draw() override;
 
 private:
-  std::array<PlayerTimerunInformation, MaxClients> _playersTimerunInformation;
-  PlayerTimerunInformation _ownTimerunInformation;
-  vec4_t inactiveTimerColor;
+  // returns the currently active run if there's any
+  // e.g. if player is running => return player's run,
+  // else if player is running, and we're speccing the player
+  // => return that player's run
+  const Timerun::PlayerTimerunInformation *currentRun() const;
 
-  bool canSkipDraw() const;
+  static std::string getTimerString(int msec);
+
+  static int getTransitionRange(int previousTime);
+
+  static void pastRecordAnimation(vec4_t *color, const char *text,
+                                  int timerTime, int record);
+
+  static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
+                             int duration);
+
+  vec4_t inactiveTimerColor{};
+  std::shared_ptr<Timerun> _timerun;
+
+  vec4_t colorDefault = {1.0f, 1.0f, 1.0f, 1.0f};
+  vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
+  vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
+  static const int animationTime = 300;
+  static const int fadeHold = 5000; // 5s pause before fade starts
+  static const int fadeTime = 2000; // 2s fade
+
+  static const int popupFadeTime = 100;
+
+  static bool canSkipDraw();
 };
 } // namespace ETJump
