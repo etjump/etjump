@@ -445,6 +445,13 @@ vmCvar_t etj_checkpointsShadow;
 vmCvar_t etj_checkpointsStyle;
 vmCvar_t etj_checkpointsCount;
 
+vmCvar_t etj_checkpointsPopup;
+vmCvar_t etj_checkpointsPopupX;
+vmCvar_t etj_checkpointsPopupY;
+vmCvar_t etj_checkpointsPopupSize;
+vmCvar_t etj_checkpointsPopupShadow;
+vmCvar_t etj_checkpointsPopupDuration;
+
 vmCvar_t etj_drawMessageTime;
 
 vmCvar_t movie_changeFovBasedOnSpeed;
@@ -966,6 +973,15 @@ cvarTable_t cvarTable[] = {
     {&etj_checkpointsShadow, "etj_checkpointsShadow", "0", CVAR_ARCHIVE},
     {&etj_checkpointsStyle, "etj_checkpointsStyle", "0", CVAR_ARCHIVE},
     {&etj_checkpointsCount, "etj_checkpointsCount", "3", CVAR_ARCHIVE},
+
+    {&etj_checkpointsPopup, "etj_checkpointsPopup", "1", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupX, "etj_checkpointsPopupX", "320", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupY, "etj_checkpointsPopupY", "200", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupSize, "etj_checkpointsPopupSize", "2", CVAR_ARCHIVE},
+    {&etj_checkpointsPopupShadow, "etj_checkpointsPopupShadow", "1",
+     CVAR_ARCHIVE},
+    {&etj_checkpointsPopupDuration, "etj_checkpointsPopupDuration", "1000",
+     CVAR_ARCHIVE},
 
     {&etj_drawMessageTime, "etj_drawMessageTime", "2", CVAR_ARCHIVE},
 

@@ -50,8 +50,8 @@ private:
   static void pastRecordAnimation(vec4_t *color, const char *text,
                                   int timerTime, int record);
 
-  // returns the alpha value of runtimer
-  static float getTimerAlpha(bool running, int lastRunTimer, int timeVar);
+  static float fadeAlpha(bool running, bool autoHide, int fadeStart,
+                         int duration);
 
   vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;
@@ -60,8 +60,10 @@ private:
   vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
   vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
   static const int animationTime = 300;
-  static const int fadeOut = 2000;  // 2s fade out
-  static const int fadeHold = 5000; // 5s pause
+  static const int fadeHold = 5000; // 5s pause before fade starts
+  static const int fadeTime = 2000; // 2s fade
+
+  static const int popupFadeTime = 100;
 
   static bool canSkipDraw();
 };
