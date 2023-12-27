@@ -50,8 +50,8 @@ private:
   static void pastRecordAnimation(vec4_t *color, const char *text,
                                   int timerTime, int record);
 
-  static float fadeAlpha(bool running, bool autoHide, int fadeStart,
-                         int duration);
+  static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
+                             int duration);
 
   vec4_t inactiveTimerColor{};
   std::shared_ptr<Timerun> _timerun;

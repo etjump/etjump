@@ -142,7 +142,8 @@ void ETJump::TimerunView::draw() {
   auto y = etj_runTimerY.value;
   ETJump_AdjustPosition(&x);
 
-  (*color)[3] = fadeAlpha(running, autoHide, lastRunTimer + fadeHold, fadeTime);
+  (*color)[3] =
+      getTimerAlpha(running, autoHide, lastRunTimer + fadeHold, fadeTime);
   if ((*color)[3] == 0) {
     return;
   }
@@ -259,7 +260,7 @@ void ETJump::TimerunView::draw() {
       // follow same fading as runtimer, and if that is 0, we early out
       // before ever reaching this part
       (*checkpointColor)[3] =
-          fadeAlpha(running, autoHide, lastRunTimer + fadeHold, fadeTime);
+          getTimerAlpha(running, autoHide, lastRunTimer + fadeHold, fadeTime);
 
       // we must check for cvar here to allow only checkpoint popups to display
       if (etj_drawCheckpoints.integer) {
@@ -276,7 +277,8 @@ void ETJump::TimerunView::draw() {
                                     timerStr, 0, 0, popupStyle, font);
         } else if (popupTime + popupFadeTime > cg.time) {
           // we want to always fade here so bypass running/autoHide
-          cpPopupColor[3] = fadeAlpha(false, true, popupTime, popupFadeTime);
+          cpPopupColor[3] =
+              getTimerAlpha(false, true, popupTime, popupFadeTime);
 
           CG_Text_Paint_Centred_Ext(x2, y2, popupSize, popupSize, cpPopupColor,
                                     timerStr, 0, 0, popupStyle, font);
@@ -293,8 +295,8 @@ void ETJump::TimerunView::draw() {
   }
 }
 
-float ETJump::TimerunView::fadeAlpha(bool running, bool autoHide, int fadeStart,
-                                     int duration) {
+float ETJump::TimerunView::getTimerAlpha(bool running, bool autoHide,
+                                         int fadeStart, int duration) {
   const int fadeEnd = fadeStart + duration;
   const int now = cg.time;
 
