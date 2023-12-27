@@ -65,6 +65,7 @@ public:
     int numCheckpointsHit{};
     std::array<int, MAX_TIMERUN_CHECKPOINTS> checkpoints{};
     int nextFreeCheckpointIdx{};
+    int lastCheckpointTimestamp{};
   };
 
   explicit Timerun(int clientNum,
