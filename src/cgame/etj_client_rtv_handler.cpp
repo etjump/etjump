@@ -22,35 +22,56 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
-
-#include <memory>
+#include "etj_client_rtv_handler.h"
+#include "cg_local.h"
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
+ClientRtvHandler::ClientRtvHandler() {
+  rtvMaps.clear();
+  rtvVoteYes = 0;
+  isRtvVote = false;
+}
+
+void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
+  char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
+  char value[3];       // can't exceed MAX_CLIENTS + null terminator
+
+  rtvMaps.clear();
+
+  while (cs != nullptr) {
+    Info_NextPair(&cs, key, value);
+
+    if (!key[0]) {
+      break;
+    }
+
+    rtvMaps.emplace_back(key, Q_atoi(value));
+  }
+}
+
+void ClientRtvHandler::countRtvVotes() {
+  rtvVoteYes = 0;
+
+  for (const auto &votes : rtvMaps) {
+    rtvVoteYes += votes.second;
+  }
+}
+
+const std::vector<std::pair<std::string, int>> *ClientRtvHandler::getRtvMaps() {
+  return &rtvMaps;
+}
+
+int ClientRtvHandler::getRtvYesVotes() const { return rtvVoteYes; }
+
+void ClientRtvHandler::setRtvVoteStatus() {
+  isRtvVote = !Q_stricmp(cgs.voteString, "Rock The Vote");
+}
+
+bool ClientRtvHandler::rtvVoteActive() const {
+  return isRtvVote && cgs.voteTime;
+}
+
+void ClientRtvHandler::resetRtvEventHandler() {
+  CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+}
 } // namespace ETJump
-
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
-
-struct Game {
-  Game() {}
-
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-};
-
-#endif

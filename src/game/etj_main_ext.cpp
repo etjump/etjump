@@ -38,6 +38,7 @@
 #include "etj_string_utilities.h"
 #include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
+#include "etj_rtv.h"
 
 Game game;
 
@@ -138,6 +139,11 @@ void ChangeMap() {
 void RunFrame(int levelTime) {
   game.mapStatistics->runFrame(levelTime);
   game.timerunV2->runFrame();
+
+  if (game.rtv->checkAutoRtv()) {
+    game.rtv->callAutoRtv();
+  }
+
   ETJump::Log::processMessages();
 }
 
@@ -149,6 +155,7 @@ void OnGameInit() {
       std::make_shared<CustomMapVotes>(game.mapStatistics.get());
   game.motd = std::make_shared<Motd>();
   game.tokens = std::make_shared<Tokens>();
+  game.rtv = std::make_shared<ETJump::RockTheVote>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
@@ -226,6 +233,7 @@ void OnGameShutdown() {
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
+  game.rtv = nullptr;
   ETJump::Log::processMessages();
 }
 

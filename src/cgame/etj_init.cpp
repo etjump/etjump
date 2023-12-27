@@ -55,6 +55,8 @@
 #include "etj_spectatorinfo_drawable.h"
 #include "etj_crosshair.h"
 #include "etj_overbounce_detector.h"
+#include "etj_rtv_drawable.h"
+#include "etj_client_rtv_handler.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -74,6 +76,7 @@ std::shared_ptr<PlayerEventsHandler> playerEventsHandler;
 std::shared_ptr<Timerun> timerun;
 std::shared_ptr<TimerunView> timerunView;
 std::shared_ptr<TrickjumpLines> trickjumpLines;
+std::shared_ptr<ClientRtvHandler> rtvHandler;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -213,6 +216,8 @@ void init() {
   consoleCommandsHandler->subscribe("minimize", minimize);
   ////////////////////////////////////////////////////////////////
 
+  rtvHandler = std::make_shared<ClientRtvHandler>();
+
   // initialize renderables
   // Overbounce watcher
   ETJump::renderables.push_back(
@@ -238,6 +243,8 @@ void init() {
 
   ETJump::renderables.push_back(std::make_shared<UpperRight>());
   ETJump::renderables.push_back(std::make_shared<UpmoveMeter>());
+
+  ETJump::renderables.push_back(std::make_shared<RtvDrawable>());
 
   ETJump::consoleAlphaHandler = std::make_shared<ETJump::ConsoleAlphaHandler>();
   ETJump::drawLeavesHandler = std::make_shared<ETJump::DrawLeavesHandler>();

@@ -22,35 +22,30 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
-#include <memory>
+#include "etj_irenderable.h"
+#include "../ui/ui_shared.h"
+#include <string>
+#include <vector>
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-} // namespace ETJump
+class RtvDrawable : public IRenderable {
+  void render() const override;
+  bool beforeRender() override;
+  static bool canSkipDraw();
 
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
+  static void setupPanelButtons();
 
-struct Game {
-  Game() {}
+  static void drawMenuTitleText(panel_button_t *button);
+  static void drawMenuText(panel_button_t *button);
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
+public:
+  RtvDrawable();
+  ~RtvDrawable() override = default;
+
+  static void keyHandling(int key, bool down);
+  // this is qboolean so that we don't need to cast the result to engine
+  static qboolean checkExecKey(int key, qboolean doAction);
 };
-
-#endif
+} // namespace ETJump

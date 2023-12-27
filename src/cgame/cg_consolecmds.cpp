@@ -1160,6 +1160,16 @@ void listSpawnPoints() {
     }
   }
 }
+
+void openRtvMenu() {
+  trap_UI_Popup(UIMENU_NONE);
+
+  if (cg.showRtvMenu) {
+    CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+  } else {
+    CG_EventHandling(CGAME_EVENT_RTV, qfalse);
+  }
+}
 } // namespace ETJump
 
 typedef struct {
@@ -1246,6 +1256,8 @@ static const consoleCommand_t noDemoCommands[] = {
     {"forcetapout", CG_ForceTapOut_f},
     {"startTimer", CG_StartTimer},
     {"stopTimer", CG_StopTimer},
+
+    {"openRtvMenu", ETJump::openRtvMenu},
 };
 
 static const consoleCommand_t anyTimeCommands[] = {
@@ -1396,6 +1408,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("callvote");
   trap_AddCommand("cv");
   trap_AddCommand("vote");
+  trap_AddCommand("rtvVote");
 
   // Rafael
   trap_AddCommand("nofatigue");

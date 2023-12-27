@@ -845,13 +845,17 @@ typedef struct raceStruct_s {
 } raceStruct_t;
 
 // stores client voting information
-struct etj_votingInfo_t {
+namespace ETJump {
+struct votingInfo_t {
   bool isVotedYes; // is the client voted yes
-  int time;        // last time client voted, used for timeouts between revotes
-  int attempts;    // revote attempts
-  bool isWarned;   // if client attempts to revote but timeout doesn't
+  int time;        // last time client voted, for timeouts between re-votes
+  int attempts;    // re-vote attempts
+  bool isWarned;   // if client attempts to re-vote but timeout doesn't
                    // allow yet, notification will be sent
+
+  int lastRtvMapVoted; // used for re-votes, the last map number we voted on
 };
+} // namespace ETJump
 
 // client data that stays across multiple respawns, but is cleared
 // on each level change or team change at ClientBegin()
@@ -958,7 +962,7 @@ typedef struct {
 
   int previousSetHealthTime;
 
-  etj_votingInfo_t votingInfo;
+  ETJump::votingInfo_t votingInfo;
 } clientPersistant_t;
 
 typedef struct {
@@ -1196,6 +1200,8 @@ typedef struct voteInfo_s {
   int voter_cn;
   qboolean voteCanceled;
   qboolean forcePass;
+
+  bool isAutoRtvVote;
 } voteInfo_t;
 
 typedef struct {
@@ -2040,6 +2046,8 @@ extern vmCvar_t team_nocontrols;
 extern vmCvar_t vote_allow_map;
 extern vmCvar_t vote_allow_matchreset;
 extern vmCvar_t vote_allow_randommap;
+extern vmCvar_t vote_allow_rtv;
+extern vmCvar_t vote_allow_autoRtv;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
 extern vmCvar_t g_letterbox;
@@ -2121,6 +2129,10 @@ extern vmCvar_t g_debugTrackers;
 extern vmCvar_t g_debugTimeruns;
 extern vmCvar_t g_spectatorVote;
 extern vmCvar_t g_enableVote;
+
+extern vmCvar_t g_autoRtv;
+extern vmCvar_t g_rtvMapCount;
+extern vmCvar_t vote_minRtvDuration;
 
 void trap_Printf(const char *fmt);
 void trap_Error(const char *fmt);
@@ -2743,6 +2755,12 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
                    char *arg2);
 int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2);
+namespace ETJump {
+int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
+                    char *arg2);
+int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2);
+} // namespace ETJump
+
 void G_LinkDebris(void);
 void G_LinkDamageParents(void);
 int EntsThatRadiusCanDamage(vec3_t origin, float radius, int *damagedList);

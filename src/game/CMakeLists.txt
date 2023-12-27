@@ -73,6 +73,7 @@ add_library(qagame MODULE
 	"etj_progression_tracker.cpp"
 	"etj_progression_tracker_parser.cpp"
 	"etj_result_set_formatter.cpp"
+	"etj_rtv.cpp"
 	"etj_save_system.cpp"
 	"etj_session.cpp"
 	"etj_synchronization_context.cpp"

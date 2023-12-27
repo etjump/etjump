@@ -10,6 +10,8 @@
 #include "etj_progression_tracker.h"
 #include "etj_timerun_entities.h"
 #include "etj_entity_utilities.h"
+#include "etj_numeric_utilities.h"
+#include "etj_rtv.h"
 
 level_locals_t level;
 
@@ -161,6 +163,8 @@ vmCvar_t server_motd5;
 vmCvar_t vote_allow_map;
 vmCvar_t vote_allow_matchreset;
 vmCvar_t vote_allow_randommap;
+vmCvar_t vote_allow_rtv;
+vmCvar_t vote_allow_autoRtv;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 
@@ -281,6 +285,10 @@ vmCvar_t g_debugTrackers;
 vmCvar_t g_debugTimeruns;
 vmCvar_t g_spectatorVote;
 vmCvar_t g_enableVote;
+
+vmCvar_t g_autoRtv;
+vmCvar_t g_rtvMapCount;
+vmCvar_t vote_minRtvDuration;
 
 // ETLegacy server browser integration
 // os support - this SERVERINFO cvar specifies supported client operating
@@ -434,6 +442,8 @@ cvarTable_t gameCvarTable[] = {
     {&vote_allow_matchreset, "vote_allow_matchreset", "1", 0, 0, qfalse,
      qfalse},
     {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
+    {&vote_allow_rtv, "vote_allow_rtv", "1", 0, 0, qfalse, qfalse},
+    {&vote_allow_autoRtv, "vote_allow_autoRtv", "1", 0, 0, qfalse, qfalse},
     {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
     {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
 
@@ -572,6 +582,10 @@ cvarTable_t gameCvarTable[] = {
     {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
     {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
+
+    {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE},
+    {&vote_minRtvDuration, "vote_minRtvDuration", "15000", CVAR_ARCHIVE},
+    {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1608,6 +1622,8 @@ void G_UpdateCvars(void) {
           if (cv->vmCvar == &vote_allow_map ||
               cv->vmCvar == &vote_allow_matchreset ||
               cv->vmCvar == &vote_allow_randommap ||
+              cv->vmCvar == &vote_allow_rtv ||
+              cv->vmCvar == &vote_allow_autoRtv ||
               cv->vmCvar == &g_enableVote) {
             fVoteFlags = qtrue;
           } else {
@@ -2999,6 +3015,7 @@ void resetVote() {
   level.voteInfo.voteTime = 0;
   level.voteInfo.forcePass = qfalse;
   level.voteInfo.voteCanceled = qfalse;
+  game.rtv->setRtvStatus(false);
   trap_SetConfigstring(CS_VOTE_TIME, "");
 }
 
@@ -3007,7 +3024,7 @@ void resetVote() {
 CheckVote
 ==================
 */
-void CheckVote(void) {
+void CheckVote() {
   if (level.voteInfo.voteCanceled) {
     G_LogPrintf("Vote cancelled: %s\n", level.voteInfo.voteString);
     resetVote();
@@ -3016,51 +3033,60 @@ void CheckVote(void) {
 
   if (level.voteInfo.forcePass) {
     G_LogPrintf("Vote passed: %s\n", level.voteInfo.voteString);
-    level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
+    level.voteInfo.vote_fn(nullptr, 0, nullptr, nullptr);
     resetVote();
     return;
   }
 
-  auto minVoteDuration = vote_minVoteDuration.integer;
-  minVoteDuration = minVoteDuration > 29000 ? 29000 : minVoteDuration;
-  minVoteDuration = minVoteDuration < 1000 ? 1000 : minVoteDuration;
+  int minVoteDuration;
+  const bool isRtvVote = game.rtv->rtvVoteActive();
+  const bool isAutoRtvVote = level.voteInfo.isAutoRtvVote;
 
-  if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL ||
+  // vote_minVoteDuration is likely low on most servers, so we use a separate
+  // duration for rtv to give everyone some time to pick a map
+  // I'd really like this to be seconds but bleh, consistency I guess...
+  if (isRtvVote) {
+    minVoteDuration = Numeric::clamp(vote_minRtvDuration.integer, 1000, 29000);
+  } else {
+    minVoteDuration = Numeric::clamp(vote_minVoteDuration.integer, 1000, 29000);
+  }
+
+  if (!level.voteInfo.voteTime || level.voteInfo.vote_fn == nullptr ||
       level.time - level.voteInfo.voteTime < minVoteDuration) {
     return;
   }
 
-  auto requiredPercentage = vote_percent.integer;
-  requiredPercentage = requiredPercentage > 99 ? 99 : requiredPercentage;
-  requiredPercentage = requiredPercentage < 1 ? 1 : requiredPercentage;
+  const int requiredPercentage = Numeric::clamp(vote_percent.integer, 1, 99);
+  const int validVotingClients = getNumValidVoters();
+  const int requiredClients = validVotingClients * requiredPercentage / 100;
+  const auto voter =
+      isAutoRtvVote ? nullptr : g_entities + level.voteInfo.voter_cn;
 
-  auto numConnectedClients = level.numConnectedClients;
-
-  auto validVotingClients = getNumValidVoters();
-  int requiredClients = validVotingClients * requiredPercentage / 100;
-
-  auto voter = g_entities + level.voteInfo.voter_cn;
-  if (level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
+  if (!isAutoRtvVote &&
+      level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
     Printer::BroadcastPopupMessage("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
                 level.voteInfo.voteString, voter->client->pers.netname);
+
     level.voteInfo.voteYes = 0;
     level.voteInfo.voteNo = level.numConnectedClients;
   } else if (level.voteInfo.voteYes > requiredClients) {
     Printer::BroadcastPopupMessage("^5Vote passed!");
     G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
+
     level.voteInfo.voteTime = 0;
     level.voteInfo.voteCanceled = qfalse;
-    level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
-  } else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients ||
+    level.voteInfo.vote_fn(nullptr, 0, nullptr, nullptr);
+  } else if (level.voteInfo.voteNo >=
+                 level.numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
     std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
                                                      level.voteInfo.voteString);
     Printer::BroadcastPopupMessage(voteFailedMsg);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
+
     level.voteInfo.voteTime = 0;
     level.voteInfo.voteCanceled = qfalse;
-
   } else {
     return;
   }

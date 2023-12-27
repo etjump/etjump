@@ -40,6 +40,7 @@ typedef enum cgameEvent_e {
   CGAME_EVENT_CAMPAIGNBREIFING,
   CGAME_EVENT_DEMO, // OSP
   CGAME_EVENT_FIRETEAMMSG,
+  CGAME_EVENT_RTV,
 } cgameEvent_t;
 
 /*

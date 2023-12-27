@@ -8,6 +8,7 @@
 #include "etj_client_commands_handler.h"
 #include "../game/etj_numeric_utilities.h"
 #include "etj_cvar_shadow.h"
+#include "etj_client_rtv_handler.h"
 
 #define SCOREPARSE_COUNT 9
 
@@ -625,6 +626,7 @@ CG_ConfigStringModified
 static void CG_ConfigStringModified(void) {
   const char *str;
   int num;
+  auto rtvHandler = ETJump::rtvHandler;
 
   num = Q_atoi(CG_Argv(1));
 
@@ -670,15 +672,28 @@ static void CG_ConfigStringModified(void) {
     cgs.intermissionStartTime = Q_atoi(str);
   } else if (num == CS_VOTE_TIME) {
     cgs.voteTime = Q_atoi(str);
+
+    if (!rtvHandler->rtvVoteActive()) {
+      rtvHandler->resetRtvEventHandler();
+    }
+
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_YES) {
-    cgs.voteYes = Q_atoi(str);
+    // CS_VOTE_YES might be processed before CS_VOTE_STRING, so on initial
+    // 'callvote rtv' command, the check for rtvVoteActive might return false
+    if (rtvHandler->rtvVoteActive() || strlen(str) > 1) {
+      rtvHandler->setRtvConfigStrings(str);
+      rtvHandler->countRtvVotes();
+    } else {
+      cgs.voteYes = Q_atoi(str);
+    }
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_NO) {
     cgs.voteNo = Q_atoi(str);
     cgs.voteModified = qtrue;
   } else if (num == CS_VOTE_STRING) {
     Q_strncpyz(cgs.voteString, str, sizeof(cgs.voteString));
+    rtvHandler->setRtvVoteStatus();
   } else if (num == CS_INTERMISSION) {
     cg.intermissionStarted = Q_atoi(str) ? qtrue : qfalse;
   } else if (num == CS_SCREENFADE) {
@@ -2455,7 +2470,8 @@ static void CG_ServerCommand(void) {
   }
 
   if (!Q_stricmp(cmd, "voted")) {
-    cgs.votedYes = !Q_strncmp(CG_Argv(1), "y", 1) ? true : false;
+    cgs.votedYes = !Q_strncmp(CG_Argv(1), "y", 1);
+    cgs.votedNo = !Q_strncmp(CG_Argv(1), "n", 1);
     return;
   }
 
@@ -2820,6 +2836,17 @@ static void CG_ServerCommand(void) {
     }
 
     CPri(saveMsg.c_str());
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "openRtvMenu")) {
+    trap_SendConsoleCommand("openRtvMenu");
+    return;
+  }
+
+  // for !rtv admin command
+  if (!Q_stricmp(cmd, "callvote")) {
+    trap_SendConsoleCommand(va("%s %s", cmd, arguments[0].c_str()));
     return;
   }
 

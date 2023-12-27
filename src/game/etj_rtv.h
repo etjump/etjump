@@ -22,35 +22,40 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
-#include <memory>
+#include <vector>
+#include <string>
 
 namespace ETJump {
-class TimerunV2;
-class RockTheVote;
-} // namespace ETJump
+class RockTheVote {
+  bool isRtvVote;
+  // holds the map names and their vote counts for rtv
+  std::vector<std::pair<std::string, int>> rtvMaps;
 
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
+  int autoRtvStartTime;
+  bool anyonePlayedSinceLastVote;
+  bool twoMinWarningGiven;
 
-struct Game {
-  Game() {}
+public:
+  RockTheVote();
+  ~RockTheVote() = default;
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
+  std::vector<std::pair<std::string, int>> *getRtvMaps();
+  void clearRtvMaps();
+
+  std::vector<std::string> getMostVotedMaps();
+  // in a tie situation, this sets a random winner out of the most voted maps
+  void setRtvWinner();
+  void setRtvConfigstrings();
+
+  bool rtvVoteActive() const;
+  void setRtvStatus(bool status);
+
+  bool checkAutoRtv();
+
+  // minimalistic reimplementation of Cmd_Callvote_f
+  // calls rtv with a null client, bypassing all restrictions
+  void callAutoRtv();
 };
-
-#endif
+} // namespace ETJump
