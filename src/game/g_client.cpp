@@ -2840,20 +2840,22 @@ void ClientDisconnect(int clientNum) {
 
   // disconnecting does not trigger vote cancel due to team switch in checkVote
   // note: after CalculateRanks so level.numConnectedClients is up-to-date
-  if (level.voteInfo.voter_cn == clientNum) {
-    Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
-    G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
-                level.voteInfo.voteString, ent->client->pers.netname);
-    resetVote();
-    level.voteInfo.voteYes = 0;
-    level.voteInfo.voteNo = level.numConnectedClients;
-  } else if (ent->client->ps.eFlags & EF_VOTED) {
-    if (ent->client->pers.votingInfo.isVotedYes) {
-      level.voteInfo.voteYes--;
-      trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
-    } else {
-      level.voteInfo.voteNo--;
-      trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+  if (level.voteInfo.voteTime) {
+    if (level.voteInfo.voter_cn == clientNum) {
+      Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
+      G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
+                  level.voteInfo.voteString, ent->client->pers.netname);
+      resetVote();
+      level.voteInfo.voteYes = 0;
+      level.voteInfo.voteNo = level.numConnectedClients;
+    } else if (ent->client->ps.eFlags & EF_VOTED) {
+      if (ent->client->pers.votingInfo.isVotedYes) {
+        level.voteInfo.voteYes--;
+        trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+      } else {
+        level.voteInfo.voteNo--;
+        trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
+      }
     }
   }
 
