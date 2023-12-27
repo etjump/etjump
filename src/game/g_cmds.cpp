@@ -2780,7 +2780,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     level.voteInfo.voteCanceled = qtrue;
     level.voteInfo.voteNo = level.numConnectedClients;
     level.voteInfo.voteYes = 0;
-    game.rtv->setRtvStatus(false);
+
     Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
   };
 
