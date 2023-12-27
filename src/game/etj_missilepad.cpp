@@ -36,6 +36,24 @@ void Missilepad::touch(gentity_t *self, gentity_t *other) {
   }
 
   G_UseTargets(self, other);
+
+  vec3_t noiseOrigin;
+
+  if (!VectorCompare(self->r.currentOrigin, vec3_origin)) {
+    VectorCopy(self->r.currentOrigin, noiseOrigin);
+  } else {
+    const vec3_t bmodelCenter = {(self->r.absmax[0] + self->r.absmin[0]) / 2,
+                                 (self->r.absmax[1] + self->r.absmin[1]) / 2,
+                                 (self->r.absmax[2] + self->r.absmin[2]) / 2};
+
+    VectorCopy(bmodelCenter, noiseOrigin);
+  }
+
+  if (self->noise_index) {
+    const auto te =
+        soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, self->noise_index);
+    te->s.onFireStart = self->s.onFireStart;
+  }
 }
 
 void Missilepad::use(gentity_t *ent) {
@@ -59,10 +77,20 @@ void Missilepad::spawn(gentity_t *ent) {
     trap_UnlinkEntity(ent);
   }
 
+  char *s;
+  if (G_SpawnString("noise", "NOSOUND", &s)) {
+    char buffer[MAX_QPATH];
+    Q_strncpyz(buffer, s, sizeof(buffer));
+    ent->noise_index = G_SoundIndex(buffer);
+  }
+
+  G_SpawnInt("volume", "255", &ent->s.onFireStart);
+  if (!ent->s.onFireStart) {
+    ent->s.onFireStart = 255;
+  }
+
   ent->touch = [](gentity_t *ent, gentity_t *activator, trace_t *trace) {
     Missilepad::touch(ent, activator);
   };
 }
 } // namespace ETJump
-
-void SP_func_missilepad(gentity_t *ent) { ETJump::Missilepad::spawn(ent); }
