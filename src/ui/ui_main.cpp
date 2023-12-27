@@ -4642,10 +4642,8 @@ void UI_RunMenuScript(const char **args) {
       trap_GetConfigString(CS_SERVERINFO, info, sizeof(info));
       trap_Cvar_Set("ui_voteTimelimit",
                     va("%i", Q_atoi(Info_ValueForKey(info, "timelimit"))));
-
-      trap_Cvar_Set(
-          "ui_voteAutoRtv",
-          va("%i", static_cast<int>(trap_Cvar_VariableValue("g_autoRtv"))));
+      trap_Cvar_Set("ui_voteAutoRtv",
+                    va("%i", Q_atoi(Info_ValueForKey(info, "g_autoRtv"))));
 
       return;
     }
