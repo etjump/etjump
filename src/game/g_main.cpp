@@ -583,7 +583,7 @@ cvarTable_t gameCvarTable[] = {
     {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
     {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
 
-    {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE},
+    {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
     {&vote_minRtvDuration, "vote_minRtvDuration", "15000", CVAR_ARCHIVE},
     {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
 };
