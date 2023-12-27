@@ -3015,7 +3015,14 @@ void resetVote() {
   level.voteInfo.voteTime = 0;
   level.voteInfo.forcePass = qfalse;
   level.voteInfo.voteCanceled = qfalse;
+  level.voteInfo.isAutoRtvVote = false;
   game.rtv->setRtvStatus(false);
+
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    gentity_t *client = g_entities + level.sortedClients[i];
+    memset(&client->client->pers.votingInfo, 0, sizeof(ETJump::votingInfo_t));
+  }
+
   trap_SetConfigstring(CS_VOTE_TIME, "");
 }
 
