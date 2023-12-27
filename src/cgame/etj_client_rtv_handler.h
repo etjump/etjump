@@ -42,6 +42,6 @@ public:
   bool rtvVoteActive() const;
   void setRtvVoteStatus();
   static void resetRtvEventHandler();
-  std::vector<std::pair<std::string, int>> *getRtvMaps();
+  const std::vector<std::pair<std::string, int>> *getRtvMaps();
 };
 } // namespace ETJump

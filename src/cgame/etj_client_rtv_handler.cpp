@@ -57,7 +57,7 @@ void ClientRtvHandler::countRtvVotes() {
   }
 }
 
-std::vector<std::pair<std::string, int>> *ClientRtvHandler::getRtvMaps() {
+const std::vector<std::pair<std::string, int>> *ClientRtvHandler::getRtvMaps() {
   return &rtvMaps;
 }
 
