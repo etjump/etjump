@@ -4630,13 +4630,13 @@ static void CG_Draw2D() {
   }
 
   if (!cgs.demoCam.renderingFreeCam) {
-    ETJump_DrawDrawables();
-
     for (const auto &r : ETJump::renderables) {
       if (r->beforeRender()) {
         r->render();
       }
     }
+
+    ETJump_DrawDrawables();
   }
 
   if (cg.showFireteamMenu) {

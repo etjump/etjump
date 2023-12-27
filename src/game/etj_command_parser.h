@@ -92,18 +92,18 @@ public:
 
     std::string help() const {
       auto optionsToStrings = Container::map(options, [](const auto &pair) {
-        auto optionName = pair.second.name;
+        const auto &optionName = pair.second.name;
         auto optionType = OptionDefinition::typeToString(pair.second.type);
-        auto desc = pair.second.description;
+        const auto &desc = pair.second.description;
         auto requiredString = pair.second.required ? " [required] " : "";
         auto positionString = stringFormat(
             " (pos: %d) ",
             pair.second.position.hasValue() ? pair.second.position.value() : 0);
 
-        return stringFormat("    --%s (%s) %s%s%s", optionName, optionType,
-                            desc, requiredString,
-                            pair.second.position.hasValue() ? positionString
-                                                            : "");
+        return stringFormat(
+            "    --%s (%s) %s%s%s", optionName, optionType, desc,
+            requiredString,
+            pair.second.position.hasValue() ? std::move(positionString) : "");
       });
 
       return stringFormat("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name,
@@ -131,7 +131,7 @@ public:
       opt.type = type;
       opt.required = required;
 
-      this->options[name] = opt;
+      this->options[name] = std::move(opt);
 
       return *this;
     }
@@ -163,7 +163,7 @@ public:
       opt.required = required;
       opt.position = position;
 
-      this->options[name] = opt;
+      this->options[name] = std::move(opt);
 
       return *this;
     }

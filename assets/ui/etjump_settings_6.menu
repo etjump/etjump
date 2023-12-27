@@ -7,7 +7,7 @@
 
 #define SUBW_TIMERUN_Y SUBW_Y
 #define SUBW_TIMERUN_ITEM_Y SUBW_TIMERUN_Y + SUBW_HEADER_HEIGHT
-#define SUBW_TIMERUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 13)
+#define SUBW_TIMERUN_HEIGHT SUBW_HEADER_HEIGHT + SUBW_ITEM_SPACING_Y + (SUBW_ITEM_SPACING_Y * 19)
 
 #define GROUP_NAME "group_etjump_settings_6"
 
@@ -39,9 +39,18 @@ menuDef {
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
         SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 10), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints X:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsX 320 0 640 10, "Sets X position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsX")
         CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
-        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints Y:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsY 320 0 640 10, "Sets Y position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsY")
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 11), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints Y:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsY 380 0 480 10, "Sets Y position of checkpoint timer, no effect unless checkpoint timer is in detached mode\netj_checkpointsY")
         MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 12), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints size:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of checkpoint timer\netj_checkpointsSize")
         YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 13), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoints shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsShadow", "Draw shadow on checkpoint timer\netj_checkpointsShadow")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 14), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Checkpoint popups:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsPopup", "Draw a checkpoint popup when hitting a checkpoint\netj_checkpointsPopup")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 15), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsPopupDuration", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 15), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup Duration:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsPopupDuration 1000 0 5000 100, "How long a checkpoint popup stays on screen, in milliseconds\netj_checkpointsPopupDuration")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 16), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsPopupX", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 16), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup X:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsPopupX 320 0 640 10, "Sets X position of checkpoint popup\netj_checkpointsPopupX")
+        CVARINTLABEL        (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 17), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "etj_checkpointsPopupY", 0.2, ITEM_ALIGN_RIGHT, SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT)
+        SLIDER              (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 17), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup Y:", 0.2, SUBW_ITEM_HEIGHT, etj_checkpointsPopupY 200 0 480 10, "Sets Y position of checkpoint popup\netj_checkpointsPopupY")
+        MULTI               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 18), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup size:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsPopupSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of checkpoint popups\netj_checkpointsPopupSize")
+        YESNO               (SUBW_ITEM_LEFT_X, SUBW_TIMERUN_ITEM_Y + (SUBW_ITEM_SPACING_Y * 19), SUBW_ITEM_WIDTH, SUBW_ITEM_HEIGHT, "Popup shadow:", 0.2, SUBW_ITEM_HEIGHT, "etj_checkpointsPopupShadow", "Draw shadow on checkpoint popups\netj_checkpointsPopupShadow")
 
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 0), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "BACK", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump)
         BUTTON              (ETJ_BUTTON_X + (ETJ_BUTTON_SPACING_X * 1), ETJ_BUTTON_Y, ETJ_BUTTON_WIDTH, ETJ_BUTTON_HEIGHT, "TAB 1", 0.3, ETJ_BUTTON_ITEM_HEIGHT, close etjump_settings_6; open etjump_settings_1)

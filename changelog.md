@@ -36,6 +36,20 @@
 * added `etj_autoPortalBinds` cvar to automatically bind `weapalt` to `+attack2` and back when switchig to/from portalgun [#1125](https://github.com/etjump/etjump/pull/1125)
   * this effectively allows you to use portalgun with `weapalt` without having to separetly bind `+attack2`
 * fixed not being able to enter wounded state during timeruns, which broke some timeruns (`2weeks` for example) [#1126](https://github.com/etjump/etjump/pull/1126)
+* improved `target_remove_portals` entity [#1129](https://github.com/etjump/etjump/pull/1129) [#1130](https://github.com/etjump/etjump/pull/1130)
+  * added `spawnflags 2` to fire targets when portals are removed
+  * added `noise` & `volume` keys to play a sound when portals are removed
+* added `target_portal_relay` entity [#1130](https://github.com/etjump/etjump/pull/1130)
+  * fires targets if activator has fired less or equal amount of portals as defined by `maxportals` key since last portal reset
+* portalgun portals of spectated player are no longer displayed with "others" portal colors [#1132](https://github.com/etjump/etjump/pull/1132)
+* reduced portalgun portal shader size to match the actual portal size better [#1133](https://github.com/etjump/etjump/pull/1133)
+* casting multiple votes is no longer possible by reconnecting [#1134](https://github.com/etjump/etjump/pull/1134)
+  * votes called by a disconnecting client are also now automatically canceled
+* improved `!seasons` command output [#1118](https://github.com/etjump/etjump/pull/1118)
+  * seasons are now grouped to active, upcoming and past seasons
+  * `Default` season is no longer displayed
+  * start and end dates should be more legible
+* `etj_drawCGaz` is now a bitflag cvar and allows drawing both CGaz huds at the same time [#1137](https://github.com/etjump/etjump/pull/1137)
 
 # ETJump 3.0.1
 

@@ -187,18 +187,54 @@ void ETJump::TimerunV2::computeRanks() {
       });
 }
 
+void ETJump::TimerunV2::updateSeasonStates() {
+  const auto seasons = _repository->getSeasons();
+  const auto currentTime = getCurrentTime();
+
+  _activeSeasonsIds = std::vector<int>();
+  _activeSeasons = std::vector<Timerun::Season>();
+
+  _pastSeasonsIds = std::vector<int>();
+  _pastSeasons = std::vector<Timerun::Season>();
+
+  _upcomingSeasonsIds = std::vector<int>();
+  _upcomingSeasons = std::vector<Timerun::Season>();
+
+  for (const auto &season : seasons) {
+    // upcoming seasons
+    if (season.startTime > currentTime) {
+      _upcomingSeasons.push_back(season);
+    }
+    // active seasons
+    else if (!season.endTime.hasValue() ||
+             season.endTime.value() > currentTime) {
+      _activeSeasons.push_back(season);
+    }
+    // past seasons
+    else {
+      _pastSeasons.push_back(season);
+    }
+  }
+
+  auto getSeasonId = [](const Timerun::Season &s) { return s.id; };
+
+  _activeSeasonsIds = Container::map(_activeSeasons, getSeasonId);
+  _pastSeasonsIds = Container::map(_pastSeasons, getSeasonId);
+  _upcomingSeasonsIds = Container::map(_upcomingSeasons, getSeasonId);
+
+  _logger->info("Successfully updated season states: Active seasons: (%d), "
+                "Upcoming seasons: (%d) Past seasons: (%d)",
+                _activeSeasonsIds.size(), _upcomingSeasonsIds.size(),
+                _pastSeasonsIds.size());
+}
+
 void ETJump::TimerunV2::initialize() {
   try {
-    _activeSeasonsIds = std::vector<int>();
-    _activeSeasons = std::vector<Timerun::Season>();
-
     _repository->initialize();
-    _activeSeasons = _repository->getActiveSeasons(getCurrentTime());
+
+    updateSeasonStates();
 
     _mostRelevantSeason = getMostRelevantSeason();
-
-    _activeSeasonsIds = Container::map(
-        _activeSeasons, [](const Timerun::Season &s) { return s.id; });
 
     _logger->info("Active seasons: %s",
                   StringUtil::join(Container::map(_activeSeasons,
@@ -251,6 +287,10 @@ void ETJump::TimerunV2::clientConnect(int clientNum, int userId) {
        userId](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         auto clientConnectResult =
             dynamic_cast<ClientConnectResult *>(result.get());
+
+        if (!clientConnectResult) {
+          throw std::runtime_error("clientConnectResult is NULL");
+        }
 
         _players[clientNum] = std::make_unique<Player>(
             clientNum, userId, clientConnectResult->runs);
@@ -383,6 +423,7 @@ void ETJump::TimerunV2::addSeason(Timerun::AddSeasonParams season) {
       [this, season]() {
         try {
           _repository->addSeason(season);
+          updateSeasonStates();
           return std::make_unique<AddSeasonResult>(
               stringFormat("Successfully added season `%s`", season.name));
         } catch (const std::runtime_error &e) {
@@ -420,6 +461,7 @@ void ETJump::TimerunV2::editSeason(Timerun::EditSeasonParams params) {
       [this, params]() {
         try {
           _repository->editSeason(params);
+          updateSeasonStates();
           return std::make_unique<EditSeasonResult>(
               stringFormat("Successfully edited season `%s`", params.name));
         } catch (const std::runtime_error &e) {
@@ -525,6 +567,16 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
       [this, params](auto p) {
         auto result = dynamic_cast<PrintRecordsResult *>(p.get());
 
+        if (!result) {
+          _logger->info("printRecords: unable to load records for player "
+                        "'%d': PrintRecordsResult is NULL",
+                        params.clientNum);
+          throw std::runtime_error(
+              "printRecords: unable to load records. If the problem persists "
+              "after a map change, please report the bug at "
+              "github.com/etjump/etjump");
+        }
+
         if (result->records.empty()) {
           Printer::SendConsoleMessage(params.clientNum,
                                       "No records available.\n");
@@ -585,9 +637,9 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           }
 
           for (const auto &mkvp : skvp.second) {
-            auto mapName = mkvp.first;
+            const auto &mapName = mkvp.first;
             for (const auto &rkvp : mkvp.second) {
-              auto runName = rkvp.first;
+              const auto &runName = rkvp.first;
               int rank = 1;
               int rank1Time = !rkvp.second.empty() ? rkvp.second[0]->time : 0;
               int ownTime = ownRecords[season->id][mapName].count(runName) > 0
@@ -656,7 +708,7 @@ void ETJump::TimerunV2::printRecords(Timerun::PrintRecordsParams params) {
           }
         }
 
-        Printer::SendConsoleMessage(params.clientNum, message);
+        Printer::SendConsoleMessage(params.clientNum, std::move(message));
       },
       [this, params](const std::runtime_error &e) {
         Printer::SendConsoleMessage(params.clientNum,
@@ -742,7 +794,17 @@ void ETJump::TimerunV2::loadCheckpoints(int clientNum, std::string mapName,
       },
       [this, clientNum, rank](auto r) {
         const auto result = dynamic_cast<LoadCheckpointsResult *>(r.get());
-        const auto runName = result->matchedRun;
+
+        if (!result) {
+          _logger->info("Unable to load checkpoints for client '%d': "
+                        "LoadCheckpointsResult is NULL",
+                        clientNum);
+          throw std::runtime_error(
+              "Loading checkpoints failed. If the problem persists after a map "
+              "change, please report the bug at github.com/etjump/etjump");
+        }
+
+        const auto &runName = result->matchedRun;
 
         // bail out if no checkpoints are present
         if (result->checkpoints[0] == TIMERUN_CHECKPOINT_NOT_SET) {
@@ -879,6 +941,15 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
       [this, params](auto r) {
         auto result = dynamic_cast<PrintResult *>(r.get());
 
+        if (!result) {
+          _logger->info("Unable to fetch timerun rankings for client '%d': "
+                        "PrintResult is NULL",
+                        params.clientNum);
+          throw std::runtime_error(
+              "Fetching rankings failed. If the problem persists after a map "
+              "change, please report the bug at github.com/etjump/etjump");
+        }
+
         Printer::SendConsoleMessage(params.clientNum, result->message);
       },
       [params](auto e) {
@@ -894,31 +965,94 @@ void ETJump::TimerunV2::printRankings(Timerun::PrintRankingsParams params) {
 void ETJump::TimerunV2::printSeasons(int clientNum) {
   _sc->postTask(
       [this] {
-        auto seasons = _repository->getSeasons();
+        // 1 active season means only default season is active
+        if (_activeSeasonsIds.size() == 1 && _upcomingSeasonsIds.empty() &&
+            _pastSeasonsIds.empty()) {
+          return std::make_unique<PrintResult>("No seasons found.\n");
+        }
+
+        std::string seasonHeader = stringFormat(
+            "\n^g %-30s %-15s%s\n", "Season", "Start Date", "End date");
 
         // clang-format off
         std::string message =
-            "^g=============================================================\n"
-            " ^gSeasons^7\n"
-            "^g=============================================================\n"
-            "^g Season                         From -> To\n";
+            "\n ^2Seasons^7\n"
+            "^g------------------------------------------------------------\n";
         // clang-format on
 
-        for (const auto &s : seasons) {
-          std::string formatString =
-              stringFormat(" ^2%%-%ds ^7(%%s -> %%s^7)\n",
-                           30 + StringUtil::countExtraPadding(s.name));
+        if (_activeSeasonsIds.size() > 1) {
+          message += " ^gActive seasons\n" + seasonHeader;
 
-          message += stringFormat(
-              formatString, s.name, s.startTime.toDateTimeString(),
-              s.endTime.hasValue() ? s.endTime.value().toDateTimeString()
-                                   : "*");
+          for (const auto &s : _activeSeasons) {
+            // default season is always active and cannot be deleted,
+            // don't bother listing it
+            if (s.id == defaultSeasonId) {
+              continue;
+            }
+
+            std::string formatString =
+                stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
+                             30 + StringUtil::countExtraPadding(s.name));
+
+            message += stringFormat(
+                formatString, s.name, s.startTime.toAbbrevMonthDateString(),
+                s.endTime.hasValue()
+                    ? s.endTime.value().toAbbrevMonthDateString()
+                    : "*");
+          }
+        }
+
+        if (!_upcomingSeasonsIds.empty()) {
+          // clang-format off
+          message += "\n^g------------------------------------------------------------\n";
+          // clang-format on
+          message += " ^gUpcoming seasons\n" + seasonHeader;
+
+          for (const auto &s : _upcomingSeasons) {
+            std::string formatString =
+                stringFormat(" ^7%%-%ds ^7%%-15s%%s\n",
+                             30 + StringUtil::countExtraPadding(s.name));
+
+            message += stringFormat(
+                formatString, s.name, s.startTime.toAbbrevMonthDateString(),
+                s.endTime.hasValue()
+                    ? s.endTime.value().toAbbrevMonthDateString()
+                    : "*");
+          }
+        }
+
+        if (!_pastSeasonsIds.empty()) {
+          // clang-format off
+          message += "\n^g------------------------------------------------------------\n";
+          // clang-format on
+          message += " ^gPast seasons\n" + seasonHeader;
+
+          for (const auto &s : _pastSeasons) {
+            std::string formatString =
+                stringFormat(" ^9%%-%ds ^9%%-15s%%s\n",
+                             30 + StringUtil::countExtraPadding(s.name));
+
+            message += stringFormat(
+                formatString, s.name, s.startTime.toAbbrevMonthDateString(),
+                s.endTime.hasValue()
+                    ? s.endTime.value().toAbbrevMonthDateString()
+                    : "*");
+          }
         }
 
         return std::make_unique<PrintResult>(message);
       },
-      [clientNum](auto r) {
+      [clientNum, this](auto r) {
         auto result = dynamic_cast<PrintResult *>(r.get());
+
+        if (!result) {
+          _logger->info(
+              "Unable to fetch seasons for client '%d': PrintResult is NULL",
+              clientNum);
+          throw std::runtime_error(
+              "Fetching seasons failed. If the problem persists after a map "
+              "change, please report the bug at github.com/etjump/etjump");
+        }
 
         Printer::SendConsoleMessage(clientNum, result->message);
       },
@@ -941,6 +1075,7 @@ void ETJump::TimerunV2::deleteSeason(int clientNum, const std::string &name) {
       [this, name]() {
         try {
           _repository->deleteSeason(name);
+          updateSeasonStates();
           return std::make_unique<DeleteSeasonResult>(
               stringFormat("Successfully deleted season `%s`", name));
         } catch (const std::runtime_error &e) {
@@ -1059,7 +1194,7 @@ public:
 
 void ETJump::TimerunV2::checkRecord(Player *player) {
   const auto clientNum = player->clientNum;
-  const auto activeRunName = player->activeRunName;
+  const auto &activeRunName = player->activeRunName;
   const auto userId = player->userId;
   const auto completionTime = player->completionTime.value();
   const std::map<std::string, std::string> metadata = {
@@ -1210,6 +1345,11 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
        clientNum](std::unique_ptr<SynchronizationContext::ResultBase> result) {
         const auto checkRecordResult =
             dynamic_cast<CheckRecordResult *>(result.get());
+
+        if (!checkRecordResult) {
+          throw std::runtime_error("CheckRecordResult is NULL");
+        }
+
         bool isNewRecord = false;
 
         std::string diffString;
@@ -1254,7 +1394,7 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
         // Relevant season record
         else if (checkRecordResult
                      ->isTopRecordPerSeason[_mostRelevantSeason->id]) {
-          const auto record =
+          const auto &record =
               checkRecordResult
                   ->newOwnRecordsPerSeason[_mostRelevantSeason->id];
 
@@ -1357,11 +1497,11 @@ void ETJump::TimerunV2::checkRecord(Player *player) {
           }
         }
       },
-      [this, &activeRunName, &completionTime,
+      [this, activeRunName, completionTime,
        clientNum](const std::runtime_error &e) {
-        _logger->error("Unable to check the record (%s/%s/%d) for %s: %s",
-                       _currentMap, activeRunName, completionTime, e.what());
-
+        _logger->error("Unable to check the record (%s/%s/%d) for %d: %s",
+                       _currentMap, activeRunName, completionTime, clientNum,
+                       e.what());
         Printer::SendChatMessage(
             clientNum, "Unable to process your timerun record. Please report "
                        "this as a bug at github.com/etjump/etjump.");

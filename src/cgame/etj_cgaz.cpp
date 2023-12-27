@@ -206,17 +206,13 @@ bool CGaz::beforeRender() {
     wishspeed = static_cast<float>(ps->speed) * ps->sprintSpeedScale;
   }
 
-  switch (etj_drawCGaz.integer) {
-    case 1:
-      UpdateDraw(wishspeed, pm->pmext->accel);
-      UpdateCGaz1(wishvel, uCmdScale, cmd);
-      break;
-    case 2:
-      UpdateDraw(wishspeed, pm->pmext->accel);
-      UpdateCGaz2();
-      break;
-    default:
-      break;
+  UpdateDraw(wishspeed, pm->pmext->accel);
+
+  if (etj_drawCGaz.integer & 1) {
+    UpdateCGaz1(wishvel, uCmdScale, cmd);
+  }
+  if (etj_drawCGaz.integer & 2) {
+    UpdateCGaz2();
   }
 
   return true;
@@ -224,7 +220,7 @@ bool CGaz::beforeRender() {
 
 void CGaz::render() const {
   // DeFRaG proxymod CGaz by Jelvan1
-  if (etj_drawCGaz.integer == 1) {
+  if (etj_drawCGaz.integer & 1) {
     const auto y =
         static_cast<float>(etj_CGazY.integer > 0 ? etj_CGazY.integer % 480 : 0);
     const float h = etj_CGazHeight.value > 0 ? etj_CGazHeight.value : 0;
@@ -250,12 +246,10 @@ void CGaz::render() const {
     // Max angle
     CG_FillAngleYaw(+drawMaxCos, +drawMax, yaw, y, h, fov, CGaz1Colors[3]);
     CG_FillAngleYaw(-drawMax, -drawMaxCos, yaw, y, h, fov, CGaz1Colors[3]);
-
-    return;
   }
 
   // Dzikie Weze's 2D-CGaz
-  if (etj_drawCGaz.integer == 2) {
+  if (etj_drawCGaz.integer & 2) {
     const usercmd_t cmd = pm->cmd;
     float scx = SCREEN_CENTER_X - 0.5f; // -0.5 since thickness is 1px
     const float scy = SCREEN_CENTER_Y - 0.5f;
@@ -295,7 +289,6 @@ void CGaz::render() const {
     if (etj_stretchCgaz.integer) {
       ETJump_EnableWidthScale(true);
     }
-    return;
   }
 }
 

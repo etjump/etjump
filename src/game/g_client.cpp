@@ -2841,27 +2841,29 @@ void ClientDisconnect(int clientNum) {
 
   // disconnecting does not trigger vote cancel due to team switch in checkVote
   // note: after CalculateRanks so level.numConnectedClients is up-to-date
-  if (level.voteInfo.voter_cn == clientNum) {
-    Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
-    G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
-                level.voteInfo.voteString, ent->client->pers.netname);
-    resetVote();
-    level.voteInfo.voteYes = 0;
-    level.voteInfo.voteNo = level.numConnectedClients;
-  } else if (ent->client->ps.eFlags & EF_VOTED) {
-    if (ent->client->pers.votingInfo.isVotedYes) {
-      level.voteInfo.voteYes--;
+  if (level.voteInfo.voteTime) {
+    if (level.voteInfo.voter_cn == clientNum) {
+      Printer::BroadcastPopupMessage("^7Vote canceled: caller disconnected.");
+      G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
+                  level.voteInfo.voteString, ent->client->pers.netname);
+      resetVote();
+      level.voteInfo.voteYes = 0;
+      level.voteInfo.voteNo = level.numConnectedClients;
+    } else if (ent->client->ps.eFlags & EF_VOTED) {
+      if (ent->client->pers.votingInfo.isVotedYes) {
+        level.voteInfo.voteYes--;
 
-      if (game.rtv->rtvVoteActive()) {
-        auto rtvMaps = game.rtv->getRtvMaps();
-        (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
-        game.rtv->setRtvConfigstrings();
+        if (game.rtv->rtvVoteActive()) {
+          auto rtvMaps = game.rtv->getRtvMaps();
+          (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
+          game.rtv->setRtvConfigstrings();
+        } else {
+          trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+        }
       } else {
-        trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
+        level.voteInfo.voteNo--;
+        trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
       }
-    } else {
-      level.voteInfo.voteNo--;
-      trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
     }
   }
 

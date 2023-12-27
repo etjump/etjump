@@ -65,6 +65,7 @@ void Timerun::onCheckpoint(const TimerunCommands::Checkpoint *cp) {
       cp->checkpointTime;
   _playersTimerunInformation[cp->clientNum].numCheckpointsHit =
       cp->checkpointIndex + 1;
+  _playersTimerunInformation[cp->clientNum].lastCheckpointTimestamp = cg.time;
 }
 
 void Timerun::onStart(const TimerunCommands::Start *start) {

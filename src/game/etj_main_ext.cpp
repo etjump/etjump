@@ -120,7 +120,7 @@ bool checkCheatCvars(gclient_s *client, int flags) {
     Printer::SendChatMessage(clientNum,
                              "^gCheat cvars are not allowed on this server, "
                              "check console for more information.\n");
-    Printer::SendConsoleMessage(clientNum, message);
+    Printer::SendConsoleMessage(clientNum, std::move(message));
   }
 
   return cheatCvarsEnabled;
@@ -415,7 +415,7 @@ void LogServerState() {
     state += "No players on the server.\n";
   }
 
-  LogPrint(state);
+  LogPrint(std::move(state));
 }
 
 void TimerunConnectNotify(gentity_t *ent) {

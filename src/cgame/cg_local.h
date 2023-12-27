@@ -2547,6 +2547,13 @@ extern vmCvar_t etj_checkpointsShadow;
 extern vmCvar_t etj_checkpointsStyle;
 extern vmCvar_t etj_checkpointsCount;
 
+extern vmCvar_t etj_checkpointsPopup;
+extern vmCvar_t etj_checkpointsPopupX;
+extern vmCvar_t etj_checkpointsPopupY;
+extern vmCvar_t etj_checkpointsPopupSize;
+extern vmCvar_t etj_checkpointsPopupShadow;
+extern vmCvar_t etj_checkpointsPopupDuration;
+
 extern vmCvar_t etj_drawMessageTime;
 
 extern vmCvar_t movie_changeFovBasedOnSpeed;

@@ -2,6 +2,7 @@
 //
 // q_shared.c -- stateless support routines that are included in each code dll
 #include "q_shared.h"
+#include <cstring>
 
 float Com_Clamp(float min, float max, float value) {
   if (value < min) {
@@ -936,6 +937,16 @@ char *Q_CleanDirName(char *dirname) {
   *d = '\0';
 
   return dirname;
+}
+
+size_t Q_strnlen(const char *str, size_t maxlen) {
+  if (!str) {
+    Com_Error(ERR_FATAL, "Q_strnlen: NULL str");
+    return 0; // blah blah silence warning about str being null
+  }
+
+  auto *p = static_cast<const char *>(std::memchr(str, 0, maxlen));
+  return p == nullptr ? maxlen : p - str;
 }
 
 void QDECL Com_sprintf(char *dest, int size, const char *fmt, ...) {
