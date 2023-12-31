@@ -17,55 +17,19 @@ void InitTrigger(gentity_t *self) {
   self->r.svFlags = SVF_NOCLIENT;
 }
 
-// the wait time has passed, so set back up for another activation
-void multi_wait(gentity_t *ent) { ent->nextthink = 0; }
-
-// Activates for multiple clients
-void multiactivator_multi_trigger(gentity_t *ent, gentity_t *activator) {
-  int triggerWait =
-      static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
-
-  if (activator->client->multiTriggerActivationTime + triggerWait >
-      level.time) {
-    return;
-  }
-
-  ent->activator = activator;
-
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
-
-  G_UseTargets(ent, ent->activator);
-  activator->client->multiTriggerActivationTime = level.time;
-}
-
-// activator is always a client
-void parallel_multi_trigger(gentity_t *ent, gentity_t *activator) {
-  // do not activate if we already activated in this frame
-  if (activator->client->alreadyActivatedTrigger) {
-    return;
-  }
-
-  ent->activator = activator;
-
-  G_Script_ScriptEvent(
-      ent, "activate",
-      activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
-
-  G_UseTargets(ent, ent->activator);
-  activator->client->alreadyActivatedTrigger = qtrue;
-}
-
-// the trigger was just activated
-// ent->activator should be set to the activator so it can be held through a
-// delay so wait for the delay time before firing
 void multi_trigger(gentity_t *ent, gentity_t *activator) {
-  ent->activator = activator;
+  auto wait = static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
 
-  if (ent->nextthink) {
-    return; // can't retrigger until the wait is over
+  // old constant triggers: set wait to server frame time for spawnflags 512
+  if (ent->spawnflags & static_cast<int>(TriggerMultipleFlags::Constant)) {
+    wait = level.frameMsec;
   }
+
+  if (activator->client->multiTriggerActivationTime + wait > level.time) {
+    return;
+  }
+
+  ent->activator = activator;
 
   // make sure we only pass in team if the activator is a client
   if (activator->client) {
@@ -78,16 +42,19 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
 
   G_UseTargets(ent, ent->activator);
 
-  if (ent->wait > 0) {
-    ent->think = multi_wait;
-    ent->nextthink = static_cast<int>(
-        level.time + (ent->wait + ent->random * crandom()) * 1000);
-  } else {
-    // we can't just remove (self) here, because this is a touch
-    // function called while looping through area links...
-    ent->touch = nullptr;
-    ent->nextthink = level.time + FRAMETIME;
-    ent->think = G_FreeEntity;
+  activator->client->multiTriggerActivationTime = level.time;
+
+  // free after firing once with wait <= 0
+  // for extra safety, don't do this with spawnflags 512 & 2048
+  // since they never supported single fire triggers
+  if (!(ent->spawnflags & static_cast<int>(TriggerMultipleFlags::Constant)) &&
+      !(ent->spawnflags &
+        static_cast<int>(TriggerMultipleFlags::MultiActivator))) {
+    if (ent->wait <= 0) {
+      ent->touch = nullptr;
+      ent->nextthink = level.time + FRAMETIME;
+      ent->think = G_FreeEntity;
+    }
   }
 }
 
@@ -107,67 +74,58 @@ void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace) {
     return;
   }
 
-  if (self->spawnflags & 1) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::AxisOnly)) {
     if (other->client->sess.sessionTeam != TEAM_AXIS) {
       return;
     }
-  } else if (self->spawnflags & 2) {
+  } else if (self->spawnflags &
+             static_cast<int>(TriggerMultipleFlags::AlliesOnly)) {
     if (other->client->sess.sessionTeam != TEAM_ALLIES) {
       return;
     }
   }
 
-  if (self->spawnflags & 4) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::NoBots)) {
     if (other->r.svFlags & SVF_BOT) {
       return;
     }
   }
 
-  if (self->spawnflags & 8) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::BotsOnly)) {
     if (!(other->r.svFlags & SVF_BOT)) {
       return;
     }
   }
 
   // START Mad Doc - TDF
-  if (self->spawnflags & 16) {
-    if (!(other->client->sess.playerType == PC_SOLDIER)) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::SoldierOnly)) {
+    if (other->client->sess.playerType != PC_SOLDIER) {
       return;
     }
   }
 
-  if (self->spawnflags & 32) {
-    if (!(other->client->sess.playerType == PC_FIELDOPS)) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::FieldOpsOnly)) {
+    if (other->client->sess.playerType != PC_FIELDOPS) {
       return;
     }
   }
 
-  if (self->spawnflags & 64) {
-    if (!(other->client->sess.playerType == PC_MEDIC)) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::MedicOnly)) {
+    if (other->client->sess.playerType != PC_MEDIC) {
       return;
     }
   }
 
-  if (self->spawnflags & 128) {
-    if (!(other->client->sess.playerType == PC_ENGINEER)) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::EngineerOnly)) {
+    if (other->client->sess.playerType != PC_ENGINEER) {
       return;
     }
   }
 
-  if (self->spawnflags & 256) {
-    if (!(other->client->sess.playerType == PC_COVERTOPS)) {
+  if (self->spawnflags & static_cast<int>(TriggerMultipleFlags::CvOpsOnly)) {
+    if (other->client->sess.playerType != PC_COVERTOPS) {
       return;
     }
-  }
-
-  if (self->spawnflags & 512) {
-    parallel_multi_trigger(self, other);
-    return;
-  }
-
-  if (self->spawnflags & 2048) {
-    multiactivator_multi_trigger(self, other);
-    return;
   }
   // END Mad Doc - TDF
 

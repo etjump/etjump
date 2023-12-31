@@ -3705,6 +3705,7 @@ void G_RunFrame(int levelTime) {
   level.time = levelTime;
 
   msec = level.time - level.previousTime;
+  level.frameMsec = msec;
 
   level.axisBombCounter -= msec;
   level.alliedBombCounter -= msec;
