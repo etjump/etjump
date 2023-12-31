@@ -54,9 +54,10 @@ public:
 
   struct SavePosition {
     SavePosition()
-        : isValid(false), origin{0, 0, 0}, vangles{0, 0, 0},
+        : isValid(false), isLatest(false), origin{0, 0, 0}, vangles{0, 0, 0},
           stance(SaveStance::Stand) {}
     bool isValid;
+    bool isLatest;
     vec3_t origin;
     vec3_t vangles;
     SaveStance stance;
@@ -143,6 +144,15 @@ private:
 
   // copies player positional info to target position
   void storePosition(gclient_s *client, SavePosition *pos);
+
+  // returns the latest save slot number that client used in their current team
+  // -1 if no slots found (no saved positions in current team)
+  int getLatestSaveSlot(gclient_s *client);
+
+  // marks all save slots as not latest, called before storing a new save pos
+  // this does not touch backup positions as we don't care about them
+  // since 'isLatest' check is only done to save slots, not backup slots
+  void resetLatestSaveSlot(gentity_t *ent);
 
   // Teleports player to the saved position
   static void teleportPlayer(gentity_t *ent, SavePosition *pos);
