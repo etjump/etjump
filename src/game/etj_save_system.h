@@ -22,15 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef G_SAVE_H
-#define G_SAVE_H
-
-#ifdef min
-  #undef min
-#endif
-#ifdef max
-  #undef max
-#endif
+#pragma once
 
 #include <map>
 #include <string>
@@ -38,14 +30,12 @@
 
 #include "etj_local.h"
 
-class Session;
-
 namespace ETJump {
 class SaveSystem {
 public:
-  SaveSystem(const std::shared_ptr<Session> session);
-  /*SaveSystem( IGuid *guidInterface );*/
-  ~SaveSystem();
+  explicit SaveSystem(const std::shared_ptr<Session> &session)
+      : _session(session) {}
+  ~SaveSystem() = default;
 
   static const int MAX_SAVED_POSITIONS = 3;
   static const int MAX_BACKUP_POSITIONS = 3;
@@ -66,13 +56,13 @@ public:
   struct Client {
     Client();
 
-    SavePosition alliesSavedPositions[MAX_SAVED_POSITIONS];
-    std::deque<SavePosition> alliesBackupPositions;
-    SavePosition alliesLastLoadPosition;
+    SavePosition alliesSaves[MAX_SAVED_POSITIONS];
+    std::deque<SavePosition> alliesBackups;
+    SavePosition alliesLastLoadPos;
 
-    SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
-    std::deque<SavePosition> axisBackupPositions;
-    SavePosition axisLastLoadPosition;
+    SavePosition axisSaves[MAX_SAVED_POSITIONS];
+    std::deque<SavePosition> axisBackups;
+    SavePosition axisLastLoadPos;
 
     // contains a couple of extra positions for TEAM_SPEC and
     // TEAM_FREE, but simplifies the accessing code
@@ -83,13 +73,13 @@ public:
     DisconnectedClient();
 
     // Allies saved positions at the time of disconnect
-    SavePosition alliesSavedPositions[MAX_SAVED_POSITIONS];
+    SavePosition alliesSaves[MAX_SAVED_POSITIONS];
     // Axis saved positions at the time of disconnect
-    SavePosition axisSavedPositions[MAX_SAVED_POSITIONS];
+    SavePosition axisSaves[MAX_SAVED_POSITIONS];
 
     // Last load positions
-    SavePosition axisLastLoadPosition;
-    SavePosition alliesLastLoadPosition;
+    SavePosition axisLastLoadPos;
+    SavePosition alliesLastLoadPos;
 
     // So called "map ident"
     int progression;
@@ -135,7 +125,6 @@ public:
   void loadPositionsFromDatabase(gentity_t *ent);
 
   void storeTeamQuickDeployPosition(gentity_t *ent, team_t team);
-  void loadTeamQuickDeployPosition(gentity_t *ent, team_t team);
   void loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team);
 
 private:
@@ -143,13 +132,13 @@ private:
   void saveBackupPosition(gentity_t *ent, SavePosition *pos);
 
   // copies player positional info to target position
-  void storePosition(gclient_s *client, SavePosition *pos);
+  static void storePosition(gclient_s *client, SavePosition *pos);
 
   // returns the latest save slot number that client used in their current team
   // -1 if no slots found (no saved positions in current team)
   int getLatestSaveSlot(gclient_s *client);
 
-  // marks all save slots as not latest, called before storing a new save pos
+  // marks all save slots as 'not latest', called before storing a new save pos
   // this does not touch backup positions as we don't care about them
   // since 'isLatest' check is only done to save slots, not backup slots
   void resetLatestSaveSlot(gentity_t *ent);
@@ -159,15 +148,14 @@ private:
 
   SavePosition *getValidTeamQuickDeploySave(gentity_t *ent, team_t team);
 
-  void restoreStanceFromSave(gentity_t *ent, SavePosition *pos);
+  static void restoreStanceFromSave(gentity_t *ent, SavePosition *pos);
 
   SavePosition *getValidTeamSaveForSlot(gentity_t *ent, team_t team, int slot);
 
   SavePosition *getValidTeamUnloadPos(gentity_t *ent, team_t team);
 
-  // Commands that are sent to client when they succesfully save
-  // position
-  void sendClientCommands(gentity_t *ent, int position);
+  // Commands that are sent to client when they successfully save a position
+  static void sendClientCommands(gentity_t *ent, int position);
 
   // All clients' save related data
   Client _clients[MAX_CLIENTS];
@@ -177,8 +165,5 @@ private:
 
   // Interface to get player guid
   const std::shared_ptr<Session> _session;
-  /*IGuid *guidInterface_;*/
 };
 } // namespace ETJump
-
-#endif
