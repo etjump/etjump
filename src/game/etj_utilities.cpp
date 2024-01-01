@@ -100,7 +100,7 @@ void Utilities::startRun(int clientNum) {
 
   if (!(player->client->sess.runSpawnflags &
         static_cast<int>(ETJump::TimerunSpawnflags::NoSave))) {
-    ETJump::saveSystem->resetSavedPositions(player);
+    ETJump::saveSystem->clearTimerunSaves(player);
   }
 
   // If we are debugging, just exit here
