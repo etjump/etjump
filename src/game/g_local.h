@@ -676,9 +676,19 @@ enum class DeathrunFlags {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class TriggerMultipleFlags {
-  // TODO: add the rest
   None = 0,
-  DeathrunOnly = 1 << 10
+  AxisOnly = 1 << 0,
+  AlliesOnly = 1 << 1,
+  NoBots = 1 << 2,
+  BotsOnly = 1 << 3,
+  SoldierOnly = 1 << 4,
+  FieldOpsOnly = 1 << 5,
+  MedicOnly = 1 << 6,
+  EngineerOnly = 1 << 7,
+  CvOpsOnly = 1 << 8,
+  Constant = 1 << 9, // deprecated
+  DeathrunOnly = 1 << 10,
+  MultiActivator = 1 << 11, // deprecated (default behavior now)
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1138,8 +1148,6 @@ struct gclient_s {
   int lastVoteTime;
   qboolean cheatDetected;
 
-  // Whether the client already activated a trigger or not
-  qboolean alreadyActivatedTrigger;
   // Time when client activated trigger_multiple
   int multiTriggerActivationTime;
 
@@ -1225,6 +1233,7 @@ typedef struct {
   int time;         // in msec
   int previousTime; // so movers can back up when blocked
   int frameTime;    // Gordon: time the frame started, for antilag stuff
+  int frameMsec;    // server frame time
 
   int startTime; // level.time the map was started
 

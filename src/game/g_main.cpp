@@ -3676,8 +3676,7 @@ Advances the non-player objects in the world
 ================
 */
 void G_RunFrame(int levelTime) {
-  int i, msec;
-  //	int			pass = 0;
+  int i;
 
   // if we are waiting for the level to restart, do nothing
   if (level.restarted) {
@@ -3691,8 +3690,7 @@ void G_RunFrame(int levelTime) {
     level.timeDelta = levelTime - level.timeCurrent;
     if ((level.time % 500) == 0) {
       // FIXME: set a PAUSE cs and let the client adjust
-      // their local starttimes
-      //        instead of this spam
+      //  their local start times instead of this spam
       trap_SetConfigstring(CS_LEVEL_START_TIME,
                            va("%i", level.startTime + level.timeDelta));
     }
@@ -3704,10 +3702,10 @@ void G_RunFrame(int levelTime) {
   level.previousTime = level.time;
   level.time = levelTime;
 
-  msec = level.time - level.previousTime;
+  level.frameMsec = level.time - level.previousTime;
 
-  level.axisBombCounter -= msec;
-  level.alliedBombCounter -= msec;
+  level.axisBombCounter -= level.frameMsec;
+  level.alliedBombCounter -= level.frameMsec;
 
   if (level.axisBombCounter < 0) {
     level.axisBombCounter = 0;
@@ -3747,7 +3745,7 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
 
   // go through all allocated objects
   for (i = 0; i < level.num_entities; i++) {
-    G_RunEntity(&g_entities[i], msec);
+    G_RunEntity(&g_entities[i], level.frameMsec);
   }
 
   for (i = 0; i < level.numConnectedClients; i++) {
