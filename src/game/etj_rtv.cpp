@@ -102,6 +102,15 @@ bool RockTheVote::rtvVoteActive() const { return isRtvVote; }
 void RockTheVote::setRtvStatus(bool status) { isRtvVote = status; }
 
 bool RockTheVote::checkAutoRtv() {
+  // check for upper bounds here in case server admins set it manually
+  // callvote is already capped but can be bypassed with manual set
+  // abs so that overflow = over max time
+  if (std::abs(g_autoRtv.integer) > AUTORTV_MAX_TIME) {
+    trap_Cvar_Set("g_autoRtv", std::to_string(AUTORTV_MAX_TIME).c_str());
+    G_LogPrintf("WARNING: g_autoRtv out of range (max %i), setting to %i.\n",
+                AUTORTV_MAX_TIME, AUTORTV_MAX_TIME);
+  }
+
   if (!level.numConnectedClients || g_autoRtv.integer <= 0) {
     // push the start time forward on empty servers or if auto rtv is off
     autoRtvStartTime = level.time;

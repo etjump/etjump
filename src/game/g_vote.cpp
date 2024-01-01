@@ -562,9 +562,15 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
       return G_INVALID;
     }
 
-    // don't let users vote negative values
-    if (Q_atoi(arg2) < 0) {
-      Q_strncpyz(arg2, "0", sizeof(arg2));
+    // abs so that big values are capped to max time
+    // instead of resulting in < 0 due to overflow
+    const int time = std::abs(Q_atoi(arg2));
+
+    if (time < 0) {
+      Q_strncpyz(arg2, "0", MAX_STRING_TOKENS);
+    } else if (time > game.rtv->AUTORTV_MAX_TIME) {
+      Q_strncpyz(arg2, std::to_string(game.rtv->AUTORTV_MAX_TIME).c_str(),
+                 MAX_STRING_TOKENS);
     }
 
     Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, arg2);

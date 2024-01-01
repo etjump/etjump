@@ -2773,7 +2773,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     voteMsgs += "\n";
-    Printer::SendConsoleMessage(clientNum, voteMsgs);
+    Printer::SendConsoleMessage(clientNum, std::move(voteMsgs));
   };
 
   static const auto cancelVote = [&]() {

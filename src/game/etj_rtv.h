@@ -57,5 +57,8 @@ public:
   // minimalistic reimplementation of Cmd_Callvote_f
   // calls rtv with a null client, bypassing all restrictions
   void callAutoRtv();
+
+  // upper cap of autoRtv interval, 24h
+  static const int AUTORTV_MAX_TIME = 24 * 60;
 };
 } // namespace ETJump
