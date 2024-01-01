@@ -27,44 +27,45 @@
 #include "etj_session.h"
 #include <iostream>
 
-ETJump::SaveSystem::Client::Client() {
-  alliesBackupPositions.clear();
-  axisBackupPositions.clear();
-
+namespace ETJump {
+SaveSystem::Client::Client() {
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
-    alliesSavedPositions[i].isValid = false;
-    axisSavedPositions[i].isValid = false;
+    alliesSaves[i].isValid = false;
+    alliesSaves[i].isLatest = false;
+    axisSaves[i].isValid = false;
+    axisSaves[i].isLatest = false;
   }
+
+  alliesBackups.clear();
+  axisBackups.clear();
 
   for (int i = 0; i < MAX_BACKUP_POSITIONS; i++) {
-    alliesBackupPositions.push_back(SavePosition());
-    alliesBackupPositions[i].isValid = false;
-
-    axisBackupPositions.push_back(SavePosition());
-    axisBackupPositions[i].isValid = false;
+    alliesBackups.emplace_back();
+    axisBackups.emplace_back();
   }
 
-  alliesLastLoadPosition.isValid = false;
-  axisLastLoadPosition.isValid = false;
+  alliesLastLoadPos.isValid = false;
+  axisLastLoadPos.isValid = false;
 }
 
-ETJump::SaveSystem::DisconnectedClient::DisconnectedClient() {
+SaveSystem::DisconnectedClient::DisconnectedClient() {
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
-    alliesSavedPositions[i].isValid = false;
-    axisSavedPositions[i].isValid = false;
-    progression = 0;
+    alliesSaves[i].isValid = false;
+    alliesSaves[i].isLatest = false;
+    axisSaves[i].isValid = false;
+    axisSaves[i].isLatest = false;
   }
 
-  alliesLastLoadPosition.isValid = false;
-  axisLastLoadPosition.isValid = false;
+  alliesLastLoadPos.isValid = false;
+  axisLastLoadPos.isValid = false;
+  progression = 0;
+  saveLimit = 0;
 }
-
-// Zero: required for saving saves to db
-std::string UserDatabase_Guid(gentity_t *ent);
 
 // Saves current position
-void ETJump::SaveSystem::save(gentity_t *ent) {
+void SaveSystem::save(gentity_t *ent) {
   auto *client = ent->client;
+  const int clientNum = ClientNum(ent);
 
   if (!client) {
     return;
@@ -86,8 +87,7 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
                                static_cast<int>(SaveLoadRestrictions::Move)) {
     // comparing to zero vector
     if (!VectorCompare(client->ps.velocity, vec3_origin)) {
-      CPTo(ent, "^3Save ^7is disabled while moving on "
-                "this map.");
+      CPTo(ent, "^3Save ^7is disabled while moving on this map.");
       return;
     }
   }
@@ -100,8 +100,9 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
     return;
   }
 
-  auto argv = GetArgs();
-  auto position = 0;
+  const auto argv = GetArgs();
+  int position = 0;
+
   if (argv->size() > 1) {
     ToInt((*argv)[1], position);
 
@@ -141,15 +142,13 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
 
   if (!g_cheats.integer) {
     if (level.noSave) {
-      if ((!trace.fraction) != 1.0f) {
-        CPTo(ent, "^7You can not ^3save "
-                  "^7inside this area.");
+      if (trace.fraction == 1.0f) {
+        CPTo(ent, "^7You can not ^3save ^7inside this area.");
         return;
       }
     } else {
       if (trace.fraction != 1.0f) {
-        CPTo(ent, "^7You can not ^3save "
-                  "^7inside this area.");
+        CPTo(ent, "^7You can not ^3save ^7inside this area.");
         return;
       }
     }
@@ -173,7 +172,7 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
         }
       } else {
         fireteamData_t *ft;
-        if (G_IsOnFireteam(ClientNum(ent), &ft)) {
+        if (G_IsOnFireteam(clientNum, &ft)) {
           if (ft->saveLimit == FT_SAVELIMIT_NOT_SET) {
             client->sess.saveLimitFt = FT_SAVELIMIT_NOT_SET;
           } else {
@@ -189,22 +188,28 @@ void ETJump::SaveSystem::save(gentity_t *ent) {
     }
   }
 
-  SavePosition *pos = nullptr;
-  if (client->sess.sessionTeam == TEAM_ALLIES) {
-    pos = _clients[ClientNum(ent)].alliesSavedPositions + position;
+  const auto teamSaves = client->sess.sessionTeam == TEAM_ALLIES
+                             ? _clients[clientNum].alliesSaves
+                             : _clients[clientNum].axisSaves;
+  SavePosition *pos = teamSaves + position;
+
+  if (pos->isLatest) {
+    saveBackupPosition(ent, pos);
   } else {
-    pos = _clients[ClientNum(ent)].axisSavedPositions + position;
+    const int latestSlot = getLatestSaveSlot(client);
+
+    if (latestSlot != -1) {
+      saveBackupPosition(ent, teamSaves + latestSlot);
+    }
   }
 
-  saveBackupPosition(ent, pos);
-
+  resetLatestSaveSlot(ent);
   storePosition(client, pos);
-
   sendClientCommands(ent, position);
 }
 
 // Loads position
-void ETJump::SaveSystem::load(gentity_t *ent) {
+void SaveSystem::load(gentity_t *ent) {
   auto *client = ent->client;
 
   if (!client) {
@@ -235,8 +240,9 @@ void ETJump::SaveSystem::load(gentity_t *ent) {
     return;
   }
 
-  auto argv = GetArgs();
-  auto slot = 0;
+  const auto argv = GetArgs();
+  int slot = 0;
+
   if (argv->size() > 1) {
     ToInt((*argv)[1], slot);
 
@@ -258,21 +264,25 @@ void ETJump::SaveSystem::load(gentity_t *ent) {
     return;
   }
 
-  auto validSave = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
-  if (validSave) {
+  const auto pos = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
+
+  if (pos) {
     saveLastLoadPos(ent); // store position for unload command
-    restoreStanceFromSave(ent, validSave);
+    restoreStanceFromSave(ent, pos);
+
     if (!g_cheats.integer && client->sess.timerunActive &&
         client->sess.runSpawnflags &
             static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
       InterruptRun(ent);
     }
+
     // allow fast respawn + load if we got gibbed to skip death sequence
     if (ent->client->ps.stats[STAT_HEALTH] <= GIB_HEALTH) {
       ent->client->ps.pm_flags &= ~PMF_LIMBO;
       ClientSpawn(ent, qfalse);
     }
-    teleportPlayer(ent, validSave);
+
+    teleportPlayer(ent, pos);
   } else {
     CPTo(ent, "^7Use ^3save ^7first.");
   }
@@ -280,36 +290,52 @@ void ETJump::SaveSystem::load(gentity_t *ent) {
 
 // Saves position, does not check for anything. Used for target_save
 void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent) {
-  SavePosition *pos = nullptr;
+  SavePosition *pos;
   auto *client = ent->client;
+  const int clientNum = ClientNum(ent);
 
   if (!client || !location) {
     return;
   }
 
   if (client->sess.sessionTeam == TEAM_ALLIES) {
-    pos = &_clients[ClientNum(ent)].alliesSavedPositions[0];
+    pos = &_clients[clientNum].alliesSaves[0];
   } else if (client->sess.sessionTeam == TEAM_AXIS) {
-    pos = &_clients[ClientNum(ent)].axisSavedPositions[0];
+    pos = &_clients[clientNum].axisSaves[0];
   } else {
     return;
   }
 
-  saveBackupPosition(ent, pos);
+  if (pos->isLatest) {
+    saveBackupPosition(ent, pos);
+  } else {
+    const int latestSlot = getLatestSaveSlot(client);
+
+    if (latestSlot != -1) {
+      saveBackupPosition(ent, pos + latestSlot);
+    }
+  }
+
+  resetLatestSaveSlot(ent);
 
   VectorCopy(location->s.origin, pos->origin);
   VectorCopy(location->s.angles, pos->vangles);
   pos->isValid = true;
-  pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch
-                : client->ps.eFlags & EF_PRONE   ? Prone
-                                                 : Stand;
+  pos->isLatest = true;
 
-  trap_SendServerCommand(ent - g_entities, "savePrint");
+  if (client->ps.eFlags & EF_PRONE) {
+    pos->stance = Prone;
+  } else {
+    pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
+  }
+
+  trap_SendServerCommand(clientNum, "savePrint");
 }
 
 // Loads backup position
-void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent) {
+void SaveSystem::loadBackupPosition(gentity_t *ent) {
   auto *client = ent->client;
+  const int clientNum = ClientNum(ent);
 
   if (!client) {
     return;
@@ -346,8 +372,9 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent) {
     return;
   }
 
-  auto argv = GetArgs();
-  auto slot = 0;
+  const auto argv = GetArgs();
+  int slot = 0;
+
   if (argv->size() > 1) {
     ToInt(argv->at(1), slot);
 
@@ -366,20 +393,23 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent) {
     return;
   }
 
-  SavePosition *pos = nullptr;
+  SavePosition *pos;
+
   if (client->sess.sessionTeam == TEAM_ALLIES) {
-    pos = &_clients[ClientNum(ent)].alliesBackupPositions[slot];
+    pos = &_clients[clientNum].alliesBackups[slot];
   } else {
-    pos = &_clients[ClientNum(ent)].axisBackupPositions[slot];
+    pos = &_clients[clientNum].axisBackups[slot];
   }
 
   if (pos->isValid) {
     restoreStanceFromSave(ent, pos);
+
     if (client->sess.timerunActive &&
         client->sess.runSpawnflags &
             static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
       InterruptRun(ent);
     }
+
     teleportPlayer(ent, pos);
   } else {
     CPTo(ent, "^7Use ^3save ^7first.");
@@ -388,8 +418,8 @@ void ETJump::SaveSystem::loadBackupPosition(gentity_t *ent) {
 
 // Undo last load command and teleport to last position client loaded from
 // Position validation is done here
-void ETJump::SaveSystem::unload(gentity_t *ent) {
-  auto *client = ent->client;
+void SaveSystem::unload(gentity_t *ent) {
+  const auto *client = ent->client;
 
   if (!client) {
     return;
@@ -429,33 +459,30 @@ void ETJump::SaveSystem::unload(gentity_t *ent) {
     return;
   }
 
-  auto validPos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
+  const auto pos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
 
-  if (validPos) {
+  if (pos) {
     if (!g_cheats.integer) {
-      // check for nosave areas only if we have valid
-      // pos
+      // check for nosave areas only if we have valid pos
       trace_t trace;
-      trap_TraceCapsule(&trace, validPos->origin, ent->r.mins, ent->r.maxs,
-                        validPos->origin, ent->s.number, CONTENTS_NOSAVE);
+      trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs,
+                        pos->origin, ent->s.number, CONTENTS_NOSAVE);
 
       if (level.noSave) {
-        if ((!trace.fraction) != 1.0f) {
-          CPTo(ent, "^7You can not ^3unload "
-                    "^7to this area.");
+        if (trace.fraction == 1.0f) {
+          CPTo(ent, "^7You can not ^3unload ^7to this area.");
           return;
         }
       } else {
         if (trace.fraction != 1.0f) {
-          CPTo(ent, "^7You can not ^3unload "
-                    "^7to this area.");
+          CPTo(ent, "^7You can not ^3unload ^7to this area.");
           return;
         }
       }
     }
 
-    restoreStanceFromSave(ent, validPos);
-    teleportPlayer(ent, validPos);
+    restoreStanceFromSave(ent, pos);
+    teleportPlayer(ent, pos);
   } else {
     CPTo(ent, "^7Use ^3load ^7first.");
   }
@@ -465,14 +492,15 @@ void ETJump::SaveSystem::unload(gentity_t *ent) {
 // position validation is done later. This is to prevent unexpected behavior
 // where the last load position is not a valid position, and client is
 // teleported to a position that was valid before that.
-void ETJump::SaveSystem::saveLastLoadPos(gentity_t *ent) {
-  SavePosition *pos = nullptr;
+void SaveSystem::saveLastLoadPos(gentity_t *ent) {
+  SavePosition *pos;
   auto *client = ent->client;
+  const int clientNum = ClientNum(ent);
 
   if (client->sess.sessionTeam == TEAM_ALLIES) {
-    pos = &_clients[ClientNum(ent)].alliesLastLoadPosition;
+    pos = &_clients[clientNum].alliesLastLoadPos;
   } else if (client->sess.sessionTeam == TEAM_AXIS) {
-    pos = &_clients[ClientNum(ent)].axisLastLoadPosition;
+    pos = &_clients[clientNum].axisLastLoadPos;
   } else {
     return;
   }
@@ -480,71 +508,71 @@ void ETJump::SaveSystem::saveLastLoadPos(gentity_t *ent) {
   storePosition(client, pos);
 }
 
-void ETJump::SaveSystem::reset() {
-  for (int clientIndex = 0; clientIndex < level.numConnectedClients;
-       clientIndex++) {
-    int clientNum = level.sortedClients[clientIndex];
-    // TODO: reset saved positions here
-    resetSavedPositions(g_entities + clientNum);
+void SaveSystem::reset() {
+  for (int i = 0; i < level.numConnectedClients; i++) {
+    resetSavedPositions(g_entities + level.sortedClients[i]);
   }
 
   _savedPositions.clear();
 }
 
 // Used to reset positions on map change/restart
-void ETJump::SaveSystem::resetSavedPositions(gentity_t *ent) {
-  int clientNum = ClientNum(ent);
-  for (int saveIndex = 0; saveIndex < MAX_SAVED_POSITIONS; saveIndex++) {
-    _clients[clientNum].alliesSavedPositions[saveIndex].isValid = false;
-    _clients[clientNum].axisSavedPositions[saveIndex].isValid = false;
+void SaveSystem::resetSavedPositions(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+  for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
+    _clients[clientNum].alliesSaves[i].isValid = false;
+    _clients[clientNum].alliesSaves[i].isLatest = false;
+    _clients[clientNum].axisSaves[i].isValid = false;
+    _clients[clientNum].axisSaves[i].isLatest = false;
   }
 
-  for (int backupIndex = 0; backupIndex < MAX_BACKUP_POSITIONS; backupIndex++) {
-    _clients[clientNum].alliesBackupPositions[backupIndex].isValid = false;
-    _clients[clientNum].axisBackupPositions[backupIndex].isValid = false;
+  for (int i = 0; i < MAX_BACKUP_POSITIONS; i++) {
+    _clients[clientNum].alliesBackups[i].isValid = false;
+    _clients[clientNum].axisBackups[i].isValid = false;
   }
 
   _clients[clientNum].quickDeployPositions[TEAM_ALLIES].isValid = false;
   _clients[clientNum].quickDeployPositions[TEAM_AXIS].isValid = false;
 
-  _clients[clientNum].alliesLastLoadPosition.isValid = false;
-  _clients[clientNum].axisLastLoadPosition.isValid = false;
+  _clients[clientNum].alliesLastLoadPos.isValid = false;
+  _clients[clientNum].axisLastLoadPos.isValid = false;
 }
 
 // Called on client disconnect. Saves saves for future sessions
-void ETJump::SaveSystem::savePositionsToDatabase(gentity_t *ent) {
-
+void SaveSystem::savePositionsToDatabase(gentity_t *ent) {
   if (!ent->client) {
     return;
   }
 
-  std::string guid = _session->Guid(ent);
-
+  const std::string guid = _session->Guid(ent);
+  const int clientNum = ClientNum(ent);
   DisconnectedClient client;
 
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
     // Allied
-    VectorCopy(_clients[ClientNum(ent)].alliesSavedPositions[i].origin,
-               client.alliesSavedPositions[i].origin);
-    VectorCopy(_clients[ClientNum(ent)].alliesSavedPositions[i].vangles,
-               client.alliesSavedPositions[i].vangles);
-    client.alliesSavedPositions[i].isValid =
-        _clients[ClientNum(ent)].alliesSavedPositions[i].isValid;
+    VectorCopy(_clients[clientNum].alliesSaves[i].origin,
+               client.alliesSaves[i].origin);
+    VectorCopy(_clients[clientNum].alliesSaves[i].vangles,
+               client.alliesSaves[i].vangles);
+
+    client.alliesSaves[i].isValid = _clients[clientNum].alliesSaves[i].isValid;
+    client.alliesSaves[i].isLatest =
+        _clients[clientNum].alliesSaves[i].isLatest;
     // Axis
-    VectorCopy(_clients[ClientNum(ent)].axisSavedPositions[i].origin,
-               client.axisSavedPositions[i].origin);
-    VectorCopy(_clients[ClientNum(ent)].axisSavedPositions[i].vangles,
-               client.axisSavedPositions[i].vangles);
-    client.axisSavedPositions[i].isValid =
-        _clients[ClientNum(ent)].axisSavedPositions[i].isValid;
+    VectorCopy(_clients[clientNum].axisSaves[i].origin,
+               client.axisSaves[i].origin);
+    VectorCopy(_clients[clientNum].axisSaves[i].vangles,
+               client.axisSaves[i].vangles);
+
+    client.axisSaves[i].isValid = _clients[clientNum].axisSaves[i].isValid;
+    client.axisSaves[i].isLatest = _clients[clientNum].axisSaves[i].isLatest;
   }
 
   client.progression = ent->client->sess.clientMapProgression;
   client.saveLimit = ent->client->sess.saveLimit;
   ent->client->sess.loadPreviousSavedPositions = qfalse;
 
-  std::map<std::string, DisconnectedClient>::iterator it =
-      _savedPositions.find(guid);
+  const auto it = _savedPositions.find(guid);
 
   if (it != _savedPositions.end()) {
     it->second = client;
@@ -554,8 +582,7 @@ void ETJump::SaveSystem::savePositionsToDatabase(gentity_t *ent) {
 }
 
 // Called on client connect. Loads saves from previous session
-void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
-
+void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
   if (!ent->client) {
     return;
   }
@@ -564,37 +591,41 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
     return;
   }
 
-  std::string guid = _session->Guid(ent);
-
-  std::map<std::string, DisconnectedClient>::iterator it =
-      _savedPositions.find(guid);
+  const std::string guid = _session->Guid(ent);
+  const int clientNum = ClientNum(ent);
+  const auto it = _savedPositions.find(guid);
 
   if (it != _savedPositions.end()) {
-
-    unsigned validPositionsCount = 0;
+    uint8_t validPositionsCount = 0;
 
     for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
       // Allied
-      VectorCopy(it->second.alliesSavedPositions[i].origin,
-                 _clients[ClientNum(ent)].alliesSavedPositions[i].origin);
-      VectorCopy(it->second.alliesSavedPositions[i].vangles,
-                 _clients[ClientNum(ent)].alliesSavedPositions[i].vangles);
-      _clients[ClientNum(ent)].alliesSavedPositions[i].isValid =
-          it->second.alliesSavedPositions[i].isValid;
+      VectorCopy(it->second.alliesSaves[i].origin,
+                 _clients[clientNum].alliesSaves[i].origin);
+      VectorCopy(it->second.alliesSaves[i].vangles,
+                 _clients[clientNum].alliesSaves[i].vangles);
 
-      if (it->second.alliesSavedPositions[i].isValid) {
+      _clients[clientNum].alliesSaves[i].isValid =
+          it->second.alliesSaves[i].isValid;
+      _clients[clientNum].alliesSaves[i].isLatest =
+          it->second.alliesSaves[i].isLatest;
+
+      if (it->second.alliesSaves[i].isValid) {
         ++validPositionsCount;
       }
 
       // Axis
-      VectorCopy(it->second.axisSavedPositions[i].origin,
-                 _clients[ClientNum(ent)].axisSavedPositions[i].origin);
-      VectorCopy(it->second.axisSavedPositions[i].vangles,
-                 _clients[ClientNum(ent)].axisSavedPositions[i].vangles);
-      _clients[ClientNum(ent)].axisSavedPositions[i].isValid =
-          it->second.axisSavedPositions[i].isValid;
+      VectorCopy(it->second.axisSaves[i].origin,
+                 _clients[clientNum].axisSaves[i].origin);
+      VectorCopy(it->second.axisSaves[i].vangles,
+                 _clients[clientNum].axisSaves[i].vangles);
 
-      if (it->second.axisSavedPositions[i].isValid) {
+      _clients[clientNum].axisSaves[i].isValid =
+          it->second.axisSaves[i].isValid;
+      _clients[clientNum].axisSaves[i].isLatest =
+          it->second.axisSaves[i].isLatest;
+
+      if (it->second.axisSaves[i].isValid) {
         ++validPositionsCount;
       }
     }
@@ -602,35 +633,27 @@ void ETJump::SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
     ent->client->sess.loadPreviousSavedPositions = qfalse;
     ent->client->sess.clientMapProgression = it->second.progression;
     ent->client->sess.saveLimit = it->second.saveLimit;
+
     if (validPositionsCount) {
-      ChatPrintTo(ent, "^<ETJump: ^7loaded saved positions "
-                       "from previous session.");
+      ChatPrintTo(ent,
+                  "^gETJump: ^7loaded saved positions from previous session.");
     }
   }
 }
 
-void ETJump::SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent,
-                                                      team_t team) {
-  auto lastValidSave = getValidTeamSaveForSlot(ent, team, 0);
+void SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team) {
+  const auto lastValidSave = getValidTeamSaveForSlot(ent, team, 0);
+
   if (lastValidSave) {
-    auto client = &_clients[ClientNum(ent)];
+    const auto client = &_clients[ClientNum(ent)];
     auto autoSave = &(client->quickDeployPositions[team]);
     *autoSave = *lastValidSave;
   }
 }
 
-void ETJump::SaveSystem::loadTeamQuickDeployPosition(gentity_t *ent,
-                                                     team_t team) {
-  auto validSave = getValidTeamQuickDeploySave(ent, team);
-  if (validSave) {
-    restoreStanceFromSave(ent, validSave);
-    teleportPlayer(ent, validSave);
-  }
-}
+void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent, team_t team) {
+  const auto validSave = getValidTeamQuickDeploySave(ent, team);
 
-void ETJump::SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent,
-                                                         team_t team) {
-  auto validSave = getValidTeamQuickDeploySave(ent, team);
   if (validSave) {
     restoreStanceFromSave(ent, validSave);
     teleportPlayer(ent, validSave);
@@ -638,9 +661,8 @@ void ETJump::SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent,
   }
 }
 
-ETJump::SaveSystem::SavePosition *
-ETJump::SaveSystem::getValidTeamSaveForSlot(gentity_t *ent, team_t team,
-                                            int slot) {
+SaveSystem::SavePosition *
+SaveSystem::getValidTeamSaveForSlot(gentity_t *ent, team_t team, int slot) {
   if (!ent || !ent->client) {
     return nullptr;
   }
@@ -649,12 +671,13 @@ ETJump::SaveSystem::getValidTeamSaveForSlot(gentity_t *ent, team_t team,
     return nullptr;
   }
 
-  auto client = &_clients[ClientNum(ent)];
-  SavePosition *pos = nullptr;
+  const auto client = &_clients[ClientNum(ent)];
+  SavePosition *pos;
+
   if (team == TEAM_ALLIES) {
-    pos = &client->alliesSavedPositions[slot];
+    pos = &client->alliesSaves[slot];
   } else {
-    pos = &client->axisSavedPositions[slot];
+    pos = &client->axisSaves[slot];
   }
 
   if (!pos->isValid) {
@@ -664,8 +687,8 @@ ETJump::SaveSystem::getValidTeamSaveForSlot(gentity_t *ent, team_t team,
   return pos;
 }
 
-ETJump::SaveSystem::SavePosition *
-ETJump::SaveSystem::getValidTeamUnloadPos(gentity_t *ent, team_t team) {
+SaveSystem::SavePosition *SaveSystem::getValidTeamUnloadPos(gentity_t *ent,
+                                                            team_t team) {
   if (!ent || !ent->client) {
     return nullptr;
   }
@@ -674,12 +697,13 @@ ETJump::SaveSystem::getValidTeamUnloadPos(gentity_t *ent, team_t team) {
     return nullptr;
   }
 
-  auto client = &_clients[ClientNum(ent)];
-  SavePosition *pos = nullptr;
+  const auto client = &_clients[ClientNum(ent)];
+  SavePosition *pos;
+
   if (team == TEAM_ALLIES) {
-    pos = &client->alliesLastLoadPosition;
+    pos = &client->alliesLastLoadPos;
   } else {
-    pos = &client->axisLastLoadPosition;
+    pos = &client->axisLastLoadPos;
   }
 
   if (!pos->isValid) {
@@ -689,8 +713,8 @@ ETJump::SaveSystem::getValidTeamUnloadPos(gentity_t *ent, team_t team) {
   return pos;
 }
 
-ETJump::SaveSystem::SavePosition *
-ETJump::SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team) {
+SaveSystem::SavePosition *
+SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team) {
   if (!ent || !ent->client) {
     return nullptr;
   }
@@ -699,8 +723,8 @@ ETJump::SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team) {
     return nullptr;
   }
 
-  auto client = &_clients[ClientNum(ent)];
-  auto pos = &client->quickDeployPositions[team];
+  const auto client = &_clients[ClientNum(ent)];
+  const auto pos = &client->quickDeployPositions[team];
 
   if (!pos->isValid) {
     return nullptr;
@@ -709,13 +733,13 @@ ETJump::SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, team_t team) {
   return pos;
 }
 
-void ETJump::SaveSystem::restoreStanceFromSave(gentity_t *ent,
-                                               SavePosition *pos) {
+void SaveSystem::restoreStanceFromSave(gentity_t *ent, SavePosition *pos) {
   if (!ent || !ent->client) {
     return;
   }
 
   auto client = ent->client;
+
   if (pos->stance == Crouch) {
     client->ps.eFlags &= ~EF_PRONE;
     client->ps.eFlags &= ~EF_PRONE_MOVING;
@@ -731,30 +755,34 @@ void ETJump::SaveSystem::restoreStanceFromSave(gentity_t *ent,
 }
 
 // Saves backup position
-void ETJump::SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
-
+void SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
   if (!ent->client) {
     return;
   }
 
   if (ent->client->sess.timerunActive &&
       ent->client->sess.runSpawnflags &
-          static_cast<int>(ETJump::TimerunSpawnflags::NoBackups)) {
+          static_cast<int>(TimerunSpawnflags::NoBackups)) {
     return;
   }
 
+  const int clientNum = ClientNum(ent);
   SavePosition backup;
+
   VectorCopy(pos->origin, backup.origin);
   VectorCopy(pos->vangles, backup.vangles);
+
   backup.isValid = pos->isValid;
+  backup.isLatest = pos->isLatest;
   backup.stance = pos->stance;
+
   // Can never be spectator as this would not be called
   if (ent->client->sess.sessionTeam == TEAM_ALLIES) {
-    _clients[ClientNum(ent)].alliesBackupPositions.pop_back();
-    _clients[ClientNum(ent)].alliesBackupPositions.push_front(backup);
+    _clients[clientNum].alliesBackups.pop_back();
+    _clients[clientNum].alliesBackups.push_front(backup);
   } else {
-    _clients[ClientNum(ent)].axisBackupPositions.pop_back();
-    _clients[ClientNum(ent)].axisBackupPositions.push_front(backup);
+    _clients[clientNum].axisBackups.pop_back();
+    _clients[clientNum].axisBackups.push_front(backup);
   }
 }
 
@@ -762,18 +790,45 @@ void ETJump::SaveSystem::storePosition(gclient_s *client, SavePosition *pos) {
   VectorCopy(client->ps.origin, pos->origin);
   VectorCopy(client->ps.viewangles, pos->vangles);
   pos->isValid = true;
+  pos->isLatest = true;
 
-  if (client->ps.eFlags & EF_CROUCHING) {
-    pos->stance = Crouch;
-  } else if (client->ps.eFlags & EF_PRONE) {
+  if (client->ps.eFlags & EF_PRONE) {
     pos->stance = Prone;
   } else {
-    pos->stance = Stand;
+    pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
   }
 }
 
-void ETJump::SaveSystem::sendClientCommands(gentity_t *ent, int position) {
-  auto self = ClientNum(ent);
+int SaveSystem::getLatestSaveSlot(gclient_s *client) {
+  const int clientNum = ClientNum(client);
+  const auto teamSaves = client->sess.sessionTeam == TEAM_ALLIES
+                             ? _clients[clientNum].alliesSaves
+                             : _clients[clientNum].axisSaves;
+  int slot = -1;
+
+  for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
+    if (teamSaves[i].isLatest) {
+      slot = i;
+      break;
+    }
+  }
+
+  return slot;
+}
+
+void SaveSystem::resetLatestSaveSlot(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+  const auto teamSaves = ent->client->sess.sessionTeam == TEAM_ALLIES
+                             ? _clients[clientNum].alliesSaves
+                             : _clients[clientNum].axisSaves;
+
+  for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
+    teamSaves[i].isLatest = false;
+  }
+}
+
+void SaveSystem::sendClientCommands(gentity_t *ent, int position) {
+  const int self = ClientNum(ent);
   int target;
   std::string saveMsg = va("savePrint %d\n", position);
 
@@ -795,11 +850,11 @@ void ETJump::SaveSystem::sendClientCommands(gentity_t *ent, int position) {
   }
 }
 
-void ETJump::SaveSystem::teleportPlayer(gentity_t *ent, SavePosition *pos) {
+void SaveSystem::teleportPlayer(gentity_t *ent, SavePosition *pos) {
   auto *client = ent->client;
   client->ps.eFlags ^= EF_TELEPORT_BIT;
-  G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
 
+  G_AddEvent(ent, EV_LOAD_TELEPORT, 0);
   G_SetOrigin(ent, pos->origin);
   VectorClear(client->ps.velocity);
 
@@ -809,10 +864,4 @@ void ETJump::SaveSystem::teleportPlayer(gentity_t *ent, SavePosition *pos) {
 
   client->ps.pm_time = 1; // Crashland + instant load bug fix.
 }
-
-ETJump::SaveSystem::SaveSystem(const std::shared_ptr<Session> session)
-    : _session(session)
-//: guidInterface_(guidInterface)
-{}
-
-ETJump::SaveSystem::~SaveSystem() {}
+} // namespace ETJump
