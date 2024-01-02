@@ -866,7 +866,8 @@ static qboolean PM_CheckJump(void) {
   }
 
   // store horizontal speed for CHS 55
-  pm->ps->persistant[PERS_JUMP_SPEED] = VectorLength2(pm->ps->velocity);
+  pm->ps->persistant[PERS_JUMP_SPEED] =
+      static_cast<int>(std::round(VectorLength2(pm->ps->velocity)));
 
   return qtrue;
 }
