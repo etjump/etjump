@@ -25,7 +25,7 @@
 #include "etj_map_statistics.h"
 #include <sqlite3.h>
 #include <algorithm>
-#include <json.h>
+#include "json/json.h"
 
 #include "etj_utilities.h"
 #include "etj_string_utilities.h"
