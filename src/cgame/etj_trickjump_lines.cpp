@@ -23,8 +23,7 @@
  */
 
 #include "etj_trickjump_lines.h"
-#include "../json/json.h"
-#include "etj_client_utilities.h"
+#include "json/json.h"
 #include <sstream>
 #include <memory>
 #include <string>

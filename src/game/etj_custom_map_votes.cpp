@@ -27,7 +27,7 @@
 #include "etj_string_utilities.h"
 #include <fstream>
 #include "utilities.hpp"
-#include "../json/json.h"
+#include "json/json.h"
 #include <algorithm>
 
 CustomMapVotes::CustomMapVotes(MapStatistics *mapStats) : _mapStats(mapStats) {}

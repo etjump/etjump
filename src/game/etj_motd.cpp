@@ -23,7 +23,7 @@
  */
 
 #include "etj_motd.h"
-#include "../json/json.h"
+#include "json/json.h"
 #include "etj_local.h"
 #include "utilities.hpp"
 #include <fstream>

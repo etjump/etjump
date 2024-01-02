@@ -23,7 +23,7 @@
  */
 
 #include "etj_tokens.h"
-#include "../json/json.h"
+#include "json/json.h"
 #include "g_local.h"
 #include "etj_utilities.h"
 
