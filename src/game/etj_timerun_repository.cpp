@@ -477,44 +477,57 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords() {
 
 std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     const Timerun::PrintRecordsParams &params) {
-  auto season = params.season.hasValue() ? params.season.value() : "Default";
-  const auto &map = params.map;
-  auto runSpecified = params.run.hasValue();
+  const auto season =
+      params.season.hasValue() ? params.season.value() : "Default";
+  const std::string &map = params.map;
+  const bool runSpecified = params.run.hasValue();
 
-  auto seasons = getSeasonsForName(season, false);
+  const auto seasons = getSeasonsForName(season, false);
 
   if (seasons.empty()) {
     throw std::runtime_error(
         stringFormat("No season matches name `%s`", season));
   }
 
-  auto maps = getMapsForName(params.map, params.exactMap);
+  const auto maps = getMapsForName(params.map, params.exactMap);
+  bool exactMapFound = false;
+
   if (maps.size() > 1) {
-    std::string error =
-        stringFormat("^3records: ^7found %d maps matching ^3%s^7\n",
-                     maps.size(), params.map);
-
-    const int perRow = 3;
-    int i = 0;
     for (const auto &map : maps) {
-      if (i != 0 && i % perRow == 0) {
-        error += "\n";
+      if (map == params.map) {
+        exactMapFound = true;
+        break;
       }
-
-      error += stringFormat("%-22s", map);
-      ++i;
     }
 
-    throw std::runtime_error(error);
+    if (!exactMapFound) {
+      std::string error =
+          stringFormat("^3records: ^7found %d maps matching ^3%s^7\n",
+                       maps.size(), params.map);
+
+      const int perRow = 3;
+      int i = 0;
+      for (const auto &map : maps) {
+        if (i != 0 && i % perRow == 0) {
+          error += "\n";
+        }
+
+        error += stringFormat("%-22s", map);
+        ++i;
+      }
+
+      throw std::runtime_error(error);
+    }
   }
 
-  std::string seasonPlaceholders = StringUtil::join(
+  const std::string seasonPlaceholders = StringUtil::join(
       Container::map(seasons, [](const auto &s) { return "season_id=?"; }),
       " or ");
 
-  std::string runPlaceholder = runSpecified ? "and lsanitize(run) like ?" : "";
+  const std::string runPlaceholder =
+      runSpecified ? "and lsanitize(run) like ?" : "";
 
-  auto query = stringFormat(R"(
+  const std::string query = stringFormat(R"(
     select
       season_id,
       map,
@@ -533,7 +546,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     collate nocase
     order by season_id, map, run, time asc
   )",
-                            seasonPlaceholders, runPlaceholder);
+                                         seasonPlaceholders, runPlaceholder);
 
   auto binder = _database->sql << query;
 
@@ -541,7 +554,7 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
     binder << s.id;
   }
 
-  binder << StringUtil::toLowerCase(map);
+  binder << StringUtil::toLowerCase(!maps.empty() ? maps[0] : map);
 
   if (runSpecified) {
     binder << "%" + params.run.value() + "%";
@@ -553,9 +566,10 @@ std::vector<ETJump::Timerun::Record> ETJump::TimerunRepository::getRecords(
                        int userId, int time, std::string checkpointsString,
                        std::string recordDate, std::string playerName,
                        std::string metadataString) {
-    auto record = getRecordFromStandardQueryResult(
-        seasonId, map, runName, userId, time, checkpointsString, recordDate,
-        playerName, metadataString);
+    const auto record = getRecordFromStandardQueryResult(
+        seasonId, std::move(map), std::move(runName), userId, time,
+        std::move(checkpointsString), std::move(recordDate),
+        std::move(playerName), std::move(metadataString));
 
     records.push_back(record);
   };
