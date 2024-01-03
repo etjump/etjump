@@ -271,8 +271,9 @@ void SaveSystem::load(gentity_t *ent) {
     restoreStanceFromSave(ent, pos);
 
     if (!g_cheats.integer && client->sess.timerunActive &&
-        client->sess.runSpawnflags &
-            static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
+        (client->sess.runSpawnflags &
+             static_cast<int>(ETJump::TimerunSpawnflags::NoSave) ||
+         !pos->isTimerunSave)) {
       InterruptRun(ent);
     }
 
@@ -328,6 +329,8 @@ void ETJump::SaveSystem::forceSave(gentity_t *location, gentity_t *ent) {
   } else {
     pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
   }
+
+  pos->isTimerunSave = ent->client->sess.timerunActive;
 
   trap_SendServerCommand(clientNum, "savePrint");
 }
@@ -405,8 +408,9 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     restoreStanceFromSave(ent, pos);
 
     if (client->sess.timerunActive &&
-        client->sess.runSpawnflags &
-            static_cast<int>(ETJump::TimerunSpawnflags::NoSave)) {
+        (client->sess.runSpawnflags &
+             static_cast<int>(ETJump::TimerunSpawnflags::NoSave) ||
+         !pos->isTimerunSave)) {
       InterruptRun(ent);
     }
 
@@ -536,6 +540,75 @@ void SaveSystem::resetSavedPositions(gentity_t *ent) {
 
   _clients[clientNum].alliesLastLoadPos.isValid = false;
   _clients[clientNum].axisLastLoadPos.isValid = false;
+}
+
+void SaveSystem::clearTimerunSaves(gentity_t *ent) {
+  const int clientNum = ClientNum(ent);
+
+  for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
+    if (_clients[clientNum].alliesSaves[i].isTimerunSave) {
+      _clients[clientNum].alliesSaves[i].isValid = false;
+
+      if (_clients[clientNum].alliesSaves[i].isLatest) {
+        _clients[clientNum].alliesSaves[i].isLatest = false;
+      }
+    }
+
+    if (_clients[clientNum].axisSaves[i].isTimerunSave) {
+      _clients[clientNum].axisSaves[i].isValid = false;
+
+      if (_clients[clientNum].axisSaves[i].isLatest) {
+        _clients[clientNum].axisSaves[i].isLatest = false;
+      }
+    }
+  }
+
+  bool backupsHaveTimerunSaves = false;
+
+  // check if we actually need to delete any old backups
+  for (int i = 0; i < MAX_BACKUP_POSITIONS; i++) {
+    if (_clients[clientNum].alliesBackups[i].isTimerunSave ||
+        _clients[clientNum].axisBackups[i].isTimerunSave) {
+      backupsHaveTimerunSaves = true;
+    }
+  }
+
+  if (!backupsHaveTimerunSaves) {
+    return;
+  }
+
+  std::deque<SavePosition> newAlliesBackups;
+  std::deque<SavePosition> newAxisBackups;
+
+  // clear the default constructed first slot, so we have a clean deque
+  newAlliesBackups.clear();
+  newAxisBackups.clear();
+
+  // store any backup positions that were not from a timerun
+  for (int i = 0; i < MAX_BACKUP_POSITIONS; i++) {
+    if (!_clients[clientNum].alliesBackups[i].isTimerunSave) {
+      newAlliesBackups.emplace_back(_clients[clientNum].alliesBackups[i]);
+    }
+
+    if (!_clients[clientNum].axisBackups[i].isTimerunSave) {
+      newAxisBackups.emplace_back(_clients[clientNum].axisBackups[i]);
+    }
+  }
+
+  // fill the remaining slots with default positions
+  // storing backups always pushes front + pops back,
+  // so this way we maintain the correct amount of slots
+
+  while (newAxisBackups.size() < MAX_BACKUP_POSITIONS) {
+    newAxisBackups.emplace_back();
+  }
+
+  while (newAlliesBackups.size() < MAX_BACKUP_POSITIONS) {
+    newAlliesBackups.emplace_back();
+  }
+
+  _clients[clientNum].alliesBackups = newAlliesBackups;
+  _clients[clientNum].axisBackups = newAxisBackups;
 }
 
 // Called on client disconnect. Saves saves for future sessions
@@ -775,6 +848,7 @@ void SaveSystem::saveBackupPosition(gentity_t *ent, SavePosition *pos) {
   backup.isValid = pos->isValid;
   backup.isLatest = pos->isLatest;
   backup.stance = pos->stance;
+  backup.isTimerunSave = pos->isTimerunSave;
 
   // Can never be spectator as this would not be called
   if (ent->client->sess.sessionTeam == TEAM_ALLIES) {
@@ -797,6 +871,8 @@ void ETJump::SaveSystem::storePosition(gclient_s *client, SavePosition *pos) {
   } else {
     pos->stance = client->ps.eFlags & EF_CROUCHING ? Crouch : Stand;
   }
+
+  pos->isTimerunSave = client->sess.timerunActive;
 }
 
 int SaveSystem::getLatestSaveSlot(gclient_s *client) {

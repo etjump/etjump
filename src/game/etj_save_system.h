@@ -45,12 +45,13 @@ public:
   struct SavePosition {
     SavePosition()
         : isValid(false), isLatest(false), origin{0, 0, 0}, vangles{0, 0, 0},
-          stance(SaveStance::Stand) {}
+          stance(SaveStance::Stand), isTimerunSave(false) {}
     bool isValid;
     bool isLatest;
     vec3_t origin;
     vec3_t vangles;
     SaveStance stance;
+    bool isTimerunSave;
   };
 
   struct Client {
@@ -117,6 +118,10 @@ public:
 
   // Resets targets positions
   void resetSavedPositions(gentity_t *ent);
+
+  // invalidates any save slots that are marked as timerun saves
+  // called at the start of a timerun to reset saves from previous run
+  void clearTimerunSaves(gentity_t *ent);
 
   // Saves positions to db on disconnect
   void savePositionsToDatabase(gentity_t *ent);
