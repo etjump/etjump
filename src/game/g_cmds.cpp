@@ -481,7 +481,15 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       level.voteInfo.voteYes++;
       break;
     case VotingTypes::RevoteRtv:
-      (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
+      // only reduce the map vote count if we've already voted yes
+      // as this gets called on 'vote no' -> 're-vote yes' scenarios too
+      if (client->pers.votingInfo.isVotedYes) {
+        (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].second--;
+      } else {
+        level.voteInfo.voteNo--;
+        level.voteInfo.voteYes++;
+      }
+
       (*rtvMaps)[mapNum].second++;
       ent->client->pers.votingInfo.lastRtvMapVoted = mapNum;
       client->pers.votingInfo.isVotedYes = true;
@@ -495,7 +503,6 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
     trap_SendServerCommand(clientNum, "voted yes");
   } else {
     trap_SendServerCommand(clientNum, "voted no");
-    trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
   }
 
   // note: we must always send this during rtv to update map vote counts,
@@ -505,6 +512,8 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
   } else {
     trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
   }
+
+  trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
 }
 } // namespace ETJump
 
