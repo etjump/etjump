@@ -26,7 +26,6 @@
 #include "etj_commands.h"
 
 #include "etj_command_parser.h"
-#include "etj_command_parser.h"
 #include "etj_local.h"
 #include "etj_save_system.h"
 #include "etj_session.h"
@@ -82,15 +81,13 @@ const char TOKENS = 'V';
 const char SETLEVEL = 's';
 const char MOVERSCALE = 'v';
 const char TIMERUN_MANAGEMENT = 'T';
+const char CUSTOMVOTES = 'c';
 } // namespace CommandFlags
 
-// refactor admin system to use the new command parser instead of
-// continuing to use this.
-// This is only in use to keep the scope of the timerun improvement
-// reasonable
-auto deprecated_getCommand(const std::string &commandPrefix, int clientNum,
-                           const ETJump::CommandParser::CommandDefinition &def,
-                           Arguments args) {
+namespace ETJump {
+opt<CommandParser::Command>
+getOptCommand(const std::string &commandPrefix, int clientNum,
+              const CommandParser::CommandDefinition &def, Arguments args) {
   auto command = ETJump::CommandParser(def, *args).parse();
 
   if (command.helpRequested) {
@@ -98,23 +95,24 @@ auto deprecated_getCommand(const std::string &commandPrefix, int clientNum,
         clientNum,
         ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
     Printer::SendConsoleMessage(clientNum, def.help());
-    return ETJump::opt<ETJump::CommandParser::Command>();
+    return {};
   }
 
-  if (command.errors.size() > 0) {
+  if (!command.errors.empty()) {
     Printer::SendChatMessage(
         clientNum,
-        ETJump::stringFormat(
+        stringFormat(
             "^3%s: ^7operation failed. Check console for more information.",
             commandPrefix));
 
     Printer::SendConsoleMessage(clientNum, command.getErrorMessage() + "\n");
 
-    return ETJump::opt<ETJump::CommandParser::Command>();
+    return {};
   }
 
-  return ETJump::opt<ETJump::CommandParser::Command>(std::move(command));
+  return {std::move(command)};
 }
+} // namespace ETJump
 
 namespace ClientCommands {
 
@@ -138,13 +136,18 @@ bool Unload(gentity_t *ent, Arguments argv) {
   return true;
 }
 
-bool ListInfo(gentity_t *ent, Arguments argv) {
+bool listCustomVotes(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+  const std::string &cmd = argv->at(0);
+
   if (argv->size() != 2) {
     std::string types = game.customMapVotes->ListTypes();
     Printer::SendConsoleMessage(
-        ClientNum(ent), "^gAvailable custom map vote lists:\n^z" + types +
-                            "\n\n^gUse ^3listinfo [listname] ^gto type "
-                            "maps in the specified type.\n");
+        clientNum,
+        ETJump::stringFormat(
+            "^gAvailable custom map vote lists:\n^z %s\n\n^gUse ^3%s "
+            "[listname] ^gto view maps in the specified list.\n",
+            types, cmd));
     return true;
   }
 
@@ -152,11 +155,11 @@ bool ListInfo(gentity_t *ent, Arguments argv) {
   const std::string maplist = game.customMapVotes->ListInfo(type);
   if (maplist.empty()) {
     Printer::SendConsoleMessage(
-        ClientNum(ent),
-        ETJump::stringFormat("^3listinfo: ^gCould not find type ^3%s\n", type));
+        clientNum, ETJump::stringFormat("^3%s: ^gcould not find list ^3'%s'\n",
+                                        cmd, type));
     return false;
   }
-  Printer::SendConsoleMessage(ClientNum(ent), maplist);
+  Printer::SendConsoleMessage(clientNum, maplist);
   return true;
 }
 
@@ -169,7 +172,7 @@ bool Rankings(gentity_t *ent, Arguments argv) {
   }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
 
-  auto optCommand = deprecated_getCommand(
+  auto optCommand = getOptCommand(
       "rankings", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
           "rankings",
@@ -240,7 +243,7 @@ bool Records(gentity_t *ent, Arguments argv) {
     return false;
   }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
-  auto optCommand = deprecated_getCommand(
+  auto optCommand = getOptCommand(
       "records", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
           "records",
@@ -346,7 +349,7 @@ bool LoadCheckpoints(gentity_t *ent, Arguments argv) {
     return false;
   }
   auto args = ETJump::Container::skipFirstN(*argv, 1);
-  auto optCommand = deprecated_getCommand(
+  auto optCommand = getOptCommand(
       "loadcheckpoints", ClientNum(ent),
       ETJump::CommandParser::CommandDefinition::create(
           "loadcheckpoints",
@@ -2109,7 +2112,7 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
                      "(e.g. 2000-01-01)",
                      ETJump::CommandParser::OptionDefinition::Type::Date,
                      false));
-  auto optCommand = deprecated_getCommand("add-season", clientNum, def, argv);
+  auto optCommand = getOptCommand("add-season", clientNum, def, argv);
 
   if (!optCommand.hasValue()) {
     return true;
@@ -2165,7 +2168,7 @@ bool TimerunEditSeason(gentity_t *ent, Arguments argv) {
                      ETJump::CommandParser::OptionDefinition::Type::Date,
                      false));
 
-  auto optCommand = deprecated_getCommand("edit-season", clientNum, def, argv);
+  auto optCommand = getOptCommand("edit-season", clientNum, def, argv);
 
   if (!optCommand.hasValue()) {
     return true;
@@ -2202,8 +2205,7 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
                      ETJump::CommandParser::OptionDefinition::Type::MultiToken,
                      true));
 
-  auto optCommand =
-      deprecated_getCommand("delete-season", clientNum, def, argv);
+  auto optCommand = getOptCommand("delete-season", clientNum, def, argv);
   if (!optCommand.hasValue()) {
     return true;
   }
@@ -2219,6 +2221,112 @@ bool TimerunDeleteSeason(gentity_t *ent, Arguments argv) {
 
 bool RockTheVote(gentity_t *ent, Arguments argv) {
   trap_SendServerCommand(ClientNum(ent), "callvote rtv");
+  return true;
+}
+
+bool addCustomVote(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+
+  const auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create(
+          "add-customvote", "Creates a new custom map vote list.")
+          .addOption("name", "Name of the custom vote list",
+                     ETJump::CommandParser::OptionDefinition::Type::Token, true)
+          .addOption("full-name", "Full name, displayed in the callvote text.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true)
+          .addOption("maps", "Maps to include in the list, space delimited.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     true));
+
+  const auto optCommand =
+      ETJump::getOptCommand("add-customvote", clientNum, def, argv);
+
+  if (!optCommand.hasValue()) {
+    return false;
+  }
+
+  auto command = optCommand.value();
+
+  const std::string &name = command.options["name"].text;
+  const std::string &fullName = command.options["full-name"].text;
+  const std::string &maps = command.options["maps"].text;
+
+  game.customMapVotes->addCustomvoteList(clientNum, name, fullName, maps);
+  return true;
+}
+
+bool deleteCustomVote(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+
+  auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create(
+          "delete-customvote", "Deletes a custom map vote list.")
+          .addOption("name", "Name of the list to delete.",
+                     ETJump::CommandParser::OptionDefinition::Type::Token,
+                     true));
+
+  const auto optCommand =
+      ETJump::getOptCommand("delete-customvote", clientNum, def, argv);
+
+  if (!optCommand.hasValue()) {
+    return false;
+  }
+
+  auto command = optCommand.value();
+  const std::string &name = command.options["name"].text;
+
+  game.customMapVotes->deleteCustomvoteList(clientNum, name);
+  return true;
+}
+
+bool editCustomVote(gentity_t *ent, Arguments argv) {
+  const int clientNum = ClientNum(ent);
+
+  auto def = std::move(
+      ETJump::CommandParser::CommandDefinition::create(
+          "edit-customvote", "Edits a custom map vote list.")
+          .addOption("list", "Name of the list to edit.",
+                     ETJump::CommandParser::OptionDefinition::Type::Token, true)
+          .addOption("name", "Name of the custom vote list.",
+                     ETJump::CommandParser::OptionDefinition::Type::Token,
+                     false)
+          .addOption("full-name", "Full name, displayed in the callvote text.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("add-maps", "Maps to add to the list, space delimited.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false)
+          .addOption("remove-maps",
+                     "Maps to remove from the list, space delimited.",
+                     ETJump::CommandParser::OptionDefinition::Type::MultiToken,
+                     false));
+
+  const auto optCommand =
+      ETJump::getOptCommand("edit-customvote", clientNum, def, argv);
+
+  if (!optCommand.hasValue()) {
+    return false;
+  }
+
+  auto command = optCommand.value();
+
+  const std::string &list = command.options["list"].text;
+  const auto optName = command.getOptional("name");
+  const auto optFullName = command.getOptional("full-name");
+  const auto optAddMaps = command.getOptional("add-maps");
+  const auto optRemoveMaps = command.getOptional("remove-maps");
+
+  const std::string &name = optName.hasValue() ? optName.value().text : "";
+  const std::string &fullName =
+      optFullName.hasValue() ? optFullName.value().text : "";
+  const std::string &addMaps =
+      optAddMaps.hasValue() ? optAddMaps.value().text : "";
+  const std::string &removeMaps =
+      optRemoveMaps.hasValue() ? optRemoveMaps.value().text : "";
+
+  game.customMapVotes->editCustomvoteList(clientNum, list, name, fullName,
+                                          addMaps, removeMaps);
   return true;
 }
 
@@ -2334,13 +2442,20 @@ Commands::Commands() {
       AdminCommandPair(ClientCommands::ListSeasons, CommandFlags::BASIC);
   adminCommands_["rtv"] =
       AdminCommandPair(AdminCommands::RockTheVote, CommandFlags::BASIC);
+  adminCommands_["add-customvote"] =
+      AdminCommandPair(AdminCommands::addCustomVote, CommandFlags::CUSTOMVOTES);
+  adminCommands_["delete-customvote"] = AdminCommandPair(
+      AdminCommands::deleteCustomVote, CommandFlags::CUSTOMVOTES);
+  adminCommands_["edit-customvote"] = AdminCommandPair(
+      AdminCommands::editCustomVote, CommandFlags::CUSTOMVOTES);
 
   commands_["backup"] = ClientCommands::BackupLoad;
   commands_["save"] = ClientCommands::Save;
   commands_["load"] = ClientCommands::Load;
   commands_["unload"] = ClientCommands::Unload;
   //    commands_["race"] = ClientCommands::Race;
-  commands_["listinfo"] = ClientCommands::ListInfo;
+  commands_["listinfo"] = ClientCommands::listCustomVotes;
+  commands_["customvotes"] = ClientCommands::listCustomVotes;
   commands_["records"] = ClientCommands::Records;
   commands_["times"] = ClientCommands::Records;
   commands_["ranks"] = ClientCommands::Records;

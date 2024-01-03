@@ -1487,6 +1487,7 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("help");
   trap_AddCommand("race");
   trap_AddCommand("listinfo");
+  trap_AddCommand("customvotes");
   trap_AddCommand("records");
   trap_AddCommand("times");
   trap_AddCommand("ranks");
@@ -1531,4 +1532,8 @@ void CG_InitConsoleCommands() {
   trap_AddCommand("enc_say");
   trap_AddCommand("enc_say_team");
   trap_AddCommand("enc_say_buddy");
+
+  trap_AddCommand("generateCustomvotes");
+  trap_AddCommand("readCustomvotes");
+  trap_AddCommand("generateMotd");
 }

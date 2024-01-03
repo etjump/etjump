@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 
+#include <fstream>
+#include <algorithm>
+
 #include "etj_custom_map_votes.h"
 #include "etj_map_statistics.h"
 #include "etj_string_utilities.h"
-#include <fstream>
 #include "utilities.hpp"
-#include "json/json.h"
-#include <algorithm>
+#include "etj_printer.h"
 
 CustomMapVotes::CustomMapVotes(MapStatistics *mapStats) : _mapStats(mapStats) {}
 
@@ -167,6 +168,208 @@ void CustomMapVotes::GenerateVotesFile() {
   Load();
 }
 
+void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
+                                       const std::string &fullName,
+                                       const std::string &maps) {
+  const std::string &customVotesFile = g_customMapVotesFile.string;
+  Json::Value root;
+
+  // read and append to existing file if present
+  if (readCustomvoteFile(customVotesFile, root)) {
+
+    // make sure we don't already have a list with this name
+    for (const auto &lists : customMapVotes_) {
+      if (name == lists.type) {
+        Printer::SendChatMessage(clientNum,
+                                 "^3add-customvote: ^7operation failed, check "
+                                 "console for more information.");
+        Printer::SendConsoleMessage(
+            clientNum,
+            ETJump::stringFormat("^3add-customvote: ^7a list with the name "
+                                 "^3'%s' ^7already exists.\n",
+                                 name));
+        return;
+      }
+    }
+  }
+
+  Json::Value vote;
+  vote["name"] = name;
+  vote["callvote_text"] = fullName;
+  vote["maps"] = Json::arrayValue;
+
+  const auto mapList = ETJump::StringUtil::split(maps, " ");
+
+  for (const auto &map : mapList) {
+    vote["maps"].append(map);
+  }
+
+  root.append(vote);
+
+  if (!writeCustomvoteFile(customVotesFile, root)) {
+    Printer::SendChatMessage(clientNum, "^3add-customvote: ^7operation failed, "
+                                        "check console for more information.");
+    Printer::SendConsoleMessage(
+        clientNum, ETJump::stringFormat("^3add-customvote: ^7couldn't open the "
+                                        "file ^3'%s' ^7for writing.\n",
+                                        customVotesFile));
+    return;
+  }
+
+  Load();
+  Printer::SendChatMessage(
+      clientNum, ETJump::stringFormat("^3add-customvote: ^7successfully added "
+                                      "a new custom vote list ^3'%s'",
+                                      name));
+}
+
+void CustomMapVotes::deleteCustomvoteList(int clientNum,
+                                          const std::string &name) {
+  const std::string &customVotesFile = g_customMapVotesFile.string;
+  Json::Value root;
+
+  if (!readCustomvoteFile(customVotesFile, root)) {
+    Printer::SendChatMessage(clientNum,
+                             "^3delete-customvote: ^7operation failed, check "
+                             "console for more information.");
+    Printer::SendConsoleMessage(
+        clientNum, ETJump::stringFormat("^3delete-customvote: ^7couldn't open "
+                                        "the file ^3'%s' ^7for reading.\n",
+                                        customVotesFile));
+    return;
+  }
+
+  bool found = false;
+
+  for (Json::ArrayIndex i = 0; i < root.size(); i++) {
+    if (root[i]["name"].asString() == name) {
+      Json::Value removed;
+      root.removeIndex(i, &removed);
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    Printer::SendChatMessage(
+        clientNum, ETJump::stringFormat("^3delete-customvote: ^7a list with "
+                                        "the name ^3'%s' ^7was not found.\n",
+                                        name));
+    return;
+  }
+
+  if (!writeCustomvoteFile(customVotesFile, root)) {
+    Printer::SendChatMessage(clientNum,
+                             "^3delete-customvote: ^7operation failed, check "
+                             "console for more information.");
+    Printer::SendConsoleMessage(
+        clientNum, ETJump::stringFormat("^3delete-customvote: ^7couldn't open "
+                                        "the file ^3'%s' ^7for writing.\n",
+                                        customVotesFile));
+    return;
+  }
+
+  Load();
+  Printer::SendChatMessage(
+      clientNum,
+      ETJump::stringFormat(
+          "^3delete-customvote: ^7successfully deleted custom vote list ^3'%s'",
+          name));
+}
+
+void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
+                                        const std::string &name,
+                                        const std::string &fullName,
+                                        const std::string &addMaps,
+                                        const std::string &removeMaps) {
+  const std::string &customVotesFile = g_customMapVotesFile.string;
+  Json::Value root;
+
+  if (!readCustomvoteFile(customVotesFile, root)) {
+    Printer::SendChatMessage(clientNum,
+                             "^3edit-customvote: ^7operation failed, check "
+                             "console for more information.");
+    Printer::SendConsoleMessage(
+        clientNum, ETJump::stringFormat("^3edit-customvote: ^7couldn't open "
+                                        "the file ^3'%s' ^7for reading.\n",
+                                        customVotesFile));
+    return;
+  }
+
+  bool found = false;
+
+  for (auto &object : root) {
+    if (object["name"].asString() == list) {
+      if (!name.empty()) {
+        for (const auto &key : object) {
+          if (key == object["name"].asString()) {
+            object["name"] = name;
+          }
+        }
+      }
+
+      if (!fullName.empty()) {
+        for (const auto &key : object) {
+          if (key == object["callvote_text"].asString()) {
+            object["callvote_text"] = fullName;
+          }
+        }
+      }
+
+      if (!addMaps.empty()) {
+        const auto mapList = ETJump::StringUtil::split(addMaps, " ");
+
+        for (const auto &map : mapList) {
+          object["maps"].append(map);
+        }
+      }
+
+      if (!removeMaps.empty()) {
+        const auto mapList = ETJump::StringUtil::split(removeMaps, " ");
+
+        for (const auto &map : mapList) {
+          for (Json::ArrayIndex i = 0; i < object["maps"].size(); i++) {
+            if (object["maps"][i].asString() == map) {
+              Json::Value removed;
+              object["maps"].removeIndex(i, &removed);
+              break;
+            }
+          }
+        }
+      }
+
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    Printer::SendChatMessage(
+        clientNum, ETJump::stringFormat("^3edit-customvote: ^7a list with the "
+                                        "name ^3'%s' ^7was not found.\n",
+                                        list));
+    return;
+  }
+
+  if (!writeCustomvoteFile(customVotesFile, root)) {
+    Printer::SendChatMessage(clientNum,
+                             "^3edit-customvote: ^7operation failed, check "
+                             "console for more information.");
+    Printer::SendConsoleMessage(
+        clientNum, ETJump::stringFormat("^3edit-customvote: ^7couldn't open "
+                                        "the file ^3'%s' ^7for writing.\n",
+                                        customVotesFile));
+    return;
+  }
+
+  Load();
+  Printer::SendChatMessage(
+      clientNum,
+      ETJump::stringFormat(
+          "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'",
+          list));
+}
+
 std::string CustomMapVotes::ListInfo(const std::string &type) {
   std::string buffer;
 
@@ -242,4 +445,35 @@ std::string const CustomMapVotes::RandomMap(std::string const &type) {
 bool CustomMapVotes::isValidMap(const std::string &mapName) {
   return G_MapExists(mapName.c_str()) && mapName != level.rawmapname &&
          !MapStatistics::isBlockedMap(mapName);
+}
+
+bool CustomMapVotes::writeCustomvoteFile(const std::string &file,
+                                         const Json::Value &root) {
+  Json::StyledWriter writer;
+  const std::string &output = writer.write(root);
+  std::ofstream fOut(GetPath(file));
+
+  if (!fOut) {
+    fOut.close();
+    return false;
+  }
+
+  fOut << output;
+  fOut.close();
+  return true;
+}
+
+bool CustomMapVotes::readCustomvoteFile(const std::string &file,
+                                        Json::Value &root) {
+  std::ifstream fIn(GetPath(file));
+
+  if (!fIn) {
+    fIn.close();
+    return false;
+  }
+
+  Json::CharReaderBuilder readerBuilder;
+  Json::parseFromStream(readerBuilder, fIn, &root, nullptr);
+  fIn.close();
+  return true;
 }
