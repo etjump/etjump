@@ -1110,6 +1110,17 @@ static void initNoDrop() {
   trap_Cvar_Set("shared", va("%d", shared.integer));
   G_Printf("Nodrop is %s.\n", level.noDrop ? "enabled" : "disabled");
 }
+
+static void initNoWallbug() {
+  int value = 0;
+  G_SpawnInt("nowallbug", "0", &value);
+  level.noWallbug = value;
+  level.noWallbug ? shared.integer |= BG_LEVEL_NO_WALLBUG
+                  : shared.integer &= ~BG_LEVEL_NO_WALLBUG;
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+  G_Printf("Wallbugging is %s.\n", level.noWallbug ? "disabled" : "enabled");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1258,6 +1269,7 @@ void SP_worldspawn(void) {
   ETJump::initNoFallDamage();
   ETJump::initNoProne();
   ETJump::initNoDrop();
+  ETJump::initNoWallbug();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

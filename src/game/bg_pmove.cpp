@@ -2108,6 +2108,12 @@ static void PM_GroundTrace(void) {
   PM_TraceAllLegs(&trace, &pm->pmext->proneLegsOffset, pm->ps->origin, point);
   pm->groundTrace = trace;
 
+  if (pm->shared & BG_LEVEL_NO_WALLBUG) {
+    if (trace.allsolid && pm->ps->pm_type != PM_NOCLIP) {
+      VectorClear(pm->ps->velocity);
+    }
+  }
+
   // do something corrective if the trace starts in a solid...
   if (trace.allsolid && !(pm->ps->eFlags & EF_MOUNTEDTANK)) {
     if (!PM_CorrectAllSolid(&trace)) {
