@@ -153,12 +153,24 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
           "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
       return false;
     }
+
     if (client->noclipThisLife) {
       Printer::SendCenterMessage(*clientNum,
                                  "^3WARNING: ^7Timerun was not started. Noclip "
                                  "activated this life, ^3/kill ^7required!");
       return false;
     }
+
+    if (client->pmoveOffThisLife &&
+        (!self->spawnflags ||
+         self->spawnflags &
+             static_cast<int>(TimerunSpawnflags::ResetNoPmove))) {
+      Printer::SendCenterMessage(
+          *clientNum, "^3WARNING: ^7Timerun was not started. ^3pmove_fixed 0 "
+                      "^7set this life, ^3/kill ^7required!");
+      return false;
+    }
+
     if (*speed > self->velocityUpperLimit) {
       Printer::SendCenterMessage(
           *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. Too "
@@ -166,6 +178,7 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
                                    *speed, self->velocityUpperLimit));
       return false;
     }
+
     if (client->ps.viewangles[ROLL] != 0) {
       Printer::SendCenterMessage(
           *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. "

@@ -988,6 +988,8 @@ void ClientThink_real(gentity_t *ent) {
     ucmd->serverTime =
         ((ucmd->serverTime + pmove_msec.integer - 1) / pmove_msec.integer) *
         pmove_msec.integer;
+  } else {
+    client->pmoveOffThisLife = true;
   }
 
   msec = ucmd->serverTime - client->ps.commandTime;
