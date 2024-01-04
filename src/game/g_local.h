@@ -1016,6 +1016,7 @@ struct gclient_s {
 
   qboolean noclip;
   bool noclipThisLife;
+  bool pmoveOffThisLife;
 
   int lastCmdTime; // level.time of last usercmd_t, for EF_CONNECTION
                    // we can't just use pers.lastCommand.time, because
