@@ -1127,8 +1127,8 @@ static void initNoNoclip() {
   G_SpawnInt("nonoclip", "0", &value);
 
   level.noNoclip = value;
-  level.noDrop ? shared.integer |= BG_LEVEL_NO_NOCLIP
-               : shared.integer &= ~BG_LEVEL_NO_NOCLIP;
+  level.noNoclip ? shared.integer |= BG_LEVEL_NO_NOCLIP
+                 : shared.integer &= ~BG_LEVEL_NO_NOCLIP;
 
   trap_Cvar_Set("shared", va("%d", shared.integer));
   G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
