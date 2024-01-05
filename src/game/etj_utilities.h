@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef ETJUMP_UTILITIES_H
-#define ETJUMP_UTILITIES_H
+#pragma once
 
 #include <algorithm>
 #include <iterator>
@@ -103,9 +102,10 @@ std::string timestampToString(int timestamp,
                               const char *start = "never");
 
 void RemovePlayerWeapons(int clientNum);
+
+/**
+ * Returns true if the player is inside a no-noclip area
+ * and not touching any solids
+ */
+bool inNoNoclipArea(gentity_t *ent);
 } // namespace Utilities
-
-namespace ETJump {
-} // namespace ETJump
-
-#endif // ETJUMP_UTILITIES_H

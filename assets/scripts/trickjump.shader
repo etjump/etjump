@@ -762,6 +762,21 @@ gfx/2d/prone_on
 }
 
 ////////////////
+// Noclip Icon
+////////////////
+
+gfx/2d/noclip_on
+{
+	noPicMip
+	noMipMaps
+	{
+		map gfx/2d/noclipicon.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+
+////////////////
 // Stopwatch Icon
 ////////////////
 

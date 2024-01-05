@@ -1258,9 +1258,6 @@ typedef struct {
   // ETJump: hold last jump position for chs
   vec3_t etjLastJumpPos;
 
-  int pronePressTime; // No prone print delay: when client last pressed
-                      // prone
-
   bool requiresEntityTypeAdjustment; // ETJump 2.3.0 specific hack
 
   char deformText[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
@@ -1849,6 +1846,7 @@ typedef struct {
   qhandle_t simplePlayersShader;
   qhandle_t saveIcon;
   qhandle_t proneIcon;
+  qhandle_t noclipIcon;
   qhandle_t stopwatchIcon;
   qhandle_t stopwatchIconGreen;
   qhandle_t stopwatchIconRed;
@@ -2616,6 +2614,10 @@ extern vmCvar_t etj_saveIndicatorY;
 extern vmCvar_t etj_drawProneIndicator;
 extern vmCvar_t etj_proneIndicatorX;
 extern vmCvar_t etj_proneIndicatorY;
+
+extern vmCvar_t etj_drawNoclipIndicator;
+extern vmCvar_t etj_noclipIndicatorX;
+extern vmCvar_t etj_noclipIndicatorY;
 
 // Cvar unlocks
 extern vmCvar_t etj_viewlog;

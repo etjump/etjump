@@ -10,6 +10,7 @@
 #include "etj_string_utilities.h"
 #include "etj_numeric_utilities.h"
 #include "etj_rtv.h"
+#include "etj_utilities.h"
 
 namespace ETJump {
 enum class VotingTypes {
@@ -910,8 +911,8 @@ OperationResult canNoclip(gentity_t *ent) {
   }
 
   if (!g_cheats.integer) {
-    if (level.noNoclip) {
-      return {false, "^3%s ^7has been disabled on this map.\n"};
+    if (Utilities::inNoNoclipArea(ent)) {
+      return {false, "^7You cannot ^3%s ^7inside this area.\n"};
     }
 
     if (ent->client->pers.noclipCount == 0 && !ent->client->noclip) {

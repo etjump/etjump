@@ -161,6 +161,40 @@ void Utilities::RemovePlayerWeapons(int clientNum) {
   }
 }
 
+bool Utilities::inNoNoclipArea(gentity_t *ent) {
+  trace_t trace;
+  trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins,
+                    ent->client->ps.maxs, ent->client->ps.origin,
+                    ent->client->ps.clientNum, CONTENTS_NONOCLIP);
+
+  // if we're touching a no-noclip area, do another trace for solids
+  // so that we don't get instantly stuck in a wall, unable to noclip
+  // if we fly to a no-noclip area through a wall
+  if (level.noNoclip) {
+    if (trace.fraction == 1.0f) {
+      trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins,
+                        ent->client->ps.maxs, ent->client->ps.origin,
+                        ent->client->ps.clientNum, CONTENTS_SOLID);
+
+      if (!trace.allsolid) {
+        return true;
+      }
+    }
+  } else {
+    if (trace.fraction != 1.0f) {
+      trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins,
+                        ent->client->ps.maxs, ent->client->ps.origin,
+                        ent->client->ps.clientNum, CONTENTS_SOLID);
+
+      if (!trace.allsolid) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 std::string Utilities::timestampToString(int timestamp, const char *format,
                                          const char *start) {
   char buf[1024];

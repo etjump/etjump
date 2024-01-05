@@ -2791,6 +2791,10 @@ const int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
 const int BG_LEVEL_NO_PRONE = 1 << 5;
 // Nodrop is enabled
 const int BG_LEVEL_NO_DROP = 1 << 6;
+// Wallbugging is disabled
+const int BG_LEVEL_NO_WALLBUG = 1 << 7;
+// Noclip is disabled
+const int BG_LEVEL_NO_NOCLIP = 1 << 8;
 
 namespace ETJump {
 enum class CheatCvarFlags {

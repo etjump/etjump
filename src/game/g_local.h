@@ -1422,7 +1422,7 @@ typedef struct {
   int noExplosives;
 
   qboolean noSave;
-  qboolean noNoclip;
+  bool noNoclip;
   qboolean noGod;
   qboolean noGoto;
   bool noOverbounce;
@@ -1430,6 +1430,7 @@ typedef struct {
   bool noFallDamage;
   bool noProne;
   bool noDrop;
+  bool noWallbug;
 
   int portalEnabled; // Feen: PGM - Enabled/Disabled by map key
   qboolean portalSurfaces;

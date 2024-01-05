@@ -57,6 +57,7 @@
 #include "etj_overbounce_detector.h"
 #include "etj_rtv_drawable.h"
 #include "etj_client_rtv_handler.h"
+#include "etj_areaindicator_drawable.h"
 
 namespace ETJump {
 std::shared_ptr<ClientCommandsHandler> serverCommandsHandler;
@@ -77,6 +78,7 @@ std::shared_ptr<Timerun> timerun;
 std::shared_ptr<TimerunView> timerunView;
 std::shared_ptr<TrickjumpLines> trickjumpLines;
 std::shared_ptr<ClientRtvHandler> rtvHandler;
+std::shared_ptr<AreaIndicator> areaIndicator;
 } // namespace ETJump
 
 static bool isInitialized{false};
@@ -232,6 +234,7 @@ void init() {
       std::make_shared<JumpSpeeds>(ETJump::entityEventsHandler.get()));
   ETJump::renderables.push_back(std::make_shared<QuickFollowDrawer>());
   ETJump::renderables.push_back(std::make_shared<SpectatorInfo>());
+  ETJump::renderables.push_back(std::make_shared<AreaIndicator>());
 
   if (etj_CGazOnTop.integer) {
     ETJump::renderables.push_back(std::make_shared<Snaphud>());
