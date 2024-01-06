@@ -607,8 +607,8 @@ void SaveSystem::clearTimerunSaves(gentity_t *ent) {
     newAlliesBackups.emplace_back();
   }
 
-  _clients[clientNum].alliesBackups = newAlliesBackups;
-  _clients[clientNum].axisBackups = newAxisBackups;
+  _clients[clientNum].alliesBackups = std::move(newAlliesBackups);
+  _clients[clientNum].axisBackups = std::move(newAxisBackups);
 }
 
 // Called on client disconnect. Saves saves for future sessions
