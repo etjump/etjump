@@ -1969,22 +1969,27 @@ static void PM_CrashLand(void) {
 
   // End PGM Test
 
+  static const auto PM_AddCushionFootstep = [&delta]() {
+    PM_AddEventExt(delta > 7 ? EV_CUSHIONFALLSTEP : EV_FOOTSTEP,
+                   PM_FootstepForSurface());
+  };
+
   // Aciz: moved fall damage and stepsound handling into
   // PM_CheckFallDamage to avoid very messy code when checking whether
   // nofalldamage is enabled/disabled.
   if (pm->shared & BG_LEVEL_NO_FALLDAMAGE_FORCE) {
-    PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+    PM_AddCushionFootstep();
   } else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE) {
     if (pm->groundTrace.surfaceFlags & SURF_NODAMAGE) {
       PM_CheckFallDamage(delta);
     } else {
-      PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+      PM_AddCushionFootstep();
     }
   } else {
     if (!(pm->groundTrace.surfaceFlags & SURF_NODAMAGE)) {
       PM_CheckFallDamage(delta);
     } else {
-      PM_AddEventExt(EV_FOOTSTEP, PM_FootstepForSurface());
+      PM_AddCushionFootstep();
     }
   }
 

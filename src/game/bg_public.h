@@ -1274,6 +1274,7 @@ typedef enum {
   EV_LOAD_TELEPORT,
   EV_UPHILLSTEP,
   EV_PORTAL_TRAIL,
+  EV_CUSHIONFALLSTEP,
   EV_MAX_EVENTS // just added as an 'endcap'
 } entity_event_t;
 

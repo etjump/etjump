@@ -544,6 +544,7 @@ vmCvar_t etj_drawLeaves;
 vmCvar_t etj_touchPickupWeapons;
 vmCvar_t etj_autoLoad;
 vmCvar_t etj_uphillSteps;
+vmCvar_t etj_fixedCushionSteps;
 vmCvar_t etj_quickFollow;
 vmCvar_t etj_chatLineWidth;
 vmCvar_t etj_loopedSounds;
@@ -1079,6 +1080,7 @@ cvarTable_t cvarTable[] = {
     {&etj_noclipIndicatorY, "etj_noclipIndicatorY", "313", CVAR_ARCHIVE},
 
     {&etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE},
+    {&etj_fixedCushionSteps, "etj_fixedCushionSteps", "0", CVAR_ARCHIVE},
     {&etj_chatLineWidth, "etj_chatLineWidth", "62", CVAR_ARCHIVE},
     {&etj_loopedSounds, "etj_loopedSounds", "1", CVAR_ARCHIVE},
     {&etj_onRunStart, "etj_onRunStart", "", CVAR_ARCHIVE},
