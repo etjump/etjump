@@ -22,8 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef CUSTOM_MAP_VOTES_HH
-#define CUSTOM_MAP_VOTES_HH
+#pragma once
 
 #include <vector>
 #include <string>
@@ -57,10 +56,17 @@ public:
   std::string ListInfo(const std::string &name);
   void GenerateVotesFile();
 
+  void addCustomvoteList(int clientNum, const std::string &name,
+                         const std::string &fullName, const std::string &maps);
+  void deleteCustomvoteList(int clientNum, const std::string &name);
+
+  void editCustomvoteList(int clientNum, const std::string &list,
+                          const std::string &name, const std::string &fullName,
+                          const std::string &addMaps,
+                          const std::string &removeMaps);
+
 private:
   std::vector<MapType> customMapVotes_;
   const std::vector<std::string> *_currentMapsOnServer;
   MapStatistics *_mapStats;
 };
-
-#endif

@@ -298,6 +298,11 @@ qboolean OnConsoleCommand() {
     return qtrue;
   }
 
+  if (command == "readcustomvotes") {
+    game.customMapVotes->Load();
+    return qtrue;
+  }
+
   if (command == "logstate") {
     LogServerState();
     return qtrue;
