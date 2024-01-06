@@ -30,6 +30,7 @@
 #include "etj_string_utilities.h"
 #include "utilities.hpp"
 #include "etj_printer.h"
+#include "etj_json_utilities.h"
 
 CustomMapVotes::CustomMapVotes(MapStatistics *mapStats) : _mapStats(mapStats) {}
 
@@ -175,7 +176,7 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
   Json::Value root;
 
   // read and append to existing file if present
-  if (readCustomvoteFile(customVotesFile, root)) {
+  if (ETJump::JsonUtils::readFile(customVotesFile, root)) {
 
     // make sure we don't already have a list with this name
     for (const auto &lists : customMapVotes_) {
@@ -206,7 +207,7 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
 
   root.append(vote);
 
-  if (!writeCustomvoteFile(customVotesFile, root)) {
+  if (!ETJump::JsonUtils::writeFile(customVotesFile, root)) {
     Printer::SendChatMessage(clientNum, "^3add-customvote: ^7operation failed, "
                                         "check console for more information.");
     Printer::SendConsoleMessage(
@@ -228,7 +229,7 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   const std::string &customVotesFile = g_customMapVotesFile.string;
   Json::Value root;
 
-  if (!readCustomvoteFile(customVotesFile, root)) {
+  if (!ETJump::JsonUtils::readFile(customVotesFile, root)) {
     Printer::SendChatMessage(clientNum,
                              "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
@@ -258,7 +259,7 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
     return;
   }
 
-  if (!writeCustomvoteFile(customVotesFile, root)) {
+  if (!ETJump::JsonUtils::writeFile(customVotesFile, root)) {
     Printer::SendChatMessage(clientNum,
                              "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
@@ -285,7 +286,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   const std::string &customVotesFile = g_customMapVotesFile.string;
   Json::Value root;
 
-  if (!readCustomvoteFile(customVotesFile, root)) {
+  if (!ETJump::JsonUtils::readFile(customVotesFile, root)) {
     Printer::SendChatMessage(clientNum,
                              "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
@@ -351,7 +352,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
     return;
   }
 
-  if (!writeCustomvoteFile(customVotesFile, root)) {
+  if (!ETJump::JsonUtils::writeFile(customVotesFile, root)) {
     Printer::SendChatMessage(clientNum,
                              "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
@@ -445,35 +446,4 @@ std::string const CustomMapVotes::RandomMap(std::string const &type) {
 bool CustomMapVotes::isValidMap(const std::string &mapName) {
   return G_MapExists(mapName.c_str()) && mapName != level.rawmapname &&
          !MapStatistics::isBlockedMap(mapName);
-}
-
-bool CustomMapVotes::writeCustomvoteFile(const std::string &file,
-                                         const Json::Value &root) {
-  Json::StyledWriter writer;
-  const std::string &output = writer.write(root);
-  std::ofstream fOut(GetPath(file));
-
-  if (!fOut) {
-    fOut.close();
-    return false;
-  }
-
-  fOut << output;
-  fOut.close();
-  return true;
-}
-
-bool CustomMapVotes::readCustomvoteFile(const std::string &file,
-                                        Json::Value &root) {
-  std::ifstream fIn(GetPath(file));
-
-  if (!fIn) {
-    fIn.close();
-    return false;
-  }
-
-  Json::CharReaderBuilder readerBuilder;
-  Json::parseFromStream(readerBuilder, fIn, &root, nullptr);
-  fIn.close();
-  return true;
 }

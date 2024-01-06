@@ -26,7 +26,6 @@
 
 #include <vector>
 #include <string>
-#include "json/json.h"
 
 class MapStatistics;
 
@@ -67,10 +66,6 @@ public:
                           const std::string &removeMaps);
 
 private:
-  static bool readCustomvoteFile(const std::string &file, Json::Value &root);
-  static bool writeCustomvoteFile(const std::string &file,
-                                  const Json::Value &root);
-
   std::vector<MapType> customMapVotes_;
   const std::vector<std::string> *_currentMapsOnServer;
   MapStatistics *_mapStats;
