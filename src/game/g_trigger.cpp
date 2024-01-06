@@ -25,24 +25,26 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
     wait = level.frameMsec;
   }
 
-  if (activator->client->multiTriggerActivationTime + wait > level.time) {
-    return;
+  if (activator && activator->client) {
+    if (activator->client->multiTriggerActivationTime + wait > level.time) {
+      return;
+    }
   }
 
   ent->activator = activator;
 
   // make sure we only pass in team if the activator is a client
-  if (activator->client) {
+  if (activator && activator->client) {
     G_Script_ScriptEvent(
         ent, "activate",
         activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
+
+    activator->client->multiTriggerActivationTime = level.time;
   } else {
     G_Script_ScriptEvent(ent, "activate", nullptr);
   }
 
   G_UseTargets(ent, ent->activator);
-
-  activator->client->multiTriggerActivationTime = level.time;
 
   // free after firing once with wait <= 0
   // for extra safety, don't do this with spawnflags 512 & 2048
