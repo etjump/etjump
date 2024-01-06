@@ -1121,6 +1121,18 @@ static void initNoWallbug() {
   trap_Cvar_Set("shared", va("%d", shared.integer));
   G_Printf("Wallbugging is %s.\n", level.noWallbug ? "disabled" : "enabled");
 }
+
+static void initNoNoclip() {
+  int value;
+  G_SpawnInt("nonoclip", "0", &value);
+
+  level.noNoclip = value;
+  level.noNoclip ? shared.integer |= BG_LEVEL_NO_NOCLIP
+                 : shared.integer &= ~BG_LEVEL_NO_NOCLIP;
+
+  trap_Cvar_Set("shared", va("%d", shared.integer));
+  G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
+}
 } // namespace ETJump
 
 /*QUAKED worldspawn (0 0 0) ? NO_GT_WOLF NO_GT_STOPWATCH NO_GT_CHECKPOINT NO_LMS
@@ -1172,14 +1184,6 @@ void SP_worldspawn(void) {
     level.noExplosives = noExplosives;
   }
   G_Printf("Explosives are %s.\n", level.noExplosives ? "disabled" : "enabled");
-
-  G_SpawnString("nonoclip", "0", &s);
-  if (Q_atoi(s)) {
-    level.noNoclip = qtrue;
-  } else {
-    level.noNoclip = qfalse;
-  }
-  G_Printf("Noclip is %s.\n", level.noNoclip ? "disabled" : "enabled");
 
   G_SpawnString("nogod", "0", &s);
   if (Q_atoi(s)) {
@@ -1270,6 +1274,7 @@ void SP_worldspawn(void) {
   ETJump::initNoProne();
   ETJump::initNoDrop();
   ETJump::initNoWallbug();
+  ETJump::initNoNoclip();
 
   level.mapcoordsValid = qfalse;
   if (G_SpawnVector2D("mapcoordsmins", "-128 128",

@@ -5,6 +5,7 @@
 #include "etj_inactivity_timer.h"
 #include "etj_numeric_utilities.h"
 #include "etj_string_utilities.h"
+#include "etj_utilities.h"
 
 /*
 ===============
@@ -1456,6 +1457,12 @@ void ClientThink_real(gentity_t *ent) {
                                "cp \"Mines have been reported in "
                                "this area.\" 1");
       }
+    }
+  }
+
+  if (!g_cheats.integer) {
+    if (Utilities::inNoNoclipArea(ent)) {
+      ent->client->noclip = qfalse;
     }
   }
 

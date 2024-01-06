@@ -516,6 +516,9 @@ vmCvar_t etj_saveIndicatorY;
 vmCvar_t etj_drawProneIndicator;
 vmCvar_t etj_proneIndicatorX;
 vmCvar_t etj_proneIndicatorY;
+vmCvar_t etj_drawNoclipIndicator;
+vmCvar_t etj_noclipIndicatorX;
+vmCvar_t etj_noclipIndicatorY;
 
 // Cvar unlocks
 vmCvar_t etj_viewlog;
@@ -1036,9 +1039,6 @@ cvarTable_t cvarTable[] = {
     {&etj_drawNoJumpDelay, "etj_drawNoJumpDelay", "1", CVAR_ARCHIVE},
     {&etj_noJumpDelayX, "etj_noJumpDelayX", "290", CVAR_ARCHIVE},
     {&etj_noJumpDelayY, "etj_noJumpDelayY", "220", CVAR_ARCHIVE},
-    {&etj_drawSaveIndicator, "etj_drawSaveIndicator", "3", CVAR_ARCHIVE},
-    {&etj_saveIndicatorX, "etj_saveIndicatorX", "615", CVAR_ARCHIVE},
-    {&etj_saveIndicatorY, "etj_saveIndicatorY", "363", CVAR_ARCHIVE},
 
     // Cvar unlocks
     {&etj_drawFoliage, "etj_drawFoliage", "1", CVAR_ARCHIVE},
@@ -1065,9 +1065,19 @@ cvarTable_t cvarTable[] = {
     {&etj_touchPickupWeapons, "etj_touchPickupWeapons", "0", CVAR_ARCHIVE},
     {&etj_autoLoad, "etj_autoLoad", "1", CVAR_ARCHIVE},
     {&etj_quickFollow, "etj_quickFollow", "2", CVAR_ARCHIVE},
+
+    {&etj_drawSaveIndicator, "etj_drawSaveIndicator", "3", CVAR_ARCHIVE},
+    {&etj_saveIndicatorX, "etj_saveIndicatorX", "615", CVAR_ARCHIVE},
+    {&etj_saveIndicatorY, "etj_saveIndicatorY", "363", CVAR_ARCHIVE},
+
     {&etj_drawProneIndicator, "etj_drawProneIndicator", "3", CVAR_ARCHIVE},
     {&etj_proneIndicatorX, "etj_proneIndicatorX", "615", CVAR_ARCHIVE},
     {&etj_proneIndicatorY, "etj_proneIndicatorY", "338", CVAR_ARCHIVE},
+
+    {&etj_drawNoclipIndicator, "etj_drawNoclipIndicator", "3", CVAR_ARCHIVE},
+    {&etj_noclipIndicatorX, "etj_noclipIndicatorX", "615", CVAR_ARCHIVE},
+    {&etj_noclipIndicatorY, "etj_noclipIndicatorY", "313", CVAR_ARCHIVE},
+
     {&etj_uphillSteps, "etj_uphillSteps", "1", CVAR_ARCHIVE},
     {&etj_chatLineWidth, "etj_chatLineWidth", "62", CVAR_ARCHIVE},
     {&etj_loopedSounds, "etj_loopedSounds", "1", CVAR_ARCHIVE},
@@ -3077,6 +3087,7 @@ static void CG_RegisterGraphics(void) {
   cgs.media.simplePlayersShader = trap_R_RegisterShader("etjump/simple_player");
   cgs.media.saveIcon = trap_R_RegisterShader("gfx/2d/save_on");
   cgs.media.proneIcon = trap_R_RegisterShader("gfx/2d/prone_on");
+  cgs.media.noclipIcon = trap_R_RegisterShader("gfx/2d/noclip_on");
   cgs.media.stopwatchIcon = trap_R_RegisterShader("gfx/2d/stopwatch");
   cgs.media.stopwatchIconGreen =
       trap_R_RegisterShader("gfx/2d/stopwatch_green");

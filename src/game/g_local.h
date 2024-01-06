@@ -1422,7 +1422,7 @@ typedef struct {
   int noExplosives;
 
   qboolean noSave;
-  qboolean noNoclip;
+  bool noNoclip;
   qboolean noGod;
   qboolean noGoto;
   bool noOverbounce;
