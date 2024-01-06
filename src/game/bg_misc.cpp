@@ -4043,6 +4043,7 @@ const char *eventnames[] = {
     "EV_LOAD_TELEPORT",
     "EV_UPHILLSTEP",
     "EV_SAVE",
+    "EV_CUSHIONFALLSTEP",
     "EV_MAX_EVENTS",
 };
 
