@@ -50,7 +50,44 @@
   * `Default` season is no longer displayed
   * start and end dates should be more legible
 * `etj_drawCGaz` is now a bitflag cvar and allows drawing both CGaz huds at the same time [#1137](https://github.com/etjump/etjump/pull/1137)
-
+* added checkpoint popups that display the checkpoint timer briefly on screen when hitting a checkpoint[#1139](https://github.com/etjump/etjump/pull/1139)
+  * `etj_checkpointsPopup` - toggle popup
+  * `etj_checkpointsPopupX/Y` - X/Y position
+  * `etj_checkpointsPopupSize` - popup size
+  * `etj_checkpointsPopupShadow` - toggle shadow
+  * `etj_checkpointsPopupDuration` - how long the popup stays on screen
+* added Rock The Vote system [#1135](https://github.com/etjump/etjump/pull/1135)
+  * random map vote with a specified amount of maps to choose from
+  * `callvote rtv` or `!rtv` admin command to call rtv
+  * automatic rtv mode - server will call rtv every N minutes, can be voted on/off
+  * server cvars:
+    * `g_autoRtv` - automatic rtv interval in minutes, 0 for off
+    * `g_rtvMaxMaps` - maximum amount of maps in rtv vote (2-9)
+    * `vote_minRtvDuration` - minimum vote duration for rtv (like `vote_minVoteDuration` but only for rtv)
+    * `vote_allow_rtv` - toggle allowing clients to call rtv
+    * `vote_allow_autoRtv` - toggle allowing clients to turn autortv on/off
+* fixed client vote info (such as re-vote counts) not resetting if a vote was canceled or failed [#1142](https://github.com/etjump/etjump/pull/1142)
+* deprecated `trigger_multiple` spawnflags `512/2048` - all triggers are now multi-activator by default [#1144](https://github.com/etjump/etjump/pull/1144)
+* fixed `backup` queue breaking on initial save to a specific slot [#1145](https://github.com/etjump/etjump/pull/1145)
+* fixed `/ranks [mapname] [runname]` failing if given map name had a partial match to another map [#1148](https://github.com/etjump/etjump/pull/1148)
+  * the command now also supports partial matching for the map name like it does for run name
+* jump speeds are now rounded instead of truncated, like every other speed display [#1150](https://github.com/etjump/etjump/pull/1150)
+* saves are no longer explicitly cleared on timerun start, only saves which were made during a timerun [#1149](https://github.com/etjump/etjump/pull/1149)
+  * any save slot that was saved into during a timerun will be reset
+  * backups are cleared of any backups made from timerun saves, and valid slots are pushed to the front of the queue
+* added `nowallbug` worldspawn key to prevent acceleration while stuck in a wall [#1155](https://github.com/etjump/etjump/pull/1155)
+* added custom vote editing via admin commands [#1152](https://github.com/etjump/etjump/pull/1152)
+  * `!add-customvote --name --full-name --maps` - adds a custom vote list
+  * `!delete-customvote --name` - deletes a custom vote list
+  * `!edit-customvote --list --name --full-name --add-maps --remove-maps` - edits a custom vote list
+  * access is provided with admin flag `c`
+  * added `/readCustomvotes` command to read customvote file
+  * added `customvotes` alias for `listinfo`
+* added support for no-noclip areas with `surfaceparm donotenterlarge` [#1157](https://github.com/etjump/etjump/pull/1157)
+  * `etj_drawNoclipIndicator` - draw noclip area indicator, 1 = always, 2 = outside of volume, 3 = inside of volume
+  * `etj_noclipIndicatorX/Y` - X/Y position
+* added `etj_fixedCushionSteps` to play proper fall step sounds on cushion surfaces [#1136](https://github.com/etjump/etjump/pull/1136)
+  
 # ETJump 3.0.1
 
 * fixed missing parenthesis around diff prints on seasonal record banner prints [#1057](https://github.com/etjump/etjump/pull/1057)
