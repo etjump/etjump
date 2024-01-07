@@ -1,44 +1,38 @@
-// This file must be identical in the quake and utils directories
-
 // contents flags are seperate bits
 // a given brush can contribute multiple content bits
 
-// these definitions also need to be in q_shared.h!
-
-#define CONTENTS_SOLID 0x00000001
-#define CONTENTS_LIGHTGRID 0x00000004
-#define CONTENTS_LAVA 0x00000008
-#define CONTENTS_SLIME 0x00000010
-#define CONTENTS_WATER 0x00000020
-#define CONTENTS_FOG 0x00000040
-#define CONTENTS_MISSILECLIP 0x00000080
-#define CONTENTS_ITEM 0x00000100
-#define CONTENTS_MOVER 0x00004000
-#define CONTENTS_AREAPORTAL 0x00008000
-#define CONTENTS_PLAYERCLIP 0x00010000
-#define CONTENTS_MONSTERCLIP 0x00020000
-#define CONTENTS_TELEPORTER 0x00040000 // NOT USED EITHER....
-#define CONTENTS_NOPORTAL                                                      \
-  0x00080000 // Feen: PGM - Contents formerly known as CONTENTS_JUMPPAD
-             // - Used for 'emancipation grid'
-#define CONTENTS_NOSAVE 0x00100000 // CONTENTS_NOSAVE
-#define CONTENTS_DONOTENTER                                                    \
-  0x00200000 // Aciz: renamed back to original, was renamed to
-             // CONTENTS_NOSAVERESET but never used anywhere.
-const int CONTENTS_NOPRONE = 0x00200000;
-#define CONTENTS_DONOTENTER_LARGE 0x00400000
-const int CONTENTS_NONOCLIP = 0x00400000;
-#define CONTENTS_ORIGIN 0x01000000 // removed before bsping an entity
-#define CONTENTS_BODY 0x02000000   // should never be on a brush, only in game
-#define CONTENTS_CORPSE 0x04000000
-#define CONTENTS_DETAIL 0x08000000 // brushes not used for the bsp
-
-#define CONTENTS_STRUCTURAL 0x10000000 // brushes used for the bsp
-#define CONTENTS_TRANSLUCENT                                                   \
-  0x20000000 // don't consume surface fragments inside
-#define CONTENTS_TRIGGER 0x40000000
-#define CONTENTS_NODROP                                                        \
-  0x80000000 // don't leave bodies or items (death fog, lava)
+constexpr int CONTENTS_SOLID        = 0x00000001;
+//                                  = 0x00000002 unused
+constexpr int CONTENTS_LIGHTGRID    = 0x00000004;
+constexpr int CONTENTS_LAVA         = 0x00000008;
+constexpr int CONTENTS_SLIME        = 0x00000010;
+constexpr int CONTENTS_WATER        = 0x00000020;
+constexpr int CONTENTS_FOG          = 0x00000040;
+constexpr int CONTENTS_MISSILECLIP  = 0x00000080;
+constexpr int CONTENTS_ITEM         = 0x00000100;
+//                                  = 0x00000200 unused
+//                                  = 0x00000400 unused
+//                                  = 0x00000800 unused
+//                                  = 0x00001000 unused, AI_NOSIGHT in q3map2
+//                                  = 0x00002000 unused, CLIPSHOT in q3map2, OBS! compiles to solid
+constexpr int CONTENTS_MOVER        = 0x00004000;
+constexpr int CONTENTS_AREAPORTAL   = 0x00008000;
+constexpr int CONTENTS_PLAYERCLIP   = 0x00010000;
+constexpr int CONTENTS_MONSTERCLIP  = 0x00020000;
+//                                  = 0x00040000 unused, was CONTENTS_TELEPORTER
+constexpr int CONTENTS_PORTALCLIP   = 0x00080000; // etjump, was JUMPPAD, can't fire portalgun through this
+constexpr int CONTENTS_NOSAVE       = 0x00100000; // etjump, was CLUSTERPORTAL.
+constexpr int CONTENTS_NOPRONE      = 0x00200000; // etjump, was DONOTENTER
+constexpr int CONTENTS_NONOCLIP     = 0x00400000; // etjump, was DONOTENTER_LARGE, BOTCLIP in q3map2
+//                                  = 0x00800000 unused
+constexpr int CONTENTS_ORIGIN       = 0x01000000; // removed before bsping an entity
+constexpr int CONTENTS_BODY         = 0x02000000; // should never be on a brush, only in game
+constexpr int CONTENTS_CORPSE       = 0x04000000;
+constexpr int CONTENTS_DETAIL       = 0x08000000; // brushes not used for the bsp
+constexpr int CONTENTS_STRUCTURAL   = 0x10000000; // brushes used for the bsp
+constexpr int CONTENTS_TRANSLUCENT  = 0x20000000; // don't consume surface fragments inside
+constexpr int CONTENTS_TRIGGER      = 0x40000000;
+constexpr int CONTENTS_NODROP       = 0x80000000; // don't leave bodies or items (death fog, lava)
 
 #define SURF_NODAMAGE 0x00000001 // never give falling damage
 #define SURF_SLICK 0x00000002    // effects game physics

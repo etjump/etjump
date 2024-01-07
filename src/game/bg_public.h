@@ -1781,8 +1781,8 @@ bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
 #define MASK_MISSILESHOT (MASK_SHOT | CONTENTS_MISSILECLIP)
 // Feen: PGM
 #define MASK_PORTAL                                                            \
-  (CONTENTS_SOLID | CONTENTS_NOPORTAL) // Feen: Trace hits solid objects
-                                       // or emancipation grids
+  (CONTENTS_SOLID | CONTENTS_PORTALCLIP) // Feen: Trace hits solid objects
+                                         // or emancipation grids
 
 //
 // entityState_t->eType
