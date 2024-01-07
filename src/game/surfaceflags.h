@@ -1,8 +1,9 @@
 // contents flags are seperate bits
 // a given brush can contribute multiple content bits
 
+/* content bits */
 constexpr int CONTENTS_SOLID        = 0x00000001;
-//                                  = 0x00000002 unused
+//                                  = 0x00000002 unused, no built-in surfaceparm
 constexpr int CONTENTS_LIGHTGRID    = 0x00000004;
 constexpr int CONTENTS_LAVA         = 0x00000008;
 constexpr int CONTENTS_SLIME        = 0x00000010;
@@ -10,21 +11,21 @@ constexpr int CONTENTS_WATER        = 0x00000020;
 constexpr int CONTENTS_FOG          = 0x00000040;
 constexpr int CONTENTS_MISSILECLIP  = 0x00000080;
 constexpr int CONTENTS_ITEM         = 0x00000100;
-//                                  = 0x00000200 unused
-//                                  = 0x00000400 unused
-//                                  = 0x00000800 unused
-//                                  = 0x00001000 unused, AI_NOSIGHT in q3map2
-//                                  = 0x00002000 unused, CLIPSHOT in q3map2, OBS! compiles to solid
+//                                  = 0x00000200 unused, no built-in surfaceparm
+//                                  = 0x00000400 unused, no built-in surfaceparm
+//                                  = 0x00000800 unused, no built-in surfaceparm
+//                                  = 0x00001000 unused, surfaceparm "ai_nosight"
+//                                  = 0x00002000 unused, surfaceparm "clipshot", compiles to solid
 constexpr int CONTENTS_MOVER        = 0x00004000;
 constexpr int CONTENTS_AREAPORTAL   = 0x00008000;
 constexpr int CONTENTS_PLAYERCLIP   = 0x00010000;
 constexpr int CONTENTS_MONSTERCLIP  = 0x00020000;
-//                                  = 0x00040000 unused, was CONTENTS_TELEPORTER
-constexpr int CONTENTS_PORTALCLIP   = 0x00080000; // etjump, was JUMPPAD, can't fire portalgun through this
-constexpr int CONTENTS_NOSAVE       = 0x00100000; // etjump, was CLUSTERPORTAL.
-constexpr int CONTENTS_NOPRONE      = 0x00200000; // etjump, was DONOTENTER
-constexpr int CONTENTS_NONOCLIP     = 0x00400000; // etjump, was DONOTENTER_LARGE, BOTCLIP in q3map2
-//                                  = 0x00800000 unused
+//                                  = 0x00040000 unused, was CONTENTS_TELEPORTER, no built-in surfaceparm
+constexpr int CONTENTS_PORTALCLIP   = 0x00080000; // etjump, was JUMPPAD, no built-in surfaceparm
+constexpr int CONTENTS_NOSAVE       = 0x00100000; // etjump, was CLUSTERPORTAL, surfaceparm "clusterportal"
+constexpr int CONTENTS_NOPRONE      = 0x00200000; // etjump, was DONOTENTE, surfaceparm "donotenter"
+constexpr int CONTENTS_NONOCLIP     = 0x00400000; // etjump, was DONOTENTER_LARGE, BOTCLIP in q3map2, surfaceparm "donotenterlarge"
+//                                  = 0x00800000 unused, no built-in surfaceparm
 constexpr int CONTENTS_ORIGIN       = 0x01000000; // removed before bsping an entity
 constexpr int CONTENTS_BODY         = 0x02000000; // should never be on a brush, only in game
 constexpr int CONTENTS_CORPSE       = 0x04000000;
@@ -34,6 +35,7 @@ constexpr int CONTENTS_TRANSLUCENT  = 0x20000000; // don't consume surface fragm
 constexpr int CONTENTS_TRIGGER      = 0x40000000;
 constexpr int CONTENTS_NODROP       = 0x80000000; // don't leave bodies or items (death fog, lava)
 
+/* surface bits */
 constexpr int SURF_NODAMAGE			= 0x00000001; // never give falling damage
 constexpr int SURF_SLICK			= 0x00000002; // effects game physics
 constexpr int SURF_SKY				= 0x00000004; // lighting from environment map
@@ -58,11 +60,11 @@ constexpr int SURF_GRAVEL			= 0x00100000;
 constexpr int SURF_GLASS			= 0x00200000;
 constexpr int SURF_SNOW				= 0x00400000;
 constexpr int SURF_ROOF				= 0x00800000;
-//                                  = 0x01000000 unused, was RUBBLE
+//                                  = 0x01000000 unused, was RUBBLE, surfaceparm "rubble"
 constexpr int SURF_CARPET			= 0x02000000;
-//                                  = 0x04000000 unused, was MONSTERSLICK
-constexpr int SURF_PORTALGATE		= 0x08000000; // etjump, was SURF_MONSLICK_W. surface of an active portal
-constexpr int SURF_NOJUMPDELAY		= 0x10000000; // etjump, was SURF_MONSLICK_N. toggle for jump delay
-constexpr int SURF_PORTALSURFACE	= 0x20000000; // etjump, was SURF_MONSLICK_E. toggle for surface you can shoot portals to
-constexpr int SURF_OVERBOUNCE		= 0x40000000; // etjump, was SURF_MONSLICK_S. toggle for overbounceable
+//                                  = 0x04000000 unused, was MONSTERSLICK, surfaceparm "monsterslick"
+constexpr int SURF_PORTALGATE		= 0x08000000; // etjump, was SURF_MONSLICK_W, surfaceparm "monsterslickwest"
+constexpr int SURF_NOJUMPDELAY		= 0x10000000; // etjump, was SURF_MONSLICK_N, surfaceparm "monsterslicknorth"
+constexpr int SURF_PORTALSURFACE	= 0x20000000; // etjump, was SURF_MONSLICK_E, surfaceparm "monsterslickeast"
+constexpr int SURF_OVERBOUNCE		= 0x40000000; // etjump, was SURF_MONSLICK_S, surfaceparm "monsterslicksouth"
 constexpr int SURF_LANDMINE			= 0x80000000; // ydnar: ok to place landmines on this surface
