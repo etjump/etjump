@@ -75,6 +75,8 @@
 * saves are no longer explicitly cleared on timerun start, only saves which were made during a timerun [#1149](https://github.com/etjump/etjump/pull/1149)
   * any save slot that was saved into during a timerun will be reset
   * backups are cleared of any backups made from timerun saves, and valid slots are pushed to the front of the queue
+* timeruns no longer start if client has set `pmove_fixed 0` after spawning [#1156](https://github.com/etjump/etjump/pull/1156)
+  * does not apply to timeruns which do not force `pmove_fixed 1`
 * added `nowallbug` worldspawn key to prevent acceleration while stuck in a wall [#1155](https://github.com/etjump/etjump/pull/1155)
 * added custom vote editing via admin commands [#1152](https://github.com/etjump/etjump/pull/1152)
   * `!add-customvote --name --full-name --maps` - adds a custom vote list
