@@ -1404,46 +1404,13 @@ void PM_CheckPortal(void) {
   VectorMA(pm->ps->origin, TRACE_PORTAL_DIST, straightdown, spot);
   pm->trace(&trace, newOrigin /*pm->ps->origin*/, pm->ps->mins, pm->ps->maxs,
             spot, pm->ps->clientNum,
-            (CONTENTS_TRIGGER | CONTENTS_ITEM | CONTENTS_TELEPORTER |
-             CONTENTS_SOLID));
+            (CONTENTS_TRIGGER | CONTENTS_SOLID));
   // trap_Trace( &trace, pm->ps->origin, pm->mins, pm->maxs, spot,
   // pm->ps->clientNum, CONTENTS_TRIGGER );
 
   if (trace.fraction < 1) {
 
 #if GAMEDLL
-    // Com_Printf("PGM: Well, we hit something...\n");
-    // //Debug..
-
-  #if 0
-
-		Com_Printf("PGM: _CheckPortal trace results.....\n CONTENTS:  ");
-
-		if (trace.contents & CONTENTS_SOLID)
-		{
-			Com_Printf("_SOLID ->");
-		}
-
-		if (trace.contents & CONTENTS_TRIGGER)
-		{
-			Com_Printf("  _TRIGGER ->");
-		}
-
-		if (trace.contents & CONTENTS_ITEM)
-		{
-			Com_Printf("  _ITEM ->");
-		}
-
-		if (trace.contents & CONTENTS_TELEPORTER)
-		{
-			Com_Printf("  _TELEPORTER");
-		}
-
-
-		Com_Printf("\nPGM: END _CheckPortal trace results.....\n");
-
-  #endif
-
     if (trace.surfaceFlags & SURF_PORTALGATE) {
       // Com_Printf("PGM: Well, we detected a
       // portal...\n");	//Debug..
