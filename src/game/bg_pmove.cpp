@@ -6415,7 +6415,7 @@ Pmove
 Can be called by either the server or the client
 ================
 */
-int Pmove(pmove_t *pmove) {
+void Pmove(pmove_t *pmove) {
   int finalTime;
 
   // Ridah
@@ -6428,7 +6428,7 @@ int Pmove(pmove_t *pmove) {
   finalTime = pmove->cmd.serverTime;
 
   if (finalTime < pmove->ps->commandTime) {
-    return (0); // should not happen
+    return; // should not happen
   }
 
   if (finalTime > pmove->ps->commandTime + 1000) {
@@ -6490,11 +6490,4 @@ int Pmove(pmove_t *pmove) {
   }
 
   // PM_CheckStuck();
-
-  if ((pm->ps->stats[STAT_HEALTH] <= 0 || pm->ps->pm_type == PM_DEAD) &&
-      pm->groundTrace.surfaceFlags & SURF_MONSTERSLICK) {
-    return (pm->groundTrace.surfaceFlags);
-  } else {
-    return (0);
-  }
 }

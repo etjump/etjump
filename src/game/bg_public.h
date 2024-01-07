@@ -704,7 +704,7 @@ void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd,
                                      const vec3_t end, int passEntityNum,
                                      int contentMask),
                          int tracemask);
-int Pmove(pmove_t *pmove);
+void Pmove(pmove_t *pmove);
 void PmoveSingle(pmove_t *pmove);
 
 constexpr int CMDSCALE_DEFAULT = 127;
