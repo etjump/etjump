@@ -1,5 +1,6 @@
 // contents flags are seperate bits
 // a given brush can contribute multiple content bits
+// clang-format off
 
 /* content bits */
 constexpr int CONTENTS_SOLID        = 0x00000001;
@@ -36,35 +37,36 @@ constexpr int CONTENTS_TRIGGER      = 0x40000000;
 constexpr int CONTENTS_NODROP       = 0x80000000; // don't leave bodies or items (death fog, lava)
 
 /* surface bits */
-constexpr int SURF_NODAMAGE			= 0x00000001; // never give falling damage
-constexpr int SURF_SLICK			= 0x00000002; // effects game physics
-constexpr int SURF_SKY				= 0x00000004; // lighting from environment map
-constexpr int SURF_LADDER			= 0x00000008;
-constexpr int SURF_NOIMPACT			= 0x00000010; // don't make missile explosions
-constexpr int SURF_NOMARKS			= 0x00000020; // don't leave missile marks
-constexpr int SURF_SPLASH			= 0x00000040; // SURF_FLESH in quake
-constexpr int SURF_NODRAW			= 0x00000080; // don't generate a drawsurface at all
-constexpr int SURF_HINT				= 0x00000100; // make a primary bsp splitter
-constexpr int SURF_SKIP				= 0x00000200; // completely ignore, allowing non-closed brushes
-constexpr int SURF_NOLIGHTMAP		= 0x00000400; // surface doesn't need a lightmap
-constexpr int SURF_POINTLIGHT		= 0x00000800; // generate lighting info at vertexes
-constexpr int SURF_METAL			= 0x00001000; // clanking footsteps
-constexpr int SURF_NOSTEPS			= 0x00002000; // no footstep sounds
-constexpr int SURF_NONSOLID			= 0x00004000; // don't collide against curves with this set
-constexpr int SURF_LIGHTFILTER		= 0x00008000; // act as a light filter during q3map -light
-constexpr int SURF_ALPHASHADOW		= 0x00010000; // do per-pixel light shadow casting in q3map
-constexpr int SURF_NODLIGHT			= 0x00020000; // don't dlight even if solid (solid lava, skies)
-constexpr int SURF_WOOD				= 0x00040000;
-constexpr int SURF_GRASS			= 0x00080000;
-constexpr int SURF_GRAVEL			= 0x00100000;
-constexpr int SURF_GLASS			= 0x00200000;
-constexpr int SURF_SNOW				= 0x00400000;
-constexpr int SURF_ROOF				= 0x00800000;
+constexpr int SURF_NODAMAGE         = 0x00000001; // never give falling damage
+constexpr int SURF_SLICK            = 0x00000002; // effects game physics
+constexpr int SURF_SKY              = 0x00000004; // lighting from environment map
+constexpr int SURF_LADDER           = 0x00000008;
+constexpr int SURF_NOIMPACT         = 0x00000010; // don't make missile explosions
+constexpr int SURF_NOMARKS          = 0x00000020; // don't leave missile marks
+constexpr int SURF_SPLASH           = 0x00000040; // SURF_FLESH in quake
+constexpr int SURF_NODRAW           = 0x00000080; // don't generate a drawsurface at all
+constexpr int SURF_HINT             = 0x00000100; // make a primary bsp splitter
+constexpr int SURF_SKIP             = 0x00000200; // completely ignore, allowing non-closed brushes
+constexpr int SURF_NOLIGHTMAP       = 0x00000400; // surface doesn't need a lightmap
+constexpr int SURF_POINTLIGHT       = 0x00000800; // generate lighting info at vertexes
+constexpr int SURF_METAL            = 0x00001000; // clanking footsteps
+constexpr int SURF_NOSTEPS          = 0x00002000; // no footstep sounds
+constexpr int SURF_NONSOLID         = 0x00004000; // don't collide against curves with this set
+constexpr int SURF_LIGHTFILTER      = 0x00008000; // act as a light filter during q3map -light
+constexpr int SURF_ALPHASHADOW      = 0x00010000; // do per-pixel light shadow casting in q3map
+constexpr int SURF_NODLIGHT         = 0x00020000; // don't dlight even if solid (solid lava, skies)
+constexpr int SURF_WOOD             = 0x00040000;
+constexpr int SURF_GRASS            = 0x00080000;
+constexpr int SURF_GRAVEL           = 0x00100000;
+constexpr int SURF_GLASS            = 0x00200000;
+constexpr int SURF_SNOW             = 0x00400000;
+constexpr int SURF_ROOF             = 0x00800000;
 //                                  = 0x01000000 unused, was RUBBLE, surfaceparm "rubble"
-constexpr int SURF_CARPET			= 0x02000000;
+constexpr int SURF_CARPET           = 0x02000000;
 //                                  = 0x04000000 unused, was MONSTERSLICK, surfaceparm "monsterslick"
-constexpr int SURF_PORTALGATE		= 0x08000000; // etjump, was SURF_MONSLICK_W, surfaceparm "monsterslickwest"
-constexpr int SURF_NOJUMPDELAY		= 0x10000000; // etjump, was SURF_MONSLICK_N, surfaceparm "monsterslicknorth"
-constexpr int SURF_PORTALSURFACE	= 0x20000000; // etjump, was SURF_MONSLICK_E, surfaceparm "monsterslickeast"
-constexpr int SURF_OVERBOUNCE		= 0x40000000; // etjump, was SURF_MONSLICK_S, surfaceparm "monsterslicksouth"
-constexpr int SURF_LANDMINE			= 0x80000000; // ydnar: ok to place landmines on this surface
+constexpr int SURF_PORTALGATE       = 0x08000000; // etjump, was SURF_MONSLICK_W, surfaceparm "monsterslickwest"
+constexpr int SURF_NOJUMPDELAY      = 0x10000000; // etjump, was SURF_MONSLICK_N, surfaceparm "monsterslicknorth"
+constexpr int SURF_PORTALSURFACE    = 0x20000000; // etjump, was SURF_MONSLICK_E, surfaceparm "monsterslickeast"
+constexpr int SURF_OVERBOUNCE       = 0x40000000; // etjump, was SURF_MONSLICK_S, surfaceparm "monsterslicksouth"
+constexpr int SURF_LANDMINE         = 0x80000000; // ydnar: ok to place landmines on this surface
+// clang-format on
