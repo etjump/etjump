@@ -3615,11 +3615,11 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
     return;
   }
 
-  if (level.portalSurfaces && tr.surfaceFlags & SURF_MONSLICK_E) {
+  if (level.portalSurfaces && tr.surfaceFlags & SURF_PORTALSURFACE) {
     return;
   }
 
-  if (!level.portalSurfaces && !(tr.surfaceFlags & SURF_MONSLICK_E)) {
+  if (!level.portalSurfaces && !(tr.surfaceFlags & SURF_PORTALSURFACE)) {
     return;
   }
 
