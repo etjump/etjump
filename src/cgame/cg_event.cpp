@@ -1536,16 +1536,18 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     if (!etj_fixedCushionSteps.integer) {
       event = EV_FOOTSTEP;
     }
-  } else if (event == EV_UPHILLSTEP && !etj_uphillSteps.integer) {
-    return;
   }
 
   switch (event) {
     //
     // movement generated events
     //
-    case EV_FOOTSTEP:
     case EV_UPHILLSTEP:
+      if (!etj_uphillSteps.integer) {
+        break;
+      }
+      // fall through
+    case EV_FOOTSTEP:
       DEBUGNAME("EV_FOOTSTEP");
       if (es->eventParm != FOOTSTEP_TOTAL && cg_footsteps.integer) {
         if (es->eventParm) {

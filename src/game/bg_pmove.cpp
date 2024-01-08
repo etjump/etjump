@@ -1403,8 +1403,7 @@ void PM_CheckPortal(void) {
 
   VectorMA(pm->ps->origin, TRACE_PORTAL_DIST, straightdown, spot);
   pm->trace(&trace, newOrigin /*pm->ps->origin*/, pm->ps->mins, pm->ps->maxs,
-            spot, pm->ps->clientNum,
-            (CONTENTS_TRIGGER | CONTENTS_SOLID));
+            spot, pm->ps->clientNum, (CONTENTS_TRIGGER | CONTENTS_SOLID));
   // trap_Trace( &trace, pm->ps->origin, pm->mins, pm->maxs, spot,
   // pm->ps->clientNum, CONTENTS_TRIGGER );
 
@@ -1867,6 +1866,11 @@ static void PM_CheckFallDamage(const float delta) {
   }
 }
 
+static void PM_AddCushionFootstep(const float &delta) {
+  PM_AddEventExt(delta > 7 ? EV_CUSHIONFALLSTEP : EV_FOOTSTEP,
+                 PM_FootstepForSurface());
+}
+
 /*
 =================
 PM_CrashLand
@@ -1936,27 +1940,22 @@ static void PM_CrashLand(void) {
 
   // End PGM Test
 
-  static const auto PM_AddCushionFootstep = [&delta]() {
-    PM_AddEventExt(delta > 7 ? EV_CUSHIONFALLSTEP : EV_FOOTSTEP,
-                   PM_FootstepForSurface());
-  };
-
   // Aciz: moved fall damage and stepsound handling into
   // PM_CheckFallDamage to avoid very messy code when checking whether
   // nofalldamage is enabled/disabled.
   if (pm->shared & BG_LEVEL_NO_FALLDAMAGE_FORCE) {
-    PM_AddCushionFootstep();
+    PM_AddCushionFootstep(delta);
   } else if (pm->shared & BG_LEVEL_NO_FALLDAMAGE) {
     if (pm->groundTrace.surfaceFlags & SURF_NODAMAGE) {
       PM_CheckFallDamage(delta);
     } else {
-      PM_AddCushionFootstep();
+      PM_AddCushionFootstep(delta);
     }
   } else {
     if (!(pm->groundTrace.surfaceFlags & SURF_NODAMAGE)) {
       PM_CheckFallDamage(delta);
     } else {
-      PM_AddCushionFootstep();
+      PM_AddCushionFootstep(delta);
     }
   }
 
