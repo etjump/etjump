@@ -105,10 +105,10 @@ OverbounceWatcher::OverbounceWatcher(
 }
 
 OverbounceWatcher::~OverbounceWatcher() {
-  _clientCommandsHandler->unsubcribe("ob_save");
-  _clientCommandsHandler->unsubcribe("ob_load");
-  _clientCommandsHandler->unsubcribe("ob_reset");
-  _clientCommandsHandler->unsubcribe("ob_list");
+  _clientCommandsHandler->unsubscribe("ob_save");
+  _clientCommandsHandler->unsubscribe("ob_load");
+  _clientCommandsHandler->unsubscribe("ob_reset");
+  _clientCommandsHandler->unsubscribe("ob_list");
 }
 
 bool OverbounceWatcher::beforeRender() {

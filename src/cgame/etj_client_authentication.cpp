@@ -41,7 +41,7 @@ ETJump::ClientAuthentication::ClientAuthentication(
 }
 
 ETJump::ClientAuthentication::~ClientAuthentication() {
-  _serverCommandsHandler->unsubcribe(Constants::Authentication::GUID_REQUEST);
+  _serverCommandsHandler->unsubscribe(Constants::Authentication::GUID_REQUEST);
 }
 
 void ETJump::ClientAuthentication::login() {

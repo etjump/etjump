@@ -59,7 +59,7 @@ ETJump::AwaitedCommandHandler::AwaitedCommandHandler(
 }
 
 ETJump::AwaitedCommandHandler::~AwaitedCommandHandler() {
-  _consoleCommandsHandler->unsubcribe("await");
+  _consoleCommandsHandler->unsubscribe("await");
 }
 
 void ETJump::AwaitedCommandHandler::runFrame() {

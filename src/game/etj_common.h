@@ -27,6 +27,6 @@
 #include <functional>
 
 namespace ETJump {
-int subcribeToRunFrame(std::function<void(int)> callback);
-void unsubcribeToRunFrame(int id);
+int subscribeToRunFrame(std::function<void(int)> callback);
+void unsubscribeToRunFrame(int id);
 } // namespace ETJump
