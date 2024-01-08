@@ -157,6 +157,10 @@ void RockTheVote::callAutoRtv() {
 
   Q_strncpyz(voteArg, "rtv", sizeof(voteArg));
 
+  // must be set before G_voteCmdCheck, otherwise auto rtv won't get called
+  // if vote_allow_rtv is set to 0
+  level.voteInfo.isAutoRtvVote = true;
+
   if ((i = G_voteCmdCheck(nullptr, voteArg, nullptr)) != G_OK) {
     if (i == G_NOTFOUND) {
       G_LogPrintf(
@@ -168,6 +172,7 @@ void RockTheVote::callAutoRtv() {
     // if we fail here, it's because we don't have enough maps,
     // so push back auto rtv timer so that we don't flood the logs
     autoRtvStartTime = level.time;
+    level.voteInfo.isAutoRtvVote = false; // reset in case vote cmd fails
     return;
   }
 
@@ -179,7 +184,6 @@ void RockTheVote::callAutoRtv() {
   level.voteInfo.voteTime = level.time;
   level.voteInfo.voter_cn = -1;
   level.voteInfo.voter_team = TEAM_FREE;
-  level.voteInfo.isAutoRtvVote = true;
 
   autoRtvStartTime = level.time; // reset cooldown in case this vote fails
   anyonePlayedSinceLastVote = false;

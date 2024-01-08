@@ -32,8 +32,6 @@ class RockTheVote {
   bool isRtvVote;
   // holds the map names and their vote counts for rtv
   std::vector<std::pair<std::string, int>> rtvMaps;
-
-  int autoRtvStartTime;
   bool anyonePlayedSinceLastVote;
   bool twoMinWarningGiven;
 
@@ -60,5 +58,7 @@ public:
 
   // upper cap of autoRtv interval, 24h
   static const int AUTORTV_MAX_TIME = 24 * 60;
+
+  int autoRtvStartTime;
 };
 } // namespace ETJump

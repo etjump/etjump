@@ -573,6 +573,13 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
                  MAX_STRING_TOKENS);
     }
 
+    // if auto rtv is already off, no point turning it off again
+    if (Q_atoi(arg2) == 0 && !g_autoRtv.integer) {
+      Printer::SendPopupMessage(
+          ClientNum(ent), "^gAutomatic Rock The Vote is already turned off.");
+      return G_INVALID;
+    }
+
     Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, arg2);
   } else {
     trap_SendConsoleCommand(EXEC_APPEND,
@@ -582,13 +589,25 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
       Printer::BroadcastPopupMessage(
           "^gAutomatic Rock The Vote has been turned off.");
     } else {
-      const char *minutesStr =
-          Q_atoi(level.voteInfo.vote_value) == 1 ? "minute" : "minutes";
-      Printer::BroadcastPopupMessage(
-          "^gAutomatic Rock The Vote has been turned on!");
-      Printer::BroadcastPopupMessage(
-          stringFormat("^gNext vote will be called in ^3%i ^g%s.",
-                       Q_atoi(level.voteInfo.vote_value), minutesStr));
+      std::string voteMsg;
+
+      if (!g_autoRtv.integer) {
+        voteMsg = "^gAutomatic Rock The Vote has been turned on!";
+      } else {
+        voteMsg = "^gAutomatic Rock The Vote interval was adjusted!";
+      }
+
+      const int interval = Q_atoi(level.voteInfo.vote_value);
+      const int nextVoteTime =
+          interval - ((level.time - game.rtv->autoRtvStartTime) / (1000 * 60));
+      const char *minutesStr = nextVoteTime == 1 ? "minute" : "minutes";
+
+      Printer::BroadcastPopupMessage(voteMsg);
+      if (nextVoteTime > 0) {
+        Printer::BroadcastPopupMessage(
+            stringFormat("^gNext vote will be called in ^3%i ^g%s.",
+                         nextVoteTime, minutesStr));
+      }
     }
   }
 
