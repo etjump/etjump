@@ -185,7 +185,7 @@ void init() {
   isInitialized = false;
 
   // NOTE: client server commands handlers must be created before other
-  // modules as other modules use them to subcribe to commands.
+  // modules as other modules use them to subscribe to commands.
   // Generally all modules should get these as constructor params but
   // they're still being used in the C code
   // => make sure they're created first
@@ -340,8 +340,8 @@ void shutdown() {
                                      " shutdown...\n");
 
   if (ETJump::consoleCommandsHandler) {
-    ETJump::consoleCommandsHandler->unsubcribe("min");
-    ETJump::consoleCommandsHandler->unsubcribe("minimize");
+    ETJump::consoleCommandsHandler->unsubscribe("min");
+    ETJump::consoleCommandsHandler->unsubscribe("minimize");
   }
 
   ETJump::operatingSystem = nullptr;

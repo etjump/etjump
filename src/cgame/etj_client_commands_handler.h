@@ -48,7 +48,7 @@ public:
 
   // unsubscribes the command handler
   // returns false if it does not exist
-  bool unsubcribe(const std::string &command);
+  bool unsubscribe(const std::string &command);
 
 private:
   void (*_addToAutocompleteList)(const char *command);

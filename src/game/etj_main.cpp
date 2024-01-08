@@ -65,12 +65,12 @@ void ShutdownBannerSystem() {
 } // namespace
 
 namespace ETJump {
-int subcribeToRunFrame(std::function<void(int)> callback) {
+int subscribeToRunFrame(std::function<void(int)> callback) {
   runFrameCallbacks.push_back(callback);
   return runFrameCallbacks.size() - 1;
 }
 
-void unsubcribeToRunFrame(int id) {
+void unsubscribeToRunFrame(int id) {
   runFrameCallbacks.erase(begin(runFrameCallbacks) + id);
 }
 } // namespace ETJump
