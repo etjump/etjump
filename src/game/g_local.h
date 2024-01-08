@@ -595,6 +595,9 @@ struct gentity_s {
 
   char *targetShaderName;
   char *targetShaderNewName;
+
+  // last activation time of trigger_multiple for each client
+  int triggerActivationTime[MAX_CLIENTS];
 };
 
 // Ridah
@@ -1148,9 +1151,6 @@ struct gclient_s {
   int last8BallTime; // Last level.time client used !8ball.
   int lastVoteTime;
   qboolean cheatDetected;
-
-  // Time when client activated trigger_multiple
-  int multiTriggerActivationTime;
 
   // Time when client activated trigger_push
   int pushTriggerActivationTime;

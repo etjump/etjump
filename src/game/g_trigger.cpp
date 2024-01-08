@@ -26,7 +26,7 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
   }
 
   if (activator && activator->client) {
-    if (activator->client->multiTriggerActivationTime + wait > level.time) {
+    if (ent->triggerActivationTime[ClientNum(activator)] + wait > level.time) {
       return;
     }
   }
@@ -39,7 +39,7 @@ void multi_trigger(gentity_t *ent, gentity_t *activator) {
         ent, "activate",
         activator->client->sess.sessionTeam == TEAM_AXIS ? "axis" : "allies");
 
-    activator->client->multiTriggerActivationTime = level.time;
+    ent->triggerActivationTime[ClientNum(activator)] = level.time;
   } else {
     G_Script_ScriptEvent(ent, "activate", nullptr);
   }
