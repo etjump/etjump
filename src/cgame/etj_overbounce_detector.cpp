@@ -129,20 +129,20 @@ bool OverbounceDetector::beforeRender() {
 
 void OverbounceDetector::render() const {
   if (belowOverbounce) {
-    DrawString(x + 10, etj_OBY.value, 0.25f, 0.25f, colorWhite, qfalse, "B", 0,
-               ITEM_TEXTSTYLE_SHADOWED);
+    CG_DrawStringExt(static_cast<int>(x + 10), etj_OBY.integer, "B", colorWhite,
+                     qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
   }
   if (fallOverbounce) {
-    DrawString(x - 10, etj_OBY.value, 0.25f, 0.25f, colorWhite, qfalse, "F", 0,
-               ITEM_TEXTSTYLE_SHADOWED);
+    CG_DrawStringExt(static_cast<int>(x - 10), etj_OBY.integer, "F", colorWhite,
+                     qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
   }
   if (jumpOverbounce) {
-    DrawString(x, etj_OBY.value, 0.25f, 0.25f, colorWhite, qfalse, "J", 0,
-               ITEM_TEXTSTYLE_SHADOWED);
+    CG_DrawStringExt(static_cast<int>(x), etj_OBY.integer, "J", colorWhite,
+                     qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
   }
   if (stickyOverbounce) {
-    DrawString(x - 20, etj_OBY.value, 0.25f, 0.25f, colorWhite, qfalse, "S", 0,
-               ITEM_TEXTSTYLE_SHADOWED);
+    CG_DrawStringExt(static_cast<int>(x - 20), etj_OBY.integer, "S", colorWhite,
+                     qfalse, qtrue, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
   }
 }
 
