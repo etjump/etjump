@@ -3611,15 +3611,15 @@ void Weapon_Portal_Fire(gentity_t *ent, int portalNumber) {
   }
 
   // emancipation grid
-  if (tr.contents & CONTENTS_NOPORTAL) {
+  if (tr.contents & CONTENTS_PORTALCLIP) {
     return;
   }
 
-  if (level.portalSurfaces && tr.surfaceFlags & SURF_MONSLICK_E) {
+  if (level.portalSurfaces && tr.surfaceFlags & SURF_PORTALSURFACE) {
     return;
   }
 
-  if (!level.portalSurfaces && !(tr.surfaceFlags & SURF_MONSLICK_E)) {
+  if (!level.portalSurfaces && !(tr.surfaceFlags & SURF_PORTALSURFACE)) {
     return;
   }
 

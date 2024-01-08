@@ -704,7 +704,7 @@ void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd,
                                      const vec3_t end, int passEntityNum,
                                      int contentMask),
                          int tracemask);
-int Pmove(pmove_t *pmove);
+void Pmove(pmove_t *pmove);
 void PmoveSingle(pmove_t *pmove);
 
 constexpr int CMDSCALE_DEFAULT = 127;
@@ -1781,8 +1781,8 @@ bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
 #define MASK_MISSILESHOT (MASK_SHOT | CONTENTS_MISSILECLIP)
 // Feen: PGM
 #define MASK_PORTAL                                                            \
-  (CONTENTS_SOLID | CONTENTS_NOPORTAL) // Feen: Trace hits solid objects
-                                       // or emancipation grids
+  (CONTENTS_SOLID | CONTENTS_PORTALCLIP) // Feen: Trace hits solid objects
+                                         // or emancipation grids
 
 //
 // entityState_t->eType
