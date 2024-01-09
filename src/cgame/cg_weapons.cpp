@@ -1312,7 +1312,7 @@ static qboolean CG_RW_ParseClient(int handle, weaponInfo_t *weaponInfo) {
       if (!PC_String_ParseNoAlloc(handle, filename, sizeof(filename))) {
         return CG_RW_ParseError(handle, "expected pickupModel filename");
       } else {
-        strncpy(weaponInfo->pickupModelPath, filename, MAX_QPATH);
+        Q_strncpyz(weaponInfo->pickupModelPath, filename, MAX_QPATH);
         weaponInfo->weaponModel[W_PU_MODEL].model =
             trap_R_RegisterModel(filename);
       }
