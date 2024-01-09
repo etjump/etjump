@@ -1988,6 +1988,15 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
                 "rate specified");
       }
       rate = Q_atoi(token);
+
+      // ensure we don't div by 0 for idealFrame below
+      if (rate <= 0) {
+        rate = 20;
+        G_Printf("G_ScriptAction_PlayAnim: rate <= 0, setting default 20\n");
+      } else if (rate > 1000) {
+        rate = 20;
+        G_Printf("G_ScriptAction_PlayAnim: rate > 1000, setting default 20\n");
+      }
     }
 
     if (!looping) {
@@ -2321,7 +2330,14 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
-    ent->scriptAccumBuffer[bufferIndex] = rand() % Q_atoi(token);
+
+    const int randomValue = Q_atoi(token);
+
+    if (randomValue == 0) {
+      G_Error("G_ScriptAction_Accum: random requires a non-zero value\n");
+    }
+
+    ent->scriptAccumBuffer[bufferIndex] = rand() % randomValue;
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
@@ -2523,7 +2539,14 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
-    level.globalAccumBuffer[bufferIndex] = rand() % Q_atoi(token);
+
+    const int randomValue = Q_atoi(token);
+
+    if (randomValue == 0) {
+      G_Error("G_ScriptAction_GlobalAccum: random requires a non-zero value");
+    }
+
+    level.globalAccumBuffer[bufferIndex] = rand() % randomValue;
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
