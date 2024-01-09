@@ -36,6 +36,8 @@ public:
   ClientRtvHandler();
   ~ClientRtvHandler() = default;
 
+  void initialize();
+
   void setRtvConfigStrings(const char *cs);
   void countRtvVotes();
   int getRtvYesVotes() const;

@@ -219,6 +219,7 @@ void init() {
   ////////////////////////////////////////////////////////////////
 
   rtvHandler = std::make_shared<ClientRtvHandler>();
+  rtvHandler->initialize();
 
   // initialize renderables
   // Overbounce watcher
