@@ -1719,7 +1719,8 @@ void Cmd_Team_f(gentity_t *ent) {
     G_SetClientWeapons(ent, w, w2, qtrue);
   }
 
-  if (!ent->client->sess.runSpawnflags ||
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
+      !ent->client->sess.runSpawnflags ||
       ent->client->sess.runSpawnflags &
           static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
     InterruptRun(ent);
