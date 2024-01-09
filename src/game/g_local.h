@@ -1191,7 +1191,8 @@ typedef struct ipMute_s {
 #define MAX_SPAWN_VARS_CHARS 2048
 #define VOTE_MAXSTRING 256 // Same value as MAX_STRING_TOKENS
 
-#define MAX_SCRIPT_ACCUM_BUFFERS 8
+// was incorrectly set to 8
+constexpr int MAX_SCRIPT_ACCUM_BUFFERS = 10;
 
 #define MAX_BUFFERED_CONFIGSTRINGS 128
 
