@@ -969,6 +969,7 @@ void setPlayerOffset(gentity_t *ent) {
   VectorCopy(ent->client->ps.viewangles, angles);
 
   decreaseNoclipCount(ent, "setoffset");
+  ent->client->noclipThisLife = true;
 
   for (auto i = 0; i < 3; i++) {
     trap_Argv(i + 1, buffer, sizeof buffer);
