@@ -124,7 +124,7 @@ void CGaz::UpdateDraw(float wishspeed, float accel) {
 
 float CGaz::UpdateDrawSnap() {
   // don't highligh snapzone on very low velocities
-  if (!etj_CGazDrawAccelZone.integer || state.vf < state.wishspeed) {
+  if (!etj_CGazDrawSnapZone.integer || state.vf < state.wishspeed) {
     return NAN;
   }
 
