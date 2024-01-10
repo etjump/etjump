@@ -33,7 +33,6 @@ class RockTheVote {
   // holds the map names and their vote counts for rtv
   std::vector<std::pair<std::string, int>> rtvMaps;
   bool anyonePlayedSinceLastVote;
-  bool twoMinWarningGiven;
 
 public:
   RockTheVote();
