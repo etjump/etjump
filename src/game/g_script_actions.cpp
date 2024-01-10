@@ -2542,7 +2542,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     const int randomValue = Q_atoi(token);
 
     if (randomValue == 0) {
-      G_Error("G_ScriptAction_GlobalAccum: random requires a non-zero value");
+      G_Error("G_ScriptAction_GlobalAccum: random requires a non-zero value\n");
     }
 
     level.globalAccumBuffer[bufferIndex] = rand() % randomValue;
