@@ -1934,9 +1934,9 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
 
   for (i = 0; i < 2; i++) {
     token = COM_ParseExt(&pString, qfalse);
+
     if (!token || !token[0]) {
-      G_Printf("G_Scripting: syntax error\n\nplayanim "
-               "<startframe> <endframe> "
+      G_Printf("G_Scripting: syntax error\n\nplayanim <startframe> <endframe> "
                "[LOOPING <duration>]\n");
       return qtrue;
     } else {
@@ -1955,12 +1955,11 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
 
       token = COM_ParseExt(&pString, qfalse);
       if (!token || !token[0]) {
-        G_Printf("G_Scripting: syntax "
-                 "error\n\nplayanim <startframe> "
-                 "<endframe> [LOOPING "
-                 "<duration>]\n");
+        G_Printf("G_Scripting: syntax error\n\nplayanim <startframe> "
+                 "<endframe> [LOOPING <duration>]\n");
         return qtrue;
       }
+
       if (!Q_stricmp(token, "untilreachmarker")) {
         if (level.time < ent->s.pos.trTime + ent->s.pos.trDuration) {
           endtime = level.time + 100;
@@ -1970,8 +1969,8 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
       } else if (!Q_stricmp(token, "forever")) {
         ent->scriptStatus.animatingParams = params;
         ent->scriptStatus.scriptFlags |= SCFL_ANIMATING;
-        endtime = level.time + 100; // we don't care when it ends,
-                                    // since we are going forever!
+        // we don't care when it ends, since we are going forever!
+        endtime = level.time + 100;
         forever = qtrue;
       } else {
         endtime = ent->scriptStatus.scriptStackChangeTime + Q_atoi(token);
@@ -1983,19 +1982,17 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
     if (token[0] && !Q_stricmp(token, "rate")) {
       token = COM_ParseExt(&pString, qfalse);
       if (!token[0]) {
-        G_Error("G_Scripting: playanim has RATE "
-                "parameter without an actual "
+        G_Error("G_Scripting: playanim has RATE parameter without an actual "
                 "rate specified");
       }
+
       rate = Q_atoi(token);
 
       // ensure we don't div by 0 for idealFrame below
-      if (rate <= 0) {
+      if (rate <= 0 || rate > 1000) {
         rate = 20;
-        G_Printf("G_ScriptAction_PlayAnim: rate <= 0, setting default 20\n");
-      } else if (rate > 1000) {
-        rate = 20;
-        G_Printf("G_ScriptAction_PlayAnim: rate > 1000, setting default 20\n");
+        G_Printf("G_ScriptAction_PlayAnim: rate out of range (1 - 1000), "
+                 "setting default 20\n");
       }
     }
 
@@ -2005,10 +2002,12 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
     }
   }
 
-  idealframe =
-      startframe +
-      (int)floor((float)(level.time - ent->scriptStatus.scriptStackChangeTime) /
-                 (1000.0 / (float)rate));
+  idealframe = startframe +
+               static_cast<int>(std::floor(
+                   static_cast<float>(level.time -
+                                      ent->scriptStatus.scriptStackChangeTime) /
+                   (1000.0 / static_cast<float>(rate))));
+
   if (looping) {
     ent->s.frame =
         startframe + (idealframe - startframe) % (endframe - startframe);
