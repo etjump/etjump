@@ -2254,11 +2254,13 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] += Q_atoi(token);
   } else if (!Q_stricmp(lastToken, "abort_if_less_than")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] < Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2268,6 +2270,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] > Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2278,6 +2281,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] != Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2287,6 +2291,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2296,16 +2301,19 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] |= (1 << Q_atoi(token));
   } else if (!Q_stricmp(lastToken, "bitreset")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] &= ~(1 << Q_atoi(token));
   } else if (!Q_stricmp(lastToken, "abort_if_bitset")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] & (1 << Q_atoi(token))) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2315,6 +2323,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (!(ent->scriptAccumBuffer[bufferIndex] & (1 << Q_atoi(token)))) {
       // abort the current script
       ent->scriptStatus.scriptStackHead =
@@ -2324,6 +2333,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     ent->scriptAccumBuffer[bufferIndex] = Q_atoi(token);
   } else if (!Q_stricmp(lastToken, "random")) {
     if (!token[0]) {
@@ -2341,52 +2351,54 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       gentity_t *trent;
       int oldId;
-      //			qboolean loop = qfalse;
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(lastToken, token, sizeof(lastToken));
+
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
+
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a "
-                "name and an identifier: %s\n",
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
                 params);
       }
-      //
+
       terminate = qfalse;
       found = qfalse;
       // for all entities/bots with this scriptName
-      trent = G_Find(NULL, FOFS(scriptName), lastToken);
+      trent = G_Find(nullptr, FOFS(scriptName), lastToken);
+
       while (trent) {
         found = qtrue;
         oldId = trent->scriptStatus.scriptId;
         G_Script_ScriptEvent(trent, "trigger", name);
-        // if the script changed, return false
-        // so we don't muck with it's variables
+
+        // if the script changed, return false,
+        // so we don't muck with its variables
         if ((trent == ent) && (oldId != trent->scriptStatus.scriptId)) {
           terminate = qtrue;
         }
+
         trent = G_Find(trent, FOFS(scriptName), lastToken);
       }
-      //
+
       if (terminate) {
         return qfalse;
       }
+
       if (found) {
         return qtrue;
       }
-      //
-      //			G_Error( "G_Scripting:
-      // trigger has unknown name: %s\n", name );
+
       G_Printf("G_Scripting: trigger has unknown name: %s\n", name);
       return qtrue;
     }
@@ -2394,6 +2406,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
+
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       return qfalse;
     }
