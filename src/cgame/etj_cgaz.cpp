@@ -128,7 +128,6 @@ float CGaz::UpdateDrawSnap() {
     return NAN;
   }
 
-  const usercmd_t cmd = PmoveUtils::getUserCmd(*ps, CMDSCALE_DEFAULT);
   Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(*ps, pm);
 
   if (std::isnan(cs.snap)) {
@@ -142,9 +141,9 @@ float CGaz::UpdateDrawSnap() {
     snap = 90 - std::fmod(snap, 90);
   }
 
+  // snaps are in absolute angles, calculate it relative to yaw
   const float viewOffset = AngleNormalize180(cs.yaw - RAD2DEG(yaw));
 
-  // convert grid based snap angle to cgaz's velocity vector based
   float snapInCgazAngles =
       std::fmod(!cs.rightStrafe ? snap - viewOffset : viewOffset - snap, 90);
 
