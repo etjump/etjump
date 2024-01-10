@@ -128,7 +128,7 @@ float CGaz::UpdateDrawSnap() {
     return NAN;
   }
 
-  Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(*ps, pm);
+  const Snaphud::CurrentSnap cs = Snaphud::getCurrentSnap(*ps, pm);
 
   if (std::isnan(cs.snap)) {
     return NAN;

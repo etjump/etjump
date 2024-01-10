@@ -432,15 +432,15 @@ Snaphud::CurrentSnap Snaphud::getCurrentSnap(const playerState_t &ps,
 }
 
 bool Snaphud::inMainAccelZone(const playerState_t &ps, pmove_t *pm) {
-  auto cs = getCurrentSnap(ps, pm);
+  const Snaphud::CurrentSnap cs = getCurrentSnap(ps, pm);
 
   if (std::isnan(cs.snap)) {
     return false;
   }
 
-  auto yaw = cs.yaw;
-  auto opt = cs.opt;
-  auto snap = cs.snap;
+  const float yaw = cs.yaw;
+  const float opt = cs.opt;
+  const float snap = cs.snap;
 
   // return true if yaw is between opt angle and end of the current
   // snapzone also account for jumps at the boundary (e.g. 100 and 10
