@@ -155,9 +155,16 @@ bool TimerunEntity::canStartTimerun(gentity_t *self, gentity_t *activator,
     }
 
     if (client->noclipThisLife) {
-      Printer::SendCenterMessage(*clientNum,
-                                 "^3WARNING: ^7Timerun was not started. Noclip "
-                                 "activated this life, ^3/kill ^7required!");
+      Printer::SendCenterMessage(
+          *clientNum, "^3WARNING: ^7Timerun was not started. ^3noclip "
+                      "^7activated this life, ^3/kill ^7required!");
+      return false;
+    }
+
+    if (client->setoffsetThisLife) {
+      Printer::SendCenterMessage(
+          *clientNum, "^3WARNING: ^7Timerun was not started. ^3setoffset "
+                      "^7activated this life, ^3/kill ^7required!");
       return false;
     }
 
